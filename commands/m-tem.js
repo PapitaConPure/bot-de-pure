@@ -8,12 +8,12 @@ module.exports = {
         'm-theme'
     ],
 	execute(message, args) {
-        if(args.length === 1) {
+        if(args.length > 8) {
+            message.channel.send(':warning: Límite de palabras excedido. Solo se permiten hasta 8 palabras.');
+        } else if(args.length > 0) {
             global.tem = args[0];
             for(var i = 1; i < args.length; i++) global.tem += " " + args[i];
             message.channel.send(`:white_check_mark: nombre de temática actualizado a _${args[0]}...[puede continuar]_.`);
-        } else if(args.length > 1) {
-            message.channel.send(':warning: Demasiados parámetros.');
         } else message.channel.send(':warning: tienes que especificar la temática luego del comando.');
     },
 };
