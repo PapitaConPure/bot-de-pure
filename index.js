@@ -21,7 +21,7 @@ client.once('ready', () => {
 });
 
 client.on('message', message => { //En caso de recibir un mensaje
-    if(global.cansay === 0) { if(message.author.bot) return; }
+    if(global.cansay === 0) { if(message.author.bot) return; } 
     console.log(`${message.author.username}:  "${message.content}"`);
     if(!message.content.startsWith(p_drmk)) return; //Salir si no tiene el prefijo establecido o es un mensaje de un bot
 
