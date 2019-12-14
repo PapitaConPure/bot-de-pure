@@ -9,7 +9,7 @@
     "empezando": false,
     "empezado": false,
     "terminando": false,
-    "cansay": false,
+    "cansay": true,
 
 	"cntjugadores": 0,
     "jugadores": [],
