@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/PapitaConPure/bot-de-pure#readme",
   "dependencies": {
-    "discord.js": "^11.5.1"
+    "discord.js": "^11.5.1",
+    "eslint": "^6.7.2"
   }
 }

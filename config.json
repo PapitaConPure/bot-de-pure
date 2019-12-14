@@ -1,0 +1,28 @@
+{
+	"p_drmk": "d!",
+	"token": "NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY",
+	"tiempo": 60,
+	"edi": 3,
+    "tem": "TEMÁTICA",
+    "desc": "DESCRIPCIÓN",
+    "desctem": "DESCRIPCIÓN DE TEMÁTICA",
+    "empezando": false,
+    "empezado": false,
+    "terminando": false,
+    "cansay": false,
+
+	"cntjugadores": 0,
+    "jugadores": [],
+    "nombres": [],
+    "numeros": [],
+    "puntos": [],
+    "danmaku": "",
+    "ndibujante": 0,
+    "seleccionado": false,
+    "dibujado": false,
+    "recompensado": -1,
+    "trest": 0,
+    "tjuego": 7200,
+    "chi": "<#sincanal>",
+    "goingnext": false
+}
