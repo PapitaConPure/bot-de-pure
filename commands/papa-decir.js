@@ -10,7 +10,7 @@ module.exports = {
                 var sentence;
                 sentence = args[0];
                 for(var i = 1; i < args.length; i++) sentence += ' ' + args[i];
-                global.cansay = true;
+                global.cansay = 2;
                 message.channel.send(sentence);
             } else message.channel.send(':warning: tienes que especificar lo que quieres que diga.');
         } else {
