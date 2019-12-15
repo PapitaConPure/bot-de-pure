@@ -199,7 +199,7 @@ module.exports = {
         console.log('Mostrando resultados.');
         var str = '';
         for(var i = 0; i < global.cntjugadores; i++)
-            str += `[Posición ${i} / jugador ${global.numeros[i]}] ${global.nombres[i]}: ${global.puntos[i]} punto(s).\n`;
+            str += `[Posición ${i + 1} / jugador ${global.numeros[i]}] ${global.nombres[i]}: ${global.puntos[i]} punto(s).\n`;
         global.chi.send(
             ':arrow_up_small: **FINAL FINAL FINAL FINAL FINAL FINAL** :arrow_up_small:\n' +
             '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' +
