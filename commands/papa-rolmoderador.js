@@ -14,18 +14,29 @@ module.exports = {
 
                     switch(args[0]) {
                         case '+':
-                            var tmp = global.modroles.length;
-                            global.modroles[tmp] = args[1];
-                            message.channel.send(`:white_check_mark: rol <@&${args[1]}> añadido a los roles de moderación de Drawmaku.`);
+                            var canwrite = true;
+                            for(var i = 0; i < global.modroles.length; i++)
+                                if(global.modroles[i] === args[1]) {
+                                    canwrite = false;
+                                    break;
+                                }
+                            if(canwrite) {
+                                var tmp = global.modroles.length;
+                                global.modroles[tmp] = args[1];
+                                message.channel.send(`:white_check_mark: rol <@&${args[1]}> añadido a los roles de moderación de Drawmaku.`);
+                            } else message.channel.send(`:warning: el rol <@&${args[1]}> ya fue añadido a los roles de moderación de Drawmaku anteriormente.`);
                         break;
 
                         case '-':
+                            var found = false;
                             for(var i = 0; i < global.modroles.length; i++)
                                 if(global.modroles[i] === args[1]) {
                                     global.modroles[i] = -1;
+                                    found = true;
                                     break;
                                 }
-                            message.channel.send(`:white_check_mark: rol <@&${args[1]}> eliminado de los roles de moderación de Drawmaku.`);
+                            if(found) message.channel.send(`:white_check_mark: rol <@&${args[1]}> eliminado de los roles de moderación de Drawmaku.`);
+                            else message.channel.send(`:warning: el rol <@&${args[1]} no se encuentra entre los roles de moderación de Drawmaku.`);
                         break;
 
                         default:
