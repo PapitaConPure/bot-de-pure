@@ -44,6 +44,17 @@ module.exports = {
                             message.channel.send(':warning: Parámetros inválidos o en orden incorrecto. Recuerda: `d!papa-rolmoderador <[+/-]*> <@$rol*>`.');
                     }
                 } else message.channel.send(':warning: tienes que mencionar un rol a volver moderador Drawmaku.');
+            } else if(args.length === 0) {
+                if(!global.modroles.length) {
+                    message.channel.send(
+                        ':tools::no_entry_sign::tools::no_entry_sign:\n' +
+                        'Aún no se ha establecido ningún rol de moderador Drawmaku.\n' +
+                        'Es altamente recomendable crear un rol de moderación de Drawmaku y enlistarlo con `d!papa-rolmoderador <[+/-]*> <@$rol*>`.\n' +
+                        ':tools::no_entry_sign::tools::no_entry_sign:\n'
+                    );
+                }
+                for(var i = 0; i < global.modroles.length; i++)
+                    message.channel.send(`${i + 1}: <@&${global.modroles[i]}>`);
             } else if(args.length < 2) message.channel.send(':warning: Parámetros insuficientes. Recuerda: `d!papa-rolmoderador <[+/-]*> <@$rol*>`.');
             else message.channel.send(':warning: Demasiados parámetros. Recuerda: `d!papa-rolmoderador <[+/-]*> <@$rol*>`.');
         } else {
