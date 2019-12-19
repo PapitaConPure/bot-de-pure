@@ -1,10 +1,11 @@
 const Discord = require('discord.js'); //Integrar discord.js
 var global = require('../config.json'); //Variables globales
+var func = require('../func.js'); //Funciones globales
 
 module.exports = {
 	name: 'papa-rolmoderador',
 	execute(message, args) {
-        if(message.author.id === '423129757954211880') {
+        if(message.author.id === '423129757954211880' || !func.notModerator()) {
             if(args.length === 2) {
                 if(message.mentions.roles.size) {
                     if(args[1].startsWith('<@') && args[1].endsWith('>')) {
@@ -36,7 +37,7 @@ module.exports = {
                                     break;
                                 }
                             if(found) message.channel.send(`:white_check_mark: rol <@&${args[1]}> eliminado de los roles de moderación de Drawmaku.`);
-                            else message.channel.send(`:warning: el rol <@&${args[1]} no se encuentra entre los roles de moderación de Drawmaku.`);
+                            else message.channel.send(`:warning: el rol <@&${args[1]}> no se encuentra entre los roles de moderación de Drawmaku.`);
                         break;
 
                         default:
@@ -46,7 +47,7 @@ module.exports = {
             } else if(args.length < 2) message.channel.send(':warning: Parámetros insuficientes. Recuerda: `d!papa-rolmoderador <[+/-]*> <@$rol*>`.');
             else message.channel.send(':warning: Demasiados parámetros. Recuerda: `d!papa-rolmoderador <[+/-]*> <@$rol*>`.');
         } else {
-            message.channel.send(':closed_lock_with_key: Solo Papita con Pure puede usar este comando.');
+            message.channel.send(':closed_lock_with_key: Solo Papita con Pure y aquellos con un rol de moderación de Drawmaku puede usar este comando.');
             return;
         }
     },
