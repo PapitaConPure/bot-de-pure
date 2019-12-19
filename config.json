@@ -9,7 +9,8 @@
     "empezando": false,
     "empezado": false,
     "terminando": false,
-    "cansay": 0, 
+    "cansay": 0,
+    "modroles": [],
 
 	"cntjugadores": 0,
     "jugadores": [],

@@ -162,7 +162,7 @@ module.exports = {
     },
     //#endregion
 
-    //#region Otros
+    //#region Comprobadores
     notStartedAndSameChannel: function(msgch, preinicio = false) {
         console.log('Verificando si el comando de evento fue ejecutado en lugar y tiempo correctos.');
         var confirm = true;
@@ -182,6 +182,20 @@ module.exports = {
         return (!confirm);
     },
 
+    notModerator: function(author) {
+        var ismod = false;
+        
+        for(var i = 0; i < global.modroles.length; i++)
+            if(author.roles.has(global.modroles[i])) {
+                ismod = true;
+                break;
+            }
+
+        return (!ismod);
+    },
+    //#endregion
+
+    //#region Otros
     mostrarResultados: function() {
         console.log('Ordenando resultados de mayor a menor puntaje.');
         //Ordenamiento burbuja
