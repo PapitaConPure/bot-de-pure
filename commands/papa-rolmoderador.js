@@ -60,7 +60,7 @@ module.exports = {
                 }
                 var str = '';
                 for(var i = 0; i < global.modroles.length; i++)
-                    str += `${i + 1}: <@&${global.modroles[i]}>\n`;
+                    str += `${i + 1}: <@&${(global.modroles[i] !== -1)?(global.modroles[i]):'vacante'}>\n`;
                 message.channel.send(str);
             } else if(args.length < 2) message.channel.send(':warning: Parámetros insuficientes. Recuerda: `d!papa-rolmoderador <[+/-]*> <@$rol*>`.');
             else message.channel.send(':warning: Demasiados parámetros. Recuerda: `d!papa-rolmoderador <[+/-]*> <@$rol*>`.');
