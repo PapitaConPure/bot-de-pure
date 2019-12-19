@@ -15,7 +15,8 @@ module.exports = {
             str += 'empezando = ' + ((typeof global.empezando !== 'undefined')?`${global.empezando}`:'indefinido') + ';\n';
             str += 'empezado = ' + ((typeof global.empezado !== 'undefined')?`${global.empezado}`:'indefinido') + ';\n';
             str += 'terminando = ' + ((typeof global.terminando !== 'undefined')?`${global.terminando}`:'indefinido') + ';\n';
-            str += 'chi = \'' + ((typeof global.chi !== 'undefined')?`${global.chi}`:'indefinido') + '\';\n\n';
+            str += 'chi = \'' + ((typeof global.chi !== 'undefined')?`${global.chi}`:'indefinido') + '\';\n';
+            str += 'modroles = [' + ((typeof global.modroles !== 'undefined')?`${global.modroles}`:'indefinido') + '];\n\n';
             str += '//Variables de partida\n';
             str += 'cntjugadores = ' + ((typeof global.cntjugadores !== 'undefined')?`${global.cntjugadores}`:'indefinido') + ';\n';
             str += 'jugadores = [' + ((typeof global.jugadores !== 'undefined')?`${global.jugadores}`:'indefinido') + '];\n';

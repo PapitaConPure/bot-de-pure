@@ -16,6 +16,7 @@ module.exports = {
                         case '+':
                             var tmp = global.modroles.length;
                             global.modroles[tmp] = args[1];
+                            message.channel.send(`:white_check_mark: rol <@$${args[1]}> añadido a los roles de moderación de Drawmaku.`);
                         break;
 
                         case '-':
@@ -24,10 +25,11 @@ module.exports = {
                                     global.modroles[i] = -1;
                                     break;
                                 }
+                            message.channel.send(`:white_check_mark: rol <@$${args[1]}> eliminado de los roles de moderación de Drawmaku.`);
                         break;
 
                         default:
-                            message.channel.send(':warning: Parámetros inválidos.');
+                            message.channel.send(':warning: Parámetros inválidos o en orden incorrecto. Recuerda: `d!papa-rolmoderador <[+/-]*> <@$rol*>`.');
                     }
                 } else message.channel.send(':warning: tienes que mencionar un rol a volver moderador Drawmaku.');
             } else if(args.length < 2) message.channel.send(':warning: Parámetros insuficientes. Recuerda: `d!papa-rolmoderador <[+/-]*> <@$rol*>`.');
