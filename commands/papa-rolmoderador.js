@@ -5,7 +5,7 @@ var func = require('../func.js'); //Funciones globales
 module.exports = {
 	name: 'papa-rolmoderador',
 	execute(message, args) {
-        if(message.author.id === '423129757954211880' || !func.notModerator(message.author)) {
+        if(message.author.id === '423129757954211880' || !func.notModerator(message.member)) {
             if(args.length === 2) {
                 if(message.mentions.roles.size) {
                     if(args[1].startsWith('<@') && args[1].endsWith('>')) {
@@ -25,7 +25,6 @@ module.exports = {
                                 var tmp = global.modroles.length;
                                 global.modroles[tmp] = args[1];
                                 message.channel.send(`:white_check_mark: rol <@&${args[1]}> añadido a los roles de moderación de Drawmaku.`);
-                                message.channel.send(`${message.author.roles.has(args[1])}`);
                             } else message.channel.send(`:warning: el rol <@&${args[1]}> ya fue añadido a los roles de moderación de Drawmaku anteriormente.`);
                         break;
 
