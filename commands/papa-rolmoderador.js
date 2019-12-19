@@ -5,7 +5,7 @@ var func = require('../func.js'); //Funciones globales
 module.exports = {
 	name: 'papa-rolmoderador',
 	execute(message, args) {
-        if(message.author.id === '423129757954211880' || !func.notModerator()) {
+        if(message.author.id === '423129757954211880' || !func.notModerator(message.author)) {
             if(args.length === 2) {
                 if(message.mentions.roles.size) {
                     if(args[1].startsWith('<@') && args[1].endsWith('>')) {
