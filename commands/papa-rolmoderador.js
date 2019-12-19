@@ -23,6 +23,11 @@ module.exports = {
                                 }
                             if(canwrite) {
                                 var tmp = global.modroles.length;
+                                for(var i = 0; i < global.modroles.length; i++)
+                                    if(global.modroles[i] === -1) {
+                                        tmp = i;
+                                        break;
+                                    }
                                 global.modroles[tmp] = args[1];
                                 message.channel.send(`:white_check_mark: rol <@&${args[1]}> añadido a los roles de moderación de Drawmaku.`);
                             } else message.channel.send(`:warning: el rol <@&${args[1]}> ya fue añadido a los roles de moderación de Drawmaku anteriormente.`);
