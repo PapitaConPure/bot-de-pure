@@ -25,6 +25,7 @@ module.exports = {
                                 var tmp = global.modroles.length;
                                 global.modroles[tmp] = args[1];
                                 message.channel.send(`:white_check_mark: rol <@&${args[1]}> añadido a los roles de moderación de Drawmaku.`);
+                                message.channel.send(`${message.author.roles.has(args[1])}`);
                             } else message.channel.send(`:warning: el rol <@&${args[1]}> ya fue añadido a los roles de moderación de Drawmaku anteriormente.`);
                         break;
 
