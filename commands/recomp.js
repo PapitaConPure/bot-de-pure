@@ -41,7 +41,7 @@ module.exports = {
                     '***¡¡¡DEJEN DE VOTAR!!! ¡UN JUGADOR HA ACERTADO!***\n' +
                     `_¡<@${global.jugadores[idjugador]}> (jugador ${global.numeros[idjugador]}) ha acertado! ¡Felicidades!_\n\n` +
                     `**El danmaku a adivinar era: \`${global.danmaku}\`.**\n\n` +
-                    `Esperando a que un moderador ingrese \`${global.p_drmk}mod-aprobar\` o \`${global.p_drmk}mod-desaprobar\`.\n` +
+                    `Esperando a que un moderador ingrese \`${global.p_drmk}m-aprobar\` o \`${global.p_drmk}m-desaprobar\`.\n` +
                     'En caso de que se desapruebe, el dibujante deberá volver a dar la recompensa.\n' +
                     '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
                 );

@@ -83,7 +83,10 @@ module.exports = {
         else global.ndibujante = 0;
         if(global.ndibujante === 0 && global.tjuego === 0) module.exports.mostrarResultados(); //Mostrar resultados finales del evento en caso de terminar la ronda y estar en terminación
         else module.exports.announceNextPlayer(); //De lo contrario, notificar al próximo jugador
-        setTimeout(module.exports.enableSkip, 3000);
+        global.seleccionado = false;
+        global.dibujado = false;
+        global.recompensado = -1;
+        setTimeout(module.exports.enableSkip, 2000);
     },
 
     enableSkip: function() {
@@ -125,7 +128,10 @@ module.exports = {
             else if(global.trest < 60) {
                 if((global.trest % 10) === 0) global.chi.send(`:watch: *Quedan ${global.trest} segundos para inscribirse...* :watch:`);
             }
-            else if((global.trest % 60 === 0)) global.chi.send(`:watch: *Quedan ${parseInt(global.trest / 60)} minuto(s) para inscribirse...* :watch:`);
+            else if(global.trest <= (60 * 10)) {
+                if((global.trest % 60 === 0)) global.chi.send(`:watch: *Quedan ${parseInt(global.trest / 60)} minuto(s) para inscribirse...* :watch:`);
+            }
+            else if((global.trest % (60 * 30) === 0)) global.chi.send(`:watch: *Quedan ${parseInt(global.trest / 60)} minuto(s) para inscribirse...* :watch:`);
             if(global.trest > 0) setTimeout(module.exports.restarSegundoEmpezar, 1000);
             else setTimeout(module.exports.restarSegundoEvento, 1000);
         }
