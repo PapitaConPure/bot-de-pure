@@ -11,6 +11,10 @@ module.exports = {
     ],
 	execute(message, args) {
         //Comprobar que se pueda empezar un nuevo Drawmaku
+        if(func.notModerator(message.member)) {
+            message.channel.send(':closed_lock_with_key: Solo aquellos con un rol de moderación de Drawmaku puede usar este comando.');
+            return;
+        }
         if(global.trest > 0) {
             message.channel.send(':warning: El Drawmaku ya está por empezar.');
             return;

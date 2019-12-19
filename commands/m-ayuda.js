@@ -10,6 +10,10 @@ module.exports = {
         'm-h'
     ],
 	execute(message, args) {
+        if(func.notModerator(message.member)) {
+            message.channel.send(':closed_lock_with_key: Solo aquellos con un rol de moderación de Drawmaku puede usar este comando.');
+            return;
+        }
 		message.channel.send(
             '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
             '***LISTA DE COMANDOS DE MODERACIÓN***\n' +

@@ -10,6 +10,10 @@ module.exports = {
         'm-s'
     ],
 	execute(message, args) {
+        if(func.notModerator(message.member)) { //Cancelar si el comando no fue ejecutado por un moderador
+            message.channel.send(':closed_lock_with_key: Solo aquellos con un rol de moderación de Drawmaku puede usar este comando.');
+            return;
+        }
         if(func.notStartedAndSameChannel(message.channel)) return; //Cancelar si no se está en el evento y/o en el mismo canal del evento
         if(global.goingnext) { //Cancelar si ya se está cambiando de jugador
             message.channel.send(':warning: Espera un momento para hacer eso.');

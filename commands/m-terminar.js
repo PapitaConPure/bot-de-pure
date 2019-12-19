@@ -11,6 +11,10 @@ module.exports = {
     ],
 	execute(message, args) {
         //Comprobar que se esté jugando o por jugar
+        if(func.notModerator(message.member)) {
+            message.channel.send(':closed_lock_with_key: Solo aquellos con un rol de moderación de Drawmaku puede usar este comando.');
+            return;
+        }
         if(!global.trest && !global.empezado) {
             message.channel.send(':warning: No ha empezado ni está por empezar ningún Drawmaku.');
             return;
