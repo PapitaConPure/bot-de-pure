@@ -9,14 +9,14 @@ module.exports = {
                 if(message.mentions.roles.size) {
                     if(args[1].startsWith('<@') && args[1].endsWith('>')) {
                         args[1] = args[1].slice(2, -1);
-                        if(args[1].startsWith('$')) args[1] = args[1].slice(1);
+                        if(args[1].startsWith('&')) args[1] = args[1].slice(1);
                     }
 
                     switch(args[0]) {
                         case '+':
                             var tmp = global.modroles.length;
                             global.modroles[tmp] = args[1];
-                            message.channel.send(`:white_check_mark: rol <@$${args[1]}> añadido a los roles de moderación de Drawmaku.`);
+                            message.channel.send(`:white_check_mark: rol <@&${args[1]}> añadido a los roles de moderación de Drawmaku.`);
                         break;
 
                         case '-':
@@ -25,7 +25,7 @@ module.exports = {
                                     global.modroles[i] = -1;
                                     break;
                                 }
-                            message.channel.send(`:white_check_mark: rol <@$${args[1]}> eliminado de los roles de moderación de Drawmaku.`);
+                            message.channel.send(`:white_check_mark: rol <@&${args[1]}> eliminado de los roles de moderación de Drawmaku.`);
                         break;
 
                         default:
