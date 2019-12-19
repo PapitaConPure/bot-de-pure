@@ -1,5 +1,4 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const client = new Discord.Client(); //Cliente de bot
 var global = require('../config.json'); //Variables globales
 var func = require('../func.js'); //Funciones globales
 

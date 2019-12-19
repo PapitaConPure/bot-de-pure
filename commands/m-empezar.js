@@ -1,5 +1,5 @@
-//Variables globales
-var global = require('../config.json');
+const Discord = require('discord.js'); //Integrar discord.js
+var global = require('../config.json'); //Variables globales
 
 module.exports = {
 	name: 'm-empezar',

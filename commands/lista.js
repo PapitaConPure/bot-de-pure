@@ -4,7 +4,7 @@ var func = require('../func.js'); //Funciones globales
 module.exports = {
 	name: 'lista',
     aliases: [
-        'tabla', 'jugadores', 'puntaje', 'puntajes', 'puntos', 'fila',
+        'tabla', 'jugadores', 'puntaje', 'puntajes', 'puntos', 'ronda', 'fila',
         'list', 'table', 'players', 'score', 'points', 'queue',
         'l', 'q'
     ],

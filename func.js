@@ -100,7 +100,7 @@ module.exports = {
         //Temporizador al comenzar drawmaku
         if(global.empezando) {
             global.trest--;
-            console.log(global.trest);
+            if((global.trest % 10) === 0) console.log(global.trest);
             if(global.trest === 0) {
                 if(global.cntjugadores > 1) {
                     console.log('Cantidad de jugadores valedera; Drawmaku iniciado.');
@@ -141,7 +141,7 @@ module.exports = {
         //Temporizador al comenzar drawmaku
         if(global.empezado) {
             global.tjuego--;
-            console.log(global.tjuego);
+            if((global.tjuego % 30) === 0) console.log(global.tjuego);
             if(global.tjuego === 0) {
                 console.log('El juego terminará al final de la ronda actual.');
                 global.chi.send(

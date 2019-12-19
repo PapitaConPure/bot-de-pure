@@ -74,6 +74,8 @@ module.exports = {
                 `Si el dibujante actual tiene otro danmaku a mano, puede ingresar \`${global.p_drmk}danmaku ||danmaku||\`, de lo contrario deberá ingresar \`${global.p_drmk}saltar\` y esperar su próximo turno.\n` +
                 '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
             );
+            global.seleccionado = false;
+            global.dibujado = false;
         }
     },
 };
