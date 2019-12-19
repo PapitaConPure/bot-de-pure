@@ -53,8 +53,10 @@ module.exports = {
                         ':tools::no_entry_sign::tools::no_entry_sign:\n'
                     );
                 }
+                var str = '';
                 for(var i = 0; i < global.modroles.length; i++)
-                    message.channel.send(`${i + 1}: <@&${global.modroles[i]}>`);
+                    str += `${i + 1}: <@&${global.modroles[i]}>\n`;
+                message.channel.send(str);
             } else if(args.length < 2) message.channel.send(':warning: Parámetros insuficientes. Recuerda: `d!papa-rolmoderador <[+/-]*> <@$rol*>`.');
             else message.channel.send(':warning: Demasiados parámetros. Recuerda: `d!papa-rolmoderador <[+/-]*> <@$rol*>`.');
         } else {
