@@ -28,7 +28,7 @@ module.exports = {
             `\t\`${global.p_drmk}m-desctem <descripción*>\` para cambiar la breve descripción de la temática de un evento.\n` +
             `\t\`${global.p_drmk}m-expulsar <@jugadorA*> <@jugadorB> <@jugadorC>...\` para expulsar jugadores del evento.\n` +
             `\t\`${global.p_drmk}m-saltar\` para forzar a un usuario a dejar de dibujar.\n` +
-            `\t\`${global.p_drmk}m-cambiarpt <@jugador> <cantidad>\` para sumar o restar puntos a un jugador.\n` +
+            `\t\`${global.p_drmk}m-cambiarpt <@jugador*> <cantidad>\` para sumar o restar puntos a un jugador.\n` +
             `\t\`${global.p_drmk}m-aprobar\` para aprobar una recompensa.\n` +
             `\t\`${global.p_drmk}m-desaprobar\` para desaprobar y reiniciar una recompensa.\n` +
             `*__Nota: los <parámetros> con el símbolo "\\*" son obligatorios__*\n` +

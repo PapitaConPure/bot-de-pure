@@ -43,8 +43,7 @@ module.exports = {
                 message.channel.send(':warning: Demasiados parámetros.');
             } else {
                 global.puntos[idjugador]++;
-                if(args[1] > 0) message.channel.send(`:arrow_heading_up: ${global.nombres[idjugador]} (jugador ${global.numeros[idjugador]}) ha recibido 1 punto.`);
-                else if(args[1] < 0) message.channel.send(`:arrow_heading_down: ${global.nombres[idjugador]} (jugador ${global.numeros[idjugador]}) ha perdido 1 punto.`);
+                message.channel.send(`:arrow_heading_up: ${global.nombres[idjugador]} (jugador ${global.numeros[idjugador]}) ha recibido 1 punto.`);
             }
         } else message.channel.send(':warning: El jugador que especificaste no está jugando.');
     },
