@@ -1,7 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 var global = require('../config.json'); //Variables globales
 var func = require('../func.js'); //Funciones globales
-const fs = require('fs'); //Integrar operaciones sistema de archivos de consola
 
 module.exports = {
 	name: 'papa-guardarestado',
