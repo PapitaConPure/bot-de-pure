@@ -30,7 +30,7 @@ client.once('ready', () => {
     client.user.setActivity("UwU 24/7", "WATCHING");
 });
 
-client.on('message', async message => { //En caso de recibir un mensaje
+client.on('message', message => { //En caso de recibir un mensaje
     if(global.cansay === 0) { if(message.author.bot) return; } 
     console.log(`${message.author.username}:  "${message.content}"`);
     var pdetect;
