@@ -6,7 +6,7 @@ module.exports = {
 	name: 'gatos',
 	execute(message, args) {
 		try {
-			const { file } = fetch('https://aws.random.cat/meow').then(response => response.json());
+			const { file } = await fetch('https://aws.random.cat/meow').then(response => response.json());
 			message.channel.send(file);
 		} catch(error) {
 			message.channel.send(':radioactive: Ha ocurrido un error mientras se buscaban tus gatitos.');
