@@ -10,6 +10,7 @@ const { //Constantes globales
 var global = require('./config.json'); //Variables globales
 var func = require('./func.js'); //Funciones globales
 const client = new Discord.Client(); //Cliente de bot
+const fetch = require('node-fetch');
 //Establecer comandos
 client.ComandosDrawmaku = new Discord.Collection(); //Comandos de Drawmaku
 var commandFiles = fs.readdirSync('./commands/Drawmaku').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
