@@ -4,7 +4,7 @@ var global = require('../../config.json'); //Variables globales
 
 module.exports = {
 	name: 'gatos',
-	executeAsync(message, args) {
+	async execute(message, args) {
 		const { file } = fetch('https://aws.random.cat/meow').then(response => response.json());
 		message.channel.send(file);
     },
