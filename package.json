@@ -19,6 +19,7 @@
   "homepage": "https://github.com/PapitaConPure/bot-de-pure#readme",
   "dependencies": {
     "discord.js": "^11.5.1",
-    "eslint": "^6.7.2"
+    "eslint": "^6.7.2",
+    "node-fetch": "^2.6.0"
   }
 }

@@ -18,14 +18,7 @@ for(const file of commandFiles) {
 
 client.once('ready', () => {
 	console.log('Bot conectado y funcionando.');
-    bot.user.setStatus('available')
-    bot.user.setPresence({
-        game: {
-            name: 'uwu 24/7',
-            type: "STREAMING",
-            url: "https://www.youtube.com/watch?v=YWcrfp_dXKM"
-        }
-    });
+    client.user.setActivity("UwU 24/7", "WATCHING");
 });
 
 client.on('message', message => { //En caso de recibir un mensaje
