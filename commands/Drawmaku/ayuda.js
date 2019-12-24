@@ -1,4 +1,4 @@
-var global = require('../config.json'); //Variables globales
+var global = require('../../config.json'); //Variables globales
 
 module.exports = {
 	name: 'ayuda',

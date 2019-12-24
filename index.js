@@ -32,13 +32,14 @@ client.on('message', message => { //En caso de recibir un mensaje
     console.log(`${message.author.username}:  "${message.content}"`);
     if(!message.content.startsWith(p_drmk) && !message.content.startsWith(p_pure)) return; //Salir si no se encuentra el comando
 
+    const tmpmsg = message.content;
     const args = message.content.slice(p_drmk.length).split(/ +/); //Argumentos ingresados
     const nombrecomando = args.shift().toLowerCase(); //Comando ingresado
 
     var comando;
-    if(message.content.startsWith(p_drmk))
+    if(tmpmsg.startsWith(p_drmk))
         comando = client.ComandosDrawmaku.get(nombrecomando) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
-	else if(message.content.startsWith(p_pure))
+	else if(tmpmsg.startsWith(p_pure))
         comando = client.ComandosPure.get(nombrecomando) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
     
     if (!comando) {

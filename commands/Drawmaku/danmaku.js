@@ -1,4 +1,4 @@
-var global = require('../config.json'); //Variables globales
+var global = require('../../config.json'); //Variables globales
 var func = require('../../func.js'); //Funciones globales
 
 function attachIsImage(msgAttach) {
