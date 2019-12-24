@@ -30,16 +30,18 @@ client.once('ready', () => {
 client.on('message', message => { //En caso de recibir un mensaje
     if(global.cansay === 0) { if(message.author.bot) return; } 
     console.log(`${message.author.username}:  "${message.content}"`);
-    if(!message.content.startsWith(p_drmk) && !message.content.startsWith(p_pure)) return; //Salir si no se encuentra el comando
+    var pdetect;
+    if(message.content.startsWith(p_drmk)) pdetect = p_drmk;
+    else if(message.content.startsWith(p_pure)) pdetect = p_pure;
+    else return; //Salir si no se encuentra el comando
 
-    const tmpmsg = message.content;
     const args = message.content.slice(p_drmk.length).split(/ +/); //Argumentos ingresados
     const nombrecomando = args.shift().toLowerCase(); //Comando ingresado
 
     var comando;
-    if(tmpmsg.startsWith(p_drmk))
+    if(pdetect === p_drmk)
         comando = client.ComandosDrawmaku.get(nombrecomando) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
-	else if(tmpmsg.startsWith(p_pure))
+	else if(pdetect === p_pure)
         comando = client.ComandosPure.get(nombrecomando) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
     
     if (!comando) {
