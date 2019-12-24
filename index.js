@@ -9,15 +9,19 @@ const { //Constantes globales
 } = require('./config.json');
 var global = require('./config.json'); //Variables globales
 var func = require('./func.js'); //Funciones globales
-const client = new Discord.Client(); //Cliente de bot
-client.ComandosDrawmaku = new Discord.Collection(); //Comandos de bot
-client.ComandosPure = new Discord.Collection(); //Comandos de bot
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
 const fetch = require('node-fetch'); //Integrar node-fetch
+const client = new Discord.Client(); //Cliente de bot
 //Establecer comandos
+client.ComandosDrawmaku = new Discord.Collection(); //Comandos de Drawmaku
+var commandFiles = fs.readdirSync('./commands/Drawmaku').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
 for(const file of commandFiles) {
 	const command = require(`./commands/Drawmaku/${file}`);
 	client.ComandosDrawmaku.set(command.name, command);
+}
+
+client.ComandosPure = new Discord.Collection(); //Comandos de Pure
+commandFiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
+for(const file of commandFiles) {
     command = require(`./commands/Pure/${file}`);
 	client.ComandosPure.set(command.name, command);
 }
