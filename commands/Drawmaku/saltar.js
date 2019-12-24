@@ -1,5 +1,5 @@
 var global = require('../config.json'); //Variables globales
-var func = require('../func.js'); //Funciones globales
+var func = require('../../func.js'); //Funciones globales
 
 function nextRound() {
     if(global.ndibujante < (global.cntjugadores - 1)) global.ndibujante++;

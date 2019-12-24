@@ -1,6 +1,7 @@
 //TRABAJAR CON DISCORD.JS Y HACER USO DE SISTEMAS DE ARCHIVOS
 const fs = require('fs'); //Integrar operaciones sistema de archivos de consola
 const Discord = require('discord.js'); //Integrar discord.js
+const { Client, RichEmbed } = require('discord.js'); //Ni idea, la verdad, pero aquí está
 const { //Constantes globales
     p_drmk, //prefijo drawmaku
     token, //"llave" del bot
@@ -8,12 +9,16 @@ const { //Constantes globales
 var global = require('./config.json'); //Variables globales
 var func = require('./func.js'); //Funciones globales
 const client = new Discord.Client(); //Cliente de bot
-client.commands = new Discord.Collection(); //Comandos de bot
+client.ComandosDrawmaku = new Discord.Collection(); //Comandos de bot
+client.ComandosPure = new Discord.Collection(); //Comandos de bot
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
+const fetch = require('node-fetch'); //Integrar node-fetch
 //Establecer comandos
 for(const file of commandFiles) {
-	const command = require(`./commands/${file}`);
-	client.commands.set(command.name, command);
+	const command = require(`./commands/Drawmaku/${file}`);
+	client.ComandosDrawmaku.set(command.name, command);
+    command = require(`./commands/Pure/${file}`);
+	client.ComandosPure.set(command.name, command);
 }
 
 client.once('ready', () => {
@@ -24,13 +29,18 @@ client.once('ready', () => {
 client.on('message', message => { //En caso de recibir un mensaje
     if(global.cansay === 0) { if(message.author.bot) return; } 
     console.log(`${message.author.username}:  "${message.content}"`);
-    if(!message.content.startsWith(p_drmk)) return; //Salir si no tiene el prefijo establecido o es un mensaje de un bot
+    if(!message.content.startsWith(p_drmk) && !message.content.startsWith(p_pure)) return; //Salir si no se encuentra el comando
 
     const args = message.content.slice(p_drmk.length).split(/ +/); //Argumentos ingresados
     const nombrecomando = args.shift().toLowerCase(); //Comando ingresado
 
-    const comando = client.commands.get(nombrecomando) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando)); //Salir si no se encuentra el comando
-	if (!comando) {
+    const comando;
+    if(message.content.startsWith(p_drmk))
+        comando = client.ComandosDrawmaku.get(nombrecomando) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
+	else if(message.content.startsWith(p_pure))
+        comando = client.ComandosPure.get(nombrecomando) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
+    
+    if (!comando) {
         message.channel.send(':x: Disculpá, soy estúpido. Tal vez escribiste mal el comando y no te entiendo.');
         return;
     }
