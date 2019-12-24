@@ -4,9 +4,8 @@ var global = require('../../config.json'); //Variables globales
 
 module.exports = {
 	name: 'gatos',
-	execute(message, args) {
-        const { embfile } = await fetch('https://aws.random.cat/meow').then(response => response.json());
-
-		message.channel.send(embfile);
+	executeAsync(message, args) {
+		const { file } = fetch('https://aws.random.cat/meow').then(response => response.json());
+		message.channel.send(file);
     },
 };
