@@ -13,7 +13,7 @@ module.exports = {
                 message.channel.send(sentence);
             } else message.channel.send(':warning: tienes que especificar lo que quieres que diga.');
         } else {
-            message.channel.send(':closed_lock_with_key: Solo Papita con Pure puede usar este comando.');
+            message.channel.send(':closed_lock_with_key: Solo Papita con Puré puede usar este comando.');
             return;
         }
     },

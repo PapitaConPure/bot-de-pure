@@ -65,7 +65,7 @@ module.exports = {
             } else if(args.length < 2) message.channel.send(':warning: Parámetros insuficientes. Recuerda: `d!papa-rolmoderador <[+/-]*> <@$rol*>`.');
             else message.channel.send(':warning: Demasiados parámetros. Recuerda: `d!papa-rolmoderador <[+/-]*> <@$rol*>`.');
         } else {
-            message.channel.send(':closed_lock_with_key: Solo Papita con Pure y aquellos con un rol de moderación de Drawmaku puede usar este comando.');
+            message.channel.send(':closed_lock_with_key: Solo Papita con Puré y aquellos con un rol de moderación de Drawmaku pueden usar este comando.');
             return;
         }
     },

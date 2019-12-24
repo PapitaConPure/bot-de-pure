@@ -11,7 +11,7 @@ module.exports = {
     ],
 	execute(message, args) {
         if(func.notModerator(message.member)) {
-            message.channel.send(':closed_lock_with_key: Solo aquellos con un rol de moderación de Drawmaku puede usar este comando.');
+            message.channel.send(':closed_lock_with_key: Solo aquellos con un rol de moderación de Drawmaku pueden usar este comando.');
             return;
         }
 		message.channel.send(

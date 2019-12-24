@@ -12,6 +12,9 @@ module.exports = {
                     console.error(err);
                 }
             });
+        } else {
+            message.channel.send(':closed_lock_with_key: Solo Papita con Puré y aquellos con un rol de moderación de Drawmaku pueden usar este comando.');
+            return;
         }
     },
 };
