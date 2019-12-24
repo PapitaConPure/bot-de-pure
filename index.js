@@ -4,6 +4,7 @@ const Discord = require('discord.js'); //Integrar discord.js
 const { Client, RichEmbed } = require('discord.js'); //Ni idea, la verdad, pero aquí está
 const { //Constantes globales
     p_drmk, //prefijo drawmaku
+    p_pure, //prefijo puré
     token, //"llave" del bot
 } = require('./config.json');
 var global = require('./config.json'); //Variables globales
