@@ -34,7 +34,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     const args = message.content.slice(p_drmk.length).split(/ +/); //Argumentos ingresados
     const nombrecomando = args.shift().toLowerCase(); //Comando ingresado
 
-    const comando;
+    var comando;
     if(message.content.startsWith(p_drmk))
         comando = client.ComandosDrawmaku.get(nombrecomando) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
 	else if(message.content.startsWith(p_pure))
