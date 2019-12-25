@@ -15,12 +15,13 @@ const tmpfunc = async function(tmpch) {
 	).then(response => response.json());
 
 	// inside a command, event listener, etc.
-	const selected = data[getRandomInt(srchlimit - 1)];
+	const tempnum = getRandomInt(srchlimit - 1);
+	const selected = data[tempnum];
 	const Embed = new Discord.RichEmbed()
 		.setColor('#6a4928')
 		.setTitle('Café uwu')
 		.setURL(`${selected.bitly_url}`)
-		.addField('Fórmula de búsqueda', `${srchoff} + [0~${srchlimit} => ${selected}]`)
+		.addField('Fórmula de búsqueda', `${srchoff} + [0~${srchlimit} => ${tempnum}]`)
 		.setImage(`https://media.giphy.com/media/${selected.id}/giphy.gif`);
 	
 	tmpch.send(Embed);
