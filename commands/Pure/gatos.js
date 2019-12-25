@@ -6,7 +6,7 @@ const tmpfunc = async function(tmpch) {
 	const { file } = await fetch('https://aws.random.cat/meow').then(response => response.json());
 	//Crear y usar embed
 	const Embed = new Discord.RichEmbed()
-		.setColor('#6a4928')
+		.setColor('#ffc0cb')
 		.setTitle('Gatitos uwu')
 		.addField('Salsa', file)
 		.setImage(file);
