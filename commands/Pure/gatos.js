@@ -4,7 +4,13 @@ const fetch = require('node-fetch');
 
 const tmpfunc = async function(tmpch) {
 	const { file } = await fetch('https://aws.random.cat/meow').then(response => response.json());
-	tmpch.send(file);
+	//Crear y usar embed
+	const Embed = new Discord.RichEmbed()
+		.setColor('#6a4928')
+		.setTitle('Gatitos uwu')
+		.addField('Salsa', file)
+		.setImage(file);
+	tmpch.send(Embed);
 }
 
 module.exports = {

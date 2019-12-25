@@ -19,7 +19,7 @@ const tmpfunc = async function(tmpch) {
 	const Embed = new Discord.RichEmbed()
 		.setColor('#6a4928')
 		.setTitle('Café uwu')
-		.setURL(`${selected.bitly_url}`)
+		.addField('Salsa', `${selected.bitly_url}`)
 		.setImage(`https://media.giphy.com/media/${selected.id}/giphy.gif`);
 	tmpch.send(Embed);
 }
