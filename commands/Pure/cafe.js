@@ -14,16 +14,13 @@ const tmpfunc = async function(tmpch) {
 		`https://api.giphy.com/v1/gifs/search?api_key=Qu29veK701szqoFK6tXgOiybuc1q3PaX&q=coffee&offset=${srchoff}&limit=${srchlimit}`
 	).then(response => response.json());
 
-	// inside a command, event listener, etc.
-	const tempnum = getRandomInt(srchlimit - 1);
-	const selected = data[tempnum];
+	//Crear y usar embed
+	const selected = getRandomInt(srchlimit - 1);
 	const Embed = new Discord.RichEmbed()
 		.setColor('#6a4928')
 		.setTitle('Café uwu')
 		.setURL(`${selected.bitly_url}`)
-		.addField('Fórmula de búsqueda', `${srchoff} + [0~${srchlimit} => ${tempnum}]`)
 		.setImage(`https://media.giphy.com/media/${selected.id}/giphy.gif`);
-	
 	tmpch.send(Embed);
 }
 
