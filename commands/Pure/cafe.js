@@ -8,7 +8,7 @@ const getRandomInt = function(_max) {
 }
 
 const tmpfunc = async function(tmpch) {
-	const srchoff = getRandomInt;
+	const srchoff = getRandomInt(100);
 	const srchlimit = 10;
 	const { data } = await fetch(
 		`https://api.giphy.com/v1/gifs/search?api_key=Qu29veK701szqoFK6tXgOiybuc1q3PaX&q=coffee&offset=${srchoff}&limit=${srchlimit}`
