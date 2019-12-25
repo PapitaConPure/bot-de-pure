@@ -8,10 +8,11 @@ const tmpfunc = async function(tmpch) {
 }
 
 module.exports = {
-	name: 'gatos',
+	name: 'touhou',
 	aliases: [
-        'gato', 'felino',
-        'cats', 'cat'
+        'imagentouhou', 'imgtouhou',
+        'touhoupic', '2hupic',
+		'2hu'
     ],
 	execute(message, args){
 		tmpfunc(message.channel);
