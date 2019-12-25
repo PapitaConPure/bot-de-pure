@@ -15,7 +15,7 @@ const tmpfunc = async function(tmpch) {
 	).then(response => response.json());
 
 	//Crear y usar embed
-	const selected = getRandomInt(srchlimit - 1);
+	const selected = data[getRandomInt(srchlimit - 1)];
 	const Embed = new Discord.RichEmbed()
 		.setColor('#6a4928')
 		.setTitle('Café uwu')
