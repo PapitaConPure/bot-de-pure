@@ -8,8 +8,8 @@ const getRandomInt = function(_max) {
 }
 
 const tmpfunc = async function(tmpch) {
-	const { file } = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=Qu29veK701szqoFK6tXgOiybuc1q3PaX&q=coffee&limit=25`).then(response => response.json());
-	tmpch.send(file[getRandomInt(24)]);
+	const { data } = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=Qu29veK701szqoFK6tXgOiybuc1q3PaX&q=coffee&limit=25`).then(response => response.json());
+	tmpch.send(data[getRandomInt(24)]);
 }
 
 module.exports = {
