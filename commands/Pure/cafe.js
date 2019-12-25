@@ -16,7 +16,7 @@ module.exports = {
 	name: 'cafe',
 	aliases: [
         'café',
-        'coffee'
+        'coffee', 'cawfee'
     ],
 	execute(message, args){
 		tmpfunc(message.channel);
