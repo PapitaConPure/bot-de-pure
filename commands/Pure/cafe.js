@@ -16,12 +16,11 @@ const tmpfunc = async function(tmpch) {
 
 	// inside a command, event listener, etc.
 	const selected = data[getRandomInt(srchlimit - 1)];
-	const usnm = (selected.username.length > 0)?`${selected.username}`:`Desconocido`;
 	const Embed = new Discord.RichEmbed()
 		.setColor('#6a4928')
 		.setTitle('Café uwu')
 		.setURL(`${selected.bitly_url}`)
-		.addField('Autor', `${selected.username}`)
+		.addField('Fórmula de búsqueda', `${srchoff} + [0~${srchlimit} => ${selected}]`)
 		.setImage(`https://media.giphy.com/media/${selected.id}/giphy.gif`);
 	
 	tmpch.send(Embed);
