@@ -20,9 +20,8 @@ const tmpfunc = async function(tmpch) {
 		.setColor('#6a4928')
 		.setTitle('Café uwu')
 		.setURL(`${selected.bitly_url}`)
-		.setThumbnail('https://i.imgur.com/wSTFkRM.png')
 		.addField('Autor', `${selected.username}`)
-		.setImage(`https://media.giphy.com/media/${selected.id}/giphy.gif`)
+		.setImage(`https://media.giphy.com/media/${selected.id}/giphy.gif`);
 	tmpch.send(Embed);
 }
 
