@@ -16,9 +16,9 @@ const tmpfunc = async function(tmpch, arglist) {
 		srchtags += ' ' + arglist[i];
 	const srchpg = getRandomInt(3);
 	const srchlimit = 10;
-	const { source, image } = await fetch(
+	const { source, file_url } = await fetch(
 		`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
-	).then(json => console.log(json)).then(response => response.json());
+	).then(response => { response.json(); console.log(response); });
 
 	//Crear y usar embed
 	const selected = getRandomInt(srchlimit - 1);
@@ -27,7 +27,7 @@ const tmpfunc = async function(tmpch, arglist) {
 		.setColor('#fa7b62')
 		.setTitle('Tohas uwu')
 		.addField('Salsa', `${salsa}`)
-		.setImage(image[selected]);
+		.setImage(file_url[selected]);
 	tmpch.send(Embed);
 }
 
