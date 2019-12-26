@@ -13,18 +13,17 @@ const tmpfunc = async function(tmpch, arglist) {
 	else srchtags += 'safe';
 	for(let i = 0; i < arglist.length; i++)
 		srchtags += ' ' + arglist[i];
-	const srchpg = getRandomInt(3);
-	const srchlimit = 10;
+	const srchpg = getRandomInt(20);
+	const srchlimit = 42;
 	{
 		let i = 0;
 		let selectedpic = getRandomInt(9);
+		let foundpic = false;
 		axios.get(
 			`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
 		).then((data) => {
 			data.data.forEach(image => {
 				if(image !== undefined && i === selectedpic) {
-					let embed = {
-					}
 					//Crear y usar embed
 					const Embed = new Discord.RichEmbed()
 						.setColor('#fa7b62')
@@ -32,12 +31,15 @@ const tmpfunc = async function(tmpch, arglist) {
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
 						.setImage(image.file_url);
 					tmpch.send(Embed);
+					foundpic = true;
 				}
 				i++;
 			})
 		}).catch((error) => {
-			tmpch.send(':warning: No hay resultados con estas tags >:C');
+			tmpch.send(':warning: Ocurrió un error en la búsqueda. Revisa las tags umu');
 		});
+
+		if(!foundpic) tmpch.send(':warning: No hay resultados para estas tags >:C');
 	}
 }
 
