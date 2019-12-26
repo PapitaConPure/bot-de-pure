@@ -57,7 +57,7 @@ module.exports = {
 		'2hu'
     ],
 	execute(message, args){
-		let botmsg = tmpfunc(message.channel, args);
+		let botmsg = await tmpfunc(message.channel, args);
 
 		if(botmsg !== undefined) {
 			const filter = m => m.content.startsWith('d') && m.author.id === message.author.id;
