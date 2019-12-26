@@ -9,8 +9,8 @@ const getRandomInt = function(_max) {
 
 const tmpfunc = async function(tmpch, arglist) {
 	let srchtags = 'touhou rating:';
-	if(tmpch.nsfw) srchtags += 'explicit';
-	else srchtags += 'safe';
+	if(tmpch.nsfw) { srchtags += 'explicit -guro -lolicon'; }
+	else { srchtags += 'safe'; }
 	for(let i = 0; i < arglist.length; i++)
 		srchtags += ' ' + arglist[i];
 	const srchpg = getRandomInt(20);
@@ -29,13 +29,15 @@ const tmpfunc = async function(tmpch, arglist) {
 						.setColor('#fa7b62')
 						.setTitle('Tohas uwu')
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
+						.addBlankField()
+						.addField('Eliminar imagen', `Si la imagen incumple las reglas del canal/servidor/ToS de Discord, escribe "d" para eliminar este mensaje.`)
 						.setImage(image.file_url);
 					tmpch.send(Embed);
 					foundpic = true;
 				}
 				i++;
 			})
-			
+
 			if(!foundpic) tmpch.send(':warning: No hay resultados para estas tags >:C');
 		}).catch((error) => {
 			tmpch.send(':warning: Ocurrió un error en la búsqueda. Revisa las tags umu');
