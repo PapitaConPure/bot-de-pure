@@ -72,7 +72,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 module.exports = {
 	name: 'touhou',
 	aliases: [
-        'imagentouhou', 'imgtouhou',
+        'imagentouhou', 'imgtouhou', 'tohas', 'touhas', 'tojas', 'tohitas', 'touhitas', 'tojitas',
         'touhoupic', '2hupic',
 		'2hu'
     ],
