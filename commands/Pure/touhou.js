@@ -34,6 +34,8 @@ const tmpfunc = async function(tmpch, arglist) {
 						.setImage(image.file_url);
 					tmpch.send(Embed).then(sent => {
 						BotMessage = tmpch.fetchMessage(`${sent.id}`);
+						console.log(sent.id);
+						console.log(BotMessage);
 					});
 					foundpic = true;
 				}
@@ -50,7 +52,8 @@ const tmpfunc = async function(tmpch, arglist) {
 				});
 			} else tmpch.send(':warning: No hay resultados para estas tags >:C');
 		}).catch((error) => {
-			tmpch.send(':warning: Ocurrió un error en la búsqueda. Revisa las tags umu');
+			tmpch.send(':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags umu');
+			console.error(error);
 		});
 	}
 }
