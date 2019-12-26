@@ -8,6 +8,7 @@ const getRandomInt = function(_max) {
 }
 
 const tmpfunc = async function(tmpch, arglist) {
+	let ReturnMessage = -1;
 	let srchtags = 'touhou rating:';
 	if(tmpch.nsfw) { srchtags += 'explicit -guro -lolicon'; }
 	else { srchtags += 'safe'; }
@@ -29,10 +30,9 @@ const tmpfunc = async function(tmpch, arglist) {
 						.setColor('#fa7b62')
 						.setTitle('Tohas uwu')
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
-						.addBlankField()
 						.addField('Eliminar imagen', `Si la imagen incumple las reglas del canal/servidor/ToS de Discord, escribe "d" para eliminar este mensaje.`)
 						.setImage(image.file_url);
-					tmpch.send(Embed);
+					tmpch.send(Embed).then(sent => {ReturnMessage = sent;});
 					foundpic = true;
 				}
 				i++;
@@ -43,6 +43,7 @@ const tmpfunc = async function(tmpch, arglist) {
 			tmpch.send(':warning: Ocurrió un error en la búsqueda. Revisa las tags umu');
 		});
 	}
+	return ReturnMessage;
 }
 
 module.exports = {
@@ -53,6 +54,15 @@ module.exports = {
 		'2hu'
     ],
 	execute(message, args){
-		tmpfunc(message.channel, args);
+		const botmsg = tmpfunc(message.channel, args);
+
+		if(botmsg !== -1) {
+			const filter = m => m.content.startsWith('d') && m.author.id === message.author.id;
+			const collector = message.channel.createMessageCollector(filter, { time: 40000 });
+			collector.on('collect', m => {
+				console.log(`Collected ${m.content}`);
+				botmsg.delete();
+			});
+		}
     },
 };
