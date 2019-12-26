@@ -33,7 +33,7 @@ const tmpfunc = async function(tmpch, arglist) {
 						.addField('Eliminar imagen', `Si la imagen incumple las reglas del canal/servidor/ToS de Discord, escribe "d" para eliminar este mensaje.`)
 						.setImage(image.file_url);
 					tmpch.send(Embed).then(sent => {
-						BotMessage = msgch.fetchMessage(sent.id);
+						BotMessage = tmpch.fetchMessage(sent.id);
 					});
 					foundpic = true;
 				}
