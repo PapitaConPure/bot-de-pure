@@ -8,7 +8,7 @@ const getRandomInt = function(_max) {
 }
 
 const tmpfunc = async function(tmpch, arglist) {
-	let ReturnMessage = -1;
+	let ReturnMessage = undefined;
 	let srchtags = 'touhou rating:';
 	if(tmpch.nsfw) { srchtags += 'explicit -guro -lolicon'; }
 	else { srchtags += 'safe'; }
@@ -34,6 +34,9 @@ const tmpfunc = async function(tmpch, arglist) {
 						.setImage(image.file_url);
 					tmpch.send(Embed).then(sent => {
 						ReturnMessage = sent.id;
+						console.log(`sent: ${sent}`);
+						console.log(`sent.id: ${sent.id}`);
+						console.log(`comparando con tmpch: ${tmpch}`);
 					});
 					foundpic = true;
 				}
@@ -45,6 +48,7 @@ const tmpfunc = async function(tmpch, arglist) {
 			tmpch.send(':warning: Ocurrió un error en la búsqueda. Revisa las tags umu');
 		});
 	}
+
 	return ReturnMessage;
 }
 
@@ -58,7 +62,7 @@ module.exports = {
 	execute(message, args){
 		let botmsg = tmpfunc(message.channel, args);
 
-		if(botmsg !== -1) {
+		if(botmsg !== undefined) {
 			const filter = m => m.content.startsWith('d') && m.author.id === message.author.id;
 			const collector = message.channel.createMessageCollector(filter, { time: 40000 });
 			collector.on('collect', m => {
