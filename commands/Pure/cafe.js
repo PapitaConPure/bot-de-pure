@@ -12,7 +12,7 @@ const tmpfunc = async function(tmpch) {
 	const srchlimit = 10;
 	const { data } = await fetch(
 		`https://api.giphy.com/v1/gifs/search?api_key=Qu29veK701szqoFK6tXgOiybuc1q3PaX&q=coffee&offset=${srchoff}&limit=${srchlimit}`
-	).then(response => { response.json(); console.log(response.json()); });
+	).then(response => { response.json(); console.log(response); });
 
 	//Crear y usar embed
 	const selected = data[getRandomInt(srchlimit - 1)];
