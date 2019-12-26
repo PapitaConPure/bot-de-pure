@@ -1,6 +1,7 @@
 const Discord = require('discord.js'); //Integrar discord.js
 var global = require('../../config.json'); //Variables globales
 const fetch = require('node-fetch');
+const querystring = require('querystring');
 
 const getRandomInt = function(_max) {
   _max = Math.floor(_max);
@@ -13,6 +14,7 @@ const tmpfunc = async function(tmpch, arglist) {
 	else srchtags += 'safe';
 	for(let i = 0; i < arglist.length; i++)
 		srchtags += ' ' + arglist[i];
+	srchtags = querystring.stringify({ term: srchtags });
 	const srchpg = getRandomInt(3);
 	const srchlimit = 10;
 	const { post } = await fetch(
