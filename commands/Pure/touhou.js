@@ -7,7 +7,7 @@ const getRandomInt = function(_max) {
   return Math.floor(Math.random() * _max);
 }
 
-const tmpfunc = async function(tmpch, arglist) {
+const tmpfunc = async function(tmpch, arglist, tempvar) {
 	let ReturnMessage = undefined;
 	let srchtags = 'touhou rating:';
 	if(tmpch.nsfw) { srchtags += 'explicit -guro -lolicon'; }
@@ -36,7 +36,7 @@ const tmpfunc = async function(tmpch, arglist) {
 						ReturnMessage = sent.id;
 						console.log(`sent: ${sent}`);
 						console.log(`sent.id: ${sent.id}`);
-						console.log(`comparando con tmpch: ${tmpch}`);
+						console.log(`comparando con tempvar: ${tempvar}`);
 					});
 					foundpic = true;
 				}
@@ -60,7 +60,7 @@ module.exports = {
 		'2hu'
     ],
 	execute(message, args){
-		let botmsg = tmpfunc(message.channel, args);
+		let botmsg = tmpfunc(message.channel, args, message);
 
 		if(botmsg !== undefined) {
 			const filter = m => m.content.startsWith('d') && m.author.id === message.author.id;
