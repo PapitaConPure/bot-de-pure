@@ -40,19 +40,17 @@ const tmpfunc = async function(tmpch, arglist) {
 				i++;
 			})
 
-			if(!foundpic) tmpch.send(':warning: No hay resultados para estas tags >:C');
+			if(foundpic) {
+				const filter = m => m.content.startsWith('d') && m.author.id === message.author.id;
+				const collector = message.channel.createMessageCollector(filter, { time: 40000 });
+				collector.on('collect', m => {
+					console.log(`Collected ${m.content}`);
+					console.log(BotMessage);
+					BotMessage.delete();
+				});
+			} else tmpch.send(':warning: No hay resultados para estas tags >:C');
 		}).catch((error) => {
 			tmpch.send(':warning: Ocurrió un error en la búsqueda. Revisa las tags umu');
-		});
-	}
-
-	if(foundpic) {
-		const filter = m => m.content.startsWith('d') && m.author.id === message.author.id;
-		const collector = message.channel.createMessageCollector(filter, { time: 40000 });
-		collector.on('collect', m => {
-			console.log(`Collected ${m.content}`);
-			console.log(BotMessage);
-			BotMessage.delete();
 		});
 	}
 }
