@@ -7,7 +7,7 @@ const getRandomInt = function(_max) {
   return Math.floor(Math.random() * _max);
 }
 
-const tmpfunc = async function(tmpch, arglist, tempvar) {
+const tmpfunc = async function(tmpch, arglist) {
 	let ReturnMessage = undefined;
 	let srchtags = 'touhou rating:';
 	if(tmpch.nsfw) { srchtags += 'explicit -guro -lolicon'; }
@@ -34,9 +34,6 @@ const tmpfunc = async function(tmpch, arglist, tempvar) {
 						.setImage(image.file_url);
 					tmpch.send(Embed).then(sent => {
 						ReturnMessage = sent.id;
-						console.log(`sent: ${sent}`);
-						console.log(`sent.id: ${sent.id}`);
-						console.log(`comparando con tempvar: ${tempvar}`);
 					});
 					foundpic = true;
 				}
@@ -60,14 +57,16 @@ module.exports = {
 		'2hu'
     ],
 	execute(message, args){
-		let botmsg = tmpfunc(message.channel, args, message);
+		let botmsg = tmpfunc(message.channel, args);
 
 		if(botmsg !== undefined) {
 			const filter = m => m.content.startsWith('d') && m.author.id === message.author.id;
 			const collector = message.channel.createMessageCollector(filter, { time: 40000 });
 			collector.on('collect', m => {
 				console.log(`Collected ${m.content}`);
-				botmsg = message.channel.fetchMessage({botmsg});
+				console.log(botmsg);
+				botmsg = message.channel.fetchMessage(botmsg);
+				console.log(botmsg);
 				botmsg.delete();
 			});
 		}
