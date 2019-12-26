@@ -8,7 +8,9 @@ const getRandomInt = function(_max) {
 }
 
 const tmpfunc = async function(tmpch, arglist) {
-	let srchtags = 'touhou';
+	let srchtags = 'touhou rating:';
+	if(tmpch.nsfw) srchtags += 'explicit';
+	else srchtags += 'safe';
 	for(let i = 0; i < arglist.length; i++)
 		srchtags += ' ' + arglist[i];
 	const srchpg = getRandomInt(3);
