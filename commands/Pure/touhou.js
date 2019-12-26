@@ -30,11 +30,10 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 						.setColor('#fa7b62')
 						.setTitle('Tohas uwu')
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
-						.addField('Eliminar imagen', `Si la imagen incumple las reglas del canal/servidor/ToS de Discord, escribe "d" para eliminar este mensaje.`)
+						.addField('Eliminar imagen', `Si la imagen incumple alguna regla, escribe "d" para eliminar este mensaje.`)
 						.setImage(image.file_url);
 					tmpch.send(Embed).then(sent => {
-						BotMessage = tmpch.fetchMessage(`${sent.id}`);
-						console.log(sent.id);
+						BotMessage = sent.id;
 						console.log(BotMessage);
 					});
 					foundpic = true;
@@ -47,8 +46,8 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 				const collector = tmpch.createMessageCollector(filter, { time: 40000 });
 				collector.on('collect', m => {
 					console.log(`Collected ${m.content}`);
-					console.log(BotMessage.message.id);
-					BotMessage.delete();
+					console.log(BotMessage);
+					tmpch.fetchMessage(BotMessage).then(msg => msg.delete());
 				});
 			} else tmpch.send(':warning: No hay resultados para estas tags >:C');
 		}).catch((error) => {
