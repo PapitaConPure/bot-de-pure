@@ -46,7 +46,7 @@ const tmpfunc = async function(tmpch, arglist) {
 		});
 	}
 
-	if(botmsg !== undefined) {
+	if(BotMessage !== undefined) {
 		const filter = m => m.content.startsWith('d') && m.author.id === message.author.id;
 		const collector = message.channel.createMessageCollector(filter, { time: 40000 });
 		collector.on('collect', m => {
