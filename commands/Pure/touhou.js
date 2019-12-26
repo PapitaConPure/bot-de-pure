@@ -15,11 +15,11 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 	if(tmpch.nsfw) {
 		srchtags += 'explicit -guro -lolicon -shotacon -bestiality';
 		embedcolor = '#38214e';
-		embedtitle = 'Tohas uwu';
+		embedtitle = 'Tohitas O//w//O';
 	} else {
 		srchtags += 'safe';
 		embedcolor = '#fa7b62';
-		embedtitle = 'Tohitas O//w//O';
+		embedtitle = 'Tohas uwu';
 	}
 	for(let i = 0; i < arglist.length; i++)
 		srchtags += ' ' + arglist[i];
