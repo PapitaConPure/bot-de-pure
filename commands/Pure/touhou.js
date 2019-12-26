@@ -15,12 +15,12 @@ const tmpfunc = async function(tmpch, arglist) {
 		srchtags += ' ' + arglist[i];
 	const srchpg = getRandomInt(3);
 	const srchlimit = 10;
-	const { posts } = await fetch(
+	const { post } = await fetch(
 		`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526`
 	).then(response => response.json());
 
 	//Crear y usar embed
-	const selected = posts[getRandomInt(srchlimit - 1)];
+	const selected = post[getRandomInt(srchlimit - 1)];
 	const salsa = (selected.source.startsWith('http'))?selected.source:'Desconocida.';
 	const Embed = new Discord.RichEmbed()
 		.setColor('#fa7b62')
