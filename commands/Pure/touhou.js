@@ -18,7 +18,7 @@ const tmpfunc = async function(tmpch, arglist) {
 	const srchlimit = 10;
 	const { source, file_url } = await fetch(
 		`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
-	).then(response => { response.json(); console.log(response); });
+	).then(response => { response.json(); console.log(response.json()); });
 
 	//Crear y usar embed
 	const selected = getRandomInt(srchlimit - 1);
