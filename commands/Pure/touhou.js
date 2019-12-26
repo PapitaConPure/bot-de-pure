@@ -1,7 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 var global = require('../../config.json'); //Variables globales
-const fetch = require('node-fetch');
-const querystring = require('querystring');
+const axios = require('axios');
 
 const getRandomInt = function(_max) {
   _max = Math.floor(_max);
@@ -16,19 +15,26 @@ const tmpfunc = async function(tmpch, arglist) {
 		srchtags += ' ' + arglist[i];
 	const srchpg = getRandomInt(3);
 	const srchlimit = 10;
-	const { data } = await fetch(
+	axios.get(
 		`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
-	).then(response => response.json());
-
-	//Crear y usar embed
-	const selected = data[getRandomInt(srchlimit - 1)];
-	const salsa = (selected.source.startsWith('http'))?selected.source:'Desconocida.';
-	const Embed = new Discord.RichEmbed()
-		.setColor('#fa7b62')
-		.setTitle('Tohas uwu')
-		.addField('Salsa', `${salsa}`)
-		.setImage(selected.file_url);
-	tmpch.send(Embed);
+	).then((data) => {
+        data.data.forEach(image => {
+			if (image !== undefined) {
+				let embed = {
+				}
+				//Crear y usar embed
+				const Embed = new Discord.RichEmbed()
+					.setColor('#fa7b62')
+					.setTitle('Tohas uwu')
+					.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
+					.setImage(image.file_url);
+				tmpch.send(Embed);
+			}
+        })
+    }).catch((error) => {
+        message.reply('Sorry, there was an unexpected error. Try with another tags')
+        signale.fatal(new Error(error))
+    });
 }
 
 module.exports = {
