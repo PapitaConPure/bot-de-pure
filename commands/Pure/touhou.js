@@ -35,11 +35,11 @@ const tmpfunc = async function(tmpch, arglist) {
 				}
 				i++;
 			})
+			
+			if(!foundpic) tmpch.send(':warning: No hay resultados para estas tags >:C');
 		}).catch((error) => {
 			tmpch.send(':warning: Ocurrió un error en la búsqueda. Revisa las tags umu');
 		});
-
-		if(!foundpic) tmpch.send(':warning: No hay resultados para estas tags >:C');
 	}
 }
 
