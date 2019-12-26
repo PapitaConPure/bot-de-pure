@@ -10,8 +10,17 @@ const getRandomInt = function(_max) {
 const tmpfunc = async function(tmpch, arglist, tmpauth) {
 	let BotMessage = -1;
 	let srchtags = 'touhou rating:';
-	if(tmpch.nsfw) { srchtags += 'explicit -guro -lolicon -shotacon -bestiality'; }
-	else { srchtags += 'safe'; }
+	let embedcolor;
+	let embedtitle;
+	if(tmpch.nsfw) {
+		srchtags += 'explicit -guro -lolicon -shotacon -bestiality';
+		embedcolor = '#38214e';
+		embedtitle = 'Tohas uwu';
+	} else {
+		srchtags += 'safe';
+		embedcolor = '#fa7b62';
+		embedtitle = 'Tohitas O//w//O';
+	}
 	for(let i = 0; i < arglist.length; i++)
 		srchtags += ' ' + arglist[i];
 	const srchpg = getRandomInt(20);
@@ -27,8 +36,8 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 				if(image !== undefined && i === selectedpic) {
 					//Crear y usar embed
 					const Embed = new Discord.RichEmbed()
-						.setColor('#fa7b62')
-						.setTitle('Tohas uwu')
+						.setColor(embedcolor)
+						.setTitle(embedtitle)
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
 						.addField('Eliminar imagen', `Si la imagen incumple alguna regla, escribe "d" para eliminar este mensaje.`)
 						.setImage(image.file_url);
