@@ -49,6 +49,9 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 					console.log(BotMessage);
 					tmpch.fetchMessage(BotMessage).then(msg => msg.delete());
 				});
+				collector.on('end', collected => {
+					console.log(`Collected ${collected.size} items`);
+				});
 			} else tmpch.send(':warning: No hay resultados para estas tags >:C');
 		}).catch((error) => {
 			tmpch.send(':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags umu');
