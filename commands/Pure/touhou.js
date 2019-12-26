@@ -8,9 +8,9 @@ const getRandomInt = function(_max) {
 }
 
 const tmpfunc = async function(tmpch, arglist) {
-	let ReturnMessage = undefined;
+	let BotMessage = undefined;
 	let srchtags = 'touhou rating:';
-	if(tmpch.nsfw) { srchtags += 'explicit -guro -lolicon'; }
+	if(tmpch.nsfw) { srchtags += 'explicit -guro -lolicon -shotacon -bestiality'; }
 	else { srchtags += 'safe'; }
 	for(let i = 0; i < arglist.length; i++)
 		srchtags += ' ' + arglist[i];
@@ -33,7 +33,7 @@ const tmpfunc = async function(tmpch, arglist) {
 						.addField('Eliminar imagen', `Si la imagen incumple las reglas del canal/servidor/ToS de Discord, escribe "d" para eliminar este mensaje.`)
 						.setImage(image.file_url);
 					tmpch.send(Embed).then(sent => {
-						ReturnMessage = sent.id;
+						BotMessage = msgch.fetchMessage(sent.id);
 					});
 					foundpic = true;
 				}
@@ -46,7 +46,15 @@ const tmpfunc = async function(tmpch, arglist) {
 		});
 	}
 
-	return ReturnMessage;
+	if(botmsg !== undefined) {
+		const filter = m => m.content.startsWith('d') && m.author.id === message.author.id;
+		const collector = message.channel.createMessageCollector(filter, { time: 40000 });
+		collector.on('collect', m => {
+			console.log(`Collected ${m.content}`);
+			console.log(BotMessage);
+			BotMessage.delete();
+		});
+	}
 }
 
 module.exports = {
@@ -57,18 +65,6 @@ module.exports = {
 		'2hu'
     ],
 	execute(message, args){
-		let botmsg = await tmpfunc(message.channel, args);
-
-		if(botmsg !== undefined) {
-			const filter = m => m.content.startsWith('d') && m.author.id === message.author.id;
-			const collector = message.channel.createMessageCollector(filter, { time: 40000 });
-			collector.on('collect', m => {
-				console.log(`Collected ${m.content}`);
-				console.log(botmsg);
-				botmsg = message.channel.fetchMessage(botmsg);
-				console.log(botmsg);
-				botmsg.delete();
-			});
-		}
+		tmpfunc(message.channel, args);
     },
 };
