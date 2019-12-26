@@ -8,7 +8,7 @@ const getRandomInt = function(_max) {
 }
 
 const tmpfunc = async function(tmpch, arglist) {
-	let BotMessage = undefined;
+	let BotMessage = -1;
 	let srchtags = 'touhou rating:';
 	if(tmpch.nsfw) { srchtags += 'explicit -guro -lolicon -shotacon -bestiality'; }
 	else { srchtags += 'safe'; }
@@ -33,7 +33,7 @@ const tmpfunc = async function(tmpch, arglist) {
 						.addField('Eliminar imagen', `Si la imagen incumple las reglas del canal/servidor/ToS de Discord, escribe "d" para eliminar este mensaje.`)
 						.setImage(image.file_url);
 					tmpch.send(Embed).then(sent => {
-						BotMessage = tmpch.fetchMessage(sent.id);
+						BotMessage = await tmpch.fetchMessage(`${sent.id}`);
 					});
 					foundpic = true;
 				}
@@ -46,7 +46,7 @@ const tmpfunc = async function(tmpch, arglist) {
 		});
 	}
 
-	if(BotMessage !== undefined) {
+	if(foundpic) {
 		const filter = m => m.content.startsWith('d') && m.author.id === message.author.id;
 		const collector = message.channel.createMessageCollector(filter, { time: 40000 });
 		collector.on('collect', m => {
