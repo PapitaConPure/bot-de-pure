@@ -32,7 +32,7 @@ const tmpfunc = async function(tmpch, arglist) {
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
 						.addField('Eliminar imagen', `Si la imagen incumple las reglas del canal/servidor/ToS de Discord, escribe "d" para eliminar este mensaje.`)
 						.setImage(image.file_url);
-					tmpch.send(Embed).then(sent => {ReturnMessage = sent;});
+					tmpch.send(Embed).then(sent => {ReturnMessage = sent.id;});
 					foundpic = true;
 				}
 				i++;
