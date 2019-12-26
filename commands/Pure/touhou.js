@@ -47,7 +47,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 				const collector = tmpch.createMessageCollector(filter, { time: 40000 });
 				collector.on('collect', m => {
 					console.log(`Collected ${m.content}`);
-					console.log(BotMessage);
+					console.log(BotMessage.message.id);
 					BotMessage.delete();
 				});
 			} else tmpch.send(':warning: No hay resultados para estas tags >:C');
