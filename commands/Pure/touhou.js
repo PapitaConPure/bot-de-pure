@@ -32,7 +32,6 @@ const tmpfunc = async function(tmpch, arglist) {
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
 						.setImage(image.file_url);
 					tmpch.send(Embed);
-					break;
 				}
 				i++;
 			})
