@@ -36,7 +36,7 @@ module.exports = {
                     return;
                 }
                 global.dibujado = true;
-                imgs[message.author.username] = {
+                imgs[message.author.lastMessageID] = {
                     dibujo: message.attachments.array()[0].url
                 }
                 fs.writeFile('../../images.json', JSON.stringify(imgs, null, 4), err => {
