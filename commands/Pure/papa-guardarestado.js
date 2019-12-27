@@ -6,13 +6,15 @@ let path = require('path');
 var test = require('../../save.json'); //Variables globales
 const axios = require('axios');
 
-function readJSON(file) {
-    var request = new XMLHttpRequest();
-    request.open('GET', file, false);
-    request.send(null);
-    if (request.status == 200)
-        return request.responseText;
-};
+async function Pedir(directorio) {
+    let res = await axios.get(directorio)
+    .then(resp => {
+        message.channel.send(`Datos:\n\`\`\`json\n${JSON.stringify(resp.data, null, 4)}\`\`\``);
+    })
+    .catch(error => {
+        console.error(error);
+    });
+}
 
 module.exports = {
 	name: 'papa-guardarestado',
@@ -28,14 +30,7 @@ module.exports = {
             });
 
             message.channel.send(`:white_check_mark: datos guardados con éxito.`);
-            axios.get('https://raw.githubusercontent.com/PapitaConPure/bot-de-pure/master/save.json?token=AH6KN7SNYQKCJN3DF3VUK4S6AYUHG')
-            .then(resp => {
-                message.channel.send(`Datos:\n\`\`\`json\n${JSON.stringify(resp.data, null, 4)}\`\`\``);
-            })
-            .catch(error => {
-                console.error(error);
-            });
-            
+            Pedir('https://raw.githubusercontent.com/PapitaConPure/bot-de-pure/master/save.json?token=AH6KN7SNYQKCJN3DF3VUK4S6AYUHG');
             message.channel.send(`Ejemplo:\n\`\`\`json\n${JSON.stringify(test, null, 4)}\`\`\``);
         } else {
             message.channel.send(':closed_lock_with_key: Solo Papita con Puré puede usar este comando.');
