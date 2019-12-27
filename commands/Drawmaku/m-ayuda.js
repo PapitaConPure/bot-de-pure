@@ -29,7 +29,7 @@ module.exports = {
             `\t╠ \`${global.p_drmk}m-expulsar <@jugadorA*> <@jugadorB> <@jugadorC>...\` para expulsar jugadores del evento.\n` +
             `\t╠ \`${global.p_drmk}m-saltar <cantidad de turnos>\` para forzar a uno o más usuarios a dejar de dibujar.\n` +
             `\t╠ \`${global.p_drmk}m-cambiarpt <@jugador*> <cantidad>\` para sumar o restar puntos a un jugador.\n` +
-            `\t║ \t\t║ ***Al no ingresar la cantidad se suma un punto.***\n` +
+            `\t║ \t\t╠ ***Al no ingresar la cantidad se suma un punto.***\n` +
             `\t║ \t\t╚ ***Usa el símbolo menos en el parámetro de cantidad para restar puntos.***\n` +
             `\t╠ \`${global.p_drmk}m-aprobar\` para aprobar una recompensa.\n` +
             `\t╚ \`${global.p_drmk}m-desaprobar\` para desaprobar y reiniciar una recompensa.\n` +
