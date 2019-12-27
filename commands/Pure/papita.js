@@ -7,7 +7,16 @@ module.exports = {
         'papa', 'leche'
     ],
 	execute(message, args){
-		if(message.channel.nsfw) message.channel.send('https://www.youtube.com/watch?v=pwEvEY-7p9o');
-		else message.channel.send('**Lechita:tm: uwu** :milk:');
+		if(args.length) {
+			let newmsg;
+			newmsg = `***:copyright: ${args[0]}:registered:`;
+			for(let i = 1; i < args.length; i++)
+				newmsg += ` ${args[i]}:tm:`;
+			newmsg += `***`;
+			message.channel.send(newmsg);
+		} else {
+			if(message.channel.nsfw) message.channel.send('https://www.youtube.com/watch?v=pwEvEY-7p9o');
+			else message.channel.send('**Lechita:tm: uwu** :milk:');
+		}
     },
 };

@@ -174,7 +174,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 			});
 
 			if(foundpic) {
-				const filter = m => (m.content.startsWith('d') || m.content.startsWith('p!')) && m.author.id === tmpauth.id;
+				const filter = m => (m.content === 'd' || m.content.startsWith('p!')) && m.author.id === tmpauth.id;
 				global.imgcollector = tmpch.createMessageCollector(filter, { time: 40000 });
 				global.imgcollector.on('collect', m => {
 					console.log(`Collected ${m.content}`);
