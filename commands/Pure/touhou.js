@@ -174,14 +174,13 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 			});
 
 			if(foundpic) {
-				const filter = m => m.content.startsWith('d') && m.author.id === tmpauth.id;
-				if(global.imgcollector !== undefined) global.imgcollector.stop();
+				const filter = m => (m.content.startsWith('d') || m.content.startsWith('p!')) && m.author.id === tmpauth.id;
 				global.imgcollector = tmpch.createMessageCollector(filter, { time: 40000 });
 				global.imgcollector.on('collect', m => {
 					console.log(`Collected ${m.content}`);
-					console.log(global.imgcollector);
 					console.log(BotMessage);
-					tmpch.fetchMessage(BotMessage).then(msg => msg.delete());
+					if(m.content.startsWith('d')) tmpch.fetchMessage(BotMessage).then(msg => msg.delete());
+					else global.imgcollector.stop();
 				});
 				global.imgcollector.on('end', collected => {
 					console.log(`Collected ${collected.size} items`);
