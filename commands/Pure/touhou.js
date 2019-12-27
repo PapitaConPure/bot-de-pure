@@ -9,7 +9,7 @@ const getRandomInt = function(_max) {
   return _randnum;
 }
 
-const tmpfunc = async function(tmpch, arglist, tmpauth) {
+const tmpfunc = async function(tmpch, arglist, tmpauth, collector) {
 	let BotMessage = -1;
 	let srchtags = 'touhou -guro -furry -tagme rating:';
 	let embedcolor;
@@ -175,7 +175,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 
 			if(foundpic) {
 				const filter = m => m.content.startsWith('d') && m.author.id === tmpauth.id;
-				const collector = tmpch.createMessageCollector(filter, { time: 40000 });
+				collector = tmpch.createMessageCollector(filter, { time: 40000 });
 				collector.on('collect', m => {
 					console.log(`Collected ${m.content}`);
 					console.log(BotMessage);
@@ -199,7 +199,8 @@ module.exports = {
         'touhoupic', '2hupic',
 		'2hu'
     ],
-	execute(message, args){
-		tmpfunc(message.channel, args, message.author);
+	execute(message, args) {
+		let collectid;
+		tmpfunc(message.channel, args, message.author, collectid);
     },
 };
