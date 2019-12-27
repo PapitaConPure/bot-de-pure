@@ -42,7 +42,7 @@ client.on('message', message => { //En caso de recibir un mensaje
                 console.log('Apagando.');
                 client.destroy().then(() => {
                     console.log('Apagado.');
-                    client.login(token).then(() => {;
+                    client.login(token).then(() => {
                         console.log('Encendido.');
                         message.channel.send(':white_check_mark: reiniciado.')
                     });
