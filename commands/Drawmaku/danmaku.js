@@ -1,8 +1,9 @@
-var global = require('../../config.json'); //Variables globales
-var func = require('../../func.js'); //Funciones globales
-
+let global = require('../../config.json'); //Variables globales
+let func = require('../../func.js'); //Funciones globales
+let imgs = require('../../images.json'); //Imágenes guardadas
+const fs = require('fs'); //Integrar operaciones sistema de archivos de consola
 function attachIsImage(msgAttach) {
-    var url = msgAttach.url;
+    let url = msgAttach.url;
 
     return (url.indexOf("png", url.length - 3) !== -1 || url.indexOf("jpg", url.length - 3) !== -1 || url.indexOf("jpeg", url.length - 4) !== -1);
 };
@@ -24,7 +25,7 @@ module.exports = {
         //Adjuntar imagen
         if(!args.length) {
             if(message.attachments.size > 0) {
-                if(!message.attachments.every(attachIsImage)) {
+                if(!message.attachments[0].attachIsImage()) {
                     message.delete(message.author.lastMessageID);
                     message.channel.send(':warning: el archivo adjuntado no es una imagen.');
                     return;
@@ -34,6 +35,13 @@ module.exports = {
                     return;
                 }
                 global.dibujado = true;
+                imgs[message.author.username] = {
+                    dibujo: message.attachments[0].url
+                }
+                fs.writeFile('../../images.json', JSON.stringify(imgs, null, 4), err => {
+                    if(err) console.error(err);
+                    console.log('Imagen guardada.');
+                });
                 if(global.seleccionado) message.channel.send(
                     '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
                     '***¡EL DIBUJANTE YA HA SELECCIONADO Y DIBUJADO UN DANMAKU!***\n' +
