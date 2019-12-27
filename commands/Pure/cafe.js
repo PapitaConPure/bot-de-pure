@@ -10,8 +10,11 @@ const getRandomInt = function(_max) {
 const tmpfunc = async function(tmpch) {
 	const srchoff = getRandomInt(100);
 	const srchlimit = 10;
+	let srchextra = '';
+	for(let i = 0; i < args.length; i++)
+		srchextra += ` ${args[i]}`;
 	const { data } = await fetch(
-		`https://api.giphy.com/v1/gifs/search?api_key=Qu29veK701szqoFK6tXgOiybuc1q3PaX&q=coffee&offset=${srchoff}&limit=${srchlimit}`
+		`https://api.giphy.com/v1/gifs/search?api_key=Qu29veK701szqoFK6tXgOiybuc1q3PaX&q=coffee${srchextra}&offset=${srchoff}&limit=${srchlimit}`
 	).then(response => response.json());
 
 	//Crear y usar embed
