@@ -5,8 +5,8 @@ const { Client, RichEmbed } = require('discord.js'); //Ni idea, la verdad, pero 
 const { //Constantes globales
     p_drmk, //prefijo drawmaku
     p_pure, //prefijo puré
-    token, //"llave" del bot
 } = require('./config.json');
+const token = 'NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY';//La llave del bot
 var global = require('./config.json'); //Variables globales
 var func = require('./func.js'); //Funciones globales
 const client = new Discord.Client(); //Cliente de bot
