@@ -26,7 +26,7 @@ module.exports = {
         //Adjuntar imagen
         if(!args.length) {
             if(message.attachments.size > 0) {
-                if(!attachIsImage(message.attachments[0])) {
+                if(!message.attachments.every(attachIsImage)) {
                     message.delete(message.author.lastMessageID);
                     message.channel.send(':warning: el archivo adjuntado no es una imagen.');
                     return;
@@ -37,7 +37,7 @@ module.exports = {
                 }
                 global.dibujado = true;
                 imgs[message.author.username] = {
-                    dibujo: message.attachments[0].url
+                    dibujo: message.attachments.array()[0].url
                 }
                 fs.writeFile('../../images.json', JSON.stringify(imgs, null, 4), err => {
                     if(err) console.error(err);
