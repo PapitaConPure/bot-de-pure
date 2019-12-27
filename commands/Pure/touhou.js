@@ -176,12 +176,12 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 			if(foundpic) {
 				const filter = m => m.content.startsWith('d') && m.author.id === tmpauth.id;
 				global.imgcollector = tmpch.createMessageCollector(filter, { time: 40000 });
-				collector.on('collect', m => {
+				global.imgcollector.on('collect', m => {
 					console.log(`Collected ${m.content}`);
 					console.log(BotMessage);
 					tmpch.fetchMessage(BotMessage).then(msg => msg.delete());
 				});
-				collector.on('end', collected => {
+				global.imgcollector.on('end', collected => {
 					console.log(`Collected ${collected.size} items`);
 				});
 			} else tmpch.send(':warning: No hay resultados para estas tags >:C');
