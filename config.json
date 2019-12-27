@@ -1,8 +1,8 @@
 {
-	"p_drmk": "d!",
+    "p_drmk": "d!",
     "p_pure": "p!",
-	"tiempo": 60,
-	"edi": 3,
+    "tiempo": 60,
+    "edi": 3,
     "tem": "TEMÁTICA",
     "desc": "DESCRIPCIÓN",
     "desctem": "DESCRIPCIÓN DE TEMÁTICA",
@@ -10,9 +10,10 @@
     "empezado": false,
     "terminando": false,
     "cansay": 0,
-    "modroles": [],
-
-	"cntjugadores": 0,
+    "modroles": [
+        "651967417890635776"
+    ],
+    "cntjugadores": 0,
     "jugadores": [],
     "nombres": [],
     "numeros": [],
@@ -26,6 +27,5 @@
     "tjuego": 7200,
     "chi": "<#sincanal>",
     "goingnext": false,
-
     "imgcollector": []
 }
