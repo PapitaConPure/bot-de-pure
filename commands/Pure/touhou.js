@@ -11,7 +11,7 @@ const getRandomInt = function(_max) {
 
 const tmpfunc = async function(tmpch, arglist, tmpauth) {
 	let BotMessage = -1;
-	let srchtags = 'touhou -guro -furry';
+	let srchtags = 'touhou -guro -furry rating:';
 	let embedcolor;
 	let embedtitle;
 	//Nombres de tohas a tags
@@ -122,12 +122,12 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 	}
 
 	if(tmpch.nsfw) {
-		srchtags += ' -rating:safe -lolicon -loli -shotacon -bestiality -rumia -cirno -remilia_scarlet -flandre_scarlet -chen -ibuki_suika -inaba_tewi';
+		srchtags += 'explicit -lolicon -loli -shotacon -bestiality -rumia -cirno -remilia_scarlet -flandre_scarlet -chen -ibuki_suika -inaba_tewi';
 		srchtags += ' -kisume -sukuna_shinmyoumaru -clownpiece -komano_aun -ebisu_eika -luna_child -star_sapphire -sunny_milk -motoori_kosuzu -hieda_no_akyuu';
 		embedcolor = '#38214e';
 		embedtitle = 'Tohitas O//w//O';
 	} else {
-		srchtags += ' rating:safe';
+		srchtags += 'safe';
 		embedcolor = '#fa7b62';
 		embedtitle = 'Tohas uwu';
 	}
