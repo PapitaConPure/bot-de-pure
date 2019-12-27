@@ -9,25 +9,32 @@ const getRandomInt = function(_max) {
 
 const tmpfunc = async function(tmpch, arglist, tmpauth) {
 	let BotMessage = -1;
-	let srchtags = 'touhou rating:';
+	let srchtags = 'touhou -guro -furry';
 	let embedcolor;
 	let embedtitle;
 	if(tmpch.nsfw) {
-		srchtags += 'explicit -guro -lolicon -shotacon -bestiality';
+		srchtags += ' -rating:safe -lolicon -shotacon -bestiality';
 		embedcolor = '#38214e';
 		embedtitle = 'Tohitas O//w//O';
 	} else {
-		srchtags += 'safe';
+		srchtags += ' rating:safe';
 		embedcolor = '#fa7b62';
 		embedtitle = 'Tohas uwu';
 	}
-	for(let i = 0; i < arglist.length; i++)
-		srchtags += ' ' + arglist[i];
-	const srchpg = getRandomInt(20);
+	let srchpg = 0;
+	if(isNaN(args[0])) srchtags += ` ${args[0]}`;
+	else {
+		if(args[0] < 0) {
+			tmpch.send(':warning: no se pueden buscar números de página negativos.');
+		}
+		srchpg = args[0];
+	}
+	for(let i = 1; i < arglist.length; i++)
+		srchtags += ` ${arglist[i]}`;
 	const srchlimit = 42;
 	{
 		let i = 0;
-		let selectedpic = getRandomInt(9);
+		let selectedpic = 0;
 		let foundpic = false;
 		axios.get(
 			`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
