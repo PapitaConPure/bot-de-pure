@@ -6,7 +6,7 @@ const { //Constantes globales
     p_drmk, //prefijo drawmaku
     p_pure, //prefijo puré
 } = require('./config.json');
-const token = 'NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY';//La llave del bot
+const token = 'NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY'; //La llave del bot
 var global = require('./config.json'); //Variables globales
 var func = require('./func.js'); //Funciones globales
 const client = new Discord.Client(); //Cliente de bot
@@ -34,6 +34,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     if(global.cansay === 0) { if(message.author.bot) return; } 
     console.log(`[${message.guild.name}→#${message.channel.name}] ${message.author.username}: "${message.content}"`);
     message.content = message.content.toLowerCase();
+
     let pdetect;
     if(message.content.startsWith(p_drmk)) pdetect = p_drmk;
     else if(message.content.startsWith(p_pure)) pdetect = p_pure;
