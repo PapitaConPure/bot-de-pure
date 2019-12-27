@@ -28,8 +28,12 @@ module.exports = {
             });
 
             message.channel.send(`:white_check_mark: datos guardados con éxito.`);
-            axios.get('https://raw.githubusercontent.com/PapitaConPure/bot-de-pure/master/save.json?token=AH6KN7SNYQKCJN3DF3VUK4S6AYUHG').then(resp => {
-                message.channel.send(`Datos:\n\`\`\`json\n${JSON.stringify(resp.data)}\`\`\``);
+            axios.get('https://raw.githubusercontent.com/PapitaConPure/bot-de-pure/master/save.json?token=AH6KN7SNYQKCJN3DF3VUK4S6AYUHG')
+            .then(resp => {
+                message.channel.send(`Datos:\n\`\`\`json\n${JSON.stringify(resp.data, null, 4)}\`\`\``);
+            })
+            .catch(error => {
+                console.error(error);
             });
             
             message.channel.send(`Ejemplo:\n\`\`\`json\n${JSON.stringify(test, null, 4)}\`\`\``);
