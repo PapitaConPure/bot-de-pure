@@ -17,7 +17,7 @@ module.exports = {
                 }
             });
             message.channel.send(`:white_check_mark: datos guardados con éxito.`);
-            message.channel.send(`Directorio: \`${path.__dirname}\``);
+            message.channel.send(`Directorio: \`${__dirname}\``);
             message.channel.send(`\`\`\`json\n${JSON.stringify(test, null, 4)}\`\`\``);
         } else {
             message.channel.send(':closed_lock_with_key: Solo Papita con Puré puede usar este comando.');
