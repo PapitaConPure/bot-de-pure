@@ -16,8 +16,11 @@ module.exports = {
                     return;
                 }
             });
+
+            let parsedjson = path.join(__dirname, '../../save.json');
+            parsedjson = fs.readFileSync(parsedjson);
             message.channel.send(`:white_check_mark: datos guardados con éxito.`);
-            message.channel.send(JSON.stringify(path.join(__dirname, '../../save.json')));
+            message.channel.send(JSON.stringify(parsedjson));
             message.channel.send(`\`\`\`json\n${JSON.stringify(test, null, 4)}\`\`\``);
         } else {
             message.channel.send(':closed_lock_with_key: Solo Papita con Puré puede usar este comando.');
