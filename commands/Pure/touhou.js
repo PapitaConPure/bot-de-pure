@@ -11,7 +11,7 @@ const getRandomInt = function(_max) {
 
 const tmpfunc = async function(tmpch, arglist, tmpauth) {
 	let BotMessage = -1;
-	let srchtags = 'touhou -guro -furry -tagme rating:';
+	let srchtags = 'touhou -guro -furry -tagme -vore rating:';
 	let embedcolor;
 	let embedtitle;
 	//Nombres de tohas a tags
