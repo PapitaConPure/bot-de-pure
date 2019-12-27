@@ -26,5 +26,7 @@
     "trest": 0,
     "tjuego": 7200,
     "chi": "<#sincanal>",
-    "goingnext": false
+    "goingnext": false,
+
+    "imgcollector": []
 }
