@@ -32,7 +32,7 @@ client.once('ready', () => {
 
 client.on('message', message => { //En caso de recibir un mensaje
     if(global.cansay === 0) { if(message.author.bot) return; } 
-    console.log(`[${message.guild.name}→${message.channel}] ${message.author.username}: "${message.content}"`);
+    console.log(`[${message.guild.name}→${message.channel.name}] ${message.author.username}: "${message.content}"`);
     message.content = message.content.toLowerCase();
     let pdetect;
     if(message.content.startsWith(p_drmk)) pdetect = p_drmk;
