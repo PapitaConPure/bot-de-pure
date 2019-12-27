@@ -22,12 +22,13 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 		embedtitle = 'Tohas uwu';
 	}
 	let srchpg = 0;
-	if(isNaN(args[0])) srchtags += ` ${args[0]}`;
+	if(isNaN(arglist[0])) srchtags += ` ${arglist[0]}`;
 	else {
 		if(args[0] < 0) {
 			tmpch.send(':warning: no se pueden buscar números de página negativos.');
+			return;
 		}
-		srchpg = args[0];
+		srchpg = arglist[0];
 	}
 	for(let i = 1; i < arglist.length; i++)
 		srchtags += ` ${arglist[i]}`;
