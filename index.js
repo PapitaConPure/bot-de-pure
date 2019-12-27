@@ -32,16 +32,18 @@ client.once('ready', () => {
 
 client.on('message', message => { //En caso de recibir un mensaje
     if(global.cansay === 0) { if(message.author.bot) return; } 
-    console.log(`${message.author.username}:  "${message.content}"`);
-    var pdetect;
+    console.log(message);
+    console.log(`[${message.channel}] ${message.author.username}:  "${message.content}"`);
+    message.content = message.content.toLowerCase();
+    let pdetect;
     if(message.content.startsWith(p_drmk)) pdetect = p_drmk;
     else if(message.content.startsWith(p_pure)) pdetect = p_pure;
     else return; //Salir si no se encuentra el comando
 
     const args = message.content.slice(p_drmk.length).split(/ +/); //Argumentos ingresados
-    const nombrecomando = args.shift().toLowerCase(); //Comando ingresado
+    const nombrecomando = args.shift(); //Comando ingresado
 
-    var comando;
+    let comando;
     if(pdetect === p_drmk)
         comando = client.ComandosDrawmaku.get(nombrecomando) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
 	else if(pdetect === p_pure)
