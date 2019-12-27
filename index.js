@@ -37,16 +37,10 @@ client.on('message', message => { //En caso de recibir un mensaje
 
     if(message.content.startsWith(`${p_pure}papa-reiniciar`)) {
         if (message.author.id === '423129757954211880') {
-            message.channel.send(':arrows_counterclockwise: reiniciando...')
+            message.channel.send(':arrows_counterclockwise: apagando...\n_Nota: puedes comprobar si el bot se reinició viendo el log del proceso._')
             .then(sent => {
                 console.log('Apagando.');
-                client.destroy().then(() => {
-                    console.log('Apagado.');
-                    client.login(token).then(() => {
-                        console.log('Encendido.');
-                        message.channel.send(':white_check_mark: reiniciado.')
-                    });
-                });
+                process.exit();
             }).catch(error => {
                 console.error(error);
             });
