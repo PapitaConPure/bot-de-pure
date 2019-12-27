@@ -33,9 +33,8 @@ client.on('ready', () => {
 client.on('message', message => { //En caso de recibir un mensaje
     if(global.cansay === 0) { if(message.author.bot) return; } 
     console.log(`[${message.guild.name}→#${message.channel.name}] ${message.author.username}: "${message.content}"`);
-    message.content = message.content.toLowerCase();
 
-    if(message.content.startsWith(`${p_pure}papa-reiniciar`)) {
+    if(message.content.toLowerCase().startsWith(`${p_pure}papa-reiniciar`)) {
         if (message.author.id === '423129757954211880') {
             message.channel.send(':arrows_counterclockwise: apagando...\n_Nota: puedes comprobar si el bot se reinició viendo el log del proceso._')
             .then(sent => {
@@ -49,12 +48,12 @@ client.on('message', message => { //En caso de recibir un mensaje
     }
     
     let pdetect;
-    if(message.content.startsWith(p_drmk)) pdetect = p_drmk;
-    else if(message.content.startsWith(p_pure)) pdetect = p_pure;
+    if(message.content.toLowerCase().startsWith(p_drmk)) pdetect = p_drmk;
+    else if(message.content.toLowerCase().startsWith(p_pure)) pdetect = p_pure;
     else return; //Salir si no se encuentra el comando
 
     const args = message.content.slice(p_drmk.length).split(/ +/); //Argumentos ingresados
-    const nombrecomando = args.shift(); //Comando ingresado
+    const nombrecomando = args.toLowerCase().shift(); //Comando ingresado
 
     let comando;
     if(pdetect === p_drmk)
