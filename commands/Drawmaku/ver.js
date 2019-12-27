@@ -1,5 +1,6 @@
 var global = require('../../config.json'); //Variables globales
 var func = require('../../func.js'); //Funciones globales
+let imgs = require('../../images.json'); //Imágenes guardadas
 
 module.exports = {
 	name: 'ver',
@@ -14,9 +15,7 @@ module.exports = {
             return;
         }
 
-        fs.readFile('../../images.json', JSON.stringify(imgs, null, 4), err => {
-            if(err) console.error(err);
-            console.log('Imagen enviada.');
-        });
+        message.channel.send(imgs.dibujoactual);
+        console.log('Imagen enviada.');
     },
 };
