@@ -25,7 +25,7 @@ for(const file of commandFiles) {
 	client.ComandosPure.set(command.name, command);
 }
 
-client.once('ready', () => {
+client.on('ready', () => {
 	console.log('Bot conectado y funcionando.');
     client.user.setActivity("UwU 24/7", "WATCHING");
 });
