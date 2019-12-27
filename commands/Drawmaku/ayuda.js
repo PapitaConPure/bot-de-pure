@@ -19,7 +19,7 @@ module.exports = {
             `\t║ \t\t╠ ***¡No olvides las \\|\\|barras verticales\\|\\|!***\n` +
             `\t║ \t\t╚ ***Para adjuntar tu dibujo, debes usar un comando aparte.***\n` +
             `\t╠ \`${global.p_drmk}danmaku <imagen adjunta del danmaku*>\` para ingresar el dibujo de tu danmaku.\n` +
-            `\t║ \t\t╠ ***Se tiene que adjuntar el dibujo junto al comando.***\n` +
+            `\t║ \t\t╠ ***Se tiene que adjuntar el dibujo con el comando.***\n` +
             `\t║ \t\t╚ ***Para establecer el nombre de tu danmaku, debes usar un comando aparte.***\n` +
             `\t╠ \`${global.p_drmk}recomp <@jugador*>\` para darle un punto a un jugador por adivinar y mostrar el nombre de la spell.\n` +
             `\t╠ \`${global.p_drmk}lista\` para mostrar la lista de jugadores y sus puntajes.\n` +
