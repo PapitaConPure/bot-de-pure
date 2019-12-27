@@ -2,6 +2,7 @@ let global = require('../../config.json'); //Variables globales
 let func = require('../../func.js'); //Funciones globales
 let imgs = require('../../images.json'); //Imágenes guardadas
 const fs = require('fs'); //Integrar operaciones sistema de archivos de consola
+
 function attachIsImage(msgAttach) {
     let url = msgAttach.url;
 
@@ -25,7 +26,7 @@ module.exports = {
         //Adjuntar imagen
         if(!args.length) {
             if(message.attachments.size > 0) {
-                if(!message.attachments[0].attachIsImage()) {
+                if(!attachIsImage(message.attachments[0])) {
                     message.delete(message.author.lastMessageID);
                     message.channel.send(':warning: el archivo adjuntado no es una imagen.');
                     return;
