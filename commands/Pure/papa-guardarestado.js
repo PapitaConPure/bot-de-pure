@@ -7,9 +7,8 @@ module.exports = {
 	execute(message, args) {
         if(message.author.id === '423129757954211880') {
             message.channel.send(
-                ':floppy_disk: copiá y pegá esto en el archivo \`config.json\` de la carpeta del bot:\n' +
-                `\`\`\`json\n${JSON.stringify(global, null, 4)}\n\`\`\`` +
-                '_Al reiniciar el bot por medio de `p!papa-reiniciar` estos datos se cargarán automáticamente. Si se mata el proceso se deben cargar de forma manual._'
+                ':floppy_disk: antes de reiniciar el bot, copiá y pegá esto en el archivo \`config.json\` de la carpeta del bot:\n' +
+                `\`\`\`json\n${JSON.stringify(global, null, 4)}\n\`\`\``
             );
         } else {
             message.channel.send(':closed_lock_with_key: Solo Papita con Puré puede usar este comando.');
