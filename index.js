@@ -17,7 +17,6 @@ for(const file of commandFiles) {
 	const command = require(`./commands/Drawmaku/${file}`);
 	client.ComandosDrawmaku.set(command.name, command);
 }
-module.exports = {client}
 
 client.ComandosPure = new Discord.Collection(); //Comandos de Pure
 commandFiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
@@ -36,6 +35,24 @@ client.on('message', message => { //En caso de recibir un mensaje
     console.log(`[${message.guild.name}→#${message.channel.name}] ${message.author.username}: "${message.content}"`);
     message.content = message.content.toLowerCase();
 
+    if(message.content.startsWith(`${p_pure}papa-reiniciar`))
+        if (message.author.id === '423129757954211880') {
+            message.channel.send(':arrows_counterclockwise: reiniciando...')
+            .then(sent => {
+                console.log('Apagando.');
+                client.destroy();
+                console.log('Apagado.');
+                client.login(token);
+                console.log('Encendido.');
+                message.channel.send(':white_check_mark: reiniciado.')
+            }).catch(error => {
+                console.error(error);
+            });
+        } else {
+            message.channel.send(':closed_lock_with_key: Solo Papita con Puré puede usar este comando.');
+            return;
+        }
+    
     let pdetect;
     if(message.content.startsWith(p_drmk)) pdetect = p_drmk;
     else if(message.content.startsWith(p_pure)) pdetect = p_pure;
