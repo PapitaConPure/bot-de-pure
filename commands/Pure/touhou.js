@@ -24,7 +24,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 	let srchpg = 0;
 	if(isNaN(arglist[0])) srchtags += ` ${arglist[0]}`;
 	else {
-		if(args[0] < 0) {
+		if(arglist[0] < 0) {
 			tmpch.send(':warning: no se pueden buscar números de página negativos.');
 			return;
 		}
