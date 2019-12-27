@@ -9,29 +9,21 @@ const getRandomInt = function(_max) {
 
 const tmpfunc = async function(tmpch, arglist, tmpauth) {
 	let BotMessage = -1;
-	let srchtags = 'touhou -guro -furry';
+	let srchtags = 'touhou rating:';
 	let embedcolor;
 	let embedtitle;
 	if(tmpch.nsfw) {
-		srchtags += ' -rating:safe -lolicon -shotacon -bestiality';
+		srchtags += 'explicit -guro -lolicon -shotacon -bestiality';
 		embedcolor = '#38214e';
 		embedtitle = 'Tohitas O//w//O';
 	} else {
-		srchtags += ' rating:safe';
+		srchtags += 'safe';
 		embedcolor = '#fa7b62';
 		embedtitle = 'Tohas uwu';
 	}
-	let srchpg = 0;
-	if(isNaN(arglist[0])) srchtags += ` ${arglist[0]}`;
-	else {
-		if(arglist[0] < 0) {
-			tmpch.send(':warning: no se pueden buscar números de página negativos.');
-			return;
-		}
-		srchpg = arglist[0];
-	}
-	for(let i = 1; i < arglist.length; i++)
-		srchtags += ` ${arglist[i]}`;
+	for(let i = 0; i < arglist.length; i++)
+		srchtags += ' ' + arglist[i];
+	const srchpg = getRandomInt(30);
 	const srchlimit = 42;
 	{
 		let i = 0;
