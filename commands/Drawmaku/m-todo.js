@@ -14,12 +14,11 @@ module.exports = {
             message.channel.send(':closed_lock_with_key: Solo aquellos con un rol de moderación de Drawmaku pueden usar este comando.');
             return;
         }
-        let i = 0;
-        imgs.forEach(image => {
-            if(i !== 0) {
-                message.channel.send(image.dibujo);
-            }
-            i++;
-        });
+        
+        let str = '***LISTA DE IMÁGENES***\n';
+        str += 'Mostrando todas las imágenes guardadas del Drawmaku.\n';
+        for(let i = 0; i < global.cntimagenes; i++)
+            str += `${imgs.dibujo[i]} (Autor: ${imgs.creador[i]})\n`;
+        message.channel.send(str);
     },
 };

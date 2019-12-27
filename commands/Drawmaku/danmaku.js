@@ -37,12 +37,14 @@ module.exports = {
                 }
                 global.dibujado = true;
                 imgs.dibujoactual = message.attachments.array()[0].url;
-                imgs[message.author.lastMessageID] = { dibujo: message.attachments.array()[0].url }
-                fs.writeFile('../../images.json', JSON.stringify(imgs, null, 4), err => {
+                imgs.dibujo[global.cntimagenes] = message.attachments.array()[0].url;
+                imgs.creador[global.cntimagenes] = message.author.name;
+                cntimagenes++;
+                /*fs.writeFile('../../images.json', JSON.stringify(imgs, null, 4), err => {
                     if(err) console.error(err);
                     console.log('Imagen guardada.');
                     console.log(imgs);
-                });
+                });*/
                 if(global.seleccionado) message.channel.send(
                     '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
                     '***¡EL DIBUJANTE YA HA SELECCIONADO Y DIBUJADO UN DANMAKU!***\n' +
