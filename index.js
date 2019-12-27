@@ -17,6 +17,7 @@ for(const file of commandFiles) {
 	const command = require(`./commands/Drawmaku/${file}`);
 	client.ComandosDrawmaku.set(command.name, command);
 }
+module.exports = {client}
 
 client.ComandosPure = new Discord.Collection(); //Comandos de Pure
 commandFiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.js')); //Lectura de comandos de bot

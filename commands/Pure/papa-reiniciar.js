@@ -2,6 +2,7 @@ const Discord = require('discord.js'); //Integrar discord.js
 var global = require('../../config.json'); //Variables globales
 var func = require('../../func.js'); //Funciones globales
 const token = 'NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY'; //La llave del bot
+const {client} = require('../../index.js');
 
 module.exports = {
 	name: 'papa-reiniciar',
