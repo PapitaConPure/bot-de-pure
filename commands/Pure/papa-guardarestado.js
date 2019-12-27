@@ -29,10 +29,10 @@ module.exports = {
 
             message.channel.send(`:white_check_mark: datos guardados con éxito.`);
             axios.get('https://raw.githubusercontent.com/PapitaConPure/bot-de-pure/master/save.json?token=AH6KN7SNYQKCJN3DF3VUK4S6AYUHG').then(resp => {
-                message.channel.send(JSON.stringify(resp.data));
+                message.channel.send(`Datos:\n\`\`\`json\n${JSON.stringify(resp.data)}\`\`\``);
             });
             
-            message.channel.send(`\`\`\`json\n${JSON.stringify(test, null, 4)}\`\`\``);
+            message.channel.send(`Ejemplo:\n\`\`\`json\n${JSON.stringify(test, null, 4)}\`\`\``);
         } else {
             message.channel.send(':closed_lock_with_key: Solo Papita con Puré puede usar este comando.');
             return;
