@@ -39,7 +39,7 @@ module.exports = {
                 imgs.dibujoactual = message.attachments.array()[0].url;
                 imgs.dibujo[global.cntimagenes] = message.attachments.array()[0].url;
                 imgs.creador[global.cntimagenes] = message.author.name;
-                cntimagenes++;
+                global.cntimagenes++;
                 /*fs.writeFile('../../images.json', JSON.stringify(imgs, null, 4), err => {
                     if(err) console.error(err);
                     console.log('Imagen guardada.');
