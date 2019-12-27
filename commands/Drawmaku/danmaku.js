@@ -38,7 +38,7 @@ module.exports = {
                 global.dibujado = true;
                 imgs.dibujoactual = message.attachments.array()[0].url;
                 imgs.dibujo[global.cntimagenes] = message.attachments.array()[0].url;
-                imgs.creador[global.cntimagenes] = message.author.name;
+                imgs.creador[global.cntimagenes] = message.author.username;
                 global.cntimagenes++;
                 /*fs.writeFile('../../images.json', JSON.stringify(imgs, null, 4), err => {
                     if(err) console.error(err);
