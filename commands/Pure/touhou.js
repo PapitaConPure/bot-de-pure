@@ -21,9 +21,19 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 		embedcolor = '#fa7b62';
 		embedtitle = 'Tohas uwu';
 	}
-	for(let i = 0; i < arglist.length; i++)
-		srchtags += ' ' + arglist[i];
-	const srchpg = getRandomInt(30);
+	let srchpg = 0;
+	if(arglist.length) {
+		if(isNaN(arglist[0])) srchtags += ` ${arglist[0]}`;
+		else {
+			if(arglist[0] < 0) {
+				tmpch.send(':warning: no se pueden buscar números de página negativos.');
+				return;
+			}
+			srchpg = arglist[0];
+		}
+		for(let i = 1; i < arglist.length; i++)
+			srchtags += ' ' + arglist[i];
+	}
 	const srchlimit = 42;
 	{
 		let i = 0;
