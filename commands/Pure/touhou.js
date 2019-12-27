@@ -178,6 +178,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 				global.imgcollector = tmpch.createMessageCollector(filter, { time: 40000 });
 				global.imgcollector.on('collect', m => {
 					console.log(`Collected ${m.content}`);
+					console.log(global.imgcollector);
 					console.log(BotMessage);
 					tmpch.fetchMessage(BotMessage).then(msg => msg.delete());
 				});
