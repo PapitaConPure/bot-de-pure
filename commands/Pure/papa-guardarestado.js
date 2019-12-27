@@ -9,7 +9,7 @@ module.exports = {
 	name: 'papa-guardarestado',
 	execute(message, args) {
         if(message.author.id === '423129757954211880') {
-            fs.writeFileSync(path.join(__dirname, '../../save.json'), JSON.stringify(global, null, 4), err => {
+            fs.writeFileSync('https://github.com/PapitaConPure/bot-de-pure/save.json'/*path.join(__dirname, '../../save.json')*/, JSON.stringify(global, null, 4), err => {
                 if(err) {
                     message.channel.send(':bangbang: error en la escritura de datos. Se recomienda guardar cualquier dato ingresado al bot en un bloc de notas y reiniciar.');
                     console.error(err);
