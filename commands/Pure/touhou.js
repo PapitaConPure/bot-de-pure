@@ -175,6 +175,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 
 			if(foundpic) {
 				const filter = m => m.content.startsWith('d') && m.author.id === tmpauth.id;
+				if(global.imgcollector !== undefined) global.imgcollector.stop();
 				global.imgcollector = tmpch.createMessageCollector(filter, { time: 40000 });
 				global.imgcollector.on('collect', m => {
 					console.log(`Collected ${m.content}`);
