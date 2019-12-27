@@ -86,6 +86,7 @@ module.exports = {
                 '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
             );
             global.seleccionado = false;
+            if(global.dibujado) global.cntimagenes--;
             global.dibujado = false;
         }
     },

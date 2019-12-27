@@ -34,6 +34,7 @@ module.exports = {
             '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
         );
         global.seleccionado = false;
+        if(global.dibujado) global.cntimagenes--;
         global.dibujado = false;
         global.recompensado = -1;
         global.goingnext = true;

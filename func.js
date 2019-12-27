@@ -55,7 +55,10 @@ module.exports = {
         }
         if(global.empezado) {
             console.log('Verificando si el dibujante sigue en juego.');
-            if(global.ndibujante === idj) setTimeout(module.exports.nextPlayer, 1500);
+            if(global.ndibujante === idj) {
+                if(global.dibujado) global.cntimagenes--;
+                setTimeout(module.exports.nextPlayer, 1500);
+            }
             if(global.ndibujante === idj || global.ndibujante > idj) global.ndibujante--;
         }
         global.cntjugadores--;

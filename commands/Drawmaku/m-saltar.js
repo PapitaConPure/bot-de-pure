@@ -24,6 +24,7 @@ module.exports = {
         message.delete(message.author.lastMessageID);
         message.channel.send(`:stop_sign: <@${global.jugadores[global.ndibujante]}> (jugador ${global.numeros[global.ndibujante]}) ha sido forzado a dejar de dibujar por esta ronda.`);
         global.seleccionado = false;
+        if(global.dibujado) global.cntimagenes--;
         global.dibujado = false;
         global.recompensado = -1;
         global.goingnext = true;
