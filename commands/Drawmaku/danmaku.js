@@ -42,6 +42,7 @@ module.exports = {
                 fs.writeFile('../../images.json', JSON.stringify(imgs, null, 4), err => {
                     if(err) console.error(err);
                     console.log('Imagen guardada.');
+                    console.log(imgs);
                 });
                 if(global.seleccionado) message.channel.send(
                     '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
