@@ -53,7 +53,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     else return; //Salir si no se encuentra el comando
 
     const args = message.content.slice(p_drmk.length).split(/ +/); //Argumentos ingresados
-    const nombrecomando = args.toLowerCase().shift(); //Comando ingresado
+    const nombrecomando = args.shift().toLowerCase(); //Comando ingresado
 
     let comando;
     if(pdetect === p_drmk)
