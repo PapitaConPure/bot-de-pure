@@ -7,12 +7,12 @@ const getRandomInt = function(_max) {
   return Math.floor(Math.random() * _max);
 }
 
-const tmpfunc = async function(tmpch) {
+const tmpfunc = async function(tmpch, alist) {
 	const srchoff = getRandomInt(100);
 	const srchlimit = 10;
 	let srchextra = '';
-	for(let i = 0; i < args.length; i++)
-		srchextra += ` ${args[i]}`;
+	for(let i = 0; i < alist.length; i++)
+		srchextra += ` ${alist[i]}`;
 	const { data } = await fetch(
 		`https://api.giphy.com/v1/gifs/search?api_key=Qu29veK701szqoFK6tXgOiybuc1q3PaX&q=coffee${srchextra}&offset=${srchoff}&limit=${srchlimit}`
 	).then(response => response.json());
@@ -34,6 +34,6 @@ module.exports = {
         'coffee', 'cawfee'
     ],
 	execute(message, args){
-		tmpfunc(message.channel);
+		tmpfunc(message.channel, args);
     },
 };
