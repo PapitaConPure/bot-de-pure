@@ -105,6 +105,7 @@ module.exports = {
                 if(global.cntjugadores > 1) {
                     console.log('Cantidad de jugadores valedera; Drawmaku iniciado.');
                     global.empezado = true;
+                    global.cntimagenes = 0;
                     global.chi.send(
                         '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
                         ':fireworks: ***__¡¡¡EL DRAWMAKU HA COMENZADO!!!__*** :art:\n' +
