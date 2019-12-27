@@ -7,7 +7,7 @@ module.exports = {
 	name: 'papa-guardarestado',
 	execute(message, args) {
         if(message.author.id === '423129757954211880') {
-            fs.writeFile("../config.json", JSON.stringify(global, null, 4), err => {
+            fs.writeFile('../../save.json', JSON.stringify(global, null, 4), err => {
                 if(err) {
                     message.channel.send(':bangbang: Error en la escritura de datos. Se recomienda guardar cualquier dato ingresado al bot en un bloc de notas y reiniciar.');
                     console.error(err);
