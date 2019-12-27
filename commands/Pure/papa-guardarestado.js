@@ -5,6 +5,14 @@ const fs = require('fs');
 let path = require('path');
 var test = require('../../save.json'); //Variables globales
 
+function readJSON(file) {
+    var request = new XMLHttpRequest();
+    request.open('GET', file, false);
+    request.send(null);
+    if (request.status == 200)
+        return request.responseText;
+};
+
 module.exports = {
 	name: 'papa-guardarestado',
 	execute(message, args) {
@@ -17,8 +25,7 @@ module.exports = {
                 }
             });
 
-            let parsedjson = path.join(__dirname, '../../save.json');
-            parsedjson = fs.readFileSync(parsedjson);
+            let parsedjson = readJSON(path.join(__dirname, '../../save.json'));
             message.channel.send(`:white_check_mark: datos guardados con éxito.`);
             message.channel.send(JSON.stringify(parsedjson));
             message.channel.send(`\`\`\`json\n${JSON.stringify(test, null, 4)}\`\`\``);
