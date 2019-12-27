@@ -44,9 +44,7 @@ client.on('message', message => { //En caso de recibir un mensaje
             }).catch(error => {
                 console.error(error);
             });
-        } else {
-            message.channel.send(':closed_lock_with_key: Solo Papita con Puré puede usar este comando.');
-        }
+        } else message.channel.send(':closed_lock_with_key: Solo Papita con Puré puede usar este comando.');
         return;
     }
     
