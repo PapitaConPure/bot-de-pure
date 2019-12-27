@@ -4,7 +4,7 @@ var func = require('../../func.js'); //Funciones globales
 const token = 'NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY'; //La llave del bot
 
 module.exports = {
-	name: 'papa-guardarestado',
+	name: 'papa-reiniciar',
 	execute(message, args) {
         if(message.author.id === '423129757954211880') {
             message.channel.send(':arrows_counterclockwise: reiniciando...')
