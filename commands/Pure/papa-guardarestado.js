@@ -13,7 +13,7 @@ module.exports = {
             );
 
             message.channel.send({
-                files: ['../../config.json']
+                files: ['./config.json']
             });
         } else {
             message.channel.send(':closed_lock_with_key: Solo Papita con Puré puede usar este comando.');
