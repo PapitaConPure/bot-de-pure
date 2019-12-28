@@ -8,7 +8,7 @@ module.exports = {
         if(message.author.id === '423129757954211880') {
             console.log(JSON.stringify(global, null, 4));
             message.channel.send(
-                ':floppy_disk: antes de reiniciar el bot, copiá y pegá esto en el archivo \`config.json\` de la carpeta del bot:\n' +
+                ':floppy_disk: antes de iniciar el bot, puedes copiar el estado guardado y pegarlo en el archivo \`config.json\` de la carpeta del bot:\n' +
                 '_Los datos de estado deberían estar en el log del proceso._'
             );
         } else {
