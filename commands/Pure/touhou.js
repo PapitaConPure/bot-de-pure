@@ -16,7 +16,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 	let embedtitle;
 	//Nombres de tohas a tags
 	for(let i = 0; i < arglist.length; i++) {
-		switch(arglist[i]) {
+		switch(arglist[i].toLowerCase()) {
 			case 'reimu': arglist[i] = 'hakurei_reimu'; break;
 			case 'marisa': arglist[i] = 'kirisame_marisa'; break;
 			case 'meiling': arglist[i] = 'hong_meiling'; break;

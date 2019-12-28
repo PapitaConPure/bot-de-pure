@@ -11,17 +11,16 @@ module.exports = {
 	execute(message, args) {
         if(func.notStartedAndSameChannel(message.channel, true)) return; //Cancelar si no se está en el evento y/o en el mismo canal del evento
         
-        var str = '';
+        let str = '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n';
+        str += '***LISTA DE JUGADORES***\n';
+        str += '_A continuación se ven las estadísticas del evento._\n';
         if(global.cntjugadores > 0) {
             for(var i = 0; i < global.cntjugadores; i++)
                 str += `\`Número ${global.numeros[i]}\`, **${global.nombres[i]}**: *${global.puntos[i]} punto(s).*\n`;
         } else str = '`Aún no hay nadie jugando...`\n';
-        message.channel.send(
-            '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
-            '***LISTA DE JUGADORES***\n' +
-            '_A continuación se ven las estadísticas del evento._\n' +
-            `${str}` +
-            '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
-        );
+        str += '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬';
+        if(global.tjuego === 0) str += '***Esta edición de Drawmaku terminará al final de la ronda actual.***';
+        else str += `*Tiempo restante: ${Math.floor(global.tjuego / 3600)}:${Math.floor(global.tjuego / 60) % 60}:${global.tjuego % 60}*`;
+        message.channel.send(str);
     },
 };
