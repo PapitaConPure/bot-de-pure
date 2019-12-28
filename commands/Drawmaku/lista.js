@@ -18,9 +18,9 @@ module.exports = {
             for(var i = 0; i < global.cntjugadores; i++)
                 str += `\`Número ${global.numeros[i]}\`, **${global.nombres[i]}**: *${global.puntos[i]} punto(s).*\n`;
         } else str = '`Aún no hay nadie jugando...`\n';
-        str += '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬';
+        str += '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n';
         if(global.tjuego === 0) str += '***Esta edición de Drawmaku terminará al final de la ronda actual.***';
-        else str += `*Tiempo restante: ${Math.floor(global.tjuego / 3600)}:${Math.floor(global.tjuego / 60) % 60}:${global.tjuego % 60}*`;
+        else str += `*Tiempo restante: ${Math.floor(global.tjuego / 3600)}:${('0' + Math.floor((global.tjuego / 60) % 60)).slice(-2)}:${('0' + global.tjuego % 60).slice(-2)}*`;
         message.channel.send(str);
     },
 };
