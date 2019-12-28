@@ -31,6 +31,11 @@ module.exports = {
         else if(!isNaN(args[0])) idjugador = func.getNumberPlayerID(args[0]);
         else message.channel.send(':warning: El usuario ' + args[0] + ' no existe.');
 
+        if(idjugador === global.ndibujante) {
+            message.channel.send(':warning: No puedes darte puntos solo.');
+            return;
+        }
+
         //Asignar puntos
         if(idjugador !== -1) {
             if(global.recompensado !== idjugador) {

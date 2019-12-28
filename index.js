@@ -62,7 +62,7 @@ client.on('message', message => { //En caso de recibir un mensaje
         comando = client.ComandosPure.get(nombrecomando) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
     
     if (!comando) {
-        message.channel.send(':x: Disculpá, soy estúpido. Tal vez escribiste mal el comando y no te entiendo.');
+        message.channel.send(':x: Disculpa, soy estúpido. Tal vez escribiste mal el comando y no te entiendo.');
         return;
     }
 
