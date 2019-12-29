@@ -45,6 +45,12 @@ module.exports = {
             module.exports.reiniciarTodo();
             return;
         }
+        if(global.empezado) {
+            global[eliminado].jugadores[global.cntjugadores] = global.jugadores[global.cntjugadores];
+            global[eliminado].nombres[global.cntjugadores] = global.nombres[global.cntjugadores];
+            global[eliminado].puntos[global.cntjugadores] = global.puntos[global.cntjugadores];
+            global[eliminado].cntjugadores++;
+        }
         global.jugadores[global.cntjugadores] = global.jugadores[idj];
         global.nombres[global.cntjugadores] = global.nombres[idj];
         global.puntos[global.cntjugadores] = global.puntos[idj];
@@ -204,9 +210,16 @@ module.exports = {
     //#region Otros
     mostrarResultados: function() {
         console.log('Ordenando resultados de mayor a menor puntaje.');
+        //Añadir jugadores eliminados
+        for(let i = 0; i < global[eliminado].cntjugadores; i++) {
+            global.jugadores[global.cntjugadores] = global[eliminado].jugadores[global.cntjugadores];
+            global.nombres[global.cntjugadores] = global[eliminado].nombres[global.cntjugadores];
+            global.puntos[global.cntjugadores] = global[eliminado].puntos[global.cntjugadores];
+            global.cntjugadores++;
+        }
         //Ordenamiento burbuja
-        for(var i = 1; i < global.cntjugadores; i++)
-            for(var j = 0; j < (global.cntjugadores - i); j++)
+        for(let i = 1; i < global.cntjugadores; i++)
+            for(let j = 0; j < (global.cntjugadores - i); j++)
                 if(global.puntos[j] < global.puntos[j + 1]) {
                     var tmp = global.jugadores[j];
                     global.jugadores[j] = global.jugadores[j + 1];
@@ -223,8 +236,8 @@ module.exports = {
                 }
         
         console.log('Mostrando resultados.');
-        var str = '';
-        for(var i = 0; i < global.cntjugadores; i++)
+        let str = '';
+        for(let i = 0; i < global.cntjugadores; i++)
             str += `[Posición ${i + 1} / jugador ${global.numeros[i]}] ${global.nombres[i]}: ${global.puntos[i]} punto(s).\n`;
         global.chi.send(
             ':arrow_up_small: **FINAL FINAL FINAL FINAL FINAL FINAL** :arrow_up_small:\n' +

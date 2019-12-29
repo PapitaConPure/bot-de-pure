@@ -18,6 +18,13 @@
     "nombres": [],
     "numeros": [],
     "puntos": [],
+    "eliminado": {
+        "cntjugadores": 0,
+        "jugadores": [],
+        "nombres": [],
+        "numeros": [],
+        "puntos": []
+    },
     "danmaku": "",
     "ndibujante": 0,
     "seleccionado": false,

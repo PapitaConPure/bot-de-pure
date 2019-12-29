@@ -7,7 +7,7 @@ module.exports = {
         'sassa', 'drossafras', 'dross'
     ],
 	execute(message, args){
-		if(message.channel.id === '611756424787394610')
+		if(message.channel.id === '611756424787394610' || message.guild.id === '651244470691561473')
 			message.channel.send(
 				'***Una cagada asquerosa, repelente, abyecta, vomitiva, mugrosa, maldita, diarreosa, estercolera, inmunda, malnacida, pudenda, apestosa, maloliente, cabrona, ' +
 				'maricona, huevona, pendeja, tarada, cancerígena, jodida, culeada, gilipollesca, pelotuda, encamada, malnacida, retardada, atrasada, inútil, móngola, incestuosa, ' +
@@ -16,9 +16,13 @@ module.exports = {
 				'profana, calamitosa, deficiente, cretina, lela, ramera, fulana, calientaguevos, ridícula, petarda, pasmarote, fistro, desidiosa, puta, reputa, soputa, recontraputa, ' +
 				'hija de puta, hija de un millón de putas, escupepitos, caradepedo, necrofílica, alientoamojón, lambe-bukaka, revuelcaleche, coñoesumadre y de su abuela, conchuda, ' +
 				'culoroto, nalgas reventadas, tragasable, succionaditos, esfinterpartido, ojetedesilachado, sorbemocos, capulla, pelmaza, zoquete, masturbadora crónica, espuria, ' +
-				'chupa-tampones, regluda, coprófaga, gerontofílica, turra, ojete, atorrante, tierrúa, pajúa, amamaguevos, onanista caradeconcha y MALA.***'
+				'chupa-tampones, regluda, coprófaga, gerontofílica, turra, ojete, atorrante, tierrúa, pajúa, amamaguevos, onanista caradeconcha y MALA.***\n' +
+				'https://www.youtube.com/watch?v=-FWnpxCRVIo'
 			);
 		else
-			message.channel.send('Mi libro, Luna de Plutón, ya está disponible en todas las librerías de Argentina, Chile, Uruguay, Paraguay, Bolivia, y Guatemala. Léelo, sé que te encantará.');
+			message.channel.send(
+				'***Mi libro, Luna de Plutón, ya está disponible en todas las librerías de Argentina, Chile, Uruguay, Paraguay, Bolivia, y Guatemala. Léelo, sé que te va a encantar.***\n' +
+				'https://www.youtube.com/watch?v=pdTuXR4TOLY'
+			);
     },
 };
