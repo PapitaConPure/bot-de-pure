@@ -46,10 +46,10 @@ module.exports = {
             return;
         }
         if(global.empezado) {
-            global[eliminado].jugadores[global.cntjugadores] = global.jugadores[global.cntjugadores];
-            global[eliminado].nombres[global.cntjugadores] = global.nombres[global.cntjugadores];
-            global[eliminado].puntos[global.cntjugadores] = global.puntos[global.cntjugadores];
-            global[eliminado].cntjugadores++;
+            global.eliminado.jugadores[global.cntjugadores] = global.jugadores[global.cntjugadores];
+            global.eliminado.nombres[global.cntjugadores] = global.nombres[global.cntjugadores];
+            global.eliminado.puntos[global.cntjugadores] = global.puntos[global.cntjugadores];
+            global.eliminado.cntjugadores++;
         }
         global.jugadores[global.cntjugadores] = global.jugadores[idj];
         global.nombres[global.cntjugadores] = global.nombres[idj];
@@ -212,9 +212,9 @@ module.exports = {
         console.log('Ordenando resultados de mayor a menor puntaje.');
         //Añadir jugadores eliminados
         for(let i = 0; i < global[eliminado].cntjugadores; i++) {
-            global.jugadores[global.cntjugadores] = global[eliminado].jugadores[global.cntjugadores];
-            global.nombres[global.cntjugadores] = global[eliminado].nombres[global.cntjugadores];
-            global.puntos[global.cntjugadores] = global[eliminado].puntos[global.cntjugadores];
+            global.jugadores[global.cntjugadores] = global.eliminado.jugadores[global.cntjugadores];
+            global.nombres[global.cntjugadores] = global.eliminado.nombres[global.cntjugadores];
+            global.puntos[global.cntjugadores] = global.eliminado.puntos[global.cntjugadores];
             global.cntjugadores++;
         }
         //Ordenamiento burbuja
