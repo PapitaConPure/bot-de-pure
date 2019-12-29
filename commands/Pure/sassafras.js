@@ -19,6 +19,6 @@ module.exports = {
 				'chupa-tampones, regluda, coprófaga, gerontofílica, turra, ojete, atorrante, tierrúa, pajúa, amamaguevos, onanista caradeconcha y MALA.***'
 			);
 		else
-			message.channel.send('Mi libro, Luna de Plutón, ya está disponible en todas las librerías de Argentina, Chile, Uruguay, Paraguay, Bolivia, y Guatemala. Léelo, sé que te encantará..');
+			message.channel.send('Mi libro, Luna de Plutón, ya está disponible en todas las librerías de Argentina, Chile, Uruguay, Paraguay, Bolivia, y Guatemala. Léelo, sé que te encantará.');
     },
 };

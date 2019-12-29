@@ -78,12 +78,14 @@ module.exports = {
         );
     },
 
-    nextPlayer: function() {
-        console.log('Cambiando de dibujante.');
-        console.log(`Dibujante a reemplazar: ${global.nombres[global.ndibujante]} (${global.jugadores[global.ndibujante]})`);
-        //Recorrer lista en bucle
-        if(global.ndibujante < (global.cntjugadores - 1)) global.ndibujante++;
-        else global.ndibujante = 0;
+    nextPlayer: function(amt = 1) {
+        for(i = 0; i < amt; i++) {
+            console.log('Cambiando de dibujante.');
+            console.log(`Dibujante a reemplazar: ${global.nombres[global.ndibujante]} (${global.jugadores[global.ndibujante]})`);
+            //Recorrer lista en bucle
+            if(global.ndibujante < (global.cntjugadores - 1)) global.ndibujante++;
+            else global.ndibujante = 0;
+        }
         if(global.ndibujante === 0 && global.tjuego === 0) module.exports.mostrarResultados(); //Mostrar resultados finales del evento en caso de terminar la ronda y estar en terminación
         else module.exports.announceNextPlayer(); //De lo contrario, notificar al próximo jugador
         global.seleccionado = false;

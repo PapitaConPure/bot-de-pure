@@ -152,7 +152,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 		axios.get(
 			`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
 		).then((data) => {
-			data.data.forEach(image => { results++; console.log(`Cuenta: ${results}, ID: ${image.id}`); });
+			data.data.forEach(image => { results++; });
 
 			const selectedpic = getRandomInt(results);
 			data.data.forEach(image => {
