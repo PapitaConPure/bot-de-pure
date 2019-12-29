@@ -26,7 +26,6 @@ module.exports = {
         if(global.dibujado) global.cntimagenes--;
         global.dibujado = false;
         global.recompensado = -1;
-        global.goingnext = true;
         let jumpamt = 1;
         if(args.length) {
             if(args[0] < 1 || args[0] > (global.cntjugadores - 1)) {
@@ -34,12 +33,13 @@ module.exports = {
                 return;
             }
             jumpamt = args[0];
-            let playerslist;
+            let playerslist = '';
             for(let i = 0; i < jumpamt; i++)
-                playerslist += `<@${global.jugadores[(global.ndibujante + i) % global.cntjugadores]}> (jugador ${global.numeros[(global.ndibujante + i) % global.cntjugadores]}`;
+                playerslist += `<@${global.jugadores[(global.ndibujante + i) % global.cntjugadores]}> (jugador ${global.numeros[(global.ndibujante + i) % global.cntjugadores]}\n`;
             message.channel.send(`:stop_sign: los siguientes jugadores han sido forzados a dejar de dibujar por esta(s) ronda(s):\n${playerslist}`);
         } else
             message.channel.send(`:stop_sign: <@${global.jugadores[global.ndibujante]}> (jugador ${global.numeros[global.ndibujante]}) ha sido forzado a dejar de dibujar por esta ronda.`);
+        global.goingnext = true;
         setTimeout(func.nextPlayer, 1500, jumpamt);
     },
 };
