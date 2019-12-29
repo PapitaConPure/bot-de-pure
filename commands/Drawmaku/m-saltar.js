@@ -29,7 +29,7 @@ module.exports = {
         global.goingnext = true;
         let jumpamt = 1;
         if(args.length) {
-            if(args[0] < 1 || args[0] > (cntjugadores - 1)) {
+            if(args[0] < 1 || args[0] > (global.cntjugadores - 1)) {
                 message.channel.send(`:warning: solo puedes saltar entre 1 y ${global.cntjugadores - 1} jugadores.`);
                 return;
             }
