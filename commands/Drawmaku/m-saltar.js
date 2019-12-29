@@ -28,6 +28,8 @@ module.exports = {
         global.dibujado = false;
         global.recompensado = -1;
         global.goingnext = true;
-        setTimeout(func.nextPlayer, 1500);
+        let jumpamt = 1;
+        if(args.length) jumpamt = Math.m()
+        setTimeout(func.nextPlayer, 1500, jumpamt);
     },
 };
