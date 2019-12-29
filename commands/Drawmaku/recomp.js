@@ -32,7 +32,7 @@ module.exports = {
         else message.channel.send(':warning: El usuario ' + args[0] + ' no existe.');
 
         if(idjugador === global.ndibujante) {
-            message.channel.send(':warning: No puedes darte puntos solo.');
+            message.channel.send(':warning: no puedes recompensarte solo.');
             return;
         }
 

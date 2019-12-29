@@ -35,7 +35,7 @@ module.exports = {
             jumpamt = args[0];
             let playerslist = '';
             for(let i = 0; i < jumpamt; i++)
-                playerslist += `<@${global.jugadores[(global.ndibujante + i) % global.cntjugadores]}> (jugador ${global.numeros[(global.ndibujante + i) % global.cntjugadores]}\n`;
+                playerslist += `<@${global.jugadores[(global.ndibujante + i) % global.cntjugadores]}> (jugador ${global.numeros[(global.ndibujante + i) % global.cntjugadores]})\n`;
             message.channel.send(`:stop_sign: los siguientes jugadores han sido forzados a dejar de dibujar por esta(s) ronda(s):\n${playerslist}`);
         } else
             message.channel.send(`:stop_sign: <@${global.jugadores[global.ndibujante]}> (jugador ${global.numeros[global.ndibujante]}) ha sido forzado a dejar de dibujar por esta ronda.`);
