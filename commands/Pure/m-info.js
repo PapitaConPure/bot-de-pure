@@ -36,7 +36,7 @@ module.exports = {
 				.addField('Fecha de creación', servidor.createdAt, false)
 				.addField('ID', servidor.id, true)
 
-				.addImage(message.guild.iconURL);
+				.setImage(servidor.iconURL);
 			tmpch.send(Embed);
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR ROLES** (MANAGE ROLES)* para usar este comando.');
     },
