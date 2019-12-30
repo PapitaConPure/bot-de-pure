@@ -6,8 +6,12 @@ module.exports = {
 	aliases: [
         'sassa', 'drossafras', 'dross'
     ],
-	execute(message, args){
-		if(message.channel.id === '611756424787394610' || message.guild.id === '651244470691561473')
+	execute(message, args) {
+		let forcesassamodo = false;
+		if(args.length)
+			if(args[0] === 'forzar-sassamodo')
+				forcesassamodo = true;
+		if(message.channel.id === '611756424787394610' || message.guild.id === '651244470691561473' || forcesassamodo)
 			message.channel.send(
 				'***Una cagada asquerosa, repelente, abyecta, vomitiva, mugrosa, maldita, diarreosa, estercolera, inmunda, malnacida, pudenda, apestosa, maloliente, cabrona, ' +
 				'maricona, huevona, pendeja, tarada, cancerígena, jodida, culeada, gilipollesca, pelotuda, encamada, malnacida, retardada, atrasada, inútil, móngola, incestuosa, ' +
