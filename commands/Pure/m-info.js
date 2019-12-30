@@ -9,7 +9,7 @@ module.exports = {
     ],
 	execute(message, args) {
 		if(message.member.hasPermission('MANAGE_ROLES', false, true, true)) {
-			let textcnt = 0;
+			let textcnt = 0;//csm
 			let voicecnt = 0;
 			let categorycnt = 0;
 			let peoplecnt = guild.members.filter(member => !member.user.bot).size;
