@@ -8,7 +8,7 @@ module.exports = {
         'm-serverinfo', 'm-svinfo', 'm-svinf'
     ],
 	execute(message, args) {
-		if(message.author.hasPermission('MANAGE_ROLES', false, true, true)) {
+		if(message.member.hasPermission('MANAGE_ROLES', false, true, true)) {
 			let textcnt = 0;
 			let voicecnt = 0;
 			let categorycnt = 0;
