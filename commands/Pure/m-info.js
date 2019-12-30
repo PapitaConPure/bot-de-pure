@@ -10,7 +10,7 @@ module.exports = {
 	execute(message, args) {
 		if(message.member.hasPermission('MANAGE_ROLES', false, true, true)) {
 			const servidor = message.channel.guild;
-			let textcnt = 0;//csm
+			let textcnt = 0;
 			let voicecnt = 0;
 			let categorycnt = 0;
 			let peoplecnt = servidor.members.filter(member => !member.user.bot).size;
