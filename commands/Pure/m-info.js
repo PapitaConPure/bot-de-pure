@@ -2,9 +2,10 @@ const Discord = require('discord.js'); //Integrar discord.js
 var global = require('../../config.json'); //Variables globales
 
 module.exports = {
-	name: 'papita',
+	name: 'm-info',
 	aliases: [
-        'papa', 'leche'
+		'm-informacion', 'm-información', 'm-inf',
+        'm-serverinfo', 'm-svinfo', 'm-svinf'
     ],
 	execute(message, args){
 		if(message.author.hasPermission('MANAGE_ROLES', false, true, true)) {
