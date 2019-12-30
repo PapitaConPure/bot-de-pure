@@ -36,7 +36,7 @@ module.exports = {
 				.addField('Fecha de creación', servidor.createdAt, true)
 				.addField('ID', servidor.id, true)
 
-				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
+				.setFooter(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
 				.setImage(servidor.iconURL)
 				.setThumbnail(servidor.owner.user.avatarURL);
 			message.channel.send(Embed);
