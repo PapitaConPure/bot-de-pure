@@ -30,15 +30,15 @@ module.exports = {
 				.addField('Canales', `:hash: x ${textcnt}\n:loud_sound: x ${voicecnt}\n:label: x ${categorycnt}`, true)
 
 				.addField('Región', servidor.region, true)
-				.addField('Creador', `${servidor.owner.nickname}\n[${servidor.owner.id}]`, true)
+				.addField('Creador', `${servidor.owner.user.username}\n[${servidor.owner.id}]`, true)
 				.addField('Nivel de verificación', servidor.verificationLevel, true)
 
 				.addField('Fecha de creación', servidor.createdAt, true)
 				.addField('ID', servidor.id, true)
 
-				.setAuthor(`Comando invocado por ${message.author.nickname}`, message.author.avatarURL)
+				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
 				.setImage(servidor.iconURL)
-				.setThumbnail(servidor.owner.client.avatarURL);
+				.setThumbnail(servidor.owner.user.avatarURL);
 			message.channel.send(Embed);
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR ROLES** (MANAGE ROLES)* para usar este comando.');
     },
