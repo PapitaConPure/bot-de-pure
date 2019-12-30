@@ -15,7 +15,7 @@ module.exports = {
             '*Puré:*\n' +
             `\t╠ \`${global.p_pure}gatos \` para mostrar imágenes de gatitos.\n` +
             `\t╠ \`${global.p_pure}café <tags [Giphy]>\` para mostrar imágenes de café.\n` +
-            `\t╠ \`${global.p_pure}touhou <página> <tags [Gelbooru]>\` para mostrar imágenes de tohas.\n` +
+            `\t╠ \`${global.p_pure}touhou <rango de páginas> <tags [Gelbooru]>\` para mostrar imágenes de tohas.\n` +
             `\t║ \t\t╚ ***En canales marcados como "NSFW", los resultados serán lewds.***\n` +
             `\t╚ \`${global.p_pure}uwu \` uwu.\n` +
             '*Drawmaku:*\n' +

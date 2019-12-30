@@ -168,7 +168,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 		embedcolor = '#fa7b62';
 		embedtitle = 'Tohas uwu';
 	}
-	let srchpg = 1;
+	let srchpg = 0;
 	if(arglist.length) {
 		if(isNaN(arglist[0])) srchtags += ` ${arglist[0]}`;
 		else {
@@ -176,7 +176,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 				tmpch.send(':warning: no se pueden buscar números de página menores que 1.');
 				return;
 			}
-			srchpg = arglist[0];
+			srchpg = getRandomInt(arglist[0]);
 		}
 		for(let i = 1; i < arglist.length; i++)
 			srchtags += ' ' + arglist[i];
@@ -187,7 +187,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 		let foundpic = false;
 		let results = 0;
 		axios.get(
-			`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${srchpg - 1}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
+			`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
 		).then((data) => {
 			data.data.forEach(image => { results++; });
 
@@ -222,9 +222,9 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 				global.imgcollector.on('end', collected => {
 					console.log(`Collected ${collected.size} items`);
 				});
-			} else tmpch.send(':warning: No hay resultados para estas tags >:C');
+			} else tmpch.send(':warning: No hay resultados para estas tags. Prueba usando tags diferentes o un menor rango de páginas :C');
 		}).catch((error) => {
-			tmpch.send(':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags umu');
+			tmpch.send(':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags o usando un menor rango de páginas umu');
 			console.error(error);
 		});
 	}
