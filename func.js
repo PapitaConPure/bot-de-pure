@@ -46,10 +46,10 @@ module.exports = {
             return;
         }
         if(global.empezado) {
-            global.eliminado.jugadores[global.cntjugadores] = global.jugadores[idj];
-            global.eliminado.nombres[global.cntjugadores] = global.nombres[idj];
-            global.eliminado.numeros[global.cntjugadores] = -global.numeros[idj];
-            global.eliminado.puntos[global.cntjugadores] = global.puntos[idj];
+            global.eliminado.jugadores[global.eliminado.cntjugadores] = global.jugadores[idj];
+            global.eliminado.nombres[global.eliminado.cntjugadores] = global.nombres[idj];
+            global.eliminado.numeros[global.eliminado.cntjugadores] = -global.numeros[idj];
+            global.eliminado.puntos[global.eliminado.cntjugadores] = global.puntos[idj];
             global.eliminado.cntjugadores++;
         }
         global.jugadores[global.cntjugadores] = global.jugadores[idj];

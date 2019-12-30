@@ -5,7 +5,8 @@ module.exports = {
 	name: 'entrar',
     aliases: [
         'inscribir', 'inscribirse', 'ingresar', 'registrarse',
-        'enter', 'inscribe', 'register'
+        'enter', 'inscribe', 'register',
+        'e'
     ],
 	execute(message, args) {
         if(!global.trest) {
