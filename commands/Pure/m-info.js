@@ -37,7 +37,7 @@ module.exports = {
 				.addField('ID', servidor.id, true)
 
 				.setImage(servidor.iconURL);
-			tmpch.send(Embed);
+			message.channel.send(Embed);
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR ROLES** (MANAGE ROLES)* para usar este comando.');
     },
 };
