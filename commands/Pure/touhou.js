@@ -11,7 +11,7 @@ const getRandomInt = function(_max) {
 
 const tmpfunc = async function(tmpch, arglist, tmpauth) {
 	let BotMessage = -1;
-	let srchtags = 'touhou -guro -furry -tagme -vore rating:';
+	let srchtags = 'touhou -guro -furry -vore rating:';
 	let embedcolor;
 	let embedtitle;
 	//Nombres de tohas a tags
@@ -135,8 +135,8 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 	if(arglist.length) {
 		if(isNaN(arglist[0])) srchtags += ` ${arglist[0]}`;
 		else {
-			if(arglist[0] < 0) {
-				tmpch.send(':warning: no se pueden buscar números de página negativos.');
+			if(arglist[0] < 1) {
+				tmpch.send(':warning: no se pueden buscar números de página menores que 1.');
 				return;
 			}
 			srchpg = arglist[0];
@@ -150,7 +150,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 		let foundpic = false;
 		let results = 0;
 		axios.get(
-			`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
+			`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${srchpg - 1}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
 		).then((data) => {
 			data.data.forEach(image => { results++; });
 
@@ -174,7 +174,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 			});
 
 			if(foundpic) {
-				const filter = m => (m.content === 'd' || m.content.startsWith('p!')) && m.author.id === tmpauth.id;
+				const filter = m => (m.content.toLowerCase() === 'd' || m.content.toLowerCase().startsWith('p!')) && m.author.id === tmpauth.id;
 				global.imgcollector = tmpch.createMessageCollector(filter, { time: 40000 });
 				global.imgcollector.on('collect', m => {
 					console.log(`Collected ${m.content}`);
