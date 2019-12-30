@@ -46,9 +46,10 @@ module.exports = {
             return;
         }
         if(global.empezado) {
-            global.eliminado.jugadores[global.cntjugadores] = global.jugadores[global.cntjugadores];
-            global.eliminado.nombres[global.cntjugadores] = global.nombres[global.cntjugadores];
-            global.eliminado.puntos[global.cntjugadores] = global.puntos[global.cntjugadores];
+            global.eliminado.jugadores[global.cntjugadores] = global.jugadores[idj];
+            global.eliminado.nombres[global.cntjugadores] = global.nombres[idj];
+            global.eliminado.numeros[global.cntjugadores] = -global.numeros[idj];
+            global.eliminado.puntos[global.cntjugadores] = global.puntos[idj];
             global.eliminado.cntjugadores++;
         }
         global.jugadores[global.cntjugadores] = global.jugadores[idj];
@@ -214,6 +215,7 @@ module.exports = {
         for(let i = 0; i < global.eliminado.cntjugadores; i++) {
             global.jugadores[global.cntjugadores] = global.eliminado.jugadores[i];
             global.nombres[global.cntjugadores] = global.eliminado.nombres[i];
+            global.numeros[global.cntjugadores] = global.eliminado.numeros[i];
             global.puntos[global.cntjugadores] = global.eliminado.puntos[i];
             global.cntjugadores++;
         }
