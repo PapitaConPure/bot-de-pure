@@ -7,7 +7,7 @@ module.exports = {
 		'm-informacion', 'm-información', 'm-inf',
         'm-serverinfo', 'm-svinfo', 'm-svinf'
     ],
-	execute(message, args){
+	execute(message, args) {
 		if(message.author.hasPermission('MANAGE_ROLES', false, true, true)) {
 			let textcnt = 0;
 			let voicecnt = 0;
