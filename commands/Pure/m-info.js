@@ -25,18 +25,20 @@ module.exports = {
 			const Embed = new Discord.RichEmbed()
 				.setColor('#ffd500')
 				.setTitle('Información del servidor OwO')
-				.addField('Nombre', servidor.name)
+				.addField('Nombre', servidor.name, true)
 				.addField('Usuarios', `:wrestlers: x ${peoplecnt}\n:robot: x ${botcnt}`, true)
 				.addField('Canales', `:hash: x ${textcnt}\n:loud_sound: x ${voicecnt}\n:label: x ${categorycnt}`, true)
 
-				.addField('Región', servidor.region, false)
-				.addField('Creador', `${servidor.owner.username}\n[${servidor.owner.id}]`, true)
+				.addField('Región', servidor.region, true)
+				.addField('Creador', `${servidor.owner.nickname}\n[${servidor.owner.id}]`, true)
 				.addField('Nivel de verificación', servidor.verificationLevel, true)
 
-				.addField('Fecha de creación', servidor.createdAt, false)
+				.addField('Fecha de creación', servidor.createdAt, true)
 				.addField('ID', servidor.id, true)
 
-				.setImage(servidor.iconURL);
+				.setAuthor(`Comando invocado por ${message.author.nickname}`, message.author.avatarURL)
+				.setImage(servidor.iconURL)
+				.setThumbnail(servidor.owner.client.avatarURL);
 			message.channel.send(Embed);
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR ROLES** (MANAGE ROLES)* para usar este comando.');
     },
