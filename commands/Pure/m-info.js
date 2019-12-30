@@ -16,7 +16,7 @@ module.exports = {
 			let peoplecnt = servidor.members.filter(member => !member.user.bot).size;
 			let botcnt = servidor.memberCount - peoplecnt;
 			servidor.channels.forEach(channel => {
-				if(channel.type === 'text') textnct++;
+				if(channel.type === 'text') textcnt++;
 				else if(channel.type === 'voice') voicecnt++;
 				else if(channel.type === 'category') categorycnt++;
 			});
