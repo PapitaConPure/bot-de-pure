@@ -212,7 +212,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 
 			if(foundpic) {
 				const filter = m => (m.content.toLowerCase() === 'd' || m.content.toLowerCase().startsWith('p!')) && m.author.id === tmpauth.id;
-				global.imgcollector = tmpch.createMessageCollector(filter, { time: 40000 });
+				global.imgcollector = tmpch.createMessageCollector(filter, { time: 120000 });
 				global.imgcollector.on('collect', m => {
 					console.log(`Collected ${m.content}`);
 					console.log(BotMessage);
