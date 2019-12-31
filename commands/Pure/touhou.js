@@ -108,6 +108,8 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 			case 'raiko': arglist[i] = 'horikawa_raiko'; break;
 			//#endregion
 			//#region LoLK (15)
+			case 'seiran': arglist[i] = 'seiran*'; break;
+			case 'ringo': arglist[i] = 'ringo*'; break;
 			case 'doremy': arglist[i] = 'doremy_sweet'; break;
 			case 'sagume': arglist[i] = 'kishin_sagume'; break;
 			case 'junko': arglist[i] = 'junko*'; break;
