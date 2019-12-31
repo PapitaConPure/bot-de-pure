@@ -11,12 +11,17 @@ const getRandomInt = function(_max) {
 
 const tmpfunc = async function(tmpch, arglist, tmpauth) {
 	let BotMessage = -1;
-	let srchtags = 'touhou -guro -furry -vore rating:';
+	let srchtags = 'touhou -guro -furry -vore -webm -audio rating:';
 	let embedcolor;
 	let embedtitle;
-	//Nombres de tohas a tags
+	//Nombres de tohas a tags y tags raras a tags más raras
 	for(let i = 0; i < arglist.length; i++) {
 		switch(arglist[i].toLowerCase()) {
+			//#region Otras
+			case 'gif': arglist[i] = 'animated'; break;
+			case 'breasts': arglist[i] = 'large_breasts'; break;
+			case 'big_breasts': arglist[i] = 'large_breasts'; break;
+			//#endregion
 			//#region Protagonistas
 			case 'reimu': arglist[i] = 'hakurei_reimu'; break;
 			case 'marisa': arglist[i] = 'kirisame_marisa'; break;
