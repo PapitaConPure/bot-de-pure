@@ -11,11 +11,6 @@ module.exports = {
 	execute(message, args) {
         if(!func.notModerator(message.member)) {
             if(args.length === 1) {
-                let rol = message.guild.roles.get(args[0]);
-                if(rol === undefined && message.mentions.roles.size === 0) {
-                    message.channel.send('El argumento especificado no parece ser un rol o una ID de rol.');
-                    return;
-                }
                 if(message.mentions.roles.size) {
                     if(args[0].startsWith('<@') && args[0].endsWith('>')) {
                         args[0] = args[0].slice(2, -1);
@@ -25,6 +20,11 @@ module.exports = {
                     if(global.notroles === 'na') message.channel.send(`:white_check_mark: rol <@&${args[0]}> establecido como rol de notificación de Drawmaku.`);
                     else message.channel.send(`:white_check_mark: rol <@&${args[0]}> sobreescrito en los roles de notificación de Drawmaku.`);
                 } else {
+                    let rol = message.guild.roles.get(args[0]);
+                    if(rol === undefined) {
+                        message.channel.send('El argumento especificado no parece ser un rol o una ID de rol.');
+                        return;
+                    }
                     if(global.notroles === 'na') message.channel.send(`:white_check_mark: rol ${rol.name} establecido como rol de notificación de Drawmaku.`);
                     else message.channel.send(`:white_check_mark: rol ${rol.name} sobreescrito en los roles de notificación de Drawmaku.`);
                 }
