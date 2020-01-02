@@ -35,8 +35,9 @@ module.exports = {
             global.cntjugadores++;
             if(global.notroles !== 'na')
                 if(!message.member.roles.has(global.notroles)) {
-                    let rol = message.member.guild.roles.get(global.notroles);
-                    if(rol !== undefined) message.member.addRole(rol)
+                    let rol = message.guild.roles.get(args[0]);
+                    if(rol !== undefined) message.member.addRole(global.notroles)
+                    .then(rolegot => console.log(`Añadido nuevo rol a ${message.author.username}`))
                     .catch(err => {
                         console.log('Ha ocurrido un error al asignar un rol.');
                         console.error(err);
