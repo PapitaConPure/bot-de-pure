@@ -35,7 +35,7 @@ module.exports = {
             global.cntjugadores++;
             if(global.notroles !== 'na')
                 if(!message.member.roles.has(global.notroles)) {
-                    let rol = message.guild.roles.get(global.notroles);
+                    let rol = message.member.guild.roles.get(global.notroles);
                     if(rol !== undefined) message.member.setRoles(rol);
                 }
         } else message.channel.send(`:warning: No puedes entrar dos veces. Ya estás dentro como el jugador ${global.numeros[idjugador]}.`);
