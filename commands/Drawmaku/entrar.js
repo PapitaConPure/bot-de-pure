@@ -39,7 +39,7 @@ module.exports = {
                     if(rol !== undefined) {
                         message.member.addRole(global.notroles)
                         console.log(`Añadido nuevo rol a ${message.author.username}`)
-                    } else console.log(`not poto\n${message.guild}`);
+                    } else console.log(`Rol no encontrado.\n${message.guild}`);
                 }
         } else message.channel.send(`:warning: No puedes entrar dos veces. Ya estás dentro como el jugador ${global.numeros[idjugador]}.`);
     },
