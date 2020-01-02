@@ -118,7 +118,7 @@ module.exports = {
                 if(global.cntjugadores > 1) {
                     console.log('Cantidad de jugadores valedera; Drawmaku iniciado.');
                     let notification = '';
-                    if(global.notroles !== 'na') notification = `:bell: <@&${global.notrole}> :bell:\n`;
+                    if(global.notroles !== 'na') notification = `:bell: <@&${global.notroles}> :bell:\n`;
                     global.empezado = true;
                     global.cntimagenes = 0;
                     global.chi.send(
