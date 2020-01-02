@@ -16,7 +16,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 	let embedtitle;
 
 	if(tmpch.nsfw) {
-		srchtags += 'explicit -lolicon -loli -shotacon -bestiality';
+		srchtags += 'explicit -bestiality';
 		embedcolor = '#921131';
 		embedtitle = 'MEGUMIN Ó//w//Ò';
 	} else {
