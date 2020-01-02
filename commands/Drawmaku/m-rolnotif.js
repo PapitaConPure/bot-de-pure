@@ -22,8 +22,8 @@ module.exports = {
                         if(args[0].startsWith('&')) args[0] = args[0].slice(1);
                     }
 
-                    if(global.notroles === 'na') message.channel.send(`:white_check_mark: rol ${args[0]} establecido como rol de notificación de Drawmaku.`);
-                    else message.channel.send(`:white_check_mark: rol ${args[0]} sobreescrito en los roles de notificación de Drawmaku.`);
+                    if(global.notroles === 'na') message.channel.send(`:white_check_mark: rol <@${args[0]}> establecido como rol de notificación de Drawmaku.`);
+                    else message.channel.send(`:white_check_mark: rol <@${args[0]}> sobreescrito en los roles de notificación de Drawmaku.`);
                 } else {
                     if(global.notroles === 'na') message.channel.send(`:white_check_mark: rol ${rol.name} establecido como rol de notificación de Drawmaku.`);
                     else message.channel.send(`:white_check_mark: rol ${rol.name} sobreescrito en los roles de notificación de Drawmaku.`);
