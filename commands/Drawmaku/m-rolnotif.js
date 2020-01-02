@@ -37,7 +37,7 @@ module.exports = {
                         'Es altamente recomendable crear un rol de notificación de Drawmaku y enlistarlo con `d!m-rolnotif <rol>`.\n' +
                         ':no_bell::no_bell::no_bell:\n'
                     );
-                else message.channel.send(`El rol de notificación Drawmaku designado es ${global.notroles[i]}`);
+                else message.channel.send(`El rol de notificación Drawmaku designado es ${global.notroles}`);
             } else if(args.length > 1) message.channel.send(':warning: Demasiados parámetros. Recuerda: `d!m-rolnotif <rol>`.');
         } else {
             message.channel.send(':closed_lock_with_key: Solo aquellos con un rol de moderación de Drawmaku pueden usar este comando.');
