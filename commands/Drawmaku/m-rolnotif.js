@@ -10,8 +10,8 @@ module.exports = {
     ],
 	execute(message, args) {
         if(!func.notModerator(message.member)) {
-            let rol = message.guild.roles.get(args[0]);
             if(args.length === 1) {
+                let rol = message.guild.roles.get(args[0]);
                 if(rol === undefined && message.mentions.roles.size === 0) {
                     message.channel.send('El argumento especificado no parece ser un rol o una ID de rol.');
                     return;
@@ -37,10 +37,10 @@ module.exports = {
                         'Es altamente recomendable crear un rol de notificación de Drawmaku y enlistarlo con `d!m-rolnotif <rol>`.\n' +
                         ':no_bell::no_bell::no_bell:\n'
                     );
-                else message.channel.send(`El rol de notificación Drawmaku designado es ${global.notroles}`);
-            } else if(args.length > 1) message.channel.send(':warning: Demasiados parámetros. Recuerda: `d!m-rolnotif <rol>`.');
+                else message.channel.send(`:bell: el rol de notificación Drawmaku designado es ${global.notroles}`);
+            } else if(args.length > 1) message.channel.send(':warning: demasiados parámetros. Recuerda: `d!m-rolnotif <rol>`.');
         } else {
-            message.channel.send(':closed_lock_with_key: Solo aquellos con un rol de moderación de Drawmaku pueden usar este comando.');
+            message.channel.send(':closed_lock_with_key: solo aquellos con un rol de moderación de Drawmaku pueden usar este comando.');
             return;
         }
     },
