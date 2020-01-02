@@ -37,7 +37,7 @@ module.exports = {
                 if(!message.member.roles.has(global.notroles)) {
                     let rol = message.guild.roles.get(global.notroles);
                     if(rol !== undefined) {
-                        message.member.addRole(global.notroles)
+                        message.member.addRole(global.notroles);
                         console.log(`Añadido nuevo rol a ${message.author.username}`)
                     } else console.log(`Rol no encontrado.\n${message.guild}`);
                 }

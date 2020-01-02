@@ -88,6 +88,4 @@ client.on('message', message => { //En caso de recibir un mensaje
     if(global.cansay > 0) global.cansay--;
 });
 
-
-
 client.login(token);
