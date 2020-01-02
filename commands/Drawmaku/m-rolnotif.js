@@ -10,8 +10,8 @@ module.exports = {
     ],
 	execute(message, args) {
         if(!func.notModerator(message.member)) {
-            const rol = message.guild.roles.get(args[0]);
-            if(!rol && !message.mentions.roles.size) {
+            let rol = message.guild.roles.get(toString(args[0]));
+            if(rol === undefined && message.mentions.roles.size === 0) {
                 message.channel.send('El argumento especificado no parece ser un rol o una ID de rol.');
                 return;
             }
