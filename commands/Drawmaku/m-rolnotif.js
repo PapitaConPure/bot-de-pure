@@ -39,6 +39,10 @@ module.exports = {
                     );
                 else {
                     let rol = message.guild.roles.get(global.notroles);
+                    if(rol === undefined) {
+                        message.channel.send(':warning: parece que el rol establecido fue eliminado. Se recomienda establecer otro rol de notificación de Drawmaku.');
+                        return;
+                    }
                     message.channel.send(`:bell: el rol de notificación Drawmaku designado es "${rol.name}" (ID: ${global.notroles})`);
                 }
             } else if(args.length > 1) message.channel.send(':warning: demasiados parámetros. Recuerda: `d!m-rolnotif <rol>`.');

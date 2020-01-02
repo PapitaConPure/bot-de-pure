@@ -35,15 +35,11 @@ module.exports = {
             global.cntjugadores++;
             if(global.notroles !== 'na')
                 if(!message.member.roles.has(global.notroles)) {
-                    let rolget = message.guild.roles.get(global.notroles);
-                    if(rolget !== undefined) console.log(`poto\n${message.member}`);
-                    else console.log(`not poto\n${message.guild}`);
-                    /*wasdmessage.member.addRole(global.notroles)
-                    .then(rolegot => console.log(`Añadido nuevo rol a ${message.author.username}`))
-                    .catch(err => {
-                        console.log('Ha ocurrido un error al asignar un rol.');
-                        console.error(err);
-                    });*/
+                    let rol = message.guild.roles.get(global.notroles);
+                    if(rol !== undefined) {
+                        message.member.addRole(global.notroles)
+                        console.log(`Añadido nuevo rol a ${message.author.username}`)
+                    } else console.log(`not poto\n${message.guild}`);
                 }
         } else message.channel.send(`:warning: No puedes entrar dos veces. Ya estás dentro como el jugador ${global.numeros[idjugador]}.`);
     },
