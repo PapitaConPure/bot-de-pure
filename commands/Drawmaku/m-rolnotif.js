@@ -38,7 +38,7 @@ module.exports = {
                         ':no_bell::no_bell::no_bell:\n'
                     );
                 else {
-                    let rol = message.guild.roles.get(args[0]);
+                    let rol = message.guild.roles.get(global.notroles);
                     message.channel.send(`:bell: el rol de notificación Drawmaku designado es "${rol.name}" (ID: ${global.notroles})`);
                 }
             } else if(args.length > 1) message.channel.send(':warning: demasiados parámetros. Recuerda: `d!m-rolnotif <rol>`.');
