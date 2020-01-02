@@ -10,7 +10,7 @@ module.exports = {
     ],
 	execute(message, args) {
         if(!func.notModerator(message.member)) {
-            if(!member.roles.some(role => role.id === global.notroles)) {
+            if(!message.member.channel.guild.roles.some(role => role.id === global.notroles)) {
                 message.channel.send(':warning: el parámetro especificado no es un rol o una ID de rol.');
                 return;
             }
