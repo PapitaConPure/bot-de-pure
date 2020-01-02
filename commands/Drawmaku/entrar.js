@@ -35,7 +35,7 @@ module.exports = {
             global.cntjugadores++;
             if(global.notroles !== 'na')
                 if(!message.member.roles.has(global.notroles)) {
-                    let rolget = message.guild.roles.get(args[0]);
+                    let rolget = message.guild.roles.get(global.notroles);
                     if(rolget !== undefined) console.log(`poto\n${message.member}`);
                     else console.log(`not poto\n${message.guild}`);
                     /*wasdmessage.member.addRole(global.notroles)
