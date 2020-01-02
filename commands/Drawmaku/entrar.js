@@ -38,7 +38,7 @@ module.exports = {
                     message.guild.roles.get(args[0]).then(rolget => {
                         if(rolget !== undefined) console.log(`poto\n${message.member}`)
                         else console.log(`not poto\n${message.guild}`);
-                    });/*message.member.addRole(global.notroles)
+                    });/*wasdmessage.member.addRole(global.notroles)
                     .then(rolegot => console.log(`Añadido nuevo rol a ${message.author.username}`))
                     .catch(err => {
                         console.log('Ha ocurrido un error al asignar un rol.');
