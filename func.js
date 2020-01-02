@@ -116,10 +116,12 @@ module.exports = {
             if(global.trest === 0) {
                 if(global.cntjugadores > 1) {
                     console.log('Cantidad de jugadores valedera; Drawmaku iniciado.');
+                    let notification = '';
+                    if(global.notroles !== 'na') notification = `:bell: <@&${global.notrole}> :bell:\n`;
                     global.empezado = true;
                     global.cntimagenes = 0;
                     global.chi.send(
-                        `:bell: <@&${global.notrole}> :bell:` +
+                        notification +
                         '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
                         ':fireworks: ***__¡¡¡EL DRAWMAKU HA COMENZADO!!!__*** :art:\n' +
                         ':popcorn: _¡Prepárense para otra jornada creativa! ¡Asegúrense de poner buena música y decir que todo es una spellcard de Okuu!_ :musical_note:\n\n' +
