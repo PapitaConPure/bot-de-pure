@@ -35,10 +35,10 @@ module.exports = {
             global.cntjugadores++;
             if(global.notroles !== 'na')
                 if(!message.member.roles.has(global.notroles)) {
-                    message.guild.roles.get(args[0]).then(rolget => {
-                        if(rolget !== undefined) console.log(`poto\n${message.member}`)
-                        else console.log(`not poto\n${message.guild}`);
-                    });/*wasdmessage.member.addRole(global.notroles)
+                    let rolget = message.guild.roles.get(args[0]);
+                    if(rolget !== undefined) console.log(`poto\n${message.member}`);
+                    else console.log(`not poto\n${message.guild}`);
+                    /*wasdmessage.member.addRole(global.notroles)
                     .then(rolegot => console.log(`Añadido nuevo rol a ${message.author.username}`))
                     .catch(err => {
                         console.log('Ha ocurrido un error al asignar un rol.');
