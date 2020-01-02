@@ -36,7 +36,11 @@ module.exports = {
             if(global.notroles !== 'na')
                 if(!message.member.roles.has(global.notroles)) {
                     let rol = message.member.guild.roles.get(global.notroles);
-                    if(rol !== undefined) message.member.setRoles(rol);
+                    if(rol !== undefined) message.member.addRole(rol)
+                    .catch(err => {
+                        console.log('Ha ocurrido un error al asignar un rol.');
+                        console.error(err);
+                    });
                 }
         } else message.channel.send(`:warning: No puedes entrar dos veces. Ya estás dentro como el jugador ${global.numeros[idjugador]}.`);
     },
