@@ -10,13 +10,13 @@ module.exports = {
     ],
 	execute(message, args) {
         if(!func.notModerator(message.member)) {
-            const rol = message.channel.guild.roles.some(role => role.id === args[0])
-            if(rol === undefined && !message.mentions.roles.size) {
+            const rol = message.guild.roles.get(args[0]);
+            if(!rol && !message.mentions.roles.size) {
                 message.channel.send('El argumento especificado no parece ser un rol o una ID de rol.');
                 return;
             }
             if(args.length === 1) {
-                if(rol === undefined) {
+                if(message.mentions.roles.size) {
                     if(args[0].startsWith('<@') && args[0].endsWith('>')) {
                         args[0] = args[0].slice(2, -1);
                         if(args[0].startsWith('&')) args[0] = args[0].slice(1);
