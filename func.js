@@ -69,6 +69,7 @@ module.exports = {
             if(global.ndibujante === idj || global.ndibujante > idj) global.ndibujante--;
         }
         global.cntjugadores--;
+        console.log('Jugador removido.');
     },
 
     announceNextPlayer: function() {
