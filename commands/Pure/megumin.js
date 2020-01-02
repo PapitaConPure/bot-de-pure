@@ -93,6 +93,10 @@ module.exports = {
 		'bestgirl', 'explosion'
     ],
 	execute(message, args) {
+		if(message.guild.id !== '651244470691561473') {
+			message.channel.send('_Este comando solo puede ser usado en la superficie..._');
+			return;
+		}
 		tmpfunc(message.channel, args, message.author);
     },
 };
