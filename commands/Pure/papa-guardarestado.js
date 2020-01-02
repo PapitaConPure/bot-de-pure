@@ -6,7 +6,10 @@ module.exports = {
 	name: 'papa-guardarestado',
 	execute(message, args) {
         if(message.author.id === '423129757954211880') {
-            console.log(JSON.stringify(global, null, 4));
+            {
+                let templog = JSON.stringify(global, null, 4);
+                console.log(templog);
+            }
             message.channel.send(
                 ':floppy_disk: antes de iniciar el bot, puedes copiar el estado guardado y pegarlo en el archivo \`config.json\` de la carpeta del bot:\n' +
                 '_Los datos de estado deberían estar en el log del proceso._'

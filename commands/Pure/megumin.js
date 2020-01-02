@@ -89,7 +89,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 module.exports = {
 	name: 'megumin',
 	aliases: [
-        'megu', 'explosión', 'bakuretsu', 'papiwaifu', 'waifu',
+        'megu', 'explosión', 'bakuretsu', 'papiwaifu', 'papawaifu', 'waifu',
 		'bestgirl', 'explosion'
     ],
 	execute(message, args) {
