@@ -119,6 +119,7 @@ module.exports = {
                     global.empezado = true;
                     global.cntimagenes = 0;
                     global.chi.send(
+                        `:bell: <@&${global.notrole}> :bell:` +
                         '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
                         ':fireworks: ***__¡¡¡EL DRAWMAKU HA COMENZADO!!!__*** :art:\n' +
                         ':popcorn: _¡Prepárense para otra jornada creativa! ¡Asegúrense de poner buena música y decir que todo es una spellcard de Okuu!_ :musical_note:\n\n' +

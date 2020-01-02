@@ -34,8 +34,10 @@ module.exports = {
             message.channel.send(`:wrestlers: _<@${global.jugadores[global.cntjugadores]}> ha entrado al Drawmaku como el jugador ${global.numeros[global.cntjugadores]} ${str}._`);
             global.cntjugadores++;
             if(global.notroles !== 'na')
-                if(!message.member.roles.has(global.notroles))
-                    message.member.setRoles(global.notroles);
+                if(!message.member.roles.has(global.notroles)) {
+                    let rol = message.guild.roles.get(global.notroles);
+                    if(rol !== undefined) message.member.setRoles(rol);
+                }
         } else message.channel.send(`:warning: No puedes entrar dos veces. Ya estás dentro como el jugador ${global.numeros[idjugador]}.`);
     },
 };
