@@ -27,7 +27,7 @@ module.exports = {
         if(!args.length) {
             if(message.attachments.size > 0) {
                 if(!message.attachments.every(attachIsImage)) {
-                    message.delete(message.author.lastMessageID);
+                    message.delete();
                     message.channel.send(':warning: el archivo adjuntado no es una imagen.');
                     return;
                 }
@@ -60,7 +60,7 @@ module.exports = {
 
         //Ingresar ataque
         if(args[0].startsWith('||') && args[args.length - 1].endsWith('||')) {
-            message.delete(message.author.lastMessageID);
+            message.delete();
             if(global.seleccionado) {
                 message.channel.send(':warning: Ya seleccionaste un danmaku.');
                 return;

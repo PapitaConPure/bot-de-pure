@@ -9,7 +9,7 @@ module.exports = {
     ],
 	execute(message, args) {
 		if(message.member.hasPermission('MANAGE_ROLES', false, true, true)) {
-			message.delete(message.author.lastMessageID);
+			message.delete();
 			if(!args.length) {
 				message.channel.send(':warning: debes especificar al menos una ID de un mensaje enviado por mí.');
 			}
@@ -25,8 +25,8 @@ module.exports = {
 					}
 				})
 				.catch(err => {
+					message.channel.send(`:warning: "${args[0]}" no parece ser una ID de mensaje.`);
 					console.log(':warning: ha ocurrido un error al borrar un mensaje.');
-					console.error(err);
 				});
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR ROLES** (MANAGE ROLES)* para usar este comando.');
     },

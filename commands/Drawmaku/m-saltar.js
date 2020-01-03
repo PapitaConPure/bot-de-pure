@@ -21,7 +21,7 @@ module.exports = {
         }
         
         //Saltar jugador
-        message.delete(message.author.lastMessageID);
+        message.delete();
         global.seleccionado = false;
         if(global.dibujado) global.cntimagenes--;
         global.dibujado = false;

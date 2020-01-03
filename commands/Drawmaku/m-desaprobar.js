@@ -10,7 +10,7 @@ module.exports = {
         'm-n'
     ],
     execute(message, args) {
-        message.delete(message.author.lastMessageID);
+        message.delete();
         if(func.notModerator(message.member)) { //Cancelar si el comando no fue ejecutado por un moderador
             message.channel.send(':closed_lock_with_key: Solo aquellos con un rol de moderación de Drawmaku pueden usar este comando.');
             return;
@@ -25,7 +25,7 @@ module.exports = {
             return;
         }
         
-        message.delete(message.author.lastMessageID);
+        message.delete();
         if(global.recompensado === -1) {
             message.channel.send(':warning: No hay nadie esperando a ser recompensado.');
             return;
