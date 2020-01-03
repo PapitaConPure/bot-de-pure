@@ -36,7 +36,7 @@ module.exports = {
             '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
             '***INSCRIPCIONES ABIERTAS***\n' +
             `_¡Ya pueden comenzar a inscribirse a la ${global.edi}ª edición de Drawmaku!_\n\n` +
-            `Si quieren empezar sus dibujos ahora: la temática de esta edición será **${global.tem}**\n` +
+            `¡Si quieren empezar sus dibujos ahora: la temática de esta edición será **${global.tem}**!\n` +
             `> ${global.desctem}\n` +
             `**Tienen ${tiempoinsc} para inscribirse.**\n` +
             `Para entrar al evento escribe \`${global.p_drmk}entrar\` ahora.\n` +
