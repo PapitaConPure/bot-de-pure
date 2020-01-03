@@ -39,20 +39,21 @@ module.exports = {
                 imgs.dibujoactual = message.attachments.array()[0].url;
                 imgs.dibujo[global.cntimagenes] = message.attachments.array()[0].url;
                 imgs.creador[global.cntimagenes] = message.author.username;
-                global.cntimagenes++;
                 /*fs.writeFile('../../images.json', JSON.stringify(imgs, null, 4), err => {
                     if(err) console.error(err);
                     console.log('Imagen guardada.');
                     console.log(imgs);
                 });*/
-                if(global.seleccionado) message.channel.send(
-                    '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
-                    '***¡EL DIBUJANTE YA HA SELECCIONADO Y DIBUJADO UN DANMAKU!***\n' +
-                    '_¡Voten ahora! ¡No hay necesidad de comandos y tienen infinitos intentos!_\n\n' +
-                    `Cuando alguien adivine el danmaku, el dibujante deberá darle puntos con \`${global.p_drmk}recomp <@jugador>\`.\n` +
-                    '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
-                );
-                else message.channel.send(':yin_yang: ~ Se seleccionó un dibujo ~ :yin_yang:');
+                if(global.seleccionado) {
+                    message.channel.send(
+                        '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
+                        '***¡EL DIBUJANTE YA HA SELECCIONADO Y DIBUJADO UN DANMAKU!***\n' +
+                        '_¡Voten ahora! ¡No hay necesidad de comandos y tienen infinitos intentos!_\n\n' +
+                        `Cuando alguien adivine el danmaku, el dibujante deberá darle puntos con \`${global.p_drmk}recomp <@jugador>\`.\n` +
+                        '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
+                    );
+                    global.cntimagenes++;
+                } else message.channel.send(':yin_yang: ~ Se seleccionó un dibujo ~ :yin_yang:');
             } else message.channel.send(`:warning: Olvidaste mencionar tu ataque/spellcard o adjuntar la imagen del danmaku, recuerda: \`${global.p_drmk}danmaku ||<danmaku>||\` o \`${global.p_drmk}danmaku <imagen>\``);
             return;
         }
@@ -67,15 +68,18 @@ module.exports = {
             global.danmaku = args[0].slice(2);
             for(var i = 1; i < args.length; i++) global.danmaku += ' ' + args[i];
             global.danmaku = global.danmaku.slice(0, -2);
+            imgs.secreto[global.cntimagenes] = global.danmaku;
             global.seleccionado = true;
-            if(global.dibujado) message.channel.send(
-                '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
-                '***¡EL DIBUJANTE YA HA SELECCIONADO Y DIBUJADO UN DANMAKU!***\n' +
-                '_¡Voten ahora! ¡No hay necesidad de comandos y tienen infinitos intentos!_\n\n' +
-                `Cuando alguien adivine el danmaku, el dibujante deberá darle puntos con \`${global.p_drmk}recomp <@jugador>\`.\n` +
-                '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
-            );
-            else message.channel.send(':yin_yang: ~ Se seleccionó un danmaku ~ :yin_yang:');
+            if(global.dibujado) {
+                message.channel.send(
+                    '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
+                    '***¡EL DIBUJANTE YA HA SELECCIONADO Y DIBUJADO UN DANMAKU!***\n' +
+                    '_¡Voten ahora! ¡No hay necesidad de comandos y tienen infinitos intentos!_\n\n' +
+                    `Cuando alguien adivine el danmaku, el dibujante deberá darle puntos con \`${global.p_drmk}recomp <@jugador>\`.\n` +
+                    '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
+                );
+                global.cntimagenes++;
+            } else message.channel.send(':yin_yang: ~ Se seleccionó un danmaku ~ :yin_yang:');
         } else {
             message.channel.send(
                 '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
@@ -86,7 +90,6 @@ module.exports = {
                 '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
             );
             global.seleccionado = false;
-            if(global.dibujado) global.cntimagenes--;
             global.dibujado = false;
         }
     },
