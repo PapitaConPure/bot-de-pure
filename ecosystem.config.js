@@ -23,7 +23,7 @@ module.exports = {
       host : '212.83.163.1',
       ref  : 'origin/master',
       repo : 'git@github.com:PapitaConPure/bot-de-pure.git',
-      path : '/var/www/bot-de-pure',
+      path : '/var/www/bin',
       'post-deploy' : 'npm install && pm2 reload ecosystem.config.js --env production'
     }
   }
