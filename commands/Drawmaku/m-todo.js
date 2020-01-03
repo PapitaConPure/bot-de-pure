@@ -6,7 +6,7 @@ let imgs = require('../../images.json'); //Imágenes guardadas
 module.exports = {
 	name: 'm-todo',
     aliases: [
-        'm-imágenes',
+        'm-imágenes', 'm-dibujos',
         'm-everything', 'm-images'
     ],
 	execute(message, args) {
