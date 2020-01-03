@@ -29,11 +29,16 @@ module.exports = {
         global.chi = message.channel;
         global.cntjugadores = 0;
         global.ndibujante = 0;
+        let tiempoinsc = `${global.tiempo} segundos`;
+        if(global.tiempo >= 3600) tiempoinsc = `${Math.floor(global.tiempo / 3600)} hora(s)`;
+        else if(global.tiempo >= 60) tiempoinsc = `${Math.floor((global.tiempo / 60) % 60)} minuto(s)`;
         message.channel.send(
             '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
             '***INSCRIPCIONES ABIERTAS***\n' +
             `_¡Ya pueden comenzar a inscribirse a la ${global.edi}ª edición de Drawmaku!_\n\n` +
-            `**Tienen ${global.tiempo} segundos para inscribirse.**\n` +
+            `Si quieren empezar sus dibujos ahora: la temática de esta edición será **${global.tem}**` +
+            `> ${global.desctem}` +
+            `**Tienen ${tiempoinsc} para inscribirse.**\n` +
             `Para entrar al evento escribe \`${global.p_drmk}entrar\` ahora.\n` +
             `Para salir del evento escribe \`${global.p_drmk}salir\` en cualquier momento.\n` +
             '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
