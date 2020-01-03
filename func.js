@@ -161,9 +161,12 @@ module.exports = {
             if((global.tjuego % 30) === 0) console.log(global.tjuego);
             if(global.tjuego === 0) {
                 console.log('El juego terminará al final de la ronda actual.');
+                let notification = '';
+                if(global.notroles !== 'na') notification = `:bell: <@&${global.notroles}> :bell:\n`;
                 global.chi.send(
+                    notification +
                     '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
-                    ':bell: ***AVISO*** :bell:\n' +
+                    ':mega: ***AVISO*** :mega:\n' +
                     '_Esta edición de Drawmaku está por terminar..._\n\n' +
                     `¡Jugadores! Al final de esta ronda se dará por terminada la ${global.edi}ª edición de Drawmaku.\n` +
                     `Si sigues jugando, no te recomiendo salirte, ya que serás eliminado de la tabla de resultados si lo haces.\n` +

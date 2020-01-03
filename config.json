@@ -6,8 +6,15 @@
     "tem": "tohas sin gorrito",
     "desc": "El Drawmaku es un juego similar a las charadas, en el que tendrás que adivinar el danmaku que dibujan los demás. ¡A revivir viejos traumas y maravillarnos con los fuegos artificiales!",
     "desctem": "¡En esta ocasión, dibujaremos danmaku de tohas que no posean ningún gorro o sombrero! Como por ejemplo Reimu, Sakuya, Alice, Reisen, Mokou, Medicine y Kokoro. NO se permiten tohas con mantos como Keiki e Ichirin. SÍ se permiten tohas con moños de cualquier tamaño y sujetadores de pelo pequeños.",
-    "reglas": [],
-    "empezando": false,
+    "reglas": [
+        "Pueden utilizar cualquier software o herramienta que les permita representar su danmaku",
+        "¡Respeta tu turno en la lista!",
+        "Si después de unos minutos el danmaku no es adivinado, se deben comenzar a dar pistas",
+        "Procuren dibujar con un nivel de abstracción aceptable. Pueden hacerlo dibujando la parte que más resalta del patrón, intentando usar la misma paleta de colores que el original o haciendo lo que se les ocurra para que a simple vista uno note que se trata de X danmaku",
+        "Pueden consultar los comandos en los mensajes fijados de <#624869238158393344>, y pueden hacer cualquier pregunta a los moderadores del evento",
+        "¡Diviértanse!"
+    ],
+    "empezando": true,
     "empezado": false,
     "terminando": false,
     "cansay": 0,
