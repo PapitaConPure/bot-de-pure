@@ -23,8 +23,22 @@ module.exports = {
       host : '212.83.163.1',
       ref  : 'origin/master',
       repo : 'git@github.com:PapitaConPure/bot-de-pure.git',
-      path : '/var/www/bot-de-pure',
+      path : '/var/www/production',
+      'ssh_options': 'StrictHostKeyChecking=no',
+      'pre-setup' : 'apt-get install git',
       'post-deploy' : 'npm install && pm2 reload ecosystem.config.js --env production'
+    },
+    staging : {
+      user : "node",
+      host : "212.83.163.1",
+      ref  : "origin/master",
+      repo : "git@github.com:repo.git",
+      path : "/var/www/development",
+      'ssh_options': ['StrictHostKeyChecking=no', 'PasswordAuthentication=no'],
+      'post-deploy' : 'pm2 startOrRestart ecosystem.json --env dev',
+      "env"  : {
+        "NODE_ENV": "staging"
+      }
     }
   }
 };
