@@ -43,5 +43,14 @@ module.exports = {
             `Para salir del evento escribe \`${global.p_drmk}salir\` en cualquier momento.\n` +
             '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
         );
+        let listareglas = '';
+        for(let i = 0; i < global.reglas.length; i++)
+            listareglas += `• **${i + 1}:** ${global.reglas[i]}\n`;
+        message.channel.send(
+            '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
+            '***REGLAS***\n' +
+            listareglas +
+            '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
+        );
     },
 };
