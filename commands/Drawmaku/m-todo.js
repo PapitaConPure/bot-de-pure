@@ -18,7 +18,7 @@ module.exports = {
         let str = '***LISTA DE IMÁGENES***\n';
         str += 'Mostrando todas las imágenes guardadas del Drawmaku.\n';
         for(let i = 0; i < global.cntimagenes; i++)
-            str += `${imgs.dibujo[i]} (Autor: ${imgs.creador[i]})\n`;
+            str += `\`${i + 1}\` **Autor:** _${imgs.creador[i]}_ **Secreto:** _${imgs.secreto[i]}_\n${imgs.dibujo[i]})\n`;
         message.channel.send(str);
     },
 };
