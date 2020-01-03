@@ -25,6 +25,7 @@ module.exports = {
                 message.channel.send(':warning: el número de regla debe estar entre 1 y 50.');
                 return;
             }
+            numregla -= 1;
             global.reglas[numregla] = args[1];
             for(var i = 2; i < args.length; i++) global.reglas[numregla] += " " + args[i];
             message.channel.send(`:white_check_mark: regla ${numregla} actualizada.`);
