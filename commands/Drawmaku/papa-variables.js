@@ -12,6 +12,7 @@ module.exports = {
             str += 'tem = \'' + ((typeof global.tem !== 'undefined')?`${global.tem}`:'indefinido') + '\';\n';
             str += 'desc = \'' + ((typeof global.desc !== 'undefined')?`${global.desc}`:'indefinido') + '\';\n';
             str += 'desctem = \'' + ((typeof global.desctem !== 'undefined')?`${global.desctem}`:'indefinido') + '\';\n';
+            str += 'reglas = [\'' + ((typeof global.reglas !== 'undefined')?`${global.reglas}`:'indefinido') + '\'];\n';
             str += 'empezando = ' + ((typeof global.empezando !== 'undefined')?`${global.empezando}`:'indefinido') + ';\n';
             str += 'empezado = ' + ((typeof global.empezado !== 'undefined')?`${global.empezado}`:'indefinido') + ';\n';
             str += 'terminando = ' + ((typeof global.terminando !== 'undefined')?`${global.terminando}`:'indefinido') + ';\n';
