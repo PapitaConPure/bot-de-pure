@@ -17,7 +17,7 @@ module.exports = {
         //Repetir temática si el llamador está jugando
         if(idjugador !== -1) {
             message.channel.send(
-                '*__Repitiendo..._*' +
+                '*__Repitiendo...__*\n' +
                 `La temática es: ***${global.tem}***\n` +
                 `> ${global.desctem}\n`
             );
