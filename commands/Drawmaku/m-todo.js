@@ -24,5 +24,6 @@ module.exports = {
                 str = '';
             }
         }
+        if(str.length) message.channel.send(str);
     },
 };
