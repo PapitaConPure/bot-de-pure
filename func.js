@@ -169,7 +169,7 @@ module.exports = {
                     ':mega: ***AVISO*** :mega:\n' +
                     '_Esta edición de Drawmaku está por terminar..._\n\n' +
                     `¡Jugadores! Al final de esta ronda se dará por terminada la ${global.edi}ª edición de Drawmaku.\n` +
-                    `Si sigues jugando, no te recomiendo salirte, ya que serás eliminado de la tabla de resultados si lo haces.\n` +
+                    `¡Hagan su último esfuerzo!\n` +
                     '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
                 );
             } else if(global.tjuego < 60) {

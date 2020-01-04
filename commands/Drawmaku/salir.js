@@ -17,6 +17,6 @@ module.exports = {
         if(idjugador !== -1) {
             message.channel.send(`:wave: _<@${global.jugadores[idjugador]}> (ex-jugador ${global.numeros[idjugador]}) ha abandonado el Drawmaku._`);
             func.removeFromList(idjugador);
-        } else message.channel.send(':warning: Tenés que estar dentro del evento para salirte.');
+        } else message.channel.send(':warning: tenés que estar dentro del evento para salirte.');
     },
 };
