@@ -27,7 +27,7 @@ for(const file of commandFiles) {
 
 client.on('ready', () => {
 	console.log('Bot conectado y funcionando.');
-    client.user.setActivity("UwU 24/7", "WATCHING");
+    client.user.setActivity("UwU 24/7", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' });
 });
 
 client.on('message', message => { //En caso de recibir un mensaje
