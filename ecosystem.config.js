@@ -2,6 +2,7 @@ module.exports = {
   apps : [{
     name: 'API',
     script: 'app.js',
+    exp_backoff_restart_delay: 100,
 
     // Options reference: https://pm2.keymetrics.io/docs/usage/application-declaration/
     args: 'one two',
