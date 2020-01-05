@@ -121,6 +121,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 			case 'hecatia': arglist[i] = 'hecatia_lapislazuli'; break;
 			//#endregion
 			//#region HSiFS (16)
+			case 'eternity': arglist[i] = 'eternity_larva'; break;
 			case 'nemuno': arglist[i] = 'sakata_nemuno'; break;
 			case 'aunn': arglist[i] = 'komano_aun'; break;
 			case 'komano': arglist[i] = 'komano_aun'; break;
