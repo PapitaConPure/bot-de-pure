@@ -33,7 +33,7 @@ module.exports = {
       user : "node",
       host : "212.83.163.1",
       ref  : "origin/master",
-      repo : "git@github.com:repo.git",
+      repo : "git@github.com:PapitaConPure/emilia.git",
       path : "/var/www/development",
       'ssh_options': ['StrictHostKeyChecking=no', 'PasswordAuthentication=no'],
       'post-deploy' : 'pm2 startOrRestart ecosystem.json --env dev',

@@ -167,7 +167,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 	}
 
 	if(tmpch.nsfw) {
-		srchtags += 'explicit -lolicon -loli -shotacon -bestiality';// -rumia -cirno -remilia_scarlet -flandre_scarlet -chen -inaba_tewi';
+		srchtags += 'explicit -lolicon -loli -shotacon -bestiality -comic -4koma';// -rumia -cirno -remilia_scarlet -flandre_scarlet -chen -inaba_tewi';
 		//srchtags += ' -kisume -sukuna_shinmyoumaru -clownpiece -ebisu_eika -luna_child -star_sapphire -sunny_milk -motoori_kosuzu -hieda_no_akyuu';
 		embedcolor = '#38214e';
 		embedtitle = 'Tohitas O//w//O';
