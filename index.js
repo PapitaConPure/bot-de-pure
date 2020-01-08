@@ -23,6 +23,7 @@ commandFiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.
 for(const file of commandFiles) {
     command = require(`./commands/Pure/${file}`);
 	client.ComandosPure.set(command.name, command);
+    func.saveState();
 }
 
 client.on('ready', () => {

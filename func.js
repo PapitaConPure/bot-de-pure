@@ -1,5 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
-var global = require('./config.json'); //Variables globales
+const global = require('./config.json'); //Variables globales
+const fs = require('fs');
 
 module.exports = {
     //#region Lista
@@ -212,6 +213,16 @@ module.exports = {
             }
 
         return (!ismod);
+    },
+    //#endregion
+
+    //#region Sistema
+    saveState: function() {
+        fs.writeFile("config.json", JSON.stringify(global, null, 4), err => {
+            if(err) console.error(err);
+        });
+        setTimeout(module.exports.saveState, (10 * 1000));
+        console.log('Estado guardado.');
     },
     //#endregion
 
