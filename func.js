@@ -1,6 +1,27 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const global = require('./config.json'); //Variables globales
 const fs = require('fs');
+/*import GitHub from 'github-api';
+
+// unauthenticated client
+const gh = new GitHub();
+let gist = gh.getGist(); //not a gist yet
+gist.create({
+   public: true,
+   description: 'My first gist',
+   files: {
+      "file1.txt": {
+         content: "Aren't gists great!"
+      }
+   }
+}).then(function({data}) {
+   // Promises!
+   let createdGist = data;
+   return gist.read();
+}).then(function({data}) {
+   let retrievedGist = data;
+   // do interesting things
+});*/
 
 module.exports = {
     //#region Lista
@@ -217,13 +238,13 @@ module.exports = {
     //#endregion
 
     //#region Sistema
-    saveState: function() {
+    /*saveState: function() {
         fs.writeFile("config.json", JSON.stringify(global, null, 4), err => {
             if(err) console.error(err);
         });
         setTimeout(module.exports.saveState, (10 * 1000));
         console.log('Estado guardado.');
-    },
+    },*/
     //#endregion
 
     //#region Otros
