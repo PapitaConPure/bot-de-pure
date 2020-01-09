@@ -233,7 +233,7 @@ module.exports = {
         mgc.connect((err, db) => {
             const collection = mgc.db('bot-de-pure').collection('config').insertOne({
                 'edi': 4//global.edi
-            }/*, err => { console.log('Ha ocurrido un error al guardar en la base de datos.'); }*/);
+            }, err => { console.log(err); });
             mgc.close();
         });
 
