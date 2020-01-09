@@ -1,6 +1,7 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const global = require('./config.json'); //Variables globales
 const fs = require('fs');
+const MongoClient = require('mongodb').MongoClient;
 
 module.exports = {
     //#region Lista
@@ -217,9 +218,23 @@ module.exports = {
     //#endregion
 
     //#region Sistema
+    reloadState: function() {
+        /**/
+        
+        setTimeout(module.exports.saveState, (20 * 1000));
+    },
+
     saveState: function() {
-        fs.writeFile("config.json", JSON.stringify(global, null, 4), err => {
+        /*fs.writeFile("config.json", JSON.stringify(global, null, 4), err => {
             if(err) console.error(err);
+        });*/
+        const uri = "mongodb+srv://PapaPure:EE2aDRLAwWLVFprw@bot-de-pure-fbz2w.gcp.mongodb.net/test?retryWrites=true&w=majority";
+        const mgclient = new MongoClient(uri, { useNewUrlParser: true });
+        mgclient.connect((err, db) => {
+            const collection = mgclient.db('bot-de-pure').collection('config').updateOne({
+                $set: {'edi':global.edi}
+            });
+            mgclient.close();
         });
 
         setTimeout(module.exports.saveState, (10 * 1000));

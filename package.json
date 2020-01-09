@@ -22,6 +22,7 @@
     "discord.js": "^11.5.1",
     "eslint": "^6.7.2",
     "github-api": "^3.3.0",
+    "mongodb": "^3.4.1",
     "node-fetch": "^2.6.0",
     "parse": "^2.11.0",
     "pixiv-api-client": "^0.22.0",
