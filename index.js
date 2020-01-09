@@ -48,6 +48,12 @@ const Global = sequelize.define('Global', {
 
 client.once('ready', () => {
     Global.sync();
+    async function conchetumare() {
+        const tag = await Global.findAll({attributes: ['name']});
+        const tagString = tagList.map(t => t.name).join(', ') || 'No tags set.';
+        console.log(`List of tags: ${tagString}`);
+    }
+    conchetumare();
 });
 
 client.on('ready', () => {
@@ -94,15 +100,16 @@ client.on('message', message => { //En caso de recibir un mensaje
 
     async function asd() {
         try {
-            Tags.create({
+            const tag = await Tags.create({
                 name: args[0],
                 description: args[1]
             });
+            console.log(`The new tag is ${tag.name} and its description is ${tag.description}`);
         } catch (error) {
             if(error.name === 'SequelizeUniqueConstraintError') {
-                return message.reply('That tag already exists.');
+                console.log('That tag already exists.');
             }
-            return message.reply('Something went wrong with adding a tag.');
+            console.log('Something went wrong with adding a tag.');
         }
     }
     asd();
