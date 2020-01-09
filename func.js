@@ -232,7 +232,7 @@ module.exports = {
         const mgc = new MongoClient(uri, { useNewUrlParser: true });
         mgc.connect((err, db) => {
             const collection = mgc.db('bot-de-pure').collection('config').insertOne({
-                'edi': global.edi
+                'edi': 4//global.edi
             }, err => { console.log('Ha ocurrido un error al guardar en la base de datos.'); });
             mgc.close();
         });
