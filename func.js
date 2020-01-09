@@ -223,11 +223,8 @@ module.exports = {
             if(err) console.error(err);
         });*/
         const gh = new GitHub();
-        
-        gh.getRepo('PapitaConPure', 'bot-de-pure')
-        .then(repo => {
-            repo.commit();
-        })
+        let repo = gh.getRepo('PapitaConPure', 'bot-de-pure');
+        repo.commit()
         .then(() => console.log('Estado guardado.'))
         .catch(() => console.log('Ha ocurrido un error al guardar el estado actual.'));
 
