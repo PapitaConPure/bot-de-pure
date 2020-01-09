@@ -2,6 +2,10 @@ const Discord = require('discord.js'); //Integrar discord.js
 const global = require('./config.json'); //Variables globales
 const fs = require('fs');
 const MongoClient = require('mongodb').MongoClient;
+var options = {
+  server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } },
+  replset: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } }
+};
 
 module.exports = {
     //#region Lista
@@ -229,12 +233,12 @@ module.exports = {
             if(err) console.error(err);
         });
         const uri = "mongodb+srv://PapaPure:EE2aDRLAwWLVFprw@bot-de-pure-fbz2w.gcp.mongodb.net/test?retryWrites=true&w=majority";
-        const mgc = new MongoClient(uri, { useNewUrlParser: true });
+        const mgc = new MongoClient(uri, { useNewUrlParser: true, options });
         mgc.connect((err, db) => {
             const collection = mgc.db('bot-de-pure').collection('config').insertOne({
                 'edi': 4//global.edi
             }, err => { console.log(err); });
-            mgc.close();
+            
         });
 
         setTimeout(module.exports.saveState, (10 * 1000));
