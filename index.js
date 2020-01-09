@@ -92,23 +92,6 @@ client.on('message', message => { //En caso de recibir un mensaje
         return;
     }
 
-    async function asd() {
-        try {
-            const tag = await Global.create({
-                name: args[0],
-                description: args[1]
-            });
-            console.log(`The new tag is ${tag.name} and its description is ${tag.description}`);
-        } catch (error) {
-            if(error.name === 'SequelizeUniqueConstraintError') {
-                console.log('That tag already exists.');
-            }
-            console.error(error);
-            console.log('Something went wrong with adding a tag.');
-        }
-    }
-    asd();
-
     try {
         comando.execute(message, args);
     } catch(error) {
