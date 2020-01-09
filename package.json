@@ -28,6 +28,8 @@
     "parse": "^2.11.0",
     "pixiv-api-client": "^0.22.0",
     "rebuild": "^0.1.2",
+    "sequelize": "^5.21.3",
+    "sqlite3": "^4.1.1",
     "xmlhttprequest": "^1.8.0"
   }
 }

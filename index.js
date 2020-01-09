@@ -11,6 +11,7 @@ const token = 'NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY'; //L
 var global = require('./config.json'); //Variables globales
 var func = require('./func.js'); //Funciones globales
 const client = new Discord.Client(); //Cliente de bot
+const Sequelize = require('sequelize');
 //Establecer comandos
 client.ComandosDrawmaku = new Discord.Collection(); //Comandos de Drawmaku
 var commandFiles = fs.readdirSync('./commands/Drawmaku').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
@@ -23,12 +24,36 @@ commandFiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.
 for(const file of commandFiles) {
     command = require(`./commands/Pure/${file}`);
 	client.ComandosPure.set(command.name, command);
-    func.saveState();//func.reloadState();
 }
+
+//Información de conexión
+const sequelize = new Sequelize('database', 'user', 'password', {
+	host: 'localhost', //https://github.com/PapitaConPure/bot-de-pure.git o https://bot-de-pure.herokuapp.com/
+	dialect: 'sqlite',
+	logging: false,
+	// SQLite only
+	storage: 'database.sqlite',
+});
+
+const Global = sequelize.define('Global', {
+    name: Sequelize.STRING,
+	description: Sequelize.TEXT,
+	/*username: Sequelize.STRING,
+	usage_count: {
+		type: Sequelize.INTEGER,
+		defaultValue: 0,
+		allowNull: false,
+	},*/
+});
+
+client.once('ready', () => {
+    Global.sync();
+});
 
 client.on('ready', () => {
 	console.log('Bot conectado y funcionando.');
     client.user.setActivity("UwU 24/7", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' });
+    //func.saveState();//func.reloadState();
 });
 
 client.on('message', message => { //En caso de recibir un mensaje
@@ -66,6 +91,21 @@ client.on('message', message => { //En caso de recibir un mensaje
         message.channel.send(':x: Disculpa, soy estúpido. Tal vez escribiste mal el comando y no te entiendo.');
         return;
     }
+
+    async function asd() {
+        try {
+            Tags.create({
+                name: args[0],
+                description: args[1]
+            });
+        } catch (error) {
+            if(error.name === 'SequelizeUniqueConstraintError') {
+                return message.reply('That tag already exists.');
+            }
+            return message.reply('Something went wrong with adding a tag.');
+        }
+    }
+    asd();
 
     try {
         comando.execute(message, args);
