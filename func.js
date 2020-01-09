@@ -229,7 +229,7 @@ module.exports = {
             if(err) console.error(err);
         });
         const uri = "mongodb+srv://PapaPure:EE2aDRLAwWLVFprw@bot-de-pure-fbz2w.gcp.mongodb.net/test?retryWrites=true&w=majority";
-        const mgc = new MongoClient(uri, { keepAlive: 1, useNewUrlParser: true, options });
+        const mgc = new MongoClient(uri, { keepAlive: 1, useNewUrlParser: true });
         mgc.connect((err, db) => {
             const collection = mgc.db('bot-de-pure').collection('config');
             collection.insertOne({
@@ -238,7 +238,7 @@ module.exports = {
             mgc.close();
         });
 
-        setTimeout(module.exports.saveState, (10 * 1000));
+        //setTimeout(module.exports.saveState, (10 * 1000));
     },
     //#endregion
 
