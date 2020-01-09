@@ -23,6 +23,7 @@
     "eslint": "^6.7.2",
     "github-api": "^3.3.0",
     "node-fetch": "^2.6.0",
+    "parse": "^2.11.0",
     "pixiv-api-client": "^0.22.0",
     "xmlhttprequest": "^1.8.0"
   }

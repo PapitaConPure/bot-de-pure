@@ -1,6 +1,7 @@
 //TRABAJAR CON DISCORD.JS Y HACER USO DE SISTEMAS DE ARCHIVOS
 const fs = require('fs'); //Integrar operaciones sistema de archivos de consola
 const Discord = require('discord.js'); //Integrar discord.js
+const Parse = require('parse/node');
 const { Client, RichEmbed } = require('discord.js'); //Ni idea, la verdad, pero aquí está
 const { //Constantes globales
     p_drmk, //prefijo drawmaku
@@ -17,13 +18,12 @@ for(const file of commandFiles) {
 	const command = require(`./commands/Drawmaku/${file}`);
 	client.ComandosDrawmaku.set(command.name, command);
 }
-
 client.ComandosPure = new Discord.Collection(); //Comandos de Pure
 commandFiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
 for(const file of commandFiles) {
     command = require(`./commands/Pure/${file}`);
 	client.ComandosPure.set(command.name, command);
-    //func.saveState();
+    func.saveState();
 }
 
 client.on('ready', () => {
