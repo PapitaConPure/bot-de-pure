@@ -109,6 +109,7 @@ client.on('message', message => { //En caso de recibir un mensaje
             if(error.name === 'SequelizeUniqueConstraintError') {
                 console.log('That tag already exists.');
             }
+            console.error(error);
             console.log('Something went wrong with adding a tag.');
         }
     }
