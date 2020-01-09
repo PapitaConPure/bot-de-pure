@@ -229,12 +229,15 @@ module.exports = {
             if(err) console.error(err);
         });*/
         const uri = "mongodb+srv://PapaPure:EE2aDRLAwWLVFprw@bot-de-pure-fbz2w.gcp.mongodb.net/test?retryWrites=true&w=majority";
-        const mgclient = new MongoClient(uri, { useNewUrlParser: true });
-        mgclient.connect((err, db) => {
-            const collection = mgclient.db('bot-de-pure').collection('config').updateOne({
-                $set: {'edi':global.edi}
-            });
-            mgclient.close();
+        const mgc = new MongoClient(uri, { useNewUrlParser: true });
+        mgc.connect((err, db) => {
+            const collection = mgc.db('bot-de-pure').collection('config').insertOne(global, err => { console.log('Ha ocurrido un error al guardar en la base de datos.'); });
+            /*collection.updateOne({}, {
+                $set: {
+                    'edi': global.edi
+                }
+            });*/
+            mgc.close();
         });
 
         setTimeout(module.exports.saveState, (10 * 1000));
