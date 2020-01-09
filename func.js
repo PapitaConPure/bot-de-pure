@@ -225,13 +225,13 @@ module.exports = {
     },
 
     saveState: function() {
-        /*fs.writeFile("config.json", JSON.stringify(global, null, 4), err => {
+        fs.writeFile("config.json", JSON.stringify(global, null, 4), err => {
             if(err) console.error(err);
-        });*/
+        });
         const uri = "mongodb+srv://PapaPure:EE2aDRLAwWLVFprw@bot-de-pure-fbz2w.gcp.mongodb.net/test?retryWrites=true&w=majority";
         const mgc = new MongoClient(uri, { useNewUrlParser: true });
         mgc.connect((err, db) => {
-            const collection = mgc.db('bot-de-pure').collection('config').insertOne(global, err => { console.log('Ha ocurrido un error al guardar en la base de datos.'); });
+            const collection = mgc.db('bot-de-pure').collection('config').insertOne('config.json', err => { console.log('Ha ocurrido un error al guardar en la base de datos.'); });
             /*collection.updateOne({}, {
                 $set: {
                     'edi': global.edi
