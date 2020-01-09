@@ -1,7 +1,7 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const global = require('./config.json'); //Variables globales
 const fs = require('fs');
-import GitHub from 'github-api';
+const GitHub = require('github-api');
 
 module.exports = {
     //#region Lista
