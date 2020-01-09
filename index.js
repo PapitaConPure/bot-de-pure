@@ -48,12 +48,12 @@ const Global = sequelize.define('Global', {
 
 client.once('ready', () => {
     Global.sync();
-    async function conchetumare() {
+    /*async function conchetumare() {
         const tag = await Global.findAll({attributes: ['name']});
         const tagString = tag.map(t => t.name).join(', ') || 'No tags set.';
         console.log(`List of tags: ${tagString}`);
     }
-    conchetumare();
+    conchetumare();*/
 });
 
 client.on('ready', () => {
