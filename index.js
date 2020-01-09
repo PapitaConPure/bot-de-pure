@@ -26,30 +26,6 @@ for(const file of commandFiles) {
 	client.ComandosPure.set(command.name, command);
 }
 
-//Información de conexión
-const sequelize = new Sequelize('database', 'user', 'password', {
-	host: 'localhost', //https://github.com/PapitaConPure/bot-de-pure.git o https://bot-de-pure.herokuapp.com/
-	dialect: 'sqlite',
-	logging: false,
-	// SQLite only
-	storage: 'database.sqlite',
-});
-
-const Global = sequelize.define('Global', {
-    name: Sequelize.STRING,
-	description: Sequelize.TEXT,
-	/*username: Sequelize.STRING,
-	usage_count: {
-		type: Sequelize.INTEGER,
-		defaultValue: 0,
-		allowNull: false,
-	},*/
-});
-
-client.once('ready', () => {
-    Global.sync();
-});
-
 client.on('ready', () => {
 	console.log('Bot conectado y funcionando.');
     client.user.setActivity("UwU 24/7", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' });
