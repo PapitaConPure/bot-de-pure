@@ -1,7 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const global = require('./config.json'); //Variables globales
 const fs = require('fs');
-const GitHub = require('github-api');
 
 module.exports = {
     //#region Lista
@@ -222,6 +221,7 @@ module.exports = {
         fs.writeFile("config.json", JSON.stringify(global, null, 4), err => {
             if(err) console.error(err);
         });
+
         setTimeout(module.exports.saveState, (10 * 1000));
     },
     //#endregion
