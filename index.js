@@ -100,7 +100,7 @@ client.on('message', message => { //En caso de recibir un mensaje
 
     async function asd() {
         try {
-            const tag = await Tags.create({
+            const tag = await Global.create({
                 name: args[0],
                 description: args[1]
             });
