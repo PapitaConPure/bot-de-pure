@@ -229,7 +229,7 @@ module.exports = {
             if(err) console.error(err);
         });
         const uri = "mongodb+srv://PapaPure:EE2aDRLAwWLVFprw@bot-de-pure-fbz2w.gcp.mongodb.net/test?retryWrites=true&w=majority";
-        const mgc = new MongoClient(uri, { useUnifiedTopology: true, useNewUrlParser: true });
+        const mgc = new MongoClient(uri, { useNewUrlParser: true });
         mgc.connect((err, db) => {
             const collection = mgc.db('bot-de-pure').collection('config').insertOne({
                 'edi': 4//global.edi
