@@ -219,15 +219,9 @@ module.exports = {
 
     //#region Sistema
     saveState: function() {
-        /*fs.writeFile("config.json", JSON.stringify(global, null, 4), err => {
+        fs.writeFile("config.json", JSON.stringify(global, null, 4), err => {
             if(err) console.error(err);
-        });*/
-        const gh = new GitHub();
-        let repo = gh.getRepo('PapitaConPure', 'bot-de-pure');
-        repo.commit()
-        .then(() => console.log('Estado guardado.'))
-        .catch(() => console.log('Ha ocurrido un error al guardar el estado actual.'));
-
+        });
         setTimeout(module.exports.saveState, (10 * 1000));
     },
     //#endregion
