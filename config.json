@@ -2,10 +2,10 @@
     "p_drmk": "d!",
     "p_pure": "p!",
     "tiempo": "7200",
-    "edi": "3",
-    "tem": "tohas sin gorrito",
+    "edi": "4",
+    "tem": "tohas con pelo claro",
     "desc": "El Drawmaku es un juego similar a las charadas, en el que tendrás que adivinar el danmaku que dibujan los demás. ¡A revivir viejos traumas y maravillarnos con los fuegos artificiales!",
-    "desctem": "¡En esta ocasión, dibujaremos danmaku de tohas que no posean ningún gorro o sombrero! Como por ejemplo Reimu, Sakuya, Alice, Reisen, Mokou, Medicine y Kokoro. NO se permiten tohas con mantos como Keiki e Ichirin. SÍ se permiten tohas con moños de cualquier tamaño y sujetadores de pelo pequeños.",
+    "desctem": "¡Esta vez la temática será de danmaku de tohas (y haditas de stage) con pelo claro! Esto, por ejemplo, incluye a Sagume, Okina, Junko, Alice, Clownpiece, Yuuka y Lily, y excluye a Raiko, Wriggle, Meiling y Seiran. En resumen, está permitido de pelo castaño/verde claro en adelante.",
     "reglas": [
         "Pueden utilizar cualquier software o herramienta que les permita representar su danmaku",
         "¡Respeta tu turno en la lista!",

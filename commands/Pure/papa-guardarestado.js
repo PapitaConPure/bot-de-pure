@@ -16,7 +16,7 @@ module.exports = {
                 if(err) console.log(err);
             });
             message.channel.send(
-                ':floppy_disk: antes de iniciar el bot, puedes copiar el estado guardado y pegarlo en el archivo \`config.json\` de la carpeta del bot:\n',
+                ':floppy_disk: **archivo generado**. Guarda los datos en los archivos del proyecto especificados.\n',
                 { files: ["save.txt"] }
             );
         } else {
