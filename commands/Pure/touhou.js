@@ -163,6 +163,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 			case 'akyuu': arglist[i] = 'hieda_no_akyuu'; break;
 			case 'kasen': arglist[i] = 'ibaraki_kasen'; break;
 			case 'miyoi': arglist[i] = 'okunoda_miyoi'; break;
+			case 'tokiko': arglist[i] = 'tokiko_(touhou)'; break;
 			//#endregion
 		}
 	}
