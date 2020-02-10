@@ -17,7 +17,7 @@ async function dibujarBienvenida(msg) {
 	ctx.fillText(msg.member.displayName, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 125 - fontSize / 2);
 
 	ctx.beginPath();
-	ctx.arc(canvas.width, 300, 150, 0, Math.PI * 2, true);
+	ctx.arc(canvas.width / 2, 300, 150, 0, Math.PI * 2, true);
 	ctx.closePath();
 	ctx.clip();
 
