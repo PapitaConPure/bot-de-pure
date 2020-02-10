@@ -159,6 +159,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 			case 'sunny': arglist[i] = 'sunny_milk'; break;
 			case 'kosuzu': arglist[i] = 'motoori_kosuzu'; break;
 			case 'maribel': arglist[i] = 'maribel_hearn'; break;
+			case 'merry': arglist[i] = 'maribel_hearn'; break;
 			case 'renko': arglist[i] = 'usami_renko'; break;
 			case 'akyuu': arglist[i] = 'hieda_no_akyuu'; break;
 			case 'kasen': arglist[i] = 'ibaraki_kasen'; break;
