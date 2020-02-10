@@ -7,8 +7,14 @@ async function dibujarBienvenida(msg) {
     const ctx = canvas.getContext('2d');
 
     const fondo = await Canvas.loadImage('./fondo.png');
-    const avatar = await Canvas.loadImage(msg.member.user.displayAvatarURL/*member.user.displayAvatarURL*/);
     ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+
+	ctx.beginPath();
+	ctx.arc(125, 125, 100, 0, Math.PI * 2, true);
+	ctx.closePath();
+	ctx.clip();
+
+    const avatar = await Canvas.loadImage(msg.member.user.displayAvatarURL/*member.user.displayAvatarURL*/);
 	ctx.drawImage(avatar, 350, 200, 300, 300);
 
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
