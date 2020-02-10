@@ -93,7 +93,10 @@ client.on('message', message => { //En caso de recibir un mensaje
 client.on('guildMemberAdd', member => {
     const servidor = member.guild;
     let peoplecnt = servidor.members.filter(member => !member.user.bot).size;
-    servidor.channels.get(servidor.systemChannelID).send(`¡Se ha unido **${member.user.username}**!`);
+    servidor.channels.get(servidor.systemChannelID).send(
+        `¡Se ha unido **${member.user.username}**!\n` +
+        `*Ahora hay ${peoplecnt} miembros en el server.*`
+    );
 });
 
 client.login(token);
