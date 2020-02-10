@@ -90,8 +90,8 @@ client.on('message', message => { //En caso de recibir un mensaje
     if(global.cansay > 0) global.cansay--;
 });
 
-client.on('guildMemberAdd', miembro => {
-    
+client.on('guildMemberAdd', member => {
+    member.guild.channels.get('channelID').send(`¡Se ha unido **${member.nickname}**!`);
 });
 
 client.login(token);
