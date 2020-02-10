@@ -2,7 +2,7 @@ const Discord = require('discord.js'); //Integrar discord.js
 var global = require('../../config.json'); //Variables globales
 
 module.exports = {
-	name: 'papa-decir',
+	name: 'papa-invitar',
 	execute(message, args) {
         if(message.author.id === '423129757954211880') {
             message.channel.send(
