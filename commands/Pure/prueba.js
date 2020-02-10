@@ -14,7 +14,7 @@ async function dibujarBienvenida(msg) {
 	while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
 	ctx.font = `${fontSize}px sans-serif`;
 	ctx.fillStyle = '#ffffff';
-	ctx.fillText(msg.member.displayName, canvas.width / 2, 125 - fontSize / 2);
+	ctx.fillText(msg.member.displayName, canvas.width / 2 - ctx.measureText(Texto).width / 2, 20);
 
 	ctx.beginPath();
 	ctx.arc(500, 300, 150, 0, Math.PI * 2, true);
