@@ -10,7 +10,7 @@ async function dibujarBienvenida(msg) {
     ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 
 	ctx.beginPath();
-	ctx.arc(500, 350, 200, 0, Math.PI * 2, true);
+	ctx.arc(500, 350, 150, 0, Math.PI * 2, true);
 	ctx.closePath();
 	ctx.clip();
 
