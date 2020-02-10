@@ -15,7 +15,7 @@ async function dibujarBienvenida(msg) {
 module.exports = {
 	name: 'prueba',
 	execute(message, args) {
-        if(msg.author.id === '423129757954211880') dibujarBienvenida(message);
+        if(message.author.id === '423129757954211880') dibujarBienvenida(message);
         else message.channel.send(':closed_lock_with_key: Solo Papita con Puré puede usar este comando.');
     },
 };
