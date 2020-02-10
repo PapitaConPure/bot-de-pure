@@ -7,12 +7,12 @@ async function dibujarBienvenida(msg) {
     const ctx = canvas.getContext('2d');
 
     const fondo = await Canvas.loadImage('./fondo.png');
-    const avatar = await Canvas.loadImage(member.user.displayAvatarURL);
+    const avatar = await Canvas.loadImage(msg.member.user.displayAvatarURL/*member.user.displayAvatarURL*/);
     ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 	ctx.drawImage(avatar, 400, 200, 600, 400);
 
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
-    msg.channel.send(`Welcome to the server, ${msg.author.username}!`, imagen);
+    msg.channel.send(`Welcome to the server, ${msg.author.username/*member*/}!`, imagen);
 }
 
 module.exports = {
