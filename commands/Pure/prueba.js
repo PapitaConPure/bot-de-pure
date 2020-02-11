@@ -12,6 +12,10 @@ async function dibujarBienvenida(msg) {
     const Texto = msg.author.username/*member*/;
     let fontSize = 72;
 	while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
+    ctx.shadowOffsetX = 5;
+    ctx.shadowOffsetY = 5;
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = 'black';
 	ctx.font = `${fontSize}px sans-serif`;
 	ctx.fillStyle = '#ffffff';
 	ctx.fillText(msg.member.displayName, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 125 - fontSize / 2);
@@ -20,8 +24,10 @@ async function dibujarBienvenida(msg) {
 	ctx.arc(canvas.width / 2, 300, 150, 0, Math.PI * 2, true);
 	ctx.closePath();
 	ctx.clip();
-
     const avatar = await Canvas.loadImage(msg.member.user.displayAvatarURL/*member.user.displayAvatarURL*/);
+    ctx.shadowOffsetX = 8;
+    ctx.shadowOffsetY = 8;
+    ctx.shadowBlur = 20;
 	ctx.drawImage(avatar, canvas.width / 2 - 150, 150, 300, 300);
 
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
