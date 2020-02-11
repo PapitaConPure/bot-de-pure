@@ -12,15 +12,15 @@ async function dibujarBienvenida(msg) {
     //#endregion
 
     //#region Nombre del usuario
-    ctx.shadowOffsetX = shadowOffsetY = 3;
-    ctx.shadowBlur = 12;
+    ctx.shadowOffsetX = shadowOffsetY = 0;
+    ctx.shadowBlur = 8;
     ctx.shadowColor = 'black';
-    const Texto = msg.author.username/*member*/;
+    const Texto = msg.member.displayName;
     let fontSize = 72;
 	while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
 	ctx.font = `${fontSize}px sans-serif`;
 	ctx.fillStyle = '#ffffff';
-	ctx.fillText(msg.member.displayName, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 125 - fontSize / 2);
+	ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 125 - fontSize / 2);
     //#endregion
 
     //#region Dibujar sombra de foto de perfil
