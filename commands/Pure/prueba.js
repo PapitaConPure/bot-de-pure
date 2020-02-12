@@ -12,26 +12,27 @@ async function dibujarBienvenida(msg) {
     //#endregion
 
     //#region Texto
+    ctx.textBaseline = 'bottom';
     ctx.shadowOffsetX = shadowOffsetY = 2;
     ctx.shadowBlur = 10;
     ctx.shadowColor = 'black';
     ctx.fillStyle = '#ffffff';
-    { //Nombre del usuario
-        const Texto = msg.member.displayName;
-        let fontSize = 72;
-        while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
-        ctx.font = `bold ${fontSize}px sans-serif`;
-        ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 100 / 2);
-    }
-    { //Texto inferior
-        const Texto = `${msg.channel.guild.name}!`;
-        let fontSize = 120;
-        while(ctx.measureText(Texto).width > (canvas.width - 150)) fontSize -= 2;
-        ctx.font = `${fontSize}px sans-serif`;
-        ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - fontSize - 15);
-        ctx.font = `32px sans-serif`;
-        ctx.fillText('¡Bienvenido a', (canvas.width / 2) - (ctx.measureText('¡Bienvenido a').width / 2), canvas.height - fontSize - 30);
-    }
+    //Nombre del usuario
+    let Texto = msg.member.displayName;
+    let fontSize = 72;
+    while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
+    ctx.font = `bold ${fontSize}px sans-serif`;
+    ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 80);
+    
+    //Texto inferior
+    Texto = `${msg.channel.guild.name}!`;
+    let fontSize = 120;
+    while(ctx.measureText(Texto).width > (canvas.width - 150)) fontSize -= 2;
+    ctx.font = `${fontSize}px sans-serif`;
+    ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 15);
+    Texto = '¡Bienvenido a';
+    ctx.font = `48px sans-serif`;
+    ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - fontSize - 30);
     //#endregion
 
     //#region Dibujar sombra de foto de perfil
