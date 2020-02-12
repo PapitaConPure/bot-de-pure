@@ -12,15 +12,26 @@ async function dibujarBienvenida(msg) {
     //#endregion
 
     //#region Nombre del usuario
-    ctx.shadowOffsetX = shadowOffsetY = 0;
-    ctx.shadowBlur = 8;
+    ctx.shadowOffsetX = shadowOffsetY = 2;
+    ctx.shadowBlur = 10;
     ctx.shadowColor = 'black';
-    const Texto = msg.member.displayName;
-    let fontSize = 72;
-	while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
-	ctx.font = `${fontSize}px sans-serif`;
-	ctx.fillStyle = '#ffffff';
-	ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 125 - fontSize / 2);
+    ctx.fillStyle = '#ffffff';
+    { //Nombre del usuario
+        const Texto = msg.member.displayName;
+        let fontSize = 72;
+        while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
+        ctx.font = `${fontSize}px Arial Black`;
+        ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 125 - fontSize / 2);
+    }
+    { //Texto inferior
+        ctx.font = `32px sans-serif`;
+        ctx.fillText('¡Bienvenido a', (canvas.width / 2) - (ctx.measureText('¡Bienvenido a').width / 2), 125 - fontSize / 2);
+        const Texto = `${msg.channel.guild.name}!`;
+        let fontSize = 120;
+        while(ctx.measureText(Texto).width > (canvas.width - 150)) fontSize -= 2;
+        ctx.font = `${fontSize}px sans-serif`;
+        ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 125 - fontSize / 2);
+    }
     //#endregion
 
     //#region Dibujar sombra de foto de perfil
@@ -40,14 +51,12 @@ async function dibujarBienvenida(msg) {
 	ctx.drawImage(avatar, canvas.width / 2 - 150, 150, 300, 300);
 
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
-    let contwelcome;
-    msg.channel.send(contwelcome, imagen);
+    msg.channel.send('Llegó un weón.', imagen);
     if(msg.channel.guild.id === '654471968200065034')
         msg.channel.send(
-            'Prueba de Hourai Doll en ejecución.\n' +
-            '¡Bienvenido! Recuerda revisar el canal <#id de indicaciones aquí>.\n' +
-            'También, si lo deseas, puedes revisar los roles de <#id de canal de roles aquí> y pedirle alguno a algún moderador.\n' +
-            /*<@&654472238510112799>, */'¡alguien llegó! ¡Vengan a saludar!'
+            'Wena po conchetumare, recuerda revisar el canal <#671817759268536320> o te funamos <:HaniwaSmile:659872119995498507>\n' +
+            'También si quieres un rol de color revisa <#671831878902349824> y pídele el que te guste a alguno de los enfermos que trabajan aquí <:Mayuwu:654489124413374474>\n' +
+            'WENO YA PO CONCHESUMARE. <@&TODAVÍA NO654472238510112799>, vengan a saludar maricones <:marx:675439504982671370>'
         );
 }
 
