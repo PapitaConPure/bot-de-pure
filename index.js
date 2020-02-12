@@ -167,7 +167,7 @@ async function dibujarBienvenida(miembro) {
         }
     });
 }
-
+ 
 client.on('guildMemberAdd', member => {
     if(!member.user.bot) dibujarBienvenida(member);
     else member.guild.channels.get(servidor.systemChannelID).send(
