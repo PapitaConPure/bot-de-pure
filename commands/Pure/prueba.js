@@ -21,7 +21,7 @@ async function dibujarBienvenida(msg) {
         let fontSize = 72;
         while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
         ctx.font = `bold ${fontSize}px sans-serif`;
-        ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 16);
+        ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 100 / 2);
     }
     { //Texto inferior
         const Texto = `${msg.channel.guild.name}!`;
@@ -48,7 +48,7 @@ async function dibujarBienvenida(msg) {
 	ctx.closePath();
 	ctx.clip();
     const avatar = await Canvas.loadImage(msg.member.user.displayAvatarURL/*member.user.displayAvatarURL*/);
-	ctx.drawImage(avatar, canvas.width / 2 - 150, 150, 300, 300);
+	ctx.drawImage(avatar, canvas.width / 2 - 150, 100, 300, 300);
 
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
     msg.channel.send('Llegó un weón.', imagen).then(sent => {
