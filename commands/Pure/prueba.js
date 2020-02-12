@@ -40,14 +40,21 @@ async function dibujarBienvenida(msg) {
 	ctx.drawImage(avatar, canvas.width / 2 - 150, 150, 300, 300);
 
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
-    msg.channel.send(``, imagen);
+    let contwelcome;
+    if(msg.channel.guild.id === '654471968200065034')
+            msg.channel.send(
+                'Prueba de Hourai Doll en ejecución.\n' +
+                '¡Bienvenido! Recuerda revisar el canal <#id de indicaciones aquí>.' +
+                'También, si lo deseas, puedes revisar los roles de <#id de canal de roles aquí> y pedirle alguno a algún moderador.' +
+                '\\<@&654472238510112799>, ¡alguien llegó! ¡Vengan a saludar!'
+            );
+    msg.channel.send(contwelcome, imagen);
 }
 
 module.exports = {
 	name: 'prueba',
 	execute(message, args) {
         if(message.author.id === '423129757954211880') {
-            if(message.channel.guild.id === '654471968200065034') message.channel.send('Prueba de Hourai Doll; \\<@&654472238510112799>');
             dibujarBienvenida(message);
         } else message.channel.send(':closed_lock_with_key: Solo Papita con Puré puede usar este comando.');
     },
