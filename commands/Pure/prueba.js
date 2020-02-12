@@ -26,7 +26,7 @@ async function dibujarBienvenida(msg) {
     
     //Texto inferior
     Texto = `${msg.channel.guild.name}!`;
-    let fontSize = 120;
+    fontSize = 120;
     while(ctx.measureText(Texto).width > (canvas.width - 150)) fontSize -= 2;
     ctx.font = `${fontSize}px sans-serif`;
     ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 15);
