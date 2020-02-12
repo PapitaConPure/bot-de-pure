@@ -170,8 +170,8 @@ async function dibujarBienvenida(miembro) {
             canal.send(
                 '¡Bienvenido al servidor!\n' +
                 `*Ahora hay **${peoplecnt}** usuarios en el server.*`
-            );
-    });
+            ); 
+    }); 
 }
  
 client.on('guildMemberAdd', member => {
