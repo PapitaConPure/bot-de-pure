@@ -3,7 +3,7 @@ const Canvas = require('canvas');
 let global = require('../../config.json'); //Variables globales
 
 async function dibujarBienvenida(msg) {
-    const canvas = Canvas.createCanvas(850/*1200*/, 850/*750*/);
+    const canvas = Canvas.createCanvas(1275, 825);
     const ctx = canvas.getContext('2d');
 
     //#region Fondo
@@ -57,7 +57,7 @@ async function dibujarBienvenida(msg) {
             sent.channel.send(
                 'Wena po conchetumare, como estai. Porfa revisa el canal <#671817759268536320> o te funamos <:HaniwaSmile:659872119995498507>\n' +
                 'También si quieres un rol de color revisa <#671831878902349824> y pídele el que te guste a alguno de los enfermos que trabajan aquí <:Mayuwu:654489124413374474>\n' +
-                'WENO YA PO CONCHESUMARE. <@&TODAVÍA NO654472238510112799>, vengan a saludar maricones <:marx:675439504982671370>'
+                'WENO YA PO CONCHESUMARE. <@&654472238510112799>, vengan a saludar maricones <:marx:675439504982671370>'
             );
     });
 }
