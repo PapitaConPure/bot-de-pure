@@ -152,8 +152,8 @@ async function dibujarBienvenida(miembro) {
     //Mandar imagen + mensaje bonito
     const peoplecnt = 1 + servidor.members.filter(member => !member.user.bot).size;
     try {
-        canal.send('', imagen).then(sent => {
-            /*if(servidor.id === '654471968200065034') {
+        canal.send('', imagen);/*.then(sent => {
+            if(servidor.id === '654471968200065034') {
                 canal.send(
                     'Wena po conchetumare, como estai. Porfa revisa el canal <#671817759268536320> o te funamos <:HaniwaSmile:659872119995498507>\n' +
                     'También si quieres un rol de color revisa <#671831878902349824> y pídele el que te guste a alguno de los enfermos que trabajan aquí <:Mayuwu:654489124413374474>\n' +
@@ -172,8 +172,8 @@ async function dibujarBienvenida(miembro) {
                     '¡Bienvenido al servidor!\n' +
                     `*Ahora hay **${peoplecnt}** usuarios en el server.*`
                 );
-            }*/
-        });
+            }
+        });*/
     } catch(error) {
         console.log('Ha ocurrido un error al dar la bienvenida.');
         console.error(error);
