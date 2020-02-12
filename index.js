@@ -95,14 +95,14 @@ async function dibujarBienvenida(miembro) {
     const servidor = miembro.guild;
     const canal = servidor.channels.get(servidor.systemChannelID);
 
-    /*//Creación de imagen
+    //Creación de imagen
     const canvas = Canvas.createCanvas(1275, 825);
     const ctx = canvas.getContext('2d');
 
     const fondo = await Canvas.loadImage('./fondo.png');
     ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 
-    //Texto
+    /*//Texto
     ctx.textBaseline = 'bottom';
     ctx.shadowOffsetX = shadowOffsetY = 2;
     ctx.shadowBlur = 10;
@@ -140,12 +140,13 @@ async function dibujarBienvenida(miembro) {
 	ctx.clip();
     const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL);
 	ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
+    */
 
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
 
     //Mandar imagen + mensaje bonito
     const peoplecnt = 1 + servidor.members.filter(member => !member.user.bot).size;
-    canal.send('', imagen).then(sent => {*/
+    canal.send('', imagen).then(sent => {
         if(servidor.id === '654471968200065034') {
             canal.send(
                 'Wena po conchetumare, como estai. Porfa revisa el canal <#671817759268536320> o te funamos <:HaniwaSmile:659872119995498507>\n' +
@@ -158,7 +159,8 @@ async function dibujarBienvenida(miembro) {
                 `Welcome to the server **${miembro.displayName}**! / ¡Bienvenido/a al server **${miembro.displayName}**!\n\n` +
                 `**EN:** To fully enjoy the server, don't forget to get 1 of the 5 main roles in the following channel~\n` +
                 '**ES:** Para disfrutar totalmente del servidor, no olvides escoger 1 de los 5 roles principales en el siguiente canal~\n\n' +
-                '→ <#611753608601403393> ←'
+                '→ <#611753608601403393> ←\n\n' +
+                `*Ahora hay **${peoplecnt}** usuarios en el server.*`
             );
         } else {
             canal.send(
@@ -166,7 +168,7 @@ async function dibujarBienvenida(miembro) {
                 `*Ahora hay **${peoplecnt}** usuarios en el server.*`
             );
         }
-    //});
+    });
 }
  
 client.on('guildMemberAdd', member => {
