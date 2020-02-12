@@ -159,12 +159,18 @@ async function dibujarBienvenida(miembro) {
                 'WENO YA PO CONCHESUMARE. <@&654472238510112799>, vengan a saludar maricones <:marx:675439504982671370>\n' +
                 `*Por cierto, ahora hay **${peoplecnt}** aweonaos en el server.*`
             );
-        else {
+        else if(servidor.id === '611732083995443210')
+            canal.send(
+                `Welcome to the server, **${miembro.displayName}**! **/** ¡Bienvenido/a al server, **${miembro.displayName}**!\n` +
+                `**EN:** To fully enjoy the server, don't forget to get 1 of the 5 main roles in the following channel~` +
+                '**ES:** Para disfrutar totalmente del servidor, no olvides escoger 1 de los 5 roles principales en el siguiente canal~' +
+                '**__---> {<#611753608601403393>} <---__**'
+            );
+        else
             canal.send(
                 '¡Bienvenido al servidor!\n' +
                 `*Ahora hay **${peoplecnt}** usuarios en el server.*`
             );
-        }
     });
 }
  
