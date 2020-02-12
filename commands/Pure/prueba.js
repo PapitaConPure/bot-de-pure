@@ -3,7 +3,7 @@ const Canvas = require('canvas');
 let global = require('../../config.json'); //Variables globales
 
 async function dibujarBienvenida(msg) {
-    const canvas = Canvas.createCanvas(1200, 750);
+    const canvas = Canvas.createCanvas(850/*1200*/, 850/*750*/);
     const ctx = canvas.getContext('2d');
 
     //#region Fondo
@@ -52,7 +52,7 @@ async function dibujarBienvenida(msg) {
 	ctx.drawImage(avatar, canvas.width / 2 - 150, 100, 300, 300);
 
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
-    msg.channel.send('Llegó un weón.', imagen).then(sent => {
+    msg.channel.send('', imagen).then(sent => {
         if(sent.channel.guild.id === '654471968200065034')
             sent.channel.send(
                 'Wena po conchetumare, como estai. Porfa revisa el canal <#671817759268536320> o te funamos <:HaniwaSmile:659872119995498507>\n' +
@@ -65,8 +65,8 @@ async function dibujarBienvenida(msg) {
 module.exports = {
 	name: 'prueba',
 	execute(message, args) {
-        if(message.author.id === '423129757954211880') {
+        //if(message.author.id === '423129757954211880') {
             dibujarBienvenida(message);
-        } else message.channel.send(':closed_lock_with_key: Solo Papita con Puré puede usar este comando.');
+        //} else message.channel.send(':closed_lock_with_key: Solo Papita con Puré puede usar este comando.');
     },
 };
