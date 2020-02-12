@@ -28,10 +28,10 @@ async function dibujarBienvenida(msg) {
     Texto = `${msg.channel.guild.name}!`;
     fontSize = 120;
     while(ctx.measureText(Texto).width > (canvas.width - 150)) fontSize -= 2;
-    ctx.font = `${fontSize}px sans-serif`;
+    ctx.font = `bold ${fontSize}px sans-serif`;
     ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 15);
     Texto = '¡Bienvenido a';
-    ctx.font = `48px sans-serif`;
+    ctx.font = `bold 48px sans-serif`;
     ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - fontSize - 30);
     //#endregion
 
