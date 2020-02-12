@@ -44,12 +44,13 @@ async function dibujarBienvenida(msg) {
     //#endregion
 
     //Dibujar foto de perfil
+    const ycenter = (80 + (canvas.height - fontSize - 48 - 30)) / 2;
 	ctx.beginPath();
-	ctx.arc(canvas.width / 2, 250, 150, 0, Math.PI * 2, true);
+	ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
 	ctx.closePath();
 	ctx.clip();
     const avatar = await Canvas.loadImage(msg.member.user.displayAvatarURL/*member.user.displayAvatarURL*/);
-	ctx.drawImage(avatar, canvas.width / 2 - 150, 100, 300, 300);
+	ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
 
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
     msg.channel.send('', imagen).then(sent => {
@@ -65,8 +66,8 @@ async function dibujarBienvenida(msg) {
 module.exports = {
 	name: 'prueba',
 	execute(message, args) {
-        //if(message.author.id === '423129757954211880') {
+        if(message.author.id === '423129757954211880') {
             dibujarBienvenida(message);
-        //} else message.channel.send(':closed_lock_with_key: Solo Papita con Puré puede usar este comando.');
+        } else message.channel.send(':closed_lock_with_key: Solo Papita con Puré puede usar este comando.');
     },
 };
