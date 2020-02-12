@@ -157,19 +157,23 @@ async function dibujarBienvenida(miembro) {
                 'Wena po conchetumare, como estai. Porfa revisa el canal <#671817759268536320> o te funamos <:HaniwaSmile:659872119995498507>\n' +
                 'También si quieres un rol de color revisa <#671831878902349824> y pídele el que te guste a alguno de los enfermos que trabajan aquí <:Mayuwu:654489124413374474>\n' +
                 'WENO YA PO CONCHESUMARE. <@&654472238510112799>, vengan a saludar maricones <:marx:675439504982671370>\n' +
-                `*Por cierto, ahora hay **${peoplecnt + 1}** aweonaos en el server.*`
+                `*Por cierto, ahora hay **${peoplecnt}** aweonaos en el server.*`
             );
         else {
             canal.send(
                 '¡Bienvenido al servidor!\n' +
-                `*Ahora hay **${peoplecnt + 1}** usuarios en el server.*`
+                `*Ahora hay **${peoplecnt}** usuarios en el server.*`
             );
         }
     });
 }
 
 client.on('guildMemberAdd', member => {
-    dibujarBienvenida(member);
+    if(!member.user.bot) dibujarBienvenida(member);
+    else member.guild.channels.get(servidor.systemChannelID).send(
+        'Se acaba de unir un bot.\n' +
+        '***Beep boop, boop beep?***'
+    );
 });
 
 client.login(token);
