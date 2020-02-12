@@ -95,16 +95,14 @@ async function dibujarBienvenida(miembro) {
     const servidor = miembro.guild;
     const canal = servidor.channels.get(servidor.systemChannelID);
 
-    //#region Creación de imagen
+    /*//Creación de imagen
     const canvas = Canvas.createCanvas(1275, 825);
     const ctx = canvas.getContext('2d');
 
-    //#region Fondo
     const fondo = await Canvas.loadImage('./fondo.png');
     ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
-    //#endregion
 
-    //#region Texto
+    //Texto
     ctx.textBaseline = 'bottom';
     ctx.shadowOffsetX = shadowOffsetY = 2;
     ctx.shadowBlur = 10;
@@ -126,32 +124,28 @@ async function dibujarBienvenida(miembro) {
     Texto = '¡Bienvenid@ a';
     ctx.font = `bold 48px sans-serif`;
     ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - fontSize - 30);
-    //#endregion
 
-    //#region Dibujar sombra de foto de perfil
+    //Dibujar sombra de foto de perfil
     const ycenter = (80 + (canvas.height - fontSize - 48 - 30)) / 2;
     ctx.shadowOffsetX = shadowOffsetY = 8;
     ctx.shadowBlur = 20;
     ctx.fillStyle = '#36393f';
     ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
     ctx.fill();
-    //#endregion
 
-    //#region Dibujar foto de perfil
+    //Dibujar foto de perfil
 	ctx.beginPath();
 	ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
 	ctx.closePath();
 	ctx.clip();
     const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL);
 	ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
-    //#endregion
 
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
-    //#endregion
 
     //Mandar imagen + mensaje bonito
     const peoplecnt = 1 + servidor.members.filter(member => !member.user.bot).size;
-    canal.send('', imagen).then(sent => {
+    canal.send('', imagen).then(sent => {*/
         if(servidor.id === '654471968200065034') {
             canal.send(
                 'Wena po conchetumare, como estai. Porfa revisa el canal <#671817759268536320> o te funamos <:HaniwaSmile:659872119995498507>\n' +
@@ -172,7 +166,7 @@ async function dibujarBienvenida(miembro) {
                 `*Ahora hay **${peoplecnt}** usuarios en el server.*`
             );
         }
-    });
+    //});
 }
  
 client.on('guildMemberAdd', member => {
