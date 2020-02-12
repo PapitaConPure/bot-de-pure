@@ -90,8 +90,9 @@ client.on('message', message => { //En caso de recibir un mensaje
     if(global.cansay > 0) global.cansay--;
 });
 
-async function dibujarBienvenida(msg) {
-    const servidor = member.guild;
+async function dibujarBienvenida(miembro) {
+    const servidor = miembro.guild;
+    const canal = servidor.channels.get(servidor.systemChannelID);
 
     //#region Creación de imagen
     const canvas = Canvas.createCanvas(1275, 825);
@@ -109,14 +110,14 @@ async function dibujarBienvenida(msg) {
     ctx.shadowColor = 'black';
     ctx.fillStyle = '#ffffff';
     //Nombre del usuario
-    let Texto = msg.member.displayName;
+    let Texto = miembro.displayName;
     let fontSize = 72;
     while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
     ctx.font = `bold ${fontSize}px sans-serif`;
     ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 80);
     
     //Texto inferior
-    Texto = `${msg.channel.guild.name}!`;
+    Texto = `${miembro.guild}!`;
     fontSize = 120;
     while(ctx.measureText(Texto).width > (canvas.width - 150)) fontSize -= 2;
     ctx.font = `bold ${fontSize}px sans-serif`;
@@ -140,7 +141,7 @@ async function dibujarBienvenida(msg) {
 	ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
 	ctx.closePath();
 	ctx.clip();
-    const avatar = await Canvas.loadImage(msg.member.user.displayAvatarURL/*member.user.displayAvatarURL*/);
+    const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL);
 	ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
     //#endregion
 
@@ -149,16 +150,16 @@ async function dibujarBienvenida(msg) {
 
     //Mandar imagen + mensaje bonito
     const peoplecnt = 1 + servidor.members.filter(member => !member.user.bot).size;
-    msg.channel.send('', imagen).then(sent => {
-        if(server.id === '654471968200065034')
-            servidor.channels.get(servidor.systemChannelID).send(
+    canal.send('', imagen).then(sent => {
+        if(servidor.id === '654471968200065034')
+            canal.send(
                 'Wena po conchetumare, como estai. Porfa revisa el canal <#671817759268536320> o te funamos <:HaniwaSmile:659872119995498507>\n' +
                 'También si quieres un rol de color revisa <#671831878902349824> y pídele el que te guste a alguno de los enfermos que trabajan aquí <:Mayuwu:654489124413374474>\n' +
                 'WENO YA PO CONCHESUMARE. <@&654472238510112799>, vengan a saludar maricones <:marx:675439504982671370>'
                  `*Por cierto, ahora hay ${peoplecnt} aweonaos en el server.*`
             );
         else {
-            servidor.channels.get(servidor.systemChannelID).send(
+            canal.send(
                 'Wena po conchetumare, como estai. Porfa revisa el canal <#671817759268536320> o te funamos <:HaniwaSmile:659872119995498507>\n' +
                 'También si quieres un rol de color revisa <#671831878902349824> y pídele el que te guste a alguno de los enfermos que trabajan aquí <:Mayuwu:654489124413374474>\n' +
                 'WENO YA PO CONCHESUMARE. <@&654472238510112799>, vengan a saludar maricones <:marx:675439504982671370>'
