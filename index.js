@@ -123,7 +123,7 @@ async function dibujarBienvenida(miembro) {
     while(ctx.measureText(Texto).width > (canvas.width - 150)) fontSize -= 2;
     ctx.font = `bold ${fontSize}px sans-serif`;
     ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 15);
-    Texto = '¡Bienvenido a';
+    Texto = '¡Bienvenid@ a';
     ctx.font = `bold 48px sans-serif`;
     ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - fontSize - 30);
     //#endregion
@@ -156,7 +156,7 @@ async function dibujarBienvenida(miembro) {
             canal.send(
                 'Wena po conchetumare, como estai. Porfa revisa el canal <#671817759268536320> o te funamos <:HaniwaSmile:659872119995498507>\n' +
                 'También si quieres un rol de color revisa <#671831878902349824> y pídele el que te guste a alguno de los enfermos que trabajan aquí <:Mayuwu:654489124413374474>\n' +
-                'WENO YA PO CONCHESUMARE. <@&654472238510112799>, vengan a saludar maricones <:marx:675439504982671370>'
+                'WENO YA PO CONCHESUMARE. <@&654472238510112799>, vengan a saludar maricones <:marx:675439504982671370>\n' +
                 `*Por cierto, ahora hay **${peoplecnt + 1}** aweonaos en el server.*`
             );
         else {
