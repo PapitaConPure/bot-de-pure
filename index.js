@@ -162,8 +162,8 @@ async function dibujarBienvenida(miembro) {
         } else if(servidor.id === '611732083995443210') {
             canal.send(
                 `Welcome to the server! **/** ¡Bienvenido/a al server!\n\n` +
-                `**EN:** To fully enjoy the server, don't forget to get 1 of the 5 main roles in the following channel~` +
-                '**ES:** Para disfrutar totalmente del servidor, no olvides escoger 1 de los 5 roles principales en el siguiente canal~' +
+                `**EN:** To fully enjoy the server, don't forget to get 1 of the 5 main roles in the following channel~\n` +
+                '**ES:** Para disfrutar totalmente del servidor, no olvides escoger 1 de los 5 roles principales en el siguiente canal~\n' +
                 '**__---> {<#611753608601403393>} <---__**'
             );
         } else {
