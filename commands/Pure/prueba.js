@@ -36,21 +36,22 @@ async function dibujarBienvenida(msg) {
     //#endregion
 
     //#region Dibujar sombra de foto de perfil
+    const ycenter = (80 + (canvas.height - fontSize - 48 - 30)) / 2;
     ctx.shadowOffsetX = shadowOffsetY = 8;
     ctx.shadowBlur = 20;
     ctx.fillStyle = '#36393f';
-    ctx.arc(canvas.width / 2, 250, 150, 0, Math.PI * 2, true);
+    ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
     ctx.fill();
     //#endregion
 
-    //Dibujar foto de perfil
-    const ycenter = (80 + (canvas.height - fontSize - 48 - 30)) / 2;
+    //#region Dibujar foto de perfil
 	ctx.beginPath();
 	ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
 	ctx.closePath();
 	ctx.clip();
     const avatar = await Canvas.loadImage(msg.member.user.displayAvatarURL/*member.user.displayAvatarURL*/);
 	ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
+    //#endregion
 
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
     msg.channel.send('', imagen).then(sent => {
