@@ -41,14 +41,14 @@ async function dibujarBienvenida(msg) {
 
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
     let contwelcome;
-    if(msg.channel.guild.id === '654471968200065034')
-            msg.channel.send(
-                'Prueba de Hourai Doll en ejecución.\n' +
-                '¡Bienvenido! Recuerda revisar el canal <#id de indicaciones aquí>.' +
-                'También, si lo deseas, puedes revisar los roles de <#id de canal de roles aquí> y pedirle alguno a algún moderador.' +
-                '\\<@&654472238510112799>, ¡alguien llegó! ¡Vengan a saludar!'
-            );
     msg.channel.send(contwelcome, imagen);
+    if(msg.channel.guild.id === '654471968200065034')
+        msg.channel.send(
+            'Prueba de Hourai Doll en ejecución.\n' +
+            '¡Bienvenido! Recuerda revisar el canal <#id de indicaciones aquí>.\n' +
+            'También, si lo deseas, puedes revisar los roles de <#id de canal de roles aquí> y pedirle alguno a algún moderador.\n' +
+            /*<@&654472238510112799>, */'¡alguien llegó! ¡Vengan a saludar!'
+        );
 }
 
 module.exports = {
