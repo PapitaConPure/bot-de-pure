@@ -47,7 +47,7 @@ module.exports = {
 	name: 'prueba',
 	execute(message, args) {
         if(message.author.id === '423129757954211880') {
-            if(message.channel.guild.id === '654471968200065034') message.channel.send('<@&654472238510112799>');
+            if(message.channel.guild.id === '654471968200065034') message.channel.send('Prueba de Hourai Doll; \\<@&654472238510112799>');
             dibujarBienvenida(message);
         } else message.channel.send(':closed_lock_with_key: Solo Papita con Puré puede usar este comando.');
     },
