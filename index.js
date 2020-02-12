@@ -102,7 +102,7 @@ async function dibujarBienvenida(miembro) {
     const fondo = await Canvas.loadImage('./fondo.png');
     ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 
-    /*//Texto
+    //Texto
     ctx.textBaseline = 'bottom';
     ctx.shadowOffsetX = shadowOffsetY = 2;
     ctx.shadowBlur = 10;
@@ -125,7 +125,7 @@ async function dibujarBienvenida(miembro) {
     ctx.font = `bold 48px sans-serif`;
     ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - fontSize - 30);
 
-    //Dibujar sombra de foto de perfil
+    /*//Dibujar sombra de foto de perfil
     const ycenter = (80 + (canvas.height - fontSize - 48 - 30)) / 2;
     ctx.shadowOffsetX = shadowOffsetY = 8;
     ctx.shadowBlur = 20;
