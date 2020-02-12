@@ -164,8 +164,8 @@ async function dibujarBienvenida(miembro) {
                 canal.send(
                     `Welcome to the server! **/** ¡Bienvenido/a al server!\n\n` +
                     `**EN:** To fully enjoy the server, don't forget to get 1 of the 5 main roles in the following channel~\n` +
-                    '**ES:** Para disfrutar totalmente del servidor, no olvides escoger 1 de los 5 roles principales en el siguiente canal~\n' +
-                    '**__---> {<#611753608601403393>} <---__**'
+                    '**ES:** Para disfrutar totalmente del servidor, no olvides escoger 1 de los 5 roles principales en el siguiente canal~\n\n'/* +
+                    '**__---> {<#611753608601403393>} <---__**'*/
                 );
             /*} else {
                 canal.send(
