@@ -170,7 +170,7 @@ async function dibujarBienvenida(miembro) {
  
 client.on('guildMemberAdd', member => {
     if(!member.user.bot) dibujarBienvenida(member);
-    else member.guild.channels.get(servidor.systemChannelID).send(
+    else member.guild.channels.get(member.guild.systemChannelID).send(
         'Se acaba de unir un bot.\n' +
         '***Beep boop, boop beep?***'
     );
