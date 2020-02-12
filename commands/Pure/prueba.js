@@ -27,7 +27,7 @@ async function dibujarBienvenida(msg) {
     ctx.shadowOffsetX = shadowOffsetY = 8;
     ctx.shadowBlur = 20;
     ctx.fillStyle = '#36393f';
-    ctx.arc(50, 50, 50, 0, Math.PI * 2, true);
+    ctx.arc(canvas.width / 2, 300, 150, 0, Math.PI * 2, true);
     ctx.fill();
     //#endregion
 
