@@ -152,19 +152,17 @@ async function dibujarBienvenida(miembro) {
     //Mandar imagen + mensaje bonito
     const peoplecnt = 1 + servidor.members.filter(member => !member.user.bot).size;
     canal.send('', imagen).then(sent => {
-        if(servidor.id === '654471968200065034')
+        if(servidor.guild.id === '654471968200065034')
             canal.send(
                 'Wena po conchetumare, como estai. Porfa revisa el canal <#671817759268536320> o te funamos <:HaniwaSmile:659872119995498507>\n' +
                 'También si quieres un rol de color revisa <#671831878902349824> y pídele el que te guste a alguno de los enfermos que trabajan aquí <:Mayuwu:654489124413374474>\n' +
                 'WENO YA PO CONCHESUMARE. <@&654472238510112799>, vengan a saludar maricones <:marx:675439504982671370>'
-                 `*Por cierto, ahora hay ${peoplecnt} aweonaos en el server.*`
+                `*Por cierto, ahora hay ${peoplecnt} aweonaos en el server y ${servidor.members.size - peoplecnt} weones metálicos.*`
             );
         else {
             canal.send(
-                'Wena po conchetumare, como estai. Porfa revisa el canal <#671817759268536320> o te funamos <:HaniwaSmile:659872119995498507>\n' +
-                'También si quieres un rol de color revisa <#671831878902349824> y pídele el que te guste a alguno de los enfermos que trabajan aquí <:Mayuwu:654489124413374474>\n' +
-                'WENO YA PO CONCHESUMARE. <@&654472238510112799>, vengan a saludar maricones <:marx:675439504982671370>'
-                 `*Por cierto, ahora hay ${peoplecnt} aweonaos en el server.*`
+                '¡Bienvenido al servidor!\n' +
+                `*Ahora hay **${peoplecnt}** (**+${servidor.members.size - peoplecnt}** :robot:) usuarios en el server.*`
             );
         }
     });
