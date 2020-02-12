@@ -11,7 +11,7 @@ async function dibujarBienvenida(msg) {
     ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
     //#endregion
 
-    //#region Nombre del usuario
+    //#region Texto
     ctx.shadowOffsetX = shadowOffsetY = 2;
     ctx.shadowBlur = 10;
     ctx.shadowColor = 'black';
@@ -20,7 +20,7 @@ async function dibujarBienvenida(msg) {
         const Texto = msg.member.displayName;
         let fontSize = 72;
         while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
-        ctx.font = `${fontSize}px Arial Black`;
+        ctx.font = `bold ${fontSize}px sans-serif`;
         ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 16);
     }
     { //Texto inferior
@@ -44,7 +44,7 @@ async function dibujarBienvenida(msg) {
 
     //Dibujar foto de perfil
 	ctx.beginPath();
-	ctx.arc(canvas.width / 2, 300, 150, 0, Math.PI * 2, true);
+	ctx.arc(canvas.width / 2, 250, 150, 0, Math.PI * 2, true);
 	ctx.closePath();
 	ctx.clip();
     const avatar = await Canvas.loadImage(msg.member.user.displayAvatarURL/*member.user.displayAvatarURL*/);
