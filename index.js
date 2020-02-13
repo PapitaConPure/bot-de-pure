@@ -125,7 +125,7 @@ async function dibujarBienvenida(miembro) {
     ctx.font = `bold 48px sans-serif`;
     ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - fontSize - 30);
 
-    /*//Dibujar sombra de foto de perfil
+    //Dibujar sombra de foto de perfil
     const ycenter = (80 + (canvas.height - fontSize - 48 - 30)) / 2;
     ctx.shadowOffsetX = shadowOffsetY = 8;
     ctx.shadowBlur = 20;
@@ -139,7 +139,7 @@ async function dibujarBienvenida(miembro) {
 	ctx.closePath();
 	ctx.clip();
     const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL);
-	ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);*/
+	ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
 
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
 
