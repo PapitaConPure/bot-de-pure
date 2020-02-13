@@ -116,7 +116,8 @@ async function dibujarBienvenida(miembro) {
     ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 80);
     
     //Texto inferior
-    Texto = `${servidor.name}!`;
+    if(servidor.id === '611732083995443210') Texto = 'Animal Realm';
+    else Texto = `${servidor.name}!`;
     fontSize = 120;
     while(ctx.measureText(Texto).width > (canvas.width - 150)) fontSize -= 2;
     ctx.font = `bold ${fontSize}px sans-serif`;
