@@ -109,14 +109,14 @@ async function dibujarBienvenida(miembro) {
     ctx.shadowColor = 'black';
     ctx.fillStyle = '#ffffff';
     //Nombre del usuario
-    let Texto = miembro.displayName;
+    let Texto = 'Prueba'/*`${miembro.displayName}`*/;
     let fontSize = 72;
     while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
     ctx.font = `bold ${fontSize}px sans-serif`;
     ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 80);
     
     //Texto inferior
-    Texto = `${miembro.guild}!`;
+    Texto = 'Prueba 2'/*`${servidor}!`*/;
     fontSize = 120;
     while(ctx.measureText(Texto).width > (canvas.width - 150)) fontSize -= 2;
     ctx.font = `bold ${fontSize}px sans-serif`;
@@ -139,8 +139,7 @@ async function dibujarBienvenida(miembro) {
 	ctx.closePath();
 	ctx.clip();
     const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL);
-	ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
-    */
+	ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);*/
 
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
 
