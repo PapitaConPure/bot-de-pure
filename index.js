@@ -109,7 +109,7 @@ async function dibujarBienvenida(miembro) {
     ctx.shadowColor = 'black';
     ctx.fillStyle = '#ffffff';
     //Nombre del usuario
-    let Texto = 'Prueba'/*`${miembro.displayName}`*/;
+    let Texto = `${miembro.displayName}`;
     let fontSize = 72;
     while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
     ctx.font = `bold ${fontSize}px sans-serif`;
