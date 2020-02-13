@@ -184,4 +184,74 @@ client.on('guildMemberAdd', member => {
     }
 });
 
+async function dibujarDespedida(miembro) {
+    const servidor = miembro.guild;
+    const canal = servidor.channels.get(servidor.systemChannelID);
+
+    //Creación de imagen
+    const canvas = Canvas.createCanvas(1500, 900);
+    const ctx = canvas.getContext('2d');
+
+    const fondo = await Canvas.loadImage('./fondo2.png');
+    ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+
+    //Texto
+    ctx.textBaseline = 'bottom';
+    ctx.shadowOffsetX = shadowOffsetY = 2;
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = 'black';
+    ctx.fillStyle = '#ffffff';
+    //Nombre del usuario
+    let Texto = `Adiós, ${miembro.displayName}`;
+    let fontSize = 72;
+    while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
+    ctx.font = `bold ${fontSize}px sans-serif`;
+    ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 40);
+
+    //Dibujar sombra de foto de perfil
+    const ycenter = 40 + 150;
+    ctx.shadowOffsetX = shadowOffsetY = 8;
+    ctx.shadowBlur = 20;
+    ctx.fillStyle = '#36393f';
+    ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
+    ctx.fill();
+
+    //Dibujar foto de perfil
+	ctx.beginPath();
+	ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
+	ctx.closePath();
+	ctx.clip();
+    const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL);
+	ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
+
+    const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
+
+    //Mandar imagen + mensaje bonito
+    const peoplecnt = 1 + servidor.members.filter(member => !member.user.bot).size;
+    canal.send('', imagen).then(sent => {
+        if(servidor.id === '654471968200065034') {
+            canal.send(
+                'Nooooo po csm, perdimo otro weón <:GatoSad:669332507942060042>' +
+                `*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
+            );
+        } else {
+            canal.send(
+                `*Ahora hay **${peoplecnt}** usuarios en el server.*`
+            );
+        }
+    });
+}
+
+client.on('guildMemberRemove', member => {
+    try {
+        /*if(!member.user.bot)*/ dibujarDespedida(member);
+        /*else member.guild.channels.get(member.guild.systemChannelID).send(
+            `**${miembro.displayName}** ya no es parte de la pandilla de bots de este servidor :[\n`
+        );*/
+    } catch(error) {
+        console.log('Ha ocurrido un error al dar la despedida.');
+        console.error(error);
+    }
+});
+
 client.login(token);
