@@ -13,7 +13,7 @@ module.exports = {
 				}
 			});
         } else {
-            message.channel.send('*Nisiquiera lo intentes...*');
+            message.channel.send('*Nisiquiera lo intentes.*');
             return;
         }
     },
