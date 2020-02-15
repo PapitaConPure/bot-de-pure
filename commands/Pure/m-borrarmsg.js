@@ -14,7 +14,7 @@ module.exports = {
 				message.channel.send(':warning: debes especificar el número de mensajes a borrar.');
 				return;
 			}
-			message.channel.bulkDelete(5);
+			message.channel.bulkDelete(args[0]);
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR MENSAJES** (MANAGE_MESSAGES)* para usar este comando.');
     },
 };
