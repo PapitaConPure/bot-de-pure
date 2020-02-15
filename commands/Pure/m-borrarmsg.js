@@ -5,7 +5,8 @@ module.exports = {
 	name: 'm-borrarmsg',
 	aliases: [
 		'm-borrar',
-        'm-deletemsg', 'm-delete'
+        'm-deletemsg', 'm-delete',
+        'm-del', 'm-d', 
     ],
 	execute(message, args) {
 		if(message.member.hasPermission('MANAGE_MESSAGES', false, true, true)) {
