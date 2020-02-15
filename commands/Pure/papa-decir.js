@@ -6,8 +6,12 @@ module.exports = {
 	execute(message, args) {
         if(message.author.id === '423129757954211880') {
             if(args.length > 0) {
-                var sentence;
+                let sentence;
                 sentence = args[0];
+                if(args[0] === 'del') {
+                    sentence = '';
+                    message.delete();
+                }
                 for(var i = 1; i < args.length; i++) sentence += ' ' + args[i];
                 global.cansay = 2; 
                 message.channel.send(sentence);

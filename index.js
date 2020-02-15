@@ -170,19 +170,6 @@ async function dibujarBienvenida(miembro) {
         }
     });
 }
- 
-client.on('guildMemberAdd', member => {
-    try {
-        if(!member.user.bot) dibujarBienvenida(member);
-        else member.guild.channels.get(member.guild.systemChannelID).send(
-            'Se acaba de unir un bot.\n' +
-            '***Beep boop, boop beep?***'
-        );
-    } catch(error) {
-        console.log('Ha ocurrido un error al dar la bienvenida.');
-        console.error(error);
-    }
-});
 
 async function dibujarDespedida(miembro) {
     const servidor = miembro.guild;
@@ -241,13 +228,26 @@ async function dibujarDespedida(miembro) {
         }
     });
 }
+ 
+client.on('guildMemberAdd', member => {
+    try {
+        if(!member.user.bot) dibujarBienvenida(member);
+        else member.guild.channels.get(member.guild.systemChannelID).send(
+            'Se acaba de unir un bot.\n' +
+            '***Beep boop, boop beep?***'
+        );
+    } catch(error) {
+        console.log('Ha ocurrido un error al dar la bienvenida.');
+        console.error(error);
+    }
+});
 
 client.on('guildMemberRemove', member => {
     try {
-        /*if(!member.user.bot)*/ dibujarDespedida(member);
-        /*else member.guild.channels.get(member.guild.systemChannelID).send(
+        if(!member.user.bot) dibujarDespedida(member);
+        else member.guild.channels.get(member.guild.systemChannelID).send(
             `**${miembro.displayName}** ya no es parte de la pandilla de bots de este servidor :[\n`
-        );*/
+        );
     } catch(error) {
         console.log('Ha ocurrido un error al dar la despedida.');
         console.error(error);
