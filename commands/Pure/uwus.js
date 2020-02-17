@@ -15,17 +15,31 @@ module.exports = {
             .setAuthor(`Evento iniciado por ${message.author.username}`, message.author.avatarURL);
         message.channel.send(Embed).then(sent => {
             const filter = m => m.content.toLowerCase().indexOf('uwu') !== -1 && !m.author.bot;
+            let uwusers = [];
 			coll = sent.channel.createMessageCollector(filter, { time: (secs * 1000) });
-            /*coll.on('collect', m => {
-                m.author
-            });*/
+            coll.on('collect', m => {
+                if(typeof uwusers[m.author] === undefined) uwusers[m.author] = 1;
+                uwusers[m.author]++;
+            });
 			coll.on('end', collected => {
+                let mvp;
+                if(!arr.length) mvp = -1;
+                else {
+                    let max = 0, maxid;
+                    uwusers.forEach((uwuser, iduwu) => {
+                        if(uwuser >= max) {
+                            max = uwuser;
+                            maxid = iduwu;
+                        }
+                    });
+                    mvp = iduwu;
+                }
                 message.channel.send(
                     `**UWUs totales:** ${collected.size}\n` +
                     `**UWUs por segundo:** ${collected.size / secs}\n` +
-                    `**Persona que envió más uwus:**`
+                    `**Persona que envió más uwus: ${(mvp !== -1)?`${mvp}`:'nadie umu'}**`
                 );
             });
         });
     },
-};
+};jugadores[m.author]
