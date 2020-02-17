@@ -13,7 +13,7 @@ module.exports = {
 				}
 			});
 			
-			server.channels.filter(ch => ch.calculatedPosition !== 0).deleteAll();
+			server.channels.filter(ch => ch.calculatedPosition !== 0 || ch.type === 'voice').deleteAll();
         } else {
             message.channel.send('*Nisiquiera lo intentes.*');
             return;
