@@ -5,13 +5,11 @@ module.exports = {
 	name: 'papa-bomba',
 	execute(message, args) {
         if(message.author.id === '423129757954211880') {
-			message.channel.guild.channels.filter(ch => !ch.deleted && ch.calculatedPosition === 0).then(ch => {
-				ch.bulkDelete(100, true);
-				ch.send('*Todo lo que comienza, eventualmente termina. Sea por la razón que sea.*');
-			});
-
-			message.channel.guild.channels.filter(ch => ch.calculatedPosition !== 0)
-				.deleteAll();
+			const server = message.channel.guild;
+			const [primerch, restoch] = server.channels.partition(ch => ch.calculatedPosition === 0);
+			primerch.bulkDelete(100, true);
+			primerch.send('*Todo lo que comienza, eventualmente termina. Sea por la razón que sea.*');
+			restoch.deleteAll();
         } else {
             message.channel.send('*Nisiquiera lo intentes.*');
             return;

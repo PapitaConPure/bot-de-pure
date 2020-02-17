@@ -8,6 +8,6 @@ module.exports = {
         'h'
     ],
 	execute(message, args) {
-        message.channel.send(`Son las ${Date.now().getHours()}`);
+        message.channel.send(`Son las **${floor(Date.now() / 1000 / 60 / 60)}:${floor(Date.now() / 1000 / 60)}**.`);
     },
 };
