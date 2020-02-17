@@ -18,8 +18,8 @@ module.exports = {
             let uwusers = [];
 			coll = sent.channel.createMessageCollector(filter, { time: (secs * 1000) });
             coll.on('collect', m => {
-                if(typeof uwusers[m.author] === undefined) uwusers[m.author] = 1;
-                uwusers[m.author]++;
+                if(typeof uwusers[m.author.id] === undefined) uwusers[m.author.id] = 1;
+                uwusers[m.author.id]++;
             });
 			coll.on('end', collected => {
                 let mvp;
@@ -37,9 +37,9 @@ module.exports = {
                 message.channel.send(
                     `**UWUs totales:** ${collected.size}\n` +
                     `**UWUs por segundo:** ${collected.size / secs}\n` +
-                    `**Persona que envió más uwus: ${(mvp !== -1)?`${mvp}`:'nadie umu'}**`
+                    `**Persona que envió más uwus: ${(mvp !== -1)?`${Client.fetchUser(mvp).username}`:'nadie umu'}**`
                 );
             });
         });
     },
-};jugadores[m.author]
+};
