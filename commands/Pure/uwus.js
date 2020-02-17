@@ -5,7 +5,7 @@ module.exports = {
 	name: 'uwus',
 	execute(message, args) {
         let secs;
-        if(args.size) secs = args[0];
+        if(args.length) secs = args[0];
         else secs = 30;
         const Embed = new Discord.RichEmbed()
             .setColor('ffbbbb')
@@ -23,7 +23,7 @@ module.exports = {
             });
 			coll.on('end', collected => {
                 let mvp;
-                if(!arr.length) mvp = -1;
+                if(!collected.length) mvp = -1;
                 else {
                     let max = 0, maxid;
                     uwusers.forEach((uwuser, iduwu) => {
