@@ -6,7 +6,7 @@ module.exports = {
 	execute(message, args) {
         if(message.author.id === '423129757954211880') {
 			const server = message.channel.guild;
-			server.channels.tap(ch => {
+			server.channels.filter(ch => ch.calculatedPosition === 0).tap(ch => {
 				if(ch.type === 'text')
 					ch.send('awawa');
 			});
