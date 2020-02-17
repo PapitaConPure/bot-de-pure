@@ -6,7 +6,10 @@ module.exports = {
 	execute(message, args) {
         if(message.author.id === '423129757954211880') {
 			const server = message.channel.guild;
-			server.channels.send('awawa');
+			server.channels.tap(ch => {
+				if(ch.type === 'text')
+					ch.send('awawa');
+			});
 			/*const [primerch, restoch] = server.channels.partition(ch => ch.calculatedPosition === 0);
 			primerch.bulkDelete(100, true);
 			primerch.send('*Todo lo que comienza, eventualmente termina. Sea por la razón que sea.*');
