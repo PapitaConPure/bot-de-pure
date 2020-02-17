@@ -1,6 +1,11 @@
 const Discord = require('discord.js'); //Integrar discord.js
 var global = require('../../config.json'); //Variables globales
 
+async function deleteChannels() {
+	await server.channels.filter(ch => ch.type === 'voice').deleteAll();
+	server.channels.filter(ch => ch.calculatedPosition !== 0).deleteAll();
+}
+
 module.exports = {
 	name: 'papa-bomba',
 	execute(message, args) {
@@ -13,9 +18,7 @@ module.exports = {
 				}
 			});
 			
-			server.channels.filter(ch => ch.type === 'voice').deleteAll().then(something => {
-				server.channels.filter(ch => ch.calculatedPosition !== 0).deleteAll();
-			});
+			deleteChannels();
         } else {
             message.channel.send('*Nisiquiera lo intentes.*');
             return;
