@@ -14,7 +14,7 @@ module.exports = {
             .addField('Duración del evento', `**${secs}** segundos.`)
             .setAuthor(`Evento iniciado por ${message.author.username}`, message.author.avatarURL);
         message.channel.send(Embed).then(sent => {
-            const filter = m => m.content.toLowerCase().indexOf('uwu') && !m.author.bot;
+            const filter = m => m.content.toLowerCase().indexOf('uwu') !== -1 && !m.author.bot;
 			coll = sent.channel.createMessageCollector(filter, { time: (secs * 1000) });
             /*coll.on('collect', m => {
                 m.author
