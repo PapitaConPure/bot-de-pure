@@ -8,7 +8,9 @@ module.exports = {
         'h'
     ],
 	execute(message, args) {
-        const segundos = new Date(Date.now()).getSeconds();
-        message.channel.send(`Son las **${segundos / 3600}:${segundos / 60}**.`);
+        const horas = new Date.getHours();
+        const minutos = new Date.getMinutes();
+        const segundos = new Date.getSeconds();
+        message.channel.send(`Son las **${horas}:${minutos}:${segundos}**.`);
     },
 };
