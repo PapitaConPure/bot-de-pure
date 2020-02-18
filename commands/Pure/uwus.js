@@ -1,6 +1,4 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const { Client, RichEmbed } = require('discord.js'); //Seguir integrando discord.js (?
-const client = new Discord.Client(); //Cliente de bot
 const global = require('../../config.json'); //Variables globales
 
 module.exports = {
@@ -40,11 +38,9 @@ module.exports = {
                 message.channel.send(
                     `**UWUs totales:** ${collected.size}\n` +
                     `**UWUs por segundo:** ${collected.size / secs}\n` +
-                    `**Persona que envió más uwus: ${(mvp !== -1)?`${client.fetchUser(mvp).username}`:'nadie umu'}**`
+                    `**Persona que envió más uwus: ${(mvp !== -1)?`<@${mvp}>`:'nadie umu'}**`
                 );
             });
         });
     },
 };
-
-client.login('NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY');
