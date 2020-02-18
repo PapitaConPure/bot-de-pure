@@ -23,7 +23,7 @@ module.exports = {
                     if(!uwusers.hasOwnProperty(`${m.author.id}`)) { uwusers[m.author.id] = 1; }
                     else uwusers[m.author.id]++;
                     ultimuwu = m.author.id;
-                } else coll.end();
+                } else coll.stop();
             });
 			coll.on('end', collected => {
                 let mvp;
