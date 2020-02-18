@@ -27,7 +27,9 @@ module.exports = {
                 let mvp;
                 let auwus = Object.entries(uwusers);
                 let max = 0, maxid = -1;
+                console.log(auwus);
                 for(let uwuser of auwus) {
+                    console.log(`${uwuser[0]}: ${uwuser[1]}`);
                     if(uwuser[1] >= max) {
                         maxid = uwuser[0];
                         max = uwuser[1];
