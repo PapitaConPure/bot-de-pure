@@ -30,15 +30,12 @@ module.exports = {
                 let auwus = Object.entries(uwusers);
                 let max = 0, maxid = -1;
                 for(let uwuser of auwus) {
-                    console.log(`${uwuser[0]}: ${uwuser[1]}`);
                     if(uwuser[1] >= max) {
                         maxid = uwuser[0];
                         max = uwuser[1];
-                        console.log(`Procesado ${uwuser[1]} de ${uwuser[0]}`);
                     }
                 }
                 mvp = maxid;
-                console.log(mvp);
                 message.channel.send(
                     `**UWUs totales:** ${collected.size}\n` +
                     `**UWUs por segundo:** ${collected.size / secs}\n` +
