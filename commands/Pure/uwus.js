@@ -36,6 +36,7 @@ module.exports = {
                     }
                 }
                 mvp = maxid;
+                console.log(mvp);
                 message.channel.send(
                     `**UWUs totales:** ${collected.size}\n` +
                     `**UWUs por segundo:** ${collected.size / secs}\n` +
