@@ -19,20 +19,20 @@ module.exports = {
 			coll = sent.channel.createMessageCollector(filter, { time: (secs * 1000) });
             coll.on('collect', m => {
                 if(typeof uwusers[m.author.id] === undefined) uwusers[m.author.id] = 1;
-                uwusers[m.author.id]++;
+                else uwusers[m.author.id]++;
+                m.channel.send(`${m.author.id}: ${uwusers[m.author.id]}`);
             });
 			coll.on('end', collected => {
                 let mvp;
-                if(!collected.length) mvp = -1;
-                else {
-                    let max = 0, maxid;
+                if(uwusers.length) {
+                let max = 0, maxid;
                     uwusers.forEach((uwuser, iduwu) => {
                         if(uwuser >= max) {
                             max = uwuser;
                             maxid = iduwu;
                         }
                     });
-                    mvp = iduwu;
+                    mvp = maxid;
                 }
                 message.channel.send(
                     `**UWUs totales:** ${collected.size}\n` +
