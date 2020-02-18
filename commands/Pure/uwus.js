@@ -20,8 +20,8 @@ module.exports = {
             let uwusers = [];
 			coll = sent.channel.createMessageCollector(filter, { time: (secs * 1000) });
             coll.on('collect', m => {
-                if(isNaN(uwusers[m.author.id])) { uwusers[m.author.id].n = 1; uwusers[m.author.id].id = m.author.id; }
-                else uwusers[m.author.id].n++;
+                if(isNaN(uwusers[m.author.id])) { uwusers[m.author.id] = 1; }
+                else uwusers[m.author.id]++;
             });
 			coll.on('end', collected => {
                 let mvp;
@@ -29,11 +29,11 @@ module.exports = {
                 if(uwusers.length) {
                     console.log('Comenzando procesado');
                     let max = 0, maxid;
-                    uwusers.forEach(uwuser => {
-                        if(uwuser.n >= max) {
-                            max = uwuser.n;
-                            maxid = uwuser.id;
-                            console.log(`Procesado ${uwuser.n} de ${uwuser.id}`);
+                    uwusers.forEach((uwuser, iduwu) => {
+                        if(uwuser >= max) {
+                            max = uwuser;
+                            maxid = iduwu;
+                            console.log(`Procesado ${uwuser} de ${iduwu}`);
                         }
                     });
                     mvp = maxid;
