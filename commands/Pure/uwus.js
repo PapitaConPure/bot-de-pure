@@ -26,18 +26,16 @@ module.exports = {
 			coll.on('end', collected => {
                 let mvp;
                 let str = '';
-                //if(uwusers.length) {
-                    console.log('Comenzando procesado');
-                    let max = 0, maxid;
-                    uwusers.forEach((uwuser, iduwu) => {
-                        if(uwuser >= max) {
-                            max = uwuser;
-                            maxid = iduwu;
-                            console.log(`Procesado ${uwuser} de ${iduwu}`);
-                        }
-                    });
-                    mvp = maxid;
-                //}
+                console.log('Comenzando procesado');
+                let max = 0, maxid = -1;
+                uwusers.forEach((uwuser, iduwu) => {
+                    if(uwuser >= max) {
+                        max = uwuser;
+                        maxid = iduwu;
+                        console.log(`Procesado ${uwuser} de ${iduwu}`);
+                    }
+                });
+                mvp = maxid;
                 message.channel.send(
                     `**UWUs totales:** ${collected.size}\n` +
                     `**UWUs por segundo:** ${collected.size / secs}\n` +
