@@ -20,31 +20,29 @@ module.exports = {
             let uwusers = [];
 			coll = sent.channel.createMessageCollector(filter, { time: (secs * 1000) });
             coll.on('collect', m => {
-                if(isNaN(uwusers[m.author.id])) uwusers[m.author.id] = 1;
-                else uwusers[m.author.id]++;
+                if(isNaN(uwusers[m.author.id])) { uwusers[m.author.id].n = 1; uwusers[m.author.id].id = m.author.id; }
+                else uwusers[m.author.id].n++;
             });
 			coll.on('end', collected => {
                 let mvp;
                 let str = '';
                 if(uwusers.length) {
-                let max = 0, maxid;
-                    uwusers.forEach((uwuser, iduwu) => {
-                        if(uwuser >= max) {
-                            max = uwuser;
-                            maxid = iduwu;
-                            str += `${iduwu}\n`;
-                            console.log('Procesado.');
+                    console.log('Comenzando procesado');
+                    let max = 0, maxid;
+                    uwusers.forEach(uwuser => {
+                        if(uwuser.n >= max) {
+                            max = uwuser.n;
+                            maxid = uwuser.id;
+                            console.log(`Procesado ${uwuser.n} de ${uwuser.id}`);
                         }
                     });
                     mvp = maxid;
                 }
-                message.channel.send(str).then(sent => {
-                    message.channel.send(
-                        `**UWUs totales:** ${collected.size}\n` +
-                        `**UWUs por segundo:** ${collected.size / secs}\n` +
-                        `**Persona que envió más uwus: ${(mvp !== -1)?`${client.fetchUser(mvp).username}`:'nadie umu'}**`
-                    )
-                });
+                message.channel.send(
+                    `**UWUs totales:** ${collected.size}\n` +
+                    `**UWUs por segundo:** ${collected.size / secs}\n` +
+                    `**Persona que envió más uwus: ${(mvp !== -1)?`${client.fetchUser(mvp).username}`:'nadie umu'}**`
+                );
             });
         });
     },
