@@ -39,7 +39,7 @@ module.exports = {
                 message.channel.send(
                     `**UWUs totales:** ${collected.size}\n` +
                     `**UWUs por segundo:** ${collected.size / secs}\n` +
-                    `**Persona que envió más uwus: ${(mvp !== -1)?`${Client.fetchUser(mvp).username}`:'nadie umu'}**`
+                    `**Persona que envió más uwus: ${(mvp !== -1)?`${client.fetchUser(mvp).username}`:'nadie umu'}**`
                 );
             });
         });
