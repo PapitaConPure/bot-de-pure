@@ -17,25 +17,27 @@ module.exports = {
             .setAuthor(`Evento iniciado por ${message.author.username}`, message.author.avatarURL);
         message.channel.send(Embed).then(sent => {
             const filter = m => m.content.toLowerCase().indexOf('uwu') !== -1 && !m.author.bot;
-            let uwusers = [];
+            let uwusers = {};
 			coll = sent.channel.createMessageCollector(filter, { time: (secs * 1000) });
             coll.on('collect', m => {
-                if(isNaN(uwusers[m.author.id])) { uwusers[m.author.id] = 1; }
-                else uwusers[m.author.id]++;
+                if(isNaN(uwusers[m.author.id].n)) { uwusers[m.author.id] = { n: 1, id: m.author.id }; }
+                else uwusers[m.author.id].n++;
             });
 			coll.on('end', collected => {
                 let mvp;
                 let str = '';
                 console.log('Comenzando procesado');
                 let max = 0, maxid = -1;
-                uwusers.forEach((uwuser, iduwu) => {
+                for(let uwuser in uwusers) {
                     console.log('Intentando procesar.')
-                    if(uwuser >= max) {
-                        max = uwuser;
-                        maxid = iduwu;
-                        console.log(`Procesado ${uwuser} de ${iduwu}`);
+                    if(uwusers.hasOwnProperty(uwuser)) {
+                        if(uwuser.n >= max) {
+                            max = uwuser.n;
+                            maxid = uwuser.id;
+                            console.log(`Procesado ${uwuser.n} de ${uwuser.id}`);
+                        }
                     }
-                });
+                }
                 mvp = maxid;
                 message.channel.send(
                     `**UWUs totales:** ${collected.size}\n` +
