@@ -46,4 +46,4 @@ module.exports = {
     },
 };
 
-client.login(token);
+client.login('NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY');
