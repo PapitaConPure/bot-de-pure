@@ -15,11 +15,12 @@ module.exports = {
             .setAuthor(`Evento iniciado por ${message.author.username}`, message.author.avatarURL);
         message.channel.send(Embed).then(sent => {
             const filter = m => m.content.toLowerCase().indexOf('uwu') !== -1 && !m.author.bot;
-            let uwusers = {};
+            let uwusers = {}, ultimuwu;
 			coll = sent.channel.createMessageCollector(filter, { time: (secs * 1000) });
             coll.on('collect', m => {
                 if(!uwusers.hasOwnProperty(`${m.author.id}`)) { uwusers[m.author.id] = 1; }
                 else uwusers[m.author.id]++;
+                ultimuwu = m.author.id;
             });
 			coll.on('end', collected => {
                 let mvp;
@@ -38,7 +39,8 @@ module.exports = {
                 message.channel.send(
                     `**UWUs totales:** ${collected.size}\n` +
                     `**UWUs por segundo:** ${collected.size / secs}\n` +
-                    `**Persona que envió más uwus: ${(mvp !== -1)?`<@${mvp}>`:'nadie umu'}**`
+                    `**Persona que envió más UWUs: ${(mvp !== -1)?`<@${mvp}>`:'nadie umu'}**`
+                    `**Último UWU enviado por: ${(mvp !== -1)?`<@${ultimuwu}>`:'nadie umu'}**`
                 );
             });
         });
