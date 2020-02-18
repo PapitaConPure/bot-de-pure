@@ -1,8 +1,9 @@
 //TRABAJAR CON DISCORD.JS Y HACER USO DE SISTEMAS DE ARCHIVOS
 const fs = require('fs'); //Integrar operaciones sistema de archivos de consola
-const Discord = require('discord.js'); //Integrar discord.js
 const Parse = require('parse/node');
+const Discord = require('discord.js'); //Integrar discord.js
 const { Client, RichEmbed } = require('discord.js'); //Ni idea, la verdad, pero aquí está
+const client = new Discord.Client(); //Cliente de bot
 const { //Constantes globales
     p_drmk, //prefijo drawmaku
     p_pure, //prefijo puré
@@ -10,7 +11,6 @@ const { //Constantes globales
 const token = 'NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY'; //La llave del bot
 var global = require('./config.json'); //Variables globales
 var func = require('./func.js'); //Funciones globales
-const client = new Discord.Client(); //Cliente de bot
 const Sequelize = require('sequelize');
 const Canvas = require('canvas');
 //Establecer comandos

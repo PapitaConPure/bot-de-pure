@@ -1,4 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
+const { Client, RichEmbed } = require('discord.js'); //Seguir integrando discord.js (?
+const client = new Discord.Client(); //Cliente de bot
 const global = require('../../config.json'); //Variables globales
 
 module.exports = {
@@ -18,7 +20,7 @@ module.exports = {
             let uwusers = [];
 			coll = sent.channel.createMessageCollector(filter, { time: (secs * 1000) });
             coll.on('collect', m => {
-                if(typeof uwusers[m.author.id] === undefined) uwusers[m.author.id] = 1;
+                if(isNaN(uwusers[m.author.id])) uwusers[m.author.id] = 1;
                 else uwusers[m.author.id]++;
                 m.channel.send(`${m.author.id}: ${uwusers[m.author.id]}`);
             });
