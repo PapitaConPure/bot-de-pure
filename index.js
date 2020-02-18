@@ -150,7 +150,7 @@ async function dibujarBienvenida(miembro) {
         if(servidor.id === '654471968200065034') {
             canal.send(
                 'Wena po conchetumare, como estai. Porfa revisa el canal <#671817759268536320> o te funamos <:HaniwaSmile:659872119995498507>\n' +
-                'También si quieres un rol de color revisa <#671831878902349824> y pídele el que te guste a alguno de los enfermos que trabajan aquí <:Mayuwu:654489124413374474>\n' +
+                'También si quieres un rol de color revisa <#679150440612626479> y pídele el que te guste a alguno de los enfermos que trabajan aquí <:Mayuwu:654489124413374474>\n' +
                 'WENO YA PO CONCHESUMARE. <@&654472238510112799>, vengan a saludar maricones <:marx:675439504982671370>\n' +
                 `*Por cierto, ahora hay **${peoplecnt}** aweonaos en el server.*`
             );
