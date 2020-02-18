@@ -22,20 +22,22 @@ module.exports = {
             coll.on('collect', m => {
                 if(isNaN(uwusers[m.author.id])) uwusers[m.author.id] = 1;
                 else uwusers[m.author.id]++;
-                m.channel.send(`${m.author.id}: ${uwusers[m.author.id]}`);
             });
 			coll.on('end', collected => {
                 let mvp;
+                let str = '';
                 if(uwusers.length) {
                 let max = 0, maxid;
                     uwusers.forEach((uwuser, iduwu) => {
                         if(uwuser >= max) {
                             max = uwuser;
                             maxid = iduwu;
+                            str += `${iduwu}\n`;
                         }
                     });
                     mvp = maxid;
                 }
+                message.channel.send(str);
                 message.channel.send(
                     `**UWUs totales:** ${collected.size}\n` +
                     `**UWUs por segundo:** ${collected.size / secs}\n` +
