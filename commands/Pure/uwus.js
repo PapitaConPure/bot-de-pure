@@ -37,12 +37,13 @@ module.exports = {
                     });
                     mvp = maxid;
                 }
-                message.channel.send(str);
-                message.channel.send(
-                    `**UWUs totales:** ${collected.size}\n` +
-                    `**UWUs por segundo:** ${collected.size / secs}\n` +
-                    `**Persona que envió más uwus: ${(mvp !== -1)?`${client.fetchUser(mvp).username}`:'nadie umu'}**`
-                );
+                message.channel.send(str).then(sent => {
+                    message.channel.send(
+                        `**UWUs totales:** ${collected.size}\n` +
+                        `**UWUs por segundo:** ${collected.size / secs}\n` +
+                        `**Persona que envió más uwus: ${(mvp !== -1)?`${client.fetchUser(mvp).username}`:'nadie umu'}**`
+                    )
+                });
             });
         });
     },
