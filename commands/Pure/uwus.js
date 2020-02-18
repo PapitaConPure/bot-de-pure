@@ -20,22 +20,18 @@ module.exports = {
             let uwusers = {};
 			coll = sent.channel.createMessageCollector(filter, { time: (secs * 1000) });
             coll.on('collect', m => {
-                if(!uwusers.hasOwnProperty(`${m.author.id}`)) { uwusers[m.author.id] = { id: m.author.id, n: 1 }; }
-                else uwusers[m.author.id].n++;
+                if(!uwusers.hasOwnProperty(`${m.author.id}`)) { uwusers[m.author.id] = 1; }
+                else uwusers[m.author.id]++;
             });
 			coll.on('end', collected => {
                 let mvp;
-                let str = '';
-                console.log('Comenzando procesado');
+                let auwus = Object.entries(uwusers);
                 let max = 0, maxid = -1;
-                for(let uwuser in uwusers) {
-                    console.log('Intentando procesar.')
-                    if(uwusers.hasOwnProperty(uwuser)) {
-                        if(uwuser.n >= max) {
-                            max = uwuser.n;
-                            maxid = uwuser.id;
-                            console.log(`Procesado ${uwuser.n} de ${uwuser.id}`);
-                        }
+                for(let uwuser of auwus) {
+                    if(uwuser[1] >= max) {
+                        maxid = uwuser[0];
+                        max = uwuser[1];
+                        console.log(`Procesado ${uwuser[1]} de ${uwuser[0]}`);
                     }
                 }
                 mvp = maxid;
