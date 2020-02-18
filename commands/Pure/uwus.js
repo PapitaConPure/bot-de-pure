@@ -33,6 +33,7 @@ module.exports = {
                             max = uwuser;
                             maxid = iduwu;
                             str += `${iduwu}\n`;
+                            console.log('Procesado.');
                         }
                     });
                     mvp = maxid;
