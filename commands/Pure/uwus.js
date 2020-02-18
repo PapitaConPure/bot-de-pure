@@ -29,6 +29,7 @@ module.exports = {
                 console.log('Comenzando procesado');
                 let max = 0, maxid = -1;
                 uwusers.forEach((uwuser, iduwu) => {
+                    console.log('Intentando procesar.')
                     if(uwuser >= max) {
                         max = uwuser;
                         maxid = iduwu;
