@@ -20,7 +20,7 @@ module.exports = {
             let uwusers = {};
 			coll = sent.channel.createMessageCollector(filter, { time: (secs * 1000) });
             coll.on('collect', m => {
-                if(isNaN(uwusers[m.author.id].id)) { uwusers[m.author.id] = { id: m.author.id, n: 1 }; }
+                if(!uwusers.hasOwnProperty(`${m.author.id}`)) { uwusers[m.author.id] = { id: m.author.id, n: 1 }; }
                 else uwusers[m.author.id].n++;
             });
 			coll.on('end', collected => {
