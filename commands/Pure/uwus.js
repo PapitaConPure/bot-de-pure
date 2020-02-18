@@ -26,7 +26,7 @@ module.exports = {
 			coll.on('end', collected => {
                 let mvp;
                 let str = '';
-                if(uwusers.length) {
+                //if(uwusers.length) {
                     console.log('Comenzando procesado');
                     let max = 0, maxid;
                     uwusers.forEach((uwuser, iduwu) => {
@@ -37,7 +37,7 @@ module.exports = {
                         }
                     });
                     mvp = maxid;
-                }
+                //}
                 message.channel.send(
                     `**UWUs totales:** ${collected.size}\n` +
                     `**UWUs por segundo:** ${collected.size / secs}\n` +
