@@ -15,13 +15,15 @@ module.exports = {
             .addField('Duración del evento', `**${secs}** segundos.`)
             .setAuthor(`Evento iniciado por ${message.author.username}`, message.author.avatarURL);
         message.channel.send(Embed).then(sent => {
-            const filter = m => m.content.toLowerCase().indexOf('uwu') !== -1 && !m.author.bot;
+            const filter = m => (m.content.toLowerCase().indexOf('uwu') !== -1 && !m.author.bot) || (m.content.toLowerCase() === 'antiuwu' && m.author.id === message.author.id);
             let uwusers = {}, ultimuwu;
 			coll = sent.channel.createMessageCollector(filter, { time: (secs * 1000) });
             coll.on('collect', m => {
-                if(!uwusers.hasOwnProperty(`${m.author.id}`)) { uwusers[m.author.id] = 1; }
-                else uwusers[m.author.id]++;
-                ultimuwu = m.author.id;
+                if(m.content !== 'antiuwu') {
+                    if(!uwusers.hasOwnProperty(`${m.author.id}`)) { uwusers[m.author.id] = 1; }
+                    else uwusers[m.author.id]++;
+                    ultimuwu = m.author.id;
+                } else coll.end();
             });
 			coll.on('end', collected => {
                 let mvp;
