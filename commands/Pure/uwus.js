@@ -5,9 +5,10 @@ module.exports = {
 	name: 'uwus',
 	execute(message, args) {
         let secs;
-        if(args.length)
+        if(args.length) {
             if(!isNaN(args[0])) secs = Math.max(0.1, Math.min(args[0], 3600 * 2));
-        else secs = 30;
+            else secs = 30;
+        } else secs = 30;
         const Embed = new Discord.RichEmbed()
             .setColor('ffbbbb')
             .setTitle('Evento UWU')
