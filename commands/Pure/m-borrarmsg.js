@@ -10,12 +10,12 @@ module.exports = {
     ],
 	execute(message, args) {
 		if(message.member.hasPermission('MANAGE_MESSAGES', false, true, true)) {
-			message.delete();
 			if(!args.length) {
+				message.delete();
 				message.channel.send(':warning: debes especificar el número de mensajes a borrar.');
 				return;
 			}
-			message.channel.bulkDelete(args[0]);
+			message.channel.bulkDelete(Math.max(2, Math.min(args[0] + 1, 100)));
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR MENSAJES** (MANAGE_MESSAGES)* para usar este comando.');
     },
 };
