@@ -8,12 +8,16 @@ async function deleteChannels(server) {
 
 async function stupidBomb(animLen, animPos, mid, mch) {
 	const msg = await mch.fetchMessage(mid);
-	if(animPos === 0)
-		mch.send(':firecracker: :part_alternation_mark: :part_alternation_mark: :part_alternation_mark: :part_alternation_mark:')
-			.then(sent => mid = sent.id);
-	else if(animPos === 1)
-		msg.edit(':firecracker: :part_alternation_mark: :part_alternation_mark: :part_alternation_mark: :part_alternation_mark: :candle:');
-	else if(animPos >= 2 && animPos <= 5) {
+	if(animPos === 0) {
+		let animStr = ':firecracker: ';
+		for(let i = 0; i < animLen; i++) animStr += ':part_alternation_mark: ';
+		mch.send(animStr).then(sent => mid = sent.id);
+	} else if(animPos === 1) {
+		let animStr = ':firecracker: ';
+		for(let i = 0; i < animLen - 1; i++) animStr += ':part_alternation_mark: ';
+		animStr += ':candle:';
+		msg.edit(animStr);
+	} else if(animPos >= 2 && animPos <= 5) {
 		let animStr = ':firecracker: ';
 		for(let i = 0; i < (animLen - (animPos - 1)); i++) animStr += ':part_alternation_mark: ';
 		animStr += ':fire:';
@@ -26,7 +30,7 @@ async function stupidBomb(animLen, animPos, mid, mch) {
 	else if(animPos === (animLen + 6)) msg.edit(':low_brightness:');
 	else if(animPos === (animLen + 7)) msg.edit(':eight_pointed_black_star:');
 
-	if(animPos < (7 + animLen)) setTimeout(stupidBomb, 1000, animLen, animPos + 1, mid, mch);
+	if(animPos < (7 + animLen)) setTimeout(stupidBomb, 2000, animLen, animPos + 1, mid, mch);
 }
 
 module.exports = {
