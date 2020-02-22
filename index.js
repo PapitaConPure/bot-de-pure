@@ -40,35 +40,33 @@ client.on('message', message => { //En caso de recibir un mensaje
     if(global.cansay === 0) { if(message.author.bot) return; } //Hacer que el bot no sea un pelotudo (ignorar mensajes de bots)
     console.log(`[${message.guild.name}→#${message.channel.name}] ${message.author.username}: "${message.content}"`); //Hacer que el bot de hecho sea inteligente (messages log)
 
-
-
     //#region Respuestas rápidas
     if(message.channel.guild.id === '654471968200065034') {
         const msg = message.content.toLowerCase();
         if(msg.indexOf('hourai') !== -1 && (msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)) {
-            const str = [
+            const fuckustr = [
                 '***__Recuerden:__ soy objetivamente mejor que Hourai <:haniwaSmile:659872119995498507>***',
                 '**Bot > Puré > Papita > Hourai <:okinai:672173297428856862>**',
                 'Pero la reputa, dejen de compararme con esa weá <:marx:675439504982671370>',
                 '*__Recuerden niñas:__ Hourai come tula 24/7 <:haniwaSmile:659872119995498507>*'
             ];
-            message.channel.send(str[Math.random() * 3]);
+            message.channel.send(fuckustr[Math.round(Math.random()) * fuckustr.length]);
         } else if(msg.startsWith('~echo ') || msg.startsWith('$say ')) {
-            const str = [
+            const fuckustr = [
                 'Cállate puta <:haniwaSmile:659872119995498507>',
                 'Tu madre, por si acaso <:haniwaSmile:659872119995498507>',
                 '*Pero no seas puto <:haniwaSmile:659872119995498507>*'
             ];
-            message.channel.send(str[Math.random() * 2]);
+            message.channel.send(fuckustr[Math.round(Math.random()) * fuckustr.length]);
         } else if(msg.indexOf('hourai') !== -1) {
-            const str = [
+            const fuckustr = [
                 '*¿Pero y a tí quién te invitó? <:mayuwu:654489124413374474>*',
                 'Hourai puto <:dedede:675764852106592276>',
                 '***No hablen de esa weá <:dedede:675764852106592276>***',
                 'Puta que son pesaos con el Hourai <:notlikealice:654489127202586634>',
                 '**CSM NO HABLEN DE ESE BOT** <:marx:675439504982671370>'
             ];
-            message.channel.send(str[Math.random() * 4]);
+            message.channel.send(fuckustr[Math.round(Math.random()) * fuckustr.length]);
         }
     }
     //#endregion
