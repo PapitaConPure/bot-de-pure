@@ -10,11 +10,11 @@ async function stupidBomb(animLen, animPos, mid, mch) {
 	const msg = await mch.fetchMessage(mid);
 	if(animPos === 0) {
 		let animStr = ':firecracker: ';
-		for(let i = 0; i < animLen; i++) animStr += ':part_alternation_mark: ';
+		for(let i = 0; i < (animLen + 1); i++) animStr += ':part_alternation_mark: ';
 		mch.send(animStr).then(sent => mid = sent.id);
 	} else if(animPos === 1) {
 		let animStr = ':firecracker: ';
-		for(let i = 0; i < animLen - 1; i++) animStr += ':part_alternation_mark: ';
+		for(let i = 0; i < animLen; i++) animStr += ':part_alternation_mark: ';
 		animStr += ':candle:';
 		msg.edit(animStr);
 	} else if(animPos >= 2 && animPos <= 5) {
@@ -30,7 +30,7 @@ async function stupidBomb(animLen, animPos, mid, mch) {
 	else if(animPos === (animLen + 6)) msg.edit(':low_brightness:');
 	else if(animPos === (animLen + 7)) msg.edit(':eight_pointed_black_star:');
 
-	if(animPos < (7 + animLen)) setTimeout(stupidBomb, 2000, animLen, animPos + 1, mid, mch);
+	if(animPos < (7 + animLen)) setTimeout(stupidBomb, 3000, animLen, animPos + 1, mid, mch);
 }
 
 module.exports = {
