@@ -40,16 +40,18 @@ client.on('message', message => { //En caso de recibir un mensaje
     if(global.cansay === 0) { if(message.author.bot) return; } //Hacer que el bot no sea un pelotudo (ignorar mensajes de bots)
     console.log(`[${message.guild.name}→#${message.channel.name}] ${message.author.username}: "${message.content}"`); //Hacer que el bot de hecho sea inteligente (messages log)
 
+
+
     //#region Respuestas rápidas
     if(message.channel.guild.id === '654471968200065034') {
         console.log('La weá se esparce :^)');
         const msg = message.content.toLowerCase();
-        if(msg.indexOf('Hourai') !== -1 && (msg.indexOf('Puré') !== -1 || msg.indexOf('Pure') !== -1)) {
+        if(msg.indexOf('hourai') !== -1 && (msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)) {
             message.channel.send('***__Recuerden:__ soy objetivamente mejor que Hourai uwu***');
-        } else if(msg.indexOf('Hourai') !== -1) {
-            message.channel.send('*Hourai puto.*');
         } else if(msg.startsWith('~echo')) {
             message.channel.send('Cállate puta.');
+        } else if(msg.indexOf('hourai') !== -1) {
+            message.channel.send('*Hourai puto.*');
         }
     }
     //#endregion
