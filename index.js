@@ -44,14 +44,30 @@ client.on('message', message => { //En caso de recibir un mensaje
 
     //#region Respuestas rápidas
     if(message.channel.guild.id === '654471968200065034') {
-        console.log('La weá se esparce :^)');
         const msg = message.content.toLowerCase();
         if(msg.indexOf('hourai') !== -1 && (msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)) {
-            message.channel.send('***__Recuerden:__ soy objetivamente mejor que Hourai uwu***');
+            const str = [
+                '***__Recuerden:__ soy objetivamente mejor que Hourai <:haniwaSmile:659872119995498507>***',
+                '**Bot > Puré > Papita > Hourai <:okinai:672173297428856862>**',
+                'Pero la reputa, dejen de compararme con esa weá <:marx:675439504982671370>',
+                '*__Recuerden niñas:__ Hourai come tula 24/7 <:haniwaSmile:659872119995498507>*'
+            ]
+            message.channel.send(str[Math.random() * 3]);
         } else if(msg.startsWith('~echo')) {
-            message.channel.send('Cállate puta.');
+            const str = [
+                'Cállate puta <:haniwaSmile:659872119995498507>',
+                'Tu madre, por si acaso <:haniwaSmile:659872119995498507>',
+                '*Pero no seas puto <:haniwaSmile:659872119995498507>*'
+            ]
+            message.channel.send(str[Math.random() * 2]);
         } else if(msg.indexOf('hourai') !== -1) {
-            message.channel.send('*Hourai puto.*');
+            const str = [
+                '*¿Pero y a tí quién te invitó? <:mayuwu:654489124413374474>*',
+                'Hourai puto <:dedede:675764852106592276>',
+                '***No hablen de esa weá <:dedede:675764852106592276>***',
+                'Puta que son pesaos con el Hourai <:notlikealice:654489127202586634>'
+            ]
+            message.channel.send(str[Math.random() * 4]);
         }
     }
     //#endregion
