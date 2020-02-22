@@ -50,14 +50,14 @@ client.on('message', message => { //En caso de recibir un mensaje
                 'Pero la reputa, dejen de compararme con esa weá <:marx:675439504982671370>',
                 '*__Recuerden niñas:__ Hourai come tula 24/7 <:haniwaSmile:659872119995498507>*'
             ];
-            message.channel.send(fuckustr[Math.round(Math.random() * fuckustr.length)]);
+            message.channel.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]);
         } else if(msg.startsWith('~echo ') || msg.startsWith('$say ')) {
             const fuckustr = [
                 'Cállate puta <:haniwaSmile:659872119995498507>',
                 'Tu madre, por si acaso <:haniwaSmile:659872119995498507>',
                 '*Pero no seas puto <:haniwaSmile:659872119995498507>*'
             ];
-            message.channel.send(fuckustr[Math.round(Math.random() * fuckustr.length)]);
+            message.channel.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]);
         } else if(msg.indexOf('hourai') !== -1) {
             const fuckustr = [
                 '*¿Pero y a tí quién te invitó? <:mayuwu:654489124413374474>*',
@@ -66,7 +66,7 @@ client.on('message', message => { //En caso de recibir un mensaje
                 'Puta que son pesaos con el Hourai <:notlikealice:654489127202586634>',
                 '**CSM NO HABLEN DE ESE BOT** <:marx:675439504982671370>'
             ];
-            message.channel.send(fuckustr[Math.round(Math.random() * fuckustr.length)]); 
+            message.channel.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]); 
         }
     }
     //#endregion
