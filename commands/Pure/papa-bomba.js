@@ -11,9 +11,9 @@ async function stupidBomb(animPos, mid, mch) {
 	if(animPos === 0)
 		mch.send(':firecracker: :part_alternation_mark: :part_alternation_mark: :part_alternation_mark: :part_alternation_mark:')
 			.then(sent => mid = sent.id);
-	else if(animPos === 1){mch.send(msg.content);
+	else if(animPos === 1)
 		msg.edit(':firecracker: :part_alternation_mark: :part_alternation_mark: :part_alternation_mark: :part_alternation_mark: :candle:');
-	}else if(animPos >= 2 && animPos <= 5) {
+	else if(animPos >= 2 && animPos <= 5) {
 		let animStr = ':firecracker: ';
 		for(let i = 0; i < (4 - (animPos - 1)); i++) animStr += ':part_alternation_mark: ';
 		animStr += ':fire:';
@@ -26,7 +26,7 @@ async function stupidBomb(animPos, mid, mch) {
 	else if(animPos === 10) msg.edit(':low_brightness:');
 	else if(animPos === 11) msg.edit(':eight_pointed_black_star:');
 
-	if(animPos < 10) setTimeout(stupidBomb, 1000, animPos + 1, mid, mch);
+	if(animPos < 11) setTimeout(stupidBomb, 1000, animPos + 1, mid, mch);
 }
 
 module.exports = {
