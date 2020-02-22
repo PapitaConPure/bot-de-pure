@@ -1,4 +1,4 @@
-//TRABAJAR CON DISCORD.JS Y HACER USO DE SISTEMAS DE ARCHIVOS
+//#region Inclusión de cabeceras
 const fs = require('fs'); //Integrar operaciones sistema de archivos de consola
 const Parse = require('parse/node');
 const Discord = require('discord.js'); //Integrar discord.js
@@ -13,7 +13,9 @@ var global = require('./config.json'); //Variables globales
 var func = require('./func.js'); //Funciones globales
 const Sequelize = require('sequelize');
 const Canvas = require('canvas');
-//Establecer comandos
+//#endregion
+
+//#region Establecimiento de Comandos
 client.ComandosDrawmaku = new Discord.Collection(); //Comandos de Drawmaku
 var commandFiles = fs.readdirSync('./commands/Drawmaku').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
 for(const file of commandFiles) {
@@ -26,17 +28,19 @@ for(const file of commandFiles) {
     command = require(`./commands/Pure/${file}`);
 	client.ComandosPure.set(command.name, command);
 }
+//#endregion
 
-client.on('ready', () => {
+client.on('ready', () => { //Confirmación de inicio y cambio de estado
 	console.log('Bot conectado y funcionando.');
     client.user.setActivity("UwU 24/7", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' });
     //func.saveState();//func.reloadState();
 });
 
 client.on('message', message => { //En caso de recibir un mensaje
-    if(global.cansay === 0) { if(message.author.bot) return; } 
-    console.log(`[${message.guild.name}→#${message.channel.name}] ${message.author.username}: "${message.content}"`);
+    if(global.cansay === 0) { if(message.author.bot) return; } //Hacer que el bot no sea un pelotudo (ignorar mensajes de bots)
+    console.log(`[${message.guild.name}→#${message.channel.name}] ${message.author.username}: "${message.content}"`); //Hacer que el bot de hecho sea inteligente (messages log)
 
+    //#region papa-reiniciar
     if(message.content.toLowerCase().startsWith(`${p_pure}papa-reiniciar`)) {
         if (message.author.id === '423129757954211880') {
             message.channel.send(':arrows_counterclockwise: apagando...\n_Nota: puedes comprobar si el bot se reinició viendo el log del proceso._')
@@ -49,7 +53,10 @@ client.on('message', message => { //En caso de recibir un mensaje
         } else message.channel.send(':closed_lock_with_key: Solo Papita con Puré puede usar este comando.');
         return;
     }
+    //#endregion
     
+    //#region Comandos
+    //#region Detección de Comandos
     let pdetect;
     if(message.content.toLowerCase().startsWith(p_drmk)) pdetect = p_drmk;
     else if(message.content.toLowerCase().startsWith(p_pure)) pdetect = p_pure;
@@ -68,7 +75,9 @@ client.on('message', message => { //En caso de recibir un mensaje
         message.channel.send(':x: Disculpa, soy estúpido. Tal vez escribiste mal el comando y no te entiendo.');
         return;
     }
+    //#endregion
 
+    //#region Ejecución de Comandos
     try {
         comando.execute(message, args);
     } catch(error) {
@@ -87,35 +96,43 @@ client.on('message', message => { //En caso de recibir un mensaje
         global.empezando = true;
         setTimeout(func.restarSegundoEmpezar, 1000);
     }
+    //#endregion
 
-    if(global.cansay > 0) global.cansay--;
+    if(global.cansay > 0) global.cansay--; //Hacer que el bot sea incluso menos pelotudo (aceptar comandos de sí mismo si fueron escritos con p!papa-decir)
+    //#endregion
 });
 
-async function dibujarBienvenida(miembro) {
-    const servidor = miembro.guild;
-    const canal = servidor.channels.get(servidor.systemChannelID);
+//#region Mensajes de sistema
+async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo de un servidor
+    const servidor = miembro.guild; //Servidor
+    const canal = servidor.channels.get(servidor.systemChannelID); //Canal de mensajes de sistema
 
-    //Creación de imagen
+    //#region Creación de imagen
     const canvas = Canvas.createCanvas(1275, 825);
     const ctx = canvas.getContext('2d');
 
     const fondo = await Canvas.loadImage('./fondo.png');
     ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+    //#endregion
 
-    //Texto
+    //#region Texto
+    //#region Propiedades de texto
     ctx.textBaseline = 'bottom';
     ctx.shadowOffsetX = shadowOffsetY = 2;
     ctx.shadowBlur = 10;
     ctx.shadowColor = 'black';
     ctx.fillStyle = '#ffffff';
-    //Nombre del usuario
+    //#endregion
+
+    //#region Nombre del usuario
     let Texto = `${miembro.displayName}`;
     let fontSize = 72;
     while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
     ctx.font = `bold ${fontSize}px sans-serif`;
     ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 80);
+    //#endregion
     
-    //Texto inferior
+    //#region Texto inferior
     if(servidor.id === '611732083995443210') Texto = 'Animal Realm!';
     else Texto = `${servidor.name}!`;
     fontSize = 120;
@@ -125,36 +142,42 @@ async function dibujarBienvenida(miembro) {
     Texto = '¡Bienvenid@ a';
     ctx.font = `bold 48px sans-serif`;
     ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - fontSize - 30);
+    //#endregion
+    //#endregion
 
-    //Dibujar sombra de foto de perfil
+    //#region Foto de Perfil
+    //#region Sombra
     const ycenter = (80 + (canvas.height - fontSize - 48 - 30)) / 2;
     ctx.shadowOffsetX = shadowOffsetY = 8;
     ctx.shadowBlur = 20;
     ctx.fillStyle = '#36393f';
     ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
     ctx.fill();
+    //#endregion
 
-    //Dibujar foto de perfil
+    //#region Imagen circular
 	ctx.beginPath();
 	ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
 	ctx.closePath();
 	ctx.clip();
     const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL);
 	ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
+    //#endregion
+    //#endregion
 
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
 
-    //Mandar imagen + mensaje bonito
+    //#region Imagen y Mensaje extra
     const peoplecnt = 1 + servidor.members.filter(member => !member.user.bot).size;
     canal.send('', imagen).then(sent => {
-        if(servidor.id === '654471968200065034') {
+        if(servidor.id === '654471968200065034') { //Hourai Doll
             canal.send(
                 'Wena po conchetumare, como estai. Porfa revisa el canal <#671817759268536320> o te funamos <:HaniwaSmile:659872119995498507>\n' +
                 'También si quieres un rol de color revisa <#679150440612626479> y pídele el que te guste a alguno de los enfermos que trabajan aquí <:Mayuwu:654489124413374474>\n' +
                 'WENO YA PO CONCHESUMARE. <@&654472238510112799>, vengan a saludar maricones <:marx:675439504982671370>\n' +
                 `*Por cierto, ahora hay **${peoplecnt}** aweonaos en el server.*`
             );
-        } else if(servidor.id === '611732083995443210') {
+        } else if(servidor.id === '611732083995443210') { //Animal Realm
             canal.send(
                 `Welcome to the server **${miembro.displayName}**! / ¡Bienvenido/a al server **${miembro.displayName}**!\n\n` +
                 `**EN:** To fully enjoy the server, don't forget to get 1 of the 5 main roles in the following channel~\n` +
@@ -162,71 +185,83 @@ async function dibujarBienvenida(miembro) {
                 '→ <#611753608601403393> ←\n\n' +
                 `*Ahora hay **${peoplecnt}** usuarios en el server.*`
             );
-        } else {
+        } else { //Otros servidores
             canal.send(
                 `¡Bienvenido al servidor **${miembro.displayName}**!\n` +
                 `*Ahora hay **${peoplecnt}** usuarios en el server.*`
             );
         }
     });
+    //#endregion
 }
 
-async function dibujarDespedida(miembro) {
+async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un servidor
     const servidor = miembro.guild;
     const canal = servidor.channels.get(servidor.systemChannelID);
 
-    //Creación de imagen
+    //#region Creación de imagen
     const canvas = Canvas.createCanvas(1500, 900);
     const ctx = canvas.getContext('2d');
 
     const fondo = await Canvas.loadImage('./fondo2.png');
     ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+    //#endregion
 
-    //Texto
+    //#region Texto
+    //#region Propiedades de Texto
     ctx.textBaseline = 'bottom';
     ctx.shadowOffsetX = shadowOffsetY = 2;
     ctx.shadowBlur = 10;
     ctx.shadowColor = 'black';
     ctx.fillStyle = '#ffffff';
-    //Nombre del usuario
+    //#endregion
+
+    //#region Nombre del usuario
     let Texto = `Adiós, ${miembro.displayName}`;
     let fontSize = 72;
     while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
     ctx.font = `bold ${fontSize}px sans-serif`;
     ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 40);
+    //#endregion
+    //#endregion
 
-    //Dibujar sombra de foto de perfil
+    //#region Foto de Perfil
+    //#region Sombra
     const ycenter = 40 + 150;
     ctx.shadowOffsetX = shadowOffsetY = 8;
     ctx.shadowBlur = 20;
     ctx.fillStyle = '#36393f';
     ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
     ctx.fill();
+    //#endregion
 
-    //Dibujar foto de perfil
+    //#region Dibujar foto de perfil
 	ctx.beginPath();
 	ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
 	ctx.closePath();
 	ctx.clip();
     const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL);
 	ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
+    //#endregion
+    //#endregion
 
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
 
-    //Mandar imagen + mensaje bonito
+    //#region Imagen y Mensaje extra
     const peoplecnt = 1 + servidor.members.filter(member => !member.user.bot).size;
     canal.send('', imagen).then(sent => {
-        if(servidor.id === '654471968200065034') {
+        if(servidor.id === '654471968200065034') { //Hourai Doll
             canal.send(
                 'Nooooo po csm, perdimo otro weón <:GatoSad:669332507942060042>' +
                 `*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
             );
-        } else {
+        } else { //Otros servidores
             canal.send(
                 `*Ahora hay **${peoplecnt}** usuarios en el server.*`
             );
         }
     });
+    //#endregion
 }
  
 client.on('guildMemberAdd', member => {
@@ -253,5 +288,6 @@ client.on('guildMemberRemove', member => {
         console.error(error);
     }
 });
+//#endregion
 
-client.login(token);
+client.login(token); //Ingresar sesión con el bot
