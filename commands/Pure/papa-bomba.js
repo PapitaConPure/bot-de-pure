@@ -10,14 +10,14 @@ async function stupidBomb(animLen, animPos, mid, mch) {
 	const msg = await mch.fetchMessage(mid);
 	if(animPos === 0) {
 		let animStr = ':firecracker: ';
-		for(let i = 0; i < (animLen + 1); i++) animStr += ':part_alternation_mark: ';
+		for(let i = 0; i < animLen; i++) animStr += ':part_alternation_mark: ';
 		mch.send(animStr).then(sent => mid = sent.id);
 	} else if(animPos === 1) {
 		let animStr = ':firecracker: ';
 		for(let i = 0; i < animLen; i++) animStr += ':part_alternation_mark: ';
 		animStr += ':candle:';
 		msg.edit(animStr);
-	} else if(animPos >= 2 && animPos <= 5) {
+	} else if(animPos >= 2 && animPos <= (animLen + 2)) {
 		let animStr = ':firecracker: ';
 		for(let i = 0; i < (animLen - (animPos - 1)); i++) animStr += ':part_alternation_mark: ';
 		animStr += ':fire:';
