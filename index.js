@@ -66,7 +66,7 @@ client.on('message', message => { //En caso de recibir un mensaje
                 'Puta que son pesaos con el Hourai <:notlikealice:654489127202586634>',
                 '**CSM NO HABLEN DE ESE BOT** <:marx:675439504982671370>'
             ];
-            message.channel.send(fuckustr[Math.round(Math.random() * fuckustr.length)]);
+            message.channel.send(fuckustr[Math.round(Math.random() * fuckustr.length)]); 
         }
     }
     //#endregion
