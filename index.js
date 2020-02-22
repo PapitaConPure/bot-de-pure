@@ -53,7 +53,7 @@ client.on('message', message => { //En caso de recibir un mensaje
                 '*__Recuerden niñas:__ Hourai come tula 24/7 <:haniwaSmile:659872119995498507>*'
             ]
             message.channel.send(str[Math.random() * 3]);
-        } else if(msg.startsWith('~echo')) {
+        } else if(msg.startsWith('~echo ') || msg.startsWith('$say ')) {
             const str = [
                 'Cállate puta <:haniwaSmile:659872119995498507>',
                 'Tu madre, por si acaso <:haniwaSmile:659872119995498507>',
