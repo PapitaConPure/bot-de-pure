@@ -42,6 +42,7 @@ client.on('message', message => { //En caso de recibir un mensaje
 
     //#region Respuestas rápidas
     if(message.channel.guild.id === '654471968200065034') {
+        console.log('La weá se esparce :^)');
         const msg = message.content.toLowerCase();
         if(msg.indexOf('Hourai') !== -1 && (msg.indexOf('Puré') !== -1 || msg.indexOf('Pure') !== -1)) {
             message.channel.send('***__Recuerden:__ soy objetivamente mejor que Hourai uwu***');
