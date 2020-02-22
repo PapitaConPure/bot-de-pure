@@ -65,7 +65,8 @@ client.on('message', message => { //En caso de recibir un mensaje
                 '*¿Pero y a tí quién te invitó? <:mayuwu:654489124413374474>*',
                 'Hourai puto <:dedede:675764852106592276>',
                 '***No hablen de esa weá <:dedede:675764852106592276>***',
-                'Puta que son pesaos con el Hourai <:notlikealice:654489127202586634>'
+                'Puta que son pesaos con el Hourai <:notlikealice:654489127202586634>',
+                '**CSM NO HABLEN DE ESE BOT** <:marx:675439504982671370>'
             ]
             message.channel.send(str[Math.random() * 4]);
         }
