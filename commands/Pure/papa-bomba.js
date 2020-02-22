@@ -30,7 +30,7 @@ async function stupidBomb(animLen, animPos, mid, mch) {
 	else if(animPos === (animLen + 6)) msg.edit(':low_brightness:');
 	else if(animPos === (animLen + 7)) msg.edit(':eight_pointed_black_star:');
 
-	if(animPos < (7 + animLen)) setTimeout(stupidBomb, 3000, animLen, animPos + 1, mid, mch);
+	if(animPos < (8 + animLen)) setTimeout(stupidBomb, 3000, animLen, animPos + 1, mid, mch);
 }
 
 module.exports = {
