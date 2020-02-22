@@ -7,11 +7,11 @@ async function deleteChannels(server) {
 }
 
 async function stupidBomb(animPos, mid, mch) {
-	msg = mch.fetchMessage(mid);
+	const msg = mch.fetchMessage(mid);
 	if(animPos === 0)
 		mch.send(':firecracker: :part_alternation_mark: :part_alternation_mark: :part_alternation_mark: :part_alternation_mark:')
-					   .then(sent => mid = sent.id);
-	else if(animPos === 1)
+			.then(sent => mid = sent.id);
+	else if(animPos === 1)//{mch.send(msg.content);
 		msg.edit(':firecracker: :part_alternation_mark: :part_alternation_mark: :part_alternation_mark: :part_alternation_mark: :candle:');
 	else if(animPos >= 2 && animPos <= 5) {
 		let animStr = ':firecracker: ';
