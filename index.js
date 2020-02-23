@@ -52,12 +52,15 @@ client.on('message', message => { //En caso de recibir un mensaje
             ];
             message.channel.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]);
         } else if(msg.startsWith('~echo ') || msg.startsWith('$say ')) {
-            const fuckustr = [
-                'Cállate puta <:haniwaSmile:659872119995498507>',
-                'Tu madre, por si acaso <:haniwaSmile:659872119995498507>',
-                '*Pero no seas puto <:haniwaSmile:659872119995498507>*'
-            ];
-            message.channel.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]);
+            async function responder(ch) {
+                const fuckustr = [
+                    'Cállate puta <:haniwaSmile:659872119995498507>',
+                    'Tu madre, por si acaso <:haniwaSmile:659872119995498507>',
+                    '*Pero no seas puto <:haniwaSmile:659872119995498507>*'
+                ];
+                ch.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]);
+            };
+            setTimeout(responder, 800, message.channel);
         } else if(msg.indexOf('hourai') !== -1 && msg.indexOf('hourai doll') === -1) {
             const fuckustr = [
                 '*¿Pero y a tí quién te invitó? <:mayuwu:654489124413374474>*',
