@@ -43,7 +43,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     //#region Respuestas rápidas
     if(message.channel.guild.id === '654471968200065034') {
         const msg = message.content.toLowerCase();
-        if(msg.indexOf('hourai') !== -1 && (msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)) {
+        if(msg.indexOf('hourai') !== -1 && msg.indexOf('hourai doll') === -1 && (msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)) {
             const fuckustr = [
                 '***__Recuerden:__ soy objetivamente mejor que Hourai <:haniwaSmile:659872119995498507>***',
                 '**Bot > Puré > Papita > Hourai <:okinai:672173297428856862>**',
@@ -58,7 +58,7 @@ client.on('message', message => { //En caso de recibir un mensaje
                 '*Pero no seas puto <:haniwaSmile:659872119995498507>*'
             ];
             message.channel.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]);
-        } else if(msg.indexOf('hourai') !== -1) {
+        } else if(msg.indexOf('hourai') !== -1 && msg.indexOf('hourai doll') === -1) {
             const fuckustr = [
                 '*¿Pero y a tí quién te invitó? <:mayuwu:654489124413374474>*',
                 'Hourai puto <:dedede:675764852106592276>',
