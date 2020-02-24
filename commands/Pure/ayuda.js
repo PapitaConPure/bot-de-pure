@@ -35,8 +35,8 @@ module.exports = {
                     `\t╠ \`${global.p_pure}papita\` comando de lechita:tm: de Papita con Puré:registered:.\n` +
                     `\t║ \t\t╚ ***En canales marcados como "NSFW", mandará un shitpost adecuado para la situación.***\n` +
                     `\t╚ \`${global.p_pure}sassafras <¿Sassamodo?>\` comando de perturbación de Sassafras.\n` +
-                    `\t║ \t\t╠ ***En algunos canales establecidos de antemano, Sassafras liberará un 5% de su enojo en un solo mensaje.***\n` +
-                    `\t║ \t\t╚ ***Agrega de argumento \`forzar-sassamodo\` para forzar ese resultado, pero revisa bien dónde lo harás.***\n`;
+                    `\t\t\t\t╠ ***En algunos canales establecidos de antemano, Sassafras liberará un 5% de su enojo en un solo mensaje.***\n` +
+                    `\t\t\t\t╚ ***Agrega de argumento \`forzar-sassamodo\` para forzar ese resultado, pero revisa bien dónde lo harás.***\n`;
         
         str +=
             '*Drawmaku:*\n' +
