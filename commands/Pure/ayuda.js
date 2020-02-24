@@ -28,7 +28,7 @@ module.exports = {
                     `\t╠ \`${global.p_pure}fuee\` comando de frase de Dylan/Fuee.\n` +
                     `\t╠ \`${global.p_pure}imagine\` comando de grito de Imagine Breaker.\n` +
                     `\t╠ \`${global.p_pure}mari\` comando de caras (aleatorias) de Marisaac.\n` +
-                    `\t╠ \`${global.p_pure}megumin\` comando de imágenes de Megumin uwu.\n` +
+                    `\t╠ \`${global.p_pure}megumin <rango de páginas> <tags [Gelbooru]>\` comando de imágenes de Megumin uwu.\n` +
                     `\t║ \t\t╠ ***No funciona en cualquier servidor.***\n` +
                     `\t║ \t\t╚ ***En canales marcados como "NSFW", los resultados serán lewds U//w//U.***\n` +
                     `\t╠ \`${global.p_pure}orphen\` comando de grito de cuidado de Orphen.\n` +
