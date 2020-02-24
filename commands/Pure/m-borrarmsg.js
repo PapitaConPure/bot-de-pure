@@ -15,7 +15,7 @@ module.exports = {
 				message.channel.send(':warning: debes especificar el número de mensajes a borrar.');
 				return;
 			}
-			const wtf = Math.max(2, Math.min(args[0] + 1, 100));
+			const wtf = /*Math.max(2, */Math.min(args[0] + 1, 100);
 			message.channel./*bulkDelete*/send(wtf);
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR MENSAJES** (MANAGE_MESSAGES)* para usar este comando.');
     },
