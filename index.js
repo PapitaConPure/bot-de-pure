@@ -100,7 +100,7 @@ async function dibujarMillion(msg) { //Dar bienvenida a un miembro nuevo de un s
 
     //#region Imagen y Mensaje extra
     canal.send('', imagen).then(sent => {
-        if(servidor.id === '654471968200065034') { //Hourai Doll
+        if(msg.channel.guild.id === '654471968200065034') { //Hourai Doll
             canal.send(
                 `*Wao, <@${msg.author.id}>, tu mensaje fue seleccionado de entre un millón de otros mensajes. No ganaste nada, pero felicidades <:marx:675439504982671370>*\n` +
                 '*Bueno, de hecho, te ganaste esta imagen personalizada para presumir a los demás tu __suerte de uno en un millón__ <:sakiGyate:659872130216755220>*\n' +
