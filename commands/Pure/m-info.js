@@ -9,8 +9,6 @@ module.exports = {
     ],
 	execute(message, args) {
 		if(message.member.hasPermission('MANAGE_ROLES', false, true, true)) {
-			message.channel.startTyping();
-
 			const servidor = message.channel.guild; //Variable que almacena un objeto del servidor a analizar
 
 			//Contadores de canales
@@ -52,7 +50,8 @@ module.exports = {
 				mstactch += `<#${chid[i]}>: **${msgcnt[i]}** mensajes.\n`;
 
 			//Crear y usar embed
-			const Embed = new Discord.RichEmbed()
+			let Embed = []
+			Embed[0] = new Discord.RichEmbed()
 				.setColor('#ffd500')
 				.setTitle('Información del servidor OwO')
 
@@ -70,9 +69,8 @@ module.exports = {
 				.setImage(servidor.iconURL)
 				.setThumbnail(servidor.owner.user.avatarURL)
 				.setFooter(`Comando invocado por ${message.author.username}`, message.author.avatarURL);
-			message.channel.send(Embed);
 
-			const Embed2 = new Discord.RichEmbed()
+			Embed[1] = new Discord.RichEmbed()
 				.setColor('#eebb00')
 				.setTitle('Estadísticas de actividad ÛwÕ')
 
@@ -80,9 +78,10 @@ module.exports = {
 				.addField('Canales más activos', mstactch)
 
 				.setFooter(`Nota: estas estadísticas toman información desde el último reinicio del bot hasta la actualidad.`);
-			message.channel.send(Embed2);
-
-			message.channel.stopTyping();
+			
+			message.channel.send(Embed[0]).then(sent => {
+				
+			});
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR ROLES** (MANAGE ROLES)* para usar este comando.');
     },
 };
