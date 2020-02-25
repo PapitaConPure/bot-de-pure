@@ -229,7 +229,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     //#endregion
 
     if(global.cansay > 0) global.cansay--; //Hacer que el bot sea incluso menos pelotudo (aceptar comandos de sí mismo si fueron escritos con p!papa-decir)
-    //#endregion
+    //#endregion 
 });
 
 //#region Mensajes de sistema
