@@ -23,7 +23,7 @@ async function dibujarMillion(msg) { //Dar bienvenida a un miembro nuevo de un s
     //#endregion
 
     //#region Nombre del usuario
-    let Texto = `${message.author.username}`;
+    let Texto = `${msg.author.username}`;
     let fontSize = 72;
     while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
     ctx.font = `bold ${fontSize}px sans-serif`;
@@ -57,7 +57,7 @@ async function dibujarMillion(msg) { //Dar bienvenida a un miembro nuevo de un s
 	ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
 	ctx.closePath();
 	ctx.clip();
-    const avatar = await Canvas.loadImage(message.author.avatarURL);
+    const avatar = await Canvas.loadImage(msg.author.avatarURL);
 	ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
     //#endregion
     //#endregion
@@ -65,7 +65,6 @@ async function dibujarMillion(msg) { //Dar bienvenida a un miembro nuevo de un s
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
 
     //#region Imagen y Mensaje extra
-    const peoplecnt = 1 + servidor.members.filter(member => !member.user.bot).size;
     canal.send('', imagen).then(sent => {
         if(servidor.id === '654471968200065034') { //Hourai Doll
             canal.send(
