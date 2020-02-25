@@ -41,7 +41,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     console.log(`[${message.guild.name}→#${message.channel.name}] ${message.author.username}: "${message.content}"`); //Hacer que el bot de hecho sea inteligente (messages log)
 
     //#region Respuestas rápidas
-    //Mensajes weones
+    //#region Mensajes weones
     if(message.channel.guild.id === '654471968200065034') {
         const msg = message.content.toLowerCase();
         if(msg.indexOf('hourai') !== -1 && msg.indexOf('hourai doll') === -1 && (msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)) {
@@ -73,12 +73,14 @@ client.on('message', message => { //En caso de recibir un mensaje
             message.channel.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]); 
         }
     }
+    //#endregion
 
-    //Uno en un millón
+    //#region Uno en un millón
     const millionchance = Math.floor(Math.random() * 100);
     if(millionchance === 0) {
-        message.channel.send(/*`<@${message.author.id}> */`Probando. Si de por casualidad te sale este mensaje mientras hablas, ignóralo uwu.`);
+        message.channel.send(`<@${message.author.id}> Probando. Si de por casualidad te sale este mensaje mientras hablas, ignóralo uwu.`);
     }
+    //#endregion
     //#endregion
 
     //#region papa-reiniciar
