@@ -91,12 +91,10 @@ module.exports = {
 				sent.react(arrows[0])
 					.then(() => sent.react(arrows[1]))
     				.then(() => {
-						sent.channel.send('Prueba. Punto A.')
 						const collector = sent.createReactionCollector(filter, { time: 120 * 1000 });
 						collector.on('collect', reaction => {
 							SelectedEmbed = (SelectedEmbed === 0)?1:0;
 							sent.edit(Embed[SelectedEmbed]);
-							sent.channel.send('Prueba. Punto B.')
 						});
 					});
 			});
