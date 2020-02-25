@@ -50,7 +50,7 @@ module.exports = {
 				mstactch += `<#${chid[i]}>: **${msgcnt[i]}** mensajes.\n`;
 
 			//Crear y usar embed
-			let Embed = new Discord.RichEmbed()
+			const Embed = new Discord.RichEmbed()
 				.setColor('#ffd500')
 				.setTitle('Información del servidor OwO')
 
@@ -68,9 +68,8 @@ module.exports = {
 				.setImage(servidor.iconURL)
 				.setThumbnail(servidor.owner.user.avatarURL);
 			message.channel.send(Embed);
-			delete Embed;
 
-			Embed = new Discord.RichEmbed()
+			const Embed2 = new Discord.RichEmbed()
 				.setColor('#eebb00')
 				.setTitle('Estadísticas de actividad ÛwÕ')
 
@@ -78,7 +77,7 @@ module.exports = {
 				.addField('Canales más activos', mstactch)
 
 				.setFooter(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
-			message.channel.send(Embed);
+			message.channel.send(Embed2);
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR ROLES** (MANAGE ROLES)* para usar este comando.');
     },
 };
