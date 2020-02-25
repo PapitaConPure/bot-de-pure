@@ -83,18 +83,15 @@ module.exports = {
 				.setFooter(`Nota: estas estadísticas toman información desde el último reinicio del bot hasta la actualidad.`);
 			
 			const arrows = [message.client.emojis.get('681963688361590897'), message.client.emojis.get('681963688411922460')];
-			const filter = something => true;
+			const filter = rc => arrows.some(arrow => rc.id  && arrow.id);
 			message.channel.send(Embed[0]).then(sent => {
 				sent.react(arrows[0])
 					.then(() => sent.react(arrows[1]))
     				.then(() => sent.awaitReactions(filter, { time: 120 * 60 }))
 					.then(collected => {
-						if(arrows.some(arrow => arrow.id === collected.id)) {
-							SelectedEmbed = (SelectedEmbed === 0)?1:0;
-							sent.edit(Embed[SelectedEmbed]);
-						} else {
-							message.channel.send('Wea.');
-						}
+						SelectedEmbed = (SelectedEmbed === 0)?1:0;
+						sent.edit(Embed[SelectedEmbed]);
+						sent.channel.send(`Wea.`);
 					});
 			});
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR ROLES** (MANAGE ROLES)* para usar este comando.');
