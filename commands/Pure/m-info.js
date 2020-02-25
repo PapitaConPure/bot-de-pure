@@ -9,17 +9,40 @@ module.exports = {
     ],
 	execute(message, args) {
 		if(message.member.hasPermission('MANAGE_ROLES', false, true, true)) {
-			const servidor = message.channel.guild;
-			let textcnt = 0;
-			let voicecnt = 0;
-			let categorycnt = 0;
-			let peoplecnt = servidor.members.filter(member => !member.user.bot).size;
-			let botcnt = servidor.memberCount - peoplecnt;
+			const servidor = message.channel.guild; //Variable que almacena un objeto del servidor a analizar
+
+			//Contadores de canales
+			let textcnt = 0; //Texto
+			let voicecnt = 0; //Voz
+			let categorycnt = 0; //Categorías
+			let msgcnt = []; //Mensajes
+			let chid = []; //Mensajes
+
+			//Contadores de usuarios
+			let	peoplecnt = servidor.members.filter(member => !member.user.bot).size; //Biológicos
+			let botcnt = servidor.memberCount - peoplecnt; //Bots
+
+			//Procesado de información canal-por-canal
 			servidor.channels.forEach(channel => {
-				if(channel.type === 'text') textcnt++;
-				else if(channel.type === 'voice') voicecnt++;
+				if(channel.type === 'text') {
+					msgcnt[textcnt] = channel.messages.array().length;
+					chid[textcnt] = channel.id;
+					textcnt++;
+				} else if(channel.type === 'voice') voicecnt++;
 				else if(channel.type === 'category') categorycnt++;
 			});
+
+			//Ordenamiento burbuja
+			for(let i = 1; i < textcnt; i++)
+				for(let j = 0; j < (textcnt - i); j++)
+					if(msgcnt[j] < msgcnt[j + 1]) {
+						let tmp = msgcnt[j];
+						msgcnt[j] = msgcnt[j + 1];
+						msgcnt[j + 1] = tmp;
+						tmp = chid[j];
+						chid[j] = chid[j + 1];
+						chid[j + 1] = tmp;
+					}
 
 			//Crear y usar embed
 			const Embed = new Discord.RichEmbed()
