@@ -50,7 +50,7 @@ module.exports = {
 				mstactch += `<#${chid[i]}>: **${msgcnt[i]}** mensajes.\n`;
 
 			//Crear y usar embed
-			const Embed = new Discord.RichEmbed()
+			let Embed = new Discord.RichEmbed()
 				.setColor('#ffd500')
 				.setTitle('Información del servidor OwO')
 
