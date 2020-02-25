@@ -87,11 +87,13 @@ module.exports = {
 			message.channel.send(Embed[0]).then(sent => {
 				sent.react(arrows[0])
 					.then(() => sent.react(arrows[1]))
-    				.then(() => sent.awaitReactions(filter, { /*time: 120 * 60,*/ max: 30 }))
-					.then(collected => {
-						SelectedEmbed = (SelectedEmbed === 0)?1:0;
-						sent.edit(Embed[SelectedEmbed]);
-						sent.channel.send(`Wea.`);
+    				.then(() => {
+						sent.awaitReactions(filter, { /*time: 120 * 60,*/ max: 30 })
+							.then(collected => {
+								SelectedEmbed = (SelectedEmbed === 0)?1:0;
+								sent.edit(Embed[SelectedEmbed]);
+								sent.channel.send(`Wea.`);
+							});
 					});
 			});
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR ROLES** (MANAGE ROLES)* para usar este comando.');
