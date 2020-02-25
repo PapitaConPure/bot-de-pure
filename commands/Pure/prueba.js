@@ -5,6 +5,11 @@ const Canvas = require('canvas');
 module.exports = {
 	name: 'prueba',
 	execute(message, args){
-		message.channel.send('Comando de prueba. Actualmente vacío.');
+		message.channel.send(
+			':edgenw::lineh::lineh::edgene:\n' +
+			':linev:\t\t\t:linev2:\n' +
+			':linev:\t\t\t:linev2:\n' +
+			':edgesw::lineh2::lineh2::edgese:'
+		);
     },
 };
