@@ -6,10 +6,10 @@ async function dibujarMillion(msg) { //Dar bienvenida a un miembro nuevo de un s
     const canal = msg.channel; //Canal de mensajes de sistema
 
     //#region Creación de imagen
-    const canvas = Canvas.createCanvas(1275, 825);
+    const canvas = Canvas.createCanvas(1500, 750);
     const ctx = canvas.getContext('2d');
 
-    const fondo = await Canvas.loadImage('./fondo.png');
+    const fondo = await Canvas.loadImage('./fondo3.png');
     ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
     //#endregion
 
