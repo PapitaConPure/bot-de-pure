@@ -43,6 +43,11 @@ module.exports = {
 						chid[j] = chid[j + 1];
 						chid[j + 1] = tmp;
 					}
+			
+			//Creacion de top 5
+			let mstactch = ''; //Lista de canales más activos
+			for(let i = 0; i < Math.min(textcnt, 5); i++)
+				mstactch += `<#${chid[i]}>: **${msgcnt[i]}** mensajes.\n`;
 
 			//Crear y usar embed
 			const Embed = new Discord.RichEmbed()
@@ -58,10 +63,18 @@ module.exports = {
 
 				.addField('Fecha de creación', servidor.createdAt, true)
 				.addField('ID', servidor.id, true)
-
-				.setFooter(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
+				
 				.setImage(servidor.iconURL)
 				.setThumbnail(servidor.owner.user.avatarURL);
+			message.channel.send(Embed);
+			delete Embed;
+			const Embed = new Discord.RichEmbed()
+				.setColor('#eebb00')
+				.setTitle('Estadísticas de actividad ÛwÕ')
+				.addField('Usuarios más activos', `Sample Text:tm:`)
+				.addField('Canales más activos', mstactch)
+
+				.setFooter(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
 			message.channel.send(Embed);
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR ROLES** (MANAGE ROLES)* para usar este comando.');
     },

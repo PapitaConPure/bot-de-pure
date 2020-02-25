@@ -75,7 +75,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     }
 
     //Uno en un millón
-    const millionchance = Math.floor(Math.random() * 20);
+    const millionchance = Math.floor(Math.random() * 5);
     if(millionchance === 0) {
         message.channel.send(`<@${message.author.id}> Probando. Si de por casualidad te sale este mensaje mientras hablas, ignóralo uwu.`);
     }
