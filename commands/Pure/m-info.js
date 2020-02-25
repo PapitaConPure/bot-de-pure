@@ -83,12 +83,12 @@ module.exports = {
 				.setFooter(`Nota: estas estadísticas toman información desde el último reinicio del bot hasta la actualidad.`);
 			
 			const arrows = [message.client.emojis.get('681963688361590897'), message.client.emojis.get('681963688411922460')];
-			const filter = rc => rc.id === arrows[0].id || rc.id === arrows[1].id;
+			const filter = rc => true/*arrows.some(arrow => rc.emoji.id === arrow.id)*/;
 			message.channel.send(Embed[0]).then(sent => {
 				sent.react(arrows[0])
 					.then(() => sent.react(arrows[1]))
     				.then(() =>
-						sent.awaitReactions(filter, { /*time: 120 * 60,*/ max: 30 })
+						sent.awaitReactions(filter, { time: 120 * 60, max: 30 })
 							.then(collected => {
 								SelectedEmbed = (SelectedEmbed === 0)?1:0;
 								sent.edit(Embed[SelectedEmbed]);
