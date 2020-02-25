@@ -1,5 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 var global = require('../../config.json'); //Variables globales
+const Canvas = require('canvas');
 
 async function dibujarMillion(msg) { //Dar bienvenida a un miembro nuevo de un servidor
     const canal = msg.channel; //Canal de mensajes de sistema
@@ -71,17 +72,12 @@ async function dibujarMillion(msg) { //Dar bienvenida a un miembro nuevo de un s
                 `*Wao, <@${msg.author.id}>, tu mensaje fue seleccionado de entre un millón de otros mensajes. No ganaste nada, pero felicidades <:marx:675439504982671370>*\n` +
                 '*Bueno, de hecho, te ganaste esta imagen personalizada para presumir a los demás tu __suerte de uno en un millón__ <:sakiGyate:659872130216755220>*'
             );
-        } else if(servidor.id === '611732083995443210') { //Animal Realm
+        } else { //Animal Realm
             canal.send(
                 `***ES:** ¡WOAH, FELICIDADES <@${msg.author.id}>! ¡Este mensaje fue nominado como uno en un millón!*\n` +
                 '*Realmente no ganaste nada. Pero hey, ¡ahora tienes esta imagen personalizada para presumir tu __suerte de uno en un millón__!*\n\n' +
                 `***EN:** WOAH, CONGRATZ <@${msg.author.id}>! This message has been nominated as one in a million!*\n` +
                 `*You really didn't win anything. But hey, now you have this customized image to show off your __one in a million luck__!*`
-            );
-        } else { //Otros servidores
-            canal.send(
-                `¡Bienvenido al servidor **${miembro.displayName}**!\n` +
-                `*Ahora hay **${peoplecnt}** usuarios en el server.*`
             );
         }
     });
