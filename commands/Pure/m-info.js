@@ -25,7 +25,7 @@ module.exports = {
 			//Procesado de información canal-por-canal
 			servidor.channels.forEach(channel => {
 				if(channel.type === 'text') {
-					msgcnt[textcnt] = channel.messages.size;
+					msgcnt[textcnt] = channel.messages.fetchMessages({ limit: 100 }).size;
 					chid[textcnt] = channel.id;
 					textcnt++;
 				} else if(channel.type === 'voice') voicecnt++;
