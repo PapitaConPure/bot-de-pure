@@ -50,7 +50,9 @@ module.exports = {
 				mstactch += `<#${chid[i]}>: **${msgcnt[i]}** mensajes.\n`;
 
 			//Crear y usar embed
-			let Embed = []
+			let SelectedEmbed = 0;
+			let Embed = [];
+
 			Embed[0] = new Discord.RichEmbed()
 				.setColor('#ffd500')
 				.setTitle('Información del servidor OwO')
@@ -80,12 +82,16 @@ module.exports = {
 				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
 				.setFooter(`Nota: estas estadísticas toman información desde el último reinicio del bot hasta la actualidad.`);
 			
-			const filter = a => b && c;
+			const arrows = [message.client.emojis.get('681963688361590897'), message.client.emojis.get('681963688411922460')];
+			const filter = rc => arrows.some(arrow => rc.id  && arrow.id);
 			message.channel.send(Embed[0]).then(sent => {
-				sent.react(sent.client.emojis.get('123123123123'))
-					.then(() => sent.react(sent.client.emojis.get('')))
+				sent.react(arrows[0])
+					.then(() => sent.react(arrows[1]))
     				.then(() => sent.awaitReactions(filter, { time: 120 * 60 }))
-					.then(collected => console.log(collected.size));
+					.then(collected => {
+						SelectedEmbed = (SelectedEmbed === 0)?1:0;
+						sent.edit(Embed[SelectedEmbed]);
+					});
 			});
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR ROLES** (MANAGE ROLES)* para usar este comando.');
     },
