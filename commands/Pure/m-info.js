@@ -10,7 +10,7 @@ module.exports = {
 	execute(message, args) {
 		if(message.member.hasPermission('MANAGE_ROLES', false, true, true)) {
 			message.channel.startTyping();
-			
+
 			const servidor = message.channel.guild; //Variable que almacena un objeto del servidor a analizar
 
 			//Contadores de canales

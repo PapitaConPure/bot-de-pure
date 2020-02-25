@@ -44,7 +44,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     //#region Mensajes weones
     if(message.channel.guild.id === '654471968200065034') {
         const msg = message.content.toLowerCase();
-        if(msg.indexOf('hourai') !== -1 && msg.indexOf('hourai doll') === -1 && (msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)) {
+        if(msg.indexOf('hourai') !== -1 && msg.indexOf('hourai doll') === msg.indexOf('hourai') && (msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)) {
             const fuckustr = [
                 '***__Recuerden:__ soy objetivamente mejor que Hourai <:haniwaSmile:659872119995498507>***',
                 '**Bot > Puré > Papita > Hourai <:okinai:672173297428856862>**',
@@ -76,7 +76,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     //#endregion
 
     //#region Uno en un millón
-    const millionchance = Math.floor(Math.random() * 100);
+    const millionchance = Math.floor(Math.random() * 1000000);
     if(millionchance === 0) {
         message.channel.send(`<@${message.author.id}> Probando. Si de por casualidad te sale este mensaje mientras hablas, ignóralo uwu.`);
     }
