@@ -10,6 +10,6 @@ module.exports = {
 			'<:uwu3:681937073401233537>',
 			'<:uwu4:681937074047549467>'
 		];
-		message.channel.send(uwusopt[Math.floor(Math.random()) * uwusopt.length]);
+		message.channel.send(uwusopt[Math.floor(Math.random() * uwusopt.length)]);
     },
 };
