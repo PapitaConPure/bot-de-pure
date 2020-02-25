@@ -82,20 +82,24 @@ module.exports = {
 				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
 				.setFooter(`Nota: estas estadísticas toman información desde el último reinicio del bot hasta la actualidad.`);
 			
+			message.channel.stopTyping();
+			
 			const arrows = [message.client.emojis.get('681963688361590897'), message.client.emojis.get('681963688411922460')];
-			const filter = rc => true/*arrows.some(arrow => rc.emoji.id === arrow.id)*/;
+			const filter = rc => arrows.some(arrow => rc.emoji.id === arrow.id);
 			message.channel.send(Embed[0]).then(sent => {
 				sent.react(arrows[0])
 					.then(() => sent.react(arrows[1]))
-    				.then(() =>
-						sent.awaitReactions(filter, { time: 120 * 60, max: 30 })
-							.then(collected => {
-								SelectedEmbed = (SelectedEmbed === 0)?1:0;
-								sent.edit(Embed[SelectedEmbed]);
-								sent.channel.send(`Wea.`);
-							})
-					)
+    				.then(() => {
+						sent.channel.send('Prueba. Punto A.')
+						const collector = sent.createReactionCollector(filter, { time: 120 * 60 });
+						collector.on('collect', reaction => {
+							SelectedEmbed = (SelectedEmbed === 0)?1:0;
+							sent.edit(Embed[SelectedEmbed]);
+							sent.channel.send('Prueba. Punto B.')
+						});
+					});
 			});
+			message.channel.startTyping();
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR ROLES** (MANAGE ROLES)* para usar este comando.');
     },
 };
