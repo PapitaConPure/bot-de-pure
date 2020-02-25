@@ -53,6 +53,7 @@ module.exports = {
 			const Embed = new Discord.RichEmbed()
 				.setColor('#ffd500')
 				.setTitle('Información del servidor OwO')
+
 				.addField('Nombre', servidor.name, true)
 				.addField('Usuarios', `:wrestlers: x ${peoplecnt}\n:robot: x ${botcnt}`, true)
 				.addField('Canales', `:hash: x ${textcnt}\n:loud_sound: x ${voicecnt}\n:label: x ${categorycnt}`, true)
@@ -68,9 +69,11 @@ module.exports = {
 				.setThumbnail(servidor.owner.user.avatarURL);
 			message.channel.send(Embed);
 			delete Embed;
-			const Embed = new Discord.RichEmbed()
+
+			Embed = new Discord.RichEmbed()
 				.setColor('#eebb00')
 				.setTitle('Estadísticas de actividad ÛwÕ')
+
 				.addField('Usuarios más activos', `Sample Text:tm:`)
 				.addField('Canales más activos', mstactch)
 
