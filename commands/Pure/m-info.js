@@ -93,7 +93,7 @@ module.exports = {
 							SelectedEmbed = (SelectedEmbed === 0)?1:0;
 							sent.edit(Embed[SelectedEmbed]);
 						} else {
-							message.send('Wea.');
+							message.channel.send('Wea.');
 						}
 					});
 			});
