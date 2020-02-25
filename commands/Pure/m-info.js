@@ -68,7 +68,7 @@ module.exports = {
 
 				.setImage(servidor.iconURL)
 				.setThumbnail(servidor.owner.user.avatarURL)
-				.setFooter(`Comando invocado por ${message.author.username}`, message.author.avatarURL);
+				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL);
 
 			Embed[1] = new Discord.RichEmbed()
 				.setColor('#eebb00')
@@ -77,10 +77,15 @@ module.exports = {
 				.addField('Usuarios más activos', `Sample Text:tm:`)
 				.addField('Canales más activos', mstactch)
 
+				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
 				.setFooter(`Nota: estas estadísticas toman información desde el último reinicio del bot hasta la actualidad.`);
 			
+			const filter = a => b && c;
 			message.channel.send(Embed[0]).then(sent => {
-				
+				sent.react(client.emojis.get('123123123123'))
+					.then(() => sent.react(client.emojis.get('')))
+    				.then(() => sent.awaitReactions(filter, { time: 120 * 60 }))
+					.then(collected => console.log(collected.size));
 			});
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR ROLES** (MANAGE ROLES)* para usar este comando.');
     },
