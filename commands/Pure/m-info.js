@@ -10,6 +10,7 @@ module.exports = {
 	execute(message, args) {
 		if(message.member.hasPermission('MANAGE_ROLES', false, true, true)) {
 			message.channel.startTyping();
+			
 			const servidor = message.channel.guild; //Variable que almacena un objeto del servidor a analizar
 
 			//Contadores de canales
@@ -26,7 +27,7 @@ module.exports = {
 			//Procesado de información canal-por-canal
 			servidor.channels.forEach(channel => {
 				if(channel.type === 'text') {
-					if(channel.manageable) channel.fetchMessages({ limit: 100 }).then(messages => msgcnt[textcnt] = messages.size);
+					msgcnt[textcnt] = channel.messages.size;
 					chid[textcnt] = channel.id;
 					textcnt++;
 				} else if(channel.type === 'voice') voicecnt++;
@@ -65,9 +66,10 @@ module.exports = {
 
 				.addField('Fecha de creación', servidor.createdAt, true)
 				.addField('ID', servidor.id, true)
-				
+
 				.setImage(servidor.iconURL)
-				.setThumbnail(servidor.owner.user.avatarURL);
+				.setThumbnail(servidor.owner.user.avatarURL)
+				.setFooter(`Comando invocado por ${message.author.username}`, message.author.avatarURL);
 			message.channel.send(Embed);
 
 			const Embed2 = new Discord.RichEmbed()
@@ -77,8 +79,9 @@ module.exports = {
 				.addField('Usuarios más activos', `Sample Text:tm:`)
 				.addField('Canales más activos', mstactch)
 
-				.setFooter(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
+				.setFooter(`Nota: estas estadísticas toman información desde el último reinicio del bot hasta la actualidad.`);
 			message.channel.send(Embed2);
+
 			message.channel.stopTyping();
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR ROLES** (MANAGE ROLES)* para usar este comando.');
     },
