@@ -70,7 +70,8 @@ module.exports = {
 
 				.setImage(servidor.iconURL)
 				.setThumbnail(servidor.owner.user.avatarURL)
-				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL);
+				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
+				.setFooter(`Estas estadísticas toman información en tiempo real.`);
 
 			Embed[1] = new Discord.RichEmbed()
 				.setColor('#eebb00')
@@ -80,18 +81,18 @@ module.exports = {
 				.addField('Canales más activos', mstactch)
 
 				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
-				.setFooter(`Nota: estas estadísticas toman información desde el último reinicio del bot hasta la actualidad.`);
+				.setFooter(`Estas estadísticas toman información desde el último reinicio del bot hasta la actualidad.`);
 			
 			message.channel.stopTyping();
 			
 			const arrows = [message.client.emojis.get('681963688361590897'), message.client.emojis.get('681963688411922460')];
-			const filter = rc => arrows.some(arrow => rc.emoji.id === arrow.id);
+			const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
 			message.channel.send(Embed[0]).then(sent => {
 				sent.react(arrows[0])
 					.then(() => sent.react(arrows[1]))
     				.then(() => {
 						sent.channel.send('Prueba. Punto A.')
-						const collector = sent.createReactionCollector(filter, { time: 120 * 60 });
+						const collector = sent.createReactionCollector(filter, { time: 120 * 1000 });
 						collector.on('collect', reaction => {
 							SelectedEmbed = (SelectedEmbed === 0)?1:0;
 							sent.edit(Embed[SelectedEmbed]);
