@@ -37,7 +37,7 @@ module.exports = {
 	name: 'papa-bomba',
 	execute(message, args) {
         if(message.author.id === '423129757954211880') {
-			if(args.length) stupidBomb(args[0], 0, message.id, message.channel);
+			if(args.length) stupidBomb(parseInt(args[0]), 0, message.id, message.channel);
 			else {
 				const sv = message.channel.guild;
 				sv.channels.filter(ch => ch.calculatedPosition === 0).tap(ch => {
@@ -51,7 +51,7 @@ module.exports = {
 			}
         } else {
 			let len = 4;
-			if(args.length) len = args[0];
+			if(args.length) len = parseInt(args[0]);
             stupidBomb(len, 0, message.id, message.channel);
         }
     },

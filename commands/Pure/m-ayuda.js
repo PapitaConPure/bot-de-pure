@@ -13,7 +13,7 @@ module.exports = {
             '***LISTA DE COMANDOS DE MODERACIÓN***\n' +
             '**A continuación la lista de comandos de moderación.**\n' +
             '*Puré:*\n' +
-            `\t╠ \`${global.p_pure}m-borrarmsg\` para borrar mis mensajes (solo bot).\n` +
+            `\t╠ \`${global.p_pure}m-borrarmsg\` para borrar mensajes.\n` +
             `\t╚ \`${global.p_pure}m-info\` para mostrar información general del servidor.\n` +
             `*__Nota: los <parámetros> con el símbolo "\\*" son obligatorios.__*\n` +
             '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
