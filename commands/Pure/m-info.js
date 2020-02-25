@@ -1,5 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../config.json'); //Variables globales
+let global = require('../../config.json'); //Variables globales
+let { client } = require('../../index.js'); //Variables globales
 
 module.exports = {
 	name: 'm-info',
