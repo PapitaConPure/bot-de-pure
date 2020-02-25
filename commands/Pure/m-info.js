@@ -1,6 +1,5 @@
 const Discord = require('discord.js'); //Integrar discord.js
 let global = require('../../config.json'); //Variables globales
-let { client } = require('../../index.js'); //Variables globales
 
 module.exports = {
 	name: 'm-info',
@@ -83,8 +82,8 @@ module.exports = {
 			
 			const filter = a => b && c;
 			message.channel.send(Embed[0]).then(sent => {
-				sent.react(client.emojis.get('123123123123'))
-					.then(() => sent.react(client.emojis.get('')))
+				sent.react(sent.client.emojis.get('123123123123'))
+					.then(() => sent.react(sent.client.emojis.get('')))
     				.then(() => sent.awaitReactions(filter, { time: 120 * 60 }))
 					.then(collected => console.log(collected.size));
 			});
