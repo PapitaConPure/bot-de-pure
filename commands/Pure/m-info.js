@@ -83,7 +83,7 @@ module.exports = {
 				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
 				.setFooter(`Estas estadísticas toman información desde el último reinicio del bot hasta la actualidad.`);
 			
-			message.channel.stopTyping();
+			message.channel.stopTyping(true);
 			
 			const arrows = [message.client.emojis.get('681963688361590897'), message.client.emojis.get('681963688411922460')];
 			const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
