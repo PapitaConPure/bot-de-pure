@@ -25,6 +25,7 @@ module.exports = {
             `\t╠ \`${global.p_drmk}lista\` para mostrar la lista de jugadores y sus puntajes.\n` +
             `\t╠ \`${global.p_drmk}turno\` para ver a quién le toca dibujar.\n` +
             `\t╠ \`${global.p_drmk}ver\` para reenviar la imagen del danmaku dibujado.\n` +
+            `\t╠ \`${global.p_drmk}temática\` para reenviar la temática del Drawmaku.\n` +
             `\t╚ \`${global.p_drmk}saltar\` para dejar de dibujar (si se está dibujando).\n` +
             `*__Nota: los <parámetros> con el símbolo "\\*" son obligatorios.__*\n` +
             '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'

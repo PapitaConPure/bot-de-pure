@@ -167,7 +167,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     if(millionchance === 0) {
         message.channel.startTyping();
         dibujarMillion(message);
-        message.channel.stopTyping();
+        message.channel.stopTyping(true);
     }
     //#endregion
     //#endregion
@@ -179,7 +179,7 @@ client.on('message', message => { //En caso de recibir un mensaje
             message.channel.send(':arrows_counterclockwise: apagando...\n_Nota: puedes comprobar si el bot se reinició viendo el log del proceso._')
             .then(sent => {
                 console.log('Apagando.');
-                message.channel.stopTyping();
+                message.channel.stopTyping(true);
                 process.exit();
             }).catch(error => {
                 console.error(error);
@@ -195,8 +195,6 @@ client.on('message', message => { //En caso de recibir un mensaje
     if(message.content.toLowerCase().startsWith(p_drmk)) pdetect = p_drmk;
     else if(message.content.toLowerCase().startsWith(p_pure)) pdetect = p_pure;
     else return; //Salir si no se encuentra el prefijo
-
-    message.channel.startTyping();
 
     const args = message.content.slice(p_drmk.length).split(/ +/); //Argumentos ingresados
     const nombrecomando = args.shift().toLowerCase(); //Comando ingresado
@@ -214,6 +212,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     //#endregion
 
     //#region Ejecución de Comandos
+    message.channel.startTyping();
     try {
         comando.execute(message, args);
     } catch(error) {
@@ -225,7 +224,7 @@ client.on('message', message => { //En caso de recibir un mensaje
             ':radioactive: :regional_indicator_w: :regional_indicator_a: :regional_indicator_r: :regional_indicator_n: :regional_indicator_i: :regional_indicator_n: :regional_indicator_g: :radioactive:'
         );
     }
-    message.channel.stopTyping();
+    message.channel.stopTyping(true);
 
     //Empezar cuenta regresiva luego de mod-empezar
     if(global.trest > 0 && !global.empezando) {

@@ -15,6 +15,8 @@ module.exports = {
             '*Puré:*\n' +
             `\t╠ \`${global.p_pure}m-borrarmsg\` para borrar mensajes.\n` +
             `\t╚ \`${global.p_pure}m-info\` para mostrar información general del servidor.\n` +
+            '*Drawmaku:*\n' +
+            `\t╚ \`${global.p_drmk}ayuda \` ayuda expandida de *__Drawmaku (moderación)__*.\n` +
             `*__Nota: los <parámetros> con el símbolo "\\*" son obligatorios.__*\n` +
             '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
         );
