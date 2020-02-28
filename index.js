@@ -149,7 +149,7 @@ client.on('message', message => { //En caso de recibir un mensaje
                 ch.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]);
             };
             setTimeout(responder, 800, message.channel);
-        } else if(msg.indexOf('hourai') !== -1 && msg.indexOf('hourai doll') === -1) {
+        } else if(msg.indexOf('hourai') !== -1 && msg.indexOf('hourai doll') === -1 && msg.indexOf('houraidoll') === -1) {
             const fuckustr = [
                 '*¿Pero y a tí quién te invitó? <:mayuwu:654489124413374474>*',
                 'Hourai puto <:dedede:675764852106592276>',
