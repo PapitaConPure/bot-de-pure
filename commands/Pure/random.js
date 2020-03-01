@@ -12,7 +12,7 @@ module.exports = {
         //let randchar = '';
 
         for(let i = 0; i < 11; i++)
-            videostr += toString(Math.floor(Math.random() * 256));
+            videostr += String.fromCharCode(33 + Math.floor(Math.random() * (256 - 33)));
 
         message.channel.send(`https://www.youtube.com/watch?v=${videostr}`);
     },
