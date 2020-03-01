@@ -154,7 +154,7 @@ module.exports = {
 				sent.react(arrows[0])
 					.then(() => sent.react(arrows[1]))
     				.then(() => {
-						const collector = sent.createReactionCollector(filter, { time: 120 * 1000 });
+						const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
 						collector.on('collect', reaction => {
 							const maxpage = 2;
 							if(reaction.emoji.id === arrows[0].id) SelectedEmbed = (SelectedEmbed > 0)?(SelectedEmbed - 1):maxpage;
