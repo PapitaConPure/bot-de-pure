@@ -20,7 +20,8 @@ module.exports = {
 
         message.channel.send(`https://www.youtube.com/watch?v=${videostr}`).then(sent => {
             const filter = rct => rct.emoji.id === '683610811008024609';
-            sent.react(message.client.emojis.get('683610811008024609'))
+            const PogChamp = message.client.emojis.get('683610811008024609');
+            sent.react(PogChamp)
                 .then(() => {
                     const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
                     collector.on('collect', reaction => {
