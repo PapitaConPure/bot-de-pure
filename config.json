@@ -47,5 +47,6 @@
     "chi": "<#sincanal>",
     "goingnext": false,
     "imgcollector": [],
-    "cntimagenes": 0
+    "cntimagenes": 0,
+    "startuptime": 0
 }

@@ -14,6 +14,8 @@ module.exports = {
             '**A continuación la lista de comandos.**\n' +
             '*Puré:*\n' +
             `\t╠ \`${global.p_pure}café <tags [Giphy]>\` para mostrar imágenes de café.\n` +
+            `\t╠ \`${global.p_pure}decir <¿borrar original?> <texto*>\` para hacerme decir algo.\n` +
+            `\t║ \t\t╚ ***Agrega de argumento \`del\` para borrar __tu__ mensaje.***\n` +
             `\t╠ \`${global.p_pure}gatos\` para mostrar imágenes de gatitos.\n` +
             `\t╠ \`${global.p_pure}touhou <rango de páginas> <tags [Gelbooru]>\` para mostrar imágenes de tohas.\n` +
             `\t║ \t\t╚ ***En canales marcados como "NSFW", los resultados serán lewds.***\n` +
@@ -34,7 +36,7 @@ module.exports = {
                     `\t╠ \`${global.p_pure}orphen\` comando de grito de cuidado de Orphen.\n` +
                     `\t╠ \`${global.p_pure}papita\` comando de lechita:tm: de Papita con Puré:registered:.\n` +
                     `\t║ \t\t╚ ***En canales marcados como "NSFW", mandará un shitpost adecuado para la situación.***\n` +
-                    `\t╚ \`${global.p_pure}sassafras <¿Sassamodo?>\` comando de perturbación de Sassafras.\n` +
+                    `\t╚ \`${global.p_pure}sassafras <¿sassamodo?>\` comando de perturbación de Sassafras.\n` +
                     `\t\t\t\t╠ ***En algunos canales establecidos de antemano, Sassafras liberará un 5% de su enojo en un solo mensaje.***\n` +
                     `\t\t\t\t╚ ***Agrega de argumento \`forzar-sassamodo\` para forzar ese resultado, pero revisa bien dónde lo harás.***\n`;
         

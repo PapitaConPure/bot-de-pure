@@ -33,6 +33,7 @@ for(const file of commandFiles) {
 client.on('ready', () => { //Confirmación de inicio y cambio de estado
 	console.log('Bot conectado y funcionando.');
     client.user.setActivity("UwU 24/7", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' });
+    global.startuptime = Date.now();
     //func.saveState();//func.reloadState();
 });
 
@@ -417,7 +418,7 @@ client.on('guildMemberRemove', member => {
     try {
         if(!member.user.bot) dibujarDespedida(member);
         else member.guild.channels.get(member.guild.systemChannelID).send(
-            `**${miembro.displayName}** ya no es parte de la pandilla de bots de este servidor :[\n`
+            `**${member.displayName}** ya no es parte de la pandilla de bots de este servidor :[\n`
         );
     } catch(error) {
         console.log('Ha ocurrido un error al dar la despedida.');
