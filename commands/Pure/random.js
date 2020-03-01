@@ -9,10 +9,14 @@ module.exports = {
     ],
 	execute(message, args) {
         let videostr = '';
-        //let randchar = '';
+        let randchar = 
+            '1234567890' +
+            'QWERTYUIOPASDFGHJKLZXCVBNM' +
+            'qwertyuiopasdfghjklzxcvbnm' +
+            '-_';
 
         for(let i = 0; i < 11; i++)
-            videostr += String.fromCharCode(33 + Math.floor(Math.random() * (256 - 33)));
+            videostr += randchar[Math.floor(Math.random() * 64)];
 
         message.channel.send(`https://www.youtube.com/watch?v=${videostr}`);
     },
