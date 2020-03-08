@@ -9,6 +9,7 @@ module.exports = {
     ],
 	execute(message, args) {
 		if(message.member.hasPermission('MANAGE_ROLES', false, true, true)) {
+			message.channel.startTyping();
 			const servidor = message.channel.guild; //Variable que almacena un objeto del servidor a analizar
 			let selectch;
 
@@ -150,6 +151,7 @@ module.exports = {
 			
 			const arrows = [message.client.emojis.get('681963688361590897'), message.client.emojis.get('681963688411922460')];
 			const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
+			message.channel.stopTyping(true);
 			message.channel.send(Embed[0]).then(sent => {
 				sent.react(arrows[0])
 					.then(() => sent.react(arrows[1]))

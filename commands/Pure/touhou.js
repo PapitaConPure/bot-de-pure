@@ -10,6 +10,7 @@ const getRandomInt = function(_max) {
 }
 
 const tmpfunc = async function(tmpch, arglist, tmpauth) {
+	message.channel.startTyping();
 	let BotMessage = -1;
 	let srchtags = 'touhou -guro -furry -vore -webm -audio -comic -4koma rating:';
 	let embedcolor;
@@ -169,6 +170,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 		}
 	}
 
+	//#region Presentación
 	if(tmpch.nsfw) {
 		srchtags += 'explicit -lolicon -loli -shotacon -bestiality';// -rumia -cirno -remilia_scarlet -flandre_scarlet -chen -inaba_tewi';
 		//srchtags += ' -kisume -sukuna_shinmyoumaru -clownpiece -ebisu_eika -luna_child -star_sapphire -sunny_milk -motoori_kosuzu -hieda_no_akyuu';
@@ -179,6 +181,9 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 		embedcolor = '#fa7b62';
 		embedtitle = 'Tohas uwu';
 	}
+	//#endregion
+	
+	//#region Preparación de búsqueda
 	let srchpg = 0;
 	if(arglist.length) {
 		if(isNaN(arglist[0])) srchtags += ` ${arglist[0]}`;
@@ -192,6 +197,8 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 		for(let i = 1; i < arglist.length; i++)
 			srchtags += ' ' + arglist[i];
 	}
+	//#endregion
+	
 	const srchlimit = 42;
 	{
 		let i = 0;
@@ -202,6 +209,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 		).then((data) => {
 			data.data.forEach(image => { results++; });
 
+			//#region Enviar imagen aleatoria, si hay al menos una
 			const selectedpic = getRandomInt(results);
 			data.data.forEach(image => {
 				if(image !== undefined && i === selectedpic) {
@@ -220,8 +228,10 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 				}
 				i++;
 			});
-
+			//#endregion
+			
 			if(foundpic) {
+				//#region Eliminado de emergencia
 				const filter = m => (m.content.toLowerCase() === 'd' || m.content.toLowerCase().startsWith('p!')) && m.author.id === tmpauth.id;
 				global.imgcollector = tmpch.createMessageCollector(filter, { time: 120000 });
 				global.imgcollector.on('collect', m => {
@@ -233,11 +243,13 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 				global.imgcollector.on('end', collected => {
 					console.log(`Collected ${collected.size} items`);
 				});
+				//#endregion
 			} else tmpch.send(':warning: No hay resultados para estas tags. Prueba usando tags diferentes o un menor rango de páginas :C');
 		}).catch((error) => {
 			tmpch.send(':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags o usando un menor rango de páginas umu');
 			console.error(error);
 		});
+		message.channel.stopTyping(true);
 	}
 }
 

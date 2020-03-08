@@ -176,7 +176,6 @@ client.on('message', message => { //En caso de recibir un mensaje
     //#region papa-reiniciar
     if(message.content.toLowerCase().startsWith(`${p_pure}papa-reiniciar`)) {
         if (message.author.id === '423129757954211880') {
-            message.channel.startTyping();
             message.channel.send(':arrows_counterclockwise: apagando...\n_Nota: puedes comprobar si el bot se reinició viendo el log del proceso._')
             .then(sent => {
                 console.log('Apagando.');
@@ -213,7 +212,6 @@ client.on('message', message => { //En caso de recibir un mensaje
     //#endregion
 
     //#region Ejecución de Comandos
-    message.channel.startTyping();
     try {
         comando.execute(message, args);
     } catch(error) {
@@ -225,7 +223,6 @@ client.on('message', message => { //En caso de recibir un mensaje
             ':radioactive: :regional_indicator_w: :regional_indicator_a: :regional_indicator_r: :regional_indicator_n: :regional_indicator_i: :regional_indicator_n: :regional_indicator_g: :radioactive:'
         );
     }
-    message.channel.stopTyping(true);
 
     //Empezar cuenta regresiva luego de mod-empezar
     if(global.trest > 0 && !global.empezando) {
@@ -243,6 +240,7 @@ client.on('message', message => { //En caso de recibir un mensaje
 async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo de un servidor
     const servidor = miembro.guild; //Servidor
     const canal = servidor.channels.get(servidor.systemChannelID); //Canal de mensajes de sistema
+    canal.startTyping();
 
     //#region Creación de imagen
     const canvas = Canvas.createCanvas(1275, 825);
@@ -330,11 +328,13 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
         }
     });
     //#endregion
+    canal.stopTyping();
 }
 
 async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un servidor
     const servidor = miembro.guild;
     const canal = servidor.channels.get(servidor.systemChannelID);
+    canal.startTyping();
 
     //#region Creación de imagen
     const canvas = Canvas.createCanvas(1500, 900);
@@ -399,6 +399,7 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
         }
     });
     //#endregion
+    canal.stopTyping();
 }
  
 client.on('guildMemberAdd', member => {
