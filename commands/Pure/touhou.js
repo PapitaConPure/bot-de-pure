@@ -10,7 +10,7 @@ const getRandomInt = function(_max) {
 }
 
 const tmpfunc = async function(tmpch, arglist, tmpauth) {
-	message.channel.startTyping();
+	tmpch.startTyping();
 	let BotMessage = -1;
 	let srchtags = 'touhou -guro -furry -vore -webm -audio -comic -4koma rating:';
 	let embedcolor;
@@ -249,7 +249,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 			tmpch.send(':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags o usando un menor rango de páginas umu');
 			console.error(error);
 		});
-		message.channel.stopTyping(true);
+		tmpch.stopTyping(true);
 	}
 }
 
