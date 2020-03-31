@@ -37,7 +37,7 @@ client.on('ready', () => { //Confirmación de inicio y cambio de estado
     //func.saveState();//func.reloadState();
 });
 
-async function dibujarMillion(msg) { //Dar bienvenida a un miembro nuevo de un servidor
+async function dibujarMillion(msg) { //Dar felicitaciones al desgraciado
     const canal = msg.channel; //Canal de mensajes de sistema
 
     //#region Creación de imagen
@@ -97,7 +97,7 @@ async function dibujarMillion(msg) { //Dar bienvenida a un miembro nuevo de un s
     //#endregion
     //#endregion
 
-    const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
+    const imagen = new Discord.Attachment(canvas.toBuffer(), 'felicidades.png');
 
     //#region Imagen y Mensaje extra
     canal.send('', imagen).then(sent => {
