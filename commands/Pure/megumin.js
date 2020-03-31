@@ -97,6 +97,10 @@ module.exports = {
 			message.channel.send('_Este comando solo puede ser usado en la superficie..._');
 			return;
 		}
+		if(message.guild.id === '654471968200065034' && message.channel.nsfw) {
+			message.channel.send('*fokiu.*');
+			return;
+		}
 		tmpfunc(message.channel, args, message.author);
     },
 };
