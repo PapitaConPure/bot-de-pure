@@ -212,7 +212,8 @@ client.on('message', message => { //En caso de recibir un mensaje
     //#endregion
 
     //#region Ejecución de Comandos
-    try {
+    message.channel.send('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+    /*try {
         comando.execute(message, args);
     } catch(error) {
         console.log('Ha ocurrido un error al ingresar un comando.');
@@ -222,7 +223,7 @@ client.on('message', message => { //En caso de recibir un mensaje
             'Ha ocurrido un error inesperado, porfavor reportar a Papita inmediatamente.\n' +
             ':radioactive: :regional_indicator_w: :regional_indicator_a: :regional_indicator_r: :regional_indicator_n: :regional_indicator_i: :regional_indicator_n: :regional_indicator_g: :radioactive:'
         );
-    }
+    }*/
 
     //Empezar cuenta regresiva luego de mod-empezar
     if(global.trest > 0 && !global.empezando) {
