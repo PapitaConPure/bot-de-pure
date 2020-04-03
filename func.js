@@ -187,7 +187,7 @@ module.exports = {
         console.log('Fuck.');
         if(miembro.roles.size === 1) {
             canal.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474>`);
-            setTimeout(module.exports.askForRole, 1000 * 60 * 5, miembro);
+            setTimeout(module.exports.askForRole, 1000 * 60 * 5, miembro , canal);
         } else if(miembro.roles.size === 2) {
             canal.send(`Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>`);
             setTimeout(module.exports.forceRole, 1000 * 20, miembro, canal);
@@ -208,7 +208,7 @@ module.exports = {
                 '671851234541699092', //Russian Doll
                 '671851228308963348', //Orléans Doll
             ];
-            miembro.roles.add(colores[Math.floor(Math.random(7))]);
+            miembro.roles.add(colores[Math.floor(Math.random() * 7)]);
         } else {
             message.channel.send('Al fin qliao ya teni tu rol. Q esti bien po, tonce <:uwu:681935702308552730>');
         }
