@@ -312,7 +312,7 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
                 'WENO YA PO CONCHESUMARE. <@&654472238510112799>, vengan a saludar maricones <:marx:675439504982671370>\n' +
                 `*Por cierto, ahora hay **${peoplecnt}** aweonaos en el server.*`
             );
-            setTimeout(func.askForRole, 1000 * 30, miembro);
+            setTimeout(func.askForRole, 1000 * 30, miembro, canal);
         } else if(servidor.id === '611732083995443210') { //Animal Realm
             canal.send(
                 `Welcome to the server **${miembro.displayName}**! / ¡Bienvenido/a al server **${miembro.displayName}**!\n\n` +
