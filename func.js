@@ -184,15 +184,18 @@ module.exports = {
     },
 
     askForRole: function(miembro) {
-        if(miembro.roles.highest.id === '671826704343236629') {
+        if(miembro.roles.size === 0) {
+            message.channel.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474>`);
+            setTimeout(module.exports.askForRole, 1000 * 60 * 5, miembro);
+        } else if(miembro.roles.size === 1) {
             message.channel.send(`Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>`);
-            setTimeout(module.exports.forceRole, 1000 * 60);
+            setTimeout(module.exports.forceRole, 1000 * 60, miembro);
         } else {
             message.channel.send('Weno, ya teni tu rol, q esti bien po <:Junky:651290323557023753>');
         }
     },
 
-    forceRole: function() {
+    forceRole: function(miembro) {
         if(miembro.roles.highest.id === '671826704343236629') {
             message.channel.send(`<@${miembro.user.id}> cagaste altiro watón fome <:why:691222027738152971>`);
             const colores = [
