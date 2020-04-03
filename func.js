@@ -185,10 +185,10 @@ module.exports = {
 
     askForRole: function(miembro, canal) {
         console.log('Fuck.');
-        if(miembro.roles.size === 0) {
+        if(miembro.roles.size === 1) {
             canal.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474>`);
             setTimeout(module.exports.askForRole, 1000 * 60 * 5, miembro);
-        } else if(miembro.roles.size === 1) {
+        } else if(miembro.roles.size === 2) {
             canal.send(`Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>`);
             setTimeout(module.exports.forceRole, 1000 * 60, miembro, canal);
         } else {
