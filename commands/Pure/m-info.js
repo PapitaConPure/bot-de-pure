@@ -142,7 +142,7 @@ module.exports = {
 				.setTitle('Estadísticas de tiempo UwU')
 
 				.addField('Tiempo de vida del servidor', 
-					`**${serveryear}** años, **${servermonth}** meses, **${serverday}** días, **${serverhour}**º**${servermin}**' **${serversec}.${serverms}**''`)
+					`**${serveryear}** años, **${servermonth}** meses, **${serverday}** días, **${serverhour}**º **${servermin}**' **${serversec}.${serverms}**''`)
 				.addField('Tiempo de funcionamiento del bot', 
 					`**${bothour}**hs. **${botmin}**min. **${botsec}.${botms}**seg.`)
 
@@ -151,7 +151,6 @@ module.exports = {
 			
 			const arrows = [message.client.emojis.get('681963688361590897'), message.client.emojis.get('681963688411922460')];
 			const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
-			message.channel.stopTyping(true);
 			message.channel.send(Embed[0]).then(sent => {
 				sent.react(arrows[0])
 					.then(() => sent.react(arrows[1]))
@@ -163,7 +162,7 @@ module.exports = {
 							else SelectedEmbed = (SelectedEmbed < maxpage)?(SelectedEmbed + 1):0;
 							sent.edit(Embed[SelectedEmbed]);
 						});
-					});
+					}).then(() => message.channel.stopTyping(true));
 			});
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR ROLES** (MANAGE ROLES)* para usar este comando.');
     },
