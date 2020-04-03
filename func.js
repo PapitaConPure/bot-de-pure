@@ -197,7 +197,7 @@ module.exports = {
     },
 
     forceRole: function(miembro) {
-        if(miembro.roles.highest.id === '671826704343236629') {
+        if(miembro.roles.size === 2) {
             canal.send(`<@${miembro.user.id}> cagaste altiro watón fome <:why:691222027738152971>`);
             const colores = [
                 '671851233870479375', //France Doll
