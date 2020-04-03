@@ -184,6 +184,7 @@ module.exports = {
     },
 
     askForRole: function(miembro) {
+        console.log('Fuck.');
         if(miembro.roles.size === 0) {
             message.channel.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474>`);
             setTimeout(module.exports.askForRole, 1000 * 60 * 5, miembro);
