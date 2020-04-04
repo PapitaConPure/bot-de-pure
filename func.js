@@ -208,7 +208,7 @@ module.exports = {
                 '671851234541699092', //Russian Doll
                 '671851228308963348', //Orléans Doll
             ];
-            miembro.roles.add(colores[Math.floor(Math.random() * 7)]);
+            miembro.addRole(colores[Math.floor(Math.random() * 7)]);
         } else {
             message.channel.send('Al fin qliao ya teni tu rol. Q esti bien po, tonce <:uwu:681935702308552730>');
         }
