@@ -196,7 +196,7 @@ module.exports = {
         }
     },
 
-    forceRole: function(miembro) {
+    forceRole: function(miembro, canal) {
         if(miembro.roles.size === 2) {
             canal.send(`<@${miembro.user.id}> cagaste altiro watón fome <:why:691222027738152971>`);
             const colores = [
