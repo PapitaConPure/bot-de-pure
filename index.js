@@ -153,6 +153,7 @@ client.on('message', message => { //En caso de recibir un mensaje
         } else if(msg.indexOf('hourai') !== -1 && msg.indexOf('hourai doll') !== msg.indexOf('hourai') && msg.indexOf('houraidoll') === -1) {
             const fuckustr = [
                 '*¿Pero y a ti quién te invitó? <:mayuwu:654489124413374474>*',
+                'Oe qliao creo que se te cayó la tula <:why:691222027738152971>',
                 'Hourai puto <:dedede:675764852106592276>',
                 '***No hablen de esa weá <:dedede:675764852106592276>***',
                 'Puta que son pesaos con el Hourai <:notlikealice:654489127202586634>',
