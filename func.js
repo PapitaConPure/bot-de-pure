@@ -200,7 +200,7 @@ module.exports = {
         if(miembro.roles.size === 2) {
             canal.send(`<@${miembro.user.id}> cagaste altiro watón fome <:why:691222027738152971>`);
             const colores = [
-                '671851233870479375', //France Doll 
+                '671851233870479375', //France Doll
                 '671852132328275979', //Holland Doll
                 '671851228954755102', //Tibetan Doll
                 '671851235267182625', //Kyoto Doll
