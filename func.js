@@ -190,7 +190,7 @@ module.exports = {
             setTimeout(module.exports.askForRole, 1000 * 60 * 5, miembro , canal);
         } else if(miembro.roles.size === 2) {
             canal.send(`Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>`);
-            setTimeout(module.exports.forceRole, 1000 * 60, miembro, canal);
+            setTimeout(module.exports.forceRole, 1000 * 60 * 3, miembro, canal);
         } else {
             canal.send('Weno, ya teni tu rol, q esti bien po <:Junky:651290323557023753>');
         }
