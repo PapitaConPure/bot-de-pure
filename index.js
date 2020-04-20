@@ -156,6 +156,9 @@ client.on('message', message => { //En caso de recibir un mensaje
                 'Oe qliao creo que se te cayó la tula <:why:691222027738152971>',
                 'Hourai puto <:dedede:675764852106592276>',
                 '***No hablen de esa weá <:dedede:675764852106592276>***',
+                'Cierra el osiko tonto qliao \<:yumou:697323299801137161>',
+                '¿Pero por qué no me xupai el pico mejor, así altiro? Aweonao <:junkNo:697321858407727224>',
+                'Pero no digai tantas weás po \<:koipwaise:657346542847524875>',
                 'Puta que son pesaos con el Hourai <:notlikealice:654489127202586634>',
                 '**CSM NO HABLEN DE ESE BOT** <:marx:675439504982671370>'
             ];
@@ -308,12 +311,12 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
     canal.send('', imagen).then(sent => {
         if(servidor.id === '654471968200065034') { //Hourai Doll
             canal.send(
-                'Wena po conchetumare, como estai. Porfa revisa el canal <#671817759268536320> o te funamos <:HaniwaSmile:659872119995498507>\n' +
+                'Wena po <@${miembro.user.id}> conchetumare, como estai. Porfa revisa el canal <#671817759268536320> o te funamos <:HaniwaSmile:659872119995498507>\n' +
                 'También si quieres un rol de color revisa <#679150440612626479> y pídele el que te guste a alguno de los enfermos que trabajan aquí <:Mayuwu:654489124413374474>\n' +
                 'WENO YA PO CONCHESUMARE. <@&654472238510112799>, vengan a saludar maricones <:marx:675439504982671370>\n' +
                 `*Por cierto, ahora hay **${peoplecnt}** aweonaos en el server.*`
             );
-            setTimeout(func.askForRole, 1000 * 60 * 2, miembro, canal);
+            setTimeout(func.askForRole, 1000 * 60 * 3, miembro, canal);
         } else if(servidor.id === '611732083995443210') { //Animal Realm
             canal.send(
                 `Welcome to the server **${miembro.displayName}**! / ¡Bienvenido/a al server **${miembro.displayName}**!\n\n` +
