@@ -135,7 +135,7 @@ client.on('message', message => { //En caso de recibir un mensaje
         if(msg.indexOf('hourai') !== -1 && msg.indexOf('hourai doll') !== msg.indexOf('hourai') && (msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)) {
             const fuckustr = [
                 '***__Recuerden:__ soy objetivamente mejor que Hourai <:haniwaSmile:659872119995498507>***',
-                '**Bot > Puré > Papita > Hourai <:okinai:672173297428856862>**',
+                '**Bot > Puré > Papita > Hourai <:okinai:687840049731207180>**',
                 'Pero la reputa, dejen de compararme con esa weá <:marx:675439504982671370>',
                 '*__Recuerden niñas:__ Hourai come tula 24/7 <:haniwaSmile:659872119995498507>*'
             ];
@@ -311,7 +311,7 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
     canal.send('', imagen).then(sent => {
         if(servidor.id === '654471968200065034') { //Hourai Doll
             canal.send(
-                'Wena po <@${miembro.user.id}> conchetumare, como estai. Porfa revisa el canal <#671817759268536320> o te funamos <:HaniwaSmile:659872119995498507>\n' +
+                `Wena po <@${miembro.user.id}> conchetumare, como estai. Porfa revisa el canal <#671817759268536320> o te funamos <:HaniwaSmile:659872119995498507>\n` +
                 'También si quieres un rol de color revisa <#679150440612626479> y pídele el que te guste a alguno de los enfermos que trabajan aquí <:Mayuwu:654489124413374474>\n' +
                 'WENO YA PO CONCHESUMARE. <@&654472238510112799>, vengan a saludar maricones <:marx:675439504982671370>\n' +
                 `*Por cierto, ahora hay **${peoplecnt}** aweonaos en el server.*`
