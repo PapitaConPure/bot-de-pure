@@ -172,8 +172,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 
 	//#region Presentación
 	if(tmpch.nsfw) {
-		srchtags += 'explicit -lolicon -loli -shotacon -bestiality';// -rumia -cirno -remilia_scarlet -flandre_scarlet -chen -inaba_tewi';
-		//srchtags += ' -kisume -sukuna_shinmyoumaru -clownpiece -ebisu_eika -luna_child -star_sapphire -sunny_milk -motoori_kosuzu -hieda_no_akyuu';
+		srchtags += 'explicit -lolicon -loli -shotacon -bestiality';
 		embedcolor = '#38214e';
 		embedtitle = 'Tohitas O//w//O';
 	} else {
@@ -185,6 +184,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 	
 	//#region Preparación de búsqueda
 	let srchpg = 0;
+	let customtags = '';
 	if(arglist.length) {
 		if(isNaN(arglist[0])) srchtags += ` ${arglist[0]}`;
 		else {
@@ -195,7 +195,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 			srchpg = getRandomInt(arglist[0]);
 		}
 		for(let i = 1; i < arglist.length; i++)
-			srchtags += ' ' + arglist[i];
+			customtags += ' ' + arglist[i];
 	}
 	//#endregion
 	
@@ -205,7 +205,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 		let foundpic = false;
 		let results = 0;
 		axios.get(
-			`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
+			`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags+customtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
 		).then((data) => {
 			data.data.forEach(image => { results++; });
 
@@ -217,6 +217,8 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 					const Embed = new Discord.RichEmbed()
 						.setColor(embedcolor)
 						.setTitle(embedtitle)
+						.addField('Tu búsqueda', `https://gelbooru.com/index.php?page=post&s=view&id=${srchtags}`)
+						.addField('Etiquetas', `Todavía no...`/* ${image.tags}`*/)
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
 						.addField('Eliminar imagen', `Si la imagen incumple alguna regla, escribe "d" para eliminar este mensaje.`)
 						.setImage(image.file_url)
