@@ -188,8 +188,8 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 	if(arglist.length) {
 		if(isNaN(arglist[0])) srchtags += ` ${arglist[0]}`;
 		else {
-			if(arglist[0] < 1) {
-				tmpch.send(':warning: no se pueden buscar números de página menores que 1.');
+			if(arglist[0] < 2) {
+				tmpch.send(':warning: no se pueden buscar números de página menores que 2 (por defecto: 1).');
 				return;
 			}
 			srchpg = getRandomInt(arglist[0]);
@@ -211,6 +211,11 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 
 			//#region Enviar imagen aleatoria, si hay al menos una
 			const selectedpic = getRandomInt(results);
+			let showpg = '';
+			let showtag = '';
+			if(!isNaN(arglist[0])) {
+
+			}
 			data.data.forEach(image => {
 				if(image !== undefined && i === selectedpic) {
 					//Crear y usar embed
@@ -218,10 +223,10 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 						.setColor(embedcolor)
 						.setTitle(embedtitle)
 						.addField('Tu búsqueda', 
-							`:book: Página ${srchpg + 1}\n`+
+							`:book: Rango de páginas: 1~${arglist[0]} [Seleccionada: ${srchpg + 1}]\n`+
 							`:mag_right: ${customtags/*'No ingresaste etiquetas.'*/}`
 						)
-						.addField('Etiquetas', `Todavía no...`/* ${image.tags}`*/)
+						.addField('Etiquetas', `\`${image.tags}\``)
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
 						.addField('Eliminar imagen', `Si la imagen incumple alguna regla, escribe "d" para eliminar este mensaje.`)
 						.setImage(image.file_url)
