@@ -191,7 +191,7 @@ module.exports = {
         } else if(miembro.roles.size === 2) {
             canal.send(
                 `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>\n`+
-                `https://media.discordapp.net/attachments/679150440612626479/679150497835253840/Dolls2.png`
+                `https://imgur.com/D5Z8Itb`
             );
             setTimeout(module.exports.forceRole, 1000 * 60 * 3, miembro, canal);
         } else {
