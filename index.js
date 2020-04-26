@@ -208,7 +208,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     let comando;
     if(pdetect === p_drmk)
         comando = client.ComandosDrawmaku.get(nombrecomando) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
-	else if(pdetect === p_pure || pdetect === p_mention)
+	else if(pdetect === p_pure || pdetect === p_mention) 
         comando = client.ComandosPure.get(nombrecomando) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
     
     if (!comando) {
