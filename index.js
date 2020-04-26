@@ -7,6 +7,7 @@ const client = new Discord.Client(); //Cliente de bot
 const { //Constantes globales
     p_drmk, //prefijo drawmaku
     p_pure, //prefijo puré
+    p_mention, //prefijo puré
 } = require('./config.json');
 const token = 'NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY'; //La llave del bot
 var global = require('./config.json'); //Variables globales
@@ -198,6 +199,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     let pdetect;
     if(message.content.toLowerCase().startsWith(p_drmk)) pdetect = p_drmk;
     else if(message.content.toLowerCase().startsWith(p_pure)) pdetect = p_pure;
+    else if(message.content.toLowerCase().startsWith(p_mention)) pdetect = p_pure;
     else return; //Salir si no se encuentra el prefijo
 
     const args = message.content.slice(p_drmk.length).split(/ +/); //Argumentos ingresados
