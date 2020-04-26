@@ -230,6 +230,8 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 						.addField('Etiquetas', `*${image.tags.split(/ +/).join(', ')}*`)
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
 						.addField('Eliminar imagen', `Si la imagen incumple alguna regla, escribe "d" para eliminar este mensaje.`)
+						.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
+						.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a __Papita con Puré#6932__.')
 						.setImage(image.file_url)
 					tmpch.send(Embed).then(sent => {
 						BotMessage = sent.id;
