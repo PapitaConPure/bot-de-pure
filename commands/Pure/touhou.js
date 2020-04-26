@@ -218,8 +218,8 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 						.setColor(embedcolor)
 						.setTitle(embedtitle)
 						.addField('Tu búsqueda', 
-							`:book: Página ${srchpg}\n`+
-							`:mag_right: ${(customtags !== '')?customtags:'No ingresaste etiquetas.'}`
+							`:book: Página ${srchpg + 1}\n`+
+							`:mag_right: ${customtags/*'No ingresaste etiquetas.'*/}`
 						)
 						.addField('Etiquetas', `Todavía no...`/* ${image.tags}`*/)
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
