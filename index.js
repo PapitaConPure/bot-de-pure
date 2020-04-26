@@ -199,16 +199,16 @@ client.on('message', message => { //En caso de recibir un mensaje
     let pdetect;
     if(message.content.toLowerCase().startsWith(p_drmk)) pdetect = p_drmk;
     else if(message.content.toLowerCase().startsWith(p_pure)) pdetect = p_pure;
-    else if(message.content.toLowerCase().startsWith(p_mention)) pdetect = p_pure;
+    else if(message.content.toLowerCase().startsWith(p_mention)) pdetect = p_mention;
     else return; //Salir si no se encuentra el prefijo
 
-    const args = message.content.slice(p_drmk.length).split(/ +/); //Argumentos ingresados
+    const args = message.content.slice(pdetect.length).split(/ +/); //Argumentos ingresados
     const nombrecomando = args.shift().toLowerCase(); //Comando ingresado
 
     let comando;
     if(pdetect === p_drmk)
         comando = client.ComandosDrawmaku.get(nombrecomando) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
-	else if(pdetect === p_pure)
+	else if(pdetect === p_pure || pdetect === p_mention)
         comando = client.ComandosPure.get(nombrecomando) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
     
     if (!comando) {
