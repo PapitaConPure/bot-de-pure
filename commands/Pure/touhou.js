@@ -215,7 +215,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 			let showtag = ':mag_right: ';
 			if(!isNaN(arglist[0])) showpg += `[1~**${arglist[0]}**] => Seleccionada: ***${srchpg + 1}***`;
 			else showpg += 'No ingresaste un rango de páginas. `p!2hu <¿rango?> <¿etiquetas?>`'
-			if(customtags.length) showtag += customtags;
+			if(customtags.length) showtag += `*${customtags}*`;
 			else showtag += 'No ingresaste etiquetas. `p!2hu <¿rango?> <¿etiquetas?>`';
 			data.data.forEach(image => {
 				if(image !== undefined && i === selectedpic) {
@@ -227,7 +227,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 							`${showpg}\n`+
 							`${showtag}`
 						)
-						.addField('Etiquetas', `\`${image.tags}\``)
+						.addField('Etiquetas', `*${image.tags}*`)
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
 						.addField('Eliminar imagen', `Si la imagen incumple alguna regla, escribe "d" para eliminar este mensaje.`)
 						.setImage(image.file_url)
