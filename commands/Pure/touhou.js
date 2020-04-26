@@ -211,11 +211,12 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 
 			//#region Enviar imagen aleatoria, si hay al menos una
 			const selectedpic = getRandomInt(results);
-			let showpg = '';
-			let showtag = '';
-			if(!isNaN(arglist[0])) {
-
-			}
+			let showpg = ':book: ';
+			let showtag = ':mag_right: ';
+			if(!isNaN(arglist[0])) showpg += `[1~**${arglist[0]}**] => Seleccionada: ***${srchpg + 1}***`;
+			else showpg += 'No ingresaste un rango de páginas. Puedes hacerlo ingresando como __primer argumento__ un *número*.'
+			if(customtags.length) showtag += customtags;
+			else showtag += 'No ingresaste etiquetas.';
 			data.data.forEach(image => {
 				if(image !== undefined && i === selectedpic) {
 					//Crear y usar embed
@@ -223,8 +224,8 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 						.setColor(embedcolor)
 						.setTitle(embedtitle)
 						.addField('Tu búsqueda', 
-							`:book: Rango de páginas: 1~${arglist[0]} [Seleccionada: ${srchpg + 1}]\n`+
-							`:mag_right: ${customtags/*'No ingresaste etiquetas.'*/}`
+							`${showpg}\n`+
+							`${showtag}`
 						)
 						.addField('Etiquetas', `\`${image.tags}\``)
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
