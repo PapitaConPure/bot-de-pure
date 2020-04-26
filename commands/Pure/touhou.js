@@ -227,7 +227,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 							`${showpg}\n`+
 							`${showtag}`
 						)
-						.addField('Etiquetas', `*${image.tags}*`)
+						.addField('Etiquetas', `*${image.tags.split(/ +/).join(', ')}*`)
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
 						.addField('Eliminar imagen', `Si la imagen incumple alguna regla, escribe "d" para eliminar este mensaje.`)
 						.setImage(image.file_url)
