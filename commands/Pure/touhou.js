@@ -186,7 +186,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 	let srchpg = 0;
 	let customtags = '';
 	if(arglist.length) {
-		if(isNaN(arglist[0])) srchtags += ` ${arglist[0]}`;
+		if(isNaN(arglist[0])) customtags += ` ${arglist[0]}`;
 		else {
 			if(arglist[0] < 2) {
 				tmpch.send(':warning: no se pueden buscar números de página menores que 2 (por defecto: 1).');
@@ -214,9 +214,9 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 			let showpg = ':book: ';
 			let showtag = ':mag_right: ';
 			if(!isNaN(arglist[0])) showpg += `[1~**${arglist[0]}**] => Seleccionada: ***${srchpg + 1}***`;
-			else showpg += 'No ingresaste un rango de páginas. Puedes hacerlo ingresando como __primer argumento__ un *número*.'
+			else showpg += 'No ingresaste un rango de páginas. `p!2hu <¿rango?> <¿etiquetas?>`'
 			if(customtags.length) showtag += customtags;
-			else showtag += 'No ingresaste etiquetas.';
+			else showtag += 'No ingresaste etiquetas. `p!2hu <¿rango?> <¿etiquetas?>`';
 			data.data.forEach(image => {
 				if(image !== undefined && i === selectedpic) {
 					//Crear y usar embed
