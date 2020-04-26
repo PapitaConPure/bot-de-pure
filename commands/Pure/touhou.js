@@ -217,7 +217,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 					const Embed = new Discord.RichEmbed()
 						.setColor(embedcolor)
 						.setTitle(embedtitle)
-						.addField('Tu búsqueda', `https://gelbooru.com/index.php?page=post&s=view&id=${srchtags}`)
+						.addField('Tu búsqueda', `${(customtags.length)?customtags:'No ingresaste etiquetas.'}`)
 						.addField('Etiquetas', `Todavía no...`/* ${image.tags}`*/)
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
 						.addField('Eliminar imagen', `Si la imagen incumple alguna regla, escribe "d" para eliminar este mensaje.`)
