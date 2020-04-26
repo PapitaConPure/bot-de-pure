@@ -217,7 +217,10 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 					const Embed = new Discord.RichEmbed()
 						.setColor(embedcolor)
 						.setTitle(embedtitle)
-						.addField('Tu búsqueda', `${(customtags.length > 0)?customtags:'No ingresaste etiquetas.'}`)
+						.addField('Tu búsqueda', 
+							`:book: Página ${srchpg}\n`+
+							`:mag_right: ${(customtags !== '')?customtags:'No ingresaste etiquetas.'}`
+						)
 						.addField('Etiquetas', `Todavía no...`/* ${image.tags}`*/)
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
 						.addField('Eliminar imagen', `Si la imagen incumple alguna regla, escribe "d" para eliminar este mensaje.`)
@@ -246,9 +249,9 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 					console.log(`Collected ${collected.size} items`);
 				});
 				//#endregion
-			} else tmpch.send(':warning: No hay resultados para estas tags. Prueba usando tags diferentes o un menor rango de páginas :C');
+			} else tmpch.send(':warning: No hay resultados para estas tags. Prueba usando tags diferentes o un menor número de página :C');
 		}).catch((error) => {
-			tmpch.send(':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags o usando un menor rango de páginas umu');
+			tmpch.send(':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags o usando un menor número de página umu');
 			console.error(error);
 		});
 		tmpch.stopTyping(true);

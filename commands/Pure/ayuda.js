@@ -17,7 +17,7 @@ module.exports = {
             `\t╠ \`${global.p_pure}decir <¿borrar original?> <texto*>\` para hacerme decir algo.\n` +
             `\t║ \t\t╚ ***Agrega de argumento \`del\` para borrar __tu__ mensaje.***\n` +
             `\t╠ \`${global.p_pure}gatos\` para mostrar imágenes de gatitos.\n` +
-            `\t╠ \`${global.p_pure}touhou <rango de páginas> <tags [Gelbooru]>\` para mostrar imágenes de tohas.\n` +
+            `\t╠ \`${global.p_pure}touhou <número de página> <tags [Gelbooru]>\` para mostrar imágenes de tohas.\n` +
             `\t║ \t\t╚ ***En canales marcados como "NSFW", los resultados serán lewds.***\n` +
             `\t╠ \`${global.p_pure}uwu\` uwu.\n` +
             `\t╚ \`${global.p_pure}uwus <duración [segundos]>\` evento uwu.\n`;
@@ -30,7 +30,7 @@ module.exports = {
                     `\t╠ \`${global.p_pure}fuee\` comando de frase de Dylan/Fuee.\n` +
                     `\t╠ \`${global.p_pure}imagine\` comando de grito de Imagine Breaker.\n` +
                     `\t╠ \`${global.p_pure}mari\` comando de caras (aleatorias) de Marisaac.\n` +
-                    `\t╠ \`${global.p_pure}megumin <rango de páginas> <tags [Gelbooru]>\` comando de imágenes de Megumin uwu.\n` +
+                    `\t╠ \`${global.p_pure}megumin <número de página> <tags [Gelbooru]>\` comando de imágenes de Megumin uwu.\n` +
                     `\t║ \t\t╠ ***No funciona en cualquier servidor.***\n` +
                     `\t║ \t\t╚ ***En canales marcados como "NSFW", los resultados serán lewds U//w//U.***\n` +
                     `\t╠ \`${global.p_pure}orphen\` comando de grito de cuidado de Orphen.\n` +
