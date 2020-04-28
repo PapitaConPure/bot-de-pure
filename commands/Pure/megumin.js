@@ -9,7 +9,7 @@ const getRandomInt = function(_max) {
   return _randnum;
 }
 
-const tmpfunc = async function(tmpch, arglist, tmpauth) {
+const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 	let BotMessage = -1;
 	let srchtags = 'megumin -guro -furry -vore -webm -audio rating:';
 	let embedcolor;
@@ -140,6 +140,6 @@ module.exports = {
 			message.channel.send('*fokiu.*');
 			return;
 		}
-		tmpfunc(message.channel, args, message.author);
+		tmpfunc(message.channel, args, message.author, message);
     },
 };
