@@ -246,24 +246,29 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 								collector.on('collect', reaction => {
 									const maxpage = 2;
 									if(reaction.emoji.id === actions[0].id) {
-										reaction.message.reactions.cache.get(actions[0].id).remove().catch(error => { console.log('Ocurrió un error al quitar reacciones.'); console.error(error); })
-										.then(() => {
-											const Embed2 = new Discord.RichEmbed()
-												.setColor(embedcolor)
-												.setTitle(embedtitle)
-												.addField('Tu búsqueda', 
-													`${showpg}\n`+
-													`${showtag}`
-												)
-												.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
-												.addField('Tags', `*${image.tags.split(/ +/).join(', ')}*`)
-												.addField('Eliminar imagen', `Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`)
-												.setAuthor(`Comando invocado por ${tmpauth.username}`, tmpauth.avatarURL)
-												.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
-												.setImage(image.file_url);	
-											reaction.message.edit(Embed2);
+										sent.reactions
+											.removeAll().catch(error => { console.log('Ocurrió un error al quitar reacciones.'); console.error(error); })
+											.then(() => sent.react(actions[1]))
+											.then(() => {
+												const Embed2 = new Discord.RichEmbed()
+													.setColor(embedcolor)
+													.setTitle(embedtitle)
+													.addField('Tu búsqueda', 
+														`${showpg}\n`+
+														`${showtag}`
+													)
+													.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
+													.addField('Tags', `*${image.tags.split(/ +/).join(', ')}*`)
+													.addField('Eliminar imagen', `Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`)
+													.setAuthor(`Comando invocado por ${tmpauth.username}`, tmpauth.avatarURL)
+													.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
+													.setImage(image.file_url);	
+												reaction.message.edit(Embed2);
 										});
-									} else reaction.message.delete();
+									} else {
+										message.delete();
+										sent.delete();
+									}
 								});
 							}).then(() => sent.channel.stopTyping(true));
 					});
