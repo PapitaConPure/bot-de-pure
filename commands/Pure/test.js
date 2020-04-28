@@ -228,7 +228,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 							`${showtag}`
 						)
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
-						.addField('Tags', `Reacciona con <:tags:704612794921779290> para mostrar las tags.`)
+						.addField('Tags', `Reacciona con <:tags:704612794921779290> para ver las tags.`)
 						.addField('Eliminar imagen', `Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`)
 						.setAuthor(`Comando invocado por ${tmpauth.username}`, tmpauth.avatarURL)
 						.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
@@ -237,7 +237,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 					tmpch.send(Embed).then(sent => {
 						BotMessage = sent.id;
 						console.log(BotMessage);
-						const actions = [message.client.emojis.get('704612794921779290'), message.client.emojis.get('704612795072774164')];
+						const actions = [sent.client.emojis.get('704612794921779290'), sent.client.emojis.get('704612795072774164')];
 						sent.react(actions[0])
 							.then(() => sent.react(actions[1]))
 							.then(() => {
