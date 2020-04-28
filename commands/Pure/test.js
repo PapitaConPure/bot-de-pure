@@ -278,12 +278,9 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 			});
 			//#endregion
 			
-			if(foundpic) {
-				//#region Eliminado de emergencia
-				//#endregion
-			} else tmpch.send(':warning: No hay resultados para estas tags. Prueba usando tags diferentes o un menor número de página :C');
+			if(!foundpic) tmpch.send(':warning: No hay resultados para estas tags. Prueba usando tags diferentes o un menor número de página :C');
 		}).catch((error) => {
-			tmpch.send(':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags o usando un menor número de página umu');
+			tmpch.send(':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags o usando un menor rango de páginas umu');
 			console.error(error);
 		});
 		tmpch.stopTyping(true);

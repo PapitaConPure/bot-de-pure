@@ -43,46 +43,85 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 		let foundpic = false;
 		let results = 0;
 		axios.get(
-			`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
+			`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags+customtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
 		).then((data) => {
 			data.data.forEach(image => { results++; });
 
+			//#region Enviar imagen aleatoria, si hay al menos una
 			const selectedpic = getRandomInt(results);
+			let showpg = ':book: ';
+			let showtag = ':mag_right: ';
+			if(!isNaN(arglist[0])) showpg += `[1~**${arglist[0]}**] => Seleccionada: ***${srchpg + 1}***`;
+			else showpg += 'No ingresaste un rango de páginas. `p!2hu <¿rango?> <¿etiquetas?>`'
+			if(customtags.length) showtag += `*${customtags.trim().split(/ +/).map(str => str = str.replace('*', '\\*')).join(', ')}*`;
+			else showtag += 'No ingresaste etiquetas. `p!2hu <¿rango?> <¿etiquetas?>`'; 
 			data.data.forEach(image => {
 				if(image !== undefined && i === selectedpic) {
 					//Crear y usar embed
 					const Embed = new Discord.RichEmbed()
 						.setColor(embedcolor)
 						.setTitle(embedtitle)
+						.addField('Tu búsqueda', 
+							`${showpg}\n`+
+							`${showtag}`
+						)
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
-						.addField('Eliminar imagen', `Si la imagen incumple alguna regla, escribe "d" para eliminar este mensaje.`)
-						.setImage(image.file_url)
+						.addField('Tags', `Reacciona con <:tags:704612794921779290> para ver las tags.`)
+						.addField('Eliminar imagen', `Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`)
+						.setAuthor(`Comando invocado por ${tmpauth.username}`, tmpauth.avatarURL)
+						.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
+						.setImage(image.file_url);
+						
 					tmpch.send(Embed).then(sent => {
 						BotMessage = sent.id;
 						console.log(BotMessage);
+						const actions = [sent.client.emojis.get('704612794921779290'), sent.client.emojis.get('704612795072774164')];
+						sent.react(actions[0])
+							.then(() => sent.react(actions[1]))
+							.then(() => {
+								const filter = (rc, user) => !user.bot && actions.some(action => rc.emoji.id === action.id);
+								const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
+								let showtags = false;
+								collector.on('collect', reaction => {
+									const maxpage = 2;
+									if(reaction.emoji.id === actions[0].id) {
+										if(!showtags) {
+											const Embed2 = new Discord.RichEmbed()
+												.setColor(embedcolor)
+												.setTitle(embedtitle)
+												.addField('Tu búsqueda', 
+													`${showpg}\n`+
+													`${showtag}`
+												)
+												.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
+												.addField('Tags', `*${image.tags.split(/ +/).join(', ')}*`)
+												.addField('Eliminar imagen', `Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`)
+												.setAuthor(`Comando invocado por ${tmpauth.username}`, tmpauth.avatarURL)
+												.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
+												.setImage(image.file_url);	
+
+											sent.edit(Embed2);
+											showtags = true;
+										}
+									} else {
+										msg.delete();
+										sent.delete();
+									}
+								});
+							}).then(() => sent.channel.stopTyping(true));
 					});
 					foundpic = true;
 				}
 				i++;
 			});
-
-			if(foundpic) {
-				const filter = m => (m.content.toLowerCase() === 'd' || m.content.toLowerCase().startsWith('p!')) && m.author.id === tmpauth.id;
-				global.imgcollector = tmpch.createMessageCollector(filter, { time: 120000 });
-				global.imgcollector.on('collect', m => {
-					console.log(`Collected ${m.content}`);
-					console.log(BotMessage);
-					if(m.content.toLowerCase() === 'd') tmpch.fetchMessage(BotMessage).then(msg => msg.delete());
-					else global.imgcollector.stop();
-				});
-				global.imgcollector.on('end', collected => {
-					console.log(`Collected ${collected.size} items`);
-				});
-			} else tmpch.send(':warning: No hay resultados para estas tags. Prueba usando tags diferentes o un menor rango de páginas :C');
+			//#endregion
+			
+			if(!foundpic) tmpch.send(':warning: No hay resultados para estas tags. Prueba usando tags diferentes o un menor número de página :C');
 		}).catch((error) => {
 			tmpch.send(':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags o usando un menor rango de páginas umu');
 			console.error(error);
 		});
+		tmpch.stopTyping(true);
 	}
 }
 
