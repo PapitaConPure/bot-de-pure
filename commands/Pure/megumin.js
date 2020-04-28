@@ -10,6 +10,7 @@ const getRandomInt = function(_max) {
 }
 
 const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
+	tmpch.startTyping();
 	let BotMessage = -1;
 	let srchtags = 'megumin -guro -furry -vore -webm -audio rating:';
 	let embedcolor;
@@ -24,19 +25,24 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 		embedcolor = '#e51a4c';
 		embedtitle = 'MEGUMIN ÙwÚ';
 	}
+
+	//#region Preparación de búsqueda
 	let srchpg = 0;
+	let customtags = '';
 	if(arglist.length) {
-		if(isNaN(arglist[0])) srchtags += ` ${arglist[0]}`;
+		if(isNaN(arglist[0])) customtags += ` ${arglist[0]}`;
 		else {
-			if(arglist[0] < 1) {
-				tmpch.send(':warning: no se pueden buscar números de página menores que 1.');
+			if(arglist[0] < 2) {
+				tmpch.send(':warning: no se pueden buscar números de página menores que 2 (por defecto: 1).');
 				return;
 			}
 			srchpg = getRandomInt(arglist[0]);
 		}
 		for(let i = 1; i < arglist.length; i++)
-			srchtags += ' ' + arglist[i];
+			customtags += ' ' + arglist[i];
 	}
+	//#endregion
+
 	const srchlimit = 42;
 	{
 		let i = 0;
