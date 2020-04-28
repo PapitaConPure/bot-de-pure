@@ -241,7 +241,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 						sent.react(actions[0])
 							.then(() => sent.react(actions[1]))
 							.then(() => {
-								const filter = (rc, user) => !user.bot && actions.some(action => rc.emoji.id === action.id);
+								const filter = (rc, user) => !user.bot && actions.some(action => rc.emoji.id === action.id) && tmpauth.id === user.id;
 								const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
 								let showtags = false;
 								collector.on('collect', reaction => {
