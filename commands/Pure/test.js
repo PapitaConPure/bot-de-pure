@@ -265,7 +265,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 										});
 									} else sent.delete();
 								});
-							}).then(() => message.channel.stopTyping(true));
+							}).then(() => sent.channel.stopTyping(true));
 					});
 					foundpic = true;
 				}
