@@ -31,9 +31,40 @@ for(const file of commandFiles) {
 }
 //#endregion
 
+function modifyAct(step) {
+    switch(step) {
+        case 0: client.user.setActivity("UwU", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 1: client.user.setActivity("UwO", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 2: client.user.setActivity(">w>", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 3: client.user.setActivity("ÚwÙ", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 4: client.user.setActivity("OwÙ", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 5: client.user.setActivity("<w<", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 6: client.user.setActivity(">w<", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 7: client.user.setActivity("ÙwÚ", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 8: client.user.setActivity("OwO", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 9: client.user.setActivity("O//w//O", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 10: client.user.setActivity("^w^", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 11: client.user.setActivity("ÒwÓ", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 12: client.user.setActivity("ÓwÒ", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 13: client.user.setActivity("Ó3Ò", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 14: client.user.setActivity("\"3\"", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 15: client.user.setActivity(".w.", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 16: client.user.setActivity(">m<", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 17: client.user.setActivity("ÙmÚ", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 18: client.user.setActivity("UmU", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 19: client.user.setActivity("ÚmÙ", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 20: client.user.setActivity("@w@", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 21: client.user.setActivity("XwX", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 22: client.user.setActivity("XmX", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 23: client.user.setActivity("X_X", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+    }
+    setTimeout(modifyAct, 1000 * 60 * 60, step + 1);
+}
+
 client.on('ready', () => { //Confirmación de inicio y cambio de estado
 	console.log('Bot conectado y funcionando.');
-    client.user.setActivity("UwU 24/7", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' });
+    client.user.setActivity("UwU", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' });
+    setTimeout(modifyAct, 1000 * 60 * 60 , 0);
     global.startuptime = Date.now();
     //func.saveState();//func.reloadState();
 });
