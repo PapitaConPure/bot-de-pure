@@ -286,12 +286,12 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 }
 
 module.exports = {
-	name: 'touhou',
-	aliases: [
+	name: 'test',
+	/*aliases: [
         'imagentouhou', 'imgtouhou', 'tohas', 'touhas', 'tojas', 'tohitas', 'touhitas', 'tojitas',
         'touhoupic', '2hupic',
 		'2hu'
-    ],
+    ],*/
 	execute(message, args) {
 		tmpfunc(message.channel, args, message.author);
     },
