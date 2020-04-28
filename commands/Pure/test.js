@@ -246,7 +246,6 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 								collector.on('collect', reaction => {
 									const maxpage = 2;
 									if(reaction.emoji.id === actions[0].id) {
-										SelectedEmbed = (SelectedEmbed > 0)?(SelectedEmbed - 1):maxpage;
 										sent.reactions.cache.get(actions[0].id).remove().catch(error => { console.log('Ocurrió un error al quitar reacciones.'); console.error(error); })
 										.then(() => {
 											const Embed2 = new Discord.RichEmbed()
