@@ -410,7 +410,7 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
     canal.send('', imagen).then(sent => {
         if(servidor.id === '654471968200065034') { //Hourai Doll
             canal.send(
-                'Nooooo po csm, perdimo otro weón <:GatoSad:669332507942060042>' +
+                'Nooooo po csm, perdimo otro weón \<:gatoMuySad:697353668915363968>' +
                 `*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
             );
         } else { //Otros servidores
