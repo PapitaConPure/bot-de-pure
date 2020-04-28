@@ -57,14 +57,16 @@ function modifyAct(step) {
         case 21: client.user.setActivity("XwX", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
         case 22: client.user.setActivity("XmX", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
         case 23: client.user.setActivity("X_X", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 24: client.user.setActivity("-_-", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
+        case 25: client.user.setActivity("=_=", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' }); break;
     }
-    setTimeout(modifyAct, 1000 * 6/*60 * 60*/, step + 1);
+    setTimeout(modifyAct, 1000 * 60 * 60, step + 1);
 }
 
 client.on('ready', () => { //Confirmación de inicio y cambio de estado
 	console.log('Bot conectado y funcionando.');
     client.user.setActivity("UwU", { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' });
-    setTimeout(modifyAct, 1000 * 6/*60 * 60*/, 0);
+    setTimeout(modifyAct, 1000 * 60 * 60, 0);
     global.startuptime = Date.now();
     //func.saveState();//func.reloadState();
 });
