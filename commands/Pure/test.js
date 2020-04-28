@@ -9,7 +9,7 @@ const getRandomInt = function(_max) {
   return _randnum;
 }
 
-const tmpfunc = async function(tmpch, arglist, tmpauth) {
+const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 	tmpch.startTyping();
 	let BotMessage = -1;
 	let srchtags = 'touhou -guro -furry -vore -webm -audio -comic -4koma rating:';
@@ -266,7 +266,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth) {
 												reaction.message.edit(Embed2);
 										});
 									} else {
-										message.delete();
+										msg.delete();
 										sent.delete();
 									}
 								});
@@ -298,6 +298,6 @@ module.exports = {
 		'2hu'
     ],*/
 	execute(message, args) {
-		tmpfunc(message.channel, args, message.author);
+		tmpfunc(message.channel, args, message.author, message);
     },
 };
