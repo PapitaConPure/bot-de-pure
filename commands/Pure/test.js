@@ -5,7 +5,6 @@ const axios = require('axios');
 module.exports = {
 	name: 'test',
 	execute(message, args) {
-		message.channel.send('**Oe mira po, emotes** <:yumou:697323299801137161>\n');
-		message.channel.send(message.client.guilds.get('676251911850164255').emojis.map(emote => `<:${emote.name}:${emote.id}>`).join(' '));
+		message.channel.send('No se están haciendo pruebas por el momento <:uwu:681935702308552730>');
     },
 };

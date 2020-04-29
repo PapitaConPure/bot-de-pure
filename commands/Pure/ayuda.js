@@ -16,6 +16,7 @@ module.exports = {
             `\t╠ \`${global.p_pure}café <tags [Giphy]>\` para mostrar imágenes de café.\n` +
             `\t╠ \`${global.p_pure}decir <¿borrar original?> <texto*>\` para hacerme decir algo.\n` +
             `\t║ \t\t╚ ***Agrega de argumento \`del\` para borrar __tu__ mensaje.***\n` +
+            `\t╠ \`${global.p_pure}emotes\` uwu.\n` +
             `\t╠ \`${global.p_pure}gatos\` para mostrar imágenes de gatitos.\n` +
             `\t╠ \`${global.p_pure}touhou <rango de páginas> <tags [Gelbooru]>\` para mostrar imágenes de tohas.\n` +
             `\t║ \t\t╚ ***En canales marcados como "NSFW", los resultados serán lewds.***\n` +
