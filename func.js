@@ -213,7 +213,7 @@ module.exports = {
             ];
             miembro.addRole(colores[Math.floor(Math.random() * 7)]);
         } else {
-            message.channel.send('Al fin qliao ya teni tu rol. Q esti bien po, tonce <:uwu:681935702308552730>');
+            canal.send('Al fin qliao ya teni tu rol. Q esti bien po, tonce <:uwu:681935702308552730>');
         }
     },
     //#endregion
