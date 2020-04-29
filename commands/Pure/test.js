@@ -7,7 +7,7 @@ module.exports = {
 	execute(message, args) {
 		message.channel.send(
 			'Oe mira po, emotes <:yumou:697323299801137161>\n' +
-			`${message.client.guilds.get('676251911850164255').emojis.cache.map(emote => `<:${emote.name}:${emote.id}>`)}`
+			`${message.client.guilds.get('676251911850164255').emojis.map(emote => `<:${emote.name}:${emote.id}>`)}`
 		);
     },
 };
