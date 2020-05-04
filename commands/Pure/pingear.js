@@ -22,7 +22,7 @@ module.exports = {
 			
 			if(alt > 0) {
 				if(args[alt].startsWith('<@') && args[alt].endsWith('>')) {
-					pingear(cnt, args[alt]);
+					pingear(cnt, args[alt]); 
 				} else message.channel.send(':warning: debes ingresar un valor numérico y una mención (`p!ping <número*> <mención*>`).');
 			} else if(alt == -1) message.channel.send(':warning: debes ingresar un valor numérico y una mención (`p!ping <número*> <mención*>`).');
 			else message.channel.send(':warning: solo puedes pingear a alguien entre 2 y 10 veces.');
