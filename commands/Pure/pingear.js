@@ -15,8 +15,8 @@ module.exports = {
 				else message.channel.send(':warning: solo puedes pingear a alguien entre 2 y 10 veces.');
 			}
 			
-			if(args[alt].startsWith('<@') && args[alt].endsWith('>')) {
-				func.pingear(cnt, args[alt], message.channel); 
+			if(args[1].startsWith('<@') && args[1].endsWith('>')) {
+				func.pingear(cnt, args[1], message.channel); 
 			} else message.channel.send(':warning: debes ingresar un valor numérico y una mención (`p!pingear <número*> <mención*>`).');
 		} else message.channel.send(':warning: debes ingresar 2 parámetros (`p!pingear <número*> <mención*>`).');
     },
