@@ -1,5 +1,5 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const func = require('./func.js'); //Funciones globales
+const func = require('../func.js'); //Funciones globales
 
 module.exports = {
 	name: 'pingear',
