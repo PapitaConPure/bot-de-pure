@@ -18,6 +18,6 @@ module.exports = {
 			if(args[alt].startsWith('<@') && args[alt].endsWith('>')) {
 				func.pingear(cnt, args[alt], message.channel); 
 			} else message.channel.send(':warning: debes ingresar un valor numérico y una mención (`p!pingear <número*> <mención*>`).');
-		} else message.channel.send(':warning: debes ingresar 2 parámetros (`p!pingear <número*> <mención*>`).')
+		} else message.channel.send(':warning: debes ingresar 2 parámetros (`p!pingear <número*> <mención*>`).');
     },
 };
