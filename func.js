@@ -230,6 +230,10 @@ module.exports = {
         ];
 
         msgch.send(frase[Math.floor(Math.random() * 8)]);
+        
+        if(cnt > 1) {
+            setTimeout(module.exports.pingear, 1000 * 60, cnt - 1, mention, msgch);
+        }
     },
     //#endregion
 
