@@ -1,5 +1,5 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const func = require('../func.js'); //Funciones globales
+const func = require('../../func.js'); //Funciones globales
 
 module.exports = {
 	name: 'pingear',
@@ -22,7 +22,7 @@ module.exports = {
 			
 			if(alt > 0) {
 				if(args[alt].startsWith('<@') && args[alt].endsWith('>')) {
-					pingear(cnt, args[alt]); 
+					func.pingear(cnt, args[alt], message.channel); 
 				} else message.channel.send(':warning: debes ingresar un valor numérico y una mención (`p!ping <número*> <mención*>`).');
 			} else if(alt == -1) message.channel.send(':warning: debes ingresar un valor numérico y una mención (`p!ping <número*> <mención*>`).');
 			else message.channel.send(':warning: solo puedes pingear a alguien entre 2 y 10 veces.');
