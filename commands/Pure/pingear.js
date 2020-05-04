@@ -8,7 +8,7 @@ module.exports = {
 		'pingsomeone'
     ],
 	execute(message, args) {
-		if(args.size === 2) {
+		if(args.length === 2) {
 			let cnt = -1;
 			let alt = -1;
 			for(let i = 0; i < 2; i++)
