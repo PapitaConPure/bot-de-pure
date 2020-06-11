@@ -36,7 +36,7 @@ module.exports = {
 		];
 
 		if(!args.length) {
-			const randperrito = Math.floor(Math.random() * perritosopt.length) * 2;
+			const randperrito = Math.floor(Math.random() * perritosopt.length / 2) * 2;
 
 			message.channel.send(`<:${perritosopt[randperrito]}:${perritosopt[randperrito + 1]}>`);
 		} else {
