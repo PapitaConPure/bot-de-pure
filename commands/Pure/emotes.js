@@ -9,7 +9,7 @@ module.exports = {
 		'emt'
 	],
 	execute(message, args) {
-		message.channel.send('**Oe mira po, emotes** <:yumou:697323299801137161>\n');
+		message.channel.send('**Oe mira po, emotes** <:yumou:708158159180660748>\n');
 		message.channel.send(message.client.guilds.get('676251911850164255').emojis.map(emote => `<:${emote.name}:${emote.id}>`).join(' '));
     },
 };
