@@ -171,9 +171,9 @@ client.on('message', message => { //En caso de recibir un mensaje
                 'Oe qliao creo que se te cayó la tula <:pepe:697320983106945054>',
                 'Hourai puto <:dedede:675764852106592276>',
                 '***No hablen de esa weá <:aruStare:697497314884845658>***',
-                'Cierra el osiko tonto qliao \<:yumou:697323299801137161>',
+                'Cierra el osiko tonto qliao <:yumou:708158159180660748>',
                 '¿Pero por qué no me xupai el pico mejor, así altiro? Aweonao <:junkNo:697321858407727224>',
-                'Pero no digai tantas weás po \<:koipwaise:657346542847524875>',
+                'Pero no digai tantas weás po <:koipwaise:657346542847524875>',
                 'Puta que son pesaos con el Hourai <:notlikealice:654489127202586634>',
                 '**CSM NO HABLEN DE HOURAI** <:poutSumi:698658511474786364>'
             ];
