@@ -44,14 +44,14 @@ module.exports = {
 				message.channel.send(
 					'**Emote**\t**Nombre**\n' +
 					message.client.guilds.get('676251911850164255').emojis.map(emote => {
-						if(perritosopt.some(perrito === emote.name))
+						if(perritosopt.some(perrito => perrito === emote.name))
 							`<:${emote.name}:${emote.id}> \t\t${emote.name}`
 					})
 					.join('\n')
 				);
 			else
 				message.client.guilds.get('676251911850164255').emojis.map(emote => {
-					if(emote.name.startsWith(args[0]) && perritosopt.some(perrito === emote.name))
+					if(emote.name.startsWith(args[0]) && perritosopt.some(perrito => perrito === emote.name))
 						message.channel.send(`<:${emote.name}:${emote.id}>`);
 				});
 		}
