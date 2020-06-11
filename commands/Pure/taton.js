@@ -6,7 +6,7 @@ module.exports = {
 	aliases: [
 		'perrito',
 		'perritos'
-	]
+	],
 	execute(message, args) {
 		const uwusopt = [
 			'<:perrito:720736050305171456>',
