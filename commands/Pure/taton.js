@@ -63,8 +63,9 @@ module.exports = {
 						}
 					}
 				});
-				
-				message.channel.send(`<:${perritosopt[0]}:${perritosopt[1]}>`);
+
+				if(!foundperrito)
+					message.channel.send(`<:${perritosopt[0]}:${perritosopt[1]}>`);
 			}
 		}
     },
