@@ -29,7 +29,7 @@ module.exports = {
             if(global.tjuego > 1) global.tjuego = 1;
             else message.channel.send(':warning: El Drawmaku terminará cuando finalice la ronda.');
         } else {
-            message.channel.send(':octagonal_sign: Se ha cancelado el inicio del drawmaku.');
+            message.channel.send(':octagonal_sign: Se ha cancelado el inicio del Drawmaku.');
             func.reiniciarTodo();
         }
     },

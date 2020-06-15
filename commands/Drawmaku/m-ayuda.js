@@ -32,7 +32,7 @@ module.exports = {
             `\t║ \t\t╠ ***Al no ingresar la cantidad se suma un punto.***\n` +
             `\t║ \t\t╚ ***Usa el símbolo menos en el parámetro de cantidad para restar puntos.***\n` +
             `\t╠ \`${global.p_drmk}m-aprobar\` para aprobar una recompensa.\n` +
-            `\t╚ \`${global.p_drmk}m-desaprobar\` para desaprobar y reiniciar una recompensa.\n` +
+            `\t╠ \`${global.p_drmk}m-desaprobar\` para desaprobar y reiniciar una recompensa.\n` +
             `\t╚ \`${global.p_drmk}m-todo\` para mostrar todas las imágenes publicadas, una vez finalizado el evento.\n` +
             `*__Nota: los <parámetros> con el símbolo "\\*" son obligatorios__*\n` +
             '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
