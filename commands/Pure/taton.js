@@ -49,7 +49,7 @@ module.exports = {
 
 				message.client.guilds.get('676251911850164255').emojis.map(emote => {
 					if(perritosopt.some(perrito => perrito === emote.name))
-						perritostr +=`<:${emote.name}:${emote.id}> \t\t${emote.name}\n`
+						perritostr +=`<:${emote.name}:${emote.id}> \t\t${emote.name}\n`;
 				});
 				
 				message.channel.send(perritostr);
@@ -57,6 +57,8 @@ module.exports = {
 				message.client.guilds.get('676251911850164255').emojis.map(emote => {
 					if(emote.name.startsWith(args[0]) && perritosopt.some(perrito => perrito === emote.name))
 						message.channel.send(`<:${emote.name}:${emote.id}>`);
+					else
+						message.channel.send(`<:${perritosopt[0]}:${perritosopt[1]}>`);
 				});
 			}
 		}
