@@ -4,8 +4,7 @@ var global = require('../../config.json'); //Variables globales
 module.exports = {
 	name: 'taton',
 	aliases: [
-		'perrito',
-		'perritos'
+		'perrito'
 	],
 	execute(message, args) {
 		const perritosopt = [
@@ -44,7 +43,8 @@ module.exports = {
 
 			message.channel.send(`<:${perritosopt[randperrito]}:${perritosopt[randperrito + 1]}>`);
 		} else {
-			if(args[0] === 'todo' || args[0] === 'everything' || args[0] === 'all') {
+			const todoslosperritos = ['perritos', 'todo', 'todos', 'lista', 'ayuda', 'everything', 'all', 'help'];
+			if(todoslosperritos.includes(args[0])) {
 				let perritostr = '**Emote**\t**Nombre**\n';
 
 				message.client.guilds.get('676251911850164255').emojis.map(emote => {
