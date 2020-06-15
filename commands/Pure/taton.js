@@ -56,9 +56,11 @@ module.exports = {
 			} else {
 				let foundperrito = false;
 				message.client.guilds.get('676251911850164255').emojis.map(emote => {
-					if(!foundperrito && emote.name.startsWith(args[0]) && perritosopt.some(perrito => perrito === emote.name)) {
-						message.channel.send(`<:${emote.name}:${emote.id}>`);
-						foundperrito = true;
+					if(!foundperrito) {
+						if(emote.name.startsWith(args[0]) && perritosopt.some(perrito => perrito === emote.name)) {
+							message.channel.send(`<:${emote.name}:${emote.id}>`);
+							foundperrito = true;
+						}
 					}
 				});
 				
