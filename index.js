@@ -142,7 +142,10 @@ async function dibujarMillion(msg) { //Dar felicitaciones al desgraciado
 client.on('message', message => { //En caso de recibir un mensaje
     if(global.cansay === 0) { if(message.author.bot) return; } //Hacer que el bot no sea un pelotudo (ignorar mensajes de bots)
     if(message.guild) console.log(`[${message.guild.name}→#${message.channel.name}] ${message.author.username}: "${message.content}"`); //Hacer que el bot de hecho sea inteligente (messages log)
-    else console.log(`[DM→@${message.author.id}] ${message.author.username}: "${message.content}"`);
+    else {
+        console.log(`[DM→@${message.author.id}] ${message.author.username}: "${message.content}"`);
+        message.channel.send(':x: Uh... disculpá, no trabajo con mensajes directos.');
+    }
 
     //#region Respuestas rápidas
     //#region Mensajes weones
