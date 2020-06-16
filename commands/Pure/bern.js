@@ -4,8 +4,8 @@ var global = require('../../config.json'); //Variables globales
 module.exports = {
 	name: 'bern',
 	aliases: [
-        'bewny', 'bernbailando',
-		'berndance'
+        'bewny', 'polola',
+		'procrastinar'
     ],
 	execute(message, args){
 		const emot = [

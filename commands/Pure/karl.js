@@ -6,17 +6,16 @@ const getRandomInt = function(_max) {
 }
 
 module.exports = {
-	name: 'bern',
+	name: 'karl',
 	aliases: [
-        'bewny', 'bernbailando',
-		'berndance'
+        'karlos', 'zupija'
     ],
 	execute(message, args){
 		const emot = [
 			':musical_keyboard:', ':saxophone:', ':trumpet:', ':violin:', ':guitar:',' :banjo:', ':aquarius:'
 		];
 		message.channel.send(
-			`**Buenas, soy Karl. Combina estas weás, créeme soy licenciado** <:reibu:686220828773318663> :thumbs_up:\n` +
+			`**Buenas, soy Karl. Combina estas weás, créeme soy licenciado** <:reibu:686220828773318663> :thumbsup:\n` +
 			`<:arrowr:681963688411922460> ${emot[getRandomInt(emot.length)]} ${emot[getRandomInt(emot.length)]} ${emot[getRandomInt(emot.length)]} <:arrowl:681963688361590897>`
 		);
     },
