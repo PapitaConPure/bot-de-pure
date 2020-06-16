@@ -1,6 +1,10 @@
 const Discord = require('discord.js'); //Integrar discord.js
 var global = require('../../config.json'); //Variables globales
 
+const getRandomInt = function(_max) {
+  return Math.floor(Math.random() * _max);
+}
+
 module.exports = {
 	name: 'bern',
 	aliases: [
