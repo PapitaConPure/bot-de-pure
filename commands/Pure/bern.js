@@ -8,6 +8,11 @@ module.exports = {
 		'berndance'
     ],
 	execute(message, args){
-		message.channel.send(':men_wrestling:');
+		const emot = [
+			'Mi polola.', 'Mi reina.', 'Mi princesa', 'Mi esposa', 'Mi mujer', 'Procrastinar', ':wine_glass:',
+			'No avancé en el manga de Kogasa', 'No avancé en el manga de Komachi'
+		];
+		const selection = getRandomInt(emot.length);
+		message.channel.send(`**${emot[selection]}** <:chad:722334924845350973>`);
     },
 };
