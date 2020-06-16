@@ -15,7 +15,7 @@ module.exports = {
             if(args[0] === 'meme-boi')
                 memez = true;
 
-        if(memez)
+        if(!memez)
             str = 
                 '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
                 '***LISTA DE COMANDOS***\n' +
