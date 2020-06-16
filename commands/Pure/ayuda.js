@@ -34,7 +34,7 @@ module.exports = {
         else
             str =
                 '*Puré [:egg::unlock:]:*\n' +
-                `\t╠ \`${global.p_pure}bern\` comando de baile de GoddamnBernkastel.\n` +
+                `\t╠ \`${global.p_pure}bern\` comando de procrastinación de GoddamnBernkastel.\n` +
                 `\t╠ \`${global.p_pure}fuee\` comando de frase de Dylan/Fuee.\n` +
                 `\t╠ \`${global.p_pure}imagine\` comando de grito de Imagine Breaker.\n` +
                 `\t╠ \`${global.p_pure}juani\` comando de belleza de JuaniUru.\n` +
