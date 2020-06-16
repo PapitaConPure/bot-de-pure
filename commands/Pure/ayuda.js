@@ -38,6 +38,7 @@ module.exports = {
                 `\t╠ \`${global.p_pure}fuee\` comando de frase de Dylan/Fuee.\n` +
                 `\t╠ \`${global.p_pure}imagine\` comando de grito de Imagine Breaker.\n` +
                 `\t╠ \`${global.p_pure}juani\` comando de belleza de JuaniUru.\n` +
+                `\t╠ \`${global.p_pure}karl\` comando de música de Karl Zuñiga.\n` +
                 `\t╠ \`${global.p_pure}mari\` comando de caras (aleatorias) de Marisaac.\n` +
                 `\t╠ \`${global.p_pure}megumin <rango de páginas> <tags [Gelbooru]>\` comando de imágenes de Megumin uwu.\n` +
                 `\t║ \t\t╚ ***En canales marcados como "NSFW", los resultados serán lewds U//w//U (no funciona en cualquier servidor).***\n` +
