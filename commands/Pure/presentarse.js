@@ -17,7 +17,7 @@ module.exports = {
             '```css\n' +
             `[Versión actual]: ${global.bot_version}\n` +
             `[Estado]: ${global.bot_status}\n` +
-            `[Desarrollador]: Papita con Puré#6932 (@423129757954211880)\n` +
+            `[Desarrollador]: Papita con Puré#6932 (423129757954211880)\n` +
             '```\n' +
             '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n'
         );
