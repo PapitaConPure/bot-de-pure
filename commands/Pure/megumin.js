@@ -16,15 +16,17 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 	let embedcolor;
 	let embedtitle;
 
+	//#region Presentación
 	if(tmpch.nsfw) {
 		srchtags += 'explicit -bestiality';
 		embedcolor = '#921131';
 		embedtitle = 'MEGUMIN Ó//w//Ò';
 	} else {
-		srchtags += 'safe';
+		srchtags += 'safe -breasts_apart -soles -bikini -breast_grab';
 		embedcolor = '#e51a4c';
 		embedtitle = 'MEGUMIN ÙwÚ';
 	}
+	//#endregion
 
 	//#region Preparación de búsqueda
 	let srchpg = 0;
@@ -58,9 +60,9 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 			let showpg = ':book: ';
 			let showtag = ':mag_right: ';
 			if(!isNaN(arglist[0])) showpg += `[1~**${arglist[0]}**] => Seleccionada: ***${srchpg + 1}***`;
-			else showpg += 'No ingresaste un rango de páginas. `p!2hu <¿rango?> <¿etiquetas?>`'
+			else showpg += 'No ingresaste un rango de páginas. `p!megumin <¿rango?> <¿etiquetas?>`'
 			if(customtags.length) showtag += `*${customtags.trim().split(/ +/).map(str => str = str.replace('*', '\\*')).join(', ')}*`;
-			else showtag += 'No ingresaste etiquetas. `p!2hu <¿rango?> <¿etiquetas?>`'; 
+			else showtag += 'No ingresaste etiquetas. `p!megumin <¿rango?> <¿etiquetas?>`'; 
 			data.data.forEach(image => {
 				if(image !== undefined && i === selectedpic) {
 					//Crear y usar embed
@@ -72,8 +74,11 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 							`${showtag}`
 						)
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
-						.addField('Tags', `Reacciona con <:tags:704612794921779290> para ver las tags.`)
-						.addField('Eliminar imagen', `Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`)
+						.addField('Acciones',
+							`Reacciona con...\n` +
+							`<:tags:704612794921779290> para ver las tags.\n` +
+							`<:delete:704612795072774164> si la imagen incumple alguna regla.`
+						)
 						.setAuthor(`Comando invocado por ${tmpauth.username}`, tmpauth.avatarURL)
 						.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
 						.setImage(image.file_url);
@@ -85,7 +90,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 						sent.react(actions[0])
 							.then(() => sent.react(actions[1]))
 							.then(() => {
-								const filter = (rc, user) => !user.bot && actions.some(action => rc.emoji.id === action.id);
+								const filter = (rc, user) => !user.bot && actions.some(action => rc.emoji.id === action.id) && tmpauth.id === user.id;
 								const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
 								let showtags = false;
 								collector.on('collect', reaction => {
