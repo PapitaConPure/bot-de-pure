@@ -9,7 +9,7 @@ module.exports = {
 	execute(message, args) {
         message.channel.send(
             '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' +
-            '***PRESENTACIÓN***\n' +
+            '***PRESENTACIÓN***\n\n' +
             '*¡Permíteme presentarme!*\n' +
             '¡Hola! Soy __Bot de Puré__, un bot dedicado al entretenimiento con tecnologías de complemento de chat y de búsqueda de imágenes. ' +
             'Habiendo sido creado como un proyecto de prueba para un evento competitivo de una pequeña comunidad, actualmente me encuentro como un bot bastante decente y con varias funcionalidades extra que ya distorsionaron mi propósito original por completo.\n' +
