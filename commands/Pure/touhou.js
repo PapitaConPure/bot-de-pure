@@ -229,9 +229,8 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 						)
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
 						.addField('Acciones',
-							`Reacciona con...\n` +
-							`<:tags:704612794921779290> para ver las tags.\n` +
-							`<:delete:704612795072774164> si la imagen incumple alguna regla.`
+							`Reacciona con <:tags:704612794921779290> para ver las tags.\n` +
+							`Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`
 						)
 						.setAuthor(`Comando invocado por ${tmpauth.username}`, tmpauth.avatarURL)
 						.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
