@@ -9,17 +9,17 @@ module.exports = {
     ],
 	execute(message, args) {
         let memez = false;
-        let str;
+        let str =
+            '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
+            '***LISTA DE COMANDOS***\n' +
+            '**A continuación la lista de comandos.**\n';
 
         if(args.length)
             if(args[0] === 'meme-boi')
                 memez = true;
 
         if(!memez)
-            str = 
-                '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
-                '***LISTA DE COMANDOS***\n' +
-                '**A continuación la lista de comandos.**\n' +
+            str += 
                 '*Puré:*\n' +
                 `\t╠ \`${global.p_pure}café <tags [Giphy]>\` para mostrar imágenes de café.\n` +
                 `\t╠ \`${global.p_pure}decir <¿borrar original?> <texto*>\` para hacerme decir algo.\n` +

@@ -1,13 +1,14 @@
 {
-    "bot_version": "Full.2.6.00",
+    "bot_status": "EN DESARROLLO",
+    "bot_version": "Full.2.6.01",
     "p_drmk": "d!",
     "p_pure": "p!",
     "p_mention": "oe po <@!651250669390528561>, ",
     "tiempo": "7200",
     "edi": "4",
-    "tem": "tohas con pelo claro",
+    "tem": "Sin temática",
     "desc": "El Drawmaku es un juego similar a las charadas, en el que tendrás que adivinar el danmaku que dibujan los demás. ¡A revivir viejos traumas y maravillarnos con los fuegos artificiales!",
-    "desctem": "¡Esta vez la temática será de danmaku de tohas (y haditas de stage) con pelo claro! Esto, por ejemplo, incluye a Sagume, Okina, Junko, Alice, Clownpiece, Yuuka y Lily, y excluye a Raiko, Wriggle, Meiling y Seiran. En resumen, está permitido de pelo castaño/verde claro en adelante.",
+    "desctem": "Sin descripción de temática.",
     "reglas": [
         "Pueden utilizar cualquier software o herramienta que les permita representar su danmaku",
         "¡Respeta tu turno en la lista!",
