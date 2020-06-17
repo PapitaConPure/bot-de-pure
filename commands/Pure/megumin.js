@@ -105,7 +105,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 												)
 												.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
 												.addField('Tags', `*${image.tags.split(/ +/).join(', ')}*`)
-												.addField('Eliminar imagen', `Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`)
+												.addField('Acciones', `Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`)
 												.setAuthor(`Comando invocado por ${tmpauth.username}`, tmpauth.avatarURL)
 												.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
 												.setImage(image.file_url);	
