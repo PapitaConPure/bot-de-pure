@@ -176,7 +176,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 		embedcolor = '#38214e';
 		embedtitle = 'Tohitas O//w//O';
 	} else {
-		srchtags += 'safe -breasts_apart -soles -bikini -breast_grab';
+		srchtags += 'safe -soles -bikini -breast_grab -revealing_clothes -panties -no_bra -no_panties';
 		embedcolor = '#fa7b62';
 		embedtitle = 'Tohas uwu';
 	}

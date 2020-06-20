@@ -12,17 +12,16 @@ const getRandomInt = function(_max) {
 const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 	tmpch.startTyping();
 	let BotMessage = -1;
-	let srchtags = 'megumin -guro -furry -vore -webm -audio rating:';
+	let srchtags = 'holo -guro -furry -vore -webm -audio rating:';
 	let embedcolor;
 	let embedtitle;
 
 	//#region Presentación
 	if(tmpch.nsfw) {
-		srchtags += 'explicit -bestiality';
-		embedcolor = '#921131';
-		embedtitle = 'MEGUMIN Ó//w//Ò';
+		tmpch.send('NO.');
+		return;
 	} else {
-		srchtags += 'safe -soles -bikini -breast_grab -revealing_clothes -panties -no_bra -no_panties';
+		srchtags += 'safe -soles -bikini -breast_grab -revealing_clothes -panties -no_bra -no_panties -ass';
 		embedcolor = '#e51a4c';
 		embedtitle = 'MEGUMIN ÙwÚ';
 	}
@@ -136,10 +135,9 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 }
 
 module.exports = {
-	name: 'megumin',
+	name: 'heart',
 	aliases: [
-        'megu', 'explosión', 'bakuretsu', 'papiwaifu', 'papawaifu', 'waifu',
-		'bestgirl', 'explosion'
+        'holo'
     ],
 	execute(message, args) {
 		if(message.guild.id !== '651244470691561473' && message.guild.id !== '654471968200065034') {
