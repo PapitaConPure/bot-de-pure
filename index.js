@@ -333,10 +333,10 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
     canal.send('', imagen).then(sent => {
         if(servidor.id === '654471968200065034') { //Hourai Doll
             canal.send(
-                `Wena po <@${miembro.user.id}> conchetumare, como estai. Porfa revisa el canal <#671817759268536320> para que no te funemos <:HaniwaSmile:659872119995498507>\n` +
-                'También elije un rol de color (puedes verlos aquí abajo) y pídele el que te guste a alguno de los enfermos que trabajan aquí <:Mayuwu:654489124413374474>\n' +
+                `Wena po <@${miembro.user.id}> conchetumare, como estai. Porfa revisa el canal <#671817759268536320> para que no te funemos <:haniwaSmile:659872119995498507> \n` +
+                'También elije un rol de color (puedes verlos aquí abajo) y pídele el que te guste a alguno de los enfermos que trabajan aquí <:mayuwu:654489124413374474> \n' +
                 'Nota: si no lo haces, lo haré por tí, por aweonao <:junkNo:697321858407727224>\n' +
-                'WENO YA PO CSM. <@&654472238510112799>, vengan a saludar maricones <:perrito:688879477979086881>\n' +
+                'WENO YA PO CSM. <@&654472238510112799>, vengan a saludar maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
                 `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>`
             );
             setTimeout(func.askForRole, 1000 * 60 * 3, miembro, canal);
@@ -417,7 +417,7 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
     canal.send('', imagen).then(sent => {
         if(servidor.id === '654471968200065034') { //Hourai Doll
             canal.send(
-                'Nooooo po csm, perdimo otro weón \<:gatoMuySad:697353668915363968>' +
+                'Nooooo po csm, perdimo otro weón \<:meguDerp:708064265092726834>' +
                 `*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
             );
         } else { //Otros servidores

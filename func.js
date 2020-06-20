@@ -220,13 +220,14 @@ module.exports = {
     pingear: function(cnt, mention, msgch) {
         const frase = [
             `Oe po ${mention} <:junkNo:697321858407727224>`,
-            `Wacho, cachai ${mention} <:yumou:697323299801137161>`,
-            `Oe ${mention} qliao <:poppo:697321587690700911>`,
+            `Wacho, cachai ${mention} <:yumou:708158159180660748>`,
+            `Oe ${mention} qliao <:miyoi:674823039086624808>`,
             `Responde po ${mention} <:mayuwu:654489124413374474>`,
             `¿Vai a responder ${mention}? <:haniwaSmile:659872119995498507>`,
-            `${mention}, respondé altoke <:why:691222027738152971>`,
+            `${mention}, respondé altoke <:hypergardener:720759009866547342>`,
             `Dale ${mention} ctm <:reibu:686220828773318663>`,
-            `Wena po ${mention} como andai <:meguSmile:694324892073721887>`
+            `Wena po ${mention} como andai <:meguSmile:694324892073721887>`,
+            `Pero qué andai haciendo po ${mention} rectm <:spookedSyura:688883921697374208>`
         ];
 
         msgch.send(frase[Math.floor(Math.random() * 8)]);
