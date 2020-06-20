@@ -36,7 +36,9 @@ module.exports = {
 			'doge',			'721973016455807017',
 			'cheems',		'721973038555463741',
 			'jugo',			'721976283080294420',
-			'papita',		'722238533007310928'
+			'papita',		'722238533007310928',
+			'mano',			'723753514463133758',
+			'EA',			'723753514672586822'
 		];
 
 		if(!args.length) {
@@ -45,7 +47,7 @@ module.exports = {
 			message.channel.send(`<:${perritosopt[randperrito]}:${perritosopt[randperrito + 1]}>`);
 		} else {
 			const todoslosperritos = ['perritos', 'todo', 'todos', 'lista', 'ayuda', 'everything', 'all', 'help'];
-			if(todoslosperritos.includes(args[0])) {
+			if(todoslosperritos.includes(args[0].toLowerCase())) {
 				let perritostr = '**Emote**\t**Nombre**\n';
 
 				message.client.guilds.get('676251911850164255').emojis.map(emote => {
@@ -58,7 +60,7 @@ module.exports = {
 				let foundperrito = false;
 				message.client.guilds.get('676251911850164255').emojis.map(emote => {
 					if(!foundperrito) {
-						if(emote.name.startsWith(args[0]) && perritosopt.some(perrito => perrito === emote.name)) {
+						if(emote.name.startsWith(args[0].toLowerCase()) && perritosopt.some(perrito => perrito === emote.name)) {
 							message.channel.send(`<:${emote.name}:${emote.id}>`);
 							foundperrito = true;
 						}
