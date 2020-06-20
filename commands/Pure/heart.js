@@ -59,9 +59,9 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 			let showpg = ':book: ';
 			let showtag = ':mag_right: ';
 			if(!isNaN(arglist[0])) showpg += `[1~**${arglist[0]}**] => Seleccionada: ***${srchpg + 1}***`;
-			else showpg += 'No ingresaste un rango de páginas. `p!megumin <¿rango?> <¿etiquetas?>`'
+			else showpg += 'No ingresaste un rango de páginas. `p!heart <¿rango?> <¿etiquetas?>`'
 			if(customtags.length) showtag += `*${customtags.trim().split(/ +/).map(str => str = str.replace('*', '\\*')).join(', ')}*`;
-			else showtag += 'No ingresaste etiquetas. `p!megumin <¿rango?> <¿etiquetas?>`'; 
+			else showtag += 'No ingresaste etiquetas. `p!heart <¿rango?> <¿etiquetas?>`'; 
 			data.data.forEach(image => {
 				if(image !== undefined && i === selectedpic) {
 					//Crear y usar embed
