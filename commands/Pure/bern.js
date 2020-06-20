@@ -17,6 +17,6 @@ module.exports = {
 			'No avancé en el manga de Kogasa', 'No avancé en el manga de Komachi'
 		];
 		const selection = getRandomInt(emot.length);
-		message.channel.send(`**${emot[selection]}** <:chad:722334924845350973>`);
+		message.channel.send(`**${emot[selection]}** <:bern:722334924845350973>`);
     },
 };
