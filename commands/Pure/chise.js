@@ -2,11 +2,9 @@ const Discord = require('discord.js'); //Integrar discord.js
 var global = require('../../config.json'); //Variables globales
 
 module.exports = {
-	name: 'colores',
+	name: 'chise',
 	aliases: [
-		'color', 'roles', 'rol',
-		'colours', 'colour', 'role',
-		'c'
+		'sylvia', 'empalar'
 	],
 	execute(message, args) {
 		if(message.channel.guild.id === '654471968200065034')

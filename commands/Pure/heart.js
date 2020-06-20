@@ -22,8 +22,8 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 		return;
 	} else {
 		srchtags += 'safe -soles -bikini -breast_grab -revealing_clothes -panties -no_bra -no_panties -ass';
-		embedcolor = '#e51a4c';
-		embedtitle = 'MEGUMIN ÙwÚ';
+		embedcolor = '#dc7018';
+		embedtitle = 'HOLO OWO';
 	}
 	//#endregion
 
