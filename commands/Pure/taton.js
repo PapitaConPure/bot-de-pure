@@ -45,8 +45,7 @@ module.exports = {
 			'Megumin',		'724779168033800214',
 			'Navi',			'724779176816672819',
 			'aluminio',		'725535400654929930',
-			'chocolatada',	'725535400692547654',
-			'pensativo',	'725536929239662622'
+			'chocolatada',	'725535400692547654'
 		];
 
 		if(!args.length) {
