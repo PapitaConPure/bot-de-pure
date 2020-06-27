@@ -1,6 +1,7 @@
 const Discord = require('discord.js'); //Integrar discord.js
 var global = require('../../config.json'); //Variables globales
 const axios = require('axios');
+const Canvas = require('canvas'); 
 
 async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo de un servidor
 	const servidor = miembro.guild; //Servidor
