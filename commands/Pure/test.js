@@ -29,7 +29,7 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
 	let Texto = `${miembro.displayName}`;
 	let fontSize = 72;
 	while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
-	ctx.font = `bold ${fontSize}px sans-serif`;
+	ctx.font = `bold ${fontSize}px Verdana`;
 	ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 80);
 	//#endregion
 	
