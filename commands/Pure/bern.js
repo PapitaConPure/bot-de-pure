@@ -14,9 +14,9 @@ module.exports = {
 	execute(message, args){
 		const emot = [
 			'Mi polola.', 'Mi reina.', 'Mi princesa', 'Mi esposa', 'Mi mujer', 'Procrastinar', ':wine_glass:',
-			'No avancé en el manga de Kogasa', 'No avancé en el manga de Komachi'
+			'No avancé en el manga de Kogasa', 'No avancé en el manga de Komachi', 'Mañana lo hago', 'Otro día'
 		];
 		const selection = getRandomInt(emot.length);
-		message.channel.send(`**${emot[selection]}** <:bern:722334924845350973>`);
+		message.channel.send(`**${emot[selection]}** <:bewny:722334924845350973>`);
     },
 };

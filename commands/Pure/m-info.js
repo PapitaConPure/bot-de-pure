@@ -42,9 +42,14 @@ module.exports = {
 					if(args[0].startsWith('!')) args[0] = args[0].slice(1);
 				}
 
-				selectch = message.guild.channels.get(args[0]);
+				if(isNaN(args[0])) {
+					selectch = message.guild.channels.find(chnm => chnm.name.toLowerCase() === args[0]);
+				} else {
+					selectch = message.guild.channels.get(args[0]);
+				}
 			}
-			if(args.length && typeof selectch !== undefined) {
+
+			if(args.length && !(typeof selectch === undefined || typeof selectch === null)) {
 				let i = 0;
 				selectch.members.filter(member => !member.user.bot).forEach(member => {
 					peocnt[i] = selectch.messages.filter(m => m.author.id === member.user.id).size;
