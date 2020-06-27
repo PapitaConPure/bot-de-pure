@@ -43,7 +43,7 @@ module.exports = {
 				}
 
 				if(isNaN(args[0])) {
-					selectch = message.guild.channels.find(chnm => chnm.name.toLowerCase.indexOf(args[0]) !== -1);
+					selectch = message.guild.channels.find(chnm => chnm.name.toLowerCase().indexOf(args[0]) !== -1);
 				} else {
 					selectch = message.guild.channels.get(args[0]);
 				}
