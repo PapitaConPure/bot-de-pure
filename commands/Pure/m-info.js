@@ -51,14 +51,15 @@ module.exports = {
 
 			if(args.length && !(typeof selectch === undefined || typeof selectch === null)) {
 				let i = 0;
-				selectch.members.filter(member => !member.user.bot).forEach(member => {
+				/*selectch.members.filter(member => !member.user.bot).forEach(member => {
 					peocnt[i] = selectch.messages.filter(m => m.author.id === member.user.id).size;
 					peoid[i] = member.user.id;
 					i++;
-				});
+				});*/
+				message.channel.send(selectch);
 			}
 
-			//Ordenamiento burbuja
+			/*//Ordenamiento burbuja
 			for(let i = 1; i < textcnt; i++)
 				for(let j = 0; j < (textcnt - i); j++)
 					if(msgcnt[j] < msgcnt[j + 1]) {
@@ -168,7 +169,7 @@ module.exports = {
 							sent.edit(Embed[SelectedEmbed]);
 						});
 					}).then(() => message.channel.stopTyping(true));
-			});
+			});*/
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR ROLES** (MANAGE ROLES)* para usar este comando.');
     },
 };
