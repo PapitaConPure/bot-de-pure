@@ -56,7 +56,6 @@ module.exports = {
 					peoid[i] = member.user.id;
 					i++;
 				});
-				message.channel.send(selectch);
 			}
 
 			//Ordenamiento burbuja
@@ -122,7 +121,7 @@ module.exports = {
 				.setColor('#eebb00')
 				.setTitle('Estadísticas de actividad ÛwÕ')
 
-				.addField(`Usuarios más activos (canal: ${(args.length && typeof selectch !== undefined)?selectch.name:'ninguno'})`, `${(args.length && typeof selectch !== undefined)?mstactpeo:'Ingresa un #canal como argumento para ver estadísticas del mismo.'}`)
+				.addField(`Usuarios más activos (canal: ${(args.length && (typeof selectch) !== null)?selectch.name:'ninguno'})`, `${(args.length && (typeof selectch) !== null)?mstactpeo:'Ingresa un #canal como argumento para ver estadísticas del mismo.'}`)
 				.addField('Canales más activos', mstactch)
 
 				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
