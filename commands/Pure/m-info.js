@@ -47,15 +47,17 @@ module.exports = {
 				} else {
 					selectch = message.guild.channels.get(args[0]);
 				}
-			}
 
-			if(args.length && !((typeof selectch) === undefined || (typeof selectch) === null)) {
-				let i = 0;
-				selectch.members.filter(member => !member.user.bot).forEach(member => {
-					peocnt[i] = selectch.messages.filter(m => m.author.id === member.user.id).size;
-					peoid[i] = member.user.id;
-					i++;
-				});
+				console.log(typeof selectch);
+
+				if((typeof selectch) !== undefined && (typeof selectch) !== null) {
+					let i = 0;
+					selectch.members.filter(member => !member.user.bot).forEach(member => {
+						peocnt[i] = selectch.messages.filter(m => m.author.id === member.user.id).size;
+						peoid[i] = member.user.id;
+						i++;
+					});
+				}
 			}
 
 			//Ordenamiento burbuja
