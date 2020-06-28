@@ -48,7 +48,7 @@ module.exports = {
 					selectch = message.guild.channels.get(args[0]);
 				}
 
-				console.log(typeof selectch);
+				selectch.any(val => { console.log(typeof val) });
 
 				if((typeof selectch) !== undefined && (typeof selectch) !== null) {
 					let i = 0;
