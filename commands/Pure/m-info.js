@@ -56,7 +56,7 @@ module.exports = {
 
 				console.log(typeof selectch);
 
-				if((typeof selectch) !== undefined) {
+				if((typeof selectch) !== 'undefined') {
 					let i = 0;
 					selectch.members.filter(member => !member.user.bot).forEach(member => {
 						peocnt[i] = selectch.messages.filter(m => m.author.id === member.user.id).size;
@@ -129,7 +129,7 @@ module.exports = {
 				.setColor('#eebb00')
 				.setTitle('Estadísticas de actividad ÛwÕ')
 
-				.addField(`Usuarios más activos (canal: ${(args.length && (typeof selectch) !== null)?selectch.name:'ninguno'})`, `${(args.length && (typeof selectch) !== null)?mstactpeo:'Ingresa un #canal como argumento para ver estadísticas del mismo.'}`)
+				.addField(`Usuarios más activos (canal: ${(args.length && (typeof selectch) !== 'undefined')?selectch.name:'ninguno'})`, `${(args.length && (typeof selectch) !== 'undefined')?mstactpeo:'Ingresa un #canal como argumento para ver estadísticas del mismo.'}`)
 				.addField('Canales más activos', mstactch)
 
 				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
