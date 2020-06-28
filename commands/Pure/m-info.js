@@ -54,6 +54,8 @@ module.exports = {
 					});
 				}
 
+				console.log(typeof selectch);
+
 				if((typeof selectch) !== undefined) {
 					let i = 0;
 					selectch.members.filter(member => !member.user.bot).forEach(member => {
