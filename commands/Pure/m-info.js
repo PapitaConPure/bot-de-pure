@@ -49,7 +49,7 @@ module.exports = {
 				}
 			}
 
-			if(args.length && !(selectch === undefined || selectch === null)) {
+			if(args.length && !((typeof selectch) === undefined || (typeof selectch) === null)) {
 				let i = 0;
 				selectch.members.filter(member => !member.user.bot).forEach(member => {
 					peocnt[i] = selectch.messages.filter(m => m.author.id === member.user.id).size;
