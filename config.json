@@ -1,6 +1,6 @@
 {
-    "bot_status": "EN DESARROLLO; HOSTEADO LOCALMENTE",
-    "bot_version": "Full.2.7.29",
+    "bot_status": "EN DESARROLLO; HOSTEADO EN HEROKU.COM",
+    "bot_version": "Full.2.7.32",
     "p_drmk": "d!",
     "p_pure": "p!",
     "p_mention": "oe po <@!651250669390528561>, ",
