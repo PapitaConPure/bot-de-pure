@@ -142,11 +142,17 @@ module.exports = {
 		'bestgirl', 'explosion'
     ],
 	execute(message, args) {
-		if(message.guild.id !== '651244470691561473' && message.guild.id !== '654471968200065034') {
+		const admitted = [
+			'651244470691561473',
+			'698323332160028792',
+			'654471968200065034'
+		];
+		
+		if(admitted.some(soleID => (message.guild.id === soleID))) {
 			message.channel.send('_Este comando solo puede ser usado en la superficie..._');
 			return;
 		}
-		if(message.guild.id === '654471968200065034' && message.channel.nsfw) {
+		if(message.channel.nsfw) {
 			message.channel.send('*fokiu.*');
 			return;
 		}
