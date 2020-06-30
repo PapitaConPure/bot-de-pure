@@ -184,18 +184,21 @@ module.exports = {
     },
 
     askForRole: function(miembro, canal) {
-        console.log('Fuck.');
-        if(miembro.roles.size === 1) {
-            canal.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474>`);
-            setTimeout(module.exports.askForRole, 1000 * 60 * 5, miembro , canal);
-        } else if(miembro.roles.size === 2) {
-            canal.send(
-                `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>\n`+
-                `https://imgur.com/D5Z8Itb`
-            );
-            setTimeout(module.exports.forceRole, 1000 * 60 * 3, miembro, canal);
+        if(!member.deleted) {
+            if(miembro.roles.size === 1) {
+                canal.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474>`);
+                setTimeout(module.exports.askForRole, 1000 * 60 * 5, miembro , canal);
+            } else if(miembro.roles.size === 2) {
+                canal.send(
+                    `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>\n`+
+                    `https://imgur.com/D5Z8Itb`
+                );
+                setTimeout(module.exports.forceRole, 1000 * 60 * 3, miembro, canal);
+            } else {
+                canal.send('Weno, ya teni tu rol, q esti bien po <:Junky:651290323557023753>');
+            }
         } else {
-            canal.send('Weno, ya teni tu rol, q esti bien po <:Junky:651290323557023753>');
+            canal.send('Se murió <@${miembro.user.id}> po <:mayuwu:654489124413374474>');
         }
     },
 
