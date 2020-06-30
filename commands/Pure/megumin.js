@@ -143,12 +143,13 @@ module.exports = {
     ],
 	execute(message, args) {
 		const admitted = [
-			'651244470691561473',
-			'698323332160028792',
-			'654471968200065034'
+			'651244470691561473', //Server de Puré
+			'698323332160028792', //Hourai Doll
+			'654471968200065034', //USD
+			'676251911850164255' //Slot 1
 		];
 		
-		if(admitted.some(soleID => (message.guild.id === soleID))) {
+		if(!(admitted.some(soleID => (message.guild.id === soleID)))) {
 			message.channel.send('_Este comando solo puede ser usado en la superficie..._');
 			return;
 		}
