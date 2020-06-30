@@ -3,9 +3,9 @@ var global = require('../../config.json'); //Variables globales
 const axios = require('axios');
 const Canvas = require('canvas'); 
 
-async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo de un servidor
+async function dibujarBienvenida(miembro, canal) { //Dar bienvenida a un miembro nuevo de un servidor
 	const servidor = miembro.guild; //Servidor
-	const canal = servidor.channels.get(servidor.systemChannelID); //Canal de mensajes de sistema
+	//const canal = servidor.channels.get(servidor.systemChannelID); //Canal de mensajes de sistema
 	canal.startTyping();
 
 	//#region Creación de imagen
@@ -104,6 +104,6 @@ module.exports = {
 	execute(message, args) {
 		//message.channel.send('No se están haciendo pruebas por el momento <:uwu:681935702308552730>'); Verdana
 		
-		dibujarBienvenida(message.member);
+		dibujarBienvenida(message.member, message.channel);
     },
 };
