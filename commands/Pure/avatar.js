@@ -10,7 +10,13 @@ module.exports = {
     ],
 	execute(message, args) {
         if(!args.length) {
-            message.channel.send({ files: [message.author.avatarURL] });
+            const embed = new Discord.RichEmbed()
+				.setTitle(`Avatar de ${message.author.username}`)
+                .setColor('#faa61a')
+                .setImage(message.author.avatarURL)
+				.setFooter(`Comando invocado por ${message.author.username}`);
+            
+            message.channel.send(embed);
         } else {
             if(isNaN(args[0])) {
                 if(args[0].startsWith('<@') && args[0].endsWith('>')) {
@@ -30,7 +36,14 @@ module.exports = {
                 message.channel.send(':warning: ¡Usuario no encontrado!');
                 return;
             }
-            message.channel.send({ files: [fetcheduser.avatarURL()] });
+
+            const embed = new Discord.RichEmbed()
+				.setTitle(`Avatar de ${fetcheduser.username}`)
+                .setColor('#faa61a')
+                .setImage(fetcheduser.avatarURL)
+				.setFooter(`Comando invocado por ${message.author.username}`);
+
+            message.channel.send(embed);
         }
     },
 };
