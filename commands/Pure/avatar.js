@@ -23,24 +23,30 @@ module.exports = {
                 if(args[0].startsWith('!')) args[0] = args[0].slice(1);
             }
             if(isNaN(args[0])) {
-                const temp = args[0];
-                args[0] = message.client.users.filter(user => {
-                    let nickmatch = false;
-                    /*if(typeof(member.nickname) !== null) {
-                        if(user.nickname.toLowerCase().indexOf(temp) !== -1)
-                            nickmatch = true;
-                    }*/
-                    
-                    return (nickmatch || user.username.toLowerCase().indexOf(temp) !== -1);
-                }).first().id;
+                const temp = args[0].toLowerCase();
+                args[0] = message.client.users.filter(user => 
+                    user.username.toLowerCase().indexOf(temp) !== -1
+                ).first();
+
+                if((typeof args[0]) === undefined)
+                    args[0] = message.channel.guild.members.filter(member => {
+                        let nickmatch = false;
+                        if(typeof(member.nickname) !== null) {
+                            if(member.nickname.toLowerCase().indexOf(temp) !== -1)
+                                nickmatch = true;
+                        }
+                        
+                        return nickmatch;
+                    }).first();
+
+                if((typeof args[0]) === undefined) {
+                    message.channel.send(':warning: ¡Usuario no encontrado!');
+                    return;
+                }
             }
             message.channel.send(`\`${args[0]}\``);
-            const fetcheduser = message.client.users.get(args[0]);
 
-            if((typeof fetcheduser) === undefined) {
-                message.channel.send(':warning: ¡Usuario no encontrado!');
-                return;
-            }
+            const fetcheduser = message.client.users.get(args[0]);
 
             const embed = new Discord.RichEmbed()
 				.setTitle(`Avatar de ${fetcheduser.username}`)
