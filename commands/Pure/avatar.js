@@ -24,18 +24,18 @@ module.exports = {
             }
             if(isNaN(args[0])) {
                 const temp = args[0];
-                args[0] = message.channel.guild.members.filter(member => {
+                args[0] = message.client.users.filter(user => {
                     let nickmatch = false;
                     /*if(typeof(member.nickname) !== null) {
-                        if(member.nickname.toLowerCase().indexOf(temp) !== -1)
+                        if(user.nickname.toLowerCase().indexOf(temp) !== -1)
                             nickmatch = true;
                     }*/
                     
-                    return (nickmatch || member.user.username.toLowerCase().indexOf(temp) !== -1);
+                    return (nickmatch || user.username.toLowerCase().indexOf(temp) !== -1);
                 }).first().id;
             }
 
-            const fetcheduser = message.channel.guild.members.get(args[0]);
+            const fetcheduser = message.client.users.fetch(args[0]);
 
             if((typeof fetcheduser) === undefined) {
                 message.channel.send(':warning: ¡Usuario no encontrado!');
