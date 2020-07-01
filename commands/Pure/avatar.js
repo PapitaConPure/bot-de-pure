@@ -26,9 +26,10 @@ module.exports = {
                 const temp = args[0];
                 args[0] = message.channel.guild.members.filter(member => {
                     let nickmatch = false;
-                    if(typeof member.nickname !== null)
+                    /*if(typeof(member.nickname) !== null) {
                         if(member.nickname.toLowerCase().indexOf(temp) !== -1)
                             nickmatch = true;
+                    }*/
                     
                     return (nickmatch || member.user.username.toLowerCase().indexOf(temp) !== -1);
                 }).first().id;
