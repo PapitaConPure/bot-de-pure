@@ -34,7 +34,7 @@ module.exports = {
                     return (nickmatch || user.username.toLowerCase().indexOf(temp) !== -1);
                 }).first().id;
             }
-
+            message.channel.send(`\`${args[0]}\``);
             const fetcheduser = message.client.users.fetch(args[0]);
 
             if((typeof fetcheduser) === undefined) {
