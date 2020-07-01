@@ -42,21 +42,26 @@ module.exports = {
 
                     if((typeof args[avalist]) === 'undefined') {
                         message.channel.send(':warning: ¡Usuario no encontrado!');
-                        return;
-                    }
-
-                    args[avalist] = args[avalist].id;
+                        args[avalist] = -1;
+                    } else
+                        args[avalist] = args[avalist].id;
                 }
 
-                const fetcheduser = message.client.users.get(args[avalist]);
+                if(args[avalist] !== -1) {
+                    const fetcheduser = message.client.users.get(args[avalist]);
 
-                const embed = new Discord.RichEmbed()
-                    .setTitle(`Avatar de ${fetcheduser.username}`)
-                    .setColor('#faa61a')
-                    .setImage(fetcheduser.avatarURL)
-                    .setFooter(`Comando invocado por ${message.author.username}`);
+                    if((typeof fetcheduser) === 'undefined')
+                        message.channel.send(':warning: La ID ingresada no es válida o no es una ID en absoluto...');
+                    else {
+                        const embed = new Discord.RichEmbed()
+                            .setTitle(`Avatar de ${fetcheduser.username}`)
+                            .setColor('#faa61a')
+                            .setImage(fetcheduser.avatarURL)
+                            .setFooter(`Comando invocado por ${message.author.username}`);
 
-                message.channel.send(embed);
+                        message.channel.send(embed);
+                    }
+                }
             }
         }
     },
