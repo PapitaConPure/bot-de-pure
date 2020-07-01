@@ -35,7 +35,7 @@ module.exports = {
                 }).first().id;
             }
             message.channel.send(`\`${args[0]}\``);
-            const fetcheduser = message.client.users.fetch(args[0]);
+            const fetcheduser = message.client.users.get(args[0]);
 
             if((typeof fetcheduser) === undefined) {
                 message.channel.send(':warning: ¡Usuario no encontrado!');
