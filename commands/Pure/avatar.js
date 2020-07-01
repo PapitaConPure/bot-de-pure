@@ -18,45 +18,46 @@ module.exports = {
             
             message.channel.send(embed);
         } else {
-            if(args[0].startsWith('<@') && args[0].endsWith('>')) {
-                args[0] = args[0].slice(2, -1);
-                if(args[0].startsWith('!')) args[0] = args[0].slice(1);
-            }
-            if(isNaN(args[0])) {
-                const temp = args[0].toLowerCase();
-                args[0] = message.client.users.filter(user => 
-                    user.username.toLowerCase().indexOf(temp) !== -1
-                ).first();
+            for(avalist = 0; avalist < Math.min(args.length, 8); avalist++) {
+                if(args[avalist].startsWith('<@') && args[avalist].endsWith('>')) {
+                    args[avalist] = args[avalist].slice(2, -1);
+                    if(args[avalist].startsWith('!')) args[avalist] = args[avalist].slice(1);
+                }
+                if(isNaN(args[avalist])) {
+                    const temp = args[avalist].toLowerCase();
+                    args[avalist] = message.client.users.filter(user => 
+                        user.username.toLowerCase().indexOf(temp) !== -1
+                    ).first();
 
-                if((typeof args[0]) === 'undefined')
-                    args[0] = message.channel.guild.members.filter(member => {
-                        let nickmatch = false;
-                        if(member.nickname !== null) {
-                            if(member.nickname.toLowerCase().indexOf(temp) !== -1)
-                                nickmatch = true;
-                        }
-                        
-                        return nickmatch;
-                    }).first();
+                    if((typeof args[avalist]) === 'undefined')
+                        args[avalist] = message.channel.guild.members.filter(member => {
+                            let nickmatch = false;
+                            if(member.nickname !== null) {
+                                if(member.nickname.toLowerCase().indexOf(temp) !== -1)
+                                    nickmatch = true;
+                            }
+                            
+                            return nickmatch;
+                        }).first();
 
-                if((typeof args[0]) === 'undefined') {
-                    message.channel.send(':warning: ¡Usuario no encontrado!');
-                    return;
+                    if((typeof args[avalist]) === 'undefined') {
+                        message.channel.send(':warning: ¡Usuario no encontrado!');
+                        return;
+                    }
+
+                    args[avalist] = args[avalist].id;
                 }
 
-                args[0] = args[0].id;
+                const fetcheduser = message.client.users.get(args[avalist]);
+
+                const embed = new Discord.RichEmbed()
+                    .setTitle(`Avatar de ${fetcheduser.username}`)
+                    .setColor('#faa61a')
+                    .setImage(fetcheduser.avatarURL)
+                    .setFooter(`Comando invocado por ${message.author.username}`);
+
+                message.channel.send(embed);
             }
-            message.channel.send(`\`${args[0]}\``);
-
-            const fetcheduser = message.client.users.get(args[0]);
-
-            const embed = new Discord.RichEmbed()
-				.setTitle(`Avatar de ${fetcheduser.username}`)
-                .setColor('#faa61a')
-                .setImage(fetcheduser.avatarURL)
-				.setFooter(`Comando invocado por ${message.author.username}`);
-
-            message.channel.send(embed);
         }
     },
 };
