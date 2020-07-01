@@ -4,11 +4,13 @@ var global = require('../../config.json'); //Variables globales
 module.exports = {
 	name: 'avatar',
     aliases: [
-        'presentacion', 'presentación', 'hola', 'presentar', 'puré', 'pure'
+        'perfil', 'fotoperfil',
+        'profile', 'profilepicture',
+        'pfp'
     ],
 	execute(message, args) {
         if(!args.length) {
-            message.channel.send({ files: [message.author.avatarURL()] });
+            message.channel.send({ files: [message.author.avatarURL] });
         } else {
             if(isNaN(args[0])) {
                 if(args[0].startsWith('<@') && args[0].endsWith('>')) {
