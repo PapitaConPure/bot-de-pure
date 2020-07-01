@@ -28,7 +28,7 @@ module.exports = {
                     user.username.toLowerCase().indexOf(temp) !== -1
                 ).first();
 
-                if((typeof args[0]) === undefined)
+                if((typeof args[0]) === 'undefined')
                     args[0] = message.channel.guild.members.filter(member => {
                         let nickmatch = false;
                         if(typeof(member.nickname) !== null) {
@@ -39,10 +39,11 @@ module.exports = {
                         return nickmatch;
                     }).first();
 
-                if((typeof args[0]) === undefined) {
+                if((typeof args[0]) === 'undefined') {
                     message.channel.send(':warning: ¡Usuario no encontrado!');
                     return;
                 }
+
                 args[0] = args[0].id;
             }
             message.channel.send(`\`${args[0]}\``);
