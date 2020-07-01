@@ -43,6 +43,7 @@ module.exports = {
                     message.channel.send(':warning: ¡Usuario no encontrado!');
                     return;
                 }
+                args[0] = args[0].id;
             }
             message.channel.send(`\`${args[0]}\``);
 
