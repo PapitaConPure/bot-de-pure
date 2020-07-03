@@ -335,7 +335,7 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
             canal.send(
                 `Wena po <@${miembro.user.id}> conchetumare, como estai. Porfa revisa el canal <#671817759268536320> para que no te funemos <:haniwaSmile:659872119995498507> \n` +
                 'También elije un rol de color (puedes verlos aquí abajo) y pídele el que te guste a alguno de los enfermos que trabajan aquí <:mayuwu:654489124413374474> \n' +
-                'Nota: si no lo haces, lo haré por tí, por aweonao <:junkNo:697321858407727224>\n' +
+                'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:697321858407727224>\n' +
                 'WENO YA PO CSM. <@&654472238510112799>, vengan a saludar maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
                 `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>`
             );
@@ -413,7 +413,7 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
 
     //#region Imagen y Mensaje extra
-    const peoplecnt = 1 + servidor.members.filter(member => !member.user.bot).size;
+    const peoplecnt = servidor.members.filter(member => !member.user.bot).size;
     canal.send('', imagen).then(sent => {
         if(servidor.id === '654471968200065034') { //Hourai Doll
             canal.send(

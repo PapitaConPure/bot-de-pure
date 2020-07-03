@@ -29,7 +29,7 @@ async function dibujarBienvenida(miembro, canal) { //Dar bienvenida a un miembro
 	let Texto = `${miembro.displayName}`;
 	let fontSize = 72;
 	while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
-	ctx.font = `bold ${fontSize}px Verdana`;
+	ctx.font = `900 ${fontSize}px Luminari`;
 	ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 80);
 	//#endregion
 	
@@ -38,10 +38,10 @@ async function dibujarBienvenida(miembro, canal) { //Dar bienvenida a un miembro
 	else Texto = `${servidor.name}!`;
 	fontSize = 120;
 	while(ctx.measureText(Texto).width > (canvas.width - 150)) fontSize -= 2;
-	ctx.font = `bold ${fontSize}px sans-serif`;
+	ctx.font = `900 ${fontSize}px Luminari`;
 	ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 15);
 	Texto = '¡Bienvenid@ a';
-	ctx.font = `bold 48px sans-serif`;
+	ctx.font = `bold 48px Luminari`;
 	ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - fontSize - 30);
 	//#endregion
 	//#endregion
@@ -69,14 +69,15 @@ async function dibujarBienvenida(miembro, canal) { //Dar bienvenida a un miembro
 	const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
 
 	//#region Imagen y Mensaje extra
-	const peoplecnt = 1 + servidor.members.filter(member => !member.user.bot).size;
+	const peoplecnt = servidor.members.filter(member => !member.user.bot).size;
 	canal.send('', imagen).then(sent => {
 		if(servidor.id === '654471968200065034') { //Hourai Doll
 			canal.send(
 				`Wena po <@${miembro.user.id}> conchetumare, como estai. Porfa revisa el canal <#671817759268536320> para que no te funemos <:haniwaSmile:659872119995498507> \n` +
 				'También elije un rol de color (puedes verlos aquí abajo) y pídele el que te guste a alguno de los enfermos que trabajan aquí <:mayuwu:654489124413374474> \n' +
+				'https://imgur.com/D5Z8Itb\n' +
 				'Nota: si no lo haces, lo haré por tí, por aweonao <:junkNo:697321858407727224>\n' +
-				'WENO YA PO CSM. <@&654472238510112799>, vengan a saludar maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
+				'WENO YA PO CSM. <@& 654472238510112799 >, vengan a saludar maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
 				`*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>`
 			);
 			setTimeout(func.askForRole, 1000 * 60 * 3, miembro, canal);
