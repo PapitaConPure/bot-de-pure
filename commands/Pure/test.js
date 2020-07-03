@@ -2,6 +2,7 @@ const Discord = require('discord.js'); //Integrar discord.js
 var global = require('../../config.json'); //Variables globales
 const axios = require('axios');
 const Canvas = require('canvas'); 
+const Canvas = require('canvas'); 
 
 async function dibujarBienvenida(miembro, canal) { //Dar bienvenida a un miembro nuevo de un servidor
 	const servidor = miembro.guild; //Servidor
@@ -103,7 +104,7 @@ async function dibujarBienvenida(miembro, canal) { //Dar bienvenida a un miembro
 module.exports = {
 	name: 'test',
 	execute(message, args) {
-		//message.channel.send('No se están haciendo pruebas por el momento <:uwu:681935702308552730>'); Verdana
+		//message.channel.send('No se están haciendo pruebas por el momento <:uwu:681935702308552730>');
 		
 		dibujarBienvenida(message.member, message.channel);
     },
