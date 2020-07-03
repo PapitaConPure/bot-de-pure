@@ -27,7 +27,7 @@ async function dibujarBienvenida(miembro, canal) { //Dar bienvenida a un miembro
 	//#endregion
 
 	//#region Nombre del usuario
-	let Texto = `${miembro.displayName}`;
+	let Texto = `${miembro.displayName}`; 
 	let fontSize = 72;
 	while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
 	ctx.font = `900 ${fontSize}px ${wea}`;
