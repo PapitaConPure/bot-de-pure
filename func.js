@@ -184,13 +184,13 @@ module.exports = {
     },
 
     askForRole: function(miembro, canal) {
-        if(!member.deleted) {
+        if(!miembro.deleted) {
             if(miembro.roles.size === 1) {
                 canal.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474>`);
                 setTimeout(module.exports.askForRole, 1000 * 60 * 5, miembro , canal);
             } else if(miembro.roles.size === 2) {
                 canal.send(
-                    `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>\n`+
+                    `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>\n` +
                     `https://imgur.com/D5Z8Itb`
                 );
                 setTimeout(module.exports.forceRole, 1000 * 60 * 3, miembro, canal);
@@ -198,25 +198,29 @@ module.exports = {
                 canal.send('Weno, ya teni tu rol, q esti bien po <:Junky:651290323557023753>');
             }
         } else {
-            canal.send('Se murió <@${miembro.user.id}> po <:mayuwu:654489124413374474>');
+            canal.send('Se murió el wn de <@${miembro.user.id}> po <:mayuwu:654489124413374474>');
         }
     },
 
     forceRole: function(miembro, canal) {
-        if(miembro.roles.size === 2) {
-            canal.send(`<@${miembro.user.id}> cagaste altiro watón fome <:why:691222027738152971>`);
-            const colores = [
-                '671851233870479375', //France Doll
-                '671852132328275979', //Holland Doll
-                '671851228954755102', //Tibetan Doll
-                '671851235267182625', //Kyoto Doll
-                '671851236538187790', //London Doll
-                '671851234541699092', //Russian Doll
-                '671851228308963348', //Orléans Doll
-            ];
-            miembro.addRole(colores[Math.floor(Math.random() * 7)]);
+        if(!miembro.deleted) {
+            if(miembro.roles.size === 2) {
+                canal.send(`<@${miembro.user.id}> cagaste altiro watón fome <:why:691222027738152971>`);
+                const colores = [
+                    '671851233870479375', //France Doll
+                    '671852132328275979', //Holland Doll
+                    '671851228954755102', //Tibetan Doll
+                    '671851235267182625', //Kyoto Doll
+                    '671851236538187790', //London Doll
+                    '671851234541699092', //Russian Doll
+                    '671851228308963348', //Orléans Doll
+                ];
+                miembro.addRole(colores[Math.floor(Math.random() * 7)]);
+            } else  {
+                canal.send('Al fin qliao ya teni tu rol. Q esti bien po, tonce <:uwu:681935702308552730>');
+            }
         } else {
-            canal.send('Al fin qliao ya teni tu rol. Q esti bien po, tonce <:uwu:681935702308552730>');
+            canal.send('Se murió el wn de <@${miembro.user.id}> po <:mayuwu:654489124413374474>');
         }
     },
 
