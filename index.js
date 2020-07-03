@@ -14,7 +14,6 @@ var global = require('./config.json'); //Variables globales
 var func = require('./func.js'); //Funciones globales
 const Sequelize = require('sequelize');
 const Canvas = require('canvas');
-require('typeface-bangers');
 //#endregion
 
 //#region Establecimiento de Comandos
