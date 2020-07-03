@@ -2,7 +2,6 @@ const Discord = require('discord.js'); //Integrar discord.js
 var global = require('../../config.json'); //Variables globales
 const axios = require('axios');
 const Canvas = require('canvas');
-const wea = require('typeface-bangers');
 
 async function dibujarBienvenida(miembro, canal) { //Dar bienvenida a un miembro nuevo de un servidor
 	const servidor = miembro.guild; //Servidor
@@ -30,7 +29,7 @@ async function dibujarBienvenida(miembro, canal) { //Dar bienvenida a un miembro
 	let Texto = `${miembro.displayName}`; 
 	let fontSize = 72;
 	while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
-	ctx.font = `900 ${fontSize}px ${wea}`;
+	ctx.font = `900 ${fontSize}px Arial`;
 	ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 80);
 	//#endregion
 	
@@ -39,10 +38,10 @@ async function dibujarBienvenida(miembro, canal) { //Dar bienvenida a un miembro
 	else Texto = `${servidor.name}!`;
 	fontSize = 120;
 	while(ctx.measureText(Texto).width > (canvas.width - 150)) fontSize -= 2;
-	ctx.font = `900 ${fontSize}px ${wea}`;
+	ctx.font = `900 ${fontSize}px Arial`;
 	ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 15);
 	Texto = '¡Bienvenid@ a';
-	ctx.font = `bold 48px ${wea}`;
+	ctx.font = `bold 48px Arial`;
 	ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - fontSize - 30);
 	//#endregion
 	//#endregion
