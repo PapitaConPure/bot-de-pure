@@ -198,7 +198,7 @@ module.exports = {
                 canal.send('Weno, ya teni tu rol, q esti bien po <:Junky:651290323557023753>');
             }
         } else {
-            canal.send('Se murió el wn de <@${miembro.user.id}> po <:mayuwu:654489124413374474>');
+            canal.send(`Se murió el wn de <@${miembro.user.id}> po <:mayuwu:654489124413374474>`);
         }
     },
 
@@ -220,7 +220,7 @@ module.exports = {
                 canal.send('Al fin qliao ya teni tu rol. Q esti bien po, tonce <:uwu:681935702308552730>');
             }
         } else {
-            canal.send('Se murió el wn de <@${miembro.user.id}> po <:mayuwu:654489124413374474>');
+            canal.send(`Se murió el wn de <@${miembro.user.id}> po <:mayuwu:654489124413374474>`);
         }
     },
 
