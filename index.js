@@ -13,7 +13,7 @@ const token = 'NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY'; //L
 var global = require('./config.json'); //Variables globales
 var func = require('./func.js'); //Funciones globales
 const Sequelize = require('sequelize');
-const Canvas = require('canvas');
+const Canvas = require('canvas'); 
 //#endregion
 
 //#region Establecimiento de Comandos
