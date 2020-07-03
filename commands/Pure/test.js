@@ -30,7 +30,7 @@ async function dibujarBienvenida(miembro, canal) { //Dar bienvenida a un miembro
 	let Texto = `${miembro.displayName}`;
 	let fontSize = 72;
 	while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
-	ctx.font = `900 ${fontSize}px Luminari`;
+	ctx.font = `900 ${fontSize}px typeface-bangers`;
 	ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 80);
 	//#endregion
 	
@@ -39,10 +39,10 @@ async function dibujarBienvenida(miembro, canal) { //Dar bienvenida a un miembro
 	else Texto = `${servidor.name}!`;
 	fontSize = 120;
 	while(ctx.measureText(Texto).width > (canvas.width - 150)) fontSize -= 2;
-	ctx.font = `900 ${fontSize}px Luminari`;
+	ctx.font = `900 ${fontSize}px typeface-bangers`;
 	ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 15);
 	Texto = '¡Bienvenid@ a';
-	ctx.font = `bold 48px Luminari`;
+	ctx.font = `bold 48px typeface-bangers`;
 	ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - fontSize - 30);
 	//#endregion
 	//#endregion
