@@ -14,8 +14,8 @@ module.exports = {
 				message.channel.send(
 					':x: ¡Debes ingresar al menos dos parámetros!\n' +
 					'Uso: `p!m-inforol <Inclusivo[+] / Exclusivo[-]*> <Rol1*> <Rol2...8>`\n' +
-					'`+` ***Inclusivo:** se consideran usuarios con __uno o más de los roles__ buscados*\n' +
-					'`-` ***Exclusivo:** se consideran usuarios con __todos los roles__ buscados*'
+					'`+` ***Inclusivo:** se consideran usuarios con __uno o más de los roles__ buscados (dinámico)*\n' +
+					'`-` ***Exclusivo:** se consideran usuarios con __todos los roles__ buscados (específico)*'
 				);
 				return;
 			}
