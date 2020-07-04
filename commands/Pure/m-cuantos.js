@@ -32,7 +32,7 @@ module.exports = {
 
 			if(args[1] !== -1) {
 				//Contadores de usuarios
-				const rolemembers = servidor.members.filter(member => !member.user.bot && args[0].every(argrole => member.roles.has(argrole))); //Usuarios con rol
+				const rolemembers = servidor.members.filter(member => !member.user.bot && args[1].every(argrole => member.roles.has(argrole))); //Usuarios con rol
 				const totalcnt = rolemembers.size;
 				const peoplecnt = rolemembers.filter(member => !member.user.bot).size; //Roles
 				const botcnt = rolemembers.filter(member => member.user.bot).size; //Bots
