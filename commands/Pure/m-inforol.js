@@ -6,7 +6,7 @@ module.exports = {
 	aliases: [
 		'm-cuántos', 'm-cuantos', 'm-cuentarol',
         'm-rolecount', 'm-roleinfo',
-        'm-irol', 'm-ri', 'm-rolei'
+        'm-irol', 'm-ir', 'm-ri', 'm-rolei'
     ],
 	execute(message, args) {
 		if(message.member.hasPermission('MANAGE_ROLES', false, true, true)) {
