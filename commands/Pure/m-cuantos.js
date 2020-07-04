@@ -32,15 +32,22 @@ module.exports = {
 
 			if(args[1] !== -1) {
 				//Contadores de usuarios
-				const rolemembers = servidor.members.filter(member => !member.user.bot && args[1].every(argrole => member.roles.has(argrole))); //Usuarios con rol
-				const totalcnt = rolemembers.size;
+				const rolemembers = servidor.members.filter(member => 
+					!member.user.bot && args.every(argrole => {
+						if(argrole !== args[0])
+							return member.roles.has(argrole);
+						else
+							return true;
+					})
+				); //Usuarios con rol
+				const totalcnt = rolemembers.size; //Total
 				const peoplecnt = rolemembers.filter(member => !member.user.bot).size; //Roles
 				const botcnt = rolemembers.filter(member => member.user.bot).size; //Bots
 
 				//Crear y usar embed
 				let SelectedEmbed = 0;
 				let Embed = [];
-				let peoplelist = rolemembers.array();
+				let peoplelist = rolemembers.array(); //Convertir la colección de miembros con el rol a un arreglo
 
 				Embed[0] = new Discord.RichEmbed()
 					.setColor('#ff00ff')
@@ -62,7 +69,7 @@ module.exports = {
 						.setColor('#ff00ff')
 						.setTitle('Análisis del roles (Detalle)')
 
-						.addField('Usuarios', plrange)
+						.addField('Lista de usuarios', plrange)
 
 						.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
 						.setFooter(`Estas estadísticas toman información desde el último reinicio del bot hasta la actualidad.`);
