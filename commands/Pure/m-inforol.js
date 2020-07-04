@@ -10,7 +10,11 @@ module.exports = {
 	execute(message, args) {
 		if(message.member.hasPermission('MANAGE_ROLES', false, true, true)) {
 			if(args.length < 2) {
-				message.channel.send(':x: ¡Debes ingresar al menos dos parámetros!\nUso: `p!m-inforol <Inclusivo[+] / Exclusivo[-]*> <Rol1*> <Rol2...8>`');
+				message.channel.send(
+					':x: ¡Debes ingresar al menos dos parámetros!\n' +
+					'Uso: `p!m-inforol <Inclusivo[+] / Exclusivo[-]*> <Rol1*> <Rol2...8>`\n' +
+					''
+				);
 				return;
 			}
 
@@ -53,7 +57,7 @@ module.exports = {
 						});
 					else
 						return args.every(argrole => {
-							if(argrole !== args[0])
+							if(argrole !== args[0] && argrole !== '-1')
 								return member.roles.has(argrole);
 							else
 								return true;
@@ -72,7 +76,7 @@ module.exports = {
 					.setColor('#ff00ff')
 					.setTitle(`Análisis del roles (Total)`)
 
-					.addField('Roles en análisis', args.map(anarole => `<@&${anarole}>`).join(', '))
+					.addField('Roles en análisis', args.filter(anarole => anarole !== '-1').map(anarole => `<@&${anarole}>`).join(', '))
 					.addField('Cuenta total', `:wrestlers: x ${peoplecnt}\n:robot: x ${botcnt}`)
 
 					.setThumbnail(servidor.iconURL)
