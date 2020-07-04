@@ -10,7 +10,13 @@ module.exports = {
 	execute(message, args) {
 		if(message.member.hasPermission('MANAGE_ROLES', false, true, true)) {
 			if(args.length < 2) {
-				message.channel.send(':warning: ¡Debes ingresar al menos dos parámetros!\nUso: `p!m-inforol <Inclusivo[+] / Exclusivo[-]*> <Rol1*> <Rol2...8>`');
+				message.channel.send(':x: ¡Debes ingresar al menos dos parámetros!\nUso: `p!m-inforol <Inclusivo[+] / Exclusivo[-]*> <Rol1*> <Rol2...8>`');
+				return;
+			}
+
+			if(args[0] !== '-' && args[0] !== '+') {
+				message.channel.send(':warning: El primer parámetro solo puede ser `+` o `-`\nUso: `p!m-inforol <Inclusivo[+] / Exclusivo[-]*> <Rol1*> <Rol2...8>`');
+				return;
 			}
 
 			message.channel.startTyping();
@@ -22,6 +28,7 @@ module.exports = {
 					args[roleget] = args[roleget].slice(3, -1);
 				}
 				if(isNaN(args[roleget])) {
+					const temp = args[roleget].toLowerCase();
 					args[roleget] = servidor.roles.filter(role => 
 						role.name.toLowerCase().indexOf(temp) !== -1
 					).first();
@@ -36,14 +43,23 @@ module.exports = {
 
 			if(args[1] !== -1) {
 				//Contadores de usuarios
-				const rolemembers = servidor.members.filter(member => 
-					args.every(argrole => {
-						if(argrole !== args[0])
-							return member.roles.has(argrole);
-						else
-							return true;
-					})
-				); //Usuarios con rol
+				const rolemembers = servidor.members.filter(member => { //Usuarios con rol
+					if(args[0] === '+') {
+						args.some(argrole => {
+							if(argrole !== args[0])
+								return member.roles.has(argrole);
+							else
+								return true;
+						});
+					} else {
+						args.every(argrole => {
+							if(argrole !== args[0])
+								return member.roles.has(argrole);
+							else
+								return true;
+						});
+					}
+				});
 				const totalcnt = rolemembers.size; //Total
 				const peoplecnt = rolemembers.filter(member => !member.user.bot).size; //Roles
 				const botcnt = totalcnt - peoplecnt; //Bots
