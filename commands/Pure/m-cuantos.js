@@ -15,8 +15,7 @@ module.exports = {
 
 			//Adquirir ID del rol
 			if(args[1].startsWith('<@&') && args[1].endsWith('>')) {
-				args[1] = args[1].slice(2, -1);
-				if(args[1].startsWith('&')) args[1] = args[1].slice(1);
+				args[1] = args[1].slice(3, -1);
 			}
 			if(isNaN(args[1])) {
 				const temp = args[1].toLowerCase();
