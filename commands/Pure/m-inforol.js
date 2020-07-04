@@ -78,7 +78,7 @@ module.exports = {
 					.setColor('#ff00ff')
 					.setTitle(`Análisis del roles (Total)`)
 
-					.addField('Roles en análisis', args.filter(anarole => anarole !== '-1').map(anarole => `<@&${anarole}>`).join(', '))
+					.addField('Roles en análisis', args.filter(anarole => anarole !== '-' && anarole !== '+' && anarole !== '-1').map(anarole => `<@&${anarole}>`).join(', '))
 					.addField('Cuenta total', `:wrestlers: x ${peoplecnt}\n:robot: x ${botcnt}`)
 
 					.setThumbnail(servidor.iconURL)
