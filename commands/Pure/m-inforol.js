@@ -5,7 +5,8 @@ module.exports = {
 	name: 'm-inforol',
 	aliases: [
 		'm-cuántos', 'm-cuantos', 'm-cuentarol',
-        'm-rolecount', 'm-roleinfo'
+        'm-rolecount', 'm-roleinfo',
+        'm-irol', 'm-ri', 'm-rolei'
     ],
 	execute(message, args) {
 		if(message.member.hasPermission('MANAGE_ROLES', false, true, true)) {
@@ -13,7 +14,8 @@ module.exports = {
 				message.channel.send(
 					':x: ¡Debes ingresar al menos dos parámetros!\n' +
 					'Uso: `p!m-inforol <Inclusivo[+] / Exclusivo[-]*> <Rol1*> <Rol2...8>`\n' +
-					''
+					'`+` ***Inclusivo:** se listan usuarios que tienen __uno o más de los roles__ a analizar*\n' +
+					'`-` ***Exclusivo:** se listan usuarios que tienen __todos los roles__ a analizar*'
 				);
 				return;
 			}
