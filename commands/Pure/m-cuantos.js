@@ -62,7 +62,7 @@ module.exports = {
 
 				for(let i = 0; i < (totalcnt / 10); i++) {
 					let plrange = '';
-					for(let listrange = i * 10; listrange < Math.min(listrange + 10, totalcnt); listrange++) 
+					for(let listrange = i * 10; listrange < Math.min(i * 10 + 10, totalcnt); listrange++) 
 						plrange += `${peoplelist[listrange]}\n`;
 
 					Embed[i + 1] = new Discord.RichEmbed()
@@ -83,7 +83,7 @@ module.exports = {
 						.then(() => {
 							const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
 							collector.on('collect', reaction => {
-								const maxpage = 1;
+								const maxpage = listrange / 10;
 								if(reaction.emoji.id === arrows[0].id) SelectedEmbed = (SelectedEmbed > 0)?(SelectedEmbed - 1):maxpage;
 								else SelectedEmbed = (SelectedEmbed < maxpage)?(SelectedEmbed + 1):0;
 								sent.edit(Embed[SelectedEmbed]);
