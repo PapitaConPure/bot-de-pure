@@ -41,7 +41,7 @@ async function dibujarBienvenida(miembro, canal) { //Dar bienvenida a un miembro
 	ctx.font = `900 ${fontSize}px Arial`;
 	ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 15);
 	Texto = '¡Bienvenid@ a';
-	ctx.font = `bold 48px Arial`;
+	ctx.font = `900 48px Arial`;
 	ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - fontSize - 30);
 	//#endregion
 	//#endregion
