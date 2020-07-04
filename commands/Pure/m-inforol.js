@@ -44,21 +44,20 @@ module.exports = {
 			if(args[1] !== -1) {
 				//Contadores de usuarios
 				const rolemembers = servidor.members.filter(member => { //Usuarios con rol
-					if(args[0] === '+') {
-						args.some(argrole => {
+					if(args[0] === '+')
+						return args.some(argrole => {
 							if(argrole !== args[0])
 								return member.roles.has(argrole);
 							else
 								return true;
 						});
-					} else {
-						args.every(argrole => {
+					else
+						return args.every(argrole => {
 							if(argrole !== args[0])
 								return member.roles.has(argrole);
 							else
 								return true;
 						});
-					}
 				});
 				const totalcnt = rolemembers.size; //Total
 				const peoplecnt = rolemembers.filter(member => !member.user.bot).size; //Roles
