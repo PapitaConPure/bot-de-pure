@@ -55,8 +55,7 @@ module.exports = {
 
 					.addField('Cuenta total', `:wrestlers: x ${peoplecnt}\n:robot: x ${botcnt}`)
 
-					.setImage(servidor.iconURL)
-					.setThumbnail(servidor.owner.user.avatarURL)
+					.setThumbnail(servidor.iconURL)
 					.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
 					.setFooter(`Estas estadísticas toman información concreta.`);
 
@@ -83,7 +82,7 @@ module.exports = {
 						.then(() => {
 							const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
 							collector.on('collect', reaction => {
-								const maxpage = listrange / 10;
+								const maxpage = totalcnt / 10;
 								if(reaction.emoji.id === arrows[0].id) SelectedEmbed = (SelectedEmbed > 0)?(SelectedEmbed - 1):maxpage;
 								else SelectedEmbed = (SelectedEmbed < maxpage)?(SelectedEmbed + 1):0;
 								sent.edit(Embed[SelectedEmbed]);
