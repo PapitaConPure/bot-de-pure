@@ -42,7 +42,7 @@ module.exports = {
 				); //Usuarios con rol
 				const totalcnt = rolemembers.size; //Total
 				const peoplecnt = rolemembers.filter(member => !member.user.bot).size; //Roles
-				const botcnt = rolemembers.filter(member => member.user.bot).size; //Bots
+				const botcnt = totalcnt - peoplecnt; //Bots
 
 				//Crear y usar embed
 				let SelectedEmbed = 0;
