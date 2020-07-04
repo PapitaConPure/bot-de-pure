@@ -2,38 +2,42 @@ const Discord = require('discord.js'); //Integrar discord.js
 let global = require('../../config.json'); //Variables globales
 
 module.exports = {
-	name: 'm-cuantos',
+	name: 'm-inforol',
 	aliases: [
-		'm-cuántos', 'm-inforol', 'm-cuentarol',
+		'm-cuántos', 'm-cuantos', 'm-cuentarol',
         'm-rolecount', 'm-roleinfo'
     ],
 	execute(message, args) {
 		if(message.member.hasPermission('MANAGE_ROLES', false, true, true)) {
+			if(args.length < 2) {
+				message.channel.send(':warning: ¡Debes ingresar al menos dos parámetros!\nUso: `p!m-inforol <Inclusivo[+] / Exclusivo[-]*> <Rol1*> <Rol2...8>`');
+			}
+
 			message.channel.startTyping();
 			const servidor = message.channel.guild; //Variable que almacena un objeto del servidor a analizar
-			let selectch;
 
-			//Adquirir ID del rol
-			if(args[1].startsWith('<@&') && args[1].endsWith('>')) {
-				args[1] = args[1].slice(3, -1);
-			}
-			if(isNaN(args[1])) {
-				const temp = args[1].toLowerCase();
-				args[1] = servidor.roles.filter(role => 
-					role.name.toLowerCase().indexOf(temp) !== -1
-				).first();
+			//Adquirir ID de los roles
+			for(let roleget = 1; roleget < args.length; roleget++) {
+				if(args[roleget].startsWith('<@&') && args[roleget].endsWith('>')) {
+					args[roleget] = args[roleget].slice(3, -1);
+				}
+				if(isNaN(args[roleget])) {
+					args[roleget] = servidor.roles.filter(role => 
+						role.name.toLowerCase().indexOf(temp) !== -1
+					).first();
 
-				if((typeof args[1]) === 'undefined') {
-					message.channel.send(':warning: ¡Rol no encontrado!');
-					args[1] = -1;
-				} else
-					args[1] = args[1].id;
+					if((typeof args[roleget]) === 'undefined') {
+						message.channel.send(':warning: ¡Rol no encontrado!');
+						args[roleget] = -1;
+					} else
+						args[roleget] = args[roleget].id;
+				}
 			}
 
 			if(args[1] !== -1) {
 				//Contadores de usuarios
 				const rolemembers = servidor.members.filter(member => 
-					!member.user.bot && args.every(argrole => {
+					args.every(argrole => {
 						if(argrole !== args[0])
 							return member.roles.has(argrole);
 						else
@@ -61,8 +65,11 @@ module.exports = {
 
 				for(let i = 0; i < (totalcnt / 10); i++) {
 					let plrange = '';
-					for(let listrange = i * 10; listrange < Math.min(i * 10 + 10, totalcnt); listrange++) 
-						plrange += `${peoplelist[listrange]}\n`;
+					for(let listrange = i * 10; listrange < Math.min(i * 10 + 10, totalcnt); listrange++) {
+						plrange += `${peoplelist[listrange]}`;
+						if(peoplelist[listrange].user.bot) plrange += ' **[BOT]**';
+						plrange += '\n';
+					}
 
 					Embed[i + 1] = new Discord.RichEmbed()
 						.setColor('#ff00ff')
