@@ -49,7 +49,7 @@ module.exports = {
 							if(argrole !== args[0])
 								return member.roles.has(argrole);
 							else
-								return true;
+								return false;
 						});
 					else
 						return args.every(argrole => {
