@@ -49,7 +49,7 @@ module.exports = {
 					});
 				} else {
 					message.guild.channels.map(chnb => {
-						if(chnm.id === args[0])
+						if(chnb.id === args[0])
 							selectch = chnb;
 					});
 				}
