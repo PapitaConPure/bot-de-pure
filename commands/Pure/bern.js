@@ -16,7 +16,15 @@ module.exports = {
 			'Mi polola.', 'Mi reina.', 'Mi princesa', 'Mi esposa', 'Mi mujer', 'Procrastinar', ':wine_glass:',
 			'No avancé en el manga de Kogasa', 'No avancé en el manga de Komachi', 'Mañana lo hago', 'Otro día'
 		];
+		const lel = [
+			message.client.emojis.get('697320983106945054'),
+			message.client.emojis.get('697323104141049867')
+		];
 		const selection = getRandomInt(emot.length);
-		message.channel.send(`**${emot[selection]}** <:bewny:722334924845350973>`);
+		
+		message.channel.send(`**${emot[selection]}** <:bewny:722334924845350973>`).then(sent => {
+			sent.react(lel[0])
+				.then(() => sent.react(lel[1]));
+		});;
     },
 };
