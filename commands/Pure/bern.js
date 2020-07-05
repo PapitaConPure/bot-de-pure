@@ -26,10 +26,12 @@ module.exports = {
 		
 		message.channel.send(`**${emot[selection]}** <:bewny:722334924845350973>`).then(sent => {
 			if(selection < 6) {
-
-			} else if(selection > 6) {
-				sent.react(lel[0])
-					.then(() => sent.react(lel[1]));
+				sent.react(lel[0]);
+			} else if(selection === 6) {
+				sent.react(lel[1]);
+			} else {
+				sent.react(lel[2])
+					.then(() => sent.react(lel[3]));
 			}
 		});;
     },
