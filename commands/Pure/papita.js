@@ -17,7 +17,22 @@ module.exports = {
 			message.channel.send(newmsg);
 		} else {
 			if(message.channel.nsfw) message.channel.send('https://www.youtube.com/watch?v=pwEvEY-7p9o');
-			else message.channel.send('**Lechita:tm: uwu** :milk:');
+			else {
+				const paputa = [
+					'Lechita:tm: uwu :milk:',
+					'¿Qué es "Manzanas contra Bananas"? <:mayuwu:654489124413374474>',
+					'J-j-jueguen Palactis <:kogablush:654504689873977347>',
+					'Meguuuu <:aliceHug:684625280991756312>',
+					'Sagume <:aliceHug:684625280991756312>',
+					'***KONOSUBA!***',
+					'***NEKOPARA!***'
+				];
+
+				message.channel.send(`**${paputa[Math.floor(Math.random() * paputa.length)]}**`).then(sent => {
+					sent.react(lel[0])
+						.then(() => sent.react(lel[1]));
+				});
+			}
 		}
     },
 };

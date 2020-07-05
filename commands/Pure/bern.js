@@ -15,7 +15,7 @@ module.exports = {
 		const emot = [
 			'Mi polola', 'Mi reina', 'Mi princesa', 'Mi esposa', 'Mi mujer',
 			':wine_glass:', ':wine_glass::wine_glass:', ':wine_glass::wine_glass::wine_glass:',
-			'No avancé en el manga de Kogasa', 'No avancé en el manga de Komachi', 'Mañana lo hago', 'Otro día', 'Mañana sin falta', 'Esta semana lo termino', 'Procrastinar'
+			'No avancé en el manga de Komachi', 'Mañana lo hago', 'Otro día', 'Mañana sin falta', 'Esta semana lo termino', 'Procrastinar'
 		];
 		const lel = [
 			message.client.emojis.get('654504689873977347'), //Kogablush
