@@ -84,7 +84,7 @@ module.exports = {
 
 					.setThumbnail(servidor.iconURL)
 					.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
-					.setFooter(`Página 0/${Math.ceil(totalcnt / 10)}`);SelectedEmbed
+					.setFooter(`Página principal}`);SelectedEmbed
 
 				for(let i = 0; i < (totalcnt / 10); i++) {
 					let plrange = '';
@@ -101,7 +101,7 @@ module.exports = {
 						.addField('Lista de usuarios', plrange)
 
 						.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
-						.setFooter(`Página ${SelectedEmbed}/${Math.ceil(totalcnt / 10)}`);
+						.setFooter(`Página de lista ${i + 1}/${Math.ceil(totalcnt / 10) + 1}`);
 				}
 				
 				const arrows = [message.client.emojis.get('681963688361590897'), message.client.emojis.get('681963688411922460')];
