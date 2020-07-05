@@ -78,7 +78,7 @@ module.exports = {
 					.setColor('#ff00ff')
 					.setTitle(`Análisis del roles (Total)`)
 
-					.addField('Roles en análisis', args.filter(anarole => anarole !== '-' && anarole !== '+' && anarole !== '-1').map(anarole => `<@&${anarole}>`).join(', '))
+					.addField('Roles en análisis', args.filter(ar => ar !== '-' && ar !== '+' && ar > -1 && !isNaN(ar)).map(ar => `<@&${ar}>`).join(', '))
 					.addField('Caso', `**${(args[0] === '+')?'Inclusivo':'Exclusivo'}**`, true)
 					.addField('Cuenta total', `:wrestlers: x ${peoplecnt}\n:robot: x ${botcnt}`, true)
 
