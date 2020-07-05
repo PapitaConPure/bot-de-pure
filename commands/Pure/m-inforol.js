@@ -47,12 +47,12 @@ module.exports = {
 				}
 			}
 
-			if(args[1] !== -1) {
+			if(!args.every(argfetched => argfetched === '-1')) {
 				//Contadores de usuarios
 				const rolemembers = servidor.members.filter(member => { //Usuarios con rol
 					if(args[0] === '+')
 						return args.some(argrole => {
-							if(argrole !== args[0])
+							if(argrole !== args[0] && argrole !== '-1')
 								return member.roles.has(argrole);
 							else
 								return false;
