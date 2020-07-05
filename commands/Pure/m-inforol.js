@@ -79,11 +79,12 @@ module.exports = {
 					.setTitle(`Análisis del roles (Total)`)
 
 					.addField('Roles en análisis', args.filter(anarole => anarole !== '-' && anarole !== '+' && anarole !== '-1').map(anarole => `<@&${anarole}>`).join(', '))
-					.addField('Cuenta total', `:wrestlers: x ${peoplecnt}\n:robot: x ${botcnt}`)
+					.addField('Caso', `**${(args[0] === '+')?'Inclusivo':'Exclusivo'}**`, true)
+					.addField('Cuenta total', `:wrestlers: x ${peoplecnt}\n:robot: x ${botcnt}`, true)
 
 					.setThumbnail(servidor.iconURL)
 					.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
-					.setFooter(`Estas estadísticas toman información concreta.`);
+					.setFooter(`Página 0/${Math.ceil(totalcnt / 10)}`);SelectedEmbed
 
 				for(let i = 0; i < (totalcnt / 10); i++) {
 					let plrange = '';
@@ -100,7 +101,7 @@ module.exports = {
 						.addField('Lista de usuarios', plrange)
 
 						.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
-						.setFooter(`Estas estadísticas toman información desde el último reinicio del bot hasta la actualidad.`);
+						.setFooter(`Página ${SelectedEmbed}/${Math.ceil(totalcnt / 10)}`);
 				}
 				
 				const arrows = [message.client.emojis.get('681963688361590897'), message.client.emojis.get('681963688411922460')];
