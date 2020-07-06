@@ -20,6 +20,7 @@ module.exports = {
 			else {
 				const paputa = [
 					'Lechita:tm: uwu :milk:',
+					'Romper al bot <:lewdsen:660217470635737088>',
 					'¿Qué es "Manzanas contra Bananas"? <:mayuwu:654489124413374474>',
 					'J-j-jueguen Palactis <:kogablush:654504689873977347>',
 					'Meguuuu <:aliceHug:684625280991756312>',
