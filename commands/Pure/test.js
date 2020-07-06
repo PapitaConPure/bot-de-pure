@@ -12,8 +12,9 @@ module.exports = {
 
 		let test = '';
 		search.map(selem => {
-			while(selem.startsWith(' ') && selem.length) selem = selem.slice(1);
-			while(selem.endsWith(' ') && selem.length) selem = selem.slice(-1);
+			let prevent = selem.length;
+			while(selem.startsWith(/ +/) && prevent > 0) { selem = selem.slice(1); prevent--; }
+			while(selem.endsWith(/ +/) && prevent > 0) { selem = selem.slice(-1); prevent--; }
 			if(selem.length) {
 				test += `\`${selem}\`\n`;
 			}
