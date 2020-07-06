@@ -13,8 +13,8 @@ module.exports = {
 		let test = '';
 		search.map(selem => {
 			let prevent = selem.length;
-			//while(selem.startsWith(' ') && prevent > 0) { selem = selem.slice(1); prevent--; }
-			//while(selem.endsWith(' ') && prevent > 0) { selem = selem.slice(-1); prevent--; }
+			while(selem.startsWith(' ') && prevent > 0) { selem = selem.slice(1); prevent--; }
+			while(selem.endsWith(' ') && prevent > 0) { selem = selem.slice(-1); prevent--; }
 			if(selem.length) {
 				test += `\`${selem}\`\n`;
 			}
