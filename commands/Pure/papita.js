@@ -25,8 +25,8 @@ module.exports = {
 					'J-j-jueguen Palactis <:kogablush:654504689873977347>',
 					'Meguuuu <:aliceHug:684625280991756312>',
 					'Sagume <:aliceHug:684625280991756312>',
-					'***KONOSUBA!***',
-					'***NEKOPARA!***'
+					'*KONOSUBA!*',
+					'*NEKOPARA!*'
 				];
 
 				message.channel.send(`**${paputa[Math.floor(Math.random() * paputa.length)]}**`).then(sent => {
