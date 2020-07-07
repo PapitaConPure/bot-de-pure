@@ -9,14 +9,14 @@ module.exports = {
 		'emt'
 	],
 	execute(message, args) {
-		message.channel.send(
+		/*message.channel.send(
 			'```\n' +
 			'[REPORTE DE ESTADO DEL BOT]\n' +
 			'Estoy investigando un error con el comando p!emotes que hace que no se pueda ver ninguno de los emotes disponibles al utilizarlo.\n' +
 			'~Papita con Puré\n' +
 			'```'
-		);
-		/*message.channel.send('**Oe mira po, emotes** <:yumou:708158159180660748>\n');
-		message.channel.send(message.client.guilds.get('676251911850164255').emojis.map(emote => `<:${emote.name}:${emote.id}>`).join(' '));*/
+		);*/
+		message.channel.send('**Oe mira po, emotes** <:yumou:708158159180660748>\n');
+		message.channel.send(message.client.guilds.get('676251911850164255').emojis.map(emote => `<:${emote.name}:${emote.id}>`).join(' '));
     },
 };
