@@ -20,7 +20,7 @@ module.exports = {
 				message.channel.send(':warning: la cantidad de mensajes a borrar debe ser un número entre 0 y 100.');
 			}
 			const wtf = Math.max(2, Math.min(parseInt(args[0]) + 1, 100));
-			message.channel.bulkDelete(wtf);
+			message.channel.bulkDelete(wtf, true);
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR MENSAJES** (MANAGE_MESSAGES)* para usar este comando.');
     },
 };
