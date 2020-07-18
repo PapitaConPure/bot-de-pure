@@ -8,6 +8,15 @@ module.exports = {
         'm-serverinfo', 'm-svinfo', 'm-svinf'
     ],
 	execute(message, args) {
+		message.channel.send(
+			'```\n' +
+			'[REPORTE DE ESTADO DEL BOT]\n' +
+			'Estoy investigando un error con los comandos con Embed.\n' +
+			'~Papita con Puré\n' +
+			'```'
+		);
+		return;
+
 		if(message.member.hasPermission('MANAGE_ROLES', false, true, true)) {
 			message.channel.startTyping();
 			const servidor = message.channel.guild; //Variable que almacena un objeto del servidor a analizar

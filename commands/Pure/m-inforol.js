@@ -9,6 +9,15 @@ module.exports = {
         'm-irol', 'm-ir', 'm-ri', 'm-rolei'
     ],
 	execute(message, args) {
+		message.channel.send(
+			'```\n' +
+			'[REPORTE DE ESTADO DEL BOT]\n' +
+			'Estoy investigando un error con los comandos con Embed.\n' +
+			'~Papita con Puré\n' +
+			'```'
+		);
+		return;
+
 		if(message.member.hasPermission('MANAGE_ROLES', false, true, true)) {
 			if(args.length < 2) {
 				message.channel.send(

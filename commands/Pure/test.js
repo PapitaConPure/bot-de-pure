@@ -6,7 +6,8 @@ const Canvas = require('canvas');
 module.exports = {
 	name: 'test',
 	execute(message, args) {
-		//message.channel.send('No se están haciendo pruebas por el momento <:uwu:681935702308552730>');
+		message.channel.send('No se están haciendo pruebas por el momento <:uwu:681935702308552730>');
+		return;
 
 		let search = args.join(' ').split(',');
 

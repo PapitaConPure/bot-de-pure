@@ -6,7 +6,16 @@ module.exports = {
 	aliases: [
         'tryhard', 'tryhardeo'
     ],
-	execute(message, args){
+	execute(message, args) {
+		message.channel.send(
+			'```\n' +
+			'[REPORTE DE ESTADO DEL BOT]\n' +
+			'Estoy investigando un error con los comandos con auto reacción personalizada que hace que tiren error al intentar conseguir las IDs de los emotes.\n' +
+			'~Papita con Puré\n' +
+			'```'
+		);
+		return;
+
 		const mayuwu = [
 			'<:mayuwu:654489124413374474>',
 			'<:keikuwu:725572179101614161>',

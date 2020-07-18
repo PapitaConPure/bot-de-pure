@@ -12,6 +12,15 @@ module.exports = {
 		'procrastinar'
     ],
 	execute(message, args){
+		message.channel.send(
+			'```\n' +
+			'[REPORTE DE ESTADO DEL BOT]\n' +
+			'Estoy investigando un error con los comandos con auto reacción personalizada que hace que tiren error al intentar conseguir las IDs de los emotes.\n' +
+			'~Papita con Puré\n' +
+			'```'
+		);
+		return;
+
 		const emot = [
 			'Mi polola', 'Mi reina', 'Mi princesa', 'Mi esposa', 'Mi mujer',
 			':wine_glass:', ':wine_glass::wine_glass:', ':wine_glass::wine_glass::wine_glass:',

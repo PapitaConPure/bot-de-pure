@@ -7,7 +7,7 @@ module.exports = {
         'papa', 'leche',
 		'potato', 'milk'
     ],
-	execute(message, args){
+	execute(message, args) {
 		if(args.length) {
 			let newmsg;
 			newmsg = `***:copyright: ${args[0]}:registered:`;
@@ -29,10 +29,7 @@ module.exports = {
 					'*NEKOPARA!*'
 				];
 
-				message.channel.send(`**${paputa[Math.floor(Math.random() * paputa.length)]}**`).then(sent => {
-					sent.react(lel[0])
-						.then(() => sent.react(lel[1]));
-				});
+				message.channel.send(`**${paputa[Math.floor(Math.random() * paputa.length)]}**`);
 			}
 		}
     },

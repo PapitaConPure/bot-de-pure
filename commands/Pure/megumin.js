@@ -10,6 +10,15 @@ const getRandomInt = function(_max) {
 }
 
 const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
+	message.channel.send(
+			'```\n' +
+			'[REPORTE DE ESTADO DEL BOT]\n' +
+			'Estoy investigando un error con los comandos con Embed.\n' +
+			'~Papita con Puré\n' +
+			'```'
+		);
+		return;
+
 	tmpch.startTyping();
 	let BotMessage = -1;
 	let srchtags = 'megumin -guro -furry -vore -webm -audio rating:';
