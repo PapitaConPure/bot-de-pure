@@ -245,8 +245,9 @@ client.on('message', message => { //En caso de recibir un mensaje
         console.error(error);
         message.channel.send(
             ':radioactive: :regional_indicator_w: :regional_indicator_a: :regional_indicator_r: :regional_indicator_n: :regional_indicator_i: :regional_indicator_n: :regional_indicator_g: :radioactive: \n' +
-            'Ha ocurrido un error inesperado. <@!423129757954211880>\n' +
-            'Usa p!presentar para conocer el estado actual del bot. Si el error ya se conoce, aparecerá ahí.' +
+            'Ha ocurrido un error inesperado.\n' +
+            'Usa p!presentar para conocer el estado actual del bot. Si el error ya se conoce, aparecerá ahí.\n' +
+            '<@!423129757954211880>\n' +
             ':radioactive: :regional_indicator_w: :regional_indicator_a: :regional_indicator_r: :regional_indicator_n: :regional_indicator_i: :regional_indicator_n: :regional_indicator_g: :radioactive:'
         );
     }
