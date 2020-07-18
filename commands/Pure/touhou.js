@@ -10,15 +10,6 @@ const getRandomInt = function(_max) {
 }
 
 const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
-	message.channel.send(
-			'```\n' +
-			'[REPORTE DE ESTADO DEL BOT]\n' +
-			'Estoy investigando un error con los comandos con Embed.\n' +
-			'~Papita con Puré\n' +
-			'```'
-		);
-		return;
-
 	tmpch.startTyping();
 	let BotMessage = -1;
 	let srchtags = 'touhou -guro -furry -vore -webm -audio -comic -4koma rating:';
@@ -306,6 +297,15 @@ module.exports = {
 		'2hu'
     ],
 	execute(message, args) {
+		message.channel.send(
+				'```\n' +
+				'[REPORTE DE ESTADO DEL BOT]\n' +
+				'Estoy investigando un error con los comandos con Embed.\n' +
+				'~Papita con Puré\n' +
+				'```'
+			);
+			return;
+
 		tmpfunc(message.channel, args, message.author, message);
     },
 };
