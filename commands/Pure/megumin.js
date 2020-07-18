@@ -9,16 +9,7 @@ const getRandomInt = function(_max) {
   return _randnum;
 }
 
-const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
-	message.channel.send(
-			'```\n' +
-			'[REPORTE DE ESTADO DEL BOT]\n' +
-			'Estoy investigando un error con los comandos con Embed.\n' +
-			'~Papita con Puré\n' +
-			'```'
-		);
-		return;
-
+const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {;
 	tmpch.startTyping();
 	let BotMessage = -1;
 	let srchtags = 'megumin -guro -furry -vore -webm -audio rating:';
@@ -151,6 +142,15 @@ module.exports = {
 		'bestgirl', 'explosion'
     ],
 	execute(message, args) {
+		message.channel.send(
+				'```\n' +
+				'[REPORTE DE ESTADO DEL BOT]\n' +
+				'Estoy investigando un error con los comandos con Embed.\n' +
+				'~Papita con Puré\n' +
+				'```'
+			);
+			return;
+
 		const admitted = [
 			'651244470691561473', //Server de Puré
 			'698323332160028792', //Hourai Doll
