@@ -20,9 +20,11 @@ module.exports = {
             `[Desarrollador]: Papita con Puré#6932::423129757954211880\n` +
             '```\n' +
             '**`[REPORTE 18/07]`**\n' +
+            '```\n' +
             '- Problemas con recolección de emotes personalizados.\n' +
             '- Problemas con mensajes enviados a través de Embeds.\n' +
             '- Se esperan más problemas relacionados a otras funciones de Discord.\n' +
+            '```\n' +
             '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n'
         );
     },
