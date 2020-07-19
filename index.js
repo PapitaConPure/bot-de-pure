@@ -269,7 +269,7 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
     const servidor = miembro.guild; //Servidor
     const canal = servidor.channels.get(servidor.systemChannelID); //Canal de mensajes de sistema
     canal.startTyping();
-
+    /*
     //#region Creación de imagen
     const canvas = Canvas.createCanvas(1275, 825);
     const ctx = canvas.getContext('2d');
@@ -332,7 +332,7 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
 
     //#region Imagen y Mensaje extra
     const peoplecnt = servidor.members.filter(member => !member.user.bot).size;
-    canal.send('', imagen).then(sent => {
+    canal.send('', imagen).then(sent => {*/
         if(servidor.id === '654471968200065034') { //Hourai Doll
             canal.send(
                 `Wena po <@${miembro.user.id}> conchetumare, como estai. Porfa revisa el canal <#671817759268536320> para que no te funemos <:haniwaSmile:659872119995498507> \n` +
@@ -356,7 +356,7 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
                 `*Ahora hay **${peoplecnt}** usuarios en el server.*`
             );
         }
-    });
+    //});
     //#endregion
     canal.stopTyping(true);
 }
@@ -365,7 +365,7 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
     const servidor = miembro.guild;
     const canal = servidor.channels.get(servidor.systemChannelID);
     canal.startTyping();
-
+    /*
     //#region Creación de imagen
     const canvas = Canvas.createCanvas(1500, 900);
     const ctx = canvas.getContext('2d');
@@ -416,7 +416,7 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
 
     //#region Imagen y Mensaje extra
     const peoplecnt = servidor.members.filter(member => !member.user.bot).size;
-    canal.send('', imagen).then(sent => {
+    canal.send('', imagen).then(sent => {*/
         if(servidor.id === '654471968200065034') { //Hourai Doll
             canal.send(
                 'Nooooo po csm, perdimo otro weón \<:meguDerp:708064265092726834>' +
@@ -427,7 +427,7 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
                 `*Ahora hay **${peoplecnt}** usuarios en el server.*`
             );
         }
-    });
+    //});
     //#endregion
     canal.stopTyping();
 }
