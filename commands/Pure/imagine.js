@@ -24,8 +24,8 @@ module.exports = {
 			'<:kokocrong:697323104141049867>'
 		];
 		const lel = [
-			message.client.emojis.get('697320983106945054'),
-			message.client.emojis.get('697323104141049867')
+			message.client.emojis.cache.get('697320983106945054'),
+			message.client.emojis.cache.get('697323104141049867')
 		];
 
 		message.channel.send(`${mayuwu[Math.floor(Math.random() * mayuwu.length)]} (?`).then(sent => {

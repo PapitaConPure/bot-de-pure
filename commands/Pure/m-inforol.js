@@ -113,7 +113,7 @@ module.exports = {
 						.setFooter(`Página de lista ${i + 1}/${Math.ceil(totalcnt / 10)}`);
 				}
 				
-				const arrows = [message.client.emojis.get('681963688361590897'), message.client.emojis.get('681963688411922460')];
+				const arrows = [message.client.emojis.cache.get('681963688361590897'), message.client.emojis.cache.get('681963688411922460')];
 				const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
 				message.channel.send(Embed[0]).then(sent => {
 					sent.react(arrows[0])

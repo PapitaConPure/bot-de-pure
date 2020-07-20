@@ -84,7 +84,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 					tmpch.send(Embed).then(sent => {
 						BotMessage = sent.id;
 						console.log(BotMessage);
-						const actions = [sent.client.emojis.get('704612794921779290'), sent.client.emojis.get('704612795072774164')];
+						const actions = [sent.client.emojis.get('704612794921779290'), sent.client.emojis.cache.get('704612795072774164')];
 						sent.react(actions[0])
 							.then(() => sent.react(actions[1]))
 							.then(() => {

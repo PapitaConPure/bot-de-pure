@@ -19,6 +19,6 @@ module.exports = {
 		return;*/
 		
 		message.channel.send('**Oe mira po, emotes** <:yumou:708158159180660748>\n');
-		message.channel.send(message.client.guilds.cache.get('676251911850164255').emojis.map(emote => `<:${emote.name}:${emote.id}>`).join(' '));
+		message.channel.send(message.client.guilds.cache.get('676251911850164255').emojis.cache.map(emote => `<:${emote.name}:${emote.id}>`).join(' '));
     },
 };

@@ -27,10 +27,10 @@ module.exports = {
 			'No avancé en el manga de Komachi', 'Mañana lo hago', 'Otro día', 'Mañana sin falta', 'Esta semana lo termino', 'Procrastinar'
 		];
 		const lel = [
-			message.client.emojis.get('654504689873977347'), //Kogablush
-			message.client.emojis.get('722334924845350973'), //Chad
-			message.client.emojis.get('697320983106945054'), //Pepe
-			message.client.emojis.get('697323104141049867'), //Kokocrong
+			message.client.emojis.cache.get('654504689873977347'), //Kogablush
+			message.client.emojis.cache.get('722334924845350973'), //Chad
+			message.client.emojis.cache.get('697320983106945054'), //Pepe
+			message.client.emojis.cache.get('697323104141049867'), //Kokocrong
 		];
 		const selection = getRandomInt(emot.length);
 		
