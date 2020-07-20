@@ -267,9 +267,9 @@ client.on('message', message => { //En caso de recibir un mensaje
 //#region Mensajes de sistema
 async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo de un servidor
     const servidor = miembro.guild; //Servidor
-    const canal = servidor.channels.get(servidor.systemChannelID); //Canal de mensajes de sistema
+    const canal = servidor.channels.cache.get(servidor.systemChannelID); //Canal de mensajes de sistema
     canal.startTyping();
-    /*
+    
     //#region Creación de imagen
     const canvas = Canvas.createCanvas(1275, 825);
     const ctx = canvas.getContext('2d');
@@ -332,7 +332,7 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
 
     //#region Imagen y Mensaje extra
     const peoplecnt = servidor.members.filter(member => !member.user.bot).size;
-    canal.send('', imagen).then(sent => {*/
+    canal.send('', imagen).then(sent => {
         if(servidor.id === '654471968200065034') { //Hourai Doll
             canal.send(
                 `Wena po <@${miembro.user.id}> conchetumare, como estai. Porfa revisa el canal <#671817759268536320> para que no te funemos <:haniwaSmile:659872119995498507> \n` +
@@ -356,16 +356,16 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
                 `*Ahora hay **${peoplecnt}** usuarios en el server.*`
             );
         }
-    //});
+    });
     //#endregion
     canal.stopTyping(true);
 }
 
 async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un servidor
     const servidor = miembro.guild;
-    const canal = servidor.channels.get(servidor.systemChannelID);
+    const canal = servidor.channels.cache.get(servidor.systemChannelID);
     canal.startTyping();
-    /*
+    
     //#region Creación de imagen
     const canvas = Canvas.createCanvas(1500, 900);
     const ctx = canvas.getContext('2d');
@@ -416,7 +416,7 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
 
     //#region Imagen y Mensaje extra
     const peoplecnt = servidor.members.filter(member => !member.user.bot).size;
-    canal.send('', imagen).then(sent => {*/
+    canal.send('', imagen).then(sent => {
         if(servidor.id === '654471968200065034') { //Hourai Doll
             canal.send(
                 'Nooooo po csm, perdimo otro weón \<:meguDerp:708064265092726834>' +
@@ -427,7 +427,7 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
                 `*Ahora hay **${peoplecnt}** usuarios en el server.*`
             );
         }
-    //});
+    });
     //#endregion
     canal.stopTyping();
 }
@@ -435,7 +435,7 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
 client.on('guildMemberAdd', member => {
     try {
         if(!member.user.bot) dibujarBienvenida(member);
-        else member.guild.channels.get(member.guild.systemChannelID).send(
+        else member.guild.channels.cache.get(member.guild.systemChannelID).send(
             'Se acaba de unir un bot.\n' +
             '***Beep boop, boop beep?***'
         );
@@ -448,7 +448,7 @@ client.on('guildMemberAdd', member => {
 client.on('guildMemberRemove', member => {
     try {
         if(!member.user.bot) dibujarDespedida(member);
-        else member.guild.channels.get(member.guild.systemChannelID).send(
+        else member.guild.channels.cache.get(member.guild.systemChannelID).send(
             `**${member.displayName}** ya no es parte de la pandilla de bots de este servidor :[\n`
         );
     } catch(error) {

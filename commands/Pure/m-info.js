@@ -38,7 +38,7 @@ module.exports = {
 			//Procesado de información canal-por-canal
 			servidor.channels.cache.forEach(channel => {
 				if(channel.type === 'text') {
-					msgcnt[textcnt] = channel.messages.size;
+					msgcnt[textcnt] = channel.messages.cache.size;
 					chid[textcnt] = channel.id;
 					textcnt++;
 				} else if(channel.type === 'voice') voicecnt++;
@@ -52,12 +52,12 @@ module.exports = {
 				}
 
 				if(isNaN(args[0])) {
-					message.guild.channels.map(chnm => {
+					message.guild.channels.cache.map(chnm => {
 						if(chnm.name.toLowerCase().indexOf(args[0]) !== -1)
 							selectch = chnm;
 					});
 				} else {
-					message.guild.channels.map(chnb => {
+					message.guild.channels.cache.map(chnb => {
 						if(chnb.id === args[0])
 							selectch = chnb;
 					});
@@ -68,7 +68,7 @@ module.exports = {
 				if((typeof selectch) !== 'undefined') {
 					let i = 0;
 					selectch.members.filter(member => !member.user.bot).forEach(member => {
-						peocnt[i] = selectch.messages.filter(m => m.author.id === member.user.id).size;
+						peocnt[i] = selectch.messages.cache.filter(m => m.author.id === member.user.id).size;
 						peoid[i] = member.user.id;
 						i++;
 					});

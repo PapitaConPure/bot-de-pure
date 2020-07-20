@@ -67,7 +67,7 @@ module.exports = {
 			if(todoslosperritos.includes(args[0].toLowerCase())) {
 				let perritostr = '**Emote**\t**Nombre**\n';
 
-				message.client.guilds.get('676251911850164255').emojis.map(emote => {
+				message.client.guilds.cache.get('676251911850164255').emojis.map(emote => {
 					if(perritosopt.some(perrito => perrito === emote.name))
 						perritostr +=`<:${emote.name}:${emote.id}> \t\t${emote.name}\n`;
 				});
@@ -75,7 +75,7 @@ module.exports = {
 				message.channel.send(perritostr);
 			} else {
 				let foundperrito = false;
-				message.client.guilds.get('676251911850164255').emojis.map(emote => {
+				message.client.guilds.cache.get('676251911850164255').emojis.map(emote => {
 					if(!foundperrito) {
 						if(emote.name.toLowerCase().startsWith(args[0].toLowerCase()) && perritosopt.some(perrito => perrito === emote.name)) {
 							message.channel.send(`<:${emote.name}:${emote.id}>`);

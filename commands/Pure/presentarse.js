@@ -25,6 +25,11 @@ module.exports = {
             '- Problemas con mensajes enviados a través de Embeds.\n' +
             '- Se esperan más problemas relacionados a otras funciones de Discord.\n' +
             '```\n' +
+            '**`[REPORTE 20/07]`**\n' +
+            '```\n' +
+            '- Se llegó al origen del problema y se está implementando una solución.\n' +
+            '- Se están restaurando los comandos afectados de a poco.\n' +
+            '```\n' +
             '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n'
         );
     },
