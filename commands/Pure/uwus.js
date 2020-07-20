@@ -26,18 +26,18 @@ module.exports = {
             .setAuthor(`Evento iniciado por ${message.author.username}`, message.author.avatarURL);
         message.channel.send(Embed).then(sent => {
             const filter = m => (m.content.toLowerCase().indexOf('uwu') !== -1 && !m.author.bot) || (m.content.toLowerCase() === 'antiuwu' && m.author.id === message.author.id);
-            let uwusers.cache = {}, ultimuwu;
+            let uwusers = {}, ultimuwu;
 			coll = sent.channel.createMessageCollector(filter, { time: (secs * 1000) });
             coll.on('collect', m => {
                 if(m.content !== 'antiuwu') {
-                    if(!uwusers.cache.hasOwnProperty(`${m.author.id}`)) { uwusers.cache[m.author.id] = 1; }
-                    else uwusers.cache[m.author.id]++;
+                    if(!uwusers.hasOwnProperty(`${m.author.id}`)) { uwusers[m.author.id] = 1; }
+                    else uwusers[m.author.id]++;
                     ultimuwu = m.author.id;
                 } else coll.stop();
             });
 			coll.on('end', collected => {
                 let mvp;
-                let auwus = Object.entries(uwusers.cache);
+                let auwus = Object.entries(uwusers);
                 let max = 0, maxid = -1;
                 for(let uwuser of auwus) {
                     if(uwuser[1] >= max) {
