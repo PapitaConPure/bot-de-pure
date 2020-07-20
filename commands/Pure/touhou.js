@@ -297,14 +297,14 @@ module.exports = {
 		'2hu'
     ],
 	execute(message, args) {
-		message.channel.send(
+		/*message.channel.send(
 				'```\n' +
 				'[REPORTE DE ESTADO DEL BOT]\n' +
 				'Estoy investigando un error con los comandos con Embed.\n' +
 				'~Papita con Puré\n' +
 				'```'
 			);
-			return;
+			return;*/
 
 		tmpfunc(message.channel, args, message.author, message);
     },
