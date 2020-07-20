@@ -62,14 +62,14 @@ module.exports = {
 					if(args[0] === '+')
 						return args.some(argrole => {
 							if(argrole !== args[0] && argrole !== '-1')
-								return member.roles.has(argrole);
+								return member.roles.cache.has(argrole);
 							else
 								return false;
 						});
 					else
 						return args.every(argrole => {
 							if(argrole !== args[0] && argrole !== '-1')
-								return member.roles.has(argrole);
+								return member.roles.cache.has(argrole);
 							else
 								return true;
 						});

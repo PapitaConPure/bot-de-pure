@@ -34,7 +34,7 @@ module.exports = {
             message.channel.send(`:wrestlers: _<@${global.jugadores[global.cntjugadores]}> ha entrado al Drawmaku como el jugador ${global.numeros[global.cntjugadores]} ${str}._`);
             global.cntjugadores++;
             if(global.notroles !== 'na')
-                if(!message.member.roles.has(global.notroles)) {
+                if(!message.member.roles.cache.has(global.notroles)) {
                     let rol = message.guild.roles.get(global.notroles);
                     if(rol !== undefined) {
                         message.member.addRole(global.notroles);

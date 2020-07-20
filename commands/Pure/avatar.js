@@ -41,7 +41,7 @@ module.exports = {
                     if((typeof args[avalist]) === 'undefined')
                         args[avalist] = message.channel.guild.members.cache.filter(member => {
                             let nickmatch = false;
-                            if(member.nickname !== null) {
+                            if(member.nickname !== null && member.nickname !== undefined) {
                                 if(member.nickname.toLowerCase().indexOf(temp) !== -1)
                                     nickmatch = true;
                             }
