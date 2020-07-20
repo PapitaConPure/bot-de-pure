@@ -63,11 +63,9 @@ module.exports = {
 					});
 				}
 
-				console.log(typeof selectch);
-
 				if((typeof selectch) !== 'undefined') {
 					let i = 0;
-					selectch.members.cache.filter(member => !member.user.bot).forEach(member => {
+					selectch.members.filter(member => !member.user.bot).forEach(member => {
 						peocnt[i] = selectch.messages.cache.filter(m => m.author.id === member.user.id).size;
 						peoid[i] = member.user.id;
 						i++;

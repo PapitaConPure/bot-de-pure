@@ -44,7 +44,7 @@ module.exports = {
 				}
 				if(isNaN(args[roleget])) {
 					const temp = args[roleget].toLowerCase();
-					args[roleget] = servidor.roles.filter(role => 
+					args[roleget] = servidor.roles.cache.filter(role => 
 						role.name.toLowerCase().indexOf(temp) !== -1
 					).first();
 
