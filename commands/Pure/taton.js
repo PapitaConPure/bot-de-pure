@@ -7,14 +7,14 @@ module.exports = {
 		'perrito'
 	],
 	execute(message, args) {
-		message.channel.send(
+		/*message.channel.send(
 			'```\n' +
 			'[REPORTE DE ESTADO DEL BOT]\n' +
 			'Estoy investigando un error con los comandos con emotes personalizados.\n' +
 			'~Papita con Puré\n' +
 			'```'
 		);
-		return;
+		return;*/
 
 		const perritosopt = [
 			'perrito',		'720736050305171456',

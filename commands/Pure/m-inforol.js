@@ -58,7 +58,7 @@ module.exports = {
 
 			if(!args.every(argfetched => argfetched === '-1')) {
 				//Contadores de usuarios
-				const rolemembers = servidor.members.filter(member => { //Usuarios con rol
+				const rolemembers.cache = servidor.members.cache.filter(member => { //Usuarios con rol
 					if(args[0] === '+')
 						return args.some(argrole => {
 							if(argrole !== args[0] && argrole !== '-1')
@@ -74,14 +74,14 @@ module.exports = {
 								return true;
 						});
 				});
-				const totalcnt = rolemembers.size; //Total
-				const peoplecnt = rolemembers.filter(member => !member.user.bot).size; //Roles
+				const totalcnt = rolemembers.cache.size; //Total
+				const peoplecnt = rolemembers.cache.filter(member => !member.user.bot).size; //Roles
 				const botcnt = totalcnt - peoplecnt; //Bots
 
 				//Crear y usar embed
 				let SelectedEmbed = 0;
 				let Embed = [];
-				let peoplelist = rolemembers.array(); //Convertir la colección de miembros con el rol a un arreglo
+				let peoplelist = rolemembers.cache.array(); //Convertir la colección de miembros con el rol a un arreglo
 
 				Embed[0] = new Discord.MessageEmbed()
 					.setColor('#ff00ff')

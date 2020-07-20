@@ -32,7 +32,7 @@ module.exports = {
 			let peoid = []; //Contador de personas (parte "id")
 
 			//Contadores de usuarios
-			let	peoplecnt = servidor.members.filter(member => !member.user.bot).size; //Biológicos
+			let	peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size; //Biológicos
 			let botcnt = servidor.memberCount - peoplecnt; //Bots
 
 			//Procesado de información canal-por-canal
@@ -67,7 +67,7 @@ module.exports = {
 
 				if((typeof selectch) !== 'undefined') {
 					let i = 0;
-					selectch.members.filter(member => !member.user.bot).forEach(member => {
+					selectch.members.cache.filter(member => !member.user.bot).forEach(member => {
 						peocnt[i] = selectch.messages.cache.filter(m => m.author.id === member.user.id).size;
 						peoid[i] = member.user.id;
 						i++;

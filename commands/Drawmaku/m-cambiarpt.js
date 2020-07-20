@@ -22,7 +22,7 @@ module.exports = {
 
         //Identificar jugador
         var idjugador = -1;
-        if(message.mentions.users.size) idjugador = func.getMentionPlayerID(args[0]);
+        if(message.mentions.users.cache.size) idjugador = func.getMentionPlayerID(args[0]);
         else if(!isNaN(args[0])) idjugador = func.getNumberPlayerID(args[0]);
         else message.channel.send(':warning: El usuario ' + args[0] + ' no existe.');
 

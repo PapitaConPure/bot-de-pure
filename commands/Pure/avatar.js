@@ -9,14 +9,14 @@ module.exports = {
         'pfp'
     ],
 	execute(message, args) {
-        message.channel.send(
+        /*message.channel.send(
 			'```\n' +
 			'[REPORTE DE ESTADO DEL BOT]\n' +
 			'Estoy investigando un error con los comandos con Embed.\n' +
 			'~Papita con Puré\n' +
 			'```'
 		);
-		return;
+		return;*/
 
         if(!args.length) {
             const embed = new Discord.MessageEmbed()
@@ -34,12 +34,12 @@ module.exports = {
                 }
                 if(isNaN(args[avalist])) {
                     const temp = args[avalist].toLowerCase();
-                    args[avalist] = message.client.users.filter(user => 
+                    args[avalist] = message.client.users.cache.filter(user => 
                         user.username.toLowerCase().indexOf(temp) !== -1
                     ).first();
 
                     if((typeof args[avalist]) === 'undefined')
-                        args[avalist] = message.channel.guild.members.filter(member => {
+                        args[avalist] = message.channel.guild.members.cache.filter(member => {
                             let nickmatch = false;
                             if(member.nickname !== null) {
                                 if(member.nickname.toLowerCase().indexOf(temp) !== -1)

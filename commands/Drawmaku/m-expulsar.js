@@ -20,7 +20,7 @@ module.exports = {
             message.channel.send(':warning: Estás intentando expulsar una cantidad de personas mayor a la de personas jugando.');
         }
         
-        if(message.mentions.users.size) {
+        if(message.mentions.users.cache.size) {
             var idjugador;
             for(var i = 0; i < args.length; i++) {
                 //Comprobar si el jugador está jugando

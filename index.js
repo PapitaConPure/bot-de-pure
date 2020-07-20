@@ -331,7 +331,7 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
 
     //#region Imagen y Mensaje extra
-    const peoplecnt = servidor.members.filter(member => !member.user.bot).size;
+    const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
     canal.send('', imagen).then(sent => {
         if(servidor.id === '654471968200065034') { //Hourai Doll
             canal.send(
@@ -415,7 +415,7 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
     const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
 
     //#region Imagen y Mensaje extra
-    const peoplecnt = servidor.members.filter(member => !member.user.bot).size;
+    const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
     canal.send('', imagen).then(sent => {
         if(servidor.id === '654471968200065034') { //Hourai Doll
             canal.send(
