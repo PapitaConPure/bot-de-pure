@@ -107,7 +107,7 @@ async function dibujarMillion(msg) { //Dar felicitaciones al desgraciado
 	ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
 	ctx.closePath();
 	ctx.clip();
-    const avatar = await Canvas.loadImage(msg.author.avatarURL);
+    const avatar = await Canvas.loadImage(msg.author.avatarURL());
 	ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
     //#endregion
     //#endregion
