@@ -65,7 +65,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 			data.data.forEach(image => {
 				if(image !== undefined && i === selectedpic) {
 					//Crear y usar embed
-					const Embed = new Discord.RichEmbed()
+					const Embed = new Discord.MessageEmbed()
 						.setColor(embedcolor)
 						.setTitle(embedtitle)
 						.addField('Tu búsqueda', 
@@ -95,7 +95,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 									const maxpage = 2;
 									if(reaction.emoji.id === actions[0].id) {
 										if(!showtags) {
-											const Embed2 = new Discord.RichEmbed()
+											const Embed2 = new Discord.MessageEmbed()
 												.setColor(embedcolor)
 												.setTitle(embedtitle)
 												.addField('Tu búsqueda', 

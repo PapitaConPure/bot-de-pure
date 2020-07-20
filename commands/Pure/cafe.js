@@ -19,7 +19,7 @@ const tmpfunc = async function(tmpch, alist) {
 
 	//Crear y usar embed
 	const selected = data[getRandomInt(srchlimit - 1)];
-	const Embed = new Discord.RichEmbed()
+	const Embed = new Discord.MessageEmbed()
 		.setColor('#6a4928')
 		.setTitle('Café uwu')
 		.addField('Salsa', `${selected.bitly_url}`)

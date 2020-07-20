@@ -83,7 +83,7 @@ module.exports = {
 				let Embed = [];
 				let peoplelist = rolemembers.array(); //Convertir la colección de miembros con el rol a un arreglo
 
-				Embed[0] = new Discord.RichEmbed()
+				Embed[0] = new Discord.MessageEmbed()
 					.setColor('#ff00ff')
 					.setTitle(`Análisis del roles (Total)`)
 
@@ -103,7 +103,7 @@ module.exports = {
 						plrange += '\n';
 					}
 
-					Embed[i + 1] = new Discord.RichEmbed()
+					Embed[i + 1] = new Discord.MessageEmbed()
 						.setColor('#ff00ff')
 						.setTitle('Análisis del roles (Detalle)')
 

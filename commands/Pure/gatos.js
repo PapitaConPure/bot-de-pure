@@ -5,7 +5,7 @@ const fetch = require('node-fetch');
 const tmpfunc = async function(tmpch) {
 	const { file } = await fetch('https://aws.random.cat/meow').then(response => response.json());
 	//Crear y usar embed
-	const Embed = new Discord.RichEmbed()
+	const Embed = new Discord.MessageEmbed()
 		.setColor('#ffc0cb')
 		.setTitle('Gatitos uwu')
 		.addField('Salsa', file)

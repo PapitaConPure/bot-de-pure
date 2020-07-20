@@ -19,7 +19,7 @@ module.exports = {
 		return;
 
         if(!args.length) {
-            const embed = new Discord.RichEmbed()
+            const embed = new Discord.MessageEmbed()
 				.setTitle(`Avatar de ${message.author.username}`)
                 .setColor('#faa61a')
                 .setImage(message.author.avatarURL)
@@ -57,12 +57,12 @@ module.exports = {
                 }
 
                 if(args[avalist] !== -1) {
-                    const fetcheduser = message.client.users.get(args[avalist]);
+                    const fetcheduser = message.client.users.cache.get(args[avalist]);
 
                     if((typeof fetcheduser) === 'undefined')
                         message.channel.send(':warning: La ID ingresada no es válida o no es una ID en absoluto...');
                     else {
-                        const embed = new Discord.RichEmbed()
+                        const embed = new Discord.MessageEmbed()
                             .setTitle(`Avatar de ${fetcheduser.username}`)
                             .setColor('#faa61a')
                             .setImage(fetcheduser.avatarURL)

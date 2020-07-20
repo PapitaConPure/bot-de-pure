@@ -18,7 +18,7 @@ module.exports = {
             if(!isNaN(args[0])) secs = Math.max(0.1, Math.min(args[0], 3600 * 2));
             else secs = 30;
         } else secs = 30;
-        const Embed = new Discord.RichEmbed()
+        const Embed = new Discord.MessageEmbed()
             .setColor('ffbbbb')
             .setTitle('Evento UWU')
             .addField('UWU', 'Envía **uwu** para sumar un **uwu**.')

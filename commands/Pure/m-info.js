@@ -8,14 +8,14 @@ module.exports = {
         'm-serverinfo', 'm-svinfo', 'm-svinf'
     ],
 	execute(message, args) {
-		message.channel.send(
+		/*message.channel.send(
 			'```\n' +
 			'[REPORTE DE ESTADO DEL BOT]\n' +
 			'Estoy investigando un error con los comandos con Embed.\n' +
 			'~Papita con Puré\n' +
 			'```'
 		);
-		return;
+		return;*/
 
 		if(message.member.hasPermission('MANAGE_ROLES', false, true, true)) {
 			message.channel.startTyping();
@@ -36,7 +36,7 @@ module.exports = {
 			let botcnt = servidor.memberCount - peoplecnt; //Bots
 
 			//Procesado de información canal-por-canal
-			servidor.channels.forEach(channel => {
+			servidor.channels.cache.forEach(channel => {
 				if(channel.type === 'text') {
 					msgcnt[textcnt] = channel.messages.size;
 					chid[textcnt] = channel.id;
@@ -114,7 +114,7 @@ module.exports = {
 			let SelectedEmbed = 0;
 			let Embed = [];
 
-			Embed[0] = new Discord.RichEmbed()
+			Embed[0] = new Discord.MessageEmbed()
 				.setColor('#ffd500')
 				.setTitle('Información del servidor OwO')
 
@@ -134,7 +134,7 @@ module.exports = {
 				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
 				.setFooter(`Estas estadísticas toman información concreta.`);
 
-			Embed[1] = new Discord.RichEmbed()
+			Embed[1] = new Discord.MessageEmbed()
 				.setColor('#eebb00')
 				.setTitle('Estadísticas de actividad ÛwÕ')
 
@@ -159,7 +159,7 @@ module.exports = {
 			const botmin = Math.floor(tiempobot/1000/60) % 60;
 			const bothour = Math.floor(tiempobot/1000/3600) % 24;
 
-			Embed[2] = new Discord.RichEmbed()
+			Embed[2] = new Discord.MessageEmbed()
 				.setColor('#e99979')
 				.setTitle('Estadísticas de tiempo UwU')
 
