@@ -29,6 +29,7 @@ module.exports = {
             '```\n' +
             '- Se llegó al origen del problema y se está implementando una solución.\n' +
             '- Se están restaurando los comandos afectados de a poco.\n' +
+            '- En busca de errores hasta el 21/07.\n' +
             '```\n' +
             '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n'
         );

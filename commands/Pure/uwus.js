@@ -4,14 +4,14 @@ const global = require('../../config.json'); //Variables globales
 module.exports = {
 	name: 'uwus',
 	execute(message, args) {
-        message.channel.send(
+        /*message.channel.send(
 			'```\n' +
 			'[REPORTE DE ESTADO DEL BOT]\n' +
 			'Estoy investigando un error con los comandos con Embed.\n' +
 			'~Papita con Puré\n' +
 			'```'
 		);
-		return;
+		return;*/
 
         let secs;
         if(args.length) {

@@ -7,14 +7,14 @@ module.exports = {
         'tryhard', 'tryhardeo'
     ],
 	execute(message, args) {
-		message.channel.send(
+		/*message.channel.send(
 			'```\n' +
 			'[REPORTE DE ESTADO DEL BOT]\n' +
 			'Estoy investigando un error con los comandos con auto reacción personalizada que hace que tiren error al intentar conseguir las IDs de los emotes.\n' +
 			'~Papita con Puré\n' +
 			'```'
 		);
-		return;
+		return;*/
 
 		const mayuwu = [
 			'<:mayuwu:654489124413374474>',
