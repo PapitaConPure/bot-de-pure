@@ -22,7 +22,7 @@ module.exports = {
             const embed = new Discord.MessageEmbed()
 				.setTitle(`Avatar de ${message.author.username}`)
                 .setColor('#faa61a')
-                .setImage(message.author.avatarURL)
+                .setImage(message.author.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
 				.setFooter(`Comando invocado por ${message.author.username}`);
             
             message.channel.send(embed);
@@ -65,7 +65,7 @@ module.exports = {
                         const embed = new Discord.MessageEmbed()
                             .setTitle(`Avatar de ${fetcheduser.username}`)
                             .setColor('#faa61a')
-                            .setImage(fetcheduser.avatarURL)
+                            .setImage(fetcheduser.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
                             .setFooter(`Comando invocado por ${message.author.username}`);
 
                         message.channel.send(embed);

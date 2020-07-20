@@ -77,14 +77,14 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 							`Reacciona con <:tags:704612794921779290> para ver las tags.\n` +
 							`Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`
 						)
-						.setAuthor(`Comando invocado por ${tmpauth.username}`, tmpauth.avatarURL)
+						.setAuthor(`Comando invocado por ${tmpauth.username}`, tmpauth.avatarURL())
 						.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
 						.setImage(image.file_url);
 						
 					tmpch.send(Embed).then(sent => {
 						BotMessage = sent.id;
 						console.log(BotMessage);
-						const actions = [sent.client.emojis.get('704612794921779290'), sent.client.emojis.cache.get('704612795072774164')];
+						const actions = [sent.client.emojis.cache.get('704612794921779290'), sent.client.emojis.cache.get('704612795072774164')];
 						sent.react(actions[0])
 							.then(() => sent.react(actions[1]))
 							.then(() => {
@@ -105,7 +105,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {
 												.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
 												.addField('Tags', `*${image.tags.split(/ +/).join(', ')}*`)
 												.addField('Acciones', `Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`)
-												.setAuthor(`Comando invocado por ${tmpauth.username}`, tmpauth.avatarURL)
+												.setAuthor(`Comando invocado por ${tmpauth.username}`, tmpauth.avatarURL())
 												.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
 												.setImage(image.file_url);	
 

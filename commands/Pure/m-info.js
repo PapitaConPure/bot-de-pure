@@ -130,8 +130,8 @@ module.exports = {
 				.addField('ID', servidor.id, true)
 
 				.setImage(servidor.iconURL)
-				.setThumbnail(servidor.owner.user.avatarURL)
-				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
+				.setThumbnail(servidor.owner.user.avatarURL())
+				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
 				.setFooter(`Estas estadísticas toman información concreta.`);
 
 			Embed[1] = new Discord.MessageEmbed()
@@ -141,7 +141,7 @@ module.exports = {
 				.addField(`Usuarios más activos (canal: ${(args.length && (typeof selectch) !== 'undefined')?selectch.name:'ninguno'})`, `${(args.length && (typeof selectch) !== 'undefined')?mstactpeo:'Ingresa un #canal como argumento para ver estadísticas del mismo.'}`)
 				.addField('Canales más activos', mstactch)
 
-				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
+				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
 				.setFooter(`Estas estadísticas toman información desde el último reinicio del bot hasta la actualidad.`);
 
 			const tiempoguild = Date.now() - servidor.createdAt;
@@ -168,7 +168,7 @@ module.exports = {
 				.addField('Tiempo de funcionamiento del bot', 
 					`**${bothour}**hs. **${botmin}**min. **${botsec}.${botms}**seg.`)
 
-				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
+				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
 				.setFooter(`Estas estadísticas toman información concreta.`);
 			
 			const arrows = [message.client.emojis.cache.get('681963688361590897'), message.client.emojis.cache.get('681963688411922460')];

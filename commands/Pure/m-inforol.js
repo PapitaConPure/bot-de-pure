@@ -92,7 +92,7 @@ module.exports = {
 					.addField('Cuenta total', `:wrestlers: x ${peoplecnt}\n:robot: x ${botcnt}`, true)
 
 					.setThumbnail(servidor.iconURL)
-					.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
+					.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
 					.setFooter(`Página principal`);SelectedEmbed
 
 				for(let i = 0; i < (totalcnt / 10); i++) {
@@ -109,7 +109,7 @@ module.exports = {
 
 						.addField('Lista de usuarios', plrange)
 
-						.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL)
+						.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
 						.setFooter(`Página de lista ${i + 1}/${Math.ceil(totalcnt / 10)}`);
 				}
 				

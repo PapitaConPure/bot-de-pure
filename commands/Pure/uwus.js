@@ -23,7 +23,7 @@ module.exports = {
             .setTitle('Evento UWU')
             .addField('UWU', 'Envía **uwu** para sumar un **uwu**.')
             .addField('Duración del evento', `**${secs}** segundos.`)
-            .setAuthor(`Evento iniciado por ${message.author.username}`, message.author.avatarURL);
+            .setAuthor(`Evento iniciado por ${message.author.username}`, message.author.avatarURL());
         message.channel.send(Embed).then(sent => {
             const filter = m => (m.content.toLowerCase().indexOf('uwu') !== -1 && !m.author.bot) || (m.content.toLowerCase() === 'antiuwu' && m.author.id === message.author.id);
             let uwusers = {}, ultimuwu;
