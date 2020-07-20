@@ -9,14 +9,14 @@ module.exports = {
         'm-irol', 'm-ir', 'm-ri', 'm-rolei'
     ],
 	execute(message, args) {
-		message.channel.send(
+		/*message.channel.send(
 			'```\n' +
 			'[REPORTE DE ESTADO DEL BOT]\n' +
 			'Estoy investigando un error con los comandos con Embed.\n' +
 			'~Papita con Puré\n' +
 			'```'
 		);
-		return;
+		return;*/
 
 		if(message.member.hasPermission('MANAGE_ROLES', false, true, true)) {
 			if(args.length < 2) {
@@ -58,7 +58,7 @@ module.exports = {
 
 			if(!args.every(argfetched => argfetched === '-1')) {
 				//Contadores de usuarios
-				const rolemembers.cache = servidor.members.cache.filter(member => { //Usuarios con rol
+				const rolemembers = servidor.members.cache.filter(member => { //Usuarios con rol
 					if(args[0] === '+')
 						return args.some(argrole => {
 							if(argrole !== args[0] && argrole !== '-1')
@@ -74,14 +74,14 @@ module.exports = {
 								return true;
 						});
 				});
-				const totalcnt = rolemembers.cache.size; //Total
-				const peoplecnt = rolemembers.cache.filter(member => !member.user.bot).size; //Roles
+				const totalcnt = rolemembers.size; //Total
+				const peoplecnt = rolemembers.filter(member => !member.user.bot).size; //Roles
 				const botcnt = totalcnt - peoplecnt; //Bots
 
 				//Crear y usar embed
 				let SelectedEmbed = 0;
 				let Embed = [];
-				let peoplelist = rolemembers.cache.array(); //Convertir la colección de miembros con el rol a un arreglo
+				let peoplelist = rolemembers.array(); //Convertir la colección de miembros con el rol a un arreglo
 
 				Embed[0] = new Discord.MessageEmbed()
 					.setColor('#ff00ff')
