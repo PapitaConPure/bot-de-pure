@@ -107,12 +107,12 @@ async function dibujarMillion(msg) { //Dar felicitaciones al desgraciado
 	ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
 	ctx.closePath();
 	ctx.clip();
-    const avatar = await Canvas.loadImage(msg.author.avatarURL({ format: 'png', dynamic: true, size: 1024 }));
+    const avatar = await Canvas.loadImage(msg.author.avatarURL({ format: 'png', dynamic: false, size: 1024 }));
 	ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
     //#endregion
     //#endregion
 
-    const imagen = new Discord.Attachment(canvas.toBuffer(), 'felicidades.png');
+    const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'felicidades.png');
 
     //#region Imagen y Mensaje extra
     canal.send('', imagen).then(sent => {
@@ -278,6 +278,7 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
     ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
     //#endregion
 
+	
     //#region Texto
     //#region Propiedades de texto
     ctx.textBaseline = 'bottom';
@@ -307,10 +308,11 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
     ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - fontSize - 30);
     //#endregion
     //#endregion
+	
 
     //#region Foto de Perfil
     //#region Sombra
-    const ycenter = (80 + (canvas.height - fontSize - 48 - 30)) / 2;
+    const ycenter = (80 + (canvas.height - 10/*fontSize*/ - 48 - 30)) / 2;
     ctx.shadowOffsetX = shadowOffsetY = 8;
     ctx.shadowBlur = 20;
     ctx.fillStyle = '#36393f';
@@ -319,20 +321,20 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
     //#endregion
 
     //#region Imagen circular
-	ctx.beginPath();
-	ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
-	ctx.closePath();
-	ctx.clip();
-    const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL);
-	ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
+    ctx.beginPath();
+    ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.clip();
+    const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL({ format: 'png', dynamic: false, size: 1024 }));
+    ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
     //#endregion
     //#endregion
-
-    const imagen = new Discord.Attachment(canvas.toBuffer(), 'bienvenida.png');
+	
+    const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'bienvenida.png');
 
     //#region Imagen y Mensaje extra
     const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
-    canal.send('', imagen).then(sent => {
+    canal.send({files: [imagen]}).then(sent => {
         if(servidor.id === '654471968200065034') { //Hourai Doll
             canal.send(
                 `Wena po <@${miembro.user.id}> conchetumare, como estai. Porfa revisa el canal <#671817759268536320> para que no te funemos <:haniwaSmile:659872119995498507> \n` +
@@ -407,7 +409,7 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
 	ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
 	ctx.closePath();
 	ctx.clip();
-    const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL);
+    const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL({ format: 'png', dynamic: false, size: 1024 }));
 	ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
     //#endregion
     //#endregion
@@ -416,7 +418,7 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
 
     //#region Imagen y Mensaje extra
     const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
-    canal.send('', imagen).then(sent => {
+    canal.send({attachment: imagen}).then(sent => {
         if(servidor.id === '654471968200065034') { //Hourai Doll
             canal.send(
                 'Nooooo po csm, perdimo otro weón \<:meguDerp:708064265092726834>' +
