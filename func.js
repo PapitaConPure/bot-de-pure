@@ -185,10 +185,10 @@ module.exports = {
 
     askForRole: function(miembro, canal) {
         if(!miembro.deleted) {
-            if(miembro.roles.size === 1) {
+            if(miembro.roles.cache.size === 1) {
                 canal.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474>`);
                 setTimeout(module.exports.askForRole, 1000 * 60 * 5, miembro , canal);
-            } else if(miembro.roles.size === 2) {
+            } else if(miembro.roles.cache.size === 2) {
                 canal.send(
                     `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>\n` +
                     `https://imgur.com/D5Z8Itb`
@@ -204,7 +204,7 @@ module.exports = {
 
     forceRole: function(miembro, canal) {
         if(!miembro.deleted) {
-            if(miembro.roles.size === 2) {
+            if(miembro.roles.cache.size === 2) {
                 canal.send(`<@${miembro.user.id}> cagaste altiro watón fome <:why:691222027738152971>`);
                 const colores = [
                     '671851233870479375', //France Doll

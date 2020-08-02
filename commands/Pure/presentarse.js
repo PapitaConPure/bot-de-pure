@@ -19,18 +19,6 @@ module.exports = {
             `[Estado]: ${global.bot_status}\n` +
             `[Desarrollador]: Papita con Puré#6932::423129757954211880\n` +
             '```\n' +
-            '**`[REPORTE 18/07]`**\n' +
-            '```\n' +
-            '- Problemas con recolección de emotes personalizados.\n' +
-            '- Problemas con mensajes enviados a través de Embeds.\n' +
-            '- Se esperan más problemas relacionados a otras funciones de Discord.\n' +
-            '```\n' +
-            '**`[REPORTE 20/07]`**\n' +
-            '```\n' +
-            '- Se llegó al origen del problema y se está implementando una solución.\n' +
-            '- Se están restaurando los comandos afectados de a poco.\n' +
-            '- En busca de errores hasta el 21/07.\n' +
-            '```\n' +
             '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n'
         );
     },
