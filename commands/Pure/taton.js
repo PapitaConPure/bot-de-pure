@@ -55,7 +55,9 @@ module.exports = {
 			'Navi',			'724779176816672819',
 			'Sansas',		'725535400654929930',
 			'chocolatada',	'725535400692547654',
-			'ZUN',			'729041785715818646'
+			'ZUN',			'729041785715818646',
+			'cafe',			'739512946354421770',
+			'mate',			'739514195372146789'
 		];
 
 		if(!args.length) {
@@ -65,17 +67,52 @@ module.exports = {
 		} else {
 			const todoslosperritos = ['perritos', 'todo', 'todos', 'lista', 'ayuda', 'everything', 'all', 'help'];
 			if(todoslosperritos.includes(args[0].toLowerCase())) {
-				let perritostr = '**Emote**\t**Nombre**\n';
+				const guilds = message.client.guilds.cache;
+				const slot1Coll = guilds.get(global.serverid.slot1).emojis.cache;
+				const slot2Coll = guilds.get(global.serverid.slot2).emojis.cache;
+				const emotes = slot1Coll.concat(slot2Coll).filter(emote => { return perritosopt.some(perrito => perrito === emote.name); }).array();
+				const listmax = 10;
 
-				message.client.guilds.cache.get('676251911850164255').emojis.cache.map(emote => {
-					if(perritosopt.some(perrito => perrito === emote.name))
-						perritostr +=`<:${emote.name}:${emote.id}> \t\t${emote.name}\n`;
+				let Embed = [];
+				let SelectedEmbed = 0;
+				for(let i = 0; i < (emotes.length / listmax); i++) {
+					let emolist = '';
+					let namelist = '';
+					for(let listrange = i * listmax; listrange < Math.min(i * listmax + listmax, emotes.length); listrange++) {
+						const emote = emotes[listrange];
+						emolist += `<:${emote.name}:${emote.id}>\n`;
+						namelist += `${emote.name}\n`;
+					}
+
+					Embed[i] = new Discord.MessageEmbed()
+						.setColor('#e4d0c9')
+						.setTitle(`Perritos <:${perritosopt[0]}:${perritosopt[1]}>`)
+
+						.addField('Emote', emolist, true)
+						.addField('Nombre', namelist, true)
+
+						.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
+						.setFooter(`Página de lista ${i + 1}/${Math.ceil(emotes.length / listmax)}`);
+				}
+
+				const arrows = [message.client.emojis.cache.get('681963688361590897'), message.client.emojis.cache.get('681963688411922460')];
+				const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
+				message.channel.send(Embed[0]).then(sent => {
+					sent.react(arrows[0])
+						.then(() => sent.react(arrows[1]))
+						.then(() => {
+							const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
+							collector.on('collect', reaction => {
+								const maxpage = Math.floor(emotes.length / listmax);
+								if(reaction.emoji.id === arrows[0].id) SelectedEmbed = (SelectedEmbed > 0)?(SelectedEmbed - 1):maxpage;
+								else SelectedEmbed = (SelectedEmbed < maxpage)?(SelectedEmbed + 1):0;
+								sent.edit(Embed[SelectedEmbed]);
+							});
+						});
 				});
-				
-				message.channel.send(perritostr);
 			} else {
 				let foundperrito = false;
-				message.client.guilds.cache.get('676251911850164255').emojis.cache.map(emote => {
+				message.client.guilds.cache.get(global.serverid.slot1).emojis.cache.map(emote => {
 					if(!foundperrito) {
 						if(emote.name.toLowerCase().startsWith(args[0].toLowerCase()) && perritosopt.some(perrito => perrito === emote.name)) {
 							message.channel.send(`<:${emote.name}:${emote.id}>`);
@@ -84,8 +121,7 @@ module.exports = {
 					}
 				});
 
-				if(!foundperrito)
-					message.channel.send(`<:${perritosopt[0]}:${perritosopt[1]}>`);
+				if(!foundperrito) message.channel.send(`<:${perritosopt[0]}:${perritosopt[1]}>`);
 			}
 		}
     },

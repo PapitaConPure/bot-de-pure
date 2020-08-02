@@ -2,7 +2,7 @@
 const fs = require('fs'); //Integrar operaciones sistema de archivos de consola
 const Parse = require('parse/node');
 const Discord = require('discord.js'); //Integrar discord.js
-const { Client, MessageEmbed } = require('discord.js'); //Ni idea, la verdad, pero aquí está
+const { Client, MessageEmbed } = require('discord.js'); //Integrar constructores requeridos
 const client = new Discord.Client(); //Cliente de bot
 const { //Constantes globales
     p_drmk, //prefijo drawmaku
@@ -10,10 +10,11 @@ const { //Constantes globales
     p_mention, //prefijo puré
 } = require('./config.json');
 const token = 'NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY'; //La llave del bot
-var global = require('./config.json'); //Variables globales
-var func = require('./func.js'); //Funciones globales
+const global = require('./config.json'); //Variables globales
+const func = require('./func.js'); //Funciones globales
 const Sequelize = require('sequelize');
 const Canvas = require('canvas'); 
+module.exports = { Discord };
 //#endregion
 
 //#region Establecimiento de Comandos
@@ -151,7 +152,7 @@ client.on('message', message => { //En caso de recibir un mensaje
 
     //#region Respuestas rápidas
     //#region Mensajes weones
-    if(message.channel.guild.id === '654471968200065034') {
+    if(message.channel.guild.id === global.serverid.hourai) {
         const msg = message.content.toLowerCase();
         if(msg.indexOf('hourai') !== -1 && msg.indexOf('hourai doll') !== msg.indexOf('hourai') && (msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)) {
             const fuckustr = [
