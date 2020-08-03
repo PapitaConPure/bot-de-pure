@@ -65,12 +65,13 @@ module.exports = {
 
 			message.channel.send(`<:${perritosopt[randperrito]}:${perritosopt[randperrito + 1]}>`);
 		} else {
+			const guilds = message.client.guilds.cache;
+			const slot1Coll = guilds.get(global.serverid.slot1).emojis.cache;
+			const slot2Coll = guilds.get(global.serverid.slot2).emojis.cache;
+			const emotes = slot1Coll.concat(slot2Coll).filter(emote => { return perritosopt.some(perrito => perrito === emote.name); }).array();
 			const todoslosperritos = ['perritos', 'todo', 'todos', 'lista', 'ayuda', 'everything', 'all', 'help'];
+
 			if(todoslosperritos.includes(args[0].toLowerCase())) {
-				const guilds = message.client.guilds.cache;
-				const slot1Coll = guilds.get(global.serverid.slot1).emojis.cache;
-				const slot2Coll = guilds.get(global.serverid.slot2).emojis.cache;
-				const emotes = slot1Coll.concat(slot2Coll).filter(emote => { return perritosopt.some(perrito => perrito === emote.name); }).array();
 				const listmax = 10;
 
 				let Embed = [];
@@ -112,7 +113,7 @@ module.exports = {
 				});
 			} else {
 				let foundperrito = false;
-				message.client.guilds.cache.get(global.serverid.slot1).emojis.cache.map(emote => {
+				emotes.map(emote => {
 					if(!foundperrito) {
 						if(emote.name.toLowerCase().startsWith(args[0].toLowerCase()) && perritosopt.some(perrito => perrito === emote.name)) {
 							message.channel.send(`<:${emote.name}:${emote.id}>`);
