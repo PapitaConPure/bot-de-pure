@@ -57,7 +57,8 @@ module.exports = {
 			'chocolatada',	'725535400692547654',
 			'ZUN',			'729041785715818646',
 			'cafe',			'739512946354421770',
-			'mate',			'739514195372146789'
+			'mate',			'739514195372146789',
+			'espiando',		'740392218707361863'
 		];
 
 		if(!args.length) {
@@ -65,14 +66,15 @@ module.exports = {
 
 			message.channel.send(`<:${perritosopt[randperrito]}:${perritosopt[randperrito + 1]}>`);
 		} else {
+			const todoslosperritos = ['perritos', 'todo', 'todos', 'lista', 'ayuda', 'everything', 'all', 'help'];
 			const guilds = message.client.guilds.cache;
 			const slot1Coll = guilds.get(global.serverid.slot1).emojis.cache;
 			const slot2Coll = guilds.get(global.serverid.slot2).emojis.cache;
-			const emotes = slot1Coll.concat(slot2Coll).filter(emote => { return perritosopt.some(perrito => perrito === emote.name); }).array();
-			const todoslosperritos = ['perritos', 'todo', 'todos', 'lista', 'ayuda', 'everything', 'all', 'help'];
+			let emotes = slot1Coll.concat(slot2Coll);
 
 			if(todoslosperritos.includes(args[0].toLowerCase())) {
 				const listmax = 10;
+				emotes = emotes.filter(emote => { return perritosopt.some(perrito => perrito === emote.name); }).array();
 
 				let Embed = [];
 				let SelectedEmbed = 0;
