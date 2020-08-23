@@ -4,7 +4,7 @@ var global = require('../../config.json'); //Variables globales
 module.exports = {
 	name: 'taton',
 	aliases: [
-		'perrito'
+		'perrito', 'pe'
 	],
 	execute(message, args) {
 		/*message.channel.send(
@@ -58,7 +58,8 @@ module.exports = {
 			'ZUN',			'729041785715818646',
 			'cafe',			'739512946354421770',
 			'mate',			'739514195372146789',
-			'espiando',		'740392218707361863'
+			'espiando',		'740392218707361863',
+			'madera',		'746893446425346150'
 		];
 
 		if(!args.length) {
