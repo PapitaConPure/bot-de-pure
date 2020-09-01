@@ -45,7 +45,7 @@ module.exports = {
                         max = uwuser[1];
                     }
                 }
-                collected.deleteAll();
+                collected.map(uwumsg => uwumsg.delete());
                 mvp = maxid;
                 message.channel.send(
                     `**UWUs totales:** ${collected.size}\n` +

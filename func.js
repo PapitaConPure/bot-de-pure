@@ -186,7 +186,10 @@ module.exports = {
     askForRole: function(miembro, canal) {
         if(!miembro.deleted) {
             if(miembro.roles.cache.size === 1) {
-                canal.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474>`);
+                if(global.houraiwarn <= 3) {
+                    global.houraiwarn++;
+                    canal.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474> (${global.houraiwarn}/3 llamados)`);
+                }
                 setTimeout(module.exports.askForRole, 1000 * 60 * 5, miembro , canal);
             } else if(miembro.roles.cache.size === 2) {
                 canal.send(
@@ -215,7 +218,7 @@ module.exports = {
                     '671851234541699092', //Russian Doll
                     '671851228308963348', //Orléans Doll
                 ];
-                miembro.addRole(colores[Math.floor(Math.random() * 7)]);
+                miembro.roles.add(colores[Math.floor(Math.random() * 7)]);
             } else  {
                 canal.send('Al fin qliao ya teni tu rol. Q esti bien po, tonce <:uwu:681935702308552730>');
             }

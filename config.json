@@ -1,17 +1,19 @@
 {
     "bot_status": "EN DESARROLLO; HOSTEADO LOCALMENTE; VERSIÓN ESTABLE",
-    "bot_version": "Full.2.7.B4",
+    "bot_version": "Full.2.7.DA",
     "p_drmk": "d!",
     "p_pure": "p!",
     "p_mention": "oe po <@651250669390528561>, ",
     "serverid": {
+        "bautistas": "745003943997997056",
         "pure":     "651244470691561473",
         "hourai":   "654471968200065034",
-        "ar":       "",
-        "usd":      "",
+        "ar":       "000000000000000000",
+        "usd":      "000000000000000000",
         "slot1":    "676251911850164255",
         "slot2":    "739513729158217829"
     },
+    "houraiwarn": 0,
     "tiempo": "7200",
     "edi": "4",
     "tem": "Sin temática",

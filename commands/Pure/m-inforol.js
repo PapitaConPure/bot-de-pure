@@ -82,52 +82,57 @@ module.exports = {
 				let SelectedEmbed = 0;
 				let Embed = [];
 				let peoplelist = rolemembers.array(); //Convertir la colección de miembros con el rol a un arreglo
-
-				Embed[0] = new Discord.MessageEmbed()
-					.setColor('#ff00ff')
-					.setTitle(`Análisis del roles (Total)`)
-
-					.addField('Roles en análisis', args.filter(ar => ar !== '-' && ar !== '+' && ar > -1 && !isNaN(ar)).map(ar => `<@&${ar}>`).join(', '))
-					.addField('Caso', `**${(args[0] === '+')?'Inclusivo':'Exclusivo'}**`, true)
-					.addField('Cuenta total', `:wrestlers: x ${peoplecnt}\n:robot: x ${botcnt}`, true)
-
-					.setThumbnail(servidor.iconURL)
-					.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
-					.setFooter(`Página principal`);SelectedEmbed
-
-				for(let i = 0; i < (totalcnt / 10); i++) {
-					let plrange = '';
-					for(let listrange = i * 10; listrange < Math.min(i * 10 + 10, totalcnt); listrange++) {
-						plrange += `${peoplelist[listrange]}`;
-						if(peoplelist[listrange].user.bot) plrange += ' **[BOT]**';
-						plrange += '\n';
-					}
-
-					Embed[i + 1] = new Discord.MessageEmbed()
-						.setColor('#ff00ff')
-						.setTitle('Análisis del roles (Detalle)')
-
-						.addField('Lista de usuarios', plrange)
-
-						.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
-						.setFooter(`Página de lista ${i + 1}/${Math.ceil(totalcnt / 10)}`);
-				}
+				const anaroles = args.filter(ar => ar !== '-' && ar !== '+' && ar > -1 && !isNaN(ar)).map(ar => `<@&${ar}>`).join(', ');
 				
-				const arrows = [message.client.emojis.cache.get('681963688361590897'), message.client.emojis.cache.get('681963688411922460')];
-				const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
-				message.channel.send(Embed[0]).then(sent => {
-					sent.react(arrows[0])
-						.then(() => sent.react(arrows[1]))
-						.then(() => {
-							const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
-							collector.on('collect', reaction => {
-								const maxpage = Math.ceil(totalcnt / 10);
-								if(reaction.emoji.id === arrows[0].id) SelectedEmbed = (SelectedEmbed > 0)?(SelectedEmbed - 1):maxpage;
-								else SelectedEmbed = (SelectedEmbed < maxpage)?(SelectedEmbed + 1):0;
-								sent.edit(Embed[SelectedEmbed]);
-							});
-						}).then(() => message.channel.stopTyping(true));
-				});
+				if(anaroles.length === 0)
+					message.channel.stopTyping(true);
+				else {
+					Embed[0] = new Discord.MessageEmbed()
+						.setColor('#ff00ff')
+						.setTitle(`Análisis del roles (Total)`)
+
+						.addField('Roles en análisis', anaroles)
+						.addField('Caso', `**${(args[0] === '+')?'Inclusivo':'Exclusivo'}**`, true)
+						.addField('Cuenta total', `:wrestlers: x ${peoplecnt}\n:robot: x ${botcnt}`, true)
+
+						.setThumbnail(servidor.iconURL)
+						.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
+						.setFooter(`Página principal`);SelectedEmbed
+
+					for(let i = 0; i < (totalcnt / 10); i++) {
+						let plrange = '';
+						for(let listrange = i * 10; listrange < Math.min(i * 10 + 10, totalcnt); listrange++) {
+							plrange += `${peoplelist[listrange]}`;
+							if(peoplelist[listrange].user.bot) plrange += ' **[BOT]**';
+							plrange += '\n';
+						}
+
+						Embed[i + 1] = new Discord.MessageEmbed()
+							.setColor('#ff00ff')
+							.setTitle('Análisis del roles (Detalle)')
+
+							.addField('Lista de usuarios', plrange)
+
+							.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
+							.setFooter(`Página de lista ${i + 1}/${Math.ceil(totalcnt / 10)}`);
+					}
+					
+					const arrows = [message.client.emojis.cache.get('681963688361590897'), message.client.emojis.cache.get('681963688411922460')];
+					const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
+					message.channel.send(Embed[0]).then(sent => {
+						sent.react(arrows[0])
+							.then(() => sent.react(arrows[1]))
+							.then(() => {
+								const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
+								collector.on('collect', reaction => {
+									const maxpage = Math.ceil(totalcnt / 10);
+									if(reaction.emoji.id === arrows[0].id) SelectedEmbed = (SelectedEmbed > 0)?(SelectedEmbed - 1):maxpage;
+									else SelectedEmbed = (SelectedEmbed < maxpage)?(SelectedEmbed + 1):0;
+									sent.edit(Embed[SelectedEmbed]);
+								});
+							}).then(() => message.channel.stopTyping(true));
+					});
+				}
 			} else message.channel.send(':warning: La ID ingresada no es válida o no es una ID en absoluto...');
 		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR ROLES** (MANAGE ROLES)* para usar este comando.');
     },

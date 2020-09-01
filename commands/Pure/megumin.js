@@ -150,16 +150,20 @@ module.exports = {
 				'```'
 			);
 			return;*/
-
-		const admitted = [
-			'651244470691561473', //Server de Puré
-			'698323332160028792', //Hourai Doll
-			'654471968200065034', //USD
-			'676251911850164255' //Slot 1
-		];
 		
-		if(!(admitted.some(soleID => (message.guild.id === soleID)))) {
-			message.channel.send('_Este comando solo puede ser usado en la superficie..._');
+		let serveridcheck = false;
+		for(sid in global.serverid) {
+			if(global.serverid.hasOwnProperty(sid)) {
+				sid = global.serverid[sid];
+			}
+			if(sid === message.guild.id) {
+				serveridcheck = true;
+				break;
+			}
+		}
+
+		if(!serveridcheck) {
+			message.channel.send('_Este comando no puede ser usado aquí..._');
 			return;
 		}
 		if(message.channel.nsfw) {

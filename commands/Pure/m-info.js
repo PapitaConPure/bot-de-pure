@@ -5,7 +5,8 @@ module.exports = {
 	name: 'm-info',
 	aliases: [
 		'm-informacion', 'm-información', 'm-inf',
-        'm-serverinfo', 'm-svinfo', 'm-svinf'
+        'm-serverinfo', 'm-svinfo', 'm-svinf',
+		'm-i'
     ],
 	execute(message, args) {
 		/*message.channel.send(
@@ -127,9 +128,9 @@ module.exports = {
 				.addField('Fecha de creación', servidor.createdAt, true)
 				.addField('ID', servidor.id, true)
 
-				.setImage(servidor.iconURL)
-				.setThumbnail(servidor.owner.user.avatarURL())
-				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
+				.setImage(servidor.iconURL({ dynamic: true, size: 256 }))
+				.setThumbnail(servidor.owner.user.avatarURL({ dynamic: true, size: 256 }))
+				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL({ dynamic: true, size: 256 }))
 				.setFooter(`Estas estadísticas toman información concreta.`);
 
 			Embed[1] = new Discord.MessageEmbed()
