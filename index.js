@@ -141,6 +141,13 @@ async function dibujarMillion(msg) { //Dar felicitaciones al desgraciado
 }
 
 client.on('message', message => { //En caso de recibir un mensaje
+    if(msg.indexOf('aguacate') !== -1) {
+        let paltastr = message.content.replace('aguacate', 'palta');
+
+        message.channel.send(`**${message.member.nickname}:**\n` + paltastr);
+        message.delete();
+    }
+    
     if(global.cansay === 0) { if(message.author.bot) return; } //Hacer que el bot no sea un pelotudo (ignorar mensajes de bots)
     
     if(message.guild) console.log(`[${message.guild.name}→#${message.channel.name}] ${message.author.username}: "${message.content}"`); //Hacer que el bot de hecho sea inteligente (messages log)
@@ -185,11 +192,6 @@ client.on('message', message => { //En caso de recibir un mensaje
                 '**CSM NO HABLEN DE HOURAI** <:poutSumi:698658511474786364>'
             ];
             message.channel.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]); 
-        } else if(msg.indexOf('aguacate') !== -1) {
-            let paltastr = message.content.replace('aguacate', 'palta');
-
-            message.channel.send(`**${message.member.nickname}:**\n` + paltastr);
-            message.delete();
         }
     }
     //#endregion
