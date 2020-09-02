@@ -141,7 +141,7 @@ async function dibujarMillion(msg) { //Dar felicitaciones al desgraciado
 }
 
 client.on('message', message => { //En caso de recibir un mensaje
-    if(msg.indexOf('aguacate') !== -1) {
+    if(message.indexOf('aguacate') !== -1) {
         let paltastr = message.content.replace('aguacate', 'palta');
 
         message.channel.send(`**${message.member.nickname}:**\n` + paltastr);
