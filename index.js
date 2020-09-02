@@ -185,6 +185,11 @@ client.on('message', message => { //En caso de recibir un mensaje
                 '**CSM NO HABLEN DE HOURAI** <:poutSumi:698658511474786364>'
             ];
             message.channel.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]); 
+        } else if(msg.indexOf('aguacate') !== -1) {
+            let paltastr = message.content.replace('aguacate', 'palta');
+
+            message.channel.send(`**${message.member.nickname}:**\n` + paltastr);
+            message.delete();
         }
     }
     //#endregion
