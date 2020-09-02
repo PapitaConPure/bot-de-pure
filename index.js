@@ -141,8 +141,10 @@ async function dibujarMillion(msg) { //Dar felicitaciones al desgraciado
 }
 
 client.on('message', message => { //En caso de recibir un mensaje
-    if(message.content.indexOf('aguacate') !== -1) {
-        let paltastr = message.content.replace('aguacate', 'palta');
+    const msg = message.content.toLowerCase();
+
+    if(msg.indexOf('aguacate') !== -1) {
+        let paltastr = msg.replace('aguacate', 'palta');
 
         message.channel.send(`**${message.member.nickname}:**\n` + paltastr);
         message.delete();
@@ -160,7 +162,6 @@ client.on('message', message => { //En caso de recibir un mensaje
     //#region Respuestas rápidas
     //#region Mensajes weones
     if(message.channel.guild.id === global.serverid.hourai) {
-        const msg = message.content.toLowerCase();
         if(msg.indexOf('hourai') !== -1 && msg.indexOf('hourai doll') !== msg.indexOf('hourai') && (msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)) {
             const fuckustr = [
                 '***__Recuerden:__ soy objetivamente mejor que Hourai <:haniwaSmile:659872119995498507>***',
