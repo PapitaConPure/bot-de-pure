@@ -4,8 +4,8 @@ var global = require('../../config.json'); //Variables globales
 module.exports = {
 	name: 'papita',
 	aliases: [
-        'papa', 'leche', 'apita', 'ure', 'uré',
-		'potato', 'milk'
+        'papa', 'apita', 'ure', 'uré',
+		'potato', 'p'
     ],
 	execute(message, args) {
 		if(args.length) {

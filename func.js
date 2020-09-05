@@ -208,7 +208,7 @@ module.exports = {
     forceRole: function(miembro, canal) {
         if(!miembro.deleted) {
             if(miembro.roles.cache.size === 2) {
-                canal.send(`<@${miembro.user.id}> cagaste altiro watón fome <:why:691222027738152971>`);
+                canal.send(`<@${miembro.user.id}> cagaste altiro watón fome <:mukyuugh:725583038913708034>`);
                 const colores = [
                     '671851233870479375', //France Doll
                     '671852132328275979', //Holland Doll

@@ -1,6 +1,6 @@
 {
     "bot_status": "EN DESARROLLO; HOSTEADO EN HEROKU.COM; VERSIÓN ESTABLE",
-    "bot_version": "Full.2.7.CB",
+    "bot_version": "Full.2.7.D2",
     "p_drmk": "d!",
     "p_pure": "p!",
     "p_mention": "oe po <@651250669390528561>, ",
@@ -13,6 +13,7 @@
         "slot1":    "676251911850164255",
         "slot2":    "739513729158217829"
     },
+    "lechitauses": 0,
     "houraiwarn": 0,
     "tiempo": "7200",
     "edi": "4",
