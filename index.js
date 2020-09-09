@@ -35,13 +35,42 @@ for(const file of commandFiles) {
 function modifyAct(pasuwus) { //Cambio de estado constante
     //Nombres de estado
     const estaduwus = [
-        "UwU", "UwO", ">w>", "ÚwÙ", "OwÙ", "<w<", ">w<", "ÙwÚ", "OwO", "O//w//O",
-        "^w^", "ÒwÓ", "ÓwÒ", "Ó3Ò", "\"3\"", ".w.", ">m<", "ÙmÚ", "UmU", "ÚmÙ",
-        "@w@", "XwX", "XmX", "X_X", "-_-", "=_="
+        [//0
+            "UwU", "UwO", ">w>", "ÚwÙ", "OwÙ", "<w<", ">w<", "ÙwÚ", "OwO", "O//w//O",
+            "^w^", "ÒwÓ", "ÓwÒ", "Ó3Ò", "\"3\"", ".w.", ">m<", "ÙmÚ", "UmU", "ÚmÙ",
+            "@w@", "XwX", "XmX", "X_X", "-_-", "=_="
+        ],
+        [//1
+            'pdSaYARN0A4', //Meta: Saki's Stroll
+            'Y20Par9n6e8', //Surnist: MARIQUEST
+            'gT9AJm_LAlQ', //Perl: TOUHOU BEAT DROPS
+            'VyX6akEAE1s', //Max: Attention all Touhou gamers
+            'L3MHp-xzmn4', //Tengu: El Ruido del Mar
+            'caZR-bDnhZ0', //Perl: REIMU DANCING
+            'A7iBnoZVoYw', //Max: Raiko Cat
+            'R4XiMFCOeQg', //Fr00sk: Touhou 17 in a nutshell
+            'nZ4_qeGmW9g', //Perl: TOUHOU FUNNY
+            'fdjUeQP58dU', //Okuu: When no one understands your Touhou
+            '87fnvz4_Nis', //Baka: Are ya winning son?
+            'h_3ULXom6so', //Perl: being addicted to touhou music
+            'ki5hZZDVLxc', //Brick: Marisa Wolf Goast Hyper || Touhou 17
+            '1NAEE9ypzzo', //Meta: The Pro Guide To Embodiment of Scarlet Devil
+            'RAHfcUYiREk', //Okuu: Touhou in a nutshell
+            'fRn7-SxHuqo', //Surnist: 🐑 SWEET ZONE 😏
+            'Rr-L8QhEfvU', //Meta: HARK!
+            'Tpzu1NqAuG0', //Clownplease: The PC98 to Windows operation
+            't2S-XkRgO3Y', //Max: Charisma Break
+            'V2h5VAxTwRY', //Perl: BYAKUREN FUCKING DIES
+            'VyX6akEAE1s', //Max: Okina falls off wheelchair
+            'z_SMPVAKJyo' //Dyna: Change Gensokyo, My Final Message
+        ]
     ];
 
     //Actualización de actividad
-    client.user.setActivity(estaduwus[pasuwus], { type: 'STREAMING', url: 'https://www.youtube.com/watch?v=h_3ULXom6so' });
+    client.user.setActivity(
+        estaduwus[0][Math.min(estaduwus[0].length, pasuwus)],
+        { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${estaduwus[1][Math.min(estaduwus[1].length, pasuwus)]}` }
+    );
 
     setTimeout(modifyAct, 1000 * 60 * 60, pasuwus + 1);
 }
@@ -348,12 +377,13 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
         if(servidor.id === '654471968200065034') { //Hourai Doll
             canal.send(
                 `Wena po <@${miembro.user.id}> conchetumare, como estai. Porfa revisa el canal <#671817759268536320> para que no te funemos <:haniwaSmile:659872119995498507> \n` +
-                'También elige un rol de color (https://imgur.com/D5Z8Itb) y pídele el que te guste a alguno de los enfermos que trabajan aquí <:mayuwu:654489124413374474> \n' +
+                'También elige un rol de color (debajo de este mensaje) y pídele el que te guste a alguno de los enfermos que trabajan aquí <:mayuwu:654489124413374474> \n' +
                 'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:697321858407727224>\n' +
                 'WENO YA PO CSM. <@&654472238510112799>, vengan a saludar maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
-                `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>`
+                `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n` +
+                'https://imgur.com/D5Z8Itb'
             );
-            setTimeout(func.askForRole, 1000 * 60 * 3, miembro, canal);
+            setTimeout(func.askForRole, 1000 * 60 * 5, miembro, canal);
         } else if(servidor.id === '611732083995443210') { //Animal Realm
             canal.send(
                 `Welcome to the server **${miembro.displayName}**! / ¡Bienvenido/a al server **${miembro.displayName}**!\n\n` +

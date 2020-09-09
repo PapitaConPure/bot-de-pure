@@ -186,17 +186,18 @@ module.exports = {
     askForRole: function(miembro, canal) {
         if(!miembro.deleted) {
             if(miembro.roles.cache.size === 1) {
-                if(global.houraiwarn <= 3) {
-                    global.houraiwarn++;
-                    canal.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474> (${global.houraiwarn}/3 llamados)`);
+                global.houraiwarn++;
+                if(global.houraiwarn <= 6) {
+                    if(global.houraiwarn <= 3)
+                        canal.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474> (${global.houraiwarn}/3 llamados)`);
+                    setTimeout(module.exports.askForRole, 1000 * 60 * 5, miembro , canal);
                 }
-                setTimeout(module.exports.askForRole, 1000 * 60 * 5, miembro , canal);
             } else if(miembro.roles.cache.size === 2) {
                 canal.send(
                     `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>\n` +
                     `https://imgur.com/D5Z8Itb`
                 );
-                setTimeout(module.exports.forceRole, 1000 * 60 * 3, miembro, canal);
+                setTimeout(module.exports.forceRole, 1000 * 60 * 4, miembro, canal);
             } else {
                 canal.send('Weno, ya teni tu rol, q esti bien po <:Junky:651290323557023753>');
             }
