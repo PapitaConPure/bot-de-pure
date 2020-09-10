@@ -60,6 +60,7 @@ function modifyAct(pasuwus) { //Cambio de estado constante
             'Rr-L8QhEfvU', //Meta: HARK!
             'Tpzu1NqAuG0', //Clownplease: The PC98 to Windows operation
             't2S-XkRgO3Y', //Max: Charisma Break
+            'ks-n3NhoBqI', //ゆずれす: HANIWA DANCE
             'V2h5VAxTwRY', //Perl: BYAKUREN FUCKING DIES
             'VyX6akEAE1s', //Max: Okina falls off wheelchair
             'z_SMPVAKJyo' //Dyna: Change Gensokyo, My Final Message
