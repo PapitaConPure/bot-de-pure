@@ -68,8 +68,8 @@ function modifyAct(pasuwus) { //Cambio de estado constante
 
     //Actualización de actividad
     client.user.setActivity(
-        estaduwus[0][Math.min(estaduwus[0].length, pasuwus)],
-        { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${estaduwus[1][Math.min(estaduwus[1].length, pasuwus)]}` }
+        estaduwus[0][Math.min(estaduwus[0].length - 1, pasuwus)],
+        { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${estaduwus[1][Math.min(estaduwus[1].length - 1, pasuwus)]}` }
     );
 
     setTimeout(modifyAct, 1000 * 60 * 60, pasuwus + 1);
