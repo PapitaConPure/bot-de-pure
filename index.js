@@ -313,8 +313,22 @@ client.on('message', message => { //En caso de recibir un mensaje
 //#region Mensajes de sistema
 async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo de un servidor
     const servidor = miembro.guild; //Servidor
+    if(servidor.systemChannelID === undefined) {
+        console.log('El servidor no tiene canal de mensajes de sistema.');
+        servidor.owner.user.send(
+            '¡Hola, soy Bot de Puré!\n' +
+            `¡Un nuevo miembro, **<@${miembro.id}> (${miembro.id})**, ha entrado a tu servidor **${servidor.name}**!\n\n` +
+            '*Si deseas que envíe una bienvenida a los miembros nuevos en lugar de enviarte un mensaje privado, selecciona un canal de mensajes de sistema en tu servidor.*\n' +
+            '*__Nota:__ Bot de Puré no opera con mensajes privados.*'
+        );
+        return;
+    }
     const canal = servidor.channels.cache.get(servidor.systemChannelID); //Canal de mensajes de sistema
     console.log(`Un usuario ha entrado a ${servidor.name}...`);
+    if(!servidor.me.permissionsIn(canal).has(['SEND_MESSAGES', 'VIEW_CHANNEL'])) {
+        console.log('No se puede enviar un mensaje de bienvenida en este canal.');
+        return;
+    }
     canal.startTyping();
     
     //#region Creación de imagen
@@ -415,8 +429,16 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
 
 async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un servidor
     const servidor = miembro.guild;
+    if(servidor.systemChannelID === undefined) {
+        console.log('El servidor no tiene canal de mensajes de sistema.');
+        return;
+    }
     const canal = servidor.channels.cache.get(servidor.systemChannelID);
     console.log(`Un usuario ha salido de ${servidor.name}...`);
+    if(!servidor.me.permissionsIn(canal).has(['SEND_MESSAGES', 'VIEW_CHANNEL'])) {
+        console.log('No se puede enviar un mensaje de despedida en este canal.');
+        return;
+    }
     canal.startTyping();
     
     //#region Creación de imagen
