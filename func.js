@@ -184,31 +184,42 @@ module.exports = {
     },
 
     askForRole: function(miembro, canal) {
+        console.log('Comprobando miembro nuevo en Hourai Doll para petición de rol de color');
         if(!miembro.deleted) {
+            console.log('El miembro sigue en el servidor');
             if(miembro.roles.cache.size === 1) {
+                console.log('El miembro está retenido.');
                 global.houraiwarn++;
                 if(global.houraiwarn <= 6) {
                     if(global.houraiwarn <= 3)
                         canal.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474> (${global.houraiwarn}/3 llamados)`);
                     setTimeout(module.exports.askForRole, 1000 * 60 * 5, miembro , canal);
+                    console.log(`Volviendo a esperar confirmación de miembro (${global.houraiwarn}/6)...`);
                 }
             } else if(miembro.roles.cache.size === 2) {
+                console.log('El miembro no ha recibido roles básicos.');
                 canal.send(
                     `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>\n` +
                     `https://imgur.com/D5Z8Itb`
                 );
                 setTimeout(module.exports.forceRole, 1000 * 60 * 4, miembro, canal);
+                console.log(`Esperando comprobación final de miembro en unos minutos...`);
             } else {
+                console.log(`El miembro ha recibido sus roles básicos.`);
                 canal.send('Weno, ya teni tu rol, q esti bien po <:Junky:651290323557023753>');
             }
         } else {
+            console.log(`El miembro se fue del servidor. Abortando.`);
             canal.send(`Se murió el wn de <@${miembro.user.id}> po <:mayuwu:654489124413374474>`);
         }
     },
 
     forceRole: function(miembro, canal) {
+        console.log('Comprobando miembro nuevo en Hourai Doll para forzado de rol de color');
         if(!miembro.deleted) {
+            console.log('El miembro sigue en el servidor');
             if(miembro.roles.cache.size === 2) {
+                console.log('El miembro requiere roles básicos. Forzando roles...');
                 canal.send(`<@${miembro.user.id}> cagaste altiro watón fome <:mukyuugh:725583038913708034>`);
                 const colores = [
                     '671851233870479375', //France Doll
@@ -220,8 +231,13 @@ module.exports = {
                     '671851228308963348', //Orléans Doll
                 ];
                 miembro.roles.add(colores[Math.floor(Math.random() * 7)]);
-            } else  {
+                console.log('Roles forzados.');
+            } else if(miembro.roles.cache.size > 2) {
+                console.log('El miembro ya tiene los roles básicos.');
                 canal.send('Al fin qliao ya teni tu rol. Q esti bien po, tonce <:uwu:681935702308552730>');
+            } else {
+                console.log('El miembro ya no tiene ningún rol básico.');
+                canal.send('Espérate qué weá pasó con el nuevo <:reibu:686220828773318663>\nOh bueno, ya me aburrí... chao.');
             }
         } else {
             canal.send(`Se murió el wn de <@${miembro.user.id}> po <:mayuwu:654489124413374474>`);

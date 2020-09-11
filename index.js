@@ -33,6 +33,7 @@ for(const file of commandFiles) {
 //#endregion
 
 function modifyAct(pasuwus) { //Cambio de estado constante
+    console.log(`Iniciando cambio de presencia ${pasuwus}...`);
     //Nombres de estado
     const estaduwus = [
         [//0
@@ -72,8 +73,10 @@ function modifyAct(pasuwus) { //Cambio de estado constante
         estaduwus[0][Math.min(estaduwus[0].length - 1, pasuwus)],
         { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${estaduwus[1][Math.min(estaduwus[1].length - 1, pasuwus)]}` }
     );
-
+        
+    console.log('Cambio de presencia finalizado.');
     setTimeout(modifyAct, 1000 * 60 * 60, pasuwus + 1);
+    console.log(`Cambio de presencia ${pasuwus + 1} en una hora...`);
 }
 
 client.on('ready', () => { //Confirmación de inicio y cambio de estado
@@ -85,6 +88,7 @@ client.on('ready', () => { //Confirmación de inicio y cambio de estado
 });
 
 async function dibujarMillion(msg) { //Dar felicitaciones al desgraciado
+    console.log('Evento "Uno en un Millón" detonado...')
     const canal = msg.channel; //Canal de mensajes de sistema
 
     //#region Creación de imagen
@@ -169,6 +173,8 @@ async function dibujarMillion(msg) { //Dar felicitaciones al desgraciado
         }
     });
     //#endregion
+
+    console.log('Evento "Uno en un Millón" finalizado.');
 }
 
 client.on('message', message => { //En caso de recibir un mensaje
@@ -308,6 +314,7 @@ client.on('message', message => { //En caso de recibir un mensaje
 async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo de un servidor
     const servidor = miembro.guild; //Servidor
     const canal = servidor.channels.cache.get(servidor.systemChannelID); //Canal de mensajes de sistema
+    console.log(`Un usuario ha entrado a ${servidor.name}...`);
     canal.startTyping();
     
     //#region Creación de imagen
@@ -385,6 +392,7 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
                 'https://imgur.com/D5Z8Itb'
             );
             setTimeout(func.askForRole, 1000 * 60 * 5, miembro, canal);
+            console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');
         } else if(servidor.id === '611732083995443210') { //Animal Realm
             canal.send(
                 `Welcome to the server **${miembro.displayName}**! / ¡Bienvenido/a al server **${miembro.displayName}**!\n\n` +
@@ -401,12 +409,14 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
         }
     });
     //#endregion
+    console.log('Bienvenida finalizada.');
     canal.stopTyping(true);
 }
 
 async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un servidor
     const servidor = miembro.guild;
     const canal = servidor.channels.cache.get(servidor.systemChannelID);
+    console.log(`Un usuario ha salido de ${servidor.name}...`);
     canal.startTyping();
     
     //#region Creación de imagen
@@ -472,10 +482,12 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
         }
     });
     //#endregion
+    console.log('Despedida finalizada.');
     canal.stopTyping();
 }
  
 client.on('guildMemberAdd', member => {
+    console.log('Evento de entrada de usuario a servidor desencadenado.');
     try {
         if(!member.user.bot) dibujarBienvenida(member);
         else member.guild.channels.cache.get(member.guild.systemChannelID).send(
@@ -489,6 +501,7 @@ client.on('guildMemberAdd', member => {
 });
 
 client.on('guildMemberRemove', member => {
+    console.log('Evento de salida de usuario de servidor desencadenado.');
     try {
         if(!member.user.bot) dibujarDespedida(member);
         else member.guild.channels.cache.get(member.guild.systemChannelID).send(
