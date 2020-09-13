@@ -1,5 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const global = require('../../config.json'); //Variables globales
+const func = require('../../func.js'); //Funciones globales
 const axios = require('axios');
 const Canvas = require('canvas'); 
 
@@ -16,13 +17,30 @@ function dibujarCum(msg, link) {
 
 			const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'cummies.png');
 			msg.channel.send({files: [imagen]});
-		} else {
+		} else
 			msg.channel.send(':warning: Ocurrió un error al descargar la imagen\n```\n' + response.status + '\n```')
-			return;
-		}
 	}).catch(error => {
-		msg.channel.send(':warning: Enlace inválido.')
-		return;
+		console.error(error);
+		//Resolver usuario
+		let user = message.author;
+		if(args.length) {
+			user = func.resolverIDUsuario(link, message.channel.guild, message.client);
+			if(user === undefined) {
+				msg.channel.send(':warning: ¡Enlace o usuario inválido!');
+				return;
+			} else user = message.client.users.cache.get(user);
+		}
+
+		const fondo = await Canvas.loadImage(user.avatarURL({ format: 'png', size: 1024 }));
+		const cum = await Canvas.loadImage('./cum.png');
+		const canvas = Canvas.createCanvas(fondo.width, fondo.height);
+		const ctx = canvas.getContext('2d');
+
+		ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+		ctx.drawImage(cum, 0, 0, canvas.width, canvas.height);
+
+		const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'cummies.png');
+		msg.channel.send({files: [imagen]});
 	});
 }
 
@@ -54,9 +72,17 @@ module.exports = {
 					'<:GigaChad:748623625653059584>',
 					'<:anzub:704641772399362068>'
 				];
-				const randcoomer = Math.floor(Math.random() * coomer.length / 2);
+				const randcoomer = Math.floor(Math.random() * coomer.length);
 
-				message.client.guilds.cache.get(global.serverid.slot2).emojis.create(message.author.avatarURL({ format: 'png' }), message.author.id)
+				//Resolver usuario
+				let user = message.author;
+				if(args.length) {
+					user = func.resolverIDUsuario(args[0], message.channel.guild, message.client);
+					if(user === undefined) user = message.author;
+					else user = message.client.users.cache.get(user);
+				}
+
+				message.client.guilds.cache.get(global.serverid.slot2).emojis.create(user.avatarURL({ format: 'png' }), message.author.id)
 					.then(useremo => {
 						message.channel.send(`${coomer[randcoomer]} <:lechita:674736445071556618> <:${useremo.name}:${useremo.id}>`)
 						.then(() => useremo.delete());
