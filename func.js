@@ -385,7 +385,7 @@ module.exports = {
         console.log('Evento terminado.');
     },
 
-    buscarUsuario: function(searchData) {
+    buscarUsuario: function(searchdata) {
 
     }
     //#endregion
