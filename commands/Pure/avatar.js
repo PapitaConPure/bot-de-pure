@@ -1,6 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../config.json'); //Variables globales
-const { buscarUsuario } = require('../../func');
+const global = require('../../config.json'); //Variables globales
+const func = require('../../func.js'); //Funciones globales
 
 module.exports = {
 	name: 'avatar',
@@ -29,7 +29,7 @@ module.exports = {
             message.channel.send(embed);
         } else {
             for(avalist = 0; avalist < Math.min(args.length, 8); avalist++) {
-                args[avalist] = resolverIDUsuario(args[avalist], message.channel.guild, message.client);
+                args[avalist] = func.resolverIDUsuario(args[avalist], message.channel.guild, message.client);
 
                 if(args[avalist] !== undefined) {
                     const fetcheduser = message.client.users.cache.get(args[avalist]);
