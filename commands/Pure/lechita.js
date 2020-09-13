@@ -24,13 +24,11 @@ function dibujarCum(msg, link) {
 
 		//Resolver usuario
 		let user = msg.author;
-		if(args.length) {
-			user = func.resolverIDUsuario(link, msg.channel.guild, msg.client);
-			if(user === undefined) {
-				msg.channel.send(':warning: ¡Enlace o usuario inválido!');
-				return;
-			} else user = msg.client.users.cache.get(user);
-		}
+		user = func.resolverIDUsuario(link, msg.channel.guild, msg.client);
+		if(user === undefined) {
+			msg.channel.send(':warning: ¡Enlace o usuario inválido!');
+			return;
+		} else user = msg.client.users.cache.get(user);
 
 		const fondo = await Canvas.loadImage(user.avatarURL({ format: 'png', size: 1024 }));
 		const cum = await Canvas.loadImage('./cum.png');
