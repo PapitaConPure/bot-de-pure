@@ -413,7 +413,7 @@ module.exports = {
                     nickmatch = -1;
                 
                 return (nickmatch !== -1);
-            });
+            }).first();
             
             //Buscar por nombre de usuario en resto de guilds
             minimum = -1;
@@ -433,7 +433,7 @@ module.exports = {
                     });
 
                     if(fetchednick !== undefined) data = fetchednick;
-                });
+                }).first();
             
             //Convertir miembro a usuario
             if(data !== undefined)
