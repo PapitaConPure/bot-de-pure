@@ -417,6 +417,9 @@ module.exports = {
                 return (nickmatch !== -1)?(member.user):undefined;
             });
             
+            if(data !== undefined)
+                console.log(data.id);
+                
             //Buscar por nombre de usuario en resto de guilds
             minimum = -1;
             if(data === undefined)
@@ -438,6 +441,8 @@ module.exports = {
 
                    return passthroughuser;
                 }).first();
+            
+            console.log(data.id);
             
             if(data !== undefined)
                 data = data.id;
