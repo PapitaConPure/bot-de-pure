@@ -51,7 +51,8 @@ module.exports = {
                     //Buscar por nombre de usuario en resto de guilds
                     if((typeof args[avalist]) === 'undefined')
                         message.client.guilds.cache.filter(guild => guild.id !== message.channel.guild.id).map(guild => {
-                            args[avalist] = guild.members.cache.filter(member => member.user.username.toLowerCase().indexOf(temp) !== -1).first();
+                            let fetchednick = guild.members.cache.filter(member => member.user.username.toLowerCase().indexOf(temp) !== -1).first();
+                            if(fetchednick !== undefined) args[avalist] = fetchednick;
                         });
 
                     if((typeof args[avalist]) === 'undefined') {
