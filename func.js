@@ -396,23 +396,42 @@ module.exports = {
         if(isNaN(data)) {
             //Para comprobaciones posteriores
             const temp = data.toLowerCase();
+            let minimum = -1;
 
             //Buscar por apodo o nombre de usuario dentro de guild actual
             data = guild.members.cache.filter(member => {
-                let nickmatch = false;
+                let nickmatch;
 
                 if(member.nickname !== null && member.nickname !== undefined)
-                    nickmatch = (member.nickname.toLowerCase().indexOf(temp) !== -1);
-                if(!nickmatch)
-                    nickmatch = (member.user.username.toLowerCase().indexOf(temp) !== -1);
+                    nickmatch = member.nickname.toLowerCase().indexOf(temp);
+                if(nickmatch === -1)
+                    nickmatch = member.user.username.toLowerCase().indexOf(temp);
                 
-                return nickmatch;
-            }).first();
+                if(minimum === -1 || nickmatch < minimum)
+                    minimum = nickmatch;
+                else
+                    nickmatch = -1;
+                
+                return (nickmatch !== -1);
+            });
             
             //Buscar por nombre de usuario en resto de guilds
+            minimum = -1;
             if(data === undefined)
                 client.guilds.cache.filter(cguild => cguild.id !== guild.id).map(cguild => {
-                    let fetchednick = cguild.members.cache.filter(member => member.user.username.toLowerCase().indexOf(temp) !== -1).first();
+                    let fetchednick = cguild.members.cache.filter(member => {
+                        let usermatch;
+
+                        usermatch = member.user.username.toLowerCase().indexOf(temp);
+
+                        if(minimum === -1 || usermatch < minimum)
+                            minimum = usermatch;
+                        else
+                            usermatch = -1;
+                        
+                        return (nickmatch !== -1);
+                    });
+
                     if(fetchednick !== undefined) data = fetchednick;
                 });
             
