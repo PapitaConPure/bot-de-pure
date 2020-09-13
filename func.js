@@ -1,5 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const global = require('./config.json'); //Variables globales
+const { NUMBER, STRING } = require('sequelize/types');
 //const fs = require('fs');
 //const MongoClient = require('mongodb').MongoClient;
 
@@ -385,8 +386,37 @@ module.exports = {
         console.log('Evento terminado.');
     },
 
-    buscarUsuario: function(searchdata) {
+    resolverIDUsuario: function(data, guild, client) {
+        if(data.startsWith('<@') && data.endsWith('>')) {
+            data = data.slice(2, -1);
+            if(data.startsWith('!')) data = data.slice(1);
+        }
+        if(isNaN(data)) {
+            //Comprobador de nombre, en caso de que no sea una ID
+            const temp = data.toLowerCase();
 
+            //Buscar por apodo o nombre de usuario dentro de guild actual
+            data = guild.members.cache.filter(member => {
+                let nickmatch = false;
+
+                if(member.nickname !== null && member.nickname !== undefined)
+                    nickmatch = (member.nickname.toLowerCase().indexOf(temp) !== -1);
+                if(!nickmatch)
+                    nickmatch = (member.user.username.toLowerCase().indexOf(temp) !== -1);
+                
+                return nickmatch;
+            }).first();
+            
+            //Buscar por nombre de usuario en resto de guilds
+            if(data === undefined)
+                client.guilds.cache.filter(cguild => cguild.id !== guild.id).map(cguild => {
+                    let fetchednick = cguild.members.cache.filter(member => member.user.username.toLowerCase().indexOf(temp) !== -1).first();
+                    if(fetchednick !== undefined) data = fetchednick;
+                });
+            
+            if(data !== undefined)
+                data = data.user.id;
+        }
     }
     //#endregion
 };
