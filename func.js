@@ -412,6 +412,8 @@ module.exports = {
                 else
                     nickmatch = -1;
                 
+                console.log(`${member.user.username} (${member.user.id}): ${nickmatch}`);
+                
                 return (nickmatch !== -1);
             }).first();
             
@@ -430,10 +432,10 @@ module.exports = {
                             usermatch = -1;
                         
                         return (nickmatch !== -1);
-                    });
+                    }).first();
 
                     if(fetchednick !== undefined) data = fetchednick;
-                }).first();
+                });
             
             //Convertir miembro a usuario
             if(data !== undefined)
