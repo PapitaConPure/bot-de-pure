@@ -400,7 +400,7 @@ module.exports = {
 
             //Buscar por apodo o nombre de usuario dentro de guild actual
             data = guild.members.cache.filter(member => {
-                let nickmatch;
+                let nickmatch = -1;
 
                 if(member.nickname !== null && member.nickname !== undefined)
                     nickmatch = member.nickname.toLowerCase().indexOf(temp);
@@ -422,7 +422,7 @@ module.exports = {
             if(data === undefined)
                 client.guilds.cache.filter(cguild => cguild.id !== guild.id).map(cguild => {
                     let fetchednick = cguild.members.cache.filter(member => {
-                        let usermatch;
+                        let usermatch = -1;
 
                         usermatch = member.user.username.toLowerCase().indexOf(temp);
 
