@@ -390,8 +390,10 @@ module.exports = {
             data = data.slice(2, -1);
             if(data.startsWith('!')) data = data.slice(1);
         }
+
+        //Buscador por nombre, en caso de que la información de búsqueda no sea una ID
         if(isNaN(data)) {
-            //Comprobador de nombre, en caso de que no sea una ID
+            //Para comprobaciones posteriores
             const temp = data.toLowerCase();
 
             //Buscar por apodo o nombre de usuario dentro de guild actual
@@ -413,11 +415,13 @@ module.exports = {
                     if(fetchednick !== undefined) data = fetchednick;
                 });
             
+            //Convertir miembro a usuario
             if(data !== undefined)
                 data = data.user.id;
-
-            return data;
         }
+
+        //Retornar objeto User
+        return data;
     }
     //#endregion
 };
