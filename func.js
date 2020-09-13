@@ -386,12 +386,13 @@ module.exports = {
     },
 
     resolverIDUsuario: function(data, guild, client) {
+        //Intentar descifrar ID por mención
         if(data.startsWith('<@') && data.endsWith('>')) {
             data = data.slice(2, -1);
             if(data.startsWith('!')) data = data.slice(1);
         }
 
-        //Buscador por nombre, en caso de que la información de búsqueda no sea una ID
+        //Buscador por nombre, en caso de que la información de búsqueda no sea una ID ni una mención
         if(isNaN(data)) {
             //Para comprobaciones posteriores
             const temp = data.toLowerCase();
