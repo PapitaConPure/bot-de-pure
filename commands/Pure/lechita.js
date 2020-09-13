@@ -19,16 +19,17 @@ function dibujarCum(msg, link) {
 			msg.channel.send({files: [imagen]});
 		} else
 			msg.channel.send(':warning: Ocurrió un error al descargar la imagen\n```\n' + response.status + '\n```')
-	}).catch(error => {
+	}).catch(async function (error) {
 		console.error(error);
+
 		//Resolver usuario
-		let user = message.author;
+		let user = msg.author;
 		if(args.length) {
-			user = func.resolverIDUsuario(link, message.channel.guild, message.client);
+			user = func.resolverIDUsuario(link, msg.channel.guild, msg.client);
 			if(user === undefined) {
 				msg.channel.send(':warning: ¡Enlace o usuario inválido!');
 				return;
-			} else user = message.client.users.cache.get(user);
+			} else user = msg.client.users.cache.get(user);
 		}
 
 		const fondo = await Canvas.loadImage(user.avatarURL({ format: 'png', size: 1024 }));
