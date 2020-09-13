@@ -384,5 +384,9 @@ module.exports = {
         global.cntjugadores = 0;
         console.log('Evento terminado.');
     },
+
+    buscarUsuario: function(searchData) {
+
+    }
     //#endregion
 };

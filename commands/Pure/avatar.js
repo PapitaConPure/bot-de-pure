@@ -33,21 +33,26 @@ module.exports = {
                     if(args[avalist].startsWith('!')) args[avalist] = args[avalist].slice(1);
                 }
                 if(isNaN(args[avalist])) {
+                    //Comprobador de nombre, en caso de que no sea una ID
                     const temp = args[avalist].toLowerCase();
-                    args[avalist] = message.client.users.cache.filter(user => 
-                        user.username.toLowerCase().indexOf(temp) !== -1
-                    ).first();
 
+                    //Buscar por apodo o nombre de usuario dentro de guild actual
+                    args[avalist] = message.channel.guild.members.cache.filter(member => {
+                        let nickmatch = false;
+
+                        if(member.nickname !== null && member.nickname !== undefined)
+                            nickmatch = (member.nickname.toLowerCase().indexOf(temp) !== -1);
+                        if(!nickmatch)
+                            nickmatch = (member.user.username.toLowerCase().indexOf(temp) !== -1);
+                        
+                        return nickmatch;
+                    }).first();
+                    
+                    //Buscar por nombre de usuario en resto de guilds
                     if((typeof args[avalist]) === 'undefined')
-                        args[avalist] = message.channel.guild.members.cache.filter(member => {
-                            let nickmatch = false;
-                            if(member.nickname !== null && member.nickname !== undefined) {
-                                if(member.nickname.toLowerCase().indexOf(temp) !== -1)
-                                    nickmatch = true;
-                            }
-                            
-                            return nickmatch;
-                        }).first();
+                        args[avalist] = message.client.guilds.cache.filter(guild => guild.id !== message.channel.guild.id).cache.filter(member => 
+                            member.user.username.toLowerCase().indexOf(temp) !== -1
+                        ).first();
 
                     if((typeof args[avalist]) === 'undefined') {
                         message.channel.send(':warning: ¡Usuario no encontrado!');
