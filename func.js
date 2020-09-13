@@ -412,6 +412,8 @@ module.exports = {
                 else
                     nickmatch = -1;
                 
+                console.log(nickmatch);
+                
                 return (nickmatch !== -1)?(member.user):undefined;
             });
             
@@ -428,8 +430,10 @@ module.exports = {
                             minimum = usermatch;
                         else
                             usermatch = -1;
+                
+                        console.log(usermatch);
                         
-                        return (nickmatch !== -1)?(member.user):undefined;
+                        return (usermatch !== -1)?(member.user):undefined;
                     });
 
                    return passthroughuser;
