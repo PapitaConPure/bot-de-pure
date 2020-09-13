@@ -1,6 +1,5 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const global = require('./config.json'); //Variables globales
-const { NUMBER, STRING } = require('sequelize/types');
 //const fs = require('fs');
 //const MongoClient = require('mongodb').MongoClient;
 
