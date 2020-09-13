@@ -412,7 +412,7 @@ module.exports = {
                 else
                     nickmatch = -1;
                 
-                return (nickmatch !== -1)?(member.user.id):undefined;
+                return (nickmatch !== -1)?(member.user):undefined;
             });
             
             //Buscar por nombre de usuario en resto de guilds
@@ -434,9 +434,13 @@ module.exports = {
 
                    return passthroughuser;
                 }).first();
+            
+            if(data !== undefined)
+                data = data.id;
         }
 
         //Retornar objeto User
+        console.log(data);
         return data;
     }
     //#endregion
