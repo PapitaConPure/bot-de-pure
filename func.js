@@ -399,7 +399,7 @@ module.exports = {
             let minimum = -1;
 
             //Buscar por apodo o nombre de usuario dentro de guild actual
-            data = guild.members.cache.map(member => {
+            guild.members.cache.map(member => {
                 let nickmatch = -1;
 
                 if(member.nickname !== null && member.nickname !== undefined)
@@ -414,7 +414,7 @@ module.exports = {
                 
                 console.log(`${member.user.username}: ${nickmatch}`);
                 
-                return (nickmatch !== -1)?(member.user):undefined;
+                if(nickmatch !== -1) data = (member.user);
             });
             
             if(data !== undefined) console.log(`Encontré: ${data.username} (${data.id})`);
@@ -423,7 +423,7 @@ module.exports = {
             //Buscar por nombre de usuario en resto de guilds
             minimum = -1;
             if(data === undefined)
-                data = client.guilds.cache.filter(cguild => cguild.id !== guild.id).map(cguild => {
+                client.guilds.cache.filter(cguild => cguild.id !== guild.id).map(cguild => {
                     let passthroughuser = cguild.members.cache.map(member => {
                         let usermatch = -1;
 
@@ -436,11 +436,9 @@ module.exports = {
                 
                         console.log(usermatch);
                         
-                        return (usermatch !== -1)?(member.user):undefined;
+                        if(usermatch !== -1) data = (member.user);
                     });
-
-                   return passthroughuser;
-                }).first();
+                })
             
             console.log(data.id);
             
