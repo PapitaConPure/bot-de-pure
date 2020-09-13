@@ -412,14 +412,14 @@ module.exports = {
                 else
                     nickmatch = -1;
                 
-                console.log(nickmatch);
+                console.log(`${member.user.username}: ${nickmatch}`);
                 
                 return (nickmatch !== -1)?(member.user):undefined;
             });
             
-            if(data !== undefined)
-                console.log(data.id);
-                
+            if(data !== undefined) console.log(`Encontré: ${data.username} (${data.id})`);
+            else console.log('No encontré ni mierda.');
+
             //Buscar por nombre de usuario en resto de guilds
             minimum = -1;
             if(data === undefined)
