@@ -429,7 +429,7 @@ module.exports = {
                         else
                             usermatch = -1;
                         
-                        return (nickmatch !== -1)?(member.user.id):undefined;
+                        return (nickmatch !== -1)?(member.user):undefined;
                     });
 
                    return passthroughuser;
