@@ -434,10 +434,6 @@ module.exports = {
 
                    return passthroughuser;
                 }).first();
-            
-            //Convertir miembro a usuario
-            if(data !== undefined)
-                data = data.user.id;
         }
 
         //Retornar objeto User
