@@ -415,6 +415,8 @@ module.exports = {
             
             if(data !== undefined)
                 data = data.user.id;
+
+            return data;
         }
     }
     //#endregion

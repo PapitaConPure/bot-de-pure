@@ -35,7 +35,7 @@ module.exports = {
                     const fetcheduser = message.client.users.cache.get(args[avalist]);
 
                     if(fetcheduser === undefined)
-                        message.channel.send(':warning: ¡Usuario no encontrado!');
+                        message.channel.send(':warning: La ID ingresada es inválida o no es una ID en absoluto...');
                     else {
                         const embed = new Discord.MessageEmbed()
                             .setTitle(`Avatar de ${fetcheduser.username}`)
@@ -45,7 +45,8 @@ module.exports = {
 
                         message.channel.send(embed);
                     }
-                }
+                } else 
+                    message.channel.send(':warning: ¡Usuario no encontrado!');
             }
         }
     },
