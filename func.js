@@ -402,52 +402,43 @@ module.exports = {
             guild.members.cache.map(member => {
                 let nickmatch = -1;
 
-                if(member.nickname !== null && member.nickname !== undefined)
+                nickmatch = member.user.username.toLowerCase().indexOf(temp);
+                if(nickmatch === -1 && member.nickname !== null && member.nickname !== undefined) {
                     nickmatch = member.nickname.toLowerCase().indexOf(temp);
-                if(nickmatch === -1)
-                    nickmatch = member.user.username.toLowerCase().indexOf(temp);
+                    if(nickmatch !== -1) nickmatch += 32;
+                }
                 
-                if(minimum === -1 || nickmatch < minimum)
+                console.log(`${member.user.username}: ${nickmatch} vs. ${minimum}`)
+                if(minimum === -1 || (nickmatch !== -1 && nickmatch < minimum)) {
+                    data = member.user;
                     minimum = nickmatch;
-                else
-                    nickmatch = -1;
-                
-                console.log(`${member.user.username}: ${nickmatch}`);
-                
-                if(nickmatch !== -1) data = (member.user);
+                }
             });
-            
-            if(data !== undefined) console.log(`Encontré: ${data.username} (${data.id})`);
-            else console.log('No encontré ni mierda.');
 
             //Buscar por nombre de usuario en resto de guilds
-            minimum = -1;
-            if(data === undefined)
+            if(minimum === -1)
                 client.guilds.cache.filter(cguild => cguild.id !== guild.id).map(cguild => {
                     let passthroughuser = cguild.members.cache.map(member => {
                         let usermatch = -1;
 
                         usermatch = member.user.username.toLowerCase().indexOf(temp);
 
-                        if(minimum === -1 || usermatch < minimum)
+                        if(minimum === -1 || (usermatch !== -1 && usermatch < minimum)) {
+                            data = member.user;
                             minimum = usermatch;
-                        else
-                            usermatch = -1;
-                
-                        console.log(usermatch);
-                        
-                        if(usermatch !== -1) data = (member.user);
+                        }
                     });
                 })
             
             console.log(data.id);
             
-            if(data !== undefined)
+            if(minimum !== -1)
                 data = data.id;
+            else
+                data = undefined;
         }
 
-        //Retornar objeto User
-        console.log(data);
+        //Retornar ID de objeto User
         return data;
     }
     //#endregion
