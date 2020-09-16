@@ -206,7 +206,7 @@ module.exports = {
                 console.log(`Esperando comprobación final de miembro en unos minutos...`);
             } else {
                 console.log(`El miembro ha recibido sus roles básicos.`);
-                canal.send('Weno, ya teni tu rol, q esti bien po <:Junky:651290323557023753>');
+                canal.send(`Weno **${miembro.user.username}**, ya teni tu rol, q esti bien po <:Junky:651290323557023753>`);
             }
         } else {
             console.log(`El miembro se fue del servidor. Abortando.`);
@@ -220,7 +220,6 @@ module.exports = {
             console.log('El miembro sigue en el servidor');
             if(miembro.roles.cache.size === 2) {
                 console.log('El miembro requiere roles básicos. Forzando roles...');
-                canal.send(`<@${miembro.user.id}> cagaste altiro watón fome <:mukyuugh:725583038913708034>`);
                 const colores = [
                     '671851233870479375', //France Doll
                     '671852132328275979', //Holland Doll
@@ -228,16 +227,21 @@ module.exports = {
                     '671851235267182625', //Kyoto Doll
                     '671851236538187790', //London Doll
                     '671851234541699092', //Russian Doll
-                    '671851228308963348', //Orléans Doll
+                    '671851228308963348' //Orléans Doll
                 ];
+                canal.send(
+                    `<@${miembro.user.id}>, cagaste altiro watón fome <:mukyuugh:725583038913708034>\n` +
+                    `Toma un rol random po <:mayuwu:654489124413374474> <:venAqui2:668644951353065500>\n` +
+                    'https://imgur.com/pXumeJT'
+                );
                 miembro.roles.add(colores[Math.floor(Math.random() * 7)]);
                 console.log('Roles forzados.');
             } else if(miembro.roles.cache.size > 2) {
                 console.log('El miembro ya tiene los roles básicos.');
-                canal.send('Al fin qliao ya teni tu rol. Q esti bien po, tonce <:uwu:681935702308552730>');
+                canal.send(`Al fin qliao ya teni tu rol. Q esti bien **${miembro.user.username}**, po <:uwu:681935702308552730>`);
             } else {
                 console.log('El miembro ya no tiene ningún rol básico.');
-                canal.send('Espérate qué weá pasó con el nuevo <:reibu:686220828773318663>\nOh bueno, ya me aburrí... chao.');
+                canal.send(`Espérate qué weá pasó con **${miembro.user.username}** <:reibu:686220828773318663>\nOh bueno, ya me aburrí... chao.`);
             }
         } else {
             canal.send(`Se murió el wn de <@${miembro.user.id}> po <:mayuwu:654489124413374474>`);
