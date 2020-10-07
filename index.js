@@ -183,8 +183,7 @@ client.on('message', message => { //En caso de recibir un mensaje
 
     if(msg.indexOf('aguacate') !== -1) {
         let paltastr = msg.replace('aguacate', 'palta');
-        let paltaname = message.member.nickname;
-        if(paltaname === undefined || paltaname === null) paltaname = message.author.username;
+        let paltaname = message.author.username;
 
         message.channel.send(`**${paltaname}:**\n` + paltastr);
         message.delete();
