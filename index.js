@@ -180,11 +180,11 @@ async function dibujarMillion(msg) { //Dar felicitaciones al desgraciado
 
 client.on('message', message => { //En caso de recibir un mensaje
     if(message.author.id === '651250669390528561') return;
-    
+
     const msg = message.content.toLowerCase();
 
     if(msg.indexOf('aguacate') !== -1) {
-        let paltastr = msg.replace('aguacate', 'palta');
+        let paltastr = msg.replace(/aguacate/g, 'palta');
         let paltaname = message.member.nickname;
         if(paltaname === undefined || paltaname === null) paltaname = message.author.username;
 
