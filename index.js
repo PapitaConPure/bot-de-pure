@@ -3,7 +3,7 @@ const fs = require('fs'); //Integrar operaciones sistema de archivos de consola
 const Parse = require('parse/node');
 const Discord = require('discord.js'); //Integrar discord.js
 const { Client, MessageEmbed } = require('discord.js'); //Integrar constructores requeridos
-const client = new Discord.Client(); //Cliente de bot
+const client = new Discord.Client({ fetchAllMembers: true }); //Cliente de bot
 const { //Constantes globales
     p_drmk, //prefijo drawmaku
     p_pure, //prefijo puré
