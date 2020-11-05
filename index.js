@@ -404,8 +404,8 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
                 `Wena po <@${miembro.user.id}> conchetumare, como estai. Porfa revisa el canal <#671817759268536320> para que no te funemos <:haniwaSmile:659872119995498507> \n` +
                 'También elige un rol de color (debajo de este mensaje) y pídele el que te guste a alguno de los enfermos que trabajan aquí <:mayuwu:654489124413374474> \n' +
                 'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:697321858407727224>\n' +
-                'WENO YA PO CSM. <@&654472238510112799>, vengan a saludar maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
-                `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n` +
+                'WENO YA PO CSM. <@&654472238510112799>, vengan a saludar maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n'/* +
+                `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n`*/ +
                 'https://imgur.com/D5Z8Itb'
             );
             setTimeout(func.askForRole, 1000 * 60 * 5, miembro, canal);
@@ -415,13 +415,13 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
                 `Welcome to the server **${miembro.displayName}**! / ¡Bienvenido/a al server **${miembro.displayName}**!\n\n` +
                 `**EN:** To fully enjoy the server, don't forget to get 1 of the 5 main roles in the following channel~\n` +
                 '**ES:** Para disfrutar totalmente del servidor, no olvides escoger 1 de los 5 roles principales en el siguiente canal~\n\n' +
-                '→ <#611753608601403393> ←\n\n' +
-                `*Ahora hay **${peoplecnt}** usuarios en el server.*`
+                '→ <#611753608601403393> ←\n\n'/* +
+                `*Ahora hay **${peoplecnt}** usuarios en el server.*`*/
             );
         } else { //Otros servidores
             canal.send(
-                `¡Bienvenido al servidor **${miembro.displayName}**!\n` +
-                `*Ahora hay **${peoplecnt}** usuarios en el server.*`
+                `¡Bienvenido al servidor **${miembro.displayName}**!\n`/* +
+                `*Ahora hay **${peoplecnt}** usuarios en el server.*`*/
             );
         }
     });
@@ -497,14 +497,14 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
     canal.send({files: [imagen]}).then(sent => {
         if(servidor.id === '654471968200065034') { //Hourai Doll
             canal.send(
-                'Nooooo po csm, perdimo otro weón \<:meguDerp:708064265092726834>' +
-                `*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
+                'Nooooo po csm, perdimo otro weón \<:meguDerp:708064265092726834>'/* +
+                `*Ahora quedan menos**${peoplecnt}** aweonaos en el server.*`*/
             );
-        } else { //Otros servidores
+        }/* else { //Otros servidores
             canal.send(
                 `*Ahora hay **${peoplecnt}** usuarios en el server.*`
             );
-        }
+        }*/
     });
     //#endregion
     console.log('Despedida finalizada.');
