@@ -316,7 +316,9 @@ client.on('message', message => { //En caso de recibir un mensaje
 //#region Mensajes de sistema
 async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo de un servidor
     const servidor = miembro.guild; //Servidor
-    if(servidor.systemChannelID === undefined) {
+    const canal = servidor.channels.cache.get(servidor.systemChannelID); //Canal de mensajes de sistema
+
+    if(typeof canal === 'undefined') {
         console.log('El servidor no tiene canal de mensajes de sistema.');
         servidor.owner.user.send(
             '¡Hola, soy Bot de Puré!\n' +
@@ -326,7 +328,7 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
         );
         return;
     }
-    const canal = servidor.channels.cache.get(servidor.systemChannelID); //Canal de mensajes de sistema
+
     console.log(`Un usuario ha entrado a ${servidor.name}...`);
     if(!servidor.me.permissionsIn(canal).has(['SEND_MESSAGES', 'VIEW_CHANNEL'])) {
         console.log('No se puede enviar un mensaje de bienvenida en este canal.');
@@ -432,11 +434,34 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
 
 async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un servidor
     const servidor = miembro.guild;
-    if(servidor.systemChannelID === undefined) {
+    const canal = servidor.channels.cache.get(servidor.systemChannelID);
+
+    if(typeof canal === 'undefined') {
         console.log('El servidor no tiene canal de mensajes de sistema.');
         return;
     }
-    const canal = servidor.channels.cache.get(servidor.systemChannelID);
+
+    if(servidor.id === global.serverid.hourai) {
+        const inadvertidos = [
+            '225701598272290827', //Orphen
+            '190681032935211008', //Sheep
+            '632011537413963777', //Hikari
+            '263163573843263509' //Recycle
+        ];
+
+        if(inadvertidos.includes(miembro.id)) {
+            servidor.owner.user.send(
+                '¡Hola, soy Bot de Puré!\n' +
+                `El miembro **<@${miembro.id}> (${miembro.id})**, ha salido de tu servidor **${servidor.name}**...\n` +
+                `¡Shhh! Si bien tienes un canal de mensajes de sistema establecido, este miembro se encuentra en una lista negra de despedidas.\n\n` +
+                '*Si piensas que el usuario no debería estar en dicha lista negra, comunícate con mi creador~*\n' +
+                '*__Nota:__ Bot de Puré no opera con mensajes privados.*'
+            );
+            console.log('Se ha inadvertido el usuario.')
+            return;
+        }
+    }
+
     console.log(`Un usuario ha salido de ${servidor.name}...`);
     if(!servidor.me.permissionsIn(canal).has(['SEND_MESSAGES', 'VIEW_CHANNEL'])) {
         console.log('No se puede enviar un mensaje de despedida en este canal.');
