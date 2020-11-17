@@ -207,6 +207,7 @@ module.exports = {
             } else {
                 console.log(`El miembro ha recibido sus roles básicos.`);
                 canal.send(`Weno **${miembro.user.username}**, ya teni tu rol, q esti bien po <:Junky:651290323557023753>`);
+                setTimeout(module.exports.askCandy, 1000, miembro, canal);
             }
         } else {
             console.log(`El miembro se fue del servidor. Abortando.`);
@@ -239,6 +240,7 @@ module.exports = {
             } else if(miembro.roles.cache.size > 2) {
                 console.log('El miembro ya tiene los roles básicos.');
                 canal.send(`Al fin qliao ya teni tu rol. Q esti bien **${miembro.user.username}**, po <:uwu:681935702308552730>`);
+                setTimeout(module.exports.askCandy, 1000, miembro, canal);
             } else {
                 console.log('El miembro ya no tiene ningún rol básico.');
                 canal.send(`Espérate qué weá pasó con **${miembro.user.username}** <:reibu:686220828773318663>\nOh bueno, ya me aburrí... chao.`);
@@ -246,6 +248,31 @@ module.exports = {
         } else {
             canal.send(`Se murió el wn de <@${miembro.user.id}> po <:mayuwu:654489124413374474>`);
         }
+    },
+
+    askCandy: function(miembro, canal) {
+        let candyemote = '778180421304188939';
+        let candyrole = miembro.guild.roles.cache.get('683084373717024869');
+        console.log('Preguntando por caramelos.');
+        canal.send(
+            `Weno **${miembro.nickname}**, si querí __caramelos__, reacciona con <:milky:778180421304188939> a esto po <:yumou:708158159180660748>\n` +
+            '> *__Caramelos:__ están cargados con magia. Leyendas dicen que permiten ver canales donde abunda la lujuria...*'
+        ).then(sent => {
+            sent.react(candyemote)
+            .then(() => {
+                const filter = (rc, user) => !user.bot && rc.emoji.id === candyemote && miembro.user.id === user.id;
+                const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
+                collector.on('collect', () => {
+                    if(miembro.roles.cache.some(role => role.id === candyrole.id)) {
+                        canal.send('Oe tranqui po, que ya tení tus caramelos <:kageuwu:742506313258369056>');
+                        collector.stop();
+                    } else {
+                        miembro.roles.add(candyrole.id);
+                        canal.send('Caramelos entregados <:miyoi:674823039086624808>:pinching_hand: :candy:');
+                    }
+                });
+            });
+        });
     },
 
     pingear: function(cnt, mention, msgch) {

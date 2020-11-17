@@ -457,7 +457,7 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
                 '*Si piensas que el usuario no debería estar en dicha lista negra, comunícate con mi creador~*\n' +
                 '*__Nota:__ Bot de Puré no opera con mensajes privados.*'
             );
-            console.log('Se ha inadvertido el usuario.')
+            console.log('Se ha inadvertido el usuario.');
             return;
         }
     }
