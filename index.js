@@ -446,6 +446,8 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
             '225701598272290827', //Orphen
             '190681032935211008', //Sheep
             '632011537413963777', //Hikari
+            '212311832281612289', //Chise
+            '537080207580987402', //Aerza
             '263163573843263509' //Recycle
         ];
 
