@@ -37,7 +37,7 @@ function modifyAct(pasuwus) { //Cambio de estado constante
     console.log(`Iniciando cambio de presencia ${pasuwus}...`);
     //Nombres de estado
     const estaduwus = [
-        [//0
+        [//0: créditos a Sassafras
             "De fiesta en el Santuario Hakurei",
             "¡Siguiente nekoparada: La Soleil!",
             "KO NI CHI WA",
@@ -86,7 +86,7 @@ function modifyAct(pasuwus) { //Cambio de estado constante
             "Estudiando a los Haniwa",
             "Flawless Clothing of the Celestials"
         ],
-        [//1
+        [//1: créditos a Imagine Breaker
             'pdSaYARN0A4', //Meta: Saki's Stroll
             'Y20Par9n6e8', //Surnist: MARIQUEST
             'gT9AJm_LAlQ', //Perl: TOUHOU BEAT DROPS
