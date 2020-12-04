@@ -38,21 +38,22 @@ function modifyAct(pasuwus) { //Cambio de estado constante
     //Nombres de estado
     const estaduwus = [
         [//0
-            "Sale fiesta en el Santuario Hakurei",
-            "¡Pip pip! ¡Siguiente nekoparada: La Soleil!",
+            "De fiesta en el Santuario Hakurei",
+            "¡Siguiente nekoparada: La Soleil!",
             "KO NI CHI WA",
             "BEATORIIIICHEEEEEEEEEEEE",
             "¡Pa! ¡Papá! ¡Papita!",
-            "Ahora sin tuberculosis",
+            "¡Ahora sin tuberculosis!",
             "Welcome ♥ Hell",
-            "Hello World",
+            "Hello World!",
             "The Fragrance of Dark Coffee",
-            "Chatarra tu abuela",
+            "Chatarra tu abuela >:(",
             "¿Cómo te va? Porque yo soy una patata",
             "Maravillosa Boterdotisa del Paraíso",
             "¿Hay gente que lee estos?",
-            "@everyone",
+            "Tirando @everyone",
             "Código hecho sin trabajo esclavo",
+            "Señal Kappa \"Pepinillo Monstruo\"",
             "Señal Código \"Magia de la Nueva Era\"",
             "Comforting Chococcino",
             "¿Se encuentra Papa Natas?",
@@ -66,11 +67,24 @@ function modifyAct(pasuwus) { //Cambio de estado constante
             "Pasando memes en #general",
             "Made in UPRPRC",
             "¿Y cuánto cuesta el fin de semana gratis?",
-            "EXPLOOOOOOOSIOOOOOOON",
+            "EXPLOOOOOSIOOOON",
             "Procrastinando",
             "Negociando fotos de Satono con Okina",
             "Dando bienvenidas como todo un campeón",
-            ""
+            "Fallando con éxito",
+            "El insecticida viene por separado",
+            "Bug Net®️",
+            "Visitando el Bosque Mágico",
+            "Visitando Eientei",
+            "Dándole de comer a Yuyuko",
+            "Tocando la trompeta",
+            "Romantic Romance, Reed Trumpet",
+            "Esperando a que arreglen aquel bug",
+            "Intentando crashear",
+            "Por favor no cliquees para ver el stream",
+            "[No olvidar poner texto aquí]",
+            "Estudiando a los Haniwa",
+            "Flawless Clothing of the Celestials"
         ],
         [//1
             'pdSaYARN0A4', //Meta: Saki's Stroll
@@ -102,7 +116,7 @@ function modifyAct(pasuwus) { //Cambio de estado constante
 
     //Actualización de actividad
     client.user.setActivity(
-        `p!ayuda/${estaduwus[0][randInt(0, estaduwus[0].length)]}`,
+        estaduwus[0][randInt(0, estaduwus[0].length)],
         { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${randInt(0, estaduwus[1].length)}` }
     );
         
