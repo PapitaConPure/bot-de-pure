@@ -84,7 +84,10 @@ function modifyAct(pasuwus) { //Cambio de estado constante
             "Por favor no cliquees para ver el stream",
             "[No olvidar poner texto aquí]",
             "Estudiando a los Haniwa",
-            "Flawless Clothing of the Celestials"
+            "Flawless Clothing of the Celestials",
+            "Mostrando memes en este mismo estado",
+            "24 transmisiones de memes por día... casí",
+            "¿Quién cliquea el stream, de todos modos?"
         ],
         [//1: créditos a Imagine Breaker
             'pdSaYARN0A4', //Meta: Saki's Stroll
