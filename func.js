@@ -471,6 +471,10 @@ module.exports = {
 
         //Retornar ID de objeto User
         return data;
+    },
+
+    randInt: function(min, max) {
+        return min + Math.floor((max - min) * Math.random());
     }
     //#endregion
 };

@@ -14,6 +14,7 @@ const global = require('./config.json'); //Variables globales
 const func = require('./func.js'); //Funciones globales
 const Sequelize = require('sequelize');
 const Canvas = require('canvas'); 
+const { randInt } = require('./func.js');
 module.exports = { Discord };
 //#endregion
 
@@ -37,9 +38,39 @@ function modifyAct(pasuwus) { //Cambio de estado constante
     //Nombres de estado
     const estaduwus = [
         [//0
-            "UwU", "UwO", ">w>", "ÚwÙ", "OwÙ", "<w<", ">w<", "ÙwÚ", "OwO", "O//w//O",
-            "^w^", "ÒwÓ", "ÓwÒ", "Ó3Ò", "\"3\"", ".w.", ">m<", "ÙmÚ", "UmU", "ÚmÙ",
-            "@w@", "XwX", "XmX", "X_X", "-_-", "=_="
+            "Sale fiesta en el Santuario Hakurei",
+            "¡Pip pip! ¡Siguiente nekoparada: La Soleil!",
+            "KO NI CHI WA",
+            "BEATORIIIICHEEEEEEEEEEEE",
+            "¡Pa! ¡Papá! ¡Papita!",
+            "Ahora sin tuberculosis",
+            "Welcome ♥ Hell",
+            "Hello World",
+            "The Fragrance of Dark Coffee",
+            "Chatarra tu abuela",
+            "¿Cómo te va? Porque yo soy una patata",
+            "Maravillosa Boterdotisa del Paraíso",
+            "¿Hay gente que lee estos?",
+            "@everyone",
+            "Código hecho sin trabajo esclavo",
+            "Señal Código \"Magia de la Nueva Era\"",
+            "Comforting Chococcino",
+            "¿Se encuentra Papa Natas?",
+            "Me quedé sin frases chistosas",
+            "El Coso™️",
+            "¿Jugaste dos horas para morir así?",
+            "No, no me acaban de resetear",
+            "Fabricado en Tierra del Fuego",
+            "Cliqueando galletas",
+            "Recuerden lavarse el prepucio",
+            "Pasando memes en #general",
+            "Made in UPRPRC",
+            "¿Y cuánto cuesta el fin de semana gratis?",
+            "EXPLOOOOOOOSIOOOOOOON",
+            "Procrastinando",
+            "Negociando fotos de Satono con Okina",
+            "Dando bienvenidas como todo un campeón",
+            ""
         ],
         [//1
             'pdSaYARN0A4', //Meta: Saki's Stroll
@@ -71,8 +102,8 @@ function modifyAct(pasuwus) { //Cambio de estado constante
 
     //Actualización de actividad
     client.user.setActivity(
-        estaduwus[0][Math.min(estaduwus[0].length - 1, pasuwus)],
-        { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${estaduwus[1][Math.min(estaduwus[1].length - 1, pasuwus)]}` }
+        `${estaduwus[0][randInt(0, estaduwus[0].length)]} // p!ayuda`,
+        { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${randInt(0, estaduwus[1].length)}` }
     );
         
     console.log('Cambio de presencia finalizado.');
