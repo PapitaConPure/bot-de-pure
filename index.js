@@ -102,7 +102,7 @@ function modifyAct(pasuwus) { //Cambio de estado constante
 
     //Actualización de actividad
     client.user.setActivity(
-        `${estaduwus[0][randInt(0, estaduwus[0].length)]} // p!ayuda`,
+        `p!ayuda/${estaduwus[0][randInt(0, estaduwus[0].length)]}`,
         { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${randInt(0, estaduwus[1].length)}` }
     );
         
