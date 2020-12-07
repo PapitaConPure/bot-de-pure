@@ -516,6 +516,8 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
             `El miembro **<@${miembro.id}> (${miembro.id})** ha salido de tu servidor **${servidor.name}**...\n` +
             '*__Nota:__ Bot de Puré no opera con mensajes privados.*'
         );
+        
+        return;
     }
 
     console.log(`Un usuario ha salido de ${servidor.name}...`);
