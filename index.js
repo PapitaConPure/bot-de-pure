@@ -124,7 +124,7 @@ function modifyAct(pasuwus) { //Cambio de estado constante
     );
         
     console.log('Cambio de presencia finalizado.');
-    setTimeout(modifyAct, 1000 * 60 * 60, pasuwus + 1);
+    setTimeout(modifyAct, 1000 * 60 * randInt(30, 70), pasuwus + 1);
     console.log(`Cambio de presencia ${pasuwus + 1} en una hora...`);
 }
 
@@ -502,7 +502,7 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
         if(inadvertidos.includes(miembro.id)) {
             servidor.owner.user.send(
                 '¡Hola, soy Bot de Puré!\n' +
-                `El miembro **<@${miembro.id}> (${miembro.id})**, ha salido de tu servidor **${servidor.name}**...\n` +
+                `El miembro **<@${miembro.id}> (${miembro.id})** ha salido de tu servidor **${servidor.name}**...\n` +
                 `¡Shhh! Si bien tienes un canal de mensajes de sistema establecido, este miembro se encuentra en una lista negra de despedidas.\n\n` +
                 '*Si piensas que el usuario no debería estar en dicha lista negra, comunícate con mi creador~*\n' +
                 '*__Nota:__ Bot de Puré no opera con mensajes privados.*'
@@ -510,6 +510,12 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
             console.log('Se ha inadvertido el usuario.');
             return;
         }
+
+        servidor.owner.user.send(
+            '¡Hola, soy Bot de Puré!\n' +
+            `El miembro **<@${miembro.id}> (${miembro.id})** ha salido de tu servidor **${servidor.name}**...\n` +
+            '*__Nota:__ Bot de Puré no opera con mensajes privados.*'
+        );
     }
 
     console.log(`Un usuario ha salido de ${servidor.name}...`);
