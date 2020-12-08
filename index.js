@@ -119,9 +119,10 @@ function modifyAct(pasuwus) { //Cambio de estado constante
             "Defendiendo la Capital Lunar",
             "Golpeando a las Flores Egoístas",
             "Viajando dentro de una espalda",
+            "SaCaNdO fOtOs con Sumireko",
             "Ayudando a Yachie",
             "Peleando por agua negra",
-            "SaCaNdO fOtOs con Sumireko"
+            "Jugando a la casita con Shinmyoumaru"
         ],
         [//1: créditos a Imagine Breaker
             'pdSaYARN0A4', //Meta: Saki's Stroll
