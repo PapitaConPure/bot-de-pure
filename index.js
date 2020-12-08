@@ -74,7 +74,7 @@ function modifyAct(pasuwus) { //Cambio de estado constante
             "Fallando con éxito",
             "El insecticida viene por separado",
             "Bug Net®️",
-            "Visitando el Bosque Mágico",
+            "Visitando el Bosque de la Magia",
             "Visitando Eientei",
             "Dándole de comer a Yuyuko",
             "Tocando la trompeta",
@@ -86,8 +86,9 @@ function modifyAct(pasuwus) { //Cambio de estado constante
             "Estudiando a los Haniwa",
             "Flawless Clothing of the Celestials",
             "Mostrando memes en este mismo estado",
-            "24 transmisiones de memes por día... casí",
-            "¿Quién cliquea el stream, de todos modos?"
+            "24 transmisiones de memes por día... casi",
+            "¿Quién cliquea el stream, de todos modos?",
+            "Supervisando a Komachi"
         ],
         [//1: créditos a Imagine Breaker
             'pdSaYARN0A4', //Meta: Saki's Stroll
