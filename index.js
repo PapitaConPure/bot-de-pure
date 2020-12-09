@@ -37,7 +37,7 @@ function modifyAct(pasuwus) { //Cambio de estado constante
     console.log(`Iniciando cambio de presencia ${pasuwus}...`);
     //Nombres de estado
     const estaduwus = [
-        [//0: créditos a Sassafras
+        [//0: créditos a Sassafras, Imagine
             "De fiesta en el Santuario Hakurei",
             "¡Siguiente nekoparada: La Soleil!",
             "KO NI CHI WA",
@@ -122,7 +122,17 @@ function modifyAct(pasuwus) { //Cambio de estado constante
             "SaCaNdO fOtOs con Sumireko",
             "Ayudando a Yachie",
             "Peleando por agua negra",
-            "Jugando a la casita con Shinmyoumaru"
+            "Jugando a la casita con Shinmyoumaru",
+            "Realizando préstamos vitalicios",
+            "Minando criptomoneda",
+            "It's Lunatic Time!",
+            "¡¿Hay alguna otra Sumireko que deba conocer?!",
+            "No eres inmune a la Hanipaganda",
+            "Tomando cibercafé",
+            "Investigando si Maribel es Yukari",
+            "¡Alcen la bandera de la rebelión!",
+            "¿Alguien recuerda PC-98?",
+            "Ya terminé de limpiar páginas, señor Johnson"
         ],
         [//1: créditos a Imagine Breaker
             'pdSaYARN0A4', //Meta: Saki's Stroll
@@ -160,7 +170,7 @@ function modifyAct(pasuwus) { //Cambio de estado constante
         
     console.log('Cambio de presencia finalizado.');
     setTimeout(modifyAct, 1000 * 60 * randInt(30, 70), pasuwus + 1);
-    console.log(`Cambio de presencia ${pasuwus + 1} en una hora...`);
+    console.log(`Esperando ciclo ${pasuwus + 1} en breve...`);
 }
 
 client.on('ready', () => { //Confirmación de inicio y cambio de estado
