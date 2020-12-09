@@ -132,7 +132,17 @@ function modifyAct(pasuwus) { //Cambio de estado constante
             "Investigando si Maribel es Yukari",
             "¡Alcen la bandera de la rebelión!",
             "¿Alguien recuerda PC-98?",
-            "Ya terminé de limpiar páginas, señor Johnson"
+            "Ya terminé de limpiar páginas, señor Johnson",
+            "Me perdí en Bosque de Bambú. Envíen ayuda",
+            "Deshipnotizando a Alice",
+            "Dial.5A f.5A 6A 2B(2~4) hj9 j.5A j.2A",
+            "2A 3A(1) 5B(<4) hj9 j.5A j.2A(1) j.2C 214C hj9 j.6A j.5B",
+            "Escribiendo este mismo est_",
+            "\"El Inminente e Intrigante Alboroto de las Hadas\"",
+            "\"Hadas Traviesas en Busca del Culpable\"",
+            "\"Pasaje Fantasmal\"",
+            "\"Locura Espejada\"",
+            "\"El Furioso Cielo Estrellado\""
         ],
         [//1: créditos a Imagine Breaker
             'pdSaYARN0A4', //Meta: Saki's Stroll
