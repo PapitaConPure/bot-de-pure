@@ -378,9 +378,11 @@ client.on('message', message => { //En caso de recibir un mensaje
     const nombrecomando = args.shift().toLowerCase(); //Comando ingresado
 
     let comando;
-    if(pdetect === p_drmk)
-        message.channel.send('<:delete:704612795072774164> Los comandos de Drawmaku estarán deshabilitados por un tiempo indefinido. Se pide disculpas.');//comando = client.ComandosDrawmaku.get(nombrecomando) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
-	else if(pdetect === p_pure || pdetect === p_mention) 
+    if(pdetect === p_drmk) {
+        //comando = client.ComandosDrawmaku.get(nombrecomando) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
+        message.channel.send('<:delete:704612795072774164> Los comandos de Drawmaku estarán deshabilitados por un tiempo indefinido. Se pide disculpas.');
+        return;
+    } else if(pdetect === p_pure || pdetect === p_mention) 
         comando = client.ComandosPure.get(nombrecomando) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
     
     if (!comando) {
