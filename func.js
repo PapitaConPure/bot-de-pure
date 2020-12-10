@@ -282,7 +282,7 @@ module.exports = {
             `Oe ${mention} qliao <:miyoi:674823039086624808>`,
             `Responde po ${mention} <:mayuwu:654489124413374474>`,
             `¿Vai a responder ${mention}? <:haniwaSmile:659872119995498507>`,
-            `${mention}, respondé altoke <:hypergardener:720759009866547342>`,
+            `${mention}, respondé altoke <:HYPERGARDENER:757163180211306516>`,
             `Dale ${mention} ctm <:reibu:686220828773318663>`,
             `Wena po ${mention} como andai <:meguSmile:694324892073721887>`,
             `Pero qué andai haciendo po ${mention} rectm <:spookedSyura:688883921697374208>`
