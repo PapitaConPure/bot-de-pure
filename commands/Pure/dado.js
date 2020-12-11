@@ -15,37 +15,50 @@ module.exports = {
 		//return;
 
 		let faces = 6;
-		let cnt = 1;
+		let dices = 1;
+		let total = 0;
+		let dice = [];
+
 		try {
-			let opt = '';
+			let opt = 'NLL';
 			args.forEach(arg => {
-				if(opt.length === 0) {
-					if(arg.startsWith('-'))
-						opt = arg.slice(1);
-				} else {
+				if(opt === 'NLL' && arg.startsWith('-'))
+					opt = arg.slice(1);
+				else {
 					switch(opt) {
 					case 'c': //Caras
-						faces = opt;
+						faces = parseInt(arg);
 						break;
 					
-					case 'n': //Cantidad
-						cnt = opt;
+					case 'd': //Cantidad
+						dices = parseInt(arg);
 						break;
 					}
-					opt = '';
+					opt = 'NLL';
 				}
 			});
+			
+			if(dices > 64) {
+				message.channel.send('PERO NO SEAS TAN ENFERMO <:zunWTF:757163179569840138>');
+				return;
+			}
+
+			for(let d = 0; d < dices; d++){
+				dice[d] = randInt(1, faces + 1);
+				total += dice[d];
+			};
 		} catch(err) {
 			message.channel.send(
 				'¡No puedo tirar dados tetradimensionales! ***...todavía.***!\n' +
-				`Uso: _\`p!dado { -c n, cantidad -m n }\``
+				`Uso: _\`p!dado -c Caras -n Cantidad\``
 			);
 		};
 
 		message.channel.send(
-			`**Caras** ${faces}\n` +
-			`**Cantidad** ${cnt}`
+			'```\n' +
+			`Dados:\n${dice.join('\n')}\n\n` +
+			`Total: ${total}\n` +
+			'```'
 		);
-		//message.channel.send(`\`${randInt(10, 1000)}\``);
     },
 };
