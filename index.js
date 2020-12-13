@@ -184,11 +184,13 @@ function modifyAct(pasuwus) { //Cambio de estado constante
 }
 
 client.on('ready', () => { //Confirmación de inicio y cambio de estado
-	console.log('Bot conectado y funcionando.');
+    let stt = Date.now();
+    global.startuptime = stt;
+    global.lechitauses = stt;
+    global.seed = stt / 60000;
     modifyAct(0);
-    global.lechitauses = Date.now();
-    global.startuptime = Date.now();
     //func.saveState();//func.reloadState();
+	console.log('Bot conectado y funcionando.');
 });
 
 async function dibujarMillion(msg) { //Dar felicitaciones al desgraciado

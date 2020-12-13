@@ -475,7 +475,7 @@ module.exports = {
 
     randInt: function(min, max) {
         let range = max - min;
-        return min + Math.floor((Date.now() / 60000 + range * Math.random()) % range);
+        return min + Math.floor((global.seed + range * Math.random()) % range);
     }
     //#endregion
 };

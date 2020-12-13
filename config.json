@@ -1,6 +1,6 @@
 {
     "bot_status": "EN DESARROLLO; HOSTEADO EN HEROKU.COM; VERSIÓN ESTABLE",
-    "bot_version": "Full.2.7.F3",
+    "bot_version": "Full.2.7.F4",
     "p_drmk": "d!",
     "p_pure": "p!",
     "p_mention": "oe po <@651250669390528561>, ",
@@ -16,6 +16,7 @@
     },
     "lechitauses": 0,
     "houraiwarn": 0,
+    "seed": 0,
     "tiempo": "7200",
     "edi": "4",
     "tem": "Sin temática",
