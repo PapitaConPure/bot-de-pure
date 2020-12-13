@@ -251,6 +251,11 @@ module.exports = {
     },
 
     askCandy: function(miembro, canal) {
+        if(canal.guild.id !== global.serverid.hourai) {
+            canal.send('<:milky:778180421304188939>');
+            return;
+        }
+
         let candyemote = '778180421304188939';
         let candyrole = miembro.guild.roles.cache.get('683084373717024869');
         console.log('Preguntando por caramelos.');

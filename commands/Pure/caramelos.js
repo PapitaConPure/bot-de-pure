@@ -9,7 +9,6 @@ module.exports = {
 		'candy', 'candies', 'milky'
 	],
 	execute(message, args) {
-		if(message.guild.id === global.serverid.hourai)
-			func.askCandy(message.member, message.channel);
+		func.askCandy(message.member, message.channel);
     },
 };
