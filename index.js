@@ -142,7 +142,11 @@ function modifyAct(pasuwus) { //Cambio de estado constante
             "\"Hadas Traviesas en Busca del Culpable\"",
             "\"Pasaje Fantasmal\"",
             "\"Locura Espejada\"",
-            "\"El Furioso Cielo Estrellado\""
+            "\"El Furioso Cielo Estrellado\"",
+            "En algún momento, el 80% del código de index.js pasó a ser frases para esta cosa que nadie lee. Tenga buen día uwo",
+            "Feliz Nueva Era 2021",
+            "Un tubérculo es un tallo subterráneo​ modificado y engrosado donde se acumulan los nutrientes de reserva para la planta (cumplie",
+            "Se hablar Touhounés, pero no le cuenten a Papita >wO"
         ],
         [//1: créditos a Imagine Breaker
             'pdSaYARN0A4', //Meta: Saki's Stroll
@@ -553,7 +557,7 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
             '225701598272290827', //Orphen
             '190681032935211008', //Sheep
             '632011537413963777', //Hikari
-            '212311832281612289', //Chise
+            //'212311832281612289', //Chise
             '537080207580987402', //Aerza
             '263163573843263509' //Recycle
         ];
