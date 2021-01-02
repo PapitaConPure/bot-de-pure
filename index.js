@@ -146,7 +146,7 @@ function modifyAct(pasuwus) { //Cambio de estado constante
             "En algún momento, el 80% del código de index.js pasó a ser frases para esta cosa que nadie lee. Tenga buen día uwo",
             "Feliz Nueva Era 2021",
             "Un tubérculo es un tallo subterráneo​ modificado y engrosado donde se acumulan los nutrientes de reserva para la planta (cumplie",
-            "Se hablar Touhounés, pero no le cuenten a Papita >wO"
+            "Sé hablar Touhounés, pero no le cuenten a Papita >wO"
         ],
         [//1: créditos a Imagine Breaker
             'pdSaYARN0A4', //Meta: Saki's Stroll
