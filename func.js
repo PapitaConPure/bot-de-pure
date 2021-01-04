@@ -444,7 +444,7 @@ module.exports = {
                     if(nickmatch !== -1) nickmatch += 32;
                 }
                 
-                console.log(`${member.user.username}: ${nickmatch} vs. ${minimum}`)
+                //console.log(`${member.user.username}: ${nickmatch} vs. ${minimum}`)
                 if(minimum === -1 || (nickmatch !== -1 && nickmatch < minimum)) {
                     data = member.user;
                     minimum = nickmatch;
@@ -454,11 +454,10 @@ module.exports = {
             //Buscar por nombre de usuario en resto de guilds
             if(minimum === -1)
                 client.guilds.cache.filter(cguild => cguild.id !== guild.id).map(cguild => {
-                    let passthroughuser = cguild.members.cache.map(member => {
+                    cguild.members.cache.map(member => {
                         let usermatch = -1;
 
                         usermatch = member.user.username.toLowerCase().indexOf(temp);
-
                         if(minimum === -1 || (usermatch !== -1 && usermatch < minimum)) {
                             data = member.user;
                             minimum = usermatch;
@@ -466,7 +465,7 @@ module.exports = {
                     });
                 })
             
-            console.log(data.id);
+            //console.log(data.id);
             
             if(minimum !== -1)
                 data = data.id;
