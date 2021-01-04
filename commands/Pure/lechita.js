@@ -56,7 +56,7 @@ module.exports = {
         } else {
 			const tiempoguild = Date.now() - global.lechitauses;
 			const lechesec = Math.floor(tiempoguild/1000);
-			if(lechesec > 10) {
+			if(lechesec > 5) {
 				global.lechitauses = Date.now();
 				const coomer = [
 					'<:wtfchomu:725582341401083967>',
