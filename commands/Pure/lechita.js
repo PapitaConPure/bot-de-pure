@@ -18,7 +18,7 @@ async function resolverLink(msg, linkRes, iSize) {
 				iurl = msg.author.avatarURL({ format: 'png', size: iSize });
 			}
 		} else {
-			msg.channel.send(':warning: Ocurrió un error al descargar la imagen\n```\n' + response.status + '\n```');
+			msg.channel.send(':warning: Ocurrió un error al descargar la imagen\n```\n' + response.status + '\n```\nToma cum.');
 			iurl = msg.author.avatarURL({ format: 'png', size: iSize });
 		}
 	}).catch(function (error) {
