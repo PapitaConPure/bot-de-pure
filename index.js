@@ -172,7 +172,8 @@ function modifyAct(pasuwus) { //Cambio de estado constante
             'ks-n3NhoBqI', //ゆずれす: HANIWA DANCE
             'V2h5VAxTwRY', //Perl: BYAKUREN FUCKING DIES
             'yVmrAAvozuM', //Max: Okina falls off wheelchair
-            'z_SMPVAKJyo' //Dyna: Change Gensokyo, My Final Message
+            'z_SMPVAKJyo', //Dyna: Change Gensokyo, My Final Message
+            'LpOWQlJjDfM'  //Kirby Jason: Touhou Characters Portrayed By Vines & Memes (4)
         ]
     ];
 
