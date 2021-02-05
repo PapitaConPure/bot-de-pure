@@ -311,16 +311,39 @@ client.on('message', message => { //En caso de recibir un mensaje
 
     //#region Respuestas rápidas
     //#region Mensajes weones
-    if(message.channel.guild.id === global.serverid.hourai) {
-        if(msg.indexOf('hourai') !== -1 && msg.indexOf('hourai doll') !== msg.indexOf('hourai') && (msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)) {
-            const fuckustr = [
-                '***__Recuerden:__ soy objetivamente mejor que Hourai <:haniwaSmile:659872119995498507>***',
-                '**Bot > Puré > Papita > Hourai <:miyoi:674823039086624808>**',
-                'Pero la reputa, dejen de compararme con esa weá <:meguDerp:708064265092726834>',
-                '*__Recuerden niñas:__ Hourai come tula 24/7 <:haniwaSmile:659872119995498507>*',
-                'Ah, te hacei el gracioso conchetumare? <:yoom:749728988137652365>',
-                'Disculpa cuál es tu problema? <:perropistola:748626491457273966>'
-            ];
+    if(message.channel.guild.id === global.serverid.hourai || message.channel.guild.id === global.serverid.slot2) {
+        const hrai = msg.indexOf('hourai');
+        const hraiwl = [
+            'doll',
+            ' doll',
+            ' victim',
+            ' ningyou',
+            'san'
+        ];
+        const hraifound = hrai !== -1 && !hraiwl.some(hkw => msg.indexOf(`hourai${hkw}`) === hrai);
+        if(hraifound) {
+            let fuckustr = [];
+            if(msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)
+                fuckustr = [
+                    '***__Recuerden:__ soy objetivamente mejor que Hourai <:haniwaSmile:659872119995498507>***',
+                    '**Bot > Puré > Papita > Hourai <:miyoi:674823039086624808>**',
+                    'Pero la reputa, dejen de compararme con esa weá <:meguDerp:708064265092726834>',
+                    '*__Recuerden niñas:__ Hourai come tula 24/7 <:haniwaSmile:659872119995498507>*',
+                    'Ah, te hacei el gracioso conchetumare? <:yoom:749728988137652365>',
+                    'Disculpa cuál es tu problema? <:perropistola:748626491457273966>'
+                ];
+            else
+                fuckustr = [
+                    '*¿Pero y a ti quién te invitó? <:mayuwu:654489124413374474>*',
+                    'Oe qliao creo que se te cayó la tula <:pepe:697320983106945054>',
+                    'Hourai puto <:knoipuais:751176163182772244>',
+                    '***No hablen de esa weá <:aruStare:697497314884845658>***',
+                    'Cierra el osiko tonto qliao <:yumou:708158159180660748>',
+                    '¿Pero por qué no me xupai el pico mejor, así altiro? Aweonao <:junkNo:697321858407727224>',
+                    'Pero no digai tantas weás po <:koipwaise:657346542847524875>',
+                    'Puta que son pesaos con el Hourai <:notlikealice:654489127202586634>',
+                    '**CSM NO HABLEN DE HOURAI** <:poutSumi:698658511474786364>'
+                ];
             message.channel.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]);
         } else if(msg.startsWith('~echo ') || msg.startsWith('$say ')) {
             async function responder(ch) {
@@ -334,19 +357,6 @@ client.on('message', message => { //En caso de recibir un mensaje
                 ch.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]);
             };
             setTimeout(responder, 800, message.channel);
-        } else if(msg.indexOf('hourai') !== -1 && msg.indexOf('hourai doll') !== msg.indexOf('hourai') && msg.indexOf('houraidoll') === -1) {
-            const fuckustr = [
-                '*¿Pero y a ti quién te invitó? <:mayuwu:654489124413374474>*',
-                'Oe qliao creo que se te cayó la tula <:pepe:697320983106945054>',
-                'Hourai puto <:knoipuais:751176163182772244>',
-                '***No hablen de esa weá <:aruStare:697497314884845658>***',
-                'Cierra el osiko tonto qliao <:yumou:708158159180660748>',
-                '¿Pero por qué no me xupai el pico mejor, así altiro? Aweonao <:junkNo:697321858407727224>',
-                'Pero no digai tantas weás po <:koipwaise:657346542847524875>',
-                'Puta que son pesaos con el Hourai <:notlikealice:654489127202586634>',
-                '**CSM NO HABLEN DE HOURAI** <:poutSumi:698658511474786364>'
-            ];
-            message.channel.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]); 
         }
     }
     //#endregion
