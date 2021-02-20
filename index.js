@@ -302,8 +302,14 @@ client.on('message', message => { //En caso de recibir un mensaje
     
     if(global.cansay === 0) { if(message.author.bot) return; } //Hacer que el bot no sea un pelotudo (ignorar mensajes de bots)
     
-    if(message.guild) console.log(`[${message.guild.name}→#${message.channel.name}] ${message.author.username}: "${message.content}"`); //Hacer que el bot de hecho sea inteligente (messages log)
-    else {
+    //Hacer que el bot de hecho sea inteligente (messages log)
+    if(message.guild) {
+        console.log(`[${message.guild.name}→#${message.channel.name}] ${message.author.username}: "${message.content}"`);
+        if(message.attachments.size > 0) {
+            if(message.content.length > 0) console.log('\n');
+            console.log(`[[${message.attachments.map(attf => attf.url).join(', ')}]]`);
+        }
+    } else {
         console.log(`[DM→@${message.author.id}] ${message.author.username}: "${message.content}"`);
         message.channel.send(':x: Uh... disculpá, no trabajo con mensajes directos.');
         return;
@@ -313,14 +319,19 @@ client.on('message', message => { //En caso de recibir un mensaje
     //#region Mensajes weones
     if(message.channel.guild.id === global.serverid.hourai || message.channel.guild.id === global.serverid.slot2) {
         const hrai = msg.indexOf('hourai');
-        const hraiwl = [
+        const hraipf = [
+            'elixir ',
+            'muñeca '
+        ];
+        const hraisf = [
             'doll',
             ' doll',
             ' victim',
+            ' elixir',
             ' ningyou',
             'san'
         ];
-        const hraifound = hrai !== -1 && !hraiwl.some(hkw => msg.indexOf(`hourai${hkw}`) === hrai);
+        const hraifound = hrai !== -1 && !(hraipf.some(pf => msg.indexOf(`${pf}hourai`) === (hrai - pf.length)) || hraisf.some(sf => msg.indexOf(`hourai${sf}`) === hrai));
         if(hraifound) {
             let fuckustr = [];
             if(msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)
