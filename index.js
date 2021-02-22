@@ -584,7 +584,7 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
             '190681032935211008', //Sheep
             '632011537413963777', //Hikari
             //'212311832281612289', //Chise
-            '537080207580987402', //Aerza
+            //'537080207580987402', //Aerza
             '263163573843263509' //Recycle
         ];
 
@@ -600,13 +600,13 @@ async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un s
             return;
         }
 
-        servidor.owner.user.send(
+        /*servidor.owner.user.send(
             '¡Hola, soy Bot de Puré!\n' +
             `El miembro **<@${miembro.id}> (${miembro.id})** ha salido de tu servidor **${servidor.name}**...\n` +
             '*__Nota:__ Bot de Puré no opera con mensajes privados.*'
         );
         
-        return;
+        return;*/
     }
 
     console.log(`Un usuario ha salido de ${servidor.name}...`);
