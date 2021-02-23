@@ -299,16 +299,36 @@ client.on('message', message => { //En caso de recibir un mensaje
         message.channel.send(`**${paltaname}:**\n` + paltastr);
         message.delete();
     }
+
+    //Dulce Victoria(tm)
+    //Escuchar mensajes en canal de gacha
+    if(message.channel.id === '813189609911353385' || message.channel.id === '739513729649082490')
+        //Si se detecta un embed y tiene nombre de autor "Megumin", proceder con el plan
+        if(message.embeds.length > 0) {
+            if(message.embeds.some(embed => (embed.author === null)?false:(embed.author.name.indexOf('Megumin') !== -1))) {
+                //Reaccionar instantáneamente (no detecta reacciones del bot; descartado) y dar rol para gacha: 813194804161806436
+                //message.react('💖');
+                message.channel.guild.members.cache.get('423129757954211880').roles.add('813194804161806436');
+                
+
+                //Notificar
+                const thingyembed = new Discord.MessageEmbed()
+                    .setTitle(`Megumin po ${message.author.username}`)
+                    .setColor('#dc143c')
+                    .setAuthor('Un weón que se ve así', message.author.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
+                    .addField('Mensaje', `"${message.content}"`)
+                    .addField('URL', `${message.url}`);
+                client.users.cache.get('423129757954211880').send(thingyembed);
+            }
+        }
     
     if(global.cansay === 0) { if(message.author.bot) return; } //Hacer que el bot no sea un pelotudo (ignorar mensajes de bots)
     
     //Hacer que el bot de hecho sea inteligente (messages log)
     if(message.guild) {
-        console.log(`[${message.guild.name}→#${message.channel.name}] ${message.author.username}: "${message.content}"`);
-        if(message.attachments.size > 0) {
-            if(message.content.length > 0) console.log('\n');
+        console.log(`[${message.guild.name.substr(0,12)}::${message.guild.id} → #${message.channel.name.substr(0,8)}::${message.channel.id}] ${message.author.username}: "${message.content}"`);
+        if(message.attachments.size > 0)
             console.log(`[[${message.attachments.map(attf => attf.url).join(', ')}]]`);
-        }
     } else {
         console.log(`[DM→@${message.author.id}] ${message.author.username}: "${message.content}"`);
         message.channel.send(':x: Uh... disculpá, no trabajo con mensajes directos.');
@@ -429,13 +449,13 @@ client.on('message', message => { //En caso de recibir un mensaje
     } catch(error) {
         console.log('Ha ocurrido un error al ingresar un comando.');
         console.error(error);
-        message.channel.send(
+        /*message.channel.send(
             ':radioactive: :regional_indicator_w: :regional_indicator_a: :regional_indicator_r: :regional_indicator_n: :regional_indicator_i: :regional_indicator_n: :regional_indicator_g: :radioactive: \n' +
             'Ha ocurrido un error inesperado.\n' +
             'Usa p!presentar para conocer el estado actual del bot. Si el error ya se conoce, aparecerá ahí.\n' +
             '<@!423129757954211880>\n' +
             ':radioactive: :regional_indicator_w: :regional_indicator_a: :regional_indicator_r: :regional_indicator_n: :regional_indicator_i: :regional_indicator_n: :regional_indicator_g: :radioactive:'
-        );
+        );*/
     }
 
     //Empezar cuenta regresiva luego de mod-empezar
