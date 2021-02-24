@@ -26,7 +26,8 @@ module.exports = {
 					'Meguuuu <:aliceHug:684625280991756312>',
 					'Sagume <:aliceHug:684625280991756312>',
 					'*KONOSUBA!*',
-					'*NEKOPARA!*'
+					'*NEKOPARA!*',
+					'https://i.imgur.com/HxTxjdL.png'
 				];
 
 				message.channel.send(`**${paputa[Math.floor(Math.random() * paputa.length)]}**`);
