@@ -17,7 +17,8 @@
             "Rehacer p!ayuda para que indexe y categorice comandos automáticamente, permitiendo un formato de árbol de búsqueda",
             "Visualización de estado en p!presentar discriminada hacia nuevo comando p!estado",
             "Búsqueda múltiple con p!pfp separada con comas en lugar de espacios",
-            "Minijuegos individuales y tipo-fiesta"
+            "Minijuegos individuales y tipo-fiesta",
+            "Base de datos en la nube"
         ]
     },
     "p_drmk": "d!",

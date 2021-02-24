@@ -16,9 +16,9 @@ module.exports = {
         const embed = new Discord.MessageEmbed()
             .setColor('#608bf3')
             .setAuthor('Estado del Bot', message.client.user.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
-            .setImage('https://imgur.com/HxTxjdL')
+            .setImage('https://i.imgur.com/HxTxjdL.png')
             .addField('Host', global.bot_status.host, true)
-            .addField('Versión', `:hash: ${global.bot_status.version.number}\n:scroll: ${global.bot_status.version.name}`)
+            .addField('Versión', `:hash: ${global.bot_status.version.number}\n:scroll: ${global.bot_status.version.name}`, true)
             .addField('Notas', global.bot_status.note)
             .addField('Cambios', clformat)
             .addField('Lo que sigue', tdformat);
