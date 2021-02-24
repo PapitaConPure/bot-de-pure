@@ -1,8 +1,6 @@
 //#region Inclusión de cabeceras
 const fs = require('fs'); //Integrar operaciones sistema de archivos de consola
-const Parse = require('parse/node');
 const Discord = require('discord.js'); //Integrar discord.js
-const { Client, MessageEmbed } = require('discord.js'); //Integrar constructores requeridos
 const client = new Discord.Client({ fetchAllMembers: true }); //Cliente de bot
 const { //Constantes globales
     p_drmk, //prefijo drawmaku
@@ -12,7 +10,6 @@ const { //Constantes globales
 const token = 'NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY'; //La llave del bot
 const global = require('./config.json'); //Variables globales
 const func = require('./func.js'); //Funciones globales
-const Sequelize = require('sequelize');
 const Canvas = require('canvas'); 
 const { randInt } = require('./func.js');
 module.exports = { Discord };
@@ -33,157 +30,16 @@ for(const file of commandFiles) {
 }
 //#endregion
 
-function modifyAct(pasuwus) { //Cambio de estado constante
-    console.log(`Iniciando cambio de presencia ${pasuwus}...`);
-    //Nombres de estado
-    const estaduwus = [
-        [//0: créditos a Sassafras, Imagine
-            "De fiesta en el Santuario Hakurei",
-            "¡Siguiente nekoparada: La Soleil!",
-            "KO NI CHI WA",
-            "BEATORIIIICHEEEEEEEEEEEE",
-            "¡Pa! ¡Papá! ¡Papita!",
-            "¡Ahora sin tuberculosis!",
-            "Welcome ♥ Hell",
-            "Hello World!",
-            "The Fragrance of Dark Coffee",
-            "Chatarra tu abuela >:(",
-            "¿Cómo te va? Porque yo soy una patata",
-            "Maravillosa Boterdotisa del Paraíso",
-            "¿Hay gente que lee estos?",
-            "Tirando @everyone",
-            "Código hecho sin trabajo esclavo",
-            "Señal Kappa \"Pepinillo Monstruo\"",
-            "Señal Código \"Magia de la Nueva Era\"",
-            "Comforting Chococcino",
-            "¿Se encuentra Papa Natas?",
-            "Me quedé sin frases chistosas",
-            "El Coso™️",
-            "¿Jugaste dos horas para morir así?",
-            "No, no me acaban de resetear",
-            "Fabricado en Tierra del Fuego",
-            "Cliqueando galletas",
-            "Recuerden lavarse el prepucio",
-            "Pasando memes en #general",
-            "Made in UPRPRC",
-            "¿Y cuánto cuesta el fin de semana gratis?",
-            "EXPLOOOOOSIOOOON",
-            "Procrastinando",
-            "Vendiéndole fotos de Satono con Okina",
-            "Dando bienvenidas como todo un campeón",
-            "Fallando con éxito",
-            "El insecticida viene por separado",
-            "Bug Net®️",
-            "Esquivando bolitas de colores",
-            "Visitando el Santuario Hakurei",
-            "Visitando el Santuario Moriya",
-            "Visitando el Bosque de la Magia",
-            "Visitando el Templo Myouren",
-            "Visitando el Inframundo",
-            "Visitando el Antiguo Infierno",
-            "Visitando el Makai",
-            "Visitando el Mundo de las Bestias",
-            "Visitando la Capital Lunar",
-            "Visitando Eientei",
-            "Dándole de comer a Yuyuko",
-            "Tocando la trompeta",
-            "Romantic Romance, Reed Trumpet",
-            "Esperando a que arreglen aquel bug",
-            "Intentando crashear",
-            "Por favor no cliquees para ver el stream",
-            "[No olvidar poner texto aquí]",
-            "Estudiando a los Haniwa",
-            "Flawless Clothing of the Celestials",
-            "Mostrando memes en este mismo estado",
-            "24 transmisiones de memes por día... casi",
-            "¿Quién cliquea el stream, de todos modos?",
-            "Supervisando a Komachi",
-            "Barriendo pétalos de cerezo",
-            "Despejando la Niebla Escarlata",
-            "Regando un tal Saigyou Ayakashi",
-            "Deteniendo los Festines",
-            "Verificando que la luna no sea de papel",
-            "Reventando espíritus (literalmente)",
-            "SaCaNdO fOtOs con Aya",
-            "Escalando la Montaña Youkai",
-            "Castigando Celestiales Malcriadas",
-            "Investigando un Géiser",
-            "Juntando UFOs en un Barco Palanquín Volador",
-            "Buscando al Hisou Tensoku",
-            "SaCaNdO fOtOs con Hatate",
-            "Castigando Hadas Traviesas",
-            "Lidiando con Espíritus Divinos",
-            "Impidiendo la Rebelión Youkai",
-            "Volteando la mesa con Seija",
-            "Contando Leyendas Urbanas",
-            "Defendiendo la Capital Lunar",
-            "Golpeando a las Flores Egoístas",
-            "Viajando dentro de una espalda",
-            "SaCaNdO fOtOs con Sumireko",
-            "Ayudando a Yachie",
-            "Peleando por agua negra",
-            "Jugando a la casita con Shinmyoumaru",
-            "Realizando préstamos vitalicios",
-            "Minando criptomoneda",
-            "It's Lunatic Time!",
-            "¡¿Hay alguna otra Sumireko que deba conocer?!",
-            "No eres inmune a la Hanipaganda",
-            "Tomando cibercafé",
-            "Investigando si Maribel es Yukari",
-            "¡Alcen la bandera de la rebelión!",
-            "¿Alguien recuerda PC-98?",
-            "Ya terminé de limpiar páginas, señor Johnson",
-            "Me perdí en Bosque de Bambú. Envíen ayuda",
-            "Deshipnotizando a Alice",
-            "DialA f.5A 6A 2B(2~4) hj9 j.5A j.2A",
-            "2A 3A(1) 5B(<4) hj9 j.5A j.2A(1) j.2C 214C hj9 j.6A j.5B",
-            "Escribiendo este mismo est_",
-            "\"El Inminente e Intrigante Alboroto de las Hadas\"",
-            "\"Hadas Traviesas en Busca del Culpable\"",
-            "\"Pasaje Fantasmal\"",
-            "\"Locura Espejada\"",
-            "\"El Furioso Cielo Estrellado\"",
-            "En algún momento, el 80% del código de index.js pasó a ser frases para esta cosa que nadie lee. Tenga buen día uwo",
-            "Feliz Nueva Era 2021",
-            "Un tubérculo es un tallo subterráneo​ modificado y engrosado donde se acumulan los nutrientes de reserva para la planta (cumplie",
-            "Sé hablar Touhounés, pero no le cuenten a Papita >wO"
-        ],
-        [//1: créditos a Imagine Breaker
-            'pdSaYARN0A4', //Meta: Saki's Stroll
-            'Y20Par9n6e8', //Surnist: MARIQUEST
-            'gT9AJm_LAlQ', //Perl: TOUHOU BEAT DROPS
-            'VyX6akEAE1s', //Max: Attention all Touhou gamers
-            'L3MHp-xzmn4', //Tengu: El Ruido del Mar
-            'ihyMuwLQB4c', //Clownplease: PLOT OF URBAN LEGEND IN LIMBO
-            'caZR-bDnhZ0', //Perl: REIMU DANCING
-            'A7iBnoZVoYw', //Max: Raiko Cat
-            'R4XiMFCOeQg', //Fr00sk: Touhou 17 in a nutshell
-            'nZ4_qeGmW9g', //Perl: TOUHOU FUNNY
-            'fdjUeQP58dU', //Okuu: When no one understands your Touhou
-            '87fnvz4_Nis', //Baka: Are ya winning son?
-            'h_3ULXom6so', //Perl: being addicted to touhou music
-            'ki5hZZDVLxc', //Brick: Marisa Wolf Goast Hyper || Touhou 17
-            '1NAEE9ypzzo', //Meta: The Pro Guide To Embodiment of Scarlet Devil
-            'RAHfcUYiREk', //Okuu: Touhou in a nutshell
-            'fRn7-SxHuqo', //Surnist: 🐑 SWEET ZONE 😏
-            'Rr-L8QhEfvU', //Meta: HARK!
-            'Tpzu1NqAuG0', //Clownplease: The PC98 to Windows operation
-            't2S-XkRgO3Y', //Max: Charisma Break
-            'ks-n3NhoBqI', //ゆずれす: HANIWA DANCE
-            'V2h5VAxTwRY', //Perl: BYAKUREN FUCKING DIES
-            'yVmrAAvozuM', //Max: Okina falls off wheelchair
-            'z_SMPVAKJyo', //Dyna: Change Gensokyo, My Final Message
-            'LpOWQlJjDfM'  //Kirby Jason: Touhou Characters Portrayed By Vines & Memes (4)
-        ]
-    ];
-
+function modifyAct(pasuwus) { //Cambio de estado constante; créditos a Imagine Breaker y Sassafras
     //Actualización de actividad
+    console.log(`Iniciando cambio de presencia ${pasuwus}...`);
     client.user.setActivity(
         estaduwus[0][randInt(0, estaduwus[0].length)],
         { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${estaduwus[1][randInt(0, estaduwus[1].length)]}` }
     );
-        
     console.log('Cambio de presencia finalizado.');
+    
+    //Programar próxima actualización de actividad
     setTimeout(modifyAct, 1000 * 60 * randInt(30, 70), pasuwus + 1);
     console.log(`Esperando ciclo ${pasuwus + 1} en breve...`);
 }
