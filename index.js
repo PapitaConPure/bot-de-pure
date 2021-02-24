@@ -12,6 +12,7 @@ const global = require('./config.json'); //Variables globales
 const func = require('./func.js'); //Funciones globales
 const Canvas = require('canvas'); 
 const { randInt } = require('./func.js');
+const presence = require('./presence.json');
 module.exports = { Discord };
 //#endregion
 
@@ -34,14 +35,15 @@ function modifyAct(pasuwus) { //Cambio de estado constante; créditos a Imagine 
     //Actualización de actividad
     console.log(`Iniciando cambio de presencia ${pasuwus}...`);
     client.user.setActivity(
-        estaduwus[0][randInt(0, estaduwus[0].length)],
-        { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${estaduwus[1][randInt(0, estaduwus[1].length)]}` }
+        presence.status[randInt(0, presence.status.length)],
+        { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${presence.stream[randInt(0, presence.stream.length)]}` }
     );
     console.log('Cambio de presencia finalizado.');
     
     //Programar próxima actualización de actividad
-    setTimeout(modifyAct, 1000 * 60 * randInt(30, 70), pasuwus + 1);
-    console.log(`Esperando ciclo ${pasuwus + 1} en breve...`);
+    const stepwait = randInt(30, 70);
+    setTimeout(modifyAct, 1000 * 60 * stepwait, pasuwus + 1);
+    console.log(`Esperando ciclo ${pasuwus + 1} en ${stepwait} minutos...`);
 }
 
 client.on('ready', () => { //Confirmación de inicio y cambio de estado
