@@ -9,13 +9,18 @@ module.exports = {
     ],
 	execute(message, args) {
         if(args.length > 0) {
-            let sentence;
-            sentence = args[0];
-            if(args[0] === 'del') {
-                sentence = '';
-                message.delete();
+            let sentence = '';
+            for(var i = 0; i < args.length; i++) {
+                switch(args[i]) {
+                    case '-d':
+                        message.delete();
+                        break;
+                    
+                    default:
+                        sentence += ' ' + args[i];
+                        break;
+                }
             }
-            for(var i = 1; i < args.length; i++) sentence += ' ' + args[i];
 
             const minus = sentence.toLowerCase();
 

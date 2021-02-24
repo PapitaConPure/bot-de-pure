@@ -1,6 +1,25 @@
 {
-    "bot_status": "EN DESARROLLO; HOSTEADO LOCALMENTE; VERSIÓN ESTABLE",
-    "bot_version": "Full.2.7.F7",
+    "bot_status": {
+        "host": "https://heroku.com",
+        "version": {
+            "number": "Full.2.8.00",
+            "name": "Cisne Cristalino"
+        },
+        "note": "Se espera inconsistencia y errores debido a recientes trabajos de reestructuración",
+        "changelog": [
+            "Nueva función exclusiva para personal autorizado",
+            "Visualización de estado en p!presentar discriminada hacia nuevo comando p!estado",
+            "p!lechita ahora es responsivo a emotes y enlaces de imágenes pequeñas",
+            "Se comenzó a implementar un formato de comandos similar al usado por terminales en p!dados, sin mención en p!ayuda por el momento",
+            "Corrección de un error al despedir un miembro del server"
+        ],
+        "todo": [
+            "Rehacer p!ayuda para que indexe y categorice comandos automáticamente, permitiendo un formato de árbol de búsqueda",
+            "Visualización de estado en p!presentar discriminada hacia nuevo comando p!estado",
+            "Búsqueda múltiple con p!pfp separada con comas en lugar de espacios",
+            "Minijuegos individuales y tipo-fiesta"
+        ]
+    },
     "p_drmk": "d!",
     "p_pure": "p!",
     "p_mention": "oe po <@651250669390528561>, ",

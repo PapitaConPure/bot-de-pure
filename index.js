@@ -306,10 +306,9 @@ client.on('message', message => { //En caso de recibir un mensaje
         //Si se detecta un embed y tiene nombre de autor "Megumin", proceder con el plan
         if(message.embeds.length > 0) {
             if(message.embeds.some(embed => (embed.author === null)?false:(embed.author.name.indexOf('Megumin') !== -1))) {
-                //Reaccionar instantáneamente (no detecta reacciones del bot; descartado) y dar rol para gacha: 813194804161806436
+                //Dar rol para gacha: 813194804161806436
                 //message.react('💖');
                 message.channel.guild.members.cache.get('423129757954211880').roles.add('813194804161806436');
-                
 
                 //Notificar
                 const thingyembed = new Discord.MessageEmbed()
