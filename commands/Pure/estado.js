@@ -19,7 +19,7 @@ module.exports = {
             .setImage('https://i.imgur.com/HxTxjdL.png')
             .addField('Host', global.bot_status.host, true)
             .addField('Versión', `:hash: ${global.bot_status.version.number}\n:scroll: ${global.bot_status.version.name}`, true)
-            .addField('Notas', global.bot_status.note)
+            .addField('Visión general', global.bot_status.note)
             .addField('Cambios', clformat)
             .addField('Lo que sigue', tdformat);
 
