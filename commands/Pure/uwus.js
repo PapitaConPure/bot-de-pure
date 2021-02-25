@@ -5,7 +5,7 @@ module.exports = {
 	name: 'uwus',
     desc: '',
     flags: [
-        ''
+        'meme'
     ],
 	
 	execute(message, args) {

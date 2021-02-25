@@ -10,9 +10,9 @@ module.exports = {
 		'dados', 'tirar', 'random',
 		'roll', 'rolldie', 'die',
 	],
-    desc: '',
+    desc: 'Tira uno o más dados para recibir un números aleatorios',
     flags: [
-        ''
+        'common'
     ],
 	
 	execute(message, args) {

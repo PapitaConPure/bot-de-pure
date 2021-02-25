@@ -21,7 +21,7 @@ module.exports = {
     ],
     desc: '',
     flags: [
-        ''
+        'common'
     ],
 	
 	execute(message, args) {

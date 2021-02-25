@@ -10,7 +10,7 @@ module.exports = {
     ],
     desc: '',
     flags: [
-        ''
+        'mod'
     ],
 	
 	execute(message, args) {

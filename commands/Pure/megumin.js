@@ -143,7 +143,8 @@ module.exports = {
     ],
     desc: '',
     flags: [
-        ''
+        'meme',
+		'exclusivo'
     ],
 	
 	execute(message, args) {

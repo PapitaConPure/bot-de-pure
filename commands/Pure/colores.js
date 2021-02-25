@@ -8,9 +8,9 @@ module.exports = {
 		'colours', 'colour', 'role',
 		'c'
 	],
-    desc: '',
+    desc: 'Muestra un tablón de roles de colores básicos para Hourai Doll',
     flags: [
-        ''
+        'hourai'
     ],
 	
 	execute(message, args) {

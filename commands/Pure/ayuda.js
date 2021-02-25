@@ -1,6 +1,7 @@
 const fs = require('fs'); //Integrar operaciones sistema de archivos de consola
 const Discord = require('discord.js');
 const global = require('../../config.json'); //Variables globales
+const { stringify } = require('querystring');
 
 module.exports = {
 	name: 'ayuda',
@@ -15,36 +16,66 @@ module.exports = {
     ],
     
 	execute(message, args) {
-        let memes = args.some(arg => arg === '-m' || arg === '--memes');
+        let fex = false;
+        let fmeme = false;
+        let fmod = false;
+        let fpapa = false;
+        let fhourai = false;
+        args.some(arg => {
+            if(arg.startsWith('--'))
+                switch(arg.slice(2)) {
+                case 'meme': fmeme = true; break;
+                case 'mod': fmod = true; break;
+                case 'papa': fpapa = true; break;
+                case 'hourai': fhourai = true; break;
+                }
+            else if(arg.startsWith('-')) {
+                for(c of arg.slice(1))
+                    switch(c) {
+                    case 'x': fex = true; break;
+                    case 'm': fmod = true; break;
+                    case 'p': fpapa = true; break;
+                    case 'h': fhourai = true; break;
+                    }
+            }
+        });
         let commands = new Discord.Collection();
         const cfiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
-        let list = {
-            'name': [],
-            'desc': []
-        };
+        let list = [];
         let item = 0;
         for(const file of cfiles) {
             const command = require(`../../commands/Pure/${file}`);
-
-            if((memes)?command.flags.includes('meme'):true)
+            const cmeme = fmeme? true : !command.flags.includes('meme');
+            const cmod = fmod? true : !command.flags.includes('mod');
+            const cpapa = fpapa? true : !command.flags.includes('papa');
+            const chourai = fhourai? true : !command.flags.includes('hourai');
+            const cex = fex? !command.flags.includes('common') : true;
+            
+            if(cmeme && cmod && cpapa && chourai && cex) {
                 //commands.set(command.name, command);
-                list.name[item] = command.name;
-                list.desc[item] = command.desc;
+                list[item] = command.name;
                 item++;
+            }
         }
         
-        let page = 1;
-        const maxpage = Math.floor((list.name.length - 1) / 10);
+        let page = 0;
+        const maxpage = Math.floor((list.length - 1) / 10);
         let embed = new Discord.MessageEmbed()
             .setColor('#608bf3')
             .setAuthor('Lista de comandos', message.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }))
-            .setFooter(`Página ${page + 1}/${maxpage + 1}`)
-            .addField('Nombre', list.name.filter((_, i) => i >= (page * 10) && i < (page * 10 + 10)).join('\n'), true)
-            .addField('Descripción', list.desc.filter((_, i) => i >= (page * 10) && i < (page * 10 + 10)).join('\n'), true);
+            .addField('Añade...',
+                '`-x` para filtrar resultados comunes\n' +
+                '`--meme` para ver comandos meme\n' +
+                '`-m` o `--mod` para ver comandos de moderación\n' +
+                '`-p` o `--papa` para ver comandos de Papita con Puré\n'+
+                '`-h` o `--hourai` para ver comandos exclusivos de Hourai'
+            )
+            .addField('Usa `p!ayuda <comando>` para más información', (list.length > 0)?list.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas).');
+            //.addField('Función', list.desc.filter((_, i) => i >= (page * 10) && i < (page * 10 + 10)).join('\n'), true);
         
-        const arrows = [message.client.emojis.cache.get('681963688361590897'), message.client.emojis.cache.get('681963688411922460')];
-        const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
-        message.channel.send(embed).then(sent => {
+        //const arrows = [message.client.emojis.cache.get('681963688361590897'), message.client.emojis.cache.get('681963688411922460')];
+        //const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
+        message.channel.send(embed);/*.then(sent => {
             sent.react(arrows[0])
                 .then(() => sent.react(arrows[1]))
                 .then(() => {
@@ -57,8 +88,8 @@ module.exports = {
                             .setColor('#608bf3')
                             .setAuthor('Lista de comandos', message.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }))
                             .setFooter(`Página ${page + 1}/${maxpage + 1}`)
-                            .addField('Nombre', list.name.filter((_, i) => i >= (page * 10) && i < (page * 10 + 10)).join('\n'), true)
-                            .addField('Descripción', list.desc.filter((_, i) => i >= (page * 10) && i < (page * 10 + 10)).join('\n'), true);
+                            .addField('Usa `p!ayuda <comando>` para más información', list.filter((_, i) => i >= (page * 10) && i < (page * 10 + 10)).join('\n'), true)
+                            .addField('Función', list.desc.filter((_, i) => i >= (page * 10) && i < (page * 10 + 10)).join('\n'), true);
                         sent.edit(embed);
                     });
                 });
@@ -68,7 +99,7 @@ module.exports = {
         if(!memez)
             str += 
                 '*Puré:*\n' +
-                `\t╠ \`${global.p_pure}café <tags [Giphy]>\` para mostrar imágenes de café.\n` +
+                `\t╠ \`${global.p_pure}café <tags [Giphy]>\` \n` +
                 `\t╠ \`${global.p_pure}decir <¿borrar original?> <texto*>\` para hacerme decir algo.\n` +
                 `\t║ \t\t╚ ***Agrega de argumento \`del\` para borrar __tu__ mensaje.***\n` +
                 `\t╠ \`${global.p_pure}emotes\` para mostrar mis emotes personalizados.\n` +
@@ -82,7 +113,7 @@ module.exports = {
             str =
                 '*Puré [:egg::unlock:]:*\n' +
                 `\t╠ \`${global.p_pure}bern\` \n` +
-                `\t╠ \`${global.p_pure}fuee\` comando de frase de Dylan/Fuee.\n` +
+                `\t╠ \`${global.p_pure}fuee\` \n` +
                 `\t╠ \`${global.p_pure}imagine\` comando de grito de Imagine Breaker.\n` +
                 `\t╠ \`${global.p_pure}juani\` comando de belleza de JuaniUru.\n` +
                 `\t╠ \`${global.p_pure}karl\` comando de música de Karl Zuñiga.\n` +

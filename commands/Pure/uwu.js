@@ -5,7 +5,7 @@ module.exports = {
 	name: 'uwu',
     desc: '',
     flags: [
-        ''
+        'common'
     ],
 	
 	execute(message, args) {

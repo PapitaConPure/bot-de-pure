@@ -8,9 +8,9 @@ module.exports = {
 		'caramelo',
 		'candy', 'candies', 'milky'
 	],
-    desc: '',
+    desc: 'Otorga caramelos al reaccionar al mensaje generado',
     flags: [
-        ''
+        'hourai'
     ],
 	
 	execute(message, args) {

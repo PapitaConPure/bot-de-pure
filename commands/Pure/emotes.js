@@ -8,9 +8,9 @@ module.exports = {
 		'emojis', 'emote', 'emoji',
 		'emt'
 	],
-    desc: '',
+    desc: 'Muestra una lista de emotes a mi disposición',
     flags: [
-        ''
+        'common'
     ],
 	
 	execute(message, args) {

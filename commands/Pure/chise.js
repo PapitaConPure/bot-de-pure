@@ -6,9 +6,9 @@ module.exports = {
 	aliases: [
 		'sylvia', 'empalar'
 	],
-    desc: '',
+    desc: 'Comando de empalamiento de Chise',
     flags: [
-        ''
+        'meme'
     ],
 	
 	execute(message, args) {

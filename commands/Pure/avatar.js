@@ -10,6 +10,10 @@ module.exports = {
         'pfp'
     ],
     desc: 'Muestra el avatar mencionado',
+    flags: [
+        'common'
+    ],
+
 	execute(message, args) {
         /*message.channel.send(
 			'```\n' +

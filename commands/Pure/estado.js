@@ -6,9 +6,9 @@ module.exports = {
     aliases: [
         'status', 'botstatus'
     ],
-    desc: '',
+    desc: 'Muestra mi estado actual, registro de cambios, etc',
     flags: [
-        ''
+        'common'
     ],
 	
 	execute(message, args) {

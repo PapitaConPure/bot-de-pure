@@ -33,9 +33,9 @@ module.exports = {
         'café', 'cafecito',
         'coffee', 'cawfee'
     ],
-    desc: '',
+    desc: 'Muestra imágenes de café',
     flags: [
-        ''
+        'common'
     ],
 
 	execute(message, args){

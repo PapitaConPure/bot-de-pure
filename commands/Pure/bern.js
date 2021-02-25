@@ -11,7 +11,7 @@ module.exports = {
         'bewny', 'polola',
 		'procrastinar'
     ],
-    desc: 'Comando de procrastinación de GoddamnBernkastel.',
+    desc: 'Comando de procrastinación de GoddamnBernkastel',
     flags: [
         'meme'
     ],

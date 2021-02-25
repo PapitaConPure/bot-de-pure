@@ -7,7 +7,8 @@ module.exports = {
 	name: 'test',
     desc: '',
     flags: [
-        'papa'
+        'papa',
+        'exclusivo'
     ],
 	
 	execute(message, args) {

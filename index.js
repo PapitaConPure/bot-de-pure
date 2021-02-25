@@ -197,6 +197,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     if(message.channel.guild.id === global.serverid.hourai || message.channel.guild.id === global.serverid.slot2) {
         const hrai = msg.indexOf('hourai');
         const hraipf = [
+            '--',
             'elixir ',
             'muñeca '
         ];

@@ -4,11 +4,11 @@ var global = require('../../config.json'); //Variables globales
 module.exports = {
 	name: 'fuee',
 	aliases: [
-        'nuez'
+        'dylan', 'nuez'
     ],
-    desc: '',
+    desc: 'Comando de frase de Dylan/Fuee',
     flags: [
-        ''
+        'meme'
     ],
 	
 	execute(message, args){

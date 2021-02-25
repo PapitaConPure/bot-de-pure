@@ -8,7 +8,7 @@ module.exports = {
 	],
     desc: '',
     flags: [
-        ''
+        'meme'
     ],
 	
 	execute(message, args) {

@@ -7,9 +7,9 @@ module.exports = {
         'exclamar', 'escribir',
         'say', 'echo'
     ],
-    desc: '',
+    desc: 'Me hace decir lo que quieras que diga',
     flags: [
-        ''
+        'common'
     ],
 	
 	execute(message, args) {
