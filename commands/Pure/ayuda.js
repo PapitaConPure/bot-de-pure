@@ -64,9 +64,9 @@ module.exports = {
             const command = require(`../../commands/Pure/${file}`);
             if(search === 'n') {
                 const cmeme = fmeme? true : !command.flags.includes('meme');
-                const cmod = fmod? true : !command.flags.includes('mod');
-                const cpapa = fpapa? true : !command.flags.includes('papa');
-                const chourai = fhourai? true : !command.flags.includes('hourai');
+                const cmod = (fmod && message.member.hasPermission('MANAGE_ROLES'))? true : !command.flags.includes('mod');
+                const cpapa = (fpapa && message.author.id === '423129757954211880')? true : !command.flags.includes('papa');
+                const chourai = (fhourai && message.channel.guild.id === global.serverid.hourai)? true : !command.flags.includes('hourai');
                 const cex = fex? !command.flags.includes('common') : true;
             
                 if((cmeme && cmod && cpapa && chourai && cex)) {
@@ -94,7 +94,7 @@ module.exports = {
                 '`-p` o `--papa` para ver comandos de Papita con Puré\n' +
                 '`-h` o `--hourai` para ver comandos exclusivos de Hourai'
             )
-            .addField('Usa `p!ayuda <comando>` para más información', (list.name.length > 0)?list.name.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas).');
+            .addField('Usa `p!ayuda <comando>` para más información', (list.name.length > 0)?list.name.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para realizar tu búsqueda).');
         } else {
             const title = s => {
                 s = (s.startsWith('m-'))?`${s.slice(2)} (Mod)`:s;
