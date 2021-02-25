@@ -37,6 +37,9 @@ module.exports = {
     flags: [
         'common'
     ],
+    options: [
+
+    ],
 
 	execute(message, args){
 		tmpfunc(message.channel, args);

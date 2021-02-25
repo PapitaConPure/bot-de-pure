@@ -10,6 +10,9 @@ module.exports = {
     flags: [
         'common'
     ],
+    options: [
+
+    ],
 	
 	execute(message, args) {
         const embed = new Discord.MessageEmbed()

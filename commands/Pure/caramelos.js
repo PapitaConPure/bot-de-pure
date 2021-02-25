@@ -12,6 +12,9 @@ module.exports = {
     flags: [
         'hourai'
     ],
+    options: [
+
+    ],
 	
 	execute(message, args) {
 		func.askCandy(message.member, message.channel);

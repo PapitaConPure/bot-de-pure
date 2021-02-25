@@ -12,6 +12,9 @@ module.exports = {
     flags: [
         'mod'
     ],
+    options: [
+
+    ],
 	
 	execute(message, args) {
 		if(message.member.hasPermission('MANAGE_MESSAGES', false, true, true)) {

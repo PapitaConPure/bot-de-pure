@@ -10,6 +10,9 @@ module.exports = {
     flags: [
         'meme'
     ],
+    options: [
+
+    ],
 	
 	execute(message, args) {
 		let forcesassamodo = false;

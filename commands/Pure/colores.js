@@ -12,6 +12,9 @@ module.exports = {
     flags: [
         'hourai'
     ],
+    options: [
+
+    ],
 	
 	execute(message, args) {
 		if(message.channel.guild.id === '654471968200065034')

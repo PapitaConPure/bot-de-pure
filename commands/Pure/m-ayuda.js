@@ -11,6 +11,9 @@ module.exports = {
     flags: [
         'mod'
     ],
+    options: [
+
+    ],
 	
 	execute(message, args) {
         message.channel.send(

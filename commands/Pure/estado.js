@@ -10,6 +10,9 @@ module.exports = {
     flags: [
         'common'
     ],
+    options: [
+
+    ],
 	
 	execute(message, args) {
         let clformat = `- ${global.bot_status.changelog[0]}`;

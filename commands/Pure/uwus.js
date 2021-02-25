@@ -7,6 +7,9 @@ module.exports = {
     flags: [
         'meme'
     ],
+    options: [
+
+    ],
 	
 	execute(message, args) {
         /*message.channel.send(

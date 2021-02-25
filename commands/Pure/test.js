@@ -10,6 +10,9 @@ module.exports = {
         'papa',
         'exclusivo'
     ],
+    options: [
+
+    ],
 	
 	execute(message, args) {
 		message.channel.send('No se están haciendo pruebas por el momento <:uwu:681935702308552730>');

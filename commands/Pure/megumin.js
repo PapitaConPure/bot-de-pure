@@ -146,6 +146,9 @@ module.exports = {
         'meme',
 		'exclusivo'
     ],
+    options: [
+
+    ],
 	
 	execute(message, args) {
 		/*message.channel.send(

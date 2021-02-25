@@ -11,6 +11,9 @@ module.exports = {
     flags: [
         'common'
     ],
+    options: [
+
+    ],
 	
 	execute(message, args) {
         if(args.length > 0) {

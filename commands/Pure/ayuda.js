@@ -14,6 +14,13 @@ module.exports = {
     flags: [
         'common'
     ],
+    options: [
+        '`-x`para filtrar resultados comunes',
+        '`--meme` para ver comandos meme',
+        '`-m` o `--mod` para ver comandos de moderación',
+        '`-p` o `--papa` para ver comandos de Papita con Puré',
+        '`-h` o `--hourai` para ver comandos exclusivos de Hourai'
+    ],
     
 	execute(message, args) {
         let commands = new Discord.Collection();
@@ -48,7 +55,7 @@ module.exports = {
             'name': [],
             'aliases': [],
             'flags': [],
-            'options': {},
+            'options': [],
             'desc': ''
         };
         let item = 0;
@@ -66,7 +73,7 @@ module.exports = {
                     list.name[item] = command.name;
                     item++;
                 }
-            } else if(search === command.name || command.aliases.some(alias => alias === search)) {
+            } else if(search === command.name || ((command.aliases !== undefined)?command.aliases.some(alias => alias === search):false)) {
                 list.name[0] = command.name;
                 list.aliases = command.aliases;
                 list.flags = command.flags;
@@ -99,8 +106,8 @@ module.exports = {
                     .addField('Nombre', list.name[0], true)
                     .addField('Alias', (list.aliases.length > 0)?(list.aliases.map(i => `\`${i}\``).join(', ')):':label: Este comando no tiene ningún alias', true)
                     .addField('Características', (list.flags.length > 0)?(list.flags.map(i => `\`${i}\``).join(', ').toUpperCase()):':question: Este comando no tiene banderas por ahora')
-                    .addField('Uso', `\`p!${list.name[0]}\``, true)
-                    .addField('Opciones (-x --xxx)', (list.options.size > 0)?'a':':abacus: Este comando no tiene --opciones adicionales', true)
+                    .addField('Llamado', `\`p!${list.name[0]}\``, true)
+                    .addField('Opciones (`p!x -x --xxx`)', (list.options.length > 0)?list.options.join('\n'):':abacus: Este comando no tiene `--opciones` adicionales', true)
                     .addField('Descripción', (list.desc.length > 0)?list.desc:':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde');
             else
                 embed.setAuthor('Sin resultados', aurl)

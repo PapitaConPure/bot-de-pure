@@ -41,6 +41,9 @@ module.exports = {
     flags: [
         'papa'
     ],
+    options: [
+
+    ],
 	
 	execute(message, args) {
         if(message.author.id === '423129757954211880') {

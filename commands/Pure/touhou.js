@@ -300,6 +300,9 @@ module.exports = {
     flags: [
         'common'
     ],
+    options: [
+
+    ],
 	
 	execute(message, args) {
 		/*message.channel.send(

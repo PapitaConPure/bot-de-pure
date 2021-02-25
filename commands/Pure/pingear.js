@@ -11,6 +11,9 @@ module.exports = {
     flags: [
         'meme'
     ],
+    options: [
+
+    ],
 	
 	execute(message, args) {
 		if(args.length === 2) {

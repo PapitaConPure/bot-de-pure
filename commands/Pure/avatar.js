@@ -13,9 +13,9 @@ module.exports = {
     flags: [
         'common'
     ],
-    options: {
+    options: [
 
-    },
+    ],
 
 	execute(message, args) {
         /*message.channel.send(
