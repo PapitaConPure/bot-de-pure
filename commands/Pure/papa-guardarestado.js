@@ -6,7 +6,7 @@ const fs = require('fs');
 
 module.exports = {
 	name: 'papa-guardarestado',
-    desc: '',
+    desc: 'Vuelca el estado de todas mis propiedades en el momento que se ejecuta el comando y se envía como un archivo de texto para descargar',
     flags: [
         'papa'
     ],

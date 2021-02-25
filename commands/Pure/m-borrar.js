@@ -2,19 +2,20 @@ const Discord = require('discord.js'); //Integrar discord.js
 var global = require('../../config.json'); //Variables globales
 
 module.exports = {
-	name: 'm-borrarmsg',
+	name: 'm-borrar',
 	aliases: [
-		'm-borrar',
+		'm-borrarmsg',
         'm-deletemsg', 'm-delete',
         'm-del', 'm-d', 
     ],
-    desc: '',
+    desc: 'Elimina una cierta cantidad de mensajes entre 2 y 100',
     flags: [
         'mod'
     ],
     options: [
-
+		'`cantidad` para especificar la cantidad de mensajes a borrar (sin contar el mensaje del comando)'
     ],
+	callx: '<cantidad>',
 	
 	execute(message, args) {
 		if(message.member.hasPermission('MANAGE_MESSAGES', false, true, true)) {

@@ -141,10 +141,10 @@ module.exports = {
         'megu', 'explosión', 'bakuretsu', 'papiwaifu', 'papawaifu', 'waifu',
 		'bestgirl', 'explosion'
     ],
-    desc: '',
+    desc: 'Muestra imágenes de Megumin, también conocida como "La Legítima Esposa de Papita con Puré"',
     flags: [
         'meme',
-		'exclusivo',
+		'exclusive',
 		'maintenance'
     ],
     options: [

@@ -6,7 +6,7 @@ module.exports = {
     aliases: [
         'presentacion', 'presentación', 'hola', 'presentar', 'puré', 'pure'
     ],
-    desc: '',
+    desc: 'Me presento y digo cositas sobre mí~',
     flags: [
         'common'
     ],

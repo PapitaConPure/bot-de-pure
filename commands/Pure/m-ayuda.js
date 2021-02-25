@@ -7,7 +7,7 @@ module.exports = {
         'm-help', 'm-commands',
         'm-h'
     ],
-    desc: '',
+    desc: 'Muestra un árbol de comandos de moderación',
     flags: [
         'mod',
         'outdated'

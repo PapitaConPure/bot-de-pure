@@ -6,7 +6,7 @@ module.exports = {
 	aliases: [
         'nightford', 'cuidado'
     ],
-    desc: '',
+    desc: 'Comando de grito a Orphen Nightford',
     flags: [
         'meme'
     ],

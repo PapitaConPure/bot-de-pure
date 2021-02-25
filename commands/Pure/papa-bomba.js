@@ -37,13 +37,15 @@ async function stupidBomb(animLen, animPos, mid, mch) {
 
 module.exports = {
 	name: 'papa-bomba',
-    desc: '',
+    desc: 'Comando para reiniciarme',
     flags: [
-        'papa'
+        'papa',
+		'maintenance'
     ],
     options: [
-
+		'`<largo?>` _(número)_ especifica el largo de la mecha (cantidad de segundos antes de que me reinicie)'
     ],
+	callx: '<largo?>',
 	
 	execute(message, args) {
         if(message.author.id === '423129757954211880') {

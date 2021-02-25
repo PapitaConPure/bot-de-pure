@@ -8,24 +8,19 @@ module.exports = {
         'm-rolecount', 'm-roleinfo',
         'm-irol', 'm-ir', 'm-ri', 'm-rolei'
     ],
-    desc: '',
+    desc: 'Realiza una búsqueda en el servidor para encontrar a todos los usuarios que cumplen con los búsqueda de roles solicitada. Devuelve el total de usuarios encontrados junto con una lista paginada de los mismos\n' +
+		'**[+]Inclusivo:** se consideran usuarios con __algunos de los roles__ buscados (dinámico)\n' +
+		'**[-]Exclusivo:** se consideran usuarios con __todos los roles__ buscados (específico)',
     flags: [
         'mod'
     ],
     options: [
-
+		'`caso` _(signos +/-)_ para especificar si la búsqueda es de caso [+]Inclusivo o [-]Exclusivo',
+		'`búsqueda...` _(rol/roles...)_ para especificar los roles que quieres buscar'
     ],
+	callx: '<caso> <búsqueda...>',
 	
 	execute(message, args) {
-		/*message.channel.send(
-			'```\n' +
-			'[REPORTE DE ESTADO DEL BOT]\n' +
-			'Estoy investigando un error con los comandos con Embed.\n' +
-			'~Papita con Puré\n' +
-			'```'
-		);
-		return;*/
-
 		if(message.member.hasPermission('MANAGE_ROLES', false, true, true)) {
 			if(args.length < 2) {
 				message.channel.send(

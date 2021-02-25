@@ -10,7 +10,7 @@ module.exports = {
 	aliases: [
         'mari'
     ],
-    desc: '',
+    desc: 'Comando de caritas de Marisaac. Las caritas son aleatorias',
     flags: [
         'meme'
     ],

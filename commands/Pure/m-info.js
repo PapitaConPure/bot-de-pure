@@ -8,13 +8,14 @@ module.exports = {
         'm-serverinfo', 'm-svinfo', 'm-svinf',
 		'm-i'
     ],
-    desc: '',
+    desc: 'Muestra información estadística paginada del servidor',
     flags: [
         'mod'
     ],
     options: [
-
+		'`<canal?>` para mostrar estadísticas extra de un canal'
     ],
+	callx: '<canal?>',
 	
 	execute(message, args) {
 		/*message.channel.send(

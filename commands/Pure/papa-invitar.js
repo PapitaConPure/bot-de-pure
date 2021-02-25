@@ -3,7 +3,7 @@ var global = require('../../config.json'); //Variables globales
 
 module.exports = {
 	name: 'papa-invitar',
-    desc: '',
+    desc: 'Muestra una carta de invitación para agregarme a otro servidor',
     flags: [
         'papa'
     ],

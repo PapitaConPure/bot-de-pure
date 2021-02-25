@@ -7,13 +7,16 @@ module.exports = {
         'papa', 'apita', 'ure', 'uré',
 		'potato', 'p'
     ],
-    desc: '',
+    desc: 'Comando de frases de Papita con Puré. Si se ingresa texto, se lo patentará, sino, dependiendo del canal...\n' +
+		'**SFW:** muestra frases y cosas de Papita\n' +
+		'**NSFW:** muestra _otra_ frase _tal vez_ de Papita',
     flags: [
         'meme'
     ],
     options: [
-
+		'`<frase?>` _(texto)_ para indicar una frase a patentar'
     ],
+	callx: '<frase?>',
 	
 	execute(message, args) {
 		if(args.length) {

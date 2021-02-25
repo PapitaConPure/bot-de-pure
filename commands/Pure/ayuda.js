@@ -109,11 +109,11 @@ module.exports = {
             if(list.name.length > 0) 
                 embed.setAuthor(title(list.name[0]), aurl)
                     .addField('Nombre', `\`${list.name[0]}\``, true)
-                    .addField('Alias', (list.aliases.length > 0)?(list.aliases.map(i => `\`${i}\``).join(', ')):':label: Sin alias', true)
-                    .addField('Descripción', (list.desc.length > 0)?list.desc:':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde')
+                    .addField('Alias', (list.aliases !== undefined && list.aliases.length > 0)?(list.aliases.map(i => `\`${i}\``).join(', ')):':label: Sin alias', true)
+                    .addField('Descripción', (list.desc !== undefined && list.desc.length > 0)?list.desc:':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde')
                     .addField('Llamado', `\`p!${list.name[0]}${(list.callx !== undefined)?` ${list.callx}`:''}\``, true)
-                    .addField('Opciones (`p!x -x --xxx <x>`)', (list.options.length > 0)?list.options.join('\n'):':abacus: Sin opciones', true)
-                    .addField('Identificadores', (list.flags.length > 0)?(list.flags.map(i => `\`${i}\``).join(', ').toUpperCase()):':question: Este comando no tiene banderas por ahora');
+                    .addField('Opciones (`p!x -x --xxx <x>`)', (list.options !== undefined && list.options.length > 0)?list.options.join('\n'):':abacus: Sin opciones', true)
+                    .addField('Identificadores', (list.flags !== undefined && list.flags.length > 0)?(list.flags.map(i => `\`${i}\``).join(', ').toUpperCase()):':question: Este comando no tiene identificadores por ahora');
             else
                 embed.setAuthor('Sin resultados', aurl)
                     .addField('No se ha encontrado ningún comando con este nombre', `Utiliza \`p!ayuda\` para ver una lista de comandos disponibles y luego usa \`p!comando <comando>\` para ver un comando en específico`);
