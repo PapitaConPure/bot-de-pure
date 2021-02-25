@@ -16,11 +16,14 @@ module.exports = {
     ],
     
 	execute(message, args) {
+        let commands = new Discord.Collection();
+        const cfiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
         let fex = false;
         let fmeme = false;
         let fmod = false;
         let fpapa = false;
         let fhourai = false;
+        let search = 'n';
         args.some(arg => {
             if(arg.startsWith('--'))
                 switch(arg.slice(2)) {
@@ -37,63 +40,77 @@ module.exports = {
                     case 'p': fpapa = true; break;
                     case 'h': fhourai = true; break;
                     }
-            }
+            } else if(search === 'n')
+                search = arg;
         });
-        let commands = new Discord.Collection();
-        const cfiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
-        let list = [];
+
+        let list = {
+            'name': [],
+            'aliases': [],
+            'flags': [],
+            'options': {},
+            'desc': ''
+        };
         let item = 0;
+        
         for(const file of cfiles) {
             const command = require(`../../commands/Pure/${file}`);
-            const cmeme = fmeme? true : !command.flags.includes('meme');
-            const cmod = fmod? true : !command.flags.includes('mod');
-            const cpapa = fpapa? true : !command.flags.includes('papa');
-            const chourai = fhourai? true : !command.flags.includes('hourai');
-            const cex = fex? !command.flags.includes('common') : true;
+            if(search === 'n') {
+                const cmeme = fmeme? true : !command.flags.includes('meme');
+                const cmod = fmod? true : !command.flags.includes('mod');
+                const cpapa = fpapa? true : !command.flags.includes('papa');
+                const chourai = fhourai? true : !command.flags.includes('hourai');
+                const cex = fex? !command.flags.includes('common') : true;
             
-            if(cmeme && cmod && cpapa && chourai && cex) {
-                //commands.set(command.name, command);
-                list[item] = command.name;
-                item++;
+                if((cmeme && cmod && cpapa && chourai && cex)) {
+                    list.name[item] = command.name;
+                    item++;
+                }
+            } else if(search === command.name || command.aliases.some(alias => alias === search)) {
+                list.name[0] = command.name;
+                list.aliases = command.aliases;
+                list.flags = command.flags;
+                list.options = command.options;
+                list.desc = command.desc;
+                break;
             }
         }
-        
-        let page = 0;
-        const maxpage = Math.floor((list.length - 1) / 10);
-        let embed = new Discord.MessageEmbed()
-            .setColor('#608bf3')
-            .setAuthor('Lista de comandos', message.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }))
+
+        const aurl = message.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 });
+        let embed = new Discord.MessageEmbed().setColor('#608bf3');
+        if(search === 'n') {
+            embed.setAuthor('Lista de comandos', aurl)
             .addField('Añade...',
                 '`-x` para filtrar resultados comunes\n' +
                 '`--meme` para ver comandos meme\n' +
                 '`-m` o `--mod` para ver comandos de moderación\n' +
-                '`-p` o `--papa` para ver comandos de Papita con Puré\n'+
+                '`-p` o `--papa` para ver comandos de Papita con Puré\n' +
                 '`-h` o `--hourai` para ver comandos exclusivos de Hourai'
             )
-            .addField('Usa `p!ayuda <comando>` para más información', (list.length > 0)?list.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas).');
-            //.addField('Función', list.desc.filter((_, i) => i >= (page * 10) && i < (page * 10 + 10)).join('\n'), true);
+            .addField('Usa `p!ayuda <comando>` para más información', (list.name.length > 0)?list.name.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas).');
+        } else {
+            const title = s => {
+                s = (s.startsWith('m-'))?`${s.slice(2)} (Mod)`:s;
+                s = (s.startsWith('papa-'))?`${s.slice(5)} (Papita con Puré)`:s;
+                return `${s[0].toUpperCase()}${s.slice(1)}`;
+            };
+            if(list.name.length > 0) 
+                embed.setAuthor(title(list.name[0]), aurl)
+                    .addField('Nombre', list.name[0], true)
+                    .addField('Alias', (list.aliases.length > 0)?(list.aliases.map(i => `\`${i}\``).join(', ')):':label: Este comando no tiene ningún alias', true)
+                    .addField('Características', (list.flags.length > 0)?(list.flags.map(i => `\`${i}\``).join(', ').toUpperCase()):':question: Este comando no tiene banderas por ahora')
+                    .addField('Uso', `\`p!${list.name[0]}\``, true)
+                    .addField('Opciones (-x --xxx)', (list.options.size > 0)?'a':':abacus: Este comando no tiene --opciones adicionales', true)
+                    .addField('Descripción', (list.desc.length > 0)?list.desc:':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde');
+            else
+                embed.setAuthor('Sin resultados', aurl)
+                    .addField('No se ha encontrado ningún comando con este nombre', `Utiliza \`p!ayuda\` para ver una lista de comandos disponibles y luego usa \`p!comando <comando>\` para ver un comando en específico`);
+        }
         
-        //const arrows = [message.client.emojis.cache.get('681963688361590897'), message.client.emojis.cache.get('681963688411922460')];
-        //const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
-        message.channel.send(embed);/*.then(sent => {
-            sent.react(arrows[0])
-                .then(() => sent.react(arrows[1]))
-                .then(() => {
-                    const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
-                    collector.on('collect', reaction => {
-                        if(reaction.emoji.id === arrows[0].id) page = (page > 0)?(page - 1):maxpage;
-                        else page = (page < maxpage)?(page + 1):0;
-
-                        embed = new Discord.MessageEmbed()
-                            .setColor('#608bf3')
-                            .setAuthor('Lista de comandos', message.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }))
-                            .setFooter(`Página ${page + 1}/${maxpage + 1}`)
-                            .addField('Usa `p!ayuda <comando>` para más información', list.filter((_, i) => i >= (page * 10) && i < (page * 10 + 10)).join('\n'), true)
-                            .addField('Función', list.desc.filter((_, i) => i >= (page * 10) && i < (page * 10 + 10)).join('\n'), true);
-                        sent.edit(embed);
-                    });
-                });
-        });
+        let page = 0;
+        const maxpage = Math.floor((list.length - 1) / 10);
+        
+        message.channel.send(embed);
         
         /*
         if(!memez)
