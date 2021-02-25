@@ -87,13 +87,14 @@ module.exports = {
         let embed = new Discord.MessageEmbed().setColor('#608bf3');
         if(search === 'n') {
             embed.setAuthor('Lista de comandos', aurl)
-            .addField('Añade...',
+            /*.addField('Añade...',
                 '`-x` para filtrar resultados comunes\n' +
                 '`--meme` para ver comandos meme\n' +
                 '`-m` o `--mod` para ver comandos de moderación\n' +
                 '`-p` o `--papa` para ver comandos de Papita con Puré\n' +
                 '`-h` o `--hourai` para ver comandos exclusivos de Hourai'
-            )
+            )*/
+            .addField('Comandos: ejemplos de uso', '`p!ayuda -xmph --meme`\n`p!avatar @Usuario`\n`p!dados -c 20 -d 3`')
             .addField('Usa `p!ayuda <comando>` para más información', (list.name.length > 0)?list.name.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para realizar tu búsqueda).');
         } else {
             const title = s => {
@@ -107,7 +108,7 @@ module.exports = {
                     .addField('Alias', (list.aliases.length > 0)?(list.aliases.map(i => `\`${i}\``).join(', ')):':label: Sin alias', true)
                     .addField('Características', (list.flags.length > 0)?(list.flags.map(i => `\`${i}\``).join(', ').toUpperCase()):':question: Este comando no tiene banderas por ahora')
                     .addField('Llamado', `\`p!${list.name[0]}\``, true)
-                    .addField('Opciones (`p!x -x --xxx`)', (list.options.length > 0)?list.options.join('\n'):':abacus: Sin opciones', true)
+                    .addField('Opciones (`p!x -x --xxx <x>`)', (list.options.length > 0)?list.options.join('\n'):':abacus: Sin opciones', true)
                     .addField('Descripción', (list.desc.length > 0)?list.desc:':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde');
             else
                 embed.setAuthor('Sin resultados', aurl)

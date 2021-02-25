@@ -14,7 +14,7 @@ module.exports = {
         'common'
     ],
     options: [
-
+        '`<usuario>`'
     ],
 
 	execute(message, args) {
