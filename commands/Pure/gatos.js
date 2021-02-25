@@ -19,7 +19,7 @@ module.exports = {
         'gato', 'felino', 'gatito', 'gatitos', 'miau', 'michi', 'michis',
         'cats', 'cat', 'meow', 'nya', 'kitty', 'kitties'
     ],
-    desc: '',
+    desc: 'Muestra imágenes de gatitos uwu',
     flags: [
         'common'
     ],

@@ -8,7 +8,7 @@ module.exports = {
 		'emojis', 'emote', 'emoji',
 		'emt'
 	],
-    desc: 'Muestra una lista de emotes a mi disposición',
+    desc: 'Muestra una lista paginada de emotes a mi disposición',
     flags: [
         'common'
     ],
@@ -47,11 +47,10 @@ module.exports = {
 				.setColor('#fecb4c')
 				.setTitle('Emotes')
 
-				.addField('Emote', emolist, true)
-				.addField('Nombre', namelist, true)
+				.addField('Lista de emotes', `${emolist} ${namelist}`)
 
 				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
-				.setFooter(`Página de lista ${i + 1}/${Math.ceil(emotes.length / listmax)}`);
+				.setFooter(`Página ${i + 1}/${Math.ceil(emotes.length / listmax)}`);
 		}
 
 		message.channel.send('**Oe mira po, emotes** <:yumou:708158159180660748>\n');

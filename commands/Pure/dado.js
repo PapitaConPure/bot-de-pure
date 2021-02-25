@@ -61,7 +61,7 @@ module.exports = {
 
 		message.channel.send(
 			'```\n' +
-			`Tiré ${dices} dados de ${faces} caras~♪` +
+			`Tiré ${dices} dados de ${faces} caras~♪\n` +
 			`Resultados:\n${dice.join(', ')}\n` +
 			`Total: ${total}\n` +
 			'```'
