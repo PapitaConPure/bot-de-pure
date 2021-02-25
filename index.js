@@ -303,7 +303,22 @@ client.on('message', message => { //En caso de recibir un mensaje
 
     //#region Ejecución de Comandos
     try {
-        comando.execute(message, args);
+        if(comando.flags.some(flag => flag === 'outdated'))
+            message.channel.send(new Discord.MessageEmbed()
+                .setAuthor('Un momento...')
+                .setTitle('Comando desactualizado')
+                .addField(`${pdetect}${nombrecomando}`, 'El comando no se encuentra disponible debido a que su función ya no es requerida en absoluto. Espera a que se actualice~')
+                .setColor('#f01010')
+            );
+        else if(comando.flags.some(flag => flag === 'maintenance'))
+            message.channel.send(new Discord.MessageEmbed()
+                .setAuthor('Un momento...')
+                .setTitle('Comando en mantenimiento')
+                .addField(`${pdetect}${nombrecomando}`, 'El comando no se encuentra disponible debido a que está en proceso de actualización o reparación en este momento. Espera a que se actualice~')
+                .setColor('#f01010')
+            );
+        else
+            comando.execute(message, args);
     } catch(error) {
         console.log('Ha ocurrido un error al ingresar un comando.');
         console.error(error);

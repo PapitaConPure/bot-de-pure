@@ -298,10 +298,11 @@ module.exports = {
     ],
     desc: '',
     flags: [
-        'common'
+        'common',
+		'maintenance'
     ],
     options: [
-
+		':coffee: Queda pendiente rehacer comandos de imágenes con banderas y búsqueda ilimitada. Por favor, paciencia'
     ],
 	
 	execute(message, args) {
