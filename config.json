@@ -12,7 +12,7 @@
             "p!lechita ahora es responsivo a emotes y enlaces de imágenes pequeñas",
             "Se comenzó a implementar un formato de comandos similar al usado por terminales en p!ayuda, p!dados y p!decir, sin mención en p!ayuda por el momento",
             "Se rehizo p!ayuda para que indexe y categorice comandos automáticamente, permitiendo un formato de árbol de búsqueda",
-            "p!ayuda <comando> ahora muestra información de dicho comando",
+            "p!ayuda <comando> ahora muestra información de dicho comando y tiene búsqueda con privilegios",
             "Corrección de un error al despedir un miembro del server"
         ],
         "todo": [
