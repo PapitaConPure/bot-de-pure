@@ -6,7 +6,7 @@ module.exports = {
 	aliases: [
         'tryhard', 'tryhardeo'
     ],
-    desc: '',
+    desc: 'Comando de coso de Imagine Breaker',
     flags: [
         'meme',
 		'outdated'

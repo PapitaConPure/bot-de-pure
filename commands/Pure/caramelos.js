@@ -10,7 +10,8 @@ module.exports = {
 	],
     desc: 'Otorga caramelos al reaccionar al mensaje generado',
     flags: [
-        'hourai'
+        'hourai',
+        'outdated'
     ],
     options: [
 

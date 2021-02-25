@@ -9,7 +9,8 @@ module.exports = {
     ],
     desc: '',
     flags: [
-        'mod'
+        'mod',
+        'outdated'
     ],
     options: [
 

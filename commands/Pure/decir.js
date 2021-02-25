@@ -12,8 +12,10 @@ module.exports = {
         'common'
     ],
     options: [
+        '`<mensaje>` _(texto)_ para borrar tu mensaje',
         '`-d` o `--delete` para borrar tu mensaje'
     ],
+    callx: '<mensaje>',
 	
 	execute(message, args) {
         if(args.length > 0) {

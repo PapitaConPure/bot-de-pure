@@ -9,13 +9,14 @@ module.exports = {
         'profile', 'profilepicture',
         'pfp'
     ],
-    desc: 'Muestra el avatar mencionado',
+    desc: 'Muestra tu propio avatar o el del usuario mencionado',
     flags: [
         'common'
     ],
     options: [
-        '`<usuario>`'
+        '`<usuario?>` _(mención/texto/id)_ para especificar un usuario'
     ],
+    callx: '<usuario?>',
 
 	execute(message, args) {
         /*message.channel.send(

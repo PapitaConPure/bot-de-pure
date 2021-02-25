@@ -10,7 +10,7 @@ module.exports = {
 	aliases: [
         'karlos', 'zupija'
     ],
-    desc: '',
+    desc: 'Comando de gacha musical de Karl Zuñiga',
     flags: [
         'meme'
     ],

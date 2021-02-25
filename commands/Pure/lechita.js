@@ -68,13 +68,16 @@ module.exports = {
 		'leche',
 		'cum', 'cummies', 'milk', 'milkies'
 	],
-    desc: '',
+    desc: 'Disparo leche a ti o a lo que especifiques :flushed:\n**Nota:** en canales marcados como NSFW, el resultado será diferente',
     flags: [
         'meme'
     ],
     options: [
-
+		'`<usuario?>` _(mención/texto/id)_ para disparar a un usuario',
+		'`<emote?>` _(emote)_ para disparar a un emote',
+		'`<imagen?>` _(enlace)_ para disparar a una imagen (<=256KB)'
     ],
+	callx: '[<usuario?>/<emote?>/<imagen?>]',
 	
 	execute(message, args) {
 		async function aaamipija() {

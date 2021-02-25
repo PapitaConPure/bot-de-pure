@@ -150,6 +150,7 @@ module.exports = {
     options: [
 		':coffee: Queda pendiente rehacer comandos de imágenes con banderas y búsqueda ilimitada. Por favor, paciencia'
     ],
+	callx: '<rango?> <etiquetas?>',
 	
 	execute(message, args) {
 		/*message.channel.send(

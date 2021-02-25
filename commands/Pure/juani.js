@@ -6,9 +6,10 @@ module.exports = {
 	aliases: [
         'wholesome', 'wani'
     ],
-    desc: '',
+    desc: 'Comando bonito y hermoso de JuaniUru',
     flags: [
-        'meme'
+        'meme',
+        'outdated'
     ],
     options: [
 
