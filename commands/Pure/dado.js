@@ -10,7 +10,7 @@ module.exports = {
 		'dados', 'tirar', 'random',
 		'roll', 'rolldie', 'die',
 	],
-    desc: 'Tira uno o más dados para recibir un números aleatorios',
+    desc: 'Tira uno o más dados de la cantidad de caras deseadas para recibir números aleatorios',
     flags: [
         'common'
     ],
