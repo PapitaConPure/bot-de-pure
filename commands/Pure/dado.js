@@ -15,7 +15,8 @@ module.exports = {
         'common'
     ],
     options: [
-
+		'`-d <n>` o `--dados <n>` para especificar la cantidad de dados',
+		'`-c <n>` o `--caras <n>` para especificar la cantidad de caras'
     ],
 	
 	execute(message, args) {
@@ -28,22 +29,18 @@ module.exports = {
 		let dice = [];
 
 		try {
-			let opt = 'NLL';
-			args.forEach(arg => {
-				if(opt === 'NLL' && arg.startsWith('-'))
-					opt = arg.slice(1);
-				else {
-					switch(opt) {
-					case 'c': //Caras
-						faces = parseInt(arg);
-						break;
-					
-					case 'd': //Cantidad
-						dices = parseInt(arg);
-						break;
+			args.some((arg, i) => {
+				if(arg.startsWith('--'))
+					switch(arg.slice(2)) {
+					case 'dados': dices = parseInt(args[i + 1]); break;
+					case 'caras': faces = parseInt(args[i + 1]); break;
 					}
-					opt = 'NLL';
-				}
+				else if(arg.startsWith('-'))
+					for(c of arg.slice(1))
+						switch(c) {
+						case 'd': dices = parseInt(args[i + 1]); break;
+						case 'c': faces = parseInt(args[i + 1]); break;
+						}
 			});
 			
 			if(dices > 64) {
@@ -58,13 +55,14 @@ module.exports = {
 		} catch(err) {
 			message.channel.send(
 				'¡No puedo tirar dados tetradimensionales! ***...todavía.***!\n' +
-				`Uso: _\`p!dado -c Caras -n Cantidad\``
+				`Revisa \`p!ayuda dado\` para más información`
 			);
 		};
 
 		message.channel.send(
 			'```\n' +
-			`Dados:\n${dice.join('\n')}\n\n` +
+			`Tiré ${dices} dados de ${faces} caras~♪` +
+			`Resultados:\n${dice.join(', ')}\n` +
 			`Total: ${total}\n` +
 			'```'
 		);

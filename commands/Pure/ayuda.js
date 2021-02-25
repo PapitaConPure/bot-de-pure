@@ -103,11 +103,11 @@ module.exports = {
             };
             if(list.name.length > 0) 
                 embed.setAuthor(title(list.name[0]), aurl)
-                    .addField('Nombre', list.name[0], true)
+                    .addField('Nombre', `\`${list.name[0]}\``, true)
                     .addField('Alias', (list.aliases.length > 0)?(list.aliases.map(i => `\`${i}\``).join(', ')):':label: Este comando no tiene ningún alias', true)
                     .addField('Características', (list.flags.length > 0)?(list.flags.map(i => `\`${i}\``).join(', ').toUpperCase()):':question: Este comando no tiene banderas por ahora')
                     .addField('Llamado', `\`p!${list.name[0]}\``, true)
-                    .addField('Opciones (`p!x -x --xxx`)', (list.options.length > 0)?list.options.join('\n'):':abacus: Este comando no tiene `--opciones` adicionales', true)
+                    .addField('Opciones (`p!x -x --xxx`)', (list.options.length > 0)?list.options.join('\n'):':abacus: No hay `--opciones` extra', true)
                     .addField('Descripción', (list.desc.length > 0)?list.desc:':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde');
             else
                 embed.setAuthor('Sin resultados', aurl)
