@@ -296,6 +296,11 @@ module.exports = {
         'touhoupic', '2hupic',
 		'2hu'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
 		/*message.channel.send(
 				'```\n' +

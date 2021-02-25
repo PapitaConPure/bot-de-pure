@@ -6,6 +6,11 @@ module.exports = {
 	aliases: [
         'sassa', 'drossafras', 'dross'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
 		let forcesassamodo = false;
 		if(args.length)

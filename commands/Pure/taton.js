@@ -6,6 +6,11 @@ module.exports = {
 	aliases: [
 		'perrito', 'pe'
 	],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
 		/*message.channel.send(
 			'```\n' +

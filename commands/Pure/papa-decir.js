@@ -3,6 +3,11 @@ var global = require('../../config.json'); //Variables globales
 
 module.exports = {
 	name: 'papa-decir',
+    desc: '',
+    flags: [
+        'papa'
+    ],
+	
 	execute(message, args) {
         if(message.author.id === '423129757954211880') {
             if(args.length > 0) {

@@ -9,6 +9,7 @@ module.exports = {
         'profile', 'profilepicture',
         'pfp'
     ],
+    desc: 'Muestra el avatar mencionado',
 	execute(message, args) {
         /*message.channel.send(
 			'```\n' +

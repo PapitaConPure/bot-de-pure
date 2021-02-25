@@ -6,6 +6,11 @@ module.exports = {
 	aliases: [
         'tryhard', 'tryhardeo'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
 		/*message.channel.send(
 			'```\n' +

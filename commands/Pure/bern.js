@@ -11,6 +11,11 @@ module.exports = {
         'bewny', 'polola',
 		'procrastinar'
     ],
+    desc: 'Comando de procrastinación de GoddamnBernkastel.',
+    flags: [
+        'meme'
+    ],
+
 	execute(message, args){
 		/*message.channel.send(
 			'```\n' +

@@ -3,6 +3,11 @@ var global = require('../../config.json'); //Variables globales
 
 module.exports = {
 	name: 'papa-invitar',
+    desc: '',
+    flags: [
+        'papa'
+    ],
+	
 	execute(message, args) {
         if(message.author.id === '423129757954211880') {
             message.channel.send(

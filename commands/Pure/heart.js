@@ -139,6 +139,11 @@ module.exports = {
 	aliases: [
         'holo'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
 		/*message.channel.send(
 			'```\n' +

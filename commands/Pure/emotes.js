@@ -8,6 +8,11 @@ module.exports = {
 		'emojis', 'emote', 'emoji',
 		'emt'
 	],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
 		/*message.channel.send(
 			'```\n' +

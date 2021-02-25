@@ -6,6 +6,11 @@ module.exports = {
 	aliases: [
         'nuez'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args){
 		message.channel.send('**PAPITA**\n**PAPITA**');
 		message.channel.send('**OE PAPITA**\n**LA NUEZ**');

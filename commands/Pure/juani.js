@@ -6,6 +6,11 @@ module.exports = {
 	aliases: [
         'wholesome', 'wani'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args){
 		message.channel.send('**Gwacyas~♪** <:uwu:681935702308552730>');
     },

@@ -6,6 +6,11 @@ module.exports = {
 	aliases: [
         'nightford', 'cuidado'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args){
 		message.channel.send('***ORPHEN CUIDADO***');
 		message.channel.send('***CUIDADO ORPHEEEEEN***');

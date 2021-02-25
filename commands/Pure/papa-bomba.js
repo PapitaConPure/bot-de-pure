@@ -37,6 +37,11 @@ async function stupidBomb(animLen, animPos, mid, mch) {
 
 module.exports = {
 	name: 'papa-bomba',
+    desc: '',
+    flags: [
+        'papa'
+    ],
+	
 	execute(message, args) {
         if(message.author.id === '423129757954211880') {
 			if(args.length) stupidBomb(parseInt(args[0]), 0, message.id, message.channel);

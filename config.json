@@ -2,15 +2,15 @@
     "bot_status": {
         "host": "https://heroku.com",
         "version": {
-            "number": "Full.2.8.00",
+            "number": "Full.2.8.01",
             "name": "Cisne Cristalino"
         },
-        "note": "Se espera inconsistencia y errores debido a recientes trabajos de reestructuración",
+        "note": "Se esperan inconsistencias y errores debido a recientes trabajos de reestructuración",
         "changelog": [
             "Nueva función exclusiva para personal autorizado",
             "Visualización de estado en p!presentar discriminada hacia nuevo comando p!estado",
             "p!lechita ahora es responsivo a emotes y enlaces de imágenes pequeñas",
-            "Se comenzó a implementar un formato de comandos similar al usado por terminales en p!dados, sin mención en p!ayuda por el momento",
+            "Se comenzó a implementar un formato de comandos similar al usado por terminales en p!dados y p!decir, sin mención en p!ayuda por el momento",
             "Corrección de un error al despedir un miembro del server"
         ],
         "todo": [
@@ -27,7 +27,7 @@
         "bautistas": "745003943997997056",
         "pure":     "651244470691561473",
         "hourai":   "654471968200065034",
-        "ar":       "000000000000000000",
+        "ar":       "611732083995443210",
         "usd":      "698323332160028792",
         "slot1":    "676251911850164255",
         "slot2":    "739513729158217829",

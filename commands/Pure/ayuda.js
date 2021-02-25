@@ -1,4 +1,6 @@
-var global = require('../../config.json'); //Variables globales
+const fs = require('fs'); //Integrar operaciones sistema de archivos de consola
+const Discord = require('discord.js');
+const global = require('../../config.json'); //Variables globales
 
 module.exports = {
 	name: 'ayuda',
@@ -7,17 +9,62 @@ module.exports = {
         'help', 'commands',
         'h'
     ],
+    desc: 'Muestra una lista de comandos o un comando en detalle.',
+    flags: [
+        'common'
+    ],
+    
 	execute(message, args) {
-        let memez = false;
-        let str =
-            '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
-            '***LISTA DE COMANDOS***\n' +
-            '**A continuación la lista de comandos.**\n';
+        let memes = args.some(arg => arg === '-m' || arg === '--memes');
+        let commands = new Discord.Collection();
+        const cfiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
+        let list = {
+            'name': [],
+            'desc': []
+        };
+        let item = 0;
+        for(const file of cfiles) {
+            const command = require(`../../commands/Pure/${file}`);
 
-        if(args.length)
-            if(args[0] === 'meme-boi')
-                memez = true;
+            if((memes)?command.flags.includes('meme'):true)
+                //commands.set(command.name, command);
+                list.name[item] = command.name;
+                list.desc[item] = command.desc;
+                item++;
+        }
+        
+        let page = 1;
+        const maxpage = Math.floor((list.name.length - 1) / 10);
+        let embed = new Discord.MessageEmbed()
+            .setColor('#608bf3')
+            .setAuthor('Lista de comandos', message.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }))
+            .setFooter(`Página ${page + 1}/${maxpage + 1}`)
+            .addField('Nombre', list.name.filter((_, i) => i >= (page * 10) && i < (page * 10 + 10)).join('\n'), true)
+            .addField('Descripción', list.desc.filter((_, i) => i >= (page * 10) && i < (page * 10 + 10)).join('\n'), true);
+        
+        const arrows = [message.client.emojis.cache.get('681963688361590897'), message.client.emojis.cache.get('681963688411922460')];
+        const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
+        message.channel.send(embed).then(sent => {
+            sent.react(arrows[0])
+                .then(() => sent.react(arrows[1]))
+                .then(() => {
+                    const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
+                    collector.on('collect', reaction => {
+                        if(reaction.emoji.id === arrows[0].id) page = (page > 0)?(page - 1):maxpage;
+                        else page = (page < maxpage)?(page + 1):0;
 
+                        embed = new Discord.MessageEmbed()
+                            .setColor('#608bf3')
+                            .setAuthor('Lista de comandos', message.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }))
+                            .setFooter(`Página ${page + 1}/${maxpage + 1}`)
+                            .addField('Nombre', list.name.filter((_, i) => i >= (page * 10) && i < (page * 10 + 10)).join('\n'), true)
+                            .addField('Descripción', list.desc.filter((_, i) => i >= (page * 10) && i < (page * 10 + 10)).join('\n'), true);
+                        sent.edit(embed);
+                    });
+                });
+        });
+        
+        /*
         if(!memez)
             str += 
                 '*Puré:*\n' +
@@ -34,7 +81,7 @@ module.exports = {
         else
             str =
                 '*Puré [:egg::unlock:]:*\n' +
-                `\t╠ \`${global.p_pure}bern\` comando de procrastinación de GoddamnBernkastel.\n` +
+                `\t╠ \`${global.p_pure}bern\` \n` +
                 `\t╠ \`${global.p_pure}fuee\` comando de frase de Dylan/Fuee.\n` +
                 `\t╠ \`${global.p_pure}imagine\` comando de grito de Imagine Breaker.\n` +
                 `\t╠ \`${global.p_pure}juani\` comando de belleza de JuaniUru.\n` +
@@ -59,5 +106,6 @@ module.exports = {
             '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬';
         
         message.channel.send(str);
+        */
     },
 };

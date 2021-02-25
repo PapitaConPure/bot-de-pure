@@ -7,6 +7,11 @@ module.exports = {
         'papa', 'apita', 'ure', 'uré',
 		'potato', 'p'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
 		if(args.length) {
 			let newmsg;

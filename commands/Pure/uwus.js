@@ -3,6 +3,11 @@ const global = require('../../config.json'); //Variables globales
 
 module.exports = {
 	name: 'uwus',
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
         /*message.channel.send(
 			'```\n' +

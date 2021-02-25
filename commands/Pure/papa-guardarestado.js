@@ -6,6 +6,11 @@ const fs = require('fs');
 
 module.exports = {
 	name: 'papa-guardarestado',
+    desc: '',
+    flags: [
+        'papa'
+    ],
+	
 	execute(message, args) {
         if(message.author.id === '423129757954211880') {
             let templog = JSON.stringify(global, null, 4);

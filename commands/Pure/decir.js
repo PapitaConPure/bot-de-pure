@@ -7,12 +7,21 @@ module.exports = {
         'exclamar', 'escribir',
         'say', 'echo'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
         if(args.length > 0) {
             let sentence = '';
             for(var i = 0; i < args.length; i++) {
                 switch(args[i]) {
                     case '-d':
+                        message.delete();
+                        break;
+
+                    case '--del':
                         message.delete();
                         break;
                     

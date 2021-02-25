@@ -8,6 +8,11 @@ module.exports = {
         'm-serverinfo', 'm-svinfo', 'm-svinf',
 		'm-i'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
 		/*message.channel.send(
 			'```\n' +

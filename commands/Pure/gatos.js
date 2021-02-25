@@ -19,6 +19,11 @@ module.exports = {
         'gato', 'felino', 'gatito', 'gatitos', 'miau', 'michi', 'michis',
         'cats', 'cat', 'meow', 'nya', 'kitty', 'kitties'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
 		/*message.channel.send(
 			'```\n' +

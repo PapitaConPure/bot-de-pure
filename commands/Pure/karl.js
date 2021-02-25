@@ -10,6 +10,11 @@ module.exports = {
 	aliases: [
         'karlos', 'zupija'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args){
 		const emot = [
 			':musical_keyboard:', ':saxophone:', ':trumpet:', ':violin:', ':guitar:',' :banjo:', ':aquarius:'

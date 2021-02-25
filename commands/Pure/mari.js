@@ -10,6 +10,11 @@ module.exports = {
 	aliases: [
         'mari'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
 		const emot = [
 			'\'o\'', '\'O\'', '\'u\'', '\'U\'', '^O^', 'o.o', 'O.O', 'QUQ', '\'.\'', '¬u¬', '¬U¬', 'o\'o', 'o.o\'\'', 'o-o', 'O.o', 'x.x', 'ouo', 'OUO', 'OuO', 'Ouo', '>:C',

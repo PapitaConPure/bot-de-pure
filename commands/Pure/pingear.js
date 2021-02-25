@@ -7,6 +7,11 @@ module.exports = {
         'pinguear', 'pingeara', 'pingueara',
 		'pingsomeone'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
 		if(args.length === 2) {
 			let cnt = -1;

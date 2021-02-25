@@ -33,6 +33,11 @@ module.exports = {
         'café', 'cafecito',
         'coffee', 'cawfee'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+
 	execute(message, args){
 		tmpfunc(message.channel, args);
     },

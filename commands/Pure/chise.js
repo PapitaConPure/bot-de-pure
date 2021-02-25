@@ -6,6 +6,11 @@ module.exports = {
 	aliases: [
 		'sylvia', 'empalar'
 	],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
 		if(message.channel.guild.id === '654471968200065034')
 			message.channel.send(

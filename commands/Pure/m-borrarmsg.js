@@ -8,6 +8,11 @@ module.exports = {
         'm-deletemsg', 'm-delete',
         'm-del', 'm-d', 
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
 		if(message.member.hasPermission('MANAGE_MESSAGES', false, true, true)) {
 			if(!args.length) {

@@ -7,6 +7,11 @@ module.exports = {
         'm-help', 'm-commands',
         'm-h'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
         message.channel.send(
             '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 

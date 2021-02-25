@@ -6,6 +6,11 @@ module.exports = {
     aliases: [
         'status', 'botstatus'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
         let clformat = `- ${global.bot_status.changelog[0]}`;
         let tdformat = `- ${global.bot_status.todo[0]}`;

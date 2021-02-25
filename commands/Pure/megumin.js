@@ -141,6 +141,11 @@ module.exports = {
         'megu', 'explosión', 'bakuretsu', 'papiwaifu', 'papawaifu', 'waifu',
 		'bestgirl', 'explosion'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
 		/*message.channel.send(
 				'```\n' +

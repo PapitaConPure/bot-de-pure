@@ -68,6 +68,11 @@ module.exports = {
 		'leche',
 		'cum', 'cummies', 'milk', 'milkies'
 	],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
 		async function aaamipija() {
 			if(message.channel.nsfw) {

@@ -6,6 +6,11 @@ module.exports = {
     aliases: [
         'presentacion', 'presentación', 'hola', 'presentar', 'puré', 'pure'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
         const embed = new Discord.MessageEmbed()
             .setColor('#608bf3')

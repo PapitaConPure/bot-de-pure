@@ -8,6 +8,11 @@ module.exports = {
         'm-rolecount', 'm-roleinfo',
         'm-irol', 'm-ir', 'm-ri', 'm-rolei'
     ],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
 		/*message.channel.send(
 			'```\n' +

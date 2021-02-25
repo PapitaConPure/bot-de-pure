@@ -8,6 +8,11 @@ module.exports = {
 		'colours', 'colour', 'role',
 		'c'
 	],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
 		if(message.channel.guild.id === '654471968200065034')
 			message.channel.send(`Aquí teni los colore po <:reibu:686220828773318663>\nhttps://imgur.com/D5Z8Itb`);

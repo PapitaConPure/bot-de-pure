@@ -8,6 +8,11 @@ module.exports = {
 		'caramelo',
 		'candy', 'candies', 'milky'
 	],
+    desc: '',
+    flags: [
+        ''
+    ],
+	
 	execute(message, args) {
 		func.askCandy(message.member, message.channel);
     },
