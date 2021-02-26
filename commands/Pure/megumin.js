@@ -141,7 +141,9 @@ module.exports = {
         'megu', 'explosión', 'bakuretsu', 'papiwaifu', 'papawaifu', 'waifu',
 		'bestgirl', 'explosion'
     ],
-    desc: 'Muestra imágenes de Megumin, también conocida como "La Legítima Esposa de Papita con Puré"',
+    desc: 'Muestra imágenes de Megumin, también conocida como "La Legítima Esposa de Papita con Puré"\n' +
+		'**Nota:** no intentes buscarla en canales NSFW, conchetumare :rage:\n' +
+		':heart: :brown_heart: :orange_heart: :yellow_heart: :green_heart: :blue_heart: :purple_heart: :white_heart: :heart_decoration: :hearts: :heart_exclamation: :two_hearts: :revolving_hearts: :heartbeat: :heartpulse: :sparkling_heart: :gift_heart:',
     flags: [
         'meme',
 		'exclusive',
@@ -153,15 +155,6 @@ module.exports = {
 	callx: '<rango?> <etiquetas?>',
 	
 	execute(message, args) {
-		/*message.channel.send(
-				'```\n' +
-				'[REPORTE DE ESTADO DEL BOT]\n' +
-				'Estoy investigando un error con los comandos con Embed.\n' +
-				'~Papita con Puré\n' +
-				'```'
-			);
-			return;*/
-		
 		let serveridcheck = false;
 		for(sid in global.serverid) {
 			if(global.serverid.hasOwnProperty(sid)) {

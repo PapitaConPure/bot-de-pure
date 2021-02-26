@@ -6,13 +6,15 @@ module.exports = {
 	aliases: [
 		'perrito', 'pe'
 	],
-    desc: '',
+    desc: 'Comando cachorro de Taton. Puedes ingresar una palabra identificadora para enviar un perrito en específico o ver una lista de perritos. Si no ingresas nada, se enviará un perrito aleatorio',
     flags: [
         'meme'
     ],
     options: [
-
+		'`<perrito?>` _(texto)_ para especificar un perrito a enviar (por nombres identificadores)',
+		'`<lista?>` _(texto: `perritos, todo, todos, lista, ayuda, everything, all, help`)_ para, en cambio, mostrar una lista de todos los perritos disponibles junto a sus nombres identificadores'
     ],
+	callx: '[<perrito?>/<lista?>]',
 	
 	execute(message, args) {
 		/*message.channel.send(

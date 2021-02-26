@@ -3,13 +3,15 @@ var global = require('../../config.json'); //Variables globales
 
 module.exports = {
 	name: 'uwu',
-    desc: '',
+    desc: 'uwu',
     flags: [
-        'common'
+        'common',
+		'uwu'
     ],
     options: [
-
+		'`uwu` uwu'
     ],
+	callx: 'uwu',
 	
 	execute(message, args) {
 		const uwusopt = [

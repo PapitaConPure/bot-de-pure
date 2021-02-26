@@ -3,24 +3,18 @@ const global = require('../../config.json'); //Variables globales
 
 module.exports = {
 	name: 'uwus',
-    desc: '',
+    desc: 'Inicia un __evento UwU__, que puede durar el tiempo que se desee hasta 2 horas (7200s).\n' +
+        '*Evento UwU:* la persona que más __mensajes que contienen "uwu"s__ envíe para cuando el tiempo acabe, ganará. Ganar no tiene ninún beneficio pero ganar no es perder y perder es feo (umu).\n' +
+        'Al finalizar el evento, se muestran los resultados y se borran todos los mensajes con "uwu" enviados durante el mismo.',
     flags: [
         'meme'
     ],
     options: [
-
+        '`tiempo?` _(número)_ para establecer la duración del evento, en segundos'
     ],
+    callx: '<tiempo?>',
 	
 	execute(message, args) {
-        /*message.channel.send(
-			'```\n' +
-			'[REPORTE DE ESTADO DEL BOT]\n' +
-			'Estoy investigando un error con los comandos con Embed.\n' +
-			'~Papita con Puré\n' +
-			'```'
-		);
-		return;*/
-
         let secs;
         if(args.length) {
             if(!isNaN(args[0])) secs = Math.max(0.1, Math.min(args[0], 3600 * 2));

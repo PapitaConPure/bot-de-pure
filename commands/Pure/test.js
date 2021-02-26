@@ -5,7 +5,7 @@ const func = require('../../func.js'); //Funciones globales
 
 module.exports = {
 	name: 'test',
-    desc: '',
+    desc: 'Comando de pruebas :flushed: :point_right: :point_left:',
     flags: [
         'papa',
         'exclusivo'

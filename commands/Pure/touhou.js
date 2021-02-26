@@ -296,7 +296,8 @@ module.exports = {
         'touhoupic', '2hupic',
 		'2hu'
     ],
-    desc: '',
+    desc: 'Muestra imágenes de Touhou.\n' +
+		'**Nota:** en canales NSFW, los resultados serán, respectivamente, NSFW',
     flags: [
         'common',
 		'maintenance'
@@ -307,15 +308,6 @@ module.exports = {
 	callx: '<rango?> <etiquetas?>',
 	
 	execute(message, args) {
-		/*message.channel.send(
-				'```\n' +
-				'[REPORTE DE ESTADO DEL BOT]\n' +
-				'Estoy investigando un error con los comandos con Embed.\n' +
-				'~Papita con Puré\n' +
-				'```'
-			);
-			return;*/
-
 		tmpfunc(message.channel, args, message.author, message);
     },
 };
