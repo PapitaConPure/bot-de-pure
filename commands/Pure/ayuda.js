@@ -101,7 +101,7 @@ module.exports = {
             };
             if(list.name.length > 0) 
                 embed.setAuthor(title(list.name[0]), aurl)
-                    .setFooter('**Nota:** los `<parámetros>` con el símbolo "?" son opcionales')
+                    .setFooter('Nota: los <parámetros> con el símbolo "?" son opcionales, el resto son obligatorios')
                     .addField('Nombre', `\`${list.name[0]}\``, true)
                     .addField('Alias', (list.aliases !== undefined && list.aliases.length > 0)?(list.aliases.map(i => `\`${i}\``).join(', ')):':label: Sin alias', true)
                     .addField('Descripción', (list.desc !== undefined && list.desc.length > 0)?list.desc:':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde')

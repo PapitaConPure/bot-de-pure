@@ -113,7 +113,7 @@ module.exports = {
 				if(bglink !== undefined) {
 					const tiempoguild = Date.now() - global.lechitauses;
 					const lechesec = Math.floor(tiempoguild/1000);
-					const tiempoespera = 5;
+					const tiempoespera = 3;
 					
 					if(lechesec > tiempoespera) {
 						global.lechitauses = Date.now();
