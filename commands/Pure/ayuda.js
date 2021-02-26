@@ -91,13 +91,6 @@ module.exports = {
         let embed = new Discord.MessageEmbed().setColor('#608bf3');
         if(search === 'n') {
             embed.setAuthor('Lista de comandos', aurl)
-            /*.addField('Añade...',
-                '`-x` para filtrar resultados comunes\n' +
-                '`--meme` para ver comandos meme\n' +
-                '`-m` o `--mod` para ver comandos de moderación\n' +
-                '`-p` o `--papa` para ver comandos de Papita con Puré\n' +
-                '`-h` o `--hourai` para ver comandos exclusivos de Hourai'
-            )*/
             .addField('Comandos: ejemplos de uso', '`p!ayuda -xmph --meme`\n`p!avatar @Usuario`\n`p!dados -c 20 -d 3`')
             .addField('Usa `p!ayuda <comando>` para más información', (list.name.length > 0)?list.name.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para realizar tu búsqueda).');
         } else {
@@ -108,6 +101,7 @@ module.exports = {
             };
             if(list.name.length > 0) 
                 embed.setAuthor(title(list.name[0]), aurl)
+                    .setFooter('**Nota:** los `<parámetros>` con el símbolo "?" son opcionales')
                     .addField('Nombre', `\`${list.name[0]}\``, true)
                     .addField('Alias', (list.aliases !== undefined && list.aliases.length > 0)?(list.aliases.map(i => `\`${i}\``).join(', ')):':label: Sin alias', true)
                     .addField('Descripción', (list.desc !== undefined && list.desc.length > 0)?list.desc:':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde')
@@ -119,25 +113,6 @@ module.exports = {
                     .addField('No se ha encontrado ningún comando con este nombre', `Utiliza \`p!ayuda\` para ver una lista de comandos disponibles y luego usa \`p!comando <comando>\` para ver un comando en específico`);
         }
         
-        let page = 0;
-        const maxpage = Math.floor((list.length - 1) / 10);
-        
         message.channel.send(embed);
-        
-        /*
-        if(!memez)
-            str += 
-                '*Puré:*\n' +
-                `\t╠ \`${global.p_pure}uwu\` uwu.\n` +
-                `\t╚ \`${global.p_pure}uwus <duración [segundos]>\` evento uwu.\n`;
-        
-        str +=
-            '*Drawmaku:*\n' +
-            `\t╚ \`${global.p_drmk}ayuda \` ayuda expandida de *__Drawmaku__*.\n` +
-            `*__Nota: los <parámetros> con el símbolo "\\*" son obligatorios.__*\n` +
-            '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬';
-        
-        message.channel.send(str);
-        */
     },
 };
