@@ -1,7 +1,5 @@
-const Discord = require('discord.js'); //Integrar discord.js
 const global = require('./config.json'); //Variables globales
-//const fs = require('fs');
-//const MongoClient = require('mongodb').MongoClient;
+const presence = require('./presence.json'); //Datos de presencia
 
 module.exports = {
     //#region Lista
@@ -298,6 +296,21 @@ module.exports = {
         if(cnt > 1) {
             setTimeout(module.exports.pingear, 1000, cnt - 1, mention, msgch);
         }
+    },
+
+    modifyAct: function(clientowo, pasuwus) { //Cambio de estado constante; créditos a Imagine Breaker y Sassafras
+        //Actualización de actividad
+        console.log(`Iniciando cambio de presencia ${pasuwus}...`);
+        clientowo.user.setActivity(
+            presence.status[module.exports.randInt(0, presence.status.length)],
+            { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${presence.stream[module.exports.randInt(0, presence.stream.length)]}` }
+        );
+        console.log('Cambio de presencia finalizado.');
+        
+        //Programar próxima actualización de actividad
+        const stepwait = module.exports.randInt(30, 70);
+        setTimeout(module.exports.modifyAct, 1000 * 60 * stepwait, pasuwus + 1);
+        console.log(`Esperando ciclo ${pasuwus + 1} en ${stepwait} minutos...`);
     },
     //#endregion
 

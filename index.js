@@ -2,17 +2,12 @@
 const fs = require('fs'); //Integrar operaciones sistema de archivos de consola
 const Discord = require('discord.js'); //Integrar discord.js
 const client = new Discord.Client({ fetchAllMembers: true }); //Cliente de bot
-const { //Constantes globales
-    p_drmk, //prefijo drawmaku
-    p_pure, //prefijo puré
-    p_mention, //prefijo puré
-} = require('./config.json');
-const token = 'NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY'; //La llave del bot
-const global = require('./config.json'); //Variables globales
+//const Keyv = require('keyv');
+//const keyv = new Keyv('postgresql://sxiejhineqmvsg:d0b53a4f62e2cf77383908ff8d281e4a5d4f7db7736abd02e51f0f27b6fc6264@ec2-35-175-170-131.compute-1.amazonaws.com:5432/da27odtfovvn7n');
+const global = require('./config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
 const Canvas = require('canvas'); 
-const { randInt } = require('./func.js');
-const presence = require('./presence.json');
+const token = 'NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY'; //La clave del bot
 module.exports = { Discord };
 //#endregion
 
@@ -31,27 +26,15 @@ for(const file of commandFiles) {
 }
 //#endregion
 
-function modifyAct(pasuwus) { //Cambio de estado constante; créditos a Imagine Breaker y Sassafras
-    //Actualización de actividad
-    console.log(`Iniciando cambio de presencia ${pasuwus}...`);
-    client.user.setActivity(
-        presence.status[randInt(0, presence.status.length)],
-        { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${presence.stream[randInt(0, presence.stream.length)]}` }
-    );
-    console.log('Cambio de presencia finalizado.');
-    
-    //Programar próxima actualización de actividad
-    const stepwait = randInt(30, 70);
-    setTimeout(modifyAct, 1000 * 60 * stepwait, pasuwus + 1);
-    console.log(`Esperando ciclo ${pasuwus + 1} en ${stepwait} minutos...`);
-}
+//keyv.on('error', err => console.error('Keyv connection error:', err));
 
-client.on('ready', () => { //Confirmación de inicio y cambio de estado
+client.on('ready', async () => { //Confirmación de inicio y cambio de estado
     let stt = Date.now();
     global.startuptime = stt;
     global.lechitauses = stt;
     global.seed = stt / 60000;
-    modifyAct(0);
+    func.modifyAct(client, 0);
+    //keyv.set();
     //func.saveState();//func.reloadState();
 	console.log('Bot conectado y funcionando.');
 });
@@ -261,7 +244,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     //#endregion
 
     //#region papa-reiniciar
-    if(message.content.toLowerCase().startsWith(`${p_pure}papa-reiniciar`)) {
+    if(message.content.toLowerCase().startsWith(`${global.p_pure}papa-reiniciar`)) {
         if (message.author.id === '423129757954211880') {
             message.channel.send(':arrows_counterclockwise: apagando...\n_Nota: puedes comprobar si el bot se reinició viendo el log del proceso._')
             .then(sent => {
@@ -279,20 +262,20 @@ client.on('message', message => { //En caso de recibir un mensaje
     //#region Comandos
     //#region Detección de Comandos
     let pdetect;
-    if(message.content.toLowerCase().startsWith(p_drmk)) pdetect = p_drmk;
-    else if(message.content.toLowerCase().startsWith(p_pure)) pdetect = p_pure;
-    else if(message.content.toLowerCase().startsWith(p_mention)) pdetect = p_mention;
+    if(message.content.toLowerCase().startsWith(global.p_drmk)) pdetect = global.p_drmk;
+    else if(message.content.toLowerCase().startsWith(global.p_pure)) pdetect = global.p_pure;
+    else if(message.content.toLowerCase().startsWith(global.p_mention)) pdetect = global.danmakup_mention;
     else return; //Salir si no se encuentra el prefijo
 
     const args = message.content.slice(pdetect.length).split(/ +/); //Argumentos ingresados
     const nombrecomando = args.shift().toLowerCase(); //Comando ingresado
 
     let comando;
-    if(pdetect === p_drmk) {
+    if(pdetect === global.p_drmk) {
         //comando = client.ComandosDrawmaku.get(nombrecomando) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
         message.channel.send('<:delete:704612795072774164> Los comandos de Drawmaku estarán deshabilitados por un tiempo indefinido. Se pide disculpas.');
         return;
-    } else if(pdetect === p_pure || pdetect === p_mention) 
+    } else if(pdetect === global.p_pure || pdetect === global.p_mention) 
         comando = client.ComandosPure.get(nombrecomando) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
     
     if (!comando) {

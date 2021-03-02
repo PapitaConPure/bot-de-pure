@@ -1,5 +1,4 @@
 const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../config.json'); //Variables globales
 const fetch = require('node-fetch');
 
 const getRandomInt = function(_max) {

@@ -29,7 +29,7 @@ module.exports = {
 		let dice = [];
 
 		try {
-			args.some((arg, i) => {
+			args.map((arg, i) => {
 				if(arg.startsWith('--'))
 					switch(arg.slice(2)) {
 					case 'dados': dices = parseInt(args[i + 1]); break;
