@@ -11,7 +11,7 @@ async function resolverLink(msg, linkRes, iSize) {
 		//Si se pasó un enlace, comprobar su funcionamiento y devolverlo si es accesible
 		console.log('Se ha pasado un enlace válido en llamado de p!lechita');
 		if(response.status === 200) {
-			if((linkRes.indexOf('.gif') + linkRes.indexOf('.mp4')) < 0 && (response.data.toString().length / 1024) < 256) {
+			if(msg.channel.nsfw || ((linkRes.indexOf('.gif') + linkRes.indexOf('.mp4')) < 0 && (response.data.toString().length / 1024) < 256)) {
 				iurl = linkRes;
 			} else {
 				msg.channel.send(':warning: La imagen es muy grande (>256KB) o tiene un formato inválido. Toma cum.');
