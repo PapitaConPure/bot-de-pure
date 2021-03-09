@@ -1,3 +1,4 @@
+const { Message } = require('discord.js');
 const global = require('./config.json'); //Variables globales
 const presence = require('./presence.json'); //Datos de presencia
 
@@ -206,6 +207,10 @@ module.exports = {
                 console.log(`El miembro ha recibido sus roles básicos.`);
                 canal.send(`Weno **${miembro.user.username}**, ya teni tu rol, q esti bien po <:Junky:651290323557023753>`);
                 //setTimeout(module.exports.askCandy, 1000, miembro, canal);
+
+                //Otorgar rol con 50% de probabilidad
+                if(Math.random() < 0.5)
+                    miembro.roles.add('727952950395273247');
             }
         } else {
             console.log(`El miembro se fue del servidor. Abortando.`);
@@ -255,7 +260,7 @@ module.exports = {
         }
 
         let candyemote = '778180421304188939';
-        let candyrole = miembro.guild.roles.cache.get('683084373717024869');
+        let candyrole = '683084373717024869';
         console.log('Preguntando por caramelos.');
         canal.send(
             `Weno **${miembro.user.username}**, si querí __caramelos__, reacciona con <:milky:778180421304188939> a esto po <:yumou:708158159180660748>\n` +
@@ -266,15 +271,44 @@ module.exports = {
                 const filter = (rc, user) => !user.bot && rc.emoji.id === candyemote && miembro.user.id === user.id;
                 const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
                 collector.on('collect', () => {
-                    if(miembro.roles.cache.some(role => role.id === candyrole.id)) {
+                    if(miembro.roles.cache.some(role => role.id === candyrole)) {
                         canal.send('Oe tranqui po, que ya tení tus caramelos <:kageuwu:742506313258369056>');
                         collector.stop();
                     } else {
-                        miembro.roles.add(candyrole.id);
+                        miembro.roles.add(candyrole);
                         canal.send('Caramelos entregados <:miyoi:674823039086624808>:pinching_hand: :candy:');
                     }
                 });
             });
+        });
+    },
+
+    askColor: function(rmessage) {
+        if(rmessage.channel.guild.id !== global.serverid.hourai) 
+            return;
+
+        let colrol = {
+            '778180421304188939': '671851233870479375', //French
+            '778180421304188939': '671852132328275979', //Holland
+            '778180421304188939': '671851228954755102', //Tibetan
+            '778180421304188939': '671851235267182625', //Kyoto
+            '778180421304188939': '671851236538187790', //London
+            '778180421304188939': '671851234541699092', //Russian
+            '778180421304188939': '671851228308963348' //Orléans
+        };
+        console.log('Se solicitaron colores.');
+        for(const [crr , crid] of Object.entries(colrol))
+            rmessage.react(crid);
+        const filter = (rc, user) => !user.bot && colrol.hasOwnProperty(rc.emoji.id) && rmessage.user.id === user.id;
+        const collector = rmessage.createReactionCollector(filter, { max: 3, time: 8 * 60 * 1000 });
+        collector.on('collect', rc => {
+            const reacted = rc.emoji.id;
+            miembro.roles.add(colrol[reacted]);
+            if(miembro.roles.cache.some(role => colrol.includes(role.id))) {
+                miembro.roles.remove(colrol[reacted]);
+                rmessage.channel.send('Colores intercambiados <:monowo:757624423300726865>');
+            } else 
+                rmessage.send('Colores otorgados <:miyoi:674823039086624808> :thumbsup:');
         });
     },
 

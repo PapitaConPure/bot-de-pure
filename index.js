@@ -193,7 +193,7 @@ client.on('message', message => { //En caso de recibir un mensaje
             'san'
         ];
         const hraifound = hrai !== -1 && !(hraipf.some(pf => msg.indexOf(`${pf}hourai`) === (hrai - pf.length)) || hraisf.some(sf => msg.indexOf(`hourai${sf}`) === hrai));
-        if(hraifound) {
+        if(hraifound && message.author.id !== '239550977638793217') {
             let fuckustr = [];
             if(msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)
                 fuckustr = [
@@ -224,7 +224,7 @@ client.on('message', message => { //En caso de recibir un mensaje
                     'Tu madre, por si acaso <:haniwaSmile:659872119995498507>',
                     '*Pero no seas puto <:haniwaSmile:659872119995498507>*',
                     'Qué decí? <:yuyuthink:722516632345247834>',
-                    'Ahhh, el culiao bravo eh? Vení que te rajo '
+                    'Ahhh, el culiao bravo eh? Vení que te rajo <:wtfchomu:725582341401083967>'
                 ];
                 ch.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]);
             };
@@ -410,7 +410,7 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
     //#region Imagen y Mensaje extra
     const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
     canal.send({files: [imagen]}).then(sent => {
-        if(servidor.id === '654471968200065034') { //Hourai Doll
+        if(servidor.id === global.serverid.hourai) {
             canal.send(
                 `Wena po <@${miembro.user.id}> conchetumare, como estai. Porfa revisa el canal <#671817759268536320> para que no te funemos <:haniwaSmile:659872119995498507> \n` +
                 'También elige un rol de color (debajo de este mensaje) y pídele el que te guste a alguno de los enfermos que trabajan aquí <:mayuwu:654489124413374474> \n' +
@@ -421,7 +421,7 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
             );
             setTimeout(func.askForRole, 1000 * 60 * 5, miembro, canal);
             console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');
-        } else if(servidor.id === '611732083995443210') { //Animal Realm
+        } else if(servidor.id === global.serverid.ar) {
             canal.send(
                 `Welcome to the server **${miembro.displayName}**! / ¡Bienvenido/a al server **${miembro.displayName}**!\n\n` +
                 `**EN:** To fully enjoy the server, don't forget to get 1 of the 5 main roles in the following channel~\n` +

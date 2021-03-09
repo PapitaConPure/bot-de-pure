@@ -19,7 +19,9 @@
         "todo": [
             "Búsqueda múltiple con p!pfp separada con comas en lugar de espacios",
             "Minijuegos individuales y tipo-fiesta",
-            "Base de datos en la nube"
+            "Base de datos en la nube",
+            "Simplificar prefijos y personalización de Bot a nivel de servidor",
+            "Comandos propios con Puréscript:tm:"
         ]
     },
     "p_drmk": "d!",

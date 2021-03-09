@@ -1,5 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../config.json'); //Variables globales
+const global = require('../../config.json'); //Variables globales
+const func = require('../../func');
 
 module.exports = {
 	name: 'colores',
@@ -17,9 +18,7 @@ module.exports = {
     ],
 	
 	execute(message, args) {
-		if(message.channel.guild.id === '654471968200065034')
-			message.channel.send(`Aquí teni los colore po <:reibu:686220828773318663>\nhttps://imgur.com/D5Z8Itb`);
-		else
-			message.channel.send(':x: Disculpa, soy estúpido. Tal vez escribiste mal el comando y no te entiendo.');
+		message.channel.send(`Aquí teni los colore po <:reibu:686220828773318663>\nhttps://imgur.com/D5Z8Itb`);
+		func.askColor(message);
     },
 };
