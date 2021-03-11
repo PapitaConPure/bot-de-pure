@@ -33,7 +33,7 @@ module.exports = {
         let fpapa = false;
         let fhourai = false;
         let search = 'n';
-        args.some(arg => {
+        args.map(arg => {
             if(arg.startsWith('--'))
                 switch(arg.slice(2)) {
                 case 'meme': fmeme = true; break;

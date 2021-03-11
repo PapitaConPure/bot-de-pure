@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "https://heroku.com",
         "version": {
-            "number": "Full.2.8.0D",
+            "number": "Full.2.8.0F",
             "name": "Cisne Cristalino"
         },
         "note": "Se esperan inconsistencias y errores debido a recientes trabajos de reestructuración",
