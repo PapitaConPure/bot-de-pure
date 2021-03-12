@@ -1,10 +1,9 @@
 const Discord = require('discord.js'); //Integrar discord.js
 var global = require('../../config.json'); //Variables globales
-const { randInt } = require('../../func.js');
 const func = require('../../func.js'); //Funciones globales
 
 module.exports = {
-	name: 'test',
+	name: 'papa-test',
     desc: 'Comando de pruebas :flushed: :point_right: :point_left:',
     flags: [
         'papa',
@@ -15,8 +14,9 @@ module.exports = {
     ],
 	
 	execute(message, args) {
-		message.channel.send('No se están haciendo pruebas por el momento <:uwu:681935702308552730>');
-		return;
-		message.channel.send(`\`${randInt(10, 1000)}\``);
+		//message.channel.send('No se están haciendo pruebas por el momento <:uwu:681935702308552730>');
+		//return;
+		//func.dibujarBienvenida(message.member);
+        message.channel.send('uwu');
     },
 };

@@ -264,11 +264,12 @@ client.on('message', message => { //En caso de recibir un mensaje
     //#region Comandos
     //#region Detección de Comandos
     let pdetect;
-    if(message.content.toLowerCase().startsWith(global.p_drmk)) pdetect = global.p_drmk;
-    else if(message.content.toLowerCase().startsWith(global.p_pure)) pdetect = global.p_pure;
-    else if(message.content.toLowerCase().startsWith(global.p_mention)) pdetect = global.danmakup_mention;
+    if(msg.startsWith(global.p_drmk)) pdetect = global.p_drmk;
+    else if(msg.startsWith(global.p_pure)) pdetect = global.p_pure;
+    else if(msg.startsWith(global.p_mention)) pdetect = global.p_mention;
     else return; //Salir si no se encuentra el prefijo
 
+    //Partición de mensaje comando
     const args = message.content.slice(pdetect.length).split(/ +/); //Argumentos ingresados
     const nombrecomando = args.shift().toLowerCase(); //Comando ingresado
 
@@ -288,11 +289,66 @@ client.on('message', message => { //En caso de recibir un mensaje
 
     //#region Ejecución de Comandos
     try {
+        //Detectar problemas con el comando basado en flags
+        let errtitle, errfield;
+        if(comando.flags.some(flag => {
+            switch(flag) {
+            case 'outdated':
+                errtitle = 'Comando desactualizado';
+                errfield = 'El comando no se encuentra disponible debido a que su función ya no es requerida en absoluto. Espera a que se actualice~';
+                return true;
+
+            case 'maintenance':
+                errtitle = 'Comando en mantenimiento';
+                errfield = 'El comando no se encuentra disponible debido a que está en proceso de actualización o reparación en este momento. Espera a que se actualice~';
+                return true;
+
+            case 'mod':
+                if(message.member.hasPermission('MANAGE_ROLES') || message.member.hasPermission('MANAGE_MESSAGES')) return false;
+                errtitle = 'Comando exclusivo para moderación';
+                errfield = 'El comando es de uso restringido para moderación.\n**Considero a alguien como moderador cuando** tiene permisos para administrar roles *(MANAGE_ROLES)* o mensajes *(MANAGE_MESSAGES)*';
+                return true;
+            
+            case 'papa':
+                if(message.author.id === '423129757954211880') return false;
+                errtitle = 'Comando exclusivo de Papita con Puré';
+                errfield = 'El comando es de uso restringido para el usuario __Papita con Puré#6932__. Esto generalmente se debe a que el comando es usado para pruebas o ajustes globales/significativos/sensibles del Bot';
+                return true;
+
+            case 'hourai':
+                if(message.channel.guild.id === global.serverid.hourai) return false;
+                errtitle = 'Comando exclusivo de Hourai Doll';
+                errfield = 'El comando es de uso restringido para el servidor __Hourai Doll__. Esto generalmente se debe a que cumple funciones que solo funcionan allí';
+                return true;
+                
+            default:
+                return false;
+            }
+        })) {
+            //En caso de detectar un problema, enviar embed reportando el estado del comando
+            message.channel.send(new Discord.MessageEmbed()
+                .setColor('#f01010')
+                .setAuthor('Un momento...')
+                .setTitle(`${errtitle}`)
+                .addField(`${pdetect}${nombrecomando}`, `${errfield}`)
+                .setFooter('¿Dudas? ¿Sugerencias? Contacta con Papita con Puré#6932')
+            );
+            return;
+        } else //En cambio, si no se detectan problemas, finalmente ejecutar comando
+            comando.execute(message, args);
+        /*
         if(comando.flags.some(flag => flag === 'outdated'))
             message.channel.send(new Discord.MessageEmbed()
                 .setAuthor('Un momento...')
-                .setTitle('Comando desactualizado')
-                .addField(`${pdetect}${nombrecomando}`, 'El comando no se encuentra disponible debido a que su función ya no es requerida en absoluto. Espera a que se actualice~')
+                .setTitle()
+                .addField(`${pdetect}${nombrecomando}`, '')
+                .setColor('#f01010')
+            );
+        else if(comando.flags.some(flag => flag === 'maintenance'))
+            message.channel.send(new Discord.MessageEmbed()
+                .setAuthor('Un momento...')
+                .setTitle('')
+                .addField(`${pdetect}${nombrecomando}`, '')
                 .setColor('#f01010')
             );
         else if(comando.flags.some(flag => flag === 'maintenance'))
@@ -301,15 +357,14 @@ client.on('message', message => { //En caso de recibir un mensaje
                 .setTitle('Comando en mantenimiento')
                 .addField(`${pdetect}${nombrecomando}`, 'El comando no se encuentra disponible debido a que está en proceso de actualización o reparación en este momento. Espera a que se actualice~')
                 .setColor('#f01010')
-            );
-        else
-            comando.execute(message, args);
+            );*/
     } catch(error) {
         console.log('Ha ocurrido un error al ingresar un comando.');
         console.error(error);
         message.channel.send(
-            `\`\`\`js\n${error}\n\`\`\`` +
-            '<@!423129757954211880>\n');
+            `\`\`\`js\n${error}\n\`\`\`\n` +
+            '<@!423129757954211880>'
+        );
     }
 
     //Empezar cuenta regresiva luego de mod-empezar
@@ -325,242 +380,10 @@ client.on('message', message => { //En caso de recibir un mensaje
 });
 
 //#region Mensajes de sistema
-async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo de un servidor
-    const servidor = miembro.guild; //Servidor
-    const canal = servidor.channels.cache.get(servidor.systemChannelID); //Canal de mensajes de sistema
-
-    if(typeof canal === 'undefined') {
-        console.log('El servidor no tiene canal de mensajes de sistema.');
-        servidor.owner.user.send(
-            '¡Hola, soy Bot de Puré!\n' +
-            `¡Un nuevo miembro, **<@${miembro.id}> (${miembro.id})**, ha entrado a tu servidor **${servidor.name}**!\n\n` +
-            '*Si deseas que envíe una bienvenida a los miembros nuevos en lugar de enviarte un mensaje privado, selecciona un canal de mensajes de sistema en tu servidor.*\n' +
-            '*__Nota:__ Bot de Puré no opera con mensajes privados.*'
-        );
-        return;
-    }
-
-    console.log(`Un usuario ha entrado a ${servidor.name}...`);
-    if(!servidor.me.permissionsIn(canal).has(['SEND_MESSAGES', 'VIEW_CHANNEL'])) {
-        console.log('No se puede enviar un mensaje de bienvenida en este canal.');
-        return;
-    }
-    canal.startTyping();
-    
-    //#region Creación de imagen
-    const canvas = Canvas.createCanvas(1275, 825);
-    const ctx = canvas.getContext('2d');
-
-    const fondo = await Canvas.loadImage('./fondo.png');
-    ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
-    //#endregion
-
-	
-    //#region Texto
-    //#region Propiedades de texto
-    ctx.textBaseline = 'bottom';
-    ctx.shadowOffsetX = shadowOffsetY = 2;
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = 'black';
-    ctx.fillStyle = '#ffffff';
-    //#endregion
-
-    //#region Nombre del usuario
-    let Texto = `${miembro.displayName}`;
-    let fontSize = 72;
-    while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
-    ctx.font = `bold ${fontSize}px sans-serif`;
-    ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 80);
-    //#endregion
-    
-    //#region Texto inferior
-    if(servidor.id === '611732083995443210') Texto = 'Animal Realm!';
-    else Texto = `${servidor.name}!`;
-    fontSize = 120;
-    while(ctx.measureText(Texto).width > (canvas.width - 150)) fontSize -= 2;
-    ctx.font = `bold ${fontSize}px sans-serif`;
-    ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 15);
-    Texto = '¡Bienvenid@ a';
-    ctx.font = `bold 48px sans-serif`;
-    ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - fontSize - 30);
-    //#endregion
-    //#endregion
-	
-
-    //#region Foto de Perfil
-    //#region Sombra
-    const ycenter = (80 + (canvas.height - 10/*fontSize*/ - 48 - 30)) / 2;
-    ctx.shadowOffsetX = shadowOffsetY = 8;
-    ctx.shadowBlur = 20;
-    ctx.fillStyle = '#36393f';
-    ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
-    ctx.fill();
-    //#endregion
-
-    //#region Imagen circular
-    ctx.beginPath();
-    ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
-    ctx.closePath();
-    ctx.clip();
-    const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL({ format: 'png', dynamic: false, size: 1024 }));
-    ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
-    //#endregion
-    //#endregion
-	
-    const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'bienvenida.png');
-
-    //#region Imagen y Mensaje extra
-    const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
-    canal.send({files: [imagen]}).then(sent => {
-        if(servidor.id === global.serverid.hourai) {
-            canal.send(
-                `Wena po <@${miembro.user.id}> conchetumare, como estai. Porfa revisa el canal <#671817759268536320> para que no te funemos <:haniwaSmile:659872119995498507> \n` +
-                'También elige un rol de color (debajo de este mensaje) y pídele el que te guste a alguno de los enfermos que trabajan aquí <:mayuwu:654489124413374474> \n' +
-                'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:697321858407727224>\n' +
-                'WENO YA PO CSM. <@&654472238510112799>, vengan a saludar maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
-                `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n` +
-                'https://imgur.com/D5Z8Itb'
-            ).then(sent => func.askColor(sent, message));
-            setTimeout(func.askForRole, 1000 * 60 * 5, miembro, canal);
-            console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');
-        } else if(servidor.id === global.serverid.ar) {
-            canal.send(
-                `Welcome to the server **${miembro.displayName}**! / ¡Bienvenido/a al server **${miembro.displayName}**!\n\n` +
-                `**EN:** To fully enjoy the server, don't forget to get 1 of the 5 main roles in the following channel~\n` +
-                '**ES:** Para disfrutar totalmente del servidor, no olvides escoger 1 de los 5 roles principales en el siguiente canal~\n\n' +
-                '→ <#611753608601403393> ←\n\n' +
-                `*Ahora hay **${peoplecnt}** usuarios en el server.*`
-            );
-        } else { //Otros servidores
-            canal.send(
-                `¡Bienvenido al servidor **${miembro.displayName}**!\n` +
-                `*Ahora hay **${peoplecnt}** usuarios en el server.*`
-            );
-        }
-    });
-    //#endregion
-    console.log('Bienvenida finalizada.');
-    canal.stopTyping(true);
-}
-
-async function dibujarDespedida(miembro) { //Dar despedida a ex-miembros de un servidor
-    const servidor = miembro.guild;
-    const canal = servidor.channels.cache.get(servidor.systemChannelID);
-
-    if(typeof canal === 'undefined') {
-        console.log('El servidor no tiene canal de mensajes de sistema.');
-        return;
-    }
-
-    if(servidor.id === global.serverid.hourai) {
-        const inadvertidos = [
-            '225701598272290827', //Orphen
-            '190681032935211008', //Sheep
-            '632011537413963777', //Hikari
-            //'212311832281612289', //Chise
-            //'537080207580987402', //Aerza
-            '263163573843263509' //Recycle
-        ];
-
-        if(inadvertidos.includes(miembro.id)) {
-            servidor.owner.user.send(
-                '¡Hola, soy Bot de Puré!\n' +
-                `El miembro **<@${miembro.id}> (${miembro.id})** ha salido de tu servidor **${servidor.name}**...\n` +
-                `¡Shhh! Si bien tienes un canal de mensajes de sistema establecido, este miembro se encuentra en una lista negra de despedidas.\n\n` +
-                '*Si piensas que el usuario no debería estar en dicha lista negra, comunícate con mi creador~*\n' +
-                '*__Nota:__ Bot de Puré no opera con mensajes privados.*'
-            );
-            console.log('Se ha inadvertido el usuario.');
-            return;
-        }
-
-        /*servidor.owner.user.send(
-            '¡Hola, soy Bot de Puré!\n' +
-            `El miembro **<@${miembro.id}> (${miembro.id})** ha salido de tu servidor **${servidor.name}**...\n` +
-            '*__Nota:__ Bot de Puré no opera con mensajes privados.*'
-        );
-        
-        return;*/
-    }
-
-    console.log(`Un usuario ha salido de ${servidor.name}...`);
-    if(!servidor.me.permissionsIn(canal).has(['SEND_MESSAGES', 'VIEW_CHANNEL'])) {
-        console.log('No se puede enviar un mensaje de despedida en este canal.');
-        return;
-    }
-    canal.startTyping();
-    
-    //#region Creación de imagen
-    const canvas = Canvas.createCanvas(1500, 900);
-    const ctx = canvas.getContext('2d');
-
-    const fondo = await Canvas.loadImage('./fondo2.png');
-    ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
-    //#endregion
-
-    //#region Texto
-    //#region Propiedades de Texto
-    ctx.textBaseline = 'bottom';
-    ctx.shadowOffsetX = shadowOffsetY = 2;
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = 'black';
-    ctx.fillStyle = '#ffffff';
-    //#endregion
-
-    //#region Nombre del usuario
-    let Texto = `Adiós, ${miembro.displayName}`;
-    let fontSize = 72;
-    while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
-    ctx.font = `bold ${fontSize}px sans-serif`;
-    ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 40);
-    //#endregion
-    //#endregion
-
-    //#region Foto de Perfil
-    //#region Sombra
-    const ycenter = 40 + 150;
-    ctx.shadowOffsetX = shadowOffsetY = 8;
-    ctx.shadowBlur = 20;
-    ctx.fillStyle = '#36393f';
-    ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
-    ctx.fill();
-    //#endregion
-
-    //#region Dibujar foto de perfil
-	ctx.beginPath();
-	ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
-	ctx.closePath();
-	ctx.clip();
-    const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL({ format: 'png', dynamic: false, size: 1024 }));
-	ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
-    //#endregion
-    //#endregion
-
-    const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'bienvenida.png');
-
-    //#region Imagen y Mensaje extra
-    const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
-    canal.send({files: [imagen]}).then(sent => {
-        if(servidor.id === '654471968200065034') { //Hourai Doll
-            canal.send(
-                'Nooooo po csm, perdimo otro weón \<:meguDerp:708064265092726834>' +
-                `*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
-            );
-        } else { //Otros servidores
-            canal.send(
-                `*Ahora hay **${peoplecnt}** usuarios en el server.*`
-            );
-        }
-    });
-    //#endregion
-    console.log('Despedida finalizada.');
-    canal.stopTyping();
-}
- 
 client.on('guildMemberAdd', member => {
     console.log('Evento de entrada de usuario a servidor desencadenado.');
     try {
-        if(!member.user.bot) dibujarBienvenida(member);
+        if(!member.user.bot) func.dibujarBienvenida(member);
         else member.guild.channels.cache.get(member.guild.systemChannelID).send(
             'Se acaba de unir un bot.\n' +
             '***Beep boop, boop beep?***'
@@ -574,7 +397,7 @@ client.on('guildMemberAdd', member => {
 client.on('guildMemberRemove', member => {
     console.log('Evento de salida de usuario de servidor desencadenado.');
     try {
-        if(!member.user.bot) dibujarDespedida(member);
+        if(!member.user.bot) func.dibujarDespedida(member);
         else member.guild.channels.cache.get(member.guild.systemChannelID).send(
             `**${member.displayName}** ya no es parte de la pandilla de bots de este servidor :[\n`
         );
