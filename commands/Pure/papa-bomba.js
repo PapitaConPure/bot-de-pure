@@ -48,7 +48,7 @@ module.exports = {
 	callx: '<largo?>',
 	
 	execute(message, args) {
-        if(message.author.id === '423129757954211880') {
+        /*if(message.author.id === '423129757954211880') {
 			if(args.length) stupidBomb(parseInt(args[0]), 0, message.id, message.channel);
 			else {
 				const sv = message.channel.guild;
@@ -65,6 +65,6 @@ module.exports = {
 			let bomblen = 4;
 			if(args.length) bomblen = parseInt(args[0]);
             stupidBomb(bomblen, 0, message.id, message.channel);
-        }
+        }*/
     },
 };

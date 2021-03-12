@@ -6,17 +6,13 @@ module.exports = {
 	name: 'papa-test',
     desc: 'Comando de pruebas :flushed: :point_right: :point_left:',
     flags: [
-        'papa',
-        'exclusivo'
+        'papa'
     ],
     options: [
 
     ],
 	
 	execute(message, args) {
-		//message.channel.send('No se están haciendo pruebas por el momento <:uwu:681935702308552730>');
-		//return;
-		//func.dibujarBienvenida(message.member);
-        message.channel.send('uwu');
+		func.dibujarBienvenida(message.member);
     },
 };

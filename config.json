@@ -2,13 +2,14 @@
     "bot_status": {
         "host": "https://heroku.com",
         "version": {
-            "number": "Full.2.8.10",
+            "number": "Full.2.8.1A",
             "name": "Cisne Cristalino"
         },
         "note": "Se esperan inconsistencias y errores debido a recientes trabajos de reestructuración",
         "changelog": [
             "Nuevo comando de moderación (Hourai Doll)",
-            "`p!colores` y el evento de bienvenida ahora permiten al usuario elegir un color reaccionando"
+            "`p!colores` y el evento de bienvenida ahora permiten al usuario elegir un color reaccionando",
+            "Comprobaciones de estado de comandos antes de ejecutarlos (mejora de infraestructura)"
         ],
         "todo": [
             "Búsqueda múltiple con p!pfp separada con comas en lugar de espacios",

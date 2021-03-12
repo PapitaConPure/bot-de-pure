@@ -19,39 +19,37 @@ module.exports = {
 	callx: '<cantidad>',
 	
 	execute(message, args) {
-		if(message.member.hasPermission('MANAGE_MESSAGES', false, true, true)) {
-			if(!args.length) {
-				message.delete();
-				message.channel.send(':warning: debes especificar la cantidad o el autor de los mensajes a borrar.');
-				return;
-			} else {
-				let amt = 1;
-				let user;
-				let jn = false;
-				args.map((arg, i) => {
-					if(arg.startsWith('--'))
-						if(!jn) 
-							switch(arg.slice(2)) {
-							case 'usuario': jn = true; user = func.resolverIDUsuario(arg, message.channel.guild, message.client); break;
-							case 'cantidad': jn = true; amt = Math.max(2, Math.min(parseInt(args[i + 1]) + 1, 100)); break;
+		if(!args.length) {
+			message.delete();
+			message.channel.send(':warning: debes especificar la cantidad o el autor de los mensajes a borrar.');
+			return;
+		} else {
+			let amt = 1;
+			let user;
+			let jn = false;
+			args.map((arg, i) => {
+				if(arg.startsWith('--'))
+					if(!jn) 
+						switch(arg.slice(2)) {
+						case 'usuario': jn = true; user = func.resolverIDUsuario(arg, message.channel.guild, message.client); break;
+						case 'cantidad': jn = true; amt = Math.max(2, Math.min(parseInt(args[i + 1]) + 1, 100)); break;
+						}
+					else jn = false;
+				else if(arg.startsWith('-')) {
+					if(!jn)
+						for(c of arg.slice(1))
+							switch(c) {
+							case 'u': jn = true; user = func.resolverIDUsuario(arg, message.channel.guild, message.client); break;
+							case 'c': jn = true; amt = Math.max(2, Math.min(parseInt(args[i + 1]) + 1, 100)); break;
 							}
-						else jn = false;
-					else if(arg.startsWith('-')) {
-						if(!jn)
-							for(c of arg.slice(1))
-								switch(c) {
-								case 'u': jn = true; user = func.resolverIDUsuario(arg, message.channel.guild, message.client); break;
-								case 'c': jn = true; amt = Math.max(2, Math.min(parseInt(args[i + 1]) + 1, 100)); break;
-								}
-						else jn = false;
-					}
-				});
-				
-				if(user === undefined)
-					message.channel.bulkDelete(amt, true);
-				else
-					message.channel.bulkDelete(message.channel.messages.cache.filter((_, msg) => msg.author.id = user.id).first(amt), true);
-			}
-		} else message.channel.send(':warning: necesitas tener el permiso ***ADMINISTRAR MENSAJES** (MANAGE_MESSAGES)* para usar este comando.');
+					else jn = false;
+				}
+			});
+			
+			if(user === undefined)
+				message.channel.bulkDelete(amt, true);
+			else
+				message.channel.bulkDelete(message.channel.messages.cache.filter((_, msg) => msg.author.id = user.id).first(amt), true);
+		}
     },
 };
