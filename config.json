@@ -2,19 +2,13 @@
     "bot_status": {
         "host": "https://heroku.com",
         "version": {
-            "number": "Full.2.8.0F",
+            "number": "Full.2.8.10",
             "name": "Cisne Cristalino"
         },
         "note": "Se esperan inconsistencias y errores debido a recientes trabajos de reestructuración",
         "changelog": [
-            "Nueva función exclusiva para personal autorizado",
-            "Visualización de estado en `p!presentar` discriminada hacia nuevo comando `p!estado`",
-            "`p!lechita` ahora es responsivo a emotes y enlaces de imágenes pequeñas",
-            "Se comenzó a implementar un formato de comandos similar al usado por terminales en `p!ayuda`, `p!dados` y `p!decir`, sin mención en `p!ayuda` por el momento",
-            "Se rehizo `p!ayuda` para que indexe, categorice busque y detalle explique comandos automáticamente. Se agregaron metadatos a todos los comandos para esto",
-            "Corrección de un error al despedir un miembro del server",
-            "Optimización",
-            "Nuevo comando `p!arathy` para sueños o caca"
+            "Nuevo comando de moderación (Hourai Doll)",
+            "`p!colores` y el evento de bienvenida ahora permiten al usuario elegir un color reaccionando"
         ],
         "todo": [
             "Búsqueda múltiple con p!pfp separada con comas en lugar de espacios",

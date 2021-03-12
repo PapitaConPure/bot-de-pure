@@ -10,7 +10,8 @@ module.exports = {
 	],
     desc: 'Muestra una lista paginada de emotes a mi disposición',
     flags: [
-        'common'
+        'common',
+		'maintenance'
     ],
     options: [
 

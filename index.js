@@ -4,6 +4,7 @@ const Discord = require('discord.js'); //Integrar discord.js
 const client = new Discord.Client({ fetchAllMembers: true }); //Cliente de bot
 //const Keyv = require('keyv');
 //const keyv = new Keyv('postgresql://sxiejhineqmvsg:d0b53a4f62e2cf77383908ff8d281e4a5d4f7db7736abd02e51f0f27b6fc6264@ec2-35-175-170-131.compute-1.amazonaws.com:5432/da27odtfovvn7n');
+//keyv.on('error', err => console.error('Keyv connection error:', err));
 const global = require('./config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
 const Canvas = require('canvas'); 
@@ -26,8 +27,6 @@ for(const file of commandFiles) {
 }
 //#endregion
 
-//keyv.on('error', err => console.error('Keyv connection error:', err));
-
 client.on('ready', async () => { //Confirmación de inicio y cambio de estado
     let stt = Date.now();
     global.startuptime = stt;
@@ -35,7 +34,6 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
     global.seed = stt / 60000;
     func.modifyAct(client, 0);
     //keyv.set();
-    //func.saveState();//func.reloadState();
 	console.log('Bot conectado y funcionando.');
 });
 
@@ -132,6 +130,7 @@ async function dibujarMillion(msg) { //Dar felicitaciones al desgraciado
 client.on('message', message => { //En caso de recibir un mensaje
     const msg = message.content.toLowerCase();
 
+    //#region palta -> aguacate
     if(msg.indexOf('aguacate') !== -1) {
         let paltastr = msg.replace(/aguacate/g, 'palta');
         let paltaname = message.member.nickname;
@@ -140,8 +139,9 @@ client.on('message', message => { //En caso de recibir un mensaje
         message.channel.send(`**${paltaname}:**\n` + paltastr);
         message.delete();
     }
+    //#endregion
 
-    //Dulce Victoria(tm)
+    //#region Dulce Victoria(tm)
     //Escuchar mensajes en canal de gacha
     if(message.channel.id === '813189609911353385' || message.channel.id === '739513729649082490')
         //Si se detecta un embed y tiene nombre de autor "Megumin", proceder con el plan
@@ -161,10 +161,11 @@ client.on('message', message => { //En caso de recibir un mensaje
                 client.users.cache.get('423129757954211880').send(thingyembed);
             }
         }
+    //#endregion
     
+    //#region Log de Mensajes
     if(global.cansay === 0) { if(message.author.bot) return; } //Hacer que el bot no sea un pelotudo (ignorar mensajes de bots)
-    
-    //Hacer que el bot de hecho sea inteligente (messages log)
+    //Hacer que el bot de hecho sea inteligente (registrar mensajes)
     if(message.guild) {
         console.log(`[${message.guild.name.substr(0,12)}::${message.guild.id} → #${message.channel.name.substr(0,8)}::${message.channel.id}] ${message.author.username}: "${message.content}"`);
         if(message.attachments.size > 0)
@@ -174,6 +175,7 @@ client.on('message', message => { //En caso de recibir un mensaje
         message.channel.send(':x: Uh... disculpá, no trabajo con mensajes directos.');
         return;
     }
+    //#endregion
 
     //#region Respuestas rápidas
     //#region Mensajes weones
@@ -418,7 +420,7 @@ async function dibujarBienvenida(miembro) { //Dar bienvenida a un miembro nuevo 
                 'WENO YA PO CSM. <@&654472238510112799>, vengan a saludar maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
                 `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n` +
                 'https://imgur.com/D5Z8Itb'
-            );
+            ).then(sent => func.askColor(sent, message));
             setTimeout(func.askForRole, 1000 * 60 * 5, miembro, canal);
             console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');
         } else if(servidor.id === global.serverid.ar) {

@@ -200,7 +200,7 @@ module.exports = {
                 canal.send(
                     `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>\n` +
                     `https://imgur.com/D5Z8Itb`
-                );
+                ).then(sent => func.askColor(sent, message));
                 setTimeout(module.exports.forceRole, 1000 * 60 * 4, miembro, canal);
                 console.log(`Esperando comprobación final de miembro en unos minutos...`);
             } else {
@@ -283,32 +283,38 @@ module.exports = {
         });
     },
 
-    askColor: function(rmessage) {
-        if(rmessage.channel.guild.id !== global.serverid.hourai) 
-            return;
+    askColor: async function(rmessage, umessage) {
+        /*if(rmessage.channel.guild.id !== global.serverid.hourai) 
+            return;*/
 
         let colrol = {
-            '778180421304188939': '671851233870479375', //French
-            '778180421304188939': '671852132328275979', //Holland
-            '778180421304188939': '671851228954755102', //Tibetan
-            '778180421304188939': '671851235267182625', //Kyoto
-            '778180421304188939': '671851236538187790', //London
-            '778180421304188939': '671851234541699092', //Russian
-            '778180421304188939': '671851228308963348' //Orléans
+            '819772377814532116': '671851233870479375', //French
+            '819772377642041345': '671851228308963348', //Orléans
+            '819772377624870973': '671852132328275979', //Holland
+            '819772377894354944': '671851234541699092', //Russian
+            '819772377856606228': '671851236538187790', //London
+            '819772377482526741': '671851228954755102', //Tibetan
+            '819772377440583691': '671851235267182625'  //Kyoto
         };
         console.log('Se solicitaron colores.');
-        for(const [crr , crid] of Object.entries(colrol))
-            rmessage.react(crid);
-        const filter = (rc, user) => !user.bot && colrol.hasOwnProperty(rc.emoji.id) && rmessage.user.id === user.id;
+        for(const [creact, crole] of Object.entries(colrol))
+            await rmessage.react(creact);
+        const filter = (rc, user) => !user.bot && colrol.hasOwnProperty(rc.emoji.id) && umessage.author.id === user.id;
         const collector = rmessage.createReactionCollector(filter, { max: 3, time: 8 * 60 * 1000 });
-        collector.on('collect', rc => {
-            const reacted = rc.emoji.id;
-            miembro.roles.add(colrol[reacted]);
-            if(miembro.roles.cache.some(role => colrol.includes(role.id))) {
-                miembro.roles.remove(colrol[reacted]);
-                rmessage.channel.send('Colores intercambiados <:monowo:757624423300726865>');
-            } else 
-                rmessage.send('Colores otorgados <:miyoi:674823039086624808> :thumbsup:');
+        
+        collector.on('collect', (reaction, user) => {
+            const reacted = reaction.emoji.id;
+            umessage.channel.guild.members.fetch(user.id).then(member => {
+                const hadroles = member.roles.cache.filter(role => Object.values(colrol).some(colorid => colorid === role.id));
+                if(hadroles.array().length) {
+                    member.roles.remove(hadroles)
+                        .then(mem => mem.roles.add(colrol[reacted]));
+                    rmessage.channel.send('Colores intercambiados <:monowo:757624423300726865>');
+                } else {
+                    rmessage.channel.send('Colores otorgados <:miyoi:674823039086624808> :thumbsup:');
+                    member.roles.add(colrol[reacted]);
+                }
+            });
         });
     },
 
