@@ -2,14 +2,16 @@
     "bot_status": {
         "host": "https://heroku.com",
         "version": {
-            "number": "Full.2.8.1B",
+            "number": "Full.2.8.1C",
             "name": "Cisne Cristalino"
         },
         "note": "Se esperan inconsistencias y errores debido a recientes trabajos de reestructuración",
         "changelog": [
             "Nuevo comando de moderación (Hourai Doll)",
             "`p!colores` y el evento de bienvenida ahora permiten al usuario elegir un color reaccionando",
-            "Comprobaciones de estado de comandos antes de ejecutarlos (mejora de infraestructura)"
+            "Comprobaciones de estado de comandos antes de ejecutarlos (mejora de infraestructura)",
+            "Nuevo comando `p!ping` (no confundir con `p!pinguear`) para saber el estado de conexión actual",
+            "Restaurado comando exclusivo de Papita"
         ],
         "todo": [
             "Búsqueda múltiple con p!pfp separada con comas en lugar de espacios",
