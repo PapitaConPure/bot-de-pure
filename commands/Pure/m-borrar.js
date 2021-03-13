@@ -14,7 +14,8 @@ module.exports = {
         'mod'
     ],
     options: [
-		'`<cantidad>` para especificar la cantidad de mensajes a borrar (sin contar el mensaje del comando)'
+		'`<cantidad>` _(número)_ para especificar la cantidad de mensajes a borrar (sin contar el mensaje del comando)',
+		'`-u <user>` o `--usuario <user>` _(mención/texto/id)_ para especificar de qué usuario borrar mensajes'
     ],
 	callx: '<cantidad>',
 	
@@ -24,32 +25,46 @@ module.exports = {
 			message.channel.send(':warning: debes especificar la cantidad o el autor de los mensajes a borrar.');
 			return;
 		} else {
-			let amt = 1;
 			let user;
 			let jn = false;
-			args.map((arg, i) => {
-				if(arg.startsWith('--'))
-					if(!jn) 
+			args = args.map((arg, i) => {
+				let ignore = true;
+				if(!jn) {
+					if(arg.startsWith('--'))
 						switch(arg.slice(2)) {
-						case 'usuario': jn = true; user = func.resolverIDUsuario(arg, message.channel.guild, message.client); break;
-						case 'cantidad': jn = true; amt = Math.max(2, Math.min(parseInt(args[i + 1]) + 1, 100)); break;
+						case 'usuario': jn = true; user = func.resolverIDUsuario(args[i + 1], message.channel.guild, message.client); args[i] = undefined; args[i + 1] = undefined; break;
+						default: ignore = false;
 						}
-					else jn = false;
-				else if(arg.startsWith('-')) {
-					if(!jn)
+					else if(arg.startsWith('-'))
 						for(c of arg.slice(1))
 							switch(c) {
-							case 'u': jn = true; user = func.resolverIDUsuario(arg, message.channel.guild, message.client); break;
-							case 'c': jn = true; amt = Math.max(2, Math.min(parseInt(args[i + 1]) + 1, 100)); break;
+							case 'u': jn = true; user = func.resolverIDUsuario(args[i + 1], message.channel.guild, message.client); args[i] = undefined; args[i + 1] = undefined; break;
+							default: ignore = false;
 							}
-					else jn = false;
-				}
-			});
+					else ignore = false;
+				} else jn = false;
+
+				if(ignore) return undefined;
+				else return arg;
+			}).filter(arg => arg !== undefined);
+
+			let amt = parseInt(args[0]);
+			if(isNaN(amt)) {
+				message.channel.send(
+					'Debes especificar la cantidad de mensajes a borrar\n' +
+					`Revisa \`p!ayuda m-borrar\` para más información`
+				);
+				return;
+			}
+			amt = Math.max(2, Math.min(amt + 1, 100));
 			
 			if(user === undefined)
-				message.channel.bulkDelete(amt, true);
-			else
-				message.channel.bulkDelete(message.channel.messages.cache.filter((_, msg) => msg.author.id = user.id).first(amt), true);
+				message.channel.bulkDelete(amt);
+			else {
+				message.channel.messages.fetch({ limit: amt }).then(mcoll =>
+					message.channel.bulkDelete(mcoll.filter(msg => msg.author.id === user.id))
+				);
+			}
 		}
     },
 };

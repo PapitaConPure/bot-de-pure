@@ -1,6 +1,7 @@
-const { Message } = require('discord.js');
+const Discord = require('discord.js');
 const global = require('./config.json'); //Variables globales
 const presence = require('./presence.json'); //Datos de presencia
+const Canvas = require('canvas'); 
 
 module.exports = {
     //#region Lista
@@ -186,7 +187,7 @@ module.exports = {
         console.log('Comprobando miembro nuevo en Hourai Doll para petición de rol de color');
         if(!miembro.deleted) {
             console.log('El miembro sigue en el servidor');
-            if(miembro.roles.cache.size === 1) {
+            if(module.exports.dollCount(miembro) === 1) {
                 console.log('El miembro está retenido.');
                 global.houraiwarn++;
                 if(global.houraiwarn <= 6) {
@@ -195,12 +196,12 @@ module.exports = {
                     setTimeout(module.exports.askForRole, 1000 * 60 * 5, miembro , canal);
                     console.log(`Volviendo a esperar confirmación de miembro (${global.houraiwarn}/6)...`);
                 }
-            } else if(miembro.roles.cache.size === 2) {
+            } else if(module.exports.dollCount(miembro) === 2) {
                 console.log('El miembro no ha recibido roles básicos.');
                 canal.send(
                     `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>\n` +
                     `https://imgur.com/D5Z8Itb`
-                ).then(sent => func.askColor(sent, message));
+                ).then(sent => module.exports.askColor(sent, miembro));
                 setTimeout(module.exports.forceRole, 1000 * 60 * 4, miembro, canal);
                 console.log(`Esperando comprobación final de miembro en unos minutos...`);
             } else {
@@ -222,7 +223,7 @@ module.exports = {
         console.log('Comprobando miembro nuevo en Hourai Doll para forzado de rol de color');
         if(!miembro.deleted) {
             console.log('El miembro sigue en el servidor');
-            if(miembro.roles.cache.size === 2) {
+            if(module.exports.dollCount(miembro) === 2) {
                 console.log('El miembro requiere roles básicos. Forzando roles...');
                 const colores = [
                     '671851233870479375', //France Doll
@@ -240,7 +241,7 @@ module.exports = {
                 );
                 miembro.roles.add(colores[Math.floor(Math.random() * 7)]);
                 console.log('Roles forzados.');
-            } else if(miembro.roles.cache.size > 2) {
+            } else if(module.exports.dollCount(miembro) > 2) {
                 console.log('El miembro ya tiene los roles básicos.');
                 canal.send(`Al fin qliao ya teni tu rol. Q esti bien **${miembro.user.username}**, po <:uwu:681935702308552730>`);
                 //setTimeout(module.exports.askCandy, 1000, miembro, canal);
@@ -249,7 +250,7 @@ module.exports = {
                 canal.send(`Espérate qué weá pasó con **${miembro.user.username}** <:reibu:686220828773318663>\nOh bueno, ya me aburrí... chao.`);
             }
         } else {
-            canal.send(`Se murió el wn de <@${miembro.user.id}> po <:mayuwu:654489124413374474>`);
+            canal.send(`Se fue cagando el <@${miembro.user.id}> csm <:mayuwu:654489124413374474>`);
         }
     },
 
@@ -340,17 +341,22 @@ module.exports = {
 
     modifyAct: function(clientowo, pasuwus) { //Cambio de estado constante; créditos a Imagine Breaker y Sassafras
         //Actualización de actividad
-        console.log(`Iniciando cambio de presencia ${pasuwus}...`);
-        clientowo.user.setActivity(
-            presence.status[module.exports.randInt(0, presence.status.length)],
-            { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${presence.stream[module.exports.randInt(0, presence.stream.length)]}` }
-        );
-        console.log('Cambio de presencia finalizado.');
-        
-        //Programar próxima actualización de actividad
-        const stepwait = module.exports.randInt(30, 70);
-        setTimeout(module.exports.modifyAct, 1000 * 60 * stepwait, pasuwus + 1);
-        console.log(`Esperando ciclo ${pasuwus + 1} en ${stepwait} minutos...`);
+        try {
+            console.log(`Iniciando cambio de presencia ${pasuwus}...`);
+            clientowo.user.setActivity(
+                presence.status[module.exports.randInt(0, presence.status.length)],
+                { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${presence.stream[module.exports.randInt(0, presence.stream.length)]}` }
+            );
+            console.log('Cambio de presencia finalizado.');
+            
+            //Programar próxima actualización de actividad
+            const stepwait = module.exports.randInt(1, 2/*30, 70*/);
+            setTimeout(module.exports.modifyAct, 1000 * 60 * stepwait, clientowo, pasuwus + 1);
+            console.log(`Esperando ciclo ${pasuwus + 1} en ${stepwait} minutos...`);
+        } catch(err) {
+            console.log('Ocurrió un error al intentar realizar un cambio de presencia.');
+            console.error(err);
+        }
     },
     //#endregion
 
@@ -384,6 +390,15 @@ module.exports = {
             }
 
         return (!ismod);
+    },
+
+    dollCount: function(member) {
+        let fp = 0; //Falsos positivos a restar
+        member.roles.cache.map(role => {
+            if(role.id === '699304214253404292' || role.id === '813194804161806436')
+                fp++;
+        });
+        return (member.roles.cache.size - fp);
     },
     //#endregion
 
@@ -501,7 +516,7 @@ module.exports = {
                     `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n` +
                     'https://imgur.com/D5Z8Itb'
                 ).then(sent => module.exports.askColor(sent, miembro));
-                setTimeout(func.askForRole, 1000 * 60 * 5, miembro, canal);
+                setTimeout(module.exports.askForRole, 1000 * 60 * 5, miembro, canal);
                 console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');
             } else if(servidor.id === global.serverid.ar) {
                 canal.send(
