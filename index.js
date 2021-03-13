@@ -282,7 +282,7 @@ client.on('message', message => { //En caso de recibir un mensaje
         comando = client.ComandosPure.get(nombrecomando) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
     
     if (!comando) {
-        message.channel.send(':x: Disculpa, soy estúpido. Tal vez escribiste mal el comando y no te entiendo.');
+        message.channel.send(':x: Disculpa, soy estúpida. Tal vez escribiste mal el comando y no te entiendo.');
         return;
     }
     //#endregion
@@ -336,28 +336,6 @@ client.on('message', message => { //En caso de recibir un mensaje
             return;
         } else //En cambio, si no se detectan problemas, finalmente ejecutar comando
             comando.execute(message, args);
-        /*
-        if(comando.flags.some(flag => flag === 'outdated'))
-            message.channel.send(new Discord.MessageEmbed()
-                .setAuthor('Un momento...')
-                .setTitle()
-                .addField(`${pdetect}${nombrecomando}`, '')
-                .setColor('#f01010')
-            );
-        else if(comando.flags.some(flag => flag === 'maintenance'))
-            message.channel.send(new Discord.MessageEmbed()
-                .setAuthor('Un momento...')
-                .setTitle('')
-                .addField(`${pdetect}${nombrecomando}`, '')
-                .setColor('#f01010')
-            );
-        else if(comando.flags.some(flag => flag === 'maintenance'))
-            message.channel.send(new Discord.MessageEmbed()
-                .setAuthor('Un momento...')
-                .setTitle('Comando en mantenimiento')
-                .addField(`${pdetect}${nombrecomando}`, 'El comando no se encuentra disponible debido a que está en proceso de actualización o reparación en este momento. Espera a que se actualice~')
-                .setColor('#f01010')
-            );*/
     } catch(error) {
         console.log('Ha ocurrido un error al ingresar un comando.');
         console.error(error);

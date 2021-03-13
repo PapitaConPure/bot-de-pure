@@ -18,6 +18,6 @@ module.exports = {
     ],
 	
 	execute(message, args) {
-		message.channel.send(`Aquí teni los colore po <:reibu:686220828773318663>\nhttps://imgur.com/D5Z8Itb`).then(sent => func.askColor(sent, message));
+		message.channel.send(`Aquí teni los colore po <:reibu:686220828773318663>\nhttps://imgur.com/D5Z8Itb`).then(sent => func.askColor(sent, message.member));
     },
 };

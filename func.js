@@ -283,7 +283,7 @@ module.exports = {
         });
     },
 
-    askColor: async function(rmessage, umessage) {
+    askColor: async function(rmessage, orimem) {
         /*if(rmessage.channel.guild.id !== global.serverid.hourai) 
             return;*/
 
@@ -299,12 +299,12 @@ module.exports = {
         console.log('Se solicitaron colores.');
         for(const [creact, crole] of Object.entries(colrol))
             await rmessage.react(creact);
-        const filter = (rc, user) => !user.bot && colrol.hasOwnProperty(rc.emoji.id) && umessage.author.id === user.id;
-        const collector = rmessage.createReactionCollector(filter, { max: 3, time: 8 * 60 * 1000 });
+        const filter = (rc, user) => !user.bot && colrol.hasOwnProperty(rc.emoji.id) && orimem.user.id === user.id;
+        const collector = rmessage.createReactionCollector(filter, { max: 3, time: 2 * 60 * 1000 });
         
         collector.on('collect', (reaction, user) => {
             const reacted = reaction.emoji.id;
-            umessage.channel.guild.members.fetch(user.id).then(member => {
+            rmessage.channel.guild.members.fetch(user.id).then(member => {
                 const hadroles = member.roles.cache.filter(role => Object.values(colrol).some(colorid => colorid === role.id));
                 if(hadroles.array().length) {
                     member.roles.remove(hadroles)
@@ -500,7 +500,7 @@ module.exports = {
                     'WENO YA PO CSM. <@&654472238510112799>, vengan a saludar maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
                     `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n` +
                     'https://imgur.com/D5Z8Itb'
-                ).then(sent => func.askColor(sent, message));
+                ).then(sent => module.exports.askColor(sent, miembro));
                 setTimeout(func.askForRole, 1000 * 60 * 5, miembro, canal);
                 console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');
             } else if(servidor.id === global.serverid.ar) {
