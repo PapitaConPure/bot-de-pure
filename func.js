@@ -350,7 +350,7 @@ module.exports = {
             console.log('Cambio de presencia finalizado.');
             
             //Programar próxima actualización de actividad
-            const stepwait = module.exports.randInt(1, 2/*30, 70*/);
+            const stepwait = module.exports.randInt(30, 70);
             setTimeout(module.exports.modifyAct, 1000 * 60 * stepwait, clientowo, pasuwus + 1);
             console.log(`Esperando ciclo ${pasuwus + 1} en ${stepwait} minutos...`);
         } catch(err) {
