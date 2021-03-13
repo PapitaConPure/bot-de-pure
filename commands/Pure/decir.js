@@ -1,5 +1,4 @@
-const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../config.json'); //Variables globales
+const global = require('../../config.json'); //Variables globales
 
 module.exports = {
 	name: 'decir',
@@ -12,28 +11,40 @@ module.exports = {
         'common'
     ],
     options: [
-        '`<mensaje>` _(texto)_ para borrar tu mensaje',
-        '`-d` o `--delete` para borrar tu mensaje'
+        '`<mensaje>` _(texto)_ para especificar qué decir',
+        '`-b` o `--borrar` para borrar el mensaje original'
     ],
     callx: '<mensaje>',
 	
 	execute(message, args) {
         if(args.length > 0) {
             let dflag = false;
-            args.some((arg, i) => {
-				if(arg.startsWith('--'))
-					switch(arg.slice(2)) {
-					case 'del': args[i] = undefined; dflag = true; break;
-					case 'delete': args[i] = undefined; dflag = true; break;
-					}
-				else if(arg.startsWith('-'))
-					for(c of arg.slice(1))
-						switch(c) {
-						case 'd': args[i] = undefined; dflag = true; break;
-						}
-			});
+
+            //Lectura de flags; las flags ingresadas se ignoran como argumentos
+            args = args.map(arg => {
+                let ignore = true;
+                if(arg.startsWith('--'))
+                    switch(arg.slice(2)) {
+                    case 'borrar': dflag = true; break;
+                    case 'delete': dflag = true; break;
+                    default: ignore = false; break;
+                    }
+                else if(arg.startsWith('-'))
+                    for(c of arg.slice(1))
+                        switch(c) {
+                        case 'b': dflag = true; break;
+                        case 'd': dflag = true; break;
+                        default: ignore = false; break;
+                        }
+                else ignore = false;
+
+                if(ignore) return undefined;
+                else return arg;
+            }).filter(arg => arg !== undefined);
+
+            //Acción de comando
             if(dflag) message.delete();
-            const sentence = args.filter(arg => arg !== undefined).join(' ');
+            const sentence = args.join(' ');
 
             const minus = sentence.toLowerCase();
             if(message.channel.guild.id === global.serverid.hourai && minus.indexOf('hourai') !== -1 && minus.indexOf('hourai doll') !== minus.indexOf('hourai') && minus.indexOf('houraidoll') === -1)

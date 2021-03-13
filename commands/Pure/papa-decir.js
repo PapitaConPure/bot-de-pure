@@ -1,5 +1,5 @@
-const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../config.json'); //Variables globales
+const global = require('../../config.json'); //Variables globales
+const decir = require('./decir.js');
 
 module.exports = {
 	name: 'papa-decir',
@@ -14,16 +14,7 @@ module.exports = {
     callx: '<mensaje>',
 	
 	execute(message, args) {
-        if(args.length > 0) {
-            let sentence;
-            sentence = args[0];
-            if(args[0] === 'del') {
-                sentence = '';
-                message.delete();
-            }
-            for(var i = 1; i < args.length; i++) sentence += ' ' + args[i];
-            global.cansay = 2; 
-            message.channel.send(sentence);
-        } else message.channel.send(':warning: tienes que especificar lo que quieres que diga.');
+        decir.execute(message, args);
+        global.cansay = 2;
     },
 };
