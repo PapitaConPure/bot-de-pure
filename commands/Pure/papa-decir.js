@@ -8,8 +8,8 @@ module.exports = {
         'papa'
     ],
     options: [
-        '`<mensaje>` _(texto)_ para borrar tu mensaje',
-        '`-d` o `--delete` para borrar tu mensaje'
+        '`<mensaje>` _(texto)_ para especificar qué decir',
+        '`-b` o `--borrar` para borrar el mensaje original'
     ],
     callx: '<mensaje>',
 	

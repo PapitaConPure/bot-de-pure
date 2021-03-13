@@ -4,7 +4,7 @@ const func = require('../../func.js'); //Funciones globales
 module.exports = {
 	name: 'pinguear',
 	aliases: [
-        'pinguear', 'pingeara', 'pingueara',
+        'pingear', 'pingeara', 'pingueara',
 		'pingsomeone'
     ],
     desc: 'Pingea al usuario mencionado una cantidad designada de veces',
