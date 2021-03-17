@@ -140,28 +140,6 @@ client.on('message', message => { //En caso de recibir un mensaje
         message.delete();
     }
     //#endregion
-
-    //#region Dulce Victoria(tm)
-    //Escuchar mensajes en canal de gacha
-    if(message.channel.id === '813189609911353385' || message.channel.id === '739513729649082490')
-        //Si se detecta un embed y tiene nombre de autor "Megumin", proceder con el plan
-        if(message.embeds.length > 0) {
-            if(message.embeds.some(embed => (embed.author === null)?false:(embed.author.name.indexOf('Megumin') !== -1))) {
-                //Dar rol para gacha: 813194804161806436
-                //message.react('💖');
-                message.channel.guild.members.cache.get('423129757954211880').roles.add('813194804161806436');
-
-                //Notificar
-                const thingyembed = new Discord.MessageEmbed()
-                    .setTitle(`Megumin po ${message.author.username}`)
-                    .setColor('#dc143c')
-                    .setAuthor('Un weón que se ve así', message.author.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
-                    .addField('Mensaje', `"${message.content}"`)
-                    .addField('URL', `${message.url}`);
-                client.users.cache.get('423129757954211880').send(thingyembed);
-            }
-        }
-    //#endregion
     
     //#region Log de Mensajes
     if(global.cansay === 0) { if(message.author.bot) return; } //Hacer que el bot no sea un pelotudo (ignorar mensajes de bots)
