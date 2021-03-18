@@ -300,6 +300,7 @@ module.exports = {
         console.log('Se solicitaron colores.');
         for(const [creact, crole] of Object.entries(colrol))
             await rmessage.react(creact);
+        await rmessage.react('🎦');
         const filter = (rc, user) => !user.bot && colrol.hasOwnProperty(rc.emoji.id) && orimem.user.id === user.id;
         const collector = rmessage.createReactionCollector(filter, { max: 3, time: 2 * 60 * 1000 });
         
@@ -510,7 +511,7 @@ module.exports = {
             if(servidor.id === global.serverid.hourai) {
                 canal.send(
                     `Wena po <@${miembro.user.id}> conchetumare, como estai. Porfa revisa el canal <#671817759268536320> para que no te funemos <:haniwaSmile:659872119995498507> \n` +
-                    'También elige un rol de color (debajo de este mensaje) y pídele el que te guste a alguno de los enfermos que trabajan aquí <:mayuwu:654489124413374474> \n' +
+                    'También elige un rol de color reaccionando con <:FrenchDoll:819772377814532116><:OrleansDoll:819772377642041345><:HollandDoll:819772377624870973><:RussianDoll:819772377894354944><:LondonDoll:819772377856606228><:TibetanDoll:819772377482526741><:KyotoDoll:819772377440583691> cuando el ícono ":cinema:" aparezca <:mayuwu:654489124413374474>\n' +
                     'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:697321858407727224>\n' +
                     'WENO YA PO CSM. <@&654472238510112799>, vengan a saludar maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
                     `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n` +
