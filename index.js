@@ -1,13 +1,12 @@
-//#region Inclusión de cabeceras
-const fs = require('fs'); //Integrar operaciones sistema de archivos de consola
-const Discord = require('discord.js'); //Integrar discord.js
-const client = new Discord.Client({ fetchAllMembers: true }); //Cliente de bot
+//#region Carga de módulos necesarios
+const fs = require('fs'); //Sistema de archivos
+const Discord = require('discord.js'); //Soporte JS de la API de Discord
+const client = new Discord.Client({ fetchAllMembers: true }); //Usuario con el que inicia sesión el Bot
 //const Keyv = require('keyv');
 //const keyv = new Keyv('postgresql://sxiejhineqmvsg:d0b53a4f62e2cf77383908ff8d281e4a5d4f7db7736abd02e51f0f27b6fc6264@ec2-35-175-170-131.compute-1.amazonaws.com:5432/da27odtfovvn7n');
 //keyv.on('error', err => console.error('Keyv connection error:', err));
 const global = require('./config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
-const Canvas = require('canvas'); 
 const token = 'NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY'; //La clave del bot
 module.exports = { Discord };
 //#endregion
@@ -37,96 +36,6 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
 	console.log('Bot conectado y funcionando.');
 });
 
-async function dibujarMillion(msg) { //Dar felicitaciones al desgraciado
-    console.log('Evento "Uno en un Millón" detonado...')
-    const canal = msg.channel; //Canal de mensajes de sistema
-
-    //#region Creación de imagen
-    const canvas = Canvas.createCanvas(1500, 750);
-    const ctx = canvas.getContext('2d');
-
-    const fondo = await Canvas.loadImage('./fondo3.png');
-    ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
-    //#endregion
-
-    //#region Texto
-    //#region Propiedades de texto
-    ctx.textBaseline = 'bottom';
-    ctx.shadowOffsetX = shadowOffsetY = 2;
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = 'black';
-    ctx.fillStyle = '#ffffff';
-    //#endregion
-
-    //#region Nombre del usuario
-    let Texto = `${msg.author.username}`;
-    let fontSize = 72;
-    while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
-    ctx.font = `bold ${fontSize}px sans-serif`;
-    ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 80);
-    //#endregion
-    
-    //#region Texto inferior
-    Texto = 'Uno en Un Millón';
-    fontSize = 120;
-    while(ctx.measureText(Texto).width > (canvas.width - 150)) fontSize -= 2;
-    ctx.font = `bold ${fontSize}px sans-serif`;
-    ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 15);
-    Texto = '¡Felicidades! Tu mensaje es el destacado de';
-    ctx.font = `bold 48px sans-serif`;
-    ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - fontSize - 30);
-    //#endregion
-    //#endregion
-
-    //#region Foto de Perfil
-    //#region Sombra
-    const ycenter = (80 + (canvas.height - fontSize - 48 - 30)) / 2;
-    ctx.shadowOffsetX = shadowOffsetY = 8;
-    ctx.shadowBlur = 20;
-    ctx.fillStyle = '#36393f';
-    ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
-    ctx.fill();
-    //#endregion
-
-    //#region Imagen circular
-	ctx.beginPath();
-	ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
-	ctx.closePath();
-	ctx.clip();
-    const avatar = await Canvas.loadImage(msg.author.avatarURL({ format: 'png', dynamic: false, size: 1024 }));
-	ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
-    //#endregion
-    //#endregion
-
-    const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'felicidades.png');
-
-    //#region Imagen y Mensaje extra
-    canal.send('', imagen).then(sent => {
-        if(msg.channel.guild.id === '654471968200065034') { //Hourai Doll
-            canal.send(
-                `*Wao, <@${msg.author.id}>, tu mensaje fue seleccionado de entre un millón de otros mensajes. No ganaste nada, pero felicidades <:meguSmile:694324892073721887>*\n` +
-                '*Bueno, de hecho, te ganaste esta imagen personalizada para presumir a los demás tu __suerte de uno en un millón__ <:merry:670116052788838420>*\n' +
-                '```\n' +
-                `${msg.content}` +
-                '```\n'
-            );
-        } else { //Animal Realm
-            canal.send(
-                `***ES:** ¡WOAH, FELICIDADES <@${msg.author.id}>! ¡Este mensaje fue nominado como uno en un millón!*\n` +
-                '*Realmente no ganaste nada. Pero hey, ¡ahora tienes esta imagen personalizada para presumir tu __suerte de uno en un millón__!*\n\n' +
-                `***EN:** WOAH, CONGRATZ <@${msg.author.id}>! This message has been nominated as one in a million!*\n` +
-                `*You really didn't win anything. But hey, now you have this customized image to show off your __one in a million luck__!*\n\n` +
-                '```\n' +
-                `${msg.content}` +
-                '```\n'
-            );
-        }
-    });
-    //#endregion
-
-    console.log('Evento "Uno en un Millón" finalizado.');
-}
-
 client.on('message', message => { //En caso de recibir un mensaje
     const msg = message.content.toLowerCase();
 
@@ -140,10 +49,11 @@ client.on('message', message => { //En caso de recibir un mensaje
         message.delete();
     }
     //#endregion
+
+    //Los mensajes de bots se ignoran desde este punto
+    if(global.cansay === 0 && message.author.bot) return;
     
-    //#region Log de Mensajes
-    if(global.cansay === 0) { if(message.author.bot) return; } //Hacer que el bot no sea un pelotudo (ignorar mensajes de bots)
-    //Hacer que el bot de hecho sea inteligente (registrar mensajes)
+    //#region Log de Procesos (debug)
     if(message.guild) {
         console.log(`[${message.guild.name.substr(0,12)}::${message.guild.id} → #${message.channel.name.substr(0,8)}::${message.channel.id}] ${message.author.username}: "${message.content}"`);
         if(message.attachments.size > 0)
@@ -156,11 +66,12 @@ client.on('message', message => { //En caso de recibir un mensaje
     //#endregion
 
     //#region Respuestas rápidas
-    //#region Mensajes weones
-    if(message.channel.guild.id === global.serverid.hourai || message.channel.guild.id === global.serverid.slot2) {
+    //Hourai Doll; "Hourai"
+    if(message.channel.guild.id === global.serverid.hourai) {
         const hrai = msg.indexOf('hourai');
         const hraipf = [
             '--',
+            'es-',
             'elixir ',
             'muñeca '
         ];
@@ -211,32 +122,10 @@ client.on('message', message => { //En caso de recibir un mensaje
             setTimeout(responder, 800, message.channel);
         }
     }
-    //#endregion
-
-    //#region Uno en un millón
-    const millionchance = Math.floor(Math.random() * 1000000);
-    if(millionchance === 0) {
-        message.channel.startTyping();
-        dibujarMillion(message);
-        message.channel.stopTyping(true);
-    }
-    //#endregion
-    //#endregion
-
-    //#region papa-reiniciar
-    if(message.content.toLowerCase().startsWith(`${global.p_pure}papa-reiniciar`)) {
-        if (message.author.id === '423129757954211880') {
-            message.channel.send(':arrows_counterclockwise: apagando...\n_Nota: puedes comprobar si el bot se reinició viendo el log del proceso._')
-            .then(sent => {
-                console.log('Apagando.');
-                message.channel.stopTyping(true);
-                process.exit();
-            }).catch(error => {
-                console.error(error);
-            });
-        } else message.channel.send(':closed_lock_with_key: Solo Papita con Puré puede usar este comando.');
-        return;
-    }
+    
+    //Uno en un Millón
+    if(Math.floor(Math.random() * 1000000) === 0)
+        func.dibujarMillion(message);
     //#endregion
     
     //#region Comandos
@@ -329,13 +218,13 @@ client.on('message', message => { //En caso de recibir un mensaje
         global.empezando = true;
         setTimeout(func.restarSegundoEmpezar, 1000);
     }
-    //#endregion
 
-    if(global.cansay > 0) global.cansay--; //Hacer que el bot sea incluso menos pelotudo (aceptar comandos de sí mismo si fueron escritos con p!papa-decir)
+    //Aceptar comandos por 1 tick al ejecutar p!papa-decir
+    if(global.cansay > 0) global.cansay--;
+    //#endregion
     //#endregion 
 });
 
-//#region Mensajes de sistema
 client.on('guildMemberAdd', member => {
     console.log('Evento de entrada de usuario a servidor desencadenado.');
     try {
@@ -362,6 +251,5 @@ client.on('guildMemberRemove', member => {
         console.error(error);
     }
 });
-//#endregion
 
 client.login(token); //Ingresar sesión con el bot
