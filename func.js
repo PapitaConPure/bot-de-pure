@@ -302,7 +302,7 @@ module.exports = {
             await rmessage.react(creact);
         await rmessage.react('🎦');
         const filter = (rc, user) => !user.bot && colrol.hasOwnProperty(rc.emoji.id) && orimem.user.id === user.id;
-        const collector = rmessage.createReactionCollector(filter, { max: 3, time: 2 * 60 * 1000 });
+        const collector = rmessage.createReactionCollector(filter, { max: 1, time: 5 * 60 * 1000 });
         
         collector.on('collect', (reaction, user) => {
             const reacted = reaction.emoji.id;
