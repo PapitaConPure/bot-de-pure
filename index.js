@@ -72,6 +72,7 @@ client.on('message', message => { //En caso de recibir un mensaje
         const hraipf = [
             '--',
             'es-',
+            'es_',
             'elixir ',
             'muñeca '
         ];
