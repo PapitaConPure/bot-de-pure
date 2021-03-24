@@ -207,7 +207,6 @@ module.exports = {
             } else {
                 console.log(`El miembro ha recibido sus roles básicos.`);
                 canal.send(`Weno **${miembro.user.username}**, ya teni tu rol, q esti bien po <:Junky:651290323557023753>`);
-                //setTimeout(module.exports.askCandy, 1000, miembro, canal);
 
                 //Otorgar rol con 50% de probabilidad
                 if(Math.random() < 0.5)
@@ -241,10 +240,17 @@ module.exports = {
                 );
                 miembro.roles.add(colores[Math.floor(Math.random() * 7)]);
                 console.log('Roles forzados.');
+
+                //Otorgar rol con 50% de probabilidad
+                if(Math.random() < 0.5)
+                    miembro.roles.add('727952950395273247');
             } else if(module.exports.dollCount(miembro) > 2) {
                 console.log('El miembro ya tiene los roles básicos.');
                 canal.send(`Al fin qliao ya teni tu rol. Q esti bien **${miembro.user.username}**, po <:uwu:681935702308552730>`);
-                //setTimeout(module.exports.askCandy, 1000, miembro, canal);
+
+                //Otorgar rol con 50% de probabilidad
+                if(Math.random() < 0.5)
+                    miembro.roles.add('727952950395273247');
             } else {
                 console.log('El miembro ya no tiene ningún rol básico.');
                 canal.send(`Espérate qué weá pasó con **${miembro.user.username}** <:reibu:686220828773318663>\nOh bueno, ya me aburrí... chao.`);
