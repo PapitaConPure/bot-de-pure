@@ -66,13 +66,18 @@ module.exports = {
         for(const file of cfiles) {
             const command = require(`../../commands/Pure/${file}`);
             if(search === 'n') {
-                const cmeme = fmeme? true : !command.flags.includes('meme');
-                const cmod = (fmod && message.member.hasPermission('MANAGE_ROLES'))? true : !command.flags.includes('mod');
-                const cpapa = (fpapa && message.author.id === '423129757954211880')? true : !command.flags.includes('papa');
-                const chourai = (fhourai && message.channel.guild.id === global.serverid.hourai)? true : !command.flags.includes('hourai');
-                const cex = fex? !command.flags.includes('common') : true;
-            
-                if((cmeme && cmod && cpapa && chourai && cex)) {
+                if(command.flags !== undefined) {
+                    const cmeme = fmeme? true : !command.flags.includes('meme');
+                    const cmod = (fmod && message.member.hasPermission('MANAGE_ROLES'))? true : !command.flags.includes('mod');
+                    const cpapa = (fpapa && message.author.id === '423129757954211880')? true : !command.flags.includes('papa');
+                    const chourai = (fhourai && message.channel.guild.id === global.serverid.hourai)? true : !command.flags.includes('hourai');
+                    const cex = fex? !command.flags.includes('common') : true;
+                
+                    if((cmeme && cmod && cpapa && chourai && cex)) {
+                        list.name[item] = command.name;
+                        item++;
+                    }
+                } else {
                     list.name[item] = command.name;
                     item++;
                 }
@@ -99,16 +104,17 @@ module.exports = {
                 s = (s.startsWith('papa-'))?`${s.slice(5)} (Papita con Puré)`:s;
                 return `${s[0].toUpperCase()}${s.slice(1)}`;
             };
-            if(list.name.length > 0) 
+            if(list.name.length > 0) {
+                const arrayExists = arr => arr !== undefined && arr.some(it => it.length > 0);
                 embed.setAuthor(title(list.name[0]), aurl)
                     .setFooter('Nota: los <parámetros> con el símbolo "?" son opcionales, el resto son obligatorios')
                     .addField('Nombre', `\`${list.name[0]}\``, true)
-                    .addField('Alias', (list.aliases !== undefined && list.aliases.length > 0)?(list.aliases.map(i => `\`${i}\``).join(', ')):':label: Sin alias', true)
+                    .addField('Alias', arrayExists(list.aliases)?(list.aliases.map(i => `\`${i}\``).join(', ')):':label: Sin alias', true)
                     .addField('Descripción', (list.desc !== undefined && list.desc.length > 0)?list.desc:':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde')
                     .addField('Llamado', `\`p!${list.name[0]}${(list.callx !== undefined)?` ${list.callx}`:''}\``, true)
-                    .addField('Opciones (`p!x -x --xxx <x>`)', (list.options !== undefined && list.options.length > 0)?list.options.join('\n'):':abacus: Sin opciones', true)
-                    .addField('Identificadores', (list.flags !== undefined && list.flags.length > 0)?(list.flags.map(i => `\`${i}\``).join(', ').toUpperCase()):':question: Este comando no tiene identificadores por ahora');
-            else
+                    .addField('Opciones (`p!x -x --xxx <x>`)', arrayExists(list.options)?list.options.join('\n'):':abacus: Sin opciones', true)
+                    .addField('Identificadores', arrayExists(list.flags)?(list.flags.map(i => `\`${i}\``).join(', ').toUpperCase()):':question: Este comando no tiene identificadores por ahora');
+            } else
                 embed.setAuthor('Sin resultados', aurl)
                     .addField('No se ha encontrado ningún comando con este nombre', `Utiliza \`p!ayuda\` para ver una lista de comandos disponibles y luego usa \`p!comando <comando>\` para ver un comando en específico`);
         }

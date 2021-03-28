@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "https://heroku.com",
         "version": {
-            "number": "Full.2.8.1D",
+            "number": "Full.2.8.20",
             "name": "Cisne Cristalino"
         },
         "note": "Se esperan inconsistencias y errores debido a recientes trabajos de reestructuración",
@@ -12,7 +12,8 @@
             "Comprobaciones de estado de comandos antes de ejecutarlos (mejora de infraestructura)",
             "Nuevo comando `p!ping` (no confundir con `p!pinguear`) para saber el estado de conexión actual",
             "Restaurado comando exclusivo de Papita",
-            "Tareas de refactorización (1/4)"
+            "Tareas de refactorización (1/4)",
+            "Mejora de la bienvenida de Hourai Doll"
         ],
         "todo": [
             "Más opciones de comandos de prueba para mayor facilidad de monitoreo, mantenimiento y modificación",

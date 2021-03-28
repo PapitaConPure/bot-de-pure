@@ -183,34 +183,43 @@ module.exports = {
         }
     },
 
-    askForRole: function(miembro, canal) {
+    askForRole: function(miembro, canal, rep) {
         console.log('Comprobando miembro nuevo en Hourai Doll para petición de rol de color');
         if(!miembro.deleted) {
             console.log('El miembro sigue en el servidor');
-            if(module.exports.dollCount(miembro) === 1) {
-                console.log('El miembro está retenido.');
-                global.houraiwarn++;
-                if(global.houraiwarn <= 6) {
-                    if(global.houraiwarn <= 3)
-                        canal.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474> (${global.houraiwarn}/3 llamados)`);
-                    setTimeout(module.exports.askForRole, 1000 * 60 * 5, miembro , canal);
-                    console.log(`Volviendo a esperar confirmación de miembro (${global.houraiwarn}/6)...`);
-                }
-            } else if(module.exports.dollCount(miembro) === 2) {
-                console.log('El miembro no ha recibido roles básicos.');
-                canal.send(
-                    `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>\n` +
-                    `https://imgur.com/D5Z8Itb`
-                ).then(sent => module.exports.askColor(sent, miembro));
-                setTimeout(module.exports.forceRole, 1000 * 60 * 4, miembro, canal);
-                console.log(`Esperando comprobación final de miembro en unos minutos...`);
-            } else {
+            const dc = module.exports.dollCount(miembro);
+
+            //Comprobación constante para ver si el miembro ya tiene roles de colores
+            if(dc > 2) {
                 console.log(`El miembro ha recibido sus roles básicos.`);
                 canal.send(`Weno **${miembro.user.username}**, ya teni tu rol, q esti bien po <:Junky:651290323557023753>`);
 
-                //Otorgar rol con 50% de probabilidad
-                if(Math.random() < 0.5)
-                    miembro.roles.add('727952950395273247');
+                //Finalizar
+                setTimeout(module.exports.finalizarHourai, 1000, miembro, canal);
+            } else {
+                if(rep > 0) {
+                    setTimeout(module.exports.askForRole, 1000 * 60 / 4, miembro, canal, rep - 1);
+                    return;
+                }
+                
+                if(dc === 1) {
+                    console.log('El miembro está retenido.');
+                    global.houraiwarn++;
+                    if(global.houraiwarn <= 6) {
+                        if(global.houraiwarn <= 3)
+                            canal.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474> (${global.houraiwarn}/3 llamados)`);
+                        setTimeout(module.exports.askForRole, 1000, miembro , canal, 5 * 4);
+                        console.log(`Volviendo a esperar confirmación de miembro (${global.houraiwarn}/6)...`);
+                    }
+                } else {
+                    console.log('El miembro no ha recibido roles básicos.');
+                    canal.send(
+                        `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>\n` +
+                        `https://imgur.com/D5Z8Itb`
+                    ).then(sent => module.exports.askColor(sent, miembro));
+                    setTimeout(module.exports.forceRole, 1000, miembro, canal, 4 * 4);
+                    console.log(`Esperando comprobación final de miembro en unos minutos...`);
+                }
             }
         } else {
             console.log(`El miembro se fue del servidor. Abortando.`);
@@ -218,42 +227,49 @@ module.exports = {
         }
     },
 
-    forceRole: function(miembro, canal) {
+    forceRole: function(miembro, canal, rep) {
         console.log('Comprobando miembro nuevo en Hourai Doll para forzado de rol de color');
         if(!miembro.deleted) {
             console.log('El miembro sigue en el servidor');
-            if(module.exports.dollCount(miembro) === 2) {
-                console.log('El miembro requiere roles básicos. Forzando roles...');
-                const colores = [
-                    '671851233870479375', //France Doll
-                    '671852132328275979', //Holland Doll
-                    '671851228954755102', //Tibetan Doll
-                    '671851235267182625', //Kyoto Doll
-                    '671851236538187790', //London Doll
-                    '671851234541699092', //Russian Doll
-                    '671851228308963348' //Orléans Doll
-                ];
-                canal.send(
-                    `<@${miembro.user.id}>, cagaste altiro watón fome <:mukyuugh:725583038913708034>\n` +
-                    `Toma un rol random po <:mayuwu:654489124413374474> <:venAqui2:668644951353065500>\n` +
-                    'https://imgur.com/pXumeJT'
-                );
-                miembro.roles.add(colores[Math.floor(Math.random() * 7)]);
-                console.log('Roles forzados.');
-
-                //Otorgar rol con 50% de probabilidad
-                if(Math.random() < 0.5)
-                    miembro.roles.add('727952950395273247');
-            } else if(module.exports.dollCount(miembro) > 2) {
+            const dc = module.exports.dollCount(miembro);
+            
+            if(dc > 2) {
                 console.log('El miembro ya tiene los roles básicos.');
                 canal.send(`Al fin qliao ya teni tu rol. Q esti bien **${miembro.user.username}**, po <:uwu:681935702308552730>`);
 
-                //Otorgar rol con 50% de probabilidad
-                if(Math.random() < 0.5)
-                    miembro.roles.add('727952950395273247');
+                //Finalizar
+                setTimeout(module.exports.finalizarHourai, 1000, miembro, canal);
             } else {
-                console.log('El miembro ya no tiene ningún rol básico.');
-                canal.send(`Espérate qué weá pasó con **${miembro.user.username}** <:reibu:686220828773318663>\nOh bueno, ya me aburrí... chao.`);
+                if(rep > 0) {
+                    setTimeout(module.exports.forceRole, 1000 * 60 / 4, miembro, canal, rep - 1);
+                    return;
+                }
+
+                if(dc === 2) {
+                    console.log('El miembro requiere roles básicos. Forzando roles...');
+                    const colores = [
+                        '671851233870479375', //France Doll
+                        '671852132328275979', //Holland Doll
+                        '671851228954755102', //Tibetan Doll
+                        '671851235267182625', //Kyoto Doll
+                        '671851236538187790', //London Doll
+                        '671851234541699092', //Russian Doll
+                        '671851228308963348' //Orléans Doll
+                    ];
+                    canal.send(
+                        `<@${miembro.user.id}>, cagaste altiro watón fome <:mukyuugh:725583038913708034>\n` +
+                        `Toma un rol random po <:mayuwu:654489124413374474> <:venAqui2:668644951353065500>\n` +
+                        'https://imgur.com/pXumeJT'
+                    );
+                    miembro.roles.add(colores[Math.floor(Math.random() * 7)]);
+                    console.log('Roles forzados.');
+
+                    //Finalizar
+                    setTimeout(module.exports.finalizarHourai, 1000, miembro, canal);
+                } else {
+                    console.log('El miembro ya no tiene ningún rol básico.');
+                    canal.send(`Espérate qué weá pasó con **${miembro.user.username}** <:reibu:686220828773318663>\nOh bueno, ya me aburrí... chao.`);
+                }
             }
         } else {
             canal.send(`Se fue cagando el <@${miembro.user.id}> csm <:mayuwu:654489124413374474>`);
@@ -291,9 +307,6 @@ module.exports = {
     },
 
     askColor: async function(rmessage, orimem) {
-        /*if(rmessage.channel.guild.id !== global.serverid.hourai) 
-            return;*/
-
         let colrol = {
             '819772377814532116': '671851233870479375', //French
             '819772377642041345': '671851228308963348', //Orléans
@@ -426,6 +439,18 @@ module.exports = {
     //#endregion
 
     //#region Anuncios
+    finalizarHourai: async function(miembro, canal) {
+        //Mensaje de fin de bienvenida
+        canal.send(
+            `Una última cosita <@${miembro.user.id}>, recuerda revisar el canal <#671817759268536320> en algún momento <:Junkoborga:751938096550903850>\n` +
+            'Y estate tranqui, que ya no vas a recibir tantos pings <:starnap:727764482801008693>'
+        );
+
+        //Otorgar rol con 50% de probabilidad
+        if(Math.random() < 0.5)
+            miembro.roles.add('727952950395273247');
+    },
+
     dibujarBienvenida: async function(miembro) {
         //Dar bienvenida a un miembro nuevo de un servidor
         const servidor = miembro.guild; //Servidor
@@ -516,14 +541,15 @@ module.exports = {
         canal.send({files: [imagen]}).then(sent => {
             if(servidor.id === global.serverid.hourai) {
                 canal.send(
-                    `Wena po <@${miembro.user.id}> conchetumare, como estai. Porfa revisa el canal <#671817759268536320> para que no te funemos <:haniwaSmile:659872119995498507> \n` +
-                    'También elige un rol de color reaccionando con <:FrenchDoll:819772377814532116><:OrleansDoll:819772377642041345><:HollandDoll:819772377624870973><:RussianDoll:819772377894354944><:LondonDoll:819772377856606228><:TibetanDoll:819772377482526741><:KyotoDoll:819772377440583691> cuando el ícono ":cinema:" aparezca <:mayuwu:654489124413374474>\n' +
+                    `Wena po <@${miembro.user.id}> conchetumare, como estai.\n` +
+                    'Elige un rol de color reaccionando con estos emotes cuando un ":cinema:" aparezca <:mayuwu:654489124413374474>\n' +
+                    '<:FrenchDoll:819772377814532116><:OrleansDoll:819772377642041345><:HollandDoll:819772377624870973><:RussianDoll:819772377894354944><:LondonDoll:819772377856606228><:TibetanDoll:819772377482526741><:KyotoDoll:819772377440583691>\n' +
                     'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:697321858407727224>\n' +
-                    'WENO YA PO CSM. <@&654472238510112799>, vengan a saludar maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
+                    '<@&654472238510112799>, vengan a saludar po maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
                     `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n` +
                     'https://imgur.com/D5Z8Itb'
                 ).then(sent => module.exports.askColor(sent, miembro));
-                setTimeout(module.exports.askForRole, 1000 * 60 * 5, miembro, canal);
+                setTimeout(module.exports.askForRole, 1000, miembro, canal, 5 * 4);
                 console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');
             } else if(servidor.id === global.serverid.ar) {
                 canal.send(
