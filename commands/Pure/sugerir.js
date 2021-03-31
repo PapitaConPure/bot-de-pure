@@ -1,23 +1,41 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const global = require('../../config.json'); //Variables globales
 
+function getTitle(a, i) {
+	if(i >= a.length) //Título inválido
+		return 'Sugerencia sin título';
+	else if(a[i].startsWith('"')) { //Título largo
+		let l = i;
+		let tt;
+
+		while(l < a.length && !a[l].endsWith('"')) l++;
+		tt = a.slice(i, l + 1).join(' ').slice(1);
+
+		if(tt.length > 1) return (tt.endsWith('"'))?tt.slice(0, -1):tt;
+		else return 'Sugerencia sin título';
+	} else //Título corto
+		return a[i];
+};
+
 module.exports = {
 	name: 'sugerir',
 	aliases: [
 		''
 	],
-	desc: 'Para sugerir mejoras sobre el Bot. Todas las mejoras van a una lista.',
+	desc: 'Para sugerir mejoras sobre el Bot. Todas las sugerencias van a una buzón que tarde o temprano será leído\n' +
+		'No es obligatorio, pero pueden agregar un `-t título` o un `-t "título largo"` a su sugerencia (me facilita cosas)\n' +
+		'De antemano, ¡gracias por ayudar con el desarrollo de Bot de Puré! <a:meguDance:796931539739869235>',
 	flags: [
-		''
+		'common'
 	],
 	options: [
-		''
+		'`-t` o `--titulo` _(texto/"texto")_ para designar un título o "título largo"'
 	],
-	callx: '',
+	callx: '<sugerencia>',
 
 	execute(message, args) {
 		//Variables de flags
-		let val = 0;
+		let title = 'Sugerencia sin título';
 
 		//Lectura de flags
 		let jn = false;
@@ -26,23 +44,39 @@ module.exports = {
 			if(!jn) {
 				if(arg.startsWith('--'))
 					switch(arg.slice(2)) {
-					case 'flag': val = args[i + 1]; break;
+					case 'titulo': title = getTitle(args, i + 1); jn = true; break;
 					default: ignore = false;
 					}
 				else if(arg.startsWith('-'))
 					for(c of arg.slice(1))
 						switch(c) {
-						case 'f': val = args[i + 1]; break;
+						case 't': title = getTitle(args, i + 1); jn = true; break;
 						default: ignore = false;
 						}
 				else ignore = false;
-			} else jn = false;
+			} else if(arg.endsWith('"') || title.split(' ').length === 1) jn = false;
 
 			if(ignore) return undefined;
 			else return arg;
 		}).filter(arg => arg !== undefined);
 
 		//Acción de comando
-		message.channel.send(`\`${val}\``);
+		if(!args.length) {
+			message.channel.send(':warning: Campo de sugerencia vacío.');
+			return;
+		}
+
+		const embed = new Discord.MessageEmbed()
+			.setColor('#608bf3')
+			.setAuthor(message.author.tag, message.author.avatarURL({ dynamic: true, size: 256 }))
+			.setTitle(title)
+			.addField('Mensaje', args.join(' '))
+			.addField('Respuestas',
+				`\`p!papa-responder -u ${message.author.id}\` para confirmar lectura\n` +
+				`\`p!papa-responder -u ${message.author.id} -a\` para confirmar de aceptación\n` +
+				`\`p!papa-responder -u ${message.author.id} -p <problema>\` para reportar problema`
+			);
+		message.client.guilds.cache.get(global.serverid.sugerencias).channels.cache.get('826632022075768835').send(embed);
+		message.channel.send(`📨 ¡Se ha enviado tu sugerencia como **${title}**! Recibirás una notificación por privado si es leída, si es aceptada y si ocurre algún problema. ¡Gracias!`);
 	}
 };

@@ -25,10 +25,10 @@ async function resolverLink(msg, linkRes, iSize) {
 		//Si no se pasó un enlace u ocurrió un error inesperado, intentar resolver enlace de un emote o usuario
 		console.log('No se ha pasado un enlace en llamado de p!lechita o este no era válido/accesible.');
 
-		if(linkRes.startsWith('<:') && linkRes.endsWith('>')) {
+		if((linkRes.startsWith('<:') || linkRes.startsWith('<a:')) && linkRes.endsWith('>')) {
 			//Resolver de emote
 			console.log('Formato de emote detectado. Intentando resolver como emote.');
-			linkRes = linkRes.slice(2, -1);
+			linkRes = linkRes.slice(linkRes.indexOf(':') + 1, -1);
 			linkRes = linkRes.slice(linkRes.indexOf(':') + 1);
 			iurl = msg.guild.emojis.resolve(linkRes).url;
 		} else {
@@ -90,9 +90,8 @@ module.exports = {
 			} else {
 				let bglink;
 				if(args.length) {
-					if(!args[0].startsWith('<:') || !args[0].endsWith('>')) {
+					if(!(args[0].startsWith('<:') || args[0].startsWith('<a:')) || !args[0].endsWith('>'))
 						bglink = await resolverLink(message, args[0], 256);
-					}
 				} else bglink = message.author.avatarURL({ format: 'png', size: 256 });
 
 				const coomer = [
@@ -119,14 +118,15 @@ module.exports = {
 						global.lechitauses = Date.now();
 						message.client.guilds.cache.get(global.serverid.slot2).emojis.create(bglink, message.author.id)
 						.then(cumote => {
-							message.channel.send(`${coomer[randcoomer]} <:lechita:674736445071556618> <:${cumote.name}:${cumote.id}>`)
+							message.channel.send(`${coomer[randcoomer]} <:lechita:674736445071556618> <${cumote.animated?'a':''}:${cumote.name}:${cumote.id}>`)
 							.then(() => cumote.delete());
 						});
-					} else message.channel.send(`:no_entry_sign: Solo puedes crear emotes cada ${tiempoespera} segundos (globalmente).`);
+					} else message.channel.send(`:no_entry_sign: Solo puedes crear emotes cada ${tiempoespera} segundos (compartido globalmente).`);
 				} else
 					message.channel.send(`${coomer[randcoomer]} <:lechita:674736445071556618> ${args[0]}`)
 			}
 		}
+
 		aaamipija();
     },
 };

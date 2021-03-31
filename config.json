@@ -12,8 +12,9 @@
             "Comprobaciones de estado de comandos antes de ejecutarlos (mejora de infraestructura)",
             "Nuevo comando `p!ping` (no confundir con `p!pinguear`) para saber el estado de conexión actual",
             "Restaurado comando exclusivo de Papita",
-            "Tareas de refactorización (1/4)",
-            "Mejora de la bienvenida de Hourai Doll"
+            "Mejora de la bienvenida de Hourai Doll",
+            "p!lechita ahora soporta emotes animados (si estoy en el server del que sale el emote)",
+            "Tareas de refactorización (1/4)"
         ],
         "todo": [
             "Más opciones de comandos de prueba para mayor facilidad de monitoreo, mantenimiento y modificación",
@@ -29,14 +30,17 @@
     "p_mention": "oe po <@651250669390528561>, ",
     "serverid": {
         "bautistas": "745003943997997056",
+        "sugerencias": "826632021451341824",
+        "slot1":    "676251911850164255",
+        "slot2":    "739513729158217829",
+        "slot3":    "745003943997997056",
         "pure":     "651244470691561473",
         "hourai":   "654471968200065034",
         "ar":       "611732083995443210",
         "usd":      "698323332160028792",
-        "slot1":    "676251911850164255",
-        "slot2":    "739513729158217829",
         "ocg":      "750095369639297065"
     },
+    "papitaid": "423129757954211880",
     "lechitauses": 0,
     "houraiwarn": 0,
     "seed": 0,

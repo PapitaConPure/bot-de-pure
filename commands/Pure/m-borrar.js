@@ -32,13 +32,23 @@ module.exports = {
 				if(!jn) {
 					if(arg.startsWith('--'))
 						switch(arg.slice(2)) {
-						case 'usuario': jn = true; user = func.resolverIDUsuario(args[i + 1], message.channel.guild, message.client); args[i] = undefined; args[i + 1] = undefined; break;
+						case 'usuario':
+							jn = true;
+							user = func.resolverIDUsuario(args[i + 1], message.channel.guild, message.client);
+							args[i] = undefined;
+							args[i + 1] = undefined;
+							break;
 						default: ignore = false;
 						}
 					else if(arg.startsWith('-'))
 						for(c of arg.slice(1))
 							switch(c) {
-							case 'u': jn = true; user = func.resolverIDUsuario(args[i + 1], message.channel.guild, message.client); args[i] = undefined; args[i + 1] = undefined; break;
+							case 'u':
+								jn = true;
+								user = func.resolverIDUsuario(args[i + 1], message.channel.guild, message.client);
+								args[i] = undefined;
+								args[i + 1] = undefined;
+								break;
 							default: ignore = false;
 							}
 					else ignore = false;
