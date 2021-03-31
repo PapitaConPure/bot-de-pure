@@ -1,5 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const global = require('../../config.json'); //Variables globales
+const uses = require('../../sguses.json'); //Lista de usos desde el último reinicio del Bot
 
 function getTitle(a, i) {
 	if(i >= a.length) //Título inválido
@@ -34,6 +35,16 @@ module.exports = {
 	callx: '<sugerencia>',
 
 	execute(message, args) {
+		//Comprobación de liquidación de abuso
+		if(uses[message.author.id] === undefined)
+			uses[message.author.id] = 1;
+		else if(uses[message.author.id] < 3)
+			uses[message.author.id]++;
+		else {
+			message.channel.send(':octagonal_sign: Límite de usos por reinicio del proceso alcanzado. Inténtalo nuevamente cuando me haya reiniciado (generalmente cada 24 horas)');
+			return;
+		}
+
 		//Variables de flags
 		let title = 'Sugerencia sin título';
 
