@@ -1,6 +1,5 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const func = require('../../func.js'); //Funciones globales
-const uses = require('../../sguses.json'); //Lista de usos desde el último reinicio del Bot
 
 module.exports = {
 	name: 'papa-responder',
