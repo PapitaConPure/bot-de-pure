@@ -25,7 +25,7 @@ module.exports = {
 		else if(uses[message.author.id] <= 3)
 			uses[message.author.id]++;
 		else {
-			cout << ":octagonal_sign: Límite de usos por reinicio del proceso alcanzado. Inténtalo nuevamente cuando me haya reiniciado (generalmente cada 24 horas)" << endl;
+			message.channel.send(':octagonal_sign: Límite de usos por reinicio del proceso alcanzado. Inténtalo nuevamente cuando me haya reiniciado (generalmente cada 24 horas)');
 			return;
 		}
 		
