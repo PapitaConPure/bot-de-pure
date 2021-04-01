@@ -369,7 +369,7 @@ module.exports = {
             console.log(`Iniciando cambio de presencia ${pasuwus}...`);
             clientowo.user.setActivity(
                 'SEXOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO',//presence.status[module.exports.randInt(0, presence.status.length)],
-                { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${'https://www.youtube.com/watch?v=e7VK3pne8N4'/*presence.stream[module.exports.randInt(0, presence.stream.length)]*/}` }
+                { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${'e7VK3pne8N4'/*presence.stream[module.exports.randInt(0, presence.stream.length)]*/}` }
             );
             console.log('Cambio de presencia finalizado.');
             
