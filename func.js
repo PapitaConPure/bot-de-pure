@@ -363,8 +363,7 @@ module.exports = {
         //Actualización de actividad
         try {
             const c = clientowo.guilds.cache.get(global.serverid.hourai).channels.cache.get('659885154105294874');
-            c.send('SEXOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\nBern te kiero <:uwu:681935702308552730> Bern te kiero <:uwu:681935702308552730> Bern te kiero <:uwu:681935702308552730> Bern te kiero <:uwu:681935702308552730>');
-            c.startTyping();
+            c.send('SEXOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\nBern te kiero <:uwu:681935702308552730> Sassa te kiero <:uwu:681935702308552730> Sassa te kiero <:uwu:681935702308552730> Sassa te kiero <:uwu:681935702308552730>');
 
             console.log(`Iniciando cambio de presencia ${pasuwus}...`);
             clientowo.user.setActivity(
