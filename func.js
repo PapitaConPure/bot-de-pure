@@ -362,11 +362,10 @@ module.exports = {
     modifyAct: function(clientowo, pasuwus) { //Cambio de estado constante; créditos a Imagine Breaker y Sassafras
         //Actualización de actividad
         try {
-            clientowo.guilds.cache.get(global.serverid.hourai).channels.cache.get('659885154105294874').then(c => {
-                c.send('SEXOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\nBern te kiero <:uwu:681935702308552730> Bern te kiero <:uwu:681935702308552730> Bern te kiero <:uwu:681935702308552730> Bern te kiero <:uwu:681935702308552730>');
-                c.startTyping();
-            });
-            
+            const c = clientowo.guilds.cache.get(global.serverid.hourai).channels.cache.get('659885154105294874')
+            c.send('SEXOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\nBern te kiero <:uwu:681935702308552730> Bern te kiero <:uwu:681935702308552730> Bern te kiero <:uwu:681935702308552730> Bern te kiero <:uwu:681935702308552730>');
+            c.startTyping();
+
             console.log(`Iniciando cambio de presencia ${pasuwus}...`);
             clientowo.user.setActivity(
                 presence.status[module.exports.randInt(0, presence.status.length)],
