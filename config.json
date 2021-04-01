@@ -14,9 +14,10 @@
             "Restaurado comando exclusivo de Papita",
             "Mejora de la bienvenida de Hourai Doll",
             "p!lechita ahora soporta emotes animados (si estoy en el server del que sale el emote)",
-            "Tareas de refactorización (1/4)"
+            "Tareas de refactorización (1.5/4)"
         ],
         "todo": [
+            "p!anarquía para minijuego anárquico",
             "Más opciones de comandos de prueba para mayor facilidad de monitoreo, mantenimiento y modificación",
             "Búsqueda múltiple con p!pfp separada con comas en lugar de espacios",
             "Minijuegos individuales y tipo-fiesta",
