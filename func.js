@@ -362,13 +362,10 @@ module.exports = {
     modifyAct: function(clientowo, pasuwus) { //Cambio de estado constante; créditos a Imagine Breaker y Sassafras
         //Actualización de actividad
         try {
-            const c = clientowo.guilds.cache.get(global.serverid.hourai).channels.cache.get('659885154105294874');
-            c.send('SEXOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\nBern te kiero <:uwu:681935702308552730> Sassa te kiero <:uwu:681935702308552730> Sassa te kiero <:uwu:681935702308552730> Sassa te kiero <:uwu:681935702308552730>');
-
             console.log(`Iniciando cambio de presencia ${pasuwus}...`);
             clientowo.user.setActivity(
-                'SEXOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO',//presence.status[module.exports.randInt(0, presence.status.length)],
-                { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${'e7VK3pne8N4'/*presence.stream[module.exports.randInt(0, presence.stream.length)]*/}` }
+                presence.status[module.exports.randInt(0, presence.status.length)],
+                { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${presence.stream[module.exports.randInt(0, presence.stream.length)]}` }
             );
             console.log('Cambio de presencia finalizado.');
             
