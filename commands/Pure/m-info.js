@@ -117,7 +117,7 @@ module.exports = {
 			.setTitle('Información del servidor OwO')
 
 			.addField('Nombre', servidor.name, true)
-			.addField('Usuarios', `:wrestlers: x ${peoplecnt}\n:robot: x ${botcnt}`, true)
+			.addField('Usuarios', `:wrestlers: x ${peoplecnt}\n:robot: x ${botcnt}\n:people_hugging: x ${servidor.memberCount}`, true)
 			.addField('Canales', `:hash: x ${textcnt}\n:loud_sound: x ${voicecnt}\n:label: x ${categorycnt}`, true)
 
 			.addField('Región', servidor.region, true)
