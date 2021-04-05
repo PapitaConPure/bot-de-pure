@@ -56,7 +56,7 @@ module.exports = {
 			
 			//const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'bienvenida.png');
 			//message.channel.send({ files: [imagen] });
-			message.channel.sedn(loademotes.join(''));
+			message.channel.send(loademotes.join(''));
 		};
 		d();
 	}
