@@ -477,6 +477,7 @@ module.exports = {
         //#endregion
         
         //#region Creación de imagen
+        Canvas.registerFont('./TommySoft.otf', { family: 'TommySoft' });
         const canvas = Canvas.createCanvas(1275, 825);
         const ctx = canvas.getContext('2d');
 
@@ -486,31 +487,45 @@ module.exports = {
 
         //#region Texto
         //#region Propiedades de texto
-        ctx.textBaseline = 'bottom';
-        ctx.shadowOffsetX = shadowOffsetY = 2;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = 'black';
+        const strokeFactor = 0.07;
         ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#000000';
         //#endregion
 
         //#region Nombre del usuario
+        ctx.textBaseline = 'top';
         let Texto = `${miembro.displayName}`;
-        let fontSize = 72;
-        while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
-        ctx.font = `bold ${fontSize}px sans-serif`;
-        ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 80);
+        let fontSize = 125;
+        let xcenter;
+        ctx.font = `bold ${fontSize}px "TommySoft"`;
+        fontSize = (canvas.width - 100) / ctx.measureText(Texto).width;
+        ctx.font = `bold ${fontSize}px "TommySoft"`;
+        console.log(fontSize);
+        ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
+        xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
+        ctx.fillText(Texto, xcenter, 15);
+        ctx.strokeText(Texto, xcenter, 15);
         //#endregion
         
         //#region Texto inferior
+        ctx.textBaseline = 'bottom';
         if(servidor.id === '611732083995443210') Texto = 'Animal Realm!';
         else Texto = `${servidor.name}!`;
-        fontSize = 120;
-        while(ctx.measureText(Texto).width > (canvas.width - 150)) fontSize -= 2;
-        ctx.font = `bold ${fontSize}px sans-serif`;
-        ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 15);
+        fontSize = 125;
+        while(ctx.measureText(Texto).width > (canvas.width - 150)) {
+            fontSize -= 2;
+            ctx.font = `bold ${fontSize}px "TommySoft"`;
+        }
+        ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
+        xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
+        ctx.fillText(Texto, xcenter, canvas.height - 15);
+        ctx.strokeText(Texto, xcenter, canvas.height - 15);
         Texto = '¡Bienvenid@ a';
-        ctx.font = `bold 48px sans-serif`;
-        ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - fontSize - 30);
+        ctx.lineWidth = Math.ceil(52 * strokeFactor);
+        ctx.font = `bold 52px "TommySoft"`;
+        xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
+        ctx.fillText(Texto, xcenter, canvas.height - fontSize - 20);
+        ctx.strokeText(Texto, xcenter, canvas.height - fontSize - 20);
         //#endregion
         //#endregion
         
@@ -525,12 +540,18 @@ module.exports = {
         //#endregion
 
         //#region Imagen circular
+        ctx.save();
         ctx.beginPath();
         ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
         ctx.closePath();
         ctx.clip();
         const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL({ format: 'png', dynamic: false, size: 1024 }));
         ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
+        ctx.restore();
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 6;
+        ctx.arc(canvas.width / 2, ycenter, 150 + ctx.lineWidth, 0, Math.PI * 2, true);
+        ctx.stroke();
         //#endregion
         //#endregion
         
@@ -547,7 +568,7 @@ module.exports = {
                     'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:697321858407727224>\n' +
                     '<@&654472238510112799>, vengan a saludar po maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
                     `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n` +
-                    'https://imgur.com/D5Z8Itb'
+                    'https://i.imgur.com/7t7m3PS.png'
                 ).then(sent => module.exports.askColor(sent, miembro));
                 setTimeout(module.exports.askForRole, 1000, miembro, canal, 5 * 4);
                 console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');
@@ -622,6 +643,7 @@ module.exports = {
         //#endregion
         
         //#region Creación de imagen
+        Canvas.registerFont('./TommySoft.otf', { family: 'TommySoft' });
         const canvas = Canvas.createCanvas(1500, 900);
         const ctx = canvas.getContext('2d');
 
@@ -631,19 +653,22 @@ module.exports = {
 
         //#region Texto
         //#region Propiedades de Texto
-        ctx.textBaseline = 'bottom';
-        ctx.shadowOffsetX = shadowOffsetY = 2;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = 'black';
+        const strokeFactor = 0.07;
         ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#000000';
         //#endregion
 
         //#region Nombre del usuario
+        ctx.textBaseline = 'bottom';
         let Texto = `Adiós, ${miembro.displayName}`;
-        let fontSize = 72;
-        while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
-        ctx.font = `bold ${fontSize}px sans-serif`;
+        let fontSize = 160;
+        while(ctx.measureText(Texto).width / 2 > (canvas.width - 100)) {
+            fontSize -= 2;
+            ctx.font = `bold ${fontSize}px "TommySoft"`;
+        }
+        ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
         ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 40);
+        ctx.strokeText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 40);
         //#endregion
         //#endregion
 
@@ -658,12 +683,18 @@ module.exports = {
         //#endregion
 
         //#region Dibujar foto de perfil
+        ctx.save();
         ctx.beginPath();
         ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
         ctx.closePath();
         ctx.clip();
         const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL({ format: 'png', dynamic: false, size: 1024 }));
         ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
+        ctx.restore();
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 6;
+        ctx.arc(canvas.width / 2, ycenter, 150 + ctx.lineWidth, 0, Math.PI * 2, true);
+        ctx.stroke();
         //#endregion
         //#endregion
 
