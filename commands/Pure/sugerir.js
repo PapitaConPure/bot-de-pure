@@ -21,7 +21,7 @@ function getTitle(a, i) {
 module.exports = {
 	name: 'sugerir',
 	aliases: [
-		''
+		's'
 	],
 	desc: 'Para sugerir mejoras sobre el Bot. Todas las sugerencias van a una buzón que tarde o temprano será leído\n' +
 		'No es obligatorio, pero pueden agregar un `-t título` o un `-t "título largo"` a su sugerencia (me facilita cosas)\n' +

@@ -19,15 +19,6 @@ module.exports = {
     callx: '<usuario?>',
 
 	execute(message, args) {
-        /*message.channel.send(
-			'```\n' +
-			'[REPORTE DE ESTADO DEL BOT]\n' +
-			'Estoy investigando un error con los comandos con Embed.\n' +
-			'~Papita con Puré\n' +
-			'```'
-		);
-		return;*/
-
         if(!args.length) {
             const embed = new Discord.MessageEmbed()
 				.setTitle(`Avatar de ${message.author.username}`)

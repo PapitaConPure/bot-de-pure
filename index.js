@@ -33,6 +33,7 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
     global.seed = stt / 60000;
     func.modifyAct(client, 0);
     //keyv.set();
+    global.puretable = Array(8).fill(null).map(() => Array(8).fill(':black_large_square:'));
 	console.log('Bot conectado y funcionando.');
 });
 

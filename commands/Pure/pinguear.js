@@ -7,7 +7,7 @@ module.exports = {
         'pingear', 'pingeara', 'pingueara',
 		'pingsomeone'
     ],
-    desc: 'Pingea al usuario mencionado una cantidad designada de veces',
+    desc: 'Pingea a un `<usuario>` una `<cantidad>` de veces',
     flags: [
         'meme'
     ],

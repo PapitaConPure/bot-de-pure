@@ -36,9 +36,11 @@
         "ocg":      "750095369639297065"
     },
     "papitaid": "423129757954211880",
+    "seed": 0,
     "lechitauses": 0,
     "houraiwarn": 0,
-    "seed": 0,
+    "puretable": [],
+
     "tiempo": "7200",
     "edi": "4",
     "tem": "Sin temática",
