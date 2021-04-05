@@ -498,7 +498,7 @@ module.exports = {
         let fontSize = 125;
         let xcenter;
         ctx.font = `bold ${fontSize}px "TommySoft"`;
-        fontSize = (canvas.width - 100) / ctx.measureText(Texto).width;
+        //fontSize = (canvas.width - 100) / ctx.measureText(Texto).width;
         ctx.font = `bold ${fontSize}px "TommySoft"`;
         console.log(fontSize);
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
@@ -512,10 +512,7 @@ module.exports = {
         if(servidor.id === '611732083995443210') Texto = 'Animal Realm!';
         else Texto = `${servidor.name}!`;
         fontSize = 125;
-        while(ctx.measureText(Texto).width > (canvas.width - 150)) {
-            fontSize -= 2;
-            ctx.font = `bold ${fontSize}px "TommySoft"`;
-        }
+        ctx.font = `bold ${fontSize}px "TommySoft"`;
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
         xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
         ctx.fillText(Texto, xcenter, canvas.height - 15);
@@ -662,10 +659,7 @@ module.exports = {
         ctx.textBaseline = 'bottom';
         let Texto = `Adiós, ${miembro.displayName}`;
         let fontSize = 160;
-        while(ctx.measureText(Texto).width / 2 > (canvas.width - 100)) {
-            fontSize -= 2;
-            ctx.font = `bold ${fontSize}px "TommySoft"`;
-        }
+        ctx.font = `bold ${fontSize}px "TommySoft"`;
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
         ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 40);
         ctx.strokeText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 40);
