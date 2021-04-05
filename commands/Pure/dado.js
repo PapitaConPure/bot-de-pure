@@ -54,7 +54,7 @@ module.exports = {
 			};
 		} catch(err) {
 			message.channel.send(
-				'¡No puedo tirar dados tetradimensionales! ***...todavía.***!\n' +
+				'¡No puedo tirar dados tetradimensionales! ***...todavía***!\n' +
 				`Revisa \`p!ayuda dado\` para más información`
 			);
 		};

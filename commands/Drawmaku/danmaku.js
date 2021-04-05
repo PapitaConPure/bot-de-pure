@@ -28,7 +28,7 @@ module.exports = {
             if(message.attachments.size > 0) {
                 if(!message.attachments.every(attachIsImage)) {
                     message.delete();
-                    message.channel.send(':warning: el archivo adjuntado no es una imagen.');
+                    message.channel.send(':warning: El archivo adjuntado no es una imagen.');
                     return;
                 }
                 if(global.dibujado) {
