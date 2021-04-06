@@ -23,43 +23,57 @@ module.exports = {
 		if(!args.length) {
 			const d = async () => {
 				//Acción de comando
-				//Canvas.registerFont('./TommySoft.otf', { family: 'TommySoft' });
+				Canvas.registerFont('./TommySoft.otf', { family: 'TommySoft' });
 				const canvas = Canvas.createCanvas(864, 960);
 				const ctx = canvas.getContext('2d');
-
-				//const fondo = await Canvas.loadImage('./fondo3.png');
-				//ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 
 				//#region Propiedades de texto
 				ctx.textBaseline = 'top';
 				ctx.fillStyle = '#ffffff';
 				ctx.strokeStyle = '#000000';
 				ctx.lineWidth = 10;
-				ctx.font = `bold 128px "TommySoft"`;
+				ctx.font = `bold 116px "TommySoft"`;
 				//#endregion
 
 				//#region Nombre del usuario
-				const Texto = '¡Anarquía!';
+				const Texto = '¡Tabla de Puré!';
 				const xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
-				ctx.fillText(Texto, xcenter, 10);
-				ctx.strokeText(Texto, xcenter, 10);
+				ctx.fillText(Texto, xcenter, 4);
+				ctx.strokeText(Texto, xcenter, 4);
 				//#endregion
 
 				let loademotes = {};
-				global.puretable.map(arr =>
-					arr.sort().filter((item, i, a) => (i > 0)?(item !== a[i - 1]):true).map(item => {
-						if(!loademotes.hasOwnProperty(item))
-							loademotes[item] = message.client.emojis.cache.get(item).url;
-					})
+				//Conseguir enlaces de emotes
+				const retornarEmote = async (arr) => {
+					let narr = arr;
+					return ;
+				};
+
+				const mapearEmotes = async () =>
+					Promise.all(global.puretable.map(arr => 
+						Promise.all(arr.slice(0).sort().filter((item, i, a) => (i > 0)?(item !== a[i - 1]):true).map(async item => {
+							if(!loademotes.hasOwnProperty(item))
+								loademotes[item] = await Canvas.loadImage(message.client.emojis.cache.get(item).url);
+						}))
+					)
 				);
-				
-				const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'bienvenida.png');
-				//message.channel.send({ files: [imagen] });
-				let str = '';
-				for(const [id, url] of Object.entries(loademotes)) {
-					str += `'${id}': ${url}\n`
-				}
-				message.channel.send(str);
+
+				mapearEmotes().then(() => {
+					//Dibujar emotes en imagen
+					const size = 48;
+					const tx = canvas.width / 2 - size * global.puretable.length / 2;
+					const ty = ctx.measureText('M').emHeightDescent + 12;
+					global.puretable.map((arr, y) => {
+						arr.map((item, x) => {
+							ctx.drawImage(loademotes[item], tx + x * size, ty + y * size, size, size);
+							console.log(`${x}, ${y}: ${item}`);
+							x += size;
+						});
+					});
+					
+					const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'bienvenida.png');
+					message.channel.send({ files: [imagen] });
+				});
 			};
 			d();
 		} else {
@@ -70,14 +84,14 @@ module.exports = {
 					arg = arg.slice(arg.indexOf(':') + 1);
 					e.id = arg;//message.client.emojis.resolve(arg);
 				} else if(!isNaN(arg) && !isNaN(args[i + 1])) {
-					e.x = arg;
-					e.y = args[i + 1];
+					e.x = Math.max(0, Math.min(arg - 1, global.puretable.length));
+					e.y = Math.max(0, Math.min(args[i + 1] - 1, global.puretable[0].length));
 				}
 			});
 
 			
 			if(Object.keys(e).length === 3) {
-				global.puretable[e.x][e.y] = e.id;
+				global.puretable[e.y][e.x] = e.id;
 				message.react('✅');
 			} else
 				message.channel.send(':warning: Entrada inválida\nUsa `p!ayuda anarquia` para más información');
