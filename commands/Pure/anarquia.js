@@ -13,7 +13,7 @@ module.exports = {
 		'Puedes ingresar un `<emote>` en una `<posición(x,y)>` o, al no ingresar nada, ver la tabla\n' +
 		'La `<posicion(x,y)>` se cuenta desde 1x,1y, y el `<emote>` designado debe ser de un server del que yo forme parte~\n\n' +
 		'De forma aleatoria, puedes ir desbloqueando habilidades para rellenar líneas completas en `--horizontal` o `--vertical`. La probabilidad inicial es 1% en conjunto, y aumenta +1% por cada __nivel__\n' +
-		'**Nivel**: nivel de usuario en `p!anarquia`. +1 por cada *50 usos*\n\n' +
+		'**Nivel**: nivel de usuario en `p!anarquia`. +1 por cada *30 usos*\n\n' +
 		'Incluso si usas una habilidad de línea, debes ingresar ambos ejes (`x,y`) en orden\n' +
 		'Usa `p!anarquia p` para ver tu perfil anárquico',
 	flags: [
@@ -90,7 +90,7 @@ module.exports = {
 			if(uses.anarquia[aid] !== undefined)
 				embed.setTitle('Perfil anárquico')
 					.addField('Inventario', `↔️ x ${uses.anarquia[aid].h}\n↕ x ${uses.anarquia[aid].v}`, true)
-					.addField('Rango', `Nivel ${Math.floor(uses.anarquia[aid].exp / 100) + 1} (exp: ${uses.anarquia[aid].exp})`, true);
+					.addField('Rango', `Nivel ${Math.floor(uses.anarquia[aid].exp / 30) + 1} (exp: ${uses.anarquia[aid].exp})`, true);
 			else
 				embed.setTitle('Perfil inexistente')
 					.addField(
@@ -174,8 +174,8 @@ module.exports = {
 					}
 
 					const r = Math.random();
-					console.log(`${r} < ${(1 + Math.floor(uses.anarquia[aid].exp / 50)) / 100}`);
-					if(r < (1 + Math.floor(uses.anarquia[aid].exp / 50)) / 100)
+					console.log(`${r} < ${(1 + Math.floor(uses.anarquia[aid].exp / 30)) / 100}`);
+					if(r < (1 + Math.floor(uses.anarquia[aid].exp / 30)) / 100)
 						if(Math.random() < 0.5) {
 							uses.anarquia[aid].h++;
 							await message.react('↔️');

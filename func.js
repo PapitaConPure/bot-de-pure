@@ -481,7 +481,7 @@ module.exports = {
         const canvas = Canvas.createCanvas(1275, 825);
         const ctx = canvas.getContext('2d');
 
-        const fondo = await Canvas.loadImage('./fondo.png');
+        const fondo = await Canvas.loadImage((servidor.id === global.serverid.hourai)?'./fondo4.png':'./fondo.png');
         ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
         //#endregion
 
@@ -509,7 +509,7 @@ module.exports = {
         
         //#region Texto inferior
         ctx.textBaseline = 'bottom';
-        if(servidor.id === '611732083995443210') Texto = 'Animal Realm!';
+        if(servidor.id === global.serverid.ar) Texto = 'Animal Realm!';
         else Texto = `${servidor.name}!`;
         fontSize = 100;
         ctx.font = `bold ${fontSize}px "TommySoft"`;
@@ -518,8 +518,8 @@ module.exports = {
         ctx.fillText(Texto, xcenter, canvas.height - 15);
         ctx.strokeText(Texto, xcenter, canvas.height - 15);
         Texto = '¡Bienvenid@ a';
-        ctx.lineWidth = Math.ceil(52 * strokeFactor);
-        ctx.font = `bold 52px "TommySoft"`;
+        ctx.lineWidth = Math.ceil(56 * strokeFactor);
+        ctx.font = `bold 56px "TommySoft"`;
         xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
         ctx.fillText(Texto, xcenter, canvas.height - fontSize - 20);
         ctx.strokeText(Texto, xcenter, canvas.height - fontSize - 20);
@@ -527,27 +527,26 @@ module.exports = {
         //#endregion
         
         //#region Foto de Perfil
-        //#region Sombra
-        const ycenter = (80 + (canvas.height - 10/*fontSize*/ - 48 - 30)) / 2;
-        ctx.shadowOffsetX = shadowOffsetY = 8;
-        ctx.shadowBlur = 20;
+        //#region Fondo
+        const radius = 200;
+        const ycenter = (115 + (canvas.height - 115 - 56)) / 2;
         ctx.fillStyle = '#36393f';
-        ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
+        ctx.arc(canvas.width / 2, ycenter, radius, 0, Math.PI * 2, true);
         ctx.fill();
         //#endregion
 
         //#region Imagen circular
         ctx.save();
         ctx.beginPath();
-        ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
+        ctx.arc(canvas.width / 2, ycenter, radius, 0, Math.PI * 2, true);
         ctx.closePath();
         ctx.clip();
         const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL({ format: 'png', dynamic: false, size: 1024 }));
-        ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
+        ctx.drawImage(avatar, canvas.width / 2 - radius, ycenter - radius, radius * 2, radius * 2);
         ctx.restore();
         ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 6;
-        ctx.arc(canvas.width / 2, ycenter, 150 + ctx.lineWidth, 0, Math.PI * 2, true);
+        ctx.lineWidth = radius / 28;
+        ctx.arc(canvas.width / 2, ycenter, radius + ctx.lineWidth, 0, Math.PI * 2, true);
         ctx.stroke();
         //#endregion
         //#endregion
@@ -658,7 +657,7 @@ module.exports = {
         //#region Nombre del usuario
         ctx.textBaseline = 'bottom';
         let Texto = `Adiós, ${miembro.displayName}`;
-        let fontSize = 160;
+        let fontSize = 90;
         ctx.font = `bold ${fontSize}px "TommySoft"`;
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
         ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 40);
@@ -667,27 +666,26 @@ module.exports = {
         //#endregion
 
         //#region Foto de Perfil
-        //#region Sombra
-        const ycenter = 40 + 150;
-        ctx.shadowOffsetX = shadowOffsetY = 8;
-        ctx.shadowBlur = 20;
+        //#region Fondo
+        const radius = 200;
+        const ycenter = 80 + radius;
         ctx.fillStyle = '#36393f';
-        ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
+        ctx.arc(canvas.width / 2, ycenter, radius, 0, Math.PI * 2, true);
         ctx.fill();
         //#endregion
 
         //#region Dibujar foto de perfil
         ctx.save();
         ctx.beginPath();
-        ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
+        ctx.arc(canvas.width / 2, ycenter, radius, 0, Math.PI * 2, true);
         ctx.closePath();
         ctx.clip();
         const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL({ format: 'png', dynamic: false, size: 1024 }));
-        ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
+        ctx.drawImage(avatar, canvas.width / 2 - radius, ycenter - radius, radius * 2, radius * 2);
         ctx.restore();
         ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 6;
-        ctx.arc(canvas.width / 2, ycenter, 150 + ctx.lineWidth, 0, Math.PI * 2, true);
+        ctx.lineWidth = radius / 28;
+        ctx.arc(canvas.width / 2, ycenter, radius + ctx.lineWidth, 0, Math.PI * 2, true);
         ctx.stroke();
         //#endregion
         //#endregion
