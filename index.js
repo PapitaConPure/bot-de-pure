@@ -34,7 +34,7 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
     global.seed = stt / 60000;
     func.modifyAct(client, 0);
     //keyv.set();
-	dns.lookupService('127.0.0.1', 22, (err, hostname, service) => {
+	dns.lookupService('127.0.0.1', 443, (err, hostname, service) => {
         global.bot_status.host = (err === null)?`${service}://${hostname}/`:'[host no detectado]';
     });
     global.puretable = Array(16).fill(null).map(() => Array(16).fill('828736342372253697'));
