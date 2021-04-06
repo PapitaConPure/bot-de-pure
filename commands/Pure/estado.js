@@ -26,7 +26,7 @@ module.exports = {
             .setAuthor('Estado del Bot', message.client.user.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
             .setThumbnail('https://i.imgur.com/HxTxjdL.png')
             .addField('Creador', `Papita con Puré\n[423129757954211880]`, true)
-            .addField('Host', global.bot_status.host, true)
+            .addField('Host', (global.bot_status.host === 'https://localhost/')?'https://heroku.com/':'localhost', true)
             .addField('Versión', `:hash: ${global.bot_status.version.number}\n:scroll: ${global.bot_status.version.name}`, true)
             .addField('Visión general', global.bot_status.note)
             .addField('Cambios', clformat)

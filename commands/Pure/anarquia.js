@@ -8,16 +8,22 @@ module.exports = {
 	aliases: [
 		'anarquía', 'a'
 	],
-	desc: 'Para interactuar con la Tabla de Puré\n' +
-		'**Tabla de Puré**: tablero de 16x16 celdas de emotes ingresados por usuarios. Se reinicia cuando me reinicio\n' +
+	desc: 'Para interactuar con la __Tabla de Puré__\n' +
+		'**Tabla de Puré**: tablero de 16x16 celdas de emotes ingresados por usuarios. Se reinicia cuando me reinicio\n\n' +
 		'Puedes ingresar un `<emote>` en una `<posición(x,y)>` o, al no ingresar nada, ver la tabla\n' +
-		'La `<posicion(x,y)>` se cuenta desde 1 hasta 16 (*no* desde 0 hasta 15), y el `<emote>` designado debe ser de un server del que yo forme parte~',
+		'La `<posicion(x,y)>` se cuenta desde 1x,1y, y el `<emote>` designado debe ser de un server del que yo forme parte~\n\n' +
+		'De forma aleatoria, puedes ir desbloqueando habilidades para rellenar líneas completas en `--horizontal` o `--vertical`. La probabilidad inicial es 1% en conjunto, y aumenta +1% por cada __nivel__\n' +
+		'**Nivel**: nivel de usuario en `p!anarquia`. +1 por cada *50 usos*\n\n' +
+		'Incluso si usas una habilidad de línea, debes ingresar ambos ejes (`x,y`) en orden\n' +
+		'Usa `p!anarquia p` para ver tu perfil anárquico',
 	flags: [
 		'common'
 	],
 	options: [
 	  '`<posición(x,y)?>` _(número [2])_ para especificar una celda a modificar',
-	  '`<emote?>` _(emote)_ para especificar un emote a agregar'
+	  '`<emote?>` _(emote)_ para especificar un emote a agregar',
+	  '`-h` o `--horizontal` para usar la habilidad de línea horizontal',
+	  '`-v` o `--vertical` para usar la habilidad de línea vertical'
 	],
 	callx: '<posición(x,y)?> <emote?>',
 
@@ -76,19 +82,66 @@ module.exports = {
 				});
 			};
 			d();
+		} else if(args[0] === 'p') {
+			const aid = message.author.id;
+			const embed = new Discord.MessageEmbed()
+				.setColor('#bd0924')
+				.setAuthor(message.author.username, message.author.avatarURL({ format: 'png', dynamic: true, size: 512 }));
+			if(uses.anarquia[aid] !== undefined)
+				embed.setTitle('Perfil anárquico')
+					.addField('Inventario', `↔️ x ${uses.anarquia[aid].h}\n↕ x ${uses.anarquia[aid].v}`, true)
+					.addField('Rango', `Nivel ${Math.floor(uses.anarquia[aid].exp / 100) + 1} (exp: ${uses.anarquia[aid].exp})`, true);
+			else
+				embed.setTitle('Perfil inexistente')
+					.addField(
+						'No tienes un perfil anárquico todavía', 'Usa `p!anarquia <posición(x,y)> <emote>` para colocar un emote en la tabla de puré y crearte un perfil anárquico automáticamente\n' +
+						'Si tienes más dudas, usa `p!ayuda anarquia`'
+					);
+			message.channel.send(embed);
 		} else {
+			const aid = message.author.id;
 			//Tiempo de enfriamiento por usuario
-			if(uses.anarquia[message.author.id] !== undefined)
-				if((Date.now() - uses.anarquia[message.author.id]) / 1000 < 3) {
+			if(uses.anarquia[aid] !== undefined) {
+				if((Date.now() - uses.anarquia[aid].last) / 1000 < 3) {
 					message.react('⌛');
 					return;
-				}
-
-			uses.anarquia[message.author.id] = Date.now();
+				} else
+					uses.anarquia[aid].last = Date.now();
+			} else
+				uses.anarquia[aid] = {
+					last: Date.now(),
+					h: '1',
+					v: '1',
+					exp: '0'
+				};
 			
+			let h = false, v = false;
+			const setH = () => {
+				if(uses.anarquia[aid].h > 0) {
+					h = true;
+					uses.anarquia[aid].h--;
+				}
+			};
+			const setV = () => {
+				if(uses.anarquia[aid].v > 0) {
+					v = true;
+					uses.anarquia[aid].v--;
+				}
+			};
 			let e = {};
 			args.map((arg, i) => {
-				if(Object.keys(e).length < 4)
+				if(arg.startsWith('--'))
+					switch(arg.slice(2)) {
+					case 'horizontal': setH(); break;
+					case 'vertical': setV(); break;
+					}
+				else if(arg.startsWith('-'))
+					for(c of arg.slice(1))
+						switch(c) {
+						case 'h': setH(); break;
+						case 'v': setV(); break;
+						}
+				else if(Object.keys(e).length < 4)
 					if((arg.startsWith('<:') || arg.startsWith('<a:')) && arg.endsWith('>')) {
 						arg = arg.slice(arg.indexOf(':') + 1, -1);
 						arg = arg.slice(arg.indexOf(':') + 1);
@@ -107,13 +160,39 @@ module.exports = {
 			else if(e.id === 'unresolved')
 				message.react('⚠️');
 			else {
+				//Insertar emote en x,y
 				const stx = e.x, sty = e.y;
-				e.x = Math.max(0, Math.min(e.x, global.puretable.length - 1));
-				e.y = Math.max(0, Math.min(e.y, global.puretable[0].length - 1));
-				global.puretable[e.y][e.x] = e.id;
-				uses.anarquia[message.author.id] = Date.now();
-				if(stx !== e.x || sty !== e.y) message.react('☑️');
-				else message.react('✅');
+				e.x = Math.max(0, Math.min(e.x, global.puretable[0].length - 1));
+				e.y = Math.max(0, Math.min(e.y, global.puretable.length - 1));
+
+				const modifyAndNotify = async () => {
+					if(!h && !v) global.puretable[e.y][e.x] = e.id;
+					else {
+						if(h) for(let i = 0; i < global.puretable[0].length; i++) global.puretable[e.y][i] = e.id;
+						if(v) for(let i = 0; i < global.puretable.length; i++) global.puretable[i][e.x] = e.id;
+						await message.react('⚡');
+					}
+
+					const r = Math.random();
+					console.log(`${r} < ${(1 + Math.floor(uses.anarquia[aid].exp / 50)) / 100}`);
+					if(r < (1 + Math.floor(uses.anarquia[aid].exp / 50)) / 100)
+						if(Math.random() < 0.5) {
+							uses.anarquia[aid].h++;
+							await message.react('↔️');
+						} else {
+							uses.anarquia[aid].v++;
+							await message.react('↕️');
+						}
+					uses.anarquia[aid].exp++;
+					if((uses.anarquia[aid].exp % 30) == 0)
+						message.channel.send(`¡**${message.author.username}** subió a nivel **${Math.floor(uses.anarquia[aid].exp / 30) + 1}**!`);
+
+					if(stx !== e.x || sty !== e.y) message.react('☑️');
+					else message.react('✅');
+				}
+
+				modifyAndNotify();
+				uses.anarquia[aid].last = Date.now();
 			}
 		}
 	}
