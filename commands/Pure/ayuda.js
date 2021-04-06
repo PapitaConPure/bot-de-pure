@@ -100,7 +100,7 @@ module.exports = {
             embed.setAuthor('Lista de comandos', aurl)
             .addField('Comandos: ejemplos de uso', '`p!ayuda -xmph --meme`\n`p!avatar @Usuario`\n`p!dados -c 20 -d 3`')
             .addField('Usa `p!ayuda <comando>` para más información sobre un comando', (list.name.length > 0)?list.name.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para realizar tu búsqueda).')
-            .addField('Guía introductoria', 'Para ver la página de índice de la guía introductoria de Bot de Puré, usa `p!ayuda g-indice`');
+            .addField('Guía introductoria', 'Usa `p!ayuda g-indice` para ver la página de índice de la guía introductoria de Bot de Puré');
         } else {
             const title = s => {
                 s = (s.startsWith('g-'))?`${s.slice(2)} (Página de Guía)`:s;

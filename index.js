@@ -38,6 +38,7 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
 });
 
 client.on('message', message => { //En caso de recibir un mensaje
+    if(global.maintenance.length > 0 && message.channel.id !== global.maintenance) return;
     const msg = message.content.toLowerCase();
 
     //#region palta -> aguacate
@@ -233,6 +234,7 @@ client.on('message', message => { //En caso de recibir un mensaje
 });
 
 client.on('guildMemberAdd', member => {
+    if(global.maintenance.length > 0 && member.guild.systemChannelID !== global.maintenance) return;
     console.log('Evento de entrada de usuario a servidor desencadenado.');
     try {
         if(!member.user.bot) func.dibujarBienvenida(member);
@@ -247,6 +249,7 @@ client.on('guildMemberAdd', member => {
 });
 
 client.on('guildMemberRemove', member => {
+    if(global.maintenance.length > 0 && member.guild.systemChannelID !== global.maintenance) return;
     console.log('Evento de salida de usuario de servidor desencadenado.');
     try {
         if(!member.user.bot) func.dibujarDespedida(member);

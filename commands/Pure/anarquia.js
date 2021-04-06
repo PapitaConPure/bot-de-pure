@@ -9,7 +9,7 @@ module.exports = {
 		'anarquía', 'a'
 	],
 	desc: 'Para interactuar con la Tabla de Puré\n' +
-		'**Tabla de Puré**: tablero de 16x16 celdas de emotes ingresados por usuarios\n' +
+		'**Tabla de Puré**: tablero de 16x16 celdas de emotes ingresados por usuarios. Se reinicia cuando me reinicio\n' +
 		'Puedes ingresar un `<emote>` en una `<posición(x,y)>` o, al no ingresar nada, ver la tabla\n' +
 		'La `<posicion(x,y)>` se cuenta desde 1 hasta 16 (*no* desde 0 hasta 15), y el `<emote>` designado debe ser de un server del que yo forme parte~',
 	flags: [
@@ -88,7 +88,7 @@ module.exports = {
 			
 			let e = {};
 			args.map((arg, i) => {
-				if(Object.keys(e).length < 3)
+				if(Object.keys(e).length < 4)
 					if((arg.startsWith('<:') || arg.startsWith('<a:')) && arg.endsWith('>')) {
 						arg = arg.slice(arg.indexOf(':') + 1, -1);
 						arg = arg.slice(arg.indexOf(':') + 1);
