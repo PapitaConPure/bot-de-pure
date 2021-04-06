@@ -17,14 +17,16 @@ module.exports = {
 	callx: '<proceso?>',
 
 	execute(message, args) {
-		let phostname;
-		dns.lookupService('127.0.0.1', 22, (err, hostname, service) => {
-			phostname = `[${err}]${service}${hostname}/`;
-		});
 		//Acción de comando
-		if(!args.length)
-			message.channel.send(`**Host** ${phostname}\n**ID de InstProc** ${global.startuptime}`);
-		else
-			global.maintenance = message.channel.id;
+		dns.lookupService('127.0.0.1', 22, (err, hostname, service) => {
+			const phostname = (err === null)?`${service}://${hostname}/`:'[host no detectado]';
+
+			if(!args.length)
+				message.channel.send(`**Host** \`${phostname}\`\n**ID de InstProc** \`${global.startuptime}\``);
+			else if(args[0] === global.startuptime) {
+				global.maintenance = message.channel.id;
+				message.react('✅');
+			}
+		});
 	}
 };
