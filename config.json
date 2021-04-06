@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.2B",
+            "number": "Full.2.8.2D",
             "name": "Cisne Cristalino"
         },
         "note": "Se esperan inconsistencias y errores debido a recientes trabajos de reestructuración",
@@ -13,8 +13,9 @@
             "Mejora de bienvenida (Hourai Doll)",
             "Mejora de `p!ayuda` y descripciones varias",
             "Corrección de errores de p!anarquia",
-            "Páginas de Guía",
-            "`p!anarquia` ahora trae perfiles y habilidades"
+            "`p!ayuda` ahora cuenta con Páginas de Guía introductorias",
+            "`p!anarquia` ahora trae perfiles y habilidades",
+            "`p!imagine` restaurado, ahora envía x-uwus"
         ],
         "todo": [
             "Más opciones de comandos de prueba para mayor facilidad de monitoreo, mantenimiento y modificación",
