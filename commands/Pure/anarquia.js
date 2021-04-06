@@ -11,7 +11,8 @@ module.exports = {
 		'**Tabla de Puré**: tablero de 16x16 celdas de emotes ingresados por usuarios\n\n' +
 		'Puedes ingresar un `<emote>` en una `<posición(x,y)>` o, al no ingresar nada, ver la tabla',
 	flags: [
-		'common'
+		'common',
+		'maintenance'
 	],
 	options: [
 	  '`<posición(x,y)?>` para especificar una celda a modificar',
