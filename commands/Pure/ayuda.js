@@ -67,15 +67,17 @@ module.exports = {
             const command = require(`../../commands/Pure/${file}`);
             if(search === 'n') {
                 if(command.flags !== undefined) {
-                    const cmeme = fmeme? true : !command.flags.includes('meme');
-                    const cmod = (fmod && message.member.hasPermission('MANAGE_ROLES'))? true : !command.flags.includes('mod');
-                    const cpapa = (fpapa && message.author.id === '423129757954211880')? true : !command.flags.includes('papa');
-                    const chourai = (fhourai && message.channel.guild.id === global.serverid.hourai)? true : !command.flags.includes('hourai');
-                    const cex = fex? !command.flags.includes('common') : true;
-                
-                    if((cmeme && cmod && cpapa && chourai && cex)) {
-                        list.name[item] = command.name;
-                        item++;
+                    if(!command.flags.includes('guide')) {
+                        const cmeme = fmeme? true : !command.flags.includes('meme');
+                        const cmod = (fmod && message.member.hasPermission('MANAGE_ROLES'))? true : !command.flags.includes('mod');
+                        const cpapa = (fpapa && message.author.id === '423129757954211880')? true : !command.flags.includes('papa');
+                        const chourai = (fhourai && message.channel.guild.id === global.serverid.hourai)? true : !command.flags.includes('hourai');
+                        const cex = fex? !command.flags.includes('common') : true;
+                    
+                        if(cmeme && cmod && cpapa && chourai && cex) {
+                            list.name[item] = command.name;
+                            item++;
+                        }
                     }
                 } else {
                     list.name[item] = command.name;
@@ -97,23 +99,27 @@ module.exports = {
         if(search === 'n') {
             embed.setAuthor('Lista de comandos', aurl)
             .addField('Comandos: ejemplos de uso', '`p!ayuda -xmph --meme`\n`p!avatar @Usuario`\n`p!dados -c 20 -d 3`')
-            .addField('Usa `p!ayuda <comando>` para más información', (list.name.length > 0)?list.name.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para realizar tu búsqueda).');
+            .addField('Usa `p!ayuda <comando>` para más información sobre un comando', (list.name.length > 0)?list.name.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para realizar tu búsqueda).')
+            .addField('Guía introductoria', 'Para ver la página de índice de la guía introductoria de Bot de Puré, usa `p!ayuda g-indice`');
         } else {
             const title = s => {
+                s = (s.startsWith('g-'))?`${s.slice(2)} (Página de Guía)`:s;
                 s = (s.startsWith('m-'))?`${s.slice(2)} (Mod)`:s;
                 s = (s.startsWith('papa-'))?`${s.slice(5)} (Papita con Puré)`:s;
                 return `${s[0].toUpperCase()}${s.slice(1)}`;
             };
             if(list.name.length > 0) {
                 const arrayExists = arr => arr !== undefined && arr.some(it => it.length > 0);
+                const flagsExist = arrayExists(list.flags);
                 embed.setAuthor(title(list.name[0]), aurl)
-                    .setFooter('Nota: los <parámetros> con el símbolo "?" son opcionales, el resto son obligatorios')
+                    .setFooter('Usa "p!ayuda g-indice" para aprender más sobre comandos')
                     .addField('Nombre', `\`${list.name[0]}\``, true)
                     .addField('Alias', arrayExists(list.aliases)?(list.aliases.map(i => `\`${i}\``).join(', ')):':label: Sin alias', true)
-                    .addField('Descripción', (list.desc !== undefined && list.desc.length > 0)?list.desc:':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde')
-                    .addField('Llamado', `\`p!${list.name[0]}${(list.callx !== undefined)?` ${list.callx}`:''}\``, true)
-                    .addField('Opciones (`p!x -x --xxx <x>`)', arrayExists(list.options)?list.options.join('\n'):':abacus: Sin opciones', true)
-                    .addField('Identificadores', arrayExists(list.flags)?(list.flags.map(i => `\`${i}\``).join(', ').toUpperCase()):':question: Este comando no tiene identificadores por ahora');
+                    .addField('Descripción', (list.desc !== undefined && list.desc.length > 0)?list.desc:':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde');
+                if(!flagsExist || !list.flags.some(flag => flag === 'guide'))
+                    embed.addField('Llamado', `\`p!${list.name[0]}${(list.callx !== undefined)?` ${list.callx}`:''}\``, true)
+                        .addField('Opciones (`p!x -x --xxx <x>`)', arrayExists(list.options)?list.options.join('\n'):':abacus: Sin opciones', true)
+                        .addField('Identificadores', flagsExist?(list.flags.map(i => `\`${i}\``).join(', ').toUpperCase()):':question: Este comando no tiene identificadores por ahora');
             } else
                 embed.setAuthor('Sin resultados', aurl)
                     .addField('No se ha encontrado ningún comando con este nombre', `Utiliza \`p!ayuda\` para ver una lista de comandos disponibles y luego usa \`p!comando <comando>\` para ver un comando en específico`);

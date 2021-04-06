@@ -15,8 +15,8 @@ module.exports = {
         'common'
     ],
     options: [
-		'`-d <n>` o `--dados <n>` para especificar la cantidad de dados',
-		'`-c <n>` o `--caras <n>` para especificar la cantidad de caras'
+		'`-d <n>` o `--dados <n>` _(número)_ para especificar la cantidad de dados',
+		'`-c <n>` o `--caras <n>` _(número)_ para especificar la cantidad de caras'
     ],
 	
 	execute(message, args) {

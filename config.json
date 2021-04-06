@@ -2,16 +2,20 @@
     "bot_status": {
         "host": "https://heroku.com",
         "version": {
-            "number": "Full.2.8.23",
+            "number": "Full.2.8.29",
             "name": "Cisne Cristalino"
         },
         "note": "Se esperan inconsistencias y errores debido a recientes trabajos de reestructuración",
         "changelog": [
             "Tareas de refactorización (1.5/4)",
-            "Pequeña mejora de `p!m-info`"
+            "Pequeña mejora de `p!m-info`",
+            "`p!anarquía` para minijuego anárquico global",
+            "Mejora de bienvenida",
+            "Mejora de comando de ayuda y descripciones varias",
+            "Corrección de errores de p!anarquia",
+            "Páginas de Guía"
         ],
         "todo": [
-            "`p!anarquía` para minijuego anárquico global",
             "Más opciones de comandos de prueba para mayor facilidad de monitoreo, mantenimiento y modificación",
             "Búsqueda múltiple con p!pfp separada con comas en lugar de espacios",
             "Minijuegos individuales y tipo-fiesta",

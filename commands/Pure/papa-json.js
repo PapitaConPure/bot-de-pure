@@ -12,11 +12,15 @@ const readObj = (object, indent) => {
 
 module.exports = {
 	name: 'papa-json',
-	desc: 'Muestra las propiedades de un objeto JS con cierto `<nombre>`',
+	desc: 'Busca un `<objeto>` JS con cierto siguiendo las indicaciones de `<(ruta, nombre)>` en el `<archivo>` especificado (o `global.json`)',
 	flags: [
 		'papa'
 	],
-	callx: '<nombre>',
+	options:[
+		'`<archivo?>` _(texto: *.json)_ para especificar en qué archivo buscar el objeto',
+		'`<objeto? (ruta, nombre)>` _(texto, texto)_ para especificar la ruta relativa al archivo del objeto a buscar, en orden descendiente'
+	],
+	callx: '<archivo?> <objeto? (ruta..., nombre)>',
 
 	execute(message, args) {
 		//Buscar objeto de forma descendiente

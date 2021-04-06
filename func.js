@@ -495,7 +495,7 @@ module.exports = {
         //#region Nombre del usuario
         ctx.textBaseline = 'top';
         let Texto = `${miembro.displayName}`;
-        let fontSize = 125;
+        let fontSize = 100;
         let xcenter;
         ctx.font = `bold ${fontSize}px "TommySoft"`;
         //fontSize = (canvas.width - 100) / ctx.measureText(Texto).width;
@@ -511,7 +511,7 @@ module.exports = {
         ctx.textBaseline = 'bottom';
         if(servidor.id === '611732083995443210') Texto = 'Animal Realm!';
         else Texto = `${servidor.name}!`;
-        fontSize = 125;
+        fontSize = 100;
         ctx.font = `bold ${fontSize}px "TommySoft"`;
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
         xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);

@@ -8,21 +8,21 @@ module.exports = {
 		'm-twitter'
 	],
 	desc: 'Para mostrar Twitters de artistas con los que trabaja Hourai Doll\n' +
-	'Crea un nuevo embed con los enlaces designados (separados solamente por un espacio)\n' +
-	'Alternativamente, puedes especificar una `--id` de un embed ya enviado para editarlo, especificando qué Twitters `--agregar` o `--eliminar`\n' +
-	'El embed se añadirá o se buscará por ID para editar en el canal actual a menos que especifiques un `--canal`',
+	'Crea un nuevo embed con los `<twitters>` designados (separados solamente por un espacio)\n' +
+	'Alternativamente, puedes especificar una `--id` de un embed ya enviado para editarlo, especificando qué `<twitters>` `--agregar` o `--eliminar`\n' +
+	'El embed se añadirá o se buscará por `--id` para editar *en el canal actual* a menos que especifiques un `--canal`',
 	flags: [
 		'mod',
 		'hourai'
 	],
 	options: [,
-		'`<twitter>` _(url: https://twitter.com/)_ para colocar uno o más Twitters en un nuevo embed',
+		'`<twitters(...)>` _(enlace: https://twitter.com/ [múltiple])_ para colocar uno o más Twitters en un nuevo embed',
 		'`--canal <ch>` o `-c <ch>` _(canal)_ para especificar en qué canal enviar/editar un embed',
 		'`--id <msgid>` _(ID de mensaje)_ para especificar un embed ya enviado a editar',
 		'`-a <twitter>` o `--agregar <twitter>` para añadir Twitters a un embed ya enviado',
 		'`-e <twitter>` o `--eliminar <twitter>` para remover Twitters de un embed ya enviado'
 	],
-	callx: '<twitter>',
+	callx: '<twitters(...)>',
 
 	execute(message, args) {
 		if(args.length === 0) {

@@ -171,6 +171,11 @@ client.on('message', message => { //En caso de recibir un mensaje
                 errtitle = 'Comando en mantenimiento';
                 errfield = 'El comando no se encuentra disponible debido a que está en proceso de actualización o reparación en este momento. Espera a que se actualice~';
                 return true;
+            
+            case 'guide':
+                errtitle = 'Símbolo de página de guía';
+                errfield = 'Esto no es un comando, sino que una *página de guía* pensada para buscarse con `p!ayuda`';
+                return true;
 
             case 'mod':
                 if(message.member.hasPermission('MANAGE_ROLES') || message.member.hasPermission('MANAGE_MESSAGES')) return false;

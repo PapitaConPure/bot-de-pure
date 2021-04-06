@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const global = require('../../config.json'); //Variables globales
+const uses = require('../../sguses.json'); //Variables globales
 const Canvas = require('canvas');
 
 module.exports = {
@@ -8,15 +9,15 @@ module.exports = {
 		'anarquía', 'a'
 	],
 	desc: 'Para interactuar con la Tabla de Puré\n' +
-		'**Tabla de Puré**: tablero de 16x16 celdas de emotes ingresados por usuarios\n\n' +
-		'Puedes ingresar un `<emote>` en una `<posición(x,y)>` o, al no ingresar nada, ver la tabla',
+		'**Tabla de Puré**: tablero de 16x16 celdas de emotes ingresados por usuarios\n' +
+		'Puedes ingresar un `<emote>` en una `<posición(x,y)>` o, al no ingresar nada, ver la tabla\n' +
+		'La `<posicion(x,y)>` se cuenta desde 1 hasta 16 (*no* desde 0 hasta 15), y el `<emote>` designado debe ser de un server del que yo forme parte~',
 	flags: [
-		'common',
-		'maintenance'
+		'common'
 	],
 	options: [
-	  '`<posición(x,y)?>` para especificar una celda a modificar',
-	  '`<emote?>` para especificar un emote a agregar'
+	  '`<posición(x,y)?>` _(número [2])_ para especificar una celda a modificar',
+	  '`<emote?>` _(emote)_ para especificar un emote a agregar'
 	],
 	callx: '<posición(x,y)?> <emote?>',
 
@@ -31,8 +32,8 @@ module.exports = {
 				//#region Propiedades de texto
 				ctx.textBaseline = 'top';
 				ctx.fillStyle = '#ffffff';
-				ctx.strokeStyle = '#000000';
-				ctx.lineWidth = 10;
+				ctx.strokeStyle = '#bd0924';
+				ctx.lineWidth = 9;
 				ctx.font = `bold 116px "TommySoft"`;
 				//#endregion
 
@@ -65,11 +66,9 @@ module.exports = {
 					const tx = canvas.width / 2 - size * global.puretable.length / 2;
 					const ty = ctx.measureText('M').emHeightDescent + 12;
 					global.puretable.map((arr, y) => {
-						arr.map((item, x) => {
-							ctx.drawImage(loademotes[item], tx + x * size, ty + y * size, size, size);
-							console.log(`${x}, ${y}: ${item}`);
-							x += size;
-						});
+						arr.map((item, x) => 
+							ctx.drawImage(loademotes[item], tx + x * size, ty + y * size, size, size)
+						);
 					});
 					
 					const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'bienvenida.png');
@@ -78,24 +77,44 @@ module.exports = {
 			};
 			d();
 		} else {
+			//Tiempo de enfriamiento por usuario
+			if(uses.anarquia[message.author.id] !== undefined)
+				if((Date.now() - uses.anarquia[message.author.id]) / 1000 < 3) {
+					message.react('⌛');
+					return;
+				}
+
+			uses.anarquia[message.author.id] = Date.now();
+			
 			let e = {};
 			args.map((arg, i) => {
-				if((arg.startsWith('<:') || arg.startsWith('<a:')) && arg.endsWith('>')) {
-					arg = arg.slice(arg.indexOf(':') + 1, -1);
-					arg = arg.slice(arg.indexOf(':') + 1);
-					e.id = arg;//message.client.emojis.resolve(arg);
-				} else if(!isNaN(arg) && !isNaN(args[i + 1])) {
-					e.x = Math.max(0, Math.min(arg - 1, global.puretable.length));
-					e.y = Math.max(0, Math.min(args[i + 1] - 1, global.puretable[0].length));
-				}
+				if(Object.keys(e).length < 3)
+					if((arg.startsWith('<:') || arg.startsWith('<a:')) && arg.endsWith('>')) {
+						arg = arg.slice(arg.indexOf(':') + 1, -1);
+						arg = arg.slice(arg.indexOf(':') + 1);
+						if(message.client.emojis.cache.get(arg) !== undefined)
+							e.id = arg;
+						else
+							e.id = 'unresolved';
+					} else if(e.x === undefined && !isNaN(arg) && !isNaN(args[i + 1])) {
+						e.x = arg - 1;
+						e.y = args[i + 1] - 1;
+					}
 			});
-
 			
-			if(Object.keys(e).length === 3) {
-				global.puretable[e.y][e.x] = e.id;
-				message.react('✅');
-			} else
+			if(Object.keys(e).length !== 3)
 				message.channel.send(':warning: Entrada inválida\nUsa `p!ayuda anarquia` para más información');
+			else if(e.id === 'unresolved')
+				message.react('⚠️');
+			else {
+				const stx = e.x, sty = e.y;
+				e.x = Math.max(0, Math.min(e.x, global.puretable.length - 1));
+				e.y = Math.max(0, Math.min(e.y, global.puretable[0].length - 1));
+				global.puretable[e.y][e.x] = e.id;
+				uses.anarquia[message.author.id] = Date.now();
+				if(stx !== e.x || sty !== e.y) message.react('☑️');
+				else message.react('✅');
+			}
 		}
 	}
 };
