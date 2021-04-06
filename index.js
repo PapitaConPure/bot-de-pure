@@ -7,6 +7,7 @@ const client = new Discord.Client({ fetchAllMembers: true }); //Usuario con el q
 //keyv.on('error', err => console.error('Keyv connection error:', err));
 const global = require('./config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
+const dns = require('dns'); //Detectar host
 const token = 'NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY'; //La clave del bot
 module.exports = { Discord };
 //#endregion
@@ -33,6 +34,9 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
     global.seed = stt / 60000;
     func.modifyAct(client, 0);
     //keyv.set();
+	dns.lookupService('127.0.0.1', 22, (err, hostname, service) => {
+        global.bot_status.host = (err === null)?`${service}://${hostname}/`:'[host no detectado]';
+    });
     global.puretable = Array(16).fill(null).map(() => Array(16).fill('828736342372253697'));
 	console.log('Bot conectado y funcionando.');
 });

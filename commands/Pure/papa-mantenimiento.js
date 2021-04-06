@@ -1,5 +1,4 @@
 const global = require('../../config.json'); //Variables globales
-const dns = require('dns'); //Detectar host
 
 module.exports = {
 	name: 'papa-mantenimiento',
@@ -18,15 +17,11 @@ module.exports = {
 
 	execute(message, args) {
 		//Acción de comando
-		dns.lookupService('127.0.0.1', 22, (err, hostname, service) => {
-			const phostname = (err === null)?`${service}://${hostname}/`:'[host no detectado]';
-
-			if(!args.length)
-				message.channel.send(`**Host** \`${phostname}\`\n**ID de InstProc** \`${global.startuptime}\``);
-			else if(args[0] === global.startuptime) {
-				global.maintenance = message.channel.id;
-				message.react('✅');
-			}
-		});
+		if(!args.length)
+			message.channel.send(`**Host** \`${global.bot_status.host}\`\n**ID de InstProc** \`${global.startuptime}\``);
+		else if(args[0] === global.startuptime) {
+			global.maintenance = message.channel.id;
+			message.react('✅');
+		}
 	}
 };
