@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.2D",
+            "number": "Full.2.8.2E",
             "name": "Cisne Cristalino"
         },
         "note": "Se esperan inconsistencias y errores debido a recientes trabajos de reestructuración",
@@ -29,6 +29,8 @@
     "p_drmk": "d!",
     "p_pure": "p!",
     "p_mention": "oe po <@651250669390528561>, ",
+    "maintenance": "",
+    "seed": 0,
     "serverid": {
         "bautistas": "745003943997997056",
         "sugerencias": "826632021451341824",
@@ -41,12 +43,64 @@
         "usd":      "698323332160028792",
         "ocg":      "750095369639297065"
     },
-    "papitaid": "423129757954211880",
-    "maintenance": "",
-    "seed": 0,
+    "peopleid": {
+        "papita": "423129757954211880",
+        "bern": "239550977638793217"
+    },
     "lechitauses": 0,
-    "houraiwarn": 0,
     "puretable": [],
+    "hourai": {
+        "warn": 0,
+        "images": {
+            "colors": "https://i.imgur.com/7t7m3PS.png"
+        },
+        "replies": {
+            "ignore": {
+                "prefix": [
+                    "--",
+                    "es-",
+                    "es_",
+                    "elixir ",
+                    "muñeca "
+                ],
+                "suffix": [
+                    "doll",
+                    " doll",
+                    " victim",
+                    " elixir",
+                    " ningyou",
+                    "san"
+                ]
+            },
+            "taunt": [
+                "*¿Pero y a ti quién te invitó? <:mayuwu:654489124413374474>*",
+                "Oe qliao creo que se te cayó la tula <:pepe:697320983106945054>",
+                "Hourai puto <:knoipuais:751176163182772244>",
+                "***No hablen de esa weá <:aruStare:697497314884845658>***",
+                "Cierra el osiko tonto qliao <:yumou:708158159180660748>",
+                "¿Pero por qué no me xupai el pico mejor, así altiro? Aweonao <:junkNo:697321858407727224>",
+                "Pero no digai tantas weás po <:koipwaise:657346542847524875>",
+                "Puta que son pesaos con el Hourai <:notlikealice:654489127202586634>",
+                "**CSM NO HABLEN DE HOURAI** <:poutSumi:698658511474786364>"
+            ],
+            "compare": [
+                "***__Recuerden:__ soy objetivamente mejor que Hourai <:haniwaSmile:659872119995498507>***",
+                "**Bot > Puré > Papita > Hourai <:miyoi:674823039086624808>**",
+                "Pero la reputa, dejen de compararme con esa weá <:meguDerp:708064265092726834>",
+                "*__Recuerden niñas:__ Hourai come tula 24/7 <:haniwaSmile:659872119995498507>*",
+                "Ah, te hacei el gracioso conchetumare? <:yoom:749728988137652365>",
+                "Disculpa cuál es tu problema? <:perropistola:748626491457273966>",
+                "Yo soy basada y Hourai es cringe <:GigaChad:748623625653059584>"
+            ],
+            "reply": [
+                "Cállate puta <:haniwaSmile:659872119995498507>",
+                "Tu madre, por si acaso <:haniwaSmile:659872119995498507>",
+                "*Pero no seas puto <:haniwaSmile:659872119995498507>*",
+                "Qué decí? <:yuyuthink:722516632345247834>",
+                "Ahhh, el culiao bravo eh? Vení que te rajo <:wtfchomu:725582341401083967>"
+            ]
+        }
+    },
 
     "tiempo": "7200",
     "edi": "4",

@@ -37,15 +37,17 @@ module.exports = {
 
 		if(args.length)
 			for(arg of args.slice(0, 4))
-				if(obj[arg] === undefined) {
-					message.channel.send(`:warning: El objeto "${arg}" no existe. Revisa que el identificador esté bien escrito.`);
-					break;
-				} else {
+				if(obj[arg] !== undefined) {
 					obj = obj[arg];
 					name = arg;
-				}
+				} else break;
 
 		//Acción de comando
+		if(obj === undefined) {
+			message.channel.send(`:warning: El objeto "${args.join('\\')}" no existe. Revisa que el identificador esté bien escrito.`);
+			return;
+		}
+		
 		(readObj(obj, '\t').match(/[\s\S]{1,1966}/g) || ['\t[Empty]\n']).map(async (a) => 
 			await message.channel.send(`\`\`\`json\n"${name}": {\n${a}}\n\`\`\``)
 		);

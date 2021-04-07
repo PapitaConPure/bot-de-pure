@@ -204,18 +204,17 @@ module.exports = {
                 
                 if(dc === 1) {
                     console.log('El miembro está retenido.');
-                    global.houraiwarn++;
-                    if(global.houraiwarn <= 6) {
-                        if(global.houraiwarn <= 3)
-                            canal.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474> (${global.houraiwarn}/3 llamados)`);
+                    global.hourai.warn++;
+                    if(global.hourai.warn <= 6) {
+                        if(global.hourai.warn <= 3)
+                            canal.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474> (${global.hourai.warn}/3 llamados)`);
                         setTimeout(module.exports.askForRole, 1000, miembro , canal, 5 * 4);
-                        console.log(`Volviendo a esperar confirmación de miembro (${global.houraiwarn}/6)...`);
+                        console.log(`Volviendo a esperar confirmación de miembro (${global.hourai.warn}/6)...`);
                     }
                 } else {
                     console.log('El miembro no ha recibido roles básicos.');
                     canal.send(
-                        `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>\n` +
-                        `https://imgur.com/D5Z8Itb`
+                        `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>\n${global.hourai.images.colors}`
                     ).then(sent => module.exports.askColor(sent, miembro));
                     setTimeout(module.exports.forceRole, 1000, miembro, canal, 4 * 4);
                     console.log(`Esperando comprobación final de miembro en unos minutos...`);
@@ -564,7 +563,7 @@ module.exports = {
                     'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:697321858407727224>\n' +
                     '<@&654472238510112799>, vengan a saludar po maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
                     `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n` +
-                    'https://i.imgur.com/7t7m3PS.png'
+                    global.hourai.images.colors
                 ).then(sent => module.exports.askColor(sent, miembro));
                 setTimeout(module.exports.askForRole, 1000, miembro, canal, 5 * 4);
                 console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');
