@@ -178,10 +178,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     } catch(error) {
         console.log('Ha ocurrido un error al ingresar un comando.');
         console.error(error);
-        message.channel.send(
-            `\`\`\`js\n${error}\n\`\`\`\n` +
-            '<@!423129757954211880>'
-        );
+        message.channel.send(`\`\`\`js\n${error}\n\`\`\`\n<@!${global.peopleid.papita}>`);
     }
 
     //Empezar cuenta regresiva luego de mod-empezar

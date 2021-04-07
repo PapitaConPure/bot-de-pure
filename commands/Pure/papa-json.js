@@ -40,11 +40,14 @@ module.exports = {
 				if(obj[arg] !== undefined) {
 					obj = obj[arg];
 					name = arg;
-				} else break;
+				} else {
+					obj = undefined;
+					break;
+				}
 
 		//Acción de comando
 		if(obj === undefined) {
-			message.channel.send(`:warning: El objeto "${args.join('\\')}" no existe. Revisa que el identificador esté bien escrito.`);
+			message.channel.send(`:warning: El objeto "${args.join('.')}" no existe. Revisa que el identificador esté bien escrito.`);
 			return;
 		}
 		

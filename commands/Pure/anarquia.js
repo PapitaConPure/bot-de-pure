@@ -115,31 +115,20 @@ module.exports = {
 					exp: '0'
 				};
 			
-			let h = false, v = false;
-			const setH = () => {
-				if(uses.anarquia[aid].h > 0) {
-					h = true;
-					uses.anarquia[aid].h--;
-				}
-			};
-			const setV = () => {
-				if(uses.anarquia[aid].v > 0) {
-					v = true;
-					uses.anarquia[aid].v--;
-				}
-			};
-			let e = {};
+			let h = false,
+				v = false,
+				e = {};
 			args.map((arg, i) => {
 				if(arg.startsWith('--'))
 					switch(arg.slice(2)) {
-					case 'horizontal': setH(); break;
-					case 'vertical': setV(); break;
+					case 'horizontal': h = (uses.anarquia[aid].h > 0); break;
+					case 'vertical': v = (uses.anarquia[aid].v > 0); break;
 					}
 				else if(arg.startsWith('-'))
 					for(c of arg.slice(1))
 						switch(c) {
-						case 'h': setH(); break;
-						case 'v': setV(); break;
+						case 'h': h = (uses.anarquia[aid].h > 0); break;
+						case 'v': v = (uses.anarquia[aid].v > 0); break;
 						}
 				else if(Object.keys(e).length < 4)
 					if((arg.startsWith('<:') || arg.startsWith('<a:')) && arg.endsWith('>')) {
@@ -168,8 +157,8 @@ module.exports = {
 				const modifyAndNotify = async () => {
 					if(!h && !v) global.puretable[e.y][e.x] = e.id;
 					else {
-						if(h) for(let i = 0; i < global.puretable[0].length; i++) global.puretable[e.y][i] = e.id;
-						if(v) for(let i = 0; i < global.puretable.length; i++) global.puretable[i][e.x] = e.id;
+						if(h) { for(let i = 0; i < global.puretable[0].length; i++) global.puretable[e.y][i] = e.id; uses.anarquia[aid].h--; }
+						if(v) { for(let i = 0; i < global.puretable.length; i++)    global.puretable[i][e.x] = e.id; uses.anarquia[aid].v--; }
 						await message.react('⚡');
 					}
 
