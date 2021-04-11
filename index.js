@@ -12,7 +12,7 @@ const token = 'NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY'; //L
 module.exports = { Discord };
 //#endregion
 
-//#region Establecimiento de Comandos
+//#region Detección de archivos de comandos
 client.ComandosDrawmaku = new Discord.Collection(); //Comandos de Drawmaku
 var commandFiles = fs.readdirSync('./commands/Drawmaku').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
 for(const file of commandFiles) {
@@ -194,7 +194,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     //#endregion 
 });
 
-client.on('guildMemberAdd', member => {
+client.on('guildMemberAdd', member => { //Evento de entrada a servidor
     if(global.maintenance.length > 0 && member.guild.systemChannelID !== global.maintenance) return;
     console.log('Evento de entrada de usuario a servidor desencadenado.');
     try {
@@ -209,7 +209,7 @@ client.on('guildMemberAdd', member => {
     }
 });
 
-client.on('guildMemberRemove', member => {
+client.on('guildMemberRemove', member => { //Evento de entrada de servidor
     if(global.maintenance.length > 0 && member.guild.systemChannelID !== global.maintenance) return;
     console.log('Evento de salida de usuario de servidor desencadenado.');
     try {

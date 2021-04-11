@@ -21,6 +21,7 @@
         "todo": [
             "Más opciones de comandos de prueba para mayor facilidad de monitoreo, mantenimiento y modificación",
             "Búsqueda múltiple con p!pfp separada con comas en lugar de espacios",
+            "Comando para cartas personalizadas al estilo de Touhou 18",
             "Minijuegos individuales y tipo-fiesta",
             "Base de datos en la nube",
             "Simplificar prefijos y personalización de Bot a nivel de servidor",
