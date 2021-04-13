@@ -29,24 +29,25 @@ module.exports = {
             
             message.channel.send(embed);
         } else {
-            for(avalist = 0; avalist < Math.min(args.length, 8); avalist++) {
-                args[avalist] = func.resolverIDUsuario(args[avalist], message.channel.guild, message.client);
+            args.join(' ').split(',').map(arg => {
+                arg = arg.trim();
+                arg = func.resolverIDUsuario(arg, message.channel.guild, message.client);
 
-                if(args[avalist] !== undefined) {
-                    const fetcheduser = message.client.users.cache.get(args[avalist]);
+                if(arg !== undefined) {
+                    const fetcheduser = message.client.users.cache.get(arg);
 
                     if(fetcheduser === undefined)
                         message.channel.send(':warning: La ID ingresada es inválida o no es una ID en absoluto...');
                     else {
-                        const embed = new Discord.MessageEmbed()
+                        embed = new Discord.MessageEmbed()
                             .setTitle(`Avatar de ${fetcheduser.username}`)
                             .setImage(fetcheduser.avatarURL({ dynamic: true, size: 1024 }));
 
                         message.channel.send(embed);
                     }
                 } else 
-                    message.channel.send(':warning: ¡Usuario no encontrado!');
-            }
+                    message.channel.send(`:warning: ¡Usuario **${arg}** no encontrado!`);
+            });
         }
     },
 };

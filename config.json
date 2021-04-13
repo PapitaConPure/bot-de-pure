@@ -2,25 +2,17 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.2F",
+            "number": "Full.2.8.30",
             "name": "Cisne Cristalino"
         },
         "note": "Se esperan inconsistencias y errores debido a recientes trabajos de reestructuración",
         "changelog": [
-            "Tareas de refactorización (1.5/4)",
-            "Pequeña mejora de `p!m-info`",
-            "`p!anarquía` para minijuego anárquico global",
-            "Mejora de bienvenida (Hourai Doll)",
-            "Mejora de `p!ayuda` y descripciones varias",
-            "Corrección de errores de `p!anarquia`",
-            "`p!ayuda` ahora cuenta con Páginas de Guía introductorias",
-            "`p!anarquia` ahora trae perfiles y habilidades",
-            "`p!imagine` restaurado, ahora envía x-uwus",
-            "`p!anarquia -h/-v` ya no gasta tus habilidades al no efectuarse"
+            "Tareas de refactorización (2/4)",
+            "`p!pinguear` ahora tiene un límite temporal de usos por persona",
+            "`p!avatar` ahora separa elementos de búsqueda por comas en lugar de espacios"
         ],
         "todo": [
-            "Más opciones de comandos de prueba para mayor facilidad de monitoreo, mantenimiento y modificación",
-            "Búsqueda múltiple con p!pfp separada con comas en lugar de espacios",
+            "Comando para jugar ajedrez",
             "Comando para cartas personalizadas al estilo de Touhou 18",
             "Minijuegos individuales y tipo-fiesta",
             "Base de datos en la nube",

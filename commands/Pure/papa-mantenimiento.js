@@ -22,8 +22,10 @@ module.exports = {
 		if(!args.length) {
 			if(!global.maintenance.length)
 				message.channel.send(`**Host** \`${global.bot_status.host}\`\n**ID de InstProc** \`${global.startuptime}\``);
-			else
+			else {
 				global.maintenance = '';
+				message.react('☑️');
+			}
 		} else if(`${args[0]}` === `${global.startuptime}`) {
 			global.maintenance = message.channel.id;
 			message.react('✅');
