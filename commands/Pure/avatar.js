@@ -19,12 +19,13 @@ module.exports = {
     callx: '<usuario?>',
 
 	execute(message, args) {
+        const embed = new Discord.MessageEmbed()
+            .setColor('#faa61a')
+            .setFooter(`Comando invocado por ${message.author.username}`);
+        
         if(!args.length) {
-            const embed = new Discord.MessageEmbed()
-				.setTitle(`Avatar de ${message.author.username}`)
-                .setColor('#faa61a')
-                .setImage(message.author.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
-				.setFooter(`Comando invocado por ${message.author.username}`);
+            embed.setTitle(`Avatar de ${message.author.username}`)
+                .setImage(message.author.avatarURL({ format: 'png', dynamic: true, size: 1024 }));
             
             message.channel.send(embed);
         } else {
@@ -39,9 +40,7 @@ module.exports = {
                     else {
                         const embed = new Discord.MessageEmbed()
                             .setTitle(`Avatar de ${fetcheduser.username}`)
-                            .setColor('#faa61a')
-                            .setImage(fetcheduser.avatarURL({ dynamic: true, size: 1024 }))
-                            .setFooter(`Comando invocado por ${message.author.username}`);
+                            .setImage(fetcheduser.avatarURL({ dynamic: true, size: 1024 }));
 
                         message.channel.send(embed);
                     }

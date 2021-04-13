@@ -23,7 +23,6 @@ module.exports = {
 			message.channel.send(`:octagonal_sign: oe, ¿¡y si te calmai!?`);
 			return;
 		}
-		uses.pinguear[message.author.id] = true;
 
 		if(args.length === 2) {
 			let cnt = -1;
@@ -39,6 +38,7 @@ module.exports = {
 					message.channel.send(':warning: PERO NO SEAS TAN ENFERMO');
 					return;
 				}
+				uses.pinguear[message.author.id] = true;
 				func.pingear(cnt, mention, message.channel, message.author.id); 
 			} else message.channel.send(':warning: debes ingresar un valor numérico y una mención (`p!pinguear <número*> <mención*>`).');
 		} else message.channel.send(':warning: debes ingresar 2 parámetros (`p!pinguear <número*> <mención*>`).');
