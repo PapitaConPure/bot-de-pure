@@ -1,5 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const func = require('../../func.js'); //Funciones globales
+const uses = require('../../sguses.json'); //Funciones globales
 
 module.exports = {
 	name: 'pinguear',
@@ -18,14 +19,27 @@ module.exports = {
 	callx: '<cantidad> <usuario>',
 	
 	execute(message, args) {
+		if(uses.pinguear[message.author.id] !== undefined && uses.pinguear[message.author.id]) {
+			message.channel.send(`:octagonal_sign: oe, ¿¡y si te calmai!?`);
+			return;
+		}
+		uses.pinguear[message.author.id] = true;
+
 		if(args.length === 2) {
 			let cnt = -1;
-			if(!isNaN(args[0])) cnt = args[0];
+			let mention;
+			
+			if(!isNaN(args[0])) { cnt = args[0]; mention = args[1]; }
+			else if(!isNaN(args[1])) { cnt = args[1]; mention = args[0]; }
 
 			if(cnt < 2 || cnt > 10) 
 				message.channel.send(':warning: solo puedes pinguear a alguien entre 2 y 10 veces.');
-			else if(args[1].startsWith('<@') && args[1].endsWith('>')) {
-				func.pingear(cnt, args[1], message.channel); 
+			else if(mention.startsWith('<@') && mention.endsWith('>')) {
+				if(mention.startsWith('<@&')) {
+					message.channel.send(':warning: PERO NO SEAS TAN ENFERMO');
+					return;
+				}
+				func.pingear(cnt, mention, message.channel, message.author.id); 
 			} else message.channel.send(':warning: debes ingresar un valor numérico y una mención (`p!pinguear <número*> <mención*>`).');
 		} else message.channel.send(':warning: debes ingresar 2 parámetros (`p!pinguear <número*> <mención*>`).');
     },

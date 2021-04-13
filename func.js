@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const global = require('./config.json'); //Variables globales
 const presence = require('./presence.json'); //Datos de presencia
+const uses = require('./sguses.json'); //Funciones globales
 const Canvas = require('canvas'); 
 
 module.exports = {
@@ -338,24 +339,26 @@ module.exports = {
         });
     },
 
-    pingear: function(cnt, mention, msgch) {
+    pingear: function(cnt, mention, msgch, msgauth) {
         const frase = [
             `Oe po ${mention} <:junkNo:697321858407727224>`,
             `Wacho, cachai ${mention} <:yumou:708158159180660748>`,
             `Oe ${mention} qliao <:miyoi:674823039086624808>`,
             `Responde po ${mention} <:mayuwu:654489124413374474>`,
             `¿Vai a responder ${mention}? <:haniwaSmile:659872119995498507>`,
-            `${mention}, respondé altoke <:HYPERGARDENER:757163180211306516>`,
+            `${mention}, respondé altoke <:hypergardener:796931141851938827>`,
             `Dale ${mention} ctm <:reibu:686220828773318663>`,
             `Wena po ${mention} como andai <:meguSmile:694324892073721887>`,
-            `Pero qué andai haciendo po ${mention} rectm <:spookedSyura:688883921697374208>`
+            `Pero qué andai haciendo po ${mention} rectm <:spookedSyura:725577379665281094>`,
+            `NoOoOoOo re TUuUrBiOoOoOo, veni ${mention} <:junkWTF:796930821260836864>`
         ];
 
-        msgch.send(frase[Math.floor(Math.random() * 8)]);
+        msgch.send(frase[Math.floor(Math.random() * frase.length)]);
 
-        if(cnt > 1) {
-            setTimeout(module.exports.pingear, 1000, cnt - 1, mention, msgch);
-        }
+        if(cnt > 1)
+            setTimeout(module.exports.pingear, 1000, cnt - 1, mention, msgch, msgauth);
+        else 
+            uses.pinguear[msgauth] = false;
     },
 
     modifyAct: function(clientowo, pasuwus) { //Cambio de estado constante; créditos a Imagine Breaker y Sassafras
