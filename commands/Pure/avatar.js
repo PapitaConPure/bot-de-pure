@@ -19,7 +19,7 @@ module.exports = {
     callx: '<usuario?>',
 
 	execute(message, args) {
-        const embed = new Discord.MessageEmbed()
+        let embed = new Discord.MessageEmbed()
             .setColor('#faa61a')
             .setFooter(`Comando invocado por ${message.author.username}`);
         
