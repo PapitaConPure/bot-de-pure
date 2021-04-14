@@ -19,27 +19,28 @@ module.exports = {
     callx: '<usuario?>',
 
 	execute(message, args) {
-        let embed = new Discord.MessageEmbed()
-            .setColor('#faa61a')
-            .setFooter(`Comando invocado por ${message.author.username}`);
-        
         if(!args.length) {
-            embed.setTitle(`Avatar de ${message.author.username}`)
+            const embed = new Discord.MessageEmbed()
+                .setColor('#faa61a')
+                .setFooter(`Comando invocado por ${message.author.username}`)
+                .setTitle(`Avatar de ${message.author.username}`)
                 .setImage(message.author.avatarURL({ format: 'png', dynamic: true, size: 1024 }));
             
             message.channel.send(embed);
         } else {
             args.join(' ').split(',').map(arg => {
                 arg = arg.trim();
-                arg = func.resolverIDUsuario(arg, message.channel.guild, message.client);
+                const user = func.resolverIDUsuario(arg, message.channel.guild, message.client);
 
-                if(arg !== undefined) {
-                    const fetcheduser = message.client.users.cache.get(arg);
+                if(user !== undefined) {
+                    const fetcheduser = message.client.users.cache.get(user);
 
                     if(fetcheduser === undefined)
                         message.channel.send(':warning: La ID ingresada es inválida o no es una ID en absoluto...');
                     else {
-                        embed = new Discord.MessageEmbed()
+                        const embed = new Discord.MessageEmbed()
+                            .setColor('#faa61a')
+                            .setFooter(`Comando invocado por ${message.author.username}`)
                             .setTitle(`Avatar de ${fetcheduser.username}`)
                             .setImage(fetcheduser.avatarURL({ dynamic: true, size: 1024 }));
 
