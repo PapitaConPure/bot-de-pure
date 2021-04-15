@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.30",
+            "number": "Full.2.8.31",
             "name": "Cisne Cristalino"
         },
         "note": "Se esperan inconsistencias y errores debido a recientes trabajos de reestructuración",

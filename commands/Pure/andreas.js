@@ -1,7 +1,7 @@
 module.exports = {
 	name: 'andreas',
 	aliases: [
-		'andrea'
+		'andrea', 'akime', 'valt'
 	],
 	desc: 'Comando de discusión de Andreas',
 	flags: [
