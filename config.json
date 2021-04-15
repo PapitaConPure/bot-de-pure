@@ -9,7 +9,8 @@
         "changelog": [
             "Tareas de refactorización (2/4)",
             "`p!pinguear` ahora tiene un límite temporal de usos por persona",
-            "`p!avatar` ahora separa elementos de búsqueda por comas en lugar de espacios"
+            "`p!avatar` ahora separa elementos de búsqueda por comas en lugar de espacios",
+            "Nuevo comando `p!andreas`"
         ],
         "todo": [
             "Comando para jugar ajedrez",
