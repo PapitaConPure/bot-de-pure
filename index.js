@@ -9,12 +9,11 @@ const global = require('./config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
 const dns = require('dns'); //Detectar host
 const token = 'NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY'; //La clave del bot
-module.exports = { Discord };
 //#endregion
 
 //#region Detección de archivos de comandos
 client.ComandosDrawmaku = new Discord.Collection(); //Comandos de Drawmaku
-var commandFiles = fs.readdirSync('./commands/Drawmaku').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
+let commandFiles = fs.readdirSync('./commands/Drawmaku').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
 for(const file of commandFiles) {
 	const command = require(`./commands/Drawmaku/${file}`);
 	client.ComandosDrawmaku.set(command.name, command);

@@ -1,10 +1,10 @@
 const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../config.json'); //Variables globales
+const { readdirSync } = require('fs'); //Para el contador de comandos
 
 module.exports = {
-	name: 'presentarse',
+	name: 'presentar',
     aliases: [
-        'presentacion', 'presentación', 'hola', 'presentar', 'puré', 'pure'
+        'presentacion', 'presentación', 'hola', 'presentarse', 'puré', 'pure'
     ],
     desc: 'Me presento y digo cositas sobre mí~',
     flags: [
@@ -26,6 +26,7 @@ module.exports = {
             .addField('Historia', 'Habiendo sido creado como un proyecto de prueba para un evento competitivo de una pequeña comunidad, actualmente me encuentro como un bot bastante decente y con varias funcionalidades extra que ya distorsionaron mi propósito original por completo')
             .addField('¡Juguemos juntos~♪!', '¡No dudes en investigar lo que puedo hacer! Al menos una risa te vas a llevar')
             .addField('Por cierto...', 'La mayoría de imágenes que Bot de Puré utiliza fueron dibujadas por Rakkidei, puedes seguirlo en [Twitter](https://twitter.com/rakkidei) y [pixiv](https://www.pixiv.net/en/users/58442175) (donde también puedes encontrar sus otras redes y demás)')
+            .addField('Comandos', `¡Ofrezco ${readdirSync('./commands/Pure').filter(file => file.endsWith('.js')).length} comandos en total!`)
             .addField('Comentario de mi padre', '_"Quiero café. Necesito café, ya."_');
 
         message.channel.send(embed);

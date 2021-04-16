@@ -2,19 +2,21 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.31",
+            "number": "Full.2.8.32",
             "name": "Cisne Cristalino"
         },
         "note": "Se esperan inconsistencias y errores debido a recientes trabajos de reestructuración",
         "changelog": [
             "Tareas de refactorización (2/4)",
-            "`p!pinguear` ahora tiene un límite temporal de usos por persona",
-            "`p!avatar` ahora separa elementos de búsqueda por comas en lugar de espacios",
-            "Nuevo comando `p!andreas`"
+            "p!pinguear ahora tiene un límite temporal de usos por persona",
+            "p!avatar ahora separa elementos de búsqueda por comas en lugar de espacios",
+            "Nuevo comando p!andreas",
+            "Pilar y página de ayuda para p!ajedrez establecidos",
+            "p!estado ahora muestra la cantidad de comandos totales y ayuda rápida de cambios",
+            "p!presentar ahora muestra la cantidad de comandos totales"
         ],
         "todo": [
-            "Comando para jugar ajedrez",
-            "Comando para cartas personalizadas al estilo de Touhou 18",
+            "Comando p!cartas para cartas personalizadas de Touhou 18",
             "Minijuegos individuales y tipo-fiesta",
             "Base de datos en la nube",
             "Simplificar prefijos y personalización de Bot a nivel de servidor",
