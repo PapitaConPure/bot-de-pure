@@ -15,7 +15,6 @@ module.exports = {
 		'`-s` o `--sassamodo` para despertar al demonio interno de Sassa',
 		'`-t` o `--total` para saber la cantidad total de líneas'
     ],
-
 	
 	execute(message, args) {
 		let showtotal = false;
