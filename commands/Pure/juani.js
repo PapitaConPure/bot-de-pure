@@ -1,6 +1,3 @@
-const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../config.json'); //Variables globales
-
 module.exports = {
 	name: 'juani',
 	aliases: [
@@ -10,9 +7,6 @@ module.exports = {
     flags: [
         'meme',
         'outdated'
-    ],
-    options: [
-
     ],
 	
 	execute(message, args){

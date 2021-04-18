@@ -138,7 +138,7 @@ client.on('message', message => { //En caso de recibir un mensaje
             
             case 'guide':
                 errtitle = 'Símbolo de página de guía';
-                errfield = 'Esto no es un comando, sino que una *página de guía* pensada para buscarse con `p!ayuda`';
+                errfield = `Esto no es un comando, sino que una *página de guía* para buscarse con \`${global.p_pure}ayuda\``;
                 return true;
 
             case 'mod':

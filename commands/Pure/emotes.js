@@ -10,65 +10,45 @@ module.exports = {
 	],
     desc: 'Muestra una lista paginada de emotes a mi disposición',
     flags: [
-        'common',
-		'maintenance'
-    ],
-    options: [
-
+        'common'
     ],
 	
 	execute(message, args) {
-		/*message.channel.send(
-			'```\n' +
-			'[REPORTE DE ESTADO DEL BOT]\n' +
-			'Estoy investigando un error con el comando p!emotes que hace que no se pueda ver ninguno de los emotes disponibles al utilizarlo.\n' +
-			'~Papita con Puré\n' +
-			'```'
-		);
-		return;*/
-		
 		const guilds = message.client.guilds.cache;
-		const slot1Coll = guilds.get(global.serverid.slot1).emojis.cache;
-		const slot2Coll = guilds.get(global.serverid.slot2).emojis.cache;
-		const emotes = slot1Coll.concat(slot2Coll).array();
-		const listmax = 20;
-
-		let Embed = [];
-		let SelectedEmbed = 0;
-		for(let i = 0; i < (emotes.length / listmax); i++) {
-			let emolist = '';
-			let namelist = '';
-			for(let listrange = i * listmax; listrange < Math.min(i * listmax + listmax, emotes.length); listrange++) {
-				const emote = emotes[listrange];
-				emolist += `<:${emote.name}:${emote.id}>\n`;
-				namelist += `${emote.name}\n`;
-			}
-
-			Embed[i] = new Discord.MessageEmbed()
-				.setColor('#fecb4c')
-				.setTitle('Emotes')
-
-				.addField('Lista de emotes', `${emolist} ${namelist}`)
-
-				.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
-				.setFooter(`Página ${i + 1}/${Math.ceil(emotes.length / listmax)}`);
+		let emotes = [];
+		{
+			const slot1Coll = guilds.get(global.serverid.slot1).emojis.cache;
+			const slot2Coll = guilds.get(global.serverid.slot2).emojis.cache;
+			const slot3Coll = guilds.get(global.serverid.slot3).emojis.cache;
+			emotes = slot1Coll.concat(slot2Coll).concat(slot3Coll).array().sort();
 		}
+		const pagemax = 20;
+		emotes = emotes.map((e, i) => { return (i % pagemax === 0)?emotes.slice(i, i + pagemax):null; }).filter(e => e);
+		emotes = emotes.map(page => page.map(e => `\`${e.name}${' '.repeat(24 - e.name.length)}\` <:${e.name}:${e.id}>`).join('\n'));
+		let page = 0;
+		const embed = new Discord.MessageEmbed()
+			.setColor('#fecb4c')
+			.setTitle('Emotes')
+
+			.addField('Lista de emotes', emotes[0])
+
+			.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
+			.setFooter(`Reacciona a las flechas debajo para cambiar de página`);
 
 		message.channel.send('**Oe mira po, emotes** <:yumou:708158159180660748>\n');
 		const arrows = [message.client.emojis.cache.get('681963688361590897'), message.client.emojis.cache.get('681963688411922460')];
 		const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
-		message.channel.send(Embed[0]).then(sent => {
+		message.channel.send(embed).then(sent => {
 			sent.react(arrows[0])
-				.then(() => sent.react(arrows[1]))
-				.then(() => {
-					const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
-					collector.on('collect', reaction => {
-						const maxpage = Math.floor(emotes.length / listmax);
-						if(reaction.emoji.id === arrows[0].id) SelectedEmbed = (SelectedEmbed > 0)?(SelectedEmbed - 1):maxpage;
-						else SelectedEmbed = (SelectedEmbed < maxpage)?(SelectedEmbed + 1):0;
-						sent.edit(Embed[SelectedEmbed]);
-					});
-				});
+				.then(() => sent.react(arrows[1]));
+			const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
+			collector.on('collect', reaction => {
+				if(reaction.emoji.id === arrows[0].id) page = (page > 0)?(page - 1):(emotes.length - 1);
+				else page = (page < (emotes.length - 1))?(page + 1):0;
+				embed.fields[0].value = emotes[page];
+				embed.setFooter(`Página ${page + 1}/${Math.ceil(emotes.length)}`);
+				sent.edit(embed);
+			});
 		});
 		
 		//message.channel.send(emotes.map(emote => `<:${emote.name}:${emote.id}>`).join(' '));

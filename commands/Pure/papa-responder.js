@@ -1,4 +1,5 @@
 const Discord = require('discord.js'); //Integrar discord.js
+const { p_pure } = require('../../config.json'); //Prefijos
 const func = require('../../func.js'); //Funciones globales
 
 module.exports = {
@@ -6,7 +7,7 @@ module.exports = {
 	aliases: [
 		'papa-r'
 	],
-	desc: 'Manda una respuesta específica de `p!sugerir` al `--usuario` designado\n' +
+	desc: `Manda una respuesta específica de \`${p_pure}sugerir\` al \`--usuario\` designado\n` +
 		'La respuesta si no se incluyen las banderas `--aceptar` y `--problema` es una confirmación de lectura',
 	flags: [
 		'papa'

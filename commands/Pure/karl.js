@@ -14,9 +14,6 @@ module.exports = {
     flags: [
         'meme'
     ],
-    options: [
-
-    ],
 	
 	execute(message, args){
 		const emot = [

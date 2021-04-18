@@ -1,6 +1,3 @@
-const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../config.json'); //Variables globales
-
 module.exports = {
 	name: 'imagine',
 	aliases: [
@@ -9,9 +6,6 @@ module.exports = {
     desc: 'Comando de x-uwus de Imagine Breaker',
     flags: [
         'meme'
-    ],
-    options: [
-
     ],
 	
 	execute(message, args) {

@@ -8,10 +8,8 @@ module.exports = {
     ],
     desc: 'Comando de frase de Dylan/Fuee',
     flags: [
-        'meme'
-    ],
-    options: [
-
+        'meme',
+        'outdated'
     ],
 	
 	execute(message, args){

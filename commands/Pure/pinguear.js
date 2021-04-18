@@ -1,4 +1,3 @@
-const Discord = require('discord.js'); //Integrar discord.js
 const func = require('../../func.js'); //Funciones globales
 const uses = require('../../sguses.json'); //Funciones globales
 
@@ -40,7 +39,7 @@ module.exports = {
 				}
 				uses.pinguear[message.author.id] = true;
 				func.pingear(cnt, mention, message.channel, message.author.id); 
-			} else message.channel.send(':warning: debes ingresar un valor numérico y una mención (`p!pinguear <número*> <mención*>`).');
-		} else message.channel.send(':warning: debes ingresar 2 parámetros (`p!pinguear <número*> <mención*>`).');
+			} else message.channel.send(`:warning: debes ingresar un valor numérico y una mención (\`${p_pure}pinguear <cantidad> <usuario>\`).`);
+		} else message.channel.send(`:warning: debes ingresar 2 parámetros (\`${p_pure}pinguear <cantidad> <usuario>\`).`);
     },
 };

@@ -1,3 +1,5 @@
+const { p_pure } = require('../../config.json');
+
 module.exports = {
 	name: 'g-opciones',
 	aliases: [
@@ -14,7 +16,7 @@ module.exports = {
 		'Algunas banderas requieren que se facilite un valor:\n' +
 		'`--objetivo <usuario>`: objetivo = `<usuario>`\n' +
 		'`-xy <número>`: x = y = `<número>`\n' +
-		'Para aprender más sobre las `--parametros` de un comando, usa `p!ayuda g-parametros`\n' +
-		'Para ver sobre los _(tipos)_ de valores de parámetro, usa `p!ayuda g-tipos`',
+		`Para aprender más sobre los \`--parametros\` de comando, usa \`${p_pure}ayuda g-parametros\`\n` +
+		`Para ver sobre los _(tipos)_ de valores de parámetro, usa \`${p_pure}ayuda g-tipos\``,
 	flags: ['guide']
 };

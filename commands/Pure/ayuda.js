@@ -16,11 +16,12 @@ module.exports = {
     ],
     options: [
         '`<comando?>` _(texto)_ para ver ayuda en un comando en específico',
-        '`-x` para filtrar resultados comunes',
+        '`-x` para excluir resultados comunes',
         '`--meme` para ver comandos meme',
         '`-m` o `--mod` para ver comandos de moderación',
         '`-p` o `--papa` para ver comandos de Papita con Puré',
-        '`-h` o `--hourai` para ver comandos exclusivos de Hourai'
+        '`-h` o `--hourai` para ver comandos exclusivos de Hourai',
+        '`-t` o `--todo` para ver comandos inhabilitados'
     ],
     callx: '<comando?>',
     
@@ -32,6 +33,7 @@ module.exports = {
         let fmod = false;
         let fpapa = false;
         let fhourai = false;
+        let fall = false;
         let search = 'n';
         args.map(arg => {
             if(arg.startsWith('--'))
@@ -40,6 +42,7 @@ module.exports = {
                 case 'mod': fmod = true; break;
                 case 'papa': fpapa = true; break;
                 case 'hourai': fhourai = true; break;
+                case 'todo': fall = true; break;
                 }
             else if(arg.startsWith('-')) {
                 for(c of arg.slice(1))
@@ -48,6 +51,7 @@ module.exports = {
                     case 'm': fmod = true; break;
                     case 'p': fpapa = true; break;
                     case 'h': fhourai = true; break;
+                    case 't': fall = true; break;
                     }
             } else if(search === 'n')
                 search = arg;
@@ -73,8 +77,9 @@ module.exports = {
                         const cpapa = (fpapa && message.author.id === '423129757954211880')? true : !command.flags.includes('papa');
                         const chourai = (fhourai && message.channel.guild.id === global.serverid.hourai)? true : !command.flags.includes('hourai');
                         const cex = fex? !command.flags.includes('common') : true;
+                        const call = fall? true : (!command.flags.includes('maintenance') && !command.flags.includes('outdated'));
                     
-                        if(cmeme && cmod && cpapa && chourai && cex) {
+                        if(cmeme && cmod && cpapa && chourai && cex && call) {
                             list.name[item] = command.name;
                             item++;
                         }
@@ -98,9 +103,9 @@ module.exports = {
         let embed = new Discord.MessageEmbed().setColor('#608bf3');
         if(search === 'n') {
             embed.setAuthor('Lista de comandos', aurl)
-            .addField('Comandos: ejemplos de uso', '`p!ayuda -xmph --meme`\n`p!avatar @Usuario`\n`p!dados -c 20 -d 3`')
-            .addField('Usa `p!ayuda <comando>` para más información sobre un comando', (list.name.length > 0)?list.name.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para realizar tu búsqueda).')
-            .addField('Guía introductoria', 'Usa `p!ayuda g-indice` para ver la página de índice de la guía introductoria de Bot de Puré');
+            .addField('Comandos: ejemplos de uso', `\`${global.p_pure}ayuda -xmph --meme\`\n\`${global.p_pure}avatar @Usuario\`\n\`${global.p_pure}dados -c 20 -d 3\``)
+            .addField(`Usa \`${global.p_pure}ayuda <comando>\` para más información sobre un comando`, (list.name.length > 0)?list.name.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para realizar tu búsqueda).')
+            .addField(`Guía introductoria`, `Usa \`${global.p_pure}ayuda g-indice\` para ver la página de índice de la guía introductoria de Bot de Puré`);
         } else {
             const title = s => {
                 s = (s.startsWith('g-'))?`${s.slice(2)} (Página de Guía)`:s;
@@ -112,17 +117,17 @@ module.exports = {
                 const arrayExists = arr => arr !== undefined && arr.some(it => it.length > 0);
                 const flagsExist = arrayExists(list.flags);
                 embed.setAuthor(title(list.name[0]), aurl)
-                    .setFooter('Usa "p!ayuda g-indice" para aprender más sobre comandos')
+                    .setFooter(`Usa "${global.p_pure}ayuda g-indice" para aprender más sobre comandos`)
                     .addField('Nombre', `\`${list.name[0]}\``, true)
                     .addField('Alias', arrayExists(list.aliases)?(list.aliases.map(i => `\`${i}\``).join(', ')):':label: Sin alias', true)
                     .addField('Descripción', (list.desc !== undefined && list.desc.length > 0)?list.desc:':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde');
                 if(!flagsExist || !list.flags.some(flag => flag === 'guide'))
-                    embed.addField('Llamado', `\`p!${list.name[0]}${(list.callx !== undefined)?` ${list.callx}`:''}\``, true)
-                        .addField('Opciones (`p!x -x --xxx <x>`)', arrayExists(list.options)?list.options.join('\n'):':abacus: Sin opciones', true)
+                    embed.addField('Llamado', `\`${global.p_pure}${list.name[0]}${(list.callx !== undefined)?` ${list.callx}`:''}\``, true)
+                        .addField(`Opciones (\`${global.p_pure}x -x --xxx <x>\`)`, arrayExists(list.options)?list.options.join('\n'):':abacus: Sin opciones', true)
                         .addField('Identificadores', flagsExist?(list.flags.map(i => `\`${i}\``).join(', ').toUpperCase()):':question: Este comando no tiene identificadores por ahora');
             } else
                 embed.setAuthor('Sin resultados', aurl)
-                    .addField('No se ha encontrado ningún comando con este nombre', `Utiliza \`p!ayuda\` para ver una lista de comandos disponibles y luego usa \`p!comando <comando>\` para ver un comando en específico`);
+                    .addField('No se ha encontrado ningún comando con este nombre', `Utiliza \`${global.p_pure}ayuda\` para ver una lista de comandos disponibles y luego usa \`${global.p_pure}comando <comando>\` para ver un comando en específico`);
         }
         
         message.channel.send(embed);

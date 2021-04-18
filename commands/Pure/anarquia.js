@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const global = require('../../config.json'); //Variables globales
 const uses = require('../../sguses.json'); //Variables globales
+const func = require('../../func.js');
 const Canvas = require('canvas');
 
 module.exports = {
@@ -13,9 +14,9 @@ module.exports = {
 		'Puedes ingresar un `<emote>` en una `<posición(x,y)>` o, al no ingresar nada, ver la tabla\n' +
 		'La `<posicion(x,y)>` se cuenta desde 1x,1y, y el `<emote>` designado debe ser de un server del que yo forme parte~\n\n' +
 		'De forma aleatoria, puedes ir desbloqueando habilidades para rellenar líneas completas en `--horizontal` o `--vertical`. La probabilidad inicial es 1% en conjunto, y aumenta +1% por cada __nivel__\n' +
-		'**Nivel**: nivel de usuario en `p!anarquia`. +1 por cada *30 usos*\n\n' +
+		`**Nivel**: nivel de usuario en \`${global.p_pure}anarquia\`. +1 por cada *30 usos*\n\n` +
 		'Incluso si usas una habilidad de línea, debes ingresar ambos ejes (`x,y`) en orden\n' +
-		'Usa `p!anarquia p` para ver tu perfil anárquico',
+		`Usa \`${global.p_pure}anarquia p\` para ver tu perfil anárquico`,
 	flags: [
 		'common'
 	],
@@ -28,7 +29,7 @@ module.exports = {
 	callx: '<posición(x,y)?> <emote?>',
 
 	execute(message, args) {
-		if(!args.length) {
+		if(!args.length) { //Ver tabla
 			const d = async () => {
 				//Acción de comando
 				Canvas.registerFont('./TommySoft.otf', { family: 'TommySoft' });
@@ -51,12 +52,6 @@ module.exports = {
 				//#endregion
 
 				let loademotes = {};
-				//Conseguir enlaces de emotes
-				const retornarEmote = async (arr) => {
-					let narr = arr;
-					return ;
-				};
-
 				const mapearEmotes = async () =>
 					Promise.all(global.puretable.map(arr => 
 						Promise.all(arr.slice(0).sort().filter((item, i, a) => (i > 0)?(item !== a[i - 1]):true).map(async item => {
@@ -77,28 +72,31 @@ module.exports = {
 						);
 					});
 					
-					const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'bienvenida.png');
+					const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'anarquia.png');
 					message.channel.send({ files: [imagen] });
 				});
 			};
 			d();
-		} else if(args[0] === 'p') {
-			const aid = message.author.id;
-			const embed = new Discord.MessageEmbed()
-				.setColor('#bd0924')
-				.setAuthor(message.author.username, message.author.avatarURL({ format: 'png', dynamic: true, size: 512 }));
-			if(uses.anarquia[aid] !== undefined)
-				embed.setTitle('Perfil anárquico')
-					.addField('Inventario', `↔️ x ${uses.anarquia[aid].h}\n↕ x ${uses.anarquia[aid].v}`, true)
-					.addField('Rango', `Nivel ${Math.floor(uses.anarquia[aid].exp / 30) + 1} (exp: ${uses.anarquia[aid].exp})`, true);
-			else
-				embed.setTitle('Perfil inexistente')
-					.addField(
-						'No tienes un perfil anárquico todavía', 'Usa `p!anarquia <posición(x,y)> <emote>` para colocar un emote en la tabla de puré y crearte un perfil anárquico automáticamente\n' +
-						'Si tienes más dudas, usa `p!ayuda anarquia`'
-					);
-			message.channel.send(embed);
-		} else {
+		} else if(args[0] === 'p') { //Revisar perfil
+			const aid = (args.length > 1)?func.resolverIDUsuario(args[1], message.channel.guild, message.client):message.author.id;
+			if(aid !== undefined) {
+				const user = message.client.users.cache.get(aid);
+				const embed = new Discord.MessageEmbed()
+					.setColor('#bd0924')
+					.setAuthor(user.username, user.avatarURL({ format: 'png', dynamic: true, size: 512 }));
+				if(uses.anarquia[aid] !== undefined)
+					embed.setTitle('Perfil anárquico')
+						.addField('Inventario', `↔️ x ${uses.anarquia[aid].h}\n↕ x ${uses.anarquia[aid].v}`, true)
+						.addField('Rango', `Nivel ${Math.floor(uses.anarquia[aid].exp / 30) + 1} (exp: ${uses.anarquia[aid].exp})`, true);
+				else
+					embed.setTitle('Perfil inexistente')
+						.addField(
+							'No tienes un perfil anárquico todavía', `Usa \`${global.p_pure}anarquia <posición(x,y)> <emote>\` para colocar un emote en la tabla de puré y crearte un perfil anárquico automáticamente\n` +
+							`Si tienes más dudas, usa \`${global.p_pure}ayuda anarquia\``
+						);
+				message.channel.send(embed);
+			} else message.channel.send(`:warning: Usuario **${args[1]}** no encontrado`);
+		} else { //Ingresar emotes a tabla
 			const aid = message.author.id;
 			//Tiempo de enfriamiento por usuario
 			if(uses.anarquia[aid] !== undefined) {
@@ -145,7 +143,7 @@ module.exports = {
 			});
 			
 			if(Object.keys(e).length !== 3)
-				message.channel.send(':warning: Entrada inválida\nUsa `p!ayuda anarquia` para más información');
+				message.channel.send(`:warning: Entrada inválida\nUsa \`${global.p_pure}ayuda anarquia\` para más información`);
 			else if(e.id === 'unresolved')
 				message.react('⚠️');
 			else {

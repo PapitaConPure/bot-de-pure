@@ -1,6 +1,5 @@
-const Discord = require('discord.js'); //Integrar discord.js
 const global = require('../../config.json'); //Variables globales
-const func = require('../../func');
+const func = require('../../func'); //Funciones globales
 
 module.exports = {
 	name: 'colores',
@@ -13,11 +12,9 @@ module.exports = {
     flags: [
         'hourai'
     ],
-    options: [
-
-    ],
 	
 	execute(message, args) {
-		message.channel.send(`Aquí teni los colore po <:reibu:686220828773318663>\n${global.hourai.images.colors}`).then(sent => func.askColor(sent, message.member));
+		message.channel.send(`Aquí teni los colore po **${message.author.username}** <:reibu:686220828773318663>`, { files: [global.hourai.images.colors] })
+			.then(sent => func.askColor(sent, message.member));
     },
 };

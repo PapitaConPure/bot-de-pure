@@ -1,5 +1,4 @@
-const Discord = require('discord.js'); //Integrar discord.js
-const global = require('../../config.json'); //Variables globales
+const { p_pure } = require('../../config.json'); //Variables globales
 const func = require('../../func.js'); //Funciones globales
 
 module.exports = {
@@ -62,7 +61,7 @@ module.exports = {
 			if(isNaN(amt)) {
 				message.channel.send(
 					'Debes especificar la cantidad de mensajes a borrar\n' +
-					`Revisa \`p!ayuda m-borrar\` para más información`
+					`Revisa \`${p_pure}ayuda m-borrar\` para más información`
 				);
 				return;
 			}

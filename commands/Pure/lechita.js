@@ -9,7 +9,6 @@ async function resolverLink(msg, linkRes, iSize) {
 
 	await axios.get(linkRes).then(async function (response, data) {
 		//Si se pasó un enlace, comprobar su funcionamiento y devolverlo si es accesible
-		console.log('Se ha pasado un enlace válido en llamado de p!lechita');
 		if(response.status === 200) {
 			if(msg.channel.nsfw || ((linkRes.indexOf('.gif') + linkRes.indexOf('.mp4')) < 0 && (response.data.toString().length / 1024) < 256)) {
 				iurl = linkRes;
@@ -23,7 +22,7 @@ async function resolverLink(msg, linkRes, iSize) {
 		}
 	}).catch(function (error) {
 		//Si no se pasó un enlace u ocurrió un error inesperado, intentar resolver enlace de un emote o usuario
-		console.log('No se ha pasado un enlace en llamado de p!lechita o este no era válido/accesible.');
+		console.log('No se ha pasado un enlace en comando lechita o este no era válido/accesible.');
 
 		if((linkRes.startsWith('<:') || linkRes.startsWith('<a:')) && linkRes.endsWith('>')) {
 			//Resolver de emote

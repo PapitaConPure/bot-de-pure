@@ -1,5 +1,4 @@
 const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../config.json'); //Variables globales
 const axios = require('axios');
 
 const getRandomInt = function(_max) {
@@ -150,15 +149,6 @@ module.exports = {
 	callx: '<rango?> <etiquetas?>',
 	
 	execute(message, args) {
-		/*message.channel.send(
-			'```\n' +
-			'[REPORTE DE ESTADO DEL BOT]\n' +
-			'Estoy investigando un error con los comandos con Embed.\n' +
-			'~Papita con Puré\n' +
-			'```'
-		);
-		return;*/
-
 		if(message.guild.id !== '651244470691561473' && message.guild.id !== '654471968200065034') {
 			message.channel.send('_Este comando solo puede ser usado en la superficie..._');
 			return;

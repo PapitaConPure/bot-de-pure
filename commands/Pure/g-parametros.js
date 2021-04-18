@@ -1,3 +1,5 @@
+const { p_pure } = require('../../config.json');
+
 module.exports = {
 	name: 'g-parametros',
 	aliases: [
@@ -13,7 +15,7 @@ module.exports = {
 		'`<parámetro?>`: entrada opcional\n' +
 		'`<parámetro (...)>`: múltiples entradas (libre)\n' +
 		'`<parámetro (a,b,c)>`: múltiples entradas seguidas para los aspectos `(a)`, `(b)` y `(c)` del parámetro\n\n' +
-		'Para aprender más sobre las `--opciones` de un comando, usa `p!ayuda g-opciones`\n' +
-		'Para ver sobre los _(tipos)_ de valores de parámetro, usa `p!ayuda g-tipos`',
+		`Para aprender más sobre las \`--opciones\` de comando, usa \`${p_pure}ayuda g-opciones\`\n` +
+		`Para ver sobre los _(tipos)_ de valores de parámetro, usa \`${p_pure}ayuda g-tipos\``,
 	flags: ['guide']
 };

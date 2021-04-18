@@ -1,5 +1,4 @@
 const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../config.json'); //Variables globales
 const fetch = require('node-fetch');
 
 const tmpfunc = async function(tmpch) {
@@ -28,15 +27,6 @@ module.exports = {
     ],
 	
 	execute(message, args) {
-		/*message.channel.send(
-			'```\n' +
-			'[REPORTE DE ESTADO DEL BOT]\n' +
-			'Estoy investigando un error con los comandos con Embed.\n' +
-			'~Papita con Puré\n' +
-			'```'
-		);
-		return;*/
-
 		tmpfunc(message.channel);
     },
 };

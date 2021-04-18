@@ -1,5 +1,5 @@
 const Discord = require('discord.js'); //Integrar discord.js
-let global = require('../../config.json'); //Variables globales
+const { p_pure } = require('../../config.json'); //Variables globales
 
 module.exports = {
 	name: 'm-inforol',
@@ -23,17 +23,12 @@ module.exports = {
 	
 	execute(message, args) {
 		if(args.length < 2) {
-			message.channel.send(
-				':x: ¡Debes ingresar al menos dos parámetros!\n' +
-				'Uso: `p!m-inforol <Inclusivo[+] / Exclusivo[-]*> <Rol1*> <Rol2...8>`\n' +
-				'`+` ***Inclusivo:** se consideran usuarios con __uno o más de los roles__ buscados (dinámico)*\n' +
-				'`-` ***Exclusivo:** se consideran usuarios con __todos los roles__ buscados (específico)*'
-			);
+			message.channel.send(`:x: ¡Debes ingresar al menos dos parámetros!\nUsa \`${p_pure}ayuda m-inforol\` para más información`);
 			return;
 		}
 
 		if(args[0] !== '-' && args[0] !== '+') {
-			message.channel.send(':warning: El primer parámetro solo puede ser `+` o `-`\nUso: `p!m-inforol <Inclusivo[+] / Exclusivo[-]*> <Rol1*> <Rol2...8>`');
+			message.channel.send(`:warning: El primer parámetro solo puede ser \`+\` o \`-\`\nUsa \`${p_pure}ayuda m-inforol\` para más información`);
 			return;
 		}
 

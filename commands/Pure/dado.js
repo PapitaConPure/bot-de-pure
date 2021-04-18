@@ -1,8 +1,5 @@
-const Discord = require('discord.js'); //Integrar discord.js
-const { GridFSBucket } = require('mongodb');
-var global = require('../../config.json'); //Variables globales
+const global = require('../../config.json'); //Variables globales
 const { randInt } = require('../../func.js');
-const func = require('../../func.js'); //Funciones globales
 
 module.exports = {
 	name: 'dado',
@@ -55,7 +52,7 @@ module.exports = {
 		} catch(err) {
 			message.channel.send(
 				'¡No puedo tirar dados tetradimensionales! ***...todavía***!\n' +
-				`Revisa \`p!ayuda dado\` para más información`
+				`Revisa \`${global.p_pure}ayuda dado\` para más información`
 			);
 		};
 
