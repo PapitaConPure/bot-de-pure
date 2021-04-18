@@ -25,6 +25,8 @@ module.exports = {
 			':heartpulse:'
 		];
 
-		message.channel.send(`:gay_pride_flag: ${hearts[randInt(0, hearts.length)]} ${hearts[randInt(0, hearts.length)]} ${hearts[randInt(0, hearts.length)]} :transgender_flag:`);
+		message.channel.send(
+			`:gay_pride_flag: ${hearts[randInt(0, hearts.length)]} ${hearts[randInt(0, hearts.length)]} ${hearts[randInt(0, hearts.length)]} ${hearts[randInt(0, hearts.length)]} :transgender_flag:`
+			);
 	}
 };

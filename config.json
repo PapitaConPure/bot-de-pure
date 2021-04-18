@@ -16,7 +16,8 @@
             "p!presentar ahora muestra la cantidad de comandos totales",
             "p!emotes fue restaurado y tiene una lista mejor optimizada",
             "Ya no hay que esperar a que se cargen los menús de reacciones para reaccionar",
-            "Se hicieron cambios internos apuntando al objetivo de prefijos personalizados"
+            "Se hicieron cambios internos apuntando al objetivo de prefijos personalizados",
+            "Nuevo comando p!mabel"
         ],
         "todo": [
             "Restaurar comandos de búsqueda de imagen avanzados",
