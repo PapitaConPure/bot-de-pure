@@ -113,8 +113,8 @@ module.exports = {
 			const date = today.getUTCDate();
 			let hint;
 			switch(today.getUTCMonth() + 1) {
-			case 04: //Octubre
-				if(date === 18) { //Halloween
+			case 10: //Octubre
+				if(date === 31) { //Halloween
 					hint = 'The air is getting colder around you:';
 					list = [
 						...list,
@@ -162,7 +162,7 @@ module.exports = {
 			const umusic = list.indexOf('UMUSIC'), //Unknown music
 				  kmusic = list.indexOf('KMUSIC'), //Known Music
 				  xmusic = list.indexOf('XMUSIC'); //Extra Music
-			const i = randInt(0, list.length);
+				  i = randInt(0, list.length); //Índice aleatorio
 			
 			//Comprobado de tipo de recomendación
 			let m;
