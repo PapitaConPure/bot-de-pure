@@ -13,7 +13,7 @@ module.exports = {
 	],
 
 	execute(message, args) {
-		const hearts = [
+		const h = [
 			':heart:',
 			':orange_heart:',
 			':yellow_heart:',
@@ -26,7 +26,7 @@ module.exports = {
 		];
 
 		message.channel.send(
-			`:gay_pride_flag: ${hearts[randInt(0, hearts.length)]} ${hearts[randInt(0, hearts.length)]} ${hearts[randInt(0, hearts.length)]} ${hearts[randInt(0, hearts.length)]} :transgender_flag:`
-			);
+			`:gay_pride_flag: ${h[randInt(0, h.length)]} ${h[randInt(0, h.length)]} ${h[randInt(0, h.length)]} ${h[randInt(0, h.length)]} ${h[randInt(0, h.length)]} :transgender_flag:`
+		);
 	}
 };
