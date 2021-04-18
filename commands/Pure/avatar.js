@@ -35,7 +35,6 @@ module.exports = {
                     if(arg.length === 0) return;
                     const user = func.resolverIDUsuario(arg, message.channel.guild, message.client);
 
-                    console.log(`${user} === ${papitaid}?`);
                     if((user === peopleid.papita) && !message.channel.nsfw) {
                         message.channel.send(`Oe conchetumare te hacei el gracioso una vez más y te vas manos arriba, pantalones abajo, 'cuchai? <:junkNo:697321858407727224> <:pistolaR:697351201301463060>`);
                         return;
