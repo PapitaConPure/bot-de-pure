@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.33",
+            "number": "Full.2.8.35",
             "name": "Cisne Cristalino"
         },
         "note": "Funcionamiento correcto y buena estabilidad",
@@ -17,7 +17,8 @@
             "p!emotes fue restaurado y tiene una lista mejor optimizada",
             "Ya no hay que esperar a que se cargen los menús de reacciones para reaccionar",
             "Se hicieron cambios internos apuntando al objetivo de prefijos personalizados",
-            "Nuevo comando p!mabel"
+            "Nuevo comando p!mabel",
+            "p!sassa rehecho"
         ],
         "todo": [
             "Restaurar comandos de búsqueda de imagen avanzados",
