@@ -112,7 +112,6 @@ module.exports = {
 				m = `**Seguro nunca te escuchaste este temazo:**\nhttps://www.youtube.com/watch?v=${umusic[i - games.length]}`;
 			else
 				m = `**¿Y si voy con uno que sepamos todos?:**\nhttps://www.youtube.com/watch?v=${kmusic[i - games.length - umusic.length]}`;
-			message.channel.send(`games[${i}]=${games[i]}\numusic[${i - games.length}]=${umusic[i - games.length]}\nkmusic[${i - games.length - umusic.length}]=${[i - games.length - umusic.length]}`);
 			message.channel.send(m);
 		}
     },
