@@ -17,13 +17,13 @@ module.exports = {
         const { host, version, note, changelog, todo } = bot_status;
         const cmsearch = new RegExp(`${p_pure}\\w*`, 'g');
         let cmindex = 0;
-        String.prototype.listformat = function() {
-            return this.replace(cmsearch, match => `**[${cmindex++}]**\`${match}\``);
+        String.prototype.listformat = function(index) {
+            return this.replace(cmsearch, match => `${index?`**[${cmindex++}]**`:''}\`${match}\``);
         };
         const clformat = changelog.map(item => `- ${item}`).join('\n');
         const tdformat = todo.map(item => `- ${item}`).join('\n');
         const ne = [ '0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣' ];
-        const cm = [changelog, todo].join().match(cmsearch);
+        const cm = changelog.join().match(cmsearch);
         
         const embed = new Discord.MessageEmbed()
             .setColor('#608bf3')
@@ -34,8 +34,8 @@ module.exports = {
             .addField('Host', (host === 'https://localhost/')?'https://heroku.com/':'localhost', true)
             .addField('Versión', `:hash: ${version.number}\n:scroll: ${version.name}`, true)
             .addField('Visión general', note)
-            .addField('Cambios', clformat.listformat())
-            .addField('Lo que sigue', tdformat.listformat());
+            .addField('Cambios', clformat.listformat(true))
+            .addField('Lo que sigue', tdformat.listformat(false));
         String.prototype.listformat = null;
 
         const f = (r, u) => !u.bot;

@@ -317,11 +317,9 @@ module.exports = {
             '819772377440583691': '671851235267182625'  //Kyoto
         };
         console.log('Se solicitaron colores.');
-        for(const [creact, crole] of Object.entries(colrol))
-            await rmessage.react(creact);
-        await rmessage.react('🎦');
+        Promise.all(Object.keys(colrol).map(k => rmessage.react(k)));
         const filter = (rc, user) => !user.bot && colrol.hasOwnProperty(rc.emoji.id) && orimem.user.id === user.id;
-        const collector = rmessage.createReactionCollector(filter, { max: 1, time: 5 * 60 * 1000 });
+        const collector = rmessage.createReactionCollector(filter, { max: 2, time: 5 * 60 * 1000 });
         
         collector.on('collect', (reaction, user) => {
             const reacted = reaction.emoji.id;
@@ -329,13 +327,14 @@ module.exports = {
                 const hadroles = member.roles.cache.filter(role => Object.values(colrol).some(colorid => colorid === role.id));
                 if(hadroles.array().length) {
                     member.roles.remove(hadroles)
-                        .then(mem => mem.roles.add(colrol[reacted]));
+                    .then(mem => mem.roles.add(colrol[reacted]));
                     rmessage.channel.send('Colores intercambiados <:monowo:757624423300726865>');
                 } else {
                     rmessage.channel.send('Colores otorgados <:miyoi:674823039086624808> :thumbsup:');
                     member.roles.add(colrol[reacted]);
                 }
             });
+            rmessage.channel.send('Recibido');
         });
     },
 
@@ -561,12 +560,12 @@ module.exports = {
             if(servidor.id === global.serverid.hourai) {
                 canal.send(
                     `Wena po <@${miembro.user.id}> conchetumare, como estai.\n` +
-                    'Elige un rol de color reaccionando con estos emotes cuando un ":cinema:" aparezca <:mayuwu:654489124413374474>\n' +
+                    'Como tradición, elige un color reaccionando a alguna de estas cartas <:mayuwu:654489124413374474>\n' +
                     '<:FrenchDoll:819772377814532116><:OrleansDoll:819772377642041345><:HollandDoll:819772377624870973><:RussianDoll:819772377894354944><:LondonDoll:819772377856606228><:TibetanDoll:819772377482526741><:KyotoDoll:819772377440583691>\n' +
                     'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:697321858407727224>\n' +
                     '<@&654472238510112799>, vengan a saludar po maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
-                    `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n` +
-                    global.hourai.images.colors
+                    `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n`,
+                    { files: [global.hourai.images.colors] }
                 ).then(sent => module.exports.askColor(sent, miembro));
                 setTimeout(module.exports.askForRole, 1000, miembro, canal, 5 * 4);
                 console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');

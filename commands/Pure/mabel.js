@@ -8,8 +8,7 @@ module.exports = {
 	],
 	desc: 'Comando de inclusión de Mabel',
 	flags: [
-		'meme',
-		'hourai'
+		'meme'
 	],
 
 	execute(message, args) {
