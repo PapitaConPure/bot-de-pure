@@ -6,30 +6,35 @@ module.exports = {
 	aliases: [
         'sassa', 'recomendaciones', 'sassapon', 'drossafras', 'dross'
     ],
-    desc: 'Comando de recomendaciones de Sassafras',
+    desc: 'Comando de recomendaciones de Sassafras\n' +
+		'Cuidado con hacer enojar al tío Sassa, o puede que active su `--sassamodo`',
     flags: [
         'meme'
     ],
     options: [
-		'`-s` o `--sassamodo` para despertar al demonio interno de Sassa'
+		'`-s` o `--sassamodo` para despertar al demonio interno de Sassa',
+		'`-t` o `--total` para saber la cantidad total de líneas'
     ],
 
 	
 	execute(message, args) {
+		let showtotal = false;
 		let sassamodo = false;
 		args.some((arg, i) => {
 			if(arg.startsWith('--'))
 				switch(arg.slice(2)) {
+				case 'total': showtotal = true; break;
 				case 'sassamodo': forcesassamodo = true; break;
 				}
 			else if(arg.startsWith('-'))
 				for(c of arg.slice(1))
 					switch(c) {
+					case 't': showtotal = true; break;
 					case 's': forcesassamodo = true; break;
 					}
 		});
 		
-		if(sassamodo)
+		if(!showtotal && sassamodo)
 			message.channel.send(
 				'***Una cagada asquerosa, repelente, abyecta, vomitiva, mugrosa, maldita, diarreosa, estercolera, inmunda, malnacida, pudenda, apestosa, maloliente, cabrona, ' +
 				'maricona, huevona, pendeja, tarada, cancerígena, jodida, culeada, gilipollesca, pelotuda, encamada, malnacida, retardada, atrasada, inútil, móngola, incestuosa, ' +
@@ -56,6 +61,7 @@ module.exports = {
 				'Imaginate ser el pobre desgraciado que nunca jugó [Kirby](https://www.romulation.org/rom/NDS/2696-Kirby-Super-Star-Ultra-%28U%29)',
 				'Denle bola a [GENETOS](https://web.archive.org/web/20130728190315/http://www.tatsuya-koyama.com/software/wg002_genetos_eng.html), que es Literalmente Gratis',
 				'Me dan lástima los devs de [Wonder Wickets](https://store.steampowered.com/app/598640/Wonder_Wickets/) y estaría bueno que alguien de hecho les comprara el juego. Tiene multijugador y un Workshop con muchos mods. Por favor.',
+				'¿Sabías que el juego Cave Story tiene un hermano llamado [Kero Blaster](https://store.steampowered.com/app/292500/Kero_Blaster/)? Si no estás seguro tiene dos demos, [Pink Hour](https://store.steampowered.com/app/409670/Pink_Hour/) y [Pink Heaven](https://store.steampowered.com/app/409690/Pink_Heaven/)',
 				'UMUSIC', //Música desconocida
 				'dBWKwbjj020',
 				'w5leZrtrFi0',
@@ -173,25 +179,33 @@ module.exports = {
 			}
 			//#endregion
 
-			//#region Envío de línea de recomendación
+			//#region Envío de línea de recomendación o total
 			//Índices de listas
 			const umusic = list.indexOf('UMUSIC'), //Unknown music
-				  kmusic = list.indexOf('KMUSIC'), //Known Music
+			  	  kmusic = list.indexOf('KMUSIC'), //Known Music
 				  xmusic = list.indexOf('XMUSIC'); //Extra Music
-				  i = randInt(0, list.length); //Índice aleatorio
-			
-			//Comprobado de tipo de recomendación
-			let m;
-			if(i < umusic) //Juegos
+			let m; //Mensaje
+			if(!showtotal) {
+				const i = randInt(0, list.length); //Índice aleatorio
+				
+				//Comprobado de tipo de recomendación
+				if(i < umusic) //Juegos
+					m = new Discord.MessageEmbed()
+						.setColor('#cccccc')
+						.addField('El tío Sassa dice:', list[i]);
+				else if(i < kmusic) //Música desconocida
+					m = `**Seguro nunca te escuchaste este temazo:**\nhttps://youtu.be/${list[i + (i === umusic?1:0)]}`;
+				else if(xmusic === -1 || i < xmusic) //Música """conocida"""
+					m = `**¿Y si voy con uno que sepamos todos?:**\nhttps://youtu.be/${list[i + (i === kmusic?1:0)]}`;
+				else if(xmusic !== -1) //Música especial
+					m = `**${hint}**\nhttps://youtu.be/${list[i + (i === xmusic?1:0)]}`;
+			} else {
 				m = new Discord.MessageEmbed()
-					.setColor('#cccccc')
-					.addField('El tío Sassa dice:', list[i]);
-			else if(i < kmusic) //Música desconocida
-				m = `**Seguro nunca te escuchaste este temazo:**\nhttps://youtu.be/${list[i + (i === umusic?1:0)]}`;
-			else if(xmusic === -1 || i < xmusic) //Música """conocida"""
-				m = `**¿Y si voy con uno que sepamos todos?:**\nhttps://youtu.be/${list[i + (i === kmusic?1:0)]}`;
-			else if(xmusic !== -1) //Música especial
-				m = `**${hint}**\nhttps://youtu.be/${list[i + (i === xmusic?1:0)]}`;
+						.setColor('#cccccc')
+						.addField('Total', `Hay ${list.length} recomendaciones de Sassa disponibles ahora mismo`, true)
+						.addField('Subgrupos comunes', `🎮x${umusic}\n❓x${kmusic - umusic}\n😳x${((xmusic === -1)?list.length:xmusic) - kmusic}`, true)
+						.addField('Subgrupo especial', (xmusic !== -1)?(list.length - xmusic):'No hay subgrupos especiales ahora mismo...', true);
+			}
 			message.channel.send(m);
 			//#endregion
 		}
