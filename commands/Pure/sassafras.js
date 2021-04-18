@@ -85,6 +85,20 @@ module.exports = {
 				'rRyy0yn2Qx8',
 				'owghgsl_z5o',
 				'cOlCCc-_2sg',
+				'GPAyRytnLWE',
+				'tmI92GX-xF0',
+				'LseIASl1Pbk',
+				'Zz1jjTbVoew',
+				'3fb8JL-fz0M',
+				'8fll7w2xqcI',
+				'z3VSYWmbJFg',
+				'dE00u-GUYnw',
+				'Swd6aXqW0qM',
+				'GKVulqzzq5U',
+				'I-4dX4mxfVI',
+				'dot0iGpUL5I',
+				'DTUdiGFmVRI',
+				'wz4s6quLDLg',
 				'KMUSIC', //Música conocida
 				'wGcyKEZtWuE',
 				'AdDbbzuq1vY',
@@ -105,7 +119,8 @@ module.exports = {
 				'ey4JY8aox4E',
 				'QWhhMxrX-Us',
 				'GlUeW7IOSFc',
-				'Pm7b43TQxUU'
+				'Pm7b43TQxUU',
+				'r9xAig0C00E'
 			];
 
 			//#region Agregar a la lista si es un día especial
@@ -150,7 +165,8 @@ module.exports = {
 						'bGUZG8V1OMU',
 						'shvbqQ-1vww',
 						'DxTr51RmEjE',
-						'iuc7L50iUhw'
+						'iuc7L50iUhw',
+						'Bk8B2Tynet0'
 					];
 				}
 				break;
