@@ -22,7 +22,7 @@ module.exports = {
 			const slot3Coll = guilds.get(global.serverid.slot3).emojis.cache;
 			emotes = slot1Coll.concat(slot2Coll).concat(slot3Coll).array().sort();
 		}
-		const pagemax = 20;
+		const pagemax = 10;
 		emotes = emotes.map((e, i) => { return (i % pagemax === 0)?emotes.slice(i, i + pagemax):null; }).filter(e => e);
 		emotes = emotes.map(page => page.map(e => `\`${e.name}${' '.repeat(24 - e.name.length)}\` <:${e.name}:${e.id}>`).join('\n'));
 		let page = 0;
