@@ -334,7 +334,6 @@ module.exports = {
                     member.roles.add(colrol[reacted]);
                 }
             });
-            rmessage.channel.send('Recibido');
         });
     },
 
