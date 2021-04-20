@@ -86,7 +86,7 @@ module.exports = {
 					.setColor('#e4d0c9')
 					.setTitle(`Perritos ${emotes[0]}`)
 
-					.addField(`${'Nombre\`'.padEnd(24)}\`Emote`, pages[0], true)
+					.addField(`${'Nombre\`'.padEnd(24)}\`Emote`, pages[0])
 
 					.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
 					.setFooter(`Reacciona a las flechas debajo para cambiar de página`);

@@ -86,7 +86,8 @@ client.on('message', message => { //En caso de recibir un mensaje
                 ch.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]);
             };
             setTimeout(responder, 800, message.channel);
-        }
+        } else if(['q', 'que', 'qué'].some(i => i === msg))
+            message.channel.send({ files: ['https://media.discordapp.net/attachments/670865125154095143/834115384927191080/so_epico-1.jpg?width=394&height=700'] });
     }
     
     //Uno en un Millón
