@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.42",
+            "number": "Full.2.8.3D",
             "name": "Cisne Cristalino"
         },
         "note": "Funcionamiento correcto y buena estabilidad",
@@ -18,11 +18,11 @@
             "Ya no hay que esperar a que se cargen los menús de reacciones para reaccionar",
             "Se hicieron cambios internos apuntando al objetivo de prefijos personalizados",
             "Nuevo comando p!mabel",
-            "p!sassafras rehecho, y con más cosas especiales en días especiales"
+            "p!sassafras rehecho, y con más cosas especiales en días especiales",
+            "p!taton fue refactorizado y tiene una lista optimizada"
         ],
         "todo": [
             "Restaurar comandos de búsqueda de imagen avanzados",
-            "Aplicar optimización de muestra de listas a resto de comandos",
             "Comando p!cartas para cartas personalizadas de Touhou 18",
             "Minijuegos individuales y tipo-fiesta",
             "Base de datos en la nube",
