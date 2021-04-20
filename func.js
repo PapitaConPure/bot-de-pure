@@ -109,6 +109,15 @@ module.exports = {
         console.log('Salteado de dibujante rehabilitado.');
         global.goingnext = false;
     },
+
+    paginate: function(array, itemsOptions = { pagemax: 10, format: item => `\`${item.name.padEnd(24)}\`${item}` }) {
+        const { pagemax, format } = itemsOptions;
+		const pages = array
+            .map((_, i) => ((i % pagemax === 0)?array.slice(i, i + pagemax):null)) //Paginar
+            .filter(item => item) //Filtrar nulos
+            .map(page => page.map(format).join('\n')); //Dar formato y unir
+        return pages;
+    },
     //#endregion
 
     //#region Temporizadores
@@ -932,6 +941,10 @@ module.exports = {
     randInt: function(min, max) {
         let range = max - min;
         return min + Math.floor((global.seed + range * Math.random()) % range);
+    },
+
+    fetchArrows: function(emojiscache) {
+        return [emojiscache.get('681963688361590897'), emojiscache.get('681963688411922460')];
     }
     //#endregion
 };

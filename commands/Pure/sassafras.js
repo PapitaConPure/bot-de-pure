@@ -125,7 +125,9 @@ module.exports = {
 				'QWhhMxrX-Us',
 				'GlUeW7IOSFc',
 				'Pm7b43TQxUU',
-				'r9xAig0C00E'
+				'r9xAig0C00E',
+				'U730ft9yESk',
+				'YiUz1OiSqd8'
 			];
 
 			//#region Agregar a la lista si es un día especial
