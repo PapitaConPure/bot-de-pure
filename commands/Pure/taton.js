@@ -76,7 +76,7 @@ module.exports = {
 		const emotes = slot1Coll.concat(slot2Coll).filter(emote => perritos.some(perrito => perrito === emote.name)).array();
 
 		if(!args.length) {
-			const randp = Math.floor(Math.random() * perritos.length / 2) * 2;
+			const randp = Math.floor(Math.random() * perritos.length);
 			message.channel.send(`${emotes[randp]}`);
 		} else {
 			const mostrarlista = ['perritos', 'todo', 'todos', 'lista', 'ayuda', 'everything', 'all', 'help'];
