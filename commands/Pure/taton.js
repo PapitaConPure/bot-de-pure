@@ -80,7 +80,7 @@ module.exports = {
 			message.channel.send(`${emotes[randp]}`);
 		} else {
 			const mostrarlista = ['perritos', 'todo', 'todos', 'lista', 'ayuda', 'everything', 'all', 'help'];
-			if(mostrarlista.includes(args[0].toLowerCase())) {
+			if(mostrarlista.includes(args[0])) {
 				const pages = paginate(emotes);
 				const embed = new Discord.MessageEmbed()
 					.setColor('#e4d0c9')
