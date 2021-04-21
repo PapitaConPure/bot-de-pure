@@ -72,7 +72,7 @@ client.on('message', message => { //En caso de recibir un mensaje
 
     //#region Respuestas rápidas
     //Hourai Doll; "Hourai"
-    if(message.channel.guild.id === global.serverid.hourai) {
+    if(message.channel.guild.id === global.serverid.hourai && global.bot_status.host === 'https://localhost/') {
         const hrai = msg.indexOf('hourai');
         const hraipf = global.hourai.replies.ignore.prefix;
         const hraisf = global.hourai.replies.ignore.suffix;

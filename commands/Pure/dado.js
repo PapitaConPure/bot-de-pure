@@ -1,5 +1,4 @@
-const global = require('../../config.json'); //Variables globales
-const { randInt } = require('../../func.js');
+const { p_pure } = require('../../config.json'); //Variables globales
 
 module.exports = {
 	name: 'dado',
@@ -7,61 +6,64 @@ module.exports = {
 		'dados', 'tirar', 'random',
 		'roll', 'rolldie', 'die',
 	],
-    desc: 'Tira uno o más dados de la cantidad de caras deseadas para recibir números aleatorios',
+    desc: 'Tira uno o más dados de la cantidad de caras deseadas para recibir números aleatorios\n' + 
+		'**Ejemplo de dados:** `1d6` = 1 dado de 6 caras; `5d4` = 5 dados de 4 caras; `15d20` = 15 dados de 20 caras',
     flags: [
         'common'
     ],
     options: [
-		'`-d <n>` o `--dados <n>` _(número)_ para especificar la cantidad de dados',
-		'`-c <n>` o `--caras <n>` _(número)_ para especificar la cantidad de caras'
+		'`<cantidad>` _(número)_ para especificar una cantidad de dados',
+		'`<caras>` _(número)_ para especificar las caras de un dado',
+		'[`<cantidad><caras>(...)]>` _(grupo: `<cantidad>d<caras>` [múltiple])_ para tirar una cantidad de dados de X caras'
     ],
+	callx: '[<cantidad><caras>(...)]',
 	
 	execute(message, args) {
-		//message.channel.send('No se están haciendo pruebas por el momento <:uwu:681935702308552730>');
-		//return;
+		if(!args.length) {
+			message.channel.send(`:warning: Debes ingresar al menos un conjunto de dados a tirar, como \`1d6\`.\nPara más información sobre el comando, usa \`${p_pure}ayuda dado\``);
+			return;
+		}
 
-		let faces = 6;
-		let dices = 1;
-		let total = 0;
-		let dice = [];
+		let dices = [];
+		args.map((arg, i) => {
+			if(isNaN(arg)) {
+				const dice = arg.split('d').filter(a => a);
+				if(dice.length === 2)
+					dices.push({ d: dice[0], f: dice[1] });
+			} else if(args[i + 1].startsWith('d'))
+				dices.push({ d: arg, f: args[i + 1] });
+		});
+		
+		if(dices.length > 16) {
+			message.channel.send('PERO NO SEAS TAN ENFERMO <:zunWTF:757163179569840138>');
+			return;
+		}
 
-		try {
-			args.map((arg, i) => {
-				if(arg.startsWith('--'))
-					switch(arg.slice(2)) {
-					case 'dados': dices = parseInt(args[i + 1]); break;
-					case 'caras': faces = parseInt(args[i + 1]); break;
-					}
-				else if(arg.startsWith('-'))
-					for(c of arg.slice(1))
-						switch(c) {
-						case 'd': dices = parseInt(args[i + 1]); break;
-						case 'c': faces = parseInt(args[i + 1]); break;
-						}
-			});
-			
-			if(dices > 64) {
-				message.channel.send('PERO NO SEAS TAN ENFERMO <:zunWTF:757163179569840138>');
-				return;
-			}
-
-			for(let d = 0; d < dices; d++){
-				dice[d] = randInt(1, faces + 1);
-				total += dice[d];
-			};
-		} catch(err) {
-			message.channel.send(
-				'¡No puedo tirar dados tetradimensionales! ***...todavía***!\n' +
-				`Revisa \`${global.p_pure}ayuda dado\` para más información`
-			);
+		for(let d = 0; d < dices; d++){
+			dice[d] = randInt(1, faces + 1);
+			total += dice[d];
 		};
 
-		message.channel.send(
-			'```\n' +
-			`Tiré ${dices} dados de ${faces} caras~♪\n` +
-			`Resultados:\n${dice.join(', ')}\n` +
-			`Total: ${total}\n` +
-			'```'
-		);
+		if(dices.map(dice => dice.d).reduce((a,b) => a + b) > 1000) {
+			message.channel.send(':x: Ajá, ¿y quién va a pagar todos esos dados? <:payasowo:828755669049278476>');
+			return;
+		}
+
+		if(dices.map(dice => dice.f).reduce((a,b) => a + b) > 1000) {
+			message.channel.send(`:x: Si quieres te puedo tirar una esfera a la cara, que es lo mismo que un dado de tantas caras <:Empty:796930821554044928>`);
+			return;
+		}
+
+		dices.forEach(dice => {
+			dice.d = parseInt(dice.d);
+			dice.f = parseInt(dice.f);
+			dice.r = Array(dice.d).fill().map(() => (1 + Math.floor(Math.random() * dice.f)));
+			dice.t = dice.r.reduce((a,b) => a + b);
+		});
+		const total = dices.map(dice => dice.t).reduce((a,b) => a + b);
+
+		console.log({dices})
+		message.channel.send(dices.map(dice => `${dice.d} x :game_die:(${dice.f}) -> [${dice.r.join(',')}] = **${dice.t}**`).join('\n**+** ') + ((dices.length > 1)?`\n**= ${total}**`:''))
+		.catch(() => message.channel.send(':x: No te pasei de gracioso, ¿tamo? <:comodowo:824759668437811224> <:pistolaR:697351201301463060>'));
     },
 };

@@ -2,24 +2,14 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.3D",
+            "number": "Full.2.8.40",
             "name": "Cisne Cristalino"
         },
         "note": "Funcionamiento correcto y buena estabilidad",
         "changelog": [
-            "Tareas de refactorización (2/4)",
-            "p!pinguear ahora tiene un límite temporal de usos por persona",
-            "p!avatar ahora separa elementos de búsqueda por comas en lugar de espacios",
-            "Nuevo comando p!andreas",
-            "Pilar y página de ayuda para p!ajedrez establecidos",
-            "p!estado ahora muestra la cantidad de comandos totales y ayuda rápida de cambios",
-            "p!presentar ahora muestra la cantidad de comandos totales",
-            "p!emotes fue restaurado y tiene una lista mejor optimizada",
-            "Ya no hay que esperar a que se cargen los menús de reacciones para reaccionar",
-            "Se hicieron cambios internos apuntando al objetivo de prefijos personalizados",
-            "Nuevo comando p!mabel",
-            "p!sassafras rehecho, y con más cosas especiales en días especiales",
-            "p!taton fue refactorizado y tiene una lista optimizada"
+            "Tareas de refactorización (2.5/4)",
+            "¡Nuevo castigo (H.Doll) dibujado por Rakkidei! Enlaces:[🐦](https://twitter.com/rakkidei)[🇵](https://www.pixiv.net/users/58442175)",
+            "Nuevo comando p!rakkidei"
         ],
         "todo": [
             "Restaurar comandos de búsqueda de imagen avanzados",
@@ -56,7 +46,8 @@
     "hourai": {
         "warn": 0,
         "images": {
-            "colors": "https://i.imgur.com/7t7m3PS.png"
+            "colors": "https://i.imgur.com/7t7m3PS.png",
+            "forcecolors": "https://i.imgur.com/eHbSCHK.png"
         },
         "replies": {
             "ignore": {

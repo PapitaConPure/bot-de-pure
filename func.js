@@ -267,8 +267,8 @@ module.exports = {
                     ];
                     canal.send(
                         `**${miembro.user.username}**, cagaste altiro watón fome <:mukyuugh:725583038913708034>\n` +
-                        `Toma un rol random po <:mayuwu:654489124413374474> <:venAqui2:668644951353065500>\n` +
-                        'https://imgur.com/pXumeJT'
+                        `Toma un rol random po <:mayuwu:654489124413374474> <:venAqui2:668644951353065500>`,
+                        { files: [global.hourai.images.forcecolors] }
                     );
                     miembro.roles.add(colores[Math.floor(Math.random() * 7)]);
                     console.log('Roles forzados.');
