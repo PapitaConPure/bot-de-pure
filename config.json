@@ -2,18 +2,19 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.40",
+            "number": "Full.2.8.41",
             "name": "Cisne Cristalino"
         },
         "note": "Funcionamiento correcto y buena estabilidad",
         "changelog": [
             "Tareas de refactorización (2.5/4)",
-            "¡Nuevo castigo (H.Doll) dibujado por Rakkidei! Enlaces:[🐦](https://twitter.com/rakkidei)[🇵](https://www.pixiv.net/users/58442175)",
-            "Nuevo comando p!rakkidei"
+            "¡Nuevo castigo (H.Doll) ilustrado por Rakkidei! Links:[🐦](https://twitter.com/rakkidei)[🇵](https://www.pixiv.net/users/58442175)",
+            "Nuevo comando p!rakkidei",
+            "p!dados rehecho para mejor flexibilidad, legibilidad y presentación"
         ],
         "todo": [
-            "Restaurar comandos de búsqueda de imagen avanzados",
             "Comando p!cartas para cartas personalizadas de Touhou 18",
+            "Restaurar comandos de búsqueda de imagen avanzados",
             "Minijuegos individuales y tipo-fiesta",
             "Base de datos en la nube",
             "Simplificar prefijos y personalización de Bot a nivel de servidor",
@@ -61,6 +62,8 @@
                 "suffix": [
                     "doll",
                     " doll",
+                    "FM",
+                    " FM",
                     " victim",
                     " elixir",
                     " ningyou",
