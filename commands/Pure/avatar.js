@@ -19,11 +19,11 @@ module.exports = {
     callx: '<usuario?>',
 
 	execute(message, args) {
+        const embed = new Discord.MessageEmbed()
+            .setColor('#faa61a')
+            .setFooter(`Usa "${p_pure}ayuda avatar" para información de uso`)
         if(!args.length) {
-            const embed = new Discord.MessageEmbed()
-                .setColor('#faa61a')
-                .setFooter(`Comando invocado por ${message.author.username}`)
-                .setTitle(`Avatar de ${message.author.username}`)
+            embed.setTitle(`Avatar de ${message.author.username}`)
                 .setImage(message.author.avatarURL({ format: 'png', dynamic: true, size: 1024 }));
             
             message.channel.send(embed);
@@ -36,7 +36,7 @@ module.exports = {
                     const user = func.resolverIDUsuario(arg, message.channel.guild, message.client);
 
                     if((user === peopleid.papita) && !message.channel.nsfw) {
-                        message.channel.send(`Oe conchetumare te hacei el gracioso una vez más y te vas manos arriba, pantalones abajo, 'cuchai? <:junkNo:697321858407727224> <:pistolaR:697351201301463060>`);
+                        message.channel.send(`Oe conchetumare te hacei el gracioso una vez más y te vai manos arriba, pantalones abajo, 'cuchai? <:junkNo:697321858407727224> <:pistolaR:697351201301463060>`);
                         return;
                     }
                     if(user !== undefined) {
@@ -45,10 +45,7 @@ module.exports = {
                         if(fetcheduser === undefined)
                             message.channel.send(':warning: La ID ingresada es inválida o no es una ID en absoluto...');
                         else {
-                            const embed = new Discord.MessageEmbed()
-                                .setColor('#faa61a')
-                                .setFooter(`Usa "${p_pure}ayuda avatar" para información de uso`)
-                                .setTitle(`Avatar de ${fetcheduser.username}`)
+                            embed.setTitle(`Avatar de ${fetcheduser.username}`)
                                 .setImage(fetcheduser.avatarURL({ dynamic: true, size: 1024 }));
 
                             message.channel.send(embed);

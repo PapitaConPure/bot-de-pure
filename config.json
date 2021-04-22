@@ -2,15 +2,16 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.41",
+            "number": "Full.2.8.42",
             "name": "Cisne Cristalino"
         },
-        "note": "Funcionamiento correcto y buena estabilidad",
+        "note": "Versión estable. Se están realizando cambios lentos pero seguros apuntando a la personalización a nivel de servidor",
         "changelog": [
             "Tareas de refactorización (2.5/4)",
             "¡Nuevo castigo (H.Doll) ilustrado por Rakkidei! Links:[🐦](https://twitter.com/rakkidei)[🇵](https://www.pixiv.net/users/58442175)",
             "Nuevo comando p!rakkidei",
-            "p!dados rehecho para mejor flexibilidad, legibilidad y presentación"
+            "p!dados rehecho para mejor flexibilidad, legibilidad y presentación",
+            "Diseño de bienvenida (todos los servers) mejorado"
         ],
         "todo": [
             "Comando p!cartas para cartas personalizadas de Touhou 18",

@@ -486,7 +486,8 @@ module.exports = {
         //#endregion
         
         //#region Creación de imagen
-        Canvas.registerFont('./TommySoft.otf', { family: 'TommySoft' });
+        Canvas.registerFont('./Alice-Regular.ttf', { family: 'TommySoft' });
+        //Canvas.registerFont('./TommySoft.otf', { family: 'TommySoft' });
         const canvas = Canvas.createCanvas(1275, 825);
         const ctx = canvas.getContext('2d');
 
@@ -496,7 +497,7 @@ module.exports = {
 
         //#region Texto
         //#region Propiedades de texto
-        const strokeFactor = 0.07;
+        const strokeFactor = 0.09;
         ctx.fillStyle = '#ffffff';
         ctx.strokeStyle = '#000000';
         //#endregion
@@ -512,8 +513,8 @@ module.exports = {
         console.log(fontSize);
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
         xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
-        ctx.fillText(Texto, xcenter, 15);
         ctx.strokeText(Texto, xcenter, 15);
+        ctx.fillText(Texto, xcenter, 15);
         //#endregion
         
         //#region Texto inferior
@@ -524,14 +525,14 @@ module.exports = {
         ctx.font = `bold ${fontSize}px "TommySoft"`;
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
         xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
-        ctx.fillText(Texto, xcenter, canvas.height - 15);
         ctx.strokeText(Texto, xcenter, canvas.height - 15);
+        ctx.fillText(Texto, xcenter, canvas.height - 15);
         Texto = '¡Bienvenid@ a';
         ctx.lineWidth = Math.ceil(56 * strokeFactor);
         ctx.font = `bold 56px "TommySoft"`;
         xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
-        ctx.fillText(Texto, xcenter, canvas.height - fontSize - 20);
         ctx.strokeText(Texto, xcenter, canvas.height - fontSize - 20);
+        ctx.fillText(Texto, xcenter, canvas.height - fontSize - 20);
         //#endregion
         //#endregion
         
@@ -545,6 +546,10 @@ module.exports = {
         //#endregion
 
         //#region Imagen circular
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = radius * 0.33 * strokeFactor;
+        ctx.arc(canvas.width / 2, ycenter, radius + ctx.lineWidth, 0, Math.PI * 2, true);
+        ctx.stroke();
         ctx.save();
         ctx.beginPath();
         ctx.arc(canvas.width / 2, ycenter, radius, 0, Math.PI * 2, true);
@@ -553,10 +558,6 @@ module.exports = {
         const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL({ format: 'png', dynamic: false, size: 1024 }));
         ctx.drawImage(avatar, canvas.width / 2 - radius, ycenter - radius, radius * 2, radius * 2);
         ctx.restore();
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth = radius / 28;
-        ctx.arc(canvas.width / 2, ycenter, radius + ctx.lineWidth, 0, Math.PI * 2, true);
-        ctx.stroke();
         //#endregion
         //#endregion
         
@@ -648,7 +649,8 @@ module.exports = {
         //#endregion
         
         //#region Creación de imagen
-        Canvas.registerFont('./TommySoft.otf', { family: 'TommySoft' });
+        Canvas.registerFont('./Alice-Regular.ttf', { family: 'TommySoft' });
+        //Canvas.registerFont('./TommySoft.otf', { family: 'TommySoft' });
         const canvas = Canvas.createCanvas(1500, 900);
         const ctx = canvas.getContext('2d');
 
@@ -658,7 +660,7 @@ module.exports = {
 
         //#region Texto
         //#region Propiedades de Texto
-        const strokeFactor = 0.07;
+        const strokeFactor = 0.09;
         ctx.fillStyle = '#ffffff';
         ctx.strokeStyle = '#000000';
         //#endregion
@@ -669,8 +671,8 @@ module.exports = {
         let fontSize = 90;
         ctx.font = `bold ${fontSize}px "TommySoft"`;
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
-        ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 40);
         ctx.strokeText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 40);
+        ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 40);
         //#endregion
         //#endregion
 
@@ -684,6 +686,10 @@ module.exports = {
         //#endregion
 
         //#region Dibujar foto de perfil
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = radius * 0.33 * strokeFactor;
+        ctx.arc(canvas.width / 2, ycenter, radius + ctx.lineWidth, 0, Math.PI * 2, true);
+        ctx.stroke();
         ctx.save();
         ctx.beginPath();
         ctx.arc(canvas.width / 2, ycenter, radius, 0, Math.PI * 2, true);
@@ -692,10 +698,6 @@ module.exports = {
         const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL({ format: 'png', dynamic: false, size: 1024 }));
         ctx.drawImage(avatar, canvas.width / 2 - radius, ycenter - radius, radius * 2, radius * 2);
         ctx.restore();
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth = radius / 28;
-        ctx.arc(canvas.width / 2, ycenter, radius + ctx.lineWidth, 0, Math.PI * 2, true);
-        ctx.stroke();
         //#endregion
         //#endregion
 
