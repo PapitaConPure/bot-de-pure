@@ -61,77 +61,21 @@ module.exports = {
 				'Denle bola a [GENETOS](https://web.archive.org/web/20130728190315/http://www.tatsuya-koyama.com/software/wg002_genetos_eng.html), que es Literalmente Gratis',
 				'Me dan lástima los devs de [Wonder Wickets](https://store.steampowered.com/app/598640/Wonder_Wickets/) y estaría bueno que alguien de hecho les comprara el juego. Tiene multijugador y un Workshop con muchos mods. Por favor.',
 				'¿Sabías que el juego Cave Story tiene un hermano llamado [Kero Blaster](https://store.steampowered.com/app/292500/Kero_Blaster/)? Si no estás seguro tiene dos demos, [Pink Hour](https://store.steampowered.com/app/409670/Pink_Hour/) y [Pink Heaven](https://store.steampowered.com/app/409690/Pink_Heaven/)',
+				'¿Querés jugar Touhou pero no tenés el tiempo o las ganas de jugarte 6 niveles? ¿Qué tal si jugás [Glory of Deep Skies](https://www.bulletforge.org/u/team-alternative-snding/p/dong-fang-meng-jiu-shi-glory-of-deep-skies)? Solo tiene tres niveles y una rejugabilidad decente.',
 				'UMUSIC', //Música desconocida
-				'dBWKwbjj020',
-				'w5leZrtrFi0',
-				'5ok9bzDzaS0',
-				'LKNBOzazxZE',
-				'U_0TeykT5NA',
-				'uvQTE7H2M68',
-				'c47DEa8ICoY',
-				'jj5CLg0GS5U',
-				'1FPwPLfIubg',
-				'IyXBZ4M09ts',
-				'p7hhRd-BafY',
-				'wiwHcEF2kiI',
-				'55LnD7TNNGc',
-				'Rar7taiH0dY',
-				'wC5EQUvamQU',
-				'ElRQjuWmTUg',
-				'jAnx-rU0psE',
-				'D7chqmf2ThM',
-				'GlHKKdtLuqo',
-				'_ImmjLQi5mE',
-				'qmandi2nKi4',
-				'uddmkZiPjCw',
-				'ZjevDeTvbbw',
-				'FSJObE6eyCU',
-				'4_gObHt1uZA',
-				'rRyy0yn2Qx8',
-				'owghgsl_z5o',
-				'cOlCCc-_2sg',
-				'GPAyRytnLWE',
-				'tmI92GX-xF0',
-				'LseIASl1Pbk',
-				'Zz1jjTbVoew',
-				'3fb8JL-fz0M',
-				'8fll7w2xqcI',
-				'z3VSYWmbJFg',
-				'dE00u-GUYnw',
-				'Swd6aXqW0qM',
-				'GKVulqzzq5U',
-				'I-4dX4mxfVI',
-				'dot0iGpUL5I',
-				'DTUdiGFmVRI',
-				'wz4s6quLDLg',
-				'leIMP5mbB14',
+				'dBWKwbjj020', 'w5leZrtrFi0', '5ok9bzDzaS0', 'LKNBOzazxZE', 'U_0TeykT5NA', 'uvQTE7H2M68', 'c47DEa8ICoY', 'jj5CLg0GS5U', '1FPwPLfIubg', 'IyXBZ4M09ts',
+				'p7hhRd-BafY', 'wiwHcEF2kiI', '55LnD7TNNGc', 'Rar7taiH0dY', 'wC5EQUvamQU', 'ElRQjuWmTUg', 'jAnx-rU0psE', 'D7chqmf2ThM', 'GlHKKdtLuqo', '_ImmjLQi5mE',
+				'qmandi2nKi4', 'uddmkZiPjCw', 'ZjevDeTvbbw', 'FSJObE6eyCU', '4_gObHt1uZA', 'rRyy0yn2Qx8', 'owghgsl_z5o', 'cOlCCc-_2sg', 'GPAyRytnLWE', 'tmI92GX-xF0',
+				'LseIASl1Pbk', 'Zz1jjTbVoew', '3fb8JL-fz0M', '8fll7w2xqcI', 'z3VSYWmbJFg', 'dE00u-GUYnw', 'Swd6aXqW0qM', 'GKVulqzzq5U', 'I-4dX4mxfVI', 'dot0iGpUL5I',
+				'DTUdiGFmVRI', 'wz4s6quLDLg', 'leIMP5mbB14', 'pHKkgTZS5K8', 'peuTnilEv9g', '4EcgruWlXnQ', 'spF6PuFh7y4', 'y4EATZ-tNPU', 'B77hKKI4SbI', 'dkxrXWokYqQ',
 				'KMUSIC', //Música conocida
-				'wGcyKEZtWuE',
-				'AdDbbzuq1vY',
-				'qIk6YFTzckc',
-				'Mdnnfg6Yvb0',
-				'llnXhrCn9Yo',
-				'dVVZaZ8yO6o',
-				'2b8TKhIz_ZY',
-				'qVXeWfFTFGo',
-				'8VyaShl6urc',
-				'HSZIej-ZraE',
-				'Y0VYKbTSxu0',
-				'yn3GPjhtYJ8',
-				'LicR6XLP94U',
-				'tApsiCYkOfw',
-				'wqAYMZSOQao',
-				'Q1kf-OJdvb4',
-				'ey4JY8aox4E',
-				'QWhhMxrX-Us',
-				'GlUeW7IOSFc',
-				'Pm7b43TQxUU',
-				'r9xAig0C00E',
-				'U730ft9yESk',
-				'YiUz1OiSqd8'
+				'wGcyKEZtWuE', 'AdDbbzuq1vY', 'qIk6YFTzckc', 'Mdnnfg6Yvb0', 'llnXhrCn9Yo', 'dVVZaZ8yO6o', '2b8TKhIz_ZY', 'qVXeWfFTFGo', '8VyaShl6urc', 'HSZIej-ZraE',
+				'Y0VYKbTSxu0', 'yn3GPjhtYJ8', 'LicR6XLP94U', 'tApsiCYkOfw', 'wqAYMZSOQao', 'Q1kf-OJdvb4', 'ey4JY8aox4E', 'QWhhMxrX-Us', 'GlUeW7IOSFc', 'Pm7b43TQxUU',
+				'r9xAig0C00E', 'U730ft9yESk', 'YiUz1OiSqd8'
 			];
 
 			//#region Agregar a la lista si es un día especial
+			//Probablemente debería reemplazar esos if internos con switches en el futuro
 			const today = new Date(Date.now());
 			const date = today.getUTCDate();
 			let hint;
@@ -142,21 +86,8 @@ module.exports = {
 					list = [
 						...list,
 						'XMUSIC',
-						'jHg1_AloGEk',
-						'tgUu8N05N24',
-						'jLUaYqH-1hw',
-						'nK8uH34mpnE',
-						'0K_xO8JltXc',
-						'b677_os3s34',
-						'R4LlkoVBPFY',
-						'qcoXUuq1At8',
-						'G2oq0lVmIwU',
-						'fkZkN7uSZfk',
-						'I3kGiA3EGP4',
-						'rEmDpKsMJWc',
-						'oY9m2sHQwLs',
-						'cDd_GlynA6A',
-						'NIWyZmFSep0'
+						'jHg1_AloGEk', 'tgUu8N05N24', 'jLUaYqH-1hw', 'nK8uH34mpnE', '0K_xO8JltXc', 'b677_os3s34', 'R4LlkoVBPFY', 'qcoXUuq1At8', 'G2oq0lVmIwU', 'fkZkN7uSZfk',
+						'I3kGiA3EGP4', 'rEmDpKsMJWc', 'oY9m2sHQwLs', 'cDd_GlynA6A', 'NIWyZmFSep0'
 					];
 				}
 				break;
@@ -166,15 +97,7 @@ module.exports = {
 					list = [
 						...list,
 						'XMUSIC',
-						'TVeFyqISlHY',
-						'HHBb0z9584w',
-						'qOYbGBPnT_M',
-						'-fWMWkrfoRU',
-						'bGUZG8V1OMU',
-						'shvbqQ-1vww',
-						'DxTr51RmEjE',
-						'iuc7L50iUhw',
-						'Bk8B2Tynet0'
+						'TVeFyqISlHY', 'HHBb0z9584w', 'qOYbGBPnT_M', '-fWMWkrfoRU', 'bGUZG8V1OMU', 'shvbqQ-1vww', 'DxTr51RmEjE', 'iuc7L50iUhw', 'Bk8B2Tynet0'
 					];
 				}
 				break;

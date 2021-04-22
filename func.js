@@ -448,7 +448,7 @@ module.exports = {
     //#endregion
 
     //#region Anuncios
-    finalizarHourai: async function(miembro, canal) {
+    finalizarHourai: function(miembro, canal) {
         //Mensaje de fin de bienvenida
         canal.send(
             `Una última cosita <@${miembro.user.id}>, recuerda revisar el canal <#671817759268536320> en algún momento <:Junkoborga:751938096550903850>\n` +
@@ -456,8 +456,9 @@ module.exports = {
         );
 
         //Otorgar rol con 50% de probabilidad
+        const gr = canal.guild.roles.cache;
         if(Math.random() < 0.5)
-            miembro.roles.add('727952950395273247');
+            miembro.roles.add(gr.find(r => r.name === 'Rol con 50% de probabilidades de tenerlo'));
     },
 
     dibujarBienvenida: async function(miembro) {
@@ -701,7 +702,7 @@ module.exports = {
         //#endregion
         //#endregion
 
-        const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'bienvenida.png');
+        const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'despedida.png');
 
         //#region Imagen y Mensaje extra
         const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
