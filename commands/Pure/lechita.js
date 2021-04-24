@@ -74,7 +74,7 @@ module.exports = {
     options: [
 		'`<usuario?>` _(mención/texto/id)_ para disparar a un usuario',
 		'`<emote?>` _(emote)_ para disparar a un emote',
-		'`<imagen?>` _(enlace)_ para disparar a una imagen (<=256KB)'
+		'`<imagen?>` _(imagen/enlace)_ para disparar a una imagen (<=256KB)'
     ],
 	callx: '[<usuario?>/<emote?>/<imagen?>]',
 	

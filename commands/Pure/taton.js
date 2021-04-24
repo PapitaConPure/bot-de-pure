@@ -19,56 +19,10 @@ module.exports = {
 	
 	execute(message, args) {
 		const perritos = [
-			'perrito',
-			'otirrep',
-			'od',
-			'do',
-			'cerca',
-			'muycerca',
-			'lejos',
-			'muylejos',
-			'invertido',
-			'dormido',
-			'pistola',
-			'sad',
-			'gorrito',
-			'gorra',
-			'almirante',
-			'detective',
-			'ban',
-			'helado',
-			'corona',
-			'Bern',
-			'enojado',
-			'policia',
-			'ladron',
-			'importado',
-			'peleador',
-			'doge',
-			'cheems',
-			'jugo',
-			'Papita',
-			'mano',
-			'Mima',
-			'chad',
-			'Marisa',
-			'fumado',
-			'Megumin',
-			'Navi',
-			'Sansas',
-			'chocolatada',
-			'ZUN',
-			'cafe',
-			'mate',
-			'espiando',
-			'madera',
-			'Keiki',
-			'piola',
-			'jarra',
-			'Nazrin',
-			'Miyoi',
-			'despierto',
-			'pensando'
+			'perrito', 'otirrep', 'od', 'do', 'cerca', 'muycerca', 'lejos', 'muylejos', 'invertido', 'dormido', 'pistola', 'sad', 'gorrito', 'gorra', 'almirante', 'detective',
+			'ban', 'helado', 'corona', 'Bern', 'enojado', 'policia', 'ladron', 'importado', 'peleador', 'doge', 'cheems', 'jugo', 'Papita', 'mano', 'Mima', 'chad', 'Marisa',
+			'fumado', 'Megumin', 'Navi', 'Sansas', 'chocolatada', 'ZUN', 'cafe', 'mate', 'espiando', 'madera', 'Keiki', 'piola', 'jarra', 'Nazrin', 'Miyoi', 'despierto',
+			'pensando', 'santaclos', 'tomando', 'llorando', 'facha', 'sniper', 'amsiedad'
 		];
 		const guilds = message.client.guilds.cache;
 		const slot1Coll = guilds.get(global.serverid.slot1).emojis.cache;
@@ -88,7 +42,7 @@ module.exports = {
 
 					.addField(`${'Nombre\`'.padEnd(24)}\`Emote`, pages[0])
 
-					.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
+					.setAuthor(`${perritos.length} perritos en total`)
 					.setFooter(`Reacciona a las flechas debajo para cambiar de página`);
 				let page = 0;
 
