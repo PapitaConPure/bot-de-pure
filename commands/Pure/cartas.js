@@ -75,6 +75,9 @@ module.exports = {
 
         //#region Nombre y tipo
         ctx.textBaseline = 'top';
+		ctx.font = '120px sans-serif';
+		ctx.fillText('PRUEBA PRUEBA PRUEBA PRUEBA', 0, 0);
+		ctx.fillText('PRUEBA PRUEBA PRUEBA PRUEBA', 0, canvas.height - ctx.measureText('Mg^').height);
 		ctx.textAlign = 'center';
 		const xcenter = ww / 2;
         let Texto = `${'La Ley de la Selva'}`;
