@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const global = require('./config.json'); //Variables globales
 const presence = require('./presence.json'); //Datos de presencia
 const uses = require('./sguses.json'); //Funciones globales
+const images = require('./images.json'); //Imágenes globales
 const Canvas = require('canvas'); 
 
 module.exports = {
@@ -224,7 +225,8 @@ module.exports = {
                 } else {
                     console.log('El miembro no ha recibido roles básicos.');
                     canal.send(
-                        `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>\n${global.hourai.images.colors}`
+                        `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>`,
+                        { files: [global.hourai.images.colors] }
                     ).then(sent => module.exports.askColor(sent, miembro));
                     setTimeout(module.exports.forceRole, 1000, miembro, canal, 4 * 4);
                     console.log(`Esperando comprobación final de miembro en unos minutos...`);
@@ -461,6 +463,27 @@ module.exports = {
             miembro.roles.add(gr.find(r => r.name === 'Rol con 50% de probabilidades de tenerlo'));
     },
 
+    dibujarAvatar: async function(context2d, user, xcenter, ycenter, radius, options = { circleStrokeColor: '#000000', circleStrokeFactor: 0.02 }) {
+        //Fondo
+        context2d.fillStyle = '#36393f';
+        context2d.arc(xcenter, ycenter, radius, 0, Math.PI * 2, true);
+        context2d.fill();
+
+        //Foto de perfil
+        context2d.strokeStyle = options.strokeColor;
+        context2d.lineWidth = radius * 0.33 * options.strokeFactor;
+        context2d.arc(xcenter, ycenter, radius + context2d.lineWidth, 0, Math.PI * 2, true);
+        context2d.stroke();
+        context2d.save();
+        context2d.beginPath();
+        context2d.arc(xcenter, ycenter, radius, 0, Math.PI * 2, true);
+        context2d.closePath();
+        context2d.clip();
+        const avatar = await Canvas.loadImage(user.displayAvatarURL({ format: 'png', dynamic: false, size: 1024 }));
+        context2d.drawImage(avatar, xcenter - radius, ycenter - radius, radius * 2, radius * 2);
+        context2d.restore();
+    },
+
     dibujarBienvenida: async function(miembro) {
         //Dar bienvenida a un miembro nuevo de un servidor
         const servidor = miembro.guild; //Servidor
@@ -490,7 +513,7 @@ module.exports = {
         const canvas = Canvas.createCanvas(1275, 825);
         const ctx = canvas.getContext('2d');
 
-        const fondo = await Canvas.loadImage((servidor.id === global.serverid.hourai)?'./fondo4.png':'./fondo.png');
+        const fondo = await Canvas.loadImage((servidor.id === global.serverid.hourai)?global.hourai.images.welcome:images.announcements.welcome);
         ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
         //#endregion
 
@@ -503,13 +526,13 @@ module.exports = {
 
         //#region Nombre del usuario
         ctx.textBaseline = 'top';
+		ctx.textAlign = 'center';
+        const xcenter = canvas.width / 2;
         let Texto = `${miembro.displayName}`;
         let fontSize = 100;
-        let xcenter;
         ctx.font = `bold ${fontSize}px "headline"`;
         console.log(fontSize);
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
-        xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
         ctx.strokeText(Texto, xcenter, 15);
         ctx.fillText(Texto, xcenter, 15);
         //#endregion
@@ -521,42 +544,17 @@ module.exports = {
         fontSize = 100;
         ctx.font = `bold ${fontSize}px "headline"`;
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
-        xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
         ctx.strokeText(Texto, xcenter, canvas.height - 15);
         ctx.fillText(Texto, xcenter, canvas.height - 15);
         Texto = '¡Bienvenid@ a';
         ctx.lineWidth = Math.ceil(56 * strokeFactor);
         ctx.font = `bold 56px "headline"`;
-        xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
         ctx.strokeText(Texto, xcenter, canvas.height - fontSize - 20);
         ctx.fillText(Texto, xcenter, canvas.height - fontSize - 20);
         //#endregion
         //#endregion
         
-        //#region Foto de Perfil
-        //#region Fondo
-        const radius = 200;
-        const ycenter = (115 + (canvas.height - 115 - 56)) / 2;
-        ctx.fillStyle = '#36393f';
-        ctx.arc(canvas.width / 2, ycenter, radius, 0, Math.PI * 2, true);
-        ctx.fill();
-        //#endregion
-
-        //#region Imagen circular
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth = radius * 0.33 * strokeFactor;
-        ctx.arc(canvas.width / 2, ycenter, radius + ctx.lineWidth, 0, Math.PI * 2, true);
-        ctx.stroke();
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, ycenter, radius, 0, Math.PI * 2, true);
-        ctx.closePath();
-        ctx.clip();
-        const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL({ format: 'png', dynamic: false, size: 1024 }));
-        ctx.drawImage(avatar, canvas.width / 2 - radius, ycenter - radius, radius * 2, radius * 2);
-        ctx.restore();
-        //#endregion
-        //#endregion
+        await module.exports.dibujarAvatar(ctx, miembro.user, canvas.width / 2, (canvas.height - 56) / 2, 200, { circleStrokeFactor: strokeFactor });
         
         const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'bienvenida.png');
 
@@ -649,7 +647,7 @@ module.exports = {
         const canvas = Canvas.createCanvas(1500, 900);
         const ctx = canvas.getContext('2d');
 
-        const fondo = await Canvas.loadImage('./fondo2.png');
+        const fondo = await Canvas.loadImage(images.announcements.farewell);
         ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
         //#endregion
 
@@ -662,39 +660,18 @@ module.exports = {
 
         //#region Nombre del usuario
         ctx.textBaseline = 'bottom';
+		ctx.textAlign = 'center';
+        const xcenter = canvas.width / 2;
         let Texto = `Adiós, ${miembro.displayName}`;
         let fontSize = 90;
         ctx.font = `bold ${fontSize}px "headline"`;
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
-        ctx.strokeText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 40);
-        ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 40);
+        ctx.strokeText(Texto, xcenter, canvas.height - 40);
+        ctx.fillText(Texto, xcenter, canvas.height - 40);
         //#endregion
         //#endregion
 
-        //#region Foto de Perfil
-        //#region Fondo
-        const radius = 200;
-        const ycenter = 80 + radius;
-        ctx.fillStyle = '#36393f';
-        ctx.arc(canvas.width / 2, ycenter, radius, 0, Math.PI * 2, true);
-        ctx.fill();
-        //#endregion
-
-        //#region Dibujar foto de perfil
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth = radius * 0.33 * strokeFactor;
-        ctx.arc(canvas.width / 2, ycenter, radius + ctx.lineWidth, 0, Math.PI * 2, true);
-        ctx.stroke();
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, ycenter, radius, 0, Math.PI * 2, true);
-        ctx.closePath();
-        ctx.clip();
-        const avatar = await Canvas.loadImage(miembro.user.displayAvatarURL({ format: 'png', dynamic: false, size: 1024 }));
-        ctx.drawImage(avatar, canvas.width / 2 - radius, ycenter - radius, radius * 2, radius * 2);
-        ctx.restore();
-        //#endregion
-        //#endregion
+        await module.exports.dibujarAvatar(ctx, miembro.user, canvas.width / 2, 80 + 200, 200, { circleStrokeFactor: strokeFactor });
 
         const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'despedida.png');
 
@@ -723,60 +700,47 @@ module.exports = {
     
         //#region Creación de imagen
         const canvas = Canvas.createCanvas(1500, 750);
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { alpha: false });
     
-        const fondo = await Canvas.loadImage('./fondo3.png');
+        const fondo = await Canvas.loadImage(images.announcements.oiam);
         ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
         //#endregion
     
         //#region Texto
         //#region Propiedades de texto
-        ctx.textBaseline = 'bottom';
-        ctx.shadowOffsetX = shadowOffsetY = 2;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = 'black';
+        const strokeFactor = 0.09;
+        ctx.strokeStyle = '#000000';
         ctx.fillStyle = '#ffffff';
         //#endregion
     
         //#region Nombre del usuario
+        ctx.textBaseline = 'top';
+        ctx.textAlign = 'center';
+        const xcenter = canvas.width / 2;
         let Texto = `${msg.author.username}`;
         let fontSize = 72;
-        while(ctx.measureText(Texto).width > (canvas.width - 200)) fontSize -= 2;
-        ctx.font = `bold ${fontSize}px sans-serif`;
-        ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), 80);
+        ctx.font = `${fontSize}px "headline"`;
+        ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
+        ctx.strokeText(Texto, xcenter, 15);
+        ctx.fillText(Texto, xcenter, 15);
         //#endregion
         
         //#region Texto inferior
+        ctx.textBaseline = 'bottom';
         Texto = 'Uno en Un Millón';
         fontSize = 120;
         while(ctx.measureText(Texto).width > (canvas.width - 150)) fontSize -= 2;
-        ctx.font = `bold ${fontSize}px sans-serif`;
-        ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 15);
+        ctx.font = `${fontSize}px "headline"`;
+        ctx.strokeText(Texto, xcenter, canvas.height - 15);
+        ctx.fillText(Texto, xcenter, canvas.height - 15);
         Texto = '¡Felicidades! Tu mensaje es el destacado de';
-        ctx.font = `bold 48px sans-serif`;
-        ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - fontSize - 30);
+        ctx.font = `48px "headline"`;
+        ctx.strokeText(Texto, xcenter, canvas.height - fontSize - 20);
+        ctx.fillText(Texto, xcenter, canvas.height - fontSize - 20);
         //#endregion
         //#endregion
-    
-        //#region Foto de Perfil
-        //#region Sombra
-        const ycenter = (80 + (canvas.height - fontSize - 48 - 30)) / 2;
-        ctx.shadowOffsetX = shadowOffsetY = 8;
-        ctx.shadowBlur = 20;
-        ctx.fillStyle = '#36393f';
-        ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
-        ctx.fill();
-        //#endregion
-    
-        //#region Imagen circular
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, ycenter, 150, 0, Math.PI * 2, true);
-        ctx.closePath();
-        ctx.clip();
-        const avatar = await Canvas.loadImage(msg.author.avatarURL({ format: 'png', dynamic: false, size: 1024 }));
-        ctx.drawImage(avatar, canvas.width / 2 - 150, ycenter - 150, 300, 300);
-        //#endregion
-        //#endregion
+
+        await module.exports.dibujarAvatar(ctx, msg.author, canvas.width / 2, (80 + canvas.height - fontSize - 48 - 30) / 2, 200, { circleStrokeColor: '#8d1fd1', circleStrokeFactor: strokeFactor });
     
         const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'felicidades.png');
     

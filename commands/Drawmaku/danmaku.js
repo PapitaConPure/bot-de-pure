@@ -1,10 +1,9 @@
-let global = require('../../config.json'); //Variables globales
-let func = require('../../func.js'); //Funciones globales
-let imgs = require('../../images.json'); //Imágenes guardadas
-const fs = require('fs'); //Integrar operaciones sistema de archivos de consola
+const global = require('../../config.json'); //Variables globales
+const func = require('../../func.js'); //Funciones globales
+const imgs = require('../../drawings.json'); //Imágenes guardadas
 
 function attachIsImage(msgAttach) {
-    let url = msgAttach.url;
+    const url = msgAttach.url;
 
     return (url.indexOf("png", url.length - 3) !== -1 || url.indexOf("jpg", url.length - 3) !== -1 || url.indexOf("jpeg", url.length - 4) !== -1);
 };
@@ -39,7 +38,7 @@ module.exports = {
                 imgs.dibujoactual = message.attachments.array()[0].url;
                 imgs.dibujo[global.cntimagenes] = message.attachments.array()[0].url;
                 imgs.creador[global.cntimagenes] = message.author.username;
-                /*fs.writeFile('../../images.json', JSON.stringify(imgs, null, 4), err => {
+                /*fs.writeFile('../../drawings.json', JSON.stringify(imgs, null, 4), err => {
                     if(err) console.error(err);
                     console.log('Imagen guardada.');
                     console.log(imgs);

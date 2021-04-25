@@ -1,6 +1,6 @@
-var global = require('../../config.json'); //Variables globales
-var func = require('../../func.js'); //Funciones globales
-let imgs = require('../../images.json'); //Imágenes guardadas
+const global = require('../../config.json'); //Variables globales
+const func = require('../../func.js'); //Funciones globales
+const imgs = require('../../drawings.json'); //Imágenes guardadas
 
 module.exports = {
 	name: 'ver',

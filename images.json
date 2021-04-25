@@ -1,6 +1,7 @@
 {
-    "dibujoactual": "",
-    "secreto": [],
-    "dibujo": [],
-    "creador": []
+    "announcements": {
+        "welcome": "https://i.imgur.com/60nhXXS.png",
+        "farewell": "https://i.imgur.com/tZh6u8H.jpg",
+        "oiam": "https://i.imgur.com/buVGm5d.jpg"
+    }
 }

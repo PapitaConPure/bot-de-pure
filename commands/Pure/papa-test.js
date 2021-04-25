@@ -13,6 +13,7 @@ module.exports = {
         //uwu.execute(message, args);
         func.dibujarBienvenida(message.member);
         func.dibujarDespedida(message.member);
+        func.dibujarMillion(message);
         /*const gr = message.channel.guild.roles.cache;
         if(Math.random() < 0.5)
             message.member.roles.add(gr.find(r => r.name === 'Rol con 50% de probabilidades de tenerlo'));*/

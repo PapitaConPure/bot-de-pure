@@ -105,7 +105,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     }
     
     //Uno en un Millón
-    if(Math.floor(Math.random() * 1000000) === 0)
+    if(func.randInt(0, 1000000) === 0)
         func.dibujarMillion(message);
     //#endregion
     

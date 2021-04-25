@@ -50,6 +50,7 @@
     "hourai": {
         "warn": 0,
         "images": {
+            "welcome": "https://i.imgur.com/PdcilW3.png",
             "colors": "https://i.imgur.com/7t7m3PS.png",
             "forcecolors": "https://i.imgur.com/eHbSCHK.png"
         },
