@@ -24,7 +24,7 @@ module.exports = {
 
 	async execute(message, args) {
 		//Variables de flags
-
+		
 
 		//Lectura de flags
 		let jn = false;
@@ -33,13 +33,17 @@ module.exports = {
 			if(!jn) {
 				if(arg.startsWith('--'))
 					switch(arg.slice(2)) {
-					case 'flag':  break;
+					case 'costo': message.channel.send('`Flag --costo anexada`'); break;
+					case 'activa': message.channel.send('`Flag --activa anexada`'); break;
+					case 'equipada': message.channel.send('`Flag --equipada anexada`'); break;
 					default: ignore = false;
 					}
 				else if(arg.startsWith('-'))
 					for(c of arg.slice(1))
 						switch(c) {
-						case 'f':  break;
+						case 'c': message.channel.send('`Flag --costo anexada`'); break;
+						case 'a': message.channel.send('`Flag --activa anexada`'); break;
+						case 'e': message.channel.send('`Flag --equipada anexada`'); break;
 						default: ignore = false;
 						}
 				else ignore = false;

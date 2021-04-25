@@ -47,7 +47,8 @@ module.exports = {
 			);
 		else {
 			//Lista general con sublistas de juegos y música
-			let list = [ //Juegos
+			let list = [
+				//Juegos
 				'Jueguen [Rabi-Ribi](https://store.steampowered.com/app/400910/RabiRibi/) <:wtfchomu:725582341401083967>',
 				'Que jueguen [CosmoDreamer](https://store.steampowered.com/app/1424630/CosmoDreamer/) <:spookedSyura:725577379665281094>',
 				'Escuché que [Copy Kitty](https://store.steampowered.com/app/349250/Copy_Kitty/) está barato a esta altura del año <:boomer:748627305244524656>',
