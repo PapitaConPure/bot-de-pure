@@ -21,7 +21,7 @@ module.exports = {
 	],
 	callx: '<desc> <imagen>',
 
-	execute(message, args) {
+	async execute(message, args) {
 		//Variables de flags
 
 
