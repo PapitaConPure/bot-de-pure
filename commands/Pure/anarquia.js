@@ -32,23 +32,20 @@ module.exports = {
 		if(!args.length) { //Ver tabla
 			const d = async () => {
 				//Acción de comando
-				Canvas.registerFont('./Alice-Regular.ttf', { family: 'headline' });
+				Canvas.registerFont('fonts/Alice-Regular.ttf', { family: 'headline' });
 				const canvas = Canvas.createCanvas(864, 960);
 				const ctx = canvas.getContext('2d');
 
-				//#region Propiedades de texto
+				//#region Encabezado
 				ctx.textBaseline = 'top';
 				ctx.fillStyle = '#ffffff';
 				ctx.strokeStyle = '#bd0924';
 				ctx.lineWidth = 9;
 				ctx.font = `bold 116px "headline"`;
-				//#endregion
-
-				//#region Nombre del usuario
 				const Texto = '¡Tabla de Puré!';
 				const xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
-				ctx.fillText(Texto, xcenter, 4);
 				ctx.strokeText(Texto, xcenter, 4);
+				ctx.fillText(Texto, xcenter, 4);
 				//#endregion
 
 				let loademotes = {};

@@ -9,6 +9,7 @@ const global = require('./config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
 const dns = require('dns'); //Detectar host
 const token = 'NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY'; //La clave del bot
+const { registerFont } = require('canvas');
 //#endregion
 
 //#region Detección de archivos de comandos
@@ -27,16 +28,27 @@ for(const file of commandFiles) {
 //#endregion
 
 client.on('ready', async () => { //Confirmación de inicio y cambio de estado
+	console.log('%cCalculando semilla y horario...', 'color: #33dddd');
     let stt = Date.now();
     global.startuptime = stt;
     global.lechitauses = stt;
     global.seed = stt / 60000;
     func.modifyAct(client, 0);
+
+    //console.log('%cCargando datos de base de datos...', 'color: #33dd33');
     //keyv.set();
+
+	console.log('%cObteniendo información del host...', 'color: #dd9add');
 	dns.lookupService('127.0.0.1', 443, (err, hostname, service) => {
         global.bot_status.host = (err === null)?`${service}://${hostname}/`:'[host no detectado]';
     });
     global.puretable = Array(16).fill(null).map(() => Array(16).fill('828736342372253697'));
+
+	console.log('%cRegistrando fuentes...', 'color: #eef33aa');
+    registerFont('fonts/teen bd.ttf', { family: 'cardbody' });
+    registerFont('fonts/kirsty rg.otf', { family: 'cardclass' });
+    registerFont('fonts/cuyabra bold.otf', { family: 'cardhint' });
+
 	console.log('Bot conectado y funcionando.');
 });
 

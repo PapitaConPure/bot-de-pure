@@ -487,7 +487,7 @@ module.exports = {
         //#endregion
         
         //#region Creación de imagen
-        Canvas.registerFont('./Alice-Regular.ttf', { family: 'headline' });
+        Canvas.registerFont('fonts/Alice-Regular.ttf', { family: 'headline' });
         const canvas = Canvas.createCanvas(1275, 825);
         const ctx = canvas.getContext('2d');
 
@@ -507,8 +507,6 @@ module.exports = {
         let Texto = `${miembro.displayName}`;
         let fontSize = 100;
         let xcenter;
-        ctx.font = `bold ${fontSize}px "headline"`;
-        //fontSize = (canvas.width - 100) / ctx.measureText(Texto).width;
         ctx.font = `bold ${fontSize}px "headline"`;
         console.log(fontSize);
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
@@ -649,7 +647,7 @@ module.exports = {
         //#endregion
         
         //#region Creación de imagen
-        Canvas.registerFont('./Alice-Regular.ttf', { family: 'headline' });
+        Canvas.registerFont('fonts/Alice-Regular.ttf', { family: 'headline' });
         const canvas = Canvas.createCanvas(1500, 900);
         const ctx = canvas.getContext('2d');
 

@@ -7,7 +7,7 @@ module.exports = {
 		'papa-mant', 'papa-maint'
 	],
 	desc: 'Hace que la instancia de `<proceso>` que utilizo se restrinja al canal actual\n' +
-		'Como lo más probable es que este comando se use mientras estoy hosteada en 2 lugares al mismo tiempo, puedes diferenciar un `<proceso>` de otro con una ID única que equivale a la expresión numérica del momento en el que se ejecutó una instancia\n' +
+		'Como lo más probable es que este comando se use mientras estoy hosteada en 2 lugares al mismo tiempo, puedes diferenciar un `<proceso>` de otro por su ubicación de host o con una ID única que equivale a la expresión numérica del momento en el que se ejecutó\n' +
 		'Para deshacer la restricción, usa el comando sin argumentos una vez más (en el canal que se estableción la restricción)',
 	flags: [
 		'papa'
@@ -19,16 +19,24 @@ module.exports = {
 
 	execute(message, args) {
 		//Acción de comando
-		if(!args.length) {
-			if(!global.maintenance.length)
-				message.channel.send(`**Host** \`${global.bot_status.host}\`\n**ID de InstProc** \`${global.startuptime}\``);
-			else {
-				global.maintenance = '';
-				message.react('☑️');
-			}
-		} else if(`${args[0]}` === `${global.startuptime}`) {
-			global.maintenance = message.channel.id;
-			message.react('✅');
-		} else console.log(`${args[0]} !== ${global.startuptime}`);
+		//if(!args.length) {
+		message.channel.send(`**Host** \`${global.bot_status.host}\`\n**ID de InstProc** \`${global.startuptime}\`\n**Estado** \`[${global.maintenance.length?'PAUSADO':'OPERANDO'}]\``)
+			.then(sent => {
+				const reaction = (global.maintenance.length)?'🌀':'💤';
+				sent.react(reaction);
+				const filter = (rc, user) => rc.emoji.name === reaction && user.id === message.author.id;
+				const collector = sent.createReactionCollector(filter, { max: 1, time: 1000 * 30 });
+				collector.on('collect', () => {
+					if(global.maintenance.length) {
+						global.maintenance = '';
+						sent.react('☑️');
+						console.log({ Host: global.bot_status.host, ID: global.startuptime, Action: 'RESUME' });
+					} else {
+						global.maintenance = message.channel.id;
+						sent.react('✅');
+						console.log({ Host: global.bot_status.host, ID: global.startuptime, Action: 'PAUSE' });
+					}
+				});
+			});
 	}
 };

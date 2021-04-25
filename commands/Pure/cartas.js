@@ -1,6 +1,7 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const global = require('../../config.json'); //Variables globales
 const func = require('../../func.js'); //Funciones globales
+const Canvas = require('canvas');
 
 module.exports = {
 	name: 'cartas',
@@ -49,56 +50,46 @@ module.exports = {
 		}).filter(arg => arg !== undefined);
 
 		//Acción de comando
-        canal.startTyping();
-        Canvas.registerFont('./Alice-Regular.ttf', { family: 'headline' });
-        const canvas = Canvas.createCanvas(1275, 825);
+        message.channel.startTyping();
+        const canvas = Canvas.createCanvas(576 * 2, 672 * 2);
         const ctx = canvas.getContext('2d');
-
-        const fondo = await Canvas.loadImage((servidor.id === global.serverid.hourai)?'./fondo4.png':'./fondo.png');
-        ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 
         //#region Texto
         //#region Propiedades de texto
-        const strokeFactor = 0.09;
-        ctx.fillStyle = '#ffffff';
+        const strokeFactor = 0.1;
         ctx.strokeStyle = '#000000';
+        ctx.fillStyle = '#ffffff';
         //#endregion
 
-        //#region Nombre del usuario
+        //#region Nombre y tipo
         ctx.textBaseline = 'top';
-        let Texto = `${miembro.displayName}`;
-        let fontSize = 100;
-        let xcenter;
-        ctx.font = `bold ${fontSize}px "headline"`;
-        //fontSize = (canvas.width - 100) / ctx.measureText(Texto).width;
-        ctx.font = `bold ${fontSize}px "headline"`;
-        console.log(fontSize);
+		ctx.textAlign = 'center';
+		const xcenter = canvas.width / 2;
+        let Texto = `${'La Ley de la Selva'}`;
+        let fontSize = 96;
+        ctx.font = `bold ${fontSize}px "cardbody"`;
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
-        xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
-        ctx.strokeText(Texto, xcenter, 15);
-        ctx.fillText(Texto, xcenter, 15);
+        ctx.strokeText(Texto, canvas.width / 2, 296 * 2);
+        ctx.fillText(Texto, canvas.width / 2, 296 * 2);
+		Texto = `${'Clase: Carta Pasiva'}`;
+        ctx.strokeStyle = '#5fa6c7';
+        ctx.font = `bold ${fontSize}px "cardclass"`;
+        ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
+        ctx.strokeText(Texto, xcenter, 352 * 2);
+        ctx.fillText(Texto, xcenter, 352 * 2);
+		{
+			const txth = fontSize;
+			fontSize = 56;
+			ctx.strokeStyle = '#3d6658';
+			ctx.fillStyle = '#63f7c6';
+			ctx.font = `bold ${fontSize}px "cardhint"`;
+			ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
+			ctx.strokeText(Texto,xcenter, 352 * 2 + txth + 4);
+			ctx.fillText(Texto, xcenter, 352 * 2 + txth + 4);
+		}
         //#endregion
         
-        //#region Texto inferior
-        ctx.textBaseline = 'bottom';
-        if(servidor.id === global.serverid.ar) Texto = 'Animal Realm!';
-        else Texto = `${servidor.name}!`;
-        fontSize = 100;
-        ctx.font = `bold ${fontSize}px "headline"`;
-        ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
-        xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
-        ctx.strokeText(Texto, xcenter, canvas.height - 15);
-        ctx.fillText(Texto, xcenter, canvas.height - 15);
-        Texto = '¡Bienvenid@ a';
-        ctx.lineWidth = Math.ceil(56 * strokeFactor);
-        ctx.font = `bold 56px "headline"`;
-        xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
-        ctx.strokeText(Texto, xcenter, canvas.height - fontSize - 20);
-        ctx.fillText(Texto, xcenter, canvas.height - fontSize - 20);
-        //#endregion
-        //#endregion
-        
-        //#region Foto de Perfil
+        /*//#region Foto de Perfil
         //#region Fondo
         const radius = 200;
         const ycenter = (115 + (canvas.height - 115 - 56)) / 2;
@@ -121,10 +112,10 @@ module.exports = {
         ctx.drawImage(avatar, canvas.width / 2 - radius, ycenter - radius, radius * 2, radius * 2);
         ctx.restore();
         //#endregion
-        //#endregion
+        //#endregion*/
         
         const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'bienvenida.png');
-        canal.send({files: [imagen]});
-        canal.stopTyping(true);
+        message.channel.send({files: [imagen]});
+        message.channel.stopTyping(true);
 	}
 };
