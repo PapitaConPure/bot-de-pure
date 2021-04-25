@@ -76,10 +76,10 @@ module.exports = {
         //#region Nombre y tipo
         ctx.textBaseline = 'top';
 		ctx.font = '120px sans-serif';
-		ctx.fillText('PRUEBA', 0, 0);
+		ctx.fillText('PRUEBA', 0, -26);
 		ctx.fillText('PRUEBA', 0, canvas.height - 128);
 		ctx.textAlign = 'right';
-		ctx.fillText('PRUEBA', canvas.width, 0);
+		ctx.fillText('PRUEBA', canvas.width, -26);
 		ctx.fillText('PRUEBA', canvas.width, canvas.height - 128);
 		ctx.textAlign = 'center';
 		const xcenter = ww / 2;
