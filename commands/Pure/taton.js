@@ -33,6 +33,7 @@ module.exports = {
 			const randp = Math.floor(Math.random() * perritos.length);
 			message.channel.send(`${emotes[randp]}`);
 		} else {
+			args[0] = args[0].replace(/([aeiou])\u0301/gi, '$1');
 			const mostrarlista = ['perritos', 'todo', 'todos', 'lista', 'ayuda', 'everything', 'all', 'help'];
 			if(mostrarlista.includes(args[0])) {
 				const pages = paginate(emotes);

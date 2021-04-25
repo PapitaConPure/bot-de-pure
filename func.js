@@ -487,8 +487,7 @@ module.exports = {
         //#endregion
         
         //#region Creación de imagen
-        Canvas.registerFont('./Alice-Regular.ttf', { family: 'TommySoft' });
-        //Canvas.registerFont('./TommySoft.otf', { family: 'TommySoft' });
+        Canvas.registerFont('./Alice-Regular.ttf', { family: 'headline' });
         const canvas = Canvas.createCanvas(1275, 825);
         const ctx = canvas.getContext('2d');
 
@@ -508,9 +507,9 @@ module.exports = {
         let Texto = `${miembro.displayName}`;
         let fontSize = 100;
         let xcenter;
-        ctx.font = `bold ${fontSize}px "TommySoft"`;
+        ctx.font = `bold ${fontSize}px "headline"`;
         //fontSize = (canvas.width - 100) / ctx.measureText(Texto).width;
-        ctx.font = `bold ${fontSize}px "TommySoft"`;
+        ctx.font = `bold ${fontSize}px "headline"`;
         console.log(fontSize);
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
         xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
@@ -523,14 +522,14 @@ module.exports = {
         if(servidor.id === global.serverid.ar) Texto = 'Animal Realm!';
         else Texto = `${servidor.name}!`;
         fontSize = 100;
-        ctx.font = `bold ${fontSize}px "TommySoft"`;
+        ctx.font = `bold ${fontSize}px "headline"`;
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
         xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
         ctx.strokeText(Texto, xcenter, canvas.height - 15);
         ctx.fillText(Texto, xcenter, canvas.height - 15);
         Texto = '¡Bienvenid@ a';
         ctx.lineWidth = Math.ceil(56 * strokeFactor);
-        ctx.font = `bold 56px "TommySoft"`;
+        ctx.font = `bold 56px "headline"`;
         xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
         ctx.strokeText(Texto, xcenter, canvas.height - fontSize - 20);
         ctx.fillText(Texto, xcenter, canvas.height - fontSize - 20);
@@ -650,8 +649,7 @@ module.exports = {
         //#endregion
         
         //#region Creación de imagen
-        Canvas.registerFont('./Alice-Regular.ttf', { family: 'TommySoft' });
-        //Canvas.registerFont('./TommySoft.otf', { family: 'TommySoft' });
+        Canvas.registerFont('./Alice-Regular.ttf', { family: 'headline' });
         const canvas = Canvas.createCanvas(1500, 900);
         const ctx = canvas.getContext('2d');
 
@@ -670,7 +668,7 @@ module.exports = {
         ctx.textBaseline = 'bottom';
         let Texto = `Adiós, ${miembro.displayName}`;
         let fontSize = 90;
-        ctx.font = `bold ${fontSize}px "TommySoft"`;
+        ctx.font = `bold ${fontSize}px "headline"`;
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
         ctx.strokeText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 40);
         ctx.fillText(Texto, (canvas.width / 2) - (ctx.measureText(Texto).width / 2), canvas.height - 40);

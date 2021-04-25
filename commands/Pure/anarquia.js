@@ -32,7 +32,7 @@ module.exports = {
 		if(!args.length) { //Ver tabla
 			const d = async () => {
 				//Acción de comando
-				Canvas.registerFont('./TommySoft.otf', { family: 'TommySoft' });
+				Canvas.registerFont('./Alice-Regular.ttf', { family: 'headline' });
 				const canvas = Canvas.createCanvas(864, 960);
 				const ctx = canvas.getContext('2d');
 
@@ -41,7 +41,7 @@ module.exports = {
 				ctx.fillStyle = '#ffffff';
 				ctx.strokeStyle = '#bd0924';
 				ctx.lineWidth = 9;
-				ctx.font = `bold 116px "TommySoft"`;
+				ctx.font = `bold 116px "headline"`;
 				//#endregion
 
 				//#region Nombre del usuario
