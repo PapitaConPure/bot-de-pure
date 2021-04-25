@@ -81,7 +81,7 @@ module.exports = {
         ctx.fillText(Texto, xx + ww / 2, yy + 296 * 2);
 		Texto = `${'Clase: Carta Pasiva'}`;
         ctx.strokeStyle = '#5fa6c7';
-        ctx.font = `${fontSize - 4}px "cardclass"`;
+        ctx.font = `${fontSize - 12}px "cardclass"`;
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
         ctx.strokeText(Texto, xx + xcenter, yy + 352 * 2);
         ctx.fillText(Texto, xx + xcenter, yy + 352 * 2);
@@ -92,8 +92,8 @@ module.exports = {
 			ctx.fillStyle = '#63f7c6';
 			ctx.font = `${fontSize}px "cardhint"`;
 			ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
-			ctx.strokeText(Texto, xx + xcenter, yy + 352 * 2 + txth + 4);
-			ctx.fillText(Texto, xx + xcenter, yy + 352 * 2 + txth + 4);
+			ctx.strokeText(Texto, xx + xcenter, yy + 352 * 2 + txth - 4);
+			ctx.fillText(Texto, xx + xcenter, yy + 352 * 2 + txth - 4);
 		}
 		Texto = `${
 			'Posee la habilidad de Saki Kurokoma de potenciar tus propios disparos.\n' +
@@ -108,8 +108,8 @@ module.exports = {
         ctx.font = `${fontSize}px "cardbody"`;
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
 		Texto.split('\n').map((txt, ln) => {
-			ctx.strokeText(txt, xx + ww / 2, yy + 456 * 2 + ln * fontSize * 1.8);
-			ctx.fillText(txt, xx + ww / 2, yy + 456 * 2 + ln * fontSize * 1.8);
+			ctx.strokeText(txt, xx + ww / 2, yy + 456 * 2 + ln * fontSize * 1.66);
+			ctx.fillText(txt, xx + ww / 2, yy + 456 * 2 + ln * fontSize * 1.66);
 		});
         //#endregion
         
