@@ -102,7 +102,7 @@ module.exports = {
 			'en algún instante, todo el mundo ha de rendirse ante un poder abrumador.\n' +
 			'Al final, todo lo que importa es el poder ofensivo.'
 		}`;
-		fontSize = 36;
+		fontSize = 40;
 		ctx.strokeStyle = '#000000';
 		ctx.fillStyle = '#ffffff';
         ctx.font = `${fontSize}px "cardbody"`;
