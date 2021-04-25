@@ -51,8 +51,16 @@ module.exports = {
 
 		//Acción de comando
         message.channel.startTyping();
-        const canvas = Canvas.createCanvas(576 * 2, 672 * 2);
+		const xx = 96, yy = 32;
+		const ww = 576 * 2;
+		const hh = 672 * 2;
+        const canvas = Canvas.createCanvas(xx * 2 + ww, yy * 2 + hh);
         const ctx = canvas.getContext('2d');
+
+		//Contorno chido
+        ctx.strokeStyle = '#900000';
+        ctx.lineWidth = 8;
+		ctx.strokeRect(xx, yy, ww, hh);
 
         //#region Texto
         //#region Propiedades de texto
@@ -64,29 +72,45 @@ module.exports = {
         //#region Nombre y tipo
         ctx.textBaseline = 'top';
 		ctx.textAlign = 'center';
-		const xcenter = canvas.width / 2;
+		const xcenter = ww / 2;
         let Texto = `${'La Ley de la Selva'}`;
-        let fontSize = 96;
-        ctx.font = `bold ${fontSize}px "cardbody"`;
+        let fontSize = 88;
+        ctx.font = `${fontSize}px "cardname"`;
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
-        ctx.strokeText(Texto, canvas.width / 2, 296 * 2);
-        ctx.fillText(Texto, canvas.width / 2, 296 * 2);
+        ctx.strokeText(Texto, xx + ww / 2, yy + 296 * 2);
+        ctx.fillText(Texto, xx + ww / 2, yy + 296 * 2);
 		Texto = `${'Clase: Carta Pasiva'}`;
         ctx.strokeStyle = '#5fa6c7';
-        ctx.font = `bold ${fontSize}px "cardclass"`;
+        ctx.font = `${fontSize - 4}px "cardclass"`;
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
-        ctx.strokeText(Texto, xcenter, 352 * 2);
-        ctx.fillText(Texto, xcenter, 352 * 2);
+        ctx.strokeText(Texto, xx + xcenter, yy + 352 * 2);
+        ctx.fillText(Texto, xx + xcenter, yy + 352 * 2);
 		{
 			const txth = fontSize;
-			fontSize = 56;
+			fontSize = 36;
 			ctx.strokeStyle = '#3d6658';
 			ctx.fillStyle = '#63f7c6';
-			ctx.font = `bold ${fontSize}px "cardhint"`;
+			ctx.font = `${fontSize}px "cardhint"`;
 			ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
-			ctx.strokeText(Texto,xcenter, 352 * 2 + txth + 4);
-			ctx.fillText(Texto, xcenter, 352 * 2 + txth + 4);
+			ctx.strokeText(Texto, xx + xcenter, yy + 352 * 2 + txth + 4);
+			ctx.fillText(Texto, xx + xcenter, yy + 352 * 2 + txth + 4);
 		}
+		Texto = `${
+			'Posee la habilidad de Saki Kurokoma de potenciar tus propios disparos.\n' +
+			'Una habilidad tan eficiente que te otorga una fuerza descomunal incluso al tener poco poder.\n' +
+			'Por mucho cerebro que tengas o por los pasos que preveas,\n' +
+			'en algún instante, todo el mundo ha de rendirse ante un poder abrumador.\n' +
+			'Al final, todo lo que importa es el poder ofensivo.'
+		}`;
+		fontSize = 28;
+		ctx.strokeStyle = '#000000';
+		ctx.fillStyle = '#ffffff';
+        ctx.font = `${fontSize}px "cardbody"`;
+        ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
+		Texto.split('\n').map((txt, ln) => {
+			ctx.strokeText(txt, xx + ww / 2, yy + 456 * 2 + ln * fontSize * 1.8);
+			ctx.fillText(txt, xx + ww / 2, yy + 456 * 2 + ln * fontSize * 1.8);
+		});
         //#endregion
         
         /*//#region Foto de Perfil

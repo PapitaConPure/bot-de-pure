@@ -32,7 +32,6 @@ module.exports = {
 		if(!args.length) { //Ver tabla
 			const d = async () => {
 				//Acción de comando
-				Canvas.registerFont('fonts/Alice-Regular.ttf', { family: 'headline' });
 				const canvas = Canvas.createCanvas(864, 960);
 				const ctx = canvas.getContext('2d');
 
@@ -42,7 +41,7 @@ module.exports = {
 				ctx.strokeStyle = '#bd0924';
 				ctx.lineWidth = 9;
 				ctx.font = `bold 116px "headline"`;
-				const Texto = '¡Tabla de Puré!';
+				const Texto = 'Tabla de Puré';
 				const xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
 				ctx.strokeText(Texto, xcenter, 4);
 				ctx.fillText(Texto, xcenter, 4);

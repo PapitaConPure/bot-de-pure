@@ -45,9 +45,11 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
     global.puretable = Array(16).fill(null).map(() => Array(16).fill('828736342372253697'));
 
 	console.log('%cRegistrando fuentes...', 'color: #eef33aa');
-    registerFont('fonts/teen bd.ttf', { family: 'cardbody' });
+    registerFont('fonts/Alice-Regular.ttf', { family: 'headline' });
+    registerFont('fonts/teen bd.ttf', { family: 'cardname' });
     registerFont('fonts/kirsty rg.otf', { family: 'cardclass' });
-    registerFont('fonts/cuyabra bold.otf', { family: 'cardhint' });
+    registerFont('fonts/cuyabra.otf', { family: 'cardhint' });
+    registerFont('fonts/asap-condensed.semibold.ttf', { family: 'cardbody' });
 
 	console.log('Bot conectado y funcionando.');
 });

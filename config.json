@@ -14,7 +14,7 @@
             "Diseño de bienvenida (todos los servers) mejorado",
             "Regristro de fuentes reestructurado para no reemplazarse entre sí",
             "p!taton ahora ignora tildes al buscar perritos por nombre (e.g. café = cafe)",
-            "Se resguardó un lugar para p!cartas con página de ayuda preparada"
+            "Prototipo y página de ayuda de p!cartas agregados"
         ],
         "todo": [
             "Restaurar comandos de búsqueda de imagen avanzados",

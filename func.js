@@ -487,7 +487,6 @@ module.exports = {
         //#endregion
         
         //#region Creación de imagen
-        Canvas.registerFont('fonts/Alice-Regular.ttf', { family: 'headline' });
         const canvas = Canvas.createCanvas(1275, 825);
         const ctx = canvas.getContext('2d');
 
@@ -647,7 +646,6 @@ module.exports = {
         //#endregion
         
         //#region Creación de imagen
-        Canvas.registerFont('fonts/Alice-Regular.ttf', { family: 'headline' });
         const canvas = Canvas.createCanvas(1500, 900);
         const ctx = canvas.getContext('2d');
 
