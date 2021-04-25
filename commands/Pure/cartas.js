@@ -87,7 +87,7 @@ module.exports = {
         ctx.fillText(Texto, xx + xcenter, yy + 352 * 2);
 		{
 			const txth = fontSize;
-			fontSize = 36;
+			fontSize = 42;
 			ctx.strokeStyle = '#3d6658';
 			ctx.fillStyle = '#63f7c6';
 			ctx.font = `${fontSize}px "cardhint"`;
@@ -102,7 +102,7 @@ module.exports = {
 			'en algún instante, todo el mundo ha de rendirse ante un poder abrumador.\n' +
 			'Al final, todo lo que importa es el poder ofensivo.'
 		}`;
-		fontSize = 28;
+		fontSize = 36;
 		ctx.strokeStyle = '#000000';
 		ctx.fillStyle = '#ffffff';
         ctx.font = `${fontSize}px "cardbody"`;
