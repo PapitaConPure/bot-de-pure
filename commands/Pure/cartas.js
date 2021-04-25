@@ -51,7 +51,7 @@ module.exports = {
 
 		//Acción de comando
         message.channel.startTyping();
-		const xx = 96, yy = 32;
+		const xx = 96, yy = 4;
 		const ww = 576 * 2;
 		const hh = 672 * 2;
         const canvas = Canvas.createCanvas(xx * 2 + ww, yy * 2 + hh);
@@ -64,7 +64,7 @@ module.exports = {
 
         //#region Texto
         //#region Propiedades de texto
-        const strokeFactor = 0.1;
+        const strokeFactor = 0.12;
         ctx.strokeStyle = '#000000';
         ctx.fillStyle = '#ffffff';
         //#endregion
