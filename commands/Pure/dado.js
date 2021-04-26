@@ -44,16 +44,6 @@ module.exports = {
 			total += dice[d];
 		};
 
-		if(dices.map(dice => dice.d).reduce((a,b) => a + b) > 1000) {
-			message.channel.send(':x: Ajá, ¿y quién va a pagar todos esos dados? <:payasowo:828755669049278476>');
-			return;
-		}
-
-		if(dices.map(dice => dice.f).reduce((a,b) => a + b) > 1000) {
-			message.channel.send(`:x: Si quieres te puedo tirar una esfera a la cara, que es lo mismo que un dado de tantas caras <:Empty:796930821554044928>`);
-			return;
-		}
-
 		dices.forEach(dice => {
 			dice.d = parseInt(dice.d);
 			dice.f = parseInt(dice.f);
@@ -62,7 +52,6 @@ module.exports = {
 		});
 		const total = dices.map(dice => dice.t).reduce((a,b) => a + b);
 
-		console.log({dices})
 		message.channel.send(dices.map(dice => `${dice.d} x :game_die:(${dice.f}) -> [${dice.r.join(',')}] = **${dice.t}**`).join('\n**+** ') + ((dices.length > 1)?`\n**= ${total}**`:''))
 		.catch(() => message.channel.send(':x: No te pasei de gracioso, ¿tamo? <:comodowo:824759668437811224> <:pistolaR:697351201301463060>'));
     },

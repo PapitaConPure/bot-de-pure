@@ -850,47 +850,46 @@ module.exports = {
             if(data.startsWith('!')) data = data.slice(1);
         }
 
-        //Buscador por nombre, en caso de que la información de búsqueda no sea una ID ni una mención
+        //Buscador por usertag, en caso de que la data de búsqueda no sea una ID ni una mención
         if(isNaN(data)) {
-            //Para comprobaciones posteriores
-            const temp = data.toLowerCase();
-            let minimum = -1;
+            let user = new Discord.Collection();
+            user = client.users.cache.find(u => u.tag === data);
+            
+            //Buscador por nombre, en caso de que la data de búsqueda tampoco sea una usertag
+            if(!user) {
+                let temp = data;
+                //Para comprobaciones posteriores
+                /* Filtrado de búsqueda
+                - Nombre coincide parcial o totalmente
+                - Guild actual > resto de guilds
+                - Ocurrencia temprana > ocurrencia tardía
+                - Nombre corto > nombre largo
+                */
 
-            //Buscar por apodo o nombre de usuario dentro de guild actual
-            guild.members.cache.map(member => {
-                let nickmatch = -1;
-
-                nickmatch = member.user.username.toLowerCase().indexOf(temp);
-                if(nickmatch === -1 && member.nickname !== null && member.nickname !== undefined) {
-                    nickmatch = member.nickname.toLowerCase().indexOf(temp);
-                    if(nickmatch !== -1) nickmatch += 32;
-                }
-                
-                //console.log(`${member.user.username}: ${nickmatch} vs. ${minimum}`)
-                if(minimum === -1 || (nickmatch !== -1 && nickmatch < minimum)) {
-                    data = member.user;
-                    minimum = nickmatch;
-                }
-            });
-
-            //Buscar por nombre de usuario en resto de guilds
-            if(minimum === -1)
-                client.guilds.cache.filter(cguild => cguild.id !== guild.id).map(cguild => {
-                    cguild.members.cache.map(member => {
-                        let usermatch = -1;
-
-                        usermatch = member.user.username.toLowerCase().indexOf(temp);
-                        if(minimum === -1 || (usermatch !== -1 && usermatch < minimum)) {
-                            data = member.user;
-                            minimum = usermatch;
+                //Buscar por apodo o nombre de usuario dentro de guild actual
+                user = guild.members.cache.filter(m => m.nickname && m.nickname.toLowerCase().indexOf(temp) !== -1);
+                if(user.size)
+                    user = user
+                        .sort()
+                        .reduce((a, b) => (a.nickname.toLowerCase().indexOf(temp) < b.nickname.toLowerCase().indexOf(temp) && a.nickname.length < b.nickname.length)?a.nickname:b.nickname)
+                        .user;
+                else //Buscar por nombre de usuario en resto de guilds
+                    client.guilds.cache.map(cguild => {
+                        let found = cguild.members.cache
+                            .map(m => m.user)
+                            .filter(u => u.username.toLowerCase().indexOf(temp) !== -1);
+                        if(found.length) {
+                            user = found
+                                .sort()
+                                .reduce((a, b) => (a.username.toLowerCase().indexOf(temp) <= b.username.toLowerCase().indexOf(temp) && a.username.length < b.username.length)?a:b);
                         }
                     });
-                })
-            
-            //console.log(data.id);
-            
-            if(minimum !== -1)
-                data = data.id;
+                
+                console.log([user.username, user, user.id]);
+            }
+
+            if(user)
+                data = user.id;
             else
                 data = undefined;
         }

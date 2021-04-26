@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.45",
+            "number": "Full.2.8.47",
             "name": "Cisne Cristalino"
         },
         "note": "Versión estable. Se están realizando cambios lentos pero seguros apuntando a la personalización a nivel de servidor",
@@ -14,7 +14,8 @@
             "Diseño de bienvenida (todos los servers) mejorado",
             "Regristro de fuentes reestructurado para no reemplazarse entre sí",
             "p!taton ahora ignora tildes al buscar perritos por nombre (e.g. café = cafe)",
-            "Prototipo y página de ayuda de p!cartas agregados"
+            "Prototipo y página de ayuda de p!cartas agregados",
+            "Los argumentos de Usuario tienen una nueva jerarquía de búsqueda y soportan usertags"
         ],
         "todo": [
             "Restaurar comandos de búsqueda de imagen avanzados",
