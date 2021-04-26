@@ -11,7 +11,7 @@ module.exports = {
 		'¡Puedes asignar emotes diferentes a cada pieza con las `--banderas` a disposición!\n' +
 		'Si no sabes las reglas básicas de ajedrez, pues... [mira mira~](https://www.chess.com/es/como-jugar-ajedrez)',
 	flags: [
-		
+		'common'
 	],
 	options: [
 		'`<adversario>` _(mención/texto/id)_ para especificar el jugador contrario',

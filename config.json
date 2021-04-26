@@ -15,7 +15,8 @@
             "Regristro de fuentes reestructurado para no reemplazarse entre sí",
             "p!taton ahora ignora tildes al buscar perritos por nombre (e.g. café = cafe)",
             "Prototipo y página de ayuda de p!cartas agregados",
-            "Los argumentos de Usuario tienen una nueva jerarquía de búsqueda y soportan usertags"
+            "Los argumentos de Usuario tienen una nueva jerarquía de búsqueda y soportan usertags",
+            "Cambios de algunas flags y restricciones de respuestas rápidas en algunos servidores"
         ],
         "todo": [
             "Restaurar comandos de búsqueda de imagen avanzados",

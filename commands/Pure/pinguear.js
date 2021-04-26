@@ -10,7 +10,8 @@ module.exports = {
     ],
     desc: 'Pingea a un `<usuario>` una `<cantidad>` de veces',
     flags: [
-        'meme'
+        'meme',
+		'hourai'
     ],
     options: [
 		'`<cantidad>` _(número)_ para indicar la cantidad de veces que se debe pinguear',

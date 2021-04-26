@@ -59,7 +59,8 @@ client.on('message', message => { //En caso de recibir un mensaje
     const msg = message.content.toLowerCase();
 
     //#region palta -> aguacate
-    if(msg.indexOf('aguacate') !== -1) {
+    const paltaservers = [ global.serverid.hourai, global.serverid.usd ];
+    if(paltaservers.includes(message.channel.guild.id) && msg.indexOf('aguacate') !== -1) {
         let paltastr = msg.replace(/aguacate/g, 'palta');
         let paltaname = message.member.nickname;
         if(paltaname === undefined || paltaname === null) paltaname = message.author.username;
@@ -86,7 +87,7 @@ client.on('message', message => { //En caso de recibir un mensaje
 
     //#region Respuestas rápidas
     //Hourai Doll; "Hourai"
-    if(message.channel.guild.id === global.serverid.hourai && global.bot_status.host === 'https://localhost/') {
+    if(message.channel.guild.id === global.serverid.hourai) {
         const hrai = msg.indexOf('hourai');
         const hraipf = global.hourai.replies.ignore.prefix;
         const hraisf = global.hourai.replies.ignore.suffix;
