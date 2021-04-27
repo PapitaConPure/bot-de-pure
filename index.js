@@ -28,7 +28,7 @@ for(const file of commandFiles) {
 //#endregion
 
 client.on('ready', async () => { //Confirmación de inicio y cambio de estado
-	console.log('%cCalculando semilla y horario...', 'color: #33dddd');
+	console.log('%cCalculando semilla y horario...', ['color: aqua']);
     let stt = Date.now();
     global.startuptime = stt;
     global.lechitauses = stt;
@@ -38,20 +38,20 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
     //console.log('%cCargando datos de base de datos...', 'color: #33dd33');
     //keyv.set();
 
-	console.log('%cObteniendo información del host...', 'color: #dd9add');
+	console.log('%cObteniendo información del host...', ['color: fuchsia']);
 	dns.lookupService('127.0.0.1', 443, (err, hostname, service) => {
         global.bot_status.host = (err === null)?`${service}://${hostname}/`:'[host no detectado]';
     });
     global.puretable = Array(16).fill(null).map(() => Array(16).fill('828736342372253697'));
 
-	console.log('%cRegistrando fuentes...', 'color: #eef33aa');
+	console.log('%cRegistrando fuentes...', ['color: purple']);
     registerFont('fonts/Alice-Regular.ttf', { family: 'headline' });
     registerFont('fonts/teen bd.ttf', { family: 'cardname' });
     registerFont('fonts/kirsty rg.otf', { family: 'cardclass' });
     registerFont('fonts/cuyabra.otf', { family: 'cardhint' });
     registerFont('fonts/asap-condensed.semibold.ttf', { family: 'cardbody' });
 
-	console.log('Bot conectado y funcionando.');
+	console.log('%cBot conectado y funcionando.', ['color: lime']);
 });
 
 client.on('message', message => { //En caso de recibir un mensaje
