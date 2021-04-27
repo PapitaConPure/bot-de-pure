@@ -8,7 +8,7 @@ const client = new Discord.Client({ fetchAllMembers: true }); //Usuario con el q
 const global = require('./config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
 const dns = require('dns'); //Detectar host
-const token = 'NjUxMjUwNjY5MzkwNTI4NTYx.XeXWSg.SFwfEZuCVNIVz8BS-AqFsntG6KY'; //La clave del bot
+const token = (process.env.I_LOVE_MEGUMIN)?process.env.I_LOVE_MEGUMIN:require('./key.json').token; //La clave del bot
 const { registerFont } = require('canvas');
 //#endregion
 

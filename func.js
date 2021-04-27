@@ -1,9 +1,9 @@
-const Discord = require('discord.js');
+const Discord = require('discord.js'); //Discord.js
 const global = require('./config.json'); //Variables globales
 const presence = require('./presence.json'); //Datos de presencia
 const uses = require('./sguses.json'); //Funciones globales
 const images = require('./images.json'); //Imágenes globales
-const Canvas = require('canvas'); 
+const Canvas = require('canvas'); //Node Canvas
 
 module.exports = {
     //#region Lista
@@ -599,40 +599,9 @@ module.exports = {
         const canal = servidor.channels.cache.get(servidor.systemChannelID);
 
         //#region Comprobación de miembro y servidor
-        if(typeof canal === 'undefined') {
+        if(!canal) {
             console.log('El servidor no tiene canal de mensajes de sistema.');
             return;
-        }
-
-        if(servidor.id === global.serverid.hourai) {
-            const inadvertidos = [
-                '225701598272290827', //Orphen
-                '190681032935211008', //Sheep
-                '632011537413963777', //Hikari
-                //'212311832281612289', //Chise
-                //'537080207580987402', //Aerza
-                '263163573843263509' //Recycle
-            ];
-
-            if(inadvertidos.includes(miembro.id)) {
-                servidor.owner.user.send(
-                    '¡Hola, soy Bot de Puré!\n' +
-                    `El miembro **<@${miembro.id}> (${miembro.id})** ha salido de tu servidor **${servidor.name}**...\n` +
-                    `¡Shhh! Si bien tienes un canal de mensajes de sistema establecido, este miembro se encuentra en una lista negra de despedidas.\n\n` +
-                    '*Si piensas que el usuario no debería estar en dicha lista negra, comunícate con mi creador~*\n' +
-                    '*__Nota:__ Bot de Puré no opera con mensajes privados.*'
-                );
-                console.log('Se ha inadvertido el usuario.');
-                return;
-            }
-
-            /*servidor.owner.user.send(
-                '¡Hola, soy Bot de Puré!\n' +
-                `El miembro **<@${miembro.id}> (${miembro.id})** ha salido de tu servidor **${servidor.name}**...\n` +
-                '*__Nota:__ Bot de Puré no opera con mensajes privados.*'
-            );
-            
-            return;*/
         }
 
         console.log(`Un usuario ha salido de ${servidor.name}...`);
