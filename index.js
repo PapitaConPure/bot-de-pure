@@ -57,7 +57,7 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
     registerFont('fonts/asap-condensed.semibold.ttf', { family: 'cardbody' });
 	confirm();
 
-	console.log(chalk.rgb(255, 140, 70).bold('Bot conectado y funcionando.'));
+	console.log(chalk.greenBright.bold('Bot conectado y funcionando.'));
 });
 
 client.on('message', message => { //En caso de recibir un mensaje
@@ -66,7 +66,7 @@ client.on('message', message => { //En caso de recibir un mensaje
 
     //#region palta -> aguacate
     const paltaservers = [ global.serverid.hourai, global.serverid.usd ];
-    if(paltaservers.includes(message.channel.guild.id) && msg.indexOf('aguacate') !== -1) {
+    if(message.guild && paltaservers.includes(message.guild.id) && msg.indexOf('aguacate') !== -1) {
         let paltastr = msg.replace(/aguacate/g, 'palta');
         let paltaname = message.member.nickname;
         if(paltaname === undefined || paltaname === null) paltaname = message.author.username;

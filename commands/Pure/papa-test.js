@@ -20,32 +20,35 @@ module.exports = {
         async function superFetch(channel, superLimit = 500) {
             const messages = [];
             let lid;
-        
-            while(true) {
-                const options = { limit: Math.min(100, superLimit - messages.length) };
-                if(options.limit < 1) break;
+            
+            while(superLimit >= 1) {
+                const options = { limit: Math.min(100, superLimit) };
                 if(lid) options.before = lid;
-        
+                
                 const m = await channel.messages.fetch(options);
                 messages.push(...m.array());
+                superLimit -= m.size;
                 lid = m.last().id;
                 
                 if(m.size !== 100) break;
             }
-            console.log([channel.name, messages.length]);
 
             return messages;
         }
         message.channel.messages.fetch
         let total = 0;
+        const m = await message.channel.send('_Buscando mensajes, esto puede tardar un buen rato..._');
         await Promise.all(
-            message.client.guilds.cache.find(g => g.id === message.channel.guild.id)
+            message.client.guilds.cache
+            .filter(ch => !['voice', 'store', 'unknown', 'category'].includes(ch.type))
+            .find(g => g.id === message.channel.guild.id)
             .channels.cache.map(async ch => {
-                const msgs = await superFetch(ch, 1000 - total);
+                const msgs = await superFetch(ch, 1000);
+                m.edit(`_Buscando mensajes, esto puede tardar un buen rato..._\n**Último canal** ${ch.name}`);
                 total += msgs.length;
-                console.log(total);
+                console.log([ch.name, total]);
             })
         );
-        message.channel.send(`\`${total}\``);
+        m.edit(`_Búsqueda de mensajes concluída_\n**Total** ${total}`);
     },
 };
