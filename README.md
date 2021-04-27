@@ -4,7 +4,7 @@ Como personaje, es una robot "mujer". Es torpe y agresiva en algunos casos, pero
 <br><br>
 
 ## Índice
-* [Normativas de Desarrollo](docs/CONTRIBUTING.md)
+* [Normativas de Desarrollo](#convenciones-de-desarrollo)
 * b
 
 
