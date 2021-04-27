@@ -5,7 +5,7 @@ Como personaje, es una robot "mujer". Es torpe y agresiva en algunos casos, pero
 
 ## Índice
 * [Convenciones de Desarrollo](#convenciones-de-desarrollo)
-* [Convenciones de páginas de ayuda](#convenciones-de-paginas-de-ayuda)
+* [Convenciones de páginas de ayuda](#convenciones-de-páginas-de-ayuda)
 
 
 ### Convenciones de Desarrollo
@@ -20,3 +20,4 @@ Con el fin de trabajar de forma más eficiente y organizada, se siguen las sigui
   - las versiones largas solo deberían tener caracteres alfabéticos
 
 ### Convenciones de páginas de ayuda
+tbc
