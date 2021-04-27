@@ -4,8 +4,8 @@ Como personaje, es una robot "mujer". Es torpe y agresiva en algunos casos, pero
 <br><br>
 
 ## Índice
-* [Normativas de Desarrollo](#convenciones-de-desarrollo)
-* b
+* [Convenciones de Desarrollo](#convenciones-de-desarrollo)
+* [Convenciones de páginas de ayuda](#convenciones-de-paginas-de-ayuda)
 
 
 ### Convenciones de Desarrollo
@@ -18,3 +18,5 @@ Con el fin de trabajar de forma más eficiente y organizada, se siguen las sigui
   - deben tener, si es posible, versiones cortas y largas
   - las versiones cortas deberían ser la inicial de la contraparte larga
   - las versiones largas solo deberían tener caracteres alfabéticos
+
+### Convenciones de páginas de ayuda
