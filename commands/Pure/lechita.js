@@ -2,7 +2,8 @@ const Discord = require('discord.js'); //Integrar discord.js
 const global = require('../../config.json'); //Variables globales
 const func = require('../../func.js'); //Funciones globales
 const axios = require('axios');
-const Canvas = require('canvas'); 
+const Canvas = require('canvas');
+const { utils } = require('../../images.json'); //Funciones globales
 
 async function resolverLink(msg, linkRes, iSize) {
 	let iurl;
@@ -49,7 +50,7 @@ async function resolverLink(msg, linkRes, iSize) {
 }
 
 async function dibujarCum(msg, link) {
-	cum = await Canvas.loadImage('./cum.png');
+	cum = await Canvas.loadImage(utils.cum);
 	fondo = await Canvas.loadImage(link);
 	canvas = Canvas.createCanvas(fondo.width, fondo.height);
 	ctx = canvas.getContext('2d');

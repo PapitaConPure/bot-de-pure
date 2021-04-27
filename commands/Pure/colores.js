@@ -5,7 +5,7 @@ module.exports = {
 	name: 'colores',
 	aliases: [
 		'color', 'roles', 'rol',
-		'colours', 'colour', 'role',
+		'colours', 'colour', 'colors', 'role',
 		'c'
 	],
     desc: 'Muestra un tablón de roles de colores básicos para Hourai Doll',

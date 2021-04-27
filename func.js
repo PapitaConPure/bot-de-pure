@@ -861,31 +861,27 @@ module.exports = {
                 //Para comprobaciones posteriores
                 /* Filtrado de búsqueda
                 - Nombre coincide parcial o totalmente
-                - Guild actual > resto de guilds
-                - Ocurrencia temprana > ocurrencia tardía
-                - Nombre corto > nombre largo
+                > Guild actual > resto de guilds
+                > Ocurrencia temprana > ocurrencia tardía
+                = Nombre corto > nombre largo
                 */
 
                 //Buscar por apodo o nombre de usuario dentro de guild actual
                 user = guild.members.cache.filter(m => m.nickname && m.nickname.toLowerCase().indexOf(temp) !== -1);
-                if(user.size)
+                if(user.size) {
+                    console.log(user.map(m => m.nickname));
                     user = user
                         .sort()
-                        .reduce((a, b) => (a.nickname.toLowerCase().indexOf(temp) < b.nickname.toLowerCase().indexOf(temp) && a.nickname.length < b.nickname.length)?a.nickname:b.nickname)
+                        .reduce((a, b) => (a.nickname.toLowerCase().indexOf(temp) < b.nickname.toLowerCase().indexOf(temp) && a.nickname.length <= b.nickname.length)?a:b)
                         .user;
-                else //Buscar por nombre de usuario en resto de guilds
-                    client.guilds.cache.map(cguild => {
-                        let found = cguild.members.cache
-                            .map(m => m.user)
-                            .filter(u => u.username.toLowerCase().indexOf(temp) !== -1);
-                        if(found.length) {
-                            user = found
-                                .sort()
-                                .reduce((a, b) => (a.username.toLowerCase().indexOf(temp) <= b.username.toLowerCase().indexOf(temp) && a.username.length < b.username.length)?a:b);
-                        }
-                    });
-                
-                console.log([user.username, user, user.id]);
+                } else { //Buscar por nombre de usuario en resto de guilds
+                    user = client.users.cache.filter(m => m.username.toLowerCase().indexOf(temp) !== -1);
+                    console.log(user.map(u => u.username));
+                    if(user.size)
+                        user = user
+                            .sort()
+                            .reduce((a, b) => (a.username.toLowerCase().indexOf(temp) <= b.username.toLowerCase().indexOf(temp) && a.username.length <= b.username.length)?a:b);
+                }
             }
 
             if(user)
