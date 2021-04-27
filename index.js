@@ -1,7 +1,7 @@
 //#region Carga de módulos necesarios
 const fs = require('fs'); //Sistema de archivos
 const Discord = require('discord.js'); //Soporte JS de la API de Discord
-const client = new Discord.Client({ fetchAllMembers: true }); //Usuario con el que inicia sesión el Bot
+const client = new Discord.Client({ fetchAllMembers: true }); //Objeto cliente
 //const Keyv = require('keyv');
 //const keyv = new Keyv('postgresql://sxiejhineqmvsg:d0b53a4f62e2cf77383908ff8d281e4a5d4f7db7736abd02e51f0f27b6fc6264@ec2-35-175-170-131.compute-1.amazonaws.com:5432/da27odtfovvn7n');
 //keyv.on('error', err => console.error('Keyv connection error:', err));
@@ -9,7 +9,8 @@ const global = require('./config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
 const dns = require('dns'); //Detectar host
 const token = (process.env.I_LOVE_MEGUMIN)?process.env.I_LOVE_MEGUMIN:require('./key.json').token; //La clave del bot
-const { registerFont } = require('canvas');
+const chalk = require('chalk'); //Consola con formato bonito
+const { registerFont } = require('canvas'); //Registrar fuentes al ejecutar Bot
 //#endregion
 
 //#region Detección de archivos de comandos
@@ -28,30 +29,35 @@ for(const file of commandFiles) {
 //#endregion
 
 client.on('ready', async () => { //Confirmación de inicio y cambio de estado
-	console.log('%cCalculando semilla y horario...', ['color: aqua']);
+    const confirm = () => console.log(chalk.green('Hecho.'));
+	console.log(chalk.cyanBright('Calculando semilla y horario...'));
     let stt = Date.now();
     global.startuptime = stt;
     global.lechitauses = stt;
     global.seed = stt / 60000;
     func.modifyAct(client, 0);
+	confirm();
 
-    //console.log('%cCargando datos de base de datos...', 'color: #33dd33');
+    console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
     //keyv.set();
+	confirm();
 
-	console.log('%cObteniendo información del host...', ['color: fuchsia']);
+	console.log(chalk.magenta('Obteniendo información del host...'));
 	dns.lookupService('127.0.0.1', 443, (err, hostname, service) => {
         global.bot_status.host = (err === null)?`${service}://${hostname}/`:'[host no detectado]';
     });
     global.puretable = Array(16).fill(null).map(() => Array(16).fill('828736342372253697'));
+	confirm();
 
-	console.log('%cRegistrando fuentes...', ['color: purple']);
+	console.log(chalk.rgb(158,114,214)('Registrando fuentes...'));
     registerFont('fonts/Alice-Regular.ttf', { family: 'headline' });
     registerFont('fonts/teen bd.ttf', { family: 'cardname' });
     registerFont('fonts/kirsty rg.otf', { family: 'cardclass' });
     registerFont('fonts/cuyabra.otf', { family: 'cardhint' });
     registerFont('fonts/asap-condensed.semibold.ttf', { family: 'cardbody' });
+	confirm();
 
-	console.log('%cBot conectado y funcionando.', ['color: lime']);
+	console.log(chalk.rgb(255, 140, 70).bold('Bot conectado y funcionando.'));
 });
 
 client.on('message', message => { //En caso de recibir un mensaje

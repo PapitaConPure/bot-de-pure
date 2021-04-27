@@ -4,6 +4,11 @@ const presence = require('./presence.json'); //Datos de presencia
 const uses = require('./sguses.json'); //Funciones globales
 const images = require('./images.json'); //Imágenes globales
 const Canvas = require('canvas'); //Node Canvas
+const chalk = require('chalk'); //Consola con formato bonito
+const concol = {
+    orange: chalk.rgb(255, 140, 70),
+    purple: chalk.rgb(158, 114,214)
+};
 
 module.exports = {
     //#region Lista
@@ -195,14 +200,14 @@ module.exports = {
     },
 
     askForRole: function(miembro, canal, rep) {
-        console.log('Comprobando miembro nuevo en Hourai Doll para petición de rol de color');
+        console.log(chalk.cyan('Comprobando miembro nuevo en Hourai Doll para petición de rol de color...'));
         if(!miembro.deleted) {
-            console.log('El miembro sigue en el servidor');
+            console.log(concol.orange('El miembro sigue en el servidor'));
             const dc = module.exports.dollCount(miembro);
 
             //Comprobación constante para ver si el miembro ya tiene roles de colores
             if(dc > 2) {
-                console.log(`El miembro ha recibido sus roles básicos.`);
+                console.log(chalk.green(`El miembro ha recibido sus roles básicos.`));
                 canal.send(`Weno **${miembro.user.username}**, ya teni tu rol, q esti bien po <:Junky:651290323557023753>`);
 
                 //Finalizar
@@ -214,38 +219,38 @@ module.exports = {
                 }
                 
                 if(dc === 1) {
-                    console.log('El miembro está retenido.');
+                    console.log(chalk.magenta('El miembro está retenido.'));
                     global.hourai.warn++;
                     if(global.hourai.warn <= 6) {
                         if(global.hourai.warn <= 3)
                             canal.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474> (${global.hourai.warn}/3 llamados)`);
                         setTimeout(module.exports.askForRole, 1000, miembro , canal, 5 * 4);
-                        console.log(`Volviendo a esperar confirmación de miembro (${global.hourai.warn}/6)...`);
+                        console.log(chalk.cyan(`Volviendo a esperar confirmación de miembro (${global.hourai.warn}/6)...`));
                     }
                 } else {
-                    console.log('El miembro no ha recibido roles básicos.');
+                    console.log(chalk.yellow('El miembro no ha recibido roles básicos.'));
                     canal.send(
                         `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>`,
                         { files: [global.hourai.images.colors] }
                     ).then(sent => module.exports.askColor(sent, miembro));
                     setTimeout(module.exports.forceRole, 1000, miembro, canal, 4 * 4);
-                    console.log(`Esperando comprobación final de miembro en unos minutos...`);
+                    console.log(chalk.magentaBright(`Esperando comprobación final de miembro en unos minutos...`));
                 }
             }
         } else {
-            console.log(`El miembro se fue del servidor. Abortando.`);
+            console.log(chalk.red(`El miembro se fue del servidor. Abortando.`));
             canal.send(`Se murió el wn de <@${miembro.user.id}> po <:mayuwu:654489124413374474>`);
         }
     },
 
     forceRole: function(miembro, canal, rep) {
-        console.log('Comprobando miembro nuevo en Hourai Doll para forzado de rol de color');
+        console.log(chalk.cyan('Comprobando miembro nuevo en Hourai Doll para forzado de rol de color'));
         if(!miembro.deleted) {
-            console.log('El miembro sigue en el servidor');
+            console.log(concol.orange('El miembro sigue en el servidor'));
             const dc = module.exports.dollCount(miembro);
             
             if(dc > 2) {
-                console.log('El miembro ya tiene los roles básicos.');
+                console.log(chalk.green('El miembro ya tiene los roles básicos.'));
                 canal.send(`Al fin qliao ya teni tu rol. Q esti bien **${miembro.user.username}**, po <:uwu:681935702308552730>`);
 
                 //Finalizar
@@ -257,7 +262,7 @@ module.exports = {
                 }
 
                 if(dc === 2) {
-                    console.log('El miembro requiere roles básicos. Forzando roles...');
+                    console.log(chalk.magentaBright('El miembro requiere roles básicos. Forzando roles...'));
                     const colores = [
                         '671851233870479375', //France Doll
                         '671852132328275979', //Holland Doll
@@ -273,12 +278,12 @@ module.exports = {
                         { files: [global.hourai.images.forcecolors] }
                     );
                     miembro.roles.add(colores[Math.floor(Math.random() * 7)]);
-                    console.log('Roles forzados.');
+                    console.log(chalk.greenBright('Roles forzados.'));
 
                     //Finalizar
                     setTimeout(module.exports.finalizarHourai, 1000, miembro, canal);
                 } else {
-                    console.log('El miembro ya no tiene ningún rol básico.');
+                    console.log(chalk.red('El miembro ya no tiene ningún rol básico.'));
                     canal.send(`Espérate qué weá pasó con **${miembro.user.username}** <:reibu:686220828773318663>\nOh bueno, ya me aburrí... chao.`);
                 }
             }
@@ -373,19 +378,19 @@ module.exports = {
     modifyAct: function(clientowo, pasuwus) { //Cambio de estado constante; créditos a Imagine Breaker y Sassafras
         //Actualización de actividad
         try {
-            console.log(`Iniciando cambio de presencia ${pasuwus}...`);
+            console.log(concol.orange.underline(`Iniciando cambio de presencia ${pasuwus}...`));
             clientowo.user.setActivity(
                 presence.status[module.exports.randInt(0, presence.status.length)],
                 { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${presence.stream[module.exports.randInt(0, presence.stream.length)]}` }
             );
-            console.log('Cambio de presencia finalizado.');
+            console.log(chalk.greenBright.bold('Cambio de presencia finalizado.'));
             
             //Programar próxima actualización de actividad
             const stepwait = module.exports.randInt(30, 70);
             setTimeout(module.exports.modifyAct, 1000 * 60 * stepwait, clientowo, pasuwus + 1);
-            console.log(`Esperando ciclo ${pasuwus + 1} en ${stepwait} minutos...`);
+            console.log(chalk.cyan`Esperando ciclo ${pasuwus + 1} en ${stepwait} minutos...`);
         } catch(err) {
-            console.log('Ocurrió un error al intentar realizar un cambio de presencia.');
+            console.log(chalk.redBright.bold('Ocurrió un error al intentar realizar un cambio de presencia.'));
             console.error(err);
         }
     },
@@ -490,8 +495,8 @@ module.exports = {
         const canal = servidor.channels.cache.get(servidor.systemChannelID); //Canal de mensajes de sistema
 
         //#region Comprobación de miembro y servidor
-        if(typeof canal === 'undefined') {
-            console.log('El servidor no tiene canal de mensajes de sistema.');
+        if(canal === undefined) {
+            console.log(chalk.blue('El servidor no tiene canal de mensajes de sistema.'));
             servidor.owner.user.send(
                 '¡Hola, soy Bot de Puré!\n' +
                 `¡Un nuevo miembro, **<@${miembro.id}> (${miembro.id})**, ha entrado a tu servidor **${servidor.name}**!\n\n` +
@@ -501,9 +506,9 @@ module.exports = {
             return;
         }
 
-        console.log(`Un usuario ha entrado a ${servidor.name}...`);
+        console.log(concol.purple`Un usuario ha entrado a ${servidor.name}...`);
         if(!servidor.me.permissionsIn(canal).has(['SEND_MESSAGES', 'VIEW_CHANNEL'])) {
-            console.log('No se puede enviar un mensaje de bienvenida en este canal.');
+            console.log(chalk.red('No se puede enviar un mensaje de bienvenida en este canal.'));
             return;
         }
         canal.startTyping();
