@@ -10,7 +10,7 @@ module.exports = {
 	],
     desc: 'Muestra un tablón de roles de colores básicos para Hourai Doll',
     flags: [
-        //'hourai'
+        'hourai'
     ],
 	
 	execute(message, args) {
