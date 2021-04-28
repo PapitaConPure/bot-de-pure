@@ -1,4 +1,7 @@
 # bot-de-pure
+
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/PapitaConPure/bot-de-pure)
+
 Bot de puré es un bot de entretenimiento, búsqueda de imágenes y utilidades generales varias. Utiliza comandos tradicionales con adiciones inspiradas en terminales como <code>--flags</code>.<br>
 Como personaje, es una robot "mujer". Es torpe y agresiva en algunos casos, pero parece tener espíritu.
 <br><br>
