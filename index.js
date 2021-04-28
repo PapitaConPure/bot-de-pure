@@ -28,6 +28,10 @@ for(const file of commandFiles) {
 }
 //#endregion
 
+/*client.once('ready', async () => {
+    keyv.set();
+});*/
+
 client.on('ready', async () => { //Confirmación de inicio y cambio de estado
     const confirm = () => console.log(chalk.green('Hecho.'));
 	console.log(chalk.cyanBright('Calculando semilla y horario...'));
@@ -35,11 +39,10 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
     global.startuptime = stt;
     global.lechitauses = stt;
     global.seed = stt / 60000;
-    func.modifyAct(client, 0);
+    await func.modifyAct(client, 0);
 	confirm();
 
     console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
-    //keyv.set();
 	confirm();
 
 	console.log(chalk.magenta('Obteniendo información del host...'));
@@ -65,13 +68,12 @@ client.on('message', message => { //En caso de recibir un mensaje
     const msg = message.content.toLowerCase();
 
     //#region palta -> aguacate
-    const paltaservers = [ global.serverid.hourai, global.serverid.usd ];
-    if(message.guild && paltaservers.includes(message.guild.id) && msg.indexOf('aguacate') !== -1) {
+    if(message.guild && [global.serverid.hourai, global.serverid.usd].includes(message.guild.id) && msg.indexOf('aguacate') !== -1) {
         let paltastr = msg.replace(/aguacate/g, 'palta');
         let paltaname = message.member.nickname;
-        if(paltaname === undefined || paltaname === null) paltaname = message.author.username;
+        if(!paltaname) paltaname = message.author.username;
 
-        message.channel.send(`**${paltaname}:**\n` + paltastr);
+        message.channel.send(`**${paltaname}:**\n${paltastr}`);
         message.delete();
     }
     //#endregion
@@ -79,7 +81,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     //Los mensajes de bots se ignoran desde este punto
     if(global.cansay === 0 && message.author.bot) return;
     
-    //#region Log de Procesos (debug)
+    //#region Operaciones de proceso e ignorar mensajes privados
     if(message.guild) {
         console.log(`[${message.guild.name.substr(0,12)}::${message.guild.id} → #${message.channel.name.substr(0,8)}::${message.channel.id}] ${message.author.username}: "${message.content}"`);
         if(message.attachments.size > 0)

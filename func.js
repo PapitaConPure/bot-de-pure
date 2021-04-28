@@ -375,11 +375,11 @@ module.exports = {
             uses.pinguear[msgauth] = false;
     },
 
-    modifyAct: function(clientowo, pasuwus) { //Cambio de estado constante; créditos a Imagine Breaker y Sassafras
+    modifyAct: async function(clientowo, pasuwus) { //Cambio de estado constante; créditos a Imagine Breaker y Sassafras
         //Actualización de actividad
         try {
             console.log(concol.orange.underline(`Iniciando cambio de presencia ${pasuwus}...`));
-            clientowo.user.setActivity(
+            await clientowo.user.setActivity(
                 presence.status[module.exports.randInt(0, presence.status.length)],
                 { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${presence.stream[module.exports.randInt(0, presence.stream.length)]}` }
             );
