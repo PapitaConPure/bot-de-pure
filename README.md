@@ -41,6 +41,7 @@ Herramientas y paquetes ampliamente utilizados
 - [ ] Preparar base de datos persistente
 - [ ] Extraer algunos objetos de config.json en nuevos archivos
 - [ ] Optimizar todo func.js
+- [ ] Transferir arrays estructuras grandes en index.js a otros archivos
 
 ### Integrantes
 Personas involucradas en el desarrollo de Bot de Puré, con sus tags de Discord.
