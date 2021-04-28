@@ -1,5 +1,5 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const global = require('../../config.json'); //Variables globales
+const global = require('../../localdata/config.json'); //Variables globales
 const { paginate, fetchArrows } = require('../../func');
 
 module.exports = {

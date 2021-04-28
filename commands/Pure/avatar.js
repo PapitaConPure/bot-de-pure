@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js'); //Integrar discord.js
-const { p_pure, peopleid } = require('../../config.json');
+const { p_pure, peopleid } = require('../../localdata/config.json');
 const { resolverIDUsuario } = require('../../func.js'); //Funciones globales
 
 module.exports = {

@@ -1,5 +1,5 @@
 const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../config.json'); //Variables globales
+var global = require('../../localdata/config.json'); //Variables globales
 const axios = require('axios');
 
 const getRandomInt = function(_max) {

@@ -1,5 +1,5 @@
-const global = require('../../config.json'); //Variables globales
-const imgs = require('../../drawings.json'); //Variables globales
+const global = require('../../localdata/config.json'); //Variables globales
+const imgs = require('../../localdata/drawings.json'); //Variables globales
 const fs = require('fs');
 
 module.exports = {
@@ -13,7 +13,7 @@ module.exports = {
 	execute(message, args) {
         let templog = JSON.stringify(global, null, 4);
         let tempimg = JSON.stringify(imgs, null, 4);
-        let tempdata = `CONFIG.JSON\n${templog}\n\n\nDRAWINGS.JSON\n${tempimg}`;
+        let tempdata = `localdata/config.json\n${templog}\n\n\nlocaldata/drawings.json\n${tempimg}`;
         tempdata = tempdata.split('\n').join('\r\n');
         fs.writeFile("save.txt", tempdata, err => {
             if(err) console.log(err);

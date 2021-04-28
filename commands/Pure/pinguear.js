@@ -1,6 +1,6 @@
 const func = require('../../func.js'); //Funciones globales
-const uses = require('../../sguses.json'); //Funciones globales
-const { p_pure } = require('../../config.json'); //Prefijos
+const uses = require('../../localdata/sguses.json'); //Funciones globales
+const { p_pure } = require('../../localdata/config.json'); //Prefijos
 
 module.exports = {
 	name: 'pinguear',

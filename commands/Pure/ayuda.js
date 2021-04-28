@@ -1,6 +1,6 @@
 const fs = require('fs'); //Integrar operaciones sistema de archivos de consola
 const Discord = require('discord.js');
-const global = require('../../config.json'); //Variables globales
+const global = require('../../localdata/config.json'); //Variables globales
 const { stringify } = require('querystring');
 
 module.exports = {

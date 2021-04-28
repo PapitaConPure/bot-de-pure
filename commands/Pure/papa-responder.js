@@ -1,5 +1,5 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const { p_pure } = require('../../config.json'); //Prefijos
+const { p_pure } = require('../../localdata/config.json'); //Prefijos
 const func = require('../../func.js'); //Funciones globales
 
 module.exports = {

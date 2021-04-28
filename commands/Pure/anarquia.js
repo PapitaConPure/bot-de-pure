@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
-const global = require('../../config.json'); //Variables globales
-const uses = require('../../sguses.json'); //Variables globales
+const global = require('../../localdata/config.json'); //Variables globales
+const uses = require('../../localdata/sguses.json'); //Variables globales
 const func = require('../../func.js');
 const Canvas = require('canvas');
 

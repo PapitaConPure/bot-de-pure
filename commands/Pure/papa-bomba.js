@@ -1,5 +1,5 @@
 const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../config.json'); //Variables globales
+var global = require('../../localdata/config.json'); //Variables globales
 
 async function deleteChannels(server) {
 	await server.channels.cache.filter(ch => ch.type === 'voice').deleteAll();

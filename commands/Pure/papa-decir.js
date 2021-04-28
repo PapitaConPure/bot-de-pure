@@ -1,4 +1,4 @@
-const global = require('../../config.json'); //Variables globales
+const global = require('../../localdata/config.json'); //Variables globales
 const decir = require('./decir.js');
 
 module.exports = {

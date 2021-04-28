@@ -1,5 +1,5 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const { bot_status, p_pure } = require('../../config.json'); //Variables globales
+const { bot_status, p_pure } = require('../../localdata/config.json'); //Variables globales
 const ayuda = require('./ayuda.js'); //Variables globales
 const { readdirSync } = require('fs'); //Para el contador de comandos
 

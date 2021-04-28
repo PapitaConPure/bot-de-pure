@@ -1,9 +1,9 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const global = require('../../config.json'); //Variables globales
+const global = require('../../localdata/config.json'); //Variables globales
 const func = require('../../func.js'); //Funciones globales
 const axios = require('axios');
 const Canvas = require('canvas');
-const { utils } = require('../../images.json'); //Funciones globales
+const { utils } = require('../../localdata/images.json'); //Funciones globales
 
 async function resolverLink(msg, linkRes, iSize) {
 	let iurl;

@@ -1,4 +1,4 @@
-const { p_pure } = require('../../config.json');
+const { p_pure } = require('../../localdata/config.json');
 
 module.exports = {
 	name: 'g-indice',

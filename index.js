@@ -2,10 +2,10 @@
 const fs = require('fs'); //Sistema de archivos
 const Discord = require('discord.js'); //Soporte JS de la API de Discord
 const client = new Discord.Client({ fetchAllMembers: true }); //Objeto cliente
-//const Keyv = require('keyv');
+const Keyv = require('keyv');
 //const keyv = new Keyv('postgresql://sxiejhineqmvsg:d0b53a4f62e2cf77383908ff8d281e4a5d4f7db7736abd02e51f0f27b6fc6264@ec2-35-175-170-131.compute-1.amazonaws.com:5432/da27odtfovvn7n');
 //keyv.on('error', err => console.error('Keyv connection error:', err));
-const global = require('./config.json'); //Propiedades globales
+const global = require('./localdata/config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
 const dns = require('dns'); //Detectar host
 const token = (process.env.I_LOVE_MEGUMIN)?process.env.I_LOVE_MEGUMIN:require('./key.json').token; //La clave del bot

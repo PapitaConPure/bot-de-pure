@@ -1,6 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const global = require('../../config.json'); //Variables globales
-const uses = require('../../sguses.json'); //Lista de usos desde el último reinicio del Bot
+const global = require('../../localdata/config.json'); //Variables globales
+const uses = require('../../localdata/sguses.json'); //Lista de usos desde el último reinicio del Bot
 
 function getTitle(a, i) {
 	if(i >= a.length) //Título inválido

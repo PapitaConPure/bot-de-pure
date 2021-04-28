@@ -1,8 +1,8 @@
 const Discord = require('discord.js'); //Discord.js
-const global = require('./config.json'); //Variables globales
-const presence = require('./presence.json'); //Datos de presencia
-const uses = require('./sguses.json'); //Funciones globales
-const images = require('./images.json'); //Imágenes globales
+const global = require('./localdata/config.json'); //Variables globales
+const presence = require('./localdata/presence.json'); //Datos de presencia
+const uses = require('./localdata/sguses.json'); //Funciones globales
+const images = require('./localdata/images.json'); //Imágenes globales
 const Canvas = require('canvas'); //Node Canvas
 const chalk = require('chalk'); //Consola con formato bonito
 const concol = {
@@ -446,7 +446,7 @@ module.exports = {
     },
 
     /*saveState: function() {
-        fs.writeFile("config.json", JSON.stringify(global, null, 4), err => {
+        fs.writeFile("localdata/config.json", JSON.stringify(global, null, 4), err => {
             if(err) console.error(err);
         });
 

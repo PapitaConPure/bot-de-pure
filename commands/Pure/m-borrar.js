@@ -1,4 +1,4 @@
-const { p_pure } = require('../../config.json'); //Variables globales
+const { p_pure } = require('../../localdata/config.json'); //Variables globales
 const func = require('../../func.js'); //Funciones globales
 
 module.exports = {
