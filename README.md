@@ -8,9 +8,11 @@ Como personaje, es una robot "mujer". Es torpe y agresiva en algunos casos, pero
 * [Convenciones de Desarrollo](#convenciones-de-desarrollo)
 * [Convenciones de páginas de ayuda](#convenciones-de-páginas-de-ayuda-de-comandos)
 * [Principales herramientas utilizadas](#principales-herramientas-utilizadas)
+* [Tareas de refactorización](#tareas-de-refactorización)
 * [Integrantes](#integrantes)
 
 
+## Contenido
 ### Convenciones de Desarrollo
 Con el fin de trabajar de forma más eficiente y organizada, se siguen las siguientes convenciones
 * **Comandos**
@@ -34,12 +36,20 @@ Herramientas y paquetes ampliamente utilizados
 * Node Canvas
 * Chalk
 
+### Tareas de refactorización
+[x] Organizar en subdirectorios
+[_] Preparar base de datos persistente
+[_] Extraer algunos objetos de config.json en nuevos archivos
+[_] Optimizar todo func.js
+
 ### Integrantes
 Personas involucradas en el desarrollo de Bot de Puré, con sus tags de Discord.
-* **Creador** Papita con Puré#6932 _(Programador, Diseñador, Decisor, Ideas, Testing)_
+* **Creador** Papita con Puré#6932 _(Programador, Editor, Diseñador, Decisor, Ideas, Testing)_
 * **Participantes**
+  - GoddamnBernkastel#6299 _(Editor, Decisor)_
   - Imagine Breaker#6299 _(Decisor, Ideas, Testing)_
   - Sassafras#3331  _(Decisor, Ideas, Testing)_
 * **Colaboradores**
   - Rakkidei#4790 _(Artista en [pixiv](https://www.pixiv.net/en/users/58442175) y [Twitter](https://twitter.com/rakkidei))_
   - Super Arathy's 12#8235 _(Ideas, Testing)_
+  - Taton#0122 _(Editor)_
