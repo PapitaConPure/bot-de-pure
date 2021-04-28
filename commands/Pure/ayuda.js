@@ -103,7 +103,7 @@ module.exports = {
         let embed = new Discord.MessageEmbed().setColor('#608bf3');
         if(search === 'n') {
             embed.setAuthor('Lista de comandos', aurl)
-            .addField('Comandos: ejemplos de uso', `\`${global.p_pure}ayuda -xmph --meme\`\n\`${global.p_pure}avatar @Usuario\`\n\`${global.p_pure}dados -c 20 -d 3\``)
+            .addField('Comandos: ejemplos de uso', `\`${global.p_pure}ayuda -xmph --meme\`\n\`${global.p_pure}avatar @Usuario\`\n\`${global.p_pure}dados 5d6\``)
             .addField(`Usa \`${global.p_pure}ayuda <comando>\` para más información sobre un comando`, (list.name.length > 0)?list.name.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para realizar tu búsqueda).')
             .addField(`Guía introductoria`, `Usa \`${global.p_pure}ayuda g-indice\` para ver la página de índice de la guía introductoria de Bot de Puré`);
         } else {
