@@ -37,10 +37,10 @@ Herramientas y paquetes ampliamente utilizados
 * Chalk
 
 ### Tareas de refactorización
-[x] Organizar en subdirectorios
-[_] Preparar base de datos persistente
-[_] Extraer algunos objetos de config.json en nuevos archivos
-[_] Optimizar todo func.js
+- [x] Organizar en subdirectorios
+- [ ] Preparar base de datos persistente
+- [ ] Extraer algunos objetos de config.json en nuevos archivos
+- [ ] Optimizar todo func.js
 
 ### Integrantes
 Personas involucradas en el desarrollo de Bot de Puré, con sus tags de Discord.
