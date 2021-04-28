@@ -19,7 +19,7 @@
   "homepage": "https://github.com/PapitaConPure/bot-de-pure#readme",
   "dependencies": {
     "@keyv/sqlite": "^2.0.2",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "canvas": "^2.7.0",
     "chalk": "^4.1.1",
     "discord.js": "^12.5.3",
