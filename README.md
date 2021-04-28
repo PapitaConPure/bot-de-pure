@@ -5,8 +5,8 @@ Como personaje, es una robot "mujer". Es torpe y agresiva en algunos casos, pero
 
 ## Índice
 * [Convenciones de Desarrollo](#convenciones-de-desarrollo)
-* [Convenciones de páginas de ayuda](#convenciones-de-páginas-de-ayuda)
-* [Principales herramientas utilizadas](#convenciones-de-páginas-de-ayuda)
+* [Convenciones de páginas de ayuda](#convenciones-de-páginas-de-ayuda-de-comandos)
+* [Principales herramientas utilizadas](#principales-herramientas-utilizadas)
 * [Integrantes](#integrantes)
 
 
@@ -41,6 +41,3 @@ Personas involucradas en el desarrollo de Bot de Puré, con sus tags de Discord.
   - Sassafras#3331 
 * **Colaboradores**
   - Super Arathy's 12#8235
-
-Si te interesan las traducciones al español de diversos mangas oficiales, juegos oficiales y doujins fanmade de Touhou Project, considera unirte a Hourai Doll, que es el servidor en el que se centran las atenciones de Bot de Puré
-<iframe src="https://discord.com/widget?id=739513729158217829&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
