@@ -37,10 +37,11 @@ Herramientas y paquetes ampliamente utilizados
 * Chalk
 
 ### Tareas de refactorización
+- [x] Preparar archivos de comando para búsqueda por metadata
 - [x] Organizar archivos comunes en subdirectorios
+- [ ] Optimizar todo func.js
 - [ ] Preparar base de datos persistente
 - [ ] Extraer algunos objetos de config.json en nuevos archivos
-- [ ] Optimizar todo func.js
 - [ ] Transferir arrays y estructuras grandes en index.js a otros archivos
 
 ### Integrantes
