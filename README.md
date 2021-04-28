@@ -35,9 +35,10 @@ Herramientas y paquetes ampliamente utilizados
 
 ### Integrantes
 Personas involucradas en el desarrollo de Bot de Puré, con sus tags de Discord.
-* **Creador** Papita con Puré#6932
+* **Creador** Papita con Puré#6932 _(Programador, Diseñador, Decisor, Ideas, Testing)_
 * **Participantes**
-  - Imagine Breaker#6299
-  - Sassafras#3331 
+  - Imagine Breaker#6299 _(Decisor, Ideas, Testing)_
+  - Sassafras#3331  _(Decisor, Ideas, Testing)_
 * **Colaboradores**
-  - Super Arathy's 12#8235
+  - Rakkidei#4790 _(Artista en [pixiv](https://www.pixiv.net/en/users/58442175) y [Twitter](https://twitter.com/rakkidei))_
+  - Super Arathy's 12#8235 _(Ideas, Testing)_
