@@ -19,7 +19,7 @@
   "homepage": "https://github.com/PapitaConPure/bot-de-pure#readme",
   "dependencies": {
     "@keyv/sqlite": "^2.0.2",
-    "axios": "^0.19.0",
+    "axios": "^0.19.2",
     "canvas": "^2.6.1",
     "chalk": "^4.1.1",
     "discord.js": "^12.4.1",
@@ -27,7 +27,7 @@
     "github-api": "^3.3.0",
     "keyv": "^4.0.3",
     "mongodb": "^3.4.1",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "node-gyp": "^6.1.0",
     "parse": "^2.11.0",
     "rebuild": "^0.1.2"
