@@ -37,7 +37,7 @@ Herramientas y paquetes ampliamente utilizados
 * Chalk
 
 ### Tareas de refactorización
-- [x] Organizar en subdirectorios
+- [x] Organizar archivos comunes en subdirectorios
 - [ ] Preparar base de datos persistente
 - [ ] Extraer algunos objetos de config.json en nuevos archivos
 - [ ] Optimizar todo func.js
@@ -50,6 +50,6 @@ Personas involucradas en el desarrollo de Bot de Puré, con sus tags de Discord.
   - Imagine Breaker#6299 _(Decisor, Ideas, Testing)_
   - Sassafras#3331  _(Decisor, Ideas, Testing)_
 * **Colaboradores**
-  - Rakkidei#4790 _(Artista en [pixiv](https://www.pixiv.net/en/users/58442175) y [Twitter](https://twitter.com/rakkidei))_
+  - Rakkidei#4790 _(Artista | [pixiv](https://www.pixiv.net/en/users/58442175) [Twitter](https://twitter.com/rakkidei))_
   - Super Arathy's 12#8235 _(Ideas, Testing)_
   - Taton#0122 _(Editor)_
