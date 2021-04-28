@@ -1,7 +1,8 @@
 # bot-de-pure
 Bot de puré es un bot de entretenimiento, búsqueda de imágenes y utilidades generales varias. Utiliza comandos tradicionales con adiciones inspiradas en terminales como <code>--flags</code>.<br>
 Como personaje, es una robot "mujer". Es torpe y agresiva en algunos casos, pero parece tener espíritu.
-<br><br>
+
+![portadabot](https://i.imgur.com/oVC8pMV.png)
 
 ## Índice
 * [Convenciones de Desarrollo](#convenciones-de-desarrollo)
