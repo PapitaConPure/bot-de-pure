@@ -13,7 +13,7 @@ module.exports = {
 	'El embed se añadirá o se buscará por `--id` para editar *en el canal actual* a menos que especifiques un `--canal`',
 	flags: [
 		'mod',
-		//'hourai'
+		'hourai'
 	],
 	options: [,
 		'`<twitters(...)>` _(enlace: https://twitter.com/ [múltiple])_ para colocar uno o más Twitters en un nuevo embed',
