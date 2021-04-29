@@ -1,4 +1,5 @@
 const { p_pure } = require('../../localdata/config.json'); //Variables globales
+const { MessageEmbed } = require('discord.js');
 
 module.exports = {
 	name: 'dado',
@@ -52,7 +53,11 @@ module.exports = {
 		});
 		const total = dices.map(dice => dice.t).reduce((a,b) => a + b);
 
-		message.channel.send(dices.map(dice => `${dice.d} x :game_die:(${dice.f}) -> [${dice.r.join(',')}] = **${dice.t}**`).join('\n**+** ') + ((dices.length > 1)?`\n**= ${total}**`:''))
+		const embed = new MessageEmbed()
+		.setColor('#0909a0')
+		.setAuthor(message.author.username, message.author.avatarURL({ format: 'png', dynamic: true, size: 512 }))
+		.addField('tiró los dados...', dices.map(dice => `${dice.d} x :game_die:(${dice.f}) -> [${dice.r.join(',')}] = **${dice.t}**`).join('\n**+** ') + ((dices.length > 1)?`\n**= ${total}**`:''))
+		message.channel.send(embed)
 		.catch(() => message.channel.send(':x: No te pasei de gracioso, ¿tamo? <:comodowo:824759668437811224> <:pistolaR:697351201301463060>'));
     },
 };
