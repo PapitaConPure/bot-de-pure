@@ -1,7 +1,7 @@
 module.exports = {
   apps : [{
     name: 'API',
-    script: 'app.js',
+    script: 'index.js',
     exp_backoff_restart_delay: 100,
 
     // Options reference: https://pm2.keymetrics.io/docs/usage/application-declaration/
@@ -33,7 +33,7 @@ module.exports = {
       user : "node",
       host : "212.83.163.1",
       ref  : "origin/master",
-      repo : "git@github.com:PapitaConPure/emilia.git",
+      repo : "git@github.com:PapitaConPure/bot-de-pure.git",
       path : "/var/www/development",
       'ssh_options': ['StrictHostKeyChecking=no', 'PasswordAuthentication=no'],
       'post-deploy' : 'pm2 startOrRestart ecosystem.json --env dev',
