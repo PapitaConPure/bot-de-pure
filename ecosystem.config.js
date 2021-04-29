@@ -1,6 +1,6 @@
 module.exports = {
   apps : [{
-    name: 'API',
+    name: 'Bot',
     script: 'index.js',
     exp_backoff_restart_delay: 100,
 
