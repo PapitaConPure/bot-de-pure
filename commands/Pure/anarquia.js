@@ -74,7 +74,7 @@ module.exports = {
 			};
 			d();
 		} else if(args[0] === 'p') { //Revisar perfil
-			const aid = (args.length > 1)?func.resolverIDUsuario(args[1], message.channel.guild, message.client):message.author.id;
+			const aid = (args.length > 1)?func.fetchUserID(args[1], message.channel.guild, message.client):message.author.id;
 			if(aid !== undefined) {
 				const user = message.client.users.cache.get(aid);
 				const embed = new Discord.MessageEmbed()

@@ -380,13 +380,13 @@ module.exports = {
         try {
             console.log(concol.orange.underline(`Iniciando cambio de presencia ${pasuwus}...`));
             await clientowo.user.setActivity(
-                presence.status[module.exports.randInt(0, presence.status.length)],
-                { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${presence.stream[module.exports.randInt(0, presence.stream.length)]}` }
+                presence.status[module.exports.randRange(0, presence.status.length)],
+                { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${presence.stream[module.exports.randRange(0, presence.stream.length)]}` }
             );
             console.log(chalk.greenBright.bold('Cambio de presencia finalizado.'));
             
             //Programar próxima actualización de actividad
-            const stepwait = module.exports.randInt(30, 70);
+            const stepwait = module.exports.randRange(30, 70);
             setTimeout(module.exports.modifyAct, 1000 * 60 * stepwait, clientowo, pasuwus + 1);
             console.log(chalk.cyan`Esperando ciclo ${pasuwus + 1} en ${stepwait} minutos...`);
         } catch(err) {
@@ -746,6 +746,104 @@ module.exports = {
     },
     //#endregion
 
+    //#region Fetch
+    fetchUserID: function(data, guild, client) {
+        //Intentar descifrar ID por mención
+        if(data.startsWith('<@') && data.endsWith('>')) {
+            data = data.slice(2, -1);
+            if(data.startsWith('!')) data = data.slice(1);
+        }
+
+        //Buscador por usertag, en caso de que la data de búsqueda no sea una ID ni una mención
+        if(isNaN(data)) {
+            let user = new Discord.Collection();
+            user = client.users.cache.find(u => u.tag === data);
+            
+            //Buscador por nombre, en caso de que la data de búsqueda tampoco sea una usertag
+            if(!user) {
+                let temp = data;
+                //Para comprobaciones posteriores
+                /* Filtrado de búsqueda
+                - Nombre coincide parcial o totalmente
+                > Guild actual > resto de guilds
+                > Ocurrencia temprana > ocurrencia tardía
+                = Nombre corto > nombre largo
+                */
+
+                //Buscar por apodo o nombre de usuario dentro de guild actual
+                user = guild.members.cache.filter(m => m.nickname && m.nickname.toLowerCase().indexOf(temp) !== -1);
+                if(user.size) {
+                    console.log(user.map(m => m.nickname));
+                    user = user
+                        .sort()
+                        .reduce((a, b) => (a.nickname.toLowerCase().indexOf(temp) < b.nickname.toLowerCase().indexOf(temp) && a.nickname.length <= b.nickname.length)?a:b)
+                        .user;
+                } else { //Buscar por nombre de usuario en resto de guilds
+                    user = client.users.cache.filter(m => m.username.toLowerCase().indexOf(temp) !== -1);
+                    console.log(user.map(u => u.username));
+                    if(user.size)
+                        user = user
+                            .sort()
+                            .reduce((a, b) => (a.username.toLowerCase().indexOf(temp) <= b.username.toLowerCase().indexOf(temp) && a.username.length <= b.username.length)?a:b);
+                }
+            }
+
+            if(user)
+                data = user.id;
+            else
+                data = undefined;
+        }
+
+        //Retornar ID de objeto User
+        return data;
+    },
+
+    fetchArrows: function(emojiscache) {
+        return [emojiscache.get('681963688361590897'), emojiscache.get('681963688411922460')];
+    },
+
+    fetchFlag: function(args, flag = { property: false, short: [], long: [], callback: () => null, fallback: () => null }) {
+        let target;
+        args.forEach((arg, i) => {
+            if(flag.long.length && arg.startsWith('--')) {
+                if(flag.long.includes(arg.slice(2))) {
+                    target = (typeof flag.callback === 'function')?flag.callback():flag.callback;
+                    args.splice(i, 1)
+                }
+            } else if(flag.short.length && arg.startsWith('-')) {
+                for(c of arg.slice(1))
+                    if(flag.short.includes(c)) {
+                        target = (typeof flag.callback === 'function')?flag.callback():flag.callback;
+                        args.splice(i, 1)
+                    }
+            }
+		});
+        console.log('c', args);
+
+        return target?target:(typeof flag.fallback === 'function'?flag.fallback():flag.fallback);
+    },
+    
+    /*fetchFlags: function(args, flags = [{ target, short: [], long: [], callback }]) {
+        args = args.filter(arg => arg.startsWith('-')).filter(arg => {
+            return flags.some(flag => {
+                if(arg.startsWith('--'))
+                    if(flag.long.includes(arg.slice(2))) {
+                        flag.target = (typeof callback === 'function')?flag.callback():flag.callback;
+                        return true;
+                    }
+                else {
+                    for(c of arg.slice(1))
+                        if(flag.short.includes(c)) {
+                            flag.target = (typeof callback === 'function')?flag.callback():flag.callback;
+                            return true;
+                        }
+                }
+                return false;
+            })?null:arg;
+		});
+    },*/
+    //#endregion
+
     //#region Otros
     mostrarResultados: function() {
         console.log('Ordenando resultados de mayor a menor puntaje.');
@@ -817,64 +915,10 @@ module.exports = {
         console.log('Evento terminado.');
     },
 
-    resolverIDUsuario: function(data, guild, client) {
-        //Intentar descifrar ID por mención
-        if(data.startsWith('<@') && data.endsWith('>')) {
-            data = data.slice(2, -1);
-            if(data.startsWith('!')) data = data.slice(1);
-        }
-
-        //Buscador por usertag, en caso de que la data de búsqueda no sea una ID ni una mención
-        if(isNaN(data)) {
-            let user = new Discord.Collection();
-            user = client.users.cache.find(u => u.tag === data);
-            
-            //Buscador por nombre, en caso de que la data de búsqueda tampoco sea una usertag
-            if(!user) {
-                let temp = data;
-                //Para comprobaciones posteriores
-                /* Filtrado de búsqueda
-                - Nombre coincide parcial o totalmente
-                > Guild actual > resto de guilds
-                > Ocurrencia temprana > ocurrencia tardía
-                = Nombre corto > nombre largo
-                */
-
-                //Buscar por apodo o nombre de usuario dentro de guild actual
-                user = guild.members.cache.filter(m => m.nickname && m.nickname.toLowerCase().indexOf(temp) !== -1);
-                if(user.size) {
-                    console.log(user.map(m => m.nickname));
-                    user = user
-                        .sort()
-                        .reduce((a, b) => (a.nickname.toLowerCase().indexOf(temp) < b.nickname.toLowerCase().indexOf(temp) && a.nickname.length <= b.nickname.length)?a:b)
-                        .user;
-                } else { //Buscar por nombre de usuario en resto de guilds
-                    user = client.users.cache.filter(m => m.username.toLowerCase().indexOf(temp) !== -1);
-                    console.log(user.map(u => u.username));
-                    if(user.size)
-                        user = user
-                            .sort()
-                            .reduce((a, b) => (a.username.toLowerCase().indexOf(temp) <= b.username.toLowerCase().indexOf(temp) && a.username.length <= b.username.length)?a:b);
-                }
-            }
-
-            if(user)
-                data = user.id;
-            else
-                data = undefined;
-        }
-
-        //Retornar ID de objeto User
-        return data;
-    },
-
-    randInt: function(min, max) {
-        let range = max - min;
-        return min + Math.floor((global.seed + range * Math.random()) % range);
-    },
-
-    fetchArrows: function(emojiscache) {
-        return [emojiscache.get('681963688361590897'), emojiscache.get('681963688411922460')];
+    randRange: function(min, max, round = true) {
+        const range = max - min;
+        const rnum = (global.seed + range * Math.random()) % range;
+        return min + (round?Math.floor(rnum):rnum);
     }
     //#endregion
 };

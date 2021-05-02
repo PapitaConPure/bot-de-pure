@@ -34,7 +34,7 @@ async function resolverLink(msg, linkRes, iSize) {
 		} else {
 			//Resolver de usuario
 			console.log('Formato de emote no detectado. Intentando resolver como usuario.');
-			linkRes = func.resolverIDUsuario(linkRes, msg.channel.guild, msg.client);
+			linkRes = func.fetchUserID(linkRes, msg.channel.guild, msg.client);
 			
 			if(linkRes !== undefined)
 				iurl = msg.client.users.cache.get(linkRes).avatarURL({ format: 'png', size: iSize });

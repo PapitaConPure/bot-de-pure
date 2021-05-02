@@ -1,5 +1,5 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const { randInt } = require('../../func');
+const { randRange } = require('../../func');
 
 module.exports = {
 	name: 'sassafras',
@@ -115,7 +115,7 @@ module.exports = {
 				  xmusic = list.indexOf('XMUSIC'); //Extra Music
 			let m; //Mensaje
 			if(!showtotal) {
-				const i = randInt(0, list.length); //Índice aleatorio
+				const i = randRange(0, list.length); //Índice aleatorio
 				
 				//Comprobado de tipo de recomendación
 				if(i < umusic) //Juegos

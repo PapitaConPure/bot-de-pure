@@ -1,4 +1,4 @@
-const { randInt }  = require('../../func.js');
+const { randRange }  = require('../../func.js');
 
 module.exports = {
 	name: 'mabel',
@@ -25,7 +25,7 @@ module.exports = {
 		];
 
 		message.channel.send(
-			`:gay_pride_flag: ${h[randInt(0, h.length)]} ${h[randInt(0, h.length)]} ${h[randInt(0, h.length)]} ${h[randInt(0, h.length)]} ${h[randInt(0, h.length)]} :transgender_flag:`
+			`:gay_pride_flag: ${h[randRange(0, h.length)]} ${h[randRange(0, h.length)]} ${h[randRange(0, h.length)]} ${h[randRange(0, h.length)]} ${h[randRange(0, h.length)]} :transgender_flag:`
 		);
 	}
 };

@@ -33,7 +33,7 @@ module.exports = {
 						switch(arg.slice(2)) {
 						case 'usuario':
 							jn = true;
-							user = func.resolverIDUsuario(args[i + 1], message.channel.guild, message.client);
+							user = func.fetchUserID(args[i + 1], message.channel.guild, message.client);
 							args[i] = undefined;
 							args[i + 1] = undefined;
 							break;
@@ -44,7 +44,7 @@ module.exports = {
 							switch(c) {
 							case 'u':
 								jn = true;
-								user = func.resolverIDUsuario(args[i + 1], message.channel.guild, message.client);
+								user = func.fetchUserID(args[i + 1], message.channel.guild, message.client);
 								args[i] = undefined;
 								args[i + 1] = undefined;
 								break;

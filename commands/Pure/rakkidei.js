@@ -1,4 +1,4 @@
-const { randInt } = require('../../func.js');
+const { randRange } = require('../../func.js');
 
 module.exports = {
 	name: 'rakkidei',
@@ -19,6 +19,6 @@ module.exports = {
 		];
 
 		//Acción de comando
-		message.channel.send(phrase[randInt(0, phrase.length)], { files: ['https://i.imgur.com/eMyvXiC.png'] });
+		message.channel.send(phrase[randRange(0, phrase.length)], { files: ['https://i.imgur.com/eMyvXiC.png'] });
 	}
 };

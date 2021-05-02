@@ -13,11 +13,34 @@ module.exports = {
     ],
     options: [
 		'`<perrito?>` _(texto)_ para especificar un perrito a enviar (por nombres identificadores)',
-		'`<lista?>` _(texto: `perritos, todo, todos, lista, ayuda, everything, all, help`)_ para, en cambio, mostrar una lista de todos los perritos disponibles junto a sus nombres identificadores'
+		'`<lista?>` _(texto: `perritos, todo, todos, lista, ayuda, everything, all, help`)_ para, en cambio, mostrar una lista de todos los perritos disponibles junto a sus nombres identificadores',
+        '`-b` o `--borrar` para borrar el mensaje original'
     ],
 	callx: '[<perrito?>/<lista?>]',
 	
 	execute(message, args) {
+		let dflag = false;
+
+		//Lectura de flags; las flags ingresadas se ignoran como argumentos
+		args = args.map(arg => {
+			if(arg.startsWith('--'))
+				switch(arg.slice(2)) {
+				case 'borrar': dflag = true; break;
+				case 'delete': dflag = true; break;
+				default: return arg;
+				}
+			else if(arg.startsWith('-'))
+				for(c of arg.slice(1))
+					switch(c) {
+					case 'b': dflag = true; break;
+					case 'd': dflag = true; break;
+					default: return arg;
+					}
+			else return arg;
+		}).filter(arg => arg);
+
+		//Acción de comando
+		if(dflag) message.delete();
 		const perritos = [
 			'perrito', 'otirrep', 'od', 'do', 'cerca', 'muycerca', 'lejos', 'muylejos', 'invertido', 'dormido', 'pistola', 'sad', 'gorrito', 'gorra', 'almirante', 'detective',
 			'ban', 'helado', 'corona', 'Bern', 'enojado', 'policia', 'ladron', 'importado', 'peleador', 'doge', 'cheems', 'jugo', 'Papita', 'mano', 'Mima', 'chad', 'Marisa',
@@ -32,6 +55,7 @@ module.exports = {
 		if(!args.length) {
 			const randp = Math.floor(Math.random() * perritos.length);
 			message.channel.send(`${emotes[randp]}`);
+			if(args.includes('-d')) message.delete();
 		} else {
 			const mostrarlista = ['perritos', 'todo', 'todos', 'lista', 'ayuda', 'everything', 'all', 'help'];
 			if(mostrarlista.includes(args[0])) {
@@ -74,6 +98,7 @@ module.exports = {
 				});
 
 				if(!foundperrito) message.channel.send(`${emotes[0]}`);
+				if(args.includes('-d')) message.delete();
 			}
 		}
     },

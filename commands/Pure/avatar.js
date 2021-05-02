@@ -1,6 +1,6 @@
 const { MessageEmbed } = require('discord.js'); //Integrar discord.js
 const { p_pure, peopleid } = require('../../localdata/config.json');
-const { resolverIDUsuario } = require('../../func.js'); //Funciones globales
+const { fetchUserID } = require('../../func.js'); //Funciones globales
 
 module.exports = {
 	name: 'avatar',
@@ -33,7 +33,7 @@ module.exports = {
                 args.map(arg => {
                     arg = arg.trim();
                     if(arg.length === 0) return;
-                    const user = resolverIDUsuario(arg, message.channel.guild, message.client);
+                    const user = fetchUserID(arg, message.channel.guild, message.client);
 
                     if((user === peopleid.papita) && !message.channel.nsfw) {
                         message.channel.send(`Oe conchetumare te hacei el gracioso una vez más y te vai manos arriba, pantalones abajo, 'cuchai? <:junkNo:697321858407727224> <:pistolaR:697351201301463060>`);

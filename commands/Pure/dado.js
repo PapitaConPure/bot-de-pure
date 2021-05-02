@@ -1,5 +1,6 @@
 const { p_pure } = require('../../localdata/config.json'); //Variables globales
 const { MessageEmbed } = require('discord.js');
+const { randRange } = require('../../func');
 
 module.exports = {
 	name: 'dado',
@@ -41,7 +42,7 @@ module.exports = {
 		}
 
 		for(let d = 0; d < dices; d++){
-			dice[d] = randInt(1, faces + 1);
+			dice[d] = randRange(1, faces + 1);
 			total += dice[d];
 		};
 

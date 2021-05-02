@@ -1,6 +1,3 @@
-const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../localdata/config.json'); //Variables globales
-
 module.exports = {
 	name: 'uwu',
 	aliases: ['uwu'],
@@ -10,7 +7,9 @@ module.exports = {
 		'uwu'
     ],
     options: [
-		'`uwu` _(uwu)_ uwu'
+		'`uwu` _(uwu)_ uwu',
+		'`-u` o `--uwu` para uwu',
+        '`-b` o `--borrar` para borrar el mensaje original'
     ],
 	callx: 'uwu',
 	
@@ -23,5 +22,6 @@ module.exports = {
 			'<:uwu5:720506981743460472>'
 		];
 		message.channel.send(uwusopt[Math.floor(Math.random() * uwusopt.length)]);
+		if(args.includes('-d')) message.delete();
     },
 };

@@ -30,7 +30,7 @@ module.exports = {
 			if(!jn) {
 				if(arg.startsWith('--'))
 					switch(arg.slice(2)) {
-					case 'usuario': user = func.resolverIDUsuario(args[i + 1], message.channel.guild, message.client); jn = true; break;
+					case 'usuario': user = func.fetchUserID(args[i + 1], message.channel.guild, message.client); jn = true; break;
 					case 'aceptar': mode = 'a'; break;
 					case 'problema': mode = 'p'; break;
 					default: ignore = false;
@@ -38,7 +38,7 @@ module.exports = {
 				else if(arg.startsWith('-'))
 					for(c of arg.slice(1))
 						switch(c) {
-						case 'u': user = func.resolverIDUsuario(args[i + 1], message.channel.guild, message.client); jn = true; break;
+						case 'u': user = func.fetchUserID(args[i + 1], message.channel.guild, message.client); jn = true; break;
 						case 'a': mode = 'a'; break;
 						case 'p': mode = 'p'; break;
 						default: ignore = false;

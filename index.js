@@ -39,8 +39,9 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
     global.startuptime = stt;
     global.lechitauses = stt;
     global.seed = stt / 60000;
-    await func.modifyAct(client, 0);
 	confirm();
+    
+    await func.modifyAct(client, 0);
 
     console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
 	confirm();
@@ -114,7 +115,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     }
     
     //Uno en un Millón
-    if(func.randInt(0, 1000000) === 0)
+    if(func.randRange(0, 1000000) === 0)
         func.dibujarMillion(message);
     //#endregion
     
