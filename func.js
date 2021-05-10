@@ -200,6 +200,7 @@ module.exports = {
     },
 
     askForRole: function(miembro, canal, rep) {
+        const reps = 4;
         console.log(chalk.cyan('Comprobando miembro nuevo en Hourai Doll para petición de rol de color...'));
         if(!miembro.deleted) {
             console.log(concol.orange('El miembro sigue en el servidor'));
@@ -214,7 +215,7 @@ module.exports = {
                 setTimeout(module.exports.finalizarHourai, 1000, miembro, canal);
             } else {
                 if(rep > 0) {
-                    setTimeout(module.exports.askForRole, 1000 * 60 / 4, miembro, canal, rep - 1);
+                    setTimeout(module.exports.askForRole, 1000 * 60 / reps, miembro, canal, rep - 1);
                     return;
                 }
                 
@@ -224,7 +225,7 @@ module.exports = {
                     if(global.hourai.warn <= 6) {
                         if(global.hourai.warn <= 3)
                             canal.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474> (${global.hourai.warn}/3 llamados)`);
-                        setTimeout(module.exports.askForRole, 1000, miembro , canal, 5 * 4);
+                        setTimeout(module.exports.askForRole, 1000, miembro , canal, 3 * reps);
                         console.log(chalk.cyan(`Volviendo a esperar confirmación de miembro (${global.hourai.warn}/6)...`));
                     }
                 } else {
@@ -233,7 +234,7 @@ module.exports = {
                         `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>`,
                         { files: [global.hourai.images.colors] }
                     ).then(sent => module.exports.askColor(sent, miembro));
-                    setTimeout(module.exports.forceRole, 1000, miembro, canal, 4 * 4);
+                    setTimeout(module.exports.forceRole, 1000, miembro, canal, 2 * reps);
                     console.log(chalk.magentaBright(`Esperando comprobación final de miembro en unos minutos...`));
                 }
             }
@@ -244,6 +245,7 @@ module.exports = {
     },
 
     forceRole: function(miembro, canal, rep) {
+        const reps = 4;
         console.log(chalk.cyan('Comprobando miembro nuevo en Hourai Doll para forzado de rol de color'));
         if(!miembro.deleted) {
             console.log(concol.orange('El miembro sigue en el servidor'));
@@ -257,7 +259,7 @@ module.exports = {
                 setTimeout(module.exports.finalizarHourai, 1000, miembro, canal);
             } else {
                 if(rep > 0) {
-                    setTimeout(module.exports.forceRole, 1000 * 60 / 4, miembro, canal, rep - 1);
+                    setTimeout(module.exports.forceRole, 1000 * 60 / reps, miembro, canal, rep - 1);
                     return;
                 }
 
@@ -773,14 +775,12 @@ module.exports = {
                 //Buscar por apodo o nombre de usuario dentro de guild actual
                 user = guild.members.cache.filter(m => m.nickname && m.nickname.toLowerCase().indexOf(temp) !== -1);
                 if(user.size) {
-                    console.log(user.map(m => m.nickname));
                     user = user
                         .sort()
                         .reduce((a, b) => (a.nickname.toLowerCase().indexOf(temp) < b.nickname.toLowerCase().indexOf(temp) && a.nickname.length <= b.nickname.length)?a:b)
                         .user;
                 } else { //Buscar por nombre de usuario en resto de guilds
                     user = client.users.cache.filter(m => m.username.toLowerCase().indexOf(temp) !== -1);
-                    console.log(user.map(u => u.username));
                     if(user.size)
                         user = user
                             .sort()

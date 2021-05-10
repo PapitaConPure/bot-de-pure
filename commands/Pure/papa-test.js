@@ -21,8 +21,8 @@ module.exports = {
         const a = func.fetchFlag(args, { short: [ 'f', 's' ], long: [ 'flag', 'short' ], callback: true, fallback: false });
         const b = func.fetchFlag(args, { short: [ 'l', 'o' ], long: [ 'long' ], callback: someFunc });
         const c = func.fetchFlag(args, { short: [ 'h', 'e' ], long: [ 'hentai', 'ecchi' ], callback: 42, fallback: 0 });
-        
-        console.log({args, a, b, c, asfawefwef });
+
+        console.log({args, a, b, c });
         message.channel.send(`**args** ${args}\n**a** ${a}\n**b** ${b}\n**c** ${c}`);
     },
 };

@@ -1,8 +1,8 @@
-const Discord = require('discord.js');
-const global = require('../../localdata/config.json'); //Variables globales
-const uses = require('../../localdata/sguses.json'); //Variables globales
-const func = require('../../func.js');
-const Canvas = require('canvas');
+const { p_pure, puretable } = require('../../localdata/config.json'); //Variables globales
+const { anarquia } = require('../../localdata/sguses.json'); //Variables globales
+const { fetchUserID } = require('../../func');
+const { createCanvas, loadImage } = require('canvas');
+const { MessageEmbed, MessageAttachment } = require('discord.js');
 
 module.exports = {
 	name: 'anarquia',
@@ -14,9 +14,9 @@ module.exports = {
 		'Puedes ingresar un `<emote>` en una `<posición(x,y)>` o, al no ingresar nada, ver la tabla\n' +
 		'La `<posicion(x,y)>` se cuenta desde 1x,1y, y el `<emote>` designado debe ser de un server del que yo forme parte~\n\n' +
 		'De forma aleatoria, puedes ir desbloqueando habilidades para rellenar líneas completas en `--horizontal` o `--vertical`. La probabilidad inicial es 1% en conjunto, y aumenta +1% por cada __nivel__\n' +
-		`**Nivel**: nivel de usuario en \`${global.p_pure}anarquia\`. +1 por cada *30 usos*\n\n` +
+		`**Nivel**: nivel de usuario en \`${p_pure}anarquia\`. +1 por cada *30 usos*\n\n` +
 		'Incluso si usas una habilidad de línea, debes ingresar ambos ejes (`x,y`) en orden\n' +
-		`Usa \`${global.p_pure}anarquia p\` para ver tu perfil anárquico`,
+		`Usa \`${p_pure}anarquia p\` para ver tu perfil anárquico`,
 	flags: [
 		'common'
 	],
@@ -32,7 +32,7 @@ module.exports = {
 		if(!args.length) { //Ver tabla
 			const d = async () => {
 				//Acción de comando
-				const canvas = Canvas.createCanvas(864, 960);
+				const canvas = createCanvas(864, 960);
 				const ctx = canvas.getContext('2d');
 
 				//#region Encabezado
@@ -49,10 +49,10 @@ module.exports = {
 
 				let loademotes = {};
 				const mapearEmotes = async () =>
-					Promise.all(global.puretable.map(arr => 
+					Promise.all(puretable.map(arr => 
 						Promise.all(arr.slice(0).sort().filter((item, i, a) => (i > 0)?(item !== a[i - 1]):true).map(async item => {
 							if(!loademotes.hasOwnProperty(item))
-								loademotes[item] = await Canvas.loadImage(message.client.emojis.cache.get(item).url);
+								loademotes[item] = await loadImage(message.client.emojis.cache.get(item).url);
 						}))
 					)
 				);
@@ -60,35 +60,35 @@ module.exports = {
 				mapearEmotes().then(() => {
 					//Dibujar emotes en imagen
 					const size = 48;
-					const tx = canvas.width / 2 - size * global.puretable.length / 2;
+					const tx = canvas.width / 2 - size * puretable.length / 2;
 					const ty = ctx.measureText('M').emHeightDescent + 12;
-					global.puretable.map((arr, y) => {
+					puretable.map((arr, y) => {
 						arr.map((item, x) => 
 							ctx.drawImage(loademotes[item], tx + x * size, ty + y * size, size, size)
 						);
 					});
 					
-					const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'anarquia.png');
+					const imagen = new MessageAttachment(canvas.toBuffer(), 'anarquia.png');
 					message.channel.send({ files: [imagen] });
 				});
 			};
 			d();
 		} else if(args[0] === 'p') { //Revisar perfil
-			const aid = (args.length > 1)?func.fetchUserID(args[1], message.channel.guild, message.client):message.author.id;
+			const aid = (args.length > 1)?fetchUserID(args[1], message.channel.guild, message.client):message.author.id;
 			if(aid !== undefined) {
 				const user = message.client.users.cache.get(aid);
-				const embed = new Discord.MessageEmbed()
+				const embed = new MessageEmbed()
 					.setColor('#bd0924')
 					.setAuthor(user.username, user.avatarURL({ format: 'png', dynamic: true, size: 512 }));
 				if(uses.anarquia[aid] !== undefined)
 					embed.setTitle('Perfil anárquico')
-						.addField('Inventario', `↔️ x ${uses.anarquia[aid].h}\n↕ x ${uses.anarquia[aid].v}`, true)
-						.addField('Rango', `Nivel ${Math.floor(uses.anarquia[aid].exp / 30) + 1} (exp: ${uses.anarquia[aid].exp})`, true);
+						.addField('Inventario', `↔️ x ${anarquia[aid].h}\n↕ x ${anarquia[aid].v}`, true)
+						.addField('Rango', `Nivel ${Math.floor(anarquia[aid].exp / 30) + 1} (exp: ${anarquia[aid].exp})`, true);
 				else
 					embed.setTitle('Perfil inexistente')
 						.addField(
-							'No tienes un perfil anárquico todavía', `Usa \`${global.p_pure}anarquia <posición(x,y)> <emote>\` para colocar un emote en la tabla de puré y crearte un perfil anárquico automáticamente\n` +
-							`Si tienes más dudas, usa \`${global.p_pure}ayuda anarquia\``
+							'No tienes un perfil anárquico todavía', `Usa \`${p_pure}anarquia <posición(x,y)> <emote>\` para colocar un emote en la tabla de puré y crearte un perfil anárquico automáticamente\n` +
+							`Si tienes más dudas, usa \`${p_pure}ayuda anarquia\``
 						);
 				message.channel.send(embed);
 			} else message.channel.send(`:warning: Usuario **${args[1]}** no encontrado`);

@@ -1,4 +1,4 @@
-const global = require('../../localdata/config.json'); //Variables globales
+const { serverid } = require('../../localdata/config.json'); //Variables globales
 
 module.exports = {
 	name: 'decir',
@@ -47,7 +47,7 @@ module.exports = {
             const sentence = args.join(' ');
 
             const minus = sentence.toLowerCase();
-            if(message.channel.guild.id === global.serverid.hourai && minus.indexOf('hourai') !== -1 && minus.indexOf('hourai doll') !== minus.indexOf('hourai') && minus.indexOf('houraidoll') === -1)
+            if(message.channel.guild.id === serverid.hourai && minus.indexOf('hourai') !== -1 && minus.indexOf('hourai doll') !== minus.indexOf('hourai') && minus.indexOf('houraidoll') === -1)
                 message.channel.send('No me hagai decir weas de hourai, ¿yapo? Gracias <:haniwaSmile:659872119995498507>');
             else if(sentence.length === 0)
                 message.channel.send(':warning: tienes que especificar lo que quieres que diga.');

@@ -1,13 +1,9 @@
-const Discord = require('discord.js'); //Integrar discord.js
+const { MessageEmbed } = require('discord.js'); //Integrar discord.js
+const { randRange } = require('../../func');
 const fetch = require('node-fetch');
 
-const getRandomInt = function(_max) {
-  _max = Math.floor(_max);
-  return Math.floor(Math.random() * _max);
-}
-
 const tmpfunc = async function(tmpch, alist) {
-	const srchoff = getRandomInt(100);
+	const srchoff = randRange(0, 100);
 	const srchlimit = 10;
 	let srchextra = '';
 	for(let i = 0; i < alist.length; i++)
@@ -17,8 +13,8 @@ const tmpfunc = async function(tmpch, alist) {
 	).then(response => response.json());
 
 	//Crear y usar embed
-	const selected = data[getRandomInt(srchlimit - 1)];
-	const Embed = new Discord.MessageEmbed()
+	const selected = data[randRange(0, srchlimit)];
+	const Embed = new MessageEmbed()
 		.setColor('#6a4928')
 		.setTitle('Café uwu')
 		.addField('Salsa', `${selected.bitly_url}`)
@@ -40,7 +36,7 @@ module.exports = {
 
     ],
 
-	execute(message, args){
+	execute(message, args) {
 		tmpfunc(message.channel, args);
     },
 };

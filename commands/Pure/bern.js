@@ -1,9 +1,4 @@
-const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../localdata/config.json'); //Variables globales
-
-const getRandomInt = function(_max) {
-  return Math.floor(Math.random() * _max);
-}
+const { randRange } = require("../../func");
 
 module.exports = {
 	name: 'bern',
@@ -40,7 +35,7 @@ module.exports = {
 			message.client.emojis.cache.get('697320983106945054'), //Pepe
 			message.client.emojis.cache.get('697323104141049867'), //Kokocrong
 		];
-		const selection = getRandomInt(emot.length);
+		const selection = randRange(0, emot.length);
 		
 		message.channel.send(`**${emot[selection]}** <:bewny:722334924845350973>`).then(sent => {
 			if(selection <= 4) {

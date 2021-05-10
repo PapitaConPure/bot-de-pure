@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.4C",
+            "number": "Full.2.8.4F",
             "name": "Cisne Cristalino"
         },
         "note": "Versión estable. Se están realizando cambios lentos pero seguros apuntando a la personalización a nivel de servidor",
@@ -18,7 +18,10 @@
             "Cambios de algunas flags y restricciones de respuestas rápidas en algunos servidores",
             "p!dados ahora muestra el nombre de quién lo tiró y tiene mejor presentación",
             "p!taton ahora ignora tildes al buscar por nombre y permite borrar el mensaje original",
-            "p!uwu ahora permite borrar el mensaje original"
+            "p!uwu ahora permite borrar el mensaje original",
+            "Se lidió con la carga de información innecesaria en algunos comandos",
+            "Ahora soy más agresiva para preguntar por los roles de colores a nuevos (Hourai Doll)",
+            "Cambiados varios mensajes con enlaces de imágenes a imágenes directas"
         ],
         "todo": [
             "Restaurar comandos de búsqueda de imagen avanzados",

@@ -1,5 +1,5 @@
-const global = require('../../localdata/config.json'); //Variables globales
-const func = require('../../func'); //Funciones globales
+const { hourai } = require('../../localdata/config.json'); //Variables globales
+const { askColor } = require('../../func'); //Funciones globales
 
 module.exports = {
 	name: 'colores',
@@ -14,7 +14,7 @@ module.exports = {
     ],
 	
 	execute(message, args) {
-		message.channel.send(`Aquí teni los colore po **${message.author.username}** <:reibu:686220828773318663>`, { files: [global.hourai.images.colors] })
-			.then(sent => func.askColor(sent, message.member));
+		message.channel.send(`Aquí teni los colore po **${message.author.username}** <:reibu:686220828773318663>`, { files: [hourai.images.colors] })
+			.then(sent => askColor(sent, message.member));
     },
 };

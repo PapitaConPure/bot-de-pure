@@ -1,6 +1,6 @@
-const Discord = require('discord.js'); //Integrar discord.js
-const global = require('../../localdata/config.json'); //Variables globales
-const func = require('../../func.js'); //Funciones globales
+const { MessageAttachment } = require('discord.js'); //Integrar discord.js
+//const global = require('../../localdata/config.json'); //Variables globales
+//const func = require('../../func.js'); //Funciones globales
 const Canvas = require('canvas');
 
 module.exports = {
@@ -148,7 +148,7 @@ module.exports = {
         //#endregion
         //#endregion*/
         
-        const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'bienvenida.png');
+        const imagen = new MessageAttachment(canvas.toBuffer(), 'bienvenida.png');
         message.channel.send({files: [imagen]});
         message.channel.stopTyping(true);
 	}

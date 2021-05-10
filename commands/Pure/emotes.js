@@ -1,5 +1,5 @@
-const Discord = require('discord.js'); //Integrar discord.js
-const global = require('../../localdata/config.json'); //Variables globales
+const { MessageEmbed } = require('discord.js'); //Integrar discord.js
+const { serverid } = require('../../localdata/config.json'); //Variables globales
 const { paginate, fetchArrows } = require('../../func');
 
 module.exports = {
@@ -17,16 +17,17 @@ module.exports = {
 		const guilds = message.client.guilds.cache;
 		let emotes = [];
 		{
-			const slot1Coll = guilds.get(global.serverid.slot1).emojis.cache;
-			const slot2Coll = guilds.get(global.serverid.slot2).emojis.cache;
-			const slot3Coll = guilds.get(global.serverid.slot3).emojis.cache;
+			const slot1Coll = guilds.get(serverid.slot1).emojis.cache;
+			const slot2Coll = guilds.get(serverid.slot2).emojis.cache;
+			const slot3Coll = guilds.get(serverid.slot3).emojis.cache;
 			emotes = slot1Coll.concat(slot2Coll).concat(slot3Coll).array().sort();
 		}
 		/*emotes = emotes.map((e, i) => { return (i % pagemax === 0)?emotes.slice(i, i + pagemax):null; }).filter(e => e);
 		emotes = emotes.map(page => page.map(e => `\`${e.name}${' '.repeat(24 - e.name.length)}\` <:${e.name}:${e.id}>`).join('\n'));*/
 		emotes = paginate(emotes);
 		let page = 0;
-		const embed = new Discord.MessageEmbed()
+		const content = '**Oe mira po, emotes** <:yumou:708158159180660748>\n';
+		const embed = new MessageEmbed()
 			.setColor('#fecb4c')
 			.setTitle('Emotes')
 
@@ -35,10 +36,9 @@ module.exports = {
 			.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
 			.setFooter(`Reacciona a las flechas debajo para cambiar de página`);
 
-		message.channel.send('**Oe mira po, emotes** <:yumou:708158159180660748>\n');
 		const arrows = fetchArrows(message.client.emojis.cache);
 		const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
-		message.channel.send(embed).then(sent => {
+		message.channel.send(content, embed).then(sent => {
 			sent.react(arrows[0])
 				.then(() => sent.react(arrows[1]));
 			
@@ -48,7 +48,7 @@ module.exports = {
 				else page = (page < (emotes.length - 1))?(page + 1):0;
 				embed.fields[0].value = emotes[page];
 				embed.setFooter(`Página ${page + 1}/${Math.ceil(emotes.length)}`);
-				sent.edit(embed);
+				sent.edit(content, embed);
 			});
 		});
 		

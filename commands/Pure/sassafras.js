@@ -84,6 +84,15 @@ module.exports = {
 			const date = today.getUTCDate();
 			let hint;
 			switch(today.getUTCMonth() + 1) {
+			case 4: //Abril
+				if(date === 1)
+					hint = '';
+					list = [
+						...list,
+						'XMUSIC'
+					];
+					list = list.fill('vJzZ_LkYEb8', list.length, list.length * 2);
+				break;
 			case 10: //Octubre
 				if(date === 31) { //Halloween
 					hint = 'The air is getting colder around you:';

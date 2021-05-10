@@ -1,9 +1,5 @@
-const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../localdata/config.json'); //Variables globales
-
-const getRandomInt = function(_max) {
-    return Math.floor(Math.random() * _max);
-}
+//const Discord = require('discord.js'); //Integrar discord.js
+//const global = require('../../localdata/config.json'); //Variables globales
 
 module.exports = {
  name: 'arathy',

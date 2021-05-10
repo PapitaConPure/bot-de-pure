@@ -1,6 +1,4 @@
-const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../localdata/config.json'); //Variables globales
-const func = require('../../func.js'); //Funciones globales
+const { askCandy } = require('../../func.js'); //Funciones globales
 
 module.exports = {
 	name: 'caramelos',
@@ -13,11 +11,8 @@ module.exports = {
         'hourai',
         'outdated'
     ],
-    options: [
-
-    ],
 	
 	execute(message, args) {
-		func.askCandy(message.member, message.channel);
+		askCandy(message.member, message.channel);
     },
 };
