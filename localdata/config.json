@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.4F",
+            "number": "Full.2.8.50",
             "name": "Cisne Cristalino"
         },
         "note": "Versión estable. Se están realizando cambios lentos pero seguros apuntando a la personalización a nivel de servidor",
@@ -32,7 +32,8 @@
         "hourai":   "654471968200065034",
         "ar":       "611732083995443210",
         "usd":      "698323332160028792",
-        "ocg":      "750095369639297065"
+        "ocg":      "750095369639297065",
+        "nlp":      "832018129549918218"
     },
     "peopleid": {
         "papita": "423129757954211880",
