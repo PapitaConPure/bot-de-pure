@@ -51,8 +51,8 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
 	dns.lookupService('127.0.0.1', 443, (err, hostname, service) => {
         global.bot_status.host = (err === null)?`${service}://${hostname}/`:'[host no detectado]';
     });
-    global.puretable = Array(16).fill(null).map(() => Array(16).fill('828736342372253697'));
 	confirm();
+    global.puretable = Array(16).fill(null).map(() => Array(16).fill('828736342372253697'));
 
 	console.log(chalk.rgb(158,114,214)('Registrando fuentes...'));
     registerFont('fonts/Alice-Regular.ttf', { family: 'headline' });

@@ -5,7 +5,7 @@
             "number": "Full.2.8.50",
             "name": "Cisne Cristalino"
         },
-        "note": "Versión estable. Se están realizando cambios lentos pero seguros apuntando a la personalización a nivel de servidor",
+        "note": "Corregí un problema con p!anarquia que puede que se encuentre en otros comandos, favor de reportar. Se sigue buscando la personalización a nivel de servidor",
         "changelog": [
             "Tareas de refactorización (2.5/4)",
             "Corregido error de referencia en p!anarquia"
@@ -41,7 +41,11 @@
         "bern": "239550977638793217"
     },
     "lechitauses": 0,
-    "puretable": [],
+    "puretable": [
+        "1",
+        "2",
+        "3"
+    ],
     "hourai": {
         "warn": 0,
         "images": {
