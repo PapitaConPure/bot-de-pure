@@ -93,10 +93,10 @@ client.on('message', message => { //En caso de recibir un mensaje
     //#endregion
 
     //#region Estadísticas
-    const mgi = message.guild.id, mci = message.channel.id, mmi = message.member.id;
+    const mgi = message.guild.id, mci = message.channel.id, mmi = message.author.id;
     if(global.cansay === 0 && message.author.bot) return;
     stats.read++;
-    stats[mgi] = stats[message.guild.id] || {};
+    stats[mgi] = stats[mgi] || {};
     stats[mgi][mci] = stats[mgi][mci] || {};
     stats[mgi][mci][mmi] = (stats[mgi][mci][mmi] || 0) + 1;
     //#endregion
