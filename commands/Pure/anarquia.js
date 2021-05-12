@@ -80,7 +80,7 @@ module.exports = {
 				const embed = new MessageEmbed()
 					.setColor('#bd0924')
 					.setAuthor(user.username, user.avatarURL({ format: 'png', dynamic: true, size: 512 }));
-				if(uses.anarquia[aid] !== undefined)
+				if(anarquia[aid] !== undefined)
 					embed.setTitle('Perfil anárquico')
 						.addField('Inventario', `↔️ x ${anarquia[aid].h}\n↕ x ${anarquia[aid].v}`, true)
 						.addField('Rango', `Nivel ${Math.floor(anarquia[aid].exp / 30) + 1} (exp: ${anarquia[aid].exp})`, true);
@@ -95,14 +95,14 @@ module.exports = {
 		} else { //Ingresar emotes a tabla
 			const aid = message.author.id;
 			//Tiempo de enfriamiento por usuario
-			if(uses.anarquia[aid] !== undefined) {
-				if((Date.now() - uses.anarquia[aid].last) / 1000 < 3) {
+			if(anarquia[aid] !== undefined) {
+				if((Date.now() - anarquia[aid].last) / 1000 < 3) {
 					message.react('⌛');
 					return;
 				} else
-					uses.anarquia[aid].last = Date.now();
+					anarquia[aid].last = Date.now();
 			} else
-				uses.anarquia[aid] = {
+				anarquia[aid] = {
 					last: Date.now(),
 					h: '1',
 					v: '1',
@@ -115,14 +115,14 @@ module.exports = {
 			args.map((arg, i) => {
 				if(arg.startsWith('--'))
 					switch(arg.slice(2)) {
-					case 'horizontal': h = (uses.anarquia[aid].h > 0); break;
-					case 'vertical': v = (uses.anarquia[aid].v > 0); break;
+					case 'horizontal': h = (anarquia[aid].h > 0); break;
+					case 'vertical': v = (anarquia[aid].v > 0); break;
 					}
 				else if(arg.startsWith('-'))
 					for(c of arg.slice(1))
 						switch(c) {
-						case 'h': h = (uses.anarquia[aid].h > 0); break;
-						case 'v': v = (uses.anarquia[aid].v > 0); break;
+						case 'h': h = (anarquia[aid].h > 0); break;
+						case 'v': v = (anarquia[aid].v > 0); break;
 						}
 				else if(Object.keys(e).length < 4)
 					if((arg.startsWith('<:') || arg.startsWith('<a:')) && arg.endsWith('>')) {
@@ -139,43 +139,43 @@ module.exports = {
 			});
 			
 			if(Object.keys(e).length !== 3)
-				message.channel.send(`:warning: Entrada inválida\nUsa \`${global.p_pure}ayuda anarquia\` para más información`);
+				message.channel.send(`:warning: Entrada inválida\nUsa \`${p_pure}ayuda anarquia\` para más información`);
 			else if(e.id === 'unresolved')
 				message.react('⚠️');
 			else {
 				//Insertar emote en x,y
 				const stx = e.x, sty = e.y;
-				e.x = Math.max(0, Math.min(e.x, global.puretable[0].length - 1));
-				e.y = Math.max(0, Math.min(e.y, global.puretable.length - 1));
+				e.x = Math.max(0, Math.min(e.x, puretable[0].length - 1));
+				e.y = Math.max(0, Math.min(e.y, puretable.length - 1));
 
 				const modifyAndNotify = async () => {
-					if(!h && !v) global.puretable[e.y][e.x] = e.id;
+					if(!h && !v) puretable[e.y][e.x] = e.id;
 					else {
-						if(h) { for(let i = 0; i < global.puretable[0].length; i++) global.puretable[e.y][i] = e.id; uses.anarquia[aid].h--; }
-						if(v) { for(let i = 0; i < global.puretable.length; i++)    global.puretable[i][e.x] = e.id; uses.anarquia[aid].v--; }
+						if(h) { for(let i = 0; i < puretable[0].length; i++) puretable[e.y][i] = e.id; anarquia[aid].h--; }
+						if(v) { for(let i = 0; i < puretable.length; i++)    puretable[i][e.x] = e.id; anarquia[aid].v--; }
 						await message.react('⚡');
 					}
 
 					const r = Math.random();
-					console.log(`${r} < ${(1 + Math.floor(uses.anarquia[aid].exp / 30)) / 100}`);
-					if(r < (1 + Math.floor(uses.anarquia[aid].exp / 30)) / 100)
+					console.log(`${r} < ${(1 + Math.floor(anarquia[aid].exp / 30)) / 100}`);
+					if(r < (1 + Math.floor(anarquia[aid].exp / 30)) / 100)
 						if(Math.random() < 0.5) {
-							uses.anarquia[aid].h++;
+							anarquia[aid].h++;
 							await message.react('↔️');
 						} else {
-							uses.anarquia[aid].v++;
+							anarquia[aid].v++;
 							await message.react('↕️');
 						}
-					uses.anarquia[aid].exp++;
-					if((uses.anarquia[aid].exp % 30) == 0)
-						message.channel.send(`¡**${message.author.username}** subió a nivel **${Math.floor(uses.anarquia[aid].exp / 30) + 1}**!`);
+					anarquia[aid].exp++;
+					if((anarquia[aid].exp % 30) == 0)
+						message.channel.send(`¡**${message.author.username}** subió a nivel **${Math.floor(anarquia[aid].exp / 30) + 1}**!`);
 
 					if(stx !== e.x || sty !== e.y) message.react('☑️');
 					else message.react('✅');
 				}
 
 				modifyAndNotify();
-				uses.anarquia[aid].last = Date.now();
+				anarquia[aid].last = Date.now();
 			}
 		}
 	}
