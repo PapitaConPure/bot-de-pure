@@ -7,10 +7,11 @@ const Keyv = require('keyv');
 //keyv.on('error', err => console.error('Keyv connection error:', err));
 const global = require('./localdata/config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
+const stats = require('./localdata/stats.json');
 const dns = require('dns'); //Detectar host
-const token = (process.env.I_LOVE_MEGUMIN)?process.env.I_LOVE_MEGUMIN:require('./key.json').token; //La clave del bot
-const chalk = require('chalk'); //Consola con formato bonito
 const { registerFont } = require('canvas'); //Registrar fuentes al ejecutar Bot
+const chalk = require('chalk'); //Consola con formato bonito
+const token = (process.env.I_LOVE_MEGUMIN)?process.env.I_LOVE_MEGUMIN:require('./key.json').token; //La clave del bot
 //#endregion
 
 //#region Detección de archivos de comandos
@@ -78,9 +79,6 @@ client.on('message', message => { //En caso de recibir un mensaje
         message.delete();
     }
     //#endregion
-
-    //Los mensajes de bots se ignoran desde este punto
-    if(global.cansay === 0 && message.author.bot) return;
     
     //#region Operaciones de proceso e ignorar mensajes privados
     if(message.guild) {
@@ -92,6 +90,15 @@ client.on('message', message => { //En caso de recibir un mensaje
         message.channel.send(':x: Uh... disculpá, no trabajo con mensajes directos.');
         return;
     }
+    //#endregion
+
+    //#region Estadísticas
+    const mgi = message.guild.id, mci = message.channel.id, mmi = message.member.id;
+    if(global.cansay === 0 && message.author.bot) return;
+    stats.read++;
+    stats[mgi] = stats[message.guild.id] || {};
+    stats[mgi][mci] = stats[mgi][mci] || {};
+    stats[mgi][mci][mmi] = (stats[mgi][mci][mmi] || 0) + 1;
     //#endregion
 
     //#region Respuestas rápidas
@@ -199,10 +206,12 @@ client.on('message', message => { //En caso de recibir un mensaje
             return;
         } else //En cambio, si no se detectan problemas, finalmente ejecutar comando
             comando.execute(message, args);
+        stats.commands.succeeded++;
     } catch(error) {
         console.log('Ha ocurrido un error al ingresar un comando.');
         console.error(error);
         message.channel.send(`\`\`\`js\n${error}\n\`\`\`\n<@!${global.peopleid.papita}>`);
+        stats.commands.failed++;
     }
 
     //Empezar cuenta regresiva luego de mod-empezar

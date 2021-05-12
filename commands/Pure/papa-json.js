@@ -26,7 +26,7 @@ module.exports = {
 		//Buscar objeto de forma descendiente
 		let obj, name;
 		if(args.length && args[0].endsWith('.json')) {
-			try { obj = require(`../../${args[0]}`); }
+			try { obj = require(`../../localdata/${args[0]}`); }
 			catch(e) { obj = require('../../localdata/config.json'); }
 			name = args[0].slice(0, -5);
 			args = args.slice(1);
