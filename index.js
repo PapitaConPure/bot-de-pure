@@ -80,6 +80,9 @@ client.on('message', message => { //En caso de recibir un mensaje
     }
     //#endregion
     
+    //Ignorar mensajes de bots desde este punto
+    if(global.cansay === 0 && message.author.bot) return;
+
     //#region Operaciones de proceso e ignorar mensajes privados
     if(message.guild) {
         console.log(`[${message.guild.name.substr(0,12)}::${message.guild.id} → #${message.channel.name.substr(0,8)}::${message.channel.id}] ${message.author.username}: "${message.content}"`);
@@ -94,7 +97,6 @@ client.on('message', message => { //En caso de recibir un mensaje
 
     //#region Estadísticas
     const mgi = message.guild.id, mci = message.channel.id, mmi = message.author.id;
-    if(global.cansay === 0 && message.author.bot) return;
     stats.read++;
     stats[mgi] = stats[mgi] || {};
     stats[mgi][mci] = stats[mgi][mci] || {};
