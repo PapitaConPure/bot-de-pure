@@ -65,17 +65,21 @@ module.exports = {
 				'¿Querés jugar Touhou pero no tenés el tiempo o las ganas de jugarte 6 niveles? ¿Qué tal si jugás [Glory of Deep Skies](https://www.bulletforge.org/u/team-alternative-snding/p/dong-fang-meng-jiu-shi-glory-of-deep-skies)? Solo tiene tres niveles y una rejugabilidad decente.',
 				'¿Ya jugaste [Khimera: Destroy All Monster Girls](https://store.steampowered.com/app/467380/Khimera_Destroy_All_Monster_Girls/)? Es gratis y como 5 veces mejor de lo que parece.',
 				'Si andás aburrido y querés ver algo surreal con toques de YouTube Poop viejos, puede que te interese la serie de vídeos de [ENA](https://www.youtube.com/playlist?list=PLhPaJURyApsoMQDaoft5t0l0iAwUOLtlM), por Joel Guerra',
+				'¿Querés jugar un juego de terror que no se toma a si mismo muy en serio, pero sigue siendo perfectamente capaz de asustar? Pues [Spooky\'s Jumpscare Mansion](https://store.steampowered.com/app/356670/Spookys_Jump_Scare_Mansion/) podría interesarles. Pueden elegir la versión gratuita (en cuyo caso los DLCs son pagos) o una [versión renovada](https://store.steampowered.com/app/577690/Spookys_Jump_Scare_Mansion_HD_Renovation/) de pago que aparte de cambiar algunas mecánicas viene con todos los DLC',
+				'¿Te gusta Silent Hill pero seguís llorando porque la franquicia está completamente muerta? Pues te tengo un juego que podría ayudarte a disimular: [Lost In Vivo](https://store.steampowered.com/app/963710/Lost_in_Vivo/)',
+				'¿Sabías que el juego Cave Story tiene... una secuela? Después de muchísimos años, el mod [Jenka\'s Nightmare](http://jenkasnightmare.srb2.org/) fue finalmente concluido en 2015. Es una segunda visita a la isla con caras nuevas y viejas. A propósito, es compatible con partidas del Cave Story original (el gratuito, no la versión + de Steam), así que si lo tienen por ahí, aprovechen. (Nota: Dificultad elevada, se sugiere jugar el juego original primero)',
+				'La verdad no estoy muy seguro de cómo presentar este, pero es uno de mis hacks favoritos de EarthBound y siento que, a pesar de sus defectos, sigue siendo bastante divertido y algo a lo que más gente debería prestarle atención. También es razonablemente largo. En fin, acá está [Hallow\'s End](https://forum.starmen.net/forum/Community/PKHack/Hallow-s-End), donde vas a acompañar a Sally, Clyde y Craig en una extraña, más o menos tenebrosa desventura.',
 				'UMUSIC', //Música desconocida
 				'dBWKwbjj020', 'w5leZrtrFi0', '5ok9bzDzaS0', 'LKNBOzazxZE', 'U_0TeykT5NA', 'uvQTE7H2M68', 'c47DEa8ICoY', 'jj5CLg0GS5U', '1FPwPLfIubg', 'IyXBZ4M09ts',
 				'p7hhRd-BafY', 'wiwHcEF2kiI', '55LnD7TNNGc', 'Rar7taiH0dY', 'wC5EQUvamQU', 'ElRQjuWmTUg', 'jAnx-rU0psE', 'D7chqmf2ThM', 'GlHKKdtLuqo', '_ImmjLQi5mE',
 				'qmandi2nKi4', 'uddmkZiPjCw', 'ZjevDeTvbbw', 'FSJObE6eyCU', '4_gObHt1uZA', 'rRyy0yn2Qx8', 'owghgsl_z5o', 'cOlCCc-_2sg', 'GPAyRytnLWE', 'tmI92GX-xF0',
 				'LseIASl1Pbk', 'Zz1jjTbVoew', '3fb8JL-fz0M', '8fll7w2xqcI', 'z3VSYWmbJFg', 'dE00u-GUYnw', 'Swd6aXqW0qM', 'GKVulqzzq5U', 'I-4dX4mxfVI', 'dot0iGpUL5I',
 				'DTUdiGFmVRI', 'wz4s6quLDLg', 'leIMP5mbB14', 'pHKkgTZS5K8', 'peuTnilEv9g', '4EcgruWlXnQ', 'spF6PuFh7y4', 'y4EATZ-tNPU', 'B77hKKI4SbI', 'dkxrXWokYqQ',
-				'zKaoDdNZhJE', 'SJW697Ey5EE',
+				'zKaoDdNZhJE', 'SJW697Ey5EE', 'ZHlrHvt1dUE', 
 				'KMUSIC', //Música conocida
 				'wGcyKEZtWuE', 'AdDbbzuq1vY', 'qIk6YFTzckc', 'Mdnnfg6Yvb0', 'llnXhrCn9Yo', 'dVVZaZ8yO6o', '2b8TKhIz_ZY', 'qVXeWfFTFGo', '8VyaShl6urc', 'HSZIej-ZraE',
 				'Y0VYKbTSxu0', 'yn3GPjhtYJ8', 'LicR6XLP94U', 'tApsiCYkOfw', 'wqAYMZSOQao', 'Q1kf-OJdvb4', 'ey4JY8aox4E', 'QWhhMxrX-Us', 'GlUeW7IOSFc', 'Pm7b43TQxUU',
-				'r9xAig0C00E', 'U730ft9yESk', 'YiUz1OiSqd8', 'qxhQghflIqg'
+				'r9xAig0C00E', 'U730ft9yESk', 'YiUz1OiSqd8', 'qxhQghflIqg', 'axibQV5YsOk'
 			];
 
 			//#region Agregar a la lista si es un día especial
@@ -85,34 +89,30 @@ module.exports = {
 			let hint;
 			switch(today.getUTCMonth() + 1) {
 			case 4: //Abril
-				if(date === 1)
-					hint = '';
-					list = [
-						...list,
-						'XMUSIC'
+				hint = 'Y mirá, la verdad que me olvidé de pensar una frase para esto, pero sobala, puto';
+				list = [...list, 'XMUSIC'];
+				//Día de los inocentes
+				if(date === 1) list = [...list,
+						'vJzZ_LkYEb8', 'dQw4w9WgXcQ', 'X-cfWM0BC_4',' 7jRnpUKHCTg', 'sC0cvwnG0Ik', '-GeC0kanxPQ', 'fZdBVzSGudA', 'MmwMVBrMRHI', 'ZcJjMnHoIBI', '0tdyU_gW6WE',
+						'li5mXnHyg9w'
 					];
-					list = list.fill('vJzZ_LkYEb8', list.length, list.length * 2);
 				break;
 			case 10: //Octubre
-				if(date === 31) { //Halloween
-					hint = 'The air is getting colder around you:';
-					list = [
-						...list,
-						'XMUSIC',
+				hint = 'The air is getting colder around you:';
+				list = [...list, 'XMUSIC'];
+				//Halloween
+				if(date === 31) list = [...list,
 						'jHg1_AloGEk', 'tgUu8N05N24', 'jLUaYqH-1hw', 'nK8uH34mpnE', '0K_xO8JltXc', 'b677_os3s34', 'R4LlkoVBPFY', 'qcoXUuq1At8', 'G2oq0lVmIwU', 'fkZkN7uSZfk',
 						'I3kGiA3EGP4', 'rEmDpKsMJWc', 'oY9m2sHQwLs', 'cDd_GlynA6A', 'NIWyZmFSep0'
 					];
-				}
 				break;
 			case 12: //Diciembre
-				if(date === 24 || date === 25) { //Navidad
-					hint = '¡Niños y niñas del mundo, vamos por ustedes!:';
-					list = [
-						...list,
-						'XMUSIC',
+				hint = '¡Niños y niñas del mundo, vamos por ustedes!:';
+				list = [...list, 'XMUSIC']
+				//Navidad
+				if(date === 24 || date === 25) list = [...list,
 						'TVeFyqISlHY', 'HHBb0z9584w', 'qOYbGBPnT_M', '-fWMWkrfoRU', 'bGUZG8V1OMU', 'shvbqQ-1vww', 'DxTr51RmEjE', 'iuc7L50iUhw', 'Bk8B2Tynet0'
 					];
-				}
 				break;
 			}
 			//#endregion
@@ -137,13 +137,12 @@ module.exports = {
 					m = `**¿Y si voy con uno que sepamos todos?:**\nhttps://youtu.be/${list[i + (i === kmusic?1:0)]}`;
 				else if(xmusic !== -1) //Música especial
 					m = `**${hint}**\nhttps://youtu.be/${list[i + (i === xmusic?1:0)]}`;
-			} else {
+			} else
 				m = new Discord.MessageEmbed()
-						.setColor('#cccccc')
-						.addField('Total', `Hay ${list.length} recomendaciones de Sassa disponibles ahora mismo`, true)
-						.addField('Subgrupos comunes', `🎮x${umusic}\n❓x${kmusic - umusic}\n😳x${((xmusic === -1)?list.length:xmusic) - kmusic}`, true)
-						.addField('Subgrupo especial', (xmusic !== -1)?(list.length - xmusic):'No hay subgrupos especiales ahora mismo...', true);
-			}
+					.setColor('#cccccc')
+					.addField('Total', `Hay ${list.length} recomendaciones de Sassa disponibles ahora mismo`, true)
+					.addField('Subgrupos comunes', `🎮x${umusic}\n❓x${kmusic - umusic}\n😳x${((xmusic === -1)?list.length:xmusic) - kmusic}`, true)
+					.addField('Subgrupo especial', (xmusic !== -1)?(list.length - xmusic):'No hay subgrupos especiales ahora mismo...', true);
 			message.channel.send(m);
 			//#endregion
 		}
