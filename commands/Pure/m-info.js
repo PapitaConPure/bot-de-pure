@@ -1,5 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
-let global = require('../../localdata/config.json'); //Variables globales
+const global = require('../../localdata/config.json'); //Variables globales
+const stats = require('../../localdata/stats.json');
 
 module.exports = {
 	name: 'm-info',
@@ -22,26 +23,19 @@ module.exports = {
 		const servidor = message.channel.guild; //Variable que almacena un objeto del servidor a analizar
 		let selectch;
 
-		//Contadores de canales
-		let textcnt = 0; //Texto
-		let voicecnt = 0; //Voz
+		//Contadores
+		let textcnt = 0; //Canales de texto
+		let voicecnt = 0; //Canales de voz
 		let categorycnt = 0; //Categorías
-		let msgcnt = []; //Contador de mensajes (parte "cantidad")
-		let chid = []; //Mensajes (parte "id")
-		let peocnt = []; //Contador de personas (parte "cantidad")
-		let peoid = []; //Contador de personas (parte "id")
 
 		//Contadores de usuarios
-		let	peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size; //Biológicos
-		let botcnt = servidor.memberCount - peoplecnt; //Bots
+		const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size; //Biológicos
+		const botcnt = servidor.memberCount - peoplecnt; //Bots
 
 		//Procesado de información canal-por-canal
 		servidor.channels.cache.forEach(channel => {
-			if(channel.type === 'text') {
-				msgcnt[textcnt] = channel.messages.cache.size;
-				chid[textcnt] = channel.id;
-				textcnt++;
-			} else if(channel.type === 'voice') voicecnt++;
+			if(channel.type === 'text') textcnt++;
+			else if(channel.type === 'voice') voicecnt++;
 			else if(channel.type === 'category') categorycnt++;
 		});
 		
@@ -62,19 +56,22 @@ module.exports = {
 						selectch = chnb;
 				});
 			}
-
-			if((typeof selectch) !== 'undefined') {
-				let i = 0;
-				selectch.members.filter(member => !member.user.bot).forEach(member => {
-					peocnt[i] = selectch.messages.cache.filter(m => m.author.id === member.user.id).size;
-					peoid[i] = member.user.id;
-					i++;
-				});
-			}
 		}
 
+		if((typeof selectch) === 'undefined')
+			selectch = message.channel;
+		const peocnt = Object.entries(stats[servidor.id][selectch.id].sub)
+			.sort((a, b) => b[1] - a[1])
+			.slice(0, 5);
+		const msgcnt = Object.entries(stats[servidor.id])
+			.sort((a, b) => b[1].cnt - a[1].cnt)
+			.slice(0, 5)
+			.map(([name, obj]) => [name, obj.cnt]);
+		console.log('uwu', peocnt);
+		console.log('owo', msgcnt);
+
 		//Ordenamiento burbuja
-		for(let i = 1; i < textcnt; i++)
+		/*for(let i = 1; i < textcnt; i++)
 			for(let j = 0; j < (textcnt - i); j++)
 				if(msgcnt[j] < msgcnt[j + 1]) {
 					//Contador de mensajes "cantidad"
@@ -98,19 +95,17 @@ module.exports = {
 					tmp = peoid[j];
 					peoid[j] = peoid[j + 1];
 					peoid[j + 1] = tmp;
-				}
+				}*/
 			
 		//Creacion de top 5
-		let mstactpeo = ''; //Lista de personas más activas
-		let mstactch = ''; //Lista de canales más activos
-		for(let i = 0; i < Math.min(peoid.length, 5); i++)
-			mstactpeo += `<@${peoid[i]}>: **${peocnt[i]}** mensajes.\n`;
-		for(let i = 0; i < Math.min(textcnt, 5); i++)
-			mstactch += `<#${chid[i]}>: **${msgcnt[i]}** mensajes.\n`;
+		//Personas más activas
+		const peotop = peocnt.map(([name, count]) => `<@${name}>: **${count}** mensajes.`).join('\n');
+		//Canales más activos
+		const chtop = msgcnt.map(([name, count]) => `<#${name}>: **${count}** mensajes.`).join('\n');
 
 		//Crear y usar embed
 		let SelectedEmbed = 0;
-		let Embed = [];
+		const Embed = [];
 
 		Embed[0] = new Discord.MessageEmbed()
 			.setColor('#ffd500')
@@ -136,8 +131,8 @@ module.exports = {
 			.setColor('#eebb00')
 			.setTitle('Estadísticas de actividad ÛwÕ')
 
-			.addField(`Usuarios más activos (canal: ${(args.length && (typeof selectch) !== 'undefined')?selectch.name:'ninguno'})`, `${(args.length && (typeof selectch) !== 'undefined')?mstactpeo:'Ingresa un #canal como argumento para ver estadísticas del mismo.'}`)
-			.addField('Canales más activos', mstactch)
+			.addField(`Usuarios más activos (canal: ${selectch.name})`, peotop)
+			.addField('Canales más activos', chtop)
 
 			.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
 			.setFooter(`Estas estadísticas toman información desde el último reinicio del bot hasta la actualidad.`);

@@ -225,7 +225,7 @@ module.exports = {
                     if(global.hourai.warn <= 6) {
                         if(global.hourai.warn <= 3)
                             canal.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474> (${global.hourai.warn}/3 llamados)`);
-                        setTimeout(module.exports.askForRole, 1000, miembro , canal, 3 * reps);
+                        setTimeout(module.exports.askForRole, 1000, miembro , canal, reps);
                         console.log(chalk.cyan(`Volviendo a esperar confirmación de miembro (${global.hourai.warn}/6)...`));
                     }
                 } else {
@@ -578,7 +578,7 @@ module.exports = {
                     `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n`,
                     { files: [global.hourai.images.colors] }
                 ).then(sent => module.exports.askColor(sent, miembro));
-                setTimeout(module.exports.askForRole, 1000, miembro, canal, 5 * 4);
+                setTimeout(module.exports.askForRole, 1000, miembro, canal, 3 * 4);
                 console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');
             } else if(servidor.id === global.serverid.ar) {
                 canal.send(

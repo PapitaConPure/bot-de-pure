@@ -2,13 +2,15 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.50",
+            "number": "Full.2.8.51",
             "name": "Cisne Cristalino"
         },
         "note": "Corregí un problema con p!anarquia que puede que se encuentre en otros comandos, favor de reportar. Se sigue buscando la personalización a nivel de servidor",
         "changelog": [
             "Tareas de refactorización (2.5/4)",
-            "Corregido error de referencia en p!anarquia"
+            "Corregido error de referencia en p!anarquia",
+            "Preparando conteo de mensajes por servidor, canal y usuarios para p!m-info",
+            "El pedido para escoger color (H. Doll) es incluso más agresivo"
         ],
         "todo": [
             "Restaurar comandos de búsqueda de imagen avanzados",

@@ -100,7 +100,9 @@ client.on('message', message => { //En caso de recibir un mensaje
     stats.read++;
     stats[mgi] = stats[mgi] || {};
     stats[mgi][mci] = stats[mgi][mci] || {};
-    stats[mgi][mci][mmi] = (stats[mgi][mci][mmi] || 0) + 1;
+    stats[mgi][mci].cnt = (stats[mgi][mci].cnt || 0) + 1;
+    stats[mgi][mci].sub = stats[mgi][mci].sub || {};
+    stats[mgi][mci].sub[mmi] = (stats[mgi][mci].sub[mmi] || 0) + 1;
     //#endregion
 
     //#region Respuestas rápidas
