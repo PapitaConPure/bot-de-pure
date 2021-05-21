@@ -21,7 +21,7 @@ module.exports = {
 	execute(message, args) {
         const embed = new MessageEmbed()
             .setColor('#faa61a')
-            .setFooter(`Usa "${p_pure}ayuda avatar" para información de uso`)
+            .setFooter(`"${p_pure}ayuda avatar" para más información`)
         if(!args.length) {
             embed.setTitle(`Avatar de ${message.author.username}`)
                 .setImage(message.author.avatarURL({ format: 'png', dynamic: true, size: 1024 }));
