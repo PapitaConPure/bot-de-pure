@@ -10,7 +10,8 @@
             "Tareas de refactorización (2.5/4)",
             "Corregido error de referencia en p!anarquia",
             "Preparando conteo de mensajes por servidor, canal y usuarios para p!m-info",
-            "El pedido para escoger color (H. Doll) es incluso más agresivo"
+            "El pedido para escoger color (H. Doll) es incluso más agresivo",
+            "Agregada función interna para detección de flags, falta aplicar en comandos que hacen uso de esto"
         ],
         "todo": [
             "Restaurar comandos de búsqueda de imagen avanzados",

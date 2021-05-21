@@ -802,23 +802,28 @@ module.exports = {
         return [emojiscache.get('681963688361590897'), emojiscache.get('681963688411922460')];
     },
 
-    fetchFlag: function(args, flag = { property: false, short: [], long: [], callback: () => null, fallback: () => null }) {
-        let target;
+    fetchFlag: function(args, flag = { property: false, short: [], long: [], callback: (x, i) => undefined, fallback: (x) => undefined }) {
+        let target; //Retorno. Devuelve una variante de callback si se ingresa la flag buscada de forma válida, o una variante de fallback si no
+
+        //Recorrer parámetros e intentar procesar flags
         args.forEach((arg, i) => {
+            if(flag.property && i === (args.length - 1)) return;
             if(flag.long.length && arg.startsWith('--')) {
                 if(flag.long.includes(arg.slice(2))) {
-                    target = (typeof flag.callback === 'function')?flag.callback():flag.callback;
-                    args.splice(i, 1)
+                    if(flag.property) target = flag.callback(args, i + 1); //Debe ser una función si es una flag de propiedad
+                    else target = (typeof flag.callback === 'function')?flag.callback():flag.callback; //De lo contrario, puede ser una función o un valor
+                    args.splice(i, flag.property?2:1);
                 }
             } else if(flag.short.length && arg.startsWith('-')) {
                 for(c of arg.slice(1))
                     if(flag.short.includes(c)) {
-                        target = (typeof flag.callback === 'function')?flag.callback():flag.callback;
-                        args.splice(i, 1)
+                        if(flag.property) target = flag.callback(args, i + 1);
+                        else target = (typeof flag.callback === 'function')?flag.callback():flag.callback;
+                        args.splice(i, flag.property?2:1);
                     }
             }
 		});
-        console.log('c', args);
+        console.log(args);
 
         return target?target:(typeof flag.fallback === 'function'?flag.fallback():flag.fallback);
     },
