@@ -28,7 +28,7 @@ module.exports = {
             
             message.channel.send(embed);
         } else {
-            args = args.join(' ').split(',');
+            args = args.join(' ').toLowerCase().split(',');
             if(args.length < 5)
                 args.map(arg => {
                     arg = arg.trim();
