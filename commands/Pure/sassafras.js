@@ -101,7 +101,7 @@ module.exports = {
 			case 6: //Junio
 				if(date === 1) {
 					hint = 'Paga tributo al macho alfa de la casa, pequeño vividor';
-					list = ['XMUSIC', 'xdCv0TAp4hc?t=3' ];
+					list = ['XMUSIC', 'xdCv0TAp4hc?t=3', 'E3tkgU0pQmQ' ];
 				}
 				break;
 			case 10: //Octubre
