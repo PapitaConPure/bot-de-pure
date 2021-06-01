@@ -76,7 +76,7 @@ module.exports = {
 				'qmandi2nKi4', 'uddmkZiPjCw', 'ZjevDeTvbbw', 'FSJObE6eyCU', '4_gObHt1uZA', 'rRyy0yn2Qx8', 'owghgsl_z5o', 'cOlCCc-_2sg', 'GPAyRytnLWE', 'tmI92GX-xF0',
 				'LseIASl1Pbk', 'Zz1jjTbVoew', '3fb8JL-fz0M', '8fll7w2xqcI', 'z3VSYWmbJFg', 'dE00u-GUYnw', 'Swd6aXqW0qM', 'GKVulqzzq5U', 'I-4dX4mxfVI', 'dot0iGpUL5I',
 				'DTUdiGFmVRI', 'wz4s6quLDLg', 'leIMP5mbB14', 'pHKkgTZS5K8', 'peuTnilEv9g', 'GI1y1kJAsIo', 'y4EATZ-tNPU', 'B77hKKI4SbI', 'dkxrXWokYqQ', 'ZHlrHvt1dUE',
-				'zKaoDdNZhJE', 'SJW697Ey5EE', '5qJ4wmwarbc', 'WWnKwcAY8iU', 'nVydgPgAIRo', 'SJwh3erQlyE', 'PLNlF1QQrrM', 'k3eym4mqS4A', 'TuwoH2iZuKU',
+				'zKaoDdNZhJE', 'SJW697Ey5EE', '5qJ4wmwarbc', 'WWnKwcAY8iU', 'nVydgPgAIRo', 'SJwh3erQlyE', 'PLNlF1QQrrM', 'k3eym4mqS4A', 'TuwoH2iZuKU', 'B__f4zx2iQg',
 				'KMUSIC', //Música "conocida"
 				'wGcyKEZtWuE', 'AdDbbzuq1vY', 'qIk6YFTzckc', 'Mdnnfg6Yvb0', 'llnXhrCn9Yo', 'dVVZaZ8yO6o', '2b8TKhIz_ZY', 'qVXeWfFTFGo', '8VyaShl6urc', 'HSZIej-ZraE',
 				'Y0VYKbTSxu0', 'yn3GPjhtYJ8', 'LicR6XLP94U', 'tApsiCYkOfw', 'wqAYMZSOQao', 'Q1kf-OJdvb4', 'ey4JY8aox4E', 'QWhhMxrX-Us', 'GlUeW7IOSFc', 'Pm7b43TQxUU',
@@ -97,6 +97,12 @@ module.exports = {
 						'vJzZ_LkYEb8', 'dQw4w9WgXcQ', 'X-cfWM0BC_4',' 7jRnpUKHCTg', 'sC0cvwnG0Ik', '-GeC0kanxPQ', 'fZdBVzSGudA', 'MmwMVBrMRHI', 'ZcJjMnHoIBI', '0tdyU_gW6WE',
 						'li5mXnHyg9w'
 					];
+				break;
+			case 6: //Junio
+				if(date === 1) {
+					hint = 'Paga tributo al macho alfa de la casa, pequeño vividor';
+					list = ['XMUSIC', 'xdCv0TAp4hc?t=3' ];
+				}
 				break;
 			case 10: //Octubre
 				hint = 'The air is getting colder around you:';
