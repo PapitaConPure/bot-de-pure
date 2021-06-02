@@ -115,7 +115,7 @@ module.exports = {
 				break;
 			case 12: //Diciembre
 				hint = '¡Niños y niñas del mundo, vamos por ustedes!:';
-				list = [...list, 'XMUSIC']
+				list = [...list, 'XMUSIC'];
 				//Navidad
 				if(date === 24 || date === 25) list = [...list,
 						'TVeFyqISlHY', 'HHBb0z9584w', 'qOYbGBPnT_M', '-fWMWkrfoRU', 'bGUZG8V1OMU', 'shvbqQ-1vww', 'DxTr51RmEjE', 'iuc7L50iUhw', 'Bk8B2Tynet0'
