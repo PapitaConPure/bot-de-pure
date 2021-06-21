@@ -13,7 +13,7 @@ module.exports = {
 		'**[-]Exclusivo:** se consideran usuarios con __todos los roles__ buscados (específico)',
     flags: [
         'mod',
-		'outdated'
+		//'outdated'
     ],
     options: [
 		'`caso` _(signos +/-)_ para especificar si la búsqueda es de caso [+]Inclusivo o [-]Exclusivo',

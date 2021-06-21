@@ -141,7 +141,7 @@ module.exports = {
     desc: 'Muestra imágenes de Holo, en rendimiento a Heartnix',
     flags: [
         'meme',
-		'maintenance'
+		//'maintenance'
     ],
     options: [
 		':coffee: Queda pendiente rehacer comandos de imágenes con banderas y búsqueda ilimitada. Por favor, paciencia'
