@@ -300,7 +300,7 @@ module.exports = {
 		'**Nota:** en canales NSFW, los resultados serán, respectivamente, NSFW',
     flags: [
         'common',
-		//'maintenance'
+		'maintenance'
     ],
     options: [
 		':coffee: Queda pendiente rehacer comandos de imágenes con banderas y búsqueda ilimitada. Por favor, paciencia'
