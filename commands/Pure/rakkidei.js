@@ -15,7 +15,13 @@ module.exports = {
 			'Ahora sí vení que te saco la cresta',
 			'Vení que te dejo la cagá en la cara',
 			'Ah mira que bacán. Vení que te rajo',
-			'Aweonao recontraculiao ijoelamaraca'
+			'Aweonao recontraculiao ijoelamaraca',
+			'Avispate po\'',
+			'Te voy a meter tal pape... PERO TAL PAPE',
+			'Chúpalo gil qliao',
+			'Te tiraste',
+			'Te rifaste',
+			'Te cagaste'
 		];
 
 		//Acción de comando
