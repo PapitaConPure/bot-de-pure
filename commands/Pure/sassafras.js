@@ -81,7 +81,7 @@ module.exports = {
 				'KMUSIC', //Música "conocida"
 				'wGcyKEZtWuE', 'AdDbbzuq1vY', 'qIk6YFTzckc', 'Mdnnfg6Yvb0', 'llnXhrCn9Yo', 'dVVZaZ8yO6o', '2b8TKhIz_ZY', 'qVXeWfFTFGo', '8VyaShl6urc', 'HSZIej-ZraE',
 				'Y0VYKbTSxu0', 'yn3GPjhtYJ8', 'LicR6XLP94U', 'tApsiCYkOfw', 'wqAYMZSOQao', 'Q1kf-OJdvb4', 'ey4JY8aox4E', 'QWhhMxrX-Us', 'GlUeW7IOSFc', 'Pm7b43TQxUU',
-				'r9xAig0C00E', 'U730ft9yESk', 'YiUz1OiSqd8', 'qxhQghflIqg', 'axibQV5YsOk', '4EcgruWlXnQ', 'UgPKvxfzp6k'
+				'r9xAig0C00E', 'U730ft9yESk', 'YiUz1OiSqd8', 'qxhQghflIqg', 'axibQV5YsOk', '4EcgruWlXnQ', 'UgPKvxfzp6k', 'uV-CxxDpnqA', 'CZMWszd5SRk', 'lxKb48wvt60'
 			];
 
 			//#region Agregar a la lista si es un día especial
