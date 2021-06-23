@@ -9,14 +9,14 @@ const getRandomInt = function(_max) {
   return _randnum;
 }
 
-const searchForImage = async function(tmpch, arglist, tmpauth, msg) {
+const searchForImage = async function(arglist, msg) {
 	tmpch.startTyping();
 	let BotMessage = -1;
 	let srchtags = 'touhou -guro -furry -vore -webm -audio -comic -4koma rating:';
 	let embedcolor;
 	let embedtitle;
 	arglist = arglist.map(arg => global.boorutags.get(arg) || arg);
-	message.channel.send(`\`[${arglist.join(', ')}]\``);
+	msg.channel.send(`\`[${arglist.join(', ')}]\``);
 	return;
 
 	//#region Presentación
@@ -157,6 +157,6 @@ module.exports = {
 	callx: '<rango?> <etiquetas?>',
 	
 	execute(message, args) {
-		searchForImage(message.channel, args, message.author, message);
+		searchForImage(args, message);
     },
 };
