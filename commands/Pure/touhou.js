@@ -10,7 +10,7 @@ const getRandomInt = function(_max) {
 }
 
 const searchForImage = async function(arglist, msg) {
-	tmpch.startTyping();
+	msg.channel.startTyping();
 	let BotMessage = -1;
 	let srchtags = 'touhou -guro -furry -vore -webm -audio -comic -4koma rating:';
 	let embedcolor;
@@ -20,7 +20,7 @@ const searchForImage = async function(arglist, msg) {
 	return;
 
 	//#region Presentación
-	if(tmpch.nsfw) {
+	if(msg.channel.nsfw) {
 		srchtags += 'explicit -lolicon -loli -shotacon -bestiality';
 		embedcolor = '#38214e';
 		embedtitle = 'Tohitas O//w//O';
@@ -38,7 +38,7 @@ const searchForImage = async function(arglist, msg) {
 		if(isNaN(arglist[0])) customtags += ` ${arglist[0]}`;
 		else {
 			if(arglist[0] < 2) {
-				tmpch.send(':warning: no se pueden buscar números de página menores que 2 (por defecto: 1).');
+				msg.channel.send(':warning: no se pueden buscar números de página menores que 2 (por defecto: 1).');
 				return;
 			}
 			srchpg = getRandomInt(arglist[0]);
@@ -85,7 +85,7 @@ const searchForImage = async function(arglist, msg) {
 						.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
 						.setImage(image.file_url);
 						
-					tmpch.send(Embed).then(sent => {
+					msg.channel.send(Embed).then(sent => {
 						BotMessage = sent.id;
 						console.log(BotMessage);
 						const actions = [sent.client.emojis.cache.get('704612794921779290'), sent.client.emojis.cache.get('704612795072774164')];
@@ -129,12 +129,12 @@ const searchForImage = async function(arglist, msg) {
 			});
 			//#endregion
 			
-			if(!foundpic) tmpch.send(':warning: No hay resultados para estas tags. Prueba usando tags diferentes o un menor número de página :C');
+			if(!foundpic) msg.channel.send(':warning: No hay resultados para estas tags. Prueba usando tags diferentes o un menor número de página :C');
 		}).catch((error) => {
-			tmpch.send(':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags o usando un menor rango de páginas umu');
+			msg.channel.send(':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags o usando un menor rango de páginas umu');
 			console.error(error);
 		});
-		tmpch.stopTyping(true);
+		msg.channel.stopTyping(true);
 	}
 }
 
