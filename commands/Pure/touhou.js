@@ -10,14 +10,12 @@ const getRandomInt = function(_max) {
 }
 
 const searchForImage = async function(arglist, msg) {
-	msg.channel.startTyping();
+	//msg.channel.startTyping();
 	let BotMessage = -1;
 	let srchtags = 'touhou -guro -furry -vore -webm -audio -comic -4koma rating:';
 	let embedcolor;
 	let embedtitle;
-	arglist = arglist.map(arg => global.boorutags.get(arg) || arg);
-	msg.channel.send(`\`[${arglist.join(', ')}]\``);
-	return;
+	srchtags += arglist.map(arg => global.boorutags.get(arg) || arg).join(' ');
 
 	//#region Presentación
 	if(msg.channel.nsfw) {
@@ -30,6 +28,8 @@ const searchForImage = async function(arglist, msg) {
 		embedtitle = 'Tohas uwu';
 	}
 	//#endregion
+	msg.channel.send(`\`${srchtags}\``);
+	return;
 	
 	//#region Preparación de búsqueda
 	let srchpg = 0;
