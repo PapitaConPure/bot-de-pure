@@ -15,19 +15,22 @@ const searchForImage = async function(arglist, msg) {
 	let srchtags = 'touhou -guro -furry -vore -webm -audio -comic -4koma rating:';
 	let embedcolor;
 	let embedtitle;
-	srchtags += arglist.map(arg => global.boorutags.get(arg) || arg).join(' ');
 
 	//#region Presentación
 	if(msg.channel.nsfw) {
-		srchtags += 'explicit -lolicon -loli -shotacon -bestiality';
+		srchtags += 'explicit -lolicon -loli -shotacon -bestiality ';
 		embedcolor = '#38214e';
 		embedtitle = 'Tohitas O//w//O';
 	} else {
-		srchtags += 'safe -soles -bikini -breast_grab -revealing_clothes -panties -no_bra -no_panties';
+		srchtags += 'safe -soles -bikini -breast_grab -revealing_clothes -panties -no_bra -no_panties ';
 		embedcolor = '#fa7b62';
 		embedtitle = 'Tohas uwu';
 	}
 	//#endregion
+
+	//Búsqueda personalizada
+	srchtags += arglist.map(arg => global.boorutags.get(arg) || arg).join(' ');
+
 	msg.channel.send(`\`${srchtags}\``);
 	return;
 	
