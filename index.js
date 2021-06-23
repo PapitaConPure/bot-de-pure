@@ -8,9 +8,11 @@ const Keyv = require('keyv');
 const global = require('./localdata/config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
 const stats = require('./localdata/stats.json');
+const booru = require('./localdata/boorutags.js');
 const dns = require('dns'); //Detectar host
 const { registerFont } = require('canvas'); //Registrar fuentes al ejecutar Bot
 const chalk = require('chalk'); //Consola con formato bonito
+const { getPackedSettings } = require('http2');
 const token = (process.env.I_LOVE_MEGUMIN)?process.env.I_LOVE_MEGUMIN:require('./key.json').token; //La clave del bot
 //#endregion
 
@@ -45,6 +47,7 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
     await func.modifyAct(client, 0);
 
     console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
+    global.boorutags = booru.setTags();
 	confirm();
 
 	console.log(chalk.magenta('Obteniendo información del host...'));
@@ -163,11 +166,13 @@ client.on('message', message => { //En caso de recibir un mensaje
         if(comando.flags.some(flag => {
             switch(flag) {
             case 'outdated':
+                if(message.author.id === global.peopleid.papita) return false;
                 errtitle = 'Comando desactualizado';
                 errfield = 'El comando no se encuentra disponible debido a que su función ya no es requerida en absoluto. Espera a que se actualice~';
                 return true;
 
             case 'maintenance':
+                if(message.author.id === global.peopleid.papita) return false;
                 errtitle = 'Comando en mantenimiento';
                 errfield = 'El comando no se encuentra disponible debido a que está en proceso de actualización o reparación en este momento. Espera a que se actualice~';
                 return true;
@@ -184,7 +189,7 @@ client.on('message', message => { //En caso de recibir un mensaje
                 return true;
             
             case 'papa':
-                if(message.author.id === '423129757954211880') return false;
+                if(message.author.id === global.peopleid.papita) return false;
                 errtitle = 'Comando exclusivo de Papita con Puré';
                 errfield = 'El comando es de uso restringido para el usuario __Papita con Puré#6932__. Esto generalmente se debe a que el comando es usado para pruebas o ajustes globales/significativos/sensibles del Bot';
                 return true;
@@ -246,7 +251,7 @@ client.on('guildMemberAdd', member => { //Evento de entrada a servidor
     }
 });
 
-client.on('guildMemberRemove', member => { //Evento de entrada de servidor
+client.on('guildMemberRemove', member => { //Evento de salida de servidor
     if(global.maintenance.length > 0 && member.guild.systemChannelID !== global.maintenance) return;
     console.log('Evento de salida de usuario de servidor desencadenado.');
     try {
