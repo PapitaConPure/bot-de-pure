@@ -6,11 +6,9 @@ const { randRange } = require('../../func');
 const searchForImage = async function(arglist, msg) {
 	msg.channel.startTyping();
 	const srchlimit = 42;
-	const srchpg = randRange(0, 475);
 	let srchtags = 'touhou -guro -furry -vore -webm -audio -comic -4koma rating:';
 	let embedcolor;
 	let embedtitle;
-	let foundpic = false;
 
 	//#region Presentación
 	if(msg.channel.nsfw) {
@@ -26,70 +24,88 @@ const searchForImage = async function(arglist, msg) {
 
 	//Búsqueda personalizada
 	srchtags += arglist.map(arg => global.boorutags.get(arg) || arg).join(' ');
-	{
-		let results = 0;
-		axios.get(
-			`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
-		).then(response => {
-			console.log(response);
-			response.data.forEach(image => { results++; });
 
-			//#region Enviar imagen aleatoria, si hay al menos una
-			const showtag = ':mag_right: ' + (arglist.length?`*${srchtags.slice(srchtags.indexOf()).trim().split(/ +/).map(str => str = str.replace('*', '\\*')).join(', ')}*`:'No ingresaste etiquetas. `p!touhou <¿etiquetas?>`');
-
-			if(results > 0) {
-				const image = response.data[randRange(0, results)];
-				console.log(image);
-				//Crear y usar embed
-				const Embed = new Discord.MessageEmbed()
-					.setColor(embedcolor)
-					.setTitle(embedtitle)
-					.addField('Tu búsqueda',  showtag)
-					.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
-					.addField('Acciones',
-						`Reacciona con <:tags:704612794921779290> para ver las tags.\n` +
-						`Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`
-					)
-					.setAuthor(`Comando invocado por ${msg.author.username}`, msg.author.avatarURL())
-					.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
-					.setImage(image.file_url);
-					
-				msg.channel.send(Embed).then(sent => {
-					console.log(sent.id);
-					const actions = [sent.client.emojis.cache.get('704612794921779290'), sent.client.emojis.cache.get('704612795072774164')];
-					sent.react(actions[0])
-						.then(() => sent.react(actions[1]))
-						.then(() => {
-							const filter = (rc, user) => !user.bot && actions.some(action => rc.emoji.id === action.id) && msg.author.id === user.id;
-							const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
-							let showtags = false;
-							collector.on('collect', reaction => {
-								const maxpage = 2;
-								if(reaction.emoji.id === actions[0].id) {
-									if(!showtags) {
-										Embed.fields[2].name = 'Tags';
-										Embed.fields[2].value = `*${image.tags.split(/ +/).join(', ')}*`;
-										Embed.addField('Acciones', `Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`);
-
-										sent.edit(Embed);
-										showtags = true;
-									}
-								} else {
-									msg.delete();
-									sent.delete();
-								}
-							});
-						}).then(() => sent.channel.stopTyping(true));
-				});
-				foundpic = true;
-			} else msg.channel.send(':warning: No hay resultados para estas tags. Prueba usando tags diferentes o un menor número de página :C');
-			//#endregion
-		}).catch((error) => {
-			msg.channel.send(':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags o usando un menor rango de páginas umu');
-			console.error(error);
+	//Contar páginas
+	let pgstep = 100;
+	let foundmax = false;
+	let pgmax = 475;
+	do {
+		axios.get(`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${pgmax}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`)
+		.then(r => {
+			foundmax = (r.data.length > 0);
+			if(!foundmax) {
+				if((pgmax - pgstep) < 0) pgstep /= 10;
+				pgmax -= pgstep;
+			} else if(pgstep > 1 && r.data.length === 42) {
+				pgmax += pgstep;
+				pgstep /= 10;
+				foundmax = false;
+			}
 		});
-		msg.channel.stopTyping(true);
-	}
+	} while(!foundmax && pgmax > 0);
+	const srchpg = randRange(0, pgmax);
+
+	//Pedido
+	axios.get(
+		`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
+	).then(response => {
+		let results = 0;
+		response.data.forEach(image => { results++; });
+
+		//#region Enviar imagen aleatoria, si hay al menos una
+		const showtag = ':mag_right: ' + (arglist.length?`*${srchtags.slice(srchtags.indexOf()).trim().split(/ +/).map(str => str = str.replace('*', '\\*')).join(', ')}*`:'No ingresaste etiquetas. `p!touhou <¿etiquetas?>`');
+
+		if(results > 0) {
+			const image = response.data[randRange(0, results)];
+			console.log(image);
+			//Crear y usar embed
+			const Embed = new Discord.MessageEmbed()
+				.setColor(embedcolor)
+				.setTitle(embedtitle)
+				.addField('Tu búsqueda',  showtag)
+				.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
+				.addField('Acciones',
+					`Reacciona con <:tags:704612794921779290> para ver las tags.\n` +
+					`Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`
+				)
+				.setAuthor(`Comando invocado por ${msg.author.username}`, msg.author.avatarURL())
+				.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
+				.setImage(image.file_url);
+				
+			msg.channel.send(Embed).then(sent => {
+				console.log(sent.id);
+				const actions = [sent.client.emojis.cache.get('704612794921779290'), sent.client.emojis.cache.get('704612795072774164')];
+				sent.react(actions[0])
+					.then(() => sent.react(actions[1]))
+					.then(() => {
+						const filter = (rc, user) => !user.bot && actions.some(action => rc.emoji.id === action.id) && msg.author.id === user.id;
+						const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
+						let showtags = false;
+						collector.on('collect', reaction => {
+							const maxpage = 2;
+							if(reaction.emoji.id === actions[0].id) {
+								if(!showtags) {
+									Embed.fields[2].name = 'Tags';
+									Embed.fields[2].value = `*${image.tags.split(/ +/).join(', ')}*`;
+									Embed.addField('Acciones', `Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`);
+
+									sent.edit(Embed);
+									showtags = true;
+								}
+							} else {
+								msg.delete();
+								sent.delete();
+							}
+						});
+					}).then(() => sent.channel.stopTyping(true));
+			});
+		} else msg.channel.send(':warning: No hay resultados para estas tags. Prueba usando tags diferentes o un menor número de página :C');
+		//#endregion
+	}).catch((error) => {
+		msg.channel.send(':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags o usando un menor rango de páginas umu');
+		console.error(error);
+	});
+	msg.channel.stopTyping(true);
 }
 
 module.exports = {
