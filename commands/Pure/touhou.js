@@ -4,9 +4,9 @@ const axios = require('axios');
 const { randRange } = require('../../func');
 
 const searchForImage = async function(arglist, msg) {
-	//msg.channel.startTyping();
+	msg.channel.startTyping();
 	const srchlimit = 42;
-	const srchpg = randRange(460, 540);
+	const srchpg = randRange(0, 475);
 	let srchtags = 'touhou -guro -furry -vore -webm -audio -comic -4koma rating:';
 	let embedcolor;
 	let embedtitle;
@@ -26,12 +26,12 @@ const searchForImage = async function(arglist, msg) {
 
 	//Búsqueda personalizada
 	srchtags += arglist.map(arg => global.boorutags.get(arg) || arg).join(' ');
-	msg.channel.send(`${srchpg}`);
 	{
 		let results = 0;
 		axios.get(
 			`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
 		).then(response => {
+			console.log(response);
 			response.data.forEach(image => { results++; });
 
 			//#region Enviar imagen aleatoria, si hay al menos una
