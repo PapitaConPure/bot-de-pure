@@ -26,7 +26,7 @@ const searchForImage = async function(arglist, msg) {
 
 	//Búsqueda personalizada
 	srchtags += arglist.map(arg => global.boorutags.get(arg) || arg).join(' ');
-	message.channel.send(`srchpg`);
+	msg.channel.send(`srchpg`);
 	{
 		let results = 0;
 		axios.get(
