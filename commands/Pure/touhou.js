@@ -6,7 +6,7 @@ const { randRange } = require('../../func');
 const searchForImage = async function(arglist, msg) {
 	//msg.channel.startTyping();
 	const srchlimit = 42;
-	const srchpg = randRange(0, 1000);
+	const srchpg = randRange(460, 540);
 	let srchtags = 'touhou -guro -furry -vore -webm -audio -comic -4koma rating:';
 	let embedcolor;
 	let embedtitle;
@@ -35,9 +35,7 @@ const searchForImage = async function(arglist, msg) {
 			response.data.forEach(image => { results++; });
 
 			//#region Enviar imagen aleatoria, si hay al menos una
-			const showtag = ':mag_right: ' + (arglist.length) ?
-				`*${srchtags.slice(srchtags.indexOf()).trim().split(/ +/).map(str => str = str.replace('*', '\\*')).join(', ')}*` :
-				'No ingresaste etiquetas. `p!touhou <¿etiquetas?>`';
+			const showtag = ':mag_right: ' + (arglist.length?`*${srchtags.slice(srchtags.indexOf()).trim().split(/ +/).map(str => str = str.replace('*', '\\*')).join(', ')}*`:'No ingresaste etiquetas. `p!touhou <¿etiquetas?>`');
 
 			if(results > 0) {
 				const image = response.data[randRange(0, results)];
