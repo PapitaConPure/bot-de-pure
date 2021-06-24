@@ -5,12 +5,12 @@ const { randRange } = require('../../func');
 
 const searchForImage = async function(arglist, msg) {
 	//msg.channel.startTyping();
-	let BotMessage = -1;
 	const srchlimit = 42;
 	const srchpg = randRange(0, 20000);
 	let srchtags = 'touhou -guro -furry -vore -webm -audio -comic -4koma rating:';
 	let embedcolor;
 	let embedtitle;
+	let foundpic = false;
 
 	//#region Presentación
 	if(msg.channel.nsfw) {
@@ -29,11 +29,10 @@ const searchForImage = async function(arglist, msg) {
 	
 	{
 		let i = 0;
-		let foundpic = false;
 		let results = 0;
 		axios.get(
 			`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
-		).then(data => {
+		).then((data) => {
 			data.data.forEach(image => { results++; });
 
 			//#region Enviar imagen aleatoria, si hay al menos una
@@ -54,18 +53,17 @@ const searchForImage = async function(arglist, msg) {
 							`Reacciona con <:tags:704612794921779290> para ver las tags.\n` +
 							`Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`
 						)
-						.setAuthor(`Comando invocado por ${tmpauth.username}`, tmpauth.avatarURL())
+						.setAuthor(`Comando invocado por ${msg.author.username}`, msg.author.avatarURL())
 						.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
 						.setImage(image.file_url);
 						
 					msg.channel.send(Embed).then(sent => {
-						BotMessage = sent.id;
-						console.log(BotMessage);
+						console.log(sent.id);
 						const actions = [sent.client.emojis.cache.get('704612794921779290'), sent.client.emojis.cache.get('704612795072774164')];
 						sent.react(actions[0])
 							.then(() => sent.react(actions[1]))
 							.then(() => {
-								const filter = (rc, user) => !user.bot && actions.some(action => rc.emoji.id === action.id) && tmpauth.id === user.id;
+								const filter = (rc, user) => !user.bot && actions.some(action => rc.emoji.id === action.id) && msg.author.id === user.id;
 								const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
 								let showtags = false;
 								collector.on('collect', reaction => {
