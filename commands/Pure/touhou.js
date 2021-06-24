@@ -6,7 +6,7 @@ const { randRange } = require('../../func');
 const searchForImage = async function(arglist, msg) {
 	//msg.channel.startTyping();
 	const srchlimit = 42;
-	const srchpg = randRange(0, 2000);
+	const srchpg = msg.channel.messages.fetch('857421826052063273').content;//randRange(0, 1000);
 	let srchtags = 'touhou -guro -furry -vore -webm -audio -comic -4koma rating:';
 	let embedcolor;
 	let embedtitle;
@@ -31,13 +31,13 @@ const searchForImage = async function(arglist, msg) {
 		let i = 0;
 		let results = 0;
 		axios.get(
-			`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${1}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
+			`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
 		).then((data) => {
 			console.log(data.data);
 			data.data.forEach(image => { results++; });
 
 			//#region Enviar imagen aleatoria, si hay al menos una
-			const selectedpic = getRandomInt(results);
+			const selectedpic = randRange(results);
 			const showtag = ':mag_right: ' + (arglist.length) ?
 				`*${srchtags.slice(srchtags.indexOf()).trim().split(/ +/).map(str => str = str.replace('*', '\\*')).join(', ')}*` :
 				'No ingresaste etiquetas. `p!touhou <¿etiquetas?>`';
