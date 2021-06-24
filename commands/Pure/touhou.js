@@ -1,17 +1,13 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const global = require('../../localdata/config.json'); //Variables globales
 const axios = require('axios');
-
-const getRandomInt = function(_max) {
-  _max = Math.floor(_max);
-  let _randnum = Math.floor(Math.random() * _max);
-  if(_randnum === _max && _max > 0) _randnum--;
-  return _randnum;
-}
+const { randRange } = require('../../func');
 
 const searchForImage = async function(arglist, msg) {
 	//msg.channel.startTyping();
 	let BotMessage = -1;
+	const srchlimit = 42;
+	const srchpg = randRange(0, 20000);
 	let srchtags = 'touhou -guro -furry -vore -webm -audio -comic -4koma rating:';
 	let embedcolor;
 	let embedtitle;
@@ -30,55 +26,29 @@ const searchForImage = async function(arglist, msg) {
 
 	//Búsqueda personalizada
 	srchtags += arglist.map(arg => global.boorutags.get(arg) || arg).join(' ');
-
-	msg.channel.send(`\`${srchtags}\``);
-	return;
 	
-	//#region Preparación de búsqueda
-	let srchpg = 0;
-	let customtags = '';
-	if(arglist.length) {
-		if(isNaN(arglist[0])) customtags += ` ${arglist[0]}`;
-		else {
-			if(arglist[0] < 2) {
-				msg.channel.send(':warning: no se pueden buscar números de página menores que 2 (por defecto: 1).');
-				return;
-			}
-			srchpg = getRandomInt(arglist[0]);
-		}
-		for(let i = 1; i < arglist.length; i++)
-			customtags += ' ' + arglist[i];
-	}
-	//#endregion
-	
-	const srchlimit = 42;
 	{
 		let i = 0;
 		let foundpic = false;
 		let results = 0;
 		axios.get(
-			`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags+customtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
-		).then((data) => {
+			`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
+		).then(data => {
 			data.data.forEach(image => { results++; });
 
 			//#region Enviar imagen aleatoria, si hay al menos una
 			const selectedpic = getRandomInt(results);
-			let showpg = ':book: ';
-			let showtag = ':mag_right: ';
-			if(!isNaN(arglist[0])) showpg += `[1~**${arglist[0]}**] => Seleccionada: ***${srchpg + 1}***`;
-			else showpg += 'No ingresaste un rango de páginas. `p!touhou <¿rango?> <¿etiquetas?>`'
-			if(customtags.length) showtag += `*${customtags.trim().split(/ +/).map(str => str = str.replace('*', '\\*')).join(', ')}*`;
-			else showtag += 'No ingresaste etiquetas. `p!touhou <¿rango?> <¿etiquetas?>`'; 
+			const showtag = ':mag_right: ' + (arglist.length) ?
+				`*${srchtags.slice(srchtags.indexOf()).trim().split(/ +/).map(str => str = str.replace('*', '\\*')).join(', ')}*` :
+				'No ingresaste etiquetas. `p!touhou <¿etiquetas?>`';
+
 			data.data.forEach(image => {
 				if(image !== undefined && i === selectedpic) {
 					//Crear y usar embed
 					const Embed = new Discord.MessageEmbed()
 						.setColor(embedcolor)
 						.setTitle(embedtitle)
-						.addField('Tu búsqueda', 
-							`${showpg}\n`+
-							`${showtag}`
-						)
+						.addField('Tu búsqueda',  showtag)
 						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
 						.addField('Acciones',
 							`Reacciona con <:tags:704612794921779290> para ver las tags.\n` +
@@ -102,21 +72,11 @@ const searchForImage = async function(arglist, msg) {
 									const maxpage = 2;
 									if(reaction.emoji.id === actions[0].id) {
 										if(!showtags) {
-											const Embed2 = new Discord.MessageEmbed()
-												.setColor(embedcolor)
-												.setTitle(embedtitle)
-												.addField('Tu búsqueda', 
-													`${showpg}\n`+
-													`${showtag}`
-												)
-												.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
-												.addField('Tags', `*${image.tags.split(/ +/).join(', ')}*`)
-												.addField('Acciones', `Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`)
-												.setAuthor(`Comando invocado por ${tmpauth.username}`, tmpauth.avatarURL())
-												.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
-												.setImage(image.file_url);	
+											Embed.fields[2].name = 'Tags';
+											Embed.fields[2].value = `*${image.tags.split(/ +/).join(', ')}*`;
+											Embed.addField('Acciones', `Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`);
 
-											sent.edit(Embed2);
+											sent.edit(Embed);
 											showtags = true;
 										}
 									} else {
