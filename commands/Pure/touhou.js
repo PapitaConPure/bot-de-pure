@@ -6,7 +6,7 @@ const { randRange } = require('../../func');
 const searchForImage = async function(arglist, msg) {
 	//msg.channel.startTyping();
 	const srchlimit = 42;
-	const srchpg = msg.channel.messages.fetch('857421826052063273').content;//randRange(0, 1000);
+	const srchpg = randRange(0, 1000);
 	let srchtags = 'touhou -guro -furry -vore -webm -audio -comic -4koma rating:';
 	let embedcolor;
 	let embedtitle;
@@ -26,7 +26,7 @@ const searchForImage = async function(arglist, msg) {
 
 	//Búsqueda personalizada
 	srchtags += arglist.map(arg => global.boorutags.get(arg) || arg).join(' ');
-	
+	message.channel.send(`srchpg`);
 	{
 		let results = 0;
 		axios.get(
