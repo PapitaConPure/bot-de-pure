@@ -6,7 +6,7 @@ const { randRange } = require('../../func');
 const searchForImage = async function(arglist, msg) {
 	//msg.channel.startTyping();
 	const srchlimit = 42;
-	const srchpg = randRange(0, 20000);
+	const srchpg = randRange(0, 2000);
 	let srchtags = 'touhou -guro -furry -vore -webm -audio -comic -4koma rating:';
 	let embedcolor;
 	let embedtitle;
