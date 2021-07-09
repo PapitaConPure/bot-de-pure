@@ -13,7 +13,7 @@ module.exports = {
 
 	execute(message, args) {
 		const embed = new MessageEmbed()
-			.setColor('#bd0924') 
+			.setColor('#39b715') 
 			.setAuthor('Terraria » Hourai Doll', 'https://i.imgur.com/o2V6IX6.jpg')
 			.setTitle('Información y Guía')
 			.addField('Horario', ':earth_americas: 7PM~1AM UTC\n:flag_mx: 2PM~8PM GMT-5\n:flag_ar: 4PM~10PM GMT-3', true)
