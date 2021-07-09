@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js');
-const global = require('../../config.json'); //Variables globales
+const global = require('../../localdata/config.json'); //Variables globales
 
 module.exports = {
 	name: 'terraria',
