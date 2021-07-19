@@ -116,8 +116,9 @@ client.on('message', message => { //En caso de recibir un mensaje
         const hraisf = global.hourai.replies.ignore.suffix;
         const hraifound = hrai !== -1 && !(hraipf.some(pf => msg.indexOf(`${pf}hourai`) === (hrai - pf.length)) || hraisf.some(sf => msg.indexOf(`hourai${sf}`) === hrai));
         if(hraifound && message.author.id !== global.peopleid.bern) {
-            const fuckustr = (msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)?global.hourai.replies.compare:global.hourai.replies.taunt;
-            message.channel.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]);
+            //const fuckustr = (msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)?global.hourai.replies.compare:global.hourai.replies.taunt;
+            //message.channel.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]);
+            message.channel.send('Descanse en paz, mi pana <:pensaki:852779998351458344>');
         } else if(msg.startsWith('~echo ') || msg.startsWith('$say ')) {
             async function responder(ch) {
                 const fuckustr = global.hourai.replies.reply;
