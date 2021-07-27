@@ -750,6 +750,7 @@ module.exports = {
 
     //#region Fetch
     fetchUserID: function(data, guild, client) {
+        data = data.toLowerCase();
         //Intentar descifrar ID por mención
         if(data.startsWith('<@') && data.endsWith('>')) {
             data = data.slice(2, -1);
