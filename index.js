@@ -12,7 +12,6 @@ const booru = require('./localdata/boorutags.js');
 const dns = require('dns'); //Detectar host
 const { registerFont } = require('canvas'); //Registrar fuentes al ejecutar Bot
 const chalk = require('chalk'); //Consola con formato bonito
-const { getPackedSettings } = require('http2');
 const token = (process.env.I_LOVE_MEGUMIN)?process.env.I_LOVE_MEGUMIN:require('./key.json').token; //La clave del bot
 //#endregion
 
@@ -48,6 +47,19 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
 
     console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
     global.boorutags = booru.setTags();
+    const gds = client.guilds;
+    const sts = await Promise.all([
+        gds.fetch(global.serverid.slot1),
+        gds.fetch(global.serverid.slot2),
+        gds.fetch(global.serverid.slot3)
+    ]);
+    global.slots = {
+        'slot1': sts[0],
+        'slot2': sts[1],
+        'slot3': sts[2]
+    };
+    global.logch = global.slots.slot1.channels.resolve('870347940181471242');
+    global.confch = global.slots.slot1.channels.resolve('870347965192097812');
 	confirm();
 
 	console.log(chalk.magenta('Obteniendo información del host...'));
@@ -87,15 +99,29 @@ client.on('message', message => { //En caso de recibir un mensaje
     if(global.cansay === 0 && message.author.bot) return;
 
     //#region Operaciones de proceso e ignorar mensajes privados
+    const logembed = new Discord.MessageEmbed()
+        .addField(message.author.tag, '*Mensaje vacío.*');
     if(message.guild) {
-        console.log(`[${message.guild.name.substr(0,12)}::${message.guild.id} → #${message.channel.name.substr(0,8)}::${message.channel.id}] ${message.author.username}: "${message.content}"`);
-        if(message.attachments.size > 0)
-            console.log(`[[${message.attachments.map(attf => attf.url).join(', ')}]]`);
+        logembed
+            .setAuthor(`${message.guild.name} • ${message.channel.name} (Click para ver)`, message.author.avatarURL({ dynamic: true }), message.url)
+            .setFooter(`gid: ${message.guild.id} | cid: ${message.channel.id} | uid: ${message.author.id}`);
+        if(message.content.length)
+            logembed.fields[0].value = message.content;
     } else {
-        console.log(`[DM→@${message.author.id}] ${message.author.username}: "${message.content}"`);
+        logembed
+            .setAuthor('Mensaje privado (Click para ver)', message.author.avatarURL({ dynamic: true }), message.url)
+            .setFooter(`uid: ${message.author.id}`);
+        if(message.content.length)
+            logembed.fields[0].value = message.content;
         message.channel.send(':x: Uh... disculpá, no trabajo con mensajes directos.');
         return;
     }
+    
+    if(message.attachments.size > 0)
+        logembed.addField('Adjuntado:', message.attachments.map(attf => attf.url).join('\n'));
+
+    if(message.content.startsWith(',confession ')) global.confch.send(logembed);
+    else global.logch.send(logembed);
     //#endregion
 
     //#region Estadísticas
@@ -196,7 +222,7 @@ client.on('message', message => { //En caso de recibir un mensaje
                 return true;
 
             case 'hourai':
-                if(message.channel.guild.id === global.serverid.hourai) return false;
+                if(message.author.id === global.peopleid.papita || message.channel.guild.id === global.serverid.hourai) return false;
                 errtitle = 'Comando exclusivo de Hourai Doll';
                 errfield = 'El comando es de uso restringido para el servidor __Hourai Doll__. Esto generalmente se debe a que cumple funciones que solo funcionan allí';
                 return true;

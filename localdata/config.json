@@ -12,7 +12,9 @@
             "Preparando conteo de mensajes por servidor, canal y usuarios para p!m-info",
             "El pedido para escoger color (H. Doll) es incluso más agresivo",
             "Agregada función interna para detección de flags, falta aplicar en comandos que hacen uso de esto",
-            "Corregido un error que hacía que p!avatar no detecte búsquedas en mayúsculas"
+            "Corregido un error que hacía que búsquedas por usuarios no detecten palabras en mayúsculas",
+            "Removidas las restricciones de comandos exclusivos para Papita con Puré (excepto `MOD` y `GUIDE`)",
+            "Pequeñas optimizaciones generales"
         ],
         "todo": [
             "Restaurar comandos de búsqueda de imagen avanzados",
@@ -40,6 +42,7 @@
         "ocg":      "750095369639297065",
         "nlp":      "832018129549918218"
     },
+    "slots": {},
     "peopleid": {
         "papita": "423129757954211880",
         "bern": "239550977638793217"

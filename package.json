@@ -20,8 +20,9 @@
   "dependencies": {
     "@keyv/sqlite": "^2.0.2",
     "axios": "^0.21.1",
-    "canvas": "^2.7.0",
+    "canvas": "^2.8.0",
     "chalk": "^4.1.1",
+    "discord-rpc": "^4.0.1",
     "discord.js": "^12.5.3",
     "eslint": "^6.8.0",
     "github-api": "^3.4.0",
