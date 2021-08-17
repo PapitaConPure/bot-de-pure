@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.55",
+            "number": "Full.2.8.56",
             "name": "Cisne Cristalino"
         },
         "note": "Corregí un problema con p!anarquia que puede que se encuentre en otros comandos, favor de reportar. Se sigue buscando la personalización a nivel de servidor",
