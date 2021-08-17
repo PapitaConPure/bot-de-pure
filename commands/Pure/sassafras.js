@@ -23,13 +23,13 @@ module.exports = {
 			if(arg.startsWith('--'))
 				switch(arg.slice(2)) {
 				case 'total': showtotal = true; break;
-				case 'sassamodo': forcesassamodo = true; break;
+				case 'sassamodo': sassamodo = true; break;
 				}
 			else if(arg.startsWith('-'))
 				for(c of arg.slice(1))
 					switch(c) {
 					case 't': showtotal = true; break;
-					case 's': forcesassamodo = true; break;
+					case 's': sassamodo = true; break;
 					}
 		});
 		

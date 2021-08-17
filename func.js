@@ -461,6 +461,7 @@ module.exports = {
         //Mensaje de fin de bienvenida
         canal.send(
             `Una última cosita <@${miembro.user.id}>, recuerda revisar el canal <#671817759268536320> en algún momento <:Junkoborga:751938096550903850>\n` +
+            `También, si te interesa, puedes revisar los mensajes pinneados de este canal <:emperowo:834981904323313745>\n` +
             'Y estate tranqui, que ya no vas a recibir tantos pings <:starnap:727764482801008693>'
         );
 
