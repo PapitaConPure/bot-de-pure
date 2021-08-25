@@ -124,7 +124,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     else global.logch.send(logembed);
 
     if(message.guild.id === global.serverid.hourai && message.channel.id != '671820448207601684') {
-        const banpf = [ 'p!', '!', '$', '.', ',', ',,', '_' ];
+        const banpf = [ 'p!', '!', '->', '$', '.', ',', ',,', '_' ];
         if(banpf.some(bp => message.content.indexOf(bp) === 0)) {
             const now = Date.now();
             const mui = message.author.id;
