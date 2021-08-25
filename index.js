@@ -123,8 +123,16 @@ client.on('message', message => { //En caso de recibir un mensaje
     if(message.content.startsWith(',confession ')) global.confch.send(logembed);
     else global.logch.send(logembed);
 
-    if(message.guild.id === global.serverid.hourai && message.channel.id != '671820448207601684') {
-        const banpf = [ 'p!', '!', '->', '$', '.', ',', ',,', '_' ];
+    const banch = [
+        '671820448207601684', //botposting
+        '813189609911353385', //gachahell
+        '813195795318177802', //trata-de-waifus
+        '674422177596178437'  //muteposting
+    ];
+
+    if(message.guild.id === global.serverid.hourai && !banch.some(bc => message.channel.id == bc)) {
+        console.log(`${message.channel.name}: ${message.content}`);
+        const banpf = [ 'p!', '!', '->', '$', '.', ',', ',,' ];
         if(banpf.some(bp => message.content.indexOf(bp) === 0)) {
             const now = Date.now();
             const mui = message.author.id;
@@ -140,7 +148,7 @@ client.on('message', message => { //En caso de recibir un mensaje
                     message.channel.send('Detecto.. bots fuera de botposteo... <:empty:856369841107632129>');
                     break;
                 case 2:
-                    message.channel.send(`${message.author.tag} párale conchetumare, vete a <#671820448207601684> <:despair:852764014840905738>`);
+                    message.channel.send(`${message.author.tag} párale conchetumare, vete a <#${banch[0]}> <:despair:852764014840905738>`);
                     break;
                 default:
                     message.channel.send('Ahora sí te cagaste ijoelpico <:tenshismug:859874631795736606>');
@@ -174,9 +182,9 @@ client.on('message', message => { //En caso de recibir un mensaje
         const hraisf = global.hourai.replies.ignore.suffix;
         const hraifound = hrai !== -1 && !(hraipf.some(pf => msg.indexOf(`${pf}hourai`) === (hrai - pf.length)) || hraisf.some(sf => msg.indexOf(`hourai${sf}`) === hrai));
         if(hraifound && message.author.id !== global.peopleid.bern) {
-            //const fuckustr = (msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)?global.hourai.replies.compare:global.hourai.replies.taunt;
-            //message.channel.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]);
-            message.channel.send('Descanse en paz, mi pana <:pensaki:852779998351458344>');
+            const fuckustr = (msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)?global.hourai.replies.compare:global.hourai.replies.taunt;
+            message.channel.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]);
+            //message.channel.send('Descanse en paz, mi pana <:pensaki:852779998351458344>');
         } else if(msg.startsWith('~echo ') || msg.startsWith('$say ')) {
             async function responder(ch) {
                 const fuckustr = global.hourai.replies.reply;
