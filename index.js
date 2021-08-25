@@ -131,9 +131,9 @@ client.on('message', message => { //En caso de recibir un mensaje
     ];
 
     if(message.guild.id === global.serverid.hourai && !banch.some(bc => message.channel.id == bc)) {
-        console.log(`${message.channel.name}: ${message.content}`);
-        const banpf = [ 'p!', '!', '->', '$', '.', ',', ',,' ];
-        if(banpf.some(bp => message.content.indexOf(bp) === 0)) {
+        const banpf = [ /^p!\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,\w/, /^,,\w/, /^~\w/ ];
+        if(banpf.some(bp => message.content.match(bp))) {
+            console.log('Detectado uso incorrecto de comando');
             const now = Date.now();
             const mui = message.author.id;
             
