@@ -3,11 +3,11 @@ var global = require('../../localdata/config.json'); //Variables globales
 var func = require('../../func.js'); //Funciones globales
 
 module.exports = {
-	name: 'm-saltar',
+	name: 'saltar',
     aliases: [
-        'm-saltear',
-        'm-skip',
-        'm-s'
+        'saltear',
+        'skip',
+        's'
     ],
 	execute(message, args) {
         if(func.notModerator(message.member)) { //Cancelar si el comando no fue ejecutado por un moderador

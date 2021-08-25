@@ -3,11 +3,11 @@ var global = require('../../localdata/config.json'); //Variables globales
 var func = require('../../func.js'); //Funciones globales
 
 module.exports = {
-	name: 'm-terminar',
+	name: 'terminar',
     aliases: [
-        'm-finalizar', 'm-final', 'm-fin',
-        'm-finish', 'm-end',
-        'm-ed'
+        'finalizar', 'final', 'fin',
+        'finish', 'end',
+        'ed'
     ],
 	execute(message, args) {
         //Comprobar que se esté jugando o por jugar

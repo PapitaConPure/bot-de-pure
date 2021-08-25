@@ -3,10 +3,10 @@ const func = require('../../func.js'); //Funciones globales
 const imgs = require('../../localdata/drawings.json'); //Imágenes guardadas
 
 module.exports = {
-	name: 'm-todo',
+	name: 'todo',
     aliases: [
-        'm-imágenes', 'm-dibujos',
-        'm-everything', 'm-images'
+        'imágenes', 'dibujos',
+        'everything', 'images'
     ],
 	execute(message, args) {
         if(func.notModerator(message.member)) {

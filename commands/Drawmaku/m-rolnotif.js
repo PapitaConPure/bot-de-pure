@@ -3,10 +3,10 @@ var global = require('../../localdata/config.json'); //Variables globales
 var func = require('../../func.js'); //Funciones globales
 
 module.exports = {
-	name: 'm-rolnotif',
+	name: 'rolnotif',
     aliases: [
-        'm-rolnotificación', 'm-notificaciónrol', 'm-notifrol',
-        'm-notificationrole', 'm-notifrole'
+        'rolnotificación', 'notificaciónrol', 'notifrol',
+        'notificationrole', 'notifrole'
     ],
 	execute(message, args) {
         if(!func.notModerator(message.member)) {
@@ -34,7 +34,7 @@ module.exports = {
                     message.channel.send(
                         ':no_bell::no_bell::no_bell:\n' +
                         'Aún no se ha establecido el rol de notificación de Drawmaku.\n' +
-                        'Es altamente recomendable crear un rol de notificación de Drawmaku y enlistarlo con `d!m-rolnotif <rol>`.\n' +
+                        'Es altamente recomendable crear un rol de notificación de Drawmaku y enlistarlo con `d!rolnotif <rol>`.\n' +
                         ':no_bell::no_bell::no_bell:\n'
                     );
                 else {
@@ -45,7 +45,7 @@ module.exports = {
                     }
                     message.channel.send(`:bell: el rol de notificación Drawmaku designado es "${rol.name}" (ID: ${global.notroles})`);
                 }
-            } else if(args.length > 1) message.channel.send(':warning: demasiados parámetros. Recuerda: `d!m-rolnotif <rol>`.');
+            } else if(args.length > 1) message.channel.send(':warning: demasiados parámetros. Recuerda: `d!rolnotif <rol>`.');
         } else {
             message.channel.send(':closed_lock_with_key: solo aquellos con un rol de moderación de Drawmaku pueden usar este comando.');
             return;

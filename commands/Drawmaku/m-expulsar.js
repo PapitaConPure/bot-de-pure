@@ -3,11 +3,11 @@ var global = require('../../localdata/config.json'); //Variables globales
 var func = require('../../func.js'); //Funciones globales
 
 module.exports = {
-	name: 'm-expulsar',
+	name: 'expulsar',
     aliases: [
-        'm-patear', 'm-sacar',
-        'm-kick',
-        'm-k'
+        'patear', 'sacar',
+        'kick',
+        'k'
     ],
 	execute(message, args) {
         message.delete();
@@ -44,7 +44,7 @@ module.exports = {
                     func.removeFromList(idjugador);
                 } else message.channel.send(`:warning: El jugador ${args[i]} no existe.`);
             }
-        } else message.channel.send(`:warning: Debes mencionar a los usuarios que quieres expulsar del Drawmaku. Recuerda: \`${global.p_drmk}m-expulsar <@jugadorA> <@jugadorB> <@jugadorC>...\`.`);
+        } else message.channel.send(`:warning: Debes mencionar a los usuarios que quieres expulsar del Drawmaku. Recuerda: \`${global.p_drmk}expulsar <@jugadorA> <@jugadorB> <@jugadorC>...\`.`);
 
 
     },

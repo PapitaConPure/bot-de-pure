@@ -2,21 +2,22 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.56",
+            "number": "Full.2.8.58",
             "name": "Cisne Cristalino"
         },
         "note": "Corregí un problema con p!anarquia que puede que se encuentre en otros comandos, favor de reportar. Se sigue buscando la personalización a nivel de servidor",
         "changelog": [
             "Tareas de refactorización (2.5/4)",
-            "Corregido error de referencia en p!anarquia",
-            "Preparando conteo de mensajes por servidor, canal y usuarios para p!m-info",
+            "Preparando conteo de mensajes por servidor, canal y usuarios para p!info",
             "El pedido para escoger color (H. Doll) es incluso más agresivo",
             "Agregada función interna para detección de flags, falta aplicar en comandos que hacen uso de esto",
             "Corregido un error que hacía que búsquedas por usuarios no detecten palabras en mayúsculas",
             "Removidas las restricciones de comandos exclusivos para Papita con Puré (excepto `MOD` y `GUIDE`)",
             "Pequeñas optimizaciones generales",
             "Corregido un error que no permitía ver el sassamodo de p!sassafras",
-            "Mejora de bienvenida (H. Doll)"
+            "Mejora de bienvenida (H. Doll)",
+            "Agregado comando p!colgar (H. Doll)",
+            "Removida la extensión de prefijo \"-m\" para comandos de moderación"
         ],
         "todo": [
             "Restaurar comandos de búsqueda de imagen avanzados",
@@ -57,6 +58,7 @@
     ],
     "boorutags": {},
     "hourai": {
+        "infr": {},
         "warn": 0,
         "images": {
             "welcome": "https://i.imgur.com/PdcilW3.png",

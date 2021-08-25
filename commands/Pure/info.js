@@ -1,26 +1,30 @@
-const Discord = require('discord.js'); //Integrar discord.js
-const global = require('../../localdata/config.json'); //Variables globales
+const { MessageEmbed } = require('discord.js'); //Integrar discord.js
+const { fetchArrows, fetchFlag, fetchUserID } = require('../../func');
+const { startuptime } = require('../../localdata/config.json'); //Variables globales
 const stats = require('../../localdata/stats.json');
 
 module.exports = {
-	name: 'm-info',
+	name: 'info',
 	aliases: [
-		'm-informacion', 'm-información', 'm-inf',
-        'm-serverinfo', 'm-svinfo', 'm-svinf',
-		'm-i'
+		'informacion', 'información', 'inf',
+        'serverinfo', 'svinfo', 'svinf',
+		'i'
     ],
     desc: 'Muestra información estadística paginada del servidor',
     flags: [
         'mod'
     ],
     options: [
-		'`<canal?>` para mostrar estadísticas extra de un canal'
+		'`<canal?>` para mostrar estadísticas extra de un canal',
+		'`-m` o `--miembro` para mostrar estadísticas extra de un usuario'
     ],
 	callx: '<canal?>',
 	
 	execute(message, args) {
 		message.channel.startTyping();
 		const servidor = message.channel.guild; //Variable que almacena un objeto del servidor a analizar
+		const miembro = fetchFlag(args, { property: true, short: ['m'], long: ['miembro'], callback: (x, i) => fetchUserID(x[i], servidor, message.client) });
+		console.log(miembro);
 		let selectch;
 
 		//Contadores
@@ -69,33 +73,6 @@ module.exports = {
 			.map(([name, obj]) => [name, obj.cnt]);
 		console.log('uwu', peocnt);
 		console.log('owo', msgcnt);
-
-		//Ordenamiento burbuja
-		/*for(let i = 1; i < textcnt; i++)
-			for(let j = 0; j < (textcnt - i); j++)
-				if(msgcnt[j] < msgcnt[j + 1]) {
-					//Contador de mensajes "cantidad"
-					let tmp = msgcnt[j];
-					msgcnt[j] = msgcnt[j + 1];
-					msgcnt[j + 1] = tmp;
-					//Contador de mensajes "id"
-					tmp = chid[j];
-					chid[j] = chid[j + 1];
-					chid[j + 1] = tmp;
-				}
-
-		for(let i = 1; i < peoid.length; i++)
-			for(let j = 0; j < (peoid.length - i); j++)
-				if(peocnt[j] < peocnt[j + 1]) {
-					//Contador de personas "cantidad"
-					tmp = peocnt[j];
-					peocnt[j] = peocnt[j + 1];
-					peocnt[j + 1] = tmp;
-					//Contador de personas "id"
-					tmp = peoid[j];
-					peoid[j] = peoid[j + 1];
-					peoid[j + 1] = tmp;
-				}*/
 			
 		//Creacion de top 5
 		//Personas más activas
@@ -107,7 +84,7 @@ module.exports = {
 		let SelectedEmbed = 0;
 		const Embed = [];
 
-		Embed[0] = new Discord.MessageEmbed()
+		Embed[0] = new MessageEmbed()
 			.setColor('#ffd500')
 			.setTitle('Información del servidor OwO')
 
@@ -127,7 +104,7 @@ module.exports = {
 			.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL({ dynamic: true, size: 256 }))
 			.setFooter(`Estas estadísticas toman información concreta.`);
 
-		Embed[1] = new Discord.MessageEmbed()
+		Embed[1] = new MessageEmbed()
 			.setColor('#eebb00')
 			.setTitle('Estadísticas de actividad ÛwÕ')
 
@@ -146,13 +123,13 @@ module.exports = {
 		const servermonth = Math.floor(tiempoguild/1000/3600/24/30) % 12;
 		const serveryear = Math.floor(tiempoguild/1000/3600/24/365);
 
-		const tiempobot = Date.now() - global.startuptime;
+		const tiempobot = Date.now() - startuptime;
 		const botms = Math.floor(tiempobot) % 100;
 		const botsec = Math.floor(tiempobot/1000) % 60;
 		const botmin = Math.floor(tiempobot/1000/60) % 60;
 		const bothour = Math.floor(tiempobot/1000/3600) % 24;
 
-		Embed[2] = new Discord.MessageEmbed()
+		Embed[2] = new MessageEmbed()
 			.setColor('#e99979')
 			.setTitle('Estadísticas de tiempo UwU')
 
@@ -164,7 +141,7 @@ module.exports = {
 			.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
 			.setFooter(`Estas estadísticas toman información concreta.`);
 		
-		const arrows = [message.client.emojis.cache.get('681963688361590897'), message.client.emojis.cache.get('681963688411922460')];
+		const arrows = fetchArrows(message.client.emojis.cache);
 		const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
 		message.channel.send(Embed[0]).then(sent => {
 			sent.react(arrows[0])

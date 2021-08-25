@@ -3,10 +3,10 @@ var global = require('../../localdata/config.json'); //Variables globales
 var func = require('../../func.js'); //Funciones globales
 
 module.exports = {
-	name: 'm-cambiarpt',
+	name: 'cambiarpt',
     aliases: [
-        'm-modificarpt', 'm-cambiarpuntos', 'm-modificarpuntos', 'm-cpt', 'm-mpt',
-        'm-changept', 'm-modifypt'
+        'modificarpt', 'cambiarpuntos', 'modificarpuntos', 'cpt', 'mpt',
+        'changept', 'modifypt'
     ],
 	execute(message, args) {
         message.delete();

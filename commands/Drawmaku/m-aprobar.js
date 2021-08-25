@@ -2,11 +2,11 @@ var global = require('../../localdata/config.json'); //Variables globales
 var func = require('../../func.js'); //Funciones globales
 
 module.exports = {
-	name: 'm-aprobar',
+	name: 'aprobar',
     aliases: [
-        'm-si',
-        'm-approve', 'm-yes',
-        'm-y'
+        'si',
+        'approve', 'yes',
+        'y'
     ],
 	execute(message, args) {
         message.delete();

@@ -2,11 +2,11 @@ const Discord = require('discord.js'); //Integrar discord.js
 const { p_pure } = require('../../localdata/config.json'); //Variables globales
 
 module.exports = {
-	name: 'm-inforol',
+	name: 'inforol',
 	aliases: [
-		'm-cuántos', 'm-cuantos', 'm-cuentarol',
-        'm-rolecount', 'm-roleinfo',
-        'm-irol', 'm-ir', 'm-ri', 'm-rolei'
+		'cuántos', 'cuantos', 'cuentarol',
+        'rolecount', 'roleinfo',
+        'irol', 'ir', 'ri', 'rolei'
     ],
     desc: 'Realiza una búsqueda en el servidor para encontrar a todos los usuarios que cumplen con los búsqueda de roles solicitada. Devuelve el total de usuarios encontrados junto con una lista paginada de los mismos\n' +
 		'**[+]Inclusivo:** se consideran usuarios con __algunos de los roles__ buscados (dinámico)\n' +
@@ -23,12 +23,12 @@ module.exports = {
 	
 	execute(message, args) {
 		if(args.length < 2) {
-			message.channel.send(`:x: ¡Debes ingresar al menos dos parámetros!\nUsa \`${p_pure}ayuda m-inforol\` para más información`);
+			message.channel.send(`:x: ¡Debes ingresar al menos dos parámetros!\nUsa \`${p_pure}ayuda inforol\` para más información`);
 			return;
 		}
 
 		if(args[0] !== '-' && args[0] !== '+') {
-			message.channel.send(`:warning: El primer parámetro solo puede ser \`+\` o \`-\`\nUsa \`${p_pure}ayuda m-inforol\` para más información`);
+			message.channel.send(`:warning: El primer parámetro solo puede ser \`+\` o \`-\`\nUsa \`${p_pure}ayuda inforol\` para más información`);
 			return;
 		}
 

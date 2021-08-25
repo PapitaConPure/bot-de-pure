@@ -3,9 +3,9 @@ const global = require('../../localdata/config.json'); //Variables globales
 const func = require('../../func.js'); //Funciones globales
 
 module.exports = {
-	name: 'm-twitters',
+	name: 'twitters',
 	aliases: [
-		'm-twitter'
+		'twitter'
 	],
 	desc: 'Para mostrar Twitters de artistas con los que trabaja Hourai Doll\n' +
 	'Crea un nuevo embed con los `<twitters>` designados (separados solamente por un espacio)\n' +

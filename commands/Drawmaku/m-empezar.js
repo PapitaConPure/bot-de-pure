@@ -3,11 +3,11 @@ var global = require('../../localdata/config.json'); //Variables globales
 var func = require('../../func.js'); //Funciones globales
 
 module.exports = {
-	name: 'm-empezar',
+	name: 'empezar',
     aliases: [
-        'm-comenzar', 'm-comienzo', 'm-iniciar', 'm-inicio',
-        'm-start', 'm-begin',
-        'm-st'
+        'comenzar', 'comienzo', 'iniciar', 'inicio',
+        'start', 'begin',
+        'st'
     ],
 	execute(message, args) {
         //Comprobar que se pueda empezar un nuevo Drawmaku

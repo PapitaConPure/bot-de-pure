@@ -2,11 +2,11 @@ const { p_pure } = require('../../localdata/config.json'); //Variables globales
 const func = require('../../func.js'); //Funciones globales
 
 module.exports = {
-	name: 'm-borrar',
+	name: 'borrar',
 	aliases: [
-		'm-borrarmsg',
-        'm-deletemsg', 'm-delete',
-        'm-del', 'm-d', 
+		'borrarmsg',
+        'deletemsg', 'delete',
+        'del', 'd', 
     ],
     desc: 'Elimina una cierta cantidad de mensajes entre 2 y 100',
     flags: [
@@ -60,8 +60,8 @@ module.exports = {
 			let amt = parseInt(args[0]);
 			if(isNaN(amt)) {
 				message.channel.send(
-					'Debes especificar la cantidad de mensajes a borrar\n' +
-					`Revisa \`${p_pure}ayuda m-borrar\` para más información`
+					':warning: Debes especificar la cantidad de mensajes a borrar\n' +
+					`Revisa \`${p_pure}ayuda borrar\` para más información`
 				);
 				return;
 			}

@@ -122,6 +122,38 @@ client.on('message', message => { //En caso de recibir un mensaje
 
     if(message.content.startsWith(',confession ')) global.confch.send(logembed);
     else global.logch.send(logembed);
+
+    if(message.guild.id === global.serverid.hourai && message.channel.id != '671820448207601684') {
+        const banpf = [ 'p!', '!', '$', '.', ',', ',,', '_' ];
+        if(banpf.some(bp => message.content.indexOf(bp) === 0)) {
+            const now = Date.now();
+            const mui = message.author.id;
+            
+            if(!global.hourai.infr[mui])
+                global.hourai.infr[mui] = []; //Resentir
+            else {
+                global.hourai.infr[mui] = global.hourai.infr[mui].filter(inf => (now - inf) / 1000 < (60 * 5));
+                const total = global.hourai.infr[mui].push(now); //Añade el momento de la infracción y guarda el largo del arreglo
+                //Sancionar según infracciones cometidas en 1 minuto
+                switch(total) {
+                case 1:
+                    message.channel.send('Detecto.. bots fuera de botposteo... <:empty:856369841107632129>');
+                    break;
+                case 2:
+                    message.channel.send(`${message.author.tag} párale conchetumare, vete a <#671820448207601684> <:despair:852764014840905738>`);
+                    break;
+                default:
+                    message.channel.send('Ahora sí te cagaste ijoelpico <:tenshismug:859874631795736606>');
+                    const hd = '682629889702363143'; //Hanged Doll
+                    const gd = message.channel.guild;
+                    const member = gd.members.cache.get(message.author.id);
+                    if(!member.roles.cache.some(r => r.id === hd))
+                        member.roles.add(hd);
+                    break;
+                }
+            }
+        }
+    }
     //#endregion
 
     //#region Estadísticas

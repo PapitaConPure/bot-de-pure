@@ -108,7 +108,7 @@ module.exports = {
         } else {
             const title = s => {
                 s = (s.startsWith('g-'))?`${s.slice(2)} (Página de Guía)`:s;
-                s = (s.startsWith('m-'))?`${s.slice(2)} (Mod)`:s;
+                s = (s.startsWith(''))?`${s.slice(2)} (Mod)`:s;
                 s = (s.startsWith('papa-'))?`${s.slice(5)} (Papita con Puré)`:s;
                 return `${s[0].toUpperCase()}${s.slice(1)}`;
             };

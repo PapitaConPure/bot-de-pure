@@ -3,10 +3,10 @@ var global = require('../../localdata/config.json'); //Variables globales
 var func = require('../../func.js'); //Funciones globales
 
 module.exports = {
-	name: 'm-tem',
+	name: 'tem',
     aliases: [
-        'm-tematica',
-        'm-theme'
+        'tematica',
+        'theme'
     ],
 	execute(message, args) {
         if(func.notModerator(message.member)) {
