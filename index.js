@@ -123,15 +123,16 @@ client.on('message', message => { //En caso de recibir un mensaje
     if(message.content.startsWith(',confession ')) global.confch.send(logembed);
     else global.logch.send(logembed);
 
-    const banch = [
+    const whitech = [
         '671820448207601684', //botposting
         '813189609911353385', //gachahell
         '813195795318177802', //trata-de-waifus
-        '674422177596178437'  //muteposting
+        '674422177596178437', //muteposting
+        '673353484514492417'  //hornyposting
     ];
 
-    if(message.guild.id === global.serverid.hourai && !banch.some(bc => message.channel.id == bc)) {
-        const banpf = [ /^p!\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,(?!confession)\w/, /^,,\w/, /^~\w/ ];
+    if(message.guild.id === global.serverid.hourai && !whitech.some(bc => message.channel.id == bc)) {
+        const banpf = [ /^p!\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,(?!confession)\w/, /^,,\w/, /^~\w/, /^\/\w/ ];
         if(banpf.some(bp => message.content.match(bp))) {
             console.log('Detectado uso incorrecto de comando');
             const now = Date.now();
@@ -140,9 +141,10 @@ client.on('message', message => { //En caso de recibir un mensaje
             if(!global.hourai.infr[mui])
                 global.hourai.infr[mui] = []; //Resentir
             else {
-                global.hourai.infr[mui] = global.hourai.infr[mui].filter(inf => (now - inf) / 1000 < (60 * 5));
+                global.hourai.infr[mui] = global.hourai.infr[mui].filter(inf => (now - inf) / 1000 < (60 * 5)); //Eliminar antiguos
                 const total = global.hourai.infr[mui].push(now); //Añade el momento de la infracción y guarda el largo del arreglo
-                //Sancionar según infracciones cometidas en 1 minuto
+                
+                //Sancionar según total de infracciones cometidas en los últimos 5 minutos
                 switch(total) {
                 case 1:
                     message.channel.send('Detecto.. bots fuera de botposteo... <:empty:856369841107632129>');
@@ -155,8 +157,12 @@ client.on('message', message => { //En caso de recibir un mensaje
                     const hd = '682629889702363143'; //Hanged Doll
                     const gd = message.channel.guild;
                     const member = gd.members.cache.get(message.author.id);
-                    if(!member.roles.cache.some(r => r.id === hd))
-                        member.roles.add(hd);
+                    try {
+                        if(!member.roles.cache.some(r => r.id === hd))
+                            member.roles.add(hd);
+                    } catch(err) {
+                        message.channel.send(`<:wtfff:855940251892318238> Ese wn tiene demasia'o ki. Cuélgalo tú po'.\n\`\`\`\n${err.name}`);
+                    }
                     break;
                 }
             }
