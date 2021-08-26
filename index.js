@@ -124,11 +124,11 @@ client.on('message', message => { //En caso de recibir un mensaje
     else global.logch.send(logembed);
 
     const whitech = [
-        '671820448207601684', //botposting
-        '813189609911353385', //gachahell
-        '813195795318177802', //trata-de-waifus
-        '674422177596178437', //muteposting
-        '673353484514492417'  //hornyposting
+        '671820448207601684', //botposting          habilitado para uso completo de bots
+        '813189609911353385', //gachahell           habilitado para uso de Mudae
+        '813195795318177802', //trata-de-waifus     habilitado para uso de Mudae
+        '674422177596178437', //muteposting         habilitado para bots de música
+        '673353484514492417'  //hornyposting        habilitado para bots r-18
     ];
 
     if(message.guild.id === global.serverid.hourai && !whitech.some(bc => message.channel.id == bc)) {
@@ -150,7 +150,7 @@ client.on('message', message => { //En caso de recibir un mensaje
                     message.channel.send('Detecto.. bots fuera de botposteo... <:empty:856369841107632129>');
                     break;
                 case 2:
-                    message.channel.send(`${message.author.tag} párale conchetumare, vete a <#${banch[0]}> <:despair:852764014840905738>`);
+                    message.channel.send(`${message.author.tag} párale conchetumare, vete a <#${whitech[0]}> <:despair:852764014840905738>`);
                     break;
                 default:
                     message.channel.send('Ahora sí te cagaste ijoelpico <:tenshismug:859874631795736606>');
