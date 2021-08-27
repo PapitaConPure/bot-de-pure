@@ -124,11 +124,12 @@ client.on('message', message => { //En caso de recibir un mensaje
     else global.logch.send(logembed);
 
     const whitech = [
-        '671820448207601684', //botposting          habilitado para uso completo de bots
-        '813189609911353385', //gachahell           habilitado para uso de Mudae
-        '813195795318177802', //trata-de-waifus     habilitado para uso de Mudae
-        '674422177596178437', //muteposting         habilitado para bots de música
-        '673353484514492417'  //hornyposting        habilitado para bots r-18
+        '662317620699332627', //autómatas           habilitado para testeo
+        '671820448207601684', //botposting          habilitado para uso general
+        '813189609911353385', //gachahell           habilitado para gacha
+        '813195795318177802', //trata-de-waifus     habilitado para gacha
+        '674422177596178437', //muteposting         habilitado para música
+        '673353484514492417', //hornyposting        habilitado para NSFW
     ];
 
     if(message.guild.id === global.serverid.hourai && !whitech.some(bc => message.channel.id == bc)) {
@@ -141,16 +142,16 @@ client.on('message', message => { //En caso de recibir un mensaje
             if(!global.hourai.infr[mui])
                 global.hourai.infr[mui] = []; //Resentir
             else {
-                global.hourai.infr[mui] = global.hourai.infr[mui].filter(inf => (now - inf) / 1000 < (60 * 5)); //Eliminar antiguos
-                const total = global.hourai.infr[mui].push(now); //Añade el momento de la infracción y guarda el largo del arreglo
+                //Sancionar según total de infracciones cometidas en los últimos 10 minutos
+                global.hourai.infr[mui] = global.hourai.infr[mui].filter(inf => (now - inf) / 1000 < (60 * 10)); //Eliminar antiguas
+                const total = global.hourai.infr[mui].push(now); //Añade el momento de la infracción actual y retorna el largo del arreglo
                 
-                //Sancionar según total de infracciones cometidas en los últimos 5 minutos
                 switch(total) {
                 case 1:
                     message.channel.send('Detecto.. bots fuera de botposteo... <:empty:856369841107632129>');
                     break;
                 case 2:
-                    message.channel.send(`${message.author.tag} párale conchetumare, vete a <#${whitech[0]}> <:despair:852764014840905738>`);
+                    message.channel.send(`**${message.author.tag}** párale conchetumare, vete a <#${whitech[0]}> <:despair:852764014840905738>`);
                     break;
                 default:
                     message.channel.send('Ahora sí te cagaste ijoelpico <:tenshismug:859874631795736606>');
