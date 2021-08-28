@@ -309,7 +309,15 @@ client.on('messageCreate', message => { //En caso de recibir un mensaje
     } catch(error) {
         console.log('Ha ocurrido un error al ingresar un comando.');
         console.error(error);
-        message.channel.send({ content: `\`\`\`js\n${error}\n\`\`\`\n<@!${global.peopleid.papita}>` });
+        const errorembed = new Discord.MessageEmbed()
+            .setColor('#0000ff')
+            .setAuthor(`${message.guild.name} • ${message.channel.name} (Click para ver)`, message.author.avatarURL({ dynamic: true }), message.url)
+            .setFooter(`gid: ${message.guild.id} | cid: ${message.channel.id} | uid: ${message.author.id}`)
+            .addField('Ha ocurrido un error al ingresar un comando', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
+        global.logch.send({
+            content: `<@${global.peopleid.papita}>`,
+            embeds: [errorembed]
+        });
         stats.commands.failed++;
     }
 
@@ -339,6 +347,15 @@ client.on('guildMemberAdd', member => { //Evento de entrada a servidor
     } catch(error) {
         console.log('Ha ocurrido un error al dar la bienvenida.');
         console.error(error);
+        const errorembed = new Discord.MessageEmbed()
+            .setColor('#0000ff')
+            .setAuthor(member.guild.name)
+            .setFooter(`gid: ${member.guild.id} | uid: ${member.user.id}`)
+            .addField('Ha ocurrido un error al dar la bienvenida', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
+        global.logch.send({
+            content: `<@${global.peopleid.papita}>`,
+            embeds: [errorembed]
+        });
     }
 });
 
@@ -353,6 +370,15 @@ client.on('guildMemberRemove', member => { //Evento de salida de servidor
     } catch(error) {
         console.log('Ha ocurrido un error al dar la despedida.');
         console.error(error);
+        const errorembed = new Discord.MessageEmbed()
+            .setColor('#0000ff')
+            .setAuthor(member.guild.name)
+            .setFooter(`gid: ${member.guild.id} | uid: ${member.user.id}`)
+            .addField('Ha ocurrido un error al dar la despedida', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
+        global.logch.send({
+            content: `<@${global.peopleid.papita}>`,
+            embeds: [errorembed]
+        });
     }
 });
 
