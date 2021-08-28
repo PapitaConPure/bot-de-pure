@@ -15,7 +15,7 @@ module.exports = {
     ],
 	
 	execute(message, args){
-		message.channel.send('***ORPHEN CUIDADO***');
-		message.channel.send('***CUIDADO ORPHEEEEEN***');
+		message.channel.send({ content: '***ORPHEN CUIDADO***' });
+		message.channel.send({ content: '***CUIDADO ORPHEEEEEN***' });
     },
 };

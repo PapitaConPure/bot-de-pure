@@ -21,7 +21,7 @@ module.exports = {
 	
 	execute(message, args) {
 		if(uses.pinguear[message.author.id] !== undefined && uses.pinguear[message.author.id]) {
-			message.channel.send(`:octagonal_sign: oe, ¿¡y si te calmai!?`);
+			message.channel.send({ content: `:octagonal_sign: oe, ¿¡y si te calmai!?` });
 			return;
 		}
 
@@ -33,15 +33,15 @@ module.exports = {
 			else if(!isNaN(args[1])) { cnt = args[1]; mention = args[0]; }
 
 			if(cnt < 2 || cnt > 10) 
-				message.channel.send(':warning: solo puedes pinguear a alguien entre 2 y 10 veces.');
+				message.channel.send({ content: ':warning: solo puedes pinguear a alguien entre 2 y 10 veces.' });
 			else if(mention.startsWith('<@') && mention.endsWith('>')) {
 				if(mention.startsWith('<@&')) {
-					message.channel.send(':warning: PERO NO SEAS TAN ENFERMO');
+					message.channel.send({ content: ':warning: PERO NO SEAS TAN ENFERMO' });
 					return;
 				}
 				uses.pinguear[message.author.id] = true;
 				func.pingear(cnt, mention, message.channel, message.author.id); 
-			} else message.channel.send(`:warning: debes ingresar un valor numérico y una mención (\`${p_pure}pinguear <cantidad> <usuario>\`).`);
-		} else message.channel.send(`:warning: debes ingresar 2 parámetros (\`${p_pure}pinguear <cantidad> <usuario>\`).`);
+			} else message.channel.send({ content: `:warning: debes ingresar un valor numérico y una mención (\`${p_pure}pinguear <cantidad> <usuario>\`).` });
+		} else message.channel.send({ content: `:warning: debes ingresar 2 parámetros (\`${p_pure}pinguear <cantidad> <usuario>\`).` });
     },
 };

@@ -20,12 +20,12 @@ module.exports = {
 	execute(message, args) {
 		//Acción de comando
 		//if(!args.length) {
-		message.channel.send(`**Host** \`${global.bot_status.host}\`\n**ID de InstProc** \`${global.startuptime}\`\n**Estado** \`[${global.maintenance.length?'PAUSADO':'OPERANDO'}]\``)
+		message.channel.send({ content: `**Host** \`${global.bot_status.host}\`\n**ID de InstProc** \`${global.startuptime}\`\n**Estado** \`[${global.maintenance.length?'PAUSADO':'OPERANDO'}]\``})
 			.then(sent => {
 				const reaction = (global.maintenance.length)?'🌀':'💤';
 				sent.react(reaction);
 				const filter = (rc, user) => rc.emoji.name === reaction && user.id === message.author.id;
-				const collector = sent.createReactionCollector(filter, { max: 1, time: 1000 * 30 });
+				const collector = sent.createReactionCollector({ filter: filter, max: 1, time: 1000 * 30 });
 				collector.on('collect', () => {
 					if(global.maintenance.length) {
 						global.maintenance = '';

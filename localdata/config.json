@@ -2,10 +2,10 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.5A",
+            "number": "Full.2.8.5F",
             "name": "Cisne Cristalino"
         },
-        "note": "Corregí un problema con p!anarquia que puede que se encuentre en otros comandos, favor de reportar. Se sigue buscando la personalización a nivel de servidor",
+        "note": "Se esperan problemas y crasheos debido a la reciente actualización de Discord.js",
         "changelog": [
             "Tareas de refactorización (2.5/4)",
             "Preparando conteo de mensajes por servidor, canal y usuarios para p!info",
@@ -17,7 +17,8 @@
             "Corregido un error que no permitía ver el sassamodo de p!sassafras",
             "Mejora de bienvenida (H. Doll)",
             "Agregado comando p!colgar (H. Doll)",
-            "Removida la extensión de prefijo \"-m\" para comandos de moderación"
+            "Removida la extensión de prefijo \"-m\" para comandos de moderación",
+            "Actualizado Discord.js de v12 a v13"
         ],
         "todo": [
             "Restaurar comandos de búsqueda de imagen avanzados",

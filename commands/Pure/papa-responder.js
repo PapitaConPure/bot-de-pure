@@ -52,25 +52,29 @@ module.exports = {
 
 		//Acción de comando
 		if(user === undefined) {
-			message.channel.send(':warning: ¡Usuario no encontrado!');
+			message.channel.send({ content: ':warning: ¡Usuario no encontrado!' });
 			return;
 		}
 		user = message.client.users.cache.get(user);
 
 		if(mode === undefined) //Confirmación de lectura
-			user.send('📩 ¡Se confirmó que tu sugerencia ha sido leída! Si es aceptada, se te notificará de igual forma; en caso contrario, no recibirás ninguna notificación.');
+			user.send({ content: '📩 ¡Se confirmó que tu sugerencia ha sido leída! Si es aceptada, se te notificará de igual forma; en caso contrario, no recibirás ninguna notificación.' });
 		else if(mode === 'a') //Confirmación de aceptación
-			user.send(
-				'💌 ¡Se confirmó que tu sugerencia ha sido aceptada! ¡¡¡Muchas gracias por tu colaboración!!! <:meguSmile:796930824627945483>\n' +
-				'_Ten en cuenta que es probable que se hagan modificaciones al plan en base a diversos factores._'
-			);
+			user.send({
+				content:
+					'💌 ¡Se confirmó que tu sugerencia ha sido aceptada! ¡¡¡Muchas gracias por tu colaboración!!! <:meguSmile:796930824627945483>\n' +
+					'_Ten en cuenta que es probable que se hagan modificaciones al plan en base a diversos factores._'
+			});
 		else { //Reporte de problema
 			const embed = new Discord.MessageEmbed()
 				.setColor('#aa5555')
 				.setAuthor('Bot de Puré#9243', message.client.user.avatarURL({ size: 256 }))
 				.setTitle('Problema de presentación de sugerencia')
 				.addField('Detalle', args.join(' '));
-			user.send(':mailbox_with_mail: Llegó una notificación emergente del Buzón de Sugerencias.\n*__Nota:__ Bot de Puré no opera con mensajes privados.*', embed);
+			user.send({
+				content: ':mailbox_with_mail: Llegó una notificación emergente del Buzón de Sugerencias.\n*__Nota:__ Bot de Puré no opera con mensajes privados.*',
+				embeds: [embed]
+			});
 		}
 	}
 };

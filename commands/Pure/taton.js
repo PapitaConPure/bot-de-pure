@@ -50,19 +50,20 @@ module.exports = {
 		const guilds = message.client.guilds.cache;
 		const slot1Coll = guilds.get(global.serverid.slot1).emojis.cache;
 		const slot2Coll = guilds.get(global.serverid.slot2).emojis.cache;
-		const emotes = slot1Coll.concat(slot2Coll).filter(emote => perritos.some(perrito => perrito === emote.name)).array();
+		const emotes = slot1Coll.concat(slot2Coll).filter(emote => perritos.some(perrito => perrito === emote.name));
 
 		if(!args.length) {
-			const randp = Math.floor(Math.random() * perritos.length);
-			message.channel.send(`${emotes[randp]}`);
+			message.channel.send({ content: `${emotes.random()}` });
 			if(args.includes('-d')) message.delete();
 		} else {
+			const perritocomun = emotes.find(perrito => perrito.name === 'perrito');
+
 			const mostrarlista = ['perritos', 'todo', 'todos', 'lista', 'ayuda', 'everything', 'all', 'help'];
 			if(mostrarlista.includes(args[0])) {
-				const pages = paginate(emotes);
+				const pages = paginate([...emotes.values()]);
 				const embed = new Discord.MessageEmbed()
 					.setColor('#e4d0c9')
-					.setTitle(`Perritos ${emotes[0]}`)
+					.setTitle(`Perritos ${perritocomun}`)
 
 					.addField(`${'Nombre\`'.padEnd(24)}\`Emote`, pages[0])
 
@@ -72,11 +73,11 @@ module.exports = {
 
 				const arrows = fetchArrows(message.client.emojis.cache);
 				const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
-				message.channel.send(embed).then(sent => {
+				message.channel.send({ embeds: [embed] }).then(sent => {
 					sent.react(arrows[0])
 						.then(() => sent.react(arrows[1]));
 					
-					const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
+					const collector = sent.createReactionCollector({ filter: filter, time: 8 * 60 * 1000 });
 					collector.on('collect', reaction => {
 						if(reaction.emoji.id === arrows[0].id) page = (page > 0)?(page - 1):(pages.length - 1);
 						else page = (page < (pages.length - 1))?(page + 1):0;
@@ -90,14 +91,14 @@ module.exports = {
 				let foundperrito = false;
 				emotes.map(emote => {
 					if(!foundperrito) {
-						if(emote.name.toLowerCase().startsWith(args[0]) && perritos.some(perrito => perrito === emote.name)) {
-							message.channel.send(`${emote}`);
+						if(emote.name.toLowerCase().startsWith(args[0].toLowerCase()) && perritos.some(perrito => perrito === emote.name)) {
+							message.channel.send({ content: `${emote}` });
 							foundperrito = true;
 						}
 					}
 				});
 
-				if(!foundperrito) message.channel.send(`${emotes[0]}`);
+				if(!foundperrito) message.channel.send({ content: `${perritocomun}` });
 				if(args.includes('-d')) message.delete();
 			}
 		}

@@ -22,6 +22,6 @@ module.exports = {
 			'\\^O^/', '\\`u´/', '\\´u`/', '\'n\'', '^w^', '^W^', 'ouO', '>:3c', '\'o\'/', '\'u\'/', '\'O\'/', '\'U\'/', '>w<', '>W<', '°w°', '°W°'
 		];
 		const selection = getRandomInt(emot.length);
-		message.channel.send(`**${emot[selection]}**`);
+		message.channel.send({ content: `**${emot[selection]}**` });
     },
 };

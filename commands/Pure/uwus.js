@@ -26,10 +26,10 @@ module.exports = {
             .addField('UWU', 'Envía **uwu** para sumar un **uwu**.')
             .addField('Duración del evento', `**${secs}** segundos.`)
             .setAuthor(`Evento iniciado por ${message.author.username}`, message.author.avatarURL());
-        message.channel.send(Embed).then(sent => {
+        message.channel.send({ embeds: [Embed] }).then(sent => {
             const filter = m => (m.content.toLowerCase().indexOf('uwu') !== -1 && !m.author.bot) || (m.content.toLowerCase() === 'antiuwu' && m.author.id === message.author.id);
             let uwusers = {}, ultimuwu;
-			coll = sent.channel.createMessageCollector(filter, { time: (secs * 1000) });
+			coll = sent.channel.createMessageCollector({ filter: filter, time: (secs * 1000) });
             coll.on('collect', m => {
                 if(m.content !== 'antiuwu') {
                     if(!uwusers.hasOwnProperty(`${m.author.id}`)) { uwusers[m.author.id] = 1; }
@@ -49,12 +49,13 @@ module.exports = {
                 }
                 collected.map(uwumsg => uwumsg.delete());
                 mvp = maxid;
-                message.channel.send(
-                    `**UWUs totales:** ${collected.size}\n` +
-                    `**UWUs por segundo:** ${collected.size / secs}\n` +
-                    `**Persona que envió más UWUs:** ${(mvp !== -1)?`<@${mvp}>`:'nadie umu'}\n` +
-                    `**Último UWU enviado por:** ${(mvp !== -1)?`<@${ultimuwu}>`:'nadie umu'}`
-                );
+                message.channel.send({
+                    content:
+                        `**UWUs totales:** ${collected.size}\n` +
+                        `**UWUs por segundo:** ${collected.size / secs}\n` +
+                        `**Persona que envió más UWUs:** ${(mvp !== -1)?`<@${mvp}>`:'nadie umu'}\n` +
+                        `**Último UWU enviado por:** ${(mvp !== -1)?`<@${ultimuwu}>`:'nadie umu'}`
+                });
             });
         });
     },

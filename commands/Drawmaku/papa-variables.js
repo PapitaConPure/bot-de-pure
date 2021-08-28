@@ -33,9 +33,9 @@ module.exports = {
             str += 'trest = ' + ((typeof global.trest !== 'undefined')?`${global.trest}`:'indefinido') + ';\n';
             str += 'tjuego = ' + ((typeof global.tjuego !== 'undefined')?`${global.tjuego}`:'indefinido') + ';\n';
             str += '```';
-            message.channel.send(str);
+            message.channel.send({ content: str });
         } else {
-            message.channel.send(':closed_lock_with_key: Solo Papita con Pure puede usar este comando.');
+            message.channel.send({ content: ':closed_lock_with_key: Solo Papita con Pure puede usar este comando.' });
             return;
         }
     },

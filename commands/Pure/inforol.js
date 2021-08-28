@@ -23,16 +23,16 @@ module.exports = {
 	
 	execute(message, args) {
 		if(args.length < 2) {
-			message.channel.send(`:x: ¡Debes ingresar al menos dos parámetros!\nUsa \`${p_pure}ayuda inforol\` para más información`);
+			message.channel.send({ content: `:x: ¡Debes ingresar al menos dos parámetros!\nUsa \`${p_pure}ayuda inforol\` para más información` });
 			return;
 		}
 
 		if(args[0] !== '-' && args[0] !== '+') {
-			message.channel.send(`:warning: El primer parámetro solo puede ser \`+\` o \`-\`\nUsa \`${p_pure}ayuda inforol\` para más información`);
+			message.channel.send({ content: `:warning: El primer parámetro solo puede ser \`+\` o \`-\`\nUsa \`${p_pure}ayuda inforol\` para más información` });
 			return;
 		}
 
-		message.channel.startTyping();
+		message.channel.sendTyping();
 		const servidor = message.channel.guild; //Variable que almacena un objeto del servidor a analizar
 
 		//Adquirir ID de los roles
@@ -47,7 +47,7 @@ module.exports = {
 				).first();
 
 				if((typeof args[roleget]) === 'undefined') {
-					message.channel.send(':warning: ¡Rol no encontrado!');
+					message.channel.send({ content: ':warning: ¡Rol no encontrado!' });
 					args[roleget] = -1;
 				} else
 					args[roleget] = args[roleget].id;
@@ -79,12 +79,10 @@ module.exports = {
 			//Crear y usar embed
 			let SelectedEmbed = 0;
 			let Embed = [];
-			let peoplelist = rolemembers.array(); //Convertir la colección de miembros con el rol a un arreglo
+			let peoplelist = [...rolemembers.values()]; //Convertir la colección de miembros con el rol a un arreglo
 			const anaroles = args.filter(ar => ar !== '-' && ar !== '+' && ar > -1 && !isNaN(ar)).map(ar => `<@&${ar}>`).join(', ');
 			
-			if(anaroles.length === 0)
-				message.channel.stopTyping(true);
-			else {
+			if(anaroles.length !== 0) {
 				Embed[0] = new Discord.MessageEmbed()
 					.setColor('#ff00ff')
 					.setTitle(`Análisis del roles (Total)`)
@@ -117,20 +115,20 @@ module.exports = {
 				
 				const arrows = [message.client.emojis.cache.get('681963688361590897'), message.client.emojis.cache.get('681963688411922460')];
 				const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
-				message.channel.send(Embed[0]).then(sent => {
+				message.channel.send({ embeds: [Embed[0]] }).then(sent => {
 					sent.react(arrows[0])
 						.then(() => sent.react(arrows[1]))
 						.then(() => {
-							const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
+							const collector = sent.createReactionCollector({ filter: filter, time: 8 * 60 * 1000 });
 							collector.on('collect', reaction => {
 								const maxpage = Math.ceil(totalcnt / 10);
 								if(reaction.emoji.id === arrows[0].id) SelectedEmbed = (SelectedEmbed > 0)?(SelectedEmbed - 1):maxpage;
 								else SelectedEmbed = (SelectedEmbed < maxpage)?(SelectedEmbed + 1):0;
 								sent.edit(Embed[SelectedEmbed]);
 							});
-						}).then(() => message.channel.stopTyping(true));
+						})
 				});
 			}
-		} else message.channel.send(':warning: La ID ingresada no es válida o no es una ID en absoluto...');
+		} else message.channel.send({ content: ':warning: La ID ingresada no es válida o no es una ID en absoluto...' });
     },
 };

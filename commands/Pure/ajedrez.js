@@ -52,6 +52,6 @@ module.exports = {
 		}).filter(arg => arg !== undefined);*/
 
 		//Acción de comando
-		message.channel.send('Soon, later, never. Who knows?');
+		message.channel.send({ content: 'Soon, later, never. Who knows?' });
 	}
 };

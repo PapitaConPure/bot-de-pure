@@ -12,12 +12,12 @@ module.exports = {
 	execute(message, args) {
         message.delete();
         if(func.notModerator(message.member)) { //Cancelar si el comando no fue ejecutado por un moderador
-            message.channel.send(':closed_lock_with_key: Solo aquellos con un rol de moderación de Drawmaku pueden usar este comando.');
+            message.channel.send({ content: ':closed_lock_with_key: Solo aquellos con un rol de moderación de Drawmaku pueden usar este comando.' });
             return;
         }
         if(func.notStartedAndSameChannel(message.channel)) return; //Cancelar si no se está en el evento y/o en el mismo canal del evento
         if(args.length > global.cntjugadores) { //Cancelar si se está expulsando a más jugadores de los que hay jugando
-            message.channel.send(':warning: Estás intentando expulsar una cantidad de personas mayor a la de personas jugando.');
+            message.channel.send({ content: ':warning: Estás intentando expulsar una cantidad de personas mayor a la de personas jugando.' });
         }
         
         if(message.mentions.users.cache.size) {
@@ -28,9 +28,9 @@ module.exports = {
 
                 //Eliminar jugador encontrado
                 if(idjugador !== -1) {
-                    message.channel.send(`:no_entry: <@${global.jugadores[idjugador]}> (ex-jugador ${global.numeros[idjugador]}) ha sido expulsado de este Drawmaku`);
+                    message.channel.send({ content: `:no_entry: <@${global.jugadores[idjugador]}> (ex-jugador ${global.numeros[idjugador]}) ha sido expulsado de este Drawmaku` });
                     func.removeFromList(idjugador);
-                } else message.channel.send(`:warning: El usuario ${args[i]} no está jugando.`);
+                } else message.channel.send({ content: `:warning: El usuario ${args[i]} no está jugando.` });
             }
         } else if(args.length > 0) {
             var idjugador;
@@ -40,11 +40,11 @@ module.exports = {
 
                 //Eliminar jugador encontrado
                 if(idjugador !== -1) {
-                    message.channel.send(`:no_entry: <@${global.jugadores[idjugador]}> (ex-jugador ${global.numeros[idjugador]}) ha sido expulsado de este Drawmaku`);
+                    message.channel.send({ content: `:no_entry: <@${global.jugadores[idjugador]}> (ex-jugador ${global.numeros[idjugador]}) ha sido expulsado de este Drawmaku` });
                     func.removeFromList(idjugador);
-                } else message.channel.send(`:warning: El jugador ${args[i]} no existe.`);
+                } else message.channel.send({ content: `:warning: El jugador ${args[i]} no existe.`});
             }
-        } else message.channel.send(`:warning: Debes mencionar a los usuarios que quieres expulsar del Drawmaku. Recuerda: \`${global.p_drmk}expulsar <@jugadorA> <@jugadorB> <@jugadorC>...\`.`);
+        } else message.channel.send({ content: `:warning: Debes mencionar a los usuarios que quieres expulsar del Drawmaku. Recuerda: \`${global.p_drmk}expulsar <@jugadorA> <@jugadorB> <@jugadorC>...\`.` });
 
 
     },

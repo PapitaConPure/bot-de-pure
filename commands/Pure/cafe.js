@@ -19,7 +19,7 @@ const tmpfunc = async function(tmpch, alist) {
 		.setTitle('Café uwu')
 		.addField('Salsa', `${selected.bitly_url}`)
 		.setImage(`https://media.giphy.com/media/${selected.id}/giphy.gif`);
-	tmpch.send(Embed);
+	tmpch.send({ embeds: [Embed] });
 }
 
 module.exports = {

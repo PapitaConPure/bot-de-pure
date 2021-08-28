@@ -72,7 +72,7 @@ module.exports = {
                 if(command.flags !== undefined) {
                     if(!command.flags.includes('guide')) {
                         const cmeme = fmeme? true : !command.flags.includes('meme');
-                        const cmod = (fmod && message.member.hasPermission('MANAGE_ROLES'))? true : !command.flags.includes('mod');
+                        const cmod = (fmod && message.member.permissions.has('MANAGE_ROLES'))? true : !command.flags.includes('mod');
                         const cpapa = (fpapa && message.author.id === '423129757954211880')? true : !command.flags.includes('papa');
                         const chourai = (fhourai && message.channel.guild.id === serverid.hourai)? true : !command.flags.includes('hourai');
                         const cex = fex? !command.flags.includes('common') : true;
@@ -129,6 +129,6 @@ module.exports = {
                     .addField('No se ha encontrado ningún comando con este nombre', `Utiliza \`${p_pure}ayuda\` para ver una lista de comandos disponibles y luego usa \`${p_pure}comando <comando>\` para ver un comando en específico`);
         }
         
-        message.channel.send(embed);
+        message.channel.send({ embeds: [embed] });
     },
 };

@@ -29,6 +29,6 @@ module.exports = {
             .addField('Comandos', `¡Ofrezco ${readdirSync('./commands/Pure').filter(file => file.endsWith('.js')).length} comandos en total!`)
             .addField('Comentario de mi padre', '_"Quiero café. Necesito café, ya."_');
 
-        message.channel.send(embed);
+        message.channel.send({ embeds: [embed] });
     },
 };

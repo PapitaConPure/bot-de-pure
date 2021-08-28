@@ -13,7 +13,7 @@ module.exports = {
     ],
 	
 	execute(message, args){
-		message.channel.send('**PAPITA**\n**PAPITA**');
-		message.channel.send('**OE PAPITA**\n**LA NUEZ**');
+		message.channel.send({ content: '**PAPITA**\n**PAPITA**' });
+		message.channel.send({ content: '**OE PAPITA**\n**LA NUEZ**' });
     },
 };

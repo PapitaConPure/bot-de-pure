@@ -4,7 +4,7 @@ const axios = require('axios');
 const { randRange } = require('../../func');
 
 const searchForImage = async function(arglist, msg) {
-	msg.channel.startTyping();
+	msg.channel.sendTyping();
 	const srchlimit = 42;
 	let srchtags = 'touhou -guro -furry -vore -webm -audio -comic -4koma rating:';
 	let embedcolor;
@@ -72,14 +72,14 @@ const searchForImage = async function(arglist, msg) {
 				.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
 				.setImage(image.file_url);
 				
-			msg.channel.send(Embed).then(sent => {
+			msg.channel.send({ embeds: [Embed] }).then(sent => {
 				console.log(sent.id);
 				const actions = [sent.client.emojis.cache.get('704612794921779290'), sent.client.emojis.cache.get('704612795072774164')];
 				sent.react(actions[0])
 					.then(() => sent.react(actions[1]))
 					.then(() => {
 						const filter = (rc, user) => !user.bot && actions.some(action => rc.emoji.id === action.id) && msg.author.id === user.id;
-						const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
+						const collector = sent.createReactionCollector({ filter: filter, time: 8 * 60 * 1000 });
 						let showtags = false;
 						collector.on('collect', reaction => {
 							const maxpage = 2;
@@ -97,15 +97,14 @@ const searchForImage = async function(arglist, msg) {
 								sent.delete();
 							}
 						});
-					}).then(() => sent.channel.stopTyping(true));
+					});
 			});
-		} else msg.channel.send(':warning: No hay resultados para estas tags. Prueba usando tags diferentes o un menor número de página :C');
+		} else msg.channel.send({ content: ':warning: No hay resultados para estas tags. Prueba usando tags diferentes o un menor número de página :C' });
 		//#endregion
 	}).catch((error) => {
-		msg.channel.send(':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags o usando un menor rango de páginas umu');
+		msg.channel.send({ content: ':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags o usando un menor rango de páginas umu' });
 		console.error(error);
 	});
-	msg.channel.stopTyping(true);
 }
 
 module.exports = {

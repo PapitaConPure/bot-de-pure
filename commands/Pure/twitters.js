@@ -26,7 +26,7 @@ module.exports = {
 
 	execute(message, args) {
 		if(args.length === 0) {
-			message.channel.send(':warning: Necesitas ingresar al menos un enlace de Twitter');
+			message.channel.send({ content: ':warning: Necesitas ingresar al menos un enlace de Twitter' });
 			return;
 		}
 
@@ -102,13 +102,13 @@ module.exports = {
 					}
 				}
 				
-				ch.send(embed);
+				ch.send({ embeds: [embed] });
 			} else
-				message.channel.send(':warning: Uno o más enlaces tenían un formato inválido');
+				message.channel.send({ content: ':warning: Uno o más enlaces tenían un formato inválido' });
 		} else if(id !== undefined) {
 			ch.messages.fetch(id).then(msg => {
 				if(msg.embeds === undefined || msg.author.id !== message.client.user.id) {
-					message.channel.send(':warning: El mensaje especificado existe pero no me pertenece o no tiene ningún embed');
+					message.channel.send({ content: ':warning: El mensaje especificado existe pero no me pertenece o no tiene ningún embed' });
 					return;
 				}
 				const ntw = args.map(arg => (arg.startsWith(linkbase))?`[@${arg.slice(linkbase.length)}](${arg})`:undefined);
@@ -145,12 +145,12 @@ module.exports = {
 					msg.edit(embed);
 					message.react('✅');
 				} else
-					message.channel.send(':warning: Uno o más enlaces tenían un formato inválido');
+					message.channel.send({ content: ':warning: Uno o más enlaces tenían un formato inválido' });
 			}).catch(err => {
 				console.error(err);
-				message.channel.send(`:warning: ID de mensaje inválida`);
+				message.channel.send({ content: `:warning: ID de mensaje inválida` });
 			});
 		} else
-			message.channel.send('Para añadir o eliminar mensajes en un embed ya enviado, debes facilitar la ID del mensaje.');
+			message.channel.send({ content: 'Para añadir o eliminar mensajes en un embed ya enviado, debes facilitar la ID del mensaje.' });
 	}
 };

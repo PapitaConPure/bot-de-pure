@@ -18,7 +18,9 @@ module.exports = {
 	execute(message, args) {
         if(func.notStartedAndSameChannel(message.channel)) return; //Cancelar si no se está en el evento y/o en el mismo canal del evento
         if(global.jugadores[global.ndibujante] !== message.author.id) { //Cancelar comando si no fue ejecutado por el dibujante
-            message.channel.send(`:warning: Solo el dibujante, <@${global.jugadores[global.ndibujante]}> (jugador ${global.numeros[global.ndibujante]}), puede seleccionar y dibujar danmaku. Espera tu turno.`);
+            message.channel.send({
+                content: `:warning: Solo el dibujante, <@${global.jugadores[global.ndibujante]}> (jugador ${global.numeros[global.ndibujante]}), puede seleccionar y dibujar danmaku. Espera tu turno.`
+            });
             return;
         }
 
@@ -27,11 +29,11 @@ module.exports = {
             if(message.attachments.size > 0) {
                 if(!message.attachments.every(attachIsImage)) {
                     message.delete();
-                    message.channel.send(':warning: El archivo adjuntado no es una imagen.');
+                    message.channel.send({ content: ':warning: El archivo adjuntado no es una imagen.' });
                     return;
                 }
                 if(global.dibujado) {
-                    message.channel.send(':warning: Ya adjuntaste un dibujo.');
+                    message.channel.send({ content: ':warning: Ya adjuntaste un dibujo.' });
                     return;
                 }
                 global.dibujado = true;
@@ -44,16 +46,20 @@ module.exports = {
                     console.log(imgs);
                 });*/
                 if(global.seleccionado) {
-                    message.channel.send(
-                        '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
-                        '***¡EL DIBUJANTE YA HA SELECCIONADO Y DIBUJADO UN DANMAKU!***\n' +
-                        '_¡Voten ahora! ¡No hay necesidad de comandos y tienen infinitos intentos!_\n\n' +
-                        `Cuando alguien adivine el danmaku, el dibujante deberá darle puntos con \`${global.p_drmk}recomp <@jugador>\`.\n` +
-                        '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
-                    );
+                    message.channel.send({
+                        content:
+                            '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
+                            '***¡EL DIBUJANTE YA HA SELECCIONADO Y DIBUJADO UN DANMAKU!***\n' +
+                            '_¡Voten ahora! ¡No hay necesidad de comandos y tienen infinitos intentos!_\n\n' +
+                            `Cuando alguien adivine el danmaku, el dibujante deberá darle puntos con \`${global.p_drmk}recomp <@jugador>\`.\n` +
+                            '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
+                    });
                     global.cntimagenes++;
-                } else message.channel.send(':yin_yang: ~ Se seleccionó un dibujo ~ :yin_yang:');
-            } else message.channel.send(`:warning: Olvidaste mencionar tu ataque/spellcard o adjuntar la imagen del danmaku, recuerda: \`${global.p_drmk}danmaku ||<danmaku>||\` o \`${global.p_drmk}danmaku <imagen>\``);
+                } else message.channel.send({ content: ':yin_yang: ~ Se seleccionó un dibujo ~ :yin_yang:' });
+            } else
+                message.channel.send({
+                    content:`:warning: Olvidaste mencionar tu ataque/spellcard o adjuntar la imagen del danmaku, recuerda: \`${global.p_drmk}danmaku ||<danmaku>||\` o \`${global.p_drmk}danmaku <imagen>\``
+                });
             return;
         }
 
@@ -61,7 +67,7 @@ module.exports = {
         if(args[0].startsWith('||') && args[args.length - 1].endsWith('||')) {
             message.delete();
             if(global.seleccionado) {
-                message.channel.send(':warning: Ya seleccionaste un danmaku.');
+                message.channel.send({ content: ':warning: Ya seleccionaste un danmaku.' });
                 return;
             }
             global.danmaku = args[0].slice(2);
@@ -70,24 +76,26 @@ module.exports = {
             imgs.secreto[global.cntimagenes] = global.danmaku;
             global.seleccionado = true;
             if(global.dibujado) {
-                message.channel.send(
-                    '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
-                    '***¡EL DIBUJANTE YA HA SELECCIONADO Y DIBUJADO UN DANMAKU!***\n' +
-                    '_¡Voten ahora! ¡No hay necesidad de comandos y tienen infinitos intentos!_\n\n' +
-                    `Cuando alguien adivine el danmaku, el dibujante deberá darle puntos con \`${global.p_drmk}recomp <@jugador>\`.\n` +
-                    '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
-                );
+                message.channel.send({
+                    content:
+                        '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
+                        '***¡EL DIBUJANTE YA HA SELECCIONADO Y DIBUJADO UN DANMAKU!***\n' +
+                        '_¡Voten ahora! ¡No hay necesidad de comandos y tienen infinitos intentos!_\n\n' +
+                        `Cuando alguien adivine el danmaku, el dibujante deberá darle puntos con \`${global.p_drmk}recomp <@jugador>\`.\n` +
+                        '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
+                });
                 global.cntimagenes++;
-            } else message.channel.send(':yin_yang: ~ Se seleccionó un danmaku ~ :yin_yang:');
+            } else message.channel.send({ content: ':yin_yang: ~ Se seleccionó un danmaku ~ :yin_yang:' });
         } else {
-            message.channel.send(
-                '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
-                '***¡WHOOPS!***\n' +
-                '_Parece que el dibujante se olvidó de ser más cuidadoso..._\n\n' +
-                'El dibujante reveló el origen de su dibujo por accidente. Recuerda usar \\|\\|barras verticales\\|\\| para ocultar tu danmaku.\n' +
-                `Si el dibujante actual tiene otro danmaku a mano, puede ingresar \`${global.p_drmk}danmaku ||danmaku||\`, de lo contrario deberá ingresar \`${global.p_drmk}saltar\` y esperar su próximo turno.\n` +
-                '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
-            );
+            message.channel.send({
+                content:
+                    '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
+                    '***¡WHOOPS!***\n' +
+                    '_Parece que el dibujante se olvidó de ser más cuidadoso..._\n\n' +
+                    'El dibujante reveló el origen de su dibujo por accidente. Recuerda usar \\|\\|barras verticales\\|\\| para ocultar tu danmaku.\n' +
+                    `Si el dibujante actual tiene otro danmaku a mano, puede ingresar \`${global.p_drmk}danmaku ||danmaku||\`, de lo contrario deberá ingresar \`${global.p_drmk}saltar\` y esperar su próximo turno.\n` +
+                    '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
+            });
             global.seleccionado = false;
             global.dibujado = false;
         }

@@ -21,6 +21,6 @@ module.exports = {
         str += '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n';
         if(global.tjuego === 0) str += '***Esta edición de Drawmaku terminará al final de la ronda actual.***';
         else str += `*Tiempo restante: ${Math.floor(global.tjuego / 3600)}:${('0' + Math.floor((global.tjuego / 60) % 60)).slice(-2)}:${('0' + global.tjuego % 60).slice(-2)}*`;
-        message.channel.send(str);
+        message.channel.send({ content: str });
     },
 };

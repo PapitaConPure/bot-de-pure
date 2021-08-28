@@ -25,6 +25,6 @@ module.exports = {
 			'<a:sumiadios:827294808837062766>'
 		];
 
-		message.channel.send(xuwu[Math.floor(Math.random() * xuwu.length)]);
+		message.channel.send({ content: xuwu[Math.floor(Math.random() * xuwu.length)] });
     },
 };

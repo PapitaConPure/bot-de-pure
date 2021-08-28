@@ -21,7 +21,7 @@ module.exports = {
 	execute(message, args) {
 		//Acción de comando
 		if(!args.length) {
-			message.channel.send(':warning: Debes indicar un usuario.');
+			message.channel.send({ content: ':warning: Debes indicar un usuario.' });
 			return;
 		}
 
@@ -30,11 +30,11 @@ module.exports = {
 		const member = gd.members.cache.get(fetchUserID(args[0], gd, message.client));
 		if(!member.roles.cache.some(r => r.id === hd)) {
 			member.roles.add(hd);
-			message.channel.send(`:moyai: Se ha colgado a **${ member.user.tag }**`);
+			message.channel.send({ content: `:moyai: Se ha colgado a **${ member.user.tag }**` });
 			message.delete();
 		} else {
 			member.roles.remove(member.roles.cache.filter(r => r.id === hd));
-			message.channel.send(`:otter: Se ha descolgado a **${ member.user.tag }**`);
+			message.channel.send({ content: `:otter: Se ha descolgado a **${ member.user.tag }**` });
 		}
 	}
 };

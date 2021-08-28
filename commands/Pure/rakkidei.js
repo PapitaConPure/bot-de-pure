@@ -25,6 +25,9 @@ module.exports = {
 		];
 
 		//Acción de comando
-		message.channel.send(phrase[randRange(0, phrase.length)], { files: ['https://i.imgur.com/eMyvXiC.png'] });
+		message.channel.send({
+			content: phrase[randRange(0, phrase.length)],
+			files: ['https://i.imgur.com/eMyvXiC.png']
+		});
 	}
 };

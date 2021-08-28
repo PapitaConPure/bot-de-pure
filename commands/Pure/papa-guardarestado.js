@@ -18,9 +18,9 @@ module.exports = {
         fs.writeFile("save.txt", tempdata, err => {
             if(err) console.log(err);
         });
-        message.channel.send(
-            ':floppy_disk: **archivo generado**. Guarda los datos en los archivos del proyecto especificados.\n',
-            { files: ["save.txt"] }
-        );
+        message.channel.send({
+            content: ':floppy_disk: **archivo generado**. Guarda los datos en los archivos del proyecto especificados.\n',
+            files: ["save.txt"]
+        });
     },
 };

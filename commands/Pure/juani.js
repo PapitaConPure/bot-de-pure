@@ -10,6 +10,6 @@ module.exports = {
     ],
 	
 	execute(message, args){
-		message.channel.send('**Gwacyas~♪** <:uwu:681935702308552730>');
+		message.channel.send({ content: '**Gwacyas~♪** <:uwu:681935702308552730>' });
     },
 };

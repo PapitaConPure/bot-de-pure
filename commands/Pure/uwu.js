@@ -21,7 +21,7 @@ module.exports = {
 			'<:uwu4:681937074047549467>',
 			'<:uwu5:720506981743460472>'
 		];
-		message.channel.send(uwusopt[Math.floor(Math.random() * uwusopt.length)]);
+		message.channel.send({ content: uwusopt[Math.floor(Math.random() * uwusopt.length)] });
 		if(args.includes('-d')) message.delete();
     },
 };

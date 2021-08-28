@@ -14,7 +14,9 @@ module.exports = {
     ],
 	
 	execute(message, args) {
-		message.channel.send(`Aquí teni los colore po **${message.author.username}** <:reibu:686220828773318663>`, { files: [hourai.images.colors] })
-			.then(sent => askColor(sent, message.member));
+		message.channel.send({
+			content: `Aquí teni los colore po **${message.author.username}** <:reibu:686220828773318663>`,
+			files: [hourai.images.colors]
+		}).then(sent => askColor(sent, message.member));
     },
 };

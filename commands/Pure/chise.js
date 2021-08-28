@@ -10,11 +10,13 @@ module.exports = {
     ],
 	
 	execute(message, args) {
-		message.channel.send('', { files: [
-			{ name: 'chise1.png', attachment: 'https://cdn.discordapp.com/attachments/659885154105294874/723765798799147038/unknown.png'},
-			{ name: 'chise2.png', attachment: 'https://cdn.discordapp.com/attachments/659885154105294874/723765958552060004/unknown.png'},
-			{ name: 'chise3.png', attachment: 'https://cdn.discordapp.com/attachments/659885154105294874/723765965086523463/unknown.png'},
-			{ name: 'chise4.png', attachment: 'https://cdn.discordapp.com/attachments/659885154105294874/723766052928094249/unknown.png'}
-		]});
+		message.channel.send({
+			files: [
+				{ name: 'chise1.png', attachment: 'https://cdn.discordapp.com/attachments/659885154105294874/723765798799147038/unknown.png'},
+				{ name: 'chise2.png', attachment: 'https://cdn.discordapp.com/attachments/659885154105294874/723765958552060004/unknown.png'},
+				{ name: 'chise3.png', attachment: 'https://cdn.discordapp.com/attachments/659885154105294874/723765965086523463/unknown.png'},
+				{ name: 'chise4.png', attachment: 'https://cdn.discordapp.com/attachments/659885154105294874/723766052928094249/unknown.png'}
+			]
+		});
     },
 };

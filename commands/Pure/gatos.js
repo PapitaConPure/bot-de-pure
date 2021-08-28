@@ -9,7 +9,7 @@ const tmpfunc = async function(tmpch) {
 		.setTitle('Gatitos uwu')
 		.addField('Salsa', file)
 		.setImage(file);
-	tmpch.send(Embed);
+	tmpch.send({ embeds: [Embed] });
 }
 
 module.exports = {

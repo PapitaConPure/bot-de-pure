@@ -15,15 +15,6 @@ module.exports = {
     ],
 
 	execute(message, args){
-		/*message.channel.send(
-			'```\n' +
-			'[REPORTE DE ESTADO DEL BOT]\n' +
-			'Estoy investigando un error con los comandos con auto reacción personalizada que hace que tiren error al intentar conseguir las IDs de los emotes.\n' +
-			'~Papita con Puré\n' +
-			'```'
-		);
-		return;*/
-
 		const emot = [
 			'Mi polola', 'Mi reina', 'Mi princesa', 'Mi esposa', 'Mi mujer',
 			':wine_glass:', ':wine_glass::wine_glass:', ':wine_glass::wine_glass::wine_glass:',
@@ -37,7 +28,7 @@ module.exports = {
 		];
 		const selection = randRange(0, emot.length);
 		
-		message.channel.send(`**${emot[selection]}** <:bewny:722334924845350973>`).then(sent => {
+		message.channel.send({ content: `**${emot[selection]}** <:bewny:722334924845350973>` }).then(sent => {
 			if(selection <= 4) {
 				sent.react(lel[0]);
 			} else if(selection > 4 && selection <= 7) {

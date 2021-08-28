@@ -33,17 +33,17 @@ module.exports = {
 			if(!jn) {
 				if(arg.startsWith('--'))
 					switch(arg.slice(2)) {
-					case 'costo': message.channel.send('`Flag --costo anexada`'); break;
-					case 'activa': message.channel.send('`Flag --activa anexada`'); break;
-					case 'equipada': message.channel.send('`Flag --equipada anexada`'); break;
+					case 'costo': message.channel.send({ content: '`Flag --costo anexada`' }); break;
+					case 'activa': message.channel.send({ content: '`Flag --activa anexada`' }); break;
+					case 'equipada': message.channel.send({ content: '`Flag --equipada anexada`' }); break;
 					default: ignore = false;
 					}
 				else if(arg.startsWith('-'))
 					for(c of arg.slice(1))
 						switch(c) {
-						case 'c': message.channel.send('`Flag --costo anexada`'); break;
-						case 'a': message.channel.send('`Flag --activa anexada`'); break;
-						case 'e': message.channel.send('`Flag --equipada anexada`'); break;
+						case 'c': message.channel.send({ content: '`Flag --costo anexada`' }); break;
+						case 'a': message.channel.send({ content: '`Flag --activa anexada`' }); break;
+						case 'e': message.channel.send({ content: '`Flag --equipada anexada`' }); break;
 						default: ignore = false;
 						}
 				else ignore = false;
@@ -54,7 +54,7 @@ module.exports = {
 		}).filter(arg => arg !== undefined);
 
 		//Acción de comando
-        message.channel.startTyping();
+        message.channel.sendTyping();
 		const xx = 96, yy = 4;
 		const ww = 576 * 2;
 		const hh = 672 * 2;
@@ -149,7 +149,6 @@ module.exports = {
         //#endregion*/
         
         const imagen = new MessageAttachment(canvas.toBuffer(), 'bienvenida.png');
-        message.channel.send({files: [imagen]});
-        message.channel.stopTyping(true);
+        message.channel.send({ files: [imagen] });
 	}
 };

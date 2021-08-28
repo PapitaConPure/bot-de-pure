@@ -90,8 +90,8 @@ module.exports = {
 							'No tienes un perfil anárquico todavía', `Usa \`${global.p_pure}anarquia <posición(x,y)> <emote>\` para colocar un emote en la tabla de puré y crearte un perfil anárquico automáticamente\n` +
 							`Si tienes más dudas, usa \`${global.p_pure}ayuda anarquia\``
 						);
-				message.channel.send(embed);
-			} else message.channel.send(`:warning: Usuario **${args[1]}** no encontrado`);
+				message.channel.send({ embeds: [embed] });
+			} else message.channel.send({ content: `:warning: Usuario **${args[1]}** no encontrado` });
 		} else { //Ingresar emotes a tabla
 			const aid = message.author.id;
 			//Tiempo de enfriamiento por usuario
@@ -139,7 +139,7 @@ module.exports = {
 			});
 			
 			if(Object.keys(e).length !== 3)
-				message.channel.send(`:warning: Entrada inválida\nUsa \`${global.p_pure}ayuda anarquia\` para más información`);
+				message.channel.send({ content: `:warning: Entrada inválida\nUsa \`${global.p_pure}ayuda anarquia\` para más información` });
 			else if(e.id === 'unresolved')
 				message.react('⚠️');
 			else {
@@ -168,7 +168,7 @@ module.exports = {
 						}
 					anarquia[aid].exp++;
 					if((anarquia[aid].exp % 30) == 0)
-						message.channel.send(`¡**${message.author.username}** subió a nivel **${Math.floor(anarquia[aid].exp / 30) + 1}**!`);
+						message.channel.send({ content: `¡**${message.author.username}** subió a nivel **${Math.floor(anarquia[aid].exp / 30) + 1}**!` });
 
 					if(stx !== e.x || sty !== e.y) message.react('☑️');
 					else message.react('✅');

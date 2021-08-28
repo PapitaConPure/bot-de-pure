@@ -22,7 +22,9 @@ module.exports = {
 	
 	execute(message, args) {
 		if(!args.length) {
-			message.channel.send(`:warning: Debes ingresar al menos un conjunto de dados a tirar, como \`1d6\`.\nPara más información sobre el comando, usa \`${p_pure}ayuda dado\``);
+			message.channel.send({
+				content: `:warning: Debes ingresar al menos un conjunto de dados a tirar, como \`1d6\`.\nPara más información sobre el comando, usa \`${p_pure}ayuda dado\``
+			});
 			return;
 		}
 
@@ -37,7 +39,7 @@ module.exports = {
 		});
 		
 		if(dices.length > 16) {
-			message.channel.send('PERO NO SEAS TAN ENFERMO <:zunWTF:757163179569840138>');
+			message.channel.send({ content: 'PERO NO SEAS TAN ENFERMO <:zunWTF:757163179569840138>' });
 			return;
 		}
 
@@ -59,7 +61,7 @@ module.exports = {
 		.setAuthor(`${message.author.username} tiró los dados...`, message.author.avatarURL({ format: 'png', dynamic: true, size: 512 }))
 		.addField('Salió:', dices.map(dice => `${dice.d} x :game_die:(${dice.f}) -> [${dice.r.join(',')}] = **${dice.t}**`).join('\n**+** ') + ((dices.length > 1)?`\n**= ${total}**`:''))
 		
-		message.channel.send(embed)
-		.catch(() => message.channel.send(':x: No te pasei de gracioso, ¿tamo? <:comodowo:824759668437811224> <:pistolaR:697351201301463060>'));
+		message.channel.send({ embeds: [embed] })
+		.catch(() => message.channel.send({ content: ':x: No te pasei de gracioso, ¿tamo? <:comodowo:824759668437811224> <:pistolaR:697351201301463060>' }));
     },
 };

@@ -50,7 +50,7 @@ module.exports = {
         console.log('Intentando remover a un jugador de la lista de jugadores.');
         if(global.empezado && global.cntjugadores <= 2) {
             console.log('Juego abortado por falta de jugadores.');
-            global.chi.send(':fallen_leaf: Ya no hay suficientes personas en el evento. Abortando...');
+            global.chi.send({ content: ':fallen_leaf: Ya no hay suficientes personas en el evento. Abortando...' });
             module.exports.reiniciarTodo();
             return;
         }
@@ -84,15 +84,16 @@ module.exports = {
     announceNextPlayer: function() {
         console.log(`Nuevo dibujante: ${global.nombres[global.ndibujante]} (${global.jugadores[global.ndibujante]})`);
         //Enviar mensaje notificando próximo jugador y brindando ayuda extra
-        global.chi.send(
-            '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
-            `:art: *Le toca dibujar a <@${global.jugadores[global.ndibujante]}> (jugador ${global.numeros[global.ndibujante]}).* :art:\n` +
-            `_Para enviar el nombre de tu danmaku, ingresa \`${global.p_drmk}draw ||<danmaku>||\`. **No olvides las \\|\\|barras verticales\\|\\|**._\n` +
-            `_Para enviar el dibujo de tu danmaku, ingresa \`${global.p_drmk}draw <dibujo de danmaku>\`. **El dibujo se envía adjunto al comando**._\n` +
-            `_Para consultar la lista de usuarios envía \`${global.p_drmk}lista\`_\n` +
-            `_Para consultar todos los comandos ingresa \`${global.p_drmk}ayuda\`_\n` +
-            '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
-        );
+        global.chi.send({
+            content: 
+                '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
+                `:art: *Le toca dibujar a <@${global.jugadores[global.ndibujante]}> (jugador ${global.numeros[global.ndibujante]}).* :art:\n` +
+                `_Para enviar el nombre de tu danmaku, ingresa \`${global.p_drmk}draw ||<danmaku>||\`. **No olvides las \\|\\|barras verticales\\|\\|**._\n` +
+                `_Para enviar el dibujo de tu danmaku, ingresa \`${global.p_drmk}draw <dibujo de danmaku>\`. **El dibujo se envía adjunto al comando**._\n` +
+                `_Para consultar la lista de usuarios envía \`${global.p_drmk}lista\`_\n` +
+                `_Para consultar todos los comandos ingresa \`${global.p_drmk}ayuda\`_\n` +
+                '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
+        });
     },
 
     nextPlayer: function(amt = 1) {
@@ -139,34 +140,35 @@ module.exports = {
                     if(global.notroles !== 'na') notification = `:bell: <@&${global.notroles}> :bell:\n`;
                     global.empezado = true;
                     global.cntimagenes = 0;
-                    global.chi.send(
-                        notification +
-                        '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
-                        ':fireworks: ***__¡¡¡EL DRAWMAKU HA COMENZADO!!!__*** :art:\n' +
-                        ':popcorn: _¡Prepárense para otra jornada creativa! ¡Asegúrense de poner buena música y decir que todo es una spellcard de Okuu!_ :musical_note:\n\n' +
-                        '`' + global.desc + '`\n' +
-                        '¡Esta es la ' + global.edi + 'ª edición de Drawmaku! Y la temática esta vez es... ¡' + global.tem + '!\n' +
-                        '> ' + global.desctem + '\n' +
-                        '**__¡Tienen 2 horas para divertirse!__**\n' +
-                        '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' +
-                        ':arrow_down_small: **INICIO INICIO INICIO INICIO INICIO INICIO** :arrow_down_small:'
-                    );
+                    global.chi.send({
+                        content:
+                            notification +
+                            '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
+                            ':fireworks: ***__¡¡¡EL DRAWMAKU HA COMENZADO!!!__*** :art:\n' +
+                            ':popcorn: _¡Prepárense para otra jornada creativa! ¡Asegúrense de poner buena música y decir que todo es una spellcard de Okuu!_ :musical_note:\n\n' +
+                            '`' + global.desc + '`\n' +
+                            '¡Esta es la ' + global.edi + 'ª edición de Drawmaku! Y la temática esta vez es... ¡' + global.tem + '!\n' +
+                            '> ' + global.desctem + '\n' +
+                            '**__¡Tienen 2 horas para divertirse!__**\n' +
+                            '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' +
+                            ':arrow_down_small: **INICIO INICIO INICIO INICIO INICIO INICIO** :arrow_down_small:'
+                    });
                     setTimeout(module.exports.announceNextPlayer, 1500);
                 } else {
                     console.log('Cantidad de jugadores insuficiente; Drawmaku cancelado.');
                     global.empezando = false;
-                    global.chi.send(':fallen_leaf: No han entrado suficientes personas al evento. Cancelando...');
+                    global.chi.send({ content: ':fallen_leaf: No han entrado suficientes personas al evento. Cancelando...' });
                 }
             }
-            else if(global.trest < 5) global.chi.send(`:mega: ***¡${global.trest}!...*** :mega:`);
-            else if(global.trest === 5) global.chi.send(`:watch: **5 segundos...** :watch:`);
+            else if(global.trest < 5) global.chi.send({ content: `:mega: ***¡${global.trest}!...*** :mega:` });
+            else if(global.trest === 5) global.chi.send({ content: `:watch: **5 segundos...** :watch:` });
             else if(global.trest < 60) {
-                if((global.trest % 10) === 0) global.chi.send(`:watch: *Quedan ${global.trest} segundos para inscribirse...* :watch:`);
+                if((global.trest % 10) === 0) global.chi.send({ content: `:watch: *Quedan ${global.trest} segundos para inscribirse...* :watch:` });
             }
             else if(global.trest <= (60 * 10)) {
-                if((global.trest % 60 === 0)) global.chi.send(`:watch: *Quedan ${parseInt(global.trest / 60)} minuto(s) para inscribirse...* :watch:`);
+                if((global.trest % 60 === 0)) global.chi.send({ content: `:watch: *Quedan ${parseInt(global.trest / 60)} minuto(s) para inscribirse...* :watch:` });
             }
-            else if((global.trest % (60 * 30) === 0)) global.chi.send(`:watch: *Quedan ${parseInt(global.trest / 60)} minuto(s) para inscribirse...* :watch:`);
+            else if((global.trest % (60 * 30) === 0)) global.chi.send({ content: `:watch: *Quedan ${parseInt(global.trest / 60)} minuto(s) para inscribirse...* :watch:` });
             if(global.trest > 0) setTimeout(module.exports.restarSegundoEmpezar, 1000);
             else setTimeout(module.exports.restarSegundoEvento, 1000);
         }
@@ -181,20 +183,21 @@ module.exports = {
                 console.log('El juego terminará al final de la ronda actual.');
                 let notification = '';
                 if(global.notroles !== 'na') notification = `:bell: <@&${global.notroles}> :bell:\n`;
-                global.chi.send(
-                    notification +
-                    '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
-                    ':mega: ***AVISO*** :mega:\n' +
-                    '_Esta edición de Drawmaku está por terminar..._\n\n' +
-                    `¡Jugadores! Al final de esta ronda se dará por terminada la ${global.edi}ª edición de Drawmaku.\n` +
-                    `¡Hagan su último esfuerzo!\n` +
-                    '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
-                );
+                global.chi.send({
+                    content:
+                        notification +
+                        '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
+                        ':mega: ***AVISO*** :mega:\n' +
+                        '_Esta edición de Drawmaku está por terminar..._\n\n' +
+                        `¡Jugadores! Al final de esta ronda se dará por terminada la ${global.edi}ª edición de Drawmaku.\n` +
+                        `¡Hagan su último esfuerzo!\n` +
+                        '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
+                });
             } else if(global.tjuego < 60) {
-                if((global.tjuego % 20) === 0) global.chi.send(`:alarm_clock: *Quedan ${global.tjuego} segundos de Drawmaku...* :alarm_clock:`);
+                if((global.tjuego % 20) === 0) global.chi.send({ content: `:alarm_clock: *Quedan ${global.tjuego} segundos de Drawmaku...* :alarm_clock:` });
             } else if(global.tjuego < (60 * 60)) {
-                if((global.tjuego % (60 * 20)) === 0) global.chi.send(`:alarm_clock: *Quedan ${parseInt(global.tjuego / 60)} minutos de Drawmaku...* :alarm_clock:`);
-            } else if(global.tjuego === (60 * 60)) global.chi.send(`:alarm_clock: *Queda 1 hora de Drawmaku...* :alarm_clock:`);
+                if((global.tjuego % (60 * 20)) === 0) global.chi.send({ content: `:alarm_clock: *Quedan ${parseInt(global.tjuego / 60)} minutos de Drawmaku...* :alarm_clock:` });
+            } else if(global.tjuego === (60 * 60)) global.chi.send({ content: `:alarm_clock: *Queda 1 hora de Drawmaku...* :alarm_clock:` });
             if(global.tjuego > 0) setTimeout(module.exports.restarSegundoEvento, 1000);
         }
     },
@@ -209,7 +212,7 @@ module.exports = {
             //Comprobación constante para ver si el miembro ya tiene roles de colores
             if(dc > 2) {
                 console.log(chalk.green(`El miembro ha recibido sus roles básicos.`));
-                canal.send(`Weno **${miembro.user.username}**, ya teni tu rol, q esti bien po <:Junky:651290323557023753>`);
+                canal.send({ content: `Weno **${miembro.user.username}**, ya teni tu rol, q esti bien po <:Junky:651290323557023753>` });
 
                 //Finalizar
                 setTimeout(module.exports.finalizarHourai, 1000, miembro, canal);
@@ -224,23 +227,23 @@ module.exports = {
                     global.hourai.warn++;
                     if(global.hourai.warn <= 6) {
                         if(global.hourai.warn <= 3)
-                            canal.send(`Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474> (${global.hourai.warn}/3 llamados)`);
+                            canal.send({ content: `Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474> (${global.hourai.warn}/3 llamados)` });
                         setTimeout(module.exports.askForRole, 1000, miembro , canal, reps);
                         console.log(chalk.cyan(`Volviendo a esperar confirmación de miembro (${global.hourai.warn}/6)...`));
                     }
                 } else {
                     console.log(chalk.yellow('El miembro no ha recibido roles básicos.'));
-                    canal.send(
-                        `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>`,
-                        { files: [global.hourai.images.colors] }
-                    ).then(sent => module.exports.askColor(sent, miembro));
+                    canal.send({
+                        content: `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>`,
+                        files: [global.hourai.images.colors]
+                    }).then(sent => module.exports.askColor(sent, miembro));
                     setTimeout(module.exports.forceRole, 1000, miembro, canal, 2 * reps);
                     console.log(chalk.magentaBright(`Esperando comprobación final de miembro en unos minutos...`));
                 }
             }
         } else {
             console.log(chalk.red(`El miembro se fue del servidor. Abortando.`));
-            canal.send(`Se murió el wn de <@${miembro.user.id}> po <:mayuwu:654489124413374474>`);
+            canal.send({ content: `Se murió el wn de <@${miembro.user.id}> po <:mayuwu:654489124413374474>` });
         }
     },
 
@@ -253,7 +256,7 @@ module.exports = {
             
             if(dc > 2) {
                 console.log(chalk.green('El miembro ya tiene los roles básicos.'));
-                canal.send(`Al fin qliao ya teni tu rol. Q esti bien **${miembro.user.username}**, po <:uwu:681935702308552730>`);
+                canal.send({ content: `Al fin qliao ya teni tu rol. Q esti bien **${miembro.user.username}**, po <:uwu:681935702308552730>` });
 
                 //Finalizar
                 setTimeout(module.exports.finalizarHourai, 1000, miembro, canal);
@@ -274,11 +277,12 @@ module.exports = {
                         '671851234541699092', //Russian Doll
                         '671851228308963348' //Orléans Doll
                     ];
-                    canal.send(
-                        `**${miembro.user.username}**, cagaste altiro watón fome <:mukyuugh:725583038913708034>\n` +
-                        `Toma un rol random po <:mayuwu:654489124413374474> <:venAqui2:668644951353065500>`,
-                        { files: [global.hourai.images.forcecolors] }
-                    );
+                    canal.send({
+                        content:
+                            `**${miembro.user.username}**, cagaste altiro watón fome <:mukyuugh:725583038913708034>\n` +
+                            `Toma un rol random po <:mayuwu:654489124413374474> <:venAqui2:668644951353065500>`,
+                        files: [global.hourai.images.forcecolors]
+                    });
                     miembro.roles.add(colores[Math.floor(Math.random() * 7)]);
                     console.log(chalk.greenBright('Roles forzados.'));
 
@@ -286,38 +290,39 @@ module.exports = {
                     setTimeout(module.exports.finalizarHourai, 1000, miembro, canal);
                 } else {
                     console.log(chalk.red('El miembro ya no tiene ningún rol básico.'));
-                    canal.send(`Espérate qué weá pasó con **${miembro.user.username}** <:reibu:686220828773318663>\nOh bueno, ya me aburrí... chao.`);
+                    canal.send({ content: `Espérate qué weá pasó con **${miembro.user.username}** <:reibu:686220828773318663>\nOh bueno, ya me aburrí... chao.` });
                 }
             }
         } else {
-            canal.send(`Se fue cagando el <@${miembro.user.id}> csm <:mayuwu:654489124413374474>`);
+            canal.send({ content: `Se fue cagando el <@${miembro.user.id}> csm <:mayuwu:654489124413374474>` });
         }
     },
 
     askCandy: function(miembro, canal) {
         if(canal.guild.id !== global.serverid.hourai) {
-            canal.send('<:milky:778180421304188939>');
+            canal.send({ content: '<:milky:778180421304188939>' });
             return;
         }
 
         let candyemote = '778180421304188939';
         let candyrole = '683084373717024869';
         console.log('Preguntando por caramelos.');
-        canal.send(
-            `Weno **${miembro.user.username}**, si querí __caramelos__, reacciona con <:milky:778180421304188939> a esto po <:yumou:708158159180660748>\n` +
-            '> *__Caramelos:__ están cargados con magia. Leyendas dicen que permiten ver canales donde abunda la lujuria...*'
-        ).then(sent => {
+        canal.send({
+            content:
+                `Weno **${miembro.user.username}**, si querí __caramelos__, reacciona con <:milky:778180421304188939> a esto po <:yumou:708158159180660748>\n` +
+                '> *__Caramelos:__ están cargados con magia. Leyendas dicen que permiten ver canales donde abunda la lujuria...*'
+        }).then(sent => {
             sent.react(candyemote)
             .then(() => {
                 const filter = (rc, user) => !user.bot && rc.emoji.id === candyemote && miembro.user.id === user.id;
-                const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
+                const collector = sent.createReactionCollector({ filter: filter, time: 8 * 60 * 1000 });
                 collector.on('collect', () => {
                     if(miembro.roles.cache.some(role => role.id === candyrole)) {
-                        canal.send('Oe tranqui po, que ya tení tus caramelos <:kageuwu:742506313258369056>');
+                        canal.send({ content: 'Oe tranqui po, que ya tení tus caramelos <:kageuwu:742506313258369056>' });
                         collector.stop();
                     } else {
                         miembro.roles.add(candyrole);
-                        canal.send('Caramelos entregados <:miyoi:674823039086624808>:pinching_hand: :candy:');
+                        canal.send({ content: 'Caramelos entregados <:miyoi:674823039086624808>:pinching_hand: :candy:' });
                     }
                 });
             });
@@ -337,18 +342,18 @@ module.exports = {
         console.log('Se solicitaron colores.');
         Promise.all(Object.keys(colrol).map(k => rmessage.react(k)));
         const filter = (rc, user) => !user.bot && colrol.hasOwnProperty(rc.emoji.id) && orimem.user.id === user.id;
-        const collector = rmessage.createReactionCollector(filter, { max: 2, time: 5 * 60 * 1000 });
+        const collector = rmessage.createReactionCollector({ filter: filter, max: 2, time: 5 * 60 * 1000 });
         
         collector.on('collect', (reaction, user) => {
             const reacted = reaction.emoji.id;
             rmessage.channel.guild.members.fetch(user.id).then(member => {
-                const hadroles = member.roles.cache.filter(role => Object.values(colrol).some(colorid => colorid === role.id));
-                if(hadroles.array().length) {
+                const hadroles = member.roles.cache.find(role => Object.values(colrol).some(colorid => colorid === role.id));
+                if(hadroles !== undefined) {
                     member.roles.remove(hadroles)
                     .then(mem => mem.roles.add(colrol[reacted]));
-                    rmessage.channel.send('Colores intercambiados <:monowo:757624423300726865>');
+                    rmessage.channel.send({ content: 'Colores intercambiados <:monowo:757624423300726865>' });
                 } else {
-                    rmessage.channel.send('Colores otorgados <:miyoi:674823039086624808> :thumbsup:');
+                    rmessage.channel.send({ content: 'Colores otorgados <:miyoi:674823039086624808> :thumbsup:' });
                     member.roles.add(colrol[reacted]);
                 }
             });
@@ -369,7 +374,7 @@ module.exports = {
             `NoOoOoOo re TUuUrBiOoOoOo, veni ${mention} <:junkWTF:796930821260836864>`
         ];
 
-        msgch.send(frase[Math.floor(Math.random() * frase.length)]);
+        msgch.send({ content: frase[Math.floor(Math.random() * frase.length)] });
 
         if(cnt > 1)
             setTimeout(module.exports.pingear, 1000, cnt - 1, mention, msgch, msgauth);
@@ -407,11 +412,11 @@ module.exports = {
         if(preinicio) str = ' ni por jugar';
         if(!global.empezado && !preinicio) {
             console.log('Comando de evento desaprobado; fase Drawmaku inválida.');
-            msgch.send(`:warning: No se está jugando${str} Drawmaku en este momento.`);
+            msgch.send({ content: `:warning: No se está jugando${str} Drawmaku en este momento.` });
             confirm = false;
         } else if(msgch !== global.chi) {
             console.log('Comando de evento desaprobado; los canales no coinciden.');
-            msgch.send(`:warning: Drawmaku fue iniciado en ${global.chi}. Ingresa tus comandos de juego ahí.`);
+            msgch.send({ content: `:warning: Drawmaku fue iniciado en ${global.chi}. Ingresa tus comandos de juego ahí.` });
             confirm = false;
         } else console.log('Comando de evento aprobado.');
         
@@ -459,11 +464,12 @@ module.exports = {
     //#region Anuncios
     finalizarHourai: function(miembro, canal) {
         //Mensaje de fin de bienvenida
-        canal.send(
-            `Una última cosita <@${miembro.user.id}>, recuerda revisar el canal <#671817759268536320> en algún momento <:Junkoborga:751938096550903850>\n` +
-            `También, si te interesa, puedes revisar los mensajes pinneados de este canal <:emperowo:834981904323313745>\n` +
-            'Y estate tranqui, que ya no vas a recibir tantos pings <:starnap:727764482801008693>'
-        );
+        canal.send({
+            content:
+                `Una última cosita <@${miembro.user.id}>, recuerda revisar el canal <#671817759268536320> en algún momento <:Junkoborga:751938096550903850>\n` +
+                `También, si te interesa, puedes revisar los mensajes pinneados de este canal <:emperowo:834981904323313745>\n` +
+                'Y estate tranqui, que ya no vas a recibir tantos pings <:starnap:727764482801008693>'
+        });
 
         //Otorgar rol con 50% de probabilidad
         const gr = canal.guild.roles.cache;
@@ -500,12 +506,13 @@ module.exports = {
         //#region Comprobación de miembro y servidor
         if(canal === undefined) {
             console.log(chalk.blue('El servidor no tiene canal de mensajes de sistema.'));
-            servidor.owner.user.send(
-                '¡Hola, soy Bot de Puré!\n' +
-                `¡Un nuevo miembro, **<@${miembro.id}> (${miembro.id})**, ha entrado a tu servidor **${servidor.name}**!\n\n` +
-                '*Si deseas que envíe una bienvenida a los miembros nuevos en lugar de enviarte un mensaje privado, selecciona un canal de mensajes de sistema en tu servidor.*\n' +
-                '*__Nota:__ Bot de Puré no opera con mensajes privados.*'
-            );
+            servidor.owner.user.send({
+                content:
+                    '¡Hola, soy Bot de Puré!\n' +
+                    `¡Un nuevo miembro, **<@${miembro.id}> (${miembro.id})**, ha entrado a tu servidor **${servidor.name}**!\n\n` +
+                    '*Si deseas que envíe una bienvenida a los miembros nuevos en lugar de enviarte un mensaje privado, selecciona un canal de mensajes de sistema en tu servidor.*\n' +
+                    '*__Nota:__ Bot de Puré no opera con mensajes privados.*'
+            });
             return;
         }
 
@@ -514,7 +521,7 @@ module.exports = {
             console.log(chalk.red('No se puede enviar un mensaje de bienvenida en este canal.'));
             return;
         }
-        canal.startTyping();
+        canal.sendTyping();
         //#endregion
         
         //#region Creación de imagen
@@ -570,35 +577,37 @@ module.exports = {
         const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
         canal.send({files: [imagen]}).then(sent => {
             if(servidor.id === global.serverid.hourai) {
-                canal.send(
-                    `Wena po <@${miembro.user.id}> conchetumare, como estai.\n` +
-                    'Como tradición, elige un color reaccionando a alguna de estas cartas <:mayuwu:654489124413374474>\n' +
-                    '<:FrenchDoll:819772377814532116><:OrleansDoll:819772377642041345><:HollandDoll:819772377624870973><:RussianDoll:819772377894354944><:LondonDoll:819772377856606228><:TibetanDoll:819772377482526741><:KyotoDoll:819772377440583691>\n' +
-                    'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:697321858407727224>\n' +
-                    '<@&654472238510112799>, vengan a saludar po maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
-                    `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n`,
-                    { files: [global.hourai.images.colors] }
-                ).then(sent => module.exports.askColor(sent, miembro));
+                canal.send({
+                    content:
+                        `Wena po <@${miembro.user.id}> conchetumare, como estai.\n` +
+                        'Como tradición, elige un color reaccionando a alguna de estas cartas <:mayuwu:654489124413374474>\n' +
+                        '<:FrenchDoll:819772377814532116><:OrleansDoll:819772377642041345><:HollandDoll:819772377624870973><:RussianDoll:819772377894354944><:LondonDoll:819772377856606228><:TibetanDoll:819772377482526741><:KyotoDoll:819772377440583691>\n' +
+                        'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:697321858407727224>\n' +
+                        '<@&654472238510112799>, vengan a saludar po maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
+                        `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n`,
+                    files: [global.hourai.images.colors]
+                }).then(sent => module.exports.askColor(sent, miembro));
                 setTimeout(module.exports.askForRole, 1000, miembro, canal, 3 * 4);
                 console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');
             } else if(servidor.id === global.serverid.ar) {
-                canal.send(
-                    `Welcome to the server **${miembro.displayName}**! / ¡Bienvenido/a al server **${miembro.displayName}**!\n\n` +
-                    `**EN:** To fully enjoy the server, don't forget to get 1 of the 5 main roles in the following channel~\n` +
-                    '**ES:** Para disfrutar totalmente del servidor, no olvides escoger 1 de los 5 roles principales en el siguiente canal~\n\n' +
-                    '→ <#611753608601403393> ←\n\n' +
-                    `*Ahora hay **${peoplecnt}** usuarios en el server.*`
-                );
+                canal.send({
+                    content:
+                        `Welcome to the server **${miembro.displayName}**! / ¡Bienvenido/a al server **${miembro.displayName}**!\n\n` +
+                        `**EN:** To fully enjoy the server, don't forget to get 1 of the 5 main roles in the following channel~\n` +
+                        '**ES:** Para disfrutar totalmente del servidor, no olvides escoger 1 de los 5 roles principales en el siguiente canal~\n\n' +
+                        '→ <#611753608601403393> ←\n\n' +
+                        `*Ahora hay **${peoplecnt}** usuarios en el server.*`
+                });
             } else { //Otros servidores
-                canal.send(
-                    `¡Bienvenido al servidor **${miembro.displayName}**!\n` +
-                    `*Ahora hay **${peoplecnt}** usuarios en el server.*`
-                );
+                canal.send({
+                    content:
+                        `¡Bienvenido al servidor **${miembro.displayName}**!\n` +
+                        `*Ahora hay **${peoplecnt}** usuarios en el server.*`
+                });
             }
         });
         //#endregion
         console.log('Bienvenida finalizada.');
-        canal.stopTyping(true);
     },
 
     dibujarDespedida: async function(miembro) {
@@ -617,7 +626,7 @@ module.exports = {
             console.log('No se puede enviar un mensaje de despedida en este canal.');
             return;
         }
-        canal.startTyping();
+        canal.sendTyping();
         //#endregion
         
         //#region Creación de imagen
@@ -654,21 +663,19 @@ module.exports = {
 
         //#region Imagen y Mensaje extra
         const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
-        canal.send({files: [imagen]}).then(sent => {
+        canal.send({ files: [imagen] }).then(() => {
             if(servidor.id === '654471968200065034') { //Hourai Doll
-                canal.send(
-                    'Nooooo po csm, perdimo otro weón \<:meguDerp:708064265092726834>' +
-                    `*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
-                );
+                canal.send({
+                    content: 
+                        'Nooooo po csm, perdimo otro weón \<:meguDerp:708064265092726834>' +
+                        `*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
+                });
             } else { //Otros servidores
-                canal.send(
-                    `*Ahora hay **${peoplecnt}** usuarios en el server.*`
-                );
+                canal.send({ content: `*Ahora hay **${peoplecnt}** usuarios en el server.*`});
             }
         });
         //#endregion
         console.log('Despedida finalizada.');
-        canal.stopTyping();
     },
 
     dibujarMillion: async function(msg) {
@@ -722,25 +729,27 @@ module.exports = {
         const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'felicidades.png');
     
         //#region Imagen y Mensaje extra
-        canal.send('', imagen).then(sent => {
+        canal.send({ files: imagen }).then(() => {
             if(msg.channel.guild.id === '654471968200065034') { //Hourai Doll
-                canal.send(
-                    `*Wao, <@${msg.author.id}>, tu mensaje fue seleccionado de entre un millón de otros mensajes. No ganaste nada, pero felicidades <:meguSmile:694324892073721887>*\n` +
-                    '*Bueno, de hecho, te ganaste esta imagen personalizada para presumir a los demás tu __suerte de uno en un millón__ <:merry:670116052788838420>*\n' +
-                    '```\n' +
-                    `${msg.content}` +
-                    '```\n'
-                );
+                canal.send({
+                    content:
+                        `*Wao, <@${msg.author.id}>, tu mensaje fue seleccionado de entre un millón de otros mensajes. No ganaste nada, pero felicidades <:meguSmile:694324892073721887>*\n` +
+                        '*Bueno, de hecho, te ganaste esta imagen personalizada para presumir a los demás tu __suerte de uno en un millón__ <:merry:670116052788838420>*\n' +
+                        '```\n' +
+                        `${msg.content}` +
+                        '```\n'
+                });
             } else { //Animal Realm
-                canal.send(
-                    `***ES:** ¡WOAH, FELICIDADES <@${msg.author.id}>! ¡Este mensaje fue nominado como uno en un millón!*\n` +
-                    '*Realmente no ganaste nada. Pero hey, ¡ahora tienes esta imagen personalizada para presumir tu __suerte de uno en un millón__!*\n\n' +
-                    `***EN:** WOAH, CONGRATZ <@${msg.author.id}>! This message has been nominated as one in a million!*\n` +
-                    `*You really didn't win anything. But hey, now you have this customized image to show off your __one in a million luck__!*\n\n` +
-                    '```\n' +
-                    `${msg.content}` +
-                    '```\n'
-                );
+                canal.send({
+                    content:
+                        `***ES:** ¡WOAH, FELICIDADES <@${msg.author.id}>! ¡Este mensaje fue nominado como uno en un millón!*\n` +
+                        '*Realmente no ganaste nada. Pero hey, ¡ahora tienes esta imagen personalizada para presumir tu __suerte de uno en un millón__!*\n\n' +
+                        `***EN:** WOAH, CONGRATZ <@${msg.author.id}>! This message has been nominated as one in a million!*\n` +
+                        `*You really didn't win anything. But hey, now you have this customized image to show off your __one in a million luck__!*\n\n` +
+                        '```\n' +
+                        `${msg.content}` +
+                        '```\n'
+                });
             }
         });
         //#endregion
@@ -884,19 +893,20 @@ module.exports = {
         let str = '';
         for(let i = 0; i < global.cntjugadores; i++)
             str += `[Posición ${i + 1} / jugador ${global.numeros[i]}] ${global.nombres[i]}: ${global.puntos[i]} punto(s).\n`;
-        global.chi.send(
-            ':arrow_up_small: **FINAL FINAL FINAL FINAL FINAL FINAL** :arrow_up_small:\n' +
-            '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' +
-            ':coffee: ***__¡¡¡EL DRAWMAKU HA TERMINADO!!!__*** :tea:\n' +
-            ':beers: _¡Las chicas necesitan descansar!_ :zzz:\n\n' +
-            '**RESULTADOS**\n' +
-            '```\n' +
-            str + '\n' +
-            '```\n' +
-            '¡Muchas gracias por participar! ¡Nos vemos el viernes que viene!\n' +
-            'Si tienes alguna idea para que mejore como bot (o persona), déjala en sugerencias. ¡Nos vemos!\n' +
-            '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
-        );
+        global.chi.send({
+            content: 
+                ':arrow_up_small: **FINAL FINAL FINAL FINAL FINAL FINAL** :arrow_up_small:\n' +
+                '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' +
+                ':coffee: ***__¡¡¡EL DRAWMAKU HA TERMINADO!!!__*** :tea:\n' +
+                ':beers: _¡Las chicas necesitan descansar!_ :zzz:\n\n' +
+                '**RESULTADOS**\n' +
+                '```\n' +
+                str + '\n' +
+                '```\n' +
+                '¡Muchas gracias por participar! ¡Nos vemos el viernes que viene!\n' +
+                'Si tienes alguna idea para que mejore como bot (o persona), déjala en sugerencias. ¡Nos vemos!\n' +
+                '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
+        });
         module.exports.reiniciarTodo();
     },
 

@@ -1,7 +1,21 @@
 //#region Carga de módulos necesarios
 const fs = require('fs'); //Sistema de archivos
 const Discord = require('discord.js'); //Soporte JS de la API de Discord
-const client = new Discord.Client({ fetchAllMembers: true }); //Objeto cliente
+//Objeto cliente
+const botIntents = new Discord.Intents();
+const iflags = Discord.Intents.FLAGS;
+botIntents.add(
+    iflags.GUILDS,
+    iflags.GUILD_MEMBERS,
+    iflags.GUILD_EMOJIS_AND_STICKERS,
+    iflags.GUILD_INTEGRATIONS,
+    iflags.GUILD_PRESENCES,
+    iflags.GUILD_MESSAGES,
+    iflags.GUILD_MESSAGE_REACTIONS,
+    iflags.GUILD_MESSAGE_TYPING,
+    iflags.DIRECT_MESSAGES
+);
+const client = new Discord.Client({ intents: botIntents, fetchAllMembers: true });
 const Keyv = require('keyv');
 //const keyv = new Keyv('postgresql://sxiejhineqmvsg:d0b53a4f62e2cf77383908ff8d281e4a5d4f7db7736abd02e51f0f27b6fc6264@ec2-35-175-170-131.compute-1.amazonaws.com:5432/da27odtfovvn7n');
 //keyv.on('error', err => console.error('Keyv connection error:', err));
@@ -80,7 +94,7 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
 	console.log(chalk.greenBright.bold('Bot conectado y funcionando.'));
 });
 
-client.on('message', message => { //En caso de recibir un mensaje
+client.on('messageCreate', message => { //En caso de recibir un mensaje
     if(global.maintenance.length > 0 && message.channel.id !== global.maintenance) return;
     const msg = message.content.toLowerCase();
 
@@ -90,13 +104,14 @@ client.on('message', message => { //En caso de recibir un mensaje
         let paltaname = message.member.nickname;
         if(!paltaname) paltaname = message.author.username;
 
-        message.channel.send(`**${paltaname}:**\n${paltastr}`);
+        message.channel.send({ content: `**${paltaname}:**\n${paltastr}` });
         message.delete();
     }
     //#endregion
     
     //Ignorar mensajes de bots desde este punto
     if(global.cansay === 0 && message.author.bot) return;
+    console.log(message.content);
 
     //#region Operaciones de proceso e ignorar mensajes privados
     const logembed = new Discord.MessageEmbed()
@@ -113,19 +128,19 @@ client.on('message', message => { //En caso de recibir un mensaje
             .setFooter(`uid: ${message.author.id}`);
         if(message.content.length)
             logembed.fields[0].value = message.content;
-        message.channel.send(':x: Uh... disculpá, no trabajo con mensajes directos.');
+        message.channel.send({ content: ':x: Uh... disculpá, no trabajo con mensajes directos.' });
         return;
     }
     
     if(message.attachments.size > 0)
         logembed.addField('Adjuntado:', message.attachments.map(attf => attf.url).join('\n'));
 
-    if(message.content.startsWith(',confession ')) global.confch.send(logembed);
-    else global.logch.send(logembed);
+    if(message.content.startsWith(',confession ')) global.confch.send({ embeds: [logembed] });
+    else global.logch.send({ embeds: [logembed] });
 
     const whitech = [
-        '662317620699332627', //autómatas           habilitado para testeo
         '671820448207601684', //botposting          habilitado para uso general
+        '662317620699332627', //autómatas           habilitado para testeo
         '813189609911353385', //gachahell           habilitado para gacha
         '813195795318177802', //trata-de-waifus     habilitado para gacha
         '674422177596178437', //muteposting         habilitado para música
@@ -134,7 +149,7 @@ client.on('message', message => { //En caso de recibir un mensaje
 
     if(message.guild.id === global.serverid.hourai && !whitech.some(bc => message.channel.id == bc)) {
         const banpf = [ /^p!\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,(?!confession)\w/, /^,,\w/, /^~\w/, /^\/\w/ ];
-        if(banpf.some(bp => message.content.match(bp))) {
+        if(banpf.some(bp => message.content.toLowerCase().match(bp))) {
             console.log('Detectado uso incorrecto de comando');
             const now = Date.now();
             const mui = message.author.id;
@@ -148,13 +163,13 @@ client.on('message', message => { //En caso de recibir un mensaje
                 
                 switch(total) {
                 case 1:
-                    message.channel.send('Detecto.. bots fuera de botposteo... <:empty:856369841107632129>');
+                    message.channel.send({ content: 'Detecto.. bots fuera de botposteo... <:empty:856369841107632129>' });
                     break;
                 case 2:
-                    message.channel.send(`**${message.author.tag}** párale conchetumare, vete a <#${whitech[0]}> <:despair:852764014840905738>`);
+                    message.channel.send({ content: `**${message.author.tag}** párale conchetumare, vete a <#${whitech[0]}> <:despair:852764014840905738>` });
                     break;
                 default:
-                    message.channel.send('Ahora sí te cagaste ijoelpico <:tenshismug:859874631795736606>');
+                    message.channel.send({ content: 'Ahora sí te cagaste ijoelpico <:tenshismug:859874631795736606>' });
                     const hd = '682629889702363143'; //Hanged Doll
                     const gd = message.channel.guild;
                     const member = gd.members.cache.get(message.author.id);
@@ -162,7 +177,7 @@ client.on('message', message => { //En caso de recibir un mensaje
                         if(!member.roles.cache.some(r => r.id === hd))
                             member.roles.add(hd);
                     } catch(err) {
-                        message.channel.send(`<:wtfff:855940251892318238> Ese wn tiene demasia'o ki. Cuélgalo tú po'.\n\`\`\`\n${err.name}`);
+                        message.channel.send({ content: `<:wtfff:855940251892318238> Ese wn tiene demasia'o ki. Cuélgalo tú po'.\n\`\`\`\n${err.name}` });
                     }
                     break;
                 }
@@ -190,12 +205,12 @@ client.on('message', message => { //En caso de recibir un mensaje
         const hraifound = hrai !== -1 && !(hraipf.some(pf => msg.indexOf(`${pf}hourai`) === (hrai - pf.length)) || hraisf.some(sf => msg.indexOf(`hourai${sf}`) === hrai));
         if(hraifound && message.author.id !== global.peopleid.bern) {
             const fuckustr = (msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)?global.hourai.replies.compare:global.hourai.replies.taunt;
-            message.channel.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]);
-            //message.channel.send('Descanse en paz, mi pana <:pensaki:852779998351458344>');
+            message.channel.send({ content: fuckustr[Math.floor(Math.random() * fuckustr.length)]});
+            //message.channel.send({ content: 'Descanse en paz, mi pana <:pensaki:852779998351458344>' });
         } else if(msg.startsWith('~echo ') || msg.startsWith('$say ')) {
             async function responder(ch) {
                 const fuckustr = global.hourai.replies.reply;
-                ch.send(fuckustr[Math.floor(Math.random() * fuckustr.length)]);
+                ch.send({ content: fuckustr[Math.floor(Math.random() * fuckustr.length)] });
             };
             setTimeout(responder, 800, message.channel);
         } else if(['q', 'que', 'qué'].some(i => i === msg))
@@ -222,13 +237,13 @@ client.on('message', message => { //En caso de recibir un mensaje
     let comando;
     if(pdetect === global.p_drmk) {
         //comando = client.ComandosDrawmaku.get(nombrecomando) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
-        message.channel.send('<:delete:704612795072774164> Los comandos de Drawmaku estarán deshabilitados por un tiempo indefinido. Se pide disculpas.');
+        message.channel.send({ content: '<:delete:704612795072774164> Los comandos de Drawmaku estarán deshabilitados por un tiempo indefinido. Se pide disculpas.' });
         return;
     } else if(pdetect === global.p_pure || pdetect === global.p_mention) 
         comando = client.ComandosPure.get(nombrecomando) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
     
     if (!comando) {
-        message.channel.send(':x: Disculpa, soy estúpida. Tal vez escribiste mal el comando y no te entiendo.');
+        message.channel.send({ content: ':x: Disculpa, soy estúpida. Tal vez escribiste mal el comando y no te entiendo.' });
         return;
     }
     //#endregion
@@ -257,7 +272,7 @@ client.on('message', message => { //En caso de recibir un mensaje
                 return true;
 
             case 'mod':
-                if(message.member.hasPermission('MANAGE_ROLES') || message.member.hasPermission('MANAGE_MESSAGES')) return false;
+                if(message.member.permissions.has('MANAGE_ROLES') || message.member.permissions.has('MANAGE_MESSAGES')) return false;
                 errtitle = 'Comando exclusivo para moderación';
                 errfield = 'El comando es de uso restringido para moderación.\n**Considero a alguien como moderador cuando** tiene permisos para administrar roles *(MANAGE_ROLES)* o mensajes *(MANAGE_MESSAGES)*';
                 return true;
@@ -279,13 +294,14 @@ client.on('message', message => { //En caso de recibir un mensaje
             }
         })) {
             //En caso de detectar un problema, enviar embed reportando el estado del comando
-            message.channel.send(new Discord.MessageEmbed()
-                .setColor('#f01010')
-                .setAuthor('Un momento...')
-                .setTitle(`${errtitle}`)
-                .addField(`${pdetect}${nombrecomando}`, `${errfield}`)
-                .setFooter('¿Dudas? ¿Sugerencias? Contacta con Papita con Puré#6932')
-            );
+            message.channel.send({ embeds: [
+                new Discord.MessageEmbed()
+                    .setColor('#f01010')
+                    .setAuthor('Un momento...')
+                    .setTitle(`${errtitle}`)
+                    .addField(`${pdetect}${nombrecomando}`, `${errfield}`)
+                    .setFooter('¿Dudas? ¿Sugerencias? Contacta con Papita con Puré#6932')
+            ]});
             return;
         } else //En cambio, si no se detectan problemas, finalmente ejecutar comando
             comando.execute(message, args);
@@ -293,7 +309,7 @@ client.on('message', message => { //En caso de recibir un mensaje
     } catch(error) {
         console.log('Ha ocurrido un error al ingresar un comando.');
         console.error(error);
-        message.channel.send(`\`\`\`js\n${error}\n\`\`\`\n<@!${global.peopleid.papita}>`);
+        message.channel.send({ content: `\`\`\`js\n${error}\n\`\`\`\n<@!${global.peopleid.papita}>` });
         stats.commands.failed++;
     }
 
@@ -315,10 +331,11 @@ client.on('guildMemberAdd', member => { //Evento de entrada a servidor
     console.log('Evento de entrada de usuario a servidor desencadenado.');
     try {
         if(!member.user.bot) func.dibujarBienvenida(member);
-        else member.guild.channels.cache.get(member.guild.systemChannelID).send(
-            'Se acaba de unir un bot.\n' +
-            '***Beep boop, boop beep?***'
-        );
+        else member.guild.channels.cache.get(member.guild.systemChannelID).send({
+            content:
+                'Se acaba de unir un bot.\n' +
+                '***Beep boop, boop beep?***'
+        });
     } catch(error) {
         console.log('Ha ocurrido un error al dar la bienvenida.');
         console.error(error);
@@ -330,9 +347,9 @@ client.on('guildMemberRemove', member => { //Evento de salida de servidor
     console.log('Evento de salida de usuario de servidor desencadenado.');
     try {
         if(!member.user.bot) func.dibujarDespedida(member);
-        else member.guild.channels.cache.get(member.guild.systemChannelID).send(
-            `**${member.displayName}** ya no es parte de la pandilla de bots de este servidor :[\n`
-        );
+        else member.guild.channels.cache.get(member.guild.systemChannelID).send({
+            content: `**${member.displayName}** ya no es parte de la pandilla de bots de este servidor :[\n`
+        });
     } catch(error) {
         console.log('Ha ocurrido un error al dar la despedida.');
         console.error(error);

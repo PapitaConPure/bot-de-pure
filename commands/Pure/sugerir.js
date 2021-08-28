@@ -41,7 +41,7 @@ module.exports = {
 		else if(uses[message.author.id] < 3)
 			uses[message.author.id]++;
 		else {
-			message.channel.send(':octagonal_sign: Límite de usos por reinicio del proceso alcanzado. Inténtalo nuevamente cuando me haya reiniciado (generalmente cada 24 horas)');
+			message.channel.send({ content: ':octagonal_sign: Límite de usos por reinicio del proceso alcanzado. Inténtalo nuevamente cuando me haya reiniciado (generalmente cada 24 horas)' });
 			return;
 		}
 
@@ -73,7 +73,7 @@ module.exports = {
 
 		//Acción de comando
 		if(!args.length) {
-			message.channel.send(':warning: Campo de sugerencia vacío.');
+			message.channel.send({ content: ':warning: Campo de sugerencia vacío.' });
 			return;
 		}
 
@@ -87,7 +87,7 @@ module.exports = {
 				`\`p!papa-responder -u ${message.author.id} -a\` para confirmar de aceptación\n` +
 				`\`p!papa-responder -u ${message.author.id} -p <problema>\` para reportar problema`
 			);
-		message.client.guilds.cache.get(global.serverid.sugerencias).channels.cache.get('826632022075768835').send(embed);
-		message.channel.send(`📨 ¡Se ha enviado tu sugerencia como **${title}**! Recibirás una notificación por privado si es leída, si es aceptada y si ocurre algún problema. ¡Gracias!`);
+		message.client.guilds.cache.get(global.serverid.sugerencias).channels.cache.get('826632022075768835').send({ embeds: [embed] });
+		message.channel.send({ content: `📨 ¡Se ha enviado tu sugerencia como **${title}**! Recibirás una notificación por privado si es leída, si es aceptada y si ocurre algún problema. ¡Gracias!` });
 	}
 };

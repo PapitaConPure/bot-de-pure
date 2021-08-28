@@ -21,7 +21,7 @@ module.exports = {
 	callx: '<canal?>',
 	
 	execute(message, args) {
-		message.channel.startTyping();
+		message.channel.sendTyping();
 		const servidor = message.channel.guild; //Variable que almacena un objeto del servidor a analizar
 		const miembro = fetchFlag(args, { property: true, short: ['m'], long: ['miembro'], callback: (x, i) => fetchUserID(x[i], servidor, message.client) });
 		console.log(miembro);
@@ -143,18 +143,18 @@ module.exports = {
 		
 		const arrows = fetchArrows(message.client.emojis.cache);
 		const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
-		message.channel.send(Embed[0]).then(sent => {
+		message.channel.send({ embeds: [Embed[0]] }).then(sent => {
 			sent.react(arrows[0])
 				.then(() => sent.react(arrows[1]))
 				.then(() => {
-					const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
+					const collector = sent.createReactionCollector({ filter: filter, time: 8 * 60 * 1000 });
 					collector.on('collect', reaction => {
 						const maxpage = 2;
 						if(reaction.emoji.id === arrows[0].id) SelectedEmbed = (SelectedEmbed > 0)?(SelectedEmbed - 1):maxpage;
 						else SelectedEmbed = (SelectedEmbed < maxpage)?(SelectedEmbed + 1):0;
 						sent.edit(Embed[SelectedEmbed]);
 					});
-				}).then(() => message.channel.stopTyping(true));
+				});
 		});
     },
 };

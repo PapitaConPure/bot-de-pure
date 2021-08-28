@@ -10,7 +10,7 @@ const getRandomInt = function(_max) {
 }
 
 const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {;
-	tmpch.startTyping();
+	tmpch.sendTyping();
 	let BotMessage = -1;
 	let srchtags = 'megumin -guro -furry -vore -webm -audio rating:';
 	let embedcolor;
@@ -35,7 +35,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {;
 		if(isNaN(arglist[0])) customtags += ` ${arglist[0]}`;
 		else {
 			if(arglist[0] < 2) {
-				tmpch.send(':warning: no se pueden buscar números de página menores que 2 (por defecto: 1).');
+				tmpch.send({ content: ':warning: no se pueden buscar números de página menores que 2 (por defecto: 1).' });
 				return;
 			}
 			srchpg = getRandomInt(arglist[0]);
@@ -82,7 +82,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {;
 						.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
 						.setImage(image.file_url);
 						
-					tmpch.send(Embed).then(sent => {
+					tmpch.send({ embeds: [Embed] }).then(sent => {
 						BotMessage = sent.id;
 						console.log(BotMessage);
 						const actions = [sent.client.emojis.cache.get('704612794921779290'), sent.client.emojis.cache.get('704612795072774164')];
@@ -90,7 +90,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {;
 							.then(() => sent.react(actions[1]))
 							.then(() => {
 								const filter = (rc, user) => !user.bot && actions.some(action => rc.emoji.id === action.id) && tmpauth.id === user.id;
-								const collector = sent.createReactionCollector(filter, { time: 8 * 60 * 1000 });
+								const collector = sent.createReactionCollector({ filter: filter, time: 8 * 60 * 1000 });
 								let showtags = false;
 								collector.on('collect', reaction => {
 									const maxpage = 2;
@@ -118,7 +118,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {;
 										sent.delete();
 									}
 								});
-							}).then(() => sent.channel.stopTyping(true));
+							});
 					});
 					foundpic = true;
 				}
@@ -126,12 +126,11 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {;
 			});
 			//#endregion
 			
-			if(!foundpic) tmpch.send(':warning: No hay resultados para estas tags. Prueba usando tags diferentes o un menor número de página :C');
+			if(!foundpic) tmpch.send({ content: ':warning: No hay resultados para estas tags. Prueba usando tags diferentes o un menor número de página :C' });
 		}).catch((error) => {
-			tmpch.send(':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags o usando un menor rango de páginas umu');
+			tmpch.send({ content: ':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags o usando un menor rango de páginas umu' });
 			console.error(error);
 		});
-		tmpch.stopTyping(true);
 	}
 }
 
@@ -167,11 +166,11 @@ module.exports = {
 		}
 
 		if(!serveridcheck) {
-			message.channel.send('_Este comando no puede ser usado aquí..._');
+			message.channel.send({ content: '_Este comando no puede ser usado aquí..._' });
 			return;
 		}
 		if(message.channel.nsfw) {
-			message.channel.send('*fokiu.*');
+			message.channel.send({ content: '*fokiu.*' });
 			return;
 		}
 		tmpfunc(message.channel, args, message.author, message);

@@ -20,14 +20,15 @@ module.exports = {
 	
 	execute(message, args) {
 		if(args.length) {
-			let newmsg;
-			newmsg = `***:copyright: ${args[0]}:registered:`;
-			for(let i = 1; i < args.length; i++)
-				newmsg += ` ${args[i]}:tm:`;
-			newmsg += `***`;
-			message.channel.send(newmsg);
+			//La programación es un puto meme
+			const newmsg = message.content
+				.slice('p!papita '.length)
+				.replace(/(?!^[^\p{L}\d\s@#]?)\b\S+\b/g, '$&:tm:')
+				.replace(/^\S+\b/g, '***:copyright: $&:registered:')
+				.replace(/\b\S+$/g, '$&***');
+			message.channel.send({ content: newmsg });
 		} else {
-			if(message.channel.nsfw) message.channel.send('https://www.youtube.com/watch?v=pwEvEY-7p9o');
+			if(message.channel.nsfw) message.channel.send({ content: 'https://www.youtube.com/watch?v=pwEvEY-7p9o' });
 			else {
 				const paputa = [
 					'Lechita:tm: uwu :milk:',
@@ -41,7 +42,7 @@ module.exports = {
 					'https://i.imgur.com/HxTxjdL.png'
 				];
 
-				message.channel.send(`**${paputa[Math.floor(Math.random() * paputa.length)]}**`);
+				message.channel.send({ content: `**${paputa[Math.floor(Math.random() * paputa.length)]}**` });
 			}
 		}
     },

@@ -26,7 +26,7 @@ module.exports = {
             embed.setTitle(`Avatar de ${message.author.username}`)
                 .setImage(message.author.avatarURL({ format: 'png', dynamic: true, size: 1024 }));
             
-            message.channel.send(embed);
+            message.channel.send({ embeds: [embed] });
         } else {
             args = args.join(' ').toLowerCase().split(',');
             if(args.length < 5)
@@ -36,25 +36,27 @@ module.exports = {
                     const user = fetchUserID(arg, message.channel.guild, message.client);
 
                     if((user === peopleid.papita) && !message.channel.nsfw) {
-                        message.channel.send(`Oe conchetumare te hacei el gracioso una vez más y te vai manos arriba, pantalones abajo, 'cuchai? <:junkNo:697321858407727224> <:pistolaR:697351201301463060>`);
+                        message.channel.send({
+                            content: `Oe conchetumare te hacei el gracioso una vez más y te vai manos arriba, pantalones abajo, 'cuchai? <:junkNo:697321858407727224> <:pistolaR:697351201301463060>`
+                        });
                         return;
                     }
                     if(user !== undefined) {
                         const fetcheduser = message.client.users.cache.get(user);
 
                         if(fetcheduser === undefined)
-                            message.channel.send(':warning: La ID ingresada es inválida o no es una ID en absoluto...');
+                            message.channel.send({ content: ':warning: La ID ingresada es inválida o no es una ID en absoluto...' });
                         else {
                             embed.setTitle(`Avatar de ${fetcheduser.username}`)
                                 .setImage(fetcheduser.avatarURL({ dynamic: true, size: 1024 }));
 
-                            message.channel.send(embed);
+                            message.channel.send({ embeds: [embed] });
                         }
                     } else 
-                        message.channel.send(`:warning: ¡Usuario **${arg}** no encontrado!`);
+                        message.channel.send({ content: `:warning: ¡Usuario **${arg}** no encontrado!` });
                 });
             else
-                message.channel.send(':warning: Solo puedes ingresar hasta **5** usuarios por comando');
+                message.channel.send({ content: ':warning: Solo puedes ingresar hasta **5** usuarios por comando' });
         }
     },
 };

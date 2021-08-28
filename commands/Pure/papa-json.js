@@ -47,12 +47,12 @@ module.exports = {
 
 		//Acción de comando
 		if(obj === undefined) {
-			message.channel.send(`:warning: El objeto "${args.join('.')}" no existe. Revisa que el identificador esté bien escrito.`);
+			message.channel.send({ content: `:warning: El objeto "${args.join('.')}" no existe. Revisa que el identificador esté bien escrito.` });
 			return;
 		}
 		
 		(readObj(obj, '\t').match(/[\s\S]{1,1966}/g) || ['\t[Empty]\n']).map(async (a) => 
-			await message.channel.send(`\`\`\`json\n"${name}": {\n${a}}\n\`\`\``)
+			await message.channel.send({ content: `\`\`\`json\n"${name}": {\n${a}}\n\`\`\`` })
 		);
 	}
 };

@@ -29,8 +29,8 @@ module.exports = {
                                         break;
                                     }
                                 global.modroles[tmp] = args[1];
-                                message.channel.send(`:white_check_mark: rol <@&${args[1]}> añadido a los roles de moderación de Drawmaku.`);
-                            } else message.channel.send(`:warning: el rol <@&${args[1]}> ya fue añadido a los roles de moderación de Drawmaku anteriormente.`);
+                                message.channel.send({ content: `:white_check_mark: rol <@&${args[1]}> añadido a los roles de moderación de Drawmaku.` });
+                            } else message.channel.send({ content: `:warning: el rol <@&${args[1]}> ya fue añadido a los roles de moderación de Drawmaku anteriormente.` });
                         break;
 
                         case '-':
@@ -41,31 +41,32 @@ module.exports = {
                                     found = true;
                                     break;
                                 }
-                            if(found) message.channel.send(`:white_check_mark: rol <@&${args[1]}> eliminado de los roles de moderación de Drawmaku.`);
-                            else message.channel.send(`:warning: el rol <@&${args[1]}> no se encuentra entre los roles de moderación de Drawmaku.`);
+                            if(found) message.channel.send({ content: `:white_check_mark: rol <@&${args[1]}> eliminado de los roles de moderación de Drawmaku.` });
+                            else message.channel.send({ content: `:warning: el rol <@&${args[1]}> no se encuentra entre los roles de moderación de Drawmaku.` });
                         break;
 
                         default:
-                            message.channel.send(':warning: Parámetros inválidos o en orden incorrecto. Recuerda: `d!papa-rolmoderador <[+/-]*> <@$rol*>`.');
+                            message.channel.send({ content: ':warning: Parámetros inválidos o en orden incorrecto. Recuerda: `d!papa-rolmoderador <[+/-]*> <@$rol*>`.' });
                     }
-                } else message.channel.send(':warning: tienes que mencionar un rol a volver moderador Drawmaku.');
+                } else message.channel.send({ content: ':warning: tienes que mencionar un rol a volver moderador Drawmaku.' });
             } else if(args.length === 0) {
                 if(!global.modroles.length) {
-                    message.channel.send(
-                        ':tools::no_entry_sign::tools::no_entry_sign:\n' +
-                        'Aún no se ha establecido ningún rol de moderador Drawmaku.\n' +
-                        'Es altamente recomendable crear un rol de moderación de Drawmaku y enlistarlo con `d!papa-rolmoderador <[+/-]*> <@$rol*>`.\n' +
-                        ':tools::no_entry_sign::tools::no_entry_sign:\n'
-                    );
+                    message.channel.send({
+                        content:
+                            ':tools::no_entry_sign::tools::no_entry_sign:\n' +
+                            'Aún no se ha establecido ningún rol de moderador Drawmaku.\n' +
+                            'Es altamente recomendable crear un rol de moderación de Drawmaku y enlistarlo con `d!papa-rolmoderador <[+/-]*> <@$rol*>`.\n' +
+                            ':tools::no_entry_sign::tools::no_entry_sign:\n'
+                    });
                 }
                 var str = '';
                 for(var i = 0; i < global.modroles.length; i++)
                     str += `${i + 1}: <@&${(global.modroles[i] !== -1)?(global.modroles[i]):'vacante'}>\n`;
-                message.channel.send(str);
-            } else if(args.length < 2) message.channel.send(':warning: Parámetros insuficientes. Recuerda: `d!papa-rolmoderador <[+/-]*> <@$rol*>`.');
-            else message.channel.send(':warning: Demasiados parámetros. Recuerda: `d!papa-rolmoderador <[+/-]*> <@$rol*>`.');
+                message.channel.send({ content: str });
+            } else if(args.length < 2) message.channel.send({ content: ':warning: Parámetros insuficientes. Recuerda: `d!papa-rolmoderador <[+/-]*> <@$rol*>`.' });
+            else message.channel.send({ content: ':warning: Demasiados parámetros. Recuerda: `d!papa-rolmoderador <[+/-]*> <@$rol*>`.' });
         } else {
-            message.channel.send(':closed_lock_with_key: Solo Papita con Puré y aquellos con un rol de moderación de Drawmaku pueden usar este comando.');
+            message.channel.send({ content: ':closed_lock_with_key: Solo Papita con Puré y aquellos con un rol de moderación de Drawmaku pueden usar este comando.' });
             return;
         }
     },

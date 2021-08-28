@@ -36,10 +36,10 @@ module.exports = {
             .addField('Lo que sigue', listFormat(tdformat, false));
 
         const f = (r, u) => !u.bot;
-        message.channel.send(embed).then(async m => {
+        message.channel.send({ embeds: [embed] }).then(async m => {
             if(cm === null) return;
             Promise.all(cm.map(async (_, i) => m.react(ne[i])));
-            const coll = m.createReactionCollector(f, { max: cm.length, time: 1000 * 60 * 2 });
+            const coll = m.createReactionCollector({ filter: f, max: cm.length, time: 1000 * 60 * 2 });
             coll.on('collect', nc => {
                 const i = ne.indexOf(nc.emoji.name);
                 if(i < 0) return;

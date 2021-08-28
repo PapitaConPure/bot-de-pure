@@ -10,7 +10,7 @@ module.exports = {
     ],
 	execute(message, args) {
         if(!global.trest) {
-            message.channel.send(':warning: No puedes inscribirte en Drawmaku ahora.');
+            message.channel.send({ content: ':warning: No puedes inscribirte en Drawmaku ahora.' });
             return;
         }
 
@@ -30,7 +30,9 @@ module.exports = {
             } else global.nombres[global.cntjugadores] = `${message.author.username}`;
             global.numeros[global.cntjugadores] = global.cntjugadores + 1;
             global.puntos[global.cntjugadores] = 0;
-            message.channel.send(`:wrestlers: _<@${global.jugadores[global.cntjugadores]}> ha entrado al Drawmaku como el jugador ${global.numeros[global.cntjugadores]} ${str}._`);
+            message.channel.send({
+                content: `:wrestlers: _<@${global.jugadores[global.cntjugadores]}> ha entrado al Drawmaku como el jugador ${global.numeros[global.cntjugadores]} ${str}._`
+            });
             global.cntjugadores++;
             if(global.notroles !== 'na')
                 if(!message.member.roles.cache.has(global.notroles)) {
@@ -40,6 +42,6 @@ module.exports = {
                         console.log(`Añadido nuevo rol a ${message.author.username}`)
                     } else console.log(`Rol no encontrado.\n${message.guild}`);
                 }
-        } else message.channel.send(`:warning: No puedes entrar dos veces. Ya estás dentro como el jugador ${global.numeros[idjugador]}.`);
+        } else message.channel.send({ content: `:warning: No puedes entrar dos veces. Ya estás dentro como el jugador ${global.numeros[idjugador]}.` });
     },
 };

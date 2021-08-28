@@ -28,10 +28,10 @@ module.exports = {
             short: [ 'd', 'p' ],
             long: [ 'cuarta', 'delta', 'prop', 'usuario' ],
             callback: (x, i) => message.client.users.cache.get(fetchUserID(x[i], message.guild, message.client)).username,
-            fallback: () => { message.channel.send('Tu vieja.'); return undefined; }
+            fallback: () => { message.channel.send({ content: 'Tu vieja.' }); return undefined; }
         });
 
         console.log({ args, a, b, c, d });
-        message.channel.send(`**args** ${args}\n**a** ${a}\n**b** ${b}\n**c** ${c}\n**d** ${d}`);
+        message.channel.send({ content: `**args** ${args}\n**a** ${a}\n**b** ${b}\n**c** ${c}\n**d** ${d}` });
     },
 };

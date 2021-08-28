@@ -48,10 +48,10 @@ module.exports = {
 
             const minus = sentence.toLowerCase();
             if(message.channel.guild.id === serverid.hourai && minus.indexOf('hourai') !== -1 && minus.indexOf('hourai doll') !== minus.indexOf('hourai') && minus.indexOf('houraidoll') === -1)
-                message.channel.send('No me hagai decir weas de hourai, ¿yapo? Gracias <:haniwaSmile:659872119995498507>');
+                message.channel.send({ content: 'No me hagai decir weas de hourai, ¿yapo? Gracias <:haniwaSmile:659872119995498507>' });
             else if(sentence.length === 0)
-                message.channel.send(':warning: tienes que especificar lo que quieres que diga.');
-            else message.channel.send(sentence);
-        } else message.channel.send(':warning: tienes que especificar lo que quieres que diga.');
+                message.channel.send({ content: ':warning: tienes que especificar lo que quieres que diga.' });
+            else message.channel.send({ content: sentence });
+        } else message.channel.send({ content: ':warning: tienes que especificar lo que quieres que diga.' });
     },
 };

@@ -21,7 +21,7 @@ module.exports = {
 	execute(message, args) {
 		if(!args.length) {
 			message.delete();
-			message.channel.send(':warning: debes especificar la cantidad o el autor de los mensajes a borrar.');
+			message.channel.send({ content: ':warning: debes especificar la cantidad o el autor de los mensajes a borrar.' });
 			return;
 		} else {
 			let user;
@@ -59,10 +59,11 @@ module.exports = {
 
 			let amt = parseInt(args[0]);
 			if(isNaN(amt)) {
-				message.channel.send(
-					':warning: Debes especificar la cantidad de mensajes a borrar\n' +
-					`Revisa \`${p_pure}ayuda borrar\` para más información`
-				);
+				message.channel.send({
+					content:
+						':warning: Debes especificar la cantidad de mensajes a borrar\n' +
+						`Revisa \`${p_pure}ayuda borrar\` para más información`
+				});
 				return;
 			}
 			amt = Math.max(2, Math.min(amt + 1, 100));
