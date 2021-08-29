@@ -147,7 +147,11 @@ module.exports = {
 					m = `**¿Y si voy con uno que sepamos todos?:**\nhttps://youtu.be/${list[i + (i === kmusic?1:0)]}`;
 				else if(xmusic !== -1) //Música especial
 					m = `**${hint}**\nhttps://youtu.be/${list[i + (i === xmusic?1:0)]}`;
+				
+				if(typeof m === 'string')
 					message.channel.send({ content: m });
+				else
+					message.channel.send({ embeds: [m] });
 			} else {
 				m = new Discord.MessageEmbed()
 					.setColor('#cccccc')
