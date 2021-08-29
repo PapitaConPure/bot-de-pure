@@ -18,7 +18,10 @@
             "Mejora de bienvenida (H. Doll)",
             "Agregado comando p!colgar (H. Doll)",
             "Removida la extensión de prefijo \"-m\" para comandos de moderación",
-            "Actualizado Discord.js de v12 a v13"
+            "Actualizado Discord.js de v12 a v13",
+            "Corregidos varios errores recientes al dar la bienvenida en un server",
+            "Deshabilitadas temporalmente algunas funciones de p!info debido a errores recientes",
+            "p!inforol ahora usa una flag para búsquedas estrictas en lugar de un \"+\" ó \"-\" obligatorio"
         ],
         "todo": [
             "Restaurar comandos de búsqueda de imagen avanzados",
