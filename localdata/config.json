@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.5F",
+            "number": "Full.2.8.64",
             "name": "Cisne Cristalino"
         },
         "note": "Se esperan problemas y crasheos debido a la reciente actualización de Discord.js",
