@@ -9,8 +9,6 @@
         "changelog": [
             "Tareas de refactorización (2.5/4)",
             "Preparando conteo de mensajes por servidor, canal y usuarios para p!info",
-            "El pedido para escoger color (H. Doll) es incluso más agresivo",
-            "Agregada función interna para detección de flags, falta aplicar en comandos que hacen uso de esto",
             "Corregido un error que hacía que búsquedas por usuarios no detecten palabras en mayúsculas",
             "Removidas las restricciones de comandos exclusivos para Papita con Puré (excepto `MOD` y `GUIDE`)",
             "Pequeñas optimizaciones generales",
