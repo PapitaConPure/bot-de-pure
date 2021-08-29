@@ -146,7 +146,6 @@ module.exports = {
 		const botmin = Math.floor(tiempobot/1000/60) % 60;
 		const bothour = Math.floor(tiempobot/1000/3600) % 24;
 
-		console.log('d');
 		Embed[2] = new MessageEmbed()
 			.setColor('#e99979')
 			.setTitle('Estadísticas de tiempo UwU')
