@@ -501,18 +501,18 @@ module.exports = {
     dibujarBienvenida: async function(miembro) {
         //Dar bienvenida a un miembro nuevo de un servidor
         const servidor = miembro.guild; //Servidor
-        const canal = servidor.channels.cache.get(servidor.systemChannelID); //Canal de mensajes de sistema
-
+        const canal = servidor.channels.cache.get(servidor.systemChannelId); //Canal de mensajes de sistema
+        console.log(canal);
         //#region Comprobación de miembro y servidor
         if(canal === undefined) {
             console.log(chalk.blue('El servidor no tiene canal de mensajes de sistema.'));
-            servidor.owner.user.send({
+            servidor.fetchOwner().then(ow => ow.user.send({
                 content:
                     '¡Hola, soy Bot de Puré!\n' +
                     `¡Un nuevo miembro, **<@${miembro.id}> (${miembro.id})**, ha entrado a tu servidor **${servidor.name}**!\n\n` +
                     '*Si deseas que envíe una bienvenida a los miembros nuevos en lugar de enviarte un mensaje privado, selecciona un canal de mensajes de sistema en tu servidor.*\n' +
                     '*__Nota:__ Bot de Puré no opera con mensajes privados.*'
-            });
+            }));
             return;
         }
 
@@ -613,7 +613,7 @@ module.exports = {
     dibujarDespedida: async function(miembro) {
         //Dar despedida a ex-miembros de un servidor
         const servidor = miembro.guild;
-        const canal = servidor.channels.cache.get(servidor.systemChannelID);
+        const canal = servidor.channels.cache.get(servidor.systemChannelId);
 
         //#region Comprobación de miembro y servidor
         if(!canal) {

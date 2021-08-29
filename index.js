@@ -15,7 +15,11 @@ botIntents.add(
     iflags.GUILD_MESSAGE_TYPING,
     iflags.DIRECT_MESSAGES
 );
-const client = new Discord.Client({ intents: botIntents, fetchAllMembers: true });
+const client = new Discord.Client({
+    intents: botIntents,
+    fetchAllMembers: true,
+    allowedMentions: { parse: [ 'users', 'roles' ] }
+});
 const Keyv = require('keyv');
 //const keyv = new Keyv('postgresql://sxiejhineqmvsg:d0b53a4f62e2cf77383908ff8d281e4a5d4f7db7736abd02e51f0f27b6fc6264@ec2-35-175-170-131.compute-1.amazonaws.com:5432/da27odtfovvn7n');
 //keyv.on('error', err => console.error('Keyv connection error:', err));
@@ -335,11 +339,12 @@ client.on('messageCreate', message => { //En caso de recibir un mensaje
 });
 
 client.on('guildMemberAdd', member => { //Evento de entrada a servidor
-    if(global.maintenance.length > 0 && member.guild.systemChannelID !== global.maintenance) return;
+    if(!member.guild.available) return;
+    if(global.maintenance.length > 0 && member.guild.systemChannelId !== global.maintenance) return;
     console.log('Evento de entrada de usuario a servidor desencadenado.');
     try {
         if(!member.user.bot) func.dibujarBienvenida(member);
-        else member.guild.channels.cache.get(member.guild.systemChannelID).send({
+        else member.guild.channels.cache.get(member.guild.systemChannelId).send({
             content:
                 'Se acaba de unir un bot.\n' +
                 '***Beep boop, boop beep?***'
@@ -360,11 +365,12 @@ client.on('guildMemberAdd', member => { //Evento de entrada a servidor
 });
 
 client.on('guildMemberRemove', member => { //Evento de salida de servidor
-    if(global.maintenance.length > 0 && member.guild.systemChannelID !== global.maintenance) return;
+    if(!member.guild.available) return;
+    if(global.maintenance.length > 0 && member.guild.systemChannelId !== global.maintenance) return;
     console.log('Evento de salida de usuario de servidor desencadenado.');
     try {
         if(!member.user.bot) func.dibujarDespedida(member);
-        else member.guild.channels.cache.get(member.guild.systemChannelID).send({
+        else member.guild.channels.cache.get(member.guild.systemChannelId).send({
             content: `**${member.displayName}** ya no es parte de la pandilla de bots de este servidor :[\n`
         });
     } catch(error) {

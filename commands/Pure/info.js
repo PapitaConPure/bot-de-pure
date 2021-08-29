@@ -20,11 +20,14 @@ module.exports = {
     ],
 	callx: '<canal?>',
 	
-	execute(message, args) {
+	async execute(message, args) {
+		if(!message.guild.available) {
+			message.channel.send('El servidor está en corte ahora mismo. Intenta usar el comando más tarde.');
+			return;
+		}
 		message.channel.sendTyping();
-		const servidor = message.channel.guild; //Variable que almacena un objeto del servidor a analizar
+		const servidor = message.guild; //Variable que almacena un objeto del servidor a analizar
 		const miembro = fetchFlag(args, { property: true, short: ['m'], long: ['miembro'], callback: (x, i) => fetchUserID(x[i], servidor, message.client) });
-		console.log(miembro);
 		let selectch;
 
 		//Contadores
@@ -84,26 +87,40 @@ module.exports = {
 		let SelectedEmbed = 0;
 		const Embed = [];
 
+		console.log({
+			miembro: miembro,
+			name: servidor.name,
+			peoplecnt: peoplecnt,
+			botcnt: botcnt,
+			channels: [ textcnt, voicecnt, categorycnt ],
+			region: servidor.region,
+			verificationLevel: servidor.verificationLevel,
+			createdAt: servidor.createdAt,
+			id: servidor.id
+		});
+
+		const ow = await servidor.fetchOwner();
 		Embed[0] = new MessageEmbed()
 			.setColor('#ffd500')
 			.setTitle('Información del servidor OwO')
-
+			
 			.addField('Nombre', servidor.name, true)
+			
 			.addField('Usuarios', `:wrestlers: x ${peoplecnt}\n:robot: x ${botcnt}\n:people_hugging: x ${servidor.memberCount}`, true)
-			.addField('Canales', `:hash: x ${textcnt}\n:loud_sound: x ${voicecnt}\n:label: x ${categorycnt}`, true)
+			.addField('Canales', `:hash: x ${'N/A'/*textcnt*/}\n:loud_sound: x ${'N/A'/*voicecnt*/}\n:label: x ${'N/A'/*categorycnt*/}`, true)
 
-			.addField('Región', servidor.region, true)
-			.addField('Creador', `${servidor.owner.user.username}\n[${servidor.owner.id}]`, true)
+			.addField('Región', /*servidor.region*/'*No obtenible de momento*', true)
+			.addField('Creador', `${ow.user.username}\n[${ow.id}]`, true)
 			.addField('Nivel de verificación', servidor.verificationLevel, true)
 
-			.addField('Fecha de creación', servidor.createdAt, true)
+			.addField('Fecha de creación', /*servidor.createdAt*/'*No obtenible de momento*', true)
 			.addField('ID', servidor.id, true)
-
+			
 			.setImage(servidor.iconURL({ dynamic: true, size: 256 }))
-			.setThumbnail(servidor.owner.user.avatarURL({ dynamic: true, size: 256 }))
+			.setThumbnail(ow.user.avatarURL({ dynamic: true, size: 256 }))
 			.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL({ dynamic: true, size: 256 }))
 			.setFooter(`Estas estadísticas toman información concreta.`);
-
+		
 		Embed[1] = new MessageEmbed()
 			.setColor('#eebb00')
 			.setTitle('Estadísticas de actividad ÛwÕ')
@@ -129,6 +146,7 @@ module.exports = {
 		const botmin = Math.floor(tiempobot/1000/60) % 60;
 		const bothour = Math.floor(tiempobot/1000/3600) % 24;
 
+		console.log('d');
 		Embed[2] = new MessageEmbed()
 			.setColor('#e99979')
 			.setTitle('Estadísticas de tiempo UwU')
@@ -152,7 +170,7 @@ module.exports = {
 						const maxpage = 2;
 						if(reaction.emoji.id === arrows[0].id) SelectedEmbed = (SelectedEmbed > 0)?(SelectedEmbed - 1):maxpage;
 						else SelectedEmbed = (SelectedEmbed < maxpage)?(SelectedEmbed + 1):0;
-						sent.edit(Embed[SelectedEmbed]);
+						sent.edit({ embeds: [Embed[SelectedEmbed]] });
 					});
 				});
 		});

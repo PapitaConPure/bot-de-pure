@@ -1,4 +1,5 @@
 const Discord = require('discord.js'); //Integrar discord.js
+const { fetchArrows } = require('../../func');
 const { p_pure } = require('../../localdata/config.json'); //Variables globales
 
 module.exports = {
@@ -113,9 +114,9 @@ module.exports = {
 						.setFooter(`Página de lista ${i + 1}/${Math.ceil(totalcnt / 10)}`);
 				}
 				
-				const arrows = [message.client.emojis.cache.get('681963688361590897'), message.client.emojis.cache.get('681963688411922460')];
+				const arrows = fetchArrows;
 				const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
-				message.channel.send({ embeds: [Embed[0]] }).then(sent => {
+				message.channel.send({ embeds: [Embed[0]], allowedMentions: { parse: [] } }).then(sent => {
 					sent.react(arrows[0])
 						.then(() => sent.react(arrows[1]))
 						.then(() => {
@@ -124,7 +125,7 @@ module.exports = {
 								const maxpage = Math.ceil(totalcnt / 10);
 								if(reaction.emoji.id === arrows[0].id) SelectedEmbed = (SelectedEmbed > 0)?(SelectedEmbed - 1):maxpage;
 								else SelectedEmbed = (SelectedEmbed < maxpage)?(SelectedEmbed + 1):0;
-								sent.edit(Embed[SelectedEmbed]);
+								sent.edit({ embeds: [Embed[SelectedEmbed]] });
 							});
 						})
 				});
