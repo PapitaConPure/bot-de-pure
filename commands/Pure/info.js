@@ -166,11 +166,12 @@ module.exports = {
 				.then(() => sent.react(arrows[1]))
 				.then(() => {
 					const collector = sent.createReactionCollector({ filter: filter, time: 8 * 60 * 1000 });
-					collector.on('collect', reaction => {
+					collector.on('collect', (reaction, ruser) => {
 						const maxpage = 2;
 						if(reaction.emoji.id === arrows[0].id) SelectedEmbed = (SelectedEmbed > 0)?(SelectedEmbed - 1):maxpage;
 						else SelectedEmbed = (SelectedEmbed < maxpage)?(SelectedEmbed + 1):0;
 						sent.edit({ embeds: [Embed[SelectedEmbed]] });
+						reaction.users.remove(ruser);
 					});
 				});
 		});

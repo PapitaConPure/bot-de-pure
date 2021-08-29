@@ -78,12 +78,13 @@ module.exports = {
 						.then(() => sent.react(arrows[1]));
 					
 					const collector = sent.createReactionCollector({ filter: filter, time: 8 * 60 * 1000 });
-					collector.on('collect', reaction => {
+					collector.on('collect', (reaction, ruser) => {
 						if(reaction.emoji.id === arrows[0].id) page = (page > 0)?(page - 1):(pages.length - 1);
 						else page = (page < (pages.length - 1))?(page + 1):0;
 						embed.fields[0].value = pages[page];
 						embed.setFooter(`Página ${page + 1}/${Math.ceil(pages.length)}`);
 						sent.edit({ embeds: [embed] });
+						reaction.users.remove(ruser);
 					});
 				});
 			} else {
