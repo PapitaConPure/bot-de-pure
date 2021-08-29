@@ -114,7 +114,7 @@ module.exports = {
 						.setFooter(`Página de lista ${i + 1}/${Math.ceil(totalcnt / 10)}`);
 				}
 				
-				const arrows = fetchArrows;
+				const arrows = fetchArrows(message.client.emojis.cache);
 				const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
 				message.channel.send({ embeds: [Embed[0]], allowedMentions: { parse: [] } }).then(sent => {
 					sent.react(arrows[0])
