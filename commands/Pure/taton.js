@@ -83,7 +83,7 @@ module.exports = {
 						else page = (page < (pages.length - 1))?(page + 1):0;
 						embed.fields[0].value = pages[page];
 						embed.setFooter(`Página ${page + 1}/${Math.ceil(pages.length)}`);
-						sent.edit(embed);
+						sent.edit({ embeds: [embed] });
 					});
 				});
 			} else {
