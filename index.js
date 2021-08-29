@@ -115,7 +115,6 @@ client.on('messageCreate', message => { //En caso de recibir un mensaje
     
     //Ignorar mensajes de bots desde este punto
     if(global.cansay === 0 && message.author.bot) return;
-    console.log(message.content);
 
     //#region Operaciones de proceso e ignorar mensajes privados
     const logembed = new Discord.MessageEmbed()
@@ -312,6 +311,7 @@ client.on('messageCreate', message => { //En caso de recibir un mensaje
         stats.commands.succeeded++;
     } catch(error) {
         console.log('Ha ocurrido un error al ingresar un comando.');
+        console.log(message.content);
         console.error(error);
         const errorembed = new Discord.MessageEmbed()
             .setColor('#0000ff')
