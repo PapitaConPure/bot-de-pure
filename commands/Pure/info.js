@@ -31,9 +31,13 @@ module.exports = {
 		let selectch;
 
 		//Contadores
-		let textcnt = 0; //Canales de texto
-		let voicecnt = 0; //Canales de voz
-		let categorycnt = 0; //Categorías
+		let chs = {
+			text: 0, //Canales de texto
+			voice: 0, //Canales de voz
+			category: 0, //Categorías
+			thread: 0, //Hilos
+			news: 0, //Canales de noticias
+		};
 
 		//Contadores de usuarios
 		const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size; //Biológicos
@@ -41,9 +45,16 @@ module.exports = {
 
 		//Procesado de información canal-por-canal
 		servidor.channels.cache.forEach(channel => {
-			if(channel.type === 'text') textcnt++;
-			else if(channel.type === 'voice') voicecnt++;
-			else if(channel.type === 'category') categorycnt++;
+			console.log(channel.type);
+			switch(channel.type) {
+			case 'GUILD_NEWS': chs.news++; break;
+			case 'GUILD_TEXT': chs.text++; break;
+			case 'GUILD_VOICE': chs.voice++; break;
+			case 'GUILD_CATEGORY': chs.category++; break;
+			case 'GUILD_NEWS_THREAD': chs.thread++; break;
+			case 'GUILD_PUBLIC_THREAD': chs.thread++; break;
+			case 'GUILD_PRIVATE_THREAD': chs.thread++; break;
+			}
 		});
 		
 		if(args.length) {
@@ -92,7 +103,7 @@ module.exports = {
 			name: servidor.name,
 			peoplecnt: peoplecnt,
 			botcnt: botcnt,
-			channels: [ textcnt, voicecnt, categorycnt ],
+			chs,
 			region: servidor.region,
 			verificationLevel: servidor.verificationLevel,
 			createdAt: servidor.createdAt,
@@ -105,15 +116,14 @@ module.exports = {
 			.setTitle('Información del servidor OwO')
 			
 			.addField('Nombre', servidor.name, true)
-			
-			.addField('Usuarios', `:wrestlers: x ${peoplecnt}\n:robot: x ${botcnt}\n:people_hugging: x ${servidor.memberCount}`, true)
-			.addField('Canales', `:hash: x ${'N/A'/*textcnt*/}\n:loud_sound: x ${'N/A'/*voicecnt*/}\n:label: x ${'N/A'/*categorycnt*/}`, true)
-
-			.addField('Región', /*servidor.region*/'*No obtenible de momento*', true)
-			.addField('Creador', `${ow.user.username}\n[${ow.id}]`, true)
+			.addField('Dueño', `${ow.user.username}\n[${servidor.ownerId}]`, true)
 			.addField('Nivel de verificación', servidor.verificationLevel, true)
 
-			.addField('Fecha de creación', /*servidor.createdAt*/'*No obtenible de momento*', true)
+			.addField('Canales', `:hash: x ${chs.text}\n:loud_sound: x ${chs.voice}\n:label: x ${chs.category}`, true)
+			.addField('• • •', `:speech_left: x ${chs.thread}\n:mega: x ${chs.news}`, true)
+			.addField('Usuarios', `:wrestlers: x ${peoplecnt}\n:robot: x ${botcnt}\n:people_hugging: x ${servidor.memberCount}`, true)
+
+			.addField('Fecha de creación', `<t:${Math.floor(servidor.createdTimestamp / 1000)}:f>`, true)
 			.addField('ID', servidor.id, true)
 			
 			.setImage(servidor.iconURL({ dynamic: true, size: 256 }))
@@ -167,8 +177,8 @@ module.exports = {
 					const collector = sent.createReactionCollector({ filter: filter, time: 8 * 60 * 1000 });
 					collector.on('collect', (reaction, ruser) => {
 						const maxpage = 2;
-						if(reaction.emoji.id === arrows[0].id) SelectedEmbed = (SelectedEmbed > 0)?(SelectedEmbed - 1):maxpage;
-						else SelectedEmbed = (SelectedEmbed < maxpage)?(SelectedEmbed + 1):0;
+						if(reaction.emoji.id === arrows[0].id) SelectedEmbed = (SelectedEmbed > 0) ? (SelectedEmbed - 1) : maxpage;
+						else SelectedEmbed = (SelectedEmbed < maxpage) ? (SelectedEmbed + 1) : 0;
 						sent.edit({ embeds: [Embed[SelectedEmbed]] });
 						reaction.users.remove(ruser);
 					});
