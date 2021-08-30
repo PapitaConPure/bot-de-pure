@@ -94,10 +94,6 @@ module.exports = {
 		//Canales más activos
 		const chtop = msgcnt.map(([name, count]) => `<#${name}>: **${count}** mensajes.`).join('\n');
 
-		//Crear y usar embed
-		let SelectedEmbed = 0;
-		const Embed = [];
-
 		console.log({
 			miembro: miembro,
 			name: servidor.name,
@@ -109,6 +105,10 @@ module.exports = {
 			createdAt: servidor.createdAt,
 			id: servidor.id
 		});
+
+		//Crear y usar embed
+		let SelectedEmbed = 0;
+		const Embed = [];
 
 		const ow = await servidor.fetchOwner();
 		Embed[0] = new MessageEmbed()

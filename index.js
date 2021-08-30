@@ -53,6 +53,7 @@ for(const file of commandFiles) {
 });*/
 
 client.on('ready', async () => { //Confirmación de inicio y cambio de estado
+    global.maintenance = '1';
     const confirm = () => console.log(chalk.green('Hecho.'));
 	console.log(chalk.cyanBright('Calculando semilla y horario...'));
     let stt = Date.now();
@@ -76,8 +77,12 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
         'slot2': sts[1],
         'slot3': sts[2]
     };
-    global.logch = global.slots.slot1.channels.resolve('870347940181471242');
-    global.confch = global.slots.slot1.channels.resolve('870347965192097812');
+    const logs = await Promise.all([
+        global.slots.slot1.channels.resolve('870347940181471242'),
+        global.slots.slot1.channels.resolve('870347965192097812')
+    ]);
+    global.logch = logs[0];
+    global.confch = logs[1];
 	confirm();
 
 	console.log(chalk.magenta('Obteniendo información del host...'));
@@ -95,6 +100,15 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
     registerFont('fonts/asap-condensed.semibold.ttf', { family: 'cardbody' });
 	confirm();
 
+    global.logch.send({ embeds: [new Discord.MessageEmbed()
+        .setColor('DARK_VIVID_PINK')
+        .setAuthor('Mensaje de sistema')
+        .setTitle('Bot conectado y funcionando')
+        .addField('Host', (global.bot_status.host === 'https://localhost/') ? 'https://heroku.com/' : 'localhost', true)
+        .addField('N. de versión', global.bot_status.version.number, true)
+        .setFooter(`Inicialización concluida: <t:${Math.floor(Date.now() / 1000)}:f>`)
+    ]});
+    global.maintenance = '';
 	console.log(chalk.greenBright.bold('Bot conectado y funcionando.'));
 });
 
