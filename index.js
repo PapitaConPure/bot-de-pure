@@ -176,12 +176,18 @@ client.on('messageCreate', message => { //En caso de recibir un mensaje
             if(!global.hourai.infr[mui])
                 global.hourai.infr[mui] = [];
             
-            //Sancionar según total de infracciones cometidas en los últimos 15 minutos
-            global.hourai.infr[mui] = global.hourai.infr[mui].filter(inf => (now - inf) / 1000 < (60 * 15)); //Eliminar antiguas
+            //Sancionar según total de infracciones cometidas en los últimos 25 minutos
+            global.hourai.infr[mui] = global.hourai.infr[mui].filter(inf => (now - inf) / 1000 < (60 * 25)); //Eliminar antiguas
             const total = global.hourai.infr[mui].push(now); //Añade el momento de la infracción actual y retorna el largo del arreglo
             
             switch(total) {
             case 1:
+                message.channel.send({
+                    reply: { messageReference: message.id },
+                    content: `Detecto... bots fuera de botposteo <:empty:856369841107632129>`
+                });
+                break;
+            case 2:
                 message.channel.send({
                     reply: { messageReference: message.id },
                     allowedMentions: { repliedUser: true },
