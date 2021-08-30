@@ -106,7 +106,7 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
         .setTitle('Bot conectado y funcionando')
         .addField('Host', (global.bot_status.host === 'https://localhost/') ? 'https://heroku.com/' : 'localhost', true)
         .addField('N. de versión', global.bot_status.version.number, true)
-        .setFooter(`Inicialización concluida: <t:${Math.floor(Date.now() / 1000)}:f>`)
+        .addField('Fecha', `<t:${Math.floor(Date.now() / 1000)}:f>`, true)
     ]});
     global.maintenance = '';
 	console.log(chalk.greenBright.bold('Bot conectado y funcionando.'));
