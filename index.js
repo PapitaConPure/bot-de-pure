@@ -18,7 +18,7 @@ botIntents.add(
 const client = new Discord.Client({
     intents: botIntents,
     fetchAllMembers: true,
-    allowedMentions: { parse: [ 'users', 'roles' ] }
+    allowedMentions: { parse: [ 'users', 'roles' ], repliedUser: false }
 });
 const Keyv = require('keyv');
 //const keyv = new Keyv('postgresql://sxiejhineqmvsg:d0b53a4f62e2cf77383908ff8d281e4a5d4f7db7736abd02e51f0f27b6fc6264@ec2-35-175-170-131.compute-1.amazonaws.com:5432/da27odtfovvn7n');
@@ -157,6 +157,8 @@ client.on('messageCreate', message => { //En caso de recibir un mensaje
 
     const whitech = [
         '671820448207601684', //botposting          habilitado para uso general
+        '758432587206230037', //staff               habilitado para uso del staff
+        '674817884232613888', //traducción          habilitado para uso del staff
         '662317620699332627', //autómatas           habilitado para testeo
         '813189609911353385', //gachahell           habilitado para gacha
         '813195795318177802', //trata-de-waifus     habilitado para gacha
@@ -172,32 +174,36 @@ client.on('messageCreate', message => { //En caso de recibir un mensaje
             const mui = message.author.id;
             
             if(!global.hourai.infr[mui])
-                global.hourai.infr[mui] = []; //Resentir
-            else {
-                //Sancionar según total de infracciones cometidas en los últimos 10 minutos
-                global.hourai.infr[mui] = global.hourai.infr[mui].filter(inf => (now - inf) / 1000 < (60 * 10)); //Eliminar antiguas
-                const total = global.hourai.infr[mui].push(now); //Añade el momento de la infracción actual y retorna el largo del arreglo
-                
-                switch(total) {
-                case 1:
-                    message.channel.send({ content: 'Detecto.. bots fuera de botposteo... <:empty:856369841107632129>' });
-                    break;
-                case 2:
-                    message.channel.send({ content: `**${message.author.tag}** párale conchetumare, vete a <#${whitech[0]}> <:despair:852764014840905738>` });
-                    break;
-                default:
-                    message.channel.send({ content: 'Ahora sí te cagaste ijoelpico <:tenshismug:859874631795736606>' });
-                    const hd = '682629889702363143'; //Hanged Doll
-                    const gd = message.channel.guild;
-                    const member = gd.members.cache.get(message.author.id);
-                    try {
-                        if(!member.roles.cache.some(r => r.id === hd))
-                            member.roles.add(hd);
-                    } catch(err) {
-                        message.channel.send({ content: `<:wtfff:855940251892318238> Ese wn tiene demasia'o ki. Cuélgalo tú po'.\n\`\`\`\n${err.name}` });
-                    }
-                    break;
+                global.hourai.infr[mui] = [];
+            
+            //Sancionar según total de infracciones cometidas en los últimos 15 minutos
+            global.hourai.infr[mui] = global.hourai.infr[mui].filter(inf => (now - inf) / 1000 < (60 * 15)); //Eliminar antiguas
+            const total = global.hourai.infr[mui].push(now); //Añade el momento de la infracción actual y retorna el largo del arreglo
+            
+            switch(total) {
+            case 1:
+                message.channel.send({
+                    reply: { messageReference: message.id },
+                    allowedMentions: { repliedUser: true },
+                    content: `Párale conchetumare, vete a <#${whitech[0]}> <:despair:852764014840905738>`
+                });
+                break;
+            default:
+                message.channel.send({
+                    reply: { messageReference: message.id },
+                    allowedMentions: { repliedUser: true },
+                    content: 'Ahora sí te cagaste ijoelpico <:tenshismug:859874631795736606>'
+                });
+                const hd = '682629889702363143'; //Hanged Doll
+                const gd = message.channel.guild;
+                const member = gd.members.cache.get(message.author.id);
+                try {
+                    if(!member.roles.cache.some(r => r.id === hd))
+                        member.roles.add(hd);
+                } catch(err) {
+                    message.channel.send({ content: `<:wtfff:855940251892318238> Ese wn tiene demasia'o ki. Cuélgalo tú po'.\n\`\`\`\n${err.name}` });
                 }
+                break;
             }
         }
     }
@@ -248,7 +254,7 @@ client.on('messageCreate', message => { //En caso de recibir un mensaje
     else return; //Salir si no se encuentra el prefijo
 
     //Partición de mensaje comando
-    const args = message.content.slice(pdetect.length).split(/ +/); //Argumentos ingresados
+    const args = message.content.replace( /\n/g, ' ').slice(pdetect.length).split(/ +/); //Argumentos ingresados
     const nombrecomando = args.shift().toLowerCase(); //Comando ingresado
 
     let comando;

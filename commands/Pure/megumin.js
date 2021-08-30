@@ -110,7 +110,7 @@ const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {;
 												.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
 												.setImage(image.file_url);	
 
-											sent.edit(Embed2);
+											sent.edit({ embeds: [Embed2] });
 											showtags = true;
 										}
 									} else {

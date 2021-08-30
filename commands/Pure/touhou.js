@@ -89,7 +89,7 @@ const searchForImage = async function(arglist, msg) {
 									Embed.fields[2].value = `*${image.tags.split(/ +/).join(', ')}*`;
 									Embed.addField('Acciones', `Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`);
 
-									sent.edit(Embed);
+									sent.edit({ embeds: [Embed] });
 									showtags = true;
 								}
 							} else {

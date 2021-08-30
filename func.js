@@ -819,13 +819,14 @@ module.exports = {
         //Recorrer parámetros e intentar procesar flags
         args.forEach((arg, i) => {
             if(flag.property && i === (args.length - 1)) return;
-            if(flag.long.length && arg.startsWith('--')) {
+            arg = arg.toLowerCase();
+            if(flag.long !== undefined && flag.long.length && arg.startsWith('--')) {
                 if(flag.long.includes(arg.slice(2))) {
                     if(flag.property) target = flag.callback(args, i + 1); //Debe ser una función si es una flag de propiedad
                     else target = (typeof flag.callback === 'function')?flag.callback():flag.callback; //De lo contrario, puede ser una función o un valor
                     args.splice(i, flag.property?2:1);
                 }
-            } else if(flag.short.length && arg.startsWith('-')) {
+            } else if(flag.short !== undefined && flag.short.length && arg.startsWith('-')) {
                 for(c of arg.slice(1))
                     if(flag.short.includes(c)) {
                         if(flag.property) target = flag.callback(args, i + 1);
@@ -834,30 +835,26 @@ module.exports = {
                     }
             }
 		});
-        console.log(args);
 
         return target?target:(typeof flag.fallback === 'function'?flag.fallback():flag.fallback);
     },
     
-    /*fetchFlags: function(args, flags = [{ target, short: [], long: [], callback }]) {
-        args = args.filter(arg => arg.startsWith('-')).filter(arg => {
-            return flags.some(flag => {
-                if(arg.startsWith('--'))
-                    if(flag.long.includes(arg.slice(2))) {
-                        flag.target = (typeof callback === 'function')?flag.callback():flag.callback;
-                        return true;
-                    }
-                else {
-                    for(c of arg.slice(1))
-                        if(flag.short.includes(c)) {
-                            flag.target = (typeof callback === 'function')?flag.callback():flag.callback;
-                            return true;
-                        }
-                }
-                return false;
-            })?null:arg;
-		});
-    },*/
+    fetchSentence: function(args, i) {
+        if(i >= args.length) //Título inválido
+            return undefined;
+        else if(args[i].startsWith('"')) { //Título largo
+            let l = i;
+            let tt;
+    
+            while(l < args.length && !args[l].endsWith('"'))
+                l++;
+            tt = args.slice(i, l + 1).join(' ').slice(1);
+            args.splice(i, l - i);
+            if(tt.length > 1) return (tt.endsWith('"'))?tt.slice(0, -1):tt;
+            else return undefined;
+        } else //Título corto
+            return args[i];
+    },
     //#endregion
 
     //#region Otros

@@ -48,7 +48,7 @@ module.exports = {
 				else page = (page < (emotes.length - 1))?(page + 1):0;
 				embed.fields[0].value = emotes[page];
 				embed.setFooter(`Página ${page + 1}/${Math.ceil(emotes.length)}`);
-				sent.edit(content, embed);
+				sent.edit({ content: content, embeds: [embed]});
 			});
 		});
     },
