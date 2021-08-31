@@ -3,9 +3,6 @@
 
 module.exports = {
 	name: 'ajedrez',
-	aliases: [
-
-	],
 	desc: 'Inicia una partida de ajedrez común cronometrada (6 minutos + 15s/turno) en un tablero de 8x8 contra el `<adversario>` mencionado\n' +
 		'Con enroque, con coronación de peón, con primer movimiento doble de peón, sin peón al paso\n' +
 		'¡Puedes asignar emotes diferentes a cada pieza con las `--banderas` a disposición!\n' +
@@ -24,32 +21,8 @@ module.exports = {
 	],
 	callx: '<adversario>',
 
-	execute(message, args) {
+	async execute(message, args) {
 		//Variables de flags
-
-
-		//Lectura de flags
-		/*let jn = false;
-		args = args.map((arg, i) => {
-			let ignore = true;
-			if(!jn) {
-				if(arg.startsWith('--'))
-					switch(arg.slice(2)) {
-					case 'flag':  break;
-					default: ignore = false;
-					}
-				else if(arg.startsWith('-'))
-					for(c of arg.slice(1))
-						switch(c) {
-						case 'f':  break;
-						default: ignore = false;
-						}
-				else ignore = false;
-			} else jn = false;
-
-			if(ignore) return undefined;
-			else return arg;
-		}).filter(arg => arg !== undefined);*/
 
 		//Acción de comando
 		message.channel.send({ content: 'Soon, later, never. Who knows?' });

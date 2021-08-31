@@ -8,7 +8,7 @@ module.exports = {
         'meme'
     ],
 	
-	execute(message, args) {
+	async execute(message, args) {
 		const xuwu = [
 			'<:mayuwu:654489124413374474>',
 			'<:Staruwu:825224815865626645>',

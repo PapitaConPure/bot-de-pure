@@ -18,7 +18,7 @@ module.exports = {
 		'`-p` o `--problema` _(texto)_ para reportar un problema con la expresión de la sugerencia'
 	],
 
-	execute(message, args) {
+	async execute(message, args) {
 		//Variables de flags
 		let user;
 		let mode;

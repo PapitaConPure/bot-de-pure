@@ -14,7 +14,7 @@ module.exports = {
     '`-s` o `--sueño` para explorar el diario de sueños',
   ],
 
-  execute(message, args) {
+  async execute(message, args) {
     let dream = false;
     args.map((arg, i) => {
       if(arg.startsWith('--'))

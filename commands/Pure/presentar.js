@@ -14,7 +14,7 @@ module.exports = {
 
     ],
 	
-	execute(message, args) {
+	async execute(message, args) {
         const embed = new MessageEmbed()
             .setColor('#608bf3')
             .setAuthor('Presentación', message.client.user.avatarURL({ format: 'png', dynamic: true, size: 1024 }))

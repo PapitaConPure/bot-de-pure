@@ -13,7 +13,7 @@ module.exports = {
     ],
 	callx: 'uwu',
 	
-	execute(message, args) {
+	async execute(message, args) {
 		const uwusopt = [
 			'<:uwu:681935702308552730>',
 			'<:uwu2:681936445958914128>',

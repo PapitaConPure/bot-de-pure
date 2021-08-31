@@ -12,7 +12,7 @@ module.exports = {
         'outdated'
     ],
 	
-	execute(message, args) {
+	async execute(message, args) {
 		askCandy(message.member, message.channel);
     },
 };

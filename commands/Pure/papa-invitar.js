@@ -11,7 +11,7 @@ module.exports = {
 
     ],
 	
-	execute(message, args) {
+	async execute(message, args) {
         message.channel.send({
             content:
                 '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' +

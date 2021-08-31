@@ -34,7 +34,7 @@ module.exports = {
 	],
 	callx: '<sugerencia>',
 
-	execute(message, args) {
+	async execute(message, args) {
 		//Comprobación de liquidación de abuso
 		if(uses[message.author.id] === undefined)
 			uses[message.author.id] = 1;

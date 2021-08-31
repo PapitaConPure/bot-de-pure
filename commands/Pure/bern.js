@@ -14,7 +14,7 @@ module.exports = {
 
     ],
 
-	execute(message, args){
+	async execute(message, args){
 		const emot = [
 			'Mi polola', 'Mi reina', 'Mi princesa', 'Mi esposa', 'Mi mujer',
 			':wine_glass:', ':wine_glass::wine_glass:', ':wine_glass::wine_glass::wine_glass:',

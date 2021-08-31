@@ -18,7 +18,7 @@ module.exports = {
     ],
 	callx: '<frase?>',
 	
-	execute(message, args) {
+	async execute(message, args) {
 		if(args.length) {
 			//La programación es un puto meme
 			const newmsg = message.content

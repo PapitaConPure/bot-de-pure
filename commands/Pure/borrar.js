@@ -18,7 +18,7 @@ module.exports = {
     ],
 	callx: '<cantidad>',
 	
-	execute(message, args) {
+	async execute(message, args) {
 		if(!args.length) {
 			message.delete();
 			message.channel.send({ content: ':warning: debes especificar la cantidad o el autor de los mensajes a borrar.' });

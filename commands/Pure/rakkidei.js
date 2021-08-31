@@ -10,7 +10,7 @@ module.exports = {
 		'common'
 	],
 
-	execute(message, args) {
+	async execute(message, args) {
 		const phrase = [
 			'Ahora sí vení que te saco la cresta',
 			'Vení que te dejo la cagá en la cara',

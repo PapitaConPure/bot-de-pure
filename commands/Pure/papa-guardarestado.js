@@ -10,7 +10,7 @@ module.exports = {
         'outdated'
     ],
 	
-	execute(message, args) {
+	async execute(message, args) {
         let templog = JSON.stringify(global, null, 4);
         let tempimg = JSON.stringify(imgs, null, 4);
         let tempdata = `localdata/config.json\n${templog}\n\n\nlocaldata/drawings.json\n${tempimg}`;

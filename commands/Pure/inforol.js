@@ -20,7 +20,7 @@ module.exports = {
     ],
 	callx: '<caso> <búsqueda...>',
 	
-	execute(message, args) {
+	async execute(message, args) {
 		if(args.length < 1) {
 			message.channel.send({ content: `:x: ¡Debes ingresar al menos un parámetro!\nUsa \`${p_pure}ayuda inforol\` para más información` });
 			return;

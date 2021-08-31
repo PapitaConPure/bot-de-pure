@@ -11,7 +11,7 @@ module.exports = {
 		'meme'
 	],
 
-	execute(message, args) {
+	async execute(message, args) {
 		const h = [
 			':heart:',
 			':orange_heart:',

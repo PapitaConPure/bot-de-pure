@@ -19,7 +19,7 @@ module.exports = {
     ],
 	callx: '<cantidad> <usuario>',
 	
-	execute(message, args) {
+	async execute(message, args) {
 		if(uses.pinguear[message.author.id] !== undefined && uses.pinguear[message.author.id]) {
 			message.channel.send({ content: `:octagonal_sign: oe, ¿¡y si te calmai!?` });
 			return;

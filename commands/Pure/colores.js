@@ -13,7 +13,7 @@ module.exports = {
         'hourai'
     ],
 	
-	execute(message, args) {
+	async execute(message, args) {
 		message.channel.send({
 			content: `Aquí teni los colore po **${message.author.username}** <:reibu:686220828773318663>`,
 			files: [hourai.images.colors]

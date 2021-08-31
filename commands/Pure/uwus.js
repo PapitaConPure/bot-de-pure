@@ -14,7 +14,7 @@ module.exports = {
     ],
     callx: '<tiempo?>',
 	
-	execute(message, args) {
+	async execute(message, args) {
         let secs;
         if(args.length) {
             if(!isNaN(args[0])) secs = Math.max(0.1, Math.min(args[0], 3600 * 2));

@@ -9,7 +9,7 @@ module.exports = {
 		'hourai'
     ],
 	
-	execute(message, args) {
+	async execute(message, args) {
 		message.channel.send({
 			files: [
 				{ name: 'chise1.png', attachment: 'https://cdn.discordapp.com/attachments/659885154105294874/723765798799147038/unknown.png'},

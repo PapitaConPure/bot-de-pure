@@ -12,7 +12,7 @@ module.exports = {
         'outdated'
     ],
 	
-	execute(message, args){
+	async execute(message, args){
 		message.channel.send({ content: '**PAPITA**\n**PAPITA**' });
 		message.channel.send({ content: '**OE PAPITA**\n**LA NUEZ**' });
     },

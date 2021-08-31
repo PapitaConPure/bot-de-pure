@@ -13,7 +13,7 @@ module.exports = {
         'common'
     ],
 	
-	execute(message, args) {
+	async execute(message, args) {
         const { host, version, note, changelog, todo } = bot_status;
         const cmsearch = new RegExp(`${p_pure}[a-zA-Z0-9_.-]*`, 'g');
         const clformat = changelog.map(item => `- ${item}`).join('\n');

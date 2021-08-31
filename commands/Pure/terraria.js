@@ -11,7 +11,7 @@ module.exports = {
 		'hourai'
 	],
 
-	execute(message, args) {
+	async execute(message, args) {
 		const embed = new MessageEmbed()
 			.setColor('#39b715') 
 			.setAuthor('Terraria » Hourai Doll', 'https://i.imgur.com/o2V6IX6.jpg')

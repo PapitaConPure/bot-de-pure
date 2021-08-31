@@ -13,7 +13,7 @@ module.exports = {
         'common'
     ],
 	
-	execute(message, args) {
+	async execute(message, args) {
 		const guilds = message.client.guilds.cache;
 		let emotes = [];
 		{

@@ -29,7 +29,7 @@ module.exports = {
 	],
 	callx: '<twitters(...)>',
 
-	execute(message, args) {
+	async execute(message, args) {
 		if(!args.length) {
 			message.channel.send({ content: ':warning: Necesitas ingresar al menos un enlace de Twitter o propiedad de tablón' });
 			return;

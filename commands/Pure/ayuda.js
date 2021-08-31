@@ -25,7 +25,7 @@ module.exports = {
     ],
     callx: '<comando?>',
     
-	execute(message, args) {
+	async execute(message, args) {
         const cfiles = readdirSync('./commands/Pure').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
         let fex = false;
         let fmeme = false;

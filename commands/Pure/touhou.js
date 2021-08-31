@@ -125,7 +125,7 @@ module.exports = {
     ],
 	callx: '<rango?> <etiquetas?>',
 	
-	execute(message, args) {
+	async execute(message, args) {
 		searchForImage(args, message);
     },
 };

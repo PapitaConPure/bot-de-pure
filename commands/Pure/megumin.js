@@ -153,7 +153,7 @@ module.exports = {
     ],
 	callx: '<rango?> <etiquetas?>',
 	
-	execute(message, args) {
+	async execute(message, args) {
 		let serveridcheck = false;
 		for(sid in global.serverid) {
 			if(global.serverid.hasOwnProperty(sid)) {

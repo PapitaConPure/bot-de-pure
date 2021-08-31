@@ -28,7 +28,7 @@ module.exports = {
 	],
 	callx: '<posición(x,y)?> <emote?>',
 
-	execute(message, args) {
+	async execute(message, args) {
 		if(!args.length) { //Ver tabla
 			const d = async () => {
 				//Acción de comando

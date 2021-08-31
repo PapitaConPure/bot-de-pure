@@ -14,7 +14,7 @@ module.exports = {
 
     ],
 	
-	execute(message, args){
+	async execute(message, args){
 		message.channel.send({ content: '***ORPHEN CUIDADO***' });
 		message.channel.send({ content: '***CUIDADO ORPHEEEEEN***' });
     },

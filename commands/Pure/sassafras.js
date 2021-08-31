@@ -16,7 +16,7 @@ module.exports = {
 		'`-t` o `--total` para saber la cantidad total de líneas'
     ],
 	
-	execute(message, args) {
+	async execute(message, args) {
 		let showtotal = false;
 		let sassamodo = false;
 		args.some((arg, i) => {

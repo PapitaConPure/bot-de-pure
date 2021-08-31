@@ -18,7 +18,7 @@ module.exports = {
     ],
 	callx: '[<perrito?>/<lista?>]',
 	
-	execute(message, args) {
+	async execute(message, args) {
 		let dflag = false;
 
 		//Lectura de flags; las flags ingresadas se ignoran como argumentos

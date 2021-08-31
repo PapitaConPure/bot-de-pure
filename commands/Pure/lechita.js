@@ -79,7 +79,7 @@ module.exports = {
     ],
 	callx: '[<usuario?>/<emote?>/<imagen?>]',
 	
-	execute(message, args) {
+	async execute(message, args) {
 		async function aaamipija() {
 			if(message.channel.nsfw) {
 				let bglink;

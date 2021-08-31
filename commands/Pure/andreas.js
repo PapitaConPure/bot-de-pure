@@ -8,7 +8,7 @@ module.exports = {
 		'meme'
 	],
 
-	execute(message, args) {
+	async execute(message, args) {
 		//Acción de comando
 		message.channel.send({ files: ['https://i.imgur.com/GqepHtl.jpg'] });
 	}

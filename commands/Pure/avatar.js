@@ -18,7 +18,7 @@ module.exports = {
     ],
     callx: '<usuario?>',
 
-	execute(message, args) {
+	async execute(message, args) {
         const embed = new MessageEmbed()
             .setColor('#faa61a')
             .setFooter(`"${p_pure}ayuda avatar" para más información`)

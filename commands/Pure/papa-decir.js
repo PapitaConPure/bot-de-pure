@@ -13,7 +13,7 @@ module.exports = {
     ],
     callx: '<mensaje>',
 	
-	execute(message, args) {
+	async execute(message, args) {
         decir.execute(message, args);
         global.cansay = 2;
     },

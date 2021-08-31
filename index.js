@@ -1,6 +1,20 @@
 //#region Carga de módulos necesarios
-const fs = require('fs'); //Sistema de archivos
 const Discord = require('discord.js'); //Soporte JS de la API de Discord
+const { REST } = require('@discordjs/rest');
+const { Routes } = require('discord-api-types/v9');
+const fs = require('fs'); //Sistema de archivos
+const Keyv = require('keyv');
+//const keyv = new Keyv('postgresql://sxiejhineqmvsg:d0b53a4f62e2cf77383908ff8d281e4a5d4f7db7736abd02e51f0f27b6fc6264@ec2-35-175-170-131.compute-1.amazonaws.com:5432/da27odtfovvn7n');
+//keyv.on('error', err => console.error('Keyv connection error:', err));
+const global = require('./localdata/config.json'); //Propiedades globales
+const func = require('./func.js'); //Funciones globales
+const stats = require('./localdata/stats.json');
+const booru = require('./localdata/boorutags.js');
+const cmdex = require('./localdata/cmdExceptions.js');
+const dns = require('dns'); //Detectar host
+const { registerFont } = require('canvas'); //Registrar fuentes al ejecutar Bot
+const chalk = require('chalk'); //Consola con formato bonito
+const { SlashCommandBuilder } = require('@discordjs/builders');
 //Objeto cliente
 const botIntents = new Discord.Intents();
 const iflags = Discord.Intents.FLAGS;
@@ -20,17 +34,9 @@ const client = new Discord.Client({
     fetchAllMembers: true,
     allowedMentions: { parse: [ 'users', 'roles' ], repliedUser: false }
 });
-const Keyv = require('keyv');
-//const keyv = new Keyv('postgresql://sxiejhineqmvsg:d0b53a4f62e2cf77383908ff8d281e4a5d4f7db7736abd02e51f0f27b6fc6264@ec2-35-175-170-131.compute-1.amazonaws.com:5432/da27odtfovvn7n');
-//keyv.on('error', err => console.error('Keyv connection error:', err));
-const global = require('./localdata/config.json'); //Propiedades globales
-const func = require('./func.js'); //Funciones globales
-const stats = require('./localdata/stats.json');
-const booru = require('./localdata/boorutags.js');
-const dns = require('dns'); //Detectar host
-const { registerFont } = require('canvas'); //Registrar fuentes al ejecutar Bot
-const chalk = require('chalk'); //Consola con formato bonito
 const token = (process.env.I_LOVE_MEGUMIN)?process.env.I_LOVE_MEGUMIN:require('./key.json').token; //La clave del bot
+const restGlobal = new REST({ version: '9' }).setToken(token);
+const clientId = '651250669390528561';
 //#endregion
 
 //#region Detección de archivos de comandos
@@ -40,27 +46,42 @@ for(const file of commandFiles) {
 	const command = require(`./commands/Drawmaku/${file}`);
 	client.ComandosDrawmaku.set(command.name, command);
 }
-client.ComandosPure = new Discord.Collection(); //Comandos de Pure
+client.ComandosPure = new Discord.Collection(); //Comandos de Puré
+client.SlashPure = new Discord.Collection(); //Comandos Slash de Puré
 commandFiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
 for(const file of commandFiles) {
-    command = require(`./commands/Pure/${file}`);
+    const command = require(`./commands/Pure/${file}`);
 	client.ComandosPure.set(command.name, command);
+    command.data = new SlashCommandBuilder()
+        .setName(command.name)
+        .setDescription(command.desc.slice(0, 99));
+	client.SlashPure.set(command.name, command.data.toJSON());
 }
 //#endregion
 
-/*client.once('ready', async () => {
-    keyv.set();
-});*/
-
 client.on('ready', async () => { //Confirmación de inicio y cambio de estado
-    global.maintenance = '1';
     const confirm = () => console.log(chalk.green('Hecho.'));
-	console.log(chalk.cyanBright('Calculando semilla y horario...'));
+    global.maintenance = '1';
+
+    try {
+        console.log(chalk.bold.magentaBright('Comienzo de cargado de comandos slash.'));
+
+        await restGlobal.put(
+            Routes.applicationCommands(clientId),
+            { body: client.SlashPure },
+        );
+
+        confirm();
+    } catch (error) {
+        console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos slash'));
+        console.error(error);
+    }
+
+	console.log(chalk.cyanBright('Calculando semilla y horario.'));
     let stt = Date.now();
     global.startuptime = stt;
     global.lechitauses = stt;
     global.seed = stt / 60000;
-	confirm();
     
     await func.modifyAct(client, 0);
 
@@ -112,7 +133,7 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
 	console.log(chalk.greenBright.bold('Bot conectado y funcionando.'));
 });
 
-client.on('messageCreate', message => { //En caso de recibir un mensaje
+client.on('messageCreate', async (message) => { //En caso de recibir un mensaje
     if(global.maintenance.length > 0 && message.channel.id !== global.maintenance) return;
     const msg = message.content.toLowerCase();
 
@@ -280,60 +301,24 @@ client.on('messageCreate', message => { //En caso de recibir un mensaje
     //#region Ejecución de Comandos
     try {
         //Detectar problemas con el comando basado en flags
-        let errtitle, errfield;
-        if(comando.flags.some(flag => {
-            switch(flag) {
-            case 'outdated':
-                if(message.author.id === global.peopleid.papita) return false;
-                errtitle = 'Comando desactualizado';
-                errfield = 'El comando no se encuentra disponible debido a que su función ya no es requerida en absoluto. Espera a que se actualice~';
-                return true;
-
-            case 'maintenance':
-                if(message.author.id === global.peopleid.papita) return false;
-                errtitle = 'Comando en mantenimiento';
-                errfield = 'El comando no se encuentra disponible debido a que está en proceso de actualización o reparación en este momento. Espera a que se actualice~';
-                return true;
-            
-            case 'guide':
-                errtitle = 'Símbolo de página de guía';
-                errfield = `Esto no es un comando, sino que una *página de guía* para buscarse con \`${global.p_pure}ayuda\``;
-                return true;
-
-            case 'mod':
-                if(message.member.permissions.has('MANAGE_ROLES') || message.member.permissions.has('MANAGE_MESSAGES')) return false;
-                errtitle = 'Comando exclusivo para moderación';
-                errfield = 'El comando es de uso restringido para moderación.\n**Considero a alguien como moderador cuando** tiene permisos para administrar roles *(MANAGE_ROLES)* o mensajes *(MANAGE_MESSAGES)*';
-                return true;
-            
-            case 'papa':
-                if(message.author.id === global.peopleid.papita) return false;
-                errtitle = 'Comando exclusivo de Papita con Puré';
-                errfield = 'El comando es de uso restringido para el usuario __Papita con Puré#6932__. Esto generalmente se debe a que el comando es usado para pruebas o ajustes globales/significativos/sensibles del Bot';
-                return true;
-
-            case 'hourai':
-                if(message.author.id === global.peopleid.papita || message.channel.guild.id === global.serverid.hourai) return false;
-                errtitle = 'Comando exclusivo de Hourai Doll';
-                errfield = 'El comando es de uso restringido para el servidor __Hourai Doll__. Esto generalmente se debe a que cumple funciones que solo funcionan allí';
-                return true;
-                
-            default:
-                return false;
-            }
-        })) {
+        let exception = null;
+        comando.flags.forEach(flag => {
+            const ex = cmdex.findExceptions(flag, message)
+            if(ex) exception = ex;
+        });
+        if(exception/*comando.flags.some(flag => )*/) {
             //En caso de detectar un problema, enviar embed reportando el estado del comando
             message.channel.send({ embeds: [
                 new Discord.MessageEmbed()
                     .setColor('#f01010')
                     .setAuthor('Un momento...')
-                    .setTitle(`${errtitle}`)
-                    .addField(`${pdetect}${nombrecomando}`, `${errfield}`)
+                    .setTitle(`${exception.title}`)
+                    .addField(`${pdetect}${nombrecomando}`, `${exception.desc}`)
                     .setFooter('¿Dudas? ¿Sugerencias? Contacta con Papita con Puré#6932')
             ]});
             return;
         } else //En cambio, si no se detectan problemas, finalmente ejecutar comando
-            comando.execute(message, args);
+            await comando.execute(message, args);
         stats.commands.succeeded++;
     } catch(error) {
         console.log('Ha ocurrido un error al ingresar un comando.');
@@ -362,6 +347,33 @@ client.on('messageCreate', message => { //En caso de recibir un mensaje
     if(global.cansay > 0) global.cansay--;
     //#endregion
     //#endregion 
+});
+
+client.on('interactionCreate', async interaction => {
+	if (!interaction.isCommand()) return;
+    console.log('wasdfguwu');
+
+	const command = client.SlashPure.get(interaction.commandName);
+	if (!command) return;
+
+	try {
+		await command.execute(interaction);
+	} catch(error) {
+        console.log('Ha ocurrido un error al procesar un comando slash.');
+        console.log(message.content);
+        console.error(error);
+        const errorembed = new Discord.MessageEmbed()
+            .setColor('#0000ff')
+            .setAuthor(`${message.guild.name} • ${message.channel.name} (Click para ver)`, message.author.avatarURL({ dynamic: true }), message.url)
+            .setFooter(`gid: ${message.guild.id} | cid: ${message.channel.id} | uid: ${message.author.id}`)
+            .addField('Ha ocurrido un error al procesar un comando slash', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
+        global.logch.send({
+            content: `<@${global.peopleid.papita}>`,
+            embeds: [errorembed]
+        });
+        stats.commands.failed++;
+		await interaction.reply({ content: 'Ocurrió un error al ejecutar el comando', ephemeral: true });
+	}
 });
 
 client.on('guildMemberAdd', member => { //Evento de entrada a servidor

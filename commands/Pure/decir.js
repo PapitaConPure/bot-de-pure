@@ -16,7 +16,7 @@ module.exports = {
     ],
     callx: '<mensaje>',
 	
-	execute(message, args) {
+	async execute(message, args) {
         if(args.length > 0) {
             let dflag = false;
 

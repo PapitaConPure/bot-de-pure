@@ -18,7 +18,7 @@ module.exports = {
 	],
 	callx: '<usuario>',
 
-	execute(message, args) {
+	async execute(message, args) {
 		//Acción de comando
 		if(!args.length) {
 			message.channel.send({ content: ':warning: Debes indicar un usuario.' });

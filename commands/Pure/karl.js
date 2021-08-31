@@ -15,7 +15,7 @@ module.exports = {
         'meme'
     ],
 	
-	execute(message, args){
+	async execute(message, args){
 		const emot = [
 			':musical_keyboard:', ':saxophone:', ':trumpet:', ':violin:', ':guitar:',' :banjo:', ':aquarius:'
 		];

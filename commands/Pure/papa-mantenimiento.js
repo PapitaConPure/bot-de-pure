@@ -17,7 +17,7 @@ module.exports = {
 	],
 	callx: '<proceso?>',
 
-	execute(message, args) {
+	async execute(message, args) {
 		//Acción de comando
 		//if(!args.length) {
 		message.channel.send({ content: `**Host** \`${global.bot_status.host}\`\n**ID de InstProc** \`${global.startuptime}\`\n**Estado** \`[${global.maintenance.length?'PAUSADO':'OPERANDO'}]\``})

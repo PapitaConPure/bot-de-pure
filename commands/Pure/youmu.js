@@ -5,7 +5,7 @@ module.exports = {
 		'meme'
 	],
 
-	execute(message, args) {
+	async execute(message, args) {
 		message.channel.send({ content: '<:yomujugo:748626431914934282>' });
 	}
 };

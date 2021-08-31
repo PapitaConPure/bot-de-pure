@@ -147,7 +147,7 @@ module.exports = {
     ],
 	callx: '<rango?> <etiquetas?>',
 	
-	execute(message, args) {
+	async execute(message, args) {
 		if(message.guild.id !== '651244470691561473' && message.guild.id !== '654471968200065034') {
 			message.channel.send({ content: '_Este comando solo puede ser usado en la superficie..._' });
 			return;

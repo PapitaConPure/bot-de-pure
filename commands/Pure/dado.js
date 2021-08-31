@@ -20,7 +20,7 @@ module.exports = {
     ],
 	callx: '[<cantidad><caras>(...)]',
 	
-	execute(message, args) {
+	async execute(message, args) {
 		if(!args.length) {
 			message.channel.send({
 				content: `:warning: Debes ingresar al menos un conjunto de dados a tirar, como \`1d6\`.\nPara más información sobre el comando, usa \`${p_pure}ayuda dado\``

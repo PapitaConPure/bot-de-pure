@@ -22,7 +22,7 @@ module.exports = {
 	],
 	callx: '<archivo?> <objeto? (ruta..., nombre)>',
 
-	execute(message, args) {
+	async execute(message, args) {
 		//Buscar objeto de forma descendiente
 		let obj, name;
 		if(args.length && args[0].endsWith('.json')) {

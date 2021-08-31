@@ -36,7 +36,7 @@ module.exports = {
 
     ],
 
-	execute(message, args) {
+	async execute(message, args) {
 		tmpfunc(message.channel, args);
     },
 };
