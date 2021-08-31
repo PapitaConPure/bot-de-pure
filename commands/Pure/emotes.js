@@ -17,10 +17,10 @@ module.exports = {
 		const guilds = message.client.guilds.cache;
 		let emotes = [];
 		{
-			const slot1Coll = guilds.get(serverid.slot1).emojis.cache;
-			const slot2Coll = guilds.get(serverid.slot2).emojis.cache;
-			const slot3Coll = guilds.get(serverid.slot3).emojis.cache;
-			emotes = slot1Coll.concat(slot2Coll).concat(slot3Coll).sort();
+			const slot1Coll = guilds.get(serverid.slot1).emojis.cache.values();
+			const slot2Coll = guilds.get(serverid.slot2).emojis.cache.values();
+			const slot3Coll = guilds.get(serverid.slot3).emojis.cache.values();
+			emotes = [...slot1Coll, ...slot2Coll, ...slot3Coll].sort();
 		}
 		/*emotes = emotes.map((e, i) => { return (i % pagemax === 0)?emotes.slice(i, i + pagemax):null; }).filter(e => e);
 		emotes = emotes.map(page => page.map(e => `\`${e.name}${' '.repeat(24 - e.name.length)}\` <:${e.name}:${e.id}>`).join('\n'));*/

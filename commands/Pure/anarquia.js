@@ -157,7 +157,6 @@ module.exports = {
 					}
 
 					const r = Math.random();
-					console.log(`${r} < ${(1 + Math.floor(anarquia[aid].exp / 30)) / 100}`);
 					if(r < (1 + Math.floor(anarquia[aid].exp / 30)) / 100)
 						if(Math.random() < 0.5) {
 							anarquia[aid].h++;

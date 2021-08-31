@@ -32,6 +32,6 @@ module.exports = {
 		//Variables de flags
 
 		//Acción de comando
-		await interaction.reply('Soon, later, never. Who knows?');
+		await interaction.reply({ content: 'Soon, later, never. Who knows?', ephemeral: true });
 	}
 };

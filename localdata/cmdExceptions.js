@@ -1,17 +1,18 @@
 const global = require('../localdata/config.json');
+const { MessageEmbed } = require('discord.js');
 
 module.exports = {
     exceptions: {
         outdated: {
             title: 'Comando desactualizado',
             desc: 'El comando no se encuentra disponible debido a que su función ya no es requerida en absoluto. Espera a que se actualice~',
-            isException: (message) => !(message.author.id !== global.peopleid.papita)
+            isException: (message) => message.author.id !== global.peopleid.papita
         },
 
         maintenance: {
             title: 'Comando en mantenimiento',
             desc: 'El comando no se encuentra disponible debido a que está en proceso de actualización o reparación en este momento. Espera a que se actualice~',
-            isException: (message) => !(message.author.id !== global.peopleid.papita)
+            isException: (message) => message.author.id !== global.peopleid.papita
         },
 
         guide: {
@@ -29,7 +30,7 @@ module.exports = {
         papa: {
             title: 'Comando exclusivo de Papita con Puré',
             desc: 'El comando es de uso restringido para el usuario __Papita con Puré#6932__. Esto generalmente se debe a que el comando es usado para pruebas o ajustes globales/significativos/sensibles del Bot',
-            isException: (message) => !(message.author.id !== global.peopleid.papita)
+            isException: (message) => message.author.id !== global.peopleid.papita
         },
 
         hourai: {
@@ -40,8 +41,18 @@ module.exports = {
     },
 
     findExceptions(flag, message) {
+        console.log(message.author.id, global.peopleid.papita);
         const exflag = module.exports.exceptions[flag];
         if(exflag && exflag.isException(message)) return exflag;
         else return null;
+    },
+
+    createEmbed(exception, { cmdString = '' }) {
+        return new MessageEmbed()
+            .setColor('#f01010')
+            .setAuthor('Un momento...')
+            .setTitle(`${exception.title}`)
+            .addField(cmdString, `${exception.desc}`)
+            .setFooter('¿Dudas? ¿Sugerencias? Contacta con Papita con Puré#6932');
     }
 }

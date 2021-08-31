@@ -20,5 +20,14 @@ module.exports = {
 				content: '<:houraidoll:853402616208949279> Shanghai Shanghai Shanghai Shanghai\nHourai Hourai Hourai Hourai'
 			});
 		}
+	},
+
+	async interact(interaction) {
+		const hd = '682629889702363143'; //Hanged Doll
+		const member = interaction.member;
+		if(!member.roles.cache.some(r => r.id === hd)) {
+			member.roles.add(hd);
+			interaction.reply({ content: '<:houraidoll:853402616208949279> Shanghai Shanghai Shanghai Shanghai\nHourai Hourai Hourai Hourai' });
+		}
 	}
 };

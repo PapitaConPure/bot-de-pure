@@ -31,10 +31,10 @@ module.exports = {
 		let dices = [];
 		args.map((arg, i) => {
 			if(isNaN(arg)) {
-				const dice = arg.split('d').filter(a => a);
+				const dice = arg.split(/[Dd]/).filter(a => a);
 				if(dice.length === 2)
 					dices.push({ d: dice[0], f: dice[1] });
-			} else if(args[i + 1].startsWith('d'))
+			} else if(args[i + 1].startsWith(/[Dd]/))
 				dices.push({ d: arg, f: args[i + 1] });
 		});
 		

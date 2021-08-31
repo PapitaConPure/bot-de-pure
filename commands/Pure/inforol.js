@@ -26,47 +26,33 @@ module.exports = {
 			return;
 		}
 
-		message.channel.sendTyping();
-		const servidor = message.channel.guild; //Variable que almacena un objeto del servidor a analizar
+		//Parámetros
+		const servidor = message.channel.guild; //Servidor a analizar
+        const strict = fetchFlag(args, { short: [ 'x', 'e' ], long: [ 'estricto', 'estricta' ], callback: true, fallback: false });
 
 		//Adquirir ID de los roles
-        const strict = fetchFlag(args, { short: [ 'x', 'e' ], long: [ 'estricto', 'estricta' ], callback: true, fallback: false });
-		for(let roleget = 0; roleget < args.length; roleget++) {
-			if(args[roleget].startsWith('<@&') && args[roleget].endsWith('>')) {
-				args[roleget] = args[roleget].slice(3, -1);
-			}
-			if(isNaN(args[roleget])) {
-				const temp = args[roleget].toLowerCase();
-				args[roleget] = servidor.roles.cache.filter(role => 
-					role.name.toLowerCase().indexOf(temp) !== -1
-				).first();
-
-				if((typeof args[roleget]) === 'undefined') {
-					message.channel.send({ content: ':warning: ¡Rol no encontrado!' });
-					args[roleget] = -1;
-				} else
-					args[roleget] = args[roleget].id;
-			}
-		}
-
-		if(!args.every(argfetched => argfetched === '-1')) {
-			//Contadores de usuarios
-			const rolemembers = servidor.members.cache.filter(member => { //Usuarios con rol
-				if(strict)
-					return args.some(argrole => {
-						if(argrole !== args[0] && argrole !== '-1')
-							return member.roles.cache.has(argrole);
-						else
-							return false;
-					});
+		message.channel.sendTyping();
+		args = args.map(arg => {
+			if(arg.startsWith('<@&') && arg.endsWith('>'))
+				arg = arg.slice(3, -1);
+			if(isNaN(arg)) {
+				arg = arg.toLowerCase();
+				arg = servidor.roles.cache.find(r => r.name.toLowerCase().indexOf(arg) >= 0);
+				if(typeof arg === 'undefined')
+					arg = null;
 				else
-					return args.every(argrole => {
-						if(argrole !== args[0] && argrole !== '-1')
-							return member.roles.cache.has(argrole);
-						else
-							return true;
-					});
-			});
+					arg = arg.id;
+			}
+			return arg;
+		}).filter(arg => arg);
+
+		if(args.length) {
+			//Contadores de usuarios
+			const rolemembers = servidor.members.cache.filter(member => //Usuarios con rol
+				(strict)
+					? args.some(arg => member.roles.cache.has(arg))
+					: args.every(arg => member.roles.cache.has(arg))
+			);
 			const totalcnt = rolemembers.size; //Total
 			const peoplecnt = rolemembers.filter(member => !member.user.bot).size; //Roles
 			const botcnt = totalcnt - peoplecnt; //Bots
@@ -75,15 +61,15 @@ module.exports = {
 			let SelectedEmbed = 0;
 			let Embed = [];
 			let peoplelist = [...rolemembers.values()]; //Convertir la colección de miembros con el rol a un arreglo
-			const anaroles = args.filter(ar => ar !== '-' && ar !== '+' && ar > -1 && !isNaN(ar)).map(ar => `<@&${ar}>`).join(', ');
-			
+			const anaroles = args.map(ar => `<@&${ar}>`).join(', ');
+
 			if(anaroles.length !== 0) {
 				Embed[0] = new Discord.MessageEmbed()
 					.setColor('#ff00ff')
-					.setTitle(`Análisis del roles (Total)`)
+					.setTitle(`wawaAnálisis del roles (Total)`)
 
 					.addField('Roles en análisis', anaroles)
-					.addField('Caso', `**${(args[0] === '+')?'Inclusivo':'Exclusivo'}**`, true)
+					.addField('Caso', `**${strict?'Exclusivo':'Inclusivo'}**`, true)
 					.addField('Cuenta total', `:wrestlers: x ${peoplecnt}\n:robot: x ${botcnt}`, true)
 
 					.setThumbnail(servidor.iconURL)
@@ -125,6 +111,6 @@ module.exports = {
 						})
 				});
 			}
-		} else message.channel.send({ content: ':warning: La ID ingresada no es válida o no es una ID en absoluto...' });
+		} else message.channel.send({ content: ':warning: No se encontró ningún rol...' });
     },
 };

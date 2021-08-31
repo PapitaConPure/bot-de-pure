@@ -120,8 +120,8 @@ module.exports = {
     paginate: function(array, itemsOptions = { pagemax: 10, format: item => `\`${item.name.padEnd(24)}\`${item}` }) {
         const { pagemax, format } = itemsOptions;
 		const pages = array
-            .map((_, i) => ((i % pagemax === 0)?array.slice(i, i + pagemax):null)) //Paginar
-            .filter(item => item) //Filtrar nulos
+            .map((_, i) => (i % pagemax === 0)?array.slice(i, i + pagemax):null) //Paginar
+            .filter(item => item) //Filtrar nulls
             .map(page => page.map(format).join('\n')); //Dar formato y unir
         return pages;
     },

@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.6B",
+            "number": "Full.2.8.6D",
             "name": "Cisne Cristalino"
         },
         "note": "Se esperan problemas y crasheos debido a la reciente actualización de Discord.js",
@@ -10,8 +10,6 @@
             "Tareas de refactorización (2.75/4)",
             "Corregido un error que hacía que búsquedas por usuarios no detecten palabras en mayúsculas",
             "Pequeñas optimizaciones generales",
-            "Mejora de bienvenida (H. Doll)",
-            "Agregado comando p!colgar (H. Doll)",
             "Removida la extensión de prefijo \"-m\" para comandos de moderación",
             "Actualizado Discord.js de v12 a v13",
             "Corregidos varios errores recientes al dar la bienvenida en un server",
@@ -20,7 +18,8 @@
             "Las flags ya no son sensibles a mayúsculas",
             "Agregadas nuevas funciones y corregidos varios errores para p!twitters",
             "Preparando soporte para Slash Commands",
-            "Agregado p!suicidio (H. Doll)"
+            "Agregado p!suicidio (H. Doll)",
+            "Corregido error en p!emotes"
         ],
         "todo": [
             "Restaurar comandos de búsqueda de imagen avanzados",
@@ -61,7 +60,19 @@
     ],
     "boorutags": {},
     "hourai": {
-        "infr": {},
+        "infr": {
+            "channels": {
+                "671820448207601684": "botposting",
+                "758432587206230037": "staff",
+                "674817884232613888": "traducción",
+                "662317620699332627": "autómatas",
+                "813189609911353385": "gachahell",
+                "813195795318177802": "trata-de-waifus",
+                "674422177596178437": "muteposting",
+                "673353484514492417": "hornyposting"
+            },
+            "users": {}
+        },
         "warn": 0,
         "images": {
             "welcome": "https://i.imgur.com/PdcilW3.png",
