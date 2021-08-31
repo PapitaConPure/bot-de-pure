@@ -26,5 +26,12 @@ module.exports = {
 
 		//Acción de comando
 		message.channel.send({ content: 'Soon, later, never. Who knows?' });
+	},
+
+	async interact(interaction) {
+		//Variables de flags
+
+		//Acción de comando
+		await interaction.reply('Soon, later, never. Who knows?');
 	}
 };

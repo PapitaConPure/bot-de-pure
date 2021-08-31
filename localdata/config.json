@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.69",
+            "number": "Full.2.8.6B",
             "name": "Cisne Cristalino"
         },
         "note": "Se esperan problemas y crasheos debido a la reciente actualización de Discord.js",
@@ -10,7 +10,6 @@
             "Tareas de refactorización (2.75/4)",
             "Corregido un error que hacía que búsquedas por usuarios no detecten palabras en mayúsculas",
             "Pequeñas optimizaciones generales",
-            "Corregido un error que no permitía ver el sassamodo de p!sassafras",
             "Mejora de bienvenida (H. Doll)",
             "Agregado comando p!colgar (H. Doll)",
             "Removida la extensión de prefijo \"-m\" para comandos de moderación",
@@ -20,7 +19,8 @@
             "p!inforol ahora usa una flag para búsquedas estrictas en lugar de un \"+\" ó \"-\" obligatorio",
             "Las flags ya no son sensibles a mayúsculas",
             "Agregadas nuevas funciones y corregidos varios errores para p!twitters",
-            "Preparando soporte para Slash Commands"
+            "Preparando soporte para Slash Commands",
+            "Agregado p!suicidio (H. Doll)"
         ],
         "todo": [
             "Restaurar comandos de búsqueda de imagen avanzados",

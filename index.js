@@ -55,8 +55,10 @@ for(const file of commandFiles) {
     command.data = new SlashCommandBuilder()
         .setName(command.name)
         .setDescription(command.desc.slice(0, 99));
-	client.SlashPure.set(command.name, command.data.toJSON());
+    if(typeof command.interact === 'function')
+	    client.SlashPure.set(command.name, command.data.toJSON());
 }
+console.log(client.SlashPure);
 //#endregion
 
 client.on('ready', async () => { //Confirmación de inicio y cambio de estado
@@ -351,21 +353,21 @@ client.on('messageCreate', async (message) => { //En caso de recibir un mensaje
 
 client.on('interactionCreate', async interaction => {
 	if (!interaction.isCommand()) return;
-    console.log('wasdfguwu');
 
 	const command = client.SlashPure.get(interaction.commandName);
 	if (!command) return;
+    console.log(command);
 
 	try {
-		await command.execute(interaction);
+		await command.interact(interaction);
 	} catch(error) {
         console.log('Ha ocurrido un error al procesar un comando slash.');
-        console.log(message.content);
+        console.log(`${interaction.commandName} (${interaction.commandId})`);
         console.error(error);
         const errorembed = new Discord.MessageEmbed()
             .setColor('#0000ff')
-            .setAuthor(`${message.guild.name} • ${message.channel.name} (Click para ver)`, message.author.avatarURL({ dynamic: true }), message.url)
-            .setFooter(`gid: ${message.guild.id} | cid: ${message.channel.id} | uid: ${message.author.id}`)
+            .setAuthor(`${interaction.guild.name} • ${interaction.channel.name}`, interaction.member.user.avatarURL({ dynamic: true }))
+            .setFooter(`gid: ${interaction.guild.id} | cid: ${interaction.channel.id} | uid: ${interaction.member.user.id}`)
             .addField('Ha ocurrido un error al procesar un comando slash', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
         global.logch.send({
             content: `<@${global.peopleid.papita}>`,
