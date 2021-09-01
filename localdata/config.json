@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.70",
+            "number": "Full.2.8.71",
             "name": "Cisne Cristalino"
         },
         "note": "Se esperan problemas y crasheos debido a la reciente actualización de Discord.js",
@@ -10,7 +10,8 @@
             "Tareas de refactorización (2.75/4)",
             "PLACEHOLDER_SLASHCMD",
             "Corregidos errores en p!info y p!inforol",
-            "Mejoradas las búsquedas de usuario por nombre"
+            "Mejoradas las búsquedas de usuario por nombre",
+            "Corregido un error que hacía que no se pudiesen ingresar comandos con prefijo en mayúsculas"
         ],
         "todo": [
             "Restaurar comandos de búsqueda de imagen avanzados",

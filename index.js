@@ -181,8 +181,8 @@ client.on('messageCreate', async (message) => { //En caso de recibir un mensaje
             if(!uinfr[mui])
             uinfr[mui] = [];
             
-            //Sancionar según total de infracciones cometidas en los últimos 25 minutos
-            uinfr[mui] = uinfr[mui].filter(inf => (now - inf) / 1000 < (60 * 25)); //Eliminar antiguas
+            //Sancionar según total de infracciones cometidas en los últimos 40 minutos
+            uinfr[mui] = uinfr[mui].filter(inf => (now - inf) / 1000 < (60 * 40)); //Eliminar antiguas
             const total = uinfr[mui].push(now); //Añade el momento de la infracción actual y retorna el largo del arreglo
             
             switch(total) {
@@ -262,7 +262,7 @@ client.on('messageCreate', async (message) => { //En caso de recibir un mensaje
     else return; //Salir si no se encuentra el prefijo
 
     //Partición de mensaje comando
-    const args = message.content.replace(/^p![\n ]*/g, '').split(/[\n ]+/); //Argumentos ingresados
+    const args = message.content.replace(/^[Pp]![\n ]*/g, '').split(/[\n ]+/); //Argumentos ingresados
     let nombrecomando = args.shift().toLowerCase(); //Comando ingresado
     let comando;
     if(pdetect === global.p_drmk) {
