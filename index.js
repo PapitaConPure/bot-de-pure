@@ -77,6 +77,9 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
         console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos slash'));
         console.error(error);
     }
+    //Quitar esto luego ↓
+    const cl = global.bot_status.changelog;
+    cl[cl.findIndex(e => e === 'PLACEHOLDER_SLASHCMD')] = `Agregando soporte de ***__[/comandos](https://blog.discord.com/slash-commands-are-here-8db0a385d9e6)__*** *(${client.SlashPure.size} comandos listos)*`;
 
 	console.log(chalk.cyanBright('Calculando semilla y horario.'));
     let stt = Date.now();
@@ -249,10 +252,6 @@ client.on('messageCreate', async (message) => { //En caso de recibir un mensaje
         } else if(['q', 'que', 'qué'].some(i => i === msg))
             message.channel.send({ files: ['https://media.discordapp.net/attachments/670865125154095143/834115384927191080/so_epico-1.jpg?width=394&height=700'] });
     }
-    
-    //Uno en un Millón
-    if(func.randRange(0, 1000000) === 0)
-        func.dibujarMillion(message);
     //#endregion
     
     //#region Comandos
@@ -319,7 +318,6 @@ client.on('interactionCreate', async interaction => {
 
 	const slash = client.SlashPure.get(interaction.commandName);
 	if (!slash) return;
-    console.log(slash);
 
 	try {
         const comando = client.ComandosPure.get(interaction.commandName);
@@ -337,7 +335,6 @@ client.on('interactionCreate', async interaction => {
         stats.commands.succeeded++;
 	} catch(error) {
         console.log('Ha ocurrido un error al procesar un comando slash.');
-        console.log(`${interaction.commandName} (${interaction.commandId})`);
         console.error(error);
         const errorembed = new Discord.MessageEmbed()
             .setColor('#0000ff')
@@ -349,7 +346,7 @@ client.on('interactionCreate', async interaction => {
             embeds: [errorembed]
         });
         stats.commands.failed++;
-		await interaction.reply({ content: 'Ocurrió un error al ejecutar el comando', ephemeral: true });
+		await interaction.reply({ content: ':warning: Ocurrió un error al ejecutar el comando', ephemeral: true });
 	}
 });
 

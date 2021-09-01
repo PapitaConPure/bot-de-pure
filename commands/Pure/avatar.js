@@ -28,7 +28,7 @@ module.exports = {
             
             message.channel.send({ embeds: [embed] });
         } else {
-            args = args.join(' ').toLowerCase().split(',');
+            args = args.join(' ').split(',');
             if(args.length < 5)
                 args.map(arg => {
                     arg = arg.trim();
@@ -41,17 +41,14 @@ module.exports = {
                         });
                         return;
                     }
+                    
                     if(user !== undefined) {
                         const fetcheduser = message.client.users.cache.get(user);
 
-                        if(fetcheduser === undefined)
-                            message.channel.send({ content: ':warning: La ID ingresada es inválida o no es una ID en absoluto...' });
-                        else {
-                            embed.setTitle(`Avatar de ${fetcheduser.username}`)
-                                .setImage(fetcheduser.avatarURL({ dynamic: true, size: 1024 }));
+                        embed.setTitle(`Avatar de ${fetcheduser.username}`)
+                            .setImage(fetcheduser.avatarURL({ dynamic: true, size: 1024 }));
 
-                            message.channel.send({ embeds: [embed] });
-                        }
+                        message.channel.send({ embeds: [embed] });
                     } else 
                         message.channel.send({ content: `:warning: ¡Usuario **${arg}** no encontrado!` });
                 });

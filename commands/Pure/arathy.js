@@ -1,6 +1,8 @@
 //const Discord = require('discord.js'); //Integrar discord.js
 //const global = require('../../localdata/config.json'); //Variables globales
 
+const { fetchFlag } = require("../../func");
+
 module.exports = {
     name: 'arathy',
     aliases: [
@@ -15,18 +17,7 @@ module.exports = {
     ],
     
     async execute(message, args) {
-        let dream = false;
-        args.map((arg, i) => {
-            if(arg.startsWith('--'))
-                switch(arg.slice(2)) {
-                case 'sueño': dream = true; break;
-                }
-            else if(arg.startsWith('-'))
-                for(c of arg.slice(1))
-                switch(c) {
-                case 's': dream = true; break;
-                }
-        });
+        const dream = fetchFlag(args, { short: [ 's' ], long: [ 'sueño' ], callback: true, fallback: false });
 
         if(dream) {
             message.channel.send({ content: 'Refiérase a `p!bern` para más información.' });

@@ -2,24 +2,36 @@ const { MessageEmbed } = require('discord.js'); //Integrar discord.js
 const { randRange } = require('../../func');
 const fetch = require('node-fetch');
 
-const tmpfunc = async function(tmpch, alist) {
-	const srchoff = randRange(0, 100);
-	const srchlimit = 10;
-	let srchextra = '';
-	for(let i = 0; i < alist.length; i++)
-		srchextra += ` ${alist[i]}`;
-	const { data } = await fetch(
-		`https://api.giphy.com/v1/gifs/search?api_key=Qu29veK701szqoFK6tXgOiybuc1q3PaX&q=coffee${srchextra}&offset=${srchoff}&limit=${srchlimit}`
-	).then(response => response.json());
+const r = {
+	api: 'https://api.giphy.com/v1/gifs/search',
+	key: 'Qu29veK701szqoFK6tXgOiybuc1q3PaX',
+	off: 0,
+	limit: 10
+};
 
-	//Crear y usar embed
-	const selected = data[randRange(0, srchlimit)];
-	const Embed = new MessageEmbed()
+const requestEmbed = async () => {
+	let err;
+	r.off = randRange(0, 30);
+	const { data } = await fetch(`${r.api}?api_key=${r.key}&q=coffee&offset=${r.off}&limit=${r.limit}`)
+		.then(response => response.json())
+		.catch(e => {
+			err = `\`\`\`\n${e.message}\n\`\`\``;
+			return { data: undefined };
+		});
+
+	//Crear y devolver embed
+	const selected = data[randRange(0, r.limit)];
+	const embed = new MessageEmbed()
 		.setColor('#6a4928')
-		.setTitle('Café uwu')
-		.addField('Salsa', `${selected.bitly_url}`)
-		.setImage(`https://media.giphy.com/media/${selected.id}/giphy.gif`);
-	tmpch.send({ embeds: [Embed] });
+		.setTitle('Café uwu');
+	if(err === undefined)
+		embed
+			.addField('Salsa', `${selected.bitly_url}`)
+			.setImage(`https://media.giphy.com/media/${selected.id}/giphy.gif`);
+	else
+		embed.addField('Se produjo un error al recibir datos de un tercero', err);
+	
+	return embed;
 }
 
 module.exports = {
@@ -32,11 +44,16 @@ module.exports = {
     flags: [
         'common'
     ],
-    options: [
-
-    ],
 
 	async execute(message, args) {
-		tmpfunc(message.channel, args);
+		//Acción de comando
+		const embed = await requestEmbed();
+		await message.channel.send({ embeds: [embed] });
     },
+
+	async interact(interaction) {
+		//Acción de comando
+		const embed = await requestEmbed();
+		await interaction.reply({ embeds: [embed] });
+	}
 };

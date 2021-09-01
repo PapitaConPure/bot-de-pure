@@ -677,136 +677,45 @@ module.exports = {
         //#endregion
         console.log('Despedida finalizada.');
     },
-
-    dibujarMillion: async function(msg) {
-        console.log('Evento "Uno en un Millón" desencadenado...')
-        const canal = msg.channel; //Canal de mensajes de sistema
-    
-        //#region Creación de imagen
-        const canvas = Canvas.createCanvas(1500, 750);
-        const ctx = canvas.getContext('2d', { alpha: false });
-    
-        const fondo = await Canvas.loadImage(images.announcements.oiam);
-        ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
-        //#endregion
-    
-        //#region Texto
-        //#region Propiedades de texto
-        const strokeFactor = 0.09;
-        ctx.strokeStyle = '#000000';
-        ctx.fillStyle = '#ffffff';
-        //#endregion
-    
-        //#region Nombre del usuario
-        ctx.textBaseline = 'top';
-        ctx.textAlign = 'center';
-        const xcenter = canvas.width / 2;
-        let Texto = `${msg.author.username}`;
-        let fontSize = 72;
-        ctx.font = `${fontSize}px "headline"`;
-        ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
-        ctx.strokeText(Texto, xcenter, 15);
-        ctx.fillText(Texto, xcenter, 15);
-        //#endregion
-        
-        //#region Texto inferior
-        ctx.textBaseline = 'bottom';
-        Texto = 'Uno en Un Millón';
-        fontSize = 120;
-        while(ctx.measureText(Texto).width > (canvas.width - 150)) fontSize -= 2;
-        ctx.font = `${fontSize}px "headline"`;
-        ctx.strokeText(Texto, xcenter, canvas.height - 15);
-        ctx.fillText(Texto, xcenter, canvas.height - 15);
-        Texto = '¡Felicidades! Tu mensaje es el destacado de';
-        ctx.font = `48px "headline"`;
-        ctx.strokeText(Texto, xcenter, canvas.height - fontSize - 20);
-        ctx.fillText(Texto, xcenter, canvas.height - fontSize - 20);
-        //#endregion
-        //#endregion
-
-        await module.exports.dibujarAvatar(ctx, msg.author, canvas.width / 2, (80 + canvas.height - fontSize - 48 - 30) / 2, 200, { circleStrokeColor: '#8d1fd1', circleStrokeFactor: strokeFactor });
-    
-        const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'felicidades.png');
-    
-        //#region Imagen y Mensaje extra
-        canal.send({ files: imagen }).then(() => {
-            if(msg.channel.guild.id === '654471968200065034') { //Hourai Doll
-                canal.send({
-                    content:
-                        `*Wao, <@${msg.author.id}>, tu mensaje fue seleccionado de entre un millón de otros mensajes. No ganaste nada, pero felicidades <:meguSmile:694324892073721887>*\n` +
-                        '*Bueno, de hecho, te ganaste esta imagen personalizada para presumir a los demás tu __suerte de uno en un millón__ <:merry:670116052788838420>*\n' +
-                        '```\n' +
-                        `${msg.content}` +
-                        '```\n'
-                });
-            } else { //Animal Realm
-                canal.send({
-                    content:
-                        `***ES:** ¡WOAH, FELICIDADES <@${msg.author.id}>! ¡Este mensaje fue nominado como uno en un millón!*\n` +
-                        '*Realmente no ganaste nada. Pero hey, ¡ahora tienes esta imagen personalizada para presumir tu __suerte de uno en un millón__!*\n\n' +
-                        `***EN:** WOAH, CONGRATZ <@${msg.author.id}>! This message has been nominated as one in a million!*\n` +
-                        `*You really didn't win anything. But hey, now you have this customized image to show off your __one in a million luck__!*\n\n` +
-                        '```\n' +
-                        `${msg.content}` +
-                        '```\n'
-                });
-            }
-        });
-        //#endregion
-    
-        console.log('Evento "Uno en un Millón" finalizado.');
-    },
     //#endregion
 
     //#region Fetch
     fetchUserID: function(data, guild, client) {
-        data = data.toLowerCase();
-        //Intentar descifrar ID por mención
+        const uc = client.users.cache;
+        //Descifrar posible mención
         if(data.startsWith('<@') && data.endsWith('>')) {
             data = data.slice(2, -1);
             if(data.startsWith('!')) data = data.slice(1);
         }
+        
+        //Intentar encontrar por ID
+        if(!isNaN(data) && uc.find(u => u.id === data)) return data;
 
-        //Buscador por usertag, en caso de que la data de búsqueda no sea una ID ni una mención
-        if(isNaN(data)) {
-            let user = new Discord.Collection();
-            user = client.users.cache.find(u => u.tag === data);
-            
-            //Buscador por nombre, en caso de que la data de búsqueda tampoco sea una usertag
-            if(!user) {
-                let temp = data;
-                //Para comprobaciones posteriores
-                /* Filtrado de búsqueda
-                - Nombre coincide parcial o totalmente
-                > Guild actual > resto de guilds
-                > Ocurrencia temprana > ocurrencia tardía
-                = Nombre corto > nombre largo
-                */
-
-                //Buscar por apodo o nombre de usuario dentro de guild actual
-                user = guild.members.cache.filter(m => m.nickname && m.nickname.toLowerCase().indexOf(temp) !== -1);
-                if(user.size) {
-                    user = user
-                        .sort()
-                        .reduce((a, b) => (a.nickname.toLowerCase().indexOf(temp) < b.nickname.toLowerCase().indexOf(temp) && a.nickname.length <= b.nickname.length)?a:b)
-                        .user;
-                } else { //Buscar por nombre de usuario en resto de guilds
-                    user = client.users.cache.filter(m => m.username.toLowerCase().indexOf(temp) !== -1);
-                    if(user.size)
-                        user = user
-                            .sort()
-                            .reduce((a, b) => (a.username.toLowerCase().indexOf(temp) <= b.username.toLowerCase().indexOf(temp) && a.username.length <= b.username.length)?a:b);
-                }
-            }
-
-            if(user)
-                data = user.id;
-            else
-                data = undefined;
+        //Intentar encontrar por tag
+        const taggeduser = uc.find(u => u.tag === data);
+        if(taggeduser) return taggeduser.id;
+        
+        //Intentar encontrar por nombre de usuario
+        data = data.toLowerCase();
+        let users = uc.filter(u => u.username.toLowerCase().indexOf(data) !== -1);
+        if(users.size) {
+            users = users
+                .sort()
+                .reduce((a, b) => (a.username.toLowerCase().indexOf(data) <= b.username.toLowerCase().indexOf(data) && a.username.length <= b.username.length)?a:b);
+            return users.id;
         }
 
-        //Retornar ID de objeto User
-        return data;
+        //Intentar encontrar por nombre en guild actual
+        let members = guild.members.cache.filter(m => m.nickname && m.nickname.toLowerCase().indexOf(data) !== -1);
+        if(members.size) {
+            members = members
+                .sort()
+                .reduce((a, b) => (a.nickname.toLowerCase().indexOf(data) <= b.nickname.toLowerCase().indexOf(data) && a.nickname.length <= b.nickname.length)?a:b);
+            return members.user.id;
+        }
+
+        //Búsqueda sin resultados
+        return undefined;
     },
 
     fetchArrows: function(emojiscache) {
@@ -929,10 +838,10 @@ module.exports = {
         console.log('Evento terminado.');
     },
 
-    randRange: function(min, max, round = true) {
-        const range = max - min;
+    randRange: function(minInclusive, maxExclusive, round = true) {
+        const range = maxExclusive - minInclusive;
         const rnum = (global.seed + range * Math.random()) % range;
-        return min + (round?Math.floor(rnum):rnum);
+        return minInclusive + (round?Math.floor(rnum):rnum);
     }
     //#endregion
 };

@@ -32,7 +32,7 @@ module.exports = {
 		else
 			Embed.addField('Salsa', err);
 			
-		message.channel.send({ embeds: [Embed] });
+		await message.channel.send({ embeds: [Embed] });
     },
 	
 	async interact(interaction) {
@@ -53,8 +53,8 @@ module.exports = {
 				.addField('Salsa', file)
 				.setImage(file);
 		else
-			Embed.addField('Salsa', err);
+			Embed.addField('Se produjo un error al recibir datos de un tercero', err);
 			
-		interaction.reply({ embeds: [Embed] });
+		await interaction.reply({ embeds: [Embed] });
     },
 };
