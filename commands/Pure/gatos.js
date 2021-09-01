@@ -1,17 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const fetch = require('node-fetch');
 
-const tmpfunc = async function(tmpch) {
-	const { file } = await fetch('https://aws.random.cat/meow').then(response => response.json());
-	//Crear y usar embed
-	const Embed = new Discord.MessageEmbed()
-		.setColor('#ffc0cb')
-		.setTitle('Gatitos uwu')
-		.addField('Salsa', file)
-		.setImage(file);
-	tmpch.send({ embeds: [Embed] });
-}
-
 module.exports = {
 	name: 'gatos',
 	aliases: [
@@ -22,11 +11,50 @@ module.exports = {
     flags: [
         'common'
     ],
-    options: [
-
-    ],
 	
 	async execute(message, args) {
-		tmpfunc(message.channel);
+		let err;
+		const { file } = await fetch('https://aws.random.cat/meow')
+			.then(response => response.json())
+			.catch(e => {
+				err = `\`\`\`\n${e.message}\n\`\`\``;
+				return { file: undefined };
+			});
+
+		//Crear y usar embed
+		const Embed = new Discord.MessageEmbed()
+			.setColor('#ffc0cb')
+			.setTitle('Gatitos uwu');
+		if(err === undefined)
+			Embed
+				.addField('Salsa', file)
+				.setImage(file);
+		else
+			Embed.addField('Salsa', err);
+			
+		message.channel.send({ embeds: [Embed] });
+    },
+	
+	async interact(interaction) {
+		let err;
+		const { file } = await fetch('https://aws.random.cat/meow')
+			.then(response => response.json())
+			.catch(e => {
+				err = `\`\`\`\n${e.message}\n\`\`\``;
+				return { file: undefined };
+			});
+
+		//Crear y usar embed
+		const Embed = new Discord.MessageEmbed()
+			.setColor('#ffc0cb')
+			.setTitle('Gatitos uwu');
+		if(err === undefined)
+			Embed
+				.addField('Salsa', file)
+				.setImage(file);
+		else
+			Embed.addField('Salsa', err);
+			
+		interaction.reply({ embeds: [Embed] });
     },
 };

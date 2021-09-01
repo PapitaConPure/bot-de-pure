@@ -1,5 +1,3 @@
-import global from './config.json'
-
 module.exports = {
     number: { desc: 'número' },
     text: { desc: 'texto' },

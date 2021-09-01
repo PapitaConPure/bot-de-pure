@@ -54,7 +54,7 @@ for(const file of commandFiles) {
 	client.ComandosPure.set(command.name, command);
     command.data = new SlashCommandBuilder()
         .setName(command.name)
-        .setDescription(command.desc.slice(0, 99));
+        .setDescription(command.brief || command.desc.slice(0, 99));
     if(typeof command.interact === 'function')
 	    client.SlashPure.set(command.name, command.data.toJSON());
 }
@@ -170,7 +170,7 @@ client.on('messageCreate', async (message) => { //En caso de recibir un mensaje
 
     if(guild.id === global.serverid.hourai && !whitech[channel.id]) {
         const uinfr = infr.users;
-        const banpf = [ /^p!\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,(?!confession)\w/, /^,,\w/, /^~\w/, /^\/\w/ ];
+        const banpf = [ /^p![\n ]*\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,(?!confession)\w/, /^,,\w/, /^~\w/, /^\/\w/ ];
         if(banpf.some(bp => msg.match(bp))) {
             const now = Date.now();
             const mui = author.id;
@@ -322,9 +322,19 @@ client.on('interactionCreate', async interaction => {
     console.log(slash);
 
 	try {
-        const command = client.ComandosPure.get(interaction.commandName);
-        console.log(command);
-		await command.interact(interaction);
+        const comando = client.ComandosPure.get(interaction.commandName);
+        //Detectar problemas con el comando basado en flags
+        let exception = null;
+        comando.flags.forEach(flag => {
+            const ex = cmdex.findExceptions(flag, interaction);
+            if(ex) exception = ex;
+        });
+        if(exception) {
+            await interaction.reply({ embeds: [ cmdex.createEmbed(exception, { cmdString: `/${interaction.commandName}` }) ]});
+            return;
+        } else
+            await comando.interact(interaction);
+        stats.commands.succeeded++;
 	} catch(error) {
         console.log('Ha ocurrido un error al procesar un comando slash.');
         console.log(`${interaction.commandName} (${interaction.commandId})`);

@@ -3,6 +3,7 @@
 
 module.exports = {
 	name: 'ajedrez',
+	brief: 'Inicia una partida de ajedrez entre tú y el adversario especificado',
 	desc: 'Inicia una partida de ajedrez común cronometrada (6 minutos + 15s/turno) en un tablero de 8x8 contra el `<adversario>` mencionado\n' +
 		'Con enroque, con coronación de peón, con primer movimiento doble de peón, sin peón al paso\n' +
 		'¡Puedes asignar emotes diferentes a cada pieza con las `--banderas` a disposición!\n' +

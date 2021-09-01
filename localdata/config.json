@@ -17,7 +17,7 @@
             "p!inforol ahora usa una flag para búsquedas estrictas en lugar de un \"+\" ó \"-\" obligatorio",
             "Las flags ya no son sensibles a mayúsculas",
             "Agregadas nuevas funciones y corregidos varios errores para p!twitters",
-            "Preparando soporte para Slash Commands",
+            "Agregando soporte para Slash Commands *(4 / 58 comandos)*",
             "Agregado p!suicidio (H. Doll)",
             "Corregido error en p!emotes"
         ],

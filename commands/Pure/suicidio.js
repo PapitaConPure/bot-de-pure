@@ -4,7 +4,8 @@ module.exports = {
 		'suicidar', 'suicidarse',
 		'suicide'
 	],
-	desc: 'Comando para recibir el rol __Hanged Doll__ en Hourai Doll.',
+	brief: 'Te otorga el rol "Hanged Doll" (solo Hourai Doll)',
+	desc: 'Te otorga el rol __Hanged Doll__ en Hourai Doll.',
 	flags: [
 		'hourai',
 		'meme'
