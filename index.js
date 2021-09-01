@@ -135,57 +135,45 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
 });
 
 client.on('messageCreate', async (message) => { //En caso de recibir un mensaje
-    if(global.maintenance.length > 0 && message.channel.id !== global.maintenance) return;
+    const channel = message.channel;
+    if(global.maintenance.length > 0 && channel.id !== global.maintenance) return;
+    const author = message.author;
+    if(global.cansay === 0 && author.bot) return;
     const msg = message.content.toLowerCase();
-
-    //#region palta -> aguacate
-    if(message.guild && [global.serverid.hourai, global.serverid.usd, global.serverid.nlp].includes(message.guild.id) && msg.indexOf('aguacate') !== -1) {
-        let paltastr = msg.replace(/aguacate/g, 'palta');
-        let paltaname = message.member.nickname;
-        if(!paltaname) paltaname = message.author.username;
-
-        message.channel.send({ content: `**${paltaname}:**\n${paltastr}` });
-        message.delete();
-    }
-    //#endregion
-    
-    //Ignorar mensajes de bots desde este punto
-    if(global.cansay === 0 && message.author.bot) return;
+    const guild = message.guild;
 
     //#region Operaciones de proceso e ignorar mensajes privados
     const logembed = new Discord.MessageEmbed()
-        .addField(message.author.tag, '*Mensaje vacío.*');
-    if(message.guild) {
+        .addField(author.tag, '*Mensaje vacío.*');
+    if(guild) {
         logembed
-            .setAuthor(`${message.guild.name} • ${message.channel.name} (Click para ver)`, message.author.avatarURL({ dynamic: true }), message.url)
-            .setFooter(`gid: ${message.guild.id} | cid: ${message.channel.id} | uid: ${message.author.id}`);
-        if(message.content.length)
-            logembed.fields[0].value = message.content;
+            .setAuthor(`${guild.name} • ${channel.name} (Click para ver)`, author.avatarURL({ dynamic: true }), message.url)
+            .setFooter(`gid: ${guild.id} | cid: ${channel.id} | uid: ${author.id}`);
+        if(msg.length) logembed.fields[0].value = message.content;
     } else {
         logembed
-            .setAuthor('Mensaje privado (Click para ver)', message.author.avatarURL({ dynamic: true }), message.url)
-            .setFooter(`uid: ${message.author.id}`);
-        if(message.content.length)
-            logembed.fields[0].value = message.content;
-        message.channel.send({ content: ':x: Uh... disculpá, no trabajo con mensajes directos.' });
+            .setAuthor('Mensaje privado (Click para ver)', author.avatarURL({ dynamic: true }), message.url)
+            .setFooter(`uid: ${author.id}`);
+        if(msg.length) logembed.fields[0].value = message.content;
+        channel.send({ content: ':x: Uh... disculpá, no trabajo con mensajes directos.' });
         return;
     }
     
     if(message.attachments.size > 0)
         logembed.addField('Adjuntado:', message.attachments.map(attf => attf.url).join('\n'));
 
-    if(message.content.startsWith(',confession ')) global.confch.send({ embeds: [logembed] });
+    if(msg.startsWith(',confession ')) global.confch.send({ embeds: [logembed] });
     else global.logch.send({ embeds: [logembed] });
 
     const infr = global.hourai.infr;
     const whitech = infr.channels;
 
-    if(message.guild.id === global.serverid.hourai && !whitech[message.channel.id]) {
+    if(guild.id === global.serverid.hourai && !whitech[channel.id]) {
         const uinfr = infr.users;
         const banpf = [ /^p!\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,(?!confession)\w/, /^,,\w/, /^~\w/, /^\/\w/ ];
-        if(banpf.some(bp => message.content.toLowerCase().match(bp))) {
+        if(banpf.some(bp => msg.match(bp))) {
             const now = Date.now();
-            const mui = message.author.id;
+            const mui = author.id;
             
             if(!uinfr[mui])
             uinfr[mui] = [];
@@ -196,32 +184,32 @@ client.on('messageCreate', async (message) => { //En caso de recibir un mensaje
             
             switch(total) {
             case 1:
-                message.channel.send({
+                channel.send({
                     reply: { messageReference: message.id },
                     content: `Detecto... bots fuera de botposteo <:empty:856369841107632129>`
                 });
                 break;
             case 2:
-                message.channel.send({
+                channel.send({
                     reply: { messageReference: message.id },
                     allowedMentions: { repliedUser: true },
-                    content: `Párale conchetumare, vete a <#${whitech[0]}> <:despair:852764014840905738>`
+                    content: `Párale conchetumare, vete a <#${Object.keys(whitech).find(key => whitech[key] === 'botposting')}> <:despair:852764014840905738>`
                 });
                 break;
             default:
-                message.channel.send({
+                channel.send({
                     reply: { messageReference: message.id },
                     allowedMentions: { repliedUser: true },
                     content: 'Ahora sí te cagaste ijoelpico <:tenshismug:859874631795736606>'
                 });
                 const hd = '682629889702363143'; //Hanged Doll
-                const gd = message.channel.guild;
-                const member = gd.members.cache.get(message.author.id);
+                const gd = channel.guild;
+                const member = message.member;
                 try {
                     if(!member.roles.cache.some(r => r.id === hd))
                         member.roles.add(hd);
                 } catch(err) {
-                    message.channel.send({ content: `<:wtfff:855940251892318238> Ese wn tiene demasia'o ki. Cuélgalo tú po'.\n\`\`\`\n${err.name}` });
+                    channel.send({ content: `<:wtfff:855940251892318238> Ese wn tiene demasia'o ki. Cuélgalo tú po'.\n\`\`\`\n${err.name}` });
                 }
                 break;
             }
@@ -231,7 +219,7 @@ client.on('messageCreate', async (message) => { //En caso de recibir un mensaje
 
     //#region Estadísticas
     {
-        const mgi = message.guild.id, mci = message.channel.id, mmi = message.author.id;
+        const mgi = guild.id, mci = channel.id, mmi = author.id;
         stats.read++;
         stats[mgi] = stats[mgi] || {};
         stats[mgi][mci] = stats[mgi][mci] || {};
@@ -275,19 +263,18 @@ client.on('messageCreate', async (message) => { //En caso de recibir un mensaje
     else return; //Salir si no se encuentra el prefijo
 
     //Partición de mensaje comando
-    const args = message.content.replace(/\n/g, ' ').slice(pdetect.length).split(/ +/); //Argumentos ingresados
-    const nombrecomando = args.shift().toLowerCase(); //Comando ingresado
-
+    const args = message.content.replace(/^p![\n ]*/g, '').split(/[\n ]+/); //Argumentos ingresados
+    let nombrecomando = args.shift().toLowerCase(); //Comando ingresado
     let comando;
     if(pdetect === global.p_drmk) {
         //comando = client.ComandosDrawmaku.get(nombrecomando) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
-        message.channel.send({ content: '<:delete:704612795072774164> Los comandos de Drawmaku estarán deshabilitados por un tiempo indefinido. Se pide disculpas.' });
+        channel.send({ content: '<:delete:704612795072774164> Los comandos de Drawmaku estarán deshabilitados por un tiempo indefinido. Se pide disculpas.' });
         return;
     } else if(pdetect === global.p_pure) 
         comando = client.ComandosPure.get(nombrecomando) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
     
     if (!comando) {
-        message.channel.send({ content: ':x: Disculpa, soy estúpida. Tal vez escribiste mal el comando y no te entiendo.' });
+        channel.send({ content: ':x: Disculpa, soy estúpida. Tal vez escribiste mal el comando y no te entiendo.' });
         return;
     }
     //#endregion
@@ -301,20 +288,20 @@ client.on('messageCreate', async (message) => { //En caso de recibir un mensaje
             if(ex) exception = ex;
         });
         if(exception) {
-            message.channel.send({ embeds: [ cmdex.createEmbed(exception, { cmdString: `${pdetect}${nombrecomando}` }) ]});
+            channel.send({ embeds: [ cmdex.createEmbed(exception, { cmdString: `${pdetect}${nombrecomando}` }) ]});
             return;
         } else
             await comando.execute(message, args);
         stats.commands.succeeded++;
     } catch(error) {
-        console.log('Ha ocurrido un error al ingresar un comando.');
+        console.log(chalk.bold.redBright('Ha ocurrido un error al ingresar un comando.'));
         console.error(error);
         const errorembed = new Discord.MessageEmbed()
             .setColor('#0000ff')
-            .setAuthor(`${message.guild.name} • ${message.channel.name} (Click para ver)`, message.author.avatarURL({ dynamic: true }), message.url)
-            .setFooter(`gid: ${message.guild.id} | cid: ${message.channel.id} | uid: ${message.author.id}`)
+            .setAuthor(`${guild.name} • ${channel.name} (Click para ver)`, author.avatarURL({ dynamic: true }), message.url)
+            .setFooter(`gid: ${guild.id} | cid: ${channel.id} | uid: ${author.id}`)
             .addField('Ha ocurrido un error al ingresar un comando', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``)
-            .addField('Detalle', `"${message.content.slice(0, 699)}"\n[${message.args}]`);
+            .addField('Detalle', `"${message.content.slice(0, 699)}"\n[${nombrecomando} :: ${args}]`);
         global.logch.send({
             content: `<@${global.peopleid.papita}>`,
             embeds: [errorembed]
@@ -357,12 +344,14 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.on('guildMemberAdd', member => { //Evento de entrada a servidor
-    if(!member.guild.available) return;
-    if(global.maintenance.length > 0 && member.guild.systemChannelId !== global.maintenance) return;
+    const guild = member.guild;
+    if(!guild.available) return;
+    if(global.maintenance.length > 0 && guild.systemChannelId !== global.maintenance) return;
     console.log('Evento de entrada de usuario a servidor desencadenado.');
+    const user = member.user;
     try {
-        if(!member.user.bot) func.dibujarBienvenida(member);
-        else member.guild.channels.cache.get(member.guild.systemChannelId).send({
+        if(!user.bot) func.dibujarBienvenida(member);
+        else guild.channels.cache.get(guild.systemChannelId).send({
             content:
                 'Se acaba de unir un bot.\n' +
                 '***Beep boop, boop beep?***'
@@ -372,8 +361,8 @@ client.on('guildMemberAdd', member => { //Evento de entrada a servidor
         console.error(error);
         const errorembed = new Discord.MessageEmbed()
             .setColor('#0000ff')
-            .setAuthor(member.guild.name)
-            .setFooter(`gid: ${member.guild.id} | uid: ${member.user.id}`)
+            .setAuthor(guild.name)
+            .setFooter(`gid: ${guild.id} | uid: ${user.id}`)
             .addField('Ha ocurrido un error al dar la bienvenida', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
         global.logch.send({
             content: `<@${global.peopleid.papita}>`,
@@ -383,12 +372,14 @@ client.on('guildMemberAdd', member => { //Evento de entrada a servidor
 });
 
 client.on('guildMemberRemove', member => { //Evento de salida de servidor
-    if(!member.guild.available) return;
-    if(global.maintenance.length > 0 && member.guild.systemChannelId !== global.maintenance) return;
+    const guild = member.guild;
+    if(!guild.available) return;
+    if(global.maintenance.length > 0 && guild.systemChannelId !== global.maintenance) return;
+    const user = member.user;
     console.log('Evento de salida de usuario de servidor desencadenado.');
     try {
-        if(!member.user.bot) func.dibujarDespedida(member);
-        else member.guild.channels.cache.get(member.guild.systemChannelId).send({
+        if(!user.bot) func.dibujarDespedida(member);
+        else guild.channels.cache.get(guild.systemChannelId).send({
             content: `**${member.displayName}** ya no es parte de la pandilla de bots de este servidor :[\n`
         });
     } catch(error) {
@@ -396,8 +387,8 @@ client.on('guildMemberRemove', member => { //Evento de salida de servidor
         console.error(error);
         const errorembed = new Discord.MessageEmbed()
             .setColor('#0000ff')
-            .setAuthor(member.guild.name)
-            .setFooter(`gid: ${member.guild.id} | uid: ${member.user.id}`)
+            .setAuthor(guild.name)
+            .setFooter(`gid: ${guild.id} | uid: ${user.id}`)
             .addField('Ha ocurrido un error al dar la despedida', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
         global.logch.send({
             content: `<@${global.peopleid.papita}>`,
