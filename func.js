@@ -88,10 +88,10 @@ module.exports = {
             content: 
                 '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬\n' + 
                 `:art: *Le toca dibujar a <@${global.jugadores[global.ndibujante]}> (jugador ${global.numeros[global.ndibujante]}).* :art:\n` +
-                `_Para enviar el nombre de tu danmaku, ingresa \`${global.p_drmk}draw ||<danmaku>||\`. **No olvides las \\|\\|barras verticales\\|\\|**._\n` +
-                `_Para enviar el dibujo de tu danmaku, ingresa \`${global.p_drmk}draw <dibujo de danmaku>\`. **El dibujo se envía adjunto al comando**._\n` +
-                `_Para consultar la lista de usuarios envía \`${global.p_drmk}lista\`_\n` +
-                `_Para consultar todos los comandos ingresa \`${global.p_drmk}ayuda\`_\n` +
+                `_Para enviar el nombre de tu danmaku, ingresa \`${global.p_drmk.raw}draw ||<danmaku>||\`. **No olvides las \\|\\|barras verticales\\|\\|**._\n` +
+                `_Para enviar el dibujo de tu danmaku, ingresa \`${global.p_drmk.raw}draw <dibujo de danmaku>\`. **El dibujo se envía adjunto al comando**._\n` +
+                `_Para consultar la lista de usuarios envía \`${global.p_drmk.raw}lista\`_\n` +
+                `_Para consultar todos los comandos ingresa \`${global.p_drmk.raw}ayuda\`_\n` +
                 '▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬ ▬'
         });
     },

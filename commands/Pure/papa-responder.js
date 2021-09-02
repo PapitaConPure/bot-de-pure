@@ -7,7 +7,7 @@ module.exports = {
 	aliases: [
 		'papa-r'
 	],
-	desc: `Manda una respuesta específica de \`${p_pure}sugerir\` al \`--usuario\` designado\n` +
+	desc: `Manda una respuesta específica de \`${p_pure.raw}sugerir\` al \`--usuario\` designado\n` +
 		'La respuesta si no se incluyen las banderas `--aceptar` y `--problema` es una confirmación de lectura',
 	flags: [
 		'papa'

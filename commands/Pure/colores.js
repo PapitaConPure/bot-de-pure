@@ -14,9 +14,21 @@ module.exports = {
     ],
 	
 	async execute(message, args) {
-		message.channel.send({
+		const sm = await message.channel.send({
 			content: `Aquí teni los colore po **${message.author.username}** <:reibu:686220828773318663>`,
 			files: [hourai.images.colors]
-		}).then(sent => askColor(sent, message.member));
+		});
+		askColor(sm, message.member);
     },
+
+	async interact(interaction) {
+		await interaction.reply({
+			allowedMentions: { repliedUser: true },
+			content: `Aquí teni los colore po **${interaction.member.user.username}** <:reibu:686220828773318663>`,
+			files: [hourai.images.colors]
+		});
+		const sm = await interaction.fetchReply();
+
+		askColor(sm, interaction.member);
+	}
 };

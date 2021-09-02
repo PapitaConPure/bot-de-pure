@@ -102,9 +102,9 @@ module.exports = {
         let embed = new MessageEmbed().setColor('#608bf3');
         if(search === 'n') {
             embed.setAuthor('Lista de comandos', aurl)
-            .addField('Comandos: ejemplos de uso', `\`${p_pure}ayuda -xmph --meme\`\n\`${p_pure}avatar @Usuario\`\n\`${p_pure}dados 5d6\``)
-            .addField(`Usa \`${p_pure}ayuda <comando>\` para más información sobre un comando`, (list.name.length > 0)?list.name.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para realizar tu búsqueda).')
-            .addField(`Guía introductoria`, `Usa \`${p_pure}ayuda g-indice\` para ver la página de índice de la guía introductoria de Bot de Puré`);
+            .addField('Comandos: ejemplos de uso', `\`${p_pure.raw}ayuda -xmph --meme\`\n\`${p_pure.raw}avatar @Usuario\`\n\`${p_pure.raw}dados 5d6\``)
+            .addField(`Usa \`${p_pure.raw}ayuda <comando>\` para más información sobre un comando`, (list.name.length > 0)?list.name.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para realizar tu búsqueda).')
+            .addField(`Guía introductoria`, `Usa \`${p_pure.raw}ayuda g-indice\` para ver la página de índice de la guía introductoria de Bot de Puré`);
         } else {
             const title = s => {
                 s = (s.startsWith('g-'))?`${s.slice(2)} (Página de Guía)`:s;
@@ -116,17 +116,17 @@ module.exports = {
                 const arrayExists = arr => arr !== undefined && arr.some(it => it.length > 0);
                 const flagsExist = arrayExists(list.flags);
                 embed.setAuthor(title(list.name[0]), aurl)
-                    .setFooter(`Usa "${p_pure}ayuda g-indice" para aprender más sobre comandos`)
+                    .setFooter(`Usa "${p_pure.raw}ayuda g-indice" para aprender más sobre comandos`)
                     .addField('Nombre', `\`${list.name[0]}\``, true)
                     .addField('Alias', arrayExists(list.aliases)?(list.aliases.map(i => `\`${i}\``).join(', ')):':label: Sin alias', true)
                     .addField('Descripción', (list.desc !== undefined && list.desc.length > 0)?list.desc:':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde');
                 if(!flagsExist || !list.flags.some(flag => flag === 'guide'))
-                    embed.addField('Llamado', `\`${p_pure}${list.name[0]}${(list.callx !== undefined)?` ${list.callx}`:''}\``, true)
-                        .addField(`Opciones (\`${p_pure}x -x --xxx <x>\`)`, arrayExists(list.options)?list.options.join('\n'):':abacus: Sin opciones', true)
+                    embed.addField('Llamado', `\`${p_pure.raw}${list.name[0]}${(list.callx !== undefined)?` ${list.callx}`:''}\``, true)
+                        .addField(`Opciones (\`${p_pure.raw}x -x --xxx <x>\`)`, arrayExists(list.options)?list.options.join('\n'):':abacus: Sin opciones', true)
                         .addField('Identificadores', flagsExist?(list.flags.map(i => `\`${i}\``).join(', ').toUpperCase()):':question: Este comando no tiene identificadores por ahora');
             } else
                 embed.setAuthor('Sin resultados', aurl)
-                    .addField('No se ha encontrado ningún comando con este nombre', `Utiliza \`${p_pure}ayuda\` para ver una lista de comandos disponibles y luego usa \`${p_pure}comando <comando>\` para ver un comando en específico`);
+                    .addField('No se ha encontrado ningún comando con este nombre', `Utiliza \`${p_pure.raw}ayuda\` para ver una lista de comandos disponibles y luego usa \`${p_pure.raw}comando <comando>\` para ver un comando en específico`);
         }
         
         message.channel.send({ embeds: [embed] });

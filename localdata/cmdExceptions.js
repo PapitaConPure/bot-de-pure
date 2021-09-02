@@ -19,7 +19,7 @@ module.exports = {
 
         guide: {
             title: 'Símbolo de página de guía',
-            desc: `Esto no es un comando, sino que una *página de guía* para buscarse con \`${global.p_pure}ayuda\``,
+            desc: `Esto no es un comando, sino que una *página de guía* para buscarse con \`${global.p_pure.raw}ayuda\``,
             isException: (_) => true
         },
 

@@ -2,12 +2,12 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.71",
+            "number": "Full.2.8.72",
             "name": "Cisne Cristalino"
         },
         "note": "Se esperan problemas y crasheos debido a la reciente actualización de Discord.js",
         "changelog": [
-            "Tareas de refactorización (2.75/4)",
+            "Tareas de refactorización (2.8/4)",
             "PLACEHOLDER_SLASHCMD",
             "Corregidos errores en p!info y p!inforol",
             "Mejoradas las búsquedas de usuario por nombre",
@@ -21,9 +21,14 @@
             "Comandos propios con Puréscript:tm:"
         ]
     },
-    "p_drmk": "d!",
-    "p_pure": "p!",
-    "p_mention": "oe po <@651250669390528561>, ",
+    "p_drmk": {
+        "raw": "",
+        "regex": ""
+    },
+    "p_pure": {
+        "raw": "",
+        "regex": ""
+    },
     "maintenance": "",
     "seed": 0,
     "serverid": {

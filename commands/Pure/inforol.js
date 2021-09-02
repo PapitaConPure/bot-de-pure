@@ -22,7 +22,7 @@ module.exports = {
 	
 	async execute(message, args) {
 		if(args.length < 1) {
-			message.channel.send({ content: `:x: ¡Debes ingresar al menos un parámetro!\nUsa \`${p_pure}ayuda inforol\` para más información` });
+			message.channel.send({ content: `:x: ¡Debes ingresar al menos un parámetro!\nUsa \`${p_pure.raw}ayuda inforol\` para más información` });
 			return;
 		}
 
@@ -66,7 +66,7 @@ module.exports = {
 			if(anaroles.length !== 0) {
 				Embed[0] = new Discord.MessageEmbed()
 					.setColor('#ff00ff')
-					.setTitle(`wawaAnálisis del roles (Total)`)
+					.setTitle(`Análisis del roles (Total)`)
 
 					.addField('Roles en análisis', anaroles)
 					.addField('Caso', `**${strict?'Exclusivo':'Inclusivo'}**`, true)

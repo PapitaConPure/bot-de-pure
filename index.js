@@ -11,11 +11,16 @@ const func = require('./func.js'); //Funciones globales
 const stats = require('./localdata/stats.json');
 const booru = require('./localdata/boorutags.js');
 const cmdex = require('./localdata/cmdExceptions.js');
+const guildfunc = require('./localdata/guildFunctions.js');
 const dns = require('dns'); //Detectar host
 const { registerFont } = require('canvas'); //Registrar fuentes al ejecutar Bot
 const chalk = require('chalk'); //Consola con formato bonito
 const { SlashCommandBuilder } = require('@discordjs/builders');
-//Objeto cliente
+const { promisify } = require('util');
+const token = (process.env.I_LOVE_MEGUMIN)?process.env.I_LOVE_MEGUMIN:require('./key.json').token; //La clave del bot
+//#endregion
+
+//#region Parámetros Iniciales
 const botIntents = new Discord.Intents();
 const iflags = Discord.Intents.FLAGS;
 botIntents.add(
@@ -34,9 +39,15 @@ const client = new Discord.Client({
     fetchAllMembers: true,
     allowedMentions: { parse: [ 'users', 'roles' ], repliedUser: false }
 });
-const token = (process.env.I_LOVE_MEGUMIN)?process.env.I_LOVE_MEGUMIN:require('./key.json').token; //La clave del bot
 const restGlobal = new REST({ version: '9' }).setToken(token);
 const clientId = '651250669390528561';
+const fastGuildFunctions = (() => {
+    let rtn = [];
+    Object.values(guildfunc).map(gfs => Object.values(gfs).map(fgf => fgf.name)).forEach(fgt => rtn = [...rtn, ...fgt]);
+    return rtn.sort().filter((fgf, i, arr) => fgf !== arr[i - 1]);
+})();
+global.p_drmk = { raw: 'd!', regex: /^[Dd]![\n ]*/g };
+global.p_pure = { raw: 'p!', regex: /^[Pp]![\n ]*/g };
 //#endregion
 
 //#region Detección de archivos de comandos
@@ -65,13 +76,11 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
     global.maintenance = '1';
 
     try {
-        console.log(chalk.bold.magentaBright('Comienzo de cargado de comandos slash.'));
-
+        console.log(chalk.bold.magentaBright('Comienzo de cargado de comandos slash...'));
         await restGlobal.put(
             Routes.applicationCommands(clientId),
             { body: client.SlashPure },
         );
-
         confirm();
     } catch (error) {
         console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos slash'));
@@ -111,10 +120,15 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
 	confirm();
 
 	console.log(chalk.magenta('Obteniendo información del host...'));
-	dns.lookupService('127.0.0.1', 443, (err, hostname, service) => {
-        global.bot_status.host = (err === null)?`${service}://${hostname}/`:'[host no detectado]';
-    });
-	confirm();
+    try {
+        const asyncLookupService = promisify(dns.lookupService);
+        const host = await asyncLookupService('127.0.0.1', 443);
+        global.bot_status.host = `${host.service}://${host.hostname}/`;
+        confirm();
+    } catch(err) {
+        console.log(chalk.red('Fallido'));
+        console.error(err);
+    }
     global.puretable = Array(16).fill(null).map(() => Array(16).fill('828736342372253697'));
 
 	console.log(chalk.rgb(158,114,214)('Registrando fuentes...'));
@@ -125,11 +139,11 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
     registerFont('fonts/asap-condensed.semibold.ttf', { family: 'cardbody' });
 	confirm();
 
-    global.logch.send({ embeds: [new Discord.MessageEmbed()
+    await global.logch.send({ embeds: [new Discord.MessageEmbed()
         .setColor('DARK_VIVID_PINK')
         .setAuthor('Mensaje de sistema')
         .setTitle('Bot conectado y funcionando')
-        .addField('Host', (global.bot_status.host === 'https://localhost/') ? 'https://heroku.com/' : 'localhost', true)
+        .addField('Host', global.bot_status.host, true)
         .addField('N. de versión', global.bot_status.version.number, true)
         .addField('Fecha', `<t:${Math.floor(Date.now() / 1000)}:f>`, true)
     ]});
@@ -138,142 +152,70 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
 });
 
 client.on('messageCreate', async (message) => { //En caso de recibir un mensaje
-    const channel = message.channel;
+    const { content, author, channel, guild } = message;
     if(global.maintenance.length > 0 && channel.id !== global.maintenance) return;
-    const author = message.author;
     if(global.cansay === 0 && author.bot) return;
-    const msg = message.content.toLowerCase();
-    const guild = message.guild;
+    const msg = content.toLowerCase();
+    const gid = guild.id;
 
     //#region Operaciones de proceso e ignorar mensajes privados
-    const logembed = new Discord.MessageEmbed()
-        .addField(author.tag, '*Mensaje vacío.*');
-    if(guild) {
-        logembed
-            .setAuthor(`${guild.name} • ${channel.name} (Click para ver)`, author.avatarURL({ dynamic: true }), message.url)
-            .setFooter(`gid: ${guild.id} | cid: ${channel.id} | uid: ${author.id}`);
-        if(msg.length) logembed.fields[0].value = message.content;
-    } else {
-        logembed
-            .setAuthor('Mensaje privado (Click para ver)', author.avatarURL({ dynamic: true }), message.url)
-            .setFooter(`uid: ${author.id}`);
-        if(msg.length) logembed.fields[0].value = message.content;
+    const logembed = new Discord.MessageEmbed().addField(author.tag, content || '*Mensaje vacío.*');
+    if(guild) logembed.setAuthor(`${guild.name} • ${channel.name} (Click para ver)`, author.avatarURL({ dynamic: true }), message.url);
+    else {
+        logembed.setAuthor('Mensaje privado (Click para ver)', author.avatarURL({ dynamic: true }), message.url);
         channel.send({ content: ':x: Uh... disculpá, no trabajo con mensajes directos.' });
         return;
     }
-    
-    if(message.attachments.size > 0)
+    if(message.attachments.size)
         logembed.addField('Adjuntado:', message.attachments.map(attf => attf.url).join('\n'));
 
     if(msg.startsWith(',confession ')) global.confch.send({ embeds: [logembed] });
     else global.logch.send({ embeds: [logembed] });
-
-    const infr = global.hourai.infr;
-    const whitech = infr.channels;
-
-    if(guild.id === global.serverid.hourai && !whitech[channel.id]) {
-        const uinfr = infr.users;
-        const banpf = [ /^p![\n ]*\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,(?!confession)\w/, /^,,\w/, /^~\w/, /^\/\w/ ];
-        if(banpf.some(bp => msg.match(bp))) {
-            const now = Date.now();
-            const mui = author.id;
-            
-            if(!uinfr[mui])
-            uinfr[mui] = [];
-            
-            //Sancionar según total de infracciones cometidas en los últimos 40 minutos
-            uinfr[mui] = uinfr[mui].filter(inf => (now - inf) / 1000 < (60 * 40)); //Eliminar antiguas
-            const total = uinfr[mui].push(now); //Añade el momento de la infracción actual y retorna el largo del arreglo
-            
-            switch(total) {
-            case 1:
-                channel.send({
-                    reply: { messageReference: message.id },
-                    content: `Detecto... bots fuera de botposteo <:empty:856369841107632129>`
-                });
-                break;
-            case 2:
-                channel.send({
-                    reply: { messageReference: message.id },
-                    allowedMentions: { repliedUser: true },
-                    content: `Párale conchetumare, vete a <#${Object.keys(whitech).find(key => whitech[key] === 'botposting')}> <:despair:852764014840905738>`
-                });
-                break;
-            default:
-                channel.send({
-                    reply: { messageReference: message.id },
-                    allowedMentions: { repliedUser: true },
-                    content: 'Ahora sí te cagaste ijoelpico <:tenshismug:859874631795736606>'
-                });
-                const hd = '682629889702363143'; //Hanged Doll
-                const gd = channel.guild;
-                const member = message.member;
-                try {
-                    if(!member.roles.cache.some(r => r.id === hd))
-                        member.roles.add(hd);
-                } catch(err) {
-                    channel.send({ content: `<:wtfff:855940251892318238> Ese wn tiene demasia'o ki. Cuélgalo tú po'.\n\`\`\`\n${err.name}` });
-                }
-                break;
-            }
-        }
-    }
     //#endregion
 
     //#region Estadísticas
-    {
-        const mgi = guild.id, mci = channel.id, mmi = author.id;
+    (function registerUserMessage(mci = channel.id, mmi = author.id) {
         stats.read++;
-        stats[mgi] = stats[mgi] || {};
-        stats[mgi][mci] = stats[mgi][mci] || {};
-        stats[mgi][mci].cnt = (stats[mgi][mci].cnt || 0) + 1;
-        stats[mgi][mci].sub = stats[mgi][mci].sub || {};
-        stats[mgi][mci].sub[mmi] = (stats[mgi][mci].sub[mmi] || 0) + 1;
-    }
+        stats[gid] = stats[gid] || {};
+        stats[gid][mci] = stats[gid][mci] || {};
+        stats[gid][mci].cnt = (stats[gid][mci].cnt || 0) + 1;
+        stats[gid][mci].sub = stats[gid][mci].sub || {};
+        stats[gid][mci].sub[mmi] = (stats[gid][mci].sub[mmi] || 0) + 1;
+    })();
     //#endregion
 
     //#region Respuestas rápidas
-    //Hourai Doll; "Hourai"
-    if(message.channel.guild.id === global.serverid.hourai || message.channel.guild.id === global.serverid.nlp) {
-        const hrai = msg.indexOf('hourai');
-        const hraipf = global.hourai.replies.ignore.prefix;
-        const hraisf = global.hourai.replies.ignore.suffix;
-        const hraifound = hrai !== -1 && !(hraipf.some(pf => msg.indexOf(`${pf}hourai`) === (hrai - pf.length)) || hraisf.some(sf => msg.indexOf(`hourai${sf}`) === hrai));
-        if(hraifound && message.author.id !== global.peopleid.bern) {
-            const fuckustr = (msg.indexOf('puré') !== -1 || msg.indexOf('pure') !== -1)?global.hourai.replies.compare:global.hourai.replies.taunt;
-            message.channel.send({ content: fuckustr[Math.floor(Math.random() * fuckustr.length)]});
-            //message.channel.send({ content: 'Descanse en paz, mi pana <:pensaki:852779998351458344>' });
-        } else if(msg.startsWith('~echo ') || msg.startsWith('$say ')) {
-            async function responder(ch) {
-                const fuckustr = global.hourai.replies.reply;
-                ch.send({ content: fuckustr[Math.floor(Math.random() * fuckustr.length)] });
-            };
-            setTimeout(responder, 800, message.channel);
-        } else if(['q', 'que', 'qué'].some(i => i === msg))
-            message.channel.send({ files: ['https://media.discordapp.net/attachments/670865125154095143/834115384927191080/so_epico-1.jpg?width=394&height=700'] });
-    }
+    if(guildfunc[gid])
+        fastGuildFunctions.forEach(frf => {
+            if(guildfunc[gid][frf]) guildfunc[gid][frf](message);
+        });
     //#endregion
     
     //#region Comandos
     //#region Detección de Comandos
     let pdetect;
-    if(msg.startsWith(global.p_drmk)) pdetect = global.p_drmk;
-    else if(msg.startsWith(global.p_pure)) pdetect = global.p_pure;
+    if(msg.startsWith(global.p_drmk.raw)) pdetect = global.p_drmk;
+    else if(msg.startsWith(global.p_pure.raw)) pdetect = global.p_pure;
     else return; //Salir si no se encuentra el prefijo
 
     //Partición de mensaje comando
-    const args = message.content.replace(/^[Pp]![\n ]*/g, '').split(/[\n ]+/); //Argumentos ingresados
-    let nombrecomando = args.shift().toLowerCase(); //Comando ingresado
-    let comando;
-    if(pdetect === global.p_drmk) {
-        //comando = client.ComandosDrawmaku.get(nombrecomando) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
+    const args = content.replace(pdetect.regex, '').split(/[\n ]+/); //Argumentos ingresados
+    let commandname = args.shift().toLowerCase(); //Comando ingresado
+    let command;
+    
+    if(pdetect.raw === global.p_drmk.raw) {
+        //command = client.ComandosDrawmaku.get(commandname) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(commandname));
         channel.send({ content: '<:delete:704612795072774164> Los comandos de Drawmaku estarán deshabilitados por un tiempo indefinido. Se pide disculpas.' });
         return;
-    } else if(pdetect === global.p_pure) 
-        comando = client.ComandosPure.get(nombrecomando) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(nombrecomando));
+    } else if(pdetect.raw === global.p_pure.raw)
+        command = client.ComandosPure.get(commandname) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(commandname));
     
-    if (!comando) {
-        channel.send({ content: ':x: Disculpa, soy estúpida. Tal vez escribiste mal el comando y no te entiendo.' });
+    if(!command) {
+        const notice = await channel.send({
+            reply: { messageReference: message.id },
+            content: ':x: Disculpa, soy estúpida. Tal vez escribiste mal el comando y no te entiendo.'
+        });
+        setTimeout(() => notice.delete(), 4000);
         return;
     }
     //#endregion
@@ -282,15 +224,16 @@ client.on('messageCreate', async (message) => { //En caso de recibir un mensaje
     try {
         //Detectar problemas con el comando basado en flags
         let exception = null;
-        comando.flags.forEach(flag => {
-            const ex = cmdex.findExceptions(flag, message)
-            if(ex) exception = ex;
+        command.flags.every(flag => {
+            const ex = cmdex.findExceptions(flag, message);
+            if(ex) { exception = ex; return false; }
+            else return true;
         });
         if(exception) {
-            channel.send({ embeds: [ cmdex.createEmbed(exception, { cmdString: `${pdetect}${nombrecomando}` }) ]});
+            await channel.send({ embeds: [ cmdex.createEmbed(exception, { cmdString: `${pdetect.raw}${commandname}` }) ]});
             return;
         } else
-            await comando.execute(message, args);
+            await command.execute(message, args);
         stats.commands.succeeded++;
     } catch(error) {
         console.log(chalk.bold.redBright('Ha ocurrido un error al ingresar un comando.'));
@@ -298,9 +241,8 @@ client.on('messageCreate', async (message) => { //En caso de recibir un mensaje
         const errorembed = new Discord.MessageEmbed()
             .setColor('#0000ff')
             .setAuthor(`${guild.name} • ${channel.name} (Click para ver)`, author.avatarURL({ dynamic: true }), message.url)
-            .setFooter(`gid: ${guild.id} | cid: ${channel.id} | uid: ${author.id}`)
             .addField('Ha ocurrido un error al ingresar un comando', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``)
-            .addField('Detalle', `"${message.content.slice(0, 699)}"\n[${nombrecomando} :: ${args}]`);
+            .addField('Detalle', `"${message.content.slice(0, 699)}"\n[${commandname} :: ${args}]`);
         global.logch.send({
             content: `<@${global.peopleid.papita}>`,
             embeds: [errorembed]
@@ -315,20 +257,21 @@ client.on('messageCreate', async (message) => { //En caso de recibir un mensaje
 
 client.on('interactionCreate', async interaction => {
 	if (!interaction.isCommand()) return;
-
-	const slash = client.SlashPure.get(interaction.commandName);
+    const { commandName: commandname, guild, channel, member } = interaction;
+	const slash = client.SlashPure.get(commandname);
 	if (!slash) return;
 
 	try {
-        const comando = client.ComandosPure.get(interaction.commandName);
+        const comando = client.ComandosPure.get(commandname);
         //Detectar problemas con el comando basado en flags
         let exception = null;
         comando.flags.forEach(flag => {
             const ex = cmdex.findExceptions(flag, interaction);
-            if(ex) exception = ex;
+            if(ex) { exception = ex; return false; }
+            else return true;
         });
         if(exception) {
-            await interaction.reply({ embeds: [ cmdex.createEmbed(exception, { cmdString: `/${interaction.commandName}` }) ]});
+            await interaction.reply({ embeds: [ cmdex.createEmbed(exception, { cmdString: `/${commandname}` }) ]});
             return;
         } else
             await comando.interact(interaction);
@@ -338,8 +281,7 @@ client.on('interactionCreate', async interaction => {
         console.error(error);
         const errorembed = new Discord.MessageEmbed()
             .setColor('#0000ff')
-            .setAuthor(`${interaction.guild.name} • ${interaction.channel.name}`, interaction.member.user.avatarURL({ dynamic: true }))
-            .setFooter(`gid: ${interaction.guild.id} | cid: ${interaction.channel.id} | uid: ${interaction.member.user.id}`)
+            .setAuthor(`${guild.name} • ${channel.name}`, member.user.avatarURL({ dynamic: true }))
             .addField('Ha ocurrido un error al procesar un comando slash', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
         global.logch.send({
             content: `<@${global.peopleid.papita}>`,

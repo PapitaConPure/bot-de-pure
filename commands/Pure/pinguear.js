@@ -41,7 +41,7 @@ module.exports = {
 				}
 				uses.pinguear[message.author.id] = true;
 				func.pingear(cnt, mention, message.channel, message.author.id); 
-			} else message.channel.send({ content: `:warning: debes ingresar un valor numérico y una mención (\`${p_pure}pinguear <cantidad> <usuario>\`).` });
-		} else message.channel.send({ content: `:warning: debes ingresar 2 parámetros (\`${p_pure}pinguear <cantidad> <usuario>\`).` });
+			} else message.channel.send({ content: `:warning: debes ingresar un valor numérico y una mención (\`${p_pure.raw}pinguear <cantidad> <usuario>\`).` });
+		} else message.channel.send({ content: `:warning: debes ingresar 2 parámetros (\`${p_pure.raw}pinguear <cantidad> <usuario>\`).` });
     },
 };

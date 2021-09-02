@@ -62,7 +62,7 @@ module.exports = {
 				message.channel.send({
 					content:
 						':warning: Debes especificar la cantidad de mensajes a borrar\n' +
-						`Revisa \`${p_pure}ayuda borrar\` para más información`
+						`Revisa \`${p_pure.raw}ayuda borrar\` para más información`
 				});
 				return;
 			}
