@@ -68,7 +68,8 @@ module.exports = {
 			.setAuthor(`Comando invocado por ${interaction.member.user.username}`, interaction.member.user.avatarURL())
 			.setFooter(`Reacciona a las flechas debajo para cambiar de página`);
 
-		const sent = await interaction.reply({ content: content, embeds: [embed] });
+		await interaction.reply({ content: content, embeds: [embed] });
+		const sent = await interaction.fetchReply();
 		const arrows = fetchArrows(interaction.client.emojis.cache);
 		await Promise.all([sent.react(arrows[0]), sent.react(arrows[1])]);
 		

@@ -329,8 +329,9 @@ module.exports = {
         });
     },
 
-    askColor: async function(rmessage, orimem) {
-        let colrol = {
+    askColor: function(message, member) {
+        //ID emote: ID rol
+        const colrol = {
             '819772377814532116': '671851233870479375', //French
             '819772377642041345': '671851228308963348', //Orléans
             '819772377624870973': '671852132328275979', //Holland
@@ -339,24 +340,21 @@ module.exports = {
             '819772377482526741': '671851228954755102', //Tibetan
             '819772377440583691': '671851235267182625'  //Kyoto
         };
-        console.log('Se solicitaron colores.');
-        Promise.all(Object.keys(colrol).map(k => rmessage.react(k)));
-        const filter = (rc, user) => !user.bot && colrol.hasOwnProperty(rc.emoji.id) && orimem.user.id === user.id;
-        const collector = rmessage.createReactionCollector({ filter: filter, max: 2, time: 5 * 60 * 1000 });
+        Promise.all(Object.keys(colrol).map(k => message.react(k)));
+        const filter = (rc, user) => !user.bot && colrol.hasOwnProperty(rc.emoji.id) && member.user.id === user.id;
+        const collector = message.createReactionCollector({ filter: filter, max: 2, time: 5 * 60 * 1000 });
         
-        collector.on('collect', (reaction, user) => {
+        collector.on('collect', async (reaction) => {
             const reacted = reaction.emoji.id;
-            rmessage.channel.guild.members.fetch(user.id).then(member => {
-                const hadroles = member.roles.cache.find(role => Object.values(colrol).some(colorid => colorid === role.id));
-                if(hadroles !== undefined) {
-                    member.roles.remove(hadroles)
-                    .then(mem => mem.roles.add(colrol[reacted]));
-                    rmessage.channel.send({ content: 'Colores intercambiados <:monowo:757624423300726865>' });
-                } else {
-                    rmessage.channel.send({ content: 'Colores otorgados <:miyoi:674823039086624808> :thumbsup:' });
-                    member.roles.add(colrol[reacted]);
-                }
-            });
+            const hadroles = member.roles.cache.find(role => Object.values(colrol).some(crid => crid === role.id));
+            if(hadroles !== undefined) {
+                await member.roles.remove(hadroles);
+                await member.roles.add(colrol[reacted]);
+                message.channel.send({ content: 'Colores intercambiados <:monowo:757624423300726865>' });
+            } else {
+                await member.roles.add(colrol[reacted]);
+                message.channel.send({ content: 'Colores otorgados <:miyoi:674823039086624808> :thumbsup:' });
+            }
         });
     },
 

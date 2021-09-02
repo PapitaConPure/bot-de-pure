@@ -17,7 +17,7 @@ module.exports = {
     },
 	
 	async interact(interaction) {
-		await interaction.reply({ content: 'Procesando...', ephemeral: true });
+		await interaction.reply({ content: 'Procesando...' });
 		const message = await interaction.fetchReply();
 		askCandy(message.member, message.channel);
 		message.delete();

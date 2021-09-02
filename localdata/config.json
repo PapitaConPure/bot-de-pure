@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[esperando respuesta]",
         "version": {
-            "number": "Full.2.8.72",
+            "number": "Full.2.8.74",
             "name": "Cisne Cristalino"
         },
         "note": "Se esperan problemas y crasheos debido a la reciente actualización de Discord.js",
@@ -11,7 +11,8 @@
             "PLACEHOLDER_SLASHCMD",
             "Corregidos errores en p!info y p!inforol",
             "Mejoradas las búsquedas de usuario por nombre",
-            "Corregido un error que hacía que no se pudiesen ingresar comandos con prefijo en mayúsculas"
+            "Corregido un error que hacía que no se pudiesen ingresar comandos con prefijo en mayúsculas",
+            "Corregidos errores en versiones slash de p!caramelos y p!emotes"
         ],
         "todo": [
             "Restaurar comandos de búsqueda de imagen avanzados",
@@ -29,7 +30,7 @@
         "raw": "",
         "regex": ""
     },
-    "maintenance": "",
+    "maintenance": "2",
     "seed": 0,
     "serverid": {
         "bautistas": "745003943997997056",
