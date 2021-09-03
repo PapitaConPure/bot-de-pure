@@ -421,6 +421,13 @@ module.exports = {
     //#endregion
 
     //#region Sistema
+    channelIsBlocked: function(channel) {
+        if(global.maintenance.length > 0)
+            return (global.maintenance.startsWith('!'))
+                ? channel.id === global.maintenance
+                : channel.id !== global.maintenance
+        else return false;
+    },
     /*reloadState: function() {
         
         setTimeout(module.exports.saveState, (20 * 1000));

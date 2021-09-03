@@ -47,11 +47,11 @@ module.exports = {
                             if(!member.roles.cache.some(r => r.id === hd))
                                 member.roles.add(hd);
                         } catch(err) {
-                            channel.send({ content: `<:wtfff:855940251892318238> Ese wn tiene demasia'o ki. Cuélgalo tú po'.\n\`\`\`\n${err.name}` });
+                            imsg = await channel.send({ content: `<:wtfff:855940251892318238> Ese wn tiene demasia'o ki. Cuélgalo tú po'.\n\`\`\`\n${err.name}` });
                         }
                         break;
                     }
-                    setTimeout(() => imsg.delete());
+                    setTimeout(() => imsg.delete(), 1000 * 5);
                 }
             }
         },

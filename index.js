@@ -3,7 +3,7 @@ const Discord = require('discord.js'); //Soporte JS de la API de Discord
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const fs = require('fs'); //Sistema de archivos
-const Keyv = require('keyv');
+//const Keyv = require('keyv');
 //const keyv = new Keyv('postgresql://sxiejhineqmvsg:d0b53a4f62e2cf77383908ff8d281e4a5d4f7db7736abd02e51f0f27b6fc6264@ec2-35-175-170-131.compute-1.amazonaws.com:5432/da27odtfovvn7n');
 //keyv.on('error', err => console.error('Keyv connection error:', err));
 const global = require('./localdata/config.json'); //Propiedades globales
@@ -40,7 +40,6 @@ const client = new Discord.Client({
     allowedMentions: { parse: [ 'users', 'roles' ], repliedUser: false }
 });
 const restGlobal = new REST({ version: '9' }).setToken(token);
-const clientId = '651250669390528561';
 const fastGuildFunctions = (() => {
     let rtn = [];
     Object.values(guildfunc).map(gfs => Object.values(gfs).map(fgf => fgf.name)).forEach(fgt => rtn = [...rtn, ...fgt]);
@@ -73,23 +72,22 @@ for(const file of commandFiles) {
 
 client.on('ready', async () => { //Confirmación de inicio y cambio de estado
     const confirm = () => console.log(chalk.green('Hecho.'));
-    if(!global.maintenance.length) {
-        try {
-            console.log(chalk.bold.magentaBright('Comienzo de cargado de comandos slash...'));
-            await restGlobal.put(
-                Routes.applicationCommands(clientId),
-                { body: client.SlashPure },
-            );
-            confirm();
-        } catch (error) {
-            console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos slash'));
-            console.error(error);
-        }
-    }
     global.maintenance = '1';
+    try {
+        console.log(chalk.bold.magentaBright('Comienzo de cargado de comandos slash...'));
+        const registered = await restGlobal.put(
+            Routes.applicationCommands(client.application.id),
+            { body: client.SlashPure },
+        );
+        console.log('Comandos registrados:', registered.map(scmd => scmd.name));
+        confirm();
+    } catch (error) {
+        console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos slash'));
+        console.error(error);
+    }
     //Quitar esto luego ↓
     const cl = global.bot_status.changelog;
-    cl[cl.findIndex(e => e === 'PLACEHOLDER_SLASHCMD')] = `Agregando soporte de ***__[/comandos](https://blog.discord.com/slash-commands-are-here-8db0a385d9e6)__*** *(${client.SlashPure.size} comandos listos)*`;
+    cl[cl.indexOf('PLACEHOLDER_SLASHCMD')] = `Agregando soporte de ***__[/comandos](https://blog.discord.com/slash-commands-are-here-8db0a385d9e6)__*** *(${client.SlashPure.size} comandos listos)*`;
 
 	console.log(chalk.cyanBright('Calculando semilla y horario.'));
     let stt = Date.now();
@@ -149,7 +147,7 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
 
 client.on('messageCreate', async message => { //En caso de recibir un mensaje
     const { content, author, channel, guild } = message;
-    if(global.maintenance.length > 0 && channel.id !== global.maintenance) return;
+    if(func.channelIsBlocked(channel)) return;
     if(global.cansay === 0 && author.bot) return;
     const msg = content.toLowerCase();
     const gid = guild ? guild.id : undefined;
@@ -258,6 +256,7 @@ client.on('messageCreate', async message => { //En caso de recibir un mensaje
 client.on('interactionCreate', async interaction => {
 	if (!interaction.isCommand()) return;
     const { commandName: commandname, guild, channel, member } = interaction;
+    if(func.channelIsBlocked(channel)) return;
 	const slash = client.SlashPure.get(commandname);
 	if (!slash) return;
 
@@ -297,11 +296,10 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.on('guildMemberAdd', member => { //Evento de entrada a servidor
-    const guild = member.guild;
+    const { guild, user } = member;
     if(!guild.available) return;
-    if(global.maintenance.length > 0 && guild.systemChannelId !== global.maintenance) return;
+    if(func.channelIsBlocked(guild.systemChannelId)) return;
     console.log('Evento de entrada de usuario a servidor desencadenado.');
-    const user = member.user;
     try {
         if(!user.bot) func.dibujarBienvenida(member);
         else guild.channels.cache.get(guild.systemChannelId).send({
