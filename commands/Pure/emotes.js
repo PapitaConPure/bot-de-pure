@@ -15,7 +15,7 @@ module.exports = {
         'common'
     ],
 	
-	async execute(message, args) {
+	async execute(message, _) {
 		const guilds = message.client.guilds.cache;
 		let emotes = (() => {
 			const slot1Coll = guilds.get(serverid.slot1).emojis.cache.values();

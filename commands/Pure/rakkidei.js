@@ -19,12 +19,13 @@ module.exports = {
 	aliases: [
 		'rakki', 'tenshi'
 	],
+	brief: 'Comando de trompada de Rakkidei',
 	desc: 'Comando de trompada de Rakkidei\n[🐦 Twitter](https://twitter.com/rakkidei)\n[🇵 pixiv](https://www.pixiv.net/users/58442175)',
 	flags: [
 		'common'
 	],
 
-	async execute(message, args) {
+	async execute(message, _) {
 		//Acción de comando
 		message.channel.send({
 			content: phrase[randRange(0, phrase.length)],
