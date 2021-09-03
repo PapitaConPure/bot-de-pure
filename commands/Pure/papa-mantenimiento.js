@@ -18,16 +18,19 @@ module.exports = {
 		//Acción de comando
 		const sent = await channel.send({ content: `**Host** \`${global.bot_status.host}\`\n**ID de InstProc** \`${global.startuptime}\`\n**Estado** \`[${global.maintenance.length?'PAUSADO':'OPERANDO'}]\``})
 
-		const reaction = (global.maintenance.length)?'🌀':'💤';
-		sent.react(reaction);
-		const filter = (rc, user) => rc.emoji.name === reaction && user.id === author.id;
+		const reactions = (global.maintenance.length)?['🌀']:['💤','👁️'];
+		Promise.all(reactions.map(reaction => sent.react(reaction)));
+		const filter = (rc, user) => reactions.includes(rc.emoji.name) && user.id === author.id;
 		const collector = sent.createReactionCollector({ filter: filter, max: 1, time: 1000 * 30 });
-		collector.on('collect', () => {
+		collector.on('collect', reaction => {
 			if(global.maintenance.length) {
 				global.maintenance = '';
 				sent.react('☑️');
 			} else {
-				global.maintenance = channel.id;
+				if(reaction.emoji.name === reactions[0])
+					global.maintenance = channel.id;
+				else
+					global.maintenance = `!${channel.id}`;
 				sent.react('✅');
 			}
 		});

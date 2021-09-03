@@ -2,10 +2,10 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.79",
+            "number": "Full.2.8.7A",
             "name": "Cisne Cristalino"
         },
-        "note": "Se están haciendo actualizaciones diarias. Se esperan periodos de inoperabilidad.\n",
+        "note": "Se están haciendo actualizaciones diarias. Es probable que existan comportamientos inesperados en algunos comandos.",
         "changelog": [
             "Tareas de refactorización (2.88/4)",
             "PLACEHOLDER_SLASHCMD",
@@ -15,7 +15,7 @@
             "Mejoradas las búsquedas de usuario por nombre",
             "Rehecho p!avatar para ser más rápido con búsq. múltip.",
             "p!borrar ahora permite especificar un usuario",
-            "Corregido error menor en p!estado",
+            "Corregido un error menor en p!estado",
             "Mejorados métodos de testeo"
         ],
         "todo": [

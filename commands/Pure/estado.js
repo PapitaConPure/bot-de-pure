@@ -65,7 +65,8 @@ module.exports = {
             .addField('Cambios', listFormat(clformat, true))
             .addField('Lo que sigue', listFormat(tdformat, false));
 
-        const sent = await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed] });
+        const sent = await interaction.fetchReply();
         if(cm === null) return;
         Promise.all(cm.map(async (_, i) => sent.react(ne[i])));
         const coll = sent.createReactionCollector({ filter: (_, u) => !u.bot, max: cm.length, time: 1000 * 60 * 2 });

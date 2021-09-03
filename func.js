@@ -424,8 +424,8 @@ module.exports = {
     channelIsBlocked: function(channel) {
         if(global.maintenance.length > 0)
             return (global.maintenance.startsWith('!'))
-                ? channel.id === global.maintenance
-                : channel.id !== global.maintenance
+                ? channel.id === global.maintenance.slice(1)
+                : channel.id !== global.maintenance;
         else return false;
     },
     /*reloadState: function() {
