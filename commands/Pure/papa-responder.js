@@ -1,6 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { p_pure } = require('../../localdata/config.json'); //Prefijos
-const func = require('../../func.js'); //Funciones globales
+const { fetchFlag, fetchUser } = require('../../func.js');
 
 module.exports = {
 	name: 'papa-responder',
@@ -20,46 +20,21 @@ module.exports = {
 
 	async execute(message, args) {
 		//Variables de flags
-		let user;
-		let mode;
-
-		//Lectura de flags
-		let jn = false;
-		args = args.map((arg, i) => {
-			let ignore = true;
-			if(!jn) {
-				if(arg.startsWith('--'))
-					switch(arg.slice(2)) {
-					case 'usuario': user = func.fetchUserID(args[i + 1], message.channel.guild, message.client); jn = true; break;
-					case 'aceptar': mode = 'a'; break;
-					case 'problema': mode = 'p'; break;
-					default: ignore = false;
-					}
-				else if(arg.startsWith('-'))
-					for(c of arg.slice(1))
-						switch(c) {
-						case 'u': user = func.fetchUserID(args[i + 1], message.channel.guild, message.client); jn = true; break;
-						case 'a': mode = 'a'; break;
-						case 'p': mode = 'p'; break;
-						default: ignore = false;
-						}
-				else ignore = false;
-			} else jn = false;
-
-			if(ignore) return undefined;
-			else return arg;
-		}).filter(arg => arg !== undefined);
-
+		const user = fetchFlag(args, { property: true, short: ['u'], long: ['usuario'], callback: (x, i) => fetchUser(x[i], message) });
+		const action = fetchFlag(args, { short: ['a'], long: ['aceptar'], callback: 'accept' })
+			        || fetchFlag(args, { short: ['p'], long: ['problema'], callback: 'problem' });
+		console.log(action);
+		
 		//Acción de comando
 		if(user === undefined) {
-			message.channel.send({ content: ':warning: ¡Usuario no encontrado!' });
+			const sent = await message.channel.send({ content: ':warning: ¡Usuario no encontrado!' });
+			setTimeout(() => sent.delete(), 1000 * 5);
 			return;
 		}
-		user = message.client.users.cache.get(user);
 
-		if(mode === undefined) //Confirmación de lectura
+		if(action === undefined) //Confirmación de lectura
 			user.send({ content: '📩 ¡Se confirmó que tu sugerencia ha sido leída! Si es aceptada, se te notificará de igual forma; en caso contrario, no recibirás ninguna notificación.' });
-		else if(mode === 'a') //Confirmación de aceptación
+		else if(action === 'accept') //Confirmación de aceptación
 			user.send({
 				content:
 					'💌 ¡Se confirmó que tu sugerencia ha sido aceptada! ¡¡¡Muchas gracias por tu colaboración!!! <:meguSmile:796930824627945483>\n' +

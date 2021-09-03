@@ -3,6 +3,13 @@ const { bot_status, p_pure } = require('../../localdata/config.json'); //Variabl
 const ayuda = require('./ayuda.js'); //Variables globales
 const { readdirSync } = require('fs'); //Para el contador de comandos
 
+const { host, version, note, changelog, todo } = bot_status;
+const cmsearch = new RegExp(`${p_pure.raw}[a-zA-Z0-9_.-]*`, 'g');
+const clformat = changelog.map(item => `- ${item}`).join('\n');
+const tdformat = todo.map(item => `- ${item}`).join('\n');
+const ne = [ '0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣' ];
+const cm = changelog.join().match(cmsearch);
+
 module.exports = {
 	name: 'estado',
     aliases: [
@@ -14,13 +21,6 @@ module.exports = {
     ],
 	
 	async execute(message, args) {
-        const { host, version, note, changelog, todo } = bot_status;
-        const cmsearch = new RegExp(`${p_pure.raw}[a-zA-Z0-9_.-]*`, 'g');
-        const clformat = changelog.map(item => `- ${item}`).join('\n');
-        const tdformat = todo.map(item => `- ${item}`).join('\n');
-        const ne = [ '0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣' ];
-        const cm = changelog.join().match(cmsearch);
-        
         let cmindex = 0;
         const listFormat = (str, index) => str.replace(cmsearch, match => `${index?`**[${cmindex++}]**`:''}\`${match}\``);
         const embed = new Discord.MessageEmbed()

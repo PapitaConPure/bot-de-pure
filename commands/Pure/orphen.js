@@ -1,6 +1,3 @@
-const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../localdata/config.json'); //Variables globales
-
 module.exports = {
 	name: 'orphen',
 	aliases: [
@@ -10,12 +7,14 @@ module.exports = {
     flags: [
         'meme'
     ],
-    options: [
-
-    ],
 	
-	async execute(message, args){
-		message.channel.send({ content: '***ORPHEN CUIDADO***' });
-		message.channel.send({ content: '***CUIDADO ORPHEEEEEN***' });
+	async execute({ channel }, _){
+		await channel.send({ content: '***ORPHEN CUIDADO***' });
+		await channel.send({ content: '***CUIDADO ORPHEEEEEN***' });
     },
+	
+	async interact(interaction){
+		await interaction.reply({ content: '***ORPHEN CUIDADO***' });
+		await interaction.followUp({ content: '***CUIDADO ORPHEEEEEN***' });
+    }
 };

@@ -6,6 +6,15 @@ const emot = [
 	'No avancé en el manga de Komachi', 'Mañana lo hago', 'Otro día', 'Mañana sin falta', 'Esta semana lo termino', 'Procrastinar'
 ];
 
+function getReactionEmotes(cec) {
+	return [
+		cec.get('654504689873977347'), //Kogablush
+		cec.get('722334924845350973'), //Chad
+		cec.get('697320983106945054'), //Pepe
+		cec.get('697323104141049867'), //Kokocrong
+	];
+}
+
 module.exports = {
 	name: 'bern',
 	aliases: [
@@ -20,13 +29,8 @@ module.exports = {
 
     ],
 
-	async execute(message, args) {
-		const lel = [
-			message.client.emojis.cache.get('654504689873977347'), //Kogablush
-			message.client.emojis.cache.get('722334924845350973'), //Chad
-			message.client.emojis.cache.get('697320983106945054'), //Pepe
-			message.client.emojis.cache.get('697323104141049867'), //Kokocrong
-		];
+	async execute(message, _) {
+		const lel = getReactionEmotes(message.client.emojis.cache);
 		const selection = randRange(0, emot.length);
 		
 		message.channel.send({ content: `**${emot[selection]}** <:bewny:722334924845350973>` }).then(sent => {
@@ -42,12 +46,7 @@ module.exports = {
     },
 
 	async interact(interaction) {
-		const lel = [
-			interaction.client.emojis.cache.get('654504689873977347'), //Kogablush
-			interaction.client.emojis.cache.get('722334924845350973'), //Chad
-			interaction.client.emojis.cache.get('697320983106945054'), //Pepe
-			interaction.client.emojis.cache.get('697323104141049867'), //Kokocrong
-		];
+		const lel = getEmotesList(interaction.client.emojis.cache);
 		const selection = randRange(0, emot.length);
 		await interaction.reply({ content: `**${emot[selection]}** <:bewny:722334924845350973>` })
 		const reply = await interaction.fetchReply();

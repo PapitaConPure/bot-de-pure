@@ -11,7 +11,8 @@ module.exports = {
 	desc: 'Dibuja una presentación de carta al estilo de Touhou 18 con el texto e imagen deseados\n' +
 		'La carta es pasiva y cuesta ¥100 por defecto. Si la descripción es muy larga, no se verá completa',
 	flags: [
-		'common'
+		'common',
+		'maintenance'
 	],
 	options: [
 		'`<desc>` _(texto)_ para describir la carta',

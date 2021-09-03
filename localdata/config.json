@@ -1,24 +1,26 @@
 {
     "bot_status": {
-        "host": "[esperando respuesta]",
+        "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.74",
+            "number": "Full.2.8.75",
             "name": "Cisne Cristalino"
         },
-        "note": "Se esperan problemas y crasheos debido a la reciente actualización de Discord.js",
+        "note": "Se están haciendo actualizaciones diarias. Se esperan periodos de inoperabilidad.\n",
         "changelog": [
-            "Tareas de refactorización (2.8/4)",
+            "Tareas de refactorización (2.85/4)",
             "PLACEHOLDER_SLASHCMD",
             "Corregidos errores en p!info y p!inforol",
+            "Corregido un error al usar prefijos en mayúsculas",
+            "Corregidos errores en slashs de p!caramelos y p!emotes",
             "Mejoradas las búsquedas de usuario por nombre",
-            "Corregido un error que hacía que no se pudiesen ingresar comandos con prefijo en mayúsculas",
-            "Corregidos errores en versiones slash de p!caramelos y p!emotes"
+            "Rehecho p!avatar para ser más rápido con búsq. múltip.",
+            "p!borrar ahora permite especificar un usuario"
         ],
         "todo": [
             "Restaurar comandos de búsqueda de imagen avanzados",
             "Minijuegos individuales y tipo-fiesta",
             "Base de datos en la nube",
-            "Simplificar prefijos y personalización de Bot a nivel de servidor",
+            "Personalización de Bot a nivel de servidor",
             "Comandos propios con Puréscript:tm:"
         ]
     },
@@ -30,7 +32,7 @@
         "raw": "",
         "regex": ""
     },
-    "maintenance": "2",
+    "maintenance": "",
     "seed": 0,
     "serverid": {
         "bautistas": "745003943997997056",

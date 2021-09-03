@@ -7,9 +7,6 @@ module.exports = {
     flags: [
         'papa'
     ],
-    options: [
-
-    ],
 	
 	async execute(message, args) {
         message.channel.send({

@@ -74,7 +74,7 @@ module.exports = {
 			};
 			d();
 		} else if(args[0] === 'p') { //Revisar perfil
-			const aid = (args.length > 1)?fetchUserID(args[1], message.channel.guild, message.client):message.author.id;
+			const aid = (args.length > 1)?fetchUserID(args[1], message):message.author.id;
 			if(aid !== undefined) {
 				const user = message.client.users.cache.get(aid);
 				const embed = new MessageEmbed()
@@ -87,7 +87,7 @@ module.exports = {
 				else
 					embed.setTitle('Perfil inexistente')
 						.addField(
-							'No tienes un perfil anárquico todavía', `Usa \`${global.p_pure.raw}anarquia <posición(x,y)> <emote>\` para colocar un emote en la tabla de puré y crearte un perfil anárquico automáticamente\n` +
+							'Este perfil anárquico no existe todavía', `Usa \`${global.p_pure.raw}anarquia <posición(x,y)> <emote>\` para colocar un emote en la tabla de puré y crearte un perfil anárquico automáticamente\n` +
 							`Si tienes más dudas, usa \`${global.p_pure.raw}ayuda anarquia\``
 						);
 				message.channel.send({ embeds: [embed] });

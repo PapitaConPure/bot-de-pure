@@ -1,3 +1,5 @@
+const hd = '682629889702363143'; //Hanged Doll
+
 module.exports = {
 	name: 'suicidio',
 	aliases: [
@@ -11,9 +13,7 @@ module.exports = {
 		'meme'
 	],
 
-	async execute(message, args) {
-		const hd = '682629889702363143'; //Hanged Doll
-		const member = message.member;
+	async execute({ member }, args) {
 		if(!member.roles.cache.some(r => r.id === hd)) {
 			member.roles.add(hd);
 			message.channel.send({
@@ -23,9 +23,7 @@ module.exports = {
 		}
 	},
 
-	async interact(interaction) {
-		const hd = '682629889702363143'; //Hanged Doll
-		const member = interaction.member;
+	async interact({ member }) {
 		if(!member.roles.cache.some(r => r.id === hd)) {
 			member.roles.add(hd);
 			interaction.reply({ content: '<:houraidoll:853402616208949279> Shanghai Shanghai Shanghai Shanghai\nHourai Hourai Hourai Hourai' });

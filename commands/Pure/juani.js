@@ -9,7 +9,7 @@ module.exports = {
         'outdated'
     ],
 	
-	async execute(message, args){
-		message.channel.send({ content: '**Gwacyas~♪** <:uwu:681935702308552730>' });
+	async execute({ channel }, _){
+		channel.send({ content: '**Gwacyas~♪** <:uwu:681935702308552730>' });
     },
 };

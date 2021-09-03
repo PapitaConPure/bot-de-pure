@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js'); //Integrar discord.js
-const { fetchArrows, fetchFlag, fetchUserID } = require('../../func');
+const { fetchArrows, fetchFlag, fetchUser } = require('../../func');
 const { startuptime } = require('../../localdata/config.json'); //Variables globales
 const stats = require('../../localdata/stats.json');
 
@@ -27,7 +27,7 @@ module.exports = {
 		}
 		message.channel.sendTyping();
 		const servidor = message.guild; //Variable que almacena un objeto del servidor a analizar
-		const miembro = fetchFlag(args, { property: true, short: ['m'], long: ['miembro'], callback: (x, i) => fetchUserID(x[i], servidor, message.client) });
+		const miembro = fetchFlag(args, { property: true, short: ['m'], long: ['miembro'], callback: (x, i) => fetchUser(x[i], message) });
 		let selectch;
 
 		//Contadores
@@ -63,24 +63,19 @@ module.exports = {
 				if(args[0].startsWith('!')) args[0] = args[0].slice(1);
 			}
 
-			if(isNaN(args[0])) {
-				message.guild.channels.cache.map(chnm => {
-					if(chnm.name.toLowerCase().indexOf(args[0]) !== -1)
-						selectch = chnm;
-				});
-			} else {
-				message.guild.channels.cache.map(chnb => {
-					if(chnb.id === args[0])
-						selectch = chnb;
-				});
-			}
+			if(isNaN(args[0]))
+				selectch = servidor.channels.cache.filter(c => c.messages).find(c => c.name.toLowerCase().indexOf(args[0]) !== -1);
+			else 
+				selectch = servidor.channels.cache.filter(c => c.messages).find(c => c.id !== -1);
 		}
 
-		if((typeof selectch) === 'undefined')
+		if(selectch === undefined)
 			selectch = message.channel;
-		const peocnt = Object.entries(stats[servidor.id][selectch.id].sub)
-			.sort((a, b) => b[1] - a[1])
-			.slice(0, 5);
+		const peocnt = stats[servidor.id][selectch.id]
+			? Object.entries(stats[servidor.id][selectch.id].sub)
+				.sort((a, b) => b[1] - a[1])
+				.slice(0, 5)
+			: undefined;
 		const msgcnt = Object.entries(stats[servidor.id])
 			.sort((a, b) => b[1].cnt - a[1].cnt)
 			.slice(0, 5)
@@ -90,21 +85,9 @@ module.exports = {
 			
 		//Creacion de top 5
 		//Personas más activas
-		const peotop = peocnt.map(([name, count]) => `<@${name}>: **${count}** mensajes.`).join('\n');
+		const peotop = peocnt ? peocnt.map(([name, count]) => `<@${name}>: **${count}** mensajes.`).join('\n') : '_Este canal no tiene mensajes._';
 		//Canales más activos
 		const chtop = msgcnt.map(([name, count]) => `<#${name}>: **${count}** mensajes.`).join('\n');
-
-		console.log({
-			miembro: miembro,
-			name: servidor.name,
-			peoplecnt: peoplecnt,
-			botcnt: botcnt,
-			chs,
-			region: servidor.region,
-			verificationLevel: servidor.verificationLevel,
-			createdAt: servidor.createdAt,
-			id: servidor.id
-		});
 
 		//Crear y usar embed
 		let SelectedEmbed = 0;

@@ -19,7 +19,7 @@ module.exports = {
                     uinfr[mui] = [];
                     
                     //Sancionar según total de infracciones cometidas en los últimos 40 minutos
-                    uinfr[mui] = uinfr[mui].filter(inf => (now - inf) / 1000 < (60 * 40)); //Eliminar antiguas
+                    uinfr[mui] = uinfr[mui].filter(inf => (now - inf) < (1000 * 60 * 40)); //Eliminar antiguas
                     const total = uinfr[mui].push(now); //Añade el momento de la infracción actual y retorna el largo del arreglo
                     let imsg;
                     switch(total) {

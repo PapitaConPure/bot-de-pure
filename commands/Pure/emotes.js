@@ -9,6 +9,7 @@ module.exports = {
 		'emojis', 'emote', 'emoji',
 		'emt'
 	],
+	brief: 'Muestra una lista de emotes disponibles',
     desc: 'Muestra una lista paginada de emotes a mi disposición',
     flags: [
         'common'

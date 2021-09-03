@@ -1,9 +1,8 @@
-const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../localdata/config.json'); //Variables globales
+const { randRange: rr } = require("../../func");
 
-const getRandomInt = function(_max) {
-  return Math.floor(Math.random() * _max);
-}
+const emot = [
+	':musical_keyboard:', ':saxophone:', ':trumpet:', ':violin:', ':guitar:',' :banjo:', ':aquarius:'
+];
 
 module.exports = {
 	name: 'karl',
@@ -15,14 +14,19 @@ module.exports = {
         'meme'
     ],
 	
-	async execute(message, args){
-		const emot = [
-			':musical_keyboard:', ':saxophone:', ':trumpet:', ':violin:', ':guitar:',' :banjo:', ':aquarius:'
-		];
-		message.channel.send({
+	async execute({ channel }, _) {
+		channel.send({
 			content:
 				`**Buenas, soy Karl. Combina estas weás, créeme soy licenciado** <:reibu:686220828773318663> :thumbsup:\n` +
-				`<:arrowr:681963688411922460> ${emot[getRandomInt(emot.length)]} ${emot[getRandomInt(emot.length)]} ${emot[getRandomInt(emot.length)]} <:arrowl:681963688361590897>`
+				`<:arrowr:681963688411922460> ${Array(rr(2, 6)).fill``.map(() => emot[rr(0, emot.length)]).join(' ')} <:arrowl:681963688361590897>`
+		});
+    },
+	
+	async interact({ channel }, _) {
+		channel.send({
+			content:
+				`**Buenas, soy Karl. Combina estas weás, créeme soy licenciado** <:reibu:686220828773318663> :thumbsup:\n` +
+				`<:arrowr:681963688411922460> ${Array(rr(2, 6)).fill``.map(() => emot[rr(0, emot.length)]).join(' ')} <:arrowl:681963688361590897>`
 		});
     },
 };

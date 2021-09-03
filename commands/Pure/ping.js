@@ -1,6 +1,6 @@
 module.exports = {
 	name: 'ping',
-	desc: 'Muestra el tiempo de respuesta del Bot y de la API',
+	desc: 'Muestra el tiempo de respuesta del Bot y la API',
 	flags: [
 		'common'
 	],

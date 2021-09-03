@@ -1,5 +1,6 @@
 const { p_pure } = require('../../localdata/config.json'); //Variables globales
 const func = require('../../func.js'); //Funciones globales
+const { fetchFlag, fetchUser } = require('../../func.js');
 
 module.exports = {
 	name: 'borrar',
@@ -19,62 +20,30 @@ module.exports = {
 	callx: '<cantidad>',
 	
 	async execute(message, args) {
+		await message.delete();
 		if(!args.length) {
-			message.delete();
-			message.channel.send({ content: ':warning: debes especificar la cantidad o el autor de los mensajes a borrar.' });
+			const sent = await message.channel.send({ content: ':warning: debes especificar la cantidad o el autor de los mensajes a borrar.' });
+			setTimeout(() => sent.delete(), 1000 * 5);
 			return;
-		} else {
-			let user;
-			let jn = false;
-			args = args.map((arg, i) => {
-				let ignore = true;
-				if(!jn) {
-					if(arg.startsWith('--'))
-						switch(arg.slice(2)) {
-						case 'usuario':
-							jn = true;
-							user = func.fetchUserID(args[i + 1], message.channel.guild, message.client);
-							args[i] = undefined;
-							args[i + 1] = undefined;
-							break;
-						default: ignore = false;
-						}
-					else if(arg.startsWith('-'))
-						for(c of arg.slice(1))
-							switch(c) {
-							case 'u':
-								jn = true;
-								user = func.fetchUserID(args[i + 1], message.channel.guild, message.client);
-								args[i] = undefined;
-								args[i + 1] = undefined;
-								break;
-							default: ignore = false;
-							}
-					else ignore = false;
-				} else jn = false;
-
-				if(ignore) return undefined;
-				else return arg;
-			}).filter(arg => arg !== undefined);
-
-			let amt = parseInt(args[0]);
-			if(isNaN(amt)) {
-				message.channel.send({
-					content:
-						':warning: Debes especificar la cantidad de mensajes a borrar\n' +
-						`Revisa \`${p_pure.raw}ayuda borrar\` para más información`
-				});
-				return;
-			}
-			amt = Math.max(2, Math.min(amt + 1, 100));
-			
-			if(user === undefined)
-				message.channel.bulkDelete(amt);
-			else {
-				message.channel.messages.fetch({ limit: amt }).then(mcoll =>
-					message.channel.bulkDelete(mcoll.filter(msg => msg.author.id === user.id))
-				);
-			}
+		}
+		const user = fetchFlag(args, { property: true, short: ['u'], long: ['usuario'], callback: (x, i) => fetchUser(x[i], message), fallback: undefined });
+		let amt = (args.length) ? parseInt(args[0]) : 100;
+		if(isNaN(amt)) {
+			message.channel.send({
+				content:
+					':warning: Debes especificar la cantidad de mensajes a borrar\n' +
+					`Revisa \`${p_pure.raw}ayuda borrar\` para más información`
+			});
+			return;
+		}
+		amt = Math.max(2, Math.min(amt, 100));
+		
+		if(user === undefined)
+			message.channel.bulkDelete(amt);
+		else {
+			const messages = await message.channel.messages.fetch({ limit: 100 });
+			let i = 0;
+			message.channel.bulkDelete(messages.filter(msg => msg.author.id === user.id && i++ < amt));
 		}
     },
 };

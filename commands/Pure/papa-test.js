@@ -1,6 +1,6 @@
 //const Discord = require('discord.js'); //Integrar discord.js
 //const global = require('../../localdata/config.json'); //Variables globales
-const { fetchFlag, fetchUserID, dibujarBienvenida } = require('../../func.js');
+const { dibujarDespedida } = require('../../func.js');
 //const uwu = require('./uwu.js');
 //const Canvas = require('canvas'); 
 
@@ -33,6 +33,6 @@ module.exports = {
 
         console.log({ args, a, b, c, d });
         message.channel.send({ content: `**args** ${args}\n**a** ${a}\n**b** ${b}\n**c** ${c}\n**d** ${d}` });*/
-        dibujarBienvenida(message.member);
+        dibujarDespedida(message.member);
     },
 };

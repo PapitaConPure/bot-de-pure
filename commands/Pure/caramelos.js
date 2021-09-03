@@ -6,7 +6,7 @@ module.exports = {
 		'caramelo',
 		'candy', 'candies', 'milky'
 	],
-    desc: 'Otorga caramelos al reaccionar al mensaje generado',
+    desc: 'Otorga caramelos al reaccionar (solo Hourai Doll)',
     flags: [
         'hourai',
         'outdated'

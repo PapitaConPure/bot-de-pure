@@ -23,9 +23,11 @@ module.exports = {
 			//La programación es un puto meme
 			const newmsg = message.content
 				.slice('p!papita '.length)
-				.replace(/(?!^[^\p{L}\d\s@#]?)\b\S+\b/g, '$&:tm:')
-				.replace(/^\S+\b/g, '***:copyright: $&:registered:')
-				.replace(/\b\S+$/g, '$&***');
+				.replace(/[a-zA-Z0-9;:]+/g, '$&:tm:')
+				.replace(/^[\W_\n ]*[a-zA-Z0-9;:]+/g, '***:copyright: $&:registered: ')
+				.replace(':tm::registered:', ':registered:')
+				.replace(/[a-zA-Z0-9;:]+$/g, '$&***');
+			console.log(newmsg);
 			message.channel.send({ content: newmsg });
 		} else {
 			if(message.channel.nsfw) message.channel.send({ content: 'https://www.youtube.com/watch?v=pwEvEY-7p9o' });

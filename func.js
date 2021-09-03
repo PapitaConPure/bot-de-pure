@@ -1,7 +1,6 @@
 const Discord = require('discord.js'); //Discord.js
 const global = require('./localdata/config.json'); //Variables globales
 const presence = require('./localdata/presence.json'); //Datos de presencia
-const uses = require('./localdata/sguses.json'); //Funciones globales
 const images = require('./localdata/images.json'); //Imágenes globales
 const Canvas = require('canvas'); //Node Canvas
 const chalk = require('chalk'); //Consola con formato bonito
@@ -358,28 +357,6 @@ module.exports = {
         });
     },
 
-    pingear: function(cnt, mention, msgch, msgauth) {
-        const frase = [
-            `Oe po ${mention} <:junkNo:697321858407727224>`,
-            `Wacho, cachai ${mention} <:yumou:708158159180660748>`,
-            `Oe ${mention} qliao <:miyoi:674823039086624808>`,
-            `Responde po ${mention} <:mayuwu:654489124413374474>`,
-            `¿Vai a responder ${mention}? <:haniwaSmile:659872119995498507>`,
-            `${mention}, respondé altoke <:hypergardener:796931141851938827>`,
-            `Dale ${mention} ctm <:reibu:686220828773318663>`,
-            `Wena po ${mention} como andai <:meguSmile:694324892073721887>`,
-            `Pero qué andai haciendo po ${mention} rectm <:spookedSyura:725577379665281094>`,
-            `NoOoOoOo re TUuUrBiOoOoOo, veni ${mention} <:junkWTF:796930821260836864>`
-        ];
-
-        msgch.send({ content: frase[Math.floor(Math.random() * frase.length)] });
-
-        if(cnt > 1)
-            setTimeout(module.exports.pingear, 1000, cnt - 1, mention, msgch, msgauth);
-        else 
-            uses.pinguear[msgauth] = false;
-    },
-
     modifyAct: async function(clientowo, pasuwus) { //Cambio de estado constante; créditos a Imagine Breaker y Sassafras
         //Actualización de actividad
         try {
@@ -444,13 +421,12 @@ module.exports = {
     //#endregion
 
     //#region Sistema
-    reloadState: function() {
-        /**/
+    /*reloadState: function() {
         
         setTimeout(module.exports.saveState, (20 * 1000));
     },
 
-    /*saveState: function() {
+    saveState: function() {
         fs.writeFile("localdata/config.json", JSON.stringify(global, null, 4), err => {
             if(err) console.error(err);
         });
@@ -678,7 +654,7 @@ module.exports = {
     //#endregion
 
     //#region Fetch
-    fetchUserID: function(data, guild, client) {
+    fetchUser: function(data, { guild, client }) {
         const uc = client.users.cache;
         //Descifrar posible mención
         if(data.startsWith('<@') && data.endsWith('>')) {
@@ -686,58 +662,70 @@ module.exports = {
             if(data.startsWith('!')) data = data.slice(1);
         }
         
-        //Intentar encontrar por ID
-        if(!isNaN(data) && uc.find(u => u.id === data)) return data;
+        //Prioridad 1: Intentar encontrar por ID
+        if(!isNaN(data)) return uc.find(u => u.id === data);
 
-        //Intentar encontrar por tag
+        //Prioridad 2: Intentar encontrar por tag
         const taggeduser = uc.find(u => u.tag === data);
-        if(taggeduser) return taggeduser.id;
-        
-        //Intentar encontrar por nombre de usuario
-        data = data.toLowerCase();
-        let users = uc.filter(u => u.username.toLowerCase().indexOf(data) !== -1);
-        if(users.size) {
-            users = users
-                .sort()
-                .reduce((a, b) => (a.username.toLowerCase().indexOf(data) <= b.username.toLowerCase().indexOf(data) && a.username.length <= b.username.length)?a:b);
-            return users.id;
-        }
+        if(taggeduser) return taggeduser;
 
-        //Intentar encontrar por nombre en guild actual
-        let members = guild.members.cache.filter(m => m.nickname && m.nickname.toLowerCase().indexOf(data) !== -1);
-        if(members.size) {
-            members = members
+        //Prioridad 3: Intentar encontrar por nombre de usuario en guild actual
+        const cmpnames = (a, b) => (a.toLowerCase().indexOf(data) <= b.toLowerCase().indexOf(data) && a.length <= b.length);
+        let people = guild.members.cache.map(m => m.user).filter(u => u.username.toLowerCase().indexOf(data) !== -1);
+        if(people.size)
+            return people
                 .sort()
-                .reduce((a, b) => (a.nickname.toLowerCase().indexOf(data) <= b.nickname.toLowerCase().indexOf(data) && a.nickname.length <= b.nickname.length)?a:b);
-            return members.user.id;
-        }
+                .reduce((a, b) => cmpnames(a.username, b.username)?a:b);
+
+        //Prioridad 4: Intentar encontrar por apodo en guild actual
+        people = guild.members.cache.filter(m => m.nickname && m.nickname.toLowerCase().indexOf(data) !== -1);
+        if(people.size)
+            return people
+                .sort()
+                .reduce((a, b) => cmpnames(a.nickname, b.nickname)?a:b)
+                .user;
+        
+        //Prioridad 5: Intentar encontrar por nombre de usuario en cualquier guild
+        data = data.toLowerCase();
+        people = uc.filter(u => u.username.toLowerCase().indexOf(data) !== -1);
+        if(people.size)
+            return people
+                .sort()
+                .reduce((a, b) => cmpnames(a.username, b.username)?a:b);
 
         //Búsqueda sin resultados
         return undefined;
     },
 
-    fetchArrows: function(emojiscache) {
-        return [emojiscache.get('681963688361590897'), emojiscache.get('681963688411922460')];
+    fetchUserID: function(data, { guild, client }) {
+        const user = module.exports.fetchUser(data, { guild, client });
+        return (user === undefined) ? undefined : user.id;
     },
 
-    fetchFlag: function(args, flag = { property: false, short: [], long: [], callback: (x, i) => undefined, fallback: (x) => undefined }) {
-        let target; //Retorno. Devuelve una variante de callback si se ingresa la flag buscada de forma válida, o una variante de fallback si no
+    fetchArrows: (emojiscache) => [emojiscache.get('681963688361590897'), emojiscache.get('681963688411922460')],
+
+    fetchFlag: function(args, flag = { property, short: [], long: [], callback: (x, i) => undefined, fallback: (x) => undefined }) {
+        let target; //Retorno. Devuelve callback si se ingresa la flag buscada de forma válida, o fallback si no
+        const isFunc = (typeof flag.callback === 'function');
+
+        if(flag.property && !isFunc)
+            throw TypeError('Las flags de propiedad deben llamar una función.');
 
         //Recorrer parámetros e intentar procesar flags
         args.forEach((arg, i) => {
             if(flag.property && i === (args.length - 1)) return;
             arg = arg.toLowerCase();
-            if(flag.long !== undefined && flag.long.length && arg.startsWith('--')) {
+            if(flag.long && flag.long.length && arg.startsWith('--')) {
                 if(flag.long.includes(arg.slice(2))) {
-                    if(flag.property) target = flag.callback(args, i + 1); //Debe ser una función si es una flag de propiedad
-                    else target = (typeof flag.callback === 'function')?flag.callback():flag.callback; //De lo contrario, puede ser una función o un valor
+                    if(flag.property) target = flag.callback(args, i + 1);
+                    else target = isFunc?flag.callback():flag.callback; //De lo contrario, puede ser una función o un valor
                     args.splice(i, flag.property?2:1);
                 }
-            } else if(flag.short !== undefined && flag.short.length && arg.startsWith('-')) {
+            } else if(flag.short && flag.short.length && arg.startsWith('-')) {
                 for(c of arg.slice(1))
                     if(flag.short.includes(c)) {
                         if(flag.property) target = flag.callback(args, i + 1);
-                        else target = (typeof flag.callback === 'function')?flag.callback():flag.callback;
+                        else target = isFunc?flag.callback():flag.callback;
                         args.splice(i, flag.property?2:1);
                     }
             }

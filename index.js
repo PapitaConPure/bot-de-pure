@@ -102,16 +102,11 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
     console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
     global.boorutags = booru.setTags();
     const gds = client.guilds;
-    const sts = await Promise.all([
+    await Promise.all([
         gds.fetch(global.serverid.slot1),
         gds.fetch(global.serverid.slot2),
         gds.fetch(global.serverid.slot3)
-    ]);
-    global.slots = {
-        'slot1': sts[0],
-        'slot2': sts[1],
-        'slot3': sts[2]
-    };
+    ]).then(fetched => fetched.forEach((f, i) => global.slots[`slot${i + 1}`] = f));
     const logs = await Promise.all([
         global.slots.slot1.channels.resolve('870347940181471242'),
         global.slots.slot1.channels.resolve('870347965192097812')
@@ -127,7 +122,7 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
         global.bot_status.host = `${host.service}://${host.hostname}/`;
         confirm();
     } catch(err) {
-        console.log(chalk.red('Fallido'));
+        console.log(chalk.red('Fallido.'));
         console.error(err);
     }
     global.puretable = Array(16).fill(null).map(() => Array(16).fill('828736342372253697'));
@@ -152,26 +147,30 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
 	console.log(chalk.greenBright.bold('Bot conectado y funcionando.'));
 });
 
-client.on('messageCreate', async (message) => { //En caso de recibir un mensaje
+client.on('messageCreate', async message => { //En caso de recibir un mensaje
     const { content, author, channel, guild } = message;
     if(global.maintenance.length > 0 && channel.id !== global.maintenance) return;
     if(global.cansay === 0 && author.bot) return;
     const msg = content.toLowerCase();
-    const gid = guild.id;
-
+    const gid = guild ? guild.id : undefined;
+    
     //#region Operaciones de proceso e ignorar mensajes privados
     const logembed = new Discord.MessageEmbed().addField(author.tag, content || '*Mensaje vacío.*');
     if(guild) logembed.setAuthor(`${guild.name} • ${channel.name} (Click para ver)`, author.avatarURL({ dynamic: true }), message.url);
     else {
-        logembed.setAuthor('Mensaje privado (Click para ver)', author.avatarURL({ dynamic: true }), message.url);
+        logembed.setAuthor('Mensaje privado', author.avatarURL({ dynamic: true }));
         channel.send({ content: ':x: Uh... disculpá, no trabajo con mensajes directos.' });
-        return;
     }
     if(message.attachments.size)
         logembed.addField('Adjuntado:', message.attachments.map(attf => attf.url).join('\n'));
 
-    if(msg.startsWith(',confession ')) global.confch.send({ embeds: [logembed] });
-    else global.logch.send({ embeds: [logembed] });
+    if(global.logch === undefined || global.confch === undefined)
+        console.log(chalk.bold.red('Hay un problema con los canales de log.'));
+    else {
+        if(msg.startsWith(',confession ')) global.confch.send({ embeds: [logembed] });
+        else global.logch.send({ embeds: [logembed] });
+    }
+    if(!guild) return;
     //#endregion
 
     //#region Estadísticas
@@ -187,8 +186,8 @@ client.on('messageCreate', async (message) => { //En caso de recibir un mensaje
 
     //#region Respuestas rápidas
     if(guildfunc[gid])
-        fastGuildFunctions.forEach(frf => {
-            if(guildfunc[gid][frf]) guildfunc[gid][frf](message);
+        fastGuildFunctions.forEach(async frf => {
+            if(guildfunc[gid][frf]) await guildfunc[gid][frf](message);
         });
     //#endregion
     
@@ -289,7 +288,11 @@ client.on('interactionCreate', async interaction => {
             embeds: [errorembed]
         });
         stats.commands.failed++;
-		await interaction.reply({ content: ':warning: Ocurrió un error al ejecutar el comando', ephemeral: true });
+		await interaction.reply({ content: ':warning: Ocurrió un error al ejecutar el comando', ephemeral: true })
+        .catch(err => {
+           console.log('Posible interacción no registrada');
+           console.error(err);
+        });
 	}
 });
 
