@@ -1,3 +1,5 @@
+const andreasurl = 'https://i.imgur.com/GqepHtl.jpg';
+
 module.exports = {
 	name: 'andreas',
 	aliases: [
@@ -8,13 +10,13 @@ module.exports = {
 		'meme'
 	],
 
-	async execute(message, args) {
+	async execute({ channel }, _) {
 		//Acción de comando
-		message.channel.send({ files: ['https://i.imgur.com/GqepHtl.jpg'] });
+		channel.send({ files: [andreasurl] });
 	},
 
 	async interact(interaction) {
 		//Acción de comando
-		await interaction.reply({ files: ['https://i.imgur.com/GqepHtl.jpg'] });
+		await interaction.reply({ files: [andreasurl] });
 	}
 };

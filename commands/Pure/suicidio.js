@@ -13,19 +13,19 @@ module.exports = {
 		'meme'
 	],
 
-	async execute({ member }, args) {
+	async execute({ id, channel, member }, _) {
 		if(!member.roles.cache.some(r => r.id === hd)) {
 			member.roles.add(hd);
-			message.channel.send({
-				reply: { messageReference: message.id },
+			channel.send({
+				reply: { messageReference: id },
 				content: '<:houraidoll:853402616208949279> Shanghai Shanghai Shanghai Shanghai\nHourai Hourai Hourai Hourai'
 			});
 		}
 	},
 
-	async interact({ member }) {
-		if(!member.roles.cache.some(r => r.id === hd)) {
-			member.roles.add(hd);
+	async interact(interaction) {
+		if(!interaction.member.roles.cache.some(r => r.id === hd)) {
+			interaction.member.roles.add(hd);
 			interaction.reply({ content: '<:houraidoll:853402616208949279> Shanghai Shanghai Shanghai Shanghai\nHourai Hourai Hourai Hourai' });
 		}
 	}
