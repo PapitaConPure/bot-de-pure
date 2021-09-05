@@ -63,7 +63,7 @@ module.exports = {
 			if(extags.length)
 				Embed.addField('Tu búsqueda', `:mag_right: *${extags.trim().replace('*', '\\*').split(/ +/).join(', ')}*`)
 			Embed
-				.addField('Acciones', `<:tags:704612794921779290>Revelar etiquetas\n<:delete:704612795072774164> Eliminar`, true)
+				.addField('Acciones', `<:tags:704612794921779290> Revelar etiquetas\n<:delete:704612795072774164> Eliminar`, true)
 				.addField('Salsa', [
 						`[Gelbooru](https://gelbooru.com/index.php?page=post&s=view&id=${image.id})`,
 						image.source ? `[Original](${image.source})` : null
