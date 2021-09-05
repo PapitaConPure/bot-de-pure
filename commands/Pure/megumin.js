@@ -1,4 +1,4 @@
-const { p_pure } = require('../../localdata/config.json');
+const { peopleid, p_pure } = require('../../localdata/config.json');
 const { randRange, fetchFlag } = require('../../func');
 const { MessageEmbed } = require('discord.js'); //Integrar discord.js
 const { engines, gelbooru, getBaseTags } = require('../../localdata/booruprops.js'); //Variables globales
@@ -31,7 +31,7 @@ module.exports = {
 	
 	async execute(message, args) {
 		//Acción de comando
-		if(message.channel.nsfw) {
+		if(message.channel.nsfw && message.author.id !== peopleid.papita) {
 			require('./rakkidei.js').execute(message, args);
 			return;
 		}
