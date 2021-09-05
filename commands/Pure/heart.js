@@ -19,7 +19,8 @@ module.exports = {
 		'**Nota:** en canales NSFW, los resultados serán, respectivamente, NSFW\n' +
 		'**Nota 2:** no todos los motores funcionan y con algunos no habrá búsqueda personalizada',
     flags: [
-        'common'
+        'common',
+		'meme'
     ],
     options: [
 		'`<etiquetas?(...)>` _(Texto [múltiple])_ para filtrar resultados de búsqueda',

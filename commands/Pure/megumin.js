@@ -21,7 +21,8 @@ module.exports = {
 		'**Nota:** no intentes buscarla en canales NSFW, conchetumare :rage:\n' +
 		'**Nota 2:** no todos los motores funcionan y con algunos no habrá búsqueda personalizada',
     flags: [
-        'common'
+        'common',
+		'meme'
     ],
     options: [
 		'`<etiquetas?(...)>` _(Texto [múltiple])_ para filtrar resultados de búsqueda',
