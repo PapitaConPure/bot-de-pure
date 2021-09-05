@@ -1,7 +1,7 @@
 const { p_pure } = require('../../localdata/config.json');
 const { randRange, fetchFlag } = require('../../func');
 const { MessageEmbed } = require('discord.js'); //Integrar discord.js
-const { engines, gelbooru, getBaseTags } = require('../../localdata/booruprops.js'); //Variables globales
+const { engines, gelbooru, getBaseTags, getSearchTags } = require('../../localdata/booruprops.js'); //Variables globales
 const booru = require('booru');
 
 module.exports = {
@@ -42,7 +42,7 @@ module.exports = {
 			return;
 		}
 		const stags = `touhou ${getBaseTags(engine, message.channel.nsfw)}`;
-		const extags = (engine !== 'danbooru') ? args.map(arg => gelbooru.get(arg) || arg).join(' ') : '';
+		const extags = getSearchTags(args, engine);
 		
 		//Petición
 		try {
