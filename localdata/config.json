@@ -2,22 +2,14 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.7F",
+            "number": "Full.2.8.80",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo actualizaciones diarias. Es probable que existan comportamientos inesperados en algunos comandos.",
         "changelog": [
-            "Tareas de refactorización (2.9/4)",
+            "Tareas de refactorización (2.91/4)",
             "PLACEHOLDER_SLASHCMD",
-            "Corregidos errores en p!info y p!inforol",
-            "Corregido un error al usar prefijos en mayúsculas",
-            "Corregidos errores en slashs de p!caramelos y p!emotes",
-            "Mejoradas las búsquedas de usuario por nombre",
-            "Rehecho p!avatar para ser más rápido con búsq. múltiples",
-            "p!borrar ahora permite especificar un usuario",
-            "Corregido un error menor en p!estado",
-            "Mejorados métodos de testeo",
-            "Restaurados comandos p!touhou, p!megumin y p!heart"
+            "Agregado p!celeste"
         ],
         "todo": [
             "Por el amor a Dios, encontrar una forma óptima de fusionar los comandos de búsqueda de imagen. Muchas gracias Messi",
