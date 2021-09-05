@@ -94,7 +94,7 @@ module.exports = {
         .set('ringo', 'ringo*')
         .set('doremy', 'doremy_sweet')
         .set('sagume', 'kishin_sagume')
-        .set('junko', 'junko')
+        .set('junko', 'junko_(touhou)')
         .set('hecatia', 'hecatia_lapislazuli')
         .set('eternity', 'eternity_larva')
         .set('nemuno', 'sakata_nemuno')
