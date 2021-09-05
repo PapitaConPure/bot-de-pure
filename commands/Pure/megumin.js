@@ -1,138 +1,8 @@
-const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../localdata/config.json'); //Variables globales
-const axios = require('axios');
-
-const getRandomInt = function(_max) {
-  _max = Math.floor(_max);
-  let _randnum = Math.floor(Math.random() * _max);
-  if(_randnum === _max && _max > 0) _randnum--;
-  return _randnum;
-}
-
-const tmpfunc = async function(tmpch, arglist, tmpauth, msg) {;
-	tmpch.sendTyping();
-	let BotMessage = -1;
-	let srchtags = 'megumin -guro -furry -vore -webm -audio rating:';
-	let embedcolor;
-	let embedtitle;
-
-	//#region Presentación
-	if(tmpch.nsfw) {
-		srchtags += 'explicit -bestiality';
-		embedcolor = '#921131';
-		embedtitle = 'MEGUMIN Ó//w//Ò';
-	} else {
-		srchtags += 'safe -soles -bikini -breast_grab -revealing_clothes -panties -no_bra -no_panties';
-		embedcolor = '#e51a4c';
-		embedtitle = 'MEGUMIN ÙwÚ';
-	}
-	//#endregion
-
-	//#region Preparación de búsqueda
-	let srchpg = 0;
-	let customtags = '';
-	if(arglist.length) {
-		if(isNaN(arglist[0])) customtags += ` ${arglist[0]}`;
-		else {
-			if(arglist[0] < 2) {
-				tmpch.send({ content: ':warning: no se pueden buscar números de página menores que 2 (por defecto: 1).' });
-				return;
-			}
-			srchpg = getRandomInt(arglist[0]);
-		}
-		for(let i = 1; i < arglist.length; i++)
-			customtags += ' ' + arglist[i];
-	}
-	//#endregion
-
-	const srchlimit = 42;
-	{
-		let i = 0;
-		let foundpic = false;
-		let results = 0;
-		axios.get(
-			`https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${srchtags+customtags}&pid=${srchpg}&limit=${srchlimit}&api_key=ace81bbbcbf972d37ce0b8b07afccb00261f34ed39e06cd3a8d6936d6a16521b&user_id=497526&json=1`
-		).then((data) => {
-			data.data.forEach(image => { results++; });
-
-			//#region Enviar imagen aleatoria, si hay al menos una
-			const selectedpic = getRandomInt(results);
-			let showpg = ':book: ';
-			let showtag = ':mag_right: ';
-			if(!isNaN(arglist[0])) showpg += `[1~**${arglist[0]}**] => Seleccionada: ***${srchpg + 1}***`;
-			else showpg += 'No ingresaste un rango de páginas. `p!megumin <¿rango?> <¿etiquetas?>`'
-			if(customtags.length) showtag += `*${customtags.trim().split(/ +/).map(str => str = str.replace('*', '\\*')).join(', ')}*`;
-			else showtag += 'No ingresaste etiquetas. `p!megumin <¿rango?> <¿etiquetas?>`'; 
-			data.data.forEach(image => {
-				if(image !== undefined && i === selectedpic) {
-					//Crear y usar embed
-					const Embed = new Discord.MessageEmbed()
-						.setColor(embedcolor)
-						.setTitle(embedtitle)
-						.addField('Tu búsqueda', 
-							`${showpg}\n`+
-							`${showtag}`
-						)
-						.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
-						.addField('Acciones',
-							`Reacciona con <:tags:704612794921779290> para ver las tags.\n` +
-							`Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`
-						)
-						.setAuthor(`Comando invocado por ${tmpauth.username}`, tmpauth.avatarURL())
-						.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
-						.setImage(image.file_url);
-						
-					tmpch.send({ embeds: [Embed] }).then(sent => {
-						BotMessage = sent.id;
-						console.log(BotMessage);
-						const actions = [sent.client.emojis.cache.get('704612794921779290'), sent.client.emojis.cache.get('704612795072774164')];
-						sent.react(actions[0])
-							.then(() => sent.react(actions[1]))
-							.then(() => {
-								const filter = (rc, user) => !user.bot && actions.some(action => rc.emoji.id === action.id) && tmpauth.id === user.id;
-								const collector = sent.createReactionCollector({ filter: filter, time: 8 * 60 * 1000 });
-								let showtags = false;
-								collector.on('collect', reaction => {
-									const maxpage = 2;
-									if(reaction.emoji.id === actions[0].id) {
-										if(!showtags) {
-											const Embed2 = new Discord.MessageEmbed()
-												.setColor(embedcolor)
-												.setTitle(embedtitle)
-												.addField('Tu búsqueda', 
-													`${showpg}\n`+
-													`${showtag}`
-												)
-												.addField('Salsa', `https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`)
-												.addField('Tags', `*${image.tags.split(/ +/).join(', ')}*`)
-												.addField('Acciones', `Reacciona con <:delete:704612795072774164> si la imagen incumple alguna regla.`)
-												.setAuthor(`Comando invocado por ${tmpauth.username}`, tmpauth.avatarURL())
-												.setFooter('Comando en desarrollo. Siéntanse libres de reportar errores a Papita con Puré#6932.')
-												.setImage(image.file_url);	
-
-											sent.edit({ embeds: [Embed2] });
-											showtags = true;
-										}
-									} else {
-										msg.delete();
-										sent.delete();
-									}
-								});
-							});
-					});
-					foundpic = true;
-				}
-				i++;
-			});
-			//#endregion
-			
-			if(!foundpic) tmpch.send({ content: ':warning: No hay resultados para estas tags. Prueba usando tags diferentes o un menor número de página :C' });
-		}).catch((error) => {
-			tmpch.send({ content: ':warning: Ocurrió un error en la búsqueda. Prueba revisando las tags o usando un menor rango de páginas umu' });
-			console.error(error);
-		});
-	}
-}
+const { p_pure } = require('../../localdata/config.json');
+const { randRange, fetchFlag } = require('../../func');
+const { MessageEmbed } = require('discord.js'); //Integrar discord.js
+const { engines, gelbooru, getBaseTags } = require('../../localdata/booruprops.js'); //Variables globales
+const booru = require('booru');
 
 module.exports = {
 	name: 'megumin',
@@ -140,39 +10,103 @@ module.exports = {
         'megu', 'explosión', 'bakuretsu', 'papiwaifu', 'papawaifu', 'waifu',
 		'bestgirl', 'explosion'
     ],
+	brief: 'Muestra imágenes de Megumin, la esposa de Papita',
     desc: 'Muestra imágenes de Megumin, también conocida como "La Legítima Esposa de Papita con Puré"\n' +
+		'❤️🤎🧡💛💚💙💜🤍💟♥️❣️💕💞💓💗💖💝\n' +
+		'Por defecto, las imágenes se buscan con Gelbooru.\n' +
+		'Si lo deseas, puedes usar otro `--motor` de esta lista:\n' +
+		'```\n' +
+		`${engines.map(e => `${e.charAt(0).toUpperCase()}${e.slice(1)}`).join(', ')}\n` +
+		'```\n' +
 		'**Nota:** no intentes buscarla en canales NSFW, conchetumare :rage:\n' +
-		':heart: :brown_heart: :orange_heart: :yellow_heart: :green_heart: :blue_heart: :purple_heart: :white_heart: :heart_decoration: :hearts: :heart_exclamation: :two_hearts: :revolving_hearts: :heartbeat: :heartpulse: :sparkling_heart: :gift_heart:',
+		'**Nota 2:** no todos los motores funcionan y con algunos no habrá búsqueda personalizada',
     flags: [
-        'meme',
-		'exclusive',
-		'maintenance'
+        'common'
     ],
     options: [
-		':coffee: Queda pendiente rehacer comandos de imágenes con banderas y búsqueda ilimitada. Por favor, paciencia'
+		'`<etiquetas?(...)>` _(Texto [múltiple])_ para filtrar resultados de búsqueda',
+		'`-m <nombre>` o `--motor <nombre>` _(Texto)_ para usar otro motor'
     ],
-	callx: '<rango?> <etiquetas?>',
+	callx: '<etiquetas?(...)>',
 	
 	async execute(message, args) {
-		let serveridcheck = false;
-		for(sid in global.serverid) {
-			if(global.serverid.hasOwnProperty(sid)) {
-				sid = global.serverid[sid];
-			}
-			if(sid === message.guild.id) {
-				serveridcheck = true;
-				break;
-			}
-		}
-
-		if(!serveridcheck) {
-			message.channel.send({ content: '_Este comando no puede ser usado aquí..._' });
-			return;
-		}
+		//Acción de comando
 		if(message.channel.nsfw) {
-			message.channel.send({ content: '*fokiu.*' });
+			require('./rakkidei.js').execute(message, args);
 			return;
 		}
-		tmpfunc(message.channel, args, message.author, message);
+		message.channel.sendTyping();
+		const inputengine = fetchFlag(args, {property: true, short: ['m'], long: ['motor'], callback: (x, i) => x[i], fallback: 'gelbooru' });
+		const engine = inputengine.toLowerCase();
+		if(!engines.includes(engine)) {
+			message.channel.send(
+				`:warning: El motor **${inputengine}** no aparece en la lista de motores soportados.\n` +
+				`Usa \`${p_pure.raw}ayuda ${module.exports.name}\` para más información`
+			);
+			return;
+		}
+		const stags = `megumin ${getBaseTags(engine, message.channel.nsfw)}`;
+		const extags = (engine !== 'danbooru') ? args.map(arg => gelbooru.get(arg) || arg).join(' ') : '';
+		
+		//Petición
+		try {
+			const response = await booru.search(engine, [stags, extags].join(' '), { limit: 100, random: true })
+			//Manejo de respuesta
+			if(!response.length) {
+				message.channel.send({ content: `:warning: No hay resultados en **${inputengine}** para las tags **"${extags}"** en canales **${message.channel.nsfw ? 'NSFW' : 'SFW'}**` });
+				return;
+			}
+
+			//Dar formato a respuesta
+			const image = response[randRange(0, response.length)];
+			const Embed = new MessageEmbed()
+				.setColor(message.channel.nsfw ? '#38214e' : '#fa7b62')
+				.setAuthor(`Desde ${image.booru.domain}`, (engine === 'gelbooru') ? 'https://i.imgur.com/outZ5Hm.png' : message.author.avatarURL({ dynamic: true, size: 128 }))
+				.setTitle(message.channel.nsfw ? 'Tohitas O//w//O' : 'Tohas uwu')
+				.setImage(image.fileUrl);
+			if(extags.length)
+				Embed.addField('Tu búsqueda', `:mag_right: *${extags.trim().replace('*', '\\*').split(/ +/).join(', ')}*`)
+			Embed
+				.addField('Acciones', `<:tags:704612794921779290>Revelar etiquetas\n<:delete:704612795072774164> Eliminar`, true)
+				.addField('Salsa', [
+						`[Gelbooru](https://gelbooru.com/index.php?page=post&s=view&id=${image.id})`,
+						image.source ? `[Original](${image.source})` : null
+					].join('\n'), true);
+				
+			const sent = await message.channel.send({
+				reply: { messageReference: message.id },
+				embeds: [Embed]
+			});
+			const actions = [sent.client.emojis.cache.get('704612794921779290'), sent.client.emojis.cache.get('704612795072774164')];
+			Promise.all(actions.map(action => sent.react(action)));
+			const filter = (rc, user) => message.author.id === user.id && actions.some(action => rc.emoji.id === action.id);
+			const collector = sent.createReactionCollector({ filter: filter, time: 4 * 60 * 1000 });
+			let showtags = false;
+			collector.on('collect', reaction => {
+				if(reaction.emoji.id === actions[0].id) {
+					if(!showtags) {
+						Embed.addField(`Tags (${Math.min(image.tags.length, 40)}/${image.tags.length})`, `*${image.tags.slice(0,40).join(', ')}*`);
+						Embed.fields[1].value = `<:delete:704612795072774164> Eliminar`;
+						sent.edit({ embeds: [Embed] });
+						showtags = true;
+					}
+				} else {
+					if(!message.deleted) message.delete();
+					sent.delete();
+				}
+			});
+		} catch(error) {
+			console.error(error);
+			const errorembed = new MessageEmbed()
+				.setColor('RED')
+				.addField(
+					'Ocurrió un error al realizar una petición',
+					'Es probable que le hayan pegado un tiro al que me suministra las imágenes, así que prueba buscar más tarde, a ver si revive 👉👈\n' +
+					'```js\n' +
+					`${[error.name, error.message].join(': ')}\n` +
+					'```'
+				);
+			message.channel.send({ embeds: [errorembed] });
+		}
     },
 };

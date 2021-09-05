@@ -25,6 +25,7 @@
     "@discordjs/rest": "^0.1.0-canary.0",
     "@keyv/sqlite": "^2.0.2",
     "axios": "^0.21.1",
+    "booru": "^2.4.1",
     "canvas": "^2.8.0",
     "chalk": "^4.1.1",
     "discord-api-types": "^0.22.0",

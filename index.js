@@ -9,7 +9,6 @@ const fs = require('fs'); //Sistema de archivos
 const global = require('./localdata/config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
 const stats = require('./localdata/stats.json');
-const booru = require('./localdata/boorutags.js');
 const cmdex = require('./localdata/cmdExceptions.js');
 const guildfunc = require('./localdata/guildFunctions.js');
 const dns = require('dns'); //Detectar host
@@ -98,7 +97,6 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
     await func.modifyAct(client, 0);
 
     console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
-    global.boorutags = booru.setTags();
     const gds = client.guilds;
     await Promise.all([
         gds.fetch(global.serverid.slot1),
