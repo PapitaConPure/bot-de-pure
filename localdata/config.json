@@ -9,7 +9,8 @@
         "changelog": [
             "Tareas de refactorización (2.91/4)",
             "PLACEHOLDER_SLASHCMD",
-            "Agregado p!celeste"
+            "Agregado p!celeste",
+            "Corregido un error al ingresar etiquetas en p!megumin y p!heart"
         ],
         "todo": [
             "Por el amor a Dios, encontrar una forma óptima de fusionar los comandos de búsqueda de imagen. Muchas gracias Messi",
