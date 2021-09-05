@@ -63,7 +63,7 @@ module.exports = {
 			const Embed = new MessageEmbed()
 				.setColor(message.channel.nsfw ? '#38214e' : '#fa7b62')
 				.setAuthor(`Desde ${image.booru.domain}`, (engine === 'gelbooru') ? 'https://i.imgur.com/outZ5Hm.png' : message.author.avatarURL({ dynamic: true, size: 128 }))
-				.setTitle(message.channel.nsfw ? 'Tohitas O//w//O' : 'Tohas uwu')
+				.setTitle(message.channel.nsfw ? 'MEGUMIN Ú//w//Ù' : 'MEGUMIN ÙwÚ')
 				.setImage(image.fileUrl);
 			if(extags.length)
 				Embed.addField('Tu búsqueda', `:mag_right: *${extags.trim().replace('*', '\\*').split(/ +/).join(', ')}*`)
