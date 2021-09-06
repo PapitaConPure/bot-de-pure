@@ -27,7 +27,6 @@ module.exports = {
 		}
 
 		const hd = '682629889702363143'; //Hanged Doll
-		channel.send(`\`${gd}\``);
 		const member = guild.members.cache.get(fetchUserID(args.join(' '), { guild: guild, client: client }));
 		if(!member.roles.cache.some(r => r.id === hd)) {
 			member.roles.add(hd);
