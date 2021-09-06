@@ -20,21 +20,22 @@ module.exports = {
 
 	async execute(message, args) {
 		//Acción de comando
+		const { client, guild, channel } = message;
 		if(!args.length) {
-			message.channel.send({ content: ':warning: Debes indicar un usuario.' });
+			channel.send({ content: ':warning: Debes indicar un usuario.' });
 			return;
 		}
 
 		const hd = '682629889702363143'; //Hanged Doll
-		const gd = message.channel.guild;
-		const member = gd.members.cache.get(fetchUserID(args[0], gd, message.client));
+		channel.send(`\`${gd}\``);
+		const member = guild.members.cache.get(fetchUserID(args.join(' '), { guild: guild, client: client }));
 		if(!member.roles.cache.some(r => r.id === hd)) {
 			member.roles.add(hd);
-			message.channel.send({ content: `:moyai: Se ha colgado a **${ member.user.tag }**` });
+			channel.send({ content: `:moyai: Se ha colgado a **${ member.user.tag }**` });
 			message.delete();
 		} else {
 			member.roles.remove(member.roles.cache.filter(r => r.id === hd));
-			message.channel.send({ content: `:otter: Se ha descolgado a **${ member.user.tag }**` });
+			channel.send({ content: `:otter: Se ha descolgado a **${ member.user.tag }**` });
 		}
 	}
 };
