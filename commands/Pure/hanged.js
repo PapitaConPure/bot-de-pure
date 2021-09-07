@@ -3,7 +3,7 @@ const { fetchUserID } = require('../../func');
 module.exports = {
 	name: 'colgar',
 	aliases: [
-		'mutear', 'silenciar',
+		'mutear', 'silenciar', 'castrar',
 		'mute', 'hang', 'hanged',
 		'm', 'h'
 	],
@@ -28,12 +28,20 @@ module.exports = {
 
 		const hd = '682629889702363143'; //Hanged Doll
 		const member = guild.members.cache.get(fetchUserID(args.join(' '), { guild: guild, client: client }));
+		if(!member) {
+			message.delete();
+			const sent = await channel.send({ content: ':warning: La gente que no existe por lo general no tiene cuello <:invertido:720736131368485025>' });
+			setTimeout(() => sent.delete(), 1000 * 5);
+			return;
+		}
+
 		if(!member.roles.cache.some(r => r.id === hd)) {
 			member.roles.add(hd);
-			channel.send({ content: `:moyai: Se ha colgado a **${ member.user.tag }**` });
 			message.delete();
+			channel.send({ content: `:moyai: Se ha colgado a **${ member.user.tag }**` });
 		} else {
 			member.roles.remove(member.roles.cache.filter(r => r.id === hd));
+			message.delete();
 			channel.send({ content: `:otter: Se ha descolgado a **${ member.user.tag }**` });
 		}
 	}
