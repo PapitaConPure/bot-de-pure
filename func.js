@@ -733,7 +733,13 @@ module.exports = {
                     if(flag.short.includes(c)) {
                         if(flag.property) target = flag.callback(args, i + 1);
                         else target = isFunc?flag.callback():flag.callback;
-                        args.splice(i, flag.property?2:1);
+                        if(arg.length > 2) {
+                            const rmva = new RegExp(c, 'g')
+                            let temp = args.splice(i, flag.property?2:1);
+                            args.push(temp[0].replace(rmva, ''));
+                            if(flag.property) args.push(temp[1]);
+                        } else
+                            args.splice(i, flag.property?2:1);
                     }
             }
 		});

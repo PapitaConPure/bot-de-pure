@@ -2,6 +2,7 @@ const { readdirSync } = require('fs'); //Integrar operaciones sistema de archivo
 const { MessageEmbed } = require('discord.js');
 const { p_pure, serverid } = require('../../localdata/config.json'); //Variables globales
 const { stringify } = require('querystring');
+const { fetchFlag } = require('../../func');
 
 module.exports = {
 	name: 'ayuda',
@@ -10,7 +11,8 @@ module.exports = {
         'help', 'commands',
         'h'
     ],
-    desc: 'Muestra una lista de comandos o un comando en detalle.',
+    brief: 'Muestra una lista de comandos o un comando en detalle.',
+    desc: 'Muestra una lista de comandos deseada o un comando en detalle.',
     flags: [
         'common'
     ],
@@ -25,110 +27,88 @@ module.exports = {
     ],
     callx: '<comando?>',
     
-	async execute(message, args) {
+	async execute({ client, channel, author, member }, args) {
         const cfiles = readdirSync('./commands/Pure').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
-        let fex = false;
-        let fmeme = false;
-        let fmod = false;
-        let fpapa = false;
-        let fhourai = false;
-        let fall = false;
-        let search = 'n';
-        args.map(arg => {
-            if(arg.startsWith('--'))
-                switch(arg.slice(2)) {
-                case 'meme': fmeme = true; break;
-                case 'mod': fmod = true; break;
-                case 'papa': fpapa = true; break;
-                case 'hourai': fhourai = true; break;
-                case 'todo': fall = true; break;
-                }
-            else if(arg.startsWith('-')) {
-                for(c of arg.slice(1))
-                    switch(c) {
-                    case 'x': fex = true; break;
-                    case 'm': fmod = true; break;
-                    case 'p': fpapa = true; break;
-                    case 'h': fhourai = true; break;
-                    case 't': fall = true; break;
-                    }
-            } else if(search === 'n')
-                search = arg;
-        });
-
-        let list = {
-            'name': [],
-            'aliases': [],
-            'flags': [],
-            'options': [],
-            'desc': '',
-            'callx': ''
+        const fex = fetchFlag(args, { short: ['x'], callback: true });
+        const auth = {
+            mod: member.permissions.has('MANAGE_ROLES'),
+            papa: author.id === '423129757954211880',
+            hourai: channel.guild.id === serverid.hourai
         };
-        let item = 0;
+        const filters = [
+            fetchFlag(args, {               long: ['meme'],   callback: 'meme'   }),
+            fetchFlag(args, { short: ['m'], long: ['mod'],    callback: 'mod'    }),
+            fetchFlag(args, { short: ['p'], long: ['papa'],   callback: 'papa'   }),
+            fetchFlag(args, { short: ['h'], long: ['hourai'], callback: 'hourai' })
+        ].filter(s => s);
+        
+        let fall = fetchFlag(args, { short: ['t'], long: ['todo'], callback: true });
+        let search = args.length ? args[0] : null;
+
+        let list = [];
+        const embed = new MessageEmbed().setColor('#608bf3');
+        const aurl = client.user.avatarURL({ format: 'png', dynamic: true, size: 512 });
         
         for(const file of cfiles) {
             const command = require(`../../commands/Pure/${file}`);
-            if(search === 'n') {
-                if(command.flags !== undefined) {
-                    if(!command.flags.includes('guide')) {
-                        const cmeme = fmeme? true : !command.flags.includes('meme');
-                        const cmod = (fmod && message.member.permissions.has('MANAGE_ROLES'))? true : !command.flags.includes('mod');
-                        const cpapa = (fpapa && message.author.id === '423129757954211880')? true : !command.flags.includes('papa');
-                        const chourai = (fhourai && message.channel.guild.id === serverid.hourai)? true : !command.flags.includes('hourai');
-                        const cex = fex? !command.flags.includes('common') : true;
-                        const call = fall? true : (!command.flags.includes('maintenance') && !command.flags.includes('outdated'));
-                    
-                        if(cmeme && cmod && cpapa && chourai && cex && call) {
-                            list.name[item] = command.name;
-                            item++;
-                        }
+            const { name, aliases, flags } = command;
+            
+            if(!search) {
+                let filtered = true;
+                if(flags) {
+                    filtered = !flags.includes('guide');
+                    if(filtered) {
+                        filtered = flags.every(f => (auth[f] === undefined || auth[f]));
+                        if(filtered && filters.length)
+                            filtered = flags.some(f => filters.includes(f));
                     }
-                } else {
-                    list.name[item] = command.name;
-                    item++;
                 }
-            } else if(search === command.name || ((command.aliases !== undefined)?command.aliases.some(alias => alias === search):false)) {
-                list.name[0] = command.name;
-                list.aliases = command.aliases;
-                list.flags = command.flags;
-                list.options = command.options;
-                list.desc = command.desc;
-                list.callx = command.callx;
+                if(filtered)
+                    list.push(name);
+            } else if([name, ...(aliases || [])].includes(search)) {
+                const title = s => {
+                    pfi = s.indexOf('-') + 1;
+                    s = (list.flags.includes('guide')) ? `${s.slice(pfi)} (Página de Guía)`  : s;
+                    s = (list.flags.includes('mod'))   ? `${s} (Mod)`                        : s;
+                    s = (list.flags.includes('papa'))  ? `${s.slice(pfi)} (Papita con Puré)` : s;
+                    return `${s[0].toUpperCase()}${s.slice(1)}`;
+                };
+                const listExists = l => l && l[0].length;
+
+                embed.setAuthor(title(name), aurl)
+                    .addField('Nombre', `\`${name}\``, true)
+                    .addField('Alias', listExists(aliases)
+                        ? (aliases.map(i => `\`${i}\``).join(', '))
+                        : ':label: Sin alias', true)
+                    .addField('Descripción', (cmdh.desc !== undefined && command.desc.length > 0)
+                        ? command.desc
+                        :':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde');
+                
+                if(flags ? !flags.includes('guide') : true)
+                    embed.addField('Llamado', `\`${p_pure.raw}${command.name}${command.callx ? ` ${command.callx}` : ''}\``, true)
+                        .addField(`Opciones (\`${p_pure.raw}x -x --xxx <x>\`)`, listExists(command.options)
+                            ? command.options.join('\n')
+                            : ':abacus: Sin opciones', true)
+                        .addField('Identificadores', listExists(flags)
+                            ? (flags.map(i => `\`${i}\``).join(', ').toUpperCase())
+                            : ':question: Este comando no tiene identificadores por ahora');
                 break;
             }
         }
 
-        const aurl = message.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 });
-        let embed = new MessageEmbed().setColor('#608bf3');
-        if(search === 'n') {
+        const pfr = p_pure.raw;
+        const hcmd = `${pfr}${module.exports.name}`;
+        if(!search)
             embed.setAuthor('Lista de comandos', aurl)
-            .addField('Comandos: ejemplos de uso', `\`${p_pure.raw}ayuda -xmph --meme\`\n\`${p_pure.raw}avatar @Usuario\`\n\`${p_pure.raw}dados 5d6\``)
-            .addField(`Usa \`${p_pure.raw}ayuda <comando>\` para más información sobre un comando`, (list.name.length > 0)?list.name.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para realizar tu búsqueda).')
-            .addField(`Guía introductoria`, `Usa \`${p_pure.raw}ayuda g-indice\` para ver la página de índice de la guía introductoria de Bot de Puré`);
-        } else {
-            const title = s => {
-                s = (s.startsWith('g-'))?`${s.slice(2)} (Página de Guía)`:s;
-                s = (list.flags.includes('mod'))?`${s} (Mod)`:s;
-                s = (list.flags.includes('papa'))?`${s.slice(5)} (Papita con Puré)`:s;
-                return `${s[0].toUpperCase()}${s.slice(1)}`;
-            };
-            if(list.name.length > 0) {
-                const arrayExists = arr => arr !== undefined && arr.some(it => it.length > 0);
-                const flagsExist = arrayExists(list.flags);
-                embed.setAuthor(title(list.name[0]), aurl)
-                    .setFooter(`Usa "${p_pure.raw}ayuda g-indice" para aprender más sobre comandos`)
-                    .addField('Nombre', `\`${list.name[0]}\``, true)
-                    .addField('Alias', arrayExists(list.aliases)?(list.aliases.map(i => `\`${i}\``).join(', ')):':label: Sin alias', true)
-                    .addField('Descripción', (list.desc !== undefined && list.desc.length > 0)?list.desc:':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde');
-                if(!flagsExist || !list.flags.some(flag => flag === 'guide'))
-                    embed.addField('Llamado', `\`${p_pure.raw}${list.name[0]}${(list.callx !== undefined)?` ${list.callx}`:''}\``, true)
-                        .addField(`Opciones (\`${p_pure.raw}x -x --xxx <x>\`)`, arrayExists(list.options)?list.options.join('\n'):':abacus: Sin opciones', true)
-                        .addField('Identificadores', flagsExist?(list.flags.map(i => `\`${i}\``).join(', ').toUpperCase()):':question: Este comando no tiene identificadores por ahora');
-            } else
+                .addField('Comandos: ejemplos de uso', `\`${hcmd} -xmph --meme\`\n\`${pfr}avatar @Usuario\`\n\`${pfr}dados 5d6\``)
+                .addField(`Usa \`${hcmd} <comando>\` para más información sobre un comando`, (list.length > 0) ? list.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para realizar tu búsqueda)')
+                .addField(`Guía introductoria`, `Usa \`${hcmd} g-indice\` para ver la página de índice de la guía introductoria de Bot de Puré`);
+        else {
+            if(!embed.author)
                 embed.setAuthor('Sin resultados', aurl)
-                    .addField('No se ha encontrado ningún comando con este nombre', `Utiliza \`${p_pure.raw}ayuda\` para ver una lista de comandos disponibles y luego usa \`${p_pure.raw}comando <comando>\` para ver un comando en específico`);
+                    .addField('No se ha encontrado ningún comando con este nombre', `Utiliza \`${hcmd}\` para ver una lista de comandos disponibles y luego usa \`${pfr}comando <comando>\` para ver un comando en específico`);
+            embed.setFooter(`Usa "${hcmd} ${require('./g-indice.js').name}" para aprender más sobre comandos`);
         }
-        
-        message.channel.send({ embeds: [embed] });
+        channel.send({ embeds: [embed] });
     },
 };

@@ -2,18 +2,20 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.80",
+            "number": "Full.2.8.84",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo actualizaciones diarias. Es probable que existan comportamientos inesperados en algunos comandos.",
         "changelog": [
-            "Tareas de refactorización (2.91/4)",
+            "Tareas de refactorización (2.95/4)",
             "PLACEHOLDER_SLASHCMD",
             "Agregado p!celeste",
-            "Corregido un error al ingresar etiquetas en p!megumin y p!heart"
+            "Corregido un error al ingresar etiquetas en p!megumin y p!heart",
+            "p!buscar agregado",
+            "Corregido un error con el procesado de múltiples `-banderas` cortas",
+            "Corregido pequeño error en p!lechita al ingresar un usuario"
         ],
         "todo": [
-            "Por el amor a Dios, encontrar una forma óptima de fusionar los comandos de búsqueda de imagen. Muchas gracias Messi",
             "Minijuegos individuales y tipo-fiesta",
             "Base de datos en la nube",
             "Personalización de Bot a nivel de servidor",

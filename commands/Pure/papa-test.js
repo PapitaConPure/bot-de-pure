@@ -27,7 +27,7 @@ module.exports = {
             property: true,
             short: [ 'd', 'p' ],
             long: [ 'cuarta', 'delta', 'prop', 'usuario' ],
-            callback: (x, i) => message.client.users.cache.get(fetchUserID(x[i], message.guild, message.client)).username,
+            callback: (x, i) => message.client.users.cache.get(fetchUserID(x[i], message)).username,
             fallback: () => { message.channel.send({ content: 'Tu vieja.' }); return undefined; }
         });
 
