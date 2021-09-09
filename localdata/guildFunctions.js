@@ -3,7 +3,8 @@ const sid = global.serverid;
 
 module.exports = {
     [sid.hourai]: {
-        async findBotInfraction({ content, channel, author, member, id }) {
+        async findBotInfraction(message) {
+            const { client, content, channel, author, member, id } = message;
             const infr = global.hourai.infr;
             const whitech = infr.channels;
 
@@ -24,24 +25,13 @@ module.exports = {
                     let imsg;
                     switch(total) {
                     case 1:
-                        imsg = await channel.send({
-                            reply: { messageReference: id },
-                            content: `Detecto... bots fuera de botposteo <:empty:856369841107632129>`
-                        });
+                        await message.react(client.emojis.cache.get('856369841107632129'));
                         break;
                     case 2:
-                        imsg = await channel.send({
-                            reply: { messageReference: id },
-                            allowedMentions: { repliedUser: true },
-                            content: `Párale conchetumare, vete a <#${Object.keys(whitech).find(key => whitech[key] === 'botposting')}> <:despair:852764014840905738>`
-                        });
+                        await message.react(client.emojis.cache.get('852764014840905738'));
                         break;
                     default:
-                        imsg = await channel.send({
-                            reply: { messageReference: id },
-                            allowedMentions: { repliedUser: true },
-                            content: 'Ahora sí te cagaste ijoelpico <:tenshismug:859874631795736606>'
-                        });
+                        await message.react(client.emojis.cache.get('859874631795736606'));
                         const hd = '682629889702363143'; //Hanged Doll
                         try {
                             if(!member.roles.cache.some(r => r.id === hd))
@@ -51,7 +41,6 @@ module.exports = {
                         }
                         break;
                     }
-                    setTimeout(() => imsg.delete(), 1000 * 5);
                 }
             }
         },
