@@ -22,7 +22,7 @@ module.exports = {
         '`--meme` para ver comandos meme',
         '`-m` o `--mod` para ver comandos de moderación',
         '`-p` o `--papa` para ver comandos de Papita con Puré',
-        '`-h` o `--hourai` para ver comandos exclusivos de Hourai',
+        '`-h` o `--hourai` para ver comandos exclusivos de Hourai Doll',
         '`-t` o `--todo` para ver comandos inhabilitados'
     ],
     callx: '<comando?>',
@@ -48,6 +48,8 @@ module.exports = {
         let list = [];
         const embed = new MessageEmbed().setColor('#608bf3');
         const aurl = client.user.avatarURL({ format: 'png', dynamic: true, size: 512 });
+        const pfr = p_pure.raw;
+        const hcmd = `${pfr}${module.exports.name}`;
         
         for(const file of cfiles) {
             const command = require(`../../commands/Pure/${file}`);
@@ -56,11 +58,13 @@ module.exports = {
             if(!search) {
                 let filtered = true;
                 if(flags) {
-                    filtered = !flags.includes('guide');
+                    filtered = !flags.includes('guide') && (fall || !flags.includes('maintenance'));
                     if(filtered) {
                         filtered = flags.every(f => (auth[f] === undefined || auth[f]));
-                        if(filtered && filters.length)
-                            filtered = flags.some(f => filters.includes(f));
+                        if(filtered && filters.length) {
+                            if(fex) filtered = filters.every(f => flags.includes(f));
+                            else filtered = filters.some(f => flags.includes(f));
+                        }
                     }
                 }
                 if(filtered)
@@ -68,9 +72,9 @@ module.exports = {
             } else if([name, ...(aliases || [])].includes(search)) {
                 const title = s => {
                     pfi = s.indexOf('-') + 1;
-                    s = (list.flags.includes('guide')) ? `${s.slice(pfi)} (Página de Guía)`  : s;
-                    s = (list.flags.includes('mod'))   ? `${s} (Mod)`                        : s;
-                    s = (list.flags.includes('papa'))  ? `${s.slice(pfi)} (Papita con Puré)` : s;
+                    s = (flags.includes('guide')) ? `${s.slice(pfi)} (Página de Guía)`  : s;
+                    s = (flags.includes('mod'))   ? `${s} (Mod)`                        : s;
+                    s = (flags.includes('papa'))  ? `${s.slice(pfi)} (Papita con Puré)` : s;
                     return `${s[0].toUpperCase()}${s.slice(1)}`;
                 };
                 const listExists = l => l && l[0].length;
@@ -80,13 +84,13 @@ module.exports = {
                     .addField('Alias', listExists(aliases)
                         ? (aliases.map(i => `\`${i}\``).join(', '))
                         : ':label: Sin alias', true)
-                    .addField('Descripción', (cmdh.desc !== undefined && command.desc.length > 0)
+                    .addField('Descripción', (command.desc !== undefined && command.desc.length > 0)
                         ? command.desc
                         :':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde');
                 
                 if(flags ? !flags.includes('guide') : true)
-                    embed.addField('Llamado', `\`${p_pure.raw}${command.name}${command.callx ? ` ${command.callx}` : ''}\``, true)
-                        .addField(`Opciones (\`${p_pure.raw}x -x --xxx <x>\`)`, listExists(command.options)
+                    embed.addField('Llamado', `\`${pfr}${command.name}${command.callx ? ` ${command.callx}` : ''}\``, true)
+                        .addField(`Opciones (\`${pfr}x -x --xxx <x>\`)`, listExists(command.options)
                             ? command.options.join('\n')
                             : ':abacus: Sin opciones', true)
                         .addField('Identificadores', listExists(flags)
@@ -96,12 +100,10 @@ module.exports = {
             }
         }
 
-        const pfr = p_pure.raw;
-        const hcmd = `${pfr}${module.exports.name}`;
         if(!search)
             embed.setAuthor('Lista de comandos', aurl)
                 .addField('Comandos: ejemplos de uso', `\`${hcmd} -xmph --meme\`\n\`${pfr}avatar @Usuario\`\n\`${pfr}dados 5d6\``)
-                .addField(`Usa \`${hcmd} <comando>\` para más información sobre un comando`, (list.length > 0) ? list.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para realizar tu búsqueda)')
+                .addField(`Usa \`${hcmd} <comando>\` para más información sobre un comando`, (list.length > 0) ? list.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para buscar un cierto identificador)')
                 .addField(`Guía introductoria`, `Usa \`${hcmd} g-indice\` para ver la página de índice de la guía introductoria de Bot de Puré`);
         else {
             if(!embed.author)
