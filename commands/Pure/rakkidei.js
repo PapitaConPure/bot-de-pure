@@ -25,9 +25,9 @@ module.exports = {
 		'common'
 	],
 
-	async execute(message, _) {
+	async execute({ channel }, _) {
 		//Acción de comando
-		message.channel.send({
+		channel.send({
 			content: phrase[randRange(0, phrase.length)],
 			files: [tenshiurl]
 		});

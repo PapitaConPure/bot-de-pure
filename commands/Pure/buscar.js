@@ -30,6 +30,22 @@ module.exports = {
 	callx: '<etiquetas?(...)>',
 	
 	async searchImage(message, args, searchOpt = { cmdtag: '', nsfwtitle: 'Búsqueda NSFW', sfwtitle: 'Búsqueda' }) {
+		if(message.channel.nsfw) {
+			let abort = true;
+			switch(searchOpt.cmdtag) {
+			case 'megumin':
+				if(message.author.id !== peopleid.papita)
+					require('./rakkidei.js').execute(message, []);
+				break;
+			case 'holo':
+				require('./rakkidei.js').execute(message, []);
+				break;
+			default:
+				abort = false;
+			}
+			if(abort) return;
+		}
+
 		//Acción de comando
 		message.channel.sendTyping();
 		const inputengine = fetchFlag(args, {property: true, short: ['m'], long: ['motor'], callback: (x, i) => x[i], fallback: 'gelbooru' });
