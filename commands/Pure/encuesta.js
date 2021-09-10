@@ -133,7 +133,7 @@ module.exports = {
 				.setTitle(`${message.guild.name} » Encuesta finalizada`)
 				.addField(question ? question : 'Votos finales', options
 					.sort((a,b) => (counts[b.emote.id] || 0) - (counts[a.emote.id] || 0))
-					.map(o => `${o.emote} ${o.text}`)
+					.map(o => `${o.emote} **x ${(counts[o.emote.id] || 1) - 1}** ${o.text}`)
 					.join('\n'));
 			message.channel.send({ embeds: [embed] });
 			if(channel.id !== message.channel.id)
