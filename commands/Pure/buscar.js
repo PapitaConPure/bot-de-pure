@@ -1,6 +1,6 @@
 const { peopleid, p_pure } = require('../../localdata/config.json');
 const { randRange, fetchFlag } = require('../../func');
-const { MessageEmbed } = require('discord.js'); //Integrar discord.js
+const { MessageEmbed, Permissions } = require('discord.js'); //Integrar discord.js
 const { engines, getBaseTags, getSearchTags } = require('../../localdata/booruprops.js'); //Variables globales
 const booru = require('booru');
 const rakki = require('./rakkidei.js');
@@ -110,8 +110,9 @@ module.exports = {
 						showtags = true;
 					}
 				} else {
-					if(!message.deleted) message.delete();
 					sent.delete();
+					if(!message.deleted && message.guild.me.permissionsIn(message.channel).has(Permissions.FLAGS.MANAGE_MESSAGES))
+						message.delete();
 				}
 			});
 		} catch(error) {

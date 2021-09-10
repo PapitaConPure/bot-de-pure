@@ -34,7 +34,7 @@ module.exports = {
                         await message.react(client.emojis.cache.get('859874631795736606'));
                         const hd = '682629889702363143'; //Hanged Doll
                         try {
-                            if(!member.roles.cache.some(r => r.id === hd))
+                            if(!member.roles.cache.has(hd))
                                 member.roles.add(hd);
                         } catch(err) {
                             imsg = await channel.send({ content: `<:wtfff:855940251892318238> Ese wn tiene demasia'o ki. Cuélgalo tú po'.\n\`\`\`\n${err.name}` });

@@ -35,7 +35,7 @@ module.exports = {
 			return;
 		}
 
-		if(!member.roles.cache.some(r => r.id === hd)) {
+		if(!member.roles.cache.has(hd)) {
 			member.roles.add(hd);
 			message.delete();
 			channel.send({ content: `:moyai: Se ha colgado a **${ member.user.tag }**` });

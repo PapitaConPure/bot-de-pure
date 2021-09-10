@@ -14,7 +14,7 @@ module.exports = {
 	],
 
 	async execute({ id, channel, member }, _) {
-		if(!member.roles.cache.some(r => r.id === hd)) {
+		if(!member.roles.cache.has(hd)) {
 			member.roles.add(hd);
 			channel.send({
 				reply: { messageReference: id },
@@ -24,7 +24,7 @@ module.exports = {
 	},
 
 	async interact(interaction) {
-		if(!interaction.member.roles.cache.some(r => r.id === hd)) {
+		if(!interaction.member.roles.cache.has(hd)) {
 			interaction.member.roles.add(hd);
 			interaction.reply({ content: '<:houraidoll:853402616208949279> Shanghai Shanghai Shanghai Shanghai\nHourai Hourai Hourai Hourai' });
 		}

@@ -316,7 +316,7 @@ module.exports = {
                 const filter = (rc, user) => !user.bot && rc.emoji.id === candyemote && miembro.user.id === user.id;
                 const collector = sent.createReactionCollector({ filter: filter, time: 8 * 60 * 1000 });
                 collector.on('collect', () => {
-                    if(miembro.roles.cache.some(role => role.id === candyrole)) {
+                    if(miembro.roles.cache.has(candyrole)) {
                         canal.send({ content: 'Oe tranqui po, que ya tení tus caramelos <:kageuwu:742506313258369056>' });
                         collector.stop();
                     } else {
