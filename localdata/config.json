@@ -14,7 +14,8 @@
             "p!buscar agregado",
             "Corregido un error con el procesado de múltiples `-banderas` cortas",
             "Corregido pequeño error en p!lechita al ingresar un usuario",
-            "p!vtubers agregado"
+            "p!vtubers agregado",
+            "Corregido un error al usar variantes de p!buscar en Hilos"
         ],
         "todo": [
             "Minijuegos individuales y tipo-fiesta",

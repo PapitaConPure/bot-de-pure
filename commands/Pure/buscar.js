@@ -31,7 +31,13 @@ module.exports = {
 	callx: '<etiquetas?(...)>',
 	
 	async searchImage(message, args, searchOpt = { cmdtag: '', nsfwtitle: 'Búsqueda NSFW', sfwtitle: 'Búsqueda' }) {
-		if(message.channel.nsfw) {
+		//Saber si el canal o thread es NSFW o perteneciente a un canal NSFW
+		const isnsfw = message.channel.isThread()
+			? message.channel.parent.nsfw
+			: message.channel.nsfw;
+
+		//Bannear lewds de Megumin y Holo >:C
+		if(isnsfw) {
 			if(searchOpt.cmdtag.length) {
 				let abort = true;
 				switch(searchOpt.cmdtag) {
@@ -64,24 +70,25 @@ module.exports = {
 			);
 			return;
 		}
-		const stags = [searchOpt.cmdtag, getBaseTags(engine, message.channel.nsfw)].join(' ');
+		const stags = [searchOpt.cmdtag, getBaseTags(engine, isnsfw)].join(' ');
 		const extags = getSearchTags(args, engine, searchOpt.cmdtag);
+		console.log({ args: args, isNSFWChannel: isnsfw, stags: stags, extags: extags});
 		
 		//Petición
 		try {
-			const response = await booru.search(engine, [stags, extags].join(' '), { limit: 100, random: true })
+			const response = await booru.search(engine, [stags, extags].join(' '), { limit: 100, random: true });
 			//Manejo de respuesta
 			if(!response.length) {
-				message.channel.send({ content: `:warning: No hay resultados en **${inputengine}** para las tags **"${extags}"** en canales **${message.channel.nsfw ? 'NSFW' : 'SFW'}**` });
+				message.channel.send({ content: `:warning: No hay resultados en **${inputengine}** para las tags **"${extags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` });
 				return;
 			}
 
 			//Dar formato a respuesta
 			const image = response[randRange(0, response.length)];
 			const Embed = new MessageEmbed()
-				.setColor(message.channel.nsfw ? '#38214e' : '#fa7b62')
+				.setColor(isnsfw ? '#38214e' : '#fa7b62')
 				.setAuthor(`Desde ${image.booru.domain}`, (engine === 'gelbooru') ? 'https://i.imgur.com/outZ5Hm.png' : message.author.avatarURL({ dynamic: true, size: 128 }))
-				.setTitle(message.channel.nsfw ? searchOpt.nsfwtitle : searchOpt.sfwtitle)
+				.setTitle(isnsfw ? searchOpt.nsfwtitle : searchOpt.sfwtitle)
 				.setImage(image.fileUrl);
 			if(extags.length)
 				Embed.addField('Tu búsqueda', `:mag_right: *${extags.trim().replace('*', '\\*').split(/ +/).join(', ')}*`)
