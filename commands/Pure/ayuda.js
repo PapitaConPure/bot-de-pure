@@ -77,7 +77,7 @@ module.exports = {
                     s = (flags.includes('papa'))  ? `${s.slice(pfi)} (Papita con Puré)` : s;
                     return `${s[0].toUpperCase()}${s.slice(1)}`;
                 };
-                const listExists = l => l && l[0].length;
+                const listExists = l => l && l[0] && l[0].length;
 
                 embed.setAuthor(title(name), aurl)
                     .addField('Nombre', `\`${name}\``, true)

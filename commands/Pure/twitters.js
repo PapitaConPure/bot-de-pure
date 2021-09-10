@@ -17,7 +17,7 @@ module.exports = {
 		'mod',
 		'hourai'
 	],
-	options: [,
+	options: [
 		'`<twitters(...)>` _(enlace: https://twitter.com/ [múltiple])_ para colocar uno o más Twitters en un nuevo tablón',
 		'`--canal <ch>` o `-c <ch>` _(canal)_ para especificar en qué canal enviar/editar un tablón',
 		'`--id <msgid>` _(ID de mensaje)_ para especificar un tablón ya enviado a editar',

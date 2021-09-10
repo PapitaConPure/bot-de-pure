@@ -1,3 +1,4 @@
+const { fetchFlag } = require('../../func');
 const { serverid } = require('../../localdata/config.json'); //Variables globales
 
 module.exports = {
@@ -17,41 +18,22 @@ module.exports = {
     callx: '<mensaje>',
 	
 	async execute(message, args) {
-        if(args.length > 0) {
-            let dflag = false;
+        //Acción de comando
+        const del = fetchFlag(args, { short: ['b', 'd'], long: ['borrar', 'delete'], callback: true });
 
-            //Lectura de flags; las flags ingresadas se ignoran como argumentos
-            args = args.map(arg => {
-                let ignore = true;
-                if(arg.startsWith('--'))
-                    switch(arg.slice(2)) {
-                    case 'borrar': dflag = true; break;
-                    case 'delete': dflag = true; break;
-                    default: ignore = false; break;
-                    }
-                else if(arg.startsWith('-'))
-                    for(c of arg.slice(1))
-                        switch(c) {
-                        case 'b': dflag = true; break;
-                        case 'd': dflag = true; break;
-                        default: ignore = false; break;
-                        }
-                else ignore = false;
+        if(!args.length) {
+            message.channel.send({ content: ':warning: tienes que especificar lo que quieres que diga.' });
+            return;
+        }
 
-                if(ignore) return undefined;
-                else return arg;
-            }).filter(arg => arg !== undefined);
-
-            //Acción de comando
-            if(dflag) message.delete();
-            const sentence = args.join(' ');
-
-            const minus = sentence.toLowerCase();
-            if(message.channel.guild.id === serverid.hourai && minus.indexOf('hourai') !== -1 && minus.indexOf('hourai doll') !== minus.indexOf('hourai') && minus.indexOf('houraidoll') === -1)
-                message.channel.send({ content: 'No me hagai decir weas de hourai, ¿yapo? Gracias <:haniwaSmile:659872119995498507>' });
-            else if(sentence.length === 0)
-                message.channel.send({ content: ':warning: tienes que especificar lo que quieres que diga.' });
-            else message.channel.send({ content: sentence });
-        } else message.channel.send({ content: ':warning: tienes que especificar lo que quieres que diga.' });
+        const sentence = args.join(' ');
+        if(message.guild.id === serverid.hourai && sentence.toLowerCase().indexOf(/h+(\W*_*)*o+(\W*_*)*u+(\W*_*)*r+(\W*_*)*a+(\W*_*)*i+(\W*_*)*/g) !== -1){
+            message.channel.send({ content: 'No me hagai decir weas de hourai, ¿yapo? Gracias <:haniwaSmile:659872119995498507>' });
+            return;
+        }
+        
+        await message.channel.send(sentence.split(/ +#[Nn] +/g).join('\n'));
+        if(del && !message.deleted && message.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES))
+            await message.delete()
     },
 };
