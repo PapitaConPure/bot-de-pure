@@ -712,7 +712,8 @@ module.exports = {
     fetchArrows: (emojiscache) => [emojiscache.get('681963688361590897'), emojiscache.get('681963688411922460')],
 
     fetchFlag: function(args, flag = { property, short: [], long: [], callback: (x, i) => undefined, fallback: (x) => undefined }) {
-        if(!args.length) return undefined; //Ahorrarse procesamiento en vano si no se ingresa nada
+        //Ahorrarse procesamiento en vano si no se ingresa nada
+        if(!args.length) return typeof flag.fallback === 'function' ? flag.fallback() : flag.fallback;
 
         let target; //Retorno. Devuelve callback si se ingresa la flag buscada de forma válida, o fallback si no
         const isFunc = (typeof flag.callback === 'function');

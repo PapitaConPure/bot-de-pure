@@ -56,7 +56,6 @@ module.exports = {
         }
         
         await channel.send(args.join(' ').split(/ +#ENDL +/g).join('\n'));
-        global.cansay = 2;
         if(del && !message.deleted && message.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES))
             await message.delete()
     },

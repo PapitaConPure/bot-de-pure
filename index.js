@@ -145,9 +145,7 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
 
 client.on('messageCreate', async message => { //En caso de recibir un mensaje
     const { content, author, channel, guild } = message;
-    if(func.channelIsBlocked(channel)) return;
-    if(global.cansay > 0) global.cansay--;
-    else if(author.bot) return;
+    if(func.channelIsBlocked(channel) || author.bot) return;
     const msg = content.toLowerCase();
     const gid = guild ? guild.id : undefined;
     
