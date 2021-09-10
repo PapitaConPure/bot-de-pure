@@ -151,7 +151,7 @@ client.on('messageCreate', async message => { //En caso de recibir un mensaje
     const gid = guild ? guild.id : undefined;
     
     //#region Operaciones de proceso e ignorar mensajes privados
-    const logembed = new Discord.MessageEmbed().addField(author.tag, content || '*Mensaje vacío.*');
+    const logembed = new Discord.MessageEmbed().addField(author.tag, content ? content.slice(0, 1023) : '*Mensaje vacío.*');
     if(guild) logembed.setAuthor(`${guild.name} • ${channel.name} (Click para ver)`, author.avatarURL({ dynamic: true }), message.url);
     else {
         logembed.setAuthor('Mensaje privado', author.avatarURL({ dynamic: true }));
