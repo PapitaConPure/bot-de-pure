@@ -3,6 +3,7 @@ const { randRange, fetchFlag } = require('../../func');
 const { MessageEmbed } = require('discord.js'); //Integrar discord.js
 const { engines, getBaseTags, getSearchTags } = require('../../localdata/booruprops.js'); //Variables globales
 const booru = require('booru');
+const rakki = require('./rakkidei.js');
 
 module.exports = {
 	name: 'buscar',
@@ -31,19 +32,25 @@ module.exports = {
 	
 	async searchImage(message, args, searchOpt = { cmdtag: '', nsfwtitle: 'Búsqueda NSFW', sfwtitle: 'Búsqueda' }) {
 		if(message.channel.nsfw) {
-			let abort = true;
-			switch(searchOpt.cmdtag) {
-			case 'megumin':
-				if(message.author.id !== peopleid.papita)
-					require('./rakkidei.js').execute(message, []);
-				break;
-			case 'holo':
-				require('./rakkidei.js').execute(message, []);
-				break;
-			default:
-				abort = false;
+			if(searchOpt.cmdtag.length) {
+				let abort = true;
+				switch(searchOpt.cmdtag) {
+				case 'megumin':
+					if(message.author.id !== peopleid.papita)
+						await rakki.execute(message, []);
+					else abort = false;
+					break;
+				case 'holo':
+					await rakki.execute(message, []);
+					break;
+				default:
+					abort = false;
+				}
+				if(abort) return;
+			} else if(['megumin', 'holo'].some(b => args.includes(b))) {
+				await rakki.execute(message, []);
+				return;
 			}
-			if(abort) return;
 		}
 
 		//Acción de comando
@@ -58,7 +65,7 @@ module.exports = {
 			return;
 		}
 		const stags = [searchOpt.cmdtag, getBaseTags(engine, message.channel.nsfw)].join(' ');
-		const extags = getSearchTags(args, engine);
+		const extags = getSearchTags(args, engine, searchOpt.cmdtag);
 		
 		//Petición
 		try {
@@ -119,6 +126,17 @@ module.exports = {
 					'```'
 				);
 			message.channel.send({ embeds: [errorembed] });
+		}
+
+		if(Math.random() < (1 / 40)) {
+			const noticesent = await message.channel.send(
+				'<:bot:828736342372253697> Con la reciente incorporación del comando `p!buscar`, se están buscando **nuevos atajos de etiquetas para búsquedas**.\n' +
+				'Si se te ocurre alguna tag que te gustaría escribir más fácilmente... ten, prefabriqué esto para ti:\n' +
+				'`p!sugerir -t "Diccionario de Búsqueda" <atajo> → <etiqueta>`\n' +
+				'Solo tienes que reemplazar los `<campos>` por el atajo y a qué etiqueta de booru se traduce. ¡Gracias de antemano!' +
+				'Nota: las tags están adaptadas a Gelbooru. Por motivos de consistencia, deberías buscar las etiquetas ahí'
+			);
+			setTimeout(() => noticesent.delete(), 1000 * 60);
 		}
 	},
 

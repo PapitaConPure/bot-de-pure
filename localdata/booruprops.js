@@ -16,17 +16,22 @@ module.exports = {
         if(['danbooru', 'derpibooru', 'yandere', 'kcom', 'knet'].includes(engine)) return `rating:${nsfwrating[nsfw]}`;
         else return [basetags, `rating:${nsfwrating[nsfw]}`, nsfwtags[nsfw]].join(' ');
     },
-    getSearchTags: (args, engine) => (engine !== 'danbooru')
+    getSearchTags: (args, engine, tagdb) => (engine !== 'danbooru')
         ?   args.map(arg => {
                 arg = arg.toLowerCase();
-                return module.exports.tagsMap.get(arg) || arg
+                return module.exports.tm_general.get(arg) || (module.exports[`tm_${tagdb}`] && module.exports[`tm_${tagdb}`].get(arg)) || arg
             }).join(' ')
-        : '',
-    tagsMap: (() => new Map()
-        //General
+        :   '',
+    
+    tm_general: (() => new Map()
         .set('gif', 'animated')
+        .set('boobs', 'large_breasts')
         .set('breasts', 'large_breasts')
         .set('big_breasts', 'large_breasts')
+        .set('big_boobs', 'large_breasts')
+        .set('large_boobs', 'large_breasts')
+    )(),
+    tm_touhou: (() => new Map()
         //Protas
         .set('reimu', 'hakurei_reimu')
         .set('marisa', 'kirisame_marisa')
@@ -171,5 +176,146 @@ module.exports = {
         .set('kasen', 'ibaraki_kasen')
         .set('miyoi', 'okunoda_miyoi')
         .set('tokiko', 'tokiko_(touhou)')
+    )(),
+    tm_virtual_youtuber: (() => new Map()
+        //Agencias y grupos
+        .set('holo', 'hololive')
+        .set('holoen', 'hololive_english')
+        .set('hololive_en', 'hololive_english')
+        .set('holoid', 'hololive_indonesia')
+        .set('hololive_id', 'hololive_indonesia')
+        .set('hologamers', 'hololive_gamers')
+        .set('hololive_gamers', 'hololive_gamers')
+        .set('niji', 'nijisanji')
+        .set('nijien', 'nijisanji_en')
+        .set('niji_en', 'nijisanji_en')
+        .set('nijikr', 'nijisanji_kr')
+        .set('niji_kr', 'nijisanji_kr')
+        .set('vshojo', 'nijisanji_kr')
+        //Hololive Gen 0
+        .set('sora', 'tokino_sora')
+        .set('miko', 'sakura_miko')
+        .set('suisei', 'hoshimachi_suisei')
+        .set('roboco', 'roboco-san')
+        .set('azki', 'azki_(hololive)')
+        //Hololive Gen 1
+        .set('matsuri', 'natsuiro_matsuri')
+        .set('haato', 'akai_haato')
+        .set('haachama', 'akai_haato')
+        .set('mel', 'yozora_mel')
+        .set('fubuki', 'shirakami_fubuki')
+        .set('aki', 'aki_rosenthal')
+        .set('akirose', 'aki_rosenthal')
+        //Hololive Gen 2
+        .set('aqua', 'minato_aqua')
+        .set('shion', 'murasaki_shion')
+        .set('nakiri', 'nakiri_ayame')
+        .set('ayame', 'nakiri_ayame')
+        .set('subaru', 'oozora_subaru')
+        .set('choco', 'yuzuki_choco')
+        //Hololive Gamers
+        .set('korone', 'inugami_korone')
+        .set('mio', 'ookami_mio')
+        .set('okayu', 'nekomata_okayu')
+        //Hololive Gen 3
+        .set('marine', 'houshou_marine')
+        .set('pekora', 'usada_pekora')
+        .set('rushia', 'uruha_rushia')
+        .set('noel', 'shirogane_noel')
+        .set('flare', 'shiranui_flare')
+        //Hololive Gen 4
+        .set('coco', 'kiryu_coco')
+        .set('kanata', 'amane_kanata')
+        .set('luna', 'himemori_luna')
+        .set('towa', 'tokoyami_towa')
+        .set('watame', 'tsunomaki_watame')
+        //Hololive Gen 5
+        .set('aloe', 'mano_aloe')
+        .set('polka', 'omaru_polka')
+        .set('lamy', 'yukihana_lamy')
+        .set('botan', 'shishiro_botan')
+        .set('nene', 'momosuzu_nene')
+        .set('nenechi', 'momosuzu_nene')
+        //Hololive EN Myth
+        .set('calli', 'mori_calliope')
+        .set('calliope', 'mori_calliope')
+        .set('amelia', 'watson_amelia')
+        .set('gura', 'gawr_gura')
+        .set('kiara', 'takanashi_kiara')
+        .set('ina', 'ninomae_ina\'nis')
+        //Hololive EN Council
+        .set('sana', 'tsukumo_sana')
+        .set('fauna', 'ceres_fauna')
+        .set('kronii', 'ouro_kronii')
+        .set('mumei', 'nanashi_mumei')
+        .set('bae', 'hakos_baelz')
+        .set('baelz', 'hakos_baelz')
+        //HoloID Gen 1
+        .set('risu', 'ayunda_risu')
+        .set('moona', 'moona_hoshinova')
+        .set('iofi', 'airani_iofifteen')
+        //HoloID Gen 2
+        .set('ollie', 'kureiji_ollie')
+        .set('melfissa', 'anya_melfissa')
+        .set('reine', 'pavolia_reine')
+        //Holostars Gen 1
+        .set('miyabi', 'hanasaki_miyabi')
+        .set('izuru', 'kanade_izuru')
+        .set('aruran', 'arurandeisu')
+        .set('rikka', 'rikka_(holostars)')
+        //Holostars Gen 2
+        .set('astel', 'astel_leda')
+        .set('temma', 'kishido_temma')
+        .set('roberu', 'yukoku_roberu')
+        //Holostars Gen 3
+        .set('shien', 'kageyama_shien')
+        .set('oga', 'aragami_oga')
+        //Hololive Management
+        .set('a-chan', 'a-chan_(hololive)')
+        .set('a_chan', 'a-chan_(hololive)')
+        .set('shinove', 'daidou_shinove')
+        //VOMS
+        .set('pikamee', 'amano_pikamee')
+        .set('tomoshika', 'hikasa_tomoshika')
+        .set('monoe', 'jitomi_monoe')
+        //VShojo
+        .set('nyanners', 'nyatasha_nyanners')
+        .set('melody', 'projektmelody')
+        .set('vei', 'vei_(vtuber)')
+        .set('veibae', 'vei_(vtuber)')
+        .set('apricot', 'bsapricot_(vtuber)')
+        .set('froot', 'bsapricot_(vtuber)')
+        .set('zentreya', 'zentreya_(vtuber)')
+        .set('hime', 'hime_hajime')
+        //Independientes
+        .set('tamaki', 'inuyama_tamaki')
+        .set('kana', 'kamiko_kana')
+    )(),
+    tm_megumin: (() => new Map()
+        .set('kazuma', 'satou_kazuma')
+        .set('aqua', 'aqua_(konosuba)')
+        .set('darkness', 'darkness_(konosuba)')
+        .set('chris', 'chris_(konosuba)')
+        .set('wiz', 'wiz_(konosuba)')
+        .set('yunyun', 'yunyun_(konosuba)')
+        .set('iris', 'iris_(konosuba)')
+        .set('cecily', 'cecily_(konosuba)')
+        .set('arue', 'arue_(konosuba)')
+        .set('mitsurugi', 'mitsurugi_kyouya')
+        .set('dust', 'dust_(konosuba)')
+        .set('rin', 'lean_(konosuba)')
+        .set('lean', 'lean_(konosuba)')
+        .set('lia', 'leah_(konosuba)')
+        .set('cielo', 'cello_(konosuba)')
+        .set('erika', 'erika_(konosuba)')
+        .set('melissa', 'melissa_(konosuba)')
+        .set('mia', 'miia_(konosuba)')
+        .set('amy', 'amy_(konosuba)')
+        .set('eris', 'eris_(konosuba)')
+        .set('luna', 'luna_(konosuba)')
+        .set('rain', 'rain_(konosuba)')
+        .set('claire', 'claire_(konosuba)')
+        .set('dodonko', 'dodonko_(konosuba)')
+        .set('sylvia', 'sylvia_(kono_subarashii_sekai_ni_shukufuku_wo!) ')
     )()
 }
