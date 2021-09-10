@@ -1,4 +1,5 @@
 const Discord = require('discord.js'); //Integrar discord.js
+const { randRange } = require('../../func');
 var global = require('../../localdata/config.json'); //Variables globales
 
 module.exports = {
@@ -19,18 +20,16 @@ module.exports = {
 	callx: '<frase?>',
 	
 	async execute(message, args) {
+		//Saber si el canal/thread es NSFW o perteneciente a un canal NSFW
+		const isnsfw = message.channel.isThread()
+			? message.channel.parent.nsfw
+			: message.channel.nsfw;
+		
 		if(args.length) {
-			//La programación es un puto meme
-			const newmsg = message.content
-				.slice('p!papita '.length)
-				.replace(/[a-zA-Z0-9;:]+/g, '$&:tm:')
-				.replace(/^[\W_\n ]*[a-zA-Z0-9;:]+/g, '***:copyright: $&:registered: ')
-				.replace(':tm::registered:', ':registered:')
-				.replace(/[a-zA-Z0-9;:]+$/g, '$&***');
-			console.log(newmsg);
+			const newmsg = `***:copyright: ${args.shift()}:registered: ${args.join(' ').replace(/[a-zA-Z0-9áéíóúÁÉÍÓÚüÑñ;:]+/g, '$&:tm:')}***`;
 			message.channel.send({ content: newmsg });
 		} else {
-			if(message.channel.nsfw) message.channel.send({ content: 'https://www.youtube.com/watch?v=pwEvEY-7p9o' });
+			if(isnsfw) message.channel.send({ content: 'https://www.youtube.com/watch?v=pwEvEY-7p9o' });
 			else {
 				const paputa = [
 					'Lechita:tm: uwu :milk:',
@@ -44,7 +43,7 @@ module.exports = {
 					'https://i.imgur.com/HxTxjdL.png'
 				];
 
-				message.channel.send({ content: `**${paputa[Math.floor(Math.random() * paputa.length)]}**` });
+				message.channel.send({ content: `**${paputa[randRange(0, paputa.length)]}**` });
 			}
 		}
     },

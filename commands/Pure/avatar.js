@@ -21,6 +21,11 @@ module.exports = {
     callx: '<usuario?>',
 
 	async execute(message, args) {
+		//Saber si el canal/thread es NSFW o perteneciente a un canal NSFW
+		const isnsfw = message.channel.isThread()
+			? message.channel.parent.nsfw
+			: message.channel.nsfw;
+        
         let users = [];
         let notfound = [];
 
@@ -38,7 +43,7 @@ module.exports = {
                     return;
                 }
 
-                if((user.id === peopleid.papita) && !message.channel.nsfw) {
+                if((user.id === peopleid.papita) && !isnsfw) {
                     message.channel.send({
                         content: `Oe conchetumare te hacei el gracioso una vez más y te vai manos arriba, pantalones abajo, 'cuchai? <:junkNo:697321858407727224> <:pistolaR:697351201301463060>`
                     });

@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.87",
+            "number": "Full.2.8.89",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo actualizaciones diarias. Es probable que existan comportamientos inesperados en algunos comandos.",
@@ -15,7 +15,7 @@
             "Corregido un error con el procesado de múltiples `-banderas` cortas",
             "Corregido pequeño error en p!lechita al ingresar un usuario",
             "p!vtubers agregado",
-            "Corregido un error al usar variantes de p!buscar en Hilos"
+            "Corregido un error al usar comandos SFW<->NSFW en Hilos"
         ],
         "todo": [
             "Minijuegos individuales y tipo-fiesta",
@@ -68,8 +68,7 @@
                 "813189609911353385": "gachahell",
                 "813195795318177802": "trata-de-waifus",
                 "674422177596178437": "muteposting",
-                "673353484514492417": "hornyposting",
-                "885732746935275530": "si"
+                "885732746935275530": "hornyposting"
             },
             "users": {}
         },

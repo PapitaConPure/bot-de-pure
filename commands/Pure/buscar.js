@@ -31,7 +31,7 @@ module.exports = {
 	callx: '<etiquetas?(...)>',
 	
 	async searchImage(message, args, searchOpt = { cmdtag: '', nsfwtitle: 'Búsqueda NSFW', sfwtitle: 'Búsqueda' }) {
-		//Saber si el canal o thread es NSFW o perteneciente a un canal NSFW
+		//Saber si el canal/thread es NSFW o perteneciente a un canal NSFW
 		const isnsfw = message.channel.isThread()
 			? message.channel.parent.nsfw
 			: message.channel.nsfw;
