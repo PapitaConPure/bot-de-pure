@@ -55,8 +55,9 @@ module.exports = {
 			s: fetchFlag(args, { property: true, short: ['s'], long: ['segundo', 'segundos'], callback: (x,i) => intOrZero(x[i]), fallback: 0 }),
 			t: 0
 		}
+		if(!time.h && !time.m && !time.s)
+			time.m = 1;
 		time.t = Object.values(time).slice(0, -1).reduce((a, b) => a * 60 + b);
-		console.log(time.t);
 		if(time.t > 4 * 3600) {
 			message.channel.send(':warning: El periodo de votación no puede ser mayor a 4 horas');
 			return;
