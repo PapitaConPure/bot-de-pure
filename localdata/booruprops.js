@@ -2,7 +2,7 @@ const { sites } = require('booru');
 
 module.exports = {
     engines: Object.values(sites).map(s => s.aliases[s.aliases.length - 1]),
-	basetags: '-guro -furry -vore -webm -audio -comic -4koma',
+	basetags: '-guro -furry -vore -webm -video -audio -comic -4koma',
 	nsfwrating: {
 		[true]: 'explicit',
 		[false]: 'safe'
