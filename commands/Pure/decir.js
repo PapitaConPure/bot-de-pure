@@ -1,5 +1,6 @@
 const { fetchFlag } = require('../../func');
 const { serverid } = require('../../localdata/config.json'); //Variables globales
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'decir',
@@ -9,7 +10,8 @@ module.exports = {
     ],
     desc: 'Me hace decir lo que quieras que diga',
     flags: [
-        'common'
+        'common',
+        'emote'
     ],
     options: [
         '`<mensaje>` _(texto)_ para especificar qué decir',

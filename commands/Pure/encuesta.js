@@ -64,7 +64,6 @@ module.exports = {
 		}
 		
 		//Acción de comando
-		const div = 10;
 		if(!args.length) {
 			message.channel.send(':warning: Para crear una encuesta, debes ingresar al menos 2 opciones');
 			return;
@@ -116,16 +115,16 @@ module.exports = {
 		Promise.all([ options.map(o => sent.react(o.emote)) ]);
 		const filter = (rc, u) => !u.bot && options.some(option => rc.emoji.id === option.emote.id);
 		const collector = sent.createReactionCollector({ filter: filter, time: time.t * 1000 });
+		collector.on('collect', () => { return; });
 		collector.on('end', rcs => {
 			if(!rcs.size) {
-				channel.send(':older_man: No se han recibido votos. Me voy a dormir')
+				channel.send(':older_man: No se han recibido votos. Me voy a dormir');
 				return;
 			}
 			const counts = {};
 			rcs.forEach(rc => {
 				counts[rc.emoji.id] = rc.count;
 			});
-			console.log(counts);
 			sent.reactions.removeAll();
 			const embed = new Discord.MessageEmbed()
 				.setColor('#1da1f2')

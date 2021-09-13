@@ -12,6 +12,7 @@ module.exports = {
     desc: 'uwu',
     flags: [
         'common',
+        'emote',
 		'uwu'
     ],
     options: [

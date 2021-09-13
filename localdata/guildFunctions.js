@@ -60,11 +60,6 @@ module.exports = {
                     const fuckustr = reps.reply;
                     channel.send({ content: fuckustr[Math.floor(Math.random() * fuckustr.length)] });
                 });
-        },
-
-        replyQue({ content, channel }) {
-            if(['q', 'que', 'qué'].some(i => i === content.toLowerCase()))
-                channel.send({ files: ['https://media.discordapp.net/attachments/670865125154095143/834115384927191080/so_epico-1.jpg?width=394&height=700'] });
         }
     },
 

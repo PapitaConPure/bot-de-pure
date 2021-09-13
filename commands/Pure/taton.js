@@ -9,7 +9,8 @@ module.exports = {
 	],
     desc: 'Comando cachorro de Taton. Puedes ingresar una palabra identificadora para enviar un perrito en específico o ver una lista de perritos. Si no ingresas nada, se enviará un perrito aleatorio',
     flags: [
-        'meme'
+        'meme',
+        'emote'
     ],
     options: [
 		'`<perrito?>` _(texto)_ para especificar un perrito a enviar (por nombres identificadores)',

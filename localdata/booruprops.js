@@ -24,12 +24,17 @@ module.exports = {
         :   '',
     
     tm_general: (() => new Map()
+        //General
         .set('gif',             'animated')
         .set('boobs',           'large_breasts')
         .set('breasts',         'large_breasts')
         .set('big_breasts',     'large_breasts')
         .set('big_boobs',       'large_breasts')
         .set('large_boobs',     'large_breasts')
+        //Series y tal
+        .set('genshin',         'genshin_impact')
+        .set('cote',            'youkoso_jitsuryoku_shijou_shugi_no_kyoushitsu_e')
+        .set('classroom_of_the_elite', 'youkoso_jitsuryoku_shijou_shugi_no_kyoushitsu_e')
     )(),
     tm_touhou: (() => new Map()
         //Protas
