@@ -211,7 +211,7 @@ module.exports = {
             //Comprobación constante para ver si el miembro ya tiene roles de colores
             if(dc > 2) {
                 console.log(chalk.green(`El miembro ha recibido sus roles básicos.`));
-                canal.send({ content: `Weno **${miembro.user.username}**, ya teni tu rol, q esti bien po <:Junky:651290323557023753>` });
+                canal.send({ content: `Weno **${miembro.user.username}**, ya teni tu rol, q esti bien po <:kosuzy:887166039740272691>` });
 
                 //Finalizar
                 setTimeout(module.exports.finalizarHourai, 1000, miembro, canal);
@@ -317,7 +317,7 @@ module.exports = {
                 const collector = sent.createReactionCollector({ filter: filter, time: 8 * 60 * 1000 });
                 collector.on('collect', () => {
                     if(miembro.roles.cache.has(candyrole)) {
-                        canal.send({ content: 'Oe tranqui po, que ya tení tus caramelos <:kageuwu:742506313258369056>' });
+                        canal.send({ content: 'Oe tranqui po, que ya tení tus caramelos <:kageuwu:850196617495707678>' });
                         collector.stop();
                     } else {
                         miembro.roles.add(candyrole);
@@ -349,7 +349,7 @@ module.exports = {
             if(hadroles !== undefined) {
                 await member.roles.remove(hadroles);
                 await member.roles.add(colrol[reacted]);
-                message.channel.send({ content: 'Colores intercambiados <:monowo:757624423300726865>' });
+                message.channel.send({ content: 'Colores intercambiados <:monowo:887389799042932746>' });
             } else {
                 await member.roles.add(colrol[reacted]);
                 message.channel.send({ content: 'Colores otorgados <:miyoi:674823039086624808> :thumbsup:' });
@@ -448,7 +448,7 @@ module.exports = {
         canal.send({
             content:
                 `Una última cosita <@${miembro.user.id}>, recuerda revisar el canal <#671817759268536320> en algún momento <:Junkoborga:751938096550903850>\n` +
-                `También, si te interesa, puedes revisar los mensajes pinneados de este canal <:emperowo:834981904323313745>\n` +
+                `También, si te interesa, puedes revisar los mensajes pinneados de este canal <:tenshipeacheems:854408293258493962>\n` +
                 'Y estate tranqui, que ya no vas a recibir tantos pings <:starnap:727764482801008693>'
         });
 
@@ -648,7 +648,7 @@ module.exports = {
             if(servidor.id === '654471968200065034') { //Hourai Doll
                 canal.send({
                     content: 
-                        'Nooooo po csm, perdimo otro weón \<:meguDerp:708064265092726834>' +
+                        'Nooooo po csm, perdimo otro weón <:meguDerp:887396527952236554>' +
                         `*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
                 });
             } else { //Otros servidores

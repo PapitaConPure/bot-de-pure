@@ -62,6 +62,6 @@ module.exports = {
 		.addField('Salió:', dices.map(dice => `${dice.d} x :game_die:(${dice.f}) -> [${dice.r.join(',')}] = **${dice.t}**`).join('\n**+** ') + ((dices.length > 1)?`\n**= ${total}**`:''))
 		
 		message.channel.send({ embeds: [embed] })
-		.catch(() => message.channel.send({ content: ':x: No te pasei de gracioso, ¿tamo? <:comodowo:824759668437811224> <:pistolaR:697351201301463060>' }));
+		.catch(() => message.channel.send({ content: ':x: No te pasei de gracioso, ¿tamo? <:junkWTF:796930821260836864> <:pistolaR:697351201301463060>' }));
     },
 };
