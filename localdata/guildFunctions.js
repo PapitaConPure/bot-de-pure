@@ -35,7 +35,7 @@ module.exports = {
                         const hd = '682629889702363143'; //Hanged Doll
                         try {
                             if(!member.roles.cache.has(hd))
-                                member.roles.add(hd, 'Colgado automáticamente por spam de emotes');
+                                member.roles.add(hd, 'Colgado automáticamente por spam de bots');
                         } catch(err) {
                             imsg = await channel.send({ content: `<:wtfff:855940251892318238> Ese wn tiene demasia'o ki. Cuélgalo tú po'.\n\`\`\`\n${err.name}` });
                         }
