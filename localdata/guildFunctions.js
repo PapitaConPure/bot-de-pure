@@ -25,7 +25,7 @@ module.exports = {
                     let imsg;
                     switch(total) {
                     case 1:
-                        await message.react(client.emojis.cache.get('856369841107632129'));
+                        await message.react(client.emojis.cache.get('796930821554044928'));
                         break;
                     case 2:
                         await message.react(client.emojis.cache.get('852764014840905738'));
@@ -35,7 +35,7 @@ module.exports = {
                         const hd = '682629889702363143'; //Hanged Doll
                         try {
                             if(!member.roles.cache.has(hd))
-                                member.roles.add(hd);
+                                member.roles.add(hd, 'Colgado automáticamente por spam de emotes');
                         } catch(err) {
                             imsg = await channel.send({ content: `<:wtfff:855940251892318238> Ese wn tiene demasia'o ki. Cuélgalo tú po'.\n\`\`\`\n${err.name}` });
                         }

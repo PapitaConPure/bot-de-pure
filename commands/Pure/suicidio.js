@@ -15,7 +15,7 @@ module.exports = {
 
 	async execute({ id, channel, member }, _) {
 		if(!member.roles.cache.has(hd)) {
-			member.roles.add(hd);
+			member.roles.add(hd, 'Por pelotudo');
 			channel.send({
 				reply: { messageReference: id },
 				content: '<:houraidoll:853402616208949279> Shanghai Shanghai Shanghai Shanghai\nHourai Hourai Hourai Hourai'
@@ -25,7 +25,7 @@ module.exports = {
 
 	async interact(interaction) {
 		if(!interaction.member.roles.cache.has(hd)) {
-			interaction.member.roles.add(hd);
+			interaction.member.roles.add(hd, 'Por pelotudo');
 			interaction.reply({ content: '<:houraidoll:853402616208949279> Shanghai Shanghai Shanghai Shanghai\nHourai Hourai Hourai Hourai' });
 		}
 	}

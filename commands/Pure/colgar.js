@@ -36,7 +36,7 @@ module.exports = {
 		}
 
 		if(!member.roles.cache.has(hd)) {
-			member.roles.add(hd);
+			member.roles.add(hd, `Colgado por ${message.author.tag}`);
 			message.delete();
 			channel.send({ content: `:moyai: Se ha colgado a **${ member.user.tag }**` });
 		} else {
