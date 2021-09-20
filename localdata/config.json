@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.8C",
+            "number": "Full.2.8.8D",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo actualizaciones diarias. Es probable que existan comportamientos inesperados en algunos comandos.",
@@ -16,9 +16,11 @@
             "Corregido pequeño error en p!lechita al ingresar un usuario",
             "p!vtubers agregado",
             "Corregido un error al usar comandos SFW<->NSFW en Hilos",
-            "p!encuesta agregado"
+            "p!encuesta agregado",
+            "Agregada función de `&emotes` rápidos (revisa la ayuda)"
         ],
         "todo": [
+            "Agregar ejemplos interactivos de comandos con p!ayuda",
             "Minijuegos individuales y tipo-fiesta",
             "Base de datos en la nube",
             "Personalización de Bot a nivel de servidor",

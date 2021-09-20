@@ -13,7 +13,7 @@ module.exports = {
 
 	async execute({ channel }, _) {
 		//Acción de comando
-		channel.send({ files: [violojiaurl] });
+		await channel.send({ files: [violojiaurl] });
 	},
 
 	async interact(interaction) {

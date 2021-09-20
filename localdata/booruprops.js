@@ -35,6 +35,9 @@ module.exports = {
         .set('genshin',         'genshin_impact')
         .set('cote',            'youkoso_jitsuryoku_shijou_shugi_no_kyoushitsu_e')
         .set('classroom_of_the_elite', 'youkoso_jitsuryoku_shijou_shugi_no_kyoushitsu_e')
+        //Personajes
+        .set('senko', 'senko_(sewayaki_kitsune_nosenko-san)')
+        .set('shiro', 'shiro_(sewayaki_kitsune_nosenko-san)')
     )(),
     tm_touhou: (() => new Map()
         //Protas
