@@ -57,15 +57,19 @@ for(const file of commandFiles) {
 }
 client.ComandosPure = new Discord.Collection(); //Comandos de Puré
 client.SlashPure = new Discord.Collection(); //Comandos Slash de Puré
+client.EmotesPure = new Discord.Collection(); //Emotes de Puré
 commandFiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
 for(const file of commandFiles) {
     const command = require(`./commands/Pure/${file}`);
 	client.ComandosPure.set(command.name, command);
-    command.data = new SlashCommandBuilder()
-        .setName(command.name)
-        .setDescription(command.brief || command.desc.slice(0, 99));
-    if(typeof command.interact === 'function')
+    if(typeof command.interact === 'function') {
+        command.data = new SlashCommandBuilder()
+            .setName(command.name)
+            .setDescription(command.brief || command.desc.slice(0, 99));
 	    client.SlashPure.set(command.name, command.data.toJSON());
+    }
+    if(command.flags && command.flags.includes('emote'))
+        client.EmotesPure.set(command.name, command);
 }
 //#endregion
 
@@ -191,7 +195,40 @@ client.on('messageCreate', async message => { //En caso de recibir un mensaje
     let pdetect;
     if(msg.startsWith(global.p_drmk.raw)) pdetect = global.p_drmk;
     else if(msg.startsWith(global.p_pure.raw)) pdetect = global.p_pure;
-    else return; //Salir si no se encuentra el prefijo
+    else {
+        //#region Emotes rápidos
+        let ecmd = content.split(/[\n ]+/).find(word => word.startsWith('&'));
+        if(ecmd) {
+            ecmd = ecmd.toLowerCase().slice(1);
+            const command = client.EmotesPure.get(ecmd) || client.EmotesPure.find(cmd => cmd.aliases && cmd.aliases.includes(ecmd)); //Argumentos ingresados
+            if(!command) return;
+            try {
+                //Detectar problemas con el comando basado en flags
+                let exception = null;
+                command.flags.every(flag => {
+                    const ex = cmdex.findExceptions(flag, message);
+                    if(ex) { exception = ex; return false; }
+                    else return true;
+                });
+                if(exception) return;
+                else await command.execute(message, []);
+            } catch(error) {
+                console.log(chalk.bold.redBright('Ha ocurrido un error al insertar un emote.'));
+                console.error(error);
+                const errorembed = new Discord.MessageEmbed()
+                    .setColor('#0000ff')
+                    .setAuthor(`${guild.name} • ${channel.name} (Click para ver)`, author.avatarURL({ dynamic: true }), message.url)
+                    .addField('Ha ocurrido un error al ingresar un comando', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``)
+                    .addField('Detalle', `"${message.content.slice(0, 699)}"\n[${ecmd}]`);
+                global.logch.send({
+                    content: `<@${global.peopleid.papita}>`,
+                    embeds: [errorembed]
+                });
+            }
+        }
+        //#endregion
+        return; //Salir si no se encuentra prefijo de comando ni emote
+    }
 
     //Partición de mensaje comando
     const args = content.replace(pdetect.regex, '').split(/[\n ]+/); //Argumentos ingresados
@@ -245,7 +282,7 @@ client.on('messageCreate', async message => { //En caso de recibir un mensaje
         stats.commands.failed++;
     }
     //#endregion
-    //#endregion 
+    //#endregion
 });
 
 client.on('interactionCreate', async interaction => {

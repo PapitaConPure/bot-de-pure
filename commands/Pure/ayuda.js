@@ -12,13 +12,15 @@ module.exports = {
         'h'
     ],
     brief: 'Muestra una lista de comandos o un comando en detalle.',
-    desc: 'Muestra una lista de comandos deseada o un comando en detalle.',
+    desc: 'Muestra una lista de comandos deseada o un comando en detalle.\n' +
+        'Al buscar listas de comandos, se filtran los comandos que tienen al menos uno de los `--identificadores` buscados\n' +
+        'Puedes hacer una búsqueda `--exclusiva` si solo quieres los comandos que tengan **todos** los identificadores buscados',
     flags: [
         'common'
     ],
     options: [
         '`<comando?>` _(texto)_ para ver ayuda en un comando en específico',
-        '`-x` para excluir resultados comunes',
+        '`-x` o `--exclusivo` para realizar una búsqueda exclusiva',
         '`--meme` para ver comandos meme',
         '`-m` o `--mod` para ver comandos de moderación',
         '`-p` o `--papa` para ver comandos de Papita con Puré',
@@ -28,8 +30,8 @@ module.exports = {
     callx: '<comando?>',
     
 	async execute({ client, channel, author, member }, args) {
-        const cfiles = readdirSync('./commands/Pure').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
-        const fex = fetchFlag(args, { short: ['x'], callback: true });
+        const fex = fetchFlag(args, { short: ['x'], long: ['exclusivo', 'exclusiva', 'exclusive'], callback: true });
+        const fall = fetchFlag(args, { short: ['t'], long: ['todo'], callback: true });
         const auth = {
             mod: member.permissions.has('MANAGE_ROLES'),
             papa: author.id === '423129757954211880',
@@ -42,7 +44,6 @@ module.exports = {
             fetchFlag(args, { short: ['h'], long: ['hourai'], callback: 'hourai' })
         ].filter(s => s);
         
-        let fall = fetchFlag(args, { short: ['t'], long: ['todo'], callback: true });
         let search = args.length ? args[0] : null;
 
         let list = [];
@@ -51,22 +52,24 @@ module.exports = {
         const pfr = p_pure.raw;
         const hcmd = `${pfr}${module.exports.name}`;
         
+        //Análisis de comandos
+        const cfiles = readdirSync('./commands/Pure').filter(file => file.endsWith('.js'));
         for(const file of cfiles) {
             const command = require(`../../commands/Pure/${file}`);
             const { name, aliases, flags } = command;
             
             if(!search) {
-                let filtered = true;
-                if(flags) {
-                    filtered = !flags.includes('guide') && (fall || !flags.includes('maintenance'));
-                    if(filtered) {
-                        filtered = flags.every(f => (auth[f] === undefined || auth[f]));
-                        if(filtered && filters.length) {
-                            if(fex) filtered = filters.every(f => flags.includes(f));
-                            else filtered = filters.some(f => flags.includes(f));
-                        }
-                    }
-                }
+                const filtered = (() => {
+                    if(!flags) return true;
+                    if(flags.includes('guide') || (!fall && flags.includes('maintenance')))
+                        return false;
+                    if(!flags.every(f => (auth[f] === undefined || auth[f])))
+                        return false;
+                    if(!filters.length) return true;
+                    return fex
+                        ? filters.every(f => flags.includes(f))
+                        : filters.some(f => flags.includes(f));
+                })();
                 if(filtered)
                     list.push(name);
             } else if([name, ...(aliases || [])].includes(search)) {
@@ -94,18 +97,22 @@ module.exports = {
                             ? command.options.join('\n')
                             : ':abacus: Sin opciones', true)
                         .addField('Identificadores', listExists(flags)
-                            ? (flags.map(i => `\`${i}\``).join(', ').toUpperCase())
+                            ? flags.map(i => `\`${i}\``).join(', ').toUpperCase()
                             : ':question: Este comando no tiene identificadores por ahora');
                 break;
             }
         }
 
-        if(!search)
+        if(!search) {
+            const listdisplay = list.length
+                ? list.map(item => `\`${item}\``).join(', ')
+                : 'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para buscar un cierto identificador)';
             embed.setAuthor('Lista de comandos', aurl)
                 .addField('Comandos: ejemplos de uso', `\`${hcmd} -xmph --meme\`\n\`${pfr}avatar @Usuario\`\n\`${pfr}dados 5d6\``)
-                .addField(`Usa \`${hcmd} <comando>\` para más información sobre un comando`, (list.length > 0) ? list.map(item => `\`${item}\``).join(', '):'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para buscar un cierto identificador)')
+                .addField(`Usa \`${hcmd} <comando>\` para más información sobre un comando`, listdisplay)
+                .addField('Emotes rápidos', `"Me gustan los emotes de **&perrito** y **&uwu**"`)
                 .addField(`Guía introductoria`, `Usa \`${hcmd} g-indice\` para ver la página de índice de la guía introductoria de Bot de Puré`);
-        else {
+        } else {
             if(!embed.author)
                 embed.setAuthor('Sin resultados', aurl)
                     .addField('No se ha encontrado ningún comando con este nombre', `Utiliza \`${hcmd}\` para ver una lista de comandos disponibles y luego usa \`${pfr}comando <comando>\` para ver un comando en específico`);
