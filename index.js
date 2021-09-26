@@ -3,9 +3,9 @@ const Discord = require('discord.js'); //Soporte JS de la API de Discord
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const fs = require('fs'); //Sistema de archivos
-const Keyv = require('keyv');
-const uri = process.env.MONGODB_URI ||  require('./key.json').dburi;
-const keyv = new Keyv(uri);
+const uri = (process.env.MONGODB_URI) ? process.env.MONGODB_URI : require('./key.json').dburi;
+const Mongoose = require('mongoose');
+//const keyv = new Keyv(uri);
 const global = require('./localdata/config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
 const stats = require('./localdata/stats.json');
@@ -16,7 +16,7 @@ const { registerFont } = require('canvas'); //Registrar fuentes al ejecutar Bot
 const chalk = require('chalk'); //Consola con formato bonito
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { promisify } = require('util');
-const token = process.env.I_LOVE_MEGUMIN ? process.env.I_LOVE_MEGUMIN : require('./key.json').token; //La clave del bot
+const token = (process.env.I_LOVE_MEGUMIN) ? process.env.I_LOVE_MEGUMIN : require('./key.json').token; //La clave del bot
 //#endregion
 
 //#region Parámetros Iniciales
@@ -74,7 +74,11 @@ for(const file of commandFiles) {
 //#endregion
 
 //Fallo de base de datos
-keyv.on('error', error => console.error(chalk.bold.redBright('Error de Base de Datos\n'), chalk.redBright(error)));
+//keyv.on('error', error => console.error(chalk.bold.redBright('Error de Base de Datos\n'), chalk.redBright(error)));
+
+Mongoose.connect(uri, {
+    
+}).then(console.log(chalk.greenBright('Base de datos conectada')));
 
 //Inicialización del cliente
 client.on('ready', async () => {
