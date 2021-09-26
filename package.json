@@ -23,7 +23,7 @@
   "dependencies": {
     "@discordjs/builders": "^0.6.0",
     "@discordjs/rest": "^0.1.0-canary.0",
-    "@keyv/sqlite": "^2.0.2",
+    "@keyv/mongo": "^1.1.0",
     "axios": "^0.21.1",
     "booru": "^2.4.1",
     "canvas": "^2.8.0",

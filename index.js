@@ -3,9 +3,9 @@ const Discord = require('discord.js'); //Soporte JS de la API de Discord
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const fs = require('fs'); //Sistema de archivos
-//const Keyv = require('keyv');
-//const keyv = new Keyv('postgresql://sxiejhineqmvsg:d0b53a4f62e2cf77383908ff8d281e4a5d4f7db7736abd02e51f0f27b6fc6264@ec2-35-175-170-131.compute-1.amazonaws.com:5432/da27odtfovvn7n');
-//keyv.on('error', err => console.error('Keyv connection error:', err));
+const Keyv = require('keyv');
+const uri = process.env.MONGODB_URI ||  require('./key.json').dburi;
+const keyv = new Keyv(uri);
 const global = require('./localdata/config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
 const stats = require('./localdata/stats.json');
@@ -16,7 +16,7 @@ const { registerFont } = require('canvas'); //Registrar fuentes al ejecutar Bot
 const chalk = require('chalk'); //Consola con formato bonito
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { promisify } = require('util');
-const token = (process.env.I_LOVE_MEGUMIN)?process.env.I_LOVE_MEGUMIN:require('./key.json').token; //La clave del bot
+const token = process.env.I_LOVE_MEGUMIN ? process.env.I_LOVE_MEGUMIN : require('./key.json').token; //La clave del bot
 //#endregion
 
 //#region Parámetros Iniciales
@@ -73,7 +73,11 @@ for(const file of commandFiles) {
 }
 //#endregion
 
-client.on('ready', async () => { //Confirmación de inicio y cambio de estado
+//Fallo de base de datos
+keyv.on('error', error => console.error(chalk.bold.redBright('Error de Base de Datos\n'), chalk.redBright(error)));
+
+//Inicialización del cliente
+client.on('ready', async () => {
     const confirm = () => console.log(chalk.green('Hecho.'));
     global.maintenance = '1';
     try {
@@ -147,7 +151,8 @@ client.on('ready', async () => { //Confirmación de inicio y cambio de estado
 	console.log(chalk.greenBright.bold('Bot conectado y funcionando.'));
 });
 
-client.on('messageCreate', async message => { //En caso de recibir un mensaje
+//Recepción de mensajes
+client.on('messageCreate', async message => {
     const { content, author, channel, guild } = message;
     if(func.channelIsBlocked(channel) || author.bot) return;
     const msg = content.toLowerCase();
@@ -285,6 +290,7 @@ client.on('messageCreate', async message => { //En caso de recibir un mensaje
     //#endregion
 });
 
+//Recepción de interacciones
 client.on('interactionCreate', async interaction => {
 	if (!interaction.isCommand()) return;
     const { commandName: commandname, guild, channel, member } = interaction;
@@ -327,7 +333,8 @@ client.on('interactionCreate', async interaction => {
 	}
 });
 
-client.on('guildMemberAdd', member => { //Evento de entrada a servidor
+//Evento de entrada a servidor
+client.on('guildMemberAdd', member => {
     const { guild, user } = member;
     if(!guild.available) return;
     if(func.channelIsBlocked(guild.systemChannelId)) return;
@@ -354,7 +361,8 @@ client.on('guildMemberAdd', member => { //Evento de entrada a servidor
     }
 });
 
-client.on('guildMemberRemove', member => { //Evento de salida de servidor
+//Evento de salida de servidor
+client.on('guildMemberRemove', member => {
     const guild = member.guild;
     if(!guild.available) return;
     if(global.maintenance.length > 0 && guild.systemChannelId !== global.maintenance) return;
