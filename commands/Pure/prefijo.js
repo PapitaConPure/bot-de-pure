@@ -42,9 +42,10 @@ module.exports = {
 		if(args.length) {
 			await PrefixPair.findOneAndRemove(guildsearch);
 			const pfpair = new PrefixPair(guildsearch);
-			const regex = new RegExp(`${args[0]}[\n ]*`);
+			const prefix = args[0].toLowerCase();
+			const regex = new RegExp(`${prefix.replace(/[a-z]/g, l => `[${l.toUpperCase()}${l}]`)}[\n ]*`);
 			global[`p_${target}`][message.guildId] = {
-				raw: pfpair[target].raw = args[0],
+				raw: pfpair[target].raw = prefix,
 				regex: pfpair[target].regex = regex
 			};
 			await pfpair.save();

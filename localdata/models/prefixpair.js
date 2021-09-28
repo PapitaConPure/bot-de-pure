@@ -1,5 +1,4 @@
 const Mongoose = require('mongoose');
-const global = require('../config.json');
 
 const PrefixPairSchema = new Mongoose.Schema({
     guildId: { type: String },
@@ -7,13 +6,13 @@ const PrefixPairSchema = new Mongoose.Schema({
         type: Object,
         raw: { type: String },
         regex: { type: RegExp },
-        default: { raw: 'p!', regex: /^p![\n ]*/g }
+        default: { raw: 'p!', regex: /^[Pp]![\n ]*/g }
     },
     drmk: {
         type: Object,
         raw: { type: String },
         regex: { type: RegExp },
-        default: { raw: 'd!', regex: /^d![\n ]*/g }
+        default: { raw: 'd!', regex: /^[Dd]![\n ]*/g }
     }
 });
 

@@ -47,8 +47,8 @@ const fastGuildFunctions = (() => {
     Object.values(guildfunc).map(gfs => Object.values(gfs).map(fgf => fgf.name)).forEach(fgt => rtn = [...rtn, ...fgt]);
     return rtn.sort().filter((fgf, i, arr) => fgf !== arr[i - 1]);
 })();
-global.p_drmk = { raw: 'd!', regex: /^d![\n ]*/g };
-global.p_pure = { raw: 'p!', regex: /^p![\n ]*/g };
+global.p_drmk = { raw: 'd!', regex: /^[Dd]![\n ]*/g };
+global.p_pure = { raw: 'p!', regex: /^[Pp]![\n ]*/g };
 //#endregion
 
 //#region Detección de archivos de comandos
@@ -75,9 +75,6 @@ for(const file of commandFiles) {
         client.EmotesPure.set(command.name, command);
 }
 //#endregion
-
-//Fallo de base de datos
-//keyv.on('error', error => console.error(chalk.bold.redBright('Error de Base de Datos\n'), chalk.redBright(error)));
 
 //Inicialización del cliente
 client.on('ready', async () => {
@@ -359,8 +356,7 @@ client.on('interactionCreate', async interaction => {
 //Evento de entrada a servidor
 client.on('guildMemberAdd', member => {
     const { guild, user } = member;
-    if(!guild.available) return;
-    if(func.channelIsBlocked(guild.systemChannelId)) return;
+    if(!guild.available || func.channelIsBlocked(guild.systemChannelId)) return;
     console.log('Evento de entrada de usuario a servidor desencadenado.');
     try {
         if(!user.bot) func.dibujarBienvenida(member);
