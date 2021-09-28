@@ -8,6 +8,7 @@ const fs = require('fs'); //Sistema de archivos
 const Mongoose = require('mongoose');
 const uri = (process.env.MONGODB_URI) ? process.env.MONGODB_URI : require('./key.json').dburi;
 const prefixpair = require('./localdata/models/prefixpair.js');
+const { Puretable, defaultEmote } = require('./localdata/models/puretable.js');
 
 const global = require('./localdata/config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
@@ -15,7 +16,7 @@ const stats = require('./localdata/stats.json');
 const cmdex = require('./localdata/cmdExceptions.js');
 const guildfunc = require('./localdata/guildFunctions.js');
 const dns = require('dns'); //Detectar host
-const { registerFont } = require('canvas'); //Registrar fuentes al ejecutar Bot
+const { registerFont, loadImage } = require('canvas'); //Registrar fuentes al ejecutar Bot
 const chalk = require('chalk'); //Consola con formato bonito
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { promisify } = require('util');
@@ -104,12 +105,14 @@ client.on('ready', async () => {
     
     await func.modifyAct(client, 0);
 
+    //Cargado de datos de base de datos
     console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
+    console.log(chalk.gray('Conectando...'));
     await Mongoose.connect(uri, {
         useUnifiedTopology: true,
         useNewUrlParser: true
     });
-    //Prefijos
+    console.log(chalk.gray('Facilitando prefijos...'));
     (await prefixpair.find({})).forEach(pp => {
         global.p_pure[pp.guildId] = {
             raw: pp.pure.raw,
@@ -120,6 +123,22 @@ client.on('ready', async () => {
             regex: pp.drmk.regex
         };
     });
+    console.log(chalk.gray('Preparando Tabla de Puré...'));
+    let puretable = await Puretable.findOne({});
+    if(!puretable) puretable = new Puretable();
+    else
+        puretable.cells = await Promise.all(puretable.cells.map(arr =>
+            Promise.all(arr.map(cell => client.emojis.cache.get(cell) ? cell : defaultEmote ))
+        ));
+    await puretable.save();
+    global.loademotes = {};
+    await Promise.all(puretable.cells.map(arr =>
+        Promise.all(arr.slice(0).sort().filter((item, i, a) => (i > 0)?(item !== a[i - 1]):true).map(async item => {
+            if(!global.loademotes.hasOwnProperty(item))
+                global.loademotes[item] = await loadImage(client.emojis.cache.get(item).url);
+        }))
+    ));
+    console.log(chalk.gray('Indexando Slots de Puré...'));
     const gds = client.guilds;
     await Promise.all([
         gds.fetch(global.serverid.slot1),
@@ -144,7 +163,6 @@ client.on('ready', async () => {
         console.log(chalk.red('Fallido.'));
         console.error(err);
     }
-    global.puretable = Array(16).fill(null).map(() => Array(16).fill('828736342372253697'));
 
 	console.log(chalk.rgb(158,114,214)('Registrando fuentes...'));
     registerFont('fonts/Alice-Regular.ttf', { family: 'headline' });

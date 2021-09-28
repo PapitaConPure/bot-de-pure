@@ -11,7 +11,8 @@
             "PLACEHOLDER_SLASHCMD",
             "Agregado p!prefijo",
             "Agregado p!aqua",
-            "Corregido un error con los prefijos en mayúsculas"
+            "Corregido un error con los prefijos en mayúsculas",
+            "p!anarquia ahora es permanente"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos con p!ayuda",
@@ -50,11 +51,6 @@
         "bern": "239550977638793217"
     },
     "lechitauses": 0,
-    "puretable": [
-        "1",
-        "2",
-        "3"
-    ],
     "hourai": {
         "infr": {
             "channels": {

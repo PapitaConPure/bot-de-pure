@@ -1,9 +1,10 @@
 const global = require('../../localdata/config.json'); //Variables globales
 const { anarquia } = require('../../localdata/sguses.json'); //Variables globales
-const { fetchUserID } = require('../../func.js');
+const { fetchUserID, fetchFlag } = require('../../func.js');
 const { createCanvas, loadImage } = require('canvas');
 const { MessageEmbed, MessageAttachment } = require('discord.js');
 const { p_pure } = require('../../localdata/prefixget');
+const { Puretable, AUser } = require('../../localdata/models/puretable.js');
 
 module.exports = {
 	name: 'anarquia',
@@ -30,152 +31,124 @@ module.exports = {
 	callx: '<posición(x,y)?> <emote?>',
 
 	async execute(message, args) {
+		//Acción de comando
 		if(!args.length) { //Ver tabla
-			const d = async () => {
-				//Acción de comando
-				const canvas = createCanvas(864, 960);
-				const ctx = canvas.getContext('2d');
+			const canvas = createCanvas(864, 960);
+			const ctx = canvas.getContext('2d');
 
-				//#region Encabezado
-				ctx.textBaseline = 'top';
-				ctx.fillStyle = '#ffffff';
-				ctx.strokeStyle = '#bd0924';
-				ctx.lineWidth = 9;
-				ctx.font = `bold 116px "headline"`;
-				const Texto = 'Tabla de Puré';
-				const xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
-				ctx.strokeText(Texto, xcenter, 4);
-				ctx.fillText(Texto, xcenter, 4);
-				//#endregion
+			//#region Encabezado
+			ctx.textBaseline = 'top';
+			ctx.fillStyle = '#ffffff';
+			ctx.strokeStyle = '#bd0924';
+			ctx.lineWidth = 9;
+			ctx.font = `bold 116px "headline"`;
+			const Texto = 'Tabla de Puré';
+			const xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
+			ctx.strokeText(Texto, xcenter, 4);
+			ctx.fillText(Texto, xcenter, 4);
+			//#endregion
 
-				let loademotes = {};
-				const mapearEmotes = async () =>
-					Promise.all(global.puretable.map(arr => 
-						Promise.all(arr.slice(0).sort().filter((item, i, a) => (i > 0)?(item !== a[i - 1]):true).map(async item => {
-							if(!loademotes.hasOwnProperty(item))
-								loademotes[item] = await loadImage(message.client.emojis.cache.get(item).url);
-						}))
-					)
-				);
-
-				mapearEmotes().then(() => {
-					//Dibujar emotes en imagen
-					const size = 48;
-					const tx = canvas.width / 2 - size * global.puretable.length / 2;
-					const ty = ctx.measureText('M').emHeightDescent + 12;
-					global.puretable.map((arr, y) => {
-						arr.map((item, x) => 
-							ctx.drawImage(loademotes[item], tx + x * size, ty + y * size, size, size)
-						);
-					});
-					
-					const imagen = new MessageAttachment(canvas.toBuffer(), 'anarquia.png');
-					message.channel.send({ files: [imagen] });
+			//Dibujar emotes en imagen
+			const puretable = (await Puretable.findOne({})).cells;
+			const size = 48;
+			const tx = canvas.width / 2 - size * puretable.length / 2;
+			const ty = ctx.measureText('M').emHeightDescent + 12;
+			puretable.map((arr, y) => {
+				arr.map((item, x) => {
+					ctx.drawImage(global.loademotes[item], tx + x * size, ty + y * size, size, size)
 				});
-			};
-			d();
-		} else if(args[0] === 'p') { //Revisar perfil
-			const aid = (args.length > 1) ? fetchUserID(args[1], message) : message.author.id;
-			if(aid !== undefined) {
-				const user = message.client.users.cache.get(aid);
-				const embed = new MessageEmbed()
-					.setColor('#bd0924')
-					.setAuthor(user.username, user.avatarURL({ format: 'png', dynamic: true, size: 512 }));
-				if(anarquia[aid] !== undefined)
-					embed.setTitle('Perfil anárquico')
-						.addField('Inventario', `↔️ x ${anarquia[aid].h}\n↕ x ${anarquia[aid].v}`, true)
-						.addField('Rango', `Nivel ${Math.floor(anarquia[aid].exp / 30) + 1} (exp: ${anarquia[aid].exp})`, true);
-				else
-					embed.setTitle('Perfil inexistente')
-						.addField(
-							'Este perfil anárquico no existe todavía', `Usa \`${p_pure(message.guildId).raw}anarquia <posición(x,y)> <emote>\` para colocar un emote en la tabla de puré y crearte un perfil anárquico automáticamente\n` +
-							`Si tienes más dudas, usa \`${p_pure(message.guildId).raw}ayuda anarquia\``
-						);
-				message.channel.send({ embeds: [embed] });
-			} else message.channel.send({ content: `:warning: Usuario **${args[1]}** no encontrado` });
-		} else { //Ingresar emotes a tabla
-			const aid = message.author.id;
-			//Tiempo de enfriamiento por usuario
-			if(anarquia[aid] !== undefined) {
-				if((Date.now() - anarquia[aid].last) / 1000 < 3) {
-					message.react('⌛');
-					return;
-				} else
-					anarquia[aid].last = Date.now();
-			} else
-				anarquia[aid] = {
-					last: Date.now(),
-					h: '1',
-					v: '1',
-					exp: '0'
-				};
-			
-			let h = false,
-				v = false,
-				e = {};
-			args.map((arg, i) => {
-				if(arg.startsWith('--'))
-					switch(arg.slice(2)) {
-					case 'horizontal': h = (anarquia[aid].h > 0); break;
-					case 'vertical': v = (anarquia[aid].v > 0); break;
-					}
-				else if(arg.startsWith('-'))
-					for(c of arg.slice(1))
-						switch(c) {
-						case 'h': h = (anarquia[aid].h > 0); break;
-						case 'v': v = (anarquia[aid].v > 0); break;
-						}
-				else if(Object.keys(e).length < 4)
-					if((arg.startsWith('<:') || arg.startsWith('<a:')) && arg.endsWith('>')) {
-						arg = arg.slice(arg.indexOf(':') + 1, -1);
-						arg = arg.slice(arg.indexOf(':') + 1);
-						if(message.client.emojis.cache.get(arg) !== undefined)
-							e.id = arg;
-						else
-							e.id = 'unresolved';
-					} else if(e.x === undefined && !isNaN(arg) && !isNaN(args[i + 1])) {
-						e.x = arg - 1;
-						e.y = args[i + 1] - 1;
-					}
 			});
 			
+			const imagen = new MessageAttachment(canvas.toBuffer(), 'anarquia.png');
+			message.channel.send({ files: [imagen] });
+		} else if(args[0] === 'p') { //Revisar perfil
+			args.shift();
+			const search = (args.length) ? args.join(' ') : undefined;
+			const aid = (search) ? fetchUserID(search, message) : message.author.id;
+			const auser = await AUser.findOne({ userId: aid });
+			if(!aid) {
+				message.channel.send({ content: `:warning: Usuario **${search}** no encontrado` });
+				return;
+			}
+			const user = message.client.users.cache.get(aid);
+			const embed = new MessageEmbed()
+				.setColor('#bd0924')
+				.setAuthor(user.username, user.avatarURL({ format: 'png', dynamic: true, size: 512 }));
+			if(auser)
+				embed.setTitle('Perfil anárquico')
+					.addField('Inventario', `↔️ x ${auser.skills.h}\n↕ x ${auser.skills.v}`, true)
+					.addField('Rango', `Nivel ${Math.floor(auser.exp / 30) + 1} (exp: ${auser.exp})`, true);
+			else
+				embed.setTitle('Perfil inexistente')
+					.addField(
+						'Este perfil anárquico no existe todavía', `Usa \`${p_pure(message.guildId).raw}anarquia <posición(x,y)> <emote>\` para colocar un emote en la tabla de puré y crearte un perfil anárquico automáticamente\n` +
+						`Si tienes más dudas, usa \`${p_pure(message.guildId).raw}ayuda anarquia\``
+					);
+			message.channel.send({ embeds: [embed] });
+		} else { //Ingresar emotes a tabla
+			const auser = (await AUser.findOne({ userId: message.author.id }))
+				|| new AUser({ userId: message.author.id });
+			//Tiempo de enfriamiento por usuario
+			if((Date.now() - auser.last) / 1000 < 3) {
+				message.react('⌛');
+				return;
+			} else auser.last = Date.now();
+			const h = fetchFlag(args, { short: ['h'], long: ['horizontal'], callback: (auser.skills.h > 0) });
+			const v = fetchFlag(args, { short: ['v'], long: ['vertical'], callback: (auser.skills.v > 0) });
+			let e = {};
+			let ematch = args.find(arg => arg.match(/^<a*:\w+:[0-9]+>\B/));
+			if(ematch) {
+				ematch = ematch.slice(ematch.lastIndexOf(':') + 1, -1);
+				if(message.client.emojis.cache.has(ematch))
+					e.id = ematch;
+			}
+			const axis = args.findIndex((arg, i) => !isNaN(arg) && !isNaN(args[i + 1]));
+			if(axis >= 0) {
+				e.x = args[axis] - 1;
+				e.y = args[axis + 1] - 1;
+			}
 			if(Object.keys(e).length !== 3)
 				message.channel.send({ content: `:warning: Entrada inválida\nUsa \`${p_pure(message.guildId).raw}ayuda anarquia\` para más información` });
-			else if(e.id === 'unresolved')
+			else if(!e.id || !e.x)
 				message.react('⚠️');
 			else {
 				//Insertar emote en x,y
+				const cells = (await Puretable.findOne({})).cells;
 				const stx = e.x, sty = e.y;
-				e.x = Math.max(0, Math.min(e.x, global.puretable[0].length - 1));
-				e.y = Math.max(0, Math.min(e.y, global.puretable.length - 1));
+				e.x = Math.max(0, Math.min(e.x, cells[0].length - 1));
+				e.y = Math.max(0, Math.min(e.y, cells.length - 1));
 
-				const modifyAndNotify = async () => {
-					if(!h && !v) global.puretable[e.y][e.x] = e.id;
-					else {
-						if(h) { for(let i = 0; i < global.puretable[0].length; i++) global.puretable[e.y][i] = e.id; anarquia[aid].h--; }
-						if(v) { for(let i = 0; i < global.puretable.length; i++)    global.puretable[i][e.x] = e.id; anarquia[aid].v--; }
-						await message.react('⚡');
-					}
+				//Cargar imagen nueva si no está registrada
+				if(!global.loademotes.hasOwnProperty(e.id))
+					global.loademotes[e.id] = await loadImage(message.client.emojis.cache.get(e.id).url);
 
-					const r = Math.random();
-					if(r < (1 + Math.floor(anarquia[aid].exp / 30)) / 100)
-						if(Math.random() < 0.5) {
-							anarquia[aid].h++;
-							await message.react('↔️');
-						} else {
-							anarquia[aid].v++;
-							await message.react('↕️');
-						}
-					anarquia[aid].exp++;
-					if((anarquia[aid].exp % 30) == 0)
-						message.channel.send({ content: `¡**${message.author.username}** subió a nivel **${Math.floor(anarquia[aid].exp / 30) + 1}**!` });
-
-					if(stx !== e.x || sty !== e.y) message.react('☑️');
-					else message.react('✅');
+				if(!h && !v) cells[e.y][e.x] = e.id;
+				else {
+					if(h) { for(let i = 0; i < cells[0].length; i++) cells[e.y][i] = e.id; auser.skills.h--; }
+					if(v) { for(let i = 0; i < cells.length; i++)    cells[i][e.x] = e.id; auser.skills.v--; }
+					await message.react('⚡');
 				}
+				await Puretable.updateOne({}, { cells: cells });
 
-				modifyAndNotify();
-				anarquia[aid].last = Date.now();
+				//Sistema de nivel de jugador y adquisición de habilidades
+				const maxexp = 30;
+				const userlevel = Math.floor(auser.exp / maxexp) + 1;
+				const r = Math.random();
+				if(r < userlevel / 100)
+					if(Math.random() < 0.5) {
+						auser.skills.h++;
+						await message.react('↔️');
+					} else {
+						auser.skills.v++;
+						await message.react('↕️');
+					}
+				auser.exp++;
+				if((auser.exp % maxexp) == 0)
+					message.channel.send({ content: `¡**${message.author.username}** subió a nivel **${userlevel}**!` });
+
+				if(stx !== e.x || sty !== e.y) message.react('☑️');
+				else message.react('✅');
+				auser.save();
 			}
 		}
 	}
