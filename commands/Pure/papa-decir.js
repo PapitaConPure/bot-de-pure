@@ -45,7 +45,6 @@ module.exports = {
             message.channel.send({ content: ':warning: tienes que especificar lo que quieres que diga.' });
             return;
         }
-        console.log(needch, guild ? guild.name : null, channel ? channel.name : null);
         if(!channel) {
             if(!needch) channel = message.channel;
             else channel = guild.systemChannel;

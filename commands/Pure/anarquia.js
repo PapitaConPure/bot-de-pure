@@ -3,6 +3,7 @@ const { anarquia } = require('../../localdata/sguses.json'); //Variables globale
 const { fetchUserID } = require('../../func.js');
 const { createCanvas, loadImage } = require('canvas');
 const { MessageEmbed, MessageAttachment } = require('discord.js');
+const { p_pure } = require('../../localdata/prefixget');
 
 module.exports = {
 	name: 'anarquia',
@@ -14,9 +15,9 @@ module.exports = {
 		'Puedes ingresar un `<emote>` en una `<posición(x,y)>` o, al no ingresar nada, ver la tabla\n' +
 		'La `<posicion(x,y)>` se cuenta desde 1x,1y, y el `<emote>` designado debe ser de un server del que yo forme parte~\n\n' +
 		'De forma aleatoria, puedes ir desbloqueando habilidades para rellenar líneas completas en `--horizontal` o `--vertical`. La probabilidad inicial es 1% en conjunto, y aumenta +1% por cada __nivel__\n' +
-		`**Nivel**: nivel de usuario en \`${global.p_pure.raw}anarquia\`. +1 por cada *30 usos*\n\n` +
+		`**Nivel**: nivel de usuario en minijuego Anarquía\`. +1 por cada *30 usos*\n\n` +
 		'Incluso si usas una habilidad de línea, debes ingresar ambos ejes (`x,y`) en orden\n' +
-		`Usa \`${global.p_pure.raw}anarquia p\` para ver tu perfil anárquico`,
+		`Ingresa únicamente \`p\` para ver tu perfil anárquico`,
 	flags: [
 		'common'
 	],
@@ -87,8 +88,8 @@ module.exports = {
 				else
 					embed.setTitle('Perfil inexistente')
 						.addField(
-							'Este perfil anárquico no existe todavía', `Usa \`${global.p_pure.raw}anarquia <posición(x,y)> <emote>\` para colocar un emote en la tabla de puré y crearte un perfil anárquico automáticamente\n` +
-							`Si tienes más dudas, usa \`${global.p_pure.raw}ayuda anarquia\``
+							'Este perfil anárquico no existe todavía', `Usa \`${p_pure(message.guildId).raw}anarquia <posición(x,y)> <emote>\` para colocar un emote en la tabla de puré y crearte un perfil anárquico automáticamente\n` +
+							`Si tienes más dudas, usa \`${p_pure(message.guildId).raw}ayuda anarquia\``
 						);
 				message.channel.send({ embeds: [embed] });
 			} else message.channel.send({ content: `:warning: Usuario **${args[1]}** no encontrado` });
@@ -139,7 +140,7 @@ module.exports = {
 			});
 			
 			if(Object.keys(e).length !== 3)
-				message.channel.send({ content: `:warning: Entrada inválida\nUsa \`${global.p_pure.raw}ayuda anarquia\` para más información` });
+				message.channel.send({ content: `:warning: Entrada inválida\nUsa \`${p_pure(message.guildId).raw}ayuda anarquia\` para más información` });
 			else if(e.id === 'unresolved')
 				message.react('⚠️');
 			else {

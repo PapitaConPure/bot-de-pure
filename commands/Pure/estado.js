@@ -2,13 +2,14 @@ const Discord = require('discord.js'); //Integrar discord.js
 const { bot_status, p_pure } = require('../../localdata/config.json'); //Variables globales
 const ayuda = require('./ayuda.js'); //Variables globales
 const { readdirSync } = require('fs'); //Para el contador de comandos
+const prefixget = require('../../localdata/prefixget');
 
 const { host, version, note, changelog, todo } = bot_status;
 const cmsearch = new RegExp(`${p_pure.raw}[a-zA-Z0-9_.-]*`, 'g');
 const ne = [ '0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣' ];
-function listFormat(str, addIndex) {
+function listFormat(str, addIndex, guildId) {
     let cmindex = 0;
-    return str.replace(cmsearch, match => `${addIndex?`**[${cmindex++}]**`:''}\`${match}\``)
+    return str.replace(cmsearch, match => `${addIndex?`**[${cmindex++}]**`:''}\`${prefixget.p_pure(guildId).raw}${match.slice(p_pure.raw.length)}\``)
 };
 
 module.exports = {
@@ -34,8 +35,8 @@ module.exports = {
             .addField('Host', (host === 'https://localhost/')?'https://heroku.com/':'localhost', true)
             .addField('Versión', `:hash: ${version.number}\n:scroll: ${version.name}`, true)
             .addField('Visión general', note)
-            .addField('Cambios', listFormat(clformat, true))
-            .addField('Lo que sigue', listFormat(tdformat, false));
+            .addField('Cambios', listFormat(clformat, true, message.guildId))
+            .addField('Lo que sigue', listFormat(tdformat, false, message.guildId));
 
         const sent = await message.channel.send({ embeds: [embed] })
         if(cm === null) return;

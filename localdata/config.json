@@ -2,20 +2,13 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.8F",
+            "number": "Full.2.8.90",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo reestructuraciones para una actualización mayor",
         "changelog": [
             "Tareas de refactorización (2.97/4)",
             "PLACEHOLDER_SLASHCMD",
-            "Agregado p!celeste",
-            "Agregado p!buscar",
-            "Corregido un error con el procesado de múltiples `-banderas` cortas",
-            "Agregado p!vtubers",
-            "Corregido un error al usar comandos SFW<->NSFW en Hilos",
-            "Agregado p!encuesta",
-            "Agregada función de `&emotes` rápidos (revisa la ayuda)",
             "Agregado p!prefijo",
             "Agregado p!aqua"
         ],

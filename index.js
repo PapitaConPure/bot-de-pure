@@ -123,7 +123,6 @@ client.on('ready', async () => {
             regex: pp.drmk.regex
         };
     });
-    console.log(global.p_pure);
     const gds = client.guilds;
     await Promise.all([
         gds.fetch(global.serverid.slot1),

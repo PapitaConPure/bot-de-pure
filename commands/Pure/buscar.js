@@ -1,9 +1,10 @@
-const { peopleid, p_pure } = require('../../localdata/config.json');
+const { peopleid } = require('../../localdata/config.json');
 const { randRange, fetchFlag } = require('../../func');
 const { MessageEmbed, Permissions } = require('discord.js'); //Integrar discord.js
 const { engines, getBaseTags, getSearchTags } = require('../../localdata/booruprops.js'); //Variables globales
 const booru = require('booru');
 const rakki = require('./rakkidei.js');
+const { p_pure } = require('../../localdata/prefixget');
 
 module.exports = {
 	name: 'buscar',
@@ -66,13 +67,12 @@ module.exports = {
 		if(!engines.includes(engine)) {
 			message.channel.send(
 				`:warning: El motor **${inputengine}** no aparece en la lista de motores soportados.\n` +
-				`Usa \`${p_pure.raw}ayuda ${module.exports.name}\` para más información`
+				`Usa \`${p_pure(message.guildId).raw}ayuda ${module.exports.name}\` para más información`
 			);
 			return;
 		}
 		const stags = [searchOpt.cmdtag, getBaseTags(engine, isnsfw)].join(' ');
 		const extags = getSearchTags(args, engine, searchOpt.cmdtag);
-		console.log({ args: args, isNSFWChannel: isnsfw, stags: stags, extags: extags});
 		
 		//Petición
 		try {

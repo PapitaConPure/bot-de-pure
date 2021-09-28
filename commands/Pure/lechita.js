@@ -39,7 +39,6 @@ async function resolverLink(msg, linkRes, iSize, isnsfw) {
 		}
 	});
 
-	console.log(iurl);
 	return iurl;
 }
 

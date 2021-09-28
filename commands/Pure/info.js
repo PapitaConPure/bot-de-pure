@@ -45,7 +45,6 @@ module.exports = {
 
 		//Procesado de información canal-por-canal
 		servidor.channels.cache.forEach(channel => {
-			console.log(channel.type);
 			switch(channel.type) {
 			case 'GUILD_NEWS': chs.news++; break;
 			case 'GUILD_TEXT': chs.text++; break;
@@ -80,8 +79,6 @@ module.exports = {
 			.sort((a, b) => b[1].cnt - a[1].cnt)
 			.slice(0, 5)
 			.map(([name, obj]) => [name, obj.cnt]);
-		console.log('uwu', peocnt);
-		console.log('owo', msgcnt);
 			
 		//Creacion de top 5
 		//Personas más activas

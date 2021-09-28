@@ -1,8 +1,9 @@
 const { readdirSync } = require('fs'); //Integrar operaciones sistema de archivos de consola
 const { MessageEmbed } = require('discord.js');
-const { p_pure, serverid } = require('../../localdata/config.json'); //Variables globales
+const { serverid } = require('../../localdata/config.json'); //Variables globales
 const { stringify } = require('querystring');
 const { fetchFlag } = require('../../func');
+const { p_pure } = require('../../localdata/prefixget');
 
 module.exports = {
 	name: 'ayuda',
@@ -29,7 +30,7 @@ module.exports = {
     ],
     callx: '<comando?>',
     
-	async execute({ client, channel, author, member }, args) {
+	async execute({ client, channel, author, member, guildId }, args) {
         const fex = fetchFlag(args, { short: ['x'], long: ['exclusivo', 'exclusiva', 'exclusive'], callback: true });
         const fall = fetchFlag(args, { short: ['t'], long: ['todo'], callback: true });
         const auth = {
@@ -49,7 +50,7 @@ module.exports = {
         let list = [];
         const embed = new MessageEmbed().setColor('#608bf3');
         const aurl = client.user.avatarURL({ format: 'png', dynamic: true, size: 512 });
-        const pfr = p_pure.raw;
+        const pfr = p_pure(guildId).raw;
         const hcmd = `${pfr}${module.exports.name}`;
         
         //Análisis de comandos

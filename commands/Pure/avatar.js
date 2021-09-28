@@ -1,6 +1,7 @@
 const { MessageEmbed } = require('discord.js'); //Integrar discord.js
-const { p_pure, peopleid } = require('../../localdata/config.json');
+const { peopleid } = require('../../localdata/config.json');
 const { fetchUser } = require('../../func.js'); //Funciones globales
+const { p_pure } = require('../../localdata/prefixget');
 
 const maxusers = 5;
 
@@ -65,7 +66,7 @@ module.exports = {
             embeds.push(new MessageEmbed()
                 .setTitle(`Avatar de ${user.username}`)
                 .setColor('#faa61a')
-                .setFooter(`"${p_pure.raw}ayuda avatar" para más información`)
+                .setFooter(`"${p_pure(message.guildId).raw}ayuda avatar" para más información`)
                 .setImage(user.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
             );
         });

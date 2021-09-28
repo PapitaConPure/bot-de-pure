@@ -1,6 +1,6 @@
-const { p_pure } = require('../../localdata/config.json'); //Variables globales
 const { MessageEmbed } = require('discord.js');
 const { randRange } = require('../../func');
+const { p_pure } = require('../../localdata/prefixget');
 
 module.exports = {
 	name: 'dado',
@@ -23,7 +23,9 @@ module.exports = {
 	async execute(message, args) {
 		if(!args.length) {
 			message.channel.send({
-				content: `:warning: Debes ingresar al menos un conjunto de dados a tirar, como \`1d6\`.\nPara más información sobre el comando, usa \`${p_pure.raw}ayuda dado\``
+				content:
+					':warning: Debes ingresar al menos un conjunto de dados a tirar, como `1d6`.\n' +
+					`Para más información sobre el comando, usa \`${p_pure(message.guildId).raw}ayuda dado\``
 			});
 			return;
 		}

@@ -1,9 +1,9 @@
-const aquaurl = 'https://media.tenor.co/videos/160249b37d22ffac37e6bbb98ee34f24/mp4';
+const aquaurl = 'https://tenor.com/bF5ID.gif';
 
 module.exports = {
 	name: 'aqua',
 	aliases: [
-		'minato'
+		'minato', 'onion'
 	],
 	desc: 'Comando de cachetitos de Minato Aqua',
 	flags: [

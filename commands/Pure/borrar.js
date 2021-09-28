@@ -1,6 +1,5 @@
-const { p_pure } = require('../../localdata/config.json'); //Variables globales
-const func = require('../../func.js'); //Funciones globales
 const { fetchFlag, fetchUser } = require('../../func.js');
+const { p_pure } = require('../../localdata/prefixget.js');
 
 module.exports = {
 	name: 'borrar',
@@ -32,7 +31,7 @@ module.exports = {
 			message.channel.send({
 				content:
 					':warning: Debes especificar la cantidad de mensajes a borrar\n' +
-					`Revisa \`${p_pure.raw}ayuda borrar\` para más información`
+					`Revisa \`${p_pure(message.guildId).raw}ayuda borrar\` para más información`
 			});
 			return;
 		}
