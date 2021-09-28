@@ -12,11 +12,11 @@ module.exports = {
 
 	async execute({ channel }, _) {
 		//Acción de comando
-		await channel.send({ files: [aquaurl] });
+		await channel.send({ content: aquaurl });
 	},
 
 	async interact(interaction, _) {
 		//Acción de comando
-		await interaction.reply({ files: [aquaurl] });
+		await interaction.reply({ content: aquaurl });
 	}
 };
