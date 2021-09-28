@@ -296,6 +296,7 @@ module.exports = {
         .set('zentreya',        'zentreya_(vtuber)')
         .set('hime',            'hime_hajime')
         //Independientes
+        .set('kizuna',          'kizuna_ai')
         .set('tamaki',          'inuyama_tamaki')
         .set('kana',            'kamiko_kana')
     )(),
