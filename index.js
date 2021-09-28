@@ -3,9 +3,12 @@ const Discord = require('discord.js'); //Soporte JS de la API de Discord
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const fs = require('fs'); //Sistema de archivos
-const uri = (process.env.MONGODB_URI) ? process.env.MONGODB_URI : require('./key.json').dburi;
+
+//Base de datos
 const Mongoose = require('mongoose');
-//const keyv = new Keyv(uri);
+const uri = (process.env.MONGODB_URI) ? process.env.MONGODB_URI : require('./key.json').dburi;
+const prefixpair = require('./localdata/models/prefixpair.js');
+
 const global = require('./localdata/config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
 const stats = require('./localdata/stats.json');
@@ -44,8 +47,8 @@ const fastGuildFunctions = (() => {
     Object.values(guildfunc).map(gfs => Object.values(gfs).map(fgf => fgf.name)).forEach(fgt => rtn = [...rtn, ...fgt]);
     return rtn.sort().filter((fgf, i, arr) => fgf !== arr[i - 1]);
 })();
-global.p_drmk = { raw: 'd!', regex: /^[Dd]![\n ]*/g };
-global.p_pure = { raw: 'p!', regex: /^[Pp]![\n ]*/g };
+global.p_drmk = { raw: 'd!', regex: /^d![\n ]*/g };
+global.p_pure = { raw: 'p!', regex: /^p![\n ]*/g };
 //#endregion
 
 //#region Detección de archivos de comandos
@@ -76,10 +79,6 @@ for(const file of commandFiles) {
 //Fallo de base de datos
 //keyv.on('error', error => console.error(chalk.bold.redBright('Error de Base de Datos\n'), chalk.redBright(error)));
 
-Mongoose.connect(uri, {
-    
-}).then(console.log(chalk.greenBright('Base de datos conectada')));
-
 //Inicialización del cliente
 client.on('ready', async () => {
     const confirm = () => console.log(chalk.green('Hecho.'));
@@ -109,6 +108,22 @@ client.on('ready', async () => {
     await func.modifyAct(client, 0);
 
     console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
+    await Mongoose.connect(uri, {
+        useUnifiedTopology: true,
+        useNewUrlParser: true
+    });
+    //Prefijos
+    (await prefixpair.find({})).forEach(pp => {
+        global.p_pure[pp.guildId] = {
+            raw: pp.pure.raw,
+            regex: pp.pure.regex
+        };
+        global.p_drmk[pp.guildId] = {
+            raw: pp.drmk.raw,
+            regex: pp.drmk.regex
+        };
+    });
+    console.log(global.p_pure);
     const gds = client.guilds;
     await Promise.all([
         gds.fetch(global.serverid.slot1),
@@ -197,13 +212,18 @@ client.on('messageCreate', async message => {
         fastGuildFunctions.forEach(async frf => {
             if(guildfunc[gid][frf]) await guildfunc[gid][frf](message);
         });
+    if(message.mentions.users.has(message.client.user.id)) {
+        await require('./commands/Pure/prefijo.js').execute(message, []);
+    }
     //#endregion
     
     //#region Comandos
     //#region Detección de Comandos
+    const p_drmk = global.p_drmk[gid] || global.p_drmk;
+    const p_pure = global.p_pure[gid] || global.p_pure;
     let pdetect;
-    if(msg.startsWith(global.p_drmk.raw)) pdetect = global.p_drmk;
-    else if(msg.startsWith(global.p_pure.raw)) pdetect = global.p_pure;
+    if(msg.startsWith(p_drmk.raw)) pdetect = p_drmk;
+    else if(msg.startsWith(p_pure.raw)) pdetect = p_pure;
     else {
         //#region Emotes rápidos
         let ecmd = content.split(/[\n ]+/).find(word => word.startsWith('&'));
@@ -244,11 +264,11 @@ client.on('messageCreate', async message => {
     let commandname = args.shift().toLowerCase(); //Comando ingresado
     let command;
     
-    if(pdetect.raw === global.p_drmk.raw) {
+    if(pdetect.raw === p_drmk.raw) {
         //command = client.ComandosDrawmaku.get(commandname) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(commandname));
         channel.send({ content: '<:delete:704612795072774164> Los comandos de Drawmaku estarán deshabilitados por un tiempo indefinido. Se pide disculpas.' });
         return;
-    } else if(pdetect.raw === global.p_pure.raw)
+    } else if(pdetect.raw === p_pure.raw)
         command = client.ComandosPure.get(commandname) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(commandname));
     
     if(!command) {
