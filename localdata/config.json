@@ -12,12 +12,12 @@
             "Agregado p!celeste",
             "Agregado p!buscar",
             "Corregido un error con el procesado de múltiples `-banderas` cortas",
-            "Corregido pequeño error en p!lechita al ingresar un usuario",
             "Agregado p!vtubers",
             "Corregido un error al usar comandos SFW<->NSFW en Hilos",
             "Agregado p!encuesta",
             "Agregada función de `&emotes` rápidos (revisa la ayuda)",
-            "Agregado p!prefijo"
+            "Agregado p!prefijo",
+            "Agregado p!aqua"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos con p!ayuda",
