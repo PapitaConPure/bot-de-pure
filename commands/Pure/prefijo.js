@@ -10,7 +10,8 @@ module.exports = {
 	],
 	desc: 'Cambia o muestra el prefijo del servidor actual',
 	flags: [
-		'common'
+		'common',
+		'mod'
 	],
 	options: [
 		'`<prefijo?>` _(texto)_ para cambiar el prefijo del servidor',
