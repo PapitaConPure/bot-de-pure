@@ -1,6 +1,6 @@
 const uses = require('../../localdata/sguses.json'); //Funciones globales
-const { p_pure } = require('../../localdata/config.json'); //Prefijos
 const { fetchUser, randRange } = require('../../func.js');
+const { p_pure } = require('../../localdata/prefixget');
 
 const frase = [
 	'Oe po [m] <:junkNo:697321858407727224>',
@@ -45,7 +45,7 @@ module.exports = {
 			return;
 		}
 		if(args.length !== 2) {
-			message.channel.send({ content: `:warning: Debes ingresar 2 parámetros (\`${p_pure.raw}pinguear <cantidad> <usuario>\`)` });
+			message.channel.send({ content: `:warning: Debes ingresar 2 parámetros (\`${p_pure(message.guildId).raw}pinguear <cantidad> <usuario>\`)` });
 			return;
 		}
 		let cnt = -1;

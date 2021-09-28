@@ -1,6 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { fetchFlag, fetchArrows } = require('../../func');
-const { p_pure } = require('../../localdata/config.json'); //Variables globales
+const { p_pure } = require('../../localdata/prefixget');
 
 module.exports = {
 	name: 'inforol',
@@ -22,7 +22,7 @@ module.exports = {
 	
 	async execute(message, args) {
 		if(args.length < 1) {
-			message.channel.send({ content: `:x: ¡Debes ingresar al menos un parámetro!\nUsa \`${p_pure.raw}ayuda inforol\` para más información` });
+			message.channel.send({ content: `:x: ¡Debes ingresar al menos un parámetro!\nUsa \`${p_pure(message.guildId).raw}ayuda inforol\` para más información` });
 			return;
 		}
 
