@@ -2,18 +2,19 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.94",
+            "number": "Full.2.8.95",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo reestructuraciones para una actualización mayor",
         "changelog": [
-            "Tareas de refactorización (2.98/4)",
+            "Tareas de refactorización (2.985/4)",
             "PLACEHOLDER_SLASHCMD",
             "Agregado p!prefijo",
             "Agregado p!aqua",
             "Corregido un error con los prefijos en mayúsculas",
             "p!anarquia ahora es permanente",
-            "Corregido error al buscar por nombre de usuario"
+            "Corregido error al buscar por nombre de usuario",
+            "p!info ahora recopila información permanente"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos con p!ayuda",

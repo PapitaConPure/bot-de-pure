@@ -1,7 +1,6 @@
 const { readdirSync } = require('fs'); //Integrar operaciones sistema de archivos de consola
 const { MessageEmbed } = require('discord.js');
 const { serverid } = require('../../localdata/config.json'); //Variables globales
-const { stringify } = require('querystring');
 const { fetchFlag } = require('../../func');
 const { p_pure } = require('../../localdata/prefixget');
 
@@ -62,9 +61,10 @@ module.exports = {
             if(!search) {
                 const filtered = (() => {
                     if(!flags) return true;
-                    if(flags.includes('guide') || (!fall && flags.includes('maintenance')))
-                        return false;
-                    if(!flags.every(f => (auth[f] === undefined || auth[f])))
+                    if(flags.includes('guide')) return false;
+                    if(fall) return true;
+                    if(['maintenance', 'outdated'].some(f => flags.includes(f))
+                    || (!flags.every(f => (auth[f] === undefined || auth[f]))))
                         return false;
                     if(!filters.length) return true;
                     return fex
@@ -90,7 +90,7 @@ module.exports = {
                         : ':label: Sin alias', true)
                     .addField('Descripción', (command.desc !== undefined && command.desc.length > 0)
                         ? command.desc
-                        :':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde');
+                        : ':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde');
                 
                 if(flags ? !flags.includes('guide') : true)
                     embed.addField('Llamado', `\`${pfr}${command.name}${command.callx ? ` ${command.callx}` : ''}\``, true)

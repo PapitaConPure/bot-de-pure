@@ -8,11 +8,11 @@ const fs = require('fs'); //Sistema de archivos
 const Mongoose = require('mongoose');
 const uri = (process.env.MONGODB_URI) ? process.env.MONGODB_URI : require('./key.json').dburi;
 const prefixpair = require('./localdata/models/prefixpair.js');
+const { Stats, ChannelStats } = require('./localdata/models/stats.js');
 const { Puretable, defaultEmote } = require('./localdata/models/puretable.js');
 
 const global = require('./localdata/config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
-const stats = require('./localdata/stats.json');
 const cmdex = require('./localdata/cmdExceptions.js');
 const guildfunc = require('./localdata/guildFunctions.js');
 const dns = require('dns'); //Detectar host
@@ -137,11 +137,12 @@ client.on('ready', async () => {
     console.log(chalk.gray('Preparando Tabla de Puré...'));
     let puretable = await Puretable.findOne({});
     if(!puretable) puretable = new Puretable();
-    else if(global.bot_status.host === 'https://localhost/')
+    else //Limpiar emotes eliminados / no accesibles
         puretable.cells = await Promise.all(puretable.cells.map(arr =>
             Promise.all(arr.map(cell => client.emojis.cache.get(cell) ? cell : defaultEmote ))
         ));
     await puretable.save();
+    //Volcar en memoria las imágenes necesarias para dibujar la Tabla de Puré
     global.loademotes = {};
     await Promise.all(puretable.cells.map(arr =>
         Promise.all(arr.slice(0).sort().filter((item, i, a) => (i > 0)?(item !== a[i - 1]):true).map(async item => {
@@ -211,14 +212,17 @@ client.on('messageCreate', async message => {
     //#endregion
 
     //#region Estadísticas
-    (function registerUserMessage(mci = channel.id, mmi = author.id) {
-        stats.read++;
-        stats[gid] = stats[gid] || {};
-        stats[gid][mci] = stats[gid][mci] || {};
-        stats[gid][mci].cnt = (stats[gid][mci].cnt || 0) + 1;
-        stats[gid][mci].sub = stats[gid][mci].sub || {};
-        stats[gid][mci].sub[mmi] = (stats[gid][mci].sub[mmi] || 0) + 1;
-    })();
+    const chquery = { guildId: gid, channelId: channel.id };
+    const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
+    const chstats = (await ChannelStats.findOne(chquery)) || new ChannelStats(chquery);
+    stats.read++;
+    chstats.cnt++;
+    chstats.sub[author.id] = (chstats.sub[author.id] || 0) + 1;
+    chstats.markModified('sub');
+    await Promise.all([
+        stats.save(),
+        chstats.save()
+    ]);
     //#endregion
 
     //#region Respuestas rápidas
@@ -324,6 +328,8 @@ client.on('messageCreate', async message => {
         });
         stats.commands.failed++;
     }
+    stats.markModified('commands');
+    await stats.save();
     //#endregion
     //#endregion
 });
@@ -335,6 +341,22 @@ client.on('interactionCreate', async interaction => {
     if(func.channelIsBlocked(channel)) return;
 	const slash = client.SlashPure.get(commandname);
 	if (!slash) return;
+    
+    //#region Estadísticas
+    //Los comandos slash no deberían contar como mensajes como tal, así que comento todo lo relacionado a contadores de mensajes
+    //const chquery = { guildId: guild.id, channelId: channel.id };
+    //const uid = member.user.id;
+    const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
+    /*const chstats = (await ChannelStats.findOne(chquery)) || new ChannelStats(chquery);
+    stats.read++;
+    chstats.cnt++;
+    chstats.sub[uid] = (chstats.sub[uid] || 0) + 1;
+    chstats.markModified('sub');
+    await Promise.all([
+        stats.save(),
+        chstats.save()
+    ]);*/
+    //#endregion
 
 	try {
         const comando = client.ComandosPure.get(commandname);
@@ -369,6 +391,8 @@ client.on('interactionCreate', async interaction => {
            console.error(err);
         });
 	}
+    stats.markModified('commands');
+    await stats.save();
 });
 
 //Evento de entrada a servidor

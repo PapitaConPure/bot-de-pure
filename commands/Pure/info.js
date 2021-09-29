@@ -1,7 +1,7 @@
 const { MessageEmbed } = require('discord.js'); //Integrar discord.js
 const { fetchArrows, fetchFlag, fetchUser } = require('../../func');
 const { startuptime } = require('../../localdata/config.json'); //Variables globales
-const stats = require('../../localdata/stats.json');
+const { ChannelStats, Stats } = require('../../localdata/models/stats');
 
 module.exports = {
 	name: 'info',
@@ -22,13 +22,13 @@ module.exports = {
 	
 	async execute(message, args) {
 		if(!message.guild.available) {
-			message.channel.send('El servidor está en corte ahora mismo. Intenta usar el comando más tarde.');
+			message.channel.send(':interrobang: E-el servidor está en corte ahora mismo. Intenta usar el comando más tarde');
 			return;
 		}
 		message.channel.sendTyping();
+		const stats = await Stats.findOne({});
 		const servidor = message.guild; //Variable que almacena un objeto del servidor a analizar
-		const miembro = fetchFlag(args, { property: true, short: ['m'], long: ['miembro'], callback: (x, i) => fetchUser(x[i], message) });
-		let selectch;
+		//const miembro = fetchFlag(args, { property: true, short: ['m'], long: ['miembro'], callback: (x, i) => fetchUser(x[i], message) });
 
 		//Contadores
 		let chs = {
@@ -56,35 +56,42 @@ module.exports = {
 			}
 		});
 		
+		//Análisis de actividad
+		const channels = servidor.channels.cache;
+		const chquery = {
+			guildId: servidor.id,
+			channelId: undefined
+		};
+		let sch;
 		if(args.length) {
 			if(args[0].startsWith('<#') && args[0].endsWith('>')) {
 				args[0] = args[0].slice(2, -1);
 				if(args[0].startsWith('!')) args[0] = args[0].slice(1);
 			}
-
-			if(isNaN(args[0]))
-				selectch = servidor.channels.cache.filter(c => c.messages).find(c => c.name.toLowerCase().indexOf(args[0]) !== -1);
-			else 
-				selectch = servidor.channels.cache.filter(c => c.messages).find(c => c.id !== -1);
+			sch = isNaN(args[0])
+				? channels.filter(c => c.isText()).find(c => c.name.toLowerCase().indexOf(args[0]) !== -1)
+				: channels.filter(c => c.isText()).find(c => c.id !== -1);
 		}
 
-		if(selectch === undefined)
-			selectch = message.channel;
-		const peocnt = stats[servidor.id][selectch.id]
-			? Object.entries(stats[servidor.id][selectch.id].sub)
+		if(!sch) sch = message.channel;
+		chquery.channelId = sch.id;
+		const chstats = (await ChannelStats.findOne(chquery)) || new ChannelStats(chquery);
+		
+		const peocnt = Object.keys(chstats.sub).length
+			? Object.entries(chstats.sub)
 				.sort((a, b) => b[1] - a[1])
 				.slice(0, 5)
 			: undefined;
-		const msgcnt = Object.entries(stats[servidor.id])
-			.sort((a, b) => b[1].cnt - a[1].cnt)
+		const msgcnt = Object.values(await ChannelStats.find({ guildId: servidor.id }))
+			.sort((a, b) => b.cnt - a.cnt)
 			.slice(0, 5)
-			.map(([name, obj]) => [name, obj.cnt]);
+			.map((obj) => [obj.channelId, obj.cnt]);
 			
 		//Creacion de top 5
 		//Personas más activas
-		const peotop = peocnt ? peocnt.map(([name, count]) => `<@${name}>: **${count}** mensajes.`).join('\n') : '_Este canal no tiene mensajes._';
+		const peotop = peocnt ? peocnt.map(([id, count]) => `<@${id}>: **${count}** mensajes.`).join('\n') : '_Este canal no tiene mensajes_';
 		//Canales más activos
-		const chtop = msgcnt.map(([name, count]) => `<#${name}>: **${count}** mensajes.`).join('\n');
+		const chtop = msgcnt.map(([id, count]) => `<#${id}>: **${count}** mensajes.`).join('\n');
 
 		//Crear y usar embed
 		let SelectedEmbed = 0;
@@ -111,15 +118,17 @@ module.exports = {
 			.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL({ dynamic: true, size: 256 }))
 			.setFooter(`Estas estadísticas toman información concreta.`);
 		
+		const dbstring = new Date(stats.since).toLocaleString('es-ES');
+
 		Embed[1] = new MessageEmbed()
 			.setColor('#eebb00')
 			.setTitle('Estadísticas de actividad ÛwÕ')
 
-			.addField(`Usuarios más activos (canal: ${selectch.name})`, peotop)
+			.addField(`Usuarios más activos (canal: ${sch.name})`, peotop)
 			.addField('Canales más activos', chtop)
 
 			.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
-			.setFooter(`Estas estadísticas toman información desde el último reinicio del bot hasta la actualidad.`);
+			.setFooter(`Estas estadísticas toman información desde el ${dbstring.slice(0, dbstring.indexOf(' '))}`);
 
 		const tiempoguild = Date.now() - servidor.createdAt;
 		const serverms = Math.floor(tiempoguild) % 100;
@@ -144,9 +153,6 @@ module.exports = {
 				`**${serveryear}** años, **${servermonth}** meses, **${serverday}** días, **${serverhour}**º **${servermin}**' **${serversec}.${serverms}**''`)
 			.addField('Tiempo de funcionamiento del bot', 
 				`**${bothour}**hs. **${botmin}**min. **${botsec}.${botms}**seg.`)
-
-			.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
-			.setFooter(`Estas estadísticas toman información concreta.`);
 		
 		const arrows = fetchArrows(message.client.emojis.cache);
 		const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
