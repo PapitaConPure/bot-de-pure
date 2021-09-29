@@ -109,7 +109,7 @@ module.exports = {
 			}
 			if(Object.keys(e).length !== 3)
 				message.channel.send({ content: `:warning: Entrada inválida\nUsa \`${p_pure(message.guildId).raw}ayuda anarquia\` para más información` });
-			else if(!e.id || !e.x)
+			else if(!e.id || e.x === undefined)
 				message.react('⚠️');
 			else {
 				//Insertar emote en x,y
