@@ -145,7 +145,7 @@ module.exports = {
 					}
 				auser.exp++;
 				if((auser.exp % maxexp) == 0)
-					message.channel.send({ content: `¡**${message.author.username}** subió a nivel **${userlevel}**!` });
+					message.channel.send({ content: `¡**${message.author.username}** subió a nivel **${userlevel + 1}**!` });
 
 				if(stx !== e.x || sty !== e.y) message.react('☑️');
 				else message.react('✅');
