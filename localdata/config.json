@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.95",
+            "number": "Full.2.8.96",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo reestructuraciones para una actualización mayor",
@@ -19,7 +19,6 @@
         "todo": [
             "Agregar ejemplos interactivos de comandos con p!ayuda",
             "Minijuegos individuales y tipo-fiesta",
-            "Base de datos en la nube",
             "Personalización de Bot a nivel de servidor",
             "Comandos propios con Puréscript:tm:"
         ]

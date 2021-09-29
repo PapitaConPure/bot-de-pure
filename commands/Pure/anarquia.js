@@ -1,4 +1,4 @@
-const { loademotes } = require('../../localdata/config.json'); //Variables globales
+const global = require('../../localdata/config.json'); //Variables globales
 const { fetchUserID, fetchFlag } = require('../../func.js');
 const { createCanvas, loadImage } = require('canvas');
 const { MessageEmbed, MessageAttachment } = require('discord.js');
@@ -31,6 +31,7 @@ module.exports = {
 	callx: '<posición(x,y)?> <emote?>',
 
 	async execute(message, args) {
+		const loademotes = global.loademotes;
 		//Ver tabla
 		if(!args.length) {
 			const canvas = createCanvas(864, 960);

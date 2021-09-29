@@ -23,10 +23,9 @@ module.exports = {
 	callx: '<adversario>',
 
 	async execute(message, args) {
-		//Variables de flags
-
+		const kingemote = '';
 		//Acción de comando
-		message.channel.send({ content: 'Soon, later, never. Who knows?' });
+		await message.channel.send({ content: 'Soon, later, never. Who knows?' });
 	},
 
 	async interact(interaction) {
