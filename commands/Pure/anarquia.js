@@ -126,6 +126,7 @@ module.exports = {
 				else {
 					if(h) { for(let i = 0; i < cells[0].length; i++) cells[e.y][i] = e.id; auser.skills.h--; }
 					if(v) { for(let i = 0; i < cells.length; i++)    cells[i][e.x] = e.id; auser.skills.v--; }
+					auser.markModified('skills');
 					await message.react('⚡');
 				}
 				await Puretable.updateOne({}, { cells: cells });
@@ -148,7 +149,7 @@ module.exports = {
 
 				if(stx !== e.x || sty !== e.y) message.react('☑️');
 				else message.react('✅');
-				auser.save();
+				await auser.save();
 			}
 		}
 	}

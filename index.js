@@ -105,6 +105,17 @@ client.on('ready', async () => {
     
     await func.modifyAct(client, 0);
 
+	console.log(chalk.magenta('Obteniendo información del host...'));
+    try {
+        const asyncLookupService = promisify(dns.lookupService);
+        const host = await asyncLookupService('127.0.0.1', 443);
+        global.bot_status.host = `${host.service}://${host.hostname}/`;
+        confirm();
+    } catch(err) {
+        console.log(chalk.red('Fallido.'));
+        console.error(err);
+    }
+
     //Cargado de datos de base de datos
     console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
     console.log(chalk.gray('Conectando...'));
@@ -126,7 +137,7 @@ client.on('ready', async () => {
     console.log(chalk.gray('Preparando Tabla de Puré...'));
     let puretable = await Puretable.findOne({});
     if(!puretable) puretable = new Puretable();
-    else
+    else if(global.bot_status.host === 'https://localhost/')
         puretable.cells = await Promise.all(puretable.cells.map(arr =>
             Promise.all(arr.map(cell => client.emojis.cache.get(cell) ? cell : defaultEmote ))
         ));
@@ -152,17 +163,6 @@ client.on('ready', async () => {
     global.logch = logs[0];
     global.confch = logs[1];
 	confirm();
-
-	console.log(chalk.magenta('Obteniendo información del host...'));
-    try {
-        const asyncLookupService = promisify(dns.lookupService);
-        const host = await asyncLookupService('127.0.0.1', 443);
-        global.bot_status.host = `${host.service}://${host.hostname}/`;
-        confirm();
-    } catch(err) {
-        console.log(chalk.red('Fallido.'));
-        console.error(err);
-    }
 
 	console.log(chalk.rgb(158,114,214)('Registrando fuentes...'));
     registerFont('fonts/Alice-Regular.ttf', { family: 'headline' });
