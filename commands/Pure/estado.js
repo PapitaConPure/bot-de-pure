@@ -3,6 +3,7 @@ const { bot_status, p_pure } = require('../../localdata/config.json'); //Variabl
 const ayuda = require('./ayuda.js'); //Variables globales
 const { readdirSync } = require('fs'); //Para el contador de comandos
 const prefixget = require('../../localdata/prefixget');
+const { Stats } = require('../../localdata/models/stats');
 
 const { host, version, note, changelog, todo } = bot_status;
 const cmsearch = new RegExp(`${p_pure.raw}[a-zA-Z0-9_.-]*`, 'g');
@@ -23,20 +24,26 @@ module.exports = {
     ],
 	
 	async execute(message, _) {
+        const stats = (await Stats.findOne({})) || new Stats({ since: Date.now( )});
         const clformat = changelog.map(item => `- ${item}`).join('\n');
         const tdformat = todo.map(item => `- ${item}`).join('\n');
         const cm = changelog.join().match(cmsearch);
+        const cnt = {
+            cmds: readdirSync('./commands/Pure').filter(file => file.endsWith('.js')).length,
+            guilds: message.client.guilds.cache.size
+        }
         const embed = new Discord.MessageEmbed()
             .setColor('#608bf3')
             .setAuthor('Estado del Bot', message.client.user.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
             .setThumbnail('https://i.imgur.com/HxTxjdL.png')
-            .setFooter(`Ofreciendo un total de ${readdirSync('./commands/Pure').filter(file => file.endsWith('.js')).length} comandos en ${message.client.guilds.cache.size} servidores`)
+            .setFooter(`Ofreciendo un total de ${cnt.cmds} comandos en ${cnt.guilds} servidores`)
             .addField('Creador', `Papita con Puré\n[423129757954211880]`, true)
             .addField('Host', (host === 'https://localhost/')?'https://heroku.com/':'localhost', true)
-            .addField('Versión', `:hash: ${version.number}\n:scroll: ${version.name}`, true)
+            .addField('Versión', `#️⃣ ${version.number}\n📜 ${version.name}`, true)
             .addField('Visión general', note)
             .addField('Cambios', listFormat(clformat, true, message.guildId))
-            .addField('Lo que sigue', listFormat(tdformat, false, message.guildId));
+            .addField('Lo que sigue', listFormat(tdformat, false, message.guildId))
+            .addField('Estadísticas', `🎦 ${stats.read}\n✅ ${stats.commands.succeeded}\n⚠️ ${stats.commands.failed}`);
 
         const sent = await message.channel.send({ embeds: [embed] })
         if(cm === null) return;
