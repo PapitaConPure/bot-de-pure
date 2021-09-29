@@ -27,7 +27,7 @@ module.exports = {
     ],
     options: [
 		'`<etiquetas?(...)>` _(Texto [múltiple])_ para filtrar resultados de búsqueda',
-		'`-m <nombre>` o `--motor <nombre>` _(Texto)_ para usar otro motor'
+		'`--motor <nombre>` _(Texto)_ para usar otro motor'
     ],
 	callx: '<etiquetas?(...)>',
 	
@@ -62,7 +62,7 @@ module.exports = {
 
 		//Acción de comando
 		message.channel.sendTyping();
-		const inputengine = fetchFlag(args, {property: true, short: ['m'], long: ['motor'], callback: (x, i) => x[i], fallback: 'gelbooru' });
+		const inputengine = fetchFlag(args, { property: true, long: ['motor'], callback: (x, i) => x[i], fallback: 'gelbooru' });
 		const engine = inputengine.toLowerCase();
 		if(!engines.includes(engine)) {
 			message.channel.send(
