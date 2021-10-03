@@ -91,7 +91,7 @@ module.exports = {
 		//Personas más activas
 		const peotop = peocnt ? peocnt.map(([id, count]) => `<@${id}>: **${count}** mensajes.`).join('\n') : '_Este canal no tiene mensajes_';
 		//Canales más activos
-		const chtop = msgcnt.map(([id, count]) => `<#${id}>: **${count}** mensajes.`).join('\n');
+		const chtop = msgcnt.map(([id, count]) => `<#${id}>: **${count}** mensajes`).join('\n');
 
 		//Crear y usar embed
 		let SelectedEmbed = 0;
