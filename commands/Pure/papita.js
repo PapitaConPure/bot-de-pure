@@ -6,7 +6,7 @@ module.exports = {
 	name: 'papita',
 	aliases: [
         'papa', 'apita', 'ure', 'uré',
-		'potato', 'p'
+		'potato', 'p', '🥔'
     ],
     desc: 'Comando de frases de Papita con Puré. Si se ingresa texto, se lo patentará, sino, dependiendo del canal...\n' +
 		'**SFW:** muestra frases y cosas de Papita\n' +

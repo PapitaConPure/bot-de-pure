@@ -6,7 +6,7 @@ module.exports = {
 	aliases: [
         'imagentouhou', 'imgtouhou', 'tohas', 'touhas', 'tojas', 'tohitas', 'touhitas', 'tojitas',
         'touhoupic', '2hupic',
-		'2hu'
+		'2hu', '2ho'
     ],
 	brief: 'Muestra imágenes de Touhou',
     desc: 'Muestra imágenes de Touhou.\n' +
