@@ -20,7 +20,7 @@ const desc = `${brief}\n` +
 const options = new CommandOptionsManager()
 	.addParam('etiquetas', 'TEXT', 'para filtrar resultados de búsqueda', { poly: 'MULTIPLE', optional: true })
 	.addFlag([], 'motor', 			'para usar otro motor', { name: 'nombre', type: 'TEXT' })
-	.addFlag([], ['bomba', 'bomb'], 'para mostrar muchas imágenes');
+	.addFlag([], ['bomba', 'bomb'], 'para mostrar una cierta cantidad de imágenes', { name: 'cnt', type: 'NUMBER' });
 
 module.exports = {
 	name: 'buscar',
@@ -72,7 +72,16 @@ module.exports = {
 		//Acción de comando
 		message.channel.sendTyping();
 		const inputengine = fetchFlag(args, { property: true, long: ['motor'], callback: (x, i) => x[i], fallback: 'gelbooru' });
-		const bomb = fetchFlag(args, { long: ['bomb', 'bomba'], callback: 5, fallback: 1 });
+		const bomb = fetchFlag(args, {
+			property: true,
+			long: ['bomb', 'bomba'],
+			callback: (x,i) => {
+				const cnt = parseInt(x[i]);
+				if(isNaN(cnt)) return 1;
+				return Math.max(2, Math.min(cnt, 10));
+			},
+			fallback: 1
+		});
 		const engine = inputengine.toLowerCase();
 		if(!engines.includes(engine)) {
 			message.channel.send(
