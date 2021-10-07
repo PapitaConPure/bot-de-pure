@@ -123,7 +123,7 @@ module.exports = {
 				Embeds[0].addField('Tu búsqueda', `:mag_right: *${extags.trim().replace('*', '\\*').split(/ +/).join(', ')}*`);
 
 			//Detallar acciones posteriores
-			const le = bomb - 1; //Último embed
+			const le = images.length - 1; //Último embed
 			const af = Embeds[le].fields.length; //Índice del campo de acciones
 			Embeds[le].addField('Acciones', `<:tags:704612794921779290> Revelar etiquetas\n<:delete:704612795072774164> Eliminar`, true);
 

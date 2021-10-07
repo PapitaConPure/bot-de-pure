@@ -14,7 +14,8 @@
             "Corregido un error con los prefijos en mayúsculas",
             "p!anarquia ahora es permanente",
             "Corregido error al buscar por nombre de usuario",
-            "p!info ahora recopila información permanente"
+            "p!info ahora recopila información permanente",
+            "Bandera `--bomba` agregada en p!buscar y similares"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos con p!ayuda",
