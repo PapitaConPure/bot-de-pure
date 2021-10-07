@@ -2,8 +2,11 @@ const { MessageEmbed } = require('discord.js'); //Integrar discord.js
 const { peopleid } = require('../../localdata/config.json');
 const { fetchUser } = require('../../func.js'); //Funciones globales
 const { p_pure } = require('../../localdata/prefixget');
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
 const maxusers = 5;
+const options = new CommandOptionsManager()
+    .addParam('usuario', 'USER', 'para especificar un usuario', { optional: true });
 
 module.exports = {
 	name: 'avatar',
@@ -16,9 +19,7 @@ module.exports = {
     flags: [
         'common'
     ],
-    options: [
-        '`<usuario?>` _(mención/texto/id)_ para especificar un usuario'
-    ],
+    options,
     callx: '<usuario?>',
 
 	async execute(message, args) {

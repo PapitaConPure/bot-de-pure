@@ -1,7 +1,16 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const global = require('../../localdata/config.json'); //Variables globales
-const func = require('../../func.js'); //Funciones globales
 const { fetchFlag, fetchSentence } = require('../../func.js');
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
+
+const options = new CommandOptionsManager()
+	.addParam('twitters', { name: 'enlace', expression: 'https://twitter.com/' }, 'para colocar uno o más Twitters en un nuevo tablón', { poly: true })
+	.addFlag('c',  'canal', 				 'para especificar en qué canal enviar/editar un tablón', { name: 'ch',  type: 'CHANNEL' })
+	.addFlag([],   'id', 			   		 'para especificar un tablón ya enviado a editar',		  { name: 'msg', type: 'MESSAGE' })
+	.addFlag('a',  ['agregar', 'añadir'],    'para añadir enlaces a un tablón ya enviado')
+	.addFlag('er', ['eliminar', 'remover'],  'para remover enlaces de un tablón ya enviado')
+	.addFlag([],   ['epígrafe', 'epigrafe'], 'para asignar el texto por encima del título', 		  { name: 'epi', type: 'TEXT' })
+	.addFlag([],   ['título', 'titulo'], 	 'para asignar un título', 								  { name: 'ttl', type: 'TEXT' })
+	.addFlag([],   'pie', 			   	     'para asignar el texto por debajo de los enlaces',		  { name: 'pie', type: 'TEXT' });
 
 module.exports = {
 	name: 'twitters',
@@ -17,16 +26,7 @@ module.exports = {
 		'mod',
 		'hourai'
 	],
-	options: [
-		'`<twitters(...)>` _(enlace: https://twitter.com/ [múltiple])_ para colocar uno o más Twitters en un nuevo tablón',
-		'`--canal <ch>` o `-c <ch>` _(canal)_ para especificar en qué canal enviar/editar un tablón',
-		'`--id <msgid>` _(ID de mensaje)_ para especificar un tablón ya enviado a editar',
-		'`-a <twitter>` o `--agregar <twitter>` para añadir Twitters a un tablón ya enviado',
-		'`-e <twitter>` o `--eliminar <twitter>` para remover Twitters de un tablón ya enviado',
-		'`--epígrafe <epi>` _(texto)_ para asignar el texto por encima del título',
-		'`--título <titulo>` _(texto)_ para asignar un título',
-		'`--pie <pie>` _(texto)_ para asignar el texto por debajo de los Twitters'
-	],
+	options,
 	callx: '<twitters(...)>',
 
 	async execute(message, args) {
@@ -36,9 +36,9 @@ module.exports = {
 		}
 
 		//Parámetros de comando
-		let edit = fetchFlag(args, { short: [ 'a' ], long: [ 'agregar' ], callback: 'add' });
+		let edit = fetchFlag(args, { short: [ 'a' ], long: ['agregar', 'añadir'], callback: 'add' });
 		if(edit === undefined)
-			edit = fetchFlag(args, { short: [ 'e' ], long: [ 'eliminar' ], callback: 'del', fallback: '' });
+			edit = fetchFlag(args, { short: [ 'e' ], long: ['eliminar'], callback: 'del', fallback: '' });
 		let ch = fetchFlag(args, {
 			property: true,
 			short: [ 'c' ],
@@ -52,9 +52,9 @@ module.exports = {
 		});
 		let id = fetchFlag(args, { property: true, short: [], long: [ 'id' ], callback: (x,i) => x[i] });
 		const embedprops = {
-			epigraph: fetchFlag(args, { property: true, long: [ 'epígrafe', 'epigrafe' ], callback: fetchSentence }),
-			title: fetchFlag(args, { property: true, long: [ 'título', 'titulo' ], callback: fetchSentence }),
-			footer: fetchFlag(args, { property: true, long: [ 'pie' ], callback: fetchSentence })
+			epigraph: fetchFlag(args, { property: true, long: ['epígrafe', 'epigrafe'], callback: fetchSentence }),
+			title: fetchFlag(args, { property: true, long: ['título', 'titulo'], callback: fetchSentence }),
+			footer: fetchFlag(args, { property: true, long: ['pie'], callback: fetchSentence })
 		};
 		if(!edit.length && id != undefined)
 			for(e in embedprops)

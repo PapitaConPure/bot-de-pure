@@ -1,3 +1,5 @@
+const { CommandOptionsManager } = require("../Commons/cmdOpts");
+
 const uwusopt = [
 	'<:uwu:681935702308552730>',
 	'<:uwu2:681936445958914128>',
@@ -5,6 +7,11 @@ const uwusopt = [
 	'<:uwu4:681937074047549467>',
 	'<:uwu5:720506981743460472>'
 ];
+
+const options = new CommandOptionsManager()
+	.addParam('uwu', { name: 'uwu', expression: 'uwu' }, 'uwu')
+	.addFlag('u', 'uwu', 				 'uwu')
+	.addFlag('bd', ['borrar', 'delete'], 'para borrar el mensaje original');
 
 module.exports = {
 	name: 'uwu',
@@ -15,11 +22,7 @@ module.exports = {
         'emote',
 		'uwu'
     ],
-    options: [
-		'`uwu` _(uwu)_ uwu',
-		'`-u` o `--uwu` para uwu',
-        '`-b` o `--borrar` para borrar el mensaje original'
-    ],
+    options,
 	callx: 'uwu',
 	
 	async execute(message, args) {

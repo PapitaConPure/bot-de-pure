@@ -1,4 +1,8 @@
 const { fetchUserID } = require('../../func');
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
+
+const options = new CommandOptionsManager()
+	.addParam('usuario', 'USER', 'para aplicar Hanged Doll a un usuario');
 
 module.exports = {
 	name: 'colgar',
@@ -13,9 +17,7 @@ module.exports = {
 		'mod',
 		'hourai'
 	],
-	options: [
-		'`<usuario>` _(mención/texto/id)_ para aplicar Hanged Doll a un usuario'
-	],
+	options,
 	callx: '<usuario>',
 
 	async execute(message, args) {

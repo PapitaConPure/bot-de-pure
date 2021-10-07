@@ -2,6 +2,12 @@ const global = require('../../localdata/config.json');
 const { fetchFlag } = require('../../func.js');
 const PrefixPair = require('../../localdata/models/prefixpair.js');
 const prefixget = require('../../localdata/prefixget.js');
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
+
+const options = new CommandOptionsManager()
+	.addParam('prefijo', 'TEXT', 'para cambiar el prefijo del servidor', { optional: true })
+	.addFlag('d', 'drawmaku', 'para cambiar o ver el prefijo de Drawmaku')
+	.addFlag('r', ['reestablecer', 'reiniciar', 'reset'], 'para volver al prefijo por defecto');
 
 module.exports = {
 	name: 'prefijo',
@@ -14,11 +20,7 @@ module.exports = {
 		'common',
 		'mod'
 	],
-	options: [
-		'`<prefijo?>` _(texto)_ para cambiar el prefijo del servidor',
-		'`-d` o `--drawmaku` para cambiar o ver el prefijo de Drawmaku',
-		'`-r` o `--reestablecer` para volver al prefijo por defecto'
-	],
+	options,
 	callx: '<prefijo?>',
 
 	async execute(message, args) {

@@ -1,5 +1,8 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const global = require('../../localdata/config.json'); //Variables globales
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
+
+const options = new CommandOptionsManager()
+    .addParam('tiempo', 'NUMBER', 'para establecer la duración del evento, en segundos', { optional: true });
 
 module.exports = {
 	name: 'uwus',
@@ -9,9 +12,7 @@ module.exports = {
     flags: [
         'meme'
     ],
-    options: [
-        '`tiempo?` _(número)_ para establecer la duración del evento, en segundos'
-    ],
+    options,
     callx: '<tiempo?>',
 	
 	async execute(message, args) {

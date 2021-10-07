@@ -1,6 +1,10 @@
 const { MessageEmbed } = require('discord.js');
 const { randRange } = require('../../func');
 const { p_pure } = require('../../localdata/prefixget');
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
+
+const options = new CommandOptionsManager()
+	.addParam('dados', { name: 'conjunto', expression: '`<cantidad>`+"d"+`<caras>`' }, 'para especificar la cantidad y caras de un conjunto de dados', { poly: 'MULTIPLE' });
 
 module.exports = {
 	name: 'dado',
@@ -8,17 +12,13 @@ module.exports = {
 		'dados', 'tirar', 'random',
 		'roll', 'rolldie', 'die',
 	],
-    desc: 'Tira uno o más dados de la cantidad de caras deseadas para recibir números aleatorios\n' + 
+    desc: 'Tira uno o más dados de la cantidad de caras deseadas para recibir números aleatorios\n' +
 		'**Ejemplo de dados:** `1d6` = 1 dado de 6 caras; `5d4` = 5 dados de 4 caras; `15d20` = 15 dados de 20 caras',
     flags: [
         'common'
     ],
-    options: [
-		'`<cantidad>` _(número)_ para especificar una cantidad de dados',
-		'`<caras>` _(número)_ para especificar las caras de un dado',
-		'[`<cantidad><caras>(...)]>` _(grupo: `<cantidad>d<caras>` [múltiple])_ para tirar una cantidad de dados de X caras'
-    ],
-	callx: '[<cantidad><caras>(...)]',
+    options,
+	callx: '<dados>(...)',
 	
 	async execute(message, args) {
 		if(!args.length) {

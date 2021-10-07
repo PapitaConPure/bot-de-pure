@@ -118,12 +118,25 @@ client.on('ready', async () => {
 
     //Cargado de datos de base de datos
     console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
-    console.log(chalk.gray('Conectando...'));
+    console.log(chalk.gray('Indexando Slots de Puré...'));
+    const gds = await Promise.all([
+        client.guilds.fetch(global.serverid.slot1),
+        client.guilds.fetch(global.serverid.slot2),
+        client.guilds.fetch(global.serverid.slot3)
+    ]);
+    gds.forEach((f, i) => { global.slots[`slot${i + 1}`] = f; });
+    const logs = await Promise.all([
+        global.slots.slot1.channels.resolve('870347940181471242'),
+        global.slots.slot1.channels.resolve('870347965192097812')
+    ]);
+    global.logch = logs[0];
+    global.confch = logs[1];
+    console.log(chalk.gray('Conectando a Cluster en la nube'));
     await Mongoose.connect(uri, {
         useUnifiedTopology: true,
         useNewUrlParser: true
     });
-    console.log(chalk.gray('Facilitando prefijos...'));
+    console.log(chalk.gray('Facilitando prefijos'));
     (await prefixpair.find({})).forEach(pp => {
         global.p_pure[pp.guildId] = {
             raw: pp.pure.raw,
@@ -134,7 +147,7 @@ client.on('ready', async () => {
             regex: pp.drmk.regex
         };
     });
-    console.log(chalk.gray('Preparando Tabla de Puré...'));
+    console.log(chalk.gray('Preparando Tabla de Puré'));
     let puretable = await Puretable.findOne({});
     if(!puretable) puretable = new Puretable();
     else //Limpiar emotes eliminados / no accesibles
@@ -150,19 +163,12 @@ client.on('ready', async () => {
                 global.loademotes[item] = await loadImage(client.emojis.cache.get(item).url);
         }))
     ));
-    console.log(chalk.gray('Indexando Slots de Puré...'));
-    const gds = client.guilds;
-    await Promise.all([
-        gds.fetch(global.serverid.slot1),
-        gds.fetch(global.serverid.slot2),
-        gds.fetch(global.serverid.slot3)
-    ]).then(fetched => fetched.forEach((f, i) => global.slots[`slot${i + 1}`] = f));
-    const logs = await Promise.all([
-        global.slots.slot1.channels.resolve('870347940181471242'),
-        global.slots.slot1.channels.resolve('870347965192097812')
-    ]);
-    global.logch = logs[0];
-    global.confch = logs[1];
+    console.log(chalk.gray('Preparando imágenes extra'));
+    global.loademotes = {
+        ...global.loademotes, 
+        wcell: await loadImage(global.slots.slot3.emojis.cache.find(e => e.name === 'wCell').url),
+        bcell: await loadImage(global.slots.slot3.emojis.cache.find(e => e.name === 'bCell').url),
+    };
 	confirm();
 
 	console.log(chalk.rgb(158,114,214)('Registrando fuentes...'));
@@ -358,6 +364,7 @@ client.on('interactionCreate', async interaction => {
     ]);*/
     //#endregion
 
+    //#region Ejecución de Comandos
 	try {
         const comando = client.ComandosPure.get(commandname);
         //Detectar problemas con el comando basado en flags
@@ -393,6 +400,7 @@ client.on('interactionCreate', async interaction => {
 	}
     stats.markModified('commands');
     await stats.save();
+    //#endregion
 });
 
 //Evento de entrada a servidor

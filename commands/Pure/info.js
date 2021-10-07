@@ -2,6 +2,11 @@ const { MessageEmbed } = require('discord.js'); //Integrar discord.js
 const { fetchArrows, fetchFlag, fetchUser } = require('../../func');
 const { startuptime } = require('../../localdata/config.json'); //Variables globales
 const { ChannelStats, Stats } = require('../../localdata/models/stats');
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
+
+const options = new CommandOptionsManager()
+	.addParam('canal', 'CHANNEL', 'para mostrar estadísticas extra de un canal', { optional: true })
+	.addFlag('m', 'miembro', 'para mostrar estadísticas extra de un usuario');
 
 module.exports = {
 	name: 'info',
@@ -14,10 +19,7 @@ module.exports = {
     flags: [
         'mod'
     ],
-    options: [
-		'`<canal?>` para mostrar estadísticas extra de un canal',
-		'`-m` o `--miembro` para mostrar estadísticas extra de un usuario'
-    ],
+    options,
 	callx: '<canal?>',
 	
 	async execute(message, args) {
@@ -89,7 +91,7 @@ module.exports = {
 			
 		//Creacion de top 5
 		//Personas más activas
-		const peotop = peocnt ? peocnt.map(([id, count]) => `<@${id}>: **${count}** mensajes.`).join('\n') : '_Este canal no tiene mensajes_';
+		const peotop = peocnt ? peocnt.map(([id, count]) => `<@${id}>: **${count}** mensajes`).join('\n') : '_Este canal no tiene mensajes_';
 		//Canales más activos
 		const chtop = msgcnt.map(([id, count]) => `<#${id}>: **${count}** mensajes`).join('\n');
 

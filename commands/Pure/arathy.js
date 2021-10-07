@@ -1,7 +1,10 @@
 //const Discord = require('discord.js'); //Integrar discord.js
 //const global = require('../../localdata/config.json'); //Variables globales
-
 const { fetchFlag } = require("../../func");
+const { CommandOptionsManager } = require("../Commons/cmdOpts");
+
+const options = new CommandOptionsManager()
+    .addFlag('s', 'sueño', 'para explorar el diario de los sueños');
 
 module.exports = {
     name: 'arathy',
@@ -12,9 +15,7 @@ module.exports = {
     flags: [
           'meme'
     ],
-    options: [
-        '`-s` o `--sueño` para explorar el diario de sueños',
-    ],
+    options,
     
     async execute({ channel }, args) {
         const dream = fetchFlag(args, { short: [ 's' ], long: [ 'sueño' ], callback: true, fallback: false });

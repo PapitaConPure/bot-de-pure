@@ -2,12 +2,12 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.96",
+            "number": "Full.2.8.99",
             "name": "Cisne Cristalino"
         },
-        "note": "Se están haciendo reestructuraciones para una actualización mayor",
+        "note": "Se están haciendo reestructuraciones para una actualización mayor. Es probable que algunos comandos dejen de funcionar durante el proceso",
         "changelog": [
-            "Tareas de refactorización (2.985/4)",
+            "Tareas de refactorización (2.99/4)",
             "PLACEHOLDER_SLASHCMD",
             "Agregado p!prefijo",
             "Agregado p!aqua",

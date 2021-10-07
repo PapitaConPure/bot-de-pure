@@ -1,8 +1,18 @@
 const { readdirSync } = require('fs'); //Integrar operaciones sistema de archivos de consola
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, Message } = require('discord.js');
 const { serverid } = require('../../localdata/config.json'); //Variables globales
 const { fetchFlag } = require('../../func');
 const { p_pure } = require('../../localdata/prefixget');
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
+
+const options = new CommandOptionsManager()
+    .addParam('comando', 'TEXT',                           'para ver ayuda en un comando en específico', { optional: true })
+    .addFlag('x', ['exclusivo', 'exclusiva', 'exclusive'], 'para realizar una búsqueda exclusiva')
+    .addFlag([],  'meme',                                  'para ver comandos meme')
+    .addFlag('m', 'mod',                                   'para ver comandos de moderación')
+    .addFlag('p', 'papa',                                  'para ver comandos de Papita con Puré')
+    .addFlag('h', 'hourai',                                'para ver comandos exclusivos de Hourai Doll')
+    .addFlag('t', 'todo',                                  'para ver comandos inhabilitados');
 
 module.exports = {
 	name: 'ayuda',
@@ -18,15 +28,7 @@ module.exports = {
     flags: [
         'common'
     ],
-    options: [
-        '`<comando?>` _(texto)_ para ver ayuda en un comando en específico',
-        '`-x` o `--exclusivo` para realizar una búsqueda exclusiva',
-        '`--meme` para ver comandos meme',
-        '`-m` o `--mod` para ver comandos de moderación',
-        '`-p` o `--papa` para ver comandos de Papita con Puré',
-        '`-h` o `--hourai` para ver comandos exclusivos de Hourai Doll',
-        '`-t` o `--todo` para ver comandos inhabilitados'
-    ],
+    options,
     callx: '<comando?>',
     
 	async execute({ client, channel, author, member, guildId }, args) {
@@ -94,8 +96,8 @@ module.exports = {
                 
                 if(flags ? !flags.includes('guide') : true)
                     embed.addField('Llamado', `\`${pfr}${command.name}${command.callx ? ` ${command.callx}` : ''}\``, true)
-                        .addField(`Opciones (\`${pfr}x -x --xxx <x>\`)`, listExists(command.options)
-                            ? command.options.join('\n')
+                        .addField(`Opciones (\`${pfr}x -x --xxx <x>\`)`, command.options
+                            ? command.options.display
                             : ':abacus: Sin opciones', true)
                         .addField('Identificadores', listExists(flags)
                             ? flags.map(i => `\`${i}\``).join(', ').toUpperCase()

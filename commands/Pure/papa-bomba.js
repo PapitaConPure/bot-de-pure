@@ -1,10 +1,11 @@
 const Discord = require('discord.js'); //Integrar discord.js
 var global = require('../../localdata/config.json'); //Variables globales
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
 async function deleteChannels(server) {
 	await server.channels.cache.filter(ch => ch.type === 'voice').deleteAll();
 	server.channels.cache.filter(ch => ch.calculatedPosition !== 0).deleteAll();
-}
+};
 
 async function stupidBomb(animLen, animPos, mid, mch) {
 	if(animPos === 0) {
@@ -33,7 +34,10 @@ async function stupidBomb(animLen, animPos, mid, mch) {
 		});
 	
 	if(animPos < (8 + animLen)) setTimeout(stupidBomb, 1000, animLen, animPos + 1, mid, mch);
-}
+};
+
+const options = new CommandOptionsManager()
+	.addParam('largo', 'NUMBER', 'especifica el largo de la mecha (cantidad de segundos antes de que me reinicie)', { optional: true });
 
 module.exports = {
 	name: 'papa-bomba',
@@ -42,9 +46,7 @@ module.exports = {
         'papa',
 		'maintenance'
     ],
-    options: [
-		'`<largo?>` _(número)_ especifica el largo de la mecha (cantidad de segundos antes de que me reinicie)'
-    ],
+    options,
 	callx: '<largo?>',
 	
 	async execute(message, args) {

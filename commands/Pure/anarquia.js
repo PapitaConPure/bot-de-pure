@@ -4,7 +4,14 @@ const { createCanvas, loadImage } = require('canvas');
 const { MessageEmbed, MessageAttachment } = require('discord.js');
 const { p_pure } = require('../../localdata/prefixget');
 const { Puretable, AUser } = require('../../localdata/models/puretable.js');
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
+
 const maxexp = 30;
+const options = new CommandOptionsManager()
+	.addParam('posición', 	   'NUMBER', 'para especificar una celda a modificar', { poly: ['x','y'], optional: true })
+	.addParam('emote', 		   'EMOTE',  'para especificar un emote a agregar',    { optional: true })
+	.addFlag('h', 'horizontal', 		 'para usar la habilidad de línea horizontal')
+	.addFlag('v', 'vertical', 			 'para usar la habilidad de línea vertical');
 
 module.exports = {
 	name: 'anarquia',
@@ -12,7 +19,7 @@ module.exports = {
 		'anarquía', 'a'
 	],
 	desc: 'Para interactuar con la __Tabla de Puré__\n' +
-		'**Tabla de Puré**: tablero de 16x16 celdas de emotes ingresados por usuarios. Se reinicia cuando me reinicio\n\n' +
+		'**Tabla de Puré**: tablero de 16x16 celdas de emotes ingresados por usuarios de cualquier server\n\n' +
 		'Puedes ingresar un `<emote>` en una `<posición(x,y)>` o, al no ingresar nada, ver la tabla\n' +
 		'La `<posicion(x,y)>` se cuenta desde 1x,1y, y el `<emote>` designado debe ser de un server del que yo forme parte~\n\n' +
 		'De forma aleatoria, puedes ir desbloqueando habilidades para rellenar líneas completas en `--horizontal` o `--vertical`. La probabilidad inicial es 1% en conjunto, y aumenta +1% por cada __nivel__\n' +
@@ -22,12 +29,7 @@ module.exports = {
 	flags: [
 		'common'
 	],
-	options: [
-	  '`<posición(x,y)?>` _(número [2])_ para especificar una celda a modificar',
-	  '`<emote?>` _(emote)_ para especificar un emote a agregar',
-	  '`-h` o `--horizontal` para usar la habilidad de línea horizontal',
-	  '`-v` o `--vertical` para usar la habilidad de línea vertical'
-	],
+	options,
 	callx: '<posición(x,y)?> <emote?>',
 
 	async execute(message, args) {

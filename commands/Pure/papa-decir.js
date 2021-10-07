@@ -1,20 +1,20 @@
 const { Permissions } = require('discord.js');
 const { fetchFlag } = require('../../func');
-const global = require('../../localdata/config.json'); //Variables globales
-const decir = require('./decir.js');
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
+
+const options = new CommandOptionsManager()
+    .addParam('mensaje', 'TEXT', 'para especificar qué decir')
+    .addFlag('bd', ['borrar', 'delete'],            'para borrar el mensaje original')
+    .addFlag('sg', ['servidor', 'server', 'guild'], 'para enviar en otro server', { name: 'sv', type: 'GUILD' })
+    .addFlag('c',  ['canal', 'channel'],            'para enviar en otro canal',  { name: 'ch', type: 'CHANNEL' });
 
 module.exports = {
 	name: 'papa-decir',
-    desc: 'Me hace decir lo que quieras que diga (permite que me diga comandos a mí misma)',
+    desc: 'Me hace decir lo que quieras que diga (privilegios elevados)',
     flags: [
         'papa'
     ],
-    options: [
-        '`<mensaje>` _(texto)_ para especificar qué decir',
-        '`-b` o `--borrar` para borrar el mensaje original',
-        '`-s <sv>` o `--server <sv>` _(server)_ para enviar en otro server',
-        '`-c <ch>` o `--canal <ch>` _(canal)_ para enviar en otro canal'
-    ],
+    options,
     callx: '<mensaje>',
 	
 	async execute(message, args) {

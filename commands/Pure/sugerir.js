@@ -1,6 +1,7 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const global = require('../../localdata/config.json'); //Variables globales
 const uses = require('../../localdata/sguses.json'); //Lista de usos desde el último reinicio del Bot
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
 function getTitle(a, i) {
 	if(i >= a.length) //Título inválido
@@ -18,6 +19,9 @@ function getTitle(a, i) {
 		return a[i];
 };
 
+const options = new CommandOptionsManager()
+	.addFlag('t', ['título', 'titulo'], 'para designar un título o "título largo"', { name: 'ttl', type: 'TEXT' });
+
 module.exports = {
 	name: 'sugerir',
 	aliases: [
@@ -29,9 +33,7 @@ module.exports = {
 	flags: [
 		'common'
 	],
-	options: [
-		'`-t` o `--titulo` _(texto/"texto")_ para designar un título o "título largo"'
-	],
+	options,
 	callx: '<sugerencia>',
 
 	async execute(message, args) {

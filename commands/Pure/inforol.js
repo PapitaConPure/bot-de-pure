@@ -1,6 +1,11 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { fetchFlag, fetchArrows } = require('../../func');
 const { p_pure } = require('../../localdata/prefixget');
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
+
+const options = new CommandOptionsManager()
+	.addParam('búsqueda', 'ROLE', 'para especificar los roles que quieres buscar', { poly: 'MULTIPLE' })
+	.addFlag('xe', ['estricta', 'estricto'], 'para especificar si la búsqueda es estricta');
 
 module.exports = {
 	name: 'inforol',
@@ -14,11 +19,8 @@ module.exports = {
     flags: [
         'mod'
     ],
-    options: [
-		'`-x` o `--estricto` para especificar si la búsqueda es estricta',
-		'`<búsqueda...>` _(rol/roles...)_ para especificar los roles que quieres buscar'
-    ],
-	callx: '<caso> <búsqueda...>',
+    options,
+	callx: '<búsqueda...>',
 	
 	async execute(message, args) {
 		if(args.length < 1) {
@@ -50,8 +52,8 @@ module.exports = {
 			//Contadores de usuarios
 			const rolemembers = servidor.members.cache.filter(member => //Usuarios con rol
 				(strict)
-					? args.some(arg => member.roles.cache.has(arg))
-					: args.every(arg => member.roles.cache.has(arg))
+					? args.every(arg => member.roles.cache.has(arg))
+					: args.some(arg => member.roles.cache.has(arg))
 			);
 			const totalcnt = rolemembers.size; //Total
 			const peoplecnt = rolemembers.filter(member => !member.user.bot).size; //Roles

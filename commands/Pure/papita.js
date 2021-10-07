@@ -1,6 +1,8 @@
-const Discord = require('discord.js'); //Integrar discord.js
 const { randRange } = require('../../func');
-var global = require('../../localdata/config.json'); //Variables globales
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
+
+const options = new CommandOptionsManager()
+	.addParam('frase', 'TEXT', 'para indicar una frase a patentar', { optional: true });
 
 module.exports = {
 	name: 'papita',
@@ -14,9 +16,7 @@ module.exports = {
     flags: [
         'meme'
     ],
-    options: [
-		'`<frase?>` _(texto)_ para indicar una frase a patentar'
-    ],
+    options,
 	callx: '<frase?>',
 	
 	async execute(message, args) {

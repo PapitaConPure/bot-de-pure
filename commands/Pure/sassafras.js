@@ -1,5 +1,10 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { randRange } = require('../../func');
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
+
+const options = new CommandOptionsManager()
+	.addFlag('sd', ['sassamodo', 'dross'], 'para despertar al demonio interno de Sassa')
+	.addFlag('t', 'total', 'para saber la cantidad total de recomendaciones');
 
 module.exports = {
 	name: 'sassafras',
@@ -11,10 +16,7 @@ module.exports = {
     flags: [
         'meme'
     ],
-    options: [
-		'`-s` o `--sassamodo` para despertar al demonio interno de Sassa',
-		'`-t` o `--total` para saber la cantidad total de líneas'
-    ],
+    options,
 	
 	async execute(message, args) {
 		let showtotal = false;

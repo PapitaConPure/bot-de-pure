@@ -1,6 +1,12 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { p_pure } = require('../../localdata/config.json'); //Prefijos
 const { fetchFlag, fetchUser } = require('../../func.js');
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
+
+const options = new CommandOptionsManager()
+	.addFlag('u', 'usuario',  'para especificar el usuario al cual responder', 				 { name: 'u', type: 'USER' })
+	.addFlag('a', 'aceptar',  'para confirmar la aceptación de sugerencia')
+	.addFlag('p', 'problema', 'para reportar un problema con la expresión de la sugerencia', { name: 'txt', type: 'TEXT' });
 
 module.exports = {
 	name: 'papa-responder',
@@ -12,11 +18,7 @@ module.exports = {
 	flags: [
 		'papa'
 	],
-	options: [
-		'`-u` o `--usuario` _(mención/texto/id)_ para especificar el usuario al cual responder',
-		'`-a` o `--aceptar` para confirmar aceptación de sugerencia',
-		'`-p` o `--problema` _(texto)_ para reportar un problema con la expresión de la sugerencia'
-	],
+	options,
 
 	async execute(message, args) {
 		//Variables de flags

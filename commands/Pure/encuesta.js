@@ -1,5 +1,13 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { fetchFlag, fetchSentence } = require('../../func.js');
+const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
+
+const options = new CommandOptionsManager()
+	.addParam('opciones', ['EMOTE','TEXT'], 'para agregar una opción', { poly: 'MULTIPLE', })
+	.addFlag('pq', ['pregunta', 'question'], 'para asignar una pregunta', 	   { name: 'txt', type: 'TEXT' })
+	.addFlag('h',  ['hora', 'horas'], 	     'para añadir tiempo en horas',    { name: 'n', type: 'NUMBER' })
+	.addFlag('m',  ['minuto', 'minutos'],    'para añadir tiempo en minutos',  { name: 'n', type: 'NUMBER' })
+	.addFlag('s',  ['segundo', 'segundos'],  'para añadir tiempo en segundos', { name: 'n', type: 'NUMBER' });
 
 module.exports = {
 	name: 'encuesta',
@@ -15,14 +23,8 @@ module.exports = {
 	flags: [
 		'mod'
 	],
-	options: [
-		'`<opciones (emt,txt)>` _(emote,texto [múltiple])_ para agregar una opción',
-		'`-p <txt>` o `--pregunta <txt>` _(texto)_ para asignar una pregunta',
-		'`-h <n>` o `--hora <n>` _(número)_ para añadir tiempo en horas',
-		'`-m <n>` o `--minutos <n>` _(número)_ para añadir tiempo en minutos',
-		'`-s <n>` o `--segundos <n>` _(número)_ para añadir tiempo en segundos'
-	],
-	callx: '<twitters(...)>',
+	options,
+	callx: '<opciones(...)>',
 
 	async execute(message, args) {
 		if(!args.length) {

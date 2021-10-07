@@ -1,5 +1,10 @@
 const { fetchFlag, fetchUser } = require('../../func.js');
 const { p_pure } = require('../../localdata/prefixget.js');
+const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
+
+const options = new CommandOptionsManager()
+	.addParam('cantidad', 'NUMBER', 'para especificar la cantidad de mensajes a borrar (sin contar el mensaje del comando)')
+	.addFlag('um', ['usuario', 'miembro'], 			'para especificar de qué usuario borrar mensajes', { name: 'user', type: 'USER' });
 
 module.exports = {
 	name: 'borrar',
@@ -12,10 +17,7 @@ module.exports = {
     flags: [
         'mod'
     ],
-    options: [
-		'`<cantidad>` _(número)_ para especificar la cantidad de mensajes a borrar (sin contar el mensaje del comando)',
-		'`-u <user>` o `--usuario <user>` _(mención/texto/id)_ para especificar de qué usuario borrar mensajes'
-    ],
+    options,
 	callx: '<cantidad>',
 	
 	async execute(message, args) {
@@ -25,7 +27,7 @@ module.exports = {
 			setTimeout(() => sent.delete(), 1000 * 5);
 			return;
 		}
-		const user = fetchFlag(args, { property: true, short: ['u'], long: ['usuario'], callback: (x, i) => fetchUser(x[i], message), fallback: undefined });
+		const user = fetchFlag(args, { property: true, short: ['u'], long: ['usuario', 'miembro'], callback: (x, i) => fetchUser(x[i], message), fallback: undefined });
 		let amt = (args.length) ? parseInt(args[0]) : 100;
 		if(isNaN(amt)) {
 			message.channel.send({

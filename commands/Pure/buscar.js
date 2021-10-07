@@ -5,6 +5,22 @@ const { engines, getBaseTags, getSearchTags } = require('../../localdata/boorupr
 const booru = require('booru');
 const rakki = require('./rakkidei.js');
 const { p_pure } = require('../../localdata/prefixget');
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
+
+const brief = 'Muestra imágenes #THEME';
+const desc = `${brief}\n` +
+	'Por defecto, las imágenes se buscan con Gelbooru.\n' +
+	'Si lo deseas, puedes usar otro `--motor` de esta lista:\n' +
+	'```\n' +
+	`${engines.map(e => `${e.charAt(0).toUpperCase()}${e.slice(1)}`).join(', ')}\n` +
+	'```\n' +
+	'**Nota:** #NSFW_NOTE\n' +
+	'**Nota 2:** no todos los motores funcionan y con algunos no habrá búsqueda personalizada.';
+
+const options = new CommandOptionsManager()
+	.addParam('etiquetas', 'TEXT', 'para filtrar resultados de búsqueda', { poly: 'MULTIPLE', optional: true })
+	.addFlag([], 'motor', 			'para usar otro motor', { name: 'nombre', type: 'TEXT' })
+	.addFlag([], ['bomba', 'bomb'], 'para mostrar muchas imágenes');
 
 module.exports = {
 	name: 'buscar',
@@ -13,22 +29,15 @@ module.exports = {
 		'search', 'image',
 		'img'
     ],
-	brief: 'Busca y muestra imágenes',
-    desc: 'Busca y muestra imágenes."\n' +
-		'Por defecto, las imágenes se buscan con Gelbooru.\n' +
-		'Si lo deseas, puedes usar otro `--motor` de esta lista:\n' +
-		'```\n' +
-		`${engines.map(e => `${e.charAt(0).toUpperCase()}${e.slice(1)}`).join(', ')}\n` +
-		'```\n' +
-		'**Nota:** en canales NSFW, los resultados serán, respectivamente, NSFW\n' +
-		'**Nota 2:** no todos los motores funcionan y con algunos no habrá búsqueda personalizada',
+	brief: brief.replace('#THEME', 'de cualquier cosa'),
+    desc: desc
+		.replace('#THEME', 'de cualquier cosa')
+		.replace('#NSFW_NOTE', 'en canales NSFW, los resultados serán, respectivamente, NSFW'),
+	molds: { brief: brief, desc: desc },
     flags: [
         'common'
     ],
-    options: [
-		'`<etiquetas?(...)>` _(Texto [múltiple])_ para filtrar resultados de búsqueda',
-		'`--motor <nombre>` _(Texto)_ para usar otro motor'
-    ],
+    options,
 	callx: '<etiquetas?(...)>',
 	
 	async searchImage(message, args, searchOpt = { cmdtag: '', nsfwtitle: 'Búsqueda NSFW', sfwtitle: 'Búsqueda' }) {
@@ -63,6 +72,7 @@ module.exports = {
 		//Acción de comando
 		message.channel.sendTyping();
 		const inputengine = fetchFlag(args, { property: true, long: ['motor'], callback: (x, i) => x[i], fallback: 'gelbooru' });
+		const bomb = fetchFlag(args, { long: ['bomb', 'bomba'], callback: 5, fallback: 1 });
 		const engine = inputengine.toLowerCase();
 		if(!engines.includes(engine)) {
 			message.channel.send(
@@ -83,25 +93,43 @@ module.exports = {
 				return;
 			}
 
-			//Dar formato a respuesta
-			const image = response[randRange(0, response.length)];
-			const Embed = new MessageEmbed()
-				.setColor(isnsfw ? '#38214e' : '#fa7b62')
-				.setAuthor(`Desde ${image.booru.domain}`, (engine === 'gelbooru') ? 'https://i.imgur.com/outZ5Hm.png' : message.author.avatarURL({ dynamic: true, size: 128 }))
-				.setTitle(isnsfw ? searchOpt.nsfwtitle : searchOpt.sfwtitle)
-				.setImage(image.fileUrl);
+			//Seleccionar imágenes
+			const images = response
+				.sort(() => 0.5 - Math.random())
+				.slice(0, bomb);
+
+			//Crear presentaciones
+			const Embeds = [];
+			images.forEach(image => {
+				Embeds.push(new MessageEmbed()
+					.setColor(isnsfw ? '#38214e' : '#fa7b62')
+					.setImage(image.fileUrl));
+			});
+
+			//Formatear primera presentación
+			Embeds[0]
+				.setAuthor(`Desde ${images[0].booru.domain}`, (engine === 'gelbooru') ? 'https://i.imgur.com/outZ5Hm.png' : message.author.avatarURL({ dynamic: true, size: 128 }))
+				.setTitle(isnsfw ? searchOpt.nsfwtitle : searchOpt.sfwtitle);
 			if(extags.length)
-				Embed.addField('Tu búsqueda', `:mag_right: *${extags.trim().replace('*', '\\*').split(/ +/).join(', ')}*`)
-			Embed
-				.addField('Acciones', `<:tags:704612794921779290> Revelar etiquetas\n<:delete:704612795072774164> Eliminar`, true)
-				.addField('Salsa', [
-						`[Gelbooru](https://gelbooru.com/index.php?page=post&s=view&id=${image.id})`,
-						image.source ? `[Original](${image.source})` : null
-					].join('\n'), true);
-				
+				Embeds[0].addField('Tu búsqueda', `:mag_right: *${extags.trim().replace('*', '\\*').split(/ +/).join(', ')}*`);
+
+			//Detallar acciones posteriores
+			const le = bomb - 1; //Último embed
+			const af = Embeds[le].fields.length; //Índice del campo de acciones
+			Embeds[le].addField('Acciones', `<:tags:704612794921779290> Revelar etiquetas\n<:delete:704612795072774164> Eliminar`, true);
+
+			//Rociar salsa sobre todo
+			images.forEach((image, i) => {
+				Embeds[i].addField('Salsa', [
+					`[Gelbooru](https://gelbooru.com/index.php?page=post&s=view&id=${image.id})`,
+					image.source ? `[Original](${image.source})` : null
+				].join('\n'), true);
+			});
+
+			//Enviar mensaje y esperar reacciones
 			const sent = await message.channel.send({
 				reply: { messageReference: message.id },
-				embeds: [Embed]
+				embeds: Embeds
 			});
 			const actions = [sent.client.emojis.cache.get('704612794921779290'), sent.client.emojis.cache.get('704612795072774164')];
 			Promise.all(actions.map(action => sent.react(action)));
@@ -111,9 +139,11 @@ module.exports = {
 			collector.on('collect', reaction => {
 				if(reaction.emoji.id === actions[0].id) {
 					if(!showtags) {
-						Embed.addField(`Tags (${Math.min(image.tags.length, 40)}/${image.tags.length})`, `*${image.tags.slice(0,40).join(', ')}*`);
-						Embed.fields[1].value = `<:delete:704612795072774164> Eliminar`;
-						sent.edit({ embeds: [Embed] });
+						images.forEach((image, i) => {
+							Embeds[i].addField(`Tags (${Math.min(image.tags.length, 40)}/${image.tags.length})`, `*${image.tags.slice(0,40).join(', ')}*`);
+						});
+						Embeds[le].fields[af].value = `<:delete:704612795072774164> Eliminar`;
+						sent.edit({ embeds: Embeds });
 						showtags = true;
 					}
 				} else {
@@ -134,17 +164,6 @@ module.exports = {
 					'```'
 				);
 			message.channel.send({ embeds: [errorembed] });
-		}
-
-		if(Math.random() < (1 / 40)) {
-			const noticesent = await message.channel.send(
-				'<:bot:828736342372253697> Con la reciente incorporación del comando `p!buscar`, se están buscando **nuevos atajos de etiquetas para búsquedas**.\n' +
-				'Si se te ocurre alguna tag que te gustaría escribir más fácilmente... ten, prefabriqué esto para ti:\n' +
-				'`p!sugerir -t "Diccionario de Búsqueda" <atajo> → <etiqueta>`\n' +
-				'Solo tienes que reemplazar los `<campos>` por el atajo y a qué etiqueta de booru se traduce. ¡Gracias de antemano!' +
-				'Nota: las tags están adaptadas a Gelbooru. Por motivos de consistencia, deberías buscar las etiquetas ahí'
-			);
-			setTimeout(() => noticesent.delete(), 1000 * 60);
 		}
 	},
 

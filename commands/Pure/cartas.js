@@ -1,7 +1,15 @@
 const { MessageAttachment } = require('discord.js'); //Integrar discord.js
 //const global = require('../../localdata/config.json'); //Variables globales
 //const func = require('../../func.js'); //Funciones globales
+const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
 const Canvas = require('canvas');
+
+const options = new CommandOptionsManager()
+	.addParam('desc', 'TEXT', 'para describir la carta')
+	.addParam('imagen', 'IMAGE', 'para seleccionar la imagen de la carta')
+	.addFlag('c', 'costo', 'para establecer el precio de la carta')
+	.addFlag('a', 'activa', 'para especificar que la carta es activa')
+	.addFlag('e', 'equipada', 'para especificar que la carta es equipada');
 
 module.exports = {
 	name: 'cartas',
@@ -14,19 +22,11 @@ module.exports = {
 		'common',
 		'maintenance'
 	],
-	options: [
-		'`<desc>` _(texto)_ para describir la carta',
-		'`<imagen>` _(imagen/enlace)_ para seleccionar la imagen de la carta',
-		'`-c` o `--costo` para establecer el precio de la carta',
-		'`-a` o `--activa` para especificar que la carta es activa',
-		'`-e` o `--equipada` para especificar que la carta es equipada'
-	],
+	options,
 	callx: '<desc> <imagen>',
 
 	async execute(message, args) {
 		//Variables de flags
-		
-
 		//Lectura de flags
 		let jn = false;
 		args = args.map((arg, i) => {
@@ -149,7 +149,7 @@ module.exports = {
         //#endregion
         //#endregion*/
         
-        const imagen = new MessageAttachment(canvas.toBuffer(), 'bienvenida.png');
+        const imagen = new MessageAttachment(canvas.toBuffer(), 'th18.png');
         message.channel.send({ files: [imagen] });
 	}
 };

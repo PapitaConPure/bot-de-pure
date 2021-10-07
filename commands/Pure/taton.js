@@ -1,6 +1,12 @@
 const Discord = require('discord.js'); //Integrar discord.js
 var global = require('../../localdata/config.json'); //Variables globales
 const { paginate, fetchArrows } = require('../../func');
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
+
+const options = new CommandOptionsManager()
+	.addParam('perrito', 'TEXT', 					  																		   'para especificar un perrito a enviar (por nombres identificadores)', 						   { optional: true })
+	.addParam('lista', 	 { name: 'texto', expression: 'uno de `perritos, todo, todos, lista, ayuda, everything, all, help`' }, 'para mostrar una lista de todos los perritos disponibles junto a sus nombres identificadores', { optional: true })
+	.addFlag('bd', ['borrar', 'delete'], 'para borrar el mensaje original');
 
 module.exports = {
 	name: 'taton',
@@ -12,11 +18,7 @@ module.exports = {
         'meme',
         'emote'
     ],
-    options: [
-		'`<perrito?>` _(texto)_ para especificar un perrito a enviar (por nombres identificadores)',
-		'`<lista?>` _(texto: `perritos, todo, todos, lista, ayuda, everything, all, help`)_ para, en cambio, mostrar una lista de todos los perritos disponibles junto a sus nombres identificadores',
-        '`-b` o `--borrar` para borrar el mensaje original'
-    ],
+    options,
 	callx: '[<perrito?>/<lista?>]',
 	
 	async execute(message, args) {

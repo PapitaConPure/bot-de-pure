@@ -1,16 +1,21 @@
 const { sites } = require('booru');
 
+const engines = Object.values(sites).map(s => s.aliases[s.aliases.length - 1]);
+const basetags = '-guro -furry -vore -webm -video -audio -comic -4koma';
+const nsfwrating = {
+    [true]: 'explicit',
+    [false]: 'safe'
+};
+const nsfwtags = {
+    [true]: '-lolicon -loli -shotacon -shota -bestiality',
+    [false]: '-breast_grab -revealing_clothes -no_bra -no_panties'
+}
+
 module.exports = {
-    engines: Object.values(sites).map(s => s.aliases[s.aliases.length - 1]),
-	basetags: '-guro -furry -vore -webm -video -audio -comic -4koma',
-	nsfwrating: {
-		[true]: 'explicit',
-		[false]: 'safe'
-	},
-	nsfwtags: {
-		[true]: '-lolicon -loli -shotacon -shota -bestiality',
-		[false]: '-breast_grab -revealing_clothes -no_bra -no_panties'
-	},
+    engines,
+	basetags,
+	nsfwrating,
+	nsfwtags,
     getBaseTags: (engine, nsfw) => {
         const { basetags, nsfwrating, nsfwtags } = module.exports;
         if(['danbooru', 'derpibooru', 'yandere', 'kcom', 'knet'].includes(engine)) return `rating:${nsfwrating[nsfw]}`;
@@ -327,4 +332,4 @@ module.exports = {
         .set('dodonko',         'dodonko_(konosuba)')
         .set('sylvia',          'sylvia_(kono_subarashii_sekai_ni_shukufuku_wo!)')
     )()
-}
+};

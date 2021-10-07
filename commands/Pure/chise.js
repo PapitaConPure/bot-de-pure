@@ -16,8 +16,8 @@ module.exports = {
 		'hourai'
     ],
 	
-	async execute(message, args) {
-		message.channel.send({ files: chiseFiles });
+	async execute({ channel }, _) {
+		channel.send({ files: chiseFiles });
     },
 	
 	async interact(interaction) {

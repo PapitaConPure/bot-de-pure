@@ -25,9 +25,6 @@ module.exports = {
     flags: [
         'meme'
     ],
-    options: [
-
-    ],
 
 	async execute(message, _) {
 		const lel = getReactionEmotes(message.client.emojis.cache);

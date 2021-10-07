@@ -23,9 +23,6 @@ module.exports = {
     flags: [
         'common'
     ],
-    options: [
-
-    ],
 	
 	async execute(message, args) {
         if(!embed.author)

@@ -1,6 +1,7 @@
 const uses = require('../../localdata/sguses.json'); //Funciones globales
 const { fetchUser, randRange } = require('../../func.js');
 const { p_pure } = require('../../localdata/prefixget');
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
 const frase = [
 	'Oe po [m] <:junkNo:697321858407727224>',
@@ -22,6 +23,10 @@ async function pinguear(channel, user, cnt) {
 	else uses.pinguear[user.id] = false;
 }
 
+const options = new CommandOptionsManager()
+	.addParam('cantidad', 'NUMBER', 'para indicar la cantidad de veces que se debe pinguear')
+	.addParam('usuario', 'USER', 'para indicar el usuario a pinguear');
+
 module.exports = {
 	name: 'pinguear',
 	aliases: [
@@ -33,10 +38,7 @@ module.exports = {
         'meme',
 		'hourai'
     ],
-    options: [
-		'`<cantidad>` _(número)_ para indicar la cantidad de veces que se debe pinguear',
-		'`<usuario>` _(mención/texto/id)_ para indicar el usuario a pinguear'
-    ],
+    options,
 	callx: '<cantidad> <usuario>',
 	
 	async execute(message, args) {

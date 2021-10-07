@@ -13,12 +13,12 @@ module.exports = {
         'hourai'
     ],
 	
-	async execute(message, args) {
-		const sm = await message.channel.send({
-			content: `Aquí teni los colore po **${message.author.username}** <:reibu:686220828773318663>`,
+	async execute({ channel, author, member }, _) {
+		const sm = await channel.send({
+			content: `Aquí teni los colore po **${author.username}** <:reibu:686220828773318663>`,
 			files: [hourai.images.colors]
 		});
-		askColor(sm, message.member);
+		askColor(sm, member);
     },
 
 	async interact(interaction) {

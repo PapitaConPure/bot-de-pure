@@ -1,6 +1,11 @@
 const { fetchFlag } = require('../../func');
 const { serverid } = require('../../localdata/config.json'); //Variables globales
 const { Permissions } = require('discord.js');
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
+
+const options = new CommandOptionsManager()
+    .addParam('mensaje', 'TEXT', 'para especificar qué decir')
+    .addFlag(['b', 'd'], ['borrar', 'delete'], 'para borrar el mensaje original');
 
 module.exports = {
 	name: 'decir',
@@ -13,10 +18,7 @@ module.exports = {
         'common',
         'emote'
     ],
-    options: [
-        '`<mensaje>` _(texto)_ para especificar qué decir',
-        '`-b` o `--borrar` para borrar el mensaje original'
-    ],
+    options,
     callx: '<mensaje>',
 	
 	async execute(message, args) {

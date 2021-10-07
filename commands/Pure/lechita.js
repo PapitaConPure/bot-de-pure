@@ -4,6 +4,7 @@ const func = require('../../func.js'); //Funciones globales
 const axios = require('axios');
 const Canvas = require('canvas');
 const { utils } = require('../../localdata/images.json'); //Funciones globales
+const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
 async function resolverLink(msg, linkRes, iSize, isnsfw) {
 	let iurl;
@@ -40,7 +41,7 @@ async function resolverLink(msg, linkRes, iSize, isnsfw) {
 	});
 
 	return iurl;
-}
+};
 
 async function dibujarCum(msg, link) {
 	cum = await Canvas.loadImage(utils.cum);
@@ -53,7 +54,12 @@ async function dibujarCum(msg, link) {
 
 	const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'cummies.png');
 	msg.channel.send({ files: [imagen] });
-}
+};
+
+const options = new CommandOptionsManager()
+	.addParam('usuario', 'USER',  'para disparar a un usuario', 		  { optional: true })
+	.addParam('emote', 	 'EMOTE', 'para disparar a un emote', 			  { optional: true })
+	.addParam('imagen',  'IMAGE', 'para disparar a una imagen (<=256KB)', { optional: true });
 
 module.exports = {
 	name: 'lechita',
@@ -65,12 +71,8 @@ module.exports = {
     flags: [
         'meme'
     ],
-    options: [
-		'`<usuario?>` _(mención/texto/id)_ para disparar a un usuario',
-		'`<emote?>` _(emote)_ para disparar a un emote',
-		'`<imagen?>` _(imagen/enlace)_ para disparar a una imagen (<=256KB)'
-    ],
-	callx: '[<usuario?>/<emote?>/<imagen?>]',
+    options,
+	callx: '<usuario?> <emote?> <imagen?>',
 	
 	async execute(message, args) {
 		const isnsfw = message.channel.isThread()
