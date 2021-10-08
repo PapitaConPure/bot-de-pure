@@ -329,7 +329,7 @@ class CommandOptionsManager {
      */
     get display() {
         return [
-            ...this.params.map(p => p.display),
+            [...this.params.values()].map(p => p.display),
             ...(Array.isArray(this.flags) ? this.flags.map(p => p.display) : this.flags)
         ].join('\n');
     };
