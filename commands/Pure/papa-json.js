@@ -1,3 +1,5 @@
+const { MessageAttachment } = require('discord.js');
+
 const readObj = (object, indent) => {
 	let objret = '';
 	Object.entries(object).forEach(([key, value]) => {
@@ -23,12 +25,13 @@ module.exports = {
 	callx: '<archivo?> <objeto? (ruta..., nombre)>',
 
 	async execute(message, args) {
+		const [ mainobj ] = args;
+
 		//Buscar objeto de forma descendiente
 		let obj, name;
-		if(args.length && args[0].endsWith('.json')) {
-			try { obj = require(`../../localdata/${args[0]}`); }
+		if(args.length && mainobj.endsWith('.json')) {
+			try { obj = require(`../../localdata/${mainobj}`); }
 			catch(e) { obj = require('../../localdata/config.json'); }
-			name = args[0].slice(0, -5);
 			args = args.slice(1);
 		} else {
 			obj = require('../../localdata/config.json');
@@ -50,9 +53,8 @@ module.exports = {
 			message.channel.send({ content: `:warning: El objeto "${args.join('.')}" no existe. Revisa que el identificador esté bien escrito.` });
 			return;
 		}
-		
-		(readObj(obj, '\t').match(/[\s\S]{1,1966}/g) || ['\t[Empty]\n']).map(async (a) => 
-			await message.channel.send({ content: `\`\`\`json\n"${name}": {\n${a}}\n\`\`\`` })
-		);
+
+		const jsonfile = new MessageAttachment(Buffer.from(JSON.stringify(obj, null, '\t'), 'utf-8'), 'myfile.json');
+		await message.channel.send({ files: [ jsonfile ]});
 	}
 };

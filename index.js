@@ -209,10 +209,10 @@ client.on('ready', async () => {
         }))
     ));
     console.log(chalk.gray('Preparando imágenes extra'));
-    global.loademotes = {
-        ...global.loademotes, 
-        wcell: await loadImage(global.slots.slot3.emojis.cache.find(e => e.name === 'wCell').url),
-        bcell: await loadImage(global.slots.slot3.emojis.cache.find(e => e.name === 'bCell').url),
+    global.loademotes['chess'] = {
+        WHITE: await loadImage(global.slots.slot3.emojis.cache.find(e => e.name === 'wCell').url),
+        BLACK: await loadImage(global.slots.slot3.emojis.cache.find(e => e.name === 'bCell').url),
+        pawn: await loadImage(global.slots.slot3.emojis.cache.find(e => e.name === 'pawn').url),
     };
 	confirm();
 
