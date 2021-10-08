@@ -6,7 +6,7 @@ const fs = require('fs'); //Sistema de archivos
 
 //Base de datos
 const Mongoose = require('mongoose');
-const uri = (process.env.MONGODB_URI) ? process.env.MONGODB_URI : require('./key.json').dburi;
+const uri = (process.env.MONGODB_URI) ? process.env.MONGODB_URI : require('./localenv.json').dburi;
 const prefixpair = require('./localdata/models/prefixpair.js');
 const { Stats, ChannelStats } = require('./localdata/models/stats.js');
 const { Puretable, defaultEmote } = require('./localdata/models/puretable.js');
@@ -21,7 +21,7 @@ const chalk = require('chalk'); //Consola con formato bonito
 const { SlashCommandBuilder, SlashCommandIntegerOption } = require('@discordjs/builders');
 const { CommandOptionsManager } = require('./commands/Commons/cmdOpts.js');
 const { promisify } = require('util');
-const token = (process.env.I_LOVE_MEGUMIN) ? process.env.I_LOVE_MEGUMIN : require('./key.json').token; //La clave del bot
+const token = (process.env.I_LOVE_MEGUMIN) ? process.env.I_LOVE_MEGUMIN : require('./localenv.json').token; //La clave del bot
 //#endregion
 
 //#region Parámetros Iniciales

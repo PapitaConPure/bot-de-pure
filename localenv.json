@@ -1,0 +1,6 @@
+{
+    "token": "ODgzNDMxMzg3NjAzMDMwMDQ2.YTJ1mA.yye_iWiCDtJsFpWbNhE8IutMPLU",
+    "dburi": "mongodb+srv://PapaPure:AZi4SUhpXlVWWjrE@cluster0.bwsjw.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+    "__olderdburi": "mongodb+srv://PapaPure:QJPl9xHfTFfLG5Au@botdepure.fbz2w.mongodb.net/botdepure?retryWrites=true&w=majority",
+    "inviteurl": "https://discord.com/api/oauth2/authorize?client_id=883431387603030046&permissions=139855785040&redirect_uri=https%3A%2F%2Fdiscord.com%2Fapi%2Foauth2%2Fauthorize%3Fclient_id%3D883431387603030046%26scope%3Dbot&scope=bot%20applications.commands"
+}
