@@ -77,4 +77,8 @@ module.exports = {
             embeds: embeds
         });
     },
+
+    async interact(interaction) {
+        await interaction.reply('Test');
+    }
 };

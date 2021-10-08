@@ -18,7 +18,8 @@ const guildfunc = require('./localdata/guildFunctions.js');
 const dns = require('dns'); //Detectar host
 const { registerFont, loadImage } = require('canvas'); //Registrar fuentes al ejecutar Bot
 const chalk = require('chalk'); //Consola con formato bonito
-const { SlashCommandBuilder } = require('@discordjs/builders');
+const { SlashCommandBuilder, SlashCommandIntegerOption } = require('@discordjs/builders');
+const { CommandOptionsManager } = require('./commands/Commons/cmdOpts.js');
 const { promisify } = require('util');
 const token = (process.env.I_LOVE_MEGUMIN) ? process.env.I_LOVE_MEGUMIN : require('./key.json').token; //La clave del bot
 //#endregion
@@ -67,9 +68,38 @@ for(const file of commandFiles) {
     const command = require(`./commands/Pure/${file}`);
 	client.ComandosPure.set(command.name, command);
     if(typeof command.interact === 'function') {
-        command.data = new SlashCommandBuilder()
+        const slash = new SlashCommandBuilder()
             .setName(command.name)
             .setDescription(command.brief || command.desc.slice(0, 99));
+        /**@type {CommandOptionsManager}*/
+        const options = command.options;
+        if(options) {
+            options.params.forEach(p => {
+                /**@param {SlashCommandIntegerOption} opt*/
+                const optionBuilder = (opt) => opt.setName(p._name).setDescription(p._desc).setRequired(p._optional);
+                switch(p._type) {
+                    case 'NUMBER':  slash.addIntegerOption(optionBuilder); return;
+                    case 'TEXT':    slash.addStringOption(optionBuilder);  return;
+                    case 'USER':    slash.addUserOption(optionBuilder);    return;
+                    case 'ROLE':    slash.addRoleOption(optionBuilder);    return;
+                    case 'GUILD':   slash.addStringOption(optionBuilder);  return;
+                    case 'CHANNEL': slash.addChannelOption(optionBuilder); return;
+                    case 'MESSAGE': slash.addStringOption(optionBuilder);  return;
+                    case 'EMOTE':   slash.addStringOption(optionBuilder);  return;
+                    case 'IMAGE':   slash.addStringOption(optionBuilder);  return;
+                    case 'URL':     slash.addStringOption(optionBuilder);  return;
+                    case 'ID':      slash.addIntegerOption(optionBuilder); return;
+                }
+            });
+            options.flags.forEach(f => {
+                /**@param {SlashCommandIntegerOption} opt*/
+                const optionBuilder = (opt) => opt.setName(f._long[0] || f._short[0]).setDescription(f._desc).setRequired(false);
+                if(f._expressive) {
+                    //case '': slash.addBooleanOption(optionBuilder); return;
+                } else slash.addBooleanOption(optionBuilder);
+            });
+        }
+        command.data = slash;
 	    client.SlashPure.set(command.name, command.data.toJSON());
     }
     if(command.flags && command.flags.includes('emote'))
@@ -87,8 +117,8 @@ client.on('ready', async () => {
             Routes.applicationCommands(client.application.id),
             { body: client.SlashPure },
         );
-        console.log('Comandos registrados:', registered.map(scmd => scmd.name));
         confirm();
+        console.log('Comandos registrados:', registered.map(scmd => scmd.name));
     } catch (error) {
         console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos slash'));
         console.error(error);

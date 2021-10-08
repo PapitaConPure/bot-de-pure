@@ -48,7 +48,7 @@ module.exports = {
 	async execute({ channel }, _) {
 		channel.send({
 			content:
-				`**Buenas, soy Karl (${karlRarity().join(' ')}). Combina estas weás, créeme soy licenciado** <:reibu:686220828773318663> :thumbsup:\n` +
+				`**Buenas, soy Karl (${karlRarity().join('')}). Combina estas weás, créeme soy licenciado** <:reibu:686220828773318663> :thumbsup:\n` +
 				`<:arrowr:681963688411922460> ${randomInstruments().join(' ')} <:arrowl:681963688361590897>`
 		});
     },
@@ -56,7 +56,7 @@ module.exports = {
 	async interact(interaction) {
 		interaction.reply({
 			content:
-				`**Buenas, soy Karl (${karlRarity().join(' ')}). Combina estas weás, créeme soy licenciado** <:reibu:686220828773318663> :thumbsup:\n` +
+				`**Buenas, soy Karl (${karlRarity().join('')}). Combina estas weás, créeme soy licenciado** <:reibu:686220828773318663> :thumbsup:\n` +
 				`<:arrowr:681963688411922460> ${randomInstruments().join(' ')} <:arrowl:681963688361590897>`
 		});
     },
