@@ -408,7 +408,7 @@ client.on('interactionCreate', async interaction => {
             await interaction.reply({ embeds: [ cmdex.createEmbed(exception, { cmdString: `/${commandname}` }) ]});
             return;
         } else {
-            const args = interaction.command.options;
+            const args = interaction.options;
             await comando.interact(interaction, args);
         }
         stats.commands.succeeded++;
