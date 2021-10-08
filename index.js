@@ -18,7 +18,7 @@ const guildfunc = require('./localdata/guildFunctions.js');
 const dns = require('dns'); //Detectar host
 const { registerFont, loadImage } = require('canvas'); //Registrar fuentes al ejecutar Bot
 const chalk = require('chalk'); //Consola con formato bonito
-const { SlashCommandBuilder, SlashCommandIntegerOption } = require('@discordjs/builders');
+const { SlashCommandBuilder } = require('@discordjs/builders');
 const { CommandOptionsManager } = require('./commands/Commons/cmdOpts.js');
 const { promisify } = require('util');
 const token = (process.env.I_LOVE_MEGUMIN) ? process.env.I_LOVE_MEGUMIN : require('./localenv.json').token; //La clave del bot
@@ -75,24 +75,39 @@ for(const file of commandFiles) {
         const options = command.options;
         if(options) {
             options.params.forEach(p => {
-                console.log(p._name, {
-                    type: p._type,
-                    poly: p._poly,
-                    optional: p._optional
-                });
-                /**@param {SlashCommandIntegerOption} opt*/
-                const optionBuilder = (opt) => opt.setName(p._name).setDescription(p._desc).setRequired(p._optional);
+                slash.addFunction = (opt) => {};
                 switch(p._type) {
-                    case 'NUMBER':  slash.addIntegerOption(optionBuilder); return;
-                    case 'USER':    slash.addUserOption(optionBuilder);    return;
-                    case 'ROLE':    slash.addRoleOption(optionBuilder);    return;
-                    case 'CHANNEL': slash.addChannelOption(optionBuilder); return;
-                    case 'ID':      slash.addIntegerOption(optionBuilder); return;
-                    default:        slash.addStringOption(optionBuilder);  return;
+                case 'NUMBER':  slash.addFunction = slash.addIntegerOption; break;
+                case 'USER':    slash.addFunction = slash.addUserOption;    break;
+                case 'ROLE':    slash.addFunction = slash.addRoleOption;    break;
+                case 'CHANNEL': slash.addFunction = slash.addChannelOption; break;
+                case 'ID':      slash.addFunction = slash.addIntegerOption; break;
+                default:        slash.addFunction = slash.addStringOption;  break;
+                }
+                /**
+                 * @param {*} opt
+                 * @param {String} name
+                 */
+                const optionBuilder = (opt, name, fullyOptional = false) => opt.setName(name).setDescription(p._desc).setRequired(!(fullyOptional || p._optional));
+                switch(p._poly) {
+                case 'SINGLE':
+                    slash.addFunction(opt => optionBuilder(opt, p._name));
+                    break;
+                case 'MULTIPLE':
+                    const singlename = p._name.replace(/[Ss]$/, '');
+                    slash.addFunction(opt => optionBuilder(opt, `${singlename}_1`));
+                    for(let i = 2; i <= p._polymax; i++)
+                        slash.addFunction(opt => optionBuilder(opt, `${singlename}_${i}`, true));
+                    break;
+                default:
+                    p._poly.forEach(entry => {
+                        slash.addFunction(opt => optionBuilder(opt, `${p._name}_${entry}`));
+                    });
+                    break;
                 }
             });
             options.flags.forEach(f => {
-                /**@param {SlashCommandIntegerOption} opt*/
+                /**@param {*} opt*/
                 const optionBuilder = (opt) => opt.setName(f._long[0] || f._short[0]).setDescription(f._desc).setRequired(false);
                 if(f._expressive) {
                     //case '': slash.addBooleanOption(optionBuilder); return;
@@ -408,8 +423,7 @@ client.on('interactionCreate', async interaction => {
             await interaction.reply({ embeds: [ cmdex.createEmbed(exception, { cmdString: `/${commandname}` }) ]});
             return;
         } else {
-            const args = interaction.options;
-            await comando.interact(interaction, args);
+            await comando.interact(interaction, interaction.options);
         }
         stats.commands.succeeded++;
 	} catch(error) {

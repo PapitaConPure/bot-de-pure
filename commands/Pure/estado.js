@@ -58,20 +58,26 @@ module.exports = {
     },
 	
 	async interact(interaction, _) {
+        const stats = (await Stats.findOne({})) || new Stats({ since: Date.now( )});
         const clformat = changelog.map(item => `- ${item}`).join('\n');
         const tdformat = todo.map(item => `- ${item}`).join('\n');
         const cm = changelog.join().match(cmsearch);
+        const cnt = {
+            cmds: readdirSync('./commands/Pure').filter(file => file.endsWith('.js')).length,
+            guilds: interaction.client.guilds.cache.size
+        }
         const embed = new MessageEmbed()
             .setColor('#608bf3')
             .setAuthor('Estado del Bot', interaction.client.user.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
             .setThumbnail('https://i.imgur.com/HxTxjdL.png')
-            .setFooter(`Ofreciendo un total de ${readdirSync('./commands/Pure').filter(file => file.endsWith('.js')).length} comandos en ${interaction.client.guilds.cache.size} servidores`)
+            .setFooter(`Ofreciendo un total de ${cnt.cmds} comandos en ${cnt.guilds} servidores`)
             .addField('Creador', `Papita con Puré\n[423129757954211880]`, true)
             .addField('Host', (host === 'https://localhost/')?'https://heroku.com/':'localhost', true)
-            .addField('Versión', `:hash: ${version.number}\n:scroll: ${version.name}`, true)
+            .addField('Versión', `#️⃣ ${version.number}\n📜 ${version.name}`, true)
             .addField('Visión general', note)
-            .addField('Cambios', listFormat(clformat, true))
-            .addField('Lo que sigue', listFormat(tdformat, false));
+            .addField('Cambios', listFormat(clformat, true, interaction.guild.id))
+            .addField('Lo que sigue', listFormat(tdformat, false, interaction.guild.id))
+            .addField('Estadísticas', `🎦 ${stats.read} mensajes registrados\n✅ ${stats.commands.succeeded} ejecuciones de comando exitosas\n⚠️ ${stats.commands.failed} ejecuciones de comando fallidas`);
 
         await interaction.reply({ embeds: [embed] });
         const sent = await interaction.fetchReply();

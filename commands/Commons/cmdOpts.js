@@ -2,7 +2,10 @@
  * @typedef {{name: String, expression: String|Number}} ParamTypeStrict Parámetros de CommandOption que siguen una sintaxis estricta
  * @typedef {'NUMBER'|'TEXT'|'USER'|'ROLE'|'CHANNEL'|'MESSAGE'|'EMOTE'|'IMAGE'|'URL'|'ID'|ParamTypeStrict} ParamType Tipos de parámetro de CommandOption
  * @typedef {'SINGLE'|'MULTIPLE'|Array<String>} ParamPoly Capacidad de entradas de parámetro de CommandOption
+ * @typedef {Map<String, CommandOption>} CommandOptionsCollection Colección de opciones de comando indexadas por nombre de parámetro
  */
+
+const { CommandInteractionOptionResolver } = require("discord.js");
 
 const commonTypes = {
     'NUMBER':   'número',
@@ -58,6 +61,8 @@ class CommandParam extends CommandOption {
     _optional;
     /**@type {ParamPoly}*/
     _poly;
+    /**@type {Number}*/
+    _polymax;
 
     /**
      * @constructor
@@ -70,6 +75,7 @@ class CommandParam extends CommandOption {
         this._type = type;
         this._optional = false;
         this._poly = 'SINGLE';
+        this._polymax = 1;
     };
 
     /**
@@ -93,10 +99,12 @@ class CommandParam extends CommandOption {
     /**
      * Define la capacidad de entradas del parámetro
      * @param {ParamPoly} poly La capacidad del parámetro
+     * @param {Number?} max El máximo de entradas admitidas (para parámetros de tipo múltiple)
      * @returns
      */
-    setPoly(poly) {
+    setPoly(poly, max) {
         this._poly = poly;
+        if(max) this._polymax = max;
         return this;
     };
     /**
@@ -245,25 +253,32 @@ class CommandFlagExpressive extends CommandFlag {
 class CommandOptionsManager {
     /**
      * Opciones del administrador
-     * @type {Array<CommandOption>}
+     * @type {CommandOptionsCollection}
      */
     options;
     /**
      * Parámetros del administrador
-     * @type {Array<CommandParam>}
+     * @type {CommandOptionsCollection}
      */
     params;
     /**
      * Banderas del administrador
-     * @type {Array<CommandFlag>}
+     * @type {CommandOptionsCollection}
      */
     flags;
+    /**
+     * Propiedades por defecto 
+     */
+    defaults;
 
     /**@constructor*/
     constructor() {
-        this.options = [];
-        this.params = [];
-        this.flags = [];
+        this.options = new Map();
+        this.params = new Map();
+        this.flags = new Map();
+        this.defaults = {
+            polymax: 5
+        };
     };
     
     /**
@@ -271,20 +286,19 @@ class CommandOptionsManager {
      * @param {String} name El nombre del parámetro
      * @param {ParamType|Array<ParamType>} type El tipo de parámetro
      * @param {String} desc La descripción del parámetro
-     * @param {{ poly?: ParamPoly, optional?: Boolean }} optionModifiers Los modificadores del parámetro
+     * @param {{ poly?: ParamPoly, polymax?: Number, optional?: Boolean }} optionModifiers Los modificadores del parámetro
      * @returns
      */
-    addParam(name, type, desc, optionModifiers = { poly: undefined, optional: undefined } ) {
+    addParam(name, type, desc, optionModifiers = { poly: undefined, polymax: undefined, optional: undefined } ) {
         const commandParam = new CommandParam(name, type)
             .setType(type)
             .setDesc(desc)
-            .setPoly(optionModifiers?.poly || 'Single')
+            .setPoly(optionModifiers?.poly || 'SINGLE', optionModifiers?.polymax || this.defaults.polymax)
             .setOptional(optionModifiers?.optional || false);
-        this.options.push(commandParam);
-        this.params.push(commandParam);
+        this.options.set(commandParam._name, commandParam);
+        this.params.set(commandParam._name, commandParam);
         return this;
     };
-    
     /**
      * Añade una bandera al administrador
      * @param {String | Array<String>} short El/los identificadores cortos
@@ -301,10 +315,14 @@ class CommandOptionsManager {
             .setShort(short)
             .setLong(long)
             .setDesc(desc);
-        this.options.push(commandFlag);
-        this.flags.push(commandFlag);
+        const flagIdentifier = commandFlag._long.length
+            ? (Array.isArray(commandFlag._long) ? commandFlag._long[0] : commandFlag._long)
+            : commandFlag._short[0];
+        this.options.set(flagIdentifier, commandFlag);
+        this.flags.set(flagIdentifier, commandFlag);
         return this;
     };
+
     /**
      * String de ayuda de las opciones de comando del administrador
      * @returns {String}
@@ -314,6 +332,39 @@ class CommandOptionsManager {
             ...this.params.map(p => p.display),
             ...(Array.isArray(this.flags) ? this.flags.map(p => p.display) : this.flags)
         ].join('\n');
+    };
+    /**
+     * Devuelve un arreglo de todas las entradas recibidas.
+     * Si no se recibe ninguna entrada, se devuelve fallback
+     * @param {CommandInteractionOptionResolver} args El identificador del parámetro
+     * @param {String} identifier El identificador del parámetro
+     * @param {Function} callbackFn Una función de SlashCommandBuilder para leer un valor
+     * @param {(Function | *)?} fallback Un valor por defecto si no se recibe ninguna entrada
+     * @returns {Array<*>} Un arreglo con las entradas procesadas por callbackFn, o alternativamente, un valor devuelto por fallback
+     */
+    fetchParamPoly(args, identifier, callbackFn, fallback = undefined) {
+        const option = this.params.get(identifier);
+        const singlename = identifier.replace(/[Ss]$/, '');
+        let params;
+        if(option && option._poly)
+            switch(option._poly) {
+            case 'MULTIPLE':
+                params = new Array(option._polymax)
+                    .fill(null)
+                    .map((_, i) => `${singlename}_${i + 1}`)
+                    .filter(param => param);
+                break;
+            case 'SINGLE':
+                params = [ identifier ];
+                break;
+            default:
+                params = option._poly;
+                break;
+            }
+        params = params
+            .map(opt => callbackFn.call(args, opt))
+            .filter(param => param);
+        return params.length ? params : [ (typeof fallback === 'function') ? fallback() : fallback ];
     };
 };
 

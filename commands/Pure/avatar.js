@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js'); //Integrar discord.js
+const { MessageEmbed, CommandInteractionOptionResolver, Interaction } = require('discord.js'); //Integrar discord.js
 const { peopleid } = require('../../localdata/config.json');
 const { fetchUser } = require('../../func.js'); //Funciones globales
 const { p_pure } = require('../../localdata/prefixget');
@@ -6,7 +6,7 @@ const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
 const maxusers = 10;
 const options = new CommandOptionsManager()
-    .addParam('usuario', 'USER', 'para especificar un usuario', { optional: true });
+    .addParam('usuarios', 'USER', 'para especificar usuarios', { optional: true, poly: 'MULTIPLE' });
 
 module.exports = {
 	name: 'avatar',
@@ -57,22 +57,63 @@ module.exports = {
         
         const nfc = `:warning: ¡Usuario[s] **${notfound.join(', ')}** no encontrado[s]!`.replace(/\[s\]/g, (notfound.length > 1) ? 's' : '');
         const embeds = [];
-        users.forEach(user => {
-            embeds.push(new MessageEmbed()
-                .setTitle(`Avatar de ${user.username}`)
-                .setColor('#faa61a')
-                .setFooter(`"${p_pure(message.guildId).raw}ayuda avatar" para más información`)
-                .setImage(user.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
-            );
-        });
+        if(users.length) {
+            users.forEach(user => {
+                embeds.push(new MessageEmbed()
+                    .setTitle(`Avatar de ${user.username}`)
+                    .setColor('#faa61a')
+                    .setImage(user.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
+                );
+            });
+            embeds[embeds.length - 1].setFooter(`"${p_pure(message.guildId).raw}ayuda avatar" para más información`);
+        }
 
-        message.channel.send({
-            content: (notfound.length) ? nfc : null,
-            embeds: embeds.length ? embeds : null,
-        });
+        if(notfound.length || embeds.length)
+            await message.channel.send({
+                content: (notfound.length) ? nfc : null,
+                embeds: embeds.length ? embeds : null,
+            });
     },
 
+    /**
+     * @param {Interaction} interaction
+     * @param {CommandInteractionOptionResolver} args
+     * @returns
+     */
     async interact(interaction, args) {
-        await interaction.reply({ content: `${args}`, ephemeral: true });
+		//Saber si el canal/thread es NSFW o perteneciente a un canal NSFW
+		const isnsfw = interaction.channel.isThread()
+			? interaction.channel.parent.nsfw
+			: interaction.channel.nsfw;
+
+        let content = null;
+        const users = options
+            .fetchParamPoly(args, 'usuarios', args.getUser, interaction.user)
+            .filter(user => {
+                const waytoolewd = interaction.user.id !== peopleid.papita && user.id === peopleid.papita && !isnsfw;
+                if(waytoolewd) {
+                    content = 'Oe conchetumare te hacei el gracioso una vez más y te vai manos arriba, pantalones abajo, \'cuchai? <:junkNo:697321858407727224> <:pistolaR:697351201301463060>';
+                    return;
+                }
+
+                return true;
+            });
+        
+        const embeds = [];
+        if(users.length) {
+            users.forEach(user => {
+                embeds.push(new MessageEmbed()
+                    .setTitle(`Avatar de ${user.username}`)
+                    .setColor('#faa61a')
+                    .setImage(user.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
+                );
+            });
+            embeds[embeds.length - 1].setFooter(`"${p_pure(interaction.guild.id).raw}ayuda avatar" para más información`);
+        }
+
+        await interaction.reply({
+            content: content,
+            embeds: embeds.length ? embeds : null,
+        });
     }
 };
