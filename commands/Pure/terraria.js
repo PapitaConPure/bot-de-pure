@@ -18,7 +18,8 @@ module.exports = {
 	brief: 'Muestra información del server de Terraria (solo Hourai Doll)',
 	desc: 'Muestra información sobre el server de Terraria de Hourai Doll (horario, cómo unirse, etc)',
 	flags: [
-		'hourai'
+		'hourai',
+		'outdated'
 	],
 
 	async execute(message, _) {

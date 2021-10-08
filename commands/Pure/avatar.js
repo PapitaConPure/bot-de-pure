@@ -5,6 +5,21 @@ const { p_pure } = require('../../localdata/prefixget');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
 const maxusers = 10;
+/**@param {Array} users*/
+const avatarEmbeds = (users, guildId) => {
+    const embeds = [];
+    if(users.length) {
+        users.forEach(user => {
+            embeds.push(new MessageEmbed()
+                .setTitle(`Avatar de ${user.username}`)
+                .setColor('#faa61a')
+                .setImage(user.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
+            );
+        });
+        embeds[embeds.length - 1].setFooter(`"${p_pure(guildId).raw}ayuda avatar" para más información`);
+    }
+    return embeds;
+}
 const options = new CommandOptionsManager()
     .addParam('usuarios', 'USER', 'para especificar usuarios', { optional: true, poly: 'MULTIPLE' });
 
@@ -56,17 +71,7 @@ module.exports = {
         } else users.push(message.author);
         
         const nfc = `:warning: ¡Usuario[s] **${notfound.join(', ')}** no encontrado[s]!`.replace(/\[s\]/g, (notfound.length > 1) ? 's' : '');
-        const embeds = [];
-        if(users.length) {
-            users.forEach(user => {
-                embeds.push(new MessageEmbed()
-                    .setTitle(`Avatar de ${user.username}`)
-                    .setColor('#faa61a')
-                    .setImage(user.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
-                );
-            });
-            embeds[embeds.length - 1].setFooter(`"${p_pure(message.guildId).raw}ayuda avatar" para más información`);
-        }
+        const embeds = avatarEmbeds(users, message.guildId);
 
         if(notfound.length || embeds.length)
             await message.channel.send({
@@ -99,17 +104,7 @@ module.exports = {
                 return true;
             });
         
-        const embeds = [];
-        if(users.length) {
-            users.forEach(user => {
-                embeds.push(new MessageEmbed()
-                    .setTitle(`Avatar de ${user.username}`)
-                    .setColor('#faa61a')
-                    .setImage(user.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
-                );
-            });
-            embeds[embeds.length - 1].setFooter(`"${p_pure(interaction.guild.id).raw}ayuda avatar" para más información`);
-        }
+        const embeds = avatarEmbeds(users, interaction.guild.id);
 
         await interaction.reply({
             content: content,
