@@ -25,7 +25,7 @@ module.exports = {
 		message.channel.send({ embeds: [embed] });
 	},
 
-	async interact(interaction) {
+	async interact(interaction, _) {
 		interaction.reply({ embeds: [embed] });
 	}
 };

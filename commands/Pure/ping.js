@@ -17,7 +17,7 @@ module.exports = {
 		});
 	},
 
-	async interact(interaction) {
+	async interact(interaction, _) {
 		const rtime = Date.now() - interaction.createdTimestamp;
 		//Acción de comando
 		await interaction.reply({

@@ -46,7 +46,7 @@ module.exports = {
 		await message.channel.send({ content: 'Soon, later, never. Who knows?' });
 	},
 
-	async interact(interaction) {
+	async interact(interaction, args) {
 		//Variables de flags
 
 		//Acción de comando

@@ -45,13 +45,13 @@ module.exports = {
         'common'
     ],
 
-	async execute(message, args) {
+	async execute(message, _) {
 		//Acción de comando
 		const embed = await requestEmbed();
 		await message.channel.send({ embeds: [embed] });
     },
 
-	async interact(interaction) {
+	async interact(interaction, _) {
 		//Acción de comando
 		const embed = await requestEmbed();
 		await interaction.reply({ embeds: [embed] });

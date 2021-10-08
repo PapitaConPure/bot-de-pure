@@ -27,7 +27,7 @@ module.exports = {
 		channel.send({ content: `:gay_pride_flag: ${Array(7).fill``.map(() => h[randRange(0, h.length)]).join(' ')} :transgender_flag:` });
 	},
 
-	async interact(interaction) {
+	async interact(interaction, _) {
 		interaction.reply({ content: `:gay_pride_flag: ${Array(7).fill``.map(() => h[randRange(0, h.length)]).join(' ')} :transgender_flag:` });
 	}
 };

@@ -27,7 +27,7 @@ module.exports = {
 		channel.send({ content: xuwu[Math.floor(Math.random() * xuwu.length)] });
     },
 	
-	async interact(interaction) {
+	async interact(interaction, _) {
 		interaction.reply({ content: xuwu[Math.floor(Math.random() * xuwu.length)] });
     }
 };

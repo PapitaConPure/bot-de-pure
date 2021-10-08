@@ -10,7 +10,7 @@ module.exports = {
 		await channel.send({ content: '<:yomujugo:748626431914934282>' });
 	},
 
-	async interact(interaction) {
+	async interact(interaction, _) {
 		await interaction.reply({ content: '<:yomujugo:748626431914934282>' });
 	}
 };

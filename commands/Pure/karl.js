@@ -53,7 +53,7 @@ module.exports = {
 		});
     },
 	
-	async interact(interaction) {
+	async interact(interaction, _) {
 		interaction.reply({
 			content:
 				`**Buenas, soy Karl (${karlRarity().join('')}). Combina estas weás, créeme soy licenciado** <:reibu:686220828773318663> :thumbsup:\n` +

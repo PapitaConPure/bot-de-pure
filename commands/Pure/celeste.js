@@ -12,7 +12,7 @@ module.exports = {
 		channel.send({ files: [celesteurl] });
 	},
 
-	async interact(interaction) {
+	async interact(interaction, _) {
 		//Acción de comando
 		interaction.reply({ files: [celesteurl] });
 	}

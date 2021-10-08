@@ -20,7 +20,7 @@ module.exports = {
 		channel.send({ files: chiseFiles });
     },
 	
-	async interact(interaction) {
+	async interact(interaction, _) {
 		interaction.reply({ files: chiseFiles });
     }
 };

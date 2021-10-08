@@ -20,7 +20,7 @@ module.exports = {
         channel.send({ content: `**${emot[randRange(0, emot.length)]}**` });
     },
   
-    async interact(interaction) {
+    async interact(interaction, _) {
         interaction.reply({ content: `**${emot[randRange(0, emot.length)]}**` });
     }
 };

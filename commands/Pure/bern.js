@@ -42,7 +42,7 @@ module.exports = {
 		});
     },
 
-	async interact(interaction) {
+	async interact(interaction, _) {
 		const lel = getReactionEmotes(interaction.client.emojis.cache);
 		const selection = randRange(0, emot.length);
 		await interaction.reply({ content: `**${emot[selection]}** <:bewny:722334924845350973>` })

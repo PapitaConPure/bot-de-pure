@@ -21,7 +21,7 @@ module.exports = {
 		askColor(sm, member);
     },
 
-	async interact(interaction) {
+	async interact(interaction, _) {
 		await interaction.reply({
 			allowedMentions: { repliedUser: true },
 			content: `Aquí teni los colore po **${interaction.member.user.username}** <:reibu:686220828773318663>`,

@@ -30,7 +30,7 @@ module.exports = {
         message.channel.send({ embeds: [embed] });
     },
 	
-	async interact(interaction) {
+	async interact(interaction, _) {
         if(!embed.author)
             embed.setAuthor('Presentación', interaction.client.user.avatarURL({ format: 'png', dynamic: true, size: 1024 }));
         interaction.reply({ embeds: [embed] });

@@ -1,4 +1,4 @@
-const Discord = require('discord.js'); //Integrar discord.js
+const { MessageEmbed } = require('discord.js'); //Integrar discord.js
 const fetch = require('node-fetch');
 
 module.exports = {
@@ -22,7 +22,7 @@ module.exports = {
 			});
 
 		//Crear y usar embed
-		const Embed = new Discord.MessageEmbed()
+		const Embed = new MessageEmbed()
 			.setColor('#ffc0cb')
 			.setTitle('Gatitos uwu');
 		if(err === undefined)
@@ -35,7 +35,7 @@ module.exports = {
 		await message.channel.send({ embeds: [Embed] });
     },
 	
-	async interact(interaction) {
+	async interact(interaction, _) {
 		let err;
 		const { file } = await fetch('https://aws.random.cat/meow')
 			.then(response => response.json())
@@ -45,7 +45,7 @@ module.exports = {
 			});
 
 		//Crear y usar embed
-		const Embed = new Discord.MessageEmbed()
+		const Embed = new MessageEmbed()
 			.setColor('#ffc0cb')
 			.setTitle('Gatitos uwu');
 		if(err === undefined)

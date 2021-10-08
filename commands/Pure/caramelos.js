@@ -12,11 +12,11 @@ module.exports = {
         'outdated'
     ],
 	
-	async execute(message, args) {
+	async execute(message, _) {
 		askCandy(message.member, message.channel);
     },
 	
-	async interact(interaction) {
+	async interact(interaction, _) {
 		await interaction.reply({ content: 'Procesando...' });
 		const message = await interaction.fetchReply();
 		askCandy(message.member, message.channel);

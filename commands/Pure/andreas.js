@@ -15,7 +15,7 @@ module.exports = {
 		await channel.send({ files: [andreasurl] });
 	},
 
-	async interact(interaction) {
+	async interact(interaction, _) {
 		//Acción de comando
 		await interaction.reply({ files: [andreasurl] });
 	}

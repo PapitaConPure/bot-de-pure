@@ -49,7 +49,7 @@ module.exports = {
 		});
     },
 	
-	async interact(interaction) {
+	async interact(interaction, _) {
 		const guilds = interaction.client.guilds.cache;
 		let emotes = (() => {
 			const slot1Coll = guilds.get(serverid.slot1).emojis.cache.values();

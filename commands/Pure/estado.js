@@ -1,4 +1,4 @@
-const Discord = require('discord.js'); //Integrar discord.js
+const { MessageEmbed } = require('discord.js'); //Integrar discord.js
 const { bot_status, p_pure } = require('../../localdata/config.json'); //Variables globales
 const ayuda = require('./ayuda.js'); //Variables globales
 const { readdirSync } = require('fs'); //Para el contador de comandos
@@ -32,7 +32,7 @@ module.exports = {
             cmds: readdirSync('./commands/Pure').filter(file => file.endsWith('.js')).length,
             guilds: message.client.guilds.cache.size
         }
-        const embed = new Discord.MessageEmbed()
+        const embed = new MessageEmbed()
             .setColor('#608bf3')
             .setAuthor('Estado del Bot', message.client.user.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
             .setThumbnail('https://i.imgur.com/HxTxjdL.png')
@@ -43,7 +43,7 @@ module.exports = {
             .addField('Visión general', note)
             .addField('Cambios', listFormat(clformat, true, message.guildId))
             .addField('Lo que sigue', listFormat(tdformat, false, message.guildId))
-            .addField('Estadísticas', `🎦 ${stats.read}\n✅ ${stats.commands.succeeded}\n⚠️ ${stats.commands.failed}`);
+            .addField('Estadísticas', `🎦 ${stats.read} mensajes registrados\n✅ ${stats.commands.succeeded} ejecuciones de comando exitosas\n⚠️ ${stats.commands.failed} ejecuciones de comando fallidas`);
 
         const sent = await message.channel.send({ embeds: [embed] })
         if(cm === null) return;
@@ -57,11 +57,11 @@ module.exports = {
         });
     },
 	
-	async interact(interaction) {
+	async interact(interaction, _) {
         const clformat = changelog.map(item => `- ${item}`).join('\n');
         const tdformat = todo.map(item => `- ${item}`).join('\n');
         const cm = changelog.join().match(cmsearch);
-        const embed = new Discord.MessageEmbed()
+        const embed = new MessageEmbed()
             .setColor('#608bf3')
             .setAuthor('Estado del Bot', interaction.client.user.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
             .setThumbnail('https://i.imgur.com/HxTxjdL.png')

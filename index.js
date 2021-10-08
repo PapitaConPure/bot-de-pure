@@ -75,20 +75,20 @@ for(const file of commandFiles) {
         const options = command.options;
         if(options) {
             options.params.forEach(p => {
+                console.log(p._name, {
+                    type: p._type,
+                    poly: p._poly,
+                    optional: p._optional
+                });
                 /**@param {SlashCommandIntegerOption} opt*/
                 const optionBuilder = (opt) => opt.setName(p._name).setDescription(p._desc).setRequired(p._optional);
                 switch(p._type) {
                     case 'NUMBER':  slash.addIntegerOption(optionBuilder); return;
-                    case 'TEXT':    slash.addStringOption(optionBuilder);  return;
                     case 'USER':    slash.addUserOption(optionBuilder);    return;
                     case 'ROLE':    slash.addRoleOption(optionBuilder);    return;
-                    case 'GUILD':   slash.addStringOption(optionBuilder);  return;
                     case 'CHANNEL': slash.addChannelOption(optionBuilder); return;
-                    case 'MESSAGE': slash.addStringOption(optionBuilder);  return;
-                    case 'EMOTE':   slash.addStringOption(optionBuilder);  return;
-                    case 'IMAGE':   slash.addStringOption(optionBuilder);  return;
-                    case 'URL':     slash.addStringOption(optionBuilder);  return;
                     case 'ID':      slash.addIntegerOption(optionBuilder); return;
+                    default:        slash.addStringOption(optionBuilder);  return;
                 }
             });
             options.flags.forEach(f => {
@@ -407,8 +407,10 @@ client.on('interactionCreate', async interaction => {
         if(exception) {
             await interaction.reply({ embeds: [ cmdex.createEmbed(exception, { cmdString: `/${commandname}` }) ]});
             return;
-        } else
-            await comando.interact(interaction);
+        } else {
+            const args = interaction.command.options;
+            await comando.interact(interaction, args);
+        }
         stats.commands.succeeded++;
 	} catch(error) {
         console.log('Ha ocurrido un error al procesar un comando slash.');

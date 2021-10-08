@@ -13,7 +13,7 @@ module.exports = {
 		await channel.send({ content: '***CUIDADO ORPHEEEEEN***' });
     },
 	
-	async interact(interaction){
+	async interact(interaction, _) {
 		await interaction.reply({ content: '***ORPHEN CUIDADO***' });
 		await interaction.followUp({ content: '***CUIDADO ORPHEEEEEN***' });
     }

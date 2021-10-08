@@ -10,7 +10,7 @@ const uwusopt = [
 
 const options = new CommandOptionsManager()
 	.addParam('uwu', { name: 'uwu', expression: 'uwu' }, 'uwu')
-	.addFlag('u', 'uwu', 				 'uwu')
+	.addFlag('u', 'uwuwu', 'uwu')
 	.addFlag('bd', ['borrar', 'delete'], 'para borrar el mensaje original');
 
 module.exports = {
@@ -30,7 +30,7 @@ module.exports = {
 		if(args.includes('-d')) message.delete();
     },
 	
-	async interact(interaction) {
+	async interact(interaction, args) {
 		interaction.reply({ content: uwusopt[Math.floor(Math.random() * uwusopt.length)] });
     }
 };

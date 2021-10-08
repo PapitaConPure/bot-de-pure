@@ -23,7 +23,7 @@ module.exports = {
 		}
 	},
 
-	async interact(interaction) {
+	async interact(interaction, _) {
 		if(!interaction.member.roles.cache.has(hd)) {
 			interaction.member.roles.add(hd, 'Por pelotudo');
 			interaction.reply({ content: '<:houraidoll:853402616208949279> Shanghai Shanghai Shanghai Shanghai\nHourai Hourai Hourai Hourai' });

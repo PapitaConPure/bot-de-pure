@@ -33,7 +33,7 @@ module.exports = {
 		});
 	},
 
-	async interact(interaction) {
+	async interact(interaction, _) {
 		//Acción de comando
 		interaction.reply({
 			content: phrase[randRange(0, phrase.length)],

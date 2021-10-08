@@ -4,7 +4,7 @@ const { fetchUser } = require('../../func.js'); //Funciones globales
 const { p_pure } = require('../../localdata/prefixget');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
-const maxusers = 5;
+const maxusers = 10;
 const options = new CommandOptionsManager()
     .addParam('usuario', 'USER', 'para especificar un usuario', { optional: true });
 
@@ -40,11 +40,10 @@ module.exports = {
             args.forEach(arg => {
                 const user = fetchUser(arg, message);
                 
-                if(user === undefined) {
+                if(!user) {
                     notfound.push(arg);
                     return;
                 }
-
                 if((user.id === peopleid.papita) && !isnsfw) {
                     message.channel.send({
                         content: `Oe conchetumare te hacei el gracioso una vez más y te vai manos arriba, pantalones abajo, 'cuchai? <:junkNo:697321858407727224> <:pistolaR:697351201301463060>`
@@ -57,11 +56,6 @@ module.exports = {
         } else users.push(message.author);
         
         const nfc = `:warning: ¡Usuario[s] **${notfound.join(', ')}** no encontrado[s]!`.replace(/\[s\]/g, (notfound.length > 1) ? 's' : '');
-        if(users.length === 0) {
-            if((notfound.length)) message.channel.send({ content: nfc });
-            return;
-        }
-
         const embeds = [];
         users.forEach(user => {
             embeds.push(new MessageEmbed()
@@ -74,11 +68,11 @@ module.exports = {
 
         message.channel.send({
             content: (notfound.length) ? nfc : null,
-            embeds: embeds
+            embeds: embeds.length ? embeds : null,
         });
     },
 
-    async interact(interaction) {
-        await interaction.reply('Test');
+    async interact(interaction, args) {
+        await interaction.reply({ content: `${args}`, ephemeral: true });
     }
 };
