@@ -19,7 +19,7 @@ const dns = require('dns'); //Detectar host
 const { registerFont, loadImage } = require('canvas'); //Registrar fuentes al ejecutar Bot
 const chalk = require('chalk'); //Consola con formato bonito
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { CommandOptionsManager } = require('./commands/Commons/cmdOpts.js');
+const { CommandOptionsManager, CommandParam } = require('./commands/Commons/cmdOpts.js');
 const { promisify } = require('util');
 const token = (process.env.I_LOVE_MEGUMIN) ? process.env.I_LOVE_MEGUMIN : require('./localenv.json').token; //La clave del bot
 //#endregion
@@ -67,7 +67,7 @@ commandFiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.
 for(const file of commandFiles) {
     const command = require(`./commands/Pure/${file}`);
 	client.ComandosPure.set(command.name, command);
-    if(typeof command.interact === 'function') {
+    if(typeof command.interact === 'function' || command.experimental) {
         const slash = new SlashCommandBuilder()
             .setName(command.name)
             .setDescription(command.brief || command.desc.slice(0, 99));
@@ -295,11 +295,13 @@ client.on('messageCreate', async message => {
     else if(msg.startsWith(p_pure.raw)) pdetect = p_pure;
     else {
         //#region Emotes rápidos
-        let ecmd = content.split(/[\n ]+/).find(word => word.startsWith('&'));
-        if(ecmd) {
-            ecmd = ecmd.toLowerCase().slice(1);
+        const words = content.split(/[\n ]+/);
+        let ecmd = words.findIndex(word => word.startsWith('&'));
+        if(ecmd !== -1) {
+            const args = words.slice(ecmd + 1);
+            ecmd = words[ecmd].toLowerCase().slice(1);
             const command = client.EmotesPure.get(ecmd) || client.EmotesPure.find(cmd => cmd.aliases && cmd.aliases.includes(ecmd)); //Argumentos ingresados
-            if(!command) return;
+            if(!command || command.experimental) return;
             try {
                 //Detectar problemas con el comando basado en flags
                 let exception = null;
@@ -309,7 +311,7 @@ client.on('messageCreate', async message => {
                     else return true;
                 });
                 if(exception) return;
-                else await command.execute(message, []);
+                else await command.execute(message, args);
             } catch(error) {
                 console.log(chalk.bold.redBright('Ha ocurrido un error al insertar un emote.'));
                 console.error(error);
@@ -411,10 +413,10 @@ client.on('interactionCreate', async interaction => {
 
     //#region Ejecución de Comandos
 	try {
-        const comando = client.ComandosPure.get(commandname);
+        const command = client.ComandosPure.get(commandname);
         //Detectar problemas con el comando basado en flags
         let exception = null;
-        comando.flags.forEach(flag => {
+        command.flags.forEach(flag => {
             const ex = cmdex.findExceptions(flag, interaction);
             if(ex) { exception = ex; return false; }
             else return true;
@@ -422,9 +424,10 @@ client.on('interactionCreate', async interaction => {
         if(exception) {
             await interaction.reply({ embeds: [ cmdex.createEmbed(exception, { cmdString: `/${commandname}` }) ]});
             return;
-        } else {
-            await comando.interact(interaction, interaction.options);
-        }
+        } else if(command.experimental)
+            await command.execute(interaction, args, true);
+        else
+            await command.interact(interaction, interaction.options);
         stats.commands.succeeded++;
 	} catch(error) {
         console.log('Ha ocurrido un error al procesar un comando slash.');

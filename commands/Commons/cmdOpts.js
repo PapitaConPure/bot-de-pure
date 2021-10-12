@@ -336,13 +336,14 @@ class CommandOptionsManager {
     /**
      * Devuelve un arreglo de todas las entradas recibidas.
      * Si no se recibe ninguna entrada, se devuelve fallback
-     * @param {CommandInteractionOptionResolver} args El identificador del parámetro
+     * @param {CommandInteractionOptionResolver} args El resolvedor de opciones de interacción
      * @param {String} identifier El identificador del parámetro
      * @param {Function} callbackFn Una función de SlashCommandBuilder para leer un valor
      * @param {(Function | *)?} fallback Un valor por defecto si no se recibe ninguna entrada
      * @returns {Array<*>} Un arreglo con las entradas procesadas por callbackFn, o alternativamente, un valor devuelto por fallback
      */
     fetchParamPoly(args, identifier, callbackFn, fallback = undefined) {
+        /**@type {CommandParam}*/
         const option = this.params.get(identifier);
         const singlename = identifier.replace(/[Ss]$/, '');
         let params;
@@ -362,7 +363,7 @@ class CommandOptionsManager {
                 break;
             }
         params = params
-            .map(opt => callbackFn.call(args, opt))
+            .map((opt, i) => callbackFn.call(args, opt, !i && !option._optional))
             .filter(param => param);
         return params.length ? params : [ (typeof fallback === 'function') ? fallback() : fallback ];
     };

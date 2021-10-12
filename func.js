@@ -849,8 +849,8 @@ module.exports = {
 
     randRange: function(minInclusive, maxExclusive, round = true) {
         const range = maxExclusive - minInclusive;
-        const rnum = (global.seed + range * Math.random()) % range;
-        return minInclusive + (round?Math.floor(rnum):rnum);
+        const rval = minInclusive + ((global.seed + range * Math.random()) % range);
+        return round ? Math.floor(rval) : rval;
     }
     //#endregion
 };
