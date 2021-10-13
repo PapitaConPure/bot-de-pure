@@ -425,7 +425,7 @@ client.on('interactionCreate', async interaction => {
             await interaction.reply({ embeds: [ cmdex.createEmbed(exception, { cmdString: `/${commandname}` }) ]});
             return;
         } else if(command.experimental)
-            await command.execute(interaction, args, true);
+            await command.execute(interaction, interaction.options, true);
         else
             await command.interact(interaction, interaction.options);
         stats.commands.succeeded++;

@@ -1,4 +1,4 @@
-const { Message, CommandInteraction } = require("discord.js");
+const { Message, CommandInteraction, CommandInteractionOptionResolver } = require("discord.js");
 
 /**
  * @typedef {Message | CommandInteraction} CommandRequest

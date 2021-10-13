@@ -51,12 +51,11 @@ module.exports = {
 	
 	/**
 	 * @param {import("../Commons/typings").CommandRequest} request
-	 * @param {import("../Commons/typings").CommandOptions} args
 	 * @param {Boolean} isSlash
 	 */
-	async execute(request, args, isSlash = false) {
+	async execute(request, _, isSlash = false) {
 		const kr = karlRarity();
-		(isSlash ? request.channel.send : request.reply).call(request, {
+		request.reply({
 			content:
 				`**Buenas, soy Karl (${kr.join('')}). Combina estas weás, créeme soy licenciado** <:reibu:686220828773318663> :thumbsup:\n` +
 				`<:arrowr:681963688411922460> ${instrumentsPull(kr.length).join(' ')} <:arrowl:681963688361590897>`
