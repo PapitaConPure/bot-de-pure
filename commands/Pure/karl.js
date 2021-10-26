@@ -45,7 +45,8 @@ module.exports = {
     ],
     desc: 'Comando de gacha musical de Karl Zuñiga',
     flags: [
-        'meme'
+        'meme',
+		'game'
     ],
 	experimental: true,
 	

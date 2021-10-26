@@ -91,6 +91,7 @@ module.exports = {
 		'Si no sabes las reglas básicas de ajedrez, pues... [mira mira~](https://www.chess.com/es/como-jugar-ajedrez)',
 	flags: [
 		'common',
+		'game',
 		'maintenance'
 	],
 	options,

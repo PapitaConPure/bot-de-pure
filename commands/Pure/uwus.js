@@ -10,7 +10,9 @@ module.exports = {
         '*Evento UwU:* la persona que más __mensajes que contienen "uwu"s__ envíe para cuando el tiempo acabe, ganará. Ganar no tiene ninún beneficio pero ganar no es perder y perder es feo (umu).\n' +
         'Al finalizar el evento, se muestran los resultados y se borran todos los mensajes con "uwu" enviados durante el mismo.',
     flags: [
-        'meme'
+        'meme',
+        'game',
+        'chaos'
     ],
     options,
     callx: '<tiempo?>',

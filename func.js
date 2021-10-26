@@ -718,15 +718,30 @@ module.exports = {
 
     fetchArrows: (emojiscache) => [emojiscache.get('681963688361590897'), emojiscache.get('681963688411922460')],
 
-    fetchFlag: function(args, flag = { property, short: [], long: [], callback: (x, i) => undefined, fallback: (x) => undefined }) {
+    /**
+     * @function
+     * @param {Array<String>} args
+     * @param {{
+     *  property: Boolean
+     *  short: Array<String>
+     *  long: Array<String>
+     *  callback: *
+     *  fallback: *
+     * }} flag
+     */
+    fetchFlag: function(args, flag = { property, short: [], long: [], callback, fallback }) {
         //Ahorrarse procesamiento en vano si no se ingresa nada
         if(!args.length) return typeof flag.fallback === 'function' ? flag.fallback() : flag.fallback;
 
         let target; //Retorno. Devuelve callback si se ingresa la flag buscada de forma válida, o fallback si no
         const isFunc = (typeof flag.callback === 'function');
 
-        if(flag.property && !isFunc)
-            throw TypeError('Las flags de propiedad deben llamar una función.');
+        if(!isFunc) {
+            if(flag.property)
+                throw TypeError('Las flags de propiedad deben llamar una función.');
+            const temp = flag.callback;
+            flag.callback = () => { return temp; }
+        }
 
         //Recorrer parámetros e intentar procesar flags
         args.forEach((arg, i) => {
@@ -734,15 +749,17 @@ module.exports = {
             arg = arg.toLowerCase();
             if(flag.long && flag.long.length && arg.startsWith('--')) {
                 if(flag.long.includes(arg.slice(2))) {
-                    if(flag.property) target = flag.callback(args, i + 1);
-                    else target = isFunc?flag.callback():flag.callback; //De lo contrario, puede ser una función o un valor
+                    target = flag.property
+                        ? flag.callback(args, i + 1)
+                        : flag.callback();
                     args.splice(i, flag.property?2:1);
                 }
             } else if(flag.short && flag.short.length && arg.startsWith('-')) {
                 for(c of arg.slice(1))
                     if(flag.short.includes(c)) {
-                        if(flag.property) target = flag.callback(args, i + 1);
-                        else target = isFunc?flag.callback():flag.callback;
+                        target = flag.property
+                            ? flag.callback(args, i + 1)
+                            : flag.callback();
                         if(arg.length > 2) {
                             const rmva = new RegExp(c, 'g')
                             let temp = args.splice(i, flag.property?2:1);

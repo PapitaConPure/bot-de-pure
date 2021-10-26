@@ -367,6 +367,24 @@ class CommandOptionsManager {
             .filter(param => param);
         return params.length ? params : [ (typeof fallback === 'function') ? fallback() : fallback ];
     };
+    /**
+     * Devuelve un valor o función basado en si se ingresó la flag buscada o no
+     * Si no se recibe ninguna entrada, se devuelve fallback
+     * @param {CommandInteractionOptionResolver} args El conjunto de entradas
+     * @param {String} identifier El identificador de la flag
+     * @param {Function} getMethod El método de procesado de entrada
+     * @typedef {Object} feedback
+     * @property {*} callback Valor de retorno si se respondió la flag
+     * @property {*} fallback Un valor por defecto si no se respondió la flag
+     * @param {feedback} fb Define la respuestas en cada caso
+     * @returns {*} El valor de retorno de callback si la flag fue respondida, o en cambio, el de fallback
+     */
+    fetchFlag(args, identifier, fb = { getMethod, callback, fallback }) {
+        const flagval = typeof getMethod === 'function'
+            ? getMethod.call(args, identifier, true)
+            : args.getBoolean(identifier, false);
+        return flagval ? (typeof fb.callback === 'function' ? fb.callback() : fb.callback) : (typeof fb.fallback === 'function' ? fb.fallback() : fb.fallback);
+    }
 };
 
 module.exports = {

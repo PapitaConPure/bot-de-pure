@@ -36,7 +36,8 @@ module.exports = {
     desc: 'Pingea a un `<usuario>` una `<cantidad>` de veces',
     flags: [
         'meme',
-		'hourai'
+		'hourai',
+		'chaos',
     ],
     options,
 	callx: '<cantidad> <usuario>',

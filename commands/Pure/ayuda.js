@@ -1,5 +1,5 @@
 const { readdirSync } = require('fs'); //Integrar operaciones sistema de archivos de consola
-const { MessageEmbed, Message } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const { serverid } = require('../../localdata/config.json'); //Variables globales
 const { fetchFlag } = require('../../func');
 const { p_pure } = require('../../localdata/prefixget');

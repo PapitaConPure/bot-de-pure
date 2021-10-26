@@ -17,7 +17,8 @@ module.exports = {
         'meme'
     ],
     options,
-	
+	experimental: true,
+
 	async execute(message, args) {
 		let showtotal = false;
 		let sassamodo = false;

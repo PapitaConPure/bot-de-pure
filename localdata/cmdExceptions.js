@@ -1,5 +1,6 @@
 const global = require('../localdata/config.json');
 const { MessageEmbed } = require('discord.js');
+const GuildConfig = require('./models/guildconfigs.js');
 
 const isNotByPapita = (compare) => (compare.member.user.id !== global.peopleid.papita);
 
@@ -17,16 +18,25 @@ module.exports = {
             isException: (compare) => isNotByPapita(compare)
         },
 
-        guide: {
-            title: 'Símbolo de página de guía',
-            desc: 'Esto no es un comando, sino que una *página de guía* para buscarse con el comando de ayuda',
-            isException: (_) => true
-        },
-
         mod: {
             title: 'Comando exclusivo para moderación',
             desc: 'El comando es de uso restringido para moderación.\n**Considero a alguien como moderador cuando** tiene permisos para administrar roles *(MANAGE_ROLES)* o mensajes *(MANAGE_MESSAGES)*',
             isException: (compare) => !(compare.member.permissions.has('MANAGE_ROLES') || compare.member.permissions.has('MANAGE_MESSAGES'))
+        },
+
+        chaos: {
+            title: 'Los Comandos Caóticos están desactivados',
+            desc: 'Este comando se considera un Comando Caótico debido a su volatilidad y tendencia a corromper la paz. Los comandos caóticos están desactivados por defecto. Refiérete al comando "caos" para ver cómo activarlos',
+            isException: async (compare) => {
+                const gcfg = (await GuildConfig.findOne({ guildId: compare.guild.id })) || new GuildConfig({ guildId: compare.guild.id });
+                return isNotByPapita(compare) && !gcfg.chaos;
+            }
+        },
+
+        guide: {
+            title: 'Símbolo de página de guía',
+            desc: 'Esto no es un comando, sino que una *página de guía* para buscarse con el comando de ayuda',
+            isException: (_) => true
         },
 
         papa: {

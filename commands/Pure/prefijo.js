@@ -35,7 +35,7 @@ module.exports = {
 				content:
 					'Prefijo reestablecido a la configuración por defecto.\n' +
 					`\`${global.p_pure.raw}\` <:arrowl:681963688361590897> \`${prepf}\``
-				});
+			});
 			await PrefixPair.findOneAndRemove(guildsearch);
 			global[`p_${target}`][message.guildId] = null;
 			return;
