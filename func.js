@@ -676,7 +676,8 @@ module.exports = {
 
         //Prioridad 2: Intentar encontrar por tag
         console.log('Prioridad 2 alcanzada');
-        const taggeduser = uc.find(u => u.tag === data);
+        data = data.toLowerCase();
+        const taggeduser = uc.find(u => u.tag.toLowerCase() === data);
         if(taggeduser) return taggeduser;
 
         //Prioridad 3: Intentar encontrar por nombre de usuario en guild actual
@@ -699,7 +700,6 @@ module.exports = {
         
         //Prioridad 5: Intentar encontrar por nombre de usuario en cualquier guild
         console.log('Prioridad 5 alcanzada: nombres de usuario globales');
-        data = data.toLowerCase();
         people = uc.filter(u => u.username.toLowerCase().indexOf(data) !== -1);
         if(people.size)
             return people
