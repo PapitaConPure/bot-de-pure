@@ -5,7 +5,8 @@ module.exports = {
     ],
     desc: 'Comando de grito a Orphen Nightford',
     flags: [
-        'meme'
+        'meme',
+        'outdated'
     ],
 	
 	async execute({ channel }, _){
