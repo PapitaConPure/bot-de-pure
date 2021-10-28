@@ -157,7 +157,7 @@ module.exports = {
 		const stx = e.x, sty = e.y;
 		e.x = Math.max(0, Math.min(e.x, cells[0].length - 1));
 		e.y = Math.max(0, Math.min(e.y, cells.length - 1));
-		let replyquery = '';
+		const replyquery = [];
 		let ephemeral = true;
 
 		//Cargar imagen nueva si no está registrada
@@ -171,7 +171,7 @@ module.exports = {
 			if(h) { for(let i = 0; i < cells[0].length; i++) cells[e.y][i] = e.id; auser.skills.h--; }
 			if(v) { for(let i = 0; i < cells.length; i++)    cells[i][e.x] = e.id; auser.skills.v--; }
 			auser.markModified('skills');
-			if(isSlash) { replyquery += '⚡ ***¡Habilidad usada!***'; ephemeral = false; }
+			if(isSlash) { replyquery.push('⚡ ***¡Habilidad usada!***'); ephemeral = false; }
 			else await request.react('⚡');
 		}
 		await Puretable.updateOne({}, { cells: cells });
@@ -182,11 +182,11 @@ module.exports = {
 		if(r < userlevel / 100) {
 			if(Math.random() < 0.5) {
 				auser.skills.h++;
-				if(isSlash) { replyquery += '🌟 ¡Recibiste **1** ↔️ *Habilidad Horizontal*!'; ephemeral = false; }
+				if(isSlash) { replyquery.push('🌟 ¡Recibiste **1** ↔️ *Habilidad Horizontal*!'); ephemeral = false; }
 				else await request.react('↔️');
 			} else {
 				auser.skills.v++;
-				if(isSlash) { replyquery += '🌟 ¡Recibiste **1** ↕️ *Habilidad Vertical*!'; ephemeral = false; }
+				if(isSlash) { replyquery.push('🌟 ¡Recibiste **1** ↕️ *Habilidad Vertical*!'); ephemeral = false; }
 				else await request.react('↕️');
 			}
 			auser.markModified('skills');
@@ -196,19 +196,20 @@ module.exports = {
 
 		const offlimits = (stx !== e.x || sty !== e.y) ? true : false;
 		if(isSlash)
-			replyquery += 
+			replyquery.push(
 				(offlimits
 					? '☑️ Emote[s] colocado[s] con *posición corregida*'
 					: '✅ Emote[s] colocado[s]'
-				).replace(/\[s\]/g, (h || v) ? 's' : '');
+				).replace(/\[s\]/g, (h || v) ? 's' : '')
+			);
 		else await request.react(offlimits ? '☑️' : '✅');
 
 		if((auser.exp % maxexp) == 0) {
-			if(isSlash) { replyquery += `¡**${request.user.username}** subió a nivel **${userlevel + 1}**!`; ephemeral = false; }
+			if(isSlash) { replyquery.push(`¡**${request.user.username}** subió a nivel **${userlevel + 1}**!`); ephemeral = false; }
 			else await request.reply({ content: `¡**${request.author.username}** subió a nivel **${userlevel + 1}**!` });
 		}
 
 		if(isSlash)
-			await request.reply({ content: replyquery, ephemeral: ephemeral });
+			await request.reply({ content: replyquery.join('\n'), ephemeral: ephemeral });
 	}
 };
