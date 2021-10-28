@@ -459,11 +459,14 @@ client.on('guildMemberAdd', member => {
     console.log('Evento de entrada de usuario a servidor desencadenado.');
     try {
         if(!user.bot) func.dibujarBienvenida(member);
-        else guild.channels.cache.get(guild.systemChannelId).send({
-            content:
-                'Se acaba de unir un bot.\n' +
-                '***Beep boop, boop beep?***'
-        });
+        else {
+            const sysch = guild.channels.cache.get(guild.systemChannelId);
+            if(sysch) sysch.send({
+                content:
+                    'Se acaba de unir un bot.\n' +
+                    '***Beep boop, boop beep?***'
+            });
+        }
     } catch(error) {
         console.log('Ha ocurrido un error al dar la bienvenida.');
         console.error(error);
@@ -488,9 +491,10 @@ client.on('guildMemberRemove', member => {
     console.log('Evento de salida de usuario de servidor desencadenado.');
     try {
         if(!user.bot) func.dibujarDespedida(member);
-        else guild.channels.cache.get(guild.systemChannelId).send({
-            content: `**${member.displayName}** ya no es parte de la pandilla de bots de este servidor :[\n`
-        });
+        else {
+            const sysch = guild.channels.cache.get(guild.systemChannelId);
+            if(sysch) sysch.send({ content: `**${member.displayName}** ya no es parte de la pandilla de bots de este servidor :[\n` });
+        }
     } catch(error) {
         console.log('Ha ocurrido un error al dar la despedida.');
         console.error(error);
