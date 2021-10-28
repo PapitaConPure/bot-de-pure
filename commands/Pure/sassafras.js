@@ -29,7 +29,7 @@ module.exports = {
 		const sassamodo = isSlash ? options.fetchFlag(args, 'sassamodo', { callback: true }) : fetchFlag(args, { short: ['s'], long: ['sassamodo','dross'], callback: true });
 		
 		if(!showtotal && sassamodo) {
-			request.channel.send({
+			request.reply({
 				content:
 					'***Una cagada asquerosa, repelente, abyecta, vomitiva, mugrosa, maldita, diarreosa, estercolera, inmunda, malnacida, pudenda, apestosa, maloliente, cabrona, ' +
 					'maricona, huevona, pendeja, tarada, cancerígena, jodida, culeada, gilipollesca, pelotuda, encamada, malnacida, retardada, atrasada, inútil, móngola, incestuosa, ' +
