@@ -22,6 +22,11 @@ module.exports = {
     options,
 	callx: '<canal?>',
 	
+	/**
+	 * @param {import("../Commons/typings").CommandRequest} request
+	 * @param {import('../Commons/typings').CommandOptions} args
+	 * @param {Boolean} isSlash
+	 */
 	async execute(message, args) {
 		if(!message.guild.available) {
 			message.channel.send(':interrobang: E-el servidor está en corte ahora mismo. Intenta usar el comando más tarde');
