@@ -16,7 +16,6 @@ module.exports = {
 	desc: 'Para activar o desactivar comandos caóticos en un servidor',
 	flags: [
 		'mod',
-		'maintenance',
 	],
 	options,
 	experimental: true,
