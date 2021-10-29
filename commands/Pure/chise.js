@@ -15,12 +15,10 @@ module.exports = {
         'meme',
 		'hourai'
     ],
-	
-	async execute({ channel }, _) {
-		channel.send({ files: chiseFiles });
+	experimental: true,
+
+	/**@param {import("../Commons/typings").CommandRequest} request*/
+	async execute(request, _, __) {
+		return await request.reply({ files: chiseFiles });
     },
-	
-	async interact(interaction, _) {
-		interaction.reply({ files: chiseFiles });
-    }
 };

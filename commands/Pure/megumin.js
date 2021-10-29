@@ -16,6 +16,7 @@ module.exports = {
     ],
     options: options,
 	callx: callx,
+	experimental: true,
 	
-	execute: async(message, args) => await searchImage(message, args, { cmdtag: 'megumin', sfwtitle: 'MEGUMIN ÙwÚ', nsfwtitle: 'MEGUMIN Ú//w//Ù' })
+	execute: async(message, args, isSlash = false) => await searchImage(message, args, isSlash, { cmdtag: 'megumin', sfwtitle: 'MEGUMIN ÙwÚ', nsfwtitle: 'MEGUMIN Ú//w//Ù' })
 };

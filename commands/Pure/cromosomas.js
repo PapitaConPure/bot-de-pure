@@ -8,16 +8,14 @@ module.exports = {
 	],
 	desc: 'Comando de VIOLOJÍA de Mabel',
 	flags: [
-		'meme'
+		'meme',
+		'hourai',
 	],
+	experimental: true,
 
-	async execute({ channel }, _) {
+	/**@param {import("../Commons/typings").CommandRequest} request*/
+	async execute(request, _, __) {
 		//Acción de comando
-		await channel.send({ files: [violojiaurl] });
+		return await request.reply({ files: [violojiaurl] });
 	},
-
-	async interact(interaction, _) {
-		//Acción de comando
-		await interaction.reply({ files: [violojiaurl] });
-	}
 };

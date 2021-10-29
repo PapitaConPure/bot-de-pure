@@ -186,6 +186,13 @@ class CommandFlag extends CommandOption {
         if(Array.isArray(long) && long.length)   flagString.push(`\`--${long[0]}\``);
         return `${flagString.join(' o ')} ${desc}`;
     };
+    /**
+     * Estructura de objeto de los identificadores de la bandera
+     * @returns {{ short?: Array<String>, long?: Array<String> }}
+     */
+    get structure() {
+        return { short: this._short, long: this._long };
+    }
 };
 
 /**Representa una bandera expresiva de comando*/

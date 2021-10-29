@@ -9,14 +9,11 @@ module.exports = {
 	flags: [
 		'meme'
 	],
+    experimental: true,
 
-	async execute({ channel }, _) {
+	/**@param {import("../Commons/typings").CommandRequest} request*/
+	async execute(request, _, __ = false) {
 		//Acción de comando
-		await channel.send({ files: [andreasurl] });
+		return await request.reply({ files: [andreasurl] });
 	},
-
-	async interact(interaction, _) {
-		//Acción de comando
-		await interaction.reply({ files: [andreasurl] });
-	}
 };

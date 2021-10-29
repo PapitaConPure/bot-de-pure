@@ -21,10 +21,10 @@ module.exports = {
         if(['danbooru', 'derpibooru', 'yandere', 'kcom', 'knet'].includes(engine)) return `rating:${nsfwrating[nsfw]}`;
         else return [basetags, `rating:${nsfwrating[nsfw]}`, nsfwtags[nsfw]].join(' ');
     },
-    getSearchTags: (args, engine, tagdb) => (engine !== 'danbooru')
-        ?   args.map(arg => {
-                arg = arg.toLowerCase();
-                return module.exports.tm_general.get(arg) || (module.exports[`tm_${tagdb}`] && module.exports[`tm_${tagdb}`].get(arg)) || arg
+    getSearchTags: (words, engine, tagdb) => (engine !== 'danbooru')
+        ?   words.map(word => {
+                word = word.toLowerCase();
+                return module.exports.tm_general.get(word) || (module.exports[`tm_${tagdb}`] && module.exports[`tm_${tagdb}`].get(word)) || word
             }).join(' ')
         :   '',
     

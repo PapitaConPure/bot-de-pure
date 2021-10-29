@@ -12,7 +12,7 @@ module.exports = {
     flags: [
         'meme',
         'game',
-        'chaos'
+        'chaos',
     ],
     options,
     callx: '<tiempo?>',

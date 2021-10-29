@@ -69,7 +69,8 @@ module.exports = {
 	],
     desc: 'Disparo leche a ti o a lo que especifiques :flushed:\n**Nota:** en canales marcados como NSFW, el resultado será diferente',
     flags: [
-        'meme'
+        'meme',
+		'chaos'
     ],
     options,
 	callx: '<usuario?> <emote?> <imagen?>',

@@ -20,24 +20,26 @@ module.exports = {
     ],
     options,
     callx: '<mensaje>',
+    experimental: true,
 	
-	async execute(message, args) {
+	/**
+	 * @param {import("../Commons/typings").CommandRequest} request
+	 * @param {import('../Commons/typings').CommandOptions} args
+	 * @param {Boolean} isSlash
+	 */
+	async execute(request, args, isSlash = false) {
         //Acción de comando
-        const del = fetchFlag(args, { short: ['b', 'd'], long: ['borrar', 'delete'], callback: true });
+        const del = isSlash ? options.fetchFlag(args, 'borrar', { callback: true }) : fetchFlag(args, { ...options.flags.get('borrar').structure, callback: true });
 
-        if(!args.length) {
-            message.channel.send({ content: ':warning: tienes que especificar lo que quieres que diga.' });
-            return;
-        }
+        if(!(args.data ?? args).length)
+            return await request.reply({ content: ':warning: tienes que especificar lo que quieres que diga.' });
 
-        const sentence = args.join(' ');
-        if(message.guild.id === serverid.hourai && sentence.toLowerCase().indexOf(/h+(\W*_*)*o+(\W*_*)*u+(\W*_*)*r+(\W*_*)*a+(\W*_*)*i+(\W*_*)*/g) !== -1){
-            message.channel.send({ content: 'No me hagai decir weas de hourai, ¿yapo? Gracias <:haniwaSmile:659872119995498507>' });
-            return;
-        }
+        const sentence = isSlash ? args.getString('mensaje') : args.join(' ');
+        if(request.guild.id === serverid.hourai && sentence.toLowerCase().indexOf(/h+(\W*_*)*o+(\W*_*)*u+(\W*_*)*r+(\W*_*)*a+(\W*_*)*i+(\W*_*)*/g) !== -1)
+            return await request.channel.send({ content: 'No me hagai decir weas de hourai, ¿yapo? Gracias <:haniwaSmile:659872119995498507>' });
         
-        await message.channel.send(sentence.split(/ +#[Nn] +/g).join('\n'));
-        if(del && !message.deleted && message.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES))
-            await message.delete()
+        await request.reply({ content: sentence.split(/ +#[Nn] +/g).join('\n') });
+        if(!isSlash && del && !request.deleted && request.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES))
+            return await request.delete();
     },
 };

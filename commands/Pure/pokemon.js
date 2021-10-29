@@ -14,7 +14,8 @@ module.exports = {
 	],
 	desc: 'Comando de compatibilidad Pokemon',
 	flags: [
-		'meme'
+		'meme',
+		'chaos',
 	],
 
 	async execute({ channel }, _) {

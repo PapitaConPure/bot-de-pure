@@ -11,6 +11,7 @@ module.exports = {
 	aliases: [
         'sassa', 'recomendaciones', 'sassapon', 'bassado', 'drossafras', 'dross'
     ],
+	brief: 'Comando de recomendaciones de Sassafras',
     desc: 'Comando de recomendaciones de Sassafras\n' +
 		'Cuidado con hacer enojar al tío Sassa, o puede que active su `--sassamodo`',
     flags: [

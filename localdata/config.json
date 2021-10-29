@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.9C",
+            "number": "Full.2.8.9D",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo reestructuraciones para una actualización mayor. Es probable que algunos comandos dejen de funcionar durante el proceso",
@@ -15,7 +15,9 @@
             "p!anarquia ahora es permanente",
             "Corregido error al buscar por nombre de usuario",
             "p!info ahora recopila información permanente",
-            "Bandera `--bomba` agregada en p!buscar y similares"
+            "Bandera `--bomba` agregada en p!buscar y similares",
+            "p!caos e identificador `CHAOS` agregados",
+            "Correcciones de errores varios"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos con p!ayuda",

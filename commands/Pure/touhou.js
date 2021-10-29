@@ -16,6 +16,7 @@ module.exports = {
     ],
     options: options,
 	callx: callx,
+	experimental: true,
 	
-	execute: async(message, args) => await searchImage(message, args, { cmdtag: 'touhou', sfwtitle: 'Tohas uwu', nsfwtitle: 'Tohitas O//w//O' })
+	execute: async(message, args, isSlash = false) => await searchImage(message, args, isSlash, { cmdtag: 'touhou', sfwtitle: 'Tohas uwu', nsfwtitle: 'Tohitas O//w//O' })
 };

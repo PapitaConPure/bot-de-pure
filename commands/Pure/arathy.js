@@ -9,21 +9,28 @@ const options = new CommandOptionsManager()
 module.exports = {
     name: 'arathy',
     aliases: [
-        'arati', 'arathy\'s', 'arath'
+        'arati', 'arathy\'s', 'arath', 'caca', 'popo', 'popó'
     ],
     desc: 'Comando de mierda de Arathy',
     flags: [
           'meme'
     ],
     options,
+    experimental: true,
     
-    async execute({ channel }, args) {
-        const dream = fetchFlag(args, { short: [ 's' ], long: [ 'sueño' ], callback: true, fallback: false });
+	/**
+	 * @param {import("../Commons/typings").CommandRequest} request
+	 * @param {import('../Commons/typings').CommandOptions} args
+	 * @param {Boolean} isSlash
+	 */
+    async execute(request, args, isSlash = false) {
+        const fbdream = { callback: true, fallback: false };
+        const dream = isSlash ? options.fetchFlag(args, 'sueño', fbdream) : fetchFlag(args, { ...options.flags.get('sueño').structure, ...fbdream });
 
         if(dream) {
-            channel.send({ content: 'Refiérase a `p!bern` para más información.' });
+            return await request.reply({ content: 'Refiérase a `p!bern` para más información.' });
         } else
-            channel.send({
+            return await request.reply({
                 content:
                     'Y siguiendo a lo del anterior caso, sí, sería moralmente bueno si a todos les gusta comer caca porque entonces nadie piensa que comer caca es malo, pero la caca llega a transmitir enfermedades, al igual que varias cosas que pueden ser transmitidas por malas influencias, tales como el gusto de, no sé, dañarse a sí mismo, maltratar animales, si a uno le gusta matar gatos, ¿vas a decir que está bien porque es lo que le gusta?\n' +
                     'No, no, no quiero empezar a hacer juicios éticos, y es más, dije que la caca de manera científica le hace daño a tu cuerpo, por lo que es malo a pesar de que pienses que es bueno.\n' +

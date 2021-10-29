@@ -52,9 +52,9 @@ module.exports = {
         }
     },
 
-    findExceptions(flag, compare) {
+    async findExceptions(flag, compare) {
         const exflag = module.exports.exceptions[flag];
-        if(exflag && exflag.isException(compare)) return exflag;
+        if(exflag && await exflag.isException(compare)) return exflag;
         else return null;
     },
 

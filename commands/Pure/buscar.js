@@ -1,5 +1,5 @@
 const { peopleid } = require('../../localdata/config.json');
-const { randRange, fetchFlag } = require('../../func');
+const { fetchFlag } = require('../../func');
 const { MessageEmbed, Permissions } = require('discord.js'); //Integrar discord.js
 const { engines, getBaseTags, getSearchTags } = require('../../localdata/booruprops.js'); //Variables globales
 const booru = require('booru');
@@ -18,7 +18,7 @@ const desc = `${brief}\n` +
 	'**Nota 2:** no todos los motores funcionan y con algunos no habrá búsqueda personalizada.';
 
 const options = new CommandOptionsManager()
-	.addParam('etiquetas', 'TEXT', 'para filtrar resultados de búsqueda', { poly: 'MULTIPLE', optional: true })
+	.addParam('etiquetas', 'TEXT', 'para filtrar resultados de búsqueda', { poly: 'MULTIPLE', optional: true, polymax: 8 })
 	.addFlag([], 'motor', 			'para usar otro motor', { name: 'nombre', type: 'TEXT' })
 	.addFlag([], ['bomba', 'bomb'], 'para mostrar una cierta cantidad de imágenes', { name: 'cnt', type: 'NUMBER' });
 
@@ -39,12 +39,18 @@ module.exports = {
     ],
     options,
 	callx: '<etiquetas?(...)>',
+	experimental: true,
 	
-	async searchImage(message, args, searchOpt = { cmdtag: '', nsfwtitle: 'Búsqueda NSFW', sfwtitle: 'Búsqueda' }) {
+	/**
+	 * @param {import("../Commons/typings").CommandRequest} request
+	 * @param {import('../Commons/typings').CommandOptions} args
+	 * @param {Boolean} isSlash
+	 */
+	async searchImage(request, args, isSlash, searchOpt = { cmdtag: '', nsfwtitle: 'Búsqueda NSFW', sfwtitle: 'Búsqueda' }) {
 		//Saber si el canal/thread es NSFW o perteneciente a un canal NSFW
-		const isnsfw = message.channel.isThread()
-			? message.channel.parent.nsfw
-			: message.channel.nsfw;
+		const isnsfw = request.channel.isThread()
+			? request.channel.parent.nsfw
+			: request.channel.nsfw;
 
 		//Bannear lewds de Megumin y Holo >:C
 		if(isnsfw) {
@@ -52,55 +58,56 @@ module.exports = {
 				let abort = true;
 				switch(searchOpt.cmdtag) {
 				case 'megumin':
-					if(message.author.id !== peopleid.papita)
-						await rakki.execute(message, []);
+					if(request.author.id !== peopleid.papita)
+						await rakki.execute(request, [], isSlash);
 					else abort = false;
 					break;
 				case 'holo':
-					await rakki.execute(message, []);
+					await rakki.execute(request, [], isSlash);
 					break;
 				default:
 					abort = false;
 				}
 				if(abort) return;
-			} else if(['megumin', 'holo'].some(b => args.includes(b))) {
-				await rakki.execute(message, []);
-				return;
-			}
+			} else if(['megumin', 'holo'].some(b => args.includes(b)))
+				return await rakki.execute(request, [], isSlash);
 		}
 
 		//Acción de comando
-		message.channel.sendTyping();
-		const inputengine = fetchFlag(args, { property: true, long: ['motor'], callback: (x, i) => x[i], fallback: 'gelbooru' });
-		const bomb = fetchFlag(args, {
-			property: true,
-			long: ['bomb', 'bomba'],
-			callback: (x,i) => {
-				const cnt = parseInt(x[i]);
-				if(isNaN(cnt)) return 1;
-				return Math.max(2, Math.min(cnt, 10));
-			},
-			fallback: 1
-		});
+		if(!isSlash) request.channel.sendTyping();
+		const inputengine = isSlash
+			? options.fetchFlag(args, 'motor', { callback: 'gelbooru', fallback: 'gelbooru' })
+			: fetchFlag(args, { property: true, long: ['motor'], callback: (x, i) => x[i], fallback: 'gelbooru' });
+		const bomb = isSlash
+			? options.fetchFlag(args, 'bomba', { callback: 5, fallback: 1 })
+			: fetchFlag(args, {
+				property: true,
+				...options.flags.get('bomba').structure,
+				callback: (x,i) => {
+					const cnt = parseInt(x[i]);
+					if(isNaN(cnt)) return 1;
+					return Math.max(2, Math.min(cnt, 10));
+				},
+				fallback: 1,
+			});
 		const engine = inputengine.toLowerCase();
-		if(!engines.includes(engine)) {
-			message.channel.send(
+		if(!engines.includes(engine))
+			return await request.reply(
 				`:warning: El motor **${inputengine}** no aparece en la lista de motores soportados.\n` +
-				`Usa \`${p_pure(message.guildId).raw}ayuda ${module.exports.name}\` para más información`
+				`Usa \`${p_pure(request.guild.id).raw}ayuda ${module.exports.name}\` para más información`
 			);
-			return;
-		}
 		const stags = [searchOpt.cmdtag, getBaseTags(engine, isnsfw)].join(' ');
-		const extags = getSearchTags(args, engine, searchOpt.cmdtag);
+		const words = isSlash
+			? options.fetchParamPoly(args, 'etiquetas', args.getString, null).filter(wrd => wrd)
+			: args;
+		const extags = getSearchTags(words, engine, searchOpt.cmdtag);
 		
 		//Petición
 		try {
 			const response = await booru.search(engine, [stags, extags].join(' '), { limit: 100, random: true });
 			//Manejo de respuesta
-			if(!response.length) {
-				message.channel.send({ content: `:warning: No hay resultados en **${inputengine}** para las tags **"${extags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` });
-				return;
-			}
+			if(!response.length)
+				return await request.reply({ content: `:warning: No hay resultados en **${inputengine}** para las tags **"${extags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` });
 
 			//Seleccionar imágenes
 			const images = response
@@ -116,8 +123,9 @@ module.exports = {
 			});
 
 			//Formatear primera presentación
+			const author = (request.author ?? request.user);
 			Embeds[0]
-				.setAuthor(`Desde ${images[0].booru.domain}`, (engine === 'gelbooru') ? 'https://i.imgur.com/outZ5Hm.png' : message.author.avatarURL({ dynamic: true, size: 128 }))
+				.setAuthor(`Desde ${images[0].booru.domain}`, (engine === 'gelbooru') ? 'https://i.imgur.com/outZ5Hm.png' : user.avatarURL({ dynamic: true, size: 128 }))
 				.setTitle(isnsfw ? searchOpt.nsfwtitle : searchOpt.sfwtitle);
 			if(extags.length)
 				Embeds[0].addField('Tu búsqueda', `:mag_right: *${extags.trim().replace('*', '\\*').split(/ +/).join(', ')}*`);
@@ -136,13 +144,14 @@ module.exports = {
 			});
 
 			//Enviar mensaje y esperar reacciones
-			const sent = await message.channel.send({
-				reply: { messageReference: message.id },
-				embeds: Embeds
-			});
+			const sentqueue = (await Promise.all([
+				request.reply({ embeds: Embeds }),
+				isSlash ? request.fetchReply() : null,
+			])).filter(sq => sq);
+			const sent = sentqueue.pop();
 			const actions = [sent.client.emojis.cache.get('704612794921779290'), sent.client.emojis.cache.get('704612795072774164')];
 			Promise.all(actions.map(action => sent.react(action)));
-			const filter = (rc, user) => message.author.id === user.id && actions.some(action => rc.emoji.id === action.id);
+			const filter = (rc, user) => author.id === user.id && actions.some(action => rc.emoji.id === action.id);
 			const collector = sent.createReactionCollector({ filter: filter, time: 4 * 60 * 1000 });
 			let showtags = false;
 			collector.on('collect', reaction => {
@@ -157,8 +166,8 @@ module.exports = {
 					}
 				} else {
 					sent.delete();
-					if(!message.deleted && message.guild.me.permissionsIn(message.channel).has(Permissions.FLAGS.MANAGE_MESSAGES))
-						message.delete();
+					if(!isSlash && !request.deleted && request.guild.me.permissionsIn(request.channel).has(Permissions.FLAGS.MANAGE_MESSAGES))
+						request.delete();
 				}
 			});
 		} catch(error) {
@@ -172,9 +181,9 @@ module.exports = {
 					`${[error.name, error.message].join(': ')}\n` +
 					'```'
 				);
-			message.channel.send({ embeds: [errorembed] });
+			return await request.reply({ embeds: [errorembed] });
 		}
 	},
 
-	execute: async (message, args) => await module.exports.searchImage(message, args),
+	execute: async (request, args, isSlash = false) => await module.exports.searchImage(request, args, isSlash),
 };

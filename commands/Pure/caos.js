@@ -19,37 +19,51 @@ module.exports = {
 		'maintenance',
 	],
 	options,
+	experimental: true,
 
-	async execute(message, args) {
+	/**
+	 * @param {import("../Commons/typings").CommandRequest} request
+	 * @param {import('../Commons/typings').CommandOptions} args
+	 * @param {Boolean} isSlash
+	 */
+	async execute(request, args, isSlash = false) {
 		//Acción de comando
-		const activate = fetchFlag(args, { long: ['activar', 'activate', 'on'], callback: true, fallback: false });
-		const deactivate = fetchFlag(args, { long: ['desactivar', 'deactivate', 'off'], callback: true });
-		const guildsearch = { guildId: message.guild.id };
+		const fbactivate = { callback: true, fallback: false };
+		const activate = isSlash ? options.fetchFlag(args, 'activar', fbactivate) : fetchFlag(args, { ...options.flags.get('activar').structure, ...fbactivate });
+		const deactivate = isSlash ? options.fetchFlag(args, 'desactivar', { callback: true }) : fetchFlag(args, { ...options.flags.get('desactivar').structure, callback: true });
+		const guildsearch = { guildId: request.guild.id };
 		const gcfg = (await GuildConfig.findOne(guildsearch)) || new GuildConfig(guildsearch);
+
+		if(activate && deactivate) {
+			request.reply({ content: '⚠️ Elige solo una de las banderas de activación', ephemeral: true });
+			return;
+		}
 
 		if(activate || deactivate) {
 			gcfg.chaos = activate;
 			gcfg.markModified('chaos');
 			await gcfg.save();
 			if(activate)
-				message.channel.send({ content: '👹 Se activaron los comandos caóticos' });
+				return await request.reply({ content: '👹 Se activaron los comandos caóticos' });
 			else
-				message.channel.send({ content: '😴 Se desactivaron los comandos caóticos' });
-		} else {
-			const cfiles = readdirSync('./commands/Pure').filter(file => file.endsWith('.js'));
-			const chaosnames = [];
-			for(const file of cfiles) {
-				const command = require(`../../commands/Pure/${file}`);
-				if(command.flags.includes('chaos'))
-					chaosnames.push(command.name);
-			}
-			message.channel.send({
-				content: `Con este comando, puedes activar un set de comandos que se consideran demasiado caóticos como para estar en un server tranquilito. Usa ${p_pure(message.guild.id).raw}ayuda si quieres saber cómo\n` +
+				return await request.reply({ content: '😴 Se desactivaron los comandos caóticos' });
+		}
+
+		const cfiles = readdirSync('./commands/Pure').filter(file => file.endsWith('.js'));
+		const chaosnames = [];
+		for(const file of cfiles) {
+			const command = require(`../../commands/Pure/${file}`);
+			if(command.flags.includes('chaos'))
+				chaosnames.push(command.name);
+		}
+		return await request.reply({
+			content:
+				`Con este comando, puedes activar un set de comandos que se consideran demasiado caóticos como para estar en un server tranquilito. Usa ${p_pure(request.guild.id).raw}ayuda si quieres saber cómo\n` +
 				'Comandos caóticos:\n' +
 				'```diff\n' +
 				`-> ${chaosnames.join(', ')}\n` +
-				'```'
-			});
-		}
+				'```',
+			ephemeral: true,
+		});
 	},
 };

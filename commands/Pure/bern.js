@@ -6,15 +6,6 @@ const emot = [
 	'No avancé en el manga de Komachi', 'Mañana lo hago', 'Otro día', 'Mañana sin falta', 'Esta semana lo termino', 'Procrastinar'
 ];
 
-function getReactionEmotes(cec) {
-	return [
-		cec.get('654504689873977347'), //Kogablush
-		cec.get('722334924845350973'), //Chad
-		cec.get('697320983106945054'), //Pepe
-		cec.get('697323104141049867'), //Kokocrong
-	];
-}
-
 module.exports = {
 	name: 'bern',
 	aliases: [
@@ -25,37 +16,36 @@ module.exports = {
     flags: [
         'meme'
     ],
+	experimental: true,
 
-	async execute(message, _) {
-		const lel = getReactionEmotes(message.client.emojis.cache);
+	/**
+	 * @param {import("../Commons/typings").CommandRequest} request
+	 * @param {import('../Commons/typings').CommandOptions} args
+	 * @param {Boolean} isSlash
+	 */
+	async execute(request, _, isSlash = false) {
+		const lel = [
+			'654504689873977347',
+			'722334924845350973',
+			'722334924845350973',
+			'697323104141049867',
+		].map(eid => request.client.emojis.cache.get(eid));
 		const selection = randRange(0, emot.length);
-		
-		message.channel.send({ content: `**${emot[selection]}** <:bewny:722334924845350973>` }).then(sent => {
-			if(selection <= 4) {
-				sent.react(lel[0]);
-			} else if(selection > 4 && selection <= 7) {
-				sent.react(lel[1]);
-			} else {
-				sent.react(lel[2])
-					.then(() => sent.react(lel[3]));
-			}
-		});
-    },
 
-	async interact(interaction, _) {
-		const lel = getReactionEmotes(interaction.client.emojis.cache);
-		const selection = randRange(0, emot.length);
-		await interaction.reply({ content: `**${emot[selection]}** <:bewny:722334924845350973>` })
-		const reply = await interaction.fetchReply();
-
+		const sentqueue = (await Promise.all([
+			request.reply({ content: `**${emot[selection]}** <:bewny:722334924845350973>` }),
+			isSlash ? request.fetchReply() : null,
+		])).filter(sq => sq);
+		const sent = sentqueue.pop();
 		if(selection <= 4)
-			await reply.react(lel[0]);
+			await sent.react(lel[0]);
 		else if(selection > 4 && selection <= 7)
-			await reply.react(lel[1]);
+			await sent.react(lel[1]);
 		else
 			await Promise.all([
-				reply.react(lel[2]),
-				reply.react(lel[3])
+				sent.react(lel[2]),
+				sent.react(lel[3]),
 			]);
-    }
+		return sent;
+    },
 };

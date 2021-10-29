@@ -30,28 +30,31 @@ module.exports = {
     ],
     options,
     callx: '<comando?>',
-    
-	async execute({ client, channel, author, member, guildId }, args) {
-        const fex = fetchFlag(args, { short: ['x'], long: ['exclusivo', 'exclusiva', 'exclusive'], callback: true });
-        const fall = fetchFlag(args, { short: ['t'], long: ['todo'], callback: true });
-        const auth = {
-            mod: member.permissions.has('MANAGE_ROLES'),
-            papa: author.id === '423129757954211880',
-            hourai: channel.guild.id === serverid.hourai
-        };
-        const filters = [
-            fetchFlag(args, {               long: ['meme'],   callback: 'meme'   }),
-            fetchFlag(args, { short: ['m'], long: ['mod'],    callback: 'mod'    }),
-            fetchFlag(args, { short: ['p'], long: ['papa'],   callback: 'papa'   }),
-            fetchFlag(args, { short: ['h'], long: ['hourai'], callback: 'hourai' })
-        ].filter(s => s);
-        
-        let search = args.length ? args[0] : null;
+    experimental: true,
 
+	/**
+	 * @param {import("../Commons/typings").CommandRequest} request
+	 * @param {import('../Commons/typings').CommandOptions} args
+	 * @param {Boolean} isSlash
+	 */
+	async execute(request, args, isSlash = false) {
+        const fex =  isSlash ? options.fetchFlag(args, 'exclusivo', { callback: true }) : fetchFlag(args, { ...options.flags.get('exclusivo').structure, callback: true });
+        const fall = isSlash ? options.fetchFlag(args, 'todo',      { callback: true }) : fetchFlag(args, { ...options.flags.get('todo').structure,      callback: true });
+        const auth = {
+            mod: request.member.permissions.has('MANAGE_ROLES'),
+            papa: (request.author ?? request.user).id === '423129757954211880',
+            hourai: request.guild.id === serverid.hourai,
+        };
+        const filters = ['meme', 'mod', 'papa', 'hourai']
+            .map(src => isSlash ? options.fetchFlag(args, src, { callback: src }) : fetchFlag(args, { ...options.flags.get(src).structure, callback: src }))
+            .filter(s => s);
+        console.log(filters);
+        
+        let search = isSlash ? args.getString('comando') : (args[0] ?? null);
         let list = [];
         const embed = new MessageEmbed().setColor('#608bf3');
-        const aurl = client.user.avatarURL({ format: 'png', dynamic: true, size: 512 });
-        const pfr = p_pure(guildId).raw;
+        const aurl = request.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 });
+        const pfr = p_pure(request.guild.id).raw;
         const hcmd = `${pfr}${module.exports.name}`;
         
         //Análisis de comandos
@@ -121,6 +124,6 @@ module.exports = {
                     .addField('No se ha encontrado ningún comando con este nombre', `Utiliza \`${hcmd}\` para ver una lista de comandos disponibles y luego usa \`${pfr}comando <comando>\` para ver un comando en específico`);
             embed.setFooter(`Usa "${hcmd} ${require('./g-indice.js').name}" para aprender más sobre comandos`);
         }
-        channel.send({ embeds: [embed] });
+        return await request.reply({ embeds: [embed] });
     },
 };

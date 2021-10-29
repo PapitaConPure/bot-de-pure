@@ -355,12 +355,12 @@ client.on('messageCreate', async message => {
     //#region Ejecución de Comandos
     try {
         //Detectar problemas con el comando basado en flags
-        let exception = null;
-        command.flags.every(flag => {
+        const exceptions = [];
+        command.flags.forEach(flag => {
             const ex = cmdex.findExceptions(flag, message);
-            if(ex) { exception = ex; return false; }
-            else return true;
+            if(ex) exceptions.push(ex);
         });
+        const exception = (await Promise.all(exceptions)).find(flag => flag);
         if(exception) {
             await channel.send({ embeds: [ cmdex.createEmbed(exception, { cmdString: `${pdetect.raw}${commandname}` }) ]});
             return;
@@ -415,12 +415,13 @@ client.on('interactionCreate', async interaction => {
 	try {
         const command = client.ComandosPure.get(commandname);
         //Detectar problemas con el comando basado en flags
-        let exception = null;
+        const exceptions = [];
         command.flags.forEach(flag => {
             const ex = cmdex.findExceptions(flag, interaction);
-            if(ex) { exception = ex; return false; }
-            else return true;
+            if(ex) exceptions.push(ex);
         });
+        const exception = (await Promise.all(exceptions)).find(flag => flag);
+        
         if(exception) {
             await interaction.reply({ embeds: [ cmdex.createEmbed(exception, { cmdString: `/${commandname}` }) ]});
             return;
