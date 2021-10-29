@@ -304,12 +304,7 @@ client.on('messageCreate', async message => {
             if(!command || command.experimental) return;
             try {
                 //Detectar problemas con el comando basado en flags
-                let exception = null;
-                command.flags.every(flag => {
-                    const ex = cmdex.findExceptions(flag, message);
-                    if(ex) { exception = ex; return false; }
-                    else return true;
-                });
+                const exception = await cmdex.findFirstException(command.flags, message);
                 if(exception) return;
                 else await command.execute(message, args);
             } catch(error) {
@@ -355,12 +350,7 @@ client.on('messageCreate', async message => {
     //#region Ejecución de Comandos
     try {
         //Detectar problemas con el comando basado en flags
-        const exceptions = [];
-        command.flags.forEach(flag => {
-            const ex = cmdex.findExceptions(flag, message);
-            if(ex) exceptions.push(ex);
-        });
-        const exception = (await Promise.all(exceptions)).find(flag => flag);
+        const exception = await cmdex.findFirstException(command.flags, message);
         if(exception) {
             await channel.send({ embeds: [ cmdex.createEmbed(exception, { cmdString: `${pdetect.raw}${commandname}` }) ]});
             return;
@@ -413,14 +403,9 @@ client.on('interactionCreate', async interaction => {
 
     //#region Ejecución de Comandos
 	try {
-        const command = client.ComandosPure.get(commandname);
         //Detectar problemas con el comando basado en flags
-        const exceptions = [];
-        command.flags.forEach(flag => {
-            const ex = cmdex.findExceptions(flag, interaction);
-            if(ex) exceptions.push(ex);
-        });
-        const exception = (await Promise.all(exceptions)).find(flag => flag);
+        const command = client.ComandosPure.get(commandname);
+        const exception = await cmdex.findFirstException(command.flags, interaction);
         
         if(exception) {
             await interaction.reply({ embeds: [ cmdex.createEmbed(exception, { cmdString: `/${commandname}` }) ]});

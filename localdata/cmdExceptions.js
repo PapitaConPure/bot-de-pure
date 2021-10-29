@@ -4,6 +4,10 @@ const GuildConfig = require('./models/guildconfigs.js');
 
 const isNotByPapita = (compare) => (compare.member.user.id !== global.peopleid.papita);
 
+/**
+ * @typedef {{title: String, desc: String, isException: Function?}} ExceptionSummary
+ */
+
 module.exports = {
     exceptions: {
         outdated: {
@@ -52,12 +56,39 @@ module.exports = {
         }
     },
 
-    async findExceptions(flag, compare) {
+    /**
+     * 
+     * @param {String} flag 
+     * @param {import('../commands/Commons/typings').CommandRequest} compare 
+     * @returns {Promise<ExceptionSummary> | Promise<null>}
+     */
+    async getException(flag, compare) {
         const exflag = module.exports.exceptions[flag];
         if(exflag && await exflag.isException(compare)) return exflag;
         else return null;
     },
 
+    /**
+     * 
+     * @param {Array<String>} flags 
+     * @param {import('../commands/Commons/typings').CommandRequest} request 
+     * @returns {Promise<ExceptionSummary> | Promise<undefined>}
+     */
+    async findFirstException(flags, request) {
+        const exceptions = [];
+        flags.forEach(flag => {
+            const ex = module.exports.getException(flag, request);
+            if(ex) exceptions.push(ex);
+        });
+        return (await Promise.all(exceptions)).find(flag => flag);
+    },
+
+    /**
+     * @typedef {{cmdString: String}} ExceptionOptions
+     * @param {ExceptionSummary} exception 
+     * @param {ExceptionOptions} options 
+     * @returns {MessageEmbed}
+     */
     createEmbed(exception, { cmdString = '' }) {
         return new MessageEmbed()
             .setColor('#f01010')
