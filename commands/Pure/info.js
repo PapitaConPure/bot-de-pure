@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js'); //Integrar discord.js
-const { fetchArrows, fetchFlag, fetchUser } = require('../../func');
+const { fetchArrows, fetchFlag, fetchUser, improveNumber } = require('../../func');
 const { startuptime } = require('../../localdata/config.json'); //Variables globales
 const { ChannelStats, Stats } = require('../../localdata/models/stats');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
@@ -91,9 +91,9 @@ module.exports = {
 			
 		//Creacion de top 5
 		//Personas más activas
-		const peotop = peocnt ? peocnt.map(([id, count]) => `<@${id}>: **${count}** mensajes`).join('\n') : '_Este canal no tiene mensajes_';
+		const peotop = peocnt ? peocnt.map(([id, count]) => `<@${id}>: **${improveNumber(count)}** mensajes`).join('\n') : '_Este canal no tiene mensajes_';
 		//Canales más activos
-		const chtop = msgcnt.map(([id, count]) => `<#${id}>: **${count}** mensajes`).join('\n');
+		const chtop = msgcnt.map(([id, count]) => `<#${id}>: **${improveNumber(count)}** mensajes`).join('\n');
 
 		//Crear y usar embed
 		let SelectedEmbed = 0;

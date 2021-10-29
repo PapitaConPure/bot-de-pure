@@ -868,6 +868,20 @@ module.exports = {
         const range = maxExclusive - minInclusive;
         const rval = minInclusive + ((global.seed + range * Math.random()) % range);
         return round ? Math.floor(rval) : rval;
+    },
+
+    /**
+     * @function
+     * @param {Number} num El número a mejorarle la visibilidad
+     * @param {Boolean?} shorten Si acortar el número para volverlo más fácil de leer
+     */
+    improveNumber: function(num, shorten = false) {
+        if((num < 1000000) || !shorten) return num.toLocaleString('en', {maximumFractionDigits: 2});
+
+        const ni = Math.floor((num.length - 7) / 3);
+        const snum = (num / Math.pow(1000, ni + 2)).toFixed(3);
+        const unitys = ['millones', 'miles de millones', 'millones de millones'];
+        return `${snum} ${unitys[ni]}`;
     }
     //#endregion
 };

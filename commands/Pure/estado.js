@@ -4,6 +4,7 @@ const ayuda = require('./ayuda.js'); //Variables globales
 const { readdirSync } = require('fs'); //Para el contador de comandos
 const prefixget = require('../../localdata/prefixget');
 const { Stats } = require('../../localdata/models/stats');
+const { improveNumber } = require('../../func');
 
 const { host, version, note, changelog, todo } = bot_status;
 const cmsearch = new RegExp(`${p_pure.raw}[a-zA-Z0-9_.-]*`, 'g');
@@ -43,7 +44,10 @@ module.exports = {
             .addField('Visión general', note)
             .addField('Cambios', listFormat(clformat, true, message.guildId))
             .addField('Lo que sigue', listFormat(tdformat, false, message.guildId))
-            .addField('Estadísticas', `🎦 ${stats.read} mensajes registrados\n✅ ${stats.commands.succeeded} ejecuciones de comando exitosas\n⚠️ ${stats.commands.failed} ejecuciones de comando fallidas`);
+            .addField('Estadísticas',
+                `🎦 ${improveNumber(stats.read, true)} mensajes registrados\n` +
+                `✅ ${improveNumber(stats.commands.succeeded)} ejecuciones de comando exitosas\n` +
+                `⚠️ ${improveNumber(stats.commands.failed)} ejecuciones de comando fallidas`);
 
         const sent = await message.channel.send({ embeds: [embed] })
         if(cm === null) return;
