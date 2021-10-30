@@ -47,7 +47,7 @@ module.exports = {
 	async execute(request, args, isSlash = false) {
 		const now = Date.now() * 1;
 		const uid = (request.author ?? request.user).id;
-		if(now - (uses.pinguear[uid] ?? 0) < 1000)
+		if(now - (uses.pinguear[uid] ?? 0) < 1000 * 60)
 			return await request.react('⏳');
 		if(!isSlash && args.length !== 2)
 			return await request.reply({ content: `:warning: Debes ingresar 2 parámetros (\`${p_pure(request.guild.id).raw}pinguear <cantidad> <usuario>\`)`, ephemeral: true });
