@@ -406,11 +406,10 @@ client.on('interactionCreate', async interaction => {
         //Detectar problemas con el comando basado en flags
         const command = client.ComandosPure.get(commandname);
         const exception = await cmdex.findFirstException(command.flags, interaction);
+        if(exception)
+            return await interaction.reply({ embeds: [ cmdex.createEmbed(exception, { cmdString: `/${commandname}` }) ], ephemeral: true });
         
-        if(exception) {
-            await interaction.reply({ embeds: [ cmdex.createEmbed(exception, { cmdString: `/${commandname}` }) ]});
-            return;
-        } else if(command.experimental)
+        if(command.experimental)
             await command.execute(interaction, interaction.options, true);
         else
             await command.interact(interaction, interaction.options);
