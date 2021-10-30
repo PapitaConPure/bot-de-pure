@@ -661,6 +661,13 @@ module.exports = {
     //#endregion
 
     //#region Fetch
+    /**
+     * Busca un usuario basado en la data ingresada.
+     * Devuelve el usuario que más coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún usuario, se devuelve undefined.
+     * @param {String} data 
+     * @param {{ guild: Discord.Guild, client: Discord.BaseClient }} param1 
+     * @returns { Discord.User }
+     */
     fetchUser: function(data, { guild, client }) {
         const uc = client.users.cache;
         console.log(`Buscando: ${data}`);
@@ -711,6 +718,13 @@ module.exports = {
         return undefined;
     },
 
+    /**
+     * Busca un usuario basado en la data ingresada.
+     * Devuelve la ID del usuario que más coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún usuario, se devuelve undefined.
+     * @param {String} data 
+     * @param {{ guild: Discord.Guild, client: Discord.BaseClient }} param1 
+     * @returns { String }
+     */
     fetchUserID: function(data, { guild, client }) {
         const user = module.exports.fetchUser(data, { guild, client });
         return (user === undefined) ? undefined : user.id;

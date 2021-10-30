@@ -15,12 +15,9 @@ const frase = [
 	'Pero qué andai haciendo po [m] rectm <:spookedSyura:725577379665281094>',
 	'NoOoOoOo re TUuUrBiOoOoOo, veni [m] <:junkWTF:796930821260836864>'
 ];
-
 async function pinguear(channel, user, cnt) {
 	await channel.send({ content: frase[randRange(0, frase.length)].replace('[m]', `${user}`) });
-
 	if(cnt > 1) setTimeout(pinguear, 800, channel, user, cnt - 1);
-	else uses.pinguear[user.id] = false;
 }
 
 const options = new CommandOptionsManager()
@@ -40,34 +37,37 @@ module.exports = {
     ],
     options,
 	callx: '<cantidad> <usuario>',
+	experimental: true,
 	
-	async execute(message, args) {
-		if(uses.pinguear[message.author.id] !== undefined && uses.pinguear[message.author.id]) {
-			message.react('⏳');
-			return;
-		}
-		if(args.length !== 2) {
-			message.channel.send({ content: `:warning: Debes ingresar 2 parámetros (\`${p_pure(message.guildId).raw}pinguear <cantidad> <usuario>\`)` });
-			return;
-		}
+	/**
+	 * @param {import("../Commons/typings").CommandRequest} request
+	 * @param {import('../Commons/typings').CommandOptions} args
+	 * @param {Boolean} isSlash
+	 */
+	async execute(request, args, isSlash = false) {
+		const now = Date.now() * 1;
+		const uid = (request.author ?? request.user).id;
+		if(now - (uses.pinguear[uid] ?? 0) < 1000)
+			return await request.react('⏳');
+		if(!isSlash && args.length !== 2)
+			return await request.reply({ content: `:warning: Debes ingresar 2 parámetros (\`${p_pure(request.guild.id).raw}pinguear <cantidad> <usuario>\`)`, ephemeral: true });
 		let cnt = -1;
 		let usrc;
 		
-		if(!isNaN(args[0])) { cnt = args[0]; usrc = args[1]; }
-		else if(!isNaN(args[1])) { cnt = args[1]; usrc = args[0]; }
-		if(cnt < 2 || cnt > 10) {
-			message.channel.send({ content: ':warning: Solo puedes pinguear a alguien entre 2 y 10 veces' });
-			return;
+		if(isSlash) cnt = args.getInteger('cantidad');
+		else {
+			if(!isNaN(args[0])) { cnt = args[0]; usrc = args[1]; }
+			else if(!isNaN(args[1])) { cnt = args[1]; usrc = args[0]; }
 		}
+		if(cnt < 2 || cnt > 10)
+			return await request.reply({ content: ':warning: Solo puedes pinguear a alguien entre 2 y 10 veces', ephemeral: true });
 
-		const user = fetchUser(usrc, message);
+		const user = isSlash ? args.getUser('usuario') : fetchUser(usrc, request);
+		if(user === undefined)
+			return await request.reply({ content: ':warning: Usuario inválido', ephemeral: true });
 
-		if(user === undefined) {
-			message.channel.send({ content: ':warning: Usuario inválido' });
-			return;
-		}
-
-		uses.pinguear[message.author.id] = true;
-		pinguear(message.channel, user, cnt);
+		uses.pinguear[uid] = now * 1;
+		if(isSlash) await request.reply({ content: `🤡 Tirando pings a **${user.tag}**`, ephemeral: true });
+		return await pinguear(request.channel, user, cnt);
     },
 };
