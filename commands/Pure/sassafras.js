@@ -144,8 +144,7 @@ module.exports = {
 
 			if(!hint) m.addField('Subgrupos comunes', `🎮x${umusic}\n❓x${kmusic - umusic}\n😳x${xmusic - kmusic}`, true);
 			else m.addField('Subgrupo especial', `${spemote}x${(list.length - xmusic)}`, true);
-			await request.reply({ embeds: [m] });
-			return await request.reply({ embeds: [m] });;
+			return await request.reply({ embeds: [m] });
 		}
 		const i = randRange(0, list.length); //Índice aleatorio
 		
