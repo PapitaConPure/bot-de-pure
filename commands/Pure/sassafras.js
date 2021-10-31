@@ -76,6 +76,7 @@ module.exports = {
 			'DTUdiGFmVRI', 'wz4s6quLDLg', 'leIMP5mbB14', 'pHKkgTZS5K8', 'peuTnilEv9g', 'GI1y1kJAsIo', 'y4EATZ-tNPU', 'B77hKKI4SbI', 'dkxrXWokYqQ', 'ZHlrHvt1dUE',
 			'zKaoDdNZhJE', 'SJW697Ey5EE', '5qJ4wmwarbc', 'WWnKwcAY8iU', 'nVydgPgAIRo', 'SJwh3erQlyE', 'PLNlF1QQrrM', '3H0Jh-CJJTg', 'X0l0bWReD50', 'B__f4zx2iQg',
 			'CyWCpFFovw0', 'gK7dszd_j1c', 'J9IM6KcO7qk', 'XctAezJ_OEc', '2D4tdy8b2dM', 'WrJFBmxHXuY', 'h4ioYorKqYo', 'pZOHMxAOXro', 'noXWHJVMrJg', 'OPC4eJlOXs0',
+			'2AQ_k_WVs2c', 'O9XLWW39F08', 'GvRKIxTUbf4',
 			'KMUSIC', //Música "conocida"
 			'wGcyKEZtWuE', 'AdDbbzuq1vY', 'qIk6YFTzckc', 'Mdnnfg6Yvb0', 'llnXhrCn9Yo', 'dVVZaZ8yO6o', '2b8TKhIz_ZY', 'qVXeWfFTFGo', '8VyaShl6urc', 'HSZIej-ZraE',
 			'Y0VYKbTSxu0', 'yn3GPjhtYJ8', 'LicR6XLP94U', 'tApsiCYkOfw', 'wqAYMZSOQao', 'Q1kf-OJdvb4', 'ey4JY8aox4E', 'QWhhMxrX-Us', 'GlUeW7IOSFc', 'Pm7b43TQxUU',
@@ -88,11 +89,12 @@ module.exports = {
 		//Probablemente debería reemplazar esos if internos con switches en el futuro
 		const today = new Date(Date.now());
 		const date = today.getUTCDate();
-		let hint;
+		let hint, spemote;
 		switch(today.getUTCMonth() + 1) {
 		case 4: //Abril
 			if(date === 1) { //Día de los inocentes
 				hint = 'Y mirá, la verdad que me olvidé de pensar una frase para esto, pero sobala, puto';
+				spemote = '🤡';
 				list = ['XMUSIC',
 					'vJzZ_LkYEb8', 'dQw4w9WgXcQ', 'X-cfWM0BC_4', '7jRnpUKHCTg', 'sC0cvwnG0Ik', '-GeC0kanxPQ', 'fZdBVzSGudA', 'MmwMVBrMRHI', 'ZcJjMnHoIBI', '0tdyU_gW6WE',
 					'li5mXnHyg9w'
@@ -102,15 +104,17 @@ module.exports = {
 		case 6: //Junio
 			if(date === 1) { //Cum
 				hint = 'Paga tributo al macho alfa de la casa, pequeño vividor';
+				spemote = '🍰';
 				list = ['XMUSIC', 'xdCv0TAp4hc?t=3', 'E3tkgU0pQmQ'];
 			}
 			break;
 		case 10: //Octubre
 			if(date >= 30) { //Halloween
 				hint = '_The air is getting colder around you..._';
+				spemote = '🎃';
 				list = ['XMUSIC',
 					'jHg1_AloGEk', 'tgUu8N05N24', 'jLUaYqH-1hw', 'nK8uH34mpnE', '0K_xO8JltXc', 'b677_os3s34', 'R4LlkoVBPFY', 'qcoXUuq1At8', 'G2oq0lVmIwU', 'fkZkN7uSZfk',
-					'I3kGiA3EGP4', 'rEmDpKsMJWc', 'oY9m2sHQwLs', 'cDd_GlynA6A', 'NIWyZmFSep0'
+					'I3kGiA3EGP4', 'krD919h-UpE', 'oY9m2sHQwLs', 'cDd_GlynA6A', 'NIWyZmFSep0'
 				];
 			}
 			break;
@@ -118,6 +122,7 @@ module.exports = {
 			//Navidad
 			if(date === 24 || date === 25) {
 				hint = '¡Niños y niñas del mundo, vamos por ustedes!';
+				spemote = '🌟';
 				list = ['XMUSIC',
 					'TVeFyqISlHY', 'HHBb0z9584w', 'qOYbGBPnT_M', '-fWMWkrfoRU', 'bGUZG8V1OMU', 'shvbqQ-1vww', 'DxTr51RmEjE', 'iuc7L50iUhw', 'Bk8B2Tynet0', 'wTKvewEtnRY',
 				];
@@ -135,11 +140,12 @@ module.exports = {
 		if(showtotal) {
 			m = new Discord.MessageEmbed()
 				.setColor('#cccccc')
-				.addField('Total', `Hay ${list.length} recomendaciones de Sassa disponibles ahora mismo`, true)
-				.addField('Subgrupos comunes', `🎮x${umusic}\n❓x${kmusic - umusic}\n😳x${xmusic - kmusic}`, true)
-				.addField('Subgrupo especial', (hint) ? `🌟x${(list.length - xmusic)}` : 'No hay subgrupos especiales ahora mismo...', true);
+				.addField('Total disponible actual', `Sassa quiere recomendarte ${list.length} cosas`, true);
+
+			if(!hint) m.addField('Subgrupos comunes', `🎮x${umusic}\n❓x${kmusic - umusic}\n😳x${xmusic - kmusic}`, true);
+			else m.addField('Subgrupo especial', `${spemote}x${(list.length - xmusic)}`, true);
 			await request.reply({ embeds: [m] });
-			return;
+			return await request.reply({ embeds: [m] });;
 		}
 		const i = randRange(0, list.length); //Índice aleatorio
 		
@@ -155,10 +161,7 @@ module.exports = {
 		else if(hint) //Música especial
 			m = `**${hint}**\nhttps://youtu.be/${list[i + (i === xmusic?1:0)]}`;
 		
-		if(typeof m === 'string')
-			await request.reply({ content: m });
-		else
-			await request.reply({ embeds: [m] });
+		return await request.reply({ content: m });
 		//#endregion
     },
 };
