@@ -93,34 +93,34 @@ module.exports = {
 		case 4: //Abril
 			if(date === 1) { //Día de los inocentes
 				hint = 'Y mirá, la verdad que me olvidé de pensar una frase para esto, pero sobala, puto';
-				list.push(
+				list = ['XMUSIC',
 					'vJzZ_LkYEb8', 'dQw4w9WgXcQ', 'X-cfWM0BC_4', '7jRnpUKHCTg', 'sC0cvwnG0Ik', '-GeC0kanxPQ', 'fZdBVzSGudA', 'MmwMVBrMRHI', 'ZcJjMnHoIBI', '0tdyU_gW6WE',
 					'li5mXnHyg9w'
-				);
+				];
 			}
 			break;
 		case 6: //Junio
 			if(date === 1) { //Cum
 				hint = 'Paga tributo al macho alfa de la casa, pequeño vividor';
-				list = ['XMUSIC', 'xdCv0TAp4hc?t=3', 'E3tkgU0pQmQ' ];
+				list = ['XMUSIC', 'xdCv0TAp4hc?t=3', 'E3tkgU0pQmQ'];
 			}
 			break;
 		case 10: //Octubre
 			if(date >= 30) { //Halloween
 				hint = '_The air is getting colder around you..._';
-				list.push(
+				list = ['XMUSIC',
 					'jHg1_AloGEk', 'tgUu8N05N24', 'jLUaYqH-1hw', 'nK8uH34mpnE', '0K_xO8JltXc', 'b677_os3s34', 'R4LlkoVBPFY', 'qcoXUuq1At8', 'G2oq0lVmIwU', 'fkZkN7uSZfk',
 					'I3kGiA3EGP4', 'rEmDpKsMJWc', 'oY9m2sHQwLs', 'cDd_GlynA6A', 'NIWyZmFSep0'
-				);
+				];
 			}
 			break;
 		case 12: //Diciembre
 			//Navidad
 			if(date === 24 || date === 25) {
 				hint = '¡Niños y niñas del mundo, vamos por ustedes!';
-				list.push(
+				list = ['XMUSIC',
 					'TVeFyqISlHY', 'HHBb0z9584w', 'qOYbGBPnT_M', '-fWMWkrfoRU', 'bGUZG8V1OMU', 'shvbqQ-1vww', 'DxTr51RmEjE', 'iuc7L50iUhw', 'Bk8B2Tynet0', 'wTKvewEtnRY',
-				);
+				];
 			}
 			break;
 		}
