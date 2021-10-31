@@ -25,7 +25,6 @@ module.exports = {
 		const user = fetchFlag(args, { property: true, short: ['u'], long: ['usuario'], callback: (x, i) => fetchUser(x[i], message) });
 		const action = fetchFlag(args, { short: ['a'], long: ['aceptar'], callback: 'accept' })
 			        || fetchFlag(args, { short: ['p'], long: ['problema'], callback: 'problem' });
-		console.log(action);
 		
 		//Acción de comando
 		if(user === undefined) {

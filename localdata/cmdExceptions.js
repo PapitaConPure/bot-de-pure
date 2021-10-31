@@ -95,6 +95,7 @@ module.exports = {
             .setAuthor('Un momento...')
             .setTitle(`${exception.title}`)
             .addField(cmdString, `${exception.desc}`)
+            .setThumbnail('https://i.imgur.com/vZaDu1o.jpg')
             .setFooter('¿Dudas? ¿Sugerencias? Contacta con Papita con Puré#6932');
     }
 }

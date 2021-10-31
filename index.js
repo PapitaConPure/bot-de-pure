@@ -338,11 +338,16 @@ client.on('messageCreate', async message => {
         command = client.ComandosPure.get(commandname) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(commandname));
     
     if(!command) {
-        const notice = await channel.send({
-            reply: { messageReference: message.id },
-            content: ':x: Disculpa, soy estúpida. Tal vez escribiste mal el comando y no te entiendo.'
-        });
-        setTimeout(() => notice.delete(), 4000);
+        /**@type {Array<String>} */
+        const replies = [
+            'Disculpa, soy estúpida. Tal vez escribiste mal el comando y no te entiendo\nhttps://i.imgur.com/e4uM3z6.jpg',
+            'No entiendo, ¿quieres usar un comando? Quieres usar uno, ¿verdad?, ¿prueba revisar cómo lo escribes?\nhttps://i.imgur.com/uuLuxtj.jpg',
+            `La verdad, no tengo ni idea de qué pueda ser **"${commandname}"**, ¿seguro que lo escribiste bien? Recuerda que soy un bot, eh\nhttps://i.imgur.com/AHdc7E2.jpg`,
+            'Busqué en todo el manual y no encontré el comando que me pediste. Perdóname, PERDÓNAME AAAAAAAAH\nhttps://i.imgur.com/wOxRi72.jpg',
+            'No logré encontrar tu comando en mi librito. ¿Lo habrás escrito mal?\nhttps://i.imgur.com/avTSSa4.jpg',
+        ];
+        const notice = await message.reply({ content: replies[func.randRange(0, replies.length)] });
+        setTimeout(() => notice.delete(), 6000);
         return;
     }
     //#endregion

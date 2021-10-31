@@ -2,10 +2,10 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.9D",
+            "number": "Full.2.8.9E",
             "name": "Cisne Cristalino"
         },
-        "note": "Se están haciendo reestructuraciones para una actualización mayor. Es probable que algunos comandos dejen de funcionar durante el proceso",
+        "note": "Se están haciendo reestructuraciones para una actualización mayor. Es probable que algunos comandos dejen de funcionar durante el proceso.\nTambién, las actualizaciones serán considerablemente menos frecuentes de momento",
         "changelog": [
             "Tareas de refactorización (2.99/4)",
             "PLACEHOLDER_SLASHCMD",
@@ -17,7 +17,8 @@
             "p!info ahora recopila información permanente",
             "Bandera `--bomba` agregada en p!buscar y similares",
             "p!caos e identificador `CHAOS` agregados",
-            "Correcciones de errores varios"
+            "Correcciones de errores varios",
+            "Mejoras visuales generales"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos con p!ayuda",

@@ -167,7 +167,6 @@ module.exports = {
 		//Habilidades
 		if(!h && !v) cells[e.y][e.x] = e.id;
 		else {
-			console.log('wasd');
 			if(h) { for(let i = 0; i < cells[0].length; i++) cells[e.y][i] = e.id; auser.skills.h--; }
 			if(v) { for(let i = 0; i < cells.length; i++)    cells[i][e.x] = e.id; auser.skills.v--; }
 			auser.markModified('skills');

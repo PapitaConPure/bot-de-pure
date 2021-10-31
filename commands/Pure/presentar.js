@@ -3,7 +3,7 @@ const { readdirSync } = require('fs'); //Para el contador de comandos
 
 const embed = new MessageEmbed()
     .setColor('#608bf3')
-    .setThumbnail('https://i.imgur.com/9Pn738u.jpg')
+    .setThumbnail('https://i.imgur.com/3Dp8zFa.jpg')
     .addField('Creador/Dueño', ':potato: Papita con Puré#6932', true)
     .addField('Participantes', ':horse: GoddamnBernkastel#7784\n:cowboy: Imagine Breaker#6299\n:poultry_leg: Sassafras#3331', true)
     .addField('Colaboradores', ':peach: Rakkidei#4790\n:face_with_monocle: Super Arathy\'s 12#8235\n:dog: Taton#0122', true)
@@ -17,7 +17,7 @@ const embed = new MessageEmbed()
 module.exports = {
 	name: 'presentar',
     aliases: [
-        'presentacion', 'presentación', 'hola', 'presentarse', 'puré', 'pure'
+        'presentacion', 'presentación', 'hola', 'saludar', 'presentarse', 'puré', 'pure'
     ],
     desc: 'Me presento y digo cositas sobre mí~',
     flags: [

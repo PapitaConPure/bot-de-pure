@@ -48,7 +48,6 @@ module.exports = {
         const filters = ['meme', 'mod', 'papa', 'hourai']
             .map(src => isSlash ? options.fetchFlag(args, src, { callback: src }) : fetchFlag(args, { ...options.flags.get(src).structure, callback: src }))
             .filter(s => s);
-        console.log(filters);
         
         let search = isSlash ? args.getString('comando') : (args[0] ?? null);
         let list = [];

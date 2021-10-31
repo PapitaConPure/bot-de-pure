@@ -75,7 +75,7 @@ class CommandParam extends CommandOption {
         this._type = type;
         this._optional = false;
         this._poly = 'SINGLE';
-        this._polymax = 1;
+        this._polymax = 8;
     };
 
     /**
@@ -122,7 +122,7 @@ class CommandParam extends CommandOption {
         ];
 
         if(this._poly === 'MULTIPLE')
-            typeString.push('[múltiple]');
+            typeString.push(`[múltiple/${this._polymax}]`);
         else if(Array.isArray(this._poly))
             typeString.push(`[${this._poly.length}]`);
         
