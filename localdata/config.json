@@ -18,7 +18,8 @@
             "Bandera `--bomba` agregada en p!buscar y similares",
             "p!caos e identificador `CHAOS` agregados",
             "Correcciones de errores varios",
-            "Mejoras visuales generales"
+            "Mejoras visuales generales",
+            "p!mimar agregado"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos con p!ayuda",
