@@ -896,6 +896,8 @@ module.exports = {
         const snum = (num / Math.pow(1000, ni + 2)).toFixed(3);
         const unitys = ['millones', 'miles de millones', 'millones de millones'];
         return `${snum} ${unitys[ni]}`;
-    }
+    },
+    /**@param {Array<String>} arr*/
+    regroupText: (arr) => arr.join(' ').replace(/([\n ]*,[\n ]*)+/g, ',').split(',').filter(a => a.length > 0),
     //#endregion
 };

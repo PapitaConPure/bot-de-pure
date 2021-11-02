@@ -1,6 +1,6 @@
 const { MessageEmbed, CommandInteractionOptionResolver, Interaction } = require('discord.js'); //Integrar discord.js
 const { peopleid } = require('../../localdata/config.json');
-const { fetchUser } = require('../../func.js'); //Funciones globales
+const { fetchUser, regroupText } = require('../../func.js'); //Funciones globales
 const { p_pure } = require('../../localdata/prefixget');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
@@ -47,7 +47,7 @@ module.exports = {
         let notfound = [];
 
         if(args.length) {
-            args = args.join(' ').replace(/([\n ]*,[\n ]*)+/g, ',').split(',').filter(a => a.length > 0);
+            args = regroupText(args);
             if(args.length > maxusers) {
                 message.channel.send({ content: `:warning: Solo puedes ingresar hasta **${maxusers}** usuarios por comando` });
                 return;
