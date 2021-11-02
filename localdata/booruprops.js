@@ -173,6 +173,8 @@ module.exports = {
         .set('joon',            'yorigami_jo\'on')
         .set('jo\'on',          'yorigami_jo\'on')
         .set('shion',           'yorigami_shion')
+        .set('toutetsu',        'toutetsu_yuuma')
+        .set('yuuma',           'toutetsu_yuuma')
         //Otros
         .set('rinnosuke',       'morichika_rinnosuke')
         .set('toyohime',        'watatsuki_no_toyohime')
