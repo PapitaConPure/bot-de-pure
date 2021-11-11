@@ -1,11 +1,8 @@
-const pasta = 'Hey, did you know that in terms of male human and female Pokémon breeding, Vaporeon is the most compatible Pokémon for humans?' + 
-	'Not only are they in the field egg group, which is mostly comprised of mammals, Vaporeon are an average of 3"03\' tall and 63.9 pounds.' +
-	'This means they\'re large enough to be able to handle human dicks, and with their impressive Base stats for HP and access to Acid Armor, you can be rough with one.' +
-	'Due to their mostly water based biology, there\'s no doubt in my mind that an aroused Vaporeon would be incredibly wet, so wet that you could easily have sex with one for hours without getting sore.' +
-	'They can also learn the moves Attract, Baby-Doll eyes, Captivate, Charm and Tail Whip along with not having fur to hide nipples, so it\'d be incredibly easy for one to get you in the mood.' +
-	'With their abilities Water Absorb and Hydration, they can easily recover from fatigue with enough water. No other Pokémon comes close with this level of compatibility.' +
-	'Also, fun fact, if you pull out enough, you can make your Vaporeon turn white. Vaporeon is literally built for human dick.' +
-	'Ungodly defense stat + high HP pool + Acid Armor means it can take cock all day, all shapes and sizes and still come for more.';
+const pasta = 'Ustedes sabían que en términos de reproducción entre hombres humanos y Pokémon hembras, Vaporeon es el Pokémon mas compatible para los Humanos?\n' + 
+	'No solo porque están en el Grupo Huevo Campo, que está principalmente conformado por Mamíferos, Vaporeon tiene en promedio una medida de 91.44 Cm. de altura y un peso de 28,98 Kg., esto significa que son suficientemente grandes para soportar penes humanos, y con sus impresionantes Estadísticas Base de PS y acceso a Armadura Ácida, puedes ser duro con ella. Debido a su biología mayoritariamente compuesta de agua, no hay dudas de que una Vaporeon excitada sería increíblemente húmeda, tan húmeda que podrías fácilmente tener sexo con una por horas sin lastimarte o sentir dolor.\n' +
+	'Ellas también pueden aprender los movimientos "Atracción", "Ojitos Tiernos", "Seducción", "Encanto" y "Látigo", además de no tener pelaje para esconder pezones, así que sería increíblemente fácil conseguirte una con humor. Con sus habilidades "Absorbe Agua" e "Hidratación", pueden recuperarse fácilmente de la fatiga con suficiente agua.\n' +
+	'Ningún otro Pokémon llega a estar cerca de este nivel de compatibilidad. Además, como curiosidad, si te empeñas suficiente al acabar, puedes llegar a hacer a tu Vaporeon Blanca.\n' +
+	'Vaporeon está literalmente hecha para el pene humano. Asombrosas Estadísticas de Defensa+Alta cantidad de PS+Armadura Ácida significa que puede recibir verga todo el día, de todas las formas y tamaños, y aún así venir por mas.';
 
 module.exports = {
 	name: 'pokemon',
