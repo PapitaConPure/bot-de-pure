@@ -127,13 +127,13 @@ client.on('ready', async () => {
     const confirm = () => console.log(chalk.green('Hecho.'));
     global.maintenance = '1';
     try {
-        console.log(chalk.bold.magentaBright('Comienzo de cargado de comandos slash...'));
+        console.log(chalk.bold.magentaBright('Cargando comandos slash...'));
         const registered = await restGlobal.put(
             Routes.applicationCommands(client.application.id),
             { body: client.SlashPure },
         );
         confirm();
-        console.log('Comandos registrados:', registered.map(scmd => scmd.name));
+        //console.log('Comandos registrados:', registered.map(scmd => scmd.name));
     } catch (error) {
         console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos slash'));
         console.error(error);
@@ -142,12 +142,11 @@ client.on('ready', async () => {
     const cl = global.bot_status.changelog;
     cl[cl.indexOf('PLACEHOLDER_SLASHCMD')] = `Agregando soporte de ***__[/comandos](https://blog.discord.com/slash-commands-are-here-8db0a385d9e6)__*** *(${client.SlashPure.size} comandos listos)*`;
 
-	console.log(chalk.cyanBright('Calculando semilla y horario.'));
+	console.log(chalk.cyanBright('Calculando semilla y horario; iniciando cambios de presencia periódicos...'));
     let stt = Date.now();
     global.startuptime = stt;
     global.lechitauses = stt;
     global.seed = stt / 60000;
-    
     await func.modifyAct(client, 0);
 
 	console.log(chalk.magenta('Obteniendo información del host...'));
@@ -223,6 +222,11 @@ client.on('ready', async () => {
     registerFont('fonts/cuyabra.otf', { family: 'cardhint' });
     registerFont('fonts/asap-condensed.semibold.ttf', { family: 'cardbody' });
 	confirm();
+
+    console.log(chalk.blueBright('Registrando eventos de debug del cliente'));
+    //client.on('debug', console.log);
+    client.on('warn', console.log);
+    confirm();
 
     await global.logch.send({ embeds: [new Discord.MessageEmbed()
         .setColor('DARK_VIVID_PINK')
