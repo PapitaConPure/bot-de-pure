@@ -60,7 +60,7 @@ const sassadata = {
 			music: {
 				fool: [
 					'vJzZ_LkYEb8', 'dQw4w9WgXcQ', 'X-cfWM0BC_4', '7jRnpUKHCTg', 'sC0cvwnG0Ik', '-GeC0kanxPQ', 'fZdBVzSGudA', 'MmwMVBrMRHI', 'ZcJjMnHoIBI', '0tdyU_gW6WE',
-					'li5mXnHyg9w',
+					'li5mXnHyg9w', 'czTksCF6X8Y'
 				],
 				birthday: ['xdCv0TAp4hc?t=3', 'E3tkgU0pQmQ'],
 				halloween: [
