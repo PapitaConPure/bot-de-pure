@@ -387,62 +387,91 @@ client.on('messageCreate', async message => {
 
 //Recepción de interacciones
 client.on('interactionCreate', async interaction => {
-	if (!interaction.isCommand()) return;
-    const { commandName: commandname, guild, channel, member } = interaction;
-    if(func.channelIsBlocked(channel)) return;
-	const slash = client.SlashPure.get(commandname);
-	if (!slash) return;
-    
-    //#region Estadísticas
-    //Los comandos slash no deberían contar como mensajes como tal, así que comento todo lo relacionado a contadores de mensajes
-    //const chquery = { guildId: guild.id, channelId: channel.id };
-    //const uid = member.user.id;
+    const { guild, channel, member } = interaction;
     const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
-    /*const chstats = (await ChannelStats.findOne(chquery)) || new ChannelStats(chquery);
-    stats.read++;
-    chstats.cnt++;
-    chstats.sub[uid] = (chstats.sub[uid] || 0) + 1;
-    chstats.markModified('sub');
-    await Promise.all([
-        stats.save(),
-        chstats.save()
-    ]);*/
-    //#endregion
 
-    //#region Ejecución de Comandos
-	try {
-        //Detectar problemas con el comando basado en flags
-        const command = client.ComandosPure.get(commandname);
-        const exception = await cmdex.findFirstException(command.flags, interaction);
-        if(exception)
-            return await interaction.reply({ embeds: [ cmdex.createEmbed(exception, { cmdString: `/${commandname}` }) ], ephemeral: true });
+    //Comando Slash
+	if(interaction.isCommand()) {
+        const { commandName: commandname } = interaction;
+        if(func.channelIsBlocked(channel)) return;
+        const slash = client.SlashPure.get(commandname);
+        if (!slash) return;
+
+        //#region Ejecución de Comandos
+        try {
+            //Detectar problemas con el comando basado en flags
+            const command = client.ComandosPure.get(commandname);
+            const exception = await cmdex.findFirstException(command.flags, interaction);
+            if(exception)
+                return await interaction.reply({ embeds: [ cmdex.createEmbed(exception, { cmdString: `/${commandname}` }) ], ephemeral: true });
+            
+            if(command.experimental)
+                await command.execute(interaction, interaction.options, true);
+            else
+                await command.interact(interaction, interaction.options);
+            stats.commands.succeeded++;
+        } catch(error) {
+            console.log('Ha ocurrido un error al procesar un comando slash.');
+            console.error(error);
+            const errorembed = new Discord.MessageEmbed()
+                .setColor('#0000ff')
+                .setAuthor(`${guild.name} • ${channel.name}`, member.user.avatarURL({ dynamic: true }))
+                .addField('Ha ocurrido un error al procesar un comando slash', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
+            global.logch.send({
+                content: `<@${global.peopleid.papita}>`,
+                embeds: [errorembed]
+            });
+            stats.commands.failed++;
+            await interaction.reply({ content: ':warning: Ocurrió un error al ejecutar el comando', ephemeral: true })
+            .catch(err => {
+            console.log('Posible interacción no registrada');
+            console.error(err);
+            });
+        }
+        stats.markModified('commands');
+        await stats.save();
+        //#endregion
+    }
+
+    //Click sobre botón
+    if(interaction.isButton()) {
+        if(!interaction.customId) return;
         
-        if(command.experimental)
-            await command.execute(interaction, interaction.options, true);
-        else
-            await command.interact(interaction, interaction.options);
-        stats.commands.succeeded++;
-	} catch(error) {
-        console.log('Ha ocurrido un error al procesar un comando slash.');
-        console.error(error);
-        const errorembed = new Discord.MessageEmbed()
-            .setColor('#0000ff')
-            .setAuthor(`${guild.name} • ${channel.name}`, member.user.avatarURL({ dynamic: true }))
-            .addField('Ha ocurrido un error al procesar un comando slash', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
-        global.logch.send({
-            content: `<@${global.peopleid.papita}>`,
-            embeds: [errorembed]
-        });
-        stats.commands.failed++;
-		await interaction.reply({ content: ':warning: Ocurrió un error al ejecutar el comando', ephemeral: true })
-        .catch(err => {
-           console.log('Posible interacción no registrada');
-           console.error(err);
-        });
-	}
-    stats.markModified('commands');
-    await stats.save();
-    //#endregion
+        try {
+            const funcSeek = interaction.customId.split('_');
+            let command = funcSeek.shift();
+            const func = funcSeek.join('');
+            if(command && func) {
+                //Hacer algo
+                command = client.ComandosPure.get(command) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(command));
+                if(typeof command[func] === 'function')
+                    await command[func](interaction);
+                else
+                    interaction.reply({
+                        content: '☕ Parece que encontraste un botón sin función. Mientras conecto algunos cables, ten un café',
+                        ephemeral: true,
+                    });
+            }
+            stats.commands.succeeded++;
+        } catch(error) {
+            console.log('Ha ocurrido un error al procesar una acción de botón.');
+            console.error(error);
+            const errorembed = new Discord.MessageEmbed()
+                .setColor('#0000ff')
+                .setAuthor(`${guild.name} • ${channel.name}`, member.user.avatarURL({ dynamic: true }))
+                .addField('Ha ocurrido un error al procesar una acción de botón', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
+            global.logch.send({
+                content: `<@${global.peopleid.papita}>`,
+                embeds: [errorembed]
+            });
+            stats.commands.failed++;
+            await interaction.reply({ content: ':warning: Ocurrió un error al ejecutar la acción del botón', ephemeral: true })
+            .catch(err => {
+            console.log('Posible interacción no registrada');
+            console.error(err);
+            });
+        }
+    }
 });
 
 //Evento de entrada a servidor
