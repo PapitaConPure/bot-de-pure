@@ -19,7 +19,7 @@ const dns = require('dns'); //Detectar host
 const { registerFont, loadImage } = require('canvas'); //Registrar fuentes al ejecutar Bot
 const chalk = require('chalk'); //Consola con formato bonito
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { CommandOptionsManager, CommandParam } = require('./commands/Commons/cmdOpts.js');
+const { CommandOptionsManager } = require('./commands/Commons/cmdOpts.js');
 const { promisify } = require('util');
 const token = (process.env.I_LOVE_MEGUMIN) ? process.env.I_LOVE_MEGUMIN : require('./localenv.json').token; //La clave del bot
 //#endregion
@@ -285,9 +285,8 @@ client.on('messageCreate', async message => {
         fastGuildFunctions.forEach(async frf => {
             if(guildfunc[gid][frf]) await guildfunc[gid][frf](message);
         });
-    if(message.mentions.users.has(message.client.user.id)) {
+    if(message.mentions.users.has(message.client.user.id))
         await require('./commands/Pure/prefijo.js').execute(message, []);
-    }
     //#endregion
     
     //#region Comandos
