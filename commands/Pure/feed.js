@@ -39,7 +39,7 @@ module.exports = {
 		const wizard = new MessageEmbed()
 			.setAuthor('Asistente de configuración de Feed de imágenes', request.client.user.avatarURL())
 			.addField('Bienvenido', 'Si es la primera vez que configuras un Feed de imágenes con Bot de Puré, ¡no te preocupes! Simplemente sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras')
-			.setFooter('1/5 • Bienvenida');
+			.setFooter('1/? • Bienvenida');
 		const sent = (await Promise.all([
 			request.reply({
 				embeds: [wizard],
@@ -59,23 +59,23 @@ module.exports = {
 
 	/**@param {import('discord.js').ButtonInteraction} interaction */
 	async ['startWizard'](interaction) {
-		interaction.message.embeds[0].fields[0].value = 'IT FUCKING WORKS LET\'S GOOOOOOOOOO';
-		interaction.message.embeds[0].fields[0].value = 'wasdfghij';
-		interaction.message.embeds[0].setFooter('2/5 • Acción');
+		interaction.message.embeds[0].fields[0].name = 'Selecciona una Operación';
+		interaction.message.embeds[0].fields[0].value = '¿Qué deseas hacer ahora mismo?';
+		interaction.message.embeds[0].setFooter('2/? • Acción');
 		return await interaction.update({
 			embeds: interaction.message.embeds,
 			components: [new MessageActionRow().addComponents(
 				new MessageButton()
 					.setCustomId('feed_createNew')
-					.setLabel('Comenzar')
+					.setLabel('Crear un nuevo Feed')
 					.setStyle('SUCCESS'),
 				new MessageButton()
 					.setCustomId('feed_editOne')
-					.setLabel('Editar')
+					.setLabel('Editar un Feed')
 					.setStyle('PRIMARY'),
 				new MessageButton()
 					.setCustomId('feed_deleteOne')
-					.setLabel('Eliminar')
+					.setLabel('Eliminar un Feed')
 					.setStyle('DANGER'),
 				cancelbutton,
 			)],
@@ -87,7 +87,7 @@ module.exports = {
 		const cancelEmbed = new MessageEmbed()
 			.setAuthor('Asistente de configuración de Feed de imágenes', interaction.client.user.avatarURL())
 			.addField('Asistente cancelado', 'Se canceló la configuración de Feed')
-			.setFooter('0/0 • Terminado');
+			.setFooter('Asistente terminado');
 		return await interaction.update({
 			embeds: [cancelEmbed],
 			components: [],
