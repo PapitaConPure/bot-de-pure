@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.9E",
+            "number": "Full.2.8.A0",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo reestructuraciones para una actualización mayor. Es probable que algunos comandos dejen de funcionar durante el proceso.\nTambién, las actualizaciones serán considerablemente menos frecuentes de momento",
@@ -21,7 +21,9 @@
             "Mejoras visuales generales",
             "p!mimar agregado",
             "Tag de Yuuma Toutetsu agregada en p!touhou",
-            "p!elegir añadido"
+            "p!elegir añadido",
+            "Se están incorporando botones",
+            "p!feed añadido"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos con p!ayuda",
