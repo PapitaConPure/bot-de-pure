@@ -1,5 +1,5 @@
 //const { fetchFlag } = require('../../func');
-const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { MessageEmbed, MessageActionRow, MessageButton, MessageCollector } = require('discord.js');
 //const { engines, getBaseTags, getSearchTags } = require('../../localdata/booruprops.js');
 //const { p_pure } = require('../../localdata/prefixget');
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
@@ -13,6 +13,8 @@ const booru = require('booru');
 	'```\n' +
 	'**Nota:** #NSFW_NOTE\n' +
 	'**Nota 2:** no todos los motores funcionan y con algunos no habrá búsqueda personalizada.';*/
+
+const wiztitle = 'Asistente de configuración de Feed de imágenes';
 
 const cancelbutton = new MessageButton()
 	.setCustomId('feed_cancelWizard')
@@ -36,10 +38,11 @@ module.exports = {
 	 */
 	async execute(request, _, isSlash = false) {
 		//Acción de comando
+		module.exports[request.channel.id] = { memoUser: request.author ?? request.user };
 		const wizard = new MessageEmbed()
-			.setAuthor('Asistente de configuración de Feed de imágenes', request.client.user.avatarURL())
-			.addField('Bienvenido', 'Si es la primera vez que configuras un Feed de imágenes con Bot de Puré, ¡no te preocupes! Simplemente sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras')
-			.setFooter('1/? • Bienvenida');
+			.setAuthor(wiztitle, request.client.user.avatarURL())
+			.setFooter('1/? • Bienvenida')
+			.addField('Bienvenido', 'Si es la primera vez que configuras un Feed de imágenes con Bot de Puré, ¡no te preocupes! Simplemente sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras');
 		const sent = (await Promise.all([
 			request.reply({
 				embeds: [wizard],
@@ -59,11 +62,12 @@ module.exports = {
 
 	/**@param {import('discord.js').ButtonInteraction} interaction */
 	async ['startWizard'](interaction) {
-		interaction.message.embeds[0].fields[0].name = 'Selecciona una Operación';
-		interaction.message.embeds[0].fields[0].value = '¿Qué deseas hacer ahora mismo?';
-		interaction.message.embeds[0].setFooter('2/? • Acción');
+		const wizard = new MessageEmbed()
+			.setAuthor(wiztitle, interaction.client.user.avatarURL())
+			.setFooter('2/? • Acción')
+			.addField('Selecciona una operación', '¿Qué deseas hacer ahora mismo?');
 		return await interaction.update({
-			embeds: interaction.message.embeds,
+			embeds: [wizard],
 			components: [new MessageActionRow().addComponents(
 				new MessageButton()
 					.setCustomId('feed_createNew')
@@ -83,11 +87,77 @@ module.exports = {
 	},
 
 	/**@param {import('discord.js').ButtonInteraction} interaction */
+	setupChannelCollector(interaction, backButtonFn = 'feed_none') {
+		const filter = (m) => m.author.id === module.exports[interaction.channel.id].memoUser.id;
+		module.exports[interaction.channel.id].memoCollector = new MessageCollector(interaction.channel, { filter: filter, time: 1000 * 60 * 2 });
+		module.exports[interaction.channel.id].memoCollector.on('collect', collected => {
+			collected = collected.content;
+			console.log(collected)
+			if(collected.startsWith('<#') && collected.endsWith('>')) {
+				collected = collected.slice(2, -1);
+				if(collected.startsWith('!')) collected = collected.slice(1);
+			}
+			const channels = interaction.guild.channels.cache;
+			const fetchedChannel = isNaN(collected)
+				? channels.filter(c => c.isText()).find(c => c.name.toLowerCase().indexOf(collected) !== -1)
+				: channels.filter(c => c.isText()).find(c => c.id !== -1);
+			if(fetchedChannel) {
+				module.exports[interaction.channel.id].memoChannel = fetchedChannel;
+
+				const wizard = new MessageEmbed()
+					.setAuthor(wiztitle, interaction.client.user.avatarURL())
+					.setFooter('4/4 • Asignar tags')
+					.addField('Destino', `**${fetchedChannel.name}** (canal ${fetchedChannel.nsfw ? 'NSFW' : 'SFW'})`)
+					.addField('Describe las tags del Feed', 'Entra a [Gelbooru](https://gelbooru.com) y realiza una búsqueda con tags que te den las imágenes deseadas para el Feed, separadas por espacios. Una vez lo consigas, simplemente copia las tags y envíalas como mensaje.\n_Es necesario que las tags estén bien escritas_')
+					.addField('Control de contenidos', '**IMPORTANTE:** Si quieres resultados SFW, utiliza la tag meta `rating:safe`; si quieres resultados NSFW, añade la tag `rating:explicit`; si quieres una combinación de ambos, no ingreses ninguna')
+					.addField('Ejemplo de uso', 'Enviar `touhou rating:safe -breast_grab` creará un Feed de imágenes _SFW_ de Touhou que _no_ tengan la tag "breast_grab"');
+				interaction.message.edit({
+					embeds: [wizard],
+					components: [new MessageActionRow().addComponents(
+						new MessageButton()
+							.setCustomId(backButtonFn)
+							.setLabel('Volver')
+							.setStyle('SECONDARY'),
+						cancelbutton,
+					)],
+				});
+
+				module.exports[interaction.channel.id].memoCollector.stop();
+			}
+		});
+	},
+
+	/**@param {import('discord.js').ButtonInteraction} interaction */
+	async ['createNew'](interaction) {
+		const wizard = new MessageEmbed()
+			.setAuthor(wiztitle, interaction.client.user.avatarURL())
+			.setFooter('3/4 • Elegir canal')
+			.addField('Selecciona una canal', 'Facilita, por medio de un mensaje, una porción del nombre, la mención o la ID del canal en el que quieres crear un nuevo Feed. Pasarás al siguiente paso automáticamente al decirme un canal válido');
+		module.exports.setupChannelCollector(interaction, 'feed_createNew');
+		return await interaction.update({
+			embeds: [wizard],
+			components: [new MessageActionRow().addComponents(
+				new MessageButton()
+					.setCustomId('feed_restartWizard')
+					.setLabel('Volver')
+					.setStyle('SECONDARY'),
+				cancelbutton,
+			)],
+		});
+	},
+
+	/**@param {import('discord.js').ButtonInteraction} interaction */
+	async ['restartWizard'](interaction) {
+		module.exports[interaction.channel.id].memoCollector.stop();
+		await module.exports['startWizard'](interaction);
+	},
+
+	/**@param {import('discord.js').ButtonInteraction} interaction */
 	async ['cancelWizard'](interaction) {
 		const cancelEmbed = new MessageEmbed()
-			.setAuthor('Asistente de configuración de Feed de imágenes', interaction.client.user.avatarURL())
-			.addField('Asistente cancelado', 'Se canceló la configuración de Feed')
-			.setFooter('Asistente terminado');
+			.setAuthor(wiztitle, interaction.client.user.avatarURL())
+			.setFooter('Operación abortada')
+			.addField('Asistente cancelado', 'Se canceló la configuración de Feed');
 		return await interaction.update({
 			embeds: [cancelEmbed],
 			components: [],
