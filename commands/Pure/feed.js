@@ -68,6 +68,10 @@ module.exports = {
 			.setAuthor(wiztitle, interaction.client.user.avatarURL())
 			.setFooter('2/4 • Seleccionar operación')
 			.addField('Selecciona una operación', '¿Qué deseas hacer ahora mismo?');
+			
+		const guildQuery = { guildId: interaction.guild.id };
+		const gcfg = (await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery);
+		const premade = gcfg.feeds && Object.keys(gcfg.feeds).length;
 		return await interaction.update({
 			embeds: [wizard],
 			components: [new MessageActionRow().addComponents(
@@ -78,11 +82,13 @@ module.exports = {
 				new MessageButton()
 					.setCustomId('feed_editOne')
 					.setLabel('Editar un Feed')
-					.setStyle('PRIMARY'),
+					.setStyle('PRIMARY')
+					.setDisabled(!premade),
 				new MessageButton()
 					.setCustomId('feed_deleteOne')
 					.setLabel('Eliminar un Feed')
-					.setStyle('DANGER'),
+					.setStyle('DANGER')
+					.setDisabled(!premade),
 				cancelbutton,
 			)],
 		});
@@ -148,8 +154,7 @@ module.exports = {
 			const ccontent = collected.content;
 			collected.delete();
 
-			const guildsearch = { guildId: interaction.guild.id };
-			const gcfg = (await GuildConfig.findOne(guildsearch)) || new GuildConfig(guildsearch);
+			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 			gcfg.feeds[fetchedChannel.id] = ccontent;
 			gcfg.markModified('feeds');
 			await gcfg.save();
@@ -176,7 +181,6 @@ module.exports = {
 			.addField('Feed eliminado', 'Se ha eliminado el Feed acordado. Si te arrepientes, tendrás que crearlo otra vez');
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 		delete gcfg.feeds[module.exports[interaction.channel.id].memoChannel.id];
-		console.log(gcfg.feeds);
 		gcfg.markModified('feeds');
 		return await Promise.all([
 			gcfg.save(),
@@ -234,8 +238,7 @@ module.exports = {
 			.setAuthor(wiztitle, interaction.client.user.avatarURL())
 			.setFooter('3/4 • Seleccionar Feed')
 			.addField('Selección de Feed', 'Los Feeds que configuraste anteriormente están categorizados por canal y tags. Encuentra el que quieras modificar en esta lista y selecciónalo');
-		const guildQuery = { guildId: interaction.guild.id };
-		const gcfg = (await GuildConfig.findOne(guildQuery)) || new GuildConfig({guildQuery});
+		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 		const feeds = Object.entries(gcfg.feeds).map(([chid, tags]) => ({
 			label: tags,
 			description: `#${interaction.guild.channels.cache.get(chid).name}`,
@@ -267,8 +270,7 @@ module.exports = {
 			.setAuthor(wiztitle, interaction.client.user.avatarURL())
 			.setFooter('3/4 • Seleccionar Feed')
 			.addField('Selección de Feed', 'Los Feeds que configuraste anteriormente están categorizados por canal y tags. Encuentra el que quieras eliminar en esta lista y selecciónalo');
-		const guildQuery = { guildId: interaction.guild.id };
-		const gcfg = (await GuildConfig.findOne(guildQuery)) || new GuildConfig({guildQuery});
+		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 		const feeds = Object.entries(gcfg.feeds).map(([chid, tags]) => ({
 			label: tags,
 			description: `#${interaction.guild.channels.cache.get(chid).name}`,
