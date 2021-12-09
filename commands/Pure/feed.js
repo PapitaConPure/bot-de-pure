@@ -211,7 +211,7 @@ module.exports = {
 			const channels = interaction.guild.channels.cache;
 			const fetchedChannel = isNaN(ccontent)
 				? channels.filter(c => c.isText()).find(c => c.name.toLowerCase().indexOf(ccontent) !== -1)
-				: channels.filter(c => c.isText()).find(c => c.id !== -1);
+				: channels.filter(c => c.isText()).find(c => c.id === ccontent);
 			if(fetchedChannel) {
 				collected.delete();
 				module.exports[interaction.channel.id].memoChannel = fetchedChannel;
