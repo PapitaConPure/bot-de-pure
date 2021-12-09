@@ -29,7 +29,7 @@ module.exports = {
                                     new MessageEmbed()
                                         .setColor('#608bf3')
                                         .setAuthor('Desde Gelbooru', 'https://i.imgur.com/outZ5Hm.png')
-                                        .setTitle(feed.tags.split(/ +/g).slice(0, 3).join(' ').replace(/rating:/g, ''))
+                                        //.setTitle(feed.tags.split(/ +/g).slice(0, 3).join(' ').replace(/rating:/g, ''))
                                         .addField(`Tags (${Math.min(image.tags.length, maxTags)}/${image.tags.length})`, `*${image.tags.slice(0,maxTags).join(', ').replace(/\\*\*/g,'\\*').replace(/\\*_/g,'\\_')}*`)
                                         .addField('Salsa', [
                                             `[Gelbooru](https://gelbooru.com/index.php?page=post&s=view&id=${image.id})`,
