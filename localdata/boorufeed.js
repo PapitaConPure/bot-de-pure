@@ -26,7 +26,7 @@ module.exports = {
                             gcfg.markModified('feeds');
                             const row = new MessageActionRow().addComponents(
                                 new MessageButton()
-                                    .setLabel('Gelbooru')
+                                    .setLabel('Post')
                                     .setStyle('LINK')
                                     .setURL(`https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`),
                             );
