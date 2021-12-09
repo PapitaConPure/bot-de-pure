@@ -21,6 +21,7 @@ const chalk = require('chalk'); //Consola con formato bonito
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { CommandOptionsManager } = require('./commands/Commons/cmdOpts.js');
 const { promisify } = require('util');
+const { updateBooruFeeds } = require('./localdata/boorufeed');
 const token = (process.env.I_LOVE_MEGUMIN) ? process.env.I_LOVE_MEGUMIN : require('./localenv.json').token; //La clave del bot
 //#endregion
 
@@ -238,6 +239,8 @@ client.on('ready', async () => {
     ]});
     global.maintenance = '';
 	console.log(chalk.greenBright.bold('Bot conectado y funcionando.'));
+
+    updateBooruFeeds(client);
 });
 
 //Recepción de mensajes

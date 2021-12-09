@@ -101,7 +101,7 @@ module.exports = {
 		const chid = interaction.values[0];
 		module.exports[interaction.channel.id].memoChannel = interaction.guild.channels.cache.get(chid);
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-		const tags = gcfg.feeds[chid];
+		const tags = gcfg.feeds[chid].tags;
 		const wizard = new MessageEmbed()
 			.setColor('RED')
 			.setAuthor(wiztitle, interaction.client.user.avatarURL())
@@ -201,7 +201,7 @@ module.exports = {
 		const filter = (m) => m.author.id === module.exports[interaction.channel.id].memoUser.id;
 		module.exports[interaction.channel.id].memoCollector = new MessageCollector(interaction.channel, { filter: filter, time: 1000 * 60 * 2 });
 		module.exports[interaction.channel.id].memoCollector.on('collect', collected => {
-			const ccontent = collected.content;
+			let ccontent = collected.content;
 			if(ccontent.startsWith('<#') && ccontent.endsWith('>')) {
 				ccontent = ccontent.slice(2, -1);
 				if(ccontent.startsWith('!')) ccontent = ccontent.slice(1);
@@ -218,6 +218,7 @@ module.exports = {
 			}
 		});
 		const wizard = new MessageEmbed()
+			.setColor('GOLD')
 			.setAuthor(wiztitle, interaction.client.user.avatarURL())
 			.setFooter('3/4 • Elegir canal')
 			.addField('Selecciona un canal', 'Facilita, por medio de un mensaje, una porción del nombre, la mención o la ID del canal en el que quieres crear un nuevo Feed. Pasarás al siguiente paso automáticamente al decirme un canal válido');
