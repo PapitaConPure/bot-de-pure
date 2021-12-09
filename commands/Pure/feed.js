@@ -3,7 +3,6 @@ const { MessageEmbed, MessageActionRow, MessageButton, MessageCollector, Message
 //const { engines, getBaseTags, getSearchTags } = require('../../localdata/booruprops.js');
 //const { p_pure } = require('../../localdata/prefixget');
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
-const booru = require('booru');
 
 /*const desc = `${brief}\n` +
 	'Por defecto, las imágenes se buscan con Gelbooru.\n' +
@@ -40,24 +39,20 @@ module.exports = {
 		//Acción de comando
 		module.exports[request.channel.id] = { memoUser: request.author ?? request.user };
 		const wizard = new MessageEmbed()
+			.setColor('AQUA')
 			.setAuthor(wiztitle, request.client.user.avatarURL())
 			.setFooter('1/4 • Comenzar')
 			.addField('Bienvenido', 'Si es la primera vez que configuras un Feed de imágenes con Bot de Puré, ¡no te preocupes! Simplemente sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras');
-		const sent = (await Promise.all([
-			request.reply({
-				embeds: [wizard],
-				components: [new MessageActionRow().addComponents(
-					new MessageButton()
-						.setCustomId('feed_startWizard')
-						.setLabel('Comenzar')
-						.setStyle('PRIMARY'),
-					cancelbutton,
-				)],
-			}),
-			isSlash ? request.fetchReply() : null,
-		])).filter(cch => cch)[0];
-		
-		//return await sent.edit({ embeds: [wizard] });
+		return await request.reply({
+			embeds: [wizard],
+			components: [new MessageActionRow().addComponents(
+				new MessageButton()
+					.setCustomId('feed_startWizard')
+					.setLabel('Comenzar')
+					.setStyle('PRIMARY'),
+				cancelbutton,
+			)],
+		});
 	},
 
 	/**@param {import('discord.js').ButtonInteraction} interaction */
@@ -65,6 +60,7 @@ module.exports = {
 		const unColl = module.exports[interaction.channel.id].memoCollector;
 		if(unColl && !unColl.ended) unColl.stop();
 		const wizard = new MessageEmbed()
+			.setColor('NAVY')
 			.setAuthor(wiztitle, interaction.client.user.avatarURL())
 			.setFooter('2/4 • Seleccionar operación')
 			.addField('Selecciona una operación', '¿Qué deseas hacer ahora mismo?');
@@ -107,6 +103,7 @@ module.exports = {
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 		const tags = gcfg.feeds[chid];
 		const wizard = new MessageEmbed()
+			.setColor('RED')
 			.setAuthor(wiztitle, interaction.client.user.avatarURL())
 			.setFooter('4/4 • Confirmar')
 			.addField('Confirmar eliminación de Feed', `Estás por borrar el Feed _"${safeTags(tags)}"_ ubicado en el canal **<#${chid}>**. ¿Estás seguro?`);
@@ -130,6 +127,7 @@ module.exports = {
 	async setupTagsCollector(interaction, reply, backButtonFn) {
 		const fetchedChannel = module.exports[interaction.channel.id].memoChannel;
 		const wizard = new MessageEmbed()
+			.setColor('BLURPLE')
 			.setAuthor(wiztitle, interaction.client.user.avatarURL())
 			.setFooter('4/4 • Asignar tags')
 			.addField('Destino', `**${fetchedChannel.name}** (canal ${fetchedChannel.nsfw ? 'NSFW' : 'SFW'})`)
@@ -155,11 +153,15 @@ module.exports = {
 			collected.delete();
 
 			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-			gcfg.feeds[fetchedChannel.id] = ccontent;
+			gcfg.feeds[fetchedChannel.id] = {
+				tags: ccontent,
+				ids: [],
+			};
 			gcfg.markModified('feeds');
 			await gcfg.save();
 
 			const concludedEmbed = new MessageEmbed()
+				.setColor('DARK_VIVID_PINK')
 				.setAuthor(wiztitle, interaction.client.user.avatarURL())
 				.setFooter('Operación finalizada')
 				.addField('Feed configurado', `Se ha configurado un Feed con las tags _"${safeTags(ccontent)}"_ para el canal **${fetchedChannel.name}**`)
@@ -176,6 +178,7 @@ module.exports = {
 	/**@param {import('discord.js').ButtonInteraction} interaction */
 	async ['deleteFeed'](interaction) {
 		const wizard = new MessageEmbed()
+			.setColor('DARK_RED')
 			.setAuthor(wiztitle, interaction.client.user.avatarURL())
 			.setFooter('Operación finalizada')
 			.addField('Feed eliminado', 'Se ha eliminado el Feed acordado. Si te arrepientes, tendrás que crearlo otra vez');
@@ -235,12 +238,13 @@ module.exports = {
 		const unColl = module.exports[interaction.channel.id].memoCollector;
 		if(unColl && !unColl.ended) unColl.stop();
 		const wizard = new MessageEmbed()
+			.setColor('GREYPLE')
 			.setAuthor(wiztitle, interaction.client.user.avatarURL())
 			.setFooter('3/4 • Seleccionar Feed')
 			.addField('Selección de Feed', 'Los Feeds que configuraste anteriormente están categorizados por canal y tags. Encuentra el que quieras modificar en esta lista y selecciónalo');
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-		const feeds = Object.entries(gcfg.feeds).map(([chid, tags]) => ({
-			label: tags,
+		const feeds = Object.entries(gcfg.feeds).map(([chid, feed]) => ({
+			label: feed.tags,
 			description: `#${interaction.guild.channels.cache.get(chid).name}`,
 			value: chid,
 		}));
@@ -267,12 +271,13 @@ module.exports = {
 	/**@param {import('discord.js').ButtonInteraction} interaction */
 	async ['deleteOne'](interaction) {
 		const wizard = new MessageEmbed()
+			.setColor('GREYPLE')
 			.setAuthor(wiztitle, interaction.client.user.avatarURL())
 			.setFooter('3/4 • Seleccionar Feed')
 			.addField('Selección de Feed', 'Los Feeds que configuraste anteriormente están categorizados por canal y tags. Encuentra el que quieras eliminar en esta lista y selecciónalo');
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-		const feeds = Object.entries(gcfg.feeds).map(([chid, tags]) => ({
-			label: tags,
+		const feeds = Object.entries(gcfg.feeds).map(([chid, feed]) => ({
+			label: feed.tags,
 			description: `#${interaction.guild.channels.cache.get(chid).name}`,
 			value: chid,
 		}));
