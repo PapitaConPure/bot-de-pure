@@ -434,7 +434,7 @@ client.on('interactionCreate', async interaction => {
     }
 
     //Click sobre botón
-    if(interaction.isButton()) {
+    if(interaction.isButton() || interaction.isSelectMenu()) {
         if(!interaction.customId) return;
         
         try {
@@ -442,13 +442,12 @@ client.on('interactionCreate', async interaction => {
             let command = funcSeek.shift();
             const func = funcSeek.join('');
             if(command && func) {
-                //Hacer algo
                 command = client.ComandosPure.get(command) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(command));
                 if(typeof command[func] === 'function')
                     await command[func](interaction);
                 else
                     interaction.reply({
-                        content: '☕ Parece que encontraste un botón sin función. Mientras conecto algunos cables, ten un café',
+                        content: '☕ Parece que encontraste un botón o menú desplegable sin función. Mientras conecto algunos cables, ten un café',
                         ephemeral: true,
                     });
             }
