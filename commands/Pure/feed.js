@@ -152,7 +152,8 @@ module.exports = {
 			const ccontent = collected.content;
 			collected.delete();
 
-			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
+			const guildQuery = { guildId: interaction.guild.id };
+			const gcfg = (await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery);
 			gcfg.feeds = gcfg.feeds || {};
 			gcfg.feeds[fetchedChannel.id] = {
 				tags: ccontent,
