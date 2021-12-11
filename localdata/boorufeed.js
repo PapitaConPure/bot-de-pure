@@ -27,15 +27,16 @@ module.exports = {
                             const row = new MessageActionRow().addComponents(
                                 new MessageButton()
                                     .setLabel('Post')
+                                    .setEmoji('919114849802416158')
                                     .setStyle('LINK')
                                     .setURL(`https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`),
                             );
                             const source = Array.isArray(image.source) ? image.source[0] : (image.source || undefined);
-                            console.log(source, source && source.match(/((http:\/\/|https:\/\/)?(www.)?(([a-zA-Z0-9-]){2,}\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?)/));
                             if(source && source.match(/((http:\/\/|https:\/\/)?(www.)?(([a-zA-Z0-9-]){2,}\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?)/))
                                 row.addComponents(
                                     new MessageButton()
                                         .setLabel('Original')
+                                        .setEmoji('919114849894690837')
                                         .setStyle('LINK')
                                         .setURL(source),
                                 );
