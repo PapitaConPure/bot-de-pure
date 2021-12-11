@@ -24,18 +24,11 @@ const roleList = (() => {
 	
 	return new MessageSelectMenu()
 		.setCustomId('colores_addColor')
+		.setPlaceholder('Escoge un color...')
 		.addOptions(menuOptions);
 })();
 
-const colorsRows = [
-	new MessageActionRow().addComponents(roleList),
-	new MessageActionRow().addComponents(
-		new MessageButton()
-			.setCustomId('colores_end')
-			.setLabel('Finalizar')
-			.setStyle('SECONDARY')
-	),
-];
+const colorsRow = new MessageActionRow().addComponents(roleList);
 
 module.exports = {
 	name: 'colores',
@@ -49,8 +42,7 @@ module.exports = {
         'hourai'
     ],
 	experimental: true,
-	colorsList: colorsList,
-	roleList: roleList,
+	colorsRow: colorsRow,
 	
 	/**
 	 * @param {import('../Commons/typings').CommandRequest} request 
@@ -61,7 +53,15 @@ module.exports = {
 		return await request.reply({
 			content: `Aquí teni los colore po **${(request.user ?? request.author).username}** <:reibu:686220828773318663>`,
 			files: [hourai.images.colors],
-			components: colorsRows,
+			components: [
+				colorsRow,
+				new MessageActionRow().addComponents(
+					new MessageButton()
+						.setCustomId('colores_end')
+						.setLabel('Dejar de cambiar colores')
+						.setStyle('SECONDARY')
+				),
+			],
 			ephemeral: true,
 		});
     },
@@ -80,15 +80,16 @@ module.exports = {
 				await member.roles.add(role);
 				return await interaction.reply({ content: 'Colores otorgados <:miyoi:674823039086624808> :thumbsup:', ephemeral: true });
 			}
-		} else return await interaction.reply({ content: ':x: No se encontró el rol. Si lo intentas más tarde, puede que el problema se haya solucionado '});
+		} else return await interaction.reply({ content: ':x: No se encontró el rol. Si lo intentas más tarde, puede que el problema se haya solucionado', ephemeral: true });
 	},
 
 	/** @param {import('discord.js').ButtonInteraction} interaction */
 	async ['end'](interaction) {
-		setTimeout(() => interaction.message.deleted ? null : interaction.message.delete(), 1000 * 5);
+		if(!interaction.ephemeral)
+			setTimeout(() => interaction.message.delete(), 1000 * 5);
 		return await interaction.update({
 			content: 'No más colore po',
-			files: [],
+			attachments: [],
 			components: [],
 		});
 	}

@@ -201,7 +201,7 @@ module.exports = {
         }
     },
 
-    askForRole: function(miembro, canal, rep) {
+    askForRole: async function(miembro, canal, rep) {
         const reps = 4;
         console.log(chalk.cyan('Comprobando miembro nuevo en Hourai Doll para petición de rol de color...'));
         if(!miembro.deleted) {
@@ -232,10 +232,11 @@ module.exports = {
                     }
                 } else {
                     console.log(chalk.yellow('El miembro no ha recibido roles básicos.'));
-                    canal.send({
+                    await canal.send({
                         content: `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>`,
-                        files: [global.hourai.images.colors]
-                    }).then(sent => module.exports.askColor(sent, miembro));
+                        files: [global.hourai.images.colors],
+                        components: [require('./commands/Pure/colores.js').colorsRow],
+                    });
                     setTimeout(module.exports.forceRole, 1000, miembro, canal, 2 * reps);
                     console.log(chalk.magentaBright(`Esperando comprobación final de miembro en unos minutos...`));
                 }
@@ -328,7 +329,7 @@ module.exports = {
         });
     },
 
-    askColor: function(message, member) {
+    /*askColor: function(message, member) {
         //ID emote: ID rol
         const colrol = {
             '819772377814532116': '671851233870479375', //French
@@ -355,7 +356,7 @@ module.exports = {
                 message.channel.send({ content: 'Colores otorgados <:miyoi:674823039086624808> :thumbsup:' });
             }
         });
-    },
+    },*/
 
     modifyAct: async function(clientowo, pasuwus) { //Cambio de estado constante; créditos a Imagine Breaker y Sassafras
         //Actualización de actividad
@@ -558,7 +559,7 @@ module.exports = {
         const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
         await canal.send({files: [imagen]});
         if(forceHourai || servidor.id === global.serverid.hourai) {
-            const welcome = await canal.send({
+            await canal.send({
                 content:
                     `Wena po <@${miembro.user.id}> conchetumare, como estai.\n` +
                     'Como tradición, elige un color reaccionando a alguna de estas cartas <:mayuwu:654489124413374474>\n' +
@@ -566,9 +567,9 @@ module.exports = {
                     'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:697321858407727224>\n' +
                     '<@&654472238510112799>, vengan a saludar po maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
                     `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n`,
-                files: [global.hourai.images.colors]
+                files: [global.hourai.images.colors],
+                components: [require('./commands/Pure/colores.js').colorsRow],
             });
-            module.exports.askColor(welcome, miembro);
             setTimeout(module.exports.askForRole, 1000, miembro, canal, 3 * 4);
             console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');
         } else if(servidor.id === global.serverid.ar)
