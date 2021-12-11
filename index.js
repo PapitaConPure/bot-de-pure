@@ -288,7 +288,7 @@ client.on('messageCreate', async message => {
         fastGuildFunctions.forEach(async frf => {
             if(guildfunc[gid][frf]) await guildfunc[gid][frf](message);
         });
-    if(message.mentions.users.has(message.client.user.id))
+    if(message.content.indexOf(`${message.client.user.id}>`) !== -1)
         await require('./commands/Pure/prefijo.js').execute(message, []);
     //#endregion
     
