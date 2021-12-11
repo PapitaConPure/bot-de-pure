@@ -2,14 +2,15 @@ const { hourai } = require('../../localdata/config.json'); //Variables globales
 const { MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.js');
 
 const colorsList = [
-	{ emoteId: '819772377814532116', roleName: 'French Doll', roleId: '671851233870479375' },
-	{ emoteId: '819772377642041345', roleName: 'Holland Doll', roleId: '671851228308963348' },
-	{ emoteId: '819772377624870973', roleName: 'Tibetan Doll', roleId: '671852132328275979' },
-	{ emoteId: '819772377894354944', roleName: 'Kyoto Doll', roleId: '671851234541699092' },
-	{ emoteId: '819772377856606228', roleName: 'London Doll', roleId: '671851236538187790' },
-	{ emoteId: '819772377482526741', roleName: 'Russian Doll', roleId: '671851228954755102' },
-	{ emoteId: '819772377440583691', roleName: 'Orléans Doll', roleId: '671851235267182625' },
+	{ emoteId: '819772377814532116', roleId: '671851233870479375', roleName: 'French Doll'  },
+	{ emoteId: '819772377624870973', roleId: '671852132328275979', roleName: 'Holland Doll' },
+	{ emoteId: '819772377482526741', roleId: '671851228954755102', roleName: 'Tibetan Doll' },
+	{ emoteId: '819772377440583691', roleId: '671851235267182625', roleName: 'Kyoto Doll'   },
+	{ emoteId: '819772377856606228', roleId: '671851236538187790', roleName: 'London Doll'  },
+	{ emoteId: '819772377894354944', roleId: '671851234541699092', roleName: 'Russian Doll' },
+	{ emoteId: '819772377642041345', roleId: '671851228308963348', roleName: 'Orléans Doll' },
 ];
+
 const roleList = (() => {
 	const menuOptions = [];
 	colorsList.forEach(color => menuOptions.push({
@@ -25,6 +26,7 @@ const roleList = (() => {
 		.setCustomId('colores_addColor')
 		.addOptions(menuOptions);
 })();
+
 const colorsRows = [
 	new MessageActionRow().addComponents(roleList),
 	new MessageActionRow().addComponents(
