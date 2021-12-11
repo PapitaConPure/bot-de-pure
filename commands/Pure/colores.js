@@ -37,14 +37,16 @@ module.exports = {
 						.setStyle('SECONDARY')
 				)
 			],
+			ephemeral: true,
 		});
     },
 
 	/** @param {import('discord.js').SelectMenuInteraction} interaction */
 	async ['addColor'](interaction) {
-        const role = interaction.guild.roles.cache.get(interaction.values[0]);
+		const { guild, member } = interaction;
+        const role = guild.roles.cache.get(interaction.values[0]);
         if(role) {
-			const hadroles = interaction.member.roles.cache.find(mr => role === mr.id);
+			const hadroles = member.roles.cache.find(mr => role === mr.id);
 			if(hadroles !== undefined) {
 				await member.roles.remove(hadroles);
 				await member.roles.add(colrol[reacted]);
@@ -58,9 +60,9 @@ module.exports = {
 
 	/** @param {import('discord.js').ButtonInteraction} interaction */
 	async ['end'](interaction) {
+		setTimeout(() => interaction.message.deleted ? null : interaction.message.delete(), 1000 * 5);
 		return await interaction.update({
-			content: 'No más colore po...',
-			attachments: [ ...interaction.message.attachments.values() ],
+			content: 'No más colore po',
 			components: [],
 		});
 	}
