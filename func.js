@@ -357,36 +357,6 @@ module.exports = {
         });
     },
 
-    /**
-     * Construye un Map<emote, role> para asignar roles de color en Hourai
-     * @returns {Discord.MessageSelectMenu}
-     */
-    getColorRoleList: function() {
-        //ID emote: ID rol
-        const colors = [
-            { emoteId: '819772377814532116', roleName: 'French Doll', roleId: '671851233870479375' },
-            { emoteId: '819772377642041345', roleName: 'Holland Doll', roleId: '671851228308963348' },
-            { emoteId: '819772377624870973', roleName: 'Tibetan Doll', roleId: '671852132328275979' },
-            { emoteId: '819772377894354944', roleName: 'Kyoto Doll', roleId: '671851234541699092' },
-            { emoteId: '819772377856606228', roleName: 'London Doll', roleId: '671851236538187790' },
-            { emoteId: '819772377482526741', roleName: 'Russian Doll', roleId: '671851228954755102' },
-            { emoteId: '819772377440583691', roleName: 'Orléans Doll', roleId: '671851235267182625' },
-        ];
-        const menuOptions = [];
-        colors.forEach(color => menuOptions.push({
-            value: color.roleId,
-            label: color.roleName,
-            emoji: {
-                name: color.roleName.slice(0, 3),
-                id: color.emoteId,
-            },
-        }));
-        
-        return new Discord.MessageSelectMenu()
-            .setCustomId('colores_addColor')
-            .addOptions(menuOptions);
-    },
-
     modifyAct: async function(clientowo, pasuwus) { //Cambio de estado constante; créditos a Imagine Breaker y Sassafras
         //Actualización de actividad
         try {
