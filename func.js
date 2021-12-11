@@ -357,6 +357,36 @@ module.exports = {
         });
     },
 
+    /**
+     * Construye un Map<emote, role> para asignar roles de color en Hourai
+     * @returns {Discord.MessageSelectMenu}
+     */
+    getColorRoleList: function() {
+        //ID emote: ID rol
+        const colors = [
+            { emoteId: '819772377814532116', roleName: 'French Doll', roleId: '671851233870479375' },
+            { emoteId: '819772377642041345', roleName: 'Holland Doll', roleId: '671851228308963348' },
+            { emoteId: '819772377624870973', roleName: 'Tibetan Doll', roleId: '671852132328275979' },
+            { emoteId: '819772377894354944', roleName: 'Kyoto Doll', roleId: '671851234541699092' },
+            { emoteId: '819772377856606228', roleName: 'London Doll', roleId: '671851236538187790' },
+            { emoteId: '819772377482526741', roleName: 'Russian Doll', roleId: '671851228954755102' },
+            { emoteId: '819772377440583691', roleName: 'Orléans Doll', roleId: '671851235267182625' },
+        ];
+        const menuOptions = [];
+        colors.forEach(color => menuOptions.push({
+            value: color.roleId,
+            label: color.roleName,
+            emoji: {
+                name: color.roleName.slice(0, 3),
+                id: color.emoteId,
+            },
+        }));
+        
+        return new Discord.MessageSelectMenu()
+            .setCustomId('colores_addColor')
+            .addOptions(menuOptions);
+    },
+
     modifyAct: async function(clientowo, pasuwus) { //Cambio de estado constante; créditos a Imagine Breaker y Sassafras
         //Actualización de actividad
         try {
@@ -454,8 +484,9 @@ module.exports = {
 
         //Otorgar rol con 50% de probabilidad
         const gr = canal.guild.roles.cache;
-        if(Math.random() < 0.5)
-            miembro.roles.add(gr.find(r => r.name === 'Rol con 50% de probabilidades de tenerlo'));
+        const role50 = gr.find(r => r.name === 'Rol con 50% de probabilidades de tenerlo');
+        if(role50 && Math.random() < 0.5)
+            miembro.roles.add(role50);
     },
 
     dibujarAvatar: async function(context2d, user, xcenter, ycenter, radius, options = { circleStrokeColor: '#000000', circleStrokeFactor: 0.02 }) {
@@ -479,11 +510,10 @@ module.exports = {
         context2d.restore();
     },
 
-    dibujarBienvenida: async function(miembro) {
+    dibujarBienvenida: async function(miembro, forceHourai = false) {
         //Dar bienvenida a un miembro nuevo de un servidor
         const servidor = miembro.guild; //Servidor
         const canal = servidor.channels.cache.get(servidor.systemChannelId); //Canal de mensajes de sistema
-        console.log(canal);
         //#region Comprobación de miembro y servidor
         if(canal === undefined) {
             console.log(chalk.blue('El servidor no tiene canal de mensajes de sistema.'));
@@ -556,37 +586,36 @@ module.exports = {
 
         //#region Imagen y Mensaje extra
         const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
-        canal.send({files: [imagen]}).then(sent => {
-            if(servidor.id === global.serverid.hourai) {
-                canal.send({
-                    content:
-                        `Wena po <@${miembro.user.id}> conchetumare, como estai.\n` +
-                        'Como tradición, elige un color reaccionando a alguna de estas cartas <:mayuwu:654489124413374474>\n' +
-                        '<:FrenchDoll:819772377814532116><:OrleansDoll:819772377642041345><:HollandDoll:819772377624870973><:RussianDoll:819772377894354944><:LondonDoll:819772377856606228><:TibetanDoll:819772377482526741><:KyotoDoll:819772377440583691>\n' +
-                        'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:697321858407727224>\n' +
-                        '<@&654472238510112799>, vengan a saludar po maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
-                        `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n`,
-                    files: [global.hourai.images.colors]
-                }).then(sent => module.exports.askColor(sent, miembro));
-                setTimeout(module.exports.askForRole, 1000, miembro, canal, 3 * 4);
-                console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');
-            } else if(servidor.id === global.serverid.ar) {
-                canal.send({
-                    content:
-                        `Welcome to the server **${miembro.displayName}**! / ¡Bienvenido/a al server **${miembro.displayName}**!\n\n` +
-                        `**EN:** To fully enjoy the server, don't forget to get 1 of the 5 main roles in the following channel~\n` +
-                        '**ES:** Para disfrutar totalmente del servidor, no olvides escoger 1 de los 5 roles principales en el siguiente canal~\n\n' +
-                        '→ <#611753608601403393> ←\n\n' +
-                        `*Ahora hay **${peoplecnt}** usuarios en el server.*`
-                });
-            } else { //Otros servidores
-                canal.send({
-                    content:
-                        `¡Bienvenido al servidor **${miembro.displayName}**!\n` +
-                        `*Ahora hay **${peoplecnt}** usuarios en el server.*`
-                });
-            }
-        });
+        await canal.send({files: [imagen]});
+        if(forceHourai || servidor.id === global.serverid.hourai) {
+            const welcome = await canal.send({
+                content:
+                    `Wena po <@${miembro.user.id}> conchetumare, como estai.\n` +
+                    'Como tradición, elige un color reaccionando a alguna de estas cartas <:mayuwu:654489124413374474>\n' +
+                    '<:FrenchDoll:819772377814532116><:OrleansDoll:819772377642041345><:HollandDoll:819772377624870973><:RussianDoll:819772377894354944><:LondonDoll:819772377856606228><:TibetanDoll:819772377482526741><:KyotoDoll:819772377440583691>\n' +
+                    'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:697321858407727224>\n' +
+                    '<@&654472238510112799>, vengan a saludar po maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
+                    `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n`,
+                files: [global.hourai.images.colors]
+            });
+            module.exports.askColor(welcome, miembro);
+            setTimeout(module.exports.askForRole, 1000, miembro, canal, 3 * 4);
+            console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');
+        } else if(servidor.id === global.serverid.ar)
+            await canal.send({
+                content:
+                    `Welcome to the server **${miembro.displayName}**! / ¡Bienvenido/a al server **${miembro.displayName}**!\n\n` +
+                    `**EN:** To fully enjoy the server, don't forget to get 1 of the 5 main roles in the following channel~\n` +
+                    '**ES:** Para disfrutar totalmente del servidor, no olvides escoger 1 de los 5 roles principales en el siguiente canal~\n\n' +
+                    '→ <#611753608601403393> ←\n\n' +
+                    `*Ahora hay **${peoplecnt}** usuarios en el server.*`
+            });
+        else
+            await canal.send({
+                content:
+                    `¡Bienvenido al servidor **${miembro.displayName}**!\n` +
+                    `*Ahora hay **${peoplecnt}** usuarios en el server.*`
+            });
         //#endregion
         console.log('Bienvenida finalizada.');
     },
