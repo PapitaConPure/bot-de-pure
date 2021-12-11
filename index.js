@@ -212,7 +212,7 @@ client.on('ready', async () => {
     global.loademotes['chess'] = {
         WHITE: await loadImage(global.slots.slot3.emojis.cache.find(e => e.name === 'wCell').url),
         BLACK: await loadImage(global.slots.slot3.emojis.cache.find(e => e.name === 'bCell').url),
-        pawn: await loadImage(global.slots.slot3.emojis.cache.find(e => e.name === 'pawn').url),
+        pawn:  await loadImage(global.slots.slot3.emojis.cache.find(e => e.name === 'pawn').url),
     };
 	confirm();
 
