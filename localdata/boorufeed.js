@@ -85,8 +85,8 @@ module.exports = {
                     console.log(chalk.white('Imagen nueva procesada'));
                 });
                 
-                const feedPath = `${guild.name}/${channel.name}::"${feed.tags}"`;
                 bulkSave.push(gcfg.save());
+                const feedPath = `${guild.name ?? '?'}/${channel.name ?? '?'}::"${feed.tags ?? '[x]'}"`;
                 console.log(chalk.gray(`Feed procesado en ${feedPath}`));
             }
 
