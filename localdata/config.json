@@ -22,7 +22,8 @@
             "p!elegir añadido",
             "p!feed añadido",
             "p!colores ahora usa un menú desplegable (H. Doll)",
-            "p!feed ahora permite personalizar más aspectos del feed"
+            "p!feed ahora permite personalizar más aspectos del Feed",
+            "Corregido error de vista previa de videos en Feeds"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos con p!ayuda",
