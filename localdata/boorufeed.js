@@ -86,7 +86,8 @@ module.exports = {
                 });
                 
                 bulkSave.push(gcfg.save());
-                const feedPath = `${guild.name ?? '?'}/${channel.name ?? '?'}::"${feed.tags ?? '[x]'}"`;
+                console.log(typeof channel);
+                const feedPath = `${guild.name ?? '?'}/${channel ? channel.name : '?'}::"${feed.tags ?? '[x]'}"`;
                 console.log(chalk.gray(`Feed procesado en ${feedPath}`));
             }
 
