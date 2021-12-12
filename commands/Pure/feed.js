@@ -81,6 +81,11 @@ module.exports = {
 					.setStyle('PRIMARY')
 					.setDisabled(!premade),
 				new MessageButton()
+					.setCustomId('feed_customizeOne')
+					.setLabel('Personalizar un Feed')
+					.setStyle('PRIMARY')
+					.setDisabled(!premade),
+				new MessageButton()
 					.setCustomId('feed_deleteOne')
 					.setLabel('Eliminar un Feed')
 					.setStyle('DANGER')
@@ -94,6 +99,201 @@ module.exports = {
 	async ['selectFeedEdit'](interaction) {
 		module.exports[interaction.channel.id].memoChannel = interaction.guild.channels.cache.get(interaction.values[0] || interaction.channel.id);
 		return await module.exports.setupTagsCollector(interaction, true, 'feed_editOne');
+	},
+
+	/**@param {import('discord.js').SelectMenuInteraction} interaction */
+	async ['selectFeedCustomize'](interaction) {
+		const fetchedChannel = interaction.guild.channels.cache.get(interaction.values[0] || interaction.channel.id);
+		module.exports[interaction.channel.id].memoChannel = fetchedChannel;
+		const wizard = new MessageEmbed()
+			.setColor('BLURPLE')
+			.setAuthor(wiztitle, interaction.client.user.avatarURL())
+			.setFooter('4/5 • Seleccionar elemento a personalizar')
+			.addField('Destino', `**${fetchedChannel.name}** (canal ${fetchedChannel.nsfw ? 'NSFW' : 'SFW'})`)
+			.addField('Selecciona un elemento a personalizar', 'Usa el menú desplegable para decidir qué personalizar');
+		
+		return await interaction.update({
+			embeds: [wizard],
+			components: [
+				new MessageActionRow().addComponents(
+					new MessageSelectMenu()
+						.setCustomId('feed_selectElementCustomize')
+						.setPlaceholder('Selecciona un elemento')
+						.setOptions([
+							{
+								label: 'Título',
+								description: 'Asigna o elimina un encabezado para mostrar en cada imagen',
+								value: 'title',
+							},
+							{
+								label: 'Etiquetas',
+								description: 'Decide el máximo de tags mostradas por cada imagen',
+								value: 'tags',
+							},
+							{
+								label: 'Pie',
+								description: 'Asigna o elimina un texto a mostrar debajo de cada imagen',
+								value: 'footer',
+							},
+						]),
+				),
+				new MessageActionRow().addComponents(
+					new MessageButton()
+						.setCustomId('feed_customizeOne')
+						.setLabel('Volver')
+						.setStyle('SECONDARY'),
+					cancelbutton,
+				),
+			],
+		});
+	},
+
+	/**@param {import('discord.js').SelectMenuInteraction} interaction */
+	async ['selectElementCustomize'](interaction) {
+		const fetchedChannel = module.exports[interaction.channel.id].memoChannel;
+		const wizard = new MessageEmbed()
+			.setColor('GREEN')
+			.setAuthor(wiztitle, interaction.client.user.avatarURL())
+			.setFooter('5/5 • Personalizar elemento')
+			.addField('Destino', `**${fetchedChannel.name}** (canal ${fetchedChannel.nsfw ? 'NSFW' : 'SFW'})`);
+		
+		const row = new MessageActionRow();
+		const customizeTarget = interaction.values[0];
+		switch(customizeTarget) {
+			case 'title':
+				wizard.addField('Personaliza el título', 'Envía un mensaje con el título que quieras que aparezca encima de cada imagen del Feed. Si quieres eliminar el título actual, usa el respectivo botón');
+				row.addComponents(
+					new MessageButton()
+						.setCustomId('feed_removeTitle')
+						.setLabel('Eliminar título')
+						.setStyle('DANGER'),
+				);
+				break;
+
+			case 'tags':
+				wizard.addField('Personaliza las etiquetas', 'Envía un mensaje con la cantidad máxima de tags a mostrar (número). Por defecto esto serían unas **20** etiquetas, y puedes especificar hasta un máximo de **50**')
+					  .addField('Eliminar campo de etiquetas', 'Si envías "0", el campo de etiquetas se ocultará por completo. No se permiten números negativos');
+				break;
+
+			case 'footer':
+				wizard.addField('Personaliza el pie', 'Envía un mensaje con el texto breve que quieras que aparezca debajo de cada imagen del Feed. Si quieres eliminar el pie actual, usa el respectivo botón');
+				row.addComponents(
+					new MessageButton()
+						.setCustomId('feed_removeFooter')
+						.setLabel('Eliminar pie')
+						.setStyle('DANGER'),
+				);
+				break;
+		}
+		row.addComponents(
+			new MessageButton()
+				.setCustomId('feed_selectFeedCustomize')
+				.setLabel('Volver')
+				.setStyle('SECONDARY'),
+			cancelbutton,
+		);
+		await interaction.update({
+			embeds: [wizard],
+			components: [row],
+		});
+
+		const filter = (m) => m.author.id === module.exports[interaction.channel.id].memoUser.id;
+		module.exports[interaction.channel.id].memoCollector = new MessageCollector(interaction.channel, { filter: filter, time: 1000 * 60 * 4 });
+		module.exports[interaction.channel.id].memoCollector.on('collect', async collected => {
+			const ccontent = collected.content;
+			collected.delete();
+
+			const guildQuery = { guildId: interaction.guild.id };
+			const gcfg = await GuildConfig.findOne(guildQuery);
+			let succeeded = false;
+			if(customizeTarget === 'tags') {
+				const num = parseInt(ccontent);
+				if(!isNaN(num) && num >= 0 && num <= 50) {
+					gcfg.feeds[fetchedChannel.id].maxTags = ccontent;
+					succeeded = true;
+				}
+			} else {
+				gcfg.feeds[fetchedChannel.id][customizeTarget] = ccontent;
+				succeeded = true;
+			}
+
+			if(!succeeded) return;
+			gcfg.markModified('feeds');
+			await gcfg.save();
+
+			const concludedEmbed = new MessageEmbed()
+				.setColor('ORANGE')
+				.setAuthor(wiztitle, interaction.client.user.avatarURL())
+				.setFooter('Operación finalizada')
+				.addField('Feed personalizado', `Se ha personalizado un elemento del Feed con las tags _"${safeTags(gcfg.feeds[fetchedChannel.id].tags)}"_ para el canal **${fetchedChannel.name}**`);
+			await interaction.message.edit({
+				embeds: [concludedEmbed],
+				components: [new MessageActionRow().addComponents(
+					new MessageButton()
+						.setCustomId('feed_customizeOne')
+						.setLabel('Seguir personalizando')
+						.setStyle('PRIMARY'),
+				)],
+			});
+
+			module.exports[interaction.channel.id].memoCollector.stop();
+		});
+	},
+
+	/**@param {import('discord.js').ButtonInteraction} interaction */
+	async ['removeTitle'](interaction) {
+		const unColl = module.exports[interaction.channel.id].memoCollector;
+		if(unColl && !unColl.ended) unColl.stop();
+		const fetchedChannel = module.exports[interaction.channel.id].memoChannel;
+
+		const guildQuery = { guildId: interaction.guild.id };
+		const gcfg = await GuildConfig.findOne(guildQuery);
+		delete gcfg.feeds[fetchedChannel.id].title;
+		gcfg.markModified('feeds');
+		await gcfg.save();
+
+		const concludedEmbed = new MessageEmbed()
+			.setColor('DARK_GREEN')
+			.setAuthor(wiztitle, interaction.client.user.avatarURL())
+			.setFooter('Operación finalizada')
+			.addField('Feed personalizado', `Se ha eliminado el título personalizado del Feed con las tags _"${safeTags(gcfg.feeds[fetchedChannel.id].tags)}"_ para el canal **${fetchedChannel.name}**`);
+		return await interaction.update({
+			embeds: [concludedEmbed],
+			components: [new MessageActionRow().addComponents(
+				new MessageButton()
+					.setCustomId('feed_customizeOne')
+					.setLabel('Seguir personalizando')
+					.setStyle('PRIMARY'),
+			)],
+		});
+	},
+
+	/**@param {import('discord.js').ButtonInteraction} interaction */
+	async ['removeFooter'](interaction) {
+		const unColl = module.exports[interaction.channel.id].memoCollector;
+		if(unColl && !unColl.ended) unColl.stop();
+		const fetchedChannel = module.exports[interaction.channel.id].memoChannel;
+
+		const guildQuery = { guildId: interaction.guild.id };
+		const gcfg = await GuildConfig.findOne(guildQuery);
+		delete gcfg.feeds[fetchedChannel.id].footer;
+		gcfg.markModified('feeds');
+		await gcfg.save();
+
+		const concludedEmbed = new MessageEmbed()
+			.setColor('DARK_GREEN')
+			.setAuthor(wiztitle, interaction.client.user.avatarURL())
+			.setFooter('Operación finalizada')
+			.addField('Feed personalizado', `Se ha eliminado el texto de pie personalizado del Feed con las tags _"${safeTags(gcfg.feeds[fetchedChannel.id].tags)}"_ para el canal **${fetchedChannel.name}**`);
+		return await interaction.update({
+			embeds: [concludedEmbed],
+			components: [new MessageActionRow().addComponents(
+				new MessageButton()
+					.setCustomId('feed_customizeOne')
+					.setLabel('Seguir personalizando')
+					.setStyle('PRIMARY'),
+			)],
+		});
 	},
 
 	/**@param {import('discord.js').SelectMenuInteraction} interaction */
@@ -123,7 +323,11 @@ module.exports = {
 		});
 	},
 
-	/**@param {import('discord.js').ButtonInteraction} interaction */
+	/**
+	 * @param {import('discord.js').Message | import('discord.js').ButtonInteraction} interaction
+	 * @param {Boolean} reply
+	 * @param {String} backButtonFn
+	 */
 	async setupTagsCollector(interaction, reply, backButtonFn) {
 		const fetchedChannel = module.exports[interaction.channel.id].memoChannel;
 		const wizard = new MessageEmbed()
@@ -133,7 +337,7 @@ module.exports = {
 			.addField('Destino', `**${fetchedChannel.name}** (canal ${fetchedChannel.nsfw ? 'NSFW' : 'SFW'})`)
 			.addField('Describe las tags del Feed', 'Entra a [Gelbooru](https://gelbooru.com) y realiza una búsqueda con tags que te den las imágenes deseadas para el Feed, separadas por espacios. Una vez lo consigas, simplemente copia las tags y envíalas como mensaje.\n_Es necesario que las tags estén bien escritas_')
 			.addField('Control de contenidos', '**IMPORTANTE:** Si quieres resultados SFW, utiliza la tag meta `rating:safe`; si quieres resultados NSFW, añade la tag `rating:explicit`; si quieres una combinación de ambos, no ingreses ninguna de estas')
-			.addField('Ejemplo de uso', 'Enviar `touhou rating:safe -breast_grab` creará un Feed de imágenes _SFW_ de Touhou que _no_ tengan la tag "breast_grab"');
+			.addField('Ejemplo de uso', 'Enviar `touhou rating:safe -breast_grab` configurará un Feed de imágenes _SFW_ de Touhou que _no_ tengan la tag "breast_grab"');
 		const responseUpdate = {
 			embeds: [wizard],
 			components: [new MessageActionRow().addComponents(
@@ -155,10 +359,8 @@ module.exports = {
 			const guildQuery = { guildId: interaction.guild.id };
 			const gcfg = (await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery);
 			gcfg.feeds = gcfg.feeds || {};
-			gcfg.feeds[fetchedChannel.id] = {
-				tags: ccontent,
-				ids: [],
-			};
+			gcfg.feeds[fetchedChannel.id] = gcfg.feeds[fetchedChannel.id] || { ids: (new Array(16)).fill('') };
+			gcfg.feeds[fetchedChannel.id].tags = ccontent;
 			gcfg.markModified('feeds');
 			await gcfg.save();
 
@@ -167,7 +369,7 @@ module.exports = {
 				.setAuthor(wiztitle, interaction.client.user.avatarURL())
 				.setFooter('Operación finalizada')
 				.addField('Feed configurado', `Se ha configurado un Feed con las tags _"${safeTags(ccontent)}"_ para el canal **${fetchedChannel.name}**`)
-				.addField('Control del Feed', 'Puedes modificar o eliminar este Feed en cualquier momento siguiendo el Asistente de `p!feed` una vez más');
+				.addField('Control del Feed', 'Puedes modificar, personalizar o eliminar este Feed en cualquier momento siguiendo el Asistente de `p!feed` una vez más');
 			await interaction.message.edit({
 				embeds: [concludedEmbed],
 				components: [],
@@ -257,6 +459,41 @@ module.exports = {
 				new MessageActionRow().addComponents(
 					new MessageSelectMenu()
 						.setCustomId('feed_selectFeedEdit')
+						.setPlaceholder('Selecciona un Feed')
+						.addOptions(feeds),
+				),
+				new MessageActionRow().addComponents(
+					new MessageButton()
+						.setCustomId('feed_startWizard')
+						.setLabel('Volver')
+						.setStyle('SECONDARY'),
+					cancelbutton,
+				),
+			],
+		});
+	},
+
+	/**@param {import('discord.js').ButtonInteraction} interaction */
+	async ['customizeOne'](interaction) {
+		const unColl = module.exports[interaction.channel.id].memoCollector;
+		if(unColl && !unColl.ended) unColl.stop();
+		const wizard = new MessageEmbed()
+			.setColor('GREYPLE')
+			.setAuthor(wiztitle, interaction.client.user.avatarURL())
+			.setFooter('3/5 • Seleccionar Feed')
+			.addField('Selección de Feed', 'Los Feeds que configuraste anteriormente están categorizados por canal y tags. Encuentra el que quieras personalizar en esta lista y selecciónalo');
+		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
+		const feeds = Object.entries(gcfg.feeds).map(([chid, feed]) => ({
+			label: feed.tags,
+			description: `#${interaction.guild.channels.cache.get(chid).name}`,
+			value: chid,
+		}));
+		return await interaction.update({
+			embeds: [wizard],
+			components: [
+				new MessageActionRow().addComponents(
+					new MessageSelectMenu()
+						.setCustomId('feed_selectFeedCustomize')
 						.setPlaceholder('Selecciona un Feed')
 						.addOptions(feeds),
 				),

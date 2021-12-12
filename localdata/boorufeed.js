@@ -5,66 +5,83 @@ const { Client, MessageEmbed, MessageActionRow, MessageButton } = require('disco
 module.exports = {
     /**@param {Client} client*/
     async updateBooruFeeds(client) {
-        /**@type {Array<Object>} */
+        console.log('Comprobando actualizaciones en Feeds de imágenes...');
         const maxDocuments = 16;
-        const maxTags = 20;
         const guilds = client.guilds.cache;
         guilds.forEach(async guild => {
             const gcfg = await GuildConfig.findOne({ guildId: guild.id });
             if(!gcfg) return;
             const bulkSave = [];
+            let feedcnt = 0;
             for(const [chid, feed] of Object.entries(gcfg.feeds)) {
+                feedcnt++;
                 const channel = guild.channels.cache.get(chid);
                 const response = await booru.search('gelbooru', feed.tags, { limit: maxDocuments, random: false });
+                const maxTags = feed.maxTags ?? 20;
 
                 if(!response.length) {
                     delete gcfg.feeds[chid];
                     gcfg.markModified('feeds');
-                } else {
+                } else
                     response.reverse().forEach(image => {
                         if(feed.ids.includes(image.id)) return;
 
-                        gcfg.feeds[chid].ids = [ image.id, ...gcfg.feeds[chid].ids ].slice(0, maxDocuments);
+                        feed.ids = [ image.id, ...feed.ids ];
+                        gcfg.feeds[chid].ids = feed.ids.filter(id => response.some(img => img.id === id));
                         gcfg.markModified('feeds');
+
                         const row = new MessageActionRow().addComponents(
                             new MessageButton()
                                 .setLabel('Post')
-                                .setEmoji('919133024770211880')
+                                .setEmoji('919398540172750878')
                                 .setStyle('LINK')
                                 .setURL(`https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`),
                         );
+
                         const source = Array.isArray(image.source) ? image.source[0] : (image.source || undefined);
-                        if(source && source.match(/((http:\/\/|https:\/\/)?(www.)?(([a-zA-Z0-9-]){2,}\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?)/))
+                        if(source && source.match(/(http:\/\/|https:\/\/)?(www\.)?(([a-zA-Z0-9-]){2,}\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/)) {
+                            let emoji;
+                            if(source.indexOf('pixiv.net') !== -1)
+                                emoji = '919403803126661120';
+                            else if(source.indexOf('twitter.com') !== -1)
+                                emoji = '919403803114094682';
+                            else
+                                emoji = '919114849894690837';
                             row.addComponents(
                                 new MessageButton()
                                     .setLabel('Original')
-                                    .setEmoji('919114849894690837')
+                                    .setEmoji(emoji)
                                     .setStyle('LINK')
                                     .setURL(source),
                             );
+                        }
+
+                        const feedEmbed = new MessageEmbed()
+                            .setColor('#608bf3')
+                            .setAuthor('Desde Gelbooru', feed.cornerImageUrl ? feed.cornerImageUrl : 'https://i.imgur.com/outZ5Hm.png' )
+                            .setImage(image.fileUrl);
+                        
+                        if(maxTags > 0)
+                            feedEmbed.addField(`Tags (${Math.min(image.tags.length, maxTags)}/${image.tags.length})`, `*${image.tags.slice(0, maxTags).join(', ').replace(/\\*\*/g,'\\*').replace(/\\*_/g,'\\_')}*`);
+                        if(feed.title)
+                            feedEmbed.setTitle(feed.title);
+                        if(feed.footer)
+                            feedEmbed.setFooter(feed.footer);
                         
                         channel.send({
-                            embeds: [
-                                new MessageEmbed()
-                                    .setColor('#608bf3')
-                                    .setAuthor('Desde Gelbooru', 'https://i.imgur.com/outZ5Hm.png')
-                                    //.setTitle(feed.tags.split(/ +/g).slice(0, 3).join(' ').replace(/rating:/g, ''))
-                                    .addField(`Tags (${Math.min(image.tags.length, maxTags)}/${image.tags.length})`, `*${image.tags.slice(0,maxTags).join(', ').replace(/\\*\*/g,'\\*').replace(/\\*_/g,'\\_')}*`)
-                                    //.addField('Salsa', [
-                                    //    `[Gelbooru](https://gelbooru.com/index.php?page=post&s=view&id=${image.id})`,
-                                    //    image.source ? `[Original](${image.source})` : null
-                                    //].join('\n'))
-                                    .setImage(image.fileUrl)
-                            ],
+                            embeds: [feedEmbed],
                             components: [row],
                         });
                     });
-                }
 
                 bulkSave.push(gcfg.save());
             }
 
             await Promise.all(bulkSave);
+            console.log(feedcnt === 1
+                ? `Se comprobó    1 Feed  en ${guild.name}`
+                : `Se comprobaron ${feedcnt} Feeds en ${guild.name}`
+            );
         });
 
         setTimeout(module.exports.updateBooruFeeds, 1000 * 60, client);
