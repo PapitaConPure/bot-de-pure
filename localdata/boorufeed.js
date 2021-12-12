@@ -23,7 +23,7 @@ module.exports = {
                 const maxTags = feed.maxTags ?? 20;
 
                 ///Eliminar Feed si las tags ingresadas no devuelven ninguna imagen
-                if(!response.length) {
+                if(typeof channel === 'undefined' || !response.length) {
                     delete gcfg.feeds[chid];
                     gcfg.markModified('feeds');
                     bulkSave.push(gcfg.save());
@@ -86,8 +86,7 @@ module.exports = {
                 });
                 
                 bulkSave.push(gcfg.save());
-                console.log(typeof channel);
-                const feedPath = `${guild.name ?? '?'}/${channel ? channel.name : '?'}::"${feed.tags ?? '[x]'}"`;
+                const feedPath = `${guild.name ?? '?'}/${channel ? channel.name : '<canal eliminado>'}::"${feed.tags ?? '[x]'}"`;
                 console.log(chalk.gray(`Feed procesado en ${feedPath}`));
             }
 
