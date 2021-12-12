@@ -11,8 +11,6 @@
             "PLACEHOLDER_SLASHCMD",
             "Agregado p!prefijo",
             "Agregado p!aqua",
-            "p!anarquia ahora es permanente",
-            "p!info ahora recopila información permanente",
             "Bandera `--bomba` agregada en p!buscar y similares",
             "p!caos e identificador `CHAOS` agregados",
             "Correcciones de errores varios",
@@ -20,7 +18,7 @@
             "p!mimar agregado",
             "Tag de Yuuma Toutetsu agregada en p!touhou",
             "p!elegir añadido",
-            "p!feed añadido",
+            "p!feed incorporado",
             "p!colores ahora usa un menú desplegable (H. Doll)",
             "p!feed ahora permite personalizar más aspectos del Feed",
             "Corregido error de vista previa de videos en Feeds"
