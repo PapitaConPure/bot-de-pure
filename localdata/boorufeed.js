@@ -7,13 +7,13 @@ module.exports = {
     /**@param {Client} client*/
     async updateBooruFeeds(client) {
         console.log(chalk.cyanBright('Comprobando actualizaciones en Feeds de imágenes...'));
+        const feedCheckupStart = Date.now();
         const maxDocuments = 16;
         /** @type {import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Guild>} */
         const guilds = client.guilds.cache;
         await Promise.all(guilds.map(async guild => {
             const gcfg = await GuildConfig.findOne({ guildId: guild.id });
             if(!gcfg) return;
-            const bulkSave = [];
             let feedcnt = 0;
             for(const [chid, feed] of Object.entries(gcfg.feeds)) {
                 feedcnt++;
@@ -26,10 +26,10 @@ module.exports = {
                 if(typeof channel === 'undefined' || !response.length) {
                     delete gcfg.feeds[chid];
                     gcfg.markModified('feeds');
-                    bulkSave.push(gcfg.save());
                     return;
                 }
-
+                
+                const feedPath = `${guild.name ?? '?'}/${channel ? channel.name : '<canal eliminado>'}::"${feed.tags ?? '[x]'}"`;
                 response.reverse().forEach(image => {
                     if(feed.ids.includes(image.id)) return;
 
@@ -82,15 +82,13 @@ module.exports = {
                     feedMessage.embeds = [feedEmbed];
 
                     channel.send(feedMessage).catch(() => console.log(chalk.red('Error de tiempo de espera en Feed')));
-                    console.log(chalk.white('Imagen nueva procesada'));
+                    console.log(chalk.yellow(`Imagen nueva procesada en ${feedPath}`));
                 });
                 
-                bulkSave.push(gcfg.save());
-                const feedPath = `${guild.name ?? '?'}/${channel ? channel.name : '<canal eliminado>'}::"${feed.tags ?? '[x]'}"`;
                 console.log(chalk.gray(`Feed procesado en ${feedPath}`));
             }
 
-            await Promise.all(bulkSave);
+            await gcfg.save();
             console.log(chalk.gray(feedcnt === 1
                 ? `Se comprobó    1 Feed  en ${guild.name}`
                 : `Se comprobaron ${feedcnt} Feeds en ${guild.name}`
@@ -98,6 +96,6 @@ module.exports = {
         }));
 
         setTimeout(module.exports.updateBooruFeeds, 1000 * 60, client);
-        console.log(chalk.green('Lectura global de Feeds procesada'));
+        console.log(chalk.green(`Lectura global de Feeds procesada en ${(Date.now() - feedCheckupStart) / 1000}s`));
     },
 }
