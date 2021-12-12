@@ -562,8 +562,7 @@ module.exports = {
             await canal.send({
                 content:
                     `Wena po <@${miembro.user.id}> conchetumare, como estai.\n` +
-                    'Como tradición, elige un color reaccionando a alguna de estas cartas <:mayuwu:654489124413374474>\n' +
-                    '<:FrenchDoll:819772377814532116><:OrleansDoll:819772377642041345><:HollandDoll:819772377624870973><:RussianDoll:819772377894354944><:LondonDoll:819772377856606228><:TibetanDoll:819772377482526741><:KyotoDoll:819772377440583691>\n' +
+                    'Como tradición, elige un color con el menú de abajo <:mayuwu:654489124413374474>\n' +
                     'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:697321858407727224>\n' +
                     '<@&654472238510112799>, vengan a saludar po maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
                     `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n`,
