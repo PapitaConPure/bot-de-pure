@@ -79,7 +79,7 @@ module.exports = {
                     } else
                         feedEmbed.setImage(image.fileUrl);
                     feedMessage.embeds = [feedEmbed];
-                    console.log(`Embed: ${feedEmbed.image}\nReflejado en mensaje: ${feedMessage.embeds[0].image}`);
+                    console.log(`Embed: { ${Object.entries(feedEmbed.image).map(([k, v]) => `${k}: ${v}`).join(', ')} }\nReflejado en mensaje: { ${Object.entries(feedMessage.embeds[0].image).map(([k, v]) => `${k}: ${v}`).join(', ')} }`);
 
                     channel.send(feedMessage).catch(() => console.log(chalk.red('Error de tiempo de espera en Feed')));
                 });
