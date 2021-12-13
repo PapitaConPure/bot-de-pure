@@ -17,9 +17,17 @@ module.exports = {
             let feedcnt = 0;
             for(const [chid, feed] of Object.entries(gcfg.feeds)) {
                 feedcnt++;
+                let fetchedProperly = true;
+                const response = await booru.search('gelbooru', feed.tags, { limit: maxDocuments, random: false })
+                .catch(error => {
+                    console.log('Ocurrió un problema mientras se esperaban los resultados de búsqueda de un Feed');
+                    console.error(error);
+                    fetchedProperly = false;
+                    return [ 'error' ];
+                });
+                if(!fetchedProperly) return;
                 /** @type {import('discord.js').TextChannel} */
                 const channel = guild.channels.cache.get(chid);
-                const response = await booru.search('gelbooru', feed.tags, { limit: maxDocuments, random: false });
                 const maxTags = feed.maxTags ?? 20;
 
                 ///Eliminar Feed si las tags ingresadas no devuelven ninguna imagen
