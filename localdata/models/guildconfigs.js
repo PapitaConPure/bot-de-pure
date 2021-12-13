@@ -6,7 +6,7 @@ const GuildConfigSchema = new Mongoose.Schema({
     /** Habilitar modo caótico del servidor. */
     chaos: { type: Boolean, default: false },
     /** Papas del servidor. */
-    potatoes: { type: Object, default: {} },
+    tubers: { type: Object, default: {} },
     /** Feeds de imágenes del servidor. */
     feeds: { type: Object, default: {} },
 });
