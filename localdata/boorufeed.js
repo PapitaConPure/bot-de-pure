@@ -29,7 +29,6 @@ module.exports = {
                     return;
                 }
                 
-                const feedPath = `${guild.name ?? '?'}/${channel ? channel.name : '<canal eliminado>'}::"${feed.tags ?? '[x]'}"`;
                 response.reverse().forEach(image => {
                     if(feed.ids.includes(image.id)) return;
 
@@ -67,7 +66,7 @@ module.exports = {
                     const feedMessage = { components: [row] };
                     const feedEmbed = new MessageEmbed()
                         .setColor('#608bf3')
-                        .setAuthor('Desde Gelbooru', feed.cornerImageUrl ? feed.cornerImageUrl : 'https://i.imgur.com/outZ5Hm.png');
+                        .setAuthor('Desde Gelbooru', feed.cornerIcon ? feed.cornerIcon : 'https://i.imgur.com/outZ5Hm.png');
                     if(maxTags > 0)
                         feedEmbed.addField(`Tags (${Math.min(image.tags.length, maxTags)}/${image.tags.length})`, `*${image.tags.slice(0, maxTags).join(', ').replace(/\\*\*/g,'\\*').replace(/\\*_/g,'\\_')}*`);
                     if(feed.title)
@@ -76,16 +75,14 @@ module.exports = {
                         feedEmbed.setFooter(feed.footer);
                     if(image.fileUrl.match(/\.(mp4|webm|webp)/)) {
                         feedMessage.files = [image.fileUrl];
-                        feedEmbed.addField('Archivo incompatible detectado', 'Debido a limitaciones de Discord, el archivo debe enviarse fuera del marco');
+                        feedEmbed.addField('No se pudo mostrar la vista previa aquí', 'El archivo se envió fuera del marco. Puede que aun así no se vea');
                     } else
                         feedEmbed.setImage(image.fileUrl);
                     feedMessage.embeds = [feedEmbed];
+                    console.log(`Embed: ${feedEmbed.image}\nReflejado en mensaje: ${feedMessage.embeds[0].image}`);
 
                     channel.send(feedMessage).catch(() => console.log(chalk.red('Error de tiempo de espera en Feed')));
-                    console.log(chalk.yellow(`Imagen nueva procesada en ${feedPath}`));
                 });
-                
-                console.log(chalk.gray(`Feed procesado en ${feedPath}`));
             }
 
             await gcfg.save();

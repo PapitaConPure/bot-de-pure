@@ -135,6 +135,11 @@ module.exports = {
 								description: 'Asigna o elimina un texto a mostrar debajo de cada imagen',
 								value: 'footer',
 							},
+							{
+								label: 'Ícono de esquina',
+								description: 'Elige un ícono de esquina personalizado para cada imagen',
+								value: 'cornerIcon',
+							},
 						]),
 				),
 				new MessageActionRow().addComponents(
@@ -184,6 +189,16 @@ module.exports = {
 						.setStyle('DANGER'),
 				);
 				break;
+
+			case 'cornerIcon':
+				wizard.addField('Personaliza el ícono de esquina', 'Envía un mensaje con el texto breve que quieras que aparezca debajo de cada imagen del Feed. Si quieres eliminar el pie actual, usa el respectivo botón');
+				row.addComponents(
+					new MessageButton()
+						.setCustomId('feed_removeCornerIcon')
+						.setLabel('Restaurar ícono por defecto')
+						.setStyle('DANGER'),
+				);
+				break;
 		}
 		row.addComponents(
 			new MessageButton()
@@ -199,6 +214,7 @@ module.exports = {
 
 		const filter = (m) => m.author.id === module.exports[interaction.channel.id].memoUser.id;
 		module.exports[interaction.channel.id].memoCollector = new MessageCollector(interaction.channel, { filter: filter, time: 1000 * 60 * 4 });
+		
 		module.exports[interaction.channel.id].memoCollector.on('collect', async collected => {
 			const ccontent = collected.content;
 			collected.delete();
@@ -206,15 +222,41 @@ module.exports = {
 			const guildQuery = { guildId: interaction.guild.id };
 			const gcfg = await GuildConfig.findOne(guildQuery);
 			let succeeded = false;
-			if(customizeTarget === 'tags') {
-				const num = parseInt(ccontent);
-				if(!isNaN(num) && num >= 0 && num <= 50) {
-					gcfg.feeds[fetchedChannel.id].maxTags = ccontent;
+			switch(customizeTarget) {
+				case 'tags':
+					const num = parseInt(ccontent);
+					if(!isNaN(num) && num >= 0 && num <= 50) {
+						gcfg.feeds[fetchedChannel.id].maxTags = ccontent;
+						succeeded = true;
+					}
+					break;
+				
+				case 'cornerIcon':
+					const cattach = collected.attachments;
+					console.log(cattach.length ? cattach[0] : cattach);
+					if(cattach.size && cattach.first().proxyURL.match(/(http:\/\/|https:\/\/)?(www\.)?(([a-zA-Z0-9-]){2,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_\/\.0-9#:?=&;,]*\.(png|jpg|jpeg|gif)[a-zA-Z-_\.0-9#:?=&;,]*/)) {
+						gcfg.feeds[fetchedChannel.id].cornerIcon = cattach.first().proxyURL;
+						succeeded = true;
+					} else {
+						//Crear embed de prueba para asegurarse de que el enlace sea una imagen válida
+						const testEmbed = new MessageEmbed()
+							.setColor('WHITE')
+							.setAuthor('Verificando enlace...', ccontent);
+						await interaction.channel.send({ embeds: [testEmbed] }).then(sent => {
+							console.log(sent.embeds[0].author);
+							if(sent.embeds[0].author.iconURL) {
+								gcfg.feeds[fetchedChannel.id].cornerIcon = ccontent;
+								succeeded = true;
+							}
+							setTimeout(() => { if(!sent.deleted) sent.delete() }, 1500);
+						}).catch(error => console.error(error));
+					}
+					break;
+
+				default:
+					gcfg.feeds[fetchedChannel.id][customizeTarget] = ccontent;
 					succeeded = true;
-				}
-			} else {
-				gcfg.feeds[fetchedChannel.id][customizeTarget] = ccontent;
-				succeeded = true;
+					break;
 			}
 
 			if(!succeeded) return;
@@ -285,6 +327,34 @@ module.exports = {
 			.setAuthor(wiztitle, interaction.client.user.avatarURL())
 			.setFooter('Operación finalizada')
 			.addField('Feed personalizado', `Se ha eliminado el texto de pie personalizado del Feed con las tags _"${safeTags(gcfg.feeds[fetchedChannel.id].tags)}"_ para el canal **${fetchedChannel.name}**`);
+		return await interaction.update({
+			embeds: [concludedEmbed],
+			components: [new MessageActionRow().addComponents(
+				new MessageButton()
+					.setCustomId('feed_customizeOne')
+					.setLabel('Seguir personalizando')
+					.setStyle('PRIMARY'),
+			)],
+		});
+	},
+
+	/**@param {import('discord.js').ButtonInteraction} interaction */
+	async ['removeCornerIcon'](interaction) {
+		const unColl = module.exports[interaction.channel.id].memoCollector;
+		if(unColl && !unColl.ended) unColl.stop();
+		const fetchedChannel = module.exports[interaction.channel.id].memoChannel;
+
+		const guildQuery = { guildId: interaction.guild.id };
+		const gcfg = await GuildConfig.findOne(guildQuery);
+		delete gcfg.feeds[fetchedChannel.id].cornerIcon;
+		gcfg.markModified('feeds');
+		await gcfg.save();
+
+		const concludedEmbed = new MessageEmbed()
+			.setColor('DARK_GREEN')
+			.setAuthor(wiztitle, interaction.client.user.avatarURL())
+			.setFooter('Operación finalizada')
+			.addField('Feed personalizado', `Se ha eliminado el ícono de esquina personalizado del Feed con las tags _"${safeTags(gcfg.feeds[fetchedChannel.id].tags)}"_ para el canal **${fetchedChannel.name}**`);
 		return await interaction.update({
 			embeds: [concludedEmbed],
 			components: [new MessageActionRow().addComponents(
