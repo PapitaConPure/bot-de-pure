@@ -83,13 +83,21 @@ module.exports = {
                         feedEmbed.setFooter(feed.footer);
                     if(image.fileUrl.match(/\.(mp4|webm|webp)/)) {
                         feedMessage.files = [image.fileUrl];
-                        feedEmbed.addField('No se pudo mostrar la vista previa aquí', 'El archivo se envió fuera del marco. Puede que aun así no se vea');
+                        feedEmbed.addField('No se pudo mostrar la vista previa aquí', 'La vista previa se enviará fuera del marco');
                     } else
                         feedEmbed.setImage(image.fileUrl);
                     feedMessage.embeds = [feedEmbed];
-                    console.log(`Embed: { ${Object.entries(feedEmbed.image).map(([k, v]) => `${k}: ${v}`).join(', ')} }\nReflejado en mensaje: { ${Object.entries(feedMessage.embeds[0].image).map(([k, v]) => `${k}: ${v}`).join(', ')} }`);
 
-                    channel.send(feedMessage).catch(() => console.log(chalk.red('Error de tiempo de espera en Feed')));
+                    channel.send(feedMessage)
+                    .then(sent => {
+                        const sentImage = sent.embeds[0].image;
+                        if(!sentImage.width && !sentImage.height) {
+                            feedEmbed.image = null;
+                            feedEmbed.addField('No se pudo mostrar la vista previa aquí', 'La vista previa se enviará fuera del marco');
+                            sent.edit({ files: [image.fileUrl], embeds: [feedEmbed] });
+                        }
+                    })
+                    .catch(() => console.log(chalk.red('Error de tiempo de espera en Feed')));
                 });
             }
 
