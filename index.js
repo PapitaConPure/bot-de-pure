@@ -130,8 +130,7 @@ client.on('ready', async () => {
 
     //Test
     /**@type {Discord.Message} */
-    const mensajeqliao = await client.guilds.cache.get(global.serverid.hourai).channels.cache.get('736669962424287354').messages.fetch('920065762301997097');
-    console.log(mensajeqliao);
+    const mensajeqliao = await client.guilds.cache.get(global.serverid.hourai).channels.cache.get('736669962424287354').messages.fetch('920065761026920499');
     console.log(mensajeqliao.embeds[0]);
 
     try {
