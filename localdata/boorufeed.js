@@ -91,6 +91,7 @@ module.exports = {
                     channel.send(feedMessage)
                     .then(sent => {
                         const sentImage = sent.embeds[0].image;
+                        console.log(sentImage);
                         if(!sentImage.width && !sentImage.height) {
                             feedEmbed.image = null;
                             feedEmbed.addField('No se pudo mostrar la vista previa aquí', 'La vista previa se enviará fuera del marco');
