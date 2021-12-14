@@ -88,25 +88,15 @@ module.exports = {
                         feedEmbed.setImage(image.fileUrl);
                     feedMessage.embeds = [feedEmbed];
 
-                    channel.send(feedMessage)
-                    .then(sent => {
-                        const sentImage = sent.embeds[0].image;
-                        console.log(sentImage);
-                        if(!sentImage.width && !sentImage.height) {
-                            feedEmbed.image = null;
-                            feedEmbed.addField('No se pudo mostrar la vista previa aquí', 'La vista previa se enviará fuera del marco');
-                            sent.edit({ files: [image.fileUrl], embeds: [feedEmbed] });
-                        }
-                    })
-                    .catch(() => console.log(chalk.red('Error de tiempo de espera en Feed')));
+                    channel.send(feedMessage).catch(() => console.log(chalk.red('Error de tiempo de espera en Feed')));
                 });
             }
 
             await gcfg.save();
-            console.log(chalk.gray(feedcnt === 1
+            /*console.log(chalk.gray(feedcnt === 1
                 ? `Se comprobó    1 Feed  en ${guild.name}`
                 : `Se comprobaron ${feedcnt} Feeds en ${guild.name}`
-            ));
+            ));*/
         }));
 
         setTimeout(module.exports.updateBooruFeeds, 1000 * 60, client);
