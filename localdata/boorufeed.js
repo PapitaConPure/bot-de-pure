@@ -6,17 +6,18 @@ const { Client, MessageEmbed, MessageActionRow, MessageButton } = require('disco
 module.exports = {
     /**@param {Client} client*/
     async updateBooruFeeds(client) {
-        console.log(chalk.cyanBright('Comprobando actualizaciones en Feeds de imágenes...'));
+        //console.log(chalk.cyanBright('Comprobando actualizaciones en Feeds de imágenes...'));
         const feedCheckupStart = Date.now();
         const maxDocuments = 16;
+        let feedsCount = 0;
+        let promisesCount = 0;
         /** @type {import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Guild>} */
         const guilds = client.guilds.cache;
         await Promise.all(guilds.map(async guild => {
             const gcfg = await GuildConfig.findOne({ guildId: guild.id });
             if(!gcfg) return;
-            let feedcnt = 0;
             for(const [chid, feed] of Object.entries(gcfg.feeds)) {
-                feedcnt++;
+                feedsCount++;
                 let fetchedProperly = true;
                 const response = await booru.search('gelbooru', feed.tags, { limit: maxDocuments, random: false })
                 .catch(error => {
@@ -88,18 +89,15 @@ module.exports = {
                         feedEmbed.setImage(image.fileUrl);
                     feedMessage.embeds = [feedEmbed];
 
+                    promisesCount++;
                     channel.send(feedMessage).catch(() => console.log(chalk.red('Error de tiempo de espera en Feed')));
                 });
             }
 
             await gcfg.save();
-            /*console.log(chalk.gray(feedcnt === 1
-                ? `Se comprobó    1 Feed  en ${guild.name}`
-                : `Se comprobaron ${feedcnt} Feeds en ${guild.name}`
-            ));*/
         }));
 
         setTimeout(module.exports.updateBooruFeeds, 1000 * 60, client);
-        console.log(chalk.green(`Lectura global de Feeds procesada en ${(Date.now() - feedCheckupStart) / 1000}s`));
+        console.log(chalk.green(`Se procesaron ${feedsCount} Feeds deste ${guilds.size} servers en ${(Date.now() - feedCheckupStart) / 1000}s. ${promisesCount} imágenes nuevas puestas en envío`));
     },
 }
