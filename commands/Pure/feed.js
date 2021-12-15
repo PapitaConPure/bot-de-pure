@@ -518,11 +518,20 @@ module.exports = {
 			.setFooter('3/4 • Seleccionar Feed')
 			.addField('Selección de Feed', 'Los Feeds que configuraste anteriormente están categorizados por canal y tags. Encuentra el que quieras modificar en esta lista y selecciónalo');
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-		const feeds = Object.entries(gcfg.feeds).map(([chid, feed]) => ({
-			label: feed.tags,
-			description: `#${interaction.guild.channels.cache.get(chid).name}`,
-			value: chid,
-		}));
+		const feeds = Object.entries(gcfg.feeds).map(([chid, feed]) => {
+			const channel = interaction.guild.channels.cache.get(chid);
+			if(!channel) {
+				delete gcfg.feeds[chid];
+				gcfg.markModified('feeds');
+				return null;
+			}
+			return {
+				label: feed.tags,
+				description: `#${channel.name}`,
+				value: chid,
+			};
+		}).filter(feed => feed);
+		gcfg.save();
 		return await interaction.update({
 			embeds: [wizard],
 			components: [
@@ -542,7 +551,7 @@ module.exports = {
 			],
 		});
 	},
-
+	
 	/**@param {import('discord.js').ButtonInteraction} interaction */
 	async ['customizeOne'](interaction) {
 		const unColl = module.exports[interaction.channel.id].memoCollector;
@@ -553,11 +562,20 @@ module.exports = {
 			.setFooter('3/5 • Seleccionar Feed')
 			.addField('Selección de Feed', 'Los Feeds que configuraste anteriormente están categorizados por canal y tags. Encuentra el que quieras personalizar en esta lista y selecciónalo');
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-		const feeds = Object.entries(gcfg.feeds).map(([chid, feed]) => ({
-			label: feed.tags,
-			description: `#${interaction.guild.channels.cache.get(chid).name}`,
-			value: chid,
-		}));
+		const feeds = Object.entries(gcfg.feeds).map(([chid, feed]) => {
+			const channel = interaction.guild.channels.cache.get(chid);
+			if(!channel) {
+				delete gcfg.feeds[chid];
+				gcfg.markModified('feeds');
+				return null;
+			}
+			return {
+				label: feed.tags,
+				description: `#${channel.name}`,
+				value: chid,
+			};
+		}).filter(feed => feed);
+		gcfg.save();
 		return await interaction.update({
 			embeds: [wizard],
 			components: [
