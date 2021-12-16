@@ -6,7 +6,7 @@ const options = new CommandOptionsManager()
 	.addParam('usuario', 'USER', 'para aplicar Hanged Doll a un usuario', { optional: true })
 	.addFlag('t', 'todos', 'para aplicar Hanged Doll a todos los usuarios');
 
-const hd = '921076454287101962'; //'682629889702363143'; //Hanged Doll
+const hd = '682629889702363143'; //Hanged Doll
 
 module.exports = {
 	name: 'colgar',
