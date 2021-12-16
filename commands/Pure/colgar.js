@@ -95,6 +95,7 @@ module.exports = {
 		}
 		const embed = new MessageEmbed()
 			.setTitle('Colgada en Masa ejecutada')
+			.setImage('https://i.imgur.com/RVsStid.png')
 			.addField('Se colgó a todos los miembros', 'Felicidades, Alice');
 		await interaction.update({
 			embeds: [embed],
