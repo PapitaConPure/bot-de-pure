@@ -1,8 +1,12 @@
-const { fetchUserID } = require('../../func');
+const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { fetchFlag, fetchUserID } = require('../../func');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
 const options = new CommandOptionsManager()
-	.addParam('usuario', 'USER', 'para aplicar Hanged Doll a un usuario');
+	.addParam('usuario', 'USER', 'para aplicar Hanged Doll a un usuario', { optional: true })
+	.addFlag('t', 'todos', 'para aplicar Hanged Doll a todos los usuarios');
+
+const hd = '921076454287101962'; //'682629889702363143'; //Hanged Doll
 
 module.exports = {
 	name: 'colgar',
@@ -20,31 +24,118 @@ module.exports = {
 	options,
 	callx: '<usuario>',
 
-	async execute(message, args) {
+	async execute(request, args) {
 		//Acción de comando
-		const { client, guild, channel } = message;
+		const { client, guild, channel } = request;
 		if(!args.length) {
 			channel.send({ content: ':warning: Debes indicar un usuario.' });
 			return;
 		}
 
-		const hd = '682629889702363143'; //Hanged Doll
-		const member = guild.members.cache.get(fetchUserID(args.join(' '), { guild: guild, client: client }));
-		if(!member) {
-			message.delete();
-			const sent = await channel.send({ content: ':warning: La gente que no existe por lo general no tiene cuello <:invertido:720736131368485025>' });
-			setTimeout(() => sent.delete(), 1000 * 5);
+		const everyone = fetchFlag(args, { short: ['t'], long: ['todos'], callback: true });
+		let wasHanged;
+
+		if(everyone) {
+			const embed = new MessageEmbed()
+				.setTitle('Colgar a todos')
+				.addField('Confirmar operación', '¿Quieres colgar o descolgar a todos?');
+			module.exports.memoAuthorId = request.author.id;
+			await channel.send({
+				embeds: [embed],
+				components: [new MessageActionRow().addComponents(
+					new MessageButton()
+						.setCustomId('colgar_addHanged')
+						.setLabel('Colgar')
+						.setStyle('DANGER'),
+					new MessageButton()
+						.setCustomId('colgar_removeHanged')
+						.setLabel('Descolgar')
+						.setStyle('SUCCESS'),
+					new MessageButton()
+						.setCustomId('colgar_cancelHanged')
+						.setLabel('Cancelar')
+						.setStyle('SECONDARY'),
+				)],
+			});
+		} else {
+			const member = guild.members.cache.get(fetchUserID(args.join(' '), { guild: guild, client: client }));
+			if(!member) {
+				request.delete();
+				const sent = await channel.send({ content: ':warning: La gente que no existe por lo general no tiene cuello <:invertido:720736131368485025>' });
+				setTimeout(() => sent.delete(), 1000 * 5);
+				return;
+			}
+
+			//await message.delete();
+			if(!member.roles.cache.has(hd)) {
+				await member.roles.add(hd, `Colgado por ${request.author.tag}`);
+				channel.send({
+					content: wasHanged
+						? `:moyai: Se ha colgado a **${ member.user.tag }**`
+						: `:otter: Se ha descolgado a **${ member.user.tag }**`
+				});
+			} else {
+				await member.roles.remove(member.roles.cache.find(r => r.id === hd));
+				channel.send({
+					content: wasHanged
+						? `:moyai: Se ha colgado a **${ member.user.tag }**`
+						: `:otter: Se ha descolgado a **${ member.user.tag }**`
+				});
+			}
+		}
+	},
+
+	/**
+	 * @param {import('discord.js').ButtonInteraction} interaction
+	 */
+	async ['addHanged'](interaction) {
+		if(interaction.user.id !== module.exports.memoAuthorId) {
+			interaction.reply({ content: ':x: No permitido', ephemeral: true });
 			return;
 		}
+		const embed = new MessageEmbed()
+			.setTitle('Colgada en Masa ejecutada')
+			.addField('Se colgó a todos los miembros', 'Felicidades, Alice');
+		await interaction.update({
+			embeds: [embed],
+			components: [],
+		});
+		return await Promise.all(interaction.guild.members.cache.map(member => member.roles.add(hd, `Colgado por ${interaction.user.tag}`)));
+	},
 
-		if(!member.roles.cache.has(hd)) {
-			member.roles.add(hd, `Colgado por ${message.author.tag}`);
-			message.delete();
-			channel.send({ content: `:moyai: Se ha colgado a **${ member.user.tag }**` });
-		} else {
-			member.roles.remove(member.roles.cache.filter(r => r.id === hd));
-			message.delete();
-			channel.send({ content: `:otter: Se ha descolgado a **${ member.user.tag }**` });
+	/**
+	 * @param {import('discord.js').ButtonInteraction} interaction
+	 */
+	async ['removeHanged'](interaction) {
+		if(interaction.user.id !== module.exports.memoAuthorId) {
+			interaction.reply({ content: ':x: No permitido', ephemeral: true });
+			return;
 		}
-	}
+		const embed = new MessageEmbed()
+			.setTitle('Colgada en Masa deshecha')
+			.addField('Se descolgó a todos los miembros', 'Si siguen vivos, bien por ellos~');
+		await interaction.update({
+			embeds: [embed],
+			components: [],
+		});
+		return await Promise.all(interaction.guild.members.cache.map(member =>
+			member.roles.cache.has(hd)
+				? member.roles.remove(member.roles.cache.find(r => r.id === hd))
+				: Promise.resolve()
+		));
+	},
+
+	async ['cancelHanged'](interaction) {
+		if(interaction.user.id !== module.exports.memoAuthorId) {
+			interaction.reply({ content: ':x: No permitido', ephemeral: true });
+			return;
+		}
+		const embed = new MessageEmbed()
+			.setTitle('Colgada en Masa cancelada')
+			.addField('Se canceló la operación', 'Supongo que van a vivir (o no) un día más');
+		return await interaction.update({
+			embeds: [embed],
+			components: [],
+		});
+	},
 };
