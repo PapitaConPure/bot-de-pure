@@ -526,7 +526,7 @@ module.exports = {
 				return null;
 			}
 			return {
-				label: feed.tags,
+				label: feed.tags.slice(0, 99),
 				description: `#${channel.name}`,
 				value: chid,
 			};
@@ -570,7 +570,7 @@ module.exports = {
 				return null;
 			}
 			return {
-				label: feed.tags,
+				label: feed.tags.slice(0, 99),
 				description: `#${channel.name}`,
 				value: chid,
 			};
@@ -605,7 +605,7 @@ module.exports = {
 			.addField('Selección de Feed', 'Los Feeds que configuraste anteriormente están categorizados por canal y tags. Encuentra el que quieras eliminar en esta lista y selecciónalo');
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 		const feeds = Object.entries(gcfg.feeds).map(([chid, feed]) => ({
-			label: feed.tags,
+			label: feed.tags.slice(0, 99),
 			description: `#${interaction.guild.channels.cache.get(chid).name}`,
 			value: chid,
 		}));
