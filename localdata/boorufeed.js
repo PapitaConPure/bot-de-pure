@@ -70,12 +70,16 @@ module.exports = {
                                 .setURL(source),
                         );
                     }
+                    if(maxTags === 0 || image.tags.length > maxTags)
+                        row.addComponents(
+                            new MessageButton()
+                                //.setLabel('Tags')
+                                .setEmoji('921788204540100608')
+                                .setStyle('PRIMARY')
+                                .setCustomId('feed_showFeedImageTags'),
+                        );
+                    
                     row.addComponents(
-                        new MessageButton()
-                            //.setLabel('Tags')
-                            .setEmoji('921788204540100608')
-                            .setStyle('PRIMARY')
-                            .setCustomId('feed_showFeedImageTags'),
                         new MessageButton()
                             //.setLabel('Eliminar')
                             .setEmoji('921751138997514290')
