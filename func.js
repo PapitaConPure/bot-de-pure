@@ -411,6 +411,11 @@ module.exports = {
         return (!ismod);
     },
 
+    /**
+     * @param {Discord.GuildMember} member
+     */
+    isNotModerator: (member) => !(member.permissions.has('MANAGE_ROLES') || member.permissions.has('MANAGE_MESSAGES')),
+
     dollCount: function(member) {
         let fp = 0; //Falsos positivos a restar
         member.roles.cache.map(role => {

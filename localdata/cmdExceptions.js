@@ -1,6 +1,7 @@
 const global = require('../localdata/config.json');
 const { MessageEmbed } = require('discord.js');
 const GuildConfig = require('./models/guildconfigs.js');
+const { isNotModerator } = require('../func');
 
 const isNotByPapita = (compare) => (compare.member.user.id !== global.peopleid.papita);
 
@@ -25,7 +26,7 @@ module.exports = {
         mod: {
             title: 'Comando exclusivo para moderación',
             desc: 'El comando es de uso restringido para moderación.\n**Considero a alguien como moderador cuando** tiene permisos para administrar roles *(MANAGE_ROLES)* o mensajes *(MANAGE_MESSAGES)*',
-            isException: (compare) => !(compare.member.permissions.has('MANAGE_ROLES') || compare.member.permissions.has('MANAGE_MESSAGES'))
+            isException: (compare) => isNotModerator(compare.member)
         },
 
         chaos: {

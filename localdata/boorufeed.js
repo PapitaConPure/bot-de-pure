@@ -47,7 +47,7 @@ module.exports = {
 
                     const row = new MessageActionRow().addComponents(
                         new MessageButton()
-                            .setLabel('Post')
+                            //.setLabel('Post')
                             .setEmoji('919398540172750878')
                             .setStyle('LINK')
                             .setURL(`https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`),
@@ -64,12 +64,19 @@ module.exports = {
                             emoji = '919114849894690837';
                         row.addComponents(
                             new MessageButton()
-                                .setLabel('Original')
+                                //.setLabel('Original')
                                 .setEmoji(emoji)
                                 .setStyle('LINK')
                                 .setURL(source),
                         );
                     }
+                    row.addComponents(
+                        new MessageButton()
+                            //.setLabel('Eliminar')
+                            .setEmoji('921751138997514290')
+                            .setStyle('DANGER')
+                            .setCustomId('feed_deleteFeedImage'),
+                    );
 
                     /**@type {import('discord.js').MessageOptions} */
                     const feedMessage = { components: [row] };
@@ -90,7 +97,7 @@ module.exports = {
                     feedMessage.embeds = [feedEmbed];
 
                     promisesCount++;
-                    channel.send(feedMessage).catch(() => console.log(chalk.red('Error de tiempo de espera en Feed')));
+                    channel.send(feedMessage).catch(console.error);
                 });
             }
 

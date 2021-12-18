@@ -1,5 +1,7 @@
 //const { fetchFlag } = require('../../func');
+const { default: axios } = require('axios');
 const { MessageEmbed, MessageActionRow, MessageButton, MessageCollector, MessageSelectMenu } = require('discord.js');
+const { isNotModerator } = require('../../func.js');
 //const { engines, getBaseTags, getSearchTags } = require('../../localdata/booruprops.js');
 //const { p_pure } = require('../../localdata/prefixget');
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
@@ -642,4 +644,28 @@ module.exports = {
 			components: [],
 		});
 	},
+
+	/**@param {import('discord.js').ButtonInteraction} interaction */
+	async ['deleteFeedImage'](interaction) {
+		if(isNotModerator(interaction.member))
+			return await interaction.reply({
+				content: ':x: No tienes permiso para hacer eso, teehee~',
+				ephemeral: true,
+			});
+		
+		const { message } = interaction;
+		const url = message.components[0].components[0].url;
+		const apiurl = url.replace(
+			'page=post&s=view',
+			'page=dapi&s=post&q=index&json=1'
+		);
+		const tags = await axios.get(apiurl).then(response => response.data[0].tags.slice(0, 1900));
+		return await Promise.all([
+			interaction.reply({
+				content: `**Eliminado** ${url}\n**Tags rescatadas** ${tags}`,
+				ephemeral: true,
+			}),
+			message.delete().catch(console.error),
+		]);
+	}
 };
