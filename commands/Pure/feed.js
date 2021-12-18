@@ -1,9 +1,6 @@
-//const { fetchFlag } = require('../../func');
 const { default: axios } = require('axios');
 const { MessageEmbed, MessageActionRow, MessageButton, MessageCollector, MessageSelectMenu } = require('discord.js');
 const { isNotModerator } = require('../../func.js');
-//const { engines, getBaseTags, getSearchTags } = require('../../localdata/booruprops.js');
-//const { p_pure } = require('../../localdata/prefixget');
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 
 /*const desc = `${brief}\n` +
@@ -642,6 +639,24 @@ module.exports = {
 		return await interaction.update({
 			embeds: [cancelEmbed],
 			components: [],
+		});
+	},
+
+	/**@param {import('discord.js').ButtonInteraction} interaction */
+	async ['showFeedImageTags'](interaction) {
+		const apiurl = interaction.message.components[0].components[0].url.replace(
+			'page=post&s=view',
+			'page=dapi&s=post&q=index&json=1'
+		);
+		const tags = await axios.get(apiurl)
+		.then(response => response.data[0].tags.slice(0, 1900))
+		.catch(error => {
+			console.error(error);
+			return 'Ocurrió un problema al contactar con el Booru para recuperar las tags.\nInténtalo de nuevo, si el problema persiste, es probable que el objetivo no esté disponible o que se trate de un bug de mi parte';
+		});
+		return await interaction.reply({
+			content: `**Tags**\n${tags}`,
+			ephemeral: true,
 		});
 	},
 

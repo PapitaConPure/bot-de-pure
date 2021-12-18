@@ -72,6 +72,11 @@ module.exports = {
                     }
                     row.addComponents(
                         new MessageButton()
+                            //.setLabel('Tags')
+                            .setEmoji('921788204540100608')
+                            .setStyle('PRIMARY')
+                            .setCustomId('feed_showFeedImageTags'),
+                        new MessageButton()
                             //.setLabel('Eliminar')
                             .setEmoji('921751138997514290')
                             .setStyle('DANGER')
