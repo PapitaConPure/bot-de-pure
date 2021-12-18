@@ -40,7 +40,7 @@ module.exports = {
 		const wizard = new MessageEmbed()
 			.setColor('AQUA')
 			.setAuthor(wiztitle, request.client.user.avatarURL())
-			.setFooter('1/4 • Comenzar')
+			.setFooter('1/? • Comenzar')
 			.addField('Bienvenido', 'Si es la primera vez que configuras un Feed de imágenes con Bot de Puré, ¡no te preocupes! Simplemente sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras');
 		return await request.reply({
 			embeds: [wizard],
@@ -61,7 +61,7 @@ module.exports = {
 		const wizard = new MessageEmbed()
 			.setColor('NAVY')
 			.setAuthor(wiztitle, interaction.client.user.avatarURL())
-			.setFooter('2/4 • Seleccionar operación')
+			.setFooter('2/? • Seleccionar operación')
 			.addField('Selecciona una operación', '¿Qué deseas hacer ahora mismo?');
 			
 		const guildQuery = { guildId: interaction.guild.id };
@@ -201,7 +201,7 @@ module.exports = {
 		}
 		row.addComponents(
 			new MessageButton()
-				.setCustomId('feed_selectFeedCustomize')
+				.setCustomId('feed_customizeOne')
 				.setLabel('Volver')
 				.setStyle('SECONDARY'),
 			cancelbutton,
