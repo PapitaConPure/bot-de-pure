@@ -10,7 +10,7 @@ module.exports = {
 	name: 'dado',
 	aliases: [
 		'dados', 'tirar', 'random',
-		'roll', 'rolldie', 'die',
+		'roll', 'rolldie', 'dice', 'die',
 	],
     desc: 'Tira uno o más dados de la cantidad de caras deseadas para recibir números aleatorios\n' +
 		'**Ejemplo de dados:** `1d6` = 1 dado de 6 caras; `5d4` = 5 dados de 4 caras; `15d20` = 15 dados de 20 caras',
@@ -36,8 +36,10 @@ module.exports = {
 				const dice = arg.split(/[Dd]/).filter(a => a);
 				if(dice.length === 2)
 					dices.push({ d: dice[0], f: dice[1] });
-			} else if(args[i + 1].startsWith(/[Dd]/))
-				dices.push({ d: arg, f: args[i + 1] });
+			} else if(args[i + 1]) {
+				if(args[i + 1].startsWith(/[Dd]/))
+					dices.push({ d: arg, f: args[i + 1] });
+			}
 		});
 		
 		if(dices.length > 16) {
