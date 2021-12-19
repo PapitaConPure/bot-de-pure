@@ -1,16 +1,14 @@
 const global = require('../../localdata/config.json'); //Variables globales
 const func = require('../../func.js');
+const axios = require('axios');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const { p_pure } = require('../../localdata/prefixget');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
+const { fetchFlag } = require('../../func.js');
 
-const maxexp = 30;
 const options = new CommandOptionsManager()
-	.addParam('posición', 	   'NUMBER', 'para especificar una celda a modificar', { poly: ['x','y'], optional: true })
-	.addParam('emote', 		   'EMOTE',  'para especificar un emote a agregar',    { optional: true })
-	.addFlag('h', 'horizontal', 		 'para usar la habilidad de línea horizontal')
-	.addFlag('v', 'vertical', 			 'para usar la habilidad de línea vertical');
+	.addFlag('d', ['del', 'delete'], 'para eliminar el mensaje original');
 
 module.exports = {
 	name: 'papa-eval',
@@ -28,12 +26,13 @@ module.exports = {
 		`    regex: '${p_pure().regex.source}'`,
 		'}',
 		'module.exports = {',
-		`    name: 'papa-eval'`,
-		`    aliases: []`,
-		`    desc: String`,
-		`    flags?: [ 'papa' ]`,
-		`    options: CommandOptionsManager`,
-		`    experimental: false`, 
+		`    name: 'papa-eval' //Nombre del comando`,
+		`    aliases: [] //Alias del comando`,
+		`    desc: String //Descripción breve del comando (para /comandos)`,
+		`    desc: String //Descripción del comando`,
+		`    flags?: [ 'papa' ] //Flags del comando, como COMMON y MOD`,
+		`    options: CommandOptionsManager //<banderas> y --flags`,
+		`    experimental: false //Forma experimental de interpretar cmdos.`,
 		'    execute(request: CommandRequest, args: CommandOptions, isSlash: false) //Usar esto en la elavuación puede resultar en un bucle infinito (función recursiva sin condición)',
 		'}',
 		'```',
@@ -52,23 +51,18 @@ module.exports = {
 	 */
 	async execute(request, args, isSlash = false) {
 		//Acción de comando
-		let embed = new Discord.MessageEmbed();
 		try {
-			const fnString = args.join();
-			const returned = await eval(fnString);
-			embed
-				.setColor('DARK_VIVID_PINK')
-				.setAuthor(`${request.guild.name} • ${request.channel.name}`, request.author.avatarURL({ dynamic: true }), request.url)
-				.addField('Función ejecutada', `Retorno: ${ returned ?? (typeof returned) }`);
+			const fnString = args.join(' ');
+			console.log(fnString);
+			await eval(fnString);
+			await request.react('✅');
 		} catch(error) {
-			embed
+			const embed = new Discord.MessageEmbed()
 				.setColor('#0000ff')
 				.setAuthor(`${request.guild.name} • ${request.channel.name}`, request.author.avatarURL({ dynamic: true }), request.url)
 				.addField('Ha ocurrido un error al ingresar un comando', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
+			await request.channel.send({ embeds: [embed] });
 		}
-		await request.channel.send({
-			content: 'Terminó la evaluación de la función',
-			embeds: [embed],
-		});
+		fetchFlag(args, { ...options.flags.get('del').structure, callback: request.delete });
 	}
 };
