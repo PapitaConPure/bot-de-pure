@@ -63,23 +63,33 @@ module.exports = {
                     );
 
                     //Botón de Fuente (si está disponible)
-                    const source = Array.isArray(image.source) ? image.source[0] : (image.source || undefined);
-                    if(source && source.match(/(http:\/\/|https:\/\/)?(www\.)?(([a-zA-Z0-9-]){2,}\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/)) {
-                        let emoji;
-                        if(source.indexOf('pixiv.net') !== -1)
-                            emoji = '919403803126661120';
-                        else if(source.indexOf('twitter.com') !== -1)
-                            emoji = '919403803114094682';
+                    const addSourceButton = (source) => {
+                        if(source.match(/(http:\/\/|https:\/\/)?(www\.)?(([a-zA-Z0-9-]){2,}\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/)) {
+                            let emoji;
+                            if(source.indexOf('pixiv.net') !== -1)
+                                emoji = '919403803126661120';
+                            else if(source.match(/twitter\.com|twimg\.com/))
+                                emoji = '919403803114094682';
+                            else
+                                emoji = '919114849894690837';
+                            row.addComponents(
+                                new MessageButton()
+                                    //.setLabel('Original')
+                                    .setEmoji(emoji)
+                                    .setStyle('LINK')
+                                    .setURL(source),
+                            );
+                        }
+                    };
+                    console.log(image.source);
+                    const source = image.source;
+                    if(source) {
+                        if(Array.isArray(source))
+                            source.forEach(addSourceButton);
                         else
-                            emoji = '919114849894690837';
-                        row.addComponents(
-                            new MessageButton()
-                                //.setLabel('Original')
-                                .setEmoji(emoji)
-                                .setStyle('LINK')
-                                .setURL(source),
-                        );
+                            addSourceButton(source);
                     }
+                        
                     
                     //Botón de tags (si es necesario)
                     if(maxTags === 0 || image.tags.length > maxTags)
@@ -120,7 +130,11 @@ module.exports = {
                     feedMessage.embeds = [feedEmbed];
                     
                     //Enviar imagen de Feed
-                    channel.send(feedMessage).catch(console.error);
+                    promisesCount++;
+                    channel.send(feedMessage).catch(error => {
+                        console.log(`Ocurrió un error al enviar la imagen de Feed: ${source}`);
+                        console.error(error);
+                    });
                 });
             }
 
