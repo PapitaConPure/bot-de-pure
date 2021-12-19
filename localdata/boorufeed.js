@@ -18,6 +18,9 @@ module.exports = {
             if(!gcfg) return;
             for(const [chid, feed] of Object.entries(gcfg.feeds)) {
                 feedsCount++;
+                if(promisesCount > maxDocuments) return;
+
+                //Recolectar últimas imágenes para el Feed
                 let fetchedProperly = true;
                 const response = await booru.search('gelbooru', feed.tags, { limit: maxDocuments, random: false })
                 .catch(error => {
@@ -27,6 +30,8 @@ module.exports = {
                     return [ 'error' ];
                 });
                 if(!fetchedProperly) return;
+
+                //Prepararse para enviar imágenes
                 /** @type {import('discord.js').TextChannel} */
                 const channel = guild.channels.cache.get(chid);
                 const maxTags = feed.maxTags ?? 20;
@@ -38,13 +43,17 @@ module.exports = {
                     return;
                 }
                 
+                //Comprobar recolectado en busca de imágenes nuevas
                 response.reverse().forEach(image => {
+                    //Revisar si el documento no fue anteriormente enviado por este Feed
                     if(feed.ids.includes(image.id)) return;
 
+                    //Agregar documento a IDs enviadas
                     feed.ids = [ image.id, ...feed.ids ];
                     gcfg.feeds[chid].ids = feed.ids.filter(id => response.some(img => img.id === id));
                     gcfg.markModified('feeds');
 
+                    //Botón de Post de Gelbooru
                     const row = new MessageActionRow().addComponents(
                         new MessageButton()
                             //.setLabel('Post')
@@ -53,6 +62,7 @@ module.exports = {
                             .setURL(`https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`),
                     );
 
+                    //Botón de Fuente (si está disponible)
                     const source = Array.isArray(image.source) ? image.source[0] : (image.source || undefined);
                     if(source && source.match(/(http:\/\/|https:\/\/)?(www\.)?(([a-zA-Z0-9-]){2,}\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/)) {
                         let emoji;
@@ -70,6 +80,8 @@ module.exports = {
                                 .setURL(source),
                         );
                     }
+                    
+                    //Botón de tags (si es necesario)
                     if(maxTags === 0 || image.tags.length > maxTags)
                         row.addComponents(
                             new MessageButton()
@@ -79,6 +91,7 @@ module.exports = {
                                 .setCustomId('feed_showFeedImageTags'),
                         );
                     
+                    //Botón de eliminación
                     row.addComponents(
                         new MessageButton()
                             //.setLabel('Eliminar')
@@ -87,6 +100,7 @@ module.exports = {
                             .setCustomId('feed_deleteFeedImage'),
                     );
 
+                    //Preparar Embed final
                     /**@type {import('discord.js').MessageOptions} */
                     const feedMessage = { components: [row] };
                     const feedEmbed = new MessageEmbed()
@@ -104,8 +118,8 @@ module.exports = {
                     } else
                         feedEmbed.setImage(image.fileUrl);
                     feedMessage.embeds = [feedEmbed];
-
-                    promisesCount++;
+                    
+                    //Enviar imagen de Feed
                     channel.send(feedMessage).catch(console.error);
                 });
             }
@@ -114,6 +128,6 @@ module.exports = {
         }));
 
         setTimeout(module.exports.updateBooruFeeds, 1000 * 60, client);
-        console.log(chalk.green(`Se procesaron ${feedsCount} Feeds deste ${guilds.size} servers en ${(Date.now() - feedCheckupStart) / 1000}s. ${promisesCount} imágenes nuevas puestas en envío`));
+        console.log(chalk.green(`Se procesaron ${feedsCount} Feeds desde ${guilds.size} servers en ${(Date.now() - feedCheckupStart) / 1000}s. ${promisesCount} imágenes nuevas puestas en envío`));
     },
 }
