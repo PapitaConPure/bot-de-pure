@@ -1,6 +1,6 @@
 /**
  * @typedef {{name: String, expression: String|Number}} ParamTypeStrict Parámetros de CommandOption que siguen una sintaxis estricta
- * @typedef {'NUMBER'|'TEXT'|'USER'|'ROLE'|'CHANNEL'|'MESSAGE'|'EMOTE'|'IMAGE'|'URL'|'ID'|ParamTypeStrict} ParamType Tipos de parámetro de CommandOption
+ * @typedef {'NUMBER'|'TEXT'|'USER'|'ROLE'|'CHANNEL'|'MESSAGE'|'EMOTE'|'IMAGE'|'FILE'|'URL'|'ID'|ParamTypeStrict} ParamType Tipos de parámetro de CommandOption
  * @typedef {'SINGLE'|'MULTIPLE'|Array<String>} ParamPoly Capacidad de entradas de parámetro de CommandOption
  * @typedef {Map<String, CommandOption>} CommandOptionsCollection Colección de opciones de comando indexadas por nombre de parámetro
  */
@@ -17,6 +17,7 @@ const commonTypes = {
     'MESSAGE':  'm{enlace/texto/id}',
     'EMOTE':    'emote',
     'IMAGE':    'imagen/enlace',
+    'FILE':     'archivo/enlace',
     'URL':      'enlace',
     'ID':       'id'
 };

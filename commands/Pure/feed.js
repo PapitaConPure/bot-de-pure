@@ -677,7 +677,7 @@ module.exports = {
 		const tags = await axios.get(apiurl).then(response => response.data[0].tags.slice(0, 1900));
 		return await Promise.all([
 			interaction.reply({
-				content: `**Eliminado** ${url}\n**Tags rescatadas** ${tags}`,
+				content: `**Eliminado** <${url}>\n**Tags rescatadas** *Puedes revisarlas y blacklistear algunas con "-"*\n${tags}`,
 				ephemeral: true,
 			}),
 			message.delete().catch(console.error),
