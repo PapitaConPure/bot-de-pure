@@ -104,7 +104,7 @@ module.exports = {
 					break;
 				
 				case 'borrar':
-					if(!gcfg.tubers[id]) return await request.reply({ content: '⚠️ El tubérculo especificado no existe' });
+					if(!gcfg.tubers[id]) return await request.reply({ content: `⚠️ El tubérculo **${id}** no existe` });
 
 					gcfg.tubers[id] = null;
 					delete gcfg.tubers[id];
@@ -113,11 +113,12 @@ module.exports = {
 					break;
 				
 				default:
+					if(!gcfg.tubers[id]) return await request.reply({ content: `⚠️ El tubérculo **${id}** no existe` });
 					await executeTuber(gcfg.tubers[id])
 					.catch(error => {
 						console.log('Ocurrió un error al ejecutar un Tubérculo');
 						console.error(error);
-						request.reply({ content: '❌ Parece que hay un problema con este Tubérculo. Prueba creándolo nuevamente o eliminándolo si no lo usas más' });
+						request.reply({ content: '❌ Parece que hay un problema con este Tubérculo. Prueba creándolo nuevamente o eliminándolo si no se usa más' });
 					});
 					break;
 			}
