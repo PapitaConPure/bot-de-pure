@@ -644,7 +644,8 @@ module.exports = {
 
 	/**@param {import('discord.js').ButtonInteraction} interaction */
 	async ['showFeedImageTags'](interaction) {
-		const apiurl = interaction.message.components[0].components[0].url.replace(
+		const url = interaction.message.components[0].components[0].url;
+		const apiurl = url.replace(
 			'page=post&s=view',
 			'page=dapi&s=post&q=index&json=1'
 		);
@@ -655,7 +656,7 @@ module.exports = {
 			return 'Ocurrió un problema al contactar con el Booru para recuperar las tags.\nInténtalo de nuevo, si el problema persiste, es probable que el objetivo no esté disponible o que se trate de un bug de mi parte';
 		});
 		return await interaction.reply({
-			content: `**Tags**\n${tags}`,
+			content: `**Enlace** <${url}>\n**Tags**\n${tags}`,
 			ephemeral: true,
 		});
 	},
