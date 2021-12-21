@@ -643,6 +643,25 @@ module.exports = {
 	},
 
 	/**@param {import('discord.js').ButtonInteraction} interaction */
+	async ['showFeedImageUrl'](interaction) {
+		const url = interaction.message.components[0].components[0].url;
+		const apiurl = url.replace(
+			'page=post&s=view',
+			'page=dapi&s=post&q=index&json=1'
+		);
+		const source = await axios.get(apiurl)
+		.then(response => response.data[0].source)
+		.catch(error => {
+			console.error(error);
+			return 'Ocurrió un problema al contactar con el Booru para recuperar las tags.\nInténtalo de nuevo, si el problema persiste, es probable que el objetivo no esté disponible o que se trate de un bug de mi parte';
+		});
+		return await interaction.reply({
+			content: `<:gelbooru:919398540172750878> **Post** <${url}>${ source ? `\n<:urlwhite:922669195521568818> **Fuente** <${source}>` : '' }`,
+			ephemeral: true,
+		});
+	},
+
+	/**@param {import('discord.js').ButtonInteraction} interaction */
 	async ['showFeedImageTags'](interaction) {
 		const url = interaction.message.components[0].components[0].url;
 		const apiurl = url.replace(
@@ -661,7 +680,7 @@ module.exports = {
 			return 'Ocurrió un problema al contactar con el Booru para recuperar las tags.\nInténtalo de nuevo, si el problema persiste, es probable que el objetivo no esté disponible o que se trate de un bug de mi parte';
 		});
 		return await interaction.reply({
-			content: `**Tags**\n${tags}\n**Post** <${url}>${ source ? `\n**Fuente** <${source}>` : '' }`,
+			content: `<:tagswhite:921788204540100608> **Tags**\n${tags}\n<:gelbooru:919398540172750878> **Post** <${url}>${ source ? `\n<:urlwhite:922669195521568818> **Fuente** <${source}>` : '' }`,
 			ephemeral: true,
 		});
 	},
@@ -680,10 +699,10 @@ module.exports = {
 			'page=post&s=view',
 			'page=dapi&s=post&q=index&json=1'
 		);
-		const tags = await axios.get(apiurl).then(response => response.data[0].tags.slice(0, 1900));
+		const tags = await axios.get(apiurl).then(response => response.data[0].tags.slice(0, 1800));
 		return await Promise.all([
 			interaction.reply({
-				content: `**Eliminado** <${url}>\n**Tags rescatadas** *Puedes revisarlas y blacklistear algunas con "-"*\n${tags}`,
+				content: `<:gelbooru:919398540172750878> **Eliminado** <${url}>\n<:tagswhite:921788204540100608> **Tags rescatadas** *Puedes revisarlas y blacklistear algunas con "-"*\n${tags}`,
 				ephemeral: true,
 			}),
 			message.delete().catch(console.error),

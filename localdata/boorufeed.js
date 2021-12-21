@@ -91,7 +91,7 @@ module.exports = {
                     }
                         
                     
-                    //Botón de tags (si es necesario)
+                    //Botón de tags (si es necesario) o de enlace
                     if(maxTags === 0 || image.tags.length > maxTags)
                         row.addComponents(
                             new MessageButton()
@@ -99,6 +99,14 @@ module.exports = {
                                 .setEmoji('921788204540100608')
                                 .setStyle('PRIMARY')
                                 .setCustomId('feed_showFeedImageTags'),
+                        );
+                    else
+                        row.addComponents(
+                            new MessageButton()
+                                //.setLabel('Enlace')
+                                .setEmoji('922669195521568818')
+                                .setStyle('PRIMARY')
+                                .setCustomId('feed_showFeedImageUrl'),
                         );
                     
                     //Botón de eliminación
