@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.A9",
+            "number": "Full.2.8.B2",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo reestructuraciones para una actualización mayor. Es probable que algunos comandos dejen de funcionar durante el proceso.\nTambién, las actualizaciones serán considerablemente menos frecuentes de momento",
@@ -11,23 +11,23 @@
             "PLACEHOLDER_SLASHCMD",
             "Agregado p!prefijo",
             "Agregado p!aqua",
-            "Bandera `--bomba` agregada en p!buscar y similares",
             "p!caos e identificador `CHAOS` agregados",
             "Correcciones de errores varios",
-            "Mejoras visuales generales",
             "p!mimar agregado",
             "Tag de Yuuma Toutetsu agregada en p!touhou",
             "p!elegir añadido",
             "p!feed incorporado",
             "p!colores ahora usa un menú desplegable (H. Doll)",
             "p!feed ahora permite personalizar más aspectos del Feed",
-            "Corregido error de vista previa de videos en Feeds"
+            "Corregido error de vista previa de videos en Feeds",
+            "p!tubérculo agregado",
+            "Mejoras generales a Feeds de imágenes"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos con p!ayuda",
+            "p!ajedrez",
             "Minijuegos individuales y tipo-fiesta",
-            "Comandos propios (\"Tubérculos \")",
-            "Comandos propios con Puréscript:tm:",
+            "Tubérculos con Puréscript:tm:",
             "Agregar GIFs infográficos en comandos",
             "Crear página de ayuda Web para entenderme mejor"
         ]
