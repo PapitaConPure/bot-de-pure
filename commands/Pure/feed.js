@@ -649,14 +649,19 @@ module.exports = {
 			'page=post&s=view',
 			'page=dapi&s=post&q=index&json=1'
 		);
-		const tags = await axios.get(apiurl)
-		.then(response => response.data[0].tags.slice(0, 1900))
+		let tags, source;
+		await axios.get(apiurl)
+		.then(response => {
+			post = response.data[0];
+			tags = post.tags.slice(0, 1600);
+			source = post.source;
+		})
 		.catch(error => {
 			console.error(error);
 			return 'Ocurrió un problema al contactar con el Booru para recuperar las tags.\nInténtalo de nuevo, si el problema persiste, es probable que el objetivo no esté disponible o que se trate de un bug de mi parte';
 		});
 		return await interaction.reply({
-			content: `**Enlace** <${url}>\n**Tags**\n${tags}`,
+			content: `**Tags**\n${tags}\n**Post** <${url}>${ source ? `\n**Fuente** <${source}>` : '' }`,
 			ephemeral: true,
 		});
 	},
