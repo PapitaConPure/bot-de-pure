@@ -7,7 +7,7 @@ const { Stats } = require('../../localdata/models/stats');
 const { improveNumber } = require('../../func');
 
 const { host, version, note, changelog, todo } = bot_status;
-const cmsearch = new RegExp(`${p_pure.raw}[a-zA-Z0-9_.-]*`, 'g');
+const cmsearch = new RegExp(`${p_pure.raw}[A-Za-zÁÉÍÓÚáéíóúÑñ0-9_.-]*`, 'g');
 const ne = [ '0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣' ];
 function listFormat(str, addIndex, guildId) {
     let cmindex = 0;

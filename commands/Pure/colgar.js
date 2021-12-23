@@ -101,7 +101,7 @@ module.exports = {
 			embeds: [embed],
 			components: [],
 		});
-		return await Promise.all(interaction.guild.members.cache.map(member => member.roles.add(hd, `Colgado por ${interaction.user.tag}`)));
+		return await Promise.all(interaction.guild.members.cache.filter(member => !member.user.bot).map(member => member.roles.add(hd, `Colgado por ${interaction.user.tag}`)));
 	},
 
 	/**
@@ -119,7 +119,7 @@ module.exports = {
 			embeds: [embed],
 			components: [],
 		});
-		return await Promise.all(interaction.guild.members.cache.map(member =>
+		return await Promise.all(interaction.guild.members.cache.filter(member => !member.user.bot).map(member =>
 			member.roles.cache.has(hd)
 				? member.roles.remove(member.roles.cache.find(r => r.id === hd))
 				: Promise.resolve()

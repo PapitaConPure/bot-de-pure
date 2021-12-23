@@ -10,7 +10,6 @@ const options = new CommandOptionsManager()
 	.addParam('archivos', ['FILE','IMAGE'], 'para especificar los archivos del mensaje', { poly: 'MULTIPLE', optional: true })
 	.addFlag('c', 		['crear','agregar','añadir'], 'para crear un Tubérculo')
 	.addFlag(['e','m'], ['editar','modificar'],       'para modificar un Tubérculo')
-	.addFlag(['l','v'], ['listar','ver'], 			  'para listar todos los Tubérculos')
 	.addFlag(['b','d'], ['borrar','eliminar'], 		  'para eliminar un Tubérculo');
 
 module.exports = {
@@ -21,10 +20,11 @@ module.exports = {
 	],
 	brief : 'Permite crear, editar, listar, borrar o ejecutar comandos personalizados de servidor',
 	desc: [
-		'Permite `--crear`, *editar*, `--listar`, `--borrar` o __ejecutar__ Tubérculos (comandos personalizados de servidor).',
+		'Permite `--crear`, *editar*, *listar*, `--borrar` o __ejecutar__ Tubérculos (comandos personalizados de servidor).',
+		'Usar el comando sin más listará todos los Tubérculos de los que dispone el servidor actual',
 		'En caso de estar creando un Tubérculo, se requerirá un `<mensaje>` y/o `<archivos>`, junto a la `<id>` que quieras darle al mismo. Si la ID ya está registrada, será *reemplazada (editada)*',
 		'En cualquier parte del contenido del mensaje, coloca "#FIN#" para bajar un renglón',
-		'En caso de estar editando o borrando un Tubérculo existente, se requerirá su TuberID. Dicha ID puede recordarse al `--listar` todos los Tubérculos',
+		'En caso de estar editando o borrando un Tubérculo existente, se requerirá su TuberID',
 		'⚠️ Ten en cuenta que este comando es experimental y cualquier Tubérculo ingresado podría ser eventualmente perdido a medida que me actualizo',
 	].join('\n'),
 	flags: [
@@ -45,11 +45,9 @@ module.exports = {
 		const operation = (isSlash
 			? [
 				args.getBoolean('crear' ),
-				args.getBoolean('listar'),
 				args.getBoolean('borrar'),
 			] : [
 				fetchFlag(args, { ...options.flags.get('crear').structure,  callback: 'crear'  }),
-				fetchFlag(args, { ...options.flags.get('listar').structure, callback: 'listar' }),
 				fetchFlag(args, { ...options.flags.get('borrar').structure, callback: 'borrar' }),
 			]
 		).find(op => op);
@@ -67,14 +65,14 @@ module.exports = {
 		});
 		gcfg.tubers = gcfg.tubers || {};
 
-		if(operation === 'listar') { //Listar Tubérculos
+		if(!operation) { //Listar Tubérculos
 			const embed = new MessageEmbed()
 				.setColor('LUMINOUS_VIVID_PINK')
 				.setAuthor(request.guild.name, request.guild.iconURL())
 				.setTitle('Lista de Tubérculos');
 			const pageMax = 10;
 			const items = Object.entries(gcfg.tubers);
-			for(let page = 0; page < (items.length / pageMax); page++)
+			for(let page = 0; items.length; page++)
 				embed.addField(`Lista ${Math.ceil(page / pageMax) + 1}`, items.splice(0, pageMax).map(([tid,tuber]) => `**${tid}**, por ${tuber.author}`).join('\n'), true);
 			request.reply({ embeds: [embed] });
 		} else { //Realizar operación sobre ID de Tubérculo
