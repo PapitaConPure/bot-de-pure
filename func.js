@@ -644,21 +644,19 @@ module.exports = {
 
         await module.exports.dibujarAvatar(ctx, miembro.user, canvas.width / 2, 80 + 200, 200, { circleStrokeFactor: strokeFactor });
 
-        const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'despedida.png');
-
         //#region Imagen y Mensaje extra
+        const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'despedida.png');
         const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
-        canal.send({ files: [imagen] }).then(() => {
-            if(servidor.id === '654471968200065034') { //Hourai Doll
-                canal.send({
-                    content: 
-                        'Nooooo po csm, perdimo otro weón <:meguDerp:887396527952236554>' +
-                        `*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
-                });
-            } else { //Otros servidores
-                canal.send({ content: `*Ahora hay **${peoplecnt}** usuarios en el server.*`});
-            }
-        });
+        await canal.send({ files: [imagen] });
+        if(servidor.id === '654471968200065034') //Hourai Doll
+            await canal.send({
+                content: 
+                    'Nooooo po csm, perdimo otro weón <:meguDerp:887396527952236554>' +
+                    `*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
+            });
+        else //Otros servidores
+            await canal.send({ content: `*Ahora hay **${peoplecnt}** usuarios en el server.*`});
+        
         //#endregion
         console.log('Despedida finalizada.');
     },
