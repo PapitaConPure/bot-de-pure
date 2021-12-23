@@ -36,7 +36,7 @@ module.exports = {
                             if(!member.roles.cache.has(hd))
                                 member.roles.add(hd, 'Colgado automáticamente por spam de bots');
                         } catch(err) {
-                            imsg = await channel.send({ content: `<:wtfff:855940251892318238> Ese wn tiene demasia'o ki. Cuélgalo tú po'.\n\`\`\`\n${err.name}` });
+                            await channel.send({ content: `<:wtfff:855940251892318238> Ese wn tiene demasia'o ki. Cuélgalo tú po'.\n\`\`\`\n${err.name}` });
                         }
                         break;
                     }
