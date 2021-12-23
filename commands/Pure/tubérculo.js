@@ -65,7 +65,7 @@ module.exports = {
 		});
 		gcfg.tubers = gcfg.tubers || {};
 
-		if(!operation) { //Listar Tubérculos
+		if(!operation && !id) { //Listar Tubérculos
 			const embed = new MessageEmbed()
 				.setColor('LUMINOUS_VIVID_PINK')
 				.setAuthor(request.guild.name, request.guild.iconURL())
