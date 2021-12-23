@@ -55,7 +55,7 @@ module.exports = {
 		//Adquirir ID de Tubérculo
 		const id = isSlash ? args.getString('id') : args.shift();
 
-		
+		//Preparar ejecución
 		const gid = request.guild.id;
 		const guildquery = { guildId: gid };
 		const gcfg = (await GuildConfig.findOne(guildquery)) || new GuildConfig(guildquery);
@@ -71,7 +71,7 @@ module.exports = {
 				.setAuthor(request.guild.name, request.guild.iconURL())
 				.setTitle('Lista de Tubérculos');
 			const pageMax = 10;
-			const items = Object.entries(gcfg.tubers);
+			const items = Object.entries(gcfg.tubers).reverse();
 			for(let page = 0; items.length; page++)
 				embed.addField(`Lista ${Math.ceil(page / pageMax) + 1}`, items.splice(0, pageMax).map(([tid,tuber]) => `**${tid}**, por ${tuber.author}`).join('\n'), true);
 			request.reply({ embeds: [embed] });
