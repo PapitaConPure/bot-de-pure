@@ -19,17 +19,16 @@ module.exports = {
                     if(!uinfr[mui])
                     uinfr[mui] = [];
                     
-                    //Sancionar según total de infracciones cometidas en las últimas 4 horas
-                    uinfr[mui] = uinfr[mui].filter(inf => (now - inf) < (1000 * 60 * 60 * 4)); //Eliminar antiguas
+                    //Sancionar según total de infracciones cometidas en las últimas 8 horas
+                    uinfr[mui] = uinfr[mui].filter(inf => (now - inf) < (1000 * 60 * 60 * 8)); //Eliminar antiguas
                     const total = uinfr[mui].push(now); //Añade el momento de la infracción actual y retorna el largo del arreglo
-                    let imsg;
                     switch(total) {
-                    case 1:
+                    /*case 1:
                         await message.react(client.emojis.cache.get('796930821554044928'));
                         break;
                     case 2:
                         await message.react(client.emojis.cache.get('852764014840905738'));
-                        break;
+                        break;*/
                     default:
                         await message.react(client.emojis.cache.get('859874631795736606'));
                         const hd = '682629889702363143'; //Hanged Doll
