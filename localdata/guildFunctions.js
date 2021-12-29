@@ -23,22 +23,32 @@ module.exports = {
                     uinfr[mui] = uinfr[mui].filter(inf => (now - inf) < (1000 * 60 * 60 * 4)); //Eliminar antiguas
                     const total = uinfr[mui].push(now); //Añade el momento de la infracción actual y retorna el largo del arreglo
                     switch(total) {
-                    case 1:
-                        await message.react(client.emojis.cache.get('796930821554044928'));
-                        break;
-                    case 2:
-                        await message.react(client.emojis.cache.get('852764014840905738'));
-                        break;
-                    default:
-                        await message.react(client.emojis.cache.get('859874631795736606'));
-                        const hd = '682629889702363143'; //Hanged Doll
-                        try {
-                            if(!member.roles.cache.has(hd))
-                                member.roles.add(hd, 'Colgado automáticamente por spam de bots');
-                        } catch(err) {
-                            await channel.send({ content: `<:wtfff:855940251892318238> Ese wn tiene demasiao ki\n\`\`\`\n${err.name}` });
-                        }
-                        break;
+                        case 1:
+                            await message.react(client.emojis.cache.get('920020596526551072'));
+                            break;
+                        case 2:
+                            await message.react(client.emojis.cache.get('796930821554044928'));
+                            break;
+                        case 3:
+                            await message.react(client.emojis.cache.get('859874631795736606'));
+                            const hd = '682629889702363143'; //Hanged Doll
+                            try {
+                                if(!member.roles.cache.has(hd))
+                                    member.roles.add(hd, 'Colgado automáticamente por spam de bots');
+                            } catch(err) {
+                                await channel.send({ content: `<:wtfff:855940251892318238> Ese wn tiene demasiao ki\n\`\`\`\n${err.name}` });
+                            }
+                            break;
+                        default:
+                            await message.react(client.emojis.cache.get('852764014840905738'));
+                            const cd = '925599922370256906'; //Crucified Doll
+                            try {
+                                if(!member.roles.cache.has(cd))
+                                    member.roles.add(cd, 'Colgado automáticamente por spam de bots. Debido a la evasión del castigo previo, se requiere más poder para revocar la sanción');
+                            } catch(err) {
+                                await channel.send({ content: `<:wtfff:855940251892318238> Ese wn tiene demasiao ki\n\`\`\`\n${err.name}` });
+                            }
+                            break;
                     }
                 }
             }
