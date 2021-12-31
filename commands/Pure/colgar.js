@@ -67,21 +67,16 @@ module.exports = {
 			}
 
 			//await message.delete();
-			if(!member.roles.cache.has(hd)) {
+			wasHanged = !member.roles.cache.has(hd);
+			if(wasHanged)
 				await member.roles.add(hd, `Colgado por ${request.author.tag}`);
-				channel.send({
-					content: wasHanged
-						? `:moyai: Se ha colgado a **${ member.user.tag }**`
-						: `:otter: Se ha descolgado a **${ member.user.tag }**`
-				});
-			} else {
+			else 
 				await member.roles.remove(member.roles.cache.find(r => r.id === hd));
-				channel.send({
-					content: wasHanged
-						? `:moyai: Se ha colgado a **${ member.user.tag }**`
-						: `:otter: Se ha descolgado a **${ member.user.tag }**`
-				});
-			}
+			channel.send({
+				content: wasHanged
+					? `:moyai: Se ha colgado a **${ member.user.tag }**`
+					: `:otter: Se ha descolgado a **${ member.user.tag }**`
+			});
 		}
 	},
 
