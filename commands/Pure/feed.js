@@ -650,7 +650,7 @@ module.exports = {
 			'page=dapi&s=post&q=index&json=1'
 		);
 		const source = await axios.get(apiurl)
-		.then(response => response.data[0].source)
+		.then(response => response.data.post.source)
 		.catch(error => {
 			console.error(error);
 			return 'Ocurrió un problema al contactar con el Booru para recuperar las tags.\nInténtalo de nuevo, si el problema persiste, es probable que el objetivo no esté disponible o que se trate de un bug de mi parte';
@@ -671,7 +671,7 @@ module.exports = {
 		let tags, source;
 		await axios.get(apiurl)
 		.then(response => {
-			post = response.data[0];
+			post = response.data.post;
 			tags = post.tags.slice(0, 1600);
 			source = post.source;
 		})
@@ -699,7 +699,7 @@ module.exports = {
 			'page=post&s=view',
 			'page=dapi&s=post&q=index&json=1'
 		);
-		const tags = await axios.get(apiurl).then(response => response.data[0].tags.slice(0, 1800));
+		const tags = await axios.get(apiurl).then(response => response.data.post.tags.slice(0, 1800));
 		return await Promise.all([
 			interaction.reply({
 				content: `<:gelbooru:919398540172750878> **Eliminado** <${url}>\n<:tagswhite:921788204540100608> **Tags rescatadas** *Puedes revisarlas y blacklistear algunas con "-"*\n${tags}`,

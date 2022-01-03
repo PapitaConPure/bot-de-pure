@@ -81,11 +81,11 @@ module.exports = {
                             );
                         }
                     };
-                    console.log(image.source);
                     const source = image.source;
+                    console.log(image.source);
                     if(source) {
-                        if(Array.isArray(source))
-                            source.forEach(addSourceButton);
+                        if(typeof source === 'object')
+                            Object.values(source).forEach(addSourceButton);
                         else
                             addSourceButton(source);
                     }
