@@ -671,7 +671,6 @@ module.exports = {
 		let tags, source;
 		await axios.get(apiurl)
 		.then(response => {
-			console.log(response.data.post[0]);
 			post = response.data.post[0];
 			tags = post.tags.slice(0, 1600);
 			source = post.source;
@@ -700,10 +699,7 @@ module.exports = {
 			'page=post&s=view',
 			'page=dapi&s=post&q=index&json=1'
 		);
-		const tags = await axios.get(apiurl).then(response => {
-			console.log(response.data);
-			return response.data.post[0].tags.slice(0, 1800);
-		});
+		const tags = await axios.get(apiurl).then(response => response.data.post[0].tags.slice(0, 1800));
 		return await Promise.all([
 			interaction.reply({
 				content: `<:gelbooru:919398540172750878> **Eliminado** <${url}>\n<:tagswhite:921788204540100608> **Tags rescatadas** *Puedes revisarlas y blacklistear algunas con "-"*\n${tags}`,
