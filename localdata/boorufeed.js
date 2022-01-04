@@ -82,7 +82,7 @@ module.exports = {
                         }
                     };
                     const source = image.source;
-                    console.log(image.source);
+                    //console.log(image.source);
                     if(source) {
                         if(typeof source === 'object')
                             Object.values(source).forEach(addSourceButton);
@@ -130,9 +130,21 @@ module.exports = {
                         feedEmbed.setTitle(feed.title);
                     if(feed.footer)
                         feedEmbed.setFooter(feed.footer);
-                    if(image.fileUrl.match(/\.(mp4|webm|webp)/)) {
-                        feedMessage.files = [image.fileUrl];
-                        feedEmbed.addField('No se pudo mostrar la vista previa aquí', 'La vista previa se enviará fuera del marco');
+                    
+                    if(image.tags.includes('absurdres') || image.fileUrl.match(/\.(mp4|webm|webp)/)) {
+                        console.log({
+                            sampleUrl: image.sampleUrl,
+                            previewUrl: image.previewUrl,
+                            fileUrl: image.fileUrl,
+                        });
+                        const mostAvailableUrl = image.sampleUrl || image.previewUrl;
+                        if(mostAvailableUrl) {
+                            feedEmbed.setImage(mostAvailableUrl);
+                            feedEmbed.addField('Vista previa', 'Calidad original en el respectivo <:gelbooru:919398540172750878> **Post**');
+                        } else {
+                            feedMessage.files = [image.fileUrl];
+                            feedEmbed.addField('No se pudo mostrar la vista previa aquí', 'La vista previa se enviará fuera del marco');
+                        }
                     } else
                         feedEmbed.setImage(image.fileUrl);
                     feedMessage.embeds = [feedEmbed];
