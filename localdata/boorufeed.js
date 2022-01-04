@@ -129,9 +129,11 @@ module.exports = {
                         feedEmbed.setTitle(feed.title);
                     if(feed.footer)
                         feedEmbed.setFooter(feed.footer);
-                    if(image.fileUrl.match(/\.(mp4|webm|webp)/))
-                        feedEmbed.addField('Esto es un video', `Míralo en el respectivo <:gelbooru:919398540172750878> **Post**\n[Enlace directo](${image.fileUrl})`);
-                    feedEmbed.setImage(image.sampleUrl || image.previewUrl || image.fileUrl);
+                    if(image.fileUrl.match(/\.(mp4|webm|webp)/)) {
+                        feedEmbed.addField('Video', `Míralo en su respectivo <:gelbooru:919398540172750878> **Post**\n[Enlace directo](${image.fileUrl})`);
+                        feedEmbed.setImage(image.sampleUrl || image.previewUrl);
+                    } else
+                        feedEmbed.setImage(image.sampleUrl || image.fileUrl);
                     feedMessage.embeds = [feedEmbed];
                     
                     //Enviar imagen de Feed
