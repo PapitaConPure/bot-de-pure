@@ -218,11 +218,13 @@ client.on('ready', async () => {
 	confirm();
 
 	console.log(chalk.rgb(158,114,214)('Registrando fuentes...'));
-    registerFont('fonts/Alice-Regular.ttf', { family: 'headline' });
-    registerFont('fonts/teen bd.ttf', { family: 'cardname' });
-    registerFont('fonts/kirsty rg.otf', { family: 'cardclass' });
-    registerFont('fonts/cuyabra.otf', { family: 'cardhint' });
-    registerFont('fonts/asap-condensed.semibold.ttf', { family: 'cardbody' });
+    registerFont('fonts/Alice-Regular.ttf',             { family: 'headline' });
+    registerFont('fonts/teen bd.ttf',                   { family: 'cardname' });
+    registerFont('fonts/kirsty rg.otf',                 { family: 'cardclass' });
+    registerFont('fonts/cuyabra.otf',                   { family: 'cardhint' });
+    registerFont('fonts/asap-condensed.semibold.ttf',   { family: 'cardbody' });
+    registerFont('fonts/BebasNeue_1.otf',               { family: 'bebas' });
+    registerFont('fonts/DINPro-Cond.otf',               { family: 'dinpro' });
 	confirm();
 
     console.log(chalk.blueBright('Registrando eventos de debug del cliente'));
