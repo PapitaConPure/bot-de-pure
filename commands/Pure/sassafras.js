@@ -104,7 +104,8 @@ module.exports = {
     desc: 'Comando de recomendaciones de Sassafras\n' +
 		'Cuidado con hacer enojar al tío Sassa, o puede que active su `--sassamodo`',
     flags: [
-        'meme'
+        'meme',
+		'outdated',
     ],
     options,
 	experimental: true,
