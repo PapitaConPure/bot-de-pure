@@ -1,8 +1,9 @@
 const global = require('./config.json');
+const GuildConfig = require('./models/guildconfigs.js');
 const sid = global.serverid;
 
 module.exports = {
-    [sid.hourai]: {
+    [sid.slot1]: {
         async findBotInfraction(message) {
             const { client, content, channel, author, member, id } = message;
             const infr = global.hourai.infr;
@@ -10,27 +11,32 @@ module.exports = {
 
             if(!whitech[channel.id]) {
                 const msg = content.toLowerCase();
-                const banpf = [ /^p![\n ]*\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,(?!confession)\w/, /^,,\w/, /^~\w/, /^\/\w/ ];
+                const banpf = [ /^p![\n ]*\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,(?!confession)\w/, /^,,\w/, /^~\w/, /^\/\w/, /^%\w/ ];
                 if(banpf.some(bp => msg.match(bp))) {
+                    const gquery = { guildId: message.guild.id };
+                    const gcfg = (await GuildConfig.findOne(gquery)) || new GuildConfig(gquery);
                     const now = Date.now();
                     const uinfr = infr.users;
                     const mui = author.id;
                     
-                    if(!uinfr[mui])
-                        uinfr[mui] = [];
+                    uinfr[mui] = uinfr[mui] || [];
+                    gcfg.userInfractions = gcfg.userInfractions || {};
                     
                     //Sancionar según total de infracciones cometidas en las últimas 4 horas
                     uinfr[mui] = uinfr[mui].filter(inf => (now - inf) < (1000 * 60 * 60 * 4)); //Eliminar antiguas
                     const total = uinfr[mui].push(now); //Añade el momento de la infracción actual y retorna el largo del arreglo
+                    gcfg.userInfractions[mui] = uinfr[mui];
+                    gcfg.markModified('userInfractions');
+                    await gcfg.save();
                     switch(total) {
                         case 1:
-                            await message.react(client.emojis.cache.get('920020596526551072'));
+                            await message.react(client.emojis.cache.get('920020596526551072')).catch(console.error);
                             break;
                         case 2:
-                            await message.react(client.emojis.cache.get('796930821554044928'));
+                            await message.react(client.emojis.cache.get('796930821554044928')).catch(console.error);
                             break;
                         case 3:
-                            await message.react(client.emojis.cache.get('859874631795736606'));
+                            await message.react(client.emojis.cache.get('859874631795736606')).catch(console.error);
                             const hd = '682629889702363143'; //Hanged Doll
                             try {
                                 if(!member.roles.cache.has(hd))
@@ -40,7 +46,7 @@ module.exports = {
                             }
                             break;
                         default:
-                            await message.react(client.emojis.cache.get('852764014840905738'));
+                            await message.react(client.emojis.cache.get('852764014840905738')).catch(console.error);
                             const cd = '925599922370256906'; //Crucified Doll
                             try {
                                 if(!member.roles.cache.has(cd))
