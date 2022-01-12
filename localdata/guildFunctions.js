@@ -1,5 +1,5 @@
 const global = require('./config.json');
-const GuildConfig = require('./models/guildconfigs.js');
+const Hourai = require('./models/hourai.js');
 const sid = global.serverid;
 
 module.exports = {
@@ -13,21 +13,20 @@ module.exports = {
                 const msg = content.toLowerCase();
                 const banpf = [ /^p![\n ]*\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,(?!confession)\w/, /^,,\w/, /^~\w/, /^\/\w/, /^%\w/ ];
                 if(banpf.some(bp => msg.match(bp))) {
-                    const gquery = { guildId: message.guild.id };
-                    const gcfg = (await GuildConfig.findOne(gquery)) || new GuildConfig(gquery);
+                    const hr = (await Hourai.findOne({})) || new Hourai({});
                     const now = Date.now();
                     const uinfr = infr.users;
                     const mui = author.id;
                     
                     uinfr[mui] = uinfr[mui] || [];
-                    gcfg.userInfractions = gcfg.userInfractions || {};
+                    hr.userInfractions = hr.userInfractions || {};
                     
                     //Sancionar según total de infracciones cometidas en las últimas 4 horas
                     uinfr[mui] = uinfr[mui].filter(inf => (now - inf) < (1000 * 60 * 60 * 4)); //Eliminar antiguas
                     const total = uinfr[mui].push(now); //Añade el momento de la infracción actual y retorna el largo del arreglo
-                    gcfg.userInfractions[mui] = uinfr[mui];
-                    gcfg.markModified('userInfractions');
-                    await gcfg.save();
+                    hr.userInfractions[mui] = uinfr[mui];
+                    hr.markModified('userInfractions');
+                    await hr.save().then(() => console.log('wawa')).catch(console.error);
                     switch(total) {
                         case 1:
                             await message.react(client.emojis.cache.get('920020596526551072')).catch(console.error);

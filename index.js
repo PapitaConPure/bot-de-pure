@@ -10,6 +10,7 @@ const uri = (process.env.MONGODB_URI) ? process.env.MONGODB_URI : require('./loc
 const prefixpair = require('./localdata/models/prefixpair.js');
 const { Stats, ChannelStats } = require('./localdata/models/stats.js');
 const { Puretable, defaultEmote } = require('./localdata/models/puretable.js');
+const HouraiDB = require('./localdata/models/hourai.js');
 
 const global = require('./localdata/config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
@@ -193,6 +194,14 @@ client.on('ready', async () => {
             regex: pp.drmk.regex
         };
     });
+    console.log(chalk.gray('Preparando Infracciones de Hourai'));
+    const hourai = (await HouraiDB.findOne({})) || new HouraiDB({});
+    console.log(hourai.userInfractions);
+    Object.entries(hourai.userInfractions).forEach(([mui, infrs]) => {
+        console.log(mui, infrs);
+        global.hourai.infr.users[mui] = infrs;
+    });
+
     console.log(chalk.gray('Preparando Tabla de Puré'));
     let puretable = await Puretable.findOne({});
     if(!puretable) puretable = new Puretable();
