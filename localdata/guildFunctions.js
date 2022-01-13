@@ -3,7 +3,7 @@ const Hourai = require('./models/hourai.js');
 const sid = global.serverid;
 
 module.exports = {
-    [sid.slot1]: {
+    [sid.hourai]: {
         async findBotInfraction(message) {
             const { client, content, channel, author, member, id } = message;
             const infr = global.hourai.infr;
