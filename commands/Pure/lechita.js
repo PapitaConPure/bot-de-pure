@@ -117,12 +117,12 @@ module.exports = {
 					global.lechitauses = Date.now();
 					message.client.guilds.cache.get(global.serverid.slot2).emojis.create(bglink, message.author.id)
 					.then(cumote => {
-						message.channel.send({ content: `${coomer[randcoomer]} <:lechita:674736445071556618> ${cumote}` })
+						message.channel.send({ content: `${coomer[randcoomer]} <:lechita:931409943448420433> ${cumote}` })
 						.then(() => cumote.delete());
 					});
 				} else message.channel.send({ content: `:no_entry_sign: Solo puedes crear emotes cada ${tiempoespera} segundos (compartido globalmente).` });
 			} else
-				message.channel.send({ content: `${coomer[randcoomer]} <:lechita:674736445071556618> ${args[0]}` })
+				message.channel.send({ content: `${coomer[randcoomer]} <:lechita:931409943448420433> ${args[0]}` })
 		}
     },
 };
