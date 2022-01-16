@@ -53,15 +53,7 @@ module.exports = {
 		return await request.reply({
 			content: `Aquí teni los colore po **${(request.user ?? request.author).username}** <:reibu:686220828773318663>`,
 			files: [hourai.images.colors],
-			components: [
-				colorsRow,
-				new MessageActionRow().addComponents(
-					new MessageButton()
-						.setCustomId('colores_end')
-						.setLabel('Dejar de cambiar colores')
-						.setStyle('SECONDARY')
-				),
-			],
+			components: [colorsRow],
 			ephemeral: true,
 		});
     },
@@ -82,15 +74,4 @@ module.exports = {
 			}
 		} else return await interaction.reply({ content: ':x: No se encontró el rol. Si lo intentas más tarde, puede que el problema se haya solucionado', ephemeral: true });
 	},
-
-	/** @param {import('discord.js').ButtonInteraction} interaction */
-	async ['end'](interaction) {
-		if(!interaction.ephemeral)
-			setTimeout(() => interaction.message.delete(), 1000 * 5);
-		return await interaction.update({
-			content: 'No más colore po',
-			attachments: [],
-			components: [],
-		});
-	}
 };
