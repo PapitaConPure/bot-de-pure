@@ -9,7 +9,6 @@ module.exports = {
     desc: 'Otorga caramelos al reaccionar (solo Hourai Doll)',
     flags: [
         'hourai',
-        'outdated'
     ],
 	
 	async execute(message, _) {
