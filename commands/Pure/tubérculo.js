@@ -72,10 +72,11 @@ module.exports = {
 				.setTitle('Lista de Tubérculos');
 			const pageMax = 10;
 			const items = Object.entries(gcfg.tubers).reverse();
-			for(let page = 0; items.length; page++)
-				embed.addField(`Lista ${Math.ceil(page / pageMax) + 1}`, items.splice(0, pageMax)
-					.map(([tid,tuber]) => `**${tid}**, por ${(members.get(tuber.author) ?? request.guild.me).user.username}`)
+			for(let page = 0; items.length; page++) {
+				embed.addField(`🥔)▬-▬{ ${page + 1} }▬-▬(🥔`, items.splice(0, pageMax)
+					.map(([tid,tuber]) => `**${tid}**\n↳${(members.get(tuber.author) ?? request.guild.me).user.username}`)
 					.join('\n'), true);
+			}
 			request.reply({ embeds: [embed] });
 		} else { //Realizar operación sobre ID de Tubérculo
 			if(!id) return await request.reply({ content: `⚠️ Debes ingresar una TuberID válida\n${helpstr}` });
