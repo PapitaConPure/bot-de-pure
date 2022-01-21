@@ -74,7 +74,7 @@ module.exports = {
 			const items = Object.entries(gcfg.tubers).reverse();
 			for(let page = 0; items.length; page++)
 				embed.addField(`Lista ${Math.ceil(page / pageMax) + 1}`, items.splice(0, pageMax)
-					.map(([tid,tuber]) => `**${tid}**, por ${(members.get(tuber.author) ?? request.client.user).username}`)
+					.map(([tid,tuber]) => `**${tid}**, por ${(members.get(tuber.author) ?? request.guild.me).user.username}`)
 					.join('\n'), true);
 			request.reply({ embeds: [embed] });
 		} else { //Realizar operación sobre ID de Tubérculo
