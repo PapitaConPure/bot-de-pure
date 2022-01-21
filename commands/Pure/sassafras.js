@@ -105,7 +105,6 @@ module.exports = {
 		'Cuidado con hacer enojar al tío Sassa, o puede que active su `--sassamodo`',
     flags: [
         'meme',
-		'outdated',
     ],
     options,
 	experimental: true,

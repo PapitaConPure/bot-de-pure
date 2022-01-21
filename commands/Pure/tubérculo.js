@@ -8,8 +8,7 @@ const options = new CommandOptionsManager()
 	.addParam('id', 	  'TEXT',           'para especificar sobre qué Tubérculo operar')
 	.addParam('mensaje',  'TEXT',           'para especificar el texto del mensaje',     { optional: true })
 	.addParam('archivos', ['FILE','IMAGE'], 'para especificar los archivos del mensaje', { poly: 'MULTIPLE', optional: true })
-	.addFlag('c', 		['crear','agregar','añadir'], 'para crear un Tubérculo')
-	.addFlag(['e','m'], ['editar','modificar'],       'para modificar un Tubérculo')
+	.addFlag(['c','m'], ['crear','agregar','añadir'], 'para crear o editar un Tubérculo')
 	.addFlag(['b','d'], ['borrar','eliminar'], 		  'para eliminar un Tubérculo');
 
 module.exports = {
@@ -66,6 +65,7 @@ module.exports = {
 		gcfg.tubers = gcfg.tubers || {};
 
 		if(!operation && !id) { //Listar Tubérculos
+			const members = request.guild.members.cache;
 			const embed = new MessageEmbed()
 				.setColor('LUMINOUS_VIVID_PINK')
 				.setAuthor(request.guild.name, request.guild.iconURL())
@@ -73,19 +73,24 @@ module.exports = {
 			const pageMax = 10;
 			const items = Object.entries(gcfg.tubers).reverse();
 			for(let page = 0; items.length; page++)
-				embed.addField(`Lista ${Math.ceil(page / pageMax) + 1}`, items.splice(0, pageMax).map(([tid,tuber]) => `**${tid}**, por ${tuber.author}`).join('\n'), true);
+				embed.addField(`Lista ${Math.ceil(page / pageMax) + 1}`, items.splice(0, pageMax)
+					.map(([tid,tuber]) => `**${tid}**, por ${(members.get(tuber.author) ?? request.client.user).username}`)
+					.join('\n'), true);
 			request.reply({ embeds: [embed] });
 		} else { //Realizar operación sobre ID de Tubérculo
 			if(!id) return await request.reply({ content: `⚠️ Debes ingresar una TuberID válida\n${helpstr}` });
 
 			switch(operation) {
 				case 'crear':
+					if(gcfg.tubers[id] && gcfg.tubers[id].author !== (request.author ?? request.user).id)
+						return await request.reply({ content: `⛔ Acción denegada. La TuberID **${id}** le pertenece a *${gcfg.tubers[id].author}*` });
+					
 					const content = (isSlash ? options.getString('mensaje') : args.join(' ')).split('#FIN#').join('\n');
 					const urls = isSlash ? options.fetchParamPoly(args, 'archivos', args.getString, null).filter(att => att) : (request.attachments || []).map(att => att.proxyURL);
 
 					//Incluir Tubérculo; crear colección de Tubérculos si es necesario
 					const tuberContent = {
-						author: (request.user ?? request.author).username,
+						author: (request.user ?? request.author).id,
 						content: content || null,
 						files: urls,
 					};
@@ -102,7 +107,10 @@ module.exports = {
 					break;
 				
 				case 'borrar':
-					if(!gcfg.tubers[id]) return await request.reply({ content: `⚠️ El tubérculo **${id}** no existe` });
+					if(!gcfg.tubers[id])
+						return await request.reply({ content: `⚠️ El tubérculo **${id}** no existe` });
+					if(gcfg.tubers[id].author !== (request.author ?? request.user).id)
+						return await request.reply({ content: `⛔ Acción denegada. La TuberID **${id}** le pertenece a *${gcfg.tubers[id].author}*` });
 
 					gcfg.tubers[id] = null;
 					delete gcfg.tubers[id];
