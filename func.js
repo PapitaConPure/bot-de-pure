@@ -2,6 +2,7 @@ const Discord = require('discord.js'); //Discord.js
 const global = require('./localdata/config.json'); //Variables globales
 const presence = require('./localdata/presence.json'); //Datos de presencia
 const images = require('./localdata/images.json'); //Imágenes globales
+const { p_pure } = require('./localdata/prefixget'); //Imágenes globales
 const Canvas = require('canvas'); //Node Canvas
 const chalk = require('chalk'); //Consola con formato bonito
 const concol = {
@@ -421,11 +422,17 @@ module.exports = {
     finalizarHourai: function(miembro, canal) {
         //Mensaje de fin de bienvenida
         canal.send({
-            content:
-                `Una última cosita <@${miembro.user.id}>, recuerda revisar el canal <#671817759268536320> en algún momento <:Junkoborga:751938096550903850>\n` +
-                `También, si te interesa, puedes revisar los mensajes pinneados de este canal <:tenshipeacheems:854408293258493962>\n` +
-                'Y estate tranqui, que ya no vas a recibir tantos pings <:starnap:727764482801008693>'
+            content: [
+                `Una última cosita <@${miembro.user.id}>, recuerda revisar el canal <#671817759268536320> en algún momento <:Junkoborga:751938096550903850>`,
+                `También, si te interesa, puedes revisar los mensajes pinneados de este canal <:tenshipeacheems:854408293258493962>`,
+                'Y estate tranqui, que ya no vas a recibir tantos pings <:starnap:727764482801008693>',
+                `Dicho esto, ¡disfruta el server po\'! Si quieres más roles, puedes usar \`${p_pure(global.serverid.hourai).raw}roles\``,
+            ].join('\n')
         });
+
+        //Sugerir p!suicidio con 41% de probabilidad
+        if(Math.random() < 0.41)
+            setTimeout(canal.send, 1000 * 5, { content: `Por cierto, tenemos una tradición un poco más oscura. ¿Te atrevei a usar \`${p_pure(global.serverid.hourai).raw}suicidio\`?` });
 
         //Otorgar rol con 50% de probabilidad
         const gr = canal.guild.roles.cache;
