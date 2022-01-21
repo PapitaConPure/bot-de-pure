@@ -1,7 +1,7 @@
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
 const { p_pure } = require('../../localdata/prefixget.js');
-const { fetchFlag } = require('../../func.js');
+const { fetchFlag, isNotModerator } = require('../../func.js');
 const { MessageEmbed } = require('discord.js');
 
 const options = new CommandOptionsManager()
@@ -83,7 +83,7 @@ module.exports = {
 
 			switch(operation) {
 				case 'crear':
-					if(gcfg.tubers[id] && gcfg.tubers[id].author !== (request.author ?? request.user).id)
+					if(gcfg.tubers[id] && isNotModerator(request.member) && gcfg.tubers[id].author !== (request.author ?? request.user).id)
 						return await request.reply({ content: `⛔ Acción denegada. La TuberID **${id}** le pertenece a *${gcfg.tubers[id].author}*` });
 					
 					const content = (isSlash ? options.getString('mensaje') : args.join(' ')).split('#FIN#').join('\n');
@@ -110,7 +110,7 @@ module.exports = {
 				case 'borrar':
 					if(!gcfg.tubers[id])
 						return await request.reply({ content: `⚠️ El tubérculo **${id}** no existe` });
-					if(gcfg.tubers[id].author !== (request.author ?? request.user).id)
+					if(isNotModerator(request.member) && gcfg.tubers[id].author !== (request.author ?? request.user).id)
 						return await request.reply({ content: `⛔ Acción denegada. La TuberID **${id}** le pertenece a *${gcfg.tubers[id].author}*` });
 
 					gcfg.tubers[id] = null;
