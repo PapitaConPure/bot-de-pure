@@ -2,26 +2,22 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.B2",
+            "number": "Full.2.8.BA",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo reestructuraciones para una actualización mayor. Es probable que algunos comandos dejen de funcionar durante el proceso.\nTambién, las actualizaciones serán considerablemente menos frecuentes de momento",
         "changelog": [
             "Tareas de refactorización (2.99/4)",
             "PLACEHOLDER_SLASHCMD",
-            "Agregado p!prefijo",
-            "Agregado p!aqua",
             "p!caos e identificador `CHAOS` agregados",
             "Correcciones de errores varios",
-            "p!mimar agregado",
-            "Tag de Yuuma Toutetsu agregada en p!touhou",
             "p!elegir añadido",
             "p!feed incorporado",
             "p!colores ahora usa un menú desplegable (H. Doll)",
-            "p!feed ahora permite personalizar más aspectos del Feed",
             "Corregido error de vista previa de videos en Feeds",
             "p!tubérculo agregado",
-            "Mejoras generales a Feeds de imágenes"
+            "Mejoras generales a Feeds de imágenes",
+            "p!roles integrado (H. Doll)"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos con p!ayuda",
