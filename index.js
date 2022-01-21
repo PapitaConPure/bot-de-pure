@@ -196,7 +196,6 @@ client.on('ready', async () => {
     });
     console.log(chalk.gray('Preparando Infracciones de Hourai'));
     const hourai = (await HouraiDB.findOne({})) || new HouraiDB({});
-    console.log(hourai.userInfractions);
     Object.entries(hourai.userInfractions).forEach(([mui, infrs]) => {
         console.log(mui, infrs);
         global.hourai.infr.users[mui] = infrs;
@@ -455,11 +454,12 @@ client.on('interactionCreate', async interaction => {
         try {
             const funcSeek = interaction.customId.split('_');
             let command = funcSeek.shift();
-            const func = funcSeek.join('');
+            const func = funcSeek.shift();
+            console.log(command, func, funcSeek);
             if(command && func) {
                 command = client.ComandosPure.get(command) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(command));
                 if(typeof command[func] === 'function')
-                    await command[func](interaction);
+                    await command[func](interaction, funcSeek);
                 else
                     interaction.reply({
                         content: '☕ Parece que encontraste un botón o menú desplegable sin función. Mientras conecto algunos cables, ten un café',

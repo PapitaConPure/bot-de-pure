@@ -33,8 +33,8 @@ const colorsRow = new MessageActionRow().addComponents(roleList);
 module.exports = {
 	name: 'colores',
 	aliases: [
-		'color', 'roles', 'rol',
-		'colours', 'colour', 'colors', 'role',
+		'color',
+		'colours', 'colour', 'colors',
 		'c'
 	],
     desc: 'Muestra un tablón de roles de colores básicos para Hourai Doll',
@@ -43,7 +43,7 @@ module.exports = {
     ],
 	experimental: true,
 	colorsRow: colorsRow,
-	
+
 	/**
 	 * @param {import('../Commons/typings').CommandRequest} request 
 	 * @param {import('../Commons/typings').CommandOptions} _ 

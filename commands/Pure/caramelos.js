@@ -38,7 +38,7 @@ module.exports = {
 	 * @param {Boolean} isSlash
 	 */
 	async execute(request, _) {
-		request.reply({
+		return await request.reply({
 			embeds: [ embed.setAuthor('Punto de Reparto desplegado', (request.author ?? request.user).avatarURL()) ],
 			components: [row],
 		});

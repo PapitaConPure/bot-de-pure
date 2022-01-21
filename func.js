@@ -298,37 +298,6 @@ module.exports = {
         }
     },
 
-    askCandy: function(miembro, canal) {
-        if(canal.guild.id !== global.serverid.hourai) {
-            canal.send({ content: '<:milky:778180421304188939>' });
-            return;
-        }
-
-        let candyemote = '778180421304188939';
-        let candyrole = '683084373717024869';
-        console.log('Preguntando por caramelos.');
-        canal.send({
-            content:
-                `Weno **${miembro.user.username}**, si querí __caramelos__, reacciona con <:milky:778180421304188939> a esto po <:yumou:708158159180660748>\n` +
-                '> *__Caramelos:__ están cargados con magia. Leyendas dicen que permiten ver canales donde abunda la lujuria...*'
-        }).then(sent => {
-            sent.react(candyemote)
-            .then(() => {
-                const filter = (rc, user) => !user.bot && rc.emoji.id === candyemote && miembro.user.id === user.id;
-                const collector = sent.createReactionCollector({ filter: filter, time: 8 * 60 * 1000 });
-                collector.on('collect', () => {
-                    if(miembro.roles.cache.has(candyrole)) {
-                        canal.send({ content: 'Oe tranqui po, que ya tení tus caramelos <:kageuwu:850196617495707678>' });
-                        collector.stop();
-                    } else {
-                        miembro.roles.add(candyrole);
-                        canal.send({ content: 'Caramelos entregados <:miyoi:674823039086624808>:pinching_hand: :candy:' });
-                    }
-                });
-            });
-        });
-    },
-
     /*askColor: function(message, member) {
         //ID emote: ID rol
         const colrol = {
@@ -465,25 +434,38 @@ module.exports = {
             miembro.roles.add(role50);
     },
 
-    dibujarAvatar: async function(context2d, user, xcenter, ycenter, radius, options = { circleStrokeColor: '#000000', circleStrokeFactor: 0.02 }) {
+    /**
+     * Dibuja un avatar circular con Node Canvas
+     * @param {Canvas.NodeCanvasRenderingContext2D} ctx El Canvas context2D utilizado
+     * @param {Discord.User} user El usuario del cual dibujar la foto de perfil
+     * @param {Number} xcenter La posición X del centro del círculo
+     * @param {Number} ycenter La posición Y del centro del círculo
+     * @param {Number} radius El radio del círculo
+     * @param {{
+     *  circleStrokeColor: String='#000000', 
+     *  circleStrokeFactor: Number=0.02,
+     * }} options 
+     * @returns {Promise<void>}
+     */
+    dibujarAvatar: async function(ctx, user, xcenter, ycenter, radius, options = { circleStrokeColor: '#000000', circleStrokeFactor: 0.02 }) {
         //Fondo
-        context2d.fillStyle = '#36393f';
-        context2d.arc(xcenter, ycenter, radius, 0, Math.PI * 2, true);
-        context2d.fill();
+        ctx.fillStyle = '#36393f';
+        ctx.arc(xcenter, ycenter, radius, 0, Math.PI * 2, true);
+        ctx.fill();
 
         //Foto de perfil
-        context2d.strokeStyle = options.strokeColor;
-        context2d.lineWidth = radius * 0.33 * options.strokeFactor;
-        context2d.arc(xcenter, ycenter, radius + context2d.lineWidth, 0, Math.PI * 2, true);
-        context2d.stroke();
-        context2d.save();
-        context2d.beginPath();
-        context2d.arc(xcenter, ycenter, radius, 0, Math.PI * 2, true);
-        context2d.closePath();
-        context2d.clip();
+        ctx.strokeStyle = options.strokeColor;
+        ctx.lineWidth = radius * 0.33 * options.strokeFactor;
+        ctx.arc(xcenter, ycenter, radius + ctx.lineWidth, 0, Math.PI * 2, true);
+        ctx.stroke();
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(xcenter, ycenter, radius, 0, Math.PI * 2, true);
+        ctx.closePath();
+        ctx.clip();
         const avatar = await Canvas.loadImage(user.displayAvatarURL({ format: 'png', dynamic: false, size: 1024 }));
-        context2d.drawImage(avatar, xcenter - radius, ycenter - radius, radius * 2, radius * 2);
-        context2d.restore();
+        ctx.drawImage(avatar, xcenter - radius, ycenter - radius, radius * 2, radius * 2);
+        ctx.restore();
     },
 
     dibujarBienvenida: async function(miembro, forceHourai = false) {
