@@ -68,7 +68,7 @@ module.exports = {
 		'common'
 	],
 	options,
-	callx: '<mensaje?> <archivos>',
+	callx: '<mensaje?> <archivos?>',
 	experimental: true,
 	
 	/**
@@ -96,6 +96,7 @@ module.exports = {
 		const gid = request.guild.id;
 		const guildquery = { guildId: gid };
 		const gcfg = (await GuildConfig.findOne(guildquery)) || new GuildConfig(guildquery);
+		const members = request.guild.members.cache;
 		const executeTuber = async(tuber) => await request.reply({
 			content: tuber.content,
 			files: tuber.files,
@@ -103,7 +104,6 @@ module.exports = {
 		gcfg.tubers = gcfg.tubers || {};
 
 		if(!operation && !id) { //Listar Tubérculos
-			const members = request.guild.members.cache;
 			const items = Object.entries(gcfg.tubers).reverse();
 			const lastPage = Math.ceil(items.length / pageMax) - 1;
 			request.reply({
@@ -127,7 +127,7 @@ module.exports = {
 					if(id.length > 24)
 						return await request.reply({ content: '⚠️ Las TuberID solo pueden medir hasta 24 caracteres' });
 					if(gcfg.tubers[id] && isNotModerator(request.member) && gcfg.tubers[id].author !== (request.author ?? request.user).id)
-						return await request.reply({ content: `⛔ Acción denegada. La TuberID **${id}** le pertenece a *${gcfg.tubers[id].author}*` });
+						return await request.reply({ content: `⛔ Acción denegada. La TuberID **${id}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[id].author) ?? request.guild.me).user.username}*` });
 					
 					const content = (isSlash ? options.getString('mensaje') : args.join(' ')).split('#FIN#').join('\n');
 					const urls = isSlash ? options.fetchParamPoly(args, 'archivos', args.getString, null).filter(att => att) : (request.attachments || []).map(att => att.proxyURL);

@@ -149,6 +149,6 @@ module.exports = {
         }));
 
         setTimeout(module.exports.updateBooruFeeds, 1000 * 60, client);
-        console.log(chalk.green(`Se procesaron ${feedsCount} Feeds desde ${guilds.size} servers en ${(Date.now() - feedCheckupStart) / 1000}s. ${promisesCount} imágenes nuevas puestas en envío`));
+        //console.log(chalk.green(`Se procesaron ${feedsCount} Feeds desde ${guilds.size} servers en ${(Date.now() - feedCheckupStart) / 1000}s. ${promisesCount} imágenes nuevas puestas en envío`));
     },
 }

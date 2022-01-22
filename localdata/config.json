@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.BA",
+            "number": "Full.2.8.BE",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo reestructuraciones para una actualización mayor. Es probable que algunos comandos dejen de funcionar durante el proceso.\nTambién, las actualizaciones serán considerablemente menos frecuentes de momento",
@@ -29,12 +29,16 @@
         ]
     },
     "p_drmk": {
-        "raw": "",
-        "regex": ""
+        "0": {
+            "raw": "",
+            "regex": ""
+        }
     },
     "p_pure": {
-        "raw": "",
-        "regex": ""
+        "0": {
+            "raw": "",
+            "regex": ""
+        }
     },
     "maintenance": "",
     "seed": 0,

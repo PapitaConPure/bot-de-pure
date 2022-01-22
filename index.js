@@ -23,6 +23,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { CommandOptionsManager } = require('./commands/Commons/cmdOpts.js');
 const { promisify } = require('util');
 const { updateBooruFeeds } = require('./localdata/boorufeed');
+const { p_drmk, p_pure } = require('./localdata/prefixget');
 const token = (process.env.I_LOVE_MEGUMIN) ? process.env.I_LOVE_MEGUMIN : require('./localenv.json').token; //La clave del bot
 //#endregion
 
@@ -51,8 +52,8 @@ const fastGuildFunctions = (() => {
     Object.values(guildfunc).map(gfs => Object.values(gfs).map(fgf => fgf.name)).forEach(fgt => rtn = [...rtn, ...fgt]);
     return rtn.sort().filter((fgf, i, arr) => fgf !== arr[i - 1]);
 })();
-global.p_drmk = { raw: 'd!', regex: /^[Dd]![\n ]*/g };
-global.p_pure = { raw: 'p!', regex: /^[Pp]![\n ]*/g };
+global.p_drmk['0'] = { raw: 'd!', regex: /^[Dd]![\n ]*/g };
+global.p_pure['0'] = { raw: 'p!', regex: /^[Pp]![\n ]*/g };
 //#endregion
 
 //#region Detección de archivos de comandos
@@ -169,7 +170,7 @@ client.on('ready', async () => {
     const gds = await Promise.all([
         client.guilds.fetch(global.serverid.slot1),
         client.guilds.fetch(global.serverid.slot2),
-        client.guilds.fetch(global.serverid.slot3)
+        client.guilds.fetch(global.serverid.slot3),
     ]);
     gds.forEach((f, i) => { global.slots[`slot${i + 1}`] = f; });
     const logs = await Promise.all([
@@ -185,6 +186,7 @@ client.on('ready', async () => {
     });
     console.log(chalk.gray('Facilitando prefijos'));
     (await prefixpair.find({})).forEach(pp => {
+        console.log(pp.guildId);
         global.p_pure[pp.guildId] = {
             raw: pp.pure.raw,
             regex: pp.pure.regex
@@ -194,6 +196,7 @@ client.on('ready', async () => {
             regex: pp.drmk.regex
         };
     });
+    console.log(global.p_pure);
     console.log(chalk.gray('Preparando Infracciones de Hourai'));
     const hourai = (await HouraiDB.findOne({})) || new HouraiDB({});
     Object.entries(hourai.userInfractions).forEach(([mui, infrs]) => {
@@ -305,11 +308,11 @@ client.on('messageCreate', async message => {
     
     //#region Comandos
     //#region Detección de Comandos
-    const p_drmk = global.p_drmk[gid] || global.p_drmk;
-    const p_pure = global.p_pure[gid] || global.p_pure;
+    const pdrmk = p_drmk(gid);
+    const ppure = p_pure(gid);
     let pdetect;
-    if(msg.startsWith(p_drmk.raw)) pdetect = p_drmk;
-    else if(msg.startsWith(p_pure.raw)) pdetect = p_pure;
+    if(msg.match(pdrmk.regex)) pdetect = pdrmk;
+    else if(msg.match(ppure.regex)) pdetect = ppure;
     else {
         //#region Emotes rápidos
         const words = content.split(/[\n ]+/);
@@ -347,11 +350,11 @@ client.on('messageCreate', async message => {
     let commandname = args.shift().toLowerCase(); //Comando ingresado
     let command;
     
-    if(pdetect.raw === p_drmk.raw) {
+    if(pdetect.raw === pdrmk.raw) {
         //command = client.ComandosDrawmaku.get(commandname) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(commandname));
         channel.send({ content: '<:delete:704612795072774164> Los comandos de Drawmaku estarán deshabilitados por un tiempo indefinido. Se pide disculpas.' });
         return;
-    } else if(pdetect.raw === p_pure.raw)
+    } else if(pdetect.raw === ppure.raw)
         command = client.ComandosPure.get(commandname) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(commandname));
     
     if(!command) {

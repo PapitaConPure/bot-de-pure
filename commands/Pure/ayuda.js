@@ -54,6 +54,7 @@ module.exports = {
         const embed = new MessageEmbed().setColor('#608bf3');
         const aurl = request.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 });
         const pfr = p_pure(request.guild.id).raw;
+        console.log(pfr);
         const hcmd = `${pfr}${module.exports.name}`;
         
         //Análisis de comandos
