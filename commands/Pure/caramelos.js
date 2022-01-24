@@ -29,6 +29,7 @@ module.exports = {
     desc: 'Otorga caramelos al reaccionar (solo Hourai Doll)',
     flags: [
         'hourai',
+		'outdated',
     ],
 	experimental: true,
 	
