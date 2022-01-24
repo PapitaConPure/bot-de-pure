@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.BE",
+            "number": "Full.2.8.C2",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo reestructuraciones para una actualización mayor. Es probable que algunos comandos dejen de funcionar durante el proceso.\nTambién, las actualizaciones serán considerablemente menos frecuentes de momento",
@@ -17,13 +17,13 @@
             "Corregido error de vista previa de videos en Feeds",
             "p!tubérculo agregado",
             "Mejoras generales a Feeds de imágenes",
-            "p!roles integrado (H. Doll)"
+            "p!roles integrado (H. Doll)",
+            "PuréScript básico implementado"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos con p!ayuda",
             "p!ajedrez",
             "Minijuegos individuales y tipo-fiesta",
-            "Tubérculos con Puréscript:tm:",
             "Agregar GIFs infográficos en comandos",
             "Crear página de ayuda Web para entenderme mejor"
         ]
