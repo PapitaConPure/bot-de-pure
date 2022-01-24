@@ -81,12 +81,12 @@ module.exports = {
 							emoji: '704612794921779290',
 							value: 'selectReligion',
 						},
-						{
+						/*{
 							label: 'Caramelos',
 							description: 'Cargados de amor siniestro',
 							emoji: '778180421304188939',
 							value: 'selectCandy',
-						},
+						},*/
 					]),
 			)],
 		});
