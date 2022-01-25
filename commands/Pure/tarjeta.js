@@ -146,11 +146,11 @@ module.exports = {
         ctx.fillStyle = '#e0e0e0';
 		ctx.textAlign = 'left';
         ctx.textBaseline = 'top';
-        ctx.font = '48px "dinpro"';
-        ctx.fillText(score, 208, 959);
-        ctx.textBaseline = 'ideographic';
         ctx.font = 'bold 64px "bebas"';
-        ctx.fillText((request.user ?? request.author).username, 42, canvas.height / 2);
+        ctx.fillText((request.user ?? request.author).username, 40, 504);
+        ctx.textBaseline = 'bottom';
+        ctx.font = '64px "dinpro"';
+        ctx.fillText(score, 208, 979);
         ctx.textBaseline = 'middle';
 		ctx.textAlign = 'center';
         ctx.font = '48px "dinpro"';
