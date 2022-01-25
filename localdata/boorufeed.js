@@ -45,14 +45,14 @@ module.exports = {
 
                 ///Eliminar Feed si las tags ingresadas no devuelven ninguna imagen
                 if(typeof channel === 'undefined' || !response.length) {
-                    console.log('Eliminando un Feed sin resultados');
+                    console.log('Eliminando un Feed no disponible o sin resultados');
                     delete gcfg.feeds[chid];
                     gcfg.markModified('feeds');
                     return;
                 }
                 
                 //Comprobar recolectado en busca de imágenes nuevas
-                if(logMore) console.log(`Preparándose para enviar imágenes ${response}`);
+                if(logMore) console.log(`Preparándose para enviar imágenes en ${channel.name} ${response.map(img => img.id)}`);
                 response.reverse().forEach(image => {
                     //Revisar si el documento no fue anteriormente enviado por este Feed
                     if(feed.ids.includes(image.id)) return;
