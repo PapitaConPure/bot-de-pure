@@ -31,9 +31,8 @@ module.exports = {
 	aliases: [
 		'rol',
 		'role',
-		'candies',
 	],
-    desc: 'Otorga caramelos al reaccionar (solo Hourai Doll)',
+    desc: 'Establece un punto de reparto de roles para uso colectivo (solo Hourai Doll)',
     flags: [
         'hourai',
     ],
