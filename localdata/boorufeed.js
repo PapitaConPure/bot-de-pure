@@ -10,20 +10,21 @@ module.exports = {
         const feedCheckupStart = Date.now();
         const maxDocuments = 16;
         let feedsCount = 0;
-        let promisesCount = 0;
+        let promisesCount = { total: 0 };
         /** @type {import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Guild>} */
         const guilds = client.guilds.cache;
         await Promise.all(guilds.map(async guild => {
+            promisesCount[guild] = 0;
             const gcfg = await GuildConfig.findOne({ guildId: guild.id });
             if(!gcfg) return;
             for(const [chid, feed] of Object.entries(gcfg.feeds)) {
                 feedsCount++;
-                console.log('Determinando posibilidad de procesar feed...');
+                /*console.log('Determinando posibilidad de procesar feed...');
                 if(promisesCount > maxDocuments) {
                     console.log('Se excedió el límite de envíos simultaneos establecido');
                     return;
                 }
-                console.log('Procesando feed')
+                console.log('Procesando feed');*/
 
                 //Recolectar últimas imágenes para el Feed
                 let fetchedProperly = true;
@@ -145,7 +146,8 @@ module.exports = {
                     feedMessage.embeds = [feedEmbed];
                     
                     //Enviar imagen de Feed
-                    promisesCount++;
+                    promisesCount[guild]++;
+                    promisesCount.total++;
                     channel.send(feedMessage).catch(error => {
                         console.log(`Ocurrió un error al enviar la imagen de Feed: ${source}`);
                         console.error(error);
@@ -153,10 +155,12 @@ module.exports = {
                 });
             }
 
+            console.log('GUARDANDO GUARDANDO GUARDANDO');
+            console.log('gcfg.feeds', gcfg.feeds);
             await gcfg.save();
         }));
 
         setTimeout(module.exports.updateBooruFeeds, 1000 * 60, client);
-        console.log(chalk.green(`Se procesaron ${feedsCount} Feeds desde ${guilds.size} servers en ${(Date.now() - feedCheckupStart) / 1000}s. ${promisesCount} imágenes nuevas puestas en envío`));
+        console.log(chalk.green(`Se procesaron ${feedsCount} Feeds desde ${guilds.size} servers en ${(Date.now() - feedCheckupStart) / 1000}s. ${promisesCount.total} imágenes nuevas puestas en envío`));
     },
 }
