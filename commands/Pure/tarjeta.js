@@ -146,11 +146,11 @@ module.exports = {
         ctx.fillStyle = '#e0e0e0';
         ctx.textBaseline = 'middle';
 		ctx.textAlign = 'center';
-        ctx.font = '24px "dinpro"';
+        ctx.font = '36px "dinpro"';
         ctx.fillText(issueDate, 530, 1080);
         ctx.textBaseline = 'bottom';
 		ctx.textAlign = 'left';
-        ctx.font = 'bold 36px "dinpro"';
+        ctx.font = 'bold 48px "dinpro"';
         ctx.fillText(score, 208, 959);
 
 		const phrases = [
@@ -163,7 +163,7 @@ module.exports = {
 			'¡Buena~!',
 		];
 		await request.reply({
-			content: phrases[Math.random(phrases.length)],
+			content: phrases[Math.floor(Math.random() * phrases.length)],
 			files: [ new MessageAttachment(canvas.toBuffer(), 'bienvenida.png') ],
 		});
 	}
