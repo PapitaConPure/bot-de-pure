@@ -114,7 +114,7 @@ module.exports = {
 		if(!highlights.survival[survivalname]) return await request.reply(`⚠ Debes ingresar una calidad de survival válida.\n${helpstr}`);
 		
 		const score = improveNumber(isSlash ? args.getNumber('survival') : args[3], false, 10);
-		if(!score || score < 0) return await request.reply(`⚠ Debes ingresar un puntaje final válido.\n${helpstr}`);
+		if(isNaN(score) || score <= 0) return await request.reply(`⚠ Debes ingresar un puntaje final válido.\n${helpstr}`);
 
 		let dateStr;
 		if(args.length > 4) {
