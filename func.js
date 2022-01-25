@@ -878,7 +878,8 @@ module.exports = {
     /**
      * @function
      * @param {Number | String} num El número a mejorarle la visibilidad
-     * @param {Boolean?} shorten Si acortar el número para volverlo más fácil de leer
+     * @param {Boolean} shorten Si acortar el número para volverlo más fácil de leer
+     * @param {Number} minDigits Cantidad mínima de dígitos para rellenar con 0s a la izquierda
      */
     improveNumber: function(num, shorten = false, minDigits = 1) {
         if(typeof num === 'string')
@@ -891,9 +892,7 @@ module.exports = {
         const ni = (num < Math.pow(10, 6 + unities.length * 3))
             ? Math.floor((num.length - 7) / 3)
             : unities.length - 1;
-        
         const snum = (num / Math.pow(1000, ni + 2)).toFixed(2);
-        console.log({ snum: snum, ni: ni, util: utilities });
         
         return [ snum, unities[ni] ].join(' ');
     },

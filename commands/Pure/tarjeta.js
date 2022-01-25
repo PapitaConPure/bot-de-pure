@@ -2,7 +2,7 @@ const Canvas = require('canvas');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
 const { p_pure } = require('../../localdata/prefixget');
 const { MessageAttachment } = require('discord.js');
-const { dibujarAvatar } = require('../../func.js');
+const { improveNumber, fetchFlag } = require('../../func');
 
 /**
  * @param {String} url 
@@ -45,7 +45,7 @@ const highlights = {
 	challenge: {
 		nobomb: 	'https://i.imgur.com/VWoI0FU.png',
 		nospecial: 	'https://i.imgur.com/e0p59jL.png',
-		pacifist: 	'https://i.imgur.com/Gp98keQ.png',
+		pacifista: 	'https://i.imgur.com/Gp98keQ.png',
 	},
 	difficulty: [
 		{ url: 'https://i.imgur.com/3LZJpWC.png', aliases: [ 'es', 	'fácil', 	'easy', 	'facil',	] },
@@ -58,11 +58,13 @@ const highlights = {
 
 const options = new CommandOptionsManager()
 	.addParam('juego', 		['TEXT','NUMBER'], 												'para elegir el juego')
-	.addParam('dificultad', ['TEXT'], 	'para establecer la dificultad jugada')
+	.addParam('dificultad', 'TEXT', 														'para establecer la dificultad jugada')
 	.addParam('survival', 	{ name: 'calidad', expression: '"clear", "1cc" o "nomiss"' }, 	'para establecer la calidad de supervivencia')
+	.addParam('puntaje',	'NUMBER', 														'para establecer el puntaje')
+	.addParam('fecha', 		{ name: 'fecha', expression: 'DD/MM/AAAA' }, 					'para establecer la fecha')
 	.addFlag('b', 			['nobomb','nb'], 												'para especificar que se logró sin usar bombas')
 	.addFlag(['s','c'], 	['nospecial','ns','noc'], 										'para especificar que se logró sin usar la tecla C')
-	.addFlag(['p'], 		['pacifista', 'pacifist'],										'para especificar que se logró sin realizar daño');
+	.addFlag('p', 			['pacifista', 'pacifist'],										'para especificar que se logró sin realizar daño');
 
 module.exports = {
 	name: 'tarjeta',
@@ -79,7 +81,7 @@ module.exports = {
 		'common',
 	],
 	options: options,
-	callx: '<juego> <survival>',
+	callx: '<juego> <dificultad> <survival> <fecha?>',
 	experimental: false,
 
 	/**
@@ -88,34 +90,80 @@ module.exports = {
 	 * @param {Boolean} isSlash 
 	 */
 	async execute(request, args, isSlash = false) {
-		//Acción de comando
-		if(args.length < 3) return await request.reply(`⚠ Debes ingresar al menos el juego completado, la dificultad y la calidad de supervivencia.\nUsa \`${p_pure(request.guildId).raw}ayuda\` para más información`);
+		//Cargar imágenes derivadas de flags
+		const canvas = Canvas.createCanvas(640, 1120);
+		const ctx = canvas.getContext('2d');
+		const challenges = await Promise.all(
+			['nobomb', 'nospecial', 'pacifista']
+			.map(ch => fetchFlag(args, { ...options.flags.get(ch).structure, callback: ch }))
+			.filter(ch => ch)
+			.map(ch => Canvas.loadImage(highlights.challenge[ch]))
+		);
+		console.log(challenges);
+
+		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda\` para más información`;
+		if(args.length < 3) return await request.reply(`⚠ Debes ingresar al menos el juego completado, la dificultad y la calidad de supervivencia.\n${helpstr}`);
 
 		const bg = backgrounds.find(b => b.aliases.includes(`${isSlash ? args.getString('juego') : args[0]}`.toLowerCase()));
 		if(!bg) return await request.reply('⚠ Debes ingresar un nombre o número de juego válido. Solo se permiten juegos oficiales de danmaku tradicional');
 
 		const diff = highlights.difficulty.find(d => d.aliases.includes(`${isSlash ? args.getString('dificultad') : args[1]}`.toLowerCase()));
-		if(!diff) return await request.reply(`⚠ Debes ingresar una calidad de survival válida.\nUsa \`${p_pure(request.guildId).raw}ayuda\` para más información`);
+		if(!diff) return await request.reply(`⚠ Debes ingresar una calidad de survival válida.\n${helpstr}`);
 
 		const survivalname = (isSlash ? args.getString('survival') : args[2]).toLowerCase();
-		if(!highlights.survival[survivalname]) return await request.reply(`⚠ Debes ingresar una calidad de survival válida.\nUsa \`${p_pure(request.guildId).raw}ayuda\` para más información`);
+		if(!highlights.survival[survivalname]) return await request.reply(`⚠ Debes ingresar una calidad de survival válida.\n${helpstr}`);
+		
+		const score = improveNumber(isSlash ? args.getNumber('survival') : args[3], false, 10);
+		if(!score || score < 0) return await request.reply(`⚠ Debes ingresar un puntaje final válido.\n${helpstr}`);
 
+		let dateStr;
+		if(args.length > 4) {
+			dateStr = isSlash ? args.getString('fecha') : args.slice(4).join('').split(/[\/ ]+/).map(d => d.padStart(2, '0')).join('/');
+			if(dateStr.length !== 'DD/MM/YYYY'.length)
+				return await request.reply('⚠ Fecha inválida. Asegúrate de seguir el formato DD/MM/AAAA');
+		}
+		const issueDate = dateStr
+			? dateStr
+			: new Date(Date.now()).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' });
+		
 		//Creación de imagen
-    	const canvas = Canvas.createCanvas(640, 1120);
-    	const ctx = canvas.getContext('2d');
 		const [ bgimg, diffimg, survivalimg, pfp ] = await Promise.all([
 			Canvas.loadImage(bg.url),
 			Canvas.loadImage(diff.url),
 			Canvas.loadImage(highlights.survival[survivalname]),
 			Canvas.loadImage(request.user ?? request.author.displayAvatarURL({ format: 'png', dynamic: false, size: 1024 })),
 		]);
+		console.log([ bgimg, diffimg, survivalimg, pfp ]);
+
+		//Dibujar imágenes
         ctx.drawImage(bgimg, 0, 0, canvas.width, canvas.height);
         ctx.drawImage(diffimg, 0, 0, canvas.width, canvas.height);
         ctx.drawImage(survivalimg, 0, 0, canvas.width, canvas.height);
         ctx.drawImage(pfp, 38, 804, 156, 156);
+		challenges.forEach(challenge => ctx.drawImage(challenge, 0, 0, canvas.width, canvas.height));
 
+		//Dibujar texto
+        ctx.fillStyle = '#e0e0e0';
+        ctx.textBaseline = 'middle';
+		ctx.textAlign = 'center';
+        ctx.font = '24px "dinpro"';
+        ctx.fillText(issueDate, 530, 1080);
+        ctx.textBaseline = 'bottom';
+		ctx.textAlign = 'left';
+        ctx.font = 'bold 36px "dinpro"';
+        ctx.fillText(score, 208, 959);
+
+		const phrases = [
+			'¡Bien hecho!',
+			'¡Felicidades!',
+			'Al fin, ¿eh? Bien hecho~',
+			'¡Buen trabajo!',
+			'Perfecto. ¡Buen trabajo!',
+			'¿Valió la pena? Seguro que sí',
+			'¡Buena~!',
+		];
 		await request.reply({
-			content: 'test',
+			content: phrases[Math.random(phrases.length)],
 			files: [ new MessageAttachment(canvas.toBuffer(), 'bienvenida.png') ],
 		});
 	}
