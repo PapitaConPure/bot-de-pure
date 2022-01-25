@@ -72,8 +72,10 @@ module.exports = {
 		'logro',
 		'achievement',
 	],
+	brief: 'Para crear una tarjeta de logro personal. Imágenes por **WMX#7937**',
 	desc: [
 		'Para crear una tarjeta de logro personal.',
+		'Las imágenes utilizadas son de parte de **WMX#7937**',
 		'Deberás facilitar un juego (ejemplo: "HSiFS", "128" o "Youyoumu") y la calidad de survival obtenida ("clear", "1cc" o "nomiss")',
 		'Adicionalmente, puedes especificar si el logro incluye desafíos personales como `--nobomb`, `--nospecial` y/o `--pacifista`',
 	].join('\n'),
