@@ -144,14 +144,17 @@ module.exports = {
 
 		//Dibujar texto
         ctx.fillStyle = '#e0e0e0';
+		ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.font = '48px "dinpro"';
+        ctx.fillText(issueDate, 530, 1080);
+        ctx.textBaseline = 'ideographic';
+        ctx.font = 'bold 64px "bebas"';
+        ctx.fillText((request.user ?? request.author).username, 42, canvas.height / 2);
         ctx.textBaseline = 'middle';
 		ctx.textAlign = 'center';
-        ctx.font = '36px "dinpro"';
+        ctx.font = '48px "dinpro"';
         ctx.fillText(issueDate, 530, 1080);
-        ctx.textBaseline = 'bottom';
-		ctx.textAlign = 'left';
-        ctx.font = 'bold 48px "dinpro"';
-        ctx.fillText(score, 208, 959);
 
 		const phrases = [
 			'¡Bien hecho!',
