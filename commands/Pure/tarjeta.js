@@ -75,13 +75,13 @@ module.exports = {
 	desc: [
 		'Para crear una tarjeta de logro personal.',
 		'Deberás facilitar un juego (ejemplo: "HSiFS", "128" o "Youyoumu") y la calidad de survival obtenida ("clear", "1cc" o "nomiss")',
-		'Adicionalmente, puedes especificar si el logro incluye desafíos personales como `--nobomb`, `--nospecial` y/o `pacifista`',
+		'Adicionalmente, puedes especificar si el logro incluye desafíos personales como `--nobomb`, `--nospecial` y/o `--pacifista`',
 	].join('\n'),
 	flags: [
 		'common',
 	],
 	options: options,
-	callx: '<juego> <dificultad> <survival> <fecha?>',
+	callx: '<juego> <dificultad> <survival> <score> <fecha?>',
 	experimental: false,
 
 	/**
