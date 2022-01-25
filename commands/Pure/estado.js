@@ -1,17 +1,17 @@
 const { MessageEmbed } = require('discord.js'); //Integrar discord.js
-const { bot_status, p_pure } = require('../../localdata/config.json'); //Variables globales
+const { bot_status } = require('../../localdata/config.json'); //Variables globales
 const ayuda = require('./ayuda.js'); //Variables globales
 const { readdirSync } = require('fs'); //Para el contador de comandos
-const prefixget = require('../../localdata/prefixget');
+const { p_pure } = require('../../localdata/prefixget');
 const { Stats } = require('../../localdata/models/stats');
 const { improveNumber } = require('../../func');
 
 const { host, version, note, changelog, todo } = bot_status;
-const cmsearch = new RegExp(`${p_pure.raw}[A-Za-zÁÉÍÓÚáéíóúÑñ0-9_.-]*`, 'g');
+const cmsearch = new RegExp(`${p_pure().raw}[A-Za-zÁÉÍÓÚáéíóúÑñ0-9_.-]*`, 'g');
 const ne = [ '0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣' ];
 function listFormat(str, addIndex, guildId) {
     let cmindex = 0;
-    return str.replace(cmsearch, match => `${addIndex?`**[${cmindex++}]**`:''}\`${prefixget.p_pure(guildId).raw}${match.slice(p_pure.raw.length)}\``)
+    return str.replace(cmsearch, match => `${addIndex?`**[${cmindex++}]**`:''}\`${p_pure(guildId).raw}${match.slice(p_pure().raw.length)}\``);
 };
 
 module.exports = {
