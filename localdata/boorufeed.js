@@ -122,6 +122,11 @@ module.exports = {
                     //Botón de eliminación
                     row.addComponents(
                         new MessageButton()
+                            //.setLabel('Recargar')
+                            .setEmoji('935665140601327626')
+                            .setStyle('PRIMARY')
+                            .setCustomId('feed_shockFeed'),
+                        new MessageButton()
                             //.setLabel('Eliminar')
                             .setEmoji('921751138997514290')
                             .setStyle('DANGER')
@@ -154,7 +159,7 @@ module.exports = {
                         console.log(`Ocurrió un error al enviar la imagen de Feed: ${source}`);
                         console.error(error);
                     });
-                    if(logMore) console.log(`EJECUTANDO`) ;
+                    if(logMore) console.log(`EJECUTADO`);
                 });
             }
 

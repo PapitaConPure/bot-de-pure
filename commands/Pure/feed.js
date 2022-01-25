@@ -707,5 +707,17 @@ module.exports = {
 			}),
 			message.delete().catch(console.error),
 		]);
-	}
+	},
+
+	/**@param {import('discord.js').ButtonInteraction} interaction*/
+	async ['shockFeed'](interaction) {
+		const { member, guild, channel } = interaction;
+		if(isNotModerator(member))
+			return await interaction.reply({ content: ':x: No tienes permiso para hacer eso, teehee~', ephemeral: true });
+		const gcfg = await GuildConfig.findOne({ guildId: guild.id });
+		gcfg.feeds[channel.id].ids = (await (require('booru')).search('gelbooru', gcfg.feeds[channel.id].tags, { limit: 16, random: false })).map(r => r.id);
+		gcfg.markModified('feeds');
+		await gcfg.save();
+		return await interaction.reply({ content: 'Shock aplicado.', ephemeral: true });
+	},
 };
