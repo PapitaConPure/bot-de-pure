@@ -14,6 +14,7 @@ module.exports = {
         /** @type {import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Guild>} */
         const guilds = client.guilds.cache;
         await Promise.all(guilds.map(async guild => {
+            const logMore = guild.id === '654471968200065034';
             promisesCount[guild] = 0;
             const gcfg = await GuildConfig.findOne({ guildId: guild.id });
             if(!gcfg) return;
@@ -51,15 +52,16 @@ module.exports = {
                 }
                 
                 //Comprobar recolectado en busca de imágenes nuevas
+                if(logMore) console.log(`Preparándose para enviar imágenes ${response}`);
                 response.reverse().forEach(image => {
                     //Revisar si el documento no fue anteriormente enviado por este Feed
                     if(feed.ids.includes(image.id)) return;
-                    console.log('feed.ids:', feed.ids, '\nimage.id:', image.id);
+                    if(logMore) console.log('feed.ids:', feed.ids, '\nimage.id:', image.id);
 
                     //Agregar documento a IDs enviadas
                     feed.ids = [ image.id, ...feed.ids ];
                     gcfg.feeds[chid].ids = feed.ids.filter(id => response.some(img => img.id === id));
-                    console.log('gcfg.feeds[chid].ids:', gcfg.feeds[chid].ids);
+                    if(logMore) console.log(guild.id, 'gcfg.feeds[chid].ids:', gcfg.feeds[chid].ids);
                     gcfg.markModified('feeds');
 
                     //Botón de Post de Gelbooru
@@ -152,11 +154,11 @@ module.exports = {
                         console.log(`Ocurrió un error al enviar la imagen de Feed: ${source}`);
                         console.error(error);
                     });
+                    if(logMore) console.log(`EJECUTANDO`) ;
                 });
             }
 
-            console.log('GUARDANDO GUARDANDO GUARDANDO');
-            console.log('gcfg.feeds', gcfg.feeds);
+            if(logMore) console.log(`GUARDANDO:`, gcfg.feeds);
             await gcfg.save();
         }));
 
