@@ -158,7 +158,7 @@ module.exports = {
                 });
             }
 
-            if(logMore) console.log(`GUARDANDO:`, gcfg.feeds);
+            if(logMore) console.log(`GUARDANDO:`, Object.entries(gcfg.feeds).map(([chid, feed]) => `${guild.channels.cache.get(chid).name}: ${feed.ids}`));
             await gcfg.save();
         }));
 
