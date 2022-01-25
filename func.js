@@ -877,16 +877,25 @@ module.exports = {
 
     /**
      * @function
-     * @param {Number} num El número a mejorarle la visibilidad
+     * @param {Number | String} num El número a mejorarle la visibilidad
      * @param {Boolean?} shorten Si acortar el número para volverlo más fácil de leer
      */
-    improveNumber: function(num, shorten = false) {
-        if((num < 1000000) || !shorten) return num.toLocaleString('en', {maximumFractionDigits: 2});
-
-        const ni = Math.floor((num.length - 7) / 3);
-        const snum = (num / Math.pow(1000, ni + 2)).toFixed(3);
-        const unitys = ['millones', 'miles de millones', 'millones de millones'];
-        return `${snum} ${unitys[ni]}`;
+    improveNumber: function(num, shorten = false, minDigits = 1) {
+        if(typeof num === 'string')
+            num = parseInt(num);
+        if(isNaN(num))
+            return '0';
+        if((num < 1000000) || !shorten) return num.toLocaleString('en', { maximumFractionDigits: 2, minimumIntegerDigits: minDigits });
+        
+        const unities = [ 'millones', 'miles de millones', 'billones', 'miles de billones', 'trillones', 'miles de trillones', 'cuatrillones' ];
+        const ni = (num < Math.pow(10, 6 + unities.length * 3))
+            ? Math.floor((num.length - 7) / 3)
+            : unities.length - 1;
+        
+        const snum = (num / Math.pow(1000, ni + 2)).toFixed(2);
+        console.log({ snum: snum, ni: ni, util: utilities });
+        
+        return [ snum, unities[ni] ].join(' ');
     },
     /**@param {Array<String>} arr*/
     regroupText: (arr) => arr.join(' ').replace(/([\n ]*,[\n ]*)+/g, ',').split(',').filter(a => a.length > 0),
