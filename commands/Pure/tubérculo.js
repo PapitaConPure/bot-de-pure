@@ -104,6 +104,7 @@ module.exports = {
 		 */
 		const executeTuber = async(tuber) => {
 			if(tuber.script) {
+				let replyContent = {};
 				let mem = { //Memoria del script, para cachear
 					archivos: isSlash ? [] : request.attachments.map(attachment => attachment.proxyURL),
 				};
@@ -151,8 +152,12 @@ module.exports = {
 				}
 
 				//Ejecutar secuencia de expresiones
-				return await Promise.all(tuber.script.map((expr, l) => {
+				let errors = 0;
+				await Promise.all(tuber.script.map((expression, l) => {
+					const expr = [ ...expression ];
+					let working = Promise.resolve(); //Promesa para cuando se estén realizando trabajos de fondo
 					const operation = expr.shift().toLowerCase();
+					console.log('concha de tu hermana', tuber.script);
 					let target, identifier, values;
 					switch(operation) {
 						case 'crear':
@@ -166,25 +171,31 @@ module.exports = {
 								case 'lista':
 									mem[identifier] = [];
 									break;
+
 								case 'conjunto':
 									mem[identifier] = {};
 									break;
+
 								case 'texto':
 									if(!expr.length) return psError('se esperaba un valor', l, operation);
 									mem[identifier] = '';
 									break;
+
 								case 'recuadro':
 									if(!expr.length) return psError('se esperaba un valor', l, operation);
 									mem[identifier] = new MessageEmbed();
 									break;
+
 								default:
 									return psError('contexto inválido', l, operation);
 							}
 							console.log(mem);
 							break;
+
 						case 'guardar':
 							console.log('Operación GUARDAR');
 							return psError('esta característica todavía no está disponible', l, operation);
+
 						case 'cargar':
 							console.log('Operación CARGAR');
 							if(!expr.length) return psError('se esperaba un identificador', l, operation);
@@ -207,6 +218,7 @@ module.exports = {
 							
 							console.log(mem);
 							break;
+
 						case 'enviar':
 							console.log('Operación ENVIAR');
 							const message = {};
@@ -216,26 +228,36 @@ module.exports = {
 							
 							switch(target) {
 								case 'archivos':
-
 									message.files = values;
 									console.log('message.files:', message.files);
 									break;
+
 								case 'recuadros':
 									message.embeds = values;
 									console.log('message.files:', message.files);
 									break;
-									case 'texto':
+
+								case 'texto':
 									message.content = values.join(' ');
 									break
+
 								default:
 									return psError('se esperaba contenido de mensaje', l, operation);
 							}
-							return request.reply(message);
+							replyContent = { ...replyContent, ...message };
+
+
 						default:
 							console.log('Operación *');
 							break;
 					}
+					return working;
 				}));
+				if(errors) {
+					await request.reply({ content: `⚠️ Se han encontrado **${errors} Errores PS** en la ejecución de PuréScript` });
+					return new Error('Error de PuréScript');
+				} else
+					return await request.reply(replyContent);
 			} else
 				return await request.reply({
 					content: tuber.content,
@@ -291,16 +313,18 @@ module.exports = {
 						tuberContent.files = mfiles;
 					}
 
-					console.log(tuberContent);
+					console.log('a', tuberContent);
 					gcfg.tubers[id] = tuberContent;
-				
+					console.log('b', gcfg.tubers[id]);
+					
 					try {
 						await executeTuber(gcfg.tubers[id]);
+						console.log('c', gcfg.tubers[id]);
 						gcfg.markModified('tubers');
 					} catch(error) {
 						console.log('Ocurrió un error al añadir un nuevo Tubérculo');
 						console.error(error);
-						return await request.reply({ content: '❌ Hay un problema con el Tubérculo que intentaste crear' });
+						return await request.reply({ content: '❌ Hay un problema con el Tubérculo que intentaste crear, por lo que no se registrará' });
 					}
 					break;
 				
