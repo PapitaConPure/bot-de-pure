@@ -147,7 +147,7 @@ module.exports = {
 		ctx.textAlign = 'left';
         ctx.textBaseline = 'top';
         ctx.font = '48px "dinpro"';
-        ctx.fillText(issueDate, 530, 1080);
+        ctx.fillText(score, 208, 959);
         ctx.textBaseline = 'ideographic';
         ctx.font = 'bold 64px "bebas"';
         ctx.fillText((request.user ?? request.author).username, 42, canvas.height / 2);
