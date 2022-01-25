@@ -18,7 +18,12 @@ module.exports = {
             if(!gcfg) return;
             for(const [chid, feed] of Object.entries(gcfg.feeds)) {
                 feedsCount++;
-                if(promisesCount > maxDocuments) return;
+                console.log('Determinando posibilidad de procesar feed...');
+                if(promisesCount > maxDocuments) {
+                    console.log('Se excedió el límite de envíos simultaneos establecido');
+                    return;
+                }
+                console.log('Procesando feed')
 
                 //Recolectar últimas imágenes para el Feed
                 let fetchedProperly = true;
@@ -38,6 +43,7 @@ module.exports = {
 
                 ///Eliminar Feed si las tags ingresadas no devuelven ninguna imagen
                 if(typeof channel === 'undefined' || !response.length) {
+                    console.log('Eliminando un Feed sin resultados');
                     delete gcfg.feeds[chid];
                     gcfg.markModified('feeds');
                     return;
@@ -47,10 +53,12 @@ module.exports = {
                 response.reverse().forEach(image => {
                     //Revisar si el documento no fue anteriormente enviado por este Feed
                     if(feed.ids.includes(image.id)) return;
+                    console.log('feed.ids:', feed.ids, '\nimage.id:', image.id);
 
                     //Agregar documento a IDs enviadas
                     feed.ids = [ image.id, ...feed.ids ];
                     gcfg.feeds[chid].ids = feed.ids.filter(id => response.some(img => img.id === id));
+                    console.log('gcfg.feeds[chid].ids:', gcfg.feeds[chid].ids);
                     gcfg.markModified('feeds');
 
                     //Botón de Post de Gelbooru
@@ -138,10 +146,10 @@ module.exports = {
                     
                     //Enviar imagen de Feed
                     promisesCount++;
-                    /*channel.send(feedMessage).catch(error => {
+                    channel.send(feedMessage).catch(error => {
                         console.log(`Ocurrió un error al enviar la imagen de Feed: ${source}`);
                         console.error(error);
-                    });*/
+                    });
                 });
             }
 
