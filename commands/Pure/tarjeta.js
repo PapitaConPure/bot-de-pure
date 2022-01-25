@@ -147,13 +147,13 @@ module.exports = {
 		ctx.textAlign = 'left';
         ctx.textBaseline = 'top';
         ctx.font = 'bold 64px "bebas"';
-        ctx.fillText((request.user ?? request.author).username, 40, 504);
+        ctx.fillText((request.user ?? request.author).username, 40, 500);
         ctx.textBaseline = 'bottom';
         ctx.font = '64px "dinpro"';
-        ctx.fillText(score, 208, 979);
+        ctx.fillText(score, 208, 969);
         ctx.textBaseline = 'middle';
 		ctx.textAlign = 'center';
-        ctx.font = '48px "dinpro"';
+        ctx.font = 'bold 48px "dinpro"';
         ctx.fillText(issueDate, 530, 1080);
 
 		const phrases = [
