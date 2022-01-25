@@ -253,10 +253,15 @@ module.exports = {
 						.setColor('LUMINOUS_VIVID_PINK')
 						.setAuthor(request.guild.name, request.guild.iconURL())
 						.setTitle('Arsenal de Tubérculos del Servidor')
-						.addField(`🥔)▬▬▬\\~•\\~▬▬▬\\~•\\~▬▬{ 1 / ${lastPage + 1} }▬▬\\~•\\~▬▬▬\\~•\\~▬▬▬(🥔`,
-							items.splice(0, pageMax)
-								.map(([tid,tuber]) => `**${tid}** • ${(members.get(tuber.author) ?? request.guild.me).user.username}`)
-								.join('\n'), true)
+						.addField(
+							`🥔)▬▬▬\\~•\\~▬▬▬\\~•\\~▬▬{ ${items.length ? `1 / ${lastPage + 1}` : '- - -'} }▬▬\\~•\\~▬▬▬\\~•\\~▬▬▬(🥔`, 
+							items.length
+								? items.splice(0, pageMax)
+									.map(([tid,tuber]) => `**${tid}** • ${(members.get(tuber.author) ?? request.guild.me).user.username}`)
+									.join('\n')
+								: `Este servidor no tiene ningún Tubérculo.\nComienza a desplegar TuberIDs con \`${p_pure(request.guildId)}tubérculo --crear\``,
+							true,
+						)
 				],
 				components: (items.length < pageMax) ? null : paginationRows(0, lastPage, 1, lastPage),
 			});
