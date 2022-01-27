@@ -106,8 +106,12 @@ module.exports = {
 
 	async ['selectGame'](interaction) {
 		const gameRoles = [
-			{ id: '693886880667795577', emote: '🍊', label: '100% OJ' },
+			{ id: '693886880667795577', emote: '🍊', label: '100% OJ'  },
 			{ id: '763945846705487884', emote: '🌳', label: 'Terraria' },
+			{ id: '936360389711626280', emote: '🟨', label: 'Tetris'   },
+			{ id: '936360704783577178', emote: '♟️', label: 'Ajedrez'  },
+			{ id: '936360594028757053', emote: '👶', label: 'LoL'      },
+			{ id: '936361454121132162', emote: '🦀', label: 'Pokémon'  },
 		];
 		return await interaction.reply({
 			embeds: [
@@ -129,7 +133,7 @@ module.exports = {
 		return await interaction.reply({
 			embeds: [
 				new MessageEmbed()
-					.setColor('RED')
+					.setColor('BLUE')
 					.addField('Roles de Bebidas', 'Roles decorativos para dar a conocer qué bebidas calientes disfrutas')
 			],
 			components: getAddRemoveRows(drinkRoles),
@@ -146,8 +150,8 @@ module.exports = {
 		return await interaction.reply({
 			embeds: [
 				new MessageEmbed()
-					.setColor('RED')
-					.addField('Roles de Juego', 'Roles mencionables para llamar gente a jugar algunos juegos. Si piensas ser de los que llaman a jugar, intenta no abusar las menciones')
+					.setColor('AQUA')
+					.addField('Roles de Religión', 'Roles para describir tu actitud, ideas y forma de ser. No lo tomes muy enserio... ¿o tal vez sí?')
 			],
 			components: [
 				new MessageActionRow().addComponents(gameRoles.map(gameRole =>
