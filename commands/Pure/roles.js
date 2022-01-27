@@ -66,7 +66,13 @@ module.exports = {
 							label: 'Juegos',
 							description: 'Roles mencionables para jugar juntos',
 							emoji: '919133024770211880',
-							value: 'selectGame',
+							value: 'selectGame_0',
+						},
+						{
+							label: 'Juegos 2',
+							description: 'Roles mencionables para jugar juntos',
+							emoji: '919133024770211880',
+							value: 'selectGame_1',
 						},
 						{
 							label: 'Bebidas',
@@ -92,8 +98,13 @@ module.exports = {
     },
 
 	async ['onSelect'](interaction) {
-		const [ operation ] = interaction.values;
-		return await module.exports[operation](interaction);
+		const received = interaction.values[0].split('_');
+		const operation = received.shift();
+		const args = received.shift();
+		if(args)
+			return await module.exports[operation](interaction, [args]);
+		else
+			return await module.exports[operation](interaction);
 	},
 
 	async ['selectColor'](interaction) {
@@ -104,14 +115,18 @@ module.exports = {
 		});
     },
 
-	async ['selectGame'](interaction) {
+	async ['selectGame'](interaction, [section]) {
 		const gameRoles = [
-			{ id: '693886880667795577', emote: '🍊', label: '100% OJ'  },
-			{ id: '763945846705487884', emote: '🌳', label: 'Terraria' },
-			{ id: '936360389711626280', emote: '🟨', label: 'Tetris'   },
-			{ id: '936360704783577178', emote: '♟️', label: 'Ajedrez'  },
-			{ id: '936360594028757053', emote: '👶', label: 'LoL'      },
-			{ id: '936361454121132162', emote: '🦀', label: 'Pokémon'  },
+			[ //Sección 0
+				{ id: '693886880667795577', emote: '🍊', label: '100% OJ'  },
+				{ id: '763945846705487884', emote: '🌳', label: 'Terraria' },
+				{ id: '936360389711626280', emote: '🟨', label: 'Tetris'   },
+			],
+			[ //Sección 1
+				{ id: '936360704783577178', emote: '♟️', label: 'Ajedrez'  },
+				{ id: '936360594028757053', emote: '👶', label: 'LoL'      },
+				{ id: '936361454121132162', emote: '🦀', label: 'Pokémon'  },
+			],
 		];
 		return await interaction.reply({
 			embeds: [
@@ -119,7 +134,7 @@ module.exports = {
 					.setColor('RED')
 					.addField('Roles de Juego', 'Roles mencionables para llamar gente a jugar algunos juegos. Si piensas ser de los que llaman a jugar, intenta no abusar las menciones')
 			],
-			components: getAddRemoveRows(gameRoles),
+			components: getAddRemoveRows(gameRoles[section]),
 			ephemeral: true,
 		});
     },
