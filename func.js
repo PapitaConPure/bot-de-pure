@@ -886,15 +886,25 @@ module.exports = {
             num = parseInt(num);
         if(isNaN(num))
             return '0';
+        console.log(num, shorten, minDigits);
         if((num < 1000000) || !shorten) return num.toLocaleString('en', { maximumFractionDigits: 2, minimumIntegerDigits: minDigits });
         
-        const unities = [ 'millones', 'miles de millones', 'billones', 'miles de billones', 'trillones', 'miles de trillones', 'cuatrillones' ];
-        const ni = (num < Math.pow(10, 6 + unities.length * 3))
-            ? Math.floor((num.length - 7) / 3)
-            : unities.length - 1;
-        const snum = (num / Math.pow(1000, ni + 2)).toFixed(2);
-        
-        return [ snum, unities[ni] ].join(' ');
+        const googol = Math.pow(10, 100);
+        if(num < googol) {
+            const jesus = [
+                'millones', 'miles de millones', 'billones', 'miles de billones', 'trillones', 'miles de trillones', 'cuatrillones', 'miles de cuatrillones',
+                'quintillones', 'miles de quintillones', 'sextillones', 'miles de sextillones', 'septillones', 'miles de septillones',
+                'octillones', 'miles de octillones', 'nonillones', 'miles de nonillones', 'decillones', 'miles de decillones', 'undecillones', 'miles de undecillones',
+                'duodecillones', 'miles de duodecillones', 'tredecillones', 'miles de tredecillones', 'quattuordecillones', 'miles de quattuordecillones',
+            ];
+            const ni = (num < Math.pow(10, 6 + jesus.length * 3))
+                ? Math.floor((`${num}`.length - 7) / 3)
+                : jesus.length - 1;
+            const snum = (num / Math.pow(1000, ni + 2)).toFixed(2);
+            
+            return [ snum, jesus[ni] ].join(' ');
+        } else
+            return `${num / googol} Gúgol`;
     },
     /**@param {Array<String>} arr*/
     regroupText: (arr) => arr.join(' ').replace(/([\n ]*,[\n ]*)+/g, ',').split(',').filter(a => a.length > 0),
