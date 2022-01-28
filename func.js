@@ -883,11 +883,16 @@ module.exports = {
      */
     improveNumber: function(num, shorten = false, minDigits = 1) {
         if(typeof num === 'string')
-            num = parseInt(num);
+            num = parseFloat(num);
         if(isNaN(num))
             return '0';
-        console.log(num, shorten, minDigits);
-        if((num < 1000000) || !shorten) return num.toLocaleString('en', { maximumFractionDigits: 2, minimumIntegerDigits: minDigits });
+        
+        /**
+         * @param {Number} n
+         * @param {Intl.NumberFormatOptions} nopt
+         */
+        const formatNumber = (n, nopt = {}) => n.toLocaleString('en', { maximumFractionDigits: 2, minimumIntegerDigits: minDigits, ...nopt });
+        if((num < 1000000) || !shorten) return formatNumber(num);
         
         const googol = Math.pow(10, 100);
         if(num < googol) {
@@ -896,16 +901,16 @@ module.exports = {
                 'quintillones', 'miles de quintillones', 'sextillones', 'miles de sextillones', 'septillones', 'miles de septillones',
                 'octillones', 'miles de octillones', 'nonillones', 'miles de nonillones', 'decillones', 'miles de decillones', 'undecillones', 'miles de undecillones',
                 'duodecillones', 'miles de duodecillones', 'tredecillones', 'miles de tredecillones', 'quattuordecillones', 'miles de quattuordecillones',
-                'quintillones'
+                'quindecillones', 'miles de quindecillones', 'sexdecillones', 'miles de sexdecillones'
             ];
             const ni = (num < Math.pow(10, 6 + jesus.length * 3))
-                ? Math.floor((`${num}`.length - 7) / 3)
+                ? Math.floor((num.toLocaleString('fullwide', { useGrouping: false }).length - 7) / 3)
                 : jesus.length - 1;
-            const snum = (num / Math.pow(1000, ni + 2)).toFixed(2);
+            const snum = formatNumber(num / Math.pow(1000, ni + 2), { minimumFractionDigits: 2 });
             
             return [ snum, jesus[ni] ].join(' ');
         } else
-            return `${num / googol} Gúgol`;
+            return `${formatNumber(num / googol, { maximumFractionDigits: 4 })} Gúgol`;
     },
     /**@param {Array<String>} arr*/
     regroupText: (arr) => arr.join(' ').replace(/([\n ]*,[\n ]*)+/g, ',').split(',').filter(a => a.length > 0),
