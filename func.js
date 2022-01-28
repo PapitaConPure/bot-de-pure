@@ -896,6 +896,7 @@ module.exports = {
                 'quintillones', 'miles de quintillones', 'sextillones', 'miles de sextillones', 'septillones', 'miles de septillones',
                 'octillones', 'miles de octillones', 'nonillones', 'miles de nonillones', 'decillones', 'miles de decillones', 'undecillones', 'miles de undecillones',
                 'duodecillones', 'miles de duodecillones', 'tredecillones', 'miles de tredecillones', 'quattuordecillones', 'miles de quattuordecillones',
+                'quintillones'
             ];
             const ni = (num < Math.pow(10, 6 + jesus.length * 3))
                 ? Math.floor((`${num}`.length - 7) / 3)
