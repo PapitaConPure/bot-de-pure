@@ -2,24 +2,24 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.CB",
+            "number": "Full.2.8.CF",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo reestructuraciones para una actualización mayor. Es probable que algunos comandos dejen de funcionar durante el proceso.\nTambién, las actualizaciones serán considerablemente menos frecuentes de momento",
         "changelog": [
             "Tareas de refactorización (2.99/4)",
             "PLACEHOLDER_SLASHCMD",
-            "p!caos e identificador `CHAOS` agregados",
             "Correcciones de errores varios",
             "p!elegir añadido",
             "p!feed incorporado",
-            "p!colores ahora usa un menú desplegable (H. Doll)",
             "Corregido error de vista previa de videos en Feeds",
             "p!tubérculo agregado",
             "Mejoras generales a Feeds de imágenes",
             "p!roles integrado (H. Doll)",
             "PuréScript básico implementado",
-            "p!tarjeta adherido"
+            "p!tarjeta adherido",
+            "p!número agregado",
+            "PuréScript actualizado"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos con p!ayuda",

@@ -1,7 +1,7 @@
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
 const { p_pure } = require('../../localdata/prefixget.js');
-const { fetchFlag, isNotModerator } = require('../../func.js');
+const { fetchFlag, isNotModerator, randRange } = require('../../func.js');
 const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.js');
 
 const options = new CommandOptionsManager()
@@ -9,6 +9,7 @@ const options = new CommandOptionsManager()
 	.addParam('mensaje',  'TEXT',           'para especificar el texto del mensaje',     { optional: true })
 	.addParam('archivos', ['FILE','IMAGE'], 'para especificar los archivos del mensaje', { poly: 'MULTIPLE', optional: true })
 	.addFlag(['c','m'], ['crear','agregar','añadir'], 'para crear o editar un Tubérculo')
+	.addFlag('v', 		'ver', 		  				  'para ver detalles de un Tubérculo')
 	.addFlag(['b','d'], ['borrar','eliminar'], 		  'para eliminar un Tubérculo')
 	.addFlag('s', 		['script','puré','pure'], 	  'para usar PuréScript (junto a `-c`); reemplaza la función de `<mensaje>`');
 
@@ -82,10 +83,12 @@ module.exports = {
 		const helpstr = `Usa \`${p_pure(request.guild).raw}ayuda ${module.exports.name}\` para más información`;
 		const operation = (isSlash
 			? [
-				args.getBoolean('crear' ),
-				args.getBoolean('borrar'),
+				args.getBoolean('crear' ) ? 'crear'  : undefined,
+				args.getBoolean('ver'   ) ? 'ver' 	 : undefined,
+				args.getBoolean('borrar') ? 'borrar' : undefined,
 			] : [
 				fetchFlag(args, { ...options.flags.get('crear').structure,  callback: 'crear'  }),
+				fetchFlag(args, { ...options.flags.get('ver').structure,  	callback: 'ver'    }),
 				fetchFlag(args, { ...options.flags.get('borrar').structure, callback: 'borrar' }),
 			]
 		).find(op => op);
@@ -99,6 +102,8 @@ module.exports = {
 		const guildquery = { guildId: gid };
 		const gcfg = (await GuildConfig.findOne(guildquery)) || new GuildConfig(guildquery);
 		const members = request.guild.members.cache;
+
+		//PuréScript
 		/**
 		 * @param {{author: String, content?: String | null, files?: Array<String>, script?: Array<Array<String>>}} tuber 
 		 */
@@ -106,10 +111,19 @@ module.exports = {
 			if(tuber.script) {
 				let replyContent = {};
 				let mem = { //Memoria del script, para cachear
+					__functions__: {
+						dado: (min, max) => randRange(min, max, true),
+						dadoDecimal: (min, max) => randRange(min, max, false),
+					},
+					entradas: isSlash ? options.fetchParamPoly(args, 'entradas', getString, []) : args,
 					archivos: isSlash ? [] : request.attachments.map(attachment => attachment.proxyURL),
+					funciones: {},
 				};
-				console.log('mem:', mem);
-				const psError = (description, line, operation) => request.reply({ content: `<⚠️ Error: \`${description} (Expresión ${line + 1}, Operación ${operation.toUpperCase()})\`>` });
+				let errors = 0;
+				const psError = (description, line, operation, fatal = false) => {
+					if(fatal) errors++;
+					return request.reply({ content: `<⚠️ Error ${fatal ? 'FATAL' : 'leve'}: \`${description} (Expresión ${line + 1}, Operación ${operation.toUpperCase()})\`>` });
+				};
 				const getLineString = (expression) => expression.join(' ').split(/[\n ]*#FIN#[\n ]*/).join('\n');
 				const getAttribute = (sequence) => {
 					let att = mem[sequence.shift()];
@@ -125,39 +139,37 @@ module.exports = {
 				//Leer valores o punteros
 				const readReference = (str) => {
 					let reference;
-					console.log('str inicial:', str);
+					console.log('Referencia cruda:', str);
 					if(str[0].startsWith('$')) {
 						const sequence = str[0].slice(1).split('->');
 						console.log('Secuencia:', sequence.length, 'pasos');
 						reference = getAttribute(sequence, str[0]);
 					} else
 						reference = getLineString(str);
+					console.log('Referencia procesada:', reference);
 					return reference;
 				}
 				
-				const readLineReferences = (str) => {
-					let references = [];
-					console.log('str inicial:', str);
-					str.forEach(w => {
+				const readLineReferences = (expr) => {
+					console.log('Referencias crudas:', expr);
+					const references = expr.map(w => {
 						if(w.startsWith('$')) {
 							const sequence = w.slice(1).split('->');
 							console.log('Secuencia:', sequence.length, 'pasos');
-							references.push(getAttribute(sequence, w));
+							return getAttribute(sequence, w);
 						} else
-							references.push(w);
+							return w;
 					});
-					console.log(references);
-					
+					console.log('Referencias procesadas:', references);
 					return references;
 				}
 
 				//Ejecutar secuencia de expresiones
-				let errors = 0;
 				await Promise.all(tuber.script.map((expression, l) => {
 					const expr = [ ...expression ];
+					console.log(`Expresión ${l}:`, expr.join(' '), '\tCon mem:', mem);
 					let working = Promise.resolve(); //Promesa para cuando se estén realizando trabajos de fondo
 					const operation = expr.shift().toLowerCase();
-					console.log('concha de tu hermana', tuber.script);
 					let target, identifier, values;
 					switch(operation) {
 						case 'crear':
@@ -177,12 +189,11 @@ module.exports = {
 									break;
 
 								case 'texto':
-									if(!expr.length) return psError('se esperaba un valor', l, operation);
 									mem[identifier] = '';
 									break;
 
 								case 'recuadro':
-									if(!expr.length) return psError('se esperaba un valor', l, operation);
+									if(!expr.length) return psError('se esperaba un valor', l, operation, true);
 									mem[identifier] = new MessageEmbed();
 									break;
 
@@ -200,10 +211,23 @@ module.exports = {
 							console.log('Operación CARGAR');
 							if(!expr.length) return psError('se esperaba un identificador', l, operation);
 							identifier = expr.shift();
-							if(!expr.length) return psError('se esperaba un valor', l, operation);
+							if(expr.shift() !== 'con') return psError('se esperaba "CON" en asignación de carga', l, operation);
+							if(!expr.length) return psError('se esperaba una asignación', l, operation);
+							const loader = expr.shift();	
+							let loadValue;
+							switch(loader) {
+								case 'lista':
+									if(!expr.length) return psError('se esperaba un valor', l, operation);
+									loadValue = readLineReferences(expr);
+									break;
+								default:
+									loadValue = readReference([loader]);
+									break;
+							}
+							//if(!expr.length) return psError('se esperaba un valor', l, operation);
 							if(identifier.startsWith('$')) {
-								let memtemp = readReference(expr);
-								console.log(memtemp);
+								console.log('Carga referencial');
+								let memtemp = loadValue;
 								const sequence = identifier.slice(1).split('->');
 								if(!sequence.length) return psError('se esperaba un identificador', l, operation);
 								sequence.slice(0).reverse().forEach(sq => {
@@ -213,10 +237,12 @@ module.exports = {
 								console.log('wasd', sequence[0], 'fg', mem[sequence[0]]);
 								
 								mem = { ...mem, ...memtemp };
-							} else
-								mem[identifier] = readReference(expr);
+							} else {
+								console.log('Carga directa');
+								mem[identifier] = loadValue;
+							}
 							
-							console.log(mem);
+							console.log('Carga terminada con \n\tidentifier', identifier, '\n\tloader:', loader, '\n\tloadValue:', loadValue);
 							break;
 
 						case 'enviar':
@@ -246,13 +272,13 @@ module.exports = {
 							}
 							replyContent = { ...replyContent, ...message };
 
-
 						default:
 							console.log('Operación *');
 							break;
 					}
 					return working;
 				}));
+				console.log('Memoria final:', mem, '\nErrores:', errors);
 				if(errors) {
 					await request.reply({ content: `⚠️ Se han encontrado **${errors} Errores PS** en la ejecución de PuréScript` });
 					return new Error('Error de PuréScript');
@@ -269,7 +295,7 @@ module.exports = {
 		if(!operation && !id) { //Listar Tubérculos
 			const items = Object.entries(gcfg.tubers).reverse();
 			const lastPage = Math.ceil(items.length / pageMax) - 1;
-			request.reply({
+			return await request.reply({
 				embeds: [
 					new MessageEmbed()
 						.setColor('LUMINOUS_VIVID_PINK')
@@ -309,17 +335,15 @@ module.exports = {
 					} else {
 						if(!mcontent && !mfiles.length)
 							return await request.reply({ content: `⚠️ Debes ingresar un mensaje o archivo para registrar un Tubérculo\n${helpstr}` });
-						tuberContent.content = mcontent || null;
-						tuberContent.files = mfiles;
+						if(mcontent) tuberContent.content = mcontent;
+						if(mfiles.length) tuberContent.files = mfiles;
 					}
 
-					console.log('a', tuberContent);
 					gcfg.tubers[id] = tuberContent;
-					console.log('b', gcfg.tubers[id]);
 					
 					try {
+						console.log('Ejecutando PuréScript:', gcfg.tubers[id]);
 						await executeTuber(gcfg.tubers[id]);
-						console.log('c', gcfg.tubers[id]);
 						gcfg.markModified('tubers');
 					} catch(error) {
 						console.log('Ocurrió un error al añadir un nuevo Tubérculo');
@@ -327,12 +351,38 @@ module.exports = {
 						return await request.reply({ content: '❌ Hay un problema con el Tubérculo que intentaste crear, por lo que no se registrará' });
 					}
 					break;
+
+				case 'ver':
+					const item = gcfg.tubers[id];
+					if(!item)
+						return await request.reply({ content: `⚠️ El Tubérculo **${id}** no existe` });
+
+					const embed = new MessageEmbed()
+					.setColor('DARK_VIVID_PINK')
+					.setAuthor(request.guild.name, request.guild.iconURL())
+					.setTitle('Visor de Tubérculos')
+					.addField(`TuberID: ${id}`, [
+						`**Autor** ${(request.guild.members.cache.get(item.author) ?? request.guild.me).user.username}`,
+						`**Descripción** ${item.desc ?? '*Este Tubérculo no tiene descripción*'}`,
+					].join('\n'));
+					
+					if(item.script)
+						embed.addField('PuréScript', `\`\`\`\n${item.script.map(expr => expr.join(' ')).join(';\n')}\n\`\`\``);
+					else {
+						if(item.content) embed.addField('Mensaje', item.content);
+						if(item.files && item.files.length) embed.addField('Archivos', item.files.map((f,i) => `[${i}](${f})`).join(', '));
+					}
+
+					return await request.reply({
+						embeds: [embed],
+						//components: *algo*,
+					});
 				
 				case 'borrar':
 					if(!gcfg.tubers[id])
 						return await request.reply({ content: `⚠️ El Tubérculo **${id}** no existe` });
 					if(isNotModerator(request.member) && gcfg.tubers[id].author !== (request.author ?? request.user).id)
-						return await request.reply({ content: `⛔ Acción denegada. Esta TuberID **${id}** le pertenece a *${gcfg.tubers[id].author}*` });
+						return await request.reply({ content: `⛔ Acción denegada. Esta TuberID **${id}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[id].author) ?? request.guild.me).user.username}*` });
 
 					gcfg.tubers[id] = null;
 					delete gcfg.tubers[id];
