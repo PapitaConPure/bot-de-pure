@@ -21,7 +21,7 @@ const paginationRows = (page, backward, forward, lastPage) => {
 			new MessageButton()
 			.setCustomId('tubérculo_loadPage_0_START')
 			.setEmoji('934430008586403900')
-			.setStyle('PRIMARY'),
+			.setStyle('SECONDARY'),
 			new MessageButton()
 				.setCustomId(`tubérculo_loadPage_${backward}_BACKWARD`)
 				.setEmoji('934430008343158844')
@@ -33,11 +33,11 @@ const paginationRows = (page, backward, forward, lastPage) => {
 			new MessageButton()
 				.setCustomId(`tubérculo_loadPage_${lastPage}_END`)
 				.setEmoji('934430008619962428')
-				.setStyle('PRIMARY'),
+				.setStyle('SECONDARY'),
 			new MessageButton()
 				.setCustomId(`tubérculo_loadPage_${page}_RELOAD`)
 				.setEmoji('934432754173624373')
-				.setStyle('SUCCESS'),
+				.setStyle('PRIMARY'),
 		),
 		new MessageActionRow().addComponents(
 			new MessageSelectMenu()
@@ -47,6 +47,26 @@ const paginationRows = (page, backward, forward, lastPage) => {
 					value: `${i}`,
 					label: `Página ${++i}`,
 				}))),
+		),
+		new MessageActionRow().addComponents(
+			new MessageButton()
+				.setCustomId('tubérculo_pendingA')
+				.setLabel('Filtrar Autor')
+				.setEmoji('936530498061213756')
+				.setStyle('SUCCESS')
+				.setDisabled(true),
+			new MessageButton()
+				.setCustomId('tubérculo_pendingB')
+				.setLabel('Filtrar TuberID')
+				.setEmoji('936530498061213756')
+				.setStyle('SUCCESS')
+				.setDisabled(true),
+			new MessageButton()
+				.setCustomId('tubérculo_pendingC')
+				.setLabel('Filtrar TuberID')
+				.setEmoji('936531643496288288')
+				.setStyle('DANGER')
+				.setDisabled(true),
 		),
 	]
 };
