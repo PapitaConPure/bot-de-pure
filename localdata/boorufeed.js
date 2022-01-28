@@ -83,13 +83,22 @@ module.exports = {
                                 emoji = '919403803114094682';
                             else
                                 emoji = '919114849894690837';
-                            row.addComponents(
-                                new MessageButton()
-                                    //.setLabel('Original')
-                                    .setEmoji(emoji)
-                                    .setStyle('LINK')
-                                    .setURL(source),
-                            );
+                            try {
+                                row.addComponents(
+                                    new MessageButton()
+                                        //.setLabel('Original')
+                                        .setEmoji(emoji)
+                                        .setStyle('LINK')
+                                        .setURL(source),
+                                );
+                            } catch(err) {
+                                row.addComponents(
+                                    new MessageButton()
+                                        .setEmoji(emoji)
+                                        .setStyle('DANGER')
+                                        .setDisabled(true),
+                                );
+                            }
                         }
                     };
                     const source = image.source;
@@ -119,13 +128,23 @@ module.exports = {
                                 .setCustomId('feed_showFeedImageUrl'),
                         );
                     
+                    //Botón de Shock (temporal)
+                    const closeDate = new Date('February 2, 2022 18:00:0 GMT+03:00');
+                    const now = new Date(Date.now());
+                    const diff = (closeDate - now) / (1000 * 60 * 60);
+                    //console.log([now, closeDate].map(d => d / (1000 * 60 * 60 * 24)))
+                    if(now < closeDate)
+                        row.addComponents(
+                            new MessageButton()
+                                //.setLabel('Recargar')
+                                .setLabel(`${((diff > 1) ? (diff / 24) : diff).toLocaleString('en', { maximumFractionDigits: 0 })} ${(diff > 1) ? 'días' : 'horas'}`)
+                                .setEmoji('935665140601327626')
+                                .setStyle('PRIMARY')
+                                .setCustomId('feed_shockFeed'),
+                        );
+                    
                     //Botón de eliminación
                     row.addComponents(
-                        new MessageButton()
-                            //.setLabel('Recargar')
-                            .setEmoji('935665140601327626')
-                            .setStyle('PRIMARY')
-                            .setCustomId('feed_shockFeed'),
                         new MessageButton()
                             //.setLabel('Eliminar')
                             .setEmoji('921751138997514290')
