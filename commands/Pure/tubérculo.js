@@ -90,7 +90,7 @@ module.exports = {
 		'common'
 	],
 	options,
-	callx: '<mensaje?> <archivos?>',
+	callx: '<id?> <mensaje?> <archivos?>',
 	experimental: true,
 	
 	/**
