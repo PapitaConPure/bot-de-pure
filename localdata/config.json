@@ -19,7 +19,9 @@
             "PuréScript básico implementado",
             "p!tarjeta adherido",
             "p!número agregado",
-            "PuréScript actualizado"
+            "PuréScript actualizado",
+            "Corregido (probablemente) error de memoria en Feeds",
+            "p!voz añadido"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos con p!ayuda",

@@ -63,7 +63,7 @@ const paginationRows = (page, backward, forward, lastPage) => {
 				.setDisabled(true),
 			new MessageButton()
 				.setCustomId('tubérculo_pendingC')
-				.setLabel('Filtrar TuberID')
+				.setLabel('Mostrar todo')
 				.setEmoji('936531643496288288')
 				.setStyle('DANGER')
 				.setDisabled(true),
@@ -135,14 +135,14 @@ module.exports = {
 						dado: (min, max) => randRange(min, max, true),
 						dadoDecimal: (min, max) => randRange(min, max, false),
 					},
-					entradas: isSlash ? options.fetchParamPoly(args, 'entradas', getString, []) : args,
+					//entradas: isSlash ? options.fetchParamPoly(args, 'entradas', getString, []) : args,
 					archivos: isSlash ? [] : request.attachments.map(attachment => attachment.proxyURL),
 					funciones: {},
 				};
 				let errors = 0;
-				const psError = (description, line, operation, fatal = false) => {
-					if(fatal) errors++;
-					return request.reply({ content: `<⚠️ Error ${fatal ? 'FATAL' : 'leve'}: \`${description} (Expresión ${line + 1}, Operación ${operation.toUpperCase()})\`>` });
+				const psError = (description, line, operation) => {
+					errors++;
+					return request.reply({ content: `<⚠️ Error PS: \`${description} (Expresión ${line + 1}, Operación ${operation.toUpperCase()})\`>` });
 				};
 				const getLineString = (expression) => expression.join(' ').split(/[\n ]*#FIN#[\n ]*/).join('\n');
 				const getAttribute = (sequence) => {
@@ -213,7 +213,7 @@ module.exports = {
 									break;
 
 								case 'recuadro':
-									if(!expr.length) return psError('se esperaba un valor', l, operation, true);
+									if(!expr.length) return psError('se esperaba un valor', l, operation);
 									mem[identifier] = new MessageEmbed();
 									break;
 
@@ -231,18 +231,22 @@ module.exports = {
 							console.log('Operación CARGAR');
 							if(!expr.length) return psError('se esperaba un identificador', l, operation);
 							identifier = expr.shift();
-							if(expr.shift() !== 'con') return psError('se esperaba "CON" en asignación de carga', l, operation);
+							if(expr.shift().toLowerCase() !== 'con') return psError('se esperaba "CON" en asignación de carga', l, operation);
 							if(!expr.length) return psError('se esperaba una asignación', l, operation);
 							const loader = expr.shift();	
 							let loadValue;
-							switch(loader) {
-								case 'lista':
-									if(!expr.length) return psError('se esperaba un valor', l, operation);
-									loadValue = readLineReferences(expr);
-									break;
-								default:
-									loadValue = readReference([loader]);
-									break;
+							try {
+								switch(loader) {
+									case 'lista':
+										if(!expr.length) return psError('se esperaba un valor', l, operation);
+										loadValue = readLineReferences(expr);
+										break;
+									default:
+										loadValue = readReference([loader]);
+										break;
+								}
+							} catch(err) {
+								return psError('referencia inválida', l, operation, true);
 							}
 							//if(!expr.length) return psError('se esperaba un valor', l, operation);
 							if(identifier.startsWith('$')) {
@@ -268,9 +272,10 @@ module.exports = {
 						case 'enviar':
 							console.log('Operación ENVIAR');
 							const message = {};
+							if(!expr.length) return psError('no se puede enviar un mensaje vacío', l, operation);
 							target = expr.shift().toLowerCase();
-							values = readLineReferences(expr);
-							if(!values.length) return psError('el valor especificado no existe', l, operation);
+							values = readLineReferences(expr).filter(refVal => refVal);
+							if(!values.length) return psError('los valores especificados no existen', l, operation);
 							
 							switch(target) {
 								case 'archivos':
@@ -380,14 +385,19 @@ module.exports = {
 					const embed = new MessageEmbed()
 					.setColor('DARK_VIVID_PINK')
 					.setAuthor(request.guild.name, request.guild.iconURL())
-					.setTitle('Visor de Tubérculos')
-					.addField(`TuberID: ${id}`, [
+					.addField('Visor de Tubérculos', [
+						`**TuberID** ${id}`,
 						`**Autor** ${(request.guild.members.cache.get(item.author) ?? request.guild.me).user.username}`,
 						`**Descripción** ${item.desc ?? '*Este Tubérculo no tiene descripción*'}`,
 					].join('\n'));
 					
 					if(item.script)
-						embed.addField('PuréScript', `\`\`\`\n${item.script.map(expr => expr.join(' ')).join(';\n')}\n\`\`\``);
+						embed.addField('PuréScript', [
+							`**Entradas** \`[${(item.inputs ?? []).join(', ')}]\``,
+							'```',
+							`${item.script.map(expr => expr.join(' ')).join(';\n')}`,
+							'```',
+						].join('\n'));
 					else {
 						if(item.content) embed.addField('Mensaje', item.content);
 						if(item.files && item.files.length) embed.addField('Archivos', item.files.map((f,i) => `[${i}](${f})`).join(', '));

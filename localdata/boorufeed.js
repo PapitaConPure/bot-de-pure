@@ -6,7 +6,7 @@ const { Client, MessageEmbed, MessageActionRow, MessageButton } = require('disco
 module.exports = {
     /**@param {Client} client*/
     async updateBooruFeeds(client) {
-        //console.log(chalk.cyanBright('Comprobando actualizaciones en Feeds de imágenes...'));
+        console.log(chalk.cyanBright('Comprobando actualizaciones en Feeds de imágenes...'));
         const feedCheckupStart = Date.now();
         const maxDocuments = 16;
         let feedsCount = 0;
@@ -20,12 +20,6 @@ module.exports = {
             if(!gcfg) return;
             for(const [chid, feed] of Object.entries(gcfg.feeds)) {
                 feedsCount++;
-                /*console.log('Determinando posibilidad de procesar feed...');
-                if(promisesCount > maxDocuments) {
-                    console.log('Se excedió el límite de envíos simultaneos establecido');
-                    return;
-                }
-                console.log('Procesando feed');*/
 
                 //Recolectar últimas imágenes para el Feed
                 let fetchedProperly = true;
@@ -132,7 +126,6 @@ module.exports = {
                     const closeDate = new Date('February 2, 2022 18:00:0 GMT+03:00');
                     const now = new Date(Date.now());
                     const diff = (closeDate - now) / (1000 * 60 * 60);
-                    //console.log([now, closeDate].map(d => d / (1000 * 60 * 60 * 24)))
                     if(now < closeDate)
                         row.addComponents(
                             new MessageButton()
