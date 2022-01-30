@@ -293,9 +293,47 @@ module.exports = {
 	async ['deleteSystem'](interaction, [ authorId ]) {
 		if(interaction.user.id !== authorId)
 			return await interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
+		
+		const wizard = wizEmbed(interaction.client.user.avatarURL(), 'Confirmar desinstalación', 'YELLOW')
+			.addField('Desinstalación del Sistema PuréVoice del servidor', 'Esto borrará todas los canales creados por el Sistema. La categoría del Sistema y los canales creados manualmente se ignorarán.\nConfirma la desasociación del servidor con PuréVoice');
+		const uid = interaction.user.id;
+		const row = new MessageActionRow().addComponents(
+			new MessageButton()
+				.setCustomId(`voz_deleteSystemConfirmed_${uid}`)
+				.setLabel('DESINSTALAR')
+				.setStyle('DANGER'),
+			new MessageButton()
+				.setCustomId(`voz_startWizard_${uid}`)
+				.setLabel('Volver')
+				.setStyle('SECONDARY'),
+			cancelbutton(uid),
+		);
+		return await interaction.update({
+			embeds: [wizard],
+			components: [row],
+		});
+	},
+
+	/**
+	 * @param {import('discord.js').ButtonInteraction} interaction 
+	 * @param {Array<String>} param1 
+	 */
+	async ['deleteSystemConfirmed'](interaction, [ authorId ]) {
+		if(interaction.user.id !== authorId)
+			return await interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
 
 		//Eliminar Sistema PuréVoice
-		await PureVoice.deleteOne({ guildId: interaction.guild.id });
+		const guildQuery = { guildId: interaction.guild.id };
+		const pv = await PureVoice.findOne(guildQuery);
+		if(pv) {
+			const guildChannels = interaction.guild.channels.cache;
+			await guildChannels.get(pv.voiceMakerId).delete(`PuréVoice desinstalado por ${interaction.user.tag}`);
+			await Promise.all(pv.sessions.map(({ textId, voiceId }) => Promise.all([
+				guildChannels.get(textId).delete().catch(console.error),
+				guildChannels.get(voiceId).delete().catch(console.error),
+			])));
+		}
+		await PureVoice.deleteOne(guildQuery);
 		
 		const deleteEmbed = wizEmbed(interaction.client.user.avatarURL(), 'Operación finalizada', 'RED')
 			.addField('Sistema PuréVoice eliminado', 'Se eliminó el Sistema PuréVoice asociado al servidor');

@@ -502,7 +502,7 @@ client.on('voiceStateUpdate', async (oldState, state) => {
     const prematureError = () => console.log('Canal probablemente eliminado prematuramente');
 
     //#region Desconexión
-    if(oldState.channelId) {
+    if(oldState.channelId && oldState.channel) {
         try {
             const oldChannel = oldState.channel;
             const channelPairIndex = pv.sessions.findIndex(session => session.voiceId === oldChannel.id);
@@ -534,7 +534,7 @@ client.on('voiceStateUpdate', async (oldState, state) => {
             //console.log('wawa:', guild.systemChannelId);
             console.error(error);
             if(guild.systemChannelId)
-                await guild.systemChannelId.send({ content: [
+                await guild.systemChannel.send({ content: [
                     '⚠ Ocurrió un problema en un intento de remover una sesión del Sistema PuréVoice del servidor.',
                     'Esto puede deberse a una conexión en una sesión PuréVoice que estaba siendo eliminada.',
                     'Si el par de canales relacionales de la sesión fueron eliminados, puedes ignorar este mensaje',
