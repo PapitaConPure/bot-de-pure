@@ -500,13 +500,63 @@ client.on('voiceStateUpdate', async (oldState, state) => {
     if(!(pv && guild.channels.cache.get(pv.categoryId))) return;
     
     const prematureError = () => console.log('Canal probablemente eliminado prematuramente');
-    if(channel) { //Conexión
+
+    //#region Desconexión
+    if(oldState.channelId) {
+        try {
+            const oldChannel = oldState.channel;
+            const channelPairIndex = pv.sessions.findIndex(session => session.voiceId === oldChannel.id);
+            const channelPair = pv.sessions[channelPairIndex];
+            if(channelPair) {
+                const { textId, voiceId } = channelPair;
+                
+                if(!oldChannel.members.size) {
+                    pv.sessions.splice(channelPairIndex);
+                    pv.markModified('sessions');
+                    const tryDeleting = async(id) => {
+                        const toDelete = guild.channels.cache.get(id);
+                        if(!toDelete) return Promise.resolve();
+                        return toDelete.delete();
+                    };
+                    await Promise.all([
+                        pv.save(),
+                        tryDeleting(voiceId),
+                        tryDeleting(textId),
+                    ]);
+                } else {
+                    /**@type {Discord.GuildChannel} */
+                    const textChannel = guild.channels.cache.get(textId);
+                    await textChannel.permissionOverwrites.delete(member, 'Desconexión de miembro de sesión PuréVoice')
+                    .catch(console.error);
+                }
+            }
+        } catch(error) {
+            //console.log('wawa:', guild.systemChannelId);
+            console.error(error);
+            if(guild.systemChannelId)
+                await guild.systemChannelId.send({ content: [
+                    '⚠ Ocurrió un problema en un intento de remover una sesión del Sistema PuréVoice del servidor.',
+                    'Esto puede deberse a una conexión en una sesión PuréVoice que estaba siendo eliminada.',
+                    'Si el par de canales relacionales de la sesión fueron eliminados, puedes ignorar este mensaje',
+                ].join('\n') });
+            else
+                await guild.fetchOwner().then(owner => owner.send({ content: [
+                    `⚠ Ocurrió un problema en un intento de remover una sesión del Sistema PuréVoice de tu servidor **${guild.name}**.`,
+                    'Esto puede deberse a una conexión en una sesión PuréVoice que estaba siendo eliminada.',
+                    'Si el par de canales relacionales de la sesión fueron eliminados, puedes ignorar este mensaje',
+                ].join('\n') }));
+        }
+    }
+    //#endregion
+
+    //#region Conexión
+    //console.log('Siguiente...');
+    if(channel) {
         if(channel.id === pv.voiceMakerId) {
             try {
                 const crypto = require('crypto');
-                const randomHash = crypto.randomBytes(4).toString('hex');
                 const [ sessionTextChannel, newSession ] = await Promise.all([
-                    guild.channels.create(`sesion-${randomHash.toLowerCase()}`, {
+                    guild.channels.create(`sesion-${pv.sessions.length + 1}`, {
                         type: 'GUILD_TEXT',
                         parent: pv.categoryId,
                     }),
@@ -524,62 +574,40 @@ client.on('voiceStateUpdate', async (oldState, state) => {
                     voiceId: channel.id,
                 });
                 pv.markModified('sessions');
+
                 await Promise.all([
                     pv.save(),
                     sessionTextChannel.permissionOverwrites.create(guild.roles.everyone, { SEND_MESSAGES: false }, { reason: 'Restricción de envío de mensajes en sesión PuréVoice' }).catch(prematureError),
                     sessionTextChannel.permissionOverwrites.create(guild.me, { SEND_MESSAGES: true }, { reason: 'Envío de mensajes propios en sesión PuréVoice' }).catch(prematureError),
                     sessionTextChannel.permissionOverwrites.create(member, { SEND_MESSAGES: true }, { reason: 'Inclusión de miembro en sesión PuréVoice' }).catch(prematureError),
                 ]);
-                await channel.setName(`Sesión ${randomHash.toUpperCase()}`).catch(prematureError);
+                await channel.setName(`💠 ${pv.sessions.length}「」`).catch(prematureError);
                 await channel.setUserLimit(64).catch(prematureError);
-                return await sessionTextChannel.send({ content: `${member}` });
+                await sessionTextChannel.send({ content: `${member}` }).catch(prematureError);
             } catch(error) {
-                return await guild.fetchOwner().then(owner => owner.send({ content: [
-                    `⚠ Ocurrió un problema al crear una nueva sesión para el Sistema PuréVoice de tu servidor **${guild.name}**. Esto puede deberse a una saturación de acciones`,
-                    'Si el problema persiste, desinstala y vuelve a instalar el Sistema',
-                ].join('\n') }));
+                console.error(error);
+                if(guild.systemChannelId)
+                    guild.systemChannel.send({ content: [
+                        '⚠ Ocurrió un problema al crear una nueva sesión para el Sistema PuréVoice del servidor. Esto puede deberse a una saturación de acciones o a falta de permisos.',
+                        'Si el problema persiste, prueben desinstalar y volver a instalar el Sistema',
+                    ].join('\n') });
+                else
+                    await guild.fetchOwner().then(owner => owner.send({ content: [
+                        `⚠ Ocurrió un problema al crear una nueva sesión para el Sistema PuréVoice de tu servidor **${guild.name}**. Esto puede deberse a una saturación de acciones o a falta de permisos.`,
+                        'Si el problema persiste, desinstala y vuelve a instalar el Sistema',
+                    ].join('\n') }));
             }
         } else if(channel.parentId === pv.categoryId) {
             const channelPair = pv.sessions.find(session => session.voiceId === channel.id);
             if(!channelPair) return;
             const sessionTextChannel = guild.channels.cache.get(channelPair.textId);
             if(!sessionTextChannel) return;
-            return await sessionTextChannel.permissionOverwrites.create(member, { SEND_MESSAGES: true }, { reason: 'Inclusión de miembro en sesión PuréVoice' }).catch(prematureError);
-        }
-    } else if(oldState.channelId) { //Desconexión
-        try {
-            const oldChannel = oldState.channel;
-            const channelPairIndex = pv.sessions.findIndex(session => session.voiceId === oldChannel.id);
-            const channelPair = pv.sessions[channelPairIndex];
-            if(!channelPair) return;
-            const { textId, voiceId } = channelPair;
-
-            if(!oldChannel.members.size) {
-                pv.sessions.splice(channelPairIndex);
-                pv.markModified('sessions');
-                const tryDeleting = async(id) => {
-                    const toDelete = guild.channels.cache.get(id);
-                    if(!toDelete) return Promise.resolve();
-                    return toDelete.delete();
-                };
-                return await Promise.all([
-                    pv.save(),
-                    tryDeleting(voiceId),
-                    tryDeleting(textId),
-                ]);
-            } else {
-                /**@type {Discord.GuildChannel} */
-                const textChannel = guild.channels.cache.get(textId);
-                return await textChannel.permissionOverwrites.delete(member, 'Desconexión de miembro de sesión PuréVoice')
-                .catch(console.error);
-            }
-        } catch(error) {
-            console.error(error);
-            return await guild.fetchOwner().then(owner => {
-                return owner.send({ content: '⚠ Ocurrió un problema al intentar remover una sesión del Sistema PuréVoice de tu servidor' });
-            });
+            await sessionTextChannel.permissionOverwrites.create(member, { SEND_MESSAGES: true }, { reason: 'Inclusión de miembro en sesión PuréVoice' }).catch(prematureError);
         }
     }
+    //#endregion
+
+    //console.log('--- --- --- Finalizar --- --- ---');
 });
 
 //Evento de entrada a servidor
