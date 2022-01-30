@@ -21,7 +21,8 @@
             "p!número agregado",
             "PuréScript actualizado",
             "Corregido (probablemente) error de memoria en Feeds",
-            "p!voz añadido"
+            "p!voz añadido",
+            "Corregidos errores varios con p!voz y PuréVoice"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos con p!ayuda",
