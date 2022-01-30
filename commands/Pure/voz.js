@@ -1,6 +1,7 @@
 const PureVoice = require('../../localdata/models/purevoice.js');
 const { MessageEmbed, MessageActionRow, MessageButton, MessageCollector } = require('discord.js');
 const { p_pure } = require('../../localdata/prefixget.js');
+const { isNotModerator } = require('../../func.js');
 
 const cancelbutton = (id) => new MessageButton()
 	.setCustomId(`voz_cancelWizard_${id}`)
@@ -47,6 +48,8 @@ module.exports = {
 	 */
 	async execute(request, [], isSlash = false) {
 		//Acción de comando
+		if(isNotModerator(request.member))
+			return await request.reply({ content: '(Todavía) no puedes hacer eso', ephemeral: true });
 		const wizard = wizEmbed(request.client.user.avatarURL(), '1/? • Comenzar', 'AQUA')
 			.addField('Bienvenido', 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes! Solo sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras');
 
