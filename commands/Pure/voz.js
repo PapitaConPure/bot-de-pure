@@ -61,7 +61,7 @@ module.exports = {
 			const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda voz\` para más información`;
 			const sessionName = isSlash
 				? args.getString('nombre')
-				: args[0];
+				: args.join(' ');
 
 			if(!sessionName)
 				return await request.reply({
@@ -73,7 +73,15 @@ module.exports = {
 					ephemeral: true,
 				});
 			
+			if(sessionName.length > 24)
+				return await request.reply({
+					content: '⚠ Intenta acortar un poco el nombre. El límite para nombres de sesión es de 24(+3) caracteres',
+					ephemeral: true,
+				});
+			
 			//Comprobar si se está en una sesión
+			/**@type {import('discord.js').VoiceState}*/
+			const voiceState = request.member.voice;
 			const warnNotInSession = () => request.reply({
 				content: [
 					'⚠ Debes entrar a una sesión PuréVoice para ejecutar este comando de esta forma.',
@@ -81,8 +89,6 @@ module.exports = {
 				].join('\n'),
 				ephemeral: true,
 			}).catch(console.error);
-			/**@type {import('discord.js').VoiceState}*/
-			const voiceState = request.member.voice;
 			if(!voiceState.channelId)
 				return await warnNotInSession();
 			const pv = await PureVoice.findOne({ guildId: request.guildId });
@@ -90,12 +96,13 @@ module.exports = {
 				return await warnNotInSession();
 
 			//Modificar sesión y confirmar
-			console.log('Cambiando nombre de sesión PuréVoice');
+			const chcache = request.guild.channels.cache;
+			const { textId, voiceId } = pv.sessions.find(session => session.voiceId === voiceState.channelId);
+			if(!voiceState.channel.name.match(/^💠 Sesión #\d+/)) return await request.reply({ content: '❌ Por cuestiones técnicas, solo puedes cambiar el nombre del par de canales una vez' })
 			let sessionNumber = voiceState.channel.name.match(/\d+/);
 			if(sessionNumber) sessionNumber = sessionNumber[0];
-			console.log(`💠 ${sessionNumber}「${sessionName}」`);
-			await voiceState.channel.setName(`💠 ${sessionNumber}「${sessionName}」`).catch(console.error);
-			console.log('Cambio de nombre de sesión PuréVoice finalizado');
+			await chcache.get(voiceId).setName(`${sessionNumber}「${sessionName}」`).catch(console.error);
+			await chcache.get(textId).setName(`${sessionNumber}···${sessionName.toLowerCase().split().join('-')}`).catch(console.error);
 			return await request.reply({ content: '✅ Nombre aplicado', ephemeral: true }).catch(console.error);
 		}
 		
