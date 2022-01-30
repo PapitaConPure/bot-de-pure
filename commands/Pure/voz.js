@@ -42,6 +42,7 @@ module.exports = {
 	flags: [
 		'common'
 	],
+	options: options,
 	experimental: true,
 	callx: options.callSyntax,
 	
