@@ -108,6 +108,14 @@ class CommandParam extends CommandOption {
         if(max) this._polymax = max;
         return this;
     };
+
+    /**
+     * String del nombre de parámetro
+     * @type {String}
+     */
+    get name() {
+        return this._name;
+    }
     /**
      * String del tipo de parámetro
      * @type {String}
@@ -340,6 +348,21 @@ class CommandOptionsManager {
             ...[...this.params.values()].map(p => p.display),
             ...[...this.flags.values()].map(f => f.display)
         ].join('\n');
+    };
+    /**
+     * String de ayuda de las opciones de comando del administrador
+     * @returns {String}
+     */
+    get callSyntax() {
+        /**@type {Array<CommandParam>}*/
+        const params = [...this.params.values()];
+        return params.map(p => {
+                const paramExpressions = [ p.name ];
+                if(Array.isArray(p._poly)) paramExpressions.push(` (${p._poly.join(',')})`);
+                else if(p._poly === 'MULTIPLE') paramExpressions.push(' (...)');
+                if(p.optional) paramExpressions.push('?');
+                return `<${paramExpressions.join('')}>`;
+            }).join(' ');
     };
     /**
      * Devuelve un arreglo de todas las entradas recibidas.

@@ -1,15 +1,14 @@
 const PureVoice = require('../../localdata/models/purevoice.js');
 const { MessageEmbed, MessageActionRow, MessageButton, MessageCollector } = require('discord.js');
 const { p_pure } = require('../../localdata/prefixget.js');
-const { isNotModerator } = require('../../func.js');
+const { isNotModerator, fetchFlag } = require('../../func.js');
+const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
 
 const cancelbutton = (id) => new MessageButton()
 	.setCustomId(`voz_cancelWizard_${id}`)
 	.setLabel('Cancelar')
 	.setStyle('SECONDARY');
-
 const collectors = {};
-
 /**
  * @param {Number} stepCount
  * @param {String} stepName
@@ -24,9 +23,13 @@ const wizEmbed = (iconUrl, stepName, stepColor, route = 'none') => {
 	//};
 	return new MessageEmbed()
 		.setColor(stepColor)
-		.setAuthor('Asistente de configuración de Sistema PuréVoice', iconUrl)
+		.setAuthor('Asistente de Configuración de Sistema PuréVoice', iconUrl)
 		.setFooter(stepName);
 };
+
+const options = new CommandOptionsManager()
+	.addParam('nombre', 'TEXT', 'para decidir el nombre de la sesión actual', { optional: true })
+	.addFlag('aiw', ['asistente','instalador','wizard'], 'para inicializar el Asistente de Configuración');
 
 module.exports = {
 	name: 'voz',
@@ -40,19 +43,66 @@ module.exports = {
 		'common'
 	],
 	experimental: true,
+	callx: options.callSyntax,
 	
 	/**
 	 * @param {import("../Commons/typings").CommandRequest} request
 	 * @param {import('../Commons/typings').CommandOptions} args
 	 * @param {Boolean} isSlash
 	 */
-	async execute(request, [], isSlash = false) {
+	async execute(request, args, isSlash = false) {
 		//Acción de comando
-		if(isNotModerator(request.member))
-			return await request.reply({ content: '(Todavía) no puedes hacer eso', ephemeral: true });
-		const wizard = wizEmbed(request.client.user.avatarURL(), '1/? • Comenzar', 'AQUA')
-			.addField('Bienvenido', 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes! Solo sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras');
+		const generateWizard = isSlash
+		? args.getBoolean('asistente')
+		: fetchFlag(args, { ...options.flags.get('asistente').structure, callback: true });
+		
+		//Cambiar nomre de canal de voz de sesión
+		if(!generateWizard) {
+			const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda voz\` para más información`;
+			const sessionName = isSlash
+				? args.getString('nombre')
+				: args[0];
 
+			if(!sessionName)
+				return await request.reply({
+					content: [
+						'⚠ Debes ingresar un nombre para ejecutar este comando de esta forma',
+						'Si estás buscando iniciar un Asistente de Configuración, usa la bandera `--asistente` o `-a`',
+						helpstr,
+					].join('\n'),
+					ephemeral: true,
+				});
+			
+			//Comprobar si se está en una sesión
+			const warnNotInSession = () => request.reply({
+				content: [
+					'⚠ Debes entrar a una sesión PuréVoice para ejecutar este comando de esta forma.',
+					helpstr,
+				].join('\n'),
+				ephemeral: true,
+			}).catch(console.error);
+			/**@type {import('discord.js').VoiceState}*/
+			const voiceState = request.member.voice;
+			if(!voiceState.channelId)
+				return await warnNotInSession();
+			const pv = await PureVoice.findOne({ guildId: request.guildId });
+			if(!(pv && pv.sessions.map(session => session.voiceId).includes(voiceState.channelId)))
+				return await warnNotInSession();
+
+			//Modificar sesión y confirmar
+			console.log('Cambiando nombre de sesión PuréVoice');
+			let sessionNumber = voiceState.channel.name.match(/\d+/);
+			if(sessionNumber) sessionNumber = sessionNumber[0];
+			console.log(`💠 ${sessionNumber}「${sessionName}」`);
+			await voiceState.channel.setName(`💠 ${sessionNumber}「${sessionName}」`).catch(console.error);
+			console.log('Cambio de nombre de sesión PuréVoice finalizado');
+			return await request.reply({ content: '✅ Nombre aplicado', ephemeral: true }).catch(console.error);
+		}
+		
+		//Inicializar instalador PuréVoice
+		if(isNotModerator(request.member)) return await request.reply({ content: '❌ No tienes permiso para hacer esto', ephemeral: true });
+		const wizard = wizEmbed(request.client.user.avatarURL(), '1/? • Comenzar', 'AQUA')
+		.addField('Bienvenido', 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes! Solo sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras');
 		const uid = (request.author ?? request.user).id;
 		return await request.reply({
 			embeds: [wizard],
