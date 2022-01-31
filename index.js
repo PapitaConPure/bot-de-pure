@@ -518,6 +518,12 @@ client.on('voiceStateUpdate', async (oldState, state) => {
                         if(!toDelete) return Promise.resolve();
                         return toDelete.delete();
                     };
+                    if(guild.id === global.serverid.hourai) {
+                        /**@type {Discord.GuildChannel} */
+                        const textChannel = guild.channels.cache.get(textId);
+                        global.hourai.infr.channels[textChannel.id] = null;
+                        delete global.hourai.infr.channels[textChannel.id];
+                    }
                     await Promise.all([
                         pv.save(),
                         tryDeleting(voiceId),
@@ -554,7 +560,6 @@ client.on('voiceStateUpdate', async (oldState, state) => {
     if(channel) {
         if(channel.id === pv.voiceMakerId) {
             try {
-                const crypto = require('crypto');
                 const [ sessionTextChannel, newSession ] = await Promise.all([
                     guild.channels.create(`sesion-${pv.sessions.length + 1}`, {
                         type: 'GUILD_TEXT',
@@ -574,6 +579,8 @@ client.on('voiceStateUpdate', async (oldState, state) => {
                     voiceId: channel.id,
                 });
                 pv.markModified('sessions');
+                if(guild.id === global.serverid.hourai)
+                    global.hourai.infr.channels[sessionTextChannel.id] = sessionTextChannel.name;
 
                 await Promise.all([
                     pv.save(),
@@ -607,6 +614,7 @@ client.on('voiceStateUpdate', async (oldState, state) => {
     }
     //#endregion
 
+    //console.log(global.hourai.infr.channels);
     //console.log('--- --- --- Finalizar --- --- ---');
 });
 

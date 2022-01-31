@@ -37,10 +37,10 @@ module.exports = {
 		'purévoz', 'purevoz',
 		'purévoice', 'purevoice', 'voice',
 	],
-	brief: 'Para inyectar un Sistema PureVoice en una categoria por medio de un Asistente',
-	desc: 'Para inyectar un Sistema PureVoice en una categoria. Simplemente usa el comando y sigue los pasos del Asistente para configurar todo',
+	brief: 'Para inyectar un Sistema PuréVoice en una categoria por medio de un Asistente',
+	desc: 'Para inyectar un Sistema PuréVoice en una categoria. Simplemente usa el comando y sigue los pasos del Asistente para configurar todo',
 	flags: [
-		'common'
+		'common',
 	],
 	options: options,
 	experimental: true,
