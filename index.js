@@ -699,4 +699,9 @@ client.on('guildMemberRemove', member => {
     }
 });
 
+//Evento de Rate Limit
+client.on('rateLimit', rateLimit => {
+    console.log('Se golpeó un pico de ratelimit:', rateLimit);
+});
+
 client.login(token); //Ingresar sesión con el bot
