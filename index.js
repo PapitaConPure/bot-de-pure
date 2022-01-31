@@ -496,42 +496,64 @@ client.on('interactionCreate', async interaction => {
 //Recepción de cambios en canales de voz
 client.on('voiceStateUpdate', async (oldState, state) => {
     const { guild, channel, member } = state;
+    const guildChannels = guild.channels.cache;
     const pv = await PureVoice.findOne({ guildId: guild.id });
-    if(!(pv && guild.channels.cache.get(pv.categoryId))) return;
+    if(!(pv && guildChannels.get(pv.categoryId))) return;
     
     const prematureError = () => console.log('Canal probablemente eliminado prematuramente');
 
-    //#region Desconexión
+    { //Log de estado
+        const userTag = member.user.tag;
+        console.log(userTag.slice(userTag.indexOf('#')), '::', oldState.channel ? oldState.channel.name : null, '->', channel ? channel.name : null);
+    }
+
+    //#region Comprobar canales inexistentes en base de datos antes de operar
+    await Promise.all(pv.sessions.map((session, i) => {
+        const textChannel = guildChannels.get(session.textId);
+        const voiceChannel = guildChannels.get(session.voiceId);
+        const deletions = [];
+        if(textChannel && voiceChannel) return Promise.resolve();
+        if(textChannel) deletions.push(textChannel.delete().catch(prematureError));
+        if(voiceChannel) deletions.push(voiceChannel.delete().catch(prematureError));
+        pv.sessions.splice(i, 1);
+        pv.markModified('sessions');
+        console.log('Eliminando', deletions.length);
+        return Promise.all(deletions);
+    }));
+    await pv.save();
+    //#endregion
+
+    //#region Comprobar desconexión
     if(oldState.channelId && oldState.channel) {
         try {
             const oldChannel = oldState.channel;
+            console.log('Desconexión del canal', oldChannel.name, 'con', oldChannel.members.size, 'miembros');
             const channelPairIndex = pv.sessions.findIndex(session => session.voiceId === oldChannel.id);
             const channelPair = pv.sessions[channelPairIndex];
             if(channelPair) {
                 const { textId, voiceId } = channelPair;
-                
                 if(!oldChannel.members.size) {
-                    pv.sessions.splice(channelPairIndex);
+                    pv.sessions.splice(channelPairIndex, 1);
                     pv.markModified('sessions');
                     const tryDeleting = async(id) => {
-                        const toDelete = guild.channels.cache.get(id);
+                        const toDelete = guildChannels.get(id);
                         if(!toDelete) return Promise.resolve();
                         return toDelete.delete();
                     };
                     if(guild.id === global.serverid.hourai) {
                         /**@type {Discord.GuildChannel} */
-                        const textChannel = guild.channels.cache.get(textId);
+                        const textChannel = guildChannels.get(textId);
                         global.hourai.infr.channels[textChannel.id] = null;
                         delete global.hourai.infr.channels[textChannel.id];
                     }
                     await Promise.all([
-                        pv.save(),
                         tryDeleting(voiceId),
                         tryDeleting(textId),
+                        pv.save().then(() => console.log('Sesiones:', pv.sessions)),
                     ]);
                 } else {
                     /**@type {Discord.GuildChannel} */
-                    const textChannel = guild.channels.cache.get(textId);
+                    const textChannel = guildChannels.get(textId);
                     await textChannel.permissionOverwrites.delete(member, 'Desconexión de miembro de sesión PuréVoice')
                     .catch(console.error);
                 }
@@ -555,13 +577,14 @@ client.on('voiceStateUpdate', async (oldState, state) => {
     }
     //#endregion
 
-    //#region Conexión
+    //#region Comprobar conexión
     //console.log('Siguiente...');
     if(channel) {
         if(channel.id === pv.voiceMakerId) {
             try {
+                console.log('Conexión al canal', channel.name, 'con', channel.members.size, 'miembros');
                 const [ sessionTextChannel, newSession ] = await Promise.all([
-                    guild.channels.create(`sesion-${pv.sessions.length + 1}`, {
+                    guild.channels.create(`vc-${member.user.username}`, {
                         type: 'GUILD_TEXT',
                         parent: pv.categoryId,
                     }),
@@ -583,13 +606,13 @@ client.on('voiceStateUpdate', async (oldState, state) => {
                     global.hourai.infr.channels[sessionTextChannel.id] = sessionTextChannel.name;
 
                 await Promise.all([
-                    pv.save(),
+                    pv.save().then(() => console.log('Sesiones:', pv.sessions)),
                     sessionTextChannel.permissionOverwrites.edit(guild.roles.everyone, { SEND_MESSAGES: false }, { reason: 'Restricción de envío de mensajes en sesión PuréVoice' }).catch(prematureError),
                     sessionTextChannel.permissionOverwrites.edit(guild.me, { SEND_MESSAGES: true }, { reason: 'Envío de mensajes propios en sesión PuréVoice' }).catch(prematureError),
                     sessionTextChannel.permissionOverwrites.edit(member, { SEND_MESSAGES: true }, { reason: 'Inclusión de miembro en sesión PuréVoice' }).catch(prematureError),
                 ]);
-                await channel.setName(`💠 Sesión #${pv.sessions.length}`).catch(prematureError);
-                await channel.setUserLimit(64).catch(prematureError);
+                await channel.setName(`💠「${member.user.username.slice(24)}」`).catch(prematureError);
+                await channel.setUserLimit(0).catch(prematureError);
                 await sessionTextChannel.send({ content: `📣 ${member}, usa \`${p_pure(guild.id).raw}voz <Nombre>\` para cambiar el nombre de la sesión` }).catch(prematureError);
             } catch(error) {
                 console.error(error);
@@ -607,15 +630,14 @@ client.on('voiceStateUpdate', async (oldState, state) => {
         } else if(channel.parentId === pv.categoryId) {
             const channelPair = pv.sessions.find(session => session.voiceId === channel.id);
             if(!channelPair) return;
-            const sessionTextChannel = guild.channels.cache.get(channelPair.textId);
+            const sessionTextChannel = guildChannels.get(channelPair.textId);
             if(!sessionTextChannel) return;
             await sessionTextChannel.permissionOverwrites.create(member, { SEND_MESSAGES: true }, { reason: 'Inclusión de miembro en sesión PuréVoice' }).catch(prematureError);
         }
     }
     //#endregion
 
-    //console.log(global.hourai.infr.channels);
-    //console.log('--- --- --- Finalizar --- --- ---');
+    console.log('--- --- --- Fin de paso --- --- ---');
 });
 
 //Evento de entrada a servidor

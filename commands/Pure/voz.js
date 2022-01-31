@@ -99,11 +99,11 @@ module.exports = {
 			//Modificar sesión y confirmar
 			const chcache = request.guild.channels.cache;
 			const { textId, voiceId } = pv.sessions.find(session => session.voiceId === voiceState.channelId);
-			if(!voiceState.channel.name.match(/^💠 Sesión #\d+/)) return await request.reply({ content: '❌ Por cuestiones técnicas, solo puedes cambiar el nombre del par de canales una vez' })
+			if(!voiceState.channel.name.match('💠「」')) return await request.reply({ content: '❌ Por cuestiones técnicas, solo puedes cambiar el nombre de la sesión una vez.\nSi quieres cambiar el nombre, conéctate a una nueva sesión' })
 			let sessionNumber = voiceState.channel.name.match(/\d+/);
 			if(sessionNumber) sessionNumber = sessionNumber[0];
-			await chcache.get(voiceId).setName(`${sessionNumber}「${sessionName}」`).catch(console.error);
-			await chcache.get(textId).setName(`${sessionNumber}···${sessionName.toLowerCase().split().join('-')}`).catch(console.error);
+			await chcache.get(voiceId).setName(`💠「${sessionName}」`).catch(console.error);
+			await chcache.get(textId).setName(`${sessionName.toLowerCase().split().join('-')}`).catch(console.error);
 			return await request.reply({ content: '✅ Nombre aplicado', ephemeral: true }).catch(console.error);
 		}
 		

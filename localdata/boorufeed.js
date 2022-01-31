@@ -6,7 +6,7 @@ const { Client, MessageEmbed, MessageActionRow, MessageButton } = require('disco
 module.exports = {
     /**@param {Client} client*/
     async updateBooruFeeds(client) {
-        console.log(chalk.cyanBright('Comprobando actualizaciones en Feeds de imágenes...'));
+        //console.log(chalk.cyanBright('Comprobando actualizaciones en Feeds de imágenes...'));
         const feedCheckupStart = Date.now();
         const maxDocuments = 16;
         let feedsCount = 0;
@@ -181,6 +181,6 @@ module.exports = {
         }));
 
         setTimeout(module.exports.updateBooruFeeds, 1000 * 60, client);
-        console.log(chalk.green(`Se procesaron ${feedsCount} Feeds desde ${guilds.size} servers en ${(Date.now() - feedCheckupStart) / 1000}s. ${promisesCount.total} imágenes nuevas puestas en envío`));
+        //console.log(chalk.green(`Se procesaron ${feedsCount} Feeds desde ${guilds.size} servers en ${(Date.now() - feedCheckupStart) / 1000}s. ${promisesCount.total} imágenes nuevas puestas en envío`));
     },
 }
