@@ -123,14 +123,15 @@ module.exports = {
                         );
                     
                     //Botón de Shock (temporal)
-                    const closeDate = new Date('February 2, 2022 18:00:0 GMT+03:00');
+                    const closeDate = new Date('February 3, 2022 0:00:0 GMT-03:00');
                     const now = new Date(Date.now());
                     const diff = (closeDate - now) / (1000 * 60 * 60);
+                    //console.log(closeDate.toLocaleTimeString(), '-', now.toLocaleTimeString(), '=', diff);
                     if(now < closeDate)
                         row.addComponents(
                             new MessageButton()
                                 //.setLabel('Recargar')
-                                .setLabel(`${((diff > 1) ? (diff / 24) : diff).toLocaleString('en', { maximumFractionDigits: 0 })} ${(diff > 1) ? 'días' : 'horas'}`)
+                                .setLabel(`${((diff > 24) ? (diff / 24) : diff).toLocaleString('en', { maximumFractionDigits: 0 })} ${(diff > 24) ? 'días' : 'horas'}`)
                                 .setEmoji('935665140601327626')
                                 .setStyle('PRIMARY')
                                 .setCustomId('feed_shockFeed'),
