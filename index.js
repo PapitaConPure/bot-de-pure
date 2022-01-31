@@ -527,12 +527,12 @@ client.on('voiceStateUpdate', async (oldState, state) => {
     if(oldState.channelId && oldState.channel) {
         try {
             const oldChannel = oldState.channel;
-            console.log('Desconexión del canal', oldChannel.name, 'con', oldChannel.members.size, 'miembros');
+            console.log('Desconexión del canal', oldChannel.name, 'con', oldChannel.members.filter(member => !member.user.bot).size, 'miembros');
             const channelPairIndex = pv.sessions.findIndex(session => session.voiceId === oldChannel.id);
             const channelPair = pv.sessions[channelPairIndex];
             if(channelPair) {
                 const { textId, voiceId } = channelPair;
-                if(!oldChannel.members.size) {
+                if(!oldChannel.members.filter(member => !member.user.bot).size) {
                     pv.sessions.splice(channelPairIndex, 1);
                     pv.markModified('sessions');
                     const tryDeleting = async(id) => {
@@ -610,6 +610,7 @@ client.on('voiceStateUpdate', async (oldState, state) => {
                     sessionTextChannel.permissionOverwrites.edit(guild.roles.everyone, { SEND_MESSAGES: false }, { reason: 'Restricción de envío de mensajes en sesión PuréVoice' }).catch(prematureError),
                     sessionTextChannel.permissionOverwrites.edit(guild.me, { SEND_MESSAGES: true }, { reason: 'Envío de mensajes propios en sesión PuréVoice' }).catch(prematureError),
                     sessionTextChannel.permissionOverwrites.edit(member, { SEND_MESSAGES: true }, { reason: 'Inclusión de miembro en sesión PuréVoice' }).catch(prematureError),
+                    sessionTextChannel.setTopic(`Canal de texto de Sesión\n ¡Conéctate a <#${channel.id}> para conversar aquí!`),
                 ]);
                 await channel.setName(`💠「${member.user.username.slice(24)}」`).catch(prematureError);
                 await channel.setUserLimit(0).catch(prematureError);
