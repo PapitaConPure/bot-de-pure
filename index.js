@@ -612,7 +612,7 @@ client.on('voiceStateUpdate', async (oldState, state) => {
                     sessionTextChannel.permissionOverwrites.edit(member, { SEND_MESSAGES: true }, { reason: 'Inclusión de miembro en sesión PuréVoice' }).catch(prematureError),
                     sessionTextChannel.setTopic(`#️⃣ ${guild.name} » PuréVoice » ${member.user.tag}\nCanal de texto de Sesión \n👥 ¡Conéctate a <#${channel.id}> para conversar aquí!`).catch(prematureError),
                 ]);
-                await channel.setName(`💠「${member.user.username.slice(24)}」`).catch(prematureError);
+                await channel.setName('💠「」').catch(prematureError);
                 await channel.setUserLimit(0).catch(prematureError);
                 await sessionTextChannel.send({ content: `📣 ${member}, usa \`${p_pure(guild.id).raw}voz <Nombre>\` para cambiar el nombre de la sesión` }).catch(prematureError);
             } catch(error) {
