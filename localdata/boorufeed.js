@@ -16,7 +16,7 @@ module.exports = {
         await Promise.all(guilds.map(async guild => {
             const logMore = guild.id === '654471968200065034';
             promisesCount[guild] = 0;
-            const gcfg = await GuildConfig.findOne({ guildId: guild.id });
+            const gcfg = await GuildConfig.findOne({ guildId: guild.id }).catch(console.error);
             if(!gcfg) return;
             for(const [chid, feed] of Object.entries(gcfg.feeds)) {
                 feedsCount++;
