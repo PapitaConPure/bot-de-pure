@@ -610,7 +610,7 @@ client.on('voiceStateUpdate', async (oldState, state) => {
                     sessionTextChannel.permissionOverwrites.edit(guild.roles.everyone, { SEND_MESSAGES: false }, { reason: 'Restricción de envío de mensajes en sesión PuréVoice' }).catch(prematureError),
                     sessionTextChannel.permissionOverwrites.edit(guild.me, { SEND_MESSAGES: true }, { reason: 'Envío de mensajes propios en sesión PuréVoice' }).catch(prematureError),
                     sessionTextChannel.permissionOverwrites.edit(member, { SEND_MESSAGES: true }, { reason: 'Inclusión de miembro en sesión PuréVoice' }).catch(prematureError),
-                    sessionTextChannel.setTopic(`Canal de texto de Sesión\n ¡Conéctate a <#${channel.id}> para conversar aquí!`),
+                    sessionTextChannel.setTopic(`${guild.name}» PuréVoice » ${member.user.tag}\nCanal de texto de Sesión\n ¡Conéctate a <#${channel.id}> para conversar aquí!`).catch(prematureError),
                 ]);
                 await channel.setName(`💠「${member.user.username.slice(24)}」`).catch(prematureError);
                 await channel.setUserLimit(0).catch(prematureError);
