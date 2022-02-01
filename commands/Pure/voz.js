@@ -15,7 +15,7 @@ const collectors = {};
  * @param {import('discord.js').ColorResolvable} stepColor
  * @param {String} route
  */
-const wizEmbed = (iconUrl, stepName, stepColor, route = 'none') => {
+const wizEmbed = (iconUrl, stepName, stepColor) => {
 	//const routes = {
 	//	['create']: 	5, //2 + seleccionar categoría + seleccionar/crear canal de texto + seleccionar/crear/ignorar canal de voz AFK
 	//	['edit']: 		4, //2 + seleccionar operación + operación
@@ -35,7 +35,8 @@ module.exports = {
 	name: 'voz',
 	aliases: [
 		'purévoz', 'purevoz',
-		'purévoice', 'purevoice', 'voice',
+		'voice', 'purévoice', 'purevoice',
+		'vc',
 	],
 	brief: 'Para inyectar un Sistema PuréVoice en una categoria por medio de un Asistente',
 	desc: 'Para inyectar un Sistema PuréVoice en una categoria. Simplemente usa el comando y sigue los pasos del Asistente para configurar todo',
