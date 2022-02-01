@@ -132,8 +132,8 @@ module.exports = {
 				let replyContent = {};
 				let mem = { //Memoria del script, para cachear
 					__functions__: {
-						dado: (min, max) => randRange(min, max, true),
-						dadoDecimal: (min, max) => randRange(min, max, false),
+						['dado']: ([min, max]) => randRange(min ?? 1, max ?? 7, true),
+						['dadoDecimal']: ([min, max]) => randRange(min ?? 0, max ?? 1, false),
 					},
 					//entradas: isSlash ? options.fetchParamPoly(args, 'entradas', getString, []) : args,
 					archivos: isSlash ? [] : request.attachments.map(attachment => attachment.proxyURL),
@@ -146,24 +146,47 @@ module.exports = {
 				};
 				const getLineString = (expression) => expression.join(' ').split(/[\n ]*#FIN#[\n ]*/).join('\n');
 				const getAttribute = (sequence) => {
-					let att = mem[sequence.shift()];
-					//console.log('getAttribute:', sequence, ',', str, '| att:', att);
+					console.log('getAttribute:', sequence);
+					if(sequence.length === 1 && sequence[0].endsWith('/')) {
+						return callMemFunction(sequence[0].slice(1));
+					}
+						
+					let att = mem[sequence.shift().slice(1)];
+					console.log('getAttribute:', sequence, '| att:', att);
 					sequence.forEach(a => {
-						if(att[a].startsWith('$'))
-							att = getAttribute(sequence);
-						else
+						if(att[a].startsWith('$')) {
+							console.log('Referencia compleja detectada');
+							if(att[a].endsWith('/'))
+								att = callMemFunction(att[0]);
+							else
+								att = getAttribute(sequence);
+						} else
 							att = att[sequence.shift()];
 					});
 					return att;
 				}
+				const callMemFunction = (functionCall) => {
+					const functionFactors = functionCall.split('/').filter(ff => ff);
+					const fn = functionFactors.shift();
+					console.log('Factores de la función', fn, '::', functionFactors);
+					if(mem.__functions__[fn])
+						return (mem.__functions__[fn])(functionFactors);
+					else if(mem.funciones[fn]) {
+						return '42';
+					} else {
+						psError(`la función "${fn ?? ''}" no existe`, -2, 'ANÓNIMA');
+						return undefined;
+					}
+				}
 				//Leer valores o punteros
 				const readReference = (str) => {
+					const rawReference = Array.isArray(str) ? str[0] : str;
 					let reference;
-					console.log('Referencia cruda:', str);
-					if(str[0].startsWith('$')) {
-						const sequence = str[0].slice(1).split('->');
+					console.log('Referencia cruda:', rawReference);
+					if(rawReference.startsWith('$')) {
+						const sequence = rawReference.split('->');
 						console.log('Secuencia:', sequence.length, 'pasos');
-						reference = getAttribute(sequence, str[0]);
+						reference = getAttribute(sequence);
 					} else
 						reference = getLineString(str);
 					console.log('Referencia procesada:', reference);
@@ -174,9 +197,9 @@ module.exports = {
 					console.log('Referencias crudas:', expr);
 					const references = expr.map(w => {
 						if(w.startsWith('$')) {
-							const sequence = w.slice(1).split('->');
+							const sequence = w.split('->');
 							console.log('Secuencia:', sequence.length, 'pasos');
-							return getAttribute(sequence, w);
+							return getAttribute(sequence);
 						} else
 							return w;
 					});
@@ -225,7 +248,7 @@ module.exports = {
 
 						case 'guardar':
 							console.log('Operación GUARDAR');
-							return psError('esta característica todavía no está disponible', l, operation);
+							return psError('la palabra clave GUARDAR todavía no está disponible', l, operation);
 
 						case 'cargar':
 							console.log('Operación CARGAR');
@@ -233,7 +256,7 @@ module.exports = {
 							identifier = expr.shift();
 							if(expr.shift().toLowerCase() !== 'con') return psError('se esperaba "CON" en asignación de carga', l, operation);
 							if(!expr.length) return psError('se esperaba una asignación', l, operation);
-							const loader = expr.shift();	
+							const loader = expr.shift().toLocaleLowerCase();
 							let loadValue;
 							try {
 								switch(loader) {
@@ -241,11 +264,16 @@ module.exports = {
 										if(!expr.length) return psError('se esperaba un valor', l, operation);
 										loadValue = readLineReferences(expr);
 										break;
+									case 'texto':
+										if(!expr.length) return psError('se esperaba texto', l, operation);
+										loadValue = readLineReferences(expr).join(' ');
+										break;
 									default:
 										loadValue = readReference([loader]);
 										break;
 								}
 							} catch(err) {
+								console.error(err);
 								return psError('referencia inválida', l, operation, true);
 							}
 							//if(!expr.length) return psError('se esperaba un valor', l, operation);
@@ -274,8 +302,9 @@ module.exports = {
 							const message = {};
 							if(!expr.length) return psError('no se puede enviar un mensaje vacío', l, operation);
 							target = expr.shift().toLowerCase();
-							values = readLineReferences(expr).filter(refVal => refVal);
+							values = readLineReferences(expr).filter(refVal => refVal !== undefined && refVal !== null);
 							if(!values.length) return psError('los valores especificados no existen', l, operation);
+							console.log('Valores obtenidos para enviar: ', values);
 							
 							switch(target) {
 								case 'archivos':
