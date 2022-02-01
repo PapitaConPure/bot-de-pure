@@ -497,7 +497,7 @@ client.on('interactionCreate', async interaction => {
 client.on('voiceStateUpdate', async (oldState, state) => {
     const { guild, channel, member } = state;
     const guildChannels = guild.channels.cache;
-    const pv = await PureVoice.findOne({ guildId: guild.id });
+    const pv = await PureVoice.findOne({ guildId: guild.id }).catch(console.error);
     if(!(pv && guildChannels.get(pv.categoryId))) return;
     
     const prematureError = () => console.log('Canal probablemente eliminado prematuramente');
