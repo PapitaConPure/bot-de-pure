@@ -523,6 +523,11 @@ client.on('voiceStateUpdate', async (oldState, state) => {
     await pv.save();
     //#endregion
 
+    //#region Comprobar lag
+    if(oldState.channelId === state.channelId)
+        return;
+    //#endregion
+
     //#region Comprobar desconexión
     if(oldState.channelId && oldState.channel) {
         try {
