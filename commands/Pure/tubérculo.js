@@ -144,14 +144,14 @@ module.exports = {
 					errors++;
 					return request.reply({ content: `<⚠️ Error PS: \`${description} (Expresión ${line + 1}, Operación ${operation.toUpperCase()})\`>` });
 				};
-				const getLineString = (expression) => expression.join(' ').split(/[\n ]*#FIN#[\n ]*/).join('\n');
+				const getLineString = (expression) => expression.join(' ');//.split(/[\n ]*#FIN#[\n ]*/).join('\n');
 				const getAttribute = (sequence) => {
-					console.log('getAttribute:', sequence);
-					if(sequence.length === 1 && sequence[0].endsWith('/')) {
-						return callMemFunction(sequence[0].slice(1));
+					const firstSequenced = sequence.shift().slice(1);
+					if(!sequence.length && firstSequenced.endsWith('/')) {
+						return callMemFunction(firstSequenced);
 					}
 						
-					let att = mem[sequence.shift().slice(1)];
+					let att = mem[firstSequenced];
 					console.log('getAttribute:', sequence, '| att:', att);
 					sequence.forEach(a => {
 						if(att[a].startsWith('$')) {
@@ -196,10 +196,9 @@ module.exports = {
 				const readLineReferences = (expr) => {
 					console.log('Referencias crudas:', expr);
 					const references = expr.map(w => {
-						if(w.startsWith('$')) {
-							const sequence = w.split('->');
-							console.log('Secuencia:', sequence.length, 'pasos');
-							return getAttribute(sequence);
+						if(w.match(/^[\n*~`]*\$/)) {
+							const sequences = w.split(/[\n*~`]+/).map(sequence => sequence.split('->'));
+							return sequences.map(sequence => sequence[0].startsWith('$') ? getAttribute(sequence) : sequence[0]).join('\n');
 						} else
 							return w;
 					});
@@ -385,7 +384,7 @@ module.exports = {
 					if(ps) {
 						if(!mcontent)
 							return await request.reply({ content: `⚠️ Este Tubérculo requiere ingresar PuréScript\n${helpstr}` });
-						tuberContent.script = mcontent.split(/ *;+ */).filter(line => line.length).map(line => line.split(/ +/));
+						tuberContent.script = mcontent.split(/ *;+ */).map(line => line.split(/ +/).filter(word => word !== '```')).filter(line => line.length);
 					} else {
 						if(!mcontent && !mfiles.length)
 							return await request.reply({ content: `⚠️ Debes ingresar un mensaje o archivo para registrar un Tubérculo\n${helpstr}` });
