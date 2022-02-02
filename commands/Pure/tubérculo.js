@@ -143,6 +143,7 @@ module.exports = {
 						['dado']: ([min, max]) => randRange(min ?? 1, max ?? 7, true),
 						['dadoDecimal']: ([min, max]) => randRange(min ?? 0, max ?? 1, false),
 						//Funcionalidad
+						['largo']: ([obj]) => obj.length ?? obj.size,
 						['minus']: ([texto]) => texto.toLowerCase(),
 						['mayus']: ([texto]) => texto.toUpperCase(),
 						//Embeds
@@ -182,14 +183,17 @@ module.exports = {
 							att = att[a];
 						}
 					});
+					console.log('att final:', att);
 					return att;
 				}
 				const callMemFunction = (functionCall) => {
 					const functionFactors = functionCall.split('/').filter(ff => ff);
 					const fn = functionFactors.shift();
-					console.log('Factores de la función', fn, '::', functionFactors);
+					console.log('Componiendo función');
+					const functionParams = functionFactors.map(ff => ff.startsWith('$') ? getAttribute([ff]) : ff);
+					console.log('Factores de la función', fn, '::', functionParams);
 					if(mem.__functions__[fn])
-						return (mem.__functions__[fn])(functionFactors);
+						return (mem.__functions__[fn])(functionParams);
 					else if(mem.funciones[fn]) {
 						return '42';
 					} else {
