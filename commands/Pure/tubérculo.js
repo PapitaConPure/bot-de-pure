@@ -130,13 +130,27 @@ module.exports = {
 		const executeTuber = async(tuber) => {
 			if(tuber.script) {
 				let replyContent = {};
+				/**@param {import('discord.js').GuildMember} m*/
+				const getMemberProps = (m) => ({
+					nombre: m.user.username,
+					apodo: m.nickname ?? m.user.username,
+					etiqueta: m.user.tag,
+					avatar: m.user.avatarURL({ dynamic: true }),
+				});
 				let mem = { //Memoria del script, para cachear
 					__functions__: {
+						//Aleatoreidad
 						['dado']: ([min, max]) => randRange(min ?? 1, max ?? 7, true),
 						['dadoDecimal']: ([min, max]) => randRange(min ?? 0, max ?? 1, false),
+						//Funcionalidad
+						['minus']: ([texto]) => texto.toLowerCase(),
+						['mayus']: ([texto]) => texto.toUpperCase(),
+						//Embeds
+						['marcoAgregarCampo']: ([min, max]) => randRange(min ?? 0, max ?? 1, false),
 					},
 					//entradas: isSlash ? options.fetchParamPoly(args, 'entradas', getString, []) : args,
 					archivos: isSlash ? [] : request.attachments.map(attachment => attachment.proxyURL),
+					usuario: getMemberProps(request.member),
 					funciones: {},
 				};
 				let errors = 0;
@@ -240,7 +254,6 @@ module.exports = {
 									break;
 
 								case 'recuadro':
-									if(!expr.length) return psError('se esperaba un valor', l, operation);
 									mem[identifier] = new MessageEmbed();
 									break;
 
@@ -254,7 +267,7 @@ module.exports = {
 							console.log('Operación GUARDAR');
 							return psError('la palabra clave GUARDAR todavía no está disponible', l, operation);
 
-						case 'cargar':
+						case 'cargar': {
 							console.log('Operación CARGAR');
 							if(!expr.length) return psError('se esperaba un identificador', l, operation);
 							identifier = expr.shift();
@@ -286,10 +299,21 @@ module.exports = {
 								let memtemp = loadValue;
 								const sequence = identifier.slice(1).split('->');
 								if(!sequence.length) return psError('se esperaba un identificador', l, operation);
+
+								//Leer
+								let memRead = mem;
+								sequence.slice(0, -1).forEach(sq => {
+									memRead = mem[sq];
+									console.log(memRead);
+								});
+								memRead = memRead ?? {};
+
+								//Escribir
 								sequence.slice(0).reverse().forEach(sq => {
-									memtemp = { [`${sq}`]: memtemp };
+									memtemp = { ...memRead, [`${sq}`]: memtemp };
 									console.log(memtemp);
 								});
+
 								console.log('wasd', sequence[0], 'fg', mem[sequence[0]]);
 								
 								mem = { ...mem, ...memtemp };
@@ -300,6 +324,61 @@ module.exports = {
 							
 							console.log('Carga terminada con \n\tidentifier', identifier, '\n\tloader:', loader, '\n\tloadValue:', loadValue);
 							break;
+						}
+
+						case 'extender': {
+							console.log('Operación EXTENDER');
+							if(!expr.length) return psError('se esperaba un identificador', l, operation);
+							identifier = expr.shift();
+							if(expr.shift().toLowerCase() !== 'con') return psError('se esperaba "CON" en extensión', l, operation);
+							if(!expr.length) return psError('se esperaba una asignación', l, operation);
+							const loader = expr.shift().toLocaleLowerCase();
+							let loadValue;
+							try {
+								switch(loader) {
+									case 'lista':
+										if(!expr.length) return psError('se esperaba un valor', l, operation);
+										loadValue = readLineReferences(expr);
+										break;
+									case 'texto':
+										if(!expr.length) return psError('se esperaba texto', l, operation);
+										loadValue = readLineReferences(expr).join(' ');
+										break;
+									default:
+										loadValue = readReference([loader]);
+										break;
+								}
+							} catch(err) {
+								console.error(err);
+								return psError('referencia inválida', l, operation, true);
+							}
+							//if(!expr.length) return psError('se esperaba un valor', l, operation);
+							let memRead = mem;
+
+							if(identifier.startsWith('$')) {
+								console.log('Carga referencial');
+								const sequence = identifier.slice(1).split('->');
+								if(!sequence.length) return psError('se esperaba un identificador', l, operation);
+
+								//Leer
+								sequence.forEach(sq => {
+									memRead = mem[sq];
+									console.log(memRead);
+								});
+							} else {
+								console.log('Carga directa');
+								memRead = mem[identifier];
+							}
+							//Escribir
+							if(memRead === undefined || memRead === null)
+								return psError(`el identificador "${identifier}" no existe`, l, operation);
+							if(!Array.isArray(memRead))
+								return psError(`el identificador ${identifier} no corresponde a una lista`, l, operation);
+
+							memRead.push(loadValue);
+							console.log('Carga terminada con \n\tidentifier', identifier, '\n\tloader:', loader, '\n\tloadValue:', loadValue);
+							break;
+						}
 
 						case 'enviar':
 							console.log('Operación ENVIAR');
