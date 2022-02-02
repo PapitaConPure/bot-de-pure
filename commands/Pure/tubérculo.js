@@ -154,14 +154,19 @@ module.exports = {
 					let att = mem[firstSequenced];
 					console.log('getAttribute:', sequence, '| att:', att);
 					sequence.forEach(a => {
+						console.log('Antes de comprobar índice:', a);
+						if(a.startsWith('$')) a = getAttribute([a]);
+						console.log('Luego de comprobar índice:', a, '|', att[a]);
 						if(att[a].startsWith('$')) {
 							console.log('Referencia compleja detectada');
 							if(att[a].endsWith('/'))
 								att = callMemFunction(att[0]);
 							else
 								att = getAttribute(sequence);
-						} else
-							att = att[sequence.shift()];
+						} else {
+							console.log('Referencia simple detectada');
+							att = att[a];
+						}
 					});
 					return att;
 				}
