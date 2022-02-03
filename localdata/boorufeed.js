@@ -123,7 +123,7 @@ module.exports = {
                         );
                     
                     //Botón de Shock (temporal)
-                    const closeDate = new Date('February 3, 2022 0:00:0 GMT-03:00');
+                    /*const closeDate = new Date('February 3, 2022 0:00:0 GMT-03:00');
                     const now = new Date(Date.now());
                     const diff = (closeDate - now) / (1000 * 60 * 60);
                     //console.log(closeDate.toLocaleTimeString(), '-', now.toLocaleTimeString(), '=', diff);
@@ -135,7 +135,7 @@ module.exports = {
                                 .setEmoji('935665140601327626')
                                 .setStyle('PRIMARY')
                                 .setCustomId('feed_shockFeed'),
-                        );
+                        );*/
                     
                     //Botón de eliminación
                     row.addComponents(
