@@ -41,7 +41,7 @@ botIntents.add(
     iflags.GUILD_MESSAGE_REACTIONS,
     iflags.GUILD_MESSAGE_TYPING,
     iflags.GUILD_VOICE_STATES,
-    iflags.DIRECT_MESSAGES
+    iflags.DIRECT_MESSAGES,
 );
 const client = new Discord.Client({
     intents: botIntents,
@@ -680,6 +680,7 @@ client.on('guildMemberAdd', member => {
 //Evento de salida de servidor
 client.on('guildMemberRemove', member => {
     const guild = member.guild;
+    console.log('wawa');
     if(!guild.available) return;
     if(global.maintenance.length > 0 && guild.systemChannelId !== global.maintenance) return;
     const user = member.user;
