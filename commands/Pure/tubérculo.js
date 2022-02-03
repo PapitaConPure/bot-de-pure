@@ -69,7 +69,7 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 				: args);
 			const attachmentsList = [
 				...request.attachments.map(attachment => attachment.proxyURL),
-				...argsList.map(arg => (argsList[contentStack].match(fileRegex)) ? arg : undefined).filter(arg => arg),
+				...argsList.map(arg => arg.match(fileRegex) ? arg : undefined).filter(arg => arg),
 			];
 			const contentsList = argsList.filter(arg => arg);
 			console.log('---------------------------------\ncontentsList:', contentsList, '\nattachmentsList:', attachmentsList, '\n- - - - - - -       - - - - - - -');
@@ -579,8 +579,10 @@ module.exports = {
 						console.log('Ejecutando PuréScript:', gcfg.tubers[id]);
 						await executeTuber(request, gcfg.tubers[id], { isSlash });
 						console.log('PuréScript ejecutado:', gcfg.tubers[id]);
-						gcfg.tubers[id].script = gcfg.tubers[id].script.filter(expr => expr && expr.some(w => w));
-						console.log('Script guardado:', gcfg.tubers[id]);
+						if(gcfg.tubers[id].script) {
+							gcfg.tubers[id].script = gcfg.tubers[id].script.filter(expr => expr && expr.some(w => w));
+							console.log('Script guardado:', gcfg.tubers[id].script);
+						}
 						gcfg.markModified('tubers');
 					} catch(error) {
 						console.log('Ocurrió un error al añadir un nuevo Tubérculo');
