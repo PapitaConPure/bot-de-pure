@@ -42,14 +42,22 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 		let mem = {
 			__functions__: {
 				//Aleatoreidad
+				/**@param {[Number, Number]} param0*/
 				['dado']: ([min, max]) => randRange(min ?? 1, max ?? 7, true),
+				/**@param {[Number, Number]} param0*/
 				['dadoDecimal']: ([min, max]) => randRange(min ?? 0, max ?? 1, false),
 				//Funcionalidad
+				/**@param {[*]} param0*/
 				['largo']: ([obj]) => obj.length ?? obj.size,
-				['minus']: ([texto]) => texto.toLowerCase(),
-				['mayus']: ([texto]) => texto.toUpperCase(),
+				/**@param {[String]} param0*/
+				['minus']: ([text]) => text.toLowerCase(),
+				/**@param {[String]} param0*/
+				['mayus']: ([text]) => text.toUpperCase(),
 				//Embeds
-				['marcoAgregarCampo']: ([min, max]) => randRange(min ?? 0, max ?? 1, false),
+				/**@param {[MessageEmbed, String, String]} param0*/
+				['marcoAgregarAutor']: ([embed, author, iconUrl]) => embed.setAuthor(author, iconUrl),
+				/**@param {[MessageEmbed, String, String]} param0*/
+				['marcoAgregarCampo']: ([embed, title, content, inline]) => embed.addField(title, content, inline),
 			},
 			//entradas: isSlash ? options.fetchParamPoly(args, 'entradas', getString, []) : args,
 			archivos: isSlash ? [] : request.attachments.map(attachment => attachment.proxyURL),
@@ -60,10 +68,11 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 		//Establecer claves iniciales como solo-lectura
 		const readOnlyMem = Object.keys(mem);
 		console.log('readOnlyMem:', readOnlyMem);
+		//#endregion
 
-		//Entradas personalizadas
+		//#region Entradas personalizadas
 		const fileRegex = /(http:\/\/|https:\/\/)?(www\.)?(([a-zA-Z0-9-]){2,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_\/\.0-9#:?=&;,]*\.(txt|png|jpg|jpeg|webp|gif|webm|mp4|mp3|wav|flac|ogg)[a-zA-Z-_\.0-9#:?=&;,]*/;
-		if(args !== undefined && args !== null) {
+		if(tuber.inputs && args !== undefined && args !== null) {
 			const argsList = (isSlash
 				? options.fetchParamPoly(args, 'entradas', args.getString, null).filter(input => input)
 				: args);
@@ -168,7 +177,7 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 			let working = Promise.resolve(); //Promesa para cuando se estén realizando trabajos de fondo
 			const operation = expr.shift().toLowerCase();
 			switch(operation) {
-				case 'registrar':
+				case 'registrar': {
 					console.log('Operación REGISTRAR');
 					if(!expr.length) return psError('se esperaba contexto', l, operation);
 					const target = expr.shift().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, '');
@@ -211,6 +220,7 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 					}
 					console.log(mem);
 					break;
+				}
 				
 				case 'crear': {
 					console.log('Operación CREAR');
@@ -232,7 +242,7 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 							mem[identifier] = '';
 							break;
 
-						case 'recuadro':
+						case 'marco':
 							mem[identifier] = new MessageEmbed();
 							break;
 
@@ -243,9 +253,10 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 					break;
 				}
 
-				case 'guardar':
+				case 'guardar': {
 					console.log('Operación GUARDAR');
 					return psError('la palabra clave GUARDAR todavía no está disponible', l, operation);
+				}
 
 				case 'cargar': {
 					console.log('Operación CARGAR');
@@ -361,12 +372,21 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 					break;
 				}
 
+				case 'ejecutar': {
+					console.log('Operación EJECUTAR');
+					if(!expr.length) return psError('se esperaba un valor o función', l, operation);
+					readLineReferences(expr);
+					break;
+				}
+
 				case 'enviar': {
 					console.log('Operación ENVIAR');
 					const message = {};
 					if(!expr.length) return psError('no se puede enviar un mensaje vacío', l, operation);
 					const target = expr.shift().toLowerCase();
-					const values = readLineReferences(expr).filter(refVal => refVal !== undefined && refVal !== null);
+					const values = (target === 'marcos')
+						? expr.map(e => e.startsWith('$') ? getAttribute([e]) : e)
+						: readLineReferences(expr).filter(refVal => refVal !== undefined && refVal !== null);
 					if(!values.length) return psError('los valores especificados no existen', l, operation);
 					console.log('Valores obtenidos para enviar: ', values);
 					
@@ -376,9 +396,9 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 							console.log('message.files:', message.files);
 							break;
 
-						case 'recuadros':
+						case 'marcos':
 							message.embeds = values;
-							console.log('message.files:', message.files);
+							console.log('message.embeds:', message.embeds);
 							break;
 
 						case 'texto':
@@ -391,9 +411,10 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 					replyContent = { ...replyContent, ...message };
 				}
 
-				default:
+				default: {
 					console.log('Operación *');
 					break;
+				}
 			}
 			return working;
 		}));
