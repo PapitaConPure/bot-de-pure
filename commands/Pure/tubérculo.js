@@ -55,9 +55,13 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 				['mayus']: ([text]) => text.toUpperCase(),
 				//Embeds
 				/**@param {[MessageEmbed, String, String]} param0*/
-				['marcoAgregarAutor']: ([embed, author, iconUrl]) => embed.setAuthor(author, iconUrl),
+				['marcoEstablecerAutor']: ([embed, author, iconUrl]) => embed.setAuthor(author, iconUrl),
 				/**@param {[MessageEmbed, String]} param0*/
-				['marcoAgregarEncabezado']: ([embed, title]) => embed.setAuthor(title),
+				['marcoEstablecerEncabezado']: ([embed, title]) => embed.setTitle(title),
+				/**@param {[MessageEmbed, String, String]} param0*/
+				['marcoEstablecerColor']: ([embed, color]) => embed.setColor(color),
+				/**@param {[MessageEmbed, String, String]} param0*/
+				['marcoEstablecerImagen']: ([embed, image]) => embed.setImage(image),
 				/**@param {[MessageEmbed, String, String]} param0*/
 				['marcoAgregarCampo']: ([embed, title, content, inline]) => embed.addField(title, content, inline),
 			},
