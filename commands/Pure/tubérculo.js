@@ -2,7 +2,7 @@ const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
 const { p_pure } = require('../../localdata/prefixget.js');
 const { fetchFlag, isNotModerator, randRange, fetchUserID } = require('../../func.js');
-const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, MessageCollector } = require('discord.js');
+const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, MessageCollector, MessageAttachment } = require('discord.js');
 
 const options = new CommandOptionsManager()
 	.addParam('id', 	  'TEXT',           'para especificar sobre qué Tubérculo operar')
@@ -617,6 +617,7 @@ module.exports = {
 					if(!item)
 						return await request.reply({ content: `⚠️ El Tubérculo **${id}** no existe` });
 
+					let files = [];
 					const embed = new MessageEmbed()
 					.setColor('DARK_VIVID_PINK')
 					.setAuthor(request.guild.name, request.guild.iconURL())
@@ -626,20 +627,25 @@ module.exports = {
 						`**Descripción** ${item.desc ?? '*Este Tubérculo no tiene descripción*'}`,
 					].join('\n'));
 					
-					if(item.script)
-						embed.addField('PuréScript', [
-							`**Entradas** \`[${(item.inputs ?? []).map(i => i.identifier).join(', ')}]\``,
-							'```',
-							`${item.script.map(expr => expr.join(' ')).join(';\n')}`,
-							'```',
-						].join('\n'));
-					else {
+					if(item.script) {
+						embed.addField('Entradas', `\`[${(item.inputs ?? []).map(i => i.identifier).join(', ')}]\``);
+						const visualPS = item.script.map(expr => expr.join(' ')).join(';\n');
+						if(visualPS.length >= 1020)
+							files = [new MessageAttachment(Buffer.from(visualPS, 'utf-8'), 'PuréScript.txt')];
+						else
+							embed.addField('PuréScript', [
+								'```arm',
+								`${visualPS}`,
+								'```',
+							].join('\n'));
+					} else {
 						if(item.content) embed.addField('Mensaje', item.content);
 						if(item.files && item.files.length) embed.addField('Archivos', item.files.map((f,i) => `[${i}](${f})`).join(', '));
 					}
 
 					return await request.reply({
 						embeds: [embed],
+						files,
 						//components: *algo*,
 					});
 				
