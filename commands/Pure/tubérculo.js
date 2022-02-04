@@ -59,6 +59,10 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 				/**@param {[MessageEmbed, String]} param0*/
 				['marcoEstablecerEncabezado']: ([embed, title]) => embed.setTitle(title),
 				/**@param {[MessageEmbed, String, String]} param0*/
+				['marcoEstablecerPie']: ([embed, footer]) => embed.setFooter(footer),
+				/**@param {[MessageEmbed, String, String]} param0*/
+				['marcoEstablecerMiniatura']: ([embed, image]) => embed.setThumbnail(image),
+				/**@param {[MessageEmbed, String, String]} param0*/
 				['marcoEstablecerColor']: ([embed, color]) => embed.setColor(color),
 				/**@param {[MessageEmbed, String, String]} param0*/
 				['marcoEstablecerImagen']: ([embed, image]) => embed.setImage(image),
@@ -418,8 +422,21 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 					replyContent = { ...replyContent, ...message };
 				}
 
+				case 'comentar': {
+					console.log('Operación COMENTAR');
+					break;
+				}
+
+				case 'comprobar': {
+					const identifier = expr.shift();
+					const value = readReference([identifier]);
+					tuber.script[l] = [''];
+					return request.channel.send({ content: `<Comprobando valor para identificador: \`"${identifier}" = ${value} (Expresión ${l})>\`` });
+				}
+
 				default: {
 					console.log('Operación *');
+					tuber.script[l] = [''];
 					break;
 				}
 			}
