@@ -428,10 +428,26 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 				}
 
 				case 'comprobar': {
+					tuber.script[l] = [''];
 					const identifier = expr.shift();
 					const value = readReference([identifier]);
-					tuber.script[l] = [''];
-					return request.channel.send({ content: `<Comprobando valor para identificador: \`"${identifier}" = ${value} (Expresión ${l})>\`` });
+					let display;
+					switch(typeof value) {
+						case 'boolean': display = `\`$${value ? 'VERDADERO' : 'FALSO'}\``; break;
+						case 'function': display = '`(FUNCIÓN)`'; break;
+						case 'number': display = `\`${value}\``; break;
+						case 'string': display = `\`"${value}"\``; break;
+						case 'undefined': display = '`(NO DEFINIDO)`'; break;
+						case 'object':
+							if(Array.isArray(value))
+								display = `\`(LISTA)\`:\n${value.map((elem, i) => `\t\t\`->${i}: ${elem}\``).join('\n')}\n`;
+							else if(value)
+								display = `\`(CONJUNTO)\`:\n${Object.entries(value).map(([k,v]) => `\t\t\`->${k}: ${v}\``).join('\n')}\n`;
+							else
+								display = '`(NULO)`';
+							break;
+					}
+					return request.channel.send({ content: `<🔎 Comprobando valor para identificador: \`${identifier}\` = ${display} \`(Expresión ${l + 1})\`>` });
 				}
 
 				default: {
