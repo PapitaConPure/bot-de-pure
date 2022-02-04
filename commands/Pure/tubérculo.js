@@ -1,8 +1,8 @@
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
 const { p_pure } = require('../../localdata/prefixget.js');
-const { fetchFlag, isNotModerator, randRange } = require('../../func.js');
-const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.js');
+const { fetchFlag, isNotModerator, randRange, fetchUserID } = require('../../func.js');
+const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, MessageCollector } = require('discord.js');
 
 const options = new CommandOptionsManager()
 	.addParam('id', 	  'TEXT',           'para especificar sobre qué Tubérculo operar')
@@ -56,14 +56,17 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 				//Embeds
 				/**@param {[MessageEmbed, String, String]} param0*/
 				['marcoAgregarAutor']: ([embed, author, iconUrl]) => embed.setAuthor(author, iconUrl),
+				/**@param {[MessageEmbed, String]} param0*/
+				['marcoAgregarEncabezado']: ([embed, title]) => embed.setAuthor(title),
 				/**@param {[MessageEmbed, String, String]} param0*/
 				['marcoAgregarCampo']: ([embed, title, content, inline]) => embed.addField(title, content, inline),
 			},
-			//entradas: isSlash ? options.fetchParamPoly(args, 'entradas', getString, []) : args,
 			archivos: isSlash ? [] : request.attachments.map(attachment => attachment.proxyURL),
 			usuario: getMemberProps(request.member),
 			entradas: {},
 			funciones: {},
+			VERDADERO: true,
+			FALSO: false,
 		};
 		//Establecer claves iniciales como solo-lectura
 		const readOnlyMem = Object.keys(mem);
@@ -471,23 +474,20 @@ const paginationRows = (page, backward, forward, lastPage) => {
 		),
 		new MessageActionRow().addComponents(
 			new MessageButton()
-				.setCustomId('tubérculo_pendingA')
+				.setCustomId('tubérculo_filterAuthor')
 				.setLabel('Filtrar Autor')
 				.setEmoji('936530498061213756')
-				.setStyle('SUCCESS')
-				.setDisabled(true),
+				.setStyle('SUCCESS'),
 			new MessageButton()
-				.setCustomId('tubérculo_pendingB')
+				.setCustomId('tubérculo_filterTuberID')
 				.setLabel('Filtrar TuberID')
 				.setEmoji('936530498061213756')
-				.setStyle('SUCCESS')
-				.setDisabled(true),
+				.setStyle('SUCCESS'),
 			new MessageButton()
-				.setCustomId('tubérculo_pendingC')
+				.setCustomId('tubérculo_filterClear')
 				.setLabel('Mostrar todo')
 				.setEmoji('936531643496288288')
-				.setStyle('DANGER')
-				.setDisabled(true),
+				.setStyle('DANGER'),
 		),
 	]
 };
@@ -508,7 +508,7 @@ module.exports = {
 		'⚠️ Ten en cuenta que este comando es experimental y cualquier Tubérculo ingresado podría ser eventualmente perdido a medida que me actualizo',
 	].join('\n'),
 	flags: [
-		'common'
+		'common',
 	],
 	options,
 	callx: '<id?> <mensaje?> <archivos?>',
@@ -564,7 +564,7 @@ module.exports = {
 									.join('\n')
 								: `Este servidor no tiene ningún Tubérculo.\nComienza a desplegar TuberIDs con \`${p_pure(request.guildId)}tubérculo --crear\``,
 							true,
-						)
+						),
 				],
 				components: (items.length < pageMax) ? null : paginationRows(0, lastPage, 1, lastPage),
 			});
@@ -674,6 +674,30 @@ module.exports = {
 		gcfg.save(); //Guardar en Configuraciones de Servidor si se cambió algo
 	},
 
+	async getItemsList(guild, content, page) {
+		const gcfg = await GuildConfig.findOne({ guildId: guild.id });
+		let items = Object.entries(gcfg.tubers).reverse();
+		if(content) {
+			const filter = content.split(': ');
+			const [ focus, value ] = filter;
+			if(focus === 'Autor')
+				items = items.filter(([_,tuber]) => tuber.author === value);
+			else
+				items = items.filter(([tid,_]) => tid === value);
+		}
+
+		const lastPage = Math.ceil(items.length / pageMax) - 1;
+		const backward = (page > 0) ? (page - 1) : lastPage;
+		const forward = (page < lastPage) ? (page + 1) : 0;
+		
+		return {
+			items,
+			lastPage,
+			backward,
+			forward,
+		};
+	},
+
 	/**
 	 * 
 	 * @param {import('discord.js').ButtonInteraction} interaction 
@@ -682,27 +706,129 @@ module.exports = {
 	async ['loadPage'](interaction, [ page ]) {
 		page = parseInt(page);
 		const { guild, message } = interaction;
-		const gcfg = await GuildConfig.findOne({ guildId: guild.id });
-		const items = Object.entries(gcfg.tubers).reverse();
-		
+		const { items, lastPage, backward, forward } = await module.exports.getItemsList(guild, message.content, page);
 		const members = guild.members.cache;
-		const lastPage = Math.ceil(items.length / pageMax) - 1;
-		const backward = (page > 0) ? (page - 1) : lastPage;
-		const forward = (page < lastPage) ? (page + 1) : 0;
 		const oembed = message.embeds[0];
+
 		return await interaction.update({
 			embeds: [
 				new MessageEmbed()
-				.setColor(oembed.color)
-				.setAuthor(oembed.author.name, oembed.author.url)
-				.setTitle(oembed.title)
-				.addField(`🥔)▬▬\\~•\\~▬▬▬\\~•\\~▬▬{ ${page + 1} / ${lastPage + 1} }▬▬\\~•\\~▬▬▬\\~•\\~▬▬(🥔`,
-					items.splice(page * pageMax, pageMax)
-						.map(([tid,tuber]) => `**${tid}** • ${(members.get(tuber.author) ?? guild.me).user.username}`)
-						.join('\n'), true)
+					.setColor(oembed.color)
+					.setAuthor(oembed.author.name, oembed.author.url)
+					.setTitle(oembed.title)
+					.addField(`🥔)▬▬\\~•\\~▬▬▬\\~•\\~▬▬{ ${page + 1} / ${lastPage + 1} }▬▬\\~•\\~▬▬▬\\~•\\~▬▬(🥔`,
+						items.length
+							? items.splice(page * pageMax, pageMax)
+								.map(([tid,tuber]) => `**${tid}** • ${(members.get(tuber.author) ?? guild.me).user.username}`)
+								.join('\n')
+							: `Ningún Tubérculo coincide con la búsqueda actual`,
+						true,
+					),
 			],
 			components: (items.length < pageMax) ? null : paginationRows(page, backward, forward, lastPage),
 		});
+	},
+
+	/**
+	 * 
+	 * @param {import('discord.js').ButtonInteraction} interaction 
+	 * @param {Array<any>} param1 
+	 */
+	async ['filterAuthor'](interaction) {
+		const { guild, client, message } = interaction;
+		const members = guild.members.cache;
+		const oembed = message.embeds[0];
+
+		const filter = (m) => m.author.id === interaction.user.id;
+		const filterCollector = new MessageCollector(interaction.channel, { filter: filter, time: 1000 * 60 * 2 });
+		filterCollector.on('collect', async collected => {
+			const userId = fetchUserID(collected.content, { guild, client });
+			if(!userId) return;
+			const content = `Autor: ${userId}`
+			const { items, lastPage, backward, forward } = await module.exports.getItemsList(guild, content, 0);
+			await interaction.message.edit({
+				content,
+				embeds: [
+					new MessageEmbed()
+						.setColor(oembed.color)
+						.setAuthor(oembed.author.name, oembed.author.url)
+						.setTitle(oembed.title)
+						.addField(`🥔)▬▬\\~•\\~▬▬▬\\~•\\~▬▬{ 1 / ${lastPage + 1} }▬▬\\~•\\~▬▬▬\\~•\\~▬▬(🥔`,
+							items.length
+								? items.splice(0, pageMax)
+									.map(([tid,tuber]) => `**${tid}** • ${(members.get(tuber.author) ?? guild.me).user.username}`)
+									.join('\n')
+								: `Ningún Tubérculo coincide con la búsqueda actual`,
+							true,
+						),
+				],
+				components: (items.length < pageMax) ? null : paginationRows(0, backward, forward, lastPage),
+			});
+			filterCollector.stop();
+		});
+
+		await interaction.reply({
+			content: 'Envía el usuario a filtrar',
+			ephemeral: true,
+		});
+	},
+
+	/**
+	 * 
+	 * @param {import('discord.js').ButtonInteraction} interaction 
+	 * @param {Array<any>} param1 
+	 */
+	async ['filterTuberID'](interaction) {
+		const { guild, message } = interaction;
+		const members = guild.members.cache;
+		const oembed = message.embeds[0];
+
+		const filter = (m) => m.author.id === interaction.user.id;
+		const filterCollector = new MessageCollector(interaction.channel, { filter: filter, time: 1000 * 60 * 2 });
+		filterCollector.on('collect', async collected => {
+			const content = `TuberID: ${collected.content}`;
+			const { items, lastPage, backward, forward } = await module.exports.getItemsList(guild, content, 0);
+			await interaction.message.edit({
+				content,
+				embeds: [
+					new MessageEmbed()
+						.setColor(oembed.color)
+						.setAuthor(oembed.author.name, oembed.author.url)
+						.setTitle(oembed.title)
+						.addField(`🥔)▬▬\\~•\\~▬▬▬\\~•\\~▬▬{ 1 / ${lastPage + 1} }▬▬\\~•\\~▬▬▬\\~•\\~▬▬(🥔`,
+							items.length
+								? items.splice(0, pageMax)
+									.map(([tid,tuber]) => `**${tid}** • ${(members.get(tuber.author) ?? guild.me).user.username}`)
+									.join('\n')
+								: `Ningún Tubérculo coincide con la búsqueda actual`,
+							true,
+						),
+				],
+				components: (items.length < pageMax) ? null : paginationRows(0, backward, forward, lastPage),
+			});
+			filterCollector.stop();
+		});
+
+		await interaction.reply({
+			content: 'Envía una TuberID a filtrar',
+			ephemeral: true,
+		});
+	},
+
+	/**
+	 * 
+	 * @param {import('discord.js').ButtonInteraction} interaction 
+	 * @param {Array<any>} param1 
+	 */
+	async ['filterClear'](interaction) {
+		if(interaction.message.content) {
+			await interaction.message.edit({ content: null });
+			return await module.exports['loadPage'](interaction, [0]);
+		} else
+			return await interaction.reply({
+				content: '⚠ Esta lista ya muestra todos los resultados',
+				ephemeral: true,
+			});
 	},
 
 	/**
