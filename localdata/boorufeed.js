@@ -14,7 +14,7 @@ module.exports = {
         /** @type {import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Guild>} */
         const guilds = client.guilds.cache;
         await Promise.all(guilds.map(async guild => {
-            const logMore = guild.id === '654471968200065034';
+            const logMore = false;//guild.id === '654471968200065034';
             promisesCount[guild] = 0;
             const gcfg = await GuildConfig.findOne({ guildId: guild.id }).catch(console.error);
             if(!gcfg) return;
@@ -152,17 +152,24 @@ module.exports = {
                     const feedEmbed = new MessageEmbed()
                         .setColor('#608bf3')
                         .setAuthor('Desde Gelbooru', feed.cornerIcon ? feed.cornerIcon : 'https://i.imgur.com/outZ5Hm.png');
+                    
                     if(maxTags > 0)
                         feedEmbed.addField(`Tags (${Math.min(image.tags.length, maxTags)}/${image.tags.length})`, `*${image.tags.slice(0, maxTags).join(', ').replace(/\\*\*/g,'\\*').replace(/\\*_/g,'\\_')}*`);
                     if(feed.title)
                         feedEmbed.setTitle(feed.title);
                     if(feed.footer)
                         feedEmbed.setFooter(feed.footer);
+                    
                     if(image.fileUrl.match(/\.(mp4|webm|webp)/)) {
                         feedEmbed.addField('Video', `Míralo en su respectivo <:gelbooru:919398540172750878> **Post**\n[Enlace directo](${image.fileUrl})`);
                         feedEmbed.setImage(image.sampleUrl || image.previewUrl);
-                    } else
-                        feedEmbed.setImage(image.sampleUrl || image.fileUrl);
+                    } else 
+                        feedEmbed.setImage(
+                            /*(image.tags.includes('absurdres') ? image.previewUrl : undefined)
+                            || */image.sampleUrl
+                            || image.fileUrl
+                        );
+                    
                     feedMessage.embeds = [feedEmbed];
                     
                     //Enviar imagen de Feed
