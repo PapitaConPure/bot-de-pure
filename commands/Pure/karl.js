@@ -18,7 +18,7 @@ const drums = {
 const karlRarity = () => {
 	const rarity = [];
 	const r = Math.random();
-	const probs = [ 1, 0.7, 0.3, 0.15, 0.02 ];
+	const probs = [ 1, .7, .3, .15, .02, 0.001 ];
 	for(let i = 0; i < probs.length; i++)
 		if(probs[i] > r) rarity.push(star);
 	return rarity;
