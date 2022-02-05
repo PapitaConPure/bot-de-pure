@@ -795,6 +795,7 @@ module.exports = {
 			if(!userId) return;
 			const content = `Autor: ${userId}`
 			const { items, lastPage, backward, forward } = await module.exports.getItemsList(guild, content, 0);
+			const paginationEnabled = items.length >= pageMax;
 			await interaction.message.edit({
 				content,
 				embeds: [
@@ -811,7 +812,7 @@ module.exports = {
 							true,
 						),
 				],
-				components: paginationRows(0, backward, forward, lastPage, items.length >= pageMax),
+				components: paginationRows(0, backward, forward, lastPage, paginationEnabled),
 			});
 			filterCollector.stop();
 		});
@@ -837,6 +838,7 @@ module.exports = {
 		filterCollector.on('collect', async collected => {
 			const content = `TuberID: ${collected.content}`;
 			const { items, lastPage, backward, forward } = await module.exports.getItemsList(guild, content, 0);
+			const paginationEnabled = items.length >= pageMax;
 			await interaction.message.edit({
 				content,
 				embeds: [
@@ -853,7 +855,7 @@ module.exports = {
 							true,
 						),
 				],
-				components: paginationRows(0, backward, forward, lastPage, items.length >= pageMax),
+				components: paginationRows(0, backward, forward, lastPage, paginationEnabled),
 			});
 			filterCollector.stop();
 		});
