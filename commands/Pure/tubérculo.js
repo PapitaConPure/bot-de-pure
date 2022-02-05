@@ -774,7 +774,7 @@ module.exports = {
 						true,
 					),
 			],
-			components: paginationRows(page, backward, forward, lastPage, items.length < pageMax),
+			components: (items.length < pageMax) ? null : paginationRows(page, backward, forward, lastPage),
 		});
 	},
 
@@ -811,7 +811,7 @@ module.exports = {
 							true,
 						),
 				],
-				components: paginationRows(0, backward, forward, lastPage, items.length < pageMax),
+				components: paginationRows(0, backward, forward, lastPage, items.length >= pageMax),
 			});
 			filterCollector.stop();
 		});
