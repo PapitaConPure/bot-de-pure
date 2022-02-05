@@ -60,7 +60,7 @@ module.exports = {
 		let plus12;
 		if(['am','pm'].some(m => rawTime.toLowerCase().endsWith(m))) {
 			isShortened = true;
-			plus12 = rawTime.endsWith('pm');
+			plus12 = rawTime.toLowerCase().endsWith('pm');
 			rawTime = rawTime.slice(0, -2);
 		}
 		/**@type {Array<Number>}*/
