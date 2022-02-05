@@ -814,6 +814,7 @@ module.exports = {
 				],
 				components: paginationRows(0, backward, forward, lastPage, paginationEnabled),
 			});
+			collected.delete().catch(console.error);
 			filterCollector.stop();
 		});
 
@@ -857,6 +858,7 @@ module.exports = {
 				],
 				components: paginationRows(0, backward, forward, lastPage, paginationEnabled),
 			});
+			collected.delete().catch(console.error);
 			filterCollector.stop();
 		});
 
