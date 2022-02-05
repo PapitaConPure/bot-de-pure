@@ -475,40 +475,44 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 };
 
 const pageMax = 10;
-const paginationRows = (page, backward, forward, lastPage) => {
+const paginationRows = (page, backward, forward, lastPage, navigationEnabled = true) => {
 	let i = 0;
-	return [
-		new MessageActionRow().addComponents(
-			new MessageButton()
-			.setCustomId('tubérculo_loadPage_0_START')
-			.setEmoji('934430008586403900')
-			.setStyle('SECONDARY'),
-			new MessageButton()
-				.setCustomId(`tubérculo_loadPage_${backward}_BACKWARD`)
-				.setEmoji('934430008343158844')
-				.setStyle('SECONDARY'),
-			new MessageButton()
-				.setCustomId(`tubérculo_loadPage_${forward}_FORWARD`)
-				.setEmoji('934430008250871818')
-				.setStyle('SECONDARY'),
-			new MessageButton()
-				.setCustomId(`tubérculo_loadPage_${lastPage}_END`)
-				.setEmoji('934430008619962428')
-				.setStyle('SECONDARY'),
-			new MessageButton()
-				.setCustomId(`tubérculo_loadPage_${page}_RELOAD`)
-				.setEmoji('934432754173624373')
-				.setStyle('PRIMARY'),
-		),
-		new MessageActionRow().addComponents(
-			new MessageSelectMenu()
-				.setCustomId('tubérculo_loadPageExact')
-				.setPlaceholder('Seleccionar página')
-				.setOptions(Array(Math.min(lastPage + 1, 24)).fill(null).map(() => ({
-					value: `${i}`,
-					label: `Página ${++i}`,
-				}))),
-		),
+	const rows = [];
+	if(navigationEnabled)
+		rows.push(
+			new MessageActionRow().addComponents(
+				new MessageButton()
+					.setCustomId('tubérculo_loadPage_0_START')
+					.setEmoji('934430008586403900')
+					.setStyle('SECONDARY'),
+				new MessageButton()
+					.setCustomId(`tubérculo_loadPage_${backward}_BACKWARD`)
+					.setEmoji('934430008343158844')
+					.setStyle('SECONDARY'),
+				new MessageButton()
+					.setCustomId(`tubérculo_loadPage_${forward}_FORWARD`)
+					.setEmoji('934430008250871818')
+					.setStyle('SECONDARY'),
+				new MessageButton()
+					.setCustomId(`tubérculo_loadPage_${lastPage}_END`)
+					.setEmoji('934430008619962428')
+					.setStyle('SECONDARY'),
+				new MessageButton()
+					.setCustomId(`tubérculo_loadPage_${page}_RELOAD`)
+					.setEmoji('934432754173624373')
+					.setStyle('PRIMARY'),
+			),
+			new MessageActionRow().addComponents(
+				new MessageSelectMenu()
+					.setCustomId('tubérculo_loadPageExact')
+					.setPlaceholder('Seleccionar página')
+					.setOptions(Array(Math.min(lastPage + 1, 24)).fill(null).map(() => ({
+						value: `${i}`,
+						label: `Página ${++i}`,
+					}))),
+			),
+		);
+	rows.push(
 		new MessageActionRow().addComponents(
 			new MessageButton()
 				.setCustomId('tubérculo_filterAuthor')
@@ -526,7 +530,8 @@ const paginationRows = (page, backward, forward, lastPage) => {
 				.setEmoji('936531643496288288')
 				.setStyle('DANGER'),
 		),
-	]
+	);
+	return rows;
 };
 
 module.exports = {
@@ -726,12 +731,13 @@ module.exports = {
 			if(focus === 'Autor')
 				items = items.filter(([_,tuber]) => tuber.author === value);
 			else
-				items = items.filter(([tid,_]) => tid === value);
+				items = items.filter(([tid,_]) => tid.toLowerCase().indexOf(value) !== -1);
 		}
 
 		const lastPage = Math.ceil(items.length / pageMax) - 1;
 		const backward = (page > 0) ? (page - 1) : lastPage;
 		const forward = (page < lastPage) ? (page + 1) : 0;
+		console.log(backward, '<-', page, '->', forward, '//', lastPage);
 		
 		return {
 			items,
@@ -768,7 +774,7 @@ module.exports = {
 						true,
 					),
 			],
-			components: (items.length < pageMax) ? null : paginationRows(page, backward, forward, lastPage),
+			components: paginationRows(page, backward, forward, lastPage, items.length < pageMax),
 		});
 	},
 
@@ -805,7 +811,7 @@ module.exports = {
 							true,
 						),
 				],
-				components: (items.length < pageMax) ? null : paginationRows(0, backward, forward, lastPage),
+				components: paginationRows(0, backward, forward, lastPage, items.length < pageMax),
 			});
 			filterCollector.stop();
 		});
@@ -847,7 +853,7 @@ module.exports = {
 							true,
 						),
 				],
-				components: (items.length < pageMax) ? null : paginationRows(0, backward, forward, lastPage),
+				components: paginationRows(0, backward, forward, lastPage, items.length >= pageMax),
 			});
 			filterCollector.stop();
 		});
@@ -865,8 +871,28 @@ module.exports = {
 	 */
 	async ['filterClear'](interaction) {
 		if(interaction.message.content) {
-			await interaction.message.edit({ content: null });
-			return await module.exports['loadPage'](interaction, [0]);
+			const { guild, message } = interaction;
+			const members = guild.members.cache;
+			const oembed = message.embeds[0];
+			const { items, lastPage, backward, forward } = await module.exports.getItemsList(guild, '', 0);
+			return await interaction.update({
+				content: null,
+				embeds: [
+					new MessageEmbed()
+						.setColor(oembed.color)
+						.setAuthor(oembed.author.name, oembed.author.url)
+						.setTitle(oembed.title)
+						.addField(`🥔)▬▬\\~•\\~▬▬▬\\~•\\~▬▬{ 1 / ${lastPage + 1} }▬▬\\~•\\~▬▬▬\\~•\\~▬▬(🥔`,
+							items.length
+								? items.splice(0, pageMax)
+									.map(([tid,tuber]) => `**${tid}** • ${(members.get(tuber.author) ?? guild.me).user.username}`)
+									.join('\n')
+								: `Ningún Tubérculo coincide con la búsqueda actual`,
+							true,
+						),
+				],
+				components: paginationRows(0, backward, forward, lastPage, items.length >= pageMax),
+			});
 		} else
 			return await interaction.reply({
 				content: '⚠ Esta lista ya muestra todos los resultados',
