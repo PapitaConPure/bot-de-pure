@@ -605,6 +605,7 @@ client.on('voiceStateUpdate', async (oldState, state) => {
                 pv.sessions.push({
                     textId: sessionTextChannel.id,
                     voiceId: channel.id,
+                    joinedOnce: [ member.id ],
                 });
                 pv.markModified('sessions');
                 if(guild.id === global.serverid.hourai)
@@ -634,12 +635,21 @@ client.on('voiceStateUpdate', async (oldState, state) => {
                     ].join('\n') }));
             }
         } else if(channel.parentId === pv.categoryId) {
-            const channelPair = pv.sessions.find(session => session.voiceId === channel.id);
-            if(!channelPair) return;
-            const sessionTextChannel = guildChannels.get(channelPair.textId);
+            const currentSession = pv.sessions.find(session => session.voiceId === channel.id);
+            if(!currentSession) return;
+            const sessionTextChannel = guildChannels.get(currentSession.textId);
             if(!sessionTextChannel) return;
             await sessionTextChannel.permissionOverwrites.create(member, { SEND_MESSAGES: true }, { reason: 'Inclusión de miembro en sesión PuréVoice' }).catch(prematureError);
-            await sessionTextChannel.send({ content: `📣 ${member}, ¡puedes conversar por aquí!` }).catch(prematureError);
+            if(!currentSession.joinedOnce?.includes(member.id)) {
+                await sessionTextChannel.send({
+                    content: member.user.bot
+                        ? `🤖 Bot **${member.user.tag}** anexado`
+                        : `📣 ${member}, ¡puedes conversar por aquí!`,
+                }).catch(prematureError);
+                currentSession.joinedOnce.push(member.id);
+                pv.markModified('sessions');
+                pv.save();
+            }
         }
     }
     //#endregion
