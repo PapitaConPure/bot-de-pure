@@ -39,6 +39,7 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 			avatar: m.user.avatarURL({ dynamic: true }),
 		});
 
+		const memLogEnabled = false;
 		let mem = {
 			__functions__: {
 				//Aleatoreidad
@@ -184,28 +185,38 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 		//Ejecutar secuencia de expresiones
 		await Promise.all(tuber.script.map((expression, l) => {
 			const expr = [ ...expression ];
-			console.log(`Expresión ${l}:`, expr.join(' '), '\tCon mem:', mem);
+			if(memLogEnabled) console.log(`Expresión ${l}:`, expr.join(' '), '\tCon mem:', mem);
 			let working = Promise.resolve(); //Promesa para cuando se estén realizando trabajos de fondo
+
+			//Realizar acciones en base a palabra clave "operación"
 			const operation = expr.shift().toLowerCase();
 			switch(operation) {
+				//#region Manejo de datos
+				//Registrar entradas o entidades externas importadas
 				case 'registrar': {
 					console.log('Operación REGISTRAR');
 					if(!expr.length) return psError('se esperaba contexto', l, operation);
 					const target = expr.shift().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, '');
 					if(!expr.length) return psError('se esperaba un identificador', l, operation);
-					const identifier = expr.shift();
-					if(expr.shift().toLowerCase() !== 'con') return psError('se esperaba "CON" en asignación de carga', l, operation);
-					if(!expr.length) return psError('se esperaba una asignación', l, operation);
-					const loadValue = expr.shift();
+					const getIdentifierAndValue = () => {
+						const identifier = expr.shift();
+						if(expr.shift().toLowerCase() !== 'con') return psError('se esperaba "CON" en asignación de carga', l, operation);
+						if(!expr.length) return psError('se esperaba una asignación', l, operation);
+						const value = expr.shift();
+						return [ identifier, value ];
+					}
 
 					switch(target) {
 						case 'entrada':
 							console.log('Registrando entrada');
-							tuber.inputs = tuber.inputs ?? [];
+							const optional = (expr[0]?.toLowerCase() === 'opcional');
+							if(optional) expr.shift();
+							const [ identifier, loadValue ] = getIdentifierAndValue();
 							const processedValue = readReference([loadValue]);
+							tuber.inputs = tuber.inputs ?? [];
 							tuber.inputs.push({
 								identifier: identifier,
-								required: true,
+								required: !optional,
 								desc: '',
 								isAttachment: loadValue.startsWith('$archivos') || loadValue.match(fileRegex),
 							});
@@ -229,10 +240,11 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 						default:
 							return psError('contexto inválido', l, operation);
 					}
-					console.log(mem);
+					if(memLogEnabled) console.log(mem);
 					break;
 				}
 				
+				//Crear entidades de datos
 				case 'crear': {
 					console.log('Operación CREAR');
 					if(!expr.length) return psError('se esperaba contexto', l, operation);
@@ -260,25 +272,27 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 						default:
 							return psError('contexto inválido', l, operation);
 					}
-					console.log(mem);
+					if(memLogEnabled) console.log(mem);
 					break;
 				}
 
+				//Guardar en base de datos
 				case 'guardar': {
 					console.log('Operación GUARDAR');
 					return psError('la palabra clave GUARDAR todavía no está disponible', l, operation);
 				}
 
+				//Cargar valores en entidades existentes, o crearlas si no existen
 				case 'cargar': {
 					console.log('Operación CARGAR');
 					if(!expr.length) return psError('se esperaba un identificador', l, operation);
 					const identifier = expr.shift();
 					if(expr.shift().toLowerCase() !== 'con') return psError('se esperaba "CON" en asignación de carga', l, operation);
 					if(!expr.length) return psError('se esperaba una asignación', l, operation);
-					const loader = expr.shift().toLocaleLowerCase();
+					const loader = expr.shift();
 					let loadValue;
 					try {
-						switch(loader) {
+						switch(loader.toLocaleLowerCase()) {
 							case 'lista':
 								if(!expr.length) return psError('se esperaba un valor', l, operation);
 								loadValue = readLineReferences(expr);
@@ -307,14 +321,14 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 						let memRead = mem;
 						sequence.slice(0, -1).forEach(sq => {
 							memRead = mem[sq];
-							console.log(memRead);
+							if(memLogEnabled) console.log(memRead);
 						});
 						memRead = memRead ?? {};
 
 						//Escribir
 						sequence.slice(0).reverse().forEach(sq => {
 							memtemp = { ...memRead, [`${sq}`]: memtemp };
-							console.log(memtemp);
+							if(memLogEnabled) console.log(memtemp);
 						});
 
 						console.log('wasd', sequence[0], 'fg', mem[sequence[0]]);
@@ -330,6 +344,7 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 					break;
 				}
 
+				//Evolucionar listas
 				case 'extender': {
 					console.log('Operación EXTENDER');
 					if(!expr.length) return psError('se esperaba un identificador', l, operation);
@@ -366,7 +381,7 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 						//Leer
 						sequence.forEach(sq => {
 							memRead = mem[sq];
-							console.log(memRead);
+							if(memLogEnabled) console.log(memRead);
 						});
 					} else {
 						console.log('Carga directa');
@@ -383,13 +398,71 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 					break;
 				}
 
+				//Ejecutar funciones sin almacenar el valor de retorno; para cargas indirectas
 				case 'ejecutar': {
 					console.log('Operación EJECUTAR');
 					if(!expr.length) return psError('se esperaba un valor o función', l, operation);
 					readLineReferences(expr);
 					break;
 				}
+				//#endregion
 
+				//#region Condicionales
+				case 'si': {
+					console.log('Operación SI');
+					return psError('la palabra clave SI todavía no está disponible', l, operation);
+					const logicComponents = expr.join(' ').split(/ [Yy] /).map(e => e.split(' '));
+					console.log(logicComponents);
+					const logicIsTruthy = (lc) => {
+						let approved = false;
+						console.log('Verificando lógica "Y":', lc);
+						if(!lc.length) return psError('se esperaba un identificador', l, operation);
+						const identifier = lc.shift();
+						if(!lc.length) return psError('se esperaba contexto', l, operation);
+						const target = lc.shift();
+						if(!target)
+							approved = identifier;
+						else
+							switch(target.toLowerCase()) {
+								case 'es': {
+									if(!lc.length) return psError('se esperaba un segundo identificador', l, operation);
+									const identifier2 = lc.shift();
+									console.log(identifier, '==', identifier2);
+									if(identifier == identifier2)
+										approved = true;
+									break;
+								}
+
+								case 'existe': {
+									if(identifier !== undefined && identifier !== null)
+										approved = true;
+									break;
+								}
+							}
+						
+						console.log('Lógica "Y" determinada:', approved);
+						return approved;
+					}
+
+					const processedLogic = logicComponents.map(logicIsTruthy);
+					console.log('Malla lógica:', processedLogic, '\nDeterminado en SI:', processedLogic.every(l => l === true));
+
+					break;
+				}
+
+				case 'sino': {
+					console.log('Operación SINO');
+					return psError('la palabra clave SINO todavía no está disponible', l, operation);
+				}
+
+				case 'finsi': {
+					console.log('Operación FINSI');
+					return psError('la palabra clave FINSI todavía no está disponible', l, operation);
+				}
+				//#endregion
+
+				//#region Respuestas del Tubérculo
+				//Enviar mensaje de Discord
 				case 'enviar': {
 					console.log('Operación ENVIAR');
 					const message = {};
@@ -421,7 +494,9 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 					}
 					replyContent = { ...replyContent, ...message };
 				}
+				//#endregion
 
+				//#region Asistencia de programación
 				case 'comentar': {
 					console.log('Operación COMENTAR');
 					break;
@@ -449,7 +524,9 @@ const executeTuber = async(request, tuber, { args, isSlash }) => {
 					}
 					return request.channel.send({ content: `<🔎 Comprobando valor para identificador: \`${identifier}\` = ${display} \`(Expresión ${l + 1})\`>` });
 				}
+				//#endregion
 
+				//Operación nula (no hacer nada y olvidar)
 				default: {
 					console.log('Operación *');
 					tuber.script[l] = [''];
@@ -628,7 +705,7 @@ module.exports = {
 					if(ps) {
 						if(!mcontent)
 							return await request.reply({ content: `⚠️ Este Tubérculo requiere ingresar PuréScript\n${helpstr}` });
-						tuberContent.script = mcontent.split(/ *;+ */).map(line => line.split(/ +/).filter(word => word !== '```')).filter(line => line.length);
+						tuberContent.script = mcontent.split(/ *;+ */).map(line => line.split(/ +/).filter(word => !word.match(/^```[A-Za-z0-9]*/))).filter(line => line.length);
 					} else {
 						if(!mcontent && !mfiles.length)
 							return await request.reply({ content: `⚠️ Debes ingresar un mensaje o archivo para registrar un Tubérculo\n${helpstr}` });

@@ -6,13 +6,13 @@ const PrefixPairSchema = new Mongoose.Schema({
         type: Object,
         raw: { type: String },
         regex: { type: RegExp },
-        default: { raw: 'p!', regex: /^[Pp]![\n ]*/g }
+        default: { raw: 'p!', regex: /^[Pp] *![\n ]*/ }
     },
     drmk: {
         type: Object,
         raw: { type: String },
         regex: { type: RegExp },
-        default: { raw: 'd!', regex: /^[Dd]![\n ]*/g }
+        default: { raw: 'd!', regex: /^[Dd] *![\n ]*/ }
     }
 });
 

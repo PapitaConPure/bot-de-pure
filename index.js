@@ -54,8 +54,8 @@ const fastGuildFunctions = (() => {
     Object.values(guildfunc).map(gfs => Object.values(gfs).map(fgf => fgf.name)).forEach(fgt => rtn = [...rtn, ...fgt]);
     return rtn.sort().filter((fgf, i, arr) => fgf !== arr[i - 1]);
 })();
-global.p_drmk['0'] = { raw: 'd!', regex: /^[Dd]![\n ]*/g };
-global.p_pure['0'] = { raw: 'p!', regex: /^[Pp]![\n ]*/g };
+global.p_drmk['0'] = { raw: 'd!', regex: /^[Dd] *![\n ]*/ };
+global.p_pure['0'] = { raw: 'p!', regex: /^[Pp] *![\n ]*/ };
 //#endregion
 
 //#region Detección de archivos de comandos
