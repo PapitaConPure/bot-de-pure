@@ -1,4 +1,4 @@
-const { p_pure } = require('../../localdata/config.json');
+const { p_pure } = require('../../localdata/prefixget.js');
 
 module.exports = {
 	name: 'g-tipos',
@@ -17,7 +17,7 @@ module.exports = {
 		'_(mención/texto/id)_: identificador de usuario/rol\n' +
 		'_(enlace: https://a.b)_: enlace. Debe contener: `https://a.b`\n' +
 		'_(número [2])_: 2 números seguidos`\n\n' +
-		`Para aprender más sobre los \`--parametros\` de comando, usa \`${p_pure.raw}ayuda g-parametros\`\n` +
-		`Para aprender más sobre las \`--opciones\` de comando, usa \`${p_pure.raw}ayuda g-opciones\`\n`,
+		`Para aprender más sobre los \`--parametros\` de comando, usa \`${p_pure().raw}ayuda g-parametros\`\n` +
+		`Para aprender más sobre las \`--opciones\` de comando, usa \`${p_pure().raw}ayuda g-opciones\`\n`,
 	flags: ['guide']
 };

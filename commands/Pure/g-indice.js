@@ -1,4 +1,4 @@
-const { p_pure } = require('../../localdata/config.json');
+const { p_pure } = require('../../localdata/prefixget.js');
 
 module.exports = {
 	name: 'g-indice',
@@ -12,9 +12,9 @@ module.exports = {
 		'Los `<parámetros>` y las `--banderas` son solo 2 formas de similares y a la vez diferentes manipular un comando\n' +
 		'Basándose en conveniencia de uso, algunos comportamientos se definirán con `<uno>` u con `--otro`.\n\n' +
 		'Referencia:\n' +
-		`\`${p_pure.raw}ayuda g-parametros\`: introducción a \`<parámetros>\`\n` +
-		`\`${p_pure.raw}ayuda g-opciones\`: introducción a opciones y \`--banderas\`\n` +
-		`\`${p_pure.raw}ayuda g-tipos\`: introducción a _(tipos)_ y definiciones de _(tipos)_\n\n` +
+		`\`${p_pure().raw}ayuda g-parametros\`: introducción a \`<parámetros>\`\n` +
+		`\`${p_pure().raw}ayuda g-opciones\`: introducción a opciones y \`--banderas\`\n` +
+		`\`${p_pure().raw}ayuda g-tipos\`: introducción a _(tipos)_ y definiciones de _(tipos)_\n\n` +
 		'_"¿Quién necesita Wikipedia cuando tenés un Bot chatarra?" ~Papita_',
 	flags: ['guide']
 };

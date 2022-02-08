@@ -1,4 +1,4 @@
-const { p_pure } = require('../../localdata/config.json');
+const { p_pure } = require('../../localdata/prefixget.js');
 
 module.exports = {
 	name: 'g-opciones',
@@ -16,7 +16,7 @@ module.exports = {
 		'Algunas banderas actúan como propiedades y requieren un valor:\n' +
 		'`--objetivo <usuario>`: objetivo = `<usuario>`\n' +
 		'`-xy <número>`: x = y = `<número>`\n' +
-		`Para aprender más sobre los \`--parametros\` de comando, usa \`${p_pure.raw}ayuda g-parametros\`\n` +
-		`Para ver sobre los _(tipos)_ de valores de parámetro, usa \`${p_pure.raw}ayuda g-tipos\``,
+		`Para aprender más sobre los \`--parametros\` de comando, usa \`${p_pure().raw}ayuda g-parametros\`\n` +
+		`Para ver sobre los _(tipos)_ de valores de parámetro, usa \`${p_pure().raw}ayuda g-tipos\``,
 	flags: ['guide']
 };

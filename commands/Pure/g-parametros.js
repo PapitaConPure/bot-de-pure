@@ -1,4 +1,4 @@
-const { p_pure } = require('../../localdata/config.json');
+const { p_pure } = require('../../localdata/prefixget.js');
 
 module.exports = {
 	name: 'g-parametros',
@@ -17,7 +17,7 @@ module.exports = {
 		'`<parámetro (a,b,c)>`: múltiples entradas en sucesión para `(a)`, `(b)` y `(c)`\n' +
 		'`[<parám1><parám2>(...)]`: múltiples grupos de entradas ordenadas (los grupos pueden o no separarse por espacios)\n' +
 		'`[<parám1?>/<parám2?>]`: entradas intercambiables (en un solo puesto)\n\n' +
-		`Para aprender más sobre las \`--opciones\` de comando, usa \`${p_pure.raw}ayuda g-opciones\`\n` +
-		`Para ver sobre los _(tipos)_ de valores de parámetro, usa \`${p_pure.raw}ayuda g-tipos\``,
+		`Para aprender más sobre las \`--opciones\` de comando, usa \`${p_pure().raw}ayuda g-opciones\`\n` +
+		`Para ver sobre los _(tipos)_ de valores de parámetro, usa \`${p_pure().raw}ayuda g-tipos\``,
 	flags: ['guide']
 };
