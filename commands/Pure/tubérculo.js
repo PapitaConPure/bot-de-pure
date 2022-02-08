@@ -6,9 +6,9 @@ const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, Messag
 const { executeTuber } = require('../../purescript.js');
 
 const options = new CommandOptionsManager()
-	.addParam('id', 	  'TEXT',           'para especificar sobre qué Tubérculo operar')
-	.addParam('mensaje',  'TEXT',           'para especificar el texto del mensaje',     { optional: true })
-	.addParam('archivos', ['FILE','IMAGE'], 'para especificar los archivos del mensaje', { poly: 'MULTIPLE', optional: true })
+	.addParam('id', 	  'TEXT',           'para especificar sobre qué Tubérculo operar', { optional: true })
+	.addParam('mensaje',  'TEXT',           'para especificar el texto del mensaje',       { optional: true })
+	.addParam('archivos', ['FILE','IMAGE'], 'para especificar los archivos del mensaje',   { optional: true, poly: 'MULTIPLE' })
 	.addFlag(['c','m'], ['crear','agregar','añadir'], 'para crear o editar un Tubérculo')
 	.addFlag('v', 		'ver', 		  				  'para ver detalles de un Tubérculo')
 	.addFlag(['b','d'], ['borrar','eliminar'], 		  'para eliminar un Tubérculo')
