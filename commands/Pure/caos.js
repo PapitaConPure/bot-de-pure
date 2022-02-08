@@ -57,7 +57,7 @@ module.exports = {
 		}
 		return await request.reply({
 			content:
-				`Con este comando, puedes activar un set de comandos que se consideran demasiado caóticos como para estar en un server tranquilito. Usa ${p_pure(request.guild.id).raw}ayuda si quieres saber cómo\n` +
+				`Con este comando, puedes activar un set de comandos que se consideran demasiado caóticos como para estar en un server tranquilito.\nUsa \`${p_pure(request.guild.id).raw}ayuda caos\` si quieres saber cómo.\n` +
 				'Comandos caóticos:\n' +
 				'```diff\n' +
 				`-> ${chaosnames.join(', ')}\n` +
