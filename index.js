@@ -9,7 +9,7 @@ const Mongoose = require('mongoose');
 const uri = (process.env.MONGODB_URI) ? process.env.MONGODB_URI : require('./localenv.json').dburi;
 const prefixpair = require('./localdata/models/prefixpair.js');
 const { Stats, ChannelStats } = require('./localdata/models/stats.js');
-const { Puretable, defaultEmote } = require('./localdata/models/puretable.js');
+const { Puretable, defaultEmote, pureTableImage } = require('./localdata/models/puretable.js');
 const PureVoice = require('./localdata/models/purevoice');
 const HouraiDB = require('./localdata/models/hourai.js');
 
@@ -18,7 +18,7 @@ const func = require('./func.js'); //Funciones globales
 const cmdex = require('./localdata/cmdExceptions.js');
 const guildfunc = require('./localdata/guildFunctions.js');
 const dns = require('dns'); //Detectar host
-const { registerFont, loadImage } = require('canvas'); //Registrar fuentes al ejecutar Bot
+const { registerFont, loadImage, Canvas } = require('canvas'); //Registrar fuentes al ejecutar Bot
 const chalk = require('chalk'); //Consola con formato bonito
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { CommandOptionsManager } = require('./commands/Commons/cmdOpts.js');
@@ -208,6 +208,7 @@ client.on('ready', async () => {
 
     console.log(chalk.gray('Preparando Tabla de Puré'));
     let puretable = await Puretable.findOne({});
+    global.pureTableImage = await loadImage('https://i.imgur.com/TIL0jPV.png');
     if(!puretable) puretable = new Puretable();
     else //Limpiar emotes eliminados / no accesibles
         puretable.cells = await Promise.all(puretable.cells.map(arr =>
@@ -234,7 +235,7 @@ client.on('ready', async () => {
     registerFont('fonts/Alice-Regular.ttf',             { family: 'headline' });
     registerFont('fonts/teen bd.ttf',                   { family: 'cardname' });
     registerFont('fonts/kirsty rg.otf',                 { family: 'cardclass' });
-    registerFont('fonts/cuyabra.otf',                   { family: 'cardhint' });
+    registerFont('fonts/cuyabra.otf',                   { family: 'cuyabra' });
     registerFont('fonts/asap-condensed.semibold.ttf',   { family: 'cardbody' });
     registerFont('fonts/BebasNeue_1.otf',               { family: 'bebas' });
     registerFont('fonts/DINPro-Cond.otf',               { family: 'dinpro' });

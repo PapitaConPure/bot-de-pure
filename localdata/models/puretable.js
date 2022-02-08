@@ -1,10 +1,11 @@
 const Mongoose = require('mongoose');
-const dEmoteId = '828736342372253697';
+
+const defaultEmote = '828736342372253697';
 
 const PuretableSchema = new Mongoose.Schema({
     cells: {
         type: Array,
-        default: Array(16).fill(null).map(() => Array(16).fill(dEmoteId))
+        default: Array(16).fill(null).map(() => Array(16).fill(defaultEmote))
     }
 });
 
@@ -24,7 +25,7 @@ const AUserSchema = new Mongoose.Schema({
 });
 
 module.exports = {
-    defaultEmote: dEmoteId,
+    defaultEmote,
     Puretable: Mongoose.model('Puretable', PuretableSchema),
     AUser: Mongoose.model('AUser', AUserSchema)
 };

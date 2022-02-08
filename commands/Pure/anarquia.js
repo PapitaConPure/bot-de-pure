@@ -3,7 +3,7 @@ const { fetchUserID, fetchFlag } = require('../../func.js');
 const { createCanvas, loadImage } = require('canvas');
 const { MessageEmbed, MessageAttachment } = require('discord.js');
 const { p_pure } = require('../../localdata/prefixget');
-const { Puretable, AUser } = require('../../localdata/models/puretable.js');
+const { Puretable, AUser, pureTableImage } = require('../../localdata/models/puretable.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
 const maxexp = 30;
@@ -41,32 +41,53 @@ module.exports = {
 	 * @param {Boolean} isSlash
 	 */
 	async execute(request, args, isSlash = false) {
-		const loademotes = global.loademotes;
+		const loadEmotes = global.loademotes;
 		//Ver tabla
 		if(!(isSlash ? args.data : args).length) {
-			const canvas = createCanvas(864, 960);
+			const canvas = createCanvas(864, 996);
 			const ctx = canvas.getContext('2d');
 
+			//Optimizar dibujados estáticos
+			ctx.drawImage(global.pureTableImage, 0, 0, canvas.width, canvas.height);
+
 			//#region Encabezado
-			ctx.textBaseline = 'top';
 			ctx.fillStyle = '#ffffff';
-			ctx.strokeStyle = '#bd0924';
-			ctx.lineWidth = 9;
+			ctx.textBaseline = 'top';
 			ctx.font = `bold 116px "headline"`;
+			/*ctx.strokeStyle = '#bd0924';
+			ctx.lineWidth = 9;
 			const Texto = 'Tabla de Puré';
-			const xcenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
-			ctx.strokeText(Texto, xcenter, 4);
-			ctx.fillText(Texto, xcenter, 4);
+			const xCenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
+			ctx.strokeText(Texto, xCenter, 4);
+			ctx.fillText(Texto, xCenter, 4);*/
 			//#endregion
 
 			//Dibujar emotes en imagen
-			const puretable = (await Puretable.findOne({})).cells;
-			const size = 48;
-			const tx = canvas.width / 2 - size * puretable.length / 2;
-			const ty = ctx.measureText('M').emHeightDescent + 12;
-			puretable.map((arr, y) => {
+			const pureTable = (await Puretable.findOne({})).cells;
+			const emoteSize = 48;
+			const tableX = canvas.width / 2 - emoteSize * pureTable.length / 2;
+			const tableY = ctx.measureText('M').emHeightDescent + 24;
+			/*ctx.font = '32px "cuyabra"';
+			ctx.textBaseline = 'middle';*/
+			pureTable.map((arr, y) => {
+				/*const halfSize = emoteSize * 0.5;
+				ctx.textAlign = 'center';
+				ctx.fillText(y + 1, tableX + halfSize - emoteSize,      tableY + halfSize + y * emoteSize);
+				ctx.fillText(y + 1, tableX + halfSize + 16 * emoteSize, tableY + halfSize + y * emoteSize);*/
 				arr.map((item, x) => {
-					ctx.drawImage(loademotes[item], tx + x * size, ty + y * size, size, size)
+					/*if(y === 0) {
+						ctx.fillText(x + 1, tableX + halfSize + x * emoteSize, tableY + halfSize - emoteSize);
+						ctx.fillText(x + 1, tableX + halfSize + x * emoteSize, tableY + halfSize + 16 * emoteSize);
+					}
+					const diag = x === y;
+					if(diag || (arr.length - x - 1) === y) {
+						ctx.fillStyle = diag ? '#ff0000' : '#0000ff';
+						ctx.globalAlpha = 0.5;
+						ctx.fillRect(tableX + x * emoteSize, tableY + y * emoteSize, emoteSize, emoteSize);
+						ctx.fillStyle = '#ffffff';
+						ctx.globalAlpha = 1;
+					};*/
+					ctx.drawImage(loadEmotes[item], tableX + x * emoteSize, tableY + y * emoteSize, emoteSize, emoteSize)
 				});
 			});
 			
@@ -161,8 +182,8 @@ module.exports = {
 		let ephemeral = true;
 
 		//Cargar imagen nueva si no está registrada
-		if(!loademotes.hasOwnProperty(e.id))
-			loademotes[e.id] = await loadImage(request.client.emojis.cache.get(e.id).url);
+		if(!loadEmotes.hasOwnProperty(e.id))
+			loadEmotes[e.id] = await loadImage(request.client.emojis.cache.get(e.id).url);
 
 		//Habilidades
 		if(!h && !v) cells[e.y][e.x] = e.id;
