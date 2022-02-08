@@ -523,7 +523,7 @@ client.on('voiceStateUpdate', async (oldState, state) => {
     await pv.save();
     //#endregion
 
-    //#region Comprobar lag
+    //#region Comprobar cambios ajenos a conexiones y desconexiones
     if(oldState.channelId === state.channelId)
         return;
     //#endregion
@@ -608,8 +608,6 @@ client.on('voiceStateUpdate', async (oldState, state) => {
                     joinedOnce: [ member.id ],
                 });
                 pv.markModified('sessions');
-                if(guild.id === global.serverid.hourai)
-                    global.hourai.infr.channels[sessionTextChannel.id] = sessionTextChannel.name;
 
                 await Promise.all([
                     pv.save().then(() => console.log('Sesiones:', pv.sessions)),

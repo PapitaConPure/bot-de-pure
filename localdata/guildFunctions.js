@@ -9,7 +9,7 @@ module.exports = {
             const infr = global.hourai.infr;
             const whitech = infr.channels;
 
-            if(!whitech[channel.id]) {
+            if(!(whitech[channel.id] || whitech[channel.parent?.id])) {
                 const msg = content.toLowerCase();
                 const banpf = [ /^p![\n ]*\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,(?!confession)\w/, /^,,\w/, /^~\w/, /^\/\w/, /^%\w/ ];
                 if(banpf.some(bp => msg.match(bp))) {
