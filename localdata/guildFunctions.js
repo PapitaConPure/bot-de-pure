@@ -11,7 +11,7 @@ module.exports = {
 
             if(!(whitech[channel.id] || whitech[channel.parent?.id])) {
                 const msg = content.toLowerCase();
-                const banpf = [ /^p![\n ]*\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,(?!confession)\w/, /^,,\w/, /^~\w/, /^\/\w/, /^%\w/ ];
+                const banpf = [ /^[Pp] *![\n ]*\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,(?!confession)\w/, /^,,\w/, /^~\w/, /^\/\w/, /^%\w/ ];
                 if(banpf.some(bp => msg.match(bp))) {
                     const hr = (await Hourai.findOne({})) || new Hourai({});
                     const now = Date.now();
