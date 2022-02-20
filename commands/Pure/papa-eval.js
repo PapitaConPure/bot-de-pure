@@ -56,7 +56,7 @@ module.exports = {
 		} catch(error) {
 			const embed = new Discord.MessageEmbed()
 				.setColor('#0000ff')
-				.setAuthor(`${request.guild.name} • ${request.channel.name}`, request.author.avatarURL({ dynamic: true }), request.url)
+				.setAuthor({ name: `${request.guild.name} • ${request.channel.name}`, iconURL: request.author.avatarURL({ dynamic: true }), url: request.url })
 				.addField('Ha ocurrido un error al ingresar un comando', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
 			await request.channel.send({ embeds: [embed] });
 		}

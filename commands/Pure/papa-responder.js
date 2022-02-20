@@ -44,7 +44,7 @@ module.exports = {
 		else { //Reporte de problema
 			const embed = new Discord.MessageEmbed()
 				.setColor('#aa5555')
-				.setAuthor('Bot de Puré#9243', message.client.user.avatarURL({ size: 256 }))
+				.setAuthor({ name: 'Bot de Puré#9243', iconURL: message.client.user.avatarURL({ size: 256 }) })
 				.setTitle('Problema de presentación de sugerencia')
 				.addField('Detalle', args.join(' '));
 			user.send({
