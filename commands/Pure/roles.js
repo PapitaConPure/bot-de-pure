@@ -47,7 +47,7 @@ module.exports = {
 		return await request.reply({
 			embeds: [
 				new MessageEmbed()
-					.setAuthor('Punto de Reparto desplegado', (request.author ?? request.user).avatarURL())
+					.setAuthor({ name: 'Punto de Reparto desplegado', iconURL: (request.author ?? request.user).avatarURL() })
 					.setColor('GOLD')
 					.addField('¡Se están repartiendo roles!', 'Se ha establecido una campaña de suministro de roles. Usa el menú de abajo y selecciona la categoría que quieras')
 			],
@@ -167,7 +167,7 @@ module.exports = {
 			embeds: [
 				new MessageEmbed()
 					.setColor('AQUA')
-					.addField('Roles de Religión', 'Roles para describir tu actitud, ideas y forma de ser. No lo tomes muy enserio... ¿o tal vez sí?')
+					.addField('Roles de Religión', 'Roles para describir tu actitud, ideas y forma de ser. No lo tomes muy en serio... ¿o tal vez sí?')
 			],
 			components: [
 				new MessageActionRow().addComponents(gameRoles.map(gameRole =>

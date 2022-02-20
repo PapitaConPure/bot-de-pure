@@ -32,8 +32,8 @@ module.exports = {
 
 			.addField(`${'Nombre\`'.padEnd(24)}\`Emote`, emotes[0])
 
-			.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
-			.setFooter(`Reacciona a las flechas debajo para cambiar de página`);
+			.setAuthor({ name: `Comando invocado por ${message.author.username}`, iconURL: message.author.avatarURL() })
+			.setFooter({ text: `Reacciona a las flechas debajo para cambiar de página` });
 
 		const sent = await message.channel.send({ content: content, embeds: [embed] });
 		const arrows = fetchArrows(interaction.client.emojis.cache);
@@ -44,7 +44,7 @@ module.exports = {
 			if(reaction.emoji.id === arrows[0].id) page = (page > 0)?(page - 1):(emotes.length - 1);
 			else page = (page < (emotes.length - 1))?(page + 1):0;
 			embed.fields[0].value = emotes[page];
-			embed.setFooter(`Página ${page + 1}/${Math.ceil(emotes.length)}`);
+			embed.setFooter({ text: `Página ${page + 1}/${Math.ceil(emotes.length)}` });
 			sent.edit({ content: content, embeds: [embed]});
 		});
     },
@@ -66,8 +66,8 @@ module.exports = {
 
 			.addField(`${'Nombre\`'.padEnd(24)}\`Emote`, emotes[0])
 
-			.setAuthor(`Comando invocado por ${interaction.member.user.username}`, interaction.member.user.avatarURL())
-			.setFooter(`Reacciona a las flechas debajo para cambiar de página`);
+			.setAuthor({ name: `Comando invocado por ${interaction.member.user.username}`, iconURL: interaction.member.user.avatarURL() })
+			.setFooter({ text: `Reacciona a las flechas debajo para cambiar de página `});
 
 		await interaction.reply({ content: content, embeds: [embed] });
 		const sent = await interaction.fetchReply();
@@ -79,7 +79,7 @@ module.exports = {
 			if(reaction.emoji.id === arrows[0].id) page = (page > 0)?(page - 1):(emotes.length - 1);
 			else page = (page < (emotes.length - 1))?(page + 1):0;
 			embed.fields[0].value = emotes[page];
-			embed.setFooter(`Página ${page + 1}/${Math.ceil(emotes.length)}`);
+			embed.setFooter({ text: `Página ${page + 1}/${Math.ceil(emotes.length)}` });
 			sent.edit({ content: content, embeds: [embed]});
 		});
     }

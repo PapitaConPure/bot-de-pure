@@ -115,6 +115,7 @@ module.exports = {
 				.slice(0, bomb);
 
 			//Crear presentaciones
+			/**@type {Array<MessageEmbed>}*/
 			const Embeds = [];
 			images.forEach(image => {
 				Embeds.push(new MessageEmbed()
@@ -125,7 +126,7 @@ module.exports = {
 			//Formatear primera presentación
 			const author = (request.author ?? request.user);
 			Embeds[0]
-				.setAuthor(`Desde ${images[0].booru.domain}`, (engine === 'gelbooru') ? 'https://i.imgur.com/outZ5Hm.png' : author.avatarURL({ dynamic: true, size: 128 }))
+				.setAuthor({ name: `Desde ${images[0].booru.domain}`, iconURL: (engine === 'gelbooru') ? 'https://i.imgur.com/outZ5Hm.png' : author.avatarURL({ dynamic: true, size: 128 }) })
 				.setTitle(isnsfw ? searchOpt.nsfwtitle : searchOpt.sfwtitle);
 			if(extags.length)
 				Embeds[0].addField('Tu búsqueda', `:mag_right: *${extags.trim().replace('*', '\\*').split(/ +/).join(', ')}*`);

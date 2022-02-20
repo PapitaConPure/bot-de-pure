@@ -70,8 +70,8 @@ module.exports = {
 
 					.addField(`${'Nombre\`'.padEnd(24)}\`Emote`, pages[0])
 
-					.setAuthor(`${perritos.length} perritos en total`)
-					.setFooter(`Reacciona a las flechas debajo para cambiar de página`);
+					.setAuthor({ name: `${perritos.length} perritos en total` })
+					.setFooter({ text: `Reacciona a las flechas debajo para cambiar de página` });
 				let page = 0;
 
 				const arrows = fetchArrows(message.client.emojis.cache);
@@ -85,7 +85,7 @@ module.exports = {
 						if(reaction.emoji.id === arrows[0].id) page = (page > 0)?(page - 1):(pages.length - 1);
 						else page = (page < (pages.length - 1))?(page + 1):0;
 						embed.fields[0].value = pages[page];
-						embed.setFooter(`Página ${page + 1}/${Math.ceil(pages.length)}`);
+						embed.setFooter({ text: `Página ${page + 1}/${Math.ceil(pages.length)}` });
 						sent.edit({ embeds: [embed] });
 						reaction.users.remove(ruser);
 					});

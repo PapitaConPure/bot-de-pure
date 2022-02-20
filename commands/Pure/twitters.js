@@ -83,9 +83,9 @@ module.exports = {
 
 			const embed = new Discord.MessageEmbed()
 				.setColor('#1da1f2')
-				.setAuthor(embedprops.epigraph !== undefined ? embedprops.epigraph : '¡Clickea el enlace que gustes!', message.channel.guild.iconURL({ dynamic: false, size: 256 }))
-				.setTitle(embedprops.title !== undefined ? embedprops.title : 'Tablón de Twitters')
-				.setFooter(embedprops.footer !== undefined ? embedprops.footer : '');
+				.setTitle(embedprops.title ?? 'Tablón de Twitters')
+				.setAuthor({ name: embedprops.epigraph ?? '¡Clickea el enlace que gustes!', iconURL: message.channel.guild.iconURL({ dynamic: false, size: 256 }) })
+				.setFooter({ text: embedprops.footer ?? null });
 			
 			for(page = 0; page < twitters.length; page += div)
 				embed.addField(`Tabla ${Math.ceil(page / div) + 1}`, twitters.slice(page, page + div).join('\n'), true);
@@ -112,9 +112,9 @@ module.exports = {
 
 				const embed = new Discord.MessageEmbed()
 					.setColor(target.color)
-					.setAuthor(embedprops.epigraph !== undefined ? embedprops.epigraph : target.author.name, message.channel.guild.iconURL({ dynamic: false, size: 256 }))
-					.setTitle(embedprops.title !== undefined ? embedprops.title : target.title)
-					.setFooter(embedprops.footer !== undefined ? embedprops.footer : (target.footer ? target.footer.text : ''));
+					.setTitle(embedprops.title ?? target.title)
+					.setAuthor({ name: embedprops.epigraph ?? target.author.name, iconURL: message.channel.guild.iconURL({ dynamic: false, size: 256 }) })
+					.setFooter({ text: embedprops.footer !== undefined ? embedprops.footer : (target.footer ? target.footer.text : '') });
 				
 				if(edit === 'add')
 					twitters = [...twitters, ...ntw];

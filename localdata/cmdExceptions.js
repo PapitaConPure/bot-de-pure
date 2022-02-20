@@ -93,10 +93,10 @@ module.exports = {
     createEmbed(exception, { cmdString = '' }) {
         return new MessageEmbed()
             .setColor('#f01010')
-            .setAuthor('Un momento...')
+            .setAuthor({ name: 'Un momento...' })
             .setTitle(`${exception.title}`)
             .addField(cmdString, `${exception.desc}`)
             .setThumbnail('https://i.imgur.com/vZaDu1o.jpg')
-            .setFooter('¿Dudas? ¿Sugerencias? Contacta con Papita con Puré#6932');
+            .setFooter({ text: '¿Dudas? ¿Sugerencias? Contacta con Papita con Puré#6932' });
     }
 }

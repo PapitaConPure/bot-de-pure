@@ -81,7 +81,7 @@ module.exports = {
 
 		const embed = new Discord.MessageEmbed()
 			.setColor('#608bf3')
-			.setAuthor(message.author.tag, message.author.avatarURL({ dynamic: true, size: 256 }))
+			.setAuthor({ name: message.author.tag, iconURL: message.author.avatarURL({ dynamic: true, size: 256 }) })
 			.setTitle(title)
 			.addField('Mensaje', args.join(' '))
 			.addField('Respuestas',

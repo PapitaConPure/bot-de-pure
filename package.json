@@ -1,7 +1,7 @@
 {
   "name": "bot-de-pure",
   "version": "1.0.0",
-  "description": "",
+  "description": "Bot de puré es un bot de entretenimiento, búsqueda de imágenes y utilidades generales varias. Utiliza comandos tradicionales con adiciones inspiradas en terminales como <code>--flags</code>.<br>\r Como personaje, es una robot \"mujer\". Es torpe y agresiva en algunos casos, pero parece tener espíritu.",
   "engines": {
     "node": "16.x"
   },
@@ -29,7 +29,7 @@
     "chalk": "^4.1.1",
     "discord-api-types": "^0.22.0",
     "discord-rpc": "^4.0.1",
-    "discord.js": "^13.1.0",
+    "discord.js": "^13.6.0",
     "eslint": "^6.8.0",
     "github-api": "^3.4.0",
     "mongodb": "^3.6.6",

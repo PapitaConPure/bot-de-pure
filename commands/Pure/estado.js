@@ -41,9 +41,9 @@ module.exports = {
         }
         const embed = new MessageEmbed()
             .setColor('#608bf3')
-            .setAuthor('Estado del Bot', request.client.user.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
+            .setAuthor({ name: 'Estado del Bot', iconURL: request.client.user.avatarURL({ format: 'png', dynamic: true, size: 1024 }) })
             .setThumbnail('https://i.imgur.com/HxTxjdL.png')
-            .setFooter(`Ofreciendo un total de ${cnt.cmds} comandos en ${cnt.guilds} servidores`)
+            .setFooter({ text: `Ofreciendo un total de ${cnt.cmds} comandos en ${cnt.guilds} servidores` })
             .addField('Creador', `Papita con Puré\n[423129757954211880]`, true)
             .addField('Host', (host === 'https://localhost/')?'https://heroku.com/':'localhost', true)
             .addField('Versión', `#️⃣ ${version.number}\n📜 ${version.name}`, true)

@@ -62,7 +62,7 @@ module.exports = {
 		const total = dices.map(dice => dice.t).reduce((a,b) => a + b);
 		const embed = new MessageEmbed()
 		.setColor('#0909a0')
-		.setAuthor(`${message.author.username} tiró los dados...`, message.author.avatarURL({ format: 'png', dynamic: true, size: 512 }))
+		.setAuthor({ name: `${message.author.username} tiró los dados...`, iconURL: message.author.avatarURL({ format: 'png', dynamic: true, size: 512 }) })
 		.addField('Salió:', dices.map(dice => `${dice.d} x :game_die:(${dice.f}) -> [${dice.r.join(',')}] = **${dice.t}**`).join('\n**+** ') + ((dices.length > 1)?`\n**= ${total}**`:''))
 		
 		message.channel.send({ embeds: [embed] })

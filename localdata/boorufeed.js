@@ -151,14 +151,14 @@ module.exports = {
                     const feedMessage = { components: [row] };
                     const feedEmbed = new MessageEmbed()
                         .setColor('#608bf3')
-                        .setAuthor('Desde Gelbooru', feed.cornerIcon ? feed.cornerIcon : 'https://i.imgur.com/outZ5Hm.png');
+                        .setAuthor({ name: 'Desde Gelbooru', iconURL: feed.cornerIcon ?? 'https://i.imgur.com/outZ5Hm.png' });
                     
                     if(maxTags > 0)
                         feedEmbed.addField(`Tags (${Math.min(image.tags.length, maxTags)}/${image.tags.length})`, `*${image.tags.slice(0, maxTags).join(', ').replace(/\\*\*/g,'\\*').replace(/\\*_/g,'\\_')}*`);
                     if(feed.title)
                         feedEmbed.setTitle(feed.title);
                     if(feed.footer)
-                        feedEmbed.setFooter(feed.footer);
+                        feedEmbed.setFooter({ text: feed.footer });
                     
                     if(image.fileUrl.match(/\.(mp4|webm|webp)/)) {
                         feedEmbed.addField('Video', `Míralo en su respectivo <:gelbooru:919398540172750878> **Post**\n[Enlace directo](${image.fileUrl})`);

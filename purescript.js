@@ -59,11 +59,11 @@ const executeTuber = async (request, tuber, { args, isSlash }) => {
 				['mayus']: ([text]) => text.toUpperCase(),
 				//Embeds
 				/**@param {[MessageEmbed, String, String]} param0*/
-				['marcoEstablecerAutor']: ([embed, author, iconUrl]) => embed.setAuthor(author, iconUrl),
+				['marcoEstablecerAutor']: ([embed, author, iconUrl]) => embed.setAuthor({ name: author, iconURL: iconUrl }),
 				/**@param {[MessageEmbed, String]} param0*/
 				['marcoEstablecerEncabezado']: ([embed, title]) => embed.setTitle(title),
 				/**@param {[MessageEmbed, String, String]} param0*/
-				['marcoEstablecerPie']: ([embed, footer]) => embed.setFooter(footer),
+				['marcoEstablecerPie']: ([embed, footer]) => embed.setFooter({ text: footer }),
 				/**@param {[MessageEmbed, String, String]} param0*/
 				['marcoEstablecerMiniatura']: ([embed, image]) => embed.setThumbnail(image),
 				/**@param {[MessageEmbed, String, String]} param0*/

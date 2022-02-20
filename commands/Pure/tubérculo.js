@@ -146,7 +146,7 @@ module.exports = {
 				embeds: [
 					new MessageEmbed()
 						.setColor('LUMINOUS_VIVID_PINK')
-						.setAuthor(request.guild.name, request.guild.iconURL())
+						.setAuthor({ name: request.guild.name, iconURL: request.guild.iconURL() })
 						.setTitle('Arsenal de Tubérculos del Servidor')
 						.addField(
 							`🥔)▬▬▬\\~•\\~▬▬▬\\~•\\~▬▬{ ${items.length ? `1 / ${lastPage + 1}` : '- - -'} }▬▬\\~•\\~▬▬▬\\~•\\~▬▬▬(🥔`, 
@@ -212,7 +212,7 @@ module.exports = {
 					let files = [];
 					const embed = new MessageEmbed()
 					.setColor('DARK_VIVID_PINK')
-					.setAuthor(request.guild.name, request.guild.iconURL())
+					.setAuthor({ name: request.guild.name, iconURL: request.guild.iconURL() })
 					.addField('Visor de Tubérculos', [
 						`**TuberID** ${id}`,
 						`**Autor** ${(request.guild.members.cache.get(item.author) ?? request.guild.me).user.username}`,
@@ -313,7 +313,7 @@ module.exports = {
 			embeds: [
 				new MessageEmbed()
 					.setColor(oembed.color)
-					.setAuthor(oembed.author.name, oembed.author.url)
+					.setAuthor({ name: oembed.author.name, iconURL: oembed.author.url })
 					.setTitle(oembed.title)
 					.addField(`🥔)▬▬\\~•\\~▬▬▬\\~•\\~▬▬{ ${page + 1} / ${lastPage + 1} }▬▬\\~•\\~▬▬▬\\~•\\~▬▬(🥔`,
 						items.length
@@ -351,7 +351,7 @@ module.exports = {
 				embeds: [
 					new MessageEmbed()
 						.setColor(oembed.color)
-						.setAuthor(oembed.author.name, oembed.author.url)
+						.setAuthor({ name: oembed.author.name, iconURL: oembed.author.url })
 						.setTitle(oembed.title)
 						.addField(`🥔)▬▬\\~•\\~▬▬▬\\~•\\~▬▬{ 1 / ${lastPage + 1} }▬▬\\~•\\~▬▬▬\\~•\\~▬▬(🥔`,
 							items.length
@@ -395,7 +395,7 @@ module.exports = {
 				embeds: [
 					new MessageEmbed()
 						.setColor(oembed.color)
-						.setAuthor(oembed.author.name, oembed.author.url)
+						.setAuthor({ name: oembed.author.name, iconURL: oembed.author.url })
 						.setTitle(oembed.title)
 						.addField(`🥔)▬▬\\~•\\~▬▬▬\\~•\\~▬▬{ 1 / ${lastPage + 1} }▬▬\\~•\\~▬▬▬\\~•\\~▬▬(🥔`,
 							items.length
@@ -434,7 +434,7 @@ module.exports = {
 				embeds: [
 					new MessageEmbed()
 						.setColor(oembed.color)
-						.setAuthor(oembed.author.name, oembed.author.url)
+						.setAuthor({ name: oembed.author.name, iconURL: oembed.author.url })
 						.setTitle(oembed.title)
 						.addField(`🥔)▬▬\\~•\\~▬▬▬\\~•\\~▬▬{ 1 / ${lastPage + 1} }▬▬\\~•\\~▬▬▬\\~•\\~▬▬(🥔`,
 							items.length

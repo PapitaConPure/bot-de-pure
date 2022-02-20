@@ -39,8 +39,8 @@ module.exports = {
 		module.exports[request.channel.id] = { memoUser: request.author ?? request.user };
 		const wizard = new MessageEmbed()
 			.setColor('AQUA')
-			.setAuthor(wiztitle, request.client.user.avatarURL())
-			.setFooter('1/? • Comenzar')
+			.setAuthor({ name: wiztitle, iconURL: request.client.user.avatarURL() })
+			.setFooter({ text: '1/? • Comenzar' })
 			.addField('Bienvenido', 'Si es la primera vez que configuras un Feed de imágenes con Bot de Puré, ¡no te preocupes! Simplemente sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras');
 		return await request.reply({
 			embeds: [wizard],
@@ -60,8 +60,8 @@ module.exports = {
 		if(unColl && !unColl.ended) unColl.stop();
 		const wizard = new MessageEmbed()
 			.setColor('NAVY')
-			.setAuthor(wiztitle, interaction.client.user.avatarURL())
-			.setFooter('2/? • Seleccionar operación')
+			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
+			.setFooter({ text: '2/? • Seleccionar operación' })
 			.addField('Selecciona una operación', '¿Qué deseas hacer ahora mismo?');
 			
 		const guildQuery = { guildId: interaction.guild.id };
@@ -106,8 +106,8 @@ module.exports = {
 		module.exports[interaction.channel.id].memoChannel = fetchedChannel;
 		const wizard = new MessageEmbed()
 			.setColor('BLURPLE')
-			.setAuthor(wiztitle, interaction.client.user.avatarURL())
-			.setFooter('4/5 • Seleccionar elemento a personalizar')
+			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
+			.setFooter({ text: '4/5 • Seleccionar elemento a personalizar' })
 			.addField('Destino', `**${fetchedChannel.name}** (canal ${fetchedChannel.nsfw ? 'NSFW' : 'SFW'})`)
 			.addField('Selecciona un elemento a personalizar', 'Usa el menú desplegable para decidir qué personalizar');
 		
@@ -157,8 +157,8 @@ module.exports = {
 		const fetchedChannel = module.exports[interaction.channel.id].memoChannel;
 		const wizard = new MessageEmbed()
 			.setColor('GREEN')
-			.setAuthor(wiztitle, interaction.client.user.avatarURL())
-			.setFooter('5/5 • Personalizar elemento')
+			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
+			.setFooter({ text: '5/5 • Personalizar elemento' })
 			.addField('Destino', `**${fetchedChannel.name}** (canal ${fetchedChannel.nsfw ? 'NSFW' : 'SFW'})`);
 		
 		const row = new MessageActionRow();
@@ -240,7 +240,7 @@ module.exports = {
 						//Crear embed de prueba para asegurarse de que el enlace sea una imagen válida
 						const testEmbed = new MessageEmbed()
 							.setColor('WHITE')
-							.setAuthor('Verificando enlace...', ccontent);
+							.setAuthor({ name: 'Verificando enlace...', iconURL: ccontent });
 						await interaction.channel.send({ embeds: [testEmbed] }).then(sent => {
 							console.log(sent.embeds[0].author);
 							if(sent.embeds[0].author.iconURL) {
@@ -264,8 +264,8 @@ module.exports = {
 
 			const concludedEmbed = new MessageEmbed()
 				.setColor('ORANGE')
-				.setAuthor(wiztitle, interaction.client.user.avatarURL())
-				.setFooter('Operación finalizada')
+				.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
+				.setFooter({ text: 'Operación finalizada' })
 				.addField('Feed personalizado', `Se ha personalizado un elemento del Feed con las tags _"${safeTags(gcfg.feeds[fetchedChannel.id].tags)}"_ para el canal **${fetchedChannel.name}**`);
 			await interaction.message.edit({
 				embeds: [concludedEmbed],
@@ -295,8 +295,8 @@ module.exports = {
 
 		const concludedEmbed = new MessageEmbed()
 			.setColor('DARK_GREEN')
-			.setAuthor(wiztitle, interaction.client.user.avatarURL())
-			.setFooter('Operación finalizada')
+			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
+			.setFooter({ text: 'Operación finalizada' })
 			.addField('Feed personalizado', `Se ha eliminado el título personalizado del Feed con las tags _"${safeTags(gcfg.feeds[fetchedChannel.id].tags)}"_ para el canal **${fetchedChannel.name}**`);
 		return await interaction.update({
 			embeds: [concludedEmbed],
@@ -323,8 +323,8 @@ module.exports = {
 
 		const concludedEmbed = new MessageEmbed()
 			.setColor('DARK_GREEN')
-			.setAuthor(wiztitle, interaction.client.user.avatarURL())
-			.setFooter('Operación finalizada')
+			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
+			.setFooter({ text: 'Operación finalizada' })
 			.addField('Feed personalizado', `Se ha eliminado el texto de pie personalizado del Feed con las tags _"${safeTags(gcfg.feeds[fetchedChannel.id].tags)}"_ para el canal **${fetchedChannel.name}**`);
 		return await interaction.update({
 			embeds: [concludedEmbed],
@@ -351,8 +351,8 @@ module.exports = {
 
 		const concludedEmbed = new MessageEmbed()
 			.setColor('DARK_GREEN')
-			.setAuthor(wiztitle, interaction.client.user.avatarURL())
-			.setFooter('Operación finalizada')
+			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
+			.setFooter({ text: 'Operación finalizada' })
 			.addField('Feed personalizado', `Se ha eliminado el ícono de esquina personalizado del Feed con las tags _"${safeTags(gcfg.feeds[fetchedChannel.id].tags)}"_ para el canal **${fetchedChannel.name}**`);
 		return await interaction.update({
 			embeds: [concludedEmbed],
@@ -373,8 +373,8 @@ module.exports = {
 		const tags = gcfg.feeds[chid].tags;
 		const wizard = new MessageEmbed()
 			.setColor('RED')
-			.setAuthor(wiztitle, interaction.client.user.avatarURL())
-			.setFooter('4/4 • Confirmar')
+			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
+			.setFooter({ text: '4/4 • Confirmar' })
 			.addField('Confirmar eliminación de Feed', `Estás por borrar el Feed _"${safeTags(tags)}"_ ubicado en el canal **<#${chid}>**. ¿Estás seguro?`);
 		return await interaction.update({
 			embeds: [wizard],
@@ -401,8 +401,8 @@ module.exports = {
 		const fetchedChannel = module.exports[interaction.channel.id].memoChannel;
 		const wizard = new MessageEmbed()
 			.setColor('BLURPLE')
-			.setAuthor(wiztitle, interaction.client.user.avatarURL())
-			.setFooter('4/4 • Asignar tags')
+			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
+			.setFooter({ text: '4/4 • Asignar tags' })
 			.addField('Destino', `**${fetchedChannel.name}** (canal ${fetchedChannel.nsfw ? 'NSFW' : 'SFW'})`)
 			.addField('Describe las tags del Feed', 'Entra a [Gelbooru](https://gelbooru.com) y realiza una búsqueda con tags que te den las imágenes deseadas para el Feed, separadas por espacios. Una vez lo consigas, simplemente copia las tags y envíalas como mensaje.\n_Es necesario que las tags estén bien escritas_')
 			.addField('Control de contenidos', '**IMPORTANTE:** Si quieres resultados SFW, utiliza la tag meta `rating:safe`; si quieres resultados NSFW, añade la tag `rating:explicit`; si quieres una combinación de ambos, no ingreses ninguna de estas')
@@ -435,8 +435,8 @@ module.exports = {
 
 			const concludedEmbed = new MessageEmbed()
 				.setColor('DARK_VIVID_PINK')
-				.setAuthor(wiztitle, interaction.client.user.avatarURL())
-				.setFooter('Operación finalizada')
+				.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
+				.setFooter({ text: 'Operación finalizada' })
 				.addField('Feed configurado', `Se ha configurado un Feed con las tags _"${safeTags(ccontent)}"_ para el canal **${fetchedChannel.name}**`)
 				.addField('Control del Feed', 'Puedes modificar, personalizar o eliminar este Feed en cualquier momento siguiendo el Asistente de `p!feed` una vez más');
 			await interaction.message.edit({
@@ -452,8 +452,8 @@ module.exports = {
 	async ['deleteFeed'](interaction) {
 		const wizard = new MessageEmbed()
 			.setColor('DARK_RED')
-			.setAuthor(wiztitle, interaction.client.user.avatarURL())
-			.setFooter('Operación finalizada')
+			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
+			.setFooter({ text: 'Operación finalizada' })
 			.addField('Feed eliminado', 'Se ha eliminado el Feed acordado. Si te arrepientes, tendrás que crearlo otra vez');
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 		delete gcfg.feeds[module.exports[interaction.channel.id].memoChannel.id];
@@ -492,8 +492,8 @@ module.exports = {
 		});
 		const wizard = new MessageEmbed()
 			.setColor('GOLD')
-			.setAuthor(wiztitle, interaction.client.user.avatarURL())
-			.setFooter('3/4 • Elegir canal')
+			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
+			.setFooter({ text: '3/4 • Elegir canal' })
 			.addField('Selecciona un canal', 'Facilita, por medio de un mensaje, una porción del nombre, la mención o la ID del canal en el que quieres crear un nuevo Feed. Pasarás al siguiente paso automáticamente al decirme un canal válido');
 		return await interaction.update({
 			embeds: [wizard],
@@ -513,8 +513,8 @@ module.exports = {
 		if(unColl && !unColl.ended) unColl.stop();
 		const wizard = new MessageEmbed()
 			.setColor('GREYPLE')
-			.setAuthor(wiztitle, interaction.client.user.avatarURL())
-			.setFooter('3/4 • Seleccionar Feed')
+			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
+			.setFooter({ text: '3/4 • Seleccionar Feed' })
 			.addField('Selección de Feed', 'Los Feeds que configuraste anteriormente están categorizados por canal y tags. Encuentra el que quieras modificar en esta lista y selecciónalo');
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 		const feeds = Object.entries(gcfg.feeds).map(([chid, feed]) => {
@@ -557,8 +557,8 @@ module.exports = {
 		if(unColl && !unColl.ended) unColl.stop();
 		const wizard = new MessageEmbed()
 			.setColor('GREYPLE')
-			.setAuthor(wiztitle, interaction.client.user.avatarURL())
-			.setFooter('3/5 • Seleccionar Feed')
+			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
+			.setFooter({ text: '3/5 • Seleccionar Feed' })
 			.addField('Selección de Feed', 'Los Feeds que configuraste anteriormente están categorizados por canal y tags. Encuentra el que quieras personalizar en esta lista y selecciónalo');
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 		const feeds = Object.entries(gcfg.feeds).map(([chid, feed]) => {
@@ -599,8 +599,8 @@ module.exports = {
 	async ['deleteOne'](interaction) {
 		const wizard = new MessageEmbed()
 			.setColor('GREYPLE')
-			.setAuthor(wiztitle, interaction.client.user.avatarURL())
-			.setFooter('3/4 • Seleccionar Feed')
+			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
+			.setFooter({ text: '3/4 • Seleccionar Feed' })
 			.addField('Selección de Feed', 'Los Feeds que configuraste anteriormente están categorizados por canal y tags. Encuentra el que quieras eliminar en esta lista y selecciónalo');
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 		const feeds = Object.entries(gcfg.feeds).map(([chid, feed]) => ({
@@ -633,8 +633,8 @@ module.exports = {
 		const unColl = module.exports[interaction.channel.id].memoCollector;
 		if(unColl && !unColl.ended) unColl.stop();
 		const cancelEmbed = new MessageEmbed()
-			.setAuthor(wiztitle, interaction.client.user.avatarURL())
-			.setFooter('Operación abortada')
+			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
+			.setFooter({ text: 'Operación abortada' })
 			.addField('Asistente cancelado', 'Se canceló la configuración de Feed');
 		return await interaction.update({
 			embeds: [cancelEmbed],

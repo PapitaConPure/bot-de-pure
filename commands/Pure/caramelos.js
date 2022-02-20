@@ -40,7 +40,7 @@ module.exports = {
 	 */
 	async execute(request, _) {
 		return await request.reply({
-			embeds: [ embed.setAuthor('Punto de Reparto desplegado', (request.author ?? request.user).avatarURL()) ],
+			embeds: [ embed.setAuthor({ name: 'Punto de Reparto desplegado', iconURL: (request.author ?? request.user).avatarURL() }) ],
 			components: [row],
 		});
     },

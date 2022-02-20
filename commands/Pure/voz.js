@@ -23,8 +23,8 @@ const wizEmbed = (iconUrl, stepName, stepColor) => {
 	//};
 	return new MessageEmbed()
 		.setColor(stepColor)
-		.setAuthor('Asistente de Configuración de Sistema PuréVoice', iconUrl)
-		.setFooter(stepName);
+		.setAuthor({ name: 'Asistente de Configuración de Sistema PuréVoice', iconURL: iconUrl })
+		.setFooter({ text: stepName });
 };
 
 const options = new CommandOptionsManager()

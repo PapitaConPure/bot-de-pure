@@ -122,8 +122,8 @@ module.exports = {
 			
 			.setImage(servidor.iconURL({ dynamic: true, size: 256 }))
 			.setThumbnail(ow.user.avatarURL({ dynamic: true, size: 256 }))
-			.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL({ dynamic: true, size: 256 }))
-			.setFooter(`Estas estadísticas toman información concreta.`);
+			.setAuthor({ name: `Comando invocado por ${message.author.username}`, iconURL: message.author.avatarURL({ dynamic: true, size: 256 }) })
+			.setFooter({ text: `Estas estadísticas toman información concreta.` });
 		
 		const dbstring = new Date(stats.since).toLocaleString('es-ES');
 
@@ -134,8 +134,8 @@ module.exports = {
 			.addField(`Usuarios más activos (canal: ${sch.name})`, peotop)
 			.addField('Canales más activos', chtop)
 
-			.setAuthor(`Comando invocado por ${message.author.username}`, message.author.avatarURL())
-			.setFooter(`Estas estadísticas toman información desde el ${dbstring.slice(0, dbstring.indexOf(' '))}`);
+			.setAuthor({ name: `Comando invocado por ${message.author.username}`, iconURL: message.author.avatarURL() })
+			.setFooter({ text: `Estas estadísticas toman información desde el ${dbstring.slice(0, dbstring.indexOf(' '))}` });
 
 		const tiempoguild = Date.now() - servidor.createdAt;
 		const serverms = Math.floor(tiempoguild) % 100;

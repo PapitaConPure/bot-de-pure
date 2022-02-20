@@ -6,7 +6,91 @@ const { p_pure } = require('../../localdata/prefixget');
 const { Puretable, AUser, pureTableImage } = require('../../localdata/models/puretable.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
-const maxexp = 30;
+const shapes = {
+	x: [
+		'#     #',
+		' #   # ',
+		'  # #  ',
+		'   #   ',
+		'  # #  ',
+		' #   # ',
+		'#     #',
+	],
+	square: [
+		'       ',
+		' ##### ',
+		' #   # ',
+		' #   # ',
+		' #   # ',
+		' ##### ',
+		'       ',
+	],
+	circle: [
+		'  ###  ',
+		' #   # ',
+		'#     #',
+		'#     #',
+		'#     #',
+		' #   # ',
+		'  ###  ',
+	],
+	diamond: [
+		'   #   ',
+		'  # #  ',
+		' #   # ',
+		'#     #',
+		' #   # ',
+		'  # #  ',
+		'   #   ',
+	],
+	tetris: [
+		'##     ',
+		'#   ## ',
+		'#  ##  ',
+		'      #',
+		'  #   #',
+		' ###  #',
+		'      #',
+	],
+	p: [
+		'###### ',
+		' #    #',
+		' #    #',
+		' # # # ',
+		' #     ',
+		' #     ',
+		'###    ',
+	],
+	exclamation: [
+		'   ##   ',
+		'  ####  ',
+		'  ####  ',
+		'   ##   ',
+		'        ',
+		'   ##   ',
+		'   ##   ',
+	],
+	a: [
+		'   #   ',
+		'  # #  ',
+		'  # #  ',
+		' #   # ',
+		' ##### ',
+		'#     #',
+		'#     #',
+	],
+	ultimate: [
+		' ##### ',
+		'## # ##',
+		'# ### #',
+		'### ###',
+		'# ### #',
+		'## # ##',
+		' ##### ',
+	],
+};
+const maxExp = 30;
+
 const options = new CommandOptionsManager()
 	.addParam('posición', 	   'NUMBER', 'para especificar una celda a modificar', { poly: ['x','y'], optional: true })
 	.addParam('emote', 		   'EMOTE',  'para especificar un emote a agregar',    { optional: true })
@@ -42,6 +126,35 @@ module.exports = {
 	 */
 	async execute(request, args, isSlash = false) {
 		const loadEmotes = global.loademotes;
+
+		//Revisar perfil
+		if((isSlash ? args.data : args)[0] === 'p') {
+			args.shift();
+			const search = (args.length) ? args.join(' ') : undefined;
+			const aid = (search) ? fetchUserID(search, request) : request.author.id;
+			const auser = await AUser.findOne({ userId: aid });
+			if(!aid) {
+				request.channel.send({ content: `:warning: Usuario **${search}** no encontrado` });
+				return;
+			}
+			const user = request.client.users.cache.get(aid);
+			const embed = new MessageEmbed()
+				.setColor('#bd0924')
+				.setAuthor({ name: user.username, iconURL: user.avatarURL({ format: 'png', dynamic: true, size: 512 }) });
+			if(auser)
+				embed.setTitle('Perfil anárquico')
+					.addField('Inventario', `↔️ x ${auser.skills.h}\n↕ x ${auser.skills.v}`, true)
+					.addField('Rango', `Nivel ${Math.floor(auser.exp / 30) + 1} (exp: ${auser.exp % maxExp})`, true);
+			else
+				embed.setTitle('Perfil inexistente')
+					.addField(
+						'Este perfil anárquico no existe todavía', `Usa \`${p_pure(request.guildId).raw}anarquia <posición(x,y)> <emote>\` para colocar un emote en la tabla de puré y crearte un perfil anárquico automáticamente\n` +
+						`Si tienes más dudas, usa \`${p_pure(request.guildId).raw}ayuda anarquia\``
+					);
+			await request.channel.send({ embeds: [embed] });
+			return;
+		}
+
 		//Ver tabla
 		if(!(isSlash ? args.data : args).length) {
 			const canvas = createCanvas(864, 996);
@@ -87,40 +200,12 @@ module.exports = {
 						ctx.fillStyle = '#ffffff';
 						ctx.globalAlpha = 1;
 					};*/
-					ctx.drawImage(loadEmotes[item], tableX + x * emoteSize, tableY + y * emoteSize, emoteSize, emoteSize)
+					ctx.drawImage(loadEmotes[item], tableX + x * emoteSize, tableY + y * emoteSize, emoteSize, emoteSize);
 				});
 			});
 			
 			const imagen = new MessageAttachment(canvas.toBuffer(), 'anarquia.png');
 			await request.reply({ files: [imagen] });
-			return;
-		}
-
-		//Revisar perfil
-		if((isSlash ? args.data : args)[0] === 'p') {
-			args.shift();
-			const search = (args.length) ? args.join(' ') : undefined;
-			const aid = (search) ? fetchUserID(search, request) : request.author.id;
-			const auser = await AUser.findOne({ userId: aid });
-			if(!aid) {
-				request.channel.send({ content: `:warning: Usuario **${search}** no encontrado` });
-				return;
-			}
-			const user = request.client.users.cache.get(aid);
-			const embed = new MessageEmbed()
-				.setColor('#bd0924')
-				.setAuthor(user.username, user.avatarURL({ format: 'png', dynamic: true, size: 512 }));
-			if(auser)
-				embed.setTitle('Perfil anárquico')
-					.addField('Inventario', `↔️ x ${auser.skills.h}\n↕ x ${auser.skills.v}`, true)
-					.addField('Rango', `Nivel ${Math.floor(auser.exp / 30) + 1} (exp: ${auser.exp % maxexp})`, true);
-			else
-				embed.setTitle('Perfil inexistente')
-					.addField(
-						'Este perfil anárquico no existe todavía', `Usa \`${p_pure(request.guildId).raw}anarquia <posición(x,y)> <emote>\` para colocar un emote en la tabla de puré y crearte un perfil anárquico automáticamente\n` +
-						`Si tienes más dudas, usa \`${p_pure(request.guildId).raw}ayuda anarquia\``
-					);
-			await request.channel.send({ embeds: [embed] });
 			return;
 		}
 		
@@ -197,20 +282,33 @@ module.exports = {
 		await Puretable.updateOne({}, { cells: cells });
 
 		//Sistema de nivel de jugador y adquisición de habilidades
-		const userlevel = Math.floor(auser.exp / maxexp) + 1;
-		const r = Math.random();
-		if(r < userlevel / 100) {
+		const userLevel = Math.floor(auser.exp / maxExp) + 1;
+		const probs = [
+			{ base: 1.2, emote: '❌', to: 'x', name: 'Habilidad Cruzada'	   },
+			{ base: 1.0, emote: '↔',  to: 'h', name: 'Habilidad Horizontal' },
+			{ base: 1.0, emote: '↕',  to: 'v', name: 'Habilidad Vertical'   },
+			{ base: 0.9, emote: '🟥', to: 'q', name: 'Habilidad Cuadradá' 	},
+			{ base: 0.8, emote: '🔵', to: 'o', name: 'Habilidad Circular' 	},
+			{ base: 0.7, emote: '💎', to: 'd', name: 'Habilidad Diamante' 	},
+			{ base: 0.6, emote: '🕹', to: 't', name: 'Habilidad Tetrápeda' 	 },
+			{ base: 0.5, emote: '🥔', to: 'p', name: 'Habilidad Tubércula' 	 },
+			{ base: 0.5, emote: '❗',  to: 'e', name: 'Habilidad Exclamativa' },
+			{ base: 0.5, emote: '🅰', to: 'a', name: 'Habilidad Anárquica',	 },
+			{ base: 0.1, emote: '👑', to: 'u', name: 'Habilidad Definitiva', },
+		];
+		/*const r = Math.random();
+		if(r < userLevel / 100) {
 			if(Math.random() < 0.5) {
 				auser.skills.h++;
 				if(isSlash) { replyquery.push('🌟 ¡Recibiste **1** ↔️ *Habilidad Horizontal*!'); ephemeral = false; }
-				else await request.react('↔️');
+				else await request.react('');
 			} else {
 				auser.skills.v++;
 				if(isSlash) { replyquery.push('🌟 ¡Recibiste **1** ↕️ *Habilidad Vertical*!'); ephemeral = false; }
-				else await request.react('↕️');
+				else await request.react('');
 			}
 			auser.markModified('skills');
-		}
+		}*/
 		auser.exp++;
 		await auser.save();
 
@@ -224,9 +322,9 @@ module.exports = {
 			);
 		else await request.react(offlimits ? '☑️' : '✅');
 
-		if((auser.exp % maxexp) == 0) {
-			if(isSlash) { replyquery.push(`¡**${request.user.username}** subió a nivel **${userlevel + 1}**!`); ephemeral = false; }
-			else await request.reply({ content: `¡**${request.author.username}** subió a nivel **${userlevel + 1}**!` });
+		if((auser.exp % maxExp) == 0) {
+			if(isSlash) { replyquery.push(`¡**${request.user.username}** subió a nivel **${userLevel + 1}**!`); ephemeral = false; }
+			else await request.reply({ content: `¡**${request.author.username}** subió a nivel **${userLevel + 1}**!` });
 		}
 
 		if(isSlash)

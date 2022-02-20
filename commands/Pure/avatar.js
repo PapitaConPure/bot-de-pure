@@ -16,7 +16,7 @@ const avatarEmbeds = (users, guildId) => {
                 .setImage(user.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
             );
         });
-        embeds[embeds.length - 1].setFooter(`"${p_pure(guildId).raw}ayuda avatar" para más información`);
+        embeds[embeds.length - 1].setFooter({ text: `"${p_pure(guildId).raw}ayuda avatar" para más información` });
     }
     return embeds;
 }

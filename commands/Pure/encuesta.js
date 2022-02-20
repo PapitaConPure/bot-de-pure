@@ -109,8 +109,8 @@ module.exports = {
 
 		const embed = new Discord.MessageEmbed()
 			.setColor('#1da1f2')
-			.setAuthor('Encuesta » Reacciona para votar', message.guild.iconURL({ dynamic: false, size: 256 }))
-			.setFooter(`Tiempo para votar: ${time.h}h, ${time.m}m, ${time.s}s`)
+			.setAuthor({ name: 'Encuesta » Reacciona para votar', iconURL: message.guild.iconURL({ dynamic: false, size: 256 }) })
+			.setFooter({ text: `Tiempo para votar: ${time.h}h, ${time.m}m, ${time.s}s` })
 			.addField(question ? question : 'Opciones', options.map(o => `${o.emote} ${o.text}`).join('\n'));
 		
 		const sent = await channel.send({ embeds: [embed] });
@@ -130,7 +130,7 @@ module.exports = {
 			sent.reactions.removeAll();
 			const embed = new Discord.MessageEmbed()
 				.setColor('#1da1f2')
-				.setAuthor('Encuesta finalizada', message.guild.iconURL({ dynamic: false, size: 256 }))
+				.setAuthor({ name: 'Encuesta finalizada', iconURL: message.guild.iconURL({ dynamic: false, size: 256 }) })
 				.addField(question ? question : 'Resultados de la votación', options
 					.sort((a,b) => (counts[b.emote.id] || 0) - (counts[a.emote.id] || 0))
 					.map(o => `${o.emote} **x ${(counts[o.emote.id] || 1) - 1}** ${o.text}`)

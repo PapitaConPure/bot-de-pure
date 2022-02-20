@@ -6,7 +6,7 @@ const embed = new MessageEmbed()
     .setTitle('Invitación')
     .setColor('BLURPLE')
     .setImage(tenshi['👉👈'])
-    .setFooter('Para invitar al bot a algún servidor, __Papita con Puré__ (ID:423129757954211880) debe formar parte del mismo')
+    .setFooter({ text: 'Para invitar al bot a algún servidor, __Papita con Puré__ (ID:423129757954211880) debe formar parte del mismo' })
     .addField('¡Invítame a otro servidor!', `Clickea [aquí](${invitelink}) y selecciona el servidor al que quieres invitarme (solo __Papita con Puré__)\n`);
 
 module.exports = {

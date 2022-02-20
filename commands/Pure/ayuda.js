@@ -88,7 +88,7 @@ module.exports = {
                 };
                 const listExists = l => l && l[0] && l[0].length;
 
-                embed.setAuthor(title(name), aurl)
+                embed.setAuthor({ name: title(name), iconURL: aurl})
                     .addField('Nombre', `\`${name}\``, true)
                     .addField('Alias', listExists(aliases)
                         ? (aliases.map(i => `\`${i}\``).join(', '))
@@ -113,16 +113,16 @@ module.exports = {
             const listdisplay = list.length
                 ? list.map(item => `\`${item}\``).join(', ')
                 : 'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para buscar un cierto identificador)';
-            embed.setAuthor('Lista de comandos', aurl)
+            embed.setAuthor({ name: 'Lista de comandos', iconURL: aurl })
                 .addField('Comandos: ejemplos de uso', `\`${hcmd} -xmph --meme\`\n\`${pfr}avatar @Usuario\`\n\`${pfr}dados 5d6\``)
                 .addField(`Usa \`${hcmd} <comando>\` para más información sobre un comando`, listdisplay)
                 .addField('Emotes rápidos', `"Me gustan los emotes de **&perrito** y **&uwu**"`)
                 .addField(`Guía introductoria`, `Usa \`${hcmd} g-indice\` para ver la página de índice de la guía introductoria de Bot de Puré`);
         } else {
             if(!embed.author)
-                embed.setAuthor('Sin resultados', aurl)
+                embed.setAuthor({ name: 'Sin resultados', iconURL: aurl })
                     .addField('No se ha encontrado ningún comando con este nombre', `Utiliza \`${hcmd}\` para ver una lista de comandos disponibles y luego usa \`${pfr}comando <comando>\` para ver un comando en específico`);
-            embed.setFooter(`Usa "${hcmd} ${require('./g-indice.js').name}" para aprender más sobre comandos`);
+            embed.setFooter({ text: `Usa "${hcmd} ${require('./g-indice.js').name}" para aprender más sobre comandos` });
         }
         return await request.reply({ embeds: [embed] });
     },

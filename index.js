@@ -248,7 +248,7 @@ client.on('ready', async () => {
 
     await global.logch.send({ embeds: [new Discord.MessageEmbed()
         .setColor('DARK_VIVID_PINK')
-        .setAuthor('Mensaje de sistema')
+        .setAuthor({ name: 'Mensaje de sistema' })
         .setTitle('Bot conectado y funcionando')
         .addField('Host', global.bot_status.host, true)
         .addField('N. de versión', global.bot_status.version.number, true)
@@ -269,9 +269,13 @@ client.on('messageCreate', async message => {
     
     //#region Operaciones de proceso e ignorar mensajes privados
     const logembed = new Discord.MessageEmbed().addField(author.tag, content ? content.slice(0, 1023) : '*Mensaje vacío.*');
-    if(guild) logembed.setAuthor(`${guild.name} • ${channel.name} (Click para ver)`, author.avatarURL({ dynamic: true }), message.url);
+    if(guild) logembed.setAuthor({
+        name: `${guild.name} • ${channel.name} (Click para ver)`,
+        iconURL: author.avatarURL({ dynamic: true }),
+        url: message.url,
+    });
     else {
-        logembed.setAuthor('Mensaje privado', author.avatarURL({ dynamic: true }));
+        logembed.setAuthor({ name: 'Mensaje privado', iconURL: author.avatarURL({ dynamic: true }) });
         channel.send({ content: ':x: Uh... disculpá, no trabajo con mensajes directos.' });
     }
     if(message.attachments.size)
@@ -335,7 +339,7 @@ client.on('messageCreate', async message => {
                 console.error(error);
                 const errorembed = new Discord.MessageEmbed()
                     .setColor('#0000ff')
-                    .setAuthor(`${guild.name} • ${channel.name} (Click para ver)`, author.avatarURL({ dynamic: true }), message.url)
+                    .setAuthor({ name: `${guild.name} • ${channel.name} (Click para ver)`, iconURL: author.avatarURL({ dynamic: true }), url: message.url })
                     .addField('Ha ocurrido un error al ingresar un comando', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``)
                     .addField('Detalle', `"${message.content.slice(0, 699)}"\n[${ecmd}]`);
                 global.logch.send({
@@ -390,7 +394,7 @@ client.on('messageCreate', async message => {
         console.error(error);
         const errorembed = new Discord.MessageEmbed()
             .setColor('#0000ff')
-            .setAuthor(`${guild.name} • ${channel.name} (Click para ver)`, author.avatarURL({ dynamic: true }), message.url)
+            .setAuthor({ name: `${guild.name} • ${channel.name} (Click para ver)`, iconURL: author.avatarURL({ dynamic: true }), url: message.url })
             .addField('Ha ocurrido un error al ingresar un comando', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``)
             .addField('Detalle', `"${message.content.slice(0, 699)}"\n[${commandname} :: ${args}]`);
         global.logch.send({
@@ -435,7 +439,7 @@ client.on('interactionCreate', async interaction => {
             console.error(error);
             const errorembed = new Discord.MessageEmbed()
                 .setColor('#0000ff')
-                .setAuthor(`${guild.name} • ${channel.name}`, member.user.avatarURL({ dynamic: true }))
+                .setAuthor({ name: `${guild.name} • ${channel.name}`, iconURL: member.user.avatarURL({ dynamic: true }) })
                 .addField('Ha ocurrido un error al procesar un comando slash', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
             global.logch.send({
                 content: `<@${global.peopleid.papita}>`,
@@ -478,7 +482,7 @@ client.on('interactionCreate', async interaction => {
             console.error(error);
             const errorembed = new Discord.MessageEmbed()
                 .setColor('#0000ff')
-                .setAuthor(`${guild.name} • ${channel.name}`, member.user.avatarURL({ dynamic: true }))
+                .setAuthor({ name: `${guild.name} • ${channel.name}`, iconURL: member.user.avatarURL({ dynamic: true }) })
                 .addField('Ha ocurrido un error al procesar una acción de botón', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
             global.logch.send({
                 content: `<@${global.peopleid.papita}>`,
@@ -676,8 +680,8 @@ client.on('guildMemberAdd', member => {
         console.error(error);
         const errorembed = new Discord.MessageEmbed()
             .setColor('#0000ff')
-            .setAuthor(guild.name)
-            .setFooter(`gid: ${guild.id} | uid: ${user.id}`)
+            .setAuthor({ name: guild.name })
+            .setFooter({ text: `gid: ${guild.id} | uid: ${user.id}` })
             .addField('Ha ocurrido un error al dar la bienvenida', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
         global.logch.send({
             content: `<@${global.peopleid.papita}>`,
@@ -705,12 +709,12 @@ client.on('guildMemberRemove', member => {
         console.error(error);
         const errorembed = new Discord.MessageEmbed()
             .setColor('#0000ff')
-            .setAuthor(guild.name)
-            .setFooter(`gid: ${guild.id} | uid: ${user.id}`)
+            .setAuthor({ name: guild.name })
+            .setFooter({ text: `gid: ${guild.id} | uid: ${user.id}` })
             .addField('Ha ocurrido un error al dar la despedida', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
         global.logch.send({
             content: `<@${global.peopleid.papita}>`,
-            embeds: [errorembed]
+            embeds: [errorembed],
         });
     }
 });

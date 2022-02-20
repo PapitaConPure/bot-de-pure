@@ -23,16 +23,11 @@ module.exports = {
     flags: [
         'common'
     ],
+    experimental: true,
 	
-	async execute(message, args) {
+	async execute(request, _, isSlash = false) {
         if(!embed.author)
-            embed.setAuthor('Presentación', message.client.user.avatarURL({ format: 'png', dynamic: true, size: 1024 }));
-        message.channel.send({ embeds: [embed] });
+            embed.setAuthor({ name: 'Presentación', iconURL: request.client.user.avatarURL({ format: 'png', dynamic: true, size: 1024 }) });
+        return request.reply({ embeds: [embed] });
     },
-	
-	async interact(interaction, _) {
-        if(!embed.author)
-            embed.setAuthor('Presentación', interaction.client.user.avatarURL({ format: 'png', dynamic: true, size: 1024 }));
-        interaction.reply({ embeds: [embed] });
-    }
 };
