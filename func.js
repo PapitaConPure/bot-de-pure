@@ -914,6 +914,7 @@ module.exports = {
         } else
             return `${formatNumber(num / googol, { maximumFractionDigits: 4 })} Gúgol`;
     },
+    
     /**@param {Array<String>} arr*/
     regroupText: (arr) => arr.join(' ').replace(/([\n ]*,[\n ]*)+/g, ',').split(',').filter(a => a.length > 0),
     //#endregion
