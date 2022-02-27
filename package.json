@@ -28,7 +28,6 @@
     "canvas": "^2.8.0",
     "chalk": "^4.1.1",
     "discord-api-types": "^0.22.0",
-    "discord-rpc": "^4.0.1",
     "discord.js": "^13.6.0",
     "eslint": "^6.8.0",
     "github-api": "^3.4.0",
