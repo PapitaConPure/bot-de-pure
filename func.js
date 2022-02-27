@@ -1,6 +1,5 @@
 const Discord = require('discord.js'); //Discord.js
 const global = require('./localdata/config.json'); //Variables globales
-const presence = require('./localdata/presence.json'); //Datos de presencia
 const images = require('./localdata/images.json'); //Imágenes globales
 const { p_pure } = require('./localdata/prefixget'); //Imágenes globales
 const Canvas = require('canvas'); //Node Canvas
@@ -327,26 +326,6 @@ module.exports = {
             }
         });
     },*/
-
-    modifyAct: async function(clientowo, pasuwus) { //Cambio de estado constante; créditos a Imagine Breaker y Sassafras
-        //Actualización de actividad
-        try {
-            console.log(concol.orange.underline(`Iniciando cambio de presencia ${pasuwus}...`));
-            await clientowo.user.setActivity(
-                presence.status[module.exports.randRange(0, presence.status.length)],
-                { type: 'STREAMING', url: `https://www.youtube.com/watch?v=${presence.stream[module.exports.randRange(0, presence.stream.length)]}` }
-            );
-            console.log(chalk.greenBright.bold('Cambio de presencia finalizado.'));
-            
-            //Programar próxima actualización de actividad
-            const stepwait = module.exports.randRange(30, 70);
-            setTimeout(module.exports.modifyAct, 1000 * 60 * stepwait, clientowo, pasuwus + 1);
-            console.log(chalk.cyan`Esperando ciclo ${pasuwus + 1} en ${stepwait} minutos...`);
-        } catch(err) {
-            console.log(chalk.redBright.bold('Ocurrió un error al intentar realizar un cambio de presencia.'));
-            console.error(err);
-        }
-    },
     //#endregion
 
     //#region Comprobadores
@@ -869,12 +848,44 @@ module.exports = {
         console.log('Evento terminado.');
     },
 
+    /**
+     * Devuelve un valor aleatorio entre 0 y otro valor
+     * @param {Number} maxExclusive Máximo valor; excluído del resultado
+     * @param {Boolean} round Si el número debería ser redondeado hacia abajo
+     * @returns 
+     */
+    rand: function(maxExclusive, round = true) {
+        const negativeHandler = (maxExclusive < 0) ? -1 : 1;
+        maxExclusive = maxExclusive * negativeHandler;
+        const rval = ((global.seed + maxExclusive * Math.random()) % maxExclusive);
+        maxExclusive *= negativeHandler;
+        return round ? Math.floor(rval) : rval;
+    },
+
+    /**
+     * Devuelve un valor aleatorio dentro de un rango entre 2 valores
+     * @param {Number} minInclusive Mínimo valor; puede ser incluído en el resultado
+     * @param {Number} maxExclusive Máximo valor; excluído del resultado
+     * @param {Boolean} round Si el número debería ser redondeado hacia abajo
+     * @returns 
+     */
     randRange: function(minInclusive, maxExclusive, round = true) {
-        minInclusive = minInclusive * 1;
-        maxExclusive = maxExclusive * 1;
+
+        minInclusive = 1 * minInclusive;
+        maxExclusive = 1 * maxExclusive;
         const range = maxExclusive - minInclusive;
         const rval = minInclusive + ((global.seed + range * Math.random()) % range);
         return round ? Math.floor(rval) : rval;
+    },
+
+    /**
+     * Devuelve un elemento aleatorio dentro de la Array especificada
+     * @param {Array<*>} array 
+     * @returns {*} elemento
+     */
+    randInArray: function(array) {
+        const randomIndex = module.exports.rand(array.length);
+        return array[randomIndex];
     },
 
     /**
