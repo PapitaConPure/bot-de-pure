@@ -13,6 +13,7 @@ const { Puretable, defaultEmote, pureTableImage } = require('./localdata/models/
 const PureVoice = require('./localdata/models/purevoice');
 const HouraiDB = require('./localdata/models/hourai.js');
 
+const { modifyPresence } = require('./presence.js');
 const global = require('./localdata/config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
 const cmdex = require('./localdata/cmdExceptions.js');
@@ -132,18 +133,18 @@ client.on('ready', async () => {
     const confirm = () => console.log(chalk.green('Hecho.'));
     global.maintenance = '1';
 
-    try {
-        console.log(chalk.bold.magentaBright('Cargando comandos slash...'));
-        const registered = await restGlobal.put(
-            Routes.applicationCommands(client.application.id),
-            { body: client.SlashPure },
-        );
-        confirm();
-        //console.log('Comandos registrados:', registered.map(scmd => scmd.name));
-    } catch (error) {
-        console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos slash'));
-        console.error(error);
-    }
+    // try {
+    //     console.log(chalk.bold.magentaBright('Cargando comandos slash...'));
+    //     await restGlobal.put(
+    //         Routes.applicationCommands(client.application.id),
+    //         { body: client.SlashPure },
+    //     );
+    //     confirm();
+    //     //console.log('Comandos registrados:', registered.map(scmd => scmd.name));
+    // } catch (error) {
+    //     console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos slash'));
+    //     console.error(error);
+    // }
     //Quitar esto luego ↓
     const cl = global.bot_status.changelog;
     cl[cl.indexOf('PLACEHOLDER_SLASHCMD')] = `Agregando soporte de ***__[/comandos](https://blog.discord.com/slash-commands-are-here-8db0a385d9e6)__*** *(${client.SlashPure.size} comandos listos)*`;
@@ -153,7 +154,8 @@ client.on('ready', async () => {
     global.startuptime = stt;
     global.lechitauses = stt;
     global.seed = stt / 60000;
-    await func.modifyAct(client, 0);
+    modifyPresence(client);
+    confirm();
 
 	console.log(chalk.magenta('Obteniendo información del host...'));
     try {
@@ -198,13 +200,33 @@ client.on('ready', async () => {
             regex: pp.drmk.regex
         };
     });
-    console.log(global.p_pure);
+    console.table(global.p_pure);
     console.log(chalk.gray('Preparando Infracciones de Hourai'));
     const hourai = (await HouraiDB.findOne({})) || new HouraiDB({});
-    Object.entries(hourai.userInfractions).forEach(([mui, infrs]) => {
-        console.log(mui, infrs);
-        global.hourai.infr.users[mui] = infrs;
-    });
+    {
+        const now = Date.now();
+        let wasModified = false;
+        Object.entries(hourai.userInfractions).forEach(([userId, infractions]) => {
+            const previousInfractionsLength = infractions.length;
+            console.log(`${userId}:`, infractions);
+            infractions = infractions.filter(inf => (now - inf) < (60e3 * 60 * 4)); //Eliminar antiguas
+            console.log(`${userId}:`, infractions);
+
+            if(previousInfractionsLength === infractions.length) return;
+            wasModified = true;
+
+            if(!infractions.length) {
+                hourai.userInfractions[userId] = null;
+                delete hourai.userInfractions[userId];
+                return;
+            }
+            
+            global.hourai.infr.users[userId] = infractions;
+            hourai.userInfractions[userId] = infractions;
+        });
+        if(wasModified) hourai.markModified('userInfractions');
+    }
+    await hourai.save();
 
     console.log(chalk.gray('Preparando Tabla de Puré'));
     let puretable = await Puretable.findOne({});
@@ -724,4 +746,4 @@ client.on('rateLimit', rateLimit => {
     console.log('Se golpeó un pico de ratelimit:', rateLimit);
 });
 
-client.login(token); //Ingresar sesión con el bot
+client.login(token); //Ingresar sesión en Bot
