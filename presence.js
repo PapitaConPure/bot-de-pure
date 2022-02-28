@@ -1,12 +1,26 @@
-const { randInArray, randRange } = require('./func');
+const Queue = require('./localdata/models/queues.js');
+const { randRange } = require('./func.js');
+const { readFileSync } = require('fs');
 const chalk = require('chalk');
 const chalkOrange = chalk.rgb(255, 140, 70);
-const { readFileSync } = require('fs');
 
-const txtToArray = (path) => readFileSync(path).toString().split('\n');
+const txtToArray = (path) => readFileSync(path).toString().split('\n').map(t => t.slice(0, -1));
 const presence = {
     status: txtToArray('./localdata/presence/status.txt'),
     stream: txtToArray('./localdata/presence/stream.txt'),
+};
+
+const statusQuery = { queueId: 'presenceStatus' };
+const streamQuery = { queueId: 'presenceStream' };
+
+const generateQueue = (length) => {
+    if(length <= 0) return [];
+    
+    const mapByIndex = (_, i) => i;
+    const shuffleFn = () => Math.random() - 0.5;
+    return Array
+        .from({ length }, mapByIndex)
+        .sort(shuffleFn);
 };
 
 ///Iniciar actualización periódica de presencia al estar preparado
@@ -17,17 +31,32 @@ module.exports = {
      * @param {Number} steps
      * @returns
      */
-    modifyPresence: function(client, steps = 0) { //Cambio de estado constante; Créditos a Imagine Breaker#6299 y Sassafras
+    modifyPresence: async function(client, steps = 0) { //Cambio de estado constante; Créditos a Imagine Breaker#6299 y Sassafras
         //Actualización de actividad
         try {
+            const statusQueue = (await Queue.findOne(statusQuery)) || new Queue(statusQuery);
+            const streamQueue = (await Queue.findOne(streamQuery)) || new Queue(streamQuery);
+            if(!statusQueue.content?.length) statusQueue.content = generateQueue(presence.status.length);
+            if(!streamQueue.content?.length) streamQueue.content = generateQueue(presence.stream.length);
+
+            const status = presence.status[statusQueue.content.shift()];
+            const stream = presence.stream[streamQueue.content.shift()];
+
+            statusQueue.markModified('content');
+            streamQueue.markModified('content');
+            await Promise.all([
+                statusQueue.save(),
+                streamQueue.save(),
+            ]);
+
             client.user.setActivity({
-                name: randInArray(presence.status),
+                name: status,
                 type: 'STREAMING',
-                url: `https://www.youtube.com/watch?v=${randInArray(presence.stream)}`,
+                url: `https://www.youtube.com/watch?v=${stream}`,
             });
             
             //Programar próxima actualización de actividad
-            const stepwait = randRange(30, 70);
+            const stepwait = randRange(30, 50);
             setTimeout(module.exports.modifyPresence, 60e3 * stepwait, client, steps + 1);
             console.log(chalkOrange(`Cambio de presencia ${steps} realizado. Próximo ciclo en ${stepwait} minutos...`));
         } catch(err) {

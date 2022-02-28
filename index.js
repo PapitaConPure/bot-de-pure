@@ -149,13 +149,11 @@ client.on('ready', async () => {
     const cl = global.bot_status.changelog;
     cl[cl.indexOf('PLACEHOLDER_SLASHCMD')] = `Agregando soporte de ***__[/comandos](https://blog.discord.com/slash-commands-are-here-8db0a385d9e6)__*** *(${client.SlashPure.size} comandos listos)*`;
 
-	console.log(chalk.cyanBright('Calculando semilla y horario; iniciando cambios de presencia periódicos...'));
+	console.log(chalk.cyan('Semilla y horario calculados'));
     let stt = Date.now();
     global.startuptime = stt;
     global.lechitauses = stt;
     global.seed = stt / 60000;
-    modifyPresence(client);
-    confirm();
 
 	console.log(chalk.magenta('Obteniendo información del host...'));
     try {
@@ -168,9 +166,7 @@ client.on('ready', async () => {
         console.error(err);
     }
 
-    //Cargado de datos de base de datos
-    console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
-    console.log(chalk.gray('Indexando Slots de Puré...'));
+    console.log(chalk.magenta('Indexando Slots de Puré...'));
     const gds = await Promise.all([
         client.guilds.fetch(global.serverid.slot1),
         client.guilds.fetch(global.serverid.slot2),
@@ -179,15 +175,22 @@ client.on('ready', async () => {
     gds.forEach((f, i) => { global.slots[`slot${i + 1}`] = f; });
     const logs = await Promise.all([
         global.slots.slot1.channels.resolve('870347940181471242'),
-        global.slots.slot1.channels.resolve('870347965192097812')
+        global.slots.slot1.channels.resolve('870347965192097812'),
     ]);
     global.logch = logs[0];
     global.confch = logs[1];
+    confirm();
+    
+    //Cargado de datos de base de datos
+    console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
     console.log(chalk.gray('Conectando a Cluster en la nube'));
     await Mongoose.connect(uri, {
         useUnifiedTopology: true,
         useNewUrlParser: true
     });
+    console.log(chalk.cyanBright('Iniciando cambios de presencia periódicos...'));
+    await modifyPresence(client);
+    confirm();
     console.log(chalk.gray('Facilitando prefijos'));
     (await prefixpair.find({})).forEach(pp => {
         console.log(pp.guildId);
