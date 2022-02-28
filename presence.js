@@ -1,7 +1,13 @@
-const presence = require('./localdata/presence.json'); //Datos de presencia
 const { randInArray, randRange } = require('./func');
 const chalk = require('chalk');
 const chalkOrange = chalk.rgb(255, 140, 70);
+const { readFileSync } = require('fs');
+
+const txtToArray = (path) => readFileSync(path).toString().split('\n');
+const presence = {
+    status: txtToArray('./localdata/presence/status.txt'),
+    stream: txtToArray('./localdata/presence/stream.txt'),
+};
 
 ///Iniciar actualización periódica de presencia al estar preparado
 module.exports = {
