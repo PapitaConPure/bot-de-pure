@@ -133,18 +133,18 @@ client.on('ready', async () => {
     const confirm = () => console.log(chalk.green('Hecho.'));
     global.maintenance = '1';
 
-    // try {
-    //     console.log(chalk.bold.magentaBright('Cargando comandos slash...'));
-    //     await restGlobal.put(
-    //         Routes.applicationCommands(client.application.id),
-    //         { body: client.SlashPure },
-    //     );
-    //     confirm();
-    //     //console.log('Comandos registrados:', registered.map(scmd => scmd.name));
-    // } catch (error) {
-    //     console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos slash'));
-    //     console.error(error);
-    // }
+    try {
+        console.log(chalk.bold.magentaBright('Cargando comandos slash...'));
+        await restGlobal.put(
+            Routes.applicationCommands(client.application.id),
+            { body: client.SlashPure },
+        );
+        confirm();
+        //console.log('Comandos registrados:', registered.map(scmd => scmd.name));
+    } catch (error) {
+        console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos slash'));
+        console.error(error);
+    }
     //Quitar esto luego ↓
     const cl = global.bot_status.changelog;
     cl[cl.indexOf('PLACEHOLDER_SLASHCMD')] = `Agregando soporte de ***__[/comandos](https://blog.discord.com/slash-commands-are-here-8db0a385d9e6)__*** *(${client.SlashPure.size} comandos listos)*`;
