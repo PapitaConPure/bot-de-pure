@@ -687,10 +687,10 @@ client.on('voiceStateUpdate', async (oldState, state) => {
 
 //Evento de entrada a servidor
 client.on('guildMemberAdd', member => {
-    if(!guild.available || func.channelIsBlocked(guild.systemChannelId)) return;
-
     console.log('Evento de entrada de miembro a servidor desencadenado.');
     const { guild, user } = member;
+    if(!guild.available || func.channelIsBlocked(guild.systemChannelId)) return;
+
     try {
         if(!user.bot) func.dibujarBienvenida(member);
         else {
@@ -718,11 +718,11 @@ client.on('guildMemberAdd', member => {
 
 //Evento de salida de servidor
 client.on('guildMemberRemove', member => {
-    if(!guild.available) return;
-    if(global.maintenance.length > 0 && guild.systemChannelId !== global.maintenance) return;
-
     console.log('Evento de salida de miembro de servidor desencadenado.');
     const { guild, user } = member;
+    if(!guild.available) return;
+    if(global.maintenance.length > 0 && guild.systemChannelId !== global.maintenance) return;
+    
     try {
         if(!user.bot) func.dibujarDespedida(member);
         else {
