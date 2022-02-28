@@ -11,7 +11,7 @@ module.exports = {
 		'potato', 'p', '🥔'
     ],
 	brief: 'Comando de frases de Papita con Puré',
-    desc: 'Comando de frases de Papita con Puré. Si se ingresa texto, se lo patentará, sino, dependiendo del canal...\n' +
+    desc: 'Comando de frases de Papita con Puré. Si se ingresa texto, se lo patentará, si no, dependiendo del canal...\n' +
 		'**SFW:** muestra frases y cosas de Papita\n' +
 		'**NSFW:** muestra _otra_ frase _tal vez_ de Papita',
     flags: [
