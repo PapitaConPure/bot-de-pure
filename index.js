@@ -636,6 +636,7 @@ client.on('voiceStateUpdate', async (oldState, state) => {
                     textId: sessionTextChannel.id,
                     voiceId: channel.id,
                     joinedOnce: [ member.id ],
+                    nameChanged: false,
                 });
                 pv.markModified('sessions');
 
@@ -646,9 +647,32 @@ client.on('voiceStateUpdate', async (oldState, state) => {
                     sessionTextChannel.permissionOverwrites.edit(member, { SEND_MESSAGES: true }, { reason: 'Inclusión de miembro en sesión PuréVoice' }).catch(prematureError),
                     sessionTextChannel.setTopic(`#️⃣ ${guild.name} » PuréVoice » ${member.user.tag} \n👥 Canal de texto de sesión. ¡Conéctate a <#${channel.id}> para conversar aquí!`).catch(prematureError),
                 ]);
-                await channel.setName('💠「」').catch(prematureError);
+                await channel.setName('🔶').catch(prematureError);
                 await channel.setUserLimit(0).catch(prematureError);
-                await sessionTextChannel.send({ content: `📣 ${member}, usa \`${p_pure(guild.id).raw}voz <Nombre>\` para cambiar el nombre de la sesión` }).catch(prematureError);
+                await sessionTextChannel.send({
+                    content: [
+                        `👋 ¡Buenas, ${member}!`,
+                        `📣 Puedes usar \`${p_pure(guild.id).raw}voz <Nombre>\` para cambiar el nombre de la Sesión`,
+                        `🐴 Añade la bandera \`--emote <Emote>\` o \`-e <Emote>\` al comando para cambiar el emote del canal de voz`,
+                        '⏱️ El nombre de la Sesión se cambiará y bloqueará automáticamente luego de 2 minutos'
+                    ].join('\n')
+                }).catch(prematureError);
+                const enforceNaming = async () => {
+                    const pv = await PureVoice.findOne({ guildId: guild.id }).catch(console.error);
+                    if(!pv) return;
+                    const sessionIndex = pv.sessions.findIndex(session => session.voiceId === channel.id);
+                    const session = pv.sessions[sessionIndex];
+                    if(!session || session.nameChanged) return;
+                    pv.sessions[sessionIndex].nameChanged = true;
+                    pv.markModified('sessions');
+                    return await Promise.all([
+                        pv.save(),
+                        sessionTextChannel?.send({ content: '🔹 Se asignó un nombre a la Sesión automáticamente' }),
+                        sessionTextChannel?.setName(`💠⇒${member.user.username}`).catch(console.error),
+                        channel?.setName(`💠【${member.user.username}】`).catch(console.error),
+                    ]);
+                };
+                setTimeout(enforceNaming, 60e3 * 2);
             } catch(error) {
                 console.error(error);
                 if(guild.systemChannelId)

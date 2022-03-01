@@ -28,7 +28,8 @@ const wizEmbed = (iconUrl, stepName, stepColor) => {
 };
 
 const options = new CommandOptionsManager()
-	.addParam('nombre', 'TEXT', 'para decidir el nombre de la sesión actual', { optional: true })
+	.addParam('nombre', 'TEXT', 'para decidir el nombre de la Sesión actual', { optional: true })
+	.addFlag('e', ['emote', 'emoji'], 'para determinar el emote de la Sesión actual')
 	.addFlag('aiw', ['asistente','instalador','wizard'], 'para inicializar el Asistente de Configuración');
 
 module.exports = {
@@ -55,12 +56,15 @@ module.exports = {
 	async execute(request, args, isSlash = false) {
 		//Acción de comando
 		const generateWizard = isSlash
-		? args.getBoolean('asistente')
-		: fetchFlag(args, { ...options.flags.get('asistente').structure, callback: true });
+			? args.getBoolean('asistente')
+			: fetchFlag(args, { ...options.flags.get('asistente').structure, callback: true });
 		
-		//Cambiar nomre de canal de voz de sesión
+		//Cambiar nomre de canal de voz de Sesión
 		if(!generateWizard) {
 			const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda voz\` para más información`;
+			const sessionEmote = isSlash
+				? args.getString('emote')
+				: fetchFlag(args, { ...options.flags.get('emote').structure, property: true, callback: (x, i) => x[i], fallback: '💠' });
 			const sessionName = isSlash
 				? args.getString('nombre')
 				: args.join(' ');
@@ -81,7 +85,7 @@ module.exports = {
 					ephemeral: true,
 				});
 			
-			//Comprobar si se está en una sesión
+			//Comprobar si se está en una Sesión
 			/**@type {import('discord.js').VoiceState}*/
 			const voiceState = request.member.voice;
 			const warnNotInSession = () => request.reply({
@@ -91,21 +95,31 @@ module.exports = {
 				].join('\n'),
 				ephemeral: true,
 			}).catch(console.error);
-			if(!voiceState.channelId)
-				return await warnNotInSession();
-			const pv = await PureVoice.findOne({ guildId: request.guildId });
-			if(!(pv && pv.sessions.map(session => session.voiceId).includes(voiceState.channelId)))
-				return await warnNotInSession();
+			if(!voiceState.channelId) return await warnNotInSession();
 
-			//Modificar sesión y confirmar
+			//Modificar Sesión y confirmar
+			const pv = await PureVoice.findOne({ guildId: request.guildId });
+			if(!pv) return await warnNotInSession();
+            const sessionIndex = pv.sessions.findIndex(session => session.voiceId === voiceState.channelId);
+			const session = pv.sessions[sessionIndex];
+			if(!session) return await warnNotInSession();
+			const { textId, voiceId, nameChanged } = session;
+			if(nameChanged) return await request.reply({
+				content: [
+					'❌ Por cuestiones técnicas, solo puedes cambiar el nombre de la sesión una vez.',
+					'Si quieres cambiar el nombre, conéctate a una nueva sesión',
+				].join('\n'),
+			});
+			pv.sessions[sessionIndex].nameChanged = true;
+			pv.markModified('sessions');
+
 			const chcache = request.guild.channels.cache;
-			const { textId, voiceId } = pv.sessions.find(session => session.voiceId === voiceState.channelId);
-			if(!voiceState.channel.name.match('💠「」')) return await request.reply({ content: '❌ Por cuestiones técnicas, solo puedes cambiar el nombre de la sesión una vez.\nSi quieres cambiar el nombre, conéctate a una nueva sesión' })
-			let sessionNumber = voiceState.channel.name.match(/\d+/);
-			if(sessionNumber) sessionNumber = sessionNumber[0];
-			await chcache.get(voiceId).setName(`💠「${sessionName}」`).catch(console.error);
-			await chcache.get(textId).setName(`${sessionName.toLowerCase().split().join('-')}`).catch(console.error);
-			return await request.reply({ content: '✅ Nombre aplicado', ephemeral: true }).catch(console.error);
+			return await Promise.all([
+				pv.save(),
+				chcache.get(textId).setName(`${sessionEmote}⇒${sessionName.toLowerCase().split().join('-')}`).catch(console.error),
+				chcache.get(voiceId).setName(`${sessionEmote}【${sessionName}】`).catch(console.error),
+				request.reply({ content: '✅ Nombre aplicado', ephemeral: true }).catch(console.error),
+			]);
 		}
 		
 		//Inicializar instalador PuréVoice
