@@ -4,11 +4,17 @@ const { readFileSync } = require('fs');
 const chalk = require('chalk');
 const chalkOrange = chalk.rgb(255, 140, 70);
 
-const txtToArray = (path) => readFileSync(path).toString().split('\n').map(t => t.endsWith('\r') && t.slice(0, -1));
+const txtToArray = (path) => readFileSync(path, { encoding: 'utf-8' })
+    .split('\n')
+    .map(t => {
+        if(t.endsWith('\r')) t.slice(0, -1);
+        return t;
+    });
 const presence = {
     status: txtToArray('./localdata/presence/status.txt'),
     stream: txtToArray('./localdata/presence/stream.txt'),
 };
+console.log(presence.status.join('\n'));
 
 const statusQuery = { queueId: 'presenceStatus' };
 const streamQuery = { queueId: 'presenceStream' };
