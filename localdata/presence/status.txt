@@ -143,6 +143,7 @@ Indexando entidades hilarantes
 Recuperando abstracciones humorísticas
 
 Hay 1 renglón en blanco en este archivo, así que hay una probabilidad de "1/renglones" de que crashee en cada cambio de estado
+Olviden lo del renglón en blanco, ya lo parcheé
 Poniéndole punto final a todo.
 escribiendo ligeramente mal a proposito
 No pueden donarme dinero, pero sí cariño
@@ -181,3 +182,5 @@ Espiándote para, con suerte, recomendarte los mejores shampús de tu vida en al
 Yendo al baño. Volvemos con la programación no-habitual en el próximo cambio de estado
 Pensando qué escribir
 git commit -m "Humor"
+Cambiando (inconscientemente) de estado
+Realizando una petición a una cafetera
