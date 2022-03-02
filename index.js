@@ -188,7 +188,7 @@ client.on('ready', async () => {
         useUnifiedTopology: true,
         useNewUrlParser: true
     });
-    console.log(chalk.cyanBright('Iniciando cambios de presencia periódicos...'));
+    console.log(chalk.gray('Iniciando cambios de presencia periódicos...'));
     await modifyPresence(client);
     confirm();
     console.log(chalk.gray('Facilitando prefijos'));
