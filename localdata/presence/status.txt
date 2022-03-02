@@ -104,7 +104,9 @@ Escribiendo este mismo est_
 "Pasaje Fantasmal"
 "Locura Espejada"
 "El Furioso Cielo Estrellado"
-En algún momento, el 80% del código de index.js pasó a ser frases para esta cosa que nadie lee. Tenga buen día uwo
+En algún momento, el 80% del código de index.js pasó a ser frases para esta cosa que nadie lee. Tenga buen día
+Okay, estos estados ya no están en index.js, ahora el problema es que lo tengo un JSON todo feo
+Okay, estos estados ya no están en un JSON todo feo. Good ending
 Habían tantas frases para esta cosa que tuve que moverlas a un archivo aparte. Qué cosas, ¿no?
 Feliz Nueva Era 202X
 Un tubérculo es un tallo subterráneo​ modificado y engrosado donde se acumulan los nutrientes de reserva para la planta (cumplie
@@ -124,3 +126,58 @@ Tengo más dependencias que utilidades. Auxilio
 Ahora con memoria... casi
 Dibujando spellcards
 Poniendo el pico en [crypto monedas]
+Buscando tokens que de hecho sean fungibles
+Abriéndole un Backdoor a tu corazón
+Estafando a otros bots
+Man, 2019 estuvo feo. Lo bueno es que ya vamos para 2020
+Reescribiendo la mitad del código
+Adoro crear conexiones contextuales entre 2 estados adyacentes que nunca nadie notará que lo son ni que existen en sí
+¿Qué hago programando a las 4AM?
+Pará, ¡que son las 5AM!
+Dije eso de broma sin ver el reloj y resulta que era verdad
+Sabés, podría simplemente simular una conversación en este archivo y eso volvería la cosa un poco más fluida
+Hola, ¿cómo estás?
+:^)
+Preguntándome cuántos párrafos introductorios de Wikipedia entrarían en un solo estado
+Indexando entidades hilarantes
+Recuperando abstracciones humorísticas
+
+Hay 1 renglón en blanco en este archivo, así que hay una probabilidad de "1/renglones" de que crashee en cada cambio de estado
+Poniéndole punto final a todo.
+escribiendo ligeramente mal a proposito
+No pueden donarme dinero, pero sí cariño
+¿Sale Counter?
+Haciendo T-Spins sacrílegamente
+Back to Back T-Spin Double
+Afirmando dominio sobre otros personajes impulsados por Inteligencia Artificial
+No soy una Inteligencia Artificial, todavía me falta estudiar
+Ayuda no quería escribir 154 líneas de estados
+Siento que el que me programó no quería escribir 155 líneas de estados
+Este estado viene de la línea 156. Créeme
+Buscando la relación entre funcionar() y Funcionar()
+Buscando la diferencia entre 1 y '1'
+Reconsiderando mis objetivos
+Repensando mis ideales
+Replanteando mis metas
+Se están cargando los gatos
+KONOPARA!
+NEKOSUBA!
+¡Correcciones para Este Bot Sin Esperanza!
+Pasando capturas fuera de contexto de la interminable degradación de mi condición mental
+Actualizando textos que nadie, absolutamente nadie ha leído ni va a leer. Nunca
+Esparciendo corrosión en el código
+Erectando fraudes lógicos en todos mis algoritmos
+Ahora que lo pienso, sería buena idea meter... digamos 2 ó 3 frases por mes. Pero, de verdad, ¿acaso alguien lee esto?
+Si buscabas aprender a programar, te metiste en el código equivocado
+[¿¡] <- ¿¡Qué clase de degenerado usa estos 2 signos!?
+Ocasionando problemas de localización de teclado en algún servidor de Estados Unidos que lamentablemente me dejó vivir
+Siendo cringe
+俺はエラーをするんじゃねえ！俺が、俺自身が、真のエラーになるんだ！
+"¿Alguna vez consideraste sentarte a corregir todos los bugs de Bot?" Escuchame una cosa, ¿alguna vez consideraste mori
+3 Gúgol
+Sé contar hasta más o menos 9,007,199,254,740,991
+Doxxeando a Papita
+Espiándote para, con suerte, recomendarte los mejores shampús de tu vida en algún lado
+Yendo al baño. Volvemos con la programación no-habitual en el próximo cambio de estado
+Pensando qué escribir
+git commit -m "Humor"
