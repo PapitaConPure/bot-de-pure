@@ -184,3 +184,29 @@ Pensando qué escribir
 git commit -m "Humor"
 Cambiando (inconscientemente) de estado
 Realizando una petición a una cafetera
+El que me programó nunca usó JS para hacer una página web como tal, huh...
+Esperando la próxima revolución tecnológica
+Invocando tubérculos
+Acelerador de Papitas
+¿Qué tanto lees? Hazle como el resto
+Renovando el puré
+Reconstruyendo mi casa (es de puré, así hay que hacerlo cada tanto)
+Este texto, el video del botón y mi propósito no tienen absolutamente ninguna relación
+Descifrando si Touhou es un anime o no
+Canonificando mis deseos directo en el lore
+Realizando una investigación para averiguar si hay gente que de hecho juega Touhou
+"So Dark, yet Oh So Enlightening. Be it The Bean, be it The Liquid"
+No puedo creer que ya estoy por llegar a las 200 frases para estados
+No puedo creer que se me llegaron a ocurrir 200 frases para estados. Qué loco
+¡Parece actuado! ¿¡Por qué usar signos de exclamación se lee como si estuviese en una obra!?
+Enforzando convenciones que a nadie le importan en el 80~90% de mi código
+Espero que nadie se haya dado cuenta de que tenía un estado que decía "Feliz 2021" en pleno marzo de 2022. Habrá que poner X
+Sabés qué, podría aprovechar que nadie lee estas frases para usar esto como diario
+Hasta el día en el que metí esta frase, los estados se actualizaban cada 30~50 minutos, pero de verdad tengo esperanza 
+Acabo de recordar que, cuando metí esto de las frases, eran caritas y se actualizaba cada hora. Como tal, era por puro testeo
+Nunca verifico que estas frases de hecho se vean bien. Podrían perfectamente estar fallando la mitad y yo ni enterado
+Actualizando dependencias para "humor"
+Humor - notas del parche: "¡más abstracto, menos lógico y más!"
+Mi número de versión se cambia manualmente con valores incrementalmente arbitrarios conforme pasa el tiempo
+WAGA NA WA
+En caso de que nunca hayas clickeado el botón de transmisión, también hay un puñado de videos aleatorios en ruleta
