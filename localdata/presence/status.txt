@@ -210,3 +210,5 @@ Humor - notas del parche: "¡más abstracto, menos lógico y más!"
 Mi número de versión se cambia manualmente con valores incrementalmente arbitrarios conforme pasa el tiempo
 WAGA NA WA
 En caso de que nunca hayas clickeado el botón de transmisión, también hay un puñado de videos aleatorios en ruleta
+Explicando en criollo cómo funciona la *ejem...* "Rotación de Frases y Streams por Tandas Regulares Ordenadas Aleatoriamente"
+Otro día pienso en qué escribir acá
