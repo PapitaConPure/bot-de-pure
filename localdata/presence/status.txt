@@ -212,3 +212,4 @@ WAGA NA WA
 En caso de que nunca hayas clickeado el botón de transmisión, también hay un puñado de videos aleatorios en ruleta
 Explicando en criollo cómo funciona la *ejem...* "Rotación de Frases y Streams por Tandas Regulares Ordenadas Aleatoriamente"
 Otro día pienso en qué escribir acá
+Corriendo un bug que no había notado hasta horas después de actualizar mi versión

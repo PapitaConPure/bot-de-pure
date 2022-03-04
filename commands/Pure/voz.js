@@ -29,7 +29,7 @@ const wizEmbed = (iconUrl, stepName, stepColor) => {
 
 const options = new CommandOptionsManager()
 	.addParam('nombre', 'TEXT', 'para decidir el nombre de la Sesión actual', { optional: true })
-	.addFlag('e', ['emote', 'emoji'], 'para determinar el emote de la Sesión actual')
+	.addFlag('e', ['emote', 'emoji'], 'para determinar el emote de la Sesión actual', { name: 'emt', type: 'EMOTE' })
 	.addFlag('aiw', ['asistente','instalador','wizard'], 'para inicializar el Asistente de Configuración');
 
 module.exports = {
@@ -62,13 +62,15 @@ module.exports = {
 		//Cambiar nomre de canal de voz de Sesión
 		if(!generateWizard) {
 			const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda voz\` para más información`;
-			const sessionEmote = isSlash
-				? args.getString('emote')
-				: fetchFlag(args, { ...options.flags.get('emote').structure, property: true, callback: (x, i) => x[i], fallback: '💠' });
+			const defaultEmote = '💠';
+			const emoteString = isSlash
+				? (args.getString('emote') ?? defaultEmote)
+				: fetchFlag(args, { ...options.flags.get('emote').structure, property: true, callback: (x, i) => x[i], fallback: defaultEmote });
+			const sessionEmote = emoteString?.match(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu)?.[0];
 			const sessionName = isSlash
 				? args.getString('nombre')
 				: args.join(' ');
-
+			
 			if(!sessionName)
 				return await request.reply({
 					content: [
@@ -84,7 +86,17 @@ module.exports = {
 					content: '⚠ Intenta acortar un poco el nombre. El límite para nombres de sesión es de 24(+3) caracteres',
 					ephemeral: true,
 				});
-			
+
+			if(!sessionEmote)
+				return await request.reply({
+					content: [
+						'⚠ Emote inválido',
+						'Recuerda que no se pueden usar emotes personalizados para nombres de canales',
+						'También, ten en cuenta que algunos emotes estándar de Discord no son *tan estándar* y __no se espera__ que se detecten/funcionen correctamente',
+					],
+					ephemeral: true,
+				})
+
 			//Comprobar si se está en una Sesión
 			/**@type {import('discord.js').VoiceState}*/
 			const voiceState = request.member.voice;

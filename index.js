@@ -77,47 +77,47 @@ for(const file of commandFiles) {
         const slash = new SlashCommandBuilder()
             .setName(command.name)
             .setDescription(command.brief || command.desc.slice(0, 99));
+
+        /**@param {String} type*/
+        const typeToAddFunctionName = (type) => {
+            switch(type) {
+                case 'NUMBER':  return 'addIntegerOption';
+                case 'USER':    return 'addUserOption';   
+                case 'ROLE':    return 'addRoleOption';   
+                case 'CHANNEL': return 'addChannelOption';
+                case 'ID':      return 'addIntegerOption';
+                default:        return 'addStringOption'; 
+            };
+        }
         /**@type {CommandOptionsManager}*/
         const options = command.options;
         if(options) {
             options.params.forEach(p => {
-                slash.addFunction = (opt) => {};
-                switch(p._type) {
-                case 'NUMBER':  slash.addFunction = slash.addIntegerOption; break;
-                case 'USER':    slash.addFunction = slash.addUserOption;    break;
-                case 'ROLE':    slash.addFunction = slash.addRoleOption;    break;
-                case 'CHANNEL': slash.addFunction = slash.addChannelOption; break;
-                case 'ID':      slash.addFunction = slash.addIntegerOption; break;
-                default:        slash.addFunction = slash.addStringOption;  break;
-                }
-                /**
-                 * @param {*} opt
-                 * @param {String} name
-                 */
+                const addFunction = typeToAddFunctionName(p._type)
                 const optionBuilder = (opt, name, fullyOptional = false) => opt.setName(name).setDescription(p._desc).setRequired(!(fullyOptional || p._optional));
                 switch(p._poly) {
-                case 'SINGLE':
-                    slash.addFunction(opt => optionBuilder(opt, p._name));
-                    break;
-                case 'MULTIPLE':
-                    const singlename = p._name.replace(/[Ss]$/, '');
-                    slash.addFunction(opt => optionBuilder(opt, `${singlename}_1`));
-                    for(let i = 2; i <= p._polymax; i++)
-                        slash.addFunction(opt => optionBuilder(opt, `${singlename}_${i}`, true));
-                    break;
-                default:
-                    p._poly.forEach(entry => {
-                        slash.addFunction(opt => optionBuilder(opt, `${p._name}_${entry}`));
-                    });
-                    break;
+                    case 'SINGLE':
+                        slash[addFunction](opt => optionBuilder(opt, p._name));
+                        break;
+                    case 'MULTIPLE':
+                        const singlename = p._name.replace(/[Ss]$/, '');
+                        slash[addFunction](opt => optionBuilder(opt, `${singlename}_1`));
+                        for(let i = 2; i <= p._polymax; i++)
+                            slash[addFunction](opt => optionBuilder(opt, `${singlename}_${i}`, true));
+                        break;
+                    default:
+                        p._poly.forEach(entry => {
+                            slash[addFunction](opt => optionBuilder(opt, `${p._name}_${entry}`));
+                        });
+                        break;
                 }
             });
             options.flags.forEach(f => {
                 /**@param {*} opt*/
                 const optionBuilder = (opt) => opt.setName(f._long[0] || f._short[0]).setDescription(f._desc).setRequired(false);
-                if(f._expressive) {
-                    //case '': slash.addBooleanOption(optionBuilder); return;
-                } else slash.addBooleanOption(optionBuilder);
+                if(f._expressive)
+                    return slash[typeToAddFunctionName(f._type)](optionBuilder);
+                slash.addBooleanOption(optionBuilder);
             });
         }
         command.data = slash;
