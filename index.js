@@ -70,61 +70,58 @@ client.ComandosPure = new Discord.Collection(); //Comandos de Puré
 client.SlashPure = new Discord.Collection(); //Comandos Slash de Puré
 client.EmotesPure = new Discord.Collection(); //Emotes de Puré
 commandFiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
-for(const file of commandFiles) {
-    const command = require(`./commands/Pure/${file}`);
-	client.ComandosPure.set(command.name, command);
-    if(typeof command.interact === 'function' || command.experimental) {
-        const slash = new SlashCommandBuilder()
-            .setName(command.name)
-            .setDescription(command.brief || command.desc.slice(0, 99));
-
-        /**@param {String} type*/
-        const typeToAddFunctionName = (type) => {
-            switch(type) {
-                case 'NUMBER':  return 'addIntegerOption';
-                case 'USER':    return 'addUserOption';   
-                case 'ROLE':    return 'addRoleOption';   
-                case 'CHANNEL': return 'addChannelOption';
-                case 'ID':      return 'addIntegerOption';
-                default:        return 'addStringOption'; 
-            };
-        }
-        /**@type {CommandOptionsManager}*/
-        const options = command.options;
-        if(options) {
-            options.params.forEach(p => {
-                const addFunction = typeToAddFunctionName(p._type)
-                const optionBuilder = (opt, name, fullyOptional = false) => opt.setName(name).setDescription(p._desc).setRequired(!(fullyOptional || p._optional));
-                switch(p._poly) {
-                    case 'SINGLE':
-                        slash[addFunction](opt => optionBuilder(opt, p._name));
-                        break;
-                    case 'MULTIPLE':
-                        const singlename = p._name.replace(/[Ss]$/, '');
-                        slash[addFunction](opt => optionBuilder(opt, `${singlename}_1`));
-                        for(let i = 2; i <= p._polymax; i++)
-                            slash[addFunction](opt => optionBuilder(opt, `${singlename}_${i}`, true));
-                        break;
-                    default:
-                        p._poly.forEach(entry => {
-                            slash[addFunction](opt => optionBuilder(opt, `${p._name}_${entry}`));
-                        });
-                        break;
-                }
-            });
-            options.flags.forEach(f => {
-                /**@param {*} opt*/
-                const optionBuilder = (opt) => opt.setName(f._long[0] || f._short[0]).setDescription(f._desc).setRequired(false);
-                if(f._expressive)
-                    return slash[typeToAddFunctionName(f._type)](optionBuilder);
-                slash.addBooleanOption(optionBuilder);
-            });
-        }
-        command.data = slash;
-	    client.SlashPure.set(command.name, command.data.toJSON());
+{
+    /**@param {String} type*/
+    const typeToAddFunctionName = (type) => {
+        switch(type) {
+            case 'NUMBER':  return 'addIntegerOption';
+            case 'USER':    return 'addUserOption';   
+            case 'ROLE':    return 'addRoleOption';   
+            case 'CHANNEL': return 'addChannelOption';
+            case 'ID':      return 'addIntegerOption';
+            default:        return 'addStringOption'; 
+        };
     }
-    if(command.flags && command.flags.includes('emote'))
-        client.EmotesPure.set(command.name, command);
+    
+    for(const file of commandFiles) {
+        const command = require(`./commands/Pure/${file}`);
+        client.ComandosPure.set(command.name, command);
+        if(typeof command.interact === 'function' || command.experimental) {
+            const slash = new SlashCommandBuilder()
+                .setName(command.name)
+                .setDescription(command.brief || command.desc.slice(0, 99));
+
+            /**@type {CommandOptionsManager}*/
+            const options = command.options;
+            if(options) {
+                options.params.forEach(p => {
+                    const addFunctionName = typeToAddFunctionName(p._type);
+                    const optionBuilder = (opt, name, fullyOptional = false) => opt.setName(name).setDescription(p._desc).setRequired(!(fullyOptional || p._optional));
+                    if(p._poly === 'SINGLE')
+                        return slash[addFunctionName](opt => optionBuilder(opt, p._name));
+                    if(p._poly === 'MULTIPLE') {
+                        const singularName = p._name.replace(/[Ss]$/, '');
+                        slash[addFunctionName](opt => optionBuilder(opt, `${singularName}_1`));
+                        for(let i = 2; i <= p._polymax; i++)
+                            slash[addFunctionName](opt => optionBuilder(opt, `${singularName}_${i}`, true));
+                        return;
+                    }
+                    return p._poly.forEach(entry => slash[addFunctionName](opt => optionBuilder(opt, `${p._name}_${entry}`)));
+                });
+                options.flags.forEach(f => {
+                    /**@param {*} opt*/
+                    const optionBuilder = (opt) => opt.setName(f._long[0] || f._short[0]).setDescription(f._desc).setRequired(false);
+                    if(f._expressive)
+                        return slash[typeToAddFunctionName(f._type)](optionBuilder);
+                    return slash.addBooleanOption(optionBuilder);
+                });
+            }
+            command.data = slash;
+            client.SlashPure.set(command.name, command.data.toJSON());
+        }
+        if(command.flags?.includes('emote'))
+            client.EmotesPure.set(command.name, command);
+    }
 }
 //#endregion
 

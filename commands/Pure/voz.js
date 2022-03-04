@@ -93,9 +93,9 @@ module.exports = {
 						'⚠ Emote inválido',
 						'Recuerda que no se pueden usar emotes personalizados para nombres de canales',
 						'También, ten en cuenta que algunos emotes estándar de Discord no son *tan estándar* y __no se espera__ que se detecten/funcionen correctamente',
-					],
+					].join('\n'),
 					ephemeral: true,
-				})
+				});
 
 			//Comprobar si se está en una Sesión
 			/**@type {import('discord.js').VoiceState}*/
