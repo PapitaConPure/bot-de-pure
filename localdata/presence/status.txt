@@ -239,3 +239,6 @@ Durmiendo con los ojos abiertos
 Potato Chips
 ¿Cómo nunca se me ocurrió ese chiste antes?
 Skill Issue
+Permutación sin repetición
+Aplicando todos los antipatrones posibles
+Refactorizando
