@@ -203,7 +203,7 @@ No puedo creer que se me llegaron a ocurrir 200 frases. Qué loco
 Enforzando convenciones que a nadie le importan en el 80~90% de mi código
 Espero que nadie se haya dado cuenta de que tenía un estado que decía "Feliz 2021" en pleno marzo de 2022. Habrá que poner X
 Sabés qué, podría aprovechar que nadie lee estas frases para usar esto como diario
-Hasta el día en el que metí esta frase, los estados se actualizaban cada 30~50 minutos, pero de verdad tengo esperanza 
+Antes esta cosa se actualizaba cada una hora, no sé en qué momento bajó tanto
 Acabo de recordar que, cuando metí esto de las frases, eran caritas y se actualizaba cada hora. Como tal, era por puro testeo
 Nunca verifico que estas frases de hecho se vean bien. Podrían perfectamente estar fallando la mitad y yo ni enterado
 Actualizando dependencias para "humor"
