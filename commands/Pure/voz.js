@@ -28,8 +28,8 @@ const wizEmbed = (iconUrl, stepName, stepColor) => {
 };
 
 const options = new CommandOptionsManager()
-	.addParam('nombre', 'TEXT', 'para decidir el nombre de la Sesión actual', { optional: true })
-	.addFlag('e', ['emote', 'emoji'], 'para determinar el emote de la Sesión actual', { name: 'emt', type: 'EMOTE' })
+	.addParam('nombre', 'TEXT', 'para decidir el nombre de la sesión actual', { optional: true })
+	.addFlag('e', ['emote', 'emoji'], 'para determinar el emote de la sesión actual', { name: 'emt', type: 'EMOTE' })
 	.addFlag('aiw', ['asistente','instalador','wizard'], 'para inicializar el Asistente de Configuración');
 
 module.exports = {
@@ -59,7 +59,7 @@ module.exports = {
 			? args.getBoolean('asistente')
 			: fetchFlag(args, { ...options.flags.get('asistente').structure, callback: true });
 		
-		//Cambiar nomre de canal de voz de Sesión
+		//Cambiar nomre de canal de voz de sesión
 		if(!generateWizard) {
 			const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda voz\` para más información`;
 			const defaultEmote = '💠';
@@ -97,7 +97,7 @@ module.exports = {
 					ephemeral: true,
 				});
 
-			//Comprobar si se está en una Sesión
+			//Comprobar si se está en una sesión
 			/**@type {import('discord.js').VoiceState}*/
 			const voiceState = request.member.voice;
 			const warnNotInSession = () => request.reply({
@@ -109,26 +109,26 @@ module.exports = {
 			}).catch(console.error);
 			if(!voiceState.channelId) return await warnNotInSession();
 
-			//Modificar Sesión y confirmar
+			//Modificar sesión y confirmar
 			const pv = await PureVoice.findOne({ guildId: request.guildId });
 			if(!pv) return await warnNotInSession();
             const sessionIndex = pv.sessions.findIndex(session => session.voiceId === voiceState.channelId);
 			const session = pv.sessions[sessionIndex];
 			if(!session) return await warnNotInSession();
 			const { textId, voiceId, nameChanged } = session;
-			if(nameChanged) return await request.reply({
+			if((Date.now() - nameChanged) < 60e3 * 20) return await request.reply({
 				content: [
-					'❌ Por cuestiones técnicas, solo puedes cambiar el nombre de la sesión una vez.',
-					'Si quieres cambiar el nombre, conéctate a una nueva sesión',
+					'❌ Por cuestiones técnicas, solo puedes cambiar el nombre de la sesión una vez cada 20 minutos.',
+					'Espera un tiempo e inténtalo de nuevo, o conéctate a una nueva sesión',
 				].join('\n'),
 			});
-			pv.sessions[sessionIndex].nameChanged = true;
+			pv.sessions[sessionIndex].nameChanged = Date.now();
 			pv.markModified('sessions');
 
 			const chcache = request.guild.channels.cache;
 			return await Promise.all([
 				pv.save(),
-				chcache.get(textId).setName(`${sessionEmote}⇒${sessionName.toLowerCase().split().join('-')}`).catch(console.error),
+				chcache.get(textId).setName(`${sessionEmote}〉${sessionName.toLowerCase().split().join('-')}`).catch(console.error),
 				chcache.get(voiceId).setName(`${sessionEmote}【${sessionName}】`).catch(console.error),
 				request.reply({ content: '✅ Nombre aplicado', ephemeral: true }).catch(console.error),
 			]);
@@ -386,4 +386,27 @@ module.exports = {
 			components: [],
 		});
 	},
+
+	/**
+	 * @param {import('discord.js').ButtonInteraction} interaction 
+	 * @param {Array<String>} param1 
+	 */
+	async ['showMeHow'](interaction) {
+		const commandName = `${p_pure(interaction.guildId).raw}voz`;
+		return await interaction.reply({
+			content: [
+				'Ejemplos:',
+				`> ${commandName}  Gaming   --emote  🎮`,
+				`> ${commandName}  Noche de Acapella   -e  🎤`,
+				`> ${commandName}  --emoji  🎧   Música de Fondo`,
+				`> ${commandName}  -e  🎉   Aniversario`,
+				'Resultados:',
+				`> 🎮【Gaming】`,
+				`> 🎤【Noche de Acapella】`,
+				`> 🎧【Música de Fondo】`,
+				`> 🎉【Aniversario】`,
+			].join('\n'),
+			ephemeral: true,
+		});
+	}
 };

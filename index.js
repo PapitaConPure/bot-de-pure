@@ -529,10 +529,10 @@ client.on('voiceStateUpdate', async (oldState, state) => {
     
     const prematureError = () => console.log('Canal probablemente eliminado prematuramente');
 
-    { //Log de estado
-        const userTag = member.user.tag;
-        console.log(userTag.slice(userTag.indexOf('#')), '::', oldState.channel ? oldState.channel.name : null, '->', channel ? channel.name : null);
-    }
+    // { //Log de estado
+    //     const userTag = member.user.tag;
+    //     console.log(userTag.slice(userTag.indexOf('#')), '::', oldState.channel ? oldState.channel.name : null, '->', channel ? channel.name : null);
+    // }
 
     //#region Comprobar canales inexistentes en base de datos antes de operar
     await Promise.all(pv.sessions.map((session, i) => {
@@ -616,7 +616,7 @@ client.on('voiceStateUpdate', async (oldState, state) => {
             try {
                 console.log('Conexión al canal', channel.name, 'con', channel.members.size, 'miembros');
                 const [ sessionTextChannel, newSession ] = await Promise.all([
-                    guild.channels.create(`vc-${member.user.username}`, {
+                    guild.channels.create(`🔶〉${member.user.username}`, {
                         type: 'GUILD_TEXT',
                         parent: pv.categoryId,
                     }),
@@ -633,7 +633,7 @@ client.on('voiceStateUpdate', async (oldState, state) => {
                     textId: sessionTextChannel.id,
                     voiceId: channel.id,
                     joinedOnce: [ member.id ],
-                    nameChanged: false,
+                    nameChanged: 0,
                 });
                 pv.markModified('sessions');
 
@@ -649,10 +649,18 @@ client.on('voiceStateUpdate', async (oldState, state) => {
                 await sessionTextChannel.send({
                     content: [
                         `👋 ¡Buenas, ${member}!`,
-                        `📣 Puedes usar \`${p_pure(guild.id).raw}voz <Nombre>\` para cambiar el nombre de la Sesión`,
+                        `📣 Puedes usar \`${p_pure(guild.id).raw}voz <Nombre>\` para cambiar el nombre de la sesión`,
                         `🐴 Añade la bandera \`--emote <Emote>\` o \`-e <Emote>\` al comando para cambiar el emote del canal de voz`,
-                        '⏱️ El nombre de la Sesión se cambiará y bloqueará automáticamente luego de 2 minutos'
-                    ].join('\n')
+                        '⏱️ Si no escribes un nombre de sesión en 2 minutos, se cambiará automáticamente y se bloqueará por 20 minutos'
+                    ].join('\n'),
+                    components: [new Discord.MessageActionRow().addComponents(
+                        new Discord.MessageButton({
+                            customId: 'voz_showMeHow',
+                            label: 'Muéstrame cómo',
+                            emoji: '📖',
+                            style: 'PRIMARY',
+                        }),
+                    )],
                 }).catch(prematureError);
                 const enforceNaming = async () => {
                     const pv = await PureVoice.findOne({ guildId: guild.id }).catch(console.error);
@@ -660,12 +668,12 @@ client.on('voiceStateUpdate', async (oldState, state) => {
                     const sessionIndex = pv.sessions.findIndex(session => session.voiceId === channel.id);
                     const session = pv.sessions[sessionIndex];
                     if(!session || session.nameChanged) return;
-                    pv.sessions[sessionIndex].nameChanged = true;
+                    pv.sessions[sessionIndex].nameChanged = Date.now();
                     pv.markModified('sessions');
                     return await Promise.all([
                         pv.save(),
-                        sessionTextChannel?.send({ content: '🔹 Se asignó un nombre a la Sesión automáticamente' }),
-                        sessionTextChannel?.setName(`💠⇒${member.user.username}`).catch(console.error),
+                        sessionTextChannel?.setName(`💠〉${member.user.username}`).catch(console.error),
+                        sessionTextChannel?.send({ content: '🔹 Se asignó un nombre a la sesión automáticamente' }),
                         channel?.setName(`💠【${member.user.username}】`).catch(console.error),
                     ]);
                 };

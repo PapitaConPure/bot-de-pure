@@ -1,4 +1,4 @@
-const Queue = require('./localdata/models/queues.js');
+const { getQueueItem } = require('./localdata/models/queues.js');
 const { randRange } = require('./func.js');
 const { readFileSync } = require('fs');
 const chalk = require('chalk');
@@ -16,19 +16,6 @@ const presence = {
     stream: txtToArray('./localdata/presence/stream.txt'),
 };
 
-const statusQuery = { queueId: 'presenceStatus' };
-const streamQuery = { queueId: 'presenceStream' };
-
-const generateQueue = (length) => {
-    if(length <= 0) return [];
-    
-    const mapByIndex = (_, i) => i;
-    const shuffleFn = () => Math.random() - 0.5;
-    return Array
-        .from({ length }, mapByIndex)
-        .sort(shuffleFn);
-};
-
 ///Iniciar actualización periódica de presencia al estar preparado
 module.exports = {
     /**
@@ -40,20 +27,8 @@ module.exports = {
     modifyPresence: async function(client, steps = 0) { //Cambio de estado constante; Créditos a Imagine Breaker#6299 y Sassafras
         //Actualización de actividad
         try {
-            const statusQueue = (await Queue.findOne(statusQuery)) || new Queue(statusQuery);
-            const streamQueue = (await Queue.findOne(streamQuery)) || new Queue(streamQuery);
-            if(!statusQueue.content?.length) statusQueue.content = generateQueue(presence.status.length);
-            if(!streamQueue.content?.length) streamQueue.content = generateQueue(presence.stream.length);
-
-            const status = presence.status[statusQueue.content.shift()];
-            const stream = presence.stream[streamQueue.content.shift()];
-
-            statusQueue.markModified('content');
-            streamQueue.markModified('content');
-            await Promise.all([
-                statusQueue.save(),
-                streamQueue.save(),
-            ]);
+            const status = presence.status[await getQueueItem({ queueId: 'presenceStatus', length: presence.status.length, sort: 'RANDOM' })];
+            const stream = presence.stream[await getQueueItem({ queueId: 'presenceStream', length: presence.stream.length, sort: 'RANDOM' })];
 
             client.user.setActivity({
                 name: status,
