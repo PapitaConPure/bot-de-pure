@@ -16,15 +16,14 @@ module.exports = {
 
             const hourai = (await Hourai.findOne({})) || new Hourai({});
             const now = Date.now();
-            const infractionUser = infractions.users?.[author.id] ?? [];
+            const infractionUser = infractions.users?.[author.id]?.filter(inf => (now - inf) < (1000 * 60 * 60 * 4)) ?? [];
             hourai.userInfractions = hourai.userInfractions ?? {};
             
             //Sancionar según total de infracciones cometidas en las últimas 4 horas
-            infractionUser = infractionUser.filter(inf => (now - inf) < (1000 * 60 * 60 * 4)); //Eliminar antiguas
             const infractionCount = infractionUser.push(now); //Añade el momento de la infracción actual y retorna el largo del arreglo
             hourai.userInfractions[author.id] = infractionUser;
             hourai.markModified('userInfractions');
-            await hourai.save().then(() => console.log('wawa')).catch(console.error);
+            await hourai.save().catch(console.error);
             switch(infractionCount) {
                 case 1:
                     return await message.react(client.emojis.cache.get('920020596526551072')).catch(console.error);
