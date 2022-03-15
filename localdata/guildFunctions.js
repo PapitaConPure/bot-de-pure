@@ -1,9 +1,9 @@
 const global = require('./config.json');
 const Hourai = require('./models/hourai.js');
-const sid = global.serverid;
+const guildIds = global.serverid;
 
 module.exports = {
-    [sid.hourai]: {
+    [guildIds.hourai]: {
         async findBotInfraction(message) {
             const { client, content, channel, author, member } = message;
             const infractions = global.hourai.infr;
@@ -11,39 +11,33 @@ module.exports = {
             if(whiteListed[channel.id] || whiteListed[channel.parent?.id]) return;
 
             const msg = content.toLowerCase();
-            const banpf = [ /^[Pp] *![\n ]*\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,(?!confession)\w/, /^,,\w/, /^~\w/, /^\/\w/, /^%\w/ ];
-            if(!banpf.some(bp => msg.match(bp))) return;
+            const blacklisted = [ /^[Pp] *![\n ]*\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,(?!confession)\w/, /^,,\w/, /^~\w/, /^\/\w/, /^%\w/, /^neko +\w/ ];
+            if(!blacklisted.some(bp => msg.match(bp))) return;
 
             const hourai = (await Hourai.findOne({})) || new Hourai({});
             const now = Date.now();
-            const infractionUsers = infractions.users;
-            const userId = author.id;
-            
-            infractionUsers[userId] = infractionUsers[userId] || [];
-            hourai.userInfractions = hourai.userInfractions || {};
+            const infractionUser = infractions.users?.[author.id] ?? [];
+            hourai.userInfractions = hourai.userInfractions ?? {};
             
             //Sancionar según total de infracciones cometidas en las últimas 4 horas
-            infractionUsers[userId] = infractionUsers[userId].filter(inf => (now - inf) < (1000 * 60 * 60 * 4)); //Eliminar antiguas
-            const infractionCount = infractionUsers[userId].push(now); //Añade el momento de la infracción actual y retorna el largo del arreglo
-            hourai.userInfractions[userId] = infractionUsers[userId];
+            infractionUser = infractionUser.filter(inf => (now - inf) < (1000 * 60 * 60 * 4)); //Eliminar antiguas
+            const infractionCount = infractionUser.push(now); //Añade el momento de la infracción actual y retorna el largo del arreglo
+            hourai.userInfractions[author.id] = infractionUser;
             hourai.markModified('userInfractions');
             await hourai.save().then(() => console.log('wawa')).catch(console.error);
             switch(infractionCount) {
                 case 1:
-                    await message.react(client.emojis.cache.get('920020596526551072')).catch(console.error);
-                    break;
+                    return await message.react(client.emojis.cache.get('920020596526551072')).catch(console.error);
 
                 case 2:
-                    await message.react(client.emojis.cache.get('796930821554044928')).catch(console.error);
-                    break;
+                    return await message.react(client.emojis.cache.get('796930821554044928')).catch(console.error);
 
                 case 3: {
                     await message.react(client.emojis.cache.get('859874631795736606')).catch(console.error);
                     const roleId = '682629889702363143'; //Hanged Doll
                     const reason = 'Colgado automáticamente por spam de bots';
                     if(!member.roles.cache.has(roleId))
-                        member.roles.add(roleId, reason).catch(console.error);
-                    break;
+                        return await member.roles.add(roleId, reason).catch(console.error);
                 }
 
                 default: {
@@ -51,8 +45,7 @@ module.exports = {
                     const roleId = '925599922370256906'; //Crucified Doll
                     const reason = 'Colgado automáticamente por spam de bots. Debido a la evasión del castigo previo, se requiere más poder para revocar la sanción';
                     if(!member.roles.cache.has(roleId))
-                        member.roles.add(roleId, reason).catch(console.error);
-                    break;
+                        return await member.roles.add(roleId, reason).catch(console.error);
                 }
             }
         },
@@ -72,10 +65,10 @@ module.exports = {
                     const fuckustr = reps.reply;
                     channel.send({ content: fuckustr[Math.floor(Math.random() * fuckustr.length)] });
                 });
-        }
+        },
     },
 
-    [sid.nlp]: {
-        fuckEveryOtherBot: (message) => module.exports[sid.hourai].fuckEveryOtherBot(message)
+    [guildIds.nlp]: {
+        fuckEveryOtherBot: (message) => module.exports[guildIds.hourai].fuckEveryOtherBot(message),
     }
 }
