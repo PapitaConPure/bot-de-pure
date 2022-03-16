@@ -11,7 +11,7 @@ module.exports = {
             if(whiteListed[channel.id] || whiteListed[channel.parent?.id]) return;
 
             const msg = content.toLowerCase();
-            const blacklisted = [ /^[Pp] *![\n ]*\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,(?!confession)\w/, /^,,\w/, /^~\w/, /^\/\w/, /^%\w/, /^[Nn][Ee][Kk][Oo] +\w/ ];
+            const blacklisted = [ /^[Pp] *![\n ]*\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,(?!confession)\w/, /^,,\w/, /^~\w/, /^\/\w/, /^%\w/, /^[Nn][Ee][Kk][Oo] +\w/, /^[Gg].+\w/ ];
             if(!blacklisted.some(bp => msg.match(bp))) return;
 
             const hourai = (await Hourai.findOne({})) || new Hourai({});
