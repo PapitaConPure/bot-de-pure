@@ -48,6 +48,8 @@
     },
     "maintenance": "",
     "seed": 0,
+    "lechitauses": 0,
+    "tenshiColor": "#608bf3",
     "serverid": {
         "bautistas": "745003943997997056",
         "sugerencias": "826632021451341824",
@@ -61,12 +63,11 @@
         "ocg":      "750095369639297065",
         "nlp":      "832018129549918218"
     },
-    "slots": {},
     "peopleid": {
         "papita": "423129757954211880",
         "bern": "239550977638793217"
     },
-    "lechitauses": 0,
+    "slots": {},
     "hourai": {
         "infr": {
             "channels": {
