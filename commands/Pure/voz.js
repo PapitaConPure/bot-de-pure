@@ -115,23 +115,25 @@ module.exports = {
             const sessionIndex = pv.sessions.findIndex(session => session.voiceId === voiceState.channelId);
 			const session = pv.sessions[sessionIndex];
 			if(!session) return await warnNotInSession();
-			const { textId, voiceId, nameChanged } = session;
+			const { textId, voiceId, roleId, nameChanged } = session;
 			if((Date.now() - nameChanged) < 60e3 * 20) return await request.reply({
 				content: [
 					'❌ Por cuestiones técnicas, solo puedes cambiar el nombre de la sesión una vez cada 20 minutos.',
-					'Espera un tiempo e inténtalo de nuevo, o conéctate a una nueva sesión',
+					`Inténtalo de nuevo <t:${Math.round(nameChanged / 1000 + 60 * 20)}:R>, o conéctate a una nueva sesión`,
 				].join('\n'),
 			});
 			pv.sessions[sessionIndex].nameChanged = Date.now();
 			pv.markModified('sessions');
 
-			const chcache = request.guild.channels.cache;
+			const guildChannels = request.guild.channels.cache;
+			const guildRoles = request.guild.roles.cache;
 			return await Promise.all([
 				pv.save(),
-				chcache.get(textId).setName(`${sessionEmote}〉${sessionName.toLowerCase().split().join('-')}`).catch(console.error),
-				chcache.get(voiceId).setName(`${sessionEmote}【${sessionName}】`).catch(console.error),
-				request.reply({ content: '✅ Nombre aplicado', ephemeral: true }).catch(console.error),
-			]);
+				guildChannels.get(textId)?.setName(`${sessionEmote}〉${sessionName.toLowerCase().split().join('-')}`, 'Renombrar sesión PuréVoice'),
+				guildChannels.get(voiceId)?.setName(`${sessionEmote}【${sessionName}】`, 'Renombrar sesión PuréVoice'),
+				guildRoles.get(roleId)?.setName(`${sessionEmote} ${sessionName}`, 'Renombrar sesión PuréVoice'),
+				request.reply({ content: '✅ Nombre aplicado', ephemeral: true }),
+			]).catch(() => request.reply({ content: '⚠ Ocurrió un error al aplicar el nombre', ephemeral: true }));
 		}
 		
 		//Inicializar instalador PuréVoice
