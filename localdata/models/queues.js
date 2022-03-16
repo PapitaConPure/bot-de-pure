@@ -64,7 +64,6 @@ const getQueueItem = async (subtractOptions) => {
     }
     
     const item = queue.content.shift();
-    console.log(item);
     queue.markModified('content');
     await queue.save();
 
