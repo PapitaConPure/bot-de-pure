@@ -6,8 +6,7 @@ module.exports = {
     [guildIds.hourai]: {
         async findBotInfraction(message) {
             const { client, content, channel, author, member } = message;
-            const infractions = global.hourai.infr;
-            const whiteListed = infractions.channels;
+            const whiteListed = global.hourai.infr.channels;
             if(whiteListed[channel.id] || whiteListed[channel.parent?.id]) return;
 
             const msg = content.toLowerCase();
@@ -16,11 +15,11 @@ module.exports = {
 
             const hourai = (await Hourai.findOne({})) || new Hourai({});
             const now = Date.now();
-            const infractionUser = infractions.users?.[author.id]?.filter(inf => (now - inf) < (1000 * 60 * 60 * 4)) ?? [];
-            hourai.userInfractions = hourai.userInfractions ?? {};
+            const infractionUser = hourai.userInfractions?.[author.id]?.filter(inf => (now - inf) < (1000 * 60 * 60 * 4)) ?? [];
             
             //Sancionar según total de infracciones cometidas en las últimas 4 horas
             const infractionCount = infractionUser.push(now); //Añade el momento de la infracción actual y retorna el largo del arreglo
+            hourai.userInfractions = hourai.userInfractions ?? {};
             hourai.userInfractions[author.id] = infractionUser;
             hourai.markModified('userInfractions');
             await hourai.save().catch(console.error);
