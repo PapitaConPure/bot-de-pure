@@ -599,9 +599,9 @@ client.on('voiceStateUpdate', async (oldState, state) => {
 
     //#region Comprobar conexión
     if(channel) {
+        console.log('Conexión al canal', channel.name, 'con', channel.members?.size, 'miembros');
         if(channel.id === pv.voiceMakerId) {
             try {
-                console.log('Conexión al canal', channel.name, 'con', channel.members.size, 'miembros');
                 const defaultName = member.user.username.slice(0, 24);
                 const [ sessionTextChannel, sessionRole, newSession ] = await Promise.all([
                     guild.channels.create(`🔶〉${defaultName}`, {
@@ -635,12 +635,12 @@ client.on('voiceStateUpdate', async (oldState, state) => {
 
                 await Promise.all([
                     pv.save(),
-                    sessionTextChannel.permissionOverwrites.edit(guild.roles.everyone, { SEND_MESSAGES: false }, { reason: 'Restringir de envío de mensajes en sesión PuréVoice' }).catch(prematureError),
-                    sessionTextChannel.permissionOverwrites.edit(guild.me, { SEND_MESSAGES: true }, { reason: 'Permitir mensajes propios en sesión PuréVoice' }).catch(prematureError),
-                    sessionTextChannel.permissionOverwrites.edit(sessionRole, { SEND_MESSAGES: true }, { reason: 'Conceder envío de mensajes a rol de sesión PuréVoice' }).catch(prematureError),
+                    sessionTextChannel.permissionOverwrites.edit(guild.roles.everyone, { SEND_MESSAGES: false }, { reason: 'Restringir de envío de mensajes en sesión PuréVoice' }),
+                    sessionTextChannel.permissionOverwrites.edit(guild.me, { SEND_MESSAGES: true }, { reason: 'Permitir mensajes propios en sesión PuréVoice' }),
+                    sessionTextChannel.permissionOverwrites.edit(sessionRole, { SEND_MESSAGES: true }, { reason: 'Conceder envío de mensajes a rol de sesión PuréVoice' }),
                     member.roles.add(sessionRole, 'Inclusión de primer miembro en sesión PuréVoice'),
-                    sessionTextChannel.setTopic(`#️⃣ ${guild} » PuréVoice » ${member} \n👥 Canal de texto de sesión. ¡Conéctate a ${channel} para conversar aquí!`).catch(prematureError),
-                ]);
+                    sessionTextChannel.setTopic(`#️⃣ ${guild} » PuréVoice » ${member} \n👥 Canal de texto de sesión. ¡Conéctate a ${channel} para conversar aquí!`),
+                ]).catch(prematureError);
                 await channel.setName('🔶').catch(prematureError);
                 await channel.setUserLimit(0).catch(prematureError);
                 await sessionTextChannel.send({
@@ -678,7 +678,7 @@ client.on('voiceStateUpdate', async (oldState, state) => {
                         sessionTextChannel?.setName(`💠〉${name}`, namingReason),
                         channel?.setName(`💠【${name}】`, namingReason),
                         sessionRole?.setName(`💠 ${name}`, namingReason),
-                    ]);
+                    ]).catch(console.error);
                 };
                 setTimeout(enforceNaming, 60e3 * 2);
             } catch(error) {
@@ -697,7 +697,7 @@ client.on('voiceStateUpdate', async (oldState, state) => {
         } else if(channel.parentId === pv.categoryId) {
             const currentSession = pv.sessions.find(session => session.voiceId === channel.id);
             if(!currentSession) return;
-            const sessionRole = guild.roles.cache.get(currentSession.textId);
+            const sessionRole = guild.roles.cache.get(currentSession.roleId);
             if(!sessionRole) return;
             const sessionTextChannel = guildChannels.get(currentSession.textId);
             if(!sessionTextChannel) return;
