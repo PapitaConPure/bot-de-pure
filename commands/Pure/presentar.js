@@ -1,8 +1,9 @@
 const { MessageEmbed } = require('discord.js'); //Integrar discord.js
 const { readdirSync } = require('fs'); //Para el contador de comandos
+const { tenshiColor } = require('../../localdata/config.json');
 
 const embed = new MessageEmbed()
-    .setColor('#608bf3')
+    .setColor(tenshiColor)
     .setThumbnail('https://i.imgur.com/3Dp8zFa.jpg')
     .addField('Creador/Dueño', ':potato: Papita con Puré#6932', true)
     .addField('Participantes', ':horse: GoddamnBernkastel#7784\n:cowboy: Imagine Breaker#6299\n:poultry_leg: Sassafras#3331', true)
