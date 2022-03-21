@@ -1,4 +1,4 @@
-const { p_pure, p_drmk } = require('./config.json');
+const { p_pure, p_drmk } = require('../config.json');
 
 module.exports = {
     /**

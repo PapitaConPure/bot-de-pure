@@ -1,5 +1,5 @@
 const { fetchFlag, fetchUser } = require('../../func.js');
-const { p_pure } = require('../../localdata/prefixget.js');
+const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
 
 const options = new CommandOptionsManager()

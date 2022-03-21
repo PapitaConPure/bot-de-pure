@@ -3,7 +3,7 @@ const func = require('../../func.js');
 const axios = require('axios');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
-const { p_pure } = require('../../localdata/prefixget');
+const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
 const { fetchFlag } = require('../../func.js');
 

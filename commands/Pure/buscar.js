@@ -4,7 +4,7 @@ const { MessageEmbed, Permissions } = require('discord.js'); //Integrar discord.
 const { engines, getBaseTags, getSearchTags } = require('../../localdata/booruprops.js'); //Variables globales
 const booru = require('booru');
 const rakki = require('./rakkidei.js');
-const { p_pure } = require('../../localdata/prefixget');
+const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
 const brief = 'Muestra imágenes #THEME';

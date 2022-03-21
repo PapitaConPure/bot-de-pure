@@ -1,6 +1,6 @@
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
-const { p_pure } = require('../../localdata/prefixget.js');
+const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { fetchFlag, isNotModerator, fetchUserID } = require('../../func.js');
 const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, MessageCollector, MessageAttachment } = require('discord.js');
 const { executeTuber } = require('../../purescript.js');

@@ -1,6 +1,6 @@
 const uses = require('../../localdata/sguses.json'); //Funciones globales
 const { fetchUser, randRange } = require('../../func.js');
-const { p_pure } = require('../../localdata/prefixget');
+const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
 const frase = [

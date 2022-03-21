@@ -1,5 +1,5 @@
 const GuildConfig = require('./localdata/models/guildconfigs.js');
-const { p_pure } = require('./localdata/prefixget.js');
+const { p_pure } = require('./localdata/customization/prefixes.js');
 const { randRange, fetchUserID } = require('./func.js');
 const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, MessageAttachment } = require('discord.js');
 

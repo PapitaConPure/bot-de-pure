@@ -1,6 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { fetchFlag, fetchArrows } = require('../../func');
-const { p_pure } = require('../../localdata/prefixget');
+const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
 const options = new CommandOptionsManager()

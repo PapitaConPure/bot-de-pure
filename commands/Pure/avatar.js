@@ -1,7 +1,7 @@
 const { MessageEmbed, CommandInteractionOptionResolver, Interaction } = require('discord.js'); //Integrar discord.js
 const { peopleid } = require('../../localdata/config.json');
 const { fetchUser, regroupText } = require('../../func.js'); //Funciones globales
-const { p_pure } = require('../../localdata/prefixget');
+const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
 const maxusers = 10;

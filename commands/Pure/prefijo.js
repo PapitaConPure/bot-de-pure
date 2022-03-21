@@ -1,7 +1,7 @@
 const global = require('../../localdata/config.json');
 const { fetchFlag } = require('../../func.js');
 const PrefixPair = require('../../localdata/models/prefixpair.js');
-const prefixget = require('../../localdata/prefixget.js');
+const prefixes = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
 const { request } = require('parse/lib/browser/RESTController');
 
@@ -29,7 +29,7 @@ module.exports = {
 		const target = fetchFlag(args, { short: ['d'], long: ['drawmaku', 'drmk'], callback: 'drmk', fallback: 'pure' });
 		const reset = fetchFlag(args, { short: ['r'], long: ['reestablecer', 'reiniciar', 'reset'], callback: true });
 		const guildsearch = { guildId: message.guild.id };
-		const { raw: preraw, regex: preregex } = prefixget[`p_${target}`](message.guildId);
+		const { raw: preraw, regex: preregex } = prefixes[`p_${target}`](message.guildId);
 
 		if(reset) {
 			message.channel.send({

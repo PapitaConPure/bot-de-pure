@@ -2,29 +2,28 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.DE",
+            "number": "Full.2.8.E5",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo reestructuraciones para una actualización mayor. Es probable que algunos comandos dejen de funcionar durante el proceso.\nTambién, las actualizaciones serán considerablemente menos frecuentes de momento",
         "changelog": [
-            "Tareas de refactorización (2.99/4)",
+            "Tareas de refactorización (3/4)",
             "PLACEHOLDER_SLASHCMD",
-            "Correcciones de errores varios",
             "p!elegir añadido",
             "p!feed incorporado",
             "p!tubérculo agregado",
-            "Mejoras generales a Feeds de imágenes",
             "p!roles integrado (H. Doll)",
             "PuréScript básico implementado",
             "p!tarjeta adherido",
             "p!número agregado",
             "Corregido (probablemente) error de memoria en Feeds",
             "p!voz añadido",
-            "Corregidos errores varios con p!voz y PuréVoice",
             "p!tubérculo actualizado",
             "PuréScript actualizado",
+            "p!anarquía ahora muestra coordenadas claramente",
+            "Trabajos de reestructuración",
             "PuréVoice actualizado",
-            "p!anarquía ahora muestra coordenadas claramente"
+            "p!config agregado"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos con p!ayuda",

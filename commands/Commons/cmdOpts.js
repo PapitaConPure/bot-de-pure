@@ -5,8 +5,6 @@
  * @typedef {Map<String, CommandOption>} CommandOptionsCollection Colección de opciones de comando indexadas por nombre de parámetro
  */
 
-const { CommandInteractionOptionResolver } = require("discord.js");
-
 const commonTypes = {
     'NUMBER':   'número',
     'TEXT':     'texto',
@@ -34,7 +32,7 @@ const typeHelp = (type) => commonTypes[type];
  * @param {*} pt - una instancia ParamType
  * @returns {pt is ParamTypeStrict}
  */
-const isParamTypeStrict = (pt) => pt && typeof pt.name === 'string' && ['string', 'number'].includes(typeof pt.expression);
+const isParamTypeStrict = (pt) => pt?.name && pt?.expression;
 
 /**Representa una opción de comando*/
 class CommandOption {
@@ -401,7 +399,7 @@ class CommandOptionsManager {
     /**
      * Devuelve un valor o función basado en si se ingresó la flag buscada o no
      * Si no se recibe ninguna entrada, se devuelve fallback
-     * @param {CommandInteractionOptionResolver} args El conjunto de entradas
+     * @param {import('discord.js').CommandInteractionOptionResolver} args El conjunto de entradas
      * @param {String} identifier El identificador de la flag
      * @param {Function} getMethod El método de procesado de entrada
      * @typedef {Object} feedback
@@ -420,8 +418,5 @@ class CommandOptionsManager {
 
 module.exports = {
     typeHelp,
-    CommandParam,
-    CommandFlag,
-    CommandFlagExpressive,
     CommandOptionsManager
 };

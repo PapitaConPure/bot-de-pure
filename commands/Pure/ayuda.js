@@ -2,7 +2,7 @@ const { readdirSync } = require('fs'); //Integrar operaciones sistema de archivo
 const { MessageEmbed } = require('discord.js');
 const { serverid } = require('../../localdata/config.json'); //Variables globales
 const { fetchFlag } = require('../../func');
-const { p_pure } = require('../../localdata/prefixget');
+const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
 const options = new CommandOptionsManager()
@@ -54,7 +54,6 @@ module.exports = {
         const embed = new MessageEmbed().setColor('#608bf3');
         const aurl = request.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 });
         const pfr = p_pure(request.guildId).raw;
-        console.log(pfr);
         const hcmd = `${pfr}${module.exports.name}`;
         
         //Análisis de comandos

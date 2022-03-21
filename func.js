@@ -1,7 +1,7 @@
 const Discord = require('discord.js'); //Discord.js
 const global = require('./localdata/config.json'); //Variables globales
 const images = require('./localdata/images.json'); //Imágenes globales
-const { p_pure } = require('./localdata/prefixget'); //Imágenes globales
+const { p_pure } = require('./localdata/customization/prefixes.js'); //Imágenes globales
 const Canvas = require('canvas'); //Node Canvas
 const chalk = require('chalk'); //Consola con formato bonito
 const concol = {

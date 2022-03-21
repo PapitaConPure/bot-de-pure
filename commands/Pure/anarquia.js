@@ -2,7 +2,7 @@ const global = require('../../localdata/config.json'); //Variables globales
 const { fetchUserID, fetchFlag } = require('../../func.js');
 const { createCanvas, loadImage } = require('canvas');
 const { MessageEmbed, MessageAttachment } = require('discord.js');
-const { p_pure } = require('../../localdata/prefixget');
+const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { Puretable, AUser, pureTableImage } = require('../../localdata/models/puretable.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
 

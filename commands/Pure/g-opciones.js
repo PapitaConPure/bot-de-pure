@@ -1,4 +1,4 @@
-const { p_pure } = require('../../localdata/prefixget.js');
+const { p_pure } = require('../../localdata/customization/prefixes.js');
 
 module.exports = {
 	name: 'g-opciones',

@@ -1,6 +1,6 @@
 const { MessageEmbed } = require('discord.js');
 const { randRange } = require('../../func');
-const { p_pure } = require('../../localdata/prefixget');
+const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
 const options = new CommandOptionsManager()

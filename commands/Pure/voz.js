@@ -1,6 +1,6 @@
 const PureVoice = require('../../localdata/models/purevoice.js');
 const { MessageEmbed, MessageActionRow, MessageButton, MessageCollector } = require('discord.js');
-const { p_pure } = require('../../localdata/prefixget.js');
+const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { isNotModerator, fetchFlag } = require('../../func.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
 

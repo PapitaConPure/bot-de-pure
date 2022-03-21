@@ -17,7 +17,7 @@ const { modifyPresence } = require('./presence.js');
 const global = require('./localdata/config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
 const cmdex = require('./localdata/cmdExceptions.js');
-const guildfunc = require('./localdata/guildFunctions.js');
+const guildfunc = require('./localdata/customization/guildFunctions.js');
 const dns = require('dns'); //Detectar host
 const { registerFont, loadImage, Canvas } = require('canvas'); //Registrar fuentes al ejecutar Bot
 const chalk = require('chalk'); //Consola con formato bonito
@@ -25,7 +25,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { CommandOptionsManager } = require('./commands/Commons/cmdOpts.js');
 const { promisify } = require('util');
 const { updateBooruFeeds } = require('./localdata/boorufeed');
-const { p_drmk, p_pure } = require('./localdata/prefixget');
+const { p_drmk, p_pure } = require('./localdata/customization/prefixes.js');
 const { tenshiColor } = require('./localdata/config.json');
 const token = (process.env.I_LOVE_MEGUMIN) ? process.env.I_LOVE_MEGUMIN : require('./localenv.json').token; //La clave del bot
 //#endregion

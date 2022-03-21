@@ -2,7 +2,7 @@ const { MessageEmbed } = require('discord.js'); //Integrar discord.js
 const { bot_status } = require('../../localdata/config.json'); //Variables globales
 const ayuda = require('./ayuda.js'); //Variables globales
 const { readdirSync } = require('fs'); //Para el contador de comandos
-const { p_pure } = require('../../localdata/prefixget');
+const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { Stats } = require('../../localdata/models/stats');
 const { improveNumber } = require('../../func');
 

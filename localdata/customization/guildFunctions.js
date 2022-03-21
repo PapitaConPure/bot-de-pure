@@ -1,5 +1,5 @@
-const global = require('./config.json');
-const Hourai = require('./models/hourai.js');
+const global = require('../config.json');
+const Hourai = require('../models/hourai.js');
 const guildIds = global.serverid;
 
 module.exports = {

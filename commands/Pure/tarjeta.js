@@ -1,6 +1,6 @@
 const Canvas = require('canvas');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
-const { p_pure } = require('../../localdata/prefixget');
+const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { MessageAttachment } = require('discord.js');
 const { improveNumber, fetchFlag } = require('../../func');
 
