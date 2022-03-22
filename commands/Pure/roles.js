@@ -118,14 +118,15 @@ module.exports = {
 	async ['selectGame'](interaction, [section]) {
 		const gameRoles = [
 			[ //Sección 0
-				{ id: '693886880667795577', emote: '🍊', label: '100% OJ'   },
+				{ id: '943412899689414726', emote: '🧊', label: 'Minecraft' },
 				{ id: '763945846705487884', emote: '🌳', label: 'Terraria'  },
 				{ id: '936360389711626280', emote: '🟨', label: 'Tetris'    },
-				{ id: '936360704783577178', emote: '♟️', label: 'Ajedrez'   },
+				{ id: '938949774462304256', emote: '🦆', label: 'Duck Game' },
 			],
 			[ //Sección 1
-				{ id: '938949774462304256', emote: '🦆', label: 'Duck Game' },
 				{ id: '936360594028757053', emote: '👶', label: 'LoL'       },
+				{ id: '693886880667795577', emote: '🍊', label: '100% OJ'   },
+				{ id: '936360704783577178', emote: '♟️', label: 'Ajedrez'   },
 				{ id: '936361454121132162', emote: '🦀', label: 'Pokémon'   },
 			],
 		];
