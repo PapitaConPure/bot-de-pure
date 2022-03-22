@@ -1,9 +1,6 @@
 const Mongoose = require('mongoose');
 
 const configFlags = {
-    showSlashHelp: 0,
-    showLevelUp: 1,
-    collectMessageData: 2,
 };
 
 const UserConfigSchema = new Mongoose.Schema({
@@ -12,6 +9,9 @@ const UserConfigSchema = new Mongoose.Schema({
     feedPings: { type: Array, default: [] },
     voice: { type: Object, default: {} },
     flags: { type: Array, default: [] },
+    showSlashHelp: { type: Boolean, default: false },
+    showLevelUp: { type: Boolean, default: false },
+    collectMessageData: { type: Boolean, default: false },
 });
 
 module.exports = {

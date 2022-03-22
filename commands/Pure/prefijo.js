@@ -3,7 +3,6 @@ const { fetchFlag } = require('../../func.js');
 const PrefixPair = require('../../localdata/models/prefixpair.js');
 const prefixes = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
-const { request } = require('parse/lib/browser/RESTController');
 
 const options = new CommandOptionsManager()
 	.addParam('prefijo', 'TEXT', 'para cambiar el prefijo del servidor', { optional: true })
