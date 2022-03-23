@@ -69,6 +69,7 @@ for(const file of commandFiles) {
 }
 client.ComandosPure = new Discord.Collection(); //Comandos de Puré
 client.SlashPure = new Discord.Collection(); //Comandos Slash de Puré
+client.SlashHouraiPure = new Discord.Collection(); //Comandos Slash de Puré
 client.EmotesPure = new Discord.Collection(); //Emotes de Puré
 commandFiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
 {
@@ -87,6 +88,10 @@ commandFiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.
     for(const file of commandFiles) {
         const command = require(`./commands/Pure/${file}`);
         client.ComandosPure.set(command.name, command);
+
+        if(command.flags?.includes('emote'))
+            client.EmotesPure.set(command.name, command);
+
         if(typeof command.interact === 'function' || command.experimental) {
             const slash = new SlashCommandBuilder()
                 .setName(command.name)
@@ -117,11 +122,13 @@ commandFiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.
                     return slash.addBooleanOption(optionBuilder);
                 });
             }
-            command.data = slash;
-            client.SlashPure.set(command.name, command.data.toJSON());
+
+            const jsonData = slash.toJSON();
+            if(!command.flags?.includes('hourai'))
+                client.SlashPure.set(command.name, jsonData);
+            else
+                client.SlashHouraiPure.set(command.name, jsonData);
         }
-        if(command.flags?.includes('emote'))
-            client.EmotesPure.set(command.name, command);
     }
 }
 //#endregion
@@ -137,8 +144,14 @@ client.on('ready', async () => {
             Routes.applicationCommands(client.application.id),
             { body: client.SlashPure },
         );
+        //console.log('Comandos registrados (global):', registeredGlobal.map(scmd => scmd.name));
+        const dedicatedServerId = (process.env.I_LOVE_MEGUMIN) ? global.serverid.hourai : global.serverid.slot1;
+        await restGlobal.put(
+            Routes.applicationGuildCommands(client.application.id, dedicatedServerId),
+            { body: client.SlashHouraiPure },
+        );
+        //console.log('Comandos registrados (hourai):', registeredHourai.map(scmd => scmd.name));
         confirm();
-        //console.log('Comandos registrados:', registered.map(scmd => scmd.name));
     } catch (error) {
         console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos slash'));
         console.error(error);
