@@ -1,8 +1,5 @@
 const Mongoose = require('mongoose');
 
-const configFlags = {
-};
-
 const UserConfigSchema = new Mongoose.Schema({
     userId: { type: String },
     customRole: { type: Object, default: {} },
@@ -14,7 +11,4 @@ const UserConfigSchema = new Mongoose.Schema({
     collectMessageData: { type: Boolean, default: false },
 });
 
-module.exports = {
-    configFlags,
-    UserConfig: Mongoose.model('UserConfig', UserConfigSchema),
-};
+module.exports = Mongoose.model('UserConfig', UserConfigSchema);
