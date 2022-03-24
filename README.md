@@ -1,8 +1,9 @@
 # bot-de-pure
 ![Discord](https://img.shields.io/discord/654471968200065034?color=%235865F2&label=Hourai%20Doll&logo=Discord&logoColor=%23fff)
 ![Libraries.io dependency status for GitHub repo](https://img.shields.io/librariesio/github/PapitaConPure/bot-de-pure?label=dependencias&logo=npm&logoColor=%23fff)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/PapitaConPure/bot-de-pure)
 ![GitHub repo file count](https://img.shields.io/github/directory-file-count/PapitaConPure/bot-de-pure?label=archivos)
-![GitHub repo size](https://img.shields.io/github/repo-size/PapitaConPure/bot-de-pure?label=tama%C3%B1o)
+![GitHub repo size](https://img.shields.io/github/repo-size/PapitaConPure/bot-de-pure)
 ![Twitter Follow](https://img.shields.io/twitter/follow/PapitaPure?label=%40PapitaPure&style=social)
 ![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UCRXbJiF9G6D0nqq3mU38-gw?label=Papita%20con%20Pur%C3%A9&style=social)
 
