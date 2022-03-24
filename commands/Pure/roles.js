@@ -1,6 +1,8 @@
-const { hourai } = require('../../localdata/config.json');
+const { hourai, peopleid } = require('../../localdata/config.json');
+const Hourai = require('../../localdata/models/hourai.js');
 const { colorsRow } = require('./colores.js')
 const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.js');
+const { p_pure } = require('../../localdata/customization/prefixes');
 
 const getAddRemoveRows = (roles) => [
 	new MessageActionRow().addComponents(roles.map(role =>
@@ -57,6 +59,12 @@ module.exports = {
 					.setPlaceholder('Elige una categoría')
 					.setOptions([
 						{
+							label: 'Rol Personalizado (solo Boosters)',
+							description: '¡Crea y edita tu propio rol! (solo uno)',
+							emoji: '778180421304188939',
+							value: 'selectCustomRole',
+						},
+						{
 							label: 'Colores',
 							description: '¡Elige tu bando en Hourai Doll!',
 							emoji: '853402616208949279',
@@ -86,12 +94,12 @@ module.exports = {
 							emoji: '704612794921779290',
 							value: 'selectReligion',
 						},
-						/*{
+						{
 							label: 'Caramelos',
 							description: 'Cargados de amor siniestro',
 							emoji: '778180421304188939',
 							value: 'selectCandy',
-						},*/
+						},
 					]),
 			)],
 		});
@@ -111,6 +119,55 @@ module.exports = {
 		return await interaction.reply({
 			files: [hourai.images.colors],
 			components: [colorsRow],
+			ephemeral: true,
+		});
+    },
+
+	/**
+	 * @param {import('discord.js').ButtonInteraction} interaction
+	 */
+	async ['selectCustomRole'](interaction) {
+		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
+		/**@type {Date}*/
+		const boostTimestamp = interaction.member?.premiumSinceTimestamp;
+		const currentTimestamp = (new Date(Date.now())).getTime();
+		const boostedRecently = (currentTimestamp - boostTimestamp) < (60e3 * 60 * 24 * 35);
+		const allowed = interaction.user.id === peopleid.papita || boostedRecently;
+		const customRoleId = houraiDB.customRoles?.[interaction.user.id];
+
+		return await interaction.reply({
+			embeds: [
+				new MessageEmbed()
+					.setColor('WHITE')
+					.addField('Rol Personalizado', [
+						'Crea, modifica o elimina tu Rol Personalizado de Hourai Doll',
+						'Esto es una recompensa para aquellos que boostean el servidor',
+						'Nótese que esta característica todavía no está disponible. Espera un tiempo a que se implemente',
+					].join('\n')),
+			],
+			components: [new MessageActionRow().addComponents(
+				(!interaction.member.roles.cache.get(customRoleId)) ? [
+					new MessageButton()
+						.setCustomId('roles_customRole_CREATE')
+						.setEmoji('💡')
+						.setLabel('Crear rol')
+						.setStyle('SUCCESS')
+						.setDisabled(!allowed),
+				] : [
+					new MessageButton()
+						.setCustomId('roles_customRole_EDIT')
+						.setEmoji('🎨')
+						.setLabel('Editar rol')
+						.setStyle('PRIMARY')
+						.setDisabled(!allowed),
+					new MessageButton()
+						.setCustomId('roles_customRole_DELETE')
+						.setEmoji('🗑')
+						.setLabel('Eliminar Religión')
+						.setStyle('DANGER')
+						.setDisabled(!allowed),
+				]
+			)],
 			ephemeral: true,
 		});
     },
@@ -216,9 +273,10 @@ module.exports = {
 
 	async ['addRole'](interaction, args) {
 		const { member } = interaction;
-		const [ rid ] = args;
+		const rid = args.shift();
 		if(member.roles.cache.has(rid))
 			return await interaction.reply({ content: '⚠️ Ya tienes ese rol', ephemeral: true });
+		
 		return await Promise.all([
 			member.roles.add(rid),
 			interaction.reply({ content: '✅ Rol entregado', ephemeral: true }),
@@ -264,4 +322,109 @@ module.exports = {
 		);
 		interaction.reply({ content: '✅ Roles actualizados', ephemeral: true });
     },
+
+	/**@param {import('discord.js').ButtonInteraction} interaction*/
+	async ['customRole'](interaction, [ operation ]) {
+		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
+		const uid = interaction.user.id;
+		switch(operation) {
+			case 'CREATE': {
+				houraiDB.customRoles ??= {};
+				const customRole = await interaction.guild.roles.create({
+					name: interaction.member.nickname ?? interaction.user.username,
+					position: (await interaction.guild.roles.fetch('857544764499951666'))?.rawPosition,
+					reason: 'Creación de rol personalizado de miembro',
+				});
+				houraiDB.customRoles[uid] = customRole.id;
+				houraiDB.markModified('customRoles');
+				await Promise.all([
+					houraiDB.save(),
+					interaction.member.roles.add(customRole),
+				]);
+
+				return await module.exports.customRoleWizard(interaction, customRole.id);
+			}
+			
+			case 'EDIT': {
+				const roleId = houraiDB.customRoles[uid];
+				return await module.exports.customRoleWizard(interaction, roleId);
+			}
+
+			case 'DELETE': {
+				houraiDB.customRoles[uid] = null;
+				delete houraiDB.customRoles[uid];
+				houraiDB.markModified('customRoles');
+
+				return await Promise.all([
+					interaction.member.roles.remove(roleId),
+					houraiDB.save(),
+					interaction.update({
+						content: '🗑 Rol personalizado eliminado',
+						components: [],
+						ephemeral: true,
+					}),
+				]);
+			}
+		}
+	},
+
+	/**@param {import('discord.js').ButtonInteraction} interaction*/
+	async customRoleWizard(interaction, roleId) {
+		/**@type {import('discord.js').Role}*/
+		const customRole = interaction.member.roles.cache.get(roleId);
+		if(!customRole)
+			return await interaction.update({
+				content: `⚠ No se encontró tu Rol Personalizado. Prueba usando \`${p_pure(interaction.guildId).raw}roles\` una vez más para crear uno nuevo`,
+				embeds: [],
+				components: [],
+			});
+
+		const embed = new MessageEmbed()
+			.setColor('NAVY')
+			.addField('Personaliza tu rol', 'Especifica el nombre, código de color hexadecimal y/o enlace de ícono de tu rol')
+			.addField('Edición', 'Envía en uno o varios mensajes las propiedades mencionadas, no te olvides del "#" para el código hexadecimal')
+			.addField('Finalizar', 'Escribe "Listo" cuando hayas terminado de editar. Si no finalizas manualmente, la edición finalizará automáticamente luego de 5 minutos');
+		
+		const filter = m => !m.author.bot && m.author.id === interaction.user.id;
+		const coll = interaction.channel.createMessageCollector({ filter, time: 60e3 * 5, maxProcessed: 10 });
+
+		coll.on('collect', m => {
+			if(!m.content) return;
+			if(m.content.toLowerCase() === 'listo')
+				return coll.stop();
+
+			const reportSuccess = (prop) => m.reply({ content: `✅ ${prop} de Rol Personalizado actualizado` });
+			const reportError = (prop, extra) => m.reply({ content: [`⚠ ${prop} de Rol Personalizado no se pudo actualizar`, extra].filter(r => r).join('\n') });
+			let args = m.content.split(/[ \n]+/);
+			args = args.map(arg => {
+				if(arg.startsWith('https://')) {
+					customRole.edit({ icon: arg })
+					.then(() => reportSuccess('Ícono'))
+					.catch(() => reportError('Ícono', 'Puede que el server necesite más boosts para cambiar esto'));
+					return;
+				}
+
+				if(arg.startsWith('#')) {
+					customRole.edit({ color: arg })
+					.then(() => reportSuccess('Color'))
+					.catch(() => reportError('Color'));
+					return;
+				}
+
+				return arg;
+			}).filter(arg => arg);
+
+			if(args.length)
+				return customRole.edit({ name: args.join(' ') })
+				.then(() => reportSuccess('Nombre'))
+				.catch(() => reportError('Nombre'));
+		});
+
+		coll.on('end', () => interaction.channel.send({ content: '✅ Edición de Rol Personalizado finalizada' }));
+
+		return await interaction.update({
+			embeds: [embed],
+			components: [],
+		});
+	}
 };
