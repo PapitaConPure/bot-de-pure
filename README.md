@@ -81,6 +81,6 @@ Personas involucradas en el desarrollo de Bot de Puré, con sus tags de Discord.
 * Imagine Breaker#6299
 * Sassafras#3331
 ### Participantes
-* Rakkidei#4790 [![pixiv](https://policies.pixiv.net/logo_min.ffa306e1.png)](https://www.pixiv.net/en/users/58442175) [![Twitter](https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn1.iconfinder.com%2Fdata%2Ficons%2Flogotypes%2F32%2Ftwitter-128.png&f=1&nofb=1)](https://twitter.com/rakkidei)
+* Rakkidei#4790 [![pixiv](https://static-s.aa-cdn.net/img/ios/337248563/2489b082849b6de4e4ebd8992f788952?v=1)](https://www.pixiv.net/en/users/58442175) [![Twitter](https://companiesmarketcap.com/img/company-logos/256/TWTR.png)](https://twitter.com/rakkidei)
 * Super Arathy's 12#8235
 * Taton#0122
