@@ -163,7 +163,7 @@ module.exports = {
 					new MessageButton()
 						.setCustomId('roles_customRole_DELETE')
 						.setEmoji('🗑')
-						.setLabel('Eliminar Religión')
+						.setLabel('Eliminar rol')
 						.setStyle('DANGER')
 						.setDisabled(!allowed),
 				]
