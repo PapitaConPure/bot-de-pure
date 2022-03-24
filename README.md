@@ -51,14 +51,14 @@ Las tecnologías del proyecto son:
 * Ofrecer una amplia capacidad de moderación en diferentes campos
 * Sostener un ambiente relajado y casual con comandos de entretenimiento
 * Divertirse
-#### Objetivos
-- [ ] Terminar PuréScript
-- [ ] Hacer p!ajedrez
-- [ ] Agregar ejemplos interactivos de comandos con p!ayuda
-- [ ] Restaurar comandos Drawmaku
-- [ ] Minijuegos individuales y tipo "fiesta"
-- [ ] Agregar GIFs infográficos en comandos
-- [ ] Crear página de ayuda Web para no limitarse a mensajes de Discord
+#### Objetivos actuales
+*Terminar PuréScript
+* Hacer p!ajedrez
+* Agregar ejemplos interactivos de comandos con p!ayuda
+* Restaurar comandos Drawmaku
+* Minijuegos individuales y tipo "fiesta"
+* Agregar GIFs infográficos en comandos
+* Crear página de ayuda Web para no limitarse a mensajes de Discord
 
 ### Tareas de refactorización
 Empecé este proyecto con 0 conocimiento sobre JavaScript y para cuando me di cuenta creció demasiado.
