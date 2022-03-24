@@ -1,6 +1,6 @@
 const { MessageEmbed } = require('discord.js'); //Integrar discord.js
 const { fetchArrows, fetchFlag, fetchUser, improveNumber } = require('../../func');
-const { startuptime } = require('../../localdata/config.json'); //Variables globales
+const { startupTime } = require('../../localdata/config.json'); //Variables globales
 const { ChannelStats, Stats } = require('../../localdata/models/stats');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
@@ -146,7 +146,7 @@ module.exports = {
 		const servermonth = Math.floor(tiempoguild/1000/3600/24/30) % 12;
 		const serveryear = Math.floor(tiempoguild/1000/3600/24/365);
 
-		const tiempobot = Date.now() - startuptime;
+		const tiempobot = Date.now() - startupTime;
 		const botms = Math.floor(tiempobot) % 100;
 		const botsec = Math.floor(tiempobot/1000) % 60;
 		const botmin = Math.floor(tiempobot/1000/60) % 60;

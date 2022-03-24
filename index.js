@@ -26,7 +26,6 @@ const { CommandOptionsManager } = require('./commands/Commons/cmdOpts.js');
 const { promisify } = require('util');
 const { updateBooruFeeds } = require('./localdata/boorufeed');
 const { p_drmk, p_pure } = require('./localdata/customization/prefixes.js');
-const { tenshiColor } = require('./localdata/config.json');
 const token = process.env.I_LOVE_MEGUMIN ?? (require('./localenv.json').token); //La clave del bot
 //#endregion
 
@@ -161,10 +160,10 @@ client.on('ready', async () => {
     cl[cl.indexOf('PLACEHOLDER_SLASHCMD')] = `Agregando soporte de ***__[/comandos](https://blog.discord.com/slash-commands-are-here-8db0a385d9e6)__*** *(${client.SlashPure.size} comandos listos)*`;
 
 	console.log(chalk.cyan('Semilla y horario calculados'));
-    let stt = Date.now();
-    global.startuptime = stt;
-    global.lechitauses = stt;
-    global.seed = stt / 60000;
+    let currentTime = Date.now();
+    global.startupTime = currentTime;
+    global.lechitauses = currentTime;
+    global.seed = currentTime / 60000;
 
 	console.log(chalk.magenta('Obteniendo información del host...'));
     try {
@@ -173,23 +172,21 @@ client.on('ready', async () => {
         global.bot_status.host = `${host.service}://${host.hostname}/`;
         confirm();
     } catch(err) {
+        global.bot_status.host = 'Desconocido';
         console.log(chalk.red('Fallido.'));
         console.error(err);
     }
 
     console.log(chalk.magenta('Indexando Slots de Puré...'));
-    const gds = await Promise.all([
+    (await Promise.all([
         client.guilds.fetch(global.serverid.slot1),
         client.guilds.fetch(global.serverid.slot2),
         client.guilds.fetch(global.serverid.slot3),
-    ]);
-    gds.forEach((f, i) => { global.slots[`slot${i + 1}`] = f; });
-    const logs = await Promise.all([
+    ])).forEach((guild, i) => { global.slots[`slot${i + 1}`] = guild; });
+    [ global.logch, global.confch ] = (await Promise.all([
         global.slots.slot1.channels.resolve('870347940181471242'),
         global.slots.slot1.channels.resolve('870347965192097812'),
-    ]);
-    global.logch = logs[0];
-    global.confch = logs[1];
+    ]));
     confirm();
     
     //Cargado de datos de base de datos
@@ -624,7 +621,7 @@ client.on('voiceStateUpdate', async (oldState, state) => {
                     }),
                     guild.roles.create({
                         name: `🔶 PV ${defaultName}`,
-                        color: tenshiColor,
+                        color: global.tenshiColor,
                         mentionable: true,
                         reason: 'Inyectar Rol Efímero PuréVoice',
                     }),

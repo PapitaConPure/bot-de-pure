@@ -16,7 +16,7 @@ module.exports = {
 
 	async execute({ channel, author }, _) {
 		//Acción de comando
-		const sent = await channel.send({ content: `**Host** \`${global.bot_status.host}\`\n**ID de InstProc** \`${global.startuptime}\`\n**Estado** \`[${global.maintenance.length?'PAUSADO':'OPERANDO'}]\``})
+		const sent = await channel.send({ content: `**Host** \`${global.bot_status.host}\`\n**ID de InstProc** \`${global.startupTime}\`\n**Estado** \`[${global.maintenance.length?'PAUSADO':'OPERANDO'}]\``})
 
 		const reactions = (global.maintenance.length)?['🌀']:['💤','👁️'];
 		Promise.all(reactions.map(reaction => sent.react(reaction)));
