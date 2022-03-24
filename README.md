@@ -14,7 +14,7 @@ Como personaje, es una robot torpe y agresiva en algunos casos, pero parece tene
 
 ## Índice
 * [Convenciones de Desarrollo](#convenciones-de-desarrollo)
-* [Tecnologías utilizadas](#tecnologías-utilizadas)
+* [Tecnologías](#tecnologías)
 * [Características](#características)
 * [Tareas de refactorización](#tareas-de-refactorización)
 * [Integrantes](#integrantes)
@@ -25,9 +25,13 @@ Con el fin de trabajar de forma más eficiente y organizada, se siguen las sigui
   - deben tener aliases siempre que sea posible
   - los aliases deberían ser sinónimos, versiones acortadas o las iniciales del nombre del comando
   - se deberían incluir aliases en inglés siempre que sea posible
+  - siempre que sea aplicable, debería haber una versión por mensaje y una versión por "/" del comando
+  - Deben tener una página de ayuda lo más descriptiva y breve posible
 * **Parámetros**
   - deberían de ser los más intuitivos ya que forman parte del uso básico de la mayoría de comandos
-  - se deben ingresar en orden a menos que el ordenarlos se vuelva más confuso para el comando en cuestión
+  - se deben ingresar en un orden específico, a menos que:
+    - el darles un orden vuelva muy confuso al comando en cuestión
+    - el orden de los mismos sea por motivos demasiado abstractos
 * **Banderas**
   - se deben de poder ingresar en cualquier orden
   - deben tener, si es posible, versiones cortas y largas
@@ -86,7 +90,7 @@ Personas involucradas en el desarrollo de Bot de Puré, con sus tags de Discord.
 * GoddamnBernkastel#7784
 * Imagine Breaker#6299
 * Sassafras#3331
-### Participantes
-* Rakkidei#4790 <a href="https://www.pixiv.net/en/users/58442175"><img title="pixiv" src="https://static-s.aa-cdn.net/img/ios/337248563/2489b082849b6de4e4ebd8992f788952?v=1" width=24px height=24px></a> <a href="https://twitter.com/rakkidei"><img title="Twitter" src="https://companiesmarketcap.com/img/company-logos/256/TWTR.png" width=24px height=24px></a>
+### Colaboradores
+* Rakkidei#4790 <a href="https://www.pixiv.net/en/users/58442175"><img title="pixiv" src="https://static-s.aa-cdn.net/img/ios/337248563/2489b082849b6de4e4ebd8992f788952?v=1" width=16px height=16px></a> <a href="https://twitter.com/rakkidei"><img title="Twitter" src="https://companiesmarketcap.com/img/company-logos/256/TWTR.png" width=16px height=16px></a>
 * Super Arathy's 12#8235
 * Taton#0122
