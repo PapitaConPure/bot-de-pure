@@ -33,9 +33,9 @@ Con el fin de trabajar de forma más eficiente y organizada, se siguen las sigui
   - las versiones cortas deberían ser la inicial de la contraparte larga
   - las versiones largas solo deberían tener caracteres alfabéticos
 
-## Tecnologías utilizadas
-Las tecnologías del proyecto son:
+## Tecnologías
 * [Node.js](https://nodejs.org) 16.14.2
+* [MongoDB](https://nodejs.org), [Mongoose](https://github.com/Automattic/mongoose)
 
 ## Características
 * Bot multipropósito que se desempeña eficientemente en mayoría de sus funciones
