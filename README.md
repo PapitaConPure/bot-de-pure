@@ -52,10 +52,13 @@ Las tecnologías del proyecto son:
 * Sostener un ambiente relajado y casual con comandos de entretenimiento
 * Divertirse
 #### Objetivos
-* Agregar ejemplos interactivos de comandos con p!ayuda
-* Minijuegos individuales y tipo "fiesta"
-* Agregar GIFs infográficos en comandos
-* Crear página de ayuda Web para no limitarse a mensajes de Discord
+- [ ] Terminar PuréScript
+- [ ] Hacer p!ajedrez
+- [ ] Agregar ejemplos interactivos de comandos con p!ayuda
+- [ ] Restaurar comandos Drawmaku
+- [ ] Minijuegos individuales y tipo "fiesta"
+- [ ] Agregar GIFs infográficos en comandos
+- [ ] Crear página de ayuda Web para no limitarse a mensajes de Discord
 
 ### Tareas de refactorización
 Empecé este proyecto con 0 conocimiento sobre JavaScript y para cuando me di cuenta creció demasiado.
@@ -64,6 +67,7 @@ Esta lista de objetivos busca darle legibilidad y mantenibilidad a todo lo que c
 - [x] Preparar archivos de comando para búsqueda por metadata
 - [x] Organizar archivos comunes en subdirectorios
 - [x] Preparar base de datos persistente
+- [ ] Optimizar todos los comandos
 - [ ] Optimizar todo func.js
 - [ ] Extraer algunos objetos de config.json en nuevos archivos
 - [ ] Deshacer el desastre de index.js en muchos archivos. Revisar lógica
