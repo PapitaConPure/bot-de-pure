@@ -61,7 +61,7 @@ module.exports = {
 						{
 							label: 'Rol Personalizado (solo Boosters)',
 							description: '¡Crea y edita tu propio rol! (solo uno)',
-							emoji: '778180421304188939',
+							emoji: '919114849894690837',
 							value: 'selectCustomRole',
 						},
 						{
