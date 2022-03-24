@@ -333,7 +333,7 @@ module.exports = {
 				const customRole = await interaction.guild.roles.create({
 					name: interaction.member.nickname ?? interaction.user.username,
 					position: (await interaction.guild.roles.fetch('857544764499951666'))?.rawPosition,
-					reason: 'Creación de rol personalizado de miembro',
+					reason: 'Creación de Rol Personalizado de miembro',
 				});
 				houraiDB.customRoles[uid] = customRole.id;
 				houraiDB.markModified('customRoles');
@@ -351,15 +351,17 @@ module.exports = {
 			}
 
 			case 'DELETE': {
+				const roleId = houraiDB.customRoles[uid];
 				houraiDB.customRoles[uid] = null;
 				delete houraiDB.customRoles[uid];
 				houraiDB.markModified('customRoles');
 
 				return await Promise.all([
-					interaction.member.roles.remove(roleId),
+					interaction.guild.roles.delete(roleId, 'Eliminación de Rol Personalizado de miembro'),
 					houraiDB.save(),
 					interaction.update({
 						content: '🗑 Rol personalizado eliminado',
+						embeds: [],
 						components: [],
 						ephemeral: true,
 					}),
