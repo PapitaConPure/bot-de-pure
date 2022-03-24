@@ -1,4 +1,6 @@
 # bot-de-pure
+![Nuestro Discord](https://img.shields.io/discord/654471968200065034?color=%237289da&label=Hourai%20Doll&logo=Discord&logoColor=%23fff)
+
 Bot de entretenimiento, búsqueda de imágenes y utilidades generales varias para Discord. Utiliza comandos tradicionales con adiciones inspiradas en terminales como <code>--flags</code>.<br>
 Como personaje, es una robot torpe y agresiva en algunos casos, pero parece tener espíritu.
 
@@ -11,9 +13,7 @@ Como personaje, es una robot torpe y agresiva en algunos casos, pero parece tene
 * [Tareas de refactorización](#tareas-de-refactorización)
 * [Integrantes](#integrantes)
 
-
-## Contenido
-### Convenciones de Desarrollo
+## Convenciones de Desarrollo
 Con el fin de trabajar de forma más eficiente y organizada, se siguen las siguientes convenciones
 * **Comandos**
   - deben tener aliases siempre que sea posible
@@ -28,11 +28,11 @@ Con el fin de trabajar de forma más eficiente y organizada, se siguen las sigui
   - las versiones cortas deberían ser la inicial de la contraparte larga
   - las versiones largas solo deberían tener caracteres alfabéticos
 
-### Tecnologías utilizadas
+## Tecnologías utilizadas
 Las tecnologías del proyecto son:
 * [Node.js](https://nodejs.org) 16.14.2
 
-### Características
+## Características
 * Bot multipropósito que se desempeña eficientemente en mayoría de sus funciones
 * Personalización a nivel de servidor y usuario
 * Fácil y rápida automatización de múltiples aspectos de un servidor gracias al uso de Asistentes de Configuración:
@@ -45,13 +45,13 @@ Las tecnologías del proyecto son:
   - Los "Tubérculos PuréScript" ejecutan una serie de instrucciones PuréScript para enviar respuestas más elaboradas
 * Comandos altamente dinámicos
 * Páginas de ayuda normalizadas y súper detalladas
-#### Metas
+### Metas
 * Brindar más herramientas de personalización a nivel de servidor, canal y usuario; que sean fáciles de entender y ejecutar
 * Ofrecer potentes herramientas de automatización que empoderen a TODOS los usuarios y aumenten la actividad del servidor
 * Ofrecer una amplia capacidad de moderación en diferentes campos
 * Sostener un ambiente relajado y casual con comandos de entretenimiento
 * Divertirse
-#### Objetivos actuales
+### Objetivos actuales
 *Terminar PuréScript
 * Hacer p!ajedrez
 * Agregar ejemplos interactivos de comandos con p!ayuda
@@ -60,7 +60,7 @@ Las tecnologías del proyecto son:
 * Agregar GIFs infográficos en comandos
 * Crear página de ayuda Web para no limitarse a mensajes de Discord
 
-### Tareas de refactorización
+## Tareas de refactorización
 Empecé este proyecto con 0 conocimiento sobre JavaScript y para cuando me di cuenta creció demasiado.
 Es de esperarse que mi primera vez con un nuevo lenguaje no sea la mejor, sin mencionar las diferencias de experiencia. Esto repercutió principalmente en los archivos de index.js, func.js y config.json.
 Esta lista de objetivos busca darle legibilidad y mantenibilidad a todo lo que conforma la estructura principal de Bot de Puré, además de volver mucho más eficiente la creación de nuevos comandos y más accesible la adición de nuevas características.
@@ -72,14 +72,15 @@ Esta lista de objetivos busca darle legibilidad y mantenibilidad a todo lo que c
 - [ ] Extraer algunos objetos de config.json en nuevos archivos
 - [ ] Deshacer el desastre de index.js en muchos archivos. Revisar lógica
 
-### Integrantes
+## Integrantes
 Personas involucradas en el desarrollo de Bot de Puré, con sus tags de Discord.
-* **Creador** Papita con Puré#6932 _(Programador, Editor, Diseñador, Decisor, Ideas, Testing)_
-* **Participantes**
-  - GoddamnBernkastel#6299 _(Editor, Decisor)_
-  - Imagine Breaker#6299 _(Decisor, Ideas, Testing)_
-  - Sassafras#3331  _(Decisor, Ideas, Testing)_
-* **Colaboradores**
-  - Rakkidei#4790 _(Artista | [pixiv](https://www.pixiv.net/en/users/58442175) [Twitter](https://twitter.com/rakkidei))_
-  - Super Arathy's 12#8235 _(Ideas, Testing)_
-  - Taton#0122 _(Editor)_
+### Desarrolladores
+* [Papita con Puré#6932](https://github.com/PapitaConPure)
+### Participantes
+* GoddamnBernkastel#7784
+* Imagine Breaker#6299
+* Sassafras#3331
+### Participantes
+* Rakkidei#4790 [![pixiv](https://policies.pixiv.net/logo_min.ffa306e1.png)](https://www.pixiv.net/en/users/58442175) [![Twitter](https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn1.iconfinder.com%2Fdata%2Ficons%2Flogotypes%2F32%2Ftwitter-128.png&f=1&nofb=1)](https://twitter.com/rakkidei)
+* Super Arathy's 12#8235
+* Taton#0122
