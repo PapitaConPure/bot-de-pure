@@ -6,7 +6,7 @@ const fs = require('fs'); //Sistema de archivos
 
 //Base de datos
 const Mongoose = require('mongoose');
-const uri = (process.env.MONGODB_URI) ? process.env.MONGODB_URI : require('./localenv.json').dburi;
+const uri = process.env.MONGODB_URI ?? (require('./localenv.json')?.dburi);
 const prefixpair = require('./localdata/models/prefixpair.js');
 const { Stats, ChannelStats } = require('./localdata/models/stats.js');
 const { Puretable, defaultEmote, pureTableImage } = require('./localdata/models/puretable.js');
@@ -27,7 +27,7 @@ const { promisify } = require('util');
 const { updateBooruFeeds } = require('./localdata/boorufeed');
 const { p_drmk, p_pure } = require('./localdata/customization/prefixes.js');
 const { tenshiColor } = require('./localdata/config.json');
-const token = (process.env.I_LOVE_MEGUMIN) ? process.env.I_LOVE_MEGUMIN : require('./localenv.json').token; //La clave del bot
+const token = process.env.I_LOVE_MEGUMIN ?? (require('./localenv.json').token); //La clave del bot
 //#endregion
 
 //#region Parámetros Iniciales

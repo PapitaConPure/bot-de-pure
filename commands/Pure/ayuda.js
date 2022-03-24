@@ -38,9 +38,9 @@ module.exports = {
 	 * @param {Boolean} isSlash
 	 */
 	async execute(request, args, isSlash = false) {
-        const fex =  isSlash ? options.fetchFlag(args, 'exclusivo', { callback: true }) : fetchFlag(args, { ...options.flags.get('exclusivo').structure, callback: true });
-        const fall = isSlash ? options.fetchFlag(args, 'todo',      { callback: true }) : fetchFlag(args, { ...options.flags.get('todo').structure,      callback: true });
-        const auth = {
+        const filterExclusive =  isSlash ? options.fetchFlag(args, 'exclusivo', { callback: true }) : fetchFlag(args, { ...options.flags.get('exclusivo').structure, callback: true });
+        const filterAll =        isSlash ? options.fetchFlag(args, 'todo',      { callback: true }) : fetchFlag(args, { ...options.flags.get('todo').structure,      callback: true });
+        const filterAuth = {
             mod: request.member.permissions.has('MANAGE_ROLES'),
             papa: (request.author ?? request.user).id === '423129757954211880',
             hourai: request.guild.id === serverid.hourai,
@@ -66,12 +66,12 @@ module.exports = {
                 const filtered = (() => {
                     if(!flags) return true;
                     if(flags.includes('guide')) return false;
-                    if(fall) return true;
+                    if(filterAll) return true;
                     if(['maintenance', 'outdated'].some(f => flags.includes(f))
-                    || (!flags.every(f => (auth[f] === undefined || auth[f]))))
+                    || (!flags.every(f => (filterAuth[f] === undefined || filterAuth[f]))))
                         return false;
                     if(!filters.length) return true;
-                    return fex
+                    return filterExclusive
                         ? filters.every(f => flags.includes(f))
                         : filters.some(f => flags.includes(f));
                 })();
