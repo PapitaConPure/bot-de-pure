@@ -1,11 +1,10 @@
 # bot-de-pure
 ![Discord](https://img.shields.io/discord/654471968200065034?color=%235865F2&label=Hourai%20Doll&logo=Discord&logoColor=%23fff)
-![Twitter Follow](https://img.shields.io/twitter/follow/PapitaPure?label=%40PapitaPure&style=social)
-![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UCRXbJiF9G6D0nqq3mU38-gw?label=Papita%20con%20Pur%C3%A9&style=social)
 ![Libraries.io dependency status for GitHub repo](https://img.shields.io/librariesio/github/PapitaConPure/bot-de-pure?label=dependencias&logo=npm&logoColor=%23fff)
 ![GitHub repo file count](https://img.shields.io/github/directory-file-count/PapitaConPure/bot-de-pure?label=archivos)
 ![GitHub repo size](https://img.shields.io/github/repo-size/PapitaConPure/bot-de-pure?label=tama%C3%B1o)
-![Lines of code](https://img.shields.io/tokei/lines/github/PapitaConPure/bot-de-pure?label=l%C3%ADneas)
+![Twitter Follow](https://img.shields.io/twitter/follow/PapitaPure?label=%40PapitaPure&style=social)
+![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UCRXbJiF9G6D0nqq3mU38-gw?label=Papita%20con%20Pur%C3%A9&style=social)
 
 Bot de entretenimiento, búsqueda de imágenes y utilidades generales varias para Discord. Utiliza comandos tradicionales con adiciones inspiradas en terminales como <code>--flags</code>.<br>
 Como personaje, es una robot torpe y agresiva en algunos casos, pero parece tener espíritu.
