@@ -61,38 +61,49 @@ module.exports = {
                     //Botón de Post de Gelbooru
                     const row = new MessageActionRow().addComponents(
                         new MessageButton()
-                            //.setLabel('Post')
                             .setEmoji('919398540172750878')
                             .setStyle('LINK')
                             .setURL(`https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`),
                     );
+                    let embedColor = '#000000';
 
                     //Botón de Fuente (si está disponible)
                     const addSourceButton = (source) => {
-                        if(source.match(/(http:\/\/|https:\/\/)?(www\.)?(([a-zA-Z0-9-]){2,}\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/)) {
-                            let emoji;
-                            if(source.indexOf('pixiv.net') !== -1)
-                                emoji = '919403803126661120';
-                            else if(source.match(/twitter\.com|twimg\.com/))
-                                emoji = '919403803114094682';
-                            else
-                                emoji = '919114849894690837';
-                            try {
-                                row.addComponents(
-                                    new MessageButton()
-                                        //.setLabel('Original')
-                                        .setEmoji(emoji)
-                                        .setStyle('LINK')
-                                        .setURL(source),
-                                );
-                            } catch(err) {
-                                row.addComponents(
-                                    new MessageButton()
-                                        .setEmoji(emoji)
-                                        .setStyle('DANGER')
-                                        .setDisabled(true),
-                                );
-                            }
+                        if(!source.match(/(http:\/\/|https:\/\/)?(www\.)?(([a-zA-Z0-9-]){2,}\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/))
+                            return;
+                        
+                        let emoji;
+                        if(source.indexOf('pixiv.net') !== -1) {
+                            emoji = '919403803126661120';
+                            embedColor = '#0096fa';
+                        } else if(source.match(/twitter\.com|twimg\.com/)) {
+                            emoji = '919403803114094682';
+                            embedColor = '#1da1f2';
+                        } else if(source.indexOf('tumblr.com') !== -1) {
+                            emoji = '956817457413255178';
+                            embedColor = '#36465d';
+                        } else if(source.match(/reddit\.com|i\.redd\.it/)) {
+                            emoji = '956817457803296798';
+                            embedColor = '#ff4500';
+                        } else {
+                            emoji = '919114849894690837';
+                            embedColor = '#1bb76e';
+                        }
+
+                        try {
+                            row.addComponents(
+                                new MessageButton()
+                                    .setEmoji(emoji)
+                                    .setStyle('LINK')
+                                    .setURL(source),
+                            );
+                        } catch(err) {
+                            row.addComponents(
+                                new MessageButton()
+                                    .setEmoji(emoji)
+                                    .setStyle('DANGER')
+                                    .setDisabled(true),
+                            );
                         }
                     };
                     const source = image.source;
@@ -107,7 +118,6 @@ module.exports = {
                     if(maxTags === 0 || image.tags.length > maxTags)
                         row.addComponents(
                             new MessageButton()
-                                //.setLabel('Tags')
                                 .setEmoji('921788204540100608')
                                 .setStyle('PRIMARY')
                                 .setCustomId('feed_showFeedImageTags'),
@@ -115,7 +125,6 @@ module.exports = {
                     else
                         row.addComponents(
                             new MessageButton()
-                                //.setLabel('Enlace')
                                 .setEmoji('922669195521568818')
                                 .setStyle('PRIMARY')
                                 .setCustomId('feed_showFeedImageUrl'),
@@ -129,7 +138,6 @@ module.exports = {
                     if(now < closeDate)
                         row.addComponents(
                             new MessageButton()
-                                //.setLabel('Recargar')
                                 .setLabel(`${((diff > 24) ? (diff / 24) : diff).toLocaleString('en', { maximumFractionDigits: 0 })} ${(diff > 24) ? 'días' : 'horas'}`)
                                 .setEmoji('935665140601327626')
                                 .setStyle('PRIMARY')
@@ -139,7 +147,6 @@ module.exports = {
                     //Botón de eliminación
                     row.addComponents(
                         new MessageButton()
-                            //.setLabel('Eliminar')
                             .setEmoji('921751138997514290')
                             .setStyle('DANGER')
                             .setCustomId('feed_deleteFeedImage'),
@@ -149,7 +156,7 @@ module.exports = {
                     /**@type {import('discord.js').MessageOptions} */
                     const feedMessage = { components: [row] };
                     const feedEmbed = new MessageEmbed()
-                        .setColor('#608bf3')
+                        .setColor(embedColor)
                         .setAuthor({ name: 'Desde Gelbooru', iconURL: feed.cornerIcon ?? 'https://i.imgur.com/outZ5Hm.png' });
                     
                     if(maxTags > 0)
