@@ -1,23 +1,23 @@
 const GuildConfig = require('./models/guildconfigs.js');
 const booru = require('booru');
-const chalk = require('chalk');
 const { Client, MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+
+
 
 module.exports = {
     /**@param {Client} client*/
     async updateBooruFeeds(client) {
-        //console.log(chalk.cyanBright('Comprobando actualizaciones en Feeds de imágenes...'));
-        const feedCheckupStart = Date.now();
+        console.time('ProcesarFeeds');
         const maxDocuments = 16;
         let feedsCount = 0;
         let promisesCount = { total: 0 };
         /** @type {import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Guild>} */
         const guilds = client.guilds.cache;
         await Promise.all(guilds.map(async guild => {
-            const logMore = false;//guild.id === '654471968200065034';
+            const logMore = false;
             promisesCount[guild] = 0;
             const gcfg = await GuildConfig.findOne({ guildId: guild.id }).catch(console.error);
-            if(!gcfg) return;
+            if(!gcfg?.feeds) return;
             for(const [chid, feed] of Object.entries(gcfg.feeds)) {
                 feedsCount++;
 
@@ -102,7 +102,6 @@ module.exports = {
                         else
                             addSourceButton(source);
                     }
-                        
                     
                     //Botón de tags (si es necesario) o de enlace
                     if(maxTags === 0 || image.tags.length > maxTags)
@@ -186,8 +185,8 @@ module.exports = {
             if(logMore) console.log(`GUARDANDO:`, Object.entries(gcfg.feeds).map(([chid, feed]) => `${guild.channels.cache.get(chid).name}: ${feed.ids}`));
             await gcfg.save();
         }));
-
         setTimeout(module.exports.updateBooruFeeds, 1000 * 60, client);
-        //console.log(chalk.green(`Se procesaron ${feedsCount} Feeds desde ${guilds.size} servers en ${(Date.now() - feedCheckupStart) / 1000}s. ${promisesCount.total} imágenes nuevas puestas en envío`));
+        console.timeEnd('ProcesarFeeds');
+        console.log(`Se procesaron ${feedsCount} Feeds desde ${guilds.size} servers. ${promisesCount.total} imágenes nuevas puestas en envío`);
     },
 }
