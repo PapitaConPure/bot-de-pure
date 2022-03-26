@@ -7,8 +7,8 @@
 ![GitHub deployments](https://img.shields.io/github/deployments/PapitaConPure/bot-de-pure/bot-de-pure?logo=GitHub)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/PapitaConPure/bot-de-pure)
 ![GitHub repo size](https://img.shields.io/github/repo-size/PapitaConPure/bot-de-pure)
-![Discord](https://img.shields.io/discord/654471968200065034?color=%235865F2&logo=Discord&label=Hourai%20Doll&logoColor=%23fff?link=https://discord.gg/3s4NyQRsPN)
-![Twitter Follow](https://img.shields.io/twitter/follow/PapitaPure?label=%40PapitaPure&style=social?link=https://twitter.com/PapitaPure)
+![Discord](https://img.shields.io/discord/654471968200065034?color=%235865F2&logo=Discord&label=Hourai%20Doll&logoColor=%23fff&link=https://discord.gg/3s4NyQRsPN)
+![Twitter Follow](https://img.shields.io/twitter/follow/PapitaPure?label=%40PapitaPure&style=social&link=https://twitter.com/PapitaPure)
 
 Bot de entretenimiento, búsqueda de imágenes y utilidades generales varias para Discord. Utiliza comandos tradicionales con adiciones inspiradas en terminales como <code>--flags</code>.<br>
 Como personaje, es una robot torpe y agresiva en algunos casos, pero parece tener espíritu.
