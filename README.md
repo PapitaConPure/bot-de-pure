@@ -1,11 +1,14 @@
 # bot-de-pure
-![Discord](https://img.shields.io/discord/654471968200065034?color=%235865F2&label=Hourai%20Doll&logo=Discord&logoColor=%23fff)
-![Libraries.io dependency status for GitHub repo](https://img.shields.io/librariesio/github/PapitaConPure/bot-de-pure?label=dependencias&logoColor=%23fff)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/PapitaConPure/bot-de-pure?label=commits)
-![GitHub repo file count](https://img.shields.io/github/directory-file-count/PapitaConPure/bot-de-pure?label=archivos)
-![GitHub repo size](https://img.shields.io/github/repo-size/PapitaConPure/bot-de-pure?label=tama%C3%B1o)
-![Twitter Follow](https://img.shields.io/twitter/follow/PapitaPure?label=%40PapitaPure&style=social)
-![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UCRXbJiF9G6D0nqq3mU38-gw?label=Papita%20con%20Pur%C3%A9&style=social)
+![GitHub package.json dependency version (prod)](https://img.shields.io/github/package-json/dependency-version/PapitaConPure/bot-de-pure/discord.js)
+![GitHub package.json dependency version (prod)](https://img.shields.io/github/package-json/dependency-version/PapitaConPure/bot-de-pure/mongoose)
+![GitHub package.json dependency version (prod)](https://img.shields.io/github/package-json/dependency-version/PapitaConPure/bot-de-pure/pm2)
+![GitHub package.json dependency version (prod)](https://img.shields.io/github/package-json/dependency-version/PapitaConPure/bot-de-pure/canvas)
+![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/PapitaConPure/bot-de-pure)
+![GitHub deployments](https://img.shields.io/github/deployments/PapitaConPure/bot-de-pure/bot-de-pure&logo=GitHub)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/PapitaConPure/bot-de-pure)
+![GitHub repo size](https://img.shields.io/github/repo-size/PapitaConPure/bot-de-pure)
+![Discord](https://img.shields.io/discord/654471968200065034?color=%235865F2&logo=Discord&label=Hourai%20Doll&logoColor=%23fff?link=https://discord.gg/3s4NyQRsPN)
+![Twitter Follow](https://img.shields.io/twitter/follow/PapitaPure?label=%40PapitaPure&style=social?link=https://twitter.com/PapitaPure)
 
 Bot de entretenimiento, búsqueda de imágenes y utilidades generales varias para Discord. Utiliza comandos tradicionales con adiciones inspiradas en terminales como <code>--flags</code>.<br>
 Como personaje, es una robot torpe y agresiva en algunos casos, pero parece tener espíritu.
