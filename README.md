@@ -16,30 +16,11 @@ Como personaje, es una robot torpe y agresiva en algunos casos, pero parece tene
 ![portadabot](https://i.imgur.com/oVC8pMV.png)
 
 ## Índice
-* [Convenciones de Desarrollo](#convenciones-de-desarrollo)
 * [Tecnologías](#tecnologías)
 * [Características](#características)
+* [Convenciones de Desarrollo](#convenciones-de-desarrollo)
 * [Tareas de refactorización](#tareas-de-refactorización)
 * [Integrantes](#integrantes)
-
-## Convenciones de Desarrollo
-Con el fin de trabajar de forma más eficiente y organizada, se siguen las siguientes convenciones
-* **Comandos**
-  - deben tener aliases siempre que sea posible
-  - los aliases deberían ser sinónimos, versiones acortadas o las iniciales del nombre del comando
-  - se deberían incluir aliases en inglés siempre que sea posible
-  - siempre que sea aplicable, debería haber una versión por mensaje y una versión por "/" del comando
-  - Deben tener una página de ayuda lo más descriptiva y breve posible
-* **Parámetros**
-  - deberían de ser los más intuitivos ya que forman parte del uso básico de la mayoría de comandos
-  - se deben ingresar en un orden específico, a menos que:
-    - el darles un orden vuelva muy confuso al comando en cuestión
-    - el orden de los mismos sea por motivos demasiado abstractos
-* **Banderas**
-  - se deben de poder ingresar en cualquier orden
-  - deben tener, si es posible, versiones cortas y largas
-  - las versiones cortas deberían ser la inicial de la contraparte larga
-  - las versiones largas solo deberían tener caracteres alfabéticos
 
 ## Tecnologías
 * [Node.js](https://nodejs.org) 16.14.2
@@ -72,6 +53,25 @@ Con el fin de trabajar de forma más eficiente y organizada, se siguen las sigui
 * Minijuegos individuales y tipo "fiesta"
 * Agregar GIFs infográficos en comandos
 * Crear página de ayuda Web para no limitarse a mensajes de Discord
+
+## Convenciones de Desarrollo
+Con el fin de trabajar de forma más eficiente y organizada, se siguen las siguientes convenciones
+* **Comandos**
+  - deben tener aliases siempre que sea posible
+  - los aliases deberían ser sinónimos, versiones acortadas o las iniciales del nombre del comando
+  - se deberían incluir aliases en inglés siempre que sea posible
+  - siempre que sea aplicable, debería haber una versión por mensaje y una versión por "/" del comando
+  - Deben tener una página de ayuda lo más descriptiva y breve posible
+* **Parámetros**
+  - deberían de ser los más intuitivos ya que forman parte del uso básico de la mayoría de comandos
+  - se deben ingresar en un orden específico, a menos que:
+    - el darles un orden vuelva muy confuso al comando en cuestión
+    - el orden de los mismos sea por motivos demasiado abstractos
+* **Banderas**
+  - se deben de poder ingresar en cualquier orden
+  - deben tener, si es posible, versiones cortas y largas
+  - las versiones cortas deberían ser la inicial de la contraparte larga
+  - las versiones largas solo deberían tener caracteres alfabéticos
 
 ## Tareas de refactorización
 Empecé este proyecto con 0 conocimiento sobre JavaScript y para cuando me di cuenta creció demasiado.
