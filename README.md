@@ -4,7 +4,7 @@
 ![GitHub package.json dependency version (prod)](https://img.shields.io/github/package-json/dependency-version/PapitaConPure/bot-de-pure/pm2)
 ![GitHub package.json dependency version (prod)](https://img.shields.io/github/package-json/dependency-version/PapitaConPure/bot-de-pure/canvas)
 ![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/PapitaConPure/bot-de-pure)
-![GitHub deployments](https://img.shields.io/github/deployments/PapitaConPure/bot-de-pure/bot-de-pure&logo=GitHub)
+![GitHub deployments](https://img.shields.io/github/deployments/PapitaConPure/bot-de-pure/bot-de-pure?logo=GitHub)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/PapitaConPure/bot-de-pure)
 ![GitHub repo size](https://img.shields.io/github/repo-size/PapitaConPure/bot-de-pure)
 ![Discord](https://img.shields.io/discord/654471968200065034?color=%235865F2&logo=Discord&label=Hourai%20Doll&logoColor=%23fff?link=https://discord.gg/3s4NyQRsPN)
