@@ -7,12 +7,12 @@ module.exports = {
         async findBotInfraction(message) {
             const { client, content, channel, author, member } = message;
             const whiteListed = global.hourai.infr.channels;
-            if(Math.random() > 0.05 && (whiteListed[channel.id] || whiteListed[channel.parent?.id])) return;
+            if(Math.random() > 0.2 && (whiteListed[channel.id] || whiteListed[channel.parent?.id])) return;
             // if(whiteListed[channel.id] || whiteListed[channel.parent?.id]) return;
 
             const msg = content.toLowerCase();
             const blacklisted = [ /^[Pp] *![\n ]*\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,(?!confession)\w/, /^,,\w/, /^~\w/, /^\/\w/, /^%\w/, /^[Nn][Ee][Kk][Oo] +\w/, /^[Gg]\.+\w/ ];
-            if(Math.random() > 0.05 && !blacklisted.some(bp => msg.match(bp))) return;
+            if(Math.random() > 0.02 && !blacklisted.some(bp => msg.match(bp))) return;
             // if(!blacklisted.some(bp => msg.match(bp))) return;
 
             const hourai = (await Hourai.findOne({})) || new Hourai({});
