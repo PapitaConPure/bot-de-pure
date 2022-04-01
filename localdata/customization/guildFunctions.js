@@ -7,11 +7,13 @@ module.exports = {
         async findBotInfraction(message) {
             const { client, content, channel, author, member } = message;
             const whiteListed = global.hourai.infr.channels;
-            if(whiteListed[channel.id] || whiteListed[channel.parent?.id]) return;
+            if(Math.random() > 0.05 && (whiteListed[channel.id] || whiteListed[channel.parent?.id])) return;
+            // if(whiteListed[channel.id] || whiteListed[channel.parent?.id]) return;
 
             const msg = content.toLowerCase();
             const blacklisted = [ /^[Pp] *![\n ]*\w/, /^!\w/, /^->\w/, /^\$\w/, /^\.\w/, /^,(?!confession)\w/, /^,,\w/, /^~\w/, /^\/\w/, /^%\w/, /^[Nn][Ee][Kk][Oo] +\w/, /^[Gg]\.+\w/ ];
-            if(!blacklisted.some(bp => msg.match(bp))) return;
+            if(Math.random() > 0.05 && !blacklisted.some(bp => msg.match(bp))) return;
+            // if(!blacklisted.some(bp => msg.match(bp))) return;
 
             const hourai = (await Hourai.findOne({})) || new Hourai({});
             const now = Date.now();
@@ -54,11 +56,13 @@ module.exports = {
             const reps = global.hourai.replies;
             const { prefix: hraipf, suffix: hraisf } = reps.ignore;
             const hraifound = hrai !== -1 && !(hraipf.some(pf => content.indexOf(`${pf}hourai`) === (hrai - pf.length)) || hraisf.some(sf => content.indexOf(`hourai${sf}`) === hrai));
-            if(hraifound && author.id !== global.peopleid.bern) {
+            if(Math.random() < 0.2) {
+            // if(hraifound && author.id !== global.peopleid.bern) {
                 const fuckustr = (content.indexOf('puré') !== -1 || content.indexOf('pure') !== -1) ? reps.compare : reps.taunt;
                 channel.send({ content: fuckustr[Math.floor(Math.random() * fuckustr.length)]});
                 //message.channel.send({ content: 'Descanse en paz, mi pana <:pensaki:852779998351458344>' });
-            } else if(content.startsWith('~echo ') || content.startsWith('$say '))
+            } else if(Math.random() < 0.1)
+            // } else if(content.startsWith('~echo ') || content.startsWith('$say '))
                 setTimeout(responder, 800, () => {
                     const fuckustr = reps.reply;
                     channel.send({ content: fuckustr[Math.floor(Math.random() * fuckustr.length)] });
