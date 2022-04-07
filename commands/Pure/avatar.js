@@ -42,7 +42,12 @@ module.exports = {
         'profile', 'profilepicture',
         'pfp'
     ],
-    desc: 'Muestra tu propio avatar o el del usuario mencionado',
+    brief: 'Muestra tu propio avatar o el del usuario mencionado',
+    desc: [
+        'Muestra tu propio avatar o el del usuario mencionado',
+        'Puedes buscar por ID, mención, etiqueta, nombre o apodo. Para búsquedas múltiples, separa los términos con comas',
+        'Se priorizan resultados del servidor actual, pero la búsqueda tiene un rango de todos los servidores a los que tengo acceso',
+    ].join('\n'),
     flags: [
         'common'
     ],
