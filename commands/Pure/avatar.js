@@ -12,14 +12,14 @@ const getAvatarEmbed = (member) => {
         .setTitle(`Avatar de ${member.displayName}`)
         .setColor('#faa61a')
         .setImage(memberAvatarUrl)
-        .addField('Avatar', `[🔗 Enlace](${memberAvatarUrl})`, true);
+        .addField('Enlace', `[🔗](${memberAvatarUrl})`, true);
     
     //En caso de tener un override para el server
     const userAvatarUrl = member.user.displayAvatarURL(urlDisplayOptions);
     if(userAvatarUrl !== memberAvatarUrl)
         embed.setThumbnail(userAvatarUrl)
             .setDescription(`Visto desde "${member.guild}"`, true)
-            .addField('Base', `[🔗 Enlace](${userAvatarUrl})`, true);
+            .addField('Por defecto', `[🔗](${userAvatarUrl})`, true);
     
     return embed;
 };
