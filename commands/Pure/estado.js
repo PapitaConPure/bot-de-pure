@@ -4,15 +4,21 @@ const ayuda = require('./ayuda.js'); //Variables globales
 const { readdirSync } = require('fs'); //Para el contador de comandos
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { Stats } = require('../../localdata/models/stats');
-const { improveNumber } = require('../../func');
+const { improveNumber, isShortenedNumberString } = require('../../func');
 
 const { host, version, note, changelog, todo } = bot_status;
 const cmsearch = new RegExp(`${p_pure().raw}[A-Za-zÁÉÍÓÚáéíóúÑñ0-9_.-]*`, 'g');
 const ne = [ '0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣' ];
-function listFormat(str, addIndex, guildId) {
+const listFormat = (str, addIndex, guildId) => {
     let cmindex = 0;
     return str.replace(cmsearch, match => `${addIndex?`**[${cmindex++}]**`:''}\`${p_pure(guildId).raw}${match.slice(p_pure().raw.length)}\``);
 };
+const counterDisplay = (number) => {
+    const numberString = improveNumber(number, true);
+    if(isShortenedNumberString(numberString))
+        return `${numberString} de`;
+    return numberString;
+}
 
 module.exports = {
 	name: 'estado',
@@ -39,6 +45,7 @@ module.exports = {
             cmds: readdirSync('./commands/Pure').filter(file => file.endsWith('.js')).length,
             guilds: request.client.guilds.cache.size
         }
+
         const embed = new MessageEmbed()
             .setColor('#608bf3')
             .setAuthor({ name: 'Estado del Bot', iconURL: request.client.user.avatarURL({ format: 'png', dynamic: true, size: 1024 }) })
@@ -50,10 +57,11 @@ module.exports = {
             .addField('Visión general', note)
             .addField('Cambios', listFormat(clformat, true, request.guild.id))
             .addField('Lo que sigue', listFormat(tdformat, false, request.guild.id))
-            .addField('Estadísticas',
-                `🎦 ${improveNumber(stats.read, true)} mensajes registrados\n` +
-                `✅ ${improveNumber(stats.commands.succeeded)} ejecuciones de comando exitosas\n` +
-                `⚠️ ${improveNumber(stats.commands.failed)} ejecuciones de comando fallidas`);
+            .addField('Estadísticas', [
+                `🎦 ${counterDisplay(stats.read)} mensajes registrados`,
+                `✅ ${counterDisplay(stats.commands.succeeded)} ejecuciones de comando exitosas`,
+                `⚠️ ${counterDisplay(stats.commands.failed)} ejecuciones de comando fallidas`,
+            ].join('\n'));
 
         const sentquery = (await Promise.all([
             request.reply({ embeds: [embed] }),

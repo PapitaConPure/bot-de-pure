@@ -1,25 +1,37 @@
-const { MessageEmbed, CommandInteractionOptionResolver, Interaction } = require('discord.js'); //Integrar discord.js
-const { peopleid } = require('../../localdata/config.json');
-const { fetchUser, regroupText } = require('../../func.js'); //Funciones globales
+const { MessageEmbed } = require('discord.js'); //Integrar discord.js
+const { fetchUser, regroupText, fetchMember } = require('../../func.js'); //Funciones globales
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
 
 const maxusers = 10;
-/**@param {Array} users*/
-const avatarEmbeds = (users, guildId) => {
+/**@param {import('discord.js').GuildMember} member*/
+const getAvatarEmbed = (member) => {
+    const urlDisplayOptions = { format: 'png', dynamic: true, size: 1024 };
+    const memberAvatarUrl = member.displayAvatarURL(urlDisplayOptions);
+    const embed = new MessageEmbed()
+        .setTitle(`Avatar de ${member.displayName}`)
+        .setColor('#faa61a')
+        .setImage(memberAvatarUrl)
+        .addField('Avatar', `[🔗 Enlace](${memberAvatarUrl})`, true);
+    
+    //En caso de tener un override para el server
+    const userAvatarUrl = member.user.displayAvatarURL(urlDisplayOptions);
+    //if(userAvatarUrl !== memberAvatarUrl)
+        embed.setThumbnail(userAvatarUrl)
+            .setDescription(`Visto desde "${member.guild}"`, true)
+            .addField('Base', `[🔗 Enlace](${userAvatarUrl})`, true);
+    
+    return embed;
+};
+const generateAvatarEmbeds = (members = [], guildId = '0') => {
     const embeds = [];
-    if(users.length) {
-        users.forEach(user => {
-            embeds.push(new MessageEmbed()
-                .setTitle(`Avatar de ${user.username}`)
-                .setColor('#faa61a')
-                .setImage(user.avatarURL({ format: 'png', dynamic: true, size: 1024 }))
-            );
-        });
+    if(members.length) {
+        members.forEach(member => embeds.push(getAvatarEmbed(member)));
         embeds[embeds.length - 1].setFooter({ text: `"${p_pure(guildId).raw}ayuda avatar" para más información` });
     }
     return embeds;
-}
+};
+
 const options = new CommandOptionsManager()
     .addParam('usuarios', 'USER', 'para especificar usuarios', { optional: true, poly: 'MULTIPLE' });
 
@@ -36,79 +48,44 @@ module.exports = {
     ],
     options,
     callx: '<usuario?>',
-
-	async execute(message, args) {
-		//Saber si el canal/thread es NSFW o perteneciente a un canal NSFW
-		const isnsfw = message.channel.isThread()
-			? message.channel.parent.nsfw
-			: message.channel.nsfw;
-        
-        let users = [];
-        let notfound = [];
-
-        if(args.length) {
-            args = regroupText(args);
-            if(args.length > maxusers) {
-                message.channel.send({ content: `:warning: Solo puedes ingresar hasta **${maxusers}** usuarios por comando` });
-                return;
-            }
-            args.forEach(arg => {
-                const user = fetchUser(arg, message);
-                
-                if(!user) {
-                    notfound.push(arg);
-                    return;
-                }
-                if((user.id === peopleid.papita) && !isnsfw) {
-                    message.channel.send({
-                        content: `Oe conchetumare te hacei el gracioso una vez más y te vai manos arriba, pantalones abajo, 'cuchai? <:junkNo:697321858407727224> <:pistolaR:697351201301463060>`
-                    });
-                    return;
-                }
-
-                users.push(user);
-            });
-        } else users.push(message.author);
-        
-        const nfc = `:warning: ¡Usuario[s] **${notfound.join(', ')}** no encontrado[s]!`.replace(/\[s\]/g, (notfound.length > 1) ? 's' : '');
-        const embeds = avatarEmbeds(users, message.guildId);
-
-        if(notfound.length || embeds.length)
-            await message.channel.send({
-                content: (notfound.length) ? nfc : null,
-                embeds: embeds.length ? embeds : null,
-            });
-    },
+    experimental: true,
 
     /**
-     * @param {Interaction} interaction
-     * @param {CommandInteractionOptionResolver} args
+     * @param {import('../Commons/typings').CommandRequest} request
+     * @param {import('../Commons/typings').CommandOptions} args
+     * @param {Boolean} isSlash
      * @returns
      */
-    async interact(interaction, args) {
-		//Saber si el canal/thread es NSFW o perteneciente a un canal NSFW
-		const isnsfw = interaction.channel.isThread()
-			? interaction.channel.parent.nsfw
-			: interaction.channel.nsfw;
+	async execute(request, args, isSlash) {
+        const notfound = [];
+        let members;
+        let replyStack = {};
 
-        let content = null;
-        const users = options
-            .fetchParamPoly(args, 'usuarios', args.getUser, interaction.user)
-            .filter(user => {
-                const waytoolewd = interaction.user.id !== peopleid.papita && user.id === peopleid.papita && !isnsfw;
-                if(waytoolewd) {
-                    content = 'Oe conchetumare te hacei el gracioso una vez más y te vai manos arriba, pantalones abajo, \'cuchai? <:junkNo:697321858407727224> <:pistolaR:697351201301463060>';
-                    return;
-                }
-
-                return true;
-            });
+        if(isSlash)
+            members = options.fetchParamPoly(args, 'usuarios', args.getUser, interaction.user);
+        else {
+            members = [];
+            if(args.length) {
+                args = regroupText(args);
+                if(args.length > maxusers)
+                    return await request.reply({ content: `:warning: Solo puedes ingresar hasta **${maxusers}** usuarios por comando` });
+                
+                args.forEach(arg => {
+                    const member = fetchMember(arg, request);
+                    if(!member) return notfound.push(arg);
+                    members.push(member);
+                });
+            } else members.push(request.author);
+        }
         
-        const embeds = avatarEmbeds(users, interaction.guild.id);
+        if(notfound.length)
+            replyStack.content = [
+                `:warning: ¡Usuario[s] **${notfound.join(', ')}** no encontrado[s]!`.replace(/\[s\]/g, (notfound.length > 1) ? 's' : ''),
+                `Recuerda separar cada usuario con una coma. Usa \`${p_pure(guildId).raw}ayuda avatar\` para más información`,
+            ].join('\n');
+        if(members?.length)
+            replyStack.embeds = generateAvatarEmbeds(members, request.guildId) ?? null;
 
-        await interaction.reply({
-            content: content,
-            embeds: embeds.length ? embeds : null,
-        });
-    }
+        await request.reply(replyStack);
+    },
 };

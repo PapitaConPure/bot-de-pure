@@ -632,6 +632,19 @@ module.exports = {
 
     //#region Fetch
     /**
+     * Extrae una ID de usuario de una mención
+     * @param {String} data 
+     * @returns {String}
+     */
+    extractUserID(data) {
+        if(data.startsWith('<@') && data.endsWith('>')) {
+            data = data.slice(2, -1);
+            if(data.startsWith('!')) data = data.slice(1);
+        }
+        return data;
+    },
+    
+    /**
      * Busca un usuario basado en la data ingresada.
      * Devuelve el usuario que más coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún usuario, se devuelve undefined.
      * @param {String} data 
@@ -642,10 +655,7 @@ module.exports = {
         const uc = client.users.cache;
         //console.log(`Buscando: ${data}`);
         //Descifrar posible mención
-        if(data.startsWith('<@') && data.endsWith('>')) {
-            data = data.slice(2, -1);
-            if(data.startsWith('!')) data = data.slice(1);
-        }
+        data = module.exports.extractUserID(data);
         
         //Prioridad 1: Intentar encontrar por ID
         //console.log('Prioridad 1 alcanzada');
@@ -685,6 +695,63 @@ module.exports = {
 
         //Búsqueda sin resultados
         //console.log('Sin resultados');
+        return undefined;
+    },
+
+    /**
+     * Busca un usuario basado en la data ingresada.
+     * Devuelve el usuario que más coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún usuario, se devuelve undefined.
+     * @param {String} data 
+     * @param {{ guild: Discord.Guild, client: Discord.Client }} param1 
+     * @returns { Discord.GuildMember }
+     */
+    fetchMember: function(data, { guild: thisGuild, client }) {
+        console.time('Buscar miembro');
+        
+        const otherGuilds = client.guilds.cache.filter(g => g.id !== thisGuild.id);
+        data = module.exports.extractUserID(data);
+        
+        //Prioridad 1: Intentar encontrar por ID o tag
+        let searchFn = (m) => m.id === data
+        if(isNaN(data)) {
+            data = data.toLowerCase();
+            searchFn =  (m) => m.tag.toLowerCase();
+        }
+
+        let member = thisGuild.members.cache.find(m => m.id === data);
+        if(member) return member;
+        member = otherGuilds.map(guild => guild.members.cache.find(m => m.id === data)).find(m => m);
+        if(member) return member;
+
+        //Prioridad 3: Intentar encontrar por nombre de usuario en guild actual
+        const compareNames = (a, b) => (a.toLowerCase().indexOf(data) <= b.toLowerCase().indexOf(data) && a.length <= b.length);
+        {
+            const people = thisGuild.members.cache.filter(m => m.user.username.toLowerCase().indexOf(data) !== -1);
+            if(people.size)
+                return people
+                    .sort()
+                    .reduce((a, b) => compareNames(a.user.username, b.user.username) ? a : b);
+        }
+
+        //Prioridad 4: Intentar encontrar por apodo en guild actual
+        {
+            const people = thisGuild.members.cache.filter(m => m.nickname && m.nickname.toLowerCase().indexOf(data) !== -1);
+            if(people.size)
+                return people
+                    .sort()
+                    .reduce((a, b) => compareNames(a.nickname, b.nickname) ? a : b);
+        }
+        //Prioridad 5: Intentar encontrar por nombre de usuario en cualquier guild
+        {
+            const people = otherGuilds.map(guild => guild.members.cache.find(m => m.user.username.toLowerCase().indexOf(data) !== -1)).filter(m => m);
+            if(people.length)
+                return people
+                    .sort()
+                    .reduce((a, b) => compareNames(a.user.username, b.user.username) ? a : b);
+        }
+        console.timeEnd('Buscar miembro');
+
+        //Búsqueda sin resultados
         return undefined;
     },
 
@@ -888,11 +955,20 @@ module.exports = {
         return array[randomIndex];
     },
 
+    shortNumberNames: [
+        'millones', 'miles de millones', 'billones', 'miles de billones', 'trillones', 'miles de trillones', 'cuatrillones', 'miles de cuatrillones',
+        'quintillones', 'miles de quintillones', 'sextillones', 'miles de sextillones', 'septillones', 'miles de septillones',
+        'octillones', 'miles de octillones', 'nonillones', 'miles de nonillones', 'decillones', 'miles de decillones', 'undecillones', 'miles de undecillones',
+        'duodecillones', 'miles de duodecillones', 'tredecillones', 'miles de tredecillones', 'quattuordecillones', 'miles de quattuordecillones',
+        'quindecillones', 'miles de quindecillones', 'sexdecillones', 'miles de sexdecillones'
+    ],
+
     /**
      * @function
      * @param {Number | String} num El número a mejorarle la visibilidad
      * @param {Boolean} shorten Si acortar el número para volverlo más fácil de leer
      * @param {Number} minDigits Cantidad mínima de dígitos para rellenar con 0s a la izquierda
+     * @returns {String}
      */
     improveNumber: function(num, shorten = false, minDigits = 1) {
         if(typeof num === 'string')
@@ -909,13 +985,7 @@ module.exports = {
         
         const googol = Math.pow(10, 100);
         if(num < googol) {
-            const jesus = [
-                'millones', 'miles de millones', 'billones', 'miles de billones', 'trillones', 'miles de trillones', 'cuatrillones', 'miles de cuatrillones',
-                'quintillones', 'miles de quintillones', 'sextillones', 'miles de sextillones', 'septillones', 'miles de septillones',
-                'octillones', 'miles de octillones', 'nonillones', 'miles de nonillones', 'decillones', 'miles de decillones', 'undecillones', 'miles de undecillones',
-                'duodecillones', 'miles de duodecillones', 'tredecillones', 'miles de tredecillones', 'quattuordecillones', 'miles de quattuordecillones',
-                'quindecillones', 'miles de quindecillones', 'sexdecillones', 'miles de sexdecillones'
-            ];
+            const jesus = module.exports.shortNumberNames;
             const ni = (num < Math.pow(10, 6 + jesus.length * 3))
                 ? Math.floor((num.toLocaleString('fullwide', { useGrouping: false }).length - 7) / 3)
                 : jesus.length - 1;
@@ -924,6 +994,10 @@ module.exports = {
             return [ snum, jesus[ni] ].join(' ');
         } else
             return `${formatNumber(num / googol, { maximumFractionDigits: 4 })} Gúgol`;
+    },
+
+    isShortenedNumberString: function(numberString) {
+        return module.exports.shortNumberNames.some(snn => numberString.indexOf(snn) >= 0);
     },
     
     /**@param {Array<String>} arr*/
