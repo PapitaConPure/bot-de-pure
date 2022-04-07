@@ -16,7 +16,7 @@ const getAvatarEmbed = (member) => {
     
     //En caso de tener un override para el server
     const userAvatarUrl = member.user.displayAvatarURL(urlDisplayOptions);
-    //if(userAvatarUrl !== memberAvatarUrl)
+    if(userAvatarUrl !== memberAvatarUrl)
         embed.setThumbnail(userAvatarUrl)
             .setDescription(`Visto desde "${member.guild}"`, true)
             .addField('Base', `[🔗 Enlace](${userAvatarUrl})`, true);
