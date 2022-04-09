@@ -9,17 +9,16 @@ const getAvatarEmbed = (member) => {
     const urlDisplayOptions = { format: 'png', dynamic: true, size: 1024 };
     const memberAvatarUrl = member.displayAvatarURL(urlDisplayOptions);
     const embed = new MessageEmbed()
-        .setTitle(`Avatar de ${member.displayName}`)
         .setColor('#faa61a')
         .setImage(memberAvatarUrl)
-        .addField('Enlace', `[🔗](${memberAvatarUrl})`, true);
+        .addField(`Avatar de ${member.displayName}`, `[🔗 Enlace](${memberAvatarUrl})`, true);
     
     //En caso de tener un override para el server
     const userAvatarUrl = member.user.displayAvatarURL(urlDisplayOptions);
     if(userAvatarUrl !== memberAvatarUrl)
         embed.setThumbnail(userAvatarUrl)
             .setDescription(`Visto desde "${member.guild}"`, true)
-            .addField('Por defecto', `[🔗](${userAvatarUrl})`, true);
+            .addField('Global', `[🔗 Enlace](${userAvatarUrl})`, true);
     
     return embed;
 };
