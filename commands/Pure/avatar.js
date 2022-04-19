@@ -39,7 +39,7 @@ module.exports = {
     aliases: [
         'perfil', 'fotoperfil',
         'profile', 'profilepicture',
-        'pfp'
+        'pfp',
     ],
     brief: 'Muestra tu propio avatar o el del usuario mencionado',
     desc: [

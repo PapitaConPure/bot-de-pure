@@ -11,12 +11,12 @@ module.exports = {
 	name: 'decir',
     aliases: [
         'exclamar', 'escribir',
-        'say', 'echo'
+        'say', 'echo',
     ],
     desc: 'Me hace decir lo que quieras que diga',
     flags: [
         'common',
-        'emote'
+        'emote',
     ],
     options,
     callx: '<mensaje>',
