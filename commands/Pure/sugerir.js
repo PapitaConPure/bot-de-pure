@@ -19,21 +19,16 @@ function getTitle(a, i) {
 		return a[i];
 };
 
-const options = new CommandOptionsManager()
-	.addFlag('t', ['título', 'titulo'], 'para designar un título o "título largo"', { name: 'ttl', type: 'TEXT' });
-
 module.exports = {
 	name: 'sugerir',
 	aliases: [
 		's'
 	],
-	desc: 'Para sugerir mejoras sobre el Bot. Todas las sugerencias van a una buzón que tarde o temprano será leído\n' +
-		'No es obligatorio, pero pueden agregar un `-t título` o un `-t "título largo"` a su sugerencia (me facilita cosas)\n' +
-		'De antemano, ¡gracias por ayudar con el desarrollo de Bot de Puré! <a:meguDance:796931539739869235>',
+	desc: 'Para sugerir mejoras sobre el Bot',
 	flags: [
-		'common'
+		'common',
+		'maintenance',
 	],
-	options,
 	callx: '<sugerencia>',
 
 	async execute(message, args) {
@@ -69,15 +64,12 @@ module.exports = {
 				else ignore = false;
 			} else if(arg.endsWith('"') || title.split(' ').length === 1) jn = false;
 
-			if(ignore) return undefined;
-			else return arg;
-		}).filter(arg => arg !== undefined);
+			if(!ignore) return arg;
+		}).filter(arg => arg);
 
 		//Acción de comando
-		if(!args.length) {
-			message.channel.send({ content: ':warning: Campo de sugerencia vacío.' });
-			return;
-		}
+		if(!args.length)
+			return await message.channel.send({ content: ':warning: Campo de sugerencia vacío.' });
 
 		const embed = new Discord.MessageEmbed()
 			.setColor('#608bf3')
