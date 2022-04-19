@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.E8",
+            "number": "Full.2.8.EA",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo reestructuraciones para una actualización mayor. Es probable que algunos comandos dejen de funcionar durante el proceso.\nTambién, las actualizaciones serán considerablemente menos frecuentes de momento",
@@ -16,7 +16,6 @@
             "PuréScript básico implementado",
             "p!tarjeta adherido",
             "p!número agregado",
-            "Corregido (probablemente) error de memoria en Feeds",
             "p!voz añadido",
             "p!tubérculo actualizado",
             "PuréScript actualizado",
@@ -24,7 +23,8 @@
             "Trabajos de reestructuración",
             "PuréVoice actualizado",
             "p!config agregado",
-            "Roles personalizados agregados (H. Doll)"
+            "Roles personalizados agregados (H. Doll)",
+            "p!hora añadido"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos con p!ayuda",
