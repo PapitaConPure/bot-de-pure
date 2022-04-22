@@ -2,6 +2,7 @@ node_modules
 images
 Command Makefile
 localenv.json
+remoteenv.json
 b4a.exe
 mkf.exe
 Nota.txt
