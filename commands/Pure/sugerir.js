@@ -22,16 +22,34 @@ function getTitle(a, i) {
 module.exports = {
 	name: 'sugerir',
 	aliases: [
+		'reportar', 'informar',
 		's'
 	],
-	desc: 'Para sugerir mejoras sobre el Bot',
+	desc: 'Para sugerir mejoras sobre Bot de Puré, o reportar un error',
 	flags: [
 		'common',
-		'maintenance',
 	],
 	callx: '<sugerencia>',
+	experimental: true,
 
-	async execute(message, args) {
+	/**
+	 * @param {import('../Commons/typings').CommandRequest} request
+	 * @param {import('../Commons/typings').CommandOptions} args
+	 * @param {Boolean} isSlash
+	 */
+	async execute(request, args, isSlash = false) {
+		const embed = new Discord.MessageEmbed()
+			.setColor(global.tenshiColor)
+			.setAuthor({ name: 'Bot de Puré • Comentarios', iconURL: request.client.user.avatarURL({ size: 256, format: 'jpg' }) })
+			.setThumbnail('https://i.imgur.com/Ah7G6iV.jpg')
+			.addField('Método', 'Para enviar tus comentarios, accede a este [🔗 Formulario de Google](https://forms.gle/tHFXxbsTmuJTQm1z7)', true)
+			.addField('Por favor', 'Se pide no enviar formularios de broma. Ya para las bromas estoy yo', true)
+			.addField('Privacidad', 'Si lo deseas, puedes enviar tus comentarios de forma totalmente anónima', true);
+
+		return await request.reply({ embeds: [embed] });
+	},
+
+	async __execute(message, args) {
 		//Comprobación de liquidación de abuso
 		if(uses[message.author.id] === undefined)
 			uses[message.author.id] = 1;

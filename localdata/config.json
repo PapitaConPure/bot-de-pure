@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.EB",
+            "number": "Full.2.8.EC",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo reestructuraciones para una actualización mayor. Es probable que algunos comandos dejen de funcionar durante el proceso.\nTambién, las actualizaciones serán considerablemente menos frecuentes de momento",
@@ -20,10 +20,10 @@
             "PuréScript actualizado",
             "Trabajos de reestructuración",
             "PuréVoice actualizado",
-            "p!config agregado",
             "Roles personalizados agregados (H. Doll)",
             "p!hora añadido",
-            "p!avatar ahora detecta avatares de servidor"
+            "p!avatar ahora detecta avatares de servidor",
+            "Trabajando en soporte de Preferencias de Usuario"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos con p!ayuda",
