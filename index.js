@@ -3,10 +3,12 @@ const Discord = require('discord.js'); //Soporte JS de la API de Discord
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const fs = require('fs'); //Sistema de archivos
+// const envpath = './localenv.json';
+const envPath = './remoteenv.json';
 
 //Base de datos
 const Mongoose = require('mongoose');
-const uri = process.env.MONGODB_URI ?? (require('./localenv.json')?.dburi);
+const uri = process.env.MONGODB_URI ?? (require(envPath)?.dburi);
 const prefixpair = require('./localdata/models/prefixpair.js');
 const { Stats, ChannelStats } = require('./localdata/models/stats.js');
 const { Puretable, defaultEmote, pureTableImage } = require('./localdata/models/puretable.js');
@@ -26,7 +28,7 @@ const { CommandOptionsManager } = require('./commands/Commons/cmdOpts.js');
 const { promisify } = require('util');
 const { updateBooruFeeds } = require('./localdata/boorufeed');
 const { p_drmk, p_pure } = require('./localdata/customization/prefixes.js');
-const token = process.env.I_LOVE_MEGUMIN ?? (require('./localenv.json').token); //La clave del bot
+const token = process.env.I_LOVE_MEGUMIN ?? (require(envPath).token); //La clave del bot
 //#endregion
 
 //#region Parámetros Iniciales
