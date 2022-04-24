@@ -7,7 +7,7 @@ module.exports = {
 		'g-index',
 		'g-ind', 'g-i'
 	],
-	desc: `Esta es la página de introducción de Bot de Puré. Si estás tan confundido como para no saber del todo cómo usar \`${p_pure.raw}ayuda\`, esto puede serte útil\n\n` +
+	desc: `Esta es la página de introducción de Bot de Puré. Si estás tan confundido como para no saber del todo cómo usar \`${p_pure().raw}ayuda\`, esto puede serte útil\n\n` +
 		'En general, usas comandos para hacer cosas y en algunos casos querrás ingresar `<parámetros>` y/o `--banderas`\n' +
 		'Los `<parámetros>` y las `--banderas` son solo 2 formas de similares y a la vez diferentes manipular un comando\n' +
 		'Basándose en conveniencia de uso, algunos comportamientos se definirán con `<uno>` u con `--otro`.\n\n' +

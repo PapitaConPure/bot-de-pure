@@ -3,7 +3,7 @@ const Discord = require('discord.js'); //Soporte JS de la API de Discord
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const fs = require('fs'); //Sistema de archivos
-// const envpath = './localenv.json';
+// const envPath = './localenv.json';
 const envPath = './remoteenv.json';
 
 //Base de datos
