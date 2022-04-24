@@ -165,7 +165,7 @@ const checkFeeds = async (guilds) => {
                     feedEmbed.setFooter({ text: feed.footer });
                 
                 if(image.fileUrl.match(/\.(mp4|webm|webp)/)) {
-                    feedEmbed.addField('Video', `Míralo en su respectivo <:gelbooru:919398540172750878> **Post**\n[Enlace directo](${image.fileUrl})`);
+                    feedEmbed.addField('Video', `Míralo en su respectivo [<:gelbooru:919398540172750878> **Post**](${image.fileUrl})`);
                     feedEmbed.setImage(image.sampleUrl || image.previewUrl);
                 } else 
                     feedEmbed.setImage(
