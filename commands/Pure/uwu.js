@@ -1,3 +1,4 @@
+const { fetchFlag } = require("../../func");
 const { CommandOptionsManager } = require("../Commons/cmdOpts");
 
 const uwusopt = [
@@ -24,13 +25,23 @@ module.exports = {
     ],
     options,
 	callx: 'uwu',
+	experimental: true,
 	
-	async execute(message, args) {
-		message.channel.send({ content: uwusopt[Math.floor(Math.random() * uwusopt.length)] });
-		if(args.includes('-d')) message.delete();
+	/**
+	 * @param {import("../Commons/typings").CommandRequest} request
+	 * @param {import('../Commons/typings').CommandOptions} args
+	 * @param {Boolean} isSlash
+	 */
+	async execute(request, args, isSlash = false) {
+		const deleteOriginal = isSlash ? false : fetchFlag(args, { ...options.flags.get('borrar').structure, callback: true });
+		const randomUwu = uwusopt[Math.floor(Math.random() * uwusopt.length)];
+		
+		if(!deleteOriginal)
+			return await request.reply({ content: uwusopt[Math.floor(Math.random() * uwusopt.length)] });
+		
+		return await Promise.all([
+			request.channel.send({ content: randomUwu }),
+			request.delete().catch(console.error),
+		]);
     },
-	
-	async interact(interaction, args) {
-		interaction.reply({ content: uwusopt[Math.floor(Math.random() * uwusopt.length)] });
-    }
 };

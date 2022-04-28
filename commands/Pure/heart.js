@@ -11,7 +11,8 @@ module.exports = {
 		.replace('#NSFW_NOTE', 'nisiquiera intentes buscarla en canales NSFW'),
     flags: [
         'common',
-		'meme'
+		'meme',
+		'outdated',
     ],
     options: options,
 	callx: callx,

@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.EC",
+            "number": "Full.2.8.ED",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo reestructuraciones para una actualización mayor. Es probable que algunos comandos dejen de funcionar durante el proceso.\nTambién, las actualizaciones serán considerablemente menos frecuentes de momento",
@@ -67,6 +67,7 @@
         "bern": "239550977638793217"
     },
     "slots": {},
+    "reportFormUrl": "https://forms.gle/tHFXxbsTmuJTQm1z7",
     
     "hourai": {
         "infr": {

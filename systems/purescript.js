@@ -1,6 +1,6 @@
-const GuildConfig = require('./localdata/models/guildconfigs.js');
-const { p_pure } = require('./localdata/customization/prefixes.js');
-const { randRange, fetchUserID } = require('./func.js');
+const GuildConfig = require('../localdata/models/guildconfigs.js');
+const { p_pure } = require('../localdata/customization/prefixes.js');
+const { randRange, fetchUserID } = require('../func.js');
 const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, MessageAttachment } = require('discord.js');
 
 //RegExp para analizar enlaces de archivos válidos
@@ -28,7 +28,7 @@ const readOnlyMem = [
 //#region Esqueleto de PuréScript
 /**Evalua el tipo de Tubérculo (básico o avanzado) y lo ejecuta. Si es avanzado, se ejecutará con PuréScript
  * @function
- * @param {import("./commands/Commons/typings").CommandRequest} request
+ * @param {import("../commands/Commons/typings").CommandRequest} request
  * @param {Tubercle} tuber 
  * @param {{ args: Array<String>, isSlash: Boolean }} inputOptions
  */

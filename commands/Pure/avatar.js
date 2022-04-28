@@ -66,7 +66,7 @@ module.exports = {
         let replyStack = {};
 
         if(isSlash)
-            members = options.fetchParamPoly(args, 'usuarios', args.getUser, interaction.user);
+            members = options.fetchParamPoly(args, 'usuarios', args.getMember, request.member);
         else {
             members = [];
             if(args.length) {
@@ -79,7 +79,7 @@ module.exports = {
                     if(!member) return notfound.push(arg);
                     members.push(member);
                 });
-            } else members.push(request.author);
+            } else members.push(request.member);
         }
         
         if(notfound.length)

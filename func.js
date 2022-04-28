@@ -619,7 +619,7 @@ module.exports = {
         if(servidor.id === '654471968200065034') //Hourai Doll
             await canal.send({
                 content: 
-                    'Nooooo po csm, perdimo otro weón <:meguDerp:887396527952236554>' +
+                    'Nooooo po csm, perdimo otro weón <:meguDerp:887396527952236554>\n' +
                     `*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
             });
         else //Otros servidores

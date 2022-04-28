@@ -1,10 +1,11 @@
 //#region Carga de módulos necesarios
+console.time('Carga de módulos');
 const Discord = require('discord.js'); //Soporte JS de la API de Discord
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const fs = require('fs'); //Sistema de archivos
-// const envPath = './localenv.json';
-const envPath = './remoteenv.json';
+const envPath = './localenv.json';
+// const envPath = './remoteenv.json';
 
 //Base de datos
 const Mongoose = require('mongoose');
@@ -26,12 +27,14 @@ const chalk = require('chalk'); //Consola con formato bonito
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { CommandOptionsManager } = require('./commands/Commons/cmdOpts.js');
 const { promisify } = require('util');
-const { updateBooruFeeds } = require('./localdata/boorufeed');
+const { updateBooruFeeds } = require('./systems/boorufeed');
 const { p_drmk, p_pure } = require('./localdata/customization/prefixes.js');
 const token = process.env.I_LOVE_MEGUMIN ?? (require(envPath).token); //La clave del bot
+console.timeEnd('Carga de módulos');
 //#endregion
 
 //#region Parámetros Iniciales
+console.time('Establecimiento de parámetros iniciales');
 const botIntents = new Discord.Intents();
 const iflags = Discord.Intents.FLAGS;
 botIntents.add(
@@ -59,9 +62,11 @@ const fastGuildFunctions = (() => {
 })();
 global.p_drmk['0'] = { raw: 'd!', regex: /^[Dd] *![\n ]*/ };
 global.p_pure['0'] = { raw: 'p!', regex: /^[Pp] *![\n ]*/ };
+console.timeEnd('Establecimiento de parámetros iniciales');
 //#endregion
 
 //#region Detección de archivos de comandos
+console.time('Detección de archivos de comando');
 client.ComandosDrawmaku = new Discord.Collection(); //Comandos de Drawmaku
 let commandFiles = fs.readdirSync('./commands/Drawmaku').filter(file => file.endsWith('.js')); //Lectura de comandos de bot
 for(const file of commandFiles) {
@@ -132,8 +137,10 @@ commandFiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.
         }
     }
 }
+console.timeEnd('Detección de archivos de comando');
 //#endregion
 
+console.time('Registro de eventos del cliente');
 //Inicialización del cliente
 client.on('ready', async () => {
     const confirm = () => console.log(chalk.green('Hecho.'));
@@ -276,11 +283,6 @@ client.on('ready', async () => {
     registerFont('fonts/DINPro-Cond.otf',               { family: 'dinpro' });
 	confirm();
 
-    console.log(chalk.blueBright('Registrando eventos de debug del cliente'));
-    //client.on('debug', console.log);
-    client.on('warn', console.log);
-    confirm();
-
     await global.logch.send({ embeds: [new Discord.MessageEmbed()
         .setColor('DARK_VIVID_PINK')
         .setAuthor({ name: 'Mensaje de sistema' })
@@ -292,7 +294,19 @@ client.on('ready', async () => {
     global.maintenance = '';
 	console.log(chalk.greenBright.bold('Bot conectado y funcionando.'));
 
-    updateBooruFeeds(client);
+    //Encontrar el próximo inicio de media hora (X:00 / X:30) para actualizar Feedsconst now = new Date();
+    const now = new Date();
+    const feedUpdateDelay = 1000 * 60 * 15;
+    let feedUpdateStart = feedUpdateDelay - (
+        now.getMinutes() * 1000 * 60 +
+        now.getSeconds() * 1000 +
+        now.getMilliseconds());
+    while(feedUpdateStart <= 0)
+        feedUpdateStart += feedUpdateDelay;
+    feedUpdateStart += 1000 * 30; //Añadir 30 segundos para dar ventana de tiempo razonable a Gelbooru
+    console.log(now.toString(), '\n', new Date(now.getTime() + feedUpdateStart).toString());
+    setTimeout(updateBooruFeeds, feedUpdateStart, client);
+    // updateBooruFeeds(client);
 });
 
 //Recepción de mensajes
@@ -372,14 +386,28 @@ client.on('messageCreate', async message => {
             } catch(error) {
                 console.log(chalk.bold.redBright('Ha ocurrido un error al insertar un emote.'));
                 console.error(error);
-                const errorembed = new Discord.MessageEmbed()
+                const errorEmbed = new Discord.MessageEmbed()
                     .setColor('#0000ff')
-                    .setAuthor({ name: `${guild.name} • ${channel.name} (Click para ver)`, iconURL: author.avatarURL({ dynamic: true }), url: message.url })
-                    .addField('Ha ocurrido un error al ingresar un comando', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``)
+                    .setAuthor({ name: `${guild.name} • ${channel.name} (Click para ver)`, iconURL: author.avatarURL({ dynamic: true }), url: message.url });
+
+                if(error.message === 'Missing Permissions') {
+                    errorEmbed
+                        .setThumbnail('https://i.imgur.com/ftAxUen.jpg')
+                        .addField('¡Me faltan permisos!', [
+                            'No tengo los permisos necesarios para ejecutar el comando que acabas de pedirme en ese canal',
+                            'Soy una niña educada, así que no haré nada hasta que me den permiso. Puedes comentarle el asunto a algún moderador del server para que lo revise',
+                        ].join('\n'))
+                        .addField('Reportar un error', `¿Crees que esto se trata de otro tipo error? Eso nunca debería ser el caso, pero de ser así, puedes [reportarlo](${global.reportFormUrl})`);
+
+                    return message.author.send({ embeds: [errorEmbed] }).catch(console.error);
+                }
+
+                errorEmbed
+                    .addField('Ha ocurrido un error al ejecutar un Comando Rápido de Emote', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``)
                     .addField('Detalle', `"${message.content.slice(0, 699)}"\n[${ecmd}]`);
                 global.logch.send({
                     content: `<@${global.peopleid.papita}>`,
-                    embeds: [errorembed]
+                    embeds: [errorEmbed]
                 });
             }
         }
@@ -427,14 +455,28 @@ client.on('messageCreate', async message => {
     } catch(error) {
         console.log(chalk.bold.redBright('Ha ocurrido un error al ingresar un comando.'));
         console.error(error);
-        const errorembed = new Discord.MessageEmbed()
+        const errorEmbed = new Discord.MessageEmbed()
             .setColor('#0000ff')
-            .setAuthor({ name: `${guild.name} • ${channel.name} (Click para ver)`, iconURL: author.avatarURL({ dynamic: true }), url: message.url })
+            .setAuthor({ name: `${guild.name} • ${channel.name} (Click para ver)`, iconURL: author.avatarURL({ dynamic: true }), url: message.url });
+        
+        if(error.message === 'Missing Permissions') {
+            errorEmbed
+                .setThumbnail('https://i.imgur.com/ftAxUen.jpg')
+                .addField('¡Me faltan permisos!', [
+                    'No tengo los permisos necesarios para ejecutar el comando que acabas de pedirme en ese canal',
+                    'Soy una niña educada, así que no haré nada hasta que me den permiso. Puedes comentarle el asunto a algún moderador del server para que lo revise',
+                ].join('\n'))
+                .addField('Reportar un error', `¿Crees que esto se trata de otro tipo error? Eso nunca debería ser el caso, pero de ser así, puedes [reportarlo](${global.reportFormUrl})`);
+
+            return message.author.send({ embeds: [errorEmbed] }).catch(console.error);
+        }
+
+        errorEmbed
             .addField('Ha ocurrido un error al ingresar un comando', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``)
             .addField('Detalle', `"${message.content.slice(0, 699)}"\n[${commandname} :: ${args}]`);
         global.logch.send({
             content: `<@${global.peopleid.papita}>`,
-            embeds: [errorembed]
+            embeds: [errorEmbed]
         });
         stats.commands.failed++;
     }
@@ -796,4 +838,14 @@ client.on('rateLimit', rateLimit => {
     console.log('Se golpeó un pico de ratelimit:', rateLimit);
 });
 
+//Evento de advertencia
+client.on('warn', console.log);
+
+//Evento de error de API
+client.on('error', error => {
+    console.log(chalk.redBright('Error con la API de Discord'));
+    console.error(error);
+});
+
 client.login(token); //Ingresar sesión en Bot
+console.timeEnd('Registro de eventos del cliente');

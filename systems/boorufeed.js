@@ -1,6 +1,7 @@
-const GuildConfig = require('./models/guildconfigs.js');
+const GuildConfig = require('../localdata/models/guildconfigs.js');
 const booru = require('booru');
 const { Client, MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const chalk = require('chalk');
 
 const logMore = false;
 
@@ -20,9 +21,16 @@ const checkFeeds = async (guilds) => {
 
             //Recolectar últimas imágenes para el Feed
             let fetchedProperly = true;
+            // const response = [];
             const response = await booru.search('gelbooru', feed.tags, { limit: maxDocuments, random: false })
             .catch(error => {
-                console.log('Ocurrió un problema mientras se esperaban los resultados de búsqueda de un Feed');
+                console.log(chalk.redBright('Ocurrió un problema mientras se esperaban los resultados de búsqueda de un Feed'));
+                console.log({
+                    guildName: guild.name,
+                    channelId: chid,
+                    feedStack: feed.ids,
+                    feedTags: feed.tags,
+                });
                 console.error(error);
                 fetchedProperly = false;
                 return [ 'error' ];
@@ -49,8 +57,10 @@ const checkFeeds = async (guilds) => {
                 if(feed.ids.includes(image.id)) return;
                 if(logMore) console.log('feed.ids:', feed.ids, '\nimage.id:', image.id);
 
+                Array.prototype
                 //Agregar documento a IDs enviadas
-                feed.ids = [ image.id, ...feed.ids ];
+                feed.ids.unshift(image.id);
+                //Eliminar de la base de datos aquellas imágenes no coincidentes con lo encontrado
                 gcfg.feeds[chid].ids = feed.ids.filter(id => response.some(img => img.id === id));
                 if(logMore) console.log(guild.id, 'gcfg.feeds[chid].ids:', gcfg.feeds[chid].ids);
                 gcfg.markModified('feeds');
@@ -88,21 +98,21 @@ const checkFeeds = async (guilds) => {
                         embedColor = '#1bb76e';
                     }
 
-                    try {
-                        row.addComponents(
-                            new MessageButton()
-                                .setEmoji(emoji)
-                                .setStyle('LINK')
-                                .setURL(source),
-                        );
-                    } catch(err) {
-                        row.addComponents(
+                    if(source.length > 512)
+                        return row.addComponents(
                             new MessageButton()
                                 .setEmoji(emoji)
                                 .setStyle('DANGER')
+                                .setCustomId('feed_invalidUrl')
                                 .setDisabled(true),
                         );
-                    }
+
+                    row.addComponents(
+                        new MessageButton()
+                            .setEmoji(emoji)
+                            .setStyle('LINK')
+                            .setURL(source),
+                    );
                 };
                 const source = image.source;
                 if(source) {
@@ -193,21 +203,27 @@ const checkFeeds = async (guilds) => {
     return promisesCount;
 }
 
+/**
+ * @param {Client} client
+ * @returns {void}
+ */
+const updateBooruFeeds = async (client) => {
+    /** @type {import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Guild>} */
+    const guilds = client.guilds.cache;
+
+    const startMs = Date.now();
+    const promisesCount = await checkFeeds(guilds)
+    .catch(e => {
+        console.error(e);
+        return -1;
+    });
+
+    const delayMs = Date.now() - startMs;
+    console.log(new Date(Date.now() + 1000 * 60 * 15 - delayMs).toString(), '| delayMs:', delayMs);
+    setTimeout(updateBooruFeeds, 1000 * 60 * 15 - delayMs, client);
+    console.log(`Se procesaron Feeds de ${guilds.size} servers. ${promisesCount.total} imágenes nuevas puestas en envío`);
+};
+
 module.exports = {
-    /**@param {Client} client*/
-    async updateBooruFeeds(client) {
-        /** @type {import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Guild>} */
-        const guilds = client.guilds.cache;
-
-        console.time('ProcesarFeeds');
-        const promisesCount = await checkFeeds(guilds)
-        .catch(e => {
-            console.error(e);
-            return -1;
-        });
-        console.timeEnd('ProcesarFeeds');
-
-        setTimeout(module.exports.updateBooruFeeds, 1000 * 60, client);
-        console.log(`Se procesaron Feeds de ${guilds.size} servers. ${promisesCount.total} imágenes nuevas puestas en envío`);
-    },
-}
+    updateBooruFeeds,
+};

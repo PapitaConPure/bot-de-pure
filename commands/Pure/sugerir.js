@@ -42,7 +42,7 @@ module.exports = {
 			.setColor(global.tenshiColor)
 			.setAuthor({ name: 'Bot de Puré • Comentarios', iconURL: request.client.user.avatarURL({ size: 256, format: 'jpg' }) })
 			.setThumbnail('https://i.imgur.com/Ah7G6iV.jpg')
-			.addField('Método', 'Para enviar tus comentarios, accede a este [🔗 Formulario de Google](https://forms.gle/tHFXxbsTmuJTQm1z7)', true)
+			.addField('Método', `Para enviar tus comentarios, accede a este [🔗 Formulario de Google](${global.reportFormUrl})`, true)
 			.addField('Por favor', 'Se pide no enviar formularios de broma. Ya para las bromas estoy yo', true)
 			.addField('Privacidad', 'Si lo deseas, puedes enviar tus comentarios de forma totalmente anónima', true);
 
