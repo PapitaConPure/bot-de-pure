@@ -45,7 +45,7 @@ const generateQueue = ({ length = 0, mapFn = (v, k) => k, sort = 'NONE' }) => {
  */
 const saveQueue = async (queueQuery) => {
     const queue = (await QueueModel.findOne(queueQuery)) || new QueueModel(queueQuery);
-    return await queue.save();
+    return queue.save();
 };
 
 /**

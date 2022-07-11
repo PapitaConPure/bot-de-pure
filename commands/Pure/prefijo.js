@@ -59,7 +59,7 @@ module.exports = {
 				].join('\n')
 			});
 		} else
-			return await message.reply({
+			return message.reply({
 				content: [
 					`El prefijo actual es **${preraw}**`,
 					`Usa \`${preraw}ayuda\` para más información`,

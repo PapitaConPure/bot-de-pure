@@ -35,9 +35,9 @@ module.exports = {
 		if((args.data ?? args).length) {
 			const words = isSlash ? args.getString('frase').split(/[ \n]+/) : args;
 			const newmsg = `***:copyright: ${words.shift()}:registered: ${words.join(' ').replace(/[a-zA-Z0-9áéíóúÁÉÍÓÚüÑñ;:]+/g, '$&:tm:')}***`;
-			return await request.reply({ content: newmsg });
+			return request.reply({ content: newmsg });
 		}
-		if(isnsfw) return await request.reply({ content: 'https://www.youtube.com/watch?v=pwEvEY-7p9o' });
+		if(isnsfw) return request.reply({ content: 'https://www.youtube.com/watch?v=pwEvEY-7p9o' });
 		else {
 			const paputa = [
 				'Lechita:tm: uwu :milk:',
@@ -51,7 +51,7 @@ module.exports = {
 				'https://i.imgur.com/HxTxjdL.png'
 			];
 
-			return await request.reply({ content: `**${paputa[randRange(0, paputa.length)]}**` });
+			return request.reply({ content: `**${paputa[randRange(0, paputa.length)]}**` });
 		}
     },
 };

@@ -111,7 +111,7 @@ const executeTuber = async (request, tuber, { args, isSlash }) => {
 				return true;
 			});
 			// console.log('entradas:', mem.entradas, '\nreadyInputs:', readyInputs, '\n---------------------------------');
-			if(!readyInputs.every(input => input)) return await request.reply(`🛑 Este Tubérculo requiere más parámetros.\nUsa \`${p_pure(request.guildId).raw}tubérculo --ayuda <TuberID>\` para más información`);
+			if(!readyInputs.every(input => input)) return request.reply(`🛑 Este Tubérculo requiere más parámetros.\nUsa \`${p_pure(request.guildId).raw}tubérculo --ayuda <TuberID>\` para más información`);
 		}
 		//#endregion
 		
@@ -129,9 +129,9 @@ const executeTuber = async (request, tuber, { args, isSlash }) => {
 			await request.reply({ content: `⚠️ Se han encontrado **${errors} Errores PS** en la ejecución de PuréScript` });
 			return new Error('Error de PuréScript');
 		} else
-			return await request.reply(replyContent).catch(console.error);
+			return request.reply(replyContent).catch(console.error);
 	} else //Tubérculo básico (contenido y archivos directos)
-		return await request.reply({
+		return request.reply({
 			content: tuber.content,
 			files: tuber.files,
 		}).catch(console.error);

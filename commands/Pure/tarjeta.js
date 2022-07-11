@@ -104,25 +104,25 @@ module.exports = {
 		console.log(challenges);
 
 		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda ${module.exports.name}\` para más información`;
-		if(args.length < 3) return await request.reply(`⚠ Debes ingresar al menos el juego completado, la dificultad y la calidad de supervivencia.\n${helpstr}`);
+		if(args.length < 3) return request.reply(`⚠ Debes ingresar al menos el juego completado, la dificultad y la calidad de supervivencia.\n${helpstr}`);
 
 		const bg = backgrounds.find(b => b.aliases.includes(`${isSlash ? args.getString('juego') : args[0]}`.toLowerCase()));
-		if(!bg) return await request.reply('⚠ Debes ingresar un nombre o número de juego válido. Solo se permiten juegos oficiales de danmaku tradicional');
+		if(!bg) return request.reply('⚠ Debes ingresar un nombre o número de juego válido. Solo se permiten juegos oficiales de danmaku tradicional');
 
 		const diff = highlights.difficulty.find(d => d.aliases.includes(`${isSlash ? args.getString('dificultad') : args[1]}`.toLowerCase()));
-		if(!diff) return await request.reply(`⚠ Debes ingresar una calidad de survival válida.\n${helpstr}`);
+		if(!diff) return request.reply(`⚠ Debes ingresar una calidad de survival válida.\n${helpstr}`);
 
 		const survivalname = (isSlash ? args.getString('survival') : args[2]).toLowerCase();
-		if(!highlights.survival[survivalname]) return await request.reply(`⚠ Debes ingresar una calidad de survival válida.\n${helpstr}`);
+		if(!highlights.survival[survivalname]) return request.reply(`⚠ Debes ingresar una calidad de survival válida.\n${helpstr}`);
 		
 		const score = improveNumber(isSlash ? args.getNumber('survival') : args[3], false, 10);
-		if(score === 0 || score >= Math.pow(10, 12)) return await request.reply(`⚠ Debes ingresar un puntaje final válido.\n${helpstr}`);
+		if(score === 0 || score >= Math.pow(10, 12)) return request.reply(`⚠ Debes ingresar un puntaje final válido.\n${helpstr}`);
 
 		let dateStr;
 		if(args.length > 4) {
 			dateStr = isSlash ? args.getString('fecha') : args.slice(4).join('').split(/[\/ ]+/).map(d => d.padStart(2, '0')).join('/');
 			if(dateStr.length !== 'DD/MM/YYYY'.length)
-				return await request.reply('⚠ Fecha inválida. Asegúrate de seguir el formato DD/MM/AAAA');
+				return request.reply('⚠ Fecha inválida. Asegúrate de seguir el formato DD/MM/AAAA');
 		}
 		const issueDate = dateStr
 			? dateStr

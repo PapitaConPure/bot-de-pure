@@ -45,7 +45,7 @@ module.exports = {
 			.setAuthor({ name: wiztitle, iconURL: request.client.user.avatarURL() })
 			.setFooter({ text: '1/? • Comenzar' })
 			.addField('Bienvenido', 'Si es la primera vez que configuras un Feed de imágenes con Bot de Puré, ¡no te preocupes! Simplemente sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras');
-		return await request.reply({
+		return request.reply({
 			embeds: [wizard],
 			components: [new MessageActionRow().addComponents(
 				new MessageButton()
@@ -70,7 +70,7 @@ module.exports = {
 		const guildQuery = { guildId: interaction.guild.id };
 		const gcfg = (await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery);
 		const premade = gcfg.feeds && Object.keys(gcfg.feeds).length;
-		return await interaction.update({
+		return interaction.update({
 			embeds: [wizard],
 			components: [new MessageActionRow().addComponents(
 				new MessageButton()
@@ -100,7 +100,7 @@ module.exports = {
 	/**@param {import('discord.js').SelectMenuInteraction} interaction */
 	async ['selectFeedEdit'](interaction) {
 		module.exports[interaction.channel.id].memoChannel = interaction.guild.channels.cache.get(interaction.values[0] || interaction.channel.id);
-		return await module.exports.setupTagsCollector(interaction, true, 'feed_editOne');
+		return module.exports.setupTagsCollector(interaction, true, 'feed_editOne');
 	},
 
 	/**@param {import('discord.js').SelectMenuInteraction} interaction */
@@ -114,7 +114,7 @@ module.exports = {
 			.addField('Destino', `**${fetchedChannel.name}** (canal ${fetchedChannel.nsfw ? 'NSFW' : 'SFW'})`)
 			.addField('Selecciona un elemento a personalizar', 'Usa el menú desplegable para decidir qué personalizar');
 		
-		return await interaction.update({
+		return interaction.update({
 			embeds: [wizard],
 			components: [
 				new MessageActionRow().addComponents(
@@ -301,7 +301,7 @@ module.exports = {
 			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
 			.setFooter({ text: 'Operación finalizada' })
 			.addField('Feed personalizado', `Se ha eliminado el título personalizado del Feed con las tags _"${safeTags(gcfg.feeds[fetchedChannel.id].tags)}"_ para el canal **${fetchedChannel.name}**`);
-		return await interaction.update({
+		return interaction.update({
 			embeds: [concludedEmbed],
 			components: [new MessageActionRow().addComponents(
 				new MessageButton()
@@ -329,7 +329,7 @@ module.exports = {
 			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
 			.setFooter({ text: 'Operación finalizada' })
 			.addField('Feed personalizado', `Se ha eliminado el texto de pie personalizado del Feed con las tags _"${safeTags(gcfg.feeds[fetchedChannel.id].tags)}"_ para el canal **${fetchedChannel.name}**`);
-		return await interaction.update({
+		return interaction.update({
 			embeds: [concludedEmbed],
 			components: [new MessageActionRow().addComponents(
 				new MessageButton()
@@ -357,7 +357,7 @@ module.exports = {
 			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
 			.setFooter({ text: 'Operación finalizada' })
 			.addField('Feed personalizado', `Se ha eliminado el ícono de esquina personalizado del Feed con las tags _"${safeTags(gcfg.feeds[fetchedChannel.id].tags)}"_ para el canal **${fetchedChannel.name}**`);
-		return await interaction.update({
+		return interaction.update({
 			embeds: [concludedEmbed],
 			components: [new MessageActionRow().addComponents(
 				new MessageButton()
@@ -379,7 +379,7 @@ module.exports = {
 			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
 			.setFooter({ text: '4/4 • Confirmar' })
 			.addField('Confirmar eliminación de Feed', `Estás por borrar el Feed _"${safeTags(tags)}"_ ubicado en el canal **<#${chid}>**. ¿Estás seguro?`);
-		return await interaction.update({
+		return interaction.update({
 			embeds: [wizard],
 			components: [new MessageActionRow().addComponents(
 				new MessageButton()
@@ -461,7 +461,7 @@ module.exports = {
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 		delete gcfg.feeds[module.exports[interaction.channel.id].memoChannel.id];
 		gcfg.markModified('feeds');
-		return await Promise.all([
+		return Promise.all([
 			gcfg.save(),
 			interaction.update({
 				embeds: [wizard],
@@ -498,7 +498,7 @@ module.exports = {
 			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
 			.setFooter({ text: '3/4 • Elegir canal' })
 			.addField('Selecciona un canal', 'Facilita, por medio de un mensaje, una porción del nombre, la mención o la ID del canal en el que quieres crear un nuevo Feed. Pasarás al siguiente paso automáticamente al decirme un canal válido');
-		return await interaction.update({
+		return interaction.update({
 			embeds: [wizard],
 			components: [new MessageActionRow().addComponents(
 				new MessageButton()
@@ -534,7 +534,7 @@ module.exports = {
 			};
 		}).filter(feed => feed);
 		gcfg.save();
-		return await interaction.update({
+		return interaction.update({
 			embeds: [wizard],
 			components: [
 				new MessageActionRow().addComponents(
@@ -578,7 +578,7 @@ module.exports = {
 			};
 		}).filter(feed => feed);
 		gcfg.save();
-		return await interaction.update({
+		return interaction.update({
 			embeds: [wizard],
 			components: [
 				new MessageActionRow().addComponents(
@@ -611,7 +611,7 @@ module.exports = {
 			description: `#${interaction.guild.channels.cache.get(chid).name}`,
 			value: chid,
 		}));
-		return await interaction.update({
+		return interaction.update({
 			embeds: [wizard],
 			components: [
 				new MessageActionRow().addComponents(
@@ -639,7 +639,7 @@ module.exports = {
 			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
 			.setFooter({ text: 'Operación abortada' })
 			.addField('Asistente cancelado', 'Se canceló la configuración de Feed');
-		return await interaction.update({
+		return interaction.update({
 			embeds: [cancelEmbed],
 			components: [],
 		});
@@ -657,7 +657,7 @@ module.exports = {
 			console.error(error);
 			return 'Ocurrió un problema al contactar con el Booru para recuperar las tags.\nInténtalo de nuevo, si el problema persiste, es probable que el objetivo no esté disponible o que se trate de un bug de mi parte';
 		});
-		return await interaction.reply({
+		return interaction.reply({
 			content: `**Tags**\n${tags}`,
 			ephemeral: true,
 		});
@@ -666,7 +666,7 @@ module.exports = {
 	/**@param {import('discord.js').ButtonInteraction} interaction */
 	async ['deleteFeedImage'](interaction) {
 		if(isNotModerator(interaction.member))
-			return await interaction.reply({
+			return interaction.reply({
 				content: ':x: No tienes permiso para hacer eso, teehee~',
 				ephemeral: true,
 			});
@@ -678,7 +678,7 @@ module.exports = {
 			'page=dapi&s=post&q=index&json=1'
 		);
 		const tags = await axios.get(apiurl).then(response => response.data[0].tags.slice(0, 1900));
-		return await Promise.all([
+		return Promise.all([
 			interaction.reply({
 				content: `**Eliminado** ${url}\n**Tags rescatadas** ${tags}`,
 				ephemeral: true,

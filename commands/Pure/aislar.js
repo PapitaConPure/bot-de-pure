@@ -31,17 +31,17 @@ module.exports = {
 	async execute(request, args, isSlash = false) {
 		//Acción de comando
 		if(!isSlash && !args.length)
-			return await request.reply({ content: '⚠ Debes indicar un usuario.', ephemeral: true });
+			return request.reply({ content: '⚠ Debes indicar un usuario.', ephemeral: true });
 
 		const duration = isSlash ? args.getNumber('duración') : args.shift();
 		if(duration === undefined || duration < 0)
-			return await request.reply({ content: '⚠ Debes especificar la duración del aislamiento en minutos\nIngresa 0 para revocarlo', ephemeral: true });
+			return request.reply({ content: '⚠ Debes especificar la duración del aislamiento en minutos\nIngresa 0 para revocarlo', ephemeral: true });
 
 		const members = isSlash
 			? options.fetchParamPoly(args, 'miembros', args.getMember, [])
 			: regroupText(args).map(data => fetchMember(data, request));
 		if(!members.length)
-			return await request.reply({ content: '⚠ Debes mencionar al menos un miembro a aislar', ephemeral: true });
+			return request.reply({ content: '⚠ Debes mencionar al menos un miembro a aislar', ephemeral: true });
 
 		const succeeded = [];
 		const failed = [];
@@ -53,10 +53,10 @@ module.exports = {
 		));
 		
 		if(!succeeded.length)
-			return await request.reply({ content: '⚠ No pude actualizar ninguno de los miembros mencionados. Revisa que tenga permisos para administrar miembros' });
+			return request.reply({ content: '⚠ No pude actualizar ninguno de los miembros mencionados. Revisa que tenga permisos para administrar miembros' });
 		
 		const membersList = members => members.map(member => member.user.tag).join(', ');
-		return await request.reply({
+		return request.reply({
 			content: [
 				duration > 0
 					? `✅ Se ha aislado a **${membersList(succeeded)}**`

@@ -39,7 +39,7 @@ module.exports = {
 	 * @param {Boolean} isSlash
 	 */
 	async execute(request, _) {
-		return await request.reply({
+		return request.reply({
 			embeds: [ embed.setAuthor({ name: 'Punto de Reparto desplegado', iconURL: (request.author ?? request.user).avatarURL() }) ],
 			components: [row],
 		});
@@ -48,8 +48,8 @@ module.exports = {
 	async ['addCandy'](interaction) {
 		const { member } = interaction;
 		if(member.roles.cache.has(candyRole))
-			return await interaction.reply({ content: 'Oe tranqui po, que ya tení tus caramelos <:kageuwu:850196617495707678>', ephemeral: true });
-		return await Promise.all([
+			return interaction.reply({ content: 'Oe tranqui po, que ya tení tus caramelos <:kageuwu:850196617495707678>', ephemeral: true });
+		return Promise.all([
 			member.roles.add(candyRole),
 			interaction.reply({ content: 'Caramelos entregados <:miyoi:674823039086624808>:pinching_hand: :candy:', ephemeral: true }),
 		]);
@@ -58,8 +58,8 @@ module.exports = {
 	async ['removeCandy'](interaction) {
 		const { member } = interaction;
 		if(!member.roles.cache.has(candyRole))
-			return await interaction.reply({ content: 'No tenei caramelos encima, si querei plata trabaja po\' <:lechita:931409943448420433>', ephemeral: true });
-		return await Promise.all([
+			return interaction.reply({ content: 'No tenei caramelos encima, si querei plata trabaja po\' <:lechita:931409943448420433>', ephemeral: true });
+		return Promise.all([
 			member.roles.remove(candyRole),
 			interaction.reply({ content: 'Caramelos devueltos <:miyoi:674823039086624808>:pray:', ephemeral: true }),
 		]);

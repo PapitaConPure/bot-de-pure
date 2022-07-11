@@ -42,17 +42,17 @@ module.exports = {
             await hourai.save().catch(console.error);
             switch(infractionCount) {
                 case 1:
-                    return await message.react(client.emojis.cache.get('920020596526551072')).catch(console.error);
+                    return message.react(client.emojis.cache.get('920020596526551072')).catch(console.error);
 
                 case 2:
-                    return await message.react(client.emojis.cache.get('796930821554044928')).catch(console.error);
+                    return message.react(client.emojis.cache.get('796930821554044928')).catch(console.error);
 
                 case 3: {
                     await message.react(client.emojis.cache.get('859874631795736606')).catch(console.error);
                     const roleId = '682629889702363143'; //Hanged Doll
                     const reason = 'Colgado automáticamente por spam de bots';
                     if(!member.roles.cache.has(roleId))
-                        return await member.roles.add(roleId, reason).catch(console.error);
+                        return member.roles.add(roleId, reason).catch(console.error);
                 }
 
                 default: {
@@ -60,7 +60,7 @@ module.exports = {
                     const roleId = '925599922370256906'; //Crucified Doll
                     const reason = 'Colgado automáticamente por spam de bots. Debido a la evasión del castigo previo, se requiere más poder para revocar la sanción';
                     if(!member.roles.cache.has(roleId))
-                        return await member.roles.add(roleId, reason).catch(console.error);
+                        return member.roles.add(roleId, reason).catch(console.error);
                 }
             }
         },

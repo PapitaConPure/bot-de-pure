@@ -71,7 +71,7 @@ module.exports = {
 				}
 				if(abort) return;
 			} else if(['megumin', 'holo'].some(b => args.includes(b)))
-				return await rakki.execute(request, [], isSlash);
+				return rakki.execute(request, [], isSlash);
 		}
 
 		//Acción de comando
@@ -101,7 +101,7 @@ module.exports = {
 			const response = await booru.search('gelbooru', [stags, extags].join(' '), { limit: 100, random: true });
 			//Manejo de respuesta
 			if(!response.length)
-				return await request.reply({ content: `:warning: No hay resultados en **Gelbooru** para las tags **"${extags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` });
+				return request.reply({ content: `:warning: No hay resultados en **Gelbooru** para las tags **"${extags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` });
 
 			//Seleccionar imágenes
 			const posts = response
@@ -121,7 +121,7 @@ module.exports = {
 
 			//Enviar mensajes
 			await request.reply(messages.shift());
-			return await Promise.all(messages.map(message => request.channel.send(message)));
+			return Promise.all(messages.map(message => request.channel.send(message)));
 		} catch(error) {
 			console.error(error);
 			const errorembed = new MessageEmbed()
@@ -133,7 +133,7 @@ module.exports = {
 					`${[error.name, error.message].join(': ')}\n` +
 					'```'
 				);
-			return await request.reply({ embeds: [errorembed] });
+			return request.reply({ embeds: [errorembed] });
 		}
 	},
 

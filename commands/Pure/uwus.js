@@ -71,6 +71,6 @@ module.exports = {
             .addField('Duración del evento', `**${secs}** segundos.`)
             .setAuthor({ name: `Evento iniciado por ${request.author.username}`, iconURL: request.author.avatarURL() });
         
-        return await request.reply({ embeds: [embed] });
+        return request.reply({ embeds: [embed] });
     },
 };

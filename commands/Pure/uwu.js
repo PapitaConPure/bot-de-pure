@@ -37,9 +37,9 @@ module.exports = {
 		const randomUwu = uwusopt[Math.floor(Math.random() * uwusopt.length)];
 		
 		if(!deleteOriginal)
-			return await request.reply({ content: uwusopt[Math.floor(Math.random() * uwusopt.length)] });
+			return request.reply({ content: uwusopt[Math.floor(Math.random() * uwusopt.length)] });
 		
-		return await Promise.all([
+		return Promise.all([
 			request.channel.send({ content: randomUwu }),
 			request.delete().catch(console.error),
 		]);

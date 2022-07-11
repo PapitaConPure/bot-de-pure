@@ -24,6 +24,6 @@ module.exports = {
 	 */
 	async execute(request, args, isSlash = false) {
 		//Acción de comando
-		return await request.reply({ content: 'ola' });
+		return request.reply({ content: 'ola' });
 	}
 };

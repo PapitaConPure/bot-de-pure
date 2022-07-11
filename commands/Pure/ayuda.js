@@ -152,7 +152,7 @@ module.exports = {
                 );
             embeds[embeds.length - 1].setFooter({ text: `Usa "${helpCommand} ${require('./g-indice.js').name}" para aprender más sobre comandos` });
         }
-        return await request.reply({
+        return request.reply({
             embeds: embeds,
             components: components,
         });

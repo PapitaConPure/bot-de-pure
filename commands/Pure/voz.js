@@ -72,7 +72,7 @@ module.exports = {
 				: args.join(' ');
 			
 			if(!sessionName)
-				return await request.reply({
+				return request.reply({
 					content: [
 						'⚠ Debes ingresar un nombre para ejecutar este comando de esta forma',
 						'Si estás buscando iniciar un Asistente de Configuración, usa la bandera `--asistente` o `-a`',
@@ -82,13 +82,13 @@ module.exports = {
 				});
 			
 			if(sessionName.length > 24)
-				return await request.reply({
+				return request.reply({
 					content: '⚠ Intenta acortar un poco el nombre. El límite para nombres de sesión es de 24(+3) caracteres',
 					ephemeral: true,
 				});
 
 			if(!sessionEmote)
-				return await request.reply({
+				return request.reply({
 					content: [
 						'⚠ Emote inválido',
 						'Recuerda que no se pueden usar emotes personalizados para nombres de canales',
@@ -107,16 +107,16 @@ module.exports = {
 				].join('\n'),
 				ephemeral: true,
 			}).catch(console.error);
-			if(!voiceState.channelId) return await warnNotInSession();
+			if(!voiceState.channelId) return warnNotInSession();
 
 			//Modificar sesión y confirmar
 			const pv = await PureVoice.findOne({ guildId: request.guildId });
-			if(!pv) return await warnNotInSession();
+			if(!pv) return warnNotInSession();
             const sessionIndex = pv.sessions.findIndex(session => session.voiceId === voiceState.channelId);
 			const session = pv.sessions[sessionIndex];
-			if(!session) return await warnNotInSession();
+			if(!session) return warnNotInSession();
 			const { textId, voiceId, roleId, nameChanged } = session;
-			if((Date.now() - nameChanged) < 60e3 * 20) return await request.reply({
+			if((Date.now() - nameChanged) < 60e3 * 20) return request.reply({
 				content: [
 					'❌ Por cuestiones técnicas, solo puedes cambiar el nombre de la sesión una vez cada 20 minutos.',
 					`Inténtalo de nuevo <t:${Math.round(nameChanged / 1000 + 60 * 20)}:R>, o conéctate a una nueva sesión`,
@@ -127,7 +127,7 @@ module.exports = {
 
 			const guildChannels = request.guild.channels.cache;
 			const guildRoles = request.guild.roles.cache;
-			return await Promise.all([
+			return Promise.all([
 				pv.save(),
 				guildChannels.get(voiceId)?.setName(`${sessionEmote}【${sessionName}】`, 'Renombrar sesión PuréVoice'),
 				guildRoles.get(roleId)?.setName(`${sessionEmote} ${sessionName}`, 'Renombrar sesión PuréVoice'),
@@ -136,11 +136,11 @@ module.exports = {
 		}
 		
 		//Inicializar instalador PuréVoice
-		if(isNotModerator(request.member)) return await request.reply({ content: '❌ No tienes permiso para hacer esto', ephemeral: true });
+		if(isNotModerator(request.member)) return request.reply({ content: '❌ No tienes permiso para hacer esto', ephemeral: true });
 		const wizard = wizEmbed(request.client.user.avatarURL(), '1/? • Comenzar', 'AQUA')
 		.addField('Bienvenido', 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes! Solo sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras');
 		const uid = (request.author ?? request.user).id;
-		return await request.reply({
+		return request.reply({
 			embeds: [wizard],
 			components: [new MessageActionRow().addComponents(
 				new MessageButton()
@@ -159,7 +159,7 @@ module.exports = {
 	async ['startWizard'](interaction, [ authorId ]) {
 		const { user, guild } = interaction;
 		if(user.id !== authorId)
-			return await interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
+			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
 		
 		const wizard = wizEmbed(interaction.client.user.avatarURL(), '2/? • Seleccionar Operación', 'NAVY')
 			.addField('Inyección de Sistema PuréVoice', '¿Qué deseas hacer ahora mismo?');
@@ -191,7 +191,7 @@ module.exports = {
 				.setDisabled(!isInstalled),
 			cancelbutton(uid),
 		);
-		return await interaction.update({
+		return interaction.update({
 			embeds: [wizard],
 			components: [row],
 		});
@@ -203,7 +203,7 @@ module.exports = {
 	 */
 	async ['selectInstallation'](interaction, [ authorId ]) {
 		if(interaction.user.id !== authorId)
-			return await interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
+			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
 
 		const wizard = wizEmbed(interaction.client.user.avatarURL(), '3/4 • Seleccionar instalación', 'GOLD')
 			.addField('Instalación', 'Selecciona el tipo de instalación que deseas realizar');
@@ -218,7 +218,7 @@ module.exports = {
 				.setStyle('PRIMARY'),
 			cancelbutton(authorId),
 		);
-		return await interaction.update({
+		return interaction.update({
 			embeds: [wizard],
 			components: [row],
 		});
@@ -230,7 +230,7 @@ module.exports = {
 	 */
 	async ['installSystem'](interaction, [ authorId, createNew ]) {
 		if(interaction.user.id !== authorId)
-			return await interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
+			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
 		
 		const filter = (m) => m.author.id === authorId;
 		collectors[interaction.id] = new MessageCollector(interaction.channel, { filter: filter, time: 1000 * 60 * 2 });
@@ -291,7 +291,7 @@ module.exports = {
 				return finished;
 			} catch(error) {
 				console.error(error);
-				return await interaction.channel.send({ content: [
+				return interaction.channel.send({ content: [
 					'⚠ Ocurrió un error al crear esta categoría',
 					'Asegúrate de que tenga los permisos necesarios para realizar esta acción (administrar canales)',
 					'También, verifica que el nombre ingresado no esté ya ocupado por alguna otra categoría o canal',
@@ -309,7 +309,7 @@ module.exports = {
 				.setStyle('SECONDARY'),
 			cancelbutton(uid),
 		);
-		return await interaction.update({
+		return interaction.update({
 			embeds: [wizard],
 			components: [row],
 		});
@@ -321,7 +321,7 @@ module.exports = {
 	 */
 	async ['deleteSystem'](interaction, [ authorId ]) {
 		if(interaction.user.id !== authorId)
-			return await interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
+			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
 		
 		const wizard = wizEmbed(interaction.client.user.avatarURL(), 'Confirmar desinstalación', 'YELLOW')
 			.addField('Desinstalación del Sistema PuréVoice del servidor', 'Esto borrará todas los canales creados por el Sistema. La categoría del Sistema y los canales creados manualmente se ignorarán.\nConfirma la desasociación del servidor con PuréVoice');
@@ -337,7 +337,7 @@ module.exports = {
 				.setStyle('SECONDARY'),
 			cancelbutton(uid),
 		);
-		return await interaction.update({
+		return interaction.update({
 			embeds: [wizard],
 			components: [row],
 		});
@@ -349,7 +349,7 @@ module.exports = {
 	 */
 	async ['deleteSystemConfirmed'](interaction, [ authorId ]) {
 		if(interaction.user.id !== authorId)
-			return await interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
+			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
 
 		//Eliminar Sistema PuréVoice
 		const guildQuery = { guildId: interaction.guild.id };
@@ -366,7 +366,7 @@ module.exports = {
 		
 		const deleteEmbed = wizEmbed(interaction.client.user.avatarURL(), 'Operación finalizada', 'RED')
 			.addField('Sistema PuréVoice eliminado', 'Se eliminó el Sistema PuréVoice asociado al servidor');
-		return await interaction.update({
+		return interaction.update({
 			embeds: [deleteEmbed],
 			components: [],
 		});	
@@ -378,11 +378,11 @@ module.exports = {
 	 */
 	async ['cancelWizard'](interaction, [ authorId ]) {
 		if(interaction.user.id !== authorId)
-			return await interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
+			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
 		
 		const cancelEmbed = wizEmbed(interaction.client.user.avatarURL(), 'Operación abortada', 'NOT_QUITE_BLACK')
 			.addField('Asistente cancelado', 'Se canceló la configuración del Sistema PuréVoice');
-		return await interaction.update({
+		return interaction.update({
 			embeds: [cancelEmbed],
 			components: [],
 		});
@@ -394,7 +394,7 @@ module.exports = {
 	 */
 	async ['showMeHow'](interaction) {
 		const commandName = `${p_pure(interaction.guildId).raw}voz`;
-		return await interaction.reply({
+		return interaction.reply({
 			content: [
 				'Ejemplos:',
 				`> ${commandName}  Gaming   --emote  🎮`,

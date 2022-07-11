@@ -75,7 +75,7 @@ module.exports = {
 	 * @param {Boolean} isSlash
 	 */
 	async execute(request, _, isSlash = false) {
-		return await request.reply({
+		return request.reply({
 			embeds: [
 				new MessageEmbed()
 					.setAuthor({ name: 'Punto de Reparto desplegado', iconURL: (request.author ?? request.user).avatarURL() })
@@ -133,13 +133,13 @@ module.exports = {
 		const operation = received.shift();
 		const args = received.shift();
 		if(args)
-			return await module.exports[operation](interaction, [args]);
+			return module.exports[operation](interaction, [args]);
 		else
-			return await module.exports[operation](interaction);
+			return module.exports[operation](interaction);
 	},
 
 	async ['selectColor'](interaction) {
-		return await interaction.reply({
+		return interaction.reply({
 			files: [hourai.images.colors],
 			components: [colorsRow],
 			ephemeral: true,
@@ -157,7 +157,7 @@ module.exports = {
 		const boostedRecently = interaction.user.id === peopleid.papita || ((currentTimestamp - boostTimestamp) < (60e3 * 60 * 24 * 35));
 		const customRoleId = houraiDB.customRoles?.[interaction.user.id];
 
-		return await interaction.reply({
+		return interaction.reply({
 			embeds: [
 				new MessageEmbed()
 					.setColor('WHITE')
@@ -226,12 +226,12 @@ module.exports = {
 			ephemeral: true,
 		};
 
-		if(edit) return await interaction.update(messageActions);
-		return await interaction.reply(messageActions);
+		if(edit) return interaction.update(messageActions);
+		return interaction.reply(messageActions);
     },
 	
 	async ['selectDrink'](interaction) {
-		return await interaction.reply({
+		return interaction.reply({
 			embeds: [
 				new MessageEmbed()
 					.setColor('BLUE')
@@ -243,7 +243,7 @@ module.exports = {
     },
 	
 	async ['selectReligion'](interaction) {
-		return await interaction.reply({
+		return interaction.reply({
 			embeds: [
 				new MessageEmbed()
 					.setColor('AQUA')
@@ -271,7 +271,7 @@ module.exports = {
 	
 	async ['selectCandy'](interaction) {
 		const candyRole = '683084373717024869';
-		return await interaction.reply({
+		return interaction.reply({
 			embeds: [
 				new MessageEmbed()
 					.setColor('DARK_PURPLE')
@@ -297,9 +297,9 @@ module.exports = {
 		const { member } = interaction;
 		const rid = args.shift();
 		if(member.roles.cache.has(rid))
-			return await interaction.reply({ content: '⚠️ Ya tienes ese rol', ephemeral: true });
+			return interaction.reply({ content: '⚠️ Ya tienes ese rol', ephemeral: true });
 		
-		return await Promise.all([
+		return Promise.all([
 			member.roles.add(rid),
 			interaction.reply({ content: '✅ Rol entregado', ephemeral: true }),
 		]);
@@ -309,7 +309,7 @@ module.exports = {
 		const { member } = interaction;
 		const newRoleId = args.shift();
 		if(member.roles.cache.has(newRoleId))
-			return await interaction.reply({ content: '⚠️ Ya tienes ese rol', ephemeral: true })
+			return interaction.reply({ content: '⚠️ Ya tienes ese rol', ephemeral: true })
 
 		await Promise.all(
 			args.filter(rid => rid !== newRoleId).map(rid =>
@@ -318,7 +318,7 @@ module.exports = {
 				: undefined
 			)
 		);
-		return await Promise.all([
+		return Promise.all([
 			member.roles.add(newRoleId),
 			interaction.reply({ content: '✅ Rol entregado', ephemeral: true }),
 		]);
@@ -328,8 +328,8 @@ module.exports = {
 		const { member } = interaction;
 		const [ rid ] = args;
 		if(!member.roles.cache.has(rid))
-			return await interaction.reply({ content: '⚠️ No tienes ese rol', ephemeral: true });
-		return await Promise.all([
+			return interaction.reply({ content: '⚠️ No tienes ese rol', ephemeral: true });
+		return Promise.all([
 			member.roles.remove(rid),
 			interaction.reply({ content: '✅ Rol quitado', ephemeral: true }),
 		]);
@@ -369,12 +369,12 @@ module.exports = {
 					interaction.member.roles.add(customRole),
 				]);
 
-				return await module.exports.customRoleWizard(interaction, customRole.id);
+				return module.exports.customRoleWizard(interaction, customRole.id);
 			}
 			
 			case 'EDIT': {
 				const roleId = houraiDB.customRoles[uid];
-				return await module.exports.customRoleWizard(interaction, roleId);
+				return module.exports.customRoleWizard(interaction, roleId);
 			}
 
 			case 'DELETE': {
@@ -383,7 +383,7 @@ module.exports = {
 				delete houraiDB.customRoles[uid];
 				houraiDB.markModified('customRoles');
 
-				return await Promise.all([
+				return Promise.all([
 					interaction.guild.roles.delete(roleId, 'Eliminación de Rol Personalizado de miembro'),
 					houraiDB.save(),
 					interaction.update({
@@ -402,7 +402,7 @@ module.exports = {
 		/**@type {import('discord.js').Role}*/
 		const customRole = interaction.member.roles.cache.get(roleId);
 		if(!customRole)
-			return await interaction.update({
+			return interaction.update({
 				content: `⚠ No se encontró tu Rol Personalizado. Prueba usando \`${p_pure(interaction.guildId).raw}roles\` una vez más para crear uno nuevo`,
 				embeds: [],
 				components: [],
@@ -463,7 +463,7 @@ module.exports = {
 
 		coll.on('end', () => interaction.channel.send({ content: '✅ Edición de Rol Personalizado finalizada' }));
 
-		return await interaction.update({
+		return interaction.update({
 			embeds: [embed],
 			components: [],
 		});

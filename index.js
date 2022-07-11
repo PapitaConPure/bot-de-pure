@@ -340,17 +340,18 @@ client.on('messageCreate', async message => {
         chstats.markModified('sub');
         chstats.save();
     })();
-    await stats.save();
     console.timeEnd('Estadísticas');
 
     //Respuestas rápidas
-    console.time('Funciones de Guild')
+    console.time('Funciones de Guild');
     const guildFunctions = globalGuildFunctions[gid];
     if(guildFunctions)
         await Promise.all(Object.values(guildFunctions).map(fgf => fgf(message)));
-    console.timeEnd('Funciones de Guild')
+    console.timeEnd('Funciones de Guild');
     
     //#region Comandos
+    console.time('Procesado de comandos');
+    (async () => {
     //#region Detección de Comandos
     const pdrmk = p_drmk(gid);
     const ppure = p_pure(gid);
@@ -360,12 +361,12 @@ client.on('messageCreate', async message => {
     else {
         //#region Emotes rápidos
         const words = content.split(/[\n ]+/);
-        let ecmd = words.findIndex(word => word.startsWith('&'));
-        if(ecmd === -1) return; //Salir si no se encuentra prefijo de comando ni emote
+        const emoteCommandIndex = words.findIndex(word => word.startsWith('&'));
+        if(emoteCommandIndex === -1) return; //Salir si no se encuentra prefijo de comando ni emote
 
-        const args = words.slice(ecmd + 1);
-        ecmd = words[ecmd].toLowerCase().slice(1);
-        const command = client.EmotesPure.get(ecmd) || client.EmotesPure.find(cmd => cmd.aliases && cmd.aliases.includes(ecmd)); //Argumentos ingresados
+        const args = words.slice(emoteCommandIndex + 1);
+        const emoteCommand = words[emoteCommandIndex].toLowerCase().slice(1);
+        const command = client.EmotesPure.get(emoteCommand) || client.EmotesPure.find(cmd => cmd.aliases && cmd.aliases.includes(emoteCommand)); //Argumentos ingresados
         if(!command) return;
 
         try {
@@ -379,6 +380,7 @@ client.on('messageCreate', async message => {
                 stats.commands.failed++;
         }
         //#endregion
+        return;
     }
 
     //Partición de mensaje comando
@@ -424,10 +426,13 @@ client.on('messageCreate', async message => {
             stats.commands.failed++;
     }
     stats.markModified('commands');
-    await stats.save();
     //#endregion
+    })();
+    console.timeEnd('Procesado de comandos');
     //#endregion
 
+    stats.save();
+    
     //Ayuda para principiantes
     if(message.content.indexOf(`${message.client.user.id}>`) !== -1)
         (require('./commands/Pure/prefijo.js').execute(message, []));
@@ -436,7 +441,7 @@ client.on('messageCreate', async message => {
 //Recepción de interacciones
 client.on('interactionCreate', async interaction => {
     const { guild, channel } = interaction;
-    if(!guild) return await interaction.reply({ content: ':x: Solo respondo a comandos en servidores' }).catch(console.error);
+    if(!guild) return interaction.reply({ content: ':x: Solo respondo a comandos en servidores' }).catch(console.error);
     const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
 
     //Comando Slash
@@ -452,7 +457,7 @@ client.on('interactionCreate', async interaction => {
             const command = client.ComandosPure.get(commandName);
             const exception = await cmdex.findFirstException(command.flags, interaction);
             if(exception)
-                return await interaction.reply({ embeds: [ cmdex.createEmbed(exception, { cmdString: `/${commandName}` }) ], ephemeral: true });
+                return interaction.reply({ embeds: [ cmdex.createEmbed(exception, { cmdString: `/${commandName}` }) ], ephemeral: true });
             
             if(command.experimental)
                 await command.execute(interaction, interaction.options, true);

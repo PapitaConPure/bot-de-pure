@@ -31,7 +31,7 @@ module.exports = {
 			: regroupText(args);
 		
 		if(!choices.length || choices.length < 2)
-			return await request.reply({
+			return request.reply({
 				content: `⚠️ Debes ingresar al menos dos opciones separadas por comas ","\nUsa \`${p_pure(request.guild.id).raw}ayuda\` para más información`,
 				ephemeral: true,
 			});
@@ -39,6 +39,6 @@ module.exports = {
 		const embed = new MessageEmbed()
 			.setColor('GREYPLE')
 			.addField('Yo digo que...', `_"${choices[randRange(0, choices.length)]}"_`);
-		return await request.reply({ embeds: [embed] });
+		return request.reply({ embeds: [embed] });
 	}
 };

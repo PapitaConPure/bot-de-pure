@@ -215,7 +215,7 @@ class PureVoiceUpdateHandler {
                 
                 const name = member.user.username.slice(0, 24);
                 const namingReason = 'Renombrar sesión PuréVoice (forzado automáticamente)';
-                return await Promise.all([
+                return Promise.all([
                     pvDocument.save(),
                     channel?.send({ content: '🔹 Se asignó un nombre a la sesión automáticamente' }),
                     channel?.setName(`💠【${name}】`, namingReason),

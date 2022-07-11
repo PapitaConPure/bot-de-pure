@@ -46,7 +46,7 @@ module.exports = {
 			.addField('Por favor', 'Se pide no enviar formularios de broma. Ya para las bromas estoy yo', true)
 			.addField('Privacidad', 'Si lo deseas, puedes enviar tus comentarios de forma totalmente anónima', true);
 
-		return await request.reply({ embeds: [embed] });
+		return request.reply({ embeds: [embed] });
 	},
 
 	async __execute(message, args) {
@@ -87,7 +87,7 @@ module.exports = {
 
 		//Acción de comando
 		if(!args.length)
-			return await message.channel.send({ content: ':warning: Campo de sugerencia vacío.' });
+			return message.channel.send({ content: ':warning: Campo de sugerencia vacío.' });
 
 		const embed = new Discord.MessageEmbed()
 			.setColor('#608bf3')

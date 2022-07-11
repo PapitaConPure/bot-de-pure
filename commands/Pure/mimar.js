@@ -36,9 +36,9 @@ module.exports = {
 	async execute(request, args, isSlash = false) {
 		//Acción de comando
 		const user2 = isSlash ? args.getUser('persona') : fetchUser(args.join(' '), request);
-		if(!user2) return await request.reply('⚠️ Debes especificar una persona a mimar');
+		if(!user2) return request.reply('⚠️ Debes especificar una persona a mimar');
 		const user1 = request.author ?? request.user;
-		if(user1.id === user2.id) return await request.reply('⚠️ El único mimo que puedes darte a ti mismo es el de vivir una vida de la que no te arrepentirás');
+		if(user1.id === user2.id) return request.reply('⚠️ El único mimo que puedes darte a ti mismo es el de vivir una vida de la que no te arrepentirás');
 
 		const embed = new MessageEmbed()
 			.setColor('#fa7b62')
@@ -46,6 +46,6 @@ module.exports = {
 			.addField(user1.username, lovestats(), true)
 			.addField(user2.username, lovestats(), true)
 			.setImage('https://i.imgur.com/HwqSNyy.jpg');
-		return await request.reply({ embeds: [embed] });
+		return request.reply({ embeds: [embed] });
 	}
 };

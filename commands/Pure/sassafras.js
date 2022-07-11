@@ -119,7 +119,7 @@ module.exports = {
 		const sassamodo = isSlash ? options.fetchFlag(args, 'sassamodo', { callback: true }) : fetchFlag(args, { short: ['s'], long: ['sassamodo','dross'], callback: true });
 		
 		if(!showtotal && sassamodo)
-			return await request.reply({ content: sassadata.sassamodo });
+			return request.reply({ content: sassadata.sassamodo });
 		
 		//Lista general con sublistas de juegos y música
 		const sr = sassadata.recomm;
@@ -178,7 +178,7 @@ module.exports = {
 
 			if(!hint) m.addField('Subgrupos comunes', `🎮x${sr.games.length}\n❓x${sr.music.unknown.length}\n😳x${sr.music.known.length}`, true);
 			else m.addField('Subgrupo especial', `${spemote}x${(list.length)}`, true);
-			return await request.reply({ embeds: [m] });
+			return request.reply({ embeds: [m] });
 		}
 		const i = randRange(0, list.length); //Índice aleatorio
 		
@@ -197,7 +197,7 @@ module.exports = {
 		else if(i < list.length) //Música """"conocida"""""
 			m = `**¿Y si voy con uno que sepamos todos?:**\nhttps://youtu.be/${list[i + (i === kmusic?1:0)]}`;
 		
-		return await request.reply(typeof m === 'string'
+		return request.reply(typeof m === 'string'
 			? { content: m }
 			: { embeds: [m] }
 		);

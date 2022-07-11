@@ -48,9 +48,9 @@ module.exports = {
 		const now = Date.now() * 1;
 		const uid = (request.author ?? request.user).id;
 		if(now - (uses.pinguear[uid] ?? 0) < 1000 * 60)
-			return await request.react('⏳');
+			return request.react('⏳');
 		if(!isSlash && args.length < 2)
-			return await request.reply({ content: `:warning: Debes ingresar 2 parámetros (\`${p_pure(request.guild.id).raw}pinguear <cantidad> <usuario>\`)`, ephemeral: true });
+			return request.reply({ content: `:warning: Debes ingresar 2 parámetros (\`${p_pure(request.guild.id).raw}pinguear <cantidad> <usuario>\`)`, ephemeral: true });
 		
 		let repeats = -1;
 		let userSearch;
@@ -61,14 +61,14 @@ module.exports = {
 			else if(!isNaN(args[1])) { repeats = args[1]; userSearch = args[0]; }
 		}
 		if(repeats < 2 || repeats > 10)
-			return await request.reply({ content: ':warning: Solo puedes pinguear a alguien entre 2 y 10 veces', ephemeral: true });
+			return request.reply({ content: ':warning: Solo puedes pinguear a alguien entre 2 y 10 veces', ephemeral: true });
 
 		const user = isSlash ? args.getUser('usuario') : fetchUser(userSearch, request);
 		if(!user)
-			return await request.reply({ content: ':warning: Usuario inválido', ephemeral: true });
+			return request.reply({ content: ':warning: Usuario inválido', ephemeral: true });
 
 		uses.pinguear[uid] = now * 1;
 		if(isSlash) await request.reply({ content: `🤡 Tirando pings a **${user.tag}**`, ephemeral: true });
-		return await pinguear(request.channel, user, repeats);
+		return pinguear(request.channel, user, repeats);
     },
 };

@@ -142,7 +142,7 @@ module.exports = {
 		if(!operation && !id) { //Listar Tubérculos
 			const items = Object.entries(gcfg.tubers).reverse();
 			const lastPage = Math.ceil(items.length / pageMax) - 1;
-			return await request.reply({
+			return request.reply({
 				embeds: [
 					new MessageEmbed()
 						.setColor('LUMINOUS_VIVID_PINK')
@@ -161,14 +161,14 @@ module.exports = {
 				components: (items.length < pageMax) ? null : paginationRows(0, lastPage, 1, lastPage),
 			});
 		} else { //Realizar operación sobre ID de Tubérculo
-			if(!id) return await request.reply({ content: `⚠️ Debes ingresar una TuberID válida\n${helpstr}` });
+			if(!id) return request.reply({ content: `⚠️ Debes ingresar una TuberID válida\n${helpstr}` });
 
 			switch(operation) {
 				case 'crear':
 					if(id.length > 24)
-						return await request.reply({ content: '⚠️ Las TuberID solo pueden medir hasta 24 caracteres' });
+						return request.reply({ content: '⚠️ Las TuberID solo pueden medir hasta 24 caracteres' });
 					if(gcfg.tubers[id] && isNotModerator(request.member) && gcfg.tubers[id].author !== (request.author ?? request.user).id)
-						return await request.reply({ content: `⛔ Acción denegada. Esta TuberID **${id}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[id].author) ?? request.guild.me).user.username}*` });
+						return request.reply({ content: `⛔ Acción denegada. Esta TuberID **${id}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[id].author) ?? request.guild.me).user.username}*` });
 					
 					const tuberContent = { author: (request.user ?? request.author).id };
 					const mcontent = (isSlash ? options.getString('mensaje') : args.join(' ')).split(/[\n ]*#FIN#[\n ]*/).join('\n');
@@ -177,11 +177,11 @@ module.exports = {
 					//Incluir Tubérculo; crear colección de Tubérculos si es necesario
 					if(ps) {
 						if(!mcontent)
-							return await request.reply({ content: `⚠️ Este Tubérculo requiere ingresar PuréScript\n${helpstr}` });
+							return request.reply({ content: `⚠️ Este Tubérculo requiere ingresar PuréScript\n${helpstr}` });
 						tuberContent.script = mcontent.split(/ *;+ */).map(line => line.split(/ +/).filter(word => !word.match(/^```[A-Za-z0-9]*/))).filter(line => line.length);
 					} else {
 						if(!mcontent && !mfiles.length)
-							return await request.reply({ content: `⚠️ Debes ingresar un mensaje o archivo para registrar un Tubérculo\n${helpstr}` });
+							return request.reply({ content: `⚠️ Debes ingresar un mensaje o archivo para registrar un Tubérculo\n${helpstr}` });
 						if(mcontent) tuberContent.content = mcontent;
 						if(mfiles.length) tuberContent.files = mfiles;
 					}
@@ -200,14 +200,14 @@ module.exports = {
 					} catch(error) {
 						console.log('Ocurrió un error al añadir un nuevo Tubérculo');
 						console.error(error);
-						return await request.reply({ content: '❌ Hay un problema con el Tubérculo que intentaste crear, por lo que no se registrará' });
+						return request.reply({ content: '❌ Hay un problema con el Tubérculo que intentaste crear, por lo que no se registrará' });
 					}
 					break;
 
 				case 'ver':
 					const item = gcfg.tubers[id];
 					if(!item)
-						return await request.reply({ content: `⚠️ El Tubérculo **${id}** no existe` });
+						return request.reply({ content: `⚠️ El Tubérculo **${id}** no existe` });
 
 					let files = [];
 					const embed = new MessageEmbed()
@@ -235,7 +235,7 @@ module.exports = {
 						if(item.files && item.files.length) embed.addField('Archivos', item.files.map((f,i) => `[${i}](${f})`).join(', '));
 					}
 
-					return await request.reply({
+					return request.reply({
 						embeds: [embed],
 						files,
 						//components: *algo*,
@@ -243,9 +243,9 @@ module.exports = {
 				
 				case 'borrar':
 					if(!gcfg.tubers[id])
-						return await request.reply({ content: `⚠️ El Tubérculo **${id}** no existe` });
+						return request.reply({ content: `⚠️ El Tubérculo **${id}** no existe` });
 					if(isNotModerator(request.member) && gcfg.tubers[id].author !== (request.author ?? request.user).id)
-						return await request.reply({ content: `⛔ Acción denegada. Esta TuberID **${id}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[id].author) ?? request.guild.me).user.username}*` });
+						return request.reply({ content: `⛔ Acción denegada. Esta TuberID **${id}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[id].author) ?? request.guild.me).user.username}*` });
 
 					gcfg.tubers[id] = null;
 					delete gcfg.tubers[id];
@@ -254,7 +254,7 @@ module.exports = {
 					break;
 				
 				default:
-					if(!gcfg.tubers[id]) return await request.reply({
+					if(!gcfg.tubers[id]) return request.reply({
 						content: [
 							`⚠️ El Tubérculo **${id}** no existe`,
 							ps ? '¿Estás intentando crear un Tubérculo con PuréScript? Usa la bandera `--crear` junto a `--script` (o `-cs` para la versión corta)' : undefined,
@@ -309,7 +309,7 @@ module.exports = {
 		const members = guild.members.cache;
 		const oembed = message.embeds[0];
 
-		return await interaction.update({
+		return interaction.update({
 			embeds: [
 				new MessageEmbed()
 					.setColor(oembed.color)
@@ -429,7 +429,7 @@ module.exports = {
 			const members = guild.members.cache;
 			const oembed = message.embeds[0];
 			const { items, lastPage, backward, forward } = await module.exports.getItemsList(guild, '', 0);
-			return await interaction.update({
+			return interaction.update({
 				content: null,
 				embeds: [
 					new MessageEmbed()
@@ -448,7 +448,7 @@ module.exports = {
 				components: paginationRows(0, backward, forward, lastPage, items.length >= pageMax),
 			});
 		} else
-			return await interaction.reply({
+			return interaction.reply({
 				content: '⚠ Esta lista ya muestra todos los resultados',
 				ephemeral: true,
 			});

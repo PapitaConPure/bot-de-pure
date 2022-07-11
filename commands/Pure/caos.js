@@ -43,9 +43,9 @@ module.exports = {
 			gcfg.markModified('chaos');
 			await gcfg.save();
 			if(activate)
-				return await request.reply({ content: '👹 Se activaron los comandos caóticos' });
+				return request.reply({ content: '👹 Se activaron los comandos caóticos' });
 			else
-				return await request.reply({ content: '😴 Se desactivaron los comandos caóticos' });
+				return request.reply({ content: '😴 Se desactivaron los comandos caóticos' });
 		}
 
 		const cfiles = readdirSync('./commands/Pure').filter(file => file.endsWith('.js'));
@@ -55,7 +55,7 @@ module.exports = {
 			if(command.flags.includes('chaos'))
 				chaosnames.push(command.name);
 		}
-		return await request.reply({
+		return request.reply({
 			content:
 				`Con este comando, puedes activar un set de comandos que se consideran demasiado caóticos como para estar en un server tranquilito.\nUsa \`${p_pure(request.guild.id).raw}ayuda caos\` si quieres saber cómo.\n` +
 				'Comandos caóticos:\n' +

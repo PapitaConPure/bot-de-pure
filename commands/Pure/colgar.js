@@ -95,7 +95,7 @@ module.exports = {
 			embeds: [embed],
 			components: [],
 		});
-		return await Promise.all(interaction.guild.members.cache.filter(member => !member.user.bot).map(member => member.roles.add(hd, `Colgado por ${interaction.user.tag}`)));
+		return Promise.all(interaction.guild.members.cache.filter(member => !member.user.bot).map(member => member.roles.add(hd, `Colgado por ${interaction.user.tag}`)));
 	},
 
 	/**
@@ -113,7 +113,7 @@ module.exports = {
 			embeds: [embed],
 			components: [],
 		});
-		return await Promise.all(interaction.guild.members.cache.filter(member => !member.user.bot).map(member =>
+		return Promise.all(interaction.guild.members.cache.filter(member => !member.user.bot).map(member =>
 			member.roles.cache.has(hd)
 				? member.roles.remove(member.roles.cache.find(r => r.id === hd))
 				: Promise.resolve()
@@ -128,7 +128,7 @@ module.exports = {
 		const embed = new MessageEmbed()
 			.setTitle('Colgada en Masa cancelada')
 			.addField('Se canceló la operación', 'Supongo que van a vivir (o no) un día más');
-		return await interaction.update({
+		return interaction.update({
 			embeds: [embed],
 			components: [],
 		});

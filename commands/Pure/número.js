@@ -34,7 +34,7 @@ module.exports = {
 		const min = fetchFlag(args, { property: true, ...options.flags.get('mínimo').structure, callback: getFunc, fallback: 1 });
 		const exp = fetchFlag(args, { property: true, ...options.flags.get('exponente').structure, callback: getFunc });
 
-		if(!args.length) return await request.reply({ content: '⚠ Debes ingresar un número' });
+		if(!args.length) return request.reply({ content: '⚠ Debes ingresar un número' });
 		let num = args.shift();
 		if(typeof exp !== 'undefined') num = Math.pow(num, exp);
 		request.reply({ content: improveNumber(num, shorten, min) });

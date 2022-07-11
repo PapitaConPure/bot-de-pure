@@ -27,7 +27,7 @@ module.exports = {
 	async execute(request, args, isSlash = false) {
 		//Recibir GMT+X
 		const gmt = fetchFlag(args, { property: true, ...options.flags.get('gmt').structure, callback: (x,i) => (x[i] * 1), fallback: 0 });
-		if(!args.length) return await request.reply('⚠ Debes ingresar una hora');
+		if(!args.length) return request.reply('⚠ Debes ingresar una hora');
 
 		//Definir fecha
 		const dateStr = isSlash ? args.getString('fecha') : fetchFlag(args, { property: true, ...options.flags.get('fecha').structure, callback: fetchSentence });
@@ -43,7 +43,7 @@ module.exports = {
 			const lastDay = (new Date(year, month + 1, 0)).getDate();
 			console.log(day, lastDay);
 			if(day > lastDay) isInvalidDate = true;
-			if(isInvalidDate) return await request.reply('⚠ Fecha inválida. Asegúrate de seguir el formato DD/MM/AAAA');
+			if(isInvalidDate) return request.reply('⚠ Fecha inválida. Asegúrate de seguir el formato DD/MM/AAAA');
 		} else {
 			const now = new Date(Date.now());
 			now.setTime(now.valueOf() + gmt * 60 * 60 * 1000);
@@ -52,7 +52,7 @@ module.exports = {
 			year = now.getUTCFullYear();
 		}
 
-		if(!args.length) return await request.reply('⚠ Debes ingresar una hora');
+		if(!args.length) return request.reply('⚠ Debes ingresar una hora');
 
 		/**@type {String}*/
 		let rawTime = args.shift();
@@ -96,7 +96,7 @@ module.exports = {
 		};
 
 		if(isInvalidTime([ hours, minutes, seconds ]))
-			return await request.reply('⚠ Debes ingresar una hora válida');
+			return request.reply('⚠ Debes ingresar una hora válida');
 		
 		if(isShortened) {
 			if(hours === 12) hours -= 12;
@@ -108,8 +108,8 @@ module.exports = {
 		const unixDate = issueDate.valueOf() / 1000;
 
 		if(dateStr)
-			return await request.reply(`<t:${unixDate}:T> <t:${unixDate}:D>`);
+			return request.reply(`<t:${unixDate}:T> <t:${unixDate}:D>`);
 		else
-			return await request.reply(`<t:${unixDate}:T>`);
+			return request.reply(`<t:${unixDate}:T>`);
 	}
 };

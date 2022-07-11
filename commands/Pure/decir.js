@@ -32,14 +32,14 @@ module.exports = {
         const del = isSlash ? options.fetchFlag(args, 'borrar', { callback: true }) : fetchFlag(args, { ...options.flags.get('borrar').structure, callback: true });
 
         if(!(args.data ?? args).length)
-            return await request.reply({ content: ':warning: tienes que especificar lo que quieres que diga.' });
+            return request.reply({ content: ':warning: tienes que especificar lo que quieres que diga.' });
 
         const sentence = isSlash ? args.getString('mensaje') : args.join(' ');
         if(request.guild.id === serverid.hourai && sentence.toLowerCase().indexOf(/h+(\W*_*)*o+(\W*_*)*u+(\W*_*)*r+(\W*_*)*a+(\W*_*)*i+(\W*_*)*/g) !== -1)
-            return await request.channel.send({ content: 'No me hagai decir weas de hourai, ¿yapo? Gracias <:haniwaSmile:659872119995498507>' });
+            return request.channel.send({ content: 'No me hagai decir weas de hourai, ¿yapo? Gracias <:haniwaSmile:659872119995498507>' });
         
         await request.reply({ content: sentence.split(/ +#[Nn] +/g).join('\n') });
         if(!isSlash && del && request.deletable && request.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES))
-            return await request.delete();
+            return request.delete();
     },
 };

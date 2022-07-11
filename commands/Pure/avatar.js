@@ -72,7 +72,7 @@ module.exports = {
             if(args.length) {
                 args = regroupText(args);
                 if(args.length > maxusers)
-                    return await request.reply({ content: `:warning: Solo puedes ingresar hasta **${maxusers}** usuarios por comando` });
+                    return request.reply({ content: `:warning: Solo puedes ingresar hasta **${maxusers}** usuarios por comando` });
                 
                 args.forEach(arg => {
                     const member = fetchMember(arg, request);
