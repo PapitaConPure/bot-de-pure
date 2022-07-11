@@ -4,8 +4,8 @@ const Discord = require('discord.js'); //Soporte JS de la API de Discord
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const fs = require('fs'); //Sistema de archivos
-const envPath = './localenv.json';
-// const envPath = './remoteenv.json';
+// const envPath = './localenv.json';
+const envPath = './remoteenv.json';
 
 //Base de datos
 const Mongoose = require('mongoose');
@@ -13,14 +13,13 @@ const uri = process.env.MONGODB_URI ?? (require(envPath)?.dburi);
 const prefixpair = require('./localdata/models/prefixpair.js');
 const { Stats, ChannelStats } = require('./localdata/models/stats.js');
 const { Puretable, defaultEmote, pureTableImage } = require('./localdata/models/puretable.js');
-const PureVoice = require('./localdata/models/purevoice');
 const HouraiDB = require('./localdata/models/hourai.js');
 
 const { modifyPresence } = require('./presence.js');
 const global = require('./localdata/config.json'); //Propiedades globales
 const func = require('./func.js'); //Funciones globales
 const cmdex = require('./localdata/cmdExceptions.js');
-const guildfunc = require('./localdata/customization/guildFunctions.js');
+const globalGuildFunctions = require('./localdata/customization/guildFunctions.js');
 const dns = require('dns'); //Detectar host
 const { registerFont, loadImage, Canvas } = require('canvas'); //Registrar fuentes al ejecutar Bot
 const chalk = require('chalk'); //Consola con formato bonito
@@ -29,6 +28,7 @@ const { CommandOptionsManager } = require('./commands/Commons/cmdOpts.js');
 const { promisify } = require('util');
 const { updateBooruFeeds } = require('./systems/boorufeed');
 const { p_drmk, p_pure } = require('./localdata/customization/prefixes.js');
+const { PureVoiceUpdateHandler } = require('./systems/purevoice.js');
 const token = process.env.I_LOVE_MEGUMIN ?? (require(envPath).token); //La clave del bot
 console.timeEnd('Carga de módulos');
 //#endregion
@@ -55,11 +55,7 @@ const client = new Discord.Client({
     allowedMentions: { parse: [ 'users', 'roles' ], repliedUser: false }
 });
 const restGlobal = new REST({ version: '9' }).setToken(token);
-const fastGuildFunctions = (() => {
-    let rtn = [];
-    Object.values(guildfunc).map(gfs => Object.values(gfs).map(fgf => fgf.name)).forEach(fgt => rtn = [...rtn, ...fgt]);
-    return rtn.sort().filter((fgf, i, arr) => fgf !== arr[i - 1]);
-})();
+//Ordenar nombres de funciones de guild, eliminando nombres repetidos
 global.p_drmk['0'] = { raw: 'd!', regex: /^[Dd] *![\n ]*/ };
 global.p_pure['0'] = { raw: 'p!', regex: /^[Pp] *![\n ]*/ };
 console.timeEnd('Establecimiento de parámetros iniciales');
@@ -82,12 +78,12 @@ commandFiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.
     /**@param {String} type*/
     const typeToAddFunctionName = (type) => {
         switch(type) {
-            case 'NUMBER':  return 'addIntegerOption';
-            case 'USER':    return 'addUserOption';   
-            case 'ROLE':    return 'addRoleOption';   
+            case 'NUMBER':  return 'addNumberOption';
+            case 'USER':    return 'addUserOption';
+            case 'ROLE':    return 'addRoleOption';
             case 'CHANNEL': return 'addChannelOption';
             case 'ID':      return 'addIntegerOption';
-            default:        return 'addStringOption'; 
+            default:        return 'addStringOption';
         };
     }
     
@@ -311,56 +307,48 @@ client.on('ready', async () => {
 
 //Recepción de mensajes
 client.on('messageCreate', async message => {
-    const { content, author, channel, guild } = message;
+    const { content, author, channel, guild, guildId: gid } = message;
     if(func.channelIsBlocked(channel) || author.bot) return;
+    console.log('--- Mensaje recibido ---');
+    console.time('Procesado inicial');
+    if(!guild) return;
     const msg = content.toLowerCase();
-    const gid = guild ? guild.id : undefined;
     
-    //#region Operaciones de proceso e ignorar mensajes privados
-    const logembed = new Discord.MessageEmbed().addField(author.tag, content ? content.slice(0, 1023) : '*Mensaje vacío.*');
-    if(guild) logembed.setAuthor({
-        name: `${guild.name} • ${channel.name} (Click para ver)`,
-        iconURL: author.avatarURL({ dynamic: true }),
-        url: message.url,
-    });
-    else {
-        logembed.setAuthor({ name: 'Mensaje privado', iconURL: author.avatarURL({ dynamic: true }) });
-        channel.send({ content: ':x: Uh... disculpá, no trabajo con mensajes directos.' });
-    }
+    //Operaciones de proceso
+    const logembed = new Discord.MessageEmbed()
+        .addField(author.tag, content ? content.slice(0, 1023) : '*Mensaje vacío.*')
+        .setAuthor({
+            name: `${guild.name} • ${channel.name} (Click para ver)`,
+            iconURL: author.avatarURL({ dynamic: true }),
+            url: message.url,
+        });
     if(message.attachments.size)
         logembed.addField('Adjuntado:', message.attachments.map(attf => attf.url).join('\n'));
 
-    if(global.logch === undefined || global.confch === undefined)
-        console.log(chalk.bold.red('Hay un problema con los canales de log.'));
-    else {
-        if(msg.startsWith(',confession ')) global.confch.send({ embeds: [logembed] });
-        else global.logch.send({ embeds: [logembed] });
-    }
-    if(!guild) return;
-    //#endregion
+    global.logch.send({ embeds: [logembed] }).catch(console.error);
+    console.timeEnd('Procesado inicial');
 
-    //#region Estadísticas
-    const chquery = { guildId: gid, channelId: channel.id };
+    //Estadísticas
+    console.time('Estadísticas');
     const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
-    const chstats = (await ChannelStats.findOne(chquery)) || new ChannelStats(chquery);
     stats.read++;
-    chstats.cnt++;
-    chstats.sub[author.id] = (chstats.sub[author.id] || 0) + 1;
-    chstats.markModified('sub');
-    await Promise.all([
-        stats.save(),
-        chstats.save()
-    ]);
-    //#endregion
+    (async () => {
+        const channelQuery = { guildId: gid, channelId: channel.id };
+        const chstats = (await ChannelStats.findOne(channelQuery)) || new ChannelStats(channelQuery);
+        chstats.cnt++;
+        chstats.sub[author.id] = (chstats.sub[author.id] ?? 0) + 1;
+        chstats.markModified('sub');
+        chstats.save();
+    })();
+    await stats.save();
+    console.timeEnd('Estadísticas');
 
-    //#region Respuestas rápidas
-    if(guildfunc[gid])
-        fastGuildFunctions.forEach(async frf => {
-            if(guildfunc[gid][frf]) await guildfunc[gid][frf](message);
-        });
-    if(message.content.indexOf(`${message.client.user.id}>`) !== -1)
-        await require('./commands/Pure/prefijo.js').execute(message, []);
-    //#endregion
+    //Respuestas rápidas
+    console.time('Funciones de Guild')
+    const guildFunctions = globalGuildFunctions[gid];
+    if(guildFunctions)
+        await Promise.all(Object.values(guildFunctions).map(fgf => fgf(message)));
+    console.timeEnd('Funciones de Guild')
     
     //#region Comandos
     //#region Detección de Comandos
@@ -373,46 +361,24 @@ client.on('messageCreate', async message => {
         //#region Emotes rápidos
         const words = content.split(/[\n ]+/);
         let ecmd = words.findIndex(word => word.startsWith('&'));
-        if(ecmd !== -1) {
-            const args = words.slice(ecmd + 1);
-            ecmd = words[ecmd].toLowerCase().slice(1);
-            const command = client.EmotesPure.get(ecmd) || client.EmotesPure.find(cmd => cmd.aliases && cmd.aliases.includes(ecmd)); //Argumentos ingresados
-            if(!command || command.experimental) return;
-            try {
-                //Detectar problemas con el comando basado en flags
-                const exception = await cmdex.findFirstException(command.flags, message);
-                if(exception) return;
-                else await command.execute(message, args);
-            } catch(error) {
-                console.log(chalk.bold.redBright('Ha ocurrido un error al insertar un emote.'));
-                console.error(error);
-                const errorEmbed = new Discord.MessageEmbed()
-                    .setColor('#0000ff')
-                    .setAuthor({ name: `${guild.name} • ${channel.name} (Click para ver)`, iconURL: author.avatarURL({ dynamic: true }), url: message.url });
+        if(ecmd === -1) return; //Salir si no se encuentra prefijo de comando ni emote
 
-                if(error.message === 'Missing Permissions') {
-                    errorEmbed
-                        .setThumbnail('https://i.imgur.com/ftAxUen.jpg')
-                        .addField('¡Me faltan permisos!', [
-                            'No tengo los permisos necesarios para ejecutar el comando que acabas de pedirme en ese canal',
-                            'Soy una niña educada, así que no haré nada hasta que me den permiso. Puedes comentarle el asunto a algún moderador del server para que lo revise',
-                        ].join('\n'))
-                        .addField('Reportar un error', `¿Crees que esto se trata de otro tipo error? Eso nunca debería ser el caso, pero de ser así, puedes [reportarlo](${global.reportFormUrl})`);
+        const args = words.slice(ecmd + 1);
+        ecmd = words[ecmd].toLowerCase().slice(1);
+        const command = client.EmotesPure.get(ecmd) || client.EmotesPure.find(cmd => cmd.aliases && cmd.aliases.includes(ecmd)); //Argumentos ingresados
+        if(!command) return;
 
-                    return message.author.send({ embeds: [errorEmbed] }).catch(console.error);
-                }
-
-                errorEmbed
-                    .addField('Ha ocurrido un error al ejecutar un Comando Rápido de Emote', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``)
-                    .addField('Detalle', `"${message.content.slice(0, 699)}"\n[${ecmd}]`);
-                global.logch.send({
-                    content: `<@${global.peopleid.papita}>`,
-                    embeds: [errorEmbed]
-                });
-            }
+        try {
+            //Detectar problemas con el comando basado en flags
+            const exception = await cmdex.findFirstException(command.flags, message);
+            if(exception) return;
+            else await command.execute(message, args);
+        } catch(error) {
+            const isPermissionsError = cmdex.handleAndLogError(error, message, { details: `"${message.content?.slice(0, 699)}"\n[${commandname} :: ${args}]` });
+            if(!isPermissionsError)
+                stats.commands.failed++;
         }
         //#endregion
-        return; //Salir si no se encuentra prefijo de comando ni emote
     }
 
     //Partición de mensaje comando
@@ -433,11 +399,11 @@ client.on('messageCreate', async message => {
             'Disculpa, soy estúpida. Tal vez escribiste mal el comando y no te entiendo\nhttps://i.imgur.com/e4uM3z6.jpg',
             'No entiendo, ¿quieres usar un comando? Quieres usar uno, ¿verdad?, ¿prueba revisar cómo lo escribes?\nhttps://i.imgur.com/uuLuxtj.jpg',
             `La verdad, no tengo ni idea de qué pueda ser **"${commandname}"**, ¿seguro que lo escribiste bien? Recuerda que soy un bot, eh\nhttps://i.imgur.com/AHdc7E2.jpg`,
-            'Busqué en todo el manual y no encontré el comando que me pediste. Perdóname, PERDÓNAME AAAAAAAAH\nhttps://i.imgur.com/wOxRi72.jpg',
+            'Busqué en todo el manual y no encontré el comando que me pediste. Perdóname, PERDÓNAME WAAAAAAAAH\nhttps://i.imgur.com/wOxRi72.jpg',
             'No logré encontrar tu comando en mi librito. ¿Lo habrás escrito mal?\nhttps://i.imgur.com/avTSSa4.jpg',
         ];
-        const notice = await message.reply({ content: replies[func.randRange(0, replies.length)] });
-        setTimeout(() => notice.delete(), 6000);
+        const notice = await message.reply({ content: replies[func.randRange(0, replies.length)] }).catch(() => undefined);
+        setTimeout(() => notice?.delete().catch(console.error), 6000);
         return;
     }
     //#endregion
@@ -453,58 +419,40 @@ client.on('messageCreate', async message => {
             await command.execute(message, args);
         stats.commands.succeeded++;
     } catch(error) {
-        console.log(chalk.bold.redBright('Ha ocurrido un error al ingresar un comando.'));
-        console.error(error);
-        const errorEmbed = new Discord.MessageEmbed()
-            .setColor('#0000ff')
-            .setAuthor({ name: `${guild.name} • ${channel.name} (Click para ver)`, iconURL: author.avatarURL({ dynamic: true }), url: message.url });
-        
-        if(error.message === 'Missing Permissions') {
-            errorEmbed
-                .setThumbnail('https://i.imgur.com/ftAxUen.jpg')
-                .addField('¡Me faltan permisos!', [
-                    'No tengo los permisos necesarios para ejecutar el comando que acabas de pedirme en ese canal',
-                    'Soy una niña educada, así que no haré nada hasta que me den permiso. Puedes comentarle el asunto a algún moderador del server para que lo revise',
-                ].join('\n'))
-                .addField('Reportar un error', `¿Crees que esto se trata de otro tipo error? Eso nunca debería ser el caso, pero de ser así, puedes [reportarlo](${global.reportFormUrl})`);
-
-            return message.author.send({ embeds: [errorEmbed] }).catch(console.error);
-        }
-
-        errorEmbed
-            .addField('Ha ocurrido un error al ingresar un comando', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``)
-            .addField('Detalle', `"${message.content.slice(0, 699)}"\n[${commandname} :: ${args}]`);
-        global.logch.send({
-            content: `<@${global.peopleid.papita}>`,
-            embeds: [errorEmbed]
-        });
-        stats.commands.failed++;
+        const isPermissionsError = cmdex.handleAndLogError(error, message, { details: `"${message.content?.slice(0, 699)}"\n[${commandname} :: ${args}]` });
+        if(!isPermissionsError)
+            stats.commands.failed++;
     }
     stats.markModified('commands');
     await stats.save();
     //#endregion
     //#endregion
+
+    //Ayuda para principiantes
+    if(message.content.indexOf(`${message.client.user.id}>`) !== -1)
+        (require('./commands/Pure/prefijo.js').execute(message, []));
 });
 
 //Recepción de interacciones
 client.on('interactionCreate', async interaction => {
-    const { guild, channel, member } = interaction;
+    const { guild, channel } = interaction;
+    if(!guild) return await interaction.reply({ content: ':x: Solo respondo a comandos en servidores' }).catch(console.error);
     const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
 
     //Comando Slash
 	if(interaction.isCommand()) {
-        const { commandName: commandname } = interaction;
+        const { commandName } = interaction;
         if(func.channelIsBlocked(channel)) return;
-        const slash = client.SlashPure.get(commandname);
+        const slash = client.SlashPure.get(commandName);
         if (!slash) return;
 
         //#region Ejecución de Comandos
         try {
             //Detectar problemas con el comando basado en flags
-            const command = client.ComandosPure.get(commandname);
+            const command = client.ComandosPure.get(commandName);
             const exception = await cmdex.findFirstException(command.flags, interaction);
             if(exception)
-                return await interaction.reply({ embeds: [ cmdex.createEmbed(exception, { cmdString: `/${commandname}` }) ], ephemeral: true });
+                return await interaction.reply({ embeds: [ cmdex.createEmbed(exception, { cmdString: `/${commandName}` }) ], ephemeral: true });
             
             if(command.experimental)
                 await command.execute(interaction, interaction.options, true);
@@ -512,22 +460,9 @@ client.on('interactionCreate', async interaction => {
                 await command.interact(interaction, interaction.options);
             stats.commands.succeeded++;
         } catch(error) {
-            console.log('Ha ocurrido un error al procesar un comando slash.');
-            console.error(error);
-            const errorembed = new Discord.MessageEmbed()
-                .setColor('#0000ff')
-                .setAuthor({ name: `${guild.name} • ${channel.name}`, iconURL: member.user.avatarURL({ dynamic: true }) })
-                .addField('Ha ocurrido un error al procesar un comando slash', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
-            global.logch.send({
-                content: `<@${global.peopleid.papita}>`,
-                embeds: [errorembed]
-            });
-            stats.commands.failed++;
-            await interaction.reply({ content: ':warning: Ocurrió un error al ejecutar el comando', ephemeral: true })
-            .catch(err => {
-            console.log('Posible interacción no registrada');
-            console.error(err);
-            });
+            const isPermissionsError = cmdex.handleAndLogError(error, interaction, { details: commandName });
+            if(!isPermissionsError)
+                stats.commands.failed++;
         }
         stats.markModified('commands');
         await stats.save();
@@ -555,223 +490,43 @@ client.on('interactionCreate', async interaction => {
             }
             stats.commands.succeeded++;
         } catch(error) {
-            console.log('Ha ocurrido un error al procesar una acción de botón.');
-            console.error(error);
-            const errorembed = new Discord.MessageEmbed()
-                .setColor('#0000ff')
-                .setAuthor({ name: `${guild.name} • ${channel.name}`, iconURL: member.user.avatarURL({ dynamic: true }) })
-                .addField('Ha ocurrido un error al procesar una acción de botón', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
-            global.logch.send({
-                content: `<@${global.peopleid.papita}>`,
-                embeds: [errorembed]
-            });
-            stats.commands.failed++;
-            await interaction.reply({ content: ':warning: Ocurrió un error al ejecutar la acción del botón', ephemeral: true })
-            .catch(err => {
-            console.log('Posible interacción no registrada');
-            console.error(err);
-            });
+            const isPermissionsError = cmdex.handleAndLogError(error, interaction, { details: `${interaction.customId}` });
+            if(!isPermissionsError)
+                stats.commands.failed++;
         }
     }
 });
 
 //Recepción de cambios en canales de voz
+let availability = {};
 client.on('voiceStateUpdate', async (oldState, state) => {
-    const { guild, channel, member } = state;
-    const guildChannels = guild.channels.cache;
-    const pv = await PureVoice.findOne({ guildId: guild.id }).catch(console.error);
-    if(!(pv && guildChannels.get(pv.categoryId))) return;
+    // const guildName = state.guild?.name?.slice(0, 16);
+    // const swapName = `${chalk.bgRedBright.black(oldState.channel?.name?.slice(0, 16))} ${chalk.bgGreenBright.black(state.channel?.name?.slice(0, 16))}`;
+    // console.log(chalk.bold.redBright(`⚠ ${guildName} `), swapName);
     
-    const prematureError = () => console.log('Canal probablemente eliminado prematuramente');
+    const guildId = state.guild.id;
+    if(availability[guildId]) await availability[guildId];
+    availability[guildId] = new Promise(async resolve => {
+        const pv = new PureVoiceUpdateHandler(oldState, state);
+        await pv.getSystemDocument({ guildId: state.guild.id }).catch(console.error);
+        if(!pv.systemIsInstalled()) return resolve();
 
-    // { //Log de estado
-    //     const userTag = member.user.tag;
-    //     console.log(userTag.slice(userTag.indexOf('#')), '::', oldState.channel ? oldState.channel.name : null, '->', channel ? channel.name : null);
-    // }
-
-    //#region Comprobar canales inexistentes en base de datos antes de operar
-    await Promise.all(pv.sessions.map((session, i) => {
-        const textChannel = guildChannels.get(session.textId);
-        const voiceChannel = guildChannels.get(session.voiceId);
-        const deletions = [];
-        if(textChannel && voiceChannel) return Promise.resolve();
-        if(textChannel) deletions.push(textChannel.delete().catch(prematureError));
-        if(voiceChannel) deletions.push(voiceChannel.delete().catch(prematureError));
-        pv.sessions.splice(i, 1);
-        pv.markModified('sessions');
-        console.log('Eliminando', deletions.length);
-        return Promise.all(deletions);
-    }));
-    await pv.save();
-    //#endregion
-
-    //#region Comprobar cambios ajenos a conexiones y desconexiones
-    if(oldState.channelId === state.channelId)
-        return;
-    //#endregion
-
-    //#region Comprobar desconexión
-    if(oldState.channelId && oldState.channel) {
         try {
-            const oldChannel = oldState.channel;
-            console.log('Desconexión del canal', oldChannel.name, 'con', oldChannel.members.filter(member => !member.user.bot).size, 'miembros');
-            const channelPairIndex = pv.sessions.findIndex(s => s.voiceId === oldChannel.id);
-            const session = pv.sessions[channelPairIndex];
-            if(session) {
-                const { textId, roleId, voiceId } = session;
-                const sessionRole = guild.roles.cache.get(roleId);
-                if(!oldChannel.members.filter(member => !member.user.bot).size) {
-                    pv.sessions.splice(channelPairIndex, 1);
-                    pv.markModified('sessions');
-                    await Promise.all([
-                        guildChannels.get(voiceId)?.delete('Eliminar componentes de sesión PuréVoice'),
-                        guildChannels.get(textId)?.delete('Eliminar componentes de sesión PuréVoice'),
-                        sessionRole?.delete('Eliminar componentes de sesión PuréVoice'),
-                        pv.save(),
-                    ]);
-                } else
-                    await member.roles.remove(sessionRole, 'Desconexión de miembro de sesión PuréVoice');
-            }
+            await Promise.all([
+                pv.checkFaultySessions(),
+                pv.handleDisconnection(),
+                pv.handleConnection(),
+            ])
+            await pv.saveChanges();
         } catch(error) {
-            //console.log('wawa:', guild.systemChannelId);
+            console.log(chalk.redBright('Ocurrió un error mientras se analizaba un cambio de estado en una sesión Purévoice'));
             console.error(error);
-            if(guild.systemChannelId)
-                await guild.systemChannel.send({ content: [
-                    '⚠ Ocurrió un problema en un intento de remover una sesión del Sistema PuréVoice del servidor.',
-                    'Esto puede deberse a una conexión en una sesión PuréVoice que estaba siendo eliminada.',
-                    'Si el par de canales relacionales de la sesión fueron eliminados, puedes ignorar este mensaje',
-                ].join('\n') });
-            else
-                await guild.fetchOwner().then(owner => owner.send({ content: [
-                    `⚠ Ocurrió un problema en un intento de remover una sesión del Sistema PuréVoice de tu servidor **${guild.name}**.`,
-                    'Esto puede deberse a una conexión en una sesión PuréVoice que estaba siendo eliminada.',
-                    'Si el par de canales relacionales de la sesión fueron eliminados, puedes ignorar este mensaje',
-                ].join('\n') }));
         }
-    }
-    //#endregion
 
-    //#region Comprobar conexión
-    if(channel) {
-        console.log('Conexión al canal', channel.name, 'con', channel.members?.size, 'miembros');
-        if(channel.id === pv.voiceMakerId) {
-            try {
-                const defaultName = member.user.username.slice(0, 24);
-                const [ sessionTextChannel, sessionRole, newSession ] = await Promise.all([
-                    guild.channels.create(`🔶〉${defaultName}`, {
-                        type: 'GUILD_TEXT',
-                        parent: pv.categoryId,
-                        reason: 'Anexar canal de texto a sesión PuréVoice',
-                    }),
-                    guild.roles.create({
-                        name: `🔶 PV ${defaultName}`,
-                        color: global.tenshiColor,
-                        mentionable: true,
-                        reason: 'Inyectar Rol Efímero PuréVoice',
-                    }),
-                    guild.channels.create('➕ Nueva Sesión', {
-                        type: 'GUILD_VOICE',
-                        parent: pv.categoryId,
-                        bitrate: 64e3,
-                        userLimit: 1,
-                        reason: 'Desplegar Canal Automutable PuréVoice',
-                    }),
-                ]);
-                pv.voiceMakerId = newSession.id;
-                pv.sessions.push({
-                    textId: sessionTextChannel.id,
-                    voiceId: channel.id,
-                    roleId: sessionRole.id,
-                    joinedOnce: [ member.id ],
-                    nameChanged: 0,
-                });
-                pv.markModified('sessions');
+        resolve();
+    });
 
-                await Promise.all([
-                    pv.save(),
-                    sessionTextChannel.permissionOverwrites.edit(guild.roles.everyone, { SEND_MESSAGES: false }, { reason: 'Restringir de envío de mensajes en sesión PuréVoice' }),
-                    sessionTextChannel.permissionOverwrites.edit(guild.me, { SEND_MESSAGES: true }, { reason: 'Permitir mensajes propios en sesión PuréVoice' }),
-                    sessionTextChannel.permissionOverwrites.edit(sessionRole, { SEND_MESSAGES: true }, { reason: 'Conceder envío de mensajes a rol de sesión PuréVoice' }),
-                    member.roles.add(sessionRole, 'Inclusión de primer miembro en sesión PuréVoice'),
-                    sessionTextChannel.setTopic(`#️⃣ ${guild} » PuréVoice » ${member} \n👥 Canal de texto de sesión. ¡Conéctate a ${channel} para conversar aquí!`),
-                ]).catch(prematureError);
-                await channel.setName('🔶').catch(prematureError);
-                await channel.setUserLimit(0).catch(prematureError);
-                await sessionTextChannel.send({
-                    content: [
-                        `👋 ¡Buenas, ${member}!`,
-                        `🏷️ Puedes usar \`${p_pure(guild.id).raw}voz <Nombre>\` para cambiar el nombre de la sesión`,
-                        `🐴 Añade la bandera \`--emote <Emote>\` o \`-e <Emote>\` al comando para cambiar el emote del canal de voz`,
-                        `\t\t(O sea, "\`${p_pure(guild.id).raw}voz <Nombre> -e <Emote>\`")`,
-                        '⏱️ Si no escribes un nombre de sesión en 2 minutos, se cambiará automáticamente y se bloqueará por 20 minutos',
-                        `📣 Usa ${sessionRole} para mencionar a todos los miembros de la sesión`,
-                    ].join('\n'),
-                    components: [new Discord.MessageActionRow().addComponents(
-                        new Discord.MessageButton({
-                            customId: 'voz_showMeHow',
-                            label: 'Muéstrame cómo',
-                            emoji: '📖',
-                            style: 'PRIMARY',
-                        }),
-                    )],
-                }).catch(prematureError);
-                const enforceNaming = async () => {
-                    const pv = await PureVoice.findOne({ guildId: guild.id }).catch(console.error);
-                    if(!pv) return;
-                    const sessionIndex = pv.sessions.findIndex(session => session.voiceId === channel.id);
-                    const session = pv.sessions[sessionIndex];
-                    if(!session || session.nameChanged) return;
-                    pv.sessions[sessionIndex].nameChanged = Date.now();
-                    pv.markModified('sessions');
-                    
-                    const name = member.user.username.slice(0, 24);
-                    const namingReason = 'Renombrar sesión PuréVoice (forzado automáticamente)';
-                    return await Promise.all([
-                        pv.save(),
-                        sessionTextChannel?.send({ content: '🔹 Se asignó un nombre a la sesión automáticamente' }),
-                        sessionTextChannel?.setName(`💠〉${name}`, namingReason),
-                        channel?.setName(`💠【${name}】`, namingReason),
-                        sessionRole?.setName(`💠 ${name}`, namingReason),
-                    ]).catch(console.error);
-                };
-                setTimeout(enforceNaming, 60e3 * 2);
-            } catch(error) {
-                console.error(error);
-                if(guild.systemChannelId)
-                    guild.systemChannel.send({ content: [
-                        '⚠ Ocurrió un problema al crear una nueva sesión para el Sistema PuréVoice del servidor. Esto puede deberse a una saturación de acciones o a falta de permisos.',
-                        'Si el problema persiste, prueben desinstalar y volver a instalar el Sistema',
-                    ].join('\n') });
-                else
-                    await guild.fetchOwner().then(owner => owner.send({ content: [
-                        `⚠ Ocurrió un problema al crear una nueva sesión para el Sistema PuréVoice de tu servidor **${guild.name}**. Esto puede deberse a una saturación de acciones o a falta de permisos.`,
-                        'Si el problema persiste, desinstala y vuelve a instalar el Sistema',
-                    ].join('\n') }));
-            }
-        } else if(channel.parentId === pv.categoryId) {
-            const currentSession = pv.sessions.find(session => session.voiceId === channel.id);
-            if(!currentSession) return;
-            const sessionRole = guild.roles.cache.get(currentSession.roleId);
-            if(!sessionRole) return;
-            const sessionTextChannel = guildChannels.get(currentSession.textId);
-            if(!sessionTextChannel) return;
-
-            await member.roles.add(sessionRole, 'Inclusión de miembro en sesión PuréVoice');
-            if(!currentSession.joinedOnce?.includes(member.id)) {
-                await sessionTextChannel?.send({
-                    content: member.user.bot
-                        ? `🤖 Bot **${member.user.tag}** anexado`
-                        : `📣 ${member}, ¡puedes conversar por aquí!`,
-                }).catch(prematureError);
-                currentSession.joinedOnce.push(member.id);
-                pv.markModified('sessions');
-                pv.save();
-            }
-        }
-    }
-    //#endregion
-
-    console.log('--- --- --- Fin de paso --- --- ---');
+    // console.log(chalk.bold.greenBright(`✔ ${guildName} `), swapName);
 });
 
 //Evento de entrada a servidor
@@ -810,13 +565,14 @@ client.on('guildMemberRemove', member => {
     console.log('Evento de salida de miembro de servidor desencadenado.');
     const { guild, user } = member;
     if(!guild.available) return;
+    if(guild.id === global.serverid.hourai) return;
     if(global.maintenance.length > 0 && guild.systemChannelId !== global.maintenance) return;
     
     try {
         if(!user.bot) func.dibujarDespedida(member);
         else {
             const sysch = guild.channels.cache.get(guild.systemChannelId);
-            if(sysch) sysch.send({ content: `**${member.displayName}** ya no es parte de la pandilla de bots de este servidor :[\n` });
+            if(sysch) sysch.send({ content: `**${member.displayName}** ya no es parte de la pandilla de bots de este servidor :[\n` }).catch(console.error);
         }
     } catch(error) {
         console.log('Ha ocurrido un error al dar la despedida.');
@@ -835,7 +591,11 @@ client.on('guildMemberRemove', member => {
 
 //Evento de Rate Limit
 client.on('rateLimit', rateLimit => {
-    console.log('Se golpeó un pico de ratelimit:', rateLimit);
+    console.log(
+        chalk.redBright('RateLimit'),
+        chalk.yellowBright(`(${rateLimit.timeout}ms / global ${rateLimit.global}):`),
+        chalk.bgCyanBright.black.bold(`${rateLimit.method} →`), chalk.greenBright(rateLimit.route),
+    );
 });
 
 //Evento de advertencia

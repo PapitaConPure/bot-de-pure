@@ -410,8 +410,11 @@ module.exports = {
         });
 
         //Sugerir p!suicidio con 41% de probabilidad
-        if(Math.random() < 0.41)
-            setTimeout(canal.send, 1000 * 5, { content: `Por cierto, tenemos una tradición un poco más oscura. ¿Te atrevei a usar \`${p_pure(global.serverid.hourai).raw}suicidio\`?` });
+        if(Math.random() < 0.3)
+            setTimeout(() => {
+                canal.send({ content: `Por cierto, tenemos una tradición un poco más oscura. ¿Te atrevei a usar \`${p_pure(global.serverid.hourai).raw}suicidio\`?` })
+                .catch(console.error);
+            }, 1000 * 5);
 
         //Otorgar rol con 50% de probabilidad
         const gr = canal.guild.roles.cache;
@@ -914,6 +917,23 @@ module.exports = {
         global.cntjugadores = 0;
         console.log('Evento terminado.');
     },
+    
+    /**
+     * 
+     * @param {Discord.Guild} guild 
+     * @param {string} id 
+     * @param {string} fallback 
+     * @returns 
+     */
+    emote: function(guild, id, fallback) {
+        const emoji = guild.emojis.cache.get(id);
+        if(emoji)
+            return `${emoji}`;
+
+        if(!fallback.startsWith(':') && !fallback.endsWith(':'))
+            fallback = `:${fallback}:`;
+        return fallback;
+    },
 
     /**
      * Devuelve un valor aleatorio entre 0 y otro valor
@@ -1001,6 +1021,6 @@ module.exports = {
     },
     
     /**@param {Array<String>} arr*/
-    regroupText: (arr) => arr.join(' ').replace(/([\n ]*,[\n ]*)+/g, ',').split(',').filter(a => a.length > 0),
+    regroupText: (arr) => arr.join(' ').replace(/([\n ]*,[\n ]*)+/g, ',').split(',').filter(a => a.length),
     //#endregion
 };

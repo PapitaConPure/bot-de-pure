@@ -11,9 +11,8 @@ const hd = '682629889702363143'; //Hanged Doll
 module.exports = {
 	name: 'colgar',
 	aliases: [
-		'mutear', 'silenciar', 'castrar',
-		'mute', 'hang', 'hanged',
-		'm', 'h'
+		'castrar', 'colgate',
+		'hang', 'hanged',
 	],
 	desc: 'Comando de Hourai para asignar rápidamente el rol __Hanged Doll__ a un `usuario`.\n' +
 		  'Usarlo con alguien que ya está colgado lo descolgará, así que ten cuidado.',

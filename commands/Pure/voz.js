@@ -66,7 +66,7 @@ module.exports = {
 			const emoteString = isSlash
 				? (args.getString('emote') ?? defaultEmote)
 				: fetchFlag(args, { ...options.flags.get('emote').structure, property: true, callback: (x, i) => x[i], fallback: defaultEmote });
-			const sessionEmote = emoteString?.match(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu)?.[0];
+			const sessionEmote = emoteString?.match(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu)?.[0]; //Magia para detectar emotes válidos
 			const sessionName = isSlash
 				? args.getString('nombre')
 				: args.join(' ');
@@ -129,7 +129,6 @@ module.exports = {
 			const guildRoles = request.guild.roles.cache;
 			return await Promise.all([
 				pv.save(),
-				guildChannels.get(textId)?.setName(`${sessionEmote}〉${sessionName.toLowerCase().split().join('-')}`, 'Renombrar sesión PuréVoice'),
 				guildChannels.get(voiceId)?.setName(`${sessionEmote}【${sessionName}】`, 'Renombrar sesión PuréVoice'),
 				guildRoles.get(roleId)?.setName(`${sessionEmote} ${sessionName}`, 'Renombrar sesión PuréVoice'),
 				request.reply({ content: '✅ Nombre aplicado', ephemeral: true }),

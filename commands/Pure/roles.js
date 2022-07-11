@@ -1,5 +1,6 @@
 const { hourai, peopleid } = require('../../localdata/config.json');
 const Hourai = require('../../localdata/models/hourai.js');
+const axios = require('axios').default;
 const { colorsRow } = require('./colores.js')
 const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes');
@@ -27,6 +28,34 @@ const getAddRemoveRows = (roles) => [
 			.setStyle('PRIMARY'),
 	]),
 ];
+const gameRoles = [
+	[ //Sección 0
+		{ id: '943412899689414726', label: 'Minecraft', 		emote: '🧊' },
+		{ id: '763945846705487884', label: 'Terraria', 			emote: '🌳' },
+		{ id: '936360389711626280', label: 'Tetris', 			emote: '🟨' },
+		{ id: '981040691981459476', label: 'PAYDAY 2', 			emote: '🗄️' },
+	],
+	[ //Sección 1
+		{ id: '936360594028757053', label: 'League of Legends', emote: '👶' },
+		{ id: '943412943159189537', label: 'Risk of Rain 2', 	emote: '🌧️' },
+		{ id: '938949774462304256', label: 'Duck Game', 		emote: '🦆' },
+	],
+	[ //Sección 2
+		{ id: '693886880667795577', label: '100% OJ', 			emote: '🍊' },
+		{ id: '936360704783577178', label: 'Ajedrez', 			emote: '♟️' },
+		{ id: '936361454121132162', label: 'Pokémon', 			emote: '🦀' },
+	],
+];
+const drinkRoles = [
+	{ id: '727951667513000007', emote: '🍵', label: 'Té' },
+	{ id: '727951545509085204', emote: '☕', label: 'Café' },
+	{ id: '727951759263137912', emote: '🧉', label: 'Mate' },
+];
+const faithRoles = [
+	{ id: '695744222850056212', emote: '😇', label: 'Blessed' },
+	{ id: '695743527383990422', emote: '🙃', label: 'Blursed' },
+	{ id: '694358587451113564', emote: '💀', label: 'Cursed' },
+];
 
 module.exports = {
 	name: 'roles',
@@ -45,7 +74,7 @@ module.exports = {
 	 * @param {import('../Commons/typings').CommandOptions} _
 	 * @param {Boolean} isSlash
 	 */
-	async execute(request, _) {
+	async execute(request, _, isSlash = false) {
 		return await request.reply({
 			embeds: [
 				new MessageEmbed()
@@ -75,12 +104,6 @@ module.exports = {
 							description: 'Roles mencionables para jugar juntos',
 							emoji: '919133024770211880',
 							value: 'selectGame_0',
-						},
-						{
-							label: 'Juegos 2',
-							description: 'Roles mencionables para jugar juntos',
-							emoji: '919133024770211880',
-							value: 'selectGame_1',
 						},
 						{
 							label: 'Bebidas',
@@ -131,8 +154,7 @@ module.exports = {
 		/**@type {Date}*/
 		const boostTimestamp = interaction.member?.premiumSinceTimestamp;
 		const currentTimestamp = (new Date(Date.now())).getTime();
-		const boostedRecently = (currentTimestamp - boostTimestamp) < (60e3 * 60 * 24 * 35);
-		const allowed = interaction.user.id === peopleid.papita || boostedRecently;
+		const boostedRecently = interaction.user.id === peopleid.papita || ((currentTimestamp - boostTimestamp) < (60e3 * 60 * 24 * 35));
 		const customRoleId = houraiDB.customRoles?.[interaction.user.id];
 
 		return await interaction.reply({
@@ -142,8 +164,14 @@ module.exports = {
 					.addField('Rol Personalizado', [
 						'Crea, modifica o elimina tu Rol Personalizado de Hourai Doll',
 						'Esto es una recompensa para aquellos que boostean el servidor',
-						'Nótese que esta característica todavía no está disponible. Espera un tiempo a que se implemente',
-					].join('\n')),
+					].join('\n'))
+					.addField('Edición de Rol Personalizado', [
+						'Puedes editar tu Rol cuantas veces quieras durante el periodo de boosteo',
+						'Se te permite modificar el nombre, el color y/o la imagen del rol a gusto',
+					].join('\n'))
+					.addField('Editar nombre', 'Para cambiar el nombre, simplemente escríbelo (sin poner "#" al inicio de ninguna palabra)', true)
+					.addField('Editar color',  'Para editar el color, ingresa un código hexadecimal, con # al inicio', true)
+					.addField('Editar imagen', 'Para añadir una imagen, ingresa el __enlace directo al recurso de la imagen__, o un enlace de Imgur', true),
 			],
 			components: [new MessageActionRow().addComponents(
 				(!interaction.member.roles.cache.get(customRoleId)) ? [
@@ -152,58 +180,57 @@ module.exports = {
 						.setEmoji('💡')
 						.setLabel('Crear rol')
 						.setStyle('SUCCESS')
-						.setDisabled(!allowed),
+						.setDisabled(!boostedRecently),
 				] : [
 					new MessageButton()
 						.setCustomId('roles_customRole_EDIT')
 						.setEmoji('🎨')
 						.setLabel('Editar rol')
 						.setStyle('PRIMARY')
-						.setDisabled(!allowed),
+						.setDisabled(!boostedRecently),
 					new MessageButton()
 						.setCustomId('roles_customRole_DELETE')
 						.setEmoji('🗑')
 						.setLabel('Eliminar rol')
-						.setStyle('DANGER')
-						.setDisabled(!allowed),
+						.setStyle('DANGER'),
 				]
 			)],
 			ephemeral: true,
 		});
     },
 
-	async ['selectGame'](interaction, [section]) {
-		const gameRoles = [
-			[ //Sección 0
-				{ id: '943412899689414726', emote: '🧊', label: 'Minecraft' },
-				{ id: '763945846705487884', emote: '🌳', label: 'Terraria'  },
-				{ id: '936360389711626280', emote: '🟨', label: 'Tetris'    },
-				{ id: '938949774462304256', emote: '🦆', label: 'Duck Game' },
-			],
-			[ //Sección 1
-				{ id: '936360594028757053', emote: '👶', label: 'LoL'       },
-				{ id: '693886880667795577', emote: '🍊', label: '100% OJ'   },
-				{ id: '936360704783577178', emote: '♟️', label: 'Ajedrez'   },
-				{ id: '936361454121132162', emote: '🦀', label: 'Pokémon'   },
-			],
-		];
-		return await interaction.reply({
+	/**
+	 * @param {import('discord.js').ButtonInteraction} interaction
+	 */
+	async ['selectGame'](interaction, [ section, edit = false ]) {
+		section = parseInt(section);
+		const messageActions = {
 			embeds: [
 				new MessageEmbed()
 					.setColor('RED')
 					.addField('Roles de Juego', 'Roles mencionables para llamar gente a jugar algunos juegos. Si piensas ser de los que llaman a jugar, intenta no abusar las menciones')
 			],
-			components: getAddRemoveRows(gameRoles[section]),
+			components: [
+				...getAddRemoveRows(gameRoles[section]),
+				new MessageActionRow().addComponents([
+					new MessageButton()
+						.setCustomId(`roles_selectGame_${section > 0 ? (section - 1) : (gameRoles.length - 1)}_1`)
+						.setEmoji('934430008343158844')
+						.setStyle('SECONDARY'),
+					new MessageButton()
+						.setCustomId(`roles_selectGame_${section < (gameRoles.length - 1) ? (section + 1) : 0}_1`)
+						.setEmoji('934430008250871818')
+						.setStyle('SECONDARY'),
+				]),
+			],
 			ephemeral: true,
-		});
+		};
+
+		if(edit) return await interaction.update(messageActions);
+		return await interaction.reply(messageActions);
     },
 	
 	async ['selectDrink'](interaction) {
-		const drinkRoles = [
-			{ id: '727951667513000007', emote: '🍵', label: 'Té' },
-			{ id: '727951545509085204', emote: '☕', label: 'Café' },
-			{ id: '727951759263137912', emote: '🧉', label: 'Mate' },
-		];
 		return await interaction.reply({
 			embeds: [
 				new MessageEmbed()
@@ -216,11 +243,6 @@ module.exports = {
     },
 	
 	async ['selectReligion'](interaction) {
-		const gameRoles = [
-			{ id: '695744222850056212', emote: '😇', label: 'Blessed' },
-			{ id: '695743527383990422', emote: '🙃', label: 'Blursed' },
-			{ id: '694358587451113564', emote: '💀', label: 'Cursed' },
-		];
 		return await interaction.reply({
 			embeds: [
 				new MessageEmbed()
@@ -228,16 +250,16 @@ module.exports = {
 					.addField('Roles de Religión', 'Roles para describir tu actitud, ideas y forma de ser. No lo tomes muy en serio... ¿o tal vez sí?')
 			],
 			components: [
-				new MessageActionRow().addComponents(gameRoles.map(gameRole =>
+				new MessageActionRow().addComponents(faithRoles.map(faithRole =>
 					new MessageButton()
-						.setCustomId(`roles_addRoleExclusive_${gameRole.id}_${gameRoles.map(gameRole => gameRole.id).join('_')}`)
-						.setEmoji(gameRole.emote)
-						.setLabel(gameRole.label)
+						.setCustomId(`roles_addRoleExclusive_${faithRole.id}_${faithRoles.map(gameRole => gameRole.id).join('_')}`)
+						.setEmoji(faithRole.emote)
+						.setLabel(faithRole.label)
 						.setStyle('SUCCESS'),
 				)),
 				new MessageActionRow().addComponents([
 					new MessageButton()
-						.setCustomId(`roles_removeMany_${gameRoles.map(gameRole => gameRole.id).join('_')}`)
+						.setCustomId(`roles_removeMany_${faithRoles.map(faithRole => faithRole.id).join('_')}`)
 						.setEmoji('704612795072774164')
 						.setLabel('Eliminar Religión')
 						.setStyle('DANGER'),
@@ -315,6 +337,11 @@ module.exports = {
 
 	async ['removeMany'](interaction, args) {
 		const { member } = interaction;
+
+		if(args[0] === 'GAMES')
+			args = gameRoles.flat();
+		args = args.filter(rid => member.roles.cache.has(rid));
+
 		await Promise.all(
 			args
 			.map(rid => member.roles.cache.has(rid) ? member.roles.remove(rid) : undefined)
@@ -385,10 +412,10 @@ module.exports = {
 			.setColor('NAVY')
 			.addField('Personaliza tu rol', 'Especifica el nombre, código de color hexadecimal y/o enlace de ícono de tu rol')
 			.addField('Edición', 'Envía en uno o varios mensajes las propiedades mencionadas, no te olvides del "#" para el código hexadecimal')
-			.addField('Finalizar', 'Escribe "Listo" cuando hayas terminado de editar. Si no finalizas manualmente, la edición finalizará automáticamente luego de 5 minutos');
+			.addField('Finalizar', '**Escribe "listo" cuando hayas terminado de editar**. Si no finalizas manualmente, la edición finalizará automáticamente luego de 3 minutos ó 3 mensajes');
 		
 		const filter = m => !m.author.bot && m.author.id === interaction.user.id;
-		const coll = interaction.channel.createMessageCollector({ filter, time: 60e3 * 5, maxProcessed: 10 });
+		const coll = interaction.channel.createMessageCollector({ filter, time: 60e3 * 3, max: 3 });
 
 		coll.on('collect', m => {
 			if(!m.content) return;
@@ -400,16 +427,28 @@ module.exports = {
 			let args = m.content.split(/[ \n]+/);
 			args = args.map(arg => {
 				if(arg.startsWith('https://')) {
-					customRole.edit({ icon: arg })
-					.then(() => reportSuccess('Ícono'))
-					.catch(() => reportError('Ícono', 'Puede que el server necesite más boosts para cambiar esto'));
+					const imgurUrl = 'https://imgur.com/';
+					if(arg.startsWith(imgurUrl)) {
+						arg = arg.slice(imgurUrl.length);
+						if(arg.startsWith('a/'))
+							arg = arg.slice(2);
+						console.log('arg', arg);
+						arg = `https://i.imgur.com/${arg}.png`;
+					}
+
+					axios.get(arg,  { responseType: 'arraybuffer' })
+					.then(response => {
+						customRole.edit({ icon: Buffer.from(response.data, "utf-8") })
+						.then(_ => reportSuccess('Ícono'))
+						.catch(_ => reportError('Ícono', 'Puede que el server necesite más boosts para cambiar esto.\nEn caso contrario, asegúrate de haber proporcionado un enlace directo a la imagen'));
+					});
 					return;
 				}
 
 				if(arg.startsWith('#')) {
 					customRole.edit({ color: arg })
-					.then(() => reportSuccess('Color'))
-					.catch(() => reportError('Color'));
+					.then(_ => reportSuccess('Color'))
+					.catch(_ => reportError('Color'));
 					return;
 				}
 
@@ -418,8 +457,8 @@ module.exports = {
 
 			if(args.length)
 				return customRole.edit({ name: args.join(' ') })
-				.then(() => reportSuccess('Nombre'))
-				.catch(() => reportError('Nombre'));
+				.then(_ => reportSuccess('Nombre'))
+				.catch(_ => reportError('Nombre'));
 		});
 
 		coll.on('end', () => interaction.channel.send({ content: '✅ Edición de Rol Personalizado finalizada' }));

@@ -216,7 +216,7 @@ module.exports = {
 		
 		module.exports[interaction.channel.id].memoCollector.on('collect', async collected => {
 			const ccontent = collected.content;
-			collected.delete();
+			if(collected.deletable) collected.delete().catch(console.error);
 
 			const guildQuery = { guildId: interaction.guild.id };
 			const gcfg = await GuildConfig.findOne(guildQuery);
@@ -247,7 +247,7 @@ module.exports = {
 								gcfg.feeds[fetchedChannel.id].cornerIcon = ccontent;
 								succeeded = true;
 							}
-							setTimeout(() => { if(!sent.deleted) sent.delete() }, 1500);
+							setTimeout(() => { if(sent.deletable) sent.delete().catch(console.error) }, 1500);
 						}).catch(error => console.error(error));
 					}
 					break;
@@ -423,7 +423,7 @@ module.exports = {
 		module.exports[interaction.channel.id].memoCollector = new MessageCollector(interaction.channel, { filter: filter, time: 1000 * 60 * 4 });
 		module.exports[interaction.channel.id].memoCollector.on('collect', async collected => {
 			const ccontent = collected.content;
-			collected.delete();
+			collected.delete().catch(() => console.log('No se pudo eliminar un mensaje'));
 
 			const guildQuery = { guildId: interaction.guild.id };
 			const gcfg = (await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery);
@@ -484,7 +484,7 @@ module.exports = {
 				? channels.filter(c => c.isText()).find(c => c.name.toLowerCase().indexOf(ccontent) !== -1)
 				: channels.filter(c => c.isText()).find(c => c.id === ccontent);
 			if(fetchedChannel) {
-				collected.delete();
+				collected.delete().catch(() => console.log('No se pudo eliminar un mensaje'));
 				module.exports[interaction.channel.id].memoChannel = fetchedChannel;
 				module.exports.setupTagsCollector(interaction, false, 'feed_createNew');
 				module.exports[interaction.channel.id].memoCollector.stop();
@@ -642,6 +642,7 @@ module.exports = {
 		});
 	},
 
+	//Función en desuso. Permanece por compatibilidad
 	/**@param {import('discord.js').ButtonInteraction} interaction */
 	async ['showFeedImageUrl'](interaction) {
 		const url = interaction.message.components[0].components[0].url;
@@ -680,14 +681,61 @@ module.exports = {
 			return 'Ocurrió un problema al contactar con el Booru para recuperar las tags.\nInténtalo de nuevo, si el problema persiste, es probable que el objetivo no esté disponible o que se trate de un bug de mi parte';
 		});
 		return await interaction.reply({
-			content: `<:tagswhite:921788204540100608> **Tags**\n${tags}\n<:gelbooru:919398540172750878> **Post** <${url}>${ source ? `\n<:urlwhite:922669195521568818> **Fuente** <${source}>` : '' }`,
+			// content: `<:tagswhite:921788204540100608> **Tags**\n${tags}\n<:gelbooru:919398540172750878> **Post** <${url}>${ source ? `\n<:urlwhite:922669195521568818> **Fuente** <${source}>` : '' }`,
+			embeds: [new MessageEmbed()
+				.addField('<:tagswhite:921788204540100608> Tags', `\`\`\`${tags}\`\`\``)
+				.addField('<:urlwhite:922669195521568818> Enlaces', `[<:gelbooru:919398540172750878> **Post**](${url})${ source ? ` [<:heartwhite:969664712604262400> **Fuente**](${source})` : '' }`),
+			],
+			components: [new MessageActionRow().addComponents([
+				new MessageButton()
+					.setCustomId(`feed_editFollowedTags_ADD`)
+					.setLabel('Seguir tags...')
+					.setStyle('SUCCESS'),
+				new MessageButton()
+					.setCustomId(`feed_editFollowedTags_REMOVE`)
+					.setLabel('Dejar de seguir tags...')
+					.setStyle('DANGER'),
+			])],
 			ephemeral: true,
 		});
 	},
 
 	/**@param {import('discord.js').ButtonInteraction} interaction */
-	async ['deleteFeedImage'](interaction) {
-		if(isNotModerator(interaction.member))
+	async ['editFollowedTags'](interaction, [ operation ]) {
+		await interaction.update({
+			embeds: [new MessageEmbed()
+				.addField('[DISFUNCIONAL: Trabajo en progreso]', 'Envía un mensaje con una selección de tags, separadas por espacios'),
+			],
+			components: [],
+		});
+		const { channel, user } = interaction;
+
+		const filter = m => m.author.id === user.id;
+		const tagsCollector = new MessageCollector(channel, { filter, time: 60e3 * 2, max: 1 });
+		tagsCollector.on('collect', collected => {
+			if(collected.deletable) collected.delete().catch(console.error);
+
+			let response;
+			if(operation === 'ADD') {
+				response = 'Serás mencionado cuando se envíen imágenes con tags que sigas, en cualquier Feed';
+			} else {
+				response = 'Ya no serás mencionado por las tags removidas';
+			}
+
+			return interaction.editReply({
+				embeds: [new MessageEmbed()
+					.addField('[DISFUNCIONAL: Trabajo en progreso]', response),
+				],
+			}).catch(console.error);
+		});
+	},
+
+	/**
+	 * @param {import('discord.js').ButtonInteraction} interaction
+	 * @param {string?} manageableBy
+	 */
+	async ['deleteFeedImage'](interaction, manageableBy = undefined) {
+		if(manageableBy !== interaction.user.id && isNotModerator(interaction.member))
 			return await interaction.reply({
 				content: ':x: No tienes permiso para hacer eso, teehee~',
 				ephemeral: true,
@@ -697,7 +745,7 @@ module.exports = {
 		const url = message.components[0].components[0].url;
 		const apiurl = url.replace(
 			'page=post&s=view',
-			'page=dapi&s=post&q=index&json=1'
+			'page=dapi&s=post&q=index&json=1',
 		);
 		const tags = await axios.get(apiurl).then(response => response.data.post[0].tags.slice(0, 1800));
 		return await Promise.all([

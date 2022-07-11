@@ -2,6 +2,23 @@ const global = require('../config.json');
 const Hourai = require('../models/hourai.js');
 const guildIds = global.serverid;
 
+function fuckEveryOtherBot({ content, channel, author }) {
+    content = content.toLowerCase();
+    const hrai = content.indexOf('hourai');
+    const reps = global.hourai.replies;
+    const { prefix: hraipf, suffix: hraisf } = reps.ignore;
+    const hraifound = hrai !== -1 && !(hraipf.some(pf => content.indexOf(`${pf}hourai`) === (hrai - pf.length)) || hraisf.some(sf => content.indexOf(`hourai${sf}`) === hrai));
+    if(hraifound && author.id !== global.peopleid.bern) {
+        const fuckustr = (content.indexOf('puré') !== -1 || content.indexOf('pure') !== -1) ? reps.compare : reps.taunt;
+        channel.send({ content: fuckustr[Math.floor(Math.random() * fuckustr.length)]});
+        //message.channel.send({ content: 'Descanse en paz, mi pana <:pensaki:852779998351458344>' });
+    } else if(content.startsWith('~echo ') || content.startsWith('$say '))
+        setTimeout(responder, 800, () => {
+            const fuckustr = reps.reply;
+            channel.send({ content: fuckustr[Math.floor(Math.random() * fuckustr.length)] });
+        });
+};
+
 module.exports = {
     [guildIds.hourai]: {
         async findBotInfraction(message) {
@@ -48,25 +65,14 @@ module.exports = {
             }
         },
 
-        fuckEveryOtherBot({ content, channel, author }) {
-            content = content.toLowerCase();
-            const hrai = content.indexOf('hourai');
-            const reps = global.hourai.replies;
-            const { prefix: hraipf, suffix: hraisf } = reps.ignore;
-            const hraifound = hrai !== -1 && !(hraipf.some(pf => content.indexOf(`${pf}hourai`) === (hrai - pf.length)) || hraisf.some(sf => content.indexOf(`hourai${sf}`) === hrai));
-            if(hraifound && author.id !== global.peopleid.bern) {
-                const fuckustr = (content.indexOf('puré') !== -1 || content.indexOf('pure') !== -1) ? reps.compare : reps.taunt;
-                channel.send({ content: fuckustr[Math.floor(Math.random() * fuckustr.length)]});
-                //message.channel.send({ content: 'Descanse en paz, mi pana <:pensaki:852779998351458344>' });
-            } else if(content.startsWith('~echo ') || content.startsWith('$say '))
-                setTimeout(responder, 800, () => {
-                    const fuckustr = reps.reply;
-                    channel.send({ content: fuckustr[Math.floor(Math.random() * fuckustr.length)] });
-                });
-        },
+        fuckEveryOtherBot,
     },
 
     [guildIds.nlp]: {
-        fuckEveryOtherBot: (message) => module.exports[guildIds.hourai].fuckEveryOtherBot(message),
-    }
+        fuckEveryOtherBot,
+    },
+
+    [guildIds.slot1]: {
+        fuckEveryOtherBot,
+    },
 }

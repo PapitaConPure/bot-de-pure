@@ -55,7 +55,7 @@ module.exports = {
         }
         
         await channel.send(args.join(' ').split(/ +#ENDL +/g).join('\n'));
-        if(del && !message.deleted && message.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES))
+        if(del && message.deletable && message.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES))
             await message.delete()
     },
 };

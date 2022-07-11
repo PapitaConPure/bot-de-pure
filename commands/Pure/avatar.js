@@ -85,7 +85,7 @@ module.exports = {
         if(notfound.length)
             replyStack.content = [
                 `:warning: ¡Usuario[s] **${notfound.join(', ')}** no encontrado[s]!`.replace(/\[s\]/g, (notfound.length > 1) ? 's' : ''),
-                `Recuerda separar cada usuario con una coma. Usa \`${p_pure(guildId).raw}ayuda avatar\` para más información`,
+                `Recuerda separar cada usuario con una coma y escribir correctamente. Usa \`${p_pure(request.guildId).raw}ayuda avatar\` para más información`,
             ].join('\n');
         if(members?.length)
             replyStack.embeds = generateAvatarEmbeds(members, request.guildId) ?? null;

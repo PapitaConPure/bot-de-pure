@@ -103,7 +103,7 @@ module.exports = {
 		);
 		console.log(challenges);
 
-		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda\` para más información`;
+		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda ${module.exports.name}\` para más información`;
 		if(args.length < 3) return await request.reply(`⚠ Debes ingresar al menos el juego completado, la dificultad y la calidad de supervivencia.\n${helpstr}`);
 
 		const bg = backgrounds.find(b => b.aliases.includes(`${isSlash ? args.getString('juego') : args[0]}`.toLowerCase()));

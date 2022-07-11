@@ -250,7 +250,7 @@ module.exports = {
 								gcfg.feeds[fetchedChannel.id].cornerIcon = ccontent;
 								succeeded = true;
 							}
-							setTimeout(() => { if(!sent.deleted) sent.delete() }, 1500);
+							setTimeout(() => { if(sent.deletable) sent.delete() }, 1500);
 						}).catch(error => console.error(error));
 					}
 					break;

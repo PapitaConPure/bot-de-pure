@@ -39,7 +39,7 @@ module.exports = {
             return await request.channel.send({ content: 'No me hagai decir weas de hourai, ¿yapo? Gracias <:haniwaSmile:659872119995498507>' });
         
         await request.reply({ content: sentence.split(/ +#[Nn] +/g).join('\n') });
-        if(!isSlash && del && !request.deleted && request.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES))
+        if(!isSlash && del && request.deletable && request.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES))
             return await request.delete();
     },
 };

@@ -2,6 +2,7 @@ const { peopleid } = require('../../localdata/config.json');
 const { fetchFlag } = require('../../func');
 const { MessageEmbed, Permissions } = require('discord.js'); //Integrar discord.js
 const { engines, getBaseTags, getSearchTags } = require('../../localdata/booruprops.js'); //Variables globales
+const { formatBooruPostMessage } = require('../../systems/boorusend.js');
 const booru = require('booru');
 const rakki = require('./rakkidei.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
@@ -18,8 +19,8 @@ const desc = `${brief}\n` +
 	'**Nota 2:** no todos los motores funcionan y con algunos no habrá búsqueda personalizada.';
 
 const options = new CommandOptionsManager()
-	.addParam('etiquetas', 'TEXT', 'para filtrar resultados de búsqueda', { poly: 'MULTIPLE', optional: true, polymax: 8 })
-	.addFlag([], 'motor', 			'para usar otro motor', { name: 'nombre', type: 'TEXT' })
+	.addParam('etiquetas', 'TEXT',  'para filtrar resultados de búsqueda', { optional: true })
+//	.addFlag([], 'motor', 			'para usar otro motor', { name: 'nombre', type: 'TEXT' })
 	.addFlag([], ['bomba', 'bomb'], 'para mostrar una cierta cantidad de imágenes', { name: 'cnt', type: 'NUMBER' });
 
 module.exports = {
@@ -27,7 +28,7 @@ module.exports = {
 	aliases: [
         'imágenes', 'imagenes',
 		'search', 'image',
-		'img'
+		'img',
     ],
 	brief: brief.replace('#THEME', 'de cualquier cosa'),
     desc: desc
@@ -35,7 +36,7 @@ module.exports = {
 		.replace('#NSFW_NOTE', 'en canales NSFW, los resultados serán, respectivamente, NSFW'),
 	molds: { brief: brief, desc: desc },
     flags: [
-        'common'
+        'common',
     ],
     options,
 	callx: '<etiquetas?(...)>',
@@ -75,11 +76,8 @@ module.exports = {
 
 		//Acción de comando
 		if(!isSlash) request.channel.sendTyping();
-		const inputengine = isSlash
-			? options.fetchFlag(args, 'motor', { callback: 'gelbooru', fallback: 'gelbooru' })
-			: fetchFlag(args, { property: true, long: ['motor'], callback: (x, i) => x[i], fallback: 'gelbooru' });
-		const bomb = isSlash
-			? options.fetchFlag(args, 'bomba', { callback: 5, fallback: 1 })
+		const poolSize = isSlash
+			? options.fetchFlag(args, 'bomba', { callback: x => Math.max(2, Math.min(x, 10)), fallback: 1 })
 			: fetchFlag(args, {
 				property: true,
 				...options.flags.get('bomba').structure,
@@ -90,87 +88,40 @@ module.exports = {
 				},
 				fallback: 1,
 			});
-		const engine = inputengine.toLowerCase();
-		if(!engines.includes(engine))
-			return await request.reply(
-				`:warning: El motor **${inputengine}** no aparece en la lista de motores soportados.\n` +
-				`Usa \`${p_pure(request.guild.id).raw}ayuda ${module.exports.name}\` para más información`
-			);
-		const stags = [searchOpt.cmdtag, getBaseTags(engine, isnsfw)].join(' ');
+		const stags = [searchOpt.cmdtag, getBaseTags('gelbooru', isnsfw)].join(' ');
 		const words = isSlash
-			? options.fetchParamPoly(args, 'etiquetas', args.getString, null).filter(wrd => wrd)
+			? (args.getString('etiquetas', false) ?? '').split(/ +/)
 			: args;
-		const extags = getSearchTags(words, engine, searchOpt.cmdtag);
+		const extags = getSearchTags(words, 'gelbooru', searchOpt.cmdtag);
+		/**@type {import('discord.js').User} */
+		const author = (request.author ?? request.user);
 		
 		//Petición
 		try {
-			const response = await booru.search(engine, [stags, extags].join(' '), { limit: 100, random: true });
+			const response = await booru.search('gelbooru', [stags, extags].join(' '), { limit: 100, random: true });
 			//Manejo de respuesta
 			if(!response.length)
-				return await request.reply({ content: `:warning: No hay resultados en **${inputengine}** para las tags **"${extags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` });
+				return await request.reply({ content: `:warning: No hay resultados en **Gelbooru** para las tags **"${extags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` });
 
 			//Seleccionar imágenes
-			const images = response
+			const posts = response
 				.sort(() => 0.5 - Math.random())
-				.slice(0, bomb);
+				.slice(0, poolSize);
 
 			//Crear presentaciones
 			/**@type {Array<MessageEmbed>}*/
-			const Embeds = [];
-			images.forEach(image => {
-				Embeds.push(new MessageEmbed()
-					.setColor(isnsfw ? '#38214e' : '#fa7b62')
-					.setImage(image.fileUrl));
-			});
-
-			//Formatear primera presentación
-			const author = (request.author ?? request.user);
-			Embeds[0]
-				.setAuthor({ name: `Desde ${images[0].booru.domain}`, iconURL: (engine === 'gelbooru') ? 'https://i.imgur.com/outZ5Hm.png' : author.avatarURL({ dynamic: true, size: 128 }) })
-				.setTitle(isnsfw ? searchOpt.nsfwtitle : searchOpt.sfwtitle);
+			const messages = posts.map(post => formatBooruPostMessage(post, {
+				maxTags: 40,
+				title: isnsfw ? searchOpt.nsfwtitle : searchOpt.sfwtitle,
+				cornerIcon: author.avatarURL({ size: 128, dynamic: true }),
+				manageableBy: author.id,
+			}));
 			if(extags.length)
-				Embeds[0].addField('Tu búsqueda', `:mag_right: *${extags.trim().replace('*', '\\*').split(/ +/).join(', ')}*`);
+				messages[posts.length - 1].embeds[0].addField('Tu búsqueda', `:mag_right: *${extags.trim().replace('*', '\\*').split(/ +/).join(', ')}*`);
 
-			//Detallar acciones posteriores
-			const le = images.length - 1; //Último embed
-			const af = Embeds[le].fields.length; //Índice del campo de acciones
-			Embeds[le].addField('Acciones', `<:tags:704612794921779290> Revelar etiquetas\n<:delete:704612795072774164> Eliminar`, true);
-
-			//Rociar salsa sobre todo
-			images.forEach((image, i) => {
-				Embeds[i].addField('Salsa', [
-					`[Gelbooru](https://gelbooru.com/index.php?page=post&s=view&id=${image.id})`,
-					image.source ? `[Original](${image.source})` : null
-				].join('\n'), true);
-			});
-
-			//Enviar mensaje y esperar reacciones
-			const sentqueue = (await Promise.all([
-				request.reply({ embeds: Embeds }),
-				isSlash ? request.fetchReply() : null,
-			])).filter(sq => sq);
-			const sent = sentqueue.pop();
-			const actions = [sent.client.emojis.cache.get('704612794921779290'), sent.client.emojis.cache.get('704612795072774164')];
-			Promise.all(actions.map(action => sent.react(action)));
-			const filter = (rc, user) => author.id === user.id && actions.some(action => rc.emoji.id === action.id);
-			const collector = sent.createReactionCollector({ filter: filter, time: 4 * 60 * 1000 });
-			let showtags = false;
-			collector.on('collect', reaction => {
-				if(reaction.emoji.id === actions[0].id) {
-					if(!showtags) {
-						images.forEach((image, i) => {
-							Embeds[i].addField(`Tags (${Math.min(image.tags.length, 40)}/${image.tags.length})`, `*${image.tags.slice(0,40).join(', ')}*`);
-						});
-						Embeds[le].fields[af].value = `<:delete:704612795072774164> Eliminar`;
-						sent.edit({ embeds: Embeds });
-						showtags = true;
-					}
-				} else {
-					sent.delete();
-					if(!isSlash && !request.deleted && request.guild.me.permissionsIn(request.channel).has(Permissions.FLAGS.MANAGE_MESSAGES))
-						request.delete();
-				}
-			});
+			//Enviar mensajes
+			await request.reply(messages.shift());
+			return await Promise.all(messages.map(message => request.channel.send(message)));
 		} catch(error) {
 			console.error(error);
 			const errorembed = new MessageEmbed()

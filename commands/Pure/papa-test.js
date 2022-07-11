@@ -1,6 +1,6 @@
 //const Discord = require('discord.js'); //Integrar discord.js
 //const global = require('../../localdata/config.json'); //Variables globales
-const { dibujarDespedida } = require('../../func.js');
+// const { dibujarDespedida } = require('../../func.js');
 //const uwu = require('./uwu.js');
 //const Canvas = require('canvas'); 
 
@@ -9,7 +9,7 @@ module.exports = {
     desc: 'Comando de pruebas :flushed: :point_right: :point_left:',
     flags: ['papa'],
 	
-	async execute(message, args) {
+	async execute(request, args) {
         //uwu.execute(message, args);
         //func.dibujarBienvenida(message.member);
         //func.dibujarDespedida(message.member);
@@ -33,6 +33,7 @@ module.exports = {
 
         console.log({ args, a, b, c, d });
         message.channel.send({ content: `**args** ${args}\n**a** ${a}\n**b** ${b}\n**c** ${c}\n**d** ${d}` });*/
-        dibujarDespedida(message.member);
+        //dibujarDespedida(message.member);
+        uwu = 3 * dope + cope
     },
 };

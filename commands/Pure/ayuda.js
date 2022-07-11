@@ -1,6 +1,6 @@
 const { readdirSync } = require('fs'); //Integrar operaciones sistema de archivos de consola
-const { MessageEmbed } = require('discord.js');
-const { serverid } = require('../../localdata/config.json'); //Variables globales
+const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { serverid, tenshiColor } = require('../../localdata/config.json'); //Variables globales
 const { fetchFlag } = require('../../func');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts');
@@ -51,10 +51,11 @@ module.exports = {
         
         let search = isSlash ? args.getString('comando') : (args[0] ?? null);
         let list = [];
-        const embed = new MessageEmbed().setColor('#608bf3');
-        const aurl = request.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 });
-        const pfr = p_pure(request.guildId).raw;
-        const hcmd = `${pfr}${module.exports.name}`;
+        const embeds = [];
+        const components = [];
+        const avatarUrl = request.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 });
+        const guildPrefix = p_pure(request.guildId).raw;
+        const helpCommand = `${guildPrefix}${module.exports.name}`;
         
         //Análisis de comandos
         const cfiles = readdirSync('./commands/Pure').filter(file => file.endsWith('.js'));
@@ -85,25 +86,46 @@ module.exports = {
                     s = (flags.includes('papa'))  ? `${s.slice(pfi)} (Papita con Puré)` : s;
                     return `${s[0].toUpperCase()}${s.slice(1)}`;
                 };
-                const listExists = l => l && l[0] && l[0].length;
+                const isNotGuidePage = !(flags?.includes('guide'));
+                const listExists = l => l?.[0]?.length;
 
-                embed.setAuthor({ name: title(name), iconURL: aurl})
+                //Embed de metadatos
+                embeds.push(new MessageEmbed()
+                    .setColor('#608bf3')
+                    .setAuthor({ name: title(name), iconURL: avatarUrl})
                     .addField('Nombre', `\`${name}\``, true)
                     .addField('Alias', listExists(aliases)
                         ? (aliases.map(i => `\`${i}\``).join(', '))
                         : ':label: Sin alias', true)
-                    .addField('Descripción', (command.desc !== undefined && command.desc.length > 0)
-                        ? command.desc
-                        : ':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde');
+                );
+                if(isNotGuidePage)
+                    embeds[0].addField('Identificadores', listExists(flags)
+                        ? flags.map(i => `\`${i}\``).join(', ').toUpperCase()
+                        : ':question: Este comando no tiene identificadores por ahora', true);
                 
-                if(flags ? !flags.includes('guide') : true)
-                    embed.addField('Llamado', `\`${pfr}${command.name}${command.callx ? ` ${command.callx}` : ''}\``, true)
-                        .addField(`Opciones (\`${pfr}x -x --xxx <x>\`)`, command.options
+                //Embed de información
+                embeds.push(new MessageEmbed()
+                    .setColor('#bf94e4 ')
+                    .addField('Descripción', command.desc?.length
+                        ? command.desc
+                        : ':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde')
+                );
+                if(isNotGuidePage)
+                    embeds[1].addField('Llamado', `\`${guildPrefix}${command.name}${command.callx ? ` ${command.callx}` : ''}\``)
+                        .addField('Opciones', command.options
                             ? command.options.display
-                            : ':abacus: Sin opciones', true)
-                        .addField('Identificadores', listExists(flags)
-                            ? flags.map(i => `\`${i}\``).join(', ').toUpperCase()
-                            : ':question: Este comando no tiene identificadores por ahora');
+                            : ':abacus: Sin opciones');
+
+                components.push(new MessageActionRow()
+                    .addComponents([
+                        new MessageButton()
+                            .setCustomId('ayuda_porfavorayuden')
+                            .setLabel('Muéstrame cómo')
+                            .setStyle('PRIMARY')
+                            .setEmoji('📖')
+                            .setDisabled(true),
+                    ])
+                );
                 break;
             }
         }
@@ -112,17 +134,27 @@ module.exports = {
             const listdisplay = list.length
                 ? list.map(item => `\`${item}\``).join(', ')
                 : 'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para buscar un cierto identificador)';
-            embed.setAuthor({ name: 'Lista de comandos', iconURL: aurl })
-                .addField('Comandos: ejemplos de uso', `\`${hcmd} -xmph --meme\`\n\`${pfr}avatar @Usuario\`\n\`${pfr}dados 5d6\``)
-                .addField(`Usa \`${hcmd} <comando>\` para más información sobre un comando`, listdisplay)
+            embeds.push(new MessageEmbed()
+                .setColor(tenshiColor)
+                .setAuthor({ name: 'Lista de comandos', iconURL: avatarUrl })
+                .addField('Comandos: ejemplos de uso', `\`${helpCommand} -xmph --meme\`\n\`${guildPrefix}avatar @Usuario\`\n\`${guildPrefix}dados 5d6\``)
+                .addField(`Usa \`${helpCommand} <comando>\` para más información sobre un comando`, listdisplay)
                 .addField('Emotes rápidos', `"Me gustan los emotes de **&perrito** y **&uwu**"`)
-                .addField(`Guía introductoria`, `Usa \`${hcmd} g-indice\` para ver la página de índice de la guía introductoria de Bot de Puré`);
+                .addField(`Guía introductoria`, `Usa \`${helpCommand} g-indice\` para ver la página de índice de la guía introductoria de Bot de Puré`)
+            );
         } else {
-            if(!embed.author)
-                embed.setAuthor({ name: 'Sin resultados', iconURL: aurl })
-                    .addField('No se ha encontrado ningún comando con este nombre', `Utiliza \`${hcmd}\` para ver una lista de comandos disponibles y luego usa \`${pfr}comando <comando>\` para ver un comando en específico`);
-            embed.setFooter({ text: `Usa "${hcmd} ${require('./g-indice.js').name}" para aprender más sobre comandos` });
+            if(!embeds.length)
+                embeds.push(new MessageEmbed()
+                    .setColor('#e44545')
+                    .setAuthor({ name: 'Sin resultados' })
+                    .addField('No se ha encontrado ningún comando con este nombre',
+                        `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}comando <comando>\` para ver un comando en específico`)
+                );
+            embeds[embeds.length - 1].setFooter({ text: `Usa "${helpCommand} ${require('./g-indice.js').name}" para aprender más sobre comandos` });
         }
-        return await request.reply({ embeds: [embed] });
+        return await request.reply({
+            embeds: embeds,
+            components: components,
+        });
     },
 };

@@ -4,7 +4,7 @@ const engines = Object.values(sites).map(s => s.aliases[s.aliases.length - 1]);
 const basetags = '-guro -furry -vore -webm -video -audio -comic -4koma';
 const nsfwrating = {
     [true]: 'explicit',
-    [false]: 'safe'
+    [false]: 'general'
 };
 const nsfwtags = {
     [true]: '-lolicon -loli -shotacon -shota -bestiality',
@@ -42,7 +42,7 @@ module.exports = {
         .set('classroom_of_the_elite', 'youkoso_jitsuryoku_shijou_shugi_no_kyoushitsu_e')
         //Personajes
         .set('senko', 'senko_(sewayaki_kitsune_nosenko-san)')
-        .set('shiro', 'shiro_(sewayaki_kitsune_nosenko-san)')
+        .set('shiro',           'shiro_(sewayaki_kitsune_nosenko-san)')
     )(),
     tm_touhou: (() => new Map()
         //Protas

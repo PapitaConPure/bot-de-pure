@@ -49,25 +49,26 @@ module.exports = {
 		const uid = (request.author ?? request.user).id;
 		if(now - (uses.pinguear[uid] ?? 0) < 1000 * 60)
 			return await request.react('⏳');
-		if(!isSlash && args.length !== 2)
+		if(!isSlash && args.length < 2)
 			return await request.reply({ content: `:warning: Debes ingresar 2 parámetros (\`${p_pure(request.guild.id).raw}pinguear <cantidad> <usuario>\`)`, ephemeral: true });
-		let cnt = -1;
-		let usrc;
 		
-		if(isSlash) cnt = args.getInteger('cantidad');
+		let repeats = -1;
+		let userSearch;
+		
+		if(isSlash) repeats = Math.floor(args.getNumber('cantidad'));
 		else {
-			if(!isNaN(args[0])) { cnt = args[0]; usrc = args[1]; }
-			else if(!isNaN(args[1])) { cnt = args[1]; usrc = args[0]; }
+			if(!isNaN(args[0])) { repeats = args[0]; userSearch = args[1]; }
+			else if(!isNaN(args[1])) { repeats = args[1]; userSearch = args[0]; }
 		}
-		if(cnt < 2 || cnt > 10)
+		if(repeats < 2 || repeats > 10)
 			return await request.reply({ content: ':warning: Solo puedes pinguear a alguien entre 2 y 10 veces', ephemeral: true });
 
-		const user = isSlash ? args.getUser('usuario') : fetchUser(usrc, request);
-		if(user === undefined)
+		const user = isSlash ? args.getUser('usuario') : fetchUser(userSearch, request);
+		if(!user)
 			return await request.reply({ content: ':warning: Usuario inválido', ephemeral: true });
 
 		uses.pinguear[uid] = now * 1;
 		if(isSlash) await request.reply({ content: `🤡 Tirando pings a **${user.tag}**`, ephemeral: true });
-		return await pinguear(request.channel, user, cnt);
+		return await pinguear(request.channel, user, repeats);
     },
 };

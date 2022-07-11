@@ -405,15 +405,40 @@ class CommandOptionsManager {
      * @typedef {Object} feedback
      * @property {*} callback Valor de retorno si se respondió la flag
      * @property {*} fallback Un valor por defecto si no se respondió la flag
-     * @param {feedback} fb Define la respuestas en cada caso
+     * @param {feedback} output Define la respuestas en cada caso
      * @returns {*} El valor de retorno de callback si la flag fue respondida, o en cambio, el de fallback
      */
-    fetchFlag(args, identifier, fb = { getMethod, callback, fallback }) {
-        const flagval = typeof getMethod === 'function'
-            ? getMethod.call(args, identifier, true)
-            : args.getBoolean(identifier, false);
-        return flagval ? (typeof fb.callback === 'function' ? fb.callback() : fb.callback) : (typeof fb.fallback === 'function' ? fb.fallback() : fb.fallback);
-    }
+    fetchFlag(args, identifier, output = { callback, fallback }) {
+        /**@type {CommandFlagExpressive}*/
+        const flag = this.flags.get(identifier);
+
+        if(!flag)
+            throw new ReferenceError(`Cannot find command flag by identifier: ${identifier}`);
+
+        let getMethod = 'getBoolean';
+        let flagValue;
+
+        if(flag._expressive) {
+            switch(flag._type) {
+                case 'NUMBER':  getMethod = 'getNumber';  break;
+                case 'USER':    getMethod = 'getUser';    break;
+                case 'ROLE':    getMethod = 'getRole';    break;
+                case 'CHANNEL': getMethod = 'getChannel'; break;
+                case 'ID':      getMethod = 'getInteger'; break;
+                default:        getMethod = 'getString';  break;
+            }
+        }
+        
+        flagValue = args[getMethod](identifier, false);
+        
+        if(flagValue == undefined)
+            return output.fallback;
+
+        if(output.callback == undefined)
+            return flagValue;
+
+        return typeof output.callback === 'function' ? output.callback(flagValue) : output.callback;
+    };
 };
 
 module.exports = {

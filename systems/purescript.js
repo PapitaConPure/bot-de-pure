@@ -71,7 +71,7 @@ const executeTuber = async (request, tuber, { args, isSlash }) => {
 				/**@param {[MessageEmbed, String, String]} param0*/
 				['marcoEstablecerImagen']: ([embed, image]) => embed.setImage(image),
 				/**@param {[MessageEmbed, String, String]} param0*/
-				['marcoAgregarCampo']: ([embed, title, content, inline]) => embed.addField(title, content, inline),
+				['marcoAgregarCampo']: ([embed, title, content, inline]) => embed.addField(title, content.slice(0, 1023), inline),
 			},
             __tuber__: tuber,
             __replyContent__: {},
@@ -84,7 +84,7 @@ const executeTuber = async (request, tuber, { args, isSlash }) => {
 		};
 		//Establecer claves iniciales como solo-lectura
 		const readOnlyMem = Object.keys(mem);
-		console.log('readOnlyMem:', readOnlyMem);
+		// console.log('readOnlyMem:', readOnlyMem);
 		//#endregion
 
 		//#region Entradas personalizadas
@@ -110,7 +110,7 @@ const executeTuber = async (request, tuber, { args, isSlash }) => {
 				mem.entradas[input.identifier] = arg;
 				return true;
 			});
-			console.log('entradas:', mem.entradas, '\nreadyInputs:', readyInputs, '\n---------------------------------');
+			// console.log('entradas:', mem.entradas, '\nreadyInputs:', readyInputs, '\n---------------------------------');
 			if(!readyInputs.every(input => input)) return await request.reply(`🛑 Este Tubérculo requiere más parámetros.\nUsa \`${p_pure(request.guildId).raw}tubérculo --ayuda <TuberID>\` para más información`);
 		}
 		//#endregion
@@ -120,7 +120,7 @@ const executeTuber = async (request, tuber, { args, isSlash }) => {
         const { __replyContent__: replyContent } = mem;
 
         //Recopilación final
-		console.log('Memoria final:', mem, '\nErrores:', errors, '\nContenido de respuesta:', replyContent);
+		// console.log('Memoria final:', mem, '\nErrores:', errors, '\nContenido de respuesta:', replyContent);
 		if(!Object.keys(replyContent)?.length)
 			await psError('debes enviar al menos un texto u archivo', -2, 'RECOPILAR');
 
@@ -129,12 +129,12 @@ const executeTuber = async (request, tuber, { args, isSlash }) => {
 			await request.reply({ content: `⚠️ Se han encontrado **${errors} Errores PS** en la ejecución de PuréScript` });
 			return new Error('Error de PuréScript');
 		} else
-			return await request.reply(replyContent);
+			return await request.reply(replyContent).catch(console.error);
 	} else //Tubérculo básico (contenido y archivos directos)
 		return await request.reply({
 			content: tuber.content,
 			files: tuber.files,
-		});
+		}).catch(console.error);
 };
 
 /**Toma un arreglo de arreglos de palabras (arreglo de "expresiones") y las ejecuta secuencialmente

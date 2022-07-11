@@ -234,8 +234,8 @@ module.exports = {
 		}
 
 		if(isSlash) {
-			e.x = args.getInteger('posición_x') - 1;
-			e.y = args.getInteger('posición_y') - 1;
+			e.x = Math.floor(args.getNumber('posición_x')) - 1;
+			e.y = Math.floor(args.getNumber('posición_y')) - 1;
 		} else {
 			const axis = args.findIndex((arg, i) => !isNaN(arg) && !isNaN(args[i + 1]));
 			if(axis >= 0) {

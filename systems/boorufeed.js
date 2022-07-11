@@ -1,6 +1,7 @@
 const GuildConfig = require('../localdata/models/guildconfigs.js');
 const booru = require('booru');
 const { Client, MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { formatBooruPostMessage } = require('./boorusend.js');
 const chalk = require('chalk');
 
 const logMore = false;
@@ -17,11 +18,9 @@ const checkFeeds = async (guilds) => {
         promisesCount[guild] = 0;
         const gcfg = await GuildConfig.findOne({ guildId: guild.id }).catch(console.error);
         if(!gcfg?.feeds) return;
-        for(const [chid, feed] of Object.entries(gcfg.feeds)) {
-
+        await Promise.all(Object.entries(gcfg.feeds).map(async ([chid, feed]) => {
             //Recolectar últimas imágenes para el Feed
             let fetchedProperly = true;
-            // const response = [];
             const response = await booru.search('gelbooru', feed.tags, { limit: maxDocuments, random: false })
             .catch(error => {
                 console.log(chalk.redBright('Ocurrió un problema mientras se esperaban los resultados de búsqueda de un Feed'));
@@ -40,11 +39,11 @@ const checkFeeds = async (guilds) => {
             //Prepararse para enviar imágenes
             /** @type {import('discord.js').TextChannel} */
             const channel = guild.channels.cache.get(chid);
-            const maxTags = feed.maxTags ?? 20;
 
             ///Eliminar Feed si las tags ingresadas no devuelven ninguna imagen
-            if(typeof channel === 'undefined' || !response.length) {
-                console.log('Eliminando un Feed no disponible o sin resultados');
+            if(typeof channel === 'undefined'/* || !response.length*/) {
+                console.log('Eliminando un Feed no disponible');
+                console.log(channel, response);
                 delete gcfg.feeds[chid];
                 gcfg.markModified('feeds');
                 return;
@@ -52,150 +51,28 @@ const checkFeeds = async (guilds) => {
             
             //Comprobar recolectado en busca de imágenes nuevas
             if(logMore) console.log(`Preparándose para enviar imágenes en ${channel.name} ${response.map(img => img.id)}`);
-            response.reverse().forEach(image => {
+            response.reverse().forEach(post => {
                 //Revisar si el documento no fue anteriormente enviado por este Feed
-                if(feed.ids.includes(image.id)) return;
-                if(logMore) console.log('feed.ids:', feed.ids, '\nimage.id:', image.id);
+                if(feed.ids.includes(post.id)) return;
+                if(logMore) console.log('feed.ids:', feed.ids, '\nimage.id:', post.id);
 
-                Array.prototype
                 //Agregar documento a IDs enviadas
-                feed.ids.unshift(image.id);
+                feed.ids.unshift(post.id);
+
                 //Eliminar de la base de datos aquellas imágenes no coincidentes con lo encontrado
-                gcfg.feeds[chid].ids = feed.ids.filter(id => response.some(img => img.id === id));
+                gcfg.feeds[chid].ids = feed.ids.filter(id => response.some(p => p.id === id));
                 if(logMore) console.log(guild.id, 'gcfg.feeds[chid].ids:', gcfg.feeds[chid].ids);
                 gcfg.markModified('feeds');
 
-                //Botón de Post de Gelbooru
-                const row = new MessageActionRow().addComponents(
-                    new MessageButton()
-                        .setEmoji('919398540172750878')
-                        .setStyle('LINK')
-                        .setURL(`https://gelbooru.com/index.php?page=post&s=view&id=${image.id}`),
-                );
-                /**@type {import('discord.js').ColorResolvable}*/
-                let embedColor = 'AQUA';
-
-                //Botón de Fuente (si está disponible)
-                const addSourceButton = (source) => {
-                    if(!source.match(/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){2,}\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/))
-                        return;
-                    
-                    let emoji;
-                    if(source.indexOf('pixiv.net') !== -1) {
-                        emoji = '919403803126661120';
-                        embedColor = '#0096fa';
-                    } else if(source.match(/twitter\.com|twimg\.com/)) {
-                        emoji = '919403803114094682';
-                        embedColor = '#1da1f2';
-                    } else if(source.indexOf('tumblr.com') !== -1) {
-                        emoji = '956817457413255178';
-                        embedColor = '#36465d';
-                    } else if(source.match(/reddit\.com|i\.redd\.it/)) {
-                        emoji = '956817457803296798';
-                        embedColor = '#ff4500';
-                    } else {
-                        emoji = '919114849894690837';
-                        embedColor = '#1bb76e';
-                    }
-
-                    if(source.length > 512)
-                        return row.addComponents(
-                            new MessageButton()
-                                .setEmoji(emoji)
-                                .setStyle('DANGER')
-                                .setCustomId('feed_invalidUrl')
-                                .setDisabled(true),
-                        );
-
-                    row.addComponents(
-                        new MessageButton()
-                            .setEmoji(emoji)
-                            .setStyle('LINK')
-                            .setURL(source),
-                    );
-                };
-                const source = image.source;
-                if(source) {
-                    if(typeof source === 'object')
-                        Object.values(source).forEach(addSourceButton);
-                    else
-                        addSourceButton(source);
-                }
-                
-                //Botón de tags (si es necesario) o de enlace
-                if(maxTags === 0 || image.tags.length > maxTags)
-                    row.addComponents(
-                        new MessageButton()
-                            .setEmoji('921788204540100608')
-                            .setStyle('PRIMARY')
-                            .setCustomId('feed_showFeedImageTags'),
-                    );
-                else
-                    row.addComponents(
-                        new MessageButton()
-                            .setEmoji('922669195521568818')
-                            .setStyle('PRIMARY')
-                            .setCustomId('feed_showFeedImageUrl'),
-                    );
-                
-                //Botón de Shock (temporal)
-                /*const closeDate = new Date('February 3, 2022 0:00:0 GMT-03:00');
-                const now = new Date(Date.now());
-                const diff = (closeDate - now) / (1000 * 60 * 60);
-                //console.log(closeDate.toLocaleTimeString(), '-', now.toLocaleTimeString(), '=', diff);
-                if(now < closeDate)
-                    row.addComponents(
-                        new MessageButton()
-                            .setLabel(`${((diff > 24) ? (diff / 24) : diff).toLocaleString('en', { maximumFractionDigits: 0 })} ${(diff > 24) ? 'días' : 'horas'}`)
-                            .setEmoji('935665140601327626')
-                            .setStyle('PRIMARY')
-                            .setCustomId('feed_shockFeed'),
-                    );*/
-                
-                //Botón de eliminación
-                row.addComponents(
-                    new MessageButton()
-                        .setEmoji('921751138997514290')
-                        .setStyle('DANGER')
-                        .setCustomId('feed_deleteFeedImage'),
-                );
-
-                //Preparar Embed final
-                /**@type {import('discord.js').MessageOptions} */
-                const feedMessage = { components: [row] };
-                const feedEmbed = new MessageEmbed()
-                    .setColor(embedColor)
-                    .setAuthor({ name: 'Desde Gelbooru', iconURL: feed.cornerIcon ?? 'https://i.imgur.com/outZ5Hm.png' });
-                
-                if(maxTags > 0)
-                    feedEmbed.addField(`Tags (${Math.min(image.tags.length, maxTags)}/${image.tags.length})`, `*${image.tags.slice(0, maxTags).join(', ').replace(/\\*\*/g,'\\*').replace(/\\*_/g,'\\_')}*`);
-                if(feed.title)
-                    feedEmbed.setTitle(feed.title);
-                if(feed.footer)
-                    feedEmbed.setFooter({ text: feed.footer });
-                
-                if(image.fileUrl.match(/\.(mp4|webm|webp)/)) {
-                    feedEmbed.addField('Video', `Míralo en su respectivo [<:gelbooru:919398540172750878> **Post**](${image.fileUrl})`);
-                    feedEmbed.setImage(image.sampleUrl || image.previewUrl);
-                } else 
-                    feedEmbed.setImage(
-                        /*(image.tags.includes('absurdres') ? image.previewUrl : undefined)
-                        || */image.sampleUrl
-                        || image.fileUrl
-                    );
-                
-                feedMessage.embeds = [feedEmbed];
-                
-                //Enviar imagen de Feed
-                promisesCount[guild]++;
-                promisesCount.total++;
-                channel.send(feedMessage).catch(error => {
+                channel.send(formatBooruPostMessage(post, feed)).catch(error => {
                     console.log(`Ocurrió un error al enviar la imagen de Feed: ${source}`);
                     console.error(error);
                 });
+                promisesCount[guild]++;
+                promisesCount.total++;
                 if(logMore) console.log(`EJECUTADO`);
             });
-        }
+        }));
 
         if(logMore) console.log(`GUARDANDO:`, Object.entries(gcfg.feeds).map(([chid, feed]) => `${guild.channels.cache.get(chid).name}: ${feed.ids}`));
         await gcfg.save();
@@ -219,7 +96,7 @@ const updateBooruFeeds = async (client) => {
     });
 
     const delayMs = Date.now() - startMs;
-    console.log(new Date(Date.now() + 1000 * 60 * 15 - delayMs).toString(), '| delayMs:', delayMs);
+    // console.log(new Date(Date.now() + 1000 * 60 * 15 - delayMs).toString(), '| delayMs:', delayMs);
     setTimeout(updateBooruFeeds, 1000 * 60 * 15 - delayMs, client);
     console.log(`Se procesaron Feeds de ${guilds.size} servers. ${promisesCount.total} imágenes nuevas puestas en envío`);
 };
