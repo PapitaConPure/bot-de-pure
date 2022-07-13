@@ -2,6 +2,7 @@ const GuildConfig = require('../localdata/models/guildconfigs.js');
 const booru = require('booru');
 const { Client, MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
 const { formatBooruPostMessage } = require('./boorusend.js');
+const { auditError } = require('./auditor.js');
 const chalk = require('chalk');
 
 const logMore = false;
@@ -41,12 +42,21 @@ const checkFeeds = async (guilds) => {
             const channel = guild.channels.cache.get(chid);
 
             ///Eliminar Feed si las tags ingresadas no devuelven ninguna imagen
-            if(typeof channel === 'undefined'/* || !response.length*/) {
-                console.log('Eliminando un Feed no disponible');
+            feed.faults ??= 0;
+            if(typeof channel === 'undefined' || !response.length) {
+                console.log('Comprobando eliminación de un Feed no disponible');
                 console.log(channel, response);
-                delete gcfg.feeds[chid];
-                gcfg.markModified('feeds');
+                if(feed.faults > 10) {
+                    delete gcfg.feeds[chid];
+                    gcfg.markModified('feeds');
+                } else {
+                    gcfg.feeds[chid].faults = feed.faults + 1;
+                    gcfg.markModified('faults');
+                }
                 return;
+            } else if(feed.faults > 0){
+                gcfg.feeds[chid].faults = 0
+                gcfg.markModified('faults');
             }
             
             //Comprobar recolectado en busca de imágenes nuevas
@@ -67,6 +77,7 @@ const checkFeeds = async (guilds) => {
                 channel.send(formatBooruPostMessage(post, feed)).catch(error => {
                     console.log(`Ocurrió un error al enviar la imagen de Feed: ${source}`);
                     console.error(error);
+                    auditError(error, { brief: 'Ocurrió un error al enviar una imagen de Feed', details: source });
                 });
                 promisesCount[guild]++;
                 promisesCount.total++;
