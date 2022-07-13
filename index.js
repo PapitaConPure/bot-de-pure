@@ -29,6 +29,7 @@ const { promisify } = require('util');
 const { updateBooruFeeds } = require('./systems/boorufeed');
 const { p_drmk, p_pure } = require('./localdata/customization/prefixes.js');
 const { PureVoiceUpdateHandler } = require('./systems/purevoice.js');
+const { auditRequest, auditSystem } = require('./systems/auditor.js');
 const token = process.env.I_LOVE_MEGUMIN ?? (require(envPath).token); //La clave del bot
 console.timeEnd('Carga de módulos');
 //#endregion
@@ -271,22 +272,20 @@ client.on('ready', async () => {
 
 	console.log(chalk.rgb(158,114,214)('Registrando fuentes...'));
     registerFont('fonts/Alice-Regular.ttf',             { family: 'headline' });
+    registerFont('fonts/cuyabra.otf',                   { family: 'cuyabra' });
     registerFont('fonts/teen bd.ttf',                   { family: 'cardname' });
     registerFont('fonts/kirsty rg.otf',                 { family: 'cardclass' });
-    registerFont('fonts/cuyabra.otf',                   { family: 'cuyabra' });
     registerFont('fonts/asap-condensed.semibold.ttf',   { family: 'cardbody' });
     registerFont('fonts/BebasNeue_1.otf',               { family: 'bebas' });
     registerFont('fonts/DINPro-Cond.otf',               { family: 'dinpro' });
 	confirm();
 
-    await global.logch.send({ embeds: [new Discord.MessageEmbed()
-        .setColor('DARK_VIVID_PINK')
-        .setAuthor({ name: 'Mensaje de sistema' })
-        .setTitle('Bot conectado y funcionando')
-        .addField('Host', global.bot_status.host, true)
-        .addField('N. de versión', global.bot_status.version.number, true)
-        .addField('Fecha', `<t:${Math.floor(Date.now() / 1000)}:f>`, true)
-    ]});
+    const { bot_status } = global;
+    auditSystem('Bot conectado y funcionando', 
+        { name: 'Host',             value: bot_status.host,                             inline: true },
+        { name: 'N. de versión',    value: bot_status.version.number,                   inline: true },
+        { name: 'Fecha',            value: `<t:${Math.floor(Date.now() / 1000)}:f>`,    inline: true },
+    );
     global.maintenance = '';
 	console.log(chalk.greenBright.bold('Bot conectado y funcionando.'));
 
@@ -305,56 +304,39 @@ client.on('ready', async () => {
     // updateBooruFeeds(client);
 });
 
+async function updateChannelMessageCounter(guildId, channelId, userId) {
+    const channelQuery = { guildId, channelId };
+    const channelStats = (await ChannelStats.findOne(channelQuery)) || new ChannelStats(channelQuery);
+    channelStats.cnt++;
+    channelStats.sub[userId] ??= 0;
+    channelStats.sub[userId] += 1;
+    channelStats.markModified('sub');
+    channelStats.save();
+};
+
 //Recepción de mensajes
 client.on('messageCreate', async message => {
-    const { content, author, channel, guild, guildId: gid } = message;
+    const { content, author, channel, guild, guildId } = message;
     if(func.channelIsBlocked(channel) || author.bot) return;
-    console.log('--- Mensaje recibido ---');
-    console.time('Procesado inicial');
     if(!guild) return;
     const msg = content.toLowerCase();
-    
-    //Operaciones de proceso
-    const logembed = new Discord.MessageEmbed()
-        .addField(author.tag, content ? content.slice(0, 1023) : '*Mensaje vacío.*')
-        .setAuthor({
-            name: `${guild.name} • ${channel.name} (Click para ver)`,
-            iconURL: author.avatarURL({ dynamic: true }),
-            url: message.url,
-        });
-    if(message.attachments.size)
-        logembed.addField('Adjuntado:', message.attachments.map(attf => attf.url).join('\n'));
-
-    global.logch.send({ embeds: [logembed] }).catch(console.error);
-    console.timeEnd('Procesado inicial');
+    auditRequest(message);
 
     //Estadísticas
-    console.time('Estadísticas');
     const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
     stats.read++;
-    (async () => {
-        const channelQuery = { guildId: gid, channelId: channel.id };
-        const chstats = (await ChannelStats.findOne(channelQuery)) || new ChannelStats(channelQuery);
-        chstats.cnt++;
-        chstats.sub[author.id] = (chstats.sub[author.id] ?? 0) + 1;
-        chstats.markModified('sub');
-        chstats.save();
-    })();
-    console.timeEnd('Estadísticas');
+    updateChannelMessageCounter(guildId, channel.id, author.id);
 
     //Respuestas rápidas
-    console.time('Funciones de Guild');
-    const guildFunctions = globalGuildFunctions[gid];
+    const guildFunctions = globalGuildFunctions[guildId];
     if(guildFunctions)
         await Promise.all(Object.values(guildFunctions).map(fgf => fgf(message)));
-    console.timeEnd('Funciones de Guild');
     
     //#region Comandos
-    console.time('Procesado de comandos');
     (async () => {
     //#region Detección de Comandos
-    const pdrmk = p_drmk(gid);
-    const ppure = p_pure(gid);
+    const pdrmk = p_drmk(guildId);
+    const ppure = p_pure(guildId);
     let pdetect;
     if(msg.match(pdrmk.regex)) pdetect = pdrmk;
     else if(msg.match(ppure.regex)) pdetect = ppure;
@@ -374,6 +356,7 @@ client.on('messageCreate', async message => {
             const exception = await cmdex.findFirstException(command.flags, message);
             if(exception) return;
             else await command.execute(message, args);
+            stats.commands.succeeded++;
         } catch(error) {
             const isPermissionsError = cmdex.handleAndLogError(error, message, { details: `"${message.content?.slice(0, 699)}"\n[${commandname} :: ${args}]` });
             if(!isPermissionsError)
@@ -388,11 +371,9 @@ client.on('messageCreate', async message => {
     let commandname = args.shift().toLowerCase(); //Comando ingresado
     let command;
     
-    if(pdetect.raw === pdrmk.raw) {
-        //command = client.ComandosDrawmaku.get(commandname) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(commandname));
-        channel.send({ content: '<:delete:704612795072774164> Los comandos de Drawmaku estarán deshabilitados por un tiempo indefinido. Se pide disculpas.' });
-        return;
-    } else if(pdetect.raw === ppure.raw)
+    if(pdetect.raw === pdrmk.raw)
+        command = client.ComandosDrawmaku.get(commandname) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(commandname));
+    else
         command = client.ComandosPure.get(commandname) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(commandname));
     
     if(!command) {
@@ -428,20 +409,20 @@ client.on('messageCreate', async message => {
     stats.markModified('commands');
     //#endregion
     })();
-    console.timeEnd('Procesado de comandos');
     //#endregion
 
     stats.save();
-    
+
     //Ayuda para principiantes
-    if(message.content.indexOf(`${message.client.user.id}>`) !== -1)
-        (require('./commands/Pure/prefijo.js').execute(message, []));
+    if(content.indexOf(`${client.user}`) !== -1)
+        require('./commands/Pure/prefijo.js').execute(message, []);
 });
 
 //Recepción de interacciones
 client.on('interactionCreate', async interaction => {
     const { guild, channel } = interaction;
     if(!guild) return interaction.reply({ content: ':x: Solo respondo a comandos en servidores' }).catch(console.error);
+    auditRequest(interaction);
     const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
 
     //Comando Slash
@@ -465,19 +446,23 @@ client.on('interactionCreate', async interaction => {
                 await command.interact(interaction, interaction.options);
             stats.commands.succeeded++;
         } catch(error) {
-            const isPermissionsError = cmdex.handleAndLogError(error, interaction, { details: commandName });
+            const isPermissionsError = cmdex.handleAndLogError(error, interaction, { details: `/${commandName}` });
             if(!isPermissionsError)
                 stats.commands.failed++;
         }
         stats.markModified('commands');
-        await stats.save();
+        return stats.save();
         //#endregion
     }
 
-    //Click sobre botón
-    if(interaction.isButton() || interaction.isSelectMenu()) {
-        if(!interaction.customId) return;
-        
+    //Funciones de interacción
+    if(interaction.isButton() || interaction.isSelectMenu() || interaction.isModalSubmit()) {
+        if(!interaction.customId)
+            return interaction.reply({
+                content: '🍔 Recibí una acción, pero no sé cómo responderla. Esto es un problema... mientras arreglo algunas cosas, toma una hamburguesa',
+                ephemeral: true,
+            });
+
         try {
             const funcSeek = interaction.customId.split('_');
             let command = funcSeek.shift();
@@ -489,16 +474,18 @@ client.on('interactionCreate', async interaction => {
                     await command[func](interaction, funcSeek);
                 else
                     interaction.reply({
-                        content: '☕ Parece que encontraste un botón o menú desplegable sin función. Mientras conecto algunos cables, ten un café',
+                        content: '☕ Parece que encontraste un botón, menú desplegable o ventana modal sin función. Mientras conecto algunos cables, ten un café',
                         ephemeral: true,
                     });
             }
             stats.commands.succeeded++;
         } catch(error) {
-            const isPermissionsError = cmdex.handleAndLogError(error, interaction, { details: `${interaction.customId}` });
+            const isPermissionsError = cmdex.handleAndLogError(error, interaction, { details: `"${interaction.customId}"` });
             if(!isPermissionsError)
                 stats.commands.failed++;
         }
+
+        return;
     }
 });
 
