@@ -111,13 +111,15 @@ module.exports = {
             postEmbed.setFooter({ text: data.footer });
         
         if(post.fileUrl.match(/\.(mp4|webm|webp)/)) {
-            postEmbed.addField('Video', `Míralo en su respectivo [<:gelbooru:919398540172750878> **Post**](${post.fileUrl})`);
+            postEmbed.addField('Video', `[Míralo en tu navegador (<:gelbooru:919398540172750878>)](${post.fileUrl})`);
             postEmbed.setImage(post.sampleUrl || post.previewUrl);
-        } else 
+        } else if(post.fileUrl.match(/\.gif/))
+            postEmbed.setImage(post.fileUrl);
+        else
             postEmbed.setImage(
-                /*(image.tags.includes('absurdres') ? image.previewUrl : undefined)
-                || */post.sampleUrl
+                post.sampleUrl
                 || post.fileUrl
+                || post.previewUrl
             );
         
         feedMessage.embeds = [postEmbed];
