@@ -3,6 +3,7 @@ const { MessageEmbed } = require('discord.js');
 const GuildConfig = require('./models/guildconfigs.js');
 const { isNotModerator } = require('../func');
 const chalk = require('chalk');
+const { auditError } = require('../systems/auditor.js');
 
 const isNotByPapita = (compare) => (compare.member.user.id !== global.peopleid.papita);
 
@@ -104,21 +105,18 @@ module.exports = {
     /**
      * 
      * @param {Error} error 
-     * @param {import('discord.js').TextChannel} logChannel 
      * @param {import('../commands/Commons/typings').CommandRequest} request
-     * @param {{ details: string }} options 
+     * @typedef {{ brief: string, details: string }} errorLogOptions
+     * @param {errorLogOptions} param2 
      * @returns {Boolean} Devuelve si el error se debe a una falta de permisos
      */
-    async handleAndLogError(error, request, options) {
-        /**@type {import('discord.js').User}*/
-        const user = request.author ?? request.user;
-
-        const errorEmbed = new MessageEmbed()
-            .setColor('#0000ff')
-            .setAuthor({ name: `${request.guild.name} • ${request.channel.name} (Click para ver)`, iconURL: user.avatarURL({ dynamic: true }), url: request.url || 'https://discordapp.com' });
-        
+    async handleAndLogError(error, request, { brief, details }) {
         if(error.message === 'Missing Permissions') {
-            errorEmbed
+            /**@type {import('discord.js').User}*/
+            const user = request.author ?? request.user;
+            const permsEmbed = new MessageEmbed()
+                .setColor('#0000ff')
+                .setAuthor({ name: `${request.guild.name} • ${request.channel.name} (Click para ver)`, iconURL: user.avatarURL({ dynamic: true }), url: request.url || 'https://discordapp.com' })
                 .setThumbnail('https://i.imgur.com/ftAxUen.jpg')
                 .addField('¡Me faltan permisos!', [
                     'No tengo los permisos necesarios para ejecutar el comando o acción que acabas de pedirme en ese canal',
@@ -126,28 +124,23 @@ module.exports = {
                 ].join('\n'))
                 .addField('Reportar un error', `¿Crees que esto se trata de otro problema? Eso nunca debería ser el caso, pero de ser así, puedes [reportarlo](${global.reportFormUrl})`);
 
-            user.send({ embeds: [errorEmbed] }).catch(console.error);
+            user.send({ embeds: [permsEmbed] }).catch(console.error);
             return true;
         }
         
         //Los mensajes no tienen una propiedad de "token", las interacciones sí
-        let brief;
-        if(!request.token)                                      brief = 'Ha ocurrido un error al ejecutar un comando';
-        else if(request.isCommand())                            brief = 'Ha ocurrido un error al procesar un comando Slash';
-        else if(request.isButton() || request.isSelectMenu())   brief = 'Ha ocurrido un error al procesar una acción de botón';
-        else if(request.isModalSubmit())                        brief = 'Ha ocurrido un error al procesar una acción modal';
+        if(!brief) {
+            if(!request.token)                  brief = 'Ha ocurrido un error al ejecutar un comando';
+            else if(request.isCommand())        brief = 'Ha ocurrido un error al procesar un comando Slash';
+            else if(request.isButton())         brief = 'Ha ocurrido un error al procesar una acción de botón';
+            else if(request.isSelectMenu())     brief = 'Ha ocurrido un error al procesar una acción de menú desplegable';
+            else if(request.isModalSubmit())    brief = 'Ha ocurrido un error al procesar una acción de ventana modal';
+            else                                brief = 'Ha ocurrido un error desconocido';
+        }
 
         console.log(chalk.bold.redBright(brief));
         console.error(error);
-
-        errorEmbed.addField('Ha ocurrido un error al ejecutar una acción', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
-        if(options.details)
-            errorEmbed.addField('Detalle', options.details);
-        
-        global.logch.send({
-            content: `<@${global.peopleid.papita}>`,
-            embeds: [errorEmbed],
-        }).catch(console.error);
+        auditError(error, { request, brief, details, ping: true });
         return false;
     }
 }
