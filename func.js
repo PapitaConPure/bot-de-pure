@@ -6,7 +6,7 @@ const Canvas = require('canvas'); //Node Canvas
 const chalk = require('chalk'); //Consola con formato bonito
 const concol = {
     orange: chalk.rgb(255, 140, 70),
-    purple: chalk.rgb(158, 114,214)
+    purple: chalk.rgb(158, 114,214),
 };
 
 module.exports = {
@@ -917,23 +917,37 @@ module.exports = {
         global.cntjugadores = 0;
         console.log('Evento terminado.');
     },
-    
-    /**
-     * 
-     * @param {Discord.Guild} guild 
-     * @param {string} id 
-     * @param {string} fallback 
-     * @returns 
-     */
-    emote: function(guild, id, fallback) {
-        const emoji = guild.emojis.cache.get(id);
-        if(emoji)
-            return `${emoji}`;
 
-        if(!fallback.startsWith(':') && !fallback.endsWith(':'))
-            fallback = `:${fallback}:`;
-        return fallback;
+    /**
+     * Devuelve el primer emoji global encontrado en el string
+     * @param {String} emoji 
+     * @returns {String?}
+     */
+    defaultEmoji: function(emoji) {
+        if(!typeof emoji == 'string') return null;
+        return emoji.match(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu)?.[0]; //Expresión RegExp cursed
     },
+
+    /**
+     * Devuelve el primer emoji de servidor encontrado en el string
+     * @param {String} emoji 
+     * @param {import('discord.js').Guild} guild 
+     * @returns {Discord.Emoji?}
+     */
+    guildEmoji: function(emoji, guild) {
+        if(!typeof emoji == 'string') return null;
+        emoji = emoji.match(/^<a*:\w+:[0-9]+>\B/gu)?.[0];
+        if(!emoji) return null;
+        return guild.emojis.resolve(emoji);
+    },
+
+    /**
+     * Devuelve el primer emoji global o de servidor encontrado en el string
+     * @param {String} emoji 
+     * @param {import('discord.js').Guild} guild 
+     * @returns {Discord.Emoji | String | null}
+     */
+    emoji: (emoji, guild) => module.exports.defaultEmoji(emoji) ?? module.exports.guildEmoji(emoji, guild),
 
     /**
      * Devuelve un valor aleatorio entre 0 y otro valor
@@ -942,11 +956,11 @@ module.exports = {
      * @returns 
      */
     rand: function(maxExclusive, round = true) {
+        maxExclusive = 1 * maxExclusive;
         const negativeHandler = (maxExclusive < 0) ? -1 : 1;
         maxExclusive = maxExclusive * negativeHandler;
-        const rval = ((global.seed + maxExclusive * Math.random()) % maxExclusive);
-        maxExclusive *= negativeHandler;
-        return round ? Math.floor(rval) : rval;
+        const value = ((global.seed + maxExclusive * Math.random()) % maxExclusive) * negativeHandler;
+        return round ? Math.floor(value) : value;
     },
 
     /**
@@ -957,12 +971,11 @@ module.exports = {
      * @returns 
      */
     randRange: function(minInclusive, maxExclusive, round = true) {
-
         minInclusive = 1 * minInclusive;
         maxExclusive = 1 * maxExclusive;
         const range = maxExclusive - minInclusive;
-        const rval = minInclusive + ((global.seed + range * Math.random()) % range);
-        return round ? Math.floor(rval) : rval;
+        const value = minInclusive + ((global.seed + range * Math.random()) % range);
+        return round ? Math.floor(value) : value;
     },
 
     /**
@@ -1022,5 +1035,10 @@ module.exports = {
     
     /**@param {Array<String>} arr*/
     regroupText: (arr) => arr.join(' ').replace(/([\n ]*,[\n ]*)+/g, ',').split(',').filter(a => a.length),
+
+    shortenText: function(text, max, ) {
+        if(text.length < max) return text;
+        return `${text.slice(0, max - 3)}...`;
+    }
     //#endregion
 };
