@@ -405,8 +405,8 @@ module.exports = {
 			.setFooter({ text: '4/4 • Asignar tags' })
 			.addField('Destino', `**${fetchedChannel.name}** (canal ${fetchedChannel.nsfw ? 'NSFW' : 'SFW'})`)
 			.addField('Describe las tags del Feed', 'Entra a [Gelbooru](https://gelbooru.com) y realiza una búsqueda con tags que te den las imágenes deseadas para el Feed, separadas por espacios. Una vez lo consigas, simplemente copia las tags y envíalas como mensaje.\n_Es necesario que las tags estén bien escritas_')
-			.addField('Control de contenidos', '**IMPORTANTE:** Si quieres resultados SFW, utiliza la tag meta `rating:safe`; si quieres resultados NSFW, añade la tag `rating:explicit`; si quieres una combinación de ambos, no ingreses ninguna de estas')
-			.addField('Ejemplo de uso', 'Enviar `touhou rating:safe -breast_grab` configurará un Feed de imágenes _SFW_ de Touhou que _no_ tengan la tag "breast_grab"');
+			.addField('Control de contenidos', '**IMPORTANTE:** Si quieres resultados SFW, utiliza la meta-tag `rating:general` o `rating:sensitive`; si quieres resultados NSFW, añade la tag `rating:explicit` o `rating:questionable`; si quieres una combinación de ambos, no ingreses ninguna de estas')
+			.addField('Ejemplo de uso', 'Enviar `touhou rating:general -breast_grab` configurará un Feed de imágenes _SFW_ de Touhou que _no_ tengan la tag "breast_grab"');
 		const responseUpdate = {
 			embeds: [wizard],
 			components: [new MessageActionRow().addComponents(
