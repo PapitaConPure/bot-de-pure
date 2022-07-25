@@ -5,6 +5,7 @@ const { readdirSync } = require('fs'); //Para el contador de comandos
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { Stats } = require('../../localdata/models/stats');
 const { improveNumber, isShortenedNumberString } = require('../../func');
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 
 const { host, version, note, changelog, todo } = bot_status;
 const cmsearch = new RegExp(`${p_pure().raw}[A-Za-zÁÉÍÓÚáéíóúÑñ0-9_.-]*`, 'g');
@@ -26,9 +27,7 @@ module.exports = {
         'status', 'botstatus'
     ],
     desc: 'Muestra mi estado actual. Eso incluye versión, host, registro de cambios, cosas por hacer, etc',
-    flags: [
-        'common'
-    ],
+    flags: new CommandMetaFlagsManager().add('COMMON'),
     experimental: true,
 	
 	/**
@@ -45,23 +44,30 @@ module.exports = {
             cmds: readdirSync('./commands/Pure').filter(file => file.endsWith('.js')).length,
             guilds: request.client.guilds.cache.size
         }
+        const totalCommands = stats.commands.succeeded + stats.commands.failed;
 
         const embed = new MessageEmbed()
             .setColor('#608bf3')
             .setAuthor({ name: 'Estado del Bot', iconURL: request.client.user.avatarURL({ format: 'png', dynamic: true, size: 1024 }) })
             .setThumbnail('https://i.imgur.com/HxTxjdL.png')
             .setFooter({ text: `Ofreciendo un total de ${cnt.cmds} comandos en ${cnt.guilds} servidores` })
-            .addField('Creador', `Papita con Puré\n[423129757954211880]`, true)
-            .addField('Host', (host === 'https://localhost/')?'https://heroku.com/':'localhost', true)
-            .addField('Versión', `#️⃣ ${version.number}\n📜 ${version.name}`, true)
-            .addField('Visión general', note)
-            .addField('Cambios', listFormat(clformat, true, request.guild.id))
-            .addField('Lo que sigue', listFormat(tdformat, false, request.guild.id))
-            .addField('Estadísticas', [
-                `🎦 ${counterDisplay(stats.read)} mensajes registrados`,
-                `✅ ${counterDisplay(stats.commands.succeeded)} ejecuciones de comando exitosas`,
-                `⚠️ ${counterDisplay(stats.commands.failed)} ejecuciones de comando fallidas`,
-            ].join('\n'));
+            .addFields(
+                { name: 'Creador', value: `Papita con Puré\n[423129757954211880]`, inline: true },
+                { name: 'Host', value: (host === 'https://localhost/') ? 'https://heroku.com/' : 'localhost', inline: true },
+                { name: 'Versión', value: `#️⃣ ${version.number}\n📜 ${version.name}`, inline: true },
+                { name: 'Visión general', value: note },
+                { name: 'Cambios', value: listFormat(clformat, true, request.guild.id) },
+                { name: 'Lo que sigue', value: listFormat(tdformat, false, request.guild.id) },
+                {
+                    name: 'Estadísticas',
+                    value: [
+                        `🎦 ${counterDisplay(stats.read)} mensajes registrados`,
+                        `⚙️ ${counterDisplay(totalCommands)} comandos procesados`,
+                        `✅ ${counterDisplay(stats.commands.succeeded)} (${(stats.commands.succeeded / totalCommands * 100).toFixed(2)}%) ejecuciones de comando exitosas`,
+                        `⚠️ ${counterDisplay(stats.commands.failed)} (${(stats.commands.failed / totalCommands * 100).toFixed(2)}%) ejecuciones de comando fallidas`,
+                    ].join('\n'),
+                },
+            );
 
         const sentquery = (await Promise.all([
             request.reply({ embeds: [embed] }),

@@ -1,7 +1,7 @@
 const uses = require('../../localdata/sguses.json'); //Funciones globales
 const { fetchUser, randRange } = require('../../func.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptionsManager } = require('../Commons/cmdOpts');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
 
 const frase = [
 	'Oe po [m] <:junkNo:697321858407727224>',
@@ -31,10 +31,10 @@ module.exports = {
 		'pingsomeone'
     ],
     desc: 'Pingea a un `<usuario>` una `<cantidad>` de veces',
-    flags: [
-        'meme',
-		'chaos',
-    ],
+    flags: new CommandMetaFlagsManager().add(
+		'MEME',
+		'CHAOS',
+	),
     options,
 	callx: '<cantidad> <usuario>',
 	experimental: true,

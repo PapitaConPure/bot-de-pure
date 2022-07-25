@@ -1,5 +1,5 @@
 const { randRange } = require('../../func');
-const { CommandOptionsManager } = require('../Commons/cmdOpts');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
 
 const options = new CommandOptionsManager()
 	.addParam('frase', 'TEXT', 'para indicar una frase a patentar', { optional: true });
@@ -14,9 +14,9 @@ module.exports = {
     desc: 'Comando de frases de Papita con Puré. Si se ingresa texto, se lo patentará, si no, dependiendo del canal...\n' +
 		'**SFW:** muestra frases y cosas de Papita\n' +
 		'**NSFW:** muestra _otra_ frase _tal vez_ de Papita',
-    flags: [
-        'meme'
-    ],
+	flags: new CommandMetaFlagsManager().add(
+		'MEME',
+	),
     options,
 	callx: '<frase?>',
 	experimental: true,

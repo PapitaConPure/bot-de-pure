@@ -1,4 +1,5 @@
 const { p_pure } = require('../../localdata/customization/prefixes.js');
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 
 module.exports = {
 	name: 'g-parametros',
@@ -19,5 +20,5 @@ module.exports = {
 		'`[<parám1?>/<parám2?>]`: entradas intercambiables (en un solo puesto)\n\n' +
 		`Para aprender más sobre las \`--opciones\` de comando, usa \`${p_pure().raw}ayuda g-opciones\`\n` +
 		`Para ver sobre los _(tipos)_ de valores de parámetro, usa \`${p_pure().raw}ayuda g-tipos\``,
-	flags: ['guide']
+	flags: new CommandMetaFlagsManager().add('GUIDE'),
 };

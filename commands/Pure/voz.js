@@ -1,8 +1,8 @@
 const PureVoice = require('../../localdata/models/purevoice.js');
 const { MessageEmbed, MessageActionRow, MessageButton, MessageCollector } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { isNotModerator, fetchFlag } = require('../../func.js');
-const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
+const { isNotModerator, fetchFlag, defaultEmoji } = require('../../func.js');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
 
 const cancelbutton = (id) => new MessageButton()
 	.setCustomId(`voz_cancelWizard_${id}`)
@@ -41,9 +41,7 @@ module.exports = {
 	],
 	brief: 'Para inyectar un Sistema PuréVoice en una categoria por medio de un Asistente',
 	desc: 'Para inyectar un Sistema PuréVoice en una categoria. Simplemente usa el comando y sigue los pasos del Asistente para configurar todo',
-	flags: [
-		'common',
-	],
+	flags: new CommandMetaFlagsManager().add('COMMON'),
 	options: options,
 	experimental: true,
 	callx: options.callSyntax,
@@ -66,7 +64,7 @@ module.exports = {
 			const emoteString = isSlash
 				? (args.getString('emote') ?? defaultEmote)
 				: fetchFlag(args, { ...options.flags.get('emote').structure, property: true, callback: (x, i) => x[i], fallback: defaultEmote });
-			const sessionEmote = emoteString?.match(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu)?.[0]; //Magia para detectar emotes válidos
+			const sessionEmote = defaultEmoji(emoteString);
 			const sessionName = isSlash
 				? args.getString('nombre')
 				: args.join(' ');
@@ -115,7 +113,7 @@ module.exports = {
             const sessionIndex = pv.sessions.findIndex(session => session.voiceId === voiceState.channelId);
 			const session = pv.sessions[sessionIndex];
 			if(!session) return warnNotInSession();
-			const { textId, voiceId, roleId, nameChanged } = session;
+			const { voiceId, roleId, nameChanged } = session;
 			if((Date.now() - nameChanged) < 60e3 * 20) return request.reply({
 				content: [
 					'❌ Por cuestiones técnicas, solo puedes cambiar el nombre de la sesión una vez cada 20 minutos.',

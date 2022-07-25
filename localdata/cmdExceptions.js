@@ -4,34 +4,37 @@ const GuildConfig = require('./models/guildconfigs.js');
 const { isNotModerator } = require('../func');
 const chalk = require('chalk');
 const { auditError } = require('../systems/auditor.js');
+const { CommandMetaFlagsManager } = require('../commands/Commons/cmdFlags');
 
 const isNotByPapita = (compare) => (compare.member.user.id !== global.peopleid.papita);
 
 /**
- * @typedef {{title: String, desc: String, isException: Function?}} ExceptionSummary
+ * @typedef {{flag: import('../commands/Commons/cmdFlags').MetaFlagValue, title: String, desc: String, isException: Function?}} ExceptionSummary
  */
 
 module.exports = {
-    exceptions: {
-        outdated: {
+    /**@type {Array<ExceptionSummary>}*/
+    exceptions: [
+        {
+            flag: 'OUTDATED',
             title: 'Comando desactualizado',
             desc: 'El comando no se encuentra disponible debido a que su función ya no es requerida en absoluto. Espera a que se actualice~',
-            isException: (compare) => isNotByPapita(compare)
+            isException: (compare) => { console.log('a'); return true; }//isNotByPapita(compare)
         },
-
-        maintenance: {
+        {
+            flag: 'MAINTENANCE',
             title: 'Comando en mantenimiento',
             desc: 'El comando no se encuentra disponible debido a que está en proceso de actualización o reparación en este momento. Espera a que se actualice~',
-            isException: (compare) => isNotByPapita(compare)
+            isException: (compare) => { console.log('b'); return true; }//isNotByPapita(compare)
         },
-
-        mod: {
+        {
+            flag: 'MOD',
             title: 'Comando exclusivo para moderación',
             desc: 'El comando es de uso restringido para moderación.\n**Considero a alguien como moderador cuando** tiene permisos para administrar roles *(MANAGE_ROLES)* o mensajes *(MANAGE_MESSAGES)*',
             isException: (compare) => isNotModerator(compare.member)
         },
-
-        chaos: {
+        {
+            flag: 'CHAOS',
             title: 'Los Comandos Caóticos están desactivados',
             desc: 'Este comando se considera un Comando Caótico debido a su volatilidad y tendencia a corromper la paz. Los comandos caóticos están desactivados por defecto. Refiérete al comando "caos" para ver cómo activarlos',
             isException: async (compare) => {
@@ -39,51 +42,42 @@ module.exports = {
                 return isNotByPapita(compare) && !gcfg.chaos;
             }
         },
-
-        guide: {
+        {
+            flag: 'GUIDE',
             title: 'Símbolo de página de guía',
             desc: 'Esto no es un comando, sino que una *página de guía* para buscarse con el comando de ayuda',
             isException: (_) => true
         },
-
-        papa: {
+        {
+            flag: 'PAPA',
             title: 'Comando exclusivo de Papita con Puré',
             desc: 'El comando es de uso restringido para el usuario __Papita con Puré#6932__. Esto generalmente se debe a que el comando es usado para pruebas o ajustes globales/significativos/sensibles del Bot',
             isException: (compare) => isNotByPapita(compare)
         },
-
-        hourai: {
+        {
+            flag: 'HOURAI',
             title: 'Comando exclusivo de Hourai Doll',
             desc: 'El comando es de uso restringido para el servidor __Hourai Doll__. Esto generalmente se debe a que cumple funciones que solo funcionan allí',
             isException: (compare) => isNotByPapita(compare) && compare.guild.id !== global.serverid.hourai
-        }
-    },
+        },
+    ],
 
     /**
      * 
-     * @param {String} flag 
-     * @param {import('../commands/Commons/typings').CommandRequest} compare 
-     * @returns {Promise<ExceptionSummary> | Promise<null>}
-     */
-    async getException(flag, compare) {
-        const exflag = module.exports.exceptions[flag];
-        if(exflag && await exflag.isException(compare)) return exflag;
-        else return null;
-    },
-
-    /**
-     * 
-     * @param {Array<String>} flags 
+     * @param {CommandMetaFlagsManager} flags 
      * @param {import('../commands/Commons/typings').CommandRequest} request 
-     * @returns {Promise<ExceptionSummary> | Promise<undefined>}
+     * @returns {Promise<ExceptionSummary?>}
      */
     async findFirstException(flags, request) {
-        const exceptions = [];
-        flags.forEach(flag => {
-            const ex = module.exports.getException(flag, request);
-            if(ex) exceptions.push(ex);
-        });
-        return (await Promise.all(exceptions)).find(flag => flag);
+        if(!flags) return null;
+
+        const possibleExceptions = await Promise.all(
+            module.exports.exceptions
+                .map(exception => flags.has(exception.flag) && exception.isException(request))
+        );
+        const exceptions = module.exports.exceptions.filter((_, i) => possibleExceptions[i]);
+
+        return exceptions?.[0];
     },
 
     /**
@@ -92,7 +86,7 @@ module.exports = {
      * @param {ExceptionOptions} options 
      * @returns {MessageEmbed}
      */
-    createEmbed(exception, { cmdString = '' }) {
+    generateExceptionEmbed(exception, { cmdString = '' }) {
         return new MessageEmbed()
             .setColor('#f01010')
             .setAuthor({ name: 'Un momento...' })
@@ -110,7 +104,7 @@ module.exports = {
      * @param {errorLogOptions} param2 
      * @returns {Boolean} Devuelve si el error se debe a una falta de permisos
      */
-    async handleAndLogError(error, request, { brief, details }) {
+    async handleAndAuditError(error, request, { brief, details }) {
         if(error.message === 'Missing Permissions') {
             /**@type {import('discord.js').User}*/
             const user = request.author ?? request.user;

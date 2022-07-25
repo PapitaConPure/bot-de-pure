@@ -2,7 +2,7 @@ const { MessageEmbed } = require('discord.js'); //Integrar discord.js
 const { fetchArrows, fetchFlag, fetchUser, improveNumber } = require('../../func');
 const global = require('../../localdata/config.json'); //Variables globales
 const { ChannelStats, Stats } = require('../../localdata/models/stats');
-const { CommandOptionsManager } = require('../Commons/cmdOpts');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
 
 const options = new CommandOptionsManager()
 	.addParam('canal', 'CHANNEL', 'para mostrar estadísticas extra de un canal', { optional: true })
@@ -16,9 +16,7 @@ module.exports = {
 		'i'
     ],
     desc: 'Muestra información estadística paginada del servidor',
-    flags: [
-        'mod'
-    ],
+    flags: new CommandMetaFlagsManager().add('MOD'),
     options,
 	callx: '<canal?>',
 	
@@ -28,10 +26,8 @@ module.exports = {
 	 * @param {Boolean} isSlash
 	 */
 	async execute(message, args) {
-		if(!message.guild.available) {
-			message.channel.send(':interrobang: E-el servidor está en corte ahora mismo. Intenta usar el comando más tarde');
-			return;
-		}
+		if(!message.guild.available)
+			return message.reply(':interrobang: E-el servidor está en corte ahora mismo. Intenta usar el comando más tarde');
 		message.channel.sendTyping();
 		const stats = await Stats.findOne({});
 		const servidor = message.guild; //Variable que almacena un objeto del servidor a analizar

@@ -1,7 +1,7 @@
 const { MessageEmbed } = require('discord.js');
 const { regroupText, randRange } = require('../../func.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptionsManager } = require('../Commons/cmdOpts.js')
+const { CommandOptionsManager, CommandMetaFlagsManager } = require("../Commons/commands");
 
 const options = new CommandOptionsManager()
 	.addParam('opciones', 'TEXT', 'para asignar una opción elegible', { poly: 'MULTIPLE', polymax: 10 });
@@ -12,9 +12,7 @@ module.exports = {
 		'choose'
 	],
 	desc: 'Elige una de las opciones que hayas especificado, puedes separar opciones con comas',
-	flags: [
-		'common'
-	],
+	flags: new CommandMetaFlagsManager().add('COMMON'),
 	options: options,
 	callx: '<opciones...>',
 	experimental: true,
@@ -38,7 +36,7 @@ module.exports = {
 		
 		const embed = new MessageEmbed()
 			.setColor('GREYPLE')
-			.addField('Yo digo que...', `_"${choices[randRange(0, choices.length)]}"_`);
+			.addFields({ name: 'Yo digo que...', value: `_"${choices[randRange(0, choices.length)]}"_` });
 		return request.reply({ embeds: [embed] });
 	}
 };

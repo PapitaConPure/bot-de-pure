@@ -1,13 +1,13 @@
-const { peopleid } = require('../../localdata/config.json');
+const { peopleid, booru } = require('../../localdata/config.json');
 const { fetchFlag } = require('../../func');
-const { MessageEmbed, Permissions } = require('discord.js'); //Integrar discord.js
+const { MessageEmbed } = require('discord.js'); //Integrar discord.js
 const { engines, getBaseTags, getSearchTags } = require('../../localdata/booruprops.js'); //Variables globales
 const { formatBooruPostMessage } = require('../../systems/boorusend.js');
-const booru = require('booru');
 const rakki = require('./rakkidei.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptionsManager } = require('../Commons/cmdOpts');
-
+const { CommandOptionsManager, CommandMetaFlagsManager } = require("../Commons/commands");
+const { Booru } = require('../../systems/boorufetch');
+const { booruCredentials } = require('../../localdata/config.json');
 const brief = 'Muestra imágenes #THEME';
 const desc = `${brief}\n` +
 	'Por defecto, las imágenes se buscan con Gelbooru.\n' +
@@ -35,9 +35,7 @@ module.exports = {
 		.replace('#THEME', 'de cualquier cosa')
 		.replace('#NSFW_NOTE', 'en canales NSFW, los resultados serán, respectivamente, NSFW'),
 	molds: { brief: brief, desc: desc },
-    flags: [
-        'common',
-    ],
+    flags: new CommandMetaFlagsManager().add('COMMON'),
     options,
 	callx: '<etiquetas?(...)>',
 	experimental: true,
@@ -98,7 +96,8 @@ module.exports = {
 		
 		//Petición
 		try {
-			const response = await booru.search('gelbooru', [stags, extags].join(' '), { limit: 100, random: true });
+			const booru = new Booru(booruCredentials);
+			const response = await booru.search([stags, extags], { limit: 100, random: true });
 			//Manejo de respuesta
 			if(!response.length)
 				return request.reply({ content: `:warning: No hay resultados en **Gelbooru** para las tags **"${extags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` });
@@ -117,7 +116,7 @@ module.exports = {
 				manageableBy: author.id,
 			}));
 			if(extags.length)
-				messages[posts.length - 1].embeds[0].addField('Tu búsqueda', `:mag_right: *${extags.trim().replace('*', '\\*').split(/ +/).join(', ')}*`);
+				messages[posts.length - 1].embeds[0].addFields({ name: 'Tu búsqueda', value: `:mag_right: *${extags.trim().replace('*', '\\*').split(/ +/).join(', ')}*` });
 
 			//Enviar mensajes
 			await request.reply(messages.shift());
@@ -126,13 +125,15 @@ module.exports = {
 			console.error(error);
 			const errorembed = new MessageEmbed()
 				.setColor('RED')
-				.addField(
-					'Ocurrió un error al realizar una petición',
-					'Es probable que le hayan pegado un tiro al que me suministra las imágenes, así que prueba buscar más tarde, a ver si revive 👉👈\n' +
-					'```js\n' +
-					`${[error.name, error.message].join(': ')}\n` +
-					'```'
-				);
+				.addFields({
+					name: 'Ocurrió un error al realizar una petición',
+					value: [
+						'Es probable que le hayan pegado un tiro al que me suministra las imágenes, así que prueba buscar más tarde, a ver si revive 👉👈',
+						'```js',
+						`${[error.name, error.message].join(': ')}\n`,
+						'```',
+					].join('\n'),
+				});
 			return request.reply({ embeds: [errorembed] });
 		}
 	},

@@ -1,7 +1,7 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const global = require('../../localdata/config.json'); //Variables globales
 const uses = require('../../localdata/sguses.json'); //Lista de usos desde el último reinicio del Bot
-const { CommandOptionsManager } = require('../Commons/cmdOpts');
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 
 function getTitle(a, i) {
 	if(i >= a.length) //Título inválido
@@ -26,9 +26,7 @@ module.exports = {
 		's'
 	],
 	desc: 'Para sugerir mejoras sobre Bot de Puré, o reportar un error',
-	flags: [
-		'common',
-	],
+	flags: new CommandMetaFlagsManager().add('COMMON'),
 	callx: '<sugerencia>',
 	experimental: true,
 
@@ -51,14 +49,12 @@ module.exports = {
 
 	async __execute(message, args) {
 		//Comprobación de liquidación de abuso
-		if(uses[message.author.id] === undefined)
+		if(uses[message.author.id] == undefined)
 			uses[message.author.id] = 1;
 		else if(uses[message.author.id] < 3)
 			uses[message.author.id]++;
-		else {
-			message.channel.send({ content: ':octagonal_sign: Límite de usos por reinicio del proceso alcanzado. Inténtalo nuevamente cuando me haya reiniciado (generalmente cada 24 horas)' });
-			return;
-		}
+		else
+			return message.reply({ content: ':octagonal_sign: Límite de usos por reinicio del proceso alcanzado. Inténtalo nuevamente cuando me haya reiniciado (generalmente cada 24 horas)' });
 
 		//Variables de flags
 		let title = 'Sugerencia sin título';
@@ -87,7 +83,7 @@ module.exports = {
 
 		//Acción de comando
 		if(!args.length)
-			return message.channel.send({ content: ':warning: Campo de sugerencia vacío.' });
+			return message.reply({ content: ':warning: Campo de sugerencia vacío.' });
 
 		const embed = new Discord.MessageEmbed()
 			.setColor('#608bf3')
@@ -100,6 +96,6 @@ module.exports = {
 				`\`p!papa-responder -u ${message.author.id} -p <problema>\` para reportar problema`
 			);
 		message.client.guilds.cache.get(global.serverid.sugerencias).channels.cache.get('826632022075768835').send({ embeds: [embed] });
-		message.channel.send({ content: `📨 ¡Se ha enviado tu sugerencia como **${title}**! Recibirás una notificación por privado si es leída, si es aceptada y si ocurre algún problema. ¡Gracias!` });
+		return message.reply({ content: `📨 ¡Se ha enviado tu sugerencia como **${title}**! Recibirás una notificación por privado si es leída, si es aceptada y si ocurre algún problema. ¡Gracias!` });
 	}
 };

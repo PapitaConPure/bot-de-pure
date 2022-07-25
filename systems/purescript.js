@@ -3,6 +3,8 @@ const { p_pure } = require('../localdata/customization/prefixes.js');
 const { randRange, fetchUserID } = require('../func.js');
 const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, MessageAttachment } = require('discord.js');
 
+const logMore = false;
+
 //RegExp para analizar enlaces de archivos válidos
 const fileRegex = /(http:\/\/|https:\/\/)?(www\.)?(([a-zA-Z0-9-]){2,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_\/\.0-9#:?=&;,]*\.(txt|png|jpg|jpeg|webp|gif|webm|mp4|mp3|wav|flac|ogg)[a-zA-Z-_\.0-9#:?=&;,]*/;
 //Particiones de memoria consideradas como "solo lectura"
@@ -84,7 +86,6 @@ const executeTuber = async (request, tuber, { args, isSlash }) => {
 		};
 		//Establecer claves iniciales como solo-lectura
 		const readOnlyMem = Object.keys(mem);
-		// console.log('readOnlyMem:', readOnlyMem);
 		//#endregion
 
 		//#region Entradas personalizadas
@@ -97,10 +98,10 @@ const executeTuber = async (request, tuber, { args, isSlash }) => {
 				...argsList.map(arg => arg.match(fileRegex) ? arg : undefined).filter(arg => arg),
 			];
 			const contentsList = argsList.filter(arg => arg);
-			console.log('---------------------------------\ncontentsList:', contentsList, '\nattachmentsList:', attachmentsList, '\n- - - - - - -       - - - - - - -');
+			if(logMore) console.log('---------------------------------\ncontentsList:', contentsList, '\nattachmentsList:', attachmentsList, '\n- - - - - - -       - - - - - - -');
 			
 			const readyInputs = tuber.inputs.map((input, i) => {
-				console.log(input, i);
+				if(logMore) console.log(input, i);
 				const arg = input.isAttachment ? attachmentsList.shift() : contentsList.shift();
 				if(!arg && input.required) {
 					psError(`se requiere que ingreses "${input.identifier}" (entrada Nº ${i + 1}) para ejecutar este Tubérculo`, -2, 'INICIALIZAR');
@@ -147,8 +148,10 @@ const executeTuber = async (request, tuber, { args, isSlash }) => {
 const readExpressions = async (expressions, mem, { memLogEnabled }) => {
     await Promise.all(expressions.map((expression, l) => {
         const expr = [ ...expression ];
-        if(memLogEnabled) console.log(`Expresión ${l}:`, getLineString(expr), '\tCon mem:', mem);
-        else console.log(`Expresión ${l}:`, getLineString(expr));
+        if(logMore) {
+            if(memLogEnabled) console.log(`Expresión ${l}:`, getLineString(expr), '\tCon mem:', mem);
+            else console.log(`Expresión ${l}:`, getLineString(expr));
+        }
         const { __tuber__: tuber } = mem;
 
         //Realizar acciones en base a palabra clave "operación"
@@ -157,7 +160,7 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
             //#region Manejo de datos
             //Registrar entradas o entidades externas importadas
             case 'registrar': {
-                console.log('Operación REGISTRAR');
+                if(logMore) console.log('Operación REGISTRAR');
                 if(!expr.length) return psError('se esperaba contexto', l, operation);
                 const target = expr.shift().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, '');
                 if(!expr.length) return psError('se esperaba un identificador', l, operation);
@@ -171,7 +174,7 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
 
                 switch(target) {
                     case 'entrada':
-                        console.log('Registrando entrada');
+                        if(logMore) console.log('Registrando entrada');
                         const optional = (expr[0]?.toLowerCase() === 'opcional');
                         if(optional) expr.shift();
                         const [ identifier, loadValue ] = getIdentifierAndValue();
@@ -184,7 +187,7 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
                             isAttachment: loadValue.startsWith('$archivos') || loadValue.match(fileRegex),
                         });
                         mem.entradas[identifier] = processedValue;
-                        console.log(`Se registró una entrada "${identifier}" con valor de prueba`, loadValue , '->', processedValue);
+                        if(logMore) console.log(`Se registró una entrada "${identifier}" con valor de prueba`, loadValue , '->', processedValue);
                         tuber.script[l] = [''];
                         break;
 
@@ -203,13 +206,13 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
                     default:
                         return psError('contexto inválido', l, operation);
                 }
-                if(memLogEnabled) console.log(mem);
+                if(logMore && memLogEnabled) console.log(mem);
                 break;
             }
             
             //Crear entidades de datos
             case 'crear': {
-                console.log('Operación CREAR');
+                if(logMore) console.log('Operación CREAR');
                 if(!expr.length) return psError('se esperaba contexto', l, operation);
                 const target = expr.shift().toLowerCase();
                 if(!expr.length) return psError('se esperaba un identificador', l, operation);
@@ -235,19 +238,19 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
                     default:
                         return psError('contexto inválido', l, operation);
                 }
-                if(memLogEnabled) console.log(mem);
+                if(logMore && memLogEnabled) console.log(mem);
                 break;
             }
 
             //Guardar en base de datos
             case 'guardar': {
-                console.log('Operación GUARDAR');
+                if(logMore) console.log('Operación GUARDAR');
                 return psError('la palabra clave GUARDAR todavía no está disponible', l, operation);
             }
 
             //Cargar valores en entidades existentes, o crearlas si no existen
             case 'cargar': {
-                console.log('Operación CARGAR');
+                if(logMore) console.log('Operación CARGAR');
                 if(!expr.length) return psError('se esperaba un identificador', l, operation);
                 const identifier = expr.shift();
                 if(expr.shift().toLowerCase() !== 'con') return psError('se esperaba "CON" en asignación de carga', l, operation);
@@ -274,7 +277,7 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
                 }
                 //if(!expr.length) return psError('se esperaba un valor', l, operation);
                 if(identifier.startsWith('$')) {
-                    console.log('Carga referencial');
+                    if(logMore) console.log('Carga referencial');
                     let memtemp = loadValue;
                     const sequence = identifier.slice(1).split('->');
                     if(!sequence.length) return psError('se esperaba un identificador', l, operation);
@@ -284,32 +287,32 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
                     let memRead = mem;
                     sequence.slice(0, -1).forEach(sq => {
                         memRead = mem[sq];
-                        if(memLogEnabled) console.log(memRead);
+                        if(logMore && memLogEnabled) console.log(memRead);
                     });
                     memRead = memRead ?? {};
 
                     //Escribir
                     sequence.slice(0).reverse().forEach(sq => {
                         memtemp = { ...memRead, [`${sq}`]: memtemp };
-                        if(memLogEnabled) console.log(memtemp);
+                        if(logmore && memLogEnabled) console.log(memtemp);
                     });
 
-                    console.log('wasd', sequence[0], 'fg', mem[sequence[0]]);
+                    if(logMore) console.log('wasd', sequence[0], 'fg', mem[sequence[0]]);
                     
                     mem = { ...mem, ...memtemp };
                 } else {
-                    console.log('Carga directa');
+                    if(logMore) console.log('Carga directa');
                     if(readOnlyMem.includes(identifier)) return psError(`se intentó modificar el valor de solo lectura "${identifier}"`, l, operation);
                     mem[identifier] = loadValue;
                 }
                 
-                console.log('Carga terminada con \n\tidentifier', identifier, '\n\tloader:', loader, '\n\tloadValue:', loadValue);
+                if(logMore) console.log('Carga terminada con \n\tidentifier', identifier, '\n\tloader:', loader, '\n\tloadValue:', loadValue);
                 break;
             }
 
             //Evolucionar listas
             case 'extender': {
-                console.log('Operación EXTENDER');
+                if(logMore) console.log('Operación EXTENDER');
                 if(!expr.length) return psError('se esperaba un identificador', l, operation);
                 const identifier = expr.shift();
                 if(expr.shift().toLowerCase() !== 'con') return psError('se esperaba "CON" en extensión', l, operation);
@@ -337,17 +340,17 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
                 let memRead = mem;
 
                 if(identifier.startsWith('$')) {
-                    console.log('Carga referencial');
+                    if(logMore) console.log('Carga referencial');
                     const sequence = identifier.slice(1).split('->');
                     if(!sequence.length) return psError('se esperaba un identificador', l, operation);
 
                     //Leer
                     sequence.forEach(sq => {
                         memRead = mem[sq];
-                        if(memLogEnabled) console.log(memRead);
+                        if(logMore && memLogEnabled) console.log(memRead);
                     });
                 } else {
-                    console.log('Carga directa');
+                    if(logMore) console.log('Carga directa');
                     memRead = mem[identifier];
                 }
                 //Escribir
@@ -357,13 +360,13 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
                     return psError(`el identificador ${identifier} no corresponde a una lista`, l, operation);
 
                 memRead.push(loadValue);
-                console.log('Carga terminada con \n\tidentifier', identifier, '\n\tloader:', loader, '\n\tloadValue:', loadValue);
+                if(logMore) console.log('Carga terminada con \n\tidentifier', identifier, '\n\tloader:', loader, '\n\tloadValue:', loadValue);
                 break;
             }
 
             //Ejecutar funciones sin almacenar el valor de retorno; para cargas indirectas
             case 'ejecutar': {
-                console.log('Operación EJECUTAR');
+                if(logMore) console.log('Operación EJECUTAR');
                 if(!expr.length) return psError('se esperaba un valor o función', l, operation);
                 readLineReferences(mem, expr);
                 break;
@@ -372,12 +375,12 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
 
             //#region Condicionales
             case 'si': {
-                console.log('Operación SI');
+                if(logMore) console.log('Operación SI');
                 const logicComponents = expr.join(' ').split(/ [Yy] /).map(e => e.split(' '));
-                console.log(logicComponents);
+                if(logMore) console.log(logicComponents);
                 const logicIsTruthy = (lc) => {
                     let approved = false;
-                    console.log('Verificando lógica "Y":', lc);
+                    if(logMore) console.log('Verificando lógica "Y":', lc);
                     if(!lc.length) return psError('se esperaba un identificador', l, operation);
                     const identifier = lc.shift();
                     if(!lc.length) return psError('se esperaba contexto', l, operation);
@@ -389,7 +392,7 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
                             case 'es': {
                                 if(!lc.length) return psError('se esperaba un segundo identificador', l, operation);
                                 const identifier2 = lc.shift();
-                                console.log(identifier, '==', identifier2);
+                                if(logMore) console.log(identifier, '==', identifier2);
                                 if(identifier == identifier2)
                                     approved = true;
                                 break;
@@ -402,23 +405,23 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
                             }
                         }
                     
-                    console.log('Lógica "Y" determinada:', approved);
+                    if(logMore) console.log('Lógica "Y" determinada:', approved);
                     return approved;
                 }
 
                 const processedLogic = logicComponents.map(logicIsTruthy);
-                console.log('Malla lógica:', processedLogic, '\nDeterminado en SI:', processedLogic.every(l => l === true));
+                if(logMore) console.log('Malla lógica:', processedLogic, '\nDeterminado en SI:', processedLogic.every(l => l === true));
 
                 break;
             }
 
             case 'sino': {
-                console.log('Operación SINO');
+                if(logMore) console.log('Operación SINO');
                 return psError('la palabra clave SINO todavía no está disponible', l, operation);
             }
 
             case 'finsi': {
-                console.log('Operación FINSI');
+                if(logMore) console.log('Operación FINSI');
                 return psError('la palabra clave FINSI todavía no está disponible', l, operation);
             }
             //#endregion
@@ -426,7 +429,7 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
             //#region Respuestas del Tubérculo
             //Enviar mensaje de Discord
             case 'enviar': {
-                console.log('Operación ENVIAR');
+                if(logMore) console.log('Operación ENVIAR');
                 const message = {};
                 if(!expr.length) return psError('no se puede enviar un mensaje vacío', l, operation);
                 const target = expr.shift().toLowerCase();
@@ -434,36 +437,36 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
                     ? expr.map(e => e.startsWith('$') ? getAttribute(mem, [e]) : e)
                     : readLineReferences(mem, expr).filter(refVal => refVal !== undefined && refVal !== null);
                 if(!values.length) return psError('los valores especificados no existen', l, operation);
-                console.log('Valores obtenidos para enviar: ', values);
+                if(logMore) console.log('Valores obtenidos para enviar: ', values);
                 
                 switch(target) {
                     case 'archivos':
                         message.files = values;
-                        console.log('message.files:', message.files);
+                        if(logMore) console.log('message.files:', message.files);
                         break;
 
                     case 'marcos':
                         message.embeds = values;
-                        console.log('message.embeds:', message.embeds);
+                        if(logMore) console.log('message.embeds:', message.embeds);
                         break;
 
                     case 'texto':
                         message.content = values.join(' ');
-                        console.log('message.content:', message.content);
+                        if(logMore) console.log('message.content:', message.content);
                         break
 
                     default:
                         return psError('se esperaba contenido de mensaje', l, operation);
                 }
                 mem.__replyContent__ = { ...mem.__replyContent__, ...message };
-                console.log('replyContent:', mem.__replyContent__);
+                if(logMore) console.log('replyContent:', mem.__replyContent__);
                 break;
             }
             //#endregion
 
             //#region Asistencia de programación
             case 'comentar': {
-                console.log('Operación COMENTAR');
+                if(logMore) console.log('Operación COMENTAR');
                 break;
             }
 
@@ -493,12 +496,12 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
 
             //Operación nula (no hacer nada y olvidar)
             default: {
-                console.log('Operación *');
+                if(logMore) console.log('Operación *');
                 tuber.script[l] = [''];
                 break;
             }
         }
-        console.log('Retornando...');
+        if(logMore) console.log('Retornando...');
         return;
     }));
 };
@@ -535,23 +538,23 @@ const getAttribute = (mem, sequence) => {
         return callMemFunction(mem, firstSequenced);
         
     let att = mem[firstSequenced];
-    console.log('getAttribute:', sequence, '| att:', att);
+    if(logMore) console.log('getAttribute:', sequence, '| att:', att);
     sequence.forEach(a => {
-        console.log('Antes de comprobar índice:', a);
+        if(logMore) console.log('Antes de comprobar índice:', a);
         if(a.startsWith('$')) a = getAttribute(mem, [a]);
-        console.log('Luego de comprobar índice:', a, '|', att[a]);
+        if(logMore) console.log('Luego de comprobar índice:', a, '|', att[a]);
         if(att[a].startsWith('$')) {
-            console.log('Referencia compleja detectada');
+            if(logMore) console.log('Referencia compleja detectada');
             if(att[a].endsWith('/'))
                 att = callMemFunction(mem, att[0]);
             else
                 att = getAttribute(mem, sequence);
         } else {
-            console.log('Referencia simple detectada');
+            if(logMore) console.log('Referencia simple detectada');
             att = att[a];
         }
     });
-    console.log('att final:', att);
+    if(logMore) console.log('att final:', att);
     return att;
 };
 
@@ -563,9 +566,9 @@ const getAttribute = (mem, sequence) => {
 const callMemFunction = (mem, functionCall) => {
     const functionFactors = functionCall.split('/').filter(ff => ff);
     const fn = functionFactors.shift();
-    console.log('Componiendo función');
+    if(logMore) console.log('Componiendo función');
     const functionParams = functionFactors.map(ff => ff.startsWith('$') ? getAttribute(mem, [ff]) : ff);
-    console.log('Factores de la función', fn, '::', functionParams);
+    if(logMore) console.log('Factores de la función', fn, '::', functionParams);
     if(mem.__functions__[fn])
         return (mem.__functions__[fn])(functionParams);
     else if(mem.funciones[fn]) {
@@ -583,14 +586,14 @@ const callMemFunction = (mem, functionCall) => {
 const readReference = (mem, str) => {
     const rawReference = Array.isArray(str) ? str[0] : str;
     let reference;
-    console.log('Referencia cruda:', rawReference);
+    if(logMore) console.log('Referencia cruda:', rawReference);
     if(rawReference.startsWith('$')) {
         const sequence = rawReference.split('->');
-        console.log('Secuencia:', sequence.length, 'pasos');
+        if(logMore) console.log('Secuencia:', sequence.length, 'pasos');
         reference = getAttribute(mem, sequence);
     } else
         reference = getLineString(str);
-    console.log('Referencia procesada:', reference);
+    if(logMore) console.log('Referencia procesada:', reference);
     return reference;
 };
 
@@ -601,7 +604,7 @@ const readReference = (mem, str) => {
  * @returns {String}
  */
 const readLineReferences = (mem, expr) => {
-    console.log('Referencias crudas:', expr);
+    if(logMore) console.log('Referencias crudas:', expr);
     const references = expr.map(w => {
         if(w.match(/^[\n*~`]*\$/)) {
             const sequences = w.split(/[\n*~`]+/).map(sequence => sequence.split('->'));
@@ -609,7 +612,7 @@ const readLineReferences = (mem, expr) => {
         } else
             return w;
     });
-    console.log('Referencias procesadas:', references);
+    if(logMore) console.log('Referencias procesadas:', references);
     return references;
 }
 //#endregion

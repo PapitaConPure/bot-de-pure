@@ -1,5 +1,6 @@
 const { hourai } = require('../../localdata/config.json'); //Variables globales
 const { MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.js');
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 
 const colorsList = [
 	{ emoteId: '819772377814532116', roleId: '671851233870479375', roleName: 'French Doll',  roleDesc: 'Rojo'     },
@@ -35,12 +36,10 @@ module.exports = {
 	aliases: [
 		'color',
 		'colours', 'colour', 'colors',
-		'c'
+		'c',
 	],
     desc: 'Muestra un tablón de roles de colores básicos para Hourai Doll',
-    flags: [
-        'hourai'
-    ],
+    flags: new CommandMetaFlagsManager().add('HOURAI'),
 	experimental: true,
 	colorsRow: colorsRow,
 

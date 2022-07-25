@@ -1,5 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { fetchFlag, fetchSentence } = require('../../func.js');
+const { CommandMetaFlagsManager } = require('../Commons/cmdFlags.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
 
 const options = new CommandOptionsManager()
@@ -20,17 +21,13 @@ module.exports = {
 	'Si así lo deseas, puedes adherir una `--pregunta` y delegar el `--canal` al cual enviar la encuesta\n' +
 	'Debido a la naturaleza de las votaciones, no podrás editar ningún aspecto de la encuesta una vez ya esté enviada. Si cometes un error, bórrala y usa el comando nuevamente\n' +
 	'Por defecto, el periodo de votación es un minuto. Puedes cambiarlo en `--horas`, `--minutos` y `--segundos`',
-	flags: [
-		'mod'
-	],
+	flags: new CommandMetaFlagsManager().add('MOD'),
 	options,
 	callx: '<opciones(...)>',
 
 	async execute(message, args) {
-		if(!args.length) {
-			message.channel.send({ content: ':warning: Necesitas ingresar al menos dos opciones' });
-			return;
-		}
+		if(!args.length)
+			return message.reply({ content: ':warning: Necesitas ingresar al menos dos opciones' });
 
 		//Parámetros de comando
 		let channel = fetchFlag(args, {
@@ -60,16 +57,12 @@ module.exports = {
 		if(!time.h && !time.m && !time.s)
 			time.m = 1;
 		time.t = Object.values(time).slice(0, -1).reduce((a, b) => a * 60 + b);
-		if(time.t > 4 * 3600) {
-			message.channel.send(':warning: El periodo de votación no puede ser mayor a 4 horas');
-			return;
-		}
+		if(time.t > 4 * 3600)
+			return message.reply(':warning: El periodo de votación no puede ser mayor a 4 horas');
 		
 		//Acción de comando
-		if(!args.length) {
-			message.channel.send(':warning: Para crear una encuesta, debes ingresar al menos 2 opciones');
-			return;
-		}
+		if(!args.length)
+			return message.reply(':warning: Para crear una encuesta, debes ingresar al menos 2 opciones');
 		
 		const eregexp = /^<a*:\w+:[0-9]+>\B/;
 		const options = [];
@@ -102,16 +95,17 @@ module.exports = {
 				}
 			} else return b;
 		});
-		if(options.length < 2) {
-			message.channel.send({ content: ':warning: Necesitas ingresar al menos dos opciones' });
-			return;
-		}
+		if(options.length < 2)
+			return message.reply({ content: ':warning: Necesitas ingresar al menos dos opciones' });
 
 		const embed = new Discord.MessageEmbed()
 			.setColor('#1da1f2')
 			.setAuthor({ name: 'Encuesta » Reacciona para votar', iconURL: message.guild.iconURL({ dynamic: false, size: 256 }) })
 			.setFooter({ text: `Tiempo para votar: ${time.h}h, ${time.m}m, ${time.s}s` })
-			.addField(question ? question : 'Opciones', options.map(o => `${o.emote} ${o.text}`).join('\n'));
+			.addFields({
+				name: question || 'Opciones',
+				value: options.map(o => `${o.emote} ${o.text}`).join('\n'),
+			});
 		
 		const sent = await channel.send({ embeds: [embed] });
 		Promise.all([ options.map(o => sent.react(o.emote)) ]);
@@ -131,10 +125,13 @@ module.exports = {
 			const embed = new Discord.MessageEmbed()
 				.setColor('#1da1f2')
 				.setAuthor({ name: 'Encuesta finalizada', iconURL: message.guild.iconURL({ dynamic: false, size: 256 }) })
-				.addField(question ? question : 'Resultados de la votación', options
-					.sort((a,b) => (counts[b.emote.id] || 0) - (counts[a.emote.id] || 0))
-					.map(o => `${o.emote} **x ${(counts[o.emote.id] || 1) - 1}** ${o.text}`)
-					.join('\n'));
+				.addFields({
+					name: question || 'Resultados de la votación',
+					value: options
+						.sort((a,b) => (counts[b.emote.id] || 0) - (counts[a.emote.id] || 0))
+						.map(o => `${o.emote} **x ${(counts[o.emote.id] || 1) - 1}** ${o.text}`)
+						.join('\n'),
+				});
 			message.channel.send({ embeds: [embed] });
 			if(channel.id !== message.channel.id)
 				channel.send({ embeds: [embed] });

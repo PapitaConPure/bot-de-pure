@@ -1,7 +1,7 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { p_pure } = require('../../localdata/config.json'); //Prefijos
 const { fetchFlag, fetchUser } = require('../../func.js');
-const { CommandOptionsManager } = require('../Commons/cmdOpts');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
 
 const options = new CommandOptionsManager()
 	.addFlag('u', 'usuario',  'para especificar el usuario al cual responder', 				 { name: 'u', type: 'USER' })
@@ -15,9 +15,7 @@ module.exports = {
 	],
 	desc: `Manda una respuesta específica de \`${p_pure.raw}sugerir\` al \`--usuario\` designado\n` +
 		'La respuesta si no se incluyen las banderas `--aceptar` y `--problema` es una confirmación de lectura',
-	flags: [
-		'papa'
-	],
+	flags: new CommandMetaFlagsManager().add('PAPA'),
 	options,
 
 	async execute(message, args) {
@@ -28,7 +26,7 @@ module.exports = {
 		
 		//Acción de comando
 		if(user === undefined) {
-			const sent = await message.channel.send({ content: ':warning: ¡Usuario no encontrado!' });
+			const sent = await message.reply({ content: ':warning: ¡Usuario no encontrado!' });
 			setTimeout(() => sent.delete(), 1000 * 5);
 			return;
 		}

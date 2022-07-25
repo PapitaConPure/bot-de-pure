@@ -1,33 +1,19 @@
-const { hourai, peopleid } = require('../../localdata/config.json');
+const { hourai, peopleid, tenshiColor } = require('../../localdata/config.json');
 const Hourai = require('../../localdata/models/hourai.js');
 const axios = require('axios').default;
 const { colorsRow } = require('./colores.js')
-const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu } = require('discord.js');
+const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, TextInputComponent, Modal } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes');
+const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { auditError } = require('../../systems/auditor');
 
-const getAddRemoveRows = (roles) => [
-	new MessageActionRow().addComponents(roles.map(role =>
-		new MessageButton()
-			.setCustomId(`roles_addRole_${role.id}`)
-			.setEmoji(role.emote)
-			.setLabel(role.label)
-			.setStyle('SUCCESS'),
-	)),
-	new MessageActionRow().addComponents(roles.map(role =>
-		new MessageButton()
-			.setCustomId(`roles_removeRole_${role.id}`)
-			.setEmoji(role.emote)
-			.setLabel(role.label)
-			.setStyle('DANGER'),
-	)),
-	new MessageActionRow().addComponents([
-		new MessageButton()
-			.setCustomId(`roles_removeMany_${roles.map(role => role.id).join('_')}`)
-			.setEmoji('704612795072774164')
-			.setLabel('Quitarse todos')
-			.setStyle('PRIMARY'),
-	]),
-];
+/**
+ * @typedef {{id: String, label: String, emote: String}} RoleData Datos de un rol para el propósito del comando
+ * @typedef {Array<RoleData> | Array<Array<RoleData>>} RoleDataPool Conjunto de datos de rol o secciones de datos de rol
+ * @typedef {'GAMES' | 'DRINKS' | 'FAITH'} CategoryIndex índice de categoría de autogestión de roles
+ * @typedef {{ functionName: String, rolePool: RoleDataPool, exclusive: Boolean, paginated: Boolean }} CategoryContent Contenido de categoría de autogestión de roles
+ * @type {RoleDataPool}
+ */
 const gameRoles = [
 	[ //Sección 0
 		{ id: '943412899689414726', label: 'Minecraft', 		emote: '🧊' },
@@ -46,35 +32,91 @@ const gameRoles = [
 		{ id: '936361454121132162', label: 'Pokémon', 			emote: '🦀' },
 	],
 ];
+/**@type {RoleDataPool}*/
 const drinkRoles = [
-	{ id: '727951667513000007', emote: '🍵', label: 'Té' },
-	{ id: '727951545509085204', emote: '☕', label: 'Café' },
-	{ id: '727951759263137912', emote: '🧉', label: 'Mate' },
+	{ id: '727951667513000007', label: 'Té',   emote: '🍵' },
+	{ id: '727951545509085204', label: 'Café', emote: '☕' },
+	{ id: '727951759263137912', label: 'Mate', emote: '🧉' },
 ];
+/**@type {RoleDataPool}*/
 const faithRoles = [
-	{ id: '695744222850056212', emote: '😇', label: 'Blessed' },
-	{ id: '695743527383990422', emote: '🙃', label: 'Blursed' },
-	{ id: '694358587451113564', emote: '💀', label: 'Cursed' },
+	{ id: '695744222850056212', label: 'Blessed', emote: '😇' },
+	{ id: '695743527383990422', label: 'Blursed', emote: '🙃' },
+	{ id: '694358587451113564', label: 'Cursed',  emote: '💀' },
 ];
+/**@type {Map<CategoryIndex, CategoryContent>}*/
+const categories = new Map()
+	.set('GAMES',  { functionName: 'selectGame', 	 rolePool: gameRoles,  exclusive: false,  })
+	.set('DRINKS', { functionName: 'selectDrink',    rolePool: drinkRoles, exclusive: false,  })
+	.set('FAITH',  { functionName: 'selectReligion', rolePool: faithRoles, exclusive: true,   });
+categories.forEach(category => category.paginated = Array.isArray(category.rolePool[0]));
 
-module.exports = {
-	name: 'roles',
-	aliases: [
-		'rol',
-		'role',
-	],
-    desc: 'Establece un punto de reparto de roles para uso colectivo (solo Hourai Doll)',
-    flags: [
-        'hourai',
-    ],
-	experimental: true,
-	
-	/**
-	 * @param {import("../Commons/typings").CommandRequest} request
-	 * @param {import('../Commons/typings').CommandOptions} _
-	 * @param {Boolean} isSlash
-	 */
-	async execute(request, _, isSlash = false) {
+/**
+ * @param {import('discord.js').GuildMember} member 
+ * @param {CategoryIndex} category 
+ * @param {Number?} section
+ */
+const getAutoRoleRows = (member, category, section = null) => {
+	const rolePool = categories.get(category).rolePool
+	const pageRoles = rolePool[section] ?? rolePool;
+	return [
+		new MessageActionRow().addComponents(pageRoles.map(role => {
+			const button = new MessageButton()
+				.setEmoji(role.emote)
+				.setLabel(role.label);
+
+			if(member.roles.cache.has(role.id))
+				return button
+					.setCustomId(`roles_removeRole_${role.id}`)
+					.setStyle('PRIMARY');
+			return button
+				.setCustomId(`roles_addRole_${role.id}`)
+				.setStyle('SECONDARY');
+		})),
+		new MessageActionRow().addComponents([
+			new MessageButton()
+				.setCustomId(`roles_removeAll_${category}`)
+				.setEmoji('704612795072774164')
+				.setLabel('Quitarse todos')
+				.setStyle('DANGER'),
+		]),
+	];
+};
+/**
+ * @param {CategoryIndex} category 
+ * @param {Number?} section 
+ * @returns {Array<MessageActionRow>}
+ */
+const getPaginationControls = (category, section = 0) => {
+	category = categories.get(category);
+	if(!category.paginated) return [];
+
+	const functionName = category.functionName;
+	const roleDataPool = category.rolePool;
+	const nextPage = section > 0 ? (section - 1) : (roleDataPool.length - 1)
+	const prevPage = section < (roleDataPool.length - 1) ? (section + 1) : 0;
+	return [
+		new MessageActionRow().addComponents([
+			new MessageButton()
+				.setCustomId(`roles_${functionName}_${nextPage}_1`)
+				.setEmoji('934430008343158844')
+				.setStyle('SECONDARY'),
+			new MessageButton()
+				.setCustomId(`roles_${functionName}_${prevPage}_1`)
+				.setEmoji('934430008250871818')
+				.setStyle('SECONDARY'),
+		]),
+	];
+};
+
+const flags = new CommandMetaFlagsManager().add('HOURAI');
+
+const command = new CommandManager('roles', flags)
+	.setAliases('rol', 'role')
+	.setBriefDescription('Pemite a todos elegir algunos roles')
+	.setLongDescription('Establece un punto de reparto de roles para uso colectivo (solo Hourai Doll')
+	.setExperimental(true)
+	.setExecution(async (request, _, isSlash) => {
 		return request.reply({
 			embeds: [
 				new MessageEmbed()
@@ -126,30 +168,17 @@ module.exports = {
 					]),
 			)],
 		});
-    },
-
-	async ['onSelect'](interaction) {
+    })
+	.setSelectMenuResponse(async function onSelect(interaction) {
 		const received = interaction.values[0].split('_');
 		const operation = received.shift();
-		const args = received.shift();
-		if(args)
-			return module.exports[operation](interaction, [args]);
-		else
-			return module.exports[operation](interaction);
-	},
-
-	async ['selectColor'](interaction) {
-		return interaction.reply({
-			files: [hourai.images.colors],
-			components: [colorsRow],
-			ephemeral: true,
-		});
-    },
-
-	/**
-	 * @param {import('discord.js').ButtonInteraction} interaction
-	 */
-	async ['selectCustomRole'](interaction) {
+		const selectMenu = new MessageSelectMenu(interaction.component);
+		interaction.message.edit({ components: [ new MessageActionRow().addComponents(selectMenu) ] }).catch(auditError);
+		if(!received)
+			return this[operation](interaction);
+		return this[operation](interaction, ...received);
+	})
+	.setInteractionResponse(async function selectCustomRole(interaction) {
 		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
 		/**@type {Date}*/
 		const boostTimestamp = interaction.member?.premiumSinceTimestamp;
@@ -169,9 +198,6 @@ module.exports = {
 						'Puedes editar tu Rol cuantas veces quieras durante el periodo de boosteo',
 						'Se te permite modificar el nombre, el color y/o la imagen del rol a gusto',
 					].join('\n'))
-					.addField('Editar nombre', 'Para cambiar el nombre, simplemente escríbelo (sin poner "#" al inicio de ninguna palabra)', true)
-					.addField('Editar color',  'Para editar el color, ingresa un código hexadecimal, con # al inicio', true)
-					.addField('Editar imagen', 'Para añadir una imagen, ingresa el __enlace directo al recurso de la imagen__, o un enlace de Imgur', true),
 			],
 			components: [new MessageActionRow().addComponents(
 				(!interaction.member.roles.cache.get(customRoleId)) ? [
@@ -197,52 +223,53 @@ module.exports = {
 			)],
 			ephemeral: true,
 		});
-    },
-
-	/**
-	 * @param {import('discord.js').ButtonInteraction} interaction
-	 */
-	async ['selectGame'](interaction, [ section, edit = false ]) {
+	})
+	.setInteractionResponse(async function selectColor(interaction) {
+		return interaction.reply({
+			content: hourai.images.colors,
+			components: [colorsRow],
+			ephemeral: true,
+		});
+	})
+	.setInteractionResponse(async function selectGame(interaction, section, edit = false) {
 		section = parseInt(section);
 		const messageActions = {
 			embeds: [
 				new MessageEmbed()
 					.setColor('RED')
-					.addField('Roles de Juego', 'Roles mencionables para llamar gente a jugar algunos juegos. Si piensas ser de los que llaman a jugar, intenta no abusar las menciones')
+					.addField('Roles de Juego', 'Roles mencionables para llamar gente a jugar algunos juegos. Si piensas ser de los que llaman a jugar, intenta no abusar las menciones'),
 			],
 			components: [
-				...getAddRemoveRows(gameRoles[section]),
-				new MessageActionRow().addComponents([
-					new MessageButton()
-						.setCustomId(`roles_selectGame_${section > 0 ? (section - 1) : (gameRoles.length - 1)}_1`)
-						.setEmoji('934430008343158844')
-						.setStyle('SECONDARY'),
-					new MessageButton()
-						.setCustomId(`roles_selectGame_${section < (gameRoles.length - 1) ? (section + 1) : 0}_1`)
-						.setEmoji('934430008250871818')
-						.setStyle('SECONDARY'),
-				]),
+				...getAutoRoleRows(interaction.member, 'GAMES', section),
+				...getPaginationControls('GAMES', section),
 			],
 			ephemeral: true,
 		};
 
 		if(edit) return interaction.update(messageActions);
 		return interaction.reply(messageActions);
-    },
-	
-	async ['selectDrink'](interaction) {
-		return interaction.reply({
+	})
+	.setInteractionResponse(async function selectDrink(interaction, section, edit = false) {
+		section = parseInt(section);
+		const messageActions = {
 			embeds: [
 				new MessageEmbed()
 					.setColor('BLUE')
-					.addField('Roles de Bebidas', 'Roles decorativos para dar a conocer qué bebidas calientes disfrutas')
+					.addField('Roles de Bebidas', 'Roles decorativos para dar a conocer qué bebidas calientes disfrutas'),
 			],
-			components: getAddRemoveRows(drinkRoles),
+			components: [
+				...getAutoRoleRows(interaction.member, 'DRINKS', section),
+				...getPaginationControls('DRINKS', section),
+			],
 			ephemeral: true,
-		});
-    },
-	
-	async ['selectReligion'](interaction) {
+		};
+
+		if(edit) return interaction.update(messageActions);
+		return interaction.reply(messageActions);
+	})
+	.setInteractionResponse(async function selectReligion(interaction) {
+		const { member } = interaction;
+
 		return interaction.reply({
 			embeds: [
 				new MessageEmbed()
@@ -252,14 +279,14 @@ module.exports = {
 			components: [
 				new MessageActionRow().addComponents(faithRoles.map(faithRole =>
 					new MessageButton()
-						.setCustomId(`roles_addRoleExclusive_${faithRole.id}_${faithRoles.map(gameRole => gameRole.id).join('_')}`)
+						.setCustomId(`roles_addRole_${faithRole.id}_FAITH`)
 						.setEmoji(faithRole.emote)
 						.setLabel(faithRole.label)
-						.setStyle('SUCCESS'),
+						.setStyle(member.roles.cache.has(faithRole.id) ? 'PRIMARY' : 'SECONDARY'),
 				)),
 				new MessageActionRow().addComponents([
 					new MessageButton()
-						.setCustomId(`roles_removeMany_${faithRoles.map(faithRole => faithRole.id).join('_')}`)
+						.setCustomId(`roles_removeAll_FAITH`)
 						.setEmoji('704612795072774164')
 						.setLabel('Eliminar Religión')
 						.setStyle('DANGER'),
@@ -267,10 +294,10 @@ module.exports = {
 			],
 			ephemeral: true,
 		});
-    },
-	
-	async ['selectCandy'](interaction) {
+	})
+	.setInteractionResponse(async function selectCandy(interaction) {
 		const candyRole = '683084373717024869';
+		const hasCandy = interaction.member.roles.cache.has(candyRole);
 		return interaction.reply({
 			embeds: [
 				new MessageEmbed()
@@ -279,90 +306,115 @@ module.exports = {
 			],
 			components: [new MessageActionRow().addComponents([
 				new MessageButton()
-					.setCustomId(`roles_addRole_${candyRole}`)
 					.setEmoji('778180421304188939')
-					.setLabel('Recibir')
-					.setStyle('SUCCESS'),
-				new MessageButton()
-					.setCustomId(`roles_removeRole_${candyRole}`)
-					.setEmoji('704612795072774164')
-					.setLabel('Devolver')
-					.setStyle('DANGER'),
+					.setLabel('Caramelos (+18)')
+					.setCustomId(`roles_${hasCandy ? 'removeRole' : 'addRole'}_${candyRole}`)
+					.setStyle(hasCandy ? 'PRIMARY' : 'SECONDARY'),
 			])],
 			ephemeral: true,
 		});
-    },
-
-	async ['addRole'](interaction, args) {
+	})
+	.setButtonResponse(async function addRole(interaction, roleId, category = null) {
 		const { member } = interaction;
-		const rid = args.shift();
-		if(member.roles.cache.has(rid))
+
+		if(member.roles.cache.has(roleId))
 			return interaction.reply({ content: '⚠️ Ya tienes ese rol', ephemeral: true });
+
+		/**@type {Array<MessageActionRow>}*/
+		const newComponents = interaction.message.components;
+		newComponents[0].components = newComponents[0].components.map(component => {
+			const componentRid = component.customId.split('_')[2];
+			
+			if(roleId === componentRid) {
+				if(!category)
+					component.setCustomId(`roles_removeRole_${componentRid}`)
+				return component.setStyle('PRIMARY');
+			}
+			if(category)
+				return component.setStyle('SECONDARY');
+			
+			return component;
+		});
+
+		let rolesToRemove = [];
+		if(category)
+			rolesToRemove = categories.get(category).rolePool
+				.filter(role => role.id !== roleId && member.roles.cache.has(role.id))
+				.map(role => member.roles.remove(role.id));
 		
-		return Promise.all([
-			member.roles.add(rid),
-			interaction.reply({ content: '✅ Rol entregado', ephemeral: true }),
+		await Promise.all([
+			interaction.deferUpdate(),
+			...rolesToRemove,
+			member.roles.add(roleId),
 		]);
-    },
-
-	async ['addRoleExclusive'](interaction, args) {
+		return interaction.editReply({ components: newComponents });
+	})
+	.setButtonResponse(async function removeRole(interaction, roleId) {
 		const { member } = interaction;
-		const newRoleId = args.shift();
-		if(member.roles.cache.has(newRoleId))
-			return interaction.reply({ content: '⚠️ Ya tienes ese rol', ephemeral: true })
 
-		await Promise.all(
-			args.filter(rid => rid !== newRoleId).map(rid =>
-				member.roles.cache.has(rid)
-				? member.roles.remove(rid)
-				: undefined
-			)
-		);
-		return Promise.all([
-			member.roles.add(newRoleId),
-			interaction.reply({ content: '✅ Rol entregado', ephemeral: true }),
-		]);
-    },
-
-	async ['removeRole'](interaction, args) {
-		const { member } = interaction;
-		const [ rid ] = args;
-		if(!member.roles.cache.has(rid))
+		if(!member.roles.cache.has(roleId))
 			return interaction.reply({ content: '⚠️ No tienes ese rol', ephemeral: true });
+
+		/**@type {Array<MessageActionRow>}*/
+		const newComponents = interaction.message.components;
+		newComponents[0].components = newComponents[0].components.map(component => {
+			const componentRid = component.customId.split('_')[2];
+			if(roleId !== componentRid) return component;
+			
+			if(component.style === 'PRIMARY')
+				return component
+					.setCustomId(`roles_addRole_${componentRid}`)
+					.setStyle('SECONDARY');
+			return component
+				.setCustomId(`roles_removeRole_${componentRid}`)
+				.setStyle('PRIMARY');
+		});
+
 		return Promise.all([
-			member.roles.remove(rid),
-			interaction.reply({ content: '✅ Rol quitado', ephemeral: true }),
+			member.roles.remove(roleId),
+			interaction.update({ components: newComponents }),
 		]);
-    },
-
-	async ['removeMany'](interaction, args) {
+	})
+	.setButtonResponse(async function removeAll(interaction, category) {
 		const { member } = interaction;
+		const rolePool = categories.get(category).rolePool
+			.flat()
+			.filter(roleData => member.roles.cache.has(roleData.id));
 
-		if(args[0] === 'GAMES')
-			args = gameRoles.flat();
-		args = args.filter(rid => member.roles.cache.has(rid));
+		if(!rolePool.length)
+			return interaction.reply({ content: '❌ No tienes ningún rol de esta categoría', ephemeral: true });
 
-		await Promise.all(
-			args
-			.map(rid => member.roles.cache.has(rid) ? member.roles.remove(rid) : undefined)
-			.filter(rid => rid)
-		);
-		interaction.reply({ content: '✅ Roles actualizados', ephemeral: true });
-    },
+		/**@type {Array<MessageActionRow>}*/
+		const newComponents = interaction.message.components;
+		newComponents[0].components = newComponents[0].components.map(component => {
+			const [ _, functionName, componentRid ] = component.customId.split('_');
+			if(component.style === 'SECONDARY') return component;
+			if(functionName === 'removeRole')
+				component.setCustomId(`roles_addRole_${componentRid}`)
+			return component.setStyle('SECONDARY');
+		});
 
-	/**@param {import('discord.js').ButtonInteraction} interaction*/
-	async ['customRole'](interaction, [ operation ]) {
+		await Promise.all([
+			interaction.deferUpdate(),
+			...rolePool.map(roleData => member.roles.remove(roleData.id)),
+		]);
+		interaction.editReply({ components: newComponents });
+	})
+	.setButtonResponse(async function customRole(interaction, operation) {
 		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
-		const uid = interaction.user.id;
+		const userId = interaction.user.id;
+		houraiDB.customRoles ??= {};
+
 		switch(operation) {
 			case 'CREATE': {
-				houraiDB.customRoles ??= {};
+				if(interaction.member.roles.cache.get(houraiDB.customRoles[userId]))
+					return interaction.reply('⚠ ¡Tu rol ya fue creado! Si cancelaste la configuración, selecciona la categoría nuevamente para editarlo')
 				const customRole = await interaction.guild.roles.create({
 					name: interaction.member.nickname ?? interaction.user.username,
 					position: (await interaction.guild.roles.fetch('857544764499951666'))?.rawPosition,
 					reason: 'Creación de Rol Personalizado de miembro',
 				});
-				houraiDB.customRoles[uid] = customRole.id;
+				houraiDB.customRoles[userId] = customRole.id;
 				houraiDB.markModified('customRoles');
 				await Promise.all([
 					houraiDB.save(),
@@ -373,14 +425,14 @@ module.exports = {
 			}
 			
 			case 'EDIT': {
-				const roleId = houraiDB.customRoles[uid];
+				const roleId = houraiDB.customRoles[userId];
 				return module.exports.customRoleWizard(interaction, roleId);
 			}
 
 			case 'DELETE': {
-				const roleId = houraiDB.customRoles[uid];
-				houraiDB.customRoles[uid] = null;
-				delete houraiDB.customRoles[uid];
+				const roleId = houraiDB.customRoles[userId];
+				houraiDB.customRoles[userId] = null;
+				delete houraiDB.customRoles[userId];
 				houraiDB.markModified('customRoles');
 
 				return Promise.all([
@@ -395,10 +447,8 @@ module.exports = {
 				]);
 			}
 		}
-	},
-
-	/**@param {import('discord.js').ButtonInteraction} interaction*/
-	async customRoleWizard(interaction, roleId) {
+	})
+	.setButtonResponse(async function customRoleWizard(interaction, roleId) {
 		/**@type {import('discord.js').Role}*/
 		const customRole = interaction.member.roles.cache.get(roleId);
 		if(!customRole)
@@ -407,65 +457,93 @@ module.exports = {
 				embeds: [],
 				components: [],
 			});
-
-		const embed = new MessageEmbed()
-			.setColor('NAVY')
-			.addField('Personaliza tu rol', 'Especifica el nombre, código de color hexadecimal y/o enlace de ícono de tu rol')
-			.addField('Edición', 'Envía en uno o varios mensajes las propiedades mencionadas, no te olvides del "#" para el código hexadecimal')
-			.addField('Finalizar', '**Escribe "listo" cuando hayas terminado de editar**. Si no finalizas manualmente, la edición finalizará automáticamente luego de 3 minutos ó 3 mensajes');
 		
-		const filter = m => !m.author.bot && m.author.id === interaction.user.id;
-		const coll = interaction.channel.createMessageCollector({ filter, time: 60e3 * 3, max: 3 });
+		const nameInput = new TextInputComponent()
+			.setCustomId('nameInput')
+			.setLabel('Nombre')
+			.setStyle('SHORT')
+			.setMaxLength(160)
+			.setPlaceholder(`Ej: Bhavaagra Princess`);
+		const colorInput = new TextInputComponent()
+			.setCustomId('colorInput')
+			.setLabel('Color (hexadecimal)')
+			.setStyle('SHORT')
+			.setMaxLength(7)
+			.setPlaceholder(`Ej: ${tenshiColor}`);
+		const emoteUrlInput = new TextInputComponent()
+			.setCustomId('emoteUrlInput')
+			.setLabel('Ícono')
+			.setStyle('PARAGRAPH')
+			.setMaxLength(160)
+			.setPlaceholder('Ejemplo: https://cdn.discordapp.com/emojis/828736342372253697.webp');
 
-		coll.on('collect', m => {
-			if(!m.content) return;
-			if(m.content.toLowerCase() === 'listo')
-				return coll.stop();
+		const rows = [
+			new MessageActionRow().addComponents(nameInput),
+			new MessageActionRow().addComponents(colorInput),
+			new MessageActionRow().addComponents(emoteUrlInput),
+		];
 
-			const reportSuccess = (prop) => m.reply({ content: `✅ ${prop} de Rol Personalizado actualizado` });
-			const reportError = (prop, extra) => m.reply({ content: [`⚠ ${prop} de Rol Personalizado no se pudo actualizar`, extra].filter(r => r).join('\n') });
-			let args = m.content.split(/[ \n]+/);
-			args = args.map(arg => {
-				if(arg.startsWith('https://')) {
-					const imgurUrl = 'https://imgur.com/';
-					if(arg.startsWith(imgurUrl)) {
-						arg = arg.slice(imgurUrl.length);
-						if(arg.startsWith('a/'))
-							arg = arg.slice(2);
-						console.log('arg', arg);
-						arg = `https://i.imgur.com/${arg}.png`;
-					}
+		const modal = new Modal()
+			.setCustomId(`roles_applyCustomRoleChanges_${customRole.id}`)
+			.setTitle('Edita tu Rol Personalizado')
+			.addComponents(rows);
+		
+		return interaction.showModal(modal);
+	})
+	.setModalResponse(async function applyCustomRoleChanges(interaction, roleId, category = null) {
+		/**@type {import('discord.js').Role}*/
+		const customRole = interaction.member.roles.cache.get(roleId);
+		const roleName = interaction.fields.getTextInputValue('nameInput');
+		let roleColor = interaction.fields.getTextInputValue('colorInput');
+		let roleEmoteUrl = interaction.fields.getTextInputValue('emoteUrlInput');
+		const editStack = [];
+		const replyStack = [];
 
-					axios.get(arg,  { responseType: 'arraybuffer' })
-					.then(response => {
-						customRole.edit({ icon: Buffer.from(response.data, "utf-8") })
-						.then(_ => reportSuccess('Ícono'))
-						.catch(_ => reportError('Ícono', 'Puede que el server necesite más boosts para cambiar esto.\nEn caso contrario, asegúrate de haber proporcionado un enlace directo a la imagen'));
-					});
-					return;
-				}
+		if(roleName.length)
+			editStack.push(
+				customRole.edit({ name: roleName })
+				.catch(_ => replyStack.push('⚠ No se pudo actualizar el nombre del rol'))
+			);
 
-				if(arg.startsWith('#')) {
-					customRole.edit({ color: arg })
-					.then(_ => reportSuccess('Color'))
-					.catch(_ => reportError('Color'));
-					return;
-				}
+		if(roleColor.length) {
+			if(!roleColor.startsWith('#'))
+				roleColor = `#${roleColor}`;
+			editStack.push(
+				customRole.edit({ color: roleColor })
+				.catch(_ => replyStack.push('⚠ No se pudo actualizar el color del rol'))
+			);
+		}
 
-				return arg;
-			}).filter(arg => arg);
+		if(roleEmoteUrl.length) {
+			if(!roleEmoteUrl.startsWith('https://'))
+				roleEmoteUrl = `https://${roleEmoteUrl}`;
+			const imgurUrl = 'https://imgur.com/';
+			if(roleEmoteUrl.startsWith(imgurUrl)) {
+				roleEmoteUrl = roleEmoteUrl.slice(imgurUrl.length);
+				if(roleEmoteUrl.startsWith('a/'))
+				roleEmoteUrl = roleEmoteUrl.slice(2);
+				roleEmoteUrl = `https://i.imgur.com/${roleEmoteUrl}.png`;
+			}
 
-			if(args.length)
-				return customRole.edit({ name: args.join(' ') })
-				.then(_ => reportSuccess('Nombre'))
-				.catch(_ => reportError('Nombre'));
-		});
+			try {
+				const response = await axios.get(roleEmoteUrl,  { responseType: 'arraybuffer' });
+				const roleEmoteBuffer = Buffer.from(response?.data, "utf-8")
+				editStack.push(
+					customRole.edit({ icon: roleEmoteBuffer })
+					.catch(_ => replyStack.push('⚠ No se pudo actualizar el ícono del rol. Puede que el servidor sea de nivel muy bajo o no hayas proporcionado un enlace directo a la imagen'))
+				);
+			} catch(error) {
+				replyStack.push('⚠ No se pudo actualizar el ícono del rol. Puede que no hayas proporcionado un enlace directo a la imagen o el enlace sea inválido');
+			}
+		}
 
-		coll.on('end', () => interaction.channel.send({ content: '✅ Edición de Rol Personalizado finalizada' }));
+		replyStack.push('✅ Edición de Rol Personalizado finalizada')
 
-		return interaction.update({
-			embeds: [embed],
-			components: [],
-		});
-	}
-};
+		await Promise.all([
+			interaction.deferReply({ ephemeral: true }),
+			...editStack,
+		]);
+		interaction.editReply({ content: replyStack.join('\n') });
+	});
+
+module.exports = command;

@@ -1,4 +1,5 @@
 const { randRange } = require("../../func");
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 
 const emot = [
     '\'o\'', '\'O\'', '\'u\'', '\'U\'', '^O^', 'o.o', 'O.O', 'QUQ', '\'.\'', '¬u¬', '¬U¬', 'o\'o', 'o.o\'\'', 'o-o', 'O.o', 'x.x', 'ouo', 'OUO', 'OuO', 'Ouo', '>:C',
@@ -12,9 +13,7 @@ module.exports = {
         'mari'
     ],
     desc: 'Comando de caritas de Marisaac',
-    flags: [
-        'meme'
-    ],
+    flags: new CommandMetaFlagsManager().add('MEME'),
   
     async execute({ channel }, _) {
         channel.send({ content: `**${emot[randRange(0, emot.length)]}**` });

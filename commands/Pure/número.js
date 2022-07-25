@@ -1,5 +1,5 @@
 const { improveNumber, fetchFlag } = require('../../func.js'); //Funciones globales
-const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
 
 const options = new CommandOptionsManager()
 	.addParam('num', 'NUMBER', 'para designar el número a operar')
@@ -15,9 +15,7 @@ module.exports = {
 		'num',
 	],
 	desc: 'Para operar un número. Sí, solo eso, tenía ganas de jugar con algo',
-	flags: [
-		'common'
-	],
+	flags: new CommandMetaFlagsManager().add('COMMON'),
 	options: options,
 	callx: '<num>',
     experimental: true,

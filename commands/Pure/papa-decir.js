@@ -1,6 +1,7 @@
 const { Permissions } = require('discord.js');
 const { fetchFlag } = require('../../func');
-const { CommandOptionsManager } = require('../Commons/cmdOpts');
+const { auditError } = require('../../systems/auditor');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
 
 const options = new CommandOptionsManager()
     .addParam('mensaje', 'TEXT', 'para especificar qué decir')
@@ -11,9 +12,7 @@ const options = new CommandOptionsManager()
 module.exports = {
 	name: 'papa-decir',
     desc: 'Me hace decir lo que quieras que diga (privilegios elevados)',
-    flags: [
-        'papa'
-    ],
+    flags: new CommandMetaFlagsManager().add('PAPA'),
     options,
     callx: '<mensaje>',
 	
@@ -41,21 +40,19 @@ module.exports = {
 				return ccache.get(cs) || ccache.find(g => g.name.toLowerCase().indexOf(cs) !== -1);
 			}
 		});
-        if(!args.length) {
-            message.channel.send({ content: ':warning: tienes que especificar lo que quieres que diga.' });
-            return;
-        }
+        if(!args.length)
+            return message.reply({ content: ':warning: tienes que especificar lo que quieres que diga.' });
+
         if(!channel) {
             if(!needch) channel = message.channel;
             else channel = guild.systemChannel;
         }
-        if(!channel) {
-            message.channel.send({ content: ':warning: debes especificar un canal de la guild que ingresaste.' });
-            return;
-        }
+        if(!channel)
+            return message.reply({ content: ':warning: debes especificar un canal de la guild que ingresaste.' });
         
-        await channel.send(args.join(' ').split(/ +#ENDL +/g).join('\n'));
         if(del && message.deletable && message.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES))
-            await message.delete()
+            message.delete().catch(auditError);
+
+        return message.reply(args.join(' ').split(/ +#ENDL +/g).join('\n'));
     },
 };

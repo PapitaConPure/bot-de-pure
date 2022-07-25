@@ -13,9 +13,9 @@ module.exports = {
     //#region Lista
     getMentionPlayerID: function(stringcmp = ``, start = -1, end = -1) {
         console.log('Intentando encontrar un jugador por mención.');
-        var st = (start !== -1)?start:0; //Inicio de recorrido de lista [por defecto: inicio de lista]
-        var ed = (end !== -1)?end:global.cntjugadores; //Fin de recorrido de lista [por defecto: fin de lista]
-        var idretorno = -1; //ID de jugador en lista a devolver [si no está jugando: -1]
+        let st = (start !== -1)?start:0; //Inicio de recorrido de lista [por defecto: inicio de lista]
+        let ed = (end !== -1)?end:global.cntjugadores; //Fin de recorrido de lista [por defecto: fin de lista]
+        let idretorno = -1; //ID de jugador en lista a devolver [si no está jugando: -1]
         if(stringcmp.startsWith('<@') && stringcmp.endsWith('>')) {
             stringcmp = stringcmp.slice(2, -1);
             if(stringcmp.startsWith('!')) stringcmp = stringcmp.slice(1);
@@ -34,7 +34,7 @@ module.exports = {
 
     getNumberPlayerID: function(playernumber = -1) {
         console.log('Intentando encontrar un jugador por número de lista.');
-        var idretorno = -1; //ID de jugador en lista a devolver [si no está jugando: -1]
+        let idretorno = -1; //ID de jugador en lista a devolver [si no está jugando: -1]
 
         playernumber = parseInt(playernumber);
         if(playernumber >= 1 && playernumber <= global.cntjugadores) {
@@ -63,7 +63,7 @@ module.exports = {
         global.jugadores[global.cntjugadores] = global.jugadores[idj];
         global.nombres[global.cntjugadores] = global.nombres[idj];
         global.puntos[global.cntjugadores] = global.puntos[idj];
-        for(var i = idj; i < global.cntjugadores; i++) {
+        for(let i = idj; i < global.cntjugadores; i++) {
             global.jugadores[i] = global.jugadores[i + 1] ;
             global.nombres[i] = global.nombres[i + 1];
             global.puntos[i] = global.puntos[i + 1];
@@ -116,13 +116,32 @@ module.exports = {
         global.goingnext = false;
     },
 
+    /**
+     * @template T
+     * @param {Array<T> | Discord.Collection<Discord.Snowflake, T>} array 
+     * @param {Number?} pagemax
+     * @returns {Array<Array<T>> | Array<Array<[Discord.Snowflake, T]>>}
+     */
+    paginateRaw: function(array, pagemax = 10) {
+        if(!Array.isArray(array))
+            array = [...array.entries()];
+
+		return array
+            .map((_, i) => (i % pagemax === 0) ? array.slice(i, i + pagemax) : null)
+            .filter(item => item);
+    },
+
+    /**
+     * @param {Array<*> | Discord.Collection} array 
+     * @param {{
+     *  pagemax: Number?,
+     *  format: Function?,
+     * }} itemsOptions 
+     */
     paginate: function(array, itemsOptions = { pagemax: 10, format: item => `\`${item.name.padEnd(24)}\`${item}` }) {
         const { pagemax, format } = itemsOptions;
-		const pages = array
-            .map((_, i) => (i % pagemax === 0)?array.slice(i, i + pagemax):null) //Paginar
-            .filter(item => item) //Filtrar nulls
-            .map(page => page.map(format).join('\n')); //Dar formato y unir
-        return pages;
+		return paginateRaw(array, pagemax)
+            .map(page => page.map(format).join('\n'));
     },
     //#endregion
 
@@ -319,10 +338,10 @@ module.exports = {
             if(hadroles !== undefined) {
                 await member.roles.remove(hadroles);
                 await member.roles.add(colrol[reacted]);
-                message.channel.send({ content: 'Colores intercambiados <:monowo:887389799042932746>' });
+                message.reply({ content: 'Colores intercambiados <:monowo:887389799042932746>' });
             } else {
                 await member.roles.add(colrol[reacted]);
-                message.channel.send({ content: 'Colores otorgados <:miyoi:674823039086624808> :thumbsup:' });
+                message.reply({ content: 'Colores otorgados <:miyoi:674823039086624808> :thumbsup:' });
             }
         });
     },*/
@@ -331,8 +350,8 @@ module.exports = {
     //#region Comprobadores
     notStartedAndSameChannel: function(msgch, preinicio = false) {
         console.log('Verificando si el comando de evento fue ejecutado en lugar y tiempo correctos.');
-        var confirm = true;
-        var str = '';
+        let confirm = true;
+        let str = '';
         preinicio = (preinicio && global.empezando);
         if(preinicio) str = ' ni por jugar';
         if(!global.empezado && !preinicio) {
@@ -349,9 +368,9 @@ module.exports = {
     },
 
     notModerator: function(author) {
-        var ismod = false;
+        let ismod = false;
         
-        for(var i = 0; i < global.modroles.length; i++)
+        for(let i = 0; i < global.modroles.length; i++)
             if(author.roles.has(global.modroles[i])) {
                 ismod = true;
                 break;
@@ -376,12 +395,16 @@ module.exports = {
     //#endregion
 
     //#region Sistema
+    /**@param {import('discord.js').TextChannel} channel*/
     channelIsBlocked: function(channel) {
-        if(global.maintenance.length > 0)
-            return (global.maintenance.startsWith('!'))
-                ? channel.id === global.maintenance.slice(1)
-                : channel.id !== global.maintenance;
-        else return false;
+        const member = channel?.guild?.me;
+        if(!member) return true;
+        if(!member.permissionsIn(channel).any([ 'SEND_MESSAGES', 'SEND_MESSAGES_IN_THREADS' ], true)) return true;
+        if(global.maintenance.length === 0) return false;
+
+        return (global.maintenance.startsWith('!'))
+            ? channel.id === global.maintenance.slice(1)
+            : channel.id !== global.maintenance;
     },
     /*reloadState: function() {
         
@@ -541,8 +564,9 @@ module.exports = {
                     'Como tradición, elige un color con el menú de abajo <:mayuwu:654489124413374474>\n' +
                     'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:697321858407727224>\n' +
                     '<@&654472238510112799>, vengan a saludar po maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
-                    `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n`,
-                files: [global.hourai.images.colors],
+                    `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n` +
+                    global.hourai.images.colors,
+                //files: [global.hourai.images.colors],
                 components: [require('./commands/Pure/colores.js').colorsRow],
             });
             setTimeout(module.exports.askForRole, 1000, miembro, canal, 3 * 4);
@@ -825,7 +849,7 @@ module.exports = {
             }
 		});
 
-        return target?target:(typeof flag.fallback === 'function'?flag.fallback():flag.fallback);
+        return target ? target : (typeof flag.fallback === 'function' ? flag.fallback() : flag.fallback);
     },
     
     fetchSentence: function(args, i) {
@@ -861,7 +885,7 @@ module.exports = {
         for(let i = 1; i < global.cntjugadores; i++)
             for(let j = 0; j < (global.cntjugadores - i); j++)
                 if(global.puntos[j] < global.puntos[j + 1]) {
-                    var tmp = global.jugadores[j];
+                    let tmp = global.jugadores[j];
                     global.jugadores[j] = global.jugadores[j + 1];
                     global.jugadores[j + 1] = tmp;
                     tmp = global.nombres[j];
@@ -904,7 +928,7 @@ module.exports = {
         global.trest = 0;
         global.tjuego = 7200;
         global.chi = '<#sincanal>';
-        for(var i = 0; i < global.cntjugadores; i++) {
+        for(let i = 0; i < global.cntjugadores; i++) {
             global.jugadores[i] = 0;
             global.nombres[i] = '';
             global.numeros[i] = 0;
@@ -929,16 +953,18 @@ module.exports = {
     },
 
     /**
-     * Devuelve el primer emoji de servidor encontrado en el string
+     * Devuelve el primer emoji de servidor encontrado con el string
      * @param {String} emoji 
      * @param {import('discord.js').Guild} guild 
      * @returns {Discord.Emoji?}
      */
     guildEmoji: function(emoji, guild) {
-        if(!typeof emoji == 'string') return null;
-        emoji = emoji.match(/^<a*:\w+:[0-9]+>\B/gu)?.[0];
-        if(!emoji) return null;
-        return guild.emojis.resolve(emoji);
+        if(typeof emoji !== 'string') return null;
+        if(!guild.emojis) throw TypeError('Debes ingresar una Guild');
+        const parsedEmoji = emoji.match(/^<a*:\w+:[0-9]+>\B/gu)?.[0];
+        if(!parsedEmoji)
+            return guild.emojis.cache.find(e => e.name === emoji) || null;
+        return guild.emojis.resolve(parsedEmoji);
     },
 
     /**
@@ -1036,9 +1062,20 @@ module.exports = {
     /**@param {Array<String>} arr*/
     regroupText: (arr) => arr.join(' ').replace(/([\n ]*,[\n ]*)+/g, ',').split(',').filter(a => a.length),
 
-    shortenText: function(text, max, ) {
+    /**
+     * Limita un string a una cantidad definida de caracteres.
+     * Si el string sobrepasa el máximo establecido, se reemplaza el final por un string suspensor para indicar el recorte
+     * @param {String} text 
+     * @param {Number?} max
+     * @param {String?} suspensor 
+     * @returns {String}
+     */
+    shortenText: function(text, max = 200, suspensor = '...') {
+        if(typeof text !== 'string') throw TypeError('El texto debe ser un string');
+        if(typeof max !== 'number') throw TypeError('El máximo debe ser un número');
+        if(typeof suspensor !== 'string') throw TypeError('El suspensor debe ser un string');
         if(text.length < max) return text;
-        return `${text.slice(0, max - 3)}...`;
+        return `${text.slice(0, max - suspensor.length)}${suspensor}`;
     }
     //#endregion
 };

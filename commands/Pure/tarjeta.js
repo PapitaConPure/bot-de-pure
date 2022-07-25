@@ -1,5 +1,5 @@
 const Canvas = require('canvas');
-const { CommandOptionsManager } = require('../Commons/cmdOpts');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { MessageAttachment } = require('discord.js');
 const { improveNumber, fetchFlag } = require('../../func');
@@ -79,9 +79,7 @@ module.exports = {
 		'Deberás facilitar un juego (ejemplo: "HSiFS", "128" o "Youyoumu") y la calidad de survival obtenida ("clear", "1cc" o "nomiss")',
 		'Adicionalmente, puedes especificar si el logro incluye desafíos personales como `--nobomb`, `--nospecial` y/o `--pacifista`',
 	].join('\n'),
-	flags: [
-		'common',
-	],
+	flags: new CommandMetaFlagsManager().add('COMMON'),
 	options: options,
 	callx: '<juego> <dificultad> <survival> <score> <fecha?>',
 	experimental: false,

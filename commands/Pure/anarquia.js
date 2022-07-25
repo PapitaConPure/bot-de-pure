@@ -4,7 +4,7 @@ const { createCanvas, loadImage } = require('canvas');
 const { MessageEmbed, MessageAttachment } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { Puretable, AUser, pureTableImage } = require('../../localdata/models/puretable.js');
-const { CommandOptionsManager } = require('../Commons/cmdOpts');
+const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
 
 const shapes = {
 	x: [
@@ -92,39 +92,31 @@ const shapes = {
 const maxExp = 30;
 
 const options = new CommandOptionsManager()
-	.addParam('posición', 	   'NUMBER', 'para especificar una celda a modificar', { poly: ['x','y'], optional: true })
-	.addParam('emote', 		   'EMOTE',  'para especificar un emote a agregar',    { optional: true })
-	.addFlag('h', 'horizontal', 		 'para usar la habilidad de línea horizontal')
-	.addFlag('v', 'vertical', 			 'para usar la habilidad de línea vertical');
-
-module.exports = {
-	name: 'anarquia',
-	aliases: [
-		'anarquía', 'a'
-	],
-	brief: 'Para interactuar con la Tabla de Puré',
-	desc: 'Para interactuar con la __Tabla de Puré__\n' +
+	.addParam('posición', 	   'NUMBER',   'para especificar una celda a modificar', { poly: ['x','y'], optional: true })
+	.addParam('emote', 		   'EMOTE',    'para especificar un emote a agregar',    {                  optional: true })
+	.addFlag('h', 'horizontal', 		   'para usar la habilidad de línea horizontal')
+	.addFlag('v', 'vertical', 			   'para usar la habilidad de línea vertical')
+	.addFlag('s', ['especial', 'special'], 'para usar una habilidad especial', { name: 'habilidad', type: 'TEXT' });
+const flags = new CommandMetaFlagsManager().add(
+	'COMMON',
+	'GAME',
+);
+const command = new CommandManager('anarquia', flags)
+	.setAliases('anarquía', 'a')
+	.setBriefDescription('Para interactuar con la Tabla de Puré')
+	.setLongDescription(
+		'Para interactuar con la __Tabla de Puré__\n' +
 		'**Tabla de Puré**: tablero de 16x16 celdas de emotes ingresados por usuarios de cualquier server\n\n' +
 		'Puedes ingresar un `<emote>` en una `<posición(x,y)>` o, al no ingresar nada, ver la tabla\n' +
 		'La `<posicion(x,y)>` se cuenta desde 1x,1y, y el `<emote>` designado debe ser de un server del que yo forme parte~\n\n' +
 		'De forma aleatoria, puedes ir desbloqueando habilidades para rellenar líneas completas en `--horizontal` o `--vertical`. La probabilidad inicial es 1% en conjunto, y aumenta +1% por cada __nivel__\n' +
 		`**Nivel**: nivel de usuario en minijuego Anarquía. +1 por cada *30 usos*\n\n` +
 		'Incluso si usas una habilidad de línea, debes ingresar ambos ejes (`x,y`) en orden\n' +
-		`Ingresa únicamente \`p\` para ver tu perfil anárquico`,
-	flags: [
-		'common',
-		'game'
-	],
-	options,
-	callx: '<posición(x,y)?> <emote?>',
-	experimental: true,
-
-	/**
-	 * @param {import("../Commons/typings").CommandRequest} request
-	 * @param {import('../Commons/typings').CommandOptions} args
-	 * @param {Boolean} isSlash
-	 */
-	async execute(request, args, isSlash = false) {
+		`Ingresa únicamente \`p\` para ver tu perfil anárquico`
+	)
+	.setOptions(options)
+	.setExperimental(true)
+	.setExecution(async (request, args, isSlash) => {
 		const loadEmotes = global.loademotes;
 
 		//Revisar perfil
@@ -134,7 +126,7 @@ module.exports = {
 			const aid = (search) ? fetchUserID(search, request) : request.author.id;
 			const auser = await AUser.findOne({ userId: aid });
 			if(!aid) {
-				request.channel.send({ content: `:warning: Usuario **${search}** no encontrado` });
+				request.reply({ content: `:warning: Usuario **${search}** no encontrado` });
 				return;
 			}
 			const user = request.client.users.cache.get(aid);
@@ -143,16 +135,19 @@ module.exports = {
 				.setAuthor({ name: user.username, iconURL: user.avatarURL({ format: 'png', dynamic: true, size: 512 }) });
 			if(auser)
 				embed.setTitle('Perfil anárquico')
-					.addField('Inventario', `↔️ x ${auser.skills.h}\n↕ x ${auser.skills.v}`, true)
-					.addField('Rango', `Nivel ${Math.floor(auser.exp / 30) + 1} (exp: ${auser.exp % maxExp})`, true);
+					.addFields(
+						{ name: 'Inventario', value: `↔️ x ${auser.skills.h}\n↕ x ${auser.skills.v}`, inline: true },
+						{ name: 'Rango', value: `Nivel ${Math.floor(auser.exp / 30) + 1} (exp: ${auser.exp % maxExp})`, inline: true },
+					);
 			else
 				embed.setTitle('Perfil inexistente')
-					.addField(
-						'Este perfil anárquico no existe todavía', `Usa \`${p_pure(request.guildId).raw}anarquia <posición(x,y)> <emote>\` para colocar un emote en la tabla de puré y crearte un perfil anárquico automáticamente\n` +
-						`Si tienes más dudas, usa \`${p_pure(request.guildId).raw}ayuda anarquia\``
-					);
-			await request.channel.send({ embeds: [embed] });
-			return;
+					.addFields({
+						name: 'Este perfil anárquico no existe todavía',
+						value:
+							`Usa \`${p_pure(request.guildId).raw}anarquia <posición(x,y)> <emote>\` para colocar un emote en la tabla de puré y crearte un perfil anárquico automáticamente\n` +
+							`Si tienes más dudas, usa \`${p_pure(request.guildId).raw}ayuda anarquia\``
+					});
+			return request.reply({ embeds: [embed] });
 		}
 
 		//Ver tabla
@@ -205,8 +200,7 @@ module.exports = {
 			});
 			
 			const imagen = new MessageAttachment(canvas.toBuffer(), 'anarquia.png');
-			await request.reply({ files: [imagen] });
-			return;
+			return request.reply({ files: [imagen] });
 		}
 		
 		//Ingresar emotes a tabla
@@ -221,8 +215,8 @@ module.exports = {
 		} else auser.last = Date.now();
 
 		//Variables de ingreso
-		const h = isSlash ? options.fetchFlag(args, 'horizontal', { callback: (auser.skills.h > 0) }) : fetchFlag(args, { short: ['h'], long: ['horizontal'], callback: (auser.skills.h > 0) });
-		const v = isSlash ? options.fetchFlag(args, 'vertical', { callback: (auser.skills.h > 0) }) : fetchFlag(args, { short: ['v'], long: ['vertical'], callback: (auser.skills.v > 0) });
+		const h = options.fetchFlag(args, 'horizontal', { callback: (auser.skills.h > 0) });
+		const v = options.fetchFlag(args, 'vertical', { callback: (auser.skills.h > 0) });
 		let e = {};
 		let ematch = isSlash
 			? args.getString('emote')
@@ -243,7 +237,7 @@ module.exports = {
 				e.y = args[axis + 1] - 1;
 			}
 		}
-
+		
 		if(Object.keys(e).length !== 3 || !e.id || e.x === undefined) {
 			const errorcomms = [];
 			if(!isSlash)
@@ -284,31 +278,31 @@ module.exports = {
 		//Sistema de nivel de jugador y adquisición de habilidades
 		const userLevel = Math.floor(auser.exp / maxExp) + 1;
 		const probs = [
-			{ base: 1.2, emote: '❌', to: 'x', name: 'Habilidad Cruzada'	   },
-			{ base: 1.0, emote: '↔',  to: 'h', name: 'Habilidad Horizontal' },
-			{ base: 1.0, emote: '↕',  to: 'v', name: 'Habilidad Vertical'   },
-			{ base: 0.9, emote: '🟥', to: 'q', name: 'Habilidad Cuadradá' 	},
-			{ base: 0.8, emote: '🔵', to: 'o', name: 'Habilidad Circular' 	},
-			{ base: 0.7, emote: '💎', to: 'd', name: 'Habilidad Diamante' 	},
-			{ base: 0.6, emote: '🕹', to: 't', name: 'Habilidad Tetrápeda' 	 },
-			{ base: 0.5, emote: '🥔', to: 'p', name: 'Habilidad Tubércula' 	 },
-			{ base: 0.5, emote: '❗',  to: 'e', name: 'Habilidad Exclamativa' },
-			{ base: 0.5, emote: '🅰', to: 'a', name: 'Habilidad Anárquica',	 },
-			{ base: 0.1, emote: '👑', to: 'u', name: 'Habilidad Definitiva', },
+			{ base: 1.2, to: 'x', name: 'Habilidad Cruzada',     emote: '❌' },
+			{ base: 1.0, to: 'h', name: 'Habilidad Horizontal',  emote: '↔' },
+			{ base: 1.0, to: 'v', name: 'Habilidad Vertical',    emote: '↕' },
+			{ base: 0.9, to: 'q', name: 'Habilidad Cuadradá',    emote: '🟥' },
+			{ base: 0.8, to: 'o', name: 'Habilidad Circular',    emote: '🔵' },
+			{ base: 0.7, to: 'd', name: 'Habilidad Diamante',    emote: '💎' },
+			{ base: 0.6, to: 't', name: 'Habilidad Tetrápeda',   emote: '🕹' },
+			{ base: 0.5, to: 'p', name: 'Habilidad Tubércula',   emote: '🥔' },
+			{ base: 0.5, to: 'e', name: 'Habilidad Exclamativa', emote: '❗' },
+			{ base: 0.5, to: 'a', name: 'Habilidad Anárquica',   emote: '🅰' },
+			{ base: 0.1, to: 'u', name: 'Habilidad Definitiva',  emote: '👑' },
 		];
-		/*const r = Math.random();
+		const r = Math.random();
 		if(r < userLevel / 100) {
 			if(Math.random() < 0.5) {
 				auser.skills.h++;
 				if(isSlash) { replyquery.push('🌟 ¡Recibiste **1** ↔️ *Habilidad Horizontal*!'); ephemeral = false; }
-				else await request.react('');
+				else await request.react('↔');
 			} else {
 				auser.skills.v++;
 				if(isSlash) { replyquery.push('🌟 ¡Recibiste **1** ↕️ *Habilidad Vertical*!'); ephemeral = false; }
-				else await request.react('');
+				else await request.react('↕');
 			}
 			auser.markModified('skills');
-		}*/
+		}
 		auser.exp++;
 		await auser.save();
 
@@ -323,11 +317,15 @@ module.exports = {
 		else await request.react(offlimits ? '☑️' : '✅');
 
 		if((auser.exp % maxExp) == 0) {
-			if(isSlash) { replyquery.push(`¡**${request.user.username}** subió a nivel **${userLevel + 1}**!`); ephemeral = false; }
-			else await request.reply({ content: `¡**${request.author.username}** subió a nivel **${userLevel + 1}**!` });
+			if(isSlash) {
+				replyquery.push(`¡**${request.user.username}** subió a nivel **${userLevel + 1}**!`);
+				ephemeral = false;
+			} else
+				return request.reply({ content: `¡**${request.author.username}** subió a nivel **${userLevel + 1}**!` });
 		}
 
 		if(isSlash)
-			await request.reply({ content: replyquery.join('\n'), ephemeral: ephemeral });
-	}
-};
+			return request.reply({ content: replyquery.join('\n'), ephemeral: ephemeral });
+	})
+
+module.exports = command;

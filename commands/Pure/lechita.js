@@ -4,7 +4,7 @@ const func = require('../../func.js'); //Funciones globales
 const axios = require('axios');
 const Canvas = require('canvas');
 const { utils } = require('../../localdata/images.json'); //Funciones globales
-const { CommandOptionsManager } = require('../Commons/cmdOpts');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
 
 async function resolverLink(msg, linkRes, iSize, isnsfw) {
 	let iurl;
@@ -15,11 +15,11 @@ async function resolverLink(msg, linkRes, iSize, isnsfw) {
 			if(isnsfw || ((linkRes.indexOf('.gif') + linkRes.indexOf('.mp4')) < 0 && (response.data.toString().length / 1024) < 256)) {
 				iurl = linkRes;
 			} else {
-				msg.channel.send({ content: ':warning: La imagen es muy grande (>256KB) o tiene un formato inválido. Toma cum.' });
+				msg.reply({ content: ':warning: La imagen es muy grande (>256KB) o tiene un formato inválido. Toma cum.' });
 				iurl = msg.author.avatarURL({ format: 'png', size: iSize });
 			}
 		} else {
-			msg.channel.send({ content: ':warning: Ocurrió un error al descargar la imagen\n```\n' + response.status + '\n```\nToma cum.' });
+			msg.reply({ content: ':warning: Ocurrió un error al descargar la imagen\n```\n' + response.status + '\n```\nToma cum.' });
 			iurl = msg.author.avatarURL({ format: 'png', size: iSize });
 		}
 	}).catch(() => {
@@ -53,7 +53,7 @@ async function dibujarCum(msg, link) {
 	ctx.drawImage(cum, 0, 0, canvas.width, canvas.height);
 
 	const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'cummies.png');
-	msg.channel.send({ files: [imagen] });
+	return msg.reply({ files: [imagen] });
 };
 
 const options = new CommandOptionsManager()
@@ -68,10 +68,10 @@ module.exports = {
 		'cum', 'cummies', 'milk', 'milkies'
 	],
     desc: 'Disparo leche a ti o a lo que especifiques :flushed:\n**Nota:** en canales marcados como NSFW, el resultado será diferente',
-    flags: [
-        'meme',
-		'chaos'
-    ],
+    flags: new CommandMetaFlagsManager().add(
+		'MEME',
+		'CHAOS',
+	),
     options,
 	callx: '<usuario?> <emote?> <imagen?>',
 	
@@ -108,21 +108,22 @@ module.exports = {
 			];
 			const randcoomer = Math.floor(Math.random() * coomer.length);
 			
-			if(bglink !== undefined) {
-				const tiempoguild = Date.now() - global.lechitauses;
-				const lechesec = Math.floor(tiempoguild/1000);
-				const tiempoespera = 3;
+			if(bglink == undefined)
+				message.reply({ content: `${coomer[randcoomer]} <:lechita:931409943448420433> ${args[0]}` });
 				
-				if(lechesec > tiempoespera) {
-					global.lechitauses = Date.now();
-					message.client.guilds.cache.get(global.serverid.slot2).emojis.create(bglink, message.author.id)
-					.then(cumote => {
-						message.channel.send({ content: `${coomer[randcoomer]} <:lechita:931409943448420433> ${cumote}` })
-						.then(() => cumote.delete());
-					});
-				} else message.channel.send({ content: `:no_entry_sign: Solo puedes crear emotes cada ${tiempoespera} segundos (compartido globalmente).` });
-			} else
-				message.channel.send({ content: `${coomer[randcoomer]} <:lechita:931409943448420433> ${args[0]}` })
+			const tiempoguild = Date.now() - global.lechitauses;
+			const lechesec = Math.floor(tiempoguild/1000);
+			const tiempoespera = 3;
+			
+			if(lechesec <= tiempoespera) 
+				return message.reply({ content: `:no_entry_sign: Solo puedes crear emotes cada ${tiempoespera} segundos (compartido globalmente).` });
+
+			global.lechitauses = Date.now();
+			message.client.guilds.cache.get(global.serverid.slot2).emojis.create(bglink, message.author.id)
+			.then(cumote => {
+				message.reply({ content: `${coomer[randcoomer]} <:lechita:931409943448420433> ${cumote}` })
+				.then(() => cumote.delete());
+			});
 		}
     },
 };

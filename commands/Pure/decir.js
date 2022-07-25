@@ -1,7 +1,7 @@
 const { fetchFlag } = require('../../func');
 const { serverid } = require('../../localdata/config.json'); //Variables globales
 const { Permissions } = require('discord.js');
-const { CommandOptionsManager } = require('../Commons/cmdOpts');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require("../Commons/commands");
 
 const options = new CommandOptionsManager()
     .addParam('mensaje', 'TEXT', 'para especificar qué decir')
@@ -14,10 +14,10 @@ module.exports = {
         'say', 'echo',
     ],
     desc: 'Me hace decir lo que quieras que diga',
-    flags: [
-        'common',
-        'emote',
-    ],
+    flags: new CommandMetaFlagsManager().add(
+        'COMMON',
+        'EMOTE',
+    ),
     options,
     callx: '<mensaje>',
     experimental: true,
@@ -36,7 +36,7 @@ module.exports = {
 
         const sentence = isSlash ? args.getString('mensaje') : args.join(' ');
         if(request.guild.id === serverid.hourai && sentence.toLowerCase().indexOf(/h+(\W*_*)*o+(\W*_*)*u+(\W*_*)*r+(\W*_*)*a+(\W*_*)*i+(\W*_*)*/g) !== -1)
-            return request.channel.send({ content: 'No me hagai decir weas de hourai, ¿yapo? Gracias <:haniwaSmile:659872119995498507>' });
+            return request.reply({ content: 'No me hagai decir weas de hourai, ¿yapo? Gracias <:haniwaSmile:659872119995498507>' });
         
         await request.reply({ content: sentence.split(/ +#[Nn] +/g).join('\n') });
         if(!isSlash && del && request.deletable && request.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES))

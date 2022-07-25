@@ -1,7 +1,7 @@
 const { MessageEmbed } = require('discord.js'); //Integrar discord.js
 const { fetchUser, regroupText, fetchMember } = require('../../func.js'); //Funciones globales
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptionsManager } = require('../Commons/cmdOpts');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require("../Commons/commands");
 
 const maxusers = 10;
 /**@param {import('discord.js').GuildMember} member*/
@@ -11,14 +11,14 @@ const getAvatarEmbed = (member) => {
     const embed = new MessageEmbed()
         .setColor('#faa61a')
         .setImage(memberAvatarUrl)
-        .addField(`Avatar de ${member.displayName}`, `[🔗 Enlace](${memberAvatarUrl})`, true);
+        .addFields({ name: `Avatar de ${member.displayName}`, value: `[🔗 Enlace](${memberAvatarUrl})`, inline: true });
     
     //En caso de tener un override para el server
     const userAvatarUrl = member.user.displayAvatarURL(urlDisplayOptions);
     if(userAvatarUrl !== memberAvatarUrl)
         embed.setThumbnail(userAvatarUrl)
             .setDescription(`Visto desde "${member.guild}"`, true)
-            .addField('Global', `[🔗 Enlace](${userAvatarUrl})`, true);
+            .addFields({ name: 'Global', value: `[🔗 Enlace](${userAvatarUrl})`, inline: true });
     
     return embed;
 };
@@ -47,9 +47,7 @@ module.exports = {
         'Puedes buscar por ID, mención, etiqueta, nombre o apodo. Para búsquedas múltiples, separa los términos con comas',
         'Se priorizan resultados del servidor actual, pero la búsqueda tiene un rango de todos los servidores a los que tengo acceso',
     ].join('\n'),
-    flags: [
-        'common'
-    ],
+    flags: new CommandMetaFlagsManager().add('COMMON'),
     options,
     callx: '<usuario?>',
     experimental: true,

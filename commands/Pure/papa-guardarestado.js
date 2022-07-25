@@ -1,14 +1,15 @@
 const global = require('../../localdata/config.json'); //Variables globales
 const imgs = require('../../localdata/drawings.json'); //Variables globales
 const fs = require('fs');
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 
 module.exports = {
 	name: 'papa-guardarestado',
     desc: 'Vuelca el estado de todas mis propiedades en el momento que se ejecuta el comando y se envía como un archivo de texto para descargar',
-    flags: [
-        'papa',
-        'outdated'
-    ],
+	flags: new CommandMetaFlagsManager().add(
+        'PAPA',
+        'OUTDATED',
+    ),
 	
 	async execute(message, args) {
         let templog = JSON.stringify(global, null, 4);
@@ -18,7 +19,7 @@ module.exports = {
         fs.writeFile("save.txt", tempdata, err => {
             if(err) console.log(err);
         });
-        message.channel.send({
+        message.reply({
             content: ':floppy_disk: **archivo generado**. Guarda los datos en los archivos del proyecto especificados.\n',
             files: ["save.txt"]
         });

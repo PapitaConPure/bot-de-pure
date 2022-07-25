@@ -22,10 +22,10 @@
   },
   "homepage": "https://github.com/PapitaConPure/bot-de-pure#readme",
   "dependencies": {
-    "@discordjs/builders": "^0.12.0",
+    "@discordjs/builders": "^1.0.0",
     "@discordjs/rest": "^0.3.0",
     "axios": "^0.26.1",
-    "booru": "^2.5.3",
+    "booru": "^2.5.8",
     "canvas": "^2.8.0",
     "chalk": "^4.1.1",
     "discord-api-types": "^0.29.0",

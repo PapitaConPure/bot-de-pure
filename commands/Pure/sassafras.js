@@ -1,6 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { randRange, fetchFlag } = require('../../func');
-const { CommandOptionsManager } = require('../Commons/cmdOpts');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
 
 const sassadata = {
 	sassamodo:
@@ -103,9 +103,10 @@ module.exports = {
 	brief: 'Comando de recomendaciones de Sassafras',
     desc: 'Comando de recomendaciones de Sassafras\n' +
 		'Cuidado con hacer enojar al tío Sassa, o puede que active su `--sassamodo`',
-    flags: [
-        'meme',
-    ],
+	flags: new CommandMetaFlagsManager().add(
+		'MEME',
+		'OUTDATED',
+	),
     options,
 	experimental: true,
 

@@ -1,4 +1,5 @@
 const { p_pure } = require('../../localdata/customization/prefixes.js');
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 
 module.exports = {
 	name: 'g-indice',
@@ -16,5 +17,5 @@ module.exports = {
 		`\`${p_pure().raw}ayuda g-opciones\`: introducción a opciones y \`--banderas\`\n` +
 		`\`${p_pure().raw}ayuda g-tipos\`: introducción a _(tipos)_ y definiciones de _(tipos)_\n\n` +
 		'_"¿Quién necesita Wikipedia cuando tenés un Bot chatarra?" ~Papita_',
-	flags: ['guide']
+	flags: new CommandMetaFlagsManager().add('GUIDE'),
 };

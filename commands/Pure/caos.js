@@ -2,7 +2,7 @@ const { readdirSync } = require('fs'); //Integrar operaciones sistema de archivo
 const { fetchFlag } = require('../../func.js');
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptionsManager } = require('../Commons/cmdOpts');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require("../Commons/commands");
 
 const options = new CommandOptionsManager()
 	.addFlag([], ['activar', 'activate', 'on'],    'para activar los comandos caóticos del servidor')
@@ -14,9 +14,7 @@ module.exports = {
 		'chaos'
 	],
 	desc: 'Para activar o desactivar comandos caóticos en un servidor',
-	flags: [
-		'mod',
-	],
+	flags: new CommandMetaFlagsManager().add('MOD'),
 	options,
 	experimental: true,
 

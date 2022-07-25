@@ -1,12 +1,12 @@
+const { CommandMetaFlagsManager } = require('../Commons/commands');
+
 module.exports = {
 	name: 'papa-escapar',
 	aliases: [
 		'papa-abandonar'
 	],
 	desc: 'Abandono.',
-	flags: [
-		'papa'
-	],
+	flags: new CommandMetaFlagsManager().add('PAPA'),
 
 	/**
 	 * 

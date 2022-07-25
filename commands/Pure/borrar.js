@@ -1,6 +1,6 @@
 const { fetchFlag, fetchUser } = require('../../func.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require("../Commons/commands");
 
 const options = new CommandOptionsManager()
 	.addParam('cantidad', 'NUMBER', 'para especificar la cantidad de mensajes a borrar (sin contar el mensaje del comando)')
@@ -14,28 +14,25 @@ module.exports = {
         'del', 'd', 
     ],
     desc: 'Elimina una cierta cantidad de mensajes entre 2 y 100',
-    flags: [
-        'mod'
-    ],
+    flags: new CommandMetaFlagsManager().add('MOD'),
     options,
 	callx: '<cantidad>',
 	
 	async execute(message, args) {
 		await message.delete();
 		if(!args.length) {
-			const sent = await message.channel.send({ content: ':warning: debes especificar la cantidad o el autor de los mensajes a borrar.' });
+			const sent = await message.reply({ content: ':warning: debes especificar la cantidad o el autor de los mensajes a borrar.' });
 			setTimeout(() => sent.delete(), 1000 * 5);
 			return;
 		}
 		const user = fetchFlag(args, { property: true, short: ['u'], long: ['usuario', 'miembro'], callback: (x, i) => fetchUser(x[i], message), fallback: undefined });
 		let amt = (args.length) ? parseInt(args[0]) : 100;
 		if(isNaN(amt)) {
-			message.channel.send({
+			return message.reply({
 				content:
 					':warning: Debes especificar la cantidad de mensajes a borrar\n' +
 					`Revisa \`${p_pure(message.guildId).raw}ayuda borrar\` para más información`
 			});
-			return;
 		}
 		amt = Math.max(2, Math.min(amt, 100));
 		

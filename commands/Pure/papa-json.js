@@ -1,4 +1,5 @@
 const { MessageAttachment } = require('discord.js');
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 
 const readObj = (object, indent) => {
 	let objret = '';
@@ -15,9 +16,7 @@ const readObj = (object, indent) => {
 module.exports = {
 	name: 'papa-json',
 	desc: 'Busca un `<objeto>` JS con cierto siguiendo las indicaciones de `<(ruta, nombre)>` en el `<archivo>` especificado (o `global.json`)',
-	flags: [
-		'papa'
-	],
+	flags: new CommandMetaFlagsManager().add('PAPA'),
 	options:[
 		'`<archivo?>` _(texto: *.json)_ para especificar en qué archivo buscar el objeto',
 		'`<objeto? (ruta, nombre)>` _(texto, texto)_ para especificar la ruta relativa al archivo del objeto a buscar, en orden descendiente'
@@ -49,12 +48,10 @@ module.exports = {
 				}
 
 		//Acción de comando
-		if(obj === undefined) {
-			message.channel.send({ content: `:warning: El objeto "${args.join('.')}" no existe. Revisa que el identificador esté bien escrito.` });
-			return;
-		}
+		if(obj === undefined)
+			return message.reply({ content: `:warning: El objeto "${args.join('.')}" no existe. Revisa que el identificador esté bien escrito.` });
 
 		const jsonfile = new MessageAttachment(Buffer.from(JSON.stringify(obj, null, '\t'), 'utf-8'), 'myfile.json');
-		await message.channel.send({ files: [ jsonfile ]});
+		return message.reply({ files: [ jsonfile ]});
 	}
 };

@@ -1,4 +1,5 @@
 const { modifyPresence } = require('../../presence.js');
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 
 module.exports = {
 	name: 'papa-próximo',
@@ -6,9 +7,7 @@ module.exports = {
 		'papa-proximo'
 	],
 	desc: '...',
-	flags: [
-		'papa'
-	],
+	flags: new CommandMetaFlagsManager().add('PAPA'),
 
 	async execute(message, _) {
 		await Promise.all([

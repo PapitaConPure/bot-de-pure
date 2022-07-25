@@ -29,10 +29,10 @@ function getRequestContent(request) {
 async function auditRequest(request) {
     const userTag = (request.author ?? request.user).tag;
     const embed = generateRequestRecord(request)
-        .addField(userTag, getRequestContent(request));
+        .addFields({ name: userTag, value: getRequestContent(request) });
         
     if(request.attachments?.size)
-        embed.addField('Adjuntado:', request.attachments.map(attf => attf.url ?? 'https://discord.com/').join('\n').slice(0, 1023));
+        embed.addFields({ name: 'Adjuntado:', value: request.attachments.map(attf => attf.url ?? 'https://discord.com/').join('\n').slice(0, 1023) });
     
     return global.logch?.send({ embeds: [embed] }).catch(console.error);
 };
@@ -45,18 +45,24 @@ async function auditSystem(title, ...fields) {
     const embed = new MessageEmbed()
         .setColor('DARK_VIVID_PINK')
         .setAuthor({ name: 'Mensaje de sistema' })
-        .setTitle(title)
-        .setFields(fields);
+        .setTitle(title);
+    if(fields.length)
+        embed.setFields(fields);
     
     return global.logch?.send({ embeds: [embed] }).catch(console.error);
 };
 
 /**
- * @param {import('../commands/Commons/typings.js').CommandRequest} request
+ * @param {import('../commands/Commons/typings.js').CommandRequest} action
+ * @param {Array<import('discord.js').EmbedFieldData>} fields
  */
-async function auditAction(request) {
-    const embed = generateRequestRecord(request)
-        .setColor('ORANGE');
+async function auditAction(action, ...fields) {
+    const embed = new MessageEmbed()
+        .setColor('ORANGE')
+        .setAuthor({ name: 'Acción realizada' })
+        .setTitle(action);
+    if(fields.length)
+        embed.setFields(fields);
     
     return global.logch?.send({ embeds: [embed] }).catch(console.error);
 };
@@ -66,17 +72,17 @@ async function auditAction(request) {
  * @typedef {{ request: import('../commands/Commons/typings').CommandRequest, brief: String, details: String, ping: Boolean }} AuditErrorOptions
  * @param {AuditErrorOptions} param2
  */
-async function auditError(error, { request, brief, details, ping = false }) {
+async function auditError(error, { request, brief, details, ping = false } = { ping: false }) {
     const embed = (request ? generateRequestRecord(request) : new MessageEmbed())
         .setColor('#0000ff');
     
     if(request) {
         const userTag = (request.author ?? request.user).tag;
-        embed.addField(userTag, getRequestContent(request));
+        embed.addFields({ name: userTag, value: getRequestContent(request) });
     }
-    embed.addField(brief || 'Ha ocurrido un error al ejecutar una acción', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
+    embed.addFields({ name: brief || 'Ha ocurrido un error al ejecutar una acción', value: `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\`` });
     if(details)
-        embed.addField('Detalle', details);
+        embed.addFields({ name: 'Detalle', value: details });
     
     return global.logch?.send({
         content: ping ? `<@${global.peopleid.papita}>` : null,

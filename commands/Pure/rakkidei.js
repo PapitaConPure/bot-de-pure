@@ -1,4 +1,5 @@
 const { randRange } = require('../../func.js');
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 
 const phrase = [
 	'Ahora sí vení que te saco la cresta',
@@ -21,9 +22,7 @@ module.exports = {
 	],
 	brief: 'Comando de trompada de Rakkidei',
 	desc: 'Comando de trompada de Rakkidei\n[🐦 Twitter](https://twitter.com/rakkidei)\n[🇵 pixiv](https://www.pixiv.net/users/58442175)',
-	flags: [
-		'common'
-	],
+	flags: new CommandMetaFlagsManager().add('COMMON'),
 
 	async execute({ channel }, _) {
 		//Acción de comando

@@ -1,5 +1,5 @@
 const { fetchFlag, fetchSentence } = require('../../func.js');
-const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
 
 const options = new CommandOptionsManager()
 	.addParam('hora', 'TEXT', 'para establecer la hora a convertir')
@@ -13,9 +13,7 @@ module.exports = {
 		'time', 'schedule',
 	],
 	desc: 'Muestra una fecha y hora automáticamente adaptada seg�n la `<fecha>` que ingreses. Recuerda que no soy adivina, así que siempre ingresa tu huso local si no quieres que se tome como GMT+0',
-	flags: [
-		'common'
-	],
+	flags: new CommandMetaFlagsManager().add('COMMON'),
 	callx: options.callSyntax,
 	experimental: true,
 	

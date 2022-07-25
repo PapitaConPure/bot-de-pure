@@ -1,19 +1,18 @@
 const { MessageEmbed } = require("discord.js");
 const tenshi = { '👉👈': 'https://i.imgur.com/yeYyEvp.jpg' }; //Soy un puto meme
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 
 module.exports = {
 	name: 'papa-invitar',
     desc: 'Muestra una carta de invitación para agregarme a otro servidor',
-    flags: [
-        'papa'
-    ],
+	flags: new CommandMetaFlagsManager().add('PAPA'),
 	
     /**
      * @param {import('discord.js').Message} param0 
      * @param {Array<String>} _ 
      */
 	async execute({ channel, client }, _) {
-        const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${client.application.id}&scope=bot&permissions=1394522565840`;
+        const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${client.application.id}&scope=bot&permissions=1394522582224`;
         const embed = new MessageEmbed()
             .setTitle('Invitación')
             .setColor('BLURPLE')

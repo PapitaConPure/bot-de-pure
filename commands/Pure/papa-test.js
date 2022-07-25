@@ -1,4 +1,5 @@
-//const Discord = require('discord.js'); //Integrar discord.js
+const { MessageEmbed, MessageActionRow, MessageButton, Modal, TextInputComponent } = require('discord.js'); //Integrar discord.js
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 //const global = require('../../localdata/config.json'); //Variables globales
 // const { dibujarDespedida } = require('../../func.js');
 //const uwu = require('./uwu.js');
@@ -7,7 +8,7 @@
 module.exports = {
 	name: 'papa-test',
     desc: 'Comando de pruebas :flushed: :point_right: :point_left:',
-    flags: ['papa'],
+	flags: new CommandMetaFlagsManager().add('PAPA'),
 	
 	async execute(request, args) {
         //uwu.execute(message, args);
@@ -28,12 +29,47 @@ module.exports = {
             short: [ 'd', 'p' ],
             long: [ 'cuarta', 'delta', 'prop', 'usuario' ],
             callback: (x, i) => message.client.users.cache.get(fetchUserID(x[i], message)).username,
-            fallback: () => { message.channel.send({ content: 'Tu vieja.' }); return undefined; }
+            fallback: () => { message.reply({ content: 'Tu vieja.' }); return undefined; }
         });
 
         console.log({ args, a, b, c, d });
-        message.channel.send({ content: `**args** ${args}\n**a** ${a}\n**b** ${b}\n**c** ${c}\n**d** ${d}` });*/
+        message.reply({ content: `**args** ${args}\n**a** ${a}\n**b** ${b}\n**c** ${c}\n**d** ${d}` });*/
         //dibujarDespedida(message.member);
-        uwu = 3 * dope + cope
+        const embed = new MessageEmbed()
+            .setColor('AQUA')
+            .addField('Aprendé cómo ser hackeado', 'Presioná el botoncito, dale');
+        const row = new MessageActionRow()
+            .addComponents([
+                new MessageButton()
+                    .setCustomId('papa-test_test')
+                    .setStyle('PRIMARY')
+                    .setEmoji('👺')
+                    .setLabel('APRETÁ ACÁ'),
+            ]);
+        return request.reply({ embeds: [embed], components: [row] });
     },
+
+    /**@param {import('discord.js').ButtonInteraction} interaction*/
+    async test(interaction) {
+        const ipInput = new TextInputComponent()
+            .setCustomId('ipInput')
+            .setLabel('Pásame tu IP po')
+			.setStyle('SHORT');
+
+        const doxInput = new TextInputComponent()
+            .setCustomId('doxInput')
+            .setLabel('Pásame tu dirección po')
+            .setStyle('PARAGRAPH');
+
+        const rows = [
+            new MessageActionRow().addComponents(ipInput),
+            new MessageActionRow().addComponents(doxInput),
+        ];
+
+        const modal = new Modal()
+            .setCustomId('papa-test_test2')
+            .setTitle('HOLA PERO muy buenas')
+            .addComponents(rows);
+        interaction.showModal(modal);
+    }
 };

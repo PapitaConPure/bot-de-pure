@@ -1,6 +1,6 @@
 const { MessageEmbed } = require("discord.js");
 const { fetchUser, randRange } = require("../../func");
-const { CommandOptionsManager } = require("../Commons/cmdOpts");
+const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
 
 const lovestats = () => [
 	{ text: '🤝 [n]% amistad',    number: randRange(0, 100, false) },
@@ -21,9 +21,7 @@ module.exports = {
 		'besar', 'abrazar', 'hug', 'kiss'
 	],
 	desc: 'Mima al `<usuario>` mencionado y te da un resumen de cómo estuvo el mimo para ambas partes',
-	flags: [
-		'common'
-	],
+	flags: new CommandMetaFlagsManager().add('COMMON'),
 	options: options,
 	callx: '<persona>',
 	experimental: true,

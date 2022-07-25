@@ -1,4 +1,5 @@
 const global = require('../../localdata/config.json'); //Variables globales
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 
 module.exports = {
 	name: 'papa-mantenimiento',
@@ -9,9 +10,7 @@ module.exports = {
 	desc: 'Hace que la instancia de `<proceso>` que utilizo se restrinja al canal actual\n' +
 		'Como lo más probable es que este comando se use mientras estoy hosteada en 2 lugares al mismo tiempo, puedes diferenciar un `<proceso>` de otro por su ubicación de host o con una ID única que equivale a la expresión numérica del momento en el que se ejecutó\n' +
 		'Para deshacer la restricción, usa el comando sin argumentos una vez más (en el canal que se estableción la restricción)',
-	flags: [
-		'papa'
-	],
+	flags: new CommandMetaFlagsManager().add('PAPA'),
 	callx: '<proceso?>',
 
 	async execute({ channel, author }, _) {

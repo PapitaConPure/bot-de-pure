@@ -1,4 +1,5 @@
 const { p_pure } = require('../../localdata/customization/prefixes.js');
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 
 module.exports = {
 	name: 'g-tipos',
@@ -19,5 +20,5 @@ module.exports = {
 		'_(número [2])_: 2 números seguidos`\n\n' +
 		`Para aprender más sobre los \`--parametros\` de comando, usa \`${p_pure().raw}ayuda g-parametros\`\n` +
 		`Para aprender más sobre las \`--opciones\` de comando, usa \`${p_pure().raw}ayuda g-opciones\`\n`,
-	flags: ['guide']
+	flags: new CommandMetaFlagsManager().add('GUIDE'),
 };

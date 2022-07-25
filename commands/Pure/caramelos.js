@@ -1,9 +1,13 @@
 const { serverid: sid } = require('../../localdata/config.json');
 const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 
 const embed = new MessageEmbed()
 	.setColor('DARK_PURPLE')
-	.addField('¡Se están repartiendo caramelos mágicos!', 'Antiguos relatos cuentan que permiten ver trazos de lujuria grabados en el aire.\nSe están aceptando devoluciones para aplicantes previos, solo vomítenlos con cuidado de dañarlos.');
+	.addFields({
+		name: '¡Se están repartiendo caramelos mágicos!',
+		value: 'Antiguos relatos cuentan que permiten ver trazos de lujuria grabados en el aire.\nSe están aceptando devoluciones para aplicantes previos, solo vomítenlos con cuidado de dañarlos.',
+	});
 
 const row = new MessageActionRow().addComponents([
 	new MessageButton()
@@ -27,10 +31,10 @@ module.exports = {
 		'candy', 'candies', 'milky'
 	],
     desc: 'Otorga caramelos al reaccionar (solo Hourai Doll)',
-    flags: [
-        'hourai',
-		'outdated',
-    ],
+    flags: new CommandMetaFlagsManager().add(
+		'HOURAI',
+		'OUTDATED',
+	),
 	experimental: true,
 	
 	/**

@@ -1,6 +1,7 @@
 const { MessageEmbed } = require('discord.js'); //Integrar discord.js
 const { readdirSync } = require('fs'); //Para el contador de comandos
 const { tenshiColor } = require('../../localdata/config.json');
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 
 const embed = new MessageEmbed()
     .setColor(tenshiColor)
@@ -21,9 +22,7 @@ module.exports = {
         'presentacion', 'presentación', 'hola', 'saludar', 'presentarse', 'puré', 'pure'
     ],
     desc: 'Me presento y digo cositas sobre mí~',
-    flags: [
-        'common'
-    ],
+    flags: new CommandMetaFlagsManager().add('COMMON'),
     experimental: true,
 	
 	async execute(request, _, isSlash = false) {

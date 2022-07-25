@@ -1,35 +1,20 @@
-const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
 const { fetchMember, regroupText } = require('../../func');
-const { CommandOptionsManager } = require('../Commons/cmdOpts');
+const { CommandMetaFlagsManager, CommandOptionsManager, CommandManager } = require('../Commons/commands');
 
 const options = new CommandOptionsManager()
 	.addParam('duración', 'NUMBER', 'para especificar el tiempo en minutos')
 	.addParam('miembros', 'USER', 'para aislar miembros', { poly: 'MULTIPLE', polymax: 8 });
-
-module.exports = {
-	name: 'aislar',
-	aliases: [
-		'mutear', 'silenciar',
-		'mute', 'timeout',
-		'm',
-	],
-	brief: 'Aisla miembros en el server por un cierto tiempo',
-	desc: 'Aisla a uno o más `<miembros>` del servidor.\n' +
-		  'Puedes especificar la `<duración>` en minutos, o ingresar 0 para revocar el aislamiento',
-	flags: [
-		'mod',
-	],
-	options,
-	callx: options.callSyntax,
-	experimental: true,
-	
-	/**
-	 * @param {import("../Commons/typings").CommandRequest} request
-	 * @param {import('../Commons/typings').CommandOptions} args
-	 * @param {Boolean} isSlash
-	 */
-	async execute(request, args, isSlash = false) {
-		//Acción de comando
+const flags = new CommandMetaFlagsManager().add('MOD');
+const command = new CommandManager('aislar', flags)
+	.setAliases('mutear', 'silenciar', 'mute', 'timeout', 'm')
+	.setBriefDescription('Aisla miembros en el server por un cierto tiempo')
+	.setLongDescription(
+		'Aisla a uno o más `<miembros>` del servidor.',
+		'Puedes especificar la `<duración>` en minutos, o ingresar 0 para revocar el aislamiento',
+	)
+	.setOptions(options)
+	.setExperimental(true)
+	.setExecution(async (request, args, isSlash) => {
 		if(!isSlash && !args.length)
 			return request.reply({ content: '⚠ Debes indicar un usuario.', ephemeral: true });
 
@@ -63,9 +48,10 @@ module.exports = {
 					: `✅ Se ha revocado el aislamiento de **${membersList(succeeded)}**`,
 				failed.length
 					? `❌ No se ha podido actualizar a **${membersList(failed)}**. Puede que tengan más poder que yo`
-					: ''
+					: '',
 			].join('\n'),
 			ephemeral: true,
 		});
-	},
-};
+	});
+
+module.exports = command;

@@ -1,7 +1,7 @@
 const Discord = require('discord.js'); //Integrar discord.js
-var global = require('../../localdata/config.json'); //Variables globales
+const global = require('../../localdata/config.json'); //Variables globales
 const { paginate, fetchArrows } = require('../../func');
-const { CommandOptionsManager } = require('../Commons/cmdOpts');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
 
 const options = new CommandOptionsManager()
 	.addParam('perrito', 'TEXT', 					  																		   'para especificar un perrito a enviar (por nombres identificadores)', 						   { optional: true })
@@ -14,10 +14,10 @@ module.exports = {
 		'perrito', 'pe', 'dog'
 	],
     desc: 'Comando cachorro de Taton. Puedes ingresar una palabra identificadora para enviar un perrito en específico o ver una lista de perritos. Si no ingresas nada, se enviará un perrito aleatorio',
-    flags: [
-        'meme',
-        'emote'
-    ],
+    flags: new CommandMetaFlagsManager().add(
+		'MEME',
+		'EMOTE',
+	),
     options,
 	callx: '[<perrito?>/<lista?>]',
 	
@@ -56,7 +56,7 @@ module.exports = {
 		const emotes = slot1Coll.concat(slot2Coll).filter(emote => perritos.some(perrito => perrito === emote.name));
 
 		if(!args.length) {
-			message.channel.send({ content: `${emotes.random()}` });
+			message.reply({ content: `${emotes.random()}` });
 			if(args.includes('-d')) message.delete();
 		} else {
 			const perritocomun = emotes.find(perrito => perrito.name === 'perrito');
@@ -76,7 +76,7 @@ module.exports = {
 
 				const arrows = fetchArrows(message.client.emojis.cache);
 				const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
-				message.channel.send({ embeds: [embed] }).then(sent => {
+				message.reply({ embeds: [embed] }).then(sent => {
 					sent.react(arrows[0])
 						.then(() => sent.react(arrows[1]));
 					
@@ -96,13 +96,13 @@ module.exports = {
 				emotes.map(emote => {
 					if(!foundperrito) {
 						if(emote.name.toLowerCase().startsWith(args[0].toLowerCase()) && perritos.some(perrito => perrito === emote.name)) {
-							message.channel.send({ content: `${emote}` });
+							message.reply({ content: `${emote}` });
 							foundperrito = true;
 						}
 					}
 				});
 
-				if(!foundperrito) message.channel.send({ content: `${perritocomun}` });
+				if(!foundperrito) message.reply({ content: `${perritocomun}` });
 				if(args.includes('-d')) message.delete();
 			}
 		}

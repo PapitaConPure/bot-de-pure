@@ -2,8 +2,9 @@
  * @typedef {{name: String, expression: String|Number}} ParamTypeStrict Parámetros de CommandOption que siguen una sintaxis estricta
  * @typedef {'NUMBER'|'TEXT'|'USER'|'ROLE'|'CHANNEL'|'MESSAGE'|'EMOTE'|'IMAGE'|'FILE'|'URL'|'ID'|ParamTypeStrict} ParamType Tipos de parámetro de CommandOption
  * @typedef {'SINGLE'|'MULTIPLE'|Array<String>} ParamPoly Capacidad de entradas de parámetro de CommandOption
- * @typedef {Map<String, CommandOption>} CommandOptionsCollection Colección de opciones de comando indexadas por nombre de parámetro
  */
+
+const { fetchFlag } = require('../../func');
 
 const commonTypes = {
     'NUMBER':   'número',
@@ -267,17 +268,17 @@ class CommandFlagExpressive extends CommandFlag {
 class CommandOptionsManager {
     /**
      * Opciones del administrador
-     * @type {CommandOptionsCollection}
+     * @type {Map<String, CommandOption>}
      */
     options;
     /**
      * Parámetros del administrador
-     * @type {CommandOptionsCollection}
+     * @type {Map<String, CommandParam>}
      */
     params;
     /**
      * Banderas del administrador
-     * @type {CommandOptionsCollection}
+     * @type {Map<String, CommandFlag | CommandFlagExpressive>}
      */
     flags;
     /**
@@ -399,16 +400,20 @@ class CommandOptionsManager {
     /**
      * Devuelve un valor o función basado en si se ingresó la flag buscada o no
      * Si no se recibe ninguna entrada, se devuelve fallback
-     * @param {import('discord.js').CommandInteractionOptionResolver} args El conjunto de entradas
+     * @param {import('discord.js').CommandInteractionOptionResolver | Array<String>} args El conjunto de entradas
      * @param {String} identifier El identificador de la flag
      * @param {Function} getMethod El método de procesado de entrada
-     * @typedef {Object} feedback
-     * @property {*} callback Valor de retorno si se respondió la flag
-     * @property {*} fallback Un valor por defecto si no se respondió la flag
-     * @param {feedback} output Define la respuestas en cada caso
+     * @typedef {{
+     *  callback: *
+     *  fallback: *
+     * }} FeedbackOptions
+     * @param {FeedbackOptions} output Define la respuestas en cada caso
      * @returns {*} El valor de retorno de callback si la flag fue respondida, o en cambio, el de fallback
      */
     fetchFlag(args, identifier, output = { callback, fallback }) {
+        if(Array.isArray(args))
+            return fetchFlag(args, { ...this.flags.get(identifier).structure, ...output });
+        
         /**@type {CommandFlagExpressive}*/
         const flag = this.flags.get(identifier);
 
@@ -443,5 +448,5 @@ class CommandOptionsManager {
 
 module.exports = {
     typeHelp,
-    CommandOptionsManager
+    CommandOptionsManager,
 };

@@ -1,5 +1,5 @@
 const {  } = require('discord.js'); //Integrar discord.js
-const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require("../Commons/commands");
 
 const options = new CommandOptionsManager()
 	.addParam('comando', 'TEXT', 'para especificar el comando a configurar');
@@ -11,10 +11,10 @@ module.exports = {
 	],
 	options,
 	desc: 'Para configurar Preferencias de usuario',
-	flags: [
-		'common',
-		'maintenance',
-	],
+	flags: new CommandMetaFlagsManager().add(
+		'COMMON',
+		'MAINTENANCE',
+	),
     experimental: true,
 	
 	/**

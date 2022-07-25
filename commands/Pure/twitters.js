@@ -1,6 +1,7 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { fetchFlag, fetchSentence } = require('../../func.js');
-const { CommandOptionsManager } = require('../Commons/cmdOpts');
+const { auditError } = require('../../systems/auditor.js');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
 
 const options = new CommandOptionsManager()
 	.addParam('twitters', { name: 'enlace', expression: 'https://twitter.com/' }, 'para colocar uno o más Twitters en un nuevo tablón', { poly: true })
@@ -22,22 +23,20 @@ module.exports = {
 	'Alternativamente, puedes especificar una `--id` de un tablón ya enviado para editarlo, especificando qué `<twitters>` `--agregar` o `--eliminar`\n' +
 	'El tablón se añadirá o se buscará por `--id` para editar *en el canal actual* a menos que especifiques un `--canal`\n' +
 	'Puedes crear un tablón con `--epígrafe`, `--título` y `--pie` de título personalizados',
-	flags: [
-		'mod',
-		'hourai'
-	],
+	flags: new CommandMetaFlagsManager().add(
+		'MOD',
+		'HOURAI',
+	),
 	options,
 	callx: '<twitters(...)>',
 
 	async execute(message, args) {
-		if(!args.length) {
-			message.channel.send({ content: ':warning: Necesitas ingresar al menos un enlace de Twitter o propiedad de tablón' });
-			return;
-		}
+		if(!args.length)
+			return message.reply({ content: ':warning: Necesitas ingresar al menos un enlace de Twitter o propiedad de tablón' });
 
 		//Parámetros de comando
 		let edit = fetchFlag(args, { short: [ 'a' ], long: ['agregar', 'añadir'], callback: 'add' });
-		if(edit === undefined)
+		if(edit == undefined)
 			edit = fetchFlag(args, { short: [ 'e' ], long: ['eliminar'], callback: 'del', fallback: '' });
 		let ch = fetchFlag(args, {
 			property: true,
@@ -64,22 +63,18 @@ module.exports = {
 				}
 		
 		//Acción de comando
-		if(ch === undefined) ch = message.channel;
+		if(ch == undefined) ch = message.channel;
 		const linkbase = 'https://twitter.com/';
 		const div = 10;
 		if(!edit.length) {
 			//Creación de nuevo embed
-			if(!args.length) {
-				message.channel.send(':warning: Para crear un nuevo tablón de Twitters, debes ingresar algunos links iniciales');
-				return;
-			}
+			if(!args.length)
+				return message.reply(':warning: Para crear un nuevo tablón de Twitters, debes ingresar algunos links iniciales');
 			
 			const twitters = args.map(arg => (arg.startsWith(linkbase))?`[@${arg.slice(linkbase.length)}](${arg})`:undefined);
 
-			if(twitters.some(twitter => twitter === undefined)) {
-				message.channel.send({ content: ':warning: Uno o más enlaces tenían un formato inválido' });
-				return;
-			}
+			if(twitters.some(twitter => twitter === undefined))
+				return message.reply({ content: ':warning: Uno o más enlaces tenían un formato inválido' });
 
 			const embed = new Discord.MessageEmbed()
 				.setColor('#1da1f2')
@@ -90,47 +85,45 @@ module.exports = {
 			for(page = 0; page < twitters.length; page += div)
 				embed.addField(`Tabla ${Math.ceil(page / div) + 1}`, twitters.slice(page, page + div).join('\n'), true);
 			
-			ch.send({ embeds: [embed] });
-		} else if(id !== undefined) {
-			//Modificación de embed existente
-			ch.messages.fetch(id).then(msg => {
-				if(msg.embeds === undefined || msg.author.id !== message.client.user.id) {
-					message.channel.send({ content: ':warning: El mensaje especificado existe pero no me pertenece o no tiene ningún embed' });
-					return;
-				}
+			return ch.send({ embeds: [embed] });
+		}
+		
+		if(id == undefined)
+			return message.reply({ content: 'Para añadir o eliminar mensajes en un embed ya enviado, debes facilitar la ID del mensaje.' });
 
-				const target = msg.embeds[0];
-				const ntw = args.map(arg => (arg.startsWith(linkbase))?`[@${arg.slice(linkbase.length)}](${arg})`:undefined);
-				if(ntw.some(nt => nt === undefined)) {
-					message.channel.send({ content: ':warning: Uno o más enlaces tenían un formato inválido' });
-					return;
-				}
+		//Modificación de embed existente
+		const msg = await ch.messages.fetch(id).catch(auditError);
 
-				let twitters = target.fields[0].value.split('\n');
-				for(page = 1; page < target.fields.length; page++)
-					twitters = [...twitters, ...target.fields[page].value.split('\n')];
+		if(!msg)
+			return message.reply({ content: `:warning: ID de mensaje inválida` });
 
-				const embed = new Discord.MessageEmbed()
-					.setColor(target.color)
-					.setTitle(embedprops.title ?? target.title)
-					.setAuthor({ name: embedprops.epigraph ?? target.author.name, iconURL: message.channel.guild.iconURL({ dynamic: false, size: 256 }) })
-					.setFooter({ text: embedprops.footer !== undefined ? embedprops.footer : (target.footer ? target.footer.text : '') });
-				
-				if(edit === 'add')
-					twitters = [...twitters, ...ntw];
-				else if(edit === 'del')
-					twitters = twitters.filter(twitter => !ntw.some(nt => twitter === nt));
-					
-				for(page = 0; page < twitters.length; page += div)
-					embed.addField(`Tabla ${Math.ceil(page / div) + 1}`, twitters.slice(page, page + div).join('\n'), true);
+		if(msg.embeds == undefined || msg.author.id !== message.client.user.id)
+			return message.reply({ content: ':warning: El mensaje especificado existe pero no me pertenece o no tiene ningún embed' });
 
-				msg.edit({ embeds: [embed] });
-				message.react('✅');
-			}).catch(err => {
-				console.error(err);
-				message.channel.send({ content: `:warning: ID de mensaje inválida` });
-			});
-		} else
-			message.channel.send({ content: 'Para añadir o eliminar mensajes en un embed ya enviado, debes facilitar la ID del mensaje.' });
+		const target = msg.embeds[0];
+		const ntw = args.map(arg => (arg.startsWith(linkbase))?`[@${arg.slice(linkbase.length)}](${arg})`:undefined);
+		if(ntw.some(nt => nt === undefined))
+			return message.reply({ content: ':warning: Uno o más enlaces tenían un formato inválido' });
+
+		let twitters = target.fields[0].value.split('\n');
+		for(page = 1; page < target.fields.length; page++)
+			twitters = [...twitters, ...target.fields[page].value.split('\n')];
+
+		const embed = new Discord.MessageEmbed()
+			.setColor(target.color)
+			.setTitle(embedprops.title ?? target.title)
+			.setAuthor({ name: embedprops.epigraph ?? target.author.name, iconURL: message.channel.guild.iconURL({ dynamic: false, size: 256 }) })
+			.setFooter({ text: embedprops.footer !== undefined ? embedprops.footer : (target.footer ? target.footer.text : '') });
+		
+		if(edit === 'add')
+			twitters = [...twitters, ...ntw];
+		else if(edit === 'del')
+			twitters = twitters.filter(twitter => !ntw.some(nt => twitter === nt));
+			
+		for(page = 0; page < twitters.length; page += div)
+			embed.addField(`Tabla ${Math.ceil(page / div) + 1}`, twitters.slice(page, page + div).join('\n'), true);
+
+		msg.edit({ embeds: [embed] });
+		return message.react('✅');
 	}
 };

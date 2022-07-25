@@ -1,5 +1,5 @@
 const { fetchFlag } = require("../../func");
-const { CommandOptionsManager } = require("../Commons/cmdOpts");
+const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
 
 const uwusopt = [
 	'<:uwu:681935702308552730>',
@@ -18,11 +18,10 @@ module.exports = {
 	name: 'uwu',
 	aliases: ['uwu'],
     desc: 'uwu',
-    flags: [
-        'common',
-        'emote',
-		'uwu'
-    ],
+    flags: new CommandMetaFlagsManager().add(
+		'MEME',
+		'EMOTE',
+	),
     options,
 	callx: 'uwu',
 	experimental: true,
@@ -40,7 +39,7 @@ module.exports = {
 			return request.reply({ content: uwusopt[Math.floor(Math.random() * uwusopt.length)] });
 		
 		return Promise.all([
-			request.channel.send({ content: randomUwu }),
+			request.reply({ content: randomUwu }),
 			request.delete().catch(console.error),
 		]);
     },

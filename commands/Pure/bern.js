@@ -1,4 +1,5 @@
 const { randRange } = require("../../func");
+const { CommandMetaFlagsManager } = require("../Commons/commands");
 
 const emot = [
 	'Mi polola', 'Mi reina', 'Mi princesa', 'Mi esposa', 'Mi mujer',
@@ -13,9 +14,10 @@ module.exports = {
 		'procrastinar'
     ],
     desc: 'Comando de procrastinación de GoddamnBernkastel',
-    flags: [
-        'meme'
-    ],
+    flags: new CommandMetaFlagsManager().add(
+		'MEME',
+		'OUTDATED',
+	),
 	experimental: true,
 
 	/**

@@ -4,7 +4,7 @@ const axios = require('axios');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptionsManager } = require('../Commons/cmdOpts');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
 const { fetchFlag } = require('../../func.js');
 
 const options = new CommandOptionsManager()
@@ -12,7 +12,6 @@ const options = new CommandOptionsManager()
 
 module.exports = {
 	name: 'papa-eval',
-	aliases: [],
 	desc: [
 		'Evalúa una función de JavaScript en el contexto de la función `execute` de un módulo de comando.',
 		'```ts',
@@ -35,9 +34,7 @@ module.exports = {
 		'```',
 		'Se pueden realizar modificaciones a las configuraciones comunes en la caché del proceso. No se puede acceder a la Base de Datos con esto'
 	].join('\n'),
-	flags: [
-		'papa',
-	],
+	flags: new CommandMetaFlagsManager().add('PAPA'),
 	options: options,
 	experimental: false,
 
@@ -58,7 +55,7 @@ module.exports = {
 				.setColor('#0000ff')
 				.setAuthor({ name: `${request.guild.name} • ${request.channel.name}`, iconURL: request.author.avatarURL({ dynamic: true }), url: request.url })
 				.addField('Ha ocurrido un error al ingresar un comando', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
-			await request.channel.send({ embeds: [embed] });
+			await request.reply({ embeds: [embed] });
 		}
 		fetchFlag(args, { ...options.flags.get('del').structure, callback: request.delete });
 	}

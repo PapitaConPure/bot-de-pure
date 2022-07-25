@@ -1,4 +1,5 @@
 const { searchImage, molds, options, callx } = require('./buscar.js');
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 
 module.exports = {
 	name: 'touhou',
@@ -11,9 +12,7 @@ module.exports = {
     desc: molds.desc
 		.replace('#THEME', 'de Touhou')
 		.replace('#NSFW_NOTE', 'en canales NSFW, los resultados serán, respectivamente, NSFW'),
-    flags: [
-        'common'
-    ],
+	flags: new CommandMetaFlagsManager().add('COMMON'),
     options: options,
 	callx: callx,
 	experimental: true,

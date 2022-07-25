@@ -1,8 +1,8 @@
 const global = require('../../localdata/config.json');
-const { fetchFlag } = require("../../func");
+const { guildEmoji } = require("../../func");
 const { createCanvas, loadImage, NodeCanvasRenderingContext2D } = require('canvas');
-const { CommandOptionsManager } = require("../Commons/cmdOpts");
-const { Message, MessageAttachment } = require('discord.js');
+const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { MessageAttachment } = require('discord.js');
 
 /**
  * @typedef {'WHITE'|'BLACK'} ChessTeam
@@ -13,7 +13,6 @@ const { Message, MessageAttachment } = require('discord.js');
 const cells = [ 'WHITE', 'BLACK' ];
 /**
  * @param {Array<Array<ChessCell>>} board
- * @returns
  */
 const generateBoardImage = async (board, teamColors = { white: '#fff', black: '#000' }) => {
 	const canvas = createCanvas(864, 960);
@@ -77,43 +76,32 @@ const generateBoardImage = async (board, teamColors = { white: '#fff', black: '#
 	return new MessageAttachment(canvas.toBuffer(), `ajedrez_${(Date.now() + 0)}.png`);
 }
 
-const __emote = { name: 'e', type: 'EMOTE' };
 const options = new CommandOptionsManager()
-	.addParam('adversario', 'USER', 	   'para especificar el jugador contrario')
-	.addFlag('cs', ['configurar', 'config', 'setup'], 'para configurar el juego antes de comenzar', __emote);
-
-module.exports = {
-	name: 'ajedrez',
-	brief: 'Inicia una partida de ajedrez entre tú y el adversario especificado',
-	desc: 'Inicia una partida de ajedrez común cronometrada (6 minutos + 15s/turno) en un tablero de 8x8 contra el `<adversario>` mencionado\n' +
-		'Con enroque, con coronación de peón, con primer movimiento doble de peón, sin peón al paso\n' +
-		'¡Puedes asignar emotes diferentes a cada pieza con las `--banderas` a disposición!\n' +
+	.addParam('adversario', 'USER', 	   			   'para especificar el jugador contrario')
+	.addFlag('sgp', ['conjunto', 'set', 'piezas'],     'para usar un set de piezas personalizado')
+	.addFlag('cs',  ['configurar', 'config', 'setup'], 'para configurar un conjunto de piezas antes de comenzar');
+const flags = new CommandMetaFlagsManager().add(
+	'COMMON',
+	'GAME',
+	'MAINTENANCE',
+);
+const command = new CommandManager('ajedrez', flags)
+	.setBriefDescription('Inicia una partida de ajedrez entre tú y el adversario especificado')
+	.setLongDescription(
+		'Inicia una partida de ajedrez común cronometrada (6 minutos + 15s/turno) en un tablero de 8x8 contra el `<adversario>` mencionado',
+		'Con enroque, con coronación de peón, con primer movimiento doble de peón, sin peón al paso',
+		'¡Puedes asignar emotes diferentes a cada pieza con las `--banderas` a disposición!',
 		'Si no sabes las reglas básicas de ajedrez, pues... [mira mira~](https://www.chess.com/es/como-jugar-ajedrez)',
-	flags: [
-		'common',
-		'game',
-		'maintenance'
-	],
-	options,
-	callx: '<adversario>',
-
-	/**
-	 * @param {Message} message
-	 * @param {Array<String>} args
-	 */
-	async execute(message, args) {
+	)
+	.setOptions(options)
+	.setExperimental(true)
+	.setExecution(async (request, args, isSlash) => {
 		//Parámetros básicos
-		const emtcache = global.slots.slot3.emojis.cache;
-		const resEmote = async (x, i) => (await emtcache.resolve(x[i])).id;
-		const query = { property: true, callback: resEmote };
-		const pieces = {
-			king: 	fetchFlag(args, { ...query, short: ['r'], long: ['rey'], 				 callback: resEmote, fallback: 'king' }),
-			queen: 	fetchFlag(args, { ...query, short: ['d'], long: ['reina','dama'], 		 callback: resEmote, fallback: 'queen' }),
-			tower: 	fetchFlag(args, { ...query, short: ['t'], long: ['torre'], 				 callback: resEmote, fallback: 'tower' }),
-			knight: fetchFlag(args, { ...query, short: ['c'], long: ['caballero','caballo'], callback: resEmote, fallback: 'knight' }),
-			bishop: fetchFlag(args, { ...query, short: ['a'], long: ['alfil'], 				 callback: resEmote, fallback: 'bishop' }),
-			pawn: 	fetchFlag(args, { ...query, short: ['p'], long: ['peón','peon'], 		 callback: resEmote, fallback: 'pawn' }),
-		};
+		const { guild, guildId } = request;
+		const piecesSet = options.fetchFlag(args, 'conjunto', { callback: (x, i = null) => i ? x[i] : x });
+		const pieces = {};
+		for(const piece in piecesSet)
+			pieces[piece] = guildEmoji(piecesSet[guildId][piece], guild) ?? piece;
 
 		//Acción de comando
 		/**@type {Array<Array<ChessCell>>}*/
@@ -123,15 +111,8 @@ module.exports = {
 			return { piece: 'EMPTY' };
 		}));
 
-
 		const imagen = await generateBoardImage(board, { white: '#fce803', black: '#4011b8' });
-		await message.channel.send({ files: [imagen] });
-	},
+		return request.reply({ files: [imagen] });
+	});
 
-	async interact(interaction, args) {
-		//Variables de flags
-
-		//Acción de comando
-		await interaction.reply({ content: 'Soon, later, never. Who knows?', ephemeral: true });
-	}
-};
+module.exports = command;

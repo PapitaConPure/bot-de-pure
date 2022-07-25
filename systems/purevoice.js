@@ -243,7 +243,7 @@ class PureVoiceUpdateHandler {
      * @returns {Promise<Number>} la cantidad de sesiones defectuosas eliminadas
      */
     async checkFaultySessions() {
-        const { pvDocument, state, prematureError } = this;
+        const { pvDocument, state } = this;
         const guildChannels = state.guild.channels.cache;
         let deleted = 0;
 

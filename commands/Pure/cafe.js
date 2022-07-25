@@ -1,6 +1,7 @@
 const { MessageEmbed } = require('discord.js');
 const { default: axios } = require('axios');
 const { rand } = require('../../func');
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 
 const r = {
 	api: 'https://api.giphy.com/v1/gifs/search',
@@ -15,9 +16,7 @@ module.exports = {
         'coffee', 'cawfee'
     ],
     desc: 'Muestra imágenes de café',
-    flags: [
-        'common'
-    ],
+    flags: new CommandMetaFlagsManager().add('COMMON'),
 	experimental: true,
 
 	async execute(message, _, isSlash = false) {
@@ -36,11 +35,11 @@ module.exports = {
 		const embed = new MessageEmbed();
 		
 		if(!err)
-			embed.addField('Café ☕', `${selected.bitly_url}`)
+			embed.addFields({ name: 'Café ☕', value: `${selected.bitly_url}` })
 				.setImage(`https://media.giphy.com/media/${selected.id}/giphy.gif`)
 				.setColor('#6a4928');
 		else
-			embed.addField('Error de solicitud a tercero', err)
+			embed.addFields({ name: 'Error de solicitud a tercero', value: err })
 				.setColor('RED');
 		
 		await message.reply({ embeds: [embed] });

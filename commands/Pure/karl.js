@@ -1,4 +1,5 @@
 const { randRange: rr } = require("../../func");
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 
 const star = '<:tags:704612794921779290>';
 const instruments = [
@@ -44,10 +45,10 @@ module.exports = {
         'karlos', 'zupija'
     ],
     desc: 'Comando de gacha musical de Karl Zuñiga',
-    flags: [
-        'meme',
-		'game'
-    ],
+    flags: new CommandMetaFlagsManager().add(
+		'MEME',
+		'GAME',
+	),
 	experimental: true,
 	
 	/**

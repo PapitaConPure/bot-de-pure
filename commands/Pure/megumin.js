@@ -1,4 +1,5 @@
 const { searchImage, molds, options, callx } = require('./buscar.js');
+const { CommandMetaFlagsManager } = require('../Commons/commands');
 
 module.exports = {
 	name: 'megumin',
@@ -10,10 +11,10 @@ module.exports = {
     desc: molds.desc
 		.replace('#THEME', 'de Megumin, también conocida como "La Legítima Esposa de Papita con Puré".\n❤️🤎🧡💛💚💙💜🤍💟♥️❣️💕💞💓💗💖💝')
 		.replace('#NSFW_NOTE', 'no intentes buscarla en canales NSFW, conchetumare :rage:'),
-    flags: [
-        'common',
-		'meme'
-    ],
+    flags: new CommandMetaFlagsManager().add(
+		'COMMON',
+		'MEME',
+	),
     options: options,
 	callx: callx,
 	experimental: true,

@@ -1,5 +1,5 @@
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
-const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
+const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { fetchFlag, isNotModerator, fetchUserID } = require('../../func.js');
 const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, MessageCollector, MessageAttachment } = require('discord.js');
@@ -99,9 +99,7 @@ module.exports = {
 		'En caso de estar editando o borrando un Tubérculo existente, se requerirá su TuberID',
 		'⚠️ Ten en cuenta que este comando es experimental y cualquier Tubérculo ingresado podría ser eventualmente perdido a medida que me actualizo',
 	].join('\n'),
-	flags: [
-		'common',
-	],
+	flags: new CommandMetaFlagsManager().add('COMMON'),
 	options,
 	callx: '<id?> <mensaje?> <archivos?>',
 	experimental: true,
