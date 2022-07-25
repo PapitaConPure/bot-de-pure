@@ -2,12 +2,12 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.ED",
+            "number": "Full.2.8.F5",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo reestructuraciones para una actualización mayor. Es probable que algunos comandos dejen de funcionar durante el proceso.\nTambién, las actualizaciones serán considerablemente menos frecuentes de momento",
         "changelog": [
-            "Tareas de refactorización (3/4)",
+            "Tareas de refactorización (3.3/4)",
             "PLACEHOLDER_SLASHCMD",
             "p!elegir añadido",
             "p!feed incorporado",
@@ -18,19 +18,21 @@
             "p!número agregado",
             "p!voz añadido",
             "PuréScript actualizado",
-            "Trabajos de reestructuración",
             "PuréVoice actualizado",
-            "Roles personalizados agregados (H. Doll)",
             "p!hora añadido",
             "p!avatar ahora detecta avatares de servidor",
+            "Corregidos diversos errores",
             "Trabajando en soporte de Preferencias de Usuario"
         ],
         "todo": [
+            "(!) Puede que reescriba PuréScript por completo en un próximo parche",
             "Agregar ejemplos interactivos de comandos con p!ayuda",
             "p!ajedrez",
             "Minijuegos individuales y tipo-fiesta",
+            "Gráficos analíticos (rama PuréLytics, posiblemente contenida en p!info y aquí)",
             "Agregar GIFs infográficos en comandos",
-            "Crear página de ayuda Web para entenderme mejor"
+            "Crear página de ayuda Web para entenderme mejor",
+            "Considerar una versión pública de Bot de Puré (daré detalles cuando sea el momento)"
         ]
     },
     "p_drmk": {
@@ -67,6 +69,7 @@
         "bern": "239550977638793217"
     },
     "slots": {},
+    "booruCredentials": {},
     "reportFormUrl": "https://forms.gle/tHFXxbsTmuJTQm1z7",
     
     "hourai": {
