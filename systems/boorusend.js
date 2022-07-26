@@ -84,7 +84,7 @@ module.exports = {
             new MessageButton()
                 .setEmoji('921788204540100608')
                 .setStyle('PRIMARY')
-                .setCustomId('feed_showPostTags'),
+                .setCustomId('feed_showFeedImageTags'),
         );
         
         //Botón de Shock (temporal)

@@ -814,9 +814,9 @@ const command = new CommandManager('feed', flags)
 	})
 	.setButtonResponse(async function showFeedImageUrl(interaction) {
 		//Función en desuso. Permanece por compatibilidad
-		return this.showPostTags(interaction);
+		return this.showFeedImageTags(interaction);
 	})
-	.setButtonResponse(async function showPostTags(interaction) {
+	.setButtonResponse(async function showFeedImageTags(interaction) {
 		const url = interaction.message.components[0].components[0].url;
 		const booru = new Booru(globalConfigs.booruCredentials);
 		try {
