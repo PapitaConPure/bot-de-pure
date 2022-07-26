@@ -41,6 +41,9 @@ module.exports = {
             } else if(source.includes('fantia.jp')) {
                 emoji = '1000265840182181899';
                 embedColor = '#ea4c89';
+            } else if(source.includes('skeb.jp')) {
+                emoji = '1001397393511682109';
+                embedColor = '#28837f';
             } else if(source.includes('tumblr.com')) {
                 emoji = '969666470252511232';
                 embedColor = '#36465d';
