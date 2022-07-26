@@ -84,7 +84,7 @@ module.exports = {
             new MessageButton()
                 .setEmoji('921788204540100608')
                 .setStyle('PRIMARY')
-                .setCustomId('feed_showFeedImageTags'),
+                .setCustomId('feed_showPostTags'),
         );
         
         //Botón de Shock (temporal)
@@ -98,7 +98,7 @@ module.exports = {
                     .setLabel(`${((diff > 24) ? (diff / 24) : diff).toLocaleString('en', { maximumFractionDigits: 0 })} ${(diff > 24) ? 'días' : 'horas'}`)
                     .setEmoji('935665140601327626')
                     .setStyle('PRIMARY')
-                    .setCustomId('feed_shockFeed'),
+                    .setCustomId('feed_shock'),
             );*/
         
         //Botón de eliminación
@@ -106,7 +106,7 @@ module.exports = {
             new MessageButton()
                 .setEmoji('921751138997514290')
                 .setStyle('DANGER')
-                .setCustomId(`feed_deleteFeedImage${ `_${data.manageableBy}` ?? '' }`),
+                .setCustomId(`feed_deletePost${ `_${data.manageableBy}` ?? '' }`),
         );
 
         //Preparar Embed final
