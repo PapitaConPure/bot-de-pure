@@ -419,7 +419,7 @@ const command = new CommandManager('roles', flags)
 		switch(operation) {
 			case 'CREATE': {
 				if(interaction.member.roles.cache.get(houraiDB.customRoles[userId]))
-					return interaction.reply('⚠ ¡Tu rol ya fue creado! Si cancelaste la configuración, selecciona la categoría nuevamente para editarlo')
+					return interaction.reply({ content: '⚠ ¡Tu rol ya fue creado! Si cancelaste la configuración, selecciona la categoría nuevamente para editarlo', ephemeral: true });
 				const customRole = await interaction.guild.roles.create({
 					name: interaction.member.nickname ?? interaction.user.username,
 					position: (await interaction.guild.roles.fetch('857544764499951666'))?.rawPosition,
@@ -504,6 +504,7 @@ const command = new CommandManager('roles', flags)
 	.setModalResponse(async function applyCustomRoleChanges(interaction, roleId, category = null) {
 		/**@type {import('discord.js').Role}*/
 		const customRole = interaction.member.roles.cache.get(roleId);
+		if(!customRole) return interaction.reply({ content: '⚠ No se encontró el rol personalizado. Intenta crearlo otra vez', ephemeral: true });
 		const roleName = interaction.fields.getTextInputValue('nameInput');
 		let roleColor = interaction.fields.getTextInputValue('colorInput');
 		let roleEmoteUrl = interaction.fields.getTextInputValue('emoteUrlInput');
