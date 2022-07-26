@@ -122,7 +122,7 @@ const command = new CommandManager('roles', flags)
 				new MessageEmbed()
 					.setAuthor({ name: 'Punto de Reparto desplegado', iconURL: (request.author ?? request.user).avatarURL() })
 					.setColor('GOLD')
-					.addField('¡Se están repartiendo roles!', 'Se ha establecido una campaña de suministro de roles. Usa el menú de abajo y selecciona la categoría que quieras')
+					.addFields({ name: '¡Se están repartiendo roles!', value: 'Se ha establecido una campaña de suministro de roles. Usa el menú de abajo y selecciona la categoría que quieras' })
 			],
 			components: [new MessageActionRow().addComponents(
 				new MessageSelectMenu()
@@ -183,21 +183,29 @@ const command = new CommandManager('roles', flags)
 		/**@type {Date}*/
 		const boostTimestamp = interaction.member?.premiumSinceTimestamp;
 		const currentTimestamp = (new Date(Date.now())).getTime();
-		const boostedRecently = interaction.user.id === peopleid.papita || ((currentTimestamp - boostTimestamp) < (60e3 * 60 * 24 * 35));
+		const boostedRecently = ((currentTimestamp - boostTimestamp) < (60e3 * 60 * 24 * 35));
 		const customRoleId = houraiDB.customRoles?.[interaction.user.id];
 
 		return interaction.reply({
 			embeds: [
 				new MessageEmbed()
 					.setColor('WHITE')
-					.addField('Rol Personalizado', [
-						'Crea, modifica o elimina tu Rol Personalizado de Hourai Doll',
-						'Esto es una recompensa para aquellos que boostean el servidor',
-					].join('\n'))
-					.addField('Edición de Rol Personalizado', [
-						'Puedes editar tu Rol cuantas veces quieras durante el periodo de boosteo',
-						'Se te permite modificar el nombre, el color y/o la imagen del rol a gusto',
-					].join('\n'))
+					.addFields(
+						{
+							name: 'Rol Personalizado',
+							value: [
+								'Crea, modifica o elimina tu Rol Personalizado de Hourai Doll',
+								'Esto es una recompensa para aquellos que boostean el servidor',
+							].join('\n'),
+						},
+						{
+							name: 'Edición de Rol Personalizado',
+							value: [
+								'Puedes editar tu Rol cuantas veces quieras durante el periodo de boosteo',
+								'Se te permite modificar el nombre, el color y/o la imagen del rol a gusto',
+							].join('\n'),
+						},
+					),
 			],
 			components: [new MessageActionRow().addComponents(
 				(!interaction.member.roles.cache.get(customRoleId)) ? [
@@ -237,7 +245,7 @@ const command = new CommandManager('roles', flags)
 			embeds: [
 				new MessageEmbed()
 					.setColor('RED')
-					.addField('Roles de Juego', 'Roles mencionables para llamar gente a jugar algunos juegos. Si piensas ser de los que llaman a jugar, intenta no abusar las menciones'),
+					.addFields({ name: 'Roles de Juego', value: 'Roles mencionables para llamar gente a jugar algunos juegos. Si piensas ser de los que llaman a jugar, intenta no abusar las menciones' }),
 			],
 			components: [
 				...getAutoRoleRows(interaction.member, 'GAMES', section),
@@ -255,7 +263,7 @@ const command = new CommandManager('roles', flags)
 			embeds: [
 				new MessageEmbed()
 					.setColor('BLUE')
-					.addField('Roles de Bebidas', 'Roles decorativos para dar a conocer qué bebidas calientes disfrutas'),
+					.addFields({ name: 'Roles de Bebidas', value: 'Roles decorativos para dar a conocer qué bebidas calientes disfrutas' }),
 			],
 			components: [
 				...getAutoRoleRows(interaction.member, 'DRINKS', section),
@@ -274,7 +282,7 @@ const command = new CommandManager('roles', flags)
 			embeds: [
 				new MessageEmbed()
 					.setColor('AQUA')
-					.addField('Roles de Religión', 'Roles para describir tu actitud, ideas y forma de ser. No lo tomes muy en serio... ¿o tal vez sí?')
+					.addFields({ name: 'Roles de Religión', value: 'Roles para describir tu actitud, ideas y forma de ser. No lo tomes muy en serio... ¿o tal vez sí?' })
 			],
 			components: [
 				new MessageActionRow().addComponents(faithRoles.map(faithRole =>
@@ -302,7 +310,10 @@ const command = new CommandManager('roles', flags)
 			embeds: [
 				new MessageEmbed()
 					.setColor('DARK_PURPLE')
-					.addField('¡Caramelos mágicos!', 'Antiguos relatos cuentan que permiten ver trazos de lujuria grabados en el aire.\nSe aceptan devoluciones para aplicantes previos, solo vomítalos con cuidado de dañarlos.')
+					.addFields({
+						name: '¡Caramelos mágicos!',
+						value: 'Antiguos relatos cuentan que permiten ver trazos de lujuria grabados en el aire.\nSe aceptan devoluciones para aplicantes previos, solo vomítalos con cuidado de dañarlos.',
+					})
 			],
 			components: [new MessageActionRow().addComponents([
 				new MessageButton()
