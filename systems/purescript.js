@@ -72,8 +72,8 @@ const executeTuber = async (request, tuber, { args, isSlash }) => {
 				['marcoEstablecerColor']: ([embed, color]) => embed.setColor(color),
 				/**@param {[MessageEmbed, String, String]} param0*/
 				['marcoEstablecerImagen']: ([embed, image]) => embed.setImage(image),
-				/**@param {[MessageEmbed, String, String]} param0*/
-				['marcoAgregarCampo']: ([embed, title, content, inline]) => embed.addField(title, content.slice(0, 1023), inline),
+				/**@param {[MessageEmbed, String, String, Boolean]} param0*/
+				['marcoAgregarCampo']: ([embed, title, content, inline]) => embed.addFields({ name: title, value: content.slice(0, 1023), inline }),
 			},
             __tuber__: tuber,
             __replyContent__: {},
