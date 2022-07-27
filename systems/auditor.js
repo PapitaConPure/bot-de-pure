@@ -17,7 +17,7 @@ function generateRequestRecord(request) {
  */
 function getRequestContent(request) {
     if(request.commandName)
-        return `**/${request.commandName}** ${request.options.data.map(({ name, value }) => `__${name}__: ${value}`).join(' ')}`;
+        return `**/${request.commandName}** ${request.options.data.map(({ name, value }) => `${name}:\`${value}\``).join(' ')}`;
     if(request.customId)
         return `**-=-[**\`${request.customId}\`**]**`;
     return request.content?.slice(0, 1023) || '*Mensaje vacío.*'
