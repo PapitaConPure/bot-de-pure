@@ -115,7 +115,6 @@ const command = new CommandManager('anarquia', flags)
 		`Ingresa únicamente \`p\` para ver tu perfil anárquico`
 	)
 	.setOptions(options)
-	.setExperimental(true)
 	.setExecution(async (request, args, isSlash) => {
 		const loadEmotes = global.loademotes;
 

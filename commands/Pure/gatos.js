@@ -10,7 +10,6 @@ const command = new CommandManager('gatos', flags)
         'cats', 'cat', 'meow', 'nya', 'kitty', 'kitties'
     )
 	.setLongDescription('Muestra imágenes de gatitos uwu')
-	.setExperimental(true)
 	.setExecution(async (request, args, isSlash) => {
 		const { file } = (await axios.get('https://aws.random.cat/meow').catch(auditError))?.data;
 

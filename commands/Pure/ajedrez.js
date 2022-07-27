@@ -94,7 +94,6 @@ const command = new CommandManager('ajedrez', flags)
 		'Si no sabes las reglas básicas de ajedrez, pues... [mira mira~](https://www.chess.com/es/como-jugar-ajedrez)',
 	)
 	.setOptions(options)
-	.setExperimental(true)
 	.setExecution(async (request, args, isSlash) => {
 		//Parámetros básicos
 		const { guild, guildId } = request;

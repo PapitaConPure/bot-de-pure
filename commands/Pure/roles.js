@@ -115,8 +115,7 @@ const command = new CommandManager('roles', flags)
 	.setAliases('rol', 'role')
 	.setBriefDescription('Pemite a todos elegir algunos roles')
 	.setLongDescription('Establece un punto de reparto de roles para uso colectivo (solo Hourai Doll')
-	.setExperimental(true)
-	.setExecution(async (request, _, isSlash) => {
+	.setExecution(async request => {
 		return request.reply({
 			embeds: [
 				new MessageEmbed()

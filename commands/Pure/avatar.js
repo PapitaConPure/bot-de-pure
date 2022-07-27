@@ -47,7 +47,6 @@ const command = new CommandManager('avatar', flags)
         'Se priorizan resultados del servidor actual, pero la búsqueda tiene un rango de todos los servidores a los que tengo acceso',
     )
     .setOptions(options)
-    .setExperimental(true)
     .setExecution(async (request, args, isSlash) => {
         const notfound = [];
         let members;

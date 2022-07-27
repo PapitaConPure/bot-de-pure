@@ -82,7 +82,6 @@ const flags = new CommandMetaFlagsManager().add(
 const command = new CommandManager('feed', flags)
 	.setBriefDescription('Inicializa un Feed en un canal por medio de un Asistente.')
 	.setLongDescription('Inicializa un Feed de imágenes en un canal. Simplemente usa el comando y sigue los pasos del Asistente para configurar y personalizar todo')
-	.setExperimental(true)
 	.setExecution(async (request, _args, _isSlash) => {
 		const wizard = new MessageEmbed()
 			.setColor('AQUA')

@@ -14,7 +14,6 @@ const command = new CommandManager('prefijo', flags)
 	.setAliases('prefix', 'pf')
 	.setLongDescription('Cambia o muestra el prefijo del servidor actual')
 	.setOptions(options)
-	.setExperimental(true)
 	.setExecution(async (request, args, isSlash) => {
 		//Acción de comando
 		const target = options.fetchFlag(args, 'drawmaku', { callback: 'drmk', fallback: 'pure' });

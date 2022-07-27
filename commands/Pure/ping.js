@@ -3,7 +3,6 @@ const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands
 const flags = new CommandMetaFlagsManager().add('COMMON');
 const command = new CommandManager('ping', flags)
 	.setLongDescription('Muestra el tiempo de respuesta del Bot y la API')
-	.setExperimental(true)
 	.setExecution(async (request, _, __) => {
 		const rtime = Date.now() - request.createdTimestamp;
 

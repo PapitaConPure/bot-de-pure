@@ -13,7 +13,6 @@ const command = new CommandManager('aislar', flags)
 		'Puedes especificar la `<duración>` en minutos, o ingresar 0 para revocar el aislamiento',
 	)
 	.setOptions(options)
-	.setExperimental(true)
 	.setExecution(async (request, args, isSlash) => {
 		if(!isSlash && !args.length)
 			return request.reply({ content: '⚠ Debes indicar un usuario.', ephemeral: true });
