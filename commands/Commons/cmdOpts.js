@@ -4,7 +4,57 @@
  * @typedef {'SINGLE'|'MULTIPLE'|Array<String>} ParamPoly Capacidad de entradas de parámetro de CommandOption
  */
 
-const { fetchFlag } = require('../../func');
+/**
+ * @function
+ * @param {Array<String>} args
+ * @param {{
+ *  property: Boolean
+ *  short: Array<String>
+ *  long: Array<String>
+ *  callback: *
+ *  fallback: *
+ * }} flag
+ */
+const fetchMessageFlag = (args, flag = { property, short: [], long: [], callback, fallback }) => {
+    //Ahorrarse procesamiento en vano si no se ingresa nada
+    if(!args.length) return flag.fallback;
+
+    //Recorrer parámetros y procesar flags
+    let flagValue;
+    args.forEach((arg, i) => {
+        if(flag.property && i === (args.length - 1)) return;
+        arg = arg.toLowerCase();
+
+        if(flag.long?.length && arg.startsWith('--') && flag.long.includes(arg.slice(2))) {
+            flagValue = arg;
+            return args.splice(i, flag.property ? 2 : 1);
+        }
+
+        if(flag.short?.length && arg.startsWith('-')) {
+            const flagChars = [...arg.slice(1)].filter(c => flag.short.includes(c));
+            for(c of flagChars) {
+                flagValue = flag.property ? args[i + 1] : c;
+                const flagSize = flag.property ? 2 : 1;
+
+                if(arg.length <= 2)
+                    return args.splice(i, flagSize);
+
+                const flagToRemove = new RegExp(c, 'g')
+                let temp = args.splice(i, flagSize); //Remover temporalmente el stack completo de flags cortas y el parámetro si es flag-propiedad
+                args.push(temp[0].replace(flagToRemove, '')); //Reincorporar lo eliminado, descartando las flags ya procesadas
+                if(flag.property) args.push(temp[1]);
+            }
+        }
+    });
+    
+    if(flagValue == undefined)
+        return flag.fallback;
+
+    if(flag.callback == undefined)
+        return flagValue;
+
+    return typeof flag.callback === 'function' ? flag.callback(flagValue) : flag.callback;
+}
 
 const commonTypes = {
     'NUMBER':   'número',
@@ -183,6 +233,16 @@ class CommandFlag extends CommandOption {
         this._long = Array.isArray(flags) ? flags : [flags];
         return this;
     };
+    isExpressive() {
+        return this._expressive;
+    }
+    /**
+     * Tipo de bandera como un string
+     * @returns {String?}
+     */
+    get type() {
+        return this._type;
+    }
     /**
      * String de ayuda de la bandera
      * @returns {String}
@@ -199,7 +259,7 @@ class CommandFlag extends CommandOption {
      * @returns {{ short?: Array<String>, long?: Array<String> }}
      */
     get structure() {
-        return { short: this._short, long: this._long };
+        return { property: this.isExpressive(), short: this._short, long: this._long };
     }
 };
 
@@ -306,7 +366,6 @@ class CommandOptionsManager {
      */
     addParam(name, type, desc, optionModifiers = { poly: undefined, polymax: undefined, optional: undefined } ) {
         const commandParam = new CommandParam(name, type)
-            .setType(type)
             .setDesc(desc)
             .setPoly(optionModifiers?.poly || 'SINGLE', optionModifiers?.polymax || this.defaults.polymax)
             .setOptional(optionModifiers?.optional || false);
@@ -412,7 +471,7 @@ class CommandOptionsManager {
      */
     fetchFlag(args, identifier, output = { callback, fallback }) {
         if(Array.isArray(args))
-            return fetchFlag(args, { ...this.flags.get(identifier).structure, ...output });
+            return fetchMessageFlag(args, { ...this.flags.get(identifier).structure, ...output });
         
         /**@type {CommandFlagExpressive}*/
         const flag = this.flags.get(identifier);
@@ -423,8 +482,8 @@ class CommandOptionsManager {
         let getMethod = 'getBoolean';
         let flagValue;
 
-        if(flag._expressive) {
-            switch(flag._type) {
+        if(flag.isExpressive()) {
+            switch(flag.type) {
                 case 'NUMBER':  getMethod = 'getNumber';  break;
                 case 'USER':    getMethod = 'getUser';    break;
                 case 'ROLE':    getMethod = 'getRole';    break;
