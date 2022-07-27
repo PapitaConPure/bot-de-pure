@@ -674,11 +674,13 @@ module.exports = {
     /**
      * Busca un usuario basado en la data ingresada.
      * Devuelve el usuario que más coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún usuario, se devuelve undefined.
-     * @param {String} data 
+     * @param {Discord.User | String} data 
      * @param {{ guild: Discord.Guild, client: Discord.BaseClient }} param1 
      * @returns { Discord.User }
      */
     fetchUser: function(data, { guild, client }) {
+        if(data.username) return data;
+        
         const uc = client.users.cache;
         //console.log(`Buscando: ${data}`);
         //Descifrar posible mención
