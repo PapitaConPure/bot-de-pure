@@ -4,7 +4,10 @@ const PrefixPair = require('../../localdata/models/prefixpair.js');
 const prefixes = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
-const flags = new CommandMetaFlagsManager().add('COMMON', 'MOD');
+const flags = new CommandMetaFlagsManager().add(
+	'COMMON',
+	'MOD',
+);
 const options = new CommandOptionsManager()
 	.addParam('prefijo', 'TEXT', 'para cambiar el prefijo del servidor', { optional: true })
 	.addFlag('d', 'drawmaku', 'para cambiar o ver el prefijo de Drawmaku')
