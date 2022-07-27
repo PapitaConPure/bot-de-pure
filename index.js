@@ -10,7 +10,6 @@ const fs = require('fs');
 
 //Base de datos
 const { connect } = require('mongoose');
-const GuildConfig = require('./localdata/models/guildconfigs.js');
 const prefixpair = require('./localdata/models/prefixpair.js');
 const { Stats, ChannelStats } = require('./localdata/models/stats.js');
 const { Puretable, defaultEmote } = require('./localdata/models/puretable.js');
@@ -27,7 +26,7 @@ const booruUserId = process.env.BOORU_USERID ?? (require(envPath)?.booruuserid);
 const globalConfigs = require('./localdata/config.json');
 const { channelIsBlocked, randRange, shortenText, dibujarBienvenida, dibujarDespedida, paginateRaw } = require('./func.js');
 const globalGuildFunctions = require('./localdata/customization/guildFunctions.js');
-const { auditRequest, auditSystem, auditAction } = require('./systems/auditor.js');
+const { auditRequest, auditSystem } = require('./systems/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('./localdata/cmdExceptions.js');
 const { setupGuildFeedUpdateStack } = require('./systems/boorufeed');
 const { modifyPresence } = require('./presence.js');
@@ -177,7 +176,7 @@ client.on('ready', async () => {
     }
     //Quitar esto luego ↓
     const cl = globalConfigs.bot_status.changelog;
-    cl[cl.indexOf('PLACEHOLDER_SLASHCMD')] = `Agregando soporte de ***__[/comandos](https://blog.discord.com/slash-commands-are-here-8db0a385d9e6)__*** *(${client.SlashPure.size} comandos listos)*`;
+    cl[cl.indexOf('PLACEHOLDER_SLASHCMD')] = `Agregando soporte de ***__[/comandos](https://blog.discord.com/slash-commands-are-here-8db0a385d9e6)__*** *(${client.SlashPure.size}/${client.ComandosPure.size} comandos listos)*`;
 
 	console.log(chalk.cyan('Semilla y horario calculados'));
     let currentTime = Date.now();
