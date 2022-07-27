@@ -115,59 +115,57 @@ const command = new CommandManager('roles', flags)
 	.setAliases('rol', 'role')
 	.setBriefDescription('Pemite a todos elegir algunos roles')
 	.setLongDescription('Establece un punto de reparto de roles para uso colectivo (solo Hourai Doll')
-	.setExecution(async request => {
-		return request.reply({
-			embeds: [
-				new MessageEmbed()
-					.setAuthor({ name: 'Punto de Reparto desplegado', iconURL: (request.author ?? request.user).avatarURL() })
-					.setColor('GOLD')
-					.addFields({ name: '¡Se están repartiendo roles!', value: 'Se ha establecido una campaña de suministro de roles. Usa el menú de abajo y selecciona la categoría que quieras' })
-			],
-			components: [new MessageActionRow().addComponents(
-				new MessageSelectMenu()
-					.setCustomId('roles_onSelect')
-					.setPlaceholder('Elige una categoría')
-					.setOptions([
-						{
-							label: 'Rol Personalizado (solo Boosters)',
-							description: '¡Crea y edita tu propio rol! (solo uno)',
-							emoji: '919114849894690837',
-							value: 'selectCustomRole',
-						},
-						{
-							label: 'Colores',
-							description: '¡Elige tu bando en Hourai Doll!',
-							emoji: '853402616208949279',
-							value: 'selectColor',
-						},
-						{
-							label: 'Juegos',
-							description: 'Roles mencionables para jugar juntos',
-							emoji: '919133024770211880',
-							value: 'selectGame_0',
-						},
-						{
-							label: 'Bebidas',
-							description: 'Destaca tus bebidas calientes favoritas',
-							emoji: '739512946354421770',
-							value: 'selectDrink',
-						},
-						{
-							label: 'Religión',
-							description: 'Describe tu naturaleza',
-							emoji: '704612794921779290',
-							value: 'selectReligion',
-						},
-						{
-							label: 'Caramelos',
-							description: 'Cargados de amor siniestro',
-							emoji: '778180421304188939',
-							value: 'selectCandy',
-						},
-					]),
-			)],
-		});
-    })
+	.setReply({
+		embeds: [
+			new MessageEmbed()
+				.setAuthor({ name: 'Punto de Reparto desplegado', iconURL: (request.author ?? request.user).avatarURL() })
+				.setColor('GOLD')
+				.addFields({ name: '¡Se están repartiendo roles!', value: 'Se ha establecido una campaña de suministro de roles. Usa el menú de abajo y selecciona la categoría que quieras' })
+		],
+		components: [new MessageActionRow().addComponents(
+			new MessageSelectMenu()
+				.setCustomId('roles_onSelect')
+				.setPlaceholder('Elige una categoría')
+				.setOptions([
+					{
+						label: 'Rol Personalizado (solo Boosters)',
+						description: '¡Crea y edita tu propio rol! (solo uno)',
+						emoji: '919114849894690837',
+						value: 'selectCustomRole',
+					},
+					{
+						label: 'Colores',
+						description: '¡Elige tu bando en Hourai Doll!',
+						emoji: '853402616208949279',
+						value: 'selectColor',
+					},
+					{
+						label: 'Juegos',
+						description: 'Roles mencionables para jugar juntos',
+						emoji: '919133024770211880',
+						value: 'selectGame_0',
+					},
+					{
+						label: 'Bebidas',
+						description: 'Destaca tus bebidas calientes favoritas',
+						emoji: '739512946354421770',
+						value: 'selectDrink',
+					},
+					{
+						label: 'Religión',
+						description: 'Describe tu naturaleza',
+						emoji: '704612794921779290',
+						value: 'selectReligion',
+					},
+					{
+						label: 'Caramelos',
+						description: 'Cargados de amor siniestro',
+						emoji: '778180421304188939',
+						value: 'selectCandy',
+					},
+				]),
+		)],
+	})
 	.setSelectMenuResponse(async function onSelect(interaction) {
 		const received = interaction.values[0].split('_');
 		const operation = received.shift();
