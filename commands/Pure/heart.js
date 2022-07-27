@@ -1,23 +1,20 @@
-const { searchImage, molds, options, callx } = require('./buscar.js');
-const { CommandMetaFlagsManager } = require('../Commons/commands');
+const { options } = require('./buscar.js');
+const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { searchAndReplyWithPost } = require('../../systems/boorusend.js');
 
-module.exports = {
-	name: 'heart',
-	aliases: [
-        'holo'
-    ],
-	brief: molds.brief.replace('#THEME', 'de Holo, en rendimiento a Heartnix'),
-    desc: molds.desc
-		.replace('#THEME', 'de Holo, en rendimiento a Heartnix')
-		.replace('#NSFW_NOTE', 'ni siquiera intentes buscarla en canales NSFW'),
-    flags: new CommandMetaFlagsManager().add(
-        'COMMON',
-		'MEME',
-		'OUTDATED',
-    ),
-    options: options,
-	callx: callx,
-	experimental: true,
+const flags = new CommandMetaFlagsManager().add(
+	'COMMON',
+	'MEME',
+	'OUTDATED',
+);
+const command = new CommandManager('heart', flags)
+	.setAliases('holo')
+	.setBriefDescription(brief.replace('Muestra imágenes de Holo, en rendimiento a Heartnix'))
+	.setLongDescription(
+		'Muestra imágenes de Holo, en rendimiento a Heartnix.',
+		'**Nota:** ni siquiera intentes buscarla en canales NSFW',
+	)
+	.setOptions(options)
+	.setExecution(async (request, args, isSlash) => searchAndReplyWithPost(request, args, isSlash, { cmdtag: 'holo', sfwtitle: 'HOLO OWO' }));
 
-	execute: async(message, args, isSlash = false) => await searchImage(message, args, isSlash, { cmdtag: 'holo', sfwtitle: 'HOLO OWO' })
-};
+module.exports = command;

@@ -1,19 +1,16 @@
-const { searchImage, molds, options, callx } = require('./buscar.js');
-const { CommandMetaFlagsManager } = require('../Commons/commands');
+const { options } = require('./buscar.js');
+const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { searchAndReplyWithPost } = require('../../systems/boorusend.js');
 
-module.exports = {
-	name: 'vtubers',
-	aliases: [
-        'vtuber', 'vt'
-    ],
-	brief: molds.brief.replace('#THEME', 'de vtubers'),
-    desc: molds.desc
-		.replace('#THEME', 'de vtubers')
-		.replace('#NSFW_NOTE', 'en canales NSFW, los resultados serán, respectivamente, NSFW'),
-    flags: new CommandMetaFlagsManager().add('COMMON'),
-    options: options,
-	callx: callx,
-	experimental: true,
-	
-	execute: async(message, args, isSlash = false) => await searchImage(message, args, isSlash, { cmdtag: 'virtual_youtuber', sfwtitle: 'Vtubers uwu', nsfwtitle: 'Vtubas O//w//O' })
-};
+const flags = new CommandMetaFlagsManager().add('COMMON');
+const command = new CommandManager('vtubers', flags)
+	.setAliases('vtuber', 'vt')
+	.setBriefDescription(brief.replace('Muestra imágenes de vtubers'))
+	.setLongDescription(
+		'Muestra imágenes de vtubers.',
+		'**Nota:** en canales NSFW, los resultados serán NSFW',
+	)
+	.setOptions(options)
+	.setExecution(async (request, args, isSlash) => searchAndReplyWithPost(request, args, isSlash, { cmdtag: 'virtual_youtuber', sfwtitle: 'Vtubers uwu', nsfwtitle: 'Vtubas O//w//O' }));
+
+module.exports = command;

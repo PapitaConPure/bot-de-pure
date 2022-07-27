@@ -1,21 +1,20 @@
-const { searchImage, molds, options, callx } = require('./buscar.js');
-const { CommandMetaFlagsManager } = require('../Commons/commands');
+const { options } = require('./buscar.js');
+const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { searchAndReplyWithPost } = require('../../systems/boorusend.js');
 
-module.exports = {
-	name: 'touhou',
-	aliases: [
-        'imagentouhou', 'imgtouhou', 'tohas', 'touhas', 'tojas', 'tohitas', 'touhitas', 'tojitas',
+const flags = new CommandMetaFlagsManager().add('COMMON');
+const command = new CommandManager('touhou', flags)
+	.setAliases(
+		'imagentouhou', 'imgtouhou', 'tohas', 'touhas', 'tojas', 'tohitas', 'touhitas', 'tojitas',
         'touhoupic', '2hupic',
-		'2hu', '2ho'
-    ],
-	brief: molds.brief.replace('#THEME', 'de Touhou'),
-    desc: molds.desc
-		.replace('#THEME', 'de Touhou')
-		.replace('#NSFW_NOTE', 'en canales NSFW, los resultados serán, respectivamente, NSFW'),
-	flags: new CommandMetaFlagsManager().add('COMMON'),
-    options: options,
-	callx: callx,
-	experimental: true,
-	
-	execute: async(message, args, isSlash = false) => await searchImage(message, args, isSlash, { cmdtag: 'touhou', sfwtitle: 'Tohas uwu', nsfwtitle: 'Tohitas O//w//O' })
-};
+		'2hu', '2ho',
+	)
+	.setBriefDescription(brief.replace('Muestra imágenes de Touhou'))
+	.setLongDescription(
+		'Muestra imágenes de Touhou.',
+		'**Nota:** en canales NSFW, los resultados serán NSFW',
+	)
+	.setOptions(options)
+	.setExecution(async (request, args, isSlash) => searchAndReplyWithPost(request, args, isSlash, { cmdtag: 'touhou', sfwtitle: 'Tohas uwu', nsfwtitle: 'Tohitas O//w//O' }));
+
+module.exports = command;
