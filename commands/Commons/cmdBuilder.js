@@ -1,7 +1,7 @@
 const { CommandOptionsManager } = require('./cmdOpts');
 const { CommandMetaFlagsManager } = require('./cmdFlags');
 const { CommandRequest, CommandOptions } = require('./typings');
-const { Interaction, ButtonInteraction, SelectMenuInteraction, ModalSubmitInteraction } = require('discord.js');
+const { Interaction, ButtonInteraction, SelectMenuInteraction, ModalSubmitInteraction, MessagePayload, InteractionReplyOptions } = require('discord.js');
 
 /**Representa un comando*/
 class CommandManager {
@@ -22,6 +22,11 @@ class CommandManager {
     /**@type {Boolean?}*/
 	experimental;
     /**
+     * @typedef {String | MessagePayload | InteractionReplyOptions} ReplyOptions
+     * @type {ReplyOptions}
+     */
+    reply;
+    /**
      * @typedef {(request: CommandRequest, args: CommandOptions, isSlash = false) => Promise<*>} ExecutionFunction
      * @typedef {(interaction: Interaction, ...args: String) => Promise<*>} InteractionResponseFunction
      * @typedef {(interaction: ButtonInteraction, ...args: String) => Promise<*>} ButtonResponseFunction
@@ -37,12 +42,12 @@ class CommandManager {
      * @param {CommandMetaFlagsManager} flags
      */
     constructor(name, flags) {
-        if(typeof name !== 'string')    throw new TypeError('El nombre debe ser un string');
-        if(!flags?.bitField)            throw new TypeError('Las flags deben ser un CommandMetaFlagsManager');
+        if(typeof name !== 'string') throw new TypeError('El nombre debe ser un string');
+        if(!flags?.bitField)         throw new TypeError('Las flags deben ser un CommandMetaFlagsManager');
         this.name = name;
         this.flags = flags;
-        this.experimental = false;
-        this.execute = (request, args, isSlash) => Promise.resolve();
+        this.experimental = true;
+        this.execute = (request, _args, _isSlash) => request.reply(this.reply);
     };
 
     /**@param {...String} aliases*/
@@ -80,6 +85,12 @@ class CommandManager {
         this.experimental = experimental ?? false;
         return this;
     };
+
+    /**@param {ReplyOptions} replyOptions*/
+    setReply(replyOptions) {
+        this._reply = replyOptions;
+        return this;
+    }
 
     /**@param {ExecutionFunction} exeFn*/
     setExecution(exeFn) {
