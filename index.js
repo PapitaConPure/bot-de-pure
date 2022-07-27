@@ -29,7 +29,7 @@ const { channelIsBlocked, randRange, shortenText, dibujarBienvenida, dibujarDesp
 const globalGuildFunctions = require('./localdata/customization/guildFunctions.js');
 const { auditRequest, auditSystem, auditAction } = require('./systems/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('./localdata/cmdExceptions.js');
-const { updateBooruFeeds } = require('./systems/boorufeed');
+const { setupGuildFeedUpdateStack } = require('./systems/boorufeed');
 const { modifyPresence } = require('./presence.js');
 
 //Funcionalidad adicional
@@ -305,43 +305,7 @@ client.on('ready', async () => {
         { name: 'Fecha',            value: `<t:${Math.floor(Date.now() / 1000)}:f>`,    inline: true },
     );
 
-    //Encontrar próximo inicio de mitad de hora (X:00 / X:30) para actualizar Feeds
-	console.log(chalk.yellowBright.bold('Preparando Sistema PuréFeed...'));
-    const now = new Date();
-    const feedUpdateInterval = 60e3 * 30;
-    let feedUpdateStart = feedUpdateInterval - (
-        now.getMinutes() * 60e3 +
-        now.getSeconds() * 1e3 +
-        now.getMilliseconds());
-    while(feedUpdateStart <= 0)
-        feedUpdateStart += feedUpdateInterval;
-    feedUpdateStart += 30e3; //Añadir 30 segundos para dar ventana de tiempo razonable al update de Gelbooru
-
-    const guildConfigs = await GuildConfig.find({ feeds: { $exists: true } });
-    console.log(now.toString());
-    /**@type {Array<Array<[Discord.Snowflake, Discord.Guild]>>}*/
-    const guildChunks = paginateRaw(client.guilds.cache.filter(guild => guildConfigs.some(gcfg => gcfg.guildId === guild.id)), 5);
-    // console.log(guildChunks);
-    const chunkAmount = guildChunks.length;
-    let shortestTime;
-    guildChunks.forEach((chunk, i) => {
-        const guilds = new Discord.Collection(chunk);
-        let chunkUpdateStart = feedUpdateStart + feedUpdateInterval * (i / chunkAmount);
-        // console.log(i, (chunkUpdateStart - feedUpdateInterval));
-        if((chunkUpdateStart - feedUpdateInterval) > 0)
-            chunkUpdateStart -= feedUpdateInterval;
-        if(!shortestTime || chunkUpdateStart < shortestTime)
-            shortestTime = chunkUpdateStart;
-
-        console.log(new Date(now.getTime() + chunkUpdateStart).toString());
-        setTimeout(updateBooruFeeds, chunkUpdateStart, guilds);
-    });
-    auditAction('Se prepararon Feeds',
-        { name: 'Primer Envío',   value: `<t:${Math.floor((Date.now() + shortestTime) * 0.001)}:R>`, inline: true },
-        { name: 'Intervalo Base', value: `${feedUpdateInterval / 60e3} minutos`, inline: true },
-        { name: 'Subdivisiones',  value: `${chunkAmount}`,           inline: true },
-    );
-    // updateBooruFeeds(client);
+    await setupGuildFeedUpdateStack(client);
 });
 
 async function updateChannelMessageCounter(guildId, channelId, userId) {

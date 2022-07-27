@@ -7,6 +7,7 @@ const { CommandMetaFlagsManager } = require('../Commons/cmdFlags.js');
 const globalConfigs = require('../../localdata/config.json');
 const { Booru } = require('../../systems/boorufetch.js');
 const { CommandManager } = require('../Commons/cmdBuilder.js');
+const { addGuildToFeedUpdateStack } = require('../../systems/boorufeed.js');
 
 const wiztitle = 'Asistente de configuración de Feed de imágenes';
 const cancelbutton = new MessageButton()
@@ -218,6 +219,7 @@ const command = new CommandManager('feed', flags)
 		gcfg.feeds ??= {};
 		gcfg.feeds[fetchedChannel.id] ??= { ids: (new Array(16)).fill(0) };
 		gcfg.feeds[fetchedChannel.id].tags = input;
+        addGuildToFeedUpdateStack(interaction.guild);
 		gcfg.markModified('feeds');
 		await gcfg.save();
 

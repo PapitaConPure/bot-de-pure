@@ -4,15 +4,14 @@ const { formatBooruPostMessage } = require('./boorusend.js');
 const { auditError, auditAction } = require('./auditor.js');
 const chalk = require('chalk');
 const { Booru } = require('./boorufetch.js');
-const { booruCredentials } = require('../localdata/config.json');
+const globalConfigs = require('../localdata/config.json');
+const { paginateRaw } = require('../func.js');
+
+//Configuraciones globales de actualización de Feeds
+const feedUpdateInterval = 60e3 * 30;
+const chunkMax = 5;
 
 const logMore = false;
-
-const correctFeedMessages = async (messages) => {
-    messages.forEach(message => {
-
-    });
-}
 
 /**
  * @param {Booru} booru
@@ -120,7 +119,8 @@ const checkFeeds = async (booru, guilds) => {
  * @returns {Promise<void>}
  */
 const updateBooruFeeds = async (guilds) => {
-    const booru = new Booru(booruCredentials);
+    
+    const booru = new Booru(globalConfigs.booruCredentials);
     // console.log(guilds);
 
     const startMs = Date.now();
@@ -131,7 +131,7 @@ const updateBooruFeeds = async (guilds) => {
     });
 
     const delayMs = Date.now() - startMs;
-    // console.log(new Date(Date.now() + 1000 * 60 * 15 - delayMs).toString(), '| delayMs:', delayMs);
+    
     setTimeout(updateBooruFeeds, 60e3 * 30 - delayMs, guilds);
     auditAction('Se procesaron Feeds',
         { name: 'Servers',  value: `${guilds.size}`,         inline: true },
@@ -140,6 +140,107 @@ const updateBooruFeeds = async (guilds) => {
     );
 };
 
+/**@returns {Number}*/
+const getNextBaseUpdateStart = () => {
+    //Encontrar próximo inicio de fracción de hora para actualizar Feeds
+    const now = new Date();
+    let feedUpdateStart = feedUpdateInterval - (
+        now.getMinutes() * 60e3 +
+        now.getSeconds() * 1e3 +
+        now.getMilliseconds());
+    while(feedUpdateStart <= 0)
+        feedUpdateStart += feedUpdateInterval;
+    feedUpdateStart += 30e3; //Añadir 30 segundos para dar ventana de tiempo razonable al update de Gelbooru
+    return feedUpdateStart;
+};
+
+/**
+ * Inicializa una cadena de actualización de Feeds en todas las Guilds que cuentan con uno
+ * @param {Discord.Client} client 
+ */
+const setupGuildFeedUpdateStack = async (client) => {
+    const feedUpdateStart = getNextBaseUpdateStart();
+    const guildConfigs = await GuildConfig.find({ feeds: { $exists: true } });
+    /**@type {Array<{ tid: *, guilds: Array<[Discord.Snowflake, Discord.Guild]> }>}*/
+    const guildChunks = paginateRaw(client.guilds.cache.filter(guild => guildConfigs.some(gcfg => gcfg.guildId === guild.id)), chunkMax)
+        .map((g) => ({ tid: null, guilds: g }));
+    const chunkAmount = guildChunks.length;
+    let shortestTime;
+    guildChunks.forEach((chunk, i) => {
+        const guilds = new Discord.Collection(chunk.guilds);
+        let chunkUpdateStart = feedUpdateStart + feedUpdateInterval * (i / chunkAmount);
+        // console.log(i, (chunkUpdateStart - feedUpdateInterval));
+        if((chunkUpdateStart - feedUpdateInterval) > 0)
+            chunkUpdateStart -= feedUpdateInterval;
+        if(!shortestTime || chunkUpdateStart < shortestTime)
+            shortestTime = chunkUpdateStart;
+
+        // console.log(new Date(now.getTime() + chunkUpdateStart).toString());
+        guildChunks[i].tid = setTimeout(updateBooruFeeds, chunkUpdateStart, guilds);
+    });
+    globalConfigs.feedGuildChunks = guildChunks;
+
+    auditAction('Se prepararon Feeds',
+        { name: 'Primer Envío',   value: `<t:${Math.floor((Date.now() + shortestTime) * 0.001)}:R>`, inline: true },
+        { name: 'Intervalo Base', value: `${feedUpdateInterval / 60e3} minutos`,                     inline: true },
+        { name: 'Subdivisiones',  value: `${chunkAmount}`,                                           inline: true },
+    );
+
+    return;
+};
+
+/**
+ * Añade la Guild actual a la cadena de actualización de Feeds su aún no está en ella
+ * @param {Discord.Guild} guild 
+ * @returns {Boolean} Si se añadió una nueva Guild o no
+ */
+const addGuildToFeedUpdateStack = (guild) => {
+    //Retornar temprano si la guild ya está integrada al stack
+    console.log(globalConfigs.feedGuildChunks)
+    if(globalConfigs.feedGuildChunks.some(chunk => chunk.guilds.some(g => guild.id === g[0])))
+        return false;
+
+    //Añadir guild a stack en un chunk nuevo o uno ya definido
+    /**@type {Array<{ tid: *, guilds: Array<[Discord.Snowflake, Discord.Guild]> }>}*/
+    let guildChunks = globalConfigs.feedGuildChunks;
+    const feedUpdateStart = getNextBaseUpdateStart();
+    if(guildChunks[guildChunks.length - 1].guilds.length >= chunkMax) {
+        //Subdividir 1 nivel más
+        guildChunks.push({ tid: null, guilds: [[guild.id, guild]] });
+        const chunkAmount = guildChunks.length;
+        let shortestTime;
+        guildChunks.forEach((chunk, i) => {
+            let chunkUpdateStart = feedUpdateStart + feedUpdateInterval * (i / chunkAmount);
+            if((chunkUpdateStart - feedUpdateInterval) > 0)
+                chunkUpdateStart -= feedUpdateInterval;
+            if(!shortestTime || chunkUpdateStart < shortestTime)
+                shortestTime = chunkUpdateStart;
+
+            clearTimeout(chunk.tid);
+            guildChunks[i].tid = setTimeout(updateBooruFeeds, chunkUpdateStart, new Discord.Collection(chunk.guilds));
+        });
+
+        auditAction('Intervalos de Feed Reescritos',
+            { name: 'Primer Envío',   value: `<t:${Math.floor((Date.now() + shortestTime) * 0.001)}:R>`, inline: true },
+            { name: 'Subdivisiones',  value: `${chunkAmount}`, inline: true },
+        );
+    } else {
+        //Añadir a última subdivisión
+        guildChunks[guildChunks.length - 1].guilds.push([guild.id, guild]);
+        const chunk = guildChunks[guildChunks.length - 1];
+        const chunkAmount = guildChunks.length;
+        const chunkUpdateStart = feedUpdateStart + feedUpdateInterval * (chunkAmount - 1) / chunkAmount;
+        clearTimeout(chunk.tid);
+        guildChunks[guildChunks.length - 1].tid = setTimeout(updateBooruFeeds, chunkUpdateStart, new Discord.Collection(chunk.guilds));
+    }
+
+    auditAction(`Guild ${guild.id} Incorporada a Feeds`);
+    console.log(guildChunks);
+    globalConfigs.feedGuildChunks = guildChunks;
+    return true;
+};
+
 module.exports = {
-    updateBooruFeeds,
+    setupGuildFeedUpdateStack,
+    addGuildToFeedUpdateStack,
 };
