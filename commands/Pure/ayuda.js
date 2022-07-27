@@ -24,25 +24,25 @@ const command = new CommandManager('ayuda', flags)
         'Puedes hacer una búsqueda `--exclusiva` si solo quieres los comandos que tengan **todos** los identificadores buscados',
     )
     .setOptions(options)
-    .setExperimental(true)
     .setExecution(async (request, args, isSlash) => {
-        const filterExclusive =  isSlash ? options.fetchFlag(args, 'exclusivo', { callback: true }) : fetchFlag(args, { ...options.flags.get('exclusivo').structure, callback: true });
-        const filterAll =        isSlash ? options.fetchFlag(args, 'todo',      { callback: true }) : fetchFlag(args, { ...options.flags.get('todo').structure,      callback: true });
+        const filterExclusive = options.fetchFlag(args, 'exclusivo', { callback: true });
+        const filterAll =       options.fetchFlag(args, 'todo',      { callback: true });
+
+        //Crear máscaras de autorización para listar un comando según sus flags
         const blockAuth = [
             isNotModerator(request.member) && 'MOD',
             (request.author ?? request.user).id !== peopleid.papita && 'PAPA',
             request.guild.id !== serverid.hourai && 'HOURAI',
         ].filter(f => f);
-        console.log(blockAuth);
+        
         const filters = ['meme', 'mod', 'papa', 'hourai']
-            .filter(src => isSlash ? options.fetchFlag(args, src, { callback: src }) : fetchFlag(args, { ...options.flags.get(src).structure, callback: src }))
+            .filter(src => options.fetchFlag(args, src, { callback: src }))
             .map(f => f.toUpperCase());
         
         let search = isSlash ? args.getString('comando') : (args[0] ?? null);
         let list = [];
         const embeds = [];
         const components = [];
-        const avatarUrl = request.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 });
         const guildPrefix = p_pure(request.guildId).raw;
         const helpCommand = `${guildPrefix}${module.exports.name}`;
         
@@ -50,7 +50,7 @@ const command = new CommandManager('ayuda', flags)
         const cfiles = readdirSync('./commands/Pure').filter(file => file.endsWith('.js'));
         for(const file of cfiles) {
             const commandFile = require(`../../commands/Pure/${file}`);
-            /**@type {Command}*/
+            /**@type {CommandManager}*/
             const command = commandFile.command ?? commandFile;
             const { name, aliases, flags } = command;
             
@@ -83,7 +83,7 @@ const command = new CommandManager('ayuda', flags)
                 embeds.push(
                     new MessageEmbed()
                         .setColor('#608bf3')
-                        .setAuthor({ name: title(name), iconURL: avatarUrl})
+                        .setAuthor({ name: title(name), iconURL: request.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }) })
                         .addFields(
                             { name: 'Nombre', value: `\`${name}\``, inline: true },
                             {
@@ -131,7 +131,7 @@ const command = new CommandManager('ayuda', flags)
                 : 'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para buscar un cierto identificador)';
             embeds.push(new MessageEmbed()
                 .setColor(tenshiColor)
-                .setAuthor({ name: 'Lista de comandos', iconURL: avatarUrl })
+                .setAuthor({ name: 'Lista de comandos', iconURL: request.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }) })
                 .addFields(
                     {
                         name: 'Comandos: ejemplos de uso',
