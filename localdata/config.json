@@ -8,6 +8,7 @@
         "note": "Se están haciendo reestructuraciones para una actualización mayor. Es probable que algunos comandos dejen de funcionar durante el proceso.\nTambién, las actualizaciones serán considerablemente menos frecuentes de momento",
         "changelog": [
             "Tareas de refactorización (3.3/4)",
+            "Migración a nuevo modelo de desarrollo (10%)",
             "PLACEHOLDER_SLASHCMD",
             "p!elegir añadido",
             "p!feed incorporado",
@@ -17,10 +18,7 @@
             "p!tarjeta adherido",
             "p!número agregado",
             "p!voz añadido",
-            "PuréScript actualizado",
-            "PuréVoice actualizado",
             "p!hora añadido",
-            "p!avatar ahora detecta avatares de servidor",
             "Corregidos diversos errores",
             "Trabajando en soporte de Preferencias de Usuario"
         ],
