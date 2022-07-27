@@ -19,13 +19,13 @@ module.exports = {
             flag: 'OUTDATED',
             title: 'Comando desactualizado',
             desc: 'El comando no se encuentra disponible debido a que su función ya no es requerida en absoluto. Espera a que se actualice~',
-            isException: (compare) => { console.log('a'); return true; }//isNotByPapita(compare)
+            isException: (compare) => isNotByPapita(compare)
         },
         {
             flag: 'MAINTENANCE',
             title: 'Comando en mantenimiento',
             desc: 'El comando no se encuentra disponible debido a que está en proceso de actualización o reparación en este momento. Espera a que se actualice~',
-            isException: (compare) => { console.log('b'); return true; }//isNotByPapita(compare)
+            isException: (compare) => isNotByPapita(compare)
         },
         {
             flag: 'MOD',
