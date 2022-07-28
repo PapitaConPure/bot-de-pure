@@ -2,13 +2,13 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.F5",
+            "number": "Full.2.8.F9",
             "name": "Cisne Cristalino"
         },
         "note": "Se están haciendo reestructuraciones para una actualización mayor. Es probable que algunos comandos dejen de funcionar durante el proceso.\nTambién, las actualizaciones serán considerablemente menos frecuentes de momento",
         "changelog": [
-            "Tareas de refactorización (3.3/4)",
-            "Migración a nuevo modelo de desarrollo (10%)",
+            "Tareas de refactorización (3.4/4)",
+            "Aplicando nuevo modelo de comandos (15%)",
             "PLACEHOLDER_SLASHCMD",
             "p!elegir añadido",
             "p!feed incorporado",
