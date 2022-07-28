@@ -20,11 +20,11 @@ const metaFlagValues = [
  * Devuelve la profundidad de una Meta Flag
  * @param {MetaFlagValue} flag 
  */
-const metaFlagDepth = flag => 2 ** (metaFlagValues.indexOf(flag) ?? 0);
+const metaFlagDepth = flag => BigInt(2 ** (metaFlagValues.indexOf(flag) ?? 0));
 
 /**Representa un conjunto de Meta Flags de comando*/
 class CommandMetaFlagsManager {
-    /**@type {Number}*/
+    /**@type {BigInt}*/
     bitField;
 
     /**
@@ -32,8 +32,8 @@ class CommandMetaFlagsManager {
      * @constructor
      * @param {Number?} bitField Un valor binario que representa la combinación de Flags del comando
      */
-    constructor(bitField = 0) {
-        this.bitField = bitField;
+    constructor(bitField = 0n) {
+        this.bitField = BigInt(bitField);
     };
 
     /**
@@ -78,9 +78,18 @@ class CommandMetaFlagsManager {
         return this.bitField;
     };
 
-    /**Valores decimales de las Meta Flags existentes en el conjunto*/
+    /**Valores decimales individuales de las Meta Flags existentes en el conjunto, ordenadas de mayor a menor*/
     get rawValues() {
-        return metaFlagValues.filter(value => metaFlagDepth(this.has(value)));
+        const values = [];
+
+        let i = BigInt(2 ** this.bitField.toString(2).length);
+        while(i > 0n) {
+            const value = this.bitField & i;
+            if(value) values.push(value);
+            i /= 2n;
+        }
+        
+        return values;
     };
 
     /**Claves de las Meta Flags existentes en el conjunto*/
