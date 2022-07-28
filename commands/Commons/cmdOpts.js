@@ -51,7 +51,7 @@ const fetchMessageFlag = (args, flag = { property, short: [], long: [], callback
         return flag.fallback;
 
     if(flag.callback == undefined)
-        return flagValue;
+        return flag.property ? flagValue : true;
 
     return typeof flag.callback === 'function' ? flag.callback(flagValue) : flag.callback;
 }
