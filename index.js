@@ -338,28 +338,70 @@ client.on('messageCreate', async message => {
     //#region Comandos
     const msg = content.toLowerCase();
     (async () => {
-    //#region Detección de Comandos
-    const pdrmk = p_drmk(guildId);
-    const ppure = p_pure(guildId);
-    let pdetect;
-    if(msg.match(pdrmk.regex)) pdetect = pdrmk;
-    else if(msg.match(ppure.regex)) pdetect = ppure;
-    else {
-        //region Emotes rápidos
-        const words = content.split(/[\n ]+/);
-        const emoteCommandIndex = words.findIndex(word => word.startsWith('&'));
-        if(emoteCommandIndex === -1) return; //Salir si no se encuentra prefijo de comando ni emote
+        //#region Detección de Comandos
+        const pdrmk = p_drmk(guildId);
+        const ppure = p_pure(guildId);
+        let pdetect;
+        if(msg.match(pdrmk.regex)) pdetect = pdrmk;
+        else if(msg.match(ppure.regex)) pdetect = ppure;
+        else {
+            //region Emotes rápidos
+            const words = content.split(/[\n ]+/);
+            const emoteCommandIndex = words.findIndex(word => word.startsWith('&'));
+            if(emoteCommandIndex === -1) return; //Salir si no se encuentra prefijo de comando ni emote
 
+            auditRequest(message);
+            const args = words.slice(emoteCommandIndex + 1);
+            const emoteCommand = words[emoteCommandIndex].toLowerCase().slice(1);
+            const command = client.EmotesPure.get(emoteCommand) || client.EmotesPure.find(cmd => cmd.aliases && cmd.aliases.includes(emoteCommand)); //Argumentos ingresados
+            if(!command) return;
+
+            try {
+                //Detectar problemas con el comando basado en flags
+                const exception = await findFirstException(command.flags, message);
+                if(exception) return;
+                await command.execute(message, args);
+                stats.commands.succeeded++;
+            } catch(error) {
+                const isPermissionsError = handleAndAuditError(error, message, { details: `"${message.content?.slice(0, 699)}"\n[${commandname} :: ${args}]` });
+                if(!isPermissionsError)
+                    stats.commands.failed++;
+            }
+            return;
+        }
+
+        //Partición de mensaje comando
         auditRequest(message);
-        const args = words.slice(emoteCommandIndex + 1);
-        const emoteCommand = words[emoteCommandIndex].toLowerCase().slice(1);
-        const command = client.EmotesPure.get(emoteCommand) || client.EmotesPure.find(cmd => cmd.aliases && cmd.aliases.includes(emoteCommand)); //Argumentos ingresados
-        if(!command) return;
+        const args = content.replace(pdetect.regex, '').split(/[\n ]+/); //Argumentos ingresados
+        let commandname = args.shift().toLowerCase(); //Comando ingresado
+        let command;
+        
+        if(pdetect.raw === pdrmk.raw)
+            command = client.ComandosDrawmaku.get(commandname) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(commandname));
+        else
+            command = client.ComandosPure.get(commandname) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(commandname));
+        
+        if(!command) {
+            /**@type {Array<String>} */
+            const replies = [
+                'Disculpa, soy estúpida. Tal vez escribiste mal el comando y no te entiendo\nhttps://i.imgur.com/e4uM3z6.jpg',
+                'No entiendo, ¿quieres usar un comando? Quieres usar uno, ¿verdad?, ¿prueba revisar cómo lo escribes?\nhttps://i.imgur.com/uuLuxtj.jpg',
+                `La verdad, no tengo ni idea de qué pueda ser **"${commandname}"**, ¿seguro que lo escribiste bien? Recuerda que soy un bot, eh\nhttps://i.imgur.com/AHdc7E2.jpg`,
+                'Busqué en todo el manual y no encontré el comando que me pediste. Perdóname, PERDÓNAME WAAAAAAAAH\nhttps://i.imgur.com/wOxRi72.jpg',
+                'No logré encontrar tu comando en mi librito. ¿Lo habrás escrito mal?\nhttps://i.imgur.com/avTSSa4.jpg',
+            ];
+            const notice = await message.reply({ content: replies[randRange(0, replies.length)] }).catch(() => undefined);
+            setTimeout(() => notice?.delete().catch(console.error), 6000);
+            return;
+        }
+        //#endregion
 
+        //#region Ejecución de Comandos
         try {
             //Detectar problemas con el comando basado en flags
             const exception = await findFirstException(command.flags, message);
-            if(exception) return;
+            if(exception)
+                return channel.send({ embeds: [ generateExceptionEmbed(exception, { cmdString: `${pdetect.raw}${commandname}` }) ]});
             await command.execute(message, args);
             stats.commands.succeeded++;
         } catch(error) {
@@ -367,50 +409,8 @@ client.on('messageCreate', async message => {
             if(!isPermissionsError)
                 stats.commands.failed++;
         }
-        return;
-    }
-
-    //Partición de mensaje comando
-    auditRequest(message);
-    const args = content.replace(pdetect.regex, '').split(/[\n ]+/); //Argumentos ingresados
-    let commandname = args.shift().toLowerCase(); //Comando ingresado
-    let command;
-    
-    if(pdetect.raw === pdrmk.raw)
-        command = client.ComandosDrawmaku.get(commandname) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(commandname));
-    else
-        command = client.ComandosPure.get(commandname) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(commandname));
-    
-    if(!command) {
-        /**@type {Array<String>} */
-        const replies = [
-            'Disculpa, soy estúpida. Tal vez escribiste mal el comando y no te entiendo\nhttps://i.imgur.com/e4uM3z6.jpg',
-            'No entiendo, ¿quieres usar un comando? Quieres usar uno, ¿verdad?, ¿prueba revisar cómo lo escribes?\nhttps://i.imgur.com/uuLuxtj.jpg',
-            `La verdad, no tengo ni idea de qué pueda ser **"${commandname}"**, ¿seguro que lo escribiste bien? Recuerda que soy un bot, eh\nhttps://i.imgur.com/AHdc7E2.jpg`,
-            'Busqué en todo el manual y no encontré el comando que me pediste. Perdóname, PERDÓNAME WAAAAAAAAH\nhttps://i.imgur.com/wOxRi72.jpg',
-            'No logré encontrar tu comando en mi librito. ¿Lo habrás escrito mal?\nhttps://i.imgur.com/avTSSa4.jpg',
-        ];
-        const notice = await message.reply({ content: replies[randRange(0, replies.length)] }).catch(() => undefined);
-        setTimeout(() => notice?.delete().catch(console.error), 6000);
-        return;
-    }
-    //#endregion
-
-    //#region Ejecución de Comandos
-    try {
-        //Detectar problemas con el comando basado en flags
-        const exception = await findFirstException(command.flags, message);
-        if(exception)
-            return channel.send({ embeds: [ generateExceptionEmbed(exception, { cmdString: `${pdetect.raw}${commandname}` }) ]});
-        await command.execute(message, args);
-        stats.commands.succeeded++;
-    } catch(error) {
-        const isPermissionsError = handleAndAuditError(error, message, { details: `"${message.content?.slice(0, 699)}"\n[${commandname} :: ${args}]` });
-        if(!isPermissionsError)
-            stats.commands.failed++;
-    }
-    stats.markModified('commands');
-    //#endregion
+        stats.markModified('commands');
+        //#endregion
     })();
     //#endregion
 
