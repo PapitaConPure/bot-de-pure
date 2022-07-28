@@ -1,30 +1,24 @@
 const { MessageEmbed } = require('discord.js'); //Integrar discord.js
 const { serverid } = require('../../localdata/config.json'); //Variables globales
 const { paginate, fetchArrows } = require('../../func');
-const { CommandMetaFlagsManager } = require('../Commons/commands');
-const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
+const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
-module.exports = {
-	name: 'emotes',
-	aliases: [
+const flags = new CommandMetaFlagsManager().add('COMMON');
+const command = new CommandManager('emotes', flags)
+	.setAliases(
 		'emojis', 'emote', 'emoji',
-		'emt'
-	],
-	brief: 'Muestra una lista de emotes disponibles',
-    desc: 'Muestra una lista paginada de emotes a mi disposición',
-    flags: new CommandMetaFlagsManager().add('COMMON'),
-	experimental: true,
-	
-	async execute(request, _, isSlash = false) {
+		'emt',
+	)
+	.setBriefDescription('Muestra una lista de emotes disponibles')
+	.setLongDescription('Muestra una lista paginada de emotes a mi disposición')
+	.setExecution(async request => {
 		const user = (request.author ?? request.user);
 		const guilds = request.client.guilds.cache;
-		let emotes = (() => {
-			const slot1Coll = guilds.get(serverid.slot1).emojis.cache.values();
-			const slot2Coll = guilds.get(serverid.slot2).emojis.cache.values();
-			const slot3Coll = guilds.get(serverid.slot3).emojis.cache.values();
-			return [...slot1Coll, ...slot2Coll, ...slot3Coll].sort();
-		})();
-		emotes = paginate(emotes);
+		const emotes = paginate([
+			...guilds.get(serverid.slot1).emojis.cache.values(),
+			...guilds.get(serverid.slot2).emojis.cache.values(),
+			...guilds.get(serverid.slot3).emojis.cache.values(),
+		].sort());
 		let page = 0;
 		const content = '**Oe mira po, emotes** <:yumou:708158159180660748>\n';
 		const embed = new MessageEmbed()
@@ -34,14 +28,12 @@ module.exports = {
 			.setFooter({ text: `Reacciona a las flechas debajo para cambiar de página` })
 			.addFields({ name: `${'Nombre\`'.padEnd(24)}\`Emote`, value: emotes[0] });
 
-		const sent = (await Promise.all([
-			request.reply({ content: content, embeds: [embed] }),
-			isSlash ? request.fetchReply() : null,
-		])).filter(s => s).pop();
+		const sent = await request.reply({ content: content, embeds: [embed], fetchReply: true });
 		const arrows = fetchArrows(request.client.emojis.cache);
 		await Promise.all([sent.react(arrows[0]), sent.react(arrows[1])]);
 			
-		const collector = sent.createReactionCollector({ filter: filter, time: 8 * 60 * 1000 });
+		const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
+		const collector = sent.createReactionCollector({ filter, time: 8 * 60 * 1000 });
 		collector.on('collect', reaction => {
 			if(reaction.emoji.id === arrows[0].id) page = (page > 0) ? (page - 1) : (emotes.length - 1);
 			else page = (page < (emotes.length - 1)) ? (page + 1) : 0;
@@ -49,5 +41,6 @@ module.exports = {
 			embed.setFooter({ text: `Página ${page + 1}/${Math.ceil(emotes.length)}` });
 			sent.edit({ content: content, embeds: [embed]});
 		});
-    },
-};
+	});
+
+module.exports = command;
