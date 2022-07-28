@@ -20,9 +20,9 @@ const command = new CommandManager('info', flags)
 		if(!request.guild.available)
 			return request.reply(':interrobang: E-el servidor está en corte ahora mismo. Intenta usar el comando más tarde');
 		if(isSlash)
-			request.deferReply();
+			await request.deferReply();
 		else
-			request.channel.sendTyping();
+			await request.channel.sendTyping();
 
 		const stats = await Stats.findOne({});
 		const servidor = request.guild; //Variable que almacena un objeto del servidor a analizar
