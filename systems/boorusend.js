@@ -12,7 +12,7 @@ const rakki = require('../commands/Pure/rakkidei');
  * @param {Post} post Post de Booru
  * @param {{ maxTags: number?, title: string?, footer: string?, cornerIcon: string?, manageableBy: string? }} data Información adicional a mostrar en el Embed. Se puede pasar un feed directamente
  */
-async function formatBooruPostMessage(post, data = {}) {
+function formatBooruPostMessage(post, data = {}) {
     const maxTags = data.maxTags ?? 20;
     //Botón de Post de Gelbooru
     const row = new MessageActionRow().addComponents(
@@ -151,7 +151,7 @@ async function formatBooruPostMessage(post, data = {}) {
  * @param {import('../commands/Commons/typings').CommandOptions} args
  * @param {Boolean} isSlash
  */
-async function searchAndReplyWithPost(request, args, isSlash, searchOpt = { cmdtag: '', nsfwtitle: 'Búsqueda NSFW', sfwtitle: 'Búsqueda' }) {
+async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt = { cmdtag: '', nsfwtitle: 'Búsqueda NSFW', sfwtitle: 'Búsqueda' }) {
     const isnsfw = request.channel.isThread()
         ? request.channel.parent.nsfw
         : request.channel.nsfw;
@@ -177,23 +177,15 @@ async function searchAndReplyWithPost(request, args, isSlash, searchOpt = { cmdt
             return rakki.execute(request, [], isSlash);
     }
 
-    //Acción de comando
-    if(!isSlash) request.channel.sendTyping();
-    const poolSize = isSlash
-        ? options.fetchFlag(args, 'bomba', { callback: x => Math.max(2, Math.min(x, 10)), fallback: 1 })
-        : fetchFlag(args, {
-            property: true,
-            ...options.flags.get('bomba').structure,
-            callback: (x,i) => {
-                const cnt = parseInt(x[i]);
-                if(isNaN(cnt)) return 1;
-                return Math.max(2, Math.min(cnt, 10));
-            },
-            fallback: 1,
-        });
+    if(!isSlash)
+        await request.channel.sendTyping();
+    else
+        await request.deferReply();
+
+    const poolSize = options.fetchFlag(args, 'bomba', { callback: f => Math.max(2, Math.min(f, 10)), fallback: 1 });
     const stags = [searchOpt.cmdtag, getBaseTags('gelbooru', isnsfw)].join(' ');
     const words = isSlash
-        ? (args.getString('etiquetas', false) ?? '').split(/ +/)
+        ? (args.getString('etiquetas') ?? '').split(/ +/)
         : args;
     const extags = getSearchTags(words, 'gelbooru', searchOpt.cmdtag);
     /**@type {import('discord.js').User} */
@@ -204,8 +196,10 @@ async function searchAndReplyWithPost(request, args, isSlash, searchOpt = { cmdt
         const booru = new Booru(globalConfigs.booruCredentials);
         const response = await booru.search([stags, extags], { limit: 100, random: true });
         //Manejo de respuesta
-        if(!response.length)
-            return request.reply({ content: `:warning: No hay resultados en **Gelbooru** para las tags **"${extags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` });
+        if(!response.length) {
+            const replyOptions = { content: `:warning: No hay resultados en **Gelbooru** para las tags **"${extags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` };
+            return request.editReply?.(replyOptions) ?? request.reply(replyOptions);
+        }
 
         //Seleccionar imágenes
         const posts = response
@@ -224,8 +218,9 @@ async function searchAndReplyWithPost(request, args, isSlash, searchOpt = { cmdt
             messages[posts.length - 1].embeds[0].addFields({ name: 'Tu búsqueda', value: `:mag_right: *${extags.trim().replace('*', '\\*').split(/ +/).join(', ')}*` });
 
         //Enviar mensajes
-        await request.reply(messages.shift());
-        return Promise.all(messages.map(message => request.channel.send(message)));
+        const replyOptions = messages.shift();
+        await request.editReply?.(replyOptions) ?? request.reply(replyOptions);
+        return Promise.all(messages.map(message => request.channel.send(message))).catch(console.error);
     } catch(error) {
         console.error(error);
         const errorembed = new MessageEmbed()
@@ -239,7 +234,7 @@ async function searchAndReplyWithPost(request, args, isSlash, searchOpt = { cmdt
                     '```',
                 ].join('\n'),
             });
-        return request.reply({ embeds: [errorembed] });
+        return request.editReply?.({ embeds: [errorembed] }) ?? request.reply({ embeds: [errorembed] });
     }
 };
 

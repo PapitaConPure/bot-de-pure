@@ -1,6 +1,3 @@
-const { sites } = require('booru');
-
-const engines = Object.values(sites).map(s => s.aliases[s.aliases.length - 1]);
 const basetags = '-guro -furry -vore -webm -video -audio -comic -4koma';
 const nsfwrating = {
     [true]: 'explicit',
@@ -12,7 +9,6 @@ const nsfwtags = {
 }
 
 module.exports = {
-    engines,
 	basetags,
 	nsfwrating,
 	nsfwtags,

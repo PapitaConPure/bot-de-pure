@@ -9,12 +9,12 @@ const flags = new CommandMetaFlagsManager().add(
 );
 const command = new CommandManager('heart', flags)
 	.setAliases('holo')
-	.setBriefDescription(brief.replace('Muestra imágenes de Holo, en rendimiento a Heartnix'))
+	.setBriefDescription('Muestra imágenes de Holo, en rendimiento a Heartnix')
 	.setLongDescription(
 		'Muestra imágenes de Holo, en rendimiento a Heartnix.',
 		'**Nota:** ni siquiera intentes buscarla en canales NSFW',
 	)
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash) => searchAndReplyWithPost(request, args, isSlash, { cmdtag: 'holo', sfwtitle: 'HOLO OWO' }));
+	.setExecution((request, args, isSlash) => searchAndReplyWithPost(request, args, isSlash, options, { cmdtag: 'holo', sfwtitle: 'HOLO OWO' }));
 
 module.exports = command;

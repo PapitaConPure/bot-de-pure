@@ -11,12 +11,12 @@ const command = new CommandManager('buscar', flags)
 		'search', 'image',
 		'img',
 	)
-	.setBriefDescription(brief.replace('Muestra imágenes desde Gelbooru'))
+	.setBriefDescription('Muestra imágenes desde Gelbooru')
 	.setLongDescription(
 		'Muestra imágenes de cualquier cosa. La búsqueda se realiza con Gelbooru.',
 		'**Nota:** en canales NSFW, los resultados serán NSFW',
 	)
 	.setOptions(options)
-	.setExecution(searchAndReplyWithPost);
+	.setExecution((request, args, isSlash) => searchAndReplyWithPost(request, args, isSlash, options));
 
 module.exports = command;

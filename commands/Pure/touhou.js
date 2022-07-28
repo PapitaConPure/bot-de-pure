@@ -9,12 +9,12 @@ const command = new CommandManager('touhou', flags)
         'touhoupic', '2hupic',
 		'2hu', '2ho',
 	)
-	.setBriefDescription(brief.replace('Muestra imágenes de Touhou'))
+	.setBriefDescription('Muestra imágenes de Touhou')
 	.setLongDescription(
 		'Muestra imágenes de Touhou.',
 		'**Nota:** en canales NSFW, los resultados serán NSFW',
 	)
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash) => searchAndReplyWithPost(request, args, isSlash, { cmdtag: 'touhou', sfwtitle: 'Tohas uwu', nsfwtitle: 'Tohitas O//w//O' }));
+	.setExecution((request, args, isSlash) => searchAndReplyWithPost(request, args, isSlash, options, { cmdtag: 'touhou', sfwtitle: 'Tohas uwu', nsfwtitle: 'Tohitas O//w//O' }));
 
 module.exports = command;

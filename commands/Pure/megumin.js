@@ -11,13 +11,13 @@ const command = new CommandManager('megumin', flags)
 		'megu', 'explosión', 'bakuretsu', 'papiwaifu', 'papawaifu', 'waifu',
 		'bestgirl', 'explosion',
 	)
-	.setBriefDescription(brief.replace('Muestra imágenes de Megumin, la esposa de Papita'))
+	.setBriefDescription('Muestra imágenes de Megumin, la esposa de Papita')
 	.setLongDescription(
 		'Muestra imágenes de Megumin, también conocida como "La Legítima Esposa de Papita con Puré".',
 		'❤️🤎🧡💛💚💙💜🤍💟♥️❣️💕💞💓💗💖💝',
 		'**Nota:** no intentes buscarla en canales NSFW, conchetumare 😡',
 	)
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash) => searchAndReplyWithPost(request, args, isSlash, { cmdtag: 'megumin', sfwtitle: 'MEGUMIN ÙwÚ', nsfwtitle: 'MEGUMIN Ú//w//Ù' }));
+	.setExecution((request, args, isSlash) => searchAndReplyWithPost(request, args, isSlash, options, { cmdtag: 'megumin', sfwtitle: 'MEGUMIN ÙwÚ', nsfwtitle: 'MEGUMIN Ú//w//Ù' }));
 
 module.exports = command;
