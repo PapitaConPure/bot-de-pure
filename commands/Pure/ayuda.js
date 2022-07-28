@@ -1,7 +1,7 @@
 const { readdirSync } = require('fs'); //Integrar operaciones sistema de archivos de consola
 const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
 const { serverid, tenshiColor, peopleid } = require('../../localdata/config.json'); //Variables globales
-const { fetchFlag, isNotModerator } = require('../../func');
+const { isNotModerator } = require('../../func');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 

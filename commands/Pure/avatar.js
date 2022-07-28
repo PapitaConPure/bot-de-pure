@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js'); //Integrar discord.js
-const { fetchUser, regroupText, fetchMember } = require('../../func.js'); //Funciones globales
+const { regroupText, fetchMember } = require('../../func.js'); //Funciones globales
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
 
