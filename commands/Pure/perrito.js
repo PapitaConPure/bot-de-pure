@@ -19,7 +19,7 @@ const command = new CommandManager('perrito', flags)
 	.setExecution(async (request, args, isSlash) => {
 		const deleteMessage = isSlash ? false : options.fetchFlag(args, 'borrar');
 		if(deleteMessage)
-			request.delete();
+			request.delete().catch(_ => undefined);
 		
 		const perritoNames = [
 			'perrito', 'otirrep', 'od', 'do', 'cerca', 'muycerca', 'lejos', 'muylejos', 'invertido', 'dormido', 'pistola', 'sad', 'gorrito', 'gorra', 'almirante', 'detective',
