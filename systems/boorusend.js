@@ -118,7 +118,11 @@ function formatBooruPostMessage(post, data = {}) {
         .setAuthor({ name: 'Desde Gelbooru', iconURL: data.cornerIcon ?? 'https://i.imgur.com/outZ5Hm.png' });
     const filteredTags = post.tags.slice(0, maxTags);
     const tagsTitle = `${guildEmoji('tagswhite', globalConfigs.slots.slot3)} Tags (${filteredTags.length}/${post.tags.length})`;
-    const tagsContent = `*${filteredTags.join(', ').replace(/\*/g,'\\*').replace(/_/g,'\\_')}*`;
+    const tagsContent = `*${filteredTags.join(', ')
+        .replace(/\*/g,'\\*')
+        .replace(/_/g,'\\_')
+        .replace(/\|/g,'\\|')
+        .replace(/\\/g,'\\\\')}*`;
     // const tagsContent = filteredTags.join(', ');
 
     if(maxTags > 0)
