@@ -604,14 +604,5 @@ client.on('rateLimit', rateLimit => {
     );
 });
 
-//Evento de advertencia
-client.on('warn', console.log);
-
-//Evento de error de API
-client.on('error', error => {
-    console.log(chalk.redBright('Error con la API de Discord'));
-    console.error(error);
-});
-
 client.login(discordToken); //Ingresar sesión en Bot
 console.timeEnd('Registro de eventos del cliente');
