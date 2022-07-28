@@ -1,5 +1,5 @@
-const { fetchFlag } = require("../../func");
-const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
+const { rand } = require('../../func');
+const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const uwusopt = [
 	'<:uwu:681935702308552730>',
@@ -10,37 +10,25 @@ const uwusopt = [
 ];
 
 const options = new CommandOptionsManager()
-	.addParam('uwu', { name: 'uwu', expression: 'uwu' }, 'uwu')
+	.addParam('uwu', { name: 'uwu', expression: 'uwu' }, 'uwu', { optional: true })
 	.addFlag('u', 'uwuwu', 'uwu')
 	.addFlag('bd', ['borrar', 'delete'], 'para borrar el mensaje original');
+const flags = new CommandMetaFlagsManager().add(
+	'MEME',
+	'EMOTE',
+);
+const command = new CommandManager('uwu', flags)
+	.setAliases('uwu')
+	.setLongDescription('uwu')
+	.setOptions(options)
+	.setExecution(async (request, args, isSlash) => {
+		const deleteOriginal = !isSlash && options.fetchFlag(args, 'borrar');
+		const randomUwu = uwusopt[rand(uwusopt.length)];
+		
+		if(deleteOriginal)
+			request.delete().catch(console.error)
+		
+		return request.reply({ content: randomUwu });
+	});
 
-module.exports = {
-	name: 'uwu',
-	aliases: ['uwu'],
-    desc: 'uwu',
-    flags: new CommandMetaFlagsManager().add(
-		'MEME',
-		'EMOTE',
-	),
-    options,
-	callx: 'uwu',
-	experimental: true,
-	
-	/**
-	 * @param {import("../Commons/typings").CommandRequest} request
-	 * @param {import('../Commons/typings').CommandOptions} args
-	 * @param {Boolean} isSlash
-	 */
-	async execute(request, args, isSlash = false) {
-		const deleteOriginal = isSlash ? false : fetchFlag(args, { ...options.flags.get('borrar').structure, callback: true });
-		const randomUwu = uwusopt[Math.floor(Math.random() * uwusopt.length)];
-		
-		if(!deleteOriginal)
-			return request.reply({ content: uwusopt[Math.floor(Math.random() * uwusopt.length)] });
-		
-		return Promise.all([
-			request.reply({ content: randomUwu }),
-			request.delete().catch(console.error),
-		]);
-    },
-};
+module.exports = command;
