@@ -15,6 +15,7 @@ const command = new CommandManager('perrito', flags)
 	.setAliases('taton', 'dog', 'pe')
 	.setBriefDescription('Envía un emote de perrito o lista todos los disponibles')
 	.setLongDescription('Comando cachorro de Taton. Puedes ingresar una palabra identificadora para enviar un perrito en específico o ver una lista de perritos. Si no ingresas nada, se enviará un perrito aleatorio')
+	.setOptions(options)
 	.setExecution(async (request, args, isSlash) => {
 		const deleteMessage = isSlash ? false : options.fetchFlag(args, 'borrar');
 		if(deleteMessage)
