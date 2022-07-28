@@ -469,7 +469,7 @@ class CommandOptionsManager {
      * @param {FeedbackOptions} output Define la respuestas en cada caso
      * @returns {*} El valor de retorno de callback si la flag fue respondida, o en cambio, el de fallback
      */
-    fetchFlag(args, identifier, output = { callback, fallback }) {
+    fetchFlag(args, identifier, output = { callback: null, fallback: null }) {
         if(Array.isArray(args))
             return fetchMessageFlag(args, { ...this.flags.get(identifier).structure, ...output });
         
