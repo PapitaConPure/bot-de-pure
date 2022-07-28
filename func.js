@@ -428,7 +428,7 @@ module.exports = {
                 //`Una última cosita ${miembro}, recuerda revisar el canal <#671817759268536320> en algún momento <:Junkoborga:751938096550903850>`,
                 //`También, si te interesa, puedes revisar los mensajes pinneados de este canal <:tenshipeacheems:854408293258493962>`,
                 `Okay, ya \'tamos ${miembro}, recuerda convivir adecuadamente con el resto <:Junkoborga:751938096550903850>`,
-                'Si te interesa, puedes revisar los mensajes pinneados de este canal <:tenshipeacheems:854408293258493962>`',
+                'Si te interesa, puedes revisar los mensajes pinneados de este canal <:tenshipeacheems:854408293258493962>',
                 'Y estate tranqui, que ya no vas a recibir tantos pings <:starnap:727764482801008693>',
                 `Dicho esto, ¡disfruta el server po\'! Si quieres más roles, puedes usar \`${p_pure(global.serverid.hourai).raw}roles\``,
             ].join('\n')
