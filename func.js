@@ -140,7 +140,7 @@ module.exports = {
      */
     paginate: function(array, itemsOptions = { pagemax: 10, format: item => `\`${item.name.padEnd(24)}\`${item}` }) {
         const { pagemax, format } = itemsOptions;
-		return paginateRaw(array, pagemax)
+		return module.exports.paginateRaw(array, pagemax)
             .map(page => page.map(format).join('\n'));
     },
     //#endregion
