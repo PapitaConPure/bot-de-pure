@@ -119,10 +119,10 @@ function formatBooruPostMessage(post, data = {}) {
     const filteredTags = post.tags.slice(0, maxTags);
     const tagsTitle = `${guildEmoji('tagswhite', globalConfigs.slots.slot3)} Tags (${filteredTags.length}/${post.tags.length})`;
     const tagsContent = `*${filteredTags.join(', ')
+        .replace(/\\/g,'\\\\')
         .replace(/\*/g,'\\*')
         .replace(/_/g,'\\_')
-        .replace(/\|/g,'\\|')
-        .replace(/\\/g,'\\\\')}*`;
+        .replace(/\|/g,'\\|')}*`;
     // const tagsContent = filteredTags.join(', ');
 
     if(maxTags > 0)
