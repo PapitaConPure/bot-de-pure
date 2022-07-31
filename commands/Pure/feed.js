@@ -822,7 +822,7 @@ const command = new CommandManager('feed', flags)
 		const booru = new Booru(globalConfigs.booruCredentials);
 		try {
 			const post = await booru.fetchPostByUrl(url);
-			const tags = shortenText(post.tags.join(', '), 1800);
+			const tags = shortenText(post.tags.join(', '), 1000);
 			const source = post.source;
 			return interaction.reply({
 				// content: `<:tagswhite:921788204540100608> **Tags**\n${tags}\n<:gelbooru:919398540172750878> **Post** <${url}>${ source ? `\n<:urlwhite:922669195521568818> **Fuente** <${source}>` : '' }`,
