@@ -1080,6 +1080,40 @@ module.exports = {
         if(typeof suspensor !== 'string') throw TypeError('El suspensor debe ser un string');
         if(text.length < max) return text;
         return `${text.slice(0, max - suspensor.length)}${suspensor}`;
+    },
+
+    /**
+     * Calcula la distancia entre dos strings
+     * @param {String} a 
+     * @param {String} b 
+     */
+    levenshteinDistance: function(a, b) {
+        const m = a.length + 1;
+        const n = b.length + 1;
+        let distance = new Array(m);
+        for(let i = 0; i < m; ++i) {
+            distance[i] = new Array(n);
+            for(let j = 0; j < n; ++j)
+                distance[i][j] = 0;
+            distance[i][0] = i;
+        }
+
+        for(let j = 1; j < n; j++)
+            distance[0][j] = j;
+
+        let cost;
+        for(let i = 1; i < m; i++)
+            for(let j = 1; j < n; j++) {
+                cost = a.at(i - 1) === b.at(j - 1) ? 0 : 1;
+
+                distance[i][j] = Math.min(
+                    distance[i - 1][j] + 1,
+                    distance[i][j - 1] + 1,
+                    distance[i - 1][j - 1] + cost,
+                );
+            }
+
+        return distance[m - 1][n - 1];
     }
     //#endregion
 };
