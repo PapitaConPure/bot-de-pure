@@ -2,7 +2,7 @@
 //Sistemas
 const Discord = require('discord.js');
 const { REST } = require('@discordjs/rest');
-const { Routes, PermissionFlagsBits } = require('discord-api-types/v9');
+const { Routes } = require('discord-api-types/v9');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { CommandManager, CommandOptionsManager } = require('./commands/Commons/commands.js');
 const { PureVoiceUpdateHandler } = require('./systems/purevoice.js');
@@ -24,7 +24,7 @@ const booruUserId = process.env.BOORU_USERID ?? (require(envPath)?.booruuserid);
 
 //Utilidades
 const globalConfigs = require('./localdata/config.json');
-const { channelIsBlocked, randRange, shortenText, dibujarBienvenida, dibujarDespedida, levenshteinDistance } = require('./func.js');
+const { channelIsBlocked, randRange, shortenText, dibujarBienvenida, dibujarDespedida, levenshteinDistance, rand } = require('./func.js');
 const globalGuildFunctions = require('./localdata/customization/guildFunctions.js');
 const { auditRequest, auditSystem } = require('./systems/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('./localdata/cmdExceptions.js');
@@ -393,32 +393,49 @@ client.on('messageCreate', async message => {
             }
             const suggestions = foundList.sort((a, b) => a.distance - b.distance).slice(0, 5);
 
-            /**@type {Array<String>} */
+            /**@type {Array<{ text: String, imageUrl: String }>}*/
             const replies = [
-                'Disculpa, soy estúpida. Tal vez escribiste mal el comando y no te entiendo\nhttps://i.imgur.com/e4uM3z6.jpg',
-                'No entiendo, ¿quieres usar un comando? Quieres usar uno, ¿verdad?, ¿prueba revisar cómo lo escribes?\nhttps://i.imgur.com/uuLuxtj.jpg',
-                `La verdad, no tengo ni idea de qué pueda ser **"${commandname}"**, ¿seguro que lo escribiste bien? Recuerda que soy un bot, eh\nhttps://i.imgur.com/AHdc7E2.jpg`,
-                'Busqué en todo el manual y no encontré el comando que me pediste. Perdóname, PERDÓNAME WAAAAAAAAH\nhttps://i.imgur.com/wOxRi72.jpg',
-                'No logré encontrar tu comando en mi librito. ¿Lo habrás escrito mal?\nhttps://i.imgur.com/avTSSa4.jpg',
+                {
+                    text: 'Disculpa, soy estúpida. Tal vez escribiste mal el comando y no te entiendo',
+                    imageUrl: 'https://i.imgur.com/e4uM3z6.jpg',
+                },
+                {
+                    text: 'No entiendo, ¿quieres usar un comando? Quieres usar uno, ¿verdad?, ¿prueba revisar cómo lo escribes?',
+                    imageUrl: 'https://i.imgur.com/uuLuxtj.jpg',
+                },
+                {
+                    text: `La verdad, no tengo ni idea de qué pueda ser **"${commandname}"**, ¿seguro que lo escribiste bien? Recuerda que soy un bot, eh`,
+                    imageUrl: 'https://i.imgur.com/AHdc7E2.jpg',
+                },
+                {
+                    text: 'Busqué en todo el manual y no encontré el comando que me pediste. Perdóname, PERDÓNAME WAAAAAAAAH',
+                    imageUrl: 'https://i.imgur.com/wOxRi72.jpg',
+                },
+                {
+                    text: 'No logré encontrar tu comando en mi librito. ¿Lo habrás escrito mal?',
+                    imageUrl: 'https://i.imgur.com/avTSSa4.jpg',
+                },
             ];
+            const selectedReply = replies[rand(replies.length)]
             
             if(!suggestions.length) {
-                const notice = await message.reply({ content: replies[randRange(0, replies.length)] }).catch(() => undefined);
+                const notice = await message.reply({ content: selectedReply.text }).catch(() => undefined);
                 return setTimeout(() => notice?.delete().catch(_ => undefined), 6000);
             }
             
             const suggestionEmbed = new Discord.MessageEmbed()
+                .setColor('#5070bb')
                 .setTitle('Sugerencias')
                 .setFooter({ text: 'Basado en nombres y alias de comando' })
                 .addFields({
                     name: `Comandos similares a "${commandname}"`,
                     value: suggestions.map(found => `• ${pdetect.raw}${found.command.name}`).join('\n'),
                 });
-            console.log(suggestionEmbed);
             return message.reply({
-                content: replies[randRange(0, replies.length)],
-                emdeds: [suggestionEmbed],
-            }).catch(_ => undefined);
+                content: selectedReply.text,
+                files: [selectedReply.imageUrl],
+                embeds: [suggestionEmbed],
+            });
         }
         //#endregion
 
