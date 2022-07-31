@@ -10,7 +10,7 @@ const command = new CommandManager('gatos', flags)
         'cats', 'cat', 'meow', 'nya', 'kitty', 'kitties'
     )
 	.setLongDescription('Muestra imágenes de gatitos uwu')
-	.setExecution(async (request, args, isSlash) => {
+	.setExecution(async request => {
 		const { file } = (await axios.get('https://aws.random.cat/meow').catch(auditError))?.data;
 
 		//Crear y usar embed
@@ -24,7 +24,7 @@ const command = new CommandManager('gatos', flags)
 				.setImage(file)
 				.setColor('#ffc0cb');
 			
-		return message.reply({ embeds: [embed] });
+		return request.reply({ embeds: [embed] });
 	});
 
 module.exports = command;
