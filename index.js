@@ -24,7 +24,7 @@ const booruUserId = process.env.BOORU_USERID ?? (require(envPath)?.booruuserid);
 
 //Utilidades
 const globalConfigs = require('./localdata/config.json');
-const { channelIsBlocked, randRange, shortenText, dibujarBienvenida, dibujarDespedida, paginateRaw } = require('./func.js');
+const { channelIsBlocked, randRange, shortenText, dibujarBienvenida, dibujarDespedida, levenshteinDistance } = require('./func.js');
 const globalGuildFunctions = require('./localdata/customization/guildFunctions.js');
 const { auditRequest, auditSystem } = require('./systems/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('./localdata/cmdExceptions.js');
@@ -36,6 +36,8 @@ const chalk = require('chalk');
 const { lookupService } = require('dns');
 const { registerFont, loadImage } = require('canvas');
 const { promisify } = require('util');
+const command = require('./commands/Pure/feed.js');
+const commands = require('./commands/Commons/commands.js');
 //#endregion
 
 //#region Parámetros Iniciales
@@ -375,13 +377,22 @@ client.on('messageCreate', async message => {
         const args = content.replace(pdetect.regex, '').split(/[\n ]+/); //Argumentos ingresados
         let commandname = args.shift().toLowerCase(); //Comando ingresado
         let command;
+        const commandsPool = (pdetect.raw === pdrmk.raw)
+            ? client.ComandosDrawmaku
+            : client.ComandosPure;
         
-        if(pdetect.raw === pdrmk.raw)
-            command = client.ComandosDrawmaku.get(commandname) || client.ComandosDrawmaku.find(cmd => cmd.aliases && cmd.aliases.includes(commandname));
-        else
-            command = client.ComandosPure.get(commandname) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(commandname));
+        command = commandsPool.get(commandname) || commandsPool.find(cmd => cmd.aliases && cmd.aliases.includes(commandname));
         
         if(!command) {
+            const foundList = [];
+            for(const [ cmn, cmd ] of commandsPool) {
+                const lDistances = [ cmn, ...(cmd.aliases?.filter(a => a.length > 1) ?? []) ].map(c => levenshteinDistance(commandname, c));
+                const minorDistance = Math.min(...lDistances);
+                if(minorDistance < 3)
+                    foundList.push({ command: cmd, distance: minorDistance });
+            }
+            const suggestions = foundList.sort((a, b) => a.distance - b.distance).slice(0, 5);
+
             /**@type {Array<String>} */
             const replies = [
                 'Disculpa, soy estúpida. Tal vez escribiste mal el comando y no te entiendo\nhttps://i.imgur.com/e4uM3z6.jpg',
@@ -390,9 +401,24 @@ client.on('messageCreate', async message => {
                 'Busqué en todo el manual y no encontré el comando que me pediste. Perdóname, PERDÓNAME WAAAAAAAAH\nhttps://i.imgur.com/wOxRi72.jpg',
                 'No logré encontrar tu comando en mi librito. ¿Lo habrás escrito mal?\nhttps://i.imgur.com/avTSSa4.jpg',
             ];
-            const notice = await message.reply({ content: replies[randRange(0, replies.length)] }).catch(() => undefined);
-            setTimeout(() => notice?.delete().catch(console.error), 6000);
-            return;
+            
+            if(!suggestions.length) {
+                const notice = await message.reply({ content: replies[randRange(0, replies.length)] }).catch(() => undefined);
+                return setTimeout(() => notice?.delete().catch(_ => undefined), 6000);
+            }
+            
+            const suggestionEmbed = new Discord.MessageEmbed()
+                .setTitle('Sugerencias')
+                .setFooter({ text: 'Basado en nombres y alias de comando' })
+                .addFields({
+                    name: `Comandos similares a "${commandname}"`,
+                    value: suggestions.map(found => `• ${pdetect.raw}${found.command.name}`).join('\n'),
+                });
+            console.log(suggestionEmbed);
+            return message.reply({
+                content: replies[randRange(0, replies.length)],
+                emdeds: [suggestionEmbed],
+            }).catch(_ => undefined);
         }
         //#endregion
 
