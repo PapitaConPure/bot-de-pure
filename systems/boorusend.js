@@ -2,7 +2,6 @@ const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
 const { guildEmoji, shortenText } = require('../func');
 const { Post, Booru } = require('../systems/boorufetch');
 const { getBaseTags, getSearchTags } = require('../localdata/booruprops');
-const { fetchFlag } = require('../func');
 const globalConfigs = require('../localdata/config.json');
 const rakki = require('../commands/Pure/rakkidei');
 
@@ -28,7 +27,8 @@ function formatBooruPostMessage(post, data = {}) {
     const addSourceButton = (source) => {
         if(!source.match(/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){2,}\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/))
             return;
-            
+        
+        //Dar estilo a Embed según fuente de la imagen
         let emoji;
         if(source.includes('pixiv.net')) {
             emoji = '919403803126661120';
