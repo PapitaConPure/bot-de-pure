@@ -1,40 +1,31 @@
 const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
-const { fetchFlag, fetchUserID } = require('../../func');
-const { CommandOptionsManager, CommandMetaFlagsManager } = require("../Commons/commands");
+const { fetchUserID } = require('../../func');
+const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
+
+const hangedDollId = '682629889702363143';
 
 const options = new CommandOptionsManager()
 	.addParam('usuario', 'USER', 'para aplicar Hanged Doll a un usuario', { optional: true })
 	.addFlag('t', 'todos', 'para aplicar Hanged Doll a todos los usuarios');
-
-const hd = '682629889702363143'; //Hanged Doll
-
-module.exports = {
-	name: 'colgar',
-	aliases: [
+const flags = new CommandMetaFlagsManager().add(
+	'MOD',
+	'HOURAI',
+);
+const command = new CommandManager('colgar', flags)
+	.setAliases(
 		'castrar', 'colgate',
 		'hang', 'hanged',
-	],
-	desc: 'Comando de Hourai para asignar rápidamente el rol __Hanged Doll__ a un `usuario`.\n' +
-		  'Usarlo con alguien que ya está colgado lo descolgará, así que ten cuidado.',
-	flags: new CommandMetaFlagsManager().add(
-		'MOD',
-		'HOURAI',
-	),
-	options,
-	callx: '<usuario>',
-	experimental: true,
-
-	async execute(request, args, isSlash = false) {
-		//Acción de comando
+	)
+	.setBriefDescription('Cuelga o descuelga al miembro especificado (solo Hourai Doll)')
+	.setLongDescription(
+		'Asigna el rol de __Hanged Doll__ al `usuario` especificado.',
+		'Usarlo con alguien que ya está colgado lo descolgará, así que cuidado',
+	)
+	.setOptions(options)
+	.setExecution(async (request, args, isSlash) => {
 		const { client, guild } = request;
 		const user = request.author ?? request.user;
-		if(!args.length)
-			return request.reply({ content: '⚠ Debes indicar un usuario' });
-
-		const everyone = isSlash
-			? options.fetchFlag(args, 'todos')
-			: fetchFlag(args, { ...options.flags.get('todos').structure, callback: true });
-		let wasHanged;
+		const everyone = options.fetchFlag(args, 'todos');
 
 		if(everyone) {
 			const embed = new MessageEmbed()
@@ -59,35 +50,35 @@ module.exports = {
 			});
 		}
 
+		if(!args.length)
+			return request.reply({ content: '⚠ Debes indicar un usuario', ephemeral: true });
+
 		const member = guild.members.cache.get(fetchUserID(args.join(' '), { guild, client }));
 		if(!member) {
 			const sent = await request.reply({
 				content: ':warning: La gente que no existe por lo general no tiene cuello <:invertido:720736131368485025>',
 				ephemeral: true,
+				fetchReply: true,
 			});
 			if(!isSlash) {
-				setTimeout(() => sent.deletable && sent.delete(), 1000 * 5);
-				return request.delete();
+				setTimeout(() => sent.deletable && sent.delete().catch(_ => undefined), 1000 * 5);
+				return request.delete().catch(_ => undefined);
 			}
 		}
 
-		//await message.delete();
-		wasHanged = !member.roles.cache.has(hd);
+		let wasHanged;
+		wasHanged = !member.roles.cache.has(hangedDollId);
 		if(wasHanged)
-			await member.roles.add(hd, `Colgado por ${user.tag}`);
+			await member.roles.add(hangedDollId, `Colgado por ${user.tag}`);
 		else 
-			await member.roles.remove(member.roles.cache.find(r => r.id === hd));
+			await member.roles.remove(member.roles.cache.find(r => r.id === hangedDollId));
 		return request.reply({
 			content: wasHanged
 				? `:moyai: Se ha colgado a **${ member.user.tag }**`
 				: `:otter: Se ha descolgado a **${ member.user.tag }**`
 		});
-	},
-
-	/**
-	 * @param {import('discord.js').ButtonInteraction} interaction
-	 */
-	async ['addHanged'](interaction, [ userId ]) {
+	})
+	.setButtonResponse(async function addHanged(interaction, userId) {
 		if(interaction.user.id !== userId)
 			return interaction.reply({ content: ':x: No permitido', ephemeral: true });
 		const embed = new MessageEmbed()
@@ -98,13 +89,9 @@ module.exports = {
 			embeds: [embed],
 			components: [],
 		});
-		return Promise.all(interaction.guild.members.cache.filter(member => !member.user.bot).map(member => member.roles.add(hd, `Colgado por ${interaction.user.tag}`)));
-	},
-
-	/**
-	 * @param {import('discord.js').ButtonInteraction} interaction
-	 */
-	async ['removeHanged'](interaction, [ userId ]) {
+		return Promise.all(interaction.guild.members.cache.filter(member => !member.user.bot).map(member => member.roles.add(hangedDollId, `Colgado por ${interaction.user.tag}`)));
+	})
+	.setButtonResponse(async function removeHanged(interaction, userId) {
 		if(interaction.user.id !== userId)
 			return interaction.reply({ content: ':x: No permitido', ephemeral: true });
 		const embed = new MessageEmbed()
@@ -115,13 +102,12 @@ module.exports = {
 			components: [],
 		});
 		return Promise.all(interaction.guild.members.cache.filter(member => !member.user.bot).map(member =>
-			member.roles.cache.has(hd)
-				? member.roles.remove(member.roles.cache.find(r => r.id === hd))
+			member.roles.cache.has(hangedDollId)
+				? member.roles.remove(member.roles.cache.find(r => r.id === hangedDollId))
 				: Promise.resolve()
 		));
-	},
-
-	async ['cancelHanged'](interaction, [ userId ]) {
+	})
+	.setButtonResponse(async function cancelHanged(interaction, userId) {
 		if(interaction.user.id !== userId)
 			return interaction.reply({ content: ':x: No permitido', ephemeral: true });
 		const embed = new MessageEmbed()
@@ -131,5 +117,6 @@ module.exports = {
 			embeds: [embed],
 			components: [],
 		});
-	},
-};
+	});
+
+module.exports = command;
