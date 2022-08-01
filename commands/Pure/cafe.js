@@ -1,7 +1,7 @@
 const { MessageEmbed } = require('discord.js');
 const { default: axios } = require('axios');
 const { rand } = require('../../func');
-const { CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const r = {
 	api: 'https://api.giphy.com/v1/gifs/search',
@@ -9,18 +9,11 @@ const r = {
 	limit: 10,
 };
 
-module.exports = {
-	name: 'cafe',
-	aliases: [
-        'café', 'cafecito',
-        'coffee', 'cawfee'
-    ],
-    desc: 'Muestra imágenes de café',
-    flags: new CommandMetaFlagsManager().add('COMMON'),
-	experimental: true,
-
-	async execute(message, _, isSlash = false) {
-		//Acción de comando
+const flags = new CommandMetaFlagsManager().add('COMMON');
+const command = new CommandManager('café', flags)
+	.setAliases('cafe', 'cafecito', 'coffee', 'cawfee')
+	.setLongDescription('Muestra imágenes de café')
+	.setExecution(async request => {
 		let err;
 		const offset = rand(30);
 		const { data } = await axios.get(`${r.api}?api_key=${r.key}&q=coffee&offset=${offset}&limit=${r.limit}`)
@@ -42,6 +35,7 @@ module.exports = {
 			embed.addFields({ name: 'Error de solicitud a tercero', value: err })
 				.setColor('RED');
 		
-		await message.reply({ embeds: [embed] });
-    },
-};
+		await request.reply({ embeds: [embed] });
+	});
+
+module.exports = command;
