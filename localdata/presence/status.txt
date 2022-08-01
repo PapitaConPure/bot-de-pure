@@ -355,7 +355,7 @@ Debería usar Machine Learning en estos estados para ver cuánto tardan en volve
 Untando bits en las cookies
 Validando entradas
 Descargando imágenes
-Once in a Lullaby
+"Once in a Lullaby"
 Grr 😡
 Fusionando ramas
 Hostigando miembros del servidor
