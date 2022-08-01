@@ -35,7 +35,7 @@ async function findBotInfraction(message) {
     const msg = content.toLowerCase();
     // const blacklisted = [ /^->\w/, /^\$\w/, /^\+\w/, /^,(?!confession)\w/, /^~\w/, /^%\w/, /^[Nn][Ee][Kk][Oo] +\w/, /^[Gg]\. *\w/ ];
     const blacklisted = [ /^->\w/, /^\$\w/, /^\+\w/, /^,(?!confession)\w/, /^%\w/, /^neko +\w/, /^g\. *\w/ ];
-    if(blacklisted.some(bp => msg.match(bp))) {
+    if(blacklisted.some(bp => msg.match(bp)) && !author.bot) {
         //Método de generalización de comando
         infractionMessage = message;
         user = author;
