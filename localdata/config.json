@@ -20,7 +20,8 @@
             "p!voz añadido",
             "p!hora añadido",
             "Corregidos diversos errores",
-            "Trabajando en soporte de Preferencias de Usuario"
+            "Trabajando en soporte de Preferencias de Usuario",
+            "Se eliminaron comandos obsoletos de H. Doll"
         ],
         "todo": [
             "(!) Puede que reescriba PuréScript por completo en un próximo parche",
@@ -90,6 +91,15 @@
             "colors": "https://i.imgur.com/7t7m3PS.png",
             "forcecolors": "https://i.imgur.com/eHbSCHK.png"
         },
+        "colorsList": [
+            { "emoteId": "819772377814532116", "roleId": "671851233870479375", "roleName": "French Doll",  "roleDesc": "Rojo"     },
+            { "emoteId": "819772377624870973", "roleId": "671852132328275979", "roleName": "Holland Doll", "roleDesc": "Azul"     },
+            { "emoteId": "819772377482526741", "roleId": "671851228954755102", "roleName": "Tibetan Doll", "roleDesc": "Verde"    },
+            { "emoteId": "819772377440583691", "roleId": "671851235267182625", "roleName": "Kyoto Doll",   "roleDesc": "Púrpura"  },
+            { "emoteId": "819772377856606228", "roleId": "671851236538187790", "roleName": "London Doll",  "roleDesc": "Naranja"  },
+            { "emoteId": "819772377894354944", "roleId": "671851234541699092", "roleName": "Russian Doll", "roleDesc": "Amarillo" },
+            { "emoteId": "819772377642041345", "roleId": "671851228308963348", "roleName": "Orléans Doll", "roleDesc": "Celeste"  }
+        ],
         "replies": {
             "ignore": {
                 "prefix": [

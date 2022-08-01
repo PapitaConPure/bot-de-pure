@@ -1,11 +1,11 @@
 const { hourai, peopleid, tenshiColor } = require('../../localdata/config.json');
 const Hourai = require('../../localdata/models/hourai.js');
 const axios = require('axios').default;
-const { colorsRow } = require('./colores.js')
 const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, TextInputComponent, Modal } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes');
 const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 const { auditError } = require('../../systems/auditor');
+const { colorsRow } = require('../../localdata/houraiProps');
 
 /**
  * @typedef {{id: String, label: String, emote: String}} RoleData Datos de un rol para el propósito del comando

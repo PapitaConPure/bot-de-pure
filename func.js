@@ -4,6 +4,7 @@ const images = require('./localdata/images.json'); //Imágenes globales
 const { p_pure } = require('./localdata/customization/prefixes.js'); //Imágenes globales
 const Canvas = require('canvas'); //Node Canvas
 const chalk = require('chalk'); //Consola con formato bonito
+const { colorsRow } = require('./localdata/houraiProps');
 const concol = {
     orange: chalk.rgb(255, 140, 70),
     purple: chalk.rgb(158, 114,214),
@@ -254,7 +255,7 @@ module.exports = {
                     await canal.send({
                         content: `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>`,
                         files: [global.hourai.images.colors],
-                        components: [require('./commands/Pure/colores.js').colorsRow],
+                        components: [colorsRow],
                     });
                     setTimeout(module.exports.forceRole, 1000, miembro, canal, 2 * reps);
                     console.log(chalk.magentaBright(`Esperando comprobación final de miembro en unos minutos...`));
@@ -569,7 +570,7 @@ module.exports = {
                     `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n` +
                     global.hourai.images.colors,
                 //files: [global.hourai.images.colors],
-                components: [require('./commands/Pure/colores.js').colorsRow],
+                components: [colorsRow],
             });
             setTimeout(module.exports.askForRole, 1000, miembro, canal, 3 * 4);
             console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');
