@@ -493,7 +493,7 @@ class CommandOptionsManager {
             }
         }
         
-        flagValue = args[getMethod](identifier, false);
+        flagValue = args[getMethod](identifier);
         
         if(flagValue == undefined)
             return output.fallback;
