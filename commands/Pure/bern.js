@@ -19,7 +19,7 @@ const command = new CommandManager('bern', flags)
 		const lel = [
 			'654504689873977347',
 			'722334924845350973',
-			'722334924845350973',
+			'697320983106945054',
 			'697323104141049867',
 		].map(eid => request.client.emojis.cache.get(eid));
 		const selection = randRange(0, emot.length);
