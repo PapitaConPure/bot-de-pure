@@ -1,23 +1,27 @@
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
-module.exports = {
-	name: 'g-opciones',
-	aliases: [
+const flags = new CommandMetaFlagsManager().add('GUIDE');
+const command = new CommandManager('g-opciones', flags)
+	.setAliases(
 		'g-banderas',
-		'g-opt', 'g-flags'
-	],
-	desc: 'Algunos comandos requieren más detalles de lo que quieres hacer. Para esto, están los `<parámetros>` y las `--opciones`\n\n' +
-		'Las opciones (o banderas) llevan prefijos con `-`, y pueden simbolizar acciones directas o propiedades\n\n' +
-		'En la página de ayuda de cada comando, en la sección **"Opciones"**, se encuentran los nombres y detalles de los `<parámetros>` y `--banderas` ingresables\n' +
-		'Las banderas tienen identificadores únicos que pueden ser cortos o largos. Las banderas cortas pueden apilarse en un solo prefijo\n' +
-		'`-b`: bandera corta\n' +
-		'`--bandera`: bandera larga\n' +
-		'`-bcd`: banderas `b`, `c` y `d` apiladas\n\n' +
-		'Algunas banderas actúan como propiedades y requieren un valor:\n' +
-		'`--objetivo <usuario>`: objetivo = `<usuario>`\n' +
-		'`-xy <número>`: x = y = `<número>`\n' +
-		`Para aprender más sobre los \`--parametros\` de comando, usa \`${p_pure().raw}ayuda g-parametros\`\n` +
+		'g-opt', 'g-flags',
+	)
+	.setLongDescription(
+		'Algunos comandos pueden usar `--opciones`',
+		'Las opciones (o banderas) comienzan con un prefijo `-`, y pueden significar acciones directas o propiedades',
+		'',
+		'En la página de ayuda de cada comando, en la sección **"Opciones"**, se encuentran los nombres y detalles de los `<parámetros>` y `--banderas` ingresables',
+		'Las banderas tienen nombres únicos que pueden ser cortos o largos. Las banderas cortas pueden apilarse en un solo prefijo, las largas no',
+		'`-b`: bandera corta',
+		'`--bandera`: bandera larga',
+		'`-bcd`: banderas `b`, `c` y `d` apiladas',
+		'',
+		'Las banderas-propiedad se escriben así:',
+		'`--objetivo <usuario>`: objetivo = `<usuario>`',
+		'`-xy <número>`: x = y = `<número>`',
+		`Para aprender más sobre los \`--parametros\` de comando, usa \`${p_pure().raw}ayuda g-parametros\``,
 		`Para ver sobre los _(tipos)_ de valores de parámetro, usa \`${p_pure().raw}ayuda g-tipos\``,
-	flags: new CommandMetaFlagsManager().add('GUIDE'),
-};
+	);
+
+module.exports = command;
