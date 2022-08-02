@@ -1,30 +1,24 @@
 const { fetchFlag, fetchSentence } = require('../../func.js');
-const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const options = new CommandOptionsManager()
 	.addParam('hora', 'TEXT', 'para establecer la hora a convertir')
-	.addFlag([], ['gmt', 'utc', 'huso'], 'para especificar tu huso horario')
-	.addFlag(['f','d'], ['fecha','día','dia'], 'para ingresar un día en formato DD/MM/AAAA', { name: 'dma',  });
-
-module.exports = {
-	name: 'hora',
-	aliases: [
+	.addFlag('l', ['gmt', 'utc', 'huso'], 'para especificar tu huso horario', { name: 'l', type: 'NUMBER' })
+	.addFlag(['f','d'], ['fecha','día','dia'], 'para ingresar un día en formato DD/MM/AAAA', { name: 'dma', type: { name: 'dma', expression: 'dd/MM/AAAA' } });
+const flags = new CommandMetaFlagsManager().add('COMMON');
+const command = new CommandManager('hora', flags)
+	.setAliases(
 		'horario',
 		'time', 'schedule',
-	],
-	desc: 'Muestra una fecha y hora automáticamente adaptada seg�n la `<fecha>` que ingreses. Recuerda que no soy adivina, así que siempre ingresa tu huso local si no quieres que se tome como GMT+0',
-	flags: new CommandMetaFlagsManager().add('COMMON'),
-	callx: options.callSyntax,
-	experimental: true,
-	
-	/**
-	 * @param {import("../Commons/typings").CommandRequest} request
-	 * @param {import("../Commons/typings").CommandOptions} args
-	 * @param {Boolean} isSlash
-	 */
-	async execute(request, args, isSlash = false) {
-		//Recibir GMT+X
-		const gmt = fetchFlag(args, { property: true, ...options.flags.get('gmt').structure, callback: (x,i) => (x[i] * 1), fallback: 0 });
+	)
+	.setLongDescription(
+		'Muestra una fecha y hora automáticamente adaptada según la `<fecha>` que ingreses.',
+		'Recuerda que no soy adivina, así que siempre ingresa tu huso local si no quieres que se tome como GMT+0',
+	)
+	.setOptions(options)
+	.setExecution(async (request, args, isSlash) => {
+		const gmt = options.fetchFlag(args, 'gmt', { callback: x => x * 1, fallback: 0 });
+		console.log(gmt);
 		if(!args.length) return request.reply('⚠ Debes ingresar una hora');
 
 		//Definir fecha
@@ -109,5 +103,6 @@ module.exports = {
 			return request.reply(`<t:${unixDate}:T> <t:${unixDate}:D>`);
 		else
 			return request.reply(`<t:${unixDate}:T>`);
-	}
-};
+	});
+
+module.exports = command;
