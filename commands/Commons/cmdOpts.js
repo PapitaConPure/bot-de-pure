@@ -26,7 +26,7 @@ const fetchMessageFlag = (args, flag = { property, short: [], long: [], callback
         arg = arg.toLowerCase();
 
         if(flag.long?.length && arg.startsWith('--') && flag.long.includes(arg.slice(2))) {
-            flagValue = arg;
+            flagValue = flag.property ? args[i + 1] : arg;
             return args.splice(i, flag.property ? 2 : 1);
         }
 
@@ -451,9 +451,11 @@ class CommandOptionsManager {
                 params = option._poly;
                 break;
             }
+
         params = params
             .map((opt, i) => callbackFn.call(args, opt, !i && !option._optional))
             .filter(param => param);
+            
         return params.length ? params : [ (typeof fallback === 'function') ? fallback() : fallback ];
     };
     /**
@@ -470,14 +472,18 @@ class CommandOptionsManager {
      * @returns {*} El valor de retorno de callback si la flag fue respondida, o en cambio, el de fallback
      */
     fetchFlag(args, identifier, output = { callback: null, fallback: null }) {
-        if(Array.isArray(args))
-            return fetchMessageFlag(args, { ...this.flags.get(identifier).structure, ...output });
-        
         /**@type {CommandFlagExpressive}*/
         const flag = this.flags.get(identifier);
 
         if(!flag)
-            throw new ReferenceError(`Cannot find command flag by identifier: ${identifier}`);
+            throw new ReferenceError(`No se pudo encontrar una Flag con el identificador: ${identifier}`);
+
+        if(Array.isArray(args))
+            return fetchMessageFlag(args, {
+                property: flag.isExpressive(),
+                ...this.flags.get(identifier).structure,
+                ...output
+            });
 
         let getMethod = 'getBoolean';
         let flagValue;
