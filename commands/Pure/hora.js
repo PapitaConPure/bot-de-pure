@@ -18,8 +18,6 @@ const command = new CommandManager('hora', flags)
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash) => {
 		const gmt = options.fetchFlag(args, 'gmt', { callback: x => x * 1, fallback: 0 });
-		console.log(gmt);
-		if(!args.length) return request.reply('⚠ Debes ingresar una hora');
 
 		//Definir fecha
 		const dateStr = isSlash ? args.getString('fecha') : fetchFlag(args, { property: true, ...options.flags.get('fecha').structure, callback: fetchSentence });
@@ -44,10 +42,12 @@ const command = new CommandManager('hora', flags)
 			year = now.getUTCFullYear();
 		}
 
-		if(!args.length) return request.reply('⚠ Debes ingresar una hora');
-
 		/**@type {String}*/
-		let rawTime = args.shift();
+		let rawTime = isSlash ? args.getString('hora') : args.shift();
+
+		if(rawTime == undefined)
+			return request.reply('⚠ Debes ingresar una hora');
+		
 		let isShortened = false;
 		let plus12;
 		if(['am','pm'].some(m => rawTime.toLowerCase().endsWith(m))) {
@@ -68,13 +68,26 @@ const command = new CommandManager('hora', flags)
 			case 2: [ hours, minutes, seconds ] = [ ...time, 0 ]; break;
 			case 1: {
 				[ hours ] = time;
-				minutes = args.shift() ?? 0;
-				seconds = args.shift() ?? 0;
+
+				const possibleMinutes = args.shift?.();
+				if(possibleMinutes?.toLowerCase() === 'pm') {
+					plus12 = true;
+					break;
+				}
+				minutes = possibleMinutes ?? 0;
+
+				const possibleSeconds = args.shift?.();
+				if(possibleSeconds?.toLowerCase() === 'pm') {
+					plus12 = true;
+					break;
+				}
+				seconds = possibleSeconds ?? 0;
+
 				break;
 			}
 		}
 
-		if(args.shift()?.toLowerCase() === 'pm')
+		if(!isSlash && args.shift()?.toLowerCase() === 'pm')
 			plus12 = true;
 
 		const isInvalidTime = (timeArray) => {
