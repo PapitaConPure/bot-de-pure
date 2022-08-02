@@ -1,35 +1,24 @@
 const { fetchFlag } = require('../../func');
 const { serverid } = require('../../localdata/config.json'); //Variables globales
 const { Permissions } = require('discord.js');
-const { CommandOptionsManager, CommandMetaFlagsManager } = require("../Commons/commands");
+const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
 
 const options = new CommandOptionsManager()
     .addParam('mensaje', 'TEXT', 'para especificar qué decir')
     .addFlag(['b', 'd'], ['borrar', 'delete'], 'para borrar el mensaje original');
-
-module.exports = {
-	name: 'decir',
-    aliases: [
+const flags = new CommandMetaFlagsManager().add(
+    'COMMON',
+    'EMOTE',
+);
+const command = new CommandManager('decir', flags)
+    .setAliases(
         'exclamar', 'escribir',
         'say', 'echo',
-    ],
-    desc: 'Me hace decir lo que quieras que diga',
-    flags: new CommandMetaFlagsManager().add(
-        'COMMON',
-        'EMOTE',
-    ),
-    options,
-    callx: '<mensaje>',
-    experimental: true,
-	
-	/**
-	 * @param {import("../Commons/typings").CommandRequest} request
-	 * @param {import('../Commons/typings').CommandOptions} args
-	 * @param {Boolean} isSlash
-	 */
-	async execute(request, args, isSlash = false) {
-        //Acción de comando
-        const del = isSlash ? options.fetchFlag(args, 'borrar', { callback: true }) : fetchFlag(args, { ...options.flags.get('borrar').structure, callback: true });
+    )
+    .setLongDescription('Me hace decir lo que quieras que diga')
+    .setOptions(options)
+    .setExecution(async (request, args, isSlash) => {
+        const deleteFlag = options.fetchFlag(args, 'borrar');
 
         if(!(args.data ?? args).length)
             return request.reply({ content: ':warning: tienes que especificar lo que quieres que diga.' });
@@ -38,8 +27,10 @@ module.exports = {
         if(request.guild.id === serverid.hourai && sentence.toLowerCase().indexOf(/h+(\W*_*)*o+(\W*_*)*u+(\W*_*)*r+(\W*_*)*a+(\W*_*)*i+(\W*_*)*/g) !== -1)
             return request.reply({ content: 'No me hagai decir weas de hourai, ¿yapo? Gracias <:haniwaSmile:659872119995498507>' });
         
-        await request.reply({ content: sentence.split(/ +#[Nn] +/g).join('\n') });
-        if(!isSlash && del && request.deletable && request.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES))
-            return request.delete();
-    },
-};
+        if(!isSlash && deleteFlag && request.deletable && request.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES))
+            request.delete();
+        
+        return request.reply({ content: sentence.split(/ +#[Nn] +/g).join('\n') });
+    });
+
+module.exports = command;

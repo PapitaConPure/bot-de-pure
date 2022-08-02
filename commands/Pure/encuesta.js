@@ -1,5 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { fetchFlag, fetchSentence } = require('../../func.js');
+const { CommandManager } = require('../Commons/cmdBuilder.js');
 const { CommandMetaFlagsManager } = require('../Commons/cmdFlags.js');
 const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
 
@@ -10,24 +11,24 @@ const options = new CommandOptionsManager()
 	.addFlag('m',  ['minuto', 'minutos'],    'para añadir tiempo en minutos',  { name: 'n', type: 'NUMBER' })
 	.addFlag('s',  ['segundo', 'segundos'],  'para añadir tiempo en segundos', { name: 'n', type: 'NUMBER' });
 
-module.exports = {
-	name: 'encuesta',
-	aliases: [
+const flags = new CommandMetaFlagsManager().add('MOD');
+const command = new CommandManager('encuesta', flags)
+	.setAliases(
 		'votación', 'votacion', 'voto',
-		'poll'
-	],
-	desc: 'Crea una encuesta con opciones\n' +
-	'Crea una encuesta con `<opciones>` que comienzan y se separan con emotes. Los emotes serán lo que se usará para votar\n' +
-	'Si así lo deseas, puedes adherir una `--pregunta` y delegar el `--canal` al cual enviar la encuesta\n' +
-	'Debido a la naturaleza de las votaciones, no podrás editar ningún aspecto de la encuesta una vez ya esté enviada. Si cometes un error, bórrala y usa el comando nuevamente\n' +
-	'Por defecto, el periodo de votación es un minuto. Puedes cambiarlo en `--horas`, `--minutos` y `--segundos`',
-	flags: new CommandMetaFlagsManager().add('MOD'),
-	options,
-	callx: '<opciones(...)>',
-
-	async execute(message, args) {
+		'poll',
+	)
+	.setLongDescription(
+		'Crea una encuesta con opciones',
+		'Crea una encuesta con `<opciones>` que comienzan y se separan con emotes. Los emotes serán lo que se usará para votar',
+		'Si así lo deseas, puedes adherir una `--pregunta` y delegar el `--canal` al cual enviar la encuesta',
+		'Debido a la naturaleza de las votaciones, no podrás editar ningún aspecto de la encuesta una vez ya esté enviada. Si cometes un error, bórrala y usa el comando nuevamente',
+		'Por defecto, el periodo de votación es un minuto. Puedes cambiarlo en `--horas`, `--minutos` y `--segundos`',
+	)
+	.setOptions(options)
+	.setExperimental(false)
+	.setExecution(async (request, args) => {
 		if(!args.length)
-			return message.reply({ content: ':warning: Necesitas ingresar al menos dos opciones' });
+			return request.reply({ content: ':warning: Necesitas ingresar al menos dos opciones' });
 
 		//Parámetros de comando
 		let channel = fetchFlag(args, {
@@ -38,10 +39,10 @@ module.exports = {
 				let cs = x[i];
 				if(cs.startsWith('<#') && cs.endsWith('>'))
 					cs = cs.slice(2, -1);
-				return message.guild.channels.cache.find(c => c.name.toLowerCase().indexOf(cs) !== -1 || c.id === cs);
+				return request.guild.channels.cache.find(c => c.name.toLowerCase().indexOf(cs) !== -1 || c.id === cs);
 			},
 		});
-		if(channel === undefined) channel = message.channel;
+		if(channel === undefined) channel = request.channel;
 		const question = fetchFlag(args, { property: true, short: ['p', 'q'], long: ['pregunta', 'question'], callback: fetchSentence });
 		const intOrZero = (n) => {
 			const parsed = parseInt(n);
@@ -58,15 +59,15 @@ module.exports = {
 			time.m = 1;
 		time.t = Object.values(time).slice(0, -1).reduce((a, b) => a * 60 + b);
 		if(time.t > 4 * 3600)
-			return message.reply(':warning: El periodo de votación no puede ser mayor a 4 horas');
+			return request.reply(':warning: El periodo de votación no puede ser mayor a 4 horas');
 		
 		//Acción de comando
 		if(!args.length)
-			return message.reply(':warning: Para crear una encuesta, debes ingresar al menos 2 opciones');
+			return request.reply(':warning: Para crear una encuesta, debes ingresar al menos 2 opciones');
 		
 		const eregexp = /^<a*:\w+:[0-9]+>\B/;
 		const options = [];
-		const resolveEmote = (uemt) => message.guild.emojis.resolve(uemt.slice(uemt.lastIndexOf(':') + 1, -1));
+		const resolveEmote = (uemt) => request.guild.emojis.resolve(uemt.slice(uemt.lastIndexOf(':') + 1, -1));
 		args.reduce((a, b, i) => {
 			const last = (i === (args.length - 1));
 			let ae = a.match(eregexp);
@@ -96,11 +97,11 @@ module.exports = {
 			} else return b;
 		});
 		if(options.length < 2)
-			return message.reply({ content: ':warning: Necesitas ingresar al menos dos opciones' });
+			return request.reply({ content: ':warning: Necesitas ingresar al menos dos opciones' });
 
 		const embed = new Discord.MessageEmbed()
 			.setColor('#1da1f2')
-			.setAuthor({ name: 'Encuesta » Reacciona para votar', iconURL: message.guild.iconURL({ dynamic: false, size: 256 }) })
+			.setAuthor({ name: 'Encuesta » Reacciona para votar', iconURL: request.guild.iconURL({ dynamic: false, size: 256 }) })
 			.setFooter({ text: `Tiempo para votar: ${time.h}h, ${time.m}m, ${time.s}s` })
 			.addFields({
 				name: question || 'Opciones',
@@ -124,7 +125,7 @@ module.exports = {
 			sent.reactions.removeAll();
 			const embed = new Discord.MessageEmbed()
 				.setColor('#1da1f2')
-				.setAuthor({ name: 'Encuesta finalizada', iconURL: message.guild.iconURL({ dynamic: false, size: 256 }) })
+				.setAuthor({ name: 'Encuesta finalizada', iconURL: request.guild.iconURL({ dynamic: false, size: 256 }) })
 				.addFields({
 					name: question || 'Resultados de la votación',
 					value: options
@@ -132,9 +133,10 @@ module.exports = {
 						.map(o => `${o.emote} **x ${(counts[o.emote.id] || 1) - 1}** ${o.text}`)
 						.join('\n'),
 				});
-			message.channel.send({ embeds: [embed] });
-			if(channel.id !== message.channel.id)
+			request.channel.send({ embeds: [embed] });
+			if(channel.id !== request.channel.id)
 				channel.send({ embeds: [embed] });
 		});
-	}
-};
+	});
+
+module.exports = command;

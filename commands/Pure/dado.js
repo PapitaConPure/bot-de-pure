@@ -1,70 +1,79 @@
 const { MessageEmbed } = require('discord.js');
-const { randRange } = require('../../func');
+const { randRange } = require('../../func.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptionsManager, CommandMetaFlagsManager } = require("../Commons/commands");
+const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
 
 const options = new CommandOptionsManager()
-	.addParam('dados', { name: 'conjunto', expression: '`<cantidad>`+"d"+`<caras>`' }, 'para especificar la cantidad y caras de un conjunto de dados', { poly: 'MULTIPLE' });
-
-module.exports = {
-	name: 'dado',
-	aliases: [
-		'dados', 'tirar', 'random',
+	.addParam('dados', { name: 'conjunto', expression: '`<cantidad>`"d"`<caras>`' }, 'para especificar la cantidad y caras de un conjunto de dados', { poly: 'MULTIPLE' });
+const flags = new CommandMetaFlagsManager().add('COMMON');
+const command = new CommandManager('dados', flags)
+	.setAliases(
+		'dado', 'tirar', 'random',
 		'roll', 'rolldie', 'dice', 'die',
-	],
-    desc: 'Tira uno o más dados de la cantidad de caras deseadas para recibir números aleatorios\n' +
+	)
+	.setLongDescription(
+		'Tira uno o más dados de la cantidad de caras deseadas para recibir números aleatorios',
 		'**Ejemplo de dados:** `1d6` = 1 dado de 6 caras; `5d4` = 5 dados de 4 caras; `15d20` = 15 dados de 20 caras',
-	flags: new CommandMetaFlagsManager().add('COMMON'),
-    options,
-	callx: '<dados>(...)',
-	
-	async execute(message, args) {
-		if(!args.length) {
-			return message.reply({
-				content:
-					':warning: Debes ingresar al menos un conjunto de dados a tirar, como `1d6`.\n' +
-					`Para más información sobre el comando, usa \`${p_pure(message.guildId).raw}ayuda dado\``
+	)
+	.setOptions(options)
+	.setExecution(async (request, args, isSlash) => {
+		let diceInputs = isSlash
+			? options.fetchParamPoly(args, 'dados', args.getString, [])
+			: args;
+			
+		if(!diceInputs.length)
+			return request.reply({
+				content: [
+					':warning: Debes ingresar al menos un conjunto de dados a tirar, como `1d6`.',
+					`Para más información sobre el comando, usa \`${p_pure(request.guildId).raw}ayuda dado\``,
+				].join('\n')
 			});
-		}
 
-		let dices = [];
-		args.map((arg, i) => {
+		let dices = diceInputs.map((arg, i) => {
 			if(isNaN(arg)) {
 				const dice = arg.split(/[Dd]/).filter(a => a);
 				if(dice.length === 2)
-					dices.push({ d: dice[0], f: dice[1] });
-			} else if(args[i + 1]) {
-				if(args[i + 1].startsWith(/[Dd]/))
-					dices.push({ d: arg, f: args[i + 1] });
-			}
-		});
-		
-		if(dices.length > 16) {
-			return message.reply({ content: 'PERO NO SEAS TAN ENFERMO <:zunWTF:757163179569840138>' });
-		}
+					return ({
+						d: dice[0],
+						f: dice[1]
+					});
+			} else if(diceInputs[i + 1]?.startsWith(/[Dd]/))
+				return ({
+					d: arg,
+					f: diceInputs[i + 1]
+				});
+		}).filter(dice => dice);
 
-		for(let d = 0; d < dices; d++){
-			dice[d] = randRange(1, faces + 1);
-			total += dice[d];
-		};
+		if(!dices.length)
+			return request.reply({ content: '⚠ Entrada inválida' })
+		
+		if(dices.length > 16 || dices.some(dice => dice.d > 999))
+			return request.reply({ content: 'PERO NO SEAS TAN ENFERMO <:zunWTF:757163179569840138>' });
 
 		dices.forEach(dice => {
 			dice.d = parseInt(dice.d);
 			dice.f = parseInt(dice.f);
-			dice.r = Array(dice.d).fill().map(() => (1 + Math.floor(Math.random() * dice.f)));
+			dice.r = Array(dice.d).fill().map(_ => randRange(1, dice.f + 1));
 			dice.t = dice.r.reduce((a,b) => a + b);
 		});
 
-		const total = dices.map(dice => dice.t).reduce((a,b) => a + b);
+		const user = request.author ?? request.user;
 		const embed = new MessageEmbed()
-		.setColor('#0909a0')
-		.setAuthor({ name: `${message.author.username} tiró los dados...`, iconURL: message.author.avatarURL({ format: 'png', dynamic: true, size: 512 }) })
-		.addFields({
-			name: 'Salió:',
-			value: dices.map(dice => `${dice.d} x :game_die:(${dice.f}) -> [${dice.r.join(',')}] = **${dice.t}**`).join('\n**+** ') + ((dices.length > 1) ? `\n**= ${total}**` : ''),
-		})
+			.setColor('#3f4581')
+			.setAuthor({ name: `${user.username} tiró los dados...`, iconURL: user.avatarURL({ format: 'png', dynamic: true, size: 512 }) })
+			.addFields({
+				name: 'Salió:',
+				value: dices.map(dice => `${dice.d} x 🎲(${dice.f}) → [${dice.r.join(',')}] = **${dice.t}**`).join('\n**+** '),
+			});
+
+		if(dices.length > 1)
+			embed.addFields({
+				name: 'Total',
+				value: `${dices.map(dice => dice.t).reduce((a,b) => a + b)}`,
+			});
 		
-		return message.reply({ embeds: [embed] })
-		.catch(() => message.reply({ content: ':x: No te pasei de gracioso, ¿tamo? <:junkWTF:796930821260836864> <:pistolaR:697351201301463060>' }));
-    },
-};
+		return request.reply({ embeds: [embed] })
+		.catch(() => request.reply({ content: ':x: No te pasei de gracioso, ¿tamo? <:junkWTF:796930821260836864> <:pistolaR:697351201301463060>' }));
+	});
+
+module.exports = command;

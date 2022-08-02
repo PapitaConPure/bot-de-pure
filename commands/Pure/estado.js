@@ -5,7 +5,7 @@ const { readdirSync } = require('fs'); //Para el contador de comandos
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { Stats } = require('../../localdata/models/stats');
 const { improveNumber, isShortenedNumberString } = require('../../func');
-const { CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const { host, version, note, changelog, todo } = bot_status;
 const cmsearch = new RegExp(`${p_pure().raw}[A-Za-zÁÉÍÓÚáéíóúÑñ0-9_.-]*`, 'g');
@@ -21,21 +21,11 @@ const counterDisplay = (number) => {
     return numberString;
 }
 
-module.exports = {
-	name: 'estado',
-    aliases: [
-        'status', 'botstatus'
-    ],
-    desc: 'Muestra mi estado actual. Eso incluye versión, host, registro de cambios, cosas por hacer, etc',
-    flags: new CommandMetaFlagsManager().add('COMMON'),
-    experimental: true,
-	
-	/**
-	 * @param {import("../Commons/typings").CommandRequest} request
-	 * @param {import('../Commons/typings').CommandOptions} args
-	 * @param {Boolean} isSlash
-	 */
-	async execute(request, _, isSlash = false) {
+const flags = new CommandMetaFlagsManager().add('COMMON');
+const command = new CommandManager('estado', flags)
+    .setAliases('status', 'botstatus')
+    .setLongDescription('Muestra mi estado actual. Eso incluye versión, host, registro de cambios, cosas por hacer, etc')
+    .setExecution(async (request, _, isSlash) => {
         const stats = (await Stats.findOne({})) || new Stats({ since: Date.now( )});
         const clformat = changelog.map(item => `- ${item}`).join('\n');
         const tdformat = todo.map(item => `- ${item}`).join('\n');
@@ -83,5 +73,6 @@ module.exports = {
             const search = cm[i].slice(2);
             ayuda.execute(sent, [ search ]);
         });
-    },
-};
+    })
+
+module.exports = command;
