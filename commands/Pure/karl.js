@@ -1,5 +1,5 @@
 const { randRange: rr } = require("../../func");
-const { CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const star = '<:tags:704612794921779290>';
 const instruments = [
@@ -39,28 +39,20 @@ const instrumentsPull = (rarity) => {
 	return instr;
 }
 
-module.exports = {
-	name: 'karl',
-	aliases: [
-        'karlos', 'zupija'
-    ],
-    desc: 'Comando de gacha musical de Karl Zuñiga',
-    flags: new CommandMetaFlagsManager().add(
-		'MEME',
-		'GAME',
-	),
-	experimental: true,
-	
-	/**
-	 * @param {import("../Commons/typings").CommandRequest} request
-	 * @param {Boolean} isSlash
-	 */
-	async execute(request, _, isSlash = false) {
+const flags = new CommandMetaFlagsManager().add(
+	'MEME',
+	'GAME',
+);
+const command = new CommandManager('karl', flags)
+	.setAliases('karlos', 'zupija')
+	.setLongDescription('Comando de gacha musical de Karl Zuñiga')
+	.setExecution(async request => {
 		const kr = karlRarity();
-		request.reply({
+		return request.reply({
 			content:
 				`**Buenas, soy Karl (${kr.join('')}). Combina estas weás, créeme soy licenciado** <:reibu:686220828773318663> :thumbsup:\n` +
 				`<:arrowr:681963688411922460> ${instrumentsPull(kr.length).join(' ')} <:arrowl:681963688361590897>`
 		});
-    },
-};
+	});
+
+module.exports = command;
