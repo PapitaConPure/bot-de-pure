@@ -472,8 +472,8 @@ client.on('interactionCreate', async interaction => {
         return interaction.reply({
             content: [
                 '⛔ Probablemente usaste un comando mientras me reiniciaba. Usa el comando nuevamente en unos segundos y debería funcionar',
-                'Si el comando se rechaza reiteradas veces, es posible que me encuentre en mantenimiento. Esto no debería tardar más de una hora',
-                `Si luego de unas horas el comando sigue siendo rechazado, puedes notificarle a mi creador: <@${globalConfigs.peopleid.papita}>`,
+                'Si el comando se sigue rechazando, es posible que esté en mantenimiento o que no tenga suficientes permisos en este canal',
+                `Si no sabes la causa, puedes notificarle el problema a mi creador: <@${globalConfigs.peopleid.papita}>`,
             ].join('\n'),
             ephemeral: true,
         }).catch(console.error);
