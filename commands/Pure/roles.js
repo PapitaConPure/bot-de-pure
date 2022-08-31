@@ -16,20 +16,21 @@ const { colorsRow } = require('../../localdata/houraiProps');
  */
 const gameRoles = [
 	[ //Sección 0
-		{ id: '943412899689414726', label: 'Minecraft', 		emote: '🧊' },
-		{ id: '763945846705487884', label: 'Terraria', 			emote: '🌳' },
-		{ id: '936360389711626280', label: 'Tetris', 			emote: '🟨' },
-		{ id: '981040691981459476', label: 'PAYDAY 2', 			emote: '🗄️' },
+		{ id: '943412899689414726',  label: 'Minecraft', 		 emote: '🧊' },
+		{ id: '763945846705487884',  label: 'Terraria', 		 emote: '🌳' },
+		{ id: '936360389711626280',  label: 'Tetris', 			 emote: '🟨' },
+		{ id: '981040691981459476',  label: 'PAYDAY 2', 		 emote: '🗄️' },
 	],
 	[ //Sección 1
-		{ id: '936360594028757053', label: 'League of Legends', emote: '👶' },
-		{ id: '943412943159189537', label: 'Risk of Rain 2', 	emote: '🌧️' },
-		{ id: '938949774462304256', label: 'Duck Game', 		emote: '🦆' },
+		{ id: '936360594028757053',  label: 'League of Legends', emote: '👶' },
+		{ id: '943412943159189537',  label: 'Risk of Rain 2', 	 emote: '🌧️' },
+		{ id: '938949774462304256',  label: 'Duck Game', 		 emote: '🦆' },
+		{ id: '936361454121132162',  label: 'Pokémon', 			 emote: '🦀' },
 	],
 	[ //Sección 2
-		{ id: '693886880667795577', label: '100% OJ', 			emote: '🍊' },
-		{ id: '936360704783577178', label: 'Ajedrez', 			emote: '♟️' },
-		{ id: '936361454121132162', label: 'Pokémon', 			emote: '🦀' },
+		{ id: '1014494653262856262', label: 'SRB2Kart', 		 emote: '🏎️' },
+		{ id: '693886880667795577',  label: '100% OJ', 			 emote: '🍊' },
+		{ id: '936360704783577178',  label: 'Ajedrez', 			 emote: '♟️' },
 	],
 ];
 /**@type {RoleDataPool}*/
