@@ -36,6 +36,9 @@ function formatBooruPostMessage(post, data = {}) {
         } else if(source.match(/twitter\.com|twimg\.com/)) {
             emoji = '919403803114094682';
             embedColor = '#1da1f2';
+        } else if(source.includes('nitter.net')) {
+            emoji = '919403803114094682';
+            embedColor = '#ff6c60';
         } else if(source.includes('fanbox.cc')) {
             emoji = '999783444655648869';
             embedColor = '#faf18a';
