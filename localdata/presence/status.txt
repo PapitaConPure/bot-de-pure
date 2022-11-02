@@ -172,7 +172,7 @@ Esparciendo corrosión en el código
 Erectando fraudes lógicos en todos mis algoritmos
 Ahora que lo pienso, sería buena idea meter... digamos 2 ó 3 frases por mes. Pero, de verdad, ¿acaso alguien lee esto?
 Si buscabas aprender a programar, te metiste en el código equivocado
-[¿¡] <- ¿¡Qué clase de degenerado usa estos 2 signos!?
+[¿¡] <- ¿¡Qué clase de degenerado usa estos!?
 Ocasionando problemas de localización de teclado en algún servidor de Estados Unidos que lamentablemente me dejó vivir
 Siendo cringe
 俺はエラーをするんじゃねえ！俺が、俺自身が、真のエラーになるんだ！
@@ -370,3 +370,8 @@ Desplegando bugs frescos
 Stream
 Si bien actualizo esto cada tanto... los videos del botón de abajo no los toco hace rato
 Jugando a las luchitas con Daishin
+この素晴らしいボットに修正を
+Soy técnicamente una aplicación de consola... espera, qué
+There is No Escape
+Comprándole cartitas a Takane
+Riesgo de Lluvia de Balas

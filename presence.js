@@ -28,19 +28,20 @@ module.exports = {
     modifyPresence: async function(client, steps = 0) { //Cambio de estado constante; Créditos a Imagine Breaker#6299 y Sassafras
         //Actualización de actividad
         try {
-            const status = presence.status[await getQueueItem({ queueId: 'presenceStatus', length: presence.status.length, sort: 'RANDOM' })];
-            const stream = presence.stream[await getQueueItem({ queueId: 'presenceStream', length: presence.stream.length, sort: 'RANDOM' })];
-            // const status = presence.statusSpecial[await getQueueItem({ queueId: 'presenceStatusSpecial', length: presence.statusSpecial.length, sort: 'NONE' })];
+            // const status = presence.status[await getQueueItem({ queueId: 'presenceStatus', length: presence.status.length, sort: 'RANDOM' })];
+            // const stream = presence.stream[await getQueueItem({ queueId: 'presenceStream', length: presence.stream.length, sort: 'RANDOM' })];
+            const status = presence.statusSpecial[await getQueueItem({ queueId: 'presenceStatusSpecial', length: presence.statusSpecial.length, sort: 'NONE' })];
 
-            client.user.setActivity({
-                name: status,
-                type: 'STREAMING',
-                url: `https://www.youtube.com/watch?v=${stream}`,
-            });
             // client.user.setActivity({
-            //     name: `"${status}"`,
-            //     type: 'LISTENING',
+            //     name: status,
+            //     type: 'STREAMING',
+            //     url: `https://www.youtube.com/watch?v=${stream}`,
             // });
+            client.user.setActivity({
+                name: `"${status}"`,
+                type: 'STREAMING',
+                url: 'https://www.youtube.com/watch?v=NnRwmjo7MtU',
+            });
             
             //Programar próxima actualización de actividad
             const stepTime = randRange(20, 35);
