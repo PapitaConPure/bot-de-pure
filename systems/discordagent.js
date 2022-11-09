@@ -14,14 +14,12 @@ class DiscordAgent {
      */
     async setup(channel, name = 'Agente Puré') {
         if(channel.isThread()) {
-            //Trabajar en cambio con el parent y guardar la ID del Thread para el envío
             this.threadId = channel.id;
             channel = channel.parent;
         }
         
         const channelWebhooks = await channel.fetchWebhooks();
         this.webhook = channelWebhooks.find(wh => wh.token && wh.channelId === channel.id);
-        console.log(this.webhook);
         
         if(!this.webhook)
             this.webhook = await channel.createWebhook(name);

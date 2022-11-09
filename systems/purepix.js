@@ -42,7 +42,6 @@ const formatPixivPostsMessage = async (urls) => {
         const post = (await pixiv.illustDetail(postId).catch(console.error)).illust;
         const imageBuffer = await pixiv.requestUrl(post.image_urls.medium, { headers: { 'Referer': 'http://www.pixiv.net' }, responseType: 'arraybuffer' });
         const imgurResponse = await imgur.upload({ image: imageBuffer });
-        console.log(post);
         const postEmbed = new MessageEmbed()
             .setColor('#0096fa')
             .setDescription(post.type === 'ugoira' ? 'Ilustración animada (ugoira)' : 'Ilustración')
