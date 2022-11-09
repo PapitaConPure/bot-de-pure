@@ -45,15 +45,9 @@ const formatPixivPostsMessage = async (urls) => {
         const postEmbed = new MessageEmbed()
             .setColor('#0096fa')
             .setDescription(post.type === 'ugoira' ? 'Ilustración animada (ugoira)' : 'Ilustración')
-            .setAuthor({
-                name: post.user.name,
-                url: post.user.url,
-            })
+            .setAuthor({ name: post.user.name, url: post.user.url })
             .setTitle(post.title)
-            .setFooter({
-                text: `pixiv • ${postId}`,
-                iconURL: 'https://i.imgur.com/e4JPSMl.png',
-            })
+            .setFooter({ text: 'pixiv', iconURL: 'https://i.imgur.com/e4JPSMl.png' })
             .setTimestamp(new Date(post.create_date))
             .addFields({
                 name: `💬 ${post.total_comments} ❤ ${post.total_bookmarks} 👁 ${post.total_view}`,
