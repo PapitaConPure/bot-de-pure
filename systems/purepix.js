@@ -83,6 +83,7 @@ const sendPixivPostsAsWebhook = async (message) => {
     if(pixivUrls.length) {
         const newMessage = await formatPixivPostsMessage(pixivUrls.map(pixivUrl => pixivUrl[0]));
         newMessage.content = content.replace(pixivRegex, '<:pixiv:919403803126661120> [$6]($&)');
+        newMessage.files = [...(message.attachments?.values?.() || [])].map(attachment => attachment.url || attachment.proxyURL);
 
         try {
             const agent = await (new DiscordAgent().setup(channel));
