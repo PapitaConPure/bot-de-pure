@@ -3,6 +3,7 @@ const { TextChannel, User, MessagePayload } = require('discord.js');
 class DiscordAgent {
     constructor() {
         this.webhook = null;
+        this.threadId = null;
         this.user = null;
     };
 
@@ -12,8 +13,15 @@ class DiscordAgent {
      * @returns 
      */
     async setup(channel, name = 'Agente Puré') {
+        if(channel.isThread()) {
+            //Trabajar en cambio con el parent y guardar la ID del Thread para el envío
+            this.threadId = channel.id;
+            channel = channel.parent;
+        }
+        
         const channelWebhooks = await channel.fetchWebhooks();
         this.webhook = channelWebhooks.find(wh => wh.token && wh.channelId === channel.id);
+        console.log(this.webhook);
         
         if(!this.webhook)
             this.webhook = await channel.createWebhook(name);
@@ -43,6 +51,7 @@ class DiscordAgent {
             // console.log(`Webhook asociado: ${this.webhook}`)
             return await this.webhook.send({
                 ...messageOptions,
+                threadId: this.threadId,
                 username: this.user.username,
                 avatarURL: this.user.avatarURL({ dynamic: true }),
             })

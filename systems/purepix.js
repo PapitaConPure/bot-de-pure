@@ -35,7 +35,6 @@ const formatPixivPostsMessage = async (urls) => {
 
     if(!canProceed) return;
     
-    console.log('Autenticado. Ejecutando con ', urls, '...');
     const embeds = [];
 
     await Promise.all(urls.slice(0, 4).map(async url => {
@@ -43,13 +42,13 @@ const formatPixivPostsMessage = async (urls) => {
         const post = (await pixiv.illustDetail(postId).catch(console.error)).illust;
         const imageBuffer = await pixiv.requestUrl(post.image_urls.medium, { headers: { 'Referer': 'http://www.pixiv.net' }, responseType: 'arraybuffer' });
         const imgurResponse = await imgur.upload({ image: imageBuffer });
-        
+        console.log(post);
         const postEmbed = new MessageEmbed()
             .setColor('#0096fa')
             .setDescription(post.type === 'ugoira' ? 'Ilustración animada (ugoira)' : 'Ilustración')
             .setAuthor({
                 name: post.user.name,
-                url: url,
+                url: post.user.url,
             })
             .setTitle(post.title)
             .setFooter({
@@ -65,7 +64,7 @@ const formatPixivPostsMessage = async (urls) => {
         if(imgurResponse?.data?.link)
             postEmbed.setImage(imgurResponse.data.link);
 
-        setTimeout((deleteHash = imgurResponse.data.deletehash) => imgur.deleteImage(deleteHash), 1000 * 10);
+        // setTimeout((deleteHash = imgurResponse.data.deletehash) => imgur.deleteImage(deleteHash), 1000 * 10);
 
         embeds.push(postEmbed);
     }));
