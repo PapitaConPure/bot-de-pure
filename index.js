@@ -38,6 +38,7 @@ const { registerFont, loadImage } = require('canvas');
 const { promisify } = require('util');
 const command = require('./commands/Pure/feed.js');
 const commands = require('./commands/Commons/commands.js');
+const { sendPixivPostsAsWebhook } = require('./systems/purepix.js');
 //#endregion
 
 //#region Parámetros Iniciales
@@ -329,8 +330,8 @@ client.on('messageCreate', async message => {
     if(guildFunctions)
         await Promise.all(Object.values(guildFunctions).map(fgf => fgf(message)))
         .catch(error => handleAndAuditError(error, message, { brief: 'Ocurrió un problema al ejecutar una respuesta rápida', details: content ? `"${content}"` : 'Mensaje sin contenido' }));
-
     if(author.bot) return;
+    sendPixivPostsAsWebhook(message);
     
     //Estadísticas
     const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
