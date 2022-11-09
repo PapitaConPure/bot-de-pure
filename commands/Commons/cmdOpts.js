@@ -463,7 +463,6 @@ class CommandOptionsManager {
      * Si no se recibe ninguna entrada, se devuelve fallback
      * @param {import('discord.js').CommandInteractionOptionResolver | Array<String>} args El conjunto de entradas
      * @param {String} identifier El identificador de la flag
-     * @param {Function} getMethod El método de procesado de entrada
      * @typedef {{
      *  callback: *
      *  fallback: *

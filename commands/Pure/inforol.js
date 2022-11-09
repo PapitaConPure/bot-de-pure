@@ -102,7 +102,7 @@ const command = new CommandManager('inforol', flags)
 				.setColor('#ff00ff')
 				.setTitle('Análisis del roles (Detalle)')
 
-				.setFields({ name: 'Lista de usuarios', value: plrange })
+				.addFields({ name: 'Lista de usuarios', value: plrange })
 
 				.setAuthor({ name: `Comando invocado por ${user.username}`, iconURL: user.avatarURL() })
 				.setFooter({ text: `Página de lista ${i + 1}/${Math.ceil(totalcnt / 10)}` });
