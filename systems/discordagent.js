@@ -39,8 +39,8 @@ class DiscordAgent {
             throw new ReferenceError('No se ha definido un usuario');
 
         try {
-            console.log(`Usuario asociado: ${this.user}`)
-            console.log(`Webhook asociado: ${this.webhook}`)
+            // console.log(`Usuario asociado: ${this.user}`)
+            // console.log(`Webhook asociado: ${this.webhook}`)
             return await this.webhook.send({
                 ...messageOptions,
                 username: this.user.username,

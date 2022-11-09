@@ -11,7 +11,6 @@ const imgur = new ImgurClient({
     clientSecret: imgurSecret,
     refreshToken: imgurToken,
 });
-// const fs = require('fs');
 
 const pixivRegex = /<?((http:\/\/|https:\/\/)(www\.)?)(pixiv.net(\/en)?)\/artworks\/([0-9]{6,9})>?/g;
 
@@ -20,7 +19,6 @@ const pixivRegex = /<?((http:\/\/|https:\/\/)(www\.)?)(pixiv.net(\/en)?)\/artwor
  * @returns {import('discord.js').MessageOptions | MessagePayload}
  */
 const formatPixivPostsMessage = async (urls) => {
-    console.log('Autenticando pixiv...');
     let canProceed = false;
     let authAttempts = 0;
 
@@ -43,10 +41,8 @@ const formatPixivPostsMessage = async (urls) => {
     await Promise.all(urls.slice(0, 4).map(async url => {
         const postId = url.split('/').pop();
         const post = (await pixiv.illustDetail(postId).catch(console.error)).illust;
-        console.log(post);
         const imageBuffer = await pixiv.requestUrl(post.image_urls.medium, { headers: { 'Referer': 'http://www.pixiv.net' }, responseType: 'arraybuffer' });
         const imgurResponse = await imgur.upload({ image: imageBuffer });
-        console.log(imgurResponse?.data?.link);
         
         const postEmbed = new MessageEmbed()
             .setColor('#0096fa')
@@ -73,8 +69,6 @@ const formatPixivPostsMessage = async (urls) => {
 
         embeds.push(postEmbed);
     }));
-
-    console.log('Ejecutado.');
     
     return { embeds };
 };
@@ -85,8 +79,6 @@ const formatPixivPostsMessage = async (urls) => {
  */
 const sendPixivPostsAsWebhook = async (message) => {
     const { content, channel, author } = message;
-    const agent = await (new DiscordAgent().setup(channel));
-    agent.setUser(author);
 
     const pixivUrls = Array.from(content.matchAll(pixivRegex));
 
@@ -94,10 +86,16 @@ const sendPixivPostsAsWebhook = async (message) => {
         const newMessage = await formatPixivPostsMessage(pixivUrls.map(pixivUrl => pixivUrl[0]));
         newMessage.content = content.replace(pixivRegex, '<:pixiv:919403803126661120> [$6]($&)');
 
-        agent.sendAsUser(newMessage);
+        try {
+            const agent = await (new DiscordAgent().setup(channel));
+            agent.setUser(author);
+            agent.sendAsUser(newMessage);
 
-        if(message.deletable)
-            message.delete().catch(console.error);
+            if(message.deletable)
+                message.delete().catch(console.error);
+        } catch(e) {
+            console.error(e);
+        }
     }
 }
 
