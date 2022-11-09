@@ -1019,6 +1019,69 @@ module.exports = {
         return array[randomIndex];
     },
 
+    /**
+     * Agrega filas de control de navegación de páginas.
+     * 
+     * Tanto `loadPage` como `loadPageExact` cumplen la función de ir a un número de página resaltado.
+     * La diferencia es que en `loadPage` se extrae el número de página del primer argumento, y en `loadPageExact` se extrae de la opción seleccionada del SelectMenu
+     * 
+     * Tanto `loadPage` como `loadPageExact` deberían de usar el decorador {@linkcode module.exports.loadPageWrapper}
+     * 
+     * Interacciones:
+     * 
+     * ButtonInteraction `loadPage`
+     * * `args[0]`: Número de página
+     * * `args[1]`: Contexto del salto. Solo es necesario para que cada ID sea única.
+     * 
+     * SelectMenuInteraction `loadPageExact`
+     * * `.values[0]`: página seleccionada
+     * @param {String} commandFilename Nombre del archivo de comando
+     * @param {Number} page Número de página actual
+     * @param {Number} lastPage Número de última página
+     */
+    navigationRows: function(commandFilename, page, lastPage) {
+		const backward = (page > 0) ? (page - 1) : lastPage;
+		const forward = (page < lastPage) ? (page + 1) : 0;
+        const maxGrowth = 12;
+        const desiredMax = page + maxGrowth;
+        const minPage = Math.max(0, page - maxGrowth - Math.max(0, desiredMax - lastPage));
+        let i = minPage;
+
+        return [
+            new Discord.MessageActionRow().addComponents(
+                new Discord.MessageButton()
+                    .setCustomId(`${commandFilename}_loadPage_0_START`)
+                    .setEmoji('934430008586403900')
+                    .setStyle('SECONDARY'),
+                new Discord.MessageButton()
+                    .setCustomId(`${commandFilename}_loadPage_${backward}_BACKWARD`)
+                    .setEmoji('934430008343158844')
+                    .setStyle('SECONDARY'),
+                new Discord.MessageButton()
+                    .setCustomId(`${commandFilename}_loadPage_${forward}_FORWARD`)
+                    .setEmoji('934430008250871818')
+                    .setStyle('SECONDARY'),
+                new Discord.MessageButton()
+                    .setCustomId(`${commandFilename}_loadPage_${lastPage}_END`)
+                    .setEmoji('934430008619962428')
+                    .setStyle('SECONDARY'),
+                new Discord.MessageButton()
+                    .setCustomId(`${commandFilename}_loadPage_${page}_RELOAD`)
+                    .setEmoji('934432754173624373')
+                    .setStyle('PRIMARY'),
+            ),
+            new Discord.MessageActionRow().addComponents(
+                new Discord.MessageSelectMenu()
+                    .setCustomId(`${commandFilename}_loadPageExact`)
+                    .setPlaceholder('Seleccionar página')
+                    .setOptions(Array(Math.min(lastPage + 1, 25)).fill(null).map(() => ({
+                        value: `${i}`,
+                        label: `Página ${++i}`,
+                    }))),
+            ),
+        ];
+    },
+
     shortNumberNames: [
         'millones', 'miles de millones', 'billones', 'miles de billones', 'trillones', 'miles de trillones', 'cuatrillones', 'miles de cuatrillones',
         'quintillones', 'miles de quintillones', 'sextillones', 'miles de sextillones', 'septillones', 'miles de septillones',
