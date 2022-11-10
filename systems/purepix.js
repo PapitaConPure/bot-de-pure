@@ -1,4 +1,4 @@
-const { MessageEmbed, MessagePayload, Message } = require('discord.js');
+const { MessageEmbed, Message } = require('discord.js');
 const imgurSecret = process.env.IMGUR_SECRET ?? (require('../localenv.json')?.imgursecret);
 const imgurToken = process.env.IMGUR_REFRESH_TOKEN ?? (require('../localenv.json')?.imgurrt);
 const pixivToken = process.env.PIXIV_REFRESH_TOKEN ?? (require('../localenv.json')?.pixivtoken);
@@ -15,8 +15,7 @@ const imgur = new ImgurClient({
 const pixivRegex = /<?((http:\/\/|https:\/\/)(www\.)?)(pixiv.net(\/en)?)\/artworks\/([0-9]{6,9})>?/g;
 
 /**
- * @param {String} urls
- * @returns {import('discord.js').MessageOptions | MessagePayload}
+ * @param {Array<String>} urls
  */
 const formatPixivPostsMessage = async (urls) => {
     let canProceed = false;
@@ -35,9 +34,7 @@ const formatPixivPostsMessage = async (urls) => {
 
     if(!canProceed) return;
     
-    const embeds = [];
-
-    await Promise.all(urls.slice(0, 4).map(async url => {
+    const embeds = await Promise.all(urls.slice(0, 4).map(async url => {
         const postId = url.split('/').pop();
         const post = (await pixiv.illustDetail(postId).catch(console.error)).illust;
         const imageBuffer = await pixiv.requestUrl(post.image_urls.medium, { headers: { 'Referer': 'http://www.pixiv.net' }, responseType: 'arraybuffer' });
@@ -59,7 +56,7 @@ const formatPixivPostsMessage = async (urls) => {
 
         // setTimeout((deleteHash = imgurResponse.data.deletehash) => imgur.deleteImage(deleteHash), 1000 * 10);
 
-        embeds.push(postEmbed);
+        return postEmbed;
     }));
     
     return { embeds };
@@ -72,7 +69,7 @@ const formatPixivPostsMessage = async (urls) => {
 const sendPixivPostsAsWebhook = async (message) => {
     const { content, channel, author } = message;
 
-    const pixivUrls = Array.from(content.matchAll(pixivRegex));
+    const pixivUrls = Array.from(content.matchAll(pixivRegex)).filter(u => !u[0].startsWith('<') && !u[0].endsWith('>'));
 
     if(pixivUrls.length) {
         const newMessage = await formatPixivPostsMessage(pixivUrls.map(pixivUrl => pixivUrl[0]));
