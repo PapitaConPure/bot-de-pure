@@ -47,7 +47,7 @@ const formatPixivPostsMessage = async (urls) => {
             },
             responseType: 'arraybuffer',
         };
-        const illustBuffer = pixiv.requestUrl(post.image_urls.large ?? post.image_urls.medium, imageRequestOptions);
+        const illustBuffer = pixiv.requestUrl(post.image_urls.medium, imageRequestOptions);
         const profileImageUrl = post.user.profile_image_urls.medium;
         let profileAsset = 'https://s.pximg.net/common/images/no_profile.png';
         if(profileImageUrl !== profileAsset)
@@ -101,7 +101,6 @@ const sendPixivPostsAsWebhook = async (message) => {
     
     const newMessage = await formatPixivPostsMessage(pixivUrls.map(pixivUrl => pixivUrl[0]));
     newMessage.content = content.replace(pixivRegex, '<:pixiv:919403803126661120> [$6]($&)');
-    console.log(newMessage.embeds, newMessage.files);
 
     try {
         const agent = await (new DiscordAgent().setup(channel));
@@ -113,7 +112,7 @@ const sendPixivPostsAsWebhook = async (message) => {
     } catch(e) {
         console.error(e);
     }
-}
+};
 
 module.exports = {
     formatPixivPostsMessage,
