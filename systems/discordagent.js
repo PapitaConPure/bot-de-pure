@@ -1,6 +1,14 @@
-const { TextChannel, User, MessagePayload } = require('discord.js');
+const { TextChannel, User, Webhook } = require('discord.js');
 
+/**Clase para interactuar con Webhooks de Discord de forma más sencilla*/
 class DiscordAgent {
+    /**@type {Webhook}*/
+    webhook;
+    /**@type {String}*/
+    threadId;
+    /**@type {User}*/
+    user;
+
     constructor() {
         this.webhook = null;
         this.threadId = null;
@@ -8,9 +16,9 @@ class DiscordAgent {
     };
 
     /**
-     * @param {TextChannel} channel 
-     * @param {String} name 
-     * @returns 
+     * Conecta al Agente a un canal por medio de un Webhook. Si el canal no tiene un Webhook disponible, crea uno nuevo.
+     * @param {TextChannel} channel Objeto de canal o thread al cual enviar un mensaje como Agente
+     * @param {String} name Nombre de muestra de Agente
      */
     async setup(channel, name = 'Agente Puré') {
         if(channel.isThread()) {
@@ -28,6 +36,7 @@ class DiscordAgent {
     };
 
     /**
+     * Establece el usuario a replicar por el Agente al enviar mensajes
      * @param {User} user
      */
     setUser(user) {
@@ -36,9 +45,8 @@ class DiscordAgent {
     };
 
     /**
-     * 
-     * @param {import('discord.js').WebhookMessageOptions } messageOptions 
-     * @returns 
+     * Envía un mensaje como el usuario especificado. Recuerda usar `setUser` antes.
+     * @param {import('discord.js').WebhookMessageOptions } messageOptions Opciones de envío. No se puede modificar el usuario ni el canal
      */
     async sendAsUser(messageOptions) {
         if(!this.user)
