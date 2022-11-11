@@ -65,23 +65,28 @@ const formatPixivPostsMessage = async (urls) => {
             discordCaption = shortenText(
                 post.caption
                     .replace(/<a href=["'](https?:[^"']+)["']( \w+=["'][^"']+["'])*>([^<]+)<\/a>/g, (_substr, url) => {
-                        let label = 'link';
-                        if(url.includes('pixiv.net'))
-                            label = 'pixiv';
-                        else if(url.includes('twitter.com') | urls.includes('nitter.net'))
-                            label = 'Twitter';
-                        else if(url.includes('fanbox.cc'))
-                            label = 'FANBOX';
-                        else if(url.includes('fantia.jp'))
-                            label = 'Fantia';
-                        else if(url.includes('skeb.jp'))
-                            label = 'Skeb';
-                        else if(url.includes('tumblr.com'))
-                            label = 'Tumblr';
-                        else if(url.includes('reddit.com'))
-                            label = 'Reddit';
+                        const labelLink = label => `[🔗 ${label}](${url})`;
                         
-                        return `[🔗 ${label}](${url})`;
+                        if(url.includes('twitter.com') | urls.includes('nitter.net'))
+                            return labelLink('Twitter');
+                        if(url.includes('fanbox.cc'))
+                            return labelLink('FANBOX');
+                        if(url.includes('fantia.jp'))
+                            return labelLink('Fantia');
+                        if(url.includes('patreon.com'))
+                            return labelLink('Patreon');
+                        if(url.includes('skeb.jp'))
+                            return labelLink('Skeb');
+                        if(url.includes('instagram.com'))
+                            return labelLink('Instagram');
+                        if(url.includes('pixiv.net'))
+                            return labelLink('pixiv');
+                        if(url.includes('tumblr.com'))
+                            return labelLink('Tumblr');
+                        if(url.includes('reddit.com'))
+                            return labelLink('Reddit');
+      
+                        return labelLink('link');
                     })
                     .replace(/<\/?strong>/g, '**')
                     .replace(/<br ?\/?>/g, '\n')
@@ -90,7 +95,7 @@ const formatPixivPostsMessage = async (urls) => {
                 ' (...)',
             );
         const postType = {
-            ugoira: 'Ilustración animada (ugoira)',
+            ugoira: 'Ugoira',
             illust: 'Ilustración',
             manga:  'Manga',
         };
@@ -103,10 +108,10 @@ const formatPixivPostsMessage = async (urls) => {
                 iconURL: `attachment://pfp${i}.png`,
             })
             .setTitle(post.title)
-            .setDescription(`**${postType[post.type] ?? 'Imagen'}**${discordCaption ? `\n>>> ${discordCaption}` : ''}`)
+            .setDescription(discordCaption ?? '')
             .setURL(url)
             .setImage(`attachment://thumb${i}.png`)
-            .setFooter({ text: 'pixiv • PuréPix', iconURL: 'https://i.imgur.com/e4JPSMl.png' })
+            .setFooter({ text: `pixiv • ${postType[post.type] ?? 'Imagen'}`, iconURL: 'https://i.imgur.com/e4JPSMl.png' })
             .setTimestamp(new Date(post.create_date))
             .addFields({
                 name: `💬 ${post.total_comments} ❤ ${post.total_bookmarks} 👁 ${post.total_view}`,
