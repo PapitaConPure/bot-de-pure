@@ -331,7 +331,7 @@ client.on('messageCreate', async message => {
         await Promise.all(Object.values(guildFunctions).map(fgf => fgf(message)))
         .catch(error => handleAndAuditError(error, message, { brief: 'Ocurrió un problema al ejecutar una respuesta rápida', details: content ? `"${content}"` : 'Mensaje sin contenido' }));
     if(author.bot) return;
-    sendPixivPostsAsWebhook(message);
+    sendPixivPostsAsWebhook(message).catch(console.error);
     
     //Estadísticas
     const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
