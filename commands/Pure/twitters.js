@@ -1,10 +1,14 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { fetchFlag, fetchSentence } = require('../../func.js');
 const { auditError } = require('../../systems/auditor.js');
-const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
+const flags = new CommandMetaFlagsManager().add(
+	'MOD',
+	'HOURAI',
+);
 const options = new CommandOptionsManager()
-	.addParam('twitters', { name: 'enlace', expression: 'https://twitter.com/' }, 'para colocar uno o más Twitters en un nuevo tablón', { poly: true })
+	.addParam('twitters', { name: 'enlace', expression: 'https://twitter.com/' }, 'para colocar uno o más Twitters en un nuevo tablón', { poly: 'MULTIPLE', polymax: 12 })
 	.addFlag('c',  'canal', 				 'para especificar en qué canal enviar/editar un tablón', { name: 'ch',  type: 'CHANNEL' })
 	.addFlag([],   'id', 			   		 'para especificar un tablón ya enviado a editar',		  { name: 'msg', type: 'MESSAGE' })
 	.addFlag('a',  ['agregar', 'añadir'],    'para añadir enlaces a un tablón ya enviado')
@@ -12,25 +16,17 @@ const options = new CommandOptionsManager()
 	.addFlag([],   ['epígrafe', 'epigrafe'], 'para asignar el texto por encima del título', 		  { name: 'epi', type: 'TEXT' })
 	.addFlag([],   ['título', 'titulo'], 	 'para asignar un título', 								  { name: 'ttl', type: 'TEXT' })
 	.addFlag([],   'pie', 			   	     'para asignar el texto por debajo de los enlaces',		  { name: 'pie', type: 'TEXT' });
-
-module.exports = {
-	name: 'twitters',
-	aliases: [
-		'twitter'
-	],
-	desc: 'Para mostrar Twitters de artistas con los que trabaja Hourai Doll\n' +
-	'Crea un nuevo tablón con los `<twitters>` designados (separados solamente por un espacio)\n' +
-	'Alternativamente, puedes especificar una `--id` de un tablón ya enviado para editarlo, especificando qué `<twitters>` `--agregar` o `--eliminar`\n' +
-	'El tablón se añadirá o se buscará por `--id` para editar *en el canal actual* a menos que especifiques un `--canal`\n' +
-	'Puedes crear un tablón con `--epígrafe`, `--título` y `--pie` de título personalizados',
-	flags: new CommandMetaFlagsManager().add(
-		'MOD',
-		'HOURAI',
-	),
-	options,
-	callx: '<twitters(...)>',
-
-	async execute(message, args) {
+const command = new CommandManager('twitters', flags)
+	.setAliases('twitter')
+	.setDescription(
+		'Para mostrar Twitters de artistas con los que trabaja Hourai Doll',
+		'Crea un nuevo tablón con los `<twitters>` designados (separados solamente por un espacio)',
+		'Alternativamente, puedes especificar una `--id` de un tablón ya enviado para editarlo, especificando qué `<twitters>` `--agregar` o `--eliminar`',
+		'El tablón se añadirá o se buscará por `--id` para editar *en el canal actual* a menos que especifiques un `--canal`',
+		'Puedes crear un tablón con `--epígrafe`, `--título` y `--pie` de título personalizados',
+	)
+	.setOptions(options)
+	.setExecution(async (message, args) => {
 		if(!args.length)
 			return message.reply({ content: ':warning: Necesitas ingresar al menos un enlace de Twitter o propiedad de tablón' });
 
@@ -125,5 +121,6 @@ module.exports = {
 
 		msg.edit({ embeds: [embed] });
 		return message.react('✅');
-	}
-};
+	});
+
+module.exports = command;
