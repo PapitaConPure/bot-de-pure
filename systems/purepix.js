@@ -1,91 +1,117 @@
-const { MessageEmbed, Message } = require('discord.js');
-const imgurSecret = process.env.IMGUR_SECRET ?? (require('../localenv.json')?.imgursecret);
-const imgurToken = process.env.IMGUR_REFRESH_TOKEN ?? (require('../localenv.json')?.imgurrt);
+const { MessageEmbed, Message, MessageAttachment } = require('discord.js');
 const pixivToken = process.env.PIXIV_REFRESH_TOKEN ?? (require('../localenv.json')?.pixivtoken);
 const PixivApi = require('pixiv-api-client');
-const { ImgurClient } = require('imgur');
 const { DiscordAgent } = require('./discordagent.js');
 const pixiv = new PixivApi();
-const imgur = new ImgurClient({
-    clientId: 'f4b441972b26281',
-    clientSecret: imgurSecret,
-    refreshToken: imgurToken,
-});
 
 const pixivRegex = /<?((http:\/\/|https:\/\/)(www\.)?)(pixiv.net(\/en)?)\/artworks\/([0-9]{6,9})>?/g;
+let lastPixivTokenRefresh = 0;
 
-/**
- * @param {Array<String>} urls
- */
-const formatPixivPostsMessage = async (urls) => {
-    let canProceed = false;
+const refreshPixivAccessToken = async () => {
+    let authSuccess = false;
     let authAttempts = 0;
 
-    while(!canProceed && authAttempts < 3) {
+    while(!authSuccess && authAttempts < 3) {
         await pixiv.refreshAccessToken(pixivToken)
-        .then(() => canProceed = true)
+        .then(() => authSuccess = true)
         .catch(error => {
             console.error(error);
             authAttempts++;
         });
-        if(!canProceed)
+        if(!authSuccess)
             await new Promise(r => setTimeout(r, 3000 * authAttempts));
     }
+    lastPixivTokenRefresh = Date.now();
 
-    if(!canProceed) return;
+    return authSuccess;
+};
+
+/**
+ * Analiza las urls ingresadas y devuelve data de mensaje con hasta 4 Embeds de pixiv relacionados
+ * @param {Array<String>} urls Enlaces a imágenes de pixiv
+ */
+const formatPixivPostsMessage = async (urls) => {
+    if((Date.now() - lastPixivTokenRefresh) >= 3585e3) {
+        const canProceed = await refreshPixivAccessToken();
+        if(!canProceed) return;
+    }
     
-    const embeds = await Promise.all(urls.slice(0, 4).map(async url => {
+    const messageData = (await Promise.all(urls.slice(0, 4).map(async (url, i) => {
         const postId = url.split('/').pop();
-        const post = (await pixiv.illustDetail(postId).catch(console.error)).illust;
-        const imageBuffer = await pixiv.requestUrl(post.image_urls.medium, { headers: { 'Referer': 'http://www.pixiv.net' }, responseType: 'arraybuffer' });
-        const imgurResponse = await imgur.upload({ image: imageBuffer });
+        const post = (await pixiv.illustDetail(postId).catch(console.error))?.illust;
+        if(!post) return;
+
+        const imageRequestOptions = {
+            headers: {
+                'Referer': 'http://www.pixiv.net',
+            },
+            responseType: 'arraybuffer',
+        };
+        const illustBuffer = pixiv.requestUrl(post.image_urls.large ?? post.image_urls.medium, imageRequestOptions);
+        const profileImageUrl = post.user.profile_image_urls.medium;
+        let profileAsset = 'https://s.pximg.net/common/images/no_profile.png';
+        if(profileImageUrl !== profileAsset)
+            profileAsset = pixiv.requestUrl(profileImageUrl, imageRequestOptions);
+
+        const [ illustImage, profileImage ] = await Promise.all([illustBuffer, profileAsset]);
+
+        const postAttachments = [
+            new MessageAttachment(illustImage, `thumb${i}.png`),
+            new MessageAttachment(profileImage, `pfp${i}.png`),
+        ];
         const postEmbed = new MessageEmbed()
             .setColor('#0096fa')
             .setDescription(post.type === 'ugoira' ? 'Ilustración animada (ugoira)' : 'Ilustración')
-            .setAuthor({ name: post.user.name, url: post.user.url })
+            .setAuthor({
+                name: post.user.name,
+                url: post.user.url,
+                iconURL: `attachment://pfp${i}.png`
+            })
             .setTitle(post.title)
+            .setImage(`attachment://thumb${i}.png`)
             .setFooter({ text: 'pixiv', iconURL: 'https://i.imgur.com/e4JPSMl.png' })
             .setTimestamp(new Date(post.create_date))
             .addFields({
                 name: `💬 ${post.total_comments} ❤ ${post.total_bookmarks} 👁 ${post.total_view}`,
                 value: post.tags.slice(0, 6).map(t => t.translated_name ?? t.name).join(', '),
             });
-        
-        if(imgurResponse?.data?.link)
-            postEmbed.setImage(imgurResponse.data.link);
 
-        // setTimeout((deleteHash = imgurResponse.data.deletehash) => imgur.deleteImage(deleteHash), 1000 * 10);
-
-        return postEmbed;
+        return { embeds: [ postEmbed ], files: postAttachments };
+    }))).reduce((a, b) => ({
+        embeds: [ ...a.embeds, ...b.embeds ],
+        files: [ ...a.files, ...b.files ],
     }));
     
-    return { embeds };
+    return messageData;
 };
 
 /**
- * 
- * @param {Message} message 
+ * Detecta enlaces de pixiv en un mensaje y los reenvía con un Embed corregido, a través de un Agente Webhook.
+ * @param {Message} message El mensaje a analizar
  */
 const sendPixivPostsAsWebhook = async (message) => {
     const { content, channel, author } = message;
+    if(!message.guild.me.permissions.has('MANAGE_WEBHOOKS'))
+        return;
 
     const pixivUrls = Array.from(content.matchAll(pixivRegex)).filter(u => !u[0].startsWith('<') && !u[0].endsWith('>'));
 
-    if(pixivUrls.length) {
-        const newMessage = await formatPixivPostsMessage(pixivUrls.map(pixivUrl => pixivUrl[0]));
-        newMessage.content = content.replace(pixivRegex, '<:pixiv:919403803126661120> [$6]($&)');
-        newMessage.files = [...(message.attachments?.values?.() || [])].map(attachment => attachment.url || attachment.proxyURL);
+    if(!pixivUrls.length)
+        return;
+    
+    const newMessage = await formatPixivPostsMessage(pixivUrls.map(pixivUrl => pixivUrl[0]));
+    newMessage.content = content.replace(pixivRegex, '<:pixiv:919403803126661120> [$6]($&)');
+    console.log(newMessage.embeds, newMessage.files);
 
-        try {
-            const agent = await (new DiscordAgent().setup(channel));
-            agent.setUser(author);
-            agent.sendAsUser(newMessage);
+    try {
+        const agent = await (new DiscordAgent().setup(channel));
+        agent.setUser(author);
+        agent.sendAsUser(newMessage);
 
-            if(message.deletable)
-                message.delete().catch(console.error);
-        } catch(e) {
-            console.error(e);
-        }
+        if(message.deletable)
+            message.delete().catch(console.error);
+    } catch(e) {
+        console.error(e);
     }
 }
 
