@@ -365,10 +365,17 @@ class CommandOptionsManager {
      * @returns
      */
     addParam(name, type, desc, optionModifiers = { poly: undefined, polymax: undefined, optional: undefined } ) {
+        if(optionModifiers && typeof optionModifiers !== 'object')
+            throw new TypeError('Modificadores de parámetro inválidos');
+            
+        const { poly, polymax, optional } = optionModifiers ?? {};
+        if(poly && !Array.isArray(poly) && !['SINGLE', 'MULTIPLE',].includes(poly))
+            throw new TypeError('Multiplicidad de parámetro inválida');
+
         const commandParam = new CommandParam(name, type)
             .setDesc(desc)
-            .setPoly(optionModifiers?.poly || 'SINGLE', optionModifiers?.polymax || this.defaults.polymax)
-            .setOptional(optionModifiers?.optional || false);
+            .setPoly(poly || 'SINGLE', polymax || this.defaults.polymax)
+            .setOptional(optional || false);
         this.options.set(commandParam._name, commandParam);
         this.params.set(commandParam._name, commandParam);
         return this;
