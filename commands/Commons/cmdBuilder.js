@@ -37,9 +37,9 @@ class CommandManager {
     execute;
 
     /**
-     * 
-     * @param {String} name
-     * @param {CommandMetaFlagsManager} flags
+     * Crea un comando
+     * @param {String} name El nombre identificador del comando
+     * @param {CommandMetaFlagsManager} flags Un objeto {@linkcode CommandMetaFlagsManager} con las flags del comando
      */
     constructor(name, flags) {
         if(typeof name !== 'string') throw new TypeError('El nombre debe ser un string');
@@ -70,6 +70,11 @@ class CommandManager {
         if(!desc.length) throw new Error('Debes especificar una descripción');
         this.desc = desc.join('\n');
         return this;
+    };
+    
+    /**@param {...String} desc*/
+    setDescription(...desc) {
+        return this.setLongDescription(...desc);
     };
     
     /**@param {CommandOptionsManager} options*/
