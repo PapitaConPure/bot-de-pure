@@ -43,6 +43,7 @@ class CommandManager {
      */
     constructor(name, flags) {
         if(typeof name !== 'string') throw new TypeError('El nombre debe ser un string');
+        if(!name.length)             throw new Error('El nombre del comando no puede estar vacío');
         if(!flags?.bitField)         throw new TypeError('Las flags deben ser un CommandMetaFlagsManager');
         this.name = name;
         this.flags = flags;
