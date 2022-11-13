@@ -2,7 +2,7 @@ const PureVoice = require('../../localdata/models/purevoice.js');
 const { MessageEmbed, MessageActionRow, MessageButton, MessageCollector } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { isNotModerator, fetchFlag, defaultEmoji } = require('../../func.js');
-const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const cancelbutton = (id) => new MessageButton()
 	.setCustomId(`voz_cancelWizard_${id}`)
@@ -31,136 +31,127 @@ const options = new CommandOptionsManager()
 	.addParam('nombre', 'TEXT', 'para decidir el nombre de la sesión actual', { optional: true })
 	.addFlag('e', ['emote', 'emoji'], 'para determinar el emote de la sesión actual', { name: 'emt', type: 'EMOTE' })
 	.addFlag('aiw', ['asistente','instalador','wizard'], 'para inicializar el Asistente de Configuración');
-
-module.exports = {
-	name: 'voz',
-	aliases: [
+const flags = new CommandMetaFlagsManager().add('COMMON');
+const command = new CommandManager('voz', flags)
+	.setAliases(
 		'purévoz', 'purevoz',
 		'voice', 'purévoice', 'purevoice',
 		'vc',
-	],
-	brief: 'Para inyectar un Sistema PuréVoice en una categoria por medio de un Asistente',
-	desc: 'Para inyectar un Sistema PuréVoice en una categoria. Simplemente usa el comando y sigue los pasos del Asistente para configurar todo',
-	flags: new CommandMetaFlagsManager().add('COMMON'),
-	options: options,
-	experimental: true,
-	callx: options.callSyntax,
-	
-	/**
-	 * @param {import("../Commons/typings").CommandRequest} request
-	 * @param {import('../Commons/typings').CommandOptions} args
-	 * @param {Boolean} isSlash
-	 */
-	async execute(request, args, isSlash = false) {
-		//Acción de comando
+	)
+	.setBriefDescription('Para inyectar un Sistema PuréVoice en una categoria por medio de un Asistente')
+	.setLongDescription('Para inyectar un Sistema PuréVoice en una categoria. Simplemente usa el comando y sigue los pasos del Asistente para configurar todo')
+	.setOptions(options)
+	.setExecution(async (request, args, isSlash = false) => {
 		const generateWizard = isSlash
 			? args.getBoolean('asistente')
 			: fetchFlag(args, { ...options.flags.get('asistente').structure, callback: true });
+	
+		if(generateWizard) {
+			//Inicializar instalador PuréVoice
+			if(isNotModerator(request.member)) return request.reply({ content: '❌ No tienes permiso para hacer esto', ephemeral: true });
+			const wizard = wizEmbed(request.client.user.avatarURL(), '1/? • Comenzar', 'AQUA')
+				.addFields({
+					name: 'Bienvenido',
+					value: 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes! Solo sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras',
+				});
+			const uid = (request.author ?? request.user).id;
+			return request.reply({
+				embeds: [wizard],
+				components: [new MessageActionRow().addComponents(
+					new MessageButton()
+						.setCustomId(`voz_startWizard_${uid}`)
+						.setLabel('Comenzar')
+						.setStyle('PRIMARY'),
+					cancelbutton(uid),
+				)],
+			});
+		}
 		
-		//Cambiar nomre de canal de voz de sesión
-		if(!generateWizard) {
-			const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda voz\` para más información`;
-			const defaultEmote = '💠';
-			const emoteString = isSlash
-				? (args.getString('emote') ?? defaultEmote)
-				: fetchFlag(args, { ...options.flags.get('emote').structure, property: true, callback: (x, i) => x[i], fallback: defaultEmote });
-			const sessionEmote = defaultEmoji(emoteString);
-			const sessionName = isSlash
-				? args.getString('nombre')
-				: args.join(' ');
-			
-			if(!sessionName)
-				return request.reply({
-					content: [
-						'⚠ Debes ingresar un nombre para ejecutar este comando de esta forma',
-						'Si estás buscando iniciar un Asistente de Configuración, usa la bandera `--asistente` o `-a`',
-						helpstr,
-					].join('\n'),
-					ephemeral: true,
-				});
-			
-			if(sessionName.length > 24)
-				return request.reply({
-					content: '⚠ Intenta acortar un poco el nombre. El límite para nombres de sesión es de 24(+3) caracteres',
-					ephemeral: true,
-				});
-
-			if(!sessionEmote)
-				return request.reply({
-					content: [
-						'⚠ Emote inválido',
-						'Recuerda que no se pueden usar emotes personalizados para nombres de canales',
-						'También, ten en cuenta que algunos emotes estándar de Discord no son *tan estándar* y __no se espera__ que se detecten/funcionen correctamente',
-					].join('\n'),
-					ephemeral: true,
-				});
-
-			//Comprobar si se está en una sesión
-			/**@type {import('discord.js').VoiceState}*/
-			const voiceState = request.member.voice;
-			const warnNotInSession = () => request.reply({
+		//Cambiar nombre de canal de voz de sesión
+		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda voz\` para más información`;
+		const defaultEmote = '💠';
+		const emoteString = isSlash
+			? (args.getString('emote') ?? defaultEmote)
+			: fetchFlag(args, { ...options.flags.get('emote').structure, property: true, callback: (x, i) => x[i], fallback: defaultEmote });
+		const sessionEmote = defaultEmoji(emoteString);
+		const sessionName = isSlash
+			? args.getString('nombre')
+			: args.join(' ');
+		
+		if(!sessionName)
+			return request.reply({
 				content: [
-					'⚠ Debes entrar a una sesión PuréVoice para ejecutar este comando de esta forma.',
+					'⚠ Debes ingresar un nombre para ejecutar este comando de esta forma',
+					'Si estás buscando iniciar un Asistente de Configuración, usa la bandera `--asistente` o `-a`',
 					helpstr,
 				].join('\n'),
 				ephemeral: true,
-			}).catch(console.error);
-			if(!voiceState.channelId) return warnNotInSession();
-
-			//Modificar sesión y confirmar
-			const pv = await PureVoice.findOne({ guildId: request.guildId });
-			if(!pv) return warnNotInSession();
-            const sessionIndex = pv.sessions.findIndex(session => session.voiceId === voiceState.channelId);
-			const session = pv.sessions[sessionIndex];
-			if(!session) return warnNotInSession();
-			const { voiceId, roleId, nameChanged } = session;
-			if((Date.now() - nameChanged) < 60e3 * 20) return request.reply({
-				content: [
-					'❌ Por cuestiones técnicas, solo puedes cambiar el nombre de la sesión una vez cada 20 minutos.',
-					`Inténtalo de nuevo <t:${Math.round(nameChanged / 1000 + 60 * 20)}:R>, o conéctate a una nueva sesión`,
-				].join('\n'),
 			});
-			pv.sessions[sessionIndex].nameChanged = Date.now();
-			pv.markModified('sessions');
-
-			const guildChannels = request.guild.channels.cache;
-			const guildRoles = request.guild.roles.cache;
-			return Promise.all([
-				pv.save(),
-				guildChannels.get(voiceId)?.setName(`${sessionEmote}【${sessionName}】`, 'Renombrar sesión PuréVoice'),
-				guildRoles.get(roleId)?.setName(`${sessionEmote} ${sessionName}`, 'Renombrar sesión PuréVoice'),
-				request.reply({ content: '✅ Nombre aplicado', ephemeral: true }),
-			]).catch(() => request.reply({ content: '⚠ Ocurrió un error al aplicar el nombre', ephemeral: true }));
-		}
 		
-		//Inicializar instalador PuréVoice
-		if(isNotModerator(request.member)) return request.reply({ content: '❌ No tienes permiso para hacer esto', ephemeral: true });
-		const wizard = wizEmbed(request.client.user.avatarURL(), '1/? • Comenzar', 'AQUA')
-		.addField('Bienvenido', 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes! Solo sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras');
-		const uid = (request.author ?? request.user).id;
-		return request.reply({
-			embeds: [wizard],
-			components: [new MessageActionRow().addComponents(
-				new MessageButton()
-					.setCustomId(`voz_startWizard_${uid}`)
-					.setLabel('Comenzar')
-					.setStyle('PRIMARY'),
-				cancelbutton(uid),
-			)],
-		});
-	},
+		if(sessionName.length > 24)
+			return request.reply({
+				content: '⚠ Intenta acortar un poco el nombre. El límite para nombres de sesión es de 24(+3) caracteres',
+				ephemeral: true,
+			});
 
-	/**
-	 * @param {import('discord.js').ButtonInteraction} interaction 
-	 * @param {Array<String>} param1 
-	 */
-	async ['startWizard'](interaction, [ authorId ]) {
+		if(!sessionEmote)
+			return request.reply({
+				content: [
+					'⚠ Emote inválido',
+					'Recuerda que no se pueden usar emotes personalizados para nombres de canales',
+					'También, ten en cuenta que algunos emotes estándar de Discord no son *tan estándar* y __no se espera__ que se detecten/funcionen correctamente',
+				].join('\n'),
+				ephemeral: true,
+			});
+
+		//Comprobar si se está en una sesión
+		/**@type {import('discord.js').VoiceState}*/
+		const voiceState = request.member.voice;
+		const warnNotInSession = () => request.reply({
+			content: [
+				'⚠ Debes entrar a una sesión PuréVoice para ejecutar este comando de esta forma.',
+				helpstr,
+			].join('\n'),
+			ephemeral: true,
+		}).catch(console.error);
+		if(!voiceState.channelId) return warnNotInSession();
+
+		//Modificar sesión y confirmar
+		const pv = await PureVoice.findOne({ guildId: request.guildId });
+		if(!pv) return warnNotInSession();
+		const sessionIndex = pv.sessions.findIndex(session => session.voiceId === voiceState.channelId);
+		const session = pv.sessions[sessionIndex];
+		if(!session) return warnNotInSession();
+		const { voiceId, roleId, nameChanged } = session;
+		if((Date.now() - nameChanged) < 60e3 * 20) return request.reply({
+			content: [
+				'❌ Por cuestiones técnicas, solo puedes cambiar el nombre de la sesión una vez cada 20 minutos.',
+				`Inténtalo de nuevo <t:${Math.round(nameChanged / 1000 + 60 * 20)}:R>, o conéctate a una nueva sesión`,
+			].join('\n'),
+		});
+		pv.sessions[sessionIndex].nameChanged = Date.now();
+		pv.markModified('sessions');
+
+		const guildChannels = request.guild.channels.cache;
+		const guildRoles = request.guild.roles.cache;
+		return Promise.all([
+			pv.save(),
+			guildChannels.get(voiceId)?.setName(`${sessionEmote}【${sessionName}】`, 'Renombrar sesión PuréVoice'),
+			guildRoles.get(roleId)?.setName(`${sessionEmote} ${sessionName}`, 'Renombrar sesión PuréVoice'),
+			request.reply({ content: '✅ Nombre aplicado', ephemeral: true }),
+		]).catch(() => request.reply({ content: '⚠ Ocurrió un error al aplicar el nombre', ephemeral: true }));
+	})
+	.setButtonResponse(async function startWizard(interaction, authorId) {
 		const { user, guild } = interaction;
+		
 		if(user.id !== authorId)
 			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
 		
 		const wizard = wizEmbed(interaction.client.user.avatarURL(), '2/? • Seleccionar Operación', 'NAVY')
-			.addField('Inyección de Sistema PuréVoice', '¿Qué deseas hacer ahora mismo?');
+			.addFields({
+				name: 'Inyección de Sistema PuréVoice',
+				value: '¿Qué deseas hacer ahora mismo?',
+			});
 			
 		const pv = await PureVoice.findOne({ guildId: guild.id });
 		const uid = user.id;
@@ -193,18 +184,16 @@ module.exports = {
 			embeds: [wizard],
 			components: [row],
 		});
-	},
-
-	/**
-	 * @param {import('discord.js').ButtonInteraction} interaction 
-	 * @param {Array<String>} param1 
-	 */
-	async ['selectInstallation'](interaction, [ authorId ]) {
+	})
+	.setButtonResponse(async function selectInstallation(interaction, authorId) {
 		if(interaction.user.id !== authorId)
 			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
 
 		const wizard = wizEmbed(interaction.client.user.avatarURL(), '3/4 • Seleccionar instalación', 'GOLD')
-			.addField('Instalación', 'Selecciona el tipo de instalación que deseas realizar');
+			.addFields({
+				name: 'Instalación',
+				value: 'Selecciona el tipo de instalación que deseas realizar',
+			});
 		const row = new MessageActionRow().addComponents(
 			new MessageButton()
 				.setCustomId(`voz_installSystem_${authorId}_new`)
@@ -220,13 +209,8 @@ module.exports = {
 			embeds: [wizard],
 			components: [row],
 		});
-	},
-
-	/**
-	 * @param {import('discord.js').ButtonInteraction} interaction 
-	 * @param {Array<String>} param1 
-	 */
-	async ['installSystem'](interaction, [ authorId, createNew ]) {
+	})
+	.setButtonResponse(async function installSystem(interaction, authorId, createNew) {
 		if(interaction.user.id !== authorId)
 			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
 		
@@ -272,10 +256,13 @@ module.exports = {
 				});
 
 				const wizard = wizEmbed(interaction.client.user.avatarURL(), 'Operación finalizada', 'GREEN')
-					.addField('Categoría creada e inyectada', [
-						'Se ha creado una categoría que ahora escala de forma dinámica sus canales de voz.',
-						`Puedes reubicar el Sistema PuréVoice creado en el futuro, solo usa \`${p_pure(interaction.guildId).raw}voz\` otra vez`,
-					].join('\n'));
+					.addFields({
+						name: 'Categoría creada e inyectada',
+						value: [
+							'Se ha creado una categoría que ahora escala de forma dinámica sus canales de voz.',
+							`Puedes reubicar el Sistema PuréVoice creado en el futuro, solo usa \`${p_pure(interaction.guildId).raw}voz\` otra vez`,
+						].join('\n'),
+					});
 
 				const finished = await Promise.all([
 					pv.save(),
@@ -298,7 +285,10 @@ module.exports = {
 		});
 		
 		const wizard = wizEmbed(interaction.client.user.avatarURL(), `4/4 • ${createNew ? 'Nombrar' : 'Seleccionar'} categoría`, 'NAVY')
-			.addField(`${createNew ? 'Creación' : 'Selección'} de categoría`, 'Menciona el nombre de la categoría antes de inyectarle PuréVoice');
+			.addFields({
+				name: `${createNew ? 'Creación' : 'Selección'} de categoría`,
+				value: 'Menciona el nombre de la categoría antes de inyectarle PuréVoice',
+			});
 		const uid = interaction.user.id;
 		const row = new MessageActionRow().addComponents(
 			new MessageButton()
@@ -311,18 +301,19 @@ module.exports = {
 			embeds: [wizard],
 			components: [row],
 		});
-	},
-
-	/**
-	 * @param {import('discord.js').ButtonInteraction} interaction 
-	 * @param {Array<String>} param1 
-	 */
-	async ['deleteSystem'](interaction, [ authorId ]) {
+	})
+	.setButtonResponse(async function deleteSystem(interaction, authorId) {
 		if(interaction.user.id !== authorId)
 			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
 		
 		const wizard = wizEmbed(interaction.client.user.avatarURL(), 'Confirmar desinstalación', 'YELLOW')
-			.addField('Desinstalación del Sistema PuréVoice del servidor', 'Esto borrará todas los canales creados por el Sistema. La categoría del Sistema y los canales creados manualmente se ignorarán.\nConfirma la desasociación del servidor con PuréVoice');
+			.addFields({
+				name: 'Desinstalación del Sistema PuréVoice del servidor',
+				value: [
+					'Esto borrará todas los canales creados por el Sistema. La categoría del Sistema y los canales creados manualmente se ignorarán.',
+					'Confirma la desasociación del servidor con PuréVoice',
+				].join('\n'),
+			});
 		const uid = interaction.user.id;
 		const row = new MessageActionRow().addComponents(
 			new MessageButton()
@@ -339,13 +330,8 @@ module.exports = {
 			embeds: [wizard],
 			components: [row],
 		});
-	},
-
-	/**
-	 * @param {import('discord.js').ButtonInteraction} interaction 
-	 * @param {Array<String>} param1 
-	 */
-	async ['deleteSystemConfirmed'](interaction, [ authorId ]) {
+	})
+	.setButtonResponse(async function deleteSystemConfirmed(interaction, authorId) {
 		if(interaction.user.id !== authorId)
 			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
 
@@ -363,34 +349,30 @@ module.exports = {
 		await PureVoice.deleteOne(guildQuery);
 		
 		const deleteEmbed = wizEmbed(interaction.client.user.avatarURL(), 'Operación finalizada', 'RED')
-			.addField('Sistema PuréVoice eliminado', 'Se eliminó el Sistema PuréVoice asociado al servidor');
+			.addFields({
+				name: 'Sistema PuréVoice eliminado',
+				value: 'Se eliminó el Sistema PuréVoice asociado al servidor',
+			});
 		return interaction.update({
 			embeds: [deleteEmbed],
 			components: [],
 		});	
-	},
-
-	/**
-	 * @param {import('discord.js').ButtonInteraction} interaction 
-	 * @param {Array<String>} param1 
-	 */
-	async ['cancelWizard'](interaction, [ authorId ]) {
+	})
+	.setButtonResponse(async function cancelWizard(interaction, authorId) {
 		if(interaction.user.id !== authorId)
 			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
 		
 		const cancelEmbed = wizEmbed(interaction.client.user.avatarURL(), 'Operación abortada', 'NOT_QUITE_BLACK')
-			.addField('Asistente cancelado', 'Se canceló la configuración del Sistema PuréVoice');
+			.addFields({
+				name: 'Asistente cancelado',
+				value: 'Se canceló la configuración del Sistema PuréVoice'
+			});
 		return interaction.update({
 			embeds: [cancelEmbed],
 			components: [],
 		});
-	},
-
-	/**
-	 * @param {import('discord.js').ButtonInteraction} interaction 
-	 * @param {Array<String>} param1 
-	 */
-	async ['showMeHow'](interaction) {
+	})
+	.setButtonResponse(async function showMeHow(interaction) {
 		const commandName = `${p_pure(interaction.guildId).raw}voz`;
 		return interaction.reply({
 			content: [
@@ -407,5 +389,6 @@ module.exports = {
 			].join('\n'),
 			ephemeral: true,
 		});
-	}
-};
+	});
+
+module.exports = command;
