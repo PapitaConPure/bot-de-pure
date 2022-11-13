@@ -126,10 +126,12 @@ class PureVoiceUpdateHandler {
     
             if(currentSession.joinedOnce?.includes(member.id)) return;
             embed.setColor('#00ff7f')
-                .addField(`${member.user.bot ? '🤖' : '👤'} Nueva conexión`,
-                    member.user.bot
+                .addFields({
+                    name: `${member.user.bot ? '🤖' : '👤'} Nueva conexión`,
+                    value: member.user.bot
                         ? `El bot **${member.user.tag}** fue anexado a la sesión`
-                        : `El miembro **${member.user.tag}** fue incorporado a la sesión`);
+                        : `El miembro **${member.user.tag}** fue incorporado a la sesión`,
+                });
 
             await channel?.send({
                 content: member.user.bot ? null : `👋 ${member}, ¡puedes conversar por aquí!`,
@@ -179,15 +181,39 @@ class PureVoiceUpdateHandler {
 
             embed.setColor('#21abcd')
                 .setTitle('✅ Sesión inicializada')
+                .addFields(
+                    {
+                        name: '🎨 Personalizar sesión',
+                        value: `Puedes personalizar el nombre y emote del par de canales y rol de la sesión\n\`\`\`${p_pure(guild.id).raw}voz <Nombre>[ -e <Emote>]\`\`\``
+                    },
+                    
+                    {
+                        name: '🏷️ Nombre',
+                        value: `Puedes usar \`${p_pure(guild.id).raw}voz <Nombre>\` para cambiar el nombre`,
+                        inline: true,
+                    },
+                    {
+                        name: '🐴 Emote',
+                        value: 'Añade `--emote <Emote>` o `-e <Emote>` para cambiar el emote',
+                        inline: true,
+                    },
+                    {
+                        name: '📣 Rol Efímero',
+                        value: `Este rol menciona a todos en la sesión\n${sessionRole}`,
+                        inline: true,
+                    },
 
-                .addField('🎨 Personalizar sesión', `Puedes personalizar el nombre y emote del par de canales y rol de la sesión\n\`\`\`${p_pure(guild.id).raw}voz <Nombre>[ -e <Emote>]\`\`\``)
-
-                .addField('🏷️ Nombre', `Puedes usar \`${p_pure(guild.id).raw}voz <Nombre>\` para cambiar el nombre`, true)
-                .addField('🐴 Emote', 'Añade `--emote <Emote>` o `-e <Emote>` para cambiar el emote', true)
-                .addField('📣 Rol Efímero', `Este rol menciona a todos en la sesión\n${sessionRole}`, true)
-
-                .addField('🧹 Renombrar sesión', 'Debes esperar 20 minutos entre cada renombrado de la sesión', true)
-                .addField('⏱️ Nombre automático', 'Si no escribes un nombre de sesión en 2 minutos, se nombrará automáticamente', true);
+                    {
+                        name: '🧹 Renombrar sesión',
+                        value: 'Debes esperar 20 minutos entre cada renombrado de la sesión',
+                        inline: true,
+                    },
+                    {
+                        name: '⏱️ Nombre automático',
+                        value: 'Si no escribes un nombre de sesión en 2 minutos, se nombrará automáticamente',
+                        inline: true,
+                    },
+                );
 
             await channel.send({
                 content: `👋 ¡Buenas, ${member}!`,
