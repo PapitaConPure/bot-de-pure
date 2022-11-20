@@ -28,25 +28,19 @@ module.exports = {
     modifyPresence: async function(client, steps = 0) { //Cambio de estado constante; Créditos a Imagine Breaker#6299 y Sassafras
         //Actualización de actividad
         try {
-            // const status = presence.status[await getQueueItem({ queueId: 'presenceStatus', length: presence.status.length, sort: 'RANDOM' })];
-            // const stream = presence.stream[await getQueueItem({ queueId: 'presenceStream', length: presence.stream.length, sort: 'RANDOM' })];
-            const status = presence.statusSpecial[await getQueueItem({ queueId: 'presenceStatusSpecial', length: presence.statusSpecial.length, sort: 'NONE' })];
+            const status = presence.status[await getQueueItem({ queueId: 'presenceStatus', length: presence.status.length, sort: 'RANDOM' })];
+            const stream = presence.stream[await getQueueItem({ queueId: 'presenceStream', length: presence.stream.length, sort: 'RANDOM' })];
 
-            // client.user.setActivity({
-            //     name: status,
-            //     type: 'STREAMING',
-            //     url: `https://www.youtube.com/watch?v=${stream}`,
-            // });
             client.user.setActivity({
-                name: `"${status}"`,
+                name: status,
                 type: 'STREAMING',
-                url: 'https://www.youtube.com/watch?v=NnRwmjo7MtU',
+                url: `https://www.youtube.com/watch?v=${stream}`,
             });
             
             //Programar próxima actualización de actividad
-            // const stepTime = randRange(20, 35);
-            // setTimeout(module.exports.modifyPresence, 60e3 * stepTime, client, steps + 1);
-            // console.log(chalkOrange(`Cambio de presencia ${steps} realizado. Próximo ciclo en ${stepTime} minutos...`));
+            const stepTime = randRange(20, 35);
+            setTimeout(module.exports.modifyPresence, 60e3 * stepTime, client, steps + 1);
+            console.log(chalkOrange(`Cambio de presencia ${steps} realizado. Próximo ciclo en ${stepTime} minutos...`));
         } catch(err) {
             console.log(chalk.redBright.bold('Ocurrió un error al intentar realizar un cambio de presencia.'));
             console.error(err);
