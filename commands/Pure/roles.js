@@ -28,6 +28,7 @@ const gameRoles = [
 		{ id: '936361454121132162',  label: 'Pokémon', 			 emote: '🦀' },
 	],
 	[ //Sección 2
+		{ id: '1044399017498525706', label: 'Sven', 		 	 emote: '🪕' },
 		{ id: '1014494653262856262', label: 'SRB2Kart', 		 emote: '🏎️' },
 		{ id: '693886880667795577',  label: '100% OJ', 			 emote: '🍊' },
 		{ id: '936360704783577178',  label: 'Ajedrez', 			 emote: '♟️' },
