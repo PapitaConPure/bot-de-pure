@@ -18,7 +18,7 @@ const gameRoles = [
 	[ //Sección 0
 		{ id: '943412899689414726',  label: 'Minecraft', 		 emote: '🧊' },
 		{ id: '763945846705487884',  label: 'Terraria', 		 emote: '🌳' },
-		{ id: '936360704783577178',  label: 'Left 4 Dead', 	     emote: '🧟' },
+		{ id: '1027380479760023634', label: 'Left 4 Dead', 	     emote: '🧟' },
 		{ id: '936360594028757053',  label: 'League of Legends', emote: '👶' },
 		{ id: '936360389711626280',  label: 'Tetris', 			 emote: '🟨' },
 	],
