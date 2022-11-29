@@ -27,6 +27,7 @@ const gameRoles = [
 		{ id: '981040691981459476',  label: 'PAYDAY 2', 		 emote: '🗄️' },
 		{ id: '938949774462304256',  label: 'Duck Game', 		 emote: '🦆' },
 		{ id: '693886880667795577',  label: '100% OJ', 			 emote: '🍊' },
+		{ id: '1046980064815890562', label: 'Power Bomberman', 	 emote: '💣' },
 	],
 	[ //Sección 2
 		{ id: '936360704783577178',  label: 'Ajedrez', 			 emote: '♟️' },
