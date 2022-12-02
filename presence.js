@@ -14,7 +14,6 @@ const txtToArray = (path) => readFileSync(path, { encoding: 'utf-8' })
 const presence = {
     status: txtToArray('./localdata/presence/status.txt'),
     stream: txtToArray('./localdata/presence/stream.txt'),
-    statusSpecial: txtToArray('./localdata/presence/statusSpecial.txt'),
 };
 
 ///Iniciar actualización periódica de presencia al estar preparado
