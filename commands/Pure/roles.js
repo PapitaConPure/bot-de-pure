@@ -38,9 +38,10 @@ const gameRoles = [
 ];
 /**@type {RoleDataPool}*/
 const drinkRoles = [
-	{ id: '727951667513000007', label: 'Té',   emote: '🍵' },
-	{ id: '727951545509085204', label: 'Café', emote: '☕' },
-	{ id: '727951759263137912', label: 'Mate', emote: '🧉' },
+	{ id: '727951667513000007',  label: 'Té',          emote: '🍵' },
+	{ id: '727951545509085204',  label: 'Café',        emote: '☕' },
+	{ id: '727951759263137912',  label: 'Mate',        emote: '🧉' },
+	{ id: '1049551360300945488', label: 'Chocolatada', emote: '🥛' },
 ];
 /**@type {RoleDataPool}*/
 const faithRoles = [
