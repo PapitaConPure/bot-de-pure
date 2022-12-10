@@ -142,12 +142,35 @@ const sendPixivPostsAsWebhook = async (message) => {
         return;
     
     const newMessage = await formatPixivPostsMessage(pixivUrls.map(pixivUrl => pixivUrl[0]));
-    newMessage.content = content.replace(pixivRegex, '<:pixiv:919403803126661120> [$6]($&)');
+    message.content = content.replace(pixivRegex, '<:pixiv:919403803126661120> [$6]($&)');
+    message.files ??= [];
+    message.files.push(...newMessage.files);
+    message.embeds ??= [];
+    console.log('Antes', message.embeds);
+    message.embeds = message.embeds
+        .filter(embed => !(embed.type === 'link' && embed.url.includes('pixiv.net')))
+        .map(embed => {
+            if(embed.type === 'rich')
+                return embed;
+            
+            if(embed.thumbnail && embed.type === 'image' && !embed.image) {
+                embed.image = embed.thumbnail;
+                embed.thumbnail = null;
+            }
+            if(embed.type === 'video') {
+                message.files.push(embed.video.url);
+                return null;
+            }
+                
+            return embed;
+        }).filter(embed => embed);
+    message.embeds.push(...newMessage.embeds);
+    console.log('Despues', message.embeds, message.files);
 
     try {
         const agent = await (new DiscordAgent().setup(channel));
         agent.setUser(author);
-        agent.sendAsUser(newMessage);
+        agent.sendAsUser(message);
 
         if(message.deletable)
             message.delete().catch(console.error);
