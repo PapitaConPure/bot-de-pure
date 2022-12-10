@@ -19,6 +19,7 @@ const command = new CommandManager('exhibir', flags)
 	)
 	.setExecution(async (request) => {
 		const pinnedMessages = await request.channel.messages.fetchPinned();
+		const user = request.author ?? request.user;
 
 		const embed = new MessageEmbed()
 			.setTitle('Exhibir pins')
@@ -30,23 +31,27 @@ const command = new CommandManager('exhibir', flags)
 			embeds: [embed],
 			components: [new MessageActionRow().addComponents(
 				new MessageButton()
-					.setCustomId(`exhibir_flushPins`)
+					.setCustomId(`exhibir_flushPins_${user.id}`)
 					.setLabel('Exhibir')
 					.setStyle('DANGER'),
 				new MessageButton()
-					.setCustomId(`exhibir_cancelFlush`)
+					.setCustomId(`exhibir_cancelFlush_${user.id}`)
 					.setLabel('Cancelar')
 					.setStyle('SECONDARY'),
 			)],
 			ephemeral: true,
 		});
 	})
-	.setButtonResponse(async function flushPins(interaction) {
-		interaction.deferReply();
+	.setButtonResponse(async function flushPins(interaction, userId) {
+		if(interaction.user.id !== userId)
+			return interaction.reply({ content: ':x: No permitido', ephemeral: true });
+		
+		interaction.deferUpdate();
 		const { channel } = interaction;
 		const [ pinnedMessages, backupChannel ] = await Promise.all([
 			channel.messages.fetchPinned(),
-			interaction.guild.channels.fetch('672726192993992726'),
+			// interaction.guild.channels.fetch('672726192993992726'), //Hourai Doll
+			interaction.guild.channels.fetch('870347940181471242'), //Puré I
 		]);
 
 		if(!pinnedMessages?.size)
@@ -63,21 +68,17 @@ const command = new CommandManager('exhibir', flags)
 			message.embeds ??= [];
 			message.files ??= [];
 			formattedMessage.embeds = message.embeds.map(embed => {
-				if(embed.type === 'rich')
-					return embed;
+				if(embed.type === 'video')
+					return null;
 				
-				if(embed.thumbnail && embed.type === 'image' && !embed.image) {
+				if(embed.type === 'image' && embed.thumbnail && !embed.image) {
 					embed.image = embed.thumbnail;
 					embed.thumbnail = null;
 				}
-				if(embed.type === 'video') {
-					message.files.push(embed.video.url);
-					return null;
-				}
-					
+				
 				return embed;
 			}).filter(embed => embed);
-			console.log(formattedMessage.embeds)
+			
 			if(message.embeds.length < 10) {
 				formattedMessage.embeds.push(
 					new MessageEmbed()
@@ -106,12 +107,20 @@ const command = new CommandManager('exhibir', flags)
 		const embed = new MessageEmbed()
 			.setTitle('Traslado de pins ejecutado')
 			.addFields({ name: 'Se completó la operación', value: `Se liberaron **${flushed}** espacios para pin` });
-		return interaction.editReply({ embeds: [embed] });
+
+		return interaction.editReply({
+			embeds: [embed],
+			components: [],
+		});
 	})
-	.setButtonResponse(async function cancelFlush(interaction) {
+	.setButtonResponse(async function cancelFlush(interaction, userId) {
+		if(interaction.user.id !== userId)
+			return interaction.reply({ content: ':x: No permitido', ephemeral: true });
+		
 		const embed = new MessageEmbed()
 			.setTitle('Traslado cancelado')
 			.addFields({ name: 'Se canceló la operación', value: 'Todos los mensajes pinneados siguen ahí' });
+		
 		return interaction.update({ embeds: [embed], components: [] });
 	});
 
