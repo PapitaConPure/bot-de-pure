@@ -46,8 +46,7 @@ const command = new CommandManager('exhibir', flags)
 		const { channel } = interaction;
 		const [ pinnedMessages, backupChannel ] = await Promise.all([
 			channel.messages.fetchPinned(),
-			// interaction.guild.channels.fetch('672726192993992726'),
-			interaction.guild.channels.fetch('870347940181471242'),
+			interaction.guild.channels.fetch('672726192993992726'),
 		]);
 
 		if(!pinnedMessages?.size)
