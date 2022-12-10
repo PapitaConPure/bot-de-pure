@@ -49,9 +49,7 @@ class DiscordAgent {
      * @param {GuildMember} member
      */
     setMember(member) {
-        console.log(member);
         this.user = member;
-        console.log(this.user);
         return this;
     };
 
@@ -69,7 +67,8 @@ class DiscordAgent {
         const { attachments } = messageOptions;
         if(attachments && !Array.isArray(attachments)) {
             messageOptions.attachments = [];
-            messageOptions.files = [ ...attachments.values() ];
+            messageOptions.files ??= [];
+            messageOptions.files.push(...[ ...attachments.values() ]);
         }
 
         try {
