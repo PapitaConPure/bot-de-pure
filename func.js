@@ -399,8 +399,7 @@ module.exports = {
     /**@param {import('discord.js').TextChannel} channel*/
     channelIsBlocked: function(channel) {
         const member = channel?.guild?.me;
-        if(!member) return true;
-        if(!member.permissionsIn(channel).any([ 'SEND_MESSAGES', 'SEND_MESSAGES_IN_THREADS' ], true)) return true;
+        if(!member?.permissionsIn(channel)?.any([ 'SEND_MESSAGES', 'SEND_MESSAGES_IN_THREADS' ], true)) return true;
         if(global.maintenance.length === 0) return false;
 
         return (global.maintenance.startsWith('!'))
