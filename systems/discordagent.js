@@ -1,4 +1,4 @@
-const { TextChannel, User, Webhook } = require('discord.js');
+const { TextChannel, User, Webhook, GuildMember } = require('discord.js');
 
 /**Clase para interactuar con Webhooks de Discord de forma más sencilla*/
 class DiscordAgent {
@@ -6,7 +6,7 @@ class DiscordAgent {
     webhook;
     /**@type {String}*/
     threadId;
-    /**@type {User}*/
+    /**@type {GuildMember | User}*/
     user;
 
     constructor() {
@@ -45,12 +45,32 @@ class DiscordAgent {
     };
 
     /**
-     * Envía un mensaje como el usuario especificado. Recuerda usar `setUser` antes.
+     * Establece el miembro a replicar por el Agente al enviar mensajes
+     * @param {GuildMember} member
+     */
+    setMember(member) {
+        console.log(member);
+        this.user = member;
+        console.log(this.user);
+        return this;
+    };
+
+    /**
+     * Envía un mensaje como el usuario especificado. Recuerda usar `setUser` o `setMember` antes.
      * @param {import('discord.js').WebhookMessageOptions } messageOptions Opciones de envío. No se puede modificar el usuario ni el canal
      */
     async sendAsUser(messageOptions) {
         if(!this.user)
             throw new ReferenceError('No se ha definido un usuario');
+
+        if(!messageOptions.content)
+            messageOptions.content = undefined;
+        
+        const { attachments } = messageOptions;
+        if(attachments && !Array.isArray(attachments)) {
+            messageOptions.attachments = [];
+            messageOptions.files = [ ...attachments.values() ];
+        }
 
         try {
             // console.log(`Usuario asociado: ${this.user}`)
@@ -58,9 +78,10 @@ class DiscordAgent {
             return await this.webhook.send({
                 ...messageOptions,
                 threadId: this.threadId,
-                username: this.user.username,
-                avatarURL: this.user.avatarURL({ dynamic: true }),
-            })
+                username: this.user.displayName ?? this.user.username,
+                avatarURL: this.user.displayAvatarURL({ dynamic: true }),
+                nonce: undefined,
+            });
         } catch(e) {
             return console.error(e);
         }
