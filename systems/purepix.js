@@ -146,9 +146,9 @@ const sendPixivPostsAsWebhook = async (message) => {
     message.files ??= [];
     message.files.push(...newMessage.files);
     message.embeds ??= [];
-    console.log('Antes', message.embeds);
+    
     message.embeds = message.embeds
-        .filter(embed => !(embed.type === 'link' && embed.url.includes('pixiv.net')))
+        .filter(embed => !(embed.type !== 'rich' && embed.url.includes('pixiv.net')))
         .map(embed => {
             if(embed.type === 'rich')
                 return embed;
@@ -165,7 +165,6 @@ const sendPixivPostsAsWebhook = async (message) => {
             return embed;
         }).filter(embed => embed);
     message.embeds.push(...newMessage.embeds);
-    console.log('Despues', message.embeds, message.files);
 
     try {
         const agent = await (new DiscordAgent().setup(channel));
