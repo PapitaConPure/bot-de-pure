@@ -1,32 +1,23 @@
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, Collection } = require('discord.js');
 const { paginateRaw } = require('../../func');
-const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const options = new CommandOptionsManager()
     .addParam('tiempo', 'NUMBER', 'para establecer la duración del evento, en segundos', { optional: true });
-
-module.exports = {
-	name: 'uwus',
-    desc: 'Inicia un __evento UwU__, que puede durar el tiempo que se desee hasta 2 horas (7200s).\n' +
-        '*Evento UwU:* la persona que más __mensajes que contienen "uwu"s__ envíe para cuando el tiempo acabe, ganará. Ganar no tiene ninún beneficio pero ganar no es perder y perder es feo (umu).\n' +
+const flags = new CommandMetaFlagsManager().add(
+    'MEME',
+    'GAME',
+    'CHAOS',
+);
+const command = new CommandManager('uwus', flags)
+    .setBriefDescription('Inicia un evento UwU en el canal')
+    .setLongDescription(
+        'Inicia un __evento UwU__, que puede durar el tiempo que se desee hasta 2 horas (7200s).',
+        '*Evento UwU:* la persona que más __mensajes que contienen "uwu"s__ envíe para cuando el tiempo acabe, ganará. Ganar no tiene ninún beneficio pero ganar no es perder y perder es feo (umu).',
         'Al finalizar el evento, se muestran los resultados y se borran todos los mensajes con "uwu" enviados durante el mismo.',
-    flags: new CommandMetaFlagsManager().add(
-        'MEME',
-        'GAME',
-        'CHAOS',
-    ),
-    options,
-    callx: '<tiempo?>',
-    experimental: true,
-	
-    /**
-     * 
-     * @param {import('../Commons/typings').CommandRequest} request 
-     * @param {import('../Commons/typings').CommandOptions} args 
-     * @param {Boolean} isSlash 
-     * @returns 
-     */
-	async execute(request, args, isSlash = false) {
+    )
+    .setOptions(options)
+    .setExecution(async (request, args) => {
         const secs = isNaN(args[0]) ? 30 : Math.max(0.1, Math.min(args[0], 3600 * 2));
         
         let uwuUsers = {};
@@ -55,27 +46,50 @@ module.exports = {
             }
 
             const collectedSlices = paginateRaw(collected, 100);
-            console.log(collectedSlices);
+            // console.log(collectedSlices);
             
             const embed = new MessageEmbed()
                 .setColor('ffbbbb')
                 .setTitle('Evento UWU finalizado')
-                .addField('Estadísticas', `**UWUs totales:** ${collected.size}\n**UWUs por segundo:** ${collected.size / secs}`, true)
-                .addField('Persona que envió...', `**Más UWUs:** ${bestId ? `<@${bestId}>` : 'nadie umu'}\n**Último UWU:** ${lastUwu ?? 'nadie umu'}`, true);
+                .addFields(
+                    {
+                        name: 'Estadísticas',
+                        value: `**UWUs totales:** ${collected.size}\n**UWUs por segundo:** ${collected.size / secs}`,
+                        inline: true,
+                    },
+                    {
+                        name: 'Persona que envió...',
+                        value: `**Más UWUs:** ${bestId ? `<@${bestId}>` : 'nadie umu'}\n**Último UWU:** ${lastUwu ?? 'nadie umu'}`,
+                        inline: true,
+                    },
+                );
             
             return Promise.all([
-                ...collectedSlices.map(slice => request.channel.bulkDelete(slice)),
+                ...collectedSlices.map(slice => {
+                    const sliceCollection = new Collection(slice);
+                    // console.log(sliceCollection);
+                    return request.channel.bulkDelete(sliceCollection);
+                }),
                 request.reply({ embeds: [embed] }),
-            ]);
+            ]).catch(console.error);
         });
 
         const embed = new MessageEmbed()
             .setColor('ffbbbb')
             .setTitle('Evento UWU')
-            .addField('UWU', 'Envía **uwu** para sumar un **uwu**.')
-            .addField('Duración del evento', `**${secs}** segundos.`)
+            .addFields(
+                {
+                    name: 'UWU',
+                    value: 'Envía **uwu** para sumar un **uwu**.',
+                },
+                {
+                    name: 'Duración del evento',
+                    value: `**${secs}** segundos.`,
+                },
+            )
             .setAuthor({ name: `Evento iniciado por ${request.author.username}`, iconURL: request.author.avatarURL() });
         
         return request.reply({ embeds: [embed] });
-    },
-};
+    });
+
+module.exports = command;
