@@ -30,7 +30,11 @@ const instrumentsPull = (rarity) => {
 	const influence = 0.75; //Influencia de la curva
 	const midpoint = 3; //Punto de rareza en el que la curva forma una línea recta
 	const curve = (x) => Math.pow(x, Math.pow(2, (midpoint - rarity) * influence));
-	const total = rr(1.5 + rarity * 0.5, 2 + rarity * 1.5, true);
+	const totalLowFloor = 1.5;
+	const totalHighFloor = 2;
+	const totalLowWeight = 0.5;
+	const totalHighWeight = 1.5;
+	const total = rr(totalLowFloor + rarity * totalLowWeight, totalHighFloor + rarity * totalHighWeight, true);
 	const instr = Array(total).fill``.map(() => instruments[Math.floor(poolSize * curve(Math.random()))]);
 	//Probabilidad de drums
 	const r = Math.random();
@@ -45,13 +49,13 @@ const flags = new CommandMetaFlagsManager().add(
 );
 const command = new CommandManager('karl', flags)
 	.setAliases('karlos', 'zupija')
-	.setLongDescription('Comando de gacha musical de Karl Zuñiga')
+	.setDescription('Comando de gacha musical de Karl Zuñiga')
 	.setExecution(async request => {
-		const kr = karlRarity();
+		const rarity = karlRarity();
 		return request.reply({
 			content:
-				`**Buenas, soy Karl (${kr.join('')}). Combina estas weás, créeme soy licenciado** <:reibu:686220828773318663> :thumbsup:\n` +
-				`<:arrowr:681963688411922460> ${instrumentsPull(kr.length).join(' ')} <:arrowl:681963688361590897>`
+				`**Buenas, soy Karl (${rarity.join('')}). Combina estas weás, créeme soy licenciado** <:reibu:686220828773318663> :thumbsup:\n` +
+				`<:arrowr:681963688411922460> ${instrumentsPull(rarity.length).join(' ')} <:arrowl:681963688361590897>`
 		});
 	});
 

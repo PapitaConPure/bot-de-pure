@@ -6,100 +6,111 @@ const { p_pure } = require('../../localdata/customization/prefixes');
 const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 const { auditError } = require('../../systems/auditor');
 const { colorsRow } = require('../../localdata/houraiProps');
+const { subdivideArray } = require('../../func');
 
 /**
  * @typedef {{id: String, label: String, emote: String}} RoleData Datos de un rol para el propósito del comando
  * @typedef {Array<RoleData> | Array<Array<RoleData>>} RoleDataPool Conjunto de datos de rol o secciones de datos de rol
  * @typedef {'GAMES' | 'DRINKS' | 'FAITH'} CategoryIndex índice de categoría de autogestión de roles
- * @typedef {{ functionName: String, rolePool: RoleDataPool, exclusive: Boolean, paginated: Boolean }} CategoryContent Contenido de categoría de autogestión de roles
- * @type {RoleDataPool}
+ * @typedef {{ functionName: String, rolePool: RoleDataPool, exclusive: Boolean }} CategoryContent Contenido de categoría de autogestión de roles
  */
-const gameRoles = [
-	[ //Sección 0
-		{ id: '943412899689414726',  label: 'Minecraft', 		 emote: '🧊' },
-		{ id: '763945846705487884',  label: 'Terraria', 		 emote: '🌳' },
-		{ id: '1046526864560230440', label: 'Left 4 Dead', 	     emote: '🧟' },
-		{ id: '936360594028757053',  label: 'League of Legends', emote: '👶' },
-		{ id: '936360389711626280',  label: 'Tetris', 			 emote: '🟨' },
-	],
-	[ //Sección 1
-		{ id: '943412943159189537',  label: 'Risk of Rain 2', 	 emote: '🌧️' },
-		{ id: '981040691981459476',  label: 'PAYDAY 2', 		 emote: '🗄️' },
-		{ id: '938949774462304256',  label: 'Duck Game', 		 emote: '🦆' },
-		{ id: '693886880667795577',  label: '100% OJ', 			 emote: '🍊' },
-		{ id: '1046980064815890562', label: 'Power Bomberman', 	 emote: '💣' },
-	],
-	[ //Sección 2
-		{ id: '936360704783577178',  label: 'Ajedrez', 			 emote: '♟️' },
-		{ id: '1044399017498525706', label: 'Sven', 		 	 emote: '🪕' },
-		{ id: '936361454121132162',  label: 'Pokémon', 			 emote: '🦀' },
-		{ id: '1014494653262856262', label: 'SRB2Kart', 		 emote: '🏎️' },
-	],
-];
-/**@type {RoleDataPool}*/
-const drinkRoles = [
-	{ id: '727951667513000007',  label: 'Té',          emote: '🍵' },
-	{ id: '727951545509085204',  label: 'Café',        emote: '☕' },
-	{ id: '727951759263137912',  label: 'Mate',        emote: '🧉' },
-	{ id: '1049551360300945488', label: 'Chocolatada', emote: '🥛' },
-];
-/**@type {RoleDataPool}*/
-const faithRoles = [
-	{ id: '695744222850056212', label: 'Blessed', emote: '😇' },
-	{ id: '695743527383990422', label: 'Blursed', emote: '🙃' },
-	{ id: '694358587451113564', label: 'Cursed',  emote: '💀' },
-];
-/**@type {Map<CategoryIndex, CategoryContent>}*/
-const categories = new Map()
-	.set('GAMES',  { functionName: 'selectGame', 	 rolePool: gameRoles,  exclusive: false,  })
-	.set('DRINKS', { functionName: 'selectDrink',    rolePool: drinkRoles, exclusive: false,  })
-	.set('FAITH',  { functionName: 'selectReligion', rolePool: faithRoles, exclusive: true,   });
-categories.forEach(category => category.paginated = Array.isArray(category.rolePool[0]));
+// const gameRoles = [
+// 	{ id: '943412899689414726',  label: 'Minecraft', 		 emote: '🧊' },
+// 	{ id: '763945846705487884',  label: 'Terraria', 		 emote: '🌳' },
+// 	{ id: '1046526864560230440', label: 'Left 4 Dead', 	     emote: '🧟' },
+// 	{ id: '936360594028757053',  label: 'League of Legends', emote: '👶' },
+// 	{ id: '936360389711626280',  label: 'Tetris', 			 emote: '🟨' },
+// 	{ id: '943412943159189537',  label: 'Risk of Rain 2', 	 emote: '🌧️' },
+// 	{ id: '981040691981459476',  label: 'PAYDAY 2', 		 emote: '🗄️' },
+// 	{ id: '938949774462304256',  label: 'Duck Game', 		 emote: '🦆' },
+// 	{ id: '693886880667795577',  label: '100% OJ', 			 emote: '🍊' },
+// 	{ id: '1046980064815890562', label: 'Power Bomberman', 	 emote: '💣' },
+// 	{ id: '936360704783577178',  label: 'Ajedrez', 			 emote: '♟️' },
+// 	{ id: '1044399017498525706', label: 'Sven', 		 	 emote: '🪕' },
+// 	{ id: '936361454121132162',  label: 'Pokémon', 			 emote: '🦀' },
+// 	{ id: '1014494653262856262', label: 'SRB2Kart', 		 emote: '🏎️' },
+// ];
+// /**@type {RoleDataPool}*/
+// const drinkRoles = [
+// 	{ id: '727951667513000007',  label: 'Té',          emote: '🍵' },
+// 	{ id: '727951545509085204',  label: 'Café',        emote: '☕' },
+// 	{ id: '727951759263137912',  label: 'Mate',        emote: '🧉' },
+// 	{ id: '1049551360300945488', label: 'Chocolatada', emote: '🥛' },
+// ];
+// /**@type {RoleDataPool}*/
+// const faithRoles = [
+// 	{ id: '695744222850056212', label: 'Blessed', emote: '😇' },
+// 	{ id: '695743527383990422', label: 'Blursed', emote: '🙃' },
+// 	{ id: '694358587451113564', label: 'Cursed',  emote: '💀' },
+// ];
+
+// /**
+//  * @type {{GAMES: CategoryContent, DRINKS: CategoryContent, FAITH: CategoryContent}}
+//  */
+// const categories = {
+// 	GAMES:  { functionName: 'selectGame',     rolePool: gameRoles,  exclusive: false },
+// 	DRINKS: { functionName: 'selectDrink',    rolePool: drinkRoles, exclusive: false },
+// 	FAITH:  { functionName: 'selectReligion', rolePool: faithRoles, exclusive: true  },
+// };
+// for(const [i, category] of Object.entries(categories)) {
+// 	categories[i].exlusive ??= false;
+// 	categories[i].rolePool = subdivideArray(category.rolePool, 5);
+// 	console.log(categories[i].rolePool);
+// }
 
 /**
  * @param {import('discord.js').GuildMember} member 
  * @param {CategoryIndex} category 
  * @param {Number?} section
  */
-const getAutoRoleRows = (member, category, section = null) => {
-	const rolePool = categories.get(category).rolePool
-	const pageRoles = rolePool[section] ?? rolePool;
-	return [
-		new MessageActionRow().addComponents(pageRoles.map(role => {
-			const button = new MessageButton()
-				.setEmoji(role.emote)
-				.setLabel(role.label);
+const getAutoRoleRows = (member, categories, category, section = null, removeAllLabel = 'Quitarse todos de página') => {
+	if(!section || isNaN(section))
+		section = 0;
+		
+	const rolePool = subdivideArray(categories[category].rolePool, 5);
+	const pageRoles = rolePool[section];
+	const rows = [];
+	if(pageRoles.length)
+		rows.push(
+			new MessageActionRow().addComponents(pageRoles.map(role => {
+				const button = new MessageButton()
+					.setEmoji(role.emote)
+					.setLabel(role.label);
 
-			if(member.roles.cache.has(role.id))
+				if(member.roles.cache.has(role.id))
+					return button
+						.setCustomId(`roles_removeRole_${role.id}`)
+						.setStyle('PRIMARY');
 				return button
-					.setCustomId(`roles_removeRole_${role.id}`)
-					.setStyle('PRIMARY');
-			return button
-				.setCustomId(`roles_addRole_${role.id}`)
-				.setStyle('SECONDARY');
-		})),
+					.setCustomId(`roles_addRole_${role.id}`)
+					.setStyle('SECONDARY');
+			})),
+		);
+	rows.push(
 		new MessageActionRow().addComponents([
 			new MessageButton()
 				.setCustomId(`roles_removeAll_${category}`)
 				.setEmoji('704612795072774164')
-				.setLabel('Quitarse todos')
+				.setLabel(removeAllLabel)
 				.setStyle('DANGER'),
-		]),
-	];
+		])
+	);
+	
+	return rows;
 };
 /**
  * @param {CategoryIndex} category 
  * @param {Number?} section 
  * @returns {Array<MessageActionRow>}
  */
-const getPaginationControls = (category, section = 0) => {
-	category = categories.get(category);
-	if(!category.paginated) return [];
+const getPaginationControls = (categories, category, section = 0) => {
+	category = categories[category];
+	const rolePool = subdivideArray(category.rolePool, 5);
+	if(rolePool.length < 2) return [];
 
 	const functionName = category.functionName;
-	const roleDataPool = category.rolePool;
-	const nextPage = section > 0 ? (section - 1) : (roleDataPool.length - 1)
-	const prevPage = section < (roleDataPool.length - 1) ? (section + 1) : 0;
+	const nextPage = section > 0 ? (section - 1) : (rolePool.length - 1)
+	const prevPage = section < (rolePool.length - 1) ? (section + 1) : 0;
 	return [
 		new MessageActionRow().addComponents([
 			new MessageButton()
@@ -113,6 +124,25 @@ const getPaginationControls = (category, section = 0) => {
 		]),
 	];
 };
+/**
+ * @param {import('discord.js').GuildMember} member 
+ * @param {CategoryIndex} category 
+ * @param {Number?} section
+ */
+const getEditButtonRow = (member, category) => {
+	if(!member.permissions.has('MANAGE_ROLES'))
+		return [];
+
+	return [
+		new MessageActionRow().addComponents([
+			new MessageButton()
+				.setCustomId(`roles_poolEdit_${category}`)
+				.setLabel('Editar categoría')
+				.setEmoji('819772377440583691')
+				.setStyle('PRIMARY'),
+		]),
+	];
+}
 
 const flags = new CommandMetaFlagsManager().add('HOURAI');
 
@@ -245,6 +275,7 @@ const command = new CommandManager('roles', flags)
 	})
 	.setInteractionResponse(async function selectGame(interaction, section, edit = false) {
 		section = parseInt(section);
+		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
 		const messageActions = {
 			embeds: [
 				new MessageEmbed()
@@ -252,8 +283,9 @@ const command = new CommandManager('roles', flags)
 					.addFields({ name: 'Roles de Juego', value: 'Roles mencionables para llamar gente a jugar algunos juegos. Si piensas ser de los que llaman a jugar, intenta no abusar las menciones' }),
 			],
 			components: [
-				...getAutoRoleRows(interaction.member, 'GAMES', section),
-				...getPaginationControls('GAMES', section),
+				...getAutoRoleRows(interaction.member, houraiDB.mentionRoles, 'GAMES', section),
+				...getPaginationControls(houraiDB.mentionRoles, 'GAMES', section),
+				...getEditButtonRow(interaction.member, 'GAMES'),
 			],
 			ephemeral: true,
 		};
@@ -263,6 +295,7 @@ const command = new CommandManager('roles', flags)
 	})
 	.setInteractionResponse(async function selectDrink(interaction, section, edit = false) {
 		section = parseInt(section);
+		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
 		const messageActions = {
 			embeds: [
 				new MessageEmbed()
@@ -270,17 +303,20 @@ const command = new CommandManager('roles', flags)
 					.addFields({ name: 'Roles de Bebidas', value: 'Roles decorativos para dar a conocer qué bebidas calientes disfrutas' }),
 			],
 			components: [
-				...getAutoRoleRows(interaction.member, 'DRINKS', section),
-				...getPaginationControls('DRINKS', section),
+				...getAutoRoleRows(interaction.member, houraiDB.mentionRoles, 'DRINKS', section),
+				...getPaginationControls(houraiDB.mentionRoles, 'DRINKS', section),
+				...getEditButtonRow(interaction.member, 'DRINKS'),
 			],
 			ephemeral: true,
 		};
+		console.log(messageActions.components.map(c => c.components));
 
 		if(edit) return interaction.update(messageActions);
 		return interaction.reply(messageActions);
 	})
-	.setInteractionResponse(async function selectReligion(interaction) {
-		const { member } = interaction;
+	.setInteractionResponse(async function selectReligion(interaction, section, edit = false) {
+		section = parseInt(section);
+		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
 
 		return interaction.reply({
 			embeds: [
@@ -289,20 +325,9 @@ const command = new CommandManager('roles', flags)
 					.addFields({ name: 'Roles de Religión', value: 'Roles para describir tu actitud, ideas y forma de ser. No lo tomes muy en serio... ¿o tal vez sí?' })
 			],
 			components: [
-				new MessageActionRow().addComponents(faithRoles.map(faithRole =>
-					new MessageButton()
-						.setCustomId(`roles_addRole_${faithRole.id}_FAITH`)
-						.setEmoji(faithRole.emote)
-						.setLabel(faithRole.label)
-						.setStyle(member.roles.cache.has(faithRole.id) ? 'PRIMARY' : 'SECONDARY'),
-				)),
-				new MessageActionRow().addComponents([
-					new MessageButton()
-						.setCustomId(`roles_removeAll_FAITH`)
-						.setEmoji('704612795072774164')
-						.setLabel('Eliminar Religión')
-						.setStyle('DANGER'),
-				]),
+				...getAutoRoleRows(interaction.member, houraiDB.mentionRoles, 'FAITH', section, 'Eliminar Religión'),
+				...getPaginationControls(houraiDB.mentionRoles, 'FAITH', section),
+				...getEditButtonRow(interaction.member, 'FAITH'),
 			],
 			ephemeral: true,
 		});
@@ -351,9 +376,10 @@ const command = new CommandManager('roles', flags)
 			return component;
 		});
 
+		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
 		let rolesToRemove = [];
 		if(category)
-			rolesToRemove = categories.get(category).rolePool
+			rolesToRemove = houraiDB.mentionRoles[category].rolePool
 				.filter(role => role.id !== roleId && member.roles.cache.has(role.id))
 				.map(role => member.roles.remove(role.id));
 		
@@ -392,8 +418,8 @@ const command = new CommandManager('roles', flags)
 	})
 	.setButtonResponse(async function removeAll(interaction, category) {
 		const { member } = interaction;
-		const rolePool = categories.get(category).rolePool
-			.flat()
+		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
+		const rolePool = houraiDB.mentionRoles[category].rolePool
 			.filter(roleData => member.roles.cache.has(roleData.id));
 
 		if(!rolePool.length)

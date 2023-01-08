@@ -130,21 +130,17 @@ const command = new CommandManager('tubérculo', flags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash = false) => {
-		//Determinar operación
-		const helpString = `Usa \`${p_pure(request.guildId).raw}ayuda ${module.exports.name}\` para más información`;
+		const helpString = `Usa \`${p_pure(request.guildId).raw}ayuda tubérculo\` para más información`;
 		const operation = options.fetchFlag(args, 'crear', { callback: 'crear' })
 			|| options.fetchFlag(args, 'ver', { callback: 'ver' })
 			|| options.fetchFlag(args, 'borrar', { callback: 'borrar' });
-		const ps = options.fetchFlag(args, 'script');
-		console.log(ps);
+		const isPureScript = options.fetchFlag(args, 'script');
 
-		//Preparar ejecución
-		const id = isSlash ? args.getString('id') : args.shift();
-		const gid = request.guild.id;
-		const guildquery = { guildId: gid };
+		/**@type {String?}*/
+		const tuberId = isSlash ? args.getString('id') : args.shift();
 		const members = request.guild.members.cache;
 
-		if(!id) {
+		if(!tuberId) {
 			if(operation)
 				return request.reply({ content: `⚠️ Debes ingresar una TuberID válida\n${helpString}` });
 				
@@ -171,21 +167,23 @@ const command = new CommandManager('tubérculo', flags)
 		}
 
 		//Realizar operación sobre ID de Tubérculo
+		const gid = request.guild.id;
+		const guildquery = { guildId: gid };
 		const gcfg = (await GuildConfig.findOne(guildquery)) || new GuildConfig(guildquery);
 		gcfg.tubers = gcfg.tubers || {};
 		switch(operation) {
 			case 'crear':
-				if(id.length > 24)
+				if(tuberId.length > 24)
 					return request.reply({ content: '⚠️ Las TuberID solo pueden medir hasta 24 caracteres' });
-				if(gcfg.tubers[id] && isNotModerator(request.member) && gcfg.tubers[id].author !== (request.author ?? request.user).id)
-					return request.reply({ content: `⛔ Acción denegada. Esta TuberID **${id}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[id].author) ?? request.guild.me).user.username}*` });
+				if(gcfg.tubers[tuberId] && isNotModerator(request.member) && gcfg.tubers[tuberId].author !== (request.author ?? request.user).id)
+					return request.reply({ content: `⛔ Acción denegada. Esta TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.me).user.username}*` });
 				
 				const tuberContent = { author: (request.user ?? request.author).id };
 				const mcontent = (isSlash ? args.getString('mensaje') : args.join(' ')).split(/[\n ]*#FIN#[\n ]*/).join('\n');
 				const mfiles = isSlash ? options.fetchParamPoly(args, 'archivos', args.getString, null).filter(att => att) : (request.attachments || []).map(att => att.proxyURL);
 
 				//Incluir Tubérculo; crear colección de Tubérculos si es necesario
-				if(ps) {
+				if(isPureScript) {
 					if(!mcontent)
 						return request.reply({ content: `⚠️ Este Tubérculo requiere ingresar PuréScript\n${helpString}` });
 					tuberContent.script = mcontent.split(/ *;+ */).map(line => line.split(/ +/).filter(word => !word.match(/^```[A-Za-z0-9]*/))).filter(line => line.length);
@@ -196,15 +194,15 @@ const command = new CommandManager('tubérculo', flags)
 					if(mfiles.length) tuberContent.files = mfiles;
 				}
 
-				gcfg.tubers[id] = tuberContent;
+				gcfg.tubers[tuberId] = tuberContent;
 				
 				try {
-					console.log('Ejecutando PuréScript:', gcfg.tubers[id]);
-					await executeTuber(request, gcfg.tubers[id], { isSlash });
-					console.log('PuréScript ejecutado:', gcfg.tubers[id]);
-					if(gcfg.tubers[id].script) {
-						gcfg.tubers[id].script = gcfg.tubers[id].script.filter(expr => expr && expr.some(w => w));
-						console.log('Script guardado:', gcfg.tubers[id].script);
+					console.log('Ejecutando PuréScript:', gcfg.tubers[tuberId]);
+					await executeTuber(request, gcfg.tubers[tuberId], { isSlash });
+					console.log('PuréScript ejecutado:', gcfg.tubers[tuberId]);
+					if(gcfg.tubers[tuberId].script) {
+						gcfg.tubers[tuberId].script = gcfg.tubers[tuberId].script.filter(expr => expr && expr.some(w => w));
+						console.log('Script guardado:', gcfg.tubers[tuberId].script);
 					}
 					gcfg.markModified('tubers');
 				} catch(error) {
@@ -215,9 +213,9 @@ const command = new CommandManager('tubérculo', flags)
 				break;
 
 			case 'ver':
-				const item = gcfg.tubers[id];
+				const item = gcfg.tubers[tuberId];
 				if(!item)
-					return request.reply({ content: `⚠️ El Tubérculo **${id}** no existe` });
+					return request.reply({ content: `⚠️ El Tubérculo **${tuberId}** no existe` });
 
 				let files = [];
 				const embed = new MessageEmbed()
@@ -226,14 +224,14 @@ const command = new CommandManager('tubérculo', flags)
 				.addFields({
 					name: 'Visor de Tubérculos',
 					value: [
-						`**TuberID** ${id}`,
+						`**TuberID** ${tuberId}`,
 						`**Autor** ${(request.guild.members.cache.get(item.author) ?? request.guild.me).user.username}`,
 						`**Descripción** ${item.desc ?? '*Este Tubérculo no tiene descripción*'}`,
 					].join('\n')
 				});
 				
 				if(item.script) {
-					embed.addField('Entradas', `\`[${(item.inputs ?? []).map(i => i.identifier).join(', ')}]\``);
+					embed.addFields({ name: 'Entradas', value: `\`[${(item.inputs ?? []).map(i => i.identifier).join(', ')}]\`` });
 					const visualPS = item.script.map(expr => expr.join(' ')).join(';\n');
 					if(visualPS.length >= 1020)
 						files = [new MessageAttachment(Buffer.from(visualPS, 'utf-8'), 'PuréScript.txt')];
@@ -261,25 +259,25 @@ const command = new CommandManager('tubérculo', flags)
 				});
 			
 			case 'borrar':
-				if(!gcfg.tubers[id])
-					return request.reply({ content: `⚠️ El Tubérculo **${id}** no existe` });
-				if(isNotModerator(request.member) && gcfg.tubers[id].author !== (request.author ?? request.user).id)
-					return request.reply({ content: `⛔ Acción denegada. Esta TuberID **${id}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[id].author) ?? request.guild.me).user.username}*` });
+				if(!gcfg.tubers[tuberId])
+					return request.reply({ content: `⚠️ El Tubérculo **${tuberId}** no existe` });
+				if(isNotModerator(request.member) && gcfg.tubers[tuberId].author !== (request.author ?? request.user).id)
+					return request.reply({ content: `⛔ Acción denegada. Esta TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.me).user.username}*` });
 
-				gcfg.tubers[id] = null;
-				delete gcfg.tubers[id];
+				gcfg.tubers[tuberId] = null;
+				delete gcfg.tubers[tuberId];
 				gcfg.markModified('tubers');
 				request.reply({ content: '✅ Tubérculo eliminado con éxito' });
 				break;
 			
 			default:
-				if(!gcfg.tubers[id]) return request.reply({
+				if(!gcfg.tubers[tuberId]) return request.reply({
 					content: [
-						`⚠️ El Tubérculo **${id}** no existe`,
-						ps ? '¿Estás intentando crear un Tubérculo con PuréScript? Usa la bandera `--crear` junto a `--script` (o `-cs` para la versión corta)' : undefined,
+						`⚠️ El Tubérculo **${tuberId}** no existe`,
+						isPureScript ? '¿Estás intentando crear un Tubérculo con PuréScript? Usa la bandera `--crear` junto a `--script` (o `-cs` para la versión corta)' : undefined,
 					].filter(str => str).join('\n'),
 				});
-				await executeTuber(request, gcfg.tubers[id], { args, isSlash })
+				await executeTuber(request, gcfg.tubers[tuberId], { args, isSlash })
 				.catch(error => {
 					console.log('Ocurrió un error al ejecutar un Tubérculo');
 					console.error(error);
@@ -287,7 +285,7 @@ const command = new CommandManager('tubérculo', flags)
 				});
 				break;
 		}
-		return await gcfg.save(); //Guardar en Configuraciones de Servidor si se cambió algo
+		return gcfg.save(); //Guardar en Configuraciones de Servidor si se cambió algo
 	})
 	.setButtonResponse(async function loadPage(interaction, page) {
 		return loadPageNumber(interaction, page);
@@ -308,7 +306,7 @@ const command = new CommandManager('tubérculo', flags)
 			.setTitle('Filtro de búsqueda')
 			.addComponents(row);
 
-		return await interaction.showModal(modal);
+		return interaction.showModal(modal);
 	})
 	.setModalResponse(async function filterSubmit(interaction, target) {
 		const { guild, client } = interaction;
@@ -321,7 +319,7 @@ const command = new CommandManager('tubérculo', flags)
 				filter = filter.slice(1);
 			const userId = fetchUserID(filter, { guild, client });
 			if(!userId)
-				return await interaction.reply({
+				return interaction.reply({
 					content: '⚠ Usuario no encontrado',
 					ephemeral: true
 				});

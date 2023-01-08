@@ -221,100 +221,103 @@ module.exports = {
         }
     },
 
+    /**
+     * @param {Discord.GuildMember} miembro
+     * @param {Discord.TextChannel} canal
+     * @param {Number} rep
+     */
     askForRole: async function(miembro, canal, rep) {
         const reps = 4;
         console.log(chalk.cyan('Comprobando miembro nuevo en Hourai Doll para petición de rol de color...'));
-        if(!miembro.deleted) {
-            console.log(concol.orange('El miembro sigue en el servidor'));
-            const dc = module.exports.dollCount(miembro);
-
-            //Comprobación constante para ver si el miembro ya tiene roles de colores
-            if(dc > 2) {
-                console.log(chalk.green(`El miembro ha recibido sus roles básicos.`));
-                canal.send({ content: `Weno **${miembro.user.username}**, ya teni tu rol, q esti bien po <:kosuzy:887166039740272691>` });
-
-                //Finalizar
-                setTimeout(module.exports.finalizarHourai, 1000, miembro, canal);
-            } else {
-                if(rep > 0) {
-                    setTimeout(module.exports.askForRole, 1000 * 60 / reps, miembro, canal, rep - 1);
-                    return;
-                }
-                
-                if(dc === 1) {
-                    console.log(chalk.magenta('El miembro está retenido.'));
-                    global.hourai.warn++;
-                    if(global.hourai.warn <= 6) {
-                        if(global.hourai.warn <= 3)
-                            canal.send({ content: `Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474> (${global.hourai.warn}/3 llamados)` });
-                        setTimeout(module.exports.askForRole, 1000, miembro , canal, reps);
-                        console.log(chalk.cyan(`Volviendo a esperar confirmación de miembro (${global.hourai.warn}/6)...`));
-                    }
-                } else {
-                    console.log(chalk.yellow('El miembro no ha recibido roles básicos.'));
-                    await canal.send({
-                        content: `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>`,
-                        files: [global.hourai.images.colors],
-                        components: [colorsRow],
-                    });
-                    setTimeout(module.exports.forceRole, 1000, miembro, canal, 2 * reps);
-                    console.log(chalk.magentaBright(`Esperando comprobación final de miembro en unos minutos...`));
-                }
-            }
-        } else {
+        if(!canal.guild.members.cache.has(miembro.id)) {
             console.log(chalk.red(`El miembro se fue del servidor. Abortando.`));
-            canal.send({ content: `Se murió el wn de <@${miembro.user.id}> po <:mayuwu:654489124413374474>` });
+            return canal.send({ content: `Se murió el wn de <@${miembro.user.id}> po <:mayuwu:654489124413374474>` });
         }
+        console.log(concol.orange('El miembro sigue en el servidor'));
+        const hasColor = module.exports.hasColorRole(miembro);
+
+        //Comprobación constante para ver si el miembro ya tiene roles de colores
+        if(hasColor) {
+            console.log(chalk.green(`El miembro ha recibido sus roles básicos.`));
+            canal.send({ content: `Weno **${miembro.user.username}**, ya teni tu rol, q esti bien po <:kosuzy:887166039740272691>` });
+
+            //Finalizar
+            return setTimeout(module.exports.finalizarHourai, 1000, miembro, canal);
+        }
+
+        if(rep > 0)
+            return setTimeout(module.exports.askForRole, 1000 * 60 / reps, miembro, canal, rep - 1);
+        
+        if(!miembro.roles.cache.has('671826704343236629')) {
+            console.log(chalk.magenta('El miembro está retenido.'));
+            global.hourai.warn++;
+            if(global.hourai.warn <= 6) {
+                if(global.hourai.warn <= 3)
+                    canal.send({ content: `Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474> (${global.hourai.warn}/3 llamados)` });
+                setTimeout(module.exports.askForRole, 1000, miembro , canal, reps);
+                console.log(chalk.cyan(`Volviendo a esperar confirmación de miembro (${global.hourai.warn}/6)...`));
+            }
+            return;
+        }
+
+        console.log(chalk.yellow('El miembro no ha recibido roles básicos.'));
+        await canal.send({
+            content: `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>`,
+            files: [global.hourai.images.colors],
+            components: [colorsRow],
+        });
+        setTimeout(module.exports.forceRole, 1000, miembro, canal, 2 * reps);
+        console.log(chalk.magentaBright(`Esperando comprobación final de miembro en unos minutos...`));
     },
 
     forceRole: function(miembro, canal, rep) {
         const reps = 4;
         console.log(chalk.cyan('Comprobando miembro nuevo en Hourai Doll para forzado de rol de color'));
-        if(!miembro.deleted) {
-            console.log(concol.orange('El miembro sigue en el servidor'));
-            const dc = module.exports.dollCount(miembro);
-            
-            if(dc > 2) {
-                console.log(chalk.green('El miembro ya tiene los roles básicos.'));
-                canal.send({ content: `Al fin qliao ya teni tu rol. Q esti bien **${miembro.user.username}**, po <:uwu:681935702308552730>` });
+        if(miembro.deleted)
+            return canal.send({ content: `Se fue cagando el <@${miembro.user.id}> csm <:mayuwu:654489124413374474>` });
 
-                //Finalizar
-                setTimeout(module.exports.finalizarHourai, 1000, miembro, canal);
-            } else {
-                if(rep > 0) {
-                    setTimeout(module.exports.forceRole, 1000 * 60 / reps, miembro, canal, rep - 1);
-                    return;
-                }
+        console.log(concol.orange('El miembro sigue en el servidor'));
+        const hasColor = module.exports.hasColorRole(miembro);
+        
+        if(hasColor) {
+            console.log(chalk.green('El miembro ya tiene los roles básicos.'));
+            canal.send({ content: `Al fin qliao ya teni tu rol. Q esti bien **${miembro.user.username}**, po <:uwu:681935702308552730>` });
 
-                if(dc === 2) {
-                    console.log(chalk.magentaBright('El miembro requiere roles básicos. Forzando roles...'));
-                    const colores = [
-                        '671851233870479375', //France Doll
-                        '671852132328275979', //Holland Doll
-                        '671851228954755102', //Tibetan Doll
-                        '671851235267182625', //Kyoto Doll
-                        '671851236538187790', //London Doll
-                        '671851234541699092', //Russian Doll
-                        '671851228308963348' //Orléans Doll
-                    ];
-                    canal.send({
-                        content:
-                            `**${miembro.user.username}**, cagaste altiro watón fome <:mukyuugh:725583038913708034>\n` +
-                            `Toma un rol random po <:mayuwu:654489124413374474> <:venAqui2:668644951353065500>`,
-                        files: [global.hourai.images.forcecolors]
-                    });
-                    miembro.roles.add(colores[Math.floor(Math.random() * 7)]);
-                    console.log(chalk.greenBright('Roles forzados.'));
+            //Finalizar
+            return setTimeout(module.exports.finalizarHourai, 1000, miembro, canal);
+        }
 
-                    //Finalizar
-                    setTimeout(module.exports.finalizarHourai, 1000, miembro, canal);
-                } else {
-                    console.log(chalk.red('El miembro ya no tiene ningún rol básico.'));
-                    canal.send({ content: `Espérate qué weá pasó con **${miembro.user.username}** <:reibu:686220828773318663>\nOh bueno, ya me aburrí... chao.` });
-                }
-            }
-        } else {
-            canal.send({ content: `Se fue cagando el <@${miembro.user.id}> csm <:mayuwu:654489124413374474>` });
+        if(rep > 0) {
+            setTimeout(module.exports.forceRole, 1000 * 60 / reps, miembro, canal, rep - 1);
+            return;
+        }
+
+        try {
+            console.log(chalk.magentaBright('El miembro requiere roles básicos. Forzando roles...'));
+            const colores = [
+                '671851233870479375', //France Doll
+                '671852132328275979', //Holland Doll
+                '671851228954755102', //Tibetan Doll
+                '671851235267182625', //Kyoto Doll
+                '671851236538187790', //London Doll
+                '671851234541699092', //Russian Doll
+                '671851228308963348', //Orléans Doll
+            ];
+            canal.send({
+                content:
+                    `**${miembro.user.username}**, cagaste altiro watón fome <:mukyuugh:725583038913708034>\n` +
+                    `Toma un rol random po <:mayuwu:654489124413374474> <:venAqui2:668644951353065500>`,
+                files: [global.hourai.images.forcecolors]
+            });
+            miembro.roles.add(colores[Math.floor(Math.random() * 7)]);
+            console.log(chalk.greenBright('Roles forzados.'));
+
+            //Finalizar
+            setTimeout(module.exports.finalizarHourai, 1000, miembro, canal);
+        } catch(e) {
+            console.log(chalk.red('El miembro ya no tiene ningún rol básico.'));
+            console.error(e);
+            canal.send({ content: `Espérate qué weá pasó con **${miembro.user.username}** <:reibu:686220828773318663>\nOh bueno, ya me aburrí... chao.` });
         }
     },
 
@@ -385,13 +388,17 @@ module.exports = {
      */
     isNotModerator: (member) => !(member.permissions.has('MANAGE_ROLES') || member.permissions.has('MANAGE_MESSAGES')),
 
-    dollCount: function(member) {
-        let fp = 0; //Falsos positivos a restar
-        member.roles.cache.map(role => {
-            if(role.id === '699304214253404292' || role.id === '813194804161806436')
-                fp++;
-        });
-        return (member.roles.cache.size - fp);
+    /**@param {Discord.GuildMember} member*/
+    hasColorRole: function(member) {
+        return member.roles.cache.hasAny(
+            '671851233870479375',
+            '671851228954755102',
+            '671852132328275979',
+            '671851235267182625',
+            '671851234541699092',
+            '671851236538187790',
+            '671851228308963348',
+        );
     },
     //#endregion
 
@@ -399,7 +406,7 @@ module.exports = {
     /**@param {import('discord.js').TextChannel} channel*/
     channelIsBlocked: function(channel) {
         const member = channel?.guild?.me;
-        if(!member?.permissionsIn(channel)?.any([ 'SEND_MESSAGES', 'SEND_MESSAGES_IN_THREADS' ], true)) return true;
+        if(!member?.permissionsIn(channel)?.any?.([ 'SEND_MESSAGES', 'SEND_MESSAGES_IN_THREADS' ], true)) return true;
         if(global.maintenance.length === 0) return false;
 
         return (global.maintenance.startsWith('!'))
@@ -1016,6 +1023,24 @@ module.exports = {
     randInArray: function(array) {
         const randomIndex = module.exports.rand(array.length);
         return array[randomIndex];
+    },
+    
+    /**
+     * Devuelve un elemento aleatorio dentro de la Array especificada
+     * @template T
+     * @param {Array<T>} array 
+     * @param {Number} divisionSize 
+     * @returns {Array<Array<T>>} elemento
+     */
+    subdivideArray: function(array, divisionSize) {
+        if(!array.length) return [[]];
+
+        const subdivided = [];
+        for (let i = 0; (i * divisionSize) < array.length; i++) {
+            const j = i * divisionSize;
+            subdivided[i] = array.slice(j, j + divisionSize);
+        }
+        return subdivided;
     },
 
     /**

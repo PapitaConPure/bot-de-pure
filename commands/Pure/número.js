@@ -1,40 +1,27 @@
 const { improveNumber, fetchFlag } = require('../../func.js'); //Funciones globales
-const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
+const flags = new CommandMetaFlagsManager().add('COMMON');
 const options = new CommandOptionsManager()
 	.addParam('num', 'NUMBER', 'para designar el número a operar')
 	.addFlag(['a','s'], 'acortar', 'para acortar el número')
 	.addFlag(['m','d'], ['mínimo','minimo','digitos'], 'para designar el mínimo de dígitos', { name: 'minimo', type: 'NUMBER' })
 	.addFlag(['n','e'], 'exponente', 'para exponenciar el número', { name: 'exp', type: 'NUMBER' });
-
-module.exports = {
-	name: 'número',
-	aliases: [
-		'numero',
-		'núm',
-		'num',
-	],
-	desc: 'Para operar un número. Sí, solo eso, tenía ganas de jugar con algo',
-	flags: new CommandMetaFlagsManager().add('COMMON'),
-	options: options,
-	callx: '<num>',
-    experimental: true,
-	
-	/**
-	 * @param {import("../Commons/typings").CommandRequest} request
-	 * @param {import('../Commons/typings').CommandOptions} args
-	 * @param {Boolean} isSlash
-	 */
-	async execute(request, args, isSlash = false) {
+const command = new CommandManager('número', flags)
+	.setAliases('numero', 'núm', 'num')
+	.setDescription('Para operar un número. Sí, solo eso, tenía ganas de jugar con algo')
+	.setOptions(options)
+	.setExecution(async (request, args, isSlash = false) => {
 		//Acción de comando
 		const shorten = fetchFlag(args, { ...options.flags.get('acortar').structure, callback: true, fallback: false });
 		const getFunc = (x,i) => x[i];
-		const min = fetchFlag(args, { property: true, ...options.flags.get('mínimo').structure, callback: getFunc, fallback: 1 });
-		const exp = fetchFlag(args, { property: true, ...options.flags.get('exponente').structure, callback: getFunc });
+		const min = options.fetchFlag(args, 'mínimo', { fallback: 1 });
+		const exp = options.fetchFlag(args, 'exponente', { fallback: 1 });
+		
+		let num = isSlash ? args.getString('num') : args.shift();
+		if(!num) return request.reply({ content: '⚠ Debes ingresar un número' });
+		num = Math.pow(num, exp);
+		return request.reply({ content: improveNumber(num, shorten, min) });
+	});
 
-		if(!args.length) return request.reply({ content: '⚠ Debes ingresar un número' });
-		let num = args.shift();
-		if(typeof exp !== 'undefined') num = Math.pow(num, exp);
-		request.reply({ content: improveNumber(num, shorten, min) });
-	}
-};
+module.exports = command;

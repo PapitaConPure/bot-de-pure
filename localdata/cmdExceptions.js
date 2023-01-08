@@ -91,7 +91,7 @@ module.exports = {
             .setColor('#f01010')
             .setAuthor({ name: 'Un momento...' })
             .setTitle(`${exception.title}`)
-            .addField(cmdString, `${exception.desc}`)
+            .addFields({ name: cmdString, value: `${exception.desc}` })
             .setThumbnail('https://i.imgur.com/vZaDu1o.jpg')
             .setFooter({ text: '¿Dudas? ¿Sugerencias? Contacta con Papita con Puré#6932' });
     },
@@ -112,11 +112,19 @@ module.exports = {
                 .setColor('#0000ff')
                 .setAuthor({ name: `${request.guild.name} • ${request.channel.name} (Click para ver)`, iconURL: user.avatarURL({ dynamic: true }), url: request.url || 'https://discordapp.com' })
                 .setThumbnail('https://i.imgur.com/ftAxUen.jpg')
-                .addField('¡Me faltan permisos!', [
-                    'No tengo los permisos necesarios para ejecutar el comando o acción que acabas de pedirme en ese canal',
-                    'Soy una niña educada, así que no haré nada hasta que me den permiso. Puedes comentarle el asunto a algún moderador del server para que lo revise',
-                ].join('\n'))
-                .addField('Reportar un error', `¿Crees que esto se trata de otro problema? Eso nunca debería ser el caso, pero de ser así, puedes [reportarlo](${global.reportFormUrl})`);
+                .addFields(
+                    {
+                        name: '¡Me faltan permisos!',
+                        value: [
+                            'No tengo los permisos necesarios para ejecutar el comando o acción que acabas de pedirme en ese canal',
+                            'Soy una niña educada, así que no haré nada hasta que me den permiso. Puedes comentarle el asunto a algún moderador del server para que lo revise',
+                        ].join('\n'),
+                    },
+                    {
+                        name: 'Reportar un error',
+                        value: `¿Crees que esto se trata de otro problema? Eso nunca debería ser el caso, pero de ser así, puedes [reportarlo](${global.reportFormUrl})`,
+                    },
+                );
 
             user.send({ embeds: [permsEmbed] }).catch(console.error);
             return true;

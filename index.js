@@ -82,6 +82,7 @@ client.EmotesPure = new Discord.Collection(); //Emotes de Puré
     const addFunctionNames = new Map()
     addFunctionNames.set('NUMBER',  'addNumberOption')
                     .set('USER',    'addUserOption')
+                    .set('MEMBER',  'addUserOption')
                     .set('ROLE',    'addRoleOption')
                     .set('CHANNEL', 'addChannelOption')
                     .set('ID',      'addIntegerOption');

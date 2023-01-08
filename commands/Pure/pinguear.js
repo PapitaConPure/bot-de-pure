@@ -1,7 +1,7 @@
 const uses = require('../../localdata/sguses.json'); //Funciones globales
 const { fetchUser, randRange } = require('../../func.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const frase = [
 	'Oe po [m] <:junkNo:697321858407727224>',
@@ -20,31 +20,19 @@ async function pinguear(channel, user, cnt) {
 	if(cnt > 1) setTimeout(pinguear, 800, channel, user, cnt - 1);
 }
 
+const flags = new CommandMetaFlagsManager().add(
+	'MEME',
+	'CHAOS',
+);
 const options = new CommandOptionsManager()
 	.addParam('cantidad', 'NUMBER', 'para indicar la cantidad de veces que se debe pinguear')
 	.addParam('usuario', 'USER', 'para indicar el usuario a pinguear');
-
-module.exports = {
-	name: 'pinguear',
-	aliases: [
-        'pingear', 'pingeara', 'pingueara',
-		'pingsomeone'
-    ],
-    desc: 'Pingea a un `<usuario>` una `<cantidad>` de veces',
-    flags: new CommandMetaFlagsManager().add(
-		'MEME',
-		'CHAOS',
-	),
-    options,
-	callx: '<cantidad> <usuario>',
-	experimental: true,
-	
-	/**
-	 * @param {import("../Commons/typings").CommandRequest} request
-	 * @param {import('../Commons/typings').CommandOptions} args
-	 * @param {Boolean} isSlash
-	 */
-	async execute(request, args, isSlash = false) {
+const command = new CommandManager('pinguear', flags)
+	.setAliases('pingear', 'pingeara', 'pingueara', 'mencionar', 'mention', 'pingsomeone')
+	.setBriefDescription('Pingea a un usuario una cantidad de veces')
+	.setLongDescription('Pingea a un `<usuario>` una `<cantidad>` de veces')
+	.setOptions(options)
+	.setExecution(async (request, args, isSlash = false) => {
 		const now = Date.now() * 1;
 		const uid = (request.author ?? request.user).id;
 		if(now - (uses.pinguear[uid] ?? 0) < 1000 * 60)
@@ -70,5 +58,6 @@ module.exports = {
 		uses.pinguear[uid] = now * 1;
 		if(isSlash) await request.reply({ content: `🤡 Tirando pings a **${user.tag}**`, ephemeral: true });
 		return pinguear(request.channel, user, repeats);
-    },
-};
+	});
+
+module.exports = command;

@@ -1,6 +1,6 @@
 /**
  * @typedef {{name: String, expression: String|Number}} ParamTypeStrict Parámetros de CommandOption que siguen una sintaxis estricta
- * @typedef {'NUMBER'|'TEXT'|'USER'|'ROLE'|'CHANNEL'|'MESSAGE'|'EMOTE'|'IMAGE'|'FILE'|'URL'|'ID'|ParamTypeStrict} ParamType Tipos de parámetro de CommandOption
+ * @typedef {'NUMBER'|'TEXT'|'USER'|'MEMBER'|'ROLE'|'CHANNEL'|'MESSAGE'|'EMOTE'|'IMAGE'|'FILE'|'URL'|'ID'|ParamTypeStrict} ParamType Tipos de parámetro de CommandOption
  * @typedef {'SINGLE'|'MULTIPLE'|Array<String>} ParamPoly Capacidad de entradas de parámetro de CommandOption
  */
 
@@ -59,10 +59,11 @@ const fetchMessageFlag = (args, flag = { property, short: [], long: [], callback
 const commonTypes = {
     'NUMBER':   'número',
     'TEXT':     'texto',
-    'USER':     'u{mención/texto/id}',
-    'ROLE':     'r{mención/texto/id}',
+    'USER':     'U{mención/texto/id}',
+    'MEMBER':   'M{mención/texto/id}',
+    'ROLE':     'R{mención/texto/id}',
     'GUILD':    'g{texto/id}',
-    'CHANNEL':  'c{enlace/texto/id}',
+    'CHANNEL':  'C{enlace/texto/id}',
     'MESSAGE':  'm{enlace/texto/id}',
     'EMOTE':    'emote',
     'IMAGE':    'imagen/enlace',
@@ -498,6 +499,7 @@ class CommandOptionsManager {
             switch(flag.type) {
                 case 'NUMBER':  getMethod = 'getNumber';  break;
                 case 'USER':    getMethod = 'getUser';    break;
+                case 'MEMBER':  getMethod = 'getUser';    break;
                 case 'ROLE':    getMethod = 'getRole';    break;
                 case 'CHANNEL': getMethod = 'getChannel'; break;
                 case 'ID':      getMethod = 'getInteger'; break;
