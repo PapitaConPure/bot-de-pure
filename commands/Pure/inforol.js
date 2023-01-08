@@ -13,6 +13,7 @@ const command = new CommandManager('inforol', flags)
         'rolecount', 'roleinfo',
         'irol', 'ir', 'ri', 'rolei',
 	)
+	.setBriefDescription('Realiza una búsqueda de roles en el servidor. Muestra la cantidad y una lista de usuarios')
 	.setLongDescription(
 		'Realiza una búsqueda en el servidor para encontrar a todos los usuarios que cumplen con los búsqueda de roles solicitada.',
 		'Devuelve el total de usuarios encontrados junto con una lista paginada de los mismos',
