@@ -80,14 +80,15 @@ const getItemsList = async(guild, content) => {
  * @param {import('discord.js').ButtonInteraction | import('discord.js').SelectMenuInteraction} interaction 
  * @param {Number} page 
  */
-const loadPageNumber = async(interaction, page) => {
+const loadPageNumber = async(interaction, page, setFilter = undefined) => {
 	page = parseInt(page);
 	const { guild, message } = interaction;
-	const { items, lastPage } = await getItemsList(guild, message.content, page);
+	const { items, lastPage } = await getItemsList(guild, setFilter ?? message.content, page);
 	const members = guild.members.cache;
 	const oembed = message.embeds[0];
+	const paginationEnabled = items.length >= pageMax
 
-	return interaction.update({
+	const listUpdate = {
 		embeds: [
 			new MessageEmbed()
 				.setColor(oembed.color)
@@ -98,14 +99,24 @@ const loadPageNumber = async(interaction, page) => {
 					value: 
 						items.length
 							? items.splice(page * pageMax, pageMax)
-								.map(([tid,tuber]) => `**${tid}** • ${(members.get(tuber.author) ?? guild.me).user.username}`)
+								.map(([tid,tuber]) => `${tuber.script ? '`📜`' : ''}**${tid}** • ${(members.get(tuber.author) ?? guild.me).user.username}`)
 								.join('\n')
 							: `Ningún Tubérculo coincide con la búsqueda actual`,
 					inline: true,
-				}),
+				})
+				.setFooter({ iconUrl: guild.iconURL({ dynamic: true, size: 256 }), text: `Total • ${items.length}` }),
 		],
-		components: (items.length < pageMax) ? null : paginationRows(page, lastPage),
-	});
+		components: paginationRows(page, lastPage, paginationEnabled),
+	};
+
+	if(setFilter !== undefined) {
+		if(setFilter)
+			listUpdate.content = setFilter;
+		else
+			listUpdate.content = null;
+	}
+
+	return interaction.update(listUpdate);
 };
 
 const options = new CommandOptionsManager()
@@ -129,7 +140,7 @@ const command = new CommandManager('tubérculo', flags)
 		'⚠️ Ten en cuenta que este comando es experimental y cualquier Tubérculo ingresado podría ser eventualmente perdido a medida que me actualizo',
 	)
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash = false) => {
+	.setExecution(async (request, args, isSlash = false, rawArgs) => {
 		const helpString = `Usa \`${p_pure(request.guildId).raw}ayuda tubérculo\` para más información`;
 		const operation = options.fetchFlag(args, 'crear', { callback: 'crear' })
 			|| options.fetchFlag(args, 'ver', { callback: 'ver' })
@@ -156,11 +167,12 @@ const command = new CommandManager('tubérculo', flags)
 							name: `🥔)▬▬▬\\~•\\~▬▬▬\\~•\\~▬▬{ ${items.length ? `1 / ${lastPage + 1}` : '- - -'} }▬▬\\~•\\~▬▬▬\\~•\\~▬▬▬(🥔`, 
 							value: items.length
 								? items.splice(0, pageMax)
-									.map(([tid,tuber]) => `**${tid}** • ${(members.get(tuber.author) ?? request.guild.me).user.username}`)
+									.map(([tid,tuber]) => `${tuber.script ? '`📜`' : ''}**${tid}** • ${(members.get(tuber.author) ?? request.guild.me).user.username}`)
 									.join('\n')
 								: `Este servidor no tiene ningún Tubérculo.\nComienza a desplegar TuberIDs con \`${p_pure(request.guildId).raw}tubérculo --crear\``,
 							inline: true,
-						}),
+						})
+						.setFooter({ iconUrl: request.guild.iconURL({ dynamic: true, size: 256 }), text: `Total • ${items.length}` }),
 				],
 				components: (items.length < pageMax) ? null : paginationRows(0, lastPage),
 			});
@@ -179,7 +191,7 @@ const command = new CommandManager('tubérculo', flags)
 					return request.reply({ content: `⛔ Acción denegada. Esta TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.me).user.username}*` });
 				
 				const tuberContent = { author: (request.user ?? request.author).id };
-				const mcontent = (isSlash ? args.getString('mensaje') : args.join(' ')).split(/[\n ]*#FIN#[\n ]*/).join('\n');
+				const mcontent = (isSlash ? args.getString('mensaje') : args.join(' ')).split(/[\n ]*##[\n ]*/).join('\n');
 				const mfiles = isSlash ? options.fetchParamPoly(args, 'archivos', args.getString, null).filter(att => att) : (request.attachments || []).map(att => att.proxyURL);
 
 				//Incluir Tubérculo; crear colección de Tubérculos si es necesario
@@ -310,8 +322,6 @@ const command = new CommandManager('tubérculo', flags)
 	})
 	.setModalResponse(async function filterSubmit(interaction, target) {
 		const { guild, client } = interaction;
-		const members = guild.members.cache;
-		const oembed = interaction.message.embeds[0];
 		
 		let filter = interaction.fields.getTextInputValue('filterInput');
 		if(target === 'AUTHOR') {
@@ -326,27 +336,7 @@ const command = new CommandManager('tubérculo', flags)
 			filter = userId;
 		}
 		const content = `${filters[target].label}: ${filter}`;
-		const { items, lastPage } = await getItemsList(guild, content);
-		const paginationEnabled = items.length >= pageMax;
-		await interaction.update({
-			content,
-			embeds: [
-				new MessageEmbed()
-					.setColor(oembed.color)
-					.setAuthor({ name: oembed.author.name, iconURL: oembed.author.url })
-					.setTitle(oembed.title)
-					.addFields({
-						name: `🥔)▬▬\\~•\\~▬▬▬\\~•\\~▬▬{ 1 / ${lastPage + 1} }▬▬\\~•\\~▬▬▬\\~•\\~▬▬(🥔`,
-						value: items.length
-							? items.splice(0, pageMax)
-								.map(([tid,tuber]) => `**${tid}** • ${(members.get(tuber.author) ?? guild.me).user.username}`)
-								.join('\n')
-							: `Ningún Tubérculo coincide con la búsqueda actual`,
-						inline: true,
-					}),
-			],
-			components: paginationRows(0, lastPage, paginationEnabled),
-		});
+		return loadPageNumber(interaction, 0, content);
 	})
 	.setButtonResponse(async function filterClear(interaction) {
 		if(!interaction.message.content)
@@ -355,29 +345,7 @@ const command = new CommandManager('tubérculo', flags)
 				ephemeral: true,
 			});
 			
-		const { guild } = interaction;
-		const members = guild.members.cache;
-		const oembed = interaction.message.embeds[0];
-		const { items, lastPage } = await getItemsList(guild, '', 0);
-		return interaction.update({
-			content: null,
-			embeds: [
-				new MessageEmbed()
-					.setColor(oembed.color)
-					.setAuthor({ name: oembed.author.name, iconURL: oembed.author.url })
-					.setTitle(oembed.title)
-					.addFields({
-						name: `🥔)▬▬\\~•\\~▬▬▬\\~•\\~▬▬{ 1 / ${lastPage + 1} }▬▬\\~•\\~▬▬▬\\~•\\~▬▬(🥔`,
-						value: items.length
-							? items.splice(0, pageMax)
-								.map(([tid,tuber]) => `**${tid}** • ${(members.get(tuber.author) ?? guild.me).user.username}`)
-								.join('\n')
-							: `Ningún Tubérculo coincide con la búsqueda actual`,
-						inline: true,
-					}),
-			],
-			components: paginationRows(0, lastPage, items.length >= pageMax),
-		});
+		return loadPageNumber(interaction, 0, '');
 	})
 	.setSelectMenuResponse(async function loadPageExact(interaction) {
 		return loadPageNumber(interaction, interaction.values[0]);

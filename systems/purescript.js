@@ -3,7 +3,7 @@ const { p_pure } = require('../localdata/customization/prefixes.js');
 const { randRange, fetchUserID } = require('../func.js');
 const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, MessageAttachment } = require('discord.js');
 
-const logMore = false;
+const logMore = true;
 
 //RegExp para analizar enlaces de archivos válidos
 const fileRegex = /(http:\/\/|https:\/\/)?(www\.)?(([a-zA-Z0-9-]){2,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_\/\.0-9#:?=&;,]*\.(txt|png|jpg|jpeg|webp|gif|webm|mp4|mp3|wav|flac|ogg)[a-zA-Z-_\.0-9#:?=&;,]*/;
@@ -35,117 +35,121 @@ const readOnlyMem = [
  * @param {{ args: Array<String>, isSlash: Boolean }} inputOptions
  */
 const executeTuber = async (request, tuber, { args, isSlash }) => {
-	if(tuber.script) { //Tubérculo avanzado (PuréScript)
-		//Errores PS
-		let errors = 0;
-		const psError = (description, line, operation) => {
-			errors++;
-			return request.reply({ content: `<⚠️ Error PS: \`${description} (Expresión ${line + 1}, Operación ${operation.toUpperCase()})\`>` });
-		};
+    if(!tuber.script) //Tubérculo básico (contenido y archivos directos)
+        return request.reply({
+            content: tuber.content,
+            files: tuber.files,
+        }).catch(console.error);
+    
+	//Tubérculo avanzado (PuréScript)
+    //Errores PS
+    let errors = 0;
+    const psError = (description, line, operation) => {
+        errors++;
+        return request.reply({ content: `<⚠️ Error PS: \`${description} (Expresión ${line + 1}, Operación ${operation.toUpperCase()})\`>` });
+    };
 
-		//#region Memoria del script
-        /**@type {TuberMemory}*/
-		let mem = {
-			__functions__: {
-				//Aleatoreidad
-				/**@param {[Number, Number]} param0*/
-				['dado']: ([min, max]) => randRange(min ?? 1, max ?? 7, true),
-				/**@param {[Number, Number]} param0*/
-				['dadoDecimal']: ([min, max]) => randRange(min ?? 0, max ?? 1, false),
-				//Funcionalidad
-				/**@param {[*]} param0*/
-				['largo']: ([obj]) => obj.length ?? obj.size,
-				/**@param {[String]} param0*/
-				['minus']: ([text]) => text.toLowerCase(),
-				/**@param {[String]} param0*/
-				['mayus']: ([text]) => text.toUpperCase(),
-				//Embeds
-				/**@param {[MessageEmbed, String, String]} param0*/
-				['marcoEstablecerAutor']: ([embed, author, iconUrl]) => embed.setAuthor({ name: author, iconURL: iconUrl }),
-				/**@param {[MessageEmbed, String]} param0*/
-				['marcoEstablecerEncabezado']: ([embed, title]) => embed.setTitle(title),
-				/**@param {[MessageEmbed, String, String]} param0*/
-				['marcoEstablecerPie']: ([embed, footer]) => embed.setFooter({ text: footer }),
-				/**@param {[MessageEmbed, String, String]} param0*/
-				['marcoEstablecerMiniatura']: ([embed, image]) => embed.setThumbnail(image),
-				/**@param {[MessageEmbed, String, String]} param0*/
-				['marcoEstablecerColor']: ([embed, color]) => embed.setColor(color),
-				/**@param {[MessageEmbed, String, String]} param0*/
-				['marcoEstablecerImagen']: ([embed, image]) => embed.setImage(image),
-				/**@param {[MessageEmbed, String, String, Boolean]} param0*/
-				['marcoAgregarCampo']: ([embed, title, content, inline]) => embed.addFields({ name: title, value: content.slice(0, 1023), inline }),
-			},
-            __tuber__: tuber,
-            __replyContent__: {},
-			archivos: isSlash ? [] : request.attachments.map(attachment => attachment.proxyURL),
-			usuario: getMemberProps(request.member),
-			entradas: {},
-			funciones: {},
-			VERDADERO: true,
-			FALSO: false,
-		};
-		//Establecer claves iniciales como solo-lectura
-		const readOnlyMem = Object.keys(mem);
-		//#endregion
+    //#region Memoria del script
+    /**@type {TuberMemory}*/
+    let mem = {
+        __functions__: {
+            //Aleatoreidad
+            /**@param {[Number, Number]} param0*/
+            ['dado']: ([min, max]) => randRange(min ?? 1, max ?? 7, true),
+            /**@param {[Number, Number]} param0*/
+            ['dadoDecimal']: ([min, max]) => randRange(min ?? 0, max ?? 1, false),
+            //Funcionalidad
+            /**@param {[*]} param0*/
+            ['largo']: ([obj]) => obj.length ?? obj.size,
+            /**@param {[String]} param0*/
+            ['minus']: ([text]) => text.toLowerCase(),
+            /**@param {[String]} param0*/
+            ['mayus']: ([text]) => text.toUpperCase(),
+            //Embeds
+            /**@param {[MessageEmbed, String, String]} param0*/
+            ['marcoEstablecerAutor']: ([embed, author, iconUrl]) => embed.setAuthor({ name: author, iconURL: iconUrl }),
+            /**@param {[MessageEmbed, String]} param0*/
+            ['marcoEstablecerEncabezado']: ([embed, title]) => embed.setTitle(title),
+            /**@param {[MessageEmbed, String, String]} param0*/
+            ['marcoEstablecerPie']: ([embed, footer]) => embed.setFooter({ text: footer }),
+            /**@param {[MessageEmbed, String, String]} param0*/
+            ['marcoEstablecerMiniatura']: ([embed, image]) => embed.setThumbnail(image),
+            /**@param {[MessageEmbed, String, String]} param0*/
+            ['marcoEstablecerColor']: ([embed, color]) => embed.setColor(color),
+            /**@param {[MessageEmbed, String, String]} param0*/
+            ['marcoEstablecerImagen']: ([embed, image]) => embed.setImage(image),
+            /**@param {[MessageEmbed, String, String, Boolean]} param0*/
+            ['marcoAgregarCampo']: ([embed, title, content, inline]) => embed.addFields({ name: title, value: content.slice(0, 1023), inline }),
+        },
+        __tuber__: tuber,
+        __ifLevels__: [],
+        __replyContent__: {},
+        archivos: isSlash ? [] : request.attachments.map(attachment => attachment.proxyURL),
+        usuario: getMemberProps(request.member),
+        entradas: {},
+        funciones: {},
+        VERDADERO: true,
+        FALSO: false,
+    };
+    //Establecer claves iniciales como solo-lectura
+    const readOnlyMem = Object.keys(mem);
+    //#endregion
 
-		//#region Entradas personalizadas
-		if(tuber.inputs && args !== undefined && args !== null) {
-			const argsList = (isSlash
-				? options.fetchParamPoly(args, 'entradas', args.getString, null).filter(input => input)
-				: args);
-			const attachmentsList = [
-				...request.attachments.map(attachment => attachment.proxyURL),
-				...argsList.map(arg => arg.match(fileRegex) ? arg : undefined).filter(arg => arg),
-			];
-			const contentsList = argsList.filter(arg => arg);
-			if(logMore) console.log('---------------------------------\ncontentsList:', contentsList, '\nattachmentsList:', attachmentsList, '\n- - - - - - -       - - - - - - -');
-			
-			const readyInputs = tuber.inputs.map((input, i) => {
-				if(logMore) console.log(input, i);
-				const arg = input.isAttachment ? attachmentsList.shift() : contentsList.shift();
-				if(!arg && input.required) {
-					psError(`se requiere que ingreses "${input.identifier}" (entrada Nº ${i + 1}) para ejecutar este Tubérculo`, -2, 'INICIALIZAR');
-					return false;
-				}
-				
-				mem.entradas[input.identifier] = arg;
-				return true;
-			});
-			// console.log('entradas:', mem.entradas, '\nreadyInputs:', readyInputs, '\n---------------------------------');
-			if(!readyInputs.every(input => input)) return request.reply(`🛑 Este Tubérculo requiere más parámetros.\nUsa \`${p_pure(request.guildId).raw}tubérculo --ayuda <TuberID>\` para más información`);
-		}
-		//#endregion
-		
-		//Ejecutar secuencia de expresiones
-		await readExpressions(tuber.script, mem, { memLogEnabled: false });
-        const { __replyContent__: replyContent } = mem;
+    //#region Entradas personalizadas
+    if(tuber.inputs && args !== undefined && args !== null) {
+        const argsList = (isSlash
+            ? options.fetchParamPoly(args, 'entradas', args.getString, null).filter(input => input)
+            : args);
+        const attachmentsList = [
+            ...request.attachments.map(attachment => attachment.proxyURL),
+            ...argsList.map(arg => arg.match(fileRegex) ? arg : undefined).filter(arg => arg),
+        ];
+        const contentsList = argsList.filter(arg => arg);
+        if(logMore) console.log('---------------------------------\ncontentsList:', contentsList, '\nattachmentsList:', attachmentsList, '\n- - - - - - -       - - - - - - -');
+        
+        const readyInputs = tuber.inputs.map((input, i) => {
+            if(logMore) console.log(input, i);
+            const arg = input.isAttachment ? attachmentsList.shift() : contentsList.shift();
+            if(!arg && input.required) {
+                psError(`se requiere que ingreses "${input.identifier}" (entrada Nº ${i + 1}) para ejecutar este Tubérculo`, -2, 'INICIALIZAR');
+                return false;
+            }
+            
+            mem.entradas[input.identifier] = arg;
+            return true;
+        });
+        // console.log('entradas:', mem.entradas, '\nreadyInputs:', readyInputs, '\n---------------------------------');
+        if(!readyInputs.every(input => input)) return request.reply(`🛑 Este Tubérculo requiere más parámetros.\nUsa \`${p_pure(request.guildId).raw}tubérculo --ayuda <TuberID>\` para más información`);
+    }
+    //#endregion
+    
+    //Ejecutar secuencia de expresiones
+    await readExpressions(tuber.script, mem, { memLogEnabled: false, psError });
+    const { __replyContent__: replyContent } = mem;
 
-        //Recopilación final
-		// console.log('Memoria final:', mem, '\nErrores:', errors, '\nContenido de respuesta:', replyContent);
-		if(!Object.keys(replyContent)?.length)
-			await psError('debes enviar al menos un texto u archivo', -2, 'RECOPILAR');
+    //Recopilación final
+    // console.log('Memoria final:', mem, '\nErrores:', errors, '\nContenido de respuesta:', replyContent);
+    if(!Object.keys(replyContent)?.length)
+        await psError('debes enviar al menos un texto u archivo', -2, 'RECOPILAR');
 
-        //Testificar ejecución
-		if(errors) {
-			await request.reply({ content: `⚠️ Se han encontrado **${errors} Errores PS** en la ejecución de PuréScript` });
-			return new Error('Error de PuréScript');
-		} else
-			return request.reply(replyContent).catch(console.error);
-	} else //Tubérculo básico (contenido y archivos directos)
-		return request.reply({
-			content: tuber.content,
-			files: tuber.files,
-		}).catch(console.error);
+    //Testificar ejecución
+    if(errors) {
+        await request.reply({ content: `⚠️ Se han encontrado **${errors} Errores PS** en la ejecución de PuréScript` });
+        return new Error('Error de PuréScript');
+    } else
+        return request.reply(replyContent).catch(console.error);
 };
 
 /**Toma un arreglo de arreglos de palabras (arreglo de "expresiones") y las ejecuta secuencialmente
  * @function
  * @param {Array<TuberExpression>} expressions 
  * @param {TuberMemory} mem 
- * @param {{memLogEnabled: Boolean}} expressionOptions
+ * @param {{memLogEnabled: Boolean, psError: Function}} expressionOptions
  * @returns {Object} Respuesta para mensaje
  */
-const readExpressions = async (expressions, mem, { memLogEnabled }) => {
+const readExpressions = async (expressions, mem, { memLogEnabled, psError }) => {
+    const isIfLocked = () => (!mem.__ifLevels__.every(l => l));
+
     await Promise.all(expressions.map((expression, l) => {
         const expr = [ ...expression ];
         if(logMore) {
@@ -161,6 +165,7 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
             //Registrar entradas o entidades externas importadas
             case 'registrar': {
                 if(logMore) console.log('Operación REGISTRAR');
+                if(isIfLocked()) break;
                 if(!expr.length) return psError('se esperaba contexto', l, operation);
                 const target = expr.shift().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, '');
                 if(!expr.length) return psError('se esperaba un identificador', l, operation);
@@ -213,6 +218,7 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
             //Crear entidades de datos
             case 'crear': {
                 if(logMore) console.log('Operación CREAR');
+                if(isIfLocked()) break;
                 if(!expr.length) return psError('se esperaba contexto', l, operation);
                 const target = expr.shift().toLowerCase();
                 if(!expr.length) return psError('se esperaba un identificador', l, operation);
@@ -245,12 +251,14 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
             //Guardar en base de datos
             case 'guardar': {
                 if(logMore) console.log('Operación GUARDAR');
+                if(isIfLocked()) break;
                 return psError('la palabra clave GUARDAR todavía no está disponible', l, operation);
             }
 
             //Cargar valores en entidades existentes, o crearlas si no existen
             case 'cargar': {
                 if(logMore) console.log('Operación CARGAR');
+                if(isIfLocked()) break;
                 if(!expr.length) return psError('se esperaba un identificador', l, operation);
                 const identifier = expr.shift();
                 if(expr.shift().toLowerCase() !== 'con') return psError('se esperaba "CON" en asignación de carga', l, operation);
@@ -261,7 +269,7 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
                     switch(loader.toLocaleLowerCase()) {
                         case 'lista':
                             if(!expr.length) return psError('se esperaba un valor', l, operation);
-                            loadValue = readLineReferences(mem, expr);
+                            loadValue = readLineReferences(mem, expr.join(' ').split(/ *,+ */));
                             break;
                         case 'texto':
                             if(!expr.length) return psError('se esperaba texto', l, operation);
@@ -313,6 +321,7 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
             //Evolucionar listas
             case 'extender': {
                 if(logMore) console.log('Operación EXTENDER');
+                if(isIfLocked()) break;
                 if(!expr.length) return psError('se esperaba un identificador', l, operation);
                 const identifier = expr.shift();
                 if(expr.shift().toLowerCase() !== 'con') return psError('se esperaba "CON" en extensión', l, operation);
@@ -367,6 +376,7 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
             //Ejecutar funciones sin almacenar el valor de retorno; para cargas indirectas
             case 'ejecutar': {
                 if(logMore) console.log('Operación EJECUTAR');
+                if(isIfLocked()) break;
                 if(!expr.length) return psError('se esperaba un valor o función', l, operation);
                 readLineReferences(mem, expr);
                 break;
@@ -382,16 +392,16 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
                     let approved = false;
                     if(logMore) console.log('Verificando lógica "Y":', lc);
                     if(!lc.length) return psError('se esperaba un identificador', l, operation);
-                    const identifier = lc.shift();
+                    const identifier = readReference(mem, lc.shift());
                     if(!lc.length) return psError('se esperaba contexto', l, operation);
-                    const target = lc.shift();
-                    if(!target)
-                        approved = identifier;
+                    const operator = lc.shift();
+                    if(!operator)
+                        approved = !!identifier;
                     else
-                        switch(target.toLowerCase()) {
+                        switch(operator.toLowerCase()) {
                             case 'es': {
                                 if(!lc.length) return psError('se esperaba un segundo identificador', l, operation);
-                                const identifier2 = lc.shift();
+                                const identifier2 = readReference(mem, lc.shift());
                                 if(logMore) console.log(identifier, '==', identifier2);
                                 if(identifier == identifier2)
                                     approved = true;
@@ -411,18 +421,31 @@ const readExpressions = async (expressions, mem, { memLogEnabled }) => {
 
                 const processedLogic = logicComponents.map(logicIsTruthy);
                 if(logMore) console.log('Malla lógica:', processedLogic, '\nDeterminado en SI:', processedLogic.every(l => l === true));
+                mem.__ifLevels__.unshift(processedLogic.every(l => l === true));
 
                 break;
             }
 
             case 'sino': {
                 if(logMore) console.log('Operación SINO');
-                return psError('la palabra clave SINO todavía no está disponible', l, operation);
+
+                if(!mem.__ifLevels__.length)
+                    return psError('no hay ningún SI en curso', l, operation);
+
+                mem.__ifLevels__[0] = !(mem.__ifLevels__[0]);
+                
+                break;
             }
 
             case 'finsi': {
                 if(logMore) console.log('Operación FINSI');
-                return psError('la palabra clave FINSI todavía no está disponible', l, operation);
+
+                if(!mem.__ifLevels__.length)
+                    return psError('no hay ningún SI en curso', l, operation);
+
+                mem.__ifLevels__.shift();
+                
+                break;
             }
             //#endregion
 
@@ -592,7 +615,7 @@ const readReference = (mem, str) => {
         if(logMore) console.log('Secuencia:', sequence.length, 'pasos');
         reference = getAttribute(mem, sequence);
     } else
-        reference = getLineString(str);
+        reference = Array.isArray(str) ? getLineString(str) : str;
     if(logMore) console.log('Referencia procesada:', reference);
     return reference;
 };
