@@ -94,7 +94,7 @@ class CommandManager {
 
     /**@param {ReplyOptions} replyOptions*/
     setReply(replyOptions) {
-        this._reply = replyOptions;
+        this.reply = replyOptions;
         return this;
     }
 
