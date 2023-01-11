@@ -79,7 +79,11 @@ const command = new CommandManager('twitters', flags)
 				.setFooter({ text: embedprops.footer ?? null });
 			
 			for(page = 0; page < twitters.length; page += div)
-				embed.addField(`Tabla ${Math.ceil(page / div) + 1}`, twitters.slice(page, page + div).join('\n'), true);
+				embed.addFields({
+					name: `Tabla ${Math.ceil(page / div) + 1}`,
+					value: twitters.slice(page, page + div).join('\n'),
+					inline: true,
+				});
 			
 			return ch.send({ embeds: [embed] });
 		}
@@ -117,7 +121,11 @@ const command = new CommandManager('twitters', flags)
 			twitters = twitters.filter(twitter => !ntw.some(nt => twitter === nt));
 			
 		for(page = 0; page < twitters.length; page += div)
-			embed.addField(`Tabla ${Math.ceil(page / div) + 1}`, twitters.slice(page, page + div).join('\n'), true);
+			embed.addFields({
+				name: `Tabla ${Math.ceil(page / div) + 1}`,
+				value: twitters.slice(page, page + div).join('\n'),
+				inline: true,
+			});
 
 		msg.edit({ embeds: [embed] });
 		return message.react('✅');
