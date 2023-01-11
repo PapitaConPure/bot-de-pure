@@ -176,6 +176,12 @@ const command = new CommandManager('roles', flags)
 							value: 'selectColor',
 						},
 						{
+							label: 'Anuncios',
+							description: '¡Recibe notificaciones de interés!',
+							emoji: '654489124413374474',
+							value: 'selectAnnouncement',
+						},
+						{
 							label: 'Juegos',
 							description: 'Roles mencionables para jugar juntos',
 							emoji: '919133024770211880',
@@ -194,7 +200,13 @@ const command = new CommandManager('roles', flags)
 							value: 'selectReligion',
 						},
 						{
-							label: 'Caramelos',
+							label: '⚠️ Gacha',
+							description: 'Trata y comercio de waifus; ludopatía',
+							emoji: '697321858407727224',
+							value: 'selectGacha',
+						},
+						{
+							label: '🔞 Caramelos',
 							description: 'Cargados de amor siniestro',
 							emoji: '778180421304188939',
 							value: 'selectCandy',
@@ -273,6 +285,28 @@ const command = new CommandManager('roles', flags)
 			ephemeral: true,
 		});
 	})
+	.setInteractionResponse(async function selectAnnouncement(interaction) {
+		const newsRole = '699304214253404292';
+		const hasNews = interaction.member.roles.cache.has(newsRole);
+		return interaction.reply({
+			embeds: [
+				new MessageEmbed()
+					.setColor('AQUA')
+					.addFields({
+						name: 'Anuncios del servidor',
+						value: 'Serás notificado en <#674734540899483658> por noticias importantes, eventos y ocasionalmente festividades.\nEste rol te será útil si te interesa alguna o todas esas cosas. No mencionamos muy seguido, tranquilo',
+					})
+			],
+			components: [new MessageActionRow().addComponents([
+				new MessageButton()
+					.setEmoji('654489124413374474')
+					.setLabel('Anuncios')
+					.setCustomId(`roles_${hasNews ? 'removeRole' : 'addRole'}_${newsRole}`)
+					.setStyle(hasNews ? 'PRIMARY' : 'SECONDARY'),
+			])],
+			ephemeral: true,
+		});
+	})
 	.setInteractionResponse(async function selectGame(interaction, section, edit = false) {
 		section = parseInt(section);
 		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
@@ -329,6 +363,28 @@ const command = new CommandManager('roles', flags)
 				...getPaginationControls(houraiDB.mentionRoles, 'FAITH', section),
 				...getEditButtonRow(interaction.member, 'FAITH'),
 			],
+			ephemeral: true,
+		});
+	})
+	.setInteractionResponse(async function selectGacha(interaction) {
+		const gachaRole = '813194804161806436';
+		const hasGacha = interaction.member.roles.cache.has(gachaRole);
+		return interaction.reply({
+			embeds: [
+				new MessageEmbed()
+					.setColor('DARK_GOLD')
+					.addFields({
+						name: 'Mercado de waifus',
+						value: 'Ha de advertirse: una vez dentro, salir es complicado. Entra solo si estás preparado para lo que es básicamente una carrera de gacha con desconocidos y comercio sin regulación (incluye extorsiones)',
+					})
+			],
+			components: [new MessageActionRow().addComponents([
+				new MessageButton()
+					.setEmoji('697321858407727224')
+					.setLabel('Gacha')
+					.setCustomId(`roles_${hasGacha ? 'removeRole' : 'addRole'}_${gachaRole}`)
+					.setStyle(hasGacha ? 'PRIMARY' : 'SECONDARY'),
+			])],
 			ephemeral: true,
 		});
 	})
