@@ -447,7 +447,8 @@ client.on('messageCreate', async message => {
             const exception = await findFirstException(command.flags, message);
             if(exception)
                 return channel.send({ embeds: [ generateExceptionEmbed(exception, { cmdString: `${pdetect.raw}${commandname}` }) ]});
-            await command.execute(message, args);
+            const rawArgs = content.slice(content.indexOf(commandname) + commandname.length).trim();
+            await command.execute(message, args, false, rawArgs);
             stats.commands.succeeded++;
         } catch(error) {
             const isPermissionsError = handleAndAuditError(error, message, { details: `"${message.content?.slice(0, 699)}"\n[${commandname} :: ${args}]` });
