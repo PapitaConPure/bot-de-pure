@@ -1,27 +1,18 @@
-const { CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
-module.exports = {
-	name: 'papa-escapar',
-	aliases: [
-		'papa-abandonar'
-	],
-	desc: 'Abandono.',
-	flags: new CommandMetaFlagsManager().add('PAPA'),
-
-	/**
-	 * 
-	 * @param {import('discord.js').Message} message 
-	 * @param {Array<String>} args
-	 * @returns 
-	 */
-	async execute(message, args) {
+const flags = new CommandMetaFlagsManager().add('PAPA');
+const command = new CommandManager('papa-escapar', flags)
+	.setAliases('papa-abandonar')
+	.setDescription('Abandono.')
+	.setExecution(async (request, args) => {
 		//Acción de comando
-		if(!args.length) return message.reply({ content: message.client.guilds.cache.map(g => `**${g.name}** ${g.id}`).join('\n') });
+		if(!args.length) return request.reply({ content: request.client.guilds.cache.map(g => `**${g.name}** ${g.id}`).join('\n') });
 		const search = args.join(' ');
-		let guild = message.client.guilds.cache.get(search);
-		if(!guild) guild = message.client.guilds.cache.find(g => g.name.toLowerCase().indexOf(search.toLowerCase()) !== -1);
-		if(!guild) return message.reply({ content: 'Servidor inválido' });
+		let guild = request.client.guilds.cache.get(search);
+		if(!guild) guild = request.client.guilds.cache.find(g => g.name.toLowerCase().indexOf(search.toLowerCase()) !== -1);
+		if(!guild) return request.reply({ content: 'Servidor inválido' });
 
 		return guild.leave();
-	}
-};
+	});
+
+module.exports = command;

@@ -20,7 +20,6 @@ const command = new CommandManager('inforol', flags)
 		'Si la búsqueda es `--estricta`, solo se listarán los usuarios que tengan _todos_ los roles mencionados, en lugar de _uno o más_.',
 	)
 	.setOptions(options)
-	.setExperimental(false)
 	.setExecution(async (request, args, isSlash) => {
 		if(!isSlash && args.length < 1)
 			return request.reply({ content: `:x: ¡Debes ingresar al menos un parámetro!\nUsa \`${p_pure(request.guildId).raw}ayuda inforol\` para más información` });

@@ -1,30 +1,25 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { p_pure } = require('../../localdata/config.json'); //Prefijos
 const { fetchFlag, fetchUser } = require('../../func.js');
-const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
+const flags = new CommandMetaFlagsManager().add('PAPA');
 const options = new CommandOptionsManager()
 	.addFlag('u', 'usuario',  'para especificar el usuario al cual responder', 				 { name: 'u', type: 'USER' })
 	.addFlag('a', 'aceptar',  'para confirmar la aceptación de sugerencia')
 	.addFlag('p', 'problema', 'para reportar un problema con la expresión de la sugerencia', { name: 'txt', type: 'TEXT' });
-
-module.exports = {
-	name: 'papa-responder',
-	aliases: [
-		'papa-r'
-	],
-	desc: `Manda una respuesta específica de \`${p_pure.raw}sugerir\` al \`--usuario\` designado\n` +
+const command = new CommandManager('papa-responder', flags)
+	.setAliases('papa-r')
+	.setDescription(
+		`Manda una respuesta específica de \`${p_pure.raw}sugerir\` al \`--usuario\` designado\n`,
 		'La respuesta si no se incluyen las banderas `--aceptar` y `--problema` es una confirmación de lectura',
-	flags: new CommandMetaFlagsManager().add('PAPA'),
-	options,
-
-	async execute(message, args) {
-		//Variables de flags
+	)
+	.setOptions(options)
+	.setExecution(async (message, args) => {
 		const user = fetchFlag(args, { property: true, short: ['u'], long: ['usuario'], callback: (x, i) => fetchUser(x[i], message) });
 		const action = fetchFlag(args, { short: ['a'], long: ['aceptar'], callback: 'accept' })
 			        || fetchFlag(args, { short: ['p'], long: ['problema'], callback: 'problem' });
 		
-		//Acción de comando
 		if(user === undefined) {
 			const sent = await message.reply({ content: ':warning: ¡Usuario no encontrado!' });
 			setTimeout(() => sent.delete(), 1000 * 5);
@@ -44,11 +39,12 @@ module.exports = {
 				.setColor('#aa5555')
 				.setAuthor({ name: 'Bot de Puré#9243', iconURL: message.client.user.avatarURL({ size: 256 }) })
 				.setTitle('Problema de presentación de sugerencia')
-				.addField('Detalle', args.join(' '));
+				.addFields({ name: 'Detalle', value: args.join(' ') });
 			user.send({
 				content: ':mailbox_with_mail: Llegó una notificación emergente del Buzón de Sugerencias.\n*__Nota:__ Bot de Puré no opera con mensajes privados.*',
 				embeds: [embed]
 			});
 		}
-	}
-};
+	});
+
+module.exports = command;

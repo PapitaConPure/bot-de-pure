@@ -4,15 +4,14 @@ const axios = require('axios');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 const { fetchFlag } = require('../../func.js');
 
 const options = new CommandOptionsManager()
 	.addFlag('d', ['del', 'delete'], 'para eliminar el mensaje original');
-
-module.exports = {
-	name: 'papa-eval',
-	desc: [
+const flags = new CommandMetaFlagsManager().add('PAPA');
+const command = new CommandManager('papa-eval', flags)
+	.setDescription(
 		'Evalúa una función de JavaScript en el contexto de la función `execute` de un módulo de comando.',
 		'```ts',
 		'global //Propiedades comunes en caché',
@@ -32,18 +31,10 @@ module.exports = {
 		`experimental: false //Forma experimental de interpretar cmdos.`,
 		'execute(request: CommandRequest, args: CommandOptions, isSlash: false) //Usar esto en la elavuación puede resultar en un bucle infinito (función recursiva sin condición)',
 		'```',
-		'Se pueden realizar modificaciones a las configuraciones comunes en la caché del proceso. No se puede acceder a la Base de Datos con esto'
-	].join('\n'),
-	flags: new CommandMetaFlagsManager().add('PAPA'),
-	options: options,
-	experimental: false,
-
-	/**
-	 * @param {import('../Commons/typings').CommandRequest} request 
-	 * @param {import('../Commons/typings').CommandOptions} args 
-	 * @param {Boolean} isSlash 
-	 */
-	async execute(request, args, isSlash = false) {
+		'Se pueden realizar modificaciones a las configuraciones comunes en la caché del proceso. No se puede acceder a la Base de Datos con esto',
+	)
+	.setOptions(options)
+	.setExecution(async (request, args) => {
 		//Acción de comando
 		try {
 			const fnString = args.join(' ');
@@ -54,9 +45,13 @@ module.exports = {
 			const embed = new Discord.MessageEmbed()
 				.setColor('#0000ff')
 				.setAuthor({ name: `${request.guild.name} • ${request.channel.name}`, iconURL: request.author.avatarURL({ dynamic: true }), url: request.url })
-				.addField('Ha ocurrido un error al ingresar un comando', `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``);
+				.addFields({
+					name: 'Ha ocurrido un error al ingresar un comando',
+					value: `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``,
+				});
 			await request.reply({ embeds: [embed] });
 		}
 		fetchFlag(args, { ...options.flags.get('del').structure, callback: request.delete });
-	}
-};
+	});
+
+module.exports = command;

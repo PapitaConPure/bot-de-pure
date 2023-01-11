@@ -25,7 +25,6 @@ const command = new CommandManager('encuesta', flags)
 		'Por defecto, el periodo de votación es un minuto. Puedes cambiarlo en `--horas`, `--minutos` y `--segundos`',
 	)
 	.setOptions(options)
-	.setExperimental(false)
 	.setExecution(async (request, args) => {
 		if(!args.length)
 			return request.reply({ content: ':warning: Necesitas ingresar al menos dos opciones' });

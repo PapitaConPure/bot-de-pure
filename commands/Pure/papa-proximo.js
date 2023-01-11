@@ -1,18 +1,15 @@
 const { modifyPresence } = require('../../presence.js');
-const { CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
-module.exports = {
-	name: 'papa-próximo',
-	aliases: [
-		'papa-proximo'
-	],
-	desc: '...',
-	flags: new CommandMetaFlagsManager().add('PAPA'),
+const flags = new CommandMetaFlagsManager().add('PAPA');
+const command = new CommandManager('papa-próximo', flags)
+	.setAliases('papa-proximo')
+	.setDescription('...')
+	.setExecution(async request => {
+		return Promise.all([
+			modifyPresence(request.client),
+			request.react('✅'),
+		])
+	});
 
-	async execute(message, _) {
-		await Promise.all([
-			modifyPresence(message.client),
-			message.react('✅'),
-		]);
-	}
-};
+module.exports = command;

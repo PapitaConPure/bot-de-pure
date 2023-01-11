@@ -19,7 +19,10 @@ class CommandManager {
 	options;
     /**@type {String?}*/
 	callx;
-    /**@type {Boolean?}*/
+    /**
+     * @type {Boolean?}
+     * @deprecated Los comandos mensaje/Slash experimentales ya se adoptaron como la norma
+     */
 	experimental;
     /**
      * @typedef {String | MessagePayload | InteractionReplyOptions} ReplyOptions
@@ -86,7 +89,10 @@ class CommandManager {
         return this;
     };
     
-    /**@param {Boolean?} experimental*/
+    /**
+     * @param {Boolean?} experimental
+     * @deprecated Los comandos mensaje/Slash experimentales ya se adoptaron como la norma
+     */
     setExperimental(experimental) {
         this.experimental = experimental ?? false;
         return this;

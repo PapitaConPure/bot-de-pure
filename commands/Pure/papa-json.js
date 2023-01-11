@@ -1,5 +1,5 @@
 const { MessageAttachment } = require('discord.js');
-const { CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const readObj = (object, indent) => {
 	let objret = '';
@@ -13,17 +13,15 @@ const readObj = (object, indent) => {
 	return objret;
 }
 
-module.exports = {
-	name: 'papa-json',
-	desc: 'Busca un `<objeto>` JS con cierto siguiendo las indicaciones de `<(ruta, nombre)>` en el `<archivo>` especificado (o `global.json`)',
-	flags: new CommandMetaFlagsManager().add('PAPA'),
-	options:[
-		'`<archivo?>` _(texto: *.json)_ para especificar en qué archivo buscar el objeto',
-		'`<objeto? (ruta, nombre)>` _(texto, texto)_ para especificar la ruta relativa al archivo del objeto a buscar, en orden descendiente'
-	],
-	callx: '<archivo?> <objeto? (ruta..., nombre)>',
+const options = new CommandOptionsManager()
+	.addParam('archivo', { name: 'texto', expression: '*.json' }, 'para especificar en qué archivo buscar el objeto', { optional: true })
+	.addParam('ruta', 'TEXT', 'para especificar la ruta relativa al archivo del objeto a buscar, en orden descendiente', { optional: true, poly: 'MULTIPLE' });
 
-	async execute(message, args) {
+const flags = new CommandMetaFlagsManager().add('PAPA');
+const command = new CommandManager('papa-json', flags)
+	.setDescription('Busca un `<objeto>` JS con cierto siguiendo las indicaciones de `<(ruta, nombre)>` en el `<archivo>` especificado (o `global.json`)')
+	.setOptions(options)
+	.setExecution(async (message, args) => {
 		const [ mainobj ] = args;
 
 		//Buscar objeto de forma descendiente
@@ -53,5 +51,6 @@ module.exports = {
 
 		const jsonfile = new MessageAttachment(Buffer.from(JSON.stringify(obj, null, '\t'), 'utf-8'), 'myfile.json');
 		return message.reply({ files: [ jsonfile ]});
-	}
-};
+	});
+
+module.exports = command;

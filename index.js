@@ -2,7 +2,7 @@
 //Sistemas
 const Discord = require('discord.js');
 const { REST } = require('@discordjs/rest');
-const { Routes } = require('discord-api-types/v9');
+const { Routes, PermissionFlagsBits } = require('discord-api-types/v9');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { CommandManager, CommandOptionsManager } = require('./commands/Commons/commands.js');
 const { PureVoiceUpdateHandler } = require('./systems/purevoice.js');
@@ -97,25 +97,31 @@ client.EmotesPure = new Discord.Collection(); //Emotes de Puré
 
     //Puré
     commandFiles = fs.readdirSync('./commands/Pure').filter(file => file.endsWith('.js'));
+    const commandTableStack = [];
     for(const file of commandFiles) {
         const commandModule = require(`./commands/Pure/${file}`);
         /**@type {CommandManager}*/
         const command = commandModule;
         client.ComandosPure.set(command.name, command);
         
-        // console.log(command.name?.padEnd(16, ' '), '\t', command.flags?.value, '\t', command.flags?.value?.toString?.(2)?.padStart?.(11, '0'))
-        
+        commandTableStack.push({
+            name: command.name,
+            flags: command.flags.values.join(', '),
+            tieneEmote: command.flags.has('EMOTE') ? '✅' : '❌',
+            tieneMod: command.flags.has('MOD') ? '✅' : '❌',
+        });
+
         if(command.flags.has('EMOTE'))
             client.EmotesPure.set(command.name, command);
 
-        if(typeof command.interact === 'function' || command.experimental) {
+        if(!command.flags.any('PAPA', 'OUTDATED', 'MAINTENANCE', 'GUIDE')) {
             const slash = new SlashCommandBuilder()
                 .setName(command.name)
                 .setDescription(command.brief || shortenText(command.desc, 100))
                 .setDMPermission(false);
             
-            // if(command.flags.has('MOD'))
-            //     slash.setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles | PermissionFlagsBits.ManageMessages);
+            if(command.flags.has('MOD'))
+                slash.setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles | PermissionFlagsBits.ManageMessages);
 
             /**@type {CommandOptionsManager}*/
             const options = command.options;
@@ -150,6 +156,7 @@ client.EmotesPure = new Discord.Collection(); //Emotes de Puré
                 client.SlashHouraiPure.set(command.name, jsonData);
         }
     }
+    console.table(commandTableStack);
 }
 console.timeEnd('Detección de archivos de comando');
 //#endregion
@@ -498,10 +505,7 @@ client.on('interactionCreate', async interaction => {
             if(exception)
                 return interaction.reply({ embeds: [ generateExceptionEmbed(exception, { cmdString: `/${commandName}` }) ], ephemeral: true });
             
-            if(command.experimental)
-                await command.execute(interaction, interaction.options, true);
-            else
-                await command.interact(interaction, interaction.options);
+            await command.execute(interaction, interaction.options, true);
             stats.commands.succeeded++;
         } catch(error) {
             const isPermissionsError = handleAndAuditError(error, interaction, { details: `/${commandName}` });

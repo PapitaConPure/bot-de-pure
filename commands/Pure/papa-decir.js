@@ -1,22 +1,18 @@
 const { Permissions } = require('discord.js');
 const { fetchFlag } = require('../../func');
 const { auditError } = require('../../systems/auditor');
-const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
+const flags = new CommandMetaFlagsManager().add('PAPA');
 const options = new CommandOptionsManager()
     .addParam('mensaje', 'TEXT', 'para especificar qué decir')
     .addFlag('bd', ['borrar', 'delete'],            'para borrar el mensaje original')
     .addFlag('sg', ['servidor', 'server', 'guild'], 'para enviar en otro server', { name: 'sv', type: 'GUILD' })
     .addFlag('c',  ['canal', 'channel'],            'para enviar en otro canal',  { name: 'ch', type: 'CHANNEL' });
-
-module.exports = {
-	name: 'papa-decir',
-    desc: 'Me hace decir lo que quieras que diga (privilegios elevados)',
-    flags: new CommandMetaFlagsManager().add('PAPA'),
-    options,
-    callx: '<mensaje>',
-	
-	async execute(message, args) {
+const command = new CommandManager('papa-decir', flags)
+    .setDescription('Me hace decir lo que quieras que diga (privilegios elevados')
+    .setOptions(options)
+    .setExecution(async (message, args) => {
         const del = fetchFlag(args, { short: ['b', 'd'], long: ['borrar', 'delete'], callback: true });
         const gcache = message.client.guilds.cache;
         let guild = fetchFlag(args, {
@@ -54,5 +50,6 @@ module.exports = {
             message.delete().catch(auditError);
 
         return message.reply(args.join(' ').split(/ +#ENDL +/g).join('\n'));
-    },
-};
+    });
+
+module.exports = command;
