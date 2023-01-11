@@ -1,6 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { randRange, fetchFlag } = require('../../func');
-const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const sassadata = {
 	sassamodo:
@@ -91,31 +91,22 @@ sassadata.recomm.total = (() => {
 	].map(coll => coll.length).reduce((a,b) => a + b);
 })();
 
+const flags = new CommandMetaFlagsManager().add(
+	'MEME',
+	'OUTDATED',
+);
 const options = new CommandOptionsManager()
 	.addFlag('sd', ['sassamodo', 'dross'], 'para despertar al demonio interno de Sassa')
 	.addFlag('t', 'total', 'para saber la cantidad total de recomendaciones');
-
-module.exports = {
-	name: 'sassafras',
-	aliases: [
-        'sassa', 'recomendaciones', 'sassapon', 'bassado', 'drossafras', 'dross'
-    ],
-	brief: 'Comando de recomendaciones de Sassafras',
-    desc: 'Comando de recomendaciones de Sassafras\n' +
+const command = new CommandManager('sassafras', flags)
+	.setAliases('sassa', 'recomendaciones', 'sassapon', 'bassado', 'drossafras', 'dross')
+	.setBriefDescription('Comando de recomendaciones de Sassafras')
+	.setLongDescription(
+		'Comando de recomendaciones de Sassafras',
 		'Cuidado con hacer enojar al tío Sassa, o puede que active su `--sassamodo`',
-	flags: new CommandMetaFlagsManager().add(
-		'MEME',
-		'OUTDATED',
-	),
-    options,
-	experimental: true,
-
-	/**
-	 * @param {import("../Commons/typings").CommandRequest} request
-	 * @param {import('../Commons/typings').CommandOptions} args
-	 * @param {Boolean} isSlash
-	 */
-	async execute(request, args, isSlash = false) {
+	)
+	.setOptions(options)
+	.setExecution(async (request, args, isSlash = false) => {
 		const showtotal = isSlash ? options.fetchFlag(args, 'total', { callback: true }) : fetchFlag(args, { short: ['t'], long: ['total'], callback: true });
 		const sassamodo = isSlash ? options.fetchFlag(args, 'sassamodo', { callback: true }) : fetchFlag(args, { short: ['s'], long: ['sassamodo','dross'], callback: true });
 		
@@ -138,28 +129,28 @@ module.exports = {
 		const date = today.getUTCDate();
 		let hint, spemote;
 		switch(today.getUTCMonth() + 1) {
-		case 4: //Abril
+		case 4:
 			if(date === 1) { //Día de los inocentes
 				hint = 'Y mirá, la verdad que me olvidé de pensar una frase para esto, pero sobala, puto';
 				spemote = '🤡';
 				list = sr.special.music.fool;
 			}
 			break;
-		case 6: //Junio
+		case 6:
 			if(date === 1) { //Cum
 				hint = 'Paga tributo al macho alfa de la casa, pequeño vividor';
 				spemote = '🍰';
 				list = sr.special.music.birthday;
 			}
 			break;
-		case 10: //Octubre
+		case 10:
 			if(date >= 30) { //Halloween
 				hint = '_The air is getting colder around you..._';
 				spemote = '🎃';
 				list = sr.special.music.halloween;
 			}
 			break;
-		case 12: //Diciembre
+		case 12:
 			if([24, 25].includes(date)) { //Navidad
 				hint = '¡Niños y niñas del mundo, vamos por ustedes!';
 				spemote = '🌟';
@@ -174,11 +165,13 @@ module.exports = {
 		if(showtotal) {
 			m = new Discord.MessageEmbed()
 				.setColor('#cccccc')
-				.addField('Total general', `Sassa tiene **${sr.total}** recomendaciones bajo la manga`, true)
-				.addField('Disponible actual', `Sassa quiere recomendarte **${list.length}** cosas`, true);
+				.addFields(
+					{ name: 'Total general',     value: `Sassa tiene **${sr.total}** recomendaciones bajo la manga`, inline: true },
+					{ name: 'Disponible actual', value: `Sassa quiere recomendarte **${list.length}** cosas`,        inline: true },
+				);
 
-			if(!hint) m.addField('Subgrupos comunes', `🎮x${sr.games.length}\n❓x${sr.music.unknown.length}\n😳x${sr.music.known.length}`, true);
-			else m.addField('Subgrupo especial', `${spemote}x${(list.length)}`, true);
+			if(!hint) m.addFields({ name: 'Subgrupos comunes', value: `🎮x${sr.games.length}\n❓x${sr.music.unknown.length}\n😳x${sr.music.known.length}`, inline: true });
+			else m.addFields({ name: 'Subgrupo especial', value: `${spemote}x${(list.length)}`, inline: true });
 			return request.reply({ embeds: [m] });
 		}
 		const i = randRange(0, list.length); //Índice aleatorio
@@ -192,7 +185,7 @@ module.exports = {
 		else if(i < umusic) //Juegos
 			m = new Discord.MessageEmbed()
 				.setColor('#cccccc')
-				.addField('El tío Sassa dice:', list[i]);
+				.addFields({ name: 'El tío Sassa dice:', value: list[i] });
 		else if(i < kmusic) //Música desconocida
 			m = `**Seguro nunca te escuchaste este temazo:**\nhttps://youtu.be/${list[i + (i === umusic?1:0)]}`;
 		else if(i < list.length) //Música """"conocida"""""
@@ -203,5 +196,6 @@ module.exports = {
 			: { embeds: [m] }
 		);
 		//#endregion
-    },
-};
+	});
+
+module.exports = command;
