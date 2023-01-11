@@ -1,6 +1,6 @@
 const { MessageEmbed } = require("discord.js");
 const { fetchUser, randRange } = require("../../func");
-const { CommandOptionsManager, CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const lovestats = () => [
 	{ text: '🤝 [n]% amistad',    number: randRange(0, 100, false) },
@@ -12,26 +12,14 @@ const lovestats = () => [
 	{ text: ':people_hugging: [n] palmaditas', number: randRange(3, 32) },
 ].map(stat => stat.text.replace('[n]', stat.number.toLocaleString('en', { maximumFractionDigits: 2 }))).join('\n');
 
+const flags = new CommandMetaFlagsManager().add('COMMON');
 const options = new CommandOptionsManager()
-	.addParam('persona', 'USER', 'el usuario a mimar')
-
-module.exports = {
-	name: 'mimar',
-	aliases: [
-		'besar', 'abrazar', 'hug', 'kiss'
-	],
-	desc: 'Mima al `<usuario>` mencionado y te da un resumen de cómo estuvo el mimo para ambas partes',
-	flags: new CommandMetaFlagsManager().add('COMMON'),
-	options: options,
-	callx: '<persona>',
-	experimental: true,
-	
-	/**
-	 * @param {import("../Commons/typings").CommandRequest} request
-	 * @param {import('../Commons/typings').CommandOptions} args
-	 * @param {Boolean} isSlash
-	 */
-	async execute(request, args, isSlash = false) {
+	.addParam('persona', 'USER', 'el usuario a mimar');
+const command = new CommandManager('mimar', flags)
+	.setAliases('mimos', 'besar', 'abrazar', 'hug', 'kiss')
+	.setDescription('Mima al `<usuario>` mencionado y te da un resumen de cómo estuvo el mimo para ambas partes')
+	.setOptions(options)
+	.setExecution(async (request, args, isSlash = false) => {
 		//Acción de comando
 		const user2 = isSlash ? args.getUser('persona') : fetchUser(args.join(' '), request);
 		if(!user2) return request.reply('⚠️ Debes especificar una persona a mimar');
@@ -41,9 +29,13 @@ module.exports = {
 		const embed = new MessageEmbed()
 			.setColor('#fa7b62')
 			.setTitle(`${user1.username} le ha dado mimos a ${user2.username}`)
-			.addField(user1.username, lovestats(), true)
-			.addField(user2.username, lovestats(), true)
+			.addFields(
+				{ name: user1.username, value: lovestats(), inline: true },
+				{ name: user2.username, value: lovestats(), inline: true },
+			)
 			.setImage('https://i.imgur.com/HwqSNyy.jpg');
 		return request.reply({ embeds: [embed] });
-	}
-};
+	});
+
+
+module.exports = command;

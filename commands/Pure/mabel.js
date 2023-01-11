@@ -1,5 +1,5 @@
 const { randRange }  = require('../../func.js');
-const { CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const h = [
 	':heart:',
@@ -13,20 +13,12 @@ const h = [
 	':heartpulse:'
 ];
 
-module.exports = {
-	name: 'mabel',
-	aliases: [
-		'merraz', 'mármol', 'gay',
-		'pride'
-	],
-	desc: 'Comando de inclusión de Mabel',
-	flags: new CommandMetaFlagsManager().add('MEME'),
+const flags = new CommandMetaFlagsManager().add('MEME');
+const command = new CommandManager('mabel', flags)
+	.setAliases('merraz', 'mármol', 'gay', 'pride')
+	.setDescription('Comando de inclusión de Mabel')
+	.setExecution(async request => {
+		request.reply({ content: `:gay_pride_flag: ${Array(7).fill``.map(() => h[randRange(0, h.length)]).join(' ')} :transgender_flag:` });
+	});
 
-	async execute({ channel }, _) {
-		channel.send({ content: `:gay_pride_flag: ${Array(7).fill``.map(() => h[randRange(0, h.length)]).join(' ')} :transgender_flag:` });
-	},
-
-	async interact(interaction, _) {
-		interaction.reply({ content: `:gay_pride_flag: ${Array(7).fill``.map(() => h[randRange(0, h.length)]).join(' ')} :transgender_flag:` });
-	}
-};
+module.exports = command;

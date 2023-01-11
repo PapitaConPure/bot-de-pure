@@ -1,5 +1,5 @@
 const { randRange } = require("../../func");
-const { CommandMetaFlagsManager } = require('../Commons/commands');
+const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const emot = [
     '\'o\'', '\'O\'', '\'u\'', '\'U\'', '^O^', 'o.o', 'O.O', 'QUQ', '\'.\'', '¬u¬', '¬U¬', 'o\'o', 'o.o\'\'', 'o-o', 'O.o', 'x.x', 'ouo', 'OUO', 'OuO', 'Ouo', '>:C',
@@ -7,19 +7,12 @@ const emot = [
     '\\^O^/', '\\`u´/', '\\´u`/', '\'n\'', '^w^', '^W^', 'ouO', '>:3c', '\'o\'/', '\'u\'/', '\'O\'/', '\'U\'/', '>w<', '>W<', '°w°', '°W°'
 ];
 
-module.exports = {
-    name: 'marisaac',
-    aliases: [
-        'mari'
-    ],
-    desc: 'Comando de caritas de Marisaac',
-    flags: new CommandMetaFlagsManager().add('MEME'),
-  
-    async execute({ channel }, _) {
-        channel.send({ content: `**${emot[randRange(0, emot.length)]}**` });
-    },
-  
-    async interact(interaction, _) {
-        interaction.reply({ content: `**${emot[randRange(0, emot.length)]}**` });
-    }
-};
+const flags = new CommandMetaFlagsManager().add('MEME');
+const command = new CommandManager('marisaac', flags)
+    .setAliases('mari')
+    .setDescription('Comando de caritas de Marisaac')
+    .setExecution(async request => {
+        request.reply({ content: `**${emot[randRange(0, emot.length)]}**` });
+    });
+
+module.exports = command;
