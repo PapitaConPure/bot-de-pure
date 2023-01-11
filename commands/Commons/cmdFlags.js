@@ -1,4 +1,10 @@
 /**
+ * Pequeño disclaimer: no había necesidad de optimizar esto con bitfields, pero lo hice de todas formas porque quería probar usar bitfields por primera vez, sonaba divertido.
+ * En efecto, resulta que fue divertido. Tenga un buen día.
+ * ~~Papita
+ */
+
+/**
  * @typedef {'COMMON' | 'MOD' | 'EMOTE' | 'MEME' | 'CHAOS' | 'GAME' | 'MAINTENANCE' | 'OUTDATED' | 'GUIDE' | 'PAPA' | 'HOURAI'} MetaFlagValue
  * @type {Array<String>}
  */
@@ -64,7 +70,7 @@ class CommandMetaFlagsManager {
     };
 
     /**
-     * Comprueba si el conjunto contiene al menos una de las Meta Flag mencionadas
+     * Comprueba si el conjunto contiene todas las Meta Flag mencionadas
      * @param  {...MetaFlagValue} flags Meta Flags de comando a comprobar
      */
     all(...flags) {
@@ -80,6 +86,7 @@ class CommandMetaFlagsManager {
 
     /**Valores decimales individuales de las Meta Flags existentes en el conjunto, ordenadas de mayor a menor*/
     get rawValues() {
+        /**@type {Array<BigInt>}*/
         const values = [];
 
         let i = BigInt(2 ** this.bitField.toString(2).length);
