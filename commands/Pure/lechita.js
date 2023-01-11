@@ -77,7 +77,7 @@ const command = new CommandManager('lechita', flags)
 			? request.channel.parent.nsfw
 			: request.channel.nsfw;
 		
-		const target = isSlash ? args.getString('objetivo').trim() : args.join(' ');
+		const target = isSlash ? (args.getString('objetivo')?.trim() ?? '') : args.join(' ');
 		const user = request.author ?? request.user;
 
 		if(isnsfw) {
