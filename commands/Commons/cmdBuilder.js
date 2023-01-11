@@ -27,7 +27,7 @@ class CommandManager {
      */
     reply;
     /**
-     * @typedef {(request: CommandRequest, args: CommandOptions, isSlash = false) => Promise<*>} ExecutionFunction
+     * @typedef {(request: CommandRequest, args: CommandOptions, isSlash = false, rawArgs: string) => Promise<*>} ExecutionFunction
      * @typedef {(interaction: Interaction, ...args: String) => Promise<*>} InteractionResponseFunction
      * @typedef {(interaction: ButtonInteraction, ...args: String) => Promise<*>} ButtonResponseFunction
      * @typedef {(interaction: SelectMenuInteraction, ...args: String) => Promise<*>} SelectMenuResponseFunction
