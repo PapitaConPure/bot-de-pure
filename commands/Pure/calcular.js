@@ -8,9 +8,7 @@ const emot = [
 	'No avancé en el manga de Komachi', 'Mañana lo hago', 'Otro día', 'Mañana sin falta', 'Esta semana lo termino', 'Procrastinar'
 ];
 
-const flags = new CommandMetaFlagsManager().add(
-	'MEME',
-);
+const flags = new CommandMetaFlagsManager().add('COMMON');
 const options = new CommandOptionsManager()
 	.addParam('operación', 'TEXT', ' para expresar la operación matemátca')
 	.addFlag(['a','s'], 'acortar', 'para acortar el resultado')
