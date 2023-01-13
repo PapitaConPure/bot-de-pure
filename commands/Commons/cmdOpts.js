@@ -431,6 +431,41 @@ class CommandOptionsManager {
             }).join(' ');
     };
     /**
+     * Si es un comando Slash, devuelve el valor del parámetro ingresado
+     * Si es un comando de mensaje, remueve y devuelve la siguente entrada o devuelve todas las entradas en caso de que whole sea verdadero
+     * Si no se recibe ningún parámetro, se devuelve undefined
+     * @param {import('discord.js').CommandInteractionOptionResolver | Array<String>} args El conjunto de entradas
+     * @param {String} slashIdentifier El identificador del parámetro para comandos Slash
+     * @param {Boolean?} whole Indica si devolver todas las entradas en caso de un comando de mensaje
+     * @returns {*} El valor del parámetro
+     */
+    fetchParam(args, slashIdentifier, whole = false) {
+        /**@type {CommandParam}*/
+        const param = this.params.get(slashIdentifier);
+
+        if(!param)
+            throw new ReferenceError(`No se pudo encontrar un parámetro con el identificador: ${slashIdentifier}`);
+
+        if(Array.isArray(args))
+            return whole ? args.join(' ') : args.shift();
+
+        let getMethod = 'getBoolean';
+
+        if(param.isExpressive()) {
+            switch(param._type) {
+                case 'NUMBER':  getMethod = 'getNumber';  break;
+                case 'USER':    getMethod = 'getUser';    break;
+                case 'MEMBER':  getMethod = 'getUser';    break;
+                case 'ROLE':    getMethod = 'getRole';    break;
+                case 'CHANNEL': getMethod = 'getChannel'; break;
+                case 'ID':      getMethod = 'getInteger'; break;
+                default:        getMethod = 'getString';  break;
+            }
+        }
+        
+        return args[getMethod](slashIdentifier, !param._optional);
+    };
+    /**
      * Devuelve un arreglo de todas las entradas recibidas.
      * Si no se recibe ninguna entrada, se devuelve fallback
      * @param {CommandInteractionOptionResolver} args El resolvedor de opciones de interacción
