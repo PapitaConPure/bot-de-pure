@@ -13,8 +13,7 @@ const command = new CommandManager('número', flags)
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash = false) => {
 		//Acción de comando
-		const shorten = fetchFlag(args, { ...options.flags.get('acortar').structure, callback: true, fallback: false });
-		const getFunc = (x,i) => x[i];
+		const shorten = options.fetchFlag(args, 'acortar');
 		const min = options.fetchFlag(args, 'mínimo', { fallback: 1 });
 		const exp = options.fetchFlag(args, 'exponente', { fallback: 1 });
 		
