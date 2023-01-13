@@ -17,7 +17,7 @@ const command = new CommandManager('calcular', flags)
 	.setAliases('calc', 'clc', 'cx')
 	.setLongDescription(
 		'Realiza un cálculo básico y devuelve el resultado.',
-		'Usa + para sumar, - para restar, * para multiplicar, / para dividir, ^ para exponenciar, % para sacar m�dulo y () para asociar t�rminos',
+		'Usa + para sumar, - para restar, * para multiplicar, / para dividir, ^ para exponenciar, % para sacar módulo y () para asociar términos',
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
