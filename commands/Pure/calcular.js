@@ -10,7 +10,6 @@ const emot = [
 
 const flags = new CommandMetaFlagsManager().add(
 	'MEME',
-	'OUTDATED',
 );
 const options = new CommandOptionsManager()
 	.addParam('operación', 'TEXT', ' para expresar la operación matemátca')
@@ -22,6 +21,7 @@ const command = new CommandManager('calcular', flags)
 		'Realiza un cálculo básico y devuelve el resultado.',
 		'Usa + para sumar, - para restar, * para multiplicar, / para dividir, ^ para exponenciar, % para sacar m�dulo y () para asociar t�rminos',
 	)
+	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const shorten = options.fetchFlag(args, 'acortar', { callback: true, fallback: false });
 		const min = options.fetchFlag(args, 'mínimo', { fallback: 1 });
