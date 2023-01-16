@@ -28,6 +28,7 @@ const PARAM_TYPES = {
 const fetchMessageFlagText = (args, i) => {
     if(i >= args.length)
         return undefined;
+    console.log(args);
 
     //Conjunto de palabras, señalado entre ""
     if(args[i].startsWith('"')) {
@@ -72,20 +73,20 @@ const fetchMessageFlag = (args, flag = { property, short: [], long: [], callback
             return args.splice(i, 1);
         }
 
-        if(flag.short?.length && arg.startsWith('-')) {
-            const flagChars = [...arg.slice(1)].filter(c => flag.short.includes(c));
+        if(flag.short?.length && arg.startsWith('-') && !arg === '-') {
+            const flagChars = [...arg].slice(1).filter(c => flag.short.includes(c));
             for(c of flagChars) {
                 flagValue = flag.property ? fetchMessageFlagText(args, i + 1) : c;
-                const flagSize = 1;
 
                 if(arg.length <= 2)
-                    return args.splice(i, flagSize);
+                    return args.splice(i, 1);
 
                 const flagToRemove = new RegExp(c, 'g')
-                let temp = args.splice(i, flagSize); //Remover temporalmente el stack completo de flags cortas y el parámetro si es flag-propiedad
+                let temp = args.splice(i, 1); //Remover temporalmente el stack completo de flags cortas
                 args.push(temp[0].replace(flagToRemove, '')); //Reincorporar lo eliminado, descartando las flags ya procesadas
-                if(flag.property) args.push(temp[1]);
             }
+            if(args[i] === '-')
+                args.splice(i, 1);
         }
     });
     
