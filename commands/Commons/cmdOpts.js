@@ -37,7 +37,7 @@ const fetchMessageFlagText = (args, i) => {
         while(lastIndex < args.length && !args[lastIndex].endsWith('"'))
             lastIndex++;
         text = args.slice(i, lastIndex + 1).join(' ').slice(1);
-        args.splice(i, lastIndex - i);
+        args.splice(i, lastIndex - i + 1);
         if(text.length > 1) return (text.endsWith('"')) ? text.slice(0, -1) : text;
         else return undefined;
     }
