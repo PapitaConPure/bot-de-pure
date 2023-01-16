@@ -5,7 +5,7 @@ const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = requi
 
 const frase = [
 	'Oe po [m] <:junkNo:697321858407727224>',
-	'Wacho, cachai[m] <:yumou:708158159180660748>',
+	'Wacho, cachai [m] <:yumou:708158159180660748>',
 	'Oe [m] qliao <:miyoi:674823039086624808>',
 	'Responde po [m] <:mayuwu:654489124413374474>',
 	'¿Vai a responder [m]? <:haniwaSmile:659872119995498507>',
@@ -13,11 +13,21 @@ const frase = [
 	'Dale [m] ctm <:reibu:686220828773318663>',
 	'Wena po [m] como andai <:meguSmile:694324892073721887>',
 	'Pero qué andai haciendo po [m] rectm <:spookedSyura:725577379665281094>',
-	'NoOoOoOo re TUuUrBiOoOoOo, veni [m] <:junkWTF:796930821260836864>'
+	'NoOoOoOo re TUuUrBiOoOoOo, veni [m] <:junkWTF:796930821260836864>',
+	'[m] y eso pa? <:keikuwu:796930824028946432>',
+	'Sácame de la jarra [m] po <:jarra:751600554702143579>',
+	'Agáchate [m] <:lechita:931409943448420433>',
+	'[m] ola <:elGato:796931141797675029>',
+	'[m] uy se me resbaló el dedo <:cursed:657680175584247812>',
+	'Se te ve la raja [m] <:detective:720736199727251536>',
 ];
-async function pinguear(channel, user, cnt) {
-	await channel.send({ content: frase[randRange(0, frase.length)].replace('[m]', `${user}`) });
-	if(cnt > 1) setTimeout(pinguear, 800, channel, user, cnt - 1);
+async function pinguear(request, user, cnt, isFirst) {
+	const replyContent = { content: frase[randRange(0, frase.length)].replace('[m]', `${user}`) };
+	if(isFirst)
+		await request.reply(replyContent);
+	else
+		await request.channel.send(replyContent);
+	if(cnt > 1) setTimeout(pinguear, 800, request, user, cnt - 1, false);
 }
 
 const flags = new CommandMetaFlagsManager().add(
@@ -53,11 +63,10 @@ const command = new CommandManager('pinguear', flags)
 
 		const user = isSlash ? args.getUser('usuario') : fetchUser(userSearch, request);
 		if(!user)
-			return request.reply({ content: ':warning: Usuario inválido', ephemeral: true });
+			return request.reply({ content: '⚠ Usuario inválido', ephemeral: true });
 
 		uses.pinguear[uid] = now * 1;
-		if(isSlash) await request.reply({ content: `🤡 Tirando pings a **${user.tag}**`, ephemeral: true });
-		return pinguear(request.channel, user, repeats);
+		return pinguear(request, user, repeats, true);
 	});
 
 module.exports = command;
