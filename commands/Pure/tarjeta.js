@@ -2,7 +2,7 @@ const Canvas = require('canvas');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { MessageAttachment } = require('discord.js');
-const { improveNumber, fetchFlag } = require('../../func');
+const { improveNumber } = require('../../func');
 
 /**
  * @param {String} url 

@@ -1,5 +1,4 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const { fetchFlag, fetchSentence } = require('../../func.js');
 const { auditError } = require('../../systems/auditor.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 

@@ -1,7 +1,7 @@
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { fetchFlag, isNotModerator, fetchUserID, navigationRows } = require('../../func.js');
+const { isNotModerator, fetchUserID, navigationRows } = require('../../func.js');
 const { MessageEmbed, MessageActionRow, MessageButton, MessageAttachment, Modal, TextInputComponent } = require('discord.js');
 const { executeTuber } = require('../../systems/purescript.js');
 
