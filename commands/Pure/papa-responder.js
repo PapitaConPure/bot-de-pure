@@ -1,9 +1,12 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { p_pure } = require('../../localdata/config.json'); //Prefijos
-const { fetchFlag, fetchUser } = require('../../func.js');
+const { fetchUser } = require('../../func.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
-const flags = new CommandMetaFlagsManager().add('PAPA');
+const flags = new CommandMetaFlagsManager().add(
+	'PAPA',
+	'OUTDATED',
+);
 const options = new CommandOptionsManager()
 	.addFlag('u', 'usuario',  'para especificar el usuario al cual responder', 				 { name: 'u', type: 'USER' })
 	.addFlag('a', 'aceptar',  'para confirmar la aceptación de sugerencia')
@@ -15,36 +18,39 @@ const command = new CommandManager('papa-responder', flags)
 		'La respuesta si no se incluyen las banderas `--aceptar` y `--problema` es una confirmación de lectura',
 	)
 	.setOptions(options)
-	.setExecution(async (message, args) => {
-		const user = fetchFlag(args, { property: true, short: ['u'], long: ['usuario'], callback: (x, i) => fetchUser(x[i], message) });
-		const action = fetchFlag(args, { short: ['a'], long: ['aceptar'], callback: 'accept' })
-			        || fetchFlag(args, { short: ['p'], long: ['problema'], callback: 'problem' });
+	.setExecution(async (request, args) => {
+		const user = options.fetchFlag(args, 'usuario', { callback: (x) => fetchUser(x, request) });
+		console.log(args);
+		const action = options.fetchFlag(args, 'aceptar', { callback: 'accept' })
+			        || options.fetchFlag(args, 'problema');
+		console.log(action);
+		console.log(args);
 		
-		if(user === undefined) {
-			const sent = await message.reply({ content: ':warning: ¡Usuario no encontrado!' });
+		if(user == undefined) {
+			const sent = await request.reply({ content: ':warning: ¡Usuario no encontrado!' });
 			setTimeout(() => sent.delete(), 1000 * 5);
 			return;
 		}
 
-		if(action === undefined) //Confirmación de lectura
-			user.send({ content: '📩 ¡Se confirmó que tu sugerencia ha sido leída! Si es aceptada, se te notificará de igual forma; en caso contrario, no recibirás ninguna notificación.' });
-		else if(action === 'accept') //Confirmación de aceptación
-			user.send({
+		if(!action) //Confirmación de lectura
+			return user.send({ content: '📩 ¡Se confirmó que tu sugerencia ha sido leída! Si es aceptada, se te notificará de igual forma; en caso contrario, no recibirás ninguna notificación.' });
+		
+		if(action === 'accept') //Confirmación de aceptación
+			return user.send({
 				content:
 					'💌 ¡Se confirmó que tu sugerencia ha sido aceptada! ¡¡¡Muchas gracias por tu colaboración!!! <:meguSmile:796930824627945483>\n' +
 					'_Ten en cuenta que es probable que se hagan modificaciones al plan en base a diversos factores._'
 			});
-		else { //Reporte de problema
-			const embed = new Discord.MessageEmbed()
-				.setColor('#aa5555')
-				.setAuthor({ name: 'Bot de Puré#9243', iconURL: message.client.user.avatarURL({ size: 256 }) })
-				.setTitle('Problema de presentación de sugerencia')
-				.addFields({ name: 'Detalle', value: args.join(' ') });
-			user.send({
-				content: ':mailbox_with_mail: Llegó una notificación emergente del Buzón de Sugerencias.\n*__Nota:__ Bot de Puré no opera con mensajes privados.*',
-				embeds: [embed]
-			});
-		}
+		//Reporte de problema
+		const embed = new Discord.MessageEmbed()
+			.setColor('#aa5555')
+			.setAuthor({ name: 'Bot de Puré#9243', iconURL: request.client.user.avatarURL({ size: 256 }) })
+			.setTitle('Problema de presentación de sugerencia')
+			.addFields({ name: 'Detalle', value: action });
+		return user.send({
+			content: ':mailbox_with_mail: Llegó una notificación emergente del Buzón de Sugerencias.\n*__Nota:__ Bot de Puré no opera con mensajes privados.*',
+			embeds: [embed]
+		});
 	});
 
 module.exports = command;
