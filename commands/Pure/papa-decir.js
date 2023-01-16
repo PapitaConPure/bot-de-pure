@@ -1,5 +1,4 @@
 const { Permissions } = require('discord.js');
-const { fetchFlag } = require('../../func');
 const { auditError } = require('../../systems/auditor');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
@@ -13,29 +12,25 @@ const command = new CommandManager('papa-decir', flags)
     .setDescription('Me hace decir lo que quieras que diga (privilegios elevados')
     .setOptions(options)
     .setExecution(async (message, args) => {
-        const del = fetchFlag(args, { short: ['b', 'd'], long: ['borrar', 'delete'], callback: true });
-        const gcache = message.client.guilds.cache;
-        let guild = fetchFlag(args, {
-			property: true,
-			short: [ 's', 'g' ],
-			long: [ 'server', 'guild' ],
-			callback: (x,i) => gcache.get(x[i]) || gcache.find(g => g.name.toLowerCase().indexOf(x[i]) !== -1)
+        const deleteAfter = options.fetchFlag(args, 'borrar');
+        const guildsCache = message.client.guilds.cache;
+        let guild = options.fetchFlag(args, 'servidor', {
+			callback: (x) => guildsCache.get(x) || guildsCache.find(g => g.name.toLowerCase().indexOf(x) !== -1)
 		});
         let needch = false;
         if(!guild) guild = message.guild;
         else needch = true;
         const ccache = guild.channels.cache;
-        let channel = fetchFlag(args, {
-			property: true,
-			short: [ 'c' ],
-			long: [ 'canal', 'channel' ],
-			callback: (x,i) => {
-				let cs = x[i];
+        let channel = options.fetchFlag(args, 'canal', {
+			callback: (cs) => {
 				if(cs.startsWith('<#') && cs.endsWith('>'))
 					cs = cs.slice(2, -1);
-				return ccache.get(cs) || ccache.find(g => g.name.toLowerCase().indexOf(cs) !== -1);
+				const channel = ccache.get(cs) || ccache.filter(c => c.isText()).find(c => c.name.toLowerCase().indexOf(cs) !== -1);
+                if(!channel.isText()) return;
+                return channel;
 			}
 		});
+
         if(!args.length)
             return message.reply({ content: ':warning: tienes que especificar lo que quieres que diga.' });
 
@@ -46,10 +41,10 @@ const command = new CommandManager('papa-decir', flags)
         if(!channel)
             return message.reply({ content: ':warning: debes especificar un canal de la guild que ingresaste.' });
         
-        if(del && message.deletable && message.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES))
+        if(deleteAfter && message.deletable && message.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES))
             message.delete().catch(auditError);
 
-        return message.reply(args.join(' ').split(/ +#ENDL +/g).join('\n'));
+        return channel.send(args.join(' ').split(/ +#ENDL +/g).join('\n'));
     });
 
 module.exports = command;

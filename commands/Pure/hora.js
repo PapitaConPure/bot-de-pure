@@ -1,4 +1,3 @@
-const { fetchFlag, fetchSentence } = require('../../func.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const options = new CommandOptionsManager()
@@ -20,7 +19,7 @@ const command = new CommandManager('hora', flags)
 		const gmt = options.fetchFlag(args, 'gmt', { callback: x => x * 1, fallback: 0 });
 
 		//Definir fecha
-		const dateStr = isSlash ? args.getString('fecha') : fetchFlag(args, { property: true, ...options.flags.get('fecha').structure, callback: fetchSentence });
+		const dateStr = options.fetchFlag(args, 'fecha');
 		let year, month, day;
 		if(dateStr) {
 			let isInvalidDate = false;

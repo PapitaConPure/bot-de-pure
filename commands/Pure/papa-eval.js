@@ -5,7 +5,6 @@ const Canvas = require('canvas');
 const Discord = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
-const { fetchFlag } = require('../../func.js');
 
 const options = new CommandOptionsManager()
 	.addFlag('d', ['del', 'delete'], 'para eliminar el mensaje original');
@@ -35,7 +34,7 @@ const command = new CommandManager('papa-eval', flags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		//Acción de comando
+		const deleteAfter = options.fetchFlag(args, 'del');
 		try {
 			const fnString = args.join(' ');
 			console.log(fnString);
@@ -51,7 +50,8 @@ const command = new CommandManager('papa-eval', flags)
 				});
 			await request.reply({ embeds: [embed] });
 		}
-		fetchFlag(args, { ...options.flags.get('del').structure, callback: request.delete });
+		if(deleteAfter)
+			request.delete();
 	});
 
 module.exports = command;
