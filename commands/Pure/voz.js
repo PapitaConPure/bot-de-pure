@@ -1,7 +1,7 @@
 const PureVoice = require('../../localdata/models/purevoice.js');
 const { MessageEmbed, MessageActionRow, MessageButton, MessageCollector } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { isNotModerator, fetchFlag, defaultEmoji } = require('../../func.js');
+const { isNotModerator, defaultEmoji } = require('../../func.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const cancelbutton = (id) => new MessageButton()
@@ -42,9 +42,7 @@ const command = new CommandManager('voz', flags)
 	.setLongDescription('Para inyectar un Sistema PuréVoice en una categoria. Simplemente usa el comando y sigue los pasos del Asistente para configurar todo')
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash = false) => {
-		const generateWizard = isSlash
-			? args.getBoolean('asistente')
-			: fetchFlag(args, { ...options.flags.get('asistente').structure, callback: true });
+		const generateWizard = options.fetchFlag(args, 'asistente');
 	
 		if(generateWizard) {
 			//Inicializar instalador PuréVoice
@@ -69,10 +67,7 @@ const command = new CommandManager('voz', flags)
 		
 		//Cambiar nombre de canal de voz de sesión
 		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda voz\` para más información`;
-		const defaultEmote = '💠';
-		const emoteString = isSlash
-			? (args.getString('emote') ?? defaultEmote)
-			: fetchFlag(args, { ...options.flags.get('emote').structure, property: true, callback: (x, i) => x[i], fallback: defaultEmote });
+		const emoteString = options.fetchFlag(args, 'emote', { fallback: '💠' });
 		const sessionEmote = defaultEmoji(emoteString);
 		const sessionName = isSlash
 			? args.getString('nombre')

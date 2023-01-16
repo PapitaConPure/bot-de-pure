@@ -1,5 +1,5 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const { randRange, fetchFlag } = require('../../func');
+const { randRange } = require('../../func');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const sassadata = {
@@ -106,11 +106,11 @@ const command = new CommandManager('sassafras', flags)
 		'Cuidado con hacer enojar al tío Sassa, o puede que active su `--sassamodo`',
 	)
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash = false) => {
-		const showtotal = isSlash ? options.fetchFlag(args, 'total', { callback: true }) : fetchFlag(args, { short: ['t'], long: ['total'], callback: true });
-		const sassamodo = isSlash ? options.fetchFlag(args, 'sassamodo', { callback: true }) : fetchFlag(args, { short: ['s'], long: ['sassamodo','dross'], callback: true });
+	.setExecution(async (request, args) => {
+		const showTotal = options.fetchFlag(args, 'total');
+		const sassamodo = options.fetchFlag(args, 'sassamodo');
 		
-		if(!showtotal && sassamodo)
+		if(!showTotal && sassamodo)
 			return request.reply({ content: sassadata.sassamodo });
 		
 		//Lista general con sublistas de juegos y música
@@ -162,7 +162,7 @@ const command = new CommandManager('sassafras', flags)
 
 		//#region Envío de línea de recomendación o total
 		let m; //Mensaje
-		if(showtotal) {
+		if(showTotal) {
 			m = new Discord.MessageEmbed()
 				.setColor('#cccccc')
 				.addFields(
