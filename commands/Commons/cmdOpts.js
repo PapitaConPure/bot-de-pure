@@ -4,15 +4,57 @@
  * @typedef {'SINGLE'|'MULTIPLE'|Array<String>} ParamPoly Capacidad de entradas de parámetro de CommandOption
  */
 
+const PARAM_TYPES = {
+    'NUMBER':  { getMethod: 'getNumber',  help: 'número' },
+    'TEXT':    { getMethod: 'getString',  help: 'texto' },
+    'USER':    { getMethod: 'getUser',    help: 'U{mención/texto/id}' },
+    'MEMBER':  { getMethod: 'getUser',    help: 'M{mención/texto/id}' },
+    'ROLE':    { getMethod: 'getRole',    help: 'R{mención/texto/id}' },
+    'GUILD':   { getMethod: 'getString',  help: 'g{texto/id}' },
+    'CHANNEL': { getMethod: 'getChannel', help: 'C{enlace/texto/id}' },
+    'MESSAGE': { getMethod: 'getString',  help: 'm{enlace/texto/id}' },
+    'EMOTE':   { getMethod: 'getString',  help: 'emote' },
+    'IMAGE':   { getMethod: 'getString',  help: 'imagen/enlace' },
+    'FILE':    { getMethod: 'getString',  help: 'archivo/enlace' },
+    'URL':     { getMethod: 'getString',  help: 'enlace' },
+    'ID':      { getMethod: 'getInteger', help: 'id' },
+};
+
 /**
  * @function
  * @param {Array<String>} args
+ * @return {String}
+ */
+const fetchMessageFlagText = (args, i) => {
+    if(i >= args.length)
+        return undefined;
+
+    //Conjunto de palabras, señalado entre ""
+    if(args[i].startsWith('"')) {
+        let lastIndex = i;
+        let text;
+
+        while(lastIndex < args.length && !args[lastIndex].endsWith('"'))
+            lastIndex++;
+        text = args.slice(i, lastIndex + 1).join(' ').slice(1);
+        args.splice(i, lastIndex - i);
+        if(text.length > 1) return (text.endsWith('"')) ? text.slice(0, -1) : text;
+        else return undefined;
+    }
+
+    return args.splice(i, 1)[0];
+}
+
+/**
+ * @typedef {(value, isSlash: Boolean) => *} FlagCallback
+ * @function
+ * @param {Array<String>} args
  * @param {{
- *  property: Boolean
- *  short: Array<String>
- *  long: Array<String>
- *  callback: *
- *  fallback: *
+ *  property: Boolean,
+ *  short: Array<String>,
+ *  long: Array<String>,
+ *  callback: FlagCallback,
+ *  fallback: *,
  * }} flag
  */
 const fetchMessageFlag = (args, flag = { property, short: [], long: [], callback, fallback }) => {
@@ -26,15 +68,15 @@ const fetchMessageFlag = (args, flag = { property, short: [], long: [], callback
         arg = arg.toLowerCase();
 
         if(flag.long?.length && arg.startsWith('--') && flag.long.includes(arg.slice(2))) {
-            flagValue = flag.property ? args[i + 1] : arg;
-            return args.splice(i, flag.property ? 2 : 1);
+            flagValue = flag.property ? fetchMessageFlagText(args, i + 1) : arg;
+            return args.splice(i, 1);
         }
 
         if(flag.short?.length && arg.startsWith('-')) {
             const flagChars = [...arg.slice(1)].filter(c => flag.short.includes(c));
             for(c of flagChars) {
-                flagValue = flag.property ? args[i + 1] : c;
-                const flagSize = flag.property ? 2 : 1;
+                flagValue = flag.property ? fetchMessageFlagText(args, i + 1) : c;
+                const flagSize = 1;
 
                 if(arg.length <= 2)
                     return args.splice(i, flagSize);
@@ -53,31 +95,15 @@ const fetchMessageFlag = (args, flag = { property, short: [], long: [], callback
     if(flag.callback == undefined)
         return flag.property ? flagValue : true;
 
-    return typeof flag.callback === 'function' ? flag.callback(flagValue) : flag.callback;
+    return typeof flag.callback === 'function' ? flag.callback(flagValue, false) : flag.callback;
 }
-
-const commonTypes = {
-    'NUMBER':   'número',
-    'TEXT':     'texto',
-    'USER':     'U{mención/texto/id}',
-    'MEMBER':   'M{mención/texto/id}',
-    'ROLE':     'R{mención/texto/id}',
-    'GUILD':    'g{texto/id}',
-    'CHANNEL':  'C{enlace/texto/id}',
-    'MESSAGE':  'm{enlace/texto/id}',
-    'EMOTE':    'emote',
-    'IMAGE':    'imagen/enlace',
-    'FILE':     'archivo/enlace',
-    'URL':      'enlace',
-    'ID':       'id'
-};
 
 /**
  * Devuelve el tipo ingresado como texto de página de ayuda
  * @param {ParamType} type El tipo a convertir
  * @returns {String}
  */
-const typeHelp = (type) => commonTypes[type];
+const typeHelp = (type) => PARAM_TYPES[type].help;
 
 /**
  * Devuelve si el parámetro es estricto
@@ -310,7 +336,7 @@ class CommandFlagExpressive extends CommandFlag {
     get typeDisplay() {
         return isParamTypeStrict(this._type)
             ? `${this._type.name}: ${this._type.expression}`
-            : commonTypes[this._type];
+            : PARAM_TYPES[this._type].help;
     };
     /**
      *String de ayuda de la bandera
@@ -449,19 +475,10 @@ class CommandOptionsManager {
         if(Array.isArray(args))
             return whole ? args.join(' ') : args.shift();
 
-        let getMethod = 'getBoolean';
-
-        if(param.isExpressive()) {
-            switch(param._type) {
-                case 'NUMBER':  getMethod = 'getNumber';  break;
-                case 'USER':    getMethod = 'getUser';    break;
-                case 'MEMBER':  getMethod = 'getUser';    break;
-                case 'ROLE':    getMethod = 'getRole';    break;
-                case 'CHANNEL': getMethod = 'getChannel'; break;
-                case 'ID':      getMethod = 'getInteger'; break;
-                default:        getMethod = 'getString';  break;
-            }
-        }
+        let getMethod = 'getString';
+        
+        if(!isParamTypeStrict(param._type))
+            getMethod = PARAM_TYPES[param._type].getMethod;
         
         return args[getMethod](slashIdentifier, !param._optional);
     };
@@ -507,7 +524,7 @@ class CommandOptionsManager {
      * @param {import('discord.js').CommandInteractionOptionResolver | Array<String>} args El conjunto de entradas
      * @param {String} identifier El identificador de la flag
      * @typedef {{
-     *  callback: *
+     *  callback: FlagCallback,
      *  fallback: *
      * }} FeedbackOptions
      * @param {FeedbackOptions} output Define la respuestas en cada caso
@@ -530,17 +547,8 @@ class CommandOptionsManager {
         let getMethod = 'getBoolean';
         let flagValue;
 
-        if(flag.isExpressive()) {
-            switch(flag.type) {
-                case 'NUMBER':  getMethod = 'getNumber';  break;
-                case 'USER':    getMethod = 'getUser';    break;
-                case 'MEMBER':  getMethod = 'getUser';    break;
-                case 'ROLE':    getMethod = 'getRole';    break;
-                case 'CHANNEL': getMethod = 'getChannel'; break;
-                case 'ID':      getMethod = 'getInteger'; break;
-                default:        getMethod = 'getString';  break;
-            }
-        }
+        if(flag.isExpressive())
+            getMethod = PARAM_TYPES[flag._type].getMethod;
         
         flagValue = args[getMethod](identifier);
         
@@ -550,7 +558,7 @@ class CommandOptionsManager {
         if(output.callback == undefined)
             return flagValue;
 
-        return typeof output.callback === 'function' ? output.callback(flagValue) : output.callback;
+        return typeof output.callback === 'function' ? output.callback(flagValue, true) : output.callback;
     };
 };
 
