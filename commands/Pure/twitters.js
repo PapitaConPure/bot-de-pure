@@ -26,56 +26,66 @@ const command = new CommandManager('twitters', flags)
 		'Puedes crear un tablón con `--epígrafe`, `--título` y `--pie` de título personalizados',
 	)
 	.setOptions(options)
-	.setExecution(async (message, args) => {
-		if(!args.length)
-			return message.reply({ content: ':warning: Necesitas ingresar al menos un enlace de Twitter o propiedad de tablón' });
+	.setExecution(async (request, args, isSlash = false) => {
+		if(!isSlash && !args.length)
+			return request.reply({ content: ':warning: Necesitas ingresar al menos un enlace de Twitter o propiedad de tablón' });
 
 		//Parámetros de comando
-		let edit = fetchFlag(args, { short: [ 'a' ], long: ['agregar', 'añadir'], callback: 'add' });
+		let edit = options.fetchFlag(args, 'agregar', { callback: 'add' });
 		if(edit == undefined)
-			edit = fetchFlag(args, { short: [ 'e' ], long: ['eliminar'], callback: 'del', fallback: '' });
-		let ch = fetchFlag(args, {
-			property: true,
-			short: [ 'c' ],
-			long: [ 'canal', 'channel' ],
-			callback: (x,i)=> {
-				let cs = x[i];
+			edit = options.fetchFlag(args, 'eliminar', { callback: 'del', fallback: '' });
+		let ch = options.fetchFlag(args, 'canal', {
+			callback: (cs, isSlash) => {
+				if(isSlash) return cs;
+
 				if(cs.startsWith('<#') && cs.endsWith('>'))
 					cs = cs.slice(2, -1);
-				return message.guild.channels.cache.find(c => c.name.toLowerCase().indexOf(cs) !== -1 || c.id === cs);
+				return request.guild.channels.cache.find(c => c.name.toLowerCase().indexOf(cs) !== -1 || c.id === cs);
 			},
 		});
-		let id = fetchFlag(args, { property: true, short: [], long: [ 'id' ], callback: (x,i) => x[i] });
+		let id = options.fetchFlag(args, 'id');
 		const embedprops = {
-			epigraph: fetchFlag(args, { property: true, long: ['epígrafe', 'epigrafe'], callback: fetchSentence }),
-			title: fetchFlag(args, { property: true, long: ['título', 'titulo'], callback: fetchSentence }),
-			footer: fetchFlag(args, { property: true, long: ['pie'], callback: fetchSentence })
+			epigraph: options.fetchFlag(args, 'epígrafe'),
+			title: 	  options.fetchFlag(args, 'título'),
+			footer:   options.fetchFlag(args, 'pie'),
 		};
+		console.log(args);
 		if(!edit.length && id != undefined)
 			for(e in embedprops)
 				if(e !== undefined) {
 					edit = 'mod';
 					break;
 				}
+
+		const getTwitters = () => {
+			const twitters = isSlash
+				? options.fetchParamPoly(args, 'twitters', args.getString, [])
+				: args;
+
+			return twitters.map(twitter => (
+				twitter?.startsWith(linkbase))
+					? `[@${twitter.slice(linkbase.length)}](${twitter})`
+					: undefined
+			);
+		}
 		
 		//Acción de comando
-		if(ch == undefined) ch = message.channel;
+		if(ch == undefined) ch = request.channel;
 		const linkbase = 'https://twitter.com/';
 		const div = 10;
 		if(!edit.length) {
-			//Creación de nuevo embed
-			if(!args.length)
-				return message.reply(':warning: Para crear un nuevo tablón de Twitters, debes ingresar algunos links iniciales');
-			
-			const twitters = args.map(arg => (arg.startsWith(linkbase))?`[@${arg.slice(linkbase.length)}](${arg})`:undefined);
+			const twitters = getTwitters();
+
+			if(!twitters.length)
+				return request.reply(':warning: Para crear un nuevo tablón de Twitters, debes ingresar algunos links iniciales');
 
 			if(twitters.some(twitter => twitter === undefined))
-				return message.reply({ content: ':warning: Uno o más enlaces tenían un formato inválido' });
+				return request.reply({ content: ':warning: Uno o más enlaces tenían un formato inválido' });
 
 			const embed = new Discord.MessageEmbed()
 				.setColor('#1da1f2')
 				.setTitle(embedprops.title ?? 'Tablón de Twitters')
-				.setAuthor({ name: embedprops.epigraph ?? '¡Clickea el enlace que gustes!', iconURL: message.channel.guild.iconURL({ dynamic: false, size: 256 }) })
+				.setAuthor({ name: embedprops.epigraph ?? '¡Clickea el enlace que gustes!', iconURL: request.channel.guild.iconURL({ dynamic: false, size: 256 }) })
 				.setFooter({ text: embedprops.footer ?? null });
 			
 			for(page = 0; page < twitters.length; page += div)
@@ -89,21 +99,23 @@ const command = new CommandManager('twitters', flags)
 		}
 		
 		if(id == undefined)
-			return message.reply({ content: 'Para añadir o eliminar mensajes en un embed ya enviado, debes facilitar la ID del mensaje.' });
+			return request.reply({ content: 'Para añadir o eliminar mensajes en un embed ya enviado, debes facilitar la ID del mensaje.' });
 
 		//Modificación de embed existente
 		const msg = await ch.messages.fetch(id).catch(auditError);
 
 		if(!msg)
-			return message.reply({ content: `:warning: ID de mensaje inválida` });
+			return request.reply({ content: `:warning: ID de mensaje inválida` });
 
-		if(msg.embeds == undefined || msg.author.id !== message.client.user.id)
-			return message.reply({ content: ':warning: El mensaje especificado existe pero no me pertenece o no tiene ningún embed' });
+		if(msg.embeds == undefined || msg.author.id !== request.client.user.id)
+			return request.reply({ content: ':warning: El mensaje especificado existe pero no me pertenece o no tiene ningún embed' });
 
+		/**@type {Discord.MessageEmbed}*/
 		const target = msg.embeds[0];
-		const ntw = args.map(arg => (arg.startsWith(linkbase))?`[@${arg.slice(linkbase.length)}](${arg})`:undefined);
+		const ntw = getTwitters();
+
 		if(ntw.some(nt => nt === undefined))
-			return message.reply({ content: ':warning: Uno o más enlaces tenían un formato inválido' });
+			return request.reply({ content: ':warning: Uno o más enlaces tenían un formato inválido' });
 
 		let twitters = target.fields[0].value.split('\n');
 		for(page = 1; page < target.fields.length; page++)
@@ -111,9 +123,9 @@ const command = new CommandManager('twitters', flags)
 
 		const embed = new Discord.MessageEmbed()
 			.setColor(target.color)
-			.setTitle(embedprops.title ?? target.title)
-			.setAuthor({ name: embedprops.epigraph ?? target.author.name, iconURL: message.channel.guild.iconURL({ dynamic: false, size: 256 }) })
-			.setFooter({ text: embedprops.footer !== undefined ? embedprops.footer : (target.footer ? target.footer.text : '') });
+			.setTitle(embedprops.title ?? target.title ?? '')
+			.setAuthor({ name: embedprops.epigraph ?? target.author.name ?? request.guild.name, iconURL: request.guild.iconURL({ dynamic: false, size: 256 }) })
+			.setFooter({ text: embedprops.footer ?? target.footer?.text ?? '' });
 		
 		if(edit === 'add')
 			twitters = [...twitters, ...ntw];
@@ -128,7 +140,7 @@ const command = new CommandManager('twitters', flags)
 			});
 
 		msg.edit({ embeds: [embed] });
-		return message.react('✅');
+		return isSlash ? request.reply({ content: '✅ Hecho', ephemeral: true }) : request.react('✅');
 	});
 
 module.exports = command;
