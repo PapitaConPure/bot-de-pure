@@ -343,7 +343,6 @@ const command = new CommandManager('roles', flags)
 			],
 			ephemeral: true,
 		};
-		console.log(messageActions.components.map(c => c.components));
 
 		if(edit) return interaction.update(messageActions);
 		return interaction.reply(messageActions);

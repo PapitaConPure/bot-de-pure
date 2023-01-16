@@ -49,7 +49,7 @@ const command = new CommandManager('twitters', flags)
 			title: 	  options.fetchFlag(args, 'título'),
 			footer:   options.fetchFlag(args, 'pie'),
 		};
-		console.log(args);
+		
 		if(!edit.length && id != undefined)
 			for(e in embedprops)
 				if(e !== undefined) {
