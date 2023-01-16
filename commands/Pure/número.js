@@ -1,4 +1,4 @@
-const { improveNumber, fetchFlag } = require('../../func.js'); //Funciones globales
+const { improveNumber } = require('../../func.js'); //Funciones globales
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const flags = new CommandMetaFlagsManager().add('COMMON');

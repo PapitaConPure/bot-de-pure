@@ -1,4 +1,3 @@
-const { fetchFlag } = require('../../func');
 const { serverid } = require('../../localdata/config.json'); //Variables globales
 const { Permissions } = require('discord.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");

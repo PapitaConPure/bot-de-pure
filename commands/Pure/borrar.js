@@ -1,4 +1,4 @@
-const { fetchFlag, fetchUser } = require('../../func.js');
+const { fetchUser } = require('../../func.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
 

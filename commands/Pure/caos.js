@@ -1,5 +1,4 @@
 const { readdirSync } = require('fs'); //Integrar operaciones sistema de archivos de consola
-const { fetchFlag } = require('../../func.js');
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
