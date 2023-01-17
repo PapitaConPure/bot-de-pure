@@ -11,7 +11,7 @@ const command = new CommandManager('suicidio', flags)
 		'suicidar', 'suicidarse',
 		'suicide',
 	)
-	.setBriefDescription('Te otorga el rol "Hanged Doll" (solo Hourai Doll)')
+	.setBriefDescription('Te otorga el rol "Hanged Doll"')
 	.setLongDescription('Te otorga el rol __Hanged Doll__ en Hourai Doll.')
 	.setExecution(async request => {
 		const { member } = request;

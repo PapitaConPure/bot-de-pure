@@ -12,7 +12,7 @@ const command = new CommandManager('exhibir', flags)
 		'flush', 'flushpins',
 		'ep', 'mp', 'fp',
 	)
-	.setBriefDescription('Traslada mensajes pinneados a #crazy-backup (solo Hourai Doll)')
+	.setBriefDescription('Traslada mensajes pinneados a #crazy-backup')
 	.setLongDescription(
 		'Envía mensajes pinneados en el canal actual a #crazy-backup',
 		'Esto eliminará todos los pins en el canal luego de reenviarlos',

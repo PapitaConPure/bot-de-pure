@@ -16,7 +16,7 @@ const command = new CommandManager('colgar', flags)
 		'castrar', 'colgate',
 		'hang', 'hanged',
 	)
-	.setBriefDescription('Cuelga o descuelga al miembro especificado (solo Hourai Doll)')
+	.setBriefDescription('Cuelga o descuelga al miembro especificado')
 	.setLongDescription(
 		'Asigna el rol de __Hanged Doll__ al `usuario` especificado.',
 		'Usarlo con alguien que ya está colgado lo descolgará, así que cuidado',
