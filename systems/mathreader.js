@@ -55,11 +55,11 @@ class MathLexer {
                 continue;
             }
 
-            const symbol = this.#current.match(/[+\-*/^]/)?.[0];
+            const symbol = this.#current.match(/[+\-*/^%]/)?.[0];
             if(symbol) {
                 let tokenType;
                 if('+-'.includes(symbol)) tokenType = TokenTypes.COMBINATION;
-                else if('*/'.includes(symbol)) tokenType = TokenTypes.FACTOR;
+                else if('*/%'.includes(symbol)) tokenType = TokenTypes.FACTOR;
                 else if('^'.includes(symbol)) tokenType = TokenTypes.FUNCTION;
                 tokens.push(createToken(tokenType, symbol));
                 this.#cursor++;
@@ -245,6 +245,7 @@ class MathCalculator {
             '-': (leftOperand, rightOperand) => leftOperand - rightOperand,
             '*': (leftOperand, rightOperand) => leftOperand * rightOperand,
             '/': (leftOperand, rightOperand) => leftOperand / rightOperand,
+            '%': (leftOperand, rightOperand) => leftOperand % rightOperand,
             '^': (leftOperand, rightOperand) => Math.pow(leftOperand, rightOperand),
         };
 
