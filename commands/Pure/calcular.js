@@ -15,7 +15,7 @@ const command = new CommandManager('calcular', flags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const shorten = options.fetchFlag(args, 'acortar', { callback: true, fallback: false });
+		const shorten = options.fetchFlag(args, 'acortar');
 		const min = options.fetchFlag(args, 'mínimo', { fallback: 1 });
 		const operation = options.fetchParam(args, 'operación', true)?.replace(/ /g, '');
 
