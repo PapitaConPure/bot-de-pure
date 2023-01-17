@@ -73,7 +73,7 @@ const fetchMessageFlag = (args, flag = { property, short: [], long: [], callback
             return args.splice(i, 1);
         }
 
-        if(flag.short?.length && arg.startsWith('-') && !arg === '-') {
+        if(flag.short?.length && arg.startsWith('-') && arg !== '-') {
             const flagChars = [...arg].slice(1).filter(c => flag.short.includes(c));
             for(c of flagChars) {
                 flagValue = flag.property ? fetchMessageFlagText(args, i + 1) : c;
