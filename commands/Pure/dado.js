@@ -11,6 +11,7 @@ const command = new CommandManager('dados', flags)
 		'dado', 'tirar', 'random',
 		'roll', 'rolldie', 'dice', 'die',
 	)
+	.setBriefDescription('Tira 1 ó más dados de la cantidad de caras deseadas y muestra el resultado')
 	.setLongDescription(
 		'Tira uno o más dados de la cantidad de caras deseadas para recibir números aleatorios',
 		'**Ejemplo de dados:** `1d6` = 1 dado de 6 caras; `5d4` = 5 dados de 4 caras; `15d20` = 15 dados de 20 caras',

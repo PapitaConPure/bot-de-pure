@@ -9,6 +9,7 @@ const options = new CommandOptionsManager()
 	.addFlag(['m','d'], ['mínimo','minimo','digitos'], 'para designar el mínimo de dígitos', { name: 'minimo', type: 'NUMBER' });
 const command = new CommandManager('calcular', flags)
 	.setAliases('calc', 'clc', 'cx')
+	.setBriefDescription('Realiza un cálculo básico y devuelve el resultado')
 	.setLongDescription(
 		'Realiza un cálculo básico y devuelve el resultado.',
 		'Usa + para sumar, - para restar, * para multiplicar, / para dividir, ^ para exponenciar, % para sacar módulo y () para asociar términos',

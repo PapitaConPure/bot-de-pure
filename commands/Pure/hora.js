@@ -10,8 +10,9 @@ const command = new CommandManager('hora', flags)
 		'horario',
 		'time', 'schedule',
 	)
+	.setBriefDescription('Muestra una fecha y hora automáticamente adaptados según el huso horario que proporciones')
 	.setLongDescription(
-		'Muestra una fecha y hora automáticamente adaptada según la `<fecha>` que ingreses.',
+		'Muestra una `--fecha` y `<hora>` automáticamente adaptados a lo que ingreses.',
 		'Recuerda que no soy adivina, así que siempre ingresa tu huso local si no quieres que se tome como GMT+0',
 	)
 	.setOptions(options)

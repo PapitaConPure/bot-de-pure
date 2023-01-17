@@ -16,6 +16,7 @@ const command = new CommandManager('encuesta', flags)
 		'votación', 'votacion', 'voto',
 		'poll',
 	)
+	.setBriefDescription('Crea una encuesta con opciones emparejadas con emotes')
 	.setLongDescription(
 		'Crea una encuesta con opciones',
 		'Crea una encuesta con `<opciones>` que comienzan y se separan con emotes. Los emotes serán lo que se usará para votar',

@@ -17,7 +17,8 @@ const options = new CommandOptionsManager()
 	.addParam('persona', 'USER', 'el usuario a mimar');
 const command = new CommandManager('mimar', flags)
 	.setAliases('mimos', 'besar', 'abrazar', 'hug', 'kiss')
-	.setDescription('Mima al `<usuario>` mencionado y te da un resumen de cómo estuvo el mimo para ambas partes')
+	.setBriefDescription('Mima al usuario mencionado y te da un resumen de cómo estuvo el mimo para ambas partes')
+	.setLongDescription('Mima al `<usuario>` mencionado y te da un resumen de cómo estuvo el mimo para ambas partes')
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash = false) => {
 		//Acción de comando

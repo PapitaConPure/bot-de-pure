@@ -17,8 +17,9 @@ const options = new CommandOptionsManager()
 	.addFlag([],   'pie', 			   	     'para asignar el texto por debajo de los enlaces',		  { name: 'pie', type: 'TEXT' });
 const command = new CommandManager('twitters', flags)
 	.setAliases('twitter')
-	.setDescription(
-		'Para mostrar Twitters de artistas con los que trabaja Hourai Doll',
+	.setBriefDescription('Crea un tablón de Twitters en un canal o sobre un mensaje')
+	.setLongDescription(
+		'Muestra Twitters de artistas con los que trabaja Hourai Doll',
 		'Crea un nuevo tablón con los `<twitters>` designados (separados solamente por un espacio)',
 		'Alternativamente, puedes especificar una `--id` de un tablón ya enviado para editarlo, especificando qué `<twitters>` `--agregar` o `--eliminar`',
 		'El tablón se añadirá o se buscará por `--id` para editar *en el canal actual* a menos que especifiques un `--canal`',
