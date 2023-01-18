@@ -25,6 +25,10 @@ const command = new CommandManager('calcular', flags)
 		
 		try {
 			const result = calc(operation);
+
+			if(isNaN(result))
+				return request.reply({ content: '⚠ La operación no pertenece al dominio de los números Reales' });
+			
 			return request.reply({ content: improveNumber(result, shorten, min) });
 		} catch(error) {
 			return request.reply({ content: '⚠ Operación inválida' });
