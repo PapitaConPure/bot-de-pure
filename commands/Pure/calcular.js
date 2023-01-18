@@ -18,7 +18,7 @@ const command = new CommandManager('calcular', flags)
 	.setExecution(async (request, args) => {
 		const shorten = options.fetchFlag(args, 'acortar');
 		const min = options.fetchFlag(args, 'mínimo', { fallback: 1 });
-		const operation = options.fetchParam(args, 'operación', true)?.replace(/ /g, '');
+		const operation = options.fetchParam(args, 'operación', true);
 
 		if(!operation)
 			return request.reply({ content: '⚠ Debes ingresar una operación' });
@@ -31,6 +31,7 @@ const command = new CommandManager('calcular', flags)
 			
 			return request.reply({ content: improveNumber(result, shorten, min) });
 		} catch(error) {
+			console.log(error);
 			return request.reply({ content: '⚠ Operación inválida' });
 		}
 	});
