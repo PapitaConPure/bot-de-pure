@@ -90,6 +90,42 @@ class MathLexer {
                 continue;
             }
             
+            if(/\w/.test(this.#current)) {
+                let text = '';
+
+                while(/\w/.test(this.#current) && this.#cursor < this.#stream.length) {
+                    text += this.#current;
+                    this.#cursor++;
+                }
+
+                text = text.toLowerCase();
+
+                switch(text) {
+                    case 'pi':
+                        tokens.push(createToken(TokenTypes.NUMBER, Math.PI));
+                        break;
+
+                    case 'e':
+                        tokens.push(createToken(TokenTypes.NUMBER, Math.E));
+                        break;
+                        
+                    case 'sqrt':
+                    case 'sin':
+                    case 'cos':
+                    case 'tan':
+                    case 'rad':
+                    case 'deg':
+                        tokens.push(createToken(TokenTypes.FUNCTION, text));
+                        break;
+
+                    default: {
+                        throw new Error(`Texto inválido en posición ${this.#cursor}: ${text}`);
+                    }
+                }
+
+                continue;
+            }
+            
             throw new Error(`Caracter inválido en posición ${this.#cursor}: ${this.#current}`);
         }
         tokens.push(createToken(TokenTypes.EOF, 'EOF'));
@@ -141,7 +177,7 @@ class MathParser {
         if(this.#current.type === tokenType)
             this.#cursor++;
         else
-            throw new Error(`Se esperaba un Token de tipo: ${tokenType}; se encontró: ${this.#current.type}`);
+            throw new Error(`Se esperaba un Token de tipo: ${tokenType}; se encontró: ${this.#current.type}; con valor: ${this.#current.value}`);
     }
 
     parse() {
@@ -157,7 +193,6 @@ class MathParser {
             const operator = this.#current.value;
             this.#digest(TokenTypes.COMBINATION);
             let rightOperand = this.#parseFactors();
-
             leftOperand = this.#createBinaryToken(operator, leftOperand, rightOperand);
         }
 
@@ -172,7 +207,6 @@ class MathParser {
             const operator = this.#current.value;
             this.#digest(TokenTypes.FACTOR);
             let rightOperand = this.#parseFunctions();
-
             leftOperand = this.#createBinaryToken(operator, leftOperand, rightOperand);
         }
         
@@ -188,6 +222,9 @@ class MathParser {
             this.#digest(TokenTypes.FUNCTION);
             let rightOperand = this.#parseHighest();
 
+            if(operator !== '^')
+                throw new Error(`Token inesperado en posición ${this.#cursor}: FUNCTION (^)`);
+            
             leftOperand = this.#createBinaryToken(operator, leftOperand, rightOperand);
         }
 
@@ -209,6 +246,14 @@ class MathParser {
             return number;
         }
 
+        if(this.#current.type === TokenTypes.FUNCTION && this.#current.value !== '^') {
+            const operator = this.#current.value;
+            this.#digest(TokenTypes.FUNCTION);
+            const expr = this.#parseHighest();
+            const func = this.#createUnaryToken(operator, expr);
+            return func;
+        }
+
         if(this.#current.type === TokenTypes.GROUP_OPEN) {
             this.#digest(TokenTypes.GROUP_OPEN);
             const expr = this.#parseExpressions();
@@ -216,7 +261,7 @@ class MathParser {
             return expr;
         }
 
-        throw new Error(`Token inesperado en posición ${this.#cursor}: ${this.#current.type}`)
+        throw new Error(`Token inesperado en posición ${this.#cursor}: ${this.#current.type} (${this.#current.value})`)
     }
 }
 
@@ -233,13 +278,41 @@ class MathCalculator {
     }
 
     /**
+     * Realiza una operación unaria
+     * @param {String} operator 
+     * @param {Number} argument 
+     * @returns {Number} El resultado de la operación
+     */
+    #operateUnary(operator, argument) {
+        if(argument.type === TokenTypes.LITERAL)
+            argument = argument.value;
+        if(argument.type === TokenTypes.UNARY)
+            argument = this.#operateUnary(argument.operator, argument.argument);
+        if(argument.type === TokenTypes.BINARY)
+            argument = this.#operateBinary(argument.operator, argument.leftOperand, argument.rightOperand);
+
+        const operations = {
+            '+': (argument) => argument,
+            '-': (argument) => (-argument),
+            'sqrt': (argument) => Math.sqrt(argument),
+            'sin': (argument) => Math.sin(argument),
+            'cos': (argument) => Math.cos(argument),
+            'tan': (argument) => Math.tan(argument),
+            'rad': (argument) => argument * (Math.PI / 180),
+            'deg': (argument) => argument * (180 / Math.PI),
+        };
+
+        return operations[operator](argument);
+    }
+
+    /**
      * Realiza una operación binaria
      * @param {String} operator 
      * @param {Number} leftOperand 
      * @param {Number} rightOperand 
      * @returns {Number} El resultado de la operación
      */
-    #operate(operator, leftOperand, rightOperand) {
+    #operateBinary(operator, leftOperand, rightOperand) {
         const operations = {
             '+': (leftOperand, rightOperand) => leftOperand + rightOperand,
             '-': (leftOperand, rightOperand) => leftOperand - rightOperand,
@@ -269,17 +342,13 @@ class MathCalculator {
         if(token.type === TokenTypes.LITERAL)
             return token.value;
 
-        if(token.type === TokenTypes.UNARY) {
-            if(token.operator === '+')
-                return token.argument;
-            else
-                return (-token.argument);
-        }
+        if(token.type === TokenTypes.UNARY)
+            return this.#operateUnary(token.operator, token.argument);
 
         if(token.type === TokenTypes.BINARY) {
             const leftOperand = this.#calculateToken(token.leftOperand);
             const rightOperand = this.#calculateToken(token.rightOperand);
-            return this.#operate(token.operator, leftOperand, rightOperand);
+            return this.#operateBinary(token.operator, leftOperand, rightOperand);
         }
     }
 }
