@@ -289,7 +289,7 @@ class MathCalculator {
         if(argument.type === TokenTypes.UNARY)
             argument = this.#operateUnary(argument.operator, argument.argument);
         if(argument.type === TokenTypes.BINARY)
-            argument = this.#operateBinary(argument.operator, argument.leftOperand, argument.rightOperand);
+            argument = this.#calculateToken(argument);
 
         const operations = {
             '+': (argument) => argument,
