@@ -1171,9 +1171,10 @@ module.exports = {
     },
 
     /**
-     * Calcula la distancia entre dos strings
+     * Calcula la distancia entre dos strings con el algoritmo de distancia Levenshtein
      * @param {String} a 
      * @param {String} b 
+     * @returns {Number}
      */
     levenshteinDistance: function(a, b) {
         const m = a.length + 1;
@@ -1199,6 +1200,64 @@ module.exports = {
                     distance[i][j - 1] + 1,
                     distance[i - 1][j - 1] + cost,
                 );
+            }
+
+        return distance[m - 1][n - 1];
+    },
+
+    /**
+     * Calcula la distancia entre dos strings con el algoritmo de distancia Damerau-Levenshtein + peso Euclideano según distancia entre teclas del teclado
+     * @param {String} a 
+     * @param {String} b 
+     * @returns {Number}
+     */
+    edlDistance: function(a, b) {
+        const keyboardKeys = [
+            [...'qwertyuiop'],
+            [...'asdfghjklñ'],
+            [...'zxcvbnm'],
+        ];
+        const keyboardCartesians = {};
+        for(let j = 0; j < keyboardKeys.length; j++)
+            keyboardKeys[j].forEach((char, i) => keyboardCartesians[char] = { x: i, y: j });
+        const centerCartesian = { x: parseInt(keyboardKeys[1].length * 0.5), y: 1 };
+        function euclideanDistance(a = 'g', b = 'h') {
+            const aa = keyboardCartesians[a] ?? centerCartesian;
+            const bb = keyboardCartesians[b] ?? centerCartesian;
+            const x = (aa.x - bb.x) ** 2;
+            const y = (aa.y - bb.y) ** 2;
+            return Math.sqrt(x + y);
+        }
+
+        const m = a.length + 1;
+        const n = b.length + 1;
+        let distance = (new Array(m)).fill(null).map((element, i) => {
+            element = (new Array(n)).fill(0);
+            element[0] = i;
+            return element;
+        });
+        for(let j = 1; j < n; j++)
+            distance[0][j] = j;
+
+        for(let i = 1; i < m; i++)
+            for(let j = 1; j < n; j++) {
+                const aa = a.at(i - 1);
+                const bb = b.at(j - 1);
+                const cost = aa === bb ? 0 : 1;
+
+                const deletion = distance[i - 1][j] + 1;
+                const insertion = distance[i][j - 1] + 1;
+                const substitution = distance[i - 1][j - 1] + cost;
+                distance[i][j] = Math.min(deletion, insertion, substitution);
+
+                if(cost && substitution < insertion && substitution < deletion)
+                    distance[i][j] += euclideanDistance(aa, bb) - 1;
+                
+                if(a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1])
+                    distance[i][j] = Math.min(
+                        distance[i][j],
+                        distance[i - 2][j - 2] + 1,
+                    );
             }
 
         return distance[m - 1][n - 1];

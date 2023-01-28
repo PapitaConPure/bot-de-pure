@@ -24,7 +24,7 @@ const booruUserId = process.env.BOORU_USERID ?? (require(envPath)?.booruuserid);
 
 //Utilidades
 const globalConfigs = require('./localdata/config.json');
-const { channelIsBlocked, randRange, shortenText, dibujarBienvenida, dibujarDespedida, levenshteinDistance, rand } = require('./func.js');
+const { channelIsBlocked, randRange, shortenText, dibujarBienvenida, dibujarDespedida, levenshteinDistance, rand, edlDistance } = require('./func.js');
 const globalGuildFunctions = require('./localdata/customization/guildFunctions.js');
 const { auditRequest, auditSystem } = require('./systems/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('./localdata/cmdExceptions.js');
@@ -374,7 +374,7 @@ client.on('messageCreate', async message => {
                 await command.execute(message, args);
                 stats.commands.succeeded++;
             } catch(error) {
-                const isPermissionsError = handleAndAuditError(error, message, { details: `"${message.content?.slice(0, 699)}"\n[${commandname} :: ${args}]` });
+                const isPermissionsError = handleAndAuditError(error, message, { details: `"${message.content?.slice(0, 699)}"\n[${commandName} :: ${args}]` });
                 if(!isPermissionsError)
                     stats.commands.failed++;
             }
@@ -384,24 +384,16 @@ client.on('messageCreate', async message => {
         //Partición de mensaje comando
         auditRequest(message);
         const args = content.replace(pdetect.regex, '').split(/[\n ]+/); //Argumentos ingresados
-        let commandname = args.shift().toLowerCase(); //Comando ingresado
+        let commandName = args.shift().toLowerCase(); //Comando ingresado
         let command;
+        /**@type {Discord.Collection<String, CommandManager>}*/
         const commandsPool = (pdetect.raw === pdrmk.raw)
             ? client.ComandosDrawmaku
             : client.ComandosPure;
         
-        command = commandsPool.get(commandname) || commandsPool.find(cmd => cmd.aliases && cmd.aliases.includes(commandname));
+        command = commandsPool.get(commandName) || commandsPool.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
         
         if(!command) {
-            const foundList = [];
-            for(const [ cmn, cmd ] of commandsPool) {
-                const lDistances = [ cmn, ...(cmd.aliases?.filter(a => a.length > 1) ?? []) ].map(c => levenshteinDistance(commandname, c));
-                const minorDistance = Math.min(...lDistances);
-                if(minorDistance < 3)
-                    foundList.push({ command: cmd, distance: minorDistance });
-            }
-            const suggestions = foundList.sort((a, b) => a.distance - b.distance).slice(0, 5);
-
             /**@type {Array<{ text: String, imageUrl: String }>}*/
             const replies = [
                 {
@@ -413,7 +405,7 @@ client.on('messageCreate', async message => {
                     imageUrl: 'https://i.imgur.com/uuLuxtj.jpg',
                 },
                 {
-                    text: `La verdad, no tengo ni idea de qué pueda ser **"${commandname}"**, ¿seguro que lo escribiste bien? Recuerda que soy un bot, eh`,
+                    text: `La verdad, no tengo ni idea de qué pueda ser **"${commandName}"**, ¿seguro que lo escribiste bien? Recuerda que soy un bot, eh`,
                     imageUrl: 'https://i.imgur.com/AHdc7E2.jpg',
                 },
                 {
@@ -425,19 +417,35 @@ client.on('messageCreate', async message => {
                     imageUrl: 'https://i.imgur.com/avTSSa4.jpg',
                 },
             ];
-            const selectedReply = replies[rand(replies.length)]
-            
-            if(!suggestions.length) {
+
+            const selectedReply = replies[rand(replies.length)];
+            async function replyAndDelete() {
                 const notice = await message.reply({ content: selectedReply.text }).catch(() => undefined);
                 return setTimeout(() => notice?.delete().catch(_ => undefined), 6000);
             }
+
+            if(commandName.length < 2)
+                return replyAndDelete();
+
+            const allowedGuesses = commandsPool.filter(cmd => !cmd.flags.any('OUTDATED', 'MAINTENANCE'));
+            const foundList = [];
+            for(const [ cmn, cmd ] of allowedGuesses) {
+                const lDistances = [ cmn, ...(cmd.aliases?.filter(a => a.length > 1) ?? []) ].map(c => ({ n: c, d: edlDistance(commandName, c) }));
+                const minorDistance = Math.min(...(lDistances.map(d => d.d)));
+                if(minorDistance < 3)
+                    foundList.push({ command: cmd, distance: minorDistance });
+            }
+            const suggestions = foundList.sort((a, b) => a.distance - b.distance).slice(0, 5);
+            
+            if(!suggestions.length)
+                return replyAndDelete();
             
             const suggestionEmbed = new Discord.MessageEmbed()
                 .setColor('#5070bb')
                 .setTitle('Sugerencias')
                 .setFooter({ text: 'Basado en nombres y alias de comando' })
                 .addFields({
-                    name: `Comandos similares a "${commandname}"`,
+                    name: `Comandos similares a "${commandName}"`,
                     value: suggestions.map(found => `• ${pdetect.raw}${found.command.name}`).join('\n'),
                 });
             return message.reply({
@@ -453,12 +461,12 @@ client.on('messageCreate', async message => {
             //Detectar problemas con el comando basado en flags
             const exception = await findFirstException(command.flags, message);
             if(exception)
-                return channel.send({ embeds: [ generateExceptionEmbed(exception, { cmdString: `${pdetect.raw}${commandname}` }) ]});
-            const rawArgs = content.slice(content.indexOf(commandname) + commandname.length).trim();
+                return channel.send({ embeds: [ generateExceptionEmbed(exception, { cmdString: `${pdetect.raw}${commandName}` }) ]});
+            const rawArgs = content.slice(content.indexOf(commandName) + commandName.length).trim();
             await command.execute(message, args, false, rawArgs);
             stats.commands.succeeded++;
         } catch(error) {
-            const isPermissionsError = handleAndAuditError(error, message, { details: `"${message.content?.slice(0, 699)}"\n[${commandname} :: ${args}]` });
+            const isPermissionsError = handleAndAuditError(error, message, { details: `"${message.content?.slice(0, 699)}"\n[${commandName} :: ${args}]` });
             if(!isPermissionsError)
                 stats.commands.failed++;
         }
