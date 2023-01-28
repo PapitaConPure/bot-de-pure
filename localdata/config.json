@@ -2,36 +2,26 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Full.2.8.FA",
+            "number": "Alpha.2.9.00",
             "name": "Cisne Cristalino"
         },
-        "note": "Ya está todo relativamente listo para la siguiente actualización mayor. Las actualizaciones siguen sin ser frecuentes, pero se sigue trabajando en soportar comandos Slash",
+        "note": "Se pasará de Alpha a Full nuevamente dentro de poco",
         "changelog": [
-            "Tareas de refactorización (3.4/4)",
-            "Aplicando nuevo modelo de comandos (15%)",
-            "PLACEHOLDER_SLASHCMD",
-            "p!elegir añadido",
-            "p!feed incorporado",
-            "p!tubérculo agregado",
-            "p!roles integrado (H. Doll)",
-            "PuréScript básico implementado",
-            "p!tarjeta adherido",
-            "p!número agregado",
-            "p!voz añadido",
-            "p!hora añadido",
-            "Corregidos diversos errores",
-            "Trabajando en soporte de Preferencias de Usuario",
-            "Se eliminaron comandos obsoletos de H. Doll"
+            "Se terminaron tareas varias de reestructuración interna",
+            "Se implementó un nuevo modelo de Comandos Duales (mensaje+Slash)",
+            "Se agregaron diversas mejoras de \"calidad de vida\"",
+            "Trabajando en reescritura y documentación de PuréScript...",
+            "Trabajando en soporte de Preferencias de Usuario..."
         ],
         "todo": [
-            "(!) Puede que reescriba PuréScript por completo en un próximo parche",
+            "Agregar comando de Stable Diffusion",
             "Agregar ejemplos interactivos de comandos con p!ayuda",
             "p!ajedrez",
             "Minijuegos individuales y tipo-fiesta",
             "Gráficos analíticos (rama PuréLytics, posiblemente contenida en p!info y aquí)",
             "Agregar GIFs infográficos en comandos",
             "Crear página de ayuda Web para entenderme mejor",
-            "Considerar una versión pública de Bot de Puré (daré detalles cuando sea el momento)"
+            "Considerar una versión pública de Bot de Puré (daré detalles si lo hago)"
         ]
     },
     "p_drmk": {
