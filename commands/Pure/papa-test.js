@@ -1,4 +1,4 @@
-const { MessageEmbed, MessageActionRow, MessageButton, Modal, TextInputComponent } = require('discord.js'); //Integrar discord.js
+const { MessageEmbed, MessageActionRow, MessageButton, Modal, TextInputComponent, GuildMember } = require('discord.js'); //Integrar discord.js
 const { fetchMember } = require('../../func.js');
 const { formatPixivPostsMessage } = require('../../systems/purepix.js');
 const { CommandMetaFlagsManager, CommandManager, CommandOptionsManager } = require('../Commons/commands');
@@ -20,13 +20,19 @@ const command = new CommandManager('papa-test', flags)
         //func.dibujarMillion(message);
         
         //dibujarDespedida(message.member);
-        console.log({
-            request: request,
-            args: args,
-            isSlash: isSlash,
-            rawArgs: rawArgs,
-        });
-        return request.reply({ content: `**request** ${request}\n**args** ${args}\n**isSlash** ${isSlash}\n**rawArgs** ${rawArgs}`})
+
+
+        // console.log({
+        //     request: request,
+        //     args: args,
+        //     isSlash: isSlash,
+        //     rawArgs: rawArgs,
+        // });
+        // return request.reply({ content: `**request** ${request}\n**args** ${args}\n**isSlash** ${isSlash}\n**rawArgs** ${rawArgs}`})
+
+        /**@type {GuildMember}*/
+        const member = options.in(request).fetchParam(args, 'miembro');
+        request.reply({ content: `**¿Se encuentra rol de booster?** ${member.roles.cache.find(role => role.tags.premiumSubscriberRole) ? 'SI' : 'NO'}` });
     });
 
 module.exports = command;
