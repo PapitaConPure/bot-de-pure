@@ -32,7 +32,12 @@ const command = new CommandManager('papa-test', flags)
 
         /**@type {GuildMember}*/
         const member = options.in(request).fetchParam(args, 'miembro');
-        request.reply({ content: `**¿Se encuentra rol de booster?** ${member.roles.cache.find(role => role.tags.premiumSubscriberRole) ? 'SI' : 'NO'}` });
+        request.reply({
+            content: [
+                `**Miembro** ${member.displayName}`,
+                `**¿Se encuentra rol de booster?** ${member.roles.cache.find(role => role.tags.premiumSubscriberRole) ? 'SI' : 'NO'}`,
+            ].join('\n'),
+        });
     });
 
 module.exports = command;
