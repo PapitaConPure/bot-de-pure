@@ -4,6 +4,8 @@
  * @typedef {'SINGLE'|'MULTIPLE'|Array<String>} ParamPoly Capacidad de entradas de parámetro de CommandOption
  */
 
+const { fetchUser, fetchMember } = require('../../func');
+
 const PARAM_TYPES = {
     'NUMBER':  { getMethod: 'getNumber',  help: 'número' },
     'TEXT':    { getMethod: 'getString',  help: 'texto' },
@@ -369,19 +371,26 @@ class CommandOptionsManager {
      * @type {Map<String, CommandFlag | CommandFlagExpressive>}
      */
     flags;
+    /**Propiedades por defecto*/
+    #defaults;
     /**
-     * Propiedades por defecto 
+     * Contexto de Request
+     * @type {import('./typings').CommandRequest?}
      */
-    defaults;
+    #request;
 
-    /**@constructor*/
-    constructor() {
+    /**
+     * @constructor
+     * @param {import('./typings').CommandRequest?} request El contexto de Request actual. Esto solo se ingresa dentro de una ejecución
+     */
+    constructor(request = null) {
         this.options = new Map();
         this.params = new Map();
         this.flags = new Map();
-        this.defaults = {
+        this.#defaults = {
             polymax: 5
         };
+        this.#request = request;
     };
     
     /**
@@ -402,7 +411,7 @@ class CommandOptionsManager {
 
         const commandParam = new CommandParam(name, type)
             .setDesc(desc)
-            .setPoly(poly || 'SINGLE', polymax || this.defaults.polymax)
+            .setPoly(poly || 'SINGLE', polymax || this.#defaults.polymax)
             .setOptional(optional || false);
         this.options.set(commandParam._name, commandParam);
         this.params.set(commandParam._name, commandParam);
@@ -431,6 +440,21 @@ class CommandOptionsManager {
         this.flags.set(flagIdentifier, commandFlag);
         return this;
     };
+    /**
+     * Crea una copia del administrador de opciones bajo el contexto de ejecución actual
+     * Es una tarea cara que se usa al querer fetchear un miembro, usuario u otro tipo de dato que requiera el contexto de ejecución. De lo contrario, no debería usarse
+     * @param {import('./typings').CommandRequest} request
+     * @returns {CommandOptionsManager} La copia del administrador de opciones
+     */
+    in(request) {
+        const newCOM = new CommandOptionsManager(request);
+
+        newCOM.options = this.options;
+        newCOM.params = this.params;
+        newCOM.flags = this.flags;
+
+        return newCOM;
+    };
 
     /**
      * String de ayuda de las opciones de comando del administrador
@@ -458,8 +482,36 @@ class CommandOptionsManager {
             }).join(' ');
     };
     /**
+     * Remuve y devuelve la siguiente entrada o devuelve todas las entradas en caso de que {@linkcode whole} sea verdadero
+     * @param {Array<String>} args El conjunto de entradas
+     * @param {ParamType} type El tipo de entrada buscado
+     * @param {Boolean} whole Indica si devolver todas las entradas o no
+     * @returns 
+     */
+    #fetchMessageParam(args, type, whole = false) {
+        const argsPrototype = whole ? args.join(' ') : args.shift();
+        if(isParamTypeStrict(type))
+            return argsPrototype;
+        switch(type) {
+        case 'USER':
+            return fetchUser(argsPrototype, this.#request);
+        case 'MEMBER':
+            return fetchMember(argsPrototype, this.#request);
+        case 'ROLE':
+            return argsPrototype; //Pendiente
+        case 'CHANNEL':
+            return argsPrototype; //Pendiente
+        case 'IMAGE':
+            return argsPrototype; //Pendiente
+        case 'NUMBER':
+            return +argsPrototype;
+        default:
+            return argsPrototype;
+        }
+    }
+    /**
      * Si es un comando Slash, devuelve el valor del parámetro ingresado
-     * Si es un comando de mensaje, remueve y devuelve la siguente entrada o devuelve todas las entradas en caso de que whole sea verdadero
+     * Si es un comando de mensaje, remueve y devuelve la siguente entrada o devuelve todas las entradas en caso de que {@linkcode whole} sea verdadero
      * Si no se recibe ningún parámetro, se devuelve undefined
      * @param {import('discord.js').CommandInteractionOptionResolver | Array<String>} args El conjunto de entradas
      * @param {String} slashIdentifier El identificador del parámetro para comandos Slash
@@ -473,8 +525,11 @@ class CommandOptionsManager {
         if(!param)
             throw new ReferenceError(`No se pudo encontrar un parámetro con el identificador: ${slashIdentifier}`);
 
+        if(param._poly !== 'SINGLE')
+            throw new TypeError(`No se puede devolver un solo valor con un poly-parámetro: ${slashIdentifier}`);
+
         if(Array.isArray(args))
-            return whole ? args.join(' ') : args.shift();
+            return this.#fetchMessageParam(args, param._type, whole);
 
         let getMethod = 'getString';
         
