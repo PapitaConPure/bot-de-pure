@@ -181,18 +181,18 @@ class MathParser {
     }
 
     parse() {
-        let expression = this.#parseExpressions();
+        let expression = this.#parseCombination();
         return expression;
     }
 
     //Suma y resta
-    #parseExpressions() {
-        let leftOperand = this.#parseFactors();
+    #parseCombination() {
+        let leftOperand = this.#parseFactor();
         
         while(this.#current.type === TokenTypes.COMBINATION) {
             const operator = this.#current.value;
             this.#digest(TokenTypes.COMBINATION);
-            let rightOperand = this.#parseFactors();
+            let rightOperand = this.#parseFactor();
             leftOperand = this.#createBinaryToken(operator, leftOperand, rightOperand);
         }
 
@@ -200,13 +200,13 @@ class MathParser {
     }
 
     //Multiplicación y división
-    #parseFactors() {
-        let leftOperand = this.#parseFunctions();
+    #parseFactor() {
+        let leftOperand = this.#parseFunction();
         
         while(this.#current.type === TokenTypes.FACTOR) {
             const operator = this.#current.value;
             this.#digest(TokenTypes.FACTOR);
-            let rightOperand = this.#parseFunctions();
+            let rightOperand = this.#parseFunction();
             leftOperand = this.#createBinaryToken(operator, leftOperand, rightOperand);
         }
         
@@ -214,7 +214,7 @@ class MathParser {
     }
 
     //Potencias y funciones
-    #parseFunctions() {
+    #parseFunction() {
         let leftOperand = this.#parseHighest();
         
         while(this.#current.type === TokenTypes.FUNCTION) {
@@ -256,12 +256,12 @@ class MathParser {
 
         if(this.#current.type === TokenTypes.GROUP_OPEN) {
             this.#digest(TokenTypes.GROUP_OPEN);
-            const expr = this.#parseExpressions();
+            const expr = this.#parseCombination();
             this.#digest(TokenTypes.GROUP_CLOSE);
             return expr;
         }
 
-        throw new Error(`Token inesperado en posición ${this.#cursor}: ${this.#current.type} (${this.#current.value})`)
+        throw new Error(`Token inesperado en posición ${this.#cursor}: ${this.#current.type} (${this.#current.value})`);
     }
 }
 
@@ -372,6 +372,7 @@ function calc(operation) {
 }
 
 module.exports = {
+    TokenTypes,
     MathLexer,
     MathParser,
     MathCalculator,
