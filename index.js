@@ -24,7 +24,7 @@ const booruUserId = process.env.BOORU_USERID ?? (require(envPath)?.booruuserid);
 
 //Utilidades
 const globalConfigs = require('./localdata/config.json');
-const { channelIsBlocked, randRange, shortenText, dibujarBienvenida, dibujarDespedida, levenshteinDistance, rand, edlDistance } = require('./func.js');
+const { channelIsBlocked, shortenText, dibujarBienvenida, dibujarDespedida, rand, edlDistance } = require('./func.js');
 const globalGuildFunctions = require('./localdata/customization/guildFunctions.js');
 const { auditRequest, auditSystem } = require('./systems/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('./localdata/cmdExceptions.js');
