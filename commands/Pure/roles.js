@@ -6,7 +6,7 @@ const { p_pure } = require('../../localdata/customization/prefixes');
 const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 const { auditError } = require('../../systems/auditor');
 const { colorsRow } = require('../../localdata/houraiProps');
-const { subdivideArray } = require('../../func');
+const { subdivideArray, isBoosting } = require('../../func');
 
 /**
  * @typedef {{id: String, label: String, emote: String}} RoleData Datos de un rol para el propósito del comando
@@ -226,10 +226,7 @@ const command = new CommandManager('roles', flags)
 	})
 	.setInteractionResponse(async function selectCustomRole(interaction) {
 		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
-		/**@type {Date}*/
-		const boostTimestamp = interaction.member?.premiumSinceTimestamp;
-		const currentTimestamp = (new Date(Date.now())).getTime();
-		const boostedRecently = ((currentTimestamp - boostTimestamp) < (60e3 * 60 * 24 * 35));
+		const boostedRecently = isBoosting(interaction.member) || interaction.user.id === require('../../localdata/config.json').peopleid.papita;
 		const customRoleId = houraiDB.customRoles?.[interaction.user.id];
 
 		return interaction.reply({
@@ -504,7 +501,8 @@ const command = new CommandManager('roles', flags)
 		switch(operation) {
 			case 'CREATE': {
 				if(interaction.member.roles.cache.get(houraiDB.customRoles[userId]))
-					return interaction.reply({ content: '⚠ ¡Tu rol ya fue creado! Si cancelaste la configuración, selecciona la categoría nuevamente para editarlo', ephemeral: true });
+					return interaction.reply({ content: '⚠ ¡Tu rol ya fue creado! Si cancelaste la configuración o la interacción falló, selecciona la categoría nuevamente para editarlo', ephemeral: true });
+					
 				const customRole = await interaction.guild.roles.create({
 					name: interaction.member.nickname ?? interaction.user.username,
 					position: (await interaction.guild.roles.fetch('857544764499951666'))?.rawPosition,
@@ -558,8 +556,9 @@ const command = new CommandManager('roles', flags)
 			.setCustomId('nameInput')
 			.setLabel('Nombre')
 			.setStyle('SHORT')
-			.setMaxLength(160)
+			.setMaxLength(158)
 			.setPlaceholder(`Ej: Bhavaagra Princess`);
+		
 		const colorInput = new TextInputComponent()
 			.setCustomId('colorInput')
 			.setLabel('Color (hexadecimal)')
@@ -584,7 +583,7 @@ const command = new CommandManager('roles', flags)
 			.setTitle('Edita tu Rol Personalizado')
 			.addComponents(rows);
 		
-		return interaction.showModal(modal);
+		return interaction.showModal(modal).catch(e => {});
 	})
 	.setModalResponse(async function applyCustomRoleChanges(interaction, roleId, category = null) {
 		/**@type {import('discord.js').Role}*/
@@ -598,7 +597,7 @@ const command = new CommandManager('roles', flags)
 
 		if(roleName.length)
 			editStack.push(
-				customRole.edit({ name: roleName })
+				customRole.edit({ name: `✨ ${roleName}` })
 				.catch(_ => replyStack.push('⚠ No se pudo actualizar el nombre del rol'))
 			);
 
