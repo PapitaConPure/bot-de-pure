@@ -400,6 +400,11 @@ module.exports = {
             '671851228308963348',
         );
     },
+
+    /**@param {Discord.GuildMember} member*/
+    isBoosting: function(member) {
+        return member.roles.premiumSubscriberRole ? true : false;
+    },
     //#endregion
 
     //#region Sistema
