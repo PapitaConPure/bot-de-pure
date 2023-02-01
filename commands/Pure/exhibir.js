@@ -86,10 +86,15 @@ const command = new CommandManager('exhibir', flags)
 						.setAuthor({ name: `🔗 Original en #${channel.name ?? 'deleted-channel'}`, url: message.url })
 						.setTimestamp(message.createdTimestamp),
 				);
-				if(message.reactions.cache.size)
-					formattedMessage.embeds.setFooter({
-						text: message.reactions.cache.first(3).map(reaction => `${reaction.emoji} ${reaction.count}`).join(' ')
-					});
+				// message.channel.messages.fetch(message.id)
+				// .then(original => {
+				// 	console.log(original.reactions.cache);
+				// 	if(message.reactions.cache.size)
+				// 		console.log(message.reactions.cache.first(3));
+				// 		formattedMessage.embeds[embedsCount - 1].setFooter({
+				// 			text: message.reactions.cache.first(3).map(reaction => `${reaction.emoji} ${reaction.count}`).join(' ')
+				// 		});
+				// })
 			}
 
 			agent.setMember(message.member ?? message.author);
