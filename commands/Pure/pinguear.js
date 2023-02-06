@@ -46,7 +46,7 @@ const command = new CommandManager('pinguear', flags)
 		const now = Date.now() * 1;
 		const uid = (request.author ?? request.user).id;
 		if(now - (uses.pinguear[uid] ?? 0) < 1000 * 60)
-			return request.react('⏳');
+			return isSlash ? request.reply({ content: '⏳ Pero no seas tan degenerado, aflójale un poco', ephemeral: true }) : request.react('⏳');
 		if(!isSlash && args.length < 2)
 			return request.reply({ content: `:warning: Debes ingresar 2 parámetros (\`${p_pure(request.guild.id).raw}pinguear <cantidad> <usuario>\`)`, ephemeral: true });
 		
