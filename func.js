@@ -803,11 +803,43 @@ module.exports = {
      * Devuelve la ID del usuario que más coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún usuario, se devuelve undefined.
      * @param {String} data 
      * @param {{ guild: Discord.Guild, client: Discord.BaseClient }} param1 
-     * @returns { String }
+     * @returns {String}
      */
     fetchUserID: function(data, { guild, client }) {
         const user = module.exports.fetchUser(data, { guild, client });
         return (user === undefined) ? undefined : user.id;
+    },
+
+    /**
+     * Busca un canal basado en la data ingresada.
+     * Devuelve el canal que coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún canal, se devuelve undefined.
+     * @param {String} data 
+     * @param {Discord.Guild} guild 
+     * @returns {Discord.Channel}
+     */
+    fetchChannel: function(data, guild) {
+        const ccache = guild.channels.cache;
+        if(data.startsWith('<#') && data.endsWith('>'))
+            data = data.slice(2, -1);
+        const channel = ccache.get(data) || ccache.filter(c => c.isText() || c.isVoice()).find(c => c.name.toLowerCase().includes(data));
+        if(!channel?.isText() && !channel?.isVoice()) return;
+        return channel;
+    },
+
+    /**
+     * Busca un canal basado en la data ingresada.
+     * Devuelve el canal que coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún canal, se devuelve undefined.
+     * @param {String} data 
+     * @param {Discord.Guild} guild 
+     * @returns {Discord.Role}
+     */
+    fetchRole: function(data, guild) {
+        const rcache = guild.roles.cache;
+        if(data.startsWith('<@&') && data.endsWith('>'))
+            data = data.slice(3, -1);
+        const role = rcache.get(data) || rcache.filter(r => r.name !== '@everyone').find(r => r.name.toLowerCase().includes(data));
+        if(!role) return;
+        return role;
     },
 
     fetchArrows: (emojiscache) => [emojiscache.get('681963688361590897'), emojiscache.get('681963688411922460')],
