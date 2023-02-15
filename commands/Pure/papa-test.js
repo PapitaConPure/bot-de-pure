@@ -1,5 +1,5 @@
 const { MessageEmbed, MessageActionRow, MessageButton, Modal, TextInputComponent, GuildMember } = require('discord.js'); //Integrar discord.js
-const { fetchMember } = require('../../func.js');
+const { fetchMember, isBoosting, fetchChannel, fetchRole } = require('../../func.js');
 const { formatPixivPostsMessage } = require('../../systems/purepix.js');
 const { CommandMetaFlagsManager, CommandManager, CommandOptionsManager } = require('../Commons/commands');
 //const global = require('../../localdata/config.json'); //Variables globales
@@ -29,13 +29,10 @@ const command = new CommandManager('papa-test', flags)
         //     rawArgs: rawArgs,
         // });
         // return request.reply({ content: `**request** ${request}\n**args** ${args}\n**isSlash** ${isSlash}\n**rawArgs** ${rawArgs}`})
-
-        /**@type {GuildMember}*/
-        const member = options.in(request).fetchParam(args, 'miembro');
         request.reply({
             content: [
-                `**Miembro** ${member.displayName}`,
-                `**¿Se encuentra rol de booster?** ${member.roles.cache.find(role => role.tags.premiumSubscriberRole) ? 'SI' : 'NO'}`,
+                `**Canal** ${fetchChannel(args.join(' '), request.guild)}`,
+                `**Rol** ${fetchRole(args.join(' '), request.guild)}`,
             ].join('\n'),
         });
     });
