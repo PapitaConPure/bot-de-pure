@@ -199,17 +199,20 @@ const command = new CommandManager('tubérculo', flags)
 				if(isSlash)
 					mcontent = args.getString('mensaje');
 				else {
-					if(!codeTag)
-						return request.reply({
-							content: [
-								'Debes poner **\\`\\`\\`** antes y después del código.',
-								'Esto hará que Discord le ponga el formato adecuado al código y que sea más fácil programar.',
-								'Opcionalmente, puedes poner **\\`\\`\\`arm** en el del principio para colorear el código'
-							].join('\n'),
-						});
-					const firstIndex = rawArgs.indexOf(codeTag);
-					const lastIndex = rawArgs.lastIndexOf('```');
-					mcontent = rawArgs.slice(firstIndex + codeTag.length, lastIndex > firstIndex ? lastIndex : rawArgs.length).trim();
+					if(isPureScript) {
+						if(!codeTag)
+							return request.reply({
+								content: [
+									'Debes poner **\\`\\`\\`** antes y después del código.',
+									'Esto hará que Discord le ponga el formato adecuado al código y que sea más fácil programar.',
+									'Opcionalmente, puedes poner **\\`\\`\\`arm** en el del principio para colorear el código'
+								].join('\n'),
+							});
+						const firstIndex = rawArgs.indexOf(codeTag);
+						const lastIndex = rawArgs.lastIndexOf('```');
+						mcontent = rawArgs.slice(firstIndex + codeTag.length, lastIndex > firstIndex ? lastIndex : rawArgs.length).trim();
+					} else
+						mcontent = (isSlash ? args.getString('mensaje') : args.join(' ')).split(/[\n ]*##[\n ]*/).join('\n');
 				}
 				const mfiles = isSlash ? options.fetchParamPoly(args, 'archivos', args.getString, null).filter(att => att) : (request.attachments || []).map(att => att.proxyURL);
 
