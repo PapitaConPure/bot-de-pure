@@ -1250,21 +1250,47 @@ module.exports = {
      */
     edlDistance: function(a, b) {
         const keyboardKeys = [
-            [...'qwertyuiop'],
-            [...'asdfghjklñ'],
-            [...'zxcvbnm'],
+            [ ...'º1234567890\'¡' ],
+            [ ...' qwertyuiop`+' ],
+            [ ...' asdfghjklñ´ç' ],
+            [ ...'<zxcvbnm,.-  ' ],
         ];
+        const shiftKeyboardKeys = [
+            [ ...'ª!"·$%&/()=?¿' ],
+            [ ...'           ^*' ],
+            [ ...'           ¨Ç' ],
+            [ ...'>       ;:_  ' ],
+        ];
+        const altKeyboardKeys = [
+            [ ...'\\|@#~€¬      ' ],
+            [ ... '           []' ],
+            [ ... '           {}' ],
+            [ ... '             ' ],
+        ];
+
         const keyboardCartesians = {};
-        for(let j = 0; j < keyboardKeys.length; j++)
-            keyboardKeys[j].forEach((char, i) => keyboardCartesians[char] = { x: i, y: j });
+        function assignToPlane(x, y, c) {
+            if(c == undefined) return;
+            keyboardCartesians[c] = { x, y };
+        }
+        for(let j = 0; j < keyboardKeys.length; j++) {
+            keyboardKeys[j]     .forEach((char, i) => assignToPlane(i, j, char));
+            shiftKeyboardKeys[j].forEach((char, i) => assignToPlane(i, j, char));
+            altKeyboardKeys[j]  .forEach((char, i) => assignToPlane(i, j, char));
+        }
+        assignToPlane(keyboardCartesians['b'].x, keyboardCartesians['b'].y + 1, 'SPACE');
         const centerCartesian = { x: parseInt(keyboardKeys[1].length * 0.5), y: 1 };
         function euclideanDistance(a = 'g', b = 'h') {
-            const aa = keyboardCartesians[a] ?? centerCartesian;
-            const bb = keyboardCartesians[b] ?? centerCartesian;
+            a = a.toLowerCase();
+            b = b.toLowerCase();
+            const aa = a === ' ' ? keyboardCartesians['SPACE'] : keyboardCartesians[a] ?? centerCartesian;
+            const bb = b === ' ' ? keyboardCartesians['SPACE'] : keyboardCartesians[b] ?? centerCartesian;
             const x = (aa.x - bb.x) ** 2;
             const y = (aa.y - bb.y) ** 2;
             return Math.sqrt(x + y);
         }
+        const normalizedEuclidean = euclideanDistance('w', 'd');
+        const halfNormalizedEuclidean = normalizedEuclidean * 0.5;
 
         const m = a.length + 1;
         const n = b.length + 1;
@@ -1286,15 +1312,15 @@ module.exports = {
                 const insertion = distance[i][j - 1] + 1;
                 const substitution = distance[i - 1][j - 1] + cost;
                 distance[i][j] = Math.min(deletion, insertion, substitution);
-
-                if(cost && substitution < insertion && substitution < deletion)
-                    distance[i][j] += euclideanDistance(aa, bb) - 1;
                 
                 if(a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1])
                     distance[i][j] = Math.min(
                         distance[i][j],
                         distance[i - 2][j - 2] + 1,
                     );
+
+                if(cost && substitution < insertion && substitution < deletion)
+                    distance[i][j] += euclideanDistance(aa, bb) * halfNormalizedEuclidean - normalizedEuclidean;
             }
 
         return distance[m - 1][n - 1];
