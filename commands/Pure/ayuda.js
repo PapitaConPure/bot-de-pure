@@ -165,7 +165,7 @@ const command = new CommandManager('ayuda', flags)
         }
         return request.reply({
             embeds: embeds,
-            components: components,
+            components,
         });
     });
 

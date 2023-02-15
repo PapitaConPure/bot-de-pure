@@ -138,7 +138,8 @@ const command = new CommandManager('tubérculo', flags)
 		'En caso de estar creando un Tubérculo, se requerirá un `<mensaje>` y/o `<archivos>`, junto a la `<id>` que quieras darle al mismo. Si la ID ya está registrada, será *editada*',
 		'En cualquier parte del contenido del mensaje, coloca "#FIN#" para bajar un renglón (no es necesario con PuréScript)',
 		'En caso de estar editando o borrando un Tubérculo existente, se requerirá su TuberID',
-		'Puedes leer o descargar la documentación de la versión 1.0 de PuréScript desde [aquí](https://drive.google.com/file/d/1BAjusYOrTEklj7WsbpLx46e8nwPMj4Vc/view?usp=share_link) (3MB)',
+		'Puedes leer o descargar la documentación de la versión 1.0 de PuréScript desde [aquí](https://drive.google.com/file/d/1KebeyvsjJUqpInvCiy8wlOJ-M_ewrTch/view?usp=share_link) (3MB)',
+		'Nótese que el lenguaje se encuentra en una etapa prematura y puede tener bugs o cambiar considerablemente',
 	)
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash = false, rawArgs) => {
@@ -335,12 +336,11 @@ const command = new CommandManager('tubérculo', flags)
 					);
 
 					let similar;
-					if(tuberId.length > 1) {
+					if(tuberId.length > 1)
 						similar = Object.keys(gcfg.tubers)
 							.filter(name => name.length > 1)
 							.map(name => ({ name, distance: edlDistance(tuberId, name) }))
-							.filter(t => t.distance < 5);
-					}
+							.filter(t => t.distance <= 3.5);
 
 					if(similar.length) {
 						similar = similar
@@ -348,18 +348,17 @@ const command = new CommandManager('tubérculo', flags)
 							.slice(0, 5);
 						
 						notFoundEmbed.addFields({
-							name: `Comandos similares a "${shortenText(tuberId, 80)}"`,
-							value: similar.map(t => `• **${shortenText(t.name, 160)}**`).join('\n'),
+							name: `TuberIDs similares a "${shortenText(tuberId, 80)}"`,
+							value: similar.map(t => `• **${shortenText(t.name, 152)}** (~${Math.round(100 - t.distance / 3.5 * 100)}%)`).join('\n'),
 						});
-					} else {
+					} else
 						notFoundEmbed.addFields({
 							name: 'Creación de Tubérculos',
 							value: [
 								`No se encontraron Tubérculos similares a "${shortenText(tuberId, 80)}".`,
 								'¿Quieres crear un Tubérculo simple? ¡Usa la bandera `--crear` y maqueta la respuesta que desees!',
 							].join('\n'),
-						})
-					}
+						});
 					
 					if(isPureScript)
 						notFoundEmbed.addFields({
