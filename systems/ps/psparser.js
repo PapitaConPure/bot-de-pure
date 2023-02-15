@@ -78,9 +78,11 @@ TokenToLanguage['STATEMENT'] = 'sentencia';
 TokenToLanguage['EXPRESSION'] = 'expresión';
 TokenToLanguage['BLOCK'] = 'bloque';
 TokenToLanguage['RELATION'] = 'relacional';
+TokenToLanguage['DATA_TYPE'] = 'tipo de dato';
 TokenToLanguage['ARROW'] = 'flecha';
 TokenToLanguage['COLON'] = 'dos puntos';
 TokenToLanguage['NADA'] = 'nada';
+TokenToLanguage['EOF'] = 'fin de código';
 
 /**
  * @type {Map<String, NodeType>}
@@ -1106,7 +1108,7 @@ class TuberParser {
             if([ TokenTypes.EQUALS, TokenTypes.COMPARE ].includes(this.#next.type))
                 return;
             const operator = this.#digest().value;
-            const argument = this.#parseExpression();
+            const argument = this.#parsePrimary();
             return {
                 type: 'UnaryExpression',
                 operator,
@@ -1126,7 +1128,7 @@ class TuberParser {
             const number = {
                 type: 'UnaryExpression',
                 operator: this.#digest().value,
-                argument: this.#parseExpression(),
+                argument: this.#parsePrimary(),
             };
             return number;
         }

@@ -125,7 +125,8 @@ class TuberInterpreter {
     #evaluateBlock(node, scope) {
         let lastEvaluated;
         let lastStatementName = 'Programa';
-        for(const statement of node.body) {
+        for(let i = 0; i < node.body.length; i++) {
+            const statement = JSON.parse(JSON.stringify(node.body[i]));
             let statementName = statement.operator ?? NodeToLanguage.get(statement.type);
             statementName ??= statement.expression?.type === 'CallExpression' ? 'EJECUTAR' : undefined;
             if(statementName == undefined) {
@@ -161,6 +162,7 @@ class TuberInterpreter {
 
         // console.log('----------------------------------------------------------------------------------------');
         // console.log(this.#currentStatement);
+        // console.dir(node, { depth: null });
         // console.log('----------------------------------------------------------------------------------------');
         
         switch(node.type) {
@@ -243,6 +245,7 @@ class TuberInterpreter {
                 if(element == undefined) continue;
                 const blockScope = new TuberScope(scope);
                 blockScope.assignVariable(node.element.name, element);
+                // console.log('node.element.name:', node.element.name, 'element:', element);
                 const lastEvaluated = this.#evaluateBlock(node, blockScope);
                 if(lastEvaluated.type === 'BreakStatement')
                     break;
@@ -436,6 +439,7 @@ class TuberInterpreter {
         case 'Boolean':
         case 'Text':
         case 'Embed':
+            // console.log('=========================================================================envío')
             this.#sendStack.push(emission);
             break;
         case 'Identifier':
@@ -475,6 +479,8 @@ class TuberInterpreter {
             return makeValue(variable, NodeToProgram.get(node.as) ?? variable.type);
         }
         case 'ArrowExpression': {
+            // console.log('Antes de los eventos')
+            console.dir(node, { depth: null });
             const evaluation = this.#evaluateArrowExpression(node, scope);
             // console.log('Evaluación de ArrowExpression:', evaluation);
             return makeValue(evaluation, NodeToProgram.get(node.as) ?? evaluation.type);
@@ -490,7 +496,7 @@ class TuberInterpreter {
         case 'LogicalExpression': {
             const evaluation = this.#evaluateLogicalExpression(node, scope);
             // console.log('Evaluación en LogicalExpression:', evaluation);
-            return evaluation;
+            return makeValue(evaluation, NodeToProgram.get(node.as) ?? evaluation.type);
         }
         case 'CallExpression': {
             const evaluation = this.#evaluateCallExpression(node, scope);
@@ -560,6 +566,7 @@ class TuberInterpreter {
      * @returns {RuntimeValue}
      */
     #evaluateArrowExpression(node, scope, asIdentifier = false) {
+        // console.log('En evaluateArrowExpression', node.container);
         if([
             'Identifier',
             'NumericLiteral',
@@ -755,10 +762,10 @@ class TuberInterpreter {
         
         const leftValue = leftHand ? (leftHand.value ?? leftHand.elements ?? leftHand.properties) : undefined;
         const rightValue = rightHand ? (rightHand.value ?? rightHand.elements ?? rightHand.properties) : undefined;
-        console.log({ leftValue, rightValue });
+        // console.log({ leftValue, rightValue });
         
         let result = operations[operator](leftValue, rightValue);
-        console.log({ result });
+        // console.log({ result });
 
         if(typeof result === 'boolean')
             return makeBoolean(result);
