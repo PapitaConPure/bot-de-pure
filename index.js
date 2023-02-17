@@ -463,6 +463,14 @@ client.on('messageCreate', async message => {
             if(exception)
                 return channel.send({ embeds: [ generateExceptionEmbed(exception, { cmdString: `${pdetect.raw}${commandName}` }) ]});
             const rawArgs = content.slice(content.indexOf(commandName) + commandName.length).trim();
+            if(Math.random() < 0.05)
+                setTimeout(() => message.channel.send({
+                    content: [
+                        '¡Aviso!',
+                        '¡El lenguaje de scripting de Tubérculos avanzados **PuréScript** ahora está disponible por medio del comando `p!tubérculo`!',
+                        'Puedes usar `p!ayuda tubérculo` para aprender más al respecto',
+                    ].join('\n'),
+                }).catch(console.error), 1000 * 3);
             await command.execute(message, args, false, rawArgs);
             stats.commands.succeeded++;
         } catch(error) {

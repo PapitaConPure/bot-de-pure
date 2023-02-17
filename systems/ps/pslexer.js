@@ -60,6 +60,12 @@ function createToken(type, value) {
     };
 }
 
+function TuberLexerError(message) {
+    const error = new Error(message);
+    error.name = 'TuberLexerError';
+    return error;
+}
+
 /**@class Clase para parsear tokens de PuréScript*/
 class TuberLexer {
     #cursor = 0;
@@ -317,9 +323,7 @@ class TuberLexer {
         if(this.#current === ',')
             return createToken(TokenTypes.COMMA, ',');
 
-        const error = Error(`Caracter inválido en línea ${this.#line}, columna ${this.#column} (posición ${this.#cursor + 1}): ${this.#current}`);
-        error.name = 'TuberLexerError';
-        throw error;
+        throw TuberLexerError(`Caracter inválido en línea ${this.#line}, columna ${this.#column} (posición ${this.#cursor + 1}): ${this.#current}`);
     }
 
     /**
@@ -329,6 +333,8 @@ class TuberLexer {
      * @returns {Array<TuberToken>}
      */
     tokenize(input) {
+        if(Array.isArray(input))
+            throw TuberLexerError('Se detectó código de Puréscript antiguo no-ejecutable. Bot de Puré ya no es compatible con este formato de PuréScript. Deberás volver a crear el Tubérculo en la versión actual.');
         this.#stream = input;
         this.#cursor = 0;
         this.#line = 1;
