@@ -235,11 +235,8 @@ const command = new CommandManager('tubérculo', flags)
 					console.log('Ejecutando PuréScript:', gcfg.tubers[tuberId]);
 					const result = await executeTuber(request, gcfg.tubers[tuberId], { isSlash });
 					console.log('PuréScript ejecutado:', gcfg.tubers[tuberId]);
-					if(gcfg.tubers[tuberId].script) {
+					if(gcfg.tubers[tuberId].script)
 						gcfg.tubers[tuberId].script = gcfg.tubers[tuberId].script;
-						
-						console.log('Script guardado:', gcfg.tubers[tuberId].script);
-					}
 					gcfg.markModified('tubers');
 				} catch(error) {
 					console.log('Ocurrió un error al añadir un nuevo Tubérculo');
