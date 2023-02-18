@@ -97,9 +97,9 @@ const command = new CommandManager('tarjeta', flags)
 		if(!score || score >= Math.pow(10, 12)) return request.reply(`⚠ Debes ingresar un puntaje final válido.\n${helpstr}`);
 
 		/**@type {String}*/
-		let dateStr = isSlash ? args.getString('fecha') : args.slice(4);
-		if(args.length > 4)
-			dateStr = dateStr.join('');
+		let dateStr = isSlash ? args.getString('fecha') : args.slice(4).join('');
+		if(!isSlash && !dateStr.length)
+			return request.reply(`⚠ Se esperaba una fecha luego del puntaje.\n${helpstr}`);
 		const dateNumbers = dateStr.split(/[\/ ]+/);
 		if(dateNumbers.some(n => isNaN(n)))
 			return request.reply('⚠ Fecha inválida. Asegúrate de seguir el formato DD/MM/AAAA');
