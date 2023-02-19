@@ -74,6 +74,8 @@ const command = new CommandManager('uwus', flags)
             ]).catch(console.error);
         });
 
+        const user = request.author ?? request.user;
+
         const embed = new MessageEmbed()
             .setColor('ffbbbb')
             .setTitle('Evento UWU')
@@ -87,7 +89,7 @@ const command = new CommandManager('uwus', flags)
                     value: `**${secs}** segundos.`,
                 },
             )
-            .setAuthor({ name: `Evento iniciado por ${request.author.username}`, iconURL: request.author.avatarURL() });
+            .setAuthor({ name: `Evento iniciado por ${user.username}`, iconURL: user.avatarURL() });
         
         return request.reply({ embeds: [embed] });
     });
