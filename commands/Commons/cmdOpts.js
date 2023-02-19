@@ -604,7 +604,7 @@ class CommandOptionsManager {
         let flagValue;
 
         if(flag.isExpressive())
-            getMethod = PARAM_TYPES[flag._type].getMethod;
+            getMethod = PARAM_TYPES[flag._type]?.getMethod ?? 'getString';
         
         flagValue = args[getMethod](identifier);
         
