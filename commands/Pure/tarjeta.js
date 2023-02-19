@@ -69,7 +69,7 @@ const command = new CommandManager('tarjeta', flags)
 	.setLongDescription(
 		'Para crear una tarjeta de logro personal.',
 		'Las imágenes utilizadas son de parte de **WMX#7937**',
-		'Deberás facilitar un juego (ejemplo: "HSiFS", "128" o "Youyoumu") y la calidad de survival obtenida ("clear", "1cc" o "nomiss")',
+		'Deberás facilitar un `<juego>` (ejemplo: "HSiFS", "128" o "Youyoumu") y la calidad de `<survival>` obtenida ("clear", "1cc" o "nomiss"), al igual que la `<fecha>` del logro',
 		'Adicionalmente, puedes especificar si el logro incluye desafíos personales como `--nobomb`, `--nospecial` y/o `--pacifista`',
 	)
 	.setOptions(options)
