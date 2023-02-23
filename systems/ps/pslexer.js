@@ -333,8 +333,11 @@ class TuberLexer {
      * @returns {Array<TuberToken>}
      */
     tokenize(input) {
-        if(Array.isArray(input))
-            throw TuberLexerError('Se detectó código de Puréscript antiguo no-ejecutable. Bot de Puré ya no es compatible con este formato de PuréScript. Deberás volver a crear el Tubérculo en la versión actual.');
+        if(Array.isArray(input)) {
+            const error = Error('Se detectó código de Puréscript antiguo no-ejecutable. Bot de Puré ya no es compatible con este formato de PuréScript. Deberás volver a crear el Tubérculo en la versión actual.');
+            error.name = 'TuberVersionError';
+            throw error;
+        }
         this.#stream = input;
         this.#cursor = 0;
         this.#line = 1;

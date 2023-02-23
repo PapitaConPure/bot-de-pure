@@ -60,6 +60,7 @@ const executeTuber = async (request, tuber, { tuberArgs }) => {
         console.dir(result, { depth: null });
     } catch(error) {
         const errorNames = {
+            'TuberVersionError':     'Error de versión',
             'TuberInitializerError': 'Error de inicialización',
             'TuberLexerError':       'Error léxico',
             'TuberParserError':      'Error de análisis',
