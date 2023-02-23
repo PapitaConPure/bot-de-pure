@@ -87,11 +87,13 @@ const executeTuber = async (request, tuber, { tuberArgs }) => {
                 name: 'Puede que este error no sea tu culpa',
                 value: 'Este error es un error inesperado. Estos son errores del lenguaje mismo, y deberías reportarlos a Papita con Puré#6932',
             });
-        } else 
-            embed.setColor('RED')
+        } else if(error.name === 'TuberInitializerError')
+            embed.setColor('YELLOW');
+        else
+            embed.setColor('RED');
 
         await request.reply({ embeds: [embed] });
-        throw Error('Ocurrió un error en la ejecución del Tubérculo');
+        throw error;
     }
 
     let { sendStack, inputStack } = result;

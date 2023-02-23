@@ -380,7 +380,8 @@ const command = new CommandManager('tubérculo', flags)
 				.catch(error => {
 					console.log('Ocurrió un error al ejecutar un Tubérculo');
 					console.error(error);
-					request.reply({ content: '❌ Parece que hay un problema con este Tubérculo. Prueba creándolo nuevamente o eliminándolo si no se usa más' });
+					if(error.name !== 'TuberInitializerError')
+						request.reply({ content: '❌ Parece que hay un problema con este Tubérculo. Si eres el creador, puedes modificarlo o eliminarlo. Si no, avísale al creador' });
 				});
 				break;
 		}
