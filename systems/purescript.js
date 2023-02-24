@@ -21,7 +21,7 @@ function tuberExecute(input) {
 
 //#region Esqueleto de PuréScript
 /**Evalua el tipo de Tubérculo (básico o avanzado) y lo ejecuta. Si es avanzado, se ejecutará con PuréScript
- * @typedef {{author: String, content?: String | null, files?: Array<String>, script?: Array<TuberExpression>, inputs?: Array<{identifier: String, required: Boolean, desc: String}>}} Tubercle
+ * @typedef {{tuberId?: String, author: String, content?: String | null, files?: Array<String>, script?: Array<TuberExpression>, inputs?: Array<{identifier: String, required: Boolean, desc: String}>}} Tubercle
  * @function
  * @param {import("../commands/Commons/typings").CommandRequest} request
  * @param {Tubercle} tuber 
@@ -68,7 +68,8 @@ const executeTuber = async (request, tuber, { tuberArgs }) => {
             'TuberSendError':        'Error de envío',
         };
         const fieldName = errorNames[error.name] ?? 'Ocurrió un error inesperado';
-
+        
+        const replyContent = {};
         const embed = new MessageEmbed()
             .setTitle(`⚠ ${error.name}`)
             .setAuthor({
@@ -87,12 +88,20 @@ const executeTuber = async (request, tuber, { tuberArgs }) => {
                 name: 'Puede que este error no sea tu culpa',
                 value: 'Este error es un error inesperado. Estos son errores del lenguaje mismo, y deberías reportarlos a Papita con Puré#6932',
             });
-        } else if(error.name === 'TuberInitializerError')
+        } else if(error.name === 'TuberInitializerError') {
             embed.setColor('YELLOW');
-        else
+            replyContent.components = [new MessageActionRow().addComponents(
+                new MessageButton()
+                    .setCustomId(`tubérculo_getTuberHelp_${tuber.tuberId}`)
+                    .setLabel('Ver Tubérculo')
+                    .setEmoji('🔎')
+                    .setStyle('PRIMARY'),
+            )];
+        } else
             embed.setColor('RED');
 
-        await request.reply({ embeds: [embed] });
+        replyContent.embeds = [embed];
+        await request.reply(replyContent);
         throw error;
     }
 

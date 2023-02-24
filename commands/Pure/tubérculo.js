@@ -120,6 +120,69 @@ const loadPageNumber = async(interaction, page, setFilter = undefined) => {
 	return interaction.update(listUpdate);
 };
 
+function viewTuber(interaction, item, tuberId) {
+	if(!item)
+		return interaction.reply({ content: `⚠️ El Tubérculo **${tuberId}** no existe` });
+
+	let files = [];
+	const embed = new MessageEmbed()
+		.setColor('DARK_VIVID_PINK')
+		.setAuthor({ name: interaction.guild.name, iconURL: interaction.guild.iconURL() })
+		.setTitle('Visor de Tubérculos')
+		.addFields(
+			{
+				name: 'TuberID',
+				value: tuberId,
+				inline: true,
+			},
+			{
+				name: 'Autor',
+				value: (interaction.guild.members.cache.get(item.author) ?? interaction.guild.me).user.username,
+				inline: true,
+			},
+		);
+	
+	if(item.desc)
+		embed.addFields({
+			name: 'Descripción',
+			value: item.desc ?? '*Este Tubérculo no tiene descripción*',
+		});
+	
+	if(item.script) {
+		if(item.inputs?.length)
+			embed.addFields({
+				name: 'Entradas',
+				value: item.inputs.map(i => `**(${ProgramToLanguage.get(i.type) ?? 'Nada'})** \`${i.name ?? 'desconocido'}\`: ${i.description ?? 'Sin descripción'}`).join('\n'),
+			});
+		const visualPS = item.script.map
+			? item.script.map(expr => expr.join(' ')).join(';\n')
+			: item.script;
+		if(visualPS.length >= 1020)
+			files = [new MessageAttachment(Buffer.from(visualPS, 'utf-8'), 'PuréScript.txt')];
+		else
+			embed.addFields({
+				name: 'PuréScript',
+				value: [
+					'```arm',
+					`${visualPS}`,
+					'```',
+				].join('\n'),
+			});
+	} else {
+		if(item.content) embed.addFields({ name: 'Mensaje', value: item.content });
+		if(item.files && item.files.length) embed.addFields({
+			name: 'Archivos',
+			value: item.files.map((f,i) => `[${i}](${f})`).join(', '),
+		});
+	}
+
+	return interaction.reply({
+		embeds: [embed],
+		files,
+		//components: *algo*,
+	});
+}
+
 const options = new CommandOptionsManager()
 	.addParam('id', 	  'TEXT',           'para especificar sobre qué Tubérculo operar', { optional: true })
 	.addParam('mensaje',  'TEXT',           'para especificar el texto del mensaje',       { optional: true })
@@ -233,7 +296,7 @@ const command = new CommandManager('tubérculo', flags)
 				
 				try {
 					console.log('Ejecutando PuréScript:', gcfg.tubers[tuberId]);
-					const result = await executeTuber(request, gcfg.tubers[tuberId], { isSlash });
+					const result = await executeTuber(request, { ...gcfg.tubers[tuberId], tuberId }, { isSlash });
 					console.log('PuréScript ejecutado:', gcfg.tubers[tuberId]);
 					if(gcfg.tubers[tuberId].script)
 						gcfg.tubers[tuberId].script = gcfg.tubers[tuberId].script;
@@ -246,67 +309,7 @@ const command = new CommandManager('tubérculo', flags)
 				break;
 
 			case 'ver':
-				const item = gcfg.tubers[tuberId];
-				if(!item)
-					return request.reply({ content: `⚠️ El Tubérculo **${tuberId}** no existe` });
-
-				let files = [];
-				const embed = new MessageEmbed()
-					.setColor('DARK_VIVID_PINK')
-					.setAuthor({ name: request.guild.name, iconURL: request.guild.iconURL() })
-					.setTitle('Visor de Tubérculos')
-					.addFields(
-						{
-							name: 'TuberID',
-							value: tuberId,
-							inline: true,
-						},
-						{
-							name: 'Autor',
-							value: (request.guild.members.cache.get(item.author) ?? request.guild.me).user.username,
-							inline: true,
-						},
-					);
-				
-				if(item.desc)
-					embed.addFields({
-						name: 'Descripción',
-						value: item.desc ?? '*Este Tubérculo no tiene descripción*',
-					});
-				
-				if(item.script) {
-					if(item.inputs?.length)
-						embed.addFields({
-							name: 'Entradas',
-							value: item.inputs.map(i => `**(${ProgramToLanguage.get(i.type)})** \`${i.name}\`: ${i.description ?? 'Sin descripción'}`).join('\n'),
-						});
-					const visualPS = item.script.map
-						? item.script.map(expr => expr.join(' ')).join(';\n')
-						: item.script;
-					if(visualPS.length >= 1020)
-						files = [new MessageAttachment(Buffer.from(visualPS, 'utf-8'), 'PuréScript.txt')];
-					else
-						embed.addFields({
-							name: 'PuréScript',
-							value: [
-								'```arm',
-								`${visualPS}`,
-								'```',
-							].join('\n'),
-						});
-				} else {
-					if(item.content) embed.addFields({ name: 'Mensaje', value: item.content });
-					if(item.files && item.files.length) embed.addFields({
-						name: 'Archivos',
-						value: item.files.map((f,i) => `[${i}](${f})`).join(', '),
-					});
-				}
-
-				return request.reply({
-					embeds: [embed],
-					files,
-					//components: *algo*,
-				});
+				return viewTuber(request, gcfg.tubers[tuberId], tuberId);
 			
 			case 'borrar':
 				if(!gcfg.tubers[tuberId])
@@ -376,7 +379,7 @@ const command = new CommandManager('tubérculo', flags)
 					? args
 					: options.fetchParamPoly(args, 'entradas', args.getString, null).filter(input => input);
 				console.log('tuberArgs:', tuberArgs);
-				await executeTuber(request, gcfg.tubers[tuberId], { tuberArgs, isSlash })
+				await executeTuber(request, { ...gcfg.tubers[tuberId], tuberId }, { tuberArgs, isSlash })
 				.catch(error => {
 					console.log('Ocurrió un error al ejecutar un Tubérculo');
 					console.error(error);
@@ -391,6 +394,19 @@ const command = new CommandManager('tubérculo', flags)
 		if(interaction.user.id !== userId)
 			return interaction.reply({ content: 'No tienes permiso para hacer eso', ephemeral: true });
 		return require('./ayuda.js').execute(interaction, [ 'tubérculo' ], false);
+	})
+	.setButtonResponse(async function getTuberHelp(interaction, tuberId) {
+		if(!tuberId)
+			return interaction.reply({ content: '⚠ Se esperaba una TuberID válida', ephemeral: true });
+
+		const gid = interaction.guild.id;
+		const guildquery = { guildId: gid };
+		const gcfg = (await GuildConfig.findOne(guildquery)) || new GuildConfig(guildquery);
+		const tuber = gcfg.tubers[tuberId];
+		if(!tuber)
+			return interaction.reply({ content: '⚠ Esta TuberID ya no existe', ephemeral: true });
+		
+		return viewTuber(interaction, tuber, tuberId);
 	})
 	.setButtonResponse(async function loadPage(interaction, page) {
 		return loadPageNumber(interaction, page);
