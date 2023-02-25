@@ -779,7 +779,20 @@ class TuberParser {
 
         const elements = [];
         this.#insideListing = true;
-        while(![ TokenTypes.GROUP_CLOSE, TokenTypes.STATEMENT, TokenTypes.EOF ].includes(this.#current.type)) {
+        while(![
+            TokenTypes.GROUP_CLOSE,
+            TokenTypes.STATEMENT,
+            TokenTypes.CONDITION_OPEN,
+            TokenTypes.CONDITION_CHANGE,
+            TokenTypes.WHILE,
+            TokenTypes.DO_OPEN,
+            TokenTypes.FOR,
+            TokenTypes.BLOCK_OPEN,
+            TokenTypes.BLOCK_CLOSE,
+            TokenTypes.DO_CLOSE,
+            TokenTypes.IN,
+            TokenTypes.EOF,
+        ].includes(this.#current.type)) {
             elements.push(this.#parseExpression());
             if(this.#current.type !== TokenTypes.COMMA)
                 break;
