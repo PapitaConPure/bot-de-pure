@@ -416,7 +416,7 @@ const command = new CommandManager('tubérculo', flags)
 					? args
 					: options.fetchParamPoly(args, 'entradas', args.getString, null).filter(input => input);
 				console.log('tuberArgs:', tuberArgs);
-				await executeTuber(request, { ...gcfg.tubers[tid], tid }, { tuberArgs, isSlash })
+				await executeTuber(request, { ...gcfg.tubers[tid], tuberId: tid }, { tuberArgs, isSlash })
 				.catch(error => {
 					console.log('Ocurrió un error al ejecutar un Tubérculo');
 					console.error(error);
