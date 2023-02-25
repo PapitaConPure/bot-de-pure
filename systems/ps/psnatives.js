@@ -224,15 +224,17 @@ function createDiscordMember(member) {
 }
 
 /**
- * @param {import('discord.js').GuildChannel} channel 
+ * @param {import('discord.js').GuildChannel | import('discord.js').TextChannel | import('discord.js').VoiceChannel} channel 
  */
 function createDiscordChannel(channel) {
+    const isNSFW = channel.nsfw
     /**@type {Map<String, RuntimeValue>}*/
     const canal = new Map();
     canal
         .set('id',      makeText(channel.id))
         .set('nombre',  makeText(channel.name))
-        .set('mención', makeText(`${channel}`));
+        .set('mención', makeText(`${channel}`))
+        .set('nsfw',    isNSFW != undefined ? makeBoolean(isNSFW) : makeNada());
     return canal;
 }
 
@@ -240,12 +242,15 @@ function createDiscordChannel(channel) {
  * @param {import('discord.js').Role} role 
  */
 function createDiscordRole(role) {
+    const roleIcon = role.iconURL({ size: 256 })
     /**@type {Map<String, RuntimeValue>}*/
     const rol = new Map();
     rol
         .set('id',      makeText(role.id))
         .set('nombre',  makeText(role.name))
-        .set('mención', makeText(`${role}`));
+        .set('mención', makeText(`${role}`))
+        .set('color',   makeText(role.hexColor))
+        .set('ícono',   roleIcon ? makeText(roleIcon) : makeNada());
     return rol;
 }
 
@@ -883,8 +888,8 @@ async function declareContext(scope, request, tuber, args) {
     if(tuber.inputs && args != undefined) {
         const argsList = args;
         const attachmentsList = [
-            ...request.attachments.map(attachment => attachment.proxyURL),
-            ...argsList.map(arg => arg.match(fileRegex) ? arg : undefined).filter(arg => arg),
+            // ...(request.attachments ? request.attachments.map(attachment => attachment.proxyURL)) : ,
+            // ...argsList.map(arg => arg.match(fileRegex) ? arg : undefined).filter(arg => arg),
         ];
         const contentsList = argsList.filter(arg => arg);
         
