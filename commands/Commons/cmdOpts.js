@@ -550,6 +550,9 @@ class CommandOptionsManager {
     fetchParamPoly(args, identifier, callbackFn, fallback = undefined) {
         /**@type {CommandParam}*/
         const option = this.params.get(identifier);
+        if(!option)
+            throw new ReferenceError(`No se pudo encontrar un Poly-parámetro con el identificador: ${identifier}`);
+
         const singlename = identifier.replace(/[Ss]$/, '');
         let params;
         if(option && option._poly)
@@ -565,6 +568,8 @@ class CommandOptionsManager {
                 break;
             default:
                 params = option._poly;
+                if(!Array.isArray(params))
+                    throw TypeError('Se esperaba un arreglo como Poly-parámetro');
                 break;
             }
 
