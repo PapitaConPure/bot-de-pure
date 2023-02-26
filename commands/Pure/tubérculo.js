@@ -248,7 +248,7 @@ const command = new CommandManager('tubérculo', flags)
 		const isPureScript = options.fetchFlag(args, 'script');
 
 		/**@type {String?}*/
-		const tuberId = isSlash ? args.getString('id') : args.shift();
+		const tuberId = isSlash ? args.getString('id')?.replace(/ +/, '') : args.shift();
 		const members = request.guild.members.cache;
 
 		if(!tuberId) {
@@ -291,7 +291,7 @@ const command = new CommandManager('tubérculo', flags)
 					return request.reply({ content: `⛔ Acción denegada. Esta TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.me).user.username}*` });
 				
 				const tuberContent = { author: (request.user ?? request.author).id };
-				const codeTag = rawArgs.match(/```[A-Za-z0-9]*/)?.[0];
+				const codeTag = isSlash ? 0 : rawArgs.match(/```[A-Za-z0-9]*/)?.[0];
 				/**@type {String}*/
 				let mcontent;
 				if(isSlash)
@@ -332,7 +332,8 @@ const command = new CommandManager('tubérculo', flags)
 				try {
 					console.log('Ejecutando PuréScript:', gcfg.tubers[tuberId]);
 					gcfg.tubers[tuberId].tuberId = tuberId;
-					const result = await executeTuber(request, gcfg.tubers[tuberId], { isSlash });
+					if(isSlash) await request.deferReply();
+					await executeTuber(request, gcfg.tubers[tuberId], { isSlash });
 					console.log('PuréScript ejecutado:', gcfg.tubers[tuberId]);
 					if(gcfg.tubers[tuberId].script)
 						gcfg.tubers[tuberId].script = gcfg.tubers[tuberId].script;
@@ -340,7 +341,10 @@ const command = new CommandManager('tubérculo', flags)
 				} catch(error) {
 					console.log('Ocurrió un error al añadir un nuevo Tubérculo');
 					console.error(error);
-					return request.reply({ content: '❌ Hay un problema con el Tubérculo que intentaste crear, por lo que no se registrará' });
+					const errorContent = { content: '❌ Hay un problema con el Tubérculo que intentaste crear, por lo que no se registrará' };
+					return request.deferred
+						? request.editReply(errorContent)
+						: request.reply(errorContent);
 				}
 				break;
 
@@ -423,6 +427,7 @@ const command = new CommandManager('tubérculo', flags)
 					? args
 					: options.fetchParamPoly(args, 'entradas', args.getString, null).filter(input => input);
 				console.log('tuberArgs:', tuberArgs);
+				if(isSlash) await request.deferReply();
 				await executeTuber(request, { ...gcfg.tubers[tid], tuberId: tid }, { tuberArgs, isSlash })
 				.catch(error => {
 					console.log('Ocurrió un error al ejecutar un Tubérculo');

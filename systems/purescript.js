@@ -7,7 +7,7 @@ const { TuberParser } = require('./ps/psparser.js');
 const { TuberInterpreter } = require('./ps/psinterpreter.js');
 const { declareNatives, declareContext } = require('./ps/psnatives.js');
 const { TuberScope } = require('./ps/psscope.js');
-const { fileRegex, makeValue } = require('./ps/commons.js');
+const { makeValue } = require('./ps/commons.js');
 
 function tuberExecute(input) {
     const lexer = new TuberLexer();
@@ -28,8 +28,10 @@ function tuberExecute(input) {
  * @param {{ args: Array<String>, isSlash: Boolean }} inputOptions
  */
 const executeTuber = async (request, tuber, { tuberArgs }) => {
+    const replyFn = request.editReply ?? request.reply;
+
     if(!tuber.script)
-        return request.reply({
+        return replyFn.call(request, {
             content: tuber.content,
             files: tuber.files,
         }).catch(console.error);
@@ -101,14 +103,14 @@ const executeTuber = async (request, tuber, { tuberArgs }) => {
             embed.setColor('RED');
 
         replyContent.embeds = [embed];
-        await request.reply(replyContent);
+        await replyFn.call(request, replyContent);
         throw error;
     }
 
     let { sendStack, inputStack } = result;
     
     if(!sendStack.length) {
-        await request.reply({ content: `⚠ Se esperaba un envío de mensaje` });
+        await replyFn.call(request, { content: `⚠ Se esperaba un envío de mensaje` });
         throw Error('Se esperaba un envío de mensaje');
     }
 
@@ -140,10 +142,10 @@ const executeTuber = async (request, tuber, { tuberArgs }) => {
 
     tuber.inputs = inputStack;
 
-    return request.reply(replyObject).catch(async () => {
-        await request.reply({ content: `⚠ No se puede enviar el mensaje. Revisa el largo y la validez de los datos` });
+    return replyFn.call(request, replyObject).catch(async () => {
+        await replyFn.call(request, { content: `⚠ No se puede enviar el mensaje. Revisa el largo y la validez de los datos` });
         throw Error('Envío inválido');
-    });
+    })
 };
 
 module.exports = {
