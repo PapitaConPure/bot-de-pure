@@ -70,15 +70,17 @@ colors
  * @param {[ EmbedValue, TextValue, TextValue ]} param0 
  * @param {CurrentStatement} currentStatement
  */
-function marcoAgregarCampo([marco, nombre, valor], currentStatement) {
+function marcoAgregarCampo([marco, nombre, valor, alineado], currentStatement) {
     if(marco?.type !== 'Embed')
         throw TuberInterpreterError('Se esperaba un Marco de primer argumento', currentStatement);
     if(isNotValidText(nombre))
         throw TuberInterpreterError('Se esperaba un Texto válido para el nombre del campo de Marco', currentStatement);
     if(isNotValidText(valor))
         throw TuberInterpreterError('Se esperaba un Texto válido para el valor del campo de Marco', currentStatement);
+    if(alineado.type !== 'Boolean')
+        throw TuberInterpreterError('Se esperaba una Dupla válida para definir el alineamiento del campo de Marco', currentStatement);
 
-    marco.value.addFields({ name: nombre.value, value: valor.value });
+    marco.value.addFields({ name: nombre.value, value: valor.value, inline: alineado.value });
     return makeNada();
 }
 
