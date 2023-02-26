@@ -480,7 +480,8 @@ const command = new CommandManager('tubérculo', flags)
 					ephemeral: true
 				});
 			filter = userId;
-		}
+		} else
+			filter = filter.toLowerCase();
 		const content = `${filters[target].label}: ${filter}`;
 		return loadPageNumber(interaction, 0, content);
 	})

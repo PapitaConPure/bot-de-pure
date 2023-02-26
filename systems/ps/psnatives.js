@@ -406,11 +406,23 @@ function dado([x, y, z], currentStatement) {
     
     if(x.type !== 'Number' || isNotOperable(x.value))
         throw TuberInterpreterError('Se esperaba un Número de primer argumento', currentStatement);
+    
+    if(y == undefined)
+        return makeNumber(rand(x.value));
 
-    if(y?.type === 'Number' && !isNotOperable(y.value))
-        return makeNumber(randRange(x.value, y.value, z?.value || false));
+    if(y.type === 'Boolean')
+        return makeNumber(rand(x.value, true) + y.value);
+    
+    if(y.type !== 'Number' || isNotOperable(y.value))
+        throw TuberInterpreterError('Se esperaba un Número o Dupla de segundo argumento', currentStatement);
 
-    return makeNumber(rand(x.value, y?.value || false));
+    if(z == undefined)
+        return makeNumber(randRange(x.value, y.value));
+    
+    if(z.type !== 'Boolean')
+        throw TuberInterpreterError('Se esperaba una Dupla de tercer argumento', currentStatement);
+
+    return makeNumber(randRange(x.value, y.value, true) + z.value);
 }
 
 /**@type {Array<Function>}*/
