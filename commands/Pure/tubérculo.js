@@ -51,6 +51,13 @@ const paginationRows = (page, lastPage, navigationEnabled = true) => {
 				.setEmoji('936531643496288288')
 				.setStyle('DANGER'),
 		),
+		new MessageActionRow().addComponents(
+			new MessageButton()
+				.setURL('https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link')
+				.setLabel('Aprende PuréScript (v1.0)')
+				.setEmoji('📕')
+				.setStyle('LINK'),
+		),
 	);
 	return rows;
 };
