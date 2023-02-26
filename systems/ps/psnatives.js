@@ -71,6 +71,8 @@ colors
  * @param {CurrentStatement} currentStatement
  */
 function marcoAgregarCampo([marco, nombre, valor, alineado], currentStatement) {
+    alineado ??= makeBoolean(false);
+
     if(marco?.type !== 'Embed')
         throw TuberInterpreterError('Se esperaba un Marco de primer argumento', currentStatement);
     if(isNotValidText(nombre))
