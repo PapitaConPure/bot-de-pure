@@ -280,15 +280,15 @@ module.exports = {
     forceRole: function(miembro, canal, rep) {
         const reps = 4;
         console.log(chalk.cyan('Comprobando miembro nuevo en Hourai Doll para forzado de rol de color'));
-        if(!miembro?.roles.length)
-            return canal.send({ content: `Se fue cagando el <@${miembro?.user.id ?? 'nose'}> csm <:mayuwu:654489124413374474>` });
+        if(!canal.guild.members.cache.get(miembro.id))
+            return canal.send({ content: `Se fue cagando el <@${miembro?.user.id ?? 'nose'}> csm <:mayuwu:654489124413374474>` }).catch(() => {});
 
         console.log(concol.orange('El miembro sigue en el servidor'));
         const hasColor = module.exports.hasColorRole(miembro);
         
         if(hasColor) {
             console.log(chalk.green('El miembro ya tiene los roles básicos.'));
-            canal.send({ content: `Al fin qliao ya teni tu rol. Q esti bien **${miembro.user.username}**, po <:uwu:681935702308552730>` });
+            canal.send({ content: `Al fin qliao ya teni tu rol. Q esti bien **${miembro.user.username}**, po <:uwu:681935702308552730>` }).catch(() => {});
 
             //Finalizar
             return setTimeout(module.exports.finalizarHourai, 1000, miembro, canal);
@@ -324,7 +324,7 @@ module.exports = {
         } catch(e) {
             console.log(chalk.red('El miembro ya no tiene ningún rol básico.'));
             console.error(e);
-            canal.send({ content: `Espérate qué weá pasó con **${miembro.user.username}** <:reibu:686220828773318663>\nOh bueno, ya me aburrí... chao.` });
+            canal.send({ content: `Espérate qué weá pasó con **${miembro.user.username}** <:reibu:686220828773318663>\nOh bueno, ya me aburrí... chao.` }).catch(() => {});
         }
     },
 
@@ -397,7 +397,7 @@ module.exports = {
 
     /**@param {Discord.GuildMember} member*/
     hasColorRole: function(member) {
-        return member.roles.cache.hasAny(
+        return member?.roles?.cache?.hasAny(
             '671851233870479375',
             '671851228954755102',
             '671852132328275979',
@@ -442,29 +442,34 @@ module.exports = {
     //#region Anuncios
     finalizarHourai: function(miembro, canal) {
         //Mensaje de fin de bienvenida
-        canal.send({
-            content: [
-                //`Una última cosita ${miembro}, recuerda revisar el canal <#671817759268536320> en algún momento <:Junkoborga:751938096550903850>`,
-                //`También, si te interesa, puedes revisar los mensajes pinneados de este canal <:tenshipeacheems:854408293258493962>`,
-                `Okay, ya \'tamos ${miembro}, recuerda convivir adecuadamente con el resto <:Junkoborga:751938096550903850>`,
-                'Si te interesa, puedes revisar los mensajes pinneados de este canal <:tenshipeacheems:854408293258493962>',
-                'Y estate tranqui, que ya no vas a recibir tantos pings <:starnap:727764482801008693>',
-                `Dicho esto, ¡disfruta el server po\'! Si quieres más roles, puedes usar \`${p_pure(global.serverid.hourai).raw}roles\``,
-            ].join('\n')
-        });
+        try {
+            canal.send({
+                content: [
+                    //`Una última cosita ${miembro}, recuerda revisar el canal <#671817759268536320> en algún momento <:Junkoborga:751938096550903850>`,
+                    //`También, si te interesa, puedes revisar los mensajes pinneados de este canal <:tenshipeacheems:854408293258493962>`,
+                    `Okay, ya \'tamos ${miembro}, recuerda convivir adecuadamente con el resto <:Junkoborga:751938096550903850>`,
+                    'Si te interesa, puedes revisar los mensajes pinneados de este canal <:tenshipeacheems:854408293258493962>',
+                    'Y estate tranqui, que ya no vas a recibir tantos pings <:starnap:727764482801008693>',
+                    `Dicho esto, ¡disfruta el server po\'! Si quieres más roles, puedes usar \`${p_pure(global.serverid.hourai).raw}roles\``,
+                ].join('\n')
+            });
 
-        //Sugerir p!suicidio con 41% de probabilidad
-        if(Math.random() < 0.3)
-            setTimeout(() => {
-                canal.send({ content: `Por cierto, tenemos una tradición un poco más oscura. ¿Te atrevei a usar \`${p_pure(global.serverid.hourai).raw}suicidio\`?` })
-                .catch(console.error);
-            }, 1000 * 5);
+            //Sugerir p!suicidio con 41% de probabilidad
+            if(Math.random() < 0.3)
+                setTimeout(() => {
+                    canal.send({
+                        content: `Por cierto, tenemos una tradición un poco más oscura. ¿Te atrevei a usar \`${p_pure(global.serverid.hourai).raw}suicidio\`?`
+                    });
+                }, 1000 * 5);
 
-        //Otorgar rol con 50% de probabilidad
-        const gr = canal.guild.roles.cache;
-        const role50 = gr.find(r => r.name === 'Rol con 50% de probabilidades de tenerlo');
-        if(role50 && Math.random() < 0.5)
-            miembro.roles.add(role50);
+            //Otorgar rol con 50% de probabilidad
+            const gr = canal.guild.roles.cache;
+            const role50 = gr.find(r => r.name === 'Rol con 50% de probabilidades de tenerlo');
+            if(role50 && Math.random() < 0.5)
+                miembro.roles.add(role50);
+        } catch(e) {
+            console.error(e);
+        }
     },
 
     /**
@@ -1139,7 +1144,7 @@ module.exports = {
                     .setStyle('PRIMARY'),
             ),
             new Discord.MessageActionRow().addComponents(
-                new Discord.MessageSelectMenu()
+                new Discord.StringSelectMenuBuilder()
                     .setCustomId(`${commandFilename}_loadPageExact`)
                     .setPlaceholder('Seleccionar página')
                     .setOptions(Array(Math.min(lastPage + 1, 25)).fill(null).map(() => ({
