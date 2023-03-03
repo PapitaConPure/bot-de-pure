@@ -3,7 +3,6 @@
 ![GitHub package.json dependency version (prod)](https://img.shields.io/github/package-json/dependency-version/PapitaConPure/bot-de-pure/mongoose)
 ![GitHub package.json dependency version (prod)](https://img.shields.io/github/package-json/dependency-version/PapitaConPure/bot-de-pure/pm2)
 ![GitHub package.json dependency version (prod)](https://img.shields.io/github/package-json/dependency-version/PapitaConPure/bot-de-pure/canvas)
-![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/PapitaConPure/bot-de-pure)
 ![GitHub deployments](https://img.shields.io/github/deployments/PapitaConPure/bot-de-pure/bot-de-pure?logo=GitHub)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/PapitaConPure/bot-de-pure)
 ![GitHub repo size](https://img.shields.io/github/repo-size/PapitaConPure/bot-de-pure)
@@ -37,6 +36,7 @@ Como personaje, es una robot torpe y agresiva en algunos casos, pero parece tene
   - Se los llama "Tubérculos", contienen una TuberID y una respuesta que ejecutan al ser invocados
   - Los "Tubérculos simples" envían texto y/o archivos
   - Los "Tubérculos PuréScript" ejecutan una serie de instrucciones PuréScript para enviar respuestas más elaboradas
+  - Puedes leer la documentación detallada del lenguaje PuréScript en [este PDF](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link)
 * Comandos altamente dinámicos
 * Páginas de ayuda normalizadas y súper detalladas
 ### Metas
