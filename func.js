@@ -270,11 +270,18 @@ module.exports = {
         console.log(chalk.magentaBright(`Esperando comprobación final de miembro en unos minutos...`));
     },
 
+    /**
+     * 
+     * @param {Discord.GuildMember} miembro 
+     * @param {Discord.TextChannel} canal 
+     * @param {Number} rep 
+     * @returns 
+     */
     forceRole: function(miembro, canal, rep) {
         const reps = 4;
         console.log(chalk.cyan('Comprobando miembro nuevo en Hourai Doll para forzado de rol de color'));
-        if(miembro.deleted)
-            return canal.send({ content: `Se fue cagando el <@${miembro.user.id}> csm <:mayuwu:654489124413374474>` });
+        if(!miembro?.roles.length)
+            return canal.send({ content: `Se fue cagando el <@${miembro?.user.id ?? 'nose'}> csm <:mayuwu:654489124413374474>` });
 
         console.log(concol.orange('El miembro sigue en el servidor'));
         const hasColor = module.exports.hasColorRole(miembro);
