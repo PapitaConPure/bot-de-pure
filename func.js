@@ -1144,7 +1144,7 @@ module.exports = {
                     .setStyle('PRIMARY'),
             ),
             new Discord.MessageActionRow().addComponents(
-                new Discord.StringSelectMenuBuilder()
+                new Discord.MessageSelectMenu()
                     .setCustomId(`${commandFilename}_loadPageExact`)
                     .setPlaceholder('Seleccionar página')
                     .setOptions(Array(Math.min(lastPage + 1, 25)).fill(null).map(() => ({
