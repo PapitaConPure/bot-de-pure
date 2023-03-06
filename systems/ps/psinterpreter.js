@@ -576,6 +576,7 @@ class TuberInterpreter {
             'GlossaryExpression',
             'CallExpression',
             'ArrowExpression',
+            'BinaryExpression',
         ].includes(node.container.type))
             node.container = this.#evaluate(node.container, scope);
 
