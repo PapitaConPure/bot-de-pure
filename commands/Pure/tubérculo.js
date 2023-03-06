@@ -511,7 +511,7 @@ const command = new CommandManager('tubérculo', flags)
 
 		if(isNotModerator(interaction.member) && userId !== interaction.user.id)
 			return interaction.reply({
-				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.me).user.username}*`,
+				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(interaction.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? interaction.guild.me).user.username}*`,
 				ephemeral: true,
 			});
 
@@ -533,7 +533,7 @@ const command = new CommandManager('tubérculo', flags)
 		
 		if(isNotModerator(interaction.member) && userId !== interaction.user.id)
 			return interaction.reply({
-				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.me).user.username}*`,
+				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(interaction.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? interaction.guild.me).user.username}*`,
 				ephemeral: true,
 			});
 
