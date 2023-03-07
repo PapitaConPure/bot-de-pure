@@ -1,4 +1,4 @@
-const { EmbedBuilder, Message, MessageAttachment } = require('discord.js');
+const { EmbedBuilder, Message, AttachmentBuilder } = require('discord.js');
 const pixivToken = process.env.PIXIV_REFRESH_TOKEN ?? (require('../localenv.json')?.pixivtoken);
 const PixivApi = require('pixiv-api-client');
 const { shortenText } = require('../func');
@@ -57,8 +57,8 @@ const formatPixivPostsMessage = async (urls) => {
         const [ illustImage, profileImage ] = await Promise.all([illustBuffer, profileAsset]);
 
         const postAttachments = [
-            new MessageAttachment(illustImage, `thumb${i}.png`),
-            new MessageAttachment(profileImage, `pfp${i}.png`),
+            new AttachmentBuilder(illustImage, { name: `thumb${i}.png` }),
+            new AttachmentBuilder(profileImage, { name: `pfp${i}.png` }),
         ];
         let discordCaption;
         if(post.caption?.length)
@@ -108,7 +108,7 @@ const formatPixivPostsMessage = async (urls) => {
                 iconURL: `attachment://pfp${i}.png`,
             })
             .setTitle(post.title)
-            .setDescription(discordCaption ?? '')
+            .setDescription(discordCaption ?? null)
             .setURL(url)
             .setImage(`attachment://thumb${i}.png`)
             .setFooter({ text: `pixiv • ${postType[post.type] ?? 'Imagen'}`, iconURL: 'https://i.imgur.com/e4JPSMl.png' })
