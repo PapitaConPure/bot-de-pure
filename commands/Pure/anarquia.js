@@ -1,7 +1,7 @@
 const global = require('../../localdata/config.json'); //Variables globales
 const { fetchUserID } = require('../../func.js');
 const { createCanvas, loadImage } = require('canvas');
-const { EmbedBuilder, MessageAttachment } = require('discord.js');
+const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { Puretable, AUser, pureTableImage } = require('../../localdata/models/puretable.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
@@ -198,7 +198,7 @@ const command = new CommandManager('anarquia', flags)
 				});
 			});
 			
-			const imagen = new MessageAttachment(canvas.toBuffer(), 'anarquia.png');
+			const imagen = new AttachmentBuilder(canvas.toBuffer(), { name: 'anarquia.png' });
 			return request.reply({ files: [imagen] });
 		}
 		

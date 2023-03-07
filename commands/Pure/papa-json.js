@@ -1,4 +1,4 @@
-const { MessageAttachment } = require('discord.js');
+const { AttachmentBuilder } = require('discord.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const readObj = (object, indent) => {
@@ -49,7 +49,7 @@ const command = new CommandManager('papa-json', flags)
 		if(obj === undefined)
 			return message.reply({ content: `:warning: El objeto "${args.join('.')}" no existe. Revisa que el identificador esté bien escrito.` });
 
-		const jsonfile = new MessageAttachment(Buffer.from(JSON.stringify(obj, null, '\t'), 'utf-8'), 'myfile.json');
+		const jsonfile = new AttachmentBuilder(Buffer.from(JSON.stringify(obj, null, '\t'), 'utf-8'), { name: 'myfile.json' });
 		return message.reply({ files: [ jsonfile ]});
 	});
 

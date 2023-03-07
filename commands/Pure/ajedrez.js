@@ -2,7 +2,7 @@ const global = require('../../localdata/config.json');
 const { guildEmoji } = require("../../func");
 const { createCanvas, loadImage, NodeCanvasRenderingContext2D } = require('canvas');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
-const { MessageAttachment } = require('discord.js');
+const { AttachmentBuilder } = require('discord.js');
 
 /**
  * @typedef {'WHITE'|'BLACK'} ChessTeam
@@ -73,7 +73,7 @@ const generateBoardImage = async (board, teamColors = { white: '#fff', black: '#
 		});
 	});
 	
-	return new MessageAttachment(canvas.toBuffer(), `ajedrez_${(Date.now() + 0)}.png`);
+	return new AttachmentBuilder(canvas.toBuffer(), { name: `ajedrez_${(Date.now() + 0)}.png` });
 }
 
 const options = new CommandOptionsManager()

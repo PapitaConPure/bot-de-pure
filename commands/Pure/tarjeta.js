@@ -1,7 +1,7 @@
 const Canvas = require('canvas');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { MessageAttachment } = require('discord.js');
+const { AttachmentBuilder } = require('discord.js');
 const { improveNumber } = require('../../func');
 
 /**
@@ -155,7 +155,7 @@ const command = new CommandManager('tarjeta', flags)
 		];
 		const replyContent = {
 			content: phrases[Math.floor(Math.random() * phrases.length)],
-			files: [ new MessageAttachment(canvas.toBuffer(), 'tarjeta.png') ],
+			files: [ new AttachmentBuilder(canvas.toBuffer(), { name: 'tarjeta.png' }) ],
 		};
 		if(isSlash)
 			return request.editReply(replyContent);

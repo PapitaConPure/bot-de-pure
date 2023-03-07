@@ -55,7 +55,7 @@ async function dibujarCum(msg, link) {
 	ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 	ctx.drawImage(cum, 0, 0, canvas.width, canvas.height);
 
-	const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'cummies.png');
+	const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'cummies.png' });
 	return msg.reply({ files: [imagen] });
 };
 

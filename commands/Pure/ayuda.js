@@ -81,7 +81,7 @@ const command = new CommandManager('ayuda', flags)
 
                 //Embed de metadatos
                 embeds.push(
-                    new MessageEmbed()
+                    new EmbedBuilder()
                         .setColor(0x608bf3)
                         .setAuthor({ name: title(name), iconURL: request.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }) })
                         .addFields(
@@ -129,7 +129,7 @@ const command = new CommandManager('ayuda', flags)
             const listdisplay = list.length
                 ? list.map(item => `\`${item}\``).join(', ')
                 : 'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para buscar un cierto identificador)';
-            embeds.push(new MessageEmbed()
+            embeds.push(new EmbedBuilder()
                 .setColor(tenshiColor)
                 .setAuthor({ name: 'Lista de comandos', iconURL: request.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }) })
                 .addFields(
@@ -153,7 +153,7 @@ const command = new CommandManager('ayuda', flags)
             );
         } else {
             if(!embeds.length)
-                embeds.push(new MessageEmbed()
+                embeds.push(new EmbedBuilder()
                     .setColor(0xe44545)
                     .setAuthor({ name: 'Sin resultados' })
                     .addFields({

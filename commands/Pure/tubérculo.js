@@ -2,7 +2,7 @@ const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText } = require('../../func.js');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, MessageAttachment, TextInputBuilder, CommandInteraction, ButtonInteraction, ButtonStyle, TextInputStyle, Colors, ModalBuilder } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, TextInputBuilder, CommandInteraction, ButtonInteraction, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder } = require('discord.js');
 const { ProgramToLanguage } = require('../../systems/ps/commons.js');
 const { executeTuber } = require('../../systems/purescript.js');
 
@@ -190,7 +190,7 @@ function viewTuber(interaction, item, tuberId) {
 			? item.script.map(expr => expr.join(' ')).join(';\n')
 			: item.script;
 		if(visualPS.length >= 1020)
-			files = [new MessageAttachment(Buffer.from(visualPS, 'utf-8'), 'PuréScript.txt')];
+			files = [new AttachmentBuilder(Buffer.from(visualPS, 'utf-8'), { name: 'PuréScript.txt' })];
 		else
 			embed.addFields({
 				name: 'PuréScript',

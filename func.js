@@ -589,7 +589,7 @@ module.exports = {
         
         await module.exports.dibujarAvatar(ctx, miembro.user, canvas.width / 2, (canvas.height - 56) / 2, 200, { circleStrokeFactor: strokeFactor });
         
-        const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'bienvenida.png');
+        const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'bienvenida.png' });
 
         //#region Imagen y Mensaje extra
         const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
@@ -682,7 +682,7 @@ module.exports = {
         await module.exports.dibujarAvatar(ctx, miembro.user, canvas.width / 2, 80 + 200, 200, { circleStrokeFactor: strokeFactor });
 
         //#region Imagen y Mensaje extra
-        const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'despedida.png');
+        const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'despedida.png' });
         const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
         await canal.send({ files: [imagen] });
         if(servidor.id === '654471968200065034') //Hourai Doll
