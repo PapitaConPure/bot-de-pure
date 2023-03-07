@@ -229,7 +229,7 @@ const command = new CommandManager('voz', flags)
 				} else return;
 			} else {
 				await collected.delete().catch(() => console.log('Error menor al borrar mensaje recolectado'));
-				category = await interaction.guild.channels.create(ccontent, { type: ChannelType.GuildCategory, reason: 'Categoría recipiente de PuréVoice' });
+				category = await interaction.guild.channels.create({ name: ccontent, type: ChannelType.GuildCategory, reason: 'Categoría recipiente de PuréVoice' });
 			}
 			
 			try {
