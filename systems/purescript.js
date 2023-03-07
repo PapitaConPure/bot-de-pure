@@ -1,7 +1,7 @@
 const GuildConfig = require('../localdata/models/guildconfigs.js');
 const { p_pure } = require('../localdata/customization/prefixes.js');
 const { randRange, fetchUserID, shortenText } = require('../func.js');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, MessageAttachment, ThreadChannel, ButtonStyle, Colors } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
 const { TuberLexer } = require('./ps/pslexer.js');
 const { TuberParser } = require('./ps/psparser.js');
 const { TuberInterpreter } = require('./ps/psinterpreter.js');
