@@ -121,7 +121,7 @@ const command = new CommandManager('lechita', flags)
 			return request.reply({ content: `⛔ Solo puedes crear emotes cada ${minSpan} segundos (compartido globalmente).` });
 
 		global.lechitauses = Date.now();
-		const cumote = await request.client.guilds.cache.get(global.serverid.slot2).emojis.create(bglink, user.id)
+		const cumote = await request.client.guilds.cache.get(global.serverid.slot2).emojis.create({ attachment: bglink, name: user.id })
 		return request.reply({ content: `${coomer[randcoomer]} <:lechita:931409943448420433> ${cumote}` })
 		.then(() => cumote.delete());
 	});
