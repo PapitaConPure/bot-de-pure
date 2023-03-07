@@ -2,7 +2,7 @@ const { readdirSync } = require('fs'); //Integrar operaciones sistema de archivo
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 
 const options = new CommandOptionsManager()
 	.addFlag([], ['activar', 'activate', 'on'],    'para activar los comandos caóticos del servidor')
@@ -38,8 +38,8 @@ const command = new CommandManager('caos', flags)
 			if(command.flags.has('CHAOS'))
 				chaosnames.push(command.name);
 		}
-		const embed = new MessageEmbed()
-			.setColor('#b8322c')
+		const embed = new EmbedBuilder()
+			.setColor(0xb8322c)
 			.setDescription([
 				'Con este comando, puedes activar un set de comandos que se consideran demasiado caóticos como para estar en un server tranquilito.',
 				`Usa \`${p_pure(request.guild.id).raw}ayuda caos\` si quieres saber cómo.`,

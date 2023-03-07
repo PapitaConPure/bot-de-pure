@@ -36,8 +36,8 @@ const command = new CommandManager('perrito', flags)
 		const mostrarLista = options.fetchFlag(args, 'lista');
 		if(mostrarLista) {
 			const pages = paginate([...emotes.values()]);
-			const embed = new Discord.MessageEmbed()
-				.setColor('#e4d0c9')
+			const embed = new Discord.EmbedBuilder()
+				.setColor(0xe4d0c9)
 				.setTitle(`Perritos ${perritoComun}`)
 				.addFields({ name: `${'Nombre\`'.padEnd(24)}\`Emote`, value: pages[0] })
 				.setAuthor({ name: `${perritoNames.length} perritos en total` })

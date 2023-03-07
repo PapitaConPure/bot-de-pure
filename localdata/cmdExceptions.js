@@ -1,5 +1,5 @@
 const global = require('../localdata/config.json');
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const GuildConfig = require('./models/guildconfigs.js');
 const { isNotModerator } = require('../func');
 const chalk = require('chalk');
@@ -84,11 +84,11 @@ module.exports = {
      * @typedef {{cmdString: String}} ExceptionOptions
      * @param {ExceptionSummary} exception 
      * @param {ExceptionOptions} options 
-     * @returns {MessageEmbed}
+     * @returns {EmbedBuilder}
      */
     generateExceptionEmbed(exception, { cmdString = '' }) {
-        return new MessageEmbed()
-            .setColor('#f01010')
+        return new EmbedBuilder()
+            .setColor(0xf01010)
             .setAuthor({ name: 'Un momento...' })
             .setTitle(`${exception.title}`)
             .addFields({ name: cmdString, value: `${exception.desc}` })
@@ -108,8 +108,8 @@ module.exports = {
         if(error.message === 'Missing Permissions') {
             /**@type {import('discord.js').User}*/
             const user = request.author ?? request.user;
-            const permsEmbed = new MessageEmbed()
-                .setColor('#0000ff')
+            const permsEmbed = new EmbedBuilder()
+                .setColor(0x0000ff)
                 .setAuthor({ name: `${request.guild.name} • ${request.channel.name} (Click para ver)`, iconURL: user.avatarURL({ dynamic: true }), url: request.url || 'https://discordapp.com' })
                 .setThumbnail('https://i.imgur.com/ftAxUen.jpg')
                 .addFields(

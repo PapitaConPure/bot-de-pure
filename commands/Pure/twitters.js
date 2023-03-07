@@ -82,8 +82,8 @@ const command = new CommandManager('twitters', flags)
 			if(twitters.some(twitter => twitter === undefined))
 				return request.reply({ content: ':warning: Uno o más enlaces tenían un formato inválido' });
 
-			const embed = new Discord.MessageEmbed()
-				.setColor('#1da1f2')
+			const embed = new Discord.EmbedBuilder()
+				.setColor(0x1da1f2)
 				.setTitle(embedprops.title ?? 'Tablón de Twitters')
 				.setAuthor({ name: embedprops.epigraph ?? '¡Clickea el enlace que gustes!', iconURL: request.channel.guild.iconURL({ dynamic: false, size: 256 }) })
 				.setFooter({ text: embedprops.footer ?? null });
@@ -110,7 +110,7 @@ const command = new CommandManager('twitters', flags)
 		if(msg.embeds == undefined || msg.author.id !== request.client.user.id)
 			return request.reply({ content: ':warning: El mensaje especificado existe pero no me pertenece o no tiene ningún embed' });
 
-		/**@type {Discord.MessageEmbed}*/
+		/**@type {Discord.EmbedBuilder}*/
 		const target = msg.embeds[0];
 		const ntw = getTwitters();
 
@@ -121,7 +121,7 @@ const command = new CommandManager('twitters', flags)
 		for(page = 1; page < target.fields.length; page++)
 			twitters = [...twitters, ...target.fields[page].value.split('\n')];
 
-		const embed = new Discord.MessageEmbed()
+		const embed = new Discord.EmbedBuilder()
 			.setColor(target.color)
 			.setTitle(embedprops.title ?? target.title ?? '')
 			.setAuthor({ name: embedprops.epigraph ?? target.author.name ?? request.guild.name, iconURL: request.guild.iconURL({ dynamic: false, size: 256 }) })

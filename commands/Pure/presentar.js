@@ -1,9 +1,9 @@
-const { MessageEmbed } = require('discord.js'); //Integrar discord.js
+const { EmbedBuilder } = require('discord.js'); //Integrar discord.js
 const { readdirSync } = require('fs'); //Para el contador de comandos
 const { tenshiColor } = require('../../localdata/config.json');
 const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
-const embed = new MessageEmbed()
+const embed = new EmbedBuilder()
     .setColor(tenshiColor)
     .setThumbnail('https://i.imgur.com/3Dp8zFa.jpg')
     .addFields(

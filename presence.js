@@ -2,6 +2,7 @@ const { getQueueItem } = require('./localdata/models/queues.js');
 const { randRange } = require('./func.js');
 const { readFileSync } = require('fs');
 const chalk = require('chalk');
+const { ActivityType } = require('discord.js');
 // const chalkOrange = chalk.rgb(255, 140, 70);
 
 const txtToArray = (path) => readFileSync(path, { encoding: 'utf-8' })
@@ -32,7 +33,7 @@ module.exports = {
 
             client.user.setActivity({
                 name: status,
-                type: 'STREAMING',
+                type: ActivityType.Streaming,
                 url: `https://www.youtube.com/watch?v=${stream}`,
             });
             

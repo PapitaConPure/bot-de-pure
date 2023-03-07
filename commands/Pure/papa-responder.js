@@ -42,8 +42,8 @@ const command = new CommandManager('papa-responder', flags)
 					'_Ten en cuenta que es probable que se hagan modificaciones al plan en base a diversos factores._'
 			});
 		//Reporte de problema
-		const embed = new Discord.MessageEmbed()
-			.setColor('#aa5555')
+		const embed = new Discord.EmbedBuilder()
+			.setColor(0xaa5555)
 			.setAuthor({ name: 'Bot de Puré#9243', iconURL: request.client.user.avatarURL({ size: 256 }) })
 			.setTitle('Problema de presentación de sugerencia')
 			.addFields({ name: 'Detalle', value: action });

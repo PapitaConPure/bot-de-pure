@@ -1,4 +1,5 @@
 const { TextChannel, User, Webhook, GuildMember } = require('discord.js');
+const { isThread } = require('../func');
 
 /**Clase para interactuar con Webhooks de Discord de forma más sencilla*/
 class DiscordAgent {
@@ -21,7 +22,7 @@ class DiscordAgent {
      * @param {String} name Nombre de muestra de Agente
      */
     async setup(channel, name = 'Agente Puré') {
-        if(channel.isThread()) {
+        if(isThread(channel)) {
             this.threadId = channel.id;
             channel = channel.parent;
         }

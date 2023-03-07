@@ -1,7 +1,7 @@
 const GuildConfig = require('../localdata/models/guildconfigs.js');
 const { p_pure } = require('../localdata/customization/prefixes.js');
 const { randRange, fetchUserID, shortenText } = require('../func.js');
-const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, MessageAttachment, ThreadChannel } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, MessageAttachment, ThreadChannel, ButtonStyle, Colors } = require('discord.js');
 const { TuberLexer } = require('./ps/pslexer.js');
 const { TuberParser } = require('./ps/psparser.js');
 const { TuberInterpreter } = require('./ps/psinterpreter.js');
@@ -72,7 +72,7 @@ const executeTuber = async (request, tuber, { tuberArgs }) => {
         const fieldName = errorNames[error.name] ?? 'Ocurrió un error inesperado';
         
         const replyContent = {};
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle(`⚠ ${error.name}`)
             .setAuthor({
                 name: 'Error de PuréScript',
@@ -91,16 +91,16 @@ const executeTuber = async (request, tuber, { tuberArgs }) => {
                 value: 'Este error es un error inesperado. Estos son errores del lenguaje mismo, y deberías reportarlos a Papita con Puré#6932',
             });
         } else if(error.name === 'TuberInitializerError') {
-            embed.setColor('YELLOW');
-            replyContent.components = [new MessageActionRow().addComponents(
-                new MessageButton()
+            embed.setColor(Colors.Yellow);
+            replyContent.components = [new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
                     .setCustomId(`tubérculo_getTuberHelp_${tuber.tuberId}`)
                     .setLabel('Ver Tubérculo')
                     .setEmoji('🔎')
-                    .setStyle('PRIMARY'),
+                    .setStyle(ButtonStyle.Primary),
             )];
         } else
-            embed.setColor('RED');
+            embed.setColor(Colors.Red);
 
         replyContent.embeds = [embed];
         await replyFn.call(request, replyContent);

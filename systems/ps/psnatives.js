@@ -1,5 +1,5 @@
 const { TuberScope } = require('./psscope.js');
-const { randRange, fetchUserID, shortenText, rand, fetchMember, fetchChannel, fetchRole } = require('../../func.js');
+const { randRange, fetchUserID, shortenText, rand, fetchMember, fetchChannel, fetchRole, stringHexToNumber } = require('../../func.js');
 const {
     RuntimeValue,
     NumericValue,
@@ -26,6 +26,7 @@ const {
     makeValue,
     isNotValidText,
 } = require('./commons.js');
+const { Colors, GuildPremiumTier } = require('discord.js');
 
 /**@typedef {{ number: Number, name: String }} CurrentStatement*/
 
@@ -34,36 +35,36 @@ const {
 /**@type {Map<String, import('discord.js').ColorResolvable>}*/
 const colors = new Map();
 colors
-    .set('colorAleatorio',     'RANDOM')
-    .set('colorAmarillo',      'YELLOW')
-    .set('colorAqua',          'AQUA')
-    .set('colorAquaOscuro',    'DARK_AQUA')
-    .set('colorAzul',          'BLUE')
-    .set('colorAzulOscuro',    'DARK_BLUE')
-    .set('colorBlanco',        'WHITE')
-    .set('colorCasiNegro',     'DARK_BUT_NOT_BLACK')
-    .set('colorDiscord',       'BLURPLE')
-    .set('colorDorado',        'GOLD')
-    .set('colorDoradoOscuro',  'DARK_GOLD')
-    .set('colorFucsia',        'FUCHSIA')
-    .set('colorGris',          'GREY')
-    .set('colorGrisClaro',     'LIGHT_GREY')
-    .set('colorGrisNegro',     'DARKER_GREY')
-    .set('colorGrisOscuro',    'DARK_GREY')
-    .set('colorGríspura',      'GREYPLE')
-    .set('colorMarino',        'NAVY')
-    .set('colorMarinoOscuro',  'DARK_NAVY')
-    .set('colorNaranja',       'ORANGE')
-    .set('colorNaranjaOscuro', 'DARK_ORANGE')
-    .set('colorNegro',         'NOT_QUITE_BLACK')
-    .set('colorPúrpura',       'PURPLE')
-    .set('colorPúrpuraOscuro', 'DARK_PURPLE')
-    .set('colorRojo',          'RED')
-    .set('colorRojoOscuro',    'DARK_RED')
-    .set('colorRosaClaro',     'LUMINOUS_VIVID_PINK')
-    .set('colorRosaOscuro',    'DARK_VIVID_PINK')
-    .set('colorVerde',         'GREEN')
-    .set('colorVerdeOscuro',   'DARK_GREEN');
+    .set('colorAleatorio',     Math.floor(Math.random() * 0xfffffe) + 1)
+    .set('colorAmarillo',      Colors.Yellow)
+    .set('colorAqua',          Colors.Aqua)
+    .set('colorAquaOscuro',    Colors.DarkAqua)
+    .set('colorAzul',          Colors.Blue)
+    .set('colorAzulOscuro',    Colors.DarkBlue)
+    .set('colorBlanco',        Colors.White)
+    .set('colorCasiNegro',     Colors.DarkButNotBlack)
+    .set('colorDiscord',       Colors.Blurple)
+    .set('colorDorado',        Colors.Gold)
+    .set('colorDoradoOscuro',  Colors.DarkGold)
+    .set('colorFucsia',        Colors.Fuchsia)
+    .set('colorGris',          Colors.Grey)
+    .set('colorGrisClaro',     Colors.LightGrey)
+    .set('colorGrisNegro',     Colors.DarkerGrey)
+    .set('colorGrisOscuro',    Colors.DarkGrey)
+    .set('colorGríspura',      Colors.Greyple)
+    .set('colorMarino',        Colors.Navy)
+    .set('colorMarinoOscuro',  Colors.DarkNavy)
+    .set('colorNaranja',       Colors.Orange)
+    .set('colorNaranjaOscuro', Colors.DarkOrange)
+    .set('colorNegro',         Colors.NotQuiteBlack)
+    .set('colorPúrpura',       Colors.Purple)
+    .set('colorPúrpuraOscuro', Colors.DarkPurple)
+    .set('colorRojo',          Colors.Red)
+    .set('colorRojoOscuro',    Colors.DarkRed)
+    .set('colorRosaClaro',     Colors.LuminousVividPink)
+    .set('colorRosaOscuro',    Colors.DarkVividPink)
+    .set('colorVerde',         Colors.Green)
+    .set('colorVerdeOscuro',   Colors.DarkGreen);
 //#endregion
 
 /**
@@ -111,18 +112,23 @@ function marcoAsignarAutor([marco, nombre, imagen], currentStatement) {
 }
 
 /**
- * @param {[ EmbedValue, TextValue ]} param0 
+ * @param {[ EmbedValue, TextValue | NumericValue ]} param0 
  * @param {CurrentStatement} currentStatement
  */
 function marcoAsignarColor([marco, color], currentStatement) {
     if(marco?.type !== 'Embed')
         throw TuberInterpreterError('Se esperaba un Marco de primer argumento', currentStatement);
-    if(isNotValidText(color))
-        throw TuberInterpreterError('Se esperaba un Texto válido para el color del Marco (hexadecimal o predefinido)', currentStatement);
+    if(isNotValidText(color) && color?.type !== 'Number')
+        throw TuberInterpreterError('Se esperaba un Número o Texto válido para el color del Marco (hexadecimal o predefinido)', currentStatement);
 
     try {
-        marco.value.setColor(color.value);
+        const targetColor = color.type === 'Text'
+            ? stringHexToNumber(color.value)
+            : color.value;
+
+        marco.value.setColor(targetColor);
     } catch(e) {
+        console.log(e);
         throw TuberInterpreterError(`Se recibió un código de color inválido "${color.value ?? 'Nada'}" en asignación de color de Marco`, currentStatement);
     }
     return makeNada();
@@ -266,7 +272,7 @@ async function createDiscordGuild(guild) {
     const description = guild.description;
     const systemChannel = guild.systemChannel;
     const bannerUrl = guild.bannerURL({ format: 'jpg', size: 1024 });
-    const premiumTier = guild.premiumTier === 'NONE' ? 'Ninguno' : guild.premiumTier.replace('TIER_', 'Nivel ');
+    const premiumTier = guild.premiumTier === GuildPremiumTier.None ? 'Ninguno' : `Nivel ${guild.premiumTier ?? 0}`;
     const splashUrl = guild.splashURL({ format: 'jpg', size: 512 });
 
     /**@type {Map<String, RuntimeValue>}*/
@@ -885,7 +891,7 @@ function declareNatives(scope) {
     scope.assignVariable('Glosario', makeGlossary(Glosario));
     scope.assignVariable('pi',       makeNumber(Math.PI));
     for(const [traducción, original] of colors)
-        scope.assignVariable(traducción, makeText(original));
+        scope.assignVariable(traducción, makeNumber(original));
 }
 
 function TuberInitializerError(message) {

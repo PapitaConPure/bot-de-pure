@@ -41,8 +41,8 @@ const command = new CommandManager('papa-eval', flags)
 			await eval(fnString);
 			await request.react('✅');
 		} catch(error) {
-			const embed = new Discord.MessageEmbed()
-				.setColor('#0000ff')
+			const embed = new Discord.EmbedBuilder()
+				.setColor(0x0000ff)
 				.setAuthor({ name: `${request.guild.name} • ${request.channel.name}`, iconURL: request.author.avatarURL({ dynamic: true }), url: request.url })
 				.addFields({
 					name: 'Ha ocurrido un error al ingresar un comando',

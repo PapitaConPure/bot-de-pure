@@ -1,5 +1,5 @@
 const global = require('../localdata/config.json');
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder, Colors } = require('discord.js');
 
 /**
  * @param {import('../commands/Commons/typings.js').CommandRequest} request
@@ -7,7 +7,7 @@ const { MessageEmbed } = require('discord.js');
 function generateRequestRecord(request) {
     /**@type {import('discord.js').User}*/
     const user = request.author ?? request.user;
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
         .setAuthor({ name: `${request.guild.name} • ${request.channel.name}`, iconURL: user.avatarURL({ dynamic: true }), url: request.url || request.channel?.url || 'https://discordapp.com' });
     return embed;
 };
@@ -42,8 +42,8 @@ async function auditRequest(request) {
  * @param {Array<import('discord.js').EmbedFieldData>} fields
  */
 async function auditSystem(title, ...fields) {
-    const embed = new MessageEmbed()
-        .setColor('DARK_VIVID_PINK')
+    const embed = new EmbedBuilder()
+        .setColor(Colors.DarkVividPink)
         .setAuthor({ name: 'Mensaje de sistema' })
         .setTitle(title);
     if(fields.length)
@@ -57,8 +57,8 @@ async function auditSystem(title, ...fields) {
  * @param {Array<import('discord.js').EmbedFieldData>} fields
  */
 async function auditAction(action, ...fields) {
-    const embed = new MessageEmbed()
-        .setColor('ORANGE')
+    const embed = new EmbedBuilder()
+        .setColor(Colors.Orange)
         .setAuthor({ name: 'Acción realizada' })
         .setTitle(action);
     if(fields.length)
@@ -73,8 +73,8 @@ async function auditAction(action, ...fields) {
  * @param {AuditErrorOptions} param2
  */
 async function auditError(error, { request, brief, details, ping = false } = { ping: false }) {
-    const embed = (request ? generateRequestRecord(request) : new MessageEmbed())
-        .setColor('#0000ff');
+    const embed = (request ? generateRequestRecord(request) : new EmbedBuilder())
+        .setColor(0x0000ff);
     
     if(request) {
         const userTag = (request.author ?? request.user).tag;

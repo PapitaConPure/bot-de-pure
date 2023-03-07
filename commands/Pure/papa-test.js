@@ -1,4 +1,4 @@
-const { MessageEmbed, MessageActionRow, MessageButton, Modal, TextInputComponent, GuildMember } = require('discord.js'); //Integrar discord.js
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ModalBuilder, TextInputBuilder, GuildMember } = require('discord.js'); //Integrar discord.js
 const { fetchMember, isBoosting, fetchChannel, fetchRole } = require('../../func.js');
 const { formatPixivPostsMessage } = require('../../systems/purepix.js');
 const { CommandMetaFlagsManager, CommandManager, CommandOptionsManager } = require('../Commons/commands');

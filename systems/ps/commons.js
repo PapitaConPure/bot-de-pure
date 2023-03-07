@@ -67,7 +67,7 @@
  * @typedef {{ type: 'Boolean',   value: Boolean }} BooleanValue
  * @typedef {{ type: 'List', elements: Array<RuntimeValue> }} ListValue
  * @typedef {{ type: 'Glossary', properties: Map<String, PropertyValue> }} GlossaryValue
- * @typedef {{ type: 'Embed', value: MessageEmbed }} EmbedValue
+ * @typedef {{ type: 'Embed', value: EmbedBuilder }} EmbedValue
  * @typedef {{ type: 'Nada', value: null }} NadaValue
  * @typedef {{ type: 'NativeFunction', call: Function }} NativeFunctionValue
  * @typedef {{ type: 'Function', body: Array<TuberStatementNode> }} FunctionValue
@@ -75,7 +75,7 @@
  * @exports
  */
 
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder } = require("discord.js");
 
 /**
  * @param {Number} x
@@ -121,7 +121,7 @@ function makeGlossary(x) {
  * @returns {EmbedValue}
  */
 function makeEmbed() {
-    return { type: 'Embed', value: new MessageEmbed() };
+    return { type: 'Embed', value: new EmbedBuilder() };
 }
 
 /**

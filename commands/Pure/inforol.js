@@ -78,8 +78,8 @@ const command = new CommandManager('inforol', flags)
 		if(anaroles.length === 0)
 			return request.reply({ content: '⚠ Entrada inválida' });
 
-		Embed[0] = new Discord.MessageEmbed()
-			.setColor('#ff00ff')
+		Embed[0] = new Discord.EmbedBuilder()
+			.setColor(0xff00ff)
 			.setTitle(`Análisis del roles (Total)`)
 			.addFields(
 				{ name: 'Roles en análisis', value: anaroles },
@@ -98,8 +98,8 @@ const command = new CommandManager('inforol', flags)
 				plrange += '\n';
 			}
 
-			Embed[i + 1] = new Discord.MessageEmbed()
-				.setColor('#ff00ff')
+			Embed[i + 1] = new Discord.EmbedBuilder()
+				.setColor(0xff00ff)
 				.setTitle('Análisis del roles (Detalle)')
 
 				.addFields({ name: 'Lista de usuarios', value: plrange })

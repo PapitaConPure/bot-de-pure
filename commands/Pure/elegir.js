@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder, Colors } = require('discord.js');
 const { regroupText, randRange } = require('../../func.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
@@ -21,8 +21,8 @@ const command = new CommandManager('elegir', flags)
 				ephemeral: true,
 			});
 		
-		const embed = new MessageEmbed()
-			.setColor('GREYPLE')
+		const embed = new EmbedBuilder()
+			.setColor(Colors.Greyple)
 			.addFields({ name: 'Yo digo que...', value: `_"${choices[randRange(0, choices.length)]}"_` });
 		return request.reply({ embeds: [embed] });
 	});

@@ -5,6 +5,7 @@ const { p_pure } = require('./localdata/customization/prefixes.js'); //Imágenes
 const Canvas = require('canvas'); //Node Canvas
 const chalk = require('chalk'); //Consola con formato bonito
 const { colorsRow } = require('./localdata/houraiProps');
+const { ButtonStyle, ChannelType } = require('discord.js');
 const concol = {
     orange: chalk.rgb(255, 140, 70),
     purple: chalk.rgb(158, 114,214),
@@ -393,7 +394,7 @@ module.exports = {
     /**
      * @param {Discord.GuildMember} member
      */
-    isNotModerator: (member) => !(member.permissions.has('MANAGE_ROLES') || member.permissions.has('MANAGE_MESSAGES')),
+    isNotModerator: (member) => !(member.permissions.has('ManageRoles') || member.permissions.has('ManageMessages')),
 
     /**@param {Discord.GuildMember} member*/
     hasColorRole: function(member) {
@@ -412,13 +413,22 @@ module.exports = {
     isBoosting: function(member) {
         return member.roles.premiumSubscriberRole ? true : false;
     },
+
+    /**
+     * 
+     * @param {Discord.GuildChannel} channel 
+     * @returns {Boolean}
+     */
+    isThread: function(channel) {
+        return [ ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.AnnouncementThread ].includes(channel.type);
+    },
     //#endregion
 
     //#region Sistema
     /**@param {import('discord.js').TextChannel} channel*/
     channelIsBlocked: function(channel) {
-        const member = channel?.guild?.me;
-        if(!member?.permissionsIn(channel)?.any?.([ 'SEND_MESSAGES', 'SEND_MESSAGES_IN_THREADS' ], true)) return true;
+        const member = channel?.guild?.members.me;
+        if(!member?.permissionsIn(channel)?.any?.([ 'SendMessages', 'SendMessagesInThreads' ], true)) return true;
         if(global.maintenance.length === 0) return false;
 
         return (global.maintenance.startsWith('!'))
@@ -501,6 +511,12 @@ module.exports = {
         ctx.restore();
     },
 
+    /**
+     * 
+     * @param {Discord.GuildMember} miembro 
+     * @param {*} forceHourai 
+     * @returns 
+     */
     dibujarBienvenida: async function(miembro, forceHourai = false) {
         //Dar bienvenida a un miembro nuevo de un servidor
         const servidor = miembro.guild; //Servidor
@@ -519,7 +535,7 @@ module.exports = {
         }
 
         console.log(concol.purple`Un usuario ha entrado a ${servidor.name}...`);
-        if(!servidor.me.permissionsIn(canal).has(['SEND_MESSAGES', 'VIEW_CHANNEL'])) {
+        if(!servidor.members.me.permissionsIn(canal).has([ 'SendMessages', 'ViewChannel' ])) {
             console.log(chalk.red('No se puede enviar un mensaje de bienvenida en este canal.'));
             return;
         }
@@ -611,6 +627,11 @@ module.exports = {
         console.log('Bienvenida finalizada.');
     },
 
+    /**
+     * 
+     * @param {Discord.GuildMember} miembro 
+     * @returns 
+     */
     dibujarDespedida: async function(miembro) {
         //Dar despedida a ex-miembros de un servidor
         const servidor = miembro.guild;
@@ -623,7 +644,7 @@ module.exports = {
         }
 
         console.log(`Un usuario ha salido de ${servidor.name}...`);
-        if(!servidor.me.permissionsIn(canal).has(['SEND_MESSAGES', 'VIEW_CHANNEL'])) {
+        if(!servidor.members.me.permissionsIn(canal).has(['SendMessages', 'ViewChannel'])) {
             console.log('No se puede enviar un mensaje de despedida en este canal.');
             return;
         }
@@ -828,8 +849,8 @@ module.exports = {
         const ccache = guild.channels.cache;
         if(data.startsWith('<#') && data.endsWith('>'))
             data = data.slice(2, -1);
-        const channel = ccache.get(data) || ccache.filter(c => c.isText() || c.isVoice()).find(c => c.name.toLowerCase().includes(data));
-        if(!channel?.isText() && !channel?.isVoice()) return;
+        const channel = ccache.get(data) || ccache.filter(c => [ ChannelType.GuildText, ChannelType.GuildVoice ].includes(c.type)).find(c => c.name.toLowerCase().includes(data));
+        if(![ ChannelType.GuildText, ChannelType.GuildVoice ].includes(channel.type)) return;
         return channel;
     },
 
@@ -1116,30 +1137,30 @@ module.exports = {
         let i = minPage;
 
         return [
-            new Discord.MessageActionRow().addComponents(
-                new Discord.MessageButton()
+            new Discord.ActionRowBuilder().addComponents(
+                new Discord.ButtonBuilder()
                     .setCustomId(`${commandFilename}_loadPage_0_START`)
                     .setEmoji('934430008586403900')
-                    .setStyle('SECONDARY'),
-                new Discord.MessageButton()
+                    .setStyle(ButtonStyle.Secondary),
+                new Discord.ButtonBuilder()
                     .setCustomId(`${commandFilename}_loadPage_${backward}_BACKWARD`)
                     .setEmoji('934430008343158844')
-                    .setStyle('SECONDARY'),
-                new Discord.MessageButton()
+                    .setStyle(ButtonStyle.Secondary),
+                new Discord.ButtonBuilder()
                     .setCustomId(`${commandFilename}_loadPage_${forward}_FORWARD`)
                     .setEmoji('934430008250871818')
-                    .setStyle('SECONDARY'),
-                new Discord.MessageButton()
+                    .setStyle(ButtonStyle.Secondary),
+                new Discord.ButtonBuilder()
                     .setCustomId(`${commandFilename}_loadPage_${lastPage}_END`)
                     .setEmoji('934430008619962428')
-                    .setStyle('SECONDARY'),
-                new Discord.MessageButton()
+                    .setStyle(ButtonStyle.Secondary),
+                new Discord.ButtonBuilder()
                     .setCustomId(`${commandFilename}_loadPage_${page}_RELOAD`)
                     .setEmoji('934432754173624373')
-                    .setStyle('PRIMARY'),
+                    .setStyle(ButtonStyle.Primary),
             ),
-            new Discord.MessageActionRow().addComponents(
-                new Discord.MessageSelectMenu()
+            new Discord.ActionRowBuilder().addComponents(
+                new Discord.StringSelectMenuBuilder()
                     .setCustomId(`${commandFilename}_loadPageExact`)
                     .setPlaceholder('Seleccionar página')
                     .setOptions(Array(Math.min(lastPage + 1, 25)).fill(null).map(() => ({
@@ -1331,6 +1352,22 @@ module.exports = {
             }
 
         return distance[m - 1][n - 1];
+    },
+
+    /**
+     * 
+     * @param {String} str 
+     * @returns {Number}
+     */
+    stringHexToNumber: function(str) {
+        if(typeof str !== 'string')
+            throw TypeError('Se esperaba un string de hexadecimal para convertir a número');
+        if(!str.length)
+            return 0;
+        
+        if(str.startsWith('#'))
+            str = str.slice(1);
+        return parseInt(`0x${str}`);
     }
     //#endregion
 };

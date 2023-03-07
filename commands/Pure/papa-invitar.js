@@ -1,4 +1,4 @@
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 const tenshi = { '👉👈': 'https://i.imgur.com/yeYyEvp.jpg' }; //Soy un puto meme
 const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
@@ -7,9 +7,9 @@ const command = new CommandManager('papa-invitar', flags)
     .setDescription('Muestra una carta de invitación para agregarme a otro servidor')
     .setExecution(async request => {
         const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${request.client.application.id}&scope=bot&permissions=1394522582224`;
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle('Invitación')
-            .setColor('BLURPLE')
+            .setColor(Colors.Blurple)
             .setImage(tenshi['👉👈'])
             .setFooter({ text: 'Para invitar al bot a algún servidor, __Papita con Puré__ (ID:423129757954211880) debe formar parte del mismo' })
             .addFields({

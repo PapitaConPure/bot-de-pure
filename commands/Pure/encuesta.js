@@ -96,8 +96,8 @@ const command = new CommandManager('encuesta', flags)
 		if(answers.length < 2)
 			return request.reply({ content: ':warning: Necesitas ingresar al menos dos opciones' });
 
-		const embed = new Discord.MessageEmbed()
-			.setColor('#1da1f2')
+		const embed = new Discord.EmbedBuilder()
+			.setColor(0x1da1f2)
 			.setAuthor({ name: 'Encuesta » Reacciona para votar', iconURL: request.guild.iconURL({ dynamic: false, size: 256 }) })
 			.setFooter({ text: `Tiempo para votar: ${time.h}h, ${time.m}m, ${time.s}s` })
 			.addFields({
@@ -120,8 +120,8 @@ const command = new CommandManager('encuesta', flags)
 				counts[rc.emoji.id] = rc.count;
 			});
 			sent.reactions.removeAll();
-			const embed = new Discord.MessageEmbed()
-				.setColor('#1da1f2')
+			const embed = new Discord.EmbedBuilder()
+				.setColor(0x1da1f2)
 				.setAuthor({ name: 'Encuesta finalizada', iconURL: request.guild.iconURL({ dynamic: false, size: 256 }) })
 				.addFields({
 					name: question || 'Resultados de la votación',

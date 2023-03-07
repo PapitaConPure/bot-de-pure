@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js'); //Integrar discord.js
+const { EmbedBuilder } = require('discord.js'); //Integrar discord.js
 const { serverid } = require('../../localdata/config.json'); //Variables globales
 const { paginate, fetchArrows } = require('../../func');
 const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
@@ -21,8 +21,8 @@ const command = new CommandManager('emotes', flags)
 		].sort());
 		let page = 0;
 		const content = '**Oe mira po, emotes** <:yumou:708158159180660748>\n';
-		const embed = new MessageEmbed()
-			.setColor('#fecb4c')
+		const embed = new EmbedBuilder()
+			.setColor(0xfecb4c)
 			.setTitle('Emotes')
 			.setAuthor({ name: `Comando invocado por ${user.username}`, iconURL: user.avatarURL() })
 			.setFooter({ text: `Reacciona a las flechas debajo para cambiar de página` })

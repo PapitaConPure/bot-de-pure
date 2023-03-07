@@ -1,4 +1,4 @@
-const { randRange } = require('../../func');
+const { randRange, isThread } = require('../../func');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const paputa = [
@@ -29,7 +29,7 @@ const command = new CommandManager('papita', flags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash = false) => {
-		const isnsfw = request.channel.isThread()
+		const isnsfw = isThread(request.channel)
 			? request.channel.parent.nsfw
 			: request.channel.nsfw;
 		

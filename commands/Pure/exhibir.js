@@ -1,4 +1,4 @@
-const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
 const { CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
 const { DiscordAgent } = require('../../systems/discordagent.js');
 
@@ -21,7 +21,7 @@ const command = new CommandManager('exhibir', flags)
 		const pinnedMessages = await request.channel.messages.fetchPinned();
 		const user = request.author ?? request.user;
 
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setTitle('Exhibir pins')
 			.addFields({
 				name: 'Confirmar operación',
@@ -29,15 +29,15 @@ const command = new CommandManager('exhibir', flags)
 			});
 		return request.reply({
 			embeds: [embed],
-			components: [new MessageActionRow().addComponents(
-				new MessageButton()
+			components: [new ActionRowBuilder().addComponents(
+				new ButtonBuilder()
 					.setCustomId(`exhibir_flushPins_${user.id}`)
 					.setLabel('Exhibir')
-					.setStyle('DANGER'),
-				new MessageButton()
+					.setStyle(ButtonStyle.Danger),
+				new ButtonBuilder()
 					.setCustomId(`exhibir_cancelFlush_${user.id}`)
 					.setLabel('Cancelar')
-					.setStyle('SECONDARY'),
+					.setStyle(ButtonStyle.Secondary),
 			)],
 			ephemeral: true,
 		});
@@ -81,8 +81,8 @@ const command = new CommandManager('exhibir', flags)
 			
 			if(message.embeds.length < 10) {
 				formattedMessage.embeds.push(
-					new MessageEmbed()
-						.setColor('BLURPLE')
+					new EmbedBuilder()
+						.setColor(Colors.Blurple)
 						.setAuthor({ name: `🔗 Original en #${channel.name ?? 'deleted-channel'}`, url: message.url })
 						.setTimestamp(message.createdTimestamp),
 				);
@@ -109,7 +109,7 @@ const command = new CommandManager('exhibir', flags)
 		}
 		const flushed = (await Promise.all(flushing)).length;
 
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setTitle('Traslado de pins ejecutado')
 			.addFields({ name: 'Se completó la operación', value: `Se liberaron **${flushed}** espacios para pin` });
 
@@ -122,7 +122,7 @@ const command = new CommandManager('exhibir', flags)
 		if(interaction.user.id !== userId)
 			return interaction.reply({ content: ':x: No permitido', ephemeral: true });
 		
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setTitle('Traslado cancelado')
 			.addFields({ name: 'Se canceló la operación', value: 'Todos los mensajes pinneados siguen ahí' });
 		

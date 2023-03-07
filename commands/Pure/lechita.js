@@ -5,6 +5,7 @@ const axios = require('axios');
 const Canvas = require('canvas');
 const { utils } = require('../../localdata/images.json'); //Funciones globales
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { isThread } = require('../../func.js');
 
 async function resolverLink(req, linkRes, iSize, isnsfw, isSlash) {
 	let iurl;
@@ -73,7 +74,7 @@ const command = new CommandManager('lechita', flags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash) => {
-		const isnsfw = request.channel.isThread()
+		const isnsfw = isThread(request.channel)
 			? request.channel.parent.nsfw
 			: request.channel.nsfw;
 		

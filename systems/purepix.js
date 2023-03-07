@@ -1,4 +1,4 @@
-const { MessageEmbed, Message, MessageAttachment } = require('discord.js');
+const { EmbedBuilder, Message, MessageAttachment } = require('discord.js');
 const pixivToken = process.env.PIXIV_REFRESH_TOKEN ?? (require('../localenv.json')?.pixivtoken);
 const PixivApi = require('pixiv-api-client');
 const { shortenText } = require('../func');
@@ -100,8 +100,8 @@ const formatPixivPostsMessage = async (urls) => {
             manga:  'Manga',
         };
         
-        const postEmbed = new MessageEmbed()
-            .setColor('#0096fa')
+        const postEmbed = new EmbedBuilder()
+            .setColor(0x0096fa)
             .setAuthor({
                 name: post.user.name,
                 url: `https://www.pixiv.net/users/${post.user.id}`,
@@ -133,7 +133,7 @@ const formatPixivPostsMessage = async (urls) => {
  */
 const sendPixivPostsAsWebhook = async (message) => {
     const { content, channel, author } = message;
-    if(!message.guild.me.permissions.has('MANAGE_WEBHOOKS'))
+    if(!message.guild.members.me.permissions.has('ManageWebhooks'))
         return;
 
     const pixivUrls = Array.from(content.matchAll(pixivRegex)).filter(u => !u[0].startsWith('<') && !u[0].endsWith('>'));

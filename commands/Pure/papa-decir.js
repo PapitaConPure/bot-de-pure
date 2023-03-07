@@ -1,4 +1,4 @@
-const { Permissions } = require('discord.js');
+const { Permissions, ChannelType } = require('discord.js');
 const { auditError } = require('../../systems/auditor');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
@@ -25,8 +25,8 @@ const command = new CommandManager('papa-decir', flags)
 			callback: (cs) => {
 				if(cs.startsWith('<#') && cs.endsWith('>'))
 					cs = cs.slice(2, -1);
-				const channel = ccache.get(cs) || ccache.filter(c => c.isText()).find(c => c.name.toLowerCase().indexOf(cs) !== -1);
-                if(!channel.isText()) return;
+				const channel = ccache.get(cs) || ccache.filter(c => c.type === ChannelType.GuildText).find(c => c.name.toLowerCase().indexOf(cs) !== -1);
+                if(channel.type !== ChannelType.GuildText) return;
                 return channel;
 			}
 		});
