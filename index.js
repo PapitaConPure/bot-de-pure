@@ -41,21 +41,22 @@ const { sendPixivPostsAsWebhook } = require('./systems/purepix.js');
 
 //#region Parámetros Iniciales
 console.time('Establecimiento de parámetros iniciales');
-const { GatewayIntentBits, Partials } = Discord;
+const { IntentsBitField, Partials } = Discord;
+const { Flags: intentBits } = IntentsBitField;
 
-const botIntents = [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildEmojisAndStickers,
-    GatewayIntentBits.GuildIntegrations,
-    GatewayIntentBits.GuildPresences,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.GuildMessageReactions,
-    GatewayIntentBits.GuildMessageTyping,
-    GatewayIntentBits.GuildVoiceStates,
-    GatewayIntentBits.DirectMessages,
-    GatewayIntentBits.MessageContent,
-];
+const botIntents = new IntentsBitField().add(
+    intentBits.Guilds,
+    intentBits.GuildMembers,
+    intentBits.GuildEmojisAndStickers,
+    intentBits.GuildIntegrations,
+    intentBits.GuildPresences,
+    intentBits.GuildMessages,
+    intentBits.GuildMessageReactions,
+    intentBits.GuildMessageTyping,
+    intentBits.GuildVoiceStates,
+    intentBits.DirectMessages,
+    intentBits.MessageContent,
+);
 const botPartials = [
     Partials.Message,
     Partials.Channel,
