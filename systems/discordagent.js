@@ -31,7 +31,7 @@ class DiscordAgent {
         this.webhook = channelWebhooks.find(wh => wh.token && wh.channelId === channel.id);
         
         if(!this.webhook)
-            this.webhook = await channel.createWebhook(name);
+            this.webhook = await channel.createWebhook({ name, reason: 'Desplegar Agente de Puré' });
 
         return this;
     };
