@@ -210,7 +210,7 @@ const command = new CommandManager('voz', flags)
 			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
 		
 		const filter = (m) => m.author.id === authorId;
-		collectors[interaction.id] = new MessageCollector(interaction.channel, { filter: filter, time: 1000 * 60 * 2 });
+		collectors[interaction.id] = new MessageCollector(interaction.channel, { filter, time: 1000 * 60 * 2 });
 		collectors[interaction.id].on('collect', async collected => {
 			let ccontent = collected.content;
 			let category;
