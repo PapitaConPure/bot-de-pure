@@ -1360,6 +1360,24 @@ module.exports = {
         return distance[m - 1][n - 1];
     },
 
+    /**@param {Number | String} id*/
+    compressId(id) {
+        if(typeof id === 'string')
+            id = parseInt(id);
+        if(typeof id !== 'number')
+            throw Error('La id debe ser un número o string');
+        
+        return id.toString(36);
+    },
+
+    /**@param {String} id*/
+    decompressId(id) {
+        if(typeof id !== 'string')
+            throw Error('La id debe ser un string');
+        
+        return `${parseInt(id, 36)}`;
+    },
+
     /**
      * 
      * @param {String} str 

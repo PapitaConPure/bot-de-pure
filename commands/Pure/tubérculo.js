@@ -1,7 +1,7 @@
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText } = require('../../func.js');
+const { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId } = require('../../func.js');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, TextInputBuilder, CommandInteraction, ButtonInteraction, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder } = require('discord.js');
 const { ProgramToLanguage } = require('../../systems/ps/commons.js');
 const { executeTuber } = require('../../systems/purescript.js');
@@ -142,7 +142,7 @@ function viewTuber(interaction, item, tuberId) {
 
 	let components = [
 		new ButtonBuilder()
-			.setCustomId(`t_getDesc_${tuberId}_${(+item.author).toString(36)}`)
+			.setCustomId(`t_getDesc_${tuberId}_${compressId(item.author)}`)
 			.setLabel('Describir Tubérculo')
 			.setEmoji('ℹ')
 			.setStyle(ButtonStyle.Primary),
@@ -179,7 +179,7 @@ function viewTuber(interaction, item, tuberId) {
 			});
 			components.push(
 				new ButtonBuilder()
-					.setCustomId(`t_gID_${tuberId}_${(+item.author).toString(36)}`)
+					.setCustomId(`t_gID_${tuberId}_${compressId(item.author)}`)
 					.setLabel('Describir entrada')
 					.setEmoji('🏷')
 					.setStyle(ButtonStyle.Success),
@@ -507,7 +507,7 @@ const command = new CommandManager('tubérculo', flags)
 		return loadPageNumber(interaction, 0, '');
 	})
 	.setButtonResponse(function getDesc(interaction, tuberId, userId) {
-		userId = `${parseInt(userId, 36)}`;
+		userId = decompressId(userId);
 
 		if(isNotModerator(interaction.member) && userId !== interaction.user.id)
 			return interaction.reply({
@@ -529,7 +529,7 @@ const command = new CommandManager('tubérculo', flags)
 		return interaction.showModal(modal);
 	})
 	.setButtonResponse(function gID(interaction, tuberId, userId) {
-		userId = `${parseInt(userId, 36)}`;
+		userId = decompressId(userId);
 		
 		if(isNotModerator(interaction.member) && userId !== interaction.user.id)
 			return interaction.reply({
