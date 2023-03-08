@@ -1,7 +1,7 @@
 const { hourai, peopleid, tenshiColor } = require('../../localdata/config.json');
 const Hourai = require('../../localdata/models/hourai.js');
 const axios = require('axios').default;
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors, ActionRow, ComponentType } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes');
 const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 const { auditError } = require('../../systems/auditor');
@@ -218,7 +218,7 @@ const command = new CommandManager('roles', flags)
 	.setSelectMenuResponse(async function onSelect(interaction) {
 		const received = interaction.values[0].split('_');
 		const operation = received.shift();
-		const selectMenu = new StringSelectMenuBuilder(interaction.component);
+		const selectMenu = StringSelectMenuBuilder.from(interaction.component);
 		interaction.message.edit({ components: [ new ActionRowBuilder().addComponents(selectMenu) ] }).catch(auditError);
 		if(!received)
 			return this[operation](interaction);
@@ -412,20 +412,20 @@ const command = new CommandManager('roles', flags)
 		if(member.roles.cache.has(roleId))
 			return interaction.reply({ content: '⚠️ Ya tienes ese rol', ephemeral: true });
 
-		/**@type {Array<ActionRowBuilder>}*/
 		const newComponents = interaction.message.components;
 		newComponents[0].components = newComponents[0].components.map(component => {
+			const newComponent = ButtonBuilder.from(component);
 			const componentRid = component.customId.split('_')[2];
 			
 			if(roleId === componentRid) {
 				if(!category)
-					component.setCustomId(`roles_removeRole_${componentRid}`)
-				return component.setStyle(ButtonStyle.Primary);
+					newComponent.setCustomId(`roles_removeRole_${componentRid}`)
+				return newComponent.setStyle(ButtonStyle.Primary);
 			}
 			if(category)
-				return component.setStyle(ButtonStyle.Secondary);
+				return newComponent.setStyle(ButtonStyle.Secondary);
 			
-			return component;
+			return newComponent;
 		});
 
 		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
@@ -448,17 +448,17 @@ const command = new CommandManager('roles', flags)
 		if(!member.roles.cache.has(roleId))
 			return interaction.reply({ content: '⚠️ No tienes ese rol', ephemeral: true });
 
-		/**@type {Array<ActionRowBuilder>}*/
 		const newComponents = interaction.message.components;
 		newComponents[0].components = newComponents[0].components.map(component => {
+			const newComponent = ButtonBuilder.from(component);
 			const componentRid = component.customId.split('_')[2];
-			if(roleId !== componentRid) return component;
+			if(roleId !== componentRid) return newComponent;
 			
 			if(component.style === ButtonStyle.Primary)
-				return component
+				return newComponent
 					.setCustomId(`roles_addRole_${componentRid}`)
 					.setStyle(ButtonStyle.Secondary);
-			return component
+			return newComponent
 				.setCustomId(`roles_removeRole_${componentRid}`)
 				.setStyle(ButtonStyle.Primary);
 		});
@@ -480,11 +480,12 @@ const command = new CommandManager('roles', flags)
 		/**@type {Array<ActionRowBuilder>}*/
 		const newComponents = interaction.message.components;
 		newComponents[0].components = newComponents[0].components.map(component => {
+			const newComponent = ButtonBuilder.from(component);
 			const [ _, functionName, componentRid ] = component.customId.split('_');
-			if(component.style === ButtonStyle.Secondary) return component;
+			if(component.style === ButtonStyle.Secondary) return newComponent;
 			if(functionName === 'removeRole')
-				component.setCustomId(`roles_addRole_${componentRid}`)
-			return component.setStyle(ButtonStyle.Secondary);
+				newComponent.setCustomId(`roles_addRole_${componentRid}`)
+			return newComponent.setStyle(ButtonStyle.Secondary);
 		});
 
 		await Promise.all([
@@ -556,6 +557,7 @@ const command = new CommandManager('roles', flags)
 			.setCustomId('nameInput')
 			.setLabel('Nombre')
 			.setStyle(TextInputStyle.Short)
+			.setRequired(false)
 			.setMaxLength(158)
 			.setPlaceholder(`Ej: Bhavaagra Princess`);
 		
@@ -563,12 +565,14 @@ const command = new CommandManager('roles', flags)
 			.setCustomId('colorInput')
 			.setLabel('Color (hexadecimal)')
 			.setStyle(TextInputStyle.Short)
+			.setRequired(false)
 			.setMaxLength(7)
-			.setPlaceholder(`Ej: ${tenshiColor}`);
+			.setPlaceholder(`Ej: ${tenshiColor.toString(16)}`);
 		const emoteUrlInput = new TextInputBuilder()
 			.setCustomId('emoteUrlInput')
 			.setLabel('Ícono')
 			.setStyle(TextInputStyle.Paragraph)
+			.setRequired(false)
 			.setMaxLength(160)
 			.setPlaceholder('Ejemplo: https://cdn.discordapp.com/emojis/828736342372253697.webp');
 
