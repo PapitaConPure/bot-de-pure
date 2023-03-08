@@ -2,15 +2,16 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "Alpha.2.9.00",
+            "number": "2.9.01",
             "name": "Cisne Cristalino"
         },
-        "note": "Se pasará de Alpha a Full nuevamente dentro de poco",
+        "note": "Operando casi con normalidad",
         "changelog": [
             "Se terminaron tareas varias de reestructuración interna",
             "Se implementó un nuevo modelo de Comandos Duales (mensaje+Slash)",
             "Se agregaron diversas mejoras de \"calidad de vida\"",
-            "Trabajando en reescritura y documentación de PuréScript...",
+            "Se reescribió y documentó PuréScript...",
+            "Se actualizó a discord.js v14",
             "Trabajando en soporte de Preferencias de Usuario..."
         ],
         "todo": [
