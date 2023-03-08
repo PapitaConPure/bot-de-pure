@@ -139,6 +139,7 @@ module.exports = {
      *  pagemax: Number?,
      *  format: Function?,
      * }} itemsOptions 
+     * @returns {Array<Array<*>>}
      */
     paginate: function(array, itemsOptions = { pagemax: 10, format: item => `\`${item.name.padEnd(24)}\`${item}` }) {
         const { pagemax, format } = itemsOptions;
@@ -777,7 +778,7 @@ module.exports = {
      * @returns { Discord.GuildMember }
      */
     fetchMember: function(data, { guild: thisGuild, client }) {
-        console.time('Buscar miembro');
+        // console.time('Buscar miembro');
         
         const otherGuilds = client.guilds.cache.filter(g => g.id !== thisGuild.id);
         data = module.exports.extractUserID(data);
@@ -820,7 +821,7 @@ module.exports = {
                     .sort()
                     .reduce((a, b) => compareNames(a.user.username, b.user.username) ? a : b);
         }
-        console.timeEnd('Buscar miembro');
+        // console.timeEnd('Buscar miembro');
 
         //Búsqueda sin resultados
         return undefined;
@@ -1121,6 +1122,11 @@ module.exports = {
      * ButtonInteraction `loadPage`
      * * `args[0]`: Número de página
      * * `args[1]`: Contexto del salto. Solo es necesario para que cada ID sea única.
+     * * * `START`: "primera página"
+     * * * `BACKWARD`: "página atrás"
+     * * * `FORWARD`: "página delante"
+     * * * `END`: "ultima página"
+     * * * `RELOAD`: "actualizar"
      * 
      * SelectMenuInteraction `loadPageExact`
      * * `.values[0]`: página seleccionada

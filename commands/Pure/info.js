@@ -1,8 +1,16 @@
 const { EmbedBuilder, ChannelType } = require('discord.js'); //Integrar discord.js
-const { fetchArrows, fetchUser, improveNumber } = require('../../func');
+const { fetchArrows, fetchUser, improveNumber, isShortenedNumberString } = require('../../func');
 const global = require('../../localdata/config.json'); //Variables globales
 const { ChannelStats, Stats } = require('../../localdata/models/stats');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+
+/**@param {Number} number*/
+const counterDisplay = (number) => {
+    const numberString = improveNumber(number, true);
+    if(isShortenedNumberString(numberString))
+        return `${numberString} de`;
+    return numberString;
+}
 
 const options = new CommandOptionsManager()
 	.addParam('canal', 'CHANNEL', 'para mostrar estadísticas extra de un canal', { optional: true })
@@ -89,8 +97,8 @@ const command = new CommandManager('info', flags)
 			.map((obj) => [obj.channelId, obj.cnt]);
 			
 		//Creacion de tops 5
-		const peotop = peocnt ? peocnt.map(([id, count]) => `<@${id}>: **${improveNumber(count)}** mensajes`).join('\n') : '_Este canal no tiene mensajes_';
-		const chtop = msgcnt.map(([id, count]) => `<#${id}>: **${improveNumber(count)}** mensajes`).join('\n');
+		const peotop = peocnt ? peocnt.map(([id, count]) => `<@${id}>: **${counterDisplay(count)}** mensajes`).join('\n') : '_Este canal no tiene mensajes_';
+		const chtop = msgcnt.map(([id, count]) => `<#${id}>: **${counterDisplay(count)}** mensajes`).join('\n');
 
 		const pages = [];
 		const owner = await servidor.fetchOwner();
@@ -106,7 +114,7 @@ const command = new CommandManager('info', flags)
 				.addFields(
 					{ name: 'Nombre', 				 value: servidor.name, 														  					   inline: true },
 					{ name: 'Dueño', 				 value: `${owner.user.username}\n\`${servidor.ownerId}\``, 					  					   inline: true },
-					{ name: 'Nivel de verificación', value: servidor.verificationLevel, 										  					   inline: true },
+					{ name: 'Nivel de verificación', value: `Nivel ${servidor.verificationLevel}`, 										  					   inline: true },
 
 					{ name: 'Canales', 				 value: `#️⃣ x ${channelCounts.text}\n🔊 x ${channelCounts.voice}\n🏷 x ${channelCounts.category}`, inline: true },
 					{ name: '• • •', 				 value: `🗨️ x ${channelCounts.thread}\n📣 x ${channelCounts.news}`, 							    inline: true },

@@ -1,3 +1,4 @@
+const { GuildMember } = require('discord.js');
 const { fetchMember, regroupText } = require('../../func');
 const { CommandMetaFlagsManager, CommandOptionsManager, CommandManager } = require('../Commons/commands');
 
@@ -14,16 +15,29 @@ const command = new CommandManager('aislar', flags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash) => {
-		if(!isSlash && !args.length)
-			return request.reply({ content: '⚠ Debes indicar un usuario.', ephemeral: true });
+		if(!request.guild.members.me.permissions.has('ModerateMembers'))
+			return request.reply({ content: '⚠ ¡No tengo permiso para hacer eso!', ephemeral: true });
 
-		const duration = isSlash ? args.getNumber('duración') : args.shift();
-		if(duration === undefined || duration < 0)
+		if(!isSlash && !args.length)
+			return request.reply({ content: '⚠ Debes indicar la duración del castigo en minutos', ephemeral: true });
+
+		let duration = isSlash ? args.getNumber('duración') : +(args.shift());
+		if(duration === undefined || duration < 0 || isNaN(duration))
 			return request.reply({ content: '⚠ Debes especificar la duración del aislamiento en minutos\nIngresa 0 para revocarlo', ephemeral: true });
 
+		if(duration === 0) 
+			duration = null;
+		else 
+			duration = duration * 60e3;
+		
+		if(!isSlash && !args.length)
+			return request.reply({ content: '⚠ Debes indicar un usuario luego de la duración', ephemeral: true });
+
+		/**@type {Array<GuildMember>}*/
 		const members = isSlash
 			? options.fetchParamPoly(args, 'miembros', args.getMember, [])
-			: regroupText(args).map(data => fetchMember(data, request));
+			: regroupText(args).map(data => fetchMember(data, request)).filter(member => member);
+		
 		if(!members.length)
 			return request.reply({ content: '⚠ Debes mencionar al menos un miembro a aislar', ephemeral: true });
 
@@ -31,7 +45,7 @@ const command = new CommandManager('aislar', flags)
 		const failed = [];
 
 		await Promise.all(members.map(member => 
-			member.timeout(duration * 60e3, `Aislado por ${request.member.user.tag}`)
+			member.timeout(duration, `Aislado por ${request.member.user.tag}`)
 			.then(_ => succeeded.push(member))
 			.catch(_ => failed.push(member))
 		));
@@ -42,11 +56,11 @@ const command = new CommandManager('aislar', flags)
 		const membersList = members => members.map(member => member.user.tag).join(', ');
 		return request.reply({
 			content: [
-				duration > 0
+				duration
 					? `✅ Se ha aislado a **${membersList(succeeded)}**`
 					: `✅ Se ha revocado el aislamiento de **${membersList(succeeded)}**`,
 				failed.length
-					? `❌ No se ha podido actualizar a **${membersList(failed)}**. Puede que tengan más poder que yo`
+					? `❌ No se ha podido actualizar a **${membersList(failed)}**. Puede que tenga(n) más poder que yo`
 					: '',
 			].join('\n'),
 			ephemeral: true,

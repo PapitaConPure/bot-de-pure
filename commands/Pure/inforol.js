@@ -25,7 +25,7 @@ const command = new CommandManager('inforol', flags)
 			return request.reply({ content: `:x: ¡Debes ingresar al menos un parámetro!\nUsa \`${p_pure(request.guildId).raw}ayuda inforol\` para más información` });
 
 		//Parámetros
-		const servidor = request.channel.guild;
+		const servidor = request.guild;
         const strict = options.fetchFlag(args, 'estricta');
 		let roleIds;
 
@@ -53,7 +53,7 @@ const command = new CommandManager('inforol', flags)
 				return arg;
 			}).filter(arg => arg);
 		} else
-			roleIds = options.fetchParamPoly(args, 'términos', args.getRole, null).filter(arg => arg);
+			roleIds = options.fetchParamPoly(args, 'términos', args.getRole, []).map(role => role.id);
 
 		if(!roleIds.length)
 			return request.reply({ content: '⚠ No se encontró ningún rol...' });
@@ -86,7 +86,7 @@ const command = new CommandManager('inforol', flags)
 				{ name: 'Caso', value: `**${strict ? 'Estricto' : 'Flojo'}**`, inline: true },
 				{ name: 'Cuenta total', value: `:wrestlers: x ${peoplecnt}\n:robot: x ${botcnt}`, inline: true },
 			)
-			.setThumbnail(servidor.iconURL)
+			.setThumbnail(servidor.iconURL({ size: 256 }))
 			.setAuthor({ name: `Comando invocado por ${user.username}`, iconURL: user.avatarURL() })
 			.setFooter({ text: `Página principal` });
 
@@ -110,7 +110,7 @@ const command = new CommandManager('inforol', flags)
 		
 		const arrows = fetchArrows(request.client.emojis.cache);
 		const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
-		return request.reply({ embeds: [Embed[0]], allowedMentions: { parse: [] } }).then(sent => {
+		return request.reply({ embeds: [Embed[0]], allowedMentions: { parse: [] }, fetchReply: true }).then(sent => {
 			sent.react(arrows[0])
 				.then(() => sent.react(arrows[1]))
 				.then(() => {

@@ -6,10 +6,11 @@ const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
 
 const options = new CommandOptionsManager()
 	.addParam('opciones', ['EMOTE','TEXT'], 'para agregar una opción', { poly: 'MULTIPLE', })
-	.addFlag('pq', ['pregunta', 'question'], 'para asignar una pregunta', 	   { name: 'txt', type: 'TEXT' })
-	.addFlag('h',  ['hora', 'horas'], 	     'para añadir tiempo en horas',    { name: 'n', type: 'NUMBER' })
-	.addFlag('m',  ['minuto', 'minutos'],    'para añadir tiempo en minutos',  { name: 'n', type: 'NUMBER' })
-	.addFlag('s',  ['segundo', 'segundos'],  'para añadir tiempo en segundos', { name: 'n', type: 'NUMBER' });
+	.addFlag('c',  'canal',                  'para especificar un canal',      { name: 'ch',  type: 'CHANNEL' })
+	.addFlag('pq', ['pregunta', 'question'], 'para asignar una pregunta', 	   { name: 'txt', type: 'TEXT'    })
+	.addFlag('h',  ['hora', 'horas'], 	     'para añadir tiempo en horas',    { name: 'n',   type: 'NUMBER'  })
+	.addFlag('m',  ['minuto', 'minutos'],    'para añadir tiempo en minutos',  { name: 'n',   type: 'NUMBER'  })
+	.addFlag('s',  ['segundo', 'segundos'],  'para añadir tiempo en segundos', { name: 'n',   type: 'NUMBER'  });
 const flags = new CommandMetaFlagsManager().add('MOD');
 const command = new CommandManager('encuesta', flags)
 	.setAliases(

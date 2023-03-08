@@ -1,7 +1,7 @@
 const Canvas = require('canvas');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { AttachmentBuilder } = require('discord.js');
+const { AttachmentBuilder, GuildMember } = require('discord.js');
 const { improveNumber } = require('../../func');
 
 /**
@@ -115,13 +115,15 @@ const command = new CommandManager('tarjeta', flags)
 		if(isSlash)
 			await request.deferReply();
 
+		/**@type {GuildMember}*/
+		const member = request.member;
 		const [ bgImage, diffImage, survivalImage, pfp, ...challengeImages ] = await Promise.all([
 			Canvas.loadImage(bg.url),
 			Canvas.loadImage(diff.url),
 			Canvas.loadImage(highlights.survival[survivalname]),
-			Canvas.loadImage((request.user ?? request.author).displayAvatarURL({ format: 'png', dynamic: false, size: 1024 })),
+			Canvas.loadImage(member.displayAvatarURL({ size: 512, extension: 'png', forceStatic: true })),
 			...challenges.map(ch => Canvas.loadImage(highlights.challenge[ch])),
-		]);
+		]).catch(console.error);
 
 		//Dibujar imágenes
         ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
