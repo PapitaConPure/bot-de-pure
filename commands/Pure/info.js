@@ -107,9 +107,9 @@ const command = new CommandManager('info', flags)
 			new EmbedBuilder()
 				.setColor(0xffd500)
 				.setTitle('Información del servidor OwO')
-				.setImage(servidor.iconURL({ dynamic: true, size: 256 }))
-				.setThumbnail(owner.user.avatarURL({ dynamic: true, size: 256 }))
-				.setAuthor({ name: `Comando invocado por ${author.username}`, iconURL: author.avatarURL({ dynamic: true, size: 256 }) })
+				.setImage(servidor.iconURL({ size: 256 }))
+				.setThumbnail(owner.user.avatarURL({ size: 256 }))
+				.setAuthor({ name: `Comando invocado por ${author.username}`, iconURL: author.avatarURL({ size: 256 }) })
 				.setFooter({ text: `Estas estadísticas toman información concreta.` })
 				.addFields(
 					{ name: 'Nombre', 				 value: servidor.name, 														  					   inline: true },

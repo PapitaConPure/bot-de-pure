@@ -268,12 +268,12 @@ function createDiscordRole(role) {
  * @param {import('discord.js').Guild} guild 
  */
 async function createDiscordGuild(guild) {
-    const iconUrl = guild.iconURL({ format: 'jpg', size: 512 });
+    const iconUrl = guild.iconURL({ extension: 'jpg', size: 512 });
     const description = guild.description;
     const systemChannel = guild.systemChannel;
-    const bannerUrl = guild.bannerURL({ format: 'jpg', size: 1024 });
+    const bannerUrl = guild.bannerURL({ extension: 'jpg', size: 1024 });
     const premiumTier = guild.premiumTier === GuildPremiumTier.None ? 'Ninguno' : `Nivel ${guild.premiumTier ?? 0}`;
-    const splashUrl = guild.splashURL({ format: 'jpg', size: 512 });
+    const splashUrl = guild.splashURL({ extension: 'jpg', size: 512 });
 
     /**@type {Map<String, RuntimeValue>}*/
     const servidor = new Map()

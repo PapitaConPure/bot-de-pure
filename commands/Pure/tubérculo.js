@@ -112,7 +112,7 @@ const loadPageNumber = async(interaction, page, setFilter = undefined) => {
 							: `Ningún Tubérculo coincide con la búsqueda actual`,
 					inline: true,
 				})
-				.setFooter({ iconUrl: guild.iconURL({ dynamic: true, size: 256 }), text: `Total • ${items.length}` }),
+				.setFooter({ iconUrl: guild.iconURL({ size: 256 }), text: `Total • ${items.length}` }),
 		],
 		components: paginationRows(page, lastPage, paginationEnabled),
 	};
@@ -150,7 +150,7 @@ function viewTuber(interaction, item, tuberId) {
 	let files = [];
 	const embed = new EmbedBuilder()
 		.setColor(Colors.DarkVividPink)
-		.setAuthor({ name: interaction.guild.name, iconURL: interaction.guild.iconURL() })
+		.setAuthor({ name: interaction.guild.name, iconURL: interaction.guild.iconURL({ size: 256 }) })
 		.setTitle('Visor de Tubérculos')
 		.addFields(
 			{
@@ -261,7 +261,7 @@ const command = new CommandManager('tubérculo', flags)
 				embeds: [
 					new EmbedBuilder()
 						.setColor(Colors.LuminousVividPink)
-						.setAuthor({ name: request.guild.name, iconURL: request.guild.iconURL() })
+						.setAuthor({ name: request.guild.name, iconURL: request.guild.iconURL({ size: 256 }) })
 						.setTitle('Arsenal de Tubérculos del Servidor')
 						.addFields({
 							name: `🥔)▬▬▬\\~•\\~▬▬▬\\~•\\~▬▬{ ${items.length ? `1 / ${lastPage + 1}` : '- - -'} }▬▬\\~•\\~▬▬▬\\~•\\~▬▬▬(🥔`, 
@@ -272,7 +272,7 @@ const command = new CommandManager('tubérculo', flags)
 								: `Este servidor no tiene ningún Tubérculo.\nComienza a desplegar TuberIDs con \`${p_pure(request.guildId).raw}tubérculo --crear\``,
 							inline: true,
 						})
-						.setFooter({ iconUrl: request.guild.iconURL({ dynamic: true, size: 256 }), text: `Total • ${items.length}` }),
+						.setFooter({ iconUrl: request.guild.iconURL({ size: 256 }), text: `Total • ${items.length}` }),
 				],
 				components: (items.length < pageMax) ? null : paginationRows(0, lastPage),
 			});

@@ -19,7 +19,7 @@ async function resolverLink(req, linkRes, iSize, isnsfw, isSlash) {
 			const errorResponse = { content: ':warning: Ocurrió un error al descargar la imagen\n```\n' + response.status + '\n```\nToma cum.' };
 			if(isSlash) req.channel.send(errorResponse);
 			else req.reply(errorResponse);
-			return user.avatarURL({ format: 'png', size: iSize });
+			return user.avatarURL({ extension: 'png', size: iSize });
 		}
 		if(isnsfw || (!linkRes.includes('.gif') && !linkRes.includes('.mp4') && (response.data.toString().length / 1024) < 256))
 			return linkRes;
@@ -28,7 +28,7 @@ async function resolverLink(req, linkRes, iSize, isnsfw, isSlash) {
 		if(isSlash) req.channel.send(errorResponse);
 		else req.reply(errorResponse);
 
-		return user.avatarURL({ format: 'png', size: iSize });
+		return user.avatarURL({ extension: 'png', size: iSize });
 	}
 
 	//Si no se pasó un enlace u ocurrió un error inesperado, intentar resolver enlace de un emote o usuario
@@ -41,7 +41,7 @@ async function resolverLink(req, linkRes, iSize, isnsfw, isSlash) {
 	//Resolver de usuario
 	linkRes = func.fetchUserID(linkRes, req);
 	if(linkRes !== undefined)
-		return req.client.users.cache.get(linkRes).avatarURL({ format: 'png', size: iSize });
+		return req.client.users.cache.get(linkRes).avatarURL({ extension: 'png', size: iSize });
 
 	return iurl;
 };
@@ -84,14 +84,14 @@ const command = new CommandManager('lechita', flags)
 		if(isnsfw) {
 			let bglink;
 			if(args.length) bglink = await resolverLink(request, target, 1024, true, isSlash);
-			else bglink = user.avatarURL({ format: 'png', size: 1024 });
+			else bglink = user.avatarURL({ extension: 'png', size: 1024 });
 
 			return dibujarCum(request, bglink);
 		}
 
 		let bglink;
 		if(!target)
-			bglink = user.avatarURL({ format: 'png', size: 256 });
+			bglink = user.avatarURL({ extension: 'png', size: 256 });
 		else if(!(target.startsWith('<:') || target.startsWith('<a:')) || !target.endsWith('>'))
 			bglink = await resolverLink(request, target, 256, false, isSlash);
 

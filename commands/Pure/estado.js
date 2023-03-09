@@ -38,7 +38,7 @@ const command = new CommandManager('estado', flags)
 
         const embed = new EmbedBuilder()
             .setColor(0x608bf3)
-            .setAuthor({ name: 'Estado del Bot', iconURL: request.client.user.avatarURL({ format: 'png', dynamic: true, size: 1024 }) })
+            .setAuthor({ name: 'Estado del Bot', iconURL: request.client.user.avatarURL({ extension: 'png', size: 1024 }) })
             .setThumbnail('https://i.imgur.com/HxTxjdL.png')
             .setFooter({ text: `Ofreciendo un total de ${cnt.cmds} comandos en ${cnt.guilds} servidores` })
             .addFields(

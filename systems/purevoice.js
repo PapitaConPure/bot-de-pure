@@ -113,7 +113,7 @@ class PureVoiceUpdateHandler {
         
         //Embed de notificación
         const embed = new Discord.EmbedBuilder()
-            .setAuthor({ name: 'PuréVoice', iconURL: state.client.user.avatarURL({ size: 64, format: 'jpg' }) })
+            .setAuthor({ name: 'PuréVoice', iconURL: state.client.user.avatarURL({ size: 128 }) })
             .setFooter({ text: `👥 ${channel.members?.size}` });
 
         if(channel.id !== pvDocument.voiceMakerId) {

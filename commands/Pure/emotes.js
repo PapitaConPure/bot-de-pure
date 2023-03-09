@@ -27,7 +27,7 @@ async function loadPageNumber (request, page) {
 	const embed = new EmbedBuilder()
 		.setColor(0xfecb4c)
 		.setTitle('Oe mira po, emotes')
-		.setAuthor({ name: `Emotes`, iconURL: user.avatarURL() })
+		.setAuthor({ name: `Emotes`, iconURL: user.avatarURL({ size: 256 }) })
 		.setFooter({ text: `${page + 1} / ${lastPage + 1}` })
 		.addFields({ name: `${'Nombre\`'.padEnd(23)}\`Emote`, value: emotePages[page] });
 	const content = {

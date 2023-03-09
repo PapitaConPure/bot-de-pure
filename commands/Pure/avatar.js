@@ -6,7 +6,7 @@ const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = requi
 const maxusers = 10;
 /**@param {import('discord.js').GuildMember} member*/
 const getAvatarEmbed = (member) => {
-    const urlDisplayOptions = { format: 'png', dynamic: true, size: 1024 };
+    const urlDisplayOptions = { size: 1024 };
     const memberAvatarUrl = member.displayAvatarURL(urlDisplayOptions);
     const embed = new EmbedBuilder()
         .setColor(0xfaa61a)

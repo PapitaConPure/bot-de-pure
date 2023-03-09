@@ -8,7 +8,7 @@ function generateRequestRecord(request) {
     /**@type {import('discord.js').User}*/
     const user = request.author ?? request.user;
     const embed = new EmbedBuilder()
-        .setAuthor({ name: `${request.guild.name} • ${request.channel.name}`, iconURL: user.avatarURL({ dynamic: true }), url: request.url || request.channel?.url || 'https://discordapp.com' });
+        .setAuthor({ name: `${request.guild.name} • ${request.channel.name}`, iconURL: user.avatarURL({ size: 128 }), url: request.url || request.channel?.url || 'https://discordapp.com' });
     return embed;
 };
 

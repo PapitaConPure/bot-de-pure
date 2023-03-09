@@ -512,7 +512,7 @@ module.exports = {
         ctx.arc(xcenter, ycenter, radius, 0, Math.PI * 2, true);
         ctx.closePath();
         ctx.clip();
-        const avatar = await Canvas.loadImage(user.displayAvatarURL({ format: 'png', dynamic: false, size: 1024 }));
+        const avatar = await Canvas.loadImage(user.displayAvatarURL({ extension: 'png', size: 1024 }));
         ctx.drawImage(avatar, xcenter - radius, ycenter - radius, radius * 2, radius * 2);
         ctx.restore();
     },
@@ -552,7 +552,7 @@ module.exports = {
         const canvas = Canvas.createCanvas(1275, 825);
         const ctx = canvas.getContext('2d');
 
-        const fondo = await Canvas.loadImage((servidor.id === global.serverid.hourai)?global.hourai.images.welcome:images.announcements.welcome);
+        const fondo = await Canvas.loadImage((servidor.id === global.serverid.hourai) ? global.hourai.images.welcome : images.announcements.welcome);
         ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
         //#endregion
 

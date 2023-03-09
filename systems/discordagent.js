@@ -79,7 +79,7 @@ class DiscordAgent {
                 ...messageOptions,
                 threadId: this.threadId,
                 username: this.user.displayName ?? this.user.username,
-                avatarURL: this.user.displayAvatarURL({ dynamic: true }),
+                avatarURL: this.user.displayAvatarURL({ size: 512 }),
                 nonce: undefined,
             });
         } catch(e) {

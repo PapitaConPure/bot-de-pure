@@ -89,7 +89,7 @@ const command = new CommandManager('uwus', flags)
                     value: `**${secs}** segundos.`,
                 },
             )
-            .setAuthor({ name: `Evento iniciado por ${user.username}`, iconURL: user.avatarURL() });
+            .setAuthor({ name: `Evento iniciado por ${user.username}`, iconURL: user.avatarURL({ size: 256 }) });
         
         return request.reply({ embeds: [embed] });
     });

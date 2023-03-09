@@ -54,7 +54,7 @@ const command = new CommandManager('presentar', flags)
     .setDescription('Me presento y digo cositas sobre mí~')
     .setExecution(async request => {
         if(!embed.author)
-            embed.setAuthor({ name: 'Presentación', iconURL: request.client.user.avatarURL({ format: 'png', dynamic: true, size: 1024 }) });
+            embed.setAuthor({ name: 'Presentación', iconURL: request.client.user.avatarURL({ extension: 'png', size: 1024 }) });
         return request.reply({ embeds: [embed] });
     });
 

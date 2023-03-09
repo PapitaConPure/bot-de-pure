@@ -131,7 +131,7 @@ const command = new CommandManager('anarquia', flags)
 			const user = request.client.users.cache.get(aid);
 			const embed = new EmbedBuilder()
 				.setColor(0xbd0924)
-				.setAuthor({ name: user.username, iconURL: user.avatarURL({ format: 'png', dynamic: true, size: 512 }) });
+				.setAuthor({ name: user.username, iconURL: user.avatarURL({ extension: 'png', size: 512 }) });
 			if(auser)
 				embed.setTitle('Perfil anárquico')
 					.addFields(

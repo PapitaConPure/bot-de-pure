@@ -99,7 +99,7 @@ const command = new CommandManager('encuesta', flags)
 
 		const embed = new Discord.EmbedBuilder()
 			.setColor(0x1da1f2)
-			.setAuthor({ name: 'Encuesta » Reacciona para votar', iconURL: request.guild.iconURL({ dynamic: false, size: 256 }) })
+			.setAuthor({ name: 'Encuesta » Reacciona para votar', iconURL: request.guild.iconURL({ size: 256 }) })
 			.setFooter({ text: `Tiempo para votar: ${time.h}h, ${time.m}m, ${time.s}s` })
 			.addFields({
 				name: question || 'Opciones',
@@ -123,7 +123,7 @@ const command = new CommandManager('encuesta', flags)
 			sent.reactions.removeAll();
 			const embed = new Discord.EmbedBuilder()
 				.setColor(0x1da1f2)
-				.setAuthor({ name: 'Encuesta finalizada', iconURL: request.guild.iconURL({ dynamic: false, size: 256 }) })
+				.setAuthor({ name: 'Encuesta finalizada', iconURL: request.guild.iconURL({ size: 256 }) })
 				.addFields({
 					name: question || 'Resultados de la votación',
 					value: answers

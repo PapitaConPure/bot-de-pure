@@ -61,7 +61,7 @@ const command = new CommandManager('dados', flags)
 		const user = request.author ?? request.user;
 		const embed = new EmbedBuilder()
 			.setColor(0x3f4581)
-			.setAuthor({ name: `${user.username} tiró los dados...`, iconURL: user.avatarURL({ format: 'png', dynamic: true, size: 512 }) })
+			.setAuthor({ name: `${user.username} tiró los dados...`, iconURL: user.avatarURL({ extension: 'png', size: 512 }) })
 			.addFields({
 				name: 'Salió:',
 				value: dices.map(dice => `${dice.d} x 🎲(${dice.f}) → [${dice.r.join(',')}] = **${dice.t}**`).join('\n**+** '),

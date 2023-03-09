@@ -43,7 +43,7 @@ const command = new CommandManager('papa-eval', flags)
 		} catch(error) {
 			const embed = new Discord.EmbedBuilder()
 				.setColor(0x0000ff)
-				.setAuthor({ name: `${request.guild.name} • ${request.channel.name}`, iconURL: request.author.avatarURL({ dynamic: true }), url: request.url })
+				.setAuthor({ name: `${request.guild.name} • ${request.channel.name}`, iconURL: request.author.avatarURL(), url: request.url })
 				.addFields({
 					name: 'Ha ocurrido un error al ingresar un comando',
 					value: `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``,

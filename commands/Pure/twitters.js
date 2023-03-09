@@ -85,7 +85,7 @@ const command = new CommandManager('twitters', flags)
 			const embed = new Discord.EmbedBuilder()
 				.setColor(0x1da1f2)
 				.setTitle(embedprops.title ?? 'Tablón de Twitters')
-				.setAuthor({ name: embedprops.epigraph ?? '¡Clickea el enlace que gustes!', iconURL: request.channel.guild.iconURL({ dynamic: false, size: 256 }) })
+				.setAuthor({ name: embedprops.epigraph ?? '¡Clickea el enlace que gustes!', iconURL: request.channel.guild.iconURL({ size: 256 }) })
 				.setFooter({ text: embedprops.footer ?? null });
 			
 			for(page = 0; page < twitters.length; page += div)
@@ -124,7 +124,7 @@ const command = new CommandManager('twitters', flags)
 		const embed = new Discord.EmbedBuilder()
 			.setColor(target.color)
 			.setTitle(embedprops.title ?? target.title ?? '')
-			.setAuthor({ name: embedprops.epigraph ?? target.author.name ?? request.guild.name, iconURL: request.guild.iconURL({ dynamic: false, size: 256 }) })
+			.setAuthor({ name: embedprops.epigraph ?? target.author.name ?? request.guild.name, iconURL: request.guild.iconURL({ size: 256 }) })
 			.setFooter({ text: embedprops.footer ?? target.footer?.text ?? '' });
 		
 		if(edit === 'add')

@@ -219,7 +219,7 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
         const messages = posts.map(post => formatBooruPostMessage(post, {
             maxTags: 40,
             title: isnsfw ? searchOpt.nsfwtitle : searchOpt.sfwtitle,
-            cornerIcon: author.avatarURL({ size: 128, dynamic: true }),
+            cornerIcon: author.avatarURL({ size: 128 }),
             manageableBy: author.id,
         }));
         if(extags.length)

@@ -110,7 +110,7 @@ module.exports = {
             const user = request.author ?? request.user;
             const permsEmbed = new EmbedBuilder()
                 .setColor(0x0000ff)
-                .setAuthor({ name: `${request.guild.name} • ${request.channel.name} (Click para ver)`, iconURL: user.avatarURL({ dynamic: true }), url: request.url || 'https://discordapp.com' })
+                .setAuthor({ name: `${request.guild.name} • ${request.channel.name} (Click para ver)`, iconURL: user.avatarURL({ size: 128 }), url: request.url || 'https://discordapp.com' })
                 .setThumbnail('https://i.imgur.com/ftAxUen.jpg')
                 .addFields(
                     {

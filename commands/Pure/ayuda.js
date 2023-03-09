@@ -83,7 +83,7 @@ const command = new CommandManager('ayuda', flags)
                 embeds.push(
                     new EmbedBuilder()
                         .setColor(0x608bf3)
-                        .setAuthor({ name: title(name), iconURL: request.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }) })
+                        .setAuthor({ name: title(name), iconURL: request.client.user.avatarURL({ extension: 'png', size: 512 }) })
                         .addFields(
                             { name: 'Nombre', value: `\`${name}\``, inline: true },
                             {
@@ -131,7 +131,7 @@ const command = new CommandManager('ayuda', flags)
                 : 'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para buscar un cierto identificador)';
             embeds.push(new EmbedBuilder()
                 .setColor(tenshiColor)
-                .setAuthor({ name: 'Lista de comandos', iconURL: request.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }) })
+                .setAuthor({ name: 'Lista de comandos', iconURL: request.client.user.avatarURL({ extension: 'png', size: 512 }) })
                 .addFields(
                     {
                         name: 'Comandos: ejemplos de uso',

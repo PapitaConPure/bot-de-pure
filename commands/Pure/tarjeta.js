@@ -121,7 +121,7 @@ const command = new CommandManager('tarjeta', flags)
 			Canvas.loadImage(bg.url),
 			Canvas.loadImage(diff.url),
 			Canvas.loadImage(highlights.survival[survivalname]),
-			Canvas.loadImage(member.displayAvatarURL({ size: 512, extension: 'png', forceStatic: true })),
+			Canvas.loadImage(member.displayAvatarURL({ size: 512, extension: 'png' })),
 			...challenges.map(ch => Canvas.loadImage(highlights.challenge[ch])),
 		]).catch(console.error);
 
