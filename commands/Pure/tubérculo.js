@@ -1,8 +1,8 @@
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText } = require('../../func.js');
-const { MessageEmbed, MessageActionRow, MessageButton, MessageAttachment, Modal, TextInputComponent, CommandInteraction, ButtonInteraction } = require('discord.js');
+const { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId } = require('../../func.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, TextInputBuilder, CommandInteraction, ButtonInteraction, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder } = require('discord.js');
 const { ProgramToLanguage } = require('../../systems/ps/commons.js');
 const { executeTuber } = require('../../systems/purescript.js');
 
@@ -19,13 +19,13 @@ const filters = {
 };
 
 /**
- * Retorna un arreglo de MessageActionRows en respecto a la página actual y si la navegación por página está permitida
+ * Retorna un arreglo de ActionRowBuilders en respecto a la página actual y si la navegación por página está permitida
  * @param {Number} page 
  * @param {Number} backward 
  * @param {Number} forward 
  * @param {Number} lastPage 
  * @param {Boolean} navigationEnabled 
- * @returns {Array<MessageActionRow>}
+ * @returns {Array<ActionRowBuilder>}
  */
 const paginationRows = (page, lastPage, navigationEnabled = true) => {
 	const rows = [];
@@ -34,29 +34,29 @@ const paginationRows = (page, lastPage, navigationEnabled = true) => {
 		rows.push(...navigationRows('tubérculo', page, lastPage));
 
 	rows.push(
-		new MessageActionRow().addComponents(
-			new MessageButton()
+		new ActionRowBuilder().addComponents(
+			new ButtonBuilder()
 				.setCustomId('tubérculo_filterItems_AUTHOR')
 				.setLabel('Filtrar Autor')
 				.setEmoji('936530498061213756')
-				.setStyle('SUCCESS'),
-			new MessageButton()
+				.setStyle(ButtonStyle.Success),
+			new ButtonBuilder()
 				.setCustomId('tubérculo_filterItems_TID')
 				.setLabel('Filtrar TuberID')
 				.setEmoji('936530498061213756')
-				.setStyle('SUCCESS'),
-			new MessageButton()
+				.setStyle(ButtonStyle.Success),
+			new ButtonBuilder()
 				.setCustomId('tubérculo_filterClear')
 				.setLabel('Mostrar todo')
 				.setEmoji('936531643496288288')
-				.setStyle('DANGER'),
+				.setStyle(ButtonStyle.Danger),
 		),
-		new MessageActionRow().addComponents(
-			new MessageButton()
+		new ActionRowBuilder().addComponents(
+			new ButtonBuilder()
 				.setURL('https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link')
 				.setLabel('Aprende PuréScript (v1.0)')
 				.setEmoji('📖')
-				.setStyle('LINK'),
+				.setStyle(ButtonStyle.Link),
 		),
 	);
 	return rows;
@@ -98,7 +98,7 @@ const loadPageNumber = async(interaction, page, setFilter = undefined) => {
 
 	const listUpdate = {
 		embeds: [
-			new MessageEmbed()
+			new EmbedBuilder()
 				.setColor(oembed.color)
 				.setAuthor({ name: oembed.author.name, iconURL: oembed.author.url })
 				.setTitle(oembed.title)
@@ -141,15 +141,15 @@ function viewTuber(interaction, item, tuberId) {
 	const author = interaction.guild.members.cache.get(item.author) ?? interaction.guild.me;
 
 	let components = [
-		new MessageButton()
-			.setCustomId(`t_getDesc_${tuberId}_${(+item.author).toString(36)}`)
+		new ButtonBuilder()
+			.setCustomId(`t_getDesc_${tuberId}_${compressId(item.author)}`)
 			.setLabel('Describir Tubérculo')
 			.setEmoji('ℹ')
-			.setStyle('PRIMARY'),
+			.setStyle(ButtonStyle.Primary),
 	];
 	let files = [];
-	const embed = new MessageEmbed()
-		.setColor('DARK_VIVID_PINK')
+	const embed = new EmbedBuilder()
+		.setColor(Colors.DarkVividPink)
 		.setAuthor({ name: interaction.guild.name, iconURL: interaction.guild.iconURL() })
 		.setTitle('Visor de Tubérculos')
 		.addFields(
@@ -178,11 +178,11 @@ function viewTuber(interaction, item, tuberId) {
 				value: item.inputs.map(i => `**(${ProgramToLanguage.get(i.type) ?? 'Nada'})** \`${i.name ?? 'desconocido'}\`: ${i.desc ?? 'Sin descripción'}`).join('\n'),
 			});
 			components.push(
-				new MessageButton()
-					.setCustomId(`t_gID_${tuberId}_${(+item.author).toString(36)}`)
+				new ButtonBuilder()
+					.setCustomId(`t_gID_${tuberId}_${compressId(item.author)}`)
 					.setLabel('Describir entrada')
 					.setEmoji('🏷')
-					.setStyle('SUCCESS'),
+					.setStyle(ButtonStyle.Success),
 			);
 		}
 
@@ -190,7 +190,7 @@ function viewTuber(interaction, item, tuberId) {
 			? item.script.map(expr => expr.join(' ')).join(';\n')
 			: item.script;
 		if(visualPS.length >= 1020)
-			files = [new MessageAttachment(Buffer.from(visualPS, 'utf-8'), 'PuréScript.txt')];
+			files = [new AttachmentBuilder(Buffer.from(visualPS, 'utf-8'), { name: 'PuréScript.txt' })];
 		else
 			embed.addFields({
 				name: 'PuréScript',
@@ -208,7 +208,7 @@ function viewTuber(interaction, item, tuberId) {
 		});
 	}
 
-	components = [new MessageActionRow().addComponents(...components)];
+	components = [new ActionRowBuilder().addComponents(...components)];
 
 	return interaction.reply({
 		embeds: [embed],
@@ -259,8 +259,8 @@ const command = new CommandManager('tubérculo', flags)
 			const { items, lastPage } = await getItemsList(request.guild);
 			return request.reply({
 				embeds: [
-					new MessageEmbed()
-						.setColor('LUMINOUS_VIVID_PINK')
+					new EmbedBuilder()
+						.setColor(Colors.LuminousVividPink)
 						.setAuthor({ name: request.guild.name, iconURL: request.guild.iconURL() })
 						.setTitle('Arsenal de Tubérculos del Servidor')
 						.addFields({
@@ -366,17 +366,17 @@ const command = new CommandManager('tubérculo', flags)
 			default:
 				let tid = tuberId;
 				if(!gcfg.tubers[tuberId]) {
-					const notFoundEmbed = new MessageEmbed()
-						.setColor('ORANGE')
+					const notFoundEmbed = new EmbedBuilder()
+						.setColor(Colors.Orange)
 						.setTitle(`⚠️ El Tubérculo **${shortenText(tuberId, 64)}** no existe`)
 						.setImage('https://i.imgur.com/LFzqoJX.jpg');
 
-					const row = new MessageActionRow().addComponents(
-						new MessageButton()
+					const row = new ActionRowBuilder().addComponents(
+						new ButtonBuilder()
 							.setCustomId(`tubérculo_getHelp_${(request.author ?? request.user).id}`)
 							.setLabel('Necesito ayuda')
 							.setEmoji('💡')
-							.setStyle('PRIMARY'),
+							.setStyle(ButtonStyle.Primary),
 					);
 
 					/**@type {Array<{ name: String, distance: Number }>}*/
@@ -463,15 +463,15 @@ const command = new CommandManager('tubérculo', flags)
 	.setButtonResponse(async function filterItems(interaction, target) {
 		const filter = filters[target];
 
-		const filterInput = new TextInputComponent()
+		const filterInput = new TextInputBuilder()
 			.setCustomId('filterInput')
 			.setLabel(filter.label)
 			.setPlaceholder(filter.placeholder)
-			.setStyle('SHORT')
+			.setStyle(TextInputStyle.Short)
 			.setMaxLength(48)
 			.setRequired(true);
-		const row = new MessageActionRow().addComponents(filterInput);
-		const modal = new Modal()
+		const row = new ActionRowBuilder().addComponents(filterInput);
+		const modal = new ModalBuilder()
 			.setCustomId(`tubérculo_filterSubmit_${target}`)
 			.setTitle('Filtro de búsqueda')
 			.addComponents(row);
@@ -507,21 +507,21 @@ const command = new CommandManager('tubérculo', flags)
 		return loadPageNumber(interaction, 0, '');
 	})
 	.setButtonResponse(function getDesc(interaction, tuberId, userId) {
-		userId = `${parseInt(userId, 36)}`;
+		userId = decompressId(userId);
 
 		if(isNotModerator(interaction.member) && userId !== interaction.user.id)
 			return interaction.reply({
-				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.me).user.username}*`,
+				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(interaction.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? interaction.guild.me).user.username}*`,
 				ephemeral: true,
 			});
 
-		const descInput = new TextInputComponent()
+		const descInput = new TextInputBuilder()
 			.setCustomId('descInput')
 			.setLabel('Descripción')
-			.setStyle('PARAGRAPH')
+			.setStyle(TextInputStyle.Paragraph)
 			.setMaxLength(512);
-		const row = new MessageActionRow().addComponents(descInput);
-		const modal = new Modal()
+		const row = new ActionRowBuilder().addComponents(descInput);
+		const modal = new ModalBuilder()
 			.setCustomId(`t_setDesc_${tuberId}`)
 			.setTitle('Describir Tubérculo')
 			.setComponents(row);
@@ -529,28 +529,28 @@ const command = new CommandManager('tubérculo', flags)
 		return interaction.showModal(modal);
 	})
 	.setButtonResponse(function gID(interaction, tuberId, userId) {
-		userId = `${parseInt(userId, 36)}`;
+		userId = decompressId(userId);
 		
 		if(isNotModerator(interaction.member) && userId !== interaction.user.id)
 			return interaction.reply({
-				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.me).user.username}*`,
+				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(interaction.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? interaction.guild.me).user.username}*`,
 				ephemeral: true,
 			});
 
-		const nameInput = new TextInputComponent()
+		const nameInput = new TextInputBuilder()
 			.setCustomId('nameInput')
 			.setLabel('Entrada')
-			.setStyle('SHORT')
+			.setStyle(TextInputStyle.Short)
 			.setRequired(true)
 			.setPlaceholder('Nombre de la entrada');
-		const descInput = new TextInputComponent()
+		const descInput = new TextInputBuilder()
 			.setCustomId('descInput')
 			.setLabel('Descripción')
-			.setStyle('PARAGRAPH')
+			.setStyle(TextInputStyle.Paragraph)
 			.setMaxLength(512);
-		const nameRow = new MessageActionRow().addComponents(nameInput);
-		const descRow = new MessageActionRow().addComponents(descInput);
-		const modal = new Modal()
+		const nameRow = new ActionRowBuilder().addComponents(nameInput);
+		const descRow = new ActionRowBuilder().addComponents(descInput);
+		const modal = new ModalBuilder()
 			.setCustomId(`t_setIDesc_${tuberId}`)
 			.setTitle('Describir Entrada')
 			.setComponents(nameRow, descRow);

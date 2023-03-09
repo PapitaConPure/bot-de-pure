@@ -1,5 +1,5 @@
 const { readdirSync } = require('fs'); //Integrar operaciones sistema de archivos de consola
-const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { serverid, tenshiColor, peopleid } = require('../../localdata/config.json'); //Variables globales
 const { isNotModerator } = require('../../func');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
@@ -81,8 +81,8 @@ const command = new CommandManager('ayuda', flags)
 
                 //Embed de metadatos
                 embeds.push(
-                    new MessageEmbed()
-                        .setColor('#608bf3')
+                    new EmbedBuilder()
+                        .setColor(0x608bf3)
                         .setAuthor({ name: title(name), iconURL: request.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }) })
                         .addFields(
                             { name: 'Nombre', value: `\`${name}\``, inline: true },
@@ -98,8 +98,8 @@ const command = new CommandManager('ayuda', flags)
                 );
                 
                 //Embed de información
-                embeds.push(new MessageEmbed()
-                    .setColor('#bf94e4 ')
+                embeds.push(new EmbedBuilder()
+                    .setColor(0xbf94e4)
                     .addFields({
                         name: 'Descripción',
                         value: command.desc || ':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde',
@@ -111,12 +111,12 @@ const command = new CommandManager('ayuda', flags)
                         { name: 'Opciones', value: command.options?.display || ':abacus: Sin opciones' },
                     );
 
-                components.push(new MessageActionRow()
+                components.push(new ActionRowBuilder()
                     .addComponents([
-                        new MessageButton()
+                        new ButtonBuilder()
                             .setCustomId('ayuda_porfavorayuden')
                             .setLabel('Muéstrame cómo')
-                            .setStyle('PRIMARY')
+                            .setStyle(ButtonStyle.Primary)
                             .setEmoji('📖')
                             .setDisabled(true),
                     ])
@@ -129,7 +129,7 @@ const command = new CommandManager('ayuda', flags)
             const listdisplay = list.length
                 ? list.map(item => `\`${item}\``).join(', ')
                 : 'Sin resultados (remueve la bandera -x si no la necesitas y asegúrate de tener los permisos necesarios para buscar un cierto identificador)';
-            embeds.push(new MessageEmbed()
+            embeds.push(new EmbedBuilder()
                 .setColor(tenshiColor)
                 .setAuthor({ name: 'Lista de comandos', iconURL: request.client.user.avatarURL({ format: 'png', dynamic: true, size: 512 }) })
                 .addFields(
@@ -153,8 +153,8 @@ const command = new CommandManager('ayuda', flags)
             );
         } else {
             if(!embeds.length)
-                embeds.push(new MessageEmbed()
-                    .setColor('#e44545')
+                embeds.push(new EmbedBuilder()
+                    .setColor(0xe44545)
                     .setAuthor({ name: 'Sin resultados' })
                     .addFields({
                         name: 'No se ha encontrado ningún comando con este nombre',

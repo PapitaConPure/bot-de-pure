@@ -15,8 +15,8 @@ const { Stats, ChannelStats } = require('./localdata/models/stats.js');
 const { Puretable, defaultEmote } = require('./localdata/models/puretable.js');
 const { p_drmk, p_pure } = require('./localdata/customization/prefixes.js');
 const HouraiDB = require('./localdata/models/hourai.js');
-// const envPath = './localenv.json';
-const envPath = './remoteenv.json';
+const envPath = './localenv.json';
+// const envPath = './remoteenv.json';
 const mongoUri = process.env.MONGODB_URI ?? (require(envPath)?.dburi);
 const discordToken = process.env.I_LOVE_MEGUMIN ?? (require(envPath)?.token);
 const booruApiKey = process.env.BOORU_APIKEY ?? (require(envPath)?.booruapikey);
@@ -36,31 +36,40 @@ const chalk = require('chalk');
 const { lookupService } = require('dns');
 const { registerFont, loadImage } = require('canvas');
 const { promisify } = require('util');
-const command = require('./commands/Pure/feed.js');
-const commands = require('./commands/Commons/commands.js');
 const { sendPixivPostsAsWebhook } = require('./systems/purepix.js');
 //#endregion
 
 //#region Parámetros Iniciales
 console.time('Establecimiento de parámetros iniciales');
-const botIntents = new Discord.Intents();
-const iflags = Discord.Intents.FLAGS;
-botIntents.add(
-    iflags.GUILDS,
-    iflags.GUILD_MEMBERS,
-    iflags.GUILD_EMOJIS_AND_STICKERS,
-    iflags.GUILD_INTEGRATIONS,
-    iflags.GUILD_PRESENCES,
-    iflags.GUILD_MESSAGES,
-    iflags.GUILD_MESSAGE_REACTIONS,
-    iflags.GUILD_MESSAGE_TYPING,
-    iflags.GUILD_VOICE_STATES,
-    iflags.DIRECT_MESSAGES,
+const { IntentsBitField, Partials } = Discord;
+const { Flags: intentBits } = IntentsBitField;
+
+const botIntents = new IntentsBitField().add(
+    intentBits.Guilds,
+    intentBits.GuildMembers,
+    intentBits.GuildEmojisAndStickers,
+    intentBits.GuildIntegrations,
+    intentBits.GuildPresences,
+    intentBits.GuildMessages,
+    intentBits.GuildMessageReactions,
+    intentBits.GuildMessageTyping,
+    intentBits.GuildVoiceStates,
+    intentBits.DirectMessages,
+    intentBits.MessageContent,
 );
+const botPartials = [
+    Partials.Message,
+    Partials.Channel,
+    Partials.Reaction,
+];
 const client = new Discord.Client({
     intents: botIntents,
+    partials: botPartials,
     fetchAllMembers: true,
-    allowedMentions: { parse: [ 'users', 'roles' ], repliedUser: false },
+    allowedMentions: {
+        parse: [ 'users', 'roles' ],
+        repliedUser: false,
+    },
 });
 const restGlobal = new REST({ version: '9' }).setToken(discordToken);
 globalConfigs.p_drmk['0'] = { raw: 'd!', regex: /^[Dd] *![\n ]*/ };
@@ -337,7 +346,10 @@ client.on('messageCreate', async message => {
     const guildFunctions = globalGuildFunctions[guildId];
     if(guildFunctions)
         await Promise.all(Object.values(guildFunctions).map(fgf => fgf(message)))
-        .catch(error => handleAndAuditError(error, message, { brief: 'Ocurrió un problema al ejecutar una respuesta rápida', details: content ? `"${content}"` : 'Mensaje sin contenido' }));
+        .catch(error => handleAndAuditError(error, message, {
+            brief: 'Ocurrió un problema al ejecutar una respuesta rápida',
+            details: content ? `"${content}"` : 'Mensaje sin contenido'
+        }));
     if(author.bot) return;
     sendPixivPostsAsWebhook(message).catch(console.error);
     
@@ -440,8 +452,8 @@ client.on('messageCreate', async message => {
             if(!suggestions.length)
                 return replyAndDelete();
             
-            const suggestionEmbed = new Discord.MessageEmbed()
-                .setColor('#5070bb')
+            const suggestionEmbed = new Discord.EmbedBuilder()
+                .setColor(0x5070bb)
                 .setTitle('Sugerencias')
                 .setFooter({ text: 'Basado en nombres y alias de comando' })
                 .addFields({
@@ -526,7 +538,7 @@ client.on('interactionCreate', async interaction => {
     }
 
     //Funciones de interacción
-    if(interaction.isButton() || interaction.isSelectMenu() || interaction.isModalSubmit()) {
+    if(interaction.isButton() || interaction.isStringSelectMenu() || interaction.isModalSubmit()) {
         if(!interaction.customId)
             return interaction.reply({
                 content: '🍔 Recibí una acción, pero no sé cómo responderla. Esto es un problema... mientras arreglo algunas cosas, toma una hamburguesa',
@@ -612,8 +624,8 @@ client.on('guildMemberAdd', member => {
     } catch(error) {
         console.log('Ha ocurrido un error al dar la bienvenida.');
         console.error(error);
-        const errorembed = new Discord.MessageEmbed()
-            .setColor('#0000ff')
+        const errorembed = new Discord.EmbedBuilder()
+            .setColor(0x0000ff)
             .setAuthor({ name: guild.name })
             .setFooter({ text: `gid: ${guild.id} | uid: ${user.id}` })
             .addFields({ name: 'Ha ocurrido un error al dar la bienvenida', value: `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\`` });
@@ -641,8 +653,8 @@ client.on('guildMemberRemove', member => {
     } catch(error) {
         console.log('Ha ocurrido un error al dar la despedida.');
         console.error(error);
-        const errorembed = new Discord.MessageEmbed()
-            .setColor('#0000ff')
+        const errorembed = new Discord.EmbedBuilder()
+            .setColor(0x0000ff)
             .setAuthor({ name: guild.name })
             .setFooter({ text: `gid: ${guild.id} | uid: ${user.id}` })
             .addFields({ name: 'Ha ocurrido un error al dar la despedida', value: `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\`` });
@@ -654,7 +666,7 @@ client.on('guildMemberRemove', member => {
 });
 
 //Evento de Rate Limit
-client.on('rateLimit', rateLimit => {
+client.rest.on('rateLimited', rateLimit => {
     console.log(
         chalk.redBright('RateLimit'),
         chalk.yellowBright(`(${rateLimit.timeout}ms / global ${rateLimit.global}):`),

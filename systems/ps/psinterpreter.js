@@ -1,7 +1,7 @@
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { randRange, fetchUserID, shortenText } = require('../../func.js');
-const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, MessageAttachment, ThreadChannel } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, AttachmentBuilder, ThreadChannel } = require('discord.js');
 const { NodeTypes, TokenToLanguage, NodeToLanguage } = require('./psparser.js');
 const { TuberScope } = require('./psscope.js');
 const {
@@ -576,6 +576,7 @@ class TuberInterpreter {
             'GlossaryExpression',
             'CallExpression',
             'ArrowExpression',
+            'BinaryExpression',
         ].includes(node.container.type))
             node.container = this.#evaluate(node.container, scope);
 

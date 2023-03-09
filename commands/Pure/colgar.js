@@ -1,4 +1,4 @@
-const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { fetchUserID } = require('../../func');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
 
@@ -28,24 +28,24 @@ const command = new CommandManager('colgar', flags)
 		const everyone = options.fetchFlag(args, 'todos');
 
 		if(everyone) {
-			const embed = new MessageEmbed()
+			const embed = new EmbedBuilder()
 				.setTitle('Colgar a todos')
 				.addFields({ name: 'Confirmar operación', value: '¿Quieres colgar o descolgar a todos?' });
 			return request.reply({
 				embeds: [embed],
-				components: [new MessageActionRow().addComponents(
-					new MessageButton()
+				components: [new ActionRowBuilder().addComponents(
+					new ButtonBuilder()
 						.setCustomId(`colgar_addHanged_${user.id}`)
 						.setLabel('Colgar')
-						.setStyle('DANGER'),
-					new MessageButton()
+						.setStyle(ButtonStyle.Danger),
+					new ButtonBuilder()
 						.setCustomId(`colgar_removeHanged_${user.id}`)
 						.setLabel('Descolgar')
-						.setStyle('SUCCESS'),
-					new MessageButton()
+						.setStyle(ButtonStyle.Secondary),
+					new ButtonBuilder()
 						.setCustomId(`colgar_cancelHanged_${user.id}`)
 						.setLabel('Cancelar')
-						.setStyle('SECONDARY'),
+						.setStyle(ButtonStyle.Secondary),
 				)],
 			});
 		}
@@ -81,7 +81,7 @@ const command = new CommandManager('colgar', flags)
 	.setButtonResponse(async function addHanged(interaction, userId) {
 		if(interaction.user.id !== userId)
 			return interaction.reply({ content: ':x: No permitido', ephemeral: true });
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setTitle('Colgada en Masa ejecutada')
 			.setImage('https://i.imgur.com/RVsStid.png')
 			.addFields({ name: 'Se colgó a todos los miembros', value: 'Felicidades, Alice' });
@@ -94,7 +94,7 @@ const command = new CommandManager('colgar', flags)
 	.setButtonResponse(async function removeHanged(interaction, userId) {
 		if(interaction.user.id !== userId)
 			return interaction.reply({ content: ':x: No permitido', ephemeral: true });
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setTitle('Colgada en Masa deshecha')
 			.addFields({ name: 'Se descolgó a todos los miembros', value: 'Si siguen vivos, bien por ellos~' });
 		await interaction.update({
@@ -110,7 +110,7 @@ const command = new CommandManager('colgar', flags)
 	.setButtonResponse(async function cancelHanged(interaction, userId) {
 		if(interaction.user.id !== userId)
 			return interaction.reply({ content: ':x: No permitido', ephemeral: true });
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setTitle('Colgada en Masa cancelada')
 			.addFields({ name: 'Se canceló la operación', value: 'Supongo que van a vivir (o no) un día más' });
 		return interaction.update({

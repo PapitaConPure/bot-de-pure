@@ -1,12 +1,12 @@
-const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
-const { guildEmoji, shortenText } = require('../func');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
+const { guildEmoji, shortenText, isThread } = require('../func');
 const { Post, Booru } = require('../systems/boorufetch');
 const { getBaseTags, getSearchTags } = require('../localdata/booruprops');
 const globalConfigs = require('../localdata/config.json');
 const rakki = require('../commands/Pure/rakkidei');
 
 /**
- * Genera un {@linkcode MessageEmbed} a base de un {@linkcode Post} de {@linkcode Booru}
+ * Genera un {@linkcode EmbedBuilder} a base de un {@linkcode Post} de {@linkcode Booru}
  * @param {import('discord.js').TextChannel} channel Canal al cual enviar el Embed
  * @param {Post} post Post de Booru
  * @param {{ maxTags: number?, title: string?, footer: string?, cornerIcon: string?, manageableBy: string? }} data Información adicional a mostrar en el Embed. Se puede pasar un feed directamente
@@ -14,14 +14,14 @@ const rakki = require('../commands/Pure/rakkidei');
 function formatBooruPostMessage(post, data = {}) {
     const maxTags = data.maxTags ?? 20;
     //Botón de Post de Gelbooru
-    const row = new MessageActionRow().addComponents(
-        new MessageButton()
+    const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
             .setEmoji('919398540172750878')
-            .setStyle('LINK')
+            .setStyle(ButtonStyle.Link)
             .setURL(`https://gelbooru.com/index.php?page=post&s=view&id=${post.id}`),
     );
     /**@type {import('discord.js').ColorResolvable}*/
-    let embedColor = 'AQUA';
+    let embedColor = Colors.Aqua;
 
     //Botón de Fuente (si está disponible)
     const addSourceButton = (source) => {
@@ -32,46 +32,46 @@ function formatBooruPostMessage(post, data = {}) {
         let emoji;
         if(source.includes('pixiv.net')) {
             emoji = '919403803126661120';
-            embedColor = '#0096fa';
+            embedColor = 0x0096fa;
         } else if(source.match(/twitter\.com|twimg\.com/)) {
             emoji = '919403803114094682';
-            embedColor = '#1da1f2';
+            embedColor = 0x1da1f2;
         } else if(source.includes('nitter.net')) {
             emoji = '919403803114094682';
-            embedColor = '#ff6c60';
+            embedColor = 0xff6c60;
         } else if(source.includes('fanbox.cc')) {
             emoji = '999783444655648869';
-            embedColor = '#faf18a';
+            embedColor = 0xfaf18a;
         } else if(source.includes('fantia.jp')) {
             emoji = '1000265840182181899';
-            embedColor = '#ea4c89';
+            embedColor = 0xea4c89;
         } else if(source.includes('skeb.jp')) {
             emoji = '1001397393511682109';
-            embedColor = '#28837f';
+            embedColor = 0x28837f;
         } else if(source.includes('tumblr.com')) {
             emoji = '969666470252511232';
-            embedColor = '#36465d';
+            embedColor = 0x36465d;
         } else if(source.match(/reddit\.com|i\.redd\.it/)) {
             emoji = '969666029045317762';
-            embedColor = '#ff4500';
+            embedColor = 0xff4500;
         } else {
             emoji = '969664712604262400';
-            embedColor = '#1bb76e';
+            embedColor = 0x1bb76e;
         }
 
         if(source.length > 512)
             return row.addComponents(
-                new MessageButton()
+                new ButtonBuilder()
                     .setEmoji(emoji)
-                    .setStyle('DANGER')
+                    .setStyle(ButtonStyle.Danger)
                     .setCustomId('feed_invalidUrl')
                     .setDisabled(true),
             );
 
         row.addComponents(
-            new MessageButton()
+            new ButtonBuilder()
                 .setEmoji(emoji)
-                .setStyle('LINK')
+                .setStyle(ButtonStyle.Link)
                 .setURL(source),
         );
     };
@@ -85,9 +85,9 @@ function formatBooruPostMessage(post, data = {}) {
     
     //Botón de tags (si es necesario) o de enlace
     row.addComponents(
-        new MessageButton()
+        new ButtonBuilder()
             .setEmoji('921788204540100608')
-            .setStyle('PRIMARY')
+            .setStyle(ButtonStyle.Primary)
             .setCustomId('feed_showFeedImageTags'),
     );
     
@@ -98,25 +98,25 @@ function formatBooruPostMessage(post, data = {}) {
     //console.log(closeDate.toLocaleTimeString(), '-', now.toLocaleTimeString(), '=', diff);
     if(now < closeDate)
         row.addComponents(
-            new MessageButton()
+            new ButtonBuilder()
                 .setLabel(`${((diff > 24) ? (diff / 24) : diff).toLocaleString('en', { maximumFractionDigits: 0 })} ${(diff > 24) ? 'días' : 'horas'}`)
                 .setEmoji('935665140601327626')
-                .setStyle('PRIMARY')
+                .setStyle(ButtonStyle.Primary)
                 .setCustomId('feed_shock'),
         );*/
     
     //Botón de eliminación
     row.addComponents(
-        new MessageButton()
+        new ButtonBuilder()
             .setEmoji('921751138997514290')
-            .setStyle('DANGER')
+            .setStyle(ButtonStyle.Danger)
             .setCustomId(`feed_deletePost${ `_${data.manageableBy}` ?? '' }`),
     );
 
     //Preparar Embed final
     /**@type {import('discord.js').MessageOptions} */
     const feedMessage = { components: [row] };
-    const postEmbed = new MessageEmbed()
+    const postEmbed = new EmbedBuilder()
         .setColor(embedColor)
         .setAuthor({ name: 'Desde Gelbooru', iconURL: data.cornerIcon ?? 'https://i.imgur.com/outZ5Hm.png' });
     const filteredTags = post.tags.slice(0, maxTags);
@@ -160,7 +160,7 @@ function formatBooruPostMessage(post, data = {}) {
  * @param {Boolean} isSlash
  */
 async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt = { cmdtag: '', nsfwtitle: 'Búsqueda NSFW', sfwtitle: 'Búsqueda' }) {
-    const isnsfw = request.channel.isThread()
+    const isnsfw = isThread(request.channel)
         ? request.channel.parent.nsfw
         : request.channel.nsfw;
 
@@ -215,7 +215,7 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
             .slice(0, poolSize);
 
         //Crear presentaciones
-        /**@type {Array<MessageEmbed>}*/
+        /**@type {Array<EmbedBuilder>}*/
         const messages = posts.map(post => formatBooruPostMessage(post, {
             maxTags: 40,
             title: isnsfw ? searchOpt.nsfwtitle : searchOpt.sfwtitle,
@@ -231,8 +231,8 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
         return Promise.all(messages.map(message => request.channel.send(message))).catch(console.error);
     } catch(error) {
         console.error(error);
-        const errorembed = new MessageEmbed()
-            .setColor('RED')
+        const errorembed = new EmbedBuilder()
+            .setColor(Colors.Red)
             .addFields({
                 name: 'Ocurrió un error al realizar una petición',
                 value: [

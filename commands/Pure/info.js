@@ -1,8 +1,16 @@
-const { MessageEmbed } = require('discord.js'); //Integrar discord.js
-const { fetchArrows, fetchUser, improveNumber } = require('../../func');
+const { EmbedBuilder, ChannelType } = require('discord.js'); //Integrar discord.js
+const { fetchArrows, fetchUser, improveNumber, isShortenedNumberString } = require('../../func');
 const global = require('../../localdata/config.json'); //Variables globales
 const { ChannelStats, Stats } = require('../../localdata/models/stats');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+
+/**@param {Number} number*/
+const counterDisplay = (number) => {
+    const numberString = improveNumber(number, true);
+    if(isShortenedNumberString(numberString))
+        return `${numberString} de`;
+    return numberString;
+}
 
 const options = new CommandOptionsManager()
 	.addParam('canal', 'CHANNEL', 'para mostrar estadísticas extra de un canal', { optional: true })
@@ -41,19 +49,21 @@ const command = new CommandManager('info', flags)
 		};
 		
 		servidor.channels.cache.forEach(channel => {
-			switch(channel) {
-				case 'GUILD_NEWS': channelCounts.news++; break;
-				case 'GUILD_TEXT': channelCounts.text++; break;
-				case 'GUILD_VOICE': channelCounts.voice++; break;
-				case 'GUILD_CATEGORY': channelCounts.category++; break;
-				case 'GUILD_NEWS_THREAD': channelCounts.thread++; break;
-				case 'GUILD_PUBLIC_THREAD': channelCounts.thread++; break;
-				case 'GUILD_PRIVATE_THREAD': channelCounts.thread++; break;
+			switch(channel.type) {
+				case ChannelType.GuildAnnouncement:  channelCounts.news++;     break;
+				case ChannelType.GuildForum:         channelCounts.text++;     break;
+				case ChannelType.GuildText:          channelCounts.text++;     break;
+				case ChannelType.GuildVoice:         channelCounts.voice++;    break;
+				case ChannelType.GuildStageVoice:    channelCounts.voice++;    break;
+				case ChannelType.GuildCategory:      channelCounts.category++; break;
+				case ChannelType.AnnouncementThread: channelCounts.thread++;   break;
+				case ChannelType.PublicThread:       channelCounts.thread++;   break;
+				case ChannelType.PrivateThread:      channelCounts.thread++;   break;
 			}
 		});
 		
 		//Análisis de actividad
-		const textChannelsCache = servidor.channels.cache.filter(c => c.isText());
+		const textChannelsCache = servidor.channels.cache.filter(c => c.type === ChannelType.GuildText);
 		let targetChannel;
 		if(isSlash) 
 			targetChannel = args.getChannel('canal');
@@ -68,8 +78,7 @@ const command = new CommandManager('info', flags)
 				: textChannelsCache.get(search);
 		}
 
-		if(!targetChannel)
-			targetChannel = request.channel;
+		targetChannel ||= request.channel;
 
 		const channelQuery = {
 			guildId: servidor.id,
@@ -88,15 +97,15 @@ const command = new CommandManager('info', flags)
 			.map((obj) => [obj.channelId, obj.cnt]);
 			
 		//Creacion de tops 5
-		const peotop = peocnt ? peocnt.map(([id, count]) => `<@${id}>: **${improveNumber(count)}** mensajes`).join('\n') : '_Este canal no tiene mensajes_';
-		const chtop = msgcnt.map(([id, count]) => `<#${id}>: **${improveNumber(count)}** mensajes`).join('\n');
+		const peotop = peocnt ? peocnt.map(([id, count]) => `<@${id}>: **${counterDisplay(count)}** mensajes`).join('\n') : '_Este canal no tiene mensajes_';
+		const chtop = msgcnt.map(([id, count]) => `<#${id}>: **${counterDisplay(count)}** mensajes`).join('\n');
 
 		const pages = [];
 		const owner = await servidor.fetchOwner();
 		const author = request.author ?? request.user;
 		pages.push(
-			new MessageEmbed()
-				.setColor('#ffd500')
+			new EmbedBuilder()
+				.setColor(0xffd500)
 				.setTitle('Información del servidor OwO')
 				.setImage(servidor.iconURL({ dynamic: true, size: 256 }))
 				.setThumbnail(owner.user.avatarURL({ dynamic: true, size: 256 }))
@@ -105,7 +114,7 @@ const command = new CommandManager('info', flags)
 				.addFields(
 					{ name: 'Nombre', 				 value: servidor.name, 														  					   inline: true },
 					{ name: 'Dueño', 				 value: `${owner.user.username}\n\`${servidor.ownerId}\``, 					  					   inline: true },
-					{ name: 'Nivel de verificación', value: servidor.verificationLevel, 										  					   inline: true },
+					{ name: 'Nivel de verificación', value: `Nivel ${servidor.verificationLevel}`, 										  					   inline: true },
 
 					{ name: 'Canales', 				 value: `#️⃣ x ${channelCounts.text}\n🔊 x ${channelCounts.voice}\n🏷 x ${channelCounts.category}`, inline: true },
 					{ name: '• • •', 				 value: `🗨️ x ${channelCounts.thread}\n📣 x ${channelCounts.news}`, 							    inline: true },
@@ -118,8 +127,8 @@ const command = new CommandManager('info', flags)
 		
 		const dbStart = new Date(stats.since).toLocaleString('es-ES');
 		pages.push(
-			new MessageEmbed()
-			.setColor('#eebb00')
+			new EmbedBuilder()
+			.setColor(0xeebb00)
 				.setTitle('Estadísticas de actividad ÛwÕ')
 				.setAuthor({ name: `Comando invocado por ${author.username}`, iconURL: author.avatarURL() })
 				.setFooter({ text: `Estas estadísticas toman información desde el ${dbStart.slice(0, dbStart.indexOf(' '))}` })
@@ -145,8 +154,8 @@ const command = new CommandManager('info', flags)
 		const bothour = Math.floor(tiempobot / 1000 / 3600) % 24;
 
 		pages.push(
-			new MessageEmbed()
-				.setColor('#e99979')
+			new EmbedBuilder()
+				.setColor(0xe99979)
 				.setTitle('Estadísticas de tiempo UwU')
 				.addFields(
 					{

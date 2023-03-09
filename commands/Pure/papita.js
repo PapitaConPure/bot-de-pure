@@ -1,4 +1,4 @@
-const { randRange } = require('../../func');
+const { randRange, isThread } = require('../../func');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const paputa = [
@@ -29,11 +29,11 @@ const command = new CommandManager('papita', flags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash = false) => {
-		const isnsfw = request.channel.isThread()
+		const isnsfw = isThread(request.channel)
 			? request.channel.parent.nsfw
 			: request.channel.nsfw;
 		
-		const words = isSlash ? args.getString('frase').split(/[ \n]+/) : args;
+		const words = isSlash ? (args.getString('frase')?.split(/[ \n]+/) ?? []) : args;
 		if(words.length) {
 			const newmsg = `***:copyright: ${words.shift()}:registered: ${words.join(' ').replace(/[a-zA-Z0-9áéíóúÁÉÍÓÚüÑñ;:]+/g, '$&:tm:')}***`;
 			return request.reply({ content: newmsg });

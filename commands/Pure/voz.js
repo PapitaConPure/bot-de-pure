@@ -1,13 +1,13 @@
 const PureVoice = require('../../localdata/models/purevoice.js');
-const { MessageEmbed, MessageActionRow, MessageButton, MessageCollector } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, MessageCollector, ButtonStyle, Colors, ChannelType } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { isNotModerator, defaultEmoji } = require('../../func.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
-const cancelbutton = (id) => new MessageButton()
+const cancelbutton = (id) => new ButtonBuilder()
 	.setCustomId(`voz_cancelWizard_${id}`)
 	.setLabel('Cancelar')
-	.setStyle('SECONDARY');
+	.setStyle(ButtonStyle.Secondary);
 const collectors = {};
 /**
  * @param {Number} stepCount
@@ -21,7 +21,7 @@ const wizEmbed = (iconUrl, stepName, stepColor) => {
 	//	['edit']: 		4, //2 + seleccionar operación + operación
 	//	['delete']: 	3, //2 + confirmación/opciones de borrado
 	//};
-	return new MessageEmbed()
+	return new EmbedBuilder()
 		.setColor(stepColor)
 		.setAuthor({ name: 'Asistente de Configuración de Sistema PuréVoice', iconURL: iconUrl })
 		.setFooter({ text: stepName });
@@ -47,7 +47,7 @@ const command = new CommandManager('voz', flags)
 		if(generateWizard) {
 			//Inicializar instalador PuréVoice
 			if(isNotModerator(request.member)) return request.reply({ content: '❌ No tienes permiso para hacer esto', ephemeral: true });
-			const wizard = wizEmbed(request.client.user.avatarURL(), '1/? • Comenzar', 'AQUA')
+			const wizard = wizEmbed(request.client.user.avatarURL(), '1/? • Comenzar', Colors.Aqua)
 				.addFields({
 					name: 'Bienvenido',
 					value: 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes! Solo sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras',
@@ -55,11 +55,11 @@ const command = new CommandManager('voz', flags)
 			const uid = (request.author ?? request.user).id;
 			return request.reply({
 				embeds: [wizard],
-				components: [new MessageActionRow().addComponents(
-					new MessageButton()
+				components: [new ActionRowBuilder().addComponents(
+					new ButtonBuilder()
 						.setCustomId(`voz_startWizard_${uid}`)
 						.setLabel('Comenzar')
-						.setStyle('PRIMARY'),
+						.setStyle(ButtonStyle.Primary),
 					cancelbutton(uid),
 				)],
 			});
@@ -142,7 +142,7 @@ const command = new CommandManager('voz', flags)
 		if(user.id !== authorId)
 			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
 		
-		const wizard = wizEmbed(interaction.client.user.avatarURL(), '2/? • Seleccionar Operación', 'NAVY')
+		const wizard = wizEmbed(interaction.client.user.avatarURL(), '2/? • Seleccionar Operación', Colors.Navy)
 			.addFields({
 				name: 'Inyección de Sistema PuréVoice',
 				value: '¿Qué deseas hacer ahora mismo?',
@@ -150,28 +150,28 @@ const command = new CommandManager('voz', flags)
 			
 		const pv = await PureVoice.findOne({ guildId: guild.id });
 		const uid = user.id;
-		const row = new MessageActionRow();
+		const row = new ActionRowBuilder();
 		const isInstalled = pv && guild.channels.cache.get(pv.categoryId) && guild.channels.cache.get(pv.voiceMakerId);
 		if(!isInstalled)
 			row.addComponents(
-				new MessageButton()
+				new ButtonBuilder()
 					.setCustomId(`voz_selectInstallation_${uid}`)
 					.setLabel('Instalar')
-					.setStyle('PRIMARY'),
+					.setStyle(ButtonStyle.Primary),
 			);
 		else 
 			row.addComponents(
-				new MessageButton()
+				new ButtonBuilder()
 					.setCustomId(`voz_relocateSystem_${uid}`)
 					.setLabel('Reubicar')
-					.setStyle('PRIMARY'),
+					.setStyle(ButtonStyle.Primary),
 			);
 
 		row.addComponents(
-			new MessageButton()
+			new ButtonBuilder()
 				.setCustomId(`voz_deleteSystem_${uid}`)
 				.setLabel('Desinstalar')
-				.setStyle('DANGER')
+				.setStyle(ButtonStyle.Danger)
 				.setDisabled(!isInstalled),
 			cancelbutton(uid),
 		);
@@ -184,20 +184,20 @@ const command = new CommandManager('voz', flags)
 		if(interaction.user.id !== authorId)
 			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
 
-		const wizard = wizEmbed(interaction.client.user.avatarURL(), '3/4 • Seleccionar instalación', 'GOLD')
+		const wizard = wizEmbed(interaction.client.user.avatarURL(), '3/4 • Seleccionar instalación', Colors.Gold)
 			.addFields({
 				name: 'Instalación',
 				value: 'Selecciona el tipo de instalación que deseas realizar',
 			});
-		const row = new MessageActionRow().addComponents(
-			new MessageButton()
+		const row = new ActionRowBuilder().addComponents(
+			new ButtonBuilder()
 				.setCustomId(`voz_installSystem_${authorId}_new`)
 				.setLabel('Crear categoría con PuréVoice')
-				.setStyle('SUCCESS'),
-			new MessageButton()
+				.setStyle(ButtonStyle.Success),
+			new ButtonBuilder()
 				.setCustomId(`voz_installSystem_${authorId}`)
 				.setLabel('Inyectar PuréVoice en categoría')
-				.setStyle('PRIMARY'),
+				.setStyle(ButtonStyle.Primary),
 			cancelbutton(authorId),
 		);
 		return interaction.update({
@@ -210,7 +210,7 @@ const command = new CommandManager('voz', flags)
 			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
 		
 		const filter = (m) => m.author.id === authorId;
-		collectors[interaction.id] = new MessageCollector(interaction.channel, { filter: filter, time: 1000 * 60 * 2 });
+		collectors[interaction.id] = new MessageCollector(interaction.channel, { filter, time: 1000 * 60 * 2 });
 		collectors[interaction.id].on('collect', async collected => {
 			let ccontent = collected.content;
 			let category;
@@ -219,7 +219,7 @@ const command = new CommandManager('voz', flags)
 					ccontent = ccontent.slice(2, -1);
 					if(ccontent.startsWith('!')) ccontent = ccontent.slice(1);
 				}
-				const categories = interaction.guild.channels.cache.filter(c => c.type === 'GUILD_CATEGORY');
+				const categories = interaction.guild.channels.cache.filter(c => c.type === ChannelType.GuildCategory);
 				category = isNaN(ccontent)
 					? categories.find(c => c.name.toLowerCase().indexOf(ccontent) !== -1)
 					: categories.find(c => c.id === ccontent);
@@ -229,12 +229,13 @@ const command = new CommandManager('voz', flags)
 				} else return;
 			} else {
 				await collected.delete().catch(() => console.log('Error menor al borrar mensaje recolectado'));
-				category = await interaction.guild.channels.create(ccontent, { type: 'GUILD_CATEGORY', reason: 'Categoría recipiente de PuréVoice' });
+				category = await interaction.guild.channels.create({ name: ccontent, type: ChannelType.GuildCategory, reason: 'Categoría recipiente de PuréVoice' });
 			}
 			
 			try {
-				const voiceMaker = await interaction.guild.channels.create('➕ Nueva Sesión', {
-					type: 'GUILD_VOICE',
+				const voiceMaker = await interaction.guild.channels.create({
+					name: '➕ Nueva Sesión',
+					type: ChannelType.GuildVoice,
 					parent: category.id,
 					bitrate: 64 * 1000,
 					userLimit: 1,
@@ -250,7 +251,7 @@ const command = new CommandManager('voz', flags)
 					voiceMakerId: voiceMaker.id,
 				});
 
-				const wizard = wizEmbed(interaction.client.user.avatarURL(), 'Operación finalizada', 'GREEN')
+				const wizard = wizEmbed(interaction.client.user.avatarURL(), 'Operación finalizada', Colors.Green)
 					.addFields({
 						name: 'Categoría creada e inyectada',
 						value: [
@@ -279,17 +280,17 @@ const command = new CommandManager('voz', flags)
 			}
 		});
 		
-		const wizard = wizEmbed(interaction.client.user.avatarURL(), `4/4 • ${createNew ? 'Nombrar' : 'Seleccionar'} categoría`, 'NAVY')
+		const wizard = wizEmbed(interaction.client.user.avatarURL(), `4/4 • ${createNew ? 'Nombrar' : 'Seleccionar'} categoría`, Colors.Navy)
 			.addFields({
 				name: `${createNew ? 'Creación' : 'Selección'} de categoría`,
 				value: 'Menciona el nombre de la categoría antes de inyectarle PuréVoice',
 			});
 		const uid = interaction.user.id;
-		const row = new MessageActionRow().addComponents(
-			new MessageButton()
+		const row = new ActionRowBuilder().addComponents(
+			new ButtonBuilder()
 				.setCustomId(`voz_startWizard_${uid}`)
 				.setLabel('Volver')
-				.setStyle('SECONDARY'),
+				.setStyle(ButtonStyle.Secondary),
 			cancelbutton(uid),
 		);
 		return interaction.update({
@@ -301,7 +302,7 @@ const command = new CommandManager('voz', flags)
 		if(interaction.user.id !== authorId)
 			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
 		
-		const wizard = wizEmbed(interaction.client.user.avatarURL(), 'Confirmar desinstalación', 'YELLOW')
+		const wizard = wizEmbed(interaction.client.user.avatarURL(), 'Confirmar desinstalación', Colors.Yellow)
 			.addFields({
 				name: 'Desinstalación del Sistema PuréVoice del servidor',
 				value: [
@@ -310,15 +311,15 @@ const command = new CommandManager('voz', flags)
 				].join('\n'),
 			});
 		const uid = interaction.user.id;
-		const row = new MessageActionRow().addComponents(
-			new MessageButton()
+		const row = new ActionRowBuilder().addComponents(
+			new ButtonBuilder()
 				.setCustomId(`voz_deleteSystemConfirmed_${uid}`)
 				.setLabel('DESINSTALAR')
-				.setStyle('DANGER'),
-			new MessageButton()
+				.setStyle(ButtonStyle.Danger),
+			new ButtonBuilder()
 				.setCustomId(`voz_startWizard_${uid}`)
 				.setLabel('Volver')
-				.setStyle('SECONDARY'),
+				.setStyle(ButtonStyle.Secondary),
 			cancelbutton(uid),
 		);
 		return interaction.update({
@@ -343,7 +344,7 @@ const command = new CommandManager('voz', flags)
 		}
 		await PureVoice.deleteOne(guildQuery);
 		
-		const deleteEmbed = wizEmbed(interaction.client.user.avatarURL(), 'Operación finalizada', 'RED')
+		const deleteEmbed = wizEmbed(interaction.client.user.avatarURL(), 'Operación finalizada', Colors.Red)
 			.addFields({
 				name: 'Sistema PuréVoice eliminado',
 				value: 'Se eliminó el Sistema PuréVoice asociado al servidor',
@@ -357,7 +358,7 @@ const command = new CommandManager('voz', flags)
 		if(interaction.user.id !== authorId)
 			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
 		
-		const cancelEmbed = wizEmbed(interaction.client.user.avatarURL(), 'Operación abortada', 'NOT_QUITE_BLACK')
+		const cancelEmbed = wizEmbed(interaction.client.user.avatarURL(), 'Operación abortada', Colors.NotQuiteBlack)
 			.addFields({
 				name: 'Asistente cancelado',
 				value: 'Se canceló la configuración del Sistema PuréVoice'

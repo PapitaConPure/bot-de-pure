@@ -163,8 +163,8 @@ const command = new CommandManager('sassafras', flags)
 		//#region Envío de línea de recomendación o total
 		let m; //Mensaje
 		if(showTotal) {
-			m = new Discord.MessageEmbed()
-				.setColor('#cccccc')
+			m = new Discord.EmbedBuilder()
+				.setColor(0xcccccc)
 				.addFields(
 					{ name: 'Total general',     value: `Sassa tiene **${sr.total}** recomendaciones bajo la manga`, inline: true },
 					{ name: 'Disponible actual', value: `Sassa quiere recomendarte **${list.length}** cosas`,        inline: true },
@@ -183,8 +183,8 @@ const command = new CommandManager('sassafras', flags)
 		if(hint) //Música especial
 			m = `**${hint}**\nhttps://youtu.be/${list[i]}`;
 		else if(i < umusic) //Juegos
-			m = new Discord.MessageEmbed()
-				.setColor('#cccccc')
+			m = new Discord.EmbedBuilder()
+				.setColor(0xcccccc)
 				.addFields({ name: 'El tío Sassa dice:', value: list[i] });
 		else if(i < kmusic) //Música desconocida
 			m = `**Seguro nunca te escuchaste este temazo:**\nhttps://youtu.be/${list[i + (i === umusic?1:0)]}`;

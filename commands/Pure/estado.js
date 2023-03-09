@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js'); //Integrar discord.js
+const { EmbedBuilder } = require('discord.js'); //Integrar discord.js
 const { bot_status } = require('../../localdata/config.json'); //Variables globales
 const ayuda = require('./ayuda.js'); //Variables globales
 const { readdirSync } = require('fs'); //Para el contador de comandos
@@ -36,8 +36,8 @@ const command = new CommandManager('estado', flags)
         }
         const totalCommands = stats.commands.succeeded + stats.commands.failed;
 
-        const embed = new MessageEmbed()
-            .setColor('#608bf3')
+        const embed = new EmbedBuilder()
+            .setColor(0x608bf3)
             .setAuthor({ name: 'Estado del Bot', iconURL: request.client.user.avatarURL({ format: 'png', dynamic: true, size: 1024 }) })
             .setThumbnail('https://i.imgur.com/HxTxjdL.png')
             .setFooter({ text: `Ofreciendo un total de ${cnt.cmds} comandos en ${cnt.guilds} servidores` })

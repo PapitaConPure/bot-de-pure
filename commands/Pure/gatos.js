@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder, Colors } = require('discord.js');
 const { default: axios } = require('axios');
 const { auditError } = require('../../systems/auditor');
 const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
@@ -14,15 +14,15 @@ const command = new CommandManager('gatos', flags)
 		const { file } = (await axios.get('https://aws.random.cat/meow').catch(auditError))?.data;
 
 		//Crear y usar embed
-		const embed = new MessageEmbed();
+		const embed = new EmbedBuilder();
 		
 		if(!file)
 			embed.addFields({ name: 'Error', value: 'El mundo de los gatitos no contactó con nosotros esta vez...' })
-				.setColor('RED');
+				.setColor(Colors.Red);
 		else
 			embed.addFields({ name: 'Gatitos 🥺', value: file })
 				.setImage(file)
-				.setColor('#ffc0cb');
+				.setColor(0xffc0cb);
 			
 		return request.reply({ embeds: [embed] });
 	});

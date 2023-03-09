@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const { tenshiColor } = require('../../localdata/config.json');
 const { CommandMetaFlagsManager, CommandManager, CommandOptionsManager } = require('../Commons/commands');
 
@@ -18,7 +18,7 @@ const command = new CommandManager('papa-anunciar', flags)
 		const announcement = options.fetchParam(args, 'anuncio', true);
 		const guilds = request.client.guilds.cache;
 		guilds.forEach(guild => {
-			const embed = new MessageEmbed()
+			const embed = new EmbedBuilder()
 				.setColor(tenshiColor)
 				.setTitle('📣 Anuncio de Actualización')
 				.setAuthor({ name: guild.me.displayName ?? request.client.user.username, iconURL: request.client.user.avatarURL({ size: 256 }) })

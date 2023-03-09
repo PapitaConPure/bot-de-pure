@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder, Colors } = require('discord.js');
 const { default: axios } = require('axios');
 const { rand } = require('../../func');
 const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
@@ -25,15 +25,15 @@ const command = new CommandManager('café', flags)
 		const selected = data[rand(r.limit)];
 
 		//Crear y devolver embed
-		const embed = new MessageEmbed();
+		const embed = new EmbedBuilder();
 		
 		if(!err)
 			embed.addFields({ name: 'Café ☕', value: `${selected.bitly_url}` })
 				.setImage(`https://media.giphy.com/media/${selected.id}/giphy.gif`)
-				.setColor('#6a4928');
+				.setColor(0x6a4928);
 		else
 			embed.addFields({ name: 'Error de solicitud a tercero', value: err })
-				.setColor('RED');
+				.setColor(Colors.Red);
 		
 		await request.reply({ embeds: [embed] });
 	});

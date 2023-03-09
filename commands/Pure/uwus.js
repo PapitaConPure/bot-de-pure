@@ -1,4 +1,4 @@
-const { MessageEmbed, Collection } = require('discord.js');
+const { EmbedBuilder, Collection } = require('discord.js');
 const { paginateRaw } = require('../../func');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
@@ -48,7 +48,7 @@ const command = new CommandManager('uwus', flags)
             const collectedSlices = paginateRaw(collected, 100);
             // console.log(collectedSlices);
             
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setColor('ffbbbb')
                 .setTitle('Evento UWU finalizado')
                 .addFields(
@@ -76,7 +76,7 @@ const command = new CommandManager('uwus', flags)
 
         const user = request.author ?? request.user;
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setColor('ffbbbb')
             .setTitle('Evento UWU')
             .addFields(

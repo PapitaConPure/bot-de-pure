@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const { randRange } = require('../../func.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
@@ -59,8 +59,8 @@ const command = new CommandManager('dados', flags)
 		});
 
 		const user = request.author ?? request.user;
-		const embed = new MessageEmbed()
-			.setColor('#3f4581')
+		const embed = new EmbedBuilder()
+			.setColor(0x3f4581)
 			.setAuthor({ name: `${user.username} tiró los dados...`, iconURL: user.avatarURL({ format: 'png', dynamic: true, size: 512 }) })
 			.addFields({
 				name: 'Salió:',

@@ -1,4 +1,4 @@
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder } = require("discord.js");
 const { fetchUser, randRange } = require("../../func");
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
@@ -27,8 +27,8 @@ const command = new CommandManager('mimar', flags)
 		const user1 = request.author ?? request.user;
 		if(user1.id === user2.id) return request.reply('⚠️ El único mimo que puedes darte a ti mismo es el de vivir una vida de la que no te arrepentirás');
 
-		const embed = new MessageEmbed()
-			.setColor('#fa7b62')
+		const embed = new EmbedBuilder()
+			.setColor(0xfa7b62)
 			.setTitle(`${user1.username} le ha dado mimos a ${user2.username}`)
 			.addFields(
 				{ name: user1.username, value: lovestats(), inline: true },

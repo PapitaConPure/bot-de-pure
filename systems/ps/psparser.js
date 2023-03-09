@@ -220,21 +220,6 @@ class TuberParser {
         return current;
     }
 
-    /**
-     * Mira el siguiente Token y verifica que sea del tipo correcto sin actualizar la posición del cursor
-     * @param {TokenTypes} tokenType Un string de `TokenTypes` especificando el tipo de Token
-     * @param {String} errorMessage Mensaje de error al fallar la verificación de Token
-     * @returns {TuberToken}
-     */
-    #lookAhead(tokenType, errorMessage) {
-        if(this.#current.type !== tokenType)
-            throw this.TuberParserError(errorMessage ?? `Se esperaba un Token de tipo: ${tokenType}; se encontró: ${this.#current.type}; con valor: ${this.#current.value}`);
-
-        const current = this.#current;
-        // console.log('Se comprobó', this.#current);
-        return current;
-    }
-
     #ommitRemainingScope(hasToReturn) {
         const openStatements = [
             TokenTypes.BLOCK_OPEN,

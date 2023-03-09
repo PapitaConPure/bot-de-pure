@@ -1,4 +1,4 @@
-const { MessageActionRow, MessageSelectMenu } = require('discord.js');
+const { StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
 const { hourai } = require('./config.json');
 const { colorsList } = hourai;
 
@@ -13,13 +13,13 @@ const roleList = (() => {
 		},
 	}));
 	
-	return new MessageSelectMenu()
+	return new StringSelectMenuBuilder()
 		.setCustomId('colores_addColor')
 		.setPlaceholder('Escoge un color...')
 		.addOptions(menuOptions);
 })();
 
-const colorsRow = new MessageActionRow().addComponents(roleList);
+const colorsRow = new ActionRowBuilder().addComponents(roleList);
 
 module.exports = {
     colorsRow,

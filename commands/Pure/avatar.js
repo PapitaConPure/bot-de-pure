@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js'); //Integrar discord.js
+const { EmbedBuilder } = require('discord.js'); //Integrar discord.js
 const { regroupText, fetchMember } = require('../../func.js'); //Funciones globales
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
@@ -8,8 +8,8 @@ const maxusers = 10;
 const getAvatarEmbed = (member) => {
     const urlDisplayOptions = { format: 'png', dynamic: true, size: 1024 };
     const memberAvatarUrl = member.displayAvatarURL(urlDisplayOptions);
-    const embed = new MessageEmbed()
-        .setColor('#faa61a')
+    const embed = new EmbedBuilder()
+        .setColor(0xfaa61a)
         .setImage(memberAvatarUrl)
         .addFields({ name: `Avatar de ${member.displayName}`, value: `[🔗 Enlace](${memberAvatarUrl})`, inline: true });
     

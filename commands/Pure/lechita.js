@@ -5,6 +5,7 @@ const axios = require('axios');
 const Canvas = require('canvas');
 const { utils } = require('../../localdata/images.json'); //Funciones globales
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { isThread } = require('../../func.js');
 
 async function resolverLink(req, linkRes, iSize, isnsfw, isSlash) {
 	let iurl;
@@ -54,7 +55,7 @@ async function dibujarCum(msg, link) {
 	ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 	ctx.drawImage(cum, 0, 0, canvas.width, canvas.height);
 
-	const imagen = new Discord.MessageAttachment(canvas.toBuffer(), 'cummies.png');
+	const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'cummies.png' });
 	return msg.reply({ files: [imagen] });
 };
 
@@ -73,7 +74,7 @@ const command = new CommandManager('lechita', flags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash) => {
-		const isnsfw = request.channel.isThread()
+		const isnsfw = isThread(request.channel)
 			? request.channel.parent.nsfw
 			: request.channel.nsfw;
 		
@@ -120,7 +121,7 @@ const command = new CommandManager('lechita', flags)
 			return request.reply({ content: `⛔ Solo puedes crear emotes cada ${minSpan} segundos (compartido globalmente).` });
 
 		global.lechitauses = Date.now();
-		const cumote = await request.client.guilds.cache.get(global.serverid.slot2).emojis.create(bglink, user.id)
+		const cumote = await request.client.guilds.cache.get(global.serverid.slot2).emojis.create({ attachment: bglink, name: user.id })
 		return request.reply({ content: `${coomer[randcoomer]} <:lechita:931409943448420433> ${cumote}` })
 		.then(() => cumote.delete());
 	});

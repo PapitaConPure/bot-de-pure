@@ -3,6 +3,7 @@ const Discord = require('discord.js');
 const { default: mongoose } = require('mongoose');
 const { p_pure } = require('../localdata/customization/prefixes');
 const chalk = require('chalk');
+const { ButtonStyle, ChannelType } = require('discord.js');
 
 class PureVoiceUpdateHandler {
     /**@type {mongoose.Document}*/
@@ -111,7 +112,7 @@ class PureVoiceUpdateHandler {
         if(!channel || channel?.parentId !== pvDocument.categoryId) return;
         
         //Embed de notificación
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setAuthor({ name: 'PuréVoice', iconURL: state.client.user.avatarURL({ size: 64, format: 'jpg' }) })
             .setFooter({ text: `👥 ${channel.members?.size}` });
 
@@ -125,7 +126,7 @@ class PureVoiceUpdateHandler {
             await member.roles.add(sessionRole, 'Inclusión de miembro en sesión PuréVoice');
     
             if(currentSession.joinedOnce?.includes(member.id)) return;
-            embed.setColor('#00ff7f')
+            embed.setColor(0x00ff7f)
                 .addFields({
                     name: `${member.user.bot ? '🤖' : '👤'} Nueva conexión`,
                     value: member.user.bot
@@ -150,15 +151,16 @@ class PureVoiceUpdateHandler {
                 mentionable: true,
                 reason: 'Inyectar Rol Efímero PuréVoice',
             });
-            const newSession = await guild.channels.create('➕ Nueva Sesión', {
-                type: 'GUILD_VOICE',
+            const newSession = await guild.channels.create({
+                name: '➕ Nueva Sesión',
+                type: ChannelType.GuildVoice,
                 parent: pvDocument.categoryId,
                 bitrate: 64e3,
                 userLimit: 1,
                 reason: 'Desplegar Canal Automutable PuréVoice',
                 permissionOverwrites: [
-                    { id: guild.roles.everyone.id,  deny:   [ 'SEND_MESSAGES' ] },
-                    { id: guild.me.id,              allow:  [ 'SEND_MESSAGES' ] },
+                    { id: guild.roles.everyone.id,  deny:   [ 'SendMessages' ] },
+                    { id: guild.members.me.id,      allow:  [ 'SendMessages' ] },
                 ],
             });
             
@@ -179,7 +181,7 @@ class PureVoiceUpdateHandler {
             await channel.setName('🔶').catch(prematureError);
             await channel.setUserLimit(0).catch(prematureError);
 
-            embed.setColor('#21abcd')
+            embed.setColor(0x21abcd)
                 .setTitle('✅ Sesión inicializada')
                 .addFields(
                     {
@@ -218,11 +220,11 @@ class PureVoiceUpdateHandler {
             await channel.send({
                 content: `👋 ¡Buenas, ${member}!`,
                 embeds: [embed],
-                components: [new Discord.MessageActionRow().addComponents(
-                    new Discord.MessageButton({
+                components: [new Discord.ActionRowBuilder().addComponents(
+                    new Discord.ButtonBuilder({
                         customId: 'voz_showMeHow',
                         label: 'Muéstrame cómo',
-                        style: 'PRIMARY',
+                        style: ButtonStyle.Primary,
                         emoji: '📖',
                     }),
                 )],

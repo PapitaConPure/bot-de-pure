@@ -1,7 +1,7 @@
 const global = require('../../localdata/config.json'); //Variables globales
 const { fetchUserID } = require('../../func.js');
 const { createCanvas, loadImage } = require('canvas');
-const { MessageEmbed, MessageAttachment } = require('discord.js');
+const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { Puretable, AUser, pureTableImage } = require('../../localdata/models/puretable.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
@@ -129,8 +129,8 @@ const command = new CommandManager('anarquia', flags)
 				return;
 			}
 			const user = request.client.users.cache.get(aid);
-			const embed = new MessageEmbed()
-				.setColor('#bd0924')
+			const embed = new EmbedBuilder()
+				.setColor(0xbd0924)
 				.setAuthor({ name: user.username, iconURL: user.avatarURL({ format: 'png', dynamic: true, size: 512 }) });
 			if(auser)
 				embed.setTitle('Perfil anárquico')
@@ -198,7 +198,7 @@ const command = new CommandManager('anarquia', flags)
 				});
 			});
 			
-			const imagen = new MessageAttachment(canvas.toBuffer(), 'anarquia.png');
+			const imagen = new AttachmentBuilder(canvas.toBuffer(), { name: 'anarquia.png' });
 			return request.reply({ files: [imagen] });
 		}
 		
