@@ -93,18 +93,23 @@ const checkFeeds = async (booru, guilds) => {
             });
             promisesCount.feeds++;
             
-            Promise.all(messagesToSend)
-            .then(messages => {
+            /**@param {Array<Promise<Discord.Message<Boolean>>>} messagesToSend*/
+            async function correctEmbedsAfterSent(messagesToSend) {
+                let messages = await Promise.all(messagesToSend);
                 messages = messages.filter(message => message);
+                const embedWait = new Promise();
+                setTimeout(() => embedWait.resolve(), 1000);
+                await embedWait;
                 messages.forEach(message => {
                     const embed = message.embeds[0];
-                    if(embed.image.width === 0 && embed.image.height === 0) {
-                        // embed.setImage(message.components[0].components[0].url);
-                        embed.setImage(embed.image.url);
-                        message.edit({ embeds: [embed] }).catch(auditError);
+                    const newEmbed = Discord.EmbedBuilder.from(message.embeds[0]);
+                    if(embed.image.width === 0 || embed.image.height === 0) {
+                        newEmbed.setImage(embed.image.url);
+                        message.edit({ embeds: [newEmbed] }).catch(auditError);
                     }
                 });
-            }).catch(auditError);
+            }
+            correctEmbedsAfterSent(messagesToSend).catch(auditError);
         }));
 
         if(logMore) console.log(`GUARDANDO:`, Object.entries(gcfg.feeds).map(([chid, feed]) => `${guild.channels.cache.get(chid).name}: ${feed.ids}`));
