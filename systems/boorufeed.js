@@ -97,8 +97,7 @@ const checkFeeds = async (booru, guilds) => {
             async function correctEmbedsAfterSent(messagesToSend) {
                 let messages = await Promise.all(messagesToSend);
                 messages = messages.filter(message => message);
-                const embedWait = new Promise();
-                setTimeout(() => embedWait.resolve(), 1000);
+                const embedWait = new Promise(resolve => setTimeout(resolve, 1000));
                 await embedWait;
                 messages.forEach(message => {
                     const embed = message.embeds[0];
