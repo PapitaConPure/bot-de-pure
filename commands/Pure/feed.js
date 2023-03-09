@@ -700,7 +700,7 @@ const command = new CommandManager('feed', flags)
 			gcfg.save();
 			return interaction.editReply({ content: '✅ Ícono actualizado' });
 		} catch(error) {
-			auditError(error);
+			auditError(error, { brief: 'Ha ocurrido un error al procesar Feed' });
 			return interaction.editReply({ content: '⚠ Enlace inválido. Asegúrate de proveer un enlace completo y directo a la imagen' })
 		}
 	})
@@ -850,7 +850,7 @@ const command = new CommandManager('feed', flags)
 				ephemeral: true,
 			});
 		} catch(error) {
-			auditError(error);
+			auditError(error, { brief: 'Ha ocurrido un error al procesar Feed' });
 			return interaction.reply({
 				content: 'Ocurrió un problema al contactar con el Booru para recuperar las tags.\nInténtalo de nuevo, si el problema persiste, es probable que el objetivo no esté disponible o que se trate de un bug de mi parte',
 				ephemeral: true,
