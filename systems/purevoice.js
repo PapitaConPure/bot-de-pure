@@ -175,7 +175,7 @@ class PureVoiceUpdateHandler {
             console.log(chalk.gray('Se marcó para guardar'));
 
             await Promise.all([
-                channel?.permissionOverwrites?.edit(sessionRole, { SEND_MESSAGES: true, reason: 'Conceder envío de mensajes a rol de sesión PuréVoice' }),
+                channel?.permissionOverwrites?.edit(sessionRole, { SendMessages: true, reason: 'Conceder envío de mensajes a rol de sesión PuréVoice' }),
                 member.roles.add(sessionRole, 'Inclusión de primer miembro en sesión PuréVoice'),
             ]).catch(prematureError);
             await channel.setName('🔶').catch(prematureError);

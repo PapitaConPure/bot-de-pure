@@ -26,7 +26,7 @@ const command = new CommandManager('decir', flags)
         if(request.guild.id === serverid.hourai && sentence.toLowerCase().indexOf(/h+(\W*_*)*o+(\W*_*)*u+(\W*_*)*r+(\W*_*)*a+(\W*_*)*i+(\W*_*)*/g) !== -1)
             return request.reply({ content: 'No me hagai decir weas de hourai, ¿yapo? Gracias <:haniwaSmile:659872119995498507>' });
         
-        if(!isSlash && deleteFlag && request.deletable && request.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES))
+        if(!isSlash && deleteFlag && request.deletable && request.guild.me.permissions.has('ManageMessages'))
             request.delete();
         
         return request.reply({ content: sentence.split(/ +#[Nn] +/g).join('\n') });
