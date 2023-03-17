@@ -206,7 +206,7 @@ class TuberLexer {
             let tokenType;
             if(symbol === '-') {
                 if(this.#next === '>') {
-                    this.#cursor++;
+                    this.#augmentCursor();
                     return createToken(TokenTypes.ARROW, '->');
                 }
                 
