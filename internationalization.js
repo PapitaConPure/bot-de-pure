@@ -182,6 +182,10 @@ let localesObject = {
         'Tags Seguidas',
         'Followed Tags',
     ),
+    yoTagsValueDefault: new Translation(
+        '<Todavía no sigues ninguna tag>',
+        '<You aren\'t following any tag yet>',
+    ),
 };
 
 //Engañar al intérprete para guardar las claves de textMap en LocaleIds

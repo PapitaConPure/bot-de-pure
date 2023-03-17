@@ -6,6 +6,7 @@ const UserConfigSchema = new Mongoose.Schema({
     feedTagSuscriptions: {
         type: Map,
         of: [String],
+        default: () => { return new Map(); },
     },
     voice: { type: Mongoose.SchemaTypes.Mixed, default: {} },
     flags: { type: Array, default: [] },

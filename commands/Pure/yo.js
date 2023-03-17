@@ -49,9 +49,10 @@ const wizEmbed = (iconUrl, stepName, stepColor, translator) => {
 };
 /**
  * @param {String} userId 
+ * @param {UserConfigs} userConfigs 
  * @param {Translator} translator 
  */
-const dashboardRows = (userId, translator) => [
+const dashboardRows = (userId, userConfigs, translator) => [
     new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`yo_toggleLanguage_${userId}`)
@@ -62,7 +63,8 @@ const dashboardRows = (userId, translator) => [
             .setCustomId(`yo_selectFTC_${userId}`)
             .setLabel(translator.getText('yoDashboardButtonTags'))
             .setEmoji('<:tagswhite:921788204540100608>')
-            .setStyle(ButtonStyle.Primary),
+            .setStyle(ButtonStyle.Primary)
+            .setDisabled(!userConfigs.feedTagSuscriptions.size),
         new ButtonBuilder()
             .setCustomId(`yo_exitWizard_${userId}`)
             .setLabel(translator.getText('finish'))
@@ -74,23 +76,26 @@ const dashboardRows = (userId, translator) => [
  * @param {UserConfigs} userConfigs 
  * @param {Translator} translator 
  */
-const dashboardEmbed = (request, userConfigs, translator) => wizEmbed(request.client.user.avatarURL({ size: 128 }), 'yoDashboardName', tenshiColor, translator)
-    .setTitle(request.user.tag)
-    .setThumbnail(request.user.avatarURL({ size: 512 }))
-    .addFields(
-        {
-            name: translator.getText('yoDashboardLanguageName'),
-            value: `${languageEmote[translator.locale]} ${translator.getText('currentLanguage')}`,
-        },
-        {
-            name: translator.getText('yoDashboardFeedTagsName'),
-            value: translator.getText(
-                'yoDashboardFeedTagsValue',
-                [...userConfigs.feedTagSuscriptions.values()].map(a => a.length ?? 0).reduce((a, b) => a + b),
-                userConfigs.feedTagSuscriptions.size,
-            ),
-        },
-    );
+const dashboardEmbed = (request, userConfigs, translator) => {
+    const suscriptions = [...userConfigs.feedTagSuscriptions.values()];
+    return wizEmbed(request.client.user.avatarURL({ size: 128 }), 'yoDashboardName', tenshiColor, translator)
+        .setTitle(request.user.tag)
+        .setThumbnail(request.user.avatarURL({ size: 512 }))
+        .addFields(
+            {
+                name: translator.getText('yoDashboardLanguageName'),
+                value: `${languageEmote[translator.locale]} ${translator.getText('currentLanguage')}`,
+            },
+            {
+                name: translator.getText('yoDashboardFeedTagsName'),
+                value: translator.getText(
+                    'yoDashboardFeedTagsValue',
+                    suscriptions.length ? suscriptions.map(a => a.length ?? 0).reduce((a, b) => a + b) : 0,
+                    userConfigs.feedTagSuscriptions.size,
+                ),
+            },
+        );
+}
 /**
  * @param {String} userId 
  * @param {import('discord.js').ButtonInteraction} interaction 
@@ -124,7 +129,7 @@ const selectTagsChannelEmbed = (request, translator) => wizEmbed(request.client.
  * @param {String} userId 
  * @param {Translator} translator 
  */
-const followedTagsRows = (userId, channelId, translator) => [
+const followedTagsRows = (userId, channelId, translator, isAlt) => [
     new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`yo_editFT_${compressId(userId)}_${compressId(channelId)}_ADD`)
@@ -137,8 +142,10 @@ const followedTagsRows = (userId, channelId, translator) => [
         new ButtonBuilder()
             .setCustomId(`yo_selectFTC_${userId}`)
             .setLabel(translator.getText('back'))
-            .setStyle(ButtonStyle.Secondary),
-        cancelbutton(userId, translator),
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(!!isAlt),
+        cancelbutton(userId, translator)
+            .setDisabled(!!isAlt),
     ),
 ];
 /**
@@ -152,7 +159,7 @@ const followedTagsEmbed = (request, userConfigs, channelId, translator) => wizEm
     .addFields(
         {
             name: translator.getText('yoTagsName'),
-            value: `\`\`\`\n${userConfigs.feedTagSuscriptions.get(channelId).join(' ')}\n\`\`\``,
+            value: `\`\`\`\n${userConfigs.feedTagSuscriptions.get(channelId)?.join(' ') || translator.getText('yoTagsValueDefault')}\n\`\`\``,
         },
     );
 
@@ -174,13 +181,13 @@ const command = new CommandManager('yo', flags)
             userConfigs = new UserConfigs(userQuery);
             await userConfigs.save();
         }
-        console.dir(userConfigs, { depth: null });
+        console.dir(userConfigs);
 
         const translator = new Translator(userConfigs.language);
         const wizard = dashboardEmbed(request, userConfigs, translator);
         return request.reply({
             embeds: [wizard],
-            components: dashboardRows(request.userId, translator),
+            components: dashboardRows(request.userId, userConfigs, translator),
         });
 	})
 	.setButtonResponse(async function goToDashboard(interaction, authorId) {
@@ -197,7 +204,7 @@ const command = new CommandManager('yo', flags)
 		
 		return interaction.update({
 			embeds: [dashboardEmbed(interaction, userConfigs, translator)],
-			components: dashboardRows(user.id, translator),
+			components: dashboardRows(user.id, userConfigs, translator),
 		});
 	})
 	.setButtonResponse(async function toggleLanguage(interaction, authorId) {
@@ -220,7 +227,7 @@ const command = new CommandManager('yo', flags)
             userConfigs.save(),
             interaction.update({
                 embeds: [dashboardEmbed(interaction, userConfigs, translator)],
-                components: dashboardRows(user.id, translator),
+                components: dashboardRows(user.id, userConfigs, translator),
             }),
         ]);
 	})
@@ -261,7 +268,7 @@ const command = new CommandManager('yo', flags)
             userConfigs.save(),
             interaction.update({
                 embeds: [followedTagsEmbed(interaction, userConfigs, channelId, translator)],
-                components: followedTagsRows(user.id, channelId, translator),
+                components: followedTagsRows(user.id, channelId, translator, isAlt),
             }),
         ]);
 	})
