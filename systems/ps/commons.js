@@ -300,6 +300,22 @@ coercions.get('NadaLiteral')
     .set('Glossary', (_) => null)
 //#endregion
 
+/**@param {TuberNode} node*/
+function nodeTypeOf(node) {
+    if(typeof node.value === 'number')
+        return 'NumericLiteral';
+    if(typeof node.value === 'string')
+        return 'TextLiteral';
+    if(typeof node.value === 'boolean')
+        return 'BooleanLiteral';
+    if(node.elements != undefined)
+        return 'ListExpression';
+    if(node.properties != undefined)
+        return 'GlossaryExpression';
+    if(node.value === null)
+        return 'NadaLiteral';
+}
+
 /**
  * Crea un valor del tipo especificado con el valor especificado.
  * Si el valor y el tipo no coinciden, se intentará convertir el valor al tipo indicado.
@@ -309,23 +325,9 @@ coercions.get('NadaLiteral')
  * @returns {RuntimeValue}
  */
 function makeValue(node, type) {
-    /**@type {NodeType}*/
-    let origin;
-    
-    if(typeof node.value === 'number')
-        origin = 'NumericLiteral';
-    else if(typeof node.value === 'string')
-        origin = 'TextLiteral';
-    else if(typeof node.value === 'boolean')
-        origin = 'BooleanLiteral';
-    else if(node.elements != undefined)
-        origin = 'ListExpression';
-    else if(node.properties != undefined)
-        origin = 'GlossaryExpression';
-    else if(node.value === null)
-        origin = 'NadaLiteral';
-    else
-        return node;
+    let origin = nodeTypeOf(node);
+
+    if(!origin) return node;
 
     if(NodeToProgram.get(origin) === type)
         return { ...node, type: NodeToProgram.get(node.type) ?? node.type };
@@ -333,10 +335,10 @@ function makeValue(node, type) {
     /**@type { RuntimeValue }*/
     const newNode = { type };
     try {
-        // console.log('Realizando coerción:', origin, '=>', type);
+        console.log('Realizando coerción:', origin, '=>', type);
         /**@type {Function}*/
         const coerce = coercions.get(origin).get(type);
-        // console.log('Función de coerción utilizada:', coerce.toString());
+        console.log('Función de coerción utilizada:', coerce.toString());
         let result;
         if(origin === 'ListExpression') {
             const elements = node.elements.map(element => makeValue(element, type));
