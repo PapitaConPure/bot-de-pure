@@ -243,8 +243,11 @@ class TuberParser {
                 break;
             }
             
-            if(hasToReturn && this.#current.type === TokenTypes.EOF)
-                throw this.TuberParserError('DEVOLVER no puede ser usado en el bloque Programa');
+            if(this.#current.type === TokenTypes.EOF) {
+                if(hasToReturn)
+                    throw this.TuberParserError('DEVOLVER no puede ser usado en el bloque Programa');
+                break;
+            }
         } while(blockLevels >= 0 && this.#digest());
     }
 
@@ -477,16 +480,29 @@ class TuberParser {
      * @returns {TuberBlockNode}
      */
     #parseFor() {
-        let statement = this.#parseBlock();
-
-        this.#expect(TokenTypes.FOR);
+        let statement = this.#parseSimpleFor();
 
         if(this.#current.type === TokenTypes.FOR && this.#current.value === 'cada' && this.#digest()) {
             statement.type = NodeTypes.FOR_IN;
             statement.element = this.#parseExpression();
             this.#expect(TokenTypes.IN, 'Se esperaba el operador especial "en" entre el identificador de elemento y el identificador de Lista en estructura PARA CADA');
             statement.list = this.#parseExpression();
-        } else {
+        }
+
+        statement = { ...statement, body: statement.body };
+
+        while(this.#current.type !== TokenTypes.BLOCK_CLOSE)
+            statement.body.push({ ...this.#parseStatement(), number: this.#statementNumber++ });
+        
+        return statement;
+    }
+
+    #parseSimpleFor() {
+        let statement = this.#parseBlock();
+
+        this.#expect(TokenTypes.FOR);
+
+        if(this.#current.type !== TokenTypes.FOR) {
             statement.type = NodeTypes.FOR;
             statement.assignment = this.#parseAssign();
             this.#expect(TokenTypes.WHILE);
@@ -496,11 +512,6 @@ class TuberParser {
                 throw this.TuberParserError('Se esperaba una sentencia SUMAR o RESTAR como tercer componente de estructura PARA');
         }
 
-        statement = { ...statement, body: statement.body };
-
-        while(this.#current.type !== TokenTypes.BLOCK_CLOSE)
-            statement.body.push({ ...this.#parseStatement(), number: this.#statementNumber++ });
-        
         return statement;
     }
 
