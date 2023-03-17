@@ -154,6 +154,19 @@ function formatBooruPostMessage(post, data = {}) {
     return feedMessage;
 };
 
+function isUnholy(isNsfw, request, terms) {
+    if(!isNsfw)
+        return false;
+    if(terms.includes('holo'))
+        return true;
+    if(!terms.includes('megumin'))
+        return false;
+    if(request.author.id === globalConfigs.peopleid.papita)
+        return false;
+
+    return true;
+}
+
 /**
  * @param {import('../commands/Commons/typings').CommandRequest} request
  * @param {import('../commands/Commons/typings').CommandOptions} args
@@ -165,25 +178,8 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
         : request.channel.nsfw;
 
     //Bannear lewds de Megumin y Holo >:C
-    if(isnsfw) {
-        if(searchOpt.cmdtag.length) {
-            let abort = true;
-            switch(searchOpt.cmdtag) {
-            case 'megumin':
-                if(request.author.id !== globalConfigs.peopleid.papita)
-                    await rakki.execute(request, [], isSlash);
-                else abort = false;
-                break;
-            case 'holo':
-                await rakki.execute(request, [], isSlash);
-                break;
-            default:
-                abort = false;
-            }
-            if(abort) return;
-        } else if(['megumin', 'holo'].some(b => args.includes(b)))
-            return rakki.execute(request, [], isSlash);
-    }
+    if(isUnholy(isnsfw, request, [ searchOpt.cmdtag, ...words ]))
+        return rakki.execute(request, [], isSlash);
 
     if(!isSlash)
         await request.channel.sendTyping();

@@ -25,17 +25,18 @@ const command = new CommandManager('colores', flags)
 	.setSelectMenuResponse(async function addColor(interaction) {
 		const { guild, member } = interaction;
         const role = guild.roles.cache.get(interaction.values[0]);
-        if(role) {
-			const hadroles = member.roles.cache.find(mr => colorsList.some(color => color.roleId === mr.id));
-			if(hadroles !== undefined) {
-				await member.roles.remove(hadroles);
-				await member.roles.add(role);
-				return interaction.reply({ content: 'Colores intercambiados <:monowo:887389799042932746>', ephemeral: true });
-			} else {
-				await member.roles.add(role);
-				return interaction.reply({ content: 'Colores otorgados <:miyoi:674823039086624808> :thumbsup:', ephemeral: true });
-			}
-		} else return interaction.reply({ content: ':x: No se encontró el rol. Si lo intentas más tarde, puede que el problema se haya solucionado', ephemeral: true });
+        if(!role)
+			return interaction.reply({ content: '❌ No se encontró el rol. Si lo intentas más tarde, puede que el problema se haya solucionado', ephemeral: true });
+		
+		const hadroles = member.roles.cache.find(mr => colorsList.some(color => color.roleId === mr.id));
+		if(hadroles == undefined) {
+			await member.roles.add(role);
+			return interaction.reply({ content: 'Colores otorgados <:miyoi:674823039086624808> 👍', ephemeral: true });
+		}
+
+		await member.roles.remove(hadroles);
+		await member.roles.add(role);
+		return interaction.reply({ content: 'Colores intercambiados <:monowo:887389799042932746>', ephemeral: true });
 	});
 
 module.exports = command;

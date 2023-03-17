@@ -66,33 +66,32 @@ const command = new CommandManager('encuesta', flags)
 		const eregexp = /^<a*:\w+:[0-9]+>\B/;
 		const answers = [];
 		const resolveEmote = (uemt) => request.guild.emojis.resolve(uemt.slice(uemt.lastIndexOf(':') + 1, -1));
-		args.reduce((a, b, i) => {
+		args.reduce((a, b, i) => { //Qué puta mierda es este código
 			const last = (i === (args.length - 1));
 			let ae = a.match(eregexp);
 			let be = b.match(eregexp);
 			if(ae && ae.length) ae = ae[0];
 			if(be && be.length) be = be[0];
-			if(ae) {
-				if(!be && !last)
-					return `${a} ${b}`;
-				else {
-					const emt = resolveEmote(ae);
-					const option = {
-						emote: emt,
-						text: a.slice(`${emt}`.length).trim()
-					};
-					if(last) {
-						if(!be) {
-							option.text = `${option.text} ${b}`;
-							answers.push(option);
-						} else {
-							answers.push(option);
-							answers.push({ emote: resolveEmote(be), text: '' });
-						}
-					} else answers.push(option);
-					return b;
+			if(!ae)
+				return b;
+			if(!be && !last)
+				return `${a} ${b}`;
+			
+			const emt = resolveEmote(ae);
+			const option = {
+				emote: emt,
+				text: a.slice(`${emt}`.length).trim()
+			};
+			if(last) {
+				if(!be) {
+					option.text = `${option.text} ${b}`;
+					answers.push(option);
+				} else {
+					answers.push(option);
+					answers.push({ emote: resolveEmote(be), text: '' });
 				}
-			} else return b;
+			} else answers.push(option);
+			return b;
 		});
 		if(answers.length < 2)
 			return request.reply({ content: ':warning: Necesitas ingresar al menos dos opciones' });

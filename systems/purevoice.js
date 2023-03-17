@@ -83,18 +83,18 @@ class PureVoiceUpdateHandler {
             ]);
         } catch(error) {
             console.error(error);
-            if(guild.systemChannelId)
-                guild.systemChannel.send({ content: [
-                    '⚠ Ocurrió un problema en un intento de remover una sesión del Sistema PuréVoice del servidor.',
-                    'Esto puede deberse a una conexión en una sesión PuréVoice que estaba siendo eliminada.',
-                    'Si el par de canales relacionales de la sesión fueron eliminados, puedes ignorar este mensaje',
-                ].join('\n') }).catch(console.error);
-            else
-                guild.fetchOwner().then(owner => owner.send({ content: [
+            if(!guild.systemChannelId)
+                return guild.fetchOwner().then(owner => owner.send({ content: [
                     `⚠ Ocurrió un problema en un intento de remover una sesión del Sistema PuréVoice de tu servidor **${guild.name}**.`,
                     'Esto puede deberse a una conexión en una sesión PuréVoice que estaba siendo eliminada.',
                     'Si el par de canales relacionales de la sesión fueron eliminados, puedes ignorar este mensaje.',
                 ].join('\n') }).catch(console.error));
+            
+            return guild.systemChannel.send({ content: [
+                '⚠ Ocurrió un problema en un intento de remover una sesión del Sistema PuréVoice del servidor.',
+                'Esto puede deberse a una conexión en una sesión PuréVoice que estaba siendo eliminada.',
+                'Si el par de canales relacionales de la sesión fueron eliminados, puedes ignorar este mensaje',
+            ].join('\n') }).catch(console.error);
         }
     };
 
@@ -252,17 +252,16 @@ class PureVoiceUpdateHandler {
             }, 60e3 * 2);
         } catch(error) {
             console.error(error);
-            if(guild.systemChannelId)
-                guild.systemChannel.send({ content: [
-                    '⚠ Ocurrió un problema al crear una nueva sesión para el Sistema PuréVoice del servidor. Esto puede deberse a una saturación de acciones o a falta de permisos.',
-                    'Si el problema persiste, prueben desinstalar y volver a instalar el Sistema',
-                    'Si lo ven necesario, ¡menciónenle el asunto a un moderador!',
-                ].join('\n') });
-            else
-                await guild.fetchOwner().then(owner => owner.send({ content: [
+            if(!guild.systemChannelId)
+                return guild.fetchOwner().then(owner => owner.send({ content: [
                     `⚠ Ocurrió un problema al crear una nueva sesión para el Sistema PuréVoice de tu servidor **${guild.name}**. Esto puede deberse a una saturación de acciones o a falta de permisos.`,
                     'Si el problema persiste, desinstala y vuelve a instalar el Sistema',
                 ].join('\n') }));
+            return guild.systemChannel.send({ content: [
+                '⚠ Ocurrió un problema al crear una nueva sesión para el Sistema PuréVoice del servidor. Esto puede deberse a una saturación de acciones o a falta de permisos.',
+                'Si el problema persiste, prueben desinstalar y volver a instalar el Sistema',
+                'Si lo ven necesario, ¡menciónenle el asunto a un moderador!',
+            ].join('\n') });
         }
     };
 

@@ -28,6 +28,15 @@ function createToken(type, value) {
     };
 };
 
+/**@type {Map<String, keyof TokenTypes>}*/
+const operationTokens = new Map();
+operationTokens.set('+', TokenTypes.COMBINATION);
+operationTokens.set('-', TokenTypes.COMBINATION);
+operationTokens.set('*', TokenTypes.FACTOR);
+operationTokens.set('/', TokenTypes.FACTOR);
+operationTokens.set('%', TokenTypes.FACTOR);
+operationTokens.set('^', TokenTypes.FUNCTION);
+
 class MathLexer {
     #stream = '';
     #cursor = 0;
@@ -55,12 +64,9 @@ class MathLexer {
                 continue;
             }
 
-            const symbol = this.#current.match(/[+\-*/^%]/)?.[0];
-            if(symbol) {
-                let tokenType;
-                if('+-'.includes(symbol)) tokenType = TokenTypes.COMBINATION;
-                else if('*/%'.includes(symbol)) tokenType = TokenTypes.FACTOR;
-                else if('^'.includes(symbol)) tokenType = TokenTypes.FUNCTION;
+            if(operationTokens.has(this.#current)) {
+                const symbol = this.#current;
+                const tokenType = operationTokens.get(symbol);
                 tokens.push(createToken(tokenType, symbol));
                 this.#cursor++;
                 continue;
@@ -119,7 +125,7 @@ class MathLexer {
                         break;
 
                     default: {
-                        throw new Error(`Texto inválido en posición ${this.#cursor}: ${text}`);
+                        throw Error(`Texto inválido en posición ${this.#cursor}: ${text}`);
                     }
                 }
 
@@ -174,10 +180,9 @@ class MathParser {
 
     /**@param {String} tokenType*/
     #digest(tokenType) {
-        if(this.#current.type === tokenType)
-            this.#cursor++;
-        else
+        if(this.#current.type !== tokenType)
             throw new Error(`Se esperaba un Token de tipo: ${tokenType}; se encontró: ${this.#current.type}; con valor: ${this.#current.value}`);
+        this.#cursor++;
     }
 
     parse() {

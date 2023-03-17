@@ -208,10 +208,11 @@ const command = new CommandManager('anarquia', flags)
 			|| new AUser({ userId: author.id });
 		//Tiempo de enfriamiento por usuario
 		if((Date.now() - auser.last) / 1000 < 3) {
-			if(isSlash) request.reply({ content: '⌛ ¡No tan rápido!', ephemeral: true });
-			else request.react('⌛');
-			return;
-		} else auser.last = Date.now();
+			if(isSlash)
+				return request.reply({ content: '⌛ ¡No tan rápido!', ephemeral: true });
+			return request.react('⌛');
+		} else
+			auser.last = Date.now();
 
 		//Variables de ingreso
 		const h = options.fetchFlag(args, 'horizontal', { callback: (auser.skills.h > 0) });
@@ -264,7 +265,8 @@ const command = new CommandManager('anarquia', flags)
 			loadEmotes[e.id] = await loadImage(request.client.emojis.cache.get(e.id).url);
 
 		//Habilidades
-		if(!h && !v) cells[e.y][e.x] = e.id;
+		if(!h && !v)
+			cells[e.y][e.x] = e.id;
 		else {
 			if(h) { for(let i = 0; i < cells[0].length; i++) cells[e.y][i] = e.id; auser.skills.h--; }
 			if(v) { for(let i = 0; i < cells.length; i++)    cells[i][e.x] = e.id; auser.skills.v--; }
@@ -316,15 +318,14 @@ const command = new CommandManager('anarquia', flags)
 		else await request.react(offlimits ? '☑️' : '✅');
 
 		if((auser.exp % maxExp) == 0) {
-			if(isSlash) {
-				replyquery.push(`¡**${request.user.username}** subió a nivel **${userLevel + 1}**!`);
-				ephemeral = false;
-			} else
+			if(!isSlash)
 				return request.reply({ content: `¡**${request.author.username}** subió a nivel **${userLevel + 1}**!` });
+			replyquery.push(`¡**${request.user.username}** subió a nivel **${userLevel + 1}**!`);
+			ephemeral = false;
 		}
 
 		if(isSlash)
-			return request.reply({ content: replyquery.join('\n'), ephemeral: ephemeral });
+			return request.reply({ content: replyquery.join('\n'), ephemeral });
 	})
 
 module.exports = command;

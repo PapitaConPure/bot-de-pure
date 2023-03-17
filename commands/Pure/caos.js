@@ -27,8 +27,7 @@ const command = new CommandManager('caos', flags)
 			await gcfg.save();
 			if(activate)
 				return request.reply({ content: '👹 Se activaron los comandos caóticos' });
-			else
-				return request.reply({ content: '😴 Se desactivaron los comandos caóticos' });
+			return request.reply({ content: '😴 Se desactivaron los comandos caóticos' });
 		}
 
 		const cfiles = readdirSync('./commands/Pure').filter(file => file.endsWith('.js'));

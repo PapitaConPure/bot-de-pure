@@ -41,7 +41,7 @@ const command = new CommandManager('borrar', flags)
 
 		amount = Math.max(2, Math.min(amount, 100));
 		
-		if(user === undefined)
+		if(user == undefined)
 			request.channel.bulkDelete(amount);
 		else {
 			const messages = await request.channel.messages.fetch({ limit: 100 });

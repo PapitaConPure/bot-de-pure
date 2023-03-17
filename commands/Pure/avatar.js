@@ -30,6 +30,27 @@ const generateAvatarEmbeds = (members = [], guildId = '0') => {
     }
     return embeds;
 };
+function getMembers(request, args, isSlash) {
+    if(isSlash)
+        return [ options.fetchParamPoly(args, 'usuarios', args.getMember, request.member), [] ];
+
+    if(!args.length)
+        return [ [ request.member ], [] ];
+    
+    args = regroupText(args);
+    if(args.length > maxusers)
+        args = args.slice(0, 8);
+    
+    const members = [];
+    const notFound = [];
+    args.forEach(arg => {
+        const member = fetchMember(arg, request);
+        if(!member) return notFound.push(arg);
+        members.push(member);
+    });
+
+    return [ members, notFound ];
+}
 
 const options = new CommandOptionsManager()
     .addParam('usuarios', 'USER', 'para especificar usuarios', { optional: true, poly: 'MULTIPLE' });
@@ -48,30 +69,12 @@ const command = new CommandManager('avatar', flags)
     )
     .setOptions(options)
     .setExecution(async (request, args, isSlash) => {
-        const notfound = [];
-        let members;
+        const [ members, notFound ] = getMembers(request, args, isSlash);
         let replyStack = {};
-
-        if(isSlash)
-            members = options.fetchParamPoly(args, 'usuarios', args.getMember, request.member);
-        else {
-            members = [];
-            if(args.length) {
-                args = regroupText(args);
-                if(args.length > maxusers)
-                    return request.reply({ content: `:warning: Solo puedes ingresar hasta **${maxusers}** usuarios por comando` });
-                
-                args.forEach(arg => {
-                    const member = fetchMember(arg, request);
-                    if(!member) return notfound.push(arg);
-                    members.push(member);
-                });
-            } else members.push(request.member);
-        }
         
-        if(notfound.length)
+        if(notFound.length)
             replyStack.content = [
-                `:warning: ¡Usuario[s] **${notfound.join(', ')}** no encontrado[s]!`.replace(/\[s\]/g, (notfound.length > 1) ? 's' : ''),
+                `:warning: ¡Usuario[s] **${notFound.join(', ')}** no encontrado[s]!`.replace(/\[s\]/g, (notFound.length > 1) ? 's' : ''),
                 `Recuerda separar cada usuario con una coma y escribir correctamente. Usa \`${p_pure(request.guildId).raw}ayuda avatar\` para más información`,
             ].join('\n');
         if(members?.length)
