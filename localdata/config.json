@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "2.9.01",
+            "number": "2.9.1A",
             "name": "Cisne Cristalino"
         },
         "note": "Operando casi con normalidad",
@@ -12,7 +12,7 @@
             "Se agregaron diversas mejoras de \"calidad de vida\"",
             "Se reescribió y documentó PuréScript...",
             "Se actualizó a discord.js v14",
-            "Trabajando en soporte de Preferencias de Usuario..."
+            "Se incorporaron suscripciones a Feeds y selección de idiomas (parcialmente)..."
         ],
         "todo": [
             "Agregar comando de Stable Diffusion",
