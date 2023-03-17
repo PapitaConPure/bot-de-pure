@@ -47,6 +47,22 @@ function invalidToLanguage(value) {
     return 'Desconocido';
 }
 
+/**
+ * @typedef {'y'|'o'|'es'|'no es'|'parece'|'no parece'|'precede'|'no precede'|'excede'|'no excede'} LogicalOperator
+ * @type {Map<LogicalOperator, (left, right) => *>}
+ */
+const logicOperations = new Map();
+logicOperations.set('y',          (left, right) => makeValue(left && right));
+logicOperations.set('o',          (left, right) => makeValue(left || right));
+logicOperations.set('es',         (left, right) => left === right);
+logicOperations.set('no es',      (left, right) => left !== right);
+logicOperations.set('parece',     (left, right) => left ==  right);
+logicOperations.set('no parece',  (left, right) => left !=  right);
+logicOperations.set('precede',    (left, right) => left <   right);
+logicOperations.set('no precede', (left, right) => left >=  right);
+logicOperations.set('excede',     (left, right) => left >   right);
+logicOperations.set('no excede',  (left, right) => left <=  right);
+
 /**@class Interpreta un programa PuréScript*/
 class TuberInterpreter {
     /**@type {{ number: Number, name: String }}*/
@@ -191,7 +207,7 @@ class TuberInterpreter {
             const blockScope = new TuberScope(scope);
             if(test.value)
                 return this.#evaluateBlock(node.consequent, blockScope);
-            else if(node.alternate)
+            if(node.alternate)
                 return this.#evaluateStatement(node.alternate, scope);
             break;
         }
@@ -283,34 +299,26 @@ class TuberInterpreter {
 
         let { receptor, reception } = initialize;
 
-        // console.log(node);
-
         if(as === 'funcion') {
-            this.#expectNode(reception, 'BlockStatement', `Se esperaba una cuerpo de función en registro de función`);
+            this.#expectNode(reception, 'BlockStatement', 'Se esperaba una cuerpo de función en registro de función');
             reception = makeFunction(reception.body, receptor.arguments);
-            this.#expectNode(receptor, 'CallExpression', `Se esperaba una maqueta de función en registro de función`);
-            this.#expectNode(receptor.emitter, 'Identifier', `Se esperaba un identificador de función en registro de función`);
-        } else {
-            reception = this.#evaluate(reception);
-            this.#expectNode(receptor, 'Identifier', `Se esperaba un identificador en registro de ${as}`);
-        }
-        // console.log('registry.receptor: ', receptor);
-        // console.log('registry.reception:', reception);
-
-        switch(as) {
-        case 'entrada':
-            // console.log(this.#testDrive);
-            if(!this.#testDrive) return;
-            this.#inputStack.push({ type: reception.type, name: receptor.name });
-            // console.log(this.#inputStack);
-            return scope.assignVariable(receptor.name, reception);
-        case 'lista':
-            this.#listStack.push(reception);
-            return scope.assignVariable(receptor.name, reception);
-        case 'funcion':
+            this.#expectNode(receptor, 'CallExpression', 'Se esperaba una maqueta de función en registro de función');
+            this.#expectNode(receptor.emitter, 'Identifier', 'Se esperaba un identificador de función en registro de función');
             // this.#sendStack.push(reception);
             return scope.assignVariable(receptor.emitter.name, reception);
         }
+
+        this.#expectNode(receptor, 'Identifier', `Se esperaba un identificador en registro de ${as}`);
+        reception = this.#evaluate(reception);
+
+        if(as === 'entrada') {
+            if(!this.#testDrive) return;
+            this.#inputStack.push({ type: reception.type, name: receptor.name });
+        }
+        if(as === 'lista')
+            this.#listStack.push(reception);
+        
+        return scope.assignVariable(receptor.name, reception);
     }
 
     /**
@@ -745,38 +753,23 @@ class TuberInterpreter {
         rightHand = this.#evaluate(rightHand, scope);
         // console.log({ left: leftHand, right: rightHand });
 
-        const operations = {
-            'y':          (left, right) => makeValue(leftHand, 'Boolean').value && makeValue(rightHand, 'Boolean') ? right : left,
-            'o':          (left, right) => makeValue(leftHand, 'Boolean').value ? left : right,
-            'es':         (left, right) => left === right,
-            'no es':      (left, right) => left !== right,
-            'parece':     (left, right) => left ==  right,
-            'no parece':  (left, right) => left !=  right,
-            'precede':    (left, right) => left <   right,
-            'no precede': (left, right) => left >=  right,
-            'excede':     (left, right) => left >   right,
-            'no excede':  (left, right) => left <=  right,
-        };
-
-        if(typeof operations[operator] !== 'function')
+        if(!logicOperations.has(operator))
             throw TuberInterpreterError(`Operador lógico inválido: ${operator}`, this.#currentStatement);
         
-        const leftValue = leftHand ? (leftHand.value ?? leftHand.elements ?? leftHand.properties) : undefined;
+        const leftValue =  leftHand  ? (leftHand.value  ?? leftHand.elements  ?? leftHand.properties)  : undefined;
         const rightValue = rightHand ? (rightHand.value ?? rightHand.elements ?? rightHand.properties) : undefined;
         // console.log({ leftValue, rightValue });
         
-        let result = operations[operator](leftValue, rightValue);
+        let result = logicOperations.get(operator)(leftValue, rightValue);
         // console.log({ result });
 
         if(typeof result === 'boolean')
             return makeBoolean(result);
 
         if(result === leftValue)
-            result = leftHand;
-        else
-            result = rightHand;
-
-        return result;
+            return leftHand;
+        
+        return rightHand;
     }
 
     /**
