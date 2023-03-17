@@ -112,10 +112,9 @@ const command = new CommandManager('hora', flags)
 		issueDate.setTime(issueDate.getTime() - gmt * 60 * 60 * 1000);
 		const unixDate = issueDate.valueOf() / 1000;
 
-		if(dateStr)
-			return request.reply(`<t:${unixDate}:T> <t:${unixDate}:D>`);
-		else
+		if(!dateStr)
 			return request.reply(`<t:${unixDate}:T>`);
+		return request.reply(`<t:${unixDate}:T> <t:${unixDate}:D>`);
 	});
 
 module.exports = command;
