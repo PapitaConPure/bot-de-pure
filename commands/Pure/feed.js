@@ -1,13 +1,15 @@
 const { default: axios } = require('axios');
 const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType } = require('discord.js');
-const { isNotModerator, shortenText, guildEmoji } = require('../../func.js');
+const { isNotModerator, shortenText, guildEmoji, decompressId, compressId } = require('../../func.js');
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { auditError } = require('../../systems/auditor.js');
 const { CommandMetaFlagsManager } = require('../Commons/cmdFlags.js');
 const globalConfigs = require('../../localdata/config.json');
 const { Booru } = require('../../systems/boorufetch.js');
 const { CommandManager } = require('../Commons/cmdBuilder.js');
-const { addGuildToFeedUpdateStack } = require('../../systems/boorufeed.js');
+const { addGuildToFeedUpdateStack, feedTagSuscriptionsCache } = require('../../systems/boorufeed.js');
+const UserConfigs = require('../../localdata/models/userconfigs.js');
+const { Translator, fetchLocaleFor } = require('../../internationalization.js');
 
 const wiztitle = 'Asistente de configuración de Feed de imágenes';
 const cancelbutton = new ButtonBuilder()
@@ -819,6 +821,9 @@ const command = new CommandManager('feed', flags)
 		return this.showFeedImageTags(interaction);
 	})
 	.setButtonResponse(async function showFeedImageTags(interaction) {
+		const locale = await fetchLocaleFor(interaction.user.id);
+        const translator = new Translator(locale);
+
 		const url = interaction.message.components[0].components[0].url;
 		const booru = new Booru(globalConfigs.booruCredentials);
 		try {
@@ -839,12 +844,16 @@ const command = new CommandManager('feed', flags)
 				],
 				components: [new ActionRowBuilder().addComponents([
 					new ButtonBuilder()
-						.setCustomId(`feed_editFollowedTags_ADD`)
-						.setLabel('Seguir tags...')
+						.setCustomId(`yo_modifyFollowedTags_${compressId(interaction.user.id)}_ALT`)
+						.setLabel(translator.getText('feedSetTagsButtonView'))
+						.setStyle(ButtonStyle.Primary),
+					new ButtonBuilder()
+						.setCustomId('feed_editFollowedTags_ADD')
+						.setLabel(translator.getText('feedSetTagsButtonAdd'))
 						.setStyle(ButtonStyle.Success),
 					new ButtonBuilder()
-						.setCustomId(`feed_editFollowedTags_REMOVE`)
-						.setLabel('Dejar de seguir tags...')
+						.setCustomId('feed_editFollowedTags_REMOVE')
+						.setLabel(translator.getText('feedSetTagsButtonRemove'))
 						.setStyle(ButtonStyle.Danger),
 				])],
 				ephemeral: true,
@@ -858,20 +867,23 @@ const command = new CommandManager('feed', flags)
 		}
 	})
 	.setButtonResponse(async function editFollowedTags(interaction, operation) {
+		const locale = await fetchLocaleFor(interaction.user.id);
+        const translator = new Translator(locale);
+
 		const tagsInput = new TextInputBuilder()
 			.setCustomId('tagsInput')
 			.setMinLength(1)
-			.setMaxLength(128)
-			.setPlaceholder('Ejemplo: touhou animated 1girl')
+			.setMaxLength(160)
+			.setPlaceholder('touhou animated 1girl')
 			.setStyle(TextInputStyle.Paragraph);
 		let title;
 
 		if(operation === 'ADD') {
-			tagsInput.setLabel('Elige qué tags quieres seguir');
-			title = 'Seguir tags';
+			tagsInput.setLabel(translator.getText('feedEditTagsInputAdd'));
+			title = translator.getText('feedEditTagsTitleAdd');
 		} else {
-			tagsInput.setLabel('Elige qué tags quieres dejar de seguir');
-			title = 'Dejar de seguir tags';
+			tagsInput.setLabel(translator.getText('feedEditTagsInputRemove'));
+			title = translator.getText('feedEditTagsTitleRemove');
 		}
 
 		const row = new ActionRowBuilder().addComponents(tagsInput);
@@ -883,15 +895,42 @@ const command = new CommandManager('feed', flags)
 
 		return interaction.showModal(modal).catch(auditError);
 	})
-	.setButtonResponse(async function setFollowedTags(interaction, operation) {
-		let content;
-		if(operation === 'ADD')
-			content = 'Se comenzaron a seguir las tags:';
-		else
-			content = 'Se dejaron de seguir las tags:';
+	.setModalResponse(async function setFollowedTags(interaction, operation, customChannelId) {
+		const channelId = customChannelId ? decompressId(customChannelId) : interaction.channelId;
+
+		const editedTags = interaction.fields.getTextInputValue('tagsInput').split(/[ \n]+/);
+
+		const userQuery = { userId: interaction.user.id };
+		const userConfigs = (await UserConfigs.findOne(userQuery)) || new UserConfigs(userQuery);
+		const translator = new Translator(userConfigs.language);
+		let currentTags = userConfigs.feedTagSuscriptions.get(channelId);
+		currentTags = currentTags ? [ ...currentTags ] : [];
+		/**@type {import('../../internationalization.js').LocaleIds}*/
+		let replyContent;
+
+		if(operation === 'ADD') {
+			currentTags.push(...editedTags.filter(t => !currentTags.includes(t)));
+			currentTags.splice(6);
+			replyContent = 'feedSetTagsAdd';
+		} else {
+			currentTags = currentTags.filter(t => !editedTags.includes(t));
+			replyContent = 'feedSetTagsRemove';
+		}
+
+		if(userConfigs.feedTagSuscriptions.length === currentTags.length)
+			return interaction.reply({
+				content: translator.getText('feedSetTagsUnchanged'),
+				ephemeral: true,
+			});
+
+		userConfigs.feedTagSuscriptions.set(channelId, currentTags);
+		userConfigs.markModified('feedTagSuscriptions');
+		await userConfigs.save();
+
+		feedTagSuscriptionsCache.get(interaction.user.id).set(channelId, currentTags);
 
 		return interaction.reply({
-			content: `**[DISFUNCIONAL: trabajo en proceso, esto es una vista previa]**\n${content} ${interaction.fields.getTextInputValue('tagsInput')}`,
+			content: translator.getText(replyContent, editedTags.join(' ')),
 			ephemeral: true,
 		});
 	})

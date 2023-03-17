@@ -8,9 +8,11 @@ const globalConfigs = require('../localdata/config.json');
 const { paginateRaw } = require('../func.js');
 
 //Configuraciones globales de actualización de Feeds
+/**@type {Map<Discord.Snowflake, Map<Discord.Snowflake, Array<String>>>}*/
+const feedTagSuscriptionsCache = new Map();
+
 const feedUpdateInterval = 60e3 * 30;
 const chunkMax = 5;
-
 const logMore = false;
 
 /**
@@ -247,4 +249,5 @@ const addGuildToFeedUpdateStack = (guild) => {
 module.exports = {
     setupGuildFeedUpdateStack,
     addGuildToFeedUpdateStack,
+    feedTagSuscriptionsCache,
 };

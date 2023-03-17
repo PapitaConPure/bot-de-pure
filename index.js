@@ -14,6 +14,7 @@ const prefixpair = require('./localdata/models/prefixpair.js');
 const { Stats, ChannelStats } = require('./localdata/models/stats.js');
 const { Puretable, defaultEmote } = require('./localdata/models/puretable.js');
 const { p_drmk, p_pure } = require('./localdata/customization/prefixes.js');
+const UserConfigs = require('./localdata/models/userconfigs.js');
 const HouraiDB = require('./localdata/models/hourai.js');
 const envPath = './localenv.json';
 // const envPath = './remoteenv.json';
@@ -28,7 +29,7 @@ const { channelIsBlocked, shortenText, dibujarBienvenida, dibujarDespedida, rand
 const globalGuildFunctions = require('./localdata/customization/guildFunctions.js');
 const { auditRequest, auditSystem } = require('./systems/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('./localdata/cmdExceptions.js');
-const { setupGuildFeedUpdateStack } = require('./systems/boorufeed');
+const { setupGuildFeedUpdateStack, feedTagSuscriptionsCache } = require('./systems/boorufeed');
 const { modifyPresence } = require('./presence.js');
 
 //Funcionalidad adicional
@@ -78,6 +79,13 @@ globalConfigs.booruCredentials.apiKey = booruApiKey;
 globalConfigs.booruCredentials.userId = booruUserId;
 console.timeEnd('Establecimiento de parámetros iniciales');
 //#endregion
+
+const logOptions = {
+    commands: false,
+    slash: false,
+    prefixes: false,
+    feedSuscriptions: true,
+};
 
 //#region Detección de archivos de comandos
 console.time('Detección de archivos de comando');
@@ -165,7 +173,7 @@ client.EmotesPure = new Discord.Collection(); //Emotes de Puré
                 client.SlashHouraiPure.set(command.name, jsonData);
         }
     }
-    console.table(commandTableStack);
+    logOptions.commands && console.table(commandTableStack);
 }
 console.timeEnd('Detección de archivos de comando');
 //#endregion
@@ -182,21 +190,18 @@ client.on('ready', async () => {
             Routes.applicationCommands(client.application.id),
             { body: client.SlashPure },
         );
-        //console.log('Comandos registrados (global):', registeredGlobal.map(scmd => scmd.name));
+        logOptions.slash && console.log('Comandos registrados (global):', registeredGlobal.map(scmd => scmd.name));
         const dedicatedServerId = (process.env.I_LOVE_MEGUMIN) ? globalConfigs.serverid.hourai : globalConfigs.serverid.slot1;
         await restGlobal.put(
             Routes.applicationGuildCommands(client.application.id, dedicatedServerId),
             { body: client.SlashHouraiPure },
         );
-        //console.log('Comandos registrados (hourai):', registeredHourai.map(scmd => scmd.name));
+        logOptions.slash && console.log('Comandos registrados (hourai):', registeredHourai.map(scmd => scmd.name));
         confirm();
     } catch (error) {
         console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos slash'));
         console.error(error);
     }
-    //Quitar esto luego ↓
-    const cl = globalConfigs.bot_status.changelog;
-    cl[cl.indexOf('PLACEHOLDER_SLASHCMD')] = `Agregando soporte de ***__[/comandos](https://blog.discord.com/slash-commands-are-here-8db0a385d9e6)__*** *(${client.SlashPure.size}/${client.ComandosPure.size} comandos listos)*`;
 
 	console.log(chalk.cyan('Semilla y horario calculados'));
     let currentTime = Date.now();
@@ -244,7 +249,18 @@ client.on('ready', async () => {
             regex: pp.drmk.regex,
         };
     });
-    console.table(globalConfigs.p_pure);
+    logOptions.prefixes && console.table(globalConfigs.p_pure);
+
+    console.log(chalk.gray('Preparando Suscripciones de Feeds...'));
+    const userConfigs = await UserConfigs.find({});
+    await Promise.all(userConfigs.map(async config => {
+        const suscriptions = new Map();
+        for(const [ chId, tags ] of config.feedTagSuscriptions)
+            suscriptions.set(chId, tags);
+        feedTagSuscriptionsCache.set(config.userId, suscriptions);
+    }));
+    logOptions.feedSuscriptions && console.log({ feedTagSuscriptionsCache });
+
     console.log(chalk.gray('Preparando Infracciones de Hourai...'));
     const hourai = (await HouraiDB.findOne({})) || new HouraiDB({});
     {
@@ -337,6 +353,12 @@ async function updateChannelMessageCounter(guildId, channelId, userId) {
     channelStats.save();
 };
 
+/**@param {import('./commands/Commons/typings.js').CommandRequest} request*/
+function requestize(request) {
+    request.user ??= request.author;
+    request.userId ??= request.user.id;
+}
+
 //Recepción de mensajes
 client.on('messageCreate', async message => {
     const { content, author, channel, guild, guildId } = message;
@@ -383,6 +405,7 @@ client.on('messageCreate', async message => {
                 //Detectar problemas con el comando basado en flags
                 const exception = await findFirstException(command.flags, message);
                 if(exception) return;
+                requestize(message);
                 await command.execute(message, args);
                 stats.commands.succeeded++;
             } catch(error) {
@@ -475,6 +498,7 @@ client.on('messageCreate', async message => {
             if(exception)
                 return channel.send({ embeds: [ generateExceptionEmbed(exception, { cmdString: `${pdetect.raw}${commandName}` }) ]});
             const rawArgs = content.slice(content.indexOf(commandName) + commandName.length).trim();
+            requestize(message);
             await command.execute(message, args, false, rawArgs);
             stats.commands.succeeded++;
         } catch(error) {
@@ -490,8 +514,10 @@ client.on('messageCreate', async message => {
     stats.save();
 
     //Ayuda para principiantes
-    if(content.indexOf(`${client.user}`) !== -1)
+    if(content.includes(`${client.user}`)) {
+        requestize(message);
         require('./commands/Pure/prefijo.js').execute(message, []);
+    }
 });
 
 //Recepción de interacciones
@@ -525,6 +551,7 @@ client.on('interactionCreate', async interaction => {
             if(exception)
                 return interaction.reply({ embeds: [ generateExceptionEmbed(exception, { cmdString: `/${commandName}` }) ], ephemeral: true });
             
+            requestize(interaction);
             await command.execute(interaction, interaction.options, true);
             stats.commands.succeeded++;
         } catch(error) {
@@ -550,16 +577,17 @@ client.on('interactionCreate', async interaction => {
             let command = funcSeek.shift();
             const func = funcSeek.shift();
             console.log(command, func, funcSeek);
-            if(command && func) {
-                command = client.ComandosPure.get(command) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(command));
-                if(typeof command[func] === 'function')
-                    await command[func](interaction, ...funcSeek);
-                else
-                    interaction.reply({
-                        content: '☕ Parece que encontraste un botón, menú desplegable o ventana modal sin función. Mientras conecto algunos cables, ten un café',
-                        ephemeral: true,
-                    });
-            }
+            if(!command || !func)
+                return;
+
+            command = client.ComandosPure.get(command) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(command));
+            if(typeof command[func] !== 'function')
+                return interaction.reply({
+                    content: '☕ Parece que encontraste un botón, menú desplegable o ventana modal sin función. Mientras conecto algunos cables, ten un café',
+                    ephemeral: true,
+                });
+
+            command[func](interaction, ...funcSeek);
             stats.commands.succeeded++;
         } catch(error) {
             const isPermissionsError = handleAndAuditError(error, interaction, { details: `"${interaction.customId}"` });
@@ -613,14 +641,13 @@ client.on('guildMemberAdd', member => {
     console.log('Evento de entrada de miembro permitido');
 
     try {
-        if(!user.bot) dibujarBienvenida(member);
-        else {
-            if(systemChannel) systemChannel.send({
+        if(user.bot)
+            return systemChannel.send({
                 content:
                     'Se acaba de unir un bot.\n' +
                     '***Beep boop, boop beep?***'
             });
-        }
+        return dibujarBienvenida(member);
     } catch(error) {
         console.log('Ha ocurrido un error al dar la bienvenida.');
         console.error(error);
@@ -646,10 +673,9 @@ client.on('guildMemberRemove', member => {
     console.log('Evento de salida de miembro permitido');
     
     try {
-        if(!user.bot) dibujarDespedida(member);
-        else {
-            systemChannel.send({ content: `**${member.displayName}** ya no es parte de la pandilla de bots de este servidor :[\n` }).catch(console.error);
-        }
+        if(user.bot)
+            return systemChannel.send({ content: `**${member.displayName}** ya no es parte de la pandilla de bots de este servidor :[` }).catch(console.error);
+        return dibujarDespedida(member);
     } catch(error) {
         console.log('Ha ocurrido un error al dar la despedida.');
         console.error(error);
