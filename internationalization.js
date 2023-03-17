@@ -294,7 +294,22 @@ class Translator {
 }
 
 /**@type {Map<String, LocaleKey>}*/
-const userLocales = new Map();
+const userLocalesCache = new Map();
+
+/**
+ * Guarda una ID en caché para posterior uso
+ * @param {String} userId 
+ */
+async function cacheLocale(userId) {
+    const userQuery = { userId };
+    let userConfigs = await UserConfigs.findOne(userQuery);
+    if(!userConfigs) {
+        userConfigs = new UserConfigs(userQuery);
+        await userConfigs.save();
+    }
+
+    return userLocalesCache.set(userId, userConfigs.language);
+}
 
 /**
  * Devuelve el lenguaje vinculado a la ID de usuario cacheada.
@@ -303,23 +318,20 @@ const userLocales = new Map();
  * @returns {Promise<LocaleKey>}
  */
 async function fetchLocaleFor(userId) {
-    if(userLocales.has(userId))
-        return userLocales.get(userId);
+    console.log(userId, '?', userLocalesCache);
+    if(!userLocalesCache.has(userId))
+        await cacheLocale();
     
-    const userQuery = { userId };
-    let userConfigs = await UserConfigs.findOne(userQuery);
-    if(!userConfigs) {
-        userConfigs = new UserConfigs(userQuery);
-        await userConfigs.save();
-    }
+    return userLocalesCache.get(userId);
+}
 
-    userLocales.set(userId, userConfigs.language);
-    
-    return userConfigs.language;
+async function recacheLocale(userId) {
+    return cacheLocale(userId);
 }
 
 module.exports = {
     getText,
     Translator,
     fetchLocaleFor,
+    recacheLocale,
 };
