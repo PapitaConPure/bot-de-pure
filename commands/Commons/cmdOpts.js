@@ -30,22 +30,19 @@ const PARAM_TYPES = {
 const fetchMessageFlagText = (args, i) => {
     if(i >= args.length)
         return undefined;
-    console.log(args);
+    if(!args[i].startsWith('"'))
+        return args.splice(i, 1)[0];
 
-    //Conjunto de palabras, señalado entre ""
-    if(args[i].startsWith('"')) {
-        let lastIndex = i;
-        let text;
+    let lastIndex = i;
+    let text;
+    while(lastIndex < args.length && !args[lastIndex].endsWith('"'))
+        lastIndex++;
+    text = args.splice(i, lastIndex - i + 1).join(' ').slice(1);
+    
+    if(text.length === 0 || text === '"')
+        return undefined;
 
-        while(lastIndex < args.length && !args[lastIndex].endsWith('"'))
-            lastIndex++;
-        text = args.slice(i, lastIndex + 1).join(' ').slice(1);
-        args.splice(i, lastIndex - i + 1);
-        if(text.length > 1) return (text.endsWith('"')) ? text.slice(0, -1) : text;
-        else return undefined;
-    }
-
-    return args.splice(i, 1)[0];
+    return text.endsWith('"') ? text.slice(0, -1) : text;
 }
 
 /**
@@ -474,12 +471,12 @@ class CommandOptionsManager {
         /**@type {Array<CommandParam>}*/
         const params = [...this.params.values()];
         return params.map(p => {
-                const paramExpressions = [ p.name ];
-                if(Array.isArray(p._poly)) paramExpressions.push(` (${p._poly.join(',')})`);
-                else if(p._poly === 'MULTIPLE') paramExpressions.push(' (...)');
-                if(p.optional) paramExpressions.push('?');
-                return `<${paramExpressions.join('')}>`;
-            }).join(' ');
+            const paramExpressions = [ p.name ];
+            if(Array.isArray(p._poly)) paramExpressions.push(` (${p._poly.join(',')})`);
+            else if(p._poly === 'MULTIPLE') paramExpressions.push(' (...)');
+            if(p.optional) paramExpressions.push('?');
+            return `<${paramExpressions.join('')}>`;
+        }).join(' ');
     };
     /**
      * Remuve y devuelve la siguiente entrada o devuelve todas las entradas en caso de que {@linkcode whole} sea verdadero
