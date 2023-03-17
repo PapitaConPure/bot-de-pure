@@ -1,6 +1,6 @@
 const { CommandOptionsManager } = require('./cmdOpts');
 const { CommandMetaFlagsManager } = require('./cmdFlags');
-const { CommandRequest, CommandOptions } = require('./typings');
+const { ComplexCommandRequest, CommandOptions } = require('./typings');
 const { Interaction, ButtonInteraction, SelectMenuInteraction, ModalSubmitInteraction, MessagePayload, InteractionReplyOptions } = require('discord.js');
 
 /**Representa un comando*/
@@ -30,7 +30,7 @@ class CommandManager {
      */
     reply;
     /**
-     * @typedef {(request: CommandRequest, args: CommandOptions, isSlash = false, rawArgs: string) => Promise<*>} ExecutionFunction
+     * @typedef {(request: ComplexCommandRequest, args: CommandOptions, isSlash = false, rawArgs: string) => Promise<*>} ExecutionFunction
      * @typedef {(interaction: Interaction, ...args: String) => Promise<*>} InteractionResponseFunction
      * @typedef {(interaction: ButtonInteraction, ...args: String) => Promise<*>} ButtonResponseFunction
      * @typedef {(interaction: SelectMenuInteraction, ...args: String) => Promise<*>} SelectMenuResponseFunction
