@@ -601,7 +601,7 @@ module.exports = {
         const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
         await canal.send({files: [imagen]});
         if(forceHourai || servidor.id === global.serverid.hourai) {
-            await canal.send({
+            return canal.send({
                 content:
                     `Wena po <@${miembro.user.id}> conchetumare, como estai.\n` +
                     'Como tradición, elige un color con el menú de abajo <:mayuwu:654489124413374474>\n' +
@@ -614,8 +614,9 @@ module.exports = {
             });
             setTimeout(module.exports.askForRole, 1000, miembro, canal, 3 * 4);
             console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');
-        } else if(servidor.id === global.serverid.ar)
-            await canal.send({
+        }
+        if(servidor.id === global.serverid.ar)
+            return canal.send({
                 content:
                     `Welcome to the server **${miembro.displayName}**! / ¡Bienvenido/a al server **${miembro.displayName}**!\n\n` +
                     `**EN:** To fully enjoy the server, don't forget to get 1 of the 5 main roles in the following channel~\n` +
@@ -623,14 +624,12 @@ module.exports = {
                     '→ <#611753608601403393> ←\n\n' +
                     `*Ahora hay **${peoplecnt}** usuarios en el server.*`
             });
-        else
-            await canal.send({
-                content:
-                    `¡Bienvenido al servidor **${miembro.displayName}**!\n` +
-                    `*Ahora hay **${peoplecnt}** usuarios en el server.*`
-            });
+        return canal.send({
+            content:
+                `¡Bienvenido al servidor **${miembro.displayName}**!\n` +
+                `*Ahora hay **${peoplecnt}** usuarios en el server.*`
+        });
         //#endregion
-        console.log('Bienvenida finalizada.');
     },
 
     /**
@@ -905,50 +904,67 @@ module.exports = {
 
         //Recorrer parámetros e intentar procesar flags
         args.forEach((arg, i) => {
-            if(flag.property && i === (args.length - 1)) return;
+            if(flag.property && i === (args.length - 1))
+                return;
+
             arg = arg.toLowerCase();
-            if(flag.long && flag.long.length && arg.startsWith('--')) {
+            if(flag.long?.length && arg.startsWith('--')) {
                 if(flag.long.includes(arg.slice(2))) {
                     target = flag.property
                         ? flag.callback(args, i + 1)
                         : flag.callback();
                     args.splice(i, flag.property?2:1);
                 }
-            } else if(flag.short && flag.short.length && arg.startsWith('-')) {
-                for(c of arg.slice(1))
-                    if(flag.short.includes(c)) {
-                        target = flag.property
-                            ? flag.callback(args, i + 1)
-                            : flag.callback();
-                        if(arg.length > 2) {
-                            const rmva = new RegExp(c, 'g')
-                            let temp = args.splice(i, flag.property?2:1);
-                            args.push(temp[0].replace(rmva, ''));
-                            if(flag.property) args.push(temp[1]);
-                        } else
-                            args.splice(i, flag.property?2:1);
-                    }
+                return;
+            }
+
+            if(!flag.short?.length || !arg.startsWith('-'))
+                return;
+            
+            for(c of arg.slice(1)) {
+                if(!flag.short.includes(c))
+                    continue;
+
+                target = flag.property
+                    ? flag.callback(args, i + 1)
+                    : flag.callback();
+
+                if(arg.length <= 2) {
+                    args.splice(i, flag.property ? 2 : 1);
+                    continue;
+                }
+
+                const charactersToRemove = new RegExp(c, 'g')
+                let temp = args.splice(i, flag.property ? 2 : 1);
+                args.push(temp[0].replace(charactersToRemove, ''));
+                if(flag.property) args.push(temp[1]);
             }
 		});
 
         return target ? target : (typeof flag.fallback === 'function' ? flag.fallback() : flag.fallback);
     },
     
+    /**
+     * 
+     * @param {Array<String>} args 
+     * @param {Number} i 
+     */
     fetchSentence: function(args, i) {
-        if(i >= args.length) //Título inválido
+        if(i == undefined || i >= args.length)
             return undefined;
-        else if(args[i].startsWith('"')) { //Título largo
-            let l = i;
-            let tt;
+        if(!args[i].startsWith('"'))
+            return args.splice(i, 1)[0];
     
-            while(l < args.length && !args[l].endsWith('"'))
-                l++;
-            tt = args.slice(i, l + 1).join(' ').slice(1);
-            args.splice(i, l - i);
-            if(tt.length > 1) return (tt.endsWith('"'))?tt.slice(0, -1):tt;
-            else return undefined;
-        } else //Título corto
-            return args[i];
+        let last = i;
+        let text;
+        while(last < args.length && !args[last].endsWith('"'))
+            last++;
+        text = args.splice(i, last - i + 1).join(' ').slice(1);
+    
+        if(text.length === 0 || text === '"')
+            return undefined;
+    
+        return text.endsWith('"') ? text.slice(0, -1) : text;
     },
     //#endregion
 
@@ -1208,19 +1224,21 @@ module.exports = {
          * @param {Intl.NumberFormatOptions} nopt
          */
         const formatNumber = (n, nopt = {}) => n.toLocaleString('en', { maximumFractionDigits: 2, minimumIntegerDigits: minDigits, ...nopt });
-        if((num < 1000000) || !shorten) return formatNumber(num);
+        if((num < 1000000) || !shorten)
+            return formatNumber(num);
         
         const googol = Math.pow(10, 100);
-        if(num < googol) {
-            const jesus = module.exports.shortNumberNames;
-            const ni = (num < Math.pow(10, 6 + jesus.length * 3))
-                ? Math.floor((num.toLocaleString('fullwide', { useGrouping: false }).length - 7) / 3)
-                : jesus.length - 1;
-            const snum = formatNumber(num / Math.pow(1000, ni + 2), { minimumFractionDigits: 2 });
-            
-            return [ snum, jesus[ni] ].join(' ');
-        } else
+        if(num >= googol)
             return `${formatNumber(num / googol, { maximumFractionDigits: 4 })} Gúgol`;
+
+        const jesus = module.exports.shortNumberNames;
+        const ni = (num < Math.pow(10, 6 + jesus.length * 3))
+            ? Math.floor((num.toLocaleString('fullwide', { useGrouping: false }).length - 7) / 3)
+            : jesus.length - 1;
+        const snum = formatNumber(num / Math.pow(1000, ni + 2), { minimumFractionDigits: 2 });
+        
+        return [ snum, jesus[ni] ].join(' ');
+            
     },
 
     isShortenedNumberString: function(numberString) {
@@ -1365,22 +1383,61 @@ module.exports = {
         return distance[m - 1][n - 1];
     },
 
-    /**@param {Number | String} id*/
-    compressId(id) {
-        if(typeof id === 'string')
-            id = parseInt(id);
-        if(typeof id !== 'number')
-            throw Error('La id debe ser un número o string');
-        
-        return id.toString(36);
+    digitsOf64: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/',
+
+    /**
+     * @param {Number} n 
+     * @param {String} s 
+     * @returns {String}
+     */
+    to10Radix64: function(n, s = '') {
+        const newKey = n % 64;
+        const remainder = Math.floor(n / 64);
+        const stack = module.exports.digitsOf64[newKey] + s;
+        return remainder <= 0 ? stack : module.exports.to10Radix64(remainder, stack);
+    },
+
+    /**
+     * @param {String} s 
+     */
+    to64Radix10: function(s) {
+        const digits = s.split('');
+        let result = 0;
+        for(const e in digits)
+            result = (result * 64) + module.exports.digitsOf64.indexOf(digits[e]);
+        return result;
     },
 
     /**@param {String} id*/
-    decompressId(id) {
+    compressId: function(id) {
         if(typeof id !== 'string')
             throw Error('La id debe ser un string');
+
+        let mid = Math.floor(id.length * 0.5);
+        if(id[mid] === '0')
+            mid = Math.floor(mid * 0.5) || 1;
+        while(id[mid] === '0' && mid < id.length - 1)
+            mid++;
+
+        let left = id.slice(0, mid);
+        let right = id.slice(mid);
+        const compr = [ left, right ].map(str => module.exports.to10Radix64(parseInt(str)));
         
-        return `${parseInt(id, 36)}`;
+        return compr[0].length + compr.join('');
+    },
+
+    /**@param {String} id*/
+    decompressId: function(id) {
+        if(typeof id !== 'string')
+            throw Error('La id debe ser un string');
+
+        const mid = id[0];
+        id = id.slice(1);
+        let left = id.slice(0, mid);
+        let right = id.slice(mid);
+        const decomp = [ left, right ].map(str => module.exports.to64Radix10(str, 36).toString());
+        
+        return decomp.join('');
     },
 
     /**
