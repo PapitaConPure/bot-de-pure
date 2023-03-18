@@ -149,11 +149,11 @@ const checkFeeds = async (booru, guilds) => {
                     const newEmbed = Discord.EmbedBuilder.from(message.embeds[0]);
                     if(embed.image.width === 0 || embed.image.height === 0) {
                         newEmbed.setImage(embed.image.url);
-                        message.edit({ embeds: [newEmbed] }).catch(auditError);
+                        message.edit({ embeds: [newEmbed] }).catch(error => console.error(error) && auditError(error));
                     }
                 });
             }
-            correctEmbedsAfterSent(messagesToSend).catch(auditError);
+            correctEmbedsAfterSent(messagesToSend).catch(error => console.error(error) && auditError(error));
         }));
 
         if(logMore) console.log(`GUARDANDO:`, Object.entries(gcfg.feeds).map(([chid, feed]) => `${guild.channels.cache.get(chid).name}: ${feed.ids}`));
