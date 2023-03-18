@@ -1,7 +1,57 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const global = require('../../localdata/config.json'); //Variables globales
-const { paginate, fetchArrows } = require('../../func');
+const { paginate, navigationRows, rand } = require('../../func');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+
+/**@param {import('discord.js').Interaction} interaction*/
+function getEmotesList(interaction) {
+	const perritoNames = [
+		'perrito', 'otirrep', 'od', 'do', 'cerca', 'muycerca', 'lejos', 'muylejos', 'invertido', 'dormido', 'pistola', 'sad', 'gorrito', 'gorra', 'almirante', 'detective',
+		'ban', 'helado', 'corona', 'Bern', 'enojado', 'policia', 'ladron', 'importado', 'peleador', 'doge', 'cheems', 'jugo', 'Papita', 'mano', 'Mima', 'chad', 'Marisa',
+		'fumado', 'Megumin', 'Navi', 'Sansas', 'chocolatada', 'ZUN', 'cafe', 'mate', 'espiando', 'madera', 'Keiki', 'piola', 'jarra', 'Nazrin', 'Miyoi', 'despierto',
+		'pensando', 'santaclos', 'tomando', 'llorando', 'facha', 'sniper', 'amsiedad', 'Mayumi', 'rodando', 'veloz',
+	];
+
+	const guilds = interaction.client.guilds.cache;
+	const { serverid } = global;
+	const emotes = [
+		...guilds.get(serverid.slot1).emojis.cache.values(),
+		...guilds.get(serverid.slot2).emojis.cache.values(),
+	].filter(emote => perritoNames.includes(emote.name)).sort();
+	return emotes;
+}
+
+/**
+ * @param {import('../Commons/typings').ComplexCommandRequest} request
+ * @param {Number} page
+ */
+async function loadPageNumber(request, page) {
+	page = parseInt(page);
+	const emotes = getEmotesList(request);
+	const emotePages = paginate(emotes);
+	const lastPage = emotePages.length - 1;
+	if(page > lastPage)
+		return request.reply({ content: '⚠ Esta página no existe', ephemeral: true });
+
+	const perritoComun = emotePages.find(perrito => perrito.name === 'perrito');
+	
+	const embed = new Discord.EmbedBuilder()
+		.setColor(0xe4d0c9)
+		.setTitle(`Perritos ${perritoComun}`)
+		.setAuthor({ name: `${emotes.length} perritos en total` })
+		.setFooter({ text: `${page + 1} / ${lastPage + 1}` })
+		.addFields({ name: `${'Nombre\`'.padEnd(24)}\`Emote`, value: emotePages[page] });
+
+	const content = {
+		embeds: [embed],
+		components: navigationRows('emotes', page, lastPage),
+	};
+
+	if(request.author || request.type === InteractionType.ApplicationCommand)
+		return request.reply(content);
+	
+	return request.update(content);
+}
 
 const options = new CommandOptionsManager()
 	.addParam('perrito', 'TEXT', 'para especificar un perrito a enviar (por nombres identificadores)', { optional: true })
@@ -20,60 +70,33 @@ const command = new CommandManager('perrito', flags)
 		const deleteMessage = isSlash ? false : options.fetchFlag(args, 'borrar');
 		if(deleteMessage)
 			request.delete().catch(_ => undefined);
-		
-		const perritoNames = [
-			'perrito', 'otirrep', 'od', 'do', 'cerca', 'muycerca', 'lejos', 'muylejos', 'invertido', 'dormido', 'pistola', 'sad', 'gorrito', 'gorra', 'almirante', 'detective',
-			'ban', 'helado', 'corona', 'Bern', 'enojado', 'policia', 'ladron', 'importado', 'peleador', 'doge', 'cheems', 'jugo', 'Papita', 'mano', 'Mima', 'chad', 'Marisa',
-			'fumado', 'Megumin', 'Navi', 'Sansas', 'chocolatada', 'ZUN', 'cafe', 'mate', 'espiando', 'madera', 'Keiki', 'piola', 'jarra', 'Nazrin', 'Miyoi', 'despierto',
-			'pensando', 'santaclos', 'tomando', 'llorando', 'facha', 'sniper', 'amsiedad', 'Mayumi', 'rodando', 'veloz',
-		];
-		const guilds = request.client.guilds.cache;
-		const slot1Coll = guilds.get(global.serverid.slot1).emojis.cache;
-		const slot2Coll = guilds.get(global.serverid.slot2).emojis.cache;
-		const emotes = slot1Coll.concat(slot2Coll).filter(emote => perritoNames.includes(emote.name));
-		const perritoComun = emotes.find(perrito => perrito.name === 'perrito');
 
 		const mostrarLista = options.fetchFlag(args, 'lista');
-		if(mostrarLista) {
-			const pages = paginate([...emotes.values()]);
-			const embed = new Discord.EmbedBuilder()
-				.setColor(0xe4d0c9)
-				.setTitle(`Perritos ${perritoComun}`)
-				.addFields({ name: `${'Nombre\`'.padEnd(24)}\`Emote`, value: pages[0] })
-				.setAuthor({ name: `${perritoNames.length} perritos en total` })
-				.setFooter({ text: `Reacciona a las flechas debajo para cambiar de página` });
-
-			const arrows = fetchArrows(request.client.emojis.cache);
-			const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
-			const sent = await request.reply({ embeds: [embed], fetchReply: true });
-			await sent.react(arrows[0]);
-			await sent.react(arrows[1]);
-			
-			const collector = sent.createReactionCollector({ filter: filter, time: 8 * 60 * 1000 });
-			let page = 0;
-			collector.on('collect', (reaction, ruser) => {
-				if(reaction.emoji.id === arrows[0].id) page = (page > 0) ? (page - 1) : (pages.length - 1);
-				else page = (page < (pages.length - 1)) ? (page + 1) : 0;
-				embed.fields[0].value = pages[page];
-				embed.setFooter({ text: `Página ${page + 1}/${Math.ceil(pages.length)}` });
-				sent.edit({ embeds: [embed] });
-				reaction.users.remove(ruser);
-			});
-			return;
-		}
-
-		let perrito = isSlash ? args.getString('perrito') : args[0];
+		if(mostrarLista)
+			return loadPageNumber(request, 0);
+		
+		const emotes = getEmotesList(request);
+		let perrito = options.fetchParam(args, 'perrito');
 
 		if(!perrito)
-			return request.reply({ content: `${emotes.random()}` });
+			return request.reply({ content: `${emotes[rand(emotes.length)]}` });
 
 		perrito = perrito.normalize('NFD').replace(/([aeiou])\u0301/gi, '$1');
 		perrito = emotes.find(emote => emote.name.toLowerCase().startsWith(perrito.toLowerCase()));
 
-		if(!perrito)
+		if(!perrito) {
+			const perritoComun = emotes.find(perrito => perrito.name === 'perrito');
 			return request.reply({ content: `${perritoComun}` });
+		}
 
 		return request.reply({ content: `${perrito}` });
+	})
+	.setButtonResponse(async function loadPage(interaction, page) {
+		return loadPageNumber(interaction, page);
+	})
+	.setSelectMenuResponse(async function loadPageExact(interaction) {
+		const page = interaction.values[0];
+		return loadPageNumber(interaction, page);
 	});
 
 module.exports = command;

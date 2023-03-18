@@ -18,7 +18,7 @@ function getEmotePages(interaction) {
  * @param {import('../Commons/typings').CommandRequest} request
  * @param {Number} page
  */
-async function loadPageNumber (request, page) {
+async function loadPageNumber(request, page) {
 	page = parseInt(page);
 	const emotePages = getEmotePages(request);
 	const user = (request.author ?? request.user);
