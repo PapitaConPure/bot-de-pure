@@ -125,7 +125,10 @@ const checkFeeds = async (booru, guilds) => {
 
                 messagesToSend.push(
                     channel.send(formatBooruPostMessage(post, feed))
-                    .then(sent => notifyUsers(post, sent, feedSuscriptions))
+                    .then(async sent => {
+                        await Promise.all(notifyUsers(post, sent, feedSuscriptions));
+                        return sent;
+                    })
                     .catch(error => {
                         console.log(`Ocurrió un error al enviar la imagen de Feed: ${post.source ?? post.id} para ${channel.name}`);
                         console.error(error);
@@ -149,7 +152,7 @@ const checkFeeds = async (booru, guilds) => {
                     const newEmbed = Discord.EmbedBuilder.from(message.embeds[0]);
                     if(embed.image.width === 0 || embed.image.height === 0) {
                         newEmbed.setImage(embed.image.url);
-                        message.edit({ embeds: [newEmbed] }).catch(error => console.error(error) && auditError(error));
+                        message.edit({ embeds: [newEmbed] }).catch(error => auditError(error, { brief: 'Ocurrió un error al corregir un embed de Feed' }));
                     }
                 });
             }
