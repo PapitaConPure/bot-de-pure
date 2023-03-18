@@ -88,7 +88,7 @@ function formatBooruPostMessage(post, data = {}) {
         new ButtonBuilder()
             .setEmoji('921788204540100608')
             .setStyle(ButtonStyle.Primary)
-            .setLabel('❗ NUEVO') //Quitar esto luego de algunas versiones
+            .setLabel('❗ NUEVO / NEW') //Quitar esto luego de algunas versiones
             .setCustomId('feed_showFeedImageTags'),
     );
     
