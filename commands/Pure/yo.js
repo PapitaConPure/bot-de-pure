@@ -134,10 +134,12 @@ const followedTagsRows = (userId, channelId, translator, isAlt) => [
     new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`yo_editFT_${compressId(userId)}_${compressId(channelId)}_ADD`)
+            .setEmoji('1086797601925513337')
             .setLabel(translator.getText('feedSetTagsButtonAdd'))
             .setStyle(ButtonStyle.Success),
         new ButtonBuilder()
             .setCustomId(`yo_editFT_${compressId(userId)}_${compressId(channelId)}_REMOVE`)
+            .setEmoji('1086797599287296140')
             .setLabel(translator.getText('feedSetTagsButtonRemove'))
             .setStyle(ButtonStyle.Danger),
         new ButtonBuilder()

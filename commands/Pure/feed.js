@@ -875,14 +875,17 @@ const command = new CommandManager('feed', flags)
 				components: [new ActionRowBuilder().addComponents([
 					new ButtonBuilder()
 						.setCustomId(`yo_modifyFollowedTags_${compressId(interaction.user.id)}_ALT`)
+						.setEmoji('921788204540100608')
 						.setLabel(translator.getText('feedSetTagsButtonView'))
 						.setStyle(ButtonStyle.Primary),
 					new ButtonBuilder()
 						.setCustomId('feed_editFollowedTags_ADD')
+						.setEmoji('1086797601925513337')
 						.setLabel(translator.getText('feedSetTagsButtonAdd'))
 						.setStyle(ButtonStyle.Success),
 					new ButtonBuilder()
 						.setCustomId('feed_editFollowedTags_REMOVE')
+						.setEmoji('1086797599287296140')
 						.setLabel(translator.getText('feedSetTagsButtonRemove'))
 						.setStyle(ButtonStyle.Danger),
 				])],
