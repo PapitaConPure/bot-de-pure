@@ -123,9 +123,9 @@ const command = new CommandManager('twitters', flags)
 
 		const embed = new Discord.EmbedBuilder()
 			.setColor(target.color)
-			.setTitle(embedprops.title ?? target.title ?? '')
+			.setTitle(embedprops.title ?? target.title ?? null)
 			.setAuthor({ name: embedprops.epigraph ?? target.author.name ?? request.guild.name, iconURL: request.guild.iconURL({ size: 256 }) })
-			.setFooter({ text: embedprops.footer ?? target.footer?.text ?? '' });
+			.setFooter({ text: embedprops.footer ?? target.footer?.text ?? null });
 		
 		if(edit === 'add')
 			twitters = [...twitters, ...ntw];
