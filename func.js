@@ -134,7 +134,7 @@ module.exports = {
     },
 
     /**
-     * @param {Array<*> | Discord.Collection} array 
+     * @param {Array | Discord.Collection} array 
      * @param {{
      *  pagemax: Number?,
      *  format: Function?,
