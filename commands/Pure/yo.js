@@ -308,7 +308,7 @@ const command = new CommandManager('yo', flags)
 	.setModalResponse(async function setFollowedTags(interaction, operation, customChannelId) {
 		const channelId = customChannelId ? decompressId(customChannelId) : interaction.channelId;
 		const userId = interaction.user.id;
-		const editedTags = interaction.fields.getTextInputValue('tagsInput').split(/[ \n]+/).filter(t => t.length);
+		const editedTags = interaction.fields.getTextInputValue('tagsInput').toLowerCase().split(/[ \n]+/).filter(t => t.length);
 
 		const userQuery = { userId };
 		const userConfigs = (await UserConfigs.findOne(userQuery)) || new UserConfigs(userQuery);
