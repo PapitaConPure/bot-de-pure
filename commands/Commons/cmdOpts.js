@@ -1,29 +1,35 @@
 /**
  * @typedef {{name: String, expression: String|Number}} ParamTypeStrict Parámetros de CommandOption que siguen una sintaxis estricta
- * @typedef {'NUMBER'|'TEXT'|'USER'|'MEMBER'|'ROLE'|'CHANNEL'|'MESSAGE'|'EMOTE'|'IMAGE'|'FILE'|'URL'|'ID'|ParamTypeStrict} ParamType Tipos de parámetro de CommandOption
+ * @typedef {'NUMBER'|'TEXT'|'USER'|'MEMBER'|'ROLE'|'GUILD'|'CHANNEL'|'MESSAGE'|'EMOTE'|'IMAGE'|'FILE'|'URL'|'ID'} BaseParamType
+ * @typedef {BaseParamType|ParamTypeStrict} ParamType Tipos de parámetro de CommandOption
  * @typedef {'SINGLE'|'MULTIPLE'|Array<String>} ParamPoly Capacidad de entradas de parámetro de CommandOption
+ * @typedef {'getBoolean'|'getString'|'getNumber'|'getInteger'|'getChannel'|'getUser'|'getMember'|'getRole'} GetMethodName
  */
-
 const { fetchUser, fetchMember } = require('../../func');
 
-const PARAM_TYPES = {
-    'NUMBER':  { getMethod: 'getNumber',  help: 'número' },
-    'TEXT':    { getMethod: 'getString',  help: 'texto' },
-    'USER':    { getMethod: 'getUser',    help: 'U{mención/texto/id}' },
-    'MEMBER':  { getMethod: 'getUser',    help: 'M{mención/texto/id}' },
-    'ROLE':    { getMethod: 'getRole',    help: 'R{mención/texto/id}' },
-    'GUILD':   { getMethod: 'getString',  help: 'g{texto/id}' },
-    'CHANNEL': { getMethod: 'getChannel', help: 'C{enlace/texto/id}' },
-    'MESSAGE': { getMethod: 'getString',  help: 'm{enlace/texto/id}' },
-    'EMOTE':   { getMethod: 'getString',  help: 'emote' },
-    'IMAGE':   { getMethod: 'getString',  help: 'imagen/enlace' },
-    'FILE':    { getMethod: 'getString',  help: 'archivo/enlace' },
-    'URL':     { getMethod: 'getString',  help: 'enlace' },
-    'ID':      { getMethod: 'getInteger', help: 'id' },
-};
+/**
+ * @type {Map<BaseParamType, { getMethod: GetMethodName, help: String }>}
+ */
+const PARAM_TYPES = new Map();
+PARAM_TYPES
+    .set('NUMBER',  { getMethod: 'getNumber',  help: 'número' })
+    .set('TEXT',    { getMethod: 'getString',  help: 'texto' })
+    .set('USER',    { getMethod: 'getUser',    help: 'U{mención/texto/id}' })
+    .set('MEMBER',  { getMethod: 'getUser',    help: 'M{mención/texto/id}' })
+    .set('ROLE',    { getMethod: 'getRole',    help: 'R{mención/texto/id}' })
+    .set('GUILD',   { getMethod: 'getString',  help: 'g{texto/id}' })
+    .set('CHANNEL', { getMethod: 'getChannel', help: 'C{enlace/texto/id}' })
+    .set('MESSAGE', { getMethod: 'getString',  help: 'm{enlace/texto/id}' })
+    .set('EMOTE',   { getMethod: 'getString',  help: 'emote' })
+    .set('IMAGE',   { getMethod: 'getString',  help: 'imagen/enlace' })
+    .set('FILE',    { getMethod: 'getString',  help: 'archivo/enlace' })
+    .set('URL',     { getMethod: 'getString',  help: 'enlace' })
+    .set('ID',      { getMethod: 'getInteger', help: 'id' });
+
+/**@param {BaseParamType} pt*/
+const ParamTypes = (pt) => PARAM_TYPES.get(pt);
 
 /**
- * @function
  * @param {Array<String>} args
  * @return {String}
  */
@@ -67,7 +73,9 @@ const fetchMessageFlag = (args, flag = { property, short: [], long: [], callback
         if(flag.property && i === (args.length - 1)) return;
         arg = arg.toLowerCase();
 
-        if(flag.long?.length && arg.startsWith('--') && flag.long.includes(arg.slice(2))) {
+        if(arg.startsWith('--')) {
+            if(!flag.long?.length || !flag.long.includes(arg.slice(2)))
+                return;
             flagValue = flag.property ? fetchMessageFlagText(args, i + 1) : arg;
             return args.splice(i, 1);
         }
@@ -103,7 +111,7 @@ const fetchMessageFlag = (args, flag = { property, short: [], long: [], callback
  * @param {ParamType} type El tipo a convertir
  * @returns {String}
  */
-const typeHelp = (type) => PARAM_TYPES[type].help;
+const typeHelp = (type) => ParamTypes(type).help;
 
 /**
  * Devuelve si el parámetro es estricto
@@ -336,7 +344,7 @@ class CommandFlagExpressive extends CommandFlag {
     get typeDisplay() {
         return isParamTypeStrict(this._type)
             ? `${this._type.name}: ${this._type.expression}`
-            : PARAM_TYPES[this._type].help;
+            : typeHelp(this._type);
     };
     /**
      *String de ayuda de la bandera
@@ -479,11 +487,10 @@ class CommandOptionsManager {
         }).join(' ');
     };
     /**
-     * Remuve y devuelve la siguiente entrada o devuelve todas las entradas en caso de que {@linkcode whole} sea verdadero
+     * Remueve y devuelve la siguiente entrada o devuelve todas las entradas en caso de que {@linkcode whole} sea verdadero
      * @param {Array<String>} args El conjunto de entradas
      * @param {ParamType} type El tipo de entrada buscado
      * @param {Boolean} whole Indica si devolver todas las entradas o no
-     * @returns 
      */
     #fetchMessageParam(args, type, whole = false) {
         const argsPrototype = whole ? args.join(' ') : args.shift();
@@ -513,27 +520,28 @@ class CommandOptionsManager {
      * @param {import('discord.js').CommandInteractionOptionResolver | Array<String>} args El conjunto de entradas
      * @param {String} slashIdentifier El identificador del parámetro para comandos Slash
      * @param {Boolean?} whole Indica si devolver todas las entradas en caso de un comando de mensaje
-     * @returns {*} El valor del parámetro
+     * @returns El valor del parámetro
      */
     fetchParam(args, slashIdentifier, whole = false) {
         /**@type {CommandParam}*/
         const param = this.params.get(slashIdentifier);
 
         if(!param)
-            throw new ReferenceError(`No se pudo encontrar un parámetro con el identificador: ${slashIdentifier}`);
+            throw ReferenceError(`No se pudo encontrar un parámetro con el identificador: ${slashIdentifier}`);
 
         if(param._poly !== 'SINGLE')
-            throw new TypeError(`No se puede devolver un solo valor con un poly-parámetro: ${slashIdentifier}`);
+            throw TypeError(`No se puede devolver un solo valor con un poly-parámetro: ${slashIdentifier}`);
 
         if(Array.isArray(args))
             return this.#fetchMessageParam(args, param._type, whole);
 
-        let getMethod = 'getString';
-        
+        /**@type {GetMethodName}*/
+        let getMethodName = 'getString';
         if(!isParamTypeStrict(param._type))
-            getMethod = PARAM_TYPES[param._type].getMethod;
-        
-        return args[getMethod](slashIdentifier, !param._optional);
+            getMethodName = ParamTypes(param._type).getMethod;
+
+        const getMethod = args[getMethodName];
+        return getMethod(slashIdentifier, !param._optional);
     };
     /**
      * Devuelve un arreglo de todas las entradas recibidas.
@@ -602,11 +610,12 @@ class CommandOptionsManager {
                 ...output
             });
 
+        /**@type {GetMethodName}*/
         let getMethod = 'getBoolean';
         let flagValue;
 
         if(flag.isExpressive())
-            getMethod = PARAM_TYPES[flag._type]?.getMethod ?? 'getString';
+            getMethod = ParamTypes(flag._type)?.getMethod ?? 'getString';
         
         flagValue = args[getMethod](identifier);
         
