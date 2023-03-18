@@ -118,16 +118,16 @@ let localesObject = {
         '⚠ Followed tags were not modified. Make sure not to be following more than 6 tags',
     ),
     feedSetTagsButtonView: new Translation(
-        'Ver Tags Seguidas',
-        'View Followed Tags',
+        '❗ Ver Tags Seguidas',
+        '❗ View Followed Tags',
     ),
     feedSetTagsButtonAdd: new Translation(
-        'Seguir Tags',
-        'Follow Tags',
+        '❗ Seguir Tags',
+        '❗ Follow Tags',
     ),
     feedSetTagsButtonRemove: new Translation(
-        'Dejar de Seguir Tags',
-        'Unfollow Tags',
+        '❗ Dejar de Seguir Tags',
+        '❗ Unfollow Tags',
     ),
     feedEditTagsTitleAdd: new Translation(
         'Seguir Tags...',
