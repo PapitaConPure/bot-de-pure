@@ -16,6 +16,10 @@ const cancelbutton = new ButtonBuilder()
 	.setCustomId('feed_cancelWizard')
 	.setLabel('Cancelar')
 	.setStyle(ButtonStyle.Secondary);
+const finishButton = new ButtonBuilder()
+	.setCustomId('feed_finishWizard')
+	.setLabel('Finalizar')
+	.setStyle(ButtonStyle.Secondary);
 const safeTags = (_tags = '') => _tags.replace(/\\*\*/g,'\\*').replace(/\\*_/g,'\\_');
 /**
  * @param {import('discord.js').ButtonInteraction} interaction 
@@ -127,7 +131,7 @@ const command = new CommandManager('feed', flags)
 						.setLabel('Eliminar un Feed')
 						.setStyle(ButtonStyle.Danger)
 						.setDisabled(!premade),
-					cancelbutton,
+					finishButton,
 				),
 				new ActionRowBuilder().addComponents(
 					new ButtonBuilder()
@@ -235,7 +239,15 @@ const command = new CommandManager('feed', flags)
 			);
 		return interaction.update({
 			embeds: [concludedEmbed],
-			components: [],
+			components: [
+				new ActionRowBuilder().addComponents(
+					new ButtonBuilder()
+						.setCustomId('feed_startWizard')
+						.setLabel('Seguir configurando')
+						.setStyle(ButtonStyle.Primary),
+					finishButton,
+				)
+			],
 		});
 	})
 	.setButtonResponse(async function selectEdit(interaction) {
@@ -360,7 +372,7 @@ const command = new CommandManager('feed', flags)
 					.setCustomId('feed_selectEdit')
 					.setLabel('Volver')
 					.setStyle(ButtonStyle.Secondary),
-				cancelbutton,
+				finishButton,
 			)],
 		});
 	})
@@ -410,7 +422,7 @@ const command = new CommandManager('feed', flags)
 						.setCustomId('feed_selectCustomize')
 						.setLabel('Volver')
 						.setStyle(ButtonStyle.Secondary),
-					cancelbutton,
+					finishButton,
 				),
 			],
 		});
@@ -436,7 +448,7 @@ const command = new CommandManager('feed', flags)
 						.setCustomId('feed_selectView')
 						.setLabel('Volver')
 						.setStyle(ButtonStyle.Secondary),
-					cancelbutton,
+					finishButton,
 				),
 			],
 		});
@@ -474,6 +486,14 @@ const command = new CommandManager('feed', flags)
 			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
 			.setFooter({ text: 'Operación finalizada' })
 			.addFields({ name: 'Feed eliminado', value: 'Se ha eliminado el Feed acordado. Si te arrepientes, tendrás que crearlo otra vez' });
+		const rows = new ActionRowBuilder().addComponents(
+			new ButtonBuilder()
+				.setCustomId('feed_startWizard')
+				.setLabel('Seguir configurando')
+				.setStyle(ButtonStyle.Primary),
+			finishButton,
+		);
+		
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 		delete gcfg.feeds[channelId];
 		gcfg.markModified('feeds');
@@ -481,7 +501,7 @@ const command = new CommandManager('feed', flags)
 			gcfg.save(),
 			interaction.update({
 				embeds: [wizard],
-				components: [],
+				components: [rows],
 			}),
 		]);
 	})
@@ -816,6 +836,16 @@ const command = new CommandManager('feed', flags)
 			components: [],
 		});
 	})
+	.setButtonResponse(async function finishWizard(interaction) {
+		const cancelEmbed = new EmbedBuilder()
+			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
+			.setFooter({ text: 'Operación concluída' })
+			.setDescription('Se finalizó la configuración de Feeds');
+		return interaction.update({
+			embeds: [cancelEmbed],
+			components: [],
+		});
+	})
 	.setButtonResponse(async function showFeedImageUrl(interaction) {
 		//Función en desuso. Permanece por compatibilidad
 		return this.showFeedImageTags(interaction);
@@ -889,50 +919,11 @@ const command = new CommandManager('feed', flags)
 		const row = new ActionRowBuilder().addComponents(tagsInput);
 
 		const modal = new ModalBuilder()
-			.setCustomId(`feed_setFollowedTags_${operation}`)
+			.setCustomId(`yo_setFollowedTags_${operation}`)
 			.setTitle(title)
 			.addComponents(row);
 
 		return interaction.showModal(modal).catch(auditError);
-	})
-	.setModalResponse(async function setFollowedTags(interaction, operation, customChannelId) {
-		const channelId = customChannelId ? decompressId(customChannelId) : interaction.channelId;
-
-		const editedTags = interaction.fields.getTextInputValue('tagsInput').split(/[ \n]+/);
-
-		const userQuery = { userId: interaction.user.id };
-		const userConfigs = (await UserConfigs.findOne(userQuery)) || new UserConfigs(userQuery);
-		const translator = new Translator(userConfigs.language);
-		let currentTags = userConfigs.feedTagSuscriptions.get(channelId);
-		currentTags = currentTags ? [ ...currentTags ] : [];
-		/**@type {import('../../internationalization.js').LocaleIds}*/
-		let replyContent;
-
-		if(operation === 'ADD') {
-			currentTags.push(...editedTags.filter(t => !currentTags.includes(t)));
-			currentTags.splice(6);
-			replyContent = 'feedSetTagsAdd';
-		} else {
-			currentTags = currentTags.filter(t => !editedTags.includes(t));
-			replyContent = 'feedSetTagsRemove';
-		}
-
-		if(userConfigs.feedTagSuscriptions.length === currentTags.length)
-			return interaction.reply({
-				content: translator.getText('feedSetTagsUnchanged'),
-				ephemeral: true,
-			});
-
-		userConfigs.feedTagSuscriptions.set(channelId, currentTags);
-		userConfigs.markModified('feedTagSuscriptions');
-		await userConfigs.save();
-
-		feedTagSuscriptionsCache.get(interaction.user.id).set(channelId, currentTags);
-
-		return interaction.reply({
-			content: translator.getText(replyContent, editedTags.join(' ')),
-			ephemeral: true,
-		});
 	})
 	.setButtonResponse(async function deletePost(interaction, manageableBy) {
 		if(manageableBy !== interaction.user.id && isNotModerator(interaction.member))

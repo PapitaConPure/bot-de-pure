@@ -5,6 +5,7 @@ const { tenshiColor } = require('../../localdata/config.json');
 const { Translator, fetchLocaleFor, recacheLocale } = require('../../internationalization');
 const { compressId, shortenText, decompressId } = require('../../func');
 const { auditError } = require('../../systems/auditor');
+const { updateFollowedFeedTagsCache } = require('../../systems/boorufeed');
 
 const languageEmote = {
     en: '<:en:1084646415319453756>',
@@ -245,6 +246,7 @@ const command = new CommandManager('yo', flags)
         return Promise.all([
             userConfigs.save(),
             interaction.update({
+                content: null,
                 embeds: [selectTagsChannelEmbed(interaction, translator)],
                 components: selectTagsChannelRows(user.id, interaction, userConfigs, translator),
             }),
@@ -297,11 +299,59 @@ const command = new CommandManager('yo', flags)
 
         const row = new ActionRowBuilder().addComponents(tagsInput);
         const modal = new ModalBuilder()
-            .setCustomId(`feed_setFollowedTags_${operation}_${compressId(channelId)}`)
+            .setCustomId(`yo_setFollowedTags_${operation}_${compressId(channelId)}`)
             .setTitle(title)
             .addComponents(row);
 
         return interaction.showModal(modal).catch(auditError);
+	})
+	.setModalResponse(async function setFollowedTags(interaction, operation, customChannelId) {
+		const channelId = customChannelId ? decompressId(customChannelId) : interaction.channelId;
+		const userId = interaction.user.id;
+		const editedTags = interaction.fields.getTextInputValue('tagsInput').split(/[ \n]+/).filter(t => t.length);
+
+		const userQuery = { userId };
+		const userConfigs = (await UserConfigs.findOne(userQuery)) || new UserConfigs(userQuery);
+		const translator = new Translator(userConfigs.language);
+		let newTags = userConfigs.feedTagSuscriptions.get(channelId)?.slice(0) ?? [];
+		/**@type {import('../../internationalization.js').LocaleIds}*/
+		let setTagsResponse;
+		let previousLength = newTags.length;
+
+		if(operation === 'ADD') {
+			newTags.push(...editedTags.filter(t => !newTags.includes(t)));
+			newTags.splice(6);
+			setTagsResponse = 'feedSetTagsAdd';
+		} else {
+			newTags = newTags.filter(t => !editedTags.includes(t));
+			setTagsResponse = 'feedSetTagsRemove';
+		}
+
+		if(previousLength === newTags.length) {
+            const updateContent = {
+				content: translator.getText('feedSetTagsUnchanged'),
+                ephemeral: true,
+            };
+            return interaction.update(updateContent).catch(() => interaction.reply(updateContent));
+        }
+
+		if(newTags.length)
+			userConfigs.feedTagSuscriptions.set(channelId, newTags);
+		else
+			userConfigs.feedTagSuscriptions.delete(channelId);
+		userConfigs.markModified('feedTagSuscriptions');
+		
+		await userConfigs.save();
+
+		updateFollowedFeedTagsCache(userId, channelId, newTags);
+
+		const updateContent = {
+			content: translator.getText(setTagsResponse, editedTags.join(' ')),
+			embeds: [followedTagsEmbed(interaction, userConfigs, channelId, translator)],
+			ephemeral: true,
+		};
+
+		return interaction.update(updateContent).catch(() => interaction.reply(updateContent));
 	})
 	.setButtonResponse(async function cancelWizard(interaction, authorId) {
 		const locale = await fetchLocaleFor(authorId);
@@ -316,6 +366,7 @@ const command = new CommandManager('yo', flags)
 				value: translator.getText('cancelledStepValue'),
 			});
 		return interaction.update({
+            content: null,
 			embeds: [cancelEmbed],
 			components: [],
 		});
@@ -330,6 +381,7 @@ const command = new CommandManager('yo', flags)
 		const cancelEmbed = wizEmbed(interaction.client.user.avatarURL(), 'finishedStepFooterName', Colors.NotQuiteBlack, translator)
 			.setDescription(translator.getText('finishedStepDescription'));
 		return interaction.update({
+            content: null,
 			embeds: [cancelEmbed],
 			components: [],
 		});
