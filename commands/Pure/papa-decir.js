@@ -1,4 +1,4 @@
-const { Permissions, ChannelType } = require('discord.js');
+const { ChannelType } = require('discord.js');
 const { auditError } = require('../../systems/auditor');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
@@ -41,7 +41,7 @@ const command = new CommandManager('papa-decir', flags)
         if(!channel)
             return message.reply({ content: ':warning: debes especificar un canal de la guild que ingresaste.' });
         
-        if(deleteAfter && message.deletable && message.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES))
+        if(deleteAfter && message.deletable && message.guild.members.me.permissions.has('ManageMessages'))
             message.delete().catch(auditError);
 
         return channel.send(args.join(' ').split(/ +#ENDL +/g).join('\n'));

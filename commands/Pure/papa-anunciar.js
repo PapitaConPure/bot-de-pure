@@ -21,7 +21,7 @@ const command = new CommandManager('papa-anunciar', flags)
 			const embed = new EmbedBuilder()
 				.setColor(tenshiColor)
 				.setTitle('📣 Anuncio de Actualización')
-				.setAuthor({ name: guild.me.displayName ?? request.client.user.username, iconURL: request.client.user.avatarURL({ size: 256 }) })
+				.setAuthor({ name: guild.members.me.displayName ?? request.client.user.username, iconURL: request.client.user.avatarURL({ size: 256 }) })
 				.setFooter({ text: 'Bot de Puré está en desarrollo por Papita con Puré#6932' })
 				.addFields({
 					name: title ?? 'Mensaje de Papita con Puré',
