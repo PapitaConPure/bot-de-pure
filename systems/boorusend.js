@@ -1,4 +1,4 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Message } = require('discord.js');
 const { guildEmoji, shortenText, isThread } = require('../func');
 const { Post, Booru } = require('../systems/boorufetch');
 const { getBaseTags, getSearchTags } = require('../localdata/booruprops');
@@ -88,6 +88,7 @@ function formatBooruPostMessage(post, data = {}) {
         new ButtonBuilder()
             .setEmoji('921788204540100608')
             .setStyle(ButtonStyle.Primary)
+            .setLabel('❗ NUEVO') //Quitar esto luego de algunas versiones
             .setCustomId('feed_showFeedImageTags'),
     );
     
@@ -153,6 +154,55 @@ function formatBooruPostMessage(post, data = {}) {
     //Enviar imagen de Feed
     return feedMessage;
 };
+
+/**
+ * @typedef {{ userId: Discord.Snowflake, followedTags: Array<String> }} Suscription
+ / @param {import('./boorufetch').Post} post
+ * @param {Message<true>} sent
+ * @param {Array<Suscription>} feedSuscriptions 
+ */
+function notifyUsers(post, sent, feedSuscriptions) {
+    if(!sent) throw 'Se esperaba un mensaje enviado para el cuál notificar';
+    const channel = sent.channel;
+    if(!channel) throw 'No se encontró un canal para el mensaje enviado';
+    const guild = channel.guild;
+    const matchingSuscriptions = feedSuscriptions.filter(suscription => suscription.followedTags.some(tag => post.tags.includes(tag)));
+    return matchingSuscriptions.map(({ userId, followedTags }) => {
+        const user = guild.client.users.cache.get(userId);
+        if(!channel || !user) return Promise.resolve();
+        const matchingTags = followedTags.filter(tag => post.tags.includes(tag));
+
+        const userEmbed = new EmbedBuilder()
+            .setAuthor({ name: guild.name, iconURL: guild.iconURL({ size: 128 }) })
+            .setColor(globalConfigs.tenshiColor)
+            .setTitle('Notificación de Feed Suscripto')
+            .setDescription('¡Se realizó un envío que puede interesarte!')
+            .setFooter({ text: 'Nota: Bot de Puré no opera con mensajes privados' })
+            .addFields(
+                {
+                    name: 'Feed',
+                    value: `${channel}`,
+                    inline: true,
+                },
+                {
+                    name: 'Tags de interés',
+                    value: matchingTags.join(' '),
+                    inline: true,
+                },
+            );
+        const userRow = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setURL(sent.url)
+                .setLabel('Ver envío')
+                .setStyle(ButtonStyle.Link),
+        );
+
+        return user.send({
+            embeds: [userEmbed],
+            components: [userRow],
+        });
+    });
+}
 
 function isUnholy(isNsfw, request, terms) {
     if(!isNsfw)
@@ -244,5 +294,6 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
 
 module.exports = {
     formatBooruPostMessage,
+    notifyUsers,
     searchAndReplyWithPost,
 }

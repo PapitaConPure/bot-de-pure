@@ -1,6 +1,6 @@
 const GuildConfig = require('../localdata/models/guildconfigs.js');
 const Discord = require('discord.js');
-const { formatBooruPostMessage } = require('./boorusend.js');
+const { formatBooruPostMessage, notifyUsers } = require('./boorusend.js');
 const { auditError, auditAction } = require('./auditor.js');
 const chalk = require('chalk');
 const { Booru } = require('./boorufetch.js');
@@ -10,14 +10,43 @@ const { paginateRaw } = require('../func.js');
 //Configuraciones globales de actualización de Feeds
 /**@type {Map<Discord.Snowflake, Map<Discord.Snowflake, Array<String>>>}*/
 const feedTagSuscriptionsCache = new Map();
-
 const feedUpdateInterval = 60e3 * 30;
 const chunkMax = 5;
 const logMore = false;
 
 /**
+ * Actualiza el caché de una suscripción de Feed de un usuario con las tags suministradas
+ * @param {Discord.Snowflake} userId La ID del usuario suspcrito
+ * @param {Discord.Snowflake} channelId La ID del canal del Feed al cuál está suscripto el usuario
+ * @param {Array<String>} newTags Las tags con las cuáles reemplazar las actuales en caché
+ * @returns {void}
+ */
+function updateFollowedFeedTagsCache(userId, channelId, newTags) {
+    if(typeof userId !== 'string') throw ReferenceError('Se requiere una ID de usuario de tipo string');
+    if(typeof channelId !== 'string') throw ReferenceError('Se requiere una ID de canal de tipo string');
+    if(!Array.isArray(newTags)) throw TypeError('Las tags a incorporar deben ser un array');
+
+	if(!feedTagSuscriptionsCache.has(userId))
+        feedTagSuscriptionsCache.set(userId, new Map());
+
+    let userMap = feedTagSuscriptionsCache.get(userId);
+    
+    if(newTags.length) {
+        userMap.set(channelId, newTags);
+        return;
+    }
+
+    userMap.delete(channelId);
+
+    if(!userMap.size)
+        feedTagSuscriptionsCache.delete(userId);
+
+    return;
+}
+
+/**
  * @param {Booru} booru
- * @param {import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Guild>} guilds Colección de Guilds a procesar
+ * @param {Discord.Collection<Discord.Snowflake, Discord.Guild>} guilds Colección de Guilds a procesar
  * @returns {Object} Cantidad de imágenes enviadas
  */
 const checkFeeds = async (booru, guilds) => {
@@ -66,6 +95,16 @@ const checkFeeds = async (booru, guilds) => {
                 gcfg.feeds[chid].faults = Math.max(0, feed.faults - 2);
                 gcfg.markModified('feeds');
             }
+
+            //Preparar suscripciones a Feeds
+            /**@type {Array<import('./boorusend.js').Suscription>}*/
+            const feedSuscriptions = [];
+            for(const [ userId , feedSuscription ] of feedTagSuscriptionsCache) {
+                if(!feedSuscription.has(chid))
+                    continue;
+                const followedTags = feedSuscription.get(chid);
+                feedSuscriptions.push({ userId, followedTags });
+            }
             
             //Comprobar recolectado en busca de imágenes nuevas
             if(logMore) console.log(`Preparándose para enviar imágenes en ${channel.name} ${response.map(post => post.id)}`);
@@ -84,11 +123,15 @@ const checkFeeds = async (booru, guilds) => {
                 if(logMore) console.log(guild.id, 'gcfg.feeds[chid].ids:', gcfg.feeds[chid].ids);
                 gcfg.markModified('feeds');
 
-                messagesToSend.push(channel.send(formatBooruPostMessage(post, feed)).catch(error => {
-                    console.log(`Ocurrió un error al enviar la imagen de Feed: ${post.source ?? post.id} para ${channel.name}`);
-                    console.error(error);
-                    auditError(error, { brief: 'Ocurrió un error al enviar una imagen de Feed', details: `\`Post<"${post.source ?? post.id}">\`\n${channel}` });
-                }));
+                messagesToSend.push(
+                    channel.send(formatBooruPostMessage(post, feed))
+                    .then(sent => notifyUsers(post, sent, feedSuscriptions))
+                    .catch(error => {
+                        console.log(`Ocurrió un error al enviar la imagen de Feed: ${post.source ?? post.id} para ${channel.name}`);
+                        console.error(error);
+                        auditError(error, { brief: 'Ocurrió un error al enviar una imagen de Feed', details: `\`Post<"${post.source ?? post.id}">\`\n${channel}` });
+                    })
+                );
                 promisesCount[guild]++;
                 promisesCount.total++;
                 if(logMore) console.log(`EJECUTADO`);
@@ -250,4 +293,5 @@ module.exports = {
     setupGuildFeedUpdateStack,
     addGuildToFeedUpdateStack,
     feedTagSuscriptionsCache,
+    updateFollowedFeedTagsCache,
 };
