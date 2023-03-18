@@ -34,7 +34,7 @@ async function loadPageNumber(request, page) {
 	if(page > lastPage)
 		return request.reply({ content: '⚠ Esta página no existe', ephemeral: true });
 
-	const perritoComun = emotePages.find(perrito => perrito.name === 'perrito');
+	const perritoComun = emotes.find(perrito => perrito.name === 'perrito');
 	
 	const embed = new Discord.EmbedBuilder()
 		.setColor(0xe4d0c9)
