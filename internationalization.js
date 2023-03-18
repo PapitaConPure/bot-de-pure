@@ -138,12 +138,12 @@ let localesObject = {
         'Unfollow Tags...',
     ),
     feedEditTagsInputAdd: new Translation(
-        'Elige qué tags quieres seguir',
-        'Choose which tags you wanna follow',
+        'Elige qué tags quieres seguir, sin comas',
+        'Choose the tags you wanna follow, no commas',
     ),
     feedEditTagsInputRemove: new Translation(
-        'Elige qué tags quieres dejar de seguir',
-        'Choose which tags you wanna unfollow',
+        'Elige qué tags quieres dejar de seguir, sin comas',
+        'Choose which tags you wanna unfollow, no commas',
     ),
 
     yoDashboardAuthor: new Translation(
