@@ -257,7 +257,7 @@ class Translator {
 
     /**@param {LocaleKey} locale lenguaje al cual localizar el texto*/
     constructor(locale) {
-        if(!locale) throw new ReferenceError('Un Translator requiere un lenguaje para operar');
+        if(!locale) throw ReferenceError('Un Translator requiere un lenguaje para operar');
         this.#locale = locale;
     }
 
@@ -301,6 +301,7 @@ const userLocalesCache = new Map();
  * @param {String} userId 
  */
 async function cacheLocale(userId) {
+    if(!userId) throw ReferenceError('Se esperaba una ID de usuario');
     const userQuery = { userId };
     let userConfigs = await UserConfigs.findOne(userQuery);
     if(!userConfigs) {
@@ -318,9 +319,9 @@ async function cacheLocale(userId) {
  * @returns {Promise<LocaleKey>}
  */
 async function fetchLocaleFor(userId) {
-    console.log(userId, '?', userLocalesCache);
+    if(!userId) throw ReferenceError('Se esperaba una ID de usuario al recolectar lenguaje');
     if(!userLocalesCache.has(userId))
-        await cacheLocale();
+        await cacheLocale(userId);
     
     return userLocalesCache.get(userId);
 }
