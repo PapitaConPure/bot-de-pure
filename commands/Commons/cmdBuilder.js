@@ -32,9 +32,10 @@ class CommandManager {
     /**
      * @typedef {(request: ComplexCommandRequest, args: CommandOptions, isSlash = false, rawArgs: string) => Promise<*>} ExecutionFunction
      * @typedef {(interaction: Interaction, ...args: String) => Promise<*>} InteractionResponseFunction
+     * @typedef {import('discord.js').ModalMessageModalSubmitInteraction<ModalSubmitInteraction>} ModalResponseInteraction
      * @typedef {(interaction: ButtonInteraction, ...args: String) => Promise<*>} ButtonResponseFunction
      * @typedef {(interaction: SelectMenuInteraction, ...args: String) => Promise<*>} SelectMenuResponseFunction
-     * @typedef {(interaction: ModalSubmitInteraction, ...args: String) => Promise<*>} ModalResponseFunction
+     * @typedef {(interaction: ModalResponseInteraction, ...args: String) => Promise<*>} ModalResponseFunction
      * @type {ExecutionFunction}
      */
     execute;
