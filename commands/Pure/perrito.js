@@ -2,6 +2,7 @@ const Discord = require('discord.js'); //Integrar discord.js
 const global = require('../../localdata/config.json'); //Variables globales
 const { paginate, navigationRows, rand } = require('../../func');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { InteractionType } = require('discord.js');
 
 /**@param {import('discord.js').Interaction} interaction*/
 function getEmotesList(interaction) {
@@ -44,7 +45,7 @@ async function loadPageNumber(request, page) {
 
 	const content = {
 		embeds: [embed],
-		components: navigationRows('emotes', page, lastPage),
+		components: navigationRows('perrito', page, lastPage),
 	};
 
 	if(request.author || request.type === InteractionType.ApplicationCommand)
