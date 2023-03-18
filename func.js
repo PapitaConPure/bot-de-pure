@@ -611,9 +611,11 @@ module.exports = {
                     global.hourai.images.colors,
                 //files: [global.hourai.images.colors],
                 components: [colorsRow],
+            }).then(sent => {
+                setTimeout(module.exports.askForRole, 1000, miembro, canal, 3 * 4);
+                console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');
+                return sent;
             });
-            setTimeout(module.exports.askForRole, 1000, miembro, canal, 3 * 4);
-            console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');
         }
         if(servidor.id === global.serverid.ar)
             return canal.send({
