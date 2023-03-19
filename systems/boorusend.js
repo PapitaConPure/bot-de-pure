@@ -9,9 +9,10 @@ const rakki = require('../commands/Pure/rakkidei');
  * Genera un {@linkcode EmbedBuilder} a base de un {@linkcode Post} de {@linkcode Booru}
  * @param {import('discord.js').TextChannel} channel Canal al cual enviar el Embed
  * @param {Post} post Post de Booru
- * @param {{ maxTags: number?, title: string?, footer: string?, cornerIcon: string?, manageableBy: string?, isNotFeed?: Boolean }} data Información adicional a mostrar en el Embed. Se puede pasar un feed directamente
+ * @param {import('../systems/boorufetch').PostFormatData} data Información adicional a mostrar en el Embed. Se puede pasar un feed directamente
  */
-function formatBooruPostMessage(post, data = {}) {
+function formatBooruPostMessage(post, data) {
+    data ??= {};
     const maxTags = data.maxTags ?? 20;
     //Botón de Post de Gelbooru
     const row = new ActionRowBuilder().addComponents(
@@ -83,12 +84,12 @@ function formatBooruPostMessage(post, data = {}) {
         sources.slice(0, 2).forEach(addSourceButton);
     }
     
-    //Botón de tags (si es necesario) o de enlace
+    //Botón de tags
     row.addComponents(
         new ButtonBuilder()
             .setEmoji('921788204540100608')
             .setStyle(ButtonStyle.Primary)
-            .setLabel('❗ NUEVO / NEW') //Quitar esto luego de algunas versiones
+            .setLabel('❗') //Quitar esto luego de algunas versiones
             .setCustomId(`feed_showFeedImageTags_${data.isNotFeed ? 'NaF' : ''}`),
     );
     
@@ -122,16 +123,14 @@ function formatBooruPostMessage(post, data = {}) {
         .setAuthor({ name: 'Desde Gelbooru', iconURL: data.cornerIcon ?? 'https://i.imgur.com/outZ5Hm.png' });
     const filteredTags = post.tags.slice(0, maxTags);
     const tagsTitle = `${guildEmoji('tagswhite', globalConfigs.slots.slot3)} Tags (${filteredTags.length}/${post.tags.length})`;
-    const tagsContent = `*${filteredTags.join(', ')
+    const tagsContent = `*${filteredTags.join(' ')
         .replace(/\\/g,'\\\\')
         .replace(/\*/g,'\\*')
         .replace(/_/g,'\\_')
         .replace(/\|/g,'\\|')}*`;
-    // const tagsContent = filteredTags.join(', ');
 
     if(maxTags > 0)
         postEmbed.addFields({ name: tagsTitle, value: `_${shortenText(tagsContent, 1020)}_` });
-        // postEmbed.addFields({ name: tagsTitle, value: `\`\`\`\n${shortenText(tagsContent, 1000)}\`\`\`` });
     if(data.title)
         postEmbed.setTitle(data.title);
     if(data.footer)
@@ -151,7 +150,6 @@ function formatBooruPostMessage(post, data = {}) {
     
     feedMessage.embeds = [postEmbed];
     
-    //Enviar imagen de Feed
     return feedMessage;
 };
 
@@ -162,7 +160,8 @@ function formatBooruPostMessage(post, data = {}) {
  * @param {Array<Suscription>} feedSuscriptions 
  */
 function notifyUsers(post, sent, feedSuscriptions) {
-    if(!sent) throw 'Se esperaba un mensaje enviado para el cuál notificar';
+    if(!sent) throw 'Se esperaba un mensaje para el cuál notificar';
+    if(!sent.embeds?.[0] || !sent.components?.[0]) throw 'Se esperaba un mensaje de Feed válido';
     const channel = sent.channel;
     if(!channel) throw 'No se encontró un canal para el mensaje enviado';
     const guild = channel.guild;
@@ -173,11 +172,12 @@ function notifyUsers(post, sent, feedSuscriptions) {
         const matchingTags = followedTags.filter(tag => post.tags.includes(tag));
 
         const userEmbed = new EmbedBuilder()
+            .setColor(sent.embeds[0].color ?? 0)
             .setAuthor({ name: guild.name, iconURL: guild.iconURL({ size: 128 }) })
-            .setColor(globalConfigs.tenshiColor)
             .setTitle('Notificación de Feed Suscripto')
             .setDescription('¡Se realizó un envío que puede interesarte!')
             .setFooter({ text: 'Nota: Bot de Puré no opera con mensajes privados' })
+            .setThumbnail(post.previewUrl)
             .addFields(
                 {
                     name: 'Feed',
@@ -186,20 +186,23 @@ function notifyUsers(post, sent, feedSuscriptions) {
                 },
                 {
                     name: 'Tags de interés',
-                    value: matchingTags.join(' '),
+                    value: `\`\`\`\n${matchingTags.join(' ')}\n\`\`\``,
                     inline: true,
                 },
             );
-        const userRow = new ActionRowBuilder().addComponents(
+        
+        const postRow = ActionRowBuilder.from(sent.components[0]);
+        postRow.components.splice(postRow.components.length - 2);
+        postRow.addComponents(
             new ButtonBuilder()
                 .setURL(sent.url)
-                .setLabel('Ver envío')
+                .setEmoji('1087075525245272104')
                 .setStyle(ButtonStyle.Link),
         );
 
         return user.send({
             embeds: [userEmbed],
-            components: [userRow],
+            components: [postRow],
         });
     });
 }
