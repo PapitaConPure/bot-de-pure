@@ -80,14 +80,17 @@ class Booru {
 }
 
 /**
+ * @typedef {Post | Object} PostResolvable
+ * @typedef {'general'|'sensitive'|'questionable'|'explicit'} Rating
+ * @typedef {{ maxTags?: Number, title?: String, footer?: String, cornerIcon?: String, manageableBy?: String, isNotFeed?: Boolean }} PostFormatData
+ * @typedef {PostFormatData & { ids: Array<String>, tags: String, faults?: Number }} FeedData
+ */
+
+/**
  * @class
  * Representa una imagen publicada en un {@linkcode Booru}
  */
 class Post {
-    /**
-     * @typedef {Post | Object} PostResolvable
-     * @typedef {'general'|'sensitive'|'questionable'|'explicit'} Rating
-     */
     /**@type {Number}*/ id;
     /**@type {String}*/ title;
     /**@type {Array<String>}*/ tags;
