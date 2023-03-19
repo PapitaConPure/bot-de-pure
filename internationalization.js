@@ -105,6 +105,10 @@ let localesObject = {
         'Selecciona un Feed...',
         'Select a Feed...',
     ),
+    feedViewUrlsName: new Translation(
+        'Enlaces',
+        'Links',
+    ),
     feedViewTagsLinkName: new Translation(
         'Seguir Tags',
         'Follow Tags',
