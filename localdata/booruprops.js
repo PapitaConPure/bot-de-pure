@@ -9,8 +9,8 @@ const basetags = '-guro -furry -vore -webm -video -audio -comic -4koma';
 /**@type {RestrictionsMap}*/
 const nsfwRating = new Map();
 nsfwRating
-    .set(true, 'explicit')
-    .set(false, 'general');
+    .set(true, '-rating:general -rating:sensitive')
+    .set(false, '-rating:explicit -rating:questionable');
 
 /**@type {RestrictionsMap}*/
 const nsfwTags = new Map();
@@ -354,7 +354,7 @@ module.exports = {
     getBaseTags: (engine, nsfw) => {
         if(['danbooru', 'derpibooru', 'yandere', 'kcom', 'knet'].includes(engine))
             return `rating:${nsfwRating.get(nsfw)}`;
-        return [basetags, `rating:${nsfwRating.get(nsfw)}`, nsfwTags.get(nsfw)].join(' ');
+        return [basetags, nsfwRating.get(nsfw), nsfwTags.get(nsfw)].join(' ');
     },
     /**
      * Devuelve tags de búsqueda, reemplazando palabras vagas comunes de un cierto comando por tags reales para un determinado motor
