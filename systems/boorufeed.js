@@ -15,37 +15,7 @@ const chunkMax = 5;
 const logMore = false;
 
 /**
- * Actualiza el caché de una suscripción de Feed de un usuario con las tags suministradas
- * @param {Discord.Snowflake} userId La ID del usuario suspcrito
- * @param {Discord.Snowflake} channelId La ID del canal del Feed al cuál está suscripto el usuario
- * @param {Array<String>} newTags Las tags con las cuáles reemplazar las actuales en caché
- * @returns {void}
- */
-function updateFollowedFeedTagsCache(userId, channelId, newTags) {
-    if(typeof userId !== 'string') throw ReferenceError('Se requiere una ID de usuario de tipo string');
-    if(typeof channelId !== 'string') throw ReferenceError('Se requiere una ID de canal de tipo string');
-    if(!Array.isArray(newTags)) throw TypeError('Las tags a incorporar deben ser un array');
-
-	if(!feedTagSuscriptionsCache.has(userId))
-        feedTagSuscriptionsCache.set(userId, new Map());
-
-    let userMap = feedTagSuscriptionsCache.get(userId);
-    
-    if(newTags.length) {
-        userMap.set(channelId, newTags);
-        return;
-    }
-
-    userMap.delete(channelId);
-
-    if(!userMap.size)
-        feedTagSuscriptionsCache.delete(userId);
-
-    return;
-}
-
-/**
- * @param {Booru} booru
+ * @param {Booru} booru El Booru a comprobar
  * @param {Discord.Collection<Discord.Snowflake, Discord.Guild>} guilds Colección de Guilds a procesar
  * @returns {Object} Cantidad de imágenes enviadas
  */
@@ -56,7 +26,7 @@ const checkFeeds = async (booru, guilds) => {
         promisesCount[guild] = 0;
         const gcfg = await GuildConfig.findOne({ guildId: guild.id }).catch(console.error);
         if(!gcfg?.feeds) return;
-        await Promise.all(Object.entries(gcfg.feeds).map(async ([chid, feed]) => {
+        await Promise.all(Object.entries(gcfg.feeds).map(/**@param {[String, import('./boorufetch.js').FeedData]}*/ async ([chid, feed]) => {
             //Recolectar últimas imágenes para el Feed
             let fetchedProperly = true;
             /**@type {Array<import('./boorufetch').Post>}*/
@@ -141,22 +111,25 @@ const checkFeeds = async (booru, guilds) => {
             });
             promisesCount.feeds++;
             
-            /**@param {Array<Promise<Discord.Message<Boolean>>>} messagesToSend*/
+            /**
+             * Discord es ciertamente una aplicación
+             * @param {Array<Promise<Discord.Message<Boolean>>>} messagesToSend
+             */
             async function correctEmbedsAfterSent(messagesToSend) {
                 let messages = await Promise.all(messagesToSend);
                 messages = messages.filter(message => message);
                 const embedWait = new Promise(resolve => setTimeout(resolve, 1000));
                 await embedWait;
-                messages.forEach(message => {
+                return messages.map(message => {
                     const embed = message.embeds[0];
                     const newEmbed = Discord.EmbedBuilder.from(message.embeds[0]);
-                    if(embed.image.width === 0 || embed.image.height === 0) {
-                        newEmbed.setImage(embed.image.url);
-                        message.edit({ embeds: [newEmbed] }).catch(error => auditError(error, { brief: 'Ocurrió un error al corregir un embed de Feed' }));
-                    }
+                    if(embed.image.width > 0 && embed.image.height > 0)
+                        return Promise.resolve();
+                    newEmbed.setImage(embed.image.url);
+                    return message.edit({ embeds: [newEmbed] });
                 });
             }
-            correctEmbedsAfterSent(messagesToSend).catch(error => console.error(error) && auditError(error));
+            correctEmbedsAfterSent(messagesToSend).catch(error => console.error(error) && auditError(error, { brief: 'Ocurrió un error al corregir embeds de Feed' }))
         }));
 
         if(logMore) console.log(`GUARDANDO:`, Object.entries(gcfg.feeds).map(([chid, feed]) => `${guild.channels.cache.get(chid).name}: ${feed.ids}`));
@@ -291,6 +264,36 @@ const addGuildToFeedUpdateStack = (guild) => {
     globalConfigs.feedGuildChunks = guildChunks;
     return true;
 };
+
+/**
+ * Actualiza el caché de una suscripción de Feed de un usuario con las tags suministradas
+ * @param {Discord.Snowflake} userId La ID del usuario suspcrito
+ * @param {Discord.Snowflake} channelId La ID del canal del Feed al cuál está suscripto el usuario
+ * @param {Array<String>} newTags Las tags con las cuáles reemplazar las actuales en caché
+ * @returns {void}
+ */
+function updateFollowedFeedTagsCache(userId, channelId, newTags) {
+    if(typeof userId !== 'string') throw ReferenceError('Se requiere una ID de usuario de tipo string');
+    if(typeof channelId !== 'string') throw ReferenceError('Se requiere una ID de canal de tipo string');
+    if(!Array.isArray(newTags)) throw TypeError('Las tags a incorporar deben ser un array');
+
+	if(!feedTagSuscriptionsCache.has(userId))
+        feedTagSuscriptionsCache.set(userId, new Map());
+
+    let userMap = feedTagSuscriptionsCache.get(userId);
+    
+    if(newTags.length) {
+        userMap.set(channelId, newTags);
+        return;
+    }
+
+    userMap.delete(channelId);
+
+    if(!userMap.size)
+        feedTagSuscriptionsCache.delete(userId);
+
+    return;
+}
 
 module.exports = {
     setupGuildFeedUpdateStack,
