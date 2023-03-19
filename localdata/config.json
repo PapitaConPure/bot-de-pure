@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "2.9.1C",
+            "number": "2.9.1D",
             "name": "Cisne Cristalino"
         },
         "note": "Operando casi con normalidad",
@@ -13,8 +13,9 @@
             "Se reescribió y documentó PuréScript...",
             "Se actualizó a discord.js v14",
             "p!yo añadido y Preferencias parcialmente implementadas",
+            "p!feed ahora es más sencillo de utilizar",
             "Se agregó un sistema de suscripción a Feeds",
-            "p!feed ahora es más sencillo de utilizar"
+            "Notificaciones de Feeds ahora muestran vistas previas"
         ],
         "todo": [
             "Agregar comando de Stable Diffusion",
