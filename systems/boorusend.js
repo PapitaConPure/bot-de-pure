@@ -245,7 +245,6 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
     const baseTags = getBaseTags('gelbooru', isnsfw);
     const searchTags = [ searchOpt.cmdtag, baseTags ].join(' ');
     const userTags = getSearchTags(words, 'gelbooru', searchOpt.cmdtag);
-    console.log({baseTags, stags: searchTags, extags: userTags });
     /**@type {import('discord.js').User} */
     const author = (request.author ?? request.user);
     
