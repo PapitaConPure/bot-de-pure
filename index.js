@@ -84,7 +84,7 @@ const logOptions = {
     commands: false,
     slash: false,
     prefixes: false,
-    feedSuscriptions: true,
+    feedSuscriptions: false,
 };
 
 //#region Detección de archivos de comandos

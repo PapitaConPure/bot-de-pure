@@ -850,7 +850,7 @@ const command = new CommandManager('feed', flags)
 		//Función en desuso. Permanece por compatibilidad
 		return this.showFeedImageTags(interaction);
 	})
-	.setButtonResponse(async function showFeedImageTags(interaction) {
+	.setButtonResponse(async function showFeedImageTags(interaction, isNotFeed) {
 		const locale = await fetchLocaleFor(interaction.user.id);
         const translator = new Translator(locale);
 
@@ -860,21 +860,29 @@ const command = new CommandManager('feed', flags)
 			const post = await booru.fetchPostByUrl(url);
 			const tags = shortenText(post.tags.join(', '), 1010);
 			const source = post.source;
-			return interaction.reply({
-				// content: `<:tagswhite:921788204540100608> **Tags**\n${tags}\n<:gelbooru:919398540172750878> **Post** <${url}>${ source ? `\n<:urlwhite:922669195521568818> **Fuente** <${source}>` : '' }`,
-				embeds: [
-					new EmbedBuilder()
-						.addFields(
-							{ name: '<:tagswhite:921788204540100608> Tags', value: `\`\`\`${tags}\`\`\`` },
-							{
-								name: '<:urlwhite:922669195521568818> Enlaces',
-								value: `[<:gelbooru:919398540172750878> **Post**](${url})${ source ? ` [<:heartwhite:969664712604262400> **Fuente**](${source})` : '' }`,
-							},
-						),
-				],
-				components: [new ActionRowBuilder().addComponents([
+			const tagsEmbed = new EmbedBuilder()
+				.setColor(Colors.Purple)
+				.addFields(
+					{ name: '<:tagswhite:921788204540100608> Tags', value: `\`\`\`${tags}\`\`\`` },
+					{
+						name: '<:urlwhite:922669195521568818> Enlaces',
+						value: `[<:gelbooru:919398540172750878> **Post**](${url})${ source ? ` [<:heartwhite:969664712604262400> **Fuente**](${source})` : '' }`,
+					},
+				);
+			const userId = compressId(interaction.user.id);
+			const tagsEditRow = new ActionRowBuilder();
+
+			if(isNotFeed)
+				tagsEditRow.addComponents([
 					new ButtonBuilder()
-						.setCustomId(`yo_modifyFollowedTags_${compressId(interaction.user.id)}_ALT`)
+						.setCustomId(`yo_goToDashboard_${userId}`)
+						.setLabel(translator.getText('goToUserPreferences'))
+						.setStyle(ButtonStyle.Primary),
+				]);
+			else
+				tagsEditRow.addComponents([
+					new ButtonBuilder()
+						.setCustomId(`yo_modifyFollowedTags_${userId}_ALT`)
 						.setEmoji('921788204540100608')
 						.setLabel(translator.getText('feedSetTagsButtonView'))
 						.setStyle(ButtonStyle.Primary),
@@ -888,7 +896,12 @@ const command = new CommandManager('feed', flags)
 						.setEmoji('1086797599287296140')
 						.setLabel(translator.getText('feedSetTagsButtonRemove'))
 						.setStyle(ButtonStyle.Danger),
-				])],
+				]);
+
+			return interaction.reply({
+				// content: `<:tagswhite:921788204540100608> **Tags**\n${tags}\n<:gelbooru:919398540172750878> **Post** <${url}>${ source ? `\n<:urlwhite:922669195521568818> **Fuente** <${source}>` : '' }`,
+				embeds: [tagsEmbed],
+				components: [tagsEditRow],
 				ephemeral: true,
 			});
 		} catch(error) {

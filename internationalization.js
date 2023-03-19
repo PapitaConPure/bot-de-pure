@@ -60,6 +60,10 @@ let localesObject = {
         'Finalizar',
         'Finish',
     ),
+    goToUserPreferences: new Translation(
+        'Preferencias de Usuario',
+        'User Preferences',
+    ),
     cancelledStepName: new Translation(
         'Asistente cancelado',
         'Wizard cancelled',

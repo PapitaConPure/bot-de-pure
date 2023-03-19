@@ -9,7 +9,7 @@ const rakki = require('../commands/Pure/rakkidei');
  * Genera un {@linkcode EmbedBuilder} a base de un {@linkcode Post} de {@linkcode Booru}
  * @param {import('discord.js').TextChannel} channel Canal al cual enviar el Embed
  * @param {Post} post Post de Booru
- * @param {{ maxTags: number?, title: string?, footer: string?, cornerIcon: string?, manageableBy: string? }} data Información adicional a mostrar en el Embed. Se puede pasar un feed directamente
+ * @param {{ maxTags: number?, title: string?, footer: string?, cornerIcon: string?, manageableBy: string?, isNotFeed?: Boolean }} data Información adicional a mostrar en el Embed. Se puede pasar un feed directamente
  */
 function formatBooruPostMessage(post, data = {}) {
     const maxTags = data.maxTags ?? 20;
@@ -89,7 +89,7 @@ function formatBooruPostMessage(post, data = {}) {
             .setEmoji('921788204540100608')
             .setStyle(ButtonStyle.Primary)
             .setLabel('❗ NUEVO / NEW') //Quitar esto luego de algunas versiones
-            .setCustomId('feed_showFeedImageTags'),
+            .setCustomId(`feed_showFeedImageTags_${data.isNotFeed ? 'NaF' : ''}`),
     );
     
     //Botón de Shock (temporal)
@@ -221,11 +221,17 @@ function isUnholy(isNsfw, request, terms) {
  * @param {import('../commands/Commons/typings').CommandRequest} request
  * @param {import('../commands/Commons/typings').CommandOptions} args
  * @param {Boolean} isSlash
+ * @param {import('../commands/Commons/cmdOpts').CommandOptionsManager} options
  */
 async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt = { cmdtag: '', nsfwtitle: 'Búsqueda NSFW', sfwtitle: 'Búsqueda' }) {
     const isnsfw = isThread(request.channel)
         ? request.channel.parent.nsfw
         : request.channel.nsfw;
+    
+    const poolSize = options.fetchFlag(args, 'bomba', { callback: f => Math.max(2, Math.min(f, 10)), fallback: 1 });
+    const words = isSlash
+        ? (args.getString('etiquetas') ?? '').split(/ +/)
+        : args;
 
     //Bannear lewds de Megumin y Holo >:C
     if(isUnholy(isnsfw, request, [ searchOpt.cmdtag, ...words ]))
@@ -236,22 +242,20 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
     else
         await request.deferReply();
 
-    const poolSize = options.fetchFlag(args, 'bomba', { callback: f => Math.max(2, Math.min(f, 10)), fallback: 1 });
-    const stags = [searchOpt.cmdtag, getBaseTags('gelbooru', isnsfw)].join(' ');
-    const words = isSlash
-        ? (args.getString('etiquetas') ?? '').split(/ +/)
-        : args;
-    const extags = getSearchTags(words, 'gelbooru', searchOpt.cmdtag);
+    const baseTags = getBaseTags('gelbooru', isnsfw);
+    const searchTags = [ searchOpt.cmdtag, baseTags ].join(' ');
+    const userTags = getSearchTags(words, 'gelbooru', searchOpt.cmdtag);
+    console.log({baseTags, stags: searchTags, extags: userTags });
     /**@type {import('discord.js').User} */
     const author = (request.author ?? request.user);
     
     //Petición
     try {
         const booru = new Booru(globalConfigs.booruCredentials);
-        const response = await booru.search([stags, extags], { limit: 100, random: true });
+        const response = await booru.search([ searchTags, userTags ], { limit: 100, random: true });
         //Manejo de respuesta
         if(!response.length) {
-            const replyOptions = { content: `:warning: No hay resultados en **Gelbooru** para las tags **"${extags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` };
+            const replyOptions = { content: `:warning: No hay resultados en **Gelbooru** para las tags **"${userTags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` };
             return request.editReply?.(replyOptions) ?? request.reply(replyOptions);
         }
 
@@ -267,9 +271,10 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
             title: isnsfw ? searchOpt.nsfwtitle : searchOpt.sfwtitle,
             cornerIcon: author.avatarURL({ size: 128 }),
             manageableBy: author.id,
+            isNotFeed: true,
         }));
-        if(extags.length)
-            messages[posts.length - 1].embeds[0].addFields({ name: 'Tu búsqueda', value: `:mag_right: *${extags.trim().replace('*', '\\*').split(/ +/).join(', ')}*` });
+        if(userTags.length)
+            messages[posts.length - 1].embeds[0].addFields({ name: 'Tu búsqueda', value: `:mag_right: *${userTags.trim().replace('*', '\\*').split(/ +/).join(', ')}*` });
 
         //Enviar mensajes
         const replyOptions = messages.shift();
