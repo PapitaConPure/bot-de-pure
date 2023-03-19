@@ -70,7 +70,7 @@ const command = new CommandManager('uwus', flags)
                     // console.log(sliceCollection);
                     return request.channel.bulkDelete(sliceCollection);
                 }),
-                request.reply({ embeds: [embed] }),
+                request.channel.send({ embeds: [embed] }),
             ]).catch(console.error);
         });
 
