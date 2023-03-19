@@ -2,7 +2,7 @@ const UserConfigs = require('./localdata/models/userconfigs');
 
 /**
  * @typedef {'en' | 'es'} LocaleKey
-*/
+ */
 
 /**@class */
 class Translation {
@@ -142,8 +142,8 @@ let localesObject = {
         'Choose the tags you wanna follow, no commas',
     ),
     feedEditTagsInputRemove: new Translation(
-        'Elige qué tags quieres dejar de seguir, sin comas',
-        'Choose which tags you wanna unfollow, no commas',
+        'Elige las tags a dejar de seguir, sin comas',
+        'Choose the tags you wanna unfollow, no commas',
     ),
 
     yoDashboardAuthor: new Translation(
