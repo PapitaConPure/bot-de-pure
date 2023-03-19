@@ -218,7 +218,7 @@ const command = new CommandManager('feed', flags)
 	})
 	.setModalResponse(async function setTags(interaction, channelId) {
 		const fetchedChannel = interaction.guild.channels.cache.get(channelId);
-		const input = interaction.fields.getTextInputValue('tagsInput');
+		const input = interaction.fields.getTextInputValue('tagsInput').toLowerCase().trim();
 
 		const guildQuery = { guildId: interaction.guild.id };
 		const gcfg = (await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery);
@@ -865,7 +865,7 @@ const command = new CommandManager('feed', flags)
 				.addFields(
 					{ name: '<:tagswhite:921788204540100608> Tags', value: `\`\`\`${tags}\`\`\`` },
 					{
-						name: '<:urlwhite:922669195521568818> Enlaces',
+						name: '<:urlwhite:922669195521568818> ' + translator.getText('feedViewUrlsName'),
 						value: `[<:gelbooru:919398540172750878> **Post**](${url})${ source ? ` [<:heartwhite:969664712604262400> **Fuente**](${source})` : '' }`,
 					},
 				);
