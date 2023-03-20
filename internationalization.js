@@ -12,6 +12,8 @@ class Translation {
      * @param {String} en El texto a mostrar en inglés
      */
     constructor(es, en) {
+        if(!es) throw ReferenceError('Se esperaba un texto en español');
+        if(!en) throw ReferenceError('Se esperaba un texto en inglés');
         this.es = es;
         this.en = en;
     }
@@ -48,6 +50,14 @@ function subif(i, condition, whenTrue, whenFalse = '') {
 }
 
 let localesObject = {
+    currentLanguage: new Translation(
+        'Español',
+        'English',
+    ),
+    dmDisclaimer: new Translation(
+        'Nota: Bot de Puré no opera con mensajes privados',
+        'Note: Bot de Puré does not operate with DMs',
+    ),
     back: new Translation(
         'Volver',
         'Back',
@@ -59,10 +69,6 @@ let localesObject = {
     finish: new Translation(
         'Finalizar',
         'Finish',
-    ),
-    goToUserPreferences: new Translation(
-        'Preferencias de Usuario',
-        'User Preferences',
     ),
     cancelledStepName: new Translation(
         'Asistente cancelado',
@@ -96,9 +102,9 @@ let localesObject = {
         'Desactivado',
         'Disabled',
     ),
-    currentLanguage: new Translation(
-        'Español',
-        'English',
+    goToUserPreferences: new Translation(
+        'Preferencias de Usuario',
+        'User Preferences',
     ),
 
     feedSelectFeed: new Translation(
@@ -152,6 +158,19 @@ let localesObject = {
     feedEditTagsInputRemove: new Translation(
         'Tags a dejar de seguir, sin comas',
         'Tags you wanna unfollow, without commas',
+    ),
+
+    booruNotifTitle: new Translation(
+        'Notificación de Feed Suscripto',
+        'Subscribed Feed Notification',
+    ),
+    booruNotifDescription: new Translation(
+        '¡Esta publicación podría interesarte!',
+        'This post could catch your eye!',
+    ),
+    booruNotifTagsName: new Translation(
+        'Tags de interés',
+        'Tags of interest',
     ),
 
     yoDashboardAuthor: new Translation(
@@ -298,6 +317,12 @@ class Translator {
     get next() {
         if(this.is('en')) return 'es';
         return 'en';
+    }
+
+    /**@param {String} userId*/
+    static async from(userId) {
+        const locale = await fetchLocaleFor(userId);
+        return new Translator(locale);
     }
 }
 
