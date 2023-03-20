@@ -4,6 +4,7 @@ const { Post, Booru } = require('../systems/boorufetch');
 const { getBaseTags, getSearchTags } = require('../localdata/booruprops');
 const globalConfigs = require('../localdata/config.json');
 const rakki = require('../commands/Pure/rakkidei');
+const { Translator } = require('../internationalization');
 
 /**
  * Genera un {@linkcode EmbedBuilder} a base de un {@linkcode Post} de {@linkcode Booru}
@@ -166,17 +167,18 @@ function notifyUsers(post, sent, feedSuscriptions) {
     if(!channel) throw 'No se encontró un canal para el mensaje enviado';
     const guild = channel.guild;
     const matchingSuscriptions = feedSuscriptions.filter(suscription => suscription.followedTags.some(tag => post.tags.includes(tag)));
-    return matchingSuscriptions.map(({ userId, followedTags }) => {
+    return matchingSuscriptions.map(async ({ userId, followedTags }) => {
         const user = guild.client.users.cache.get(userId);
+        const translator = await Translator.from(user.id);
         if(!channel || !user) return Promise.resolve();
         const matchingTags = followedTags.filter(tag => post.tags.includes(tag));
 
         const userEmbed = new EmbedBuilder()
             .setColor(sent.embeds[0].color ?? 0)
             .setAuthor({ name: guild.name, iconURL: guild.iconURL({ size: 128 }) })
-            .setTitle('Notificación de Feed Suscripto')
-            .setDescription('¡Se realizó un envío que puede interesarte!')
-            .setFooter({ text: 'Nota: Bot de Puré no opera con mensajes privados' })
+            .setTitle(translator.getText('booruNotifTitle'))
+            .setDescription(translator.getText('booruNotifDescription'))
+            .setFooter({ text: translator.getText('dmDisclaimer') })
             .setThumbnail(post.previewUrl)
             .addFields(
                 {
@@ -185,7 +187,7 @@ function notifyUsers(post, sent, feedSuscriptions) {
                     inline: true,
                 },
                 {
-                    name: 'Tags de interés',
+                    name: translator.getText('booruNotifTagsName'),
                     value: `\`\`\`\n${matchingTags.join(' ')}\n\`\`\``,
                     inline: true,
                 },
