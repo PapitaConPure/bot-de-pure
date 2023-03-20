@@ -1,4 +1,4 @@
-const { EmbedBuilder, Message, AttachmentBuilder } = require('discord.js');
+const { EmbedBuilder, Message, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const pixivToken = process.env.PIXIV_REFRESH_TOKEN ?? (require('../localenv.json')?.pixivtoken);
 const PixivApi = require('pixiv-api-client');
 const { shortenText } = require('../func');
@@ -133,10 +133,11 @@ const formatPixivPostsMessage = async (urls) => {
  */
 const sendPixivPostsAsWebhook = async (message) => {
     const { content, channel, author } = message;
-    if(!message.guild.members.me.permissions.has('ManageWebhooks'))
+    if(!message.guild.members.me.permissionsIn(channel).has([ 'ManageWebhooks', 'SendMessages', 'AttachFiles' ]))
         return;
 
-    const pixivUrls = Array.from(content.matchAll(pixivRegex)).filter(u => !u[0].startsWith('<') && !u[0].endsWith('>'));
+    const pixivUrls = Array.from(content.matchAll(pixivRegex))
+        .filter(u => !u[0].startsWith('<') && !u[0].endsWith('>'));
 
     if(!pixivUrls.length)
         return;
@@ -146,10 +147,16 @@ const sendPixivPostsAsWebhook = async (message) => {
     message.files ??= [];
     message.files.push(...newMessage.files);
     message.embeds ??= [];
+
+    console.log('-'.repeat('80'));
+    console.log(`${author.tag} ─ ${(new Date()).toLocaleString()}`);
+    console.log(`"${content}"`);
     
     message.embeds = message.embeds
-        .filter(embed => !(embed.type !== 'rich' && embed.url.includes('pixiv.net')))
+        .filter(embed => embed.type === 'rich' || !embed.url.includes('pixiv.net'))
         .map(embed => {
+            console.log(embed);
+            
             if(embed.type === 'rich')
                 return embed;
             
@@ -165,6 +172,12 @@ const sendPixivPostsAsWebhook = async (message) => {
             return embed;
         }).filter(embed => embed);
     message.embeds.push(...newMessage.embeds);
+    message.components = [new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId(`feed_deletePost_${author.id}`)
+            .setEmoji('921751138997514290')
+            .setStyle(ButtonStyle.Danger),
+    )];
 
     try {
         const agent = await (new DiscordAgent().setup(channel));
