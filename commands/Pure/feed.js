@@ -858,7 +858,7 @@ const command = new CommandManager('feed', flags)
 		const booru = new Booru(globalConfigs.booruCredentials);
 		try {
 			const post = await booru.fetchPostByUrl(url);
-			const tags = shortenText(post.tags.join(', '), 1010);
+			const tags = shortenText(post.tags.join(' '), 1010);
 			const source = post.source;
 			const tagsEmbed = new EmbedBuilder()
 				.setColor(Colors.Purple)
