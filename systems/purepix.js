@@ -174,7 +174,7 @@ const sendPixivPostsAsWebhook = async (message) => {
     message.embeds.push(...newMessage.embeds);
     message.components = [new ActionRowBuilder().addComponents(
         new ButtonBuilder()
-            .setCustomId(`feed_deletePost_${author.id}`)
+            .setCustomId(`feed_deletePost_${author.id}_NaF`)
             .setEmoji('921751138997514290')
             .setStyle(ButtonStyle.Danger),
     )];
