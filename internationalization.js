@@ -56,7 +56,7 @@ let localesObject = {
     ),
     dmDisclaimer: new Translation(
         'Nota: Bot de Puré no opera con mensajes privados',
-        'Note: Bot de Puré does not operate with DMs',
+        'Note: Bot de Puré does not reply to DMs',
     ),
     back: new Translation(
         'Volver',
@@ -74,17 +74,9 @@ let localesObject = {
         'Asistente cancelado',
         'Wizard cancelled',
     ),
-    cancelledStepValue: new Translation(
-        'Se canceló la configuración de Preferencias de Usuario',
-        'The User Preferences configuration was cancelled',
-    ),
     cancelledStepFooterName: new Translation(
         'Operación Abortada',
         'Operation Aborted',
-    ),
-    finishedStepDescription: new Translation(
-        'Se cerró el Asistente de Preferencias de Usuario',
-        'The User Preferences Wizard has been closed',
     ),
     finishedStepFooterName: new Translation(
         'Operación Finalizada',
@@ -107,6 +99,14 @@ let localesObject = {
         'User Preferences',
     ),
 
+    feedCancelledStep: new Translation(
+        'Se canceló la configuración de Feeds',
+        'The Feeds Wizard has been terminated',
+    ),
+    feedFinishedStep: new Translation(
+        'Se finalizó la configuración de Feeds',
+        'The Feeds Wizard has been closed',
+    ),
     feedSelectFeed: new Translation(
         'Selecciona un Feed...',
         'Select a Feed...',
@@ -159,6 +159,22 @@ let localesObject = {
         'Tags a dejar de seguir, sin comas',
         'Tags you wanna unfollow, without commas',
     ),
+    feedDeletePostTitle: new Translation(
+        'Post Eliminado',
+        'Post Deleted',
+    ),
+    feedDeletePostAdvice: new Translation(
+        'Puedes blacklistear tags si colocas un "-" delante',
+        'You can blacklist a tag if you put a "-" in front',
+    ),
+    feedDeletePostTagsName: new Translation(
+        'Tags Rescatadas',
+        'Recovered Tags',
+    ),
+    feedDeletePostLinkName: new Translation(
+        'Enlace',
+        'Link',
+    ),
 
     booruNotifTitle: new Translation(
         'Notificación de Feed Suscripto',
@@ -169,10 +185,18 @@ let localesObject = {
         'This post could catch your eye!',
     ),
     booruNotifTagsName: new Translation(
-        'Tags de interés',
-        'Tags of interest',
+        'Tags de Interés',
+        'Tags of Interest',
     ),
 
+    yoCancelledStep: new Translation(
+        'Se canceló la configuración de Preferencias de Usuario',
+        'The User Preferences configuration was cancelled',
+    ),
+    yoFinishedStep: new Translation(
+        'Se cerró el Asistente de Preferencias de Usuario',
+        'The User Preferences Wizard has been closed',
+    ),
     yoDashboardAuthor: new Translation(
         'Preferencias de Usuario',
         'User Preferences',

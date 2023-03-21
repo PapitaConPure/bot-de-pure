@@ -7,8 +7,7 @@ const { CommandMetaFlagsManager } = require('../Commons/cmdFlags.js');
 const globalConfigs = require('../../localdata/config.json');
 const { Booru } = require('../../systems/boorufetch.js');
 const { CommandManager } = require('../Commons/cmdBuilder.js');
-const { addGuildToFeedUpdateStack, feedTagSuscriptionsCache } = require('../../systems/boorufeed.js');
-const UserConfigs = require('../../localdata/models/userconfigs.js');
+const { addGuildToFeedUpdateStack } = require('../../systems/boorufeed.js');
 const { Translator, fetchLocaleFor } = require('../../internationalization.js');
 
 const wiztitle = 'Asistente de configuración de Feed de imágenes';
@@ -827,20 +826,22 @@ const command = new CommandManager('feed', flags)
 		});
 	})
 	.setButtonResponse(async function cancelWizard(interaction) {
+		const translator = await Translator.from(interaction.user.id);
 		const cancelEmbed = new EmbedBuilder()
 			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
-			.setFooter({ text: 'Operación abortada' })
-			.addFields({ name: 'Asistente cancelado', value: 'Se canceló la configuración de Feed' });
+			.setFooter({ text: translator.getText('cancelledStepFooterName') })
+			.addFields({ name: translator.getText('cancelledStepName'), value: translator.getText('feedCancelledStep') });
 		return interaction.update({
 			embeds: [cancelEmbed],
 			components: [],
 		});
 	})
 	.setButtonResponse(async function finishWizard(interaction) {
+		const translator = await Translator.from(interaction.user.id);
 		const cancelEmbed = new EmbedBuilder()
 			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
-			.setFooter({ text: 'Operación concluída' })
-			.setDescription('Se finalizó la configuración de Feeds');
+			.setFooter({ text: translator.getText('finishedStepFooterName') })
+			.setDescription(translator.getText('feedFinishedStep'));
 		return interaction.update({
 			embeds: [cancelEmbed],
 			components: [],
@@ -858,12 +859,12 @@ const command = new CommandManager('feed', flags)
 		const booru = new Booru(globalConfigs.booruCredentials);
 		try {
 			const post = await booru.fetchPostByUrl(url);
-			const tags = shortenText(post.tags.join(' '), 1010);
+			const tags = shortenText(`\`\`\`${post.tags.join(' ')}\`\`\``, 1024);
 			const source = post.source;
 			const tagsEmbed = new EmbedBuilder()
 				.setColor(Colors.Purple)
 				.addFields(
-					{ name: '<:tagswhite:921788204540100608> Tags', value: `\`\`\`${tags}\`\`\`` },
+					{ name: '<:tagswhite:921788204540100608> Tags', value: tags },
 					{
 						name: '<:urlwhite:922669195521568818> ' + translator.getText('feedViewUrlsName'),
 						value: `[<:gelbooru:919398540172750878> **Post**](${url})${ source ? ` [<:heartwhite:969664712604262400> **Fuente**](${source})` : '' }`,
@@ -941,23 +942,63 @@ const command = new CommandManager('feed', flags)
 
 		return interaction.showModal(modal).catch(auditError);
 	})
-	.setButtonResponse(async function deletePost(interaction, manageableBy) {
+	.setButtonResponse(async function deletePost(interaction, manageableBy, isNotFeed) {
+		const translator = await Translator.from(interaction.user.id);
+
 		if(manageableBy !== interaction.user.id && isNotModerator(interaction.member))
 			return interaction.reply({
-				content: ':x: No tienes permiso para hacer eso, teehee~',
+				content: translator.getText('unauthorizedInteraction'),
 				ephemeral: true,
 			});
 		
 		const { message } = interaction;
 		const url = message.components[0].components[0].url;
+		if(isNotFeed || !url)
+			return Promise.all([
+				interaction.reply({
+					content: `**${translator.getText('feedDeletePostTitle')}**`,
+					ephemeral: true,
+				}),
+				message.delete().catch(console.error),
+			]);
+		
 		const booru = new Booru(globalConfigs.booruCredentials);
 		const post = await booru.fetchPostByUrl(url);
-		let tags;
-		if(post)
-			tags = shortenText(post.tags.join(', '), 1600);
+		if(!post)
+			return Promise.all([
+				interaction.reply({
+					content: `<:gelbooru:919398540172750878> **${translator.getText('feedDeletePostTitle')}** <${url}>`,
+					ephemeral: true,
+				}),
+				message.delete().catch(console.error),
+			]);
+
+		const tags = shortenText(`\`\`\`\n${post.tags.join(' ')}\n\`\`\``, 1024);
+		const embed = new EmbedBuilder()
+			.setColor(Colors.DarkRed)
+			.setTitle(translator.getText('feedDeletePostTitle'))
+			.setDescription(translator.getText('feedDeletePostAdvice'))
+			.addFields(
+				{
+					name: `<:tagswhite:921788204540100608> ${translator.getText('feedDeletePostTagsName')}`,
+					value: tags,
+				},
+				{
+					name: `<:urlwhite:922669195521568818> ${translator.getText('feedDeletePostLinkName')}`,
+					value: `[Gelbooru](${url})`,
+				},
+			);
+		const row = new ActionRowBuilder().addComponents(
+			new ButtonBuilder()
+				.setCustomId('feed_startWizard')
+				.setLabel('Configurar Feeds...')
+				.setStyle(ButtonStyle.Primary),
+		);
+
 		return Promise.all([
 			interaction.reply({
-				content: `<:gelbooru:919398540172750878> **Eliminado** <${url}>\n<:tagswhite:921788204540100608> **Tags rescatadas** *Puedes revisarlas y blacklistear algunas con "-"*\n${tags}`,
+				embeds: [embed],
+				components: [row],
 				ephemeral: true,
 			}),
 			message.delete().catch(console.error),
@@ -973,6 +1014,6 @@ const command = new CommandManager('feed', flags)
 		gcfg.markModified('feeds');
 		await gcfg.save();
 		return interaction.reply({ content: 'Shock aplicado.', ephemeral: true });
-	})
+	});
 
 module.exports = command;
