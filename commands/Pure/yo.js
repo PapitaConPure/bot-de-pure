@@ -365,7 +365,7 @@ const command = new CommandManager('yo', flags)
 		const cancelEmbed = wizEmbed(interaction.client.user.avatarURL(), 'cancelledStepFooterName', Colors.NotQuiteBlack, translator)
 			.addFields({
 				name: translator.getText('cancelledStepName'),
-				value: translator.getText('cancelledStepValue'),
+				value: translator.getText('yoCancelledStep'),
 			});
 		return interaction.update({
             content: null,
@@ -381,7 +381,7 @@ const command = new CommandManager('yo', flags)
 			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
 		
 		const cancelEmbed = wizEmbed(interaction.client.user.avatarURL(), 'finishedStepFooterName', Colors.NotQuiteBlack, translator)
-			.setDescription(translator.getText('finishedStepDescription'));
+			.setDescription(translator.getText('yoFinishedStep'));
 		return interaction.update({
             content: null,
 			embeds: [cancelEmbed],
