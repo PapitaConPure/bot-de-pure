@@ -113,7 +113,7 @@ function formatBooruPostMessage(post, data) {
         new ButtonBuilder()
             .setEmoji('921751138997514290')
             .setStyle(ButtonStyle.Danger)
-            .setCustomId(`feed_deletePost${ `_${data.manageableBy}` ?? '' }`),
+            .setCustomId(`feed_deletePost${ `_${data.manageableBy}` ?? '' }_${data.isNotFeed ?? ''}`),
     );
 
     //Preparar Embed final
