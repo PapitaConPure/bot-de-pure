@@ -8,7 +8,7 @@ const globalConfigs = require('../../localdata/config.json');
 const { Booru } = require('../../systems/boorufetch.js');
 const { CommandManager } = require('../Commons/cmdBuilder.js');
 const { addGuildToFeedUpdateStack } = require('../../systems/boorufeed.js');
-const { Translator, fetchLocaleFor } = require('../../internationalization.js');
+const { Translator } = require('../../internationalization.js');
 
 const wiztitle = 'Asistente de configuración de Feed de imágenes';
 const cancelbutton = new ButtonBuilder()
@@ -113,9 +113,14 @@ const command = new CommandManager('feed', flags)
 			.setAuthor({ name: wiztitle, iconURL: interaction.client.user.avatarURL() })
 			.setFooter({ text: 'Seleccionar operación' })
 			.addFields({ name: 'Selecciona una operación', value: '¿Qué deseas hacer ahora mismo?' });
-			
+		
 		const guildQuery = { guildId: interaction.guild.id };
-		const gcfg = (await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery);
+		const promises = await Promise.all([
+			GuildConfig.findOne(guildQuery),
+			Translator.from(interaction.user.id),
+		]);
+		const gcfg = promises[0] || new GuildConfig(guildQuery);
+		const translator = promises[1];
 		const premade = gcfg.feeds && Object.keys(gcfg.feeds).length;
 		return interaction.update({
 			embeds: [wizard],
@@ -123,11 +128,13 @@ const command = new CommandManager('feed', flags)
 				new ActionRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_createNew')
-						.setLabel('Crear un nuevo Feed')
+						.setEmoji('1051265601152229436')
+						.setLabel(translator.getText('buttonCreate'))
 						.setStyle(ButtonStyle.Success),
 					new ButtonBuilder()
 						.setCustomId('feed_selectDelete')
-						.setLabel('Eliminar un Feed')
+						.setEmoji('921751138997514290')
+						.setLabel(translator.getText('buttonDelete'))
 						.setStyle(ButtonStyle.Danger)
 						.setDisabled(!premade),
 					finishButton,
@@ -135,17 +142,20 @@ const command = new CommandManager('feed', flags)
 				new ActionRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_selectEdit')
-						.setLabel('Editar un Feed')
+						.setEmoji('921788204540100608')
+						.setLabel(translator.getText('buttonEdit'))
 						.setStyle(ButtonStyle.Primary)
 						.setDisabled(!premade),
 					new ButtonBuilder()
 						.setCustomId('feed_selectCustomize')
-						.setLabel('Personalizar un Feed')
+						.setEmoji('935665140601327626')
+						.setLabel(translator.getText('buttonCustomize'))
 						.setStyle(ButtonStyle.Primary)
 						.setDisabled(!premade),
 					new ButtonBuilder()
 						.setCustomId('feed_selectView')
-						.setLabel('Ver un Feed')
+						.setEmoji('1087075525245272104')
+						.setLabel(translator.getText('buttonView'))
 						.setStyle(ButtonStyle.Primary)
 						.setDisabled(!premade),
 				),
@@ -183,6 +193,12 @@ const command = new CommandManager('feed', flags)
 			
 		if(!fetchedChannel)
 			return interaction.reply({ content: '⚠ Canal inválido', ephemeral: true });
+
+		const guildQuery = { guildId: interaction.guild.id };
+		const gcfg = (await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery);
+
+		if(gcfg?.feeds && gcfg.feeds.hasOwnProperty(fetchedChannel.id))
+			return interaction.reply({ content: '⚠ Ya existe un Feed en el canal solicitado. Prueba editarlo o crear un Feed en otro canal', ephemeral: true });
 
 		const wizard = tagsSetupPrompt(interaction, fetchedChannel.id);
 		return interaction.update({
@@ -852,8 +868,7 @@ const command = new CommandManager('feed', flags)
 		return this.showFeedImageTags(interaction);
 	})
 	.setButtonResponse(async function showFeedImageTags(interaction, isNotFeed) {
-		const locale = await fetchLocaleFor(interaction.user.id);
-        const translator = new Translator(locale);
+        const translator = await Translator.from(interaction.user.id);
 
 		const url = interaction.message.components[0].components[0].url;
 		const booru = new Booru(globalConfigs.booruCredentials);
@@ -914,8 +929,7 @@ const command = new CommandManager('feed', flags)
 		}
 	})
 	.setButtonResponse(async function editFollowedTags(interaction, operation) {
-		const locale = await fetchLocaleFor(interaction.user.id);
-        const translator = new Translator(locale);
+        const translator = await Translator.from(interaction.user.id);
 
 		const tagsInput = new TextInputBuilder()
 			.setCustomId('tagsInput')
