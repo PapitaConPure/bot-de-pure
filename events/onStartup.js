@@ -7,23 +7,29 @@ const UserConfigs = require('../localdata/models/userconfigs.js');
 const { Puretable, defaultEmote } = require('../localdata/models/puretable.js');
 const HouraiDB = require('../localdata/models/hourai.js');
 
-const envPath = '../localenv.json';
-// const envPath = '../remoteenv.json';
-const mongoUri = process.env.MONGODB_URI ?? (require(envPath)?.dburi);
-
 const globalConfigs = require('../localdata/config.json');
+const envPath = globalConfigs.remoteStartup ? '../remoteenv.json' : '../localenv.json';
+const mongoUri = process.env.MONGODB_URI ?? (require(envPath)?.dburi);
+const discordToken = process.env.I_LOVE_MEGUMIN ?? (require(envPath)?.token);
+const booruApiKey = process.env.BOORU_APIKEY ?? (require(envPath)?.booruapikey);
+const booruUserId = process.env.BOORU_USERID ?? (require(envPath)?.booruuserid);
+
 const { setupGuildFeedUpdateStack, feedTagSuscriptionsCache } = require('../systems/boorufeed');
 const { modifyPresence } = require('../presence.js');
 const { auditSystem } = require('../systems/auditor.js');
 
-//Funcionalidad adicional
 const { registerFont, loadImage } = require('canvas');
 const { lookupService } = require('dns');
 const { promisify } = require('util');
 const chalk = require('chalk');
-//#endregion
 
-async function startup(client, discordToken, logOptions) {
+const logOptions = {
+    slash: false,
+    prefixes: false,
+    feedSuscriptions: false,
+};
+
+async function onStartup(client) {
     const confirm = () => console.log(chalk.green('Hecho.'));
     globalConfigs.maintenance = '1';
 
@@ -90,10 +96,6 @@ async function startup(client, discordToken, logOptions) {
         globalConfigs.p_pure[pp.guildId] = {
             raw: pp.pure.raw,
             regex: pp.pure.regex,
-        };
-        globalConfigs.p_drmk[pp.guildId] = {
-            raw: pp.drmk.raw,
-            regex: pp.drmk.regex,
         };
     });
     logOptions.prefixes && console.table(globalConfigs.p_pure);
@@ -199,5 +201,8 @@ async function startup(client, discordToken, logOptions) {
 }
 
 module.exports = {
-    startup,
-}
+    onStartup,
+    discordToken,
+    booruApiKey,
+    booruUserId,
+};

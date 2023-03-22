@@ -83,7 +83,7 @@ Esta lista de objetivos busca darle legibilidad y mantenibilidad a todo lo que c
 - [ ] Optimizar todos los comandos
 - [ ] Optimizar todo func.js
 - [ ] Extraer algunos objetos de config.json en nuevos archivos
-- [ ] Deshacer el desastre de index.js en muchos archivos. Revisar lógica
+- [x] Deshacer el desastre de index.js en muchos archivos. Revisar lógica
 
 ## Integrantes
 Personas involucradas en el desarrollo de Bot de Puré, con sus tags de Discord.
