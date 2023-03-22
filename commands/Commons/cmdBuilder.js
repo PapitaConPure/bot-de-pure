@@ -137,6 +137,14 @@ class CommandManager {
     setModalResponse(responseFn) {
         return this.setFunction(responseFn)
     };
+
+    /**@param {import('./typings').CommandRequest} request*/
+    static requestize(request) {
+        if(request.author)
+            request.user = request.author;
+        
+        request.userId ??= request.user.id;
+    }
 };
 
 module.exports = {
