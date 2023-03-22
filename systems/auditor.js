@@ -67,6 +67,16 @@ async function auditAction(action, ...fields) {
     return global.logch?.send({ embeds: [embed] }).catch(console.error);
 };
 
+// function handleSubErrors(embed, errors) {
+//     const key = errors.key;
+//     const error = errors.error;
+//     if(!Array.isArray(errors)) return;
+
+//     embed.addFields({ name: 'Sub-error', value: `\`\`\`\n${`${error.name}` || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\`` });
+
+//     handleSubErrors(embed, errors.errors);
+// }
+
 /**
  * @param {Error} error
  * @typedef {{ request: import('../commands/Commons/typings').CommandRequest, brief: String, details: String, ping: Boolean }} AuditErrorOptions
@@ -81,6 +91,8 @@ async function auditError(error, { request, brief, details, ping = false } = { p
         embed.addFields({ name: userTag, value: getRequestContent(request) });
     }
     embed.addFields({ name: brief || 'Ha ocurrido un error al ejecutar una acción', value: `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\`` });
+    // handleSubErrors(embed, error.errors);
+        
     if(details)
         embed.addFields({ name: 'Detalle', value: details });
     
