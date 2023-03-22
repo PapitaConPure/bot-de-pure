@@ -25,6 +25,11 @@ class Translation {
     }
 }
 
+/**@param {...String} lines*/
+function paragraph(...lines) {
+    return lines.join('\n');
+}
+
 /**
  * @param {Number} i Índice del valor de reemplazo
  * @param {String?} defaultValue Valor por defecto si no se ingresó un valor en el índice
@@ -58,18 +63,68 @@ let localesObject = {
         'Nota: Bot de Puré no opera con mensajes privados',
         'Note: Bot de Puré does not reply to DMs',
     ),
-    back: new Translation(
+    dmInteraction: new Translation(
+        '❌ Solo respondo a comandos en servidores',
+        '❌ I only respond to commands on servers',
+    ),
+    blockedInteraction: new Translation(
+        paragraph(
+            '⛔ Probablemente usaste un comando mientras me reiniciaba. Usa el comando nuevamente en unos segundos y debería funcionar',
+            'Si el comando se sigue rechazando, es posible que esté en mantenimiento o que no tenga suficientes permisos en este canal',
+            `Si no sabes la causa, puedes notificarle el problema a mi creador: <@${subl(0)}>`,
+        ),
+        paragraph(
+            '⛔ You probably used a command while I was restarting. Use the command again in a few seconds and it should work',
+            'If the command keeps getting rejected, I may be in maintenance or not have enough permissions in this channel',
+            `If you're not sure, you can tell my creator about the problem: <@${subl(0)}>`,
+        ),
+    ),
+    unknownInteraction: new Translation(
+        '🍔 Recibí una acción, pero no sé cómo responderla. Esto es un problema... mientras arreglo algunas cosas, toma una hamburguesa',
+        '🍔 I received an action, but I don\'t know how to reply to it. This is a problem... while I fix some things, take this burger',
+    ),
+    huskInteraction: new Translation(
+        '☕ Parece que encontraste un botón, menú desplegable o ventana modal sin función. Mientras conecto algunos cables, ten un café',
+        '☕ Seems like you found a button, select menu, or modal window without a function. While I wire some things up, take this coffee',
+    ),
+    unauthorizedInteraction: new Translation(
+        '❌ No puedes hacer eso',
+        '❌ You can\'t do that',
+    ),
+
+    buttonCreate: new Translation(
+        'Crear',
+        'Create',
+    ),
+    buttonDelete: new Translation(
+        'Eliminar',
+        'Delete',
+    ),
+    buttonEdit: new Translation(
+        'Editar',
+        'Edit',
+    ),
+    buttonCustomize: new Translation(
+        'Personalizar',
+        'Customize',
+    ),
+    buttonView: new Translation(
+        'Ver',
+        'View',
+    ),
+    buttonBack: new Translation(
         'Volver',
         'Back',
     ),
-    cancel: new Translation(
+    buttonCancel: new Translation(
         'Cancelar',
         'Cancel',
     ),
-    finish: new Translation(
+    buttonFinish: new Translation(
         'Finalizar',
         'Finish',
     ),
+
     cancelledStepName: new Translation(
         'Asistente cancelado',
         'Wizard cancelled',
@@ -81,10 +136,6 @@ let localesObject = {
     finishedStepFooterName: new Translation(
         'Operación Finalizada',
         'Operation Concluded',
-    ),
-    unauthorizedInteraction: new Translation(
-        '❌ No puedes hacer eso',
-        '❌ You can\'t do that',
     ),
     toggledOn: new Translation(
         'Activado',
@@ -98,7 +149,11 @@ let localesObject = {
         'Preferencias de Usuario',
         'User Preferences',
     ),
-
+    
+    feedAuthor: new Translation(
+        'Asistente de configuración de Feed de imágenes',
+        'Imageboard Feed Configuration Wizard',
+    ),
     feedCancelledStep: new Translation(
         'Se canceló la configuración de Feeds',
         'The Feeds Wizard has been terminated',
@@ -302,6 +357,47 @@ function getText(id, locale, ...values) {
     return translation;
 }
 
+/**@type {Map<String, LocaleKey>}*/
+const userLocalesCache = new Map();
+
+/**
+ * Guarda una ID en caché para uso posterior
+ * @param {String} userId 
+ */
+async function cacheLocale(userId) {
+    if(!userId) throw ReferenceError('Se esperaba una ID de usuario');
+    const userQuery = { userId };
+    let userConfigs = await UserConfigs.findOne(userQuery);
+    if(!userConfigs) {
+        userConfigs = new UserConfigs(userQuery);
+        await userConfigs.save();
+    }
+
+    return userLocalesCache.set(userId, userConfigs.language);
+}
+
+/**
+ * Sobreescribe una ID en caché para uso posterior
+ * @param {String} userId 
+ */
+async function recacheLocale(userId) {
+    return cacheLocale(userId);
+}
+
+/**
+ * Devuelve el lenguaje vinculado a la ID de usuario cacheada.
+ * Si la ID no está cacheada, se realiza una llamada a la base de datos, se cachea el lenguaje del usuario y se devuelve lo obtenido
+ * @param {String} userId 
+ * @returns {Promise<LocaleKey>}
+ */
+async function fetchLocaleFor(userId) {
+    if(!userId) throw ReferenceError('Se esperaba una ID de usuario al recolectar lenguaje');
+    if(!userLocalesCache.has(userId))
+        await cacheLocale(userId);
+    
+    return userLocalesCache.get(userId);
+}
+
 /**Clase de traducción de contenidos*/
 class Translator {
     #locale
@@ -350,46 +446,7 @@ class Translator {
     }
 }
 
-/**@type {Map<String, LocaleKey>}*/
-const userLocalesCache = new Map();
-
-/**
- * Guarda una ID en caché para posterior uso
- * @param {String} userId 
- */
-async function cacheLocale(userId) {
-    if(!userId) throw ReferenceError('Se esperaba una ID de usuario');
-    const userQuery = { userId };
-    let userConfigs = await UserConfigs.findOne(userQuery);
-    if(!userConfigs) {
-        userConfigs = new UserConfigs(userQuery);
-        await userConfigs.save();
-    }
-
-    return userLocalesCache.set(userId, userConfigs.language);
-}
-
-/**
- * Devuelve el lenguaje vinculado a la ID de usuario cacheada.
- * Si la ID no está cacheada, se realiza una llamada a la base de datos, se cachea el lenguaje del usuario y se devuelve lo obtenido
- * @param {String} userId 
- * @returns {Promise<LocaleKey>}
- */
-async function fetchLocaleFor(userId) {
-    if(!userId) throw ReferenceError('Se esperaba una ID de usuario al recolectar lenguaje');
-    if(!userLocalesCache.has(userId))
-        await cacheLocale(userId);
-    
-    return userLocalesCache.get(userId);
-}
-
-async function recacheLocale(userId) {
-    return cacheLocale(userId);
-}
-
 module.exports = {
-    getText,
-    Translator,
-    fetchLocaleFor,
     recacheLocale,
+    Translator,
 };
