@@ -2,7 +2,7 @@ const UserConfigs = require('../../localdata/models/userconfigs');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Embed, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder } = require('discord.js');
 const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 const { tenshiColor } = require('../../localdata/config.json');
-const { Translator, fetchLocaleFor, recacheLocale } = require('../../internationalization');
+const { Translator, recacheLocale } = require('../../internationalization');
 const { compressId, shortenText, decompressId } = require('../../func');
 const { auditError } = require('../../systems/auditor');
 const { updateFollowedFeedTagsCache } = require('../../systems/boorufeed');
@@ -26,7 +26,7 @@ function displayToggle(toggle, translator) {
  */
 const backToDashboardButton = (id, translator) => new ButtonBuilder()
     .setCustomId(`yo_goToDashboard_${compressId(id)}`)
-    .setLabel(translator.getText('back'))
+    .setLabel(translator.getText('buttonBack'))
     .setStyle(ButtonStyle.Secondary);
 /**
  * @param {String} id
@@ -34,7 +34,7 @@ const backToDashboardButton = (id, translator) => new ButtonBuilder()
  */
 const cancelbutton = (id, translator) => new ButtonBuilder()
 	.setCustomId(`yo_cancelWizard_${id}`)
-	.setLabel(translator.getText('cancel'))
+	.setLabel(translator.getText('buttonCancel'))
 	.setStyle(ButtonStyle.Secondary);
 /**
  * @param {Number} stepCount
@@ -68,7 +68,7 @@ const dashboardRows = (userId, userConfigs, translator) => [
             .setDisabled(!userConfigs.feedTagSuscriptions.size),
         new ButtonBuilder()
             .setCustomId(`yo_exitWizard_${userId}`)
-            .setLabel(translator.getText('finish'))
+            .setLabel(translator.getText('buttonFinish'))
             .setStyle(ButtonStyle.Secondary),
     ),
 ];
@@ -144,7 +144,7 @@ const followedTagsRows = (userId, channelId, translator, isAlt) => [
             .setStyle(ButtonStyle.Danger),
         new ButtonBuilder()
             .setCustomId(`yo_selectFTC_${userId}`)
-            .setLabel(translator.getText('back'))
+            .setLabel(translator.getText('buttonBack'))
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(!!isAlt),
         cancelbutton(userId, translator)
@@ -278,8 +278,7 @@ const command = new CommandManager('yo', flags)
 	.setButtonResponse(async function editFT(interaction, authorId, channelId, operation) {
         channelId = decompressId(channelId);
 		const { user } = interaction;
-		const locale = await fetchLocaleFor(user.id);
-        const translator = new Translator(locale);
+        const translator = await Translator.from(user.id);
 		
 		if(compressId(user.id) !== authorId)
             return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
@@ -356,8 +355,7 @@ const command = new CommandManager('yo', flags)
 		return interaction.update(updateContent).catch(() => interaction.reply(updateContent));
 	})
 	.setButtonResponse(async function cancelWizard(interaction, authorId) {
-		const locale = await fetchLocaleFor(authorId);
-        const translator = new Translator(locale);
+        const translator = await Translator.from(authorId);
 
 		if(interaction.user.id !== authorId)
 			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
@@ -374,8 +372,7 @@ const command = new CommandManager('yo', flags)
 		});
 	})
 	.setButtonResponse(async function exitWizard(interaction, authorId) {
-		const locale = await fetchLocaleFor(authorId);
-        const translator = new Translator(locale);
+        const translator = await Translator.from(authorId);
 
 		if(interaction.user.id !== authorId)
 			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
