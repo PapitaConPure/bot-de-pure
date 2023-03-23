@@ -21,7 +21,7 @@ function tuberExecute(input) {
 
 //#region Esqueleto de PuréScript
 /**Evalua el tipo de Tubérculo (básico o avanzado) y lo ejecuta. Si es avanzado, se ejecutará con PuréScript
- * @typedef {{tuberId?: String, author: String, content?: String | null, files?: Array<String>, script?: Array<TuberExpression>, inputs?: Array<{identifier: String, required: Boolean, desc: String}>}} Tubercle
+ * @typedef {{tuberId?: String, author: String, content?: String | null, files?: Array<String>, script?: String, inputs?: Array<{identifier: String, required: Boolean, desc: String}>}} Tubercle
  * @function
  * @param {import("../commands/Commons/typings").CommandRequest} request
  * @param {Tubercle} tuber 
@@ -92,13 +92,14 @@ const executeTuber = async (request, tuber, { tuberArgs }) => {
             });
         } else if(error.name === 'TuberInitializerError') {
             embed.setColor(Colors.Yellow);
-            replyContent.components = [new ActionRowBuilder().addComponents(
-                new ButtonBuilder()
-                    .setCustomId(`tubérculo_getTuberHelp_${tuber.tuberId}`)
-                    .setLabel('Ver Tubérculo')
-                    .setEmoji('🔎')
-                    .setStyle(ButtonStyle.Primary),
-            )];
+            if(tuber.tuberId)
+                replyContent.components = [new ActionRowBuilder().addComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`tubérculo_getTuberHelp_${tuber.tuberId}`)
+                        .setLabel('Ver Tubérculo')
+                        .setEmoji('🔎')
+                        .setStyle(ButtonStyle.Primary),
+                )];
         } else
             embed.setColor(Colors.Red);
 
