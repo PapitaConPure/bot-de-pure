@@ -318,7 +318,7 @@ const command = new CommandManager('tubérculo', flags)
 				if(isPureScript) {
 					if(!mcontent)
 						return request.reply({ content: `⚠️ Este Tubérculo requiere ingresar PuréScript\n${helpString}` });
-					tuberContent.script = mcontent.replace('```arm', '');
+					tuberContent.script = mcontent.replace(/```[A-Za-z0-9]*/, '');
 					console.log({ script: tuberContent.script });
 				} else {
 					if(!mcontent && !mfiles.length)
