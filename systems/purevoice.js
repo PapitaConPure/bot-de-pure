@@ -39,7 +39,7 @@ class PureVoiceUpdateHandler {
     };
 
     /** Comprueba si hay un sistema PuréVoice instalado en el servidor actual o no */
-    systemIsInstalled = _ => this.pvDocument && this.state.guild.channels.cache.get(this.pvDocument.categoryId);
+    systemIsInstalled = () => (!!(this.pvDocument && this.state.guild.channels.cache.get(this.pvDocument.categoryId)));
     
     /** Para controlar errores ocasionados por una eliminación prematura de uno de los canales asociados a una sesión */
     prematureError = _ => console.log(chalk.gray('Canal probablemente eliminado prematuramente'));
@@ -288,6 +288,52 @@ class PureVoiceUpdateHandler {
     };
 }
 
+class PureVoiceOrchestrator {
+    /**@type {String}*/
+    #guildId;
+    /**@type {Array<PureVoiceUpdateHandler>}*/
+    #handlers;
+    /**@type {Boolean}*/
+    #busy;
+
+    constructor(guildId) {
+        this.#guildId = guildId;
+        this.#handlers = [];
+        this.#busy = false;
+    }
+
+    /**@param {PureVoiceUpdateHandler} updateHandler*/
+    orchestrate(updateHandler) {
+        this.#handlers.push(updateHandler);
+        if(this.#busy) return;
+        this.#busy = true;
+        return this.consumeHandler();
+    }
+
+    async consumeHandler() {
+        const pv = this.#handlers.shift();
+        await pv.getSystemDocument({ guildId: this.#guildId }).catch(console.error);
+        if(!pv.systemIsInstalled()) return;
+        
+        try {
+            await Promise.all([
+                pv.checkFaultySessions(),
+                pv.handleDisconnection(),
+                pv.handleConnection(),
+            ]);
+            await pv.saveChanges();
+        } catch(error) {
+            console.log(chalk.redBright('Ocurrió un error mientras se analizaba un cambio de estado en una sesión Purévoice'));
+            console.error(error);
+        }
+        
+        if(this.#handlers.length)
+            return this.consumeHandler();
+        this.#busy = false;
+    }
+}
+
 module.exports = {
     PureVoiceUpdateHandler,
+    PureVoiceOrchestrator,
 };
