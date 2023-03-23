@@ -15,7 +15,8 @@
             "p!yo añadido y Preferencias parcialmente implementadas",
             "p!feed ahora es más sencillo de utilizar",
             "Se agregó un sistema de suscripción a Feeds",
-            "Notificaciones de Feeds ahora muestran vistas previas"
+            "Notificaciones de Feeds ahora muestran vistas previas",
+            "p!puréscript implementado para ejecutar código PS independiente"
         ],
         "todo": [
             "Agregar comando de Stable Diffusion",
