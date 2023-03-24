@@ -540,8 +540,7 @@ class CommandOptionsManager {
         if(!isParamTypeStrict(param._type))
             getMethodName = ParamTypes(param._type).getMethod;
 
-        const getMethod = args[getMethodName];
-        return getMethod(slashIdentifier, !param._optional);
+        return args[getMethodName](slashIdentifier, !param._optional);
     };
     /**
      * Devuelve un arreglo de todas las entradas recibidas.
