@@ -1,4 +1,5 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Message } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Message, User, MessageCreateOptions } = require('discord.js');
+const { CommandRequest, CommandOptions, CommandOptionsManager } = require('../commands/Commons/typings');
 const { guildEmoji, shortenText, isThread } = require('../func');
 const { Post, Booru } = require('../systems/boorufetch');
 const { getBaseTags, getSearchTags } = require('../localdata/booruprops');
@@ -11,6 +12,7 @@ const { Translator } = require('../internationalization');
  * @param {import('discord.js').TextChannel} channel Canal al cual enviar el Embed
  * @param {Post} post Post de Booru
  * @param {import('../systems/boorufetch').PostFormatData} data Información adicional a mostrar en el Embed. Se puede pasar un feed directamente
+ * @returns {MessageCreateOptions}
  */
 function formatBooruPostMessage(post, data) {
     data ??= {};
@@ -116,7 +118,7 @@ function formatBooruPostMessage(post, data) {
     );
 
     //Preparar Embed final
-    /**@type {import('discord.js').MessageOptions} */
+    /**@type {MessageCreateOptions} */
     const feedMessage = { components: [row] };
     const postEmbed = new EmbedBuilder()
         .setColor(embedColor)
@@ -154,10 +156,12 @@ function formatBooruPostMessage(post, data) {
 };
 
 /**
+ * Envía una notificación de {@linkcode Post} de {@linkcode Booru} a todos los {@linkcode User} suscriptos a las tags del mismo
  * @typedef {{ userId: Discord.Snowflake, followedTags: Array<String> }} Suscription
- / @param {import('./boorufetch').Post} post
+ * @param {Post} post
  * @param {Message<true>} sent
  * @param {Array<Suscription>} feedSuscriptions 
+ * @returns {Array<Promise<Message<false> | void>>}
  */
 function notifyUsers(post, sent, feedSuscriptions) {
     if(!sent) throw 'Se esperaba un mensaje para el cuál notificar';
@@ -208,6 +212,14 @@ function notifyUsers(post, sent, feedSuscriptions) {
     });
 }
 
+/**
+ * De naturaleza memética.
+ * Comprueba si la búsqueda de tags de {@linkcode Booru} no es aprobada por Dios
+ * @param {Boolean} isNsfw 
+ * @param {import('../commands/Commons/typings').CommandRequest} request 
+ * @param {Array<String>} terms 
+ * @returns {Boolean}
+ */
 function isUnholy(isNsfw, request, terms) {
     if(!isNsfw)
         return false;
@@ -222,10 +234,13 @@ function isUnholy(isNsfw, request, terms) {
 }
 
 /**
- * @param {import('../commands/Commons/typings').CommandRequest} request
- * @param {import('../commands/Commons/typings').CommandOptions} args
+ * Busca las tags de {@linkcode Booru} deseadas y envía {@linkcode Message}s acorde a la petición
+ * @param {CommandRequest} request
+ * @param {CommandOptions} args
  * @param {Boolean} isSlash
- * @param {import('../commands/Commons/cmdOpts').CommandOptionsManager} options
+ * @param {CommandOptionsManager} options
+ * @param {{ cmdtag: String, nsfwtitle: String, sfwtitle: String }}
+ * @returns {Promise<Array<Message<true>> | Message<true>>}
  */
 async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt = { cmdtag: '', nsfwtitle: 'Búsqueda NSFW', sfwtitle: 'Búsqueda' }) {
     const isnsfw = isThread(request.channel)
