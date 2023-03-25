@@ -325,11 +325,13 @@ function nodeTypeOf(node) {
  * @returns {RuntimeValue}
  */
 function makeValue(node, type) {
+    if(node == undefined)
+        return makeNada();
     let origin = nodeTypeOf(node);
 
     if(!origin) return node;
 
-    if(NodeToProgram.get(origin) === type)
+    if(type == undefined || NodeToProgram.get(origin) === type)
         return { ...node, type: NodeToProgram.get(node.type) ?? node.type };
 
     /**@type { RuntimeValue }*/
