@@ -144,7 +144,6 @@ const checkFeeds = async (booru, guilds) => {
  * @returns {Promise<void>}
  */
 const updateBooruFeeds = async (guilds) => {
-    
     const booru = new Booru(globalConfigs.booruCredentials);
     // console.log(guilds);
 
