@@ -52,8 +52,8 @@ function invalidToLanguage(value) {
  * @type {Map<LogicalOperator, (left, right) => *>}
  */
 const logicOperations = new Map();
-logicOperations.set('y',          (left, right) => makeValue(left && right));
-logicOperations.set('o',          (left, right) => makeValue(left || right));
+logicOperations.set('y',          (left, right) => left && right);
+logicOperations.set('o',          (left, right) => left || right);
 logicOperations.set('es',         (left, right) => left === right);
 logicOperations.set('no es',      (left, right) => left !== right);
 logicOperations.set('parece',     (left, right) => left ==  right);
@@ -761,7 +761,7 @@ class TuberInterpreter {
         // console.log({ leftValue, rightValue });
         
         let result = logicOperations.get(operator)(leftValue, rightValue);
-        // console.log({ result });
+        // console.log({ result, leftValue, rightValue });
 
         if(typeof result === 'boolean')
             return makeBoolean(result);
