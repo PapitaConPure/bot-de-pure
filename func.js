@@ -45,6 +45,14 @@ module.exports = {
 
     //#region Temporizadores
     /**
+     * Crea una promesa que dura la cantidad de milisegundos ingresados
+     * @returns {Promise<void>}
+     */
+    sleep: function(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    },
+
+    /**
      * @param {Discord.GuildMember} miembro
      * @param {Discord.TextChannel} canal
      * @param {Number} rep
