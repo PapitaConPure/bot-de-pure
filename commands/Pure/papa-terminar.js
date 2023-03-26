@@ -1,7 +1,7 @@
 const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const flags = new CommandMetaFlagsManager().add('PAPA');
-const command = new CommandManager('papa-anunciar', flags)
+const command = new CommandManager('papa-terminar', flags)
 	.setAliases('papa-matar')
 	.setDescription('Termina este proceso de Bot de Puré')
 	.setExecution(async request => {

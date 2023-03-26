@@ -1,7 +1,7 @@
 const { randRange } = require('../../func.js');
 const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
-const phrase = [
+const phrases = [
 	'Ahora sí vení que te saco la cresta',
 	'Vení que te dejo la cagá en la cara',
 	'Ah mira que bacán. Vení que te rajo',
@@ -21,11 +21,13 @@ const command = new CommandManager('rakkidei', flags)
 	.setBriefDescription('Comando de trompada de Rakkidei')
 	.setLongDescription(
 		'Comando de trompada de Rakkidei',
-		'[🐦 Twitter](https://twitter.com/rakkidei)\n[🇵 pixiv](https://www.pixiv.net/users/58442175)',
+		'[<:twitter:919403803114094682> Twitter](https://twitter.com/rakkidei)\n[<:pixiv:919403803126661120> pixiv](https://www.pixiv.net/users/58442175)',
 	)
-	.setReply({
-		content: phrase[randRange(0, phrase.length)],
-		files: [tenshiurl],
+	.setExecution(async function (request) {
+		return request.reply({
+			content: phrases[randRange(0, phrases.length)],
+			files: [tenshiurl],
+		});
 	});
 
 module.exports = command;

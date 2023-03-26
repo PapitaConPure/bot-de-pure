@@ -165,7 +165,7 @@ async function checkCommand(message, client, stats) {
     let command = client.ComandosPure.get(commandName) || client.ComandosPure.find(cmd => cmd.aliases?.includes(commandName));
     
     if(!command)
-        return handleInvalidCommand(message, client.ComandosPure, commandName, ppure);
+        return handleInvalidCommand(message, client, commandName, ppure);
     //#endregion
 
     const rawArgs = content.slice(content.indexOf(commandName) + commandName.length).trim();
