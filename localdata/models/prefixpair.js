@@ -3,17 +3,9 @@ const Mongoose = require('mongoose');
 const PrefixPairSchema = new Mongoose.Schema({
     guildId: { type: String },
     pure: {
-        type: Object,
-        raw: { type: String },
-        regex: { type: RegExp },
-        default: { raw: 'p!', regex: /^[Pp] *![\n ]*/ }
+        raw: { type: String, required: true },
+        regex: { type: Mongoose.SchemaTypes.Mixed, required: true },
     },
-    drmk: {
-        type: Object,
-        raw: { type: String },
-        regex: { type: RegExp },
-        default: { raw: 'd!', regex: /^[Dd] *![\n ]*/ }
-    }
 });
 
 module.exports = Mongoose.model('PrefixPair', PrefixPairSchema);

@@ -1,6 +1,12 @@
-const { fetchUser } = require('../../func.js');
+const { fetchUser, sleep } = require('../../func.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
+
+/**@param {import('discord.js').Message<true>} message*/
+function safeDelete(message) {
+	if(!message?.delete) return;
+	return message.delete().catch(_ => undefined);
+}
 
 const options = new CommandOptionsManager()
 	.addParam('cantidad', 'NUMBER', 'para especificar la cantidad de mensajes a borrar (sin contar el mensaje del comando)', { optional: true })
@@ -15,15 +21,13 @@ const command = new CommandManager('borrar', flags)
 	.setLongDescription('Elimina una cierta cantidad de mensajes entre 2 y 100')
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash) => {
-		if(!isSlash) await request.delete().catch(_ => undefined);
-
 		let user = options.fetchFlag(args, 'usuario', { callback: (f) => fetchUser(f, request) });
-		let amount = isSlash ? args.getNumber('cantidad') : (args.length ? parseInt(args[0]) : 100);
+		let amount = options.fetchParam(args, 'cantidad') ?? 100;
 
 		if(!user && !amount) {
 			const sent = await request.reply({ content: '⚠ Debes especificar la cantidad o el autor de los mensajes a borrar', ephemeral: true });
 			if(!isSlash)
-				setTimeout(() => sent.deletable && sent.delete().catch(_ => undefined), 1000 * 5);
+				sleep(1000 * 5).then(() => safeDelete(sent));
 			return;
 		}
 
@@ -35,9 +39,12 @@ const command = new CommandManager('borrar', flags)
 				ephemeral: true,
 			});
 			if(!isSlash)
-				setTimeout(() => sent.deletable && sent.delete().catch(_ => undefined), 1000 * 5);
+				sleep(1000 * 5).then(() => sent.delete().catch(_ => undefined));
 			return;
 		}
+
+		if(!isSlash)
+			await safeDelete(request);
 
 		amount = Math.max(2, Math.min(amount, 100));
 		
