@@ -178,7 +178,6 @@ function notifyUsers(post, sent, feedSuscriptions) {
 
         const userEmbed = new EmbedBuilder()
             .setColor(sent.embeds[0].color ?? 0)
-            .setAuthor({ name: guild.name, iconURL: guild.iconURL({ size: 128 }) })
             .setTitle(translator.getText('booruNotifTitle'))
             .setDescription(translator.getText('booruNotifDescription'))
             .setFooter({ text: translator.getText('dmDisclaimer') })
