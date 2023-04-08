@@ -494,6 +494,8 @@ class CommandOptionsManager {
      */
     #fetchMessageParam(args, type, whole = false) {
         const argsPrototype = whole ? args.join(' ') : args.shift();
+        if(!argsPrototype) return;
+        
         if(isParamTypeStrict(type))
             return argsPrototype;
         switch(type) {
@@ -517,6 +519,7 @@ class CommandOptionsManager {
      * Si es un comando Slash, devuelve el valor del parámetro ingresado
      * Si es un comando de mensaje, remueve y devuelve la siguente entrada o devuelve todas las entradas en caso de que {@linkcode whole} sea verdadero
      * Si no se recibe ningún parámetro, se devuelve undefined
+     * 
      * @param {import('discord.js').CommandInteractionOptionResolver | Array<String>} args El conjunto de entradas
      * @param {String} slashIdentifier El identificador del parámetro para comandos Slash
      * @param {Boolean?} whole Indica si devolver todas las entradas en caso de un comando de mensaje
