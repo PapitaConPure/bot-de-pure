@@ -46,9 +46,11 @@ module.exports = {
     //#region Temporizadores
     /**
      * Crea una promesa que dura la cantidad de milisegundos ingresados
+     * @param {Number} ms
      * @returns {Promise<void>}
      */
     sleep: function(ms) {
+        if(typeof ms !== 'number') throw 'Se esperaba un número de milisegundos durante el cuál esperar';
         return new Promise(resolve => setTimeout(resolve, ms));
     },
 
@@ -483,6 +485,8 @@ module.exports = {
      * @returns { Discord.User }
      */
     fetchUser: function(data, { guild, client }) {
+        if(!data) return;
+        if(!thisGuild || !client) throw 'Se requiere la guild actual y el cliente en búsqueda de usuario';
         if(data.username) return data;
         
         const uc = client.users.cache;
@@ -539,6 +543,8 @@ module.exports = {
      * @returns { Discord.GuildMember }
      */
     fetchMember: function(data, { guild: thisGuild, client }) {
+        if(!data) return;
+        if(!thisGuild || !client) throw 'Se requiere la guild actual y el cliente en búsqueda de miembro';
         // console.time('Buscar miembro');
         
         const otherGuilds = client.guilds.cache.filter(g => g.id !== thisGuild.id);
@@ -548,7 +554,7 @@ module.exports = {
         let searchFn = (m) => m.id === data
         if(isNaN(data)) {
             data = data.toLowerCase();
-            searchFn =  (m) => m.tag.toLowerCase();
+            searchFn = (m) => m.tag.toLowerCase();
         }
 
         let member = thisGuild.members.cache.find(m => m.id === data);
@@ -1082,21 +1088,48 @@ module.exports = {
      * @param {String} s 
      * @returns {String}
      */
-    to10Radix64: function(n, s = '') {
+    radix10to64: function(n, s = '') {
         const newKey = n % 64;
         const remainder = Math.floor(n / 64);
         const stack = module.exports.digitsOf64[newKey] + s;
-        return remainder <= 0 ? stack : module.exports.to10Radix64(remainder, stack);
+        return remainder <= 0 ? stack : module.exports.radix10to64(remainder, stack);
     },
 
     /**
      * @param {String} s 
+     * @returns {Number}
      */
-    to64Radix10: function(s) {
+    radix64to10: function(s) {
         const digits = s.split('');
         let result = 0;
         for(const e in digits)
             result = (result * 64) + module.exports.digitsOf64.indexOf(digits[e]);
+        return result;
+    },
+
+    digitsOf128: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/*ÁÉÍÓÚÀÈÌÒÙÄËÏÖÜÂÊÎÔÛÃÕáéíóúàèìòùäëïöüãõÑñÇçºª;:,.!·%¿?@#~€¬¨^<>',
+
+    /**
+     * @param {Number} n 
+     * @param {String} s 
+     * @returns {String}
+     */
+    radix10to128: function(n, s = '') {
+        const newKey = n % 128;
+        const remainder = Math.floor(n / 128);
+        const stack = module.exports.digitsOf128[newKey] + s;
+        return remainder <= 0 ? stack : module.exports.radix10to128(remainder, stack);
+    },
+
+    /**
+     * @param {String} s 
+     * @returns {Number}
+     */
+    radix128to10: function(s) {
+        const digits = s.split('');
+        let result = 0;
+        for(const e in digits)
+            result = (result * 128) + module.exports.digitsOf128.indexOf(digits[e]);
         return result;
     },
 
@@ -1113,7 +1146,7 @@ module.exports = {
 
         let left = id.slice(0, mid);
         let right = id.slice(mid);
-        const compr = [ left, right ].map(str => module.exports.to10Radix64(parseInt(str)));
+        const compr = [ left, right ].map(str => module.exports.radix10to128(parseInt(str)));
         
         return compr[0].length + compr.join('');
     },
@@ -1127,7 +1160,7 @@ module.exports = {
         id = id.slice(1);
         let left = id.slice(0, mid);
         let right = id.slice(mid);
-        const decomp = [ left, right ].map(str => module.exports.to64Radix10(str, 36).toString());
+        const decomp = [ left, right ].map(str => module.exports.radix128to10(str, 36).toString());
         
         return decomp.join('');
     },
