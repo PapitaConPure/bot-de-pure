@@ -11,18 +11,21 @@ const command = new CommandManager('gatos', flags)
     )
 	.setLongDescription('Muestra imágenes de gatitos uwu')
 	.setExecution(async request => {
-		const { file } = (await axios.get('https://aws.random.cat/meow').catch(auditError))?.data;
+		const kittenData = (await axios.get('https://aws.random.cat/meow').catch(auditError))?.data;
 
-		//Crear y usar embed
 		const embed = new EmbedBuilder();
-		
-		if(!file)
+
+		if(!kittenData?.file) {
 			embed.addFields({ name: 'Error', value: 'El mundo de los gatitos no contactó con nosotros esta vez...' })
 				.setColor(Colors.Red);
-		else
-			embed.addFields({ name: 'Gatitos 🥺', value: file })
-				.setImage(file)
-				.setColor(0xffc0cb);
+			return request.reply({ embeds: [embed] });
+		}
+		
+		const { file } = kittenData;
+		
+		embed.addFields({ name: 'Gatitos 🥺', value: file })
+			.setImage(file)
+			.setColor(0xffc0cb);
 			
 		return request.reply({ embeds: [embed] });
 	});

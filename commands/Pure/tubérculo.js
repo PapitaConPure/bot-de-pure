@@ -107,7 +107,7 @@ const loadPageNumber = async(interaction, page, setFilter = undefined) => {
 					value: 
 						items.length
 							? items.splice(page * pageMax, pageMax)
-								.map(([tid,tuber]) => `${tuber.script ? '`📜`' : ''}**${tid}** • ${(members.get(tuber.author) ?? guild.me).user.username}`)
+								.map(([tid,tuber]) => `${tuber.script ? '`📜`' : ''}**${tid}** • ${(members.get(tuber.author) ?? guild.members.me).user.username}`)
 								.join('\n')
 							: `Ningún Tubérculo coincide con la búsqueda actual`,
 					inline: true,
@@ -138,7 +138,7 @@ function viewTuber(interaction, item, tuberId) {
 	if(!item)
 		return interaction.reply({ content: `⚠️ El Tubérculo **${tuberId}** no existe` });
 
-	const author = interaction.guild.members.cache.get(item.author) ?? interaction.guild.me;
+	const author = interaction.guild.members.cache.get(item.author) ?? interaction.guild.members.me;
 
 	let components = [
 		new ButtonBuilder()
@@ -267,7 +267,7 @@ const command = new CommandManager('tubérculo', flags)
 							name: `🥔)▬▬▬\\~•\\~▬▬▬\\~•\\~▬▬{ ${items.length ? `1 / ${lastPage + 1}` : '- - -'} }▬▬\\~•\\~▬▬▬\\~•\\~▬▬▬(🥔`, 
 							value: items.length
 								? items.splice(0, pageMax)
-									.map(([tid,tuber]) => `${tuber.script ? '`📜`' : ''}**${tid}** • ${(members.get(tuber.author) ?? request.guild.me).user.username}`)
+									.map(([tid,tuber]) => `${tuber.script ? '`📜`' : ''}**${tid}** • ${(members.get(tuber.author) ?? request.guild.members.me).user.username}`)
 									.join('\n')
 								: `Este servidor no tiene ningún Tubérculo.\nComienza a desplegar TuberIDs con \`${p_pure(request.guildId).raw}tubérculo --crear\``,
 							inline: true,
@@ -288,7 +288,7 @@ const command = new CommandManager('tubérculo', flags)
 				if(tuberId.length > 24)
 					return request.reply({ content: '⚠️ Las TuberID solo pueden medir hasta 24 caracteres' });
 				if(gcfg.tubers[tuberId] && isNotModerator(request.member) && gcfg.tubers[tuberId].author !== (request.author ?? request.user).id)
-					return request.reply({ content: `⛔ Acción denegada. Esta TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.me).user.username}*` });
+					return request.reply({ content: `⛔ Acción denegada. Esta TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.members.me).user.username}*` });
 				
 				const tuberContent = { author: (request.user ?? request.author).id };
 				const codeTag = isSlash ? 0 : rawArgs.match(/```[A-Za-z0-9]*/)?.[0];
@@ -355,7 +355,7 @@ const command = new CommandManager('tubérculo', flags)
 				if(!gcfg.tubers[tuberId])
 					return request.reply({ content: `⚠️ El Tubérculo **${tuberId}** no existe` });
 				if(isNotModerator(request.member) && gcfg.tubers[tuberId].author !== (request.author ?? request.user).id)
-					return request.reply({ content: `⛔ Acción denegada. Esta TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.me).user.username}*` });
+					return request.reply({ content: `⛔ Acción denegada. Esta TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.members.me).user.username}*` });
 
 				gcfg.tubers[tuberId] = null;
 				delete gcfg.tubers[tuberId];
@@ -511,7 +511,7 @@ const command = new CommandManager('tubérculo', flags)
 
 		if(isNotModerator(interaction.member) && userId !== interaction.user.id)
 			return interaction.reply({
-				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(interaction.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? interaction.guild.me).user.username}*`,
+				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(interaction.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? interaction.guild.members.me).user.username}*`,
 				ephemeral: true,
 			});
 
@@ -533,7 +533,7 @@ const command = new CommandManager('tubérculo', flags)
 		
 		if(isNotModerator(interaction.member) && userId !== interaction.user.id)
 			return interaction.reply({
-				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(interaction.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? interaction.guild.me).user.username}*`,
+				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(interaction.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? interaction.guild.members.me).user.username}*`,
 				ephemeral: true,
 			});
 

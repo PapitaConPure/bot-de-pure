@@ -207,7 +207,7 @@ function notifyUsers(post, sent, feedSuscriptions) {
         return user.send({
             embeds: [userEmbed],
             components: [postRow],
-        });
+        }).catch(_ => _);
     });
 }
 

@@ -8,6 +8,31 @@ function safeDelete(message) {
 	return message.delete().catch(_ => undefined);
 }
 
+/**
+ * @param {import('discord.js').TextChannel} channel
+ * @param {Number} amount
+ * @param {import('discord.js').User} user
+ */
+async function bulkDeleteMessages(channel, amount, user) {
+	if(user == undefined)
+		return channel.bulkDelete(amount);
+	
+	const messages = await channel.messages.fetch({ limit: 100 });
+	let i = 0;
+	return channel.bulkDelete(messages.filter(msg => msg.author.id === user.id && i++ < amount));
+}
+
+/**
+ * @param {import('discord.js').Message<true>} original 
+ * @param {import('discord.js').Message<true>} reply 
+ */
+function deleteOriginalAndReply(original, reply) {
+	return Promise.all([
+		safeDelete(original),
+		sleep(1000 * 5).then(() => reply.delete().catch(_ => undefined)),
+	]);
+}
+
 const options = new CommandOptionsManager()
 	.addParam('cantidad', 'NUMBER', 'para especificar la cantidad de mensajes a borrar (sin contar el mensaje del comando)', { optional: true })
 	.addFlag('um', ['usuario', 'miembro'], 			'para especificar de qué usuario borrar mensajes', { name: 'user', type: 'USER' });
@@ -21,14 +46,12 @@ const command = new CommandManager('borrar', flags)
 	.setLongDescription('Elimina una cierta cantidad de mensajes entre 2 y 100')
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash) => {
-		let user = options.fetchFlag(args, 'usuario', { callback: (f) => fetchUser(f, request) });
+		const user = options.fetchFlag(args, 'usuario', { callback: (f) => fetchUser(f, request) });
 		let amount = options.fetchParam(args, 'cantidad') ?? 100;
 
 		if(!user && !amount) {
 			const sent = await request.reply({ content: '⚠ Debes especificar la cantidad o el autor de los mensajes a borrar', ephemeral: true });
-			if(!isSlash)
-				sleep(1000 * 5).then(() => safeDelete(sent));
-			return;
+			return !isSlash && deleteOriginalAndReply(request, sent);
 		}
 
 		if(isNaN(amount)) {
@@ -38,25 +61,20 @@ const command = new CommandManager('borrar', flags)
 					`Revisa \`${p_pure(request.guildId).raw}ayuda borrar\` para más información`,
 				ephemeral: true,
 			});
-			if(!isSlash)
-				sleep(1000 * 5).then(() => sent.delete().catch(_ => undefined));
-			return;
+			return !isSlash && deleteOriginalAndReply(request, sent);
 		}
 
-		if(!isSlash)
+		if(isSlash)
+			await request.deferReply({ ephemeral: true });
+		else
 			await safeDelete(request);
 
 		amount = Math.max(2, Math.min(amount, 100));
 		
-		if(user == undefined)
-			request.channel.bulkDelete(amount);
-		else {
-			const messages = await request.channel.messages.fetch({ limit: 100 });
-			let i = 0;
-			request.channel.bulkDelete(messages.filter(msg => msg.author.id === user.id && i++ < amount));
-		}
+		await bulkDeleteMessages(request.channel, amount, user);
+
 		if(isSlash)
-			return request.reply({ content: '✅ Mensajes eliminados', ephemeral: true });
+			return request.editReply({ content: '✅ Mensajes eliminados' });
 	});
 
 module.exports = command;

@@ -1,5 +1,5 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { fetchUserID } = require('../../func');
+const { fetchMember } = require('../../func');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
 
 const hangedDollId = '682629889702363143';
@@ -23,6 +23,9 @@ const command = new CommandManager('colgar', flags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash) => {
+		if(!request.guild.members.me.permissions.has('ManageRoles'))
+			return request.reply({ content: '⚠ ¡No tengo permiso para hacer eso!', ephemeral: true });
+
 		const { client, guild } = request;
 		const user = request.author ?? request.user;
 		const everyone = options.fetchFlag(args, 'todos');
@@ -50,10 +53,13 @@ const command = new CommandManager('colgar', flags)
 			});
 		}
 
-		if(!args.length)
+		if(!isSlash && !args.length)
 			return request.reply({ content: '⚠ Debes indicar un usuario', ephemeral: true });
 
-		const member = guild.members.cache.get(fetchUserID(args.join(' '), { guild, client }));
+		const search = isSlash
+			? args.getUser('usuario', true)?.id
+			: args.join(' ');
+		const member = fetchMember(search, { guild, client });
 		if(!member) {
 			const sent = await request.reply({
 				content: ':warning: La gente que no existe por lo general no tiene cuello <:invertido:720736131368485025>',
