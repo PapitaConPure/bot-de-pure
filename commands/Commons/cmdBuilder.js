@@ -24,6 +24,8 @@ class CommandManager {
      * @deprecated Los comandos mensaje/Slash experimentales ya se adoptaron como la norma
      */
 	experimental;
+    /**@type {Map<String, any>}*/
+    memory;
     /**
      * @typedef {String | MessagePayload | InteractionReplyOptions} ReplyOptions
      * @type {ReplyOptions}
@@ -52,6 +54,7 @@ class CommandManager {
         this.name = name;
         this.flags = flags;
         this.experimental = true;
+        this.memory = new Map();
         this.execute = (request, _args, _isSlash) => request.reply(this.reply);
     };
 
