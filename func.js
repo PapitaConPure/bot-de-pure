@@ -486,7 +486,7 @@ module.exports = {
      */
     fetchUser: function(data, { guild, client }) {
         if(!data) return;
-        if(!thisGuild || !client) throw 'Se requiere la guild actual y el cliente en búsqueda de usuario';
+        if(!guild || !client) throw 'Se requiere la guild actual y el cliente en búsqueda de usuario';
         if(data.username) return data;
         
         const uc = client.users.cache;
