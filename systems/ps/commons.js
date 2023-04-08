@@ -337,10 +337,10 @@ function makeValue(node, type) {
     /**@type { RuntimeValue }*/
     const newNode = { type };
     try {
-        console.log('Realizando coerción:', origin, '=>', type);
+        // console.log('Realizando coerción:', origin, '=>', type);
         /**@type {Function}*/
         const coerce = coercions.get(origin).get(type);
-        console.log('Función de coerción utilizada:', coerce.toString());
+        // console.log('Función de coerción utilizada:', coerce.toString());
         let result;
         if(origin === 'ListExpression') {
             const elements = node.elements.map(element => makeValue(element, type));

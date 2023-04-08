@@ -19,6 +19,12 @@ function tuberExecute(input) {
     return interpreter.evaluateProgram();
 }
 
+const logOptions = {
+    lexer: false,
+    parser: false,
+    interpreter: false,
+};
+
 //#region Esqueleto de PuréScript
 /**Evalua el tipo de Tubérculo (básico o avanzado) y lo ejecuta. Si es avanzado, se ejecutará con PuréScript
  * @typedef {{tuberId?: String, author: String, content?: String | null, files?: Array<String>, script?: String, inputs?: Array<{identifier: String, required: Boolean, desc: String}>}} Tubercle
@@ -40,12 +46,12 @@ const executeTuber = async (request, tuber, { tuberArgs }) => {
     try {
         const lexer = new TuberLexer();
         const tokens = lexer.tokenize(tuber.script);
-        console.table(tokens.map(token => ({ ...token, value: (typeof token.value === 'string') ? shortenText(token.value, 32, '[...]') : token.value })));
+        logOptions.lexer && console.table(tokens.map(token => ({ ...token, value: (typeof token.value === 'string') ? shortenText(token.value, 32, '[...]') : token.value })));
 
         const parser = new TuberParser(tokens);
         const program = parser.parse();
-        console.log('Bloque Programa:');
-        console.dir(program, { depth: null });
+        logOptions.parser && console.log('Bloque Programa:');
+        logOptions.parser && console.dir(program, { depth: null });
 
         const scope = new TuberScope();
         declareNatives(scope);
@@ -58,8 +64,8 @@ const executeTuber = async (request, tuber, { tuberArgs }) => {
             error.name = 'TuberSendError';
             throw error;
         }
-        console.log('Resultado:');
-        console.dir(result, { depth: null });
+        logOptions.interpreter && console.log('Resultado:');
+        logOptions.interpreter && console.dir(result, { depth: null });
     } catch(error) {
         const errorNames = {
             'TuberVersionError':     'Error de versión',
@@ -138,8 +144,6 @@ const executeTuber = async (request, tuber, { tuberArgs }) => {
         replyObject.content = replyObject.content.join('\n');
     else
         delete replyObject.content;
-
-    // console.log(replyObject);
 
     tuber.inputs = inputStack;
 

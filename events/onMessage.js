@@ -160,6 +160,7 @@ async function checkCommand(message, client, stats) {
         return checkEmoteCommand(message, client, stats);
 
     auditRequest(message);
+
     const args = content.replace(ppure.regex, '').split(/[\n ]+/); //Argumentos ingresados
     let commandName = args.shift().toLowerCase(); //Comando ingresado
     let command = client.ComandosPure.get(commandName) || client.ComandosPure.find(cmd => cmd.aliases?.includes(commandName));
@@ -198,6 +199,8 @@ async function onMessage(message, client) {
     const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
     stats.read++;
     updateChannelMessageCounter(guild.id, channel.id, author.id);
+
+    //Leer comando
     checkCommand(message, client, stats);
     stats.save();
 

@@ -121,11 +121,11 @@ class TuberInterpreter {
         this.#testDrive = isTestDrive;
         this.#evaluateBlock(node, programScope);
 
-        console.log('Variables finales:');
-        console.dir(programScope.variables, { depth: null });
+        // console.log('Variables finales:');
+        // console.dir(programScope.variables, { depth: null });
 
-        console.log('Entradas registradas:');
-        console.dir(this.#inputStack);
+        // console.log('Entradas registradas:');
+        // console.dir(this.#inputStack);
 
         return {
             inputStack: this.#inputStack,

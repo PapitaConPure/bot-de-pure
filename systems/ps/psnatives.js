@@ -128,7 +128,6 @@ function marcoAsignarColor([marco, color], currentStatement) {
 
         marco.value.setColor(targetColor);
     } catch(e) {
-        console.log(e);
         throw TuberInterpreterError(`Se recibió un código de color inválido "${color.value ?? 'Nada'}" en asignación de color de Marco`, currentStatement);
     }
     return makeNada();
