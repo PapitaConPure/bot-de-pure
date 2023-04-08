@@ -91,7 +91,20 @@ let localesObject = {
         '❌ No puedes hacer eso',
         '❌ You can\'t do that',
     ),
+    expiredWizardData: new Translation(
+        '❌ Este asistente hace uso de memoria de sesión, pero no se encontró ninguna sesión. Vuelve a usar el comando para crear una nueva sesión de este asistente',
+        '❌ This Wizard uses session memory, but no session was found. Use the command again to start a new session of this Wizard',
+    ),
 
+    welcome: new Translation(
+        'Bienvenido',
+        'Welcome',
+    ),
+
+    buttonStart: new Translation(
+        'Comenzar',
+        'Start',
+    ),
     buttonCreate: new Translation(
         'Crear',
         'Create',
@@ -129,6 +142,10 @@ let localesObject = {
         'Asistente cancelado',
         'Wizard cancelled',
     ),
+    welcomeStepFooterName: new Translation(
+        'Bienvenida',
+        'Welcome',
+    ),
     cancelledStepFooterName: new Translation(
         'Operación Abortada',
         'Operation Aborted',
@@ -148,6 +165,35 @@ let localesObject = {
     goToUserPreferences: new Translation(
         'Preferencias de Usuario',
         'User Preferences',
+    ),
+
+    pollWizardAuthor: new Translation(
+        'Asistente de configuración de Encuestas',
+        'Poll Configuration Wizard',
+    ),
+    pollCancelledStep: new Translation(
+        'Se canceló la configuración de Encuesta',
+        'The Polls Wizard has been terminated',
+    ),
+    pollFinishedStep: new Translation(
+        'Se finalizó la configuración de Encuesta',
+        'The Polls Wizard has been closed',
+    ),
+    pollWelcomeValue: new Translation(
+        'Este asistente te guiará para realizar una encuesta al server. Comienza cuando gustes',
+        'This Wizard will guide you through making a server poll. Start whenever you want',
+    ),
+    pollAnswersName: new Translation(
+        'Lista de Respuestas',
+        'Answers List',
+    ),
+    pollAnswersValueEmpty: new Translation(
+        'No has añadido respuestas todavía',
+        'You haven\'t added any answers yet',
+    ),
+    pollAnswersFooterName: new Translation(
+        'Respuestas',
+        'Answers',
     ),
     
     feedAuthor: new Translation(
