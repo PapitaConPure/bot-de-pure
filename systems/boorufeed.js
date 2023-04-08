@@ -5,7 +5,7 @@ const { auditError, auditAction } = require('./auditor.js');
 const chalk = require('chalk');
 const { Booru } = require('./boorufetch.js');
 const globalConfigs = require('../localdata/config.json');
-const { paginateRaw } = require('../func.js');
+const { paginateRaw, sleep } = require('../func.js');
 
 //Configuraciones globales de actualización de Feeds
 /**@type {Map<Discord.Snowflake, Map<Discord.Snowflake, Array<String>>>}*/
@@ -15,11 +15,45 @@ const chunkMax = 5;
 const logMore = false;
 
 /**
+ * Discord es ciertamente una aplicación
+ * @param {Array<Promise<Discord.Message<true> | void>>} messagesToSend
+ */
+async function correctEmbedsAfterSent(messagesToSend, ms = 1000) {
+    try {
+        /**@type {Array<Discord.Message<true>>}*/
+        let messages = await Promise.all(messagesToSend);
+        messages = messages.filter(message => message);
+        if(!messages.length)
+            return [];
+        await sleep(ms);
+        const correctedMessages = messages.map(message => {
+            const embed = message.embeds[0];
+            const newEmbed = Discord.EmbedBuilder.from(message.embeds[0]);
+            if(embed.image.width > 0 && embed.image.height > 0)
+                return Promise.resolve();
+            newEmbed.setImage(embed.image.url);
+            return message.edit({ embeds: [newEmbed] }).catch(console.error);
+        });
+        if(ms >= 32000)
+            return correctedMessages;
+
+        return correctEmbedsAfterSent(messagesToSend, ms * 2);
+    } catch(e) {
+        console.error(error);
+        auditError(error, { brief: 'Ocurrió un error al corregir embeds de Feed' });
+    }
+}
+
+// async function checkGuildFeeds(guild) {
+
+// }
+
+/**
  * @param {Booru} booru El Booru a comprobar
  * @param {Discord.Collection<Discord.Snowflake, Discord.Guild>} guilds Colección de Guilds a procesar
  * @returns {Object} Cantidad de imágenes enviadas
  */
-const checkFeeds = async (booru, guilds) => {
+async function checkFeeds(booru, guilds) {
     const maxDocuments = 32;
     let promisesCount = { total: 0, feeds: 0 };
     await Promise.all(guilds.map(async guild => {
@@ -78,7 +112,7 @@ const checkFeeds = async (booru, guilds) => {
             
             //Comprobar recolectado en busca de imágenes nuevas
             if(logMore) console.log(`Preparándose para enviar imágenes en ${channel.name} ${response.map(post => post.id)}`);
-            /**@type {Array<Promise<Discord.Message>>}*/
+            /**@type {Array<Promise<Discord.Message<true>>>}*/
             const messagesToSend = [];
             response.reverse().forEach(post => {
                 //Revisar si el documento no fue anteriormente enviado por este Feed
@@ -110,26 +144,8 @@ const checkFeeds = async (booru, guilds) => {
                 if(logMore) console.log(`EJECUTADO`);
             });
             promisesCount.feeds++;
-            
-            /**
-             * Discord es ciertamente una aplicación
-             * @param {Array<Promise<Discord.Message<Boolean>>>} messagesToSend
-             */
-            async function correctEmbedsAfterSent(messagesToSend) {
-                let messages = await Promise.all(messagesToSend);
-                messages = messages.filter(message => message);
-                const embedWait = new Promise(resolve => setTimeout(resolve, 1000));
-                await embedWait;
-                return messages.map(message => {
-                    const embed = message.embeds[0];
-                    const newEmbed = Discord.EmbedBuilder.from(message.embeds[0]);
-                    if(embed.image.width > 0 && embed.image.height > 0)
-                        return Promise.resolve();
-                    newEmbed.setImage(embed.image.url);
-                    return message.edit({ embeds: [newEmbed] });
-                });
-            }
-            correctEmbedsAfterSent(messagesToSend).catch(error => console.error(error) && auditError(error, { brief: 'Ocurrió un error al corregir embeds de Feed' }))
+
+            correctEmbedsAfterSent(messagesToSend);
         }));
 
         if(logMore) console.log(`GUARDANDO:`, Object.entries(gcfg.feeds).map(([chid, feed]) => `${guild.channels.cache.get(chid).name}: ${feed.ids}`));
@@ -143,7 +159,7 @@ const checkFeeds = async (booru, guilds) => {
  * @param {Discord.Collection<Discord.Snowflake, Discord.Guild>} guilds
  * @returns {Promise<void>}
  */
-const updateBooruFeeds = async (guilds) => {
+async function updateBooruFeeds(guilds) {
     const booru = new Booru(globalConfigs.booruCredentials);
     // console.log(guilds);
 
@@ -165,7 +181,7 @@ const updateBooruFeeds = async (guilds) => {
 };
 
 /**@returns {Number}*/
-const getNextBaseUpdateStart = () => {
+function getNextBaseUpdateStart() {
     //Encontrar próximo inicio de fracción de hora para actualizar Feeds
     const now = new Date();
     let feedUpdateStart = feedUpdateInterval - (
@@ -182,7 +198,7 @@ const getNextBaseUpdateStart = () => {
  * Inicializa una cadena de actualización de Feeds en todas las Guilds que cuentan con uno
  * @param {Discord.Client} client 
  */
-const setupGuildFeedUpdateStack = async (client) => {
+async function setupGuildFeedUpdateStack(client) {
     const feedUpdateStart = getNextBaseUpdateStart();
     const guildConfigs = await GuildConfig.find({ feeds: { $exists: true } });
     /**@type {Array<{ tid: *, guilds: Array<[Discord.Snowflake, Discord.Guild]> }>}*/
@@ -218,7 +234,7 @@ const setupGuildFeedUpdateStack = async (client) => {
  * @param {Discord.Guild} guild 
  * @returns {Boolean} Si se añadió una nueva Guild o no
  */
-const addGuildToFeedUpdateStack = (guild) => {
+function addGuildToFeedUpdateStack(guild) {
     //Retornar temprano si la guild ya está integrada al stack
     console.log(globalConfigs.feedGuildChunks)
     if(globalConfigs.feedGuildChunks.some(chunk => chunk.guilds.some(g => guild.id === g[0])))
