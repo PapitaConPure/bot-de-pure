@@ -618,6 +618,7 @@ module.exports = {
         if(data.startsWith('<#') && data.endsWith('>'))
             data = data.slice(2, -1);
         const channel = ccache.get(data) || ccache.filter(c => [ ChannelType.GuildText, ChannelType.GuildVoice ].includes(c.type)).find(c => c.name.toLowerCase().includes(data));
+        if(!channel) return;
         if(![ ChannelType.GuildText, ChannelType.GuildVoice ].includes(channel.type)) return;
         return channel;
     },
@@ -769,6 +770,35 @@ module.exports = {
      * @returns {Discord.Emoji | String | null}
      */
     emoji: (emoji, guild) => module.exports.defaultEmoji(emoji) ?? module.exports.guildEmoji(emoji, guild),
+
+    /**
+     * Devuelve un valor acomodado al rango facilitado
+     * @param {Number} value El valor a acomodar
+     * @param {Number} min El mínimo del rango
+     * @param {Number} max El máximo del rango
+     */
+    clamp: function(value, min, max) {
+        if(min > max) {
+            const temp = min;
+            min = max;
+            max = temp;
+        }
+
+        return Math.max(min, Math.min(value, max));
+    },
+
+    /**
+     * Devuelve el valor mediano del conjunto especificado
+     * @param {...Number} values Los valores del conjunto
+     */
+    median: function(...values) {
+        if(!values.length) throw RangeError('Se esperaba al menos 1 número');
+        values = values.sort((a, b) => a - b);
+        const lowestHalf = Math.floor(values.length / 2);
+        if(values.length % 2)
+            return values[lowestHalf];
+        return (values[lowestHalf] + values[lowestHalf + 1]) / 2;
+    },
 
     /**
      * Devuelve un valor aleatorio entre 0 y otro valor
@@ -941,6 +971,14 @@ module.exports = {
 
     isShortenedNumberString: function(numberString) {
         return module.exports.shortNumberNames.some(snn => numberString.indexOf(snn) >= 0);
+    },
+
+    /**@param {Number} num*/
+    quantityDisplay: function(num) {
+        const numberString = module.exports.improveNumber(num, true);
+        if(module.exports.isShortenedNumberString(numberString))
+            return `${numberString} de`;
+        return numberString;
     },
     
     /**@param {String[]} arr*/
@@ -1179,6 +1217,24 @@ module.exports = {
         if(str.startsWith('#'))
             str = str.slice(1);
         return parseInt(`0x${str}`);
-    }
+    },
+
+    /**
+     * Reduce la presición de un número a solo los dígitos especificados.
+     * Si la parte decimal tiene menos dígitos que lo especificado, se deja como está
+     * @param {Number} num El número
+     * @param {Number} precision La precisión
+     */
+    toPrecision: function(num, precision) {
+        if(typeof num !== 'number') throw TypeError('Se esperaba un número válido');
+        if(typeof precision !== 'number') throw TypeError('La presición debe ser un número');
+        if(precision < 0 || precision > 14) throw RangeError('La presición debe ser un número entre 0 y 14');
+    
+        const abs = ~~num;
+        const decimal = num - abs;
+        const squash = 10 ** precision;
+        const reduced = Math.floor(decimal * squash) / squash;
+        return abs + reduced;
+    },
     //#endregion
 };
