@@ -96,9 +96,70 @@ let localesObject = {
         '❌ This Wizard uses session memory, but no session was found. Use the command again to start a new session of this Wizard',
     ),
 
+    invalidInput: new Translation(
+        '⚠️ Entrada inválida',
+        '⚠️ Invalid input',
+    ),
+    invalidNumber: new Translation(
+        '⚠️ Número inválido',
+        '⚠️ Invalid number',
+    ),
+    invalidId: new Translation(
+        '⚠️ ID inválida',
+        '⚠️ Invalid ID',
+    ),
+    invalidUser: new Translation(
+        '⚠️ Usuario inválido',
+        '⚠️ Invalid number',
+    ),
+    invalidMember: new Translation(
+        '⚠️ Miembro inválido',
+        '⚠️ Invalid member',
+    ),
+    invalidRole: new Translation(
+        '⚠️ Rol inválido',
+        '⚠️ Invalid role',
+    ),
+    invalidChannel: new Translation(
+        '⚠️ Canal inválido',
+        '⚠️ Invalid channel',
+    ),
+    invalidMessage: new Translation(
+        '⚠️ Mensaje inválido',
+        '⚠️ Invalid message',
+    ),
+    invalidTime: new Translation(
+        '⚠️ Tiempo inválido',
+        '⚠️ Invalid time',
+    ),
+
     welcome: new Translation(
         'Bienvenido',
         'Welcome',
+    ),
+    name: new Translation(
+        'Nombre',
+        'Name',
+    ),
+    description: new Translation(
+        'Descripción',
+        'Description',
+    ),
+    icon: new Translation(
+        'Ícono',
+        'Icon',
+    ),
+    hours: new Translation(
+        'Horas',
+        'Hours',
+    ),
+    minutes: new Translation(
+        'Minutos',
+        'Minutes',
+    ),
+    seconds: new Translation(
+        'Segundos',
+        'Seconds',
     ),
 
     buttonStart: new Translation(
@@ -167,9 +228,30 @@ let localesObject = {
         'User Preferences',
     ),
 
+    cultivarUnauthorized: new Translation(
+        `¡Solo puedes cultivar una vez por día! Podrás volver a cultivar <t:${subl(0)}:R>`,
+        `You can only cultivate once per day! You'll be able to cultivate again <t:${subl(0)}:R>`,
+    ),
+    cultivarTitle: new Translation(
+        '¡Cultivaste papas!',
+        'You grew potatoes!',
+    ),
+    cultivarDescription: new Translation(
+        `Ahora tienes <:prc:1097208828946301123> ${subl(0)}`,
+        `You now have <:prc:1097208828946301123> ${subl(0)}`,
+    ),
+
+    poll: new Translation(
+        'Encuesta',
+        'Poll',
+    ),
     pollWizardAuthor: new Translation(
         'Asistente de configuración de Encuestas',
         'Poll Configuration Wizard',
+    ),
+    pollResultsAuthor: new Translation(
+        'Resultados de encuesta',
+        'Poll results',
     ),
     pollCancelledStep: new Translation(
         'Se canceló la configuración de Encuesta',
@@ -179,9 +261,25 @@ let localesObject = {
         'Se finalizó la configuración de Encuesta',
         'The Polls Wizard has been closed',
     ),
+    pollOngoingStepFooterName: new Translation(
+        'Encuesta en progreso',
+        'Poll in progress',
+    ),
+    pollConcludedStepFooterName: new Translation(
+        'Encuesta finalizada',
+        'Poll concluded',
+    ),
     pollWelcomeValue: new Translation(
         'Este asistente te guiará para realizar una encuesta al server. Comienza cuando gustes',
         'This Wizard will guide you through making a server poll. Start whenever you want',
+    ),
+    pollQuestionPromptTitle: new Translation(
+        'Haz una Pregunta',
+        'Ask a question',
+    ),
+    pollQuestion: new Translation(
+        'Pregunta',
+        'Question',
     ),
     pollAnswersName: new Translation(
         'Lista de Respuestas',
@@ -191,9 +289,105 @@ let localesObject = {
         'No has añadido respuestas todavía',
         'You haven\'t added any answers yet',
     ),
+    pollAnswerPromptInput: new Translation(
+        'Respuesta',
+        'Answer',
+    ),
     pollAnswersFooterName: new Translation(
         'Respuestas',
         'Answers',
+    ),
+    pollFinishTitle: new Translation(
+        'Finalizar creación',
+        'Finish configuration',
+    ),
+    pollFinishTimeName: new Translation(
+        'Duración de Encuesta',
+        'Poll Duration',
+    ),
+    pollFinishFooterName: new Translation(
+        'Finalizar',
+        'Finish',
+    ),
+    pollFinishButtonBegin: new Translation(
+        'Iniciar en...',
+        'Begin in...',
+    ),
+    pollFinishButtonReset: new Translation(
+        'Reestablecer',
+        'Reset',
+    ),
+    pollAnswerPromptTitleAdd: new Translation(
+        'Añadir Respuesta',
+        'Add Answer',
+    ),
+    pollAnswerPromptTitleRemove: new Translation(
+        'Quitar Respuesta',
+        'Remove Answer',
+    ),
+    pollChannelPromptTitle: new Translation(
+        'Enviar Encuesta',
+        'Send Poll',
+    ),
+    pollChannelPollLabel: new Translation(
+        'Canal de encuesta',
+        'Poll Channel',
+    ),
+    pollChannelPollPlaceholder: new Translation(
+        'Nombre, #nombre o ID',
+        'Name, #name or ID',
+    ),
+    pollChannelResultsLabel: new Translation(
+        'Canal de resultados',
+        'Results Channel',
+    ),
+    pollChannelResultsPlaceholder: new Translation(
+        'Nombre, #nombre, ID o nada',
+        'Name, #name, ID or nothing',
+    ),
+    pollTimePromptTitle: new Translation(
+        'Modificar tiempo',
+        'Modify time',
+    ),
+    pollResultsName: new Translation(
+        'Respuestas de encuesta',
+        'Poll Answers',
+    ),
+    pollEndTimeName: new Translation(
+        'Finalización',
+        'Conclusion',
+    ),
+    pollVoteReportAuthor: new Translation(
+        'Voto recibido',
+        'Vote received',
+    ),
+    pollVoteReportDeleted: new Translation(
+        '_<Eliminó su voto>_',
+        '_<Removed their vote>_',
+    ),
+    pollVoteSuccess: new Translation(
+        '✅ ¡Voto registrado!',
+        '✅ Vote registered!',
+    ),
+    pollVoteSwapSuccess: new Translation(
+        '✅ ¡Voto cambiado!',
+        '✅ Vote swapped!',
+    ),
+    pollVoteRemoveSuccess: new Translation(
+        '✅ Voto eliminado',
+        '✅ Vote deleted',
+    ),
+    pollVoteError: new Translation(
+        '⚠ ¡Parece que la encuesta ya terminó!',
+        '⚠ Seems like the poll has ended!',
+    ),
+    pollButtonToggleAnon: new Translation(
+        'Voto anónimo',
+        'Anonymous vote',
+    ),
+    pollInsufficientTime: new Translation(
+        '⚠ ¡Tiempo insuficiente! Pon al menos 10 segundos',
+        '⚠ Insufficient time! Set at least 10 seconds',
     ),
     
     feedAuthor: new Translation(
@@ -305,6 +499,10 @@ let localesObject = {
     yoDashboardLanguageName: new Translation(
         'Idioma',
         'Language',
+    ),
+    yoDashboardPRCName: new Translation(
+        'Créditos',
+        'Credits',
     ),
     yoDashboardFeedTagsName: new Translation(
         'Tags de Feed seguidas',
