@@ -11,7 +11,6 @@ const command = new CommandManager('colores', flags)
 	.setAliases(
 		'color',
 		'colours', 'colour', 'colors',
-		'c',
 	)
 	.setLongDescription('Muestra un tablón de roles de colores básicos para Hourai Doll')
 	.setExecution(async request => {
