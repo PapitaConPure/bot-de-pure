@@ -1,4 +1,4 @@
-const { REST } = require('discord.js');
+const { REST, Client } = require('discord.js');
 const { Routes } = require('discord-api-types/v9');
 
 const { connect } = require('mongoose');
@@ -22,6 +22,8 @@ const { registerFont, loadImage } = require('canvas');
 const { lookupService } = require('dns');
 const { promisify } = require('util');
 const chalk = require('chalk');
+const Poll = require('../localdata/models/poll.js');
+const { fetchChannel } = require('../func.js');
 
 const logOptions = {
     slash: false,
@@ -29,6 +31,7 @@ const logOptions = {
     feedSuscriptions: false,
 };
 
+/**@param {Client} client*/
 async function onStartup(client) {
     const confirm = () => console.log(chalk.green('Hecho.'));
     globalConfigs.maintenance = '1';
@@ -101,7 +104,7 @@ async function onStartup(client) {
     logOptions.prefixes && console.table(globalConfigs.p_pure);
 
     console.log(chalk.gray('Preparando Suscripciones de Feeds...'));
-    userConfigs.map(config => {
+    userConfigs.forEach(config => {
         /**@type {Map<String, Array<String>>}*/
         const suscriptions = new Map();
         for(const [ chId, tags ] of config.feedTagSuscriptions)
@@ -135,6 +138,25 @@ async function onStartup(client) {
         if(wasModified) hourai.markModified('userInfractions');
     }
     await hourai.save();
+
+    console.log(chalk.gray('Preparando Encuestas...'));
+    const polls = (await Poll.find({}));
+    const pollCommand = require('../commands/Pure/encuesta.js');
+    polls.forEach(poll => {
+        const pollChannel = client.channels.cache.get(poll.pollChannelId);
+        if(!pollChannel)
+            return poll.delete();
+
+        const resultsChannel = client.channels.cache.get(poll.resultsChannelId);
+        if(!resultsChannel)
+            return poll.delete();
+
+        const timeUntil = poll.end - Date.now();
+        if(timeUntil < 1000)
+            return pollCommand.concludePoll(pollChannel, resultsChannel, poll.id);
+
+        setTimeout(pollCommand.concludePoll, timeUntil, pollChannel, resultsChannel, poll.id);
+    });
 
     console.log(chalk.gray('Preparando Tabla de Puré...'));
     const pureTableDocument = await Puretable.findOne({});
