@@ -509,11 +509,13 @@ const command = new CommandManager('tubérculo', flags)
 	.setButtonResponse(function getDesc(interaction, tuberId, userId) {
 		userId = decompressId(userId);
 
-		if(isNotModerator(interaction.member) && userId !== interaction.user.id)
+		if(isNotModerator(interaction.member) && userId !== interaction.user.id) {
+			const members = interaction.guild.members;
 			return interaction.reply({
-				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(interaction.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? interaction.guild.members.me).user.username}*`,
+				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(members.cache.get(userId) ?? members.me).user.username}*`,
 				ephemeral: true,
 			});
+		}
 
 		const descInput = new TextInputBuilder()
 			.setCustomId('descInput')

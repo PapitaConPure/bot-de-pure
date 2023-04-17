@@ -49,7 +49,7 @@ const command = new CommandManager('exhibir', flags)
 		interaction.deferUpdate();
 		const { channel } = interaction;
 		const [ pinnedMessages, backupChannel ] = await Promise.all([
-			channel.messages.fetchPinned(),
+			(await channel.messages.fetchPinned()).reverse(),
 			interaction.guild.channels.fetch('672726192993992726'), //Hourai Doll
 			// interaction.guild.channels.fetch('870347940181471242'), //Puré I
 		]);
@@ -82,9 +82,9 @@ const command = new CommandManager('exhibir', flags)
 			if(message.embeds.length < 10) {
 				formattedMessage.embeds.push(
 					new EmbedBuilder()
-						.setColor(Colors.Blurple)
-						.setAuthor({ name: `🔗 Original en #${channel.name ?? 'deleted-channel'}`, url: message.url })
-						.setTimestamp(message.createdTimestamp),
+						.setColor(Colors.Gold)
+						.setDescription(`Destacado en [${channel}](${message.url})`)
+						// .setTimestamp(message.createdTimestamp),
 				);
 				// message.channel.messages.fetch(message.id)
 				// .then(original => {
