@@ -3,7 +3,7 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Embe
 const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 const { tenshiColor } = require('../../localdata/config.json');
 const { Translator, recacheLocale } = require('../../internationalization');
-const { compressId, shortenText, decompressId } = require('../../func');
+const { compressId, shortenText, decompressId, improveNumber } = require('../../func');
 const { auditError } = require('../../systems/auditor');
 const { updateFollowedFeedTagsCache } = require('../../systems/boorufeed');
 
@@ -86,6 +86,15 @@ const dashboardEmbed = (request, userConfigs, translator) => {
             {
                 name: translator.getText('yoDashboardLanguageName'),
                 value: `${languageEmote[translator.locale]} ${translator.getText('currentLanguage')}`,
+                inline: true,
+            },
+            {
+                name: translator.getText('yoDashboardPRCName'),
+                value: [
+                    `<:prc:1097208828946301123> ${improveNumber(userConfigs.prc, true)}`,
+                    'Acerca de PuréCoin (PDF pendiente)',
+                ].join('\n'),
+                inline: true,
             },
             {
                 name: translator.getText('yoDashboardFeedTagsName'),

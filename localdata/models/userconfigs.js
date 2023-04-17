@@ -5,6 +5,9 @@ const UserConfigSchema = new Mongoose.Schema({
         type: String,
         required: true,
     },
+    prc: { type: Number, default: 0 },
+    lastCultivate: { type: Number, default: 0 },
+    
     language: {
         type: String,
         default: 'es',

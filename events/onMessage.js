@@ -11,6 +11,7 @@ const { auditRequest } = require('../systems/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../localdata/cmdExceptions.js');
 const { sendPixivPostsAsWebhook } = require('../systems/purepix.js');
 const { tenshiColor } = require('../localdata/config.json');
+const UserConfigs = require('../localdata/models/userconfigs.js');
 
 /**
  * 
@@ -175,6 +176,15 @@ async function checkCommand(message, client, stats) {
     stats.markModified('commands');
 }
 
+/**@param {String} userId*/
+async function gainPRC(userId) {
+    const userConfigs = (await UserConfigs.findOne({ userId })) || new UserConfigs({ userId });
+
+    userConfigs.prc += 1;
+    
+    return userConfigs.save();
+}
+
 /**
  * @param {Discord.Message} message
  * @param {Discord.Client} client
@@ -192,6 +202,8 @@ async function onMessage(message, client) {
             details: content ? `"${content}"` : 'Mensaje sin contenido'
         }));
     if(author.bot) return;
+
+    gainPRC(author.id);
 
     sendPixivPostsAsWebhook(message).catch(console.error);
     
