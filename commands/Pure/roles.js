@@ -14,6 +14,7 @@ const { subdivideArray, isBoosting, stringHexToNumber } = require('../../func');
  * @typedef {'GAMES' | 'DRINKS' | 'FAITH'} CategoryIndex índice de categoría de autogestión de roles
  * @typedef {{ functionName: String, rolePool: RoleDataPool, exclusive: Boolean }} CategoryContent Contenido de categoría de autogestión de roles
  */
+
 // const gameRoles = [
 // 	{ id: '943412899689414726',  label: 'Minecraft', 		 emote: '🧊' },
 // 	{ id: '763945846705487884',  label: 'Terraria', 		 emote: '🌳' },
@@ -63,7 +64,7 @@ const { subdivideArray, isBoosting, stringHexToNumber } = require('../../func');
  * @param {CategoryIndex} category 
  * @param {Number?} section
  */
-const getAutoRoleRows = (member, categories, category, section = null, removeAllLabel = 'Quitarse todos de página') => {
+const getAutoRoleRows = (member, categories, category, section = null, exclusive = false, removeAllLabel = 'Quitarse todos de página') => {
 	if(!section || isNaN(section))
 		section = 0;
 		
@@ -77,9 +78,11 @@ const getAutoRoleRows = (member, categories, category, section = null, removeAll
 					.setEmoji(role.emote)
 					.setLabel(role.label);
 
+				let sectionArg = exclusive ? `_${section}` : '';
+
 				if(member.roles.cache.has(role.id))
 					return button
-						.setCustomId(`roles_removeRole_${role.id}`)
+						.setCustomId(`roles_removeRole_${role.id}${sectionArg}`)
 						.setStyle(ButtonStyle.Primary);
 				return button
 					.setCustomId(`roles_addRole_${role.id}`)
@@ -149,7 +152,7 @@ const flags = new CommandMetaFlagsManager().add('HOURAI');
 const command = new CommandManager('roles', flags)
 	.setAliases('rol', 'role')
 	.setBriefDescription('Pemite a todos elegir algunos roles')
-	.setLongDescription('Establece un punto de reparto de roles para uso colectivo (solo Hourai Doll')
+	.setLongDescription('Establece un punto de reparto de roles para uso colectivo (solo Saki Scans')
 	.setExecution(async request => {
 		return request.reply({
 			embeds: [
@@ -170,16 +173,16 @@ const command = new CommandManager('roles', flags)
 							value: 'selectCustomRole',
 						},
 						{
-							label: 'Colores',
-							description: '¡Elige tu bando en Hourai Doll!',
-							emoji: '853402616208949279',
-							value: 'selectColor',
-						},
-						{
 							label: 'Anuncios',
 							description: '¡Recibe notificaciones de interés!',
-							emoji: '654489124413374474',
+							emoji: '704612794921779290',
 							value: 'selectAnnouncement',
+						},
+						{
+							label: 'Colores',
+							description: '¡Elige tu bando en Saki Scans!',
+							emoji: '1107843515385389128',
+							value: 'selectColor',
 						},
 						{
 							label: 'Juegos',
@@ -196,13 +199,13 @@ const command = new CommandManager('roles', flags)
 						{
 							label: 'Religión',
 							description: 'Describe tu naturaleza',
-							emoji: '704612794921779290',
+							emoji: '819772377440583691',
 							value: 'selectReligion',
 						},
 						{
 							label: '⚠️ Gacha',
 							description: 'Trata y comercio de waifus; ludopatía',
-							emoji: '697321858407727224',
+							emoji: '796930823068057600',
 							value: 'selectGacha',
 						},
 						{
@@ -237,7 +240,7 @@ const command = new CommandManager('roles', flags)
 						{
 							name: 'Rol Personalizado',
 							value: [
-								'Crea, modifica o elimina tu Rol Personalizado de Hourai Doll',
+								'Crea, modifica o elimina tu Rol Personalizado de Saki Scans',
 								'Esto es una recompensa para aquellos que boostean el servidor',
 							].join('\n'),
 						},
@@ -283,7 +286,7 @@ const command = new CommandManager('roles', flags)
 		});
 	})
 	.setInteractionResponse(async function selectAnnouncement(interaction) {
-		const newsRole = '699304214253404292';
+		const newsRole = '1107852759442665592';
 		const hasNews = interaction.member.roles.cache.has(newsRole);
 		return interaction.reply({
 			embeds: [
@@ -291,12 +294,12 @@ const command = new CommandManager('roles', flags)
 					.setColor(Colors.Aqua)
 					.addFields({
 						name: 'Anuncios del servidor',
-						value: 'Serás notificado en <#674734540899483658> por noticias importantes, eventos y ocasionalmente festividades.\nEste rol te será útil si te interesa alguna o todas esas cosas. No mencionamos muy seguido, tranquilo',
+						value: `Serás notificado en <#${hourai.announcementChannelId}> por noticias importantes, eventos y ocasionalmente festividades.\nEste rol te será útil si te interesa alguna o todas esas cosas. No mencionamos muy seguido, tranquilo`,
 					})
 			],
 			components: [new ActionRowBuilder().addComponents([
 				new ButtonBuilder()
-					.setEmoji('654489124413374474')
+					.setEmoji('1107843515385389128')
 					.setLabel('Anuncios')
 					.setCustomId(`roles_${hasNews ? 'removeRole' : 'addRole'}_${newsRole}`)
 					.setStyle(hasNews ? ButtonStyle.Primary : ButtonStyle.Secondary),
@@ -355,7 +358,7 @@ const command = new CommandManager('roles', flags)
 					.addFields({ name: 'Roles de Religión', value: 'Roles para describir tu actitud, ideas y forma de ser. No lo tomes muy en serio... ¿o tal vez sí?' })
 			],
 			components: [
-				...getAutoRoleRows(interaction.member, houraiDB.mentionRoles, 'FAITH', section, 'Eliminar Religión'),
+				...getAutoRoleRows(interaction.member, houraiDB.mentionRoles, 'FAITH', section, true, 'Eliminar Religión'),
 				...getPaginationControls(houraiDB.mentionRoles, 'FAITH', section),
 				...getEditButtonRow(interaction.member, 'FAITH'),
 			],
@@ -363,6 +366,7 @@ const command = new CommandManager('roles', flags)
 		});
 	})
 	.setInteractionResponse(async function selectGacha(interaction) {
+		return interaction.reply({ content: '🚫 Desactivado por tiempo indefinido', ephemeral: true });
 		const gachaRole = '813194804161806436';
 		const hasGacha = interaction.member.roles.cache.has(gachaRole);
 		return interaction.reply({
@@ -385,7 +389,7 @@ const command = new CommandManager('roles', flags)
 		});
 	})
 	.setInteractionResponse(async function selectCandy(interaction) {
-		const candyRole = '683084373717024869';
+		const candyRole = hourai.candyRoleId;
 		const hasCandy = interaction.member.roles.cache.has(candyRole);
 		return interaction.reply({
 			embeds: [
@@ -506,7 +510,7 @@ const command = new CommandManager('roles', flags)
 					
 				const customRole = await interaction.guild.roles.create({
 					name: interaction.member.nickname ?? interaction.user.username,
-					position: (await interaction.guild.roles.fetch('857544764499951666'))?.rawPosition,
+					position: (await interaction.guild.roles.fetch('1108486398719295612'))?.rawPosition,
 					reason: 'Creación de Rol Personalizado de miembro',
 				});
 				houraiDB.customRoles[userId] = customRole.id;

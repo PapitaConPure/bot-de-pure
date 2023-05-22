@@ -1,6 +1,7 @@
 const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { hourai } = require('../../localdata/config.json');
 
-const hd = '682629889702363143'; //Hanged Doll
+const hd = hourai.hangedRoleId; //Hanged Doll
 
 const flags = new CommandMetaFlagsManager().add(
 	'HOURAI',
@@ -12,14 +13,14 @@ const command = new CommandManager('suicidio', flags)
 		'suicide',
 	)
 	.setBriefDescription('Te otorga el rol "Hanged Doll"')
-	.setLongDescription('Te otorga el rol __Hanged Doll__ en Hourai Doll.')
+	.setLongDescription('Te otorga el rol __Hanged Doll__ en Saki Scans.')
 	.setExecution(async request => {
 		const { member } = request;
 		if(member.roles.cache.has(hd))
-			return request.reply({ content: '\'pérate, cómo weá estai hablando <:junkNo:697321858407727224>' });
+			return request.reply({ content: '\'pérate, cómo weá estai hablando <:junkNo:1107847991580164106>' });
 
 		await member.roles.add(hd, 'Por pelotudo');
-		return request.reply({ content: '<:houraidoll:853402616208949279> Shanghai Shanghai Shanghai Shanghai\nHourai Hourai Hourai Hourai' });
+		return request.reply({ content: 'Shanghai Shanghai Shanghai Shanghai\nHourai Hourai Hourai Hourai' });
 	});
 
 module.exports = command;

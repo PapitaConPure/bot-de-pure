@@ -56,9 +56,9 @@ module.exports = {
         },
         {
             flag: 'HOURAI',
-            title: 'Comando exclusivo de Hourai Doll',
-            desc: 'El comando es de uso restringido para el servidor __Hourai Doll__. Esto generalmente se debe a que cumple funciones que solo funcionan allí',
-            isException: (compare) => isNotByPapita(compare) && compare.guild.id !== global.serverid.hourai
+            title: 'Comando exclusivo de Saki Scans',
+            desc: 'El comando es de uso restringido para el servidor __Saki Scans (Hourai Doll)__. Esto generalmente se debe a que cumple funciones que solo funcionan allí',
+            isException: (compare) => isNotByPapita(compare) && compare.guild.id !== global.serverid.saki
         },
     ],
 

@@ -12,7 +12,7 @@ const options = new CommandOptionsManager()
     .addFlag([],  'meme',                                  'para ver comandos meme')
     .addFlag('m', 'mod',                                   'para ver comandos de moderación')
     .addFlag('p', 'papa',                                  'para ver comandos de Papita con Puré')
-    .addFlag('h', 'hourai',                                'para ver comandos exclusivos de Hourai Doll')
+    .addFlag('h', 'saki',                                  'para ver comandos exclusivos de Saki Scans')
     .addFlag('t', 'todo',                                  'para ver comandos inhabilitados');
 
 const command = new CommandManager('ayuda', flags)
@@ -32,10 +32,10 @@ const command = new CommandManager('ayuda', flags)
         const blockAuth = [
             isNotModerator(request.member) && 'MOD',
             (request.author ?? request.user).id !== peopleid.papita && 'PAPA',
-            request.guild.id !== serverid.hourai && 'HOURAI',
+            request.guild.id !== serverid.saki && 'HOURAI',
         ].filter(f => f);
         
-        const filters = ['meme', 'mod', 'papa', 'hourai']
+        const filters = ['meme', 'mod', 'papa', 'saki']
             .filter(src => options.fetchFlag(args, src, { callback: src }))
             .map(f => f.toUpperCase());
         

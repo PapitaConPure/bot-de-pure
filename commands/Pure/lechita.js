@@ -96,17 +96,17 @@ const command = new CommandManager('lechita', flags)
 			bglink = await resolverLink(request, target, 256, false, isSlash);
 
 		const coomer = [
-			'<:wtfchomu:725582341401083967>',
+			'<:merryawaise:1108320072491073576>',
 			'<:seyanaSugus:854731350199500810>',
-			'<:rember:748621002677944400>',
-			'<:reibu:686220828773318663>',
-			'<:miyoi:674823039086624808>',
-			'<:kogablush:654504689873977347>',
-			'<:knoipuais:751176163182772244>',
-			'<:keikuwu:725572179101614161>',
-			'<:haniwaSmile:659872119995498507>',
-			'<:GigaChad:748623625653059584>',
-			'<:anzub:704641772399362068>',
+			'<:rember:1107843499946160219>',
+			'<:reibu:1107876018171162705>',
+			'<:reibu:1107876018171162705>',
+			'<:kogaBlush:1108605873326141500>',
+			'<:knoipuais:1108537934363250780>',
+			'<:keikuwu:1107847996013551716> ',
+			'<:haniwaSmile:1107847987201318944>',
+			'<:bobBueno:1107847975205609503>',
+			'<:tenshiJuguito:1107843487891734588>',
 		];
 		const randcoomer = Math.floor(Math.random() * coomer.length);
 		

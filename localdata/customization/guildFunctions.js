@@ -2,6 +2,7 @@ const { auditError } = require('../../systems/auditor');
 const global = require('../config.json');
 const Hourai = require('../models/hourai.js');
 const guildIds = global.serverid;
+const { hourai: houraicfg } = require('../../localdata/config.json');
 
 /**@param {import('discord.js').Message} message*/
 function fuckEveryOtherBot(message) {
@@ -12,15 +13,15 @@ function fuckEveryOtherBot(message) {
     const reps = global.hourai.replies;
     const { prefix: hraipf, suffix: hraisf } = reps.ignore;
     const hraifound = hrai !== -1 && !(hraipf.some(pf => content.indexOf(`${pf}hourai`) === (hrai - pf.length)) || hraisf.some(sf => content.indexOf(`hourai${sf}`) === hrai));
-    if(hraifound && author.id !== global.peopleid.bern) {
+    if(hraifound) {
         const fuckustr = (content.indexOf('puré') !== -1 || content.indexOf('pure') !== -1) ? reps.compare : reps.taunt;
         channel.send({ content: fuckustr[Math.floor(Math.random() * fuckustr.length)]});
         //message.channel.send({ content: 'Descanse en paz, mi pana <:pensaki:852779998351458344>' });
     } else if(content.startsWith('~echo ') || content.startsWith('$say '))
-        setTimeout(responder, 800, () => {
+        setTimeout(() => {
             const fuckustr = reps.reply;
             channel.send({ content: fuckustr[Math.floor(Math.random() * fuckustr.length)] });
-        });
+        }, 800);
 };
 
 /**@param {import('discord.js').Message} message*/
@@ -34,7 +35,7 @@ async function findBotInfraction(message) {
 
     const msg = content.toLowerCase();
     // const blacklisted = [ /^->\w/, /^\$\w/, /^\+\w/, /^,(?!confession)\w/, /^~\w/, /^%\w/, /^[Nn][Ee][Kk][Oo] +\w/, /^[Gg]\. *\w/ ];
-    const blacklisted = [ /^->\w/, /^\$\w/, /^\+[A-Za-z]/, /^,(?!confession)\w/, /^%\w/, /^neko +\w/, /^g\. *\w/, /^= *\w/ ];
+    const blacklisted = [ /^! *\w/, /^->\w/, /^\$\w/, /^\+[A-Za-z]/, /^,(?!confession)\w/, /^%\w/, /^neko +\w/, /^g\. *\w/, /^= *\w/ ];
     if(blacklisted.some(bp => msg.match(bp)) && !author.bot) {
         //Método de generalización de comando
         infractionMessage = message;
@@ -67,22 +68,22 @@ async function findBotInfraction(message) {
     hourai.save().catch(console.error);
     switch(infractionCount) {
         case 1:
-            return infractionMessage.react(client.emojis.cache.get('920020596526551072')).catch(auditError);
+            return infractionMessage.react(client.emojis.cache.get('1108784094097178655')).catch(auditError);
 
         case 2:
             return infractionMessage.react(client.emojis.cache.get('796930821554044928')).catch(auditError);
 
         case 3: {
-            await infractionMessage.react(client.emojis.cache.get('859874631795736606')).catch(auditError);
-            const roleId = '682629889702363143'; //Hanged Doll
+            await infractionMessage.react(client.emojis.cache.get('1108791369897607219')).catch(auditError);
+            const roleId = houraicfg.hangedRoleId; //Hanged Doll
             const reason = 'Colgado automáticamente por spam de bots';
             if(!member.roles.cache.has(roleId))
                 return member.roles.add(roleId, reason).catch(auditError);
         }
 
         default: {
-            await infractionMessage.react(client.emojis.cache.get('852764014840905738')).catch(auditError);
-            const roleId = '925599922370256906'; //Crucified Doll
+            await infractionMessage.react(client.emojis.cache.get('1107847979257311234')).catch(auditError);
+            const roleId = houraicfg.crucifiedRoleId; //Crucified Doll
             const reason = 'Colgado automáticamente por spam de bots. Debido a la evasión del castigo previo, se requiere más poder para revocar la sanción';
             if(!member.roles.cache.has(roleId))
                 return member.roles.add(roleId, reason).catch(auditError);
@@ -92,7 +93,7 @@ async function findBotInfraction(message) {
 
 //Funciones de Respuesta Rápida personalizadas por servidor
 module.exports = {
-    [guildIds.hourai]: {
+    [guildIds.saki]: {
         findBotInfraction,
         fuckEveryOtherBot,
     },

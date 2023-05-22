@@ -54,7 +54,7 @@ const command = new CommandManager('karl', flags)
 		const rarity = karlRarity();
 		return request.reply({
 			content:
-				`**Buenas, soy Karl (${rarity.join('')}). Combina estas weás, créeme soy licenciado** <:reibu:686220828773318663> :thumbsup:\n` +
+				`**Buenas, soy Karl (${rarity.join('')}). Combina estas weás, créeme soy licenciado** <:reibu:1107876018171162705> :thumbsup:\n` +
 				`<:arrowr:681963688411922460> ${instrumentsPull(rarity.length).join(' ')} <:arrowl:681963688361590897>`
 		});
 	});
