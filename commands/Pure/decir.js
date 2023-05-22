@@ -23,8 +23,8 @@ const command = new CommandManager('decir', flags)
             return request.reply({ content: ':warning: tienes que especificar lo que quieres que diga.' });
 
         const sentence = isSlash ? args.getString('mensaje') : args.join(' ');
-        if(request.guild.id === serverid.hourai && sentence.toLowerCase().indexOf(/h+(\W*_*)*o+(\W*_*)*u+(\W*_*)*r+(\W*_*)*a+(\W*_*)*i+(\W*_*)*/g) !== -1)
-            return request.reply({ content: 'No me hagai decir weas de hourai, ¿yapo? Gracias <:haniwaSmile:659872119995498507>' });
+        if(request.guild.id === serverid.saki && sentence.toLowerCase().indexOf(/h+(\W*_*)*o+(\W*_*)*u+(\W*_*)*r+(\W*_*)*a+(\W*_*)*i+(\W*_*)*/g) !== -1)
+            return request.reply({ content: 'No me hagai decir weas de hourai, ¿yapo? Gracias <:haniwaSmile:1107847987201318944>' });
         
         if(!isSlash && deleteFlag && request.deletable && request.guild.members.me.permissions.has('ManageMessages'))
             request.delete();
