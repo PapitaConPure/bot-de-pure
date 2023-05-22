@@ -11,6 +11,7 @@ const { onVoiceUpdate } = require('./events/onVoiceUpdate.js');
 const { onRateLimit } = require('./events/onRateLimit.js');
 const { onGuildMemberAdd } = require('./events/onGuildMemberAdd.js');
 const { onGuildMemberRemove } = require('./events/onGuildMemberRemove.js');
+const { onGuildMemberUpdate } = require('./events/onGuildMemberUpdate.js');
 
 console.time('Establecimiento de parámetros iniciales');
 const { IntentsBitField, PermissionFlagsBits, Partials } = Discord;
@@ -153,6 +154,8 @@ client.on('voiceStateUpdate', onVoiceUpdate);
 client.on('guildMemberAdd', onGuildMemberAdd);
 
 client.on('guildMemberRemove', onGuildMemberRemove);
+
+client.on('guildMemberUpdate', onGuildMemberUpdate);
 
 client.rest.on('rateLimited', onRateLimit);
 
