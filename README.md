@@ -90,7 +90,6 @@ Personas involucradas en el desarrollo de Bot de Puré, con sus tags de Discord.
 ### Desarrolladores
 * [Papita con Puré#6932](https://github.com/PapitaConPure)
 ### Participantes
-* GoddamnBernkastel#7784
 * Imagine Breaker#6299
 * Sassafras#3331
 ### Colaboradores
