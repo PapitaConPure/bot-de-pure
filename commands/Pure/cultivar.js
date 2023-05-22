@@ -8,7 +8,11 @@ const { Translator } = require("../../internationalization");
 const flags = new CommandMetaFlagsManager().add('COMMON');
 const command = new CommandManager('cultivar', flags)
     .setAliases('cultivate', 'cv', 'c')
-    .setDescription('Comando de caritas de Marisaac')
+    .setBriefDescription('Permite cultivar entre 17 y 23 PRC diario')
+    .setDescription(
+        'Permite cultivar <:prc:1097208828946301123> 17~23',
+        'Solo se puede hacer una vez por día',
+    )
     .setExecution(async request => {
         const userQuery = { userId: request.userId };
         const userConfigs = (await UserConfigs.findOne(userQuery)) || new UserConfigs(userQuery);
