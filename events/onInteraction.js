@@ -1,7 +1,7 @@
 //#region Carga de módulos necesarios
 const { Stats } = require('../localdata/models/stats.js');
 const { peopleid } = require('../localdata/config.json');
-const { channelIsBlocked } = require('../func.js');
+const { channelIsBlocked, isUsageBanned } = require('../func.js');
 const { auditRequest } = require('../systems/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../localdata/cmdExceptions.js');
 const { Translator } = require('../internationalization.js');
@@ -107,10 +107,10 @@ async function handleComponent(interaction, client) {
  * @param {import('discord.js').Client} client 
  */
 async function onInteraction(interaction, client) {
-    const { guild, channel } = interaction;
+    const { guild, channel, user } = interaction;
     if(!guild)
         return handleDMInteraction.catch(console.error);
-    if(channelIsBlocked(channel))
+    if(channelIsBlocked(channel) || (await isUsageBanned(user)))
         return handleBlockedInteraction(interaction).catch(console.error);
     
     auditRequest(interaction);

@@ -16,7 +16,7 @@ const sassadata = {
 	recomm: {
 		total: 0,
 		games: [
-			'Jueguen [Rabi-Ribi](https://store.steampowered.com/app/400910/RabiRibi/) <:wtfchomu:725582341401083967>',
+			'Jueguen [Rabi-Ribi](https://store.steampowered.com/app/400910/RabiRibi/) <:aruStare:1107843505008689263>',
 			'Que jueguen [CosmoDreamer](https://store.steampowered.com/app/1424630/CosmoDreamer/) <:spookedSyura:725577379665281094>',
 			'Escuché que [Copy Kitty](https://store.steampowered.com/app/349250/Copy_Kitty/) está barato a esta altura del año <:boomer:748627305244524656>',
 			'Jueguen [ZeroRanger](https://store.steampowered.com/app/809020/ZeroRanger/) :tangerine:',

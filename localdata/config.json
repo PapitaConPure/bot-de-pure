@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "2.9.1D",
+            "number": "2.9.2D",
             "name": "Cisne Cristalino"
         },
         "note": "Operando casi con normalidad",
@@ -41,21 +41,21 @@
     "lechitauses": 0,
     "tenshiColor": 6327283,
     "serverid": {
-        "bautistas": "745003943997997056",
+        "bautistas":   "745003943997997056",
         "sugerencias": "826632021451341824",
-        "slot1":    "676251911850164255",
-        "slot2":    "739513729158217829",
-        "slot3":    "745003943997997056",
-        "pure":     "651244470691561473",
-        "hourai":   "654471968200065034",
-        "ar":       "611732083995443210",
-        "usd":      "698323332160028792",
-        "ocg":      "750095369639297065",
-        "nlp":      "832018129549918218"
+        "slot1":       "676251911850164255",
+        "slot2":       "739513729158217829",
+        "slot3":       "745003943997997056",
+        "pure":        "651244470691561473",
+        "hourai":      "654471968200065034",
+        "saki":        "1107831054791876690",
+        "ar":          "611732083995443210",
+        "usd":         "698323332160028792",
+        "ocg":         "750095369639297065",
+        "nlp":         "832018129549918218"
     },
     "peopleid": {
-        "papita": "423129757954211880",
-        "bern": "239550977638793217"
+        "papita": "423129757954211880"
     },
     "slots": {},
     "booruCredentials": {},
@@ -64,14 +64,14 @@
     "hourai": {
         "infr": {
             "channels": {
-                "778114817168375850": "♠― Rogueposting ―♠",
-                "654471968200065035": "♠― Doll Factory ―♠",
-                "671820448207601684": "botposting",
-                "674817884232613888": "traducción",
-                "662317620699332627": "autómatas",
+                "1107845079927894026": "♠— Pseudo Paradise —♠",
+                "1107831056532525108": "♠— Forest of Dolls —♠",
+                "1107831056532525106": "🤖┊botposting",
+                "1107837229348442122": "🔎┊traducciones",
+                "1107831056129851475": "🤖┊autómatas",
                 "813189609911353385": "gachahell",
                 "813195795318177802": "trata-de-waifus",
-                "885732746935275530": "hornyposting"
+                "1107837472869720084": "🥛┊tetaposting"
             },
             "users": {}
         },
@@ -82,14 +82,20 @@
             "forcecolors": "https://i.imgur.com/eHbSCHK.png"
         },
         "colorsList": [
-            { "emoteId": "819772377814532116", "roleId": "671851233870479375", "roleName": "French Doll",  "roleDesc": "Rojo"     },
-            { "emoteId": "819772377624870973", "roleId": "671852132328275979", "roleName": "Holland Doll", "roleDesc": "Azul"     },
-            { "emoteId": "819772377482526741", "roleId": "671851228954755102", "roleName": "Tibetan Doll", "roleDesc": "Verde"    },
-            { "emoteId": "819772377440583691", "roleId": "671851235267182625", "roleName": "Kyoto Doll",   "roleDesc": "Púrpura"  },
-            { "emoteId": "819772377856606228", "roleId": "671851236538187790", "roleName": "London Doll",  "roleDesc": "Naranja"  },
-            { "emoteId": "819772377894354944", "roleId": "671851234541699092", "roleName": "Russian Doll", "roleDesc": "Amarillo" },
-            { "emoteId": "819772377642041345", "roleId": "671851228308963348", "roleName": "Orléans Doll", "roleDesc": "Celeste"  }
+            { "emoteId": "819772377814532116", "roleId": "1107840228066086952", "roleName": "French Doll",  "roleDesc": "Rojo"     },
+            { "emoteId": "819772377624870973", "roleId": "1107843021510291496", "roleName": "Holland Doll", "roleDesc": "Azul"     },
+            { "emoteId": "819772377482526741", "roleId": "1107842992858996888", "roleName": "Tibetan Doll", "roleDesc": "Verde"    },
+            { "emoteId": "819772377440583691", "roleId": "1107843075323203735", "roleName": "Kyoto Doll",   "roleDesc": "Púrpura"  },
+            { "emoteId": "819772377856606228", "roleId": "1107843093870428222", "roleName": "London Doll",  "roleDesc": "Naranja"  },
+            { "emoteId": "819772377894354944", "roleId": "1107843120751710218", "roleName": "Russian Doll", "roleDesc": "Amarillo" },
+            { "emoteId": "819772377642041345", "roleId": "1107843142608240720", "roleName": "Orléans Doll", "roleDesc": "Celeste"  }
         ],
+        "titaniaRoleId": "1107844381630799973",
+        "candyRoleId": "1107831054791876692",
+        "hangedRoleId": "1108101434152591380",
+        "crucifiedRoleId": "1108101561932066836",
+        "announcementChannelId": "1107831056129851478",
+        "crazyBackupChannelId": "1107837659247812669",
         "replies": {
             "ignore": {
                 "prefix": [
@@ -115,31 +121,31 @@
                 ]
             },
             "taunt": [
-                "*¿Pero y a ti quién te invitó? <:mayuwu:654489124413374474>*",
-                "Oe qliao creo que se te cayó la tula <:pepe:697320983106945054>",
-                "Hourai puto <:knoipuais:751176163182772244>",
-                "***No hablen de esa weá <:aruStare:697497314884845658>***",
-                "Cierra el osiko tonto qliao <:yumou:708158159180660748>",
-                "¿Pero por qué no me xupai el pico mejor, así altiro? Aweonao <:junkNo:697321858407727224>",
-                "Pero no digai tantas weás po <:koipwaise:657346542847524875>",
-                "Puta que son pesaos con el Hourai <:notlikealice:654489127202586634>",
-                "**CSM NO HABLEN DE HOURAI** <:poutSumi:698658511474786364>"
+                "*¿Pero y a ti quién te invitó? <:mayuwu:1107843515385389128>*",
+                "Oe qliao creo que se te cayó la tula <:pepe:1107843554526646303>",
+                "Hourai puto <:knoipuais:1108537934363250780>",
+                "***No hablen de esa weá <:aruStare:1107843505008689263>***",
+                "Cierra el osiko tonto qliao <:yumou:1108316649553141770>",
+                "¿Pero por qué no me xupai el pico mejor, así altiro? Aweonao <:junkNo:1107847991580164106>",
+                "Pero no digai tantas weás po <:koipwaise:1107848000283349063>",
+                "Puta que son pesaos con el Hourai <:notlikethis:1107843508779372576>",
+                "**CSM NO HABLEN DE HOURAI** <:keikiPout:1107843492610318389>"
             ],
             "compare": [
-                "***__Recuerden:__ soy objetivamente mejor que Hourai <:haniwaSmile:659872119995498507>***",
-                "**Bot > Puré > Papita > Hourai <:miyoi:674823039086624808>**",
-                "Pero la reputa, dejen de compararme con esa weá <:meguDerp:887396527952236554>",
-                "*__Recuerden niñas:__ Hourai come tula 24/7 <:haniwaSmile:659872119995498507>*",
+                "***__Recuerden:__ soy objetivamente mejor que Hourai <:haniwaSmile:1107847987201318944>***",
+                "**Bot > Puré > Papita > Hourai <:reibu:1107876018171162705>**",
+                "Pero la reputa, dejen de compararme con esa weá <:meguDerp:1107848004775465032>",
+                "*__Recuerden niñas:__ Hourai come tula 24/7 <:haniwaSmile:1107847987201318944>*",
                 "Ah, te hacei el gracioso conchetumare? <:sagustare:796931141838831646>",
                 "Disculpa cuál es tu problema? <:pistola:720736152348262500>",
-                "Yo soy basada y Hourai es cringe <:GigaChad:748623625653059584>"
+                "Yo soy basada y Hourai es cringe <:chad:1108315385314418718>"
             ],
             "reply": [
-                "Cállate puta <:haniwaSmile:659872119995498507>",
-                "Tu madre, por si acaso <:haniwaSmile:659872119995498507>",
-                "*Pero no seas puto <:haniwaSmile:659872119995498507>*",
-                "Qué decí? <:yuyuthink:722516632345247834>",
-                "Ahhh, el culiao bravo eh? Vení que te rajo <:wtfchomu:725582341401083967>"
+                "Cállate puta <:haniwaSmile:1107847987201318944>",
+                "Tu madre, por si acaso <:haniwaSmile:1107847987201318944>",
+                "*Pero no seas puto <:haniwaSmile:1107847987201318944>*",
+                "Qué decí? <:orinqtp:1107843510532575303>",
+                "Ahhh, el culiao bravo eh? Vení que te rajo <:zunwtf:1107848235999043625>"
             ]
         }
     }

@@ -191,7 +191,8 @@ const command = new CommandManager('feed', flags)
 			input = input.slice(1);
 			
 		const channels = interaction.guild.channels.cache;
-		const textChannels = channels.filter(c => c.type === ChannelType.GuildText);
+		const textChannels = channels.filter(c => [ ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread ].includes(c.type));
+		console.log({ channels, textChannels });
 		const fetchedChannel = isNaN(input)
 			? textChannels.find(c => c.name.toLowerCase().includes(input))
 			: textChannels.get(input);

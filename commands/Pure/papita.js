@@ -3,14 +3,14 @@ const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = requi
 
 const paputa = [
 	'Lechita:tm: uwu :milk:',
-	'Romper al bot <:lewdsen:660217470635737088>',
-	'¿Qué es "Manzanas contra Bananas"? <:mayuwu:654489124413374474>',
-	'J-j-jueguen Palactis <:kogablush:654504689873977347>',
-	'Meguuuu <:aliceHug:684625280991756312>',
-	'Sagume <:aliceHug:684625280991756312>',
+	'Romper al bot <:sagumeBlush:1108315844045455410>',
+	'¿Qué es "Manzanas contra Bananas"? <:mayuwu:1107843515385389128>',
+	'J-j-jueguen Palactis <:kogaBlush:1108605873326141500>',
+	'Meguuuu <:aliceHug:1107848230420623361>',
+	'Sagume <:aliceHug:1107848230420623361>',
 	'*KONOSUBA!*',
 	'*NEKOPARA!*',
-	'https://i.imgur.com/HxTxjdL.png'
+	'https://i.imgur.com/HxTxjdL.png',
 ];
 
 const flags = new CommandMetaFlagsManager().add('MEME');

@@ -2,8 +2,9 @@ const UserConfigs = require('../../localdata/models/userconfigs');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Embed, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder } = require('discord.js');
 const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 const { tenshiColor } = require('../../localdata/config.json');
-const { Translator, recacheLocale } = require('../../internationalization');
-const { compressId, shortenText, decompressId } = require('../../func');
+const { Translator } = require('../../internationalization');
+const { recacheUser } = require('../../usercache');
+const { compressId, shortenText, decompressId, improveNumber } = require('../../func');
 const { auditError } = require('../../systems/auditor');
 const { updateFollowedFeedTagsCache } = require('../../systems/boorufeed');
 
@@ -86,6 +87,15 @@ const dashboardEmbed = (request, userConfigs, translator) => {
             {
                 name: translator.getText('yoDashboardLanguageName'),
                 value: `${languageEmote[translator.locale]} ${translator.getText('currentLanguage')}`,
+                inline: true,
+            },
+            {
+                name: translator.getText('yoDashboardPRCName'),
+                value: [
+                    `<:prc:1097208828946301123> ${improveNumber(userConfigs.prc, true)}`,
+                    'Acerca de PuréCoin (PDF pendiente)',
+                ].join('\n'),
+                inline: true,
             },
             {
                 name: translator.getText('yoDashboardFeedTagsName'),
@@ -226,7 +236,7 @@ const command = new CommandManager('yo', flags)
         translator = new Translator(translator.next);
         
         return Promise.all([
-            userConfigs.save().then(() => recacheLocale(user.id)),
+            userConfigs.save().then(() => recacheUser(user.id)),
             interaction.update({
                 embeds: [dashboardEmbed(interaction, userConfigs, translator)],
                 components: dashboardRows(user.id, userConfigs, translator),

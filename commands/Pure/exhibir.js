@@ -1,6 +1,9 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
 const { CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
 const { DiscordAgent } = require('../../systems/discordagent.js');
+const { hourai } = require('../../localdata/config.json');
+
+let crazyBackupId = hourai.crazyBackupChannelId;
 
 const flags = new CommandMetaFlagsManager().add(
 	'MOD',
@@ -12,9 +15,9 @@ const command = new CommandManager('exhibir', flags)
 		'flush', 'flushpins',
 		'ep', 'mp', 'fp',
 	)
-	.setBriefDescription('Traslada mensajes pinneados a #crazy-backup')
+	.setBriefDescription(`Traslada mensajes pinneados a <#${crazyBackupId}>`)
 	.setLongDescription(
-		'Envía mensajes pinneados en el canal actual a #crazy-backup',
+		`Envía mensajes pinneados en el canal actual a <#${crazyBackupId}>`,
 		'Esto eliminará todos los pins en el canal luego de reenviarlos',
 	)
 	.setExecution(async (request) => {
@@ -25,7 +28,7 @@ const command = new CommandManager('exhibir', flags)
 			.setTitle('Exhibir pins')
 			.addFields({
 				name: 'Confirmar operación',
-				value: `¿Quieres postear todos los mensajes pinneados del canal actual en <#672726192993992726> y despinnearlos?\nEsto liberará **${pinnedMessages.size}** espacios para pin`,
+				value: `¿Quieres postear todos los mensajes pinneados del canal actual en <#${crazyBackupId}> y despinnearlos?\nEsto liberará **${pinnedMessages.size}** espacios para pin`,
 			});
 		return request.reply({
 			embeds: [embed],
@@ -50,7 +53,7 @@ const command = new CommandManager('exhibir', flags)
 		const { channel } = interaction;
 		const [ pinnedMessages, backupChannel ] = await Promise.all([
 			(await channel.messages.fetchPinned()).reverse(),
-			interaction.guild.channels.fetch('672726192993992726'), //Hourai Doll
+			interaction.guild.channels.fetch(crazyBackupId),
 			// interaction.guild.channels.fetch('870347940181471242'), //Puré I
 		]);
 

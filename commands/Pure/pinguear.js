@@ -4,13 +4,13 @@ const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const frase = [
-	'Oe po [m] <:junkNo:697321858407727224>',
-	'Wacho, cachai [m] <:yumou:708158159180660748>',
-	'Oe [m] qliao <:miyoi:674823039086624808>',
-	'Responde po [m] <:mayuwu:654489124413374474>',
-	'¿Vai a responder [m]? <:haniwaSmile:659872119995498507>',
+	'Oe po [m] <:junkNo:1107847991580164106>',
+	'Wacho, cachai [m] <:yumou:1108316649553141770>',
+	'Oe [m] qliao <:reibu:1107876018171162705>',
+	'Responde po [m] <:mayuwu:1107843515385389128>',
+	'¿Vai a responder [m]? <:haniwaSmile:1107847987201318944>',
 	'[m], respondé altoke <:hypergardener:796931141851938827>',
-	'Dale [m] ctm <:reibu:686220828773318663>',
+	'Dale [m] ctm <:reibu:1107876018171162705>',
 	'Wena po [m] como andai <:meguSmile:694324892073721887>',
 	'Pero qué andai haciendo po [m] rectm <:spookedSyura:725577379665281094>',
 	'NoOoOoOo re TUuUrBiOoOoOo, veni [m] <:junkWTF:796930821260836864>',

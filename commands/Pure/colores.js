@@ -12,10 +12,10 @@ const command = new CommandManager('colores', flags)
 		'color',
 		'colours', 'colour', 'colors',
 	)
-	.setLongDescription('Muestra un tablón de roles de colores básicos para Hourai Doll')
+	.setLongDescription('Muestra un tablón de roles de colores básicos para Saki Scans')
 	.setExecution(async request => {
 		return request.reply({
-			content: `Aquí teni los colore po **${(request.user ?? request.author).username}** <:reibu:686220828773318663>`,
+			content: `Aquí teni los colore po **${(request.user ?? request.author).username}** <:reibu:1107876018171162705>`,
 			files: [hourai.images.colors],
 			components: [colorsRow],
 			ephemeral: true,
@@ -30,12 +30,12 @@ const command = new CommandManager('colores', flags)
 		const hadroles = member.roles.cache.find(mr => colorsList.some(color => color.roleId === mr.id));
 		if(hadroles == undefined) {
 			await member.roles.add(role);
-			return interaction.reply({ content: 'Colores otorgados <:miyoi:674823039086624808> 👍', ephemeral: true });
+			return interaction.reply({ content: 'Colores otorgados <:miyoi:1107848008005062727> 👍', ephemeral: true });
 		}
 
 		await member.roles.remove(hadroles);
 		await member.roles.add(role);
-		return interaction.reply({ content: 'Colores intercambiados <:monowo:887389799042932746>', ephemeral: true });
+		return interaction.reply({ content: 'Colores intercambiados <:monowo:1108315840404803624>', ephemeral: true });
 	});
 
 module.exports = command;

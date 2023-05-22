@@ -1,8 +1,9 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { fetchMember } = require('../../func');
+const { hourai } = require('../../localdata/config.json');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
 
-const hangedDollId = '682629889702363143';
+const hangedDollId = hourai.hangedRoleId;
 
 const options = new CommandOptionsManager()
 	.addParam('usuario', 'USER', 'para aplicar Hanged Doll a un usuario', { optional: true })

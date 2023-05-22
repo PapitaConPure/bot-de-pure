@@ -9,12 +9,12 @@ const embed = new EmbedBuilder()
     .addFields(
         {
             name: 'Creador/Dueño',
-            value: ':potato: Papita con Puré#6932',
+            value: '🥔 Papita con Puré#6932',
             inline: true,
         },
         {
             name: 'Participantes',
-            value: '🐴 GoddamnBernkastel#7784\n🤠 Imagine Breaker#6299\n🍗 Sassafras#3331',
+            value: '🤠 Imagine Breaker#6299\n🍗 Sassafras#3331',
             inline: true,
         },
         {

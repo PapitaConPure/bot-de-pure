@@ -5,6 +5,9 @@ const UserConfigSchema = new Mongoose.Schema({
         type: String,
         required: true,
     },
+    prc: { type: Number, default: 0 },
+    lastCultivate: { type: Number, default: 0 },
+    
     language: {
         type: String,
         default: 'es',
@@ -28,6 +31,7 @@ const UserConfigSchema = new Mongoose.Schema({
     },
     showLevelUp: { type: Boolean, default: true },
     collectMessageData: { type: Boolean, default: true },
+    banned: { type: Boolean, default: false },
 });
 
 module.exports = Mongoose.model('UserConfig', UserConfigSchema);

@@ -5,7 +5,7 @@
  * @typedef {'SINGLE'|'MULTIPLE'|Array<String>} ParamPoly Capacidad de entradas de parámetro de CommandOption
  * @typedef {'getBoolean'|'getString'|'getNumber'|'getInteger'|'getChannel'|'getUser'|'getMember'|'getRole'} GetMethodName
  */
-const { fetchUser, fetchMember } = require('../../func');
+const { fetchUser, fetchMember, fetchChannel, fetchMessage } = require('../../func');
 
 /**
  * @type {Map<BaseParamType, { getMethod: GetMethodName, help: String }>}
@@ -493,6 +493,9 @@ class CommandOptionsManager {
      * @param {Boolean} whole Indica si devolver todas las entradas o no
      */
     #fetchMessageParam(args, type, whole = false) {
+        if([ 'USER', 'MEMBER', 'MESSAGE', 'CHANNEL' ].includes(type) && !this.#request)
+            throw ReferenceError('Se requiere un contexto para realizar este fetch. Usa <CommandOptionsManager>.in(request)');
+        
         const argsPrototype = whole ? args.join(' ') : args.shift();
         if(!argsPrototype) return;
         
@@ -505,8 +508,10 @@ class CommandOptionsManager {
             return fetchMember(argsPrototype, this.#request);
         case 'ROLE':
             return argsPrototype; //Pendiente
+        case 'MESSAGE':
+            return fetchMessage(argsPrototype, this.#request); //Pendiente
         case 'CHANNEL':
-            return argsPrototype; //Pendiente
+            return fetchChannel(argsPrototype, this.#request.guild); //Pendiente
         case 'IMAGE':
             return argsPrototype; //Pendiente
         case 'NUMBER':

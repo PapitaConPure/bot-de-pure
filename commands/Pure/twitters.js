@@ -19,7 +19,7 @@ const command = new CommandManager('twitters', flags)
 	.setAliases('twitter')
 	.setBriefDescription('Crea un tablón de Twitters en un canal o sobre un mensaje')
 	.setLongDescription(
-		'Muestra Twitters de artistas con los que trabaja Hourai Doll',
+		'Muestra Twitters de artistas con los que trabaja Saki Scans',
 		'Crea un nuevo tablón con los `<twitters>` designados (separados solamente por un espacio)',
 		'Alternativamente, puedes especificar una `--id` de un tablón ya enviado para editarlo, especificando qué `<twitters>` `--agregar` o `--eliminar`',
 		'El tablón se añadirá o se buscará por `--id` para editar *en el canal actual* a menos que especifiques un `--canal`',
