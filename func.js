@@ -6,6 +6,8 @@ const Canvas = require('canvas'); //Node Canvas
 const chalk = require('chalk'); //Consola con formato bonito
 const { colorsRow } = require('./localdata/houraiProps');
 const { ButtonStyle, ChannelType } = require('discord.js');
+const { fetchUserCache } = require('./usercache');
+const Hourai = require('./localdata/models/hourai');
 const concol = {
     orange: chalk.rgb(255, 140, 70),
     purple: chalk.rgb(158, 114,214),
@@ -61,10 +63,10 @@ module.exports = {
      */
     askForRole: async function(miembro, canal, rep) {
         const reps = 4;
-        console.log(chalk.cyan('Comprobando miembro nuevo en Hourai Doll para petición de rol de color...'));
+        console.log(chalk.cyan('Comprobando miembro nuevo en Saki Scans para petición de rol de color...'));
         if(!canal.guild.members.cache.has(miembro.id)) {
             console.log(chalk.red(`El miembro se fue del servidor. Abortando.`));
-            return canal.send({ content: `Se murió el wn de <@${miembro.user.id}> po <:mayuwu:654489124413374474>` });
+            return canal.send({ content: `Se murió el wn de <@${miembro.user.id}> po <:mayuwu:1107843515385389128>` });
         }
         console.log(concol.orange('El miembro sigue en el servidor'));
         const hasColor = module.exports.hasColorRole(miembro);
@@ -72,7 +74,7 @@ module.exports = {
         //Comprobación constante para ver si el miembro ya tiene roles de colores
         if(hasColor) {
             console.log(chalk.green(`El miembro ha recibido sus roles básicos.`));
-            canal.send({ content: `Weno **${miembro.user.username}**, ya teni tu rol, q esti bien po <:kosuzy:887166039740272691>` });
+            canal.send({ content: `Weno **${miembro.user.username}**, ya teni tu rol, q esti bien po <:junky:1107847993484386304>` });
 
             //Finalizar
             return setTimeout(module.exports.finalizarHourai, 1000, miembro, canal);
@@ -81,12 +83,12 @@ module.exports = {
         if(rep > 0)
             return setTimeout(module.exports.askForRole, 1000 * 60 / reps, miembro, canal, rep - 1);
         
-        if(!miembro.roles.cache.has('671826704343236629')) {
+        if(!miembro.roles.cache.has('1107831054791876691')) {
             console.log(chalk.magenta('El miembro está retenido.'));
             global.hourai.warn++;
             if(global.hourai.warn <= 6) {
                 if(global.hourai.warn <= 3)
-                    canal.send({ content: `Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:654489124413374474> (${global.hourai.warn}/3 llamados)` });
+                    canal.send({ content: `Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:1107843515385389128> (${global.hourai.warn}/3 llamados)` });
                 setTimeout(module.exports.askForRole, 1000, miembro , canal, reps);
                 console.log(chalk.cyan(`Volviendo a esperar confirmación de miembro (${global.hourai.warn}/6)...`));
             }
@@ -95,7 +97,7 @@ module.exports = {
 
         console.log(chalk.yellow('El miembro no ha recibido roles básicos.'));
         await canal.send({
-            content: `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:654489124413374474>`,
+            content: `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:1107843515385389128>`,
             files: [global.hourai.images.colors],
             components: [colorsRow],
         });
@@ -112,9 +114,9 @@ module.exports = {
      */
     forceRole: function(miembro, canal, rep) {
         const reps = 4;
-        console.log(chalk.cyan('Comprobando miembro nuevo en Hourai Doll para forzado de rol de color'));
+        console.log(chalk.cyan('Comprobando miembro nuevo en Saki Scans para forzado de rol de color'));
         if(!canal.guild.members.cache.get(miembro.id))
-            return canal.send({ content: `Se fue cagando el <@${miembro?.user.id ?? 'nose'}> csm <:mayuwu:654489124413374474>` }).catch(() => {});
+            return canal.send({ content: `Se fue cagando el <@${miembro?.user.id ?? 'nose'}> csm <:mayuwu:1107843515385389128>` }).catch(() => {});
 
         console.log(concol.orange('El miembro sigue en el servidor'));
         const hasColor = module.exports.hasColorRole(miembro);
@@ -134,19 +136,11 @@ module.exports = {
 
         try {
             console.log(chalk.magentaBright('El miembro requiere roles básicos. Forzando roles...'));
-            const colores = [
-                '671851233870479375', //France Doll
-                '671852132328275979', //Holland Doll
-                '671851228954755102', //Tibetan Doll
-                '671851235267182625', //Kyoto Doll
-                '671851236538187790', //London Doll
-                '671851234541699092', //Russian Doll
-                '671851228308963348', //Orléans Doll
-            ];
+            const colores = global.hourai.colorsList.map(c => c.roleId);
             canal.send({
                 content:
-                    `**${miembro.user.username}**, cagaste altiro watón fome <:mukyuugh:725583038913708034>\n` +
-                    `Toma un rol random po <:mayuwu:654489124413374474> <:venAqui2:668644951353065500>`,
+                    `**${miembro.user.username}**, cagaste altiro watón fome <:tenshiSmug:1108791369897607219>\n` +
+                    `Toma un rol random po <:mayuwu:1107843515385389128> <:hr:797294230463840267>`,
                 files: [global.hourai.images.forcecolors]
             });
             miembro.roles.add(colores[Math.floor(Math.random() * 7)]);
@@ -157,7 +151,7 @@ module.exports = {
         } catch(e) {
             console.log(chalk.red('El miembro ya no tiene ningún rol básico.'));
             console.error(e);
-            canal.send({ content: `Espérate qué weá pasó con **${miembro.user.username}** <:reibu:686220828773318663>\nOh bueno, ya me aburrí... chao.` }).catch(() => {});
+            canal.send({ content: `Espérate qué weá pasó con **${miembro.user.username}** <:reibu:1107876018171162705>\nOh bueno, ya me aburrí... chao.` }).catch(() => {});
         }
     },
     //#endregion
@@ -168,17 +162,17 @@ module.exports = {
      */
     isNotModerator: (member) => !(member.permissions.has('ManageRoles') || member.permissions.has('ManageMessages')),
 
+    /**
+     * @param {Discord.User | Discord.GuildMember} user
+     */
+    isUsageBanned: async function(user) {
+        const userCache = await fetchUserCache(user.id);
+        return userCache.banned;
+    },
+
     /**@param {Discord.GuildMember} member*/
     hasColorRole: function(member) {
-        return member?.roles?.cache?.hasAny(
-            '671851233870479375',
-            '671851228954755102',
-            '671852132328275979',
-            '671851235267182625',
-            '671851234541699092',
-            '671851236538187790',
-            '671851228308963348',
-        );
+        return member?.roles?.cache?.hasAny(...global.hourai.colorsList.map(c => c.roleId));
     },
 
     /**@param {Discord.GuildMember} member*/
@@ -208,6 +202,11 @@ module.exports = {
     //#endregion
 
     //#region Anuncios
+    /**
+     * 
+     * @param {Discord.GuildMember} miembro 
+     * @param {Discord.TextChannel} canal 
+     */
     finalizarHourai: function(miembro, canal) {
         //Mensaje de fin de bienvenida
         try {
@@ -218,7 +217,7 @@ module.exports = {
                     `Okay, ya \'tamos ${miembro}, recuerda convivir adecuadamente con el resto <:Junkoborga:751938096550903850>`,
                     'Si te interesa, puedes revisar los mensajes pinneados de este canal <:tenshipeacheems:854408293258493962>',
                     'Y estate tranqui, que ya no vas a recibir tantos pings <:starnap:727764482801008693>',
-                    `Dicho esto, ¡disfruta el server po\'! Si quieres más roles, puedes usar \`${p_pure(global.serverid.hourai).raw}roles\``,
+                    `Dicho esto, ¡disfruta el server po\'! Si quieres más roles, puedes usar \`${p_pure(global.serverid.saki).raw}roles\``,
                 ].join('\n')
             });
 
@@ -226,13 +225,13 @@ module.exports = {
             if(Math.random() < 0.3)
                 setTimeout(() => {
                     canal.send({
-                        content: `Por cierto, tenemos una tradición un poco más oscura. ¿Te atrevei a usar \`${p_pure(global.serverid.hourai).raw}suicidio\`?`
+                        content: `Por cierto, tenemos una tradición un poco más oscura. ¿Te atrevei a usar \`${p_pure(global.serverid.saki).raw}suicidio\`?`
                     });
                 }, 1000 * 5);
 
             //Otorgar rol con 50% de probabilidad
             const gr = canal.guild.roles.cache;
-            const role50 = gr.find(r => r.name === 'Rol con 50% de probabilidades de tenerlo');
+            const role50 = gr.find(r => r.name.includes('Rol con 50% de probabilidades de tenerlo'));
             if(role50 && Math.random() < 0.5)
                 miembro.roles.add(role50);
         } catch(e) {
@@ -309,7 +308,7 @@ module.exports = {
         const canvas = Canvas.createCanvas(1275, 825);
         const ctx = canvas.getContext('2d');
 
-        const fondo = await Canvas.loadImage((servidor.id === global.serverid.hourai) ? global.hourai.images.welcome : images.announcements.welcome);
+        const fondo = await Canvas.loadImage((servidor.id === global.serverid.saki) ? global.hourai.images.welcome : images.announcements.welcome);
         ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
         //#endregion
 
@@ -357,32 +356,22 @@ module.exports = {
         //#region Imagen y Mensaje extra
         const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
         await canal.send({files: [imagen]});
-        if(forceHourai || servidor.id === global.serverid.hourai) {
+        if(forceHourai || servidor.id === global.serverid.saki) {
             return canal.send({
                 content:
                     `Wena po <@${miembro.user.id}> conchetumare, como estai.\n` +
-                    'Como tradición, elige un color con el menú de abajo <:mayuwu:654489124413374474>\n' +
-                    'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:697321858407727224>\n' +
-                    '<@&654472238510112799>, vengan a saludar po maricones <:venAqui:668644938346659851><:miyoi:674823039086624808><:venAqui2:668644951353065500>\n' +
-                    `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:694324892073721887>\n` +
+                    'Como tradición, elige un color con el menú de abajo <:mayuwu:1107843515385389128>\n' +
+                    'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:1107847991580164106>\n' +
+                    '<@&1107831054791876694>, vengan a saludar po maricones <:hl:797294230359375912><:miyoi:1107848008005062727><:hr:797294230463840267>\n' +
+                    `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:1107880958981587004>\n` +
                     global.hourai.images.colors,
-                //files: [global.hourai.images.colors],
                 components: [colorsRow],
             }).then(sent => {
                 setTimeout(module.exports.askForRole, 1000, miembro, canal, 3 * 4);
-                console.log('Esperando evento personalizado de Hourai Doll en unos minutos...');
+                console.log('Esperando evento personalizado de Saki Scans en unos minutos...');
                 return sent;
             });
         }
-        if(servidor.id === global.serverid.ar)
-            return canal.send({
-                content:
-                    `Welcome to the server **${miembro.displayName}**! / ¡Bienvenido/a al server **${miembro.displayName}**!\n\n` +
-                    `**EN:** To fully enjoy the server, don't forget to get 1 of the 5 main roles in the following channel~\n` +
-                    '**ES:** Para disfrutar totalmente del servidor, no olvides escoger 1 de los 5 roles principales en el siguiente canal~\n\n' +
-                    '→ <#611753608601403393> ←\n\n' +
-                    `*Ahora hay **${peoplecnt}** usuarios en el server.*`
-            });
         return canal.send({
             content:
                 `¡Bienvenido al servidor **${miembro.displayName}**!\n` +
@@ -449,13 +438,17 @@ module.exports = {
         const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'despedida.png' });
         const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
         await canal.send({ files: [imagen] });
-        if(servidor.id === '654471968200065034') //Hourai Doll
+        if(servidor.id === global.serverid.saki) {
             await canal.send({
-                content: 
-                    'Nooooo po csm, perdimo otro weón <:meguDerp:887396527952236554>\n' +
+                content:
+                    'Nooooo po csm, perdimo otro weón <:meguDerp:1107848004775465032>\n' +
                     `*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
             });
-        else //Otros servidores
+
+            const hourai = await Hourai.findOne({}) || new Hourai({});
+
+            hourai.save();
+        } else //Otros servidores
             await canal.send({ content: `*Ahora hay **${peoplecnt}** usuarios en el server.*`});
         
         //#endregion
@@ -621,6 +614,36 @@ module.exports = {
         if(!channel) return;
         if(![ ChannelType.GuildText, ChannelType.GuildVoice ].includes(channel.type)) return;
         return channel;
+    },
+
+    /**
+     * Busca un mensaje basado en la data ingresada.
+     * Devuelve el mensaje que coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún canal, se devuelve undefined.
+     * @param {String} data 
+     * @param {{ guild: Discord.Guild, channel: Discord.TextChannel }} channel 
+     * @returns {Promise<Discord.Message>}
+     */
+    fetchMessage: async function(data, { guild, channel }) {
+        const acceptedChannelTypes = [
+            ChannelType.GuildText,
+            ChannelType.GuildVoice,
+            ChannelType.PublicThread,
+            ChannelType.PrivateThread,
+            ChannelType.AnnouncementThread,
+        ];
+
+        console.log({ channelType: channel.type });
+
+        if(!acceptedChannelTypes.includes(channel.type))
+            return;
+
+        const messages = channel.messages;
+        let message = await messages.fetch(data);
+        console.log({ data, message });
+
+        if(!message) return;
+        if(!acceptedChannelTypes.includes(message.channel.type)) return;
+        return message;
     },
 
     /**
@@ -1217,6 +1240,20 @@ module.exports = {
         if(str.startsWith('#'))
             str = str.slice(1);
         return parseInt(`0x${str}`);
+    },
+
+    /**
+     * Invierte 2 valores o referencias
+     * @param {*} a 
+     * @param {*} b 
+     * @returns {[*, *]} Los valores intercambiados
+     */
+    swap: function(a, b) {
+        const t = a;
+        a = b;
+        b = t;
+
+        return [a, b];
     },
 
     /**
