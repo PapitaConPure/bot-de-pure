@@ -5,7 +5,7 @@ const { CommandManager } = require('../commands/Commons/commands.js');
 const { Stats, ChannelStats } = require('../localdata/models/stats.js');
 const { p_pure } = require('../localdata/customization/prefixes.js');
 
-const { channelIsBlocked, rand, edlDistance } = require('../func.js');
+const { channelIsBlocked, rand, edlDistance, isUsageBanned } = require('../func.js');
 const globalGuildFunctions = require('../localdata/customization/guildFunctions.js');
 const { auditRequest } = require('../systems/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../localdata/cmdExceptions.js');
@@ -191,7 +191,7 @@ async function gainPRC(userId) {
  */
 async function onMessage(message, client) {
     const { content, author, channel, guild } = message;
-    if(channelIsBlocked(channel) || !guild) return;
+    if(channelIsBlocked(channel) || (await isUsageBanned(author)) || !guild) return;
 
     //Respuestas rápidas
     const guildFunctions = globalGuildFunctions[guild.id];
