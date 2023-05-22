@@ -1,4 +1,4 @@
-const UserConfigs = require('./localdata/models/userconfigs');
+const { fetchUserCache } = require('./usercache.js');
 
 /**
  * @typedef {'en' | 'es'} LocaleKey
@@ -71,11 +71,13 @@ let localesObject = {
         paragraph(
             '⛔ Probablemente usaste un comando mientras me reiniciaba. Usa el comando nuevamente en unos segundos y debería funcionar',
             'Si el comando se sigue rechazando, es posible que esté en mantenimiento o que no tenga suficientes permisos en este canal',
+            'También puede deberse a que estés banneado de usar a Bot de Puré',
             `Si no sabes la causa, puedes notificarle el problema a mi creador: <@${subl(0)}>`,
         ),
         paragraph(
             '⛔ You probably used a command while I was restarting. Use the command again in a few seconds and it should work',
             'If the command keeps getting rejected, I may be in maintenance or not have enough permissions in this channel',
+            'It may also be because you were banned from using Bot de Puré',
             `If you're not sure, you can tell my creator about the problem: <@${subl(0)}>`,
         ),
     ),
@@ -239,6 +241,47 @@ let localesObject = {
     cultivarDescription: new Translation(
         `Ahora tienes <:prc:1097208828946301123> ${subl(0)}`,
         `You now have <:prc:1097208828946301123> ${subl(0)}`,
+    ),
+
+    transferInputExpected: new Translation(
+        '⚠ Se esperaba que especifiques el monto a transferir y el usuario objetivo',
+        '⚠ Amount to transfer and target user to expected',
+    ),
+    transferHumanExpected: new Translation(
+        '❌ No se puede transferir PRC a bots',
+        '❌ Can\'t transfer PRC to bots',
+    ),
+    transferOtherExpected: new Translation(
+        '❌ No puedes transferirte a ti mismo',
+        '❌ You can\'t transfer PRC to yourself',
+    ),
+    transferInsufficient: new Translation(
+        '⚠ Saldo insuficiente',
+        '⚠ Insufficient funds',
+    ),
+    transferTitle: new Translation(
+        'Transferencia completada',
+        'Transfer completed',
+    ),
+    transferAuthorName: new Translation(
+        'Comprobante de pago',
+        'Receipt of payment',
+    ),
+    transferFromName: new Translation(
+        'De',
+        'From',
+    ),
+    transferForName: new Translation(
+        'Para',
+        'To',
+    ),
+    transferAmountName: new Translation(
+        'Monto',
+        'Amount',
+    ),
+    transferCodeName: new Translation(
+        'Código de referencia',
+        'Reference Code',
     ),
 
     poll: new Translation(
@@ -601,50 +644,9 @@ function getText(id, locale, ...values) {
     return translation;
 }
 
-/**@type {Map<String, LocaleKey>}*/
-const userLocalesCache = new Map();
-
-/**
- * Guarda una ID en caché para uso posterior
- * @param {String} userId 
- */
-async function cacheLocale(userId) {
-    if(!userId) throw ReferenceError('Se esperaba una ID de usuario');
-    const userQuery = { userId };
-    let userConfigs = await UserConfigs.findOne(userQuery);
-    if(!userConfigs) {
-        userConfigs = new UserConfigs(userQuery);
-        await userConfigs.save();
-    }
-
-    return userLocalesCache.set(userId, userConfigs.language);
-}
-
-/**
- * Sobreescribe una ID en caché para uso posterior
- * @param {String} userId 
- */
-async function recacheLocale(userId) {
-    return cacheLocale(userId);
-}
-
-/**
- * Devuelve el lenguaje vinculado a la ID de usuario cacheada.
- * Si la ID no está cacheada, se realiza una llamada a la base de datos, se cachea el lenguaje del usuario y se devuelve lo obtenido
- * @param {String} userId 
- * @returns {Promise<LocaleKey>}
- */
-async function fetchLocaleFor(userId) {
-    if(!userId) throw ReferenceError('Se esperaba una ID de usuario al recolectar lenguaje');
-    if(!userLocalesCache.has(userId))
-        await cacheLocale(userId);
-    
-    return userLocalesCache.get(userId);
-}
-
 /**Clase de traducción de contenidos*/
 class Translator {
-    #locale
+    #locale;
 
     /**@param {LocaleKey} locale lenguaje al cual localizar el texto*/
     constructor(locale) {
@@ -685,12 +687,11 @@ class Translator {
 
     /**@param {String} userId*/
     static async from(userId) {
-        const locale = await fetchLocaleFor(userId);
-        return new Translator(locale);
+        const userCache = await fetchUserCache(userId);
+        return new Translator(userCache.language);
     }
 }
 
 module.exports = {
-    recacheLocale,
     Translator,
 };

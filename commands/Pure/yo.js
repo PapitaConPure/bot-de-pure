@@ -2,7 +2,8 @@ const UserConfigs = require('../../localdata/models/userconfigs');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Embed, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder } = require('discord.js');
 const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 const { tenshiColor } = require('../../localdata/config.json');
-const { Translator, recacheLocale } = require('../../internationalization');
+const { Translator } = require('../../internationalization');
+const { recacheUser } = require('../../usercache');
 const { compressId, shortenText, decompressId, improveNumber } = require('../../func');
 const { auditError } = require('../../systems/auditor');
 const { updateFollowedFeedTagsCache } = require('../../systems/boorufeed');
@@ -235,7 +236,7 @@ const command = new CommandManager('yo', flags)
         translator = new Translator(translator.next);
         
         return Promise.all([
-            userConfigs.save().then(() => recacheLocale(user.id)),
+            userConfigs.save().then(() => recacheUser(user.id)),
             interaction.update({
                 embeds: [dashboardEmbed(interaction, userConfigs, translator)],
                 components: dashboardRows(user.id, userConfigs, translator),
