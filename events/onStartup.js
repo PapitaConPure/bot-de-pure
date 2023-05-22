@@ -43,13 +43,13 @@ async function onStartup(client) {
             Routes.applicationCommands(client.application.id),
             { body: client.SlashPure },
         );
-        logOptions.slash && console.log('Comandos registrados (global):', registeredGlobal.map(scmd => scmd.name));
-        const dedicatedServerId = (process.env.I_LOVE_MEGUMIN) ? globalConfigs.serverid.hourai : globalConfigs.serverid.slot1;
+        // const dedicatedServerId = (process.env.I_LOVE_MEGUMIN) ? globalConfigs.serverid.saki : globalConfigs.serverid.slot1;
+        const dedicatedServerId = globalConfigs.serverid.saki;
         await restGlobal.put(
             Routes.applicationGuildCommands(client.application.id, dedicatedServerId),
             { body: client.SlashHouraiPure },
         );
-        logOptions.slash && console.log('Comandos registrados (hourai):', registeredHourai.map(scmd => scmd.name));
+        logOptions.slash && console.log(`Comandos registrados + hourai (${dedicatedServerId} :: ${client.guilds.cache.get(dedicatedServerId).name}):`, restGlobal);
         confirm();
     } catch (error) {
         console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos slash'));
