@@ -214,9 +214,9 @@ module.exports = {
                 content: [
                     //`Una última cosita ${miembro}, recuerda revisar el canal <#671817759268536320> en algún momento <:Junkoborga:751938096550903850>`,
                     //`También, si te interesa, puedes revisar los mensajes pinneados de este canal <:tenshipeacheems:854408293258493962>`,
-                    `Okay, ya \'tamos ${miembro}, recuerda convivir adecuadamente con el resto <:Junkoborga:751938096550903850>`,
-                    'Si te interesa, puedes revisar los mensajes pinneados de este canal <:tenshipeacheems:854408293258493962>',
-                    'Y estate tranqui, que ya no vas a recibir tantos pings <:starnap:727764482801008693>',
+                    `Okay, ya \'tamos ${miembro}, recuerda convivir adecuadamente con el resto <:comodowo:1107847983065747476>`,
+                    'Si te interesa, puedes revisar los mensajes pinneados de este canal <:tenshiJuguito:1107843487891734588>',
+                    'Y estate tranqui, que ya no vas a recibir tantos pings <:dormidowo:1108318689624866846>',
                     `Dicho esto, ¡disfruta el server po\'! Si quieres más roles, puedes usar \`${p_pure(global.serverid.saki).raw}roles\``,
                 ].join('\n')
             });

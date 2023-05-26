@@ -11,7 +11,7 @@ const frase = [
 	'¿Vai a responder [m]? <:haniwaSmile:1107847987201318944>',
 	'[m], respondé altoke <:hypergardener:796931141851938827>',
 	'Dale [m] ctm <:reibu:1107876018171162705>',
-	'Wena po [m] como andai <:meguSmile:694324892073721887>',
+	'Wena po [m] como andai <:meguSmile:1107880958981587004>',
 	'Pero qué andai haciendo po [m] rectm <:spookedSyura:725577379665281094>',
 	'NoOoOoOo re TUuUrBiOoOoOo, veni [m] <:junkWTF:796930821260836864>',
 	'[m] y eso pa? <:keikuwu:796930824028946432>',

@@ -38,7 +38,7 @@ const command = new CommandManager('papa-responder', flags)
 		if(action === 'accept') //Confirmación de aceptación
 			return user.send({
 				content:
-					'💌 ¡Se confirmó que tu sugerencia ha sido aceptada! ¡¡¡Muchas gracias por tu colaboración!!! <:meguSmile:796930824627945483>\n' +
+					'💌 ¡Se confirmó que tu sugerencia ha sido aceptada! ¡¡¡Muchas gracias por tu colaboración!!! <:meguSmile:1107880958981587004>\n' +
 					'_Ten en cuenta que es probable que se hagan modificaciones al plan en base a diversos factores._'
 			});
 		//Reporte de problema
