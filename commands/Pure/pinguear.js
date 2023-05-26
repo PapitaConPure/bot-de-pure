@@ -26,7 +26,7 @@ async function pinguear(request, user, cnt, isFirst) {
 	if(isFirst)
 		await request.reply(replyContent);
 	else
-		await request.channel.send(replyContent);
+		await request.channel.send(replyContent).catch(_ => undefined);
 	if(cnt > 1) setTimeout(pinguear, 800, request, user, cnt - 1, false);
 }
 
