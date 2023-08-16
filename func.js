@@ -104,7 +104,7 @@ module.exports = {
         setTimeout(module.exports.forceRole, 1000, miembro, canal, 2 * reps);
         console.log(chalk.magentaBright(`Esperando comprobación final de miembro en unos minutos...`));
     },
-
+    
     /**
      * 
      * @param {Discord.GuildMember} miembro 
@@ -354,7 +354,8 @@ module.exports = {
         const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'bienvenida.png' });
 
         //#region Imagen y Mensaje extra
-        const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
+        const members = await servidor.members.fetch().catch(_ => servidor.members.cache);
+        const peoplecnt = members.filter(member => !member.user.bot).size;
         await canal.send({files: [imagen]});
         if(forceHourai || servidor.id === global.serverid.saki) {
             return canal.send({
@@ -436,7 +437,8 @@ module.exports = {
 
         //#region Imagen y Mensaje extra
         const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'despedida.png' });
-        const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
+        const members = await servidor.members.fetch().catch(_ => servidor.members.cache);
+        const peoplecnt = members.filter(member => !member.user.bot).size;
         await canal.send({ files: [imagen] });
         if(servidor.id === global.serverid.saki) {
             await canal.send({
