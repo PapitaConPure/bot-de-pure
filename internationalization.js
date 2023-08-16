@@ -99,40 +99,40 @@ let localesObject = {
     ),
 
     invalidInput: new Translation(
-        '⚠️ Entrada inválida',
-        '⚠️ Invalid input',
+        '⚠️️ Entrada inválida',
+        '⚠️️ Invalid input',
     ),
     invalidNumber: new Translation(
-        '⚠️ Número inválido',
-        '⚠️ Invalid number',
+        '⚠️️ Número inválido',
+        '⚠️️ Invalid number',
     ),
     invalidId: new Translation(
-        '⚠️ ID inválida',
-        '⚠️ Invalid ID',
+        '⚠️️ ID inválida',
+        '⚠️️ Invalid ID',
     ),
     invalidUser: new Translation(
-        '⚠️ Usuario inválido',
-        '⚠️ Invalid number',
+        '⚠️️ Usuario inválido',
+        '⚠️️ Invalid number',
     ),
     invalidMember: new Translation(
-        '⚠️ Miembro inválido',
-        '⚠️ Invalid member',
+        '⚠️️ Miembro inválido',
+        '⚠️️ Invalid member',
     ),
     invalidRole: new Translation(
-        '⚠️ Rol inválido',
-        '⚠️ Invalid role',
+        '⚠️️ Rol inválido',
+        '⚠️️ Invalid role',
     ),
     invalidChannel: new Translation(
-        '⚠️ Canal inválido',
-        '⚠️ Invalid channel',
+        '⚠️️ Canal inválido',
+        '⚠️️ Invalid channel',
     ),
     invalidMessage: new Translation(
-        '⚠️ Mensaje inválido',
-        '⚠️ Invalid message',
+        '⚠️️ Mensaje inválido',
+        '⚠️️ Invalid message',
     ),
     invalidTime: new Translation(
-        '⚠️ Tiempo inválido',
-        '⚠️ Invalid time',
+        '⚠️️ Tiempo inválido',
+        '⚠️️ Invalid time',
     ),
 
     welcome: new Translation(
@@ -244,8 +244,8 @@ let localesObject = {
     ),
 
     transferInputExpected: new Translation(
-        '⚠ Se esperaba que especifiques el monto a transferir y el usuario objetivo',
-        '⚠ Amount to transfer and target user to expected',
+        '⚠️ Se esperaba que especifiques el monto a transferir y el usuario objetivo',
+        '⚠️ Amount to transfer and target user to expected',
     ),
     transferHumanExpected: new Translation(
         '❌ No se puede transferir PRC a bots',
@@ -256,8 +256,8 @@ let localesObject = {
         '❌ You can\'t transfer PRC to yourself',
     ),
     transferInsufficient: new Translation(
-        '⚠ Saldo insuficiente',
-        '⚠ Insufficient funds',
+        '⚠️ Saldo insuficiente',
+        '⚠️ Insufficient funds',
     ),
     transferTitle: new Translation(
         'Transferencia completada',
@@ -421,16 +421,16 @@ let localesObject = {
         '✅ Vote deleted',
     ),
     pollVoteError: new Translation(
-        '⚠ ¡Parece que la encuesta ya terminó!',
-        '⚠ Seems like the poll has ended!',
+        '⚠️ ¡Parece que la encuesta ya terminó!',
+        '⚠️ Seems like the poll has ended!',
     ),
     pollButtonToggleAnon: new Translation(
         'Voto anónimo',
         'Anonymous vote',
     ),
     pollInsufficientTime: new Translation(
-        '⚠ ¡Tiempo insuficiente! Pon al menos 10 segundos',
-        '⚠ Insufficient time! Set at least 10 seconds',
+        '⚠️ ¡Tiempo insuficiente! Pon al menos 10 segundos',
+        '⚠️ Insufficient time! Set at least 10 seconds',
     ),
     
     feedAuthor: new Translation(
@@ -466,8 +466,8 @@ let localesObject = {
         `Stopped following the tags: ${subl(0)}`,
     ),
     feedSetTagsUnchanged: new Translation(
-        '⚠ No se modificaron las tags seguidas. Asegúrate de estar siguiendo 6 tags o menos',
-        '⚠ Followed tags were not modified. Make sure not to be following more than 6 tags',
+        '⚠️ No se modificaron las tags seguidas. Asegúrate de estar siguiendo 6 tags o menos',
+        '⚠️ Followed tags were not modified. Make sure not to be following more than 6 tags',
     ),
     feedSetTagsButtonView: new Translation(
         'Ver Tags Seguidas',
