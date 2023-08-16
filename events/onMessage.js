@@ -58,6 +58,10 @@ async function handleInvalidCommand(message, client, commandName, prefixPair) {
             text: 'No logré encontrar tu comando en mi librito. ¿Lo habrás escrito mal?',
             imageUrl: 'https://i.imgur.com/avTSSa4.jpg',
         },
+        {
+            text: 'Te juro que no encuentro ningún comando así, perdón 🥺',
+            imageUrl: 'https://i.imgur.com/gqTzYJA.jpg',
+        },
     ];
 
     const selectedReply = replies[rand(replies.length)];
