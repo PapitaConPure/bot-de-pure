@@ -85,13 +85,13 @@ class PureVoiceUpdateHandler {
             console.error(error);
             if(!guild.systemChannelId)
                 return guild.fetchOwner().then(owner => owner.send({ content: [
-                    `⚠ Ocurrió un problema en un intento de remover una sesión del Sistema PuréVoice de tu servidor **${guild.name}**.`,
+                    `⚠️ Ocurrió un problema en un intento de remover una sesión del Sistema PuréVoice de tu servidor **${guild.name}**.`,
                     'Esto puede deberse a una conexión en una sesión PuréVoice que estaba siendo eliminada.',
                     'Si el par de canales relacionales de la sesión fueron eliminados, puedes ignorar este mensaje.',
                 ].join('\n') }).catch(console.error));
             
             return guild.systemChannel.send({ content: [
-                '⚠ Ocurrió un problema en un intento de remover una sesión del Sistema PuréVoice del servidor.',
+                '⚠️ Ocurrió un problema en un intento de remover una sesión del Sistema PuréVoice del servidor.',
                 'Esto puede deberse a una conexión en una sesión PuréVoice que estaba siendo eliminada.',
                 'Si el par de canales relacionales de la sesión fueron eliminados, puedes ignorar este mensaje',
             ].join('\n') }).catch(console.error);
@@ -157,11 +157,7 @@ class PureVoiceUpdateHandler {
                 parent: pvDocument.categoryId,
                 bitrate: 64e3,
                 userLimit: 1,
-                reason: 'Desplegar Canal Automutable PuréVoice',
-                permissionOverwrites: [
-                    { id: guild.roles.everyone.id,  deny:   [ 'SendMessages' ] },
-                    { id: guild.members.me.id,      allow:  [ 'SendMessages' ] },
-                ],
+                reason: 'Desplegar Canal Automutable PuréVoice'
             });
             
             pvDocument.voiceMakerId = newSession.id;
@@ -174,19 +170,22 @@ class PureVoiceUpdateHandler {
             pvDocument.markModified('sessions');
             console.log(chalk.gray('Se marcó para guardar'));
 
+            await newSession.lockPermissions().catch(prematureError);
+            await newSession.permissionOverwrites.edit(guild.roles.everyone, { SendMessages: false }).catch(prematureError);
             await Promise.all([
-                channel?.permissionOverwrites?.edit(sessionRole, { SendMessages: true, reason: 'Conceder envío de mensajes a rol de sesión PuréVoice' }),
+                newSession.permissionOverwrites.edit(guild.members.me, { SendMessages: false }),
                 member.roles.add(sessionRole, 'Inclusión de primer miembro en sesión PuréVoice'),
             ]).catch(prematureError);
-            await channel.setName('🔶').catch(prematureError);
-            await channel.setUserLimit(0).catch(prematureError);
+            await channel?.permissionOverwrites?.edit(sessionRole, { SendMessages: true, reason: 'Conceder envío de mensajes a rol de sesión PuréVoice' }).catch(prematureError);
+            await channel?.setName('🔶').catch(prematureError);
+            await channel?.setUserLimit(0).catch(prematureError);
 
             embed.setColor(0x21abcd)
                 .setTitle('✅ Sesión inicializada')
                 .addFields(
                     {
                         name: '🎨 Personalizar sesión',
-                        value: `Puedes personalizar el nombre y emote del par de canales y rol de la sesión\n\`\`\`${p_pure(guild.id).raw}voz <Nombre>[ -e <Emote>]\`\`\``
+                        value: `Puedes personalizar el nombre y emote del canal y rol de la sesión\n\`\`\`${p_pure(guild.id).raw}voz <Nombre>[ -e <Emote>]\`\`\``
                     },
                     
                     {
@@ -212,7 +211,7 @@ class PureVoiceUpdateHandler {
                     },
                     {
                         name: '⏱️ Nombre automático',
-                        value: 'Si no escribes un nombre de sesión en 2 minutos, se nombrará automáticamente',
+                        value: 'Si no escribes un nombre de sesión en 3 minutos, se nombrará automáticamente',
                         inline: true,
                     },
                 );
@@ -249,16 +248,16 @@ class PureVoiceUpdateHandler {
                     channel?.setName(`💠【${name}】`, namingReason),
                     sessionRole?.setName(`💠 ${name}`, namingReason),
                 ]).catch(console.error);
-            }, 60e3 * 2);
+            }, 60e3 * 3);
         } catch(error) {
             console.error(error);
             if(!guild.systemChannelId)
                 return guild.fetchOwner().then(owner => owner.send({ content: [
-                    `⚠ Ocurrió un problema al crear una nueva sesión para el Sistema PuréVoice de tu servidor **${guild.name}**. Esto puede deberse a una saturación de acciones o a falta de permisos.`,
+                    `⚠️ Ocurrió un problema al crear una nueva sesión para el Sistema PuréVoice de tu servidor **${guild.name}**. Esto puede deberse a una saturación de acciones o a falta de permisos.`,
                     'Si el problema persiste, desinstala y vuelve a instalar el Sistema',
                 ].join('\n') }));
             return guild.systemChannel.send({ content: [
-                '⚠ Ocurrió un problema al crear una nueva sesión para el Sistema PuréVoice del servidor. Esto puede deberse a una saturación de acciones o a falta de permisos.',
+                '⚠️ Ocurrió un problema al crear una nueva sesión para el Sistema PuréVoice del servidor. Esto puede deberse a una saturación de acciones o a falta de permisos.',
                 'Si el problema persiste, prueben desinstalar y volver a instalar el Sistema',
                 'Si lo ven necesario, ¡menciónenle el asunto a un moderador!',
             ].join('\n') });
@@ -303,9 +302,9 @@ class PureVoiceOrchestrator {
     }
 
     /**@param {PureVoiceUpdateHandler} updateHandler*/
-    orchestrate(updateHandler) {
+    async orchestrate(updateHandler) {
         this.#handlers.push(updateHandler);
-        if(this.#busy) return;
+        if(this.#busy) return true;
         this.#busy = true;
         return this.consumeHandler();
     }
@@ -313,7 +312,7 @@ class PureVoiceOrchestrator {
     async consumeHandler() {
         const pv = this.#handlers.shift();
         await pv.getSystemDocument({ guildId: this.#guildId }).catch(console.error);
-        if(!pv.systemIsInstalled()) return;
+        if(!pv.systemIsInstalled()) return false;
         
         try {
             await Promise.all([
@@ -327,9 +326,12 @@ class PureVoiceOrchestrator {
             console.error(error);
         }
         
-        if(this.#handlers.length)
-            return this.consumeHandler();
+        if(this.#handlers.length) {
+            await this.consumeHandler();
+            return false;
+        }
         this.#busy = false;
+        return false;
     }
 }
 
