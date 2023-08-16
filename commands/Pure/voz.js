@@ -30,7 +30,8 @@ const wizEmbed = (iconUrl, stepName, stepColor) => {
 const options = new CommandOptionsManager()
 	.addParam('nombre', 'TEXT', 'para decidir el nombre de la sesión actual', { optional: true })
 	.addFlag('e', ['emote', 'emoji'], 'para determinar el emote de la sesión actual', { name: 'emt', type: 'EMOTE' })
-	.addFlag('aiw', ['asistente','instalador','wizard'], 'para inicializar el Asistente de Configuración');
+	.addFlag('i', ['invitar', 'invite'], 'para invitar del canal a la sesión actual')
+	.addFlag('aw', ['asistente','instalador','wizard'], 'para inicializar el Asistente de Configuración');
 const flags = new CommandMetaFlagsManager().add('COMMON');
 const command = new CommandManager('voz', flags)
 	.setAliases(
@@ -76,7 +77,7 @@ const command = new CommandManager('voz', flags)
 		if(!sessionName)
 			return request.reply({
 				content: [
-					'⚠ Debes ingresar un nombre para ejecutar este comando de esta forma',
+					'⚠️ Debes ingresar un nombre para ejecutar este comando de esta forma',
 					'Si estás buscando iniciar un Asistente de Configuración, usa la bandera `--asistente` o `-a`',
 					helpstr,
 				].join('\n'),
@@ -85,14 +86,14 @@ const command = new CommandManager('voz', flags)
 		
 		if(sessionName.length > 24)
 			return request.reply({
-				content: '⚠ Intenta acortar un poco el nombre. El límite para nombres de sesión es de 24(+3) caracteres',
+				content: '⚠️ Intenta acortar un poco el nombre. El límite para nombres de sesión es de 24(+3) caracteres',
 				ephemeral: true,
 			});
 
 		if(!sessionEmote)
 			return request.reply({
 				content: [
-					'⚠ Emote inválido',
+					'⚠️ Emote inválido',
 					'Recuerda que no se pueden usar emotes personalizados para nombres de canales',
 					'También, ten en cuenta que algunos emotes estándar de Discord no son *tan estándar* y __no se espera__ que se detecten/funcionen correctamente',
 				].join('\n'),
@@ -104,12 +105,33 @@ const command = new CommandManager('voz', flags)
 		const voiceState = request.member.voice;
 		const warnNotInSession = () => request.reply({
 			content: [
-				'⚠ Debes entrar a una sesión PuréVoice para ejecutar este comando de esta forma.',
+				'⚠️ Debes entrar a una sesión PuréVoice para ejecutar este comando de esta forma.',
 				helpstr,
 			].join('\n'),
 			ephemeral: true,
 		}).catch(console.error);
-		if(!voiceState.channelId) return warnNotInSession();
+		if(!voiceState.channelId)
+			return warnNotInSession();
+
+		const createInvite = options.fetchFlag(args, 'invitar');
+
+		if(createInvite) {
+			const invite = await request.guild.invites.create(voiceState.channel, { maxAge: 5 * 60 }).catch(_ => null);
+
+			if(invite)
+				return request.reply({ content: `${invite}` });
+
+			const channelRef = `${voiceState.channel ?? '⚠️️ Canal inválido'}`;
+			const embed = new EmbedBuilder()
+				.setColor('Blurple')
+				.setAuthor({
+					name: request.member.displayName,
+					iconURL: request.member.displayAvatarURL(),
+				})
+				.addFields({ name: 'Invitación a canal', value: channelRef });
+
+			return request.reply({ embeds: [embed] });
+		}
 
 		//Modificar sesión y confirmar
 		const pv = await PureVoice.findOne({ guildId: request.guildId });
@@ -118,12 +140,13 @@ const command = new CommandManager('voz', flags)
 		const session = pv.sessions[sessionIndex];
 		if(!session) return warnNotInSession();
 		const { voiceId, roleId, nameChanged } = session;
-		if((Date.now() - nameChanged) < 60e3 * 20) return request.reply({
-			content: [
-				'❌ Por cuestiones técnicas, solo puedes cambiar el nombre de la sesión una vez cada 20 minutos.',
-				`Inténtalo de nuevo <t:${Math.round(nameChanged / 1000 + 60 * 20)}:R>, o conéctate a una nueva sesión`,
-			].join('\n'),
-		});
+		if((Date.now() - nameChanged) < 60e3 * 20)
+			return request.reply({
+				content: [
+					'❌ Por cuestiones técnicas, solo puedes cambiar el nombre de la sesión una vez cada 20 minutos.',
+					`Inténtalo de nuevo <t:${Math.round(nameChanged / 1000 + 60 * 20)}:R>, o conéctate a una nueva sesión`,
+				].join('\n'),
+			});
 		pv.sessions[sessionIndex].nameChanged = Date.now();
 		pv.markModified('sessions');
 
@@ -134,13 +157,13 @@ const command = new CommandManager('voz', flags)
 			guildChannels.get(voiceId)?.setName(`${sessionEmote}【${sessionName}】`, 'Renombrar sesión PuréVoice'),
 			guildRoles.get(roleId)?.setName(`${sessionEmote} ${sessionName}`, 'Renombrar sesión PuréVoice'),
 			request.reply({ content: '✅ Nombre aplicado', ephemeral: true }),
-		]).catch(() => request.reply({ content: '⚠ Ocurrió un error al aplicar el nombre', ephemeral: true }));
+		]).catch(() => request.reply({ content: '⚠️ Ocurrió un error al aplicar el nombre', ephemeral: true }));
 	})
 	.setButtonResponse(async function startWizard(interaction, authorId) {
 		const { user, guild } = interaction;
 		
 		if(user.id !== authorId)
-			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
+			return interaction.reply({ content: '❌ No puedes hacer esto', ephemeral: true });
 		
 		const wizard = wizEmbed(interaction.client.user.avatarURL(), '2/? • Seleccionar Operación', Colors.Navy)
 			.addFields({
@@ -182,7 +205,7 @@ const command = new CommandManager('voz', flags)
 	})
 	.setButtonResponse(async function selectInstallation(interaction, authorId) {
 		if(interaction.user.id !== authorId)
-			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
+			return interaction.reply({ content: '❌ No puedes hacer esto', ephemeral: true });
 
 		const wizard = wizEmbed(interaction.client.user.avatarURL(), '3/4 • Seleccionar instalación', Colors.Gold)
 			.addFields({
@@ -207,7 +230,7 @@ const command = new CommandManager('voz', flags)
 	})
 	.setButtonResponse(async function installSystem(interaction, authorId, createNew) {
 		if(interaction.user.id !== authorId)
-			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
+			return interaction.reply({ content: '❌ No puedes hacer esto', ephemeral: true });
 		
 		const filter = (m) => m.author.id === authorId;
 		collectors[interaction.id] = new MessageCollector(interaction.channel, { filter, time: 1000 * 60 * 2 });
@@ -242,6 +265,10 @@ const command = new CommandManager('voz', flags)
 					reason: 'Desplegar Canal Autoextensible PuréVoice',
 				});
 
+				await voiceMaker.lockPermissions().catch(console.error);
+				await voiceMaker.permissionOverwrites.edit(interaction.guild.roles.everyone, { SendMessages: false }).catch(console.error);
+				await voiceMaker.permissionOverwrites.edit(interaction.guild.members.me,     { SendMessages: true  }).catch(console.error);
+
 				//Guardar nueva categoría PuréVoice
 				const guildQuery = { guildId: interaction.guild.id };
 				await PureVoice.deleteOne(guildQuery);
@@ -273,7 +300,7 @@ const command = new CommandManager('voz', flags)
 			} catch(error) {
 				console.error(error);
 				return interaction.channel.send({ content: [
-					'⚠ Ocurrió un error al crear esta categoría',
+					'⚠️ Ocurrió un error al crear esta categoría',
 					'Asegúrate de que tenga los permisos necesarios para realizar esta acción (administrar canales)',
 					'También, verifica que el nombre ingresado no esté ya ocupado por alguna otra categoría o canal',
 				].join('\n') });
@@ -300,7 +327,7 @@ const command = new CommandManager('voz', flags)
 	})
 	.setButtonResponse(async function deleteSystem(interaction, authorId) {
 		if(interaction.user.id !== authorId)
-			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
+			return interaction.reply({ content: '❌ No puedes hacer esto', ephemeral: true });
 		
 		const wizard = wizEmbed(interaction.client.user.avatarURL(), 'Confirmar desinstalación', Colors.Yellow)
 			.addFields({
@@ -329,7 +356,7 @@ const command = new CommandManager('voz', flags)
 	})
 	.setButtonResponse(async function deleteSystemConfirmed(interaction, authorId) {
 		if(interaction.user.id !== authorId)
-			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
+			return interaction.reply({ content: '❌ No puedes hacer esto', ephemeral: true });
 
 		//Eliminar Sistema PuréVoice
 		const guildQuery = { guildId: interaction.guild.id };
@@ -356,7 +383,7 @@ const command = new CommandManager('voz', flags)
 	})
 	.setButtonResponse(async function cancelWizard(interaction, authorId) {
 		if(interaction.user.id !== authorId)
-			return interaction.reply({ content: ':x: No puedes hacer esto', ephemeral: true });
+			return interaction.reply({ content: '❌ No puedes hacer esto', ephemeral: true });
 		
 		const cancelEmbed = wizEmbed(interaction.client.user.avatarURL(), 'Operación abortada', Colors.NotQuiteBlack)
 			.addFields({
