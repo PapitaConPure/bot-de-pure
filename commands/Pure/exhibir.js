@@ -47,7 +47,7 @@ const command = new CommandManager('exhibir', flags)
 	})
 	.setButtonResponse(async function flushPins(interaction, userId) {
 		if(interaction.user.id !== userId)
-			return interaction.reply({ content: ':x: No permitido', ephemeral: true });
+			return interaction.reply({ content: '❌ No permitido', ephemeral: true });
 		
 		interaction.deferUpdate();
 		const { channel } = interaction;
@@ -58,10 +58,10 @@ const command = new CommandManager('exhibir', flags)
 		]);
 
 		if(!pinnedMessages?.size)
-			return interaction.editReply({ content: '⚠ Este canal no tiene pins' });
+			return interaction.editReply({ content: '⚠️ Este canal no tiene pins' });
 
 		if(!backupChannel)
-			return interaction.editReply({ content: '⚠ Canal receptor no encontrado' });
+			return interaction.editReply({ content: '⚠️ Canal receptor no encontrado' });
 		
 		const agent = await (new DiscordAgent().setup(backupChannel));
 		let flushing = [];
@@ -86,7 +86,7 @@ const command = new CommandManager('exhibir', flags)
 				formattedMessage.embeds.push(
 					new EmbedBuilder()
 						.setColor(Colors.Gold)
-						.setDescription(`Destacado en [${channel}](${message.url})`)
+						.setDescription(`Destacado en ${channel}`)
 						// .setTimestamp(message.createdTimestamp),
 				);
 				// message.channel.messages.fetch(message.id)
@@ -103,11 +103,11 @@ const command = new CommandManager('exhibir', flags)
 			agent.setMember(message.member ?? message.author);
 			const sent = await agent.sendAsUser(formattedMessage);
 			if(!sent)
-				interaction.channel.send({ content: '⚠ Se omitió un pin debido a un error al trasladarlo' });
+				interaction.channel.send({ content: '⚠️ Se omitió un pin debido a un error al trasladarlo' });
 			else
 				flushing.push(
 					message.unpin()
-					.catch(_ => interaction.channel.send({ content: `⚠ No se pudo despinnear un mensaje\n${message.url}` }))
+					.catch(_ => interaction.channel.send({ content: `⚠️ No se pudo despinnear un mensaje\n${message.url}` }))
 				);
 		}
 		const flushed = (await Promise.all(flushing)).length;
@@ -123,7 +123,7 @@ const command = new CommandManager('exhibir', flags)
 	})
 	.setButtonResponse(async function cancelFlush(interaction, userId) {
 		if(interaction.user.id !== userId)
-			return interaction.reply({ content: ':x: No permitido', ephemeral: true });
+			return interaction.reply({ content: '❌ No permitido', ephemeral: true });
 		
 		const embed = new EmbedBuilder()
 			.setTitle('Traslado cancelado')

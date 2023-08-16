@@ -21,18 +21,18 @@ const command = new CommandManager('calcular', flags)
 		const operation = options.fetchParam(args, 'operación', true);
 
 		if(!operation)
-			return request.reply({ content: '⚠ Debes ingresar una operación' });
+			return request.reply({ content: '⚠️ Debes ingresar una operación' });
 		
 		try {
 			const result = calc(operation);
 
 			if(isNaN(result))
-				return request.reply({ content: '⚠ La operación no pertenece al dominio de los números Reales' });
+				return request.reply({ content: '⚠️ La operación no pertenece al dominio de los números Reales' });
 			
 			return request.reply({ content: improveNumber(result, shorten, min) });
 		} catch(error) {
 			console.log(error);
-			return request.reply({ content: '⚠ Operación inválida' });
+			return request.reply({ content: '⚠️ Operación inválida' });
 		}
 	});
 

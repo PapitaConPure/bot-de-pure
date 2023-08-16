@@ -14,7 +14,7 @@ const command = new CommandManager('sticker', flags)
 		const message = (await options.in(request).fetchParam(args, 'mensaje', true)) ?? request.channel.messages.cache.get(request.reference?.messageId);
 
 		if(!message || !message.stickers.size)
-			return request.reply({ content: '⚠️ Debes especificar un mensaje con un sticker' });
+			return request.reply({ content: '⚠️️ Debes especificar un mensaje con un sticker' });
 
         const sticker = await message.stickers.first().fetch().catch(console.error);
 

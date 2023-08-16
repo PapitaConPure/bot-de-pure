@@ -256,7 +256,7 @@ Socorro, el IntelliSense se volvió loco
 Recorriendo la World Wide web
 PAN, LAN, MAN, WAN
 Encriptando a mi diario 🧙
-Usando esos emojis que por alguna razón todo Web Dev usa 🎊🎉☕✅❌🔥⚠️💩🍌🍆
+Usando esos emojis que por alguna razón todo Web Dev usa 🎊🎉☕✅❌🔥⚠️️💩🍌🍆
 Insultando programadores novatos en stackoverflow.com
 Sobreviviendo una tormenta
 Persistiendo en la Nube

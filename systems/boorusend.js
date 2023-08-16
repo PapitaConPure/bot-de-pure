@@ -272,7 +272,7 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
         const response = await booru.search([ searchTags, userTags ], { limit: 100, random: true });
         //Manejo de respuesta
         if(!response.length) {
-            const replyOptions = { content: `:warning: No hay resultados en **Gelbooru** para las tags **"${userTags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` };
+            const replyOptions = { content: `⚠️ No hay resultados en **Gelbooru** para las tags **"${userTags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` };
             return request.editReply?.(replyOptions) ?? request.reply(replyOptions);
         }
 

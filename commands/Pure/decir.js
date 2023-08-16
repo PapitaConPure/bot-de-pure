@@ -20,7 +20,7 @@ const command = new CommandManager('decir', flags)
         const deleteFlag = options.fetchFlag(args, 'borrar');
 
         if(!(args.data ?? args).length)
-            return request.reply({ content: ':warning: tienes que especificar lo que quieres que diga.' });
+            return request.reply({ content: '⚠️ tienes que especificar lo que quieres que diga.' });
 
         const sentence = isSlash ? args.getString('mensaje') : args.join(' ');
         if(request.guild.id === serverid.saki && sentence.toLowerCase().indexOf(/h+(\W*_*)*o+(\W*_*)*u+(\W*_*)*r+(\W*_*)*a+(\W*_*)*i+(\W*_*)*/g) !== -1)

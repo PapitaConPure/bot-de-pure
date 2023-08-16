@@ -33,7 +33,7 @@ const command = new CommandManager('hora', flags)
 			const lastDay = (new Date(year, month + 1, 0)).getDate();
 			console.log(day, lastDay);
 			if(day > lastDay) isInvalidDate = true;
-			if(isInvalidDate) return request.reply('⚠ Fecha inválida. Asegúrate de seguir el formato DD/MM/AAAA');
+			if(isInvalidDate) return request.reply('⚠️ Fecha inválida. Asegúrate de seguir el formato DD/MM/AAAA');
 		} else {
 			const now = new Date(Date.now());
 			now.setTime(now.valueOf() + gmt * 60 * 60 * 1000);
@@ -46,7 +46,7 @@ const command = new CommandManager('hora', flags)
 		let rawTime = isSlash ? args.getString('hora') : args.shift();
 
 		if(rawTime == undefined)
-			return request.reply('⚠ Debes ingresar una hora');
+			return request.reply('⚠️ Debes ingresar una hora');
 		
 		let isShortened = false;
 		let plus12;
@@ -101,7 +101,7 @@ const command = new CommandManager('hora', flags)
 		};
 
 		if(isInvalidTime([ hours, minutes, seconds ]))
-			return request.reply('⚠ Debes ingresar una hora válida');
+			return request.reply('⚠️ Debes ingresar una hora válida');
 		
 		if(isShortened) {
 			if(hours === 12) hours -= 12;

@@ -25,7 +25,7 @@ const command = new CommandManager('colgar', flags)
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash) => {
 		if(!request.guild.members.me.permissions.has('ManageRoles'))
-			return request.reply({ content: '⚠ ¡No tengo permiso para hacer eso!', ephemeral: true });
+			return request.reply({ content: '⚠️ ¡No tengo permiso para hacer eso!', ephemeral: true });
 
 		const { client, guild } = request;
 		const user = request.author ?? request.user;
@@ -55,7 +55,7 @@ const command = new CommandManager('colgar', flags)
 		}
 
 		if(!isSlash && !args.length)
-			return request.reply({ content: '⚠ Debes indicar un usuario', ephemeral: true });
+			return request.reply({ content: '⚠️ Debes indicar un usuario', ephemeral: true });
 
 		const search = isSlash
 			? args.getUser('usuario', true)?.id
@@ -63,7 +63,7 @@ const command = new CommandManager('colgar', flags)
 		const member = fetchMember(search, { guild, client });
 		if(!member) {
 			const sent = await request.reply({
-				content: ':warning: La gente que no existe por lo general no tiene cuello <:invertido:720736131368485025>',
+				content: '⚠️ La gente que no existe por lo general no tiene cuello <:invertido:720736131368485025>',
 				ephemeral: true,
 				fetchReply: true,
 			});
@@ -87,7 +87,7 @@ const command = new CommandManager('colgar', flags)
 	})
 	.setButtonResponse(async function addHanged(interaction, userId) {
 		if(interaction.user.id !== userId)
-			return interaction.reply({ content: ':x: No permitido', ephemeral: true });
+			return interaction.reply({ content: '❌ No permitido', ephemeral: true });
 		const embed = new EmbedBuilder()
 			.setTitle('Colgada en Masa ejecutada')
 			.setImage('https://i.imgur.com/RVsStid.png')
@@ -100,7 +100,7 @@ const command = new CommandManager('colgar', flags)
 	})
 	.setButtonResponse(async function removeHanged(interaction, userId) {
 		if(interaction.user.id !== userId)
-			return interaction.reply({ content: ':x: No permitido', ephemeral: true });
+			return interaction.reply({ content: '❌ No permitido', ephemeral: true });
 		const embed = new EmbedBuilder()
 			.setTitle('Colgada en Masa deshecha')
 			.addFields({ name: 'Se descolgó a todos los miembros', value: 'Si siguen vivos, bien por ellos~' });
@@ -116,7 +116,7 @@ const command = new CommandManager('colgar', flags)
 	})
 	.setButtonResponse(async function cancelHanged(interaction, userId) {
 		if(interaction.user.id !== userId)
-			return interaction.reply({ content: ':x: No permitido', ephemeral: true });
+			return interaction.reply({ content: '❌ No permitido', ephemeral: true });
 		const embed = new EmbedBuilder()
 			.setTitle('Colgada en Masa cancelada')
 			.addFields({ name: 'Se canceló la operación', value: 'Supongo que van a vivir (o no) un día más' });

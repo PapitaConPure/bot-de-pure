@@ -28,7 +28,7 @@ const command = new CommandManager('twitters', flags)
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash = false) => {
 		if(!isSlash && !args.length)
-			return request.reply({ content: ':warning: Necesitas ingresar al menos un enlace de Twitter o propiedad de tablón' });
+			return request.reply({ content: '⚠️ Necesitas ingresar al menos un enlace de Twitter o propiedad de tablón' });
 
 		//Parámetros de comando
 		let edit = options.fetchFlag(args, 'agregar', { callback: 'add' });
@@ -77,10 +77,10 @@ const command = new CommandManager('twitters', flags)
 			const twitters = getTwitters();
 
 			if(!twitters.length)
-				return request.reply(':warning: Para crear un nuevo tablón de Twitters, debes ingresar algunos links iniciales');
+				return request.reply('⚠️ Para crear un nuevo tablón de Twitters, debes ingresar algunos links iniciales');
 
 			if(twitters.some(twitter => twitter === undefined))
-				return request.reply({ content: ':warning: Uno o más enlaces tenían un formato inválido' });
+				return request.reply({ content: '⚠️ Uno o más enlaces tenían un formato inválido' });
 
 			const embed = new Discord.EmbedBuilder()
 				.setColor(0x1da1f2)
@@ -105,17 +105,17 @@ const command = new CommandManager('twitters', flags)
 		const msg = await ch.messages.fetch(id).catch(auditError);
 
 		if(!msg)
-			return request.reply({ content: `:warning: ID de mensaje inválida` });
+			return request.reply({ content: `⚠️ ID de mensaje inválida` });
 
 		if(msg.embeds == undefined || msg.author.id !== request.client.user.id)
-			return request.reply({ content: ':warning: El mensaje especificado existe pero no me pertenece o no tiene ningún embed' });
+			return request.reply({ content: '⚠️ El mensaje especificado existe pero no me pertenece o no tiene ningún embed' });
 
 		/**@type {Discord.EmbedBuilder}*/
 		const target = msg.embeds[0];
 		const ntw = getTwitters();
 
 		if(ntw.some(nt => nt === undefined))
-			return request.reply({ content: ':warning: Uno o más enlaces tenían un formato inválido' });
+			return request.reply({ content: '⚠️ Uno o más enlaces tenían un formato inválido' });
 
 		let twitters = target.fields[0].value.split('\n');
 		for(page = 1; page < target.fields.length; page++)

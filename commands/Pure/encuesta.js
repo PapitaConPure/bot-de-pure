@@ -617,7 +617,7 @@ const command = new CommandManager('encuesta', flags)
 
 			return interaction.editReply({ content: null, embeds: [embed], components: [] });
 		} catch(e) {
-			return interaction.editReply({ content: '⚠ Error' });
+			return interaction.editReply({ content: '⚠️ Error' });
 		}
 	})
 	.setButtonResponse(async function vote(interaction, voteId, pollId) {

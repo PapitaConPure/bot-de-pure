@@ -16,7 +16,7 @@ async function resolverLink(req, linkRes, iSize, isnsfw, isSlash) {
 		const user = req.author ?? req.user;
 		//Si se pasó un enlace, comprobar su funcionamiento y devolverlo si es accesible
 		if(response.status !== 200) {
-			const errorResponse = { content: ':warning: Ocurrió un error al descargar la imagen\n```\n' + response.status + '\n```\nToma cum.' };
+			const errorResponse = { content: '⚠️ Ocurrió un error al descargar la imagen\n```\n' + response.status + '\n```\nToma cum.' };
 			if(isSlash) req.channel.send(errorResponse);
 			else req.reply(errorResponse);
 			return user.avatarURL({ extension: 'png', size: iSize });
@@ -24,7 +24,7 @@ async function resolverLink(req, linkRes, iSize, isnsfw, isSlash) {
 		if(isnsfw || (!linkRes.includes('.gif') && !linkRes.includes('.mp4') && (response.data.toString().length / 1024) < 256))
 			return linkRes;
 		
-		const errorResponse = { content: ':warning: La imagen es muy grande (>256KB) o tiene un formato inválido. Toma cum.' };
+		const errorResponse = { content: '⚠️ La imagen es muy grande (>256KB) o tiene un formato inválido. Toma cum.' };
 		if(isSlash) req.channel.send(errorResponse);
 		else req.reply(errorResponse);
 

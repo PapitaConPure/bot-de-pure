@@ -22,7 +22,7 @@ const command = new CommandManager('inforol', flags)
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash) => {
 		if(!isSlash && args.length < 1)
-			return request.reply({ content: `:x: ¡Debes ingresar al menos un parámetro!\nUsa \`${p_pure(request.guildId).raw}ayuda inforol\` para más información` });
+			return request.reply({ content: `❌ ¡Debes ingresar al menos un parámetro!\nUsa \`${p_pure(request.guildId).raw}ayuda inforol\` para más información` });
 
 		//Parámetros
 		const servidor = request.guild;
@@ -56,7 +56,7 @@ const command = new CommandManager('inforol', flags)
 			roleIds = options.fetchParamPoly(args, 'términos', args.getRole, []).map(role => role.id);
 
 		if(!roleIds.length)
-			return request.reply({ content: '⚠ No se encontró ningún rol...' });
+			return request.reply({ content: '⚠️ No se encontró ningún rol...' });
 
 		//Contadores de usuarios
 		const rolemembers = servidor.members.cache.filter(member => //Usuarios con rol
@@ -76,7 +76,7 @@ const command = new CommandManager('inforol', flags)
 		const anaroles = roleIds.map(ar => `<@&${ar}>`).join(', ');
 
 		if(anaroles.length === 0)
-			return request.reply({ content: '⚠ Entrada inválida' });
+			return request.reply({ content: '⚠️ Entrada inválida' });
 
 		Embed[0] = new Discord.EmbedBuilder()
 			.setColor(0xff00ff)
@@ -110,7 +110,10 @@ const command = new CommandManager('inforol', flags)
 		
 		const arrows = fetchArrows(request.client.emojis.cache);
 		const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
-		return request.reply({ embeds: [Embed[0]], allowedMentions: { parse: [] }, fetchReply: true }).then(sent => {
+		return request.reply({
+			embeds: [Embed[0]],
+			fetchReply: true
+		}).then(sent => {
 			sent.react(arrows[0])
 				.then(() => sent.react(arrows[1]))
 				.then(() => {

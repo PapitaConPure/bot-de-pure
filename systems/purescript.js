@@ -79,7 +79,7 @@ const executeTuber = async (request, tuber, { tuberArgs }) => {
         
         const replyContent = {};
         const embed = new EmbedBuilder()
-            .setTitle(`⚠ ${error.name}`)
+            .setTitle(`⚠️ ${error.name}`)
             .setAuthor({
                 name: 'Error de PuréScript',
                 iconURL: request.client.user.avatarURL({ size: 128 })
@@ -117,7 +117,7 @@ const executeTuber = async (request, tuber, { tuberArgs }) => {
     let { sendStack, inputStack } = result;
     
     if(!sendStack.length) {
-        await replyFn.call(request, { content: `⚠ Se esperaba un envío de mensaje` });
+        await replyFn.call(request, { content: `⚠️ Se esperaba un envío de mensaje` });
         throw Error('Se esperaba un envío de mensaje');
     }
 
@@ -148,7 +148,7 @@ const executeTuber = async (request, tuber, { tuberArgs }) => {
     tuber.inputs = inputStack;
 
     return replyFn.call(request, replyObject).catch(async () => {
-        await replyFn.call(request, { content: `⚠ No se puede enviar el mensaje. Revisa el largo y la validez de los datos` });
+        await replyFn.call(request, { content: `⚠️ No se puede enviar el mensaje. Revisa el largo y la validez de los datos` });
         throw Error('Envío inválido');
     })
 };

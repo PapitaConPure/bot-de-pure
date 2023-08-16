@@ -47,7 +47,7 @@ const command = new CommandManager('papa-json', flags)
 
 		//Acción de comando
 		if(obj === undefined)
-			return message.reply({ content: `:warning: El objeto "${args.join('.')}" no existe. Revisa que el identificador esté bien escrito.` });
+			return message.reply({ content: `⚠️ El objeto "${args.join('.')}" no existe. Revisa que el identificador esté bien escrito.` });
 
 		const jsonfile = new AttachmentBuilder(Buffer.from(JSON.stringify(obj, null, '\t'), 'utf-8'), { name: 'myfile.json' });
 		return message.reply({ files: [ jsonfile ]});

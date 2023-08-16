@@ -16,14 +16,14 @@ const command = new CommandManager('aislar', flags)
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash) => {
 		if(!request.guild.members.me.permissions.has('ModerateMembers'))
-			return request.reply({ content: '⚠ ¡No tengo permiso para hacer eso!', ephemeral: true });
+			return request.reply({ content: '⚠️ ¡No tengo permiso para hacer eso!', ephemeral: true });
 
 		if(!isSlash && !args.length)
-			return request.reply({ content: '⚠ Debes indicar la duración del castigo en minutos', ephemeral: true });
+			return request.reply({ content: '⚠️ Debes indicar la duración del castigo en minutos', ephemeral: true });
 
 		let duration = isSlash ? args.getNumber('duración') : +(args.shift());
 		if(duration === undefined || duration < 0 || isNaN(duration))
-			return request.reply({ content: '⚠ Debes especificar la duración del aislamiento en minutos\nIngresa 0 para revocarlo', ephemeral: true });
+			return request.reply({ content: '⚠️ Debes especificar la duración del aislamiento en minutos\nIngresa 0 para revocarlo', ephemeral: true });
 
 		if(duration === 0) 
 			duration = null;
@@ -31,7 +31,7 @@ const command = new CommandManager('aislar', flags)
 			duration = duration * 60e3;
 		
 		if(!isSlash && !args.length)
-			return request.reply({ content: '⚠ Debes indicar un usuario luego de la duración', ephemeral: true });
+			return request.reply({ content: '⚠️ Debes indicar un usuario luego de la duración', ephemeral: true });
 
 		/**@type {Array<GuildMember>}*/
 		const members = isSlash
@@ -39,7 +39,7 @@ const command = new CommandManager('aislar', flags)
 			: regroupText(args).map(data => fetchMember(data, request)).filter(member => member);
 		
 		if(!members.length)
-			return request.reply({ content: '⚠ Debes mencionar al menos un miembro a aislar', ephemeral: true });
+			return request.reply({ content: '⚠️ Debes mencionar al menos un miembro a aislar', ephemeral: true });
 
 		const succeeded = [];
 		const failed = [];
@@ -51,7 +51,7 @@ const command = new CommandManager('aislar', flags)
 		));
 		
 		if(!succeeded.length)
-			return request.reply({ content: '⚠ No pude actualizar ninguno de los miembros mencionados. Revisa que tenga permisos para administrar miembros' });
+			return request.reply({ content: '⚠️ No pude actualizar ninguno de los miembros mencionados. Revisa que tenga permisos para administrar miembros' });
 		
 		const membersList = members => members.map(member => member.user.tag).join(', ');
 		return request.reply({

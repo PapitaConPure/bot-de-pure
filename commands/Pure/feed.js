@@ -198,13 +198,13 @@ const command = new CommandManager('feed', flags)
 			: textChannels.get(input);
 			
 		if(!fetchedChannel)
-			return interaction.reply({ content: '⚠ Canal inválido', ephemeral: true });
+			return interaction.reply({ content: '⚠️ Canal inválido', ephemeral: true });
 
 		const guildQuery = { guildId: interaction.guild.id };
 		const gcfg = (await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery);
 
 		if(gcfg?.feeds && gcfg.feeds.hasOwnProperty(fetchedChannel.id))
-			return interaction.reply({ content: '⚠ Ya existe un Feed en el canal solicitado. Prueba editarlo o crear un Feed en otro canal', ephemeral: true });
+			return interaction.reply({ content: '⚠️ Ya existe un Feed en el canal solicitado. Prueba editarlo o crear un Feed en otro canal', ephemeral: true });
 
 		const wizard = tagsSetupPrompt(interaction, fetchedChannel.id, translator);
 		return interaction.update({
@@ -280,7 +280,7 @@ const command = new CommandManager('feed', flags)
 			.setFooter({ text: 'Seleccionar Feed' })
 			.addFields({ name: 'Selección de Feed', value: 'Los Feeds que configuraste anteriormente están categorizados por canal y tags. Encuentra el que quieras modificar en esta lista y selecciónalo' });
 		const feeds = await generateFeedOptions(interaction);
-		if(!feeds.length) return interaction.reply({ content: '⚠ No hay Feeds para mostrar', ephemeral: true });
+		if(!feeds.length) return interaction.reply({ content: '⚠️ No hay Feeds para mostrar', ephemeral: true });
 		return interaction.update({
 			embeds: [wizard],
 			components: [
@@ -308,7 +308,7 @@ const command = new CommandManager('feed', flags)
 			.setFooter({ text: 'Seleccionar Feed' })
 			.addFields({ name: 'Selección de Feed', value: 'Los Feeds que configuraste anteriormente están categorizados por canal y tags. Encuentra el que quieras personalizar en esta lista y selecciónalo' });
 		const feeds = await generateFeedOptions(interaction);
-		if(!feeds.length) return interaction.reply({ content: '⚠ No hay Feeds para mostrar', ephemeral: true });
+		if(!feeds.length) return interaction.reply({ content: '⚠️ No hay Feeds para mostrar', ephemeral: true });
 		return interaction.update({
 			embeds: [wizard],
 			components: [
@@ -336,7 +336,7 @@ const command = new CommandManager('feed', flags)
 			.setFooter({ text: 'Seleccionar Feed' })
 			.addFields({ name: 'Selección de Feed', value: 'Los Feeds que configuraste anteriormente están categorizados por canal y tags. Encuentra el que quieras ver en esta lista y selecciónalo' });
 		const feeds = await generateFeedOptions(interaction);
-		if(!feeds.length) return interaction.reply({ content: '⚠ No hay Feeds para mostrar', ephemeral: true });
+		if(!feeds.length) return interaction.reply({ content: '⚠️ No hay Feeds para mostrar', ephemeral: true });
 		return interaction.update({
 			embeds: [wizard],
 			components: [
@@ -364,7 +364,7 @@ const command = new CommandManager('feed', flags)
 			.setFooter({ text: 'Seleccionar Feed' })
 			.addFields({ name: 'Selección de Feed', value: 'Los Feeds que configuraste anteriormente están categorizados por canal y tags. Encuentra el que quieras eliminar en esta lista y selecciónalo' });
 		const feeds = await generateFeedOptions(interaction);
-		if(!feeds.length) return interaction.reply({ content: '⚠ No hay Feeds para mostrar', ephemeral: true });
+		if(!feeds.length) return interaction.reply({ content: '⚠️ No hay Feeds para mostrar', ephemeral: true });
 		return interaction.update({
 			embeds: [wizard],
 			components: [
@@ -714,7 +714,7 @@ const command = new CommandManager('feed', flags)
 		const maxTags = parseInt(input);
 
 		if(isNaN(maxTags) || maxTags < 0 || maxTags > 50)
-			return interaction.reply({ content: '⚠ Cantidad inválida. Introduce un número entre 0 y 50' });
+			return interaction.reply({ content: '⚠️ Cantidad inválida. Introduce un número entre 0 y 50' });
 
 		gcfg.markModified('feeds');
 		gcfg.save();
@@ -755,7 +755,7 @@ const command = new CommandManager('feed', flags)
 			return interaction.editReply({ content: '✅ Ícono actualizado' });
 		} catch(error) {
 			auditError(error, { brief: 'Ha ocurrido un error al procesar Feed' });
-			return interaction.editReply({ content: '⚠ Enlace inválido. Asegúrate de proveer un enlace completo y directo a la imagen' })
+			return interaction.editReply({ content: '⚠️ Enlace inválido. Asegúrate de proveer un enlace completo y directo a la imagen' })
 		}
 	})
 	.setButtonResponse(async function removeCustomTitle(interaction, channelId) {
@@ -1042,7 +1042,7 @@ const command = new CommandManager('feed', flags)
 	.setButtonResponse(async function shock(interaction) {
 		const { member, guild, channel } = interaction;
 		if(isNotModerator(member))
-			return interaction.reply({ content: ':x: No tienes permiso para hacer eso, teehee~', ephemeral: true });
+			return interaction.reply({ content: '❌ No tienes permiso para hacer eso, teehee~', ephemeral: true });
 		const gcfg = await GuildConfig.findOne({ guildId: guild.id });
 		const booru = new Booru(globalConfigs.booruCredentials);
 		gcfg.feeds[channel.id].ids = (await booru.search(gcfg.feeds[channel.id].tags, { limit: 32 })).map(r => r.id);

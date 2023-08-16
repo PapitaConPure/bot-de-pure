@@ -50,14 +50,14 @@ const command = new CommandManager('borrar', flags)
 		let amount = options.fetchParam(args, 'cantidad') ?? 100;
 
 		if(!user && !amount) {
-			const sent = await request.reply({ content: '⚠ Debes especificar la cantidad o el autor de los mensajes a borrar', ephemeral: true });
+			const sent = await request.reply({ content: '⚠️ Debes especificar la cantidad o el autor de los mensajes a borrar', ephemeral: true });
 			return !isSlash && deleteOriginalAndReply(request, sent);
 		}
 
 		if(isNaN(amount)) {
 			const sent = request.reply({
 				content:
-					'⚠ Debes especificar la cantidad de mensajes a borrar\n' +
+					'⚠️ Debes especificar la cantidad de mensajes a borrar\n' +
 					`Revisa \`${p_pure(request.guildId).raw}ayuda borrar\` para más información`,
 				ephemeral: true,
 			});

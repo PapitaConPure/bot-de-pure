@@ -31,7 +31,7 @@ const command = new CommandManager('purescript', flags)
 		/**@type {String}*/
 		const script = getScriptString(isSlash, args, rawArgs);
 		if(!script?.length)
-			return request.reply({ content: `⚠️ Este Tubérculo requiere ingresar PuréScript\n${helpString}` });
+			return request.reply({ content: `⚠️️ Este Tubérculo requiere ingresar PuréScript\n${helpString}` });
 
 		/**@type {import("../../systems/purescript").Tubercle}*/
 		const tuber = {

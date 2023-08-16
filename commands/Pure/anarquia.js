@@ -125,7 +125,7 @@ const command = new CommandManager('anarquia', flags)
 			const aid = (search) ? fetchUserID(search, request) : request.author.id;
 			const auser = await AUser.findOne({ userId: aid });
 			if(!aid) {
-				request.reply({ content: `:warning: Usuario **${search}** no encontrado` });
+				request.reply({ content: `⚠️ Usuario **${search}** no encontrado` });
 				return;
 			}
 			const user = request.client.users.cache.get(aid);
@@ -241,10 +241,10 @@ const command = new CommandManager('anarquia', flags)
 		if(Object.keys(e).length !== 3 || !e.id || e.x === undefined) {
 			const errorcomms = [];
 			if(!isSlash)
-				errorcomms.push(request.react('⚠️'));
+				errorcomms.push(request.react('⚠️️'));
 			errorcomms.push(request.reply({
 				content:
-					'⚠️ Entrada inválida\n' +
+					'⚠️️ Entrada inválida\n' +
 					`Usa \`${p_pure(request.guildId).raw}ayuda anarquia\` para más información`,
 				ephemeral: true,
 			}));

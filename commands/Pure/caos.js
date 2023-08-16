@@ -19,7 +19,7 @@ const command = new CommandManager('caos', flags)
 		const gcfg = (await GuildConfig.findOne(guildsearch)) || new GuildConfig(guildsearch);
 
 		if(activate && deactivate)
-			return request.reply({ content: '⚠️ Elige solo una de las banderas de activación', ephemeral: true });
+			return request.reply({ content: '⚠️️ Elige solo una de las banderas de activación', ephemeral: true });
 
 		if(activate || deactivate) {
 			gcfg.chaos = activate;

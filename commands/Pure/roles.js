@@ -203,7 +203,7 @@ const command = new CommandManager('roles', flags)
 							value: 'selectReligion',
 						},
 						{
-							label: '⚠️ Gacha',
+							label: '⚠️️ Gacha',
 							description: 'Trata y comercio de waifus; ludopatía',
 							emoji: '796930823068057600',
 							value: 'selectGacha',
@@ -414,7 +414,7 @@ const command = new CommandManager('roles', flags)
 		const { member } = interaction;
 
 		if(member.roles.cache.has(roleId))
-			return interaction.reply({ content: '⚠️ Ya tienes ese rol', ephemeral: true });
+			return interaction.reply({ content: '⚠️️ Ya tienes ese rol', ephemeral: true });
 
 		const newComponents = interaction.message.components;
 		newComponents[0].components = newComponents[0].components.map(component => {
@@ -450,7 +450,7 @@ const command = new CommandManager('roles', flags)
 		const { member } = interaction;
 
 		if(!member.roles.cache.has(roleId))
-			return interaction.reply({ content: '⚠️ No tienes ese rol', ephemeral: true });
+			return interaction.reply({ content: '⚠️️ No tienes ese rol', ephemeral: true });
 
 		const newComponents = interaction.message.components;
 		newComponents[0].components = newComponents[0].components.map(component => {
@@ -506,7 +506,7 @@ const command = new CommandManager('roles', flags)
 		switch(operation) {
 			case 'CREATE': {
 				if(interaction.member.roles.cache.get(houraiDB.customRoles[userId]))
-					return interaction.reply({ content: '⚠ ¡Tu rol ya fue creado! Si cancelaste la configuración o la interacción falló, selecciona la categoría nuevamente para editarlo', ephemeral: true });
+					return interaction.reply({ content: '⚠️ ¡Tu rol ya fue creado! Si cancelaste la configuración o la interacción falló, selecciona la categoría nuevamente para editarlo', ephemeral: true });
 					
 				const customRole = await interaction.guild.roles.create({
 					name: interaction.member.nickname ?? interaction.user.username,
@@ -552,7 +552,7 @@ const command = new CommandManager('roles', flags)
 		const customRole = interaction.member.roles.cache.get(roleId);
 		if(!customRole)
 			return interaction.update({
-				content: `⚠ No se encontró tu Rol Personalizado. Prueba usando \`${p_pure(interaction.guildId).raw}roles\` una vez más para crear uno nuevo`,
+				content: `⚠️ No se encontró tu Rol Personalizado. Prueba usando \`${p_pure(interaction.guildId).raw}roles\` una vez más para crear uno nuevo`,
 				embeds: [],
 				components: [],
 			});
@@ -596,7 +596,7 @@ const command = new CommandManager('roles', flags)
 	.setModalResponse(async function applyCustomRoleChanges(interaction, roleId, category = null) {
 		/**@type {import('discord.js').Role}*/
 		const customRole = interaction.member.roles.cache.get(roleId);
-		if(!customRole) return interaction.reply({ content: '⚠ No se encontró el rol personalizado. Intenta crearlo otra vez', ephemeral: true });
+		if(!customRole) return interaction.reply({ content: '⚠️ No se encontró el rol personalizado. Intenta crearlo otra vez', ephemeral: true });
 		const roleName = interaction.fields.getTextInputValue('nameInput');
 		let roleColor = interaction.fields.getTextInputValue('colorInput');
 		let roleEmoteUrl = interaction.fields.getTextInputValue('emoteUrlInput');
@@ -606,14 +606,14 @@ const command = new CommandManager('roles', flags)
 		if(roleName.length)
 			editStack.push(
 				customRole.edit({ name: `✨ ${roleName}` })
-				.catch(_ => replyStack.push('⚠ No se pudo actualizar el nombre del rol'))
+				.catch(_ => replyStack.push('⚠️ No se pudo actualizar el nombre del rol'))
 			);
 
 		if(roleColor.length) {
 			roleColor = stringHexToNumber(roleColor);
 			editStack.push(
 				customRole.edit({ color: roleColor })
-				.catch(_ => replyStack.push('⚠ No se pudo actualizar el color del rol'))
+				.catch(_ => replyStack.push('⚠️ No se pudo actualizar el color del rol'))
 			);
 		}
 
@@ -633,10 +633,10 @@ const command = new CommandManager('roles', flags)
 				const roleEmoteBuffer = Buffer.from(response?.data, "utf-8")
 				editStack.push(
 					customRole.edit({ icon: roleEmoteBuffer })
-					.catch(_ => replyStack.push('⚠ No se pudo actualizar el ícono del rol. Puede que el servidor sea de nivel muy bajo o no hayas proporcionado un enlace directo a la imagen'))
+					.catch(_ => replyStack.push('⚠️ No se pudo actualizar el ícono del rol. Puede que el servidor sea de nivel muy bajo o no hayas proporcionado un enlace directo a la imagen'))
 				);
 			} catch(error) {
-				replyStack.push('⚠ No se pudo actualizar el ícono del rol. Puede que no hayas proporcionado un enlace directo a la imagen o el enlace sea inválido');
+				replyStack.push('⚠️ No se pudo actualizar el ícono del rol. Puede que no hayas proporcionado un enlace directo a la imagen o el enlace sea inválido');
 			}
 		}
 

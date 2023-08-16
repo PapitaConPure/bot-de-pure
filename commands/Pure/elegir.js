@@ -17,7 +17,7 @@ const command = new CommandManager('elegir', flags)
 		
 		if(!choices.length || choices.length < 2)
 			return request.reply({
-				content: `⚠️ Debes ingresar al menos dos opciones separadas por comas ","\nUsa \`${p_pure(request.guild.id).raw}ayuda\` para más información`,
+				content: `⚠️️ Debes ingresar al menos dos opciones separadas por comas ","\nUsa \`${p_pure(request.guild.id).raw}ayuda\` para más información`,
 				ephemeral: true,
 			});
 		

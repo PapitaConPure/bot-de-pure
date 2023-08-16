@@ -10,7 +10,7 @@ const command = new CommandManager('g-tipos', flags)
 	)
 	.setLongDescription(
 		'Los `<parámetros>` y las `--opciones <propiedad>` de comando requieren _(tipos)_ de valores fijos',
-		'Ingresar un `<parámetro>` o una `--bandera <propiedad>` con un _(tipo)_ diferente al esperado resultará en un ⚠ **Error de entrada**',
+		'Ingresar un `<parámetro>` o una `--bandera <propiedad>` con un _(tipo)_ diferente al esperado resultará en un ⚠️ **Error de entrada**',
 		'',
 		'En la página de ayuda de cada comando, en la sección **"Opciones"**, se detalla el _(tipo)_ de valor esperado para cada entrada',
 		'',

@@ -207,7 +207,7 @@ const command = new CommandManager('yo', flags)
 			
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
-            return interaction.reply({ content: '⚠ Usuario inexistente / Unexistent user', ephemeral: true });
+            return interaction.reply({ content: '⚠️ Usuario inexistente / Unexistent user', ephemeral: true });
         
         const translator = new Translator(userConfigs.language);
 
@@ -224,7 +224,7 @@ const command = new CommandManager('yo', flags)
 			
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
-            return interaction.reply({ content: '⚠ Usuario inexistente / Unexistent user', ephemeral: true });
+            return interaction.reply({ content: '⚠️ Usuario inexistente / Unexistent user', ephemeral: true });
 
         let translator = new Translator(userConfigs.language);
 		
@@ -248,7 +248,7 @@ const command = new CommandManager('yo', flags)
 			
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
-            return interaction.reply({ content: '⚠ Usuario inexistente / Unexistent user', ephemeral: true });
+            return interaction.reply({ content: '⚠️ Usuario inexistente / Unexistent user', ephemeral: true });
 
         const translator = new Translator(userConfigs.language);
 		
@@ -270,7 +270,7 @@ const command = new CommandManager('yo', flags)
 			
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
-            return interaction.reply({ content: '⚠ Usuario inexistente / Unexistent user', ephemeral: true });
+            return interaction.reply({ content: '⚠️ Usuario inexistente / Unexistent user', ephemeral: true });
 
         const translator = new Translator(userConfigs.language);
 		

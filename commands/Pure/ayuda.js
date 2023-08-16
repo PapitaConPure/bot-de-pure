@@ -102,7 +102,7 @@ const command = new CommandManager('ayuda', flags)
                     .setColor(0xbf94e4)
                     .addFields({
                         name: 'Descripción',
-                        value: command.desc || ':warning: Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde',
+                        value: command.desc || '⚠️ Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde',
                     })
                 );
                 if(isNotGuidePage)

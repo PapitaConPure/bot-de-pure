@@ -18,7 +18,7 @@ const command = new CommandManager('número', flags)
 		const exp = options.fetchFlag(args, 'exponente', { fallback: 1 });
 		
 		let num = isSlash ? args.getNumber('num') : args.shift();
-		if(!num) return request.reply({ content: '⚠ Debes ingresar un número' });
+		if(!num) return request.reply({ content: '⚠️ Debes ingresar un número' });
 		num = Math.pow(num, exp);
 		return request.reply({ content: improveNumber(num, shorten, min) });
 	});

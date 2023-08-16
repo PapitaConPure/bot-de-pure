@@ -23,9 +23,9 @@ const command = new CommandManager('mimar', flags)
 	.setExecution(async (request, args, isSlash = false) => {
 		//Acción de comando
 		const user2 = isSlash ? args.getUser('persona') : fetchUser(args.join(' '), request);
-		if(!user2) return request.reply('⚠️ Debes especificar una persona a mimar');
+		if(!user2) return request.reply('⚠️️ Debes especificar una persona a mimar');
 		const user1 = request.author ?? request.user;
-		if(user1.id === user2.id) return request.reply('⚠️ El único mimo que puedes darte a ti mismo es el de vivir una vida de la que no te arrepentirás');
+		if(user1.id === user2.id) return request.reply('⚠️️ El único mimo que puedes darte a ti mismo es el de vivir una vida de la que no te arrepentirás');
 
 		const embed = new EmbedBuilder()
 			.setColor(0xfa7b62)

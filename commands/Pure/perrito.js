@@ -32,7 +32,7 @@ async function loadPageNumber(request, page) {
 	const emotePages = paginate(emotes);
 	const lastPage = emotePages.length - 1;
 	if(page > lastPage)
-		return request.reply({ content: '⚠ Esta página no existe', ephemeral: true });
+		return request.reply({ content: '⚠️ Esta página no existe', ephemeral: true });
 
 	const perritoComun = emotes.find(perrito => perrito.name === 'perrito');
 	

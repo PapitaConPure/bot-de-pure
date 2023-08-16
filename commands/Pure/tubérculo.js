@@ -136,7 +136,7 @@ const loadPageNumber = async(interaction, page, setFilter = undefined) => {
  */
 function viewTuber(interaction, item, tuberId) {
 	if(!item)
-		return interaction.reply({ content: `⚠️ El Tubérculo **${tuberId}** no existe` });
+		return interaction.reply({ content: `⚠️️ El Tubérculo **${tuberId}** no existe` });
 
 	const author = interaction.guild.members.cache.get(item.author) ?? interaction.guild.members.me;
 
@@ -253,7 +253,7 @@ const command = new CommandManager('tubérculo', flags)
 
 		if(!tuberId) {
 			if(operation)
-				return request.reply({ content: `⚠️ Debes ingresar una TuberID válida\n${helpString}` });
+				return request.reply({ content: `⚠️️ Debes ingresar una TuberID válida\n${helpString}` });
 				
 			//Listar Tubérculos
 			const { items, lastPage } = await getItemsList(request.guild);
@@ -286,7 +286,7 @@ const command = new CommandManager('tubérculo', flags)
 		switch(operation) {
 			case 'crear':
 				if(tuberId.length > 24)
-					return request.reply({ content: '⚠️ Las TuberID solo pueden medir hasta 24 caracteres' });
+					return request.reply({ content: '⚠️️ Las TuberID solo pueden medir hasta 24 caracteres' });
 				if(gcfg.tubers[tuberId] && isNotModerator(request.member) && gcfg.tubers[tuberId].author !== (request.author ?? request.user).id)
 					return request.reply({ content: `⛔ Acción denegada. Esta TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.members.me).user.username}*` });
 				
@@ -317,12 +317,12 @@ const command = new CommandManager('tubérculo', flags)
 				//Incluir Tubérculo; crear colección de Tubérculos si es necesario
 				if(isPureScript) {
 					if(!mcontent)
-						return request.reply({ content: `⚠️ Este Tubérculo requiere ingresar PuréScript\n${helpString}` });
+						return request.reply({ content: `⚠️️ Este Tubérculo requiere ingresar PuréScript\n${helpString}` });
 					tuberContent.script = mcontent.replace(/```[A-Za-z0-9]*/, '');
 					console.log({ script: tuberContent.script });
 				} else {
 					if(!mcontent && !mfiles.length)
-						return request.reply({ content: `⚠️ Debes ingresar un mensaje o archivo para registrar un Tubérculo\n${helpString}` });
+						return request.reply({ content: `⚠️️ Debes ingresar un mensaje o archivo para registrar un Tubérculo\n${helpString}` });
 					if(mcontent) tuberContent.content = mcontent;
 					if(mfiles.length) tuberContent.files = mfiles;
 				}
@@ -353,7 +353,7 @@ const command = new CommandManager('tubérculo', flags)
 			
 			case 'borrar':
 				if(!gcfg.tubers[tuberId])
-					return request.reply({ content: `⚠️ El Tubérculo **${tuberId}** no existe` });
+					return request.reply({ content: `⚠️️ El Tubérculo **${tuberId}** no existe` });
 				if(isNotModerator(request.member) && gcfg.tubers[tuberId].author !== (request.author ?? request.user).id)
 					return request.reply({ content: `⛔ Acción denegada. Esta TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.members.me).user.username}*` });
 
@@ -368,7 +368,7 @@ const command = new CommandManager('tubérculo', flags)
 				if(!gcfg.tubers[tuberId]) {
 					const notFoundEmbed = new EmbedBuilder()
 						.setColor(Colors.Orange)
-						.setTitle(`⚠️ El Tubérculo **${shortenText(tuberId, 64)}** no existe`)
+						.setTitle(`⚠️️ El Tubérculo **${shortenText(tuberId, 64)}** no existe`)
 						.setImage('https://i.imgur.com/LFzqoJX.jpg');
 
 					const row = new ActionRowBuilder().addComponents(
@@ -446,14 +446,14 @@ const command = new CommandManager('tubérculo', flags)
 	})
 	.setButtonResponse(async function getTuberHelp(interaction, tuberId) {
 		if(!tuberId)
-			return interaction.reply({ content: '⚠ Se esperaba una TuberID válida', ephemeral: true });
+			return interaction.reply({ content: '⚠️ Se esperaba una TuberID válida', ephemeral: true });
 
 		const gid = interaction.guild.id;
 		const guildquery = { guildId: gid };
 		const gcfg = (await GuildConfig.findOne(guildquery)) || new GuildConfig(guildquery);
 		const tuber = gcfg.tubers[tuberId];
 		if(!tuber)
-			return interaction.reply({ content: '⚠ Esta TuberID ya no existe', ephemeral: true });
+			return interaction.reply({ content: '⚠️ Esta TuberID ya no existe', ephemeral: true });
 		
 		return viewTuber(interaction, tuber, tuberId);
 	})
@@ -488,7 +488,7 @@ const command = new CommandManager('tubérculo', flags)
 			const userId = fetchUserID(filter, { guild, client });
 			if(!userId)
 				return interaction.reply({
-					content: '⚠ Usuario no encontrado',
+					content: '⚠️ Usuario no encontrado',
 					ephemeral: true
 				});
 			filter = userId;
@@ -500,7 +500,7 @@ const command = new CommandManager('tubérculo', flags)
 	.setButtonResponse(async function filterClear(interaction) {
 		if(!interaction.message.content)
 			return interaction.reply({
-				content: '⚠ Esta lista ya muestra todos los resultados',
+				content: '⚠️ Esta lista ya muestra todos los resultados',
 				ephemeral: true,
 			});
 			
@@ -564,16 +564,16 @@ const command = new CommandManager('tubérculo', flags)
 	})
 	.setModalResponse(async function setDesc(interaction, tuberId) {
 		if(!tuberId)
-			return interaction.reply({ content: '⚠ Se esperaba una TuberID válida', ephemeral: true });
+			return interaction.reply({ content: '⚠️ Se esperaba una TuberID válida', ephemeral: true });
 		
 		await interaction.deferReply({ ephemeral: true });
 
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 		if(!gcfg)
-			return interaction.editReply({ content: '⚠ Este servidor no está registrado en la base de datos' });
+			return interaction.editReply({ content: '⚠️ Este servidor no está registrado en la base de datos' });
 
 		if(!gcfg.tubers[tuberId])
-			return interaction.editReply({ content: '⚠ Esta TuberID ya no existe' });
+			return interaction.editReply({ content: '⚠️ Esta TuberID ya no existe' });
 
 		const desc = interaction.fields.getTextInputValue('descInput');
 		gcfg.tubers[tuberId].desc = desc;
@@ -584,21 +584,21 @@ const command = new CommandManager('tubérculo', flags)
 	})
 	.setModalResponse(async function setIDesc(interaction, tuberId) {
 		if(!tuberId)
-			return interaction.reply({ content: '⚠ Se esperaba una TuberID válida', ephemeral: true });
+			return interaction.reply({ content: '⚠️ Se esperaba una TuberID válida', ephemeral: true });
 		
 		await interaction.deferReply({ ephemeral: true });
 
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 		if(!gcfg)
-			return interaction.editReply({ content: '⚠ Este servidor no está registrado en la base de datos' });
+			return interaction.editReply({ content: '⚠️ Este servidor no está registrado en la base de datos' });
 
 		if(!Array.isArray(gcfg.tubers[tuberId]?.inputs))
-			return interaction.editReply({ content: '⚠ Esta TuberID ya no existe, o no contiene entradas válidas' });
+			return interaction.editReply({ content: '⚠️ Esta TuberID ya no existe, o no contiene entradas válidas' });
 		
 		const name = interaction.fields.getTextInputValue('nameInput');
 		const inputIndex = gcfg.tubers[tuberId].inputs.findIndex(input => (input.identifier ?? input.name) === name);
 		if(inputIndex < 0)
-			return interaction.editReply({ content: `⚠ La entrada "${shortenText(name, 128)}" no existe para el Tubérculo **${shortenText(tuberId, 256)}**` });
+			return interaction.editReply({ content: `⚠️ La entrada "${shortenText(name, 128)}" no existe para el Tubérculo **${shortenText(tuberId, 256)}**` });
 
 		const desc = interaction.fields.getTextInputValue('descInput');
 		gcfg.tubers[tuberId].inputs[inputIndex].desc = desc;

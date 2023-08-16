@@ -14,7 +14,7 @@ const command = new CommandManager('papa-ban', flags)
 		const user = options.in(request).fetchParam(args, 'usuario', true);
 
 		if(!user || user.id === peopleid.papita)
-			return request.reply({ content: '⚠ Usuario inválido' });
+			return request.reply({ content: '⚠️ Usuario inválido' });
 
 		const userConfig = (await UserConfig.findOne({ userId: user.id })) || new UserConfig({ userId: user.id });
 		userConfig.banned = !userConfig.banned;

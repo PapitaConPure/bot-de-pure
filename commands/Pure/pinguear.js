@@ -48,7 +48,7 @@ const command = new CommandManager('pinguear', flags)
 		if(now - (uses.pinguear[uid] ?? 0) < 1000 * 60)
 			return isSlash ? request.reply({ content: '⏳ Pero no seas tan degenerado, aflójale un poco', ephemeral: true }) : request.react('⏳');
 		if(!isSlash && args.length < 2)
-			return request.reply({ content: `:warning: Debes ingresar 2 parámetros (\`${p_pure(request.guild.id).raw}pinguear <cantidad> <usuario>\`)`, ephemeral: true });
+			return request.reply({ content: `⚠️ Debes ingresar 2 parámetros (\`${p_pure(request.guild.id).raw}pinguear <cantidad> <usuario>\`)`, ephemeral: true });
 		
 		let repeats = -1;
 		let userSearch;
@@ -59,11 +59,11 @@ const command = new CommandManager('pinguear', flags)
 			else if(!isNaN(args[1])) { repeats = args[1]; userSearch = args[0]; }
 		}
 		if(repeats < 2 || repeats > 10)
-			return request.reply({ content: ':warning: Solo puedes pinguear a alguien entre 2 y 10 veces', ephemeral: true });
+			return request.reply({ content: '⚠️ Solo puedes pinguear a alguien entre 2 y 10 veces', ephemeral: true });
 
 		const user = isSlash ? args.getUser('usuario') : fetchUser(userSearch, request);
 		if(!user)
-			return request.reply({ content: '⚠ Usuario inválido', ephemeral: true });
+			return request.reply({ content: '⚠️ Usuario inválido', ephemeral: true });
 
 		uses.pinguear[uid] = now * 1;
 		return pinguear(request, user, repeats, true);

@@ -74,7 +74,7 @@ const command = new CommandManager('avatar', flags)
         
         if(notFound.length)
             replyStack.content = [
-                `:warning: ¡Usuario[s] **${notFound.join(', ')}** no encontrado[s]!`.replace(/\[s\]/g, (notFound.length > 1) ? 's' : ''),
+                `⚠️ ¡Usuario[s] **${notFound.join(', ')}** no encontrado[s]!`.replace(/\[s\]/g, (notFound.length > 1) ? 's' : ''),
                 `Recuerda separar cada usuario con una coma y escribir correctamente. Usa \`${p_pure(request.guildId).raw}ayuda avatar\` para más información`,
             ].join('\n');
         if(members?.length)

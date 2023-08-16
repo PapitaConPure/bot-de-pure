@@ -54,7 +54,7 @@ const command = new CommandManager('estado', flags)
                         `🎦 ${counterDisplay(stats.read)} mensajes registrados`,
                         `⚙️ ${counterDisplay(totalCommands)} comandos procesados`,
                         `✅ ${counterDisplay(stats.commands.succeeded)} (${(stats.commands.succeeded / totalCommands * 100).toFixed(2)}%) ejecuciones de comando exitosas`,
-                        `⚠️ ${counterDisplay(stats.commands.failed)} (${(stats.commands.failed / totalCommands * 100).toFixed(2)}%) ejecuciones de comando fallidas`,
+                        `⚠️️ ${counterDisplay(stats.commands.failed)} (${(stats.commands.failed / totalCommands * 100).toFixed(2)}%) ejecuciones de comando fallidas`,
                     ].join('\n'),
                 },
             );

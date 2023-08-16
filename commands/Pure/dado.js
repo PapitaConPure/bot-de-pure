@@ -25,7 +25,7 @@ const command = new CommandManager('dados', flags)
 		if(!diceInputs.length)
 			return request.reply({
 				content: [
-					':warning: Debes ingresar al menos un conjunto de dados a tirar, como `1d6`.',
+					'⚠️ Debes ingresar al menos un conjunto de dados a tirar, como `1d6`.',
 					`Para más información sobre el comando, usa \`${p_pure(request.guildId).raw}ayuda dado\``,
 				].join('\n')
 			});
@@ -46,7 +46,7 @@ const command = new CommandManager('dados', flags)
 		}).filter(dice => dice);
 
 		if(!dices.length)
-			return request.reply({ content: '⚠ Entrada inválida' })
+			return request.reply({ content: '⚠️ Entrada inválida' })
 		
 		if(dices.length > 16 || dices.some(dice => dice.d > 999))
 			return request.reply({ content: 'PERO NO SEAS TAN ENFERMO <:zunWTF:757163179569840138>' });
@@ -74,7 +74,7 @@ const command = new CommandManager('dados', flags)
 			});
 		
 		return request.reply({ embeds: [embed] })
-		.catch(() => request.reply({ content: ':x: No te pasei de gracioso, ¿tamo? <:junkWTF:796930821260836864> <:pistolaR:697351201301463060>' }));
+		.catch(() => request.reply({ content: '❌ No te pasei de gracioso, ¿tamo? <:junkWTF:796930821260836864> <:pistolaR:697351201301463060>' }));
 	});
 
 module.exports = command;

@@ -32,14 +32,14 @@ const command = new CommandManager('papa-decir', flags)
 		});
 
         if(!args.length)
-            return message.reply({ content: ':warning: tienes que especificar lo que quieres que diga.' });
+            return message.reply({ content: '⚠️ tienes que especificar lo que quieres que diga.' });
 
         if(!channel) {
             if(!needch) channel = message.channel;
             else channel = guild.systemChannel;
         }
         if(!channel)
-            return message.reply({ content: ':warning: debes especificar un canal de la guild que ingresaste.' });
+            return message.reply({ content: '⚠️ debes especificar un canal de la guild que ingresaste.' });
         
         if(deleteAfter && message.deletable && message.guild.members.me.permissions.has('ManageMessages'))
             message.delete().catch(auditError);

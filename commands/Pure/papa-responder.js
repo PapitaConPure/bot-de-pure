@@ -27,7 +27,7 @@ const command = new CommandManager('papa-responder', flags)
 		console.log(args);
 		
 		if(user == undefined) {
-			const sent = await request.reply({ content: ':warning: ¡Usuario no encontrado!' });
+			const sent = await request.reply({ content: '⚠️ ¡Usuario no encontrado!' });
 			setTimeout(() => sent.delete(), 1000 * 5);
 			return;
 		}
