@@ -16,6 +16,8 @@ async function onVoiceUpdate(oldState, state) {
     orchestrator.orchestrate(pv)
     if(!orchestrators.has(guildId))
         orchestrators.set(guildId, orchestrator);
+    
+    return Promise.resolve();
 }
 
 module.exports = {
