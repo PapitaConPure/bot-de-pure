@@ -834,7 +834,7 @@ class TuberParser {
         while(this.#current.type === TokenTypes.OR) {
             this.#digest();
             // console.log('Maquetando una comprobación lógica O...', this.#current.type);
-            const rightHand = this.#parseOr();
+            const rightHand = this.#parseAnd();
             leftHand = {
                 type: NodeTypes.LOGIC,
                 leftHand,
@@ -856,7 +856,7 @@ class TuberParser {
         while(this.#current.type === TokenTypes.AND) {
             this.#digest();
             // console.log('Maquetando una comprobación lógica Y...', this.#current.type);
-            const rightHand = this.#parseAnd();
+            const rightHand = this.#parseEquality();
             leftHand = {
                 type: NodeTypes.LOGIC,
                 leftHand,
@@ -873,7 +873,7 @@ class TuberParser {
      * @returns {TuberNode}
     */
     #parseEquality() {
-        let leftHand = this.#parseComparation();
+        let leftHand = this.#parseComparison();
 
         while(this.#current.type === TokenTypes.EQUALS || this.#current.type === TokenTypes.NOT) {
             let operator = this.#digest().value;
@@ -881,7 +881,7 @@ class TuberParser {
                 operator += ` ${this.#expect(TokenTypes.EQUALS).value}`;
 
             // console.log('Maquetando una comprobación de igualdad...', this.#current.type);
-            const rightHand = this.#parseEquality();
+            const rightHand = this.#parseComparison();
             leftHand = {
                 type: NodeTypes.LOGIC,
                 leftHand,
@@ -900,7 +900,7 @@ class TuberParser {
      * Parsea una comparación lógica
      * @returns {TuberNode}
      */
-    #parseComparation() {
+    #parseComparison() {
         let leftHand = this.#parseCombination();
 
         while(this.#current.type === TokenTypes.COMPARE || this.#current.type === TokenTypes.NOT && this.#next.type === TokenTypes.COMPARE) {
@@ -908,7 +908,7 @@ class TuberParser {
             if(operator === 'no')
                 operator += ` ${this.#expect(TokenTypes.COMPARE).value}`;
             // console.log('Maquetando una comparación...', this.#current.type);
-            const rightHand = this.#parseComparation();
+            const rightHand = this.#parseCombination();
             leftHand = {
                 type: NodeTypes.LOGIC,
                 leftHand,
@@ -930,7 +930,7 @@ class TuberParser {
         while(this.#current.type === TokenTypes.COMBINATION) {
             const operator = this.#current.value;
             this.#digest();
-            let rightOperand = this.#parseCombination();
+            let rightOperand = this.#parseFactor();
             leftOperand = {
                 type: NodeTypes.BINARY,
                 operator,
@@ -952,7 +952,7 @@ class TuberParser {
         while(this.#current.type === TokenTypes.FACTOR) {
             const operator = this.#current.value;
             this.#digest();
-            let rightOperand = this.#parseFactor();
+            let rightOperand = this.#parsePowers();
             leftOperand = {
                 type: NodeTypes.BINARY,
                 operator,
@@ -969,15 +969,12 @@ class TuberParser {
      * @returns {TuberNode}
      */
     #parsePowers() {
-        let leftOperand = this.#parseMemberCall();
+        let leftOperand = this.#parseUnary();
         
         while(this.#current.type === TokenTypes.POWER) {
             const operator = this.#current.value;
             this.#digest();
             let rightOperand = this.#parsePowers();
-
-            if(operator !== '^')
-                throw new Error(`Token inesperado en posición ${this.#cursor}: FUNCTION (^)`);
             
             leftOperand = {
                 type: NodeTypes.BINARY,
@@ -990,6 +987,21 @@ class TuberParser {
         return leftOperand;
     }
 
+    #parseUnary() {
+        if(
+            this.#current.type === TokenTypes.COMBINATION
+            || (this.#current.type === TokenTypes.NOT && !([ TokenTypes.EQUALS, TokenTypes.COMPARE ].includes(this.#next.type)))
+        ) {
+            return {
+                type: 'UnaryExpression',
+                operator: this.#digest().value,
+                argument: this.#parseMemberCall(),
+            };
+        }
+
+        return this.#parseMemberCall();
+    }
+
     /**
      * Parsea llamados de miembros
      * @returns {TuberNode}
@@ -997,28 +1009,11 @@ class TuberParser {
     #parseMemberCall() {
         let member = this.#parseMember();
 
-        // console.log('En parseMemberCall', this.#current)
-
-        while([ TokenTypes.GROUP_OPEN ].includes(this.#current.type))
+        if([ TokenTypes.GROUP_OPEN ].includes(this.#current.type))
             member = this.#parseFunctionCall(member);
-
-        // console.log('A punto de comprobar parseMemberCall con', member, '\nVeamos:', this.#current)
         
-        if(this.#current.type === TokenTypes.ARROW && this.#digest()) {
-            let emitterProperty = this.#parseMemberCall();
-
-            member = {
-                type: 'CallExpression',
-                emitter: {
-                    type: NodeTypes.ARROW,
-                    container: member,
-                    property: emitterProperty.emitter,
-                },
-                arguments: emitterProperty.arguments,
-            };
-        }
-
-        // console.log('Fin de parseMemberCall', this.#current)
+        if(this.#current.type === TokenTypes.ARROW)
+            throw this.TuberParserError('No se permiten expresiones de miembro luego de una función');
 
         return member;
     }
@@ -1032,18 +1027,11 @@ class TuberParser {
         let expr = {
             type: NodeTypes.FUNCTION_CALL,
             emitter,
+            arguments: this.#parseArguments(),
         };
 
-        // if(this.#current.type === TokenTypes.IDENTIFIER) {
-        //     expr.arguments = [ this.#parseExpression() ];
-        //     return expr;
-        // }
-
-        // console.log('En parseFunctionCall', this.#current)
-
-        expr.arguments = this.#parseArguments();
-
-        // console.log('Fin de parseFunctionCall', this.#current)
+        if([ TokenTypes.GROUP_OPEN ].includes(this.#current.type))
+            expr = this.#parseFunctionCall(expr);
 
         return expr;
     }
@@ -1058,13 +1046,14 @@ class TuberParser {
 
         const wasInsideListing = this.#insideListing;
         this.#insideListing = true;
+
         const args = [ TokenTypes.GROUP_CLOSE, TokenTypes.STATEMENT, TokenTypes.EOF ].includes(this.#current.type)
             ? []
             : this.#parseArgumentsList();
+        
         this.#insideListing = wasInsideListing;
 
         this.#expect(TokenTypes.GROUP_CLOSE, 'Se esperaba un cierre de función');
-        // console.log('Fin de parseArguments:', this.#current)
 
         return args;
     }
@@ -1078,8 +1067,10 @@ class TuberParser {
 
         while(this.#current.type === TokenTypes.COMMA && this.#digest()) {
             const arg = this.#parseText();
+
             if(this.#current.type === TokenTypes.COLON && this.#digest())
                 arg.default = this.#parseExpression();
+            
             args.push(arg);
         }
 
@@ -1091,18 +1082,22 @@ class TuberParser {
      * @returns {TuberNode}
      */
     #parseMember() {
-        let expr = this.#parsePrimary();
-        // console.log('En parseMember:', expr);
+        let memberExpr = this.#parsePrimary();
 
-        if(this.#current.type === TokenTypes.ARROW && this.#digest()) {
-            expr = {
+        while(this.#current.type === TokenTypes.ARROW && this.#digest()) {
+            let property = this.#parsePrimary();
+
+            if(![ NodeTypes.IDENTIFIER, NodeTypes.NUMBER_LITERAL ].includes(property.type))
+                throw this.TuberParserError('Se esperaba un identificador o expresión entre paréntesis a la derecha de una expresión de flecha');
+
+            memberExpr = {
                 type: NodeTypes.ARROW,
-                container: expr,
-                property: this.#parseMember(),
+                container: memberExpr,
+                property: property,
             };
         }
 
-        return expr;
+        return memberExpr;
     }
     
     /**
@@ -1113,55 +1108,6 @@ class TuberParser {
         const tokenType = this.#current.type;
         // console.log('Verificando casos de parsePrimary con:', this.#current);
         switch(tokenType) {
-        case TokenTypes.NOT:
-            if([ TokenTypes.EQUALS, TokenTypes.COMPARE ].includes(this.#next.type))
-                return;
-            const operator = this.#digest().value;
-            const argument = this.#parsePrimary();
-            return {
-                type: 'UnaryExpression',
-                operator,
-                argument,
-            };
-
-        case TokenTypes.NUMBER:
-            return {
-                type: NodeTypes.NUMBER_LITERAL,
-                value: this.#digest().value,
-            };
-
-        case TokenTypes.TEXT:
-            return this.#parseTextTemplate();
-        
-        case TokenTypes.COMBINATION: {
-            const number = {
-                type: 'UnaryExpression',
-                operator: this.#digest().value,
-                argument: this.#parsePrimary(),
-            };
-            return number;
-        }
-
-        case TokenTypes.BOOLEAN:
-            return {
-                type: NodeTypes.BOOLEAN_LITERAL,
-                value: this.#digest().value,
-            };
-
-        // case TokenTypes.POWER: {
-        //     if(this.#current.value === '^')
-        //         throw this.TuberParserError('Se esperaba un nombre de función matemática');
-        //     const operator = this.#current.value;
-        //     this.#expect(TokenTypes.POWER);
-        //     const expr = this.#parsePrimary();
-        //     const func = {
-        //         type: 'UnaryExpression',
-        //         operator,
-        //         value: expr,
-        //     };
-        //     return func;
-        // }
-
         case TokenTypes.GROUP_OPEN: {
             this.#digest();
             const wasInsideTemplate = this.#insideTemplate;
@@ -1174,14 +1120,26 @@ class TuberParser {
             this.#expect(TokenTypes.GROUP_CLOSE);
             return expr;
         }
-
-        case TokenTypes.GROUP_CLOSE:
-            throw this.TuberParserError('Se esperaba una expresión entre paréntesis');
         
         case TokenTypes.IDENTIFIER:
             return {
                 type: NodeTypes.IDENTIFIER,
                 name: this.#digest().value,
+            };
+
+        case TokenTypes.NUMBER:
+            return {
+                type: NodeTypes.NUMBER_LITERAL,
+                value: this.#digest().value,
+            };
+
+        case TokenTypes.TEXT:
+            return this.#parseTextTemplate();
+
+        case TokenTypes.BOOLEAN:
+            return {
+                type: NodeTypes.BOOLEAN_LITERAL,
+                value: this.#digest().value,
             };
         
         case TokenTypes.NADA:
@@ -1190,6 +1148,9 @@ class TuberParser {
                 type: NodeTypes.NADA_LITERAL,
                 value: null,
             };
+
+        case TokenTypes.GROUP_CLOSE:
+            throw this.TuberParserError('Se esperaba una expresión entre paréntesis');
         }
 
         throw this.TuberParserError(`Token inesperado: ${this.#current.value}`);

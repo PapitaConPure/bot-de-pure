@@ -121,8 +121,8 @@ class TuberInterpreter {
         this.#testDrive = isTestDrive;
         this.#evaluateBlock(node, programScope);
 
-        // console.log('Variables finales:');
-        // console.dir(programScope.variables, { depth: null });
+        console.log('Variables finales:');
+        console.dir(programScope.variables, { depth: null });
 
         // console.log('Entradas registradas:');
         // console.dir(this.#inputStack);
@@ -238,7 +238,9 @@ class TuberInterpreter {
             const { receptor, reception } = node.assignment;
             forScope.assignVariable(receptor.name, this.#evaluate(reception, forScope));
 
-            while(makeValue(this.#evaluate(node.test, forScope), 'Boolean').value) {
+            console.dir(node, { depth: null });
+            while(makeValue(this.#evaluate(JSON.parse(JSON.stringify(node.test)), forScope), 'Boolean').value) {
+                console.dir(node, { depth: null });
                 const blockScope = new TuberScope(forScope);
                 const lastEvaluated = this.#evaluateBlock(node, blockScope);
                 if(lastEvaluated.type === 'BreakStatement')
@@ -465,54 +467,49 @@ class TuberInterpreter {
      * @param {TuberScope} scope 
      */
     #evaluate(node, scope, mustBeDeclared = false) {
-        // console.log('En evaluate:', node);
-
         if(node == undefined)
             return makeNada();
 
+        let evaluation;
         switch(node.type) {
         case 'NumericLiteral':
         case 'TextLiteral':
         case 'BooleanLiteral':
             return makeValue(node, NodeToProgram.get(node.as) ?? NodeToProgram.get(node.type));
-        case 'ListExpression': {
+        
+        case 'ListExpression':
             node = this.#createList(node, scope);
             return makeValue(node, NodeToProgram.get(node.as) ?? 'List');
-        }
+        
         case 'GlossaryExpression':
             node = this.#createGlossary(node, scope);
             return makeValue(node, NodeToProgram.get(node.as) ?? 'Glossary');
-        case 'Identifier': {
-            const variable = this.#evaluateIdentifier(node, scope, mustBeDeclared);
-            return makeValue(variable, NodeToProgram.get(node.as) ?? variable.type);
-        }
-        case 'ArrowExpression': {
-            // console.log('Antes de los eventos')
-            console.dir(node, { depth: null });
-            const evaluation = this.#evaluateArrowExpression(node, scope);
-            // console.log('Evaluación de ArrowExpression:', evaluation);
+        
+        case 'Identifier':
+            evaluation = this.#evaluateIdentifier(node, scope, mustBeDeclared);
             return makeValue(evaluation, NodeToProgram.get(node.as) ?? evaluation.type);
-        }
-        case 'UnaryExpression': {
-            const result = this.#evaluateUnaryExpression(node, scope);
-            return makeValue(result, NodeToProgram.get(node.as) ?? result.type);
-        }
-        case 'BinaryExpression': {
-            const result = this.#evaluateBinaryExpression(node, scope);
-            return makeValue(result, NodeToProgram.get(node.as) ?? result.type);
-        }
-        case 'LogicalExpression': {
-            const evaluation = this.#evaluateLogicalExpression(node, scope);
-            // console.log('Evaluación en LogicalExpression:', evaluation);
+
+        case 'ArrowExpression':
+            evaluation = this.#evaluateArrowExpression(node, scope);
             return makeValue(evaluation, NodeToProgram.get(node.as) ?? evaluation.type);
-        }
-        case 'CallExpression': {
-            const evaluation = this.#evaluateCallExpression(node, scope);
-            // console.log('Evaluación en CallExpression:', evaluation);
+
+        case 'UnaryExpression':
+            evaluation = this.#evaluateUnaryExpression(node, scope);
             return makeValue(evaluation, NodeToProgram.get(node.as) ?? evaluation.type);
-        }
+        case 'BinaryExpression':
+            evaluation = this.#evaluateBinaryExpression(node, scope);
+            return makeValue(evaluation, NodeToProgram.get(node.as) ?? evaluation.type);
+        
+        case 'LogicalExpression':
+            evaluation = this.#evaluateLogicalExpression(node, scope);
+            return makeValue(evaluation, NodeToProgram.get(node.as) ?? evaluation.type);
+        case 'CallExpression':
+            evaluation = this.#evaluateCallExpression(node, scope);
+            return makeValue(evaluation, NodeToProgram.get(node.as) ?? evaluation.type);
+
         case 'TextTemplateExpression':
             return this.#createTextFromTemplate(node, scope);
+            
         case 'NadaLiteral':
             return makeValue(makeNada(), NodeToProgram.get(node.as) ?? 'Nada');
         }
@@ -574,21 +571,7 @@ class TuberInterpreter {
      * @returns {RuntimeValue}
      */
     #evaluateArrowExpression(node, scope, asIdentifier = false) {
-        // console.log('En evaluateArrowExpression', node.container);
-        if([
-            'Identifier',
-            'NumericLiteral',
-            'TextLiteral',
-            'BooleanLiteral',
-            'ListExpression',
-            'GlossaryExpression',
-            'CallExpression',
-            'ArrowExpression',
-            'BinaryExpression',
-        ].includes(node.container.type))
-            node.container = this.#evaluate(node.container, scope);
-
-        // console.log('ostiaaaaaa', node.container);
+        node.container = this.#evaluate(node.container, scope);
 
         return this.#evaluateMembers(node.container, node.property, scope, asIdentifier);
     }
@@ -605,93 +588,81 @@ class TuberInterpreter {
         // console.log('Dios soy yo de nuevo', container, property);
 
         if(container.type === 'Number') {
-            if(property.type === 'Identifier') {
-                const listMethod = scope.lookup('Número').properties.get(property.name);
-                if(listMethod)
-                    return listMethod;
-            }
-
-            throw TuberInterpreterError(`Se esperaba un método de Número; se recibió: ${property.name ?? property.value ?? 'Nada'}`, this.#currentStatement);
+            if(property.type !== 'Identifier')
+                throw TuberInterpreterError(`Se esperaba un método de Número; se recibió: ${property.name ?? property.value ?? 'Nada'}`, this.#currentStatement);
+            
+            return scope.lookup('Número').properties.get(property.name);
         }
 
         if(container.type === 'Text') {
-            if(property.type === 'Identifier') {
-                if(property.name === 'largo')
-                    return makeNumber(container.value.length);
+            if(property.type !== 'Identifier')
+                throw TuberInterpreterError(`Se esperaba un método de Texto; se recibió: ${property.name ?? property.value ?? 'Nada'}`, this.#currentStatement);
+                
+            if(property.name === 'largo')
+                return makeNumber(container.value.length);
 
-                const listMethod = scope.lookup('Texto', false)?.properties?.get(property.name);
-                if(listMethod)
-                    return listMethod;
-            }
-
-            throw TuberInterpreterError(`Se esperaba un método de Texto; se recibió: ${property.name ?? property.value ?? 'Nada'}`, this.#currentStatement);
+            return scope.lookup('Texto', false).properties.get(property.name);
         }
 
         if(container.type === 'Boolean') {
-            if(property.type === 'Identifier') {
-                const listMethod = scope.lookup('Dupla', false)?.properties?.get(property.name);
-                if(listMethod)
-                    return listMethod;
-            }
-
-            throw TuberInterpreterError(`Se esperaba un método de Dupla; se recibió: ${property.name ?? property.value ?? 'Nada'}`, this.#currentStatement);
+            if(property.type !== 'Identifier')
+                throw TuberInterpreterError(`Se esperaba un método de Dupla; se recibió: ${property.name ?? property.value ?? 'Nada'}`, this.#currentStatement);
+            
+            const listMethod = scope.lookup('Dupla', false).properties.get(property.name);
+            if(listMethod)
+                return listMethod;
         }
 
         if(container.type === 'List') {
             if(property.type === 'Identifier') {
-                if(asIdentifier)
-                    return { container, property: this.#evaluate(property, scope) };
                 if(property.name === 'largo')
                     return makeNumber(container.elements.length);
+                
                 const listMethod = scope.lookup('Lista').properties.get(property.name);
                 if(listMethod)
                     return listMethod;
             }
 
-            if(property.type === 'ArrowExpression') {
-                const memberName = property.container.name;
-                const member = scope.lookup(memberName);
-                return this.#evaluateMembers(container.elements[member.value], property.property, scope, asIdentifier);
-            }
+            // if(property.type === 'ArrowExpression') {
+            //     const memberName = property.container.name;
+            //     const member = scope.lookup(memberName);
+            //     return this.#evaluateMembers(container.elements[member.value], property.property, scope, asIdentifier);
+            // }
 
             property = this.#evaluate(property, scope);
 
-            if(property.type === 'Number') {
-                if(asIdentifier)
-                    return { container, property };
-                
-                const calculatedIndex = property.value >= 0 ? property.value : container.elements.length - property.value;
-                return container.elements[calculatedIndex] ?? makeNada();
-            }
+            if(property.type !== 'Number')
+                throw TuberInterpreterError(`Se esperaba un índice (Número); se recibió: ${property.type}`, this.#currentStatement);
 
-            throw TuberInterpreterError(`Se esperaba un índice (Número); se recibió: ${property.type}`, this.#currentStatement);
+            if(asIdentifier)
+                return { container, property };
+            
+            const calculatedIndex = property.value >= 0 ? property.value : container.elements.length - property.value;
+            return container.elements[calculatedIndex] ?? makeNada();
         }
 
         if(container.type === 'Glossary') {
-            if(property.type === 'Identifier') {
-                if(asIdentifier)
-                    return { container, property };
+            if(property.type !== 'Identifier')
+                throw TuberInterpreterError(`Se esperaba un miembro o método de Glosario; se recibió: ${property.type}`, this.#currentStatement);
 
-                if(property.name === 'tamaño')
-                    return makeNumber(container.properties.size);
+            if(asIdentifier)
+                return { container, property };
 
-                const member = container.properties.get(property.name);
-                if(member)
-                    return member;
+            if(property.name === 'tamaño')
+                return makeNumber(container.properties.size);
 
-                const glossaryMethod = scope.lookup('Glosario').properties.get(property.name);
-                if(glossaryMethod)
-                    return glossaryMethod;
+            const member = container.properties.get(property.name);
+            if(member)
+                return member;
 
-                return makeNada();
-            }
+            const glossaryMethod = scope.lookup('Glosario').properties.get(property.name);
+            if(glossaryMethod)
+                return glossaryMethod;
 
-            if(property.type === 'ArrowExpression')
-                return this.#evaluateMembers(container.properties.get(property.container.name), property.property, scope, asIdentifier);
-            
-            throw TuberInterpreterError(`Se esperaba un miembro o método de Glosario; se recibió: ${property.type}`, this.#currentStatement);
+            return makeNada();
         }
 
+        console.log('hola', container, property);
         const nodeName = container
             ? ProgramToLanguage.get(container.type) ?? NodeToLanguage.get(container.type) ?? container.type
             : 'Nada';
