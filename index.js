@@ -12,6 +12,8 @@ const { onRateLimit } = require('./events/onRateLimit.js');
 const { onGuildMemberAdd } = require('./events/onGuildMemberAdd.js');
 const { onGuildMemberRemove } = require('./events/onGuildMemberRemove.js');
 const { onGuildMemberUpdate } = require('./events/onGuildMemberUpdate.js');
+const { auditError } = require('./systems/auditor');
+const chalk = require('chalk');
 
 console.time('Establecimiento de parámetros iniciales');
 const { IntentsBitField, PermissionFlagsBits, Partials } = Discord;
@@ -52,6 +54,16 @@ console.timeEnd('Establecimiento de parámetros iniciales');
 const logOptions = {
     commands: false,
 };
+
+/**
+ * Cuando se recibe un error inesperado durante un evento asíncrono
+ * @param {Error} error 
+ */
+function onCriticalError(error) {
+    console.log(chalk.bgRed.whiteBright('Ocurrió un error de evento inesperado'));
+    console.error(error);
+    auditError(error, { brief: 'Se rechazó inesperadamente una promesa de evento', ping: true });
+}
 
 //#region Detección de archivos de comandos
 console.time('Detección de archivos de comando');
@@ -145,17 +157,17 @@ console.timeEnd('Detección de archivos de comando');
 console.time('Registro de eventos del cliente');
 client.on('ready', onStartup);
 
-client.on('messageCreate', message => onMessage(message, client));
+client.on('messageCreate', message => onMessage(message, client).catch(onCriticalError));
 
-client.on('interactionCreate', interaction => onInteraction(interaction, client));
+client.on('interactionCreate', interaction => onInteraction(interaction, client).catch(onCriticalError));
 
-client.on('voiceStateUpdate', onVoiceUpdate);
+client.on('voiceStateUpdate', (oldState, newState) => onVoiceUpdate(oldState, newState).catch);
 
-client.on('guildMemberAdd', onGuildMemberAdd);
+client.on('guildMemberAdd', member => onGuildMemberAdd(member).catch(onCriticalError));
 
-client.on('guildMemberRemove', onGuildMemberRemove);
+client.on('guildMemberRemove', member => onGuildMemberRemove(member).catch(onCriticalError));
 
-client.on('guildMemberUpdate', onGuildMemberUpdate);
+client.on('guildMemberUpdate', (oldMember, newMember) => onGuildMemberUpdate(oldMember, newMember).catch(onCriticalError));
 
 client.rest.on('rateLimited', onRateLimit);
 
