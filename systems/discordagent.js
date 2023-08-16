@@ -78,13 +78,27 @@ class DiscordAgent {
             return await this.webhook.send({
                 ...messageOptions,
                 threadId: this.threadId,
-                username: this.user.displayName ?? this.user.username,
+                username: this.#getUserName(this.user),
                 avatarURL: this.user.displayAvatarURL({ size: 512 }),
                 nonce: undefined,
             });
         } catch(e) {
             return console.error(e);
         }
+    }
+
+    /**
+     * 
+     * @param {User | GuildMember} user 
+     */
+    #getUserName(user) {
+        if(user.nickname)
+            return user.nickname;
+
+        if(user.displayName)
+            return user.displayName;
+
+        return user.username;
     }
 }
 
