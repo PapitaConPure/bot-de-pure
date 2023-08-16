@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "2.9.2D",
+            "number": "2.9.2F",
             "name": "Cisne Cristalino"
         },
         "note": "Operando casi con normalidad",
@@ -29,7 +29,7 @@
             "Considerar una versión pública de Bot de Puré (daré detalles si lo hago)"
         ]
     },
-    "remoteStartup": true,
+    "remoteStartup": false,
     "p_pure": {
         "0": {
             "raw": "",
