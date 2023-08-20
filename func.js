@@ -455,7 +455,7 @@ module.exports = {
         await canal.send({ files: [imagen] });
         if(servidor.id === global.serverid.saki) {
             const hourai = await Hourai.findOne() || new Hourai();
-            if(hourai.configs?.bienvenida == false)
+            if(hourai.configs?.despedida == false)
                 return;
 
             await canal.send({
