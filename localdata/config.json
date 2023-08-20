@@ -62,6 +62,10 @@
     "reportFormUrl": "https://forms.gle/tHFXxbsTmuJTQm1z7",
     
     "hourai": {
+        "config": {
+            "welcome": true,
+            "welcomePing": true
+        },
         "infr": {
             "channels": {
                 "1107845079927894026": "♠— Pseudo Paradise —♠",

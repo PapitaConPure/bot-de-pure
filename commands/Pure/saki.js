@@ -1,0 +1,117 @@
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
+const { CommandMetaFlagsManager, CommandManager, CommandOptionsManager } = require("../Commons/commands");
+const { DiscordAgent } = require('../../systems/discordagent.js');
+const { hourai } = require('../../localdata/config.json');
+const HouraiCfg = require('../../localdata/models/hourai.js');
+
+let crazyBackupId = hourai.crazyBackupChannelId;
+
+const flags = new CommandMetaFlagsManager().add(
+	'MOD',
+	'HOURAI',
+);
+
+const options = new CommandOptionsManager()
+    .addFlag([], 'bienvenida', 'Para habilitar o deshabilitar la bienvenida por completo', { name: 'estado', type: 'TEXT' })
+    .addFlag([], 'despedida', 'Para habilitar o deshabilitar la bienvenida por completo', { name: 'estado', type: 'TEXT' })
+    .addFlag([], 'ping', 'Para habilitar o deshabilitar el ping de bienvenida', { name: 'estado', type: 'TEXT' });
+
+const positivos = [
+    'habilitado',
+    'habilitar',
+    'encendido',
+    'encendida',
+    'encender',
+    'activado',
+    'activada',
+    'activar',
+    'true',
+    'on',
+    '1',
+];
+
+const negativos = [
+    'deshabilitado',
+    'deshabilitar',
+    'desactivado',
+    'desactivada',
+    'desactivar',
+    'apagado',
+    'apagada',
+    'apagar',
+    'false',
+    'off',
+    '0',
+];
+
+function recibirEstado(texto) {
+    if(positivos.includes(texto))
+        return 1;
+    
+    if(negativos.includes(texto))
+        return -1;
+
+    return 0;
+}
+
+function procesarConfig(dbDoc, appliedList, prompt, configId, displayText) {
+    if(prompt) {
+        const state = recibirEstado(prompt);
+
+        if(state == 0)
+            return false;
+
+        dbDoc.configs ??= {};
+        dbDoc.configs[configId] = (state == 1);
+        dbDoc.markModified('configs');
+
+        appliedList.push(`${displayText}: ${state == 1 ? '✅' : '❌'}`);
+    }
+
+    return true;
+}
+
+const tip = '⚠️ Estado inválido. Ingresa "Activado", "Desactivado" o similares para cambiar una configuración';
+
+const command = new CommandManager('saki', flags)
+	.setAliases(
+		'sakiscans',
+		'configsaki', 'sakiconfig'
+	)
+	.setBriefDescription(`Traslada mensajes pinneados a <#${crazyBackupId}>`)
+	.setLongDescription(
+		`Envía mensajes pinneados en el canal actual a <#${crazyBackupId}>`,
+		'Esto eliminará todos los pins en el canal luego de reenviarlos',
+	)
+	.setExecution(async (request, args) => {
+		const bienvenida = options.fetchFlag(args, 'bienvenida');
+		const despedida = options.fetchFlag(args, 'despedida');
+		const pingBienvenida = options.fetchFlag(args, 'ping');
+        
+        const houraiCfg = (await HouraiCfg.findOne({})) || new HouraiCfg();
+        const applied = [];
+
+        if(!procesarConfig(houraiCfg, applied, bienvenida, 'bienvenida', 'Bienvenida'))
+            return request.reply({ content: tip });
+
+        if(!procesarConfig(houraiCfg, applied, despedida, 'despedida', 'Despedida'))
+            return request.reply({ content: tip });
+
+        if(!procesarConfig(houraiCfg, applied, pingBienvenida, 'pingBienvenida', 'Ping de Bienvenida'))
+            return request.reply({ content: tip });
+
+        if(!applied.length)
+            return request.reply({ content: '⚠️ No se aplicaron configuraciones.\nRevisa la página de ayuda del comando con `p!ayuda saki`' });
+
+        await houraiCfg.save();
+
+        return request.reply({
+            content: [
+                '## Se aplicaron configuraciones',
+                '',
+                ...applied.map(a => `* ${a}`),
+            ].join('\n'),
+        });
+	});
+
+module.exports = command;

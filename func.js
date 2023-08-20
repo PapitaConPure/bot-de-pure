@@ -282,6 +282,7 @@ module.exports = {
     dibujarBienvenida: async function(miembro, forceHourai = false) {
         //Dar bienvenida a un miembro nuevo de un servidor
         const servidor = miembro.guild; //Servidor
+
         const canal = servidor.channels.cache.get(servidor.systemChannelId); //Canal de mensajes de sistema
         //#region Comprobación de miembro y servidor
         if(canal === undefined) {
@@ -358,14 +359,26 @@ module.exports = {
         const peoplecnt = members.filter(member => !member.user.bot).size;
         await canal.send({files: [imagen]});
         if(forceHourai || servidor.id === global.serverid.saki) {
+            const hourai = await Hourai.findOne() || new Hourai();
+            if(hourai.configs?.bienvenida == false)
+                return;
+
+            const toSend = [
+                `Wena po <@${miembro.user.id}> conchetumare, como estai.`,
+                'Como tradición, elige un color con el menú de abajo <:mayuwu:1107843515385389128>',
+                'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:1107847991580164106>',
+            ];
+
+            if(hourai.configs?.pingBienvenida)
+                toSend.push('<@&1107831054791876694>, vengan a saludar po maricones <:hl:797294230359375912><:miyoi:1107848008005062727><:hr:797294230463840267>');
+
+            toSend.push(`*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:1107880958981587004>`);
+            toSend.push(global.hourai.images.colors);
+
+            hourai.save().catch(_ => undefined);
+
             return canal.send({
-                content:
-                    `Wena po <@${miembro.user.id}> conchetumare, como estai.\n` +
-                    'Como tradición, elige un color con el menú de abajo <:mayuwu:1107843515385389128>\n' +
-                    'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:1107847991580164106>\n' +
-                    '<@&1107831054791876694>, vengan a saludar po maricones <:hl:797294230359375912><:miyoi:1107848008005062727><:hr:797294230463840267>\n' +
-                    `*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:1107880958981587004>\n` +
-                    global.hourai.images.colors,
+                content: toSend.join('\n'),
                 components: [colorsRow],
             }).then(sent => {
                 setTimeout(module.exports.askForRole, 1000, miembro, canal, 3 * 4);
@@ -441,15 +454,17 @@ module.exports = {
         const peoplecnt = members.filter(member => !member.user.bot).size;
         await canal.send({ files: [imagen] });
         if(servidor.id === global.serverid.saki) {
+            const hourai = await Hourai.findOne() || new Hourai();
+            if(hourai.configs?.bienvenida == false)
+                return;
+
             await canal.send({
                 content:
                     'Nooooo po csm, perdimo otro weón <:meguDerp:1107848004775465032>\n' +
                     `*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
             });
 
-            const hourai = await Hourai.findOne({}) || new Hourai({});
-
-            hourai.save();
+            hourai.save().catch(_ => undefined);
         } else //Otros servidores
             await canal.send({ content: `*Ahora hay **${peoplecnt}** usuarios en el server.*`});
         

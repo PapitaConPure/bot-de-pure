@@ -1,6 +1,7 @@
 const Mongoose = require('mongoose');
 
 const HouraiSchema = new Mongoose.Schema({
+    configs: { type: Object, default: {} },
     userInfractions: { type: Object, default: {} },
     customRoles: { type: Object, default: {} },
     mentionRoles: {
