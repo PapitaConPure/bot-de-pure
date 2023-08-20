@@ -357,11 +357,12 @@ module.exports = {
         //#region Imagen y Mensaje extra
         const members = await servidor.members.fetch().catch(_ => servidor.members.cache);
         const peoplecnt = members.filter(member => !member.user.bot).size;
-        await canal.send({files: [imagen]});
         if(forceHourai || servidor.id === global.serverid.saki) {
             const hourai = await Hourai.findOne() || new Hourai();
             if(hourai.configs?.bienvenida == false)
                 return;
+            
+            await canal.send({files: [imagen]});
 
             const toSend = [
                 `Wena po <@${miembro.user.id}> conchetumare, como estai.`,
@@ -385,7 +386,9 @@ module.exports = {
                 console.log('Esperando evento personalizado de Saki Scans en unos minutos...');
                 return sent;
             });
-        }
+        } else
+            await canal.send({files: [imagen]});
+        
         return canal.send({
             content:
                 `¡Bienvenido al servidor **${miembro.displayName}**!\n` +
@@ -452,12 +455,12 @@ module.exports = {
         const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'despedida.png' });
         const members = await servidor.members.fetch().catch(_ => servidor.members.cache);
         const peoplecnt = members.filter(member => !member.user.bot).size;
-        await canal.send({ files: [imagen] });
         if(servidor.id === global.serverid.saki) {
             const hourai = await Hourai.findOne() || new Hourai();
             if(hourai.configs?.despedida == false)
                 return;
 
+            await canal.send({ files: [imagen] });
             await canal.send({
                 content:
                     'Nooooo po csm, perdimo otro weón <:meguDerp:1107848004775465032>\n' +
@@ -465,8 +468,10 @@ module.exports = {
             });
 
             hourai.save().catch(_ => undefined);
-        } else //Otros servidores
+        } else { //Otros servidores
+            await canal.send({ files: [imagen] });
             await canal.send({ content: `*Ahora hay **${peoplecnt}** usuarios en el server.*`});
+        }
         
         //#endregion
         console.log('Despedida finalizada.');
