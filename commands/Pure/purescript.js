@@ -2,6 +2,15 @@ const { CommandMetaFlagsManager } = require("../Commons/cmdFlags");
 const { CommandManager } = require("../Commons/cmdBuilder");
 const { executeTuber } = require("../../systems/purescript");
 const { CommandOptionsManager } = require("../Commons/cmdOpts");
+const { ButtonBuilder, ButtonStyle, ActionRowBuilder, EmbedBuilder } = require("discord.js");
+const { p_pure } = require("../../localdata/customization/prefixes");
+const { tenshiColor } = require('../../localdata/config.json');
+
+const psDocsButton = new ButtonBuilder()
+	.setURL('https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link')
+	.setLabel('Aprende PuréScript')
+	.setEmoji('📖')
+	.setStyle(ButtonStyle.Link);
 
 /**
  * 
@@ -25,13 +34,27 @@ const flags = new CommandMetaFlagsManager().add('COMMON');
 const command = new CommandManager('purescript', flags)
 	.setAliases('puréscript', 'ps')
 	.setBriefDescription('Interpreta y ejecuta código PuréScript')
-	.setLongDescription('Interpreta y ejecuta el código PuréScript ingresado')
+	.setLongDescription(
+		'Interpreta y ejecuta el código PuréScript ingresado',
+		'Puedes leer o descargar la documentación de PuréScript desde [aquí](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link) (~3MiB)',
+	)
 	.setOptions(options)
 	.setExecution(async function (request, args, isSlash, rawArgs) {
+		const helpString = `Usa \`${p_pure(request.guildId).raw}ayuda puréscript\` para más información`;
+
 		/**@type {String}*/
 		const script = getScriptString(isSlash, args, rawArgs);
 		if(!script?.length)
-			return request.reply({ content: `⚠️️ Este Tubérculo requiere ingresar PuréScript\n${helpString}` });
+			return request.reply({
+				content: `⚠️️ Este Tubérculo requiere ingresar PuréScript\n${helpString}`,
+				embeds: [
+					new EmbedBuilder()
+						.setColor(tenshiColor)
+						.setTitle('¿Nunca programaste en PuréScript?')
+						.setDescription('¡Revisa la documentación oficial!'),
+				],
+				components: [new ActionRowBuilder().addComponents(psDocsButton)],
+			});
 
 		/**@type {import("../../systems/purescript").Tubercle}*/
 		const tuber = {

@@ -54,7 +54,7 @@ const paginationRows = (page, lastPage, navigationEnabled = true) => {
 		new ActionRowBuilder().addComponents(
 			new ButtonBuilder()
 				.setURL('https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link')
-				.setLabel('Aprende PuréScript (v1.0)')
+				.setLabel('Aprende PuréScript')
 				.setEmoji('📖')
 				.setStyle(ButtonStyle.Link),
 		),
@@ -236,7 +236,7 @@ const command = new CommandManager('tubérculo', flags)
 		'En caso de estar creando un Tubérculo, se requerirá un `<mensaje>` y/o `<archivos>`, junto a la `<id>` que quieras darle al mismo. Si la ID ya está registrada, será *editada*',
 		'En cualquier parte del contenido del mensaje, coloca "#FIN#" para bajar un renglón (no es necesario con PuréScript)',
 		'En caso de estar editando o borrando un Tubérculo existente, se requerirá su TuberID',
-		'Puedes leer o descargar la documentación de la versión 1.0 de PuréScript desde [aquí](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link) (~3MiB)',
+		'Puedes leer o descargar la documentación de PuréScript desde [aquí](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link) (~3MiB)',
 		'Nótese que el lenguaje se encuentra en una etapa prematura y puede tener bugs o cambiar considerablemente',
 	)
 	.setOptions(options)
