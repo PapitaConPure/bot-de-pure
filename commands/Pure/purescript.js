@@ -36,6 +36,12 @@ const command = new CommandManager('purescript', flags)
 	.setBriefDescription('Interpreta y ejecuta código PuréScript')
 	.setLongDescription(
 		'Interpreta y ejecuta el código PuréScript ingresado',
+		'',
+		'Por facilidad de uso, puedes usar formato de código (.arm recomendado):',
+		'> p!purescript \\`\\`\\`arm',
+		'> ENVIAR "Hola mundo"',
+		'> \\`\\`\\`',
+		'',
 		'Puedes leer o descargar la documentación de PuréScript desde [aquí](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link) (~3MiB)',
 	)
 	.setOptions(options)
@@ -46,7 +52,7 @@ const command = new CommandManager('purescript', flags)
 		const script = getScriptString(isSlash, args, rawArgs);
 		if(!script?.length)
 			return request.reply({
-				content: `⚠️️ Este Tubérculo requiere ingresar PuréScript\n${helpString}`,
+				content: `⚠️️ Se requiere que ingreses código PuréScript válido. Nótese que solo los Tubérculos pueden usar las características de registro y lectura Entradas de Usuario\n${helpString}`,
 				embeds: [
 					new EmbedBuilder()
 						.setColor(tenshiColor)
