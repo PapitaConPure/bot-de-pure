@@ -257,7 +257,7 @@ const command = new CommandManager('feed', flags)
 			.setFooter({ text: 'Operación finalizada' })
 			.addFields(
 				{ name: 'Feed configurado', value: `Se ha configurado un Feed con las tags _"${safeTags(input)}"_ para el canal **${fetchedChannel.name}**` },
-				{ name: 'Control del Feed', value: 'Puedes modificar, personalizar o eliminar este Feed en cualquier momento siguiendo el Asistente de `p!feed` una vez más' },
+				{ name: 'Control del Feed', value: 'Puedes modificar, personalizar o eliminar este Feed en cualquier momento siguiendo el Asistente una vez más' },
 			);
 		return interaction.update({
 			embeds: [concludedEmbed],
