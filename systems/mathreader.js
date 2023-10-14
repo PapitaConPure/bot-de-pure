@@ -40,15 +40,22 @@ operationTokens.set('^', TokenTypes.FUNCTION);
 class MathLexer {
     #stream = '';
     #cursor = 0;
+    /**
+     * @type {MathToken}
+     */
+    #lastToken;
 
     get #current() {
         return this.#stream.charAt(this.#cursor);
     }
+
     #createToken(type, value) {
-        return {
+        this.#lastToken = {
             type: type,
             value: value,
         };
+
+        return this.#lastToken;
     };
     
     /**@returns {Array<MathToken>}*/
@@ -109,11 +116,15 @@ class MathLexer {
                 switch(text) {
                     case 'pi':
                         tokens.push(createToken(TokenTypes.NUMBER, Math.PI));
-                        break;
+                        continue;
 
                     case 'e':
                         tokens.push(createToken(TokenTypes.NUMBER, Math.E));
-                        break;
+                        continue;
+
+                    case 'inf':
+                        tokens.push(createToken(TokenTypes.NUMBER, Math.POSITIVE_INFINITY));
+                        continue;
                         
                     case 'sqrt':
                     case 'sin':
@@ -122,18 +133,81 @@ class MathLexer {
                     case 'rad':
                     case 'deg':
                         tokens.push(createToken(TokenTypes.FUNCTION, text));
-                        break;
+                        continue;
 
                     default: {
                         throw Error(`Texto inválido en posición ${this.#cursor}: ${text}`);
                     }
                 }
+            }
 
+            if(this.#current === 'π') {
+                tokens.push(createToken(TokenTypes.NUMBER, Math.PI));
                 continue;
+            }
+
+            if(this.#current === '∞') {
+                tokens.push(createToken(TokenTypes.NUMBER, Number.POSITIVE_INFINITY));
+                continue;
+            }
+
+            if(this.#current === '√') {
+                tokens.push(createToken(TokenTypes.FUNCTION, 'sqrt'));
+                continue;
+            }
+
+            if('⁰¹²³⁴⁵⁶⁷⁸⁹'.includes(this.#current)) {
+                if(this.#lastToken.type === TokenTypes.FUNCTION && this.#lastToken.value === '^')
+                    throw Error(`Potencia inválida en posición ${this.#cursor}: ${text}\nUsa "^X" o un símbolo exponente, pero no ambos juntos`);
+
+                tokens.push(createToken(TokenTypes.FUNCTION, '^'));
+
+                switch(this.#current) {
+                case '⁰':
+                    tokens.push(createToken(TokenTypes.NUMBER, '0'));
+                    continue;
+                    
+                case '¹':
+                    tokens.push(createToken(TokenTypes.NUMBER, '1'));
+                    continue;
+                    
+                case '²':
+                    tokens.push(createToken(TokenTypes.NUMBER, '2'));
+                    continue;
+                    
+                case '³':
+                    tokens.push(createToken(TokenTypes.NUMBER, '3'));
+                    continue;
+
+                case '⁴':
+                    tokens.push(createToken(TokenTypes.NUMBER, '4'));
+                    continue;
+                    
+                case '⁵':
+                    tokens.push(createToken(TokenTypes.NUMBER, '5'));
+                    continue;
+                    
+                case '⁶':
+                    tokens.push(createToken(TokenTypes.NUMBER, '6'));
+                    continue;
+                    
+                case '⁷':
+                    tokens.push(createToken(TokenTypes.NUMBER, '7'));
+                    continue;
+                    
+                case '⁸':
+                    tokens.push(createToken(TokenTypes.NUMBER, '8'));
+                    continue;
+                    
+                case '⁹':
+                    tokens.push(createToken(TokenTypes.NUMBER, '9'));
+                    continue;
+                }
             }
             
             throw new Error(`Caracter inválido en posición ${this.#cursor}: ${this.#current}`);
         }
+
         tokens.push(createToken(TokenTypes.EOF, 'EOF'));
 
         return tokens;
