@@ -594,7 +594,7 @@ class CommandOptionsManager {
     /**
      * Devuelve un valor o función basado en si se ingresó la flag buscada o no
      * Si no se recibe ninguna entrada, se devuelve fallback
-     * @param {import('discord.js').CommandInteractionOptionResolver | Array<String>} args El conjunto de entradas
+     * @param {import('discord.js').CommandInteractionOptionResolver | Array<String>} input Los datos de entrada
      * @param {String} identifier El identificador de la flag
      * @typedef {{
      *  callback: FlagCallback,
@@ -603,15 +603,15 @@ class CommandOptionsManager {
      * @param {FeedbackOptions} output Define la respuestas en cada caso
      * @returns {*} El valor de retorno de callback si la flag fue respondida, o en cambio, el de fallback
      */
-    fetchFlag(args, identifier, output = { callback: null, fallback: null }) {
+    fetchFlag(input, identifier, output = { callback: null, fallback: null }) {
         /**@type {CommandFlagExpressive}*/
         const flag = this.flags.get(identifier);
 
         if(!flag)
             throw new ReferenceError(`No se pudo encontrar una Flag con el identificador: ${identifier}`);
 
-        if(Array.isArray(args))
-            return fetchMessageFlag(args, {
+        if(Array.isArray(input))
+            return fetchMessageFlag(input, {
                 property: flag.isExpressive(),
                 ...this.flags.get(identifier).structure,
                 ...output
@@ -624,7 +624,7 @@ class CommandOptionsManager {
         if(flag.isExpressive())
             getMethod = ParamTypes(flag._type)?.getMethod ?? 'getString';
         
-        flagValue = args[getMethod](identifier);
+        flagValue = input[getMethod](identifier);
         
         if(flagValue == undefined)
             return output.fallback;

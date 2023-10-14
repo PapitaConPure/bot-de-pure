@@ -53,7 +53,7 @@ async function auditSystem(title, ...fields) {
 };
 
 /**
- * @param {import('../commands/Commons/typings.js').CommandRequest} action
+ * @param {string} action
  * @param {Array<import('discord.js').EmbedFieldData>} fields
  */
 async function auditAction(action, ...fields) {
