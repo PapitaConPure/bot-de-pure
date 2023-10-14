@@ -1,7 +1,7 @@
 const GuildConfig = require('../localdata/models/guildconfigs.js');
 const Discord = require('discord.js');
 const { formatBooruPostMessage, notifyUsers } = require('./boorusend.js');
-const { auditError, auditAction } = require('./auditor.js');
+const { auditError, auditAction, auditSystem } = require('./auditor.js');
 const chalk = require('chalk');
 const { Booru } = require('./boorufetch.js');
 const globalConfigs = require('../localdata/config.json');
@@ -60,7 +60,7 @@ async function checkFeeds(booru, guilds) {
         promisesCount[guild] = 0;
         const gcfg = await GuildConfig.findOne({ guildId: guild.id }).catch(console.error);
         if(!gcfg?.feeds) return;
-        await Promise.all(Object.entries(gcfg.feeds).map(/**@param {[String, import('./boorufetch.js').FeedData]}*/ async ([chid, feed]) => {
+        await Promise.all(Object.entries(gcfg.feeds).filter(([_, feed]) => !feed.faults || feed.faults < 10).map(/**@param {[String, import('./boorufetch.js').FeedData]}*/ async ([chid, feed]) => {
             //Recolectar últimas imágenes para el Feed
             let fetchedProperly = true;
             /**@type {Array<import('./boorufetch').Post>}*/
@@ -86,13 +86,20 @@ async function checkFeeds(booru, guilds) {
             ///Eliminar Feed si las tags ingresadas no devuelven ninguna imagen
             feed.faults ??= 0;
             if(channel == undefined || !response.length) {
-                console.log('Comprobando eliminación de un Feed no disponible');
+                auditAction('Comprobando eliminación de un Feed no disponible',
+                    { name: 'Servidor', value: `${guild}`, inline: true },
+                    { name: 'Canal', value: `${channel ?? 'No disponible'}`, inline: true },
+                    { name: 'Reintentos',  value: `${chunkAmount} / 10`, inline: true },
+                );
                 console.log(channel?.name, response.length);
-                if(feed.faults >= 10)
-                    delete gcfg.feeds[chid];
-                else
+                // if(feed.faults >= 10)
+                //     delete gcfg.feeds[chid];
+                // else
+                if(feed.faults < 10) {
                     gcfg.feeds[chid].faults = feed.faults + 1;
-                gcfg.markModified('feeds');
+                    gcfg.markModified('feeds');
+                }
+
                 return;
             }
             if(feed.faults > 0) {
