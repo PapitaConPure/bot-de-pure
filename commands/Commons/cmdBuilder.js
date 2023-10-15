@@ -9,7 +9,7 @@ class CommandManager {
     name;
     /**@type {Array<String>?}*/
 	aliases;
-    /**@type {String?}*/
+    /**@type {String}*/
 	desc;
     /**@type {String?}*/
 	brief;

@@ -49,14 +49,32 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AliasField.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="AliasField.Designer.cs">
+      <DependentUpon>AliasField.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CommandBuilder.cs" />
+    <Compile Include="CommandFlag.cs" />
+    <Compile Include="CommandFlagExpressive.cs" />
+    <Compile Include="CommandManager.cs" />
+    <Compile Include="CommandTagsManager.cs" />
+    <Compile Include="CommandOption.cs" />
+    <Compile Include="CommandOptionsManager.cs" />
+    <Compile Include="CommandParam.cs" />
     <Compile Include="FPrincipal.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FPrincipal.Designer.cs">
       <DependentUpon>FPrincipal.cs</DependentUpon>
     </Compile>
+    <Compile Include="IImprimible.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="AliasField.resx">
+      <DependentUpon>AliasField.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FPrincipal.resx">
       <DependentUpon>FPrincipal.cs</DependentUpon>
     </EmbeddedResource>
