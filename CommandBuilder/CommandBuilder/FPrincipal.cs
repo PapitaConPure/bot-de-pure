@@ -9,9 +9,17 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CommandBuilder {
-	public partial class Form1: Form {
-		public Form1() {
-			InitializeComponent();
+	public partial class FPrincipal: Form {
+		public FPrincipal() {
+			this.InitializeComponent();
+		}
+
+		private void FPrincipal_KeyPress(object sender, KeyPressEventArgs e) {
+			if(!this.tbNuevoAlias.Focused)
+				return;
+
+			MessageBox.Show(this.tbNuevoAlias.InputText);
+			this.tbNuevoAlias.Clear();
 		}
 	}
 }

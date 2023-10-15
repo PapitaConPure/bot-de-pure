@@ -1,0 +1,11 @@
+D:\bot-de-pure\CommandBuilder\CommandBuilder\bin\Debug\CommandBuilder.exe.config
+D:\bot-de-pure\CommandBuilder\CommandBuilder\bin\Debug\CommandBuilder.exe
+D:\bot-de-pure\CommandBuilder\CommandBuilder\bin\Debug\CommandBuilder.pdb
+D:\bot-de-pure\CommandBuilder\CommandBuilder\obj\Debug\CommandBuilder.FPrincipal.resources
+D:\bot-de-pure\CommandBuilder\CommandBuilder\obj\Debug\CommandBuilder.Properties.Resources.resources
+D:\bot-de-pure\CommandBuilder\CommandBuilder\obj\Debug\CommandBuilder.csproj.GenerateResource.cache
+D:\bot-de-pure\CommandBuilder\CommandBuilder\obj\Debug\CommandBuilder.csproj.CoreCompileInputs.cache
+D:\bot-de-pure\CommandBuilder\CommandBuilder\obj\Debug\CommandBuilder.exe
+D:\bot-de-pure\CommandBuilder\CommandBuilder\obj\Debug\CommandBuilder.pdb
+D:\bot-de-pure\CommandBuilder\CommandBuilder\bin\Debug\ControLib.dll
+D:\bot-de-pure\CommandBuilder\CommandBuilder\obj\Debug\CommandBuilder.csproj.CopyComplete
