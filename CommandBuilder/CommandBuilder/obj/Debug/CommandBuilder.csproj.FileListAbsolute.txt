@@ -9,3 +9,4 @@ D:\bot-de-pure\CommandBuilder\CommandBuilder\obj\Debug\CommandBuilder.exe
 D:\bot-de-pure\CommandBuilder\CommandBuilder\obj\Debug\CommandBuilder.pdb
 D:\bot-de-pure\CommandBuilder\CommandBuilder\bin\Debug\ControLib.dll
 D:\bot-de-pure\CommandBuilder\CommandBuilder\obj\Debug\CommandBuilder.csproj.CopyComplete
+D:\bot-de-pure\CommandBuilder\CommandBuilder\obj\Debug\CommandBuilder.csproj.AssemblyReference.cache
