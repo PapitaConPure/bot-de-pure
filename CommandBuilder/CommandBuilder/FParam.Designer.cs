@@ -27,6 +27,12 @@ namespace CommandBuilder {
 			this.pnlTítulo = new System.Windows.Forms.Panel();
 			this.lblTítulo = new System.Windows.Forms.Label();
 			this.pnlContenido = new System.Windows.Forms.Panel();
+			this.pnlPolyParams = new System.Windows.Forms.Panel();
+			this.tbPolyParams = new ControLib.SleekTextBox();
+			this.label3 = new System.Windows.Forms.Label();
+			this.pnlPolyMax = new System.Windows.Forms.Panel();
+			this.tbPolyMax = new ControLib.SleekTextBox();
+			this.label2 = new System.Windows.Forms.Label();
 			this.pnlPoly = new System.Windows.Forms.Panel();
 			this.cmbPoly = new System.Windows.Forms.ComboBox();
 			this.label1 = new System.Windows.Forms.Label();
@@ -36,28 +42,30 @@ namespace CommandBuilder {
 			this.pnlTipo = new System.Windows.Forms.Panel();
 			this.cmbTipos = new System.Windows.Forms.ComboBox();
 			this.lblTipo = new System.Windows.Forms.Label();
-			this.pnlNombre = new System.Windows.Forms.Panel();
-			this.tbNombre = new ControLib.SleekTextBox();
+			this.pnlOpcionesBase = new System.Windows.Forms.Panel();
+			this.tlpOpcionesBase = new System.Windows.Forms.TableLayoutPanel();
+			this.pnlOptional = new System.Windows.Forms.Panel();
+			this.cbOptional = new System.Windows.Forms.CheckBox();
+			this.lblOptional = new System.Windows.Forms.Label();
+			this.pnlName = new System.Windows.Forms.Panel();
+			this.tbName = new ControLib.SleekTextBox();
 			this.lblNombre = new System.Windows.Forms.Label();
 			this.pnlOpciones = new System.Windows.Forms.Panel();
 			this.btnAgregar = new ControLib.SleekButton();
 			this.btnEliminar = new ControLib.SleekButton();
 			this.btnCancelar = new ControLib.SleekButton();
-			this.pnlPolyMax = new System.Windows.Forms.Panel();
-			this.tbPolyMax = new ControLib.SleekTextBox();
-			this.label2 = new System.Windows.Forms.Label();
-			this.pnlPolyParams = new System.Windows.Forms.Panel();
-			this.tbPolyParams = new ControLib.SleekTextBox();
-			this.label3 = new System.Windows.Forms.Label();
 			this.pnlTítulo.SuspendLayout();
 			this.pnlContenido.SuspendLayout();
+			this.pnlPolyParams.SuspendLayout();
+			this.pnlPolyMax.SuspendLayout();
 			this.pnlPoly.SuspendLayout();
 			this.pnlDesc.SuspendLayout();
 			this.pnlTipo.SuspendLayout();
-			this.pnlNombre.SuspendLayout();
+			this.pnlOpcionesBase.SuspendLayout();
+			this.tlpOpcionesBase.SuspendLayout();
+			this.pnlOptional.SuspendLayout();
+			this.pnlName.SuspendLayout();
 			this.pnlOpciones.SuspendLayout();
-			this.pnlPolyMax.SuspendLayout();
-			this.pnlPolyParams.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// pnlTítulo
@@ -90,13 +98,120 @@ namespace CommandBuilder {
 			this.pnlContenido.Controls.Add(this.pnlPoly);
 			this.pnlContenido.Controls.Add(this.pnlDesc);
 			this.pnlContenido.Controls.Add(this.pnlTipo);
-			this.pnlContenido.Controls.Add(this.pnlNombre);
+			this.pnlContenido.Controls.Add(this.pnlOpcionesBase);
 			this.pnlContenido.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.pnlContenido.Location = new System.Drawing.Point(0, 45);
 			this.pnlContenido.Name = "pnlContenido";
 			this.pnlContenido.Padding = new System.Windows.Forms.Padding(12, 8, 12, 8);
 			this.pnlContenido.Size = new System.Drawing.Size(534, 376);
 			this.pnlContenido.TabIndex = 0;
+			// 
+			// pnlPolyParams
+			// 
+			this.pnlPolyParams.Controls.Add(this.tbPolyParams);
+			this.pnlPolyParams.Controls.Add(this.label3);
+			this.pnlPolyParams.Dock = System.Windows.Forms.DockStyle.Top;
+			this.pnlPolyParams.Location = new System.Drawing.Point(12, 308);
+			this.pnlPolyParams.Name = "pnlPolyParams";
+			this.pnlPolyParams.Padding = new System.Windows.Forms.Padding(0, 0, 0, 6);
+			this.pnlPolyParams.Size = new System.Drawing.Size(510, 60);
+			this.pnlPolyParams.TabIndex = 5;
+			this.pnlPolyParams.Visible = false;
+			// 
+			// tbPolyParams
+			// 
+			this.tbPolyParams.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(35)))), ((int)(((byte)(44)))));
+			this.tbPolyParams.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+			this.tbPolyParams.BorderRadius = 100F;
+			this.tbPolyParams.BorderSize = 0F;
+			this.tbPolyParams.Cursor = System.Windows.Forms.Cursors.IBeam;
+			this.tbPolyParams.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.tbPolyParams.FocusColor = System.Drawing.Color.Empty;
+			this.tbPolyParams.Font = new System.Drawing.Font("Segoe UI", 11F);
+			this.tbPolyParams.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
+			this.tbPolyParams.InputColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
+			this.tbPolyParams.InputText = "";
+			this.tbPolyParams.Location = new System.Drawing.Point(0, 15);
+			this.tbPolyParams.MinimumSize = new System.Drawing.Size(20, 20);
+			this.tbPolyParams.Multiline = false;
+			this.tbPolyParams.Name = "tbPolyParams";
+			this.tbPolyParams.PasswordChar = '\0';
+			this.tbPolyParams.PercentualRadius = true;
+			this.tbPolyParams.PlaceHolder = "Nombres de poliparámetro, separados por espacios";
+			this.tbPolyParams.PlaceHolderColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(73)))), ((int)(((byte)(94)))));
+			this.tbPolyParams.ReadOnly = false;
+			this.tbPolyParams.SelectAllOnClick = true;
+			this.tbPolyParams.Size = new System.Drawing.Size(510, 39);
+			this.tbPolyParams.Style = ControLib.SleekTextBox.TextBoxStyle.RoundRect;
+			this.tbPolyParams.TabIndex = 2;
+			this.tbPolyParams.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+			this.tbPolyParams.WordWrap = true;
+			// 
+			// label3
+			// 
+			this.label3.AutoSize = true;
+			this.label3.Dock = System.Windows.Forms.DockStyle.Top;
+			this.label3.Font = new System.Drawing.Font("Lato Black", 9F);
+			this.label3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(98)))), ((int)(((byte)(136)))));
+			this.label3.Location = new System.Drawing.Point(0, 0);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(118, 15);
+			this.label3.TabIndex = 3;
+			this.label3.Text = "POLIPARÁMETROS";
+			this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			// 
+			// pnlPolyMax
+			// 
+			this.pnlPolyMax.Controls.Add(this.tbPolyMax);
+			this.pnlPolyMax.Controls.Add(this.label2);
+			this.pnlPolyMax.Dock = System.Windows.Forms.DockStyle.Top;
+			this.pnlPolyMax.Location = new System.Drawing.Point(12, 248);
+			this.pnlPolyMax.Name = "pnlPolyMax";
+			this.pnlPolyMax.Padding = new System.Windows.Forms.Padding(0, 0, 0, 6);
+			this.pnlPolyMax.Size = new System.Drawing.Size(510, 60);
+			this.pnlPolyMax.TabIndex = 4;
+			// 
+			// tbPolyMax
+			// 
+			this.tbPolyMax.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(35)))), ((int)(((byte)(44)))));
+			this.tbPolyMax.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+			this.tbPolyMax.BorderRadius = 100F;
+			this.tbPolyMax.BorderSize = 0F;
+			this.tbPolyMax.Cursor = System.Windows.Forms.Cursors.IBeam;
+			this.tbPolyMax.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.tbPolyMax.FocusColor = System.Drawing.Color.Empty;
+			this.tbPolyMax.Font = new System.Drawing.Font("Segoe UI", 11F);
+			this.tbPolyMax.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
+			this.tbPolyMax.InputColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
+			this.tbPolyMax.InputText = "";
+			this.tbPolyMax.Location = new System.Drawing.Point(0, 15);
+			this.tbPolyMax.MinimumSize = new System.Drawing.Size(20, 20);
+			this.tbPolyMax.Multiline = false;
+			this.tbPolyMax.Name = "tbPolyMax";
+			this.tbPolyMax.PasswordChar = '\0';
+			this.tbPolyMax.PercentualRadius = true;
+			this.tbPolyMax.PlaceHolder = "Cantidad máxima de poliparámetros. Número entero";
+			this.tbPolyMax.PlaceHolderColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(73)))), ((int)(((byte)(94)))));
+			this.tbPolyMax.ReadOnly = false;
+			this.tbPolyMax.SelectAllOnClick = true;
+			this.tbPolyMax.Size = new System.Drawing.Size(510, 39);
+			this.tbPolyMax.Style = ControLib.SleekTextBox.TextBoxStyle.RoundRect;
+			this.tbPolyMax.TabIndex = 2;
+			this.tbPolyMax.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+			this.tbPolyMax.WordWrap = true;
+			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Dock = System.Windows.Forms.DockStyle.Top;
+			this.label2.Font = new System.Drawing.Font("Lato Black", 9F);
+			this.label2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(98)))), ((int)(((byte)(136)))));
+			this.label2.Location = new System.Drawing.Point(0, 0);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(179, 15);
+			this.label2.TabIndex = 3;
+			this.label2.Text = "MÁXIMO POLIPARAMÉTRICO";
+			this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// pnlPoly
 			// 
@@ -224,45 +339,107 @@ namespace CommandBuilder {
 			this.lblTipo.Text = "TIPO";
 			this.lblTipo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
-			// pnlNombre
+			// pnlOpcionesBase
 			// 
-			this.pnlNombre.Controls.Add(this.tbNombre);
-			this.pnlNombre.Controls.Add(this.lblNombre);
-			this.pnlNombre.Dock = System.Windows.Forms.DockStyle.Top;
-			this.pnlNombre.Location = new System.Drawing.Point(12, 8);
-			this.pnlNombre.Name = "pnlNombre";
-			this.pnlNombre.Padding = new System.Windows.Forms.Padding(0, 0, 0, 6);
-			this.pnlNombre.Size = new System.Drawing.Size(510, 60);
-			this.pnlNombre.TabIndex = 0;
+			this.pnlOpcionesBase.Controls.Add(this.tlpOpcionesBase);
+			this.pnlOpcionesBase.Dock = System.Windows.Forms.DockStyle.Top;
+			this.pnlOpcionesBase.Location = new System.Drawing.Point(12, 8);
+			this.pnlOpcionesBase.Name = "pnlOpcionesBase";
+			this.pnlOpcionesBase.Padding = new System.Windows.Forms.Padding(0, 0, 0, 6);
+			this.pnlOpcionesBase.Size = new System.Drawing.Size(510, 60);
+			this.pnlOpcionesBase.TabIndex = 0;
 			// 
-			// tbNombre
+			// tlpOpcionesBase
 			// 
-			this.tbNombre.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(35)))), ((int)(((byte)(44)))));
-			this.tbNombre.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
-			this.tbNombre.BorderRadius = 100F;
-			this.tbNombre.BorderSize = 0F;
-			this.tbNombre.Cursor = System.Windows.Forms.Cursors.IBeam;
-			this.tbNombre.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.tbNombre.FocusColor = System.Drawing.Color.Empty;
-			this.tbNombre.Font = new System.Drawing.Font("Segoe UI", 11F);
-			this.tbNombre.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			this.tbNombre.InputColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			this.tbNombre.InputText = "";
-			this.tbNombre.Location = new System.Drawing.Point(0, 15);
-			this.tbNombre.MinimumSize = new System.Drawing.Size(20, 20);
-			this.tbNombre.Multiline = false;
-			this.tbNombre.Name = "tbNombre";
-			this.tbNombre.PasswordChar = '\0';
-			this.tbNombre.PercentualRadius = true;
-			this.tbNombre.PlaceHolder = "Nombre del parámetro";
-			this.tbNombre.PlaceHolderColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(73)))), ((int)(((byte)(94)))));
-			this.tbNombre.ReadOnly = false;
-			this.tbNombre.SelectAllOnClick = true;
-			this.tbNombre.Size = new System.Drawing.Size(510, 39);
-			this.tbNombre.Style = ControLib.SleekTextBox.TextBoxStyle.RoundRect;
-			this.tbNombre.TabIndex = 0;
-			this.tbNombre.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
-			this.tbNombre.WordWrap = true;
+			this.tlpOpcionesBase.ColumnCount = 2;
+			this.tlpOpcionesBase.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 75.68627F));
+			this.tlpOpcionesBase.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 24.31373F));
+			this.tlpOpcionesBase.Controls.Add(this.pnlOptional, 1, 0);
+			this.tlpOpcionesBase.Controls.Add(this.pnlName, 0, 0);
+			this.tlpOpcionesBase.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.tlpOpcionesBase.Location = new System.Drawing.Point(0, 0);
+			this.tlpOpcionesBase.Name = "tlpOpcionesBase";
+			this.tlpOpcionesBase.RowCount = 1;
+			this.tlpOpcionesBase.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+			this.tlpOpcionesBase.Size = new System.Drawing.Size(510, 54);
+			this.tlpOpcionesBase.TabIndex = 0;
+			// 
+			// pnlOptional
+			// 
+			this.pnlOptional.Controls.Add(this.cbOptional);
+			this.pnlOptional.Controls.Add(this.lblOptional);
+			this.pnlOptional.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.pnlOptional.Location = new System.Drawing.Point(388, 0);
+			this.pnlOptional.Margin = new System.Windows.Forms.Padding(3, 0, 0, 0);
+			this.pnlOptional.Name = "pnlOptional";
+			this.pnlOptional.Size = new System.Drawing.Size(122, 54);
+			this.pnlOptional.TabIndex = 1;
+			// 
+			// cbOptional
+			// 
+			this.cbOptional.AutoSize = true;
+			this.cbOptional.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.cbOptional.Font = new System.Drawing.Font("Segoe UI", 11F);
+			this.cbOptional.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(246)))), ((int)(((byte)(246)))), ((int)(((byte)(246)))));
+			this.cbOptional.Location = new System.Drawing.Point(0, 15);
+			this.cbOptional.Name = "cbOptional";
+			this.cbOptional.Size = new System.Drawing.Size(122, 39);
+			this.cbOptional.TabIndex = 4;
+			this.cbOptional.Text = "Es opcional\r\n";
+			this.cbOptional.UseVisualStyleBackColor = true;
+			// 
+			// lblOptional
+			// 
+			this.lblOptional.AutoSize = true;
+			this.lblOptional.Dock = System.Windows.Forms.DockStyle.Top;
+			this.lblOptional.Font = new System.Drawing.Font("Lato Black", 9F);
+			this.lblOptional.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(98)))), ((int)(((byte)(136)))));
+			this.lblOptional.Location = new System.Drawing.Point(0, 0);
+			this.lblOptional.Name = "lblOptional";
+			this.lblOptional.Size = new System.Drawing.Size(71, 15);
+			this.lblOptional.TabIndex = 3;
+			this.lblOptional.Text = "OPCIONAL";
+			this.lblOptional.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			// 
+			// pnlName
+			// 
+			this.pnlName.Controls.Add(this.tbName);
+			this.pnlName.Controls.Add(this.lblNombre);
+			this.pnlName.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.pnlName.Location = new System.Drawing.Point(0, 0);
+			this.pnlName.Margin = new System.Windows.Forms.Padding(0, 0, 3, 0);
+			this.pnlName.Name = "pnlName";
+			this.pnlName.Size = new System.Drawing.Size(382, 54);
+			this.pnlName.TabIndex = 0;
+			// 
+			// tbName
+			// 
+			this.tbName.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(35)))), ((int)(((byte)(44)))));
+			this.tbName.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+			this.tbName.BorderRadius = 100F;
+			this.tbName.BorderSize = 0F;
+			this.tbName.Cursor = System.Windows.Forms.Cursors.IBeam;
+			this.tbName.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.tbName.FocusColor = System.Drawing.Color.Empty;
+			this.tbName.Font = new System.Drawing.Font("Segoe UI", 11F);
+			this.tbName.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
+			this.tbName.InputColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
+			this.tbName.InputText = "";
+			this.tbName.Location = new System.Drawing.Point(0, 15);
+			this.tbName.MinimumSize = new System.Drawing.Size(20, 20);
+			this.tbName.Multiline = false;
+			this.tbName.Name = "tbName";
+			this.tbName.PasswordChar = '\0';
+			this.tbName.PercentualRadius = true;
+			this.tbName.PlaceHolder = "Nombre del parámetro";
+			this.tbName.PlaceHolderColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(73)))), ((int)(((byte)(94)))));
+			this.tbName.ReadOnly = false;
+			this.tbName.SelectAllOnClick = true;
+			this.tbName.Size = new System.Drawing.Size(382, 39);
+			this.tbName.Style = ControLib.SleekTextBox.TextBoxStyle.RoundRect;
+			this.tbName.TabIndex = 2;
+			this.tbName.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+			this.tbName.WordWrap = true;
 			// 
 			// lblNombre
 			// 
@@ -273,7 +450,7 @@ namespace CommandBuilder {
 			this.lblNombre.Location = new System.Drawing.Point(0, 0);
 			this.lblNombre.Name = "lblNombre";
 			this.lblNombre.Size = new System.Drawing.Size(60, 15);
-			this.lblNombre.TabIndex = 1;
+			this.lblNombre.TabIndex = 3;
 			this.lblNombre.Text = "NOMBRE";
 			this.lblNombre.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
@@ -352,113 +529,6 @@ namespace CommandBuilder {
 			this.btnCancelar.Text = "Cancelar";
 			this.btnCancelar.UseVisualStyleBackColor = false;
 			// 
-			// pnlPolyMax
-			// 
-			this.pnlPolyMax.Controls.Add(this.tbPolyMax);
-			this.pnlPolyMax.Controls.Add(this.label2);
-			this.pnlPolyMax.Dock = System.Windows.Forms.DockStyle.Top;
-			this.pnlPolyMax.Location = new System.Drawing.Point(12, 248);
-			this.pnlPolyMax.Name = "pnlPolyMax";
-			this.pnlPolyMax.Padding = new System.Windows.Forms.Padding(0, 0, 0, 6);
-			this.pnlPolyMax.Size = new System.Drawing.Size(510, 60);
-			this.pnlPolyMax.TabIndex = 4;
-			// 
-			// tbPolyMax
-			// 
-			this.tbPolyMax.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(35)))), ((int)(((byte)(44)))));
-			this.tbPolyMax.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
-			this.tbPolyMax.BorderRadius = 100F;
-			this.tbPolyMax.BorderSize = 0F;
-			this.tbPolyMax.Cursor = System.Windows.Forms.Cursors.IBeam;
-			this.tbPolyMax.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.tbPolyMax.FocusColor = System.Drawing.Color.Empty;
-			this.tbPolyMax.Font = new System.Drawing.Font("Segoe UI", 11F);
-			this.tbPolyMax.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			this.tbPolyMax.InputColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			this.tbPolyMax.InputText = "";
-			this.tbPolyMax.Location = new System.Drawing.Point(0, 15);
-			this.tbPolyMax.MinimumSize = new System.Drawing.Size(20, 20);
-			this.tbPolyMax.Multiline = false;
-			this.tbPolyMax.Name = "tbPolyMax";
-			this.tbPolyMax.PasswordChar = '\0';
-			this.tbPolyMax.PercentualRadius = true;
-			this.tbPolyMax.PlaceHolder = "Cantidad máxima de poliparámetros. Número entero";
-			this.tbPolyMax.PlaceHolderColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(73)))), ((int)(((byte)(94)))));
-			this.tbPolyMax.ReadOnly = false;
-			this.tbPolyMax.SelectAllOnClick = true;
-			this.tbPolyMax.Size = new System.Drawing.Size(510, 39);
-			this.tbPolyMax.Style = ControLib.SleekTextBox.TextBoxStyle.RoundRect;
-			this.tbPolyMax.TabIndex = 2;
-			this.tbPolyMax.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
-			this.tbPolyMax.WordWrap = true;
-			// 
-			// label2
-			// 
-			this.label2.AutoSize = true;
-			this.label2.Dock = System.Windows.Forms.DockStyle.Top;
-			this.label2.Font = new System.Drawing.Font("Lato Black", 9F);
-			this.label2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(98)))), ((int)(((byte)(136)))));
-			this.label2.Location = new System.Drawing.Point(0, 0);
-			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(179, 15);
-			this.label2.TabIndex = 3;
-			this.label2.Text = "MÁXIMO POLIPARAMÉTRICO";
-			this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			// 
-			// pnlPolyParams
-			// 
-			this.pnlPolyParams.Controls.Add(this.tbPolyParams);
-			this.pnlPolyParams.Controls.Add(this.label3);
-			this.pnlPolyParams.Dock = System.Windows.Forms.DockStyle.Top;
-			this.pnlPolyParams.Location = new System.Drawing.Point(12, 308);
-			this.pnlPolyParams.Name = "pnlPolyParams";
-			this.pnlPolyParams.Padding = new System.Windows.Forms.Padding(0, 0, 0, 6);
-			this.pnlPolyParams.Size = new System.Drawing.Size(510, 60);
-			this.pnlPolyParams.TabIndex = 5;
-			this.pnlPolyParams.Visible = false;
-			// 
-			// tbPolyParams
-			// 
-			this.tbPolyParams.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(35)))), ((int)(((byte)(44)))));
-			this.tbPolyParams.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
-			this.tbPolyParams.BorderRadius = 100F;
-			this.tbPolyParams.BorderSize = 0F;
-			this.tbPolyParams.Cursor = System.Windows.Forms.Cursors.IBeam;
-			this.tbPolyParams.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.tbPolyParams.FocusColor = System.Drawing.Color.Empty;
-			this.tbPolyParams.Font = new System.Drawing.Font("Segoe UI", 11F);
-			this.tbPolyParams.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			this.tbPolyParams.InputColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			this.tbPolyParams.InputText = "";
-			this.tbPolyParams.Location = new System.Drawing.Point(0, 15);
-			this.tbPolyParams.MinimumSize = new System.Drawing.Size(20, 20);
-			this.tbPolyParams.Multiline = false;
-			this.tbPolyParams.Name = "tbPolyParams";
-			this.tbPolyParams.PasswordChar = '\0';
-			this.tbPolyParams.PercentualRadius = true;
-			this.tbPolyParams.PlaceHolder = "Nombres de poliparámetro, separados por espacios";
-			this.tbPolyParams.PlaceHolderColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(73)))), ((int)(((byte)(94)))));
-			this.tbPolyParams.ReadOnly = false;
-			this.tbPolyParams.SelectAllOnClick = true;
-			this.tbPolyParams.Size = new System.Drawing.Size(510, 39);
-			this.tbPolyParams.Style = ControLib.SleekTextBox.TextBoxStyle.RoundRect;
-			this.tbPolyParams.TabIndex = 2;
-			this.tbPolyParams.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
-			this.tbPolyParams.WordWrap = true;
-			// 
-			// label3
-			// 
-			this.label3.AutoSize = true;
-			this.label3.Dock = System.Windows.Forms.DockStyle.Top;
-			this.label3.Font = new System.Drawing.Font("Lato Black", 9F);
-			this.label3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(98)))), ((int)(((byte)(136)))));
-			this.label3.Location = new System.Drawing.Point(0, 0);
-			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(118, 15);
-			this.label3.TabIndex = 3;
-			this.label3.Text = "POLIPARÁMETROS";
-			this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			// 
 			// FParam
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -477,19 +547,23 @@ namespace CommandBuilder {
 			this.pnlTítulo.ResumeLayout(false);
 			this.pnlTítulo.PerformLayout();
 			this.pnlContenido.ResumeLayout(false);
+			this.pnlPolyParams.ResumeLayout(false);
+			this.pnlPolyParams.PerformLayout();
+			this.pnlPolyMax.ResumeLayout(false);
+			this.pnlPolyMax.PerformLayout();
 			this.pnlPoly.ResumeLayout(false);
 			this.pnlPoly.PerformLayout();
 			this.pnlDesc.ResumeLayout(false);
 			this.pnlDesc.PerformLayout();
 			this.pnlTipo.ResumeLayout(false);
 			this.pnlTipo.PerformLayout();
-			this.pnlNombre.ResumeLayout(false);
-			this.pnlNombre.PerformLayout();
+			this.pnlOpcionesBase.ResumeLayout(false);
+			this.tlpOpcionesBase.ResumeLayout(false);
+			this.pnlOptional.ResumeLayout(false);
+			this.pnlOptional.PerformLayout();
+			this.pnlName.ResumeLayout(false);
+			this.pnlName.PerformLayout();
 			this.pnlOpciones.ResumeLayout(false);
-			this.pnlPolyMax.ResumeLayout(false);
-			this.pnlPolyMax.PerformLayout();
-			this.pnlPolyParams.ResumeLayout(false);
-			this.pnlPolyParams.PerformLayout();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -499,8 +573,7 @@ namespace CommandBuilder {
 		private System.Windows.Forms.Panel pnlTítulo;
 		private System.Windows.Forms.Label lblTítulo;
 		private System.Windows.Forms.Panel pnlContenido;
-		private System.Windows.Forms.Panel pnlNombre;
-		private System.Windows.Forms.Label lblNombre;
+		private System.Windows.Forms.Panel pnlOpcionesBase;
 		private System.Windows.Forms.Panel pnlTipo;
 		private System.Windows.Forms.Label lblTipo;
 		private System.Windows.Forms.Panel pnlDesc;
@@ -508,7 +581,6 @@ namespace CommandBuilder {
 		private System.Windows.Forms.Panel pnlOpciones;
 		private ControLib.SleekButton btnCancelar;
 		private ControLib.SleekButton btnAgregar;
-		public ControLib.SleekTextBox tbNombre;
 		public System.Windows.Forms.ComboBox cmbTipos;
 		public ControLib.SleekTextBox tbDesc;
 		private ControLib.SleekButton btnEliminar;
@@ -521,5 +593,12 @@ namespace CommandBuilder {
 		private System.Windows.Forms.Panel pnlPolyMax;
 		public ControLib.SleekTextBox tbPolyMax;
 		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.TableLayoutPanel tlpOpcionesBase;
+		private System.Windows.Forms.Panel pnlName;
+		public ControLib.SleekTextBox tbName;
+		private System.Windows.Forms.Label lblNombre;
+		private System.Windows.Forms.Panel pnlOptional;
+		private System.Windows.Forms.Label lblOptional;
+		private System.Windows.Forms.CheckBox cbOptional;
 	}
 }

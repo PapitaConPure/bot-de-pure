@@ -57,10 +57,12 @@ namespace CommandBuilder {
 
 		public ParamType Type => this.type;
 
+		public ParamPoly Poly => this.paramPoly;
+
 		public override OptionType OptionKind => OptionType.Param;
 
 		public override string Imprimir() {
-			string valor = $"\t.addParam('{this.name}', '{this.type.ToString().ToUpper()}', '{this.desc}'){this.PuntoYComaFinal}";
+			string valor = $"\t.addParam('{this.name}', '{this.type.ToString().ToUpper()}', '{this.desc}'";
 
 			List<string> opciones = new List<string>();
 
@@ -72,6 +74,8 @@ namespace CommandBuilder {
 
 			if(opciones.Count > 0)
 				valor += $", {{ {string.Join(", ", opciones)} }}";
+
+			valor += $"){this.PuntoYComaFinal}";
 
 			return valor;
 		}

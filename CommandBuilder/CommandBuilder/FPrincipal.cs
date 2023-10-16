@@ -175,9 +175,12 @@ namespace CommandBuilder {
 				CommandParam param = option as CommandParam;
 
 				FParam fParam = new FParam(true);
-				fParam.tbNombre.InputText = option.Identifier;
+				fParam.tbName.InputText = option.Identifier;
 				fParam.tbDesc.InputText = option.Desc;
 				fParam.cmbTipos.SelectedIndex = (int)param.Type;
+				fParam.cmbPoly.SelectedIndex = (int)param.Poly.Rank;
+				fParam.tbPolyMax.InputText = param.Poly.Max.ToString();
+				fParam.tbPolyParams.InputText = param.Poly.VerPolyParams(" ");
 				resultado = fParam.ShowDialog();
 
 				if(resultado == DialogResult.Abort) {

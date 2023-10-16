@@ -1,42 +1,57 @@
 ﻿namespace CommandBuilder {
 	public class ParamPoly: IImprimible {
-		private readonly Rank rank;
-		private readonly int max;
+		private const int POLYMAX_DEFAULT = 8;
+
 		private readonly string[] polyParams;
 
-		public enum Rank {
+		public enum PolyRank {
 			Single = 0,
 			Multiple,
 			Complex,
 		}
 
-		private ParamPoly(Rank rank, int max) {
-			this.rank = rank;
-			this.max = max;
+		private ParamPoly(PolyRank rank, int max) {
+			this.Rank = rank;
+			this.Max = max;
 		}
 
 		private ParamPoly(params string[] polyParams) {
+			this.Rank = PolyRank.Complex;
 			this.polyParams = polyParams;
-			this.max = polyParams.Length;
+			this.Max = polyParams.Length;
 		}
 
-		public static ParamPoly Single => new ParamPoly(Rank.Single, 1);
+		public static ParamPoly Single => new ParamPoly(PolyRank.Single, 1);
 
-		public static ParamPoly Multiple(int polyMax = 8) {
-			return new ParamPoly(Rank.Single, polyMax);
+		public static ParamPoly Multiple(int polyMax = POLYMAX_DEFAULT) {
+			return new ParamPoly(PolyRank.Multiple, polyMax);
 		}
 
 		public static ParamPoly Complex(params string[] polyParams) {
 			return new ParamPoly(polyParams);
 		}
 
-		public bool IsSimple => this.rank == Rank.Single;
+		public PolyRank Rank { get; private set; }
+
+		public int Max { get; private set; }
+
+		public bool IsSimple => this.Rank == PolyRank.Single;
+
+		public string VerPolyParams(string separador = ", ") {
+			if(this.Rank != PolyRank.Complex)
+				return "";
+
+			return string.Join(separador, this.polyParams);
+		}
 
 		public string Imprimir() {
-			if(this.rank != Rank.Complex)
-				return $"poly: '{this.rank.ToString().ToUpper()}', polyMax: {this.max}";
+			if(this.Rank == PolyRank.Complex)
+				return $"poly: [ '{string.Join("', '", this.polyParams)}' ]";
 
-			return $"poly: [ '{string.Join("', '", this.polyParams)}' ], polyMax: {this.max}";
+			if(this.Max == POLYMAX_DEFAULT)
+				return $"poly: '{this.Rank.ToString().ToUpper()}'";
+
+			return $"poly: '{this.Rank.ToString().ToUpper()}', polyMax: {this.Max}";
 		}
 	}
 }

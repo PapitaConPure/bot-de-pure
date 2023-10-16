@@ -5,12 +5,13 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CommandBuilder {
 	public partial class FParam: Form {
-		private int baseHeight;
+		private readonly int baseHeight;
 
 		public FParam(bool permiteBorrar) {
 			this.InitializeComponent();
@@ -22,12 +23,25 @@ namespace CommandBuilder {
 			this.cmbTipos.Items.Remove(CommandParam.ParamType.Dynamic);
 			this.cmbTipos.SelectedIndex = 1;
 
-			foreach(ParamPoly.Rank type in Enum.GetValues(typeof(ParamPoly.Rank)))
+			foreach(ParamPoly.PolyRank type in Enum.GetValues(typeof(ParamPoly.PolyRank)))
 				this.cmbPoly.Items.Add(type);
 			this.cmbPoly.SelectedIndex = 0;
 
 			if(permiteBorrar)
 				this.btnEliminar.Visible = true;
+		}
+
+		private void CmbPoly_SelectedIndexChanged(object sender, EventArgs e) {
+			if(this.baseHeight == 0)
+				return;
+
+			ParamPoly.PolyRank rank = (ParamPoly.PolyRank)this.cmbPoly.SelectedItem;
+			bool isPoly = rank >= ParamPoly.PolyRank.Multiple;
+
+			this.Height = this.baseHeight + (isPoly ? 60 : 0);
+
+			this.pnlPolyMax.Visible = rank == ParamPoly.PolyRank.Multiple;
+			this.pnlPolyParams.Visible = rank == ParamPoly.PolyRank.Complex;
 		}
 
 		/// <summary>
@@ -37,23 +51,31 @@ namespace CommandBuilder {
 		/// <exception cref="FormatException"></exception>
 		public CommandParam GenerarParámetro() {
 			string desc = this.tbDesc.InputText;
-			string nombre = this.tbNombre.InputText;
+			string nombre = this.tbName.InputText;
 			CommandParam.ParamType type = (CommandParam.ParamType)this.cmbTipos.SelectedItem;
+			bool optional = this.cbOptional.Checked;
 
-			return new CommandParam(nombre, desc, type);
-		}
+			ParamPoly paramPoly;
+			ParamPoly.PolyRank rank = (ParamPoly.PolyRank)this.cmbPoly.SelectedItem;
 
-		private void CmbPoly_SelectedIndexChanged(object sender, EventArgs e) {
-			if(this.baseHeight == 0)
-				return;
+			if(rank == ParamPoly.PolyRank.Multiple) {
+				if(this.tbPolyMax.Empty)
+					paramPoly = ParamPoly.Multiple();
+				else {
+					string valor = this.tbPolyMax.InputText.Trim();
 
-			ParamPoly.Rank rank = (ParamPoly.Rank)this.cmbPoly.SelectedItem;
-			bool isPoly = rank >= ParamPoly.Rank.Multiple;
+					if(!Regex.IsMatch(valor, "^[0-9]+$"))
+						throw new FormatException("La cantidad máxima de poliparámetros debe indicarse con un número entero");
 
-			this.Height = this.baseHeight + (isPoly ? 60 : 0);
+					paramPoly = ParamPoly.Multiple(Convert.ToInt32(valor));
+				}
+			} else if(rank == ParamPoly.PolyRank.Complex) {
+				string[] polyParams = this.tbPolyParams.InputText.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+				paramPoly = ParamPoly.Complex(polyParams);
+			} else
+				paramPoly = ParamPoly.Single;
 
-			this.pnlPolyMax.Visible = rank == ParamPoly.Rank.Multiple;
-			this.pnlPolyParams.Visible = rank == ParamPoly.Rank.Complex;
+			return new CommandParam(nombre, desc, type, paramPoly, optional);
 		}
 	}
 }
