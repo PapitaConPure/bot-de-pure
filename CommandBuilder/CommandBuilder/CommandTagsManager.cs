@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace CommandBuilder {
-	class CommandTagsManager: IImprimible {
-		List<CommandTag> flags;
+	public class CommandTagsManager: IImprimible {
+		private readonly List<CommandTag> flags;
 
 		public CommandTagsManager() {
 			this.flags = new List<CommandTag>();

@@ -74,10 +74,10 @@ namespace CommandBuilder {
 			this.btnAgregarBandera = new ControLib.SleekButton();
 			this.btnAgregarParámetro = new ControLib.SleekButton();
 			this.lblOpciones = new System.Windows.Forms.Label();
-			this.pnlPlantillas = new System.Windows.Forms.Panel();
-			this.panel2 = new System.Windows.Forms.Panel();
+			this.pnlRespuestas = new System.Windows.Forms.Panel();
+			this.pnlContenidoRespuestas = new System.Windows.Forms.Panel();
 			this.panel3 = new System.Windows.Forms.Panel();
-			this.label1 = new System.Windows.Forms.Label();
+			this.lblTítuloRespuestas = new System.Windows.Forms.Label();
 			this.pnlMetadatos.SuspendLayout();
 			this.pnlContenidoMetadatos.SuspendLayout();
 			this.pnlEtiquetas.SuspendLayout();
@@ -93,8 +93,8 @@ namespace CommandBuilder {
 			this.pnlTablaOpciones.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dgvOpciones)).BeginInit();
 			this.tlpBotonesOpciones.SuspendLayout();
-			this.pnlPlantillas.SuspendLayout();
-			this.panel2.SuspendLayout();
+			this.pnlRespuestas.SuspendLayout();
+			this.pnlContenidoRespuestas.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// pnlMetadatos
@@ -326,7 +326,7 @@ namespace CommandBuilder {
 			this.tbDescripciónBreve.InputText = "";
 			this.tbDescripciónBreve.Location = new System.Drawing.Point(0, 15);
 			this.tbDescripciónBreve.MinimumSize = new System.Drawing.Size(20, 20);
-			this.tbDescripciónBreve.Multiline = true;
+			this.tbDescripciónBreve.Multiline = false;
 			this.tbDescripciónBreve.Name = "tbDescripciónBreve";
 			this.tbDescripciónBreve.PasswordChar = '\0';
 			this.tbDescripciónBreve.PercentualRadius = true;
@@ -578,10 +578,10 @@ namespace CommandBuilder {
 			this.btnGenerar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.btnGenerar.Font = new System.Drawing.Font("Segoe UI Semibold", 12F);
 			this.btnGenerar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(246)))), ((int)(((byte)(246)))), ((int)(((byte)(246)))));
-			this.btnGenerar.Location = new System.Drawing.Point(713, 535);
+			this.btnGenerar.Location = new System.Drawing.Point(713, 532);
 			this.btnGenerar.Name = "btnGenerar";
 			this.btnGenerar.PercentualRadius = true;
-			this.btnGenerar.Size = new System.Drawing.Size(159, 34);
+			this.btnGenerar.Size = new System.Drawing.Size(159, 39);
 			this.btnGenerar.TabIndex = 3;
 			this.btnGenerar.Text = "Generar Archivo";
 			this.btnGenerar.UseVisualStyleBackColor = false;
@@ -782,26 +782,26 @@ namespace CommandBuilder {
 			this.lblOpciones.TabIndex = 4;
 			this.lblOpciones.Text = "Opciones";
 			// 
-			// pnlPlantillas
+			// pnlRespuestas
 			// 
-			this.pnlPlantillas.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(18)))), ((int)(((byte)(18)))));
-			this.pnlPlantillas.Controls.Add(this.panel2);
-			this.pnlPlantillas.Controls.Add(this.label1);
-			this.pnlPlantillas.Dock = System.Windows.Forms.DockStyle.Right;
-			this.pnlPlantillas.Location = new System.Drawing.Point(604, 0);
-			this.pnlPlantillas.Name = "pnlPlantillas";
-			this.pnlPlantillas.Size = new System.Drawing.Size(280, 581);
-			this.pnlPlantillas.TabIndex = 2;
+			this.pnlRespuestas.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(18)))), ((int)(((byte)(18)))));
+			this.pnlRespuestas.Controls.Add(this.pnlContenidoRespuestas);
+			this.pnlRespuestas.Controls.Add(this.lblTítuloRespuestas);
+			this.pnlRespuestas.Dock = System.Windows.Forms.DockStyle.Right;
+			this.pnlRespuestas.Location = new System.Drawing.Point(604, 0);
+			this.pnlRespuestas.Name = "pnlRespuestas";
+			this.pnlRespuestas.Size = new System.Drawing.Size(280, 581);
+			this.pnlRespuestas.TabIndex = 2;
 			// 
-			// panel2
+			// pnlContenidoRespuestas
 			// 
-			this.panel2.Controls.Add(this.panel3);
-			this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.panel2.Location = new System.Drawing.Point(0, 45);
-			this.panel2.Name = "panel2";
-			this.panel2.Padding = new System.Windows.Forms.Padding(12, 8, 12, 8);
-			this.panel2.Size = new System.Drawing.Size(280, 536);
-			this.panel2.TabIndex = 2;
+			this.pnlContenidoRespuestas.Controls.Add(this.panel3);
+			this.pnlContenidoRespuestas.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.pnlContenidoRespuestas.Location = new System.Drawing.Point(0, 45);
+			this.pnlContenidoRespuestas.Name = "pnlContenidoRespuestas";
+			this.pnlContenidoRespuestas.Padding = new System.Windows.Forms.Padding(12, 8, 12, 8);
+			this.pnlContenidoRespuestas.Size = new System.Drawing.Size(280, 536);
+			this.pnlContenidoRespuestas.TabIndex = 2;
 			// 
 			// panel3
 			// 
@@ -812,17 +812,17 @@ namespace CommandBuilder {
 			this.panel3.Size = new System.Drawing.Size(256, 520);
 			this.panel3.TabIndex = 5;
 			// 
-			// label1
+			// lblTítuloRespuestas
 			// 
-			this.label1.AutoSize = true;
-			this.label1.Dock = System.Windows.Forms.DockStyle.Top;
-			this.label1.Font = new System.Drawing.Font("Segoe UI Black", 24F, System.Drawing.FontStyle.Bold);
-			this.label1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(78)))), ((int)(((byte)(39)))));
-			this.label1.Location = new System.Drawing.Point(0, 0);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(165, 45);
-			this.label1.TabIndex = 6;
-			this.label1.Text = "Plantillas";
+			this.lblTítuloRespuestas.AutoSize = true;
+			this.lblTítuloRespuestas.Dock = System.Windows.Forms.DockStyle.Top;
+			this.lblTítuloRespuestas.Font = new System.Drawing.Font("Segoe UI Black", 24F, System.Drawing.FontStyle.Bold);
+			this.lblTítuloRespuestas.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(78)))), ((int)(((byte)(39)))));
+			this.lblTítuloRespuestas.Location = new System.Drawing.Point(0, 0);
+			this.lblTítuloRespuestas.Name = "lblTítuloRespuestas";
+			this.lblTítuloRespuestas.Size = new System.Drawing.Size(195, 45);
+			this.lblTítuloRespuestas.TabIndex = 6;
+			this.lblTítuloRespuestas.Text = "Respuestas";
 			// 
 			// FPrincipal
 			// 
@@ -833,7 +833,7 @@ namespace CommandBuilder {
 			this.Controls.Add(this.btnGenerar);
 			this.Controls.Add(this.pnlOpciones);
 			this.Controls.Add(this.pnlMetadatos);
-			this.Controls.Add(this.pnlPlantillas);
+			this.Controls.Add(this.pnlRespuestas);
 			this.Font = new System.Drawing.Font("Segoe UI", 11F);
 			this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
 			this.KeyPreview = true;
@@ -867,9 +867,9 @@ namespace CommandBuilder {
 			this.pnlTablaOpciones.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.dgvOpciones)).EndInit();
 			this.tlpBotonesOpciones.ResumeLayout(false);
-			this.pnlPlantillas.ResumeLayout(false);
-			this.pnlPlantillas.PerformLayout();
-			this.panel2.ResumeLayout(false);
+			this.pnlRespuestas.ResumeLayout(false);
+			this.pnlRespuestas.PerformLayout();
+			this.pnlContenidoRespuestas.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -917,10 +917,10 @@ namespace CommandBuilder {
 		private ControLib.SleekButton btnAgregarParámetro;
 		private System.Windows.Forms.Panel pnlTablaOpciones;
 		private System.Windows.Forms.DataGridView dgvOpciones;
-		private System.Windows.Forms.Panel pnlPlantillas;
-		private System.Windows.Forms.Panel panel2;
+		private System.Windows.Forms.Panel pnlRespuestas;
+		private System.Windows.Forms.Panel pnlContenidoRespuestas;
 		private System.Windows.Forms.Panel panel3;
-		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Label lblTítuloRespuestas;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Opción;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Nombre;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Tipo;

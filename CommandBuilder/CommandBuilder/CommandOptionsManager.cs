@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CommandBuilder {
-	class CommandOptionsManager: IImprimible {
+	public class CommandOptionsManager: IImprimible {
 		public List<CommandOption> options;
 
 		public CommandOptionsManager() {

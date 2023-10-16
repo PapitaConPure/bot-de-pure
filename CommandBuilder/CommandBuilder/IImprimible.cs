@@ -1,5 +1,5 @@
 ﻿namespace CommandBuilder {
-	interface IImprimible {
+	public interface IImprimible {
 		string Imprimir();
 	}
 }

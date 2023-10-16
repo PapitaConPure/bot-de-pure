@@ -21,6 +21,8 @@ namespace CommandBuilder {
 		}
 
 		private void BtnGenerar_Click(object sender, EventArgs e) {
+			this.sflComando.FileName = this.tbNombre.InputText;
+
 			if(this.sflComando.ShowDialog() != DialogResult.OK)
 				return;
 
@@ -50,8 +52,13 @@ namespace CommandBuilder {
 						commandTagsManager.AgregarEtiqueta(etiqueta);
 					commandBuilder.AgregarImprimible(commandTagsManager);
 
-					CommandOptionsManager commandOptionsManager = new CommandOptionsManager();
-					commandBuilder.AgregarImprimible(commandOptionsManager);
+					if(this.options.Count > 0) {
+						CommandOptionsManager commandOptionsManager = new CommandOptionsManager();
+						commandBuilder.AgregarImprimible(commandOptionsManager);
+
+						foreach(CommandOption option in this.options)
+							commandOptionsManager.AgregarOpción(option);
+					}
 
 					string código = commandBuilder.ImprimirTodo();
 					if(new FCommandPreview(código).ShowDialog() == DialogResult.OK) {
@@ -65,6 +72,8 @@ namespace CommandBuilder {
 					resultado = MessageBox.Show(ex.Message, "Error de valor", botonesReporte, íconoCuidado);
 				} catch(FormatException ex) {
 					resultado = MessageBox.Show(ex.Message, "Error de formato", botonesReporte, íconoCuidado);
+				} catch(ArgumentException ex) {
+					resultado = MessageBox.Show(ex.Message, "Error de parámetro", botonesReporte, íconoCuidado);
 				} catch(IOException ex) {
 					resultado = MessageBox.Show(ex.Message, "Error de flujo de archivo", botonesError, íconoError);
 				} catch(UnauthorizedAccessException ex) {
@@ -121,6 +130,108 @@ namespace CommandBuilder {
 			this.pnlAlias.Height -= 45;
 		}
 
+		private void BtnAgregarParámetro_Click(object sender, EventArgs e) {
+			FParam fParam = new FParam(false);
+
+			if(fParam.ShowDialog() != DialogResult.OK)
+				return;
+
+			try {
+				this.options.Add(fParam.GenerarParámetro());
+			} catch(FormatException ex) {
+				MessageBox.Show(ex.Message, "Formato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+			}
+
+			this.ActualizarListaOpciones();
+		}
+
+		private void BtnAgregarBandera_Click(object sender, EventArgs e) {
+			FFlag fFlag = new FFlag(false);
+
+			if(fFlag.ShowDialog() != DialogResult.OK)
+				return;
+
+			try {
+				this.options.Add(fFlag.GenerarOpción());
+			} catch(ArgumentException ex) {
+				MessageBox.Show(ex.Message, "Datos inválidos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+			} catch(FormatException ex) {
+				MessageBox.Show(ex.Message, "Formato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+			}
+
+			this.ActualizarListaOpciones();
+		}
+
+		private void DgvOpciones_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e) {
+			int id = e.RowIndex;
+			CommandOption option = this.options[id];
+
+			DialogResult resultado;
+			if(option is CommandParam) {
+				CommandParam param = option as CommandParam;
+
+				FParam fParam = new FParam(true);
+				fParam.tbNombre.InputText = option.Identifier;
+				fParam.tbDesc.InputText = option.Desc;
+				fParam.cmbTipos.SelectedIndex = (int)param.Type;
+				resultado = fParam.ShowDialog();
+
+				if(resultado == DialogResult.Abort) {
+					this.options.RemoveAt(id);
+					this.ActualizarListaOpciones();
+					return;
+				}
+
+				if(resultado != DialogResult.OK)
+					return;
+
+				this.options[id] = fParam.GenerarParámetro();
+			} else {
+				CommandFlag flag = option as CommandFlag;
+				char[] shortIds = flag.ShortIds;
+				string[] longIds = flag.LongIds;
+
+				FFlag fFlag = new FFlag(true);
+				fFlag.tbCortos.InputText = new string(shortIds);
+				fFlag.tbLargos.InputText = string.Join(" ", longIds) ?? "";
+				fFlag.tbDesc.InputText = option.Desc;
+
+				if(option is CommandFlagExpressive) {
+					CommandFlagExpressive exprFlag = option as CommandFlagExpressive;
+					fFlag.tbNombre.InputText = exprFlag.ExprName;
+					fFlag.cmbTipos.SelectedIndex = (int)exprFlag.ExprType;
+
+					fFlag.rbExpresiva.Checked = true;
+				} else
+					fFlag.rbSimple.Checked = true;
+
+				resultado = fFlag.ShowDialog();
+
+				if(resultado == DialogResult.Abort) {
+					this.options.RemoveAt(id);
+					this.ActualizarListaOpciones();
+					return;
+				}
+
+				if(resultado != DialogResult.OK)
+					return;
+
+				this.options[id] = fFlag.GenerarOpción();
+			}
+
+			this.ActualizarListaOpciones();
+		}
+
+		private void ActualizarListaOpciones() {
+			this.dgvOpciones.Rows.Clear();
+			foreach(CommandOption option in this.options)
+				this.dgvOpciones.Rows.Add(
+					option.OptionKind,
+					option.Identifier,
+					option.Desc
+				);
+		}
+
 		private CommandTagsManager.CommandTag[] VerEtiquetas() {
 			List<CommandTagsManager.CommandTag> etiquetas = new List<CommandTagsManager.CommandTag>();
 
@@ -158,107 +269,6 @@ namespace CommandBuilder {
 				etiquetas.Add(CommandTagsManager.CommandTag.Guide);
 
 			return etiquetas.ToArray();
-		}
-
-		private void BtnAgregarParámetro_Click(object sender, EventArgs e) {
-			FParam fParam = new FParam(false);
-
-			if(fParam.ShowDialog() != DialogResult.OK)
-				return;
-
-			string nombre = fParam.tbNombre.InputText;
-			string desc = fParam.tbDescripción.InputText;
-			CommandParam.ParamType type = (CommandParam.ParamType)fParam.cmbTipos.SelectedItem;
-
-			this.options.Add(new CommandParam(nombre, desc, type));
-			this.ActualizarListaOpciones();
-		}
-
-		private void BtnAgregarBandera_Click(object sender, EventArgs e) {
-			FFlag fFlag = new FFlag(false);
-
-			if(fFlag.ShowDialog() != DialogResult.OK)
-				return;
-
-			char[] shortIds = fFlag.tbCortos.InputText.ToCharArray();
-			string[] longIds = new string[0];
-			string desc = fFlag.tbDescripción.InputText;
-
-			if(fFlag.IsExpressive) {
-				string nombre = fFlag.tbNombre.InputText;
-				CommandParam.ParamType type = (CommandParam.ParamType)fFlag.cmbTipos.SelectedItem;
-
-				this.options.Add(new CommandFlagExpressive(shortIds, longIds, desc, nombre, type));
-			} else
-				this.options.Add(new CommandFlag(shortIds, longIds, desc));
-
-			this.ActualizarListaOpciones();
-		}
-
-		private void DgvOpciones_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e) {
-			int id = e.RowIndex;
-			CommandOption option = this.options[id];
-
-			string nombre;
-			string desc;
-			DialogResult resultado;
-			if(option is CommandParam) {
-				FParam fParam = new FParam(true);
-				resultado = fParam.ShowDialog();
-
-				if(resultado == DialogResult.Abort) {
-					this.options.RemoveAt(id);
-					this.ActualizarListaOpciones();
-					return;
-				}
-
-				if(resultado != DialogResult.OK)
-					return;
-
-				nombre = fParam.tbNombre.InputText;
-				desc = fParam.tbDescripción.InputText;
-				CommandParam.ParamType type = (CommandParam.ParamType)fParam.cmbTipos.SelectedItem;
-
-				this.options[id] = new CommandParam(nombre, desc, type);
-			} else {
-				CommandFlag flag = option as CommandFlag;
-				char[] shortIds = flag.ShortIds;
-				string[] longIds = flag.LongIds;
-
-				FFlag fFlag = new FFlag(true);
-				resultado = fFlag.ShowDialog();
-
-				if(resultado == DialogResult.Abort) {
-					this.options.RemoveAt(id);
-					this.ActualizarListaOpciones();
-					return;
-				}
-
-				if(resultado != DialogResult.OK)
-					return;
-
-				desc = fFlag.tbDescripción.InputText;
-
-				if(option is CommandFlagExpressive) {
-					nombre = fFlag.tbNombre.InputText;
-					CommandParam.ParamType type = (CommandParam.ParamType)fFlag.cmbTipos.SelectedItem;
-
-					this.options[id] = new CommandFlagExpressive(shortIds, longIds, desc, nombre, type);
-				} else
-					this.options[id] = new CommandFlag(shortIds, longIds, desc);
-			}
-
-			this.ActualizarListaOpciones();
-		}
-
-		private void ActualizarListaOpciones() {
-			this.dgvOpciones.Rows.Clear();
-			foreach(CommandOption option in this.options)
-				this.dgvOpciones.Rows.Add(
-					option.Type,
-					option.Identifier,
-					option.Desc
-				);
 		}
 	}
 }

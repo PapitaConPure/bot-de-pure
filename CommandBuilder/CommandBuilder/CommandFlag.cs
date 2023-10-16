@@ -1,23 +1,49 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace CommandBuilder {
-	class CommandFlag: CommandOption {
+	public class CommandFlag: CommandOption {
 		private readonly char[] shortIds;
 		private readonly string[] longIds;
 
+		/// <summary>
+		/// Crea una Bandera de Comando con los identificadores indicados y la descripción facilitada
+		/// </summary>
+		/// <param name="shortIds">Identificadores cortos de la bandera</param>
+		/// <param name="longIds">Identificadores largos de la bandera</param>
+		/// <param name="desc">Descripción del funcionamiento de la opción</param>
+		/// <exception cref="ArgumentException"></exception>
+		/// <exception cref="FormatException"></exception>
 		public CommandFlag(char[] shortIds, string[] longIds, string desc): base(desc) {
-			foreach(char shortId in shortIds)
+			List<char> shortR = new List<char>();
+			foreach(char shortId in shortIds) {
+				if(shortR.Exists(r => r.CompareTo(shortId) == 0))
+					continue;
+
 				if(!char.IsLetter(shortId))
 					throw new FormatException($"Las etiquetas cortas deben ser letras. Se recibió: '{shortId}'");
 
-			foreach(string longId in longIds)
-				if(!Regex.IsMatch(longId, "$[A-Za-zÁÉÍÓÚÑáéíóúñ][A-Za-zÁÉÍÓÚÑáéíóúñ0-9]+^"))
-					throw new FormatException($"Las etiquetas largas comenzar con una letra y seguir con al menos una letra o número. Se recibió: \"{longId}\"");
+				shortR.Add(shortId);
+			}
 
-			this.shortIds = shortIds;
-			this.longIds = longIds;
+			List<string> longR = new List<string>();
+			foreach(string longId in longIds) {
+				if(longR.Exists(r => r.CompareTo(longId) == 0))
+					continue;
+
+				if(!Regex.IsMatch(longId, "^[A-Za-zÁÉÍÓÚÑáéíóúñ][A-Za-zÁÉÍÓÚÑáéíóúñ0-9]+$"))
+					throw new FormatException($"Las etiquetas largas deben comenzar con una letra y seguir con al menos una letra o número. Se recibió: \"{longId}\"");
+
+				longR.Add(longId);
+			}
+
+			if(shortR.Count + longR.Count == 0)
+				throw new ArgumentException("Se debe ingresar al menos un identificador de bandera, ya sea corto o largo");
+
+			this.shortIds = shortR.ToArray();
+			this.longIds = longR.ToArray();
 		}
 
 		public CommandFlag(char[] shortIds, string desc): this(shortIds, new string[0], desc) {}
@@ -54,7 +80,7 @@ namespace CommandBuilder {
 			}
 		}
 
-		public override OptionType Type => OptionType.Flag;
+		public override OptionType OptionKind => OptionType.Flag;
 
 		public override string Identifier {
 			get {
@@ -65,12 +91,12 @@ namespace CommandBuilder {
 			}
 		}
 
-		public char[] ShortIds { get; internal set; }
-		public string[] LongIds { get; internal set; }
+		public char[] ShortIds => this.shortIds;
+		public string[] LongIds => this.longIds;
 
 		public override string Imprimir() {
 
-			return $"\taddFlag('{this.CompiladoShortIds}', [ {this.CompiladoLongIds} ], '{this.desc}'){this.PuntoYComaFinal}\n";
+			return $"\t.addFlag('{this.CompiladoShortIds}', [ {this.CompiladoLongIds} ], '{this.desc}'){this.PuntoYComaFinal}";
 		}
 	}
 }

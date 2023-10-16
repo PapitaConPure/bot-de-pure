@@ -27,8 +27,8 @@ namespace CommandBuilder {
 			this.pnlTítulo = new System.Windows.Forms.Panel();
 			this.lblTítulo = new System.Windows.Forms.Label();
 			this.pnlContenido = new System.Windows.Forms.Panel();
-			this.pnlDescripción = new System.Windows.Forms.Panel();
-			this.tbDescripción = new ControLib.SleekTextBox();
+			this.pnlDesc = new System.Windows.Forms.Panel();
+			this.tbDesc = new ControLib.SleekTextBox();
 			this.lblDescripción = new System.Windows.Forms.Label();
 			this.pnlTipo = new System.Windows.Forms.Panel();
 			this.cmbTipos = new System.Windows.Forms.ComboBox();
@@ -42,7 +42,7 @@ namespace CommandBuilder {
 			this.btnCancelar = new ControLib.SleekButton();
 			this.pnlTítulo.SuspendLayout();
 			this.pnlContenido.SuspendLayout();
-			this.pnlDescripción.SuspendLayout();
+			this.pnlDesc.SuspendLayout();
 			this.pnlTipo.SuspendLayout();
 			this.pnlNombre.SuspendLayout();
 			this.pnlOpciones.SuspendLayout();
@@ -72,7 +72,8 @@ namespace CommandBuilder {
 			// 
 			// pnlContenido
 			// 
-			this.pnlContenido.Controls.Add(this.pnlDescripción);
+			this.pnlContenido.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
+			this.pnlContenido.Controls.Add(this.pnlDesc);
 			this.pnlContenido.Controls.Add(this.pnlTipo);
 			this.pnlContenido.Controls.Add(this.pnlNombre);
 			this.pnlContenido.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -82,45 +83,45 @@ namespace CommandBuilder {
 			this.pnlContenido.Size = new System.Drawing.Size(535, 199);
 			this.pnlContenido.TabIndex = 0;
 			// 
-			// pnlDescripción
+			// pnlDesc
 			// 
-			this.pnlDescripción.Controls.Add(this.tbDescripción);
-			this.pnlDescripción.Controls.Add(this.lblDescripción);
-			this.pnlDescripción.Dock = System.Windows.Forms.DockStyle.Top;
-			this.pnlDescripción.Location = new System.Drawing.Point(12, 128);
-			this.pnlDescripción.Name = "pnlDescripción";
-			this.pnlDescripción.Padding = new System.Windows.Forms.Padding(0, 0, 0, 6);
-			this.pnlDescripción.Size = new System.Drawing.Size(511, 60);
-			this.pnlDescripción.TabIndex = 2;
+			this.pnlDesc.Controls.Add(this.tbDesc);
+			this.pnlDesc.Controls.Add(this.lblDescripción);
+			this.pnlDesc.Dock = System.Windows.Forms.DockStyle.Top;
+			this.pnlDesc.Location = new System.Drawing.Point(12, 128);
+			this.pnlDesc.Name = "pnlDesc";
+			this.pnlDesc.Padding = new System.Windows.Forms.Padding(0, 0, 0, 6);
+			this.pnlDesc.Size = new System.Drawing.Size(511, 60);
+			this.pnlDesc.TabIndex = 2;
 			// 
-			// tbDescripción
+			// tbDesc
 			// 
-			this.tbDescripción.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(35)))), ((int)(((byte)(44)))));
-			this.tbDescripción.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
-			this.tbDescripción.BorderRadius = 100F;
-			this.tbDescripción.BorderSize = 0F;
-			this.tbDescripción.Cursor = System.Windows.Forms.Cursors.IBeam;
-			this.tbDescripción.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.tbDescripción.FocusColor = System.Drawing.Color.Empty;
-			this.tbDescripción.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.tbDescripción.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			this.tbDescripción.InputColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			this.tbDescripción.InputText = "";
-			this.tbDescripción.Location = new System.Drawing.Point(0, 15);
-			this.tbDescripción.MinimumSize = new System.Drawing.Size(20, 20);
-			this.tbDescripción.Multiline = false;
-			this.tbDescripción.Name = "tbDescripción";
-			this.tbDescripción.PasswordChar = '\0';
-			this.tbDescripción.PercentualRadius = true;
-			this.tbDescripción.PlaceHolder = "Descripción";
-			this.tbDescripción.PlaceHolderColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(73)))), ((int)(((byte)(94)))));
-			this.tbDescripción.ReadOnly = false;
-			this.tbDescripción.SelectAllOnClick = true;
-			this.tbDescripción.Size = new System.Drawing.Size(511, 39);
-			this.tbDescripción.Style = ControLib.SleekTextBox.TextBoxStyle.RoundRect;
-			this.tbDescripción.TabIndex = 0;
-			this.tbDescripción.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
-			this.tbDescripción.WordWrap = true;
+			this.tbDesc.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(35)))), ((int)(((byte)(44)))));
+			this.tbDesc.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+			this.tbDesc.BorderRadius = 100F;
+			this.tbDesc.BorderSize = 0F;
+			this.tbDesc.Cursor = System.Windows.Forms.Cursors.IBeam;
+			this.tbDesc.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.tbDesc.FocusColor = System.Drawing.Color.Empty;
+			this.tbDesc.Font = new System.Drawing.Font("Segoe UI", 11F);
+			this.tbDesc.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
+			this.tbDesc.InputColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
+			this.tbDesc.InputText = "";
+			this.tbDesc.Location = new System.Drawing.Point(0, 15);
+			this.tbDesc.MinimumSize = new System.Drawing.Size(20, 20);
+			this.tbDesc.Multiline = false;
+			this.tbDesc.Name = "tbDesc";
+			this.tbDesc.PasswordChar = '\0';
+			this.tbDesc.PercentualRadius = true;
+			this.tbDesc.PlaceHolder = "Descripción";
+			this.tbDesc.PlaceHolderColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(73)))), ((int)(((byte)(94)))));
+			this.tbDesc.ReadOnly = false;
+			this.tbDesc.SelectAllOnClick = true;
+			this.tbDesc.Size = new System.Drawing.Size(511, 39);
+			this.tbDesc.Style = ControLib.SleekTextBox.TextBoxStyle.RoundRect;
+			this.tbDesc.TabIndex = 0;
+			this.tbDesc.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+			this.tbDesc.WordWrap = true;
 			// 
 			// lblDescripción
 			// 
@@ -191,7 +192,7 @@ namespace CommandBuilder {
 			this.tbNombre.Cursor = System.Windows.Forms.Cursors.IBeam;
 			this.tbNombre.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tbNombre.FocusColor = System.Drawing.Color.Empty;
-			this.tbNombre.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.tbNombre.Font = new System.Drawing.Font("Segoe UI", 11F);
 			this.tbNombre.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
 			this.tbNombre.InputColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
 			this.tbNombre.InputText = "";
@@ -314,12 +315,11 @@ namespace CommandBuilder {
 			this.Name = "FParam";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "FParam";
-			this.Load += new System.EventHandler(this.FParam_Load);
 			this.pnlTítulo.ResumeLayout(false);
 			this.pnlTítulo.PerformLayout();
 			this.pnlContenido.ResumeLayout(false);
-			this.pnlDescripción.ResumeLayout(false);
-			this.pnlDescripción.PerformLayout();
+			this.pnlDesc.ResumeLayout(false);
+			this.pnlDesc.PerformLayout();
 			this.pnlTipo.ResumeLayout(false);
 			this.pnlTipo.PerformLayout();
 			this.pnlNombre.ResumeLayout(false);
@@ -338,14 +338,14 @@ namespace CommandBuilder {
 		private System.Windows.Forms.Label lblNombre;
 		private System.Windows.Forms.Panel pnlTipo;
 		private System.Windows.Forms.Label lblTipo;
-		private System.Windows.Forms.Panel pnlDescripción;
+		private System.Windows.Forms.Panel pnlDesc;
 		private System.Windows.Forms.Label lblDescripción;
 		private System.Windows.Forms.Panel pnlOpciones;
 		private ControLib.SleekButton btnCancelar;
 		private ControLib.SleekButton btnAgregar;
 		public ControLib.SleekTextBox tbNombre;
 		public System.Windows.Forms.ComboBox cmbTipos;
-		public ControLib.SleekTextBox tbDescripción;
+		public ControLib.SleekTextBox tbDesc;
 		private ControLib.SleekButton btnEliminar;
 	}
 }

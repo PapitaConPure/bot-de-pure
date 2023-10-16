@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace CommandBuilder {
-	abstract class CommandOption: IImprimible {
+	public abstract class CommandOption: IImprimible {
 		protected readonly string desc;
 
 		public enum OptionType {
@@ -9,7 +9,15 @@ namespace CommandBuilder {
 			Flag,
 		}
 
+		/// <summary>
+		/// Crea una Opción de Comando con la descripción especificada
+		/// </summary>
+		/// <param name="desc">Descripción del funcionamiento de la opción</param>
+		/// <exception cref="FormatException"></exception>
 		public CommandOption(string desc) {
+			if(desc.Length == 0)
+				throw new FormatException("Todas las opciones deben tener una descripción de al menos 1 caracter");
+
 			if(desc.Contains("\n"))
 				throw new FormatException("La descripción de una opción no puede escribirse en múltiples líneas");
 
@@ -27,11 +35,11 @@ namespace CommandBuilder {
 			}
 		}
 
-		public abstract OptionType Type { get; }
+		public string Desc => this.desc;
+
+		public abstract OptionType OptionKind { get; }
 
 		public abstract string Identifier { get; }
-
-		public string Desc => this.desc;
 
 		public abstract string Imprimir();
 	}

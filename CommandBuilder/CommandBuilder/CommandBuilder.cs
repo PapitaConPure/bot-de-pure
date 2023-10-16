@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CommandBuilder {
-	class CommandBuilder {
+	public class CommandBuilder {
 		private CommandManager commandManager;
 		private CommandTagsManager commandTagsManager;
 		private CommandOptionsManager commandOptionsManager;
@@ -48,7 +48,7 @@ namespace CommandBuilder {
 				"//const { p_pure } = require('../../localdata/customization/prefixes.js');\n" +
 				"const { CommandManager, CommandMetaFlagsManager";
 
-			if(this.commandManager != null)
+			if(this.commandOptionsManager != null)
 				total += ", CommandOptionsManager }";
 			else
 				total += " }";

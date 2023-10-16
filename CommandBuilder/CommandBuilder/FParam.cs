@@ -13,15 +13,26 @@ namespace CommandBuilder {
 		public FParam(bool permiteBorrar) {
 			this.InitializeComponent();
 
-			if(permiteBorrar)
-				this.btnEliminar.Visible = true;
-		}
-
-		private void FParam_Load(object sender, EventArgs e) {
 			foreach(CommandParam.ParamType type in Enum.GetValues(typeof(CommandParam.ParamType)))
 				this.cmbTipos.Items.Add(type);
 
 			this.cmbTipos.SelectedIndex = 1;
+
+			if(permiteBorrar)
+				this.btnEliminar.Visible = true;
+		}
+
+		/// <summary>
+		/// Genera un parámetro a partir de los datos ingresados al formulario
+		/// </summary>
+		/// <returns>Un <see cref="CommandParam"/> en base a los datos ingresados</returns>
+		/// <exception cref="FormatException"></exception>
+		public CommandParam GenerarParámetro() {
+			string desc = this.tbDesc.InputText;
+			string nombre = this.tbNombre.InputText;
+			CommandParam.ParamType type = (CommandParam.ParamType)this.cmbTipos.SelectedItem;
+
+			return new CommandParam(nombre, desc, type);
 		}
 	}
 }

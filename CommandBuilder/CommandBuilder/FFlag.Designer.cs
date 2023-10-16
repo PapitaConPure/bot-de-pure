@@ -35,11 +35,12 @@ namespace CommandBuilder {
 			this.pnlTítuloExpresión = new System.Windows.Forms.Panel();
 			this.lblTítuloExpresión = new System.Windows.Forms.Label();
 			this.rbSimple = new ControLib.SleekRadioButton();
-			this.panel1 = new System.Windows.Forms.Panel();
+			this.pnlPadRb2 = new System.Windows.Forms.Panel();
 			this.rbExpresiva = new ControLib.SleekRadioButton();
-			this.pnlPadRbExpresión = new System.Windows.Forms.Panel();
-			this.pnlDescripción = new System.Windows.Forms.Panel();
-			this.tbDescripción = new ControLib.SleekTextBox();
+			this.pnlPadRb1 = new System.Windows.Forms.Panel();
+			this.panel1 = new System.Windows.Forms.Panel();
+			this.pnlDesc = new System.Windows.Forms.Panel();
+			this.tbDesc = new ControLib.SleekTextBox();
 			this.lblDescripción = new System.Windows.Forms.Label();
 			this.pnlLargos = new System.Windows.Forms.Panel();
 			this.tbLargos = new ControLib.SleekTextBox();
@@ -58,7 +59,7 @@ namespace CommandBuilder {
 			this.pnlTipo.SuspendLayout();
 			this.pnlNombre.SuspendLayout();
 			this.pnlTítuloExpresión.SuspendLayout();
-			this.pnlDescripción.SuspendLayout();
+			this.pnlDesc.SuspendLayout();
 			this.pnlLargos.SuspendLayout();
 			this.pnlCortos.SuspendLayout();
 			this.pnlTítulo.SuspendLayout();
@@ -67,39 +68,42 @@ namespace CommandBuilder {
 			// 
 			// pnlContenido
 			// 
+			this.pnlContenido.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
 			this.pnlContenido.Controls.Add(this.pnlExpresión);
-			this.pnlContenido.Controls.Add(this.pnlDescripción);
+			this.pnlContenido.Controls.Add(this.panel1);
+			this.pnlContenido.Controls.Add(this.pnlDesc);
 			this.pnlContenido.Controls.Add(this.pnlLargos);
 			this.pnlContenido.Controls.Add(this.pnlCortos);
 			this.pnlContenido.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.pnlContenido.Location = new System.Drawing.Point(0, 45);
 			this.pnlContenido.Name = "pnlContenido";
 			this.pnlContenido.Padding = new System.Windows.Forms.Padding(12, 8, 12, 8);
-			this.pnlContenido.Size = new System.Drawing.Size(535, 357);
+			this.pnlContenido.Size = new System.Drawing.Size(532, 367);
 			this.pnlContenido.TabIndex = 0;
 			// 
 			// pnlExpresión
 			// 
+			this.pnlExpresión.AutoSize = true;
 			this.pnlExpresión.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(43)))), ((int)(((byte)(57)))));
 			this.pnlExpresión.Controls.Add(this.pnlTipo);
 			this.pnlExpresión.Controls.Add(this.pnlNombre);
 			this.pnlExpresión.Controls.Add(this.pnlTítuloExpresión);
 			this.pnlExpresión.Dock = System.Windows.Forms.DockStyle.Top;
-			this.pnlExpresión.Location = new System.Drawing.Point(12, 188);
+			this.pnlExpresión.Location = new System.Drawing.Point(12, 196);
 			this.pnlExpresión.Name = "pnlExpresión";
-			this.pnlExpresión.Size = new System.Drawing.Size(511, 151);
-			this.pnlExpresión.TabIndex = 3;
+			this.pnlExpresión.Size = new System.Drawing.Size(508, 162);
+			this.pnlExpresión.TabIndex = 5;
 			// 
 			// pnlTipo
 			// 
 			this.pnlTipo.Controls.Add(this.cmbTipos);
 			this.pnlTipo.Controls.Add(this.lblTipo);
 			this.pnlTipo.Dock = System.Windows.Forms.DockStyle.Top;
-			this.pnlTipo.Location = new System.Drawing.Point(0, 90);
+			this.pnlTipo.Location = new System.Drawing.Point(0, 102);
 			this.pnlTipo.Name = "pnlTipo";
-			this.pnlTipo.Padding = new System.Windows.Forms.Padding(0, 0, 0, 6);
-			this.pnlTipo.Size = new System.Drawing.Size(511, 60);
-			this.pnlTipo.TabIndex = 3;
+			this.pnlTipo.Padding = new System.Windows.Forms.Padding(12, 0, 12, 6);
+			this.pnlTipo.Size = new System.Drawing.Size(508, 60);
+			this.pnlTipo.TabIndex = 2;
 			this.pnlTipo.Visible = false;
 			// 
 			// cmbTipos
@@ -109,9 +113,9 @@ namespace CommandBuilder {
 			this.cmbTipos.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmbTipos.Font = new System.Drawing.Font("Segoe UI", 11F);
 			this.cmbTipos.FormattingEnabled = true;
-			this.cmbTipos.Location = new System.Drawing.Point(0, 15);
+			this.cmbTipos.Location = new System.Drawing.Point(12, 15);
 			this.cmbTipos.Name = "cmbTipos";
-			this.cmbTipos.Size = new System.Drawing.Size(511, 28);
+			this.cmbTipos.Size = new System.Drawing.Size(484, 28);
 			this.cmbTipos.TabIndex = 0;
 			// 
 			// lblTipo
@@ -120,7 +124,7 @@ namespace CommandBuilder {
 			this.lblTipo.Dock = System.Windows.Forms.DockStyle.Top;
 			this.lblTipo.Font = new System.Drawing.Font("Lato Black", 9F);
 			this.lblTipo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(98)))), ((int)(((byte)(136)))));
-			this.lblTipo.Location = new System.Drawing.Point(0, 0);
+			this.lblTipo.Location = new System.Drawing.Point(12, 0);
 			this.lblTipo.Name = "lblTipo";
 			this.lblTipo.Size = new System.Drawing.Size(36, 15);
 			this.lblTipo.TabIndex = 1;
@@ -132,27 +136,27 @@ namespace CommandBuilder {
 			this.pnlNombre.Controls.Add(this.tbNombre);
 			this.pnlNombre.Controls.Add(this.lblNombre);
 			this.pnlNombre.Dock = System.Windows.Forms.DockStyle.Top;
-			this.pnlNombre.Location = new System.Drawing.Point(0, 30);
+			this.pnlNombre.Location = new System.Drawing.Point(0, 42);
 			this.pnlNombre.Name = "pnlNombre";
-			this.pnlNombre.Padding = new System.Windows.Forms.Padding(0, 0, 0, 6);
-			this.pnlNombre.Size = new System.Drawing.Size(511, 60);
-			this.pnlNombre.TabIndex = 2;
+			this.pnlNombre.Padding = new System.Windows.Forms.Padding(12, 0, 12, 6);
+			this.pnlNombre.Size = new System.Drawing.Size(508, 60);
+			this.pnlNombre.TabIndex = 1;
 			this.pnlNombre.Visible = false;
 			// 
 			// tbNombre
 			// 
-			this.tbNombre.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(35)))), ((int)(((byte)(44)))));
+			this.tbNombre.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(21)))), ((int)(((byte)(28)))), ((int)(((byte)(34)))));
 			this.tbNombre.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
 			this.tbNombre.BorderRadius = 100F;
 			this.tbNombre.BorderSize = 0F;
 			this.tbNombre.Cursor = System.Windows.Forms.Cursors.IBeam;
 			this.tbNombre.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tbNombre.FocusColor = System.Drawing.Color.Empty;
-			this.tbNombre.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.tbNombre.Font = new System.Drawing.Font("Segoe UI", 11F);
 			this.tbNombre.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
 			this.tbNombre.InputColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
 			this.tbNombre.InputText = "";
-			this.tbNombre.Location = new System.Drawing.Point(0, 15);
+			this.tbNombre.Location = new System.Drawing.Point(12, 15);
 			this.tbNombre.MinimumSize = new System.Drawing.Size(20, 20);
 			this.tbNombre.Multiline = false;
 			this.tbNombre.Name = "tbNombre";
@@ -162,7 +166,7 @@ namespace CommandBuilder {
 			this.tbNombre.PlaceHolderColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(73)))), ((int)(((byte)(94)))));
 			this.tbNombre.ReadOnly = false;
 			this.tbNombre.SelectAllOnClick = true;
-			this.tbNombre.Size = new System.Drawing.Size(511, 39);
+			this.tbNombre.Size = new System.Drawing.Size(484, 39);
 			this.tbNombre.Style = ControLib.SleekTextBox.TextBoxStyle.RoundRect;
 			this.tbNombre.TabIndex = 0;
 			this.tbNombre.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
@@ -174,7 +178,7 @@ namespace CommandBuilder {
 			this.lblNombre.Dock = System.Windows.Forms.DockStyle.Top;
 			this.lblNombre.Font = new System.Drawing.Font("Lato Black", 9F);
 			this.lblNombre.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(98)))), ((int)(((byte)(98)))), ((int)(((byte)(136)))));
-			this.lblNombre.Location = new System.Drawing.Point(0, 0);
+			this.lblNombre.Location = new System.Drawing.Point(12, 0);
 			this.lblNombre.Name = "lblNombre";
 			this.lblNombre.Size = new System.Drawing.Size(60, 15);
 			this.lblNombre.TabIndex = 1;
@@ -185,13 +189,14 @@ namespace CommandBuilder {
 			// 
 			this.pnlTítuloExpresión.Controls.Add(this.lblTítuloExpresión);
 			this.pnlTítuloExpresión.Controls.Add(this.rbSimple);
-			this.pnlTítuloExpresión.Controls.Add(this.panel1);
+			this.pnlTítuloExpresión.Controls.Add(this.pnlPadRb2);
 			this.pnlTítuloExpresión.Controls.Add(this.rbExpresiva);
-			this.pnlTítuloExpresión.Controls.Add(this.pnlPadRbExpresión);
+			this.pnlTítuloExpresión.Controls.Add(this.pnlPadRb1);
 			this.pnlTítuloExpresión.Dock = System.Windows.Forms.DockStyle.Top;
 			this.pnlTítuloExpresión.Location = new System.Drawing.Point(0, 0);
 			this.pnlTítuloExpresión.Name = "pnlTítuloExpresión";
-			this.pnlTítuloExpresión.Size = new System.Drawing.Size(511, 30);
+			this.pnlTítuloExpresión.Padding = new System.Windows.Forms.Padding(4, 6, 0, 6);
+			this.pnlTítuloExpresión.Size = new System.Drawing.Size(508, 42);
 			this.pnlTítuloExpresión.TabIndex = 0;
 			// 
 			// lblTítuloExpresión
@@ -200,7 +205,7 @@ namespace CommandBuilder {
 			this.lblTítuloExpresión.Dock = System.Windows.Forms.DockStyle.Left;
 			this.lblTítuloExpresión.Font = new System.Drawing.Font("Segoe UI Black", 16F, System.Drawing.FontStyle.Bold);
 			this.lblTítuloExpresión.ForeColor = System.Drawing.Color.White;
-			this.lblTítuloExpresión.Location = new System.Drawing.Point(0, 0);
+			this.lblTítuloExpresión.Location = new System.Drawing.Point(4, 6);
 			this.lblTítuloExpresión.Name = "lblTítuloExpresión";
 			this.lblTítuloExpresión.Size = new System.Drawing.Size(248, 30);
 			this.lblTítuloExpresión.TabIndex = 5;
@@ -218,7 +223,7 @@ namespace CommandBuilder {
 			this.rbSimple.Dock = System.Windows.Forms.DockStyle.Right;
 			this.rbSimple.Font = new System.Drawing.Font("Segoe UI", 11F);
 			this.rbSimple.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			this.rbSimple.Location = new System.Drawing.Point(329, 0);
+			this.rbSimple.Location = new System.Drawing.Point(326, 6);
 			this.rbSimple.MinimumSize = new System.Drawing.Size(0, 21);
 			this.rbSimple.Name = "rbSimple";
 			this.rbSimple.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
@@ -230,13 +235,13 @@ namespace CommandBuilder {
 			this.rbSimple.UncheckedColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(196)))), ((int)(((byte)(130)))));
 			this.rbSimple.UseVisualStyleBackColor = true;
 			// 
-			// panel1
+			// pnlPadRb2
 			// 
-			this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
-			this.panel1.Location = new System.Drawing.Point(402, 0);
-			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(10, 30);
-			this.panel1.TabIndex = 9;
+			this.pnlPadRb2.Dock = System.Windows.Forms.DockStyle.Right;
+			this.pnlPadRb2.Location = new System.Drawing.Point(399, 6);
+			this.pnlPadRb2.Name = "pnlPadRb2";
+			this.pnlPadRb2.Size = new System.Drawing.Size(10, 30);
+			this.pnlPadRb2.TabIndex = 9;
 			// 
 			// rbExpresiva
 			// 
@@ -249,7 +254,7 @@ namespace CommandBuilder {
 			this.rbExpresiva.Dock = System.Windows.Forms.DockStyle.Right;
 			this.rbExpresiva.Font = new System.Drawing.Font("Segoe UI", 11F);
 			this.rbExpresiva.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			this.rbExpresiva.Location = new System.Drawing.Point(412, 0);
+			this.rbExpresiva.Location = new System.Drawing.Point(409, 6);
 			this.rbExpresiva.MinimumSize = new System.Drawing.Size(0, 21);
 			this.rbExpresiva.Name = "rbExpresiva";
 			this.rbExpresiva.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
@@ -261,53 +266,61 @@ namespace CommandBuilder {
 			this.rbExpresiva.UseVisualStyleBackColor = true;
 			this.rbExpresiva.CheckedChanged += new System.EventHandler(this.RbExpresión_CheckedChanged);
 			// 
-			// pnlPadRbExpresión
+			// pnlPadRb1
 			// 
-			this.pnlPadRbExpresión.Dock = System.Windows.Forms.DockStyle.Right;
-			this.pnlPadRbExpresión.Location = new System.Drawing.Point(501, 0);
-			this.pnlPadRbExpresión.Name = "pnlPadRbExpresión";
-			this.pnlPadRbExpresión.Size = new System.Drawing.Size(10, 30);
-			this.pnlPadRbExpresión.TabIndex = 7;
+			this.pnlPadRb1.Dock = System.Windows.Forms.DockStyle.Right;
+			this.pnlPadRb1.Location = new System.Drawing.Point(498, 6);
+			this.pnlPadRb1.Name = "pnlPadRb1";
+			this.pnlPadRb1.Size = new System.Drawing.Size(10, 30);
+			this.pnlPadRb1.TabIndex = 7;
 			// 
-			// pnlDescripción
+			// panel1
 			// 
-			this.pnlDescripción.Controls.Add(this.tbDescripción);
-			this.pnlDescripción.Controls.Add(this.lblDescripción);
-			this.pnlDescripción.Dock = System.Windows.Forms.DockStyle.Top;
-			this.pnlDescripción.Location = new System.Drawing.Point(12, 128);
-			this.pnlDescripción.Name = "pnlDescripción";
-			this.pnlDescripción.Padding = new System.Windows.Forms.Padding(0, 0, 0, 6);
-			this.pnlDescripción.Size = new System.Drawing.Size(511, 60);
-			this.pnlDescripción.TabIndex = 2;
+			this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
+			this.panel1.Location = new System.Drawing.Point(12, 188);
+			this.panel1.Name = "panel1";
+			this.panel1.Size = new System.Drawing.Size(508, 8);
+			this.panel1.TabIndex = 4;
 			// 
-			// tbDescripción
+			// pnlDesc
 			// 
-			this.tbDescripción.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(35)))), ((int)(((byte)(44)))));
-			this.tbDescripción.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
-			this.tbDescripción.BorderRadius = 100F;
-			this.tbDescripción.BorderSize = 0F;
-			this.tbDescripción.Cursor = System.Windows.Forms.Cursors.IBeam;
-			this.tbDescripción.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.tbDescripción.FocusColor = System.Drawing.Color.Empty;
-			this.tbDescripción.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.tbDescripción.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			this.tbDescripción.InputColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			this.tbDescripción.InputText = "";
-			this.tbDescripción.Location = new System.Drawing.Point(0, 15);
-			this.tbDescripción.MinimumSize = new System.Drawing.Size(20, 20);
-			this.tbDescripción.Multiline = false;
-			this.tbDescripción.Name = "tbDescripción";
-			this.tbDescripción.PasswordChar = '\0';
-			this.tbDescripción.PercentualRadius = true;
-			this.tbDescripción.PlaceHolder = "Descripción";
-			this.tbDescripción.PlaceHolderColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(73)))), ((int)(((byte)(94)))));
-			this.tbDescripción.ReadOnly = false;
-			this.tbDescripción.SelectAllOnClick = true;
-			this.tbDescripción.Size = new System.Drawing.Size(511, 39);
-			this.tbDescripción.Style = ControLib.SleekTextBox.TextBoxStyle.RoundRect;
-			this.tbDescripción.TabIndex = 0;
-			this.tbDescripción.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
-			this.tbDescripción.WordWrap = true;
+			this.pnlDesc.Controls.Add(this.tbDesc);
+			this.pnlDesc.Controls.Add(this.lblDescripción);
+			this.pnlDesc.Dock = System.Windows.Forms.DockStyle.Top;
+			this.pnlDesc.Location = new System.Drawing.Point(12, 128);
+			this.pnlDesc.Name = "pnlDesc";
+			this.pnlDesc.Padding = new System.Windows.Forms.Padding(0, 0, 0, 6);
+			this.pnlDesc.Size = new System.Drawing.Size(508, 60);
+			this.pnlDesc.TabIndex = 2;
+			// 
+			// tbDesc
+			// 
+			this.tbDesc.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(35)))), ((int)(((byte)(44)))));
+			this.tbDesc.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+			this.tbDesc.BorderRadius = 100F;
+			this.tbDesc.BorderSize = 0F;
+			this.tbDesc.Cursor = System.Windows.Forms.Cursors.IBeam;
+			this.tbDesc.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.tbDesc.FocusColor = System.Drawing.Color.Empty;
+			this.tbDesc.Font = new System.Drawing.Font("Segoe UI", 11F);
+			this.tbDesc.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
+			this.tbDesc.InputColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
+			this.tbDesc.InputText = "";
+			this.tbDesc.Location = new System.Drawing.Point(0, 15);
+			this.tbDesc.MinimumSize = new System.Drawing.Size(20, 20);
+			this.tbDesc.Multiline = false;
+			this.tbDesc.Name = "tbDesc";
+			this.tbDesc.PasswordChar = '\0';
+			this.tbDesc.PercentualRadius = true;
+			this.tbDesc.PlaceHolder = "Descripción";
+			this.tbDesc.PlaceHolderColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(73)))), ((int)(((byte)(94)))));
+			this.tbDesc.ReadOnly = false;
+			this.tbDesc.SelectAllOnClick = true;
+			this.tbDesc.Size = new System.Drawing.Size(508, 39);
+			this.tbDesc.Style = ControLib.SleekTextBox.TextBoxStyle.RoundRect;
+			this.tbDesc.TabIndex = 0;
+			this.tbDesc.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+			this.tbDesc.WordWrap = true;
 			// 
 			// lblDescripción
 			// 
@@ -330,7 +343,7 @@ namespace CommandBuilder {
 			this.pnlLargos.Location = new System.Drawing.Point(12, 68);
 			this.pnlLargos.Name = "pnlLargos";
 			this.pnlLargos.Padding = new System.Windows.Forms.Padding(0, 0, 0, 6);
-			this.pnlLargos.Size = new System.Drawing.Size(511, 60);
+			this.pnlLargos.Size = new System.Drawing.Size(508, 60);
 			this.pnlLargos.TabIndex = 1;
 			// 
 			// tbLargos
@@ -342,7 +355,7 @@ namespace CommandBuilder {
 			this.tbLargos.Cursor = System.Windows.Forms.Cursors.IBeam;
 			this.tbLargos.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tbLargos.FocusColor = System.Drawing.Color.Empty;
-			this.tbLargos.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.tbLargos.Font = new System.Drawing.Font("Segoe UI", 11F);
 			this.tbLargos.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
 			this.tbLargos.InputColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
 			this.tbLargos.InputText = "";
@@ -352,11 +365,11 @@ namespace CommandBuilder {
 			this.tbLargos.Name = "tbLargos";
 			this.tbLargos.PasswordChar = '\0';
 			this.tbLargos.PercentualRadius = true;
-			this.tbLargos.PlaceHolder = "Palabras separadas por comas. Ejemplo: \"nuevo, cargar, guardar\"";
+			this.tbLargos.PlaceHolder = "Palabras separadas por espacios. Ejemplo: \"nuevo cargar guardar\"";
 			this.tbLargos.PlaceHolderColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(73)))), ((int)(((byte)(94)))));
 			this.tbLargos.ReadOnly = false;
 			this.tbLargos.SelectAllOnClick = true;
-			this.tbLargos.Size = new System.Drawing.Size(511, 39);
+			this.tbLargos.Size = new System.Drawing.Size(508, 39);
 			this.tbLargos.Style = ControLib.SleekTextBox.TextBoxStyle.RoundRect;
 			this.tbLargos.TabIndex = 0;
 			this.tbLargos.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
@@ -383,7 +396,7 @@ namespace CommandBuilder {
 			this.pnlCortos.Location = new System.Drawing.Point(12, 8);
 			this.pnlCortos.Name = "pnlCortos";
 			this.pnlCortos.Padding = new System.Windows.Forms.Padding(0, 0, 0, 6);
-			this.pnlCortos.Size = new System.Drawing.Size(511, 60);
+			this.pnlCortos.Size = new System.Drawing.Size(508, 60);
 			this.pnlCortos.TabIndex = 0;
 			// 
 			// tbCortos
@@ -395,7 +408,7 @@ namespace CommandBuilder {
 			this.tbCortos.Cursor = System.Windows.Forms.Cursors.IBeam;
 			this.tbCortos.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tbCortos.FocusColor = System.Drawing.Color.Empty;
-			this.tbCortos.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.tbCortos.Font = new System.Drawing.Font("Segoe UI", 11F);
 			this.tbCortos.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
 			this.tbCortos.InputColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
 			this.tbCortos.InputText = "";
@@ -405,11 +418,11 @@ namespace CommandBuilder {
 			this.tbCortos.Name = "tbCortos";
 			this.tbCortos.PasswordChar = '\0';
 			this.tbCortos.PercentualRadius = true;
-			this.tbCortos.PlaceHolder = "Letras individuales. Ejemplo: \"abc\", \"mnpu\", \"clqmk\", etc.";
+			this.tbCortos.PlaceHolder = "Letras individuales. Ejemplos: \"abc\", \"mnpu\", \"clqmk\", etc.";
 			this.tbCortos.PlaceHolderColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(73)))), ((int)(((byte)(94)))));
 			this.tbCortos.ReadOnly = false;
 			this.tbCortos.SelectAllOnClick = true;
-			this.tbCortos.Size = new System.Drawing.Size(511, 39);
+			this.tbCortos.Size = new System.Drawing.Size(508, 39);
 			this.tbCortos.Style = ControLib.SleekTextBox.TextBoxStyle.RoundRect;
 			this.tbCortos.TabIndex = 0;
 			this.tbCortos.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
@@ -435,7 +448,7 @@ namespace CommandBuilder {
 			this.pnlTítulo.Dock = System.Windows.Forms.DockStyle.Top;
 			this.pnlTítulo.Location = new System.Drawing.Point(0, 0);
 			this.pnlTítulo.Name = "pnlTítulo";
-			this.pnlTítulo.Size = new System.Drawing.Size(535, 45);
+			this.pnlTítulo.Size = new System.Drawing.Size(532, 45);
 			this.pnlTítulo.TabIndex = 2;
 			// 
 			// lblTítulo
@@ -456,10 +469,10 @@ namespace CommandBuilder {
 			this.pnlOpciones.Controls.Add(this.btnEliminar);
 			this.pnlOpciones.Controls.Add(this.btnCancelar);
 			this.pnlOpciones.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.pnlOpciones.Location = new System.Drawing.Point(0, 402);
+			this.pnlOpciones.Location = new System.Drawing.Point(0, 412);
 			this.pnlOpciones.Name = "pnlOpciones";
 			this.pnlOpciones.Padding = new System.Windows.Forms.Padding(10);
-			this.pnlOpciones.Size = new System.Drawing.Size(535, 54);
+			this.pnlOpciones.Size = new System.Drawing.Size(532, 54);
 			this.pnlOpciones.TabIndex = 1;
 			// 
 			// btnAgregar
@@ -475,7 +488,7 @@ namespace CommandBuilder {
 			this.btnAgregar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.btnAgregar.Font = new System.Drawing.Font("Segoe UI Semibold", 12F);
 			this.btnAgregar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(246)))), ((int)(((byte)(246)))), ((int)(((byte)(246)))));
-			this.btnAgregar.Location = new System.Drawing.Point(141, 10);
+			this.btnAgregar.Location = new System.Drawing.Point(138, 10);
 			this.btnAgregar.Name = "btnAgregar";
 			this.btnAgregar.PercentualRadius = true;
 			this.btnAgregar.Size = new System.Drawing.Size(128, 34);
@@ -496,7 +509,7 @@ namespace CommandBuilder {
 			this.btnEliminar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.btnEliminar.Font = new System.Drawing.Font("Segoe UI Semibold", 12F);
 			this.btnEliminar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			this.btnEliminar.Location = new System.Drawing.Point(269, 10);
+			this.btnEliminar.Location = new System.Drawing.Point(266, 10);
 			this.btnEliminar.Name = "btnEliminar";
 			this.btnEliminar.PercentualRadius = true;
 			this.btnEliminar.Size = new System.Drawing.Size(128, 34);
@@ -517,7 +530,7 @@ namespace CommandBuilder {
 			this.btnCancelar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.btnCancelar.Font = new System.Drawing.Font("Segoe UI Semibold", 11F);
 			this.btnCancelar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			this.btnCancelar.Location = new System.Drawing.Point(397, 10);
+			this.btnCancelar.Location = new System.Drawing.Point(394, 10);
 			this.btnCancelar.Name = "btnCancelar";
 			this.btnCancelar.PercentualRadius = true;
 			this.btnCancelar.Size = new System.Drawing.Size(128, 34);
@@ -530,18 +543,19 @@ namespace CommandBuilder {
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(12)))), ((int)(((byte)(12)))), ((int)(((byte)(12)))));
-			this.ClientSize = new System.Drawing.Size(535, 456);
+			this.ClientSize = new System.Drawing.Size(532, 466);
 			this.Controls.Add(this.pnlContenido);
 			this.Controls.Add(this.pnlTítulo);
 			this.Controls.Add(this.pnlOpciones);
 			this.Font = new System.Drawing.Font("Segoe UI", 8.25F);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-			this.MinimumSize = new System.Drawing.Size(400, 296);
+			this.MinimumSize = new System.Drawing.Size(532, 312);
 			this.Name = "FFlag";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "FFlag";
 			this.Load += new System.EventHandler(this.FParam_Load);
 			this.pnlContenido.ResumeLayout(false);
+			this.pnlContenido.PerformLayout();
 			this.pnlExpresión.ResumeLayout(false);
 			this.pnlTipo.ResumeLayout(false);
 			this.pnlTipo.PerformLayout();
@@ -549,8 +563,8 @@ namespace CommandBuilder {
 			this.pnlNombre.PerformLayout();
 			this.pnlTítuloExpresión.ResumeLayout(false);
 			this.pnlTítuloExpresión.PerformLayout();
-			this.pnlDescripción.ResumeLayout(false);
-			this.pnlDescripción.PerformLayout();
+			this.pnlDesc.ResumeLayout(false);
+			this.pnlDesc.PerformLayout();
 			this.pnlLargos.ResumeLayout(false);
 			this.pnlLargos.PerformLayout();
 			this.pnlCortos.ResumeLayout(false);
@@ -578,6 +592,10 @@ namespace CommandBuilder {
 		private System.Windows.Forms.Panel pnlLargos;
 		public ControLib.SleekTextBox tbLargos;
 		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.Panel pnlDesc;
+		public ControLib.SleekTextBox tbDesc;
+		private System.Windows.Forms.Label lblDescripción;
+		private System.Windows.Forms.Panel panel1;
 		private System.Windows.Forms.Panel pnlExpresión;
 		private System.Windows.Forms.Panel pnlTipo;
 		public System.Windows.Forms.ComboBox cmbTipos;
@@ -587,12 +605,9 @@ namespace CommandBuilder {
 		private System.Windows.Forms.Label lblNombre;
 		private System.Windows.Forms.Panel pnlTítuloExpresión;
 		private System.Windows.Forms.Label lblTítuloExpresión;
-		private System.Windows.Forms.Panel pnlDescripción;
-		public ControLib.SleekTextBox tbDescripción;
-		private System.Windows.Forms.Label lblDescripción;
-		private ControLib.SleekRadioButton rbExpresiva;
-		private System.Windows.Forms.Panel pnlPadRbExpresión;
-		private ControLib.SleekRadioButton rbSimple;
-		private System.Windows.Forms.Panel panel1;
+		private System.Windows.Forms.Panel pnlPadRb2;
+		private System.Windows.Forms.Panel pnlPadRb1;
+		public ControLib.SleekRadioButton rbSimple;
+		public ControLib.SleekRadioButton rbExpresiva;
 	}
 }
