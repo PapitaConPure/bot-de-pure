@@ -36,6 +36,9 @@
     <Reference Include="ControLib">
       <HintPath>C:\Users\Papita con puré\Desktop\La Carpeta\Carpeta 2\UTN\Programación 2\AjedrezSimple\ControLib.dll</HintPath>
     </Reference>
+    <Reference Include="FastColoredTextBox, Version=2.16.24.0, Culture=neutral, PublicKeyToken=fb8aa12b994ef61b, processorArchitecture=MSIL">
+      <HintPath>..\packages\FCTB.2.16.24\lib\FastColoredTextBox.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -63,6 +66,24 @@
     <Compile Include="CommandOption.cs" />
     <Compile Include="CommandOptionsManager.cs" />
     <Compile Include="CommandParam.cs" />
+    <Compile Include="FCommandPreview.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FCommandPreview.Designer.cs">
+      <DependentUpon>FCommandPreview.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FFlag.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FFlag.Designer.cs">
+      <DependentUpon>FFlag.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FParam.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FParam.Designer.cs">
+      <DependentUpon>FParam.cs</DependentUpon>
+    </Compile>
     <Compile Include="FPrincipal.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -75,6 +96,15 @@
     <EmbeddedResource Include="AliasField.resx">
       <DependentUpon>AliasField.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FCommandPreview.resx">
+      <DependentUpon>FCommandPreview.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FFlag.resx">
+      <DependentUpon>FFlag.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FParam.resx">
+      <DependentUpon>FParam.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FPrincipal.resx">
       <DependentUpon>FPrincipal.cs</DependentUpon>
     </EmbeddedResource>
@@ -83,6 +113,7 @@
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

@@ -11,20 +11,16 @@ using ControLib;
 
 namespace CommandBuilder {
 	public partial class AliasField: UserControl {
-		private FPrincipal fPrincipal;
+		private readonly FPrincipal fPrincipal;
 
-		public AliasField(FPrincipal form, int id) {
+		public AliasField(FPrincipal form) {
 			this.InitializeComponent();
-			this.Id = id;
 			this.btnRemoveAlias.Click += this.BtnRemoveAlias_Click;
 			this.fPrincipal = form;
 		}
 
-		public int Id { get; set; }
-
 		private void BtnRemoveAlias_Click(object sender, EventArgs e) {
-			SleekButton botón = sender as SleekButton;
-			this.fPrincipal.RemoverAlias(this.Id);
+			this.fPrincipal.RemoverAlias(this);
 		}
 	}
 }

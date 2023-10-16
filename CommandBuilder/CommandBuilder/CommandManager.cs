@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace CommandBuilder {
 	class CommandManager: IImprimible {
@@ -50,8 +51,13 @@ namespace CommandBuilder {
 
 			if(this.brief.Length == 0 && this.desc.Length < 80)
 				impr += $"\t.setDescription('{this.desc.Replace("\n", "\\n")}')\n";
-			else if(this.desc.Length != 0)
-				impr += $"\t.setLongDescription(\n\t\t'{this.desc.Replace("\n", "',\n\t\t'")}',\n\t)\n";
+			else if(this.desc.Length != 0) {
+				string[] líneas = this.desc.Split(new char[] {'\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+				impr += $"\t.setLongDescription(";
+				foreach(string línea in líneas)
+					impr += $"\n\t\t'{línea.Trim(new char[] { ' ', '\n', '\r' })}',";
+				impr += "\n\t)\n";
+			}
 
 			if(this.UsaOpciones)
 				impr += "\t.setOptions(options)\n";

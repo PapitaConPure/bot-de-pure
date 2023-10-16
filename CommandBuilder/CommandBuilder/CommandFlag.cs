@@ -12,7 +12,7 @@ namespace CommandBuilder {
 				if(!char.IsLetter(shortId))
 					throw new FormatException($"Las etiquetas cortas deben ser letras. Se recibió: '{shortId}'");
 
-			foreach(string longId in this.longIds)
+			foreach(string longId in longIds)
 				if(!Regex.IsMatch(longId, "$[A-Za-zÁÉÍÓÚÑáéíóúñ][A-Za-zÁÉÍÓÚÑáéíóúñ0-9]+^"))
 					throw new FormatException($"Las etiquetas largas comenzar con una letra y seguir con al menos una letra o número. Se recibió: \"{longId}\"");
 
@@ -27,14 +27,6 @@ namespace CommandBuilder {
 		public CommandFlag(char shortId, string desc): this(new char[] { shortId }, new string[0], desc) {}
 
 		public CommandFlag(string longId, string desc): this(new char[0], new string[] { longId }, desc) {}
-
-		public string Identifier {
-			get {
-				if(this.longIds.Length > 0)
-					return this.longIds[0];
-				return this.shortIds[0].ToString();
-			}
-		}
 
 		protected string CompiladoShortIds {
 			get {
@@ -61,6 +53,20 @@ namespace CommandBuilder {
 				return compiladoLongIds.ToString();
 			}
 		}
+
+		public override OptionType Type => OptionType.Flag;
+
+		public override string Identifier {
+			get {
+				if(this.longIds.Length > 0)
+					return this.longIds[0];
+
+				return this.shortIds[0].ToString();
+			}
+		}
+
+		public char[] ShortIds { get; internal set; }
+		public string[] LongIds { get; internal set; }
 
 		public override string Imprimir() {
 

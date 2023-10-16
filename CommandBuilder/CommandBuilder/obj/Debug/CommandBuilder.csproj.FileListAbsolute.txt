@@ -11,3 +11,8 @@ D:\bot-de-pure\CommandBuilder\CommandBuilder\bin\Debug\ControLib.dll
 D:\bot-de-pure\CommandBuilder\CommandBuilder\obj\Debug\CommandBuilder.csproj.CopyComplete
 D:\bot-de-pure\CommandBuilder\CommandBuilder\obj\Debug\CommandBuilder.csproj.AssemblyReference.cache
 D:\bot-de-pure\CommandBuilder\CommandBuilder\obj\Debug\CommandBuilder.AliasField.resources
+D:\bot-de-pure\CommandBuilder\CommandBuilder\obj\Debug\CommandBuilder.FParam.resources
+D:\bot-de-pure\CommandBuilder\CommandBuilder\obj\Debug\CommandBuilder.FFlag.resources
+D:\bot-de-pure\CommandBuilder\CommandBuilder\bin\Debug\FastColoredTextBox.dll
+D:\bot-de-pure\CommandBuilder\CommandBuilder\bin\Debug\FastColoredTextBox.xml
+D:\bot-de-pure\CommandBuilder\CommandBuilder\obj\Debug\CommandBuilder.FCommandPreview.resources

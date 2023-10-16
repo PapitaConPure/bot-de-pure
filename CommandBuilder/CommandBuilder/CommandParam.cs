@@ -3,11 +3,6 @@
 		private readonly string name;
 		private readonly ParamType type;
 
-		public CommandParam(string name, string desc, ParamType type): base(desc) {
-			this.name = name.ToLower();
-			this.type = type;
-		}
-
 		public enum ParamType {
 			Number,
 			Text,
@@ -23,6 +18,15 @@
 			Url,
 			Id,
 		}
+
+		public CommandParam(string name, string desc, ParamType type): base(desc) {
+			this.name = name.ToLower();
+			this.type = type;
+		}
+
+		public override OptionType Type => OptionType.Param;
+
+		public override string Identifier => this.name;
 
 		public override string Imprimir() {
 			return $"\taddParam('{this.name}', '{this.type.ToString().ToUpper()}', '{this.desc}'){this.PuntoYComaFinal}\n";
