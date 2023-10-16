@@ -91,6 +91,7 @@
       <DependentUpon>FPrincipal.cs</DependentUpon>
     </Compile>
     <Compile Include="IImprimible.cs" />
+    <Compile Include="ParamPoly.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="AliasField.resx">

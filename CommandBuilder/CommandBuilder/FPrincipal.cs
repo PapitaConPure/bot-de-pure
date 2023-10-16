@@ -133,13 +133,15 @@ namespace CommandBuilder {
 		private void BtnAgregarParámetro_Click(object sender, EventArgs e) {
 			FParam fParam = new FParam(false);
 
-			if(fParam.ShowDialog() != DialogResult.OK)
-				return;
-
 			try {
+				if(fParam.ShowDialog() != DialogResult.OK)
+					return;
+
 				this.options.Add(fParam.GenerarParámetro());
 			} catch(FormatException ex) {
 				MessageBox.Show(ex.Message, "Formato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+			} finally {
+				fParam.Dispose();
 			}
 
 			this.ActualizarListaOpciones();
@@ -148,15 +150,17 @@ namespace CommandBuilder {
 		private void BtnAgregarBandera_Click(object sender, EventArgs e) {
 			FFlag fFlag = new FFlag(false);
 
-			if(fFlag.ShowDialog() != DialogResult.OK)
-				return;
-
 			try {
-				this.options.Add(fFlag.GenerarOpción());
+				if(fFlag.ShowDialog() != DialogResult.OK)
+					return;
+
+				this.options.Add(fFlag.GenerarBandera());
 			} catch(ArgumentException ex) {
 				MessageBox.Show(ex.Message, "Datos inválidos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 			} catch(FormatException ex) {
 				MessageBox.Show(ex.Message, "Formato inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+			} finally {
+				fFlag.Dispose();
 			}
 
 			this.ActualizarListaOpciones();
@@ -216,7 +220,7 @@ namespace CommandBuilder {
 				if(resultado != DialogResult.OK)
 					return;
 
-				this.options[id] = fFlag.GenerarOpción();
+				this.options[id] = fFlag.GenerarBandera();
 			}
 
 			this.ActualizarListaOpciones();
@@ -224,6 +228,7 @@ namespace CommandBuilder {
 
 		private void ActualizarListaOpciones() {
 			this.dgvOpciones.Rows.Clear();
+			this.options.Sort();
 			foreach(CommandOption option in this.options)
 				this.dgvOpciones.Rows.Add(
 					option.OptionKind,

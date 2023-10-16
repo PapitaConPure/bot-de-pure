@@ -1,12 +1,12 @@
 ﻿using System;
 
 namespace CommandBuilder {
-	public abstract class CommandOption: IImprimible {
+	public abstract class CommandOption: IImprimible, IComparable {
 		protected readonly string desc;
 
 		public enum OptionType {
-			Param,
-			Flag,
+			Param = 0,
+			Flag = 1,
 		}
 
 		/// <summary>
@@ -40,6 +40,10 @@ namespace CommandBuilder {
 		public abstract OptionType OptionKind { get; }
 
 		public abstract string Identifier { get; }
+
+		public int CompareTo(object obj) {
+			return (int)this.OptionKind - (int)(obj as CommandOption).OptionKind;
+		}
 
 		public abstract string Imprimir();
 	}

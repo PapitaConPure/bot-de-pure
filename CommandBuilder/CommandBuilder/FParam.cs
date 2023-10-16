@@ -10,13 +10,21 @@ using System.Windows.Forms;
 
 namespace CommandBuilder {
 	public partial class FParam: Form {
+		private int baseHeight;
+
 		public FParam(bool permiteBorrar) {
 			this.InitializeComponent();
 
+			this.baseHeight = this.Height - 60 * 2;
+
 			foreach(CommandParam.ParamType type in Enum.GetValues(typeof(CommandParam.ParamType)))
 				this.cmbTipos.Items.Add(type);
-
+			this.cmbTipos.Items.Remove(CommandParam.ParamType.Dynamic);
 			this.cmbTipos.SelectedIndex = 1;
+
+			foreach(ParamPoly.Rank type in Enum.GetValues(typeof(ParamPoly.Rank)))
+				this.cmbPoly.Items.Add(type);
+			this.cmbPoly.SelectedIndex = 0;
 
 			if(permiteBorrar)
 				this.btnEliminar.Visible = true;
@@ -33,6 +41,19 @@ namespace CommandBuilder {
 			CommandParam.ParamType type = (CommandParam.ParamType)this.cmbTipos.SelectedItem;
 
 			return new CommandParam(nombre, desc, type);
+		}
+
+		private void CmbPoly_SelectedIndexChanged(object sender, EventArgs e) {
+			if(this.baseHeight == 0)
+				return;
+
+			ParamPoly.Rank rank = (ParamPoly.Rank)this.cmbPoly.SelectedItem;
+			bool isPoly = rank >= ParamPoly.Rank.Multiple;
+
+			this.Height = this.baseHeight + (isPoly ? 60 : 0);
+
+			this.pnlPolyMax.Visible = rank == ParamPoly.Rank.Multiple;
+			this.pnlPolyParams.Visible = rank == ParamPoly.Rank.Complex;
 		}
 	}
 }

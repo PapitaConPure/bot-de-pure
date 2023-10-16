@@ -162,7 +162,7 @@ namespace CommandBuilder {
 			this.tbNombre.Name = "tbNombre";
 			this.tbNombre.PasswordChar = '\0';
 			this.tbNombre.PercentualRadius = true;
-			this.tbNombre.PlaceHolder = "Nombre de Expresión";
+			this.tbNombre.PlaceHolder = "Nombre de la expresión paramétrica";
 			this.tbNombre.PlaceHolderColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(73)))), ((int)(((byte)(94)))));
 			this.tbNombre.ReadOnly = false;
 			this.tbNombre.SelectAllOnClick = true;
@@ -312,7 +312,7 @@ namespace CommandBuilder {
 			this.tbDesc.Name = "tbDesc";
 			this.tbDesc.PasswordChar = '\0';
 			this.tbDesc.PercentualRadius = true;
-			this.tbDesc.PlaceHolder = "Descripción";
+			this.tbDesc.PlaceHolder = "Descripción de funcionalidad de la bandera";
 			this.tbDesc.PlaceHolderColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(73)))), ((int)(((byte)(94)))));
 			this.tbDesc.ReadOnly = false;
 			this.tbDesc.SelectAllOnClick = true;
@@ -553,7 +553,6 @@ namespace CommandBuilder {
 			this.Name = "FFlag";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "FFlag";
-			this.Load += new System.EventHandler(this.FParam_Load);
 			this.pnlContenido.ResumeLayout(false);
 			this.pnlContenido.PerformLayout();
 			this.pnlExpresión.ResumeLayout(false);
