@@ -1,7 +1,7 @@
 const Mongoose = require('mongoose');
 
 const PendingConfessionSchema = new Mongoose.Schema({
-    userId: {
+    id: {
         type: String,
         required: true,
     },
