@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Diagnostics;
 
 namespace CommandBuilder {
 	public partial class FPrincipal: Form {
@@ -18,6 +19,8 @@ namespace CommandBuilder {
 			this.InitializeComponent();
 			this.options = new List<CommandOption>();
 			this.aliasFields = new List<AliasField>();
+
+			this.sflComando.InitialDirectory = Environment.CurrentDirectory;
 		}
 
 		private void BtnGenerar_Click(object sender, EventArgs e) {
@@ -31,6 +34,18 @@ namespace CommandBuilder {
 			MessageBoxIcon íconoCuidado = MessageBoxIcon.Warning;
 			MessageBoxIcon íconoError = MessageBoxIcon.Error;
 			DialogResult resultado = DialogResult.None;
+
+			if(File.Exists(this.sflComando.FileName)) {
+				MessageBox.Show(
+					"Sobreescribir comandos está prohibido.\nRenombra el comando o borra el archivo existente para continuar",
+					"El archivo ya existe",
+					botonesReporte,
+					MessageBoxIcon.Information
+				);
+				this.tbNombre.Focus();
+				return;
+			}
+
 			do {
 				FileStream fileStream = null;
 				StreamWriter streamWriter = null;
@@ -40,6 +55,7 @@ namespace CommandBuilder {
 					List<string> aliases = new List<string>();
 					foreach(AliasField aliasField in this.aliasFields)
 						aliases.Add(aliasField.tbAlias.InputText);
+
 					CommandManager commandManager = new CommandManager(
 						this.tbNombre.InputText,
 						aliases,
@@ -66,6 +82,12 @@ namespace CommandBuilder {
 						streamWriter = new StreamWriter(fileStream);
 						streamWriter.Write(código);
 					}
+					
+					Process process = new Process();
+
+					process.StartInfo.FileName = "notepad.exe";
+					process.StartInfo.Arguments = this.sflComando.FileName;
+					process.Start();
 
 					resultado = DialogResult.OK;
 				} catch(ArgumentNullException ex) {

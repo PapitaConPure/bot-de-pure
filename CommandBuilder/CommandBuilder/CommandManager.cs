@@ -72,8 +72,12 @@ namespace CommandBuilder {
 			impr += 
 				"\t.setExecution(async (request, args, isSlash) => {\n" +
 					"\t\tconsole.log({ request, args, isSlash });\n\n" +
+					"\t\tif(!(args.data ?? args).length)\n" +
+						"\t\t\treturn request.reply({ content: '⚠️ no se indicaron los datos necesarios', ephemeral: true });\n\n" +
+					"\t\tif(request.userId === request.client.user.id)\n" +
+						"\t\t\treturn request.reply({ content: '❌ no puedes hacer eso', ephemeral: true });\n\n" +
 					"\t\treturn request.reply({\n" +
-						"\t\t\tcontent: '¡Comienza a escribir código en esta función!',\n" +
+						"\t\t\tcontent: '✅ comando de ejemplo ejecutado con éxito',\n" +
 					"\t\t});\n" +
 				"\t});\n\n" +
 				"module.exports = command;";
