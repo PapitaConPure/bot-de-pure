@@ -525,12 +525,12 @@ class CommandOptionsManager {
      * Si es un comando de mensaje, remueve y devuelve la siguente entrada o devuelve todas las entradas en caso de que {@linkcode whole} sea verdadero
      * Si no se recibe ningún parámetro, se devuelve undefined
      * 
-     * @param {import('discord.js').CommandInteractionOptionResolver | Array<String>} args El conjunto de entradas
+     * @param {import('discord.js').CommandInteractionOptionResolver | Array<String>} input El conjunto de entradas
      * @param {String} slashIdentifier El identificador del parámetro para comandos Slash
      * @param {Boolean?} whole Indica si devolver todas las entradas en caso de un comando de mensaje
      * @returns El valor del parámetro
      */
-    fetchParam(args, slashIdentifier, whole = false) {
+    fetchParam(input, slashIdentifier, whole = false) {
         /**@type {CommandParam}*/
         const param = this.params.get(slashIdentifier);
 
@@ -538,28 +538,28 @@ class CommandOptionsManager {
             throw ReferenceError(`No se pudo encontrar un parámetro con el identificador: ${slashIdentifier}`);
 
         if(param._poly !== 'SINGLE')
-            throw TypeError(`No se puede devolver un solo valor con un poly-parámetro: ${slashIdentifier}`);
+            throw TypeError(`No se puede devolver un solo valor con un poliparámetro: ${slashIdentifier}`);
 
-        if(Array.isArray(args))
-            return this.#fetchMessageParam(args, param._type, whole);
+        if(Array.isArray(input))
+            return this.#fetchMessageParam(input, param._type, whole);
 
         /**@type {GetMethodName}*/
         let getMethodName = 'getString';
         if(!isParamTypeStrict(param._type))
             getMethodName = ParamTypes(param._type).getMethod;
 
-        return args[getMethodName](slashIdentifier, !param._optional);
+        return input[getMethodName](slashIdentifier, !param._optional);
     };
     /**
      * Devuelve un arreglo de todas las entradas recibidas.
      * Si no se recibe ninguna entrada, se devuelve fallback
-     * @param {CommandInteractionOptionResolver} args El resolvedor de opciones de interacción
+     * @param {CommandInteractionOptionResolver} input El resolvedor de opciones de interacción
      * @param {String} identifier El identificador del parámetro
      * @param {Function} callbackFn Una función de SlashCommandBuilder para leer un valor
      * @param {(Function | *)?} fallback Un valor por defecto si no se recibe ninguna entrada
      * @returns {Array<*>} Un arreglo con las entradas procesadas por callbackFn, o alternativamente, un valor devuelto por fallback
      */
-    fetchParamPoly(args, identifier, callbackFn, fallback = undefined) {
+    fetchParamPoly(input, identifier, callbackFn, fallback = undefined) {
         /**@type {CommandParam}*/
         const option = this.params.get(identifier);
         if(!option)
@@ -586,14 +586,15 @@ class CommandOptionsManager {
             }
 
         params = params
-            .map((opt, i) => callbackFn.call(args, opt, !i && !option._optional))
+            .map((opt, i) => callbackFn.call(input, opt, !i && !option._optional))
             .filter(param => param);
             
         return params.length ? params : [ (typeof fallback === 'function') ? fallback() : fallback ];
     };
     /**
-     * Devuelve un valor o función basado en si se ingresó la flag buscada o no
-     * Si no se recibe ninguna entrada, se devuelve fallback
+     * Devuelve un valor o función basado en si se ingresó la flag buscada o no.
+     * Si no se recibe ninguna entrada, se devuelve fallback.
+     * Si callback no está definido, se devuelve el valor encontrado
      * @param {import('discord.js').CommandInteractionOptionResolver | Array<String>} input Los datos de entrada
      * @param {String} identifier El identificador de la flag
      * @typedef {{
