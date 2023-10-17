@@ -42,10 +42,10 @@ namespace CommandBuilder {
 				throw new NullReferenceException("Se debe definir un CommandMetaFlagsManager para construir un archivo de comando");
 
 			string total =
-				"//const {  } = require('discord.js'); //Integrar discord.js\n" +
-				"//const {  } = require('../../func.js'); //Funciones globales\n" +
-				"//const { p_pure } = require('../../localdata/customization/prefixes.js');\n" +
-				"//const { p_pure } = require('../../localdata/customization/prefixes.js');\n" +
+				"const {  } = require('discord.js'); //Integrar discord.js\n" +
+				"const {  } = require('../../func.js'); //Funciones globales\n" +
+				"const {  } = require('../../localdata/config.json'); //Configuraciones\n" +
+				"const { p_pure } = require('../../localdata/customization/prefixes.js');\n" +
 				"const { CommandManager, CommandMetaFlagsManager";
 
 			if(this.commandOptionsManager != null)
@@ -57,6 +57,8 @@ namespace CommandBuilder {
 
 			if(this.commandOptionsManager != null)
 				total += this.commandOptionsManager.Imprimir() + "\n";
+
+			this.commandManager.UsaOpciones = this.commandOptionsManager != null;
 
 			total += this.commandTagsManager.Imprimir() + "\n";
 			total += this.commandManager.Imprimir();

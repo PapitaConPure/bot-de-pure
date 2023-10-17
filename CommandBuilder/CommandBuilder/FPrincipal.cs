@@ -69,11 +69,13 @@ namespace CommandBuilder {
 
 					resultado = DialogResult.OK;
 				} catch(ArgumentNullException ex) {
-					resultado = MessageBox.Show(ex.Message, "Error de valor", botonesReporte, íconoCuidado);
+					resultado = MessageBox.Show(ex.Message, "Parámetro incompleto", botonesReporte, íconoCuidado);
 				} catch(FormatException ex) {
-					resultado = MessageBox.Show(ex.Message, "Error de formato", botonesReporte, íconoCuidado);
+					resultado = MessageBox.Show(ex.Message, "Formato inválido", botonesReporte, íconoCuidado);
 				} catch(ArgumentException ex) {
-					resultado = MessageBox.Show(ex.Message, "Error de parámetro", botonesReporte, íconoCuidado);
+					resultado = MessageBox.Show(ex.Message, "Parámetro inválido", botonesReporte, íconoCuidado);
+				} catch(InvalidOperationException ex) {
+					resultado = MessageBox.Show(ex.Message, "Operación inválida", botonesReporte, íconoCuidado);
 				} catch(IOException ex) {
 					resultado = MessageBox.Show(ex.Message, "Error de flujo de archivo", botonesError, íconoError);
 				} catch(UnauthorizedAccessException ex) {
