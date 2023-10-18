@@ -62,7 +62,7 @@ namespace CommandBuilder {
 			bool pasóPrimero = false;
 			foreach(CommandComponent component in this.components) {
 				if(pasóPrimero)
-					total.Append("\n\n");
+					total.AppendLine();
 				else
 					pasóPrimero = true;
 
