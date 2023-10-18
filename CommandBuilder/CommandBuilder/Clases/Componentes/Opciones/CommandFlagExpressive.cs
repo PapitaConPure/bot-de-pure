@@ -52,7 +52,7 @@ namespace CommandBuilder {
 		public CommandParam.ParamType ExprType => this.type;
 
 		public override string Imprimir() {
-			return $"\t.addFlag('{this.CompiladoShortIds}', [ {this.CompiladoLongIds} ], '{this.desc}', {{ name: '{this.name}', type: '{this.type.ToString().ToUpper()}' }}){this.PuntoYComaFinal}";
+			return $"\t.addFlag('{this.CompiladoShortIds}', [ {this.CompiladoLongIds} ], '{this.desc}', {{ name: '{this.name}', type: '{this.type.ToString().ToUpper()}' }})";
 		}
 	}
 }

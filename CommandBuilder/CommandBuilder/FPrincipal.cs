@@ -14,11 +14,13 @@ namespace CommandBuilder {
 	public partial class FPrincipal: Form {
 		private readonly List<CommandOption> options;
 		private readonly List<AliasField> aliasFields;
+		private readonly List<ResponseField> responseFields;
 
 		public FPrincipal() {
 			this.InitializeComponent();
 			this.options = new List<CommandOption>();
 			this.aliasFields = new List<AliasField>();
+			this.responseFields = new List<ResponseField>();
 
 			this.sflComando.InitialDirectory = Environment.CurrentDirectory;
 		}
@@ -61,16 +63,16 @@ namespace CommandBuilder {
 						aliases,
 						this.tbDescripciónLarga.InputText,
 						this.tbDescripciónBreve.InputText);
-					commandBuilder.AgregarImprimible(commandManager);
+					commandBuilder.AgregarComponente(commandManager);
 
 					CommandTagsManager commandTagsManager = new CommandTagsManager();
 					foreach(CommandTagsManager.CommandTag etiqueta in this.VerEtiquetas())
 						commandTagsManager.AgregarEtiqueta(etiqueta);
-					commandBuilder.AgregarImprimible(commandTagsManager);
+					commandBuilder.AgregarComponente(commandTagsManager);
 
 					if(this.options.Count > 0) {
 						CommandOptionsManager commandOptionsManager = new CommandOptionsManager();
-						commandBuilder.AgregarImprimible(commandOptionsManager);
+						commandBuilder.AgregarComponente(commandOptionsManager);
 
 						foreach(CommandOption option in this.options)
 							commandOptionsManager.AgregarOpción(option);
@@ -81,13 +83,12 @@ namespace CommandBuilder {
 						fileStream = new FileStream(this.sflComando.FileName, FileMode.CreateNew, FileAccess.Write);
 						streamWriter = new StreamWriter(fileStream);
 						streamWriter.Write(código);
-					}
-					
-					Process process = new Process();
 
-					process.StartInfo.FileName = "notepad.exe";
-					process.StartInfo.Arguments = this.sflComando.FileName;
-					process.Start();
+						Process process = new Process();
+						process.StartInfo.FileName = "notepad.exe";
+						process.StartInfo.Arguments = this.sflComando.FileName;
+						process.Start();
+					}
 
 					resultado = DialogResult.OK;
 				} catch(ArgumentNullException ex) {
@@ -262,6 +263,36 @@ namespace CommandBuilder {
 					option.Identifier,
 					option.Desc
 				);
+		}
+
+		private void btnAgregarRespuesta_Click(object sender, EventArgs e) {
+			//if(this.tbNuevoAlias.Empty)
+			//	return;
+
+			//foreach(AliasField af in this.aliasFields)
+			//	if(af.tbAlias.InputText == this.tbNuevoAlias.InputText)
+			//		return;
+
+			this.pnlListaRespuestas.Height += 179;
+			ResponseField responseField = new ResponseField(this);
+			Panel panel = responseField.pnlResponseField;
+
+			panel.TabIndex = this.pnlListaRespuestas.TabIndex;
+
+			this.responseFields.Add(responseField);
+			this.pnlListaRespuestas.Controls.Add(panel);
+			panel.BringToFront();
+			this.pnlListaRespuestas.Update();
+
+			responseField.tbNombre.Focus();
+		}
+
+		internal void RemoverRespuesta(ResponseField responseField) {
+			Panel panel = responseField.pnlResponseField;
+			this.pnlListaRespuestas.Controls.Remove(panel);
+			this.responseFields.Remove(responseField);
+			responseField.Dispose();
+			this.pnlListaRespuestas.Height -= 179;
 		}
 
 		private CommandTagsManager.CommandTag[] VerEtiquetas() {

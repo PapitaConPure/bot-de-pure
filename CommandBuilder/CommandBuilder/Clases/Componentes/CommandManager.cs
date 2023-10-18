@@ -3,17 +3,20 @@ using System.Collections.Generic;
 using System;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.Text;
 
 namespace CommandBuilder {
-	public class CommandManager: IImprimible {
+	public class CommandManager: CommandComponent {
 		private const string NAME_REGEX = "^[a-záéíóúñ\\-]+$";
 
 		private readonly string name;
 		private readonly List<string> aliases;
 		private readonly string desc;
 		private readonly string brief;
+		private readonly List<CommandResponse> responses;
 
-		public CommandManager(string name, List<string> aliases, string longDescription = "", string briefDescription = "") {
+		public CommandManager(string name, List<string> aliases, string longDescription = "", string briefDescription = "")
+		: base(10, CommandBuilder.ComponentType.CommandManager) {
 			if(name.Length == 0)
 				throw new FormatException("El nombre no puede estar vacío");
 
@@ -40,36 +43,42 @@ namespace CommandBuilder {
 
 			this.desc = longDescription;
 			this.brief = briefDescription;
+
+			this.responses = new List<CommandResponse>();
+		}
+
+		public void AgregarRespuesta(CommandResponse response) {
+			this.responses.Add(response);
 		}
 
 		public bool UsaOpciones { get; set; } = false;
 
-		public string Imprimir() {
-			string impr = $"const command = new CommandManager('{this.name}', flags)\n";
+		public override string Imprimir() {
+			StringBuilder impr = new StringBuilder($"const command = new CommandManager('{this.name}', flags)\n");
 			
 			if(this.aliases.Count > 0)
-				impr += $"\t.setAliases(\n{string.Join(",\n", this.aliases.Select(alias => $"\t\t'{alias}'"))},\n\t)\n";
+				impr.AppendLine($"\t.setAliases(\n{string.Join(",\n", this.aliases.Select(alias => $"\t\t'{alias}'"))},\n\t)");
 
 			if(this.brief.Length != 0)
-				impr += $"\t.setBriefDescription('{this.brief}')\n";
+				impr.AppendLine($"\t.setBriefDescription('{this.brief}')");
 
 			if(this.brief.Length + this.desc.Length > 0) {
 				if(this.brief.Length == 0 && this.desc.Length < 80)
-					impr += $"\t.setDescription('{this.desc.Replace("\n", "\\n")}')\n";
+					impr.AppendLine($"\t.setDescription('{this.desc.Replace("\n", "\\n")}')");
 				else if(this.desc.Length != 0) {
 					string[] líneas = this.desc.Split(new char[] {'\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-					impr += $"\t.setLongDescription(";
+					impr.Append($"\t.setLongDescription(");
 					foreach(string línea in líneas)
-						impr += $"\n\t\t'{línea.Trim(new char[] { ' ', '\n', '\r' })}',";
-					impr += "\n\t)\n";
+						impr.Append($"\n\t\t'{línea.Trim(new char[] { ' ', '\n', '\r' })}',");
+					impr.AppendLine("\n\t)");
 				}
 			}
 				
 
 			if(this.UsaOpciones)
-				impr += "\t.setOptions(options)\n";
+				impr.AppendLine("\t.setOptions(options)");
 
-			impr += 
+			impr.Append(
 				"\t.setExecution(async (request, args, isSlash) => {\n" +
 					"\t\tconsole.log({ request, args, isSlash });\n\n" +
 					"\t\tif(!(args.data ?? args).length)\n" +
@@ -79,10 +88,44 @@ namespace CommandBuilder {
 					"\t\treturn request.reply({\n" +
 						"\t\t\tcontent: '✅ comando de ejemplo ejecutado con éxito',\n" +
 					"\t\t});\n" +
-				"\t});\n\n" +
-				"module.exports = command;";
+				"\t})");
 
-			return impr;
+			foreach(CommandResponse response in this.responses)
+				impr.Append(response.Imprimir());
+
+			impr.AppendLine(";");
+
+			return impr.ToString();
+		}
+	}
+
+	public class CommandResponse: IImprimible {
+		private readonly string nombre;
+		private readonly InteractionType type;
+		private readonly List<string> args;
+
+		public enum InteractionType {
+			Button,
+			SelectMenu,
+			Modal,
+			Interaction,
+		}
+
+		public CommandResponse(string nombre, InteractionType type, List<string> args) {
+			this.nombre = nombre;
+			this.type = type;
+			this.args = args;
+		}
+
+		public CommandResponse(string nombre, InteractionType type, params string[] args): this(nombre, type, args.ToList()) {}
+
+		public CommandResponse(string nombre, InteractionType type): this(nombre, type, new List<string>()) {}
+
+		public string Imprimir() {
+			string args = string.Join(", ", this.args);
+			return $".set{this.type}Response(async function {this.nombre}({args}) {{\n" +
+					"\t\t\n" +
+				"\t})";
 		}
 	}
 }

@@ -52,20 +52,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AliasField.cs">
+    <Compile Include="Controles\AliasField.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="AliasField.Designer.cs">
+    <Compile Include="Controles\AliasField.Designer.cs">
       <DependentUpon>AliasField.cs</DependentUpon>
     </Compile>
-    <Compile Include="CommandBuilder.cs" />
-    <Compile Include="CommandFlag.cs" />
-    <Compile Include="CommandFlagExpressive.cs" />
-    <Compile Include="CommandManager.cs" />
-    <Compile Include="CommandTagsManager.cs" />
-    <Compile Include="CommandOption.cs" />
-    <Compile Include="CommandOptionsManager.cs" />
-    <Compile Include="CommandParam.cs" />
+    <Compile Include="Clases\CommandBuilder.cs" />
+    <Compile Include="Clases\Componentes\Opciones\CommandFlag.cs" />
+    <Compile Include="Clases\Componentes\Opciones\CommandFlagExpressive.cs" />
+    <Compile Include="Clases\Componentes\CommandManager.cs" />
+    <Compile Include="Clases\Componentes\CommandTagsManager.cs" />
+    <Compile Include="Clases\Componentes\Opciones\CommandOption.cs" />
+    <Compile Include="Clases\Componentes\CommandOptionsManager.cs" />
+    <Compile Include="Clases\Componentes\Opciones\CommandParam.cs" />
+    <Compile Include="Clases\IImprimible.cs" />
     <Compile Include="FCommandPreview.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -90,11 +91,17 @@
     <Compile Include="FPrincipal.Designer.cs">
       <DependentUpon>FPrincipal.cs</DependentUpon>
     </Compile>
-    <Compile Include="IImprimible.cs" />
-    <Compile Include="ParamPoly.cs" />
+    <Compile Include="Clases\CommandComponent.cs" />
+    <Compile Include="Clases\Componentes\Opciones\ParamPoly.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="AliasField.resx">
+    <Compile Include="Controles\ResponseField.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controles\ResponseField.Designer.cs">
+      <DependentUpon>ResponseField.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Controles\AliasField.resx">
       <DependentUpon>AliasField.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FCommandPreview.resx">
@@ -113,6 +120,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controles\ResponseField.resx">
+      <DependentUpon>ResponseField.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

@@ -24,11 +24,11 @@ namespace CommandBuilder {
 		/// el contenido de este método con el editor de código.
 		/// </summary>
 		private void InitializeComponent() {
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
 			this.pnlMetadatos = new System.Windows.Forms.Panel();
 			this.pnlContenidoMetadatos = new System.Windows.Forms.Panel();
 			this.pnlEtiquetas = new System.Windows.Forms.Panel();
@@ -76,8 +76,12 @@ namespace CommandBuilder {
 			this.lblOpciones = new System.Windows.Forms.Label();
 			this.pnlRespuestas = new System.Windows.Forms.Panel();
 			this.pnlContenidoRespuestas = new System.Windows.Forms.Panel();
-			this.panel3 = new System.Windows.Forms.Panel();
+			this.pnlContenidoInternoRespuestas = new System.Windows.Forms.Panel();
 			this.lblTítuloRespuestas = new System.Windows.Forms.Label();
+			this.pnlAgregarRespuesta = new System.Windows.Forms.Panel();
+			this.btnAgregarRespuesta = new ControLib.SleekButton();
+			this.pnlContenedorListaRespuestas = new System.Windows.Forms.Panel();
+			this.pnlListaRespuestas = new System.Windows.Forms.Panel();
 			this.pnlMetadatos.SuspendLayout();
 			this.pnlContenidoMetadatos.SuspendLayout();
 			this.pnlEtiquetas.SuspendLayout();
@@ -95,6 +99,9 @@ namespace CommandBuilder {
 			this.tlpBotonesOpciones.SuspendLayout();
 			this.pnlRespuestas.SuspendLayout();
 			this.pnlContenidoRespuestas.SuspendLayout();
+			this.pnlContenidoInternoRespuestas.SuspendLayout();
+			this.pnlAgregarRespuesta.SuspendLayout();
+			this.pnlContenedorListaRespuestas.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// pnlMetadatos
@@ -625,7 +632,7 @@ namespace CommandBuilder {
 			this.pnlTablaOpciones.Name = "pnlTablaOpciones";
 			this.pnlTablaOpciones.Padding = new System.Windows.Forms.Padding(6);
 			this.pnlTablaOpciones.Size = new System.Drawing.Size(300, 478);
-			this.pnlTablaOpciones.TabIndex = 5;
+			this.pnlTablaOpciones.TabIndex = 1;
 			// 
 			// dgvOpciones
 			// 
@@ -637,27 +644,27 @@ namespace CommandBuilder {
 			this.dgvOpciones.BorderStyle = System.Windows.Forms.BorderStyle.None;
 			this.dgvOpciones.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.None;
 			this.dgvOpciones.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
-			dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(43)))), ((int)(((byte)(57)))));
-			dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 11F);
-			dataGridViewCellStyle1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(85)))), ((int)(((byte)(111)))), ((int)(((byte)(138)))));
-			dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			this.dgvOpciones.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+			dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle11.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(43)))), ((int)(((byte)(57)))));
+			dataGridViewCellStyle11.Font = new System.Drawing.Font("Segoe UI", 11F);
+			dataGridViewCellStyle11.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(85)))), ((int)(((byte)(111)))), ((int)(((byte)(138)))));
+			dataGridViewCellStyle11.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			this.dgvOpciones.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle11;
 			this.dgvOpciones.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
 			this.dgvOpciones.ColumnHeadersVisible = false;
 			this.dgvOpciones.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Opción,
             this.Nombre,
             this.Tipo});
-			dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(32)))), ((int)(((byte)(36)))));
-			dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 11F);
-			dataGridViewCellStyle5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dgvOpciones.DefaultCellStyle = dataGridViewCellStyle5;
+			dataGridViewCellStyle15.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle15.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(32)))), ((int)(((byte)(36)))));
+			dataGridViewCellStyle15.Font = new System.Drawing.Font("Segoe UI", 11F);
+			dataGridViewCellStyle15.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
+			dataGridViewCellStyle15.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle15.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle15.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dgvOpciones.DefaultCellStyle = dataGridViewCellStyle15;
 			this.dgvOpciones.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.dgvOpciones.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
 			this.dgvOpciones.EnableHeadersVisualStyles = false;
@@ -672,13 +679,13 @@ namespace CommandBuilder {
 			this.dgvOpciones.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.dgvOpciones.Size = new System.Drawing.Size(288, 466);
 			this.dgvOpciones.StandardTab = true;
-			this.dgvOpciones.TabIndex = 4;
+			this.dgvOpciones.TabIndex = 0;
 			this.dgvOpciones.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvOpciones_CellContentDoubleClick);
 			// 
 			// Opción
 			// 
-			dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 11F);
-			this.Opción.DefaultCellStyle = dataGridViewCellStyle2;
+			dataGridViewCellStyle12.Font = new System.Drawing.Font("Segoe UI", 11F);
+			this.Opción.DefaultCellStyle = dataGridViewCellStyle12;
 			this.Opción.HeaderText = "Op.";
 			this.Opción.MinimumWidth = 58;
 			this.Opción.Name = "Opción";
@@ -690,9 +697,9 @@ namespace CommandBuilder {
 			// Nombre
 			// 
 			this.Nombre.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-			dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 11F);
-			this.Nombre.DefaultCellStyle = dataGridViewCellStyle3;
+			dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle13.Font = new System.Drawing.Font("Segoe UI", 11F);
+			this.Nombre.DefaultCellStyle = dataGridViewCellStyle13;
 			this.Nombre.HeaderText = "Nombre";
 			this.Nombre.MinimumWidth = 58;
 			this.Nombre.Name = "Nombre";
@@ -704,9 +711,9 @@ namespace CommandBuilder {
 			// Tipo
 			// 
 			this.Tipo.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-			dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 11F);
-			this.Tipo.DefaultCellStyle = dataGridViewCellStyle4;
+			dataGridViewCellStyle14.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle14.Font = new System.Drawing.Font("Segoe UI", 11F);
+			this.Tipo.DefaultCellStyle = dataGridViewCellStyle14;
 			this.Tipo.HeaderText = "Tipo";
 			this.Tipo.Name = "Tipo";
 			this.Tipo.ReadOnly = true;
@@ -726,7 +733,7 @@ namespace CommandBuilder {
 			this.tlpBotonesOpciones.RowCount = 1;
 			this.tlpBotonesOpciones.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
 			this.tlpBotonesOpciones.Size = new System.Drawing.Size(300, 42);
-			this.tlpBotonesOpciones.TabIndex = 4;
+			this.tlpBotonesOpciones.TabIndex = 0;
 			// 
 			// btnAgregarBandera
 			// 
@@ -795,22 +802,24 @@ namespace CommandBuilder {
 			// 
 			// pnlContenidoRespuestas
 			// 
-			this.pnlContenidoRespuestas.Controls.Add(this.panel3);
+			this.pnlContenidoRespuestas.Controls.Add(this.pnlContenidoInternoRespuestas);
 			this.pnlContenidoRespuestas.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.pnlContenidoRespuestas.Location = new System.Drawing.Point(0, 45);
 			this.pnlContenidoRespuestas.Name = "pnlContenidoRespuestas";
 			this.pnlContenidoRespuestas.Padding = new System.Windows.Forms.Padding(12, 8, 12, 8);
 			this.pnlContenidoRespuestas.Size = new System.Drawing.Size(280, 536);
-			this.pnlContenidoRespuestas.TabIndex = 2;
+			this.pnlContenidoRespuestas.TabIndex = 0;
 			// 
-			// panel3
+			// pnlContenidoInternoRespuestas
 			// 
-			this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.panel3.Location = new System.Drawing.Point(12, 8);
-			this.panel3.Name = "panel3";
-			this.panel3.Padding = new System.Windows.Forms.Padding(6);
-			this.panel3.Size = new System.Drawing.Size(256, 520);
-			this.panel3.TabIndex = 5;
+			this.pnlContenidoInternoRespuestas.Controls.Add(this.pnlContenedorListaRespuestas);
+			this.pnlContenidoInternoRespuestas.Controls.Add(this.pnlAgregarRespuesta);
+			this.pnlContenidoInternoRespuestas.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.pnlContenidoInternoRespuestas.Location = new System.Drawing.Point(12, 8);
+			this.pnlContenidoInternoRespuestas.Name = "pnlContenidoInternoRespuestas";
+			this.pnlContenidoInternoRespuestas.Padding = new System.Windows.Forms.Padding(6);
+			this.pnlContenidoInternoRespuestas.Size = new System.Drawing.Size(256, 520);
+			this.pnlContenidoInternoRespuestas.TabIndex = 0;
 			// 
 			// lblTítuloRespuestas
 			// 
@@ -823,6 +832,58 @@ namespace CommandBuilder {
 			this.lblTítuloRespuestas.Size = new System.Drawing.Size(195, 45);
 			this.lblTítuloRespuestas.TabIndex = 6;
 			this.lblTítuloRespuestas.Text = "Respuestas";
+			// 
+			// pnlAgregarRespuesta
+			// 
+			this.pnlAgregarRespuesta.AutoSize = true;
+			this.pnlAgregarRespuesta.Controls.Add(this.btnAgregarRespuesta);
+			this.pnlAgregarRespuesta.Dock = System.Windows.Forms.DockStyle.Top;
+			this.pnlAgregarRespuesta.Location = new System.Drawing.Point(6, 6);
+			this.pnlAgregarRespuesta.Name = "pnlAgregarRespuesta";
+			this.pnlAgregarRespuesta.Padding = new System.Windows.Forms.Padding(0, 0, 0, 8);
+			this.pnlAgregarRespuesta.Size = new System.Drawing.Size(244, 47);
+			this.pnlAgregarRespuesta.TabIndex = 0;
+			// 
+			// btnAgregarRespuesta
+			// 
+			this.btnAgregarRespuesta.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(43)))), ((int)(((byte)(57)))));
+			this.btnAgregarRespuesta.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+			this.btnAgregarRespuesta.BorderRadius = 100F;
+			this.btnAgregarRespuesta.BorderSize = 0F;
+			this.btnAgregarRespuesta.Dock = System.Windows.Forms.DockStyle.Top;
+			this.btnAgregarRespuesta.FlatAppearance.BorderSize = 0;
+			this.btnAgregarRespuesta.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.btnAgregarRespuesta.Font = new System.Drawing.Font("Segoe UI Semibold", 11F);
+			this.btnAgregarRespuesta.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(246)))), ((int)(((byte)(246)))), ((int)(((byte)(246)))));
+			this.btnAgregarRespuesta.Location = new System.Drawing.Point(0, 0);
+			this.btnAgregarRespuesta.Margin = new System.Windows.Forms.Padding(0, 0, 0, 3);
+			this.btnAgregarRespuesta.Name = "btnAgregarRespuesta";
+			this.btnAgregarRespuesta.PercentualRadius = true;
+			this.btnAgregarRespuesta.Size = new System.Drawing.Size(244, 39);
+			this.btnAgregarRespuesta.TabIndex = 0;
+			this.btnAgregarRespuesta.Text = "Agregar Respuesta";
+			this.btnAgregarRespuesta.UseVisualStyleBackColor = false;
+			this.btnAgregarRespuesta.Click += new System.EventHandler(this.btnAgregarRespuesta_Click);
+			// 
+			// pnlContenedorListaRespuestas
+			// 
+			this.pnlContenedorListaRespuestas.AutoScroll = true;
+			this.pnlContenedorListaRespuestas.Controls.Add(this.pnlListaRespuestas);
+			this.pnlContenedorListaRespuestas.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.pnlContenedorListaRespuestas.Location = new System.Drawing.Point(6, 53);
+			this.pnlContenedorListaRespuestas.Name = "pnlContenedorListaRespuestas";
+			this.pnlContenedorListaRespuestas.Size = new System.Drawing.Size(244, 461);
+			this.pnlContenedorListaRespuestas.TabIndex = 1;
+			// 
+			// pnlListaRespuestas
+			// 
+			this.pnlListaRespuestas.AutoScroll = true;
+			this.pnlListaRespuestas.Dock = System.Windows.Forms.DockStyle.Top;
+			this.pnlListaRespuestas.Location = new System.Drawing.Point(0, 0);
+			this.pnlListaRespuestas.Margin = new System.Windows.Forms.Padding(0);
+			this.pnlListaRespuestas.Name = "pnlListaRespuestas";
+			this.pnlListaRespuestas.Size = new System.Drawing.Size(244, 39);
+			this.pnlListaRespuestas.TabIndex = 0;
 			// 
 			// FPrincipal
 			// 
@@ -870,6 +931,10 @@ namespace CommandBuilder {
 			this.pnlRespuestas.ResumeLayout(false);
 			this.pnlRespuestas.PerformLayout();
 			this.pnlContenidoRespuestas.ResumeLayout(false);
+			this.pnlContenidoInternoRespuestas.ResumeLayout(false);
+			this.pnlContenidoInternoRespuestas.PerformLayout();
+			this.pnlAgregarRespuesta.ResumeLayout(false);
+			this.pnlContenedorListaRespuestas.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -919,11 +984,15 @@ namespace CommandBuilder {
 		private System.Windows.Forms.DataGridView dgvOpciones;
 		private System.Windows.Forms.Panel pnlRespuestas;
 		private System.Windows.Forms.Panel pnlContenidoRespuestas;
-		private System.Windows.Forms.Panel panel3;
+		private System.Windows.Forms.Panel pnlContenidoInternoRespuestas;
 		private System.Windows.Forms.Label lblTítuloRespuestas;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Opción;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Nombre;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Tipo;
+		private System.Windows.Forms.Panel pnlAgregarRespuesta;
+		private ControLib.SleekButton btnAgregarRespuesta;
+		private System.Windows.Forms.Panel pnlContenedorListaRespuestas;
+		private System.Windows.Forms.Panel pnlListaRespuestas;
 	}
 }
 

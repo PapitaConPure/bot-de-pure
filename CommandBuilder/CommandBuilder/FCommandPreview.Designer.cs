@@ -57,12 +57,12 @@ namespace CommandBuilder {
 			this.lblFlavor.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.lblFlavor.Font = new System.Drawing.Font("Lucida Fax", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))));
 			this.lblFlavor.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			this.lblFlavor.Location = new System.Drawing.Point(289, 2);
+			this.lblFlavor.Location = new System.Drawing.Point(413, 2);
 			this.lblFlavor.Name = "lblFlavor";
 			this.lblFlavor.Padding = new System.Windows.Forms.Padding(0, 0, 6, 8);
-			this.lblFlavor.Size = new System.Drawing.Size(692, 45);
+			this.lblFlavor.Size = new System.Drawing.Size(568, 45);
 			this.lblFlavor.TabIndex = 6;
-			this.lblFlavor.Text = "El archivo de comando fue generado con éxito";
+			this.lblFlavor.Text = "El comando fue generado con éxito. Esperando confirmación...";
 			this.lblFlavor.TextAlign = System.Drawing.ContentAlignment.BottomRight;
 			// 
 			// lblTítulo
@@ -73,9 +73,9 @@ namespace CommandBuilder {
 			this.lblTítulo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(78)))), ((int)(((byte)(39)))));
 			this.lblTítulo.Location = new System.Drawing.Point(0, 2);
 			this.lblTítulo.Name = "lblTítulo";
-			this.lblTítulo.Size = new System.Drawing.Size(289, 45);
+			this.lblTítulo.Size = new System.Drawing.Size(413, 45);
 			this.lblTítulo.TabIndex = 5;
-			this.lblTítulo.Text = "Comando Creado";
+			this.lblTítulo.Text = "Vista Previa de Comando";
 			// 
 			// pnlContent
 			// 
@@ -114,6 +114,7 @@ namespace CommandBuilder {
 			this.tbCódigo.Cursor = System.Windows.Forms.Cursors.IBeam;
 			this.tbCódigo.DisabledColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
 			this.tbCódigo.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.tbCódigo.Font = new System.Drawing.Font("Courier New", 9.75F);
 			this.tbCódigo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(22)))), ((int)(((byte)(22)))));
 			this.tbCódigo.IndentBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(102)))), ((int)(((byte)(99)))), ((int)(((byte)(114)))));
 			this.tbCódigo.IsReplaceMode = false;

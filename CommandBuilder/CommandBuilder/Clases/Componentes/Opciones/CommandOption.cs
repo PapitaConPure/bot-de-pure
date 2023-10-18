@@ -24,17 +24,6 @@ namespace CommandBuilder {
 			this.desc = desc;
 		}
 
-		public bool EsOpciónFinal { get; set; }
-
-		public string PuntoYComaFinal {
-			get {
-				if(this.EsOpciónFinal)
-					return ";";
-				else
-					return "";
-			}
-		}
-
 		public string Desc => this.desc;
 
 		public abstract OptionType OptionKind { get; }
