@@ -114,7 +114,6 @@ namespace CommandBuilder {
 			this.tbCódigo.Cursor = System.Windows.Forms.Cursors.IBeam;
 			this.tbCódigo.DisabledColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
 			this.tbCódigo.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.tbCódigo.Font = new System.Drawing.Font("Courier New", 9.75F);
 			this.tbCódigo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(22)))), ((int)(((byte)(22)))));
 			this.tbCódigo.IndentBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(102)))), ((int)(((byte)(99)))), ((int)(((byte)(114)))));
 			this.tbCódigo.IsReplaceMode = false;
@@ -138,6 +137,7 @@ namespace CommandBuilder {
 			// 
 			// pnlOpciones
 			// 
+			this.pnlOpciones.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(12)))), ((int)(((byte)(12)))), ((int)(((byte)(12)))));
 			this.pnlOpciones.Controls.Add(this.btnAgregar);
 			this.pnlOpciones.Controls.Add(this.btnCancelar);
 			this.pnlOpciones.Dock = System.Windows.Forms.DockStyle.Bottom;

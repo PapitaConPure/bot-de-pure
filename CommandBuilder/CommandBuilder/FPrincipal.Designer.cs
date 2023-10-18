@@ -54,7 +54,6 @@ namespace CommandBuilder {
 			this.pnlAlias = new System.Windows.Forms.Panel();
 			this.pnlNuevoAlias = new System.Windows.Forms.Panel();
 			this.tbNuevoAlias = new ControLib.SleekTextBox();
-			this.btnNuevoAlias = new ControLib.SleekButton();
 			this.lblAlias = new System.Windows.Forms.Label();
 			this.pnlNombre = new System.Windows.Forms.Panel();
 			this.tbNombre = new ControLib.SleekTextBox();
@@ -77,11 +76,15 @@ namespace CommandBuilder {
 			this.pnlRespuestas = new System.Windows.Forms.Panel();
 			this.pnlContenidoRespuestas = new System.Windows.Forms.Panel();
 			this.pnlContenidoInternoRespuestas = new System.Windows.Forms.Panel();
-			this.lblTítuloRespuestas = new System.Windows.Forms.Label();
-			this.pnlAgregarRespuesta = new System.Windows.Forms.Panel();
-			this.btnAgregarRespuesta = new ControLib.SleekButton();
 			this.pnlContenedorListaRespuestas = new System.Windows.Forms.Panel();
 			this.pnlListaRespuestas = new System.Windows.Forms.Panel();
+			this.pnlAgregarRespuesta = new System.Windows.Forms.Panel();
+			this.lblTítuloRespuestas = new System.Windows.Forms.Label();
+			this.btnNuevoAlias = new ControLib.SleekButton();
+			this.btnAgregarInteractionResponse = new ControLib.SleekButton();
+			this.btnAgregarModalResponse = new ControLib.SleekButton();
+			this.btnAgregarSelectMenuResponse = new ControLib.SleekButton();
+			this.btnAgregarButtonResponse = new ControLib.SleekButton();
 			this.pnlMetadatos.SuspendLayout();
 			this.pnlContenidoMetadatos.SuspendLayout();
 			this.pnlEtiquetas.SuspendLayout();
@@ -100,8 +103,8 @@ namespace CommandBuilder {
 			this.pnlRespuestas.SuspendLayout();
 			this.pnlContenidoRespuestas.SuspendLayout();
 			this.pnlContenidoInternoRespuestas.SuspendLayout();
-			this.pnlAgregarRespuesta.SuspendLayout();
 			this.pnlContenedorListaRespuestas.SuspendLayout();
+			this.pnlAgregarRespuesta.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// pnlMetadatos
@@ -464,27 +467,6 @@ namespace CommandBuilder {
 			this.tbNuevoAlias.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
 			this.tbNuevoAlias.WordWrap = true;
 			// 
-			// btnNuevoAlias
-			// 
-			this.btnNuevoAlias.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(35)))), ((int)(((byte)(44)))));
-			this.btnNuevoAlias.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
-			this.btnNuevoAlias.BorderRadius = 100F;
-			this.btnNuevoAlias.BorderSize = 0F;
-			this.btnNuevoAlias.Dock = System.Windows.Forms.DockStyle.Right;
-			this.btnNuevoAlias.FlatAppearance.BorderSize = 0;
-			this.btnNuevoAlias.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.btnNuevoAlias.Font = new System.Drawing.Font("Arial Black", 16F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.btnNuevoAlias.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(196)))), ((int)(((byte)(130)))));
-			this.btnNuevoAlias.Location = new System.Drawing.Point(217, 0);
-			this.btnNuevoAlias.Name = "btnNuevoAlias";
-			this.btnNuevoAlias.PercentualRadius = true;
-			this.btnNuevoAlias.Size = new System.Drawing.Size(39, 39);
-			this.btnNuevoAlias.TabIndex = 1;
-			this.btnNuevoAlias.Text = "+";
-			this.btnNuevoAlias.TextAlign = System.Drawing.ContentAlignment.TopRight;
-			this.btnNuevoAlias.UseVisualStyleBackColor = false;
-			this.btnNuevoAlias.Click += new System.EventHandler(this.BtnNuevoAlias_Click);
-			// 
 			// lblAlias
 			// 
 			this.lblAlias.AutoSize = true;
@@ -821,6 +803,40 @@ namespace CommandBuilder {
 			this.pnlContenidoInternoRespuestas.Size = new System.Drawing.Size(256, 520);
 			this.pnlContenidoInternoRespuestas.TabIndex = 0;
 			// 
+			// pnlContenedorListaRespuestas
+			// 
+			this.pnlContenedorListaRespuestas.AutoScroll = true;
+			this.pnlContenedorListaRespuestas.Controls.Add(this.pnlListaRespuestas);
+			this.pnlContenedorListaRespuestas.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.pnlContenedorListaRespuestas.Location = new System.Drawing.Point(6, 170);
+			this.pnlContenedorListaRespuestas.Name = "pnlContenedorListaRespuestas";
+			this.pnlContenedorListaRespuestas.Size = new System.Drawing.Size(244, 344);
+			this.pnlContenedorListaRespuestas.TabIndex = 1;
+			// 
+			// pnlListaRespuestas
+			// 
+			this.pnlListaRespuestas.AutoScroll = true;
+			this.pnlListaRespuestas.Dock = System.Windows.Forms.DockStyle.Top;
+			this.pnlListaRespuestas.Location = new System.Drawing.Point(0, 0);
+			this.pnlListaRespuestas.Margin = new System.Windows.Forms.Padding(0);
+			this.pnlListaRespuestas.Name = "pnlListaRespuestas";
+			this.pnlListaRespuestas.Size = new System.Drawing.Size(244, 39);
+			this.pnlListaRespuestas.TabIndex = 0;
+			// 
+			// pnlAgregarRespuesta
+			// 
+			this.pnlAgregarRespuesta.AutoSize = true;
+			this.pnlAgregarRespuesta.Controls.Add(this.btnAgregarInteractionResponse);
+			this.pnlAgregarRespuesta.Controls.Add(this.btnAgregarModalResponse);
+			this.pnlAgregarRespuesta.Controls.Add(this.btnAgregarSelectMenuResponse);
+			this.pnlAgregarRespuesta.Controls.Add(this.btnAgregarButtonResponse);
+			this.pnlAgregarRespuesta.Dock = System.Windows.Forms.DockStyle.Top;
+			this.pnlAgregarRespuesta.Location = new System.Drawing.Point(6, 6);
+			this.pnlAgregarRespuesta.Name = "pnlAgregarRespuesta";
+			this.pnlAgregarRespuesta.Padding = new System.Windows.Forms.Padding(0, 0, 0, 8);
+			this.pnlAgregarRespuesta.Size = new System.Drawing.Size(244, 164);
+			this.pnlAgregarRespuesta.TabIndex = 0;
+			// 
 			// lblTítuloRespuestas
 			// 
 			this.lblTítuloRespuestas.AutoSize = true;
@@ -833,57 +849,123 @@ namespace CommandBuilder {
 			this.lblTítuloRespuestas.TabIndex = 6;
 			this.lblTítuloRespuestas.Text = "Respuestas";
 			// 
-			// pnlAgregarRespuesta
+			// btnNuevoAlias
 			// 
-			this.pnlAgregarRespuesta.AutoSize = true;
-			this.pnlAgregarRespuesta.Controls.Add(this.btnAgregarRespuesta);
-			this.pnlAgregarRespuesta.Dock = System.Windows.Forms.DockStyle.Top;
-			this.pnlAgregarRespuesta.Location = new System.Drawing.Point(6, 6);
-			this.pnlAgregarRespuesta.Name = "pnlAgregarRespuesta";
-			this.pnlAgregarRespuesta.Padding = new System.Windows.Forms.Padding(0, 0, 0, 8);
-			this.pnlAgregarRespuesta.Size = new System.Drawing.Size(244, 47);
-			this.pnlAgregarRespuesta.TabIndex = 0;
+			this.btnNuevoAlias.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(35)))), ((int)(((byte)(44)))));
+			this.btnNuevoAlias.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+			this.btnNuevoAlias.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+			this.btnNuevoAlias.BorderRadius = 100F;
+			this.btnNuevoAlias.BorderSize = 0F;
+			this.btnNuevoAlias.Dock = System.Windows.Forms.DockStyle.Right;
+			this.btnNuevoAlias.FlatAppearance.BorderSize = 0;
+			this.btnNuevoAlias.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.btnNuevoAlias.Font = new System.Drawing.Font("Arial Black", 16F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.btnNuevoAlias.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(196)))), ((int)(((byte)(130)))));
+			this.btnNuevoAlias.Image = global::CommandBuilder.Properties.Resources.plus;
+			this.btnNuevoAlias.Location = new System.Drawing.Point(217, 0);
+			this.btnNuevoAlias.Name = "btnNuevoAlias";
+			this.btnNuevoAlias.PercentualRadius = true;
+			this.btnNuevoAlias.Size = new System.Drawing.Size(39, 39);
+			this.btnNuevoAlias.TabIndex = 1;
+			this.btnNuevoAlias.TextAlign = System.Drawing.ContentAlignment.TopRight;
+			this.btnNuevoAlias.UseVisualStyleBackColor = false;
+			this.btnNuevoAlias.Click += new System.EventHandler(this.BtnNuevoAlias_Click);
 			// 
-			// btnAgregarRespuesta
+			// btnAgregarInteractionResponse
 			// 
-			this.btnAgregarRespuesta.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(43)))), ((int)(((byte)(57)))));
-			this.btnAgregarRespuesta.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
-			this.btnAgregarRespuesta.BorderRadius = 100F;
-			this.btnAgregarRespuesta.BorderSize = 0F;
-			this.btnAgregarRespuesta.Dock = System.Windows.Forms.DockStyle.Top;
-			this.btnAgregarRespuesta.FlatAppearance.BorderSize = 0;
-			this.btnAgregarRespuesta.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.btnAgregarRespuesta.Font = new System.Drawing.Font("Segoe UI Semibold", 11F);
-			this.btnAgregarRespuesta.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(246)))), ((int)(((byte)(246)))), ((int)(((byte)(246)))));
-			this.btnAgregarRespuesta.Location = new System.Drawing.Point(0, 0);
-			this.btnAgregarRespuesta.Margin = new System.Windows.Forms.Padding(0, 0, 0, 3);
-			this.btnAgregarRespuesta.Name = "btnAgregarRespuesta";
-			this.btnAgregarRespuesta.PercentualRadius = true;
-			this.btnAgregarRespuesta.Size = new System.Drawing.Size(244, 39);
-			this.btnAgregarRespuesta.TabIndex = 0;
-			this.btnAgregarRespuesta.Text = "Agregar Respuesta";
-			this.btnAgregarRespuesta.UseVisualStyleBackColor = false;
-			this.btnAgregarRespuesta.Click += new System.EventHandler(this.btnAgregarRespuesta_Click);
+			this.btnAgregarInteractionResponse.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(43)))), ((int)(((byte)(57)))));
+			this.btnAgregarInteractionResponse.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+			this.btnAgregarInteractionResponse.BorderRadius = 100F;
+			this.btnAgregarInteractionResponse.BorderSize = 0F;
+			this.btnAgregarInteractionResponse.Dock = System.Windows.Forms.DockStyle.Top;
+			this.btnAgregarInteractionResponse.FlatAppearance.BorderSize = 0;
+			this.btnAgregarInteractionResponse.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.btnAgregarInteractionResponse.Font = new System.Drawing.Font("Segoe UI Semibold", 11F);
+			this.btnAgregarInteractionResponse.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(246)))), ((int)(((byte)(246)))), ((int)(((byte)(246)))));
+			this.btnAgregarInteractionResponse.Image = global::CommandBuilder.Properties.Resources.plus;
+			this.btnAgregarInteractionResponse.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.btnAgregarInteractionResponse.Location = new System.Drawing.Point(0, 117);
+			this.btnAgregarInteractionResponse.Margin = new System.Windows.Forms.Padding(0, 0, 0, 3);
+			this.btnAgregarInteractionResponse.Name = "btnAgregarInteractionResponse";
+			this.btnAgregarInteractionResponse.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
+			this.btnAgregarInteractionResponse.PercentualRadius = true;
+			this.btnAgregarInteractionResponse.Size = new System.Drawing.Size(244, 39);
+			this.btnAgregarInteractionResponse.TabIndex = 3;
+			this.btnAgregarInteractionResponse.Text = "Interaction";
+			this.btnAgregarInteractionResponse.UseVisualStyleBackColor = false;
+			this.btnAgregarInteractionResponse.Click += new System.EventHandler(this.btnAgregarRespuesta_Click);
 			// 
-			// pnlContenedorListaRespuestas
+			// btnAgregarModalResponse
 			// 
-			this.pnlContenedorListaRespuestas.AutoScroll = true;
-			this.pnlContenedorListaRespuestas.Controls.Add(this.pnlListaRespuestas);
-			this.pnlContenedorListaRespuestas.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.pnlContenedorListaRespuestas.Location = new System.Drawing.Point(6, 53);
-			this.pnlContenedorListaRespuestas.Name = "pnlContenedorListaRespuestas";
-			this.pnlContenedorListaRespuestas.Size = new System.Drawing.Size(244, 461);
-			this.pnlContenedorListaRespuestas.TabIndex = 1;
+			this.btnAgregarModalResponse.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(43)))), ((int)(((byte)(57)))));
+			this.btnAgregarModalResponse.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+			this.btnAgregarModalResponse.BorderRadius = 100F;
+			this.btnAgregarModalResponse.BorderSize = 0F;
+			this.btnAgregarModalResponse.Dock = System.Windows.Forms.DockStyle.Top;
+			this.btnAgregarModalResponse.FlatAppearance.BorderSize = 0;
+			this.btnAgregarModalResponse.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.btnAgregarModalResponse.Font = new System.Drawing.Font("Segoe UI Semibold", 11F);
+			this.btnAgregarModalResponse.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(246)))), ((int)(((byte)(246)))), ((int)(((byte)(246)))));
+			this.btnAgregarModalResponse.Image = global::CommandBuilder.Properties.Resources.plus;
+			this.btnAgregarModalResponse.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.btnAgregarModalResponse.Location = new System.Drawing.Point(0, 78);
+			this.btnAgregarModalResponse.Margin = new System.Windows.Forms.Padding(0, 0, 0, 3);
+			this.btnAgregarModalResponse.Name = "btnAgregarModalResponse";
+			this.btnAgregarModalResponse.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
+			this.btnAgregarModalResponse.PercentualRadius = true;
+			this.btnAgregarModalResponse.Size = new System.Drawing.Size(244, 39);
+			this.btnAgregarModalResponse.TabIndex = 2;
+			this.btnAgregarModalResponse.Text = "Modal";
+			this.btnAgregarModalResponse.UseVisualStyleBackColor = false;
+			this.btnAgregarModalResponse.Click += new System.EventHandler(this.btnAgregarRespuesta_Click);
 			// 
-			// pnlListaRespuestas
+			// btnAgregarSelectMenuResponse
 			// 
-			this.pnlListaRespuestas.AutoScroll = true;
-			this.pnlListaRespuestas.Dock = System.Windows.Forms.DockStyle.Top;
-			this.pnlListaRespuestas.Location = new System.Drawing.Point(0, 0);
-			this.pnlListaRespuestas.Margin = new System.Windows.Forms.Padding(0);
-			this.pnlListaRespuestas.Name = "pnlListaRespuestas";
-			this.pnlListaRespuestas.Size = new System.Drawing.Size(244, 39);
-			this.pnlListaRespuestas.TabIndex = 0;
+			this.btnAgregarSelectMenuResponse.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(43)))), ((int)(((byte)(57)))));
+			this.btnAgregarSelectMenuResponse.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+			this.btnAgregarSelectMenuResponse.BorderRadius = 100F;
+			this.btnAgregarSelectMenuResponse.BorderSize = 0F;
+			this.btnAgregarSelectMenuResponse.Dock = System.Windows.Forms.DockStyle.Top;
+			this.btnAgregarSelectMenuResponse.FlatAppearance.BorderSize = 0;
+			this.btnAgregarSelectMenuResponse.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.btnAgregarSelectMenuResponse.Font = new System.Drawing.Font("Segoe UI Semibold", 11F);
+			this.btnAgregarSelectMenuResponse.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(246)))), ((int)(((byte)(246)))), ((int)(((byte)(246)))));
+			this.btnAgregarSelectMenuResponse.Image = global::CommandBuilder.Properties.Resources.plus;
+			this.btnAgregarSelectMenuResponse.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.btnAgregarSelectMenuResponse.Location = new System.Drawing.Point(0, 39);
+			this.btnAgregarSelectMenuResponse.Margin = new System.Windows.Forms.Padding(0, 0, 0, 3);
+			this.btnAgregarSelectMenuResponse.Name = "btnAgregarSelectMenuResponse";
+			this.btnAgregarSelectMenuResponse.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
+			this.btnAgregarSelectMenuResponse.PercentualRadius = true;
+			this.btnAgregarSelectMenuResponse.Size = new System.Drawing.Size(244, 39);
+			this.btnAgregarSelectMenuResponse.TabIndex = 1;
+			this.btnAgregarSelectMenuResponse.Text = "SelectMenu";
+			this.btnAgregarSelectMenuResponse.UseVisualStyleBackColor = false;
+			this.btnAgregarSelectMenuResponse.Click += new System.EventHandler(this.btnAgregarRespuesta_Click);
+			// 
+			// btnAgregarButtonResponse
+			// 
+			this.btnAgregarButtonResponse.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(43)))), ((int)(((byte)(57)))));
+			this.btnAgregarButtonResponse.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+			this.btnAgregarButtonResponse.BorderRadius = 100F;
+			this.btnAgregarButtonResponse.BorderSize = 0F;
+			this.btnAgregarButtonResponse.Dock = System.Windows.Forms.DockStyle.Top;
+			this.btnAgregarButtonResponse.FlatAppearance.BorderSize = 0;
+			this.btnAgregarButtonResponse.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.btnAgregarButtonResponse.Font = new System.Drawing.Font("Segoe UI Semibold", 11F);
+			this.btnAgregarButtonResponse.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(246)))), ((int)(((byte)(246)))), ((int)(((byte)(246)))));
+			this.btnAgregarButtonResponse.Image = global::CommandBuilder.Properties.Resources.plus;
+			this.btnAgregarButtonResponse.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.btnAgregarButtonResponse.Location = new System.Drawing.Point(0, 0);
+			this.btnAgregarButtonResponse.Margin = new System.Windows.Forms.Padding(0, 0, 0, 3);
+			this.btnAgregarButtonResponse.Name = "btnAgregarButtonResponse";
+			this.btnAgregarButtonResponse.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
+			this.btnAgregarButtonResponse.PercentualRadius = true;
+			this.btnAgregarButtonResponse.Size = new System.Drawing.Size(244, 39);
+			this.btnAgregarButtonResponse.TabIndex = 0;
+			this.btnAgregarButtonResponse.Text = "Button";
+			this.btnAgregarButtonResponse.UseVisualStyleBackColor = false;
+			this.btnAgregarButtonResponse.Click += new System.EventHandler(this.btnAgregarRespuesta_Click);
 			// 
 			// FPrincipal
 			// 
@@ -933,8 +1015,8 @@ namespace CommandBuilder {
 			this.pnlContenidoRespuestas.ResumeLayout(false);
 			this.pnlContenidoInternoRespuestas.ResumeLayout(false);
 			this.pnlContenidoInternoRespuestas.PerformLayout();
-			this.pnlAgregarRespuesta.ResumeLayout(false);
 			this.pnlContenedorListaRespuestas.ResumeLayout(false);
+			this.pnlAgregarRespuesta.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -990,9 +1072,12 @@ namespace CommandBuilder {
 		private System.Windows.Forms.DataGridViewTextBoxColumn Nombre;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Tipo;
 		private System.Windows.Forms.Panel pnlAgregarRespuesta;
-		private ControLib.SleekButton btnAgregarRespuesta;
 		private System.Windows.Forms.Panel pnlContenedorListaRespuestas;
 		private System.Windows.Forms.Panel pnlListaRespuestas;
+		private ControLib.SleekButton btnAgregarModalResponse;
+		private ControLib.SleekButton btnAgregarSelectMenuResponse;
+		private ControLib.SleekButton btnAgregarButtonResponse;
+		private ControLib.SleekButton btnAgregarInteractionResponse;
 	}
 }
 

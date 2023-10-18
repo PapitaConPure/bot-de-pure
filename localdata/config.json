@@ -29,7 +29,7 @@
             "Considerar una versión pública de Bot de Puré (daré detalles si lo hago)"
         ]
     },
-    "remoteStartup": false,
+    "remoteStartup": true,
     "p_pure": {
         "0": {
             "raw": "",

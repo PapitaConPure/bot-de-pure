@@ -12,13 +12,17 @@ namespace CommandBuilder {
 	public partial class ResponseField: UserControl {
 		private readonly FPrincipal fPrincipal;
 
-		public ResponseField(FPrincipal form) {
+		public ResponseField(FPrincipal form, CommandResponse.InteractionType type) {
 			this.InitializeComponent();
-			this.btnRemoveAlias.Click += this.BtnRemoveAlias_Click;
+			this.btnRemoveResponse.Click += this.BtnRemoveResponse;
 			this.fPrincipal = form;
+			this.Type = type;
+			this.lblTítulo.Text = type.ToString();
 		}
 
-		private void BtnRemoveAlias_Click(object sender, EventArgs e) {
+		public CommandResponse.InteractionType Type { get; private set; }
+
+		private void BtnRemoveResponse(object sender, EventArgs e) {
 			this.fPrincipal.RemoverRespuesta(this);
 		}
 	}

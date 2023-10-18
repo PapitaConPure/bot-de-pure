@@ -81,6 +81,7 @@ namespace CommandBuilder {
 			this.btnRemoveAlias.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.btnRemoveAlias.Font = new System.Drawing.Font("Arial Black", 8F, System.Drawing.FontStyle.Bold);
 			this.btnRemoveAlias.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(196)))), ((int)(((byte)(130)))));
+			this.btnRemoveAlias.Image = global::CommandBuilder.Properties.Resources.x;
 			this.btnRemoveAlias.Location = new System.Drawing.Point(111, 0);
 			this.btnRemoveAlias.Name = "btnRemoveAlias";
 			this.btnRemoveAlias.PercentualRadius = true;

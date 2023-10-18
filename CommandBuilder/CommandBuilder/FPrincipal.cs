@@ -12,6 +12,8 @@ using System.Diagnostics;
 
 namespace CommandBuilder {
 	public partial class FPrincipal: Form {
+		private static int contadorRespuestas;
+
 		private readonly List<CommandOption> options;
 		private readonly List<AliasField> aliasFields;
 		private readonly List<ResponseField> responseFields;
@@ -54,15 +56,18 @@ namespace CommandBuilder {
 				try {
 					CommandBuilder commandBuilder = new CommandBuilder();
 
-					List<string> aliases = new List<string>();
-					foreach(AliasField aliasField in this.aliasFields)
-						aliases.Add(aliasField.tbAlias.InputText);
-
 					CommandManager commandManager = new CommandManager(
 						this.tbNombre.InputText,
-						aliases,
+						this.aliasFields.Select(af => af.tbAlias.InputText).ToList(),
 						this.tbDescripciónLarga.InputText,
 						this.tbDescripciónBreve.InputText);
+
+					foreach(ResponseField responseField in this.responseFields)
+						commandManager.AgregarRespuesta(new CommandResponse(
+							responseField.tbNombre.InputText,
+							responseField.Type,
+							responseField.tbParámetros.InputText.Split(' ')));
+
 					commandBuilder.AgregarComponente(commandManager);
 
 					CommandTagsManager commandTagsManager = new CommandTagsManager();
@@ -266,17 +271,17 @@ namespace CommandBuilder {
 		}
 
 		private void btnAgregarRespuesta_Click(object sender, EventArgs e) {
-			//if(this.tbNuevoAlias.Empty)
-			//	return;
+			if(!(sender is Button))
+				return;
 
-			//foreach(AliasField af in this.aliasFields)
-			//	if(af.tbAlias.InputText == this.tbNuevoAlias.InputText)
-			//		return;
+			Button botón = sender as Button;
+			CommandResponse.InteractionType tipo = (CommandResponse.InteractionType)botón.TabIndex;
 
 			this.pnlListaRespuestas.Height += 179;
-			ResponseField responseField = new ResponseField(this);
+			ResponseField responseField = new ResponseField(this, tipo);
 			Panel panel = responseField.pnlResponseField;
 
+			responseField.tbNombre.InputText = $"respuesta{++contadorRespuestas}";
 			panel.TabIndex = this.pnlListaRespuestas.TabIndex;
 
 			this.responseFields.Add(responseField);

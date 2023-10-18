@@ -105,20 +105,56 @@ namespace CommandBuilder {
 		private readonly List<string> args;
 
 		public enum InteractionType {
-			Button,
-			SelectMenu,
-			Modal,
-			Interaction,
+			Button = 0,
+			SelectMenu = 1,
+			Modal = 2,
+			Interaction = 3,
 		}
 
+		/// <summary>
+		/// Crea una respuesta de comando del tipo indicado.
+		/// Su función de respuesta recibirá el nombre especificado y los argumentos facilitados
+		/// </summary>
+		/// <param name="nombre">nombre de la función de respuesta</param>
+		/// <param name="type">tipo de respuesta</param>
+		/// <param name="args"><see cref="List{string}"/> de argumentos para la función de respuesta</param>
+		/// <remarks>Recibe al menos un parámetro: "interaction". No comprueba parámetros repetidos</remarks>
+		/// <exception cref="ArgumentException"></exception>
+		/// <exception cref="ArgumentNullException"></exception>
 		public CommandResponse(string nombre, InteractionType type, List<string> args) {
+			if(nombre is null)
+				throw new ArgumentNullException("No se proporcionó el nombre de una Respuesta de Comando");
+
+			if(nombre.Length == 0 || !(char.IsLetter(nombre[0]) || nombre[0] == '_'))
+				throw new ArgumentException($"Se debe especificar un nombre de Respuesta de Comando válido. Recibido: \"{nombre}\"");
+
 			this.nombre = nombre;
 			this.type = type;
 			this.args = args;
+			this.args.Insert(0, "interaction");
+			this.args.RemoveAll(arg => arg.Length == 0);
 		}
 
+		/// <summary>
+		/// Crea una respuesta de comando del tipo indicado.
+		/// Su función de respuesta recibirá el nombre especificado y los argumentos facilitados
+		/// </summary>
+		/// <param name="nombre">nombre de la función de respuesta</param>
+		/// <param name="type">tipo de respuesta</param>
+		/// <param name="args">argumentos de la función de respuesta</param>
+		/// <remarks>Recibe al menos un parámetro: "interaction". No comprueba parámetros repetidos</remarks>
+		/// <exception cref="ArgumentException"></exception>
+		/// <exception cref="ArgumentNullException"></exception>
 		public CommandResponse(string nombre, InteractionType type, params string[] args): this(nombre, type, args.ToList()) {}
 
+		/// <summary>
+		/// Crea una respuesta de comando del tipo indicado, con el nombre de función de respuesta especificado
+		/// </summary>
+		/// <param name="nombre">nombre de la función de respuesta</param>
+		/// <param name="type">tipo de respuesta</param>
+		/// <remarks>Recibe al menos un parámetro: "interaction"</remarks>
+		/// <exception cref="ArgumentException"></exception>
+		/// <exception cref="ArgumentNullException"></exception>
 		public CommandResponse(string nombre, InteractionType type): this(nombre, type, new List<string>()) {}
 
 		public string Imprimir() {
