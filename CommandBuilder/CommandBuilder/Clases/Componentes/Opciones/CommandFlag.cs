@@ -96,7 +96,7 @@ namespace CommandBuilder {
 
 		public override string Imprimir() {
 
-			return $"\t.addFlag('{this.CompiladoShortIds}', [ {this.CompiladoLongIds} ], '{this.desc}'){this.PuntoYComaFinal}";
+			return $"\t.addFlag('{this.CompiladoShortIds}', [ {this.CompiladoLongIds} ], '{this.desc}')";
 		}
 	}
 }

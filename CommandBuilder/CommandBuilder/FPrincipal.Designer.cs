@@ -24,11 +24,11 @@ namespace CommandBuilder {
 		/// el contenido de este método con el editor de código.
 		/// </summary>
 		private void InitializeComponent() {
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
 			this.pnlMetadatos = new System.Windows.Forms.Panel();
 			this.pnlContenidoMetadatos = new System.Windows.Forms.Panel();
 			this.pnlEtiquetas = new System.Windows.Forms.Panel();
@@ -54,7 +54,6 @@ namespace CommandBuilder {
 			this.pnlAlias = new System.Windows.Forms.Panel();
 			this.pnlNuevoAlias = new System.Windows.Forms.Panel();
 			this.tbNuevoAlias = new ControLib.SleekTextBox();
-			this.btnNuevoAlias = new ControLib.SleekButton();
 			this.lblAlias = new System.Windows.Forms.Label();
 			this.pnlNombre = new System.Windows.Forms.Panel();
 			this.tbNombre = new ControLib.SleekTextBox();
@@ -76,8 +75,16 @@ namespace CommandBuilder {
 			this.lblOpciones = new System.Windows.Forms.Label();
 			this.pnlRespuestas = new System.Windows.Forms.Panel();
 			this.pnlContenidoRespuestas = new System.Windows.Forms.Panel();
-			this.panel3 = new System.Windows.Forms.Panel();
+			this.pnlContenidoInternoRespuestas = new System.Windows.Forms.Panel();
+			this.pnlContenedorListaRespuestas = new System.Windows.Forms.Panel();
+			this.pnlListaRespuestas = new System.Windows.Forms.Panel();
+			this.pnlAgregarRespuesta = new System.Windows.Forms.Panel();
 			this.lblTítuloRespuestas = new System.Windows.Forms.Label();
+			this.btnNuevoAlias = new ControLib.SleekButton();
+			this.btnAgregarInteractionResponse = new ControLib.SleekButton();
+			this.btnAgregarModalResponse = new ControLib.SleekButton();
+			this.btnAgregarSelectMenuResponse = new ControLib.SleekButton();
+			this.btnAgregarButtonResponse = new ControLib.SleekButton();
 			this.pnlMetadatos.SuspendLayout();
 			this.pnlContenidoMetadatos.SuspendLayout();
 			this.pnlEtiquetas.SuspendLayout();
@@ -95,6 +102,9 @@ namespace CommandBuilder {
 			this.tlpBotonesOpciones.SuspendLayout();
 			this.pnlRespuestas.SuspendLayout();
 			this.pnlContenidoRespuestas.SuspendLayout();
+			this.pnlContenidoInternoRespuestas.SuspendLayout();
+			this.pnlContenedorListaRespuestas.SuspendLayout();
+			this.pnlAgregarRespuesta.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// pnlMetadatos
@@ -457,27 +467,6 @@ namespace CommandBuilder {
 			this.tbNuevoAlias.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
 			this.tbNuevoAlias.WordWrap = true;
 			// 
-			// btnNuevoAlias
-			// 
-			this.btnNuevoAlias.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(35)))), ((int)(((byte)(44)))));
-			this.btnNuevoAlias.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
-			this.btnNuevoAlias.BorderRadius = 100F;
-			this.btnNuevoAlias.BorderSize = 0F;
-			this.btnNuevoAlias.Dock = System.Windows.Forms.DockStyle.Right;
-			this.btnNuevoAlias.FlatAppearance.BorderSize = 0;
-			this.btnNuevoAlias.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.btnNuevoAlias.Font = new System.Drawing.Font("Arial Black", 16F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.btnNuevoAlias.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(196)))), ((int)(((byte)(130)))));
-			this.btnNuevoAlias.Location = new System.Drawing.Point(217, 0);
-			this.btnNuevoAlias.Name = "btnNuevoAlias";
-			this.btnNuevoAlias.PercentualRadius = true;
-			this.btnNuevoAlias.Size = new System.Drawing.Size(39, 39);
-			this.btnNuevoAlias.TabIndex = 1;
-			this.btnNuevoAlias.Text = "+";
-			this.btnNuevoAlias.TextAlign = System.Drawing.ContentAlignment.TopRight;
-			this.btnNuevoAlias.UseVisualStyleBackColor = false;
-			this.btnNuevoAlias.Click += new System.EventHandler(this.BtnNuevoAlias_Click);
-			// 
 			// lblAlias
 			// 
 			this.lblAlias.AutoSize = true;
@@ -625,7 +614,7 @@ namespace CommandBuilder {
 			this.pnlTablaOpciones.Name = "pnlTablaOpciones";
 			this.pnlTablaOpciones.Padding = new System.Windows.Forms.Padding(6);
 			this.pnlTablaOpciones.Size = new System.Drawing.Size(300, 478);
-			this.pnlTablaOpciones.TabIndex = 5;
+			this.pnlTablaOpciones.TabIndex = 1;
 			// 
 			// dgvOpciones
 			// 
@@ -637,27 +626,27 @@ namespace CommandBuilder {
 			this.dgvOpciones.BorderStyle = System.Windows.Forms.BorderStyle.None;
 			this.dgvOpciones.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.None;
 			this.dgvOpciones.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
-			dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(43)))), ((int)(((byte)(57)))));
-			dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 11F);
-			dataGridViewCellStyle1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(85)))), ((int)(((byte)(111)))), ((int)(((byte)(138)))));
-			dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			this.dgvOpciones.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+			dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle11.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(43)))), ((int)(((byte)(57)))));
+			dataGridViewCellStyle11.Font = new System.Drawing.Font("Segoe UI", 11F);
+			dataGridViewCellStyle11.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(85)))), ((int)(((byte)(111)))), ((int)(((byte)(138)))));
+			dataGridViewCellStyle11.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			this.dgvOpciones.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle11;
 			this.dgvOpciones.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
 			this.dgvOpciones.ColumnHeadersVisible = false;
 			this.dgvOpciones.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Opción,
             this.Nombre,
             this.Tipo});
-			dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(32)))), ((int)(((byte)(36)))));
-			dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 11F);
-			dataGridViewCellStyle5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dgvOpciones.DefaultCellStyle = dataGridViewCellStyle5;
+			dataGridViewCellStyle15.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle15.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(32)))), ((int)(((byte)(36)))));
+			dataGridViewCellStyle15.Font = new System.Drawing.Font("Segoe UI", 11F);
+			dataGridViewCellStyle15.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
+			dataGridViewCellStyle15.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle15.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle15.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dgvOpciones.DefaultCellStyle = dataGridViewCellStyle15;
 			this.dgvOpciones.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.dgvOpciones.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
 			this.dgvOpciones.EnableHeadersVisualStyles = false;
@@ -672,13 +661,13 @@ namespace CommandBuilder {
 			this.dgvOpciones.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.dgvOpciones.Size = new System.Drawing.Size(288, 466);
 			this.dgvOpciones.StandardTab = true;
-			this.dgvOpciones.TabIndex = 4;
+			this.dgvOpciones.TabIndex = 0;
 			this.dgvOpciones.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvOpciones_CellContentDoubleClick);
 			// 
 			// Opción
 			// 
-			dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 11F);
-			this.Opción.DefaultCellStyle = dataGridViewCellStyle2;
+			dataGridViewCellStyle12.Font = new System.Drawing.Font("Segoe UI", 11F);
+			this.Opción.DefaultCellStyle = dataGridViewCellStyle12;
 			this.Opción.HeaderText = "Op.";
 			this.Opción.MinimumWidth = 58;
 			this.Opción.Name = "Opción";
@@ -690,9 +679,9 @@ namespace CommandBuilder {
 			// Nombre
 			// 
 			this.Nombre.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-			dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 11F);
-			this.Nombre.DefaultCellStyle = dataGridViewCellStyle3;
+			dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle13.Font = new System.Drawing.Font("Segoe UI", 11F);
+			this.Nombre.DefaultCellStyle = dataGridViewCellStyle13;
 			this.Nombre.HeaderText = "Nombre";
 			this.Nombre.MinimumWidth = 58;
 			this.Nombre.Name = "Nombre";
@@ -704,9 +693,9 @@ namespace CommandBuilder {
 			// Tipo
 			// 
 			this.Tipo.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-			dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 11F);
-			this.Tipo.DefaultCellStyle = dataGridViewCellStyle4;
+			dataGridViewCellStyle14.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle14.Font = new System.Drawing.Font("Segoe UI", 11F);
+			this.Tipo.DefaultCellStyle = dataGridViewCellStyle14;
 			this.Tipo.HeaderText = "Tipo";
 			this.Tipo.Name = "Tipo";
 			this.Tipo.ReadOnly = true;
@@ -726,7 +715,7 @@ namespace CommandBuilder {
 			this.tlpBotonesOpciones.RowCount = 1;
 			this.tlpBotonesOpciones.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
 			this.tlpBotonesOpciones.Size = new System.Drawing.Size(300, 42);
-			this.tlpBotonesOpciones.TabIndex = 4;
+			this.tlpBotonesOpciones.TabIndex = 0;
 			// 
 			// btnAgregarBandera
 			// 
@@ -795,22 +784,58 @@ namespace CommandBuilder {
 			// 
 			// pnlContenidoRespuestas
 			// 
-			this.pnlContenidoRespuestas.Controls.Add(this.panel3);
+			this.pnlContenidoRespuestas.Controls.Add(this.pnlContenidoInternoRespuestas);
 			this.pnlContenidoRespuestas.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.pnlContenidoRespuestas.Location = new System.Drawing.Point(0, 45);
 			this.pnlContenidoRespuestas.Name = "pnlContenidoRespuestas";
 			this.pnlContenidoRespuestas.Padding = new System.Windows.Forms.Padding(12, 8, 12, 8);
 			this.pnlContenidoRespuestas.Size = new System.Drawing.Size(280, 536);
-			this.pnlContenidoRespuestas.TabIndex = 2;
+			this.pnlContenidoRespuestas.TabIndex = 0;
 			// 
-			// panel3
+			// pnlContenidoInternoRespuestas
 			// 
-			this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.panel3.Location = new System.Drawing.Point(12, 8);
-			this.panel3.Name = "panel3";
-			this.panel3.Padding = new System.Windows.Forms.Padding(6);
-			this.panel3.Size = new System.Drawing.Size(256, 520);
-			this.panel3.TabIndex = 5;
+			this.pnlContenidoInternoRespuestas.Controls.Add(this.pnlContenedorListaRespuestas);
+			this.pnlContenidoInternoRespuestas.Controls.Add(this.pnlAgregarRespuesta);
+			this.pnlContenidoInternoRespuestas.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.pnlContenidoInternoRespuestas.Location = new System.Drawing.Point(12, 8);
+			this.pnlContenidoInternoRespuestas.Name = "pnlContenidoInternoRespuestas";
+			this.pnlContenidoInternoRespuestas.Padding = new System.Windows.Forms.Padding(6);
+			this.pnlContenidoInternoRespuestas.Size = new System.Drawing.Size(256, 520);
+			this.pnlContenidoInternoRespuestas.TabIndex = 0;
+			// 
+			// pnlContenedorListaRespuestas
+			// 
+			this.pnlContenedorListaRespuestas.AutoScroll = true;
+			this.pnlContenedorListaRespuestas.Controls.Add(this.pnlListaRespuestas);
+			this.pnlContenedorListaRespuestas.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.pnlContenedorListaRespuestas.Location = new System.Drawing.Point(6, 170);
+			this.pnlContenedorListaRespuestas.Name = "pnlContenedorListaRespuestas";
+			this.pnlContenedorListaRespuestas.Size = new System.Drawing.Size(244, 344);
+			this.pnlContenedorListaRespuestas.TabIndex = 1;
+			// 
+			// pnlListaRespuestas
+			// 
+			this.pnlListaRespuestas.AutoScroll = true;
+			this.pnlListaRespuestas.Dock = System.Windows.Forms.DockStyle.Top;
+			this.pnlListaRespuestas.Location = new System.Drawing.Point(0, 0);
+			this.pnlListaRespuestas.Margin = new System.Windows.Forms.Padding(0);
+			this.pnlListaRespuestas.Name = "pnlListaRespuestas";
+			this.pnlListaRespuestas.Size = new System.Drawing.Size(244, 39);
+			this.pnlListaRespuestas.TabIndex = 0;
+			// 
+			// pnlAgregarRespuesta
+			// 
+			this.pnlAgregarRespuesta.AutoSize = true;
+			this.pnlAgregarRespuesta.Controls.Add(this.btnAgregarInteractionResponse);
+			this.pnlAgregarRespuesta.Controls.Add(this.btnAgregarModalResponse);
+			this.pnlAgregarRespuesta.Controls.Add(this.btnAgregarSelectMenuResponse);
+			this.pnlAgregarRespuesta.Controls.Add(this.btnAgregarButtonResponse);
+			this.pnlAgregarRespuesta.Dock = System.Windows.Forms.DockStyle.Top;
+			this.pnlAgregarRespuesta.Location = new System.Drawing.Point(6, 6);
+			this.pnlAgregarRespuesta.Name = "pnlAgregarRespuesta";
+			this.pnlAgregarRespuesta.Padding = new System.Windows.Forms.Padding(0, 0, 0, 8);
+			this.pnlAgregarRespuesta.Size = new System.Drawing.Size(244, 164);
+			this.pnlAgregarRespuesta.TabIndex = 0;
 			// 
 			// lblTítuloRespuestas
 			// 
@@ -823,6 +848,124 @@ namespace CommandBuilder {
 			this.lblTítuloRespuestas.Size = new System.Drawing.Size(195, 45);
 			this.lblTítuloRespuestas.TabIndex = 6;
 			this.lblTítuloRespuestas.Text = "Respuestas";
+			// 
+			// btnNuevoAlias
+			// 
+			this.btnNuevoAlias.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(35)))), ((int)(((byte)(44)))));
+			this.btnNuevoAlias.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+			this.btnNuevoAlias.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+			this.btnNuevoAlias.BorderRadius = 100F;
+			this.btnNuevoAlias.BorderSize = 0F;
+			this.btnNuevoAlias.Dock = System.Windows.Forms.DockStyle.Right;
+			this.btnNuevoAlias.FlatAppearance.BorderSize = 0;
+			this.btnNuevoAlias.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.btnNuevoAlias.Font = new System.Drawing.Font("Arial Black", 16F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.btnNuevoAlias.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(196)))), ((int)(((byte)(130)))));
+			this.btnNuevoAlias.Image = global::CommandBuilder.Properties.Resources.plus;
+			this.btnNuevoAlias.Location = new System.Drawing.Point(217, 0);
+			this.btnNuevoAlias.Name = "btnNuevoAlias";
+			this.btnNuevoAlias.PercentualRadius = true;
+			this.btnNuevoAlias.Size = new System.Drawing.Size(39, 39);
+			this.btnNuevoAlias.TabIndex = 1;
+			this.btnNuevoAlias.TextAlign = System.Drawing.ContentAlignment.TopRight;
+			this.btnNuevoAlias.UseVisualStyleBackColor = false;
+			this.btnNuevoAlias.Click += new System.EventHandler(this.BtnNuevoAlias_Click);
+			// 
+			// btnAgregarInteractionResponse
+			// 
+			this.btnAgregarInteractionResponse.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(43)))), ((int)(((byte)(57)))));
+			this.btnAgregarInteractionResponse.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+			this.btnAgregarInteractionResponse.BorderRadius = 100F;
+			this.btnAgregarInteractionResponse.BorderSize = 0F;
+			this.btnAgregarInteractionResponse.Dock = System.Windows.Forms.DockStyle.Top;
+			this.btnAgregarInteractionResponse.FlatAppearance.BorderSize = 0;
+			this.btnAgregarInteractionResponse.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.btnAgregarInteractionResponse.Font = new System.Drawing.Font("Segoe UI Semibold", 11F);
+			this.btnAgregarInteractionResponse.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(246)))), ((int)(((byte)(246)))), ((int)(((byte)(246)))));
+			this.btnAgregarInteractionResponse.Image = global::CommandBuilder.Properties.Resources.plus;
+			this.btnAgregarInteractionResponse.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.btnAgregarInteractionResponse.Location = new System.Drawing.Point(0, 117);
+			this.btnAgregarInteractionResponse.Margin = new System.Windows.Forms.Padding(0, 0, 0, 3);
+			this.btnAgregarInteractionResponse.Name = "btnAgregarInteractionResponse";
+			this.btnAgregarInteractionResponse.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
+			this.btnAgregarInteractionResponse.PercentualRadius = true;
+			this.btnAgregarInteractionResponse.Size = new System.Drawing.Size(244, 39);
+			this.btnAgregarInteractionResponse.TabIndex = 3;
+			this.btnAgregarInteractionResponse.Text = "Interaction";
+			this.btnAgregarInteractionResponse.UseVisualStyleBackColor = false;
+			this.btnAgregarInteractionResponse.Click += new System.EventHandler(this.btnAgregarRespuesta_Click);
+			// 
+			// btnAgregarModalResponse
+			// 
+			this.btnAgregarModalResponse.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(43)))), ((int)(((byte)(57)))));
+			this.btnAgregarModalResponse.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+			this.btnAgregarModalResponse.BorderRadius = 100F;
+			this.btnAgregarModalResponse.BorderSize = 0F;
+			this.btnAgregarModalResponse.Dock = System.Windows.Forms.DockStyle.Top;
+			this.btnAgregarModalResponse.FlatAppearance.BorderSize = 0;
+			this.btnAgregarModalResponse.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.btnAgregarModalResponse.Font = new System.Drawing.Font("Segoe UI Semibold", 11F);
+			this.btnAgregarModalResponse.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(246)))), ((int)(((byte)(246)))), ((int)(((byte)(246)))));
+			this.btnAgregarModalResponse.Image = global::CommandBuilder.Properties.Resources.plus;
+			this.btnAgregarModalResponse.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.btnAgregarModalResponse.Location = new System.Drawing.Point(0, 78);
+			this.btnAgregarModalResponse.Margin = new System.Windows.Forms.Padding(0, 0, 0, 3);
+			this.btnAgregarModalResponse.Name = "btnAgregarModalResponse";
+			this.btnAgregarModalResponse.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
+			this.btnAgregarModalResponse.PercentualRadius = true;
+			this.btnAgregarModalResponse.Size = new System.Drawing.Size(244, 39);
+			this.btnAgregarModalResponse.TabIndex = 2;
+			this.btnAgregarModalResponse.Text = "Modal";
+			this.btnAgregarModalResponse.UseVisualStyleBackColor = false;
+			this.btnAgregarModalResponse.Click += new System.EventHandler(this.btnAgregarRespuesta_Click);
+			// 
+			// btnAgregarSelectMenuResponse
+			// 
+			this.btnAgregarSelectMenuResponse.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(43)))), ((int)(((byte)(57)))));
+			this.btnAgregarSelectMenuResponse.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+			this.btnAgregarSelectMenuResponse.BorderRadius = 100F;
+			this.btnAgregarSelectMenuResponse.BorderSize = 0F;
+			this.btnAgregarSelectMenuResponse.Dock = System.Windows.Forms.DockStyle.Top;
+			this.btnAgregarSelectMenuResponse.FlatAppearance.BorderSize = 0;
+			this.btnAgregarSelectMenuResponse.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.btnAgregarSelectMenuResponse.Font = new System.Drawing.Font("Segoe UI Semibold", 11F);
+			this.btnAgregarSelectMenuResponse.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(246)))), ((int)(((byte)(246)))), ((int)(((byte)(246)))));
+			this.btnAgregarSelectMenuResponse.Image = global::CommandBuilder.Properties.Resources.plus;
+			this.btnAgregarSelectMenuResponse.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.btnAgregarSelectMenuResponse.Location = new System.Drawing.Point(0, 39);
+			this.btnAgregarSelectMenuResponse.Margin = new System.Windows.Forms.Padding(0, 0, 0, 3);
+			this.btnAgregarSelectMenuResponse.Name = "btnAgregarSelectMenuResponse";
+			this.btnAgregarSelectMenuResponse.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
+			this.btnAgregarSelectMenuResponse.PercentualRadius = true;
+			this.btnAgregarSelectMenuResponse.Size = new System.Drawing.Size(244, 39);
+			this.btnAgregarSelectMenuResponse.TabIndex = 1;
+			this.btnAgregarSelectMenuResponse.Text = "SelectMenu";
+			this.btnAgregarSelectMenuResponse.UseVisualStyleBackColor = false;
+			this.btnAgregarSelectMenuResponse.Click += new System.EventHandler(this.btnAgregarRespuesta_Click);
+			// 
+			// btnAgregarButtonResponse
+			// 
+			this.btnAgregarButtonResponse.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(43)))), ((int)(((byte)(57)))));
+			this.btnAgregarButtonResponse.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+			this.btnAgregarButtonResponse.BorderRadius = 100F;
+			this.btnAgregarButtonResponse.BorderSize = 0F;
+			this.btnAgregarButtonResponse.Dock = System.Windows.Forms.DockStyle.Top;
+			this.btnAgregarButtonResponse.FlatAppearance.BorderSize = 0;
+			this.btnAgregarButtonResponse.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.btnAgregarButtonResponse.Font = new System.Drawing.Font("Segoe UI Semibold", 11F);
+			this.btnAgregarButtonResponse.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(246)))), ((int)(((byte)(246)))), ((int)(((byte)(246)))));
+			this.btnAgregarButtonResponse.Image = global::CommandBuilder.Properties.Resources.plus;
+			this.btnAgregarButtonResponse.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.btnAgregarButtonResponse.Location = new System.Drawing.Point(0, 0);
+			this.btnAgregarButtonResponse.Margin = new System.Windows.Forms.Padding(0, 0, 0, 3);
+			this.btnAgregarButtonResponse.Name = "btnAgregarButtonResponse";
+			this.btnAgregarButtonResponse.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
+			this.btnAgregarButtonResponse.PercentualRadius = true;
+			this.btnAgregarButtonResponse.Size = new System.Drawing.Size(244, 39);
+			this.btnAgregarButtonResponse.TabIndex = 0;
+			this.btnAgregarButtonResponse.Text = "Button";
+			this.btnAgregarButtonResponse.UseVisualStyleBackColor = false;
+			this.btnAgregarButtonResponse.Click += new System.EventHandler(this.btnAgregarRespuesta_Click);
 			// 
 			// FPrincipal
 			// 
@@ -870,6 +1013,10 @@ namespace CommandBuilder {
 			this.pnlRespuestas.ResumeLayout(false);
 			this.pnlRespuestas.PerformLayout();
 			this.pnlContenidoRespuestas.ResumeLayout(false);
+			this.pnlContenidoInternoRespuestas.ResumeLayout(false);
+			this.pnlContenidoInternoRespuestas.PerformLayout();
+			this.pnlContenedorListaRespuestas.ResumeLayout(false);
+			this.pnlAgregarRespuesta.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -919,11 +1066,18 @@ namespace CommandBuilder {
 		private System.Windows.Forms.DataGridView dgvOpciones;
 		private System.Windows.Forms.Panel pnlRespuestas;
 		private System.Windows.Forms.Panel pnlContenidoRespuestas;
-		private System.Windows.Forms.Panel panel3;
+		private System.Windows.Forms.Panel pnlContenidoInternoRespuestas;
 		private System.Windows.Forms.Label lblTítuloRespuestas;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Opción;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Nombre;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Tipo;
+		private System.Windows.Forms.Panel pnlAgregarRespuesta;
+		private System.Windows.Forms.Panel pnlContenedorListaRespuestas;
+		private System.Windows.Forms.Panel pnlListaRespuestas;
+		private ControLib.SleekButton btnAgregarModalResponse;
+		private ControLib.SleekButton btnAgregarSelectMenuResponse;
+		private ControLib.SleekButton btnAgregarButtonResponse;
+		private ControLib.SleekButton btnAgregarInteractionResponse;
 	}
 }
 

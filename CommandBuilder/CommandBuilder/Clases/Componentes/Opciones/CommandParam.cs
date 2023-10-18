@@ -75,7 +75,7 @@ namespace CommandBuilder {
 			if(opciones.Count > 0)
 				valor += $", {{ {string.Join(", ", opciones)} }}";
 
-			valor += $"){this.PuntoYComaFinal}";
+			valor += $")";
 
 			return valor;
 		}
