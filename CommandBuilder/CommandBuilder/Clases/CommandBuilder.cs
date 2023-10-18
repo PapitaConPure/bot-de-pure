@@ -46,23 +46,33 @@ namespace CommandBuilder {
 
 			this.components.Sort();
 
-			string total =
-				"const {  } = require('discord.js'); //Integrar discord.js\n" +
-				"const {  } = require('../../func.js'); //Funciones globales\n" +
-				"const {  } = require('../../localdata/config.json'); //Configuraciones\n" +
-				"const { p_pure } = require('../../localdata/customization/prefixes.js');\n" +
-				$"const {{ {string.Join(", ", this.components.Select(c => c.Requiere))} }} = require('../Commons/commands.js');\n\n";
+			StringBuilder total = new StringBuilder();
+			total.AppendLine("const {  } = require('discord.js'); //Integrar discord.js");
+			total.AppendLine("const {  } = require('../../func.js'); //Funciones globales");
+			total.AppendLine("const {  } = require('../../localdata/config.json'); //Configuraciones");
+			total.AppendLine("const { p_pure } = require('../../localdata/customization/prefixes.js');");
+			total.AppendLine($"const {{ {string.Join(", ", this.components.Select(c => c.Requiere))} }} = require('../Commons/commands.js');");
 
 			if(this.tipos.HasFlag(ComponentType.CommandOptionsManager)) {
 				CommandManager manager = this.components.Find(c => c.Tipo == ComponentType.CommandManager) as CommandManager;
 				manager.UsaOpciones = true;
 			}
 
-			total += string.Join("\n\n", this.components.Select(c => c.Imprimir()));
+			total.AppendLine();
+			bool pasóPrimero = false;
+			foreach(CommandComponent component in this.components) {
+				if(pasóPrimero)
+					total.Append("\n\n");
+				else
+					pasóPrimero = true;
 
-			total += "\n\nmodule.exports = command;";
+				total.AppendLine(component.Imprimir());
+			}
 
-			return total;
+			total.AppendLine();
+			total.AppendLine("module.exports = command;");
+
+			return total.ToString();
 		}
 	}
 }
