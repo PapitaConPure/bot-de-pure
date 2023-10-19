@@ -114,6 +114,7 @@ namespace CommandBuilder {
 			this.tbCódigo.Cursor = System.Windows.Forms.Cursors.IBeam;
 			this.tbCódigo.DisabledColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
 			this.tbCódigo.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.tbCódigo.Font = new System.Drawing.Font("Courier New", 9.75F);
 			this.tbCódigo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(22)))), ((int)(((byte)(22)))));
 			this.tbCódigo.IndentBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(102)))), ((int)(((byte)(99)))), ((int)(((byte)(114)))));
 			this.tbCódigo.IsReplaceMode = false;
@@ -138,8 +139,8 @@ namespace CommandBuilder {
 			// pnlOpciones
 			// 
 			this.pnlOpciones.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(12)))), ((int)(((byte)(12)))), ((int)(((byte)(12)))));
-			this.pnlOpciones.Controls.Add(this.btnAgregar);
 			this.pnlOpciones.Controls.Add(this.btnCancelar);
+			this.pnlOpciones.Controls.Add(this.btnAgregar);
 			this.pnlOpciones.Dock = System.Windows.Forms.DockStyle.Bottom;
 			this.pnlOpciones.Location = new System.Drawing.Point(0, 588);
 			this.pnlOpciones.Name = "pnlOpciones";
@@ -160,7 +161,7 @@ namespace CommandBuilder {
 			this.btnAgregar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.btnAgregar.Font = new System.Drawing.Font("Segoe UI Semibold", 12F);
 			this.btnAgregar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(246)))), ((int)(((byte)(246)))), ((int)(((byte)(246)))));
-			this.btnAgregar.Location = new System.Drawing.Point(715, 10);
+			this.btnAgregar.Location = new System.Drawing.Point(843, 10);
 			this.btnAgregar.Name = "btnAgregar";
 			this.btnAgregar.PercentualRadius = true;
 			this.btnAgregar.Size = new System.Drawing.Size(128, 34);
@@ -180,7 +181,7 @@ namespace CommandBuilder {
 			this.btnCancelar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.btnCancelar.Font = new System.Drawing.Font("Segoe UI Semibold", 11F);
 			this.btnCancelar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			this.btnCancelar.Location = new System.Drawing.Point(843, 10);
+			this.btnCancelar.Location = new System.Drawing.Point(715, 10);
 			this.btnCancelar.Name = "btnCancelar";
 			this.btnCancelar.PercentualRadius = true;
 			this.btnCancelar.Size = new System.Drawing.Size(128, 34);

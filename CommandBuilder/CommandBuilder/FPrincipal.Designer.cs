@@ -24,11 +24,11 @@ namespace CommandBuilder {
 		/// el contenido de este método con el editor de código.
 		/// </summary>
 		private void InitializeComponent() {
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle35 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle32 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle34 = new System.Windows.Forms.DataGridViewCellStyle();
 			this.pnlMetadatos = new System.Windows.Forms.Panel();
 			this.pnlContenidoMetadatos = new System.Windows.Forms.Panel();
 			this.pnlEtiquetas = new System.Windows.Forms.Panel();
@@ -54,13 +54,13 @@ namespace CommandBuilder {
 			this.pnlAlias = new System.Windows.Forms.Panel();
 			this.pnlNuevoAlias = new System.Windows.Forms.Panel();
 			this.tbNuevoAlias = new ControLib.SleekTextBox();
+			this.btnNuevoAlias = new ControLib.SleekButton();
 			this.lblAlias = new System.Windows.Forms.Label();
 			this.pnlNombre = new System.Windows.Forms.Panel();
 			this.tbNombre = new ControLib.SleekTextBox();
 			this.lblNombre = new System.Windows.Forms.Label();
 			this.pnlTítuloMetadatos = new System.Windows.Forms.Panel();
 			this.lblMetadatos = new System.Windows.Forms.Label();
-			this.btnGenerar = new ControLib.SleekButton();
 			this.sflComando = new System.Windows.Forms.SaveFileDialog();
 			this.pnlOpciones = new System.Windows.Forms.Panel();
 			this.pnlContenidoOpciones = new System.Windows.Forms.Panel();
@@ -79,12 +79,14 @@ namespace CommandBuilder {
 			this.pnlContenedorListaRespuestas = new System.Windows.Forms.Panel();
 			this.pnlListaRespuestas = new System.Windows.Forms.Panel();
 			this.pnlAgregarRespuesta = new System.Windows.Forms.Panel();
-			this.lblTítuloRespuestas = new System.Windows.Forms.Label();
-			this.btnNuevoAlias = new ControLib.SleekButton();
 			this.btnAgregarInteractionResponse = new ControLib.SleekButton();
 			this.btnAgregarModalResponse = new ControLib.SleekButton();
 			this.btnAgregarSelectMenuResponse = new ControLib.SleekButton();
 			this.btnAgregarButtonResponse = new ControLib.SleekButton();
+			this.lblTítuloRespuestas = new System.Windows.Forms.Label();
+			this.panel1 = new System.Windows.Forms.Panel();
+			this.btnLimpiar = new ControLib.SleekButton();
+			this.btnGenerar = new ControLib.SleekButton();
 			this.pnlMetadatos.SuspendLayout();
 			this.pnlContenidoMetadatos.SuspendLayout();
 			this.pnlEtiquetas.SuspendLayout();
@@ -105,6 +107,7 @@ namespace CommandBuilder {
 			this.pnlContenidoInternoRespuestas.SuspendLayout();
 			this.pnlContenedorListaRespuestas.SuspendLayout();
 			this.pnlAgregarRespuesta.SuspendLayout();
+			this.panel1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// pnlMetadatos
@@ -467,6 +470,28 @@ namespace CommandBuilder {
 			this.tbNuevoAlias.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
 			this.tbNuevoAlias.WordWrap = true;
 			// 
+			// btnNuevoAlias
+			// 
+			this.btnNuevoAlias.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(35)))), ((int)(((byte)(44)))));
+			this.btnNuevoAlias.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+			this.btnNuevoAlias.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+			this.btnNuevoAlias.BorderRadius = 100F;
+			this.btnNuevoAlias.BorderSize = 0F;
+			this.btnNuevoAlias.Dock = System.Windows.Forms.DockStyle.Right;
+			this.btnNuevoAlias.FlatAppearance.BorderSize = 0;
+			this.btnNuevoAlias.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.btnNuevoAlias.Font = new System.Drawing.Font("Arial Black", 16F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.btnNuevoAlias.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(196)))), ((int)(((byte)(130)))));
+			this.btnNuevoAlias.Image = global::CommandBuilder.Properties.Resources.plus;
+			this.btnNuevoAlias.Location = new System.Drawing.Point(217, 0);
+			this.btnNuevoAlias.Name = "btnNuevoAlias";
+			this.btnNuevoAlias.PercentualRadius = true;
+			this.btnNuevoAlias.Size = new System.Drawing.Size(39, 39);
+			this.btnNuevoAlias.TabIndex = 1;
+			this.btnNuevoAlias.TextAlign = System.Drawing.ContentAlignment.TopRight;
+			this.btnNuevoAlias.UseVisualStyleBackColor = false;
+			this.btnNuevoAlias.Click += new System.EventHandler(this.BtnNuevoAlias_Click);
+			// 
 			// lblAlias
 			// 
 			this.lblAlias.AutoSize = true;
@@ -555,27 +580,6 @@ namespace CommandBuilder {
 			this.lblMetadatos.TabIndex = 3;
 			this.lblMetadatos.Text = "Metadatos";
 			// 
-			// btnGenerar
-			// 
-			this.btnGenerar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnGenerar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(202)))), ((int)(((byte)(41)))), ((int)(((byte)(41)))));
-			this.btnGenerar.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
-			this.btnGenerar.BorderRadius = 100F;
-			this.btnGenerar.BorderSize = 0F;
-			this.btnGenerar.FlatAppearance.BorderSize = 0;
-			this.btnGenerar.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(61)))), ((int)(((byte)(41)))));
-			this.btnGenerar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.btnGenerar.Font = new System.Drawing.Font("Segoe UI Semibold", 12F);
-			this.btnGenerar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(246)))), ((int)(((byte)(246)))), ((int)(((byte)(246)))));
-			this.btnGenerar.Location = new System.Drawing.Point(713, 532);
-			this.btnGenerar.Name = "btnGenerar";
-			this.btnGenerar.PercentualRadius = true;
-			this.btnGenerar.Size = new System.Drawing.Size(159, 39);
-			this.btnGenerar.TabIndex = 3;
-			this.btnGenerar.Text = "Generar Archivo";
-			this.btnGenerar.UseVisualStyleBackColor = false;
-			this.btnGenerar.Click += new System.EventHandler(this.BtnGenerar_Click);
-			// 
 			// sflComando
 			// 
 			this.sflComando.DefaultExt = "js";
@@ -626,27 +630,27 @@ namespace CommandBuilder {
 			this.dgvOpciones.BorderStyle = System.Windows.Forms.BorderStyle.None;
 			this.dgvOpciones.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.None;
 			this.dgvOpciones.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
-			dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle11.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(43)))), ((int)(((byte)(57)))));
-			dataGridViewCellStyle11.Font = new System.Drawing.Font("Segoe UI", 11F);
-			dataGridViewCellStyle11.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(85)))), ((int)(((byte)(111)))), ((int)(((byte)(138)))));
-			dataGridViewCellStyle11.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			this.dgvOpciones.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle11;
+			dataGridViewCellStyle31.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle31.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(43)))), ((int)(((byte)(57)))));
+			dataGridViewCellStyle31.Font = new System.Drawing.Font("Segoe UI", 11F);
+			dataGridViewCellStyle31.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(85)))), ((int)(((byte)(111)))), ((int)(((byte)(138)))));
+			dataGridViewCellStyle31.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle31.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			this.dgvOpciones.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle31;
 			this.dgvOpciones.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
 			this.dgvOpciones.ColumnHeadersVisible = false;
 			this.dgvOpciones.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Opción,
             this.Nombre,
             this.Tipo});
-			dataGridViewCellStyle15.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle15.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(32)))), ((int)(((byte)(36)))));
-			dataGridViewCellStyle15.Font = new System.Drawing.Font("Segoe UI", 11F);
-			dataGridViewCellStyle15.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			dataGridViewCellStyle15.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle15.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle15.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dgvOpciones.DefaultCellStyle = dataGridViewCellStyle15;
+			dataGridViewCellStyle35.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle35.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(32)))), ((int)(((byte)(36)))));
+			dataGridViewCellStyle35.Font = new System.Drawing.Font("Segoe UI", 11F);
+			dataGridViewCellStyle35.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
+			dataGridViewCellStyle35.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle35.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle35.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dgvOpciones.DefaultCellStyle = dataGridViewCellStyle35;
 			this.dgvOpciones.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.dgvOpciones.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
 			this.dgvOpciones.EnableHeadersVisualStyles = false;
@@ -666,8 +670,8 @@ namespace CommandBuilder {
 			// 
 			// Opción
 			// 
-			dataGridViewCellStyle12.Font = new System.Drawing.Font("Segoe UI", 11F);
-			this.Opción.DefaultCellStyle = dataGridViewCellStyle12;
+			dataGridViewCellStyle32.Font = new System.Drawing.Font("Segoe UI", 11F);
+			this.Opción.DefaultCellStyle = dataGridViewCellStyle32;
 			this.Opción.HeaderText = "Op.";
 			this.Opción.MinimumWidth = 58;
 			this.Opción.Name = "Opción";
@@ -679,9 +683,9 @@ namespace CommandBuilder {
 			// Nombre
 			// 
 			this.Nombre.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-			dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle13.Font = new System.Drawing.Font("Segoe UI", 11F);
-			this.Nombre.DefaultCellStyle = dataGridViewCellStyle13;
+			dataGridViewCellStyle33.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle33.Font = new System.Drawing.Font("Segoe UI", 11F);
+			this.Nombre.DefaultCellStyle = dataGridViewCellStyle33;
 			this.Nombre.HeaderText = "Nombre";
 			this.Nombre.MinimumWidth = 58;
 			this.Nombre.Name = "Nombre";
@@ -693,9 +697,9 @@ namespace CommandBuilder {
 			// Tipo
 			// 
 			this.Tipo.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-			dataGridViewCellStyle14.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle14.Font = new System.Drawing.Font("Segoe UI", 11F);
-			this.Tipo.DefaultCellStyle = dataGridViewCellStyle14;
+			dataGridViewCellStyle34.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle34.Font = new System.Drawing.Font("Segoe UI", 11F);
+			this.Tipo.DefaultCellStyle = dataGridViewCellStyle34;
 			this.Tipo.HeaderText = "Tipo";
 			this.Tipo.Name = "Tipo";
 			this.Tipo.ReadOnly = true;
@@ -776,6 +780,7 @@ namespace CommandBuilder {
 			this.pnlRespuestas.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(18)))), ((int)(((byte)(18)))));
 			this.pnlRespuestas.Controls.Add(this.pnlContenidoRespuestas);
 			this.pnlRespuestas.Controls.Add(this.lblTítuloRespuestas);
+			this.pnlRespuestas.Controls.Add(this.panel1);
 			this.pnlRespuestas.Dock = System.Windows.Forms.DockStyle.Right;
 			this.pnlRespuestas.Location = new System.Drawing.Point(604, 0);
 			this.pnlRespuestas.Name = "pnlRespuestas";
@@ -789,7 +794,7 @@ namespace CommandBuilder {
 			this.pnlContenidoRespuestas.Location = new System.Drawing.Point(0, 45);
 			this.pnlContenidoRespuestas.Name = "pnlContenidoRespuestas";
 			this.pnlContenidoRespuestas.Padding = new System.Windows.Forms.Padding(12, 8, 12, 8);
-			this.pnlContenidoRespuestas.Size = new System.Drawing.Size(280, 536);
+			this.pnlContenidoRespuestas.Size = new System.Drawing.Size(280, 469);
 			this.pnlContenidoRespuestas.TabIndex = 0;
 			// 
 			// pnlContenidoInternoRespuestas
@@ -800,7 +805,7 @@ namespace CommandBuilder {
 			this.pnlContenidoInternoRespuestas.Location = new System.Drawing.Point(12, 8);
 			this.pnlContenidoInternoRespuestas.Name = "pnlContenidoInternoRespuestas";
 			this.pnlContenidoInternoRespuestas.Padding = new System.Windows.Forms.Padding(6);
-			this.pnlContenidoInternoRespuestas.Size = new System.Drawing.Size(256, 520);
+			this.pnlContenidoInternoRespuestas.Size = new System.Drawing.Size(256, 453);
 			this.pnlContenidoInternoRespuestas.TabIndex = 0;
 			// 
 			// pnlContenedorListaRespuestas
@@ -810,7 +815,7 @@ namespace CommandBuilder {
 			this.pnlContenedorListaRespuestas.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.pnlContenedorListaRespuestas.Location = new System.Drawing.Point(6, 170);
 			this.pnlContenedorListaRespuestas.Name = "pnlContenedorListaRespuestas";
-			this.pnlContenedorListaRespuestas.Size = new System.Drawing.Size(244, 344);
+			this.pnlContenedorListaRespuestas.Size = new System.Drawing.Size(244, 277);
 			this.pnlContenedorListaRespuestas.TabIndex = 1;
 			// 
 			// pnlListaRespuestas
@@ -836,40 +841,6 @@ namespace CommandBuilder {
 			this.pnlAgregarRespuesta.Padding = new System.Windows.Forms.Padding(0, 0, 0, 8);
 			this.pnlAgregarRespuesta.Size = new System.Drawing.Size(244, 164);
 			this.pnlAgregarRespuesta.TabIndex = 0;
-			// 
-			// lblTítuloRespuestas
-			// 
-			this.lblTítuloRespuestas.AutoSize = true;
-			this.lblTítuloRespuestas.Dock = System.Windows.Forms.DockStyle.Top;
-			this.lblTítuloRespuestas.Font = new System.Drawing.Font("Segoe UI Black", 24F, System.Drawing.FontStyle.Bold);
-			this.lblTítuloRespuestas.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(78)))), ((int)(((byte)(39)))));
-			this.lblTítuloRespuestas.Location = new System.Drawing.Point(0, 0);
-			this.lblTítuloRespuestas.Name = "lblTítuloRespuestas";
-			this.lblTítuloRespuestas.Size = new System.Drawing.Size(195, 45);
-			this.lblTítuloRespuestas.TabIndex = 6;
-			this.lblTítuloRespuestas.Text = "Respuestas";
-			// 
-			// btnNuevoAlias
-			// 
-			this.btnNuevoAlias.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(35)))), ((int)(((byte)(44)))));
-			this.btnNuevoAlias.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-			this.btnNuevoAlias.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
-			this.btnNuevoAlias.BorderRadius = 100F;
-			this.btnNuevoAlias.BorderSize = 0F;
-			this.btnNuevoAlias.Dock = System.Windows.Forms.DockStyle.Right;
-			this.btnNuevoAlias.FlatAppearance.BorderSize = 0;
-			this.btnNuevoAlias.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.btnNuevoAlias.Font = new System.Drawing.Font("Arial Black", 16F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.btnNuevoAlias.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(196)))), ((int)(((byte)(130)))));
-			this.btnNuevoAlias.Image = global::CommandBuilder.Properties.Resources.plus;
-			this.btnNuevoAlias.Location = new System.Drawing.Point(217, 0);
-			this.btnNuevoAlias.Name = "btnNuevoAlias";
-			this.btnNuevoAlias.PercentualRadius = true;
-			this.btnNuevoAlias.Size = new System.Drawing.Size(39, 39);
-			this.btnNuevoAlias.TabIndex = 1;
-			this.btnNuevoAlias.TextAlign = System.Drawing.ContentAlignment.TopRight;
-			this.btnNuevoAlias.UseVisualStyleBackColor = false;
-			this.btnNuevoAlias.Click += new System.EventHandler(this.BtnNuevoAlias_Click);
 			// 
 			// btnAgregarInteractionResponse
 			// 
@@ -967,13 +938,79 @@ namespace CommandBuilder {
 			this.btnAgregarButtonResponse.UseVisualStyleBackColor = false;
 			this.btnAgregarButtonResponse.Click += new System.EventHandler(this.btnAgregarRespuesta_Click);
 			// 
+			// lblTítuloRespuestas
+			// 
+			this.lblTítuloRespuestas.AutoSize = true;
+			this.lblTítuloRespuestas.Dock = System.Windows.Forms.DockStyle.Top;
+			this.lblTítuloRespuestas.Font = new System.Drawing.Font("Segoe UI Black", 24F, System.Drawing.FontStyle.Bold);
+			this.lblTítuloRespuestas.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(78)))), ((int)(((byte)(39)))));
+			this.lblTítuloRespuestas.Location = new System.Drawing.Point(0, 0);
+			this.lblTítuloRespuestas.Name = "lblTítuloRespuestas";
+			this.lblTítuloRespuestas.Size = new System.Drawing.Size(195, 45);
+			this.lblTítuloRespuestas.TabIndex = 6;
+			this.lblTítuloRespuestas.Text = "Respuestas";
+			// 
+			// panel1
+			// 
+			this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(26)))), ((int)(((byte)(26)))));
+			this.panel1.Controls.Add(this.btnLimpiar);
+			this.panel1.Controls.Add(this.btnGenerar);
+			this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this.panel1.Location = new System.Drawing.Point(0, 514);
+			this.panel1.Name = "panel1";
+			this.panel1.Padding = new System.Windows.Forms.Padding(0, 14, 12, 14);
+			this.panel1.Size = new System.Drawing.Size(280, 67);
+			this.panel1.TabIndex = 7;
+			// 
+			// btnLimpiar
+			// 
+			this.btnLimpiar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(26)))), ((int)(((byte)(26)))));
+			this.btnLimpiar.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+			this.btnLimpiar.BorderRadius = 100F;
+			this.btnLimpiar.BorderSize = 0F;
+			this.btnLimpiar.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.btnLimpiar.FlatAppearance.BorderSize = 0;
+			this.btnLimpiar.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(52)))), ((int)(((byte)(52)))));
+			this.btnLimpiar.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(36)))), ((int)(((byte)(36)))));
+			this.btnLimpiar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.btnLimpiar.Font = new System.Drawing.Font("Segoe UI Semibold", 12F);
+			this.btnLimpiar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(246)))), ((int)(((byte)(246)))), ((int)(((byte)(246)))));
+			this.btnLimpiar.Location = new System.Drawing.Point(0, 14);
+			this.btnLimpiar.Name = "btnLimpiar";
+			this.btnLimpiar.PercentualRadius = true;
+			this.btnLimpiar.Size = new System.Drawing.Size(96, 39);
+			this.btnLimpiar.TabIndex = 4;
+			this.btnLimpiar.Text = "Limpiar";
+			this.btnLimpiar.UseVisualStyleBackColor = false;
+			// 
+			// btnGenerar
+			// 
+			this.btnGenerar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(202)))), ((int)(((byte)(41)))), ((int)(((byte)(41)))));
+			this.btnGenerar.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+			this.btnGenerar.BorderRadius = 100F;
+			this.btnGenerar.BorderSize = 0F;
+			this.btnGenerar.Dock = System.Windows.Forms.DockStyle.Right;
+			this.btnGenerar.FlatAppearance.BorderSize = 0;
+			this.btnGenerar.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(83)))), ((int)(((byte)(66)))));
+			this.btnGenerar.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(61)))), ((int)(((byte)(41)))));
+			this.btnGenerar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.btnGenerar.Font = new System.Drawing.Font("Segoe UI Semibold", 12F);
+			this.btnGenerar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(246)))), ((int)(((byte)(246)))), ((int)(((byte)(246)))));
+			this.btnGenerar.Location = new System.Drawing.Point(96, 14);
+			this.btnGenerar.Name = "btnGenerar";
+			this.btnGenerar.PercentualRadius = true;
+			this.btnGenerar.Size = new System.Drawing.Size(172, 39);
+			this.btnGenerar.TabIndex = 3;
+			this.btnGenerar.Text = "Generar Archivo";
+			this.btnGenerar.UseVisualStyleBackColor = false;
+			this.btnGenerar.Click += new System.EventHandler(this.BtnGenerar_Click);
+			// 
 			// FPrincipal
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(26)))), ((int)(((byte)(26)))));
 			this.ClientSize = new System.Drawing.Size(884, 581);
-			this.Controls.Add(this.btnGenerar);
 			this.Controls.Add(this.pnlOpciones);
 			this.Controls.Add(this.pnlMetadatos);
 			this.Controls.Add(this.pnlRespuestas);
@@ -981,7 +1018,7 @@ namespace CommandBuilder {
 			this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
 			this.KeyPreview = true;
 			this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-			this.MinimumSize = new System.Drawing.Size(860, 220);
+			this.MinimumSize = new System.Drawing.Size(860, 420);
 			this.Name = "FPrincipal";
 			this.ShowIcon = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -1017,13 +1054,13 @@ namespace CommandBuilder {
 			this.pnlContenidoInternoRespuestas.PerformLayout();
 			this.pnlContenedorListaRespuestas.ResumeLayout(false);
 			this.pnlAgregarRespuesta.ResumeLayout(false);
+			this.panel1.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
 
 		#endregion
 		private System.Windows.Forms.Panel pnlMetadatos;
-		private ControLib.SleekButton btnGenerar;
 		private System.Windows.Forms.SaveFileDialog sflComando;
 		private System.Windows.Forms.Panel pnlTítuloMetadatos;
 		private System.Windows.Forms.Panel pnlContenidoMetadatos;
@@ -1078,6 +1115,9 @@ namespace CommandBuilder {
 		private ControLib.SleekButton btnAgregarSelectMenuResponse;
 		private ControLib.SleekButton btnAgregarButtonResponse;
 		private ControLib.SleekButton btnAgregarInteractionResponse;
+		private System.Windows.Forms.Panel panel1;
+		private ControLib.SleekButton btnLimpiar;
+		private ControLib.SleekButton btnGenerar;
 	}
 }
 

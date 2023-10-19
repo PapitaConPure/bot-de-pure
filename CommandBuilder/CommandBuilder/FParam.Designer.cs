@@ -456,9 +456,9 @@ namespace CommandBuilder {
 			// 
 			// pnlOpciones
 			// 
-			this.pnlOpciones.Controls.Add(this.btnAgregar);
 			this.pnlOpciones.Controls.Add(this.btnEliminar);
 			this.pnlOpciones.Controls.Add(this.btnCancelar);
+			this.pnlOpciones.Controls.Add(this.btnAgregar);
 			this.pnlOpciones.Dock = System.Windows.Forms.DockStyle.Bottom;
 			this.pnlOpciones.Location = new System.Drawing.Point(0, 421);
 			this.pnlOpciones.Name = "pnlOpciones";
@@ -479,7 +479,7 @@ namespace CommandBuilder {
 			this.btnAgregar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.btnAgregar.Font = new System.Drawing.Font("Segoe UI Semibold", 12F);
 			this.btnAgregar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(246)))), ((int)(((byte)(246)))), ((int)(((byte)(246)))));
-			this.btnAgregar.Location = new System.Drawing.Point(140, 10);
+			this.btnAgregar.Location = new System.Drawing.Point(396, 10);
 			this.btnAgregar.Name = "btnAgregar";
 			this.btnAgregar.PercentualRadius = true;
 			this.btnAgregar.Size = new System.Drawing.Size(128, 34);
@@ -500,7 +500,7 @@ namespace CommandBuilder {
 			this.btnEliminar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.btnEliminar.Font = new System.Drawing.Font("Segoe UI Semibold", 12F);
 			this.btnEliminar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			this.btnEliminar.Location = new System.Drawing.Point(268, 10);
+			this.btnEliminar.Location = new System.Drawing.Point(140, 10);
 			this.btnEliminar.Name = "btnEliminar";
 			this.btnEliminar.PercentualRadius = true;
 			this.btnEliminar.Size = new System.Drawing.Size(128, 34);
@@ -521,7 +521,7 @@ namespace CommandBuilder {
 			this.btnCancelar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.btnCancelar.Font = new System.Drawing.Font("Segoe UI Semibold", 11F);
 			this.btnCancelar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			this.btnCancelar.Location = new System.Drawing.Point(396, 10);
+			this.btnCancelar.Location = new System.Drawing.Point(268, 10);
 			this.btnCancelar.Name = "btnCancelar";
 			this.btnCancelar.PercentualRadius = true;
 			this.btnCancelar.Size = new System.Drawing.Size(128, 34);
