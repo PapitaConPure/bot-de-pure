@@ -1,10 +1,12 @@
 //const {  } = require('../../func.js'); //Funciones globales
 const { compressId, fetchChannel, decompressId } = require('../../func.js');
-const { TextChannel, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder, Colors } = require('discord.js');
+const { TextChannel, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder, Colors, DiscordAPIError } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const ConfessionSystems = require('../../localdata/models/confessionSystems.js');
 const PendingConfessions = require('../../localdata/models/pendingConfessions.js');
 const { CommandManager, CommandMetaFlagsManager, CommandOptionsManager } = require('../Commons/commands.js');
+const confessionSystems = require('../../localdata/models/confessionSystems.js');
+const { auditError } = require('../../systems/auditor.js');
 
 const flags = new CommandMetaFlagsManager().add(
 	'MOD',
@@ -335,6 +337,102 @@ const command = new CommandManager('confesión', flags)
 			.setAuthor({ name: 'Confesión rechazada' })
 			.setColor(0x8334eb)
 			.setDescription('Esta confesión fue rechazada. No se le notificará al autor');
+
+		return Promise.all([
+			interaction.message.delete().catch(_ => undefined),
+			interaction.reply({ embeds: [embed], ephemeral: true }),
+		]);
+	}).setButtonResponse(async function timeoutConfessant(interaction, confId) {
+		const data = await getConfessionSystemAndChannels(interaction);
+		if(!data.success)
+			return interaction.reply({ content: data.message, ephemeral: true });
+
+		const { confSystem } = data;
+
+		const index = confSystem.pending.indexOf(confId);
+		if(index < 0)
+			return interaction.reply({ content: '⚠️ La confesión indicada no está pendiente', ephemeral: true });
+		
+		confSystem.pending.splice(index, 1);
+		confSystem.markModified('pending');
+		await Promise.all([
+			confSystem.save(),
+			PendingConfessions.findOneAndDelete({ id: confId }),
+		]);
+
+		let embed;
+		try {
+			const gmid = decompressId(userId);
+			const miembro = interaction.guild.members.cache.get(gmid);
+			if(miembro)
+				miembro.timeout(120_000, $`Aislado por ${interaction.user.username} por confesión malintencionada`);
+			else
+				throw new ReferenceError('No se pudo encontrar el autor de esta confesión');
+
+			embed = new EmbedBuilder()
+				.setAuthor({ name: 'Confesante aislado' })
+				.setColor(Colors.Orange)
+				.setDescription('Esta confesión fue rechazada y su confesante fue aislado');
+		} catch(err) {
+			embed = new EmbedBuilder()
+				.setAuthor({ name: 'Confesión rechazada con errores' })
+				.setColor(Colors.Red)
+				.setDescription(`Esta confesión fue rechazada, pero el confesante ${miembro} no pudo ser aislado`)
+				.addFields(
+					{ name: 'Error', value: `\`\`\`\n${err.message}\n\`\`\`` || '_No hay un mensaje de error disponible_' },
+				);
+
+			if(!(err instanceof DiscordAPIError))
+				auditError(err, { request: interaction, brief: 'Ha ocurrido un error al aislar un confesante', ping: false });
+		}
+
+		return Promise.all([
+			interaction.message.delete().catch(_ => undefined),
+			interaction.reply({ embeds: [embed], ephemeral: true }),
+		]);
+	}).setButtonResponse(async function banConfessant(interaction, confId) {
+		const data = await getConfessionSystemAndChannels(interaction);
+		if(!data.success)
+			return interaction.reply({ content: data.message, ephemeral: true });
+
+		const { confSystem } = data;
+
+		const index = confSystem.pending.indexOf(confId);
+		if(index < 0)
+			return interaction.reply({ content: '⚠️ La confesión indicada no está pendiente', ephemeral: true });
+		
+		confSystem.pending.splice(index, 1);
+		confSystem.markModified('pending');
+		await Promise.all([
+			confSystem.save(),
+			PendingConfessions.findOneAndDelete({ id: confId }),
+		]);
+
+		let embed;
+		try {
+			const gmid = decompressId(userId);
+			const miembro = interaction.guild.members.cache.get(gmid);
+			if(miembro)
+				miembro.ban({ reason: $`Banneado por ${interaction.user.username} por confesión malintencionada` });
+			else
+				throw new ReferenceError('No se pudo encontrar el autor de esta confesión');
+
+			embed = new EmbedBuilder()
+				.setAuthor({ name: 'Confesante banneado' })
+				.setColor(Colors.Orange)
+				.setDescription('Esta confesión fue rechazada y su confesante fue banneado');
+		} catch(err) {
+			embed = new EmbedBuilder()
+				.setAuthor({ name: 'Confesión rechazada con errores' })
+				.setColor(Colors.Red)
+				.setDescription(`Esta confesión fue rechazada, pero el confesante ${miembro} no pudo ser banneado`)
+				.addFields(
+					{ name: 'Error', value: `\`\`\`\n${err.message}\n\`\`\`` || '_No hay un mensaje de error disponible_' },
+				);
+
+			if(!(err instanceof DiscordAPIError))
+				auditError(err, { request: interaction, brief: 'Ha ocurrido un error al bannear un confesante', ping: false });
+		}
 
 		return Promise.all([
 			interaction.message.delete().catch(_ => undefined),
