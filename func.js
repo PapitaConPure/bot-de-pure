@@ -629,12 +629,20 @@ module.exports = {
      * @returns {Discord.Channel}
      */
     fetchChannel: function(data, guild) {
+        if(!data)
+            return;
+
         const ccache = guild.channels.cache;
         if(data.startsWith('<#') && data.endsWith('>'))
             data = data.slice(2, -1);
+
         const channel = ccache.get(data) || ccache.filter(c => [ ChannelType.GuildText, ChannelType.GuildVoice ].includes(c.type)).find(c => c.name.toLowerCase().includes(data));
-        if(!channel) return;
-        if(![ ChannelType.GuildText, ChannelType.GuildVoice ].includes(channel.type)) return;
+
+        if(!channel)
+            return;
+        if(![ ChannelType.GuildText, ChannelType.GuildVoice ].includes(channel.type))
+            return;
+
         return channel;
     },
 
