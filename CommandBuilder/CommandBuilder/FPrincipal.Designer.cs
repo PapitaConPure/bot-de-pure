@@ -24,11 +24,11 @@ namespace CommandBuilder {
 		/// el contenido de este método con el editor de código.
 		/// </summary>
 		private void InitializeComponent() {
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle35 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle32 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle34 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
 			this.pnlMetadatos = new System.Windows.Forms.Panel();
 			this.pnlContenidoMetadatos = new System.Windows.Forms.Panel();
 			this.pnlEtiquetas = new System.Windows.Forms.Panel();
@@ -630,27 +630,27 @@ namespace CommandBuilder {
 			this.dgvOpciones.BorderStyle = System.Windows.Forms.BorderStyle.None;
 			this.dgvOpciones.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.None;
 			this.dgvOpciones.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
-			dataGridViewCellStyle31.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle31.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(43)))), ((int)(((byte)(57)))));
-			dataGridViewCellStyle31.Font = new System.Drawing.Font("Segoe UI", 11F);
-			dataGridViewCellStyle31.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(85)))), ((int)(((byte)(111)))), ((int)(((byte)(138)))));
-			dataGridViewCellStyle31.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle31.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			this.dgvOpciones.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle31;
+			dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(43)))), ((int)(((byte)(57)))));
+			dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 11F);
+			dataGridViewCellStyle1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(85)))), ((int)(((byte)(111)))), ((int)(((byte)(138)))));
+			dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			this.dgvOpciones.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
 			this.dgvOpciones.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
 			this.dgvOpciones.ColumnHeadersVisible = false;
 			this.dgvOpciones.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Opción,
             this.Nombre,
             this.Tipo});
-			dataGridViewCellStyle35.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle35.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(32)))), ((int)(((byte)(36)))));
-			dataGridViewCellStyle35.Font = new System.Drawing.Font("Segoe UI", 11F);
-			dataGridViewCellStyle35.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
-			dataGridViewCellStyle35.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle35.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle35.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dgvOpciones.DefaultCellStyle = dataGridViewCellStyle35;
+			dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(32)))), ((int)(((byte)(36)))));
+			dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 11F);
+			dataGridViewCellStyle5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
+			dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dgvOpciones.DefaultCellStyle = dataGridViewCellStyle5;
 			this.dgvOpciones.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.dgvOpciones.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
 			this.dgvOpciones.EnableHeadersVisualStyles = false;
@@ -670,8 +670,8 @@ namespace CommandBuilder {
 			// 
 			// Opción
 			// 
-			dataGridViewCellStyle32.Font = new System.Drawing.Font("Segoe UI", 11F);
-			this.Opción.DefaultCellStyle = dataGridViewCellStyle32;
+			dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 11F);
+			this.Opción.DefaultCellStyle = dataGridViewCellStyle2;
 			this.Opción.HeaderText = "Op.";
 			this.Opción.MinimumWidth = 58;
 			this.Opción.Name = "Opción";
@@ -683,9 +683,9 @@ namespace CommandBuilder {
 			// Nombre
 			// 
 			this.Nombre.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-			dataGridViewCellStyle33.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle33.Font = new System.Drawing.Font("Segoe UI", 11F);
-			this.Nombre.DefaultCellStyle = dataGridViewCellStyle33;
+			dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 11F);
+			this.Nombre.DefaultCellStyle = dataGridViewCellStyle3;
 			this.Nombre.HeaderText = "Nombre";
 			this.Nombre.MinimumWidth = 58;
 			this.Nombre.Name = "Nombre";
@@ -697,9 +697,9 @@ namespace CommandBuilder {
 			// Tipo
 			// 
 			this.Tipo.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-			dataGridViewCellStyle34.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle34.Font = new System.Drawing.Font("Segoe UI", 11F);
-			this.Tipo.DefaultCellStyle = dataGridViewCellStyle34;
+			dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle4.Font = new System.Drawing.Font("Segoe UI", 11F);
+			this.Tipo.DefaultCellStyle = dataGridViewCellStyle4;
 			this.Tipo.HeaderText = "Tipo";
 			this.Tipo.Name = "Tipo";
 			this.Tipo.ReadOnly = true;
