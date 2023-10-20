@@ -342,7 +342,7 @@ const command = new CommandManager('confesión', flags)
 			interaction.message.delete().catch(_ => undefined),
 			interaction.reply({ embeds: [embed], ephemeral: true }),
 		]);
-	}).setButtonResponse(async function timeoutConfessant(interaction, confId) {
+	}).setButtonResponse(async function timeoutConfessant(interaction, confId, userId) {
 		const data = await getConfessionSystemAndChannels(interaction);
 		if(!data.success)
 			return interaction.reply({ content: data.message, ephemeral: true });
@@ -360,12 +360,12 @@ const command = new CommandManager('confesión', flags)
 			PendingConfessions.findOneAndDelete({ id: confId }),
 		]);
 
+		const gmid = decompressId(userId);
+		const miembro = interaction.guild.members.cache.get(gmid);
 		let embed;
 		try {
-			const gmid = decompressId(userId);
-			const miembro = interaction.guild.members.cache.get(gmid);
 			if(miembro)
-				miembro.timeout(120_000, $`Aislado por ${interaction.user.username} por confesión malintencionada`);
+				miembro.timeout(120_000, `Aislado por ${interaction.user.username} por confesión malintencionada`);
 			else
 				throw new ReferenceError('No se pudo encontrar el autor de esta confesión');
 
@@ -390,7 +390,7 @@ const command = new CommandManager('confesión', flags)
 			interaction.message.delete().catch(_ => undefined),
 			interaction.reply({ embeds: [embed], ephemeral: true }),
 		]);
-	}).setButtonResponse(async function banConfessant(interaction, confId) {
+	}).setButtonResponse(async function banConfessant(interaction, confId, userId) {
 		const data = await getConfessionSystemAndChannels(interaction);
 		if(!data.success)
 			return interaction.reply({ content: data.message, ephemeral: true });
@@ -408,12 +408,12 @@ const command = new CommandManager('confesión', flags)
 			PendingConfessions.findOneAndDelete({ id: confId }),
 		]);
 
+		const gmid = decompressId(userId);
+		const miembro = interaction.guild.members.cache.get(gmid);
 		let embed;
 		try {
-			const gmid = decompressId(userId);
-			const miembro = interaction.guild.members.cache.get(gmid);
 			if(miembro)
-				miembro.ban({ reason: $`Banneado por ${interaction.user.username} por confesión malintencionada` });
+				miembro.ban({ reason: `Banneado por ${interaction.user.username} por confesión malintencionada` });
 			else
 				throw new ReferenceError('No se pudo encontrar el autor de esta confesión');
 
