@@ -170,44 +170,46 @@ function notifyUsers(post, sent, feedSuscriptions) {
     if(!channel) throw 'No se encontró un canal para el mensaje enviado';
     const guild = channel.guild;
     const matchingSuscriptions = feedSuscriptions.filter(suscription => suscription.followedTags.some(tag => post.tags.includes(tag)));
-    return matchingSuscriptions.map(async ({ userId, followedTags }) => {
-        const user = guild.client.users.cache.get(userId);
-        const translator = await Translator.from(user.id);
-        if(!channel || !user) return Promise.resolve();
-        const matchingTags = followedTags.filter(tag => post.tags.includes(tag));
-
-        const userEmbed = new EmbedBuilder()
-            .setColor(sent.embeds[0].color ?? 0)
-            .setTitle(translator.getText('booruNotifTitle'))
-            .setDescription(translator.getText('booruNotifDescription'))
-            .setFooter({ text: translator.getText('dmDisclaimer') })
-            .setThumbnail(post.previewUrl)
-            .addFields(
-                {
-                    name: 'Feed',
-                    value: `${channel}`,
-                    inline: true,
-                },
-                {
-                    name: translator.getText('booruNotifTagsName'),
-                    value: `\`\`\`\n${matchingTags.join(' ')}\n\`\`\``,
-                    inline: true,
-                },
+    return guild.members.fetch().then(members => {
+        return matchingSuscriptions.map(async ({ userId, followedTags }) => {
+            const member = members.get(userId);
+            if(!channel || !member) return Promise.resolve();
+            const translator = await Translator.from(member.id);
+            const matchingTags = followedTags.filter(tag => post.tags.includes(tag));
+    
+            const userEmbed = new EmbedBuilder()
+                .setColor(sent.embeds[0].color ?? 0)
+                .setTitle(translator.getText('booruNotifTitle'))
+                .setDescription(translator.getText('booruNotifDescription'))
+                .setFooter({ text: translator.getText('dmDisclaimer') })
+                .setThumbnail(post.previewUrl)
+                .addFields(
+                    {
+                        name: 'Feed',
+                        value: `${channel}`,
+                        inline: true,
+                    },
+                    {
+                        name: translator.getText('booruNotifTagsName'),
+                        value: `\`\`\`\n${matchingTags.join(' ')}\n\`\`\``,
+                        inline: true,
+                    },
+                );
+            
+            const postRow = ActionRowBuilder.from(sent.components[0]);
+            postRow.components.splice(postRow.components.length - 2);
+            postRow.addComponents(
+                new ButtonBuilder()
+                    .setURL(sent.url)
+                    .setEmoji('1087075525245272104')
+                    .setStyle(ButtonStyle.Link),
             );
-        
-        const postRow = ActionRowBuilder.from(sent.components[0]);
-        postRow.components.splice(postRow.components.length - 2);
-        postRow.addComponents(
-            new ButtonBuilder()
-                .setURL(sent.url)
-                .setEmoji('1087075525245272104')
-                .setStyle(ButtonStyle.Link),
-        );
-
-        return user.send({
-            embeds: [userEmbed],
-            components: [postRow],
-        }).catch(_ => _);
+    
+            return member.send({
+                embeds: [userEmbed],
+                components: [postRow],
+            }).catch(_ => _);
+        });
     });
 }
 
