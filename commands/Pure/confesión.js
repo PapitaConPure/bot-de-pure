@@ -307,7 +307,6 @@ const command = new CommandManager('confesión', flags)
 		]);
 
 		const confirmationEmbed = new EmbedBuilder()
-			.setAuthor({ name: 'Confesión aceptada' })
 			.setColor(0x8334eb)
 			.setDescription(`Esta confesión fue aceptada por ${interaction.user}. Aparecerá en el foro de confesiones configurado`);
 
