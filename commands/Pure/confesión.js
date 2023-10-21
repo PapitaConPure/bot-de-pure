@@ -284,7 +284,7 @@ const command = new CommandManager('confesión', flags)
 		if(!confession)
 			return interaction.reply({ content: '⚠️ La confesión indicada acaba de ser atendida', ephemeral: true });
 
-		const embed = new EmbedBuilder()
+		const confessionEmbed = new EmbedBuilder()
 			.setColor(0x8334eb)
 			.addFields(
 				{ name: 'Confesión', value: confession.content },
@@ -294,10 +294,10 @@ const command = new CommandManager('confesión', flags)
 			const gmid = decompressId(userId);
 			const miembro = interaction.guild.members.cache.get(gmid);
 			if(miembro)
-				embed.setAuthor({ name: miembro.displayName ?? '[!] No se pudo resolver el autor', iconURL: miembro.displayAvatarURL({ size: 256 }) });
+				confessionEmbed.setAuthor({ name: miembro.displayName ?? '[!] No se pudo resolver el autor', iconURL: miembro.displayAvatarURL({ size: 256 }) });
 		}
 		
-		await confChannel.send({ embeds: [embed] });
+		await confChannel.send({ embeds: [confessionEmbed] });
 
 		confSystem.pending = confSystem.pending.filter(p => p !== confId);
 		confSystem.markModified('pending');
@@ -311,10 +311,7 @@ const command = new CommandManager('confesión', flags)
 			.setColor(0x8334eb)
 			.setDescription('Esta confesión fue aceptada. Aparecerá en el foro de confesiones configurado');
 
-		return Promise.all([
-			interaction.message.delete().catch(_ => undefined),
-			interaction.reply({ embeds: [confirmationEmbed], ephemeral: true }),
-		]);
+		return interaction.update({ embeds: [confirmationEmbed], components: [] });
 	}).setButtonResponse(async function rejectConfession(interaction, confId) {
 		const data = await getConfessionSystemAndChannels(interaction);
 		if(!data.success)
@@ -333,15 +330,12 @@ const command = new CommandManager('confesión', flags)
 			PendingConfessions.findOneAndDelete({ id: confId }),
 		]);
 
-		const embed = new EmbedBuilder()
+		const confirmationEmbed = new EmbedBuilder()
 			.setAuthor({ name: 'Confesión rechazada' })
 			.setColor(0x8334eb)
 			.setDescription('Esta confesión fue rechazada. No se le notificará al autor');
 
-		return Promise.all([
-			interaction.message.delete().catch(_ => undefined),
-			interaction.reply({ embeds: [embed], ephemeral: true }),
-		]);
+		return interaction.update({ embeds: [confirmationEmbed], components: [] });
 	}).setButtonResponse(async function timeoutConfessant(interaction, confId, userId) {
 		const data = await getConfessionSystemAndChannels(interaction);
 		if(!data.success)
@@ -362,19 +356,19 @@ const command = new CommandManager('confesión', flags)
 
 		const gmid = decompressId(userId);
 		const miembro = interaction.guild.members.cache.get(gmid);
-		let embed;
+		let confirmationEmbed;
 		try {
 			if(miembro)
 				miembro.timeout(120_000, `Aislado por ${interaction.user.username} por confesión malintencionada`);
 			else
 				throw new ReferenceError('No se pudo encontrar el autor de esta confesión');
 
-			embed = new EmbedBuilder()
+			confirmationEmbed = new EmbedBuilder()
 				.setAuthor({ name: 'Confesante aislado' })
 				.setColor(Colors.Orange)
 				.setDescription('Esta confesión fue rechazada y su confesante fue aislado');
 		} catch(err) {
-			embed = new EmbedBuilder()
+			confirmationEmbed = new EmbedBuilder()
 				.setAuthor({ name: 'Confesión rechazada con errores' })
 				.setColor(Colors.Red)
 				.setDescription(`Esta confesión fue rechazada, pero el confesante ${miembro} no pudo ser aislado`)
@@ -386,10 +380,7 @@ const command = new CommandManager('confesión', flags)
 				auditError(err, { request: interaction, brief: 'Ha ocurrido un error al aislar un confesante', ping: false });
 		}
 
-		return Promise.all([
-			interaction.message.delete().catch(_ => undefined),
-			interaction.reply({ embeds: [embed], ephemeral: true }),
-		]);
+		return interaction.update({ embeds: [confirmationEmbed], components: [] });
 	}).setButtonResponse(async function banConfessant(interaction, confId, userId) {
 		const data = await getConfessionSystemAndChannels(interaction);
 		if(!data.success)
@@ -410,19 +401,19 @@ const command = new CommandManager('confesión', flags)
 
 		const gmid = decompressId(userId);
 		const miembro = interaction.guild.members.cache.get(gmid);
-		let embed;
+		let confirmationEmbed;
 		try {
 			if(miembro)
 				miembro.ban({ reason: `Banneado por ${interaction.user.username} por confesión malintencionada` });
 			else
 				throw new ReferenceError('No se pudo encontrar el autor de esta confesión');
 
-			embed = new EmbedBuilder()
+			confirmationEmbed = new EmbedBuilder()
 				.setAuthor({ name: 'Confesante banneado' })
 				.setColor(Colors.Orange)
 				.setDescription('Esta confesión fue rechazada y su confesante fue banneado');
 		} catch(err) {
-			embed = new EmbedBuilder()
+			confirmationEmbed = new EmbedBuilder()
 				.setAuthor({ name: 'Confesión rechazada con errores' })
 				.setColor(Colors.Red)
 				.setDescription(`Esta confesión fue rechazada, pero el confesante ${miembro} no pudo ser banneado`)
@@ -434,10 +425,7 @@ const command = new CommandManager('confesión', flags)
 				auditError(err, { request: interaction, brief: 'Ha ocurrido un error al bannear un confesante', ping: false });
 		}
 
-		return Promise.all([
-			interaction.message.delete().catch(_ => undefined),
-			interaction.reply({ embeds: [embed], ephemeral: true }),
-		]);
+		return interaction.update({ embeds: [confirmationEmbed], components: [] });
 	});
 
 /**
