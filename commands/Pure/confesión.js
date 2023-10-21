@@ -309,7 +309,7 @@ const command = new CommandManager('confesión', flags)
 		const confirmationEmbed = new EmbedBuilder()
 			.setAuthor({ name: 'Confesión aceptada' })
 			.setColor(0x8334eb)
-			.setDescription('Esta confesión fue aceptada. Aparecerá en el foro de confesiones configurado');
+			.setDescription(`Esta confesión fue aceptada por ${interaction.user}. Aparecerá en el foro de confesiones configurado`);
 
 		return interaction.update({ embeds: [confirmationEmbed], components: [] });
 	}).setButtonResponse(async function rejectConfession(interaction, confId) {
@@ -331,9 +331,8 @@ const command = new CommandManager('confesión', flags)
 		]);
 
 		const confirmationEmbed = new EmbedBuilder()
-			.setAuthor({ name: 'Confesión rechazada' })
 			.setColor(0x8334eb)
-			.setDescription('Esta confesión fue rechazada. No se le notificará al autor');
+			.setDescription(`Esta confesión fue rechazada por ${interaction.user}. No se le notificará al autor`);
 
 		return interaction.update({ embeds: [confirmationEmbed], components: [] });
 	}).setButtonResponse(async function timeoutConfessant(interaction, confId, userId) {
@@ -366,12 +365,12 @@ const command = new CommandManager('confesión', flags)
 			confirmationEmbed = new EmbedBuilder()
 				.setAuthor({ name: 'Confesante aislado' })
 				.setColor(Colors.Orange)
-				.setDescription('Esta confesión fue rechazada y su confesante fue aislado');
+				.setDescription(`Esta confesión fue rechazada por ${interaction.user} y su confesante fue aislado`);
 		} catch(err) {
 			confirmationEmbed = new EmbedBuilder()
 				.setAuthor({ name: 'Confesión rechazada con errores' })
 				.setColor(Colors.Red)
-				.setDescription(`Esta confesión fue rechazada, pero el confesante ${miembro} no pudo ser aislado`)
+				.setDescription(`Esta confesión fue rechazada por ${interaction.user}, pero el confesante ${miembro} no pudo ser aislado`)
 				.addFields(
 					{ name: 'Error', value: `\`\`\`\n${err.message}\n\`\`\`` || '_No hay un mensaje de error disponible_' },
 				);
@@ -411,12 +410,12 @@ const command = new CommandManager('confesión', flags)
 			confirmationEmbed = new EmbedBuilder()
 				.setAuthor({ name: 'Confesante banneado' })
 				.setColor(Colors.Orange)
-				.setDescription('Esta confesión fue rechazada y su confesante fue banneado');
+				.setDescription(`Esta confesión fue rechazada por ${interaction.user} y su confesante fue banneado`);
 		} catch(err) {
 			confirmationEmbed = new EmbedBuilder()
 				.setAuthor({ name: 'Confesión rechazada con errores' })
 				.setColor(Colors.Red)
-				.setDescription(`Esta confesión fue rechazada, pero el confesante ${miembro} no pudo ser banneado`)
+				.setDescription(`Esta confesión fue rechazada por ${interaction.user}, pero el confesante ${miembro} no pudo ser banneado`)
 				.addFields(
 					{ name: 'Error', value: `\`\`\`\n${err.message}\n\`\`\`` || '_No hay un mensaje de error disponible_' },
 				);
