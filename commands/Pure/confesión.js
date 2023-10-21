@@ -357,7 +357,7 @@ const command = new CommandManager('confesión', flags)
 		let confirmationEmbed;
 		try {
 			if(miembro)
-				miembro.timeout(120_000, `Aislado por ${interaction.user.username} por confesión malintencionada`);
+				await miembro.timeout(120_000, `Aislado por ${interaction.user.username} por confesión malintencionada`);
 			else
 				throw new ReferenceError('No se pudo encontrar el autor de esta confesión');
 
@@ -402,7 +402,7 @@ const command = new CommandManager('confesión', flags)
 		let confirmationEmbed;
 		try {
 			if(miembro)
-				miembro.ban({ reason: `Banneado por ${interaction.user.username} por confesión malintencionada` });
+				await miembro.ban({ reason: `Banneado por ${interaction.user.username} por confesión malintencionada` });
 			else
 				throw new ReferenceError('No se pudo encontrar el autor de esta confesión');
 
