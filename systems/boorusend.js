@@ -161,56 +161,55 @@ function formatBooruPostMessage(post, data) {
  * @param {Post} post
  * @param {Message<true>} sent
  * @param {Array<Suscription>} feedSuscriptions 
- * @returns {Array<Promise<Message<false> | void>>}
  */
-function notifyUsers(post, sent, feedSuscriptions) {
+async function notifyUsers(post, sent, feedSuscriptions) {
     if(!sent) throw 'Se esperaba un mensaje para el cuál notificar';
     if(!sent.embeds?.[0] || !sent.components?.[0]) throw 'Se esperaba un mensaje de Feed válido';
     const channel = sent.channel;
     if(!channel) throw 'No se encontró un canal para el mensaje enviado';
     const guild = channel.guild;
     const matchingSuscriptions = feedSuscriptions.filter(suscription => suscription.followedTags.some(tag => post.tags.includes(tag)));
-    return guild.members.fetch().then(members => {
-        return matchingSuscriptions.map(async ({ userId, followedTags }) => {
-            const member = members.get(userId);
-            if(!channel || !member) return Promise.resolve();
-            const translator = await Translator.from(member.id);
-            const matchingTags = followedTags.filter(tag => post.tags.includes(tag));
-    
-            const userEmbed = new EmbedBuilder()
-                .setColor(sent.embeds[0].color ?? 0)
-                .setTitle(translator.getText('booruNotifTitle'))
-                .setDescription(translator.getText('booruNotifDescription'))
-                .setFooter({ text: translator.getText('dmDisclaimer') })
-                .setThumbnail(post.previewUrl)
-                .addFields(
-                    {
-                        name: 'Feed',
-                        value: `${channel}`,
-                        inline: true,
-                    },
-                    {
-                        name: translator.getText('booruNotifTagsName'),
-                        value: `\`\`\`\n${matchingTags.join(' ')}\n\`\`\``,
-                        inline: true,
-                    },
-                );
-            
-            const postRow = ActionRowBuilder.from(sent.components[0]);
-            postRow.components.splice(postRow.components.length - 2);
-            postRow.addComponents(
-                new ButtonBuilder()
-                    .setURL(sent.url)
-                    .setEmoji('1087075525245272104')
-                    .setStyle(ButtonStyle.Link),
+    const members = await guild.members.fetch();
+
+    return Promise.all(matchingSuscriptions.map(async ({ userId, followedTags }) => {
+        const member = members.get(userId);
+        if(!channel || !member) return Promise.resolve(null);
+        const translator = await Translator.from(member.id);
+        const matchingTags = followedTags.filter(tag => post.tags.includes(tag));
+
+        const userEmbed = new EmbedBuilder()
+            .setColor(sent.embeds[0].color ?? 0)
+            .setTitle(translator.getText('booruNotifTitle'))
+            .setDescription(translator.getText('booruNotifDescription'))
+            .setFooter({ text: translator.getText('dmDisclaimer') })
+            .setThumbnail(post.previewUrl)
+            .addFields(
+                {
+                    name: 'Feed',
+                    value: `${channel}`,
+                    inline: true,
+                },
+                {
+                    name: translator.getText('booruNotifTagsName'),
+                    value: `\`\`\`\n${matchingTags.join(' ')}\n\`\`\``,
+                    inline: true,
+                },
             );
-    
-            return member.send({
-                embeds: [userEmbed],
-                components: [postRow],
-            }).catch(_ => _);
-        });
-    });
+        
+        const postRow = ActionRowBuilder.from(sent.components[0]);
+        postRow.components.splice(postRow.components.length - 2);
+        postRow.addComponents(
+            new ButtonBuilder()
+                .setURL(sent.url)
+                .setEmoji('1087075525245272104')
+                .setStyle(ButtonStyle.Link),
+        );
+
+        return member.send({
+            embeds: [userEmbed],
+            components: [postRow],
+        }).catch(_ => null);
+    }));
 }
 
 /**

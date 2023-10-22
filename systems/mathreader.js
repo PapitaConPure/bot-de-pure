@@ -143,16 +143,19 @@ class MathLexer {
 
             if(this.#current === 'π') {
                 tokens.push(createToken(TokenTypes.NUMBER, Math.PI));
+                this.#cursor++;
                 continue;
             }
 
             if(this.#current === '∞') {
                 tokens.push(createToken(TokenTypes.NUMBER, Number.POSITIVE_INFINITY));
+                this.#cursor++;
                 continue;
             }
 
             if(this.#current === '√') {
                 tokens.push(createToken(TokenTypes.FUNCTION, 'sqrt'));
+                this.#cursor++;
                 continue;
             }
 
@@ -162,7 +165,7 @@ class MathLexer {
 
                 tokens.push(createToken(TokenTypes.FUNCTION, '^'));
 
-                switch(this.#current) {
+                switch(this.#cursor++) {
                 case '⁰':
                     tokens.push(createToken(TokenTypes.NUMBER, '0'));
                     continue;

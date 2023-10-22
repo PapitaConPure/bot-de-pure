@@ -137,7 +137,7 @@ async function checkFeeds(booru, guilds) {
                 messagesToSend.push(
                     channel.send(formatBooruPostMessage(post, feed))
                     .then(async sent => {
-                        await Promise.all(notifyUsers(post, sent, feedSuscriptions));
+                        await notifyUsers(post, sent, feedSuscriptions);
                         return sent;
                     })
                     .catch(error => {
