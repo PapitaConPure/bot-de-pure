@@ -282,7 +282,7 @@ const command = new CommandManager('confesión', flags)
 
 		const confession = await PendingConfessions.findOne({ id: confId });
 		if(!confession)
-			return interaction.reply({ content: '⚠️ La confesión indicada acaba de ser atendida', ephemeral: true });
+			return interaction.update({ content: '⚠️ La confesión ya se atendió, pero no se registró aquí por un error externo', components: [] });
 
 		const confessionEmbed = new EmbedBuilder()
 			.setColor(0x8334eb)
@@ -307,7 +307,7 @@ const command = new CommandManager('confesión', flags)
 		]);
 
 		const confirmationEmbed = new EmbedBuilder()
-			.setColor(0x8334eb)
+			.setColor(0x32e698)
 			.setDescription(`Esta confesión fue aceptada por ${interaction.user}. Aparecerá en el foro de confesiones configurado`);
 
 		return interaction.update({ embeds: [confirmationEmbed], components: [] });
@@ -330,7 +330,7 @@ const command = new CommandManager('confesión', flags)
 		]);
 
 		const confirmationEmbed = new EmbedBuilder()
-			.setColor(0x8334eb)
+			.setColor(0xeb345c)
 			.setDescription(`Esta confesión fue rechazada por ${interaction.user}. No se le notificará al autor`);
 
 		return interaction.update({ embeds: [confirmationEmbed], components: [] });
@@ -343,7 +343,7 @@ const command = new CommandManager('confesión', flags)
 
 		const index = confSystem.pending.indexOf(confId);
 		if(index < 0)
-			return interaction.reply({ content: '⚠️ La confesión indicada no está pendiente', ephemeral: true });
+			return interaction.update({ content: '⚠️ La confesión ya se atendió, pero no se registró aquí por un error externo', components: [] });
 		
 		confSystem.pending.splice(index, 1);
 		confSystem.markModified('pending');
@@ -388,7 +388,7 @@ const command = new CommandManager('confesión', flags)
 
 		const index = confSystem.pending.indexOf(confId);
 		if(index < 0)
-			return interaction.reply({ content: '⚠️ La confesión indicada no está pendiente', ephemeral: true });
+			return interaction.update({ content: '⚠️ La confesión ya se atendió, pero no se registró aquí por un error externo', components: [] });
 		
 		confSystem.pending.splice(index, 1);
 		confSystem.markModified('pending');
