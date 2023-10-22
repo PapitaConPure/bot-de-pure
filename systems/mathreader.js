@@ -160,7 +160,7 @@ class MathLexer {
             }
 
             if('⁰¹²³⁴⁵⁶⁷⁸⁹'.includes(this.#current)) {
-                if(this.#lastToken.type === TokenTypes.FUNCTION && this.#lastToken.value === '^')
+                if(this.#lastToken && this.#lastToken.type === TokenTypes.FUNCTION && this.#lastToken.value === '^')
                     throw Error(`Potencia inválida en posición ${this.#cursor}: ${text}\nUsa "^X" o un símbolo exponente, pero no ambos juntos`);
 
                 tokens.push(createToken(TokenTypes.FUNCTION, '^'));
