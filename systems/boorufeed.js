@@ -89,7 +89,7 @@ async function checkFeeds(booru, guilds) {
                 auditAction('Comprobando eliminación de un Feed no disponible',
                     { name: 'Servidor', value: `${guild}`, inline: true },
                     { name: 'Canal', value: `${channel ?? 'No disponible'}`, inline: true },
-                    { name: 'Reintentos',  value: `${chunkAmount} / 10`, inline: true },
+                    { name: 'Reintentos',  value: `${feed.faults + 1} / 10`, inline: true },
                 );
                 console.log(channel?.name, response.length);
                 // if(feed.faults >= 10)
