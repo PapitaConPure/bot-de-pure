@@ -247,8 +247,7 @@ const command = new CommandManager('confesión', flags)
 
 		await Promise.all([
 			logChannel.send({ embeds: [embed], components: [row] }),
-			confSystem.save(),
-			pendingConf.save(),
+			confSystem.save().then(_ => pendingConf.save()),
 		]);
 
 		const confirmationEmbed = new EmbedBuilder()
@@ -320,7 +319,7 @@ const command = new CommandManager('confesión', flags)
 
 		const index = confSystem.pending.indexOf(confId);
 		if(index < 0)
-			return interaction.reply({ content: '⚠️ La confesión indicada no está pendiente', ephemeral: true });
+			return interaction.update({ content: '⚠️ Esta confesión ya no está pendiente', components: [] });
 		
 		confSystem.pending.splice(index, 1);
 		confSystem.markModified('pending');

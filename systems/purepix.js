@@ -261,6 +261,7 @@ const sendPixivPostsAsWebhook = async (message) => {
 };
 
 module.exports = {
+    pixivRegex,
     formatPixivPostsMessage,
     sendPixivPostsAsWebhook,
 };

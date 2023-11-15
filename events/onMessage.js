@@ -12,6 +12,7 @@ const { findFirstException, handleAndAuditError, generateExceptionEmbed } = requ
 const { sendPixivPostsAsWebhook } = require('../systems/purepix.js');
 const { tenshiColor } = require('../localdata/config.json');
 const UserConfigs = require('../localdata/models/userconfigs.js');
+const { sendTweetsAsWebhook } = require('../systems/pureet.js');
 
 /**
  * 
@@ -210,6 +211,7 @@ async function onMessage(message, client) {
     gainPRC(author.id);
 
     sendPixivPostsAsWebhook(message).catch(console.error);
+    sendTweetsAsWebhook(message).catch(console.error);
     
     //Estadísticas
     const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });

@@ -43,7 +43,7 @@ async function findBotInfraction(message) {
         member = message.member;
     } else {
         //Método de detección de respuesta
-        if(!author.bot || !message.deletable) return;
+        if(!author.bot || !message.deletable || author.id === '647368715742216193') return;
         infractionMessage = await channel.messages.fetch(message.reference?.messageId).catch(_ => null);
         if(!infractionMessage?.deletable) return;
 
