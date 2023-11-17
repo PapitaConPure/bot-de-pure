@@ -1,4 +1,4 @@
-const { EmbedBuilder, Message, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { EmbedBuilder, Message, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Embed } = require('discord.js');
 const pixivToken = process.env.PIXIV_REFRESH_TOKEN ?? (require('../localenv.json')?.pixivtoken);
 const PixivApi = require('pixiv-api-client');
 const { shortenText } = require('../func');
@@ -57,7 +57,7 @@ const formatPixivPostsMessage = async (urls) => {
     const messageData = (await Promise.all(urls.slice(0, 4).map(async (url, i) => {
         const [ postId, pageId, wantsSpecificPage ] = extractIdAndPage(url);
         const baseUrl = url.split(pageSep).shift();
-        console.log({ postId, pageId, wantsSpecificPage, url, pageSep, baseUrl });
+        
         const post = (await pixiv.illustDetail(postId).catch(console.error))?.illust;
         if(!post) return;
 
@@ -81,7 +81,7 @@ const formatPixivPostsMessage = async (urls) => {
             const selectedPageUrls = metaPages?.[selectedPageNumber]?.image_urls
                 || post.image_urls;
 
-            console.log({ postId, pageId, selectedPageNumber, selectedPageUrls });
+            //console.log({ postId, pageId, selectedPageNumber, selectedPageUrls });
 
             illustBuffers.push(pixiv.requestUrl(selectedPageUrls.large || selectedPageUrls.medium, imageRequestOptions));
         }
@@ -171,7 +171,7 @@ const formatPixivPostsMessage = async (urls) => {
         for(let j = 1; j < illustBuffers.length; j++)
             postEmbeds.push(new EmbedBuilder().setURL(baseUrl).setImage(`attachment://thumb${i}_p${j}.png`));
 
-        console.log(postEmbeds);
+        //console.log(postEmbeds);
 
         return { embeds: postEmbeds, files: postAttachments };
     }))).reduce((a, b) => ({
@@ -216,30 +216,28 @@ const sendPixivPostsAsWebhook = async (message) => {
     message.files ??= [];
     message.files.push(...newMessage.files);
     message.embeds ??= [];
-
-    console.log('-'.repeat('80'));
-    console.log(`${author.tag} ─ ${(new Date()).toLocaleString()}`);
-    console.log(`"${content}"`);
     
     message.embeds = message.embeds
         .filter(embed => embed.type === 'rich' || !embed.url.includes('pixiv.net'))
-        .map(embed => {
+        .map(/**@type {Embed}*/embed => {
             console.log(embed);
             
             if(embed.type === 'rich')
-                return embed;
+                return EmbedBuilder.from(embed);
             
-            if(embed.thumbnail && embed.type === 'image' && !embed.image) {
-                embed.image = embed.thumbnail;
-                embed.thumbnail = null;
+            if(embed.data.thumbnail && embed.data.type === 'image' && !embed.data.image) {
+                message.files.push(embed.thumbnail.url);
+                return null;
             }
-            if(embed.type === 'video') {
+
+            if(embed.data.type === 'video') {
                 message.files.push(embed.video.url);
                 return null;
             }
                 
-            return embed;
+            return EmbedBuilder.from(embed);
         }).filter(embed => embed);
+
     message.embeds.push(...newMessage.embeds);
     message.components = [new ActionRowBuilder().addComponents(
         new ButtonBuilder()
