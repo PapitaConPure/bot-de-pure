@@ -13,7 +13,7 @@ const h = [
 	':heartpulse:'
 ];
 
-const flags = new CommandMetaFlagsManager().add('MEME');
+const flags = new CommandMetaFlagsManager().add('MEME', 'OUTDATED');
 const command = new CommandManager('mabel', flags)
 	.setAliases('merraz', 'mármol', 'gay', 'pride')
 	.setDescription('Comando de inclusión de Mabel')

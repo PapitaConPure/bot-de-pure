@@ -1,7 +1,8 @@
 const { CommandOptionsManager } = require('./cmdOpts');
 const { CommandMetaFlagsManager } = require('./cmdFlags');
 const { ComplexCommandRequest, CommandOptions } = require('./typings');
-const { Interaction, ButtonInteraction, SelectMenuInteraction, ModalSubmitInteraction, MessagePayload, InteractionReplyOptions } = require('discord.js');
+const { Interaction, ButtonInteraction, SelectMenuInteraction, ModalSubmitInteraction, MessagePayload, InteractionReplyOptions, PermissionsBitField, PermissionFlagsBits } = require('discord.js');
+const { CommandPermissions } = require('./cmdPerms');
 
 /**Representa un comando*/
 class CommandManager {
@@ -15,6 +16,8 @@ class CommandManager {
 	brief;
     /**@type {CommandMetaFlagsManager}*/
 	flags;
+    /**@type {CommandPermissions}*/
+    permissions;
     /**@type {CommandOptionsManager?}*/
 	options;
     /**@type {String?}*/
@@ -33,15 +36,15 @@ class CommandManager {
     reply;
     /**
      * @typedef {(request: ComplexCommandRequest, args: CommandOptions, isSlash = false, rawArgs: string) => Promise<*>} ExecutionFunction
-     * @typedef {(interaction: Interaction, ...args: String) => Promise<*>} InteractionResponseFunction
+     * @typedef {(interaction: Interaction, ...args: String[]) => Promise<*>} InteractionResponseFunction
      * @typedef {import('discord.js').ModalMessageModalSubmitInteraction<ModalSubmitInteraction>} ModalResponseInteraction
-     * @typedef {(interaction: ButtonInteraction, ...args: String) => Promise<*>} ButtonResponseFunction
-     * @typedef {(interaction: SelectMenuInteraction, ...args: String) => Promise<*>} SelectMenuResponseFunction
-     * @typedef {(interaction: ModalResponseInteraction, ...args: String) => Promise<*>} ModalResponseFunction
+     * @typedef {(interaction: ButtonInteraction, ...args: String[]) => Promise<*>} ButtonResponseFunction
+     * @typedef {(interaction: SelectMenuInteraction, ...args: String[]) => Promise<*>} SelectMenuResponseFunction
+     * @typedef {(interaction: ModalResponseInteraction, ...args: String[]) => Promise<*>} ModalResponseFunction
      * @type {ExecutionFunction}
      */
     execute;
-
+    
     /**
      * Crea un comando
      * @param {String} name El nombre identificador del comando
@@ -53,6 +56,8 @@ class CommandManager {
         if(!flags?.bitField)         throw new TypeError('Las flags deben ser un CommandMetaFlagsManager');
         this.name = name;
         this.flags = flags;
+        this.permissions = new CommandPermissions();
+        this.actions = [];
         this.experimental = true;
         this.memory = new Map();
         this.execute = (request, _args, _isSlash) => request.reply(this.reply);
@@ -83,6 +88,15 @@ class CommandManager {
     /**@param {...String} desc*/
     setDescription(...desc) {
         return this.setLongDescription(...desc);
+    };
+    
+    /**@param {CommandPermissions} permissions*/
+    setPermissions(permissions) {
+        if(typeof (permissions?.isAllowed) !== 'function')
+            throw new TypeError('Las opciones deben ser una instancia de CommandPermissions');
+
+        this.permissions = permissions;
+        return this;
     };
     
     /**@param {CommandOptionsManager} options*/
@@ -128,17 +142,17 @@ class CommandManager {
 
     /**@param {ButtonResponseFunction} responseFn Una función no anónima a ejecutar al recibir una interacción*/
     setButtonResponse(responseFn) {
-        return this.setFunction(responseFn)
+        return this.setFunction(responseFn);
     };
 
     /**@param {SelectMenuResponseFunction} responseFn Una función no anónima a ejecutar al recibir una interacción*/
     setSelectMenuResponse(responseFn) {
-        return this.setFunction(responseFn)
+        return this.setFunction(responseFn);
     };
 
     /**@param {ModalResponseFunction} responseFn Una función no anónima a ejecutar al recibir una interacción*/
     setModalResponse(responseFn) {
-        return this.setFunction(responseFn)
+        return this.setFunction(responseFn);
     };
 
     /**@param {import('./typings').CommandRequest} request*/

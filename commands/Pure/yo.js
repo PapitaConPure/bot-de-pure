@@ -72,6 +72,32 @@ const dashboardRows = (userId, userConfigs, translator) => [
             .setLabel(translator.getText('buttonFinish'))
             .setStyle(ButtonStyle.Secondary),
     ),
+    new ActionRowBuilder().addComponents(
+        new StringSelectMenuBuilder()
+            .setCustomId(`yo_selectConfig_${userId}`)
+            .setPlaceholder(translator.getText('yoDashboardMenuConfig'))
+            .setMaxValues(1)
+            .setOptions([
+                {
+                    label: 'PuréFeed',
+                    description: translator.getText('yoDashboardMenuConfigFeedDesc'),
+                    emoji: '921788204540100608',
+                    value: 'feed',
+                },
+                {
+                    label: 'PuréPix',
+                    description: translator.getText('yoDashboardMenuConfigPixixDesc'),
+                    emoji: '919403803126661120',
+                    value: 'pixiv',
+                },
+                {
+                    label: 'Puréet',
+                    description: translator.getText('yoDashboardMenuConfigTwitterDesc'),
+                    emoji: '919403803114094682',
+                    value: 'twitter',
+                },
+            ]),
+    ),
 ];
 /**
  * @param {import('../Commons/typings').ComplexCommandRequest} request 

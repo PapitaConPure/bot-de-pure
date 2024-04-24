@@ -6,40 +6,51 @@ const { auditRequest } = require('../systems/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../localdata/cmdExceptions.js');
 const { Translator } = require('../internationalization.js');
 const { CommandManager } = require('../commands/Commons/cmdBuilder.js');
+const { Interaction, CommandInteraction, ButtonInteraction, StringSelectMenuInteraction, ModalSubmitInteraction, Client, ContextMenuCommandInteraction } = require('discord.js');
+const { ContextMenuActionManager } = require('../actions/Commons/actionBuilder.js');
 
-/**@param {import('discord.js').Interaction} interaction*/
-async function handleBlockedInteraction(interaction) {
-    const translator = await Translator.from(interaction.user.id);
-    return interaction.reply({
-        content: translator.getText('blockedInteraction', peopleid.papita),
-        ephemeral: true,
-    });
-}
+/**
+ * 
+ * @param {Interaction} interaction 
+ * @param {Client} client 
+ */
+async function onInteraction(interaction, client) {
+    const { guild, channel, user } = interaction;
 
-/**@param {import('discord.js').Interaction} interaction*/
-async function handleDMInteraction(interaction) {
-    const translator = await Translator.from(interaction.user.id);
-    return interaction.reply({ content: translator.getText('dmInteraction') });
-}
+    if(!guild)
+        return handleDMInteraction.catch(console.error);
 
-/**@param {import('discord.js').Interaction} interaction*/
-async function handleUnknownInteraction(interaction) {
-    const translator = await Translator.from(interaction.user.id);
-    return interaction.reply({
-        content: translator.getText('unknownInteraction'),
-        ephemeral: true,
-    });
+    if(channelIsBlocked(channel) || (await isUsageBanned(user)))
+        return handleBlockedInteraction(interaction).catch(console.error);
+    
+    if(!interaction.customId?.startsWith('confesión'))
+        auditRequest(interaction);
+    const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
+
+    //Acción
+    if(interaction.isContextMenuCommand())
+        return handleAction(interaction, client, stats);
+
+    //Comando Slash
+	if(interaction.isCommand())
+        return handleCommand(interaction, client, stats);
+
+    //Funciones de interacción
+    if(interaction.isButton() || interaction.isStringSelectMenu() || interaction.isModalSubmit())
+        return handleComponent(interaction, client, stats);
+
+    return handleUnknownInteraction();
 }
 
 /**
- * @param {import('discord.js').Interaction} interaction 
- * @param {import('discord.js').Client} client 
+ * @param {CommandInteraction} interaction 
+ * @param {Client} client 
  * @param {Stats} stats 
  */
 async function handleCommand(interaction, client, stats) {
     const { commandName } = interaction;
     const slash = client.SlashPure.get(commandName) ?? client.SlashHouraiPure.get(commandName);
-    if (!slash) return;
+    if(!slash) return;
 
     try {
         //Detectar problemas con el comando basado en flags
@@ -61,19 +72,37 @@ async function handleCommand(interaction, client, stats) {
     return stats.save();
 }
 
-/**@param {import('discord.js').Interaction} interaction*/
-async function handleHuskInteraction(interaction) {
-    const translator = await Translator.from(interaction.user.id);
-    return interaction.reply({
-        content: translator.getText('huskInteraction'),
-        ephemeral: true,
-    });
+/**
+ * @param {ContextMenuCommandInteraction} interaction 
+ * @param {Client} client 
+ * @param {Stats} stats 
+ */
+async function handleAction(interaction, client, stats) {
+    const { commandName } = interaction;
+
+    const action = client.ContextPure.get(commandName);
+    if(!action) return;
+
+    try {
+        /**@type {ContextMenuActionManager | undefined}*/
+        const command = client.AccionesPure.get(commandName);
+        
+        await command.execute(interaction);
+        stats.commands.succeeded++;
+    } catch(error) {
+        const isPermissionsError = handleAndAuditError(error, interaction, { details: `/${commandName}` });
+        if(!isPermissionsError)
+            stats.commands.failed++;
+    }
+
+    stats.markModified('commands');
+    return stats.save();
 }
 
 /**
  * 
- * @param {import('discord.js').Interaction} interaction 
- * @param {import('discord.js').Client} client 
+ * @param {ButtonInteraction | StringSelectMenuInteraction | ModalSubmitInteraction} interaction 
+ * @param {Client} client 
  * @param {Stats} stats 
 */
 async function handleComponent(interaction, client) {
@@ -101,31 +130,40 @@ async function handleComponent(interaction, client) {
     }
 }
 
-/**
- * 
- * @param {import('discord.js').Interaction} interaction 
- * @param {import('discord.js').Client} client 
- */
-async function onInteraction(interaction, client) {
-    const { guild, channel, user } = interaction;
-    if(!guild)
-        return handleDMInteraction.catch(console.error);
-    if(channelIsBlocked(channel) || (await isUsageBanned(user)))
-        return handleBlockedInteraction(interaction).catch(console.error);
-    
-    auditRequest(interaction);
-    const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
-
-    //Comando Slash
-	if(interaction.isCommand())
-        return handleCommand(interaction, client, stats);
-
-    //Funciones de interacción
-    if(interaction.isButton() || interaction.isStringSelectMenu() || interaction.isModalSubmit())
-        return handleComponent(interaction, client, stats);
-
-    return handleUnknownInteraction();
+//#region Casos extremos
+/**@param {Interaction} interaction*/
+async function handleDMInteraction(interaction) {
+    const translator = await Translator.from(interaction.user.id);
+    return interaction.reply({ content: translator.getText('dmInteraction') });
 }
+
+/**@param {Interaction} interaction*/
+async function handleBlockedInteraction(interaction) {
+    const translator = await Translator.from(interaction.user.id);
+    return interaction.reply({
+        content: translator.getText('blockedInteraction', peopleid.papita),
+        ephemeral: true,
+    });
+}
+
+/**@param {Interaction} interaction*/
+async function handleUnknownInteraction(interaction) {
+    const translator = await Translator.from(interaction.user.id);
+    return interaction.reply({
+        content: translator.getText('unknownInteraction'),
+        ephemeral: true,
+    });
+}
+
+/**@param {Interaction} interaction*/
+async function handleHuskInteraction(interaction) {
+    const translator = await Translator.from(interaction.user.id);
+    return interaction.reply({
+        content: translator.getText('huskInteraction'),
+        ephemeral: true,
+    });
+}
+//#endregion
 
 module.exports = {
     onInteraction,

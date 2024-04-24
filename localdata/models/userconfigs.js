@@ -29,6 +29,8 @@ const UserConfigSchema = new Mongoose.Schema({
         default: [],
         required: true,
     },
+    convertPixiv: { type: Boolean, default: true, },
+    twitterPrefix: { type: String, default: '' },
     showLevelUp: { type: Boolean, default: true },
     collectMessageData: { type: Boolean, default: true },
     banned: { type: Boolean, default: false },

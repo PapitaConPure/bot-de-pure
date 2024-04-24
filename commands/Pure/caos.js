@@ -3,14 +3,19 @@ const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
 const { EmbedBuilder } = require('discord.js');
+const { CommandPermissions } = require('../Commons/cmdPerms.js');
+
+const perms = CommandPermissions.adminOnly();
 
 const options = new CommandOptionsManager()
 	.addFlag([], ['activar', 'activate', 'on'],    'para activar los comandos caóticos del servidor')
 	.addFlag([], ['desactivar', 'deactivate', 'off'], 'para desactivar los comandos caóticos del servidor');
+
 const flags = new CommandMetaFlagsManager().add('MOD');
 const command = new CommandManager('caos', flags)
 	.setAliases('chaos')
 	.setLongDescription('Para activar o desactivar comandos caóticos en un servidor')
+	.setPermissions(perms)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const activate = options.fetchFlag(args, 'activar');

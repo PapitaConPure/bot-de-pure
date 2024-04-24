@@ -200,6 +200,11 @@ let localesObject = {
         'Finalizar',
         'Finish',
     ),
+    
+    actionDeleteUserPost: new Translation(
+        'Borrar Post',
+        'Delete Post',
+    ),
 
     cancelledStepName: new Translation(
         'Asistente cancelado',
@@ -567,6 +572,22 @@ let localesObject = {
         'Tags Seguidas...',
         'Followed Tags...',
     ),
+    yoDashboardMenuConfig: new Translation(
+        'Preferencias',
+        'Preferences',
+    ),
+    yoDashboardMenuConfigFeedDesc: new Translation(
+        'Administra tus tags seguidas en Feeds de imágenes',
+        'Preferences',
+    ),
+    yoDashboardMenuConfigPixixDesc: new Translation(
+        'Corrige el formato de enlaces de pixiv automáticamente',
+        'Fixes pixiv embeds automatically',
+    ),
+    yoDashboardMenuConfigTwitterDesc: new Translation(
+        'Corrige el formato de enlaces de Twitter automáticamente (VX/FX)',
+        'Fixes Twitter embeds automatically (VX/FX)',
+    ),
     yoSelectTagsChannelTitle: new Translation(
         'Selecciona uno de tus Feeds seguidos',
         'Select one of the Feeds you follow',
@@ -596,53 +617,7 @@ conditionals
     .set('<=', (a, b) => a <=  b)
     .set('>=', (a, b) => a >=  b);
 
-/**
- * Muestra un texto localizado según la configuración del usuario
- * @typedef {keyof localesObject} LocaleIds id de texto a mostrar en forma localizada
- * @param {LocaleIds} id id de texto a mostrar en forma localizada
- * @param {LocaleKey} locale lenguaje al cual localizar el texto
- * @param {...String} values variables a insertar en el texto seleccionado como reemplazos de campos designados
- */
-function getText(id, locale, ...values) {
-    const localeSet = locales.get(id);
-    if(!localeSet) throw ReferenceError(`Se esperaba una id de texto localizado válido. Se recibió: ${id}`);
-    const translationTemplate = localeSet[locale];
-    if(!translationTemplate) throw RangeError(`Se esperaba una clave de localización válida. Se recibió: ${id} :: ${locale}`);
-
-    //Ejemplo: 1{...}<?{'por defecto'}
-    const subLocaleRegex = /(\d+){\.\.\.}(?:<!{((?:[=<>]{1}|(?:[!<>]=))[0-9]+)\|'((?:(?!'}).)*)'})?(?:<\?{'((?:(?!'}).)*)'})?/g;
-    const translation = translationTemplate.replace(subLocaleRegex, (_, i, condition, whenTrue, defaultValue) => {
-        const value = values[i];
-
-        if(condition != undefined) {
-            const divisionChar = condition.match(/[0-9]/gi)[0];
-            const leftValue = `${value}`;
-            let cursor = 0;
-            let operator = '';
-            let rightValue = '';
-            while(condition[cursor] !== divisionChar) {
-                operator += condition[cursor];
-                cursor++;
-            }
-            while(cursor < condition.length) {
-                rightValue += condition[cursor];
-                cursor++;
-            }
-            const conditionFn = conditionals.get(operator);
-            return conditionFn(leftValue, rightValue) ? whenTrue : (defaultValue ?? '');
-        }
-        
-        if(value != undefined)
-            return value;
-        
-        if(defaultValue != undefined)
-            return defaultValue;
-
-        throw ReferenceError(`Se esperaba un valor de reemplazo en índice [${i}] para texto localizado ${id} :: ${locale}`);
-    });
-
-    return translation;
-}
+/**@typedef {keyof localesObject} LocaleIds id de texto a mostrar en forma localizada*/
 
 /**Clase de traducción de contenidos*/
 class Translator {
@@ -660,7 +635,7 @@ class Translator {
      * @param {...String} values variables a insertar en el texto seleccionado como reemplazos de campos designados
      */
     getText(id, ...values) {
-        return getText(id, this.#locale, ...values);
+        return Translator.getText(id, this.#locale, ...values);
     }
 
     /**
@@ -689,6 +664,64 @@ class Translator {
     static async from(userId) {
         const userCache = await fetchUserCache(userId);
         return new Translator(userCache.language);
+    }
+
+    /**
+     * Muestra un texto localizado según la configuración del usuario
+     * @param {LocaleIds} id id de texto a mostrar en forma localizada
+     * @param {LocaleKey} locale lenguaje al cual localizar el texto
+     * @param {...String} values variables a insertar en el texto seleccionado como reemplazos de campos designados
+     */
+    static getText(id, locale, ...values) {
+        const localeSet = locales.get(id);
+        if(!localeSet) throw ReferenceError(`Se esperaba una id de texto localizado válido. Se recibió: ${id}`);
+        const translationTemplate = localeSet[locale];
+        if(!translationTemplate) throw RangeError(`Se esperaba una clave de localización válida. Se recibió: ${id} :: ${locale}`);
+    
+        //Ejemplo: 1{...}<?{'por defecto'}
+        const subLocaleRegex = /(\d+){\.\.\.}(?:<!{((?:[=<>]{1}|(?:[!<>]=))[0-9]+)\|'((?:(?!'}).)*)'})?(?:<\?{'((?:(?!'}).)*)'})?/g;
+        const translation = translationTemplate.replace(subLocaleRegex, (_, i, condition, whenTrue, defaultValue) => {
+            const value = values[i];
+    
+            if(condition != undefined) {
+                const divisionChar = condition.match(/[0-9]/gi)[0];
+                const leftValue = `${value}`;
+                let cursor = 0;
+                let operator = '';
+                let rightValue = '';
+                while(condition[cursor] !== divisionChar) {
+                    operator += condition[cursor];
+                    cursor++;
+                }
+                while(cursor < condition.length) {
+                    rightValue += condition[cursor];
+                    cursor++;
+                }
+                const conditionFn = conditionals.get(operator);
+                return conditionFn(leftValue, rightValue) ? whenTrue : (defaultValue ?? '');
+            }
+            
+            if(value != undefined)
+                return value;
+            
+            if(defaultValue != undefined)
+                return defaultValue;
+    
+            throw ReferenceError(`Se esperaba un valor de reemplazo en índice [${i}] para texto localizado ${id} :: ${locale}`);
+        });
+    
+        return translation;
+    }
+
+    /**
+     * Muestra un texto localizado según la configuración del usuario
+     * @param {LocaleIds} id id de traducción
+     * @returns {Translation}
+     */
+    static getTranslation(id) {
+        const localeSet = locales.get(id);
+        if(!localeSet) throw ReferenceError(`Se esperaba una id de traducción válida. Se recibió: ${id}`);
+        return localeSet;
     }
 }
 

@@ -182,27 +182,36 @@ class TuberInterpreter {
         // console.log('----------------------------------------------------------------------------------------');
         
         switch(node.type) {
-        case 'RegistryStatement':
+        case NodeTypes.REGISTRY:
             this.#evaluateRegistry(node, scope);
             break;
-        case 'DeclareStatement':
+        case NodeTypes.DECLARE:
             this.#evaluateDeclaration(node, scope);
             break;
-        case 'RelationalStatement':
+        case NodeTypes.RELATION:
             this.#evaluateRelational(node, scope);
             break;
-        case 'SendStatement':
-            this.#evaluateSend(node, scope);
+        case NodeTypes.SEND:
+            this.#evaluateSend(node.value, scope);
             break;
-        case 'ReturnStatement':
+        case NodeTypes.RETURN:
             return this.#evaluate(node.value, scope);
-        case 'BreakStatement':
+        case NodeTypes.BREAK:
             return node;
-        case 'BlockStatement': {
+        case NodeTypes.STOP:
+            const test = makeValue(this.#evaluate(node.condition, scope), 'Boolean');
+
+            if(test.value) {
+                this.#evaluateSend(node.stopMessage, scope);
+                return;
+            }
+            
+            break;
+        case NodeTypes.BLOCK: {
             const blockScope = new TuberScope(scope);
             return this.#evaluateBlock(node, blockScope);
         }
-        case 'ConditionalStatement': {
+        case NodeTypes.CONDITIONAL: {
             const test = makeValue(this.#evaluate(node.test, scope), 'Boolean');
             const blockScope = new TuberScope(scope);
             if(test.value)
@@ -211,7 +220,7 @@ class TuberInterpreter {
                 return this.#evaluateStatement(node.alternate, scope);
             break;
         }
-        case 'WhileLoopStatement': {
+        case NodeTypes.WHILE: {
             while(makeValue(this.#evaluate(node.test, scope), 'Boolean').value) {
                 const blockScope = new TuberScope(scope);
                 const lastEvaluated = this.#evaluateBlock(node, blockScope);
@@ -222,7 +231,7 @@ class TuberInterpreter {
             }
             break;
         }
-        case 'DoWhileLoopStatement': {
+        case NodeTypes.DO_WHILE: {
             do {
                 const blockScope = new TuberScope(scope);
                 const lastEvaluated = this.#evaluateBlock(node, blockScope);
@@ -233,7 +242,7 @@ class TuberInterpreter {
             } while(makeValue(this.#evaluate(node.test, scope), 'Boolean').value)
             break;
         }
-        case 'ForLoopStatement': {
+        case NodeTypes.FOR: {
             const forScope = new TuberScope(scope);
             const { receptor, reception } = node.assignment;
             forScope.assignVariable(receptor.name, this.#evaluate(reception, forScope));
@@ -251,7 +260,7 @@ class TuberInterpreter {
             }
             break;
         }
-        case 'ForInLoopStatement': {
+        case NodeTypes.FOR_IN: {
             const list = this.#evaluate(node.list, scope);
             // console.log('La lista en cuestión:', list);
             if(list.type !== 'List')
@@ -272,10 +281,10 @@ class TuberInterpreter {
             }
             break;
         }
-        case 'ExpressionStatement':
+        case NodeTypes.EXPRESSION:
             this.#evaluateExpression(node, scope);
             break;
-        case 'CommentStatement':
+        case NodeTypes.COMMENT:
             break;
         default:
             throw TuberInterpreterError(`Nodo no implementado: ${node.type}\nPrueba a usarlo en una versión posterior de PuréScript`, this.#currentStatement);
@@ -438,8 +447,8 @@ class TuberInterpreter {
      * @param {TuberNode} node 
      * @param {TuberScope} scope 
      */
-    #evaluateSend(node, scope) {
-        const emission = this.#evaluate(node.value, scope);
+    #evaluateSend(value, scope) {
+        const emission = this.#evaluate(value, scope);
         switch(emission.type) {
         case 'List':
             //Handlear envío de lista de imágenes luego
@@ -662,6 +671,12 @@ class TuberInterpreter {
             return makeNada();
         }
 
+        if(container.type === 'Embed') {
+            const embedMethod = scope.lookup('Marco').properties.get(property.name);
+            if(embedMethod)
+                return embedMethod;
+        }
+
         console.log('hola', container, property);
         const nodeName = container
             ? ProgramToLanguage.get(container.type) ?? NodeToLanguage.get(container.type) ?? container.type
@@ -722,17 +737,17 @@ class TuberInterpreter {
         let { leftHand, rightHand, operator } = node;
         leftHand = this.#evaluate(leftHand, scope);
         rightHand = this.#evaluate(rightHand, scope);
-        // console.log({ left: leftHand, right: rightHand });
+        //console.log({ left: leftHand, right: rightHand });
 
         if(!logicOperations.has(operator))
             throw TuberInterpreterError(`Operador lógico inválido: ${operator}`, this.#currentStatement);
         
         const leftValue =  leftHand  ? (leftHand.value  ?? leftHand.elements  ?? leftHand.properties)  : undefined;
         const rightValue = rightHand ? (rightHand.value ?? rightHand.elements ?? rightHand.properties) : undefined;
-        // console.log({ leftValue, rightValue });
+        //console.log({ leftValue, rightValue });
         
         let result = logicOperations.get(operator)(leftValue, rightValue);
-        // console.log({ result, leftValue, rightValue });
+        //console.log({ result, leftValue, rightValue });
 
         if(typeof result === 'boolean')
             return makeBoolean(result);

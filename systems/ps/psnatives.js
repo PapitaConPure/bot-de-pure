@@ -351,6 +351,8 @@ function esNúmero([x]) {
     return makeBoolean(x?.type === 'Number');
 }
 
+function esNumero([x]) { return esNúmero([x]); }
+
 /**@param {Array<RuntimeValue>} param0*/
 function esTexto([x]) {
     if(x == undefined) throw Error('Se esperaba un argumento en comprobación de tipo');
@@ -439,6 +441,7 @@ const nativeFunctions = [
     dado,
 
     esNúmero,
+    esNumero,
     esTexto,
     esDupla,
     esLista,
@@ -682,7 +685,9 @@ const Texto = new Map();
 Texto
     .set('caracterEn',       makeNativeFunction(textoCaracterEn))
     .set('posiciónDe',       makeNativeFunction(textoPosiciónDe))
+    .set('posicionDe',       makeNativeFunction(textoPosiciónDe))
     .set('últimaPosiciónDe', makeNativeFunction(textoÚltimaPosiciónDe))
+    .set('ultimaPosicionDe', makeNativeFunction(textoÚltimaPosiciónDe))
     .set('comienzaCon',      makeNativeFunction(textoComienzaCon))
     .set('terminaCon',       makeNativeFunction(textoTerminaCon))
     .set('incluye',          makeNativeFunction(textoIncluye))
@@ -691,7 +696,9 @@ Texto
     .set('partir',           makeNativeFunction(textoPartir))
     .set('cortar',           makeNativeFunction(textoCortar))
     .set('aMinúsculas',      makeNativeFunction(textoAMinúsculas))
+    .set('aMinusculas',      makeNativeFunction(textoAMinúsculas))
     .set('aMayúsculas',      makeNativeFunction(textoAMayúsculas))
+    .set('aMayusculas',      makeNativeFunction(textoAMayúsculas))
     .set('normalizar',       makeNativeFunction(textoNormalizar))
     .set('aLista',           makeNativeFunction(aLista));
 
@@ -829,14 +836,17 @@ const Lista = new Map();
 Lista
     .set('unir',         makeNativeFunction(listaUnir))
     .set('vacía',        makeNativeFunction(listaVacía))
+    .set('vacia',        makeNativeFunction(listaVacía))
     .set('incluye',      makeNativeFunction(listaIncluye))
     .set('invertir',     makeNativeFunction(listaInvertir))
     .set('ordenar',      makeNativeFunction(listaOrdenar))
     .set('cortar',       makeNativeFunction(listaCortar))
     .set('último',       makeNativeFunction(listaÚltimo))
+    .set('ultimo',       makeNativeFunction(listaÚltimo))
     .set('robar',        makeNativeFunction(listaRobar))
     .set('robarPrimero', makeNativeFunction(listaRobarPrimero))
     .set('robarÚltimo',  makeNativeFunction(listaRobarÚltimo))
+    .set('robarUltimo',  makeNativeFunction(listaRobarÚltimo))
     .set('aGlosario',    makeNativeFunction(listaAGlosario));
 
 /**
@@ -869,15 +879,116 @@ function glosarioValores(member, _, currentStatement) {
 function glosarioPropiedades(member, _, currentStatement) {
     if(member?.type !== 'Glossary')
         throw TuberInterpreterError('Se esperaba un Glosario válido del cuál extraer propiedades', currentStatement);
+
     return makeList(Array.from(member.properties.entries()).map(([ key, value ]) => makeList([ makeText(key), value ])));
 }
 
 /**@type {Map<String, NativeFunctionValue>}*/
 const Glosario = new Map();
 Glosario
-    .set('nombres',      makeNativeFunction(glosarioClaves))
+    .set('nombres',     makeNativeFunction(glosarioClaves))
     .set('valores',     makeNativeFunction(glosarioValores))
     .set('miembros',    makeNativeFunction(glosarioPropiedades));
+
+/**
+ * 
+ * @param {EmbedValue} member 
+ * @param {Array<RuntimeValue>} param1 
+ * @param {CurrentStatement} currentStatement 
+ * @returns {NadaValue}
+ */
+function wrapperMarcoAgregarCampo(member, [ nombre, valor, alineado ], currentStatement) {
+    return marcoAgregarCampo([ member, nombre, valor, alineado ], currentStatement);
+}
+
+/**
+ * 
+ * @param {EmbedValue} member 
+ * @param {Array<RuntimeValue>} param1 
+ * @param {CurrentStatement} currentStatement 
+ * @returns {NadaValue}
+ */
+function wrapperMarcoAsignarAutor(member, [ nombre, autor ], currentStatement) {
+    return marcoAsignarAutor([ member, nombre, autor ], currentStatement);
+}
+
+/**
+ * 
+ * @param {EmbedValue} member 
+ * @param {Array<RuntimeValue>} param1 
+ * @param {CurrentStatement} currentStatement 
+ * @returns {NadaValue}
+ */
+function wrapperMarcoAsignarColor(member, [ color ], currentStatement) {
+    return marcoAsignarColor([ member, color ], currentStatement);
+}
+
+/**
+ * 
+ * @param {EmbedValue} member 
+ * @param {Array<RuntimeValue>} param1 
+ * @param {CurrentStatement} currentStatement 
+ * @returns {NadaValue}
+ */
+function wrapperMarcoAsignarDescripción(member, [ descripción ], currentStatement) {
+    return marcoAsignarDescripción([ member, descripción ], currentStatement);
+} 
+/**
+ * 
+ * @param {EmbedValue} member 
+ * @param {Array<RuntimeValue>} param1 
+ * @param {CurrentStatement} currentStatement 
+ * @returns {NadaValue}
+ */
+function wrapperMarcoAsignarImagen(member, [ imagen ], currentStatement) {
+    return marcoAsignarImagen([ member, imagen ], currentStatement);
+}
+
+/**
+ * 
+ * @param {EmbedValue} member 
+ * @param {Array<RuntimeValue>} param1 
+ * @param {CurrentStatement} currentStatement 
+ * @returns {NadaValue}
+ */
+function wrapperMarcoAsignarMiniatura(member, [ imagen ], currentStatement) {
+    return marcoAsignarMiniatura([ member, imagen ], currentStatement);
+}
+
+/**
+ * 
+ * @param {EmbedValue} member 
+ * @param {Array<RuntimeValue>} param1 
+ * @param {CurrentStatement} currentStatement 
+ * @returns {NadaValue}
+ */
+function wrapperMarcoAsignarPie(member, [ pie, imagen ], currentStatement) {
+    return marcoAsignarPie([ member, pie, imagen ], currentStatement);
+}
+
+/**
+ * 
+ * @param {EmbedValue} member 
+ * @param {Array<RuntimeValue>} param1 
+ * @param {CurrentStatement} currentStatement 
+ * @returns {NadaValue}
+ */
+function wrapperMarcoAsignarTítulo(member, [ título ], currentStatement) {
+    return marcoAsignarTítulo([ member, título ], currentStatement);
+}
+
+const Marco = new Map();
+Marco
+    .set('agregarCampo',       makeNativeFunction(wrapperMarcoAgregarCampo))
+    .set('asignarAutor',       makeNativeFunction(wrapperMarcoAsignarAutor))
+    .set('asignarColor',       makeNativeFunction(wrapperMarcoAsignarColor))
+    .set('asignarDescripción', makeNativeFunction(wrapperMarcoAsignarDescripción))
+    .set('asignarDescripcion', makeNativeFunction(wrapperMarcoAsignarDescripción))
+    .set('asignarImagen',      makeNativeFunction(wrapperMarcoAsignarImagen))
+    .set('asignarMiniatura',   makeNativeFunction(wrapperMarcoAsignarMiniatura))
+    .set('asignarPie',         makeNativeFunction(wrapperMarcoAsignarPie))
+    .set('asignarTítulo',      makeNativeFunction(wrapperMarcoAsignarTítulo))
+    .set('asignarTitulo',      makeNativeFunction(wrapperMarcoAsignarTítulo))
 //#endregion
 
 /**@param {TuberScope} scope*/
@@ -888,6 +999,7 @@ function declareNatives(scope) {
     scope.assignVariable('Texto',    makeGlossary(Texto));
     scope.assignVariable('Lista',    makeGlossary(Lista));
     scope.assignVariable('Glosario', makeGlossary(Glosario));
+    scope.assignVariable('Marco',    makeGlossary(Marco));
     scope.assignVariable('pi',       makeNumber(Math.PI));
     for(const [traducción, original] of colors)
         scope.assignVariable(traducción, makeNumber(original));

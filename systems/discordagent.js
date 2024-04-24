@@ -1,5 +1,12 @@
-const { TextChannel, User, Webhook, GuildMember } = require('discord.js');
+const WebhookOwner = require('../localdata/models/webhookOwners.js');
+const { TextChannel, User, Webhook, GuildMember, Message } = require('discord.js');
 const { isThread } = require('../func');
+
+/**
+ * @typedef {{ userId: String, expirationDate: Date }} OwnerData
+ * @type {Map<String, OwnerData>}
+ */
+const owners = new Map();
 
 /**Clase para interactuar con Webhooks de Discord de forma más sencilla*/
 class DiscordAgent {
@@ -73,15 +80,31 @@ class DiscordAgent {
         }
 
         try {
-            // console.log(`Usuario asociado: ${this.user}`)
-            // console.log(`Webhook asociado: ${this.webhook}`)
-            return await this.webhook.send({
+            const sent = await this.webhook.send({
                 ...messageOptions,
                 threadId: this.threadId,
                 username: this.#getUserName(this.user),
                 avatarURL: this.user.displayAvatarURL({ size: 512 }),
                 nonce: undefined,
             });
+
+            const messageId = sent.id;
+            const userId = this.user.id;
+            const expirationDate = Date.now() + 3600e3;
+            const webhookOwner = new WebhookOwner({ messageId, userId, expirationDate });
+            owners.set(messageId, { userId, expirationDate });
+            webhookOwner.save();
+
+            const toDelete = [];
+            for(const [ messageId, owner ] of owners.entries()) {
+                if(Date.now > owner.expirationDate) {
+                    toDelete.push(messageId);
+                    WebhookOwner.deleteOne({ messageId });
+                }
+            }
+            toDelete.forEach(dkey => owners.delete(dkey));
+
+            return sent;
         } catch(e) {
             return console.error(e);
         }
@@ -102,6 +125,42 @@ class DiscordAgent {
     }
 }
 
+async function initializeWebhookMessageOwners() {
+    const webhookOwners = await WebhookOwner.find({});
+    const now = Date.now();
+    webhookOwners.forEach(owner => {
+        if(now < owner.expirationDate)
+            owners.set(owner.messageId, { userId: owner.userId, expirationDate: owner.expirationDate });
+    });
+}
+
+/**
+ * @param {String} messageId 
+ * @returns {String?}
+ */
+function getAgentMessageOwnerId(messageId) {
+    const owner = owners.get(messageId);
+    if(!owner) return null;
+    return owner.userId;
+}
+
+/**
+ * @param {Message} message 
+ */
+async function deleteAgentMessage(message) {
+    const webhookOwner = await WebhookOwner.findOne({ messageId: message.id });
+
+    owners.delete(message.id);
+
+    return Promise.all([
+        message.delete().catch(_ => undefined),
+        webhookOwner && webhookOwner.delete(),
+    ]);
+}
+
 module.exports = {
+    initializeWebhookMessageOwners,
+    getAgentMessageOwnerId,
+    deleteAgentMessage,
     DiscordAgent,
 };

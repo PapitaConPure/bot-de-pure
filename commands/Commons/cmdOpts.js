@@ -172,6 +172,7 @@ class CommandParam extends CommandOption {
         this._type = type;
         return this;
     };
+
     /**
      * Define si el parámetro es opcional
      * @param {Boolean} optional La optabilidad del parámetro
@@ -181,6 +182,7 @@ class CommandParam extends CommandOption {
         this._optional = optional;
         return this;
     };
+
     /**
      * Define la capacidad de entradas del parámetro
      * @param {ParamPoly} poly La capacidad del parámetro
@@ -200,6 +202,7 @@ class CommandParam extends CommandOption {
     get name() {
         return this._name;
     }
+
     /**
      * String del tipo de parámetro
      * @type {String}
@@ -221,6 +224,7 @@ class CommandParam extends CommandOption {
         
         return typeString.join(' ');
     };
+    
     /**
      * String de ayuda del parámetro
      * @returns {String}
@@ -422,6 +426,7 @@ class CommandOptionsManager {
         this.params.set(commandParam._name, commandParam);
         return this;
     };
+
     /**
      * Añade una bandera al administrador
      * @param {String | Array<String>} short El/los identificadores cortos
@@ -445,6 +450,7 @@ class CommandOptionsManager {
         this.flags.set(flagIdentifier, commandFlag);
         return this;
     };
+
     /**
      * Crea una copia del administrador de opciones bajo el contexto de ejecución actual
      * Es una tarea cara que se usa al querer fetchear un miembro, usuario u otro tipo de dato que requiera el contexto de ejecución. De lo contrario, no debería usarse
@@ -471,6 +477,7 @@ class CommandOptionsManager {
             ...[...this.flags.values()].map(f => f.display)
         ].join('\n');
     };
+
     /**
      * String de ayuda de las opciones de comando del administrador
      * @returns {String}
@@ -486,6 +493,7 @@ class CommandOptionsManager {
             return `<${paramExpressions.join('')}>`;
         }).join(' ');
     };
+
     /**
      * Remueve y devuelve la siguiente entrada o devuelve todas las entradas en caso de que {@linkcode whole} sea verdadero
      * @param {Array<String>} args El conjunto de entradas
@@ -520,6 +528,7 @@ class CommandOptionsManager {
             return argsPrototype;
         }
     }
+
     /**
      * Si es un comando Slash, devuelve el valor del parámetro ingresado
      * Si es un comando de mensaje, remueve y devuelve la siguente entrada o devuelve todas las entradas en caso de que {@linkcode whole} sea verdadero
@@ -550,6 +559,7 @@ class CommandOptionsManager {
 
         return input[getMethodName](slashIdentifier, !param._optional);
     };
+
     /**
      * Devuelve un arreglo de todas las entradas recibidas.
      * Si no se recibe ninguna entrada, se devuelve fallback
@@ -591,6 +601,7 @@ class CommandOptionsManager {
             
         return params.length ? params : [ (typeof fallback === 'function') ? fallback() : fallback ];
     };
+
     /**
      * Devuelve un valor o función basado en si se ingresó la flag buscada o no.
      * Si no se recibe ninguna entrada, se devuelve fallback.

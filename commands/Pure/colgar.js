@@ -2,12 +2,16 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('
 const { fetchMember } = require('../../func');
 const { hourai } = require('../../localdata/config.json');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
+const { CommandPermissions } = require('../Commons/cmdPerms');
 
 const hangedDollId = hourai.hangedRoleId;
+
+const perms = new CommandPermissions('ManageRoles');
 
 const options = new CommandOptionsManager()
 	.addParam('usuario', 'USER', 'para aplicar Hanged Doll a un usuario', { optional: true })
 	.addFlag('t', 'todos', 'para aplicar Hanged Doll a todos los usuarios');
+
 const flags = new CommandMetaFlagsManager().add(
 	'MOD',
 	'HOURAI',
@@ -22,6 +26,7 @@ const command = new CommandManager('colgar', flags)
 		'Asigna el rol de __Hanged Doll__ al `usuario` especificado.',
 		'Usarlo con alguien que ya está colgado lo descolgará, así que cuidado',
 	)
+	.setPermissions(perms)
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash) => {
 		if(!request.guild.members.me.permissions.has('ManageRoles'))

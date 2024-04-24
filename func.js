@@ -1054,6 +1054,42 @@ module.exports = {
     },
 
     /**
+     * Limita un string a una cantidad definida de caracteres de forma floja (no recorta palabras).
+     * Si el string sobrepasa el máximo establecido, se reemplaza el final por un string suspensor para indicar el recorte
+     * @param {String} text 
+     * @param {Number?} max
+     * @param {Number?} hardMax
+     * @param {String?} suspensor 
+     * @returns {String}
+     */
+    shortenTextLoose: function(text, max = 200, hardMax = 256, suspensor = '...') {
+        if(typeof text !== 'string') throw TypeError('El texto debe ser un string');
+        if(typeof max !== 'number') throw TypeError('El máximo debe ser un número');
+        if(typeof hardMax !== 'number') throw TypeError('El máximo verdadero debe ser un número');
+        if(typeof suspensor !== 'string') throw TypeError('El suspensor debe ser un string');
+
+        if(text.length < max)
+            return text;
+
+        const trueMax = Math.min(text.length, hardMax);
+        const whitespaces = [ ' ', '\n', '\t' ];
+        let calculatedMax = max;
+        while(calculatedMax < trueMax && !whitespaces.includes(text[calculatedMax])) calculatedMax++;
+
+        console.log({ calculatedMax, length: text.length });
+        
+        if(calculatedMax + suspensor > hardMax)
+            calculatedMax = hardMax - suspensor;
+
+        console.log({ calculatedMax, length: text.length });
+
+        if(calculatedMax <= text.length)
+            return text;
+
+        return `${text.slice(0, calculatedMax)}${suspensor}`;
+    },
+
+    /**
      * Calcula la distancia entre dos strings con el algoritmo de distancia Levenshtein
      * @param {String} a 
      * @param {String} b 

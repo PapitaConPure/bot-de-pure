@@ -14,6 +14,8 @@ const TokenTypes = {
     WHILE:            'WHILE',
     DO_OPEN:          'DO_OPEN',
     DO_CLOSE:         'DO_CLOSE',
+    REPEAT:           'REPEAT',
+    REPEAT_OPEN:      'REPEAT_OPEN',
     FOR:              'FOR',
     IN:               'IN',
     
@@ -79,6 +81,14 @@ class TuberLexer {
      */
     get #current() {
         return this.#stream.charAt(this.#cursor);
+    }
+
+    /**
+     * El caracter en la anterior posición del cursor
+     * @returns {String}
+     */
+    get #previous() {
+        return this.#stream.charAt(this.#cursor - 1);
     }
 
     /**
@@ -201,6 +211,47 @@ class TuberLexer {
             return;
         }
 
+        if(this.#current === '!')
+            return createToken(TokenTypes.NOT, 'no');
+
+        if(this.#current === '=') {
+            if(this.#next === '=' || this.#previous === '!') {
+                this.#augmentCursor();
+                return createToken(TokenTypes.EQUALS, 'es');
+            }
+
+            if(this.#previous === '<')
+                return createToken(TokenTypes.COMPARE, 'excede');
+
+            if(this.#previous === '>')
+                return createToken(TokenTypes.COMPARE, 'precede');
+
+            return createToken(TokenTypes.ASSIGN, 'con');
+        }
+
+        if(this.#current === '~' && (this.previous === '!' || this.#next === '~'))
+            return createToken(TokenTypes.EQUALS, 'parece');
+        
+        if(this.#current === '<') {
+            if(this.#next === '=')
+                return createToken(TokenTypes.NOT, 'no');
+            else
+                return createToken(TokenTypes.COMPARE, 'precede');
+        }
+        
+        if(this.#current === '>'){
+            if(this.#next === '=')
+                return createToken(TokenTypes.NOT, 'no');
+            else
+                return createToken(TokenTypes.COMPARE, 'excede');
+        }
+
+        if(this.#current === '&' && this.#next === '&')
+            return createToken(TokenTypes.AND, 'y');
+
+        if(this.#current === '|' && this.#next === '|')
+            return createToken(TokenTypes.AND, 'y');
+
         const symbol = this.#current.match(/[+\-*/^%]/)?.[0];
         if(symbol) {
             let tokenType;
@@ -274,6 +325,10 @@ class TuberLexer {
                 return createToken(TokenTypes.DO_OPEN, 'hacer');
             case 'yseguir':
                 return createToken(TokenTypes.DO_CLOSE, 'yseguir');
+            case 'repetir':
+                return createToken(TokenTypes.REPEAT, 'repetir');
+            case 'veces':
+                return createToken(TokenTypes.REPEAT_OPEN, 'veces');
             case 'para':
             case 'cada':
                 return createToken(TokenTypes.FOR, word);
@@ -287,9 +342,12 @@ class TuberLexer {
             case 'dividir':
             case 'extender':
             case 'ejecutar':
+            case 'usar':
             case 'devolver':
             case 'terminar':
+            case 'parar':
             case 'enviar':
+            case 'decir':
             case 'comentar':
                 return createToken(TokenTypes.STATEMENT, word);
             case 'numero':
@@ -303,9 +361,6 @@ class TuberLexer {
                 return createToken(TokenTypes.DATA_TYPE, word);
             case 'nada':
                 return createToken(TokenTypes.NADA, null);
-            // case 'detener':
-            //     this.#cursor = this.#stream.length;
-            //     return;
             default:
                 return createToken(TokenTypes.IDENTIFIER, rawWord);
             }

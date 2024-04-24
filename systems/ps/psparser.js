@@ -33,6 +33,7 @@ const NodeTypes = {
     SEND:        'SendStatement',
     RETURN:      'ReturnStatement',
     BREAK:       'BreakStatement',
+    STOP:        'StopStatement',
     COMMENT:     'CommentStatement',
     
     IDENTIFIER:    'Identifier',
@@ -117,6 +118,7 @@ NodeToLanguage
     .set('SendStatement',        'enviar')
     .set('ReturnStatement',      'devolver')
     .set('BreakStatement',       'terminar')
+    .set('StopStatement',        'parar')
     .set('CommentStatement',     'comentar')
 
     .set('AssignExpression',     'con')
@@ -362,6 +364,7 @@ class TuberParser {
                 expression: this.#parseAssign(),
             };
         
+        case 'usar':
         case 'ejecutar': {
             let expression = this.#parseMemberCall();
             if(expression.type === 'Identifier')
@@ -376,6 +379,7 @@ class TuberParser {
             };
             break;
         }
+        case 'decir':
         case 'enviar':
             statement = {
                 type: NodeTypes.SEND,
@@ -394,6 +398,9 @@ class TuberParser {
                 type: NodeTypes.BREAK,
             };
             this.#ommitRemainingScope(false);
+            break;
+        case 'parar':
+            statement = this.#parseStop();
             break;
         case 'comentar':
             statement = {
@@ -610,6 +617,26 @@ class TuberParser {
         // console.log(argument);
 
         return argument;
+    }
+
+    /**
+     * Parsea un verificador de interrupción
+     * @returns {TuberNode}
+     */
+    #parseStop() {
+        this.#expect(TokenTypes.ASSIGN);
+        
+        const stopMessage = this.#parseText();
+        this.#expect(TokenTypes.CONDITION_OPEN);
+        const condition = this.#parseOr();
+
+        const result = {
+            type: NodeTypes.STOP,
+            condition,
+            stopMessage,
+        };
+
+        return result;
     }
 
     /**

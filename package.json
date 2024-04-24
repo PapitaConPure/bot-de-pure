@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "description": "Bot de puré es un bot de entretenimiento, búsqueda de imágenes y utilidades generales varias. Utiliza comandos tradicionales con adiciones inspiradas en terminales como <code>--flags</code>.<br>\r Como personaje, es una robot \"mujer\". Es torpe y agresiva en algunos casos, pero parece tener espíritu.",
   "engines": {
-    "node": "16.x"
+    "node": "^20.x"
   },
   "main": "index.js",
   "scripts": {
     "start": "pm2-runtime start ecosystem.config.js --env production",
+    "cmdbuild": ".\\CommandBuilder\\CommandBuilder\\bin\\Release\\CommandBuilder.exe",
     "lint": "eslint ."
   },
   "repository": {
@@ -27,7 +28,6 @@
     "chalk": "^4.1.1",
     "discord.js": "^14.7.1",
     "express": "^4.17.3",
-    "imgur": "^2.2.0",
     "mongoose": "^6.2.7",
     "pixiv-api-client": "^0.25.0",
     "pm2": "^5.2.0"

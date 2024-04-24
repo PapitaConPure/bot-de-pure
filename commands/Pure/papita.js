@@ -2,10 +2,9 @@ const { randRange, isThread } = require('../../func');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
 
 const paputa = [
-	'Lechita:tm: uwu :milk:',
 	'Romper al bot <:sagumeBlush:1108315844045455410>',
 	'¿Qué es "Manzanas contra Bananas"? <:mayuwu:1107843515385389128>',
-	'J-j-jueguen Palactis <:kogaBlush:1108605873326141500>',
+	'J-jueguen Palactis <:kogaBlush:1108605873326141500>',
 	'Meguuuu <:aliceHug:1107848230420623361>',
 	'Sagume <:aliceHug:1107848230420623361>',
 	'*KONOSUBA!*',

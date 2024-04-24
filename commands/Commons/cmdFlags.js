@@ -47,9 +47,8 @@ class CommandMetaFlagsManager {
      * @param  {...MetaFlagValue} flags Meta Flags de comando a introducir
      */
     add(...flags) {
-        flags.forEach(flag => {
-            this.bitField = this.bitField | metaFlagDepth(flag);
-        });
+        for(const flag of flags)
+            this.bitField |= metaFlagDepth(flag);
         return this;
     };
 

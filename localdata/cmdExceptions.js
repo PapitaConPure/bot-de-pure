@@ -18,7 +18,7 @@ module.exports = {
         {
             flag: 'OUTDATED',
             title: 'Comando desactualizado',
-            desc: 'El comando no se encuentra disponible debido a que su función ya no es requerida en absoluto. Espera a que se actualice~',
+            desc: 'El comando no se encuentra disponible debido a que su función ya no es requerida en absoluto o su mantención no se encontró justificada',
             isException: (compare) => isNotByPapita(compare)
         },
         {
@@ -45,7 +45,7 @@ module.exports = {
         {
             flag: 'GUIDE',
             title: 'Símbolo de página de guía',
-            desc: 'Esto no es un comando, sino que una *página de guía* para buscarse con el comando de ayuda',
+            desc: 'Esto no es un comando, sino que una *página de guía* para buscarse con el comando de ayuda (`p!ayuda <guía>`)',
             isException: (_) => true
         },
         {
@@ -57,7 +57,11 @@ module.exports = {
         {
             flag: 'HOURAI',
             title: 'Comando exclusivo de Saki Scans',
-            desc: 'El comando es de uso restringido para el servidor __Saki Scans (Hourai Doll)__. Esto generalmente se debe a que cumple funciones que solo funcionan allí',
+            desc: [
+                'El comando es de uso restringido para el servidor __Saki Scans (anteriormente Hourai Doll)__.',
+                'Esto generalmente se debe a que cumple funciones que solo funcionan allí o que solo tiene sentido que se mantengan en dicho lugar',
+                'Si te interesa, puedes [unirte al servidor](https://discord.gg/pPwP2UNvAC)'
+            ].join('\n'),
             isException: (compare) => isNotByPapita(compare) && compare.guild.id !== global.serverid.saki
         },
     ],

@@ -1,4 +1,4 @@
-const { REST, Client } = require('discord.js');
+const { REST, Client, ApplicationCommandType, ContextMenuCommandBuilder, Collection } = require('discord.js');
 const { Routes } = require('discord-api-types/v9');
 
 const { connect } = require('mongoose');
@@ -9,9 +9,15 @@ const HouraiDB = require('../localdata/models/hourai.js');
 
 const globalConfigs = require('../localdata/config.json');
 const envPath = globalConfigs.remoteStartup ? '../remoteenv.json' : '../localenv.json';
+
+/**@type {String}*/
 const mongoUri = process.env.MONGODB_URI ?? (require(envPath)?.dburi);
+
+/**@type {String}*/
 const discordToken = process.env.I_LOVE_MEGUMIN ?? (require(envPath)?.token);
+/**@type {String}*/
 const booruApiKey = process.env.BOORU_APIKEY ?? (require(envPath)?.booruapikey);
+/**@type {String}*/
 const booruUserId = process.env.BOORU_USERID ?? (require(envPath)?.booruuserid);
 
 const { setupGuildFeedUpdateStack, feedTagSuscriptionsCache } = require('../systems/boorufeed');
@@ -23,7 +29,7 @@ const { lookupService } = require('dns');
 const { promisify } = require('util');
 const chalk = require('chalk');
 const Poll = require('../localdata/models/poll.js');
-const { fetchChannel } = require('../func.js');
+const { initializeWebhookMessageOwners } = require('../systems/discordagent.js');
 
 const logOptions = {
     slash: false,
@@ -36,23 +42,30 @@ async function onStartup(client) {
     const confirm = () => console.log(chalk.green('Hecho.'));
     globalConfigs.maintenance = '1';
 
+    console.log(chalk.bold.magentaBright('Cargando comandos Slash y Contextuales...'));
+    const restGlobal = new REST({ version: '9' }).setToken(discordToken);
+    const commandData = {
+        global: client.SlashPure.concat(client.ContextPure),
+        saki: client.SlashHouraiPure,
+    };
+
     try {
-        console.log(chalk.bold.magentaBright('Cargando comandos slash...'));
-        const restGlobal = new REST({ version: '9' }).setToken(discordToken);
         await restGlobal.put(
             Routes.applicationCommands(client.application.id),
-            { body: client.SlashPure },
+            { body: commandData.global },
         );
-        // const dedicatedServerId = (process.env.I_LOVE_MEGUMIN) ? globalConfigs.serverid.saki : globalConfigs.serverid.slot1;
+        
         const dedicatedServerId = globalConfigs.serverid.saki;
-        await restGlobal.put(
-            Routes.applicationGuildCommands(client.application.id, dedicatedServerId),
-            { body: client.SlashHouraiPure },
-        );
+        if(client.guilds.cache.get(dedicatedServerId))
+            await restGlobal.put(
+                Routes.applicationGuildCommands(client.application.id, dedicatedServerId),
+                { body: commandData.saki },
+            );
+
         logOptions.slash && console.log(`Comandos registrados + hourai (${dedicatedServerId} :: ${client.guilds.cache.get(dedicatedServerId).name}):`, restGlobal);
         confirm();
-    } catch (error) {
-        console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos slash'));
+    } catch(error) {
+        console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos Slash y/o Contextuales'));
         console.error(error);
     }
 
@@ -157,6 +170,9 @@ async function onStartup(client) {
 
         setTimeout(pollCommand.concludePoll, timeUntil, pollChannel, resultsChannel, poll.id);
     });
+
+    console.log(chalk.gray('Preparando Dueños de Mensajes de Agentes Puré...'));
+    await initializeWebhookMessageOwners();
 
     console.log(chalk.gray('Preparando Tabla de Puré...'));
     const pureTableDocument = await Puretable.findOne({});

@@ -1,7 +1,7 @@
 const { EmbedBuilder, Message, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Embed } = require('discord.js');
 const pixivToken = process.env.PIXIV_REFRESH_TOKEN ?? (require('../localenv.json')?.pixivtoken);
 const PixivApi = require('pixiv-api-client');
-const { shortenText } = require('../func');
+const { shortenTextLoose } = require('../func');
 const { DiscordAgent } = require('./discordagent.js');
 const pixiv = new PixivApi();
 
@@ -56,11 +56,11 @@ const formatPixivPostsMessage = async (urls) => {
     
     const messageData = (await Promise.all(urls.slice(0, 4).map(async (url, i) => {
         const [ postId, pageId, wantsSpecificPage ] = extractIdAndPage(url);
-        const baseUrl = url.split(pageSep).shift();
         
         const post = (await pixiv.illustDetail(postId).catch(console.error))?.illust;
         if(!post) return;
 
+        const baseUrl = url.split(pageSep).shift();
         const imageRequestOptions = {
             headers: {
                 'Referer': 'http://www.pixiv.net',
@@ -104,39 +104,39 @@ const formatPixivPostsMessage = async (urls) => {
 
         let discordCaption;
         if(post.caption?.length)
-            discordCaption = shortenText(
+            discordCaption = shortenTextLoose(
                 post.caption
-                    .replace(/<\/?strong>/g, '')
-                    .replace(/<br ?\/?>/g, '\n')
-                    .replace(/<[^>]*>/g, ''),
+                    .replace('\n', '')
+                    .replace('*', '\\*')
+                    .replace(/<\/?strong>/g, '*')
+                    .replace(/<br ?\/?>/g, '\n'),
+                    //.replace(/<[^>]*>/g, ''),
                 256,
+                960,
                 ' (...)',
-            ).replace(/<a href=["'](https?:[^"']+)["']( \w+=["'][^"']+["'])*>([^<]+)<\/a>/g, (_substr, url) => {
-                const labelLink = label => `[🔗 ${label}](${url})`;
+            )
+            .replace(/<a href=["'](https?:[^"']+)["']( \w+=["'][^"']+["'])*>([^<]+)<\/a>/g, (_substr, url) => {
+                const labelLink = (icon, label) => `[ ${icon} ${label}](${url})`;
                 
                 if(url.includes('twitter.com') | urls.includes('nitter.net'))
-                    return labelLink('Twitter');
-                if(url.includes('fanbox.cc'))
-                    return labelLink('FANBOX');
+                    return labelLink('<:twitter:919403803114094682>', 'Twitter');
+                if(url.includes('fanbox.cc') || url.includes('pixiv.net/fanbox/'))
+                    return labelLink('<:fanbox:999783444655648869>', 'FANBOX');
                 if(url.includes('fantia.jp'))
-                    return labelLink('Fantia');
-                if(url.includes('patreon.com'))
-                    return labelLink('Patreon');
+                    return labelLink('<:fantia:1000265840182181899>', 'Fantia');
                 if(url.includes('skeb.jp'))
-                    return labelLink('Skeb');
-                if(url.includes('instagram.com'))
-                    return labelLink('Instagram');
+                    return labelLink('<:skeb:1001397393511682109>', 'Skeb');
                 if(url.includes('pixiv.net'))
-                    return labelLink('pixiv');
+                    return labelLink('<:pixiv:919403803126661120>', 'pixiv');
                 if(url.includes('tumblr.com'))
-                    return labelLink('Tumblr');
+                    return labelLink('<:tumblr:969666470252511232>', 'Tumblr');
                 if(url.includes('reddit.com'))
-                    return labelLink('Reddit');
+                    return labelLink('<:reddit:969666029045317762>', 'Reddit');
 
-                return labelLink('link');
+                return labelLink('🔗', 'Link');
             });
+
         let postTypeText;
-        
         if(metaPages?.length > 1)
             postTypeText = `Galería (${metaPages.length})`;
         else {
@@ -200,16 +200,18 @@ function replacer(match, _p1, _p2, _p3, _p4, _p5, p6) {
  * Detecta enlaces de pixiv en un mensaje y los reenvía con un Embed corregido, a través de un Agente Webhook.
  * @param {Message} message El mensaje a analizar
  */
-const sendPixivPostsAsWebhook = async (message) => {
+const sendPixivPostsAsWebhook = async (message, enabled) => {
+    if(!enabled) return;
+    
     const { content, channel, author } = message;
     if(!message.guild.members.me.permissionsIn(channel).has([ 'ManageWebhooks', 'SendMessages', 'AttachFiles' ]))
-        return;
+        return false;
 
     const pixivUrls = Array.from(content.matchAll(pixivRegex))
         .filter(u => !(u[0].startsWith('<') && u[0].endsWith('>')));
 
     if(!pixivUrls.length)
-        return;
+        return false;
     
     const newMessage = await formatPixivPostsMessage(pixivUrls.map(pixivUrl => pixivUrl[0]));
     message.content = content.replace(pixivRegex, replacer);
@@ -239,23 +241,24 @@ const sendPixivPostsAsWebhook = async (message) => {
         }).filter(embed => embed);
 
     message.embeds.push(...newMessage.embeds);
-    message.components = [new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-            .setCustomId(`feed_deletePost_${author.id}_NaF`)
-            .setEmoji('921751138997514290')
-            .setStyle(ButtonStyle.Danger),
-    )];
+    // message.components = [new ActionRowBuilder().addComponents(
+    //     new ButtonBuilder()
+    //         .setCustomId(`feed_deletePost_${author.id}_NaF`)
+    //         .setEmoji('921751138997514290')
+    //         .setStyle(ButtonStyle.Danger),
+    // )];
 
     try {
         const agent = await (new DiscordAgent().setup(channel));
         agent.setUser(author);
         agent.sendAsUser(message);
 
-        if(message.deletable)
-            message.delete().catch(console.error);
+        return true;
     } catch(e) {
         console.error(e);
     }
+
+    return false;
 };
 
 module.exports = {

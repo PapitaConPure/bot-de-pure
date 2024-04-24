@@ -1,5 +1,6 @@
 const { fetchUser, sleep } = require('../../func.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
+const { CommandPermissions } = require('../Commons/cmdPerms.js');
 const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
 
 /**@param {import('discord.js').Message<true>} message*/
@@ -33,9 +34,12 @@ function deleteOriginalAndReply(original, reply) {
 	]);
 }
 
+const perms = new CommandPermissions('ManageMessages');
+
 const options = new CommandOptionsManager()
 	.addParam('cantidad', 'NUMBER', 'para especificar la cantidad de mensajes a borrar (sin contar el mensaje del comando)', { optional: true })
 	.addFlag('um', ['usuario', 'miembro'], 			'para especificar de qué usuario borrar mensajes', { name: 'user', type: 'USER' });
+
 const flags = new CommandMetaFlagsManager().add('MOD');
 const command = new CommandManager('borrar', flags)
 	.setAliases(
@@ -44,6 +48,7 @@ const command = new CommandManager('borrar', flags)
         'del', 'd',
 	)
 	.setLongDescription('Elimina una cierta cantidad de mensajes entre 2 y 100')
+	.setPermissions(perms)
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash) => {
 		const user = options.fetchFlag(args, 'usuario', { callback: (f) => fetchUser(f, request) });

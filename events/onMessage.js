@@ -13,6 +13,7 @@ const { sendPixivPostsAsWebhook } = require('../systems/purepix.js');
 const { tenshiColor } = require('../localdata/config.json');
 const UserConfigs = require('../localdata/models/userconfigs.js');
 const { sendTweetsAsWebhook } = require('../systems/pureet.js');
+const { fetchUserCache } = require('../usercache.js');
 
 /**
  * 
@@ -210,8 +211,15 @@ async function onMessage(message, client) {
 
     gainPRC(author.id);
 
-    sendPixivPostsAsWebhook(message).catch(console.error);
-    sendTweetsAsWebhook(message).catch(console.error);
+    const userCache = await fetchUserCache(author.id);
+
+    const results = await Promise.all([
+        sendPixivPostsAsWebhook(message, userCache.convertPixiv).catch(console.error),
+        sendTweetsAsWebhook(message, userCache.twitterPrefix).catch(console.error),
+    ]);
+
+    if(results.includes(true) && message.deletable)
+        message.delete().catch(console.error);
     
     //Estadísticas
     const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });

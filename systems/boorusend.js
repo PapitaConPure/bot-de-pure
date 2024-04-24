@@ -26,41 +26,59 @@ function formatBooruPostMessage(post, data) {
     );
     /**@type {import('discord.js').ColorResolvable}*/
     let embedColor = Colors.Aqua;
+    let sourceNumber = 0;
 
     //Botón de Fuente (si está disponible)
     const addSourceButton = (source) => {
-        if(!source.match(/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){2,}\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/))
-            return;
-        
-        //Dar estilo a Embed según fuente de la imagen
+        if(!source) return;
+
         let emoji;
-        if(source.includes('pixiv.net')) {
-            emoji = '919403803126661120';
-            embedColor = 0x0096fa;
-        } else if(source.match(/twitter\.com|twimg\.com/)) {
-            emoji = '919403803114094682';
-            embedColor = 0x1da1f2;
-        } else if(source.includes('nitter.net')) {
-            emoji = '919403803114094682';
-            embedColor = 0xff6c60;
-        } else if(source.includes('fanbox.cc')) {
-            emoji = '999783444655648869';
-            embedColor = 0xfaf18a;
-        } else if(source.includes('fantia.jp')) {
-            emoji = '1000265840182181899';
-            embedColor = 0xea4c89;
-        } else if(source.includes('skeb.jp')) {
-            emoji = '1001397393511682109';
-            embedColor = 0x28837f;
-        } else if(source.includes('tumblr.com')) {
-            emoji = '969666470252511232';
-            embedColor = 0x36465d;
-        } else if(source.match(/reddit\.com|i\.redd\.it/)) {
-            emoji = '969666029045317762';
-            embedColor = 0xff4500;
-        } else {
+        
+        if(!source.match(/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-])+\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/)) {
+            //Si no es un enlace, mostrar el source en texto
             emoji = '969664712604262400';
-            embedColor = 0x1bb76e;
+            return row.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`feed_plainText${sourceNumber++}`)
+                    .setEmoji(emoji)
+                    .setStyle(ButtonStyle.Secondary)
+                    .setLabel(shortenText(source, 72))
+                    .setDisabled(true),
+            );
+        } else {
+            const rawPixivAsset = source.match(/https:\/\/i.pximg.net\/img-original\/img\/[0-9\/]{19}\/([0-9]+)_p[0-9]+\.[A-Za-z]{2,4}/);
+            if(rawPixivAsset)
+                source = `https://www.pixiv.net/artworks/${rawPixivAsset[1]}`;
+
+            //Dar estilo a Embed según fuente de la imagen
+            if(source.includes('pixiv.net')) {
+                emoji = '919403803126661120';
+                embedColor = 0x0096fa;
+            } else if(source.match(/twitter\.com|twimg\.com/)) {
+                emoji = '1232243415165440040';
+                embedColor = 0x040404;
+            } else if(source.includes('nitter.net')) {
+                emoji = '919403803114094682';
+                embedColor = 0xff6c60;
+            } else if(source.includes('fanbox.cc')) {
+                emoji = '999783444655648869';
+                embedColor = 0xfaf18a;
+            } else if(source.includes('fantia.jp')) {
+                emoji = '1000265840182181899';
+                embedColor = 0xea4c89;
+            } else if(source.includes('skeb.jp')) {
+                emoji = '1001397393511682109';
+                embedColor = 0x28837f;
+            } else if(source.includes('tumblr.com')) {
+                emoji = '969666470252511232';
+                embedColor = 0x36465d;
+            } else if(source.match(/reddit\.com|i\.redd\.it/)) {
+                emoji = '969666029045317762';
+                embedColor = 0xff4500;
+            } else {
+                emoji = '969664712604262400';
+                embedColor = 0x1bb76e;
+            }
         }
 
         if(source.length > 512)
@@ -79,6 +97,7 @@ function formatBooruPostMessage(post, data) {
                 .setURL(source),
         );
     };
+
     const source = post.source;
     if(source) {
         const sources = (typeof source === 'object')

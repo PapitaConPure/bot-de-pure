@@ -16,8 +16,11 @@ function generateRequestRecord(request) {
  * @param {import('../commands/Commons/typings.js').CommandRequest} request
  */
 function getRequestContent(request) {
-    if(request.commandName)
+    if(request.commandName) {
+        if(request.isContextMenuCommand())
+            return `**\\*. ${request.commandName}** ${request.options.data.map(({ name, value }) => `${name}:\`${value}\``).join(' ')}`;
         return `**/${request.commandName}** ${request.options.data.map(({ name, value }) => `${name}:\`${value}\``).join(' ')}`;
+    }
     if(request.customId)
         return `**-=-[**\`${request.customId}\`**]**`;
     return request.content?.slice(0, 1023) || '*Mensaje vacío.*'

@@ -294,7 +294,7 @@ async function concludePoll(pollChannel, resultsChannel, pollId) {
 }
 
 const options = new CommandOptionsManager();
-const flags = new CommandMetaFlagsManager().add('MOD');
+const flags = new CommandMetaFlagsManager().add('MOD', 'OUTDATED');
 const command = new CommandManager('encuesta', flags)
 	.setAliases(
 		'votación', 'votacion', 'voto',

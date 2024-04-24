@@ -7,12 +7,13 @@ const PendingConfessions = require('../../localdata/models/pendingConfessions.js
 const { CommandManager, CommandMetaFlagsManager, CommandOptionsManager } = require('../Commons/commands.js');
 const confessionSystems = require('../../localdata/models/confessionSystems.js');
 const { auditError } = require('../../systems/auditor.js');
+const { CommandPermissions } = require('../Commons/cmdPerms.js');
 
-const flags = new CommandMetaFlagsManager().add(
-	'MOD',
-	'HOURAI',
-);
+const perms = new CommandPermissions()
+	.requireAnyOf('ManageMessages')
+	.requireAnyOf([ 'ManageChannels', 'ManageGuild' ]);
 
+const flags = new CommandMetaFlagsManager().add('MOD');
 const command = new CommandManager('confesión', flags)
 	.setAliases(
 		'confesion',
@@ -26,6 +27,7 @@ const command = new CommandManager('confesión', flags)
 	.setLongDescription(
 		'Muestra un Asistente de Configuración de Sistema de Confesiones.',
 	)
+	.setPermissions(perms)
 	.setExecution(async (request) => {
 		let query = { guildId: request.guildId };
 		const confSystem = await ConfessionSystems.findOne(query);

@@ -37,6 +37,10 @@ operationTokens.set('/', TokenTypes.FACTOR);
 operationTokens.set('%', TokenTypes.FACTOR);
 operationTokens.set('^', TokenTypes.FUNCTION);
 
+const operationAliases = new Map();
+operationAliases.set('x', '*');
+operationAliases.set(':', '/');
+
 class MathLexer {
     #stream = '';
     #cursor = 0;
@@ -71,8 +75,8 @@ class MathLexer {
                 continue;
             }
 
-            if(operationTokens.has(this.#current)) {
-                const symbol = this.#current;
+            if(operationTokens.has(this.#current) || operationAliases.has(this.#current)) {
+                const symbol = operationAliases.get(this.#current) || this.#current;
                 const tokenType = operationTokens.get(symbol);
                 tokens.push(createToken(tokenType, symbol));
                 this.#cursor++;
