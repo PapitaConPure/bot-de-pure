@@ -1,17 +1,16 @@
-const { CommandMetaFlagsManager, CommandManager, CommandOptionsManager } = require("../Commons/commands");
+const { CommandTags, CommandManager, CommandOptions, CommandOptionSolver } = require("../Commons/commands");
 const {  } = require("../../func");
 const { Message, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
-const flags = new CommandMetaFlagsManager().add('COMMON');
-const options = new CommandOptionsManager()
+const flags = new CommandTags().add('COMMON');
+const options = new CommandOptions()
 	.addParam('mensaje', 'MESSAGE', ' para especificar un mensaje por ID o respuesta');
 const command = new CommandManager('sticker', flags)
 	.setAliases('stickers', 'pegatina')
 	.setDescription('Muestra el enlace del sticker especificado')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-        /**@type {Message<true>}*/
-		const message = (await options.in(request).fetchParam(args, 'mensaje', true)) ?? request.channel.messages.cache.get(request.reference?.messageId);
+		const message = CommandOptionSolver.asMessage(await options.in(request).fetchParam(args, 'mensaje', true)) ?? request.channel.messages.cache.get(request.reference?.messageId);
 
 		if(!message || !message.stickers.size)
 			return request.reply({ content: '⚠️️ Debes especificar un mensaje con un sticker' });

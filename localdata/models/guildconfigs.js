@@ -11,4 +11,9 @@ const GuildConfigSchema = new Mongoose.Schema({
     feeds: { type: Object, default: {} },
 });
 
-module.exports = Mongoose.model('GuildConfig', GuildConfigSchema);
+const model = Mongoose.model('GuildConfig', GuildConfigSchema);
+
+function m() { return new model({}); }
+/**@typedef {ReturnType<(typeof m)>} GuildConfigDocument*/
+
+module.exports = model;

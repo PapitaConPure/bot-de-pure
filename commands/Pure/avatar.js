@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require('discord.js'); //Integrar discord.js
 const { regroupText, fetchMember } = require('../../func.js'); //Funciones globales
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
+const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
 
 const maxusers = 10;
 /**@param {import('discord.js').GuildMember} member*/
@@ -52,9 +52,9 @@ function getMembers(request, args, isSlash) {
     return [ members, notFound ];
 }
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
     .addParam('usuarios', 'USER', 'para especificar usuarios', { optional: true, poly: 'MULTIPLE' });
-const flags = new CommandMetaFlagsManager().add('COMMON');
+const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('avatar', flags)
     .setAliases(
         'perfil', 'fotoperfil',

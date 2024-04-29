@@ -8,4 +8,9 @@ const PrefixPairSchema = new Mongoose.Schema({
     },
 });
 
-module.exports = Mongoose.model('PrefixPair', PrefixPairSchema);
+const model = Mongoose.model('PrefixPair', PrefixPairSchema);
+
+function m() { return new model({}); }
+/**@typedef {ReturnType<(typeof m)>} PrefixPairDocument*/
+
+module.exports = model;

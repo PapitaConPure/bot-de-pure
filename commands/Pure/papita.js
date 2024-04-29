@@ -1,5 +1,5 @@
 const { randRange, isThread } = require('../../func');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
 const paputa = [
 	'Romper al bot <:sagumeBlush:1108315844045455410>',
@@ -12,8 +12,8 @@ const paputa = [
 	'https://i.imgur.com/HxTxjdL.png',
 ];
 
-const flags = new CommandMetaFlagsManager().add('MEME');
-const options = new CommandOptionsManager()
+const flags = new CommandTags().add('MEME');
+const options = new CommandOptions()
 	.addParam('frase', 'TEXT', 'para indicar una frase a patentar', { optional: true });
 const command = new CommandManager('papita', flags)
 	.setAliases(

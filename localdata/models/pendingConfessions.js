@@ -19,4 +19,9 @@ const PendingConfessionSchema = new Mongoose.Schema({
     },
 });
 
-module.exports = Mongoose.model('PendingConfession', PendingConfessionSchema);
+const model = Mongoose.model('PendingConfession', PendingConfessionSchema);
+
+function m() { return new model({}); }
+/**@typedef {ReturnType<(typeof m)>} PendingConfessionDocument*/
+
+module.exports = model;

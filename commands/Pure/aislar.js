@@ -1,15 +1,15 @@
 const { GuildMember } = require('discord.js');
 const { fetchMember, regroupText } = require('../../func');
-const { CommandMetaFlagsManager, CommandOptionsManager, CommandManager } = require('../Commons/commands');
+const { CommandTags, CommandOptions, CommandManager } = require('../Commons/commands');
 const { CommandPermissions } = require('../Commons/cmdPerms');
 
 const perms = new CommandPermissions('ModerateMembers');
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addParam('duración', 'NUMBER', 'para especificar el tiempo en minutos')
 	.addParam('miembros', 'USER', 'para aislar miembros', { poly: 'MULTIPLE', polymax: 8 });
 	
-const flags = new CommandMetaFlagsManager().add('MOD');
+const flags = new CommandTags().add('MOD');
 const command = new CommandManager('aislar', flags)
 	.setAliases('mutear', 'silenciar', 'mute', 'timeout', 'm')
 	.setBriefDescription('Aisla miembros en el server por un cierto tiempo')

@@ -24,8 +24,17 @@ const AUserSchema = new Mongoose.Schema({
     }
 });
 
+const pureTableModel = Mongoose.model('Puretable', PuretableSchema);
+const aUserModel = Mongoose.model('AUser', AUserSchema);
+
+function ptm() { return new pureTableModel({}); }
+/**@typedef {ReturnType<(typeof ptm)>} PureTableDocument*/
+
+function aum() { return new aUserModel({}); }
+/**@typedef {ReturnType<(typeof aum)>} AUserDocument*/
+
 module.exports = {
     defaultEmote,
-    Puretable: Mongoose.model('Puretable', PuretableSchema),
-    AUser: Mongoose.model('AUser', AUserSchema)
+    Puretable: pureTableModel,
+    AUser: aUserModel,
 };

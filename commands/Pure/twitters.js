@@ -1,12 +1,14 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { auditError } = require('../../systems/auditor.js');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandPermissions } = require('../Commons/cmdPerms.js');
 
-const flags = new CommandMetaFlagsManager().add(
+const perms = CommandPermissions.adminOnly();
+const flags = new CommandTags().add(
 	'MOD',
 	'HOURAI',
 );
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addParam('twitters', { name: 'enlace', expression: 'https://twitter.com/' }, 'para colocar uno o más Twitters en un nuevo tablón', { poly: 'MULTIPLE', polymax: 12 })
 	.addFlag('c',  'canal', 				 'para especificar en qué canal enviar/editar un tablón', { name: 'ch',  type: 'CHANNEL' })
 	.addFlag([],   'id', 			   		 'para especificar un tablón ya enviado a editar',		  { name: 'msg', type: 'MESSAGE' })
@@ -25,6 +27,7 @@ const command = new CommandManager('twitters', flags)
 		'El tablón se añadirá o se buscará por `--id` para editar *en el canal actual* a menos que especifiques un `--canal`',
 		'Puedes crear un tablón con `--epígrafe`, `--título` y `--pie` de título personalizados',
 	)
+	.setPermissions(perms)
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash = false) => {
 		if(!isSlash && !args.length)

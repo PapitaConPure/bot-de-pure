@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
 const { fetchUser, randRange } = require("../../func");
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
 const lovestats = () => [
 	{ text: '🤝 [n]% amistad',    number: randRange(0, 100, false) },
@@ -12,8 +12,8 @@ const lovestats = () => [
 	{ text: ':people_hugging: [n] palmaditas', number: randRange(3, 32) },
 ].map(stat => stat.text.replace('[n]', stat.number.toLocaleString('en', { maximumFractionDigits: 2 }))).join('\n');
 
-const flags = new CommandMetaFlagsManager().add('COMMON');
-const options = new CommandOptionsManager()
+const flags = new CommandTags().add('COMMON');
+const options = new CommandOptions()
 	.addParam('persona', 'USER', 'el usuario a mimar');
 const command = new CommandManager('mimar', flags)
 	.setAliases('mimos', 'besar', 'abrazar', 'hug', 'kiss')

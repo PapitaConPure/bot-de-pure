@@ -1,12 +1,12 @@
 const { Collection, PermissionFlagsBits, SlashCommandBuilder, Client, ContextMenuCommandBuilder } = require('discord.js');
-const { CommandManager, CommandOptionsManager } = require('./commands/Commons/commands.js');
+const { CommandManager, CommandOptions } = require('./commands/Commons/commands.js');
 const { shortenText } = require('./func.js');
 const { readdirSync } = require('fs');
 const { ContextMenuActionManager } = require('./actions/Commons/actionBuilder.js');
 
 /**
  * @param {import('discord.js').SlashCommandBuilder} slash
- * @param {CommandOptionsManager} options
+ * @param {CommandOptions} options
  */
 function setupOptionBuilders(slash, options) {
     /**@type {Map<import('./commands/Commons/cmdOpts.js').ParamType, String>} type*/
@@ -87,7 +87,7 @@ function registerCommandFiles(client, log = false) {
         if(command.flags.has('MOD'))
             slash.setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles | PermissionFlagsBits.ManageMessages);
     
-        /**@type {CommandOptionsManager}*/
+        /**@type {CommandOptions}*/
         const options = command.options;
         if(options)
             setupOptionBuilders(slash, options);

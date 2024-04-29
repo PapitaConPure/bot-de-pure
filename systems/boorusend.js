@@ -1,15 +1,17 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Message, User, MessageCreateOptions } = require('discord.js');
-const { CommandRequest, CommandOptions, CommandOptionsManager } = require('../commands/Commons/typings');
+// @ts-ignore
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Message, User, MessageCreateOptions, Snowflake } = require('discord.js');
+// @ts-ignore
+const { ComplexCommandRequest, CommandArguments } = require('../commands/Commons/typings');
+const { CommandOptions } = require('../commands/Commons/cmdOpts');
 const { guildEmoji, shortenText, isThread } = require('../func');
 const { Post, Booru } = require('../systems/boorufetch');
-const { getBaseTags, getSearchTags } = require('../localdata/booruprops');
+const { getBaseTags, getSearchTags, tagMaps } = require('../localdata/booruprops');
 const globalConfigs = require('../localdata/config.json');
 const rakki = require('../commands/Pure/rakkidei');
 const { Translator } = require('../internationalization');
 
 /**
  * Genera un {@linkcode EmbedBuilder} a base de un {@linkcode Post} de {@linkcode Booru}
- * @param {import('discord.js').TextChannel} channel Canal al cual enviar el Embed
  * @param {Post} post Post de Booru
  * @param {import('../systems/boorufetch').PostFormatData} data Información adicional a mostrar en el Embed. Se puede pasar un feed directamente
  * @returns {MessageCreateOptions}
@@ -138,11 +140,13 @@ function formatBooruPostMessage(post, data) {
 
     //Preparar Embed final
     /**@type {MessageCreateOptions} */
+    // @ts-ignore
     const feedMessage = { components: [row] };
     const postEmbed = new EmbedBuilder()
         .setColor(embedColor)
         .setAuthor({ name: 'Desde Gelbooru', iconURL: data.cornerIcon ?? 'https://i.imgur.com/outZ5Hm.png' });
     const filteredTags = post.tags.slice(0, maxTags);
+    // @ts-ignore
     const tagsTitle = `${guildEmoji('tagswhite', globalConfigs.slots.slot3)} Tags (${filteredTags.length}/${post.tags.length})`;
     const tagsContent = `*${filteredTags.join(' ')
         .replace(/\\/g,'\\\\')
@@ -176,7 +180,7 @@ function formatBooruPostMessage(post, data) {
 
 /**
  * Envía una notificación de {@linkcode Post} de {@linkcode Booru} a todos los {@linkcode User} suscriptos a las tags del mismo
- * @typedef {{ userId: Discord.Snowflake, followedTags: Array<String> }} Suscription
+ * @typedef {{ userId: Snowflake, followedTags: Array<String> }} Suscription
  * @param {Post} post
  * @param {Message<true>} sent
  * @param {Array<Suscription>} feedSuscriptions 
@@ -226,6 +230,7 @@ async function notifyUsers(post, sent, feedSuscriptions) {
 
         return member.send({
             embeds: [userEmbed],
+            // @ts-ignore
             components: [postRow],
         }).catch(_ => null);
     }));
@@ -235,7 +240,7 @@ async function notifyUsers(post, sent, feedSuscriptions) {
  * De naturaleza memética.
  * Comprueba si la búsqueda de tags de {@linkcode Booru} no es aprobada por Dios
  * @param {Boolean} isNsfw 
- * @param {import('../commands/Commons/typings').CommandRequest} request 
+ * @param {ComplexCommandRequest} request 
  * @param {Array<String>} terms 
  * @returns {Boolean}
  */
@@ -246,7 +251,7 @@ function isUnholy(isNsfw, request, terms) {
         return true;
     if(!terms.includes('megumin'))
         return false;
-    if(request.author.id === globalConfigs.peopleid.papita)
+    if(request.userId === globalConfigs.peopleid.papita)
         return false;
 
     return true;
@@ -254,20 +259,24 @@ function isUnholy(isNsfw, request, terms) {
 
 /**
  * Busca las tags de {@linkcode Booru} deseadas y envía {@linkcode Message}s acorde a la petición
- * @param {CommandRequest} request
- * @param {CommandOptions} args
+ * @param {ComplexCommandRequest} request
+ * @param {CommandArguments} args
  * @param {Boolean} isSlash
- * @param {CommandOptionsManager} options
- * @param {{ cmdtag: String, nsfwtitle: String, sfwtitle: String }}
+ * @param {CommandOptions} options
+ * @param {{ cmdtag: keyof tagMaps, nsfwtitle: String, sfwtitle: String }} [searchOpt]
  * @returns {Promise<Array<Message<true>> | Message<true>>}
  */
-async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt = { cmdtag: '', nsfwtitle: 'Búsqueda NSFW', sfwtitle: 'Búsqueda' }) {
+async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt = { cmdtag: 'general', nsfwtitle: 'Búsqueda NSFW', sfwtitle: 'Búsqueda' }) {
+    // @ts-ignore
     const isnsfw = isThread(request.channel)
+        // @ts-ignore
         ? request.channel.parent.nsfw
+        // @ts-ignore
         : request.channel.nsfw;
     
     const poolSize = options.fetchFlag(args, 'bomba', { callback: f => Math.max(2, Math.min(f, 10)), fallback: 1 });
     const words = isSlash
+        // @ts-ignore
         ? (args.getString('etiquetas') ?? '').split(/ +/)
         : args;
 
@@ -278,21 +287,24 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
     if(!isSlash)
         await request.channel.sendTyping();
     else
+        // @ts-ignore
         await request.deferReply();
 
     const baseTags = getBaseTags('gelbooru', isnsfw);
     const searchTags = [ searchOpt.cmdtag, baseTags ].join(' ');
     const userTags = getSearchTags(words, 'gelbooru', searchOpt.cmdtag);
     /**@type {import('discord.js').User} */
-    const author = (request.author ?? request.user);
+    const author = request.user;
     
     //Petición
     try {
+        // @ts-ignore
         const booru = new Booru(globalConfigs.booruCredentials);
         const response = await booru.search([ searchTags, userTags ], { limit: 100, random: true });
         //Manejo de respuesta
         if(!response.length) {
             const replyOptions = { content: `⚠️ No hay resultados en **Gelbooru** para las tags **"${userTags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` };
+            // @ts-ignore
             return request.editReply?.(replyOptions) ?? request.reply(replyOptions);
         }
 
@@ -302,7 +314,6 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
             .slice(0, poolSize);
 
         //Crear presentaciones
-        /**@type {Array<EmbedBuilder>}*/
         const messages = posts.map(post => formatBooruPostMessage(post, {
             maxTags: 40,
             title: isnsfw ? searchOpt.nsfwtitle : searchOpt.sfwtitle,
@@ -311,12 +322,14 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
             isNotFeed: true,
         }));
         if(userTags.length)
+            // @ts-ignore
             messages[posts.length - 1].embeds[0].addFields({ name: 'Tu búsqueda', value: `:mag_right: *${userTags.trim().replace('*', '\\*').split(/ +/).join(', ')}*` });
 
         //Enviar mensajes
         const replyOptions = messages.shift();
+        // @ts-ignore
         await request.editReply?.(replyOptions) ?? request.reply(replyOptions);
-        return Promise.all(messages.map(message => request.channel.send(message))).catch(console.error);
+        return Promise.all(messages.map(message => request.channel.send(message))).catch(_ => console.error && []);
     } catch(error) {
         console.error(error);
         const errorembed = new EmbedBuilder()
@@ -330,6 +343,7 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
                     '```',
                 ].join('\n'),
             });
+        // @ts-ignore
         return request.editReply?.({ embeds: [errorembed] }) ?? request.reply({ embeds: [errorembed] });
     }
 };

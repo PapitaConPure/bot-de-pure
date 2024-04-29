@@ -64,7 +64,7 @@
     <Compile Include="Clases\Componentes\CommandManager.cs" />
     <Compile Include="Clases\Componentes\CommandTagsManager.cs" />
     <Compile Include="Clases\Componentes\Opciones\CommandOption.cs" />
-    <Compile Include="Clases\Componentes\CommandOptionsManager.cs" />
+    <Compile Include="Clases\Componentes\CommandOptions.cs" />
     <Compile Include="Clases\Componentes\Opciones\CommandParam.cs" />
     <Compile Include="Clases\IImprimible.cs" />
     <Compile Include="FCommandPreview.cs">

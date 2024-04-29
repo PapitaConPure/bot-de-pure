@@ -1,8 +1,8 @@
 const { options } = require('./buscar.js');
-const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandTags, CommandManager } = require('../Commons/commands');
 const { searchAndReplyWithPost } = require('../../systems/boorusend.js');
 
-const flags = new CommandMetaFlagsManager().add('COMMON');
+const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('vtubers', flags)
 	.setAliases('vtuber', 'vt')
 	.setBriefDescription('Muestra imágenes de vtubers')

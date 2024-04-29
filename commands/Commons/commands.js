@@ -1,5 +1,5 @@
 const commandOptions = require('./cmdOpts');
-const commandFlags = require('./cmdFlags');
+const commandFlags = require('./cmdTags');
 const commandBuilder = require('./cmdBuilder');
 
 module.exports = {

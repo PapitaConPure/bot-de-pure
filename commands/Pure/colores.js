@@ -1,9 +1,9 @@
-const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandTags, CommandManager } = require('../Commons/commands');
 const { hourai } = require('../../localdata/config.json');
 const { colorsRow } = require('../../localdata/houraiProps');
 const { colorsList } = hourai;
 
-const flags = new CommandMetaFlagsManager().add(
+const flags = new CommandTags().add(
 	'HOURAI',
 	'OUTDATED',
 );

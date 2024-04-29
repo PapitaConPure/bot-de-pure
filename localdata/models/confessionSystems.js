@@ -19,4 +19,9 @@ const ConfessionSystemSchema = new Mongoose.Schema({
     }
 });
 
-module.exports = Mongoose.model('ConfessionSystem', ConfessionSystemSchema);
+const model = Mongoose.model('ConfessionSystem', ConfessionSystemSchema);
+
+function m() { return new model({}); }
+/**@typedef {ReturnType<(typeof m)>} ConfessionSystemDocument*/
+
+module.exports = model;

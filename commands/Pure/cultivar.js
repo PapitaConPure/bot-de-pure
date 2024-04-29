@@ -1,16 +1,16 @@
 const { randRange, improveNumber } = require("../../func");
-const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandTags, CommandManager } = require('../Commons/commands');
 const UserConfigs = require('../../localdata/models/userconfigs.js');
 const { tenshiColor } = require('../../localdata/config.json');
 const { EmbedBuilder } = require("discord.js");
 const { Translator } = require("../../internationalization");
 
-const flags = new CommandMetaFlagsManager().add('COMMON');
+const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('cultivar', flags)
     .setAliases('cultivate', 'cv', 'c')
-    .setBriefDescription('Permite cultivar entre 17 y 23 PRC diario')
+    .setBriefDescription('Permite cultivar entre 37 y 43 PRC diario')
     .setDescription(
-        'Permite cultivar <:prc:1097208828946301123> 17~23',
+        'Permite cultivar <:prc:1097208828946301123> 37~43',
         'Solo se puede hacer una vez por día',
     )
     .setExecution(async request => {

@@ -3,7 +3,7 @@ const Hourai = require('../../localdata/models/hourai.js');
 const axios = require('axios').default;
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors, ActionRow, ComponentType } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes');
-const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandTags, CommandManager } = require('../Commons/commands');
 const { auditError } = require('../../systems/auditor');
 const { colorsRow } = require('../../localdata/houraiProps');
 const { subdivideArray, isBoosting, stringHexToNumber } = require('../../func');
@@ -147,7 +147,7 @@ const getEditButtonRow = (member, category) => {
 	];
 }
 
-const flags = new CommandMetaFlagsManager().add('HOURAI');
+const flags = new CommandTags().add('HOURAI');
 
 const command = new CommandManager('roles', flags)
 	.setAliases('rol', 'role')

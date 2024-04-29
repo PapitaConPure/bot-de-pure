@@ -21,7 +21,12 @@ const ChannelStatsSchema = new Mongoose.Schema({
     sub: { type: Object, default: {} }
 });
 
+const model = Mongoose.model('Stats', StatsSchema);
+
+function m() { return new model({}); }
+/**@typedef {ReturnType<(typeof m)>} StatsDocument*/
+
 module.exports = {
-    Stats: Mongoose.model('Stats', StatsSchema),
+    Stats: model,
     ChannelStats: Mongoose.model('ChannelStats', ChannelStatsSchema)
 };

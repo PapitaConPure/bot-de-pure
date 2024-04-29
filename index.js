@@ -4,6 +4,7 @@ const globalConfigs = require('./localdata/config.json');
 const { registerCommandFiles } = require('./commandInit.js');
 const { events, startupData, onCriticalError } = require('./events/events.js');
 
+// @ts-ignore
 globalConfigs.p_pure['0'] = { raw: 'p!', regex: /^[Pp] *![\n ]*/ };
 globalConfigs.booruCredentials.apiKey = startupData.booruApiKey;
 globalConfigs.booruCredentials.userId = startupData.booruUserId;
@@ -20,13 +21,13 @@ client.on('messageCreate', message => events.onMessage(message, client).catch(on
 
 client.on('interactionCreate', interaction => events.onInteraction(interaction, client).catch(onCriticalError));
 
-client.on('voiceStateUpdate', (oldState, newState) => events.onVoiceUpdate(oldState, newState).catch);
+client.on('voiceStateUpdate', (oldState, newState) => events.onVoiceUpdate(oldState, newState).catch(onCriticalError));
 
-client.on('guildMemberAdd', member => events.onGuildMemberAdd(member).catch(onCriticalError));
+client.on('guildMemberAdd', member => { events.onGuildMemberAdd(member).catch(onCriticalError) });
 
-client.on('guildMemberRemove', member => events.onGuildMemberRemove(member).catch(onCriticalError));
+client.on('guildMemberRemove', member => { events.onGuildMemberRemove(member).catch(onCriticalError) });
 
-client.on('guildMemberUpdate', (oldMember, newMember) => events.onGuildMemberUpdate(oldMember, newMember).catch(onCriticalError));
+client.on('guildMemberUpdate', (oldMember, newMember) => { events.onGuildMemberUpdate(oldMember, newMember).catch(onCriticalError) });
 
 client.rest.on('rateLimited', events.onRateLimit);
 

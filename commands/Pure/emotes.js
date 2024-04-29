@@ -1,7 +1,7 @@
 const { EmbedBuilder, InteractionType } = require('discord.js'); //Integrar discord.js
 const { serverid } = require('../../localdata/config.json'); //Variables globales
 const { paginate, navigationRows } = require('../../func');
-const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandTags, CommandManager } = require('../Commons/commands');
 
 /**@param {import('discord.js').Interaction} interaction*/
 function getEmotePages(interaction) {
@@ -41,7 +41,7 @@ async function loadPageNumber(request, page) {
 	return request.update(content);
 }
 
-const flags = new CommandMetaFlagsManager().add('COMMON');
+const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('emotes', flags)
 	.setAliases(
 		'emojis', 'emote', 'emoji',

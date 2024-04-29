@@ -1,10 +1,10 @@
 const UserConfigs = require('../../localdata/models/userconfigs');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Embed, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder } = require('discord.js');
-const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandTags, CommandManager } = require('../Commons/commands');
 const { tenshiColor } = require('../../localdata/config.json');
 const { Translator } = require('../../internationalization');
 const { recacheUser } = require('../../usercache');
-const { compressId, shortenText, decompressId, improveNumber } = require('../../func');
+const { compressId, shortenText, decompressId, improveNumber, warn } = require('../../func');
 const { auditError } = require('../../systems/auditor');
 const { updateFollowedFeedTagsCache } = require('../../systems/boorufeed');
 
@@ -29,6 +29,7 @@ const backToDashboardButton = (id, translator) => new ButtonBuilder()
     .setCustomId(`yo_goToDashboard_${compressId(id)}`)
     .setLabel(translator.getText('buttonBack'))
     .setStyle(ButtonStyle.Secondary);
+
 /**
  * @param {String} id
  * @param {Translator} translator
@@ -37,41 +38,28 @@ const cancelbutton = (id, translator) => new ButtonBuilder()
 	.setCustomId(`yo_cancelWizard_${id}`)
 	.setLabel(translator.getText('buttonCancel'))
 	.setStyle(ButtonStyle.Secondary);
+
 /**
- * @param {Number} stepCount
+ * @param {String?} iconUrl
  * @param {import('../../internationalization').LocaleIds} stepName
  * @param {import('discord.js').ColorResolvable} stepColor
  * @param {Translator} translator
  */
 const wizEmbed = (iconUrl, stepName, stepColor, translator) => {
+    const author = { name: translator.getText('yoDashboardAuthor') };
+    if(iconUrl) author.iconURL = iconUrl;
     return new EmbedBuilder()
         .setColor(stepColor)
-        .setAuthor({ name: translator.getText('yoDashboardAuthor'), iconURL: iconUrl })
+        .setAuthor(author)
         .setFooter({ text: translator.getText(stepName) });
 };
+
 /**
  * @param {String} userId 
- * @param {UserConfigs} userConfigs 
+ * @param {import('../../localdata/models/userconfigs').UserConfigDocument} userConfigs 
  * @param {Translator} translator 
  */
 const dashboardRows = (userId, userConfigs, translator) => [
-    new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-            .setCustomId(`yo_toggleLanguage_${userId}`)
-            .setLabel(translator.getText('yoDashboardButtonLanguage'))
-            .setEmoji(languageEmote[translator.next])
-            .setStyle(ButtonStyle.Primary),
-        new ButtonBuilder()
-            .setCustomId(`yo_selectFTC_${userId}`)
-            .setLabel(translator.getText('yoDashboardButtonTags'))
-            .setEmoji('<:tagswhite:921788204540100608>')
-            .setStyle(ButtonStyle.Primary)
-            .setDisabled(!userConfigs.feedTagSuscriptions.size),
-        new ButtonBuilder()
-            .setCustomId(`yo_exitWizard_${userId}`)
-            .setLabel(translator.getText('buttonFinish'))
-            .setStyle(ButtonStyle.Secondary),
-    ),
     new ActionRowBuilder().addComponents(
         new StringSelectMenuBuilder()
             .setCustomId(`yo_selectConfig_${userId}`)
@@ -93,15 +81,27 @@ const dashboardRows = (userId, userConfigs, translator) => [
                 {
                     label: 'Puréet',
                     description: translator.getText('yoDashboardMenuConfigTwitterDesc'),
-                    emoji: '919403803114094682',
+                    emoji: '1232243415165440040',
                     value: 'twitter',
                 },
             ]),
     ),
+    new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId(`yo_toggleLanguage_${userId}`)
+            .setLabel(translator.getText('yoDashboardButtonLanguage'))
+            .setEmoji(languageEmote[translator.next])
+            .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
+            .setCustomId(`yo_exitWizard_${userId}`)
+            .setLabel(translator.getText('buttonFinish'))
+            .setStyle(ButtonStyle.Secondary),
+    ),
 ];
+
 /**
- * @param {import('../Commons/typings').ComplexCommandRequest} request 
- * @param {UserConfigs} userConfigs 
+ * @param {import('discord.js').Interaction | import('../Commons/typings').ComplexCommandRequest} request 
+ * @param {import('../../localdata/models/userconfigs').UserConfigDocument} userConfigs 
  * @param {Translator} translator 
  */
 const dashboardEmbed = (request, userConfigs, translator) => {
@@ -133,10 +133,27 @@ const dashboardEmbed = (request, userConfigs, translator) => {
             },
         );
 }
+
+/**
+ * @param {String} userId 
+ * @param {import('../../localdata/models/userconfigs').UserConfigDocument} userConfigs 
+ * @param {Translator} translator 
+ */
+const pixivRows = (userId, userConfigs, translator) => [
+    new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId(`yo_setPixivConvert_${userId}_${userConfigs.convertPixiv ? '': 'enable'}`)
+            .setStyle(userConfigs.convertPixiv ? ButtonStyle.Primary : ButtonStyle.Secondary)
+            .setEmoji(userConfigs.convertPixiv ? '919403803126661120' : '1138853641600643174'),
+        backToDashboardButton(userId, translator),
+        cancelbutton(userId, translator),
+    ),
+];
+
 /**
  * @param {String} userId 
  * @param {import('discord.js').ButtonInteraction} interaction 
- * @param {UserConfigs} userConfigs 
+ * @param {import('../../localdata/models/userconfigs').UserConfigDocument} userConfigs 
  * @param {Translator} translator 
  */
 const selectTagsChannelRows = (userId, interaction, userConfigs, translator) => [
@@ -145,7 +162,7 @@ const selectTagsChannelRows = (userId, interaction, userConfigs, translator) => 
             .setCustomId(`yo_modifyFollowedTags_${compressId(userId)}`)
             .setOptions([...userConfigs.feedTagSuscriptions.entries()].map(([k, v]) => ({
                 label: shortenText(v.join(' ') || '<Ninguna tag>', 99),
-                description: `#${interaction.guild.channels.cache.get(k)?.name ?? '???'}`,
+                description: `#${interaction.guild?.channels.cache.get(k)?.name ?? '???'}`,
                 value: k,
             })))
             .setPlaceholder(translator.getText('feedSelectFeed')),
@@ -155,13 +172,14 @@ const selectTagsChannelRows = (userId, interaction, userConfigs, translator) => 
         cancelbutton(userId, translator),
     ),
 ];
+
 /**
- * @param {import('../Commons/typings').ComplexCommandRequest} request 
- * @param {*} userConfigs 
+ * @param {import('discord.js').Interaction | import('../Commons/typings').ComplexCommandRequest} request 
  * @param {Translator} translator 
  */
 const selectTagsChannelEmbed = (request, translator) => wizEmbed(request.client.user.avatarURL({ size: 128 }), 'yoDashboardName', Colors.Blurple, translator)
     .setTitle(translator.getText('yoSelectTagsChannelTitle'));
+
 /**
  * @param {String} userId 
  * @param {Translator} translator 
@@ -187,12 +205,13 @@ const followedTagsRows = (userId, channelId, translator, isAlt) => [
             .setDisabled(!!isAlt),
     ),
 ];
+
 /**
  * @function
- * @param {import('../Commons/typings').ComplexCommandRequest} request 
+ * @param {import('discord.js').Interaction | import('../Commons/typings').ComplexCommandRequest} request 
  * @param {*} userConfigs 
+ * @param {String} channelId 
  * @param {Translator} translator 
- * @returns {Embed}
  */
 const followedTagsEmbed = (request, userConfigs, channelId, translator) => wizEmbed(request.client.user.avatarURL({ size: 128 }), 'yoDashboardName', Colors.LuminousVividPink, translator)
     .addFields(
@@ -202,7 +221,7 @@ const followedTagsEmbed = (request, userConfigs, channelId, translator) => wizEm
         },
     );
 
-const flags = new CommandMetaFlagsManager().add('COMMON');
+const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('yo', flags)
 	.setAliases(
 		'usuario', 'configurar', 'configuración', 'configuracion', 'preferencias',
@@ -221,10 +240,12 @@ const command = new CommandManager('yo', flags)
             await userConfigs.save();
         }
 
+        // @ts-ignore
         const translator = new Translator(userConfigs.language);
         const wizard = dashboardEmbed(request, userConfigs, translator);
         return request.reply({
             embeds: [wizard],
+            // @ts-ignore
             components: dashboardRows(request.userId, userConfigs, translator),
         });
 	})
@@ -235,6 +256,7 @@ const command = new CommandManager('yo', flags)
         if(!userConfigs)
             return interaction.reply({ content: '⚠️ Usuario inexistente / Unexistent user', ephemeral: true });
         
+        // @ts-ignore
         const translator = new Translator(userConfigs.language);
 
 		if(compressId(user.id) !== authorId)
@@ -242,6 +264,7 @@ const command = new CommandManager('yo', flags)
 		
 		return interaction.update({
 			embeds: [dashboardEmbed(interaction, userConfigs, translator)],
+			// @ts-ignore
 			components: dashboardRows(user.id, userConfigs, translator),
 		});
 	})
@@ -250,25 +273,146 @@ const command = new CommandManager('yo', flags)
 			
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
-            return interaction.reply({ content: '⚠️ Usuario inexistente / Unexistent user', ephemeral: true });
+            return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
 
+        // @ts-ignore
         let translator = new Translator(userConfigs.language);
 		
 		if(user.id !== authorId)
 			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
 
         userConfigs.language = translator.next;
-        delete translator;
         translator = new Translator(translator.next);
         
         return Promise.all([
             userConfigs.save().then(() => recacheUser(user.id)),
             interaction.update({
                 embeds: [dashboardEmbed(interaction, userConfigs, translator)],
+                // @ts-ignore
                 components: dashboardRows(user.id, userConfigs, translator),
             }),
         ]);
 	})
+    .setSelectMenuResponse(async function selectConfig(interaction, authorId) {
+        const selected = interaction.values[0];
+
+        if(selected === 'feed') return command.selectFTC(interaction, authorId);
+        
+		const { user } = interaction;
+			
+		const userConfigs = await UserConfigs.findOne({ userId: user.id });
+        if(!userConfigs)
+            return interaction.reply({ content: '⚠️ Usuario inexistente / Unexistent user', ephemeral: true });
+
+        // @ts-ignore
+        const translator = new Translator(userConfigs.language);
+		
+		if(user.id !== authorId)
+			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
+        
+        let embed;
+        let components;
+
+        if(selected === 'pixiv') {
+            embed = wizEmbed(interaction.client.user.avatarURL(), 'yoPixivStep', 0x0096fa, translator)
+                .setTitle(translator.getText('yoPixivTitle'));
+            components = pixivRows(authorId, userConfigs, translator);
+        } else {
+            embed = wizEmbed(interaction.client.user.avatarURL(), 'yoTwitterStep', 0x040404, translator)
+                .setTitle(translator.getText('yoTwitterTitle'));
+            components = [
+                new ActionRowBuilder().addComponents(
+                    new StringSelectMenuBuilder()
+                        .setCustomId(`yo_setTwitterConvert_${authorId}`)
+                        .setPlaceholder(translator.getText('yoTwitterMenuService'))
+                        .setOptions(
+                            {
+                                value: 'vx',
+                                label: 'vxTwitter / fixvx',
+                                description: translator.getText('yoTwitterMenuServiceVxDesc'),
+                            },
+                            {
+                                value: 'fx',
+                                label: 'FxTwitter / FixupX',
+                                description: translator.getText('yoTwitterMenuServiceFxDesc'),
+                            },
+                            {
+                                value: 'none',
+                                label: translator.getText('yoTwitterMenuServiceNoneLabel'),
+                                description: translator.getText('yoTwitterMenuServiceNoneDesc'),
+                            },
+                        )
+                ),
+                new ActionRowBuilder().addComponents(
+                    backToDashboardButton(authorId, translator),
+                    cancelbutton(authorId, translator),
+                ),
+            ];
+        }
+
+        return interaction.update({
+            content: null,
+            embeds: [embed],
+            // @ts-ignore
+            components,
+        });
+    })
+    .setButtonResponse(async function setPixivConvert(interaction, authorId, enable) {
+		const { user } = interaction;
+			
+		const userConfigs = await UserConfigs.findOne({ userId: user.id });
+        if(!userConfigs)
+            return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
+
+        // @ts-ignore
+        const translator = new Translator(userConfigs.language);
+		
+		if(user.id !== authorId)
+			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
+
+        const convertPixiv = !!enable;
+
+        if(convertPixiv === userConfigs.convertPixiv) {
+            return interaction.update({
+                content: translator.getText('yoPixivStateAlreadySet', convertPixiv),
+                // @ts-ignore
+                components: pixivRows(authorId, userConfigs, translator),
+            });
+        }
+
+        userConfigs.convertPixiv = convertPixiv;
+        
+        return Promise.all([
+            userConfigs.save().then(() => recacheUser(user.id)),
+            interaction.update({
+                content: null,
+                // @ts-ignore
+                components: pixivRows(authorId, userConfigs, translator),
+            }),
+        ]);
+    })
+    .setSelectMenuResponse(async function setTwitterConvert(interaction, authorId, enable) {
+		const { user } = interaction;
+			
+		const userConfigs = await UserConfigs.findOne({ userId: user.id });
+        if(!userConfigs)
+            return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
+
+        // @ts-ignore
+        const translator = new Translator(userConfigs.language);
+		
+		if(user.id !== authorId)
+			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
+
+        let service = interaction.values[0];
+        if(service === 'none') service = '';
+        userConfigs.twitterPrefix = service;
+        
+        return Promise.all([
+            userConfigs.save().then(() => recacheUser(user.id)),
+            interaction.reply({ content: translator.getText('yoTwitterSuccess'), ephemeral: true }),
+        ]);
+    })
 	.setButtonResponse(async function selectFTC(interaction, authorId) {
 		const { user } = interaction;
 			
@@ -276,6 +420,7 @@ const command = new CommandManager('yo', flags)
         if(!userConfigs)
             return interaction.reply({ content: '⚠️ Usuario inexistente / Unexistent user', ephemeral: true });
 
+        // @ts-ignore
         const translator = new Translator(userConfigs.language);
 		
 		if(user.id !== authorId)
@@ -286,6 +431,7 @@ const command = new CommandManager('yo', flags)
             interaction.update({
                 content: null,
                 embeds: [selectTagsChannelEmbed(interaction, translator)],
+                // @ts-ignore
                 components: selectTagsChannelRows(user.id, interaction, userConfigs, translator),
             }),
         ]);
@@ -296,8 +442,9 @@ const command = new CommandManager('yo', flags)
 			
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
-            return interaction.reply({ content: '⚠️ Usuario inexistente / Unexistent user', ephemeral: true });
+            return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
 
+        // @ts-ignore
         const translator = new Translator(userConfigs.language);
 		
 		if(compressId(user.id) !== authorId)
@@ -307,6 +454,7 @@ const command = new CommandManager('yo', flags)
             userConfigs.save(),
             interaction.update({
                 embeds: [followedTagsEmbed(interaction, userConfigs, channelId, translator)],
+                // @ts-ignore
                 components: followedTagsRows(user.id, channelId, translator, isAlt),
             }),
         ]);
@@ -338,6 +486,7 @@ const command = new CommandManager('yo', flags)
         const modal = new ModalBuilder()
             .setCustomId(`yo_setFollowedTags_${operation}_${compressId(channelId)}`)
             .setTitle(title)
+            // @ts-ignore
             .addComponents(row);
 
         return interaction.showModal(modal).catch(auditError);
@@ -349,6 +498,7 @@ const command = new CommandManager('yo', flags)
 
 		const userQuery = { userId };
 		const userConfigs = (await UserConfigs.findOne(userQuery)) || new UserConfigs(userQuery);
+		// @ts-ignore
 		const translator = new Translator(userConfigs.language);
 		let newTags = userConfigs.feedTagSuscriptions.get(channelId)?.slice(0) ?? [];
 		/**@type {import('../../internationalization.js').LocaleIds}*/

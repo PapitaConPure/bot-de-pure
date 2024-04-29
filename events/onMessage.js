@@ -1,6 +1,6 @@
 //#region Carga de módulos necesarios
 const Discord = require('discord.js');
-const { CommandManager } = require('../commands/Commons/commands.js');
+const { CommandManager, CommandOptionSolver } = require('../commands/Commons/commands.js');
 
 const { Stats, ChannelStats } = require('../localdata/models/stats.js');
 const { p_pure } = require('../localdata/customization/prefixes.js');
@@ -38,34 +38,8 @@ async function updateChannelMessageCounter(guildId, channelId, userId) {
  * @param {import('../localdata/customization/prefixes.js').PrefixPair} prefixPair
  */
 async function handleInvalidCommand(message, client, commandName, prefixPair) {
-    /**@type {Array<{ text: String, imageUrl: String }>}*/
-    const replies = [
-        {
-            text: 'Disculpa, soy estúpida. Tal vez escribiste mal el comando y no te entiendo',
-            imageUrl: 'https://i.imgur.com/e4uM3z6.jpg',
-        },
-        {
-            text: 'No entiendo, ¿quieres usar un comando? Quieres usar uno, ¿verdad?, ¿prueba revisar cómo lo escribes?',
-            imageUrl: 'https://i.imgur.com/uuLuxtj.jpg',
-        },
-        {
-            text: `La verdad, no tengo ni idea de qué pueda ser **"${commandName}"**, ¿seguro que lo escribiste bien? Recuerda que soy un bot, eh`,
-            imageUrl: 'https://i.imgur.com/AHdc7E2.jpg',
-        },
-        {
-            text: 'Busqué en todo el manual y no encontré el comando que me pediste. Perdóname, PERDÓNAME WAAAAAAAAH',
-            imageUrl: 'https://i.imgur.com/wOxRi72.jpg',
-        },
-        {
-            text: 'No logré encontrar tu comando en mi librito. ¿Lo habrás escrito mal?',
-            imageUrl: 'https://i.imgur.com/avTSSa4.jpg',
-        },
-        {
-            text: 'Te juro que no encuentro ningún comando así, perdón 🥺',
-            imageUrl: 'https://i.imgur.com/gqTzYJA.jpg',
-        },
-    ];
-
+    const replies = require('./unknownCommandReplies.json');
+    
     const selectedReply = replies[rand(replies.length)];
     async function replyAndDelete() {
         const notice = await message.reply({ content: selectedReply.text }).catch(() => undefined);
@@ -75,6 +49,7 @@ async function handleInvalidCommand(message, client, commandName, prefixPair) {
     if(commandName.length < 2)
         return replyAndDelete();
 
+    // @ts-ignore
     const allowedGuesses = client.ComandosPure.filter(cmd => !cmd.flags.any('OUTDATED', 'MAINTENANCE'));
     const foundList = [];
     for(const [ cmn, cmd ] of allowedGuesses) {
@@ -105,24 +80,47 @@ async function handleInvalidCommand(message, client, commandName, prefixPair) {
 /**
  * @param {Discord.Message<true>} message
  * @param {CommandManager} command
- * @param {Stats} stats
+ * @param {import('../localdata/models/stats.js').StatsDocument} stats
  * @param {Array<String>} args
- * @param {String?} rawArgs
- * @param {String?} exceptionString
+ * @param {String} [rawArgs]
+ * @param {String} [exceptionString]
  */
 async function handleMessageCommand(message, command, stats, args, rawArgs, exceptionString) {
-    const exception = await findFirstException(command.flags, message);
+    if(command.permissions && !command.permissions.isAllowed(message.member)) {
+        return exceptionString && message.channel.send({ embeds: [
+            generateExceptionEmbed({
+                tag: undefined,
+                isException: undefined,
+                title: 'Permisos insuficientes',
+                desc: 'Este comando requiere permisos para ejecutarse que no tienes actualmente',
+            }, { cmdString: exceptionString })
+            .addFields({
+                name: 'Requisitos completos',
+                value: command.permissions.matrix
+                    .map((requisite, n) => `${n + 1}. ${requisite.map(p => `\`${p}\``).join(' **o** ')}`)
+                    .join('\n')
+            })
+        ]});
+    }
+
+    const exception = await findFirstException(command, message);
     if(exception)
-        return exceptionString && message.channel.send({ embeds: [ generateExceptionEmbed(exception, { cmdString: exceptionString }) ]});;
-    CommandManager.requestize(message);
-    await command.execute(message, args, false, rawArgs);
+        return exceptionString && message.channel.send({ embeds: [ generateExceptionEmbed(exception, { cmdString: exceptionString }) ]});
+
+    const complex = CommandManager.requestize(message);
+    if(command.experimental) {
+        const solver = new CommandOptionSolver(complex, args, command.options);
+        // @ts-ignore
+        await command.execute(complex, solver);
+    } else
+        await command.execute(complex, args, false, rawArgs);
     stats.commands.succeeded++;
 }
 
 /**
  * @param {Error} error
  * @param {Discord.Message<true>} message
- * @param {Stats} stats
+ * @param {import('../localdata/models/stats.js').StatsDocument} stats
  * @param {String} commandName
  * @param {Array<String>} args
  */
@@ -135,7 +133,7 @@ function handleMessageCommandError(error, message, stats, commandName, args) {
 /**
  * @param {Discord.Message<true>} message
  * @param {Discord.Client} client
- * @param {Stats} stats
+ * @param {import('../localdata/models/stats.js').StatsDocument} stats
  */
 async function checkEmoteCommand(message, client, stats) {
     const { content } = message;
@@ -146,6 +144,7 @@ async function checkEmoteCommand(message, client, stats) {
     auditRequest(message);
     const args = words.slice(emoteCommandIndex + 1);
     const commandName = words[emoteCommandIndex].toLowerCase().slice(1);
+    // @ts-ignore
     const command = client.EmotesPure.get(commandName) || client.EmotesPure.find(cmd => cmd.aliases?.includes(commandName));
     if(!command) return;
 
@@ -157,7 +156,7 @@ async function checkEmoteCommand(message, client, stats) {
 /**
  * @param {Discord.Message<true>} message
  * @param {Discord.Client} client
- * @param {Stats} stats
+ * @param {import('../localdata/models/stats.js').StatsDocument} stats
  */
 async function checkCommand(message, client, stats) {
     const { content, guildId } = message;
@@ -170,6 +169,7 @@ async function checkCommand(message, client, stats) {
 
     const args = content.replace(ppure.regex, '').split(/[\n ]+/); //Argumentos ingresados
     let commandName = args.shift().toLowerCase(); //Comando ingresado
+    // @ts-ignore
     let command = client.ComandosPure.get(commandName) || client.ComandosPure.find(cmd => cmd.aliases?.includes(commandName));
     
     if(!command)
@@ -196,8 +196,9 @@ async function gainPRC(userId) {
  * @param {Discord.Client} client
  */
 async function onMessage(message, client) {
+    if(!message.inGuild()) return;
     const { content, author, channel, guild } = message;
-    if(channelIsBlocked(channel) || (await isUsageBanned(author)) || !guild) return;
+    if(channelIsBlocked(channel) || (await isUsageBanned(author))) return;
 
     //Respuestas rápidas
     const guildFunctions = globalGuildFunctions[guild.id];
@@ -232,8 +233,8 @@ async function onMessage(message, client) {
 
     //Ayuda para principiantes
     if(content.includes(`${client.user}`)) {
-        CommandManager.requestize(message);
-        return require('../commands/Pure/prefijo.js').execute(message, []);
+        const complex = CommandManager.requestize(message);
+        return require('../commands/Pure/prefijo.js').execute(complex, []);
     }
 }
 

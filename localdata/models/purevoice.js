@@ -11,4 +11,9 @@ const PureVoiceSchema = new Mongoose.Schema({
     sessions: { type: Array, default: [] },
 });
 
-module.exports = Mongoose.model('PureVoice', PureVoiceSchema);
+const model = Mongoose.model('PureVoice', PureVoiceSchema);
+
+function m() { return new model({}); }
+/**@typedef {ReturnType<(typeof m)>} PureVoiceDocument*/
+
+module.exports = model;

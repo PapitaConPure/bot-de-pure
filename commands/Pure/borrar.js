@@ -1,7 +1,7 @@
 const { fetchUser, sleep } = require('../../func.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
+const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require("../Commons/commands");
 
 /**@param {import('discord.js').Message<true>} message*/
 function safeDelete(message) {
@@ -35,13 +35,11 @@ function deleteOriginalAndReply(original, reply) {
 }
 
 const perms = new CommandPermissions('ManageMessages');
-
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addParam('cantidad', 'NUMBER', 'para especificar la cantidad de mensajes a borrar (sin contar el mensaje del comando)', { optional: true })
 	.addFlag('um', ['usuario', 'miembro'], 			'para especificar de qué usuario borrar mensajes', { name: 'user', type: 'USER' });
-
-const flags = new CommandMetaFlagsManager().add('MOD');
-const command = new CommandManager('borrar', flags)
+const tags = new CommandTags().add('MOD');
+const command = new CommandManager('borrar', tags)
 	.setAliases(
 		'borrarmsg',
         'deletemsg', 'delete',
@@ -52,7 +50,7 @@ const command = new CommandManager('borrar', flags)
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash) => {
 		const user = options.fetchFlag(args, 'usuario', { callback: (f) => fetchUser(f, request) });
-		let amount = options.fetchParam(args, 'cantidad') ?? 100;
+		let amount = CommandOptionSolver.asNumber((await options.fetchParam(args, 'cantidad')) ?? 100);
 
 		if(!user && !amount) {
 			const sent = await request.reply({ content: '⚠️ Debes especificar la cantidad o el autor de los mensajes a borrar', ephemeral: true });

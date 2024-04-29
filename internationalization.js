@@ -1,6 +1,12 @@
 const { fetchUserCache } = require('./usercache.js');
 
+const TrLocKey = {
+    Spanish: 'es',
+    English: 'en',
+};
+
 /**
+ * @typedef {'='|'!='|'<'|'>'|'<='|'>='} ConditionString
  * @typedef {'en' | 'es'} LocaleKey
  */
 
@@ -32,7 +38,7 @@ function paragraph(...lines) {
 
 /**
  * @param {Number} i Índice del valor de reemplazo
- * @param {String?} defaultValue Valor por defecto si no se ingresó un valor en el índice
+ * @param {String} [defaultValue] Valor por defecto si no se ingresó un valor en el índice
  */
 function subl(i, defaultValue) {
     if(i == undefined) throw ReferenceError('Se esperaba un índice de componente de traducción');
@@ -43,15 +49,16 @@ function subl(i, defaultValue) {
 }
 
 /**
- * @param {Number} i Índice del valor de comprobación
- * @param {String} condition Condición a evaluar con el valor de comprobación
+ * @param {Number} i Índice del valor a usar como operando izquierdo de la comprobación
+ * @param {ConditionString} condition Condición a evaluar con el valor de comprobación
+ * @param {*} rightOperand Operando derecho de la operación. Un valor cualquiera, no un índice
  * @param {String} whenTrue Valor de reemplazo en caso de verdadero
- * @param {String?} whenFalse Valor de reemplazo en caso de falso
+ * @param {String?} [whenFalse] Valor de reemplazo en caso de falso
  */
-function subif(i, condition, whenTrue, whenFalse = '') {
+function subif(i, condition, rightOperand, whenTrue, whenFalse = '') {
     if(i == undefined) throw ReferenceError('Se esperaba un índice de componente de traducción');
     if(!whenTrue) throw ReferenceError('Se esperaba un valor para verdadero en componente de traducción');
-    return `${i}{...}<!{${condition}|'${whenTrue}'}<?{'${whenFalse}'}`;
+    return `${i}{...}<!{${condition}:${rightOperand}|'${whenTrue}'}<?{'${whenFalse}'}`;
 }
 
 let localesObject = {
@@ -557,8 +564,8 @@ let localesObject = {
         'Followed Feed Tags',
     ),
     yoDashboardFeedTagsValue: new Translation(
-        `<:tagswhite:921788204540100608> Siguiendo ${subl(0)} tag${subif(0, '!=1', 's')} en ${subl(1)} canal${subif(1, '!=1', 'es')}`,
-        `<:tagswhite:921788204540100608> Following ${subl(0)} tag${subif(0, '!=1', 's')} in ${subl(1)} channel${subif(1, '!=1', 's')}`,
+        `<:tagswhite:921788204540100608> Siguiendo ${subl(0)} tag${subif(0, '!=', 1, 's')} en ${subl(1)} canal${subif(1, '!=', 1, 'es')}`,
+        `<:tagswhite:921788204540100608> Following ${subl(0)} tag${subif(0, '!=', 1, 's')} in ${subl(1)} channel${subif(1, '!=', 1, 's')}`,
     ),
     yoDashboardName: new Translation(
         'Panel Principal',
@@ -588,6 +595,50 @@ let localesObject = {
         'Corrige el formato de enlaces de Twitter automáticamente (VX/FX)',
         'Fixes Twitter embeds automatically (VX/FX)',
     ),
+    yoPixivStep: new Translation(
+        'Conversor de enlaces de pixiv',
+        'pixiv link converter',
+    ),
+    yoPixivTitle: new Translation(
+        'Activa o desactiva el servicio de conversión',
+        'Enable or disable the conversion service',
+    ),
+    yoPixivStateAlreadySet: new Translation(
+        `⚠️️ El servicio ya estaba ${subif(0, '=', true, 'activado', 'desactivado')}`,
+        `⚠️️ The service was already ${subif(0, '=', true, 'enabled', 'disabled')}`,
+    ),
+    yoTwitterStep: new Translation(
+        'Conversor de enlaces de Twitter/X',
+        'Twitter/X link converter',
+    ),
+    yoTwitterTitle: new Translation(
+        'Elige el servicio de conversión a usar para Twitter/X',
+        'Choose which conversion service to use for Twitter/X',
+    ),
+    yoTwitterMenuService: new Translation(
+        'Servicio',
+        'Service',
+    ),
+    yoTwitterMenuServiceVxDesc: new Translation(
+        'Opción recomendada',
+        'Recommended solution',
+    ),
+    yoTwitterMenuServiceFxDesc: new Translation(
+        'Buena alternativa, pero menos segura y privada',
+        'Good alternative, but less safe and private',
+    ),
+    yoTwitterMenuServiceNoneLabel: new Translation(
+        'Ninguno',
+        'None',
+    ),
+    yoTwitterMenuServiceNoneDesc: new Translation(
+        'No convertir enlaces de Twitter/X automáticamente',
+        'Do not convert Twitter/X links automatically',
+    ),
+    yoTwitterSuccess: new Translation(
+        '✅ Servicio de conversión actualizado',
+        '✅ Converter service updated',
+    ),
     yoSelectTagsChannelTitle: new Translation(
         'Selecciona uno de tus Feeds seguidos',
         'Select one of the Feeds you follow',
@@ -605,9 +656,10 @@ let localesObject = {
 //Engañar al intérprete para guardar las claves de textMap en LocaleIds
 const locales = new Map(Object.entries(localesObject));
 localesObject = null;
-delete localesObject;
 
-/**@type {Map<'='|'!='|'<'|'>'|'<='|'>=', (a, b) => Boolean>}*/
+/**
+ * @type {Map<ConditionString, (a: String, b: String) => Boolean>}
+ */
 const conditionals = new Map();
 conditionals
     .set('=',  (a, b) => a === b)
@@ -632,7 +684,7 @@ class Translator {
     /**
      * Muestra un texto localizado según la configuración del usuario
      * @param {LocaleIds} id id de texto a mostrar en forma localizada
-     * @param {...String} values variables a insertar en el texto seleccionado como reemplazos de campos designados
+     * @param {...*} values variables a insertar en el texto seleccionado como reemplazos de campos designados
      */
     getText(id, ...values) {
         return Translator.getText(id, this.#locale, ...values);
@@ -670,7 +722,7 @@ class Translator {
      * Muestra un texto localizado según la configuración del usuario
      * @param {LocaleIds} id id de texto a mostrar en forma localizada
      * @param {LocaleKey} locale lenguaje al cual localizar el texto
-     * @param {...String} values variables a insertar en el texto seleccionado como reemplazos de campos designados
+     * @param {...*} values variables a insertar en el texto seleccionado como reemplazos de campos designados
      */
     static getText(id, locale, ...values) {
         const localeSet = locales.get(id);
@@ -684,19 +736,22 @@ class Translator {
             const value = values[i];
     
             if(condition != undefined) {
-                const divisionChar = condition.match(/[0-9]/gi)[0];
                 const leftValue = `${value}`;
-                let cursor = 0;
-                let operator = '';
                 let rightValue = '';
-                while(condition[cursor] !== divisionChar) {
+                let operator = '';
+                let cursor = 0;
+
+                while(condition[cursor] !== ':') {
                     operator += condition[cursor];
                     cursor++;
                 }
+                cursor++;
                 while(cursor < condition.length) {
                     rightValue += condition[cursor];
                     cursor++;
                 }
+
+                // @ts-ignore
                 const conditionFn = conditionals.get(operator);
                 return conditionFn(leftValue, rightValue) ? whenTrue : (defaultValue ?? '');
             }
@@ -727,4 +782,5 @@ class Translator {
 
 module.exports = {
     Translator,
+    TrLocKey,
 };

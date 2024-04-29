@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "checkJs": true,
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "resolveJsonModule": true,
+        "resolvePackageJsonImports": true,
+        "resolvePackageJsonExports": true
+    },
+    "exclude": [
+        "node_modules",
+        "CommandBuilder",
+        "PS Docs"
+    ]
+}

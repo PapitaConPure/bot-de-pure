@@ -63,9 +63,10 @@ class DiscordAgent {
 
     /**
      * Envía un mensaje como el usuario especificado. Recuerda usar `setUser` o `setMember` antes.
-     * @param {import('discord.js').WebhookMessageOptions } messageOptions Opciones de envío. No se puede modificar el usuario ni el canal
+     * @param {import('discord.js').WebhookMessageOptions} messageOptions Opciones de envío. No se puede modificar el usuario ni el canal
+     * @param {Boolean} inheritAttachments Si heredar los antiguos attachments del mensaje (true) o no (false)
      */
-    async sendAsUser(messageOptions) {
+    async sendAsUser(messageOptions, inheritAttachments = true) {
         if(!this.user)
             throw new ReferenceError('No se ha definido un usuario');
 
@@ -73,12 +74,12 @@ class DiscordAgent {
             messageOptions.content = undefined;
         
         const { attachments } = messageOptions;
-        if(attachments && !Array.isArray(attachments)) {
+        if(inheritAttachments && attachments && !Array.isArray(attachments)) {
             messageOptions.attachments = [];
             messageOptions.files ??= [];
             messageOptions.files.push(...[ ...attachments.values() ]);
         }
-
+        
         try {
             const sent = await this.webhook.send({
                 ...messageOptions,

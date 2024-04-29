@@ -1,8 +1,9 @@
-const { PermissionResolvable, PermissionFlagsBits, GuildMember, PermissionsBitField } = require('discord.js');
+// @ts-ignore
+const { PermissionResolvable, PermissionFlagsBits, GuildMember, PermissionsBitField, BitField } = require('discord.js');
 
 /**Representa un conjunto de permisos de comando*/
 class CommandPermissions {
-    /**@type {Array<BigInt>}*/
+    /**@type {Array<bigint>}*/
     #requisites;
 
     /**
@@ -59,28 +60,27 @@ class CommandPermissions {
 
     /**
      * Recupera un Bitfield de un PermissionResolvable
-     * @constructor
      * @param {PermissionResolvable} permissions Conjunto de permisos requeridos para ejecutar el comando
      */
     #resolveToBitfield(permissions) {
         if(Array.isArray(permissions))
             return this.#calcPerms(permissions);
 
-        if(typeof permissions.bitfield === 'bigint')
-            return BigInt(permissions.bitfield);
+        if(typeof permissions === 'bigint')
+            return permissions;
 
         if(typeof permissions === 'string')
             return BigInt(PermissionFlagsBits[permissions]);
-        
-        if(typeof permissions !== 'bigint')
-            throw new TypeError("Se esperaba un valor resolvible a uno o más permisos de Discord");
-        
-        return permissions;
+
+        if(permissions instanceof BitField)
+            return BigInt(permissions.bitfield);
+
+        throw new TypeError("Se esperaba un valor resolvible a uno o más permisos de Discord");
     }
 
     /**
-     * Introduce permisos de comando al conjunto
-     * @param {Array<MetaFlagValue>} permissions Permisos de comando a introducir
+     * Recupera un Bitfield de un arreglo de PermissionResolvable
+     * @param {Array<PermissionResolvable>} permissions Permisos de comando a introducir
      */
     #calcPerms(permissions) {
         let perms = 0n;

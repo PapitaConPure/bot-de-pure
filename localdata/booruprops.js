@@ -368,4 +368,5 @@ module.exports = {
         const tagMap = tagMaps[tagMapId];
         return words.map(word => normalizeTag(word, tagMap)).join(' ');
     },
+    tagMaps,
 };

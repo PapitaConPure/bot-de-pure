@@ -58,7 +58,10 @@
         "papita": "423129757954211880"
     },
     "slots": {},
-    "booruCredentials": {},
+    "booruCredentials": {
+        "apiKey": "",
+        "userId": ""
+    },
     "reportFormUrl": "https://forms.gle/tHFXxbsTmuJTQm1z7",
     
     "hourai": {

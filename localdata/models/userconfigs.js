@@ -36,4 +36,9 @@ const UserConfigSchema = new Mongoose.Schema({
     banned: { type: Boolean, default: false },
 });
 
-module.exports = Mongoose.model('UserConfig', UserConfigSchema);
+const model = Mongoose.model('UserConfig', UserConfigSchema);
+
+function m() { return new model({}); }
+/**@typedef {ReturnType<(typeof m)>} UserConfigDocument*/
+
+module.exports = model;

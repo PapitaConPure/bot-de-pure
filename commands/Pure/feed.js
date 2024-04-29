@@ -3,12 +3,13 @@ const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, T
 const { isNotModerator, shortenText, guildEmoji, decompressId, compressId } = require('../../func.js');
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { auditError } = require('../../systems/auditor.js');
-const { CommandMetaFlagsManager } = require('../Commons/cmdFlags.js');
+const { CommandTags } = require('../Commons/cmdTags.js');
 const globalConfigs = require('../../localdata/config.json');
 const { Booru } = require('../../systems/boorufetch.js');
 const { CommandManager } = require('../Commons/cmdBuilder.js');
 const { addGuildToFeedUpdateStack } = require('../../systems/boorufeed.js');
 const { Translator } = require('../../internationalization.js');
+const { CommandPermissions } = require('../Commons/cmdPerms.js');
 
 /**@param {Translator} translator*/
 const wizTitle = (translator) => translator.getText('feedAuthor');
@@ -83,10 +84,10 @@ function tagsSetupPrompt(interaction, channelId, translator) {
 	return embed;
 };
 
-const flags = new CommandMetaFlagsManager().add(
-	'COMMON',
-	'MOD',
-);
+const perms = new CommandPermissions()
+	.requireAnyOf([ 'ManageGuild', 'ManageChannels' ])
+	.requireAnyOf('ManageMessages');
+const flags = new CommandTags().add('COMMON', 'MOD');
 const command = new CommandManager('feed', flags)
 	.setBriefDescription('Inicializa un Feed en un canal por medio de un Asistente.')
 	.setLongDescription('Inicializa un Feed de imágenes en un canal. Simplemente usa el comando y sigue los pasos del Asistente para configurar y personalizar todo')

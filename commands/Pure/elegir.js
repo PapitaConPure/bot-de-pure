@@ -1,11 +1,11 @@
 const { EmbedBuilder, Colors } = require('discord.js');
 const { regroupText, randRange } = require('../../func.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
+const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addParam('opciones', 'TEXT', 'para asignar una opción elegible', { poly: 'MULTIPLE', polymax: 20 });
-const flags = new CommandMetaFlagsManager().add('COMMON');
+const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('elegir', flags)
 	.setAliases('choose')
 	.setLongDescription('Elige una de las opciones que hayas especificado, puedes separar opciones con comas')

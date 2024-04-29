@@ -1,7 +1,7 @@
-const { CommandMetaFlagsManager } = require("../Commons/cmdFlags");
+const { CommandTags } = require("../Commons/cmdTags");
 const { CommandManager } = require("../Commons/cmdBuilder");
 const { executeTuber } = require("../../systems/purescript");
-const { CommandOptionsManager } = require("../Commons/cmdOpts");
+const { CommandOptions } = require("../Commons/cmdOpts");
 const { ButtonBuilder, ButtonStyle, ActionRowBuilder, EmbedBuilder } = require("discord.js");
 const { p_pure } = require("../../localdata/customization/prefixes");
 const { tenshiColor } = require('../../localdata/config.json');
@@ -28,9 +28,9 @@ function getScriptString(isSlash, args, rawArgs) {
 	return script;
 }
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addParam('script', 'TEXT', 'para designar código PuréScript a ejecutar');
-const flags = new CommandMetaFlagsManager().add('COMMON');
+const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('purescript', flags)
 	.setAliases('puréscript', 'ps')
 	.setBriefDescription('Interpreta y ejecuta código PuréScript')

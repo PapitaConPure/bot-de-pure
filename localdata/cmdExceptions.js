@@ -4,80 +4,91 @@ const GuildConfig = require('./models/guildconfigs.js');
 const { isNotModerator } = require('../func');
 const chalk = require('chalk');
 const { auditError } = require('../systems/auditor.js');
-const { CommandMetaFlagsManager } = require('../commands/Commons/cmdFlags');
-
-const isNotByPapita = (compare) => (compare.member.user.id !== global.peopleid.papita);
+// @ts-ignore
+const { CommandRequest } = require('../commands/Commons/typings');
+const { CommandManager } = require('../commands/Commons/cmdBuilder.js');
 
 /**
- * @typedef {{flag: import('../commands/Commons/cmdFlags').MetaFlagValue, title: String, desc: String, isException: Function?}} ExceptionSummary
+ * @typedef {(request: CommandRequest) => Promise<Boolean>} ExceptionTestFn
  */
+/**
+ * @typedef {Object} ExceptionSummary
+ * @property {import('../commands/Commons/cmdTags').CommandTagResolvable} tag
+ * @property {String} title
+ * @property {String} desc
+ * @property {ExceptionTestFn} isException
+ */
+
+/**@type {ExceptionTestFn}*/
+const isNotByPapita = async request => (request.member.user.id !== global.peopleid.papita);
 
 module.exports = {
     /**@type {Array<ExceptionSummary>}*/
     exceptions: [
         {
-            flag: 'OUTDATED',
+            tag: 'OUTDATED',
             title: 'Comando desactualizado',
             desc: 'El comando no se encuentra disponible debido a que su función ya no es requerida en absoluto o su mantención no se encontró justificada',
-            isException: (compare) => isNotByPapita(compare)
+            isException: async request => isNotByPapita(request)
         },
         {
-            flag: 'MAINTENANCE',
+            tag: 'MAINTENANCE',
             title: 'Comando en mantenimiento',
             desc: 'El comando no se encuentra disponible debido a que está en proceso de actualización o reparación en este momento. Espera a que se actualice~',
-            isException: (compare) => isNotByPapita(compare)
+            isException: async request => isNotByPapita(request)
         },
         {
-            flag: 'MOD',
+            tag: 'MOD',
             title: 'Comando exclusivo para moderación',
-            desc: 'El comando es de uso restringido para moderación.\n**Considero a alguien como moderador cuando** tiene permisos para administrar roles *(MANAGE_ROLES)* o mensajes *(MANAGE_MESSAGES)*',
-            isException: (compare) => isNotModerator(compare.member)
+            desc: 'El comando es de uso restringido para moderación.\n**Considero a alguien como moderador cuando** tiene permisos para administrar roles *(MANAGE_ROLES)* o mensajes *(MANAGE_MESSAGES)*\nNota: esto cambiará en una futura actualización, o puede ya haber cambiado pero no se ha actualizado este mensaje de error',
+            isException: async request => isNotModerator(request.member)
         },
         {
-            flag: 'CHAOS',
+            tag: 'CHAOS',
             title: 'Los Comandos Caóticos están desactivados',
             desc: 'Este comando se considera un Comando Caótico debido a su volatilidad y tendencia a corromper la paz. Los comandos caóticos están desactivados por defecto. Refiérete al comando "caos" para ver cómo activarlos',
-            isException: async (compare) => {
-                const gcfg = (await GuildConfig.findOne({ guildId: compare.guild.id })) || new GuildConfig({ guildId: compare.guild.id });
-                return isNotByPapita(compare) && !gcfg.chaos;
+            isException: async request => {
+                const gcfg = (await GuildConfig.findOne({ guildId: request.guild.id })) || new GuildConfig({ guildId: request.guild.id });
+                return isNotByPapita(request) && !gcfg.chaos;
             }
         },
         {
-            flag: 'GUIDE',
+            tag: 'GUIDE',
             title: 'Símbolo de página de guía',
             desc: 'Esto no es un comando, sino que una *página de guía* para buscarse con el comando de ayuda (`p!ayuda <guía>`)',
-            isException: (_) => true
+            isException: async _ => true
         },
         {
-            flag: 'PAPA',
+            tag: 'PAPA',
             title: 'Comando exclusivo de Papita con Puré',
             desc: 'El comando es de uso restringido para el usuario __Papita con Puré#6932__. Esto generalmente se debe a que el comando es usado para pruebas o ajustes globales/significativos/sensibles del Bot',
-            isException: (compare) => isNotByPapita(compare)
+            isException: async request => isNotByPapita(request)
         },
         {
-            flag: 'HOURAI',
+            tag: 'HOURAI',
             title: 'Comando exclusivo de Saki Scans',
             desc: [
                 'El comando es de uso restringido para el servidor __Saki Scans (anteriormente Hourai Doll)__.',
                 'Esto generalmente se debe a que cumple funciones que solo funcionan allí o que solo tiene sentido que se mantengan en dicho lugar',
                 'Si te interesa, puedes [unirte al servidor](https://discord.gg/pPwP2UNvAC)'
             ].join('\n'),
-            isException: (compare) => isNotByPapita(compare) && compare.guild.id !== global.serverid.saki
+            isException: async request => isNotByPapita(request) && request.guild.id !== global.serverid.saki
         },
     ],
 
     /**
      * 
-     * @param {CommandMetaFlagsManager} flags 
+     * @param {CommandManager} command
      * @param {import('../commands/Commons/typings').CommandRequest} request 
      * @returns {Promise<ExceptionSummary?>}
      */
-    async findFirstException(flags, request) {
+    async findFirstException(command, request) {
+        const flags = command.flags;
         if(!flags) return null;
 
         const possibleExceptions = await Promise.all(
             module.exports.exceptions
-                .map(exception => flags.has(exception.flag) && exception.isException(request))
+                .map(exception => flags.has(exception.tag) && exception.isException(request))
         );
         const exceptions = module.exports.exceptions.filter((_, i) => possibleExceptions[i]);
 
@@ -101,19 +112,25 @@ module.exports = {
     },
 
     /**
+     * @typedef {Object} ErrorLogOptions
+     * @property {String} [brief]
+     * @property {String} [details]
+     */
+    /**
      * 
      * @param {Error} error 
-     * @param {import('../commands/Commons/typings').CommandRequest} request
-     * @typedef {{ brief: string, details: string }} errorLogOptions
-     * @param {errorLogOptions} param2 
-     * @returns {Boolean} Devuelve si el error se debe a una falta de permisos
+     * @param {import('../commands/Commons/typings').CommandRequest | import('discord.js').Interaction} request
+     * @param {ErrorLogOptions} logOptions 
+     * @returns {Promise<Boolean>} Devuelve si el error se debe a una falta de permisos
      */
-    async handleAndAuditError(error, request, { brief, details }) {
+    async handleAndAuditError(error, request, logOptions = {}) {
         if(error.message === 'Missing Permissions') {
             /**@type {import('discord.js').User}*/
+            // @ts-ignore
             const user = request.author ?? request.user;
             const permsEmbed = new EmbedBuilder()
                 .setColor(0x0000ff)
+                // @ts-ignore
                 .setAuthor({ name: `${request.guild.name} • ${request.channel.name} (Click para ver)`, iconURL: user.avatarURL({ size: 128 }), url: request.url || 'https://discordapp.com' })
                 .setThumbnail('https://i.imgur.com/ftAxUen.jpg')
                 .addFields(
@@ -135,13 +152,14 @@ module.exports = {
         }
         
         //Los mensajes no tienen una propiedad de "token", las interacciones sí
+        let { brief, details } = logOptions;
         if(!brief) {
-            if(!request.token)                  brief = 'Ha ocurrido un error al ejecutar un comando';
-            else if(request.isCommand())        brief = 'Ha ocurrido un error al procesar un comando Slash';
-            else if(request.isButton())         brief = 'Ha ocurrido un error al procesar una acción de botón';
-            else if(request.isSelectMenu())     brief = 'Ha ocurrido un error al procesar una acción de menú desplegable';
-            else if(request.isModalSubmit())    brief = 'Ha ocurrido un error al procesar una acción de ventana modal';
-            else                                brief = 'Ha ocurrido un error desconocido';
+            if(CommandManager.requestIsMessage(request)) brief = 'Ha ocurrido un error al ejecutar un comando';
+            else if(request.isCommand())                 brief = 'Ha ocurrido un error al procesar un comando Slash';
+            else if(request.isButton())                  brief = 'Ha ocurrido un error al procesar una acción de botón';
+            else if(request.isStringSelectMenu())        brief = 'Ha ocurrido un error al procesar una acción de menú desplegable';
+            else if(request.isModalSubmit())             brief = 'Ha ocurrido un error al procesar una acción de ventana modal';
+            else                                         brief = 'Ha ocurrido un error desconocido';
         }
 
         console.log(chalk.bold.redBright(brief));

@@ -1,5 +1,5 @@
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId } = require('../../func.js');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, TextInputBuilder, CommandInteraction, ButtonInteraction, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder } = require('discord.js');
@@ -217,7 +217,7 @@ function viewTuber(interaction, item, tuberId) {
 	});
 }
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addParam('id', 	  'TEXT',           'para especificar sobre qué Tubérculo operar',          { optional: true })
 	.addParam('mensaje',  'TEXT',           'para especificar el texto del mensaje',                { optional: true })
 	.addParam('archivos', ['FILE','IMAGE'], 'para especificar los archivos del mensaje',            { optional: true, poly: 'MULTIPLE', polymax: 8 })
@@ -226,7 +226,7 @@ const options = new CommandOptionsManager()
 	.addFlag('v', 		'ver', 		  				  'para ver detalles de un Tubérculo')
 	.addFlag(['b','d'], ['borrar','eliminar'], 		  'para eliminar un Tubérculo')
 	.addFlag('s', 		['script','puré','pure'], 	  'para usar PuréScript (junto a `-c`); reemplaza la función de `<mensaje>`');
-const flags = new CommandMetaFlagsManager().add('COMMON');
+const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('tubérculo', flags)
 	.setAliases('tuberculo', 'tubercle', 'tuber', 't')
 	.setBriefDescription('Permite crear, editar, listar, borrar o ejecutar comandos personalizados de servidor')

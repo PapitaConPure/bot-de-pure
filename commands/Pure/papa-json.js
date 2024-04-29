@@ -1,5 +1,5 @@
 const { AttachmentBuilder } = require('discord.js');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
 const readObj = (object, indent) => {
 	let objret = '';
@@ -13,11 +13,11 @@ const readObj = (object, indent) => {
 	return objret;
 }
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addParam('archivo', { name: 'texto', expression: '*.json' }, 'para especificar en qué archivo buscar el objeto', { optional: true })
 	.addParam('ruta', 'TEXT', 'para especificar la ruta relativa al archivo del objeto a buscar, en orden descendiente', { optional: true, poly: 'MULTIPLE' });
 
-const flags = new CommandMetaFlagsManager().add('PAPA');
+const flags = new CommandTags().add('PAPA');
 const command = new CommandManager('papa-json', flags)
 	.setDescription('Busca un `<objeto>` JS con cierto siguiendo las indicaciones de `<(ruta, nombre)>` en el `<archivo>` especificado (o `global.json`)')
 	.setOptions(options)

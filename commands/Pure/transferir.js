@@ -1,5 +1,5 @@
 const { improveNumber, swap, fetchUser, compressId } = require("../../func");
-const { CommandMetaFlagsManager, CommandManager, CommandOptionsManager } = require('../Commons/commands');
+const { CommandTags, CommandManager, CommandOptions } = require('../Commons/commands');
 const UserConfigs = require('../../localdata/models/userconfigs.js');
 const { tenshiColor } = require('../../localdata/config.json');
 const { EmbedBuilder, User } = require("discord.js");
@@ -17,10 +17,10 @@ function swapIfNeeded(args) {
     args[1] = b;
 }
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
     .addParam('monto', 'NUMBER', 'para especificar el monto a pagar en PRC')
     .addParam('usuario', 'MEMBER', 'para especificar el usuario al cual transferir PRC');
-const flags = new CommandMetaFlagsManager().add('COMMON');
+const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('transferir', flags)
     .setAliases('transfer', 'tf')
     .setDescription('Permite transferir PRC a otro usuario')

@@ -189,7 +189,7 @@ module.exports = {
         return [ ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.AnnouncementThread ].includes(channel.type);
     },
     
-    /**@param {import('discord.js').TextChannel} channel*/
+    /**@param {import('discord.js').GuildTextBasedChannel} channel*/
     channelIsBlocked: function(channel) {
         const member = channel?.guild?.members.me;
         if(!member?.permissionsIn(channel)?.any?.([ 'SendMessages', 'SendMessagesInThreads' ], true)) return true;
@@ -629,8 +629,7 @@ module.exports = {
      * @returns {Discord.Channel}
      */
     fetchChannel: function(data, guild) {
-        if(!data)
-            return;
+        if(typeof data !== 'string' || !data.length) return;
 
         const ccache = guild.channels.cache;
         if(data.startsWith('<#') && data.endsWith('>'))
@@ -650,10 +649,12 @@ module.exports = {
      * Busca un mensaje basado en la data ingresada.
      * Devuelve el mensaje que coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún canal, se devuelve undefined.
      * @param {String} data 
-     * @param {{ guild: Discord.Guild, channel: Discord.TextChannel }} channel 
+     * @param {{ guild: Discord.Guild, channel: Discord.TextChannel }} context 
      * @returns {Promise<Discord.Message>}
      */
     fetchMessage: async function(data, { guild, channel }) {
+        if(typeof data !== 'string' || !data.length) return;
+
         const acceptedChannelTypes = [
             ChannelType.GuildText,
             ChannelType.GuildVoice,
@@ -662,16 +663,15 @@ module.exports = {
             ChannelType.AnnouncementThread,
         ];
 
-        console.log({ channelType: channel.type });
-
         if(!acceptedChannelTypes.includes(channel.type))
             return;
 
         const messages = channel.messages;
-        let message = await messages.fetch(data);
-        console.log({ data, message });
+        const matchedUrl = data.match(/https:\/\/discord.com\/channels\/\d+\/\d+\/(\d+)/);
+        const messageId = matchedUrl ? matchedUrl[1] : data;
+        let message = messages.cache.get(messageId) || await messages.fetch(messageId).catch(_ => _);
 
-        if(!message) return;
+        if(!message?.channel) return;
         if(!acceptedChannelTypes.includes(message.channel.type)) return;
         return message;
     },
@@ -684,6 +684,8 @@ module.exports = {
      * @returns {Discord.Role}
      */
     fetchRole: function(data, guild) {
+        if(typeof data !== 'string' || !data.length) return;
+
         const rcache = guild.roles.cache;
         if(data.startsWith('<@&') && data.endsWith('>'))
             data = data.slice(3, -1);
@@ -790,6 +792,17 @@ module.exports = {
     },
     //#endregion
 
+    //#region Utilidades
+    /**@param {String} text*/
+    success: text => `✅ ${text}`,
+
+    /**@param {String} text*/
+    warn: text => `⚠️ ${text}`,
+    
+    /**@param {String} text*/
+    unable: text => `❌ ${text}`,
+    //#endregion
+
     //#region Otros
     /**
      * Devuelve el primer emoji global encontrado en el string
@@ -871,7 +884,7 @@ module.exports = {
      * Devuelve un valor aleatorio dentro de un rango entre 2 valores
      * @param {Number} minInclusive Mínimo valor; puede ser incluído en el resultado
      * @param {Number} maxExclusive Máximo valor; excluído del resultado
-     * @param {false | undefined} round Si el número debería ser redondeado hacia abajo
+     * @param {Boolean} [round=false] Si el número debería ser redondeado hacia abajo
      * @returns 
      */
     randRange: function(minInclusive, maxExclusive, round = true) {

@@ -1,9 +1,9 @@
 const { improveNumber } = require("../../func");
-const { CommandMetaFlagsManager, CommandManager, CommandOptionsManager } = require("../Commons/commands");
+const { CommandTags, CommandManager, CommandOptions, CommandOptionSolver } = require("../Commons/commands");
 const { calc } = require('../../systems/mathreader.js');
 
-const flags = new CommandMetaFlagsManager().add('COMMON');
-const options = new CommandOptionsManager()
+const flags = new CommandTags().add('COMMON');
+const options = new CommandOptions()
 	.addParam('operación', 'TEXT', ' para expresar la operación matemátca')
 	.addFlag(['a','s'], 'acortar', 'para acortar el resultado')
 	.addFlag(['m','d'], ['mínimo','minimo','digitos'], 'para designar el mínimo de dígitos', { name: 'minimo', type: 'NUMBER' });
@@ -17,8 +17,8 @@ const command = new CommandManager('calcular', flags)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const shorten = options.fetchFlag(args, 'acortar');
-		const min = options.fetchFlag(args, 'mínimo', { fallback: 1 });
-		const operation = options.fetchParam(args, 'operación', true);
+		const min = CommandOptionSolver.asNumber(options.fetchFlag(args, 'mínimo', { fallback: 1 }));
+		const operation = CommandOptionSolver.asString(await options.fetchParam(args, 'operación', true));
 
 		if(!operation)
 			return request.reply({ content: '⚠️ Debes ingresar una operación' });

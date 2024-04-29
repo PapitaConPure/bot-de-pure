@@ -1,9 +1,9 @@
 const { ChannelType } = require('discord.js');
 const { auditError } = require('../../systems/auditor');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
-const flags = new CommandMetaFlagsManager().add('PAPA');
-const options = new CommandOptionsManager()
+const flags = new CommandTags().add('PAPA');
+const options = new CommandOptions()
     .addParam('mensaje', 'TEXT', 'para especificar qué decir')
     .addFlag('bd', ['borrar', 'delete'],            'para borrar el mensaje original')
     .addFlag('sg', ['servidor', 'server', 'guild'], 'para enviar en otro server', { name: 'sv', type: 'GUILD' })

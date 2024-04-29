@@ -1,11 +1,13 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
-const { CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
+const { CommandTags, CommandManager } = require("../Commons/commands");
 const { DiscordAgent } = require('../../systems/discordagent.js');
 const { hourai } = require('../../localdata/config.json');
+const { CommandPermissions } = require('../Commons/cmdPerms.js');
 
 let crazyBackupId = hourai.crazyBackupChannelId;
 
-const flags = new CommandMetaFlagsManager().add(
+const perms = new CommandPermissions([ 'ManageGuild', 'ManageChannels', 'ManageMessages' ]);
+const flags = new CommandTags().add(
 	'MOD',
 	'HOURAI',
 );
@@ -20,6 +22,7 @@ const command = new CommandManager('exhibir', flags)
 		`Envía mensajes pinneados en el canal actual a <#${crazyBackupId}>`,
 		'Esto eliminará todos los pins en el canal luego de reenviarlos',
 	)
+	.setPermissions(perms)
 	.setExecution(async (request) => {
 		const pinnedMessages = await request.channel.messages.fetchPinned();
 		const user = request.author ?? request.user;

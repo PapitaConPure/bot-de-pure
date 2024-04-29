@@ -1,20 +1,11 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
-const { CommandMetaFlagsManager, CommandManager, CommandOptionsManager } = require("../Commons/commands");
+const { CommandTags, CommandManager, CommandOptions } = require("../Commons/commands");
 const { DiscordAgent } = require('../../systems/discordagent.js');
 const { hourai } = require('../../localdata/config.json');
 const HouraiCfg = require('../../localdata/models/hourai.js');
+const { CommandPermissions } = require('../Commons/cmdPerms.js');
 
 let crazyBackupId = hourai.crazyBackupChannelId;
-
-const flags = new CommandMetaFlagsManager().add(
-	'MOD',
-	'HOURAI',
-);
-
-const options = new CommandOptionsManager()
-    .addFlag([], 'bienvenida', 'Para habilitar o deshabilitar la bienvenida por completo', { name: 'estado', type: 'TEXT' })
-    .addFlag([], 'despedida', 'Para habilitar o deshabilitar la bienvenida por completo', { name: 'estado', type: 'TEXT' })
-    .addFlag([], 'ping', 'Para habilitar o deshabilitar el ping de bienvenida', { name: 'estado', type: 'TEXT' });
 
 const positivos = [
     'habilitado',
@@ -73,6 +64,12 @@ function procesarConfig(dbDoc, appliedList, prompt, configId, displayText) {
 
 const tip = '⚠️ Estado inválido. Ingresa "Activado", "Desactivado" o similares para cambiar una configuración';
 
+const perms = CommandPermissions.adminOnly();
+const options = new CommandOptions()
+    .addFlag([], 'bienvenida', 'Para habilitar o deshabilitar la bienvenida por completo', { name: 'estado', type: 'TEXT' })
+    .addFlag([], 'despedida', 'Para habilitar o deshabilitar la bienvenida por completo', { name: 'estado', type: 'TEXT' })
+    .addFlag([], 'ping', 'Para habilitar o deshabilitar el ping de bienvenida', { name: 'estado', type: 'TEXT' });
+const flags = new CommandTags().add('MOD', 'HOURAI');
 const command = new CommandManager('saki', flags)
 	.setAliases(
 		'sakiscans',
@@ -83,6 +80,8 @@ const command = new CommandManager('saki', flags)
 		`Envía mensajes pinneados en el canal actual a <#${crazyBackupId}>`,
 		'Esto eliminará todos los pins en el canal luego de reenviarlos',
 	)
+    .setPermissions(perms)
+    .setOptions(options)
 	.setExecution(async (request, args) => {
 		const bienvenida = options.fetchFlag(args, 'bienvenida');
 		const despedida = options.fetchFlag(args, 'despedida');

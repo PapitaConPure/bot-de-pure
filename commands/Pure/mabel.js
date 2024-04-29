@@ -1,5 +1,5 @@
 const { randRange }  = require('../../func.js');
-const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandTags, CommandManager } = require('../Commons/commands');
 
 const h = [
 	':heart:',
@@ -13,7 +13,7 @@ const h = [
 	':heartpulse:'
 ];
 
-const flags = new CommandMetaFlagsManager().add('MEME', 'OUTDATED');
+const flags = new CommandTags().add('MEME', 'OUTDATED');
 const command = new CommandManager('mabel', flags)
 	.setAliases('merraz', 'mármol', 'gay', 'pride')
 	.setDescription('Comando de inclusión de Mabel')

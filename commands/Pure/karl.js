@@ -1,5 +1,5 @@
 const { randRange: rr } = require("../../func");
-const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandTags, CommandManager } = require('../Commons/commands');
 
 const star = '<:tags:704612794921779290>';
 const instruments = [
@@ -43,7 +43,7 @@ const instrumentsPull = (rarity) => {
 	return instr;
 }
 
-const flags = new CommandMetaFlagsManager().add(
+const flags = new CommandTags().add(
 	'MEME',
 	'GAME',
 );

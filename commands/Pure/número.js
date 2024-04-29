@@ -1,8 +1,8 @@
 const { improveNumber } = require('../../func.js'); //Funciones globales
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
-const flags = new CommandMetaFlagsManager().add('COMMON');
-const options = new CommandOptionsManager()
+const flags = new CommandTags().add('COMMON');
+const options = new CommandOptions()
 	.addParam('num', 'NUMBER', 'para designar el número a operar')
 	.addFlag(['a','s'], 'acortar', 'para acortar el número')
 	.addFlag(['m','d'], ['mínimo','minimo','digitos'], 'para designar el mínimo de dígitos', { name: 'minimo', type: 'NUMBER' })

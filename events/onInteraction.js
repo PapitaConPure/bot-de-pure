@@ -18,7 +18,7 @@ async function onInteraction(interaction, client) {
     const { guild, channel, user } = interaction;
 
     if(!guild)
-        return handleDMInteraction.catch(console.error);
+        return handleDMInteraction().catch(console.error);
 
     if(channelIsBlocked(channel) || (await isUsageBanned(user)))
         return handleBlockedInteraction(interaction).catch(console.error);
@@ -56,6 +56,22 @@ async function handleCommand(interaction, client, stats) {
         //Detectar problemas con el comando basado en flags
         /**@type {CommandManager | undefined}*/
         const command = client.ComandosPure.get(commandName);
+
+        if(command.permissions && !command.permissions.isAllowed(interaction.member)) {
+            return interaction.channel.send({ embeds: [
+                generateExceptionEmbed({
+                    title: 'Permisos insuficientes',
+                    desc: 'Este comando requiere permisos para ejecutarse que no tienes actualmente',
+                }, { cmdString: `/${commandName}` })
+                .addFields({
+                    name: 'Requisitos completos',
+                    value: command.permissions.matrix
+                        .map((requisite, n) => `${n + 1}. ${requisite.map(p => `\`${p}\``).join(' **o** ')}`)
+                        .join('\n')
+                })
+            ]});
+        }
+
         const exception = await findFirstException(command.flags, interaction);
         if(exception)
             return interaction.reply({ embeds: [ generateExceptionEmbed(exception, { cmdString: `/${commandName}` }) ], ephemeral: true });

@@ -1,11 +1,11 @@
 const { EmbedBuilder } = require('discord.js');
 const { randRange } = require('../../func.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
+const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addParam('dados', { name: 'conjunto', expression: '`<cantidad>`"d"`<caras>`' }, 'para especificar la cantidad y caras de un conjunto de dados', { poly: 'MULTIPLE' });
-const flags = new CommandMetaFlagsManager().add('COMMON');
+const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('dados', flags)
 	.setAliases(
 		'dado', 'tirar', 'random',

@@ -15,4 +15,9 @@ const WebhookOwnerSchema = new Mongoose.Schema({
     },
 });
 
-module.exports = Mongoose.model('WebhookOwner', WebhookOwnerSchema);
+const model = Mongoose.model('WebhookOwner', WebhookOwnerSchema);
+
+function m() { return new model({}); }
+/**@typedef {ReturnType<(typeof m)>} WebhookOwnerDocument*/
+
+module.exports = model;

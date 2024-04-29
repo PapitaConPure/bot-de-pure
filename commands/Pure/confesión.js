@@ -4,7 +4,7 @@ const { TextChannel, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle,
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const ConfessionSystems = require('../../localdata/models/confessionSystems.js');
 const PendingConfessions = require('../../localdata/models/pendingConfessions.js');
-const { CommandManager, CommandMetaFlagsManager, CommandOptionsManager } = require('../Commons/commands.js');
+const { CommandManager, CommandTags, CommandOptions } = require('../Commons/commands.js');
 const confessionSystems = require('../../localdata/models/confessionSystems.js');
 const { auditError } = require('../../systems/auditor.js');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
@@ -12,9 +12,8 @@ const { CommandPermissions } = require('../Commons/cmdPerms.js');
 const perms = new CommandPermissions()
 	.requireAnyOf('ManageMessages')
 	.requireAnyOf([ 'ManageChannels', 'ManageGuild' ]);
-
-const flags = new CommandMetaFlagsManager().add('MOD');
-const command = new CommandManager('confesión', flags)
+const tags = new CommandTags().add('MOD');
+const command = new CommandManager('confesión', tags)
 	.setAliases(
 		'confesion',
 		'confesiones',

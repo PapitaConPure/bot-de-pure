@@ -28,16 +28,21 @@ class Booru {
     }
 
     /**
-    * Devuelve resultados de búsqueda en forma de {@linkcode Post}s
-    * @param {String | Array<String>} tags Tags a buscar
-    * @param {{ limit: Number | null, showDeleted: Boolean | null }} searchOptions Opciones de búsqueda
-    * @returns {Promise<Array<Post>>}
-    */
+     * @typedef {Object} BooruSearchOptions
+     * @property {Number} [limit=1] Límite de resultados de la búsqueda
+     * @property {Boolean} [showDeleted] Si mostrar posts que fueron eliminados del Booru (true) o no (false)
+     * @property {Boolean} [random] Si los resultados se ordenan de forma aleatoria (true) o no (false)
+     */
+    /**
+     * Devuelve resultados de búsqueda en forma de {@linkcode Post}s
+     * @param {String | Array<String>} tags Tags a buscar
+     * @param {BooruSearchOptions} searchOptions Opciones de búsqueda
+     * @returns {Promise<Array<Post>>}
+     */
     async search(tags, searchOptions = { limit: 1 }) {
         const { apiKey, userId } = this.getCredentials();
         if(Array.isArray(tags))
             tags = tags.join(' ');
-
         const response = await axios.get(`${this.apiPostsUrl}&json=1&api_key=${apiKey}&user_id=${userId}&limit=${searchOptions.limit}&tags=${tags}`);
         if(!response.data?.post?.length) return [];
         return response.data.post.map(p => new Post(p));

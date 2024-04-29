@@ -1,12 +1,12 @@
 const { CommandPermissions } = require('../Commons/cmdPerms');
-const { CommandMetaFlagsManager, CommandManager, CommandOptionsManager } = require('../Commons/commands');
+const { CommandTags, CommandManager, CommandOptions } = require('../Commons/commands');
 
 const perms = new CommandPermissions('ManageGuild');
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addFlag('c', 'canal', 'para especificar el canal al cuál enviar la bienvenida', { name: 'cn', type: 'CHANNEL' });
 
-const flags = new CommandMetaFlagsManager().add(
+const flags = new CommandTags().add(
 	'MOD',
 	'MAINTENANCE',
 );

@@ -1,9 +1,9 @@
-const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandTags, CommandManager } = require('../Commons/commands');
 const { hourai } = require('../../localdata/config.json');
 
 const hd = hourai.hangedRoleId; //Hanged Doll
 
-const flags = new CommandMetaFlagsManager().add(
+const flags = new CommandTags().add(
 	'HOURAI',
 	'MEME',
 );

@@ -3,10 +3,10 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('
 const { serverid, tenshiColor, peopleid } = require('../../localdata/config.json'); //Variables globales
 const { isNotModerator } = require('../../func');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
 
-const flags = new CommandMetaFlagsManager().add('COMMON');
-const options = new CommandOptionsManager()
+const flags = new CommandTags().add('COMMON');
+const options = new CommandOptions()
     .addParam('comando', 'TEXT',                           'para ver ayuda en un comando en específico', { optional: true })
     .addFlag('x', ['exclusivo', 'exclusiva', 'exclusive'], 'para realizar una búsqueda exclusiva')
     .addFlag([],  'meme',                                  'para ver comandos meme')
@@ -29,17 +29,22 @@ const command = new CommandManager('ayuda', flags)
         const filterAll =       options.fetchFlag(args, 'todo',      { callback: true });
 
         //Crear máscaras de autorización para listar un comando según sus flags
+        /**@type {Array<import('../Commons/cmdTags').CommandTagResolvable>}*/
+        // @ts-ignore
         const blockAuth = [
             isNotModerator(request.member) && 'MOD',
-            (request.author ?? request.user).id !== peopleid.papita && 'PAPA',
-            request.guild.id !== serverid.saki && 'HOURAI',
+            request.userId !== peopleid.papita && 'PAPA',
+            request.guildId !== serverid.saki && 'HOURAI',
         ].filter(f => f);
         
+        /**@type {Array<import('../Commons/cmdTags').CommandTagResolvable>}*/
+        // @ts-ignore
         const filters = ['meme', 'mod', 'papa', 'saki']
+            // @ts-ignore
             .filter(src => options.fetchFlag(args, src, { callback: src }))
             .map(f => f.toUpperCase());
         
-        let search = isSlash ? args.getString('comando') : (args[0] ?? null);
+        let search = CommandOptionSolver.asString(await options.fetchParam(args, 'comando'));
         let list = [];
         const embeds = [];
         const components = [];
@@ -63,14 +68,14 @@ const command = new CommandManager('ayuda', flags)
                         return false;
                     if(!filters.length) return true;
                     return filterExclusive
-                        ? filters.every(f => flags.has(f))
-                        : filters.some(f => flags.has(f));
+                        ? flags.has(filters)
+                        : flags.all(filters);
                 })();
                 if(filtered)
                     list.push(name);
             } else if([name, ...(aliases || [])].includes(search)) {
                 const title = s => {
-                    pfi = s.indexOf('-') + 1;
+                    const pfi = s.indexOf('-') + 1;
                     s = (flags.has('GUIDE')) ? `${s.slice(pfi)} (Página de Guía)`  : s;
                     s = (flags.has('MOD'))   ? `${s} (Mod)`                        : s;
                     s = (flags.has('PAPA'))  ? `${s.slice(pfi)} (Papita con Puré)` : s;
@@ -93,7 +98,7 @@ const command = new CommandManager('ayuda', flags)
                                     : ':label: Sin alias',
                                 inline: true,
                             },
-                            { name: 'Identificadores', value: flags.values.map(f => `\`${f}\``).join(', '), inline: true },
+                            { name: 'Etiquetas', value: flags.keys.map(f => `\`${f}\``).join(', '), inline: true },
                         )
                 );
                 
@@ -165,6 +170,7 @@ const command = new CommandManager('ayuda', flags)
         }
         return request.reply({
             embeds: embeds,
+            // @ts-ignore
             components,
         });
     });

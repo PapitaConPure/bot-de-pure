@@ -1,13 +1,13 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { p_pure } = require('../../localdata/config.json'); //Prefijos
 const { fetchUser } = require('../../func.js');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
-const flags = new CommandMetaFlagsManager().add(
+const flags = new CommandTags().add(
 	'PAPA',
 	'OUTDATED',
 );
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addFlag('u', 'usuario',  'para especificar el usuario al cual responder', 				 { name: 'u', type: 'USER' })
 	.addFlag('a', 'aceptar',  'para confirmar la aceptación de sugerencia')
 	.addFlag('p', 'problema', 'para reportar un problema con la expresión de la sugerencia', { name: 'txt', type: 'TEXT' });

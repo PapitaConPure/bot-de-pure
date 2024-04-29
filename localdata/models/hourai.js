@@ -26,4 +26,9 @@ const HouraiSchema = new Mongoose.Schema({
     },
 });
 
-module.exports = Mongoose.model('Hourai', HouraiSchema);
+const model = Mongoose.model('Hourai', HouraiSchema);
+
+function m() { return new model({}); }
+/**@typedef {ReturnType<(typeof m)>} HouraiDocument*/
+
+module.exports = model;

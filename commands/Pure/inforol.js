@@ -1,12 +1,14 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { fetchArrows, regroupText } = require('../../func');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandPermissions } = require('../Commons/cmdPerms.js');
 
-const options = new CommandOptionsManager()
+const perms = new CommandPermissions('ManageRoles');
+const options = new CommandOptions()
 	.addParam('términos', 'ROLE', 'para especificar los roles que quieres buscar', { poly: 'MULTIPLE', polymax: 8 })
 	.addFlag('xe', ['estricta', 'estricto', 'exclusivo'], 'para especificar si la búsqueda es estricta');
-const flags = new CommandMetaFlagsManager().add('MOD');
+const flags = new CommandTags().add('MOD');
 const command = new CommandManager('inforol', flags)
 	.setAliases(
 		'cuántos', 'cuantos', 'cuentarol',
@@ -19,6 +21,7 @@ const command = new CommandManager('inforol', flags)
 		'Devuelve el total de usuarios encontrados junto con una lista paginada de los mismos',
 		'Si la búsqueda es `--estricta`, solo se listarán los usuarios que tengan _todos_ los roles mencionados, en lugar de _uno o más_.',
 	)
+	.setPermissions(perms)
 	.setOptions(options)
 	.setExecution(async (request, args, isSlash) => {
 		if(!isSlash && args.length < 1)
