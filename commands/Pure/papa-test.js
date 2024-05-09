@@ -32,13 +32,13 @@ const command = new CommandManager('papa-test', tags)
 
         await request.deferReply({});
 
-        const texto = await args.getString('texto', true);
-        const usuario = await args.getUser('usuario', true);
-        const miembro = await args.getMember('miembro', true);
-        const canal = await args.getChannel('canal', true);
-        const mensaje = await args.getMessage('mensaje', true);
-        const rol = await args.getRole('rol', true);
-        const número = await args.getNumber('número');
+        const texto   = args.getString('texto');
+        const número  = args.getNumber('número');
+        const usuario = args.getUser('usuario');
+        const miembro = args.getMember('miembro');
+        const canal   = args.getChannel('canal');
+        const mensaje = await args.getMessage('mensaje');
+        const rol     = args.getRole('rol');
 
         console.log({
             texto,

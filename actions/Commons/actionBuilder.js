@@ -1,11 +1,9 @@
 const { ApplicationCommandType, Locale, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction } = require('discord.js');
-const { Translator, LocaleIds } = require('../../internationalization');
+const { Translator } = require('../../internationalization');
 
 /**
  * @typedef {'ChatInput' | 'Message' | 'User'} CommandTypes
- * @typedef {(interaction: ContextMenuCommandInteraction) => Promise<*>} ContextMenuAction
- * @typedef {(interaction: MessageContextMenuCommandInteraction) => Promise<*>} MessageContextMenuAction
- * @typedef {(interaction: UserContextMenuCommandInteraction) => Promise<*>} UserContextMenuAction
+ * @typedef {ContextMenuCommandInteraction<'cached'>|MessageContextMenuCommandInteraction<'cached'>|UserContextMenuCommandInteraction<'cached'>} ContextMenuAction
  */
 
 /**Representa una acción de menú contextual*/
@@ -16,12 +14,12 @@ class ContextMenuActionManager {
     localizations;
     /**@type {ApplicationCommandType}*/
     type;
-    /**@type {ContextMenuAction|MessageContextMenuAction|UserContextMenuAction}*/
+    /**@type {(interaction: ContextMenuAction) => Promise<*>}*/
     execute;
 
     /**
      * Crea una acción de menú contextual
-     * @param {LocaleIds} nameLocaleId ID de traducción del nombre único de la acción
+     * @param {import('../../internationalization').LocaleIds} nameLocaleId ID de traducción del nombre único de la acción
      * @param {CommandTypes} type Tipo de acción de menú contextual
      * @constructor
      */
@@ -36,20 +34,23 @@ class ContextMenuActionManager {
         this.localizations.set(Locale.EnglishGB, translation['en']);
     }
 
-    /** @param {ContextMenuAction} responseFn Acción a realizar al indicarse su ejecución*/
+    /** @param {ContextMenuCommandInteraction<'cached'>} responseFn Acción a realizar al indicarse su ejecución*/
     setResponse(responseFn) {
+        // @ts-expect-error
         this.execute = responseFn;
         return this;
     }
 
-    /** @param {MessageContextMenuAction} responseFn Acción a realizar al indicarse su ejecución*/
+    /** @param {MessageContextMenuCommandInteraction<'cached'>} responseFn Acción a realizar al indicarse su ejecución*/
     setMessageResponse(responseFn) {
+        // @ts-expect-error
         this.execute = responseFn;
         return this;
     }
 
-    /** @param {UserContextMenuAction} responseFn Acción a realizar al indicarse su ejecución*/
+    /** @param {UserContextMenuCommandInteraction<'cached'>} responseFn Acción a realizar al indicarse su ejecución*/
     setUserResponse(responseFn) {
+        // @ts-expect-error
         this.execute = responseFn;
         return this;
     }

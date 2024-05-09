@@ -11,12 +11,15 @@ const { CommandPermissions } = require('./cmdPerms');
  * @property {Message<Boolean>} initialReply The command's initial reply
  * @property {Boolean} isMessage Whether the command is a message command (true) or not (false)
  * @property {Boolean} isInteraction Whether the command is an interaction or Slash command (true) or not (false)
+ * 
  * @property {MessageActivity?} activity If the command is a message command, returns the message's activity (if any)
  * @property {Collection<Snowflake, Attachment>} attachments A collection of the command's attachments, if it's a message command and it has attachments
  * @property {Readonly<PermissionsBitField>} appPermisions The permissions of the application or bot in the current channel
+ * @property {Boolean} deferred
  * @property {Readonly<PermissionsBitField>} memberPermissions The permissions within the current channel of the member who started the command
  * @property {User} user The user who started the command
  * @property {String} userId The id of the user who started the command
+ * 
  * @property {(options?: InteractionDeferReplyOptions) => Promise<Message<Boolean>>} deferReply If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply
  * @property {() => Promise<Message<Boolean>>} delete Deletes the original message if the command is a message command
  * @property {() => Promise<Message<Boolean>>} deleteReply Deletes the initial reply
@@ -26,12 +29,13 @@ const { CommandPermissions } = require('./cmdPerms');
 /**@type {ExtendedCommandRequestPrototype}*/
 const extendedCommandRequestPrototype = {
     initialReply: undefined,
-    isMessage: false,
     isInteraction: false,
+    isMessage: false,
     
     activity: undefined,
     attachments: undefined,
     appPermisions: undefined,
+    deferred: undefined,
     memberPermissions: undefined,
     user: undefined,
     userId: undefined,
@@ -49,11 +53,12 @@ const extendedCommandRequestPrototype = {
 function extendRequest(request) {
     /**@type {ExtendedCommandRequestPrototype}*/
     const extension = Object.assign({}, extendedCommandRequestPrototype);
-
+    
     if(CommandManager.requestIsMessage(request)) {
         extension.isMessage = true;
 
         extension.appPermisions = request.guild.members.me.permissionsIn(request.channel);
+        extension.deferred = false;
         extension.memberPermissions = request.member.permissionsIn(request.channel);
         extension.user = request.author;
         extension.userId = request.author.id;
@@ -61,13 +66,19 @@ function extendRequest(request) {
         extension.deferReply = async(_) => {
             const initialReply = await request.reply({ content: '...' });
             extension.initialReply = initialReply;
+            extension.deferred = true;
             return initialReply;
         };
         extension.deleteReply = async() => extension.initialReply?.delete();
-        extension.editReply = async(options) => extension.initialReply?.edit(typeof options === 'string' ? options : { content: '', ...options });
+        extension.editReply = async(options) => {
+            if(extension.initialReply == undefined)
+                throw "No se encontró una respuesta inicial de comando a editar";
+            
+            return extension.initialReply.edit(typeof options === 'string' ? options : { content: '', ...options });
+        };
     } else {
         extension.isInteraction = true;
-
+        
         extension.activity = null;
         extension.attachments = new Collection();
         extension.userId = request.user.id;
@@ -87,7 +98,7 @@ function extendRequest(request) {
 /**
  * 
  * @param {ComplexCommandRequest} request El comando disparado, ya sea de mensaje o Slash
- * @param {CommandInteractionOptionResolver|Array<String>} args El administrador de opciones del comando
+ * @param {CommandArguments} args El administrador de opciones del comando
  * @param {Boolean} [isSlash] Si es un comando Slash (true) o no (false)
  * @param {String} [rawArgs] Argumentos sin modificar, como una sola cadena
  * @returns {Promise<*>}

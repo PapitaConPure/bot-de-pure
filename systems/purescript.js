@@ -9,16 +9,6 @@ const { declareNatives, declareContext } = require('./ps/psnatives.js');
 const { TuberScope } = require('./ps/psscope.js');
 const { makeValue } = require('./ps/commons.js');
 
-function tuberExecute(input) {
-    const lexer = new TuberLexer();
-    const tokens = lexer.tokenize(input);
-    const parser = new TuberParser(tokens);
-    const program = parser.parse();
-    const interpreter = new TuberInterpreter(program);
-
-    return interpreter.evaluateProgram();
-}
-
 const logOptions = {
     lexer: false,
     parser: false,
@@ -26,18 +16,66 @@ const logOptions = {
 };
 
 //#region Esqueleto de PuréScript
-/**Evalua el tipo de Tubérculo (básico o avanzado) y lo ejecuta. Si es avanzado, se ejecutará con PuréScript
- * @typedef {{tuberId?: String, author: String, content?: String | null, files?: Array<String>, script?: String, inputs?: Array<{identifier: String, required: Boolean, desc: String}>}} Tubercle
- * @function
- * @param {import("../commands/Commons/typings").CommandRequest} request
- * @param {Tubercle} tuber 
- * @param {{ args: Array<String>, isSlash: Boolean }} inputOptions
+/**
+ * @typedef {Object} TuberExecutionInputs
+ * @property {String} name
+ * @property {import('./ps/commons.js').RuntimeType} type
+ * @property {Boolean} required
+ * @property {String} [desc]
  */
-const executeTuber = async (request, tuber, { tuberArgs }) => {
-    const replyFn = request.editReply ?? request.reply;
+/**
+ * @typedef {Object} BaseTubercle
+ * @property {String} tuberId
+ * @property {String} author
+ * @property {Array<TuberExecutionInputs>} [inputs]
+ */
+/**
+ * @typedef {Object} PartialBasicTubercleData
+ * @property {String?} [content]
+ * @property {Array<String>} [files]
+ * @typedef {import('types').RequireAtLeastOne<PartialBasicTubercleData>} BasicTubercleData
+ */
+/**
+ * @typedef {Object} AdvancedTubercleData
+ * @property {undefined} [content]
+ * @property {undefined} [files]
+ * @property {String} script
+ */
+/**
+ * @typedef {BaseTubercle & BasicTubercleData} BasicTubercle
+ * @typedef {BaseTubercle & AdvancedTubercleData} AdvancedTubercle
+ */
+/**
+ * @typedef {BasicTubercle | AdvancedTubercle} Tubercle
+ */
+/**
+ * 
+ * @param {Tubercle} tuber 
+ * @returns {tuber is AdvancedTubercle}
+ */
+function isAdvanced(tuber) {
+    return tuber.content == undefined
+        && tuber.files == undefined
+        && /**@type {AdvancedTubercle}*/(tuber).script != undefined;
+}
 
-    if(!tuber.script)
-        return replyFn.call(request, {
+/**
+ * @typedef {Object} TuberExecutionOptions
+ * @property {Array<String>} [args]
+ * @property {Boolean} isTestDrive
+ */
+/**
+ * Evalua el tipo de Tubérculo (básico o avanzado) y lo ejecuta. Si es avanzado, se ejecutará con PuréScript
+ * @function
+ * @param {import("../commands/Commons/typings").ComplexCommandRequest} request
+ * @param {Tubercle} tuber 
+ * @param {TuberExecutionOptions} [inputOptions]
+ */
+async function executeTuber(request, tuber, inputOptions) {
+    const { args, isTestDrive } = (inputOptions ?? {});
+
+    if(!isAdvanced(tuber))
+        return request.editReply({
             content: tuber.content,
             files: tuber.files,
         }).catch(console.error);
@@ -55,10 +93,10 @@ const executeTuber = async (request, tuber, { tuberArgs }) => {
 
         const scope = new TuberScope();
         declareNatives(scope);
-        await declareContext(scope, request, tuber, tuberArgs);
+        await declareContext(scope, request, tuber, args);
 
         const interpreter = new TuberInterpreter();
-        result = interpreter.evaluateProgram(program, scope, request, tuberArgs == undefined);
+        result = interpreter.evaluateProgram(program, scope, request, isTestDrive);
         if(!result.sendStack.length) {
             const error = Error('No se envió ningún mensaje');
             error.name = 'TuberSendError';
@@ -110,14 +148,14 @@ const executeTuber = async (request, tuber, { tuberArgs }) => {
             embed.setColor(Colors.Red);
 
         replyContent.embeds = [embed];
-        await replyFn.call(request, replyContent);
+        await request.editReply(replyContent);
         throw error;
     }
 
     let { sendStack, inputStack } = result;
     
     if(!sendStack.length) {
-        await replyFn.call(request, { content: `⚠️ Se esperaba un envío de mensaje` });
+        await request.editReply({ content: `⚠️ Se esperaba un envío de mensaje` });
         throw Error('Se esperaba un envío de mensaje');
     }
 
@@ -141,22 +179,23 @@ const executeTuber = async (request, tuber, { tuberArgs }) => {
     }
 
     if(replyObject.content.length)
+        //@ts-expect-error
         replyObject.content = replyObject.content.join('\n');
     else
         delete replyObject.content;
-
+    
+    //@ts-expect-error
     tuber.inputs = inputStack;
 
-    return replyFn.call(request, replyObject).catch(async () => {
-        await replyFn.call(request, { content: `⚠️ No se puede enviar el mensaje. Revisa el largo y la validez de los datos` });
+    return request.editReply(replyObject).catch(async () => {
+        await request.editReply({ content: `⚠️ No se puede enviar el mensaje. Revisa el largo y la validez de los datos` });
         throw Error('Envío inválido');
-    })
+    });
 };
 
 module.exports = {
     TuberLexer,
     TuberParser,
     TuberInterpreter,
-    tuberExecute,
     executeTuber,
 };

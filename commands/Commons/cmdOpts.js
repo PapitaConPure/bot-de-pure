@@ -1,5 +1,5 @@
 const { User, GuildMember, Message, TextChannel, VoiceChannel, GuildChannel, CommandInteractionOptionResolver, BaseGuildTextChannel, BaseGuildVoiceChannel, ChannelType, Role } = require('discord.js');
-const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole } = require('../../func');
+const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSentence } = require('../../func');
 
 /**
  * @typedef {{name: String, expression: String|Number}} ParamTypeStrict Parámetros de CommandOption que siguen una sintaxis estricta
@@ -7,7 +7,7 @@ const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole } = requir
  * @typedef {BaseParamType|ParamTypeStrict} ParamType Tipos de parámetro de CommandOption
  * @typedef {'SINGLE'|'MULTIPLE'|Array<String>} ParamPoly Capacidad de entradas de parámetro de CommandOption
  * @typedef {'getBoolean'|'getString'|'getNumber'|'getInteger'|'getChannel'|'getMessage'|'getUser'|'getMember'|'getRole'|'getAttachment'} GetMethodName
- * @typedef {Number | String | User | GuildMember | GuildChannel | Message<Boolean> | Role | undefined} ParamResult
+ * @typedef {Number | String | User | GuildMember | import('discord.js').GuildBasedChannel | Message<Boolean> | Role | undefined} ParamResult
  */
 
 /**
@@ -55,12 +55,13 @@ const fetchMessageFlagText = (args, i) => {
 }
 
 /**
- * @typedef {(value, isSlash: Boolean) => *} FlagCallback
+ * @template [T=*]
+ * @typedef {(value: any, isSlash: Boolean) => T} FlagCallback
  */
 /**
  * @typedef {Object} FeedbackOptions
- * @property {FlagCallback|number|string|boolean|bigint|object} [callback]
- * @property {*} [fallback]
+ * @property {FlagCallback|number|string|boolean|bigint|object} [callback] Una función de mapeo de retorno o un valor de retorno positivo
+ * @property {*} [fallback] Un valor de retorno negativo
  */
 /**
  * @typedef {Object} FetchMessageFlagOptions
@@ -552,7 +553,29 @@ class CommandOptions {
         if(CommandOptions.requestDependantTypes.includes(type.toString()) && !this.#request)
             throw ReferenceError('Se requiere un contexto para realizar este fetch. Usa <CommandOptions>.in(request)');
 
-        const argsPrototype = whole ? args.join(' ') : args.shift();
+        const getArgsPrototype = () => (whole ? args.join(' ') : fetchSentence(args, 0)) || undefined;
+        
+        if(isParamTypeStrict(type))
+            return getArgsPrototype();
+
+        if(type === 'MESSAGE')
+            return fetchMessage(getArgsPrototype(), this.#request);
+
+        return this.fetchMessageParamSync(args, type, whole);
+    }
+
+    /**
+     * Remueve y devuelve la siguiente entrada o devuelve todas las entradas en caso de que {@linkcode whole} sea verdadero
+     * @param {Array<String>} args El conjunto de entradas
+     * @param {ParamType} type El tipo de entrada buscado
+     * @param {Boolean} whole Indica si devolver todas las entradas o no
+     * @returns {ParamResult}
+     */
+    fetchMessageParamSync(args, type, whole = false) {
+        if(CommandOptions.requestDependantTypes.includes(type.toString()) && !this.#request)
+            throw ReferenceError('Se requiere un contexto para realizar este fetch. Usa <CommandOptions>.in(request)');
+
+        const argsPrototype = whole ? args.join(' ') : fetchSentence(args, 0);
         if(!argsPrototype) return;
         
         if(isParamTypeStrict(type))
@@ -563,17 +586,24 @@ class CommandOptions {
         case 'MEMBER':
             return fetchMember(argsPrototype, this.#request);
         case 'ROLE':
-            return fetchRole(argsPrototype, this.#request.guild); //Pendiente
+            return fetchRole(argsPrototype, this.#request.guild);
         case 'MESSAGE':
-            // @ts-ignore
-            return fetchMessage(argsPrototype, this.#request);
+            throw 'Los parámetros de mensaje solo pueden ser manejados mediante promesas';
         case 'CHANNEL':
-            // @ts-ignore
-            return fetchChannel(argsPrototype, this.#request.guild); //Pendiente
+            return fetchChannel(argsPrototype, this.#request.guild);
         case 'IMAGE':
-            return argsPrototype; //Pendiente
+            return argsPrototype;
         case 'NUMBER':
-            return +argsPrototype;
+            //No quiero pelotudeces con números de JavaScript por favor
+            if(argsPrototype == undefined)
+                return;
+
+            const correctedNumber = argsPrototype
+                .replace(/,/g, '.')
+                .replace(/_+/g, '')
+                .replace(/^([\d\.]+) .*/, '$1');
+
+            return +correctedNumber;
         default:
             return argsPrototype;
         }
@@ -680,7 +710,6 @@ class CommandOptions {
         return params.length ? params : [ (typeof fallback === 'function') ? fallback() : fallback ];
     };
 
-
     /**
      * Devuelve un valor o función basado en si se ingresó la flag buscada o no.
      * Si no se recibe ninguna entrada, se devuelve fallback.
@@ -758,12 +787,12 @@ class CommandOptionSolver {
 
     //#region What is "this"
     /**@returns {args is Array<String>}*/
-    isMessageSolver(args) {
+    isMessageSolver(args = undefined) {
         return !this.#isSlash;
     }
 
     /**@returns {args is CommandInteractionOptionResolver}*/
-    isInteractionSolver(args) {
+    isInteractionSolver(args = undefined) {
         return this.#isSlash;
     }
     //#endregion
@@ -771,46 +800,46 @@ class CommandOptionSolver {
     //#region Getters
     /**
      * @param {String} identifier 
-     * @param {Boolean} getRestOfMessageWords 
+     * @param {Boolean} [getRestOfMessageWords=false] 
      */
-    async getString(identifier, getRestOfMessageWords) {
+    getString(identifier, getRestOfMessageWords = false) {
         if(this.isInteractionSolver(this.#args))
             return this.#args.getString(identifier);
 
-        const result = await this.#getResultFromParam(identifier, getRestOfMessageWords);
+        const result = this.#getResultFromParamSync(identifier, getRestOfMessageWords);
         return CommandOptionSolver.asString(result);
     }
 
     /**
      * @param {String} identifier 
      */
-    async getNumber(identifier) {
+    getNumber(identifier) {
         if(this.isInteractionSolver(this.#args))
             return this.#args.getNumber(identifier);
 
-        const result = await this.#getResultFromParam(identifier, false);
+        const result = this.#getResultFromParamSync(identifier, false);
         return CommandOptionSolver.asNumber(result);
     }
 
     /**
      * @param {String} identifier 
-     * @param {Boolean} getRestOfMessageWords 
+     * @param {Boolean} [getRestOfMessageWords=false] 
      */
-    async getUser(identifier, getRestOfMessageWords) {
+    getUser(identifier, getRestOfMessageWords = false) {
         if(this.isInteractionSolver(this.#args))
             return this.#args.getUser(identifier);
 
         this.ensureRequistified();
 
-        const result = await this.#getResultFromParam(identifier, getRestOfMessageWords);
+        const result = this.#getResultFromParamSync(identifier, getRestOfMessageWords);
         return CommandOptionSolver.asUser(result);
     }
 
     /**
      * @param {String} identifier 
-     * @param {Boolean} getRestOfMessageWords 
+     * @param {Boolean} [getRestOfMessageWords=false] 
      */
-    async getMember(identifier, getRestOfMessageWords) {
+    getMember(identifier, getRestOfMessageWords = false) {
         if(this.isInteractionSolver(this.#args)) {
             const member = this.#args.getMember(identifier);
 
@@ -822,16 +851,15 @@ class CommandOptionSolver {
 
         this.ensureRequistified();
 
-        const result = await this.#getResultFromParam(identifier, getRestOfMessageWords);
+        const result = this.#getResultFromParamSync(identifier, getRestOfMessageWords);
         return CommandOptionSolver.asMember(result);
     }
 
     /**
      * @param {String} identifier 
-     * @param {Boolean} getRestOfMessageWords 
-     * @returns {Promise<GuildChannel>}
+     * @param {Boolean} [getRestOfMessageWords=false] 
      */
-    async getChannel(identifier, getRestOfMessageWords) {
+    getChannel(identifier, getRestOfMessageWords = false) {
         if(this.isInteractionSolver(this.#args)) {
             const channel = this.#args.getChannel(identifier);
             const valid = channel instanceof GuildChannel;
@@ -843,15 +871,15 @@ class CommandOptionSolver {
 
         this.ensureRequistified();
 
-        const result = await this.#getResultFromParam(identifier, getRestOfMessageWords);
+        const result = this.#getResultFromParamSync(identifier, getRestOfMessageWords);
         return CommandOptionSolver.asChannel(result);
     }
 
     /**
      * @param {String} identifier 
-     * @param {Boolean} getRestOfMessageWords 
+     * @param {Boolean} [getRestOfMessageWords=false] 
      */
-    async getMessage(identifier, getRestOfMessageWords) {
+    async getMessage(identifier, getRestOfMessageWords = false) {
         if(this.isInteractionSolver(this.#args)) {
             const message = this.#args.getMessage(identifier);
             
@@ -869,9 +897,9 @@ class CommandOptionSolver {
 
     /**
      * @param {String} identifier 
-     * @param {Boolean} getRestOfMessageWords 
+     * @param {Boolean} [getRestOfMessageWords] 
      */
-    async getRole(identifier, getRestOfMessageWords) {
+    getRole(identifier, getRestOfMessageWords = false) {
         if(this.isInteractionSolver(this.#args)) {
             const role = this.#args.getRole(identifier);
 
@@ -883,12 +911,80 @@ class CommandOptionSolver {
 
         this.ensureRequistified();
 
-        const result = await this.#getResultFromParam(identifier, getRestOfMessageWords);
+        const result = this.#getResultFromParamSync(identifier, getRestOfMessageWords);
         return CommandOptionSolver.asRole(result);
+    }
+
+    /**
+     * Devuelve `true` si se ingresó la bandera especificada, o `false` de lo contrario
+     * @param {string} identifier
+     */
+    parseFlag(identifier) {
+        return CommandOptionSolver.asBoolean(
+            this.#options.fetchFlag(
+                this.#args,
+                identifier,
+                {
+                    callback: true,
+                    fallback: false,
+                },
+            )
+        );
+    }
+
+    /**
+     * Devuelve {@linkcode P} si se ingresó la bandera especificada, o {@linkcode N} de lo contrario
+     * @template P
+     * @template N
+     * @param {string} identifier
+     * @param {P} positiveResult
+     * @param {N} [negativeResult]
+     * @returns {P|N}
+     */
+    parseFlagExt(identifier, positiveResult, negativeResult = undefined) {
+        return this.#options.fetchFlag(
+            this.#args,
+            identifier,
+            {
+                callback: positiveResult,
+                fallback: negativeResult,
+            },
+        );
+    }
+
+    /**
+     * Devuelve {@linkcode P} si se ingresó la bandera especificada, o {@linkcode N} de lo contrario
+     * @template P
+     * @template N
+     * @param {string} identifier
+     * @param {FlagCallback<P>} callback
+     * @param {N} [fallback]
+     * @returns {ReturnType<FlagCallback<P>>|N}
+     */
+    parseFlagExpr(identifier, callback, fallback = undefined) {
+        return this.#options.fetchFlag(
+            this.#args,
+            identifier,
+            {
+                callback,
+                fallback,
+            },
+        );
     }
     //#endregion
 
     //#region Casters
+    /**
+     * @param {ParamResult} paramResult The ParamResult to treat
+     * @returns {Boolean|undefined}
+     */
+    static asBoolean(paramResult) {
+        if(paramResult == undefined) return;
+        if(typeof paramResult !== 'boolean')
+            throw `Se esperaba el tipo de parámetro: Boolean, pero se recibió: ${typeof paramResult}`;
+        return paramResult;
+    }
+
     /**
      * @param {ParamResult} paramResult The ParamResult to treat
      * @returns {String|undefined}
@@ -1026,9 +1122,30 @@ class CommandOptionSolver {
 
     /**
      * @param {String} identifier 
-     * @param {Boolean} getRestOfMessageWords 
+     * @param {Boolean} [getRestOfMessageWords=false] 
      */
-    async #getResultFromParam(identifier, getRestOfMessageWords) {
+    #getResultFromParamSync(identifier, getRestOfMessageWords = false) {
+        if(!this.isMessageSolver(this.#args))
+            throw "Se esperaban argumentos de comando de mensaje";
+
+        const arrArgs = this.#args;
+
+        const option = this.#options.options.get(identifier);
+        if(!option.isCommandParam())
+            throw "Se esperaba un identificador de parámetro de comando";
+
+        if(Array.isArray(option._type)) {
+            const results = option._type.map(pt => this.#options.fetchMessageParamSync(arrArgs, pt, getRestOfMessageWords));
+            return results.find(r => r);
+        } else
+            return this.#options.fetchMessageParamSync(arrArgs, option._type, getRestOfMessageWords);
+    }
+
+    /**
+     * @param {String} identifier 
+     * @param {Boolean} [getRestOfMessageWords=false] 
+     */
+    async #getResultFromParam(identifier, getRestOfMessageWords = false) {
         if(!this.isMessageSolver(this.#args))
             throw "Se esperaban argumentos de comando de mensaje";
 

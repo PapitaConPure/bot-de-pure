@@ -1,17 +1,19 @@
-const { TuberInterpreterError, ProgramType, PropertyValue, RuntimeValue, NumericValue, TextValue, BooleanValue, ListValue, GlossaryValue, NadaValue, NativeFunctionValue, makeList, makeGlossary, makeBoolean, makeNumber, makeText, isNada, makeNada, makeEmbed } = require('./commons.js');
+
+
+const { TuberInterpreterError, makeList, makeGlossary, makeBoolean, makeNumber, makeText, isNada, makeNada, makeEmbed, makeFunction } = require('./commons.js');
 
 /**@class Representa un ámbito del programa de PuréScript*/
 class TuberScope {
-    /**@type {TuberScope?}*/
+    /**@type {TuberScope|undefined}*/
     #parent;
-    /**@type {Map<String, RuntimeValue>}*/
+    /**@type {Map<String, import('./commons.js').RuntimeValue>}*/
     variables;
     /**@type {{ number: Number, name: String }}*/
     #currentStatement;
 
     /**
      * @constructor
-     * @param {TuberScope?} parent 
+     * @param {TuberScope} [parent] 
      */
     constructor(parent) {
         this.#parent = parent;
@@ -21,22 +23,21 @@ class TuberScope {
     /**
      * Declara una variable
      * @param {String} identifier El nombre bajo el cual se declarará la variable
-     * @param {ProgramType} type
-     * @returns {RuntimeValue} El valor de la variable
+     * @param {import('./commons.js').RuntimeType} type
+     * @returns {import('./commons.js').RuntimeValue} El valor de la variable
      */
     declareVariable(identifier, type) {
         if(this.variables.has(identifier))
             throw TuberInterpreterError(`El identificador "${identifier}" ya estaba declarado`, this.#currentStatement);
 
         let value;
-
-        // console.log('Hola buenas soy tipado con puré', type);
+        
         switch(type) {
         case 'Number':
-            value = makeNumber(null);
+            value = makeNumber(0);
             break;
         case 'Text':
-            value = makeText(null);
+            value = makeText('');
             break;
         case 'Boolean':
             value = makeBoolean(false);
@@ -50,6 +51,9 @@ class TuberScope {
         case 'Embed':
             value = makeEmbed();
             break;
+        case 'Function':
+            value = makeFunction([], []);
+            break;
         default:
             value = makeNada();
         }
@@ -61,8 +65,8 @@ class TuberScope {
     /**
      * Declara una variable
      * @param {String} identifier El nombre bajo el cual se declarará la variable
-     * @param {String} target El identificador al que refleja el anterior
-     * @returns {RuntimeValue} El valor de la variable
+     * @param {import('./commons.js').ParserIdentifierNode} target El identificador al que refleja el anterior
+     * @returns {import('./commons.js').RuntimeValue} El valor de la variable
      */
     declareMirror(identifier, target) {
         if(this.variables.has(identifier))
@@ -75,8 +79,8 @@ class TuberScope {
     /**
      * Asigna una variable
      * @param {String} identifier El nombre de la variable
-     * @param {RuntimeValue | NativeFunctionValue} value El valor de la variable
-     * @returns {RuntimeValue | NativeFunctionValue} El valor de la variable
+     * @param {import('./commons.js').RuntimeValue | import('./commons.js').NativeFunctionValue} value El valor de la variable
+     * @returns {import('./commons.js').RuntimeValue | import('./commons.js').NativeFunctionValue} El valor de la variable
      */
     assignVariable(identifier, value) {
         // console.log('assignVariable:', identifier, value);
@@ -109,7 +113,7 @@ class TuberScope {
     /**
      * Busca una variable o función y devuelve el valor
      * @param {String} identifier
-     * @returns {RuntimeValue}
+     * @returns {import('./commons.js').RuntimeValue}
      */
     lookup(identifier, mustBeDeclared = true) {
         // console.log('lookup:', identifier);
@@ -129,7 +133,8 @@ class TuberScope {
     /**
      * Resuelve un ámbito que contenga la variable o función mencionada
      * @param {String} identifier
-     * @param {String} mustBeDeclared
+     * @param {Boolean} [mustBeDeclared]
+     * @param {Boolean} [considerMirrors]
      * @returns {TuberScope}
      */
     resolve(identifier, mustBeDeclared = true, considerMirrors = true) {
@@ -137,7 +142,7 @@ class TuberScope {
         const variable = this.variables.get(identifier);
         // console.log('resolve.variable:', variable);
         if(variable) {
-            if(considerMirrors && variable?.type === 'Identifier')
+            if(considerMirrors && variable.type === 'Identifier')
                 return this.#parent?.resolve(variable.name, mustBeDeclared, considerMirrors);
             // console.log('Fin de resolve');
 

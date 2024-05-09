@@ -38,6 +38,7 @@
     },
     "maintenance": "",
     "seed": 0,
+    "startupTime": 0,
     "lechitauses": 0,
     "tenshiColor": 6327283,
     "serverid": {
@@ -57,12 +58,21 @@
     "peopleid": {
         "papita": "423129757954211880"
     },
-    "slots": {},
+    "slots": {
+        "slot1": null,
+        "slot2": null,
+        "slot3": null
+    },
+    "logch": null,
+
+    "reportFormUrl": "https://forms.gle/tHFXxbsTmuJTQm1z7",
     "booruCredentials": {
         "apiKey": "",
         "userId": ""
     },
-    "reportFormUrl": "https://forms.gle/tHFXxbsTmuJTQm1z7",
+
+    "pureTableImage": null,
+    "loademotes": {},
     
     "hourai": {
         "config": {

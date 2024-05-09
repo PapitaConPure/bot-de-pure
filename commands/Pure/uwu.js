@@ -1,4 +1,4 @@
-const { rand } = require('../../func');
+const { randInArray } = require('../../func');
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
 const uwusopt = [
@@ -21,14 +21,19 @@ const command = new CommandManager('uwu', flags)
 	.setAliases('uwu')
 	.setLongDescription('uwu')
 	.setOptions(options)
-	.setExecution(async (request, args) => {
-		const deleteOriginal = options.fetchFlag(args, 'borrar');
-		const randomUwu = uwusopt[rand(uwusopt.length)];
+	.setExperimental(true)
+	.setExperimentalExecution(async (request, args) => {
+		const deleteOriginal = args.parseFlag('borrar');
+		const randomUwu = randInArray(uwusopt);
 		
-		if(deleteOriginal)
-			request.delete().catch(console.error)
-		
-		return request.reply({ content: randomUwu });
+		if(deleteOriginal && args.isMessageSolver()) {
+			return Promise.all([
+				request.channel.send({ content: randomUwu }).catch(console.error),
+				request.delete().catch(console.error),
+			]);
+		}
+
+		return request.reply({ content: randomUwu }).catch(console.error);
 	});
 
 module.exports = command;

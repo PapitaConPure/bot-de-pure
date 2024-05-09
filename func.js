@@ -8,6 +8,7 @@ const { colorsRow } = require('./localdata/houraiProps');
 const { ButtonStyle, ChannelType } = require('discord.js');
 const { fetchUserCache } = require('./usercache');
 const Hourai = require('./localdata/models/hourai');
+const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } = require('./tsCasts');
 const concol = {
     orange: chalk.rgb(255, 140, 70),
     purple: chalk.rgb(158, 114,214),
@@ -23,25 +24,29 @@ module.exports = {
      */
     paginateRaw: function(array, pagemax = 10) {
         if(!Array.isArray(array))
+            // @ts-ignore
             array = [...array.entries()];
 
 		return array
+            // @ts-ignore
             .map((_, i) => (i % pagemax === 0) ? array.slice(i, i + pagemax) : null)
             .filter(item => item);
     },
 
     /**
+     * @typedef {Object} PaginateOptions
+     * @property {Number} [pagemax]
+     * @property {Function} [format]
+     */
+    /**
      * @param {Array | Discord.Collection} array 
-     * @param {{
-     *  pagemax: Number?,
-     *  format: Function?,
-     * }} itemsOptions 
+     * @param {PaginateOptions} itemsOptions 
      * @returns {Array<Array<*>>}
      */
     paginate: function(array, itemsOptions = { pagemax: 10, format: item => `\`${item.name.padEnd(24)}\`${item}` }) {
         const { pagemax, format } = itemsOptions;
-		return module.exports.paginateRaw(array, pagemax)
-            .map(page => page.map(format).join('\n'));
+        const paginated = module.exports.paginateRaw(array, pagemax);
+		return paginated.map(page => page.map(format).join('\n'));
     },
     //#endregion
 
@@ -99,6 +104,7 @@ module.exports = {
         await canal.send({
             content: `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:1107843515385389128>`,
             files: [global.hourai.images.colors],
+            // @ts-ignore
             components: [colorsRow],
         });
         setTimeout(module.exports.forceRole, 1000, miembro, canal, 2 * reps);
@@ -240,27 +246,31 @@ module.exports = {
     },
 
     /**
+     * @typedef {Object} CanvasAvatarDrawOptions
+     * @property {String} [circleStrokeColor]
+     * @property {Number} [circleStrokeFactor]
+     */
+    /**
      * Dibuja un avatar circular con Node Canvas
-     * @param {Canvas.NodeCanvasRenderingContext2D} ctx El Canvas context2D utilizado
+     * @param {import('canvas').CanvasRenderingContext2D} ctx El Canvas context2D utilizado
      * @param {Discord.User} user El usuario del cual dibujar la foto de perfil
      * @param {Number} xcenter La posición X del centro del círculo
      * @param {Number} ycenter La posición Y del centro del círculo
      * @param {Number} radius El radio del círculo
-     * @param {{
-     *  circleStrokeColor: String='#000000', 
-     *  circleStrokeFactor: Number=0.02,
-     * }} options 
+     * @param {CanvasAvatarDrawOptions} options 
      * @returns {Promise<void>}
      */
-    dibujarAvatar: async function(ctx, user, xcenter, ycenter, radius, options = { circleStrokeColor: '#000000', circleStrokeFactor: 0.02 }) {
+    dibujarAvatar: async function(ctx, user, xcenter, ycenter, radius, options = {}) {
+        options.circleStrokeColor ??= '#000000';
+        options.circleStrokeFactor ??= 0.02;
         //Fondo
         ctx.fillStyle = '#36393f';
         ctx.arc(xcenter, ycenter, radius, 0, Math.PI * 2, true);
         ctx.fill();
 
         //Foto de perfil
-        ctx.strokeStyle = options.strokeColor;
-        ctx.lineWidth = radius * 0.33 * options.strokeFactor;
+        ctx.strokeStyle = options.circleStrokeColor;
+        ctx.lineWidth = radius * 0.33 * options.circleStrokeFactor;
         ctx.arc(xcenter, ycenter, radius + ctx.lineWidth, 0, Math.PI * 2, true);
         ctx.stroke();
         ctx.save();
@@ -283,7 +293,7 @@ module.exports = {
         //Dar bienvenida a un miembro nuevo de un servidor
         const servidor = miembro.guild; //Servidor
 
-        const canal = servidor.channels.cache.get(servidor.systemChannelId); //Canal de mensajes de sistema
+        const canal = servidor.systemChannel; //Canal de mensajes de sistema
         //#region Comprobación de miembro y servidor
         if(canal === undefined) {
             console.log(chalk.blue('El servidor no tiene canal de mensajes de sistema.'));
@@ -359,6 +369,7 @@ module.exports = {
         const peoplecnt = members.filter(member => !member.user.bot).size;
         if(forceHourai || servidor.id === global.serverid.saki) {
             const hourai = await Hourai.findOne() || new Hourai();
+            //@ts-expect-error
             if(hourai.configs?.bienvenida == false)
                 return;
             
@@ -370,6 +381,7 @@ module.exports = {
                 'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:1107847991580164106>',
             ];
 
+            //@ts-expect-error
             if(hourai.configs?.pingBienvenida)
                 toSend.push('<@&1107831054791876694>, vengan a saludar po maricones <:hl:797294230359375912><:miyoi:1107848008005062727><:hr:797294230463840267>');
 
@@ -380,6 +392,7 @@ module.exports = {
 
             return canal.send({
                 content: toSend.join('\n'),
+                // @ts-expect-error
                 components: [colorsRow],
             }).then(sent => {
                 setTimeout(module.exports.askForRole, 1000, miembro, canal, 3 * 4);
@@ -405,7 +418,7 @@ module.exports = {
     dibujarDespedida: async function(miembro) {
         //Dar despedida a ex-miembros de un servidor
         const servidor = miembro.guild;
-        const canal = servidor.channels.cache.get(servidor.systemChannelId);
+        const canal = servidor.systemChannel;
 
         //#region Comprobación de miembro y servidor
         if(!canal) {
@@ -457,6 +470,7 @@ module.exports = {
         const peoplecnt = members.filter(member => !member.user.bot).size;
         if(servidor.id === global.serverid.saki) {
             const hourai = await Hourai.findOne() || new Hourai();
+            //@ts-expect-error
             if(hourai.configs?.despedida == false)
                 return;
 
@@ -493,16 +507,23 @@ module.exports = {
     },
     
     /**
+     * @typedef {Object} FetchUserContext
+     * @property {Discord.Guild} [guild] La guild de la que se quiere obtener un mensaje
+     * @property {Discord.Client} [client] El canal del que se quiere obtener un mensaje
+     */
+    /**
      * Busca un usuario basado en la data ingresada.
      * Devuelve el usuario que más coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún usuario, se devuelve undefined.
      * @param {Discord.User | String} data 
-     * @param {{ guild: Discord.Guild, client: Discord.BaseClient }} param1 
+     * @param {FetchUserContext} context 
      * @returns { Discord.User }
      */
-    fetchUser: function(data, { guild, client }) {
-        if(!data) return;
+    fetchUser: function(data, context) {
+        if(!data || !context) return;
+        let { guild, client } = context;
         if(!guild || !client) throw 'Se requiere la guild actual y el cliente en búsqueda de usuario';
-        if(data.username) return data;
+        if(typeof data !== 'string')
+            return data.username ? data : undefined;
         
         const uc = client.users.cache;
         //console.log(`Buscando: ${data}`);
@@ -511,7 +532,7 @@ module.exports = {
         
         //Prioridad 1: Intentar encontrar por ID
         //console.log('Prioridad 1 alcanzada');
-        if(!isNaN(data)) return uc.find(u => u.id === data);
+        if(!isNaN(+data)) return uc.find(u => u.id === data);
 
         //Prioridad 2: Intentar encontrar por tag
         //console.log('Prioridad 2 alcanzada');
@@ -522,6 +543,7 @@ module.exports = {
         //Prioridad 3: Intentar encontrar por nombre de usuario en guild actual
         //console.log('Prioridad 3 alcanzada: nombres de usuario en servidor');
         const cmpnames = (a, b) => (a.toLowerCase().indexOf(data) <= b.toLowerCase().indexOf(data) && a.length <= b.length);
+        /**@type {*}*/
         let people = guild.members.cache.map(m => m.user).filter(u => u.username.toLowerCase().indexOf(data) !== -1);
         if(people.length)
             return people
@@ -534,7 +556,7 @@ module.exports = {
         if(people.size)
             return people
                 .sort()
-                .reduce((a, b) => cmpnames(a.nickname, b.nickname)?a:b)
+                .reduce((a, b) => cmpnames(a.nickname, b.nickname) ? a : b)
                 .user;
         
         //Prioridad 5: Intentar encontrar por nombre de usuario en cualquier guild
@@ -543,7 +565,7 @@ module.exports = {
         if(people.size)
             return people
                 .sort()
-                .reduce((a, b) => cmpnames(a.username, b.username)?a:b);
+                .reduce((a, b) => cmpnames(a.username, b.username) ? a : b);
 
         //Búsqueda sin resultados
         //console.log('Sin resultados');
@@ -554,11 +576,12 @@ module.exports = {
      * Busca un usuario basado en la data ingresada.
      * Devuelve el usuario que más coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún usuario, se devuelve undefined.
      * @param {String} data 
-     * @param {{ guild: Discord.Guild, client: Discord.Client }} param1 
+     * @param {FetchUserContext} context 
      * @returns { Discord.GuildMember }
      */
-    fetchMember: function(data, { guild: thisGuild, client }) {
-        if(!data) return;
+    fetchMember: function(data, context) {
+        if(!data || !context) return;
+        let { guild: thisGuild, client } = context;
         if(!thisGuild || !client) throw 'Se requiere la guild actual y el cliente en búsqueda de miembro';
         // console.time('Buscar miembro');
         
@@ -567,7 +590,7 @@ module.exports = {
         
         //Prioridad 1: Intentar encontrar por ID o tag
         let searchFn = (m) => m.id === data
-        if(isNaN(data)) {
+        if(isNaN(+data)) {
             data = data.toLowerCase();
             searchFn = (m) => m.tag.toLowerCase();
         }
@@ -613,11 +636,11 @@ module.exports = {
      * Busca un usuario basado en la data ingresada.
      * Devuelve la ID del usuario que más coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún usuario, se devuelve undefined.
      * @param {String} data 
-     * @param {{ guild: Discord.Guild, client: Discord.BaseClient }} param1 
+     * @param {FetchUserContext} context 
      * @returns {String}
      */
-    fetchUserID: function(data, { guild, client }) {
-        const user = module.exports.fetchUser(data, { guild, client });
+    fetchUserID: function(data, context) {
+        const user = module.exports.fetchUser(data, context);
         return (user === undefined) ? undefined : user.id;
     },
 
@@ -626,7 +649,7 @@ module.exports = {
      * Devuelve el canal que coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún canal, se devuelve undefined.
      * @param {String} data 
      * @param {Discord.Guild} guild 
-     * @returns {Discord.Channel}
+     * @returns {Discord.GuildBasedChannel}
      */
     fetchChannel: function(data, guild) {
         if(typeof data !== 'string' || !data.length) return;
@@ -646,13 +669,18 @@ module.exports = {
     },
 
     /**
+     * @typedef {Object} FetchMessageContext
+     * @property {Discord.Guild} [guild] La guild de la que se quiere obtener un mensaje
+     * @property {Discord.GuildTextBasedChannel} [channel] El canal del que se quiere obtener un mensaje
+     */
+    /**
      * Busca un mensaje basado en la data ingresada.
      * Devuelve el mensaje que coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún canal, se devuelve undefined.
      * @param {String} data 
-     * @param {{ guild: Discord.Guild, channel: Discord.TextChannel }} context 
+     * @param {FetchMessageContext} context 
      * @returns {Promise<Discord.Message>}
      */
-    fetchMessage: async function(data, { guild, channel }) {
+    fetchMessage: async function(data, context = {}) {
         if(typeof data !== 'string' || !data.length) return;
 
         const acceptedChannelTypes = [
@@ -663,10 +691,10 @@ module.exports = {
             ChannelType.AnnouncementThread,
         ];
 
-        if(!acceptedChannelTypes.includes(channel.type))
+        if(!acceptedChannelTypes.includes(context.channel?.type))
             return;
 
-        const messages = channel.messages;
+        const messages = context.channel?.messages;
         const matchedUrl = data.match(/https:\/\/discord.com\/channels\/\d+\/\d+\/(\d+)/);
         const messageId = matchedUrl ? matchedUrl[1] : data;
         let message = messages.cache.get(messageId) || await messages.fetch(messageId).catch(_ => _);
@@ -712,7 +740,7 @@ module.exports = {
      *  fallback: *
      * }} flag
      */
-    fetchFlag: function(args, flag = { property, short: [], long: [], callback, fallback }) {
+    fetchFlag: function(args, flag = { property: undefined, short: [], long: [], callback: undefined, fallback: undefined }) {
         //Ahorrarse procesamiento en vano si no se ingresa nada
         if(!args.length) return typeof flag.fallback === 'function' ? flag.fallback() : flag.fallback;
 
@@ -745,7 +773,7 @@ module.exports = {
             if(!flag.short?.length || !arg.startsWith('-'))
                 return;
             
-            for(c of arg.slice(1)) {
+            for(const c of arg.slice(1)) {
                 if(!flag.short.includes(c))
                     continue;
 
@@ -769,9 +797,8 @@ module.exports = {
     },
     
     /**
-     * @deprecated
-     * @param {Array<String>} args 
-     * @param {Number} i 
+     * @param {Array<String>} args An array of words, which may contain double-quote groups
+     * @param {Number} i Index from which to extract a sentence, be it a single word or a group
      */
     fetchSentence: function(args, i) {
         if(i == undefined || i >= args.length)
@@ -810,7 +837,7 @@ module.exports = {
      * @returns {String?}
      */
     defaultEmoji: function(emoji) {
-        if(!typeof emoji == 'string') return null;
+        if(typeof emoji !== 'string') return null;
         return emoji.match(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu)?.[0]; //Expresión RegExp cursed
     },
 
@@ -869,7 +896,7 @@ module.exports = {
     /**
      * Devuelve un valor aleatorio entre 0 y otro valor
      * @param {Number} maxExclusive Máximo valor; excluído del resultado
-     * @param {false | undefined} round Si el número debería ser redondeado hacia abajo
+     * @param {Boolean} [round=false] Si el número debería ser redondeado hacia abajo
      * @returns 
      */
     rand: function(maxExclusive, round = true) {
@@ -958,7 +985,7 @@ module.exports = {
         let i = minPage;
 
         return [
-            new Discord.ActionRowBuilder().addComponents(
+            makeButtonRowBuilder().addComponents(
                 new Discord.ButtonBuilder()
                     .setCustomId(`${commandFilename}_loadPage_0_START`)
                     .setEmoji('934430008586403900')
@@ -980,7 +1007,7 @@ module.exports = {
                     .setEmoji('934432754173624373')
                     .setStyle(ButtonStyle.Primary),
             ),
-            new Discord.ActionRowBuilder().addComponents(
+            makeStringSelectMenuRowBuilder().addComponents(
                 new Discord.StringSelectMenuBuilder()
                     .setCustomId(`${commandFilename}_loadPageExact`)
                     .setPlaceholder('Seleccionar página')
@@ -1091,8 +1118,8 @@ module.exports = {
 
         console.log({ calculatedMax, length: text.length });
         
-        if(calculatedMax + suspensor > hardMax)
-            calculatedMax = hardMax - suspensor;
+        if(calculatedMax + suspensor.length > hardMax)
+            calculatedMax = hardMax - suspensor.length;
 
         console.log({ calculatedMax, length: text.length });
 
@@ -1174,7 +1201,7 @@ module.exports = {
             altKeyboardKeys[j]  .forEach((char, i) => assignToPlane(i, j, char));
         }
         assignToPlane(keyboardCartesians['b'].x, keyboardCartesians['b'].y + 1, 'SPACE');
-        const centerCartesian = { x: parseInt(keyboardKeys[1].length * 0.5), y: 1 };
+        const centerCartesian = { x: parseInt(`${keyboardKeys[1].length * 0.5}`), y: 1 };
         function euclideanDistance(a = 'g', b = 'h') {
             a = a.toLowerCase();
             b = b.toLowerCase();
@@ -1298,9 +1325,9 @@ module.exports = {
 
         const mid = id[0];
         id = id.slice(1);
-        let left = id.slice(0, mid);
-        let right = id.slice(mid);
-        const decomp = [ left, right ].map(str => module.exports.radix128to10(str, 36).toString());
+        let left = id.slice(0, +mid);
+        let right = id.slice(+mid);
+        const decomp = [ left, right ].map(str => module.exports.radix128to10(str).toString());
         
         return decomp.join('');
     },

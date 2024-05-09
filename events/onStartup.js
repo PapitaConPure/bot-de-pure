@@ -1,7 +1,7 @@
 const { REST, Client, ApplicationCommandType, ContextMenuCommandBuilder, Collection } = require('discord.js');
 const { Routes } = require('discord-api-types/v9');
 
-const { connect } = require('mongoose');
+const mongoose = require('mongoose');
 const PrefixPair = require('../localdata/models/prefixpair.js');
 const UserConfigs = require('../localdata/models/userconfigs.js');
 const { Puretable, defaultEmote } = require('../localdata/models/puretable.js');
@@ -45,7 +45,9 @@ async function onStartup(client) {
     console.log(chalk.bold.magentaBright('Cargando comandos Slash y Contextuales...'));
     const restGlobal = new REST({ version: '9' }).setToken(discordToken);
     const commandData = {
+        //@ts-expect-error
         global: client.SlashPure.concat(client.ContextPure),
+        //@ts-expect-error
         saki: client.SlashHouraiPure,
     };
 
@@ -99,7 +101,10 @@ async function onStartup(client) {
     //Cargado de datos de base de datos
     console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
     console.log(chalk.gray('Conectando a Cluster en la nube...'));
-    await connect(mongoUri, {
+    mongoose.set("strictQuery", false);
+
+    mongoose.connect(mongoUri, {
+        //@ts-expect-error
         useUnifiedTopology: true,
         useNewUrlParser: true,
     });
@@ -132,21 +137,23 @@ async function onStartup(client) {
         const now = Date.now();
         let wasModified = false;
         Object.entries(hourai.userInfractions).forEach(([userId, infractions]) => {
-            const previousInfractionsLength = infractions.length;
-            infractions = infractions.filter(inf => (now - inf) < (60e3 * 60 * 4)); //Eliminar antiguas
-            //console.log(`${userId}:`, infractions);
+            let infr = /**@type {Array}*/(/**@type {unknown}*/(infractions));
+            
+            const previousInfractionsLength = infr.length;
+            infr = infr.filter(inf => (now - inf) < (60e3 * 60 * 4)); //Eliminar antiguas
+            //console.log(`${userId}:`, infr);
 
-            if(previousInfractionsLength === infractions.length) return;
+            if(previousInfractionsLength === infr.length) return;
             wasModified = true;
 
-            if(!infractions.length) {
+            if(!infr.length) {
                 hourai.userInfractions[userId] = null;
                 delete hourai.userInfractions[userId];
                 return;
             }
             
-            globalConfigs.hourai.infr.users[userId] = infractions;
-            hourai.userInfractions[userId] = infractions;
+            globalConfigs.hourai.infr.users[userId] = infr;
+            hourai.userInfractions[userId] = infr;
         });
         if(wasModified) hourai.markModified('userInfractions');
     }
@@ -166,8 +173,10 @@ async function onStartup(client) {
 
         const timeUntil = poll.end - Date.now();
         if(timeUntil < 1000)
+            //@ts-expect-error
             return pollCommand.concludePoll(pollChannel, resultsChannel, poll.id);
 
+        //@ts-expect-error
         setTimeout(pollCommand.concludePoll, timeUntil, pollChannel, resultsChannel, poll.id);
     });
 

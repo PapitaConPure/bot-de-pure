@@ -38,20 +38,23 @@ function getRequestContent(request) {
 }
 
 /**
- * @param {import('../commands/Commons/typings.js').CommandRequest} request
+ * @param {import('../commands/Commons/typings.js').CommandRequest|import('discord.js').Interaction} request
  */
 async function auditRequest(request) {
-    // @ts-ignore
+    // @ts-expect-error
+    if(request.customId?.startsWith('confesión')) return;
+
+    // @ts-expect-error
     const userTag = (request.author ?? request.user).tag;
     const embed = generateRequestRecord(request)
         .addFields({ name: userTag, value: getRequestContent(request) });
         
-    // @ts-ignore
+    // @ts-expect-error
     if(request.attachments?.size)
-        // @ts-ignore
+        // @ts-expect-error
         embed.addFields({ name: 'Adjuntado:', value: request.attachments.map(attf => attf.url ?? 'https://discord.com/').join('\n').slice(0, 1023) });
     
-    // @ts-ignore
+    // @ts-expect-error
     return globalConf.logch?.send({ embeds: [embed] }).catch(console.error);
 };
 

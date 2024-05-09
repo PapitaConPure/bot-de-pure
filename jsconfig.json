@@ -5,11 +5,14 @@
         "moduleResolution": "NodeNext",
         "resolveJsonModule": true,
         "resolvePackageJsonImports": true,
-        "resolvePackageJsonExports": true
+        "resolvePackageJsonExports": true,
+        "paths": {
+            "types": ["./types.js"]
+        }
     },
     "exclude": [
         "node_modules",
         "CommandBuilder",
         "PS Docs"
-    ]
+    ],
 }
