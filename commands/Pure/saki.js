@@ -1,6 +1,6 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
 const { CommandTags, CommandManager, CommandOptions } = require("../Commons/commands");
-const { DiscordAgent } = require('../../systems/discordagent.js');
+const { DiscordAgent } = require('../../systems/agents/discordagent.js');
 const { hourai } = require('../../localdata/config.json');
 const HouraiCfg = require('../../localdata/models/hourai.js');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');

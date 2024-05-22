@@ -24,6 +24,7 @@ const botPartials = [
 const client = new Client({
     intents: botIntents,
     partials: botPartials,
+    //@ts-expect-error
     fetchAllMembers: true,
     allowedMentions: {
         parse: [ 'users', 'roles' ],

@@ -1,6 +1,6 @@
-const WebhookOwner = require('../localdata/models/webhookOwners.js');
+const WebhookOwner = require('../../localdata/models/webhookOwners.js');
 const { TextChannel, User, Webhook, GuildMember, Message } = require('discord.js');
-const { isThread } = require('../func');
+const { isThread } = require('../../func.js');
 
 /**
  * @typedef {{ userId: String, expirationDate: Date }} OwnerData

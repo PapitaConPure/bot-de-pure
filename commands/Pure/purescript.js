@@ -1,6 +1,6 @@
 const { CommandTags } = require("../Commons/cmdTags");
 const { CommandManager } = require("../Commons/cmdBuilder");
-const { executeTuber } = require("../../systems/purescript");
+const { executeTuber } = require("../../systems/ps/purescript");
 const { CommandOptions } = require("../Commons/cmdOpts");
 const { ButtonBuilder, ButtonStyle, EmbedBuilder, CommandInteractionOptionResolver } = require("discord.js");
 const { p_pure } = require("../../localdata/customization/prefixes");
@@ -63,7 +63,7 @@ const command = new CommandManager('purescript', flags)
 				components: [makeButtonRowBuilder().addComponents(psDocsButton)],
 			});
 
-		/**@type {import("../../systems/purescript").Tubercle}*/
+		/**@type {import("../../systems/ps/purescript").Tubercle}*/
 		const tuber = {
 			author: request.userId,
 			script,

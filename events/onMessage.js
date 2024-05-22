@@ -7,12 +7,12 @@ const { p_pure } = require('../localdata/customization/prefixes.js');
 
 const { channelIsBlocked, rand, edlDistance, isUsageBanned } = require('../func.js');
 const globalGuildFunctions = require('../localdata/customization/guildFunctions.js');
-const { auditRequest } = require('../systems/auditor.js');
+const { auditRequest } = require('../systems/others/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../localdata/cmdExceptions.js');
-const { sendPixivPostsAsWebhook } = require('../systems/purepix.js');
+const { sendPixivPostsAsWebhook } = require('../systems/agents/purepix.js');
 const { tenshiColor } = require('../localdata/config.json');
 const UserConfigs = require('../localdata/models/userconfigs.js');
-const { sendTweetsAsWebhook } = require('../systems/pureet.js');
+const { sendTweetsAsWebhook } = require('../systems/agents/pureet.js');
 const { fetchUserCache } = require('../usercache.js');
 
 /**

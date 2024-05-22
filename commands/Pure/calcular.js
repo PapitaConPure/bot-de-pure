@@ -1,6 +1,6 @@
 const { improveNumber } = require("../../func");
 const { CommandTags, CommandManager, CommandOptions, CommandOptionSolver } = require("../Commons/commands");
-const { calc } = require('../../systems/mathreader.js');
+const { calc } = require('../../systems/others/mathreader.js');
 
 const flags = new CommandTags().add('COMMON');
 const options = new CommandOptions()

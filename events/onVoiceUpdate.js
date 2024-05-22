@@ -1,4 +1,4 @@
-const { PureVoiceUpdateHandler, PureVoiceOrchestrator } = require('../systems/purevoice.js');
+const { PureVoiceUpdateHandler, PureVoiceOrchestrator } = require('../systems/others/purevoice.js');
 const chalk = require('chalk');
 
 /**@type {Map<String, PureVoiceOrchestrator>}*/

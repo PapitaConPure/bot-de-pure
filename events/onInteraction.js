@@ -2,7 +2,7 @@
 const { Stats } = require('../localdata/models/stats.js');
 const { peopleid } = require('../localdata/config.json');
 const { channelIsBlocked, isUsageBanned } = require('../func.js');
-const { auditRequest } = require('../systems/auditor.js');
+const { auditRequest } = require('../systems/others/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../localdata/cmdExceptions.js');
 const { Translator } = require('../internationalization.js');
 const { CommandManager } = require('../commands/Commons/cmdBuilder.js');

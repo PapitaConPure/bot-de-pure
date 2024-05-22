@@ -1025,7 +1025,7 @@ function TuberInitializerError(message) {
  * 
  * @param {TuberScope} scope 
  * @param {import('../../commands/Commons/typings.js').ComplexCommandRequest} request 
- * @param {import('../purescript.js').Tubercle} tuber
+ * @param {import('./purescript.js').Tubercle} tuber
  * @param {Array<String>} args 
  */
 async function declareContext(scope, request, tuber, args) {

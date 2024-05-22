@@ -6,7 +6,7 @@ const ConfessionSystems = require('../../localdata/models/confessionSystems.js')
 const PendingConfessions = require('../../localdata/models/pendingConfessions.js');
 const { CommandManager, CommandTags, CommandOptions } = require('../Commons/commands.js');
 const confessionSystems = require('../../localdata/models/confessionSystems.js');
-const { auditError } = require('../../systems/auditor.js');
+const { auditError } = require('../../systems/others/auditor.js');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 
 const perms = new CommandPermissions()

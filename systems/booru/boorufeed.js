@@ -1,11 +1,11 @@
-const GuildConfig = require('../localdata/models/guildconfigs.js');
+const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const Discord = require('discord.js');
 const { formatBooruPostMessage, notifyUsers } = require('./boorusend.js');
-const { auditError, auditAction, auditSystem } = require('./auditor.js');
+const { auditError, auditAction, auditSystem } = require('../others/auditor.js');
 const chalk = require('chalk');
 const { Booru } = require('./boorufetch.js');
-const globalConfigs = require('../localdata/config.json');
-const { paginateRaw, sleep } = require('../func.js');
+const globalConfigs = require('../../localdata/config.json');
+const { paginateRaw, sleep } = require('../../func.js');
 
 //Configuraciones globales de actualización de Feeds
 /**@type {Map<Discord.Snowflake, Map<Discord.Snowflake, Array<String>>>}*/
@@ -133,7 +133,7 @@ async function checkFeeds(booru, guilds) {
                 gcfg.feeds[chid].ids = feed.ids.filter(id => response.some(p => p.id === id));
                 if(logMore) console.log(guild.id, 'gcfg.feeds[chid].ids:', gcfg.feeds[chid].ids);
                 gcfg.markModified('feeds');
-
+                if(logMore) console.dir({ post });
                 messagesToSend.push(
                     channel.send(formatBooruPostMessage(post, feed))
                     .then(async sent => {

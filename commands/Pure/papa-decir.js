@@ -1,5 +1,5 @@
 const { ChannelType } = require('discord.js');
-const { auditError } = require('../../systems/auditor');
+const { auditError } = require('../../systems/others/auditor');
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
 const flags = new CommandTags().add('PAPA');

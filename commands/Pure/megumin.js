@@ -1,6 +1,6 @@
 const { options } = require('./buscar.js');
 const { CommandTags, CommandManager } = require('../Commons/commands');
-const { searchAndReplyWithPost } = require('../../systems/boorusend.js');
+const { searchAndReplyWithPost } = require('../../systems/booru/boorusend.js');
 
 const flags = new CommandTags().add(
 	'COMMON',

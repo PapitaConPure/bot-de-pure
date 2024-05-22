@@ -1,13 +1,13 @@
-const GuildConfig = require('../localdata/models/guildconfigs.js');
-const { p_pure } = require('../localdata/customization/prefixes.js');
-const { randRange, fetchUserID, shortenText } = require('../func.js');
+const GuildConfig = require('../../localdata/models/guildconfigs.js');
+const { p_pure } = require('../../localdata/customization/prefixes.js');
+const { randRange, fetchUserID, shortenText } = require('../../func.js');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
-const { TuberLexer } = require('./ps/pslexer.js');
-const { TuberParser } = require('./ps/psparser.js');
-const { TuberInterpreter } = require('./ps/psinterpreter.js');
-const { declareNatives, declareContext } = require('./ps/psnatives.js');
-const { TuberScope } = require('./ps/psscope.js');
-const { makeValue } = require('./ps/commons.js');
+const { TuberLexer } = require('./pslexer.js');
+const { TuberParser } = require('./psparser.js');
+const { TuberInterpreter } = require('./psinterpreter.js');
+const { declareNatives, declareContext } = require('./psnatives.js');
+const { TuberScope } = require('./psscope.js');
+const { makeValue } = require('./commons.js');
 
 const logOptions = {
     lexer: false,
@@ -19,7 +19,7 @@ const logOptions = {
 /**
  * @typedef {Object} TuberExecutionInputs
  * @property {String} name
- * @property {import('./ps/commons.js').RuntimeType} type
+ * @property {import('./commons.js').RuntimeType} type
  * @property {Boolean} required
  * @property {String} [desc]
  */
@@ -67,7 +67,7 @@ function isAdvanced(tuber) {
 /**
  * Evalua el tipo de Tubérculo (básico o avanzado) y lo ejecuta. Si es avanzado, se ejecutará con PuréScript
  * @function
- * @param {import("../commands/Commons/typings").ComplexCommandRequest} request
+ * @param {import("../../commands/Commons/typings.js").ComplexCommandRequest} request
  * @param {Tubercle} tuber 
  * @param {TuberExecutionOptions} [inputOptions]
  */

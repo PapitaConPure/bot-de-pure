@@ -1,5 +1,5 @@
 const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
-const { searchAndReplyWithPost } = require('../../systems/boorusend.js');
+const { searchAndReplyWithPost } = require('../../systems/booru/boorusend.js');
 
 const options = new CommandOptions()
 	.addParam('etiquetas', 'TEXT',  'para filtrar resultados de búsqueda', { optional: true })

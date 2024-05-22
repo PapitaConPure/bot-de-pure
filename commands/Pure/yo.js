@@ -5,8 +5,8 @@ const { tenshiColor } = require('../../localdata/config.json');
 const { Translator } = require('../../internationalization');
 const { recacheUser } = require('../../usercache');
 const { compressId, shortenText, decompressId, improveNumber, warn } = require('../../func');
-const { auditError } = require('../../systems/auditor');
-const { updateFollowedFeedTagsCache } = require('../../systems/boorufeed');
+const { auditError } = require('../../systems/others/auditor');
+const { updateFollowedFeedTagsCache } = require('../../systems/booru/boorufeed');
 
 const languageEmote = {
     en: '<:en:1084646415319453756>',

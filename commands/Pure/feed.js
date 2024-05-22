@@ -2,12 +2,12 @@ const { default: axios } = require('axios');
 const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType } = require('discord.js');
 const { isNotModerator, shortenText, guildEmoji, decompressId, compressId } = require('../../func.js');
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
-const { auditError } = require('../../systems/auditor.js');
+const { auditError } = require('../../systems/others/auditor.js');
 const { CommandTags } = require('../Commons/cmdTags.js');
 const globalConfigs = require('../../localdata/config.json');
-const { Booru } = require('../../systems/boorufetch.js');
+const { Booru } = require('../../systems/booru/boorufetch.js');
 const { CommandManager } = require('../Commons/cmdBuilder.js');
-const { addGuildToFeedUpdateStack } = require('../../systems/boorufeed.js');
+const { addGuildToFeedUpdateStack } = require('../../systems/booru/boorufeed.js');
 const { Translator } = require('../../internationalization.js');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 

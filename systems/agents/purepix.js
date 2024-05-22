@@ -1,7 +1,7 @@
 const { EmbedBuilder, Message, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Embed } = require('discord.js');
-const pixivToken = process.env.PIXIV_REFRESH_TOKEN ?? (require('../localenv.json')?.pixivtoken);
+const pixivToken = process.env.PIXIV_REFRESH_TOKEN ?? (require('../../localenv.json')?.pixivtoken);
 const PixivApi = require('pixiv-api-client');
-const { shortenTextLoose } = require('../func');
+const { shortenTextLoose } = require('../../func');
 const { DiscordAgent } = require('./discordagent.js');
 const pixiv = new PixivApi();
 

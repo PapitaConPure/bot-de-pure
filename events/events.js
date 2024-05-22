@@ -6,7 +6,7 @@ const { onRateLimit } = require('../events/onRateLimit.js');
 const { onGuildMemberAdd } = require('../events/onGuildMemberAdd.js');
 const { onGuildMemberRemove } = require('../events/onGuildMemberRemove.js');
 const { onGuildMemberUpdate } = require('../events/onGuildMemberUpdate.js');
-const { auditError } = require('../systems/auditor.js');
+const { auditError } = require('../systems/others/auditor.js');
 const chalk = require('chalk');
 
 /**

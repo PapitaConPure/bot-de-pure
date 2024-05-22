@@ -1,7 +1,7 @@
-const PureVoice = require('../localdata/models/purevoice');
+const PureVoice = require('../../localdata/models/purevoice');
 const Discord = require('discord.js');
 const { default: mongoose } = require('mongoose');
-const { p_pure } = require('../localdata/customization/prefixes');
+const { p_pure } = require('../../localdata/customization/prefixes');
 const chalk = require('chalk');
 const { ButtonStyle, ChannelType } = require('discord.js');
 

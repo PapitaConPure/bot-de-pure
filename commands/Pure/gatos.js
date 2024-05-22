@@ -1,6 +1,6 @@
 const { EmbedBuilder, Colors } = require('discord.js');
 const { default: axios } = require('axios');
-const { auditError } = require('../../systems/auditor');
+const { auditError } = require('../../systems/others/auditor');
 const { CommandTags, CommandManager } = require('../Commons/commands');
 
 const flags = new CommandTags().add('COMMON');

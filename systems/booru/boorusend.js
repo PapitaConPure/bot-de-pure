@@ -1,14 +1,15 @@
+const { makeButtonRowBuilder } = require('../../tsCasts');
 // @ts-ignore
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Message, User, MessageCreateOptions, Snowflake } = require('discord.js');
 // @ts-ignore
-const { ComplexCommandRequest, CommandArguments } = require('../commands/Commons/typings');
-const { CommandOptions } = require('../commands/Commons/cmdOpts');
-const { guildEmoji, shortenText, isThread } = require('../func');
-const { Post, Booru } = require('../systems/boorufetch');
-const { getBaseTags, getSearchTags, tagMaps } = require('../localdata/booruprops');
-const globalConfigs = require('../localdata/config.json');
-const rakki = require('../commands/Pure/rakkidei');
-const { Translator } = require('../internationalization');
+const { ComplexCommandRequest, CommandArguments } = require('../../commands/Commons/typings');
+const { CommandOptions } = require('../../commands/Commons/cmdOpts');
+const { guildEmoji, shortenText, isThread } = require('../../func');
+const { Post, Booru } = require('./boorufetch');
+const { getBaseTags, getSearchTags, tagMaps } = require('../../localdata/booruprops');
+const globalConfigs = require('../../localdata/config.json');
+const rakki = require('../../commands/Pure/rakkidei');
+const { Translator } = require('../../internationalization');
 
 /**
  * Genera un {@linkcode EmbedBuilder} a base de un {@linkcode Post} de {@linkcode Booru}
@@ -20,7 +21,7 @@ function formatBooruPostMessage(post, data) {
     data ??= {};
     const maxTags = data.maxTags ?? 20;
     //Botón de Post de Gelbooru
-    const row = new ActionRowBuilder().addComponents(
+    const row = makeButtonRowBuilder().addComponents(
         new ButtonBuilder()
             .setEmoji('919398540172750878')
             .setStyle(ButtonStyle.Link)
@@ -140,13 +141,11 @@ function formatBooruPostMessage(post, data) {
 
     //Preparar Embed final
     /**@type {MessageCreateOptions} */
-    // @ts-ignore
     const feedMessage = { components: [row] };
     const postEmbed = new EmbedBuilder()
         .setColor(embedColor)
         .setAuthor({ name: 'Desde Gelbooru', iconURL: data.cornerIcon ?? 'https://i.imgur.com/outZ5Hm.png' });
     const filteredTags = post.tags.slice(0, maxTags);
-    // @ts-ignore
     const tagsTitle = `${guildEmoji('tagswhite', globalConfigs.slots.slot3)} Tags (${filteredTags.length}/${post.tags.length})`;
     const tagsContent = `*${filteredTags.join(' ')
         .replace(/\\/g,'\\\\')
@@ -219,7 +218,7 @@ async function notifyUsers(post, sent, feedSuscriptions) {
                 },
             );
         
-        const postRow = ActionRowBuilder.from(sent.components[0]);
+        const postRow = makeButtonRowBuilder(sent.components[0]);
         postRow.components.splice(postRow.components.length - 2);
         postRow.addComponents(
             new ButtonBuilder()
@@ -230,7 +229,6 @@ async function notifyUsers(post, sent, feedSuscriptions) {
 
         return member.send({
             embeds: [userEmbed],
-            // @ts-ignore
             components: [postRow],
         }).catch(_ => null);
     }));
@@ -284,11 +282,7 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
     if(isUnholy(isnsfw, request, [ searchOpt.cmdtag, ...words ]))
         return rakki.execute(request, [], isSlash);
 
-    if(!isSlash)
-        await request.channel.sendTyping();
-    else
-        // @ts-ignore
-        await request.deferReply();
+    await request.deferReply();
 
     const baseTags = getBaseTags('gelbooru', isnsfw);
     const searchTags = [ searchOpt.cmdtag, baseTags ].join(' ');
@@ -305,7 +299,7 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
         if(!response.length) {
             const replyOptions = { content: `⚠️ No hay resultados en **Gelbooru** para las tags **"${userTags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` };
             // @ts-ignore
-            return request.editReply?.(replyOptions) ?? request.reply(replyOptions);
+            return request.editReply(replyOptions);
         }
 
         //Seleccionar imágenes
@@ -327,8 +321,7 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
 
         //Enviar mensajes
         const replyOptions = messages.shift();
-        // @ts-ignore
-        await request.editReply?.(replyOptions) ?? request.reply(replyOptions);
+        await request.editReply(replyOptions);
         return Promise.all(messages.map(message => request.channel.send(message))).catch(_ => console.error && []);
     } catch(error) {
         console.error(error);
@@ -344,7 +337,7 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
                 ].join('\n'),
             });
         // @ts-ignore
-        return request.editReply?.({ embeds: [errorembed] }) ?? request.reply({ embeds: [errorembed] });
+        return request.editReply({ embeds: [errorembed] });
     }
 };
 

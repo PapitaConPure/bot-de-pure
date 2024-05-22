@@ -3,7 +3,7 @@ const { EmbedBuilder } = require('discord.js');
 const GuildConfig = require('./models/guildconfigs.js');
 const { isNotModerator } = require('../func');
 const chalk = require('chalk');
-const { auditError } = require('../systems/auditor.js');
+const { auditError } = require('../systems/others/auditor.js');
 // @ts-ignore
 const { CommandRequest } = require('../commands/Commons/typings');
 const { CommandManager } = require('../commands/Commons/cmdBuilder.js');

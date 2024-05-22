@@ -20,16 +20,16 @@ const booruApiKey = process.env.BOORU_APIKEY ?? (require(envPath)?.booruapikey);
 /**@type {String}*/
 const booruUserId = process.env.BOORU_USERID ?? (require(envPath)?.booruuserid);
 
-const { setupGuildFeedUpdateStack, feedTagSuscriptionsCache } = require('../systems/boorufeed');
+const { setupGuildFeedUpdateStack, feedTagSuscriptionsCache } = require('../systems/booru/boorufeed.js');
 const { modifyPresence } = require('../presence.js');
-const { auditSystem } = require('../systems/auditor.js');
+const { auditSystem } = require('../systems/others/auditor.js');
 
 const { registerFont, loadImage } = require('canvas');
 const { lookupService } = require('dns');
 const { promisify } = require('util');
 const chalk = require('chalk');
 const Poll = require('../localdata/models/poll.js');
-const { initializeWebhookMessageOwners } = require('../systems/discordagent.js');
+const { initializeWebhookMessageOwners } = require('../systems/agents/discordagent.js');
 
 const logOptions = {
     slash: false,

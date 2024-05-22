@@ -1,9 +1,9 @@
-const { CommandManager } = require('../commands/Commons/cmdBuilder');
-const globalConf = require('../localdata/config.json');
+const { CommandManager } = require('../../commands/Commons/cmdBuilder');
+const globalConf = require('../../localdata/config.json');
 const { EmbedBuilder, Colors } = require('discord.js');
 
 /**
- * @param {import('../commands/Commons/typings.js').CommandRequest|import('discord.js').Interaction} request
+ * @param {import('../../commands/Commons/typings.js').CommandRequest|import('discord.js').Interaction} request
  */
 function generateRequestRecord(request) {
     /**@type {import('discord.js').User}*/
@@ -16,7 +16,7 @@ function generateRequestRecord(request) {
 };
 
 /**
- * @param {import('../commands/Commons/typings.js').CommandRequest|import('discord.js').Interaction} request
+ * @param {import('../../commands/Commons/typings.js').CommandRequest|import('discord.js').Interaction} request
  */
 function getRequestContent(request) {
     if(CommandManager.requestIsInteraction(request)) {
@@ -38,7 +38,7 @@ function getRequestContent(request) {
 }
 
 /**
- * @param {import('../commands/Commons/typings.js').CommandRequest|import('discord.js').Interaction} request
+ * @param {import('../../commands/Commons/typings.js').CommandRequest|import('discord.js').Interaction} request
  */
 async function auditRequest(request) {
     // @ts-expect-error
@@ -102,7 +102,7 @@ async function auditAction(action, ...fields) {
 
 /**
  * @typedef {Object} AuditErrorOptions
- * @property {import('../commands/Commons/typings').CommandRequest|import('discord.js').Interaction} [request]
+ * @property {import('../../commands/Commons/typings').CommandRequest|import('discord.js').Interaction} [request]
  * @property {String} [brief]
  * @property {String} [details]
  * @property {Boolean} [ping=false]

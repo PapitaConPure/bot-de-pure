@@ -1,5 +1,5 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const { auditError } = require('../../systems/auditor.js');
+const { auditError } = require('../../systems/others/auditor.js');
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 

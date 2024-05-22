@@ -542,7 +542,7 @@ class TuberParser {
 		
 		let block = {
 			type: ParserNodeTypes.Block,
-			body: [],
+			body,
 		};
 
 		return block;
@@ -813,7 +813,7 @@ class TuberParser {
 		/**@type {Array<import('./commons.js').ParserEvaluableExpressionNode>}*/
 		const elements = [];
 		this.#insideListing = true;
-		while(!Object.values(ParserStatementNodeTypes).includes(this.#current.value)) {
+		while(/**@type {import('./commons.js').LexerTokenType}*/(this.#current.type) !== LexerTokenTypes.Statement) {
 			const expression = this.#parseExpression();
 
 			if(expression.type === ParserNodeTypes.AssignExpression)
@@ -821,7 +821,7 @@ class TuberParser {
 
 			elements.push(expression);
 
-			if(this.#verify(LexerTokenTypes.Comma))
+			if(!this.#verify(LexerTokenTypes.Comma))
 				break;
 			this.#digest();
 			while(this.#verify(LexerTokenTypes.Comma) && this.#digest())

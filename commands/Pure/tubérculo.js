@@ -4,7 +4,7 @@ const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId } = require('../../func.js');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, TextInputBuilder, CommandInteraction, ButtonInteraction, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder, ModalSubmitInteraction, StringSelectMenuBuilder, CommandInteractionOptionResolver, Message, ChatInputCommandInteraction } = require('discord.js');
 const { RuntimeToLanguageType } = require('../../systems/ps/commons.js');
-const { executeTuber } = require('../../systems/purescript.js');
+const { executeTuber } = require('../../systems/ps/purescript.js');
 const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts.js');
 
 const pageMax = 10;

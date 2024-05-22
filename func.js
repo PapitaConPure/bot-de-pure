@@ -1121,12 +1121,34 @@ module.exports = {
         if(calculatedMax + suspensor.length > hardMax)
             calculatedMax = hardMax - suspensor.length;
 
-        console.log({ calculatedMax, length: text.length });
-
         if(calculatedMax <= text.length)
             return text;
 
         return `${text.slice(0, calculatedMax)}${suspensor}`;
+    },
+
+    /**
+     * @typedef {Object} LowerCaseNormalizationOptions
+     * @property {Boolean} [removeCarriageReturns=false] Indica si remover los caracteres de retorno de carro "\r"
+     * 
+     * Pasa a minúsculas y remueve las tildes de un texto
+     * @param {String} text
+     * @param {LowerCaseNormalizationOptions} options
+     * @returns {String}
+     */
+    toLowerCaseNormalized: function(/** @type {string}*/ text, options = null) {
+        options ??= {};
+        options.removeCarriageReturns ??= false;
+
+        text = text
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/([aeiou])\u0301/gi, '$1');
+        
+        if(options.removeCarriageReturns)
+            text = text.replace(/\r/g, '');
+
+        return text;
     },
 
     /**

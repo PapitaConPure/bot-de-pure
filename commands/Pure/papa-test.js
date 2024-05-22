@@ -1,6 +1,6 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ModalBuilder, TextInputBuilder, GuildMember } = require('discord.js'); //Integrar discord.js
 const { fetchMember, isBoosting, fetchChannel, fetchRole } = require('../../func.js');
-const { formatPixivPostsMessage } = require('../../systems/purepix.js');
+const { formatPixivPostsMessage } = require('../../systems/agents/purepix.js');
 const { CommandTags, CommandManager, CommandOptions } = require('../Commons/commands');
 //const global = require('../../localdata/config.json'); //Variables globales
 // const { dibujarDespedida } = require('../../func.js');

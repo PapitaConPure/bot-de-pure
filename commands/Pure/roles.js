@@ -4,7 +4,7 @@ const axios = require('axios').default;
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors, ActionRow, ComponentType } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes');
 const { CommandTags, CommandManager } = require('../Commons/commands');
-const { auditError } = require('../../systems/auditor');
+const { auditError } = require('../../systems/others/auditor');
 const { colorsRow } = require('../../localdata/houraiProps');
 const { subdivideArray, isBoosting, stringHexToNumber } = require('../../func');
 
