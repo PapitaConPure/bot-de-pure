@@ -28,6 +28,17 @@ function parseBlock(parser, ...closeTokenKinds) {
 
 	return body;
 }
+/**
+ * 
+ * @param {import('../../ast/statements.js').BlockBody} body 
+ * @returns {import('../../ast/statements.js').BlockStatement}
+ */
+function makeBlockStmt(body) {
+	return {
+		kind: StatementKinds.BLOCK,
+		body,
+	};
+}
 
 /**
  * @param {import('../parser.js').Parser} parser
@@ -37,10 +48,7 @@ function parseBlockStatement(parser) {
 	const openToken = parser.advance();
 	const body = parseBlock(parser);
 	parser.expect(TokenKinds.BLOCK_CLOSE, `Se esperaba un cierre de bloque con Sentencia "FIN" en algún punto después de Sentencia "BLOQUE" en la línea ${openToken.line}, posición ${openToken.start}~${openToken.end}. Sin embargo, no se encontró ninguna`);
-	return {
-		kind: StatementKinds.BLOCK,
-		body,
-	};
+	return makeBlockStmt(body);
 }
 
 /**
@@ -49,11 +57,8 @@ function parseBlockStatement(parser) {
  */
 function parseConditionalStatement(parser) {
 	const openToken = parser.advance();
-	const test = parser.parseExpression(BindingPowers.LOGICAL);
-	const consequent = {
-		kind: StatementKinds.BLOCK,
-		body: parseBlock(parser, TokenKinds.BLOCK_CLOSE, TokenKinds.ELSE, TokenKinds.ELSE_IF),
-	};
+	const test = parser.parseExpression(BindingPowers.LOGICAL_DISJUNCTION);
+	const consequent = makeBlockStmt(parseBlock(parser, TokenKinds.BLOCK_CLOSE, TokenKinds.ELSE, TokenKinds.ELSE_IF));
 
 	parser.ensureAny(TokenKinds.BLOCK_CLOSE, TokenKinds.ELSE, TokenKinds.ELSE_IF)
 	      .orFail(`Se esperaba un cierre de bloque en algún punto después de Sentencia "SI" en la línea ${openToken.line}, posición ${openToken.start}~${openToken.end}. Sin embargo, no se encontró ninguna`);
@@ -69,10 +74,7 @@ function parseConditionalStatement(parser) {
 
 	if(parser.current.is(TokenKinds.ELSE)) {
 		const alternationToken = parser.advance();
-		const alternate = {
-			kind: StatementKinds.BLOCK,
-			body: parseBlock(parser, TokenKinds.BLOCK_CLOSE),
-		};
+		const alternate = makeBlockStmt(parseBlock(parser, TokenKinds.BLOCK_CLOSE));
 		parser.expect(TokenKinds.BLOCK_CLOSE, `Se esperaba un cierre de bloque con Sentencia "FIN" en algún punto después de Sentencia "SINO" en la línea ${alternationToken.line}, posición ${alternationToken.start}~${alternationToken.end}. Sin embargo, no se encontró ninguna`);
 
 		return {
@@ -99,8 +101,8 @@ function parseConditionalStatement(parser) {
  */
 function parseWhileLoopStatement(parser) {
 	const openToken = parser.advance();
-	const test = parser.parseExpression(BindingPowers.LOGICAL);
-	const body = parseBlock(parser);
+	const test = parser.parseExpression(BindingPowers.LOGICAL_DISJUNCTION);
+	const body = makeBlockStmt(parseBlock(parser));
 	parser.expect(TokenKinds.BLOCK_CLOSE, `Se esperaba un cierre de bloque con Sentencia "FIN" en algún punto después de Sentencia "MIENTRAS" en la línea ${openToken.line}, posición ${openToken.start}~${openToken.end}. Sin embargo, no se encontró ninguna`);
 
 	return {
@@ -112,16 +114,16 @@ function parseWhileLoopStatement(parser) {
 
 /**
  * @param {import('../parser.js').Parser} parser
- * @returns {import('../../ast/statements.js').DoWhileStatement}
+ * @returns {import('../../ast/statements.js').DoUntilStatement}
  */
 function parseDoWhileLoopStatement(parser) {
 	const openToken = parser.advance();
-	const body = parseBlock(parser, TokenKinds.UNTIL);
+	const body = makeBlockStmt(parseBlock(parser, TokenKinds.UNTIL));
 	parser.expect(TokenKinds.UNTIL, `Se esperaba un cierre de bloque con Sentencia "HASTA" en algún punto después de Sentencia "HACER" en la línea ${openToken.line}, posición ${openToken.start}~${openToken.end}. Sin embargo, no se encontró ninguna`);
-	const test = parser.parseExpression(BindingPowers.LOGICAL);
+	const test = parser.parseExpression(BindingPowers.LOGICAL_DISJUNCTION);
 
 	return {
-		kind: StatementKinds.DO_WHILE,
+		kind: StatementKinds.DO_UNTIL,
 		test,
 		body,
 	};
@@ -133,10 +135,10 @@ function parseDoWhileLoopStatement(parser) {
  */
 function parseRepeatLoopStatement(parser) {
 	const openToken = parser.advance();
-	const times = parser.parseExpression(BindingPowers.LOGICAL);
+	const times = parser.parseExpression(BindingPowers.LOGICAL_DISJUNCTION);
 	parser.expect(TokenKinds.TIMES);
 
-	const body = parseBlock(parser);
+	const body = makeBlockStmt(parseBlock(parser));
 	parser.expect(TokenKinds.BLOCK_CLOSE, `Se esperaba un cierre de bloque con Sentencia "FIN" en algún punto después de Sentencia "REPETIR" en la línea ${openToken.line}, posición ${openToken.start}~${openToken.end}. Sin embargo, no se encontró ninguna`);
 
 	return {
@@ -156,7 +158,7 @@ function parseForEachLoopStatement(parser) {
 	parser.expect(TokenKinds.IN);
 	const container = parser.parseExpression(BindingPowers.COMMA);
 
-	const body = parseBlock(parser);
+	const body = makeBlockStmt(parseBlock(parser));
 	parser.expect(TokenKinds.BLOCK_CLOSE, `Se esperaba un cierre de bloque con Sentencia "FIN" en algún punto después de Sentencia "PARA CADA" en la línea ${openToken.line}, posición ${openToken.start}~${openToken.end}. Sin embargo, no se encontró ninguna`);
 
 	return {
@@ -183,7 +185,7 @@ function parseForLoopStatement(parser) {
 		parser.expect(TokenKinds.UNTIL, `Se esperaba operador "hasta" en sentencia "PARA" corta, pero se recibió: ${parser.current.value}`);
 		const to = parser.parseExpression(BindingPowers.COMMA);
 		
-		const body = parseBlock(parser);
+		const body = makeBlockStmt(parseBlock(parser));
 		parser.expect(TokenKinds.BLOCK_CLOSE, `Se esperaba un cierre de bloque con Sentencia "FIN" en algún punto después de Sentencia "PARA" en la línea ${openToken.line}, posición ${openToken.start}~${openToken.end}. Sin embargo, no se encontró ninguna`);
 		
 		return {
@@ -200,10 +202,10 @@ function parseForLoopStatement(parser) {
 	parser.expect(TokenKinds.ASSIGNMENT, `Se esperaba el operador "con" o "desde" luego de identificador en Sentencia "PARA", pero se recibió: ${parser.current.value}`);
 	const start = parser.parseExpression(BindingPowers.COMMA);
 	parser.expect(TokenKinds.WHILE, `Se esperaba "MIENTRAS" en sentencia "PARA" larga, pero se recibió: ${parser.current.value}`);
-	const test = parser.parseExpression(BindingPowers.LOGICAL);
+	const test = parser.parseExpression(BindingPowers.LOGICAL_DISJUNCTION);
 	const step = parser.parseStatement();
 
-	const body = parseBlock(parser);
+	const body = makeBlockStmt(parseBlock(parser));
 	parser.expect(TokenKinds.BLOCK_CLOSE, `Se esperaba un cierre de bloque con Sentencia "FIN" en algún punto después de Sentencia "PARA" en la línea ${openToken.line}, posición ${openToken.start}~${openToken.end}. Sin embargo, no se encontró ninguna`);
 
 	return {
@@ -238,7 +240,7 @@ function parseExpressionStatement(parser) {
 function parseReadStatement(parser) {
 	parser.advance();
 	
-	const dataKind = parser.expectAny(TokenKinds.KIND_NUMBER, TokenKinds.KIND_TEXT, TokenKinds.KIND_BOOLEAN, TokenKinds.LIST, TokenKinds.EMBED)
+	const dataKind = parser.expectAny(TokenKinds.NUMBER, TokenKinds.TEXT, TokenKinds.BOOLEAN, TokenKinds.LIST, TokenKinds.EMBED)
 		.orFail(`Se esperaba un tipo de entrada antes de expresión receptora en Sentencia "LEER", pero se recibió: ${parser.current.kind}`);
 	
 	const receptor = parser.parseExpression(BindingPowers.ASSIGNMENT);
@@ -290,10 +292,10 @@ function parseDeclarationStatement(parser) {
 	parser.advance();
 	
 	let dataKind = null;
-	if(parser.current.isAny(TokenKinds.KIND_NUMBER, TokenKinds.KIND_TEXT, TokenKinds.KIND_BOOLEAN, TokenKinds.LIST, TokenKinds.REGISTRY, TokenKinds.EMBED))
+	if(parser.current.isAny(TokenKinds.NUMBER, TokenKinds.TEXT, TokenKinds.BOOLEAN, TokenKinds.LIST, TokenKinds.REGISTRY, TokenKinds.EMBED))
 		dataKind = parser.advance();
 
-	const declaration = parser.parseExpression(BindingPowers.ASSIGNMENT);
+	const declaration = parser.expect(TokenKinds.IDENTIFIER, 'Se esperaba un identificador luego del tipo de dato en Sentencia "CREAR"').value;
 
 	return {
 		kind: StatementKinds.DECLARATION,

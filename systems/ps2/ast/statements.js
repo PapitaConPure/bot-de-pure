@@ -7,7 +7,7 @@ const StatementKinds = /**@type {const}*/({
     BLOCK: 'BlockStatement',
     CONDITIONAL: 'ConditionalStatement',
     WHILE: 'WhileStatement',
-    DO_WHILE: 'DoWhileStatement',
+    DO_UNTIL: 'DoUntilStatement',
     REPEAT: 'RepeatStatement',
     FOR_EACH: 'ForEachStatement',
     FOR: 'ForStatement',
@@ -32,7 +32,7 @@ const ScopeAbortKinds = [
 
 /**
  * @template {StatementKind} [T=StatementKind]
- * @typedef {Object} Statement
+ * @typedef {Object} BaseStatementData
  * @property {NonNullable<T>} kind
  */
 
@@ -42,67 +42,69 @@ const ScopeAbortKinds = [
  * @property {BlockBody} body
  */
 
-/**@typedef {Statement<'ProgramStatement'> & BlockStatementData} ProgramStatement*/
-/**@typedef {Statement<'BlockStatement'> & BlockStatementData} BlockStatement*/
+/**@typedef {BaseStatementData<'ProgramStatement'> & BlockStatementData} ProgramStatement*/
+/**@typedef {BaseStatementData<'BlockStatement'> & BlockStatementData} BlockStatement*/
 
 /**
  * @typedef {Object} ConditionalStatementData
  * @property {import('./expressions.js').Expression} test
- * @property {Statement} consequent
+ * @property {BlockStatement} consequent
  * @property {Statement?} [alternate]
- * @typedef {Statement<'ConditionalStatement'> & ConditionalStatementData} ConditionalStatement
+ * @typedef {BaseStatementData<'ConditionalStatement'> & ConditionalStatementData} ConditionalStatement
  */
 
 /**
  * @typedef {Object} WhileStatementData
  * @property {import('./expressions.js').Expression} test
- * @property {BlockBody} body
- * @typedef {Statement<'WhileStatement'> & WhileStatementData} WhileStatement
+ * @property {BlockStatement} body
+ * @typedef {BaseStatementData<'WhileStatement'> & WhileStatementData} WhileStatement
  */
 
 /**
- * @typedef {Statement<'DoWhileStatement'> & WhileStatementData} DoWhileStatement
+ * @typedef {BaseStatementData<'DoUntilStatement'> & WhileStatementData} DoUntilStatement
  */
 
 /**
  * @typedef {Object} RepeatStatementData
  * @property {import('./expressions.js').Expression} times
- * @property {BlockBody} body
- * @typedef {Statement<'RepeatStatement'> & RepeatStatementData} RepeatStatement
+ * @property {BlockStatement} body
+ * @typedef {BaseStatementData<'RepeatStatement'> & RepeatStatementData} RepeatStatement
  */
 
 /**
  * @typedef {Object} ForEachStatementData
  * @property {String} identifier
  * @property {import('./expressions.js').Expression} container
- * @property {BlockBody} body
- * @typedef {Statement<'ForEachStatement'> & ForEachStatementData} ForEachStatement
+ * @property {BlockStatement} body
+ * @typedef {BaseStatementData<'ForEachStatement'> & ForEachStatementData} ForEachStatement
  */
 
 /**
  * @typedef {Object} BaseForStatementData
  * @property {String} identifier
- * @property {BlockBody} body
+ * @property {BlockStatement} body
+ * @typedef {BaseStatementData<'ForStatement'> & BaseForStatementData} BaseForStatement
  * 
  * @typedef {Object} FullForStatementData
  * @property {true} full
  * @property {import('./expressions.js').Expression} start
  * @property {import('./expressions.js').Expression} test
  * @property {Statement} step
- * 
+ * @typedef {BaseForStatement & FullForStatementData} FullForStatement
  * 
  * @typedef {Object} ShortForStatementData
  * @property {false} full
  * @property {import('./expressions.js').Expression} from
  * @property {import('./expressions.js').Expression} to
+ * @typedef {BaseForStatement & ShortForStatementData} ShortForStatement
  * 
- * @typedef {Statement<'ForStatement'> & BaseForStatementData & (FullForStatementData|ShortForStatementData)} ForStatement
+ * @typedef {FullForStatement | ShortForStatement} ForStatement
  */
 
 /**
  * @typedef {Object} ExpressionStatementData
  * @property {import('./expressions.js').Expression} expression
- * @typedef {Statement<'ExpressionStatement'> & ExpressionStatementData} ExpressionStatement
+ * @typedef {BaseStatementData<'ExpressionStatement'> & ExpressionStatementData} ExpressionStatement
  */
 
 /**
@@ -111,21 +113,21 @@ const ScopeAbortKinds = [
  * @property {import('./expressions.js').Expression} receptor
  * @property {import('./expressions.js').Expression} fallback
  * @property {Boolean} optional
- * @typedef {Statement<'ReadStatement'> & ReadStatementData} ReadStatement
+ * @typedef {BaseStatementData<'ReadStatement'> & ReadStatementData} ReadStatement
  */
 
 /**
  * @typedef {Object} DeclarationStatementData
- * @property {import('./expressions.js').Expression} declaration
+ * @property {String} declaration
  * @property {Token?} dataKind
- * @typedef {Statement<'DeclarationStatement'> & DeclarationStatementData} DeclarationStatement
+ * @typedef {BaseStatementData<'DeclarationStatement'> & DeclarationStatementData} DeclarationStatement
  */
 
 /**
  * @typedef {Object} SaveStatementData
  * @property {String} identifier
  * @property {import('./expressions.js').Expression} expression
- * @typedef {Statement<'SaveStatement'> & SaveStatementData} SaveStatement
+ * @typedef {BaseStatementData<'SaveStatement'> & SaveStatementData} SaveStatement
  */
 
 /**
@@ -133,21 +135,46 @@ const ScopeAbortKinds = [
  * @property {Token} operator
  * @property {import('./expressions.js').Expression} receptor
  * @property {import('./expressions.js').Expression?} reception
- * @typedef {Statement<'AssignmentStatement'> & AssignmentStatementData} AssignmentStatement
+ * @typedef {BaseStatementData<'AssignmentStatement'> & AssignmentStatementData} AssignmentStatement
  */
 
-/**@typedef {Statement<'ReturnStatement'> & ExpressionStatementData} ReturnStatement*/
+/**@typedef {BaseStatementData<'ReturnStatement'> & ExpressionStatementData} ReturnStatement*/
 
 /**
  * @typedef {Object} StopStatementData
  * @property {import('./expressions.js').Expression} stopMessage
  * @property {import('./expressions.js').Expression?} condition
- * @typedef {Statement<'StopStatement'> & StopStatementData} StopStatement
+ * @typedef {BaseStatementData<'StopStatement'> & StopStatementData} StopStatement
  */
 
-/**@typedef {Statement<'SendStatement'> & ExpressionStatementData} SendStatement*/
+/**@typedef {BaseStatementData<'SendStatement'> & ExpressionStatementData} SendStatement*/
 
-/**@typedef {Statement<'EndStatement'>} EndStatement*/
+/**@typedef {BaseStatementData<'EndStatement'>} EndStatement*/
+
+/**
+ * @typedef {ProgramStatement
+ *          |BlockStatement
+ *          |ConditionalStatement
+ *          |WhileStatement
+ *          |DoUntilStatement
+ *          |RepeatStatement
+ *          |ForEachStatement
+ *          |ForStatement
+ * } ControlStatement
+ * 
+ * @typedef {ExpressionStatement
+ *          |ReadStatement
+ *          |DeclarationStatement
+ *          |SaveStatement
+ *          |AssignmentStatement
+ *          |ReturnStatement
+ *          |StopStatement
+ *          |SendStatement
+ *          |EndStatement
+ * } SimpleStatement
+ * 
+ * @typedef {ControlStatement|SimpleStatement} Statement
+ */
 
 module.exports = {
     StatementKinds,

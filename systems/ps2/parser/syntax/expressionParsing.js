@@ -1,6 +1,8 @@
+const { toLowerCaseNormalized } = require('../../../../func');
 const { TokenKinds } = require('../../lexer/tokens');
-const { BindingPowers, Associativities } = require('../../ast/ast');
+const { BindingPowers } = require('../../ast/ast');
 const { ExpressionKinds } = require('../../ast/expressions');
+const { parseBlock } = require('./statementParsing');
 
 /**
  * @param {import('../parser.js').Parser} parser
@@ -8,22 +10,22 @@ const { ExpressionKinds } = require('../../ast/expressions');
  */
 function parsePrimaryExpression(parser) {
 	switch(parser.current.kind) {
-	case TokenKinds.NUMBER:
+	case TokenKinds.LIT_NUMBER:
 		return /**@type {import('../../ast/expressions').NumberLiteralExpression}*/({
 			kind: ExpressionKinds.NUMBER_LITERAL,
 			value: +parser.advance().value,
 		});
 
-	case TokenKinds.STRING:
+	case TokenKinds.LIT_TEXT:
 		return /**@type {import('../../ast/expressions').TextLiteralExpression}*/({
 			kind: ExpressionKinds.TEXT_LITERAL,
 			value: parser.advance().value,
 		});
 
-	case TokenKinds.BOOLEAN:
+	case TokenKinds.LIT_BOOLEAN:
 		return /**@type {import('../../ast/expressions').BooleanLiteralExpression}*/({
 			kind: ExpressionKinds.BOOLEAN_LITERAL,
-			value: parser.advance().value,
+			value: toLowerCaseNormalized(parser.advance().value) === 'verdadero' ? true : false,
 		});
 
 	case TokenKinds.IDENTIFIER:
@@ -74,6 +76,30 @@ function canFollowUp(parser) {
 
 /**
  * @param {import('../parser.js').Parser} parser
+ * @param {import('../../ast/expressions').Expression} expr
+ * @returns {String}
+ */
+function makeStoredKey(parser, expr) {
+	let value;
+
+	switch(expr.kind) {
+	case ExpressionKinds.IDENTIFIER:
+		value = expr.name;
+		break;
+	case ExpressionKinds.NUMBER_LITERAL:
+	case ExpressionKinds.TEXT_LITERAL:
+	case ExpressionKinds.BOOLEAN_LITERAL:
+		value = `${expr.value}`;
+		break;
+	default:
+		throw parser.TuberParserError(`Se esperaba un identificador, número, texto o dupla para analizar una clave de miembro de contenedor`);
+	}
+
+	return value;
+}
+
+/**
+ * @param {import('../parser.js').Parser} parser
  * @returns {Array<import('../../ast/expressions').Expression>}
  */
 function parseListElements(parser) {
@@ -89,7 +115,7 @@ function parseListElements(parser) {
 	}
 
 	if(canFollowUp(parser)) {
-		elements.push(parser.parseExpression(BindingPowers.COMMA));
+		elements.push(parser.parseExpression(BindingPowers.ASSIGNMENT));
 
 		while(parser.hasTokens && parser.current.is(TokenKinds.COMMA)) {
 			parser.advance();
@@ -107,7 +133,7 @@ function parseListElements(parser) {
 				continue;
 			}
 
-			elements.push(parser.parseExpression(BindingPowers.COMMA));
+			elements.push(parser.parseExpression(BindingPowers.ASSIGNMENT));
 		}
 	}
 
@@ -143,7 +169,7 @@ function parseRegistryMembers(parser) {
  * @returns {{ key: String, value: import('../../ast/expressions').Expression }}
  */
 function parseRegistryMember(parser) {
-	const key = parser.expectAny(TokenKinds.NUMBER, TokenKinds.STRING, TokenKinds.IDENTIFIER).orFail(`Se esperaba un identificador, una cadena o un número en lado izquierdo de expresión literal de miembro para expresión literal de glosario. Sin embargo, se recibió: ${parser.current.value}`);
+	const key = parser.expectAny(TokenKinds.LIT_NUMBER, TokenKinds.LIT_TEXT, TokenKinds.IDENTIFIER).orFail(`Se esperaba un identificador, una cadena o un número en lado izquierdo de expresión literal de miembro para expresión literal de glosario. Sin embargo, se recibió: ${parser.current.value}`);
 	parser.expect(TokenKinds.COLON);
 	const value = parser.parseExpression(BindingPowers.COMMA);
 
@@ -189,26 +215,51 @@ function parseBinaryExpression(parser, left, bp, ass) {
 
 /**
  * @param {import('../parser.js').Parser} parser
+ * @returns {import('../../ast/expressions').CastExpression}
+ */
+function parseCastExpression(parser) {
+	const as = parser.advance();
+	const argument = parser.parseExpression(BindingPowers.UNARY);
+	
+	return {
+		kind: ExpressionKinds.CAST,
+		argument,
+		as,
+	};
+}
+
+/**
+ * @param {import('../parser.js').Parser} parser
  * @param {import('../../ast/expressions').Expression} left
- * @param {import('../../ast/ast').BindingPower} bp
+ * @param {import('../../ast/ast').BindingPower} _bp
  * @param {import('../../ast/ast').Associativity} _ass
  * @returns {import('../../ast/expressions').ArrowExpression}
  */
-function parseArrowExpression(parser, left, bp, _ass) {
+function parseArrowExpression(parser, left, _bp, _ass) {
 	parser.advance();
-	
-	let computed = false;
-	let key;
+
+	const kind = ExpressionKinds.ARROW;
+	const holder = left;
 
 	if(parser.current.is(TokenKinds.PAREN_OPEN)) {
-		key = parseGroupExpression(parser);
-		computed = true;
-	} else
-		key = parsePrimaryExpression(parser);
+		const key = parseGroupExpression(parser);
+		const computed = true;
+
+		return {
+			kind,
+			holder,
+			key,
+			computed,
+		};
+	}
+
+	const primaryExpr = parsePrimaryExpression(parser);
+	const key = makeStoredKey(parser, primaryExpr);
+	const computed = false;
 
 	return {
-		kind: ExpressionKinds.ARROW,
-		holder: left,
+		kind,
+		holder,
 		key,
 		computed,
 	};
@@ -217,17 +268,17 @@ function parseArrowExpression(parser, left, bp, _ass) {
 /**
  * @param {import('../parser.js').Parser} parser
  * @param {import('../../ast/expressions').Expression} left
- * @param {import('../../ast/ast').BindingPower} bp
- * @param {import('../../ast/ast').Associativity} ass
+ * @param {import('../../ast/ast').BindingPower} _bp
+ * @param {import('../../ast/ast').Associativity} _ass
  * @returns {import('../../ast/expressions').CallExpression}
  */
-function parseCallExpression(parser, left, bp, ass) {
+function parseCallExpression(parser, left, _bp, _ass) {
 	parser.advance();
 
 	const args = [];
 
 	if(!parser.current.is(TokenKinds.PAREN_CLOSE)) {
-		args.push(parser.parseExpression(BindingPowers.COMMA));
+		args.push(parser.parseExpression(BindingPowers.ASSIGNMENT));
 
 		while(parser.hasTokens && parser.current.is(TokenKinds.COMMA)) {
 			parser.advance();
@@ -237,7 +288,7 @@ function parseCallExpression(parser, left, bp, ass) {
 
 			//Si se recibe un indicador de sentencia después de la coma, se trata de una coma suelta, así que la ignoramos
 			if(canFollowUp(parser))
-				args.push(parser.parseExpression(BindingPowers.COMMA));
+				args.push(parser.parseExpression(BindingPowers.ASSIGNMENT));
 		}
 	}
 
@@ -247,6 +298,99 @@ function parseCallExpression(parser, left, bp, ass) {
 		kind: ExpressionKinds.CALL,
 		fn: left,
 		args,
+	};
+}
+
+/**
+ * @param {import('../parser.js').Parser} parser
+ * @returns {import('../../ast/expressions').FunctionExpression}
+ */
+function parseFunctionExpression(parser) {
+	const fnToken = parser.advance();
+
+	parser.expect(TokenKinds.PAREN_OPEN, `Se esperaba una apertura de paréntesis inmediatamente luego de indicación de expresión de Función, pero se recibió: ${parser.current.value}`);
+
+	const args = [];
+
+	if(!parser.current.is(TokenKinds.PAREN_CLOSE)) {
+		args.push(parser.parseExpression(BindingPowers.ASSIGNMENT));
+
+		while(parser.hasTokens && parser.current.is(TokenKinds.COMMA)) {
+			parser.advance();
+
+			if(parser.current.is(TokenKinds.COMMA))
+				throw parser.TuberParserError('No se pueden tener argumentos vacíos en una expresión de Función');
+
+			//Si se recibe un indicador de sentencia después de la coma, se trata de una coma suelta, así que la ignoramos
+			if(canFollowUp(parser))
+				args.push(parser.parseExpression(BindingPowers.ASSIGNMENT));
+		}
+	}
+
+	parser.expect(TokenKinds.PAREN_CLOSE, `Se esperaba un cierre de paréntesis luego de los parámetros de Función para proceder al cuerpo de la Función, pero se recibió: ${parser.current.value}`);
+
+	const body = parseBlock(parser);
+	parser.expect(TokenKinds.BLOCK_CLOSE,
+		`Se esperaba a que eventualmente se cerrara el bloque de expresión de Función en la línea: ${fnToken.line}, posición: ${fnToken.start}~${fnToken.end}. Sin embargo, eso nunca ocurrió`);
+
+	return {
+		kind: ExpressionKinds.FUNCTION,
+		expression: false,
+		args,
+		body,
+	};
+}
+
+/**
+ * @param {import('../parser.js').Parser} parser
+ * @param {import('../../ast/expressions').Expression} left
+ * @param {import('../../ast/ast').BindingPower} bp
+ * @param {import('../../ast/ast').Associativity} ass
+ * @returns {import('../../ast/expressions').SequenceExpression}
+ */
+function parseSequenceExpression(parser, left, bp, ass) {
+	const expressions = [ left ];
+
+	do {
+		parser.advance();
+
+		if(!parser.hasTokens || parser.current.is(TokenKinds.COMMA))
+			throw parser.TuberParserError('Se esperaba una expresión después del operador de coma en expresión de secuencia');
+
+		//Ignorar comas sueltas
+		if(canFollowUp(parser))
+			expressions.push(parser.parseExpression(BindingPowers.ASSIGNMENT));
+	} while(parser.hasTokens && parser.current.is(TokenKinds.COMMA))
+
+	return {
+		kind: ExpressionKinds.SEQUENCE,
+		expressions,
+	};
+}
+
+/**
+ * @param {import('../parser.js').Parser} parser
+ * @param {import('../../ast/expressions').Expression} left
+ * @param {import('../../ast/ast').BindingPower} bp
+ * @param {import('../../ast/ast').Associativity} ass
+ * @returns {import('../../ast/expressions').LambdaExpression}
+ */
+function parseLambdaExpression(parser, left, bp, ass) {
+	parser.advance();
+
+	if(left.kind !== ExpressionKinds.SEQUENCE && left.kind !== ExpressionKinds.IDENTIFIER)
+		throw parser.TuberParserError('Se esperaba una expresión de secuencia o un identificador antes del operador "tal que" en expresión lambda');
+
+	const args = (left.kind === ExpressionKinds.SEQUENCE)
+		? left.expressions
+		: [ left ];
+
+	const body = parser.parseExpression(bp, ass);
+	return {
+		kind: ExpressionKinds.FUNCTION,
+		expression: true,
+		args,
+		body,
 	};
 }
 
@@ -265,7 +409,11 @@ module.exports = {
 	parsePrimaryExpression,
 	parseUnaryExpression,
 	parseBinaryExpression,
+	parseCastExpression,
 	parseArrowExpression,
 	parseCallExpression,
+	parseFunctionExpression,
+	parseSequenceExpression,
+	parseLambdaExpression,
 	parseGroupExpression,
 };

@@ -3,8 +3,10 @@ const { TokenKinds, Token } = require('./lexer/tokens');
 const chalk = require('chalk');
 
 const exChalk = {
-	orange: chalk.rgb(255, 162, 105),
+	orange: chalk.rgb(237, 171, 130),
 	ice: chalk.rgb(27, 247, 236),
+	mint: chalk.rgb(13, 222, 191),
+	peach: chalk.rgb(237, 130, 157),
 };
 
 function isInstance(obj) {
@@ -25,7 +27,7 @@ function stringifyPlainPSAST(value) {
 		valueStr = chalk.greenBright(`'${value}'`);
 		break;
 	case 'boolean': 
-		valueStr = chalk.cyanBright(`${value}`);
+		valueStr = exChalk.orange(`${value}`);
 		break;
 	case 'bigint': 
 		valueStr = chalk.yellowBright(`${value}n`);
@@ -34,7 +36,7 @@ function stringifyPlainPSAST(value) {
 		valueStr = chalk.italic.greenBright(value.toString());
 		break;
 	case 'function':
-		valueStr = chalk.blueBright(`fn ${value.name ?? chalk.italic.magentaBright('Anon')}${shortenText(value.toString(), 24)}`);
+		valueStr = exChalk.peach(`fn ${value.name != null ? exChalk.ice(value.name) : exChalk.mint.italic('<anon>')}${shortenText(value.toString(), 24)}`);
 		break;
 	case 'undefined':
 		valueStr = chalk.bold.gray('undefined');
@@ -56,10 +58,23 @@ function stringifySimplePSAST(obj) {
 	const delims = isArray ? '[]' : '{}';
 	let name = '';
 
-	if(!isArray && obj.hasOwnProperty('kind')) {
-		const { kind, ...rest } = obj;
-		obj = rest;
-		name = chalk.cyan(`${kind} `);
+	if(!isArray) {
+		if(obj.hasOwnProperty('equals')) {
+			const { equals, ...rest } = obj;
+			obj = rest;
+		}
+		if(obj.hasOwnProperty('compareTo')) {
+			const { compareTo, ...rest } = obj;
+			obj = rest;
+		}
+		if(obj.hasOwnProperty('kind')) {
+			const { kind, ...rest } = obj;
+			obj = rest;
+			name = chalk.cyan(`${kind} `);
+		}
+
+		if(Object.keys(obj).length === 0)
+			return name ?? chalk.gray(delims);
 	}
 
 	let result = `${name}${chalk.gray(delims[0])} `;
@@ -136,24 +151,44 @@ function stringifyPSAST(obj, indentSize = 2, indent = indentSize) {
 	if(isInstance(obj))
 		return exChalk.orange(obj.toString());
 
+	const isArray = Array.isArray(obj);
+	const delims = isArray ? '[]' : '{}';
+	let hasKind = false;
+	let name = '';
+	let threshold = 2;
+
+	if(!isArray) {
+		hasKind = obj.hasOwnProperty('kind');
+		if(obj.hasOwnProperty('equals')) {
+			const { equals, ...rest } = obj;
+			obj = rest;
+		}
+		if(obj.hasOwnProperty('compareTo')) {
+			const { compareTo, ...rest } = obj;
+			obj = rest;
+		}
+		if(hasKind)
+			threshold = 3;
+	} else if(/**@type {Array}*/(obj).length === 0)
+		return chalk.gray(delims);
+
 	const values = Object.values(obj);
-	if(values.length <= 2 && values.every(v => typeof v !== 'object' || v == null || isInstance(v))) {
+	if(values.length <= threshold && values.every(v => typeof v !== 'object' || v == null || isInstance(v))) {
 		const simple = stringifySimplePSAST(obj);
 		if(simple.length < 127)
 			return simple;
 	}
 
-	const isArray = Array.isArray(obj);
-	const delims = isArray ? '[]' : '{}';
-	let spaces = ' '.repeat(indent);
-	let name = '';
-
-	if(!isArray && obj.hasOwnProperty('kind')) {
+	if(!isArray && hasKind) {
 		const { kind, ...rest } = obj;
 		obj = rest;
 		name = chalk.cyan(`${kind} `);
 	}
 
+	if(values.length === 0)
+		return name ?? chalk.gray(delims);
+
+	let spaces = ' '.repeat(indent);
 	let result = `${name}${chalk.gray(delims[0])}\n`;
 
 	const prefixer = isArray
@@ -173,6 +208,17 @@ function stringifyPSAST(obj, indentSize = 2, indent = indentSize) {
 	return result;
 }
 
+/**
+ * @param {*} ast
+ * @param {Number} [indentSize]
+ * @param {Number} [indentSteps]
+ */
+function logPSAST(ast, indentSize = 2, indentSteps = 0) {
+	const indent = indentSize + indentSize * indentSteps;
+	console.log(stringifyPSAST(ast, indentSize, indent));
+}
+
 module.exports = {
 	stringifyPSAST,
+	logPSAST
 };

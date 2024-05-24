@@ -6,10 +6,14 @@ const BindingPowers = /**@type {const}*/({
     DEFAULT: Ut.siota(),
     /**Segundo vínculo más débil. A veces usado para el operador de coma*/
     COMMA: Ut.iota,
-    /**Tercer vínculo más débil. Usado para operadores a nivel de asignación*/
+    /**Tercer vínculo más débil. Usado para operadores a nivel de asignación y misceláneos*/
     ASSIGNMENT: Ut.iota,
-    /**Usado para operadores a nivel lógico*/
-    LOGICAL: Ut.iota,
+    /**Usado para operadores a nivel lógico. Se encarga de el orden disyuntivo (o), que es el más débil en el nivel*/
+    LOGICAL_DISJUNCTION: Ut.iota,
+    /**Usado para operadores a nivel lógico. Se encarga de el orden conjuntivo (y), que es de más fuerte en el nivel*/
+    LOGICAL_CONJUNCTION: Ut.iota,
+    /**Usado para operadores a nivel equitativo*/
+    EQUALITY: Ut.iota,
     /**Usado para operadores a nivel relacional*/
     RELATIONAL: Ut.iota,
     /**Usado para operadores a nivel aritmético. Se encarga de el orden aditivo*/

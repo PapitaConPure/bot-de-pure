@@ -10,15 +10,18 @@ const ExpressionKinds = /**@type {const}*/({
     IDENTIFIER: 'Identifier',
 
     UNARY: 'UnaryExpression',
+    CAST: 'CastExpression',
     BINARY: 'BinaryExpression',
     ARROW: 'ArrowExpression',
     CALL: 'CallExpression',
+    FUNCTION: 'FunctionExpression',
+    SEQUENCE: 'SequenceExpression',
 });
 /**@typedef {import('types').ValuesOf<typeof ExpressionKinds>} ExpressionKind*/
 
 /**
  * @template {ExpressionKind} [T=ExpressionKind]
- * @typedef {Object} Expression
+ * @typedef {Object} BaseExpressionData
  * @property {Readonly<NonNullable<T>>} kind
  */
 
@@ -26,43 +29,43 @@ const ExpressionKinds = /**@type {const}*/({
 /**
  * @typedef {Object} NumberLiteralExpressionData
  * @property {Number} value
- * @typedef {Expression<'NumberLiteralExpression'> & NumberLiteralExpressionData} NumberLiteralExpression
+ * @typedef {BaseExpressionData<'NumberLiteralExpression'> & NumberLiteralExpressionData} NumberLiteralExpression
  */
 
 /**
  * @typedef {Object} TextLiteralExpressionData
  * @property {String} value
- * @typedef {Expression<'TextLiteralExpression'> & TextLiteralExpressionData} TextLiteralExpression
+ * @typedef {BaseExpressionData<'TextLiteralExpression'> & TextLiteralExpressionData} TextLiteralExpression
  */
 
 /**
  * @typedef {Object} BooleanLiteralExpressionData
  * @property {Boolean} value
- * @typedef {Expression<'BooleanLiteralExpression'> & BooleanLiteralExpressionData} BooleanLiteralExpression
+ * @typedef {BaseExpressionData<'BooleanLiteralExpression'> & BooleanLiteralExpressionData} BooleanLiteralExpression
  */
 
 /**
  * @typedef {Object} ListLiteralExpressionData
  * @property {Array<Expression>} elements
- * @typedef {Expression<'ListLiteralExpression'> & ListLiteralExpressionData} ListLiteralExpression
+ * @typedef {BaseExpressionData<'ListLiteralExpression'> & ListLiteralExpressionData} ListLiteralExpression
  */
 
 /**
  * @typedef {Object} RegistryLiteralExpressionData
  * @property {Map<String, Expression>} entries
- * @typedef {Expression<'RegistryLiteralExpression'> & RegistryLiteralExpressionData} RegistryLiteralExpression
+ * @typedef {BaseExpressionData<'RegistryLiteralExpression'> & RegistryLiteralExpressionData} RegistryLiteralExpression
  */
 
 /**
  * @typedef {Object} NadaLiteralExpressionData
  * @property {null} value
- * @typedef {Expression<'NadaLiteralExpression'> & NadaLiteralExpressionData} NadaLiteralExpression
+ * @typedef {BaseExpressionData<'NadaLiteralExpression'> & NadaLiteralExpressionData} NadaLiteralExpression
  */
 
 /**
  * @typedef {Object} IdentifierData
  * @property {String} name
- * @typedef {Expression<'Identifier'> & IdentifierData} Identifier
+ * @typedef {BaseExpressionData<'Identifier'> & IdentifierData} Identifier
  */
 //#endregion
 
@@ -71,7 +74,14 @@ const ExpressionKinds = /**@type {const}*/({
  * @typedef {Object} UnaryExpressionData
  * @property {Token} operator
  * @property {Expression} argument
- * @typedef {Expression<'UnaryExpression'> & UnaryExpressionData} UnaryExpression
+ * @typedef {BaseExpressionData<'UnaryExpression'> & UnaryExpressionData} UnaryExpression
+ */
+
+/**
+ * @typedef {Object} CastExpressionData
+ * @property {Expression} argument
+ * @property {Token} as
+ * @typedef {BaseExpressionData<'CastExpression'> & CastExpressionData} CastExpression
  */
 
 /**
@@ -79,24 +89,83 @@ const ExpressionKinds = /**@type {const}*/({
  * @property {Token} operator
  * @property {Expression} left
  * @property {Expression} right
- * @typedef {Expression<'BinaryExpression'> & BinaryExpressionData} BinaryExpression
+ * @typedef {BaseExpressionData<'BinaryExpression'> & BinaryExpressionData} BinaryExpression
  */
 
 /**
- * @typedef {Object} ArrowExpressionData
+ * @typedef {Object} BaseArrowExpressionData
  * @property {Expression} holder
- * @property {Expression} key
  * @property {Boolean} computed
- * @typedef {Expression<'ArrowExpression'> & ArrowExpressionData} ArrowExpression
+ * 
+ * @typedef {Object} StoredArrowExpressionData
+ * @property {String} key
+ * @property {false} computed
+ * 
+ * @typedef {Object} ComputedArrowExpressionData
+ * @property {Expression} key
+ * @property {true} computed
+ * 
+ * @typedef {BaseArrowExpressionData & (StoredArrowExpressionData|ComputedArrowExpressionData)} ArrowExpressionData
+ * 
+ * @typedef {BaseExpressionData<'ArrowExpression'> & ArrowExpressionData} ArrowExpression
  */
 
 /**
  * @typedef {Object} CallExpressionData
  * @property {Expression} fn
  * @property {Array<Expression>} args
- * @typedef {Expression<'CallExpression'> & CallExpressionData} CallExpression
+ * @typedef {BaseExpressionData<'CallExpression'> & CallExpressionData} CallExpression
  */
 
+/**
+ * @typedef {Object} BaseFunctionExpressionData
+ * @property {Array<Expression>} args
+ * @typedef {BaseExpressionData<'FunctionExpression'> & BaseFunctionExpressionData} BaseFunctionExpression
+ * 
+ * @typedef {Object} StandardFunctionExpressionData
+ * @property {false} expression
+ * @property {import('./statements').BlockBody} body
+ * @typedef {BaseFunctionExpression & StandardFunctionExpressionData} StandardFunctionExpression
+ * 
+ * @typedef {Object} LambdaExpressionData
+ * @property {true} expression
+ * @property {import('./expressions').Expression} body
+ * @typedef {BaseFunctionExpression & LambdaExpressionData} LambdaExpression
+ * 
+ * @typedef {StandardFunctionExpression | LambdaExpression} FunctionExpression
+ */
+
+/**
+ * @typedef {Object} SequenceExpressionData
+ * @property {Array<Expression>} expressions
+ * @typedef {BaseExpressionData<'SequenceExpression'> & SequenceExpressionData} SequenceExpression
+ */
+
+/**
+ * @typedef {NumberLiteralExpression
+ *          |TextLiteralExpression
+ *          |BooleanLiteralExpression
+ *          |ListLiteralExpression
+ *          |RegistryLiteralExpression
+ *          |NadaLiteralExpression
+ *          |Identifier
+ * } PrimaryExpression
+ */
+
+/**
+ * @typedef {UnaryExpression
+ *          |BinaryExpression
+ *          |CastExpression
+ *          |ArrowExpression
+ *          |CallExpression
+ *          |SequenceExpression
+ *          |FunctionExpression
+ * } ComplexExpression
+ */
+
+/**
+ * @typedef {PrimaryExpression|ComplexExpression} Expression
+ */
 //#endregion
 
 module.exports = {

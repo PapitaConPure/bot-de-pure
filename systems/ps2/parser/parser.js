@@ -4,6 +4,7 @@ const { StatementKinds } = require('../ast/statements');
 const { parseBlock } = require('./syntax/statementParsing');
 const { stmtLookup, nudLookup, ledLookup, bpLookup, createLookups, assLookup } = require('./lookups.js');
 
+/**Representa un Analizador Sintáctico de PuréScript*/
 class Parser {
 	/**@type {Array<Error>}*/
 	errorStack;

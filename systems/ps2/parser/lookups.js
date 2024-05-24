@@ -4,8 +4,12 @@ const {
     parsePrimaryExpression,
     parseUnaryExpression,
     parseBinaryExpression,
+    parseCastExpression,
     parseArrowExpression,
     parseCallExpression,
+    parseFunctionExpression,
+	parseSequenceExpression,
+    parseLambdaExpression,
     parseGroupExpression,
 } = require('./syntax/expressionParsing.js');
 const {
@@ -104,17 +108,25 @@ function createLookups() {
     stmt(TokenKinds.STOP, parseStopStatement);
     stmt(TokenKinds.SEND, parseSendStatement);
 
+    //Coma
+    led(TokenKinds.COMMA, BindingPowers.COMMA, Associativities.LEFT, parseSequenceExpression);
+
+    //Asignación y Misceláneo
+    led(TokenKinds.LAMBDA, BindingPowers.ASSIGNMENT, Associativities.RIGHT, parseLambdaExpression);
+
     //Lógico
-    led(TokenKinds.AND, BindingPowers.LOGICAL, Associativities.LEFT, parseBinaryExpression);
-    led(TokenKinds.OR, BindingPowers.LOGICAL, Associativities.LEFT, parseBinaryExpression);
+    led(TokenKinds.OR, BindingPowers.LOGICAL_DISJUNCTION, Associativities.LEFT, parseBinaryExpression);
+    led(TokenKinds.AND, BindingPowers.LOGICAL_CONJUNCTION, Associativities.LEFT, parseBinaryExpression);
     
+    //Equitativo
+    led(TokenKinds.EQUALS, BindingPowers.EQUALITY, Associativities.LEFT, parseBinaryExpression);
+    led(TokenKinds.NOT_EQUALS, BindingPowers.EQUALITY, Associativities.LEFT, parseBinaryExpression);
+
     //Relacional
     led(TokenKinds.LESS, BindingPowers.RELATIONAL, Associativities.LEFT, parseBinaryExpression);
     led(TokenKinds.LESS_EQUALS, BindingPowers.RELATIONAL, Associativities.LEFT, parseBinaryExpression);
     led(TokenKinds.GREATER, BindingPowers.RELATIONAL, Associativities.LEFT, parseBinaryExpression);
     led(TokenKinds.GREATER_EQUALS, BindingPowers.RELATIONAL, Associativities.LEFT, parseBinaryExpression);
-    led(TokenKinds.EQUALS, BindingPowers.RELATIONAL, Associativities.LEFT, parseBinaryExpression);
-    led(TokenKinds.NOT_EQUALS, BindingPowers.RELATIONAL, Associativities.LEFT, parseBinaryExpression);
     
     //Aditivo
     led(TokenKinds.PLUS, BindingPowers.ADDITIVE, Associativities.LEFT, parseBinaryExpression);
@@ -132,6 +144,9 @@ function createLookups() {
     nud(TokenKinds.NOT, parseUnaryExpression);
     nud(TokenKinds.PLUS, parseUnaryExpression);
     nud(TokenKinds.DASH, parseUnaryExpression);
+    nud(TokenKinds.NUMBER, parseCastExpression);
+    nud(TokenKinds.TEXT, parseCastExpression);
+    nud(TokenKinds.BOOLEAN, parseCastExpression);
     
     //Llamadas
     led(TokenKinds.PAREN_OPEN, BindingPowers.CALL, Associativities.LEFT, parseCallExpression);
@@ -140,13 +155,15 @@ function createLookups() {
     led(TokenKinds.ARROW, BindingPowers.MEMBER, Associativities.LEFT, parseArrowExpression);
     
     //Primarios
-    nud(TokenKinds.NUMBER, parsePrimaryExpression);
-    nud(TokenKinds.STRING, parsePrimaryExpression);
-    nud(TokenKinds.BOOLEAN, parsePrimaryExpression);
+    nud(TokenKinds.LIT_NUMBER, parsePrimaryExpression);
+    nud(TokenKinds.LIT_TEXT, parsePrimaryExpression);
+    nud(TokenKinds.LIT_BOOLEAN, parsePrimaryExpression);
     nud(TokenKinds.LIST, parsePrimaryExpression);
     nud(TokenKinds.REGISTRY, parsePrimaryExpression);
     nud(TokenKinds.IDENTIFIER, parsePrimaryExpression);
     nud(TokenKinds.NADA, parsePrimaryExpression);
+
+    nud(TokenKinds.FUNCTION, parseFunctionExpression)
 
     //Agrupamiento
     nud(TokenKinds.PAREN_OPEN, parseGroupExpression);

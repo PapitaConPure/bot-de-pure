@@ -1,8 +1,8 @@
 /**Contiene tipos de token de lexer*/
 const TokenKinds = /**@type {const}*/({
-	NUMBER: 'Number',
-	STRING: 'String',
-	BOOLEAN: 'Boolean',
+	LIT_NUMBER: 'Number',
+	LIT_TEXT: 'String',
+	LIT_BOOLEAN: 'Boolean',
 	IDENTIFIER: 'Identifier',
 
 	PAREN_OPEN: 'ParenOpen',
@@ -51,6 +51,7 @@ const TokenKinds = /**@type {const}*/({
 
 	ASSIGNMENT: 'Assignment',
 	ARROW: 'Arrow',
+	LAMBDA: 'Lambda',
 	COLON: 'Colon',
 	COMMA: 'Comma',
 	TIMES: 'Times',
@@ -65,9 +66,9 @@ const TokenKinds = /**@type {const}*/({
 	PERCENT: 'Percent',
 	CARET: 'Caret',
 
-	KIND_NUMBER: 'NumberKind',
-	KIND_TEXT: 'TextKind',
-	KIND_BOOLEAN: 'BooleanKind',
+	NUMBER: 'NumberKind',
+	TEXT: 'TextKind',
+	BOOLEAN: 'BooleanKind',
 	LIST: 'List',
 	REGISTRY: 'Registry',
 	EMBED: 'Embed',
@@ -85,9 +86,9 @@ const TokenKinds = /**@type {const}*/({
 /**@type {Map<TokenKind, String>}*/
 const TokenKindTranslations = new Map();
 TokenKindTranslations
-	.set(TokenKinds.NUMBER, 'Literal de Número')
-	.set(TokenKinds.STRING, 'Literal de Texto')
-	.set(TokenKinds.BOOLEAN, 'Literal de Dupla')
+	.set(TokenKinds.LIT_NUMBER, 'Literal de Número')
+	.set(TokenKinds.LIT_TEXT, 'Literal de Texto')
+	.set(TokenKinds.LIT_BOOLEAN, 'Literal de Dupla')
 	.set(TokenKinds.IDENTIFIER, 'Literal de Identificador')
 
 	.set(TokenKinds.PAREN_OPEN, 'Inicio de agrupamiento "("')
@@ -146,9 +147,9 @@ TokenKindTranslations
 	.set(TokenKinds.SLASH, 'Operador "/"')
 	.set(TokenKinds.PERCENT, 'Operador "%"')
 
-	.set(TokenKinds.KIND_NUMBER, 'Tipo Número')
-	.set(TokenKinds.KIND_TEXT, 'Tipo Texto')
-	.set(TokenKinds.KIND_BOOLEAN, 'Tipo Dupla')
+	.set(TokenKinds.NUMBER, 'Tipo Número')
+	.set(TokenKinds.TEXT, 'Tipo Texto')
+	.set(TokenKinds.BOOLEAN, 'Tipo Dupla')
 	.set(TokenKinds.LIST, 'Tipo Lista')
 	.set(TokenKinds.REGISTRY, 'Tipo Registro')
 	.set(TokenKinds.EMBED, 'Tipo Marco')
@@ -211,11 +212,11 @@ const DataKindValues = /**@type {const}*/({
 	INPUT: 'Entrada',
 });
 /**
- * Representa un tipo de token de lexer
+ * Representa un tipo de Token Léxico de PuréScript
  * @typedef {import("types").ValuesOf<DataKindValues>} DataKindValue
  */
 
-/**Representa un token de lexer*/
+/**Representa un Token Léxico de PuréScript*/
 class Token {
 	/**
 	 * El tipo del token
