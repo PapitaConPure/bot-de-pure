@@ -241,22 +241,22 @@ function parseReadStatement(parser) {
 	parser.advance();
 	
 	const dataKind = parser.expectAny(TokenKinds.NUMBER, TokenKinds.TEXT, TokenKinds.BOOLEAN, TokenKinds.LIST, TokenKinds.EMBED)
-		.orFail(`Se esperaba un tipo de entrada antes de expresión receptora en Sentencia "LEER", pero se recibió: ${parser.current.kind}`);
+		.orFail(`Se esperaba un tipo de entrada antes de expresión receptora en Sentencia "LEER", pero se recibió: ${parser.current.translated}`);
+
+	let optional = false;
+	if(parser.hasTokens && parser.current.is(TokenKinds.OPTIONAL)) {
+		optional = true;
+		parser.advance();
+	}
 	
-	const receptor = parser.parseExpression(BindingPowers.ASSIGNMENT);
+	const receptor = parser.parseExpression(BindingPowers.COMMA);
 
 	/**@type {import('../../ast/expressions.js').Expression}*/
 	let fallback = null;
-	let optional = false;
 
 	if(!parser.current.is(TokenKinds.ASSIGNMENT)) {
-		if(parser.hasTokens && parser.current.is(TokenKinds.OPTIONAL)) {
-			optional = true;
-			parser.advance();
-		}
-
 		if(parser.hasTokens && !parser.current.isStatement)
-			throw parser.TuberParserError(`Se esperaba "con" y una expresión (o palabra clave "opcional") luego de identificador en Sentencia "LEER". Sin embargo, se recibió: ${parser.current.value}`);
+			throw parser.TuberParserError(`Se esperaba "con" y una expresión (o palabra clave "opcional") luego de identificador en Sentencia "LEER". Sin embargo, se recibió: ${parser.current.translated}`);
 
 		return {
 			kind: StatementKinds.READ,
@@ -268,7 +268,7 @@ function parseReadStatement(parser) {
 	}
 
 	parser.advance(); //Avanzar "con"
-	fallback = parser.parseExpression(BindingPowers.ASSIGNMENT);
+	fallback = parser.parseExpression(BindingPowers.COMMA);
 
 	if(parser.hasTokens && parser.current.is(TokenKinds.OPTIONAL)) {
 		optional = true;
@@ -295,11 +295,28 @@ function parseDeclarationStatement(parser) {
 	if(parser.current.isAny(TokenKinds.NUMBER, TokenKinds.TEXT, TokenKinds.BOOLEAN, TokenKinds.LIST, TokenKinds.REGISTRY, TokenKinds.EMBED))
 		dataKind = parser.advance();
 
-	const declaration = parser.expect(TokenKinds.IDENTIFIER, 'Se esperaba un identificador luego del tipo de dato en Sentencia "CREAR"').value;
+	const declaration = [ parser.expect(TokenKinds.IDENTIFIER, 'Se esperaba un identificador luego del tipo de dato en Sentencia "CREAR"').value ];
+
+	if(parser.current.is(TokenKinds.COMMA)) {
+		while(parser.current.is(TokenKinds.COMMA)) {
+			parser.advance();
+
+			if(!parser.hasTokens || parser.current.isStatement)
+				break;
+
+			declaration.push(parser.expect(TokenKinds.IDENTIFIER, 'Se esperaba un identificador luego del tipo de dato en Sentencia "CREAR"').value);
+		}
+
+		return {
+			kind: StatementKinds.DECLARATION,
+			declarations: declaration,
+			dataKind: dataKind,
+		};
+	}
 
 	return {
 		kind: StatementKinds.DECLARATION,
-		declaration,
+		declarations: declaration,
 		dataKind: dataKind,
 	};
 }
@@ -313,7 +330,7 @@ function parseSaveStatement(parser) {
 	const identifier = /**@type {String}*/(parser.expect(TokenKinds.IDENTIFIER, `Se esperaba un literal de identificador en Sentencia "GUARDAR", pero se recibió: ${parser.current.value}`).value);
 	
 	parser.expect(TokenKinds.ASSIGNMENT, `Se esperaba "con" y una expresión luego de identificador en Sentencia "GUARDAR", pero se recibió: ${parser.current.value}`);
-	const expression = parser.parseExpression(BindingPowers.ASSIGNMENT);
+	const expression = parser.parseExpression(BindingPowers.COMMA);
 
 	return {
 		kind: StatementKinds.SAVE,
@@ -328,9 +345,9 @@ function parseSaveStatement(parser) {
  */
 function parseAssignmentStatement(parser) {
 	const operator = parser.advance();
-	const receptor = parser.parseExpression(BindingPowers.ASSIGNMENT);
+	const receptor = parser.parseExpression(BindingPowers.COMMA);
 
-	if(receptor.kind !== ExpressionKinds.IDENTIFIER)
+	if(receptor.kind !== ExpressionKinds.IDENTIFIER && receptor.kind !== ExpressionKinds.ARROW)
 		throw 'Se esperaba un identificador como receptor en sentencia de asignación';
 
 	if(operator.isAny(TokenKinds.ADD, TokenKinds.SUBTRACT) && !parser.current.is(TokenKinds.ASSIGNMENT)) {
@@ -343,7 +360,7 @@ function parseAssignmentStatement(parser) {
 	}
 
 	parser.expect(TokenKinds.ASSIGNMENT, `Se esperaba "con" y una expresión luego de identificador en ${translateTokenKind(operator.kind)}, pero se recibió: ${parser.current.value}`);
-	const reception = parser.parseExpression(BindingPowers.ASSIGNMENT);
+	const reception = parser.parseExpression(BindingPowers.COMMA);
 
 	return ({
 		kind: StatementKinds.ASSIGNMENT,
@@ -386,9 +403,9 @@ function parseEndStatement(parser) {
 function parseStopStatement(parser) {
 	parser.advance();
 	parser.expect(TokenKinds.ASSIGNMENT);
-	const stopMessage = parser.parseExpression(BindingPowers.ASSIGNMENT);
+	const stopMessage = parser.parseExpression(BindingPowers.COMMA);
 	parser.expect(TokenKinds.IF);
-	const condition = parser.parseExpression(BindingPowers.ASSIGNMENT);
+	const condition = parser.parseExpression(BindingPowers.COMMA);
 
 	return {
 		kind: StatementKinds.STOP,

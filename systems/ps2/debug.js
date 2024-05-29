@@ -1,5 +1,5 @@
 const { shortenText } = require('../../func');
-const { TokenKinds, Token } = require('./lexer/tokens');
+const { EmbedBuilder } = require('discord.js');
 const chalk = require('chalk');
 
 const exChalk = {
@@ -10,7 +10,7 @@ const exChalk = {
 };
 
 function isInstance(obj) {
-	return obj?.constructor?.name && ![ 'Object', 'Array', 'Map' ].includes(obj.constructor.name);
+	return obj?.constructor?.name && ![ 'Object', 'Array', 'Map', 'EmbedBuilder' ].includes(obj.constructor.name);
 }
 
 /**
@@ -36,7 +36,12 @@ function stringifyPlainPSAST(value) {
 		valueStr = chalk.italic.greenBright(value.toString());
 		break;
 	case 'function':
-		valueStr = exChalk.peach(`fn ${value.name != null ? exChalk.ice(value.name) : exChalk.mint.italic('<anon>')}${shortenText(value.toString(), 24)}`);
+		const fnString = value
+			.toString()
+			.slice(9 + value.name.length)
+			.replace(/(\r?\n)+/g, '')
+			.replace(/[\t ]+/g, ' ');
+		valueStr = exChalk.peach(`fn ${value.name != null ? exChalk.ice(value.name) : exChalk.mint.italic('<anon>')}${chalk.gray(shortenText(fnString, 48))}`);
 		break;
 	case 'undefined':
 		valueStr = chalk.bold.gray('undefined');
@@ -147,6 +152,9 @@ function stringifyPSAST(obj, indentSize = 2, indent = indentSize) {
 
 	if(obj instanceof Map)
 		return stringifyPSASTMap(obj, indentSize, indent);
+
+	if(obj instanceof EmbedBuilder)
+		return stringifyPSAST(obj.data, indentSize, indent);
 
 	if(isInstance(obj))
 		return exChalk.orange(obj.toString());

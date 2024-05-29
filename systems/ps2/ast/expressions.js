@@ -9,6 +9,7 @@ const ExpressionKinds = /**@type {const}*/({
     NADA_LITERAL: 'NadaLiteralExpression',
     IDENTIFIER: 'Identifier',
 
+    ARGUMENT: 'Argument',
     UNARY: 'UnaryExpression',
     CAST: 'CastExpression',
     BINARY: 'BinaryExpression',
@@ -96,16 +97,19 @@ const ExpressionKinds = /**@type {const}*/({
  * @typedef {Object} BaseArrowExpressionData
  * @property {Expression} holder
  * @property {Boolean} computed
+ * @typedef {BaseExpressionData<'ArrowExpression'> & BaseArrowExpressionData} BaseArrowExpression
  * 
  * @typedef {Object} StoredArrowExpressionData
- * @property {String} key
  * @property {false} computed
+ * @property {String} key
+ * @typedef {BaseArrowExpression & StoredArrowExpressionData} StoredArrowExpression
  * 
  * @typedef {Object} ComputedArrowExpressionData
- * @property {Expression} key
  * @property {true} computed
+ * @property {Expression} key
+ * @typedef {BaseArrowExpression & ComputedArrowExpressionData} ComputedArrowExpression
  * 
- * @typedef {BaseArrowExpressionData & (StoredArrowExpressionData|ComputedArrowExpressionData)} ArrowExpressionData
+ * @typedef {StoredArrowExpression | ComputedArrowExpression} ArrowExpressionData
  * 
  * @typedef {BaseExpressionData<'ArrowExpression'> & ArrowExpressionData} ArrowExpression
  */
@@ -118,13 +122,28 @@ const ExpressionKinds = /**@type {const}*/({
  */
 
 /**
+ * @typedef {Object} BaseArgumentExpressionData
+ * @property {String} identifier
+ * 
+ * @typedef {Object} RequiredArgumentData
+ * @property {false} optional
+ * 
+ * @typedef {Object} OptionalArgumentData
+ * @property {true} optional
+ * @property {Expression} fallback
+ * 
+ * @typedef {BaseArgumentExpressionData & (RequiredArgumentData | OptionalArgumentData)} ArgumentExpressionData
+ * @typedef {BaseExpressionData<'Argument'> & ArgumentExpressionData} ArgumentExpression
+ */
+
+/**
  * @typedef {Object} BaseFunctionExpressionData
- * @property {Array<Expression>} args
+ * @property {Array<ArgumentExpression>} args
  * @typedef {BaseExpressionData<'FunctionExpression'> & BaseFunctionExpressionData} BaseFunctionExpression
  * 
  * @typedef {Object} StandardFunctionExpressionData
  * @property {false} expression
- * @property {import('./statements').BlockBody} body
+ * @property {import('./statements').BlockStatement} body
  * @typedef {BaseFunctionExpression & StandardFunctionExpressionData} StandardFunctionExpression
  * 
  * @typedef {Object} LambdaExpressionData
@@ -159,6 +178,7 @@ const ExpressionKinds = /**@type {const}*/({
  *          |ArrowExpression
  *          |CallExpression
  *          |SequenceExpression
+ *          |ArgumentExpression
  *          |FunctionExpression
  * } ComplexExpression
  */

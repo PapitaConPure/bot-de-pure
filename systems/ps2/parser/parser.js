@@ -88,7 +88,7 @@ class Parser {
 			this.#pos--;
 			const parser = this;
 			return {
-				orFail: function(errorMessage = `Se esperaba un token de tipo: ${translateTokenKinds(...tokenKinds).join('/')}, pero se recibió: ${token.value}`) {
+				orFail: function(errorMessage = `Se esperaba un token de tipo: ${translateTokenKinds(...tokenKinds).join('/')}, pero se recibió: ${token.translated}`) {
 					throw parser.TuberParserError(errorMessage);
 				},
 			};
@@ -202,13 +202,6 @@ class Parser {
 		}
 		
 		throw this.TuberParserError(`Se esperaba un indicador de sentencia válido, pero se recibió: ${translateTokenKind(this.current.kind)}, con valor: ${this.current.value}`);
-
-		//const expression = this.parseExpression(BindingPowers.DEFAULT);
-
-		//return /**@type {import('../ast/statements').ExpressionStatement}*/({
-		//	kind: StatementKinds.EXPRESSION,
-		//	expression,
-		//});
 	}
 }
 

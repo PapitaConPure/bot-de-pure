@@ -94,7 +94,7 @@ async function executeTuber(request, tuber, inputOptions) {
         const scope = new TuberScope();
         declareNatives(scope);
         await declareContext(scope, request, tuber, args);
-
+        
         const interpreter = new TuberInterpreter();
         result = interpreter.evaluateProgram(program, scope, request, isTestDrive);
         if(!result.sendStack.length) {

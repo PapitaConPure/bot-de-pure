@@ -2,28 +2,45 @@ const { Scope } = require('./scope');
 const { TokenKinds } = require('../lexer/tokens');
 const { ExpressionKinds } = require('../ast/expressions');
 const { StatementKinds } = require('../ast/statements');
-const { ValueKinds, makeNumber, makeText, makeBoolean, makeList, makeRegistry, makeEmbed, makeNada, makeValue } = require('./values');
-const { UnaryExpressionLookups, BinaryExpressionLookups, ValueKindLookups } = require('./lookups');
+const { ValueKinds, makeNumber, makeText, makeBoolean, makeList, makeRegistry, makeEmbed, makeNada, coerceValue, isInternalOperable, makeNativeFunction, makeFunction, makeLambda, ValueKindTranslationLookups, defaultValueOf } = require('./values');
+const { UnaryExpressionLookups, BinaryExpressionLookups: BinaryOperationLookups, ValueKindLookups } = require('./lookups');
+const { NativeMethodsLookup } = require('./environment/environment');
 
 /**Representa un Intérprete de PuréScript*/
 class Interpreter {
 	/**@type {Array<Error>}*/
-	errorStack;
-	/**@type {Array<*>}*/
-	inputStack;
+	#errorStack;
+	/**@type {Array<import('../purescript').TuberInput>}*/
+	#inputStack;
+	/**@type {Map<String, import('../purescript').TuberInput>}*/
+	#inputLookup;
 	/**@type {Array<import('./values').RuntimeValue>}*/
-	sendStack;
-	/**@type {Boolean}*/
-	#isTestDrive;
+	#sendStack;
+	/**@type {Map<String, import('./values').RuntimeValue>}*/
+	#saveTable;
+	/**@type {import('../../../commands/Commons/typings').ComplexCommandRequest?}*/
+	#request;
 	/**@type {Boolean}*/
 	#stop;
+	/**@type {Number}*/
+	#quota;
+	/**@type {(node: import('../ast/statements').ReadStatement, scope: Scope) => import('./values').NadaValue}*/
+	#evaluateReadStatement;
 
 	constructor() {
-		this.errorStack = [];
-		this.inputStack = [];
-		this.sendStack = [];
-		this.#isTestDrive = false;
+		this.#errorStack = [];
+		this.#inputStack = [];
+		this.#inputLookup = new Map();
+		this.#sendStack = [];
+		this.#saveTable = new Map();
+		this.#request = null;
 		this.#stop = false;
+		this.#quota = 1000;
+		this.#evaluateReadStatement = null;
+	}
+
+	get request() {
+		return this.#request;
 	}
 
 	/**
@@ -57,46 +74,55 @@ class Interpreter {
 
 	/**
 	 * @template {import('./values').ValueKind} T
-	 * @param {import('../ast/statements').Statement|import('../ast/expressions').Expression} node
+	 * @param {import('../ast/expressions').Expression} node
 	 * @param {import('./scope').Scope} scope
 	 * @param {T} as
 	 * @returns {Extract<import('./values').RuntimeValue, { kind: T }>}
 	 */
-	evaluateAs(node, scope, as) {
-		return /**@type {Extract<import('./values').RuntimeValue, { kind: T }>}*/(makeValue(this, this.evaluate(node, scope), as));
+	evaluateAs(node, scope, as, mustBeDeclared = true) {
+		return /**@type {Extract<import('./values').RuntimeValue, { kind: T }>}*/(coerceValue(this, this.evaluate(node, scope, mustBeDeclared), as));
 	}
 
 	/**
 	 * Evalúa un nodo programa
 	 * @param {import('../ast/statements').ProgramStatement} ast
 	 * @param {import('./scope').Scope} scope
+	 * @param {import('../../../commands/Commons/typings').ComplexCommandRequest} request
 	 * @param {Boolean} [isTestDrive]
 	 */
-	evaluateProgram(ast, scope, isTestDrive = false) {
+	evaluateProgram(ast, scope, request, isTestDrive = false) {
 		if(ast == null || ast.kind !== StatementKinds.PROGRAM || ast.body == null)
 			throw `Se esperaba AST válido para interrpretar`;
 
-		this.errorStack = [];
-		this.inputStack = [];
-		this.sendStack = [];
-		this.#isTestDrive = isTestDrive;
-		this.#stop = false; //?
+		this.#errorStack = [];
+		this.#inputStack = [];
+		this.#sendStack = [];
+		this.#request = request;
+		this.#stop = false;
+		this.#evaluateReadStatement = isTestDrive
+			? this.#evaluateTestDriveRead
+			: this.#evaluateProductionRead;
+			
 		const returned = this.#evaluateBlock(ast, scope);
 
 		return {
-			errorStack: this.errorStack,
-			sendStack: this.sendStack,
+			errorStack: this.#errorStack.slice(),
+			sendStack: this.#sendStack.slice(),
+			saveTable: new Map(this.#saveTable.entries()),
 			returned,
 		};
 	}
 
 	/**
-	 * Evalúa una sentencia o expresión y devuelve un valor extraído de las mismas
-	 * @param {import('../ast/statements').Statement|import('../ast/expressions').Expression} node
+	 * Evalúa una sentencia y devuelve el valor Nada
+	 * @param {import('../ast/statements').Statement} node
 	 * @param {import('./scope').Scope} scope
 	 * @returns {import('./values').RuntimeValue}
 	 */
-	evaluate(node, scope) {
+	evaluateStatement(node, scope) {
+		if(this.#quota-- <= 0)
+			throw this.TuberInterpreterError(`Límite de ejecución de sentencias agotado. Esto puede deberse a un bucle infinito, abuso de estructuras iterativas o código poco eficiente`);
+
 		switch(node.kind) {
 		//Estructuras de control
 		case StatementKinds.BLOCK:
@@ -120,35 +146,53 @@ class Interpreter {
 		case StatementKinds.FOR:
 			return this.#evaluateFor(node, scope);
 
-		//Sentencias
+		//Imperativas
 		case StatementKinds.EXPRESSION:
-			return this.evaluate(node.expression, scope);
+			return this.#evaluateExpressionStatement(node, scope);
 
 		case StatementKinds.READ:
-			return this.#evaluateRead(node, scope);
+			return this.#evaluateReadStatement(node, scope);
 
 		case StatementKinds.DECLARATION:
-			return this.#evaluateDeclaration(node, scope);
+			return this.#evaluateDeclarationStatement(node, scope);
 
 		case StatementKinds.SAVE:
-			throw this.TuberInterpreterError('La característica todavía no está implementada: Secuencia "GUARDAR". ¡Vuelve a intentarlo en una futura versión de PuréScript!');
+			return this.#evaluateSaveStatement(node, scope);
 
 		case StatementKinds.ASSIGNMENT:
-			return this.#evaluateAssignment(node, scope);
+			return this.#evaluateAssignmentStatement(node, scope);
 
 		case StatementKinds.RETURN:
-			return this.#evaluateReturn(node, scope);
+			return this.#evaluateReturnStatement(node, scope);
 
 		case StatementKinds.END:
-			return this.#evaluateEnd();
+			return this.#evaluateEndStatement();
 
 		case StatementKinds.STOP:
-			return this.#evaluateStop(node, scope);
+			return this.#evaluateStopStatement(node, scope);
 
 		case StatementKinds.SEND:
-			return this.#evaluateSend(node, scope);
+			return this.#evaluateSendStatement(node, scope);
 
-		//Expresiones
+		default:
+			throw this.TuberInterpreterError(`Se encontró un nodo inesperado u no implementado al evaluar sentencia: ${node.kind}`);
+		}
+	}
+
+	/**
+	 * Evalúa una sentencia o expresión y devuelve un valor extraído de las mismas
+	 * @param {import('../ast/expressions').Expression} node
+	 * @param {import('./scope').Scope} scope
+	 * @param {Boolean} [mustBeDeclared]
+	 * @returns {import('./values').RuntimeValue}
+	 */
+	evaluate(node, scope, mustBeDeclared = true) {
+		if(this.#quota <= 0)
+			throw this.TuberInterpreterError(`Límite de ejecución de sentencias agotado. Esto puede deberse a un bucle infinito, abuso de estructuras iterativas o código poco eficiente`);
+		
+		this.#quota -= 0.1;
+
+		switch(node.kind) {
 		case ExpressionKinds.NUMBER_LITERAL:
 			return makeNumber(node.value);
 
@@ -165,31 +209,34 @@ class Interpreter {
 			return this.#evaluateRegistry(node, scope);
 
 		case ExpressionKinds.FUNCTION:
-			throw this.TuberInterpreterError(`No implementado: ${node.kind}`);
+			return this.#evaluateFunction(node, scope);
 
 		case ExpressionKinds.NADA_LITERAL:
 			return makeNada();
 
 		case ExpressionKinds.IDENTIFIER:
-			return scope.lookup(node.name, true);
+			return scope.lookup(node.name, mustBeDeclared);
 
 		case ExpressionKinds.UNARY:
-			return this.#evaluateUnaryExpression(node, scope);
+			return this.#evaluateUnaryExpression(node, scope, mustBeDeclared);
 
 		case ExpressionKinds.BINARY:
-			return this.#evaluateBinaryExpression(node, scope);
+			return this.#evaluateBinaryExpression(node, scope, mustBeDeclared);
 			
 		case ExpressionKinds.CAST:
-			return this.#evaluateCastExpression(node, scope);
+			return this.#evaluateCastExpression(node, scope, mustBeDeclared);
+
+		case ExpressionKinds.SEQUENCE:
+			return this.#evaluateSequence(node, scope);
 
 		case ExpressionKinds.ARROW:
-			throw this.TuberInterpreterError(`No implementado: ${node.kind}`);
+			return this.#evaluateArrowExpression(node, scope);
 
 		case ExpressionKinds.CALL:
-			throw this.TuberInterpreterError(`No implementado: ${node.kind}`);
+			return this.#evaluateCallExpression(node, scope);
 
 		default:
-			throw this.TuberInterpreterError(`Se encontró un nodo desconocido u no implementado: ${node.kind}`);
+			throw this.TuberInterpreterError(`Se encontró un nodo inesperado u no implementado al evaluar expresión: ${node.kind}`);
 		}
 	}
 
@@ -197,15 +244,14 @@ class Interpreter {
 	 * 
 	 * @param {import('../ast/statements').ProgramStatement|import('../ast/statements').BlockStatement} node 
 	 * @param {import('./scope').Scope} scope
-	 * @param {Boolean} [avoidNewScope=false]
 	 */
-	#evaluateBlock(node, scope, avoidNewScope = false) {
+	#evaluateBlock(node, scope) {
 		/**@type {import('./values').RuntimeValue}*/
 		let returned = makeNada();
 
-		const blockScope = avoidNewScope ? scope : new Scope(this, scope);
+		const blockScope = new Scope(this, scope);
 		for(const statement of node.body) {
-			returned = this.evaluate(statement, blockScope);
+			returned = this.evaluateStatement(statement, blockScope);
 			if(this.#stop) break;
 		}
 
@@ -220,12 +266,12 @@ class Interpreter {
 	#evaluateConditional(node, scope) {
 		const { test, consequent, alternate } = node;
 
-		const testValue = this.evaluateAs(test, scope, ValueKinds.BOOLEAN);
+		const testValue = this.evaluateAs(test, scope, ValueKinds.BOOLEAN, false);
 		if(testValue.value)
 			return this.#evaluateBlock(consequent, scope);
 		
 		if(alternate != null)
-			return this.evaluate(alternate, scope);
+			return this.evaluateStatement(alternate, scope);
 
 		return makeNada();
 	}
@@ -301,7 +347,7 @@ class Interpreter {
 
 		const containerValue = this.evaluate(container, scope);
 		if(!this.isAnyOf(containerValue, ValueKinds.LIST, ValueKinds.REGISTRY))
-			throw this.TuberInterpreterError(`Se esperaba un valor de Lista o Registro en expresión de contenedor de Sentencia "PARA CADA"`);
+			throw this.TuberInterpreterError(`Se esperaba un valor de Lista o Registro en expresión de contenedor de Sentencia "PARA CADA", pero "${this.#exprStr(container)}" fue de tipo ${ValueKindTranslationLookups.get(containerValue.kind)}`);
 
 		const entryNames = (this.is(containerValue, ValueKinds.LIST) ? containerValue.elements : containerValue.entries).keys();
 		const forEachScope = new Scope(this, scope);
@@ -343,7 +389,7 @@ class Interpreter {
 		const forScope = new Scope(this, scope);
 		const startValue = this.evaluate(start, scope);
 		const testFn = () => this.evaluateAs(test, forScope, ValueKinds.BOOLEAN).value;
-		const stepFn = () => this.evaluate(step, forScope);
+		const stepFn = () => this.evaluateStatement(step, forScope);
 
 		for(forScope.assignVariable(identifier, startValue); testFn(); stepFn()) {
 			evaluated = this.#evaluateBlock(body, forScope);
@@ -381,39 +427,129 @@ class Interpreter {
 
 		return evaluated;
 	}
+	
+	/**
+	 * 
+	 * @param {import('../ast/statements').ExpressionStatement} node 
+	 * @param {Scope} scope 
+	 * @returns 
+	 */
+	#evaluateExpressionStatement(node, scope) {
+		this.evaluate(node.expression, scope);
+		return makeNada();
+	}
 
 	/**
 	 * 
 	 * @param {import('../ast/statements').ReadStatement} node 
 	 * @param {import('./scope').Scope} scope
 	 */
-	#evaluateRead(node, scope) {
+	#evaluateTestDriveRead(node, scope) {
 		const { receptor, dataKind, optional, fallback } = node;
-		// PENDIENTE
-		//this.inputStack.push();
+		
+		//Cargar valor de prueba
+		const valueKind = ValueKindLookups.get(dataKind.kind);
+		const fallbackValue = (fallback != null) ? this.evaluate(fallback, scope) : defaultValueOf(valueKind);
+		const coercedValue = coerceValue(this, fallbackValue, valueKind);
+		const name = this.#exprStr(receptor);
+		this.#assignValueToExpression(receptor, coercedValue, scope);
+		
+		//Registrar nueva Entrada o marcar Entrada existente como extensiva
+		if(this.#inputLookup.has(name)) {
+			const input = this.#inputLookup.get(name);
+			input.spread = true;
+		} else {
+			//No aceptar más Entradas extensivas si ya se detectó una
+			if(this.#inputStack.length > 0 && this.#inputStack[this.#inputStack.length - 1].spread) {
+				const spreadInput = this.#inputStack[this.#inputStack.length - 1];
+				throw this.TuberInterpreterError([
+					'Solo puede haber una única Entrada extensiva por Tubérculo, y debe ser la última Entrada del mismo.',
+					`La Entrada anterior, "${spreadInput.name}", se detectó como extensiva. Sin embargo, luego se leyó una Entrada con otro nombre: "${name}".`,
+					`Acomoda tu código de forma tal que la Entrada extensiva sea la última en ser leída`,
+				].join('\n'));
+			}
+
+			const input = /**@type {import('../purescript').TuberInput}*/({
+				kind: valueKind,
+				name,
+				optional,
+				spread: false,
+			});
+	
+			this.#inputStack.push(input);
+			this.#inputLookup.set(name, input);
+		}
+
 		return makeNada();
 	}
 
 	/**
 	 * 
+	 * @param {import('../ast/statements').ReadStatement} node 
+	 * @param {import('./scope').Scope} scope
+	 */
+	#evaluateProductionRead(node, scope) {
+		const { receptor, dataKind, optional, fallback } = node;
+
+		const receptorString = this.#exprStr(receptor);
+		const valueKind = ValueKindLookups.get(dataKind.kind);
+		let receptionValue = scope.lookup(receptorString, false);
+
+		if(receptionValue.kind === ValueKinds.NADA) {
+			if(optional)
+				receptionValue = (fallback != null) ? this.evaluate(fallback, scope) : defaultValueOf(valueKind);
+			else 
+				throw this.TuberInterpreterError(`No se recibió un valor para la Entrada obligatoria "${receptorString}" de tipo ${dataKind.translated}`);
+		}
+
+		const coercedValue = coerceValue(this, receptionValue, valueKind);
+		this.#assignValueToExpression(receptor, coercedValue, scope);
+
+		return makeNada();
+	}
+
+	/**
+	 * Evalúa una sentencia de declaración de variable.
+	 * 
+	 * La variable no debe estar ya declarada en el mismo ámbito.
+	 * Si la variable existía en un ámbito padre, se declara otra en el ámbito actual que opaca la del ámbito padre
 	 * @param {import('../ast/statements').DeclarationStatement} node 
 	 * @param {import('./scope').Scope} scope
 	 */
-	#evaluateDeclaration(node, scope) {
-		const { dataKind, declaration } = node;
+	#evaluateDeclarationStatement(node, scope) {
+		const { dataKind, declarations } = node;
 
 		const valueKind = ValueKindLookups.get(dataKind.kind);
-		scope.declareVariable(declaration, valueKind);
+		for(const declaration of declarations)
+			scope.declareVariable(declaration, valueKind);
 
 		return makeNada();
 	}
 
 	/**
+	 * Evalúa una sentencia de guardado de variable.
 	 * 
+	 * La variable se guarda en la base de datos para recuperarla en ejecuciones subsecuentes.
+	 * @param {import('../ast/statements').SaveStatement} node 
+	 * @param {Scope} scope 
+	 */
+	#evaluateSaveStatement(node, scope) {
+		const { identifier, expression } = node;
+
+		const value = this.evaluate(expression, scope);
+		this.#saveTable.set(identifier, value);
+
+		return makeNada();
+	}
+
+	/**
+	 * Evalúa una sentencia de asignación de variable.
+	 * 
+	 * Si la variable no está declarada en este ámbito o los ámbitos padre, se la declara en este ámbito
 	 * @param {import('../ast/statements').AssignmentStatement} node 
 	 * @param {import('./scope').Scope} scope
 	 */
-	#evaluateAssignment(node, scope) {
+	#evaluateAssignmentStatement(node, scope) {
 		const { operator, receptor, reception } = node;
 
 		/**@type {import('./values').RuntimeValue}*/
@@ -424,33 +560,16 @@ class Interpreter {
 
 			receptionValue = makeNumber(1);
 		} else
-			receptionValue = this.evaluate(reception, scope);
+			receptionValue = this.evaluate(reception, scope, false);
 
-		if(BinaryExpressionLookups.has(operator.kind)) {
-			const operation = BinaryExpressionLookups.get(operator.kind);
-			const receptorValue = this.evaluate(receptor, scope);
+		//SUMAR, RESTAR, etc...
+		if(BinaryOperationLookups.has(operator.kind)) {
+			const operation = BinaryOperationLookups.get(operator.kind);
+			const receptorValue = this.evaluate(receptor, scope, false);
 			receptionValue = operation(this, receptorValue, receptionValue);
 		}
 
-		/**@type {String}*/
-		let identifier;
-		switch(receptor.kind) {
-		case ExpressionKinds.IDENTIFIER:
-			identifier = receptor.name;
-			scope.assignVariable(identifier, receptionValue);
-			break;
-		case ExpressionKinds.ARROW:
-			// PENDIENTE
-			if(receptor.computed === true) {
-				identifier = makeValue(this, this.evaluate(receptor, scope), ValueKinds.TEXT).value;
-			} else {
-				identifier = receptor.key;
-			}
-			scope.assignVariable(identifier, receptionValue);
-			break;
-		default:
-			throw this.TuberInterpreterError(`Expresión inválida en lado receptor (izquierdo) de sentencia de asignación. Se recibió: ${receptor.kind}`);
-		}
+		this.#assignValueToExpression(receptor, receptionValue, scope);
 
 		return makeNada();
 	}
@@ -460,15 +579,16 @@ class Interpreter {
 	 * @param {import('../ast/statements').ReturnStatement} node 
 	 * @param {import('./scope').Scope} scope
 	 */
-	#evaluateReturn(node, scope) {
+	#evaluateReturnStatement(node, scope) {
+		const returned = this.evaluate(node.expression, scope, false);
 		this.#stop = true;
-		return this.evaluate(node.expression, scope);
+		return returned;
 	}
 
 	/**
 	 * 
 	 */
-	#evaluateEnd() {
+	#evaluateEndStatement() {
 		this.#stop = true;
 		return makeNada();
 	}
@@ -478,15 +598,15 @@ class Interpreter {
 	 * @param {import('../ast/statements').StopStatement} node 
 	 * @param {import('./scope').Scope} scope
 	 */
-	#evaluateStop(node, scope) {
+	#evaluateStopStatement(node, scope) {
 		const { condition, stopMessage } = node;
 
-		const conditionValue = makeValue(this, this.evaluate(condition, scope), ValueKinds.BOOLEAN);
-		const stopMessageValue = makeValue(this, this.evaluate(stopMessage, scope), ValueKinds.TEXT);
+		const conditionValue = coerceValue(this, this.evaluate(condition, scope, false), ValueKinds.BOOLEAN);
+		const stopMessageValue = coerceValue(this, this.evaluate(stopMessage, scope), ValueKinds.TEXT);
 
 		if(conditionValue.value) {
 			this.#stop = true;
-			this.sendStack.push(stopMessageValue)
+			this.#sendStack.push(stopMessageValue)
 			return stopMessageValue;
 		}
 
@@ -498,9 +618,19 @@ class Interpreter {
 	 * @param {import('../ast/statements').SendStatement} node 
 	 * @param {import('./scope').Scope} scope
 	 */
-	#evaluateSend(node, scope) {
-		const send = this.evaluate(node.expression, scope);
-		this.sendStack.push(send);
+	#evaluateSendStatement(node, scope) {
+		let sendValue = this.evaluate(node.expression, scope, false);
+
+		switch(sendValue.kind) {
+		case ValueKinds.LIST:
+			sendValue = makeList([ ... sendValue.elements ]);
+			break;
+		case ValueKinds.REGISTRY:
+			sendValue = makeRegistry(new Map([ ...sendValue.entries.entries() ]));
+			break;
+		}
+
+		this.#sendStack.push(sendValue);
 		return makeNada();
 	}
 
@@ -522,12 +652,31 @@ class Interpreter {
 	 */
 	#evaluateRegistry(node, scope) {
 		const { entries } = node;
-		
-		const evaluatedEntries = new Map();
-		for(const [ key, value ] of entries.entries())
-			evaluatedEntries.set(key, this.evaluate(value, scope));
 
-		return makeRegistry(evaluatedEntries);
+		const registryValue = makeRegistry(new Map());
+		
+		for(const [ key, value ] of entries.entries()) {
+			let evaluated = this.evaluate(value, scope);
+
+			if(evaluated.kind === ValueKinds.NATIVE_FN)
+				evaluated = evaluated.with(registryValue);
+
+			registryValue.entries.set(key, evaluated);
+		}
+
+		return registryValue;
+	}
+
+	/**
+	 * 
+	 * @param {import('../ast/expressions').FunctionExpression} node 
+	 * @param {import('./scope').Scope} scope
+	 */
+	#evaluateFunction(node, scope) {
+		if(node.expression === true)
+			return makeLambda(node.body, node.args);
+
+		return makeFunction(node.body, node.args, scope);
 	}
 
 	/**
@@ -535,14 +684,14 @@ class Interpreter {
 	 * @param {import('../ast/expressions').UnaryExpression} node 
 	 * @param {import('./scope').Scope} scope
 	 */
-	#evaluateUnaryExpression(node, scope) {
+	#evaluateUnaryExpression(node, scope, mustBeDeclared = true) {
 		const { operator, argument } = node;
 
-		const argumentValue = this.evaluate(argument, scope);
+		const argumentValue = this.evaluate(argument, scope, mustBeDeclared);
 
 		const operation = UnaryExpressionLookups.get(operator.kind);
 		if(operation == null)
-			throw this.TuberInterpreterError('Operación binaria inválida');
+			throw this.TuberInterpreterError(`Operación unaria inválida. No se puede evaluar ${this.#exprStr(node)} porque el operador "${operator.value}" es inválido`);
 
 		return operation(this, argumentValue);
 	}
@@ -552,15 +701,15 @@ class Interpreter {
 	 * @param {import('../ast/expressions').BinaryExpression} node 
 	 * @param {import('./scope').Scope} scope
 	 */
-	#evaluateBinaryExpression(node, scope) {
+	#evaluateBinaryExpression(node, scope, mustBeDeclared = true) {
 		const { operator, left, right } = node;
 
-		const leftValue = this.evaluate(left, scope);
-		const rightValue = this.evaluate(right, scope);
+		const leftValue = this.evaluate(left, scope, mustBeDeclared);
+		const rightValue = this.evaluate(right, scope, mustBeDeclared);
 
-		const operation = BinaryExpressionLookups.get(operator.kind);
+		const operation = BinaryOperationLookups.get(operator.kind);
 		if(operation == null)
-			throw this.TuberInterpreterError('Operación binaria inválida');
+			throw this.TuberInterpreterError(`Operación binaria inválida. No se puede evaluar ${this.#exprStr(node)} porque el operador "${operator.value}" es inválido`);
 		
 		return operation(this, leftValue, rightValue);
 	}
@@ -569,11 +718,320 @@ class Interpreter {
 	 * @param {import('../ast/expressions').CastExpression} node 
 	 * @param {import("./scope").Scope} scope
 	 */
-	#evaluateCastExpression(node, scope) {
+	#evaluateCastExpression(node, scope, mustBeDeclared = true) {
 		const { argument, as } = node;
-		const value = this.evaluate(argument, scope)
+		const value = this.evaluate(argument, scope, false);
 		const valueKind = ValueKindLookups.get(as.kind);
-		return makeValue(this, value, valueKind);
+		return coerceValue(this, value, valueKind);
+	}
+
+	/**
+	 * 
+	 * @param {import('../ast/expressions').SequenceExpression} node 
+	 * @param {import("./scope").Scope} scope
+	 */
+	#evaluateSequence(node, scope) {
+		/**@type {import('./values').RuntimeValue}*/
+		let lastEvaluation = makeNada();
+
+		for(const expression of node.expressions) {
+			lastEvaluation = this.evaluate(expression, scope);
+		}
+
+		return lastEvaluation;
+	}
+
+	/**
+	 * Satanás está DIRECTAMENTE INVOLUCRADO en esta función
+	 * @param {import('../ast/expressions').ArrowExpression} node 
+	 * @param {import("./scope").Scope} scope
+	 */
+	#evaluateArrowExpression(node, scope) {
+		const { holder } = node;
+
+		const holderValue = this.evaluate(holder, scope);
+		const keyString = node.computed === true ? this.evaluateAs(node.key, scope, ValueKinds.TEXT).value : node.key;
+
+		switch(holderValue.kind) {
+		case ValueKinds.NUMBER: {
+			const method = this.#tryFindNativeMethod(holderValue, keyString);
+			if(method) return method;
+			return makeNada();
+		}
+
+		case ValueKinds.TEXT: {
+			if(keyString === 'largo')
+				return makeNumber(holderValue.value.length);
+
+			const method = this.#tryFindNativeMethod(holderValue, keyString);
+			if(method) return method;
+			return makeNada();
+		}
+
+		case ValueKinds.BOOLEAN: {
+			throw this.TuberInterpreterError(`El contenedor "${this.#exprStr(holder)}" en expresión de flecha "->" fue de tipo Dupla, el cual no contiene miembros accedibles por clave`);
+		}
+
+		case ValueKinds.LIST: {
+			if(keyString === 'largo')
+				return makeNumber(holderValue.elements.length);
+
+			const method = this.#tryFindNativeMethod(holderValue, keyString);
+			if(method) return method;
+
+			const index = +keyString;
+			if(isInternalOperable(index))
+				return holderValue.elements[index] ?? makeNada();
+
+			return makeNada();
+		}
+
+		case ValueKinds.REGISTRY: {
+			const method = this.#tryFindNativeMethod(holderValue, keyString);
+			if(method) return method;
+
+			if(holderValue.entries.has(keyString)) {
+				const value = holderValue.entries.get(keyString);
+				
+				if(this.is(value, ValueKinds.NATIVE_FN))
+					return value.with(holderValue);
+	
+				return value;
+			}
+			
+			if(keyString === 'largo' || keyString === 'tamaño')
+				return makeNumber(holderValue.entries.size);
+
+			return makeNada();
+		}
+
+		case ValueKinds.EMBED: {
+			if(keyString === 'largo')
+				return makeNumber(holderValue.value.data.fields.length);
+
+			const method = this.#tryFindNativeMethod(holderValue, keyString);
+			if(method) return method;
+			return makeNada();
+		}
+
+		case ValueKinds.NATIVE_FN: {
+			if(keyString === 'largo')
+				return makeNumber(holderValue.call.length);
+
+			const method = this.#tryFindNativeMethod(holderValue, keyString);
+			if(method) return method;
+			return makeNada();
+		}
+
+		case ValueKinds.FUNCTION: {
+			if(keyString === 'largo')
+				return makeNumber(holderValue.args.length);
+
+			const method = this.#tryFindNativeMethod(holderValue, keyString);
+			if(method) return method;
+			return makeNada();
+		}
+
+		default:
+			throw this.TuberInterpreterError(`El contenedor "${this.#exprStr(holder)}" en expresión de flecha "->" fue de tipo Nada`);
+		}
+	}
+
+	/**
+	 * 
+	 * @param {import('../ast/expressions').CallExpression} node 
+	 * @param {import("./scope").Scope} scope
+	 */
+	#evaluateCallExpression(node, scope) {
+		const { fn, args } = node;
+
+		const fnValue = this.evaluate(fn, scope);
+		if(!this.isAnyOf(fnValue, ValueKinds.NATIVE_FN, ValueKinds.FUNCTION))
+			throw this.TuberInterpreterError(`No se pudo llamar ${this.#exprStr(fn)} porque no era una Función. En cambio, era de tipo ${ValueKindTranslationLookups.get(fnValue.kind)}`);
+
+		const argValues = args.map(arg => this.evaluate(arg, scope, false));
+		let returnedValue;
+
+		if(this.is(fnValue, ValueKinds.NATIVE_FN)) {
+			const fnScope = new Scope(this, scope);
+			returnedValue = fnValue.call(fnValue.self, argValues, fnScope);
+		} else {
+			const fnScope = new Scope(this, scope);
+			const itpt = this;
+			fnValue.args.forEach((arg, i) => {
+				/**@type {import('./values').RuntimeValue}*/
+				let value;
+				if(i < argValues.length)
+					value = argValues[i];
+				else if(arg.optional)
+					value = this.evaluate(arg.fallback, scope);
+				else
+					throw this.TuberInterpreterError(`Se esperaba un valor para el argumento "${arg.identifier}" de la Función ${itpt.#exprStr(fn)}`);
+
+				fnScope.assignVariable(arg.identifier, argValues[i]);
+			});
+
+			if(fnValue.lambda === false) {
+				fnScope.include(fnValue.scope);
+				returnedValue = this.#evaluateBlock(fnValue.body, fnScope);
+			} else
+				returnedValue = this.evaluate(fnValue.expression, fnScope);
+		}
+
+		this.#stop = false;
+		return returnedValue;
+	}
+
+	/**
+	 * 
+	 * @param {import('./values').RuntimeValue} value 
+	 * @param {String} key 
+	 * @returns 
+	 */
+	#tryFindNativeMethod(value, key) {
+		const lookup = NativeMethodsLookup.get(value.kind);
+		if(lookup.has(key)) {
+			const method = lookup.get(key);
+			return makeNativeFunction(value, method);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Asigna un valor concreto a un valor receptor. La expresión receptora DEBE evaluar a una referencia asignable
+	 * @param {import('../ast/expressions').Expression} receptor
+	 * @param {import('./values').RuntimeValue} receptionValue
+	 * @param {import("./scope").Scope} scope
+	 */
+	#assignValueToExpression(receptor, receptionValue, scope) {
+		/**@type {String}*/
+		let identifier;
+		switch(receptor.kind) {
+		case ExpressionKinds.IDENTIFIER: {
+			identifier = receptor.name;
+			scope.assignVariable(identifier, receptionValue);
+			break;
+		}
+			
+		case ExpressionKinds.ARROW:
+			if(receptor.computed === true) {
+				const evaluated = this.evaluate(receptor.key, scope);
+				identifier = coerceValue(this, evaluated, ValueKinds.TEXT).value;
+			} else
+				identifier = receptor.key;
+			
+			//Modificar por referencia
+			const holderValue = this.evaluate(receptor.holder, scope);
+			switch(holderValue.kind) {
+			case ValueKinds.LIST:
+				const index = +identifier;
+				if(!isInternalOperable(index))
+					throw this.TuberInterpreterError(`Se esperaba un índice válido en lado derecho de expresión de flecha "->" para la Lista "${this.#exprStr(receptor.holder)}" en expresión receptora de sentencia de asignación. Sin embargo, se recibió: ${identifier}`);
+
+				holderValue.elements[index] = receptionValue;
+				break;
+
+			case ValueKinds.REGISTRY:
+				if(receptionValue.kind === ValueKinds.NATIVE_FN)
+					receptionValue = receptionValue.with(holderValue);
+				holderValue.entries.set(identifier, receptionValue);
+				break;
+
+			default:
+				throw this.TuberInterpreterError(`Expresión de flecha inválida como receptora de sentencia de asignación. El tipo de "${this.#exprStr(receptor.holder)}" no tiene miembros asignables`);
+			}
+			break;
+
+		default:
+			throw this.TuberInterpreterError(`La expresión ${this.#exprStr(receptor)} es inválida como receptora de una sentencia de asignación`);
+		}
+	}
+
+	/**
+	 * Reconstruye un String de código fuente a partir de una expresión de AST
+	 * @param {import('../ast/expressions').Expression} node
+	 * @returns {String} 
+	 */
+	#exprStr(node) {
+		switch(node.kind) {
+		case ExpressionKinds.ARGUMENT:
+			return node.identifier;
+
+		case ExpressionKinds.ARROW: {
+			const holderString = this.#exprStr(node.holder);
+			const actualKey = (node.computed) ? this.#exprStr(node.key) : node.key;
+			return `${holderString}->${actualKey}`;
+		}
+
+		case ExpressionKinds.IDENTIFIER:
+			return node.name;
+
+		case ExpressionKinds.UNARY: {
+			const argumentString = this.#exprStr(node.argument);
+			return `${node.operator.value} ${argumentString})`;
+		}
+
+		case ExpressionKinds.BINARY: {
+			const leftString = this.#exprStr(node.left);
+			const rightString = this.#exprStr(node.right);
+			return `(${leftString} ${node.operator.value} ${rightString})`;
+		}
+
+		case ExpressionKinds.NUMBER_LITERAL:
+			return `${node.value}`;
+
+		case ExpressionKinds.TEXT_LITERAL:
+			return `'${node.value}'`;
+
+		case ExpressionKinds.BOOLEAN_LITERAL:
+			return node.value ? 'Verdadero' : 'Falso';
+
+		case ExpressionKinds.LIST_LITERAL: {
+			const stringifiedElements = node.elements.map(el => this.#exprStr(el));
+			return `(Lista ${stringifiedElements.join(', ')})`;
+		}
+
+		case ExpressionKinds.REGISTRY_LITERAL: {
+			const entriesArray = [ ...node.entries.entries() ];
+			const stringifiedEntries = entriesArray.map(([ k, expr ]) => `${k}: ${this.#exprStr(expr)}`);
+			return `(Registro ${stringifiedEntries.join(', ')})`;
+		}
+
+		case ExpressionKinds.CALL: {
+			const fnString = this.#exprStr(node.fn);
+			const argsString = node.args.map(arg => this.#exprStr(arg)).join(', ');
+			return `${fnString}(${argsString})`;
+		}
+
+		case ExpressionKinds.CAST: {
+			const operatorString = node.as.value;
+			const argumentString = this.#exprStr(node.argument);
+			return `(${operatorString} ${argumentString})`;
+		}
+
+		case ExpressionKinds.FUNCTION: {
+			const argsString = node.args.map(arg => this.#exprStr(arg)).join(', ');
+
+			if(node.expression === true) {
+				const bodyString = this.#exprStr(node.body);
+				return `(${argsString}) tal que ${bodyString}`;
+			}
+
+			return `Función(${argsString}) ... FIN`;
+		}
+
+		case ExpressionKinds.SEQUENCE: {
+			const stringifiedExpressions = node.expressions.map(expression => this.#exprStr(expression));
+			return `${stringifiedExpressions.join(', ')}`;
+		}
+
+		case ExpressionKinds.NADA_LITERAL:
+			return 'Nada';
+
+		default:
+			return 'Desconocido';
+		}
 	}
 }
 

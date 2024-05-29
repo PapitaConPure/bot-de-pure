@@ -138,6 +138,20 @@ class Lexer {
 		];
 	}
 
+	TuberLexerError(message) {
+		const lineString = this.lineString;
+		message = [
+			'```arm',
+			lineString,
+			`${' '.repeat(this.#col - 1)}↑${' '.repeat(lineString.length - this.#col)}`,
+			'```',
+			`En línea ${this.#line}, columna ${this.#col} - ${message}`,
+		].join('\n');
+		const error = new Error(message);
+		error.name = 'TuberLexerError';
+		return error;
+	}
+
 	get pos() {
 		return this.#pos;
 	}
@@ -152,6 +166,10 @@ class Lexer {
 
 	get lookupTable() {
 		return this.#keywords;
+	}
+
+	get lineString() {
+		return this.#source.split(/\r?\n/g)[this.#line - 1];
 	}
 
 	/**
@@ -179,7 +197,7 @@ class Lexer {
 	 */
 	tokenize(source) {
 		if(typeof source !== 'string')
-			throw 'Se esperaba un String válido para tokenizar';
+			throw this.TuberLexerError('Se esperaba un String válido para tokenizar');
 
 		this.#tokens = [];
 		this.#source = source;
@@ -205,8 +223,10 @@ class Lexer {
 				}
 			}
 
-			if(match == null)
-				throw `Símbolo no reconocido cerca de posición (${this.#col}; ${this.#line}), : ${this.#pos === 1 ? '' : '(...)'} ${shortenText(this.remainder, 12, ' (...)')}`;
+			if(match == null) {
+				const wsIndex = this.remainder.match(/[\r\s\b]/).index;
+				throw this.TuberLexerError(`Símbolo no reconocido: "${shortenText(this.remainder.slice(0, wsIndex), 12, ' (...)')}"`);
+			}
 		}
 
 		this.addToken(new Token(TokenKinds.EOF, 'Fin de Código', (this.#col === 1) ? this.#line : (this.#line + 1), 1));
@@ -276,7 +296,7 @@ class Lexer {
 			const num = +matched.replace(/_/g, '');
 
 			if(isNaN(num))
-				throw 'Valor inválido en tokenización de número';
+				throw lexer.TuberLexerError('Valor inválido en tokenización de número');
 
 			lexer.addToken(new Token(TokenKinds.LIT_NUMBER, num, lexer.line, lexer.col, len));
 			lexer.advance(len, { advanceColumns: true });
@@ -315,7 +335,7 @@ class Lexer {
 						case '\\': chars[pos] = '\\'; break;
 	
 						default:
-							throw `Caracter de escape inválido en literal de Texto: ${rawMatch}`;
+							throw lexer.TuberLexerError(`Caracter de escape inválido en literal de Texto: ${rawMatch}`);
 						}
 					}
 
@@ -387,7 +407,7 @@ class Lexer {
 	#makeInvalidHandler(errorMessage) {
 		const lexer = this;
 		return function(_, __) {
-			throw `${errorMessage}; cerca de posición (${lexer.col}; ${lexer.line}): ${lexer.pos === 1 ? '' : '(...)'} ${shortenText(lexer.remainder, 12, ' (...)')}`;
+			throw lexer.TuberLexerError(errorMessage);
 		}
 	}
 	//#endregion

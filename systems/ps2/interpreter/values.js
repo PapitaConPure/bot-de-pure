@@ -8,6 +8,7 @@ const ValueKinds = /**@type {const}*/({
 	LIST: 'List',
 	REGISTRY: 'Registry',
 	EMBED: 'Embed',
+	NATIVE_FN: 'NativeFunction',
 	FUNCTION: 'Function',
 	NADA: 'Nada',
 });
@@ -57,9 +58,37 @@ const ValueKinds = /**@type {const}*/({
  */
 
 /**
- * @typedef {Object} FunctionValueData
- * @property {Array<RuntimeValue>} args
- * @property {import('../ast/statements').BlockBody} body
+ * @template {RuntimeValue} [T=RuntimeValue]
+ * @typedef {(self: T, args: Array<RuntimeValue>, scope: import('./scope').Scope) => RuntimeValue} NativeMethod
+ */
+
+/**
+ * @template {RuntimeValue} [T=RuntimeValue]
+ * @typedef {(self: T, args: Array<RuntimeValue>, scope: import('./scope').Scope) => RuntimeValue} NativeFunction
+ */
+
+/**
+ * @typedef {Object} NativeFunctionValueData
+ * @property {RuntimeValue?} self
+ * @property {NativeFunction} call
+ * @property {(self: RuntimeValue) => NativeFunctionValue} with
+ * @typedef {BaseValueData<'NativeFunction'> & NativeFunctionValueData} NativeFunctionValue
+ */
+
+/**
+ * @typedef {Object} BaseFunctionValueData
+ * @property {Array<import('../ast/expressions').ArgumentExpression>} args
+ * 
+ * @typedef {Object} StandardFunctionValueData
+ * @property {false} lambda
+ * @property {import('../ast/statements').BlockStatement} body
+ * @property {import('./scope').Scope} scope
+ * 
+ * @typedef {Object} DelegateValueData
+ * @property {true} lambda
+ * @property {import('../ast/expressions').Expression} expression
+ * 
+ * @typedef {BaseFunctionValueData & (StandardFunctionValueData | DelegateValueData)} FunctionValueData
  * @typedef {BaseValueData<'Function'> & FunctionValueData} FunctionValue
  */
 
@@ -73,6 +102,7 @@ const ValueKinds = /**@type {const}*/({
  * @typedef {ListValue
  *          |RegistryValue
  *          |EmbedValue
+ *          |NativeFunctionValue
  *          |FunctionValue
  * } ComplexValue
  * 
@@ -107,7 +137,7 @@ function defaultValueOf(dataKind) {
 }
 
 /**
- * Comprueba si un valor no existe o es numéricamente inoperable
+ * Comprueba si un RuntimeValue existe, es de tipo Número y es numéricamente operable
  * @param {RuntimeValue} value 
  * @returns {value is NumberValue}
  */
@@ -119,7 +149,7 @@ function isOperable(value) {
 }
 
 /**
- * Comprueba si un valor no existe o es numéricamente inoperable
+ * Comprueba si un valor existe y es numéricamente operable
  * @param {*} value 
  * @returns {value is Number}
  */
@@ -130,12 +160,57 @@ function isInternalOperable(value) {
 }
 
 /**
- * Comprueba si un valor es Nada o inoperable
+ * Comprueba si un RuntimeValue es de tipo Texto
  * @param {RuntimeValue} value 
  * @returns {value is TextValue}
  */
 function isValidText(value) {
 	return value?.kind === ValueKinds.TEXT;
+}
+
+/**
+ * Comprueba si un RuntimeValue es de tipo Dupla
+ * @param {RuntimeValue} value 
+ * @returns {value is BooleanValue}
+ */
+function isBoolean(value) {
+	return value?.kind === ValueKinds.BOOLEAN;
+}
+
+/**
+ * Comprueba si un RuntimeValue es de tipo Lista
+ * @param {RuntimeValue} value 
+ * @returns {value is ListValue}
+ */
+function isList(value) {
+	return value?.kind === ValueKinds.LIST;
+}
+
+/**
+ * Comprueba si un RuntimeValue es de tipo Registro
+ * @param {RuntimeValue} value 
+ * @returns {value is RegistryValue}
+ */
+function isRegistry(value) {
+	return value?.kind === ValueKinds.REGISTRY;
+}
+
+/**
+ * Comprueba si un RuntimeValue es de tipo Marco
+ * @param {RuntimeValue} value 
+ * @returns {value is EmbedValue}
+ */
+function isEmbed(value) {
+	return value?.kind === ValueKinds.EMBED;
+}
+
+/**
+ * Comprueba si un RuntimeValue no existe o es de tipo Nada
+ * @param {RuntimeValue} value 
+ * @returns {value is NadaValue}
+ */
+function isNada(value) {
+	return value?.kind === ValueKinds.NADA;
 }
 
 /**
@@ -158,6 +233,11 @@ function basicCompareTo(other) {
 	return makeNumber(this.value < other.value ? -1 : 1);
 }
 
+/**@param {NumberValue|TextValue|BooleanValue} other*/
+function invalidCompareTo(other) {
+	return makeNumber(-1);
+}
+
 /**@param {NumberValue|TextValue|BooleanValue|EmbedValue|NadaValue} other*/
 function basicEquals(other) {
 	return makeBoolean(this.kind === other.kind && this.value === other.value);
@@ -169,31 +249,59 @@ function listEquals(other) {
 }
 
 /**@param {RegistryValue} other*/
-function glossaryEquals(other) {
+function registryEquals(other) {
 	return makeBoolean(other.kind === ValueKinds.REGISTRY && this.kind === other.kind && this.entries === other.entries);
 }
 
+/**@param {NativeFunctionValue} other*/
+function nativeFnEquals(other) {
+	return makeBoolean(other.kind === ValueKinds.NATIVE_FN && this.kind === other.kind && this.call === other.call);
+}
+
+/**@param {FunctionValue} other*/
+function referenceEquals(other) {
+	return makeBoolean(this === other);
+}
+
+/**
+ * @type {Map<import('./values').ValueKind, String>}
+ */
+const ValueKindTranslationLookups = new Map();
+ValueKindTranslationLookups
+	.set(ValueKinds.NUMBER, 'Número')
+	.set(ValueKinds.TEXT, 'Texto')
+	.set(ValueKinds.BOOLEAN, 'Dupla')
+	.set(ValueKinds.LIST, 'List')
+	.set(ValueKinds.REGISTRY, 'Registro')
+	.set(ValueKinds.EMBED, 'Marco')
+	.set(ValueKinds.FUNCTION, 'Función')
+	.set(ValueKinds.NADA, 'Nada');
+
 /**@type {Map<ValueKind, RuntimeValue['compareTo']>}*/
-const RuntimeCompareToFns = new Map();
-RuntimeCompareToFns
-	.set(ValueKinds.NUMBER,   basicCompareTo)
-	.set(ValueKinds.TEXT,     basicCompareTo)
-	.set(ValueKinds.BOOLEAN,  basicCompareTo)
-	.set(ValueKinds.LIST,     _ => makeNumber(-1))
-	.set(ValueKinds.REGISTRY, _ => makeNumber(-1))
-	.set(ValueKinds.EMBED,    _ => makeNumber(-1))
-	.set(ValueKinds.NADA,     _ => makeNumber(-1));
+const CompareToMethodLookups = new Map();
+CompareToMethodLookups
+	.set(ValueKinds.NUMBER,    basicCompareTo)
+	.set(ValueKinds.TEXT,      basicCompareTo)
+	.set(ValueKinds.BOOLEAN,   basicCompareTo)
+	.set(ValueKinds.LIST,      invalidCompareTo)
+	.set(ValueKinds.REGISTRY,  invalidCompareTo)
+	.set(ValueKinds.EMBED,     invalidCompareTo)
+	.set(ValueKinds.NATIVE_FN, invalidCompareTo)
+	.set(ValueKinds.FUNCTION,  invalidCompareTo)
+	.set(ValueKinds.NADA,      invalidCompareTo);
 
 /**@type {Map<ValueKind, RuntimeValue['equals']>}*/
-const RuntimeEqualsFns = new Map();
-RuntimeEqualsFns
-	.set(ValueKinds.NUMBER,   basicEquals)
-	.set(ValueKinds.TEXT,     basicEquals)
-	.set(ValueKinds.BOOLEAN,  basicEquals)
-	.set(ValueKinds.LIST,     listEquals)
-	.set(ValueKinds.REGISTRY, glossaryEquals)
-	.set(ValueKinds.EMBED,    basicEquals)
-	.set(ValueKinds.NADA,     basicEquals);
+const EqualsMethodLookups = new Map();
+EqualsMethodLookups
+	.set(ValueKinds.NUMBER,    basicEquals)
+	.set(ValueKinds.TEXT,      basicEquals)
+	.set(ValueKinds.BOOLEAN,   basicEquals)
+	.set(ValueKinds.LIST,      listEquals)
+	.set(ValueKinds.REGISTRY,  registryEquals)
+	.set(ValueKinds.EMBED,     basicEquals)
+	.set(ValueKinds.NATIVE_FN, nativeFnEquals)
+	.set(ValueKinds.FUNCTION,  referenceEquals)
+	.set(ValueKinds.NADA,      basicEquals);
 
 /**
  * @param {Number} value
@@ -204,8 +312,8 @@ function makeNumber(value) {
 	return {
 		kind,
 		value: +value,
-		equals: RuntimeEqualsFns.get(kind),
-		compareTo: RuntimeCompareToFns.get(kind),
+		equals: EqualsMethodLookups.get(kind),
+		compareTo: CompareToMethodLookups.get(kind),
 	};
 }
 
@@ -218,8 +326,8 @@ function makeText(value) {
 	return {
 		kind,
 		value: `${value}`,
-		equals: RuntimeEqualsFns.get(kind),
-		compareTo: RuntimeCompareToFns.get(kind),
+		equals: EqualsMethodLookups.get(kind),
+		compareTo: CompareToMethodLookups.get(kind),
 	};
 }
 
@@ -232,8 +340,8 @@ function makeBoolean(value) {
 	return {
 		kind,
 		value: !!value,
-		equals: RuntimeEqualsFns.get(kind),
-		compareTo: RuntimeCompareToFns.get(kind),
+		equals: EqualsMethodLookups.get(kind),
+		compareTo: CompareToMethodLookups.get(kind),
 	};
 }
 
@@ -255,8 +363,8 @@ function makeList(elements) {
 	return {
 		kind,
 		elements,
-		equals: RuntimeEqualsFns.get(kind),
-		compareTo: RuntimeCompareToFns.get(kind),
+		equals: EqualsMethodLookups.get(kind),
+		compareTo: CompareToMethodLookups.get(kind),
 	};
 }
 
@@ -269,8 +377,8 @@ function makeRegistry(entries) {
 	return {
 		kind,
 		entries,
-		equals: RuntimeEqualsFns.get(kind),
-		compareTo: RuntimeCompareToFns.get(kind),
+		equals: EqualsMethodLookups.get(kind),
+		compareTo: CompareToMethodLookups.get(kind),
 	};
 }
 
@@ -282,23 +390,65 @@ function makeEmbed() {
 	return {
 		kind,
 		value: new EmbedBuilder(),
-		equals: RuntimeEqualsFns.get(kind),
-		compareTo: RuntimeCompareToFns.get(kind),
+		equals: EqualsMethodLookups.get(kind),
+		compareTo: CompareToMethodLookups.get(kind),
 	};
 }
 
-///**
-// * @param {Function} fn
-// * @returns {NativeFunctionValue}
-// */
-/*function makeNativeFunction(fn) {
+/**
+ * @param {RuntimeValue} self
+ * @param {NativeFunction} fn
+ * @returns {NativeFunctionValue}
+ */
+function makeNativeFunction(self, fn) {
+	const kind = ValueKinds.NATIVE_FN;
 	return {
-		type: 'NativeFunction',
-		compareTo: _ => makeNumber(-1),
-		equals: n => makeBoolean(n.type === 'NativeFunction' && n.call === fn),
+		kind,
+		self,
 		call: fn,
+		compareTo: CompareToMethodLookups.get(kind),
+		equals: EqualsMethodLookups.get(kind),
+		with: function(self) {
+			return makeNativeFunction(self, this.call);
+		},
 	};
-}*/
+}
+
+/**
+ * @param {import('../ast/statements').BlockStatement} body
+ * @param {Array<import('../ast/expressions').ArgumentExpression>} args
+ * @param {import('./scope').Scope} scope
+ * @returns {FunctionValue}
+ */
+function makeFunction(body, args, scope) {
+	const kind = ValueKinds.FUNCTION;
+	return {
+		kind,
+		lambda: false,
+		body,
+		args,
+		scope,
+		compareTo: CompareToMethodLookups.get(kind),
+		equals: EqualsMethodLookups.get(kind),
+	};
+}
+
+/**
+ * @param {import('../ast/expressions').Expression} expression
+ * @param {Array<import('../ast/expressions').ArgumentExpression>} args
+ * @returns {FunctionValue}
+ */
+function makeLambda(expression, args) {
+	const kind = ValueKinds.FUNCTION;
+	return {
+		kind,
+		lambda: true,
+		expression,
+		args,
+		compareTo: CompareToMethodLookups.get(kind),
+		equals: EqualsMethodLookups.get(kind),
+	};
+}
 
 /**@returns {NadaValue}*/
 function makeNada() {
@@ -306,50 +456,42 @@ function makeNada() {
 	return {
 		kind,
 		value: null,
-		equals: RuntimeEqualsFns.get(kind),
-		compareTo: RuntimeCompareToFns.get(kind),
+		equals: EqualsMethodLookups.get(kind),
+		compareTo: CompareToMethodLookups.get(kind),
 	};
 }
 
 /**@type {Map<ValueKind, Map<ValueKind, (x: *, interpreter: import('./interpreter').Interpreter) => RuntimeValue>>}*/
 const coercions = new Map();
 coercions
-	.set(ValueKinds.NUMBER,   new Map())
-	.set(ValueKinds.TEXT,     new Map())
-	.set(ValueKinds.BOOLEAN,  new Map())
-	.set(ValueKinds.LIST,     new Map())
-	.set(ValueKinds.REGISTRY, new Map())
-	.set(ValueKinds.EMBED,    new Map())
-	.set(ValueKinds.NADA,     new Map());
+	.set(ValueKinds.NUMBER,    new Map())
+	.set(ValueKinds.TEXT,      new Map())
+	.set(ValueKinds.BOOLEAN,   new Map())
+	.set(ValueKinds.LIST,      new Map())
+	.set(ValueKinds.REGISTRY,  new Map())
+	.set(ValueKinds.EMBED,     new Map())
+	.set(ValueKinds.FUNCTION,  new Map())
+	.set(ValueKinds.NATIVE_FN, new Map())
+	.set(ValueKinds.NADA,      new Map());
 
 coercions.get(ValueKinds.NUMBER)
-	.set(ValueKinds.NUMBER,   (x) => makeNumber(x))
 	.set(ValueKinds.TEXT,     (x) => makeText(`${x ?? 'Nada'}`))
-	.set(ValueKinds.BOOLEAN,  (x) => makeBoolean(x ? true : false))
-	.set(ValueKinds.LIST,     (_) => makeNada())
-	.set(ValueKinds.REGISTRY, (_) => makeNada());
+	.set(ValueKinds.BOOLEAN,  (x) => makeBoolean(x ? true : false));
 
 coercions.get(ValueKinds.TEXT)
 	.set(ValueKinds.NUMBER,   (x) => makeNumber(!isInternalOperable(+x) ? 0 : +x))
-	.set(ValueKinds.TEXT,     (x) => makeText(x))
 	.set(ValueKinds.BOOLEAN,  (x) => makeBoolean(x ? true : false))
-	.set(ValueKinds.LIST,     (x) => makeList([ ...x ]))
-	.set(ValueKinds.REGISTRY, (_) => makeNada());
+	.set(ValueKinds.LIST,     (x) => makeList([ ...x ]));
 
 coercions.get(ValueKinds.BOOLEAN)
 	.set(ValueKinds.NUMBER,   (x) => makeNumber(x ? 1 : 0))
-	.set(ValueKinds.TEXT,     (x) => makeText(x ? 'Verdadero' : 'Falso'))
-	.set(ValueKinds.BOOLEAN,  (x) => makeBoolean(x))
-	.set(ValueKinds.LIST,     (_) => makeNada())
-	.set(ValueKinds.REGISTRY, (_) => makeNada());
+	.set(ValueKinds.TEXT,     (x) => makeText(x ? 'Verdadero' : 'Falso'));
 
 coercions.get(ValueKinds.LIST)
-	.set(ValueKinds.NUMBER,   (_) => makeNada())
 	.set(ValueKinds.TEXT,     (/**@type Array<RuntimeValue>*/ x, interpreter) => {
-		return makeText(`(${x?.map(y => makeValue(interpreter, y, 'Text').value).join('')})`)
+		return makeText(`(${x?.map(y => coerceValue(interpreter, y, 'Text').value).join('')})`)
 	})
 	.set(ValueKinds.BOOLEAN,  (x) => makeBoolean(x?.length ? true : false))
-	.set(ValueKinds.LIST,     (x) => makeList(x))
 	.set(ValueKinds.REGISTRY, (x) => {
 		if(!Array.isArray(x)) return makeNada();
 		const properties = new Map();
@@ -362,24 +504,21 @@ coercions.get(ValueKinds.REGISTRY)
 	.set(ValueKinds.TEXT,     (/**@type Map<string, RuntimeValue>*/ x, interpreter) => {
 		let glossaryStrings = [];
 		for(const [key, value] of x) {
-			const coercedValue = makeValue(interpreter, value, 'Text').value;
+			const coercedValue = coerceValue(interpreter, value, 'Text').value;
 			glossaryStrings.push(`${key}: ${coercedValue}`);
 		}
 		return makeText(`{Gl ${glossaryStrings.join(', ')}}`);
 	})
-	.set(ValueKinds.BOOLEAN,  (x) => makeBoolean(x?.size ? true : false))
-	.set(ValueKinds.LIST,     (_) => makeNada())
-	.set(ValueKinds.REGISTRY, (x) => makeRegistry(x));
+	.set(ValueKinds.BOOLEAN,  (x) => makeBoolean(x?.size ? true : false));
 
-coercions.get('Embed')
-	.set(ValueKinds.NUMBER,   (_) => makeNada())
+coercions.get(ValueKinds.EMBED)
 	.set(ValueKinds.TEXT,     (_) => makeText('[Marco]'))
-	.set(ValueKinds.BOOLEAN,  (x) => makeBoolean(x ? true : false))
-	.set(ValueKinds.LIST,     (_) => makeNada())
+	.set(ValueKinds.BOOLEAN,  (x) => makeBoolean(true))
 	.set(ValueKinds.REGISTRY, (/**@type {EmbedBuilder}*/x) => {
 		if(x == null || x.data == null)
 			return makeNada();
 
+		/**@type {Map<String, RuntimeValue>}*/
 		const properties = new Map()
 			.set('color', makeNumber(x.data.color));
 
@@ -419,12 +558,17 @@ coercions.get('Embed')
 		return makeRegistry(properties);
 	});
 
-coercions.get('Nada')
-	.set(ValueKinds.NUMBER,   (_) => makeNada())
+coercions.get(ValueKinds.FUNCTION)
+	.set(ValueKinds.TEXT,     (_) => makeText('[Función]'))
+	.set(ValueKinds.BOOLEAN,  (_) => makeBoolean(true));
+
+coercions.get(ValueKinds.NATIVE_FN)
+	.set(ValueKinds.TEXT,     (_) => makeText('[Función nativa]'))
+	.set(ValueKinds.BOOLEAN,  (_) => makeBoolean(true));
+
+coercions.get(ValueKinds.NADA)
 	.set(ValueKinds.TEXT,     (_) => makeText('Nada'))
-	.set(ValueKinds.BOOLEAN,  (_) => makeBoolean(false))
-	.set(ValueKinds.LIST,     (_) => makeNada())
-	.set(ValueKinds.REGISTRY, (_) => makeNada())
+	.set(ValueKinds.BOOLEAN,  (_) => makeBoolean(false));
 
 /**
  * @template {ValueKind} T
@@ -433,9 +577,12 @@ coercions.get('Nada')
  * @param {T} as
  * @returns {Extract<RuntimeValue, { kind: T }>}
  */
-function makeValue(interpreter, value, as) {
+function coerceValue(interpreter, value, as) {
 	if(value == null || !value.kind)
 		throw interpreter.TuberInterpreterError('Valor de origen corrupto al intentar convertirlo a otro tipo');
+
+	if(value.kind === as)
+		return /**@type {Extract<RuntimeValue, { kind: T }>}*/(value);
 
 	const coercionOrigin = coercions.get(value.kind);
 	if(coercionOrigin == null)
@@ -443,29 +590,33 @@ function makeValue(interpreter, value, as) {
 
 	const coercionFn = /**@type {(x: *, interpreter: import('./interpreter').Interpreter) => Extract<RuntimeValue, { kind: T }>}*/(coercionOrigin.get(as));
 	if(coercionFn == null)
-		throw interpreter.TuberInterpreterError('Tipo de destino de conversión inválido al intentar convertir un valor a otro tipo');
+		throw interpreter.TuberInterpreterError(`No se puede convertir un valor de tipo ${ValueKindTranslationLookups.get(value.kind)} a ${ValueKindTranslationLookups.get(as) ?? 'Desconocido'}`);
 
 	switch(value.kind) {
 	case ValueKinds.LIST:
 		return coercionFn(value.elements, interpreter);
 	case ValueKinds.REGISTRY:
 		return coercionFn(value.entries, interpreter);
-	case ValueKinds.NUMBER:
-	case ValueKinds.TEXT:
-	case ValueKinds.BOOLEAN:
-	case ValueKinds.EMBED:
-	case ValueKinds.NADA:
-		return coercionFn(value.value, interpreter);
+	case ValueKinds.NATIVE_FN:
+	case ValueKinds.FUNCTION:
+		return coercionFn(null, interpreter);
 	default:
-		throw interpreter.TuberInterpreterError(`Coerción no implementada: ${value.kind} → ${as}`);
+		return coercionFn(value.value, interpreter);
 	}
 }
 
 module.exports = {
 	ValueKinds,
+	ValueKindTranslationLookups,
 	defaultValueOf,
 	isOperable,
+	isInternalOperable,
 	isValidText,
+	isBoolean,
+	isList,
+	isRegistry,
+	isEmbed,
+	isNada,
 	extendList,
 	makeNumber,
 	makeText,
@@ -474,6 +625,9 @@ module.exports = {
 	makeList,
 	makeRegistry,
 	makeEmbed,
+	makeNativeFunction,
+	makeFunction,
+	makeLambda,
 	makeNada,
-	makeValue,
+	coerceValue,
 };

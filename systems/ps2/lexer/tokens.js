@@ -136,6 +136,7 @@ TokenKindTranslations
 	.set(TokenKinds.ARROW, 'Operador de flecha "->"')
 	.set(TokenKinds.COLON, 'Operador ":"')
 	.set(TokenKinds.COMMA, 'Operador ","')
+	.set(TokenKinds.LAMBDA, 'Operador Lambda')
 	.set(TokenKinds.TIMES, 'Operador especial "veces"')
 	.set(TokenKinds.IN, 'Operador especial "en"')
 	.set(TokenKinds.FROM, 'Operador especial "desde"')
@@ -278,7 +279,7 @@ class Token {
 	get kind() { return this.#kind; }
 
 	get translated() {
-		return this.#kind;
+		return TokenKindTranslations.get(this.#kind);
 	}
 
 	/**El valor del token*/

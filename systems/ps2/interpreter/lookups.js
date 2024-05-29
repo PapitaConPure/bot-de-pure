@@ -1,5 +1,5 @@
 const { TokenKinds } = require('../lexer/tokens');
-const { ValueKinds, makeValue, makeNumber, makeText, makeBoolean, toggleBoolean } = require('./values');
+const { ValueKinds, coerceValue, makeNumber, makeText, makeBoolean, toggleBoolean } = require('./values');
 
 /**
  * @param {import('../lexer/tokens').TokenKind} op
@@ -11,19 +11,19 @@ function makeUnaryOperation(op) {
 
 	switch(op) {
 	case TokenKinds.PLUS:
-		operation = (it, arg) => makeValue(it, arg, ValueKinds.NUMBER);
+		operation = (it, arg) => coerceValue(it, arg, ValueKinds.NUMBER);
 		break;
 
 	case TokenKinds.DASH:
 		operation = (it, arg) => {
-			const val = makeValue(it, arg, ValueKinds.NUMBER);
+			const val = coerceValue(it, arg, ValueKinds.NUMBER);
 			val.value *= -1;
 			return val;
 		};
 		break;
 
 	case TokenKinds.NOT:
-		operation = (it, arg) => toggleBoolean(makeValue(it, arg, ValueKinds.BOOLEAN));
+		operation = (it, arg) => toggleBoolean(coerceValue(it, arg, ValueKinds.BOOLEAN));
 		break;
 
 	default:
@@ -50,13 +50,13 @@ UnaryExpressionLookups
  */
 function plusBinaryOperation(it, l, r) {
 	if(l.kind === ValueKinds.TEXT || r.kind === ValueKinds.TEXT) {
-		const leftVal = makeValue(it, l, ValueKinds.TEXT).value;
-		const rightVal = makeValue(it, r, ValueKinds.TEXT).value;
+		const leftVal = coerceValue(it, l, ValueKinds.TEXT).value;
+		const rightVal = coerceValue(it, r, ValueKinds.TEXT).value;
 		return makeText(leftVal + rightVal);
 	}
 
-	const leftVal = makeValue(it, l, ValueKinds.NUMBER).value;
-	const rightVal = makeValue(it, r, ValueKinds.NUMBER).value;
+	const leftVal = coerceValue(it, l, ValueKinds.NUMBER).value;
+	const rightVal = coerceValue(it, r, ValueKinds.NUMBER).value;
 	return makeNumber(leftVal + rightVal);
 }
 
@@ -78,8 +78,12 @@ function makeArithmeticBinaryOperation(op) {
 	}
 
 	return function(it, l, r) {
-		const leftVal = makeValue(it, l, ValueKinds.NUMBER).value;
-		const rightVal = makeValue(it, r, ValueKinds.NUMBER).value;
+		const leftVal = coerceValue(it, l, ValueKinds.NUMBER).value;
+		const rightVal = coerceValue(it, r, ValueKinds.NUMBER).value;
+		
+		if((op === TokenKinds.SLASH || op === TokenKinds.PERCENT) && rightVal === 0)
+			throw it.TuberInterpreterError('División por cero');
+
 		return operation(leftVal, rightVal);
 	};
 }
@@ -94,10 +98,10 @@ function makeRelationalBinaryOperation(op) {
 
 	switch(op) {
 	case TokenKinds.OR:
-		operation = (it, l, r) => makeValue(it, l, ValueKinds.BOOLEAN).value ? l : r;
+		operation = (it, l, r) => coerceValue(it, l, ValueKinds.BOOLEAN).value ? l : r;
 		break;
 	case TokenKinds.AND:
-		operation = (it, l, r) => makeValue(it, l, ValueKinds.BOOLEAN).value ? r : l;
+		operation = (it, l, r) => coerceValue(it, l, ValueKinds.BOOLEAN).value ? r : l;
 		break;
 	case TokenKinds.EQUALS:
 		operation = (it, l, r) => l.equals(r);
@@ -129,7 +133,7 @@ function makeRelationalBinaryOperation(op) {
  */
 const BinaryExpressionLookups = new Map();
 BinaryExpressionLookups
-	.set(TokenKinds.ADD, makeArithmeticBinaryOperation(TokenKinds.PLUS))
+	.set(TokenKinds.ADD, plusBinaryOperation)
 	.set(TokenKinds.SUBTRACT, makeArithmeticBinaryOperation(TokenKinds.DASH))
 	.set(TokenKinds.MULTIPLY, makeArithmeticBinaryOperation(TokenKinds.STAR))
 	.set(TokenKinds.DIVIDE, makeArithmeticBinaryOperation(TokenKinds.SLASH))

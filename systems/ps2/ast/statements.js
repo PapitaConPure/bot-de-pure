@@ -118,7 +118,7 @@ const ScopeAbortKinds = [
 
 /**
  * @typedef {Object} DeclarationStatementData
- * @property {String} declaration
+ * @property {Array<String>} declarations
  * @property {Token?} dataKind
  * @typedef {BaseStatementData<'DeclarationStatement'> & DeclarationStatementData} DeclarationStatement
  */

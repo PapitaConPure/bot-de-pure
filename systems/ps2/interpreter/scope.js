@@ -7,6 +7,8 @@ class Scope {
 	#parent;
 	/**@type {Map<String, import('./values').RuntimeValue>}*/
 	variables;
+    /**@type {Boolean}*/
+    global;
 
 	/**
 	 * 
@@ -17,7 +19,12 @@ class Scope {
 		this.#interpreter = interpreter;
 		this.#parent = parent;
 		this.variables = new Map();
+        this.global = false;
 	}
+
+    get interpreter() {
+        return this.#interpreter;
+    }
 
 	get parent() {
 		return this.#parent;
@@ -96,6 +103,19 @@ class Scope {
         }
 
         return this.#parent.resolve(identifier, mustBeDeclared);
+    }
+
+    /**
+     * Asigna todas las variables de otro scope al que llama el método
+     * @param {Scope} scope 
+     */
+    include(scope) {
+        if(scope.hasParent && scope.parent !== this && !scope.parent.global)
+            this.include(scope.parent);
+
+        scope.variables.forEach((variable, key) => {
+            this.variables.set(key, variable);
+        });
     }
 }
 
