@@ -24,7 +24,7 @@ functionMethods.set('llamar', function(self, [ valor ], scope) {
 	if(self.lambda === true)
 		evaluated = scope.interpreter.evaluate(self.expression, scope);
 	else
-		evaluated = scope.interpreter.evaluate(self.body, scope);
+		evaluated = scope.interpreter.evaluateStatement(self.body, scope);
 
 	return evaluated;
 });

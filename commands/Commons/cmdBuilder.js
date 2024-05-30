@@ -106,7 +106,7 @@ function extendRequest(request) {
 async function executeFnSample(request, args, isSlash = false, rawArgs = undefined) {}
 
 /**
- * @typedef {(request: ComplexCommandRequest, args: CommandOptionSolver) => Promise<*>} ExperimentalExecuteFunction
+ * @typedef {(request: ComplexCommandRequest, args: CommandOptionSolver, rawArgs?: String | null) => Promise<*>} ExperimentalExecuteFunction
  */
 
 /**Representa un comando*/

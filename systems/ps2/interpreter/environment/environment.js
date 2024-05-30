@@ -17,7 +17,7 @@ function declareNatives(scope) {
     scope.assignVariable('E', makeNumber(Math.E));
 
     for(const [traducción, original] of NativeColorsLookup)
-        scope.assignVariable(traducción, makeNumber(original));
+        scope.assignVariable(traducción, makeText(original.toString(16)));
 
 	for(const { id, fn } of NativeFunctions)
 		scope.assignVariable(id, makeNativeFunction(null, fn));
@@ -27,12 +27,11 @@ function declareNatives(scope) {
  * @param {Scope} scope
  * @param {import('../../../../commands/Commons/typings').ComplexCommandRequest} request
  */
-function declareContext(scope, request) {
+async function declareContext(scope, request) {
 	if(request != null) {
 		scope.assignVariable('usuario', makeDiscordMember(request.member));
 		scope.assignVariable('canal', makeDiscordChannel(request.channel));
-		makeDiscordGuild(request.guild)
-			.then(guildValue => scope.assignVariable('servidor', guildValue));
+		scope.assignVariable('servidor', await makeDiscordGuild(request.guild));
 	} else {
 		scope.assignVariable('usuario', makeRegistry(new Map()));
 		scope.assignVariable('canal', makeRegistry(new Map()));

@@ -7,7 +7,7 @@ const { findFirstException, handleAndAuditError, generateExceptionEmbed } = requ
 const { Translator } = require('../internationalization.js');
 const { CommandManager } = require('../commands/Commons/cmdBuilder.js');
 // @ts-ignore
-const { Interaction, CommandInteraction, ButtonInteraction, StringSelectMenuInteraction, ModalSubmitInteraction, Client, ContextMenuCommandInteraction, ChatInputCommandInteraction } = require('discord.js');
+const { Interaction, CommandInteraction, ButtonInteraction, StringSelectMenuInteraction, ModalSubmitInteraction, Client, ContextMenuCommandInteraction, ChatInputCommandInteraction, CommandInteractionOptionResolver } = require('discord.js');
 const { ContextMenuActionManager } = require('../actions/Commons/actionBuilder.js');
 const { CommandOptionSolver } = require('../commands/Commons/cmdOpts.js');
 
@@ -83,8 +83,7 @@ async function handleCommand(interaction, client, stats) {
         
         const complex = CommandManager.requestize(interaction);
         if(command.experimental) {
-            // @ts-expect-error
-            const solver = new CommandOptionSolver(complex, interaction.options, command.options);
+            const solver = new CommandOptionSolver(complex, /**@type {CommandInteractionOptionResolver}*/(interaction.options), command.options);
             // @ts-expect-error
             await command.execute(complex, solver);
         } else

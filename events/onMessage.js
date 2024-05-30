@@ -109,7 +109,7 @@ async function handleMessageCommand(message, command, stats, args, rawArgs, exce
 
     const complex = CommandManager.requestize(message);
     if(command.experimental) {
-        const solver = new CommandOptionSolver(complex, args, command.options);
+        const solver = new CommandOptionSolver(complex, args, command.options, rawArgs);
         // @ts-expect-error
         await command.execute(complex, solver);
     } else

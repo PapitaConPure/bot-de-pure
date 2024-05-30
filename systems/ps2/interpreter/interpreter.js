@@ -30,7 +30,7 @@ class Interpreter {
 		this.#saveTable = new Map();
 		this.#request = null;
 		this.#stop = false;
-		this.#quota = 1000;
+		this.#quota = 0;
 	}
 
 	get request() {
@@ -93,25 +93,28 @@ class Interpreter {
 		if(ast == null || ast.kind !== StatementKinds.PROGRAM || ast.body == null)
 			throw `Se esperaba AST válido para interrpretar`;
 
+		this.#saveTable = new Map();
 		this.#errorStack = [];
 		this.#sendStack = [];
 		this.#request = request;
 		this.#stop = false;
+		this.#quota = 1000;
+
 		this.#inputReader = isTestDrive
 			? new TestDriveInputReader(this, args)
 			: new ProductionInputReader(this, args);
 			
 		const returned = this.#evaluateBlock(ast, scope);
-		const saveTable = new Map(this.#saveTable.entries());
 		const inputStack = this.#inputReader.inputStack;
 		const sendStack = this.#sendStack.slice();
+		const saveTable = new Map(this.#saveTable.entries());
 		const errorStack = this.#errorStack.slice();
 
 		return {
 			returned,
-			saveTable,
 			inputStack,
 			sendStack,
+			saveTable,
 			errorStack,
 		};
 	}
@@ -149,7 +152,7 @@ class Interpreter {
 		case StatementKinds.FOR:
 			return this.#evaluateFor(node, scope);
 
-		//Imperativas
+		//Inmediatas
 		case StatementKinds.EXPRESSION:
 			return this.#evaluateExpressionStatement(node, scope);
 
@@ -221,22 +224,22 @@ class Interpreter {
 			return scope.lookup(node.name, mustBeDeclared);
 
 		case ExpressionKinds.UNARY:
-			return this.#evaluateUnaryExpression(node, scope, mustBeDeclared);
+			return this.#evaluateUnary(node, scope, mustBeDeclared);
 
 		case ExpressionKinds.BINARY:
-			return this.#evaluateBinaryExpression(node, scope, mustBeDeclared);
+			return this.#evaluateBinary(node, scope, mustBeDeclared);
 			
 		case ExpressionKinds.CAST:
-			return this.#evaluateCastExpression(node, scope, mustBeDeclared);
+			return this.#evaluateCast(node, scope, mustBeDeclared);
 
 		case ExpressionKinds.SEQUENCE:
 			return this.#evaluateSequence(node, scope);
 
 		case ExpressionKinds.ARROW:
-			return this.#evaluateArrowExpression(node, scope);
+			return this.#evaluateArrow(node, scope);
 
 		case ExpressionKinds.CALL:
-			return this.#evaluateCallExpression(node, scope);
+			return this.#evaluateCall(node, scope);
 
 		default:
 			throw this.TuberInterpreterError(`Se encontró un nodo inesperado u no implementado al evaluar expresión: ${node.kind}`);
@@ -443,7 +446,17 @@ class Interpreter {
 	}
 
 	/**
+	 * Evalúa una sentencia de lectura de Entrada de Usuario.
 	 * 
+	 * El comportamiento exacto depende de si el programa actual se evalúa en modo prueba o no.
+	 * * Si es una ejecución de prueba, ocurre el primer punto que aplique entre los siguientes:
+	 *   1. Si la Entrada tiene valor de falla, se asume el valor de falla especificado por el programador
+	 *   2. Se asume el valor por defecto del tipo esperado de la Entrada
+	 * * Si es una ejecución ordinaria, ocurre el primer punto que aplique entre los siguientes:
+	 *   1. Si quien ejecuta el script da un valor, se asume ese valor
+	 *   2. Si la Entrada es opcional y tiene valor de falla, se asume el valor de falla especificado por el programador
+	 *   3. Si la Entrada es opcional y no tiene valor de falla, se asume el valor por defecto del tipo esperado de la Entrada
+	 *   4. Se lanza un error
 	 * @param {import('../ast/statements').ReadStatement} node 
 	 * @param {import('./scope').Scope} scope
 	 */
@@ -520,7 +533,10 @@ class Interpreter {
 	}
 
 	/**
+	 * Evalúa una sentencia de retorno de valor.
 	 * 
+	 * Devuelve el valor de la expresión indicada.
+	 * Todas las sentencias luego de esta se ignoran hasta que finaliza un ámbito de Función o el Programa
 	 * @param {import('../ast/statements').ReturnStatement} node 
 	 * @param {import('./scope').Scope} scope
 	 */
@@ -531,7 +547,9 @@ class Interpreter {
 	}
 
 	/**
+	 * Evalúa una sentencia de corte de Función o Programa.
 	 * 
+	 * Todas las sentencias luego de esta se ignoran hasta que finaliza un ámbito de Función o el Programa
 	 */
 	#evaluateEndStatement() {
 		this.#stop = true;
@@ -539,8 +557,13 @@ class Interpreter {
 	}
 	
 	/**
+	 * Evalúa una sentencia de finalización condicional.
 	 * 
-	 * @param {import('../ast/statements').StopStatement} node 
+	 * Si la condición se cumple, se envía Y devuelve el mensaje de finalización indicado.
+	 * Todas las sentencias luego de esta se ignoran hasta que finaliza el Programa (no aplica a Programas que ejecutan Programas).
+	 * 
+	 * Los ámbitos de Función son irrelevantes para esta sentencia
+	 * @param {import('../ast/statements').StopStatement} node
 	 * @param {import('./scope').Scope} scope
 	 */
 	#evaluateStopStatement(node, scope) {
@@ -559,7 +582,10 @@ class Interpreter {
 	}
 
 	/**
+	 * Evalúa una sentencia de envío de valor.
 	 * 
+	 * Añade un valor a la pila de valores enviados.
+	 * Dichos valores serían enviados en conjunto al finalizar el Programa.
 	 * @param {import('../ast/statements').SendStatement} node 
 	 * @param {import('./scope').Scope} scope
 	 */
@@ -580,7 +606,7 @@ class Interpreter {
 	}
 
 	/**
-	 * 
+	 * Evalúa una expresión de Lista y retorna un valor de Lista
 	 * @param {import('../ast/expressions').ListLiteralExpression} node 
 	 * @param {import('./scope').Scope} scope
 	 */
@@ -591,7 +617,7 @@ class Interpreter {
 	}
 
 	/**
-	 * 
+	 * Evalúa una expresión de Registro y retorna un valor de Registro
 	 * @param {import('../ast/expressions').RegistryLiteralExpression} node 
 	 * @param {import('./scope').Scope} scope
 	 */
@@ -613,7 +639,7 @@ class Interpreter {
 	}
 
 	/**
-	 * 
+	 * Evalúa una expresión de Función de usuario y devuelve un valor de Función de usuario
 	 * @param {import('../ast/expressions').FunctionExpression} node 
 	 * @param {import('./scope').Scope} scope
 	 */
@@ -625,11 +651,11 @@ class Interpreter {
 	}
 
 	/**
-	 * 
+	 * Evalúa una expresión unaria y devuelve el valor resultante de la operación
 	 * @param {import('../ast/expressions').UnaryExpression} node 
 	 * @param {import('./scope').Scope} scope
 	 */
-	#evaluateUnaryExpression(node, scope, mustBeDeclared = true) {
+	#evaluateUnary(node, scope, mustBeDeclared = true) {
 		const { operator, argument } = node;
 
 		const argumentValue = this.evaluate(argument, scope, mustBeDeclared);
@@ -642,11 +668,11 @@ class Interpreter {
 	}
 
 	/**
-	 * 
+	 * Evalúa una expresión binaria y devuelve el valor resultante de la operación
 	 * @param {import('../ast/expressions').BinaryExpression} node 
 	 * @param {import('./scope').Scope} scope
 	 */
-	#evaluateBinaryExpression(node, scope, mustBeDeclared = true) {
+	#evaluateBinary(node, scope, mustBeDeclared = true) {
 		const { operator, left, right } = node;
 
 		const leftValue = this.evaluate(left, scope, mustBeDeclared);
@@ -660,10 +686,13 @@ class Interpreter {
 	}
 
 	/**
+	 * Evalúa una expresión de conversión de valor.
+	 * 
+	 * Si es posible, convierte un valor de un cierto tipo al tipo indicado
 	 * @param {import('../ast/expressions').CastExpression} node 
 	 * @param {import("./scope").Scope} scope
 	 */
-	#evaluateCastExpression(node, scope, mustBeDeclared = true) {
+	#evaluateCast(node, scope, mustBeDeclared = true) {
 		const { argument, as } = node;
 		const value = this.evaluate(argument, scope, false);
 		const valueKind = ValueKindLookups.get(as.kind);
@@ -671,7 +700,9 @@ class Interpreter {
 	}
 
 	/**
+	 * Evalúa una expresión de secuencia de expresiones.
 	 * 
+	 * Evalúa todas las expresiones en orden de izquierda a derecha y devuelve el valor de la última expresión evaluada
 	 * @param {import('../ast/expressions').SequenceExpression} node 
 	 * @param {import("./scope").Scope} scope
 	 */
@@ -691,7 +722,7 @@ class Interpreter {
 	 * @param {import('../ast/expressions').ArrowExpression} node 
 	 * @param {import("./scope").Scope} scope
 	 */
-	#evaluateArrowExpression(node, scope) {
+	#evaluateArrow(node, scope) {
 		const { holder } = node;
 
 		const holderValue = this.evaluate(holder, scope);
@@ -783,11 +814,15 @@ class Interpreter {
 	}
 
 	/**
+	 * Evalúa una expresión de llamado de Función o Método.
 	 * 
+	 * Ejecuta la Función especificada, si existe, con los argumentos indicados, si aplica.
+	 * 
+	 * Es irrelevante si la Función es nativa o de usuario. Superficialmente, se ejecutarán de forma similar
 	 * @param {import('../ast/expressions').CallExpression} node 
 	 * @param {import("./scope").Scope} scope
 	 */
-	#evaluateCallExpression(node, scope) {
+	#evaluateCall(node, scope) {
 		const { fn, args } = node;
 
 		const fnValue = this.evaluate(fn, scope);
@@ -828,10 +863,11 @@ class Interpreter {
 	}
 
 	/**
+	 * Función de utilidad para intentar encontrar un método nativo y enlazarlo a un valor correspondiente.
 	 * 
+	 * Si no se encuentra un método con el nombre solicitado para el tipo del valor indicado, se devuelve `null`
 	 * @param {import('./values').RuntimeValue} value 
 	 * @param {String} key 
-	 * @returns 
 	 */
 	#tryFindNativeMethod(value, key) {
 		const lookup = NativeMethodsLookup.get(value.kind);
@@ -978,16 +1014,6 @@ class Interpreter {
 			return 'Desconocido';
 		}
 	}
-}
-
-/**
- * 
- * @param {string} message
- */
-function TuberInputError(message) {
-	const err = new Error(message);
-	err.name = 'TuberInputError';
-	return err;
 }
 
 module.exports = {

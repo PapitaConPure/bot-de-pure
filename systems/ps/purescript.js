@@ -62,7 +62,8 @@ function isAdvanced(tuber) {
 /**
  * @typedef {Object} TuberExecutionOptions
  * @property {Array<String>} [args]
- * @property {Boolean} isTestDrive
+ * @property {Boolean} [overwrite]
+ * @property {Boolean} [isTestDrive]
  */
 /**
  * Evalua el tipo de Tubérculo (básico o avanzado) y lo ejecuta. Si es avanzado, se ejecutará con PuréScript
@@ -72,7 +73,9 @@ function isAdvanced(tuber) {
  * @param {TuberExecutionOptions} [inputOptions]
  */
 async function executeTuber(request, tuber, inputOptions) {
-    const { args, isTestDrive } = (inputOptions ?? {});
+    inputOptions ??= {};
+    const overwrite = inputOptions.overwrite ?? true;
+    const { args, isTestDrive } = inputOptions;
 
     if(!isAdvanced(tuber))
         return request.editReply({
@@ -184,8 +187,9 @@ async function executeTuber(request, tuber, inputOptions) {
     else
         delete replyObject.content;
     
-    //@ts-expect-error
-    tuber.inputs = inputStack;
+    if(overwrite)
+        //@ts-expect-error
+        tuber.inputs = inputStack;
 
     return request.editReply(replyObject).catch(async () => {
         await request.editReply({ content: `⚠️ No se puede enviar el mensaje. Revisa el largo y la validez de los datos` });

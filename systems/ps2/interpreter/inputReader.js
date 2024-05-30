@@ -1,10 +1,6 @@
 const { Scope } = require('./scope');
-const { TokenKinds } = require('../lexer/tokens');
-const { ExpressionKinds } = require('../ast/expressions');
-const { StatementKinds } = require('../ast/statements');
-const { ValueKinds, makeNumber, makeText, makeBoolean, makeList, makeRegistry, makeEmbed, makeNada, coerceValue, isInternalOperable, makeNativeFunction, makeFunction, makeLambda, ValueKindTranslationLookups, defaultValueOf } = require('./values');
-const { UnaryExpressionLookups, BinaryExpressionLookups: BinaryOperationLookups, ValueKindLookups } = require('./lookups');
-const { NativeMethodsLookup } = require('./environment/environment');
+const { makeText, makeNada, coerceValue, defaultValueOf } = require('./values');
+const { ValueKindLookups } = require('./lookups');
 
 class InputReader {
 	/**@type {import('./interpreter').Interpreter}*/
@@ -107,7 +103,7 @@ class TestDriveInputReader extends InputReader {
 	 * @param {Array<String>} args
 	 */
 	constructor(interpreter, args) {
-		super(interpreter, args);
+		super(interpreter, args ?? []);
 		this.#spreadCounter = 0;
 	}
 
@@ -183,19 +179,30 @@ class ProductionInputReader extends InputReader {
 				? this.interpreter.evaluate(fallback, scope)
 				: defaultValueOf(valueKind);
 		else
-			throw this.interpreter.TuberInterpreterError(`No se recibió un valor para la Entrada obligatoria "${receptorString}" de tipo ${dataKind.translated}`);
+			throw TuberInputError(`No se recibió un valor para la Entrada obligatoria "${receptorString}" de ${dataKind.translated}`);
 
 		try {
 			const coercedValue = coerceValue(this.interpreter, receptionValue, valueKind);
 			return coercedValue;
 		} catch {
-			throw this.interpreter.TuberInterpreterError(`Se recibió una Entrada con formato inválido. Se esperaba un valor conversible a tipo ${dataKind.translated}, pero se recibió: "${arg}"`);
+			throw TuberInputError(`Se recibió una Entrada con formato inválido. Se esperaba un valor conversible a ${dataKind.translated}, pero se recibió: "${arg}"`);
 		}
 	}
+}
+
+/**
+ * 
+ * @param {String} message
+ */
+function TuberInputError(message) {
+	const err = new Error(message);
+	err.name = 'TuberInputError';
+	return err;
 }
 
 module.exports = {
 	InputReader,
 	TestDriveInputReader,
 	ProductionInputReader,
+	TuberInputError,
 };

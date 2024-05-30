@@ -145,7 +145,7 @@ class Lexer {
 			lineString,
 			`${' '.repeat(this.#col - 1)}↑${' '.repeat(lineString.length - this.#col)}`,
 			'```',
-			`En línea ${this.#line}, columna ${this.#col} - ${message}`,
+			`En línea **${this.#line}**, columna **${this.#col}** - ${message}`,
 		].join('\n');
 		const error = new Error(message);
 		error.name = 'TuberLexerError';
@@ -225,7 +225,7 @@ class Lexer {
 
 			if(match == null) {
 				const wsIndex = this.remainder.match(/[\r\s\b]/).index;
-				throw this.TuberLexerError(`Símbolo no reconocido: "${shortenText(this.remainder.slice(0, wsIndex), 12, ' (...)')}"`);
+				throw this.TuberLexerError(`Símbolo no reconocido: \`${shortenText(this.remainder.slice(0, wsIndex), 12, ' (...)')}\``);
 			}
 		}
 

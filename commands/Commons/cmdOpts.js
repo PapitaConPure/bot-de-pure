@@ -1,5 +1,5 @@
 const { User, GuildMember, Message, TextChannel, VoiceChannel, GuildChannel, CommandInteractionOptionResolver, BaseGuildTextChannel, BaseGuildVoiceChannel, ChannelType, Role } = require('discord.js');
-const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSentence } = require('../../func');
+const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSentence, toLowerCaseNormalized } = require('../../func');
 
 /**
  * @typedef {{name: String, expression: String|Number}} ParamTypeStrict Parámetros de CommandOption que siguen una sintaxis estricta
@@ -759,40 +759,69 @@ class CommandOptions {
     };
 };
 
-/**@class Representa un resolvedor de opciones de comando, sea este un comando de mensaje o un comandoSlash*/
+/**
+ * @template {import('./typings').CommandArguments} [TArgs=import('./typings').CommandArguments]
+ * @class Representa un resolvedor de opciones de comando, sea este un comando de mensaje o un comandoSlash
+ */
 class CommandOptionSolver {
     /**@type {import('./typings').ComplexCommandRequest}*/
     #request;
     /**@type {Boolean}*/
     #requestified;
-    /**@type {CommandInteractionOptionResolver|Array<String>}*/
+    /**@type {TArgs}*/
     #args;
+    /**@type {String | null}*/
+    #rawArgs;
     /**@type {CommandOptions}*/
     #options;
+    /**@type {Boolean}*/
     #isSlash = false;
 
     /**
      * 
      * @param {import('./typings').ComplexCommandRequest} request 
-     * @param {import('./typings').CommandArguments} args 
+     * @param {TArgs} args 
      * @param {CommandOptions} options 
+     * @param {String} [rawArgs=null] 
      */
-    constructor(request, args, options) {
+    constructor(request, args, options, rawArgs = null) {
         this.#request = request;
         this.#requestified = false;
         this.#args = args;
+        this.#rawArgs = rawArgs;
         this.#options = options;
         this.#isSlash = args instanceof CommandInteractionOptionResolver;
     }
 
+    get remainder() {
+        if(this.isMessageSolver(this.#args))
+            return this.#args.join(' ');
+
+        return `${this.#args}`;
+    }
+
+    get args() {
+        return this.#args;
+    }
+
+    get rawArgs() {
+        return this.#rawArgs;
+    }
+
     //#region What is "this"
-    /**@returns {args is Array<String>}*/
-    isMessageSolver(args = undefined) {
+    /**
+     * @param {*} args
+     * @returns {args is Array<String>}
+     */
+    isMessageSolver(args) {
         return !this.#isSlash;
     }
 
-    /**@returns {args is CommandInteractionOptionResolver}*/
-    isInteractionSolver(args = undefined) {
+    /**
+     * @param {*} args
+     * @returns {args is CommandInteractionOptionResolver}
+     */
+    isInteractionSolver(args) {
         return this.#isSlash;
     }
     //#endregion
@@ -916,8 +945,25 @@ class CommandOptionSolver {
     }
 
     /**
+     * @template {(identifier: String, required?: Boolean) => *} TMethod
+     * @template [TFallback=null]
+     * @param {String} identifier 
+     * @param {TMethod} method 
+     * @param {TFallback} [fallback=null]
+     * @returns {Array<ReturnType<TMethod>>|Array<TFallback>}
+     */
+    parsePolyParam(identifier, method, fallback) {
+        if(this.isMessageSolver(this.#args))
+            throw 'Función parsePolyParam no permitida para comandos de mensaje';
+
+        return this.#options
+            .fetchParamPoly(this.#args, identifier, this.#args.getString, fallback)
+            .filter(input => input);
+    }
+
+    /**
      * Devuelve `true` si se ingresó la bandera especificada, o `false` de lo contrario
-     * @param {string} identifier
+     * @param {String} identifier
      */
     parseFlag(identifier) {
         return CommandOptionSolver.asBoolean(
@@ -935,10 +981,10 @@ class CommandOptionSolver {
     /**
      * Devuelve {@linkcode P} si se ingresó la bandera especificada, o {@linkcode N} de lo contrario
      * @template P
-     * @template N
-     * @param {string} identifier
+     * @template [N=undefined]
+     * @param {String} identifier
      * @param {P} positiveResult
-     * @param {N} [negativeResult]
+     * @param {N} [negativeResult=undefined]
      * @returns {P|N}
      */
     parseFlagExt(identifier, positiveResult, negativeResult = undefined) {
@@ -955,10 +1001,10 @@ class CommandOptionSolver {
     /**
      * Devuelve {@linkcode P} si se ingresó la bandera especificada, o {@linkcode N} de lo contrario
      * @template P
-     * @template N
+     * @template [N=undefined]
      * @param {string} identifier
      * @param {FlagCallback<P>} callback
-     * @param {N} [fallback]
+     * @param {N} [fallback=undefined]
      * @returns {ReturnType<FlagCallback<P>>|N}
      */
     parseFlagExpr(identifier, callback, fallback = undefined) {
@@ -1134,11 +1180,15 @@ class CommandOptionSolver {
         if(!option.isCommandParam())
             throw "Se esperaba un identificador de parámetro de comando";
 
+
+        let finalResult;
         if(Array.isArray(option._type)) {
             const results = option._type.map(pt => this.#options.fetchMessageParamSync(arrArgs, pt, getRestOfMessageWords));
-            return results.find(r => r);
+            finalResult = results.find(r => r);
         } else
-            return this.#options.fetchMessageParamSync(arrArgs, option._type, getRestOfMessageWords);
+            finalResult = this.#options.fetchMessageParamSync(arrArgs, option._type, getRestOfMessageWords);
+
+        return finalResult;
     }
 
     /**
