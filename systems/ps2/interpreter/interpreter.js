@@ -1,3 +1,4 @@
+const { ProductionInputReader, TestDriveInputReader } = require('./inputReader');
 const { Scope } = require('./scope');
 const { TokenKinds } = require('../lexer/tokens');
 const { ExpressionKinds } = require('../ast/expressions');
@@ -8,12 +9,10 @@ const { NativeMethodsLookup } = require('./environment/environment');
 
 /**Representa un Intérprete de PuréScript*/
 class Interpreter {
+	/**@type {import('./inputReader').InputReader}*/
+	#inputReader;
 	/**@type {Array<Error>}*/
 	#errorStack;
-	/**@type {Array<import('../purescript').TuberInput>}*/
-	#inputStack;
-	/**@type {Map<String, import('../purescript').TuberInput>}*/
-	#inputLookup;
 	/**@type {Array<import('./values').RuntimeValue>}*/
 	#sendStack;
 	/**@type {Map<String, import('./values').RuntimeValue>}*/
@@ -24,23 +23,22 @@ class Interpreter {
 	#stop;
 	/**@type {Number}*/
 	#quota;
-	/**@type {(node: import('../ast/statements').ReadStatement, scope: Scope) => import('./values').NadaValue}*/
-	#evaluateReadStatement;
 
 	constructor() {
 		this.#errorStack = [];
-		this.#inputStack = [];
-		this.#inputLookup = new Map();
 		this.#sendStack = [];
 		this.#saveTable = new Map();
 		this.#request = null;
 		this.#stop = false;
 		this.#quota = 1000;
-		this.#evaluateReadStatement = null;
 	}
 
 	get request() {
 		return this.#request;
+	}
+
+	get hasArgs() {
+		return this.#inputReader.hasArgs;
 	}
 
 	/**
@@ -88,28 +86,33 @@ class Interpreter {
 	 * @param {import('../ast/statements').ProgramStatement} ast
 	 * @param {import('./scope').Scope} scope
 	 * @param {import('../../../commands/Commons/typings').ComplexCommandRequest} request
+	 * @param {Array<String>} args
 	 * @param {Boolean} [isTestDrive]
 	 */
-	evaluateProgram(ast, scope, request, isTestDrive = false) {
+	evaluateProgram(ast, scope, request, args, isTestDrive = false) {
 		if(ast == null || ast.kind !== StatementKinds.PROGRAM || ast.body == null)
 			throw `Se esperaba AST válido para interrpretar`;
 
 		this.#errorStack = [];
-		this.#inputStack = [];
 		this.#sendStack = [];
 		this.#request = request;
 		this.#stop = false;
-		this.#evaluateReadStatement = isTestDrive
-			? this.#evaluateTestDriveRead
-			: this.#evaluateProductionRead;
+		this.#inputReader = isTestDrive
+			? new TestDriveInputReader(this, args)
+			: new ProductionInputReader(this, args);
 			
 		const returned = this.#evaluateBlock(ast, scope);
+		const saveTable = new Map(this.#saveTable.entries());
+		const inputStack = this.#inputReader.inputStack;
+		const sendStack = this.#sendStack.slice();
+		const errorStack = this.#errorStack.slice();
 
 		return {
-			errorStack: this.#errorStack.slice(),
-			sendStack: this.#sendStack.slice(),
-			saveTable: new Map(this.#saveTable.entries()),
 			returned,
+			saveTable,
+			inputStack,
+			sendStack,
+			errorStack,
 		};
 	}
 
@@ -347,7 +350,7 @@ class Interpreter {
 
 		const containerValue = this.evaluate(container, scope);
 		if(!this.isAnyOf(containerValue, ValueKinds.LIST, ValueKinds.REGISTRY))
-			throw this.TuberInterpreterError(`Se esperaba un valor de Lista o Registro en expresión de contenedor de Sentencia "PARA CADA", pero "${this.#exprStr(container)}" fue de tipo ${ValueKindTranslationLookups.get(containerValue.kind)}`);
+			throw this.TuberInterpreterError(`Se esperaba un valor de Lista o Registro en expresión de contenedor de Sentencia "PARA CADA", pero "${this.expressionString(container)}" fue de tipo ${ValueKindTranslationLookups.get(containerValue.kind)}`);
 
 		const entryNames = (this.is(containerValue, ValueKinds.LIST) ? containerValue.elements : containerValue.entries).keys();
 		const forEachScope = new Scope(this, scope);
@@ -444,67 +447,9 @@ class Interpreter {
 	 * @param {import('../ast/statements').ReadStatement} node 
 	 * @param {import('./scope').Scope} scope
 	 */
-	#evaluateTestDriveRead(node, scope) {
-		const { receptor, dataKind, optional, fallback } = node;
-		
-		//Cargar valor de prueba
-		const valueKind = ValueKindLookups.get(dataKind.kind);
-		const fallbackValue = (fallback != null) ? this.evaluate(fallback, scope) : defaultValueOf(valueKind);
-		const coercedValue = coerceValue(this, fallbackValue, valueKind);
-		const name = this.#exprStr(receptor);
-		this.#assignValueToExpression(receptor, coercedValue, scope);
-		
-		//Registrar nueva Entrada o marcar Entrada existente como extensiva
-		if(this.#inputLookup.has(name)) {
-			const input = this.#inputLookup.get(name);
-			input.spread = true;
-		} else {
-			//No aceptar más Entradas extensivas si ya se detectó una
-			if(this.#inputStack.length > 0 && this.#inputStack[this.#inputStack.length - 1].spread) {
-				const spreadInput = this.#inputStack[this.#inputStack.length - 1];
-				throw this.TuberInterpreterError([
-					'Solo puede haber una única Entrada extensiva por Tubérculo, y debe ser la última Entrada del mismo.',
-					`La Entrada anterior, "${spreadInput.name}", se detectó como extensiva. Sin embargo, luego se leyó una Entrada con otro nombre: "${name}".`,
-					`Acomoda tu código de forma tal que la Entrada extensiva sea la última en ser leída`,
-				].join('\n'));
-			}
-
-			const input = /**@type {import('../purescript').TuberInput}*/({
-				kind: valueKind,
-				name,
-				optional,
-				spread: false,
-			});
-	
-			this.#inputStack.push(input);
-			this.#inputLookup.set(name, input);
-		}
-
-		return makeNada();
-	}
-
-	/**
-	 * 
-	 * @param {import('../ast/statements').ReadStatement} node 
-	 * @param {import('./scope').Scope} scope
-	 */
-	#evaluateProductionRead(node, scope) {
-		const { receptor, dataKind, optional, fallback } = node;
-
-		const receptorString = this.#exprStr(receptor);
-		const valueKind = ValueKindLookups.get(dataKind.kind);
-		let receptionValue = scope.lookup(receptorString, false);
-
-		if(receptionValue.kind === ValueKinds.NADA) {
-			if(optional)
-				receptionValue = (fallback != null) ? this.evaluate(fallback, scope) : defaultValueOf(valueKind);
-			else 
-				throw this.TuberInterpreterError(`No se recibió un valor para la Entrada obligatoria "${receptorString}" de tipo ${dataKind.translated}`);
-		}
-
-		const coercedValue = coerceValue(this, receptionValue, valueKind);
-		this.#assignValueToExpression(receptor, coercedValue, scope);
-
+	#evaluateReadStatement(node, scope) {
+		const coercedValue = this.#inputReader.readInput(node, scope);
+		this.#assignValueToExpression(node.receptor, coercedValue, scope);
 		return makeNada();
 	}
 
@@ -691,7 +636,7 @@ class Interpreter {
 
 		const operation = UnaryExpressionLookups.get(operator.kind);
 		if(operation == null)
-			throw this.TuberInterpreterError(`Operación unaria inválida. No se puede evaluar ${this.#exprStr(node)} porque el operador "${operator.value}" es inválido`);
+			throw this.TuberInterpreterError(`Operación unaria inválida. No se puede evaluar ${this.expressionString(node)} porque el operador "${operator.value}" es inválido`);
 
 		return operation(this, argumentValue);
 	}
@@ -709,7 +654,7 @@ class Interpreter {
 
 		const operation = BinaryOperationLookups.get(operator.kind);
 		if(operation == null)
-			throw this.TuberInterpreterError(`Operación binaria inválida. No se puede evaluar ${this.#exprStr(node)} porque el operador "${operator.value}" es inválido`);
+			throw this.TuberInterpreterError(`Operación binaria inválida. No se puede evaluar ${this.expressionString(node)} porque el operador "${operator.value}" es inválido`);
 		
 		return operation(this, leftValue, rightValue);
 	}
@@ -769,7 +714,7 @@ class Interpreter {
 		}
 
 		case ValueKinds.BOOLEAN: {
-			throw this.TuberInterpreterError(`El contenedor "${this.#exprStr(holder)}" en expresión de flecha "->" fue de tipo Dupla, el cual no contiene miembros accedibles por clave`);
+			throw this.TuberInterpreterError(`El contenedor "${this.expressionString(holder)}" en expresión de flecha "->" fue de tipo Dupla, el cual no contiene miembros accedibles por clave`);
 		}
 
 		case ValueKinds.LIST: {
@@ -833,7 +778,7 @@ class Interpreter {
 		}
 
 		default:
-			throw this.TuberInterpreterError(`El contenedor "${this.#exprStr(holder)}" en expresión de flecha "->" fue de tipo Nada`);
+			throw this.TuberInterpreterError(`El contenedor "${this.expressionString(holder)}" en expresión de flecha "->" fue de tipo Nada`);
 		}
 	}
 
@@ -847,7 +792,7 @@ class Interpreter {
 
 		const fnValue = this.evaluate(fn, scope);
 		if(!this.isAnyOf(fnValue, ValueKinds.NATIVE_FN, ValueKinds.FUNCTION))
-			throw this.TuberInterpreterError(`No se pudo llamar ${this.#exprStr(fn)} porque no era una Función. En cambio, era de tipo ${ValueKindTranslationLookups.get(fnValue.kind)}`);
+			throw this.TuberInterpreterError(`No se pudo llamar ${this.expressionString(fn)} porque no era una Función. En cambio, era de tipo ${ValueKindTranslationLookups.get(fnValue.kind)}`);
 
 		const argValues = args.map(arg => this.evaluate(arg, scope, false));
 		let returnedValue;
@@ -866,7 +811,7 @@ class Interpreter {
 				else if(arg.optional)
 					value = this.evaluate(arg.fallback, scope);
 				else
-					throw this.TuberInterpreterError(`Se esperaba un valor para el argumento "${arg.identifier}" de la Función ${itpt.#exprStr(fn)}`);
+					throw this.TuberInterpreterError(`Se esperaba un valor para el argumento "${arg.identifier}" de la Función ${itpt.expressionString(fn)}`);
 
 				fnScope.assignVariable(arg.identifier, argValues[i]);
 			});
@@ -927,7 +872,7 @@ class Interpreter {
 			case ValueKinds.LIST:
 				const index = +identifier;
 				if(!isInternalOperable(index))
-					throw this.TuberInterpreterError(`Se esperaba un índice válido en lado derecho de expresión de flecha "->" para la Lista "${this.#exprStr(receptor.holder)}" en expresión receptora de sentencia de asignación. Sin embargo, se recibió: ${identifier}`);
+					throw this.TuberInterpreterError(`Se esperaba un índice válido en lado derecho de expresión de flecha "->" para la Lista "${this.expressionString(receptor.holder)}" en expresión receptora de sentencia de asignación. Sin embargo, se recibió: ${identifier}`);
 
 				holderValue.elements[index] = receptionValue;
 				break;
@@ -939,12 +884,12 @@ class Interpreter {
 				break;
 
 			default:
-				throw this.TuberInterpreterError(`Expresión de flecha inválida como receptora de sentencia de asignación. El tipo de "${this.#exprStr(receptor.holder)}" no tiene miembros asignables`);
+				throw this.TuberInterpreterError(`Expresión de flecha inválida como receptora de sentencia de asignación. El tipo de "${this.expressionString(receptor.holder)}" no tiene miembros asignables`);
 			}
 			break;
 
 		default:
-			throw this.TuberInterpreterError(`La expresión ${this.#exprStr(receptor)} es inválida como receptora de una sentencia de asignación`);
+			throw this.TuberInterpreterError(`La expresión ${this.expressionString(receptor)} es inválida como receptora de una sentencia de asignación`);
 		}
 	}
 
@@ -953,14 +898,14 @@ class Interpreter {
 	 * @param {import('../ast/expressions').Expression} node
 	 * @returns {String} 
 	 */
-	#exprStr(node) {
+	expressionString(node) {
 		switch(node.kind) {
 		case ExpressionKinds.ARGUMENT:
 			return node.identifier;
 
 		case ExpressionKinds.ARROW: {
-			const holderString = this.#exprStr(node.holder);
-			const actualKey = (node.computed) ? this.#exprStr(node.key) : node.key;
+			const holderString = this.expressionString(node.holder);
+			const actualKey = (node.computed) ? this.expressionString(node.key) : node.key;
 			return `${holderString}->${actualKey}`;
 		}
 
@@ -968,13 +913,13 @@ class Interpreter {
 			return node.name;
 
 		case ExpressionKinds.UNARY: {
-			const argumentString = this.#exprStr(node.argument);
+			const argumentString = this.expressionString(node.argument);
 			return `${node.operator.value} ${argumentString})`;
 		}
 
 		case ExpressionKinds.BINARY: {
-			const leftString = this.#exprStr(node.left);
-			const rightString = this.#exprStr(node.right);
+			const leftString = this.expressionString(node.left);
+			const rightString = this.expressionString(node.right);
 			return `(${leftString} ${node.operator.value} ${rightString})`;
 		}
 
@@ -988,33 +933,33 @@ class Interpreter {
 			return node.value ? 'Verdadero' : 'Falso';
 
 		case ExpressionKinds.LIST_LITERAL: {
-			const stringifiedElements = node.elements.map(el => this.#exprStr(el));
+			const stringifiedElements = node.elements.map(el => this.expressionString(el));
 			return `(Lista ${stringifiedElements.join(', ')})`;
 		}
 
 		case ExpressionKinds.REGISTRY_LITERAL: {
 			const entriesArray = [ ...node.entries.entries() ];
-			const stringifiedEntries = entriesArray.map(([ k, expr ]) => `${k}: ${this.#exprStr(expr)}`);
+			const stringifiedEntries = entriesArray.map(([ k, expr ]) => `${k}: ${this.expressionString(expr)}`);
 			return `(Registro ${stringifiedEntries.join(', ')})`;
 		}
 
 		case ExpressionKinds.CALL: {
-			const fnString = this.#exprStr(node.fn);
-			const argsString = node.args.map(arg => this.#exprStr(arg)).join(', ');
+			const fnString = this.expressionString(node.fn);
+			const argsString = node.args.map(arg => this.expressionString(arg)).join(', ');
 			return `${fnString}(${argsString})`;
 		}
 
 		case ExpressionKinds.CAST: {
 			const operatorString = node.as.value;
-			const argumentString = this.#exprStr(node.argument);
+			const argumentString = this.expressionString(node.argument);
 			return `(${operatorString} ${argumentString})`;
 		}
 
 		case ExpressionKinds.FUNCTION: {
-			const argsString = node.args.map(arg => this.#exprStr(arg)).join(', ');
+			const argsString = node.args.map(arg => this.expressionString(arg)).join(', ');
 
 			if(node.expression === true) {
-				const bodyString = this.#exprStr(node.body);
+				const bodyString = this.expressionString(node.body);
 				return `(${argsString}) tal que ${bodyString}`;
 			}
 
@@ -1022,7 +967,7 @@ class Interpreter {
 		}
 
 		case ExpressionKinds.SEQUENCE: {
-			const stringifiedExpressions = node.expressions.map(expression => this.#exprStr(expression));
+			const stringifiedExpressions = node.expressions.map(expression => this.expressionString(expression));
 			return `${stringifiedExpressions.join(', ')}`;
 		}
 
@@ -1033,6 +978,16 @@ class Interpreter {
 			return 'Desconocido';
 		}
 	}
+}
+
+/**
+ * 
+ * @param {string} message
+ */
+function TuberInputError(message) {
+	const err = new Error(message);
+	err.name = 'TuberInputError';
+	return err;
 }
 
 module.exports = {

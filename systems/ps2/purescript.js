@@ -46,8 +46,6 @@ const { declareNatives, declareContext } = require('./interpreter/environment/en
 /**@typedef {BasicTubercle | AdvancedTubercle} Tubercle*/
 
 module.exports = {
-    stringifyPSAST,
-    logPSAST,
     Token,
     Lexer,
     Parser,
@@ -55,4 +53,6 @@ module.exports = {
     Scope,
     declareNatives,
     declareContext,
+    stringifyPSAST,
+    logPSAST,
 };

@@ -63,8 +63,10 @@ const ValueKinds = /**@type {const}*/({
  */
 
 /**
- * @template {RuntimeValue} [T=RuntimeValue]
- * @typedef {(self: T, args: Array<RuntimeValue>, scope: import('./scope').Scope) => RuntimeValue} NativeFunction
+ * @template {RuntimeValue} [TSelf=RuntimeValue]
+ * @template {Array<RuntimeValue>} [TArg=Array<RuntimeValue>]
+ * @template {RuntimeValue} [TReturn=RuntimeValue]
+ * @typedef {(self: TSelf, args: TArg, scope: import('./scope').Scope) => TReturn} NativeFunction
  */
 
 /**

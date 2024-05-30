@@ -1,4 +1,4 @@
-const { ValueKinds, makeNumber, makeText } = require('../../values');
+const { ValueKinds, makeNumber, makeText, makeBoolean } = require('../../values');
 const { getParamOrNada } = require('../nativeUtils');
 const { Scope } = require('../../scope');
 const { rand, randRange } = require('../../../../../func');
@@ -16,12 +16,12 @@ const { rand, randRange } = require('../../../../../func');
  */
 
 /**
- * 
- * @param {null} self
- * @param {[ NumberValue, NumberValue ]} args 
- * @param {Scope} scope 
- * @returns {NumberValue}
+ * @template {Array<RuntimeValue>} [TArg=Array<RuntimeValue>]
+ * @template {RuntimeValue} [TResult=RuntimeValue]
+ * @typedef {import('../../values').NativeFunction<null, TArg, TResult>} NativeFunction
  */
+
+/**@type {NativeFunction<[ NumberValue, NumberValue ], NumberValue>}*/
 function dado(self, [ n, m ], scope) {
 	const [ nExists, nResult ] = getParamOrNada(n, ValueKinds.NUMBER, scope);
 	if(!nExists)
@@ -34,13 +34,7 @@ function dado(self, [ n, m ], scope) {
 	return makeNumber(randRange(nResult.value, mResult.value, true));
 }
 
-/**
- * 
- * @param {null} self
- * @param {[ NumberValue, NumberValue ]} args 
- * @param {Scope} scope 
- * @returns {NumberValue}
- */
+/**@type {NativeFunction<[ NumberValue, NumberValue ], NumberValue>}*/
 function aleatorio(self, [ n, m ], scope) {
 	const [ nExists, nResult ] = getParamOrNada(n, ValueKinds.NUMBER, scope);
 	if(!nExists)
@@ -53,24 +47,25 @@ function aleatorio(self, [ n, m ], scope) {
 	return makeNumber(randRange(nResult.value, mResult.value, false));
 }
 
-/**
- * 
- * @param {null} self
- * @param {[]} args 
- * @param {Scope} scope 
- * @returns {TextValue}
- */
+/**@type {NativeFunction<[], TextValue>}*/
 function colorAleatorio(self, [], scope) {
 	const colorNumber = ((Math.random() * 0xfffffe) << 0) + 1;
 	const colorString = colorNumber.toString(16).padStart(6, '0');
 	return makeText(colorString);
 }
 
-/**@type {Array<{ id: String, fn: import('../../values').NativeFunction }>}*/
+/**@type {NativeFunction<[], BooleanValue>}*/
+function quedanEntradas(self, [], scope) {
+	const test = scope.interpreter.hasArgs;
+	return makeBoolean(test);
+}
+
+/**@type {Array<{ id: String, fn: NativeFunction }>}*/
 const utilFunctions = [
 	{ id: 'dado', fn: dado },
 	{ id: 'aleatorio', fn: aleatorio },
 	{ id: 'colorAleatorio', fn: colorAleatorio },
+	{ id: 'quedanEntradas', fn: quedanEntradas },
 ];
 
 module.exports = {
