@@ -1,6 +1,7 @@
 const { ValueKinds, makeText, makeBoolean, makeList, makeRegistry, makeNada, coerceValue } = require('../../values');
 const { expectParam, getParamOrNada } = require('../nativeUtils');
 const { Scope } = require('../../scope');
+const { stringifyPSAST } = require('../../../debug');
 
 /**
  * @typedef {import('../../values').NumberValue} NumberValue
@@ -151,8 +152,13 @@ function listaUnir(self, [ separador ], scope) {
 	if(!self.elements.length)
 		return makeText('');
 
+	console.log(`llegó: ${stringifyPSAST({ separador, elements: self.elements })}`);
 	const separadorResult = expectParam(separador, ValueKinds.TEXT, scope);
-	const elementTextValues = self.elements.map(el => coerceValue(scope.interpreter, el, ValueKinds.TEXT).value);
+	const elementTextValues = self.elements.map(el => {
+		console.log(`Convirtiending: ${stringifyPSAST(el)}`);
+		return coerceValue(scope.interpreter, el, ValueKinds.TEXT).value;
+	});
+	console.log(`llegó: ${stringifyPSAST({ elementTextValues })}`);
 	return makeText(elementTextValues.join(separadorResult.value));
 }
 

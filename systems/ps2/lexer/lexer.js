@@ -89,7 +89,7 @@ class Lexer {
 		this.#patterns = [
 			{ match: /^\r?\n+/, handler: this.#makeNewlineHandler() },
 			{ match: /^[ \t\r]+/, handler: this.#makeSkipHandler() },
-			{ match: /^\/\/.*/, handler: this.#makeSkipHandler() },
+			{ match: /^\/\/.*/, handler: this.#makeNewlineHandler() },
 
 			{ match: '(', handler: this.#makeDefaultHandler(TokenKinds.PAREN_OPEN) },
 			{ match: ')', handler: this.#makeDefaultHandler(TokenKinds.PAREN_CLOSE) },
@@ -138,18 +138,31 @@ class Lexer {
 		];
 	}
 
-	TuberLexerError(message) {
+	/**
+	 * @param {string} message
+	 */
+	TuberLexerError(message, errorOptions) {
+		errorOptions ??= {};
+		errorOptions.col ??= this.#col;
+		errorOptions.line ??= this.#line;
 		const lineString = this.lineString;
+		console.log({ ...errorOptions, lineString });
+		const col = Math.max(1, Math.min(errorOptions.col, lineString.length));
+		const line = errorOptions.line;
 		message = [
 			'```arm',
 			lineString,
-			`${' '.repeat(this.#col - 1)}↑${' '.repeat(lineString.length - this.#col)}`,
+			`${' '.repeat(col - 1)}↑${' '.repeat(lineString.length - col)}`,
 			'```',
-			`En línea **${this.#line}**, columna **${this.#col}** - ${message}`,
+			`En línea **${line}**, columna **${col}** - ${message}`,
 		].join('\n');
 		const error = new Error(message);
 		error.name = 'TuberLexerError';
 		return error;
+	}
+
+	get source() {
+		return this.#source;
 	}
 
 	get pos() {
@@ -169,7 +182,8 @@ class Lexer {
 	}
 
 	get lineString() {
-		return this.#source.split(/\r?\n/g)[this.#line - 1];
+		const sourceLines = this.#source.split(/\r?\n/g);
+		return sourceLines[this.#line - 1];
 	}
 
 	/**
@@ -200,7 +214,7 @@ class Lexer {
 			throw this.TuberLexerError('Se esperaba un String válido para tokenizar');
 
 		this.#tokens = [];
-		this.#source = source;
+		this.#source = source.replace(/^\s+/, '');
 		this.#pos = this.#col = this.#line = 1;
 		this.handleCommentStatement = false;
 
@@ -313,7 +327,6 @@ class Lexer {
 			const len = match.length;
 
 			const chars = rawMatch.slice(1, -1).split('');
-			let pos = 1;
 			let col = lexer.col;
 			let line = lexer.line;
 			for(const c of chars) {
@@ -322,27 +335,27 @@ class Lexer {
 					line++;
 				} else {
 					if(c === '\\') {
-						chars.splice(--pos, 1);
+						const rePos = chars.indexOf('\\');
+						chars.splice(rePos, 1);
 						
-						switch(chars[pos]) {
+						switch(chars[rePos]) {
 						case 'N':
 						case 'n':
-							chars[pos] = '\n';
+							chars[rePos] = '\n';
 							break;
 	
-						case '"': chars[pos] = '"'; break;
-						case "'": chars[pos] = "'"; break;
-						case '\\': chars[pos] = '\\'; break;
+						case '"': break;
+						case "'": break;
+						case '\\': break;
 	
 						default:
-							throw lexer.TuberLexerError(`Caracter de escape inválido en literal de Texto: ${rawMatch}`);
+							const lineString = lexer.source.split(/\r?\n/g)[line - 1];
+							throw lexer.TuberLexerError(`Caracter de escape inválido en literal de Texto: ${rawMatch}`, { col, line, lineString });
 						}
 					}
 
 					col++;
 				}
-
-				pos++;
 			}
 
 			rawMatch = chars.join('');

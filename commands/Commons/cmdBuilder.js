@@ -16,14 +16,19 @@ const { CommandPermissions } = require('./cmdPerms');
  * @property {Collection<Snowflake, Attachment>} attachments A collection of the command's attachments, if it's a message command and it has attachments
  * @property {Readonly<PermissionsBitField>} appPermisions The permissions of the application or bot in the current channel
  * @property {Boolean} deferred
+ * @property {Boolean} replied
  * @property {Readonly<PermissionsBitField>} memberPermissions The permissions within the current channel of the member who started the command
  * @property {User} user The user who started the command
  * @property {String} userId The id of the user who started the command
  * 
+ * @property {(options?: (string|MessagePayload)&(MessageEditOptions|InteractionReplyOptions)|{}|undefined) => Promise<Message<Boolean>>} reply If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply
+ * @property {(options?: (string|MessagePayload)&(MessageEditOptions|InteractionReplyOptions)|{}|undefined) => Promise<Message<Boolean>>} replyFirst If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply
  * @property {(options?: InteractionDeferReplyOptions) => Promise<Message<Boolean>>} deferReply If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply
  * @property {() => Promise<Message<Boolean>>} delete Deletes the original message if the command is a message command
  * @property {() => Promise<Message<Boolean>>} deleteReply Deletes the initial reply
  * @property {(options: (string|MessagePayload)&(MessageEditOptions|InteractionEditReplyOptions)|{}|undefined) => Promise<Message<Boolean>>} editReply Edits the initial reply
+ * @property {() => Boolean} wasDeferred Determines whether the initial reply was deferred (true) or not (false)
+ * @property {() => Boolean} wasReplied Determines whether the initial reply was sent (true) or not (false)
  */
 
 /**@type {ExtendedCommandRequestPrototype}*/
@@ -36,14 +41,19 @@ const extendedCommandRequestPrototype = {
     attachments: undefined,
     appPermisions: undefined,
     deferred: undefined,
+    replied: undefined,
     memberPermissions: undefined,
     user: undefined,
     userId: undefined,
 
+    reply: undefined,
+    replyFirst: undefined,
     deferReply: undefined,
     delete: undefined,
     deleteReply: undefined,
     editReply: undefined,
+    wasDeferred: undefined,
+    wasReplied: undefined,
 };
 
 /**
@@ -59,6 +69,7 @@ function extendRequest(request) {
 
         extension.appPermisions = request.guild.members.me.permissionsIn(request.channel);
         extension.deferred = false;
+        extension.replied = false;
         extension.memberPermissions = request.member.permissionsIn(request.channel);
         extension.user = request.author;
         extension.userId = request.author.id;
@@ -74,16 +85,27 @@ function extendRequest(request) {
             if(extension.initialReply == undefined)
                 throw "No se encontró una respuesta inicial de comando a editar";
             
+            extension.replied = true;
+
             return extension.initialReply.edit(typeof options === 'string' ? options : { content: '', ...options });
         };
+        extension.replyFirst = async(options) => {
+            const replied = request.reply(options);
+            extension.replied = true;
+            return replied;
+        }
+        extension.wasDeferred = () => extension.deferred;
+        extension.wasReplied = () => extension.replied;
     } else {
         extension.isInteraction = true;
-        
+
         extension.activity = null;
         extension.attachments = new Collection();
         extension.userId = request.user.id;
 
         extension.delete = async() => undefined;
+        extension.wasDeferred = () => request.deferred;
+        extension.wasReplied = () => request.replied;
     }
 
     for(const [k, v] of Object.entries(extension)) {

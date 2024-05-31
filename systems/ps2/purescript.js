@@ -105,19 +105,14 @@ async function executeTuber(request, tuber, inputOptions) {
 
         const scope = new Scope(interpreter);
         declareNatives(scope);
-        declareContext(scope, request);
-        
-        if(savedData != null)
-            savedData.forEach((value, key) => scope.assignVariable(key, value));
-
+        await declareContext(scope, request, savedData);
         result = interpreter.evaluateProgram(program, scope, request, args, isTestDrive);
         if(!result.sendStack.length) {
             const error = Error('No se envió ningún mensaje');
             error.name = 'TuberSendError';
             throw error;
         }
-        logOptions.interpreter && console.log('Resultado:');
-        logOptions.interpreter && console.dir(result, { depth: null });
+        logOptions.interpreter && console.log(`Resultado: ${stringifyPSAST(result)}`);
     } catch(error) {
         const errorNames = {
             'TuberVersionError':     { color: Colors.Greyple, icon: '🏚️', translation: `Se requiere actualización de PuréScript: ${tuber.psVersion} → ${CURRENT_PS_VERSION}` },

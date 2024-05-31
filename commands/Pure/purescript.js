@@ -1,6 +1,6 @@
 const { CommandTags } = require("../Commons/cmdTags");
 const { CommandManager } = require("../Commons/cmdBuilder");
-const { executeTuber } = require("../../systems/ps/purescript");
+const { executeTuber, CURRENT_PS_VERSION } = require("../../systems/ps2/purescript");
 const { CommandOptions } = require("../Commons/cmdOpts");
 const { ButtonBuilder, ButtonStyle, EmbedBuilder, CommandInteractionOptionResolver } = require("discord.js");
 const { p_pure } = require("../../localdata/customization/prefixes");
@@ -63,22 +63,30 @@ const command = new CommandManager('purescript', flags)
 				components: [makeButtonRowBuilder().addComponents(psDocsButton)],
 			});
 
-		/**@type {import("../../systems/ps/purescript").Tubercle}*/
+		/**@type {import("../../systems/ps2/purescript").Tubercle}*/
 		const tuber = {
+			id: null,
 			author: request.userId,
+			advanced: true,
 			script,
+			psVersion: CURRENT_PS_VERSION,
+			saved: new Map(),
 		};
 		
 		try {
-			console.log('Ejecutando PuréScript:',tuber);
+			console.log(`Ejecutando PuréScript: ${tuber}`);
 			await request.deferReply();
-			await executeTuber(request, tuber, { isTestDrive: false });
-			console.log('PuréScript ejecutado:', tuber);
+			await executeTuber(request, tuber, { isTestDrive: false, args: [] });
+			console.log(`PuréScript ejecutado: ${tuber}`);
 		} catch(error) {
 			console.log('Ocurrió un error al ejecutar código PuréScript');
 			console.error(error);
 			const errorContent = { content: '❌ Hay un problema con el código que intentaste ejecutar' };
-			return request.deferred
+
+			if(request.wasReplied())
+				return null;
+
+			return request.wasDeferred()
 				? request.editReply(errorContent)
 				: request.reply(errorContent);
 		}

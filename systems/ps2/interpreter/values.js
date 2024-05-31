@@ -505,11 +505,11 @@ coercions.get(ValueKinds.REGISTRY)
 	.set(ValueKinds.NUMBER,   (_) => makeNada())
 	.set(ValueKinds.TEXT,     (/**@type Map<string, RuntimeValue>*/ x, interpreter) => {
 		let glossaryStrings = [];
-		for(const [key, value] of x) {
+		x.forEach((value, key) => {
 			const coercedValue = coerceValue(interpreter, value, 'Text').value;
 			glossaryStrings.push(`${key}: ${coercedValue}`);
-		}
-		return makeText(`{Gl ${glossaryStrings.join(', ')}}`);
+		});
+		return makeText(`{Rg ${glossaryStrings.join(', ')}}`);
 	})
 	.set(ValueKinds.BOOLEAN,  (x) => makeBoolean(x?.size ? true : false));
 

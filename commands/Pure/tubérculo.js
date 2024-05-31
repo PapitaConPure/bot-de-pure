@@ -429,7 +429,7 @@ async function createTuber(tuberId, gcfg, isPureScript, request, args) {
 					content: [
 						'Debes poner **\\`\\`\\`** antes y después del código.',
 						'Esto hará que Discord le ponga el formato adecuado al código y que sea más fácil programar.',
-						'Opcionalmente, puedes poner **\\`\\`\\`arm** en el del principio para colorear el código'
+						'Opcionalmente, puedes poner **\\`\\`\\`arm** en el del principio para colorear el código',
 					].join('\n'),
 				});
 			const firstIndex = args.rawArgs.indexOf(codeTag);
@@ -493,7 +493,6 @@ async function createTuber(tuberId, gcfg, isPureScript, request, args) {
  */
 function viewTuber(interaction, item, tuberId) {
 	if(!item) {
-		//@ts-expect-error
 		return interaction.reply({ content: `⚠️️ El Tubérculo **${tuberId}** no existe` });
 	}
 
@@ -578,7 +577,6 @@ function viewTuber(interaction, item, tuberId) {
 	const embeds = [embed];
 	const components = [ makeButtonRowBuilder().addComponents(...buttons) ];
 
-	//@ts-expect-error
 	return interaction.reply({ embeds, files, components });
 }
 
