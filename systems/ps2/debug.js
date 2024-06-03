@@ -162,6 +162,7 @@ function stringifyPSAST(obj, indentSize = 2, indent = indentSize) {
 	const isArray = Array.isArray(obj);
 	const delims = isArray ? '[]' : '{}';
 	let hasKind = false;
+	let hasPositionalData = false;
 	let name = '';
 	let threshold = 2;
 
@@ -175,22 +176,31 @@ function stringifyPSAST(obj, indentSize = 2, indent = indentSize) {
 			const { compareTo, ...rest } = obj;
 			obj = rest;
 		}
-		if(hasKind)
+		if(hasKind) {
 			threshold = 3;
+			if(obj.hasOwnProperty('line'))
+				hasPositionalData = true;
+		}
 	} else if(/**@type {Array}*/(obj).length === 0)
 		return chalk.gray(delims);
 
 	const values = Object.values(obj);
 	if(values.length <= threshold && values.every(v => typeof v !== 'object' || v == null || isInstance(v))) {
 		const simple = stringifySimplePSAST(obj);
-		if(simple.length < 127)
+		if(simple.length < 160)
 			return simple;
 	}
 
 	if(!isArray && hasKind) {
-		const { kind, ...rest } = obj;
-		obj = rest;
-		name = chalk.cyan(`${kind} `);
+		if(hasPositionalData) {
+			const { kind, line, start, end, ...rest } = obj;
+			obj = rest;
+			name = chalk.cyan(`${kind} ${exChalk.peach(`(${exChalk.mint(line)}, ${exChalk.mint(`${start}~${end}`)})`)} `);
+		} else {
+			const { kind, ...rest } = obj;
+			obj = rest;
+			name = chalk.cyan(`${kind} `);
+		}
 	}
 
 	if(values.length === 0)
