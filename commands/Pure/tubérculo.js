@@ -526,8 +526,8 @@ function viewTuber(interaction, item, tuberId) {
 
 	if(item.psVersion)
 		embed.addFields({
-			name: 'PuréScript',
-			value: `\`v${item.psVersion}\``,
+			name: 'Versión',
+			value: `\`PS v${item.psVersion}\``,
 			inline: true,
 		});
 	
