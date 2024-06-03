@@ -1143,7 +1143,7 @@ module.exports = {
         text = text
             .toLowerCase()
             .normalize('NFD')
-            .replace(/([aeiou])\u0301/gi, '$1');
+            .replace(/([aeioun])[\u0300-\u030A]/gi, '$1');
         
         if(options.removeCarriageReturns)
             text = text.replace(/\r/g, '');
