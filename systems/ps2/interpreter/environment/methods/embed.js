@@ -24,9 +24,9 @@ const { EmbedBuilder, GuildPremiumTier } = require('discord.js');
  * @returns {EmbedValue}
  */
 function marcoAgregarCampo(self, [ nombre, valor, alineado ], scope) {
-	const nombreResult = expectParam(nombre, ValueKinds.TEXT, scope);
-	const valorResult = expectParam(valor, ValueKinds.TEXT, scope);
-	const alineadoResult = getParamOrDefault(alineado, ValueKinds.BOOLEAN, scope, false);
+	const nombreResult = expectParam('nombre', nombre, ValueKinds.TEXT, scope);
+	const valorResult = expectParam('valor', valor, ValueKinds.TEXT, scope);
+	const alineadoResult = getParamOrDefault('alineado', alineado, ValueKinds.BOOLEAN, scope, false);
 
     self.value.addFields({
 		name: nombreResult.value,
@@ -43,15 +43,15 @@ function marcoAgregarCampo(self, [ nombre, valor, alineado ], scope) {
  * @param {Scope} scope
  */
 function marcoAsignarAutor(self, [ nombre, imagen ], scope) {
-	const nombreResult = expectParam(nombre, ValueKinds.TEXT, scope);
-	const [ imagenExists, imagenResult ] = getParamOrNada(imagen, ValueKinds.TEXT, scope);
+	const nombreResult = expectParam('nombre', nombre, ValueKinds.TEXT, scope);
+	const [ imagenExists, imagenResult ] = getParamOrNada('imagen', imagen, ValueKinds.TEXT, scope);
 
     if(!imagenExists) {
         self.value.setAuthor({ name: nombreResult.value });
         return self;
     }
     
-    if(!fileRegex.test(imagen.value))
+    if(!fileRegex.test(imagenResult.value))
         throw scope.interpreter.TuberInterpreterError('Se esperaba un enlace válido para el ícono del autor del Marco');
 
     self.value.setAuthor({
@@ -68,7 +68,7 @@ function marcoAsignarAutor(self, [ nombre, imagen ], scope) {
  * @param {Scope} scope
  */
 function marcoAsignarColor(self, [ color ], scope) {
-	const colorResult = expectParam(color, ValueKinds.TEXT, scope);
+	const colorResult = expectParam('color', color, ValueKinds.TEXT, scope);
 
     try {
         const targetColor = stringHexToNumber(colorResult.value);
@@ -86,7 +86,7 @@ function marcoAsignarColor(self, [ color ], scope) {
  * @param {Scope} scope
  */
 function marcoAsignarDescripción(self, [ descripción ], scope) {
-	const descripciónResult = expectParam(descripción, ValueKinds.TEXT, scope);
+	const descripciónResult = expectParam('descripción', descripción, ValueKinds.TEXT, scope);
 
     self.value.setDescription(descripciónResult.value);
 
@@ -99,7 +99,7 @@ function marcoAsignarDescripción(self, [ descripción ], scope) {
  * @param {Scope} scope
  */
 function marcoAsignarImagen(self, [ imagen ], scope) {
-	const imagenResult = expectParam(imagen, ValueKinds.TEXT, scope);
+	const imagenResult = expectParam('imagen', imagen, ValueKinds.TEXT, scope);
 
     if(!fileRegex.test(imagenResult.value))
         throw scope.interpreter.TuberInterpreterError('Se esperaba un enlace válido para la imagen del Marco');
@@ -115,10 +115,10 @@ function marcoAsignarImagen(self, [ imagen ], scope) {
  * @param {Scope} scope
  */
 function marcoAsignarMiniatura(self, [ imagen ], scope) {
-	const imagenResult = expectParam(imagen, ValueKinds.TEXT, scope);
+	const imagenResult = expectParam('imagen', imagen, ValueKinds.TEXT, scope);
 
     if(!fileRegex.test(imagenResult.value))
-        throw scope.interpreter.TuberInterpreterError('Se esperaba un enlace válido para la imagen del Marco');
+        throw scope.interpreter.TuberInterpreterError('Se esperaba un enlace válido para la miniatura del Marco');
 
     self.value.setThumbnail(imagenResult.value);
 
@@ -131,8 +131,8 @@ function marcoAsignarMiniatura(self, [ imagen ], scope) {
  * @param {Scope} scope
  */
 function marcoAsignarPie(self, [ pie, imagen ], scope) {
-	const pieResult = expectParam(pie, ValueKinds.TEXT, scope);
-	const [ imagenExists, imagenResult ] = getParamOrNada(imagen, ValueKinds.TEXT, scope);
+	const pieResult = expectParam('pie', pie, ValueKinds.TEXT, scope);
+	const [ imagenExists, imagenResult ] = getParamOrNada('imagen', imagen, ValueKinds.TEXT, scope);
 
     if(!imagenExists) {
         self.value.setFooter({ text: pieResult.value });
@@ -156,7 +156,7 @@ function marcoAsignarPie(self, [ pie, imagen ], scope) {
  * @param {Scope} scope
  */
 function marcoAsignarTítulo(self, [ título ], scope) {
-	const títuloResult = expectParam(título, ValueKinds.TEXT, scope);
+	const títuloResult = expectParam('título', título, ValueKinds.TEXT, scope);
 
     self.value.setTitle(títuloResult.value);
 

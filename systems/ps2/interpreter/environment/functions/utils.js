@@ -23,11 +23,11 @@ const { rand, randRange } = require('../../../../../func');
 
 /**@type {NativeFunction<[ NumberValue, NumberValue ], NumberValue>}*/
 function dado(self, [ n, m ], scope) {
-	const [ nExists, nResult ] = getParamOrNada(n, ValueKinds.NUMBER, scope);
+	const [ nExists, nResult ] = getParamOrNada('n', n, ValueKinds.NUMBER, scope);
 	if(!nExists)
 		return makeNumber(rand(6, true) + 1);
 		
-	const [ mExists, mResult ] = getParamOrNada(m, ValueKinds.NUMBER, scope);
+	const [ mExists, mResult ] = getParamOrNada('m', m, ValueKinds.NUMBER, scope);
 	if(!mExists)
 		return makeNumber(rand(nResult.value, true));
 
@@ -36,11 +36,11 @@ function dado(self, [ n, m ], scope) {
 
 /**@type {NativeFunction<[ NumberValue, NumberValue ], NumberValue>}*/
 function aleatorio(self, [ n, m ], scope) {
-	const [ nExists, nResult ] = getParamOrNada(n, ValueKinds.NUMBER, scope);
+	const [ nExists, nResult ] = getParamOrNada('n', n, ValueKinds.NUMBER, scope);
 	if(!nExists)
 		return makeNumber(Math.random());
 	
-	const [ mExists, mResult ] = getParamOrNada(m, ValueKinds.NUMBER, scope);
+	const [ mExists, mResult ] = getParamOrNada('m', m, ValueKinds.NUMBER, scope);
 	if(!mExists)
 		return makeNumber(rand(nResult.value, false));
 

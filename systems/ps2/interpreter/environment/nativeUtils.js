@@ -1,9 +1,9 @@
 const { Scope } = require('../scope');
-const { ValueKinds, coerceValue, isOperable, makeNada, makeNativeFunction, makeFunction, makeEmbed, makeRegistry, makeList, makeNumber, makeText, makeBoolean, isValidText } = require('../values');
+const { ValueKinds, coerceValue, isOperable, makeNada, makeNativeFunction, makeFunction, makeEmbed, makeRegistry, makeList, makeNumber, makeText, makeBoolean, isValidText, ValueKindTranslationLookups } = require('../values');
 
-const fileRegex = /(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_\/\.0-9#:?=&;,]*\.(txt|png|jpg|jpeg|webp|gif|webm|mp4|mp3|wav|flac|ogg)[a-zA-Z-_\.0-9#:?=&;,]*/;
-const imageRegex = /(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_\/\.0-9#:?=&;,]*\.(png|jpg|jpeg|webp)[a-zA-Z-_\.0-9#:?=&;,]*/;
-const linkRegex = /(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}(\/[a-zA-Z-_\/\.0-9#:?=&;,]*)?/;
+const fileRegex = /(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_\/\.0-9#:?=&;,]*\.(txt|png|jpg|jpeg|webp|gif|webm|mp4|mp3|wav|flac|ogg)[a-zA-Z-_\.0-9#:?=&;,]*/i;
+const imageRegex = /(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_\/\.0-9#:?=&;,]*\.(png|jpg|jpeg|webp)[a-zA-Z-_\.0-9#:?=&;,]*/i;
+const linkRegex = /(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}(\/[a-zA-Z-_\/\.0-9#:?=&;,]*)?/i;
 
 /**
  * @template {import('../values').ValueKind} T
@@ -42,12 +42,12 @@ function makeKindFromValue(kind, ...values) {
  * @param {T} kind 
  * @param {Scope} scope
  */
-function verifyParam(coerced, kind, scope) {
+function verifyParam(name, coerced, kind, scope) {
 	if(kind === ValueKinds.NUMBER && !isOperable(coerced))
-		throw scope.interpreter.TuberInterpreterError('Se recibió un Número inválido como argumento de tipo Número');
+		throw scope.interpreter.TuberInterpreterError(`Se recibió un valor inválido para parámetro de tipo **Número**: \`${name}\``);
 
 	if(kind === ValueKinds.TEXT && !isValidText(coerced))
-		throw scope.interpreter.TuberInterpreterError('Se recibió un Texto inválido como argumento de tipo Texto');
+		throw scope.interpreter.TuberInterpreterError(`Se recibió un valor inválido para parámetro de tipo **Texto**: \`${name}\``);
 }
 
 /**
@@ -56,17 +56,21 @@ function verifyParam(coerced, kind, scope) {
  * Si el parámetro existe y puede ser convertido al valor esperado correctamente (si no lo era antes), devuelve el resultado de esa conversión. En cualquier otro caso, arroja un error
  * 
  * @template {import('../values').ValueKind} T
+ * @param {String} name
  * @param {import('../values').RuntimeValue} value 
  * @param {T} kind 
  * @param {Scope} scope 
  * @returns {Extract<import('../values').RuntimeValue, { kind: T }>}
  */
-function expectParam(value, kind, scope) {
-	if(value === null)
-		throw scope.interpreter.TuberInterpreterError('Se esperaba un valor para un parámetro requerido en función nativa');
+function expectParam(name, value, kind, scope) {
+	if(value == null)
+		throw scope.interpreter.TuberInterpreterError(`Se esperaba un valor para el parámetro requerido \`${name}\` en Función nativa`);
+
+	if(value.kind === ValueKinds.NADA)
+		throw scope.interpreter.TuberInterpreterError(`Se esperaba un **${ValueKindTranslationLookups.get(kind)}** para el parámetro requerido \`${name}\` en Función nativa, pero se recibió **Nada**`);
 
 	const coerced = coerceValue(scope.interpreter, value, kind);
-	verifyParam(coerced, kind, scope);
+	verifyParam(name, coerced, kind, scope);
 
 	return coerced;
 }
@@ -81,18 +85,19 @@ function expectParam(value, kind, scope) {
  * * Si el parámetro no existe, se devuelve el valor por defecto especificado envuelto en un {@link RuntimeValue} del tipo especificado.
  * 
  * @template {import('../values').ValueKind} T
+ * @param {String} name
  * @param {import('../values').RuntimeValue} value 
  * @param {T} kind 
  * @param {Scope} scope 
  * @param {...*} fallback
  * @returns {Extract<import('../values').RuntimeValue, { kind: T }>}
  */
-function getParamOrDefault(value, kind, scope, ...fallback) {
-	if(value == null)
+function getParamOrDefault(name, value, kind, scope, ...fallback) {
+	if(value == null || value.kind === ValueKinds.NADA)
 		return makeKindFromValue(kind, ...fallback);
 
 	const coerced = coerceValue(scope.interpreter, value, kind);
-	verifyParam(coerced, kind, scope);
+	verifyParam(name, coerced, kind, scope);
 
 	return coerced;
 }
@@ -113,7 +118,7 @@ function getParamOrDefault(value, kind, scope, ...fallback) {
  * @param {Scope} scope 
  * @returns {[ false, import('../values').NadaValue ] | [ true, Extract<import('../values').RuntimeValue, { kind: T }> ]}
  */
-function getParamOrNada(value, kind, scope) {
+function getParamOrNada(name, value, kind, scope) {
 	if(value == null)
 		return [
 			false,
@@ -121,7 +126,7 @@ function getParamOrNada(value, kind, scope) {
 		];
 
 	const coerced = coerceValue(scope.interpreter, value, kind);
-	verifyParam(coerced, kind, scope);
+	verifyParam(name, coerced, kind, scope);
 
 	return [
 		true,

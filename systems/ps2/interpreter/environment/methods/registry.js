@@ -33,7 +33,7 @@ function registroClaves(self, [], scope) {
  * @returns {BooleanValue}
  */
 function registroContiene(self, [ clave ], scope) {
-	const claveResult = expectParam(clave, ValueKinds.TEXT, scope)
+	const claveResult = expectParam('clave', clave, ValueKinds.TEXT, scope)
 	return makeBoolean(self.entries.has(claveResult.value));
 }
 
@@ -67,7 +67,7 @@ function registroEntradas(self, [], scope) {
  * @returns {BooleanValue}
  */
 function registroQuitar(self, [ clave ], scope) {
-	const claveResult = expectParam(clave, ValueKinds.TEXT, scope);
+	const claveResult = expectParam('clave', clave, ValueKinds.TEXT, scope);
 	const deleted = self.entries.delete(claveResult.value);
 	return makeBoolean(deleted);
 }

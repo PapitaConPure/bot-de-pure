@@ -64,11 +64,11 @@ function listaContiene(self, [ x ], scope) {
  * @returns {ListValue}
  */
 function listaCortar(self, [ inicio, fin ], scope) {
-	const [ inicioExists, inicioResult ] = getParamOrNada(inicio, ValueKinds.NUMBER, scope);
+	const [ inicioExists, inicioResult ] = getParamOrNada('inicio', inicio, ValueKinds.NUMBER, scope);
 	if(!inicioExists)
 		return self;
 
-	const [ finExists, finResult ] = getParamOrNada(fin, ValueKinds.NUMBER, scope);
+	const [ finExists, finResult ] = getParamOrNada('fin', fin, ValueKinds.NUMBER, scope);
 	if(!finExists)
 		return makeList(self.elements.slice(inicioResult.value));
 
@@ -104,7 +104,7 @@ function listaOrdenar(self, [], scope) {
  * @returns {RuntimeValue}
  */
 function listaRobar(self, [ índice ], scope) {
-	const índiceResult = expectParam(índice, ValueKinds.NUMBER, scope);
+	const índiceResult = expectParam('índice', índice, ValueKinds.NUMBER, scope);
 
 	if(índiceResult.value < 0 || índiceResult.value >= self.elements.length)
 		return makeNada();
@@ -152,13 +152,8 @@ function listaUnir(self, [ separador ], scope) {
 	if(!self.elements.length)
 		return makeText('');
 
-	console.log(`llegó: ${stringifyPSAST({ separador, elements: self.elements })}`);
-	const separadorResult = expectParam(separador, ValueKinds.TEXT, scope);
-	const elementTextValues = self.elements.map(el => {
-		console.log(`Convirtiending: ${stringifyPSAST(el)}`);
-		return coerceValue(scope.interpreter, el, ValueKinds.TEXT).value;
-	});
-	console.log(`llegó: ${stringifyPSAST({ elementTextValues })}`);
+	const separadorResult = expectParam('separador', separador, ValueKinds.TEXT, scope);
+	const elementTextValues = self.elements.map(el => coerceValue(scope.interpreter, el, ValueKinds.TEXT).value);
 	return makeText(elementTextValues.join(separadorResult.value));
 }
 

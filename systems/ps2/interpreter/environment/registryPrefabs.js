@@ -1,5 +1,4 @@
 const { ValueKinds, makeNumber, makeText, makeBoolean, makeList, makeRegistry, makeNada, isNada, isOperable, isInternalOperable, coerceValue } = require('../values');
-const { expectParam, getParamOrNada, calculatePositionOffset } = require('./nativeUtils');
 const { Scope } = require('../scope');
 const { GuildPremiumTier } = require('discord.js');
 

@@ -106,7 +106,7 @@ function esNada(self, [ x ], scope) {
  * @returns {BooleanValue}
  */
 function esEnlace(self, [ x ], scope) {
-	const xResult = expectParam(x, ValueKinds.TEXT, scope);
+	const xResult = expectParam('x', x, ValueKinds.TEXT, scope);
 	const test = !linkRegex.test(xResult.value);
 	return makeBoolean(test);
 }
@@ -119,7 +119,7 @@ function esEnlace(self, [ x ], scope) {
  * @returns {BooleanValue}
  */
 function esArchivo(self, [ x ], scope) {
-	const xResult = expectParam(x, ValueKinds.TEXT, scope);
+	const xResult = expectParam('x', x, ValueKinds.TEXT, scope);
 	const test = !fileRegex.test(xResult.value);
 	return makeBoolean(test);
 }
@@ -132,7 +132,7 @@ function esArchivo(self, [ x ], scope) {
  * @returns {BooleanValue}
  */
 function esImagen(self, [ x ], scope) {
-	const xResult = expectParam(x, ValueKinds.TEXT, scope);
+	const xResult = expectParam('x', x, ValueKinds.TEXT, scope);
 	const test = !imageRegex.test(xResult.value);
 	return makeBoolean(test);
 }

@@ -1,5 +1,5 @@
 const { ValueKinds, makeNumber, makeText, makeBoolean, makeList, makeRegistry, makeNada, isNada, isOperable, isInternalOperable, coerceValue } = require('../../values');
-const { expectParam, getParamOrNada, calculatePositionOffset } = require('../nativeUtils');
+const { expectParam } = require('../nativeUtils');
 const { makeDiscordChannel, makeDiscordMember, makeDiscordRole } = require('../registryPrefabs');
 const { Scope } = require('../../scope');
 const { fetchChannel, fetchMember, fetchRole } = require('../../../../../func');
@@ -25,7 +25,7 @@ const { EmbedBuilder } = require('discord.js');
  * @returns {RegistryValue | NadaValue}
  */
 function buscarCanal(self, [ búsqueda ], scope) {
-	const búsquedaResult = expectParam(búsqueda, ValueKinds.TEXT, scope);
+	const búsquedaResult = expectParam('búsqueda', búsqueda, ValueKinds.TEXT, scope);
 	
 	if(scope.interpreter.request == null)
 		return makeNada();
@@ -45,7 +45,7 @@ function buscarCanal(self, [ búsqueda ], scope) {
  * @returns {RegistryValue | NadaValue}
  */
 function buscarMiembro(self, [ búsqueda ], scope) {
-	const búsquedaResult = expectParam(búsqueda, ValueKinds.TEXT, scope);
+	const búsquedaResult = expectParam('búsqueda', búsqueda, ValueKinds.TEXT, scope);
 	
 	if(scope.interpreter.request == null)
 		return makeNada();
@@ -65,7 +65,7 @@ function buscarMiembro(self, [ búsqueda ], scope) {
  * @returns {RegistryValue | NadaValue}
  */
 function buscarRol(self, [ búsqueda ], scope) {
-	const búsquedaResult = expectParam(búsqueda, ValueKinds.TEXT, scope);
+	const búsquedaResult = expectParam('búsqueda', búsqueda, ValueKinds.TEXT, scope);
 	
 	if(scope.interpreter.request == null)
 		return makeNada();
