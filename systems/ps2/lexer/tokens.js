@@ -21,7 +21,6 @@ const TokenKinds = /**@type {const}*/({
 	FOR_EACH: 'ForEach',
 	FOR: 'For',
 
-	REGISTER: 'Register',
 	READ: 'Read',
 	CREATE: 'Create',
 	SAVE: 'Save',
@@ -80,7 +79,7 @@ const TokenKinds = /**@type {const}*/({
 });
 /**
  * Representa un tipo de token de lexer
- * @typedef {import("types").ValuesOf<typeof TokenKinds>} TokenKind
+ * @typedef {import('types').ValuesOf<typeof TokenKinds>} TokenKind
  */
 
 /**@type {Map<TokenKind, String>}*/
@@ -89,64 +88,63 @@ TokenKindTranslations
 	.set(TokenKinds.LIT_NUMBER, 'Literal de Número')
 	.set(TokenKinds.LIT_TEXT, 'Literal de Texto')
 	.set(TokenKinds.LIT_BOOLEAN, 'Literal de Dupla')
-	.set(TokenKinds.IDENTIFIER, 'Literal de Identificador')
+	.set(TokenKinds.IDENTIFIER, 'Identificador')
 
-	.set(TokenKinds.PAREN_OPEN, 'Inicio de agrupamiento "("')
-	.set(TokenKinds.PAREN_CLOSE, 'Fin de agrupamiento ")"')
-	.set(TokenKinds.BLOCK_OPEN, 'Sentencia "BLOQUE"')
-	.set(TokenKinds.BLOCK_CLOSE, 'Sentencia "FIN"')
-	.set(TokenKinds.IF, 'Sentencia "SI"')
-	.set(TokenKinds.ELSE, 'Sentencia "SINO"')
-	.set(TokenKinds.ELSE_IF, 'Sentencias "SINO SI"')
-	.set(TokenKinds.WHILE, 'Sentencia "MIENTRAS"')
-	.set(TokenKinds.DO, 'Sentencia "HACER"')
-	.set(TokenKinds.UNTIL, 'Sentencia "HASTA" u operador especial "hasta"')
-	.set(TokenKinds.REPEAT, 'Sentencia "REPETIR"')
-	.set(TokenKinds.FOR_EACH, 'Sentencia "PARA CADA"')
-	.set(TokenKinds.FOR, 'Sentencia "PARA"')
-	.set(TokenKinds.REGISTER, 'Sentencia "REGISTRAR"')
-	.set(TokenKinds.READ, 'Sentencia "LEER"')
-	.set(TokenKinds.CREATE, 'Sentencia "CREAR"')
-	.set(TokenKinds.SAVE, 'Sentencia "GUARDAR"')
-	.set(TokenKinds.LOAD, 'Sentencia "CARGAR"')
-	.set(TokenKinds.ADD, 'Sentencia "SUMAR"')
-	.set(TokenKinds.SUBTRACT, 'Sentencia "RESTAR"')
-	.set(TokenKinds.MULTIPLY, 'Sentencia "MULTIPLICAR"')
-	.set(TokenKinds.DIVIDE, 'Sentencia "DIVIDIR"')
-	.set(TokenKinds.EXTEND, 'Sentencia "EXTENDER"')
-	.set(TokenKinds.EXECUTE, 'Sentencia "EJECUTAR"')
-	.set(TokenKinds.RETURN, 'Sentencia "DEVOLVER"')
-	.set(TokenKinds.END, 'Sentencia "TERMINAR"')
-	.set(TokenKinds.STOP, 'Sentencia "PARAR"')
-	.set(TokenKinds.SEND, 'Sentencia "ENVIAR"')
-	.set(TokenKinds.COMMENT, 'Sentencia "COMENTAR"')
+	.set(TokenKinds.PAREN_OPEN, 'Inicio de agrupamiento \`(\`')
+	.set(TokenKinds.PAREN_CLOSE, 'Fin de agrupamiento \`)\`')
+	.set(TokenKinds.BLOCK_OPEN, 'Sentencia \`BLOQUE\`')
+	.set(TokenKinds.BLOCK_CLOSE, 'Sentencia \`FIN\`')
+	.set(TokenKinds.IF, 'Sentencia \`SI\`')
+	.set(TokenKinds.ELSE, 'Sentencia \`SINO\`')
+	.set(TokenKinds.ELSE_IF, 'Sentencias \`SINO SI\`')
+	.set(TokenKinds.WHILE, 'Sentencia \`MIENTRAS\`')
+	.set(TokenKinds.DO, 'Sentencia \`HACER\`')
+	.set(TokenKinds.UNTIL, 'Sentencia \`HASTA\` u operador especial \`hasta\`')
+	.set(TokenKinds.REPEAT, 'Sentencia \`REPETIR\`')
+	.set(TokenKinds.FOR_EACH, 'Sentencia \`PARA CADA\`')
+	.set(TokenKinds.FOR, 'Sentencia \`PARA\`')
+	.set(TokenKinds.READ, 'Sentencia \`LEER\`')
+	.set(TokenKinds.CREATE, 'Sentencia \`CREAR\`')
+	.set(TokenKinds.SAVE, 'Sentencia \`GUARDAR\`')
+	.set(TokenKinds.LOAD, 'Sentencia \`CARGAR\`')
+	.set(TokenKinds.ADD, 'Sentencia \`SUMAR\`')
+	.set(TokenKinds.SUBTRACT, 'Sentencia \`RESTAR\`')
+	.set(TokenKinds.MULTIPLY, 'Sentencia \`MULTIPLICAR\`')
+	.set(TokenKinds.DIVIDE, 'Sentencia \`DIVIDIR\`')
+	.set(TokenKinds.EXTEND, 'Sentencia \`EXTENDER\`')
+	.set(TokenKinds.EXECUTE, 'Sentencia \`EJECUTAR\`')
+	.set(TokenKinds.RETURN, 'Sentencia \`DEVOLVER\`')
+	.set(TokenKinds.END, 'Sentencia \`TERMINAR\`')
+	.set(TokenKinds.STOP, 'Sentencia \`PARAR\`')
+	.set(TokenKinds.SEND, 'Sentencia \`ENVIAR\`')
+	.set(TokenKinds.COMMENT, 'Sentencia \`COMENTAR\`')
 
-	.set(TokenKinds.OR, 'Operador "o"')
-	.set(TokenKinds.AND, 'Operador "y"')
-	.set(TokenKinds.NOT, 'Operador "no"')
+	.set(TokenKinds.OR, 'Operador \`o\`')
+	.set(TokenKinds.AND, 'Operador \`y\`')
+	.set(TokenKinds.NOT, 'Operador \`no\`')
 
-	.set(TokenKinds.EQUALS, 'Operador "es"')
-	.set(TokenKinds.NOT_EQUALS, 'Operador "no es"')
-	.set(TokenKinds.LESS, 'Operador "precede"')
-	.set(TokenKinds.LESS_EQUALS, 'Operador "no excede"')
-	.set(TokenKinds.GREATER, 'Operador "excede"')
-	.set(TokenKinds.GREATER_EQUALS, 'Operador "no precede"')
+	.set(TokenKinds.EQUALS, 'Operador \`es\`')
+	.set(TokenKinds.NOT_EQUALS, 'Operador \`no es\`')
+	.set(TokenKinds.LESS, 'Operador \`precede\`')
+	.set(TokenKinds.LESS_EQUALS, 'Operador \`no excede\`')
+	.set(TokenKinds.GREATER, 'Operador \`excede\`')
+	.set(TokenKinds.GREATER_EQUALS, 'Operador \`no precede\`')
 
-	.set(TokenKinds.ASSIGNMENT, 'Operador "con"')
-	.set(TokenKinds.ARROW, 'Operador de flecha "->"')
-	.set(TokenKinds.COLON, 'Operador ":"')
-	.set(TokenKinds.COMMA, 'Operador ","')
+	.set(TokenKinds.ASSIGNMENT, 'Operador \`con\`')
+	.set(TokenKinds.ARROW, 'Operador de flecha \`->\`')
+	.set(TokenKinds.COLON, 'Operador \`:\`')
+	.set(TokenKinds.COMMA, 'Operador \`,\`')
 	.set(TokenKinds.LAMBDA, 'Operador Lambda')
-	.set(TokenKinds.TIMES, 'Operador especial "veces"')
-	.set(TokenKinds.IN, 'Operador especial "en"')
-	.set(TokenKinds.FROM, 'Operador especial "desde"')
-	.set(TokenKinds.OPTIONAL, 'Operador especial "opcional"')
+	.set(TokenKinds.TIMES, 'Operador especial \`veces\`')
+	.set(TokenKinds.IN, 'Operador especial \`en\`')
+	.set(TokenKinds.FROM, 'Operador especial \`desde\`')
+	.set(TokenKinds.OPTIONAL, 'Operador especial \`opcional\`')
 
-	.set(TokenKinds.PLUS, 'Operador "+"')
-	.set(TokenKinds.DASH, 'Operador "-"')
-	.set(TokenKinds.STAR, 'Operador "*"')
-	.set(TokenKinds.SLASH, 'Operador "/"')
-	.set(TokenKinds.PERCENT, 'Operador "%"')
+	.set(TokenKinds.PLUS, 'Operador \`+\`')
+	.set(TokenKinds.DASH, 'Operador \`-\`')
+	.set(TokenKinds.STAR, 'Operador \`*\`')
+	.set(TokenKinds.SLASH, 'Operador \`/\`')
+	.set(TokenKinds.PERCENT, 'Operador \`%\`')
 
 	.set(TokenKinds.NUMBER, 'Tipo Número')
 	.set(TokenKinds.TEXT, 'Tipo Texto')
@@ -184,7 +182,6 @@ const StatementVerbs = /**@type {const}*/([
 	TokenKinds.REPEAT,
 	TokenKinds.FOR_EACH,
 	TokenKinds.FOR,
-	TokenKinds.REGISTER,
 	TokenKinds.READ,
 	TokenKinds.CREATE,
 	TokenKinds.SAVE,
@@ -214,11 +211,16 @@ const DataKindValues = /**@type {const}*/({
 });
 /**
  * Representa un tipo de Token Léxico de PuréScript
- * @typedef {import("types").ValuesOf<DataKindValues>} DataKindValue
+ * @typedef {import('types').ValuesOf<DataKindValues>} DataKindValue
  */
 
 /**Representa un Token Léxico de PuréScript*/
 class Token {
+	/**
+	 * El texto fuente de la línea original del token
+	 * @type {import('./lexer').Lexer}
+	 */
+	#lexer;
 	/**
 	 * El tipo del token
 	 * @type {TokenKind}
@@ -251,13 +253,14 @@ class Token {
 	isStatement;
 
 	/**
+	 * @param {import('./lexer').Lexer} lexer El Lexer que instanció este Token
 	 * @param {TokenKind} kind El tipo de token
 	 * @param {any} value El valor del token
 	 * @param {number} line La línea del inicio del token
 	 * @param {number} start La columna inicial del token
 	 * @param {number} [length=1] El largo del token
 	 */
-	constructor(kind, value, line, start, length = 1) {
+	constructor(lexer, kind, value, line, start, length = 1) {
 		if(!Object.values(TokenKinds).includes(kind))
 			throw 'La posición de inicio del token debe ser al menos 1';
 		if(line < 1)
@@ -267,6 +270,7 @@ class Token {
 		if(length < 1)
 			throw 'El largo del token debe ser al menos 1';
 
+		this.#lexer = lexer;
 		this.#kind = kind;
 		this.#value = value;
 		this.#line = line;
@@ -297,6 +301,11 @@ class Token {
 	/**El largo del token*/
 	get length() { return this.#length; }
 
+	/**El texto fuente de la línea de origen del token*/
+	get lineString() {
+		return this.#lexer.sourceLines[this.#line - 1];
+	}
+
 	get json() {
 		return {
 			kind: this.#kind,
@@ -305,6 +314,7 @@ class Token {
 			start: this.#start,
 			end: this.end,
 			length: this.#length,
+			lineString: this.lineString,
 		};
 	};
 

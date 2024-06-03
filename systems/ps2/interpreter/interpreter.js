@@ -387,13 +387,13 @@ class Interpreter {
 	 * @param {import('./scope').Scope} scope
 	 */
 	#evaluateFullFor(node, scope) {
-		const { start, test, step, identifier, body } = node;
+		const { init, test, step, identifier, body } = node;
 
 		/**@type {import('./values').RuntimeValue}*/
 		let evaluated = makeNada();
 
 		const forScope = new Scope(this, scope);
-		const startValue = this.evaluate(start, scope);
+		const startValue = this.evaluate(init, scope);
 		const testFn = () => this.evaluateAs(test, forScope, ValueKinds.BOOLEAN).value;
 		const stepFn = () => this.evaluateStatement(step, forScope);
 
@@ -477,7 +477,7 @@ class Interpreter {
 	#evaluateDeclarationStatement(node, scope) {
 		const { dataKind, declarations } = node;
 
-		const valueKind = ValueKindLookups.get(dataKind.kind);
+		const valueKind = dataKind != null ? ValueKindLookups.get(dataKind.kind) : ValueKinds.NADA;
 		for(const declaration of declarations)
 			scope.declareVariable(declaration, valueKind);
 

@@ -11,6 +11,8 @@ class Lexer {
 	#tokens;
 	/**@type {String}*/
 	#source;
+	/**@type {Array<String>}*/
+	#sourceLines;
 	/**@type {Number}*/
 	#pos;
 	/**@type {Number}*/
@@ -26,6 +28,7 @@ class Lexer {
 	constructor() {
 		this.#tokens = [];
 		this.#source = null;
+		this.#sourceLines = [];
 		this.#pos = this.#col = this.#line = 1;
 
 		this.#keywords = [
@@ -57,7 +60,6 @@ class Lexer {
 			{ match: 'repetir', kind: TokenKinds.REPEAT },
 			{ match: 'para', kind: TokenKinds.FOR },
 
-			{ match: 'registrar', kind: TokenKinds.REGISTER },
 			{ match: 'leer', kind: TokenKinds.READ },
 			{ match: 'crear', kind: TokenKinds.CREATE },
 			{ match: 'guardar', kind: TokenKinds.SAVE },
@@ -87,9 +89,9 @@ class Lexer {
 		];
 
 		this.#patterns = [
-			{ match: /^\r?\n+/, handler: this.#makeNewlineHandler() },
+			{ match: /^\r?\n/, handler: this.#makeNewlineHandler() },
 			{ match: /^[ \t\r]+/, handler: this.#makeSkipHandler() },
-			{ match: /^\/\/.*/, handler: this.#makeNewlineHandler() },
+			{ match: /^\/\/.*/, handler: this.#makeSkipHandler() },
 
 			{ match: '(', handler: this.#makeDefaultHandler(TokenKinds.PAREN_OPEN) },
 			{ match: ')', handler: this.#makeDefaultHandler(TokenKinds.PAREN_CLOSE) },
@@ -102,7 +104,7 @@ class Lexer {
 			{ match: '+', handler: this.#makeDefaultHandler(TokenKinds.PLUS) },
 			{ match: '-', handler: this.#makeDefaultHandler(TokenKinds.DASH) },
 			{ match: '*', handler: this.#makeDefaultHandler(TokenKinds.STAR) },
-			{ match: '/', handler: this.#makeDefaultHandler(TokenKinds.DASH) },
+			{ match: '/', handler: this.#makeDefaultHandler(TokenKinds.SLASH) },
 			{ match: '%', handler: this.#makeDefaultHandler(TokenKinds.PERCENT) },
 			{ match: '^', handler: this.#makeDefaultHandler(TokenKinds.CARET) },
 			
@@ -133,8 +135,8 @@ class Lexer {
 			{ match: /^"(\\"|[^"])*"/, handler: this.#makeStringHandler() },
 			{ match: /^'(\\'|[^'])*'/, handler: this.#makeStringHandler() },
 
-			{ match: '"', handler: this.#makeInvalidHandler(`Faltó cerrar comillas dobles (")`) },
-			{ match: "'", handler: this.#makeInvalidHandler(`Faltó cerrar comillas simples (')`) },
+			{ match: '"', handler: this.#makeInvalidHandler(`Faltó cerrar comillas dobles (\`"\`)`) },
+			{ match: "'", handler: this.#makeInvalidHandler(`Faltó cerrar comillas simples (\`'\`)`) },
 		];
 	}
 
@@ -146,13 +148,12 @@ class Lexer {
 		errorOptions.col ??= this.#col;
 		errorOptions.line ??= this.#line;
 		const lineString = this.lineString;
-		console.log({ ...errorOptions, lineString });
 		const col = Math.max(1, Math.min(errorOptions.col, lineString.length));
 		const line = errorOptions.line;
 		message = [
 			'```arm',
 			lineString,
-			`${' '.repeat(col - 1)}↑${' '.repeat(lineString.length - col)}`,
+			`${' '.repeat(col - 1)}↑`,
 			'```',
 			`En línea **${line}**, columna **${col}** - ${message}`,
 		].join('\n');
@@ -163,6 +164,10 @@ class Lexer {
 
 	get source() {
 		return this.#source;
+	}
+
+	get sourceLines() {
+		return this.#sourceLines;
 	}
 
 	get pos() {
@@ -182,8 +187,7 @@ class Lexer {
 	}
 
 	get lineString() {
-		const sourceLines = this.#source.split(/\r?\n/g);
-		return sourceLines[this.#line - 1];
+		return this.#sourceLines[this.#line - 1];
 	}
 
 	/**
@@ -214,7 +218,8 @@ class Lexer {
 			throw this.TuberLexerError('Se esperaba un String válido para tokenizar');
 
 		this.#tokens = [];
-		this.#source = source.replace(/^\s+/, '');
+		this.#source = source.replace(/(^\s+)|(\s+$)/g, '');
+		this.#sourceLines = this.#source.split(/\r?\n/g);
 		this.#pos = this.#col = this.#line = 1;
 		this.handleCommentStatement = false;
 
@@ -243,7 +248,7 @@ class Lexer {
 			}
 		}
 
-		this.addToken(new Token(TokenKinds.EOF, 'Fin de Código', (this.#col === 1) ? this.#line : (this.#line + 1), 1));
+		this.addToken(new Token(this, TokenKinds.EOF, 'Fin de Código', this.#line, this.#col));
 		return [ ...this.#tokens ];
 	}
 
@@ -287,14 +292,14 @@ class Lexer {
 	//#region Handlers
 	/**
 	 * 
-	 * @param {import("./tokens").TokenKind} kind
+	 * @param {import('./tokens').TokenKind} kind
 	 * @returns {PatternHandler}
 	 */
 	#makeDefaultHandler(kind) {
 		const lexer = this;
 		return function(_, rawMatch) {
 			const len = `${rawMatch}`.length;
-			lexer.addToken(new Token(kind, rawMatch, lexer.line, lexer.col, len));
+			lexer.addToken(new Token(lexer, kind, rawMatch, lexer.line, lexer.col, len));
 			lexer.advance(len, { advanceColumns: true });
 		};
 	}
@@ -312,7 +317,7 @@ class Lexer {
 			if(isNaN(num))
 				throw lexer.TuberLexerError('Valor inválido en tokenización de número');
 
-			lexer.addToken(new Token(TokenKinds.LIT_NUMBER, num, lexer.line, lexer.col, len));
+			lexer.addToken(new Token(lexer, TokenKinds.LIT_NUMBER, num, lexer.line, lexer.col, len));
 			lexer.advance(len, { advanceColumns: true });
 		};
 	}
@@ -326,9 +331,12 @@ class Lexer {
 		return function(match, rawMatch) {
 			const len = match.length;
 
+			//Arreglo de caracteres sin los ""
 			const chars = rawMatch.slice(1, -1).split('');
-			let col = lexer.col;
+
+			let col = lexer.col + 1; //Sumar los "" removidos
 			let line = lexer.line;
+
 			for(const c of chars) {
 				if(c === '\n') {
 					col = 1;
@@ -358,10 +366,11 @@ class Lexer {
 				}
 			}
 
+			col++; //Sumar los "" removidos
 			rawMatch = chars.join('');
 
-			lexer.addToken(new Token(TokenKinds.LIT_TEXT, rawMatch, lexer.line, lexer.col, len));
-			lexer.advance(len, { override: { col, line } });
+			lexer.addToken(new Token(lexer, TokenKinds.LIT_TEXT, rawMatch, lexer.line, lexer.col, len));
+			lexer.advance(len, { override: { col, line } }); //Aplicar cambios de columna y línea locales
 			lexer.handleCommentStatement = false;
 		};
 	}
@@ -378,11 +387,11 @@ class Lexer {
 			
 			if(keyword) {
 				if(keyword.kind !== TokenKinds.COMMENT)
-					lexer.addToken(new Token(keyword.kind, rawMatch, lexer.line, lexer.col, len));
+					lexer.addToken(new Token(lexer, keyword.kind, rawMatch, lexer.line, lexer.col, len));
 				else
 					lexer.handleCommentStatement = true;
 			} else {
-				lexer.addToken(new Token(TokenKinds.IDENTIFIER, rawMatch, lexer.line, lexer.col, len));
+				lexer.addToken(new Token(lexer, TokenKinds.IDENTIFIER, rawMatch, lexer.line, lexer.col, len));
 			}
 
 			lexer.advance(len, { advanceColumns: true });

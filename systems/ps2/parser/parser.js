@@ -24,11 +24,67 @@ class Parser {
 	 * @param {String} message 
 	 * @param {Token} [token]
 	 */
-	TuberParserError(message, token = this.current) {
-		const specifier = `Línea: ${token.line} / Posición: ${token.start}~${token.end} - `;
+	TuberParserError(message, token = null) {
+		token ??= this.current;
+
+		const { lineString, offset } = this.#formatParserErrorDisplay(token);
+		const col = Math.max(0, Math.min(token.start - offset - 1, lineString.length));
+		const rest = Math.max(1, Math.min(col + token.length, lineString.length) - col);
+		const specifier = [
+			'```arm',
+			lineString || '//No hay información adicional para mostrar...',
+			lineString ? `${' '.repeat(col)}${'↑'.repeat(rest)}` : '',
+			'```',
+			`**Valor**: \`${token.value}\``,
+			`En línea **${token.line}**, columnas **${token.start}** a **${token.end}** - `,
+		].join('\n');
 		const err = new Error(specifier + message);
 		err.name = 'TuberParserError';
 		return err;
+	}
+
+	/**
+	 * @param {Token} token
+	 */
+	#formatParserErrorDisplay(token) {
+		const suspensor = '(...)'
+		const maxLength = 55;
+		const offset = Math.max(0, token.lineString.length - maxLength);
+		let lineString = token.lineString || '//No hay información adicional para mostrar...';
+
+		if(lineString.length < maxLength)
+			return {
+				lineString,
+				offset,
+			};
+
+		const suspensorLength = suspensor.length + 1; //Considera el espacio
+
+		if(token.end < maxLength)
+			lineString = lineString.slice(0, maxLength - suspensorLength) + ' ' + suspensor
+		else if(token.start >= lineString.length)
+			lineString = suspensor + ' ' + lineString.slice(lineString.length - maxLength - 1 + suspensorLength);
+		else {
+			let center = (token.start + token.end) * 0.5;
+			const half1 = Math.floor(maxLength * 0.5);
+			const half2 = maxLength - half1;
+			if(token.start < (center - half1))
+				center = token.start + half1;
+			lineString = suspensor + ' ' + lineString.slice(center - half1 + suspensorLength, center + half2 - suspensorLength) + ' ' + suspensor;
+		}
+
+		return {
+			lineString,
+			offset,
+		}
+	}
+
+	/**
+	 * Devuelve el token actual, sin consumirlo
+	 * @returns {Token}
+	 */
+	get previous() {
+		return this.tokens[Math.max(0, this.#pos - 1)];
 	}
 
 	/**
@@ -66,7 +122,7 @@ class Parser {
 
 		if(token.kind !== tokenKind) {
 			this.#pos--;
-			errorMessage ??= `Se esperaba un token de tipo ${translateTokenKind(tokenKind)}, pero se recibió: ${token.value}`;
+			errorMessage ??= `Se esperaba un token de tipo: *${translateTokenKind(tokenKind)}*, pero se recibió: *${token.translated}*`;
 			throw this.TuberParserError(errorMessage, token);
 		}
 			
@@ -79,24 +135,25 @@ class Parser {
 	 * 
 	 * Al momento de arrojar un error, si se usa un mensaje personalizado en el método orFail, `this.current` será el token que lo ocasionó (caso especial)
 	 * @param {...import('../lexer/tokens').TokenKind} tokenKinds
-	 * @returns {{ orFail: (errorMessage?: String) => Token }}
+	 * @returns {{ orFail: (errorMessage?: String, token?: Token) => Token }}
 	 */
 	expectAny(...tokenKinds) {
-		const token = this.advance();
+		const expectedToken = this.advance();
 		
-		if(!token.isAny(...tokenKinds)) {
+		if(!expectedToken.isAny(...tokenKinds)) {
 			this.#pos--;
 			const parser = this;
 			return {
-				orFail: function(errorMessage = `Se esperaba un token de tipo: ${translateTokenKinds(...tokenKinds).join('/')}, pero se recibió: ${token.translated}`) {
-					throw parser.TuberParserError(errorMessage);
+				orFail: function(errorMessage = `Se esperaba un token de tipo: ${translateTokenKinds(...tokenKinds).join('/')}, pero se recibió: ${expectedToken.translated}`, token = null) {
+					token ??= expectedToken;
+					throw parser.TuberParserError(errorMessage, token);
 				},
 			};
 		}
 			
 		return {
-			orFail: function(errorMessage = null) {
-				return token;
+			orFail: function(errorMessage = null, token = null) {
+				return expectedToken;
 			},
 		};
 	}
@@ -155,9 +212,14 @@ class Parser {
 		this.tokens = tokens;
 		this.#pos = 0;
 
+		const body = parseBlock(this);
+
 		return {
 			kind: StatementKinds.PROGRAM,
-			body: parseBlock(this),
+			start: 1,
+			end: body.length ? body[body.length - 1].end : 2,
+			line: 1,
+			body,
 		};
 	}
 	
@@ -169,7 +231,7 @@ class Parser {
 	parseExpression(bp, rightAssociative = null) {
 		const tokenKind = this.current.kind;
 		if(!nudLookup.has(tokenKind))
-			throw this.TuberParserError(`Se esperaba un token prefijo u primario, pero se recibió: ${translateTokenKind(tokenKind)}, de valor: ${this.current.value}`);
+			throw this.TuberParserError(`Se esperaba un Token prefijo o primario válido, pero se recibió: *${translateTokenKind(tokenKind)}*`);
 
 		rightAssociative ??= assLookup.get(tokenKind) ?? Associativities.LEFT;
 		const nudHandler = nudLookup.get(tokenKind);
@@ -180,7 +242,7 @@ class Parser {
 		while(bpLookup.get(this.current.kind) > actualBp) {
 			const tokenKind = this.current.kind;
 			if(!ledLookup.has(tokenKind))
-				throw this.TuberParserError(`Se esperaba un token infijo u sufijo, pero se recibió: ${translateTokenKind(tokenKind)}, de valor: ${this.current.value}`);
+				throw this.TuberParserError(`Se esperaba un Token infijo u sufijo válido, pero se recibió: *${translateTokenKind(tokenKind)}*`);
 
 			const ledHandler = ledLookup.get(tokenKind);
 			left = ledHandler(this, left, bpLookup.get(this.current.kind), assLookup.get(this.current.kind));
@@ -201,7 +263,7 @@ class Parser {
 			return stmtHandler(this);
 		}
 		
-		throw this.TuberParserError(`Se esperaba un indicador de sentencia válido, pero se recibió: ${translateTokenKind(this.current.kind)}, con valor: ${this.current.value}`);
+		throw this.TuberParserError(`Se esperaba un indicador de sentencia válido, pero se recibió: ${translateTokenKind(this.current.kind)}`);
 	}
 }
 

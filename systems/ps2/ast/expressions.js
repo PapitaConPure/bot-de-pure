@@ -24,6 +24,9 @@ const ExpressionKinds = /**@type {const}*/({
  * @template {ExpressionKind} [T=ExpressionKind]
  * @typedef {Object} BaseExpressionData
  * @property {Readonly<NonNullable<T>>} kind
+ * @property {Number} line
+ * @property {Number} start
+ * @property {Number} end
  */
 
 //#region Literales

@@ -34,6 +34,9 @@ const ScopeAbortKinds = [
  * @template {StatementKind} [T=StatementKind]
  * @typedef {Object} BaseStatementData
  * @property {NonNullable<T>} kind
+ * @property {Number} start
+ * @property {Number} end
+ * @property {Number} line
  */
 
 /**
@@ -87,7 +90,7 @@ const ScopeAbortKinds = [
  * 
  * @typedef {Object} FullForStatementData
  * @property {true} full
- * @property {import('./expressions.js').Expression} start
+ * @property {import('./expressions.js').Expression} init
  * @property {import('./expressions.js').Expression} test
  * @property {Statement} step
  * @typedef {BaseForStatement & FullForStatementData} FullForStatement
