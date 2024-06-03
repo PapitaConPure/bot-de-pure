@@ -2,16 +2,69 @@ const { Scope } = require('./scope');
 const { makeText, makeNada, coerceValue, defaultValueOf } = require('./values');
 const { ValueKindLookups } = require('./lookups');
 
+class Input {
+	/**@type {String}*/
+	#name;
+	/**@type {import('./values').ValueKind}*/
+	#kind;
+	/**@type {Boolean}*/
+	#optional;
+	/**@type {Boolean}*/
+	#spread;
+	/**@type {String}*/
+	#desc;
+
+	/**
+	 * 
+	 * @param {String} name 
+	 * @param {import('./values').ValueKind} kind 
+	 * @param {Boolean} optional 
+	 */
+	constructor(name, kind, optional) {
+		this.#name = name;
+		this.#kind = kind;
+		this.#optional = optional;
+		this.#spread = false;
+		this.#desc = null;
+	}
+
+	get name() { return this.#name; }
+
+	get kind() { return this.#kind; }
+	
+	get optional() { return this.#optional; }
+	
+	get spread() { return this.#spread; }
+	
+	get desc() { return this.#desc; }
+
+	/**
+	 * @param {Boolean} spread
+	 */
+	setSpread(spread) {
+		this.#spread = spread;
+		return this;
+	}
+
+	/**
+	 * @param {String} desc
+	 */
+	setDesc(desc) {
+		this.#desc = desc;
+		return this;
+	}
+}
+
 class InputReader {
 	/**@type {import('./interpreter').Interpreter}*/
 	interpreter;
 	/**@type {Array<String>}*/
 	#args;
-	/**@type {Array<import('../purescript').TuberInput>}*/
+	/**@type {Array<Input>}*/
 	#inputStack;
-	/**@type {Map<String, import('../purescript').TuberInput>}*/
+	/**@type {Map<String, Input>}*/
 	#inputLookup;
-	/**@type {import('../purescript').TuberInput?}*/
+	/**@type {Input?}*/
 	#spreadInput;
 
 	/**
@@ -66,32 +119,39 @@ class InputReader {
 	}
 
 	/**
-	 * @param {String} name
-	 * @param {import('./values').ValueKind} kind
-	 * @param {Boolean} optional
+	 * El lector de Entradas no debe tener una entrada extensiva. De lo contrario, se alzará un error
+	 * @param {Input} input
 	 */
-	addInput(name, kind, optional) {
-		if(this.#inputLookup.has(name))
+	addInput(input) {
+		//No aceptar más Entradas extensivas si ya se detectó una
+		if(this.hasSpreadInput)
+			throw this.interpreter.TuberInterpreterError([
+				'Solo puede haber una única Entrada extensiva por Tubérculo, y debe ser la última Entrada del mismo.',
+				`La Entrada anterior, "${this.spreadInputName}", se detectó como extensiva. Sin embargo, luego se leyó una Entrada con otro nombre: "${name}".`,
+				`Acomoda tu código de forma tal que la Entrada extensiva sea la última en ser leída`,
+			].join('\n'));
+			
+		if(this.#inputLookup.has(input.name))
 			throw 'Entrada duplicada';
 
-		const input = {
-			kind,
-			name,
-			optional,
-			spread: false,
-		};
-
 		this.#inputStack.push(input);
-		this.#inputLookup.set(name, input);
+		this.#inputLookup.set(input.name, input);
 	}
 
 	/**
+	 * Marca la Entrada bajo en identificador especificado como Extensiva
 	 * @param {String} name
 	 */
 	setInputAsSpread(name) {
+		if(this.#spreadInput != null) {
+			if(this.#spreadInput.name != name)
+				throw 'Entrada duplicada';
+
+			return;
+		}
+
 		const input = this.#inputLookup.get(name);
-		input.spread = true;
-		this.#spreadInput = input;
+		this.#spreadInput = input.setSpread(true);
 	}
 }
 
@@ -126,20 +186,10 @@ class TestDriveInputReader extends InputReader {
 		const fallbackValue = (fallback != null) ? this.interpreter.evaluate(fallback, scope) : defaultValueOf(valueKind);
 		const name = this.interpreter.expressionString(receptor);
 		
-		//Registrar nueva Entrada o marcar Entrada existente como extensiva
-		if(this.hasInput(name)) {
+		if(this.hasInput(name))
 			this.setInputAsSpread(name);
-		} else {
-			//No aceptar más Entradas extensivas si ya se detectó una
-			if(this.hasSpreadInput)
-				throw this.interpreter.TuberInterpreterError([
-					'Solo puede haber una única Entrada extensiva por Tubérculo, y debe ser la última Entrada del mismo.',
-					`La Entrada anterior, "${this.spreadInputName}", se detectó como extensiva. Sin embargo, luego se leyó una Entrada con otro nombre: "${name}".`,
-					`Acomoda tu código de forma tal que la Entrada extensiva sea la última en ser leída`,
-				].join('\n'));
-
-			this.addInput(name, valueKind, optional);
-		}
+		else
+			this.addInput(new Input(name, valueKind, optional));
 
 		try {
 			const coercedValue = coerceValue(this.interpreter, fallbackValue, valueKind);
@@ -170,6 +220,11 @@ class ProductionInputReader extends InputReader {
 		const arg = this.dequeueArg();
 		const receptorString = this.interpreter.expressionString(receptor);
 		const valueKind = ValueKindLookups.get(dataKind.kind);
+		
+		if(this.hasInput(receptorString))
+			this.setInputAsSpread(receptorString);
+		else
+			this.addInput(new Input(receptorString, valueKind, optional));
 		
 		let receptionValue;
 		if(arg != null)
