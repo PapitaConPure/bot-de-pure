@@ -34,25 +34,25 @@ const {
 } = require('./syntax/statementParsing.js');
 
 /**
- * @typedef {(parser: import('./parser.js').Parser) => import("../ast/statements").Statement} StatementHandler
- * @typedef {(parser: import('./parser.js').Parser) => import("../ast/expressions").Expression} NuDHandler
- * @typedef {(parser: import('./parser.js').Parser, left: import("../ast/expressions").Expression, bp: import('../ast/ast').BindingPower, ass: import('../ast/ast').Associativity) => import("../ast/expressions").Expression} LeDHandler
+ * @typedef {(parser: import('./parser.js').Parser) => import('../ast/statements').Statement} StatementHandler
+ * @typedef {(parser: import('./parser.js').Parser) => import('../ast/expressions').Expression} NuDHandler
+ * @typedef {(parser: import('./parser.js').Parser, left: import('../ast/expressions').Expression, bp: import('../ast/ast').BindingPower, ass: import('../ast/ast').Associativity) => import('../ast/expressions').Expression} LeDHandler
  */
 
-/**@type {Map<import("../lexer/tokens").TokenKind, StatementHandler>}*/
+/**@type {Map<import('../lexer/tokens').TokenKind, StatementHandler>}*/
 const stmtLookup = new Map();
-/**@type {Map<import("../lexer/tokens").TokenKind, NuDHandler>}*/
+/**@type {Map<import('../lexer/tokens').TokenKind, NuDHandler>}*/
 const nudLookup = new Map();
-/**@type {Map<import("../lexer/tokens").TokenKind, LeDHandler>}*/
+/**@type {Map<import('../lexer/tokens').TokenKind, LeDHandler>}*/
 const ledLookup = new Map();
-/**@type {Map<import("../lexer/tokens").TokenKind, import('../ast/ast').BindingPower>}*/
+/**@type {Map<import('../lexer/tokens').TokenKind, import('../ast/ast').BindingPower>}*/
 const bpLookup = new Map();
-/**@type {Map<import("../lexer/tokens").TokenKind, import('../ast/ast').Associativity>}*/
+/**@type {Map<import('../lexer/tokens').TokenKind, import('../ast/ast').Associativity>}*/
 const assLookup = new Map();
 
 /**
  * 
- * @param {import("../lexer/tokens").TokenKind} kind 
+ * @param {import('../lexer/tokens').TokenKind} kind 
  * @param {StatementHandler} handler 
  */
 function stmt(kind, handler) {
@@ -61,7 +61,7 @@ function stmt(kind, handler) {
 
 /**
  * 
- * @param {import("../lexer/tokens").TokenKind} kind 
+ * @param {import('../lexer/tokens').TokenKind} kind 
  * @param {NuDHandler} handler 
  */
 function nud(kind, handler) {
@@ -70,7 +70,7 @@ function nud(kind, handler) {
 
 /**
  * 
- * @param {import("../lexer/tokens").TokenKind} kind 
+ * @param {import('../lexer/tokens').TokenKind} kind 
  * @param {import('../ast/ast').BindingPower} bp 
  * @param {import('../ast/ast').Associativity} ass 
  * @param {LeDHandler} handler 
@@ -93,7 +93,6 @@ function createLookups() {
 
     //Sentencias Comunes
     stmt(TokenKinds.EXECUTE, parseExpressionStatement);
-    //stmt(TokenKinds.REGISTER, parseRegistryStatement);
     stmt(TokenKinds.READ, parseReadStatement);
     stmt(TokenKinds.CREATE, parseDeclarationStatement);
     stmt(TokenKinds.SAVE, parseSaveStatement);

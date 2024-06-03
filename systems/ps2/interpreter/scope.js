@@ -42,7 +42,7 @@ class Scope {
      */
     declareVariable(identifier, kind) {
         if(this.variables.has(identifier))
-            throw this.#interpreter.TuberInterpreterError(`El identificador "${identifier}" ya estaba declarado`);
+            throw this.#interpreter.TuberInterpreterError(`El identificador \`${identifier}\` ya estaba declarado`);
 
         const value = defaultValueOf(kind);
         this.variables.set(identifier, value);
@@ -97,7 +97,7 @@ class Scope {
 
         if(this.#parent == null) {
             if(mustBeDeclared)
-                throw this.#interpreter.TuberInterpreterError(`El identificador "${identifier}" no representa ninguna variable ni función`);
+                throw this.#interpreter.TuberInterpreterError(`El identificador \`${identifier}\` no representa ninguna variable ni función`);
             
             return null;
         }
