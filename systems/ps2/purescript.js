@@ -4,6 +4,7 @@ const { Lexer } = require('./lexer/lexer');
 const { Parser } = require('./parser/parser');
 const { Interpreter } = require('./interpreter/interpreter');
 const { Scope } = require('./interpreter/scope');
+const { Input } = require('../ps2/interpreter/inputReader');
 const { ValueKinds, coerceValue, makeNada } = require('./interpreter/values');
 const { declareNatives, declareContext } = require('./interpreter/environment/environment');
 const { EmbedBuilder, Colors, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
@@ -18,19 +19,10 @@ const logOptions = {
 };
 
 /**
- * @typedef {Object} TuberInput
- * @property {String} name
- * @property {import('./interpreter/values').ValueKind} kind
- * @property {Boolean} optional
- * @property {Boolean} spread
- * @property {String} [desc]
- */
-
-/**
  * @typedef {Object} BaseTubercle
  * @property {String} id
  * @property {String} author
- * @property {Array<TuberInput>} [inputs]
+ * @property {Array<Array<*>>} [inputs]
  */
 
 /**
@@ -69,10 +61,11 @@ const interpreter = new Interpreter();
  * @property {Boolean} [overwrite]
  * @property {Map<String, import('./interpreter/values').RuntimeValue>} [savedData]
  */
+
 /**
  * Evalua el tipo de Tubérculo (básico o avanzado) y lo ejecuta. Si es avanzado, se ejecutará con PuréScript
  * @function
- * @param {import("../../commands/Commons/typings.js").ComplexCommandRequest} request
+ * @param {import('../../commands/Commons/typings.js').ComplexCommandRequest} request
  * @param {Tubercle} tuber 
  * @param {TuberExecutionOptions} [inputOptions]
  */
@@ -150,7 +143,7 @@ async function executeTuber(request, tuber, inputOptions) {
             if(tuber.id)
                 replyContent.components = [new ActionRowBuilder().addComponents(
                     new ButtonBuilder()
-                        .setCustomId(`tubérculo_getTuberHelp_${tuber.id}`)
+                        .setCustomId(`tubérculo_getTuberHelp_${tuber.id}_0`)
                         .setLabel('Ver Tubérculo')
                         .setEmoji('🔎')
                         .setStyle(ButtonStyle.Primary),
@@ -195,8 +188,18 @@ async function executeTuber(request, tuber, inputOptions) {
     if(replyStacks.content.length)
         replyObject.content = replyStacks.content.join('\n');
     
-    if(overwrite)
-        tuber.inputs = inputStack;
+    if(overwrite) {
+        tuber.inputs = [ inputStack ];
+    } else {
+        tuber.inputs ??= [];
+        /**
+         * @param {Array<import('../ps2/interpreter/inputReader').Input>} a
+         * @param {Array<import('../ps2/interpreter/inputReader').Input>} b
+         */
+        const variantEquals = (a, b) => a.every(input1 => b.every(input2 => input1.equals(input2)));
+        if(!tuber.inputs.some(otherStack => variantEquals(inputStack, otherStack)))
+            tuber.inputs.push(inputStack);
+    }
 
     tuber.saved = saveTable;
 

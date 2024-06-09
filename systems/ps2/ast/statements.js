@@ -16,6 +16,7 @@ const StatementKinds = /**@type {const}*/({
     READ: 'ReadStatement',
     DECLARATION: 'DeclarationStatement',
     SAVE: 'SaveStatement',
+    LOAD: 'LoadStatement',
     ASSIGNMENT: 'AssignmentStatement',
     RETURN: 'ReturnStatement',
     END: 'EndStatement',
@@ -134,6 +135,12 @@ const ScopeAbortKinds = [
  */
 
 /**
+ * @typedef {Object} LoadStatementData
+ * @property {String} identifier
+ * @typedef {BaseStatementData<'LoadStatement'> & LoadStatementData} LoadStatement
+ */
+
+/**
  * @typedef {Object} AssignmentStatementData
  * @property {Token} operator
  * @property {import('./expressions.js').Expression} receptor
@@ -169,6 +176,7 @@ const ScopeAbortKinds = [
  *          |ReadStatement
  *          |DeclarationStatement
  *          |SaveStatement
+ *          |LoadStatement
  *          |AssignmentStatement
  *          |ReturnStatement
  *          |StopStatement

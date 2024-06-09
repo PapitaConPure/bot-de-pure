@@ -463,6 +463,30 @@ function makeNada() {
 	};
 }
 
+/**@type {Map<ValueKind, (x?: *) => RuntimeValue>}*/
+const valueMakers = new Map();
+valueMakers
+	.set(ValueKinds.NUMBER, makeNumber)
+	.set(ValueKinds.TEXT, makeText)
+	.set(ValueKinds.BOOLEAN, makeBoolean)
+	.set(ValueKinds.LIST, makeList)
+	.set(ValueKinds.REGISTRY, makeRegistry)
+	.set(ValueKinds.EMBED, makeEmbed)
+	.set(ValueKinds.NADA, makeNada)
+
+/**
+ * Crea un valor a partir de un tipo y un valor
+ * Esta función no convierte {@link RuntimeValue}s. Para convertir un {@link RuntimeValue} de tipo X a tipo Y, usa {@linkcode coerceValue}
+ * @template {ValueKind} T
+ * @param {T} kind
+ * @param {*} value
+ * @returns {Extract<RuntimeValue, { kind: T }>}
+ */
+function makeValue(kind, value) {
+	const makerFunction = valueMakers.get(kind);
+	return /**@type {Extract<RuntimeValue, { kind: T }>}*/(makerFunction(value));
+}
+
 /**@type {Map<ValueKind, Map<ValueKind, (x: *, interpreter: import('./interpreter').Interpreter) => RuntimeValue>>}*/
 const coercions = new Map();
 coercions
@@ -631,5 +655,6 @@ module.exports = {
 	makeFunction,
 	makeLambda,
 	makeNada,
+	makeValue,
 	coerceValue,
 };

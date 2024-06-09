@@ -165,6 +165,9 @@ class Interpreter {
 		case StatementKinds.SAVE:
 			return this.#evaluateSaveStatement(node, scope);
 
+		case StatementKinds.LOAD:
+			return this.#evaluateLoadStatement(node, scope);
+
 		case StatementKinds.ASSIGNMENT:
 			return this.#evaluateAssignmentStatement(node, scope);
 
@@ -353,7 +356,7 @@ class Interpreter {
 
 		const containerValue = this.evaluate(container, scope);
 		if(!this.isAnyOf(containerValue, ValueKinds.LIST, ValueKinds.REGISTRY))
-			throw this.TuberInterpreterError(`Se esperaba un valor de Lista o Registro en expresión de contenedor de Sentencia "PARA CADA", pero "${this.expressionString(container)}" fue de tipo ${ValueKindTranslationLookups.get(containerValue.kind)}`);
+			throw this.TuberInterpreterError(`Se esperaba un valor de Lista o Registro en expresión de contenedor de Sentencia \`PARA CADA\`, pero \`${this.expressionString(container)}\` fue de tipo ${ValueKindTranslationLookups.get(containerValue.kind)}`);
 
 		const entryNames = (this.is(containerValue, ValueKinds.LIST) ? containerValue.elements : containerValue.entries).keys();
 		const forEachScope = new Scope(this, scope);
@@ -393,11 +396,15 @@ class Interpreter {
 		let evaluated = makeNada();
 
 		const forScope = new Scope(this, scope);
-		const startValue = this.evaluate(init, scope);
+		const startValue = this.evaluate(init, forScope);
+		const startFn = () => {
+			forScope.declareVariable(identifier, startValue.kind);
+			forScope.assignVariable(identifier, startValue);
+		};
 		const testFn = () => this.evaluateAs(test, forScope, ValueKinds.BOOLEAN).value;
 		const stepFn = () => this.evaluateStatement(step, forScope);
 
-		for(forScope.assignVariable(identifier, startValue); testFn(); stepFn()) {
+		for(startFn(); testFn(); stepFn()) {
 			evaluated = this.#evaluateBlock(body, forScope);
 			if(this.#stop) break;
 		}
@@ -495,7 +502,30 @@ class Interpreter {
 		const { identifier, expression } = node;
 
 		const value = this.evaluate(expression, scope);
+		if(!this.isAnyOf(value, ValueKinds.NUMBER, ValueKinds.TEXT, ValueKinds.BOOLEAN, ValueKinds.LIST, ValueKinds.REGISTRY)) {
+			const kindStr = ValueKindTranslationLookups.get(value.kind) ?? 'Desconocido';
+			throw this.TuberInterpreterError(`Tipo de dato inválido al intentar guardar un valor bajo el nombre: \`${identifier}\`. El tipo del valor recibido fue: _${kindStr}_`);
+		}
+
 		this.#saveTable.set(identifier, value);
+
+		return makeNada();
+	}
+
+	/**
+	 * Evalúa una sentencia de guardado de variable.
+	 * 
+	 * La variable se guarda en la base de datos para recuperarla en ejecuciones subsecuentes.
+	 * @param {import('../ast/statements').LoadStatement} node 
+	 * @param {Scope} scope 
+	 */
+	#evaluateLoadStatement(node, scope) {
+		const { identifier } = node;
+
+		const value = scope.lookup(identifier, false);
+
+		if(value.kind === ValueKinds.NADA)
+			scope.assignVariable(identifier, value);
 
 		return makeNada();
 	}
@@ -514,11 +544,20 @@ class Interpreter {
 		let receptionValue;
 		if(reception == null) {
 			if(!operator.isAny(TokenKinds.ADD, TokenKinds.SUBTRACT))
-				throw this.TuberInterpreterError('La omisión del valor de recepción en una sentencia de asignación solo puede hacerse con los Indicadores de Sentencia "SUMAR" y "RESTAR"');
+				throw this.TuberInterpreterError('La omisión del valor de recepción en una sentencia de asignación solo puede hacerse con los indicadores de Sentencia "SUMAR" y "RESTAR"');
 
 			receptionValue = makeNumber(1);
 		} else
 			receptionValue = this.evaluate(reception, scope, false);
+
+		if(operator.is(TokenKinds.EXTEND)) {
+			const receptorValue = this.evaluate(receptor, scope, false);
+			if(!this.is(receptorValue, ValueKinds.LIST))
+				throw this.TuberInterpreterError(`El receptor en Sentencia \`EXTENDER\` debe ser una Lista, y \`${this.expressionString(receptor)}\` no lo era`);
+
+			receptorValue.elements.push(receptionValue);
+			return makeNada();
+		}
 
 		//SUMAR, RESTAR, etc...
 		if(BinaryOperationLookups.has(operator.kind)) {

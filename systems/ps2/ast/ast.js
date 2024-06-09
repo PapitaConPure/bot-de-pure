@@ -31,7 +31,7 @@ const BindingPowers = /**@type {const}*/({
     /**Vínculo más fuerte. Usado para expresiones primarias y símbolos*/
     PRIMARY: Ut.iota,
 });
-/**@typedef {import("types").ValuesOf<BindingPowers>} BindingPower*/
+/**@typedef {import('types').ValuesOf<BindingPowers>} BindingPower*/
 
 /**Contiene tipos de asociatividad de operadores*/
 const Associativities = /**@type {const}*/({
@@ -40,7 +40,7 @@ const Associativities = /**@type {const}*/({
     /**Asociatividad a la derecha. No se suele usar*/
     RIGHT: -0.5,
 });
-/**@typedef {import("types").ValuesOf<Associativities>} Associativity*/
+/**@typedef {import('types').ValuesOf<Associativities>} Associativity*/
 
 module.exports = {
     BindingPowers,

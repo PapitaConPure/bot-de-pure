@@ -125,7 +125,7 @@ class Parser {
 			errorMessage ??= `Se esperaba un token de tipo: *${translateTokenKind(tokenKind)}*, pero se recibió: *${token.translated}*`;
 			throw this.TuberParserError(errorMessage, token);
 		}
-			
+		
 		return token;
 	}
 
@@ -198,6 +198,26 @@ class Parser {
 				return token;
 			},
 		};
+	}
+
+	/**
+	 * Tira un error si el Token actual no representa una expresión
+	 * @param {String} errorMessage
+	 * @param {Token} [token]
+	 */
+	ensureExpression(errorMessage, token = null) {
+		if(!this.hasTokens || this.current.isStatement)
+			throw this.TuberParserError(errorMessage, token);
+	}
+
+	/**
+	 * Tira un error si el Token actual no es un indicador de Sentencia
+	 * @param {String} errorMessage
+	 * @param {Token} [token]
+	 */
+	ensureStatement(errorMessage, token = null) {
+		if(!this.hasTokens || !this.current.isStatement)
+			throw this.TuberParserError(errorMessage, token);
 	}
 
 	/**

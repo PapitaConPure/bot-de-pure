@@ -187,7 +187,7 @@ function stringifyPSAST(obj, indentSize = 2, indent = indentSize) {
 	const values = Object.values(obj);
 	if(values.length <= threshold && values.every(v => typeof v !== 'object' || v == null || isInstance(v))) {
 		const simple = stringifySimplePSAST(obj);
-		if(simple.length < 160)
+		if(simple.length < 192)
 			return simple;
 	}
 

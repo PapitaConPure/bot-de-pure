@@ -127,8 +127,6 @@ class Lexer {
 			{ match: 'sino si', handler: this.#makeDefaultHandler(TokenKinds.ELSE_IF) },
 			{ match: 'para cada', handler: this.#makeDefaultHandler(TokenKinds.FOR_EACH) },
 
-			{ match: 'tal que', handler: this.#makeDefaultHandler(TokenKinds.LAMBDA) },
-
 			{ match: /^[A-Za-z_][A-Za-z0-9_]{0,99}/, handler: this.#makeSymbolHandler() },
 
 			{ match: /^(?!_)(([0-9_]+([.][0-9]*)?)|([.][0-9]+))/, handler: this.#makeNumberHandler() },

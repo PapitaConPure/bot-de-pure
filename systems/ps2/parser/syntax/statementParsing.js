@@ -4,6 +4,11 @@ const { StatementKinds, ScopeAbortKinds } = require('../../ast/statements.js');
 const { ExpressionKinds } = require('../../ast/expressions.js');
 
 /**
+ * Parsea un cuerpo de bloque. Se analizan Sentencias secuencialmente desde el Token actual hasta que se encuentra uno de los Tokens de cierre indicados (o `EOF`).
+ * 
+ * Las sentencias analizadas se agrupan en orden y son devueltas al detectar el cierre del bloque actual. NO se consume el Token de cierre detectado.
+ * 
+ * Si se encuentra una sentencia que haría que las secuencias subsecuentes no se ejecuten al interpretar el código, las mismas se descartan en este paso (justo antes de devolver el Array).
  * @param {import('../parser.js').Parser} parser
  * @param {...import('../../lexer/tokens.js').TokenKind} closeTokenKinds
  * @returns {import('../../ast/statements.js').BlockBody}
@@ -12,7 +17,7 @@ function parseBlockBody(parser, ...closeTokenKinds) {
 	if(!closeTokenKinds.length)
 		closeTokenKinds.push(TokenKinds.BLOCK_CLOSE);
 
-	/**@type {Array<import('../../ast/statements').Statement>}*/
+	/**@type {import('../../ast/statements.js').BlockBody}*/
 	const body = [];
 	
 	while(parser.hasTokens && !parser.current.isAny(...closeTokenKinds)) {
@@ -29,7 +34,9 @@ function parseBlockBody(parser, ...closeTokenKinds) {
 	return body;
 }
 /**
+ * Crea un nodo de Sentencia de Bloque (`kind`: {@linkcode StatementKinds.BLOCK}) a partir del cuerpo de bloque especificado.
  * 
+ * El bloque contiene metadatos de rango de inicio y fin según los Tokens ingresados. `startToken` y `endToken` respectivamente
  * @param {import('../../ast/statements.js').BlockBody} body 
  * @param {Token} startToken 
  * @param {Token} [endToken]
@@ -47,6 +54,7 @@ function makeBlockStmt(body, startToken, endToken = null) {
 }
 
 /**
+ * Parsea una Sentencia de Bloque
  * @param {import('../parser.js').Parser} parser
  * @returns {import('../../ast/statements.js').BlockStatement}
  */
@@ -58,12 +66,16 @@ function parseBlockStatement(parser) {
 }
 
 /**
+ * Parsea una Sentencia Condicional
  * @param {import('../parser.js').Parser} parser
  * @returns {import('../../ast/statements.js').ConditionalStatement}
  */
 function parseConditionalStatement(parser) {
 	const openToken = parser.advance();
+
+	parser.ensureExpression(`Se esperaba una expresión luego de indicador \`SI\`, pero la Sentencia finalizó con: *${parser.current.translated}*`);
 	const test = parser.parseExpression(BindingPowers.ASSIGNMENT);
+
 	const consequentBlock = parseBlockBody(parser, TokenKinds.BLOCK_CLOSE, TokenKinds.ELSE, TokenKinds.ELSE_IF);
 	const consequent = makeBlockStmt(consequentBlock, openToken, parser.current);
 
@@ -113,12 +125,16 @@ function parseConditionalStatement(parser) {
 }
 
 /**
+ * Parsea una Sentencia de Iteración Condicional
  * @param {import('../parser.js').Parser} parser
  * @returns {import('../../ast/statements.js').WhileStatement}
  */
 function parseWhileLoopStatement(parser) {
 	const openToken = parser.advance();
+
+	parser.ensureExpression(`Se esperaba una expresión luego de indicador \`MIENTRAS\`, pero la Sentencia finalizó con: *${parser.current.translated}*`);
 	const test = parser.parseExpression(BindingPowers.ASSIGNMENT);
+	
 	const whileBlock = parseBlockBody(parser);
 	const closeToken = parser.expect(TokenKinds.BLOCK_CLOSE,
 		`Se esperaba un cierre de bloque con Sentencia \`FIN\` en algún punto después del indicador \`MIENTRAS\` en la línea **${openToken.line}**, columnas **${openToken.start}** a **${openToken.end}**. Sin embargo, no se encontró ninguna`);
@@ -135,6 +151,7 @@ function parseWhileLoopStatement(parser) {
 }
 
 /**
+ * Parsea una Sentencia de Iteración Condicional con cuerpo consecuente de frente
  * @param {import('../parser.js').Parser} parser
  * @returns {import('../../ast/statements.js').DoUntilStatement}
  */
@@ -143,6 +160,8 @@ function parseDoWhileLoopStatement(parser) {
 	const doWhileBlock = parseBlockBody(parser, TokenKinds.UNTIL);
 	const closeToken = parser.expect(TokenKinds.UNTIL, `Se esperaba un cierre de bloque con Sentencia \`HASTA\` en algún punto después del indicador \`HACER\` en la línea **${openToken.line}**, columnas **${openToken.start}** a **${openToken.end}**. Sin embargo, no se encontró ninguna`);
 	const body = makeBlockStmt(doWhileBlock, openToken, closeToken);
+
+	parser.ensureExpression(`Se esperaba una expresión luego de indicador \`HASTA\`, pero la Sentencia \`HACER\` asociada finalizó con: *${parser.current.translated}*`);
 	const test = parser.parseExpression(BindingPowers.ASSIGNMENT);
 
 	return {
@@ -156,11 +175,14 @@ function parseDoWhileLoopStatement(parser) {
 }
 
 /**
+ * Parsea una Sentencia de Iteración Programada
  * @param {import('../parser.js').Parser} parser
  * @returns {import('../../ast/statements.js').RepeatStatement}
  */
 function parseRepeatLoopStatement(parser) {
 	const openToken = parser.advance();
+
+	parser.ensureExpression(`Se esperaba una expresión luego de indicador \`REPETIR\`, pero la Sentencia finalizó con: *${parser.current.translated}*`);
 	const times = parser.parseExpression(BindingPowers.ASSIGNMENT);
 	
 	const blockStartToken = parser.expect(TokenKinds.TIMES);
@@ -179,6 +201,7 @@ function parseRepeatLoopStatement(parser) {
 }
 
 /**
+ * Parsea una Sentencia de Iteración sobre Contenedor
  * @param {import('../parser.js').Parser} parser
  * @returns {import('../../ast/statements.js').ForEachStatement}
  */
@@ -186,12 +209,13 @@ function parseForEachLoopStatement(parser) {
 	const openToken = parser.advance();
 	const identifier = parser.expect(TokenKinds.IDENTIFIER, `Se esperaba un identificador en Sentencia \`PARA CADA\`, pero se recibió: *${parser.current.value}*`);
 	parser.expect(TokenKinds.IN);
+	parser.ensureExpression(`Se esperaba una expresión de contenedor luego de operador \`en\` en Sentencia \`PARA CADA\`, pero la misma finalizó con: *${parser.current.translated}*`);
 	const container = parser.parseExpression(BindingPowers.COMMA);
 
 	const blockStartToken = parser.current;
 	const forEachBlock = parseBlockBody(parser);
 	const closeToken = parser.expect(TokenKinds.BLOCK_CLOSE,
-		`Se esperaba un cierre de bloque con Sentencia "FIN" en algún punto después del indicador \`PARA CADA\` en la línea **${openToken.line}**, columnas **${openToken.start}** a **${openToken.end}**. Sin embargo, no se encontró ninguna`);
+		`Se esperaba un cierre de bloque con Sentencia \`FIN\` en algún punto después del indicador \`PARA CADA\` en la línea **${openToken.line}**, columnas **${openToken.start}** a **${openToken.end}**. Sin embargo, no se encontró ninguna`);
 	const body = makeBlockStmt(forEachBlock, blockStartToken, closeToken);
 
 	return {
@@ -206,6 +230,7 @@ function parseForEachLoopStatement(parser) {
 }
 
 /**
+ * Parsea una Sentencia de Iteración Compleja
  * @param {import('../parser.js').Parser} parser
  * @returns {import('../../ast/statements.js').ForStatement}
  */
@@ -216,8 +241,10 @@ function parseForLoopStatement(parser) {
 
 	if(parser.current.is(TokenKinds.FROM)) {
 		const openToken = parser.advance();
+		parser.ensureExpression(`Se esperaba una expresión luego de operador \`desde\` en Sentencia \`PARA\` corta, pero la misma finalizó con: *${parser.current.translated}*`);
 		const from = parser.parseExpression(BindingPowers.COMMA);
-		parser.expect(TokenKinds.UNTIL, `Se esperaba operador \`hasta\` en sentencia \`PARA\` corta, pero se recibió: *${parser.current.value}*`);
+		parser.expect(TokenKinds.UNTIL, `Se esperaba operador \`hasta\` en Sentencia \`PARA\` corta, pero se recibió: *${parser.current.value}*`);
+		parser.ensureExpression(`Se esperaba una expresión luego de operador \`hasta\` en Sentencia \`PARA\` corta, pero la misma finalizó con: *${parser.current.translated}*`);
 		const to = parser.parseExpression(BindingPowers.COMMA);
 		
 		const blockStart = parser.current;
@@ -240,9 +267,12 @@ function parseForLoopStatement(parser) {
 
 	full = true;
 	parser.expect(TokenKinds.ASSIGNMENT, `Se esperaba el operador \`con\` o \`desde\` luego de identificador en Sentencia \`PARA\`, pero se recibió: *${parser.current.value}*`);
+	parser.ensureExpression(`Se esperaba una expresión luego de operador \`con\` en paso de inicialización de Sentencia \`PARA\` larga, pero la misma finalizó con: *${parser.current.translated}*`);
 	const init = parser.parseExpression(BindingPowers.COMMA);
 	parser.expect(TokenKinds.WHILE, `Se esperaba \`MIENTRAS\` en sentencia \`PARA\` larga, pero se recibió: *${parser.current.value}*`);
+	parser.ensureExpression(`Se esperaba una expresión en paso de condición de Sentencia \`PARA\` larga, pero la misma finalizó con: *${parser.current.translated}*`);
 	const test = parser.parseExpression(BindingPowers.ASSIGNMENT);
+	parser.ensureStatement(`Se esperaba una Sentencia en paso de actualización de Sentencia \`PARA\` larga, pero la misma finalizó con: *${parser.current.translated}*`);
 	const step = parser.parseStatement();
 
 	const blockStartToken = parser.current;
@@ -265,15 +295,14 @@ function parseForLoopStatement(parser) {
 }
 
 /**
+ * Parsea una Sentencia de Expresión
  * @param {import('../parser.js').Parser} parser
  * @returns {import('../../ast/statements.js').ExpressionStatement}
  */
 function parseExpressionStatement(parser) {
 	const startToken = parser.advance();
 
-	if(!parser.hasTokens || parser.current.isStatement)
-		throw parser.TuberParserError(`Se esperaba una expresión a ejecutar inmediatamente después de indicador \`${startToken.value}\`. Sin embargo, se recibió: *${parser.current.translated}*`);
-
+	parser.ensureExpression(`Se esperaba una expresión a ejecutar inmediatamente después de indicador \`${startToken.value}\`. Sin embargo, se recibió: *${parser.current.translated}*`);
 	const expression = parser.parseExpression(BindingPowers.COMMA);
 
 	return {
@@ -286,6 +315,7 @@ function parseExpressionStatement(parser) {
 }
 
 /**
+ * Parsea una Sentencia de Lectura de Entrada
  * @param {import('../parser.js').Parser} parser
  * @returns {import('../../ast/statements.js').ReadStatement}
  */
@@ -296,12 +326,12 @@ function parseReadStatement(parser) {
 		.orFail(`Se esperaba un tipo de Entrada antes de expresión receptora en Sentencia \`LEER\`, pero se recibió: *${parser.current.translated}*`);
 
 	let optional = false;
-	if(!parser.hasTokens || parser.current.isStatement)
-		throw parser.TuberParserError(`Se esperaba una expresión receptora en Sentencia \`LEER\`, pero se recibió: *${parser.current.translated}*`);
+	parser.ensureExpression(`Se esperaba una expresión receptora en Sentencia \`LEER\`, pero se recibió: *${parser.current.translated}*`);
 
 	if(parser.hasTokens && parser.current.is(TokenKinds.OPTIONAL)) {
 		optional = true;
 		parser.advance();
+		parser.ensureExpression(`Se esperaba una expresión receptora en Sentencia \`LEER\`, pero se recibió: *${parser.current.translated}*`);
 	}
 	
 	const receptor = parser.parseExpression(BindingPowers.COMMA);
@@ -310,9 +340,8 @@ function parseReadStatement(parser) {
 	let fallback = null;
 
 	if(!parser.current.is(TokenKinds.ASSIGNMENT)) {
-		if(parser.hasTokens && !parser.current.isStatement)
-			throw parser.TuberParserError(
-				`Se esperaba \`con\` y una expresión (o palabra clave \`opcional\`) luego de expresión receptora en Sentencia \`LEER\`. Sin embargo, se recibió: *${parser.current.translated}*`);
+		if(this.hasTokens && !this.current.isStatement)
+			throw parser.TuberParserError(`Se esperaba \`con\` y una expresión (o palabra clave \`opcional\`) luego de expresión receptora en Sentencia \`LEER\`. Sin embargo, se recibió: *${parser.current.translated}*`);
 
 		return {
 			kind: StatementKinds.READ,
@@ -327,11 +356,7 @@ function parseReadStatement(parser) {
 	}
 
 	parser.advance(); //Avanzar "con"
-
-	if(!parser.hasTokens || parser.current.isStatement)
-		throw parser.TuberParserError(
-			`Se esperaba una expresión de valor de respaldo luego de \`con\` en Sentencia \`LEER\`, pero la instrucción finalizó sin más con: *${parser.current.translated}*`);
-
+	parser.ensureExpression(`Se esperaba una expresión de valor de respaldo luego de \`con\` en Sentencia \`LEER\`, pero la instrucción finalizó sin más con: *${parser.current.translated}*`);
 	fallback = parser.parseExpression(BindingPowers.COMMA);
 
 	return {
@@ -347,6 +372,7 @@ function parseReadStatement(parser) {
 }
 
 /**
+ * Parsea una Sentencia de Declaración de Variable
  * @param {import('../parser.js').Parser} parser
  * @returns {import('../../ast/statements.js').DeclarationStatement}
  */
@@ -392,6 +418,7 @@ function parseDeclarationStatement(parser) {
 }
 
 /**
+ * Parsea una Sentencia de Guardado de Dato
  * @param {import('../parser.js').Parser} parser
  * @returns {import('../../ast/statements.js').SaveStatement}
  */
@@ -403,6 +430,7 @@ function parseSaveStatement(parser) {
 	let expression;
 	if(parser.current.is(TokenKinds.ASSIGNMENT)) {
 		parser.advance();
+		parser.ensureExpression(`Se esperaba una expresión a guardar luego de \`con\` en Sentencia \`GUARDAR\`, pero se recibió: *${parser.current.value}*`);
 		expression = parser.parseExpression(BindingPowers.COMMA);
 	} else
 		expression = {
@@ -424,39 +452,51 @@ function parseSaveStatement(parser) {
 }
 
 /**
+ * Parsea una Sentencia de Asignación de Variable
  * @param {import('../parser.js').Parser} parser
- * @returns {import('../../ast/statements.js').AssignmentStatement}
+ * @returns {import('../../ast/statements.js').AssignmentStatement|import('../../ast/statements.js').LoadStatement}
  */
 function parseAssignmentStatement(parser) {
 	const operator = parser.advance();
+	const operatorString = `\`${`${operator.value}`.toUpperCase()}\``;
 
-	if(!parser.hasTokens || parser.current.isStatement)
-		throw parser.TuberParserError(
-			`Se esperaba una expresión receptora válida luego del indicador \`${`${operator.value}`.toUpperCase()}\`. Sin embargo, se recibió: *${parser.current.translated}*`,
-			parser.previous);
+	parser.ensureExpression(
+		`Se esperaba una expresión receptora válida luego del indicador ${operatorString}. Sin embargo, se recibió: *${parser.current.translated}*`,
+		parser.previous);
 	const receptor = parser.parseExpression(BindingPowers.COMMA);
 
 	if(receptor.kind !== ExpressionKinds.IDENTIFIER && receptor.kind !== ExpressionKinds.ARROW)
-		throw parser.TuberParserError(`Se esperaba una expresión receptora asignable en ${operator.translated}. Sin embargo, se recibió: *${parser.current.translated}*`);
+		throw parser.TuberParserError(`Se esperaba una expresión receptora asignable en Sentencia ${operatorString}. Sin embargo, se recibió: *${parser.current.translated}*`);
 
-	if(operator.isAny(TokenKinds.ADD, TokenKinds.SUBTRACT) && !parser.current.is(TokenKinds.ASSIGNMENT)) {
-		return ({
-			kind: StatementKinds.ASSIGNMENT,
-			line: operator.line,
-			start: operator.start,
-			end: receptor.end,
-			operator,
-			receptor,
-			reception: null,
-		});
+	if(!parser.current.is(TokenKinds.ASSIGNMENT)) {
+		if(operator.isAny(TokenKinds.ADD, TokenKinds.SUBTRACT)) {
+			return ({
+				kind: StatementKinds.ASSIGNMENT,
+				line: operator.line,
+				start: operator.start,
+				end: receptor.end,
+				operator,
+				receptor,
+				reception: null,
+			});
+		}
+
+		if(operator.is(TokenKinds.LOAD) && parser.current.isStatement && receptor.kind === ExpressionKinds.IDENTIFIER) {
+			return ({
+				kind: StatementKinds.LOAD,
+				line: operator.line,
+				start: operator.start,
+				end: receptor.end,
+				identifier: receptor.name,
+			});
+		}
 	}
 
-	parser.expect(TokenKinds.ASSIGNMENT, `Se esperaba "con" y una expresión luego de expresión receptora en ${operator.translated}. Sin embargo, se recibió: ${parser.current.translated}`);
+	parser.expect(TokenKinds.ASSIGNMENT, `Se esperaba "con" y una expresión luego de expresión receptora en Sentencia ${operatorString}. Sin embargo, se recibió: ${parser.current.translated}`);
 
-	if(!parser.hasTokens || parser.current.isStatement)
-		throw parser.TuberParserError(
-			`Se esperaba una expresión de recepción válida luego del operador \`con\` en ${operator.translated}. Sin embargo, se recibió: *${parser.current.translated}*`,
-			parser.previous);
+	parser.ensureExpression(
+		`Se esperaba una expresión de recepción válida luego del operador \`con\` en Sentencia ${operatorString}. Sin embargo, se recibió: *${parser.current.translated}*`,
+		parser.previous);
 	const reception = parser.parseExpression(BindingPowers.COMMA);
 
 	return ({
@@ -471,14 +511,14 @@ function parseAssignmentStatement(parser) {
 }
 
 /**
+ * Parsea una Sentencia de Retorno de Valor
  * @param {import('../parser.js').Parser} parser
  * @returns {import('../../ast/statements.js').ReturnStatement}
  */
 function parseReturnStatement(parser) {
 	const startToken = parser.advance();
 
-	if(!parser.hasTokens || parser.current.isStatement)
-		throw parser.TuberParserError(`Se esperaba una expresión a devolver inmediatamente después de indicador \`${`${startToken.value}`.toUpperCase()}\`. Sin embargo, se recibió: *${parser.current.translated}*`);
+	parser.ensureExpression(`Se esperaba una expresión a devolver inmediatamente después de indicador \`${`${startToken.value}`.toUpperCase()}\`. Sin embargo, se recibió: *${parser.current.translated}*`);
 	const expression = parser.parseExpression(BindingPowers.COMMA);
 
 	return {
@@ -491,6 +531,7 @@ function parseReturnStatement(parser) {
 }
 
 /**
+ * Parsea una Sentencia de Terminación Inmediata de Función o Programa
  * @param {import('../parser.js').Parser} parser
  * @returns {import('../../ast/statements.js').EndStatement}
  */
@@ -506,6 +547,7 @@ function parseEndStatement(parser) {
 }
 
 /**
+ * Parsea una Sentencia de Terminación Condicional de Programa
  * @param {import('../parser.js').Parser} parser
  * @returns {import('../../ast/statements.js').StopStatement}
  */
@@ -513,14 +555,12 @@ function parseStopStatement(parser) {
 	const startToken = parser.advance();
 	parser.expect(TokenKinds.ASSIGNMENT, `Se esperaba \`con\` en Sentencia \`PARAR\`, pero se recibió: *${parser.current.translated}*`);
 
-	if(!parser.hasTokens || parser.current.isStatement)
-		throw parser.TuberParserError(`Se esperaba un mensaje de corte luego de \`con\` en Sentencia \`PARAR\`. Sin embargo, se recibió: *${parser.current.translated}*`);
+	parser.ensureExpression(`Se esperaba un mensaje de corte luego de \`con\` en Sentencia \`PARAR\`. Sin embargo, se recibió: *${parser.current.translated}*`);
 	const stopMessage = parser.parseExpression(BindingPowers.COMMA);
 
 	parser.expect(TokenKinds.IF, `Se esperaba \`SI\` y una condición luego de mensaje de corte en Sentencia \`PARAR\`. Sin embargo, se recibió: *${parser.current.translated}*`);
 	
-	if(!parser.hasTokens || parser.current.isStatement)
-		throw parser.TuberParserError(`Se esperaba una expresión lógica luego de \`SI\` en Sentencia \`PARAR\`. Sin embargo, se recibió: *${parser.current.translated}*`);
+	parser.ensureExpression(`Se esperaba una expresión lógica luego de \`SI\` en Sentencia \`PARAR\`. Sin embargo, se recibió: *${parser.current.translated}*`);
 	const condition = parser.parseExpression(BindingPowers.COMMA);
 
 	return {
@@ -534,14 +574,14 @@ function parseStopStatement(parser) {
 }
 
 /**
+ * Parsea una Sentencia de Envío de Valor
  * @param {import('../parser.js').Parser} parser
  * @returns {import('../../ast/statements.js').SendStatement}
  */
 function parseSendStatement(parser) {
 	const startToken = parser.advance();
 
-	if(!parser.hasTokens || parser.current.isStatement)
-		throw parser.TuberParserError(`Se esperaba una expresión a enviar inmediatamente después de indicador \`${startToken.value}\`. Sin embargo, se recibió: *${parser.current.translated}*`);
+	parser.ensureExpression(`Se esperaba una expresión a enviar inmediatamente después de indicador \`${`${startToken.value}`.toUpperCase()}\`. Sin embargo, se recibió: *${parser.current.translated}*`);
 	const expression = parser.parseExpression(BindingPowers.COMMA);
 
 	return {

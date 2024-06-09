@@ -67,7 +67,9 @@ class Scope {
     }
 
     /**
-     * Busca una variable y devuelve el valor
+     * Busca una variable y devuelve el valor.
+     * 
+     * Si no está declarada y `mustBeDeclared` es falso, se devuelve un `NadaValue`. Si es verdadero, se alza un error
      * @param {String} identifier
      * @returns {import('./values').RuntimeValue}
      */

@@ -1,5 +1,5 @@
 const { Scope } = require('../scope');
-const { makeNumber, makeRegistry, makeNativeFunction, ValueKindTranslationLookups, ValueKinds, makeText } = require('../values');
+const { makeNumber, makeRegistry, makeNativeFunction, ValueKindTranslationLookups, ValueKinds, makeText, makeValue, makeBoolean, makeList, makeNada } = require('../values');
 const { NativeColorsLookup } = require('./variables/colors');
 const { NativeFunctions } = require('./functions/functions');
 const { NativeMethodsLookup } = require('./methods/methods');
@@ -38,9 +38,9 @@ async function declareContext(scope, request, savedData = null) {
 	}
 	
 	if(savedData != null) {
-		savedData.forEach((value, key) => {
-			recursiveConvertRegistry(value);
-			scope.assignVariable(key, value);
+		savedData.forEach((node, key) => {
+			recursiveConvertRegistry(node);
+			scope.assignVariable(key, makeValueFromSaved(node));
 		});
 	}
 }
@@ -61,6 +61,28 @@ function recursiveConvertRegistry(value) {
 			mapEntries.set(k, v);
 		}
 		value.entries = mapEntries;
+	}
+}
+
+/**
+ * @template {import('../values').ValueKind} T
+ * @param {import('../values').RuntimeValue} node 
+ * @returns {Extract<import('../values').RuntimeValue, { kind: node['kind'] }>}
+ */
+function makeValueFromSaved(node) {
+	switch(node.kind) {
+	case ValueKinds.NUMBER:
+		return makeNumber(node.value);
+	case ValueKinds.TEXT:
+		return makeText(node.value);
+	case ValueKinds.BOOLEAN:
+		return makeBoolean(node.value);
+	case ValueKinds.LIST:
+		return makeList(node.elements);
+	case ValueKinds.REGISTRY:
+		return makeRegistry(node.entries);
+	default:
+		return makeNada();
 	}
 }
 
