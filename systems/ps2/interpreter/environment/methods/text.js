@@ -1,5 +1,5 @@
 const { ValueKinds, makeNumber, makeText, makeBoolean, makeList, makeNada, isInternalOperable } = require('../../values');
-const { calculatePositionOffset } = require('../nativeUtils');
+const { calculatePositionOffset, expectParam, getParamOrDefault } = require('../nativeUtils');
 const { Scope } = require('../../scope');
 
 /**
@@ -136,7 +136,7 @@ function textoContiene(self, [ texto ], scope) {
  * @param {Scope} scope 
  * @returns {TextValue}
  */
-function textoRepetir(self, [ veces ], scope) {
+function textoRepetido(self, [ veces ], scope) {
 	if(veces.kind !== ValueKinds.NUMBER || !isInternalOperable(veces.value))
 		throw scope.interpreter.TuberInterpreterError('Se esperaba un Número válido como argumento de repeticiones de Texto');
 	let pos = Math.floor(veces.value);
@@ -221,7 +221,8 @@ textMethods
 	.set('comienzaCon', textoComienzaCon)
 	.set('terminaCon', textoTerminaCon)
 	.set('contiene', textoContiene)
-	.set('repetir', textoRepetir)
+	.set('repetido', textoRepetido)
+	.set('repetida', textoRepetido)
 	.set('reemplazar', textoReemplazar)
 	.set('partir', textoPartir)
 	.set('cortar', textoCortar)

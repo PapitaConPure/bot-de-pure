@@ -31,12 +31,12 @@ const refreshPixivAccessToken = async () => {
 /**
  * 
  * @param {string} url 
- * @returns {[ Number, Number ]}
+ * @returns {[ Number, Number, Boolean ]}
  */
 function extractIdAndPage(url) {
     const data = url.split('/').pop();
 
-    if(!isNaN(data))
+    if(!isNaN(+data))
         return [ +data, 0, false ];
 
     const [ id, page ] = data.split(pageSep);
@@ -97,7 +97,7 @@ const formatPixivPostsMessage = async (urls) => {
             profileAsset,
         ]);
 
-        /**@type {Array<import('discord.js').Attachment>}*/
+        /**@type {Array<import('discord.js').AttachmentBuilder>}*/
         const postAttachments = [];
         illustImages.forEach((illustImage, j) => postAttachments.push(new AttachmentBuilder(illustImage, { name: `thumb${i}_p${j}.png` })));
         postAttachments.push(new AttachmentBuilder(profileImage, { name: `pfp${i}.png` }));
@@ -118,7 +118,7 @@ const formatPixivPostsMessage = async (urls) => {
             .replace(/<a href=["'](https?:[^"']+)["']( \w+=["'][^"']+["'])*>([^<]+)<\/a>/g, (_substr, url) => {
                 const labelLink = (icon, label) => `[ ${icon} ${label}](${url})`;
                 
-                if(url.includes('twitter.com') | urls.includes('nitter.net'))
+                if(url.includes('x.com') ||url.includes('twitter.com') || url.includes('nitter.net'))
                     return labelLink('<:twitter:919403803114094682>', 'Twitter');
                 if(url.includes('fanbox.cc') || url.includes('pixiv.net/fanbox/'))
                     return labelLink('<:fanbox:999783444655648869>', 'FANBOX');

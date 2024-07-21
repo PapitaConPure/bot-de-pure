@@ -15,7 +15,7 @@ class Ut {
 	 * @param {Number} [value=0] El valor inicial del nuevo generador Iota
 	 * @returns {Number}
 	 */
-	static siota(value = 0) {
+	static Iota(value = 0) {
 		Ut.#iota = iotaGenerator(value);
 		return Ut.iota;
 	}
@@ -26,7 +26,7 @@ class Ut {
 	 */
 	static get iota() {
 		if(Ut.#iota == null)
-			return Ut.siota();
+			return Ut.Iota();
 
 		const value = Ut.#iota.next().value;
 		return /**@type {Number}*/(value);

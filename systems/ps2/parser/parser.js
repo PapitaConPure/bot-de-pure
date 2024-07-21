@@ -1,5 +1,6 @@
-const { Token, TokenKinds, StatementVerbs, translateTokenKind, translateTokenKinds } = require('../lexer/tokens');
-const { BindingPowers, Associativities } = require('../ast/ast');
+const { Lexer } = require('../lexer/lexer');
+const { Token, TokenKinds, translateTokenKind, translateTokenKinds } = require('../lexer/tokens');
+const { Associativities } = require('../ast/ast');
 const { StatementKinds } = require('../ast/statements');
 const { parseBlock } = require('./syntax/statementParsing');
 const { stmtLookup, nudLookup, ledLookup, bpLookup, createLookups, assLookup } = require('./lookups.js');
@@ -28,16 +29,18 @@ class Parser {
 		token ??= this.current;
 
 		const { lineString, offset } = this.#formatParserErrorDisplay(token);
-		const col = Math.max(0, Math.min(token.start - offset - 1, lineString.length));
+		const col = Math.max(0, Math.min(token.column - offset - 1, lineString.length));
 		const rest = Math.max(1, Math.min(col + token.length, lineString.length) - col);
+
 		const specifier = [
 			'```arm',
 			lineString || '//No hay información adicional para mostrar...',
 			lineString ? `${' '.repeat(col)}${'↑'.repeat(rest)}` : '',
 			'```',
 			`**Valor**: \`${token.value}\``,
-			`En línea **${token.line}**, columnas **${token.start}** a **${token.end}** - `,
+			`En línea **${token.line}**, columnas **${token.column}** a **${token.column + token.length}** - `,
 		].join('\n');
+		
 		const err = new Error(specifier + message);
 		err.name = 'TuberParserError';
 		return err;
@@ -49,6 +52,8 @@ class Parser {
 	#formatParserErrorDisplay(token) {
 		const suspensor = '(...)'
 		const maxLength = 55;
+
+		const columnEnd = token.column + token.length;
 		const offset = Math.max(0, token.lineString.length - maxLength);
 		let lineString = token.lineString || '//No hay información adicional para mostrar...';
 
@@ -60,23 +65,23 @@ class Parser {
 
 		const suspensorLength = suspensor.length + 1; //Considera el espacio
 
-		if(token.end < maxLength)
+		if(columnEnd < maxLength) //Suspensor a la derecha
 			lineString = lineString.slice(0, maxLength - suspensorLength) + ' ' + suspensor
-		else if(token.start >= lineString.length)
+		else if(token.column >= lineString.length) //Suspensor a la izquierda
 			lineString = suspensor + ' ' + lineString.slice(lineString.length - maxLength - 1 + suspensorLength);
-		else {
-			let center = (token.start + token.end) * 0.5;
+		else { //Dos suspensores
+			let center = (token.column + columnEnd) * 0.5;
 			const half1 = Math.floor(maxLength * 0.5);
 			const half2 = maxLength - half1;
-			if(token.start < (center - half1))
-				center = token.start + half1;
+			if(token.column < (center - half1))
+				center = token.column + half1;
 			lineString = suspensor + ' ' + lineString.slice(center - half1 + suspensorLength, center + half2 - suspensorLength) + ' ' + suspensor;
 		}
 
 		return {
 			lineString,
 			offset,
-		}
+		};
 	}
 
 	/**
@@ -201,7 +206,7 @@ class Parser {
 	}
 
 	/**
-	 * Tira un error si el Token actual no representa una expresión
+	 * Tira un error si el Token actual no representa una expresión (no es un indicador de Sentencia)
 	 * @param {String} errorMessage
 	 * @param {Token} [token]
 	 */
@@ -221,7 +226,8 @@ class Parser {
 	}
 
 	/**
-	 * @param {Array<Token>} tokens
+	 * Analiza sintácticamente un conjunto de Tokens previamente extraídos de un análisis léxico por medio de un {@link Lexer}
+	 * @param {Array<Token>} tokens Los tokens extraídos del análisis léxico de PuréScript
 	 * @returns {import('../ast/statements').ProgramStatement}
 	 */
 	parse(tokens) {
@@ -236,9 +242,10 @@ class Parser {
 
 		return {
 			kind: StatementKinds.PROGRAM,
-			start: 1,
-			end: body.length ? body[body.length - 1].end : 2,
 			line: 1,
+			column: 1,
+			start: 0,
+			end: body.length ? body[body.length - 1].end : 1,
 			body,
 		};
 	}

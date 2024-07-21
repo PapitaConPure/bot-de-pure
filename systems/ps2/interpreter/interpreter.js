@@ -4,8 +4,17 @@ const { TokenKinds } = require('../lexer/tokens');
 const { ExpressionKinds } = require('../ast/expressions');
 const { StatementKinds } = require('../ast/statements');
 const { ValueKinds, makeNumber, makeText, makeBoolean, makeList, makeRegistry, makeEmbed, makeNada, coerceValue, isInternalOperable, makeNativeFunction, makeFunction, makeLambda, ValueKindTranslationLookups, defaultValueOf } = require('./values');
-const { UnaryExpressionLookups, BinaryExpressionLookups: BinaryOperationLookups, ValueKindLookups } = require('./lookups');
+const { UnaryOperationLookups, BinaryOperationLookups, ValueKindLookups } = require('./lookups');
 const { NativeMethodsLookup } = require('./environment/environment');
+const Ut = require('../../../utils');
+
+const Stops = /**@type {const}*/({
+	NONE: Ut.Iota(0),
+	BREAK: Ut.iota,
+	RETURN: Ut.iota,
+	ABORT: Ut.iota,
+});
+/**@typedef {import('types').ValuesOf<Stops>} StopKind*/
 
 /**Representa un Intérprete de PuréScript*/
 class Interpreter {
@@ -17,20 +26,26 @@ class Interpreter {
 	#sendStack;
 	/**@type {Map<String, import('./values').RuntimeValue>}*/
 	#saveTable;
+	/**@type {String}*/
+	#source;
 	/**@type {import('../../../commands/Commons/typings').ComplexCommandRequest?}*/
 	#request;
-	/**@type {Boolean}*/
+	/**@type {StopKind}*/
 	#stop;
 	/**@type {Number}*/
 	#quota;
+	/**@type {Array<import('../ast/statements').Statement | import('../ast/expressions').Expression>}*/
+	#lastNodes;
 
 	constructor() {
 		this.#errorStack = [];
 		this.#sendStack = [];
 		this.#saveTable = new Map();
+		this.#source = '';
 		this.#request = null;
-		this.#stop = false;
+		this.#stop = Stops.NONE;
 		this.#quota = 0;
+		this.#lastNodes = [];
 	}
 
 	get request() {
@@ -43,11 +58,125 @@ class Interpreter {
 
 	/**
 	 * @param {String} message
+	 * @param {import('../ast/expressions').Expression | import('../ast/statements').Statement | import('../lexer/tokens').Token} node
 	 */
-	TuberInterpreterError(message) {
-		const error = new Error(message);
-		error.name = 'TuberInterpreterError';
-		return error;
+	TuberInterpreterError(message, node = null) {
+		node ??= this.#lastNodes[0];
+
+		const { lineString, offset, markLength } = this.#setupInterpreterErrorDisplay(node);
+		const specifier = this.#formatInterpreterErrorDisplay(node, lineString, offset, markLength);
+
+		const stackTrace = this.#generateStackTrace();
+
+		const err = new Error(`${specifier}${message}\n${stackTrace}`);
+		err.name = 'TuberInterpreterError';
+		return err;
+	}
+
+	/**
+	 * @param {String} message
+	 * @param {import('../ast/expressions').Expression | import('../ast/statements').Statement | import('../lexer/tokens').Token} node
+	 */
+	TuberSendError(message, node = null) {
+		node ??= this.#lastNodes[0];
+
+		const { lineString, offset, markLength } = this.#setupInterpreterErrorDisplay(node);
+		const specifier = this.#formatInterpreterErrorDisplay(node, lineString, offset, markLength);
+
+		const err = new Error(specifier + message);
+		err.name = 'TuberSendError';
+		return err;
+	}
+
+	/**
+	 * 
+	 * @param {import('../ast/expressions').Expression | import('../ast/statements').Statement | import('../lexer/tokens').Token} node
+	 * @returns {{ lineString: String, offset: Number, markLength: Number }}
+	 */
+	#setupInterpreterErrorDisplay(node) {
+		if(node == null) {
+			return {
+				lineString: null,
+				offset: 0,
+				markLength: 0,
+			};
+		}
+
+		const suspensor = '(...)';
+		const maxLength = 55;
+
+		const nodeLength = node.end - node.start;
+		const columnEnd = node.column + nodeLength;
+
+		const sourceLines = this.#source.split(/\r?\n/g);
+		let lineString = sourceLines[node.line - 1];
+		const offset = Math.max(0, lineString.length - maxLength);
+
+		if(lineString.length < maxLength) {
+			return {
+				lineString,
+				offset,
+				markLength: nodeLength,
+			};
+		}
+
+		const suspensorLength = suspensor.length + 1; //Considera el espacio
+
+		if(columnEnd < maxLength) //Suspensor a la derecha
+			lineString = lineString.slice(0, maxLength - suspensorLength) + ' ' + suspensor
+		else if(node.column >= lineString.length) //Suspensor a la izquierda
+			lineString = suspensor + ' ' + lineString.slice(lineString.length - maxLength - 1 + suspensorLength);
+		else { //Dos suspensores
+			let center = (node.column + columnEnd) * 0.5;
+			const half1 = Math.floor(maxLength * 0.5);
+			const half2 = maxLength - half1;
+			if(node.column < (center - half1))
+				center = node.column + half1;
+			lineString = suspensor + ' ' + lineString.slice(center - half1 + suspensorLength, center + half2 - suspensorLength) + ' ' + suspensor;
+		}
+
+		return {
+			lineString,
+			offset,
+			markLength: nodeLength,
+		};
+	}
+
+	/**
+	 * 
+	 * @param {import('../ast/expressions').Expression | import('../ast/statements').Statement | import('../lexer/tokens').Token} node
+	 * @param {String} lineString 
+	 * @param {Number} offset 
+	 * @param {Number} markLength 
+	 */
+	#formatInterpreterErrorDisplay(node, lineString, offset, markLength) {
+		if(node == null)
+			return '```arm\n//No hay información adicional para mostrar...\n```';
+
+		const col = Math.max(0, Math.min(node.column - offset - 1, lineString.length));
+		const rest = Math.max(1, Math.min(col + markLength, lineString.length) - col);
+
+		return [
+			'```arm',
+			lineString || '//No hay información adicional para mostrar...',
+			lineString ? `${' '.repeat(col)}${'↑'.repeat(rest)}` : '',
+			'```',
+			`En línea **${node.line}**, columnas **${node.column}** a **${node.column + markLength}** - `,
+		].join('\n');
+	}
+
+	#generateStackTrace() {
+		const stackTrace = [];
+
+		while(this.#lastNodes.length > 0 && stackTrace.length < 6) {
+			const node = this.forgetLastNode();
+			if(node.kind === ExpressionKinds.CALL)
+				stackTrace.push(`- En \`${this.astString(node.fn)}\``);
+		}
+
+		stackTrace.push(`- En raíz de ejecución`);
+
+		return stackTrace.join('\n');
 	}
 
 	/**
@@ -71,6 +200,37 @@ class Interpreter {
 	}
 
 	/**
+	 * @param {StopKind} stopKind
+	 */
+	checkStop(stopKind) {
+		return this.#stop >= stopKind;
+	}
+
+	/**
+	 * @param {StopKind} stopKind 
+	 */
+	eatStop(stopKind) {
+		const test = this.#stop >= stopKind;
+
+		if(this.#stop <= stopKind)
+			this.#stop = Stops.NONE;
+
+		return test;
+	}
+
+	/**
+	 * 
+	 * @param {import('../ast/expressions').Expression | import('../ast/statements').Statement} node 
+	 */
+	rememberNode(node) {
+		this.#lastNodes.unshift(node);
+	}
+
+	forgetLastNode() {
+		return this.#lastNodes.shift();
+	}
+
+	/**
 	 * @template {import('./values').ValueKind} T
 	 * @param {import('../ast/expressions').Expression} node
 	 * @param {import('./scope').Scope} scope
@@ -85,19 +245,24 @@ class Interpreter {
 	 * Evalúa un nodo programa
 	 * @param {import('../ast/statements').ProgramStatement} ast
 	 * @param {import('./scope').Scope} scope
+	 * @param {String} source
 	 * @param {import('../../../commands/Commons/typings').ComplexCommandRequest} request
 	 * @param {Array<String>} args
 	 * @param {Boolean} [isTestDrive]
 	 */
-	evaluateProgram(ast, scope, request, args, isTestDrive = false) {
+	evaluateProgram(ast, scope, source, request, args, isTestDrive = false) {
 		if(ast == null || ast.kind !== StatementKinds.PROGRAM || ast.body == null)
-			throw `Se esperaba AST válido para interrpretar`;
+			throw `Se esperaba AST válido para interpretar`;
+
+		if(typeof source !== 'string')
+			throw new Error('Se esperaba un String válido para proveer información de errores de evaluación');
 
 		this.#saveTable = new Map();
 		this.#errorStack = [];
 		this.#sendStack = [];
+		this.#source = source.replace(/(^\s+)|(\s+$)/g, '');
 		this.#request = request;
-		this.#stop = false;
+		this.#stop = Stops.NONE;
 		this.#quota = 1000;
 
 		this.#inputReader = isTestDrive
@@ -127,65 +292,88 @@ class Interpreter {
 	 */
 	evaluateStatement(node, scope) {
 		if(this.#quota-- <= 0)
-			throw this.TuberInterpreterError(`Límite de ejecución de sentencias agotado. Esto puede deberse a un bucle infinito, abuso de estructuras iterativas o código poco eficiente`);
+			throw this.TuberInterpreterError(`Límite de ejecución de sentencias agotado. Esto puede deberse a un bucle infinito, abuso de estructuras iterativas o código poco eficiente`, node);
+		
+		this.rememberNode(node);
 
+		let returnValue;
 		switch(node.kind) {
 		//Estructuras de control
 		case StatementKinds.BLOCK:
-			return this.#evaluateBlock(node, scope);
+			returnValue = this.#evaluateBlock(node, scope);
+			break;
 
 		case StatementKinds.CONDITIONAL:
-			return this.#evaluateConditional(node, scope);
+			returnValue = this.#evaluateConditional(node, scope);
+			break;
 
 		case StatementKinds.WHILE:
-			return this.#evaluateWhile(node, scope);
+			returnValue = this.#evaluateWhile(node, scope);
+			break;
 
 		case StatementKinds.DO_UNTIL:
-			return this.#evaluateDoUntil(node, scope);
+			returnValue = this.#evaluateDoUntil(node, scope);
+			break;
 
 		case StatementKinds.REPEAT:
-			return this.#evaluateRepeat(node, scope);
+			returnValue = this.#evaluateRepeat(node, scope);
+			break;
 
 		case StatementKinds.FOR_EACH:
-			return this.#evaluateForEach(node, scope);
+			returnValue = this.#evaluateForEach(node, scope);
+			break;
 
 		case StatementKinds.FOR:
-			return this.#evaluateFor(node, scope);
+			returnValue = this.#evaluateFor(node, scope);
+			break;
 
 		//Inmediatas
 		case StatementKinds.EXPRESSION:
-			return this.#evaluateExpressionStatement(node, scope);
+			returnValue = this.#evaluateExpressionStatement(node, scope);
+			break;
 
 		case StatementKinds.READ:
-			return this.#evaluateReadStatement(node, scope);
+			returnValue = this.#evaluateReadStatement(node, scope);
+			break;
 
 		case StatementKinds.DECLARATION:
-			return this.#evaluateDeclarationStatement(node, scope);
+			returnValue = this.#evaluateDeclarationStatement(node, scope);
+			break;
 
 		case StatementKinds.SAVE:
-			return this.#evaluateSaveStatement(node, scope);
+			returnValue = this.#evaluateSaveStatement(node, scope);
+			break;
 
 		case StatementKinds.LOAD:
-			return this.#evaluateLoadStatement(node, scope);
+			returnValue = this.#evaluateLoadStatement(node, scope);
+			break;
 
 		case StatementKinds.ASSIGNMENT:
-			return this.#evaluateAssignmentStatement(node, scope);
+			returnValue = this.#evaluateAssignmentStatement(node, scope);
+			break;
 
 		case StatementKinds.RETURN:
-			return this.#evaluateReturnStatement(node, scope);
+			returnValue = this.#evaluateReturnStatement(node, scope);
+			break;
 
 		case StatementKinds.END:
-			return this.#evaluateEndStatement();
+			returnValue = this.#evaluateEndStatement();
+			break;
 
 		case StatementKinds.STOP:
-			return this.#evaluateStopStatement(node, scope);
+			returnValue = this.#evaluateStopStatement(node, scope);
+			break;
 
 		case StatementKinds.SEND:
-			return this.#evaluateSendStatement(node, scope);
+			returnValue = this.#evaluateSendStatement(node, scope);
+			break;
 
 		default:
-			throw this.TuberInterpreterError(`Se encontró un nodo inesperado u no implementado al evaluar sentencia: ${node.kind}`);
+			throw new Error(`Se encontró un nodo inesperado u no implementado al evaluar sentencia: ${node.kind}`);
 		}
+
+		this.forgetLastNode();
+		return returnValue;
 	}
 
 	/**
@@ -196,57 +384,77 @@ class Interpreter {
 	 * @returns {import('./values').RuntimeValue}
 	 */
 	evaluate(node, scope, mustBeDeclared = true) {
+		this.rememberNode(node)
+
 		if(this.#quota <= 0)
-			throw this.TuberInterpreterError(`Límite de ejecución de sentencias agotado. Esto puede deberse a un bucle infinito, abuso de estructuras iterativas o código poco eficiente`);
+			throw this.TuberInterpreterError(`Límite de ejecución de sentencias agotado. Esto puede deberse a un bucle infinito, abuso de estructuras iterativas o código poco eficiente`, node);
 		
 		this.#quota -= 0.1;
 
+		let returnValue;
 		switch(node.kind) {
 		case ExpressionKinds.NUMBER_LITERAL:
-			return makeNumber(node.value);
+			returnValue = makeNumber(node.value);
+			break;
 
 		case ExpressionKinds.TEXT_LITERAL:
-			return makeText(node.value);
+			returnValue = makeText(node.value);
+			break;
 
 		case ExpressionKinds.BOOLEAN_LITERAL:
-			return makeBoolean(node.value);
+			returnValue = makeBoolean(node.value);
+			break;
 
 		case ExpressionKinds.LIST_LITERAL:
-			return this.#evaluateList(node, scope);
+			returnValue = this.#evaluateList(node, scope);
+			break;
 
 		case ExpressionKinds.REGISTRY_LITERAL:
-			return this.#evaluateRegistry(node, scope);
+			returnValue = this.#evaluateRegistry(node, scope);
+			break;
 
 		case ExpressionKinds.FUNCTION:
-			return this.#evaluateFunction(node, scope);
+			returnValue = this.#evaluateFunction(node, scope);
+			break;
 
 		case ExpressionKinds.NADA_LITERAL:
-			return makeNada();
+			returnValue = makeNada();
+			break;
 
 		case ExpressionKinds.IDENTIFIER:
-			return scope.lookup(node.name, mustBeDeclared);
+			returnValue = scope.lookup(node.name, mustBeDeclared);
+			break;
 
 		case ExpressionKinds.UNARY:
-			return this.#evaluateUnary(node, scope, mustBeDeclared);
+			returnValue = this.#evaluateUnary(node, scope, mustBeDeclared);
+			break;
 
 		case ExpressionKinds.BINARY:
-			return this.#evaluateBinary(node, scope, mustBeDeclared);
+			returnValue = this.#evaluateBinary(node, scope, mustBeDeclared);
+			break;
 			
 		case ExpressionKinds.CAST:
-			return this.#evaluateCast(node, scope, mustBeDeclared);
+			returnValue = this.#evaluateCast(node, scope, mustBeDeclared);
+			break;
 
 		case ExpressionKinds.SEQUENCE:
-			return this.#evaluateSequence(node, scope);
+			returnValue = this.#evaluateSequence(node, scope);
+			break;
 
 		case ExpressionKinds.ARROW:
-			return this.#evaluateArrow(node, scope);
+			returnValue = this.#evaluateArrow(node, scope);
+			break;
 
 		case ExpressionKinds.CALL:
-			return this.#evaluateCall(node, scope);
+			returnValue = this.#evaluateCall(node, scope);
+			break;
 
 		default:
-			throw this.TuberInterpreterError(`Se encontró un nodo inesperado u no implementado al evaluar expresión: ${node.kind}`);
+			throw new Error(`Se encontró un nodo inesperado u no implementado al evaluar expresión: ${node.kind}`);
 		}
+
+		this.forgetLastNode();
+		return returnValue;
 	}
 
 	/**
@@ -261,7 +469,7 @@ class Interpreter {
 		const blockScope = new Scope(this, scope);
 		for(const statement of node.body) {
 			returned = this.evaluateStatement(statement, blockScope);
-			if(this.#stop) break;
+			if(this.checkStop(Stops.BREAK)) break;
 		}
 
 		return returned;
@@ -298,7 +506,7 @@ class Interpreter {
 
 		while(this.evaluateAs(test, scope, ValueKinds.BOOLEAN).value === true) {
 			evaluated = this.#evaluateBlock(body, scope);
-			if(this.#stop) break;
+			if(this.eatStop(Stops.BREAK)) break;
 		}
 
 		return evaluated;
@@ -317,7 +525,7 @@ class Interpreter {
 
 		do {
 			evaluated = this.#evaluateBlock(body, scope);
-			if(this.#stop) break;
+			if(this.eatStop(Stops.BREAK)) break;
 		} while(this.evaluateAs(test, scope, ValueKinds.BOOLEAN).value === false);
 
 		return evaluated;
@@ -337,7 +545,7 @@ class Interpreter {
 		const timesValue = this.evaluateAs(times, scope, ValueKinds.NUMBER).value;
 		for(let i = 0; i < timesValue; i++) {
 			evaluated = this.#evaluateBlock(body, scope);
-			if(this.#stop) break;
+			if(this.eatStop(Stops.BREAK)) break;
 		}
 
 		return evaluated;
@@ -356,7 +564,7 @@ class Interpreter {
 
 		const containerValue = this.evaluate(container, scope);
 		if(!this.isAnyOf(containerValue, ValueKinds.LIST, ValueKinds.REGISTRY))
-			throw this.TuberInterpreterError(`Se esperaba un valor de Lista o Registro en expresión de contenedor de Sentencia \`PARA CADA\`, pero \`${this.expressionString(container)}\` fue de tipo ${ValueKindTranslationLookups.get(containerValue.kind)}`);
+			throw this.TuberInterpreterError(`Se esperaba un valor de Lista o Registro en expresión de contenedor de Sentencia \`PARA CADA\`, pero \`${this.astString(container)}\` fue de tipo ${ValueKindTranslationLookups.get(containerValue.kind)}`, container);
 
 		const entryNames = (this.is(containerValue, ValueKinds.LIST) ? containerValue.elements : containerValue.entries).keys();
 		const forEachScope = new Scope(this, scope);
@@ -367,7 +575,7 @@ class Interpreter {
 		for(const entryName of entryNames) {
 			forEachScope.assignVariable(identifier, getFn(entryName));
 			evaluated = this.#evaluateBlock(body, forEachScope);
-			if(this.#stop) break;
+			if(this.eatStop(Stops.BREAK)) break;
 		}
 
 		return evaluated;
@@ -406,7 +614,7 @@ class Interpreter {
 
 		for(startFn(); testFn(); stepFn()) {
 			evaluated = this.#evaluateBlock(body, forScope);
-			if(this.#stop) break;
+			if(this.eatStop(Stops.BREAK)) break;
 		}
 
 		return evaluated;
@@ -435,7 +643,7 @@ class Interpreter {
 		for(i = fromValue; testFn(); stepFn()) {
 			forScope.assignVariable(identifier, makeNumber(i));
 			evaluated = this.#evaluateBlock(body, forScope);
-			if(this.#stop) break;
+			if(this.eatStop(Stops.BREAK)) break;
 		}
 
 		return evaluated;
@@ -504,7 +712,7 @@ class Interpreter {
 		const value = this.evaluate(expression, scope);
 		if(!this.isAnyOf(value, ValueKinds.NUMBER, ValueKinds.TEXT, ValueKinds.BOOLEAN, ValueKinds.LIST, ValueKinds.REGISTRY)) {
 			const kindStr = ValueKindTranslationLookups.get(value.kind) ?? 'Desconocido';
-			throw this.TuberInterpreterError(`Tipo de dato inválido al intentar guardar un valor bajo el nombre: \`${identifier}\`. El tipo del valor recibido fue: _${kindStr}_`);
+			throw this.TuberInterpreterError(`Tipo de dato inválido al intentar guardar un valor bajo el nombre: \`${identifier}\`. El tipo del valor recibido fue: _${kindStr}_`, expression);
 		}
 
 		this.#saveTable.set(identifier, value);
@@ -542,18 +750,21 @@ class Interpreter {
 
 		/**@type {import('./values').RuntimeValue}*/
 		let receptionValue;
+		let implicit = false;
+		
 		if(reception == null) {
 			if(!operator.isAny(TokenKinds.ADD, TokenKinds.SUBTRACT))
-				throw this.TuberInterpreterError('La omisión del valor de recepción en una sentencia de asignación solo puede hacerse con los indicadores de Sentencia "SUMAR" y "RESTAR"');
+				throw this.TuberInterpreterError('La omisión del valor de recepción en una sentencia de asignación solo puede hacerse con los indicadores de Sentencia "SUMAR" y "RESTAR"', operator);
 
 			receptionValue = makeNumber(1);
+			implicit = true;
 		} else
 			receptionValue = this.evaluate(reception, scope, false);
 
 		if(operator.is(TokenKinds.EXTEND)) {
 			const receptorValue = this.evaluate(receptor, scope, false);
 			if(!this.is(receptorValue, ValueKinds.LIST))
-				throw this.TuberInterpreterError(`El receptor en Sentencia \`EXTENDER\` debe ser una Lista, y \`${this.expressionString(receptor)}\` no lo era`);
+				throw this.TuberInterpreterError(`El receptor en Sentencia \`EXTENDER\` debe ser una Lista, y \`${this.astString(receptor)}\` no lo era`, receptor);
 
 			receptorValue.elements.push(receptionValue);
 			return makeNada();
@@ -561,9 +772,20 @@ class Interpreter {
 
 		//SUMAR, RESTAR, etc...
 		if(BinaryOperationLookups.has(operator.kind)) {
-			const operation = BinaryOperationLookups.get(operator.kind);
 			const receptorValue = this.evaluate(receptor, scope, false);
-			receptionValue = operation(this, receptorValue, receptionValue);
+			
+			if(receptorValue.kind === ValueKinds.TEXT) {
+				if(implicit)
+					throw this.TuberInterpreterError('La omisión del valor de recepción en una sentencia de asignación solo puede hacerse con Números', operator);
+
+				if(!operator.is(TokenKinds.ADD))
+					throw this.TuberInterpreterError('Las únicas sentencias de asignación que se pueden usar con Textos son `CARGAR` y `SUMAR`', operator);
+			}
+
+			const operation = BinaryOperationLookups.get(operator.kind);
+
+
+			receptionValue = operation(this, receptorValue, receptionValue, receptor, reception);
 		}
 
 		this.#assignValueToExpression(receptor, receptionValue, scope);
@@ -581,7 +803,7 @@ class Interpreter {
 	 */
 	#evaluateReturnStatement(node, scope) {
 		const returned = this.evaluate(node.expression, scope, false);
-		this.#stop = true;
+		this.#stop = Stops.RETURN;
 		return returned;
 	}
 
@@ -591,7 +813,7 @@ class Interpreter {
 	 * Todas las sentencias luego de esta se ignoran hasta que finaliza un ámbito de Función o el Programa
 	 */
 	#evaluateEndStatement() {
-		this.#stop = true;
+		this.#stop = Stops.BREAK;
 		return makeNada();
 	}
 	
@@ -612,8 +834,8 @@ class Interpreter {
 		const stopMessageValue = coerceValue(this, this.evaluate(stopMessage, scope), ValueKinds.TEXT);
 
 		if(conditionValue.value) {
-			this.#stop = true;
-			this.#sendStack.push(stopMessageValue)
+			this.#stop = Stops.ABORT;
+			this.#sendStack.push(stopMessageValue);
 			return stopMessageValue;
 		}
 
@@ -686,7 +908,19 @@ class Interpreter {
 		if(node.expression === true)
 			return makeLambda(node.body, node.args);
 
-		return makeFunction(node.body, node.args, scope);
+		const fnValue = makeFunction(node.body, node.args, new Scope(this).include(scope));
+
+		let name = '[Función]';
+		const variables = scope.variables.entries();
+		for(const [ identifier, variable ] of variables) {
+			if(variable.equals(fnValue)) {
+				name = identifier;
+				break;
+			}
+		}
+
+		fnValue.name = name;
+		return fnValue;
 	}
 
 	/**
@@ -699,11 +933,11 @@ class Interpreter {
 
 		const argumentValue = this.evaluate(argument, scope, mustBeDeclared);
 
-		const operation = UnaryExpressionLookups.get(operator.kind);
+		const operation = UnaryOperationLookups.get(operator.kind);
 		if(operation == null)
-			throw this.TuberInterpreterError(`Operación unaria inválida. No se puede evaluar ${this.expressionString(node)} porque el operador "${operator.value}" es inválido`);
+			throw this.TuberInterpreterError(`Operación unaria inválida. No se puede evaluar ${this.astString(node)} porque el operador "${operator.value}" es inválido`, operator);
 
-		return operation(this, argumentValue);
+		return operation(this, argumentValue, argument);
 	}
 
 	/**
@@ -714,14 +948,39 @@ class Interpreter {
 	#evaluateBinary(node, scope, mustBeDeclared = true) {
 		const { operator, left, right } = node;
 
+		//Caso especial de operaciones binarias lógicas
+		if(operator.isAny(TokenKinds.AND, TokenKinds.OR))
+			return this.#evaluateLogical(node, scope, mustBeDeclared);
+
 		const leftValue = this.evaluate(left, scope, mustBeDeclared);
 		const rightValue = this.evaluate(right, scope, mustBeDeclared);
 
 		const operation = BinaryOperationLookups.get(operator.kind);
+
 		if(operation == null)
-			throw this.TuberInterpreterError(`Operación binaria inválida. No se puede evaluar ${this.expressionString(node)} porque el operador "${operator.value}" es inválido`);
-		
-		return operation(this, leftValue, rightValue);
+			throw this.TuberInterpreterError(`Operación binaria inválida. No se puede evaluar ${this.astString(node)} porque el operador "${operator.value}" es inválido`, operator);
+
+		return operation(this, leftValue, rightValue, left, right);
+	}
+
+	/**
+	 * Evalúa una expresión binaria lógica y devuelve el valor resultante de la operación
+	 * @param {import('../ast/expressions').BinaryExpression} node 
+	 * @param {import('./scope').Scope} scope
+	 */
+	#evaluateLogical(node, scope, mustBeDeclared = true) {
+		const { operator, left, right } = node;
+
+		const leftValue = this.evaluate(left, scope, mustBeDeclared);
+		const leftTruth = this.is(leftValue, ValueKinds.NADA) ? makeBoolean(false) : coerceValue(this, leftValue, ValueKinds.BOOLEAN);
+
+		//Evaluación de cortocircuito
+		if((leftTruth.value === true  && operator.is(TokenKinds.OR))
+		|| (leftTruth.value === false && operator.is(TokenKinds.AND)))
+			return leftValue;
+
+		const rightValue = this.evaluate(right, scope, mustBeDeclared);
+		return rightValue;
 	}
 
 	/**
@@ -749,9 +1008,8 @@ class Interpreter {
 		/**@type {import('./values').RuntimeValue}*/
 		let lastEvaluation = makeNada();
 
-		for(const expression of node.expressions) {
+		for(const expression of node.expressions)
 			lastEvaluation = this.evaluate(expression, scope);
-		}
 
 		return lastEvaluation;
 	}
@@ -784,7 +1042,7 @@ class Interpreter {
 		}
 
 		case ValueKinds.BOOLEAN: {
-			throw this.TuberInterpreterError(`El contenedor "${this.expressionString(holder)}" en expresión de flecha "->" fue de tipo Dupla, el cual no contiene miembros accedibles por clave`);
+			throw this.TuberInterpreterError(`El contenedor "${this.astString(holder)}" en expresión de flecha "->" fue de tipo Lógico, el cual no contiene miembros accedibles por clave`, holder);
 		}
 
 		case ValueKinds.LIST: {
@@ -848,7 +1106,7 @@ class Interpreter {
 		}
 
 		default:
-			throw this.TuberInterpreterError(`El contenedor "${this.expressionString(holder)}" en expresión de flecha "->" fue de tipo Nada`);
+			throw this.TuberInterpreterError(`El contenedor "${this.astString(holder)}" en expresión de flecha "->" fue de tipo Nada`, holder);
 		}
 	}
 
@@ -866,17 +1124,38 @@ class Interpreter {
 
 		const fnValue = this.evaluate(fn, scope);
 		if(!this.isAnyOf(fnValue, ValueKinds.NATIVE_FN, ValueKinds.FUNCTION))
-			throw this.TuberInterpreterError(`No se pudo llamar ${this.expressionString(fn)} porque no era una Función. En cambio, era de tipo ${ValueKindTranslationLookups.get(fnValue.kind)}`);
+			throw this.TuberInterpreterError(`No se pudo llamar ${this.astString(fn)} porque no era una Función. En cambio, era de tipo ${ValueKindTranslationLookups.get(fnValue.kind)}`, fn);
 
 		const argValues = args.map(arg => this.evaluate(arg, scope, false));
+		
+		return this.callFunction(fnValue, argValues, scope);
+	}
+
+	/**
+	 * Evalúa un llamado de valor de Función o Método.
+	 * 
+	 * Ejecuta el valor de Función especificado, con los argumentos indicados, si aplica.
+	 * 
+	 * Es irrelevante si la Función es nativa o de usuario. Superficialmente, se ejecutarán de forma similar
+	 * @param {import('./values').FunctionValue | import('./values').NativeFunctionValue} fnValue
+	 * @param {Array<import('./values').RuntimeValue>} argValues
+	 * @param {import("./scope").Scope} scope
+	 */
+	callFunction(fnValue, argValues, scope) {
 		let returnedValue;
 
 		if(this.is(fnValue, ValueKinds.NATIVE_FN)) {
 			const fnScope = new Scope(this, scope);
 			returnedValue = fnValue.call(fnValue.self, argValues, fnScope);
 		} else {
-			const fnScope = new Scope(this, scope);
-			const itpt = this;
+			let fnScope;
+
+			if(fnValue.lambda === false) {
+				fnValue.scope.include(scope);
+				fnScope = new Scope(this, fnValue.scope);
+			} else
+				fnScope = new Scope(this, scope);
+
 			fnValue.args.forEach((arg, i) => {
 				/**@type {import('./values').RuntimeValue}*/
 				let value;
@@ -885,19 +1164,19 @@ class Interpreter {
 				else if(arg.optional)
 					value = this.evaluate(arg.fallback, scope);
 				else
-					throw this.TuberInterpreterError(`Se esperaba un valor para el argumento "${arg.identifier}" de la Función ${itpt.expressionString(fn)}`);
+					throw this.TuberInterpreterError(`Se esperaba un valor para el argumento "${arg.identifier}" de la Función ${fnValue.name}`, arg);
 
-				fnScope.assignVariable(arg.identifier, argValues[i]);
+				fnScope.declareVariable(arg.identifier, ValueKinds.NADA);
+				fnScope.assignVariable(arg.identifier, value);
 			});
 
-			if(fnValue.lambda === false) {
-				fnScope.include(fnValue.scope);
+			if(fnValue.lambda === false)
 				returnedValue = this.#evaluateBlock(fnValue.body, fnScope);
-			} else
+			else
 				returnedValue = this.evaluate(fnValue.expression, fnScope);
 		}
 
-		this.#stop = false;
+		this.eatStop(Stops.RETURN);
 		return returnedValue;
 	}
 
@@ -933,7 +1212,7 @@ class Interpreter {
 			scope.assignVariable(identifier, receptionValue);
 			break;
 		}
-			
+		
 		case ExpressionKinds.ARROW:
 			if(receptor.computed === true) {
 				const evaluated = this.evaluate(receptor.key, scope);
@@ -947,7 +1226,7 @@ class Interpreter {
 			case ValueKinds.LIST:
 				const index = +identifier;
 				if(!isInternalOperable(index))
-					throw this.TuberInterpreterError(`Se esperaba un índice válido en lado derecho de expresión de flecha "->" para la Lista "${this.expressionString(receptor.holder)}" en expresión receptora de sentencia de asignación. Sin embargo, se recibió: ${identifier}`);
+					throw this.TuberInterpreterError(`Se esperaba un índice válido en lado derecho de expresión de flecha "->" para la Lista \`${this.astString(receptor.holder)}\` en expresión receptora de sentencia de asignación. Sin embargo, se recibió: ${identifier}`, receptor);
 
 				holderValue.elements[index] = receptionValue;
 				break;
@@ -959,99 +1238,22 @@ class Interpreter {
 				break;
 
 			default:
-				throw this.TuberInterpreterError(`Expresión de flecha inválida como receptora de sentencia de asignación. El tipo de "${this.expressionString(receptor.holder)}" no tiene miembros asignables`);
+				throw this.TuberInterpreterError(`Expresión de flecha inválida como receptora de sentencia de asignación. El tipo de \`${this.astString(receptor.holder)}\` no tiene miembros asignables`, receptor);
 			}
 			break;
 
 		default:
-			throw this.TuberInterpreterError(`La expresión ${this.expressionString(receptor)} es inválida como receptora de una sentencia de asignación`);
+			throw this.TuberInterpreterError(`La expresión ${this.astString(receptor)} es inválida como receptora de una sentencia de asignación`, receptor);
 		}
 	}
 
 	/**
-	 * Reconstruye un String de código fuente a partir de una expresión de AST
-	 * @param {import('../ast/expressions').Expression} node
+	 * Devuelve el fragmento de código fuento del cual se originó el nodo AST indicado
+	 * @param {import('../ast/expressions').Expression | import('../ast/statements').Statement | import('../lexer/tokens').Token} node
 	 * @returns {String} 
 	 */
-	expressionString(node) {
-		switch(node.kind) {
-		case ExpressionKinds.ARGUMENT:
-			return node.identifier;
-
-		case ExpressionKinds.ARROW: {
-			const holderString = this.expressionString(node.holder);
-			const actualKey = (node.computed) ? this.expressionString(node.key) : node.key;
-			return `${holderString}->${actualKey}`;
-		}
-
-		case ExpressionKinds.IDENTIFIER:
-			return node.name;
-
-		case ExpressionKinds.UNARY: {
-			const argumentString = this.expressionString(node.argument);
-			return `${node.operator.value} ${argumentString})`;
-		}
-
-		case ExpressionKinds.BINARY: {
-			const leftString = this.expressionString(node.left);
-			const rightString = this.expressionString(node.right);
-			return `(${leftString} ${node.operator.value} ${rightString})`;
-		}
-
-		case ExpressionKinds.NUMBER_LITERAL:
-			return `${node.value}`;
-
-		case ExpressionKinds.TEXT_LITERAL:
-			return `'${node.value}'`;
-
-		case ExpressionKinds.BOOLEAN_LITERAL:
-			return node.value ? 'Verdadero' : 'Falso';
-
-		case ExpressionKinds.LIST_LITERAL: {
-			const stringifiedElements = node.elements.map(el => this.expressionString(el));
-			return `(Lista ${stringifiedElements.join(', ')})`;
-		}
-
-		case ExpressionKinds.REGISTRY_LITERAL: {
-			const entriesArray = [ ...node.entries.entries() ];
-			const stringifiedEntries = entriesArray.map(([ k, expr ]) => `${k}: ${this.expressionString(expr)}`);
-			return `(Registro ${stringifiedEntries.join(', ')})`;
-		}
-
-		case ExpressionKinds.CALL: {
-			const fnString = this.expressionString(node.fn);
-			const argsString = node.args.map(arg => this.expressionString(arg)).join(', ');
-			return `${fnString}(${argsString})`;
-		}
-
-		case ExpressionKinds.CAST: {
-			const operatorString = node.as.value;
-			const argumentString = this.expressionString(node.argument);
-			return `(${operatorString} ${argumentString})`;
-		}
-
-		case ExpressionKinds.FUNCTION: {
-			const argsString = node.args.map(arg => this.expressionString(arg)).join(', ');
-
-			if(node.expression === true) {
-				const bodyString = this.expressionString(node.body);
-				return `(${argsString}) tal que ${bodyString}`;
-			}
-
-			return `Función(${argsString}) ... FIN`;
-		}
-
-		case ExpressionKinds.SEQUENCE: {
-			const stringifiedExpressions = node.expressions.map(expression => this.expressionString(expression));
-			return `${stringifiedExpressions.join(', ')}`;
-		}
-
-		case ExpressionKinds.NADA_LITERAL:
-			return 'Nada';
-
-		default:
-			return 'Desconocido';
-		}
+	astString(node) {
+		return this.#source.slice(node.start, node.end);
 	}
 }
 

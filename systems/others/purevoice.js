@@ -1,12 +1,13 @@
 const PureVoice = require('../../localdata/models/purevoice');
+const UserConfigs = require('../../localdata/models/userconfigs')
 const Discord = require('discord.js');
-const { default: mongoose } = require('mongoose');
 const { p_pure } = require('../../localdata/customization/prefixes');
 const chalk = require('chalk');
 const { ButtonStyle, ChannelType } = require('discord.js');
+const { makeButtonRowBuilder } = require('../../tsCasts');
 
 class PureVoiceUpdateHandler {
-    /**@type {mongoose.Document}*/
+    /**@typedef {import('../../localdata/models/purevoice').PureVoiceDocument}*/
     pvDocument;
     /**@type {Discord.VoiceState}*/
     oldState;
@@ -15,7 +16,6 @@ class PureVoiceUpdateHandler {
 
     /**
      * Crea un nuevo Handler para una actualización de estado de un canal de voz con Sistema PuréVoice
-     * @param {Object} documentQuery 
      * @param {Discord.VoiceState} oldState 
      * @param {Discord.VoiceState} state 
      */
@@ -35,7 +35,7 @@ class PureVoiceUpdateHandler {
 
     async relinkDocument() {
         const documentId = this.pvDocument.id;
-        this.pvDocument = await PureVoice.findById(documentId).catch(console.error)
+        this.pvDocument = await PureVoice.findById(documentId).catch(console.error);
     };
 
     /** Comprueba si hay un sistema PuréVoice instalado en el servidor actual o no */
@@ -124,8 +124,14 @@ class PureVoiceUpdateHandler {
             if(!sessionRole || !channel) return;
     
             await member.roles.add(sessionRole, 'Inclusión de miembro en sesión PuréVoice');
-    
+
             if(currentSession.joinedOnce?.includes(member.id)) return;
+            
+            const userConfigs = await UserConfigs.findOne({ userId: member.id }) || new UserConfigs({ userId: member.id });
+            userConfigs.voice ??= {};
+            userConfigs.voice.ping ??= 'always';
+            if(userConfigs.voice.ping !== 'always') return;
+
             embed.setColor(0x00ff7f)
                 .addFields({
                     name: `${member.user.bot ? '🤖' : '👤'} Nueva conexión`,
@@ -216,18 +222,28 @@ class PureVoiceUpdateHandler {
                     },
                 );
 
-            await channel.send({
-                content: `👋 ¡Buenas, ${member}!`,
+            const userConfigs = await UserConfigs.findOne({ userId: member.id }) || new UserConfigs({ userId: member.id });
+            userConfigs.voice ??= {};
+            userConfigs.voice.ping ??= 'always';
+            
+            /**@type {String | Discord.MessagePayload | Discord.MessageCreateOptions}*/
+            const startMessage = {
                 embeds: [embed],
-                components: [new Discord.ActionRowBuilder().addComponents(
-                    new Discord.ButtonBuilder({
-                        customId: 'voz_showMeHow',
-                        label: 'Muéstrame cómo',
-                        style: ButtonStyle.Primary,
-                        emoji: '📖',
-                    }),
+                components: [
+                    makeButtonRowBuilder().addComponents(
+                        new Discord.ButtonBuilder({
+                            customId: 'voz_showMeHow',
+                            label: 'Muéstrame cómo',
+                            style: ButtonStyle.Primary,
+                            emoji: '📖',
+                        }),
                 )],
-            }).catch(prematureError);
+            };
+
+            if(userConfigs.voice.ping !== 'never')
+                startMessage.content = `👋 ¡Buenas, ${member}!`;
+
+            await channel.send(startMessage).catch(prematureError);
             
             setTimeout(async () => {
                 await this.relinkDocument();

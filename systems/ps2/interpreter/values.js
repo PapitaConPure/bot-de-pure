@@ -79,6 +79,7 @@ const ValueKinds = /**@type {const}*/({
 
 /**
  * @typedef {Object} BaseFunctionValueData
+ * @property {String} name
  * @property {Array<import('../ast/expressions').ArgumentExpression>} args
  * 
  * @typedef {Object} StandardFunctionValueData
@@ -171,7 +172,7 @@ function isValidText(value) {
 }
 
 /**
- * Comprueba si un RuntimeValue es de tipo Dupla
+ * Comprueba si un RuntimeValue es de tipo Lógico
  * @param {RuntimeValue} value 
  * @returns {value is BooleanValue}
  */
@@ -260,7 +261,7 @@ function nativeFnEquals(other) {
 	return makeBoolean(other.kind === ValueKinds.NATIVE_FN && this.kind === other.kind && this.call === other.call);
 }
 
-/**@param {FunctionValue} other*/
+/**@param {RuntimeValue} other*/
 function referenceEquals(other) {
 	return makeBoolean(this === other);
 }
@@ -272,7 +273,7 @@ const ValueKindTranslationLookups = new Map();
 ValueKindTranslationLookups
 	.set(ValueKinds.NUMBER, 'Número')
 	.set(ValueKinds.TEXT, 'Texto')
-	.set(ValueKinds.BOOLEAN, 'Dupla')
+	.set(ValueKinds.BOOLEAN, 'Lógico')
 	.set(ValueKinds.LIST, 'List')
 	.set(ValueKinds.REGISTRY, 'Registro')
 	.set(ValueKinds.EMBED, 'Marco')
@@ -427,6 +428,7 @@ function makeFunction(body, args, scope) {
 	return {
 		kind,
 		lambda: false,
+		name: '[Función]',
 		body,
 		args,
 		scope,
@@ -445,6 +447,7 @@ function makeLambda(expression, args) {
 	return {
 		kind,
 		lambda: true,
+		name: '[Lambda]',
 		expression,
 		args,
 		compareTo: CompareToMethodLookups.get(kind),
@@ -526,14 +529,16 @@ coercions.get(ValueKinds.LIST)
 	});
 
 coercions.get(ValueKinds.REGISTRY)
-	.set(ValueKinds.NUMBER,   (_) => makeNada())
 	.set(ValueKinds.TEXT,     (/**@type Map<string, RuntimeValue>*/ x, interpreter) => {
+		if(!x.size)
+			return makeText('{Rg}');
+
 		let glossaryStrings = [];
 		x.forEach((value, key) => {
 			const coercedValue = coerceValue(interpreter, value, 'Text').value;
 			glossaryStrings.push(`${key}: ${coercedValue}`);
 		});
-		return makeText(`{Rg ${glossaryStrings.join(', ')}}`);
+		return makeText(`{Rg ${glossaryStrings.join(', ')} }`);
 	})
 	.set(ValueKinds.BOOLEAN,  (x) => makeBoolean(x?.size ? true : false));
 
@@ -544,44 +549,7 @@ coercions.get(ValueKinds.EMBED)
 		if(x == null || x.data == null)
 			return makeNada();
 
-		/**@type {Map<String, RuntimeValue>}*/
-		const properties = new Map()
-			.set('color', makeNumber(x.data.color));
-
-		if(x.data.title)
-			properties.set('título', makeText(x.data.title));
-
-		if(x.data.description)
-			properties.set('descripción', makeText(x.data.description));
-		
-		if(x.data.author)
-			properties.set('autor', makeRegistry(new Map()
-				.set('nombre', x.data.author.name ? makeText(x.data.author.name) : makeNada())
-				.set('ícono', x.data.author.name ? makeText(x.data.author.icon_url) : makeNada())
-			));
-			
-		if(x.data.footer)
-			properties.set('pie', makeRegistry(new Map()
-				.set('texto', x.data.author.name ? makeText(x.data.footer.text) : makeNada())
-				.set('ícono', x.data.author.name ? makeText(x.data.footer.icon_url) : makeNada())
-			));
-		
-		if(x.data.timestamp)
-			properties.set('tiempo', makeText(x.data.timestamp));
-
-		if(x.data.image?.url)
-			properties.set('imagen', makeText(x.data.image.url));
-		
-		if(x.data.video?.url)
-			properties.set('video', makeText(x.data.video.url));
-		
-		if(x.data.thumbnail?.url)
-			properties.set('miniatura', makeText(x.data.thumbnail.url));
-		
-		if(x.data.url)
-			properties.set('enlace', makeText(x.data.url));
-		
-		return makeRegistry(properties);
+		return require('./environment/registryPrefabs').makeEmbedRegistry(x);
 	});
 
 coercions.get(ValueKinds.FUNCTION)

@@ -1,5 +1,5 @@
-const { ValueKinds, makeText, makeBoolean, makeList, makeRegistry, makeNada, coerceValue } = require('../../values');
-const { expectParam, getParamOrNada } = require('../nativeUtils');
+const { ValueKinds, makeText, makeBoolean, makeList, makeRegistry, makeNada, coerceValue, makeNumber } = require('../../values');
+const { expectParam, getParamOrNada, makePredicateFn } = require('../nativeUtils');
 const { Scope } = require('../../scope');
 const { stringifyPSAST } = require('../../../debug');
 
@@ -23,16 +23,6 @@ const { stringifyPSAST } = require('../../../debug');
  */
 function listaAInvertido(self, [], scope) {
 	return makeList(self.elements.toReversed());
-}
-
-/**
- * @param {ListValue} self
- * @param {[]} args
- * @param {Scope} scope
- * @returns {ListValue}
- */
-function listaAOrdenado(self, [], scope) {
-	return makeList(self.elements.toSorted((a, b) => a.compareTo(b).value));
 }
 
 /**
@@ -83,17 +73,6 @@ function listaCortar(self, [ inicio, fin ], scope) {
  */
 function listaInvertir(self, [], scope) {
 	self.elements.reverse();
-	return makeNada();
-}
-
-/**
- * @param {ListValue} self
- * @param {[]} args
- * @param {Scope} scope
- * @returns {NadaValue}
- */
-function listaOrdenar(self, [], scope) {
-	self.elements.sort((a, b,) => a.compareTo(b).value);
 	return makeNada();
 }
 
@@ -167,22 +146,178 @@ function listaVacía(self, [], scope) {
 	return makeBoolean(self.elements.length === 0);
 }
 
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {ListValue}
+ */
+function listaFiltrar(self, [ predicado ], scope) {
+	const fn = makePredicateFn('filtro', predicado, scope);
+	const processedElements = self.elements.filter((el, i) => coerceValue(scope.interpreter, fn(el, makeNumber(i), self), ValueKinds.BOOLEAN).value);
+	return makeList(processedElements);
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {ListValue}
+ */
+function listaMapear(self, [ predicado ], scope) {
+	const fn = makePredicateFn('mapeo', predicado, scope);
+	const processedElements = self.elements.map((el, i) => fn(el, makeNumber(i), self));
+	return makeList(processedElements);
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {RuntimeValue}
+ */
+function listaEncontrar(self, [ predicado ], scope) {
+	const fn = makePredicateFn('búsqueda', predicado, scope);
+	const element = self.elements.find((el, i) => coerceValue(scope.interpreter, fn(el, makeNumber(i), self), ValueKinds.BOOLEAN).value) ?? makeNada();
+	return element;
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {RuntimeValue}
+ */
+function listaEncontrarÚltimo(self, [ predicado ], scope) {
+	const fn = makePredicateFn('búsqueda', predicado, scope);
+	const element = self.elements.findLast((el, i) => coerceValue(scope.interpreter, fn(el, makeNumber(i), self), ValueKinds.BOOLEAN).value) ?? makeNada();
+	return element;
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {NumberValue}
+ */
+function listaEncontrarId(self, [ predicado ], scope) {
+	const fn = makePredicateFn('búsqueda', predicado, scope);
+	const idx = self.elements.findIndex((el, i) => coerceValue(scope.interpreter, fn(el, makeNumber(i), self), ValueKinds.BOOLEAN).value);
+	return makeNumber(idx);
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {NumberValue}
+ */
+function listaEncontrarÚltimaId(self, [ predicado ], scope) {
+	const fn = makePredicateFn('búsqueda', predicado, scope);
+	const idx = self.elements.findLastIndex((el, i) => coerceValue(scope.interpreter, fn(el, makeNumber(i), self), ValueKinds.BOOLEAN).value);
+	return makeNumber(idx);
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {NadaValue}
+ */
+function listaOrdenar(self, [ predicado ], scope) {
+	if(predicado == null) {
+		self.elements.sort((a, b) => a.compareTo(b).value);
+	} else {
+		const fn = makePredicateFn('criterio', predicado, scope);
+		self.elements.sort((a, b) => coerceValue(scope.interpreter, fn(a, b), ValueKinds.NUMBER).value);
+	}
+	
+	return makeNada();
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {ListValue}
+ */
+function listaAOrdenada(self, [ predicado ], scope) {
+	if(predicado == null)
+		return makeList(self.elements.toSorted((a, b) => a.compareTo(b).value));
+	
+	const fn = makePredicateFn('criterio', predicado, scope);
+	const processedElements = self.elements.toSorted((a, b) => coerceValue(scope.interpreter, fn(a, b), ValueKinds.NUMBER).value);
+	return makeList(processedElements);
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {BooleanValue}
+ */
+function listaAlguno(self, [ predicado ], scope) {
+	const fn = makePredicateFn('predicado', predicado, scope);
+	const test = self.elements.some((el, i) => coerceValue(scope.interpreter, fn(el, makeNumber(i), self), ValueKinds.BOOLEAN).value);
+	return makeBoolean(test);
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {BooleanValue}
+ */
+function listaTodos(self, [ predicado ], scope) {
+	const fn = makePredicateFn('predicado', predicado, scope);
+	const test = self.elements.every((el, i) => coerceValue(scope.interpreter, fn(el, makeNumber(i), self), ValueKinds.BOOLEAN).value);
+	return makeBoolean(test);
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {NadaValue}
+ */
+function listaParaCada(self, [ predicado ], scope) {
+	const fn = makePredicateFn('procedimiento', predicado, scope);
+	self.elements.slice().forEach((el, i) => fn(el, makeNumber(i), self));
+	return makeNada();
+}
+
 /**@type Map<String, import('../../values').NativeFunction<ListValue>>*/
 const listMethods = new Map();
 listMethods
 	.set('aInvertida', listaAInvertido)
 	.set('aInvertido', listaAInvertido)
-	.set('aOrdenada', listaAOrdenado)
-	.set('aOrdenado', listaAOrdenado)
+	.set('algun', listaAlguno)
+	.set('algún', listaAlguno)
+	.set('alguno', listaAlguno)
+	.set('aOrdenada', listaAOrdenada)
+	.set('aOrdenado', listaAOrdenada)
 	.set('aRegistro', listaARegistro)
 	.set('contiene', listaContiene)
 	.set('cortar', listaCortar)
+	.set('encontrar', listaEncontrar)
+	.set('encontrarId', listaEncontrarId)
+	.set('encontrarUltimaId', listaEncontrarÚltimaId)
+	.set('encontrarÚltimaId', listaEncontrarÚltimaId)
+	.set('encontrarUltimo', listaEncontrarÚltimo)
+	.set('encontrarÚltimo', listaEncontrarÚltimo)
+	.set('filtrar', listaFiltrar)
+	.set('incluye', listaContiene)
 	.set('invertir', listaInvertir)
+	.set('mapear', listaMapear)
 	.set('ordenar', listaOrdenar)
+	.set('ordenada', listaAOrdenada)
+	.set('ordenado', listaAOrdenada)
+	.set('paraCada', listaParaCada)
 	.set('robar', listaRobar)
 	.set('robarPrimero', listaRobarPrimero)
 	.set('robarUltimo', listaRobarÚltimo)
 	.set('robarÚltimo', listaRobarÚltimo)
+	.set('todos', listaTodos)
 	.set('unir', listaUnir)
 	.set('vacia', listaVacía)
 	.set('vacía', listaVacía);

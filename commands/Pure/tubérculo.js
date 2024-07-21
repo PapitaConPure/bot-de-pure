@@ -137,7 +137,14 @@ async function loadPageNumber(interaction, page, setFilter = undefined) {
 		return interaction.update(listUpdate);
 };
 
-const helpString = (/**@type {import('../Commons/typings.js').ComplexCommandRequest}*/ request) => `Usa \`${p_pure(request.guildId).raw}ayuda tubérculo\` para más información`;
+const helpString = (/**@type {import('../Commons/typings.js').ComplexCommandRequest}*/ request) => [
+	'## Ejemplos de Uso',
+	'Supongamos que queremos crear, ver o editar un Tubérculo llamado **"saludo"**:',
+	'* 🔍 **Ver Tubérculo** — `p!t --ver saludo` o `p!t -v saludo`',
+	'* 🗑️ **Borrar Tubérculo** — `p!t --borrar saludo` o `p!t -b saludo`',
+	'* ✏️ **Crear o editar Tubérculo simple** — `p!t --crear saludo ¡Hola!` o `p!t -c saludo ¡Hola!`',
+	`-# Usa \`${p_pure(request.guildId).raw}ayuda tubérculo\` para más información. Si quieres crear un Tubérculo avanzado, puedes leer la [documentación más reciente de PuréScript](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link).`,
+].join('\n');
 
 const options = new CommandOptions()
 	.addParam('id', 	  'TEXT',           'para especificar sobre qué Tubérculo operar',          { optional: true })
@@ -153,18 +160,16 @@ const command = new CommandManager('tubérculo', flags)
 	.setAliases('tuberculo', 'tubercle', 'tuber', 't')
 	.setBriefDescription('Permite crear, editar, listar, borrar o ejecutar comandos personalizados de servidor')
 	.setLongDescription(
-		'Permite *listar*, `--crear`/editar, `--borrar` o __ejecutar__ Tubérculos (comandos personalizados de servidor).',
-		'Usar el comando sin más listará todos los Tubérculos de los que dispone el servidor actual',
-		'En caso de estar creando un Tubérculo, se requerirá un `<mensaje>` y/o `<archivos>`, junto a la `<id>` que quieras darle al mismo. Si la ID ya está registrada, será *editada*',
-		'En cualquier parte del contenido del mensaje, coloca "#FIN#" para bajar un renglón (no es necesario con PuréScript)',
-		'En caso de estar editando o borrando un Tubérculo existente, se requerirá su TuberID',
-		'Puedes leer o descargar la documentación de PuréScript desde [aquí](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link) (~3MiB)',
-		'Nótese que el lenguaje se encuentra en una etapa prematura y puede tener bugs o cambiar considerablemente',
+		'Ofrece acciones de Tubérculos (comandos personalizados de servidor).',
+		'Usar el comando sin nada lista todos los Tubérculos de este servidor',
+		'Para `--crear` (o *editar*) un Tubérculo, se requerirá un `<mensaje>` y/o `<archivos>`, junto a la `<id>` que quieras darle al mismo. Si la ID ya existe, será *editada*',
+		'Para `--borrar` un Tubérculo, igualmente debes indicar su `<id>`',
+		'Escribe los indicadores `--crear --script` (o `-cs`) para crear un **Tubérculo avanzado con PuréScript**',
+		'[Clickea esto para leer la documentación de PuréScript](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link)'
 	)
 	.setOptions(options)
 	.setExperimental(true)
 	.setExperimentalExecution(async (request, args, rawArgs) => {
-
 		const operation = args.parseFlagExt('crear', 'crear')
 			|| args.parseFlagExt('ver', 'ver')
 			|| args.parseFlagExt('borrar', 'borrar');
@@ -200,8 +205,11 @@ const command = new CommandManager('tubérculo', flags)
 			});
 		}
 
-		if(tuberId == null)
-			return request.reply({ content: warn(`Debes ingresar una TuberID válida\n${helpString(request)}`) });
+		if(tuberId == null) {
+			return request.reply({
+				content: warn(`Debes indicar una TuberID válida para realizar una acción\n${helpString(request)}`)
+			});
+		}
 
 		//Realizar operación sobre ID de Tubérculo
 		const gid = request.guild.id;
@@ -387,13 +395,16 @@ const command = new CommandManager('tubérculo', flags)
 			return interaction.editReply({ content: '⚠️ Esta TuberID ya no existe, o no contiene entradas válidas' });
 		
 		const name = interaction.fields.getTextInputValue('nameInput');
-		const inputIndex = gcfg.tubers[tuberId].inputs.findIndex(input => (input.identifier ?? input.name) === name);
-		if(inputIndex < 0)
-			return interaction.editReply({ content: `⚠️ La entrada "${shortenText(name, 128)}" no existe para el Tubérculo **${shortenText(tuberId, 256)}**` });
 
-		const desc = interaction.fields.getTextInputValue('descInput');
-		gcfg.tubers[tuberId].inputs[inputIndex].desc = desc;
-		console.log(tuberId, name, inputIndex, ':', desc);
+		if(gcfg.tubers[tuberId].psVersion == null) {
+			const inputIndex = gcfg.tubers[tuberId].inputs.findIndex(input => (input.identifier ?? input.name) === name);
+			if(inputIndex < 0)
+				return interaction.editReply({ content: `⚠️ La entrada "${shortenText(name, 128)}" no existe para el Tubérculo **${shortenText(tuberId, 256)}**` });
+			
+			const desc = interaction.fields.getTextInputValue('descInput');
+			gcfg.tubers[tuberId].inputs[inputIndex].desc = desc;
+		}
+		
 		gcfg.markModified(`tubers.${tuberId}`);
 		await gcfg.save();
 
@@ -548,6 +559,8 @@ function viewTuber(interaction, item, tuberId, inputVariant, updateMessage) {
 		if(item.inputs?.length) {
 			let inputTitle;
 			let inputStrings;
+			let actuallyValid = true;
+			
 			if(!item.psVersion) {
 				inputTitle = 'Entradas';
 				inputStrings = item.inputs
@@ -555,21 +568,27 @@ function viewTuber(interaction, item, tuberId, inputVariant, updateMessage) {
 					.join('\n');
 			} else {
 				inputTitle = `Entradas (variante ${inputVariant + 1} de ${pageCount})`;
-				inputStrings = item.inputs[inputVariant]
-					.map(i => Input.from(i).toString())
-					.join('\n');
+				if(item.inputs[inputVariant].length === 0)
+					actuallyValid = false;
+				else
+					inputStrings = item.inputs[inputVariant]
+						.map(i => Input.from(i).toString())
+						.join('\n');
 			}
-			embed.addFields({
-				name: inputTitle,
-				value: inputStrings,
-			});
-			descriptionButtons.push(
-				new ButtonBuilder()
-					.setCustomId(`t_gID_${tuberId}_${compressId(item.author)}`)
-					.setLabel('Describir entrada')
-					.setEmoji('🏷')
-					.setStyle(ButtonStyle.Success),
-			);
+
+			if(actuallyValid) {
+				embed.addFields({
+					name: inputTitle,
+					value: inputStrings,
+				});
+				descriptionButtons.push(
+					new ButtonBuilder()
+						.setCustomId(`t_gID_${tuberId}_${compressId(item.author)}`)
+						.setLabel('Describir entrada')
+						.setEmoji('🏷')
+						.setStyle(ButtonStyle.Success),
+				);
+			}
 		}
 
 		const visualPS = item.script.map

@@ -14,7 +14,7 @@ const { Translator } = require('../../internationalization');
 /**
  * Genera un {@linkcode EmbedBuilder} a base de un {@linkcode Post} de {@linkcode Booru}
  * @param {Post} post Post de Booru
- * @param {import('../systems/boorufetch').PostFormatData} data Información adicional a mostrar en el Embed. Se puede pasar un feed directamente
+ * @param {import('./boorufetch').PostFormatData} data Información adicional a mostrar en el Embed. Se puede pasar un feed directamente
  * @returns {MessageCreateOptions}
  */
 function formatBooruPostMessage(post, data) {
@@ -32,7 +32,7 @@ function formatBooruPostMessage(post, data) {
     let sourceNumber = 0;
 
     //Botón de Fuente (si está disponible)
-    const addSourceButton = (source) => {
+    const addSourceButton = (/**@type {String}*/ source) => {
         if(!source) return;
 
         let emoji;
@@ -57,7 +57,7 @@ function formatBooruPostMessage(post, data) {
             if(source.includes('pixiv.net')) {
                 emoji = '919403803126661120';
                 embedColor = 0x0096fa;
-            } else if(source.match(/twitter\.com|twimg\.com/)) {
+            } else if(source.match(/(twitter\.com)|(twimg\.com)|(x\.com)/)) {
                 emoji = '1232243415165440040';
                 embedColor = 0x040404;
             } else if(source.includes('nitter.net')) {
@@ -75,7 +75,7 @@ function formatBooruPostMessage(post, data) {
             } else if(source.includes('tumblr.com')) {
                 emoji = '969666470252511232';
                 embedColor = 0x36465d;
-            } else if(source.match(/reddit\.com|i\.redd\.it/)) {
+            } else if(source.match(/(reddit\.com)|(i\.redd\.it)/)) {
                 emoji = '969666029045317762';
                 embedColor = 0xff4500;
             } else {

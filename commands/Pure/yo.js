@@ -5,6 +5,7 @@ const { tenshiColor } = require('../../localdata/config.json');
 const { Translator } = require('../../internationalization');
 const { recacheUser } = require('../../usercache');
 const { compressId, shortenText, decompressId, improveNumber, warn } = require('../../func');
+const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } = require('../../tsCasts');
 const { auditError } = require('../../systems/others/auditor');
 const { updateFollowedFeedTagsCache } = require('../../systems/booru/boorufeed');
 
@@ -34,7 +35,7 @@ const backToDashboardButton = (id, translator) => new ButtonBuilder()
  * @param {String} id
  * @param {Translator} translator
  */
-const cancelbutton = (id, translator) => new ButtonBuilder()
+const cancelButton = (id, translator) => new ButtonBuilder()
 	.setCustomId(`yo_cancelWizard_${id}`)
 	.setLabel(translator.getText('buttonCancel'))
 	.setStyle(ButtonStyle.Secondary);
@@ -60,7 +61,7 @@ const wizEmbed = (iconUrl, stepName, stepColor, translator) => {
  * @param {Translator} translator 
  */
 const dashboardRows = (userId, userConfigs, translator) => [
-    new ActionRowBuilder().addComponents(
+    makeStringSelectMenuRowBuilder().addComponents(
         new StringSelectMenuBuilder()
             .setCustomId(`yo_selectConfig_${userId}`)
             .setPlaceholder(translator.getText('yoDashboardMenuConfig'))
@@ -71,6 +72,12 @@ const dashboardRows = (userId, userConfigs, translator) => [
                     description: translator.getText('yoDashboardMenuConfigFeedDesc'),
                     emoji: '921788204540100608',
                     value: 'feed',
+                },
+                {
+                    label: 'PuréVoice',
+                    description: translator.getText('yoDashboardMenuConfigVoiceDesc'),
+                    emoji: '1260802777320263690',
+                    value: 'voice',
                 },
                 {
                     label: 'PuréPix',
@@ -86,7 +93,7 @@ const dashboardRows = (userId, userConfigs, translator) => [
                 },
             ]),
     ),
-    new ActionRowBuilder().addComponents(
+    makeButtonRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`yo_toggleLanguage_${userId}`)
             .setLabel(translator.getText('yoDashboardButtonLanguage'))
@@ -135,18 +142,50 @@ const dashboardEmbed = (request, userConfigs, translator) => {
 }
 
 /**
+ * 
+ * @param {import('discord.js').Interaction} interaction 
+ * @param {import('../../localdata/models/userconfigs').UserConfigDocument} userConfigs 
+ * @param {Translator} translator 
+ */
+const voiceEmbed = (interaction, userConfigs, translator) => {
+    const voicePingConfig = (() => {
+        switch(userConfigs.voice.ping) {
+        case 'always': return translator.getText('always');
+        case 'onCreate': return translator.getText('yoVoiceMenuPingOnCreateLabel');
+        case 'never': return translator.getText('never');
+        default: throw 'User ping config was invalid';
+        }
+    })();
+
+    return wizEmbed(interaction.client.user.avatarURL(), 'yoVoiceStep', 0x0096fa, translator)
+        .setTitle(translator.getText('yoVoiceTitle'))
+        .addFields(
+            {
+                name: translator.getText('yoVoicePingName'),
+                value: voicePingConfig,
+                inline: true,
+            },
+            {
+                name: translator.getText('yoVoiceAutonameName'),
+                value: userConfigs.voice.autoname ? `💠【${userConfigs.voice.autoname}】` : '_Ninguno._',
+                inline: true,
+            },
+        );
+};
+
+/**
  * @param {String} userId 
  * @param {import('../../localdata/models/userconfigs').UserConfigDocument} userConfigs 
  * @param {Translator} translator 
  */
 const pixivRows = (userId, userConfigs, translator) => [
-    new ActionRowBuilder().addComponents(
+    makeButtonRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`yo_setPixivConvert_${userId}_${userConfigs.convertPixiv ? '': 'enable'}`)
             .setStyle(userConfigs.convertPixiv ? ButtonStyle.Primary : ButtonStyle.Secondary)
             .setEmoji(userConfigs.convertPixiv ? '919403803126661120' : '1138853641600643174'),
         backToDashboardButton(userId, translator),
-        cancelbutton(userId, translator),
+        cancelButton(userId, translator),
     ),
 ];
 
@@ -169,7 +208,7 @@ const selectTagsChannelRows = (userId, interaction, userConfigs, translator) => 
     ),
     new ActionRowBuilder().addComponents(
         backToDashboardButton(userId, translator),
-        cancelbutton(userId, translator),
+        cancelButton(userId, translator),
     ),
 ];
 
@@ -201,7 +240,7 @@ const followedTagsRows = (userId, channelId, translator, isAlt) => [
             .setLabel(translator.getText('buttonBack'))
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(!!isAlt),
-        cancelbutton(userId, translator)
+        cancelButton(userId, translator)
             .setDisabled(!!isAlt),
     ),
 ];
@@ -245,7 +284,6 @@ const command = new CommandManager('yo', flags)
         const wizard = dashboardEmbed(request, userConfigs, translator);
         return request.reply({
             embeds: [wizard],
-            // @ts-ignore
             components: dashboardRows(request.userId, userConfigs, translator),
         });
 	})
@@ -264,7 +302,6 @@ const command = new CommandManager('yo', flags)
 		
 		return interaction.update({
 			embeds: [dashboardEmbed(interaction, userConfigs, translator)],
-			// @ts-ignore
 			components: dashboardRows(user.id, userConfigs, translator),
 		});
 	})
@@ -288,7 +325,6 @@ const command = new CommandManager('yo', flags)
             userConfigs.save().then(() => recacheUser(user.id)),
             interaction.update({
                 embeds: [dashboardEmbed(interaction, userConfigs, translator)],
-                // @ts-ignore
                 components: dashboardRows(user.id, userConfigs, translator),
             }),
         ]);
@@ -296,7 +332,8 @@ const command = new CommandManager('yo', flags)
     .setSelectMenuResponse(async function selectConfig(interaction, authorId) {
         const selected = interaction.values[0];
 
-        if(selected === 'feed') return command.selectFTC(interaction, authorId);
+        if(selected === 'feed')
+            return command.selectFTC(interaction, authorId);
         
 		const { user } = interaction;
 			
@@ -304,8 +341,7 @@ const command = new CommandManager('yo', flags)
         if(!userConfigs)
             return interaction.reply({ content: '⚠️ Usuario inexistente / Unexistent user', ephemeral: true });
 
-        // @ts-ignore
-        const translator = new Translator(userConfigs.language);
+        const translator = new Translator(/**@type {'es'|'en'}*/(userConfigs.language));
 		
 		if(user.id !== authorId)
 			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
@@ -313,15 +349,58 @@ const command = new CommandManager('yo', flags)
         let embed;
         let components;
 
-        if(selected === 'pixiv') {
+        userConfigs.voice ??= {};
+        userConfigs.voice.ping ??= 'always';
+
+        switch(selected) {
+        case 'voice':
+            embed = voiceEmbed(interaction, userConfigs, translator);
+            components = [
+                makeStringSelectMenuRowBuilder().addComponents(
+                    new StringSelectMenuBuilder()
+                        .setCustomId(`yo_setVoicePing_${authorId}`)
+                        .setPlaceholder(translator.getText('yoVoiceMenuPing'))
+                        .setOptions(
+                            {
+                                value: 'always',
+                                label: translator.getText('always'),
+                                description: translator.getText('yoVoiceMenuPingAlwaysDesc'),
+                            },
+                            {
+                                value: 'onCreate',
+                                label: translator.getText('yoVoiceMenuPingOnCreateLabel'),
+                                description: translator.getText('yoVoiceMenuPingOnCreateDesc'),
+                            },
+                            {
+                                value: 'never',
+                                label: translator.getText('never'),
+                                description: translator.getText('yoVoiceMenuPingNeverDesc'),
+                            },
+                        )
+                ),
+                makeButtonRowBuilder().addComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`yo_setAutoname_${authorId}`)
+                        .setStyle(ButtonStyle.Primary)
+                        .setLabel('Nombre de sesión automático...'),
+                    backToDashboardButton(authorId, translator),
+                    cancelButton(authorId, translator),
+                ),
+            ];
+            break;
+            
+        case 'pixiv':
             embed = wizEmbed(interaction.client.user.avatarURL(), 'yoPixivStep', 0x0096fa, translator)
                 .setTitle(translator.getText('yoPixivTitle'));
             components = pixivRows(authorId, userConfigs, translator);
-        } else {
+
+            break;
+
+        default:
             embed = wizEmbed(interaction.client.user.avatarURL(), 'yoTwitterStep', 0x040404, translator)
                 .setTitle(translator.getText('yoTwitterTitle'));
             components = [
-                new ActionRowBuilder().addComponents(
+                makeStringSelectMenuRowBuilder().addComponents(
                     new StringSelectMenuBuilder()
                         .setCustomId(`yo_setTwitterConvert_${authorId}`)
                         .setPlaceholder(translator.getText('yoTwitterMenuService'))
@@ -343,19 +422,42 @@ const command = new CommandManager('yo', flags)
                             },
                         )
                 ),
-                new ActionRowBuilder().addComponents(
+                makeButtonRowBuilder().addComponents(
                     backToDashboardButton(authorId, translator),
-                    cancelbutton(authorId, translator),
+                    cancelButton(authorId, translator),
                 ),
             ];
+            break;
         }
 
         return interaction.update({
             content: null,
             embeds: [embed],
-            // @ts-ignore
             components,
         });
+    })
+    .setSelectMenuResponse(async function setVoicePing(interaction, authorId, enable) {
+        const { user } = interaction;
+            
+        const userConfigs = await UserConfigs.findOne({ userId: user.id });
+        if(!userConfigs)
+            return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
+
+        const translator = new Translator(/**@type {import('../../internationalization').LocaleKey}*/(userConfigs.language));
+        
+        if(user.id !== authorId)
+            return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
+
+        let pingMode = interaction.values[0];
+        userConfigs.voice.ping = pingMode;
+        userConfigs.markModified('voice');
+        
+        return Promise.all([
+            userConfigs.save(),
+            interaction.update({
+                embeds: [ voiceEmbed(interaction, userConfigs, translator) ],
+            }),
+        ]);
     })
     .setButtonResponse(async function setPixivConvert(interaction, authorId, enable) {
 		const { user } = interaction;
@@ -364,8 +466,7 @@ const command = new CommandManager('yo', flags)
         if(!userConfigs)
             return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
 
-        // @ts-ignore
-        const translator = new Translator(userConfigs.language);
+        const translator = new Translator(/**@type {import('../../internationalization').LocaleKey}*/(userConfigs.language));
 		
 		if(user.id !== authorId)
 			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
@@ -375,7 +476,6 @@ const command = new CommandManager('yo', flags)
         if(convertPixiv === userConfigs.convertPixiv) {
             return interaction.update({
                 content: translator.getText('yoPixivStateAlreadySet', convertPixiv),
-                // @ts-ignore
                 components: pixivRows(authorId, userConfigs, translator),
             });
         }
@@ -386,7 +486,6 @@ const command = new CommandManager('yo', flags)
             userConfigs.save().then(() => recacheUser(user.id)),
             interaction.update({
                 content: null,
-                // @ts-ignore
                 components: pixivRows(authorId, userConfigs, translator),
             }),
         ]);
@@ -425,6 +524,9 @@ const command = new CommandManager('yo', flags)
 		
 		if(user.id !== authorId)
 			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
+
+        if(userConfigs.feedTagSuscriptions.size === 0)
+            return interaction.reply({ content: translator.getText('yoFeedEmptyError'), ephemeral: true });
         
         return Promise.all([
             userConfigs.save(),

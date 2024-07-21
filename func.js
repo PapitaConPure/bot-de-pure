@@ -188,8 +188,8 @@ module.exports = {
 
     /**
      * 
-     * @param {Discord.GuildChannel} channel 
-     * @returns {Boolean}
+     * @param {Discord.GuildBasedChannel} channel 
+     * @returns {channel is Discord.AnyThreadChannel}
      */
     isThread: function(channel) {
         return [ ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.AnnouncementThread ].includes(channel.type);
@@ -1368,6 +1368,7 @@ module.exports = {
         
         if(str.startsWith('#'))
             str = str.slice(1);
+        
         return parseInt(`0x${str}`);
     },
 

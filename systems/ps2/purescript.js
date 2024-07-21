@@ -99,12 +99,9 @@ async function executeTuber(request, tuber, inputOptions) {
         const scope = new Scope(interpreter);
         declareNatives(scope);
         await declareContext(scope, request, savedData);
-        result = interpreter.evaluateProgram(program, scope, request, args, isTestDrive);
-        if(!result.sendStack.length) {
-            const error = Error('No se envió ningún mensaje');
-            error.name = 'TuberSendError';
-            throw error;
-        }
+        result = interpreter.evaluateProgram(program, scope, tuber.script, request, args, isTestDrive);
+        if(!result.sendStack.length)
+            throw interpreter.TuberSendError('No se envió ningún mensaje');
         logOptions.interpreter && console.log(`Resultado: ${stringifyPSAST(result)}`);
     } catch(error) {
         const errorNames = {
@@ -169,15 +166,12 @@ async function executeTuber(request, tuber, inputOptions) {
 
     for(const sendItem of sendStack) {
         switch(sendItem.kind) {
-        case ValueKinds.NUMBER:
-        case ValueKinds.TEXT:
-        case ValueKinds.BOOLEAN:
-        case ValueKinds.LIST:
-        case ValueKinds.REGISTRY:
-            replyStacks.content.push(coerceValue(interpreter, sendItem, 'Text').value);
-            break;
         case ValueKinds.EMBED:
             replyStacks.embeds.push(sendItem.value);
+            break;
+        default:
+            replyStacks.content.push(coerceValue(interpreter, sendItem, 'Text').value);
+            break;
         }
     }
 
@@ -224,6 +218,7 @@ module.exports = {
     Parser,
     Interpreter,
     Scope,
+    Input,
     lexer,
     parser,
     interpreter,

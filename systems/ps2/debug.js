@@ -193,7 +193,7 @@ function stringifyPSAST(obj, indentSize = 2, indent = indentSize) {
 
 	if(!isArray && hasKind) {
 		if(hasPositionalData) {
-			const { kind, line, start, end, ...rest } = obj;
+			const { kind, line, column, start, end, ...rest } = obj;
 			obj = rest;
 			name = chalk.cyan(`${kind} ${exChalk.peach(`(${exChalk.mint(line)}, ${exChalk.mint(`${start}~${end}`)})`)} `);
 		} else {

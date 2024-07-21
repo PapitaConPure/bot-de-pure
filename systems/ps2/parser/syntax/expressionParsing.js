@@ -3,6 +3,7 @@ const { TokenKinds } = require('../../lexer/tokens');
 const { BindingPowers } = require('../../ast/ast');
 const { StatementKinds } = require('../../ast/statements');
 const { ExpressionKinds } = require('../../ast/expressions');
+const { makeMetadata } = require('../../ast/metadata');
 const { parseBlock } = require('./statementParsing');
 
 /**
@@ -12,41 +13,40 @@ const { parseBlock } = require('./statementParsing');
 function parsePrimaryExpression(parser) {
 	const literal = parser.advance();
 
+	const metadata = {
+		line: literal.line,
+		column: literal.column,
+		start: literal.start,
+		end: literal.end,
+	};
+	
 	switch(literal.kind) {
 	case TokenKinds.LIT_NUMBER:
 		return {
 			kind: ExpressionKinds.NUMBER_LITERAL,
-			line: literal.line,
-			start: literal.start,
-			end: literal.end,
 			value: +literal.value,
+			...metadata,
 		};
 
 	case TokenKinds.LIT_TEXT:
 		return {
 			kind: ExpressionKinds.TEXT_LITERAL,
-			line: literal.line,
-			start: literal.start,
-			end: literal.end,
 			value: literal.value,
+			...metadata,
 		};
 
 	case TokenKinds.LIT_BOOLEAN:
 		return {
 			kind: ExpressionKinds.BOOLEAN_LITERAL,
-			line: literal.line,
-			start: literal.start,
-			end: literal.end,
 			value: toLowerCaseNormalized(literal.value) === 'verdadero' ? true : false,
+			...metadata,
 		};
 
 	case TokenKinds.IDENTIFIER:
 		return {
 			kind: ExpressionKinds.IDENTIFIER,
-			line: literal.line,
-			start: literal.start,
-			end: literal.end,
 			name: literal.value,
+			...metadata,
 		};
 
 	case TokenKinds.LIST:
@@ -57,29 +57,24 @@ function parsePrimaryExpression(parser) {
 
 		return {
 			kind: ExpressionKinds.LIST_LITERAL,
-			line: literal.line,
-			start: literal.start,
-			end,
 			elements,
+			...metadata,
+			end,
 		};
 
 	case TokenKinds.REGISTRY:
 		const entries = parseRegistryMembers(parser);
 		return {
 			kind: ExpressionKinds.REGISTRY_LITERAL,
-			line: literal.line,
-			start: literal.start,
-			end: literal.end,
 			entries,
+			...metadata,
 		};
 
 	case TokenKinds.NADA:
 		return {
 			kind: ExpressionKinds.NADA_LITERAL,
-			line: literal.line,
-			start: literal.start,
-			end: literal.end,
 			value: literal.value,
+			...metadata,
 		};
 
 	default:
@@ -118,7 +113,7 @@ function makeStoredKey(parser, expr) {
 		value = `${expr.value}`;
 		break;
 	default:
-		throw parser.TuberParserError(`Se esperaba un identificador, número, texto o dupla para analizar una clave de miembro de contenedor`);
+		throw parser.TuberParserError(`Se esperaba un identificador, número, texto o lógico para analizar una clave de miembro de contenedor`);
 	}
 
 	return value;
@@ -136,10 +131,8 @@ function parseListElements(parser) {
 		const comma = parser.advance();
 		elements.push({
 			kind: ExpressionKinds.NADA_LITERAL,
-			line: comma.line,
-			start: comma.start,
-			end: comma.end,
 			value: null,
+			...makeMetadata(comma),
 		});
 	}
 
@@ -157,10 +150,8 @@ function parseListElements(parser) {
 			if(parser.current.is(TokenKinds.COMMA)) {
 				elements.push(({
 					kind: ExpressionKinds.NADA_LITERAL,
-					line: comma.line,
-					start: comma.start,
-					end: comma.end,
 					value: null,
+					...makeMetadata(comma),
 				}));
 				continue;
 			}
@@ -221,11 +212,9 @@ function parseUnaryExpression(parser) {
 
 	return {
 		kind: ExpressionKinds.UNARY,
-		line: operator.line,
-		start: operator.start,
-		end: argument.end,
 		operator,
 		argument,
+		...makeMetadata(operator, argument),
 	};
 }
 
@@ -242,7 +231,8 @@ function parseBinaryExpression(parser, left, bp, ass) {
 
 	return {
 		kind: ExpressionKinds.BINARY,
-		line: left.line,
+		line: operator.line,
+		column: operator.column,
 		start: left.start,
 		end: right.end,
 		operator,
@@ -261,11 +251,9 @@ function parseCastExpression(parser) {
 	
 	return {
 		kind: ExpressionKinds.CAST,
-		line: as.line,
-		start: as.start,
-		end: argument.end,
 		argument,
 		as,
+		...makeMetadata(as, argument),
 	};
 }
 
@@ -288,12 +276,10 @@ function parseArrowExpression(parser, left, _bp, _ass) {
 
 		return {
 			kind,
-			line: holder.line,
-			start: holder.start,
-			end: key.end,
 			holder,
 			key,
 			computed,
+			...makeMetadata(holder, key),
 		};
 	}
 
@@ -304,6 +290,7 @@ function parseArrowExpression(parser, left, _bp, _ass) {
 	return {
 		kind,
 		line: holder.line,
+		column: holder.column,
 		start: holder.start,
 		end: primaryExpr.end,
 		holder,
@@ -325,7 +312,7 @@ function parseCallExpression(parser, left, _bp, _ass) {
 	const args = [];
 
 	if(!parser.current.is(TokenKinds.PAREN_CLOSE)) {
-		args.push(parser.parseExpression(BindingPowers.ASSIGNMENT));
+		args.push(parser.parseExpression(BindingPowers.COMMA));
 
 		while(parser.hasTokens && parser.current.is(TokenKinds.COMMA)) {
 			parser.advance();
@@ -335,7 +322,7 @@ function parseCallExpression(parser, left, _bp, _ass) {
 
 			//Si se recibe un indicador de sentencia después de la coma, se trata de una coma suelta, así que la ignoramos
 			if(canFollowUp(parser))
-				args.push(parser.parseExpression(BindingPowers.ASSIGNMENT));
+				args.push(parser.parseExpression(BindingPowers.COMMA));
 		}
 	}
 
@@ -343,11 +330,9 @@ function parseCallExpression(parser, left, _bp, _ass) {
 
 	return {
 		kind: ExpressionKinds.CALL,
-		line: left.line,
-		start: left.start,
-		end: closingParen.end,
 		fn: left,
 		args,
+		...makeMetadata(left, closingParen),
 	};
 }
 
@@ -367,22 +352,18 @@ function parseArgument(parser, expression) {
 		const fallback = parser.parseExpression(BindingPowers.ASSIGNMENT);
 		return {
 			kind: ExpressionKinds.ARGUMENT,
-			line: expression.line,
-			start: expression.start,
-			end: fallback.end,
 			optional: true,
 			identifier,
 			fallback,
+			...makeMetadata(expression, fallback),
 		};
 	}
 
 	return {
 		kind: ExpressionKinds.ARGUMENT,
-		line: expression.line,
-		start: expression.start,
-		end: expression.end,
 		optional: false,
 		identifier,
+		...makeMetadata(expression),
 	};
 }
 
@@ -421,20 +402,16 @@ function parseFunctionExpression(parser) {
 
 	const body = {
 		kind: StatementKinds.BLOCK,
-		line: blockStart.line,
-		start: blockStart.start,
-		end: blockEnd.end,
 		body: blockBody,
+		...makeMetadata(blockStart, blockEnd),
 	};
 
 	return {
 		kind: ExpressionKinds.FUNCTION,
-		line: fnToken.line,
-		start: fnToken.start,
-		end: blockEnd.end,
 		expression: false,
 		args,
 		body,
+		...makeMetadata(fnToken, blockEnd),
 	};
 }
 
@@ -461,10 +438,8 @@ function parseSequenceExpression(parser, left, bp, ass) {
 
 	return {
 		kind: ExpressionKinds.SEQUENCE,
-		line: left.line,
-		start: left.start,
-		end: expressions[expressions.length - 1].end,
 		expressions,
+		...makeMetadata(left, expressions[expressions.length - 1]),
 	};
 }
 
@@ -488,12 +463,10 @@ function parseLambdaExpression(parser, left, bp, ass) {
 	const body = parser.parseExpression(BindingPowers.DEFAULT);
 	return {
 		kind: ExpressionKinds.FUNCTION,
-		line: left.line,
-		start: left.start,
-		end: body.end,
 		expression: true,
 		args,
 		body,
+		...makeMetadata(left, body),
 	};
 }
 
@@ -508,10 +481,8 @@ function parseGroupExpression(parser) {
 		const parenClose = parser.advance();
 		return {
 			kind: ExpressionKinds.SEQUENCE,
-			line: parenOpen.line,
-			start: parenOpen.start,
-			end: parenClose.end,
 			expressions: [],
+			...makeMetadata(parenOpen, parenClose),
 		};
 	}
 	

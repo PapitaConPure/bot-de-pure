@@ -2,6 +2,9 @@ const { TokenKinds, translateTokenKind, Token, translateTokenKinds } = require('
 const { BindingPowers } = require('../../ast/ast.js');
 const { StatementKinds, ScopeAbortKinds } = require('../../ast/statements.js');
 const { ExpressionKinds } = require('../../ast/expressions.js');
+const { makeMetadata } = require('../../ast/metadata.js')
+const { makeText, makeNumber, ValueKinds } = require('../../interpreter/values.js');
+const { toLowerCaseNormalized, clamp } = require('../../../../func.js');
 
 /**
  * Parsea un cuerpo de bloque. Se analizan Sentencias secuencialmente desde el Token actual hasta que se encuentra uno de los Tokens de cierre indicados (o `EOF`).
@@ -46,10 +49,8 @@ function makeBlockStmt(body, startToken, endToken = null) {
 	endToken ??= startToken;
 	return {
 		kind: StatementKinds.BLOCK,
-		line: startToken.line,
-		start: startToken.start,
-		end: endToken.end,
 		body,
+		...makeMetadata(startToken, endToken),
 	};
 }
 
@@ -86,11 +87,9 @@ function parseConditionalStatement(parser) {
 		const closeToken = parser.advance();
 		return {
 			kind: StatementKinds.CONDITIONAL,
-			line: openToken.line,
-			start: openToken.start,
-			end: closeToken.end,
 			test,
 			consequent,
+			...makeMetadata(openToken, closeToken),
 		};
 	}
 
@@ -102,12 +101,10 @@ function parseConditionalStatement(parser) {
 
 		return {
 			kind: StatementKinds.CONDITIONAL,
-			line: openToken.line,
-			start: openToken.start,
-			end: closeToken.end,
 			test,
 			consequent,
 			alternate,
+			...makeMetadata(openToken, closeToken),
 		}
 	}
 	
@@ -115,12 +112,10 @@ function parseConditionalStatement(parser) {
 
 	return {
 		kind: StatementKinds.CONDITIONAL,
-		line: openToken.line,
-		start: openToken.start,
-		end: alternate.end,
 		test,
 		consequent,
 		alternate,
+		...makeMetadata(openToken, alternate),
 	};
 }
 
@@ -142,11 +137,9 @@ function parseWhileLoopStatement(parser) {
 
 	return {
 		kind: StatementKinds.WHILE,
-		line: openToken.line,
-		start: openToken.start,
-		end: closeToken.end,
 		test,
 		body,
+		...makeMetadata(openToken, closeToken),
 	};
 }
 
@@ -166,11 +159,9 @@ function parseDoWhileLoopStatement(parser) {
 
 	return {
 		kind: StatementKinds.DO_UNTIL,
-		line: openToken.line,
-		start: openToken.start,
-		end: test.end,
 		test,
 		body,
+		...makeMetadata(openToken, test),
 	};
 }
 
@@ -192,11 +183,9 @@ function parseRepeatLoopStatement(parser) {
 
 	return {
 		kind: StatementKinds.REPEAT,
-		line: openToken.line,
-		start: openToken.start,
-		end: closeToken.end,
 		times,
 		body,
+		...makeMetadata(openToken, closeToken),
 	};
 }
 
@@ -220,12 +209,10 @@ function parseForEachLoopStatement(parser) {
 
 	return {
 		kind: StatementKinds.FOR_EACH,
-		line: openToken.line,
-		start: openToken.start,
-		end: closeToken.end,
 		identifier: identifier.value,
 		container,
 		body,
+		...makeMetadata(openToken, closeToken),
 	};
 }
 
@@ -254,14 +241,12 @@ function parseForLoopStatement(parser) {
 		
 		return {
 			kind: StatementKinds.FOR,
-			line: openToken.line,
-			start: openToken.start,
-			end: closeToken.end,
 			identifier,
 			body,
 			full,
 			from,
 			to,
+			...makeMetadata(openToken, closeToken),
 		};
 	}
 
@@ -282,15 +267,13 @@ function parseForLoopStatement(parser) {
 
 	return {
 		kind: StatementKinds.FOR,
-		line: openToken.line,
-		start: openToken.start,
-		end: closeToken.end,
 		identifier,
 		body,
 		full,
 		init,
 		test,
 		step,
+		...makeMetadata(openToken, closeToken),
 	};
 }
 
@@ -307,10 +290,8 @@ function parseExpressionStatement(parser) {
 
 	return {
 		kind: StatementKinds.EXPRESSION,
-		line: startToken.line,
-		start: startToken.start,
-		end: expression.end,
 		expression,
+		...makeMetadata(startToken, expression),
 	};
 }
 
@@ -340,18 +321,21 @@ function parseReadStatement(parser) {
 	let fallback = null;
 
 	if(!parser.current.is(TokenKinds.ASSIGNMENT)) {
+		const modifier = parseReadStmtModifier(parser, dataKind);
+
 		if(this.hasTokens && !this.current.isStatement)
 			throw parser.TuberParserError(`Se esperaba \`con\` y una expresión (o palabra clave \`opcional\`) luego de expresión receptora en Sentencia \`LEER\`. Sin embargo, se recibió: *${parser.current.translated}*`);
+		
 
+		//Sin valor de respaldo
 		return {
 			kind: StatementKinds.READ,
-			line: startToken.line,
-			start: startToken.start,
-			end: receptor.end,
 			dataKind,
 			receptor,
 			fallback,
 			optional,
+			modifier,
+			...makeMetadata(startToken, receptor),
 		};
 	}
 
@@ -359,16 +343,72 @@ function parseReadStatement(parser) {
 	parser.ensureExpression(`Se esperaba una expresión de valor de respaldo luego de \`con\` en Sentencia \`LEER\`, pero la instrucción finalizó sin más con: *${parser.current.translated}*`);
 	fallback = parser.parseExpression(BindingPowers.COMMA);
 
+	const modifier = parseReadStmtModifier(parser, dataKind);
+
 	return {
 		kind: StatementKinds.READ,
-		line: startToken.line,
-		start: startToken.start,
-		end: fallback.end,
 		dataKind,
 		receptor,
 		fallback,
 		optional,
+		modifier,
+		...makeMetadata(startToken, fallback),
 	};
+}
+
+/**
+ * @param {import('../parser.js').Parser} parser
+ * @param {Token} dataKind
+ * @returns {import('../../ast/statements.js').ReadStatementModifier}
+ */
+function parseReadStmtModifier(parser, dataKind) {
+	if(!parser.hasTokens || parser.current.isStatement)
+		return v => v;
+	
+	if(dataKind.is(TokenKinds.TEXT)) {
+		parser.expect(TokenKinds.IN, `Se esperaba un operador de formato para la definición de Entrada de Usuario, pero se recibió: *${parser.current.translated}*`);
+		const caseToken = parser.expect(TokenKinds.IDENTIFIER, `Se esperaba: \`mayusculas\`, \`minusculas\` o similares en definición de formato de Entrada de Usuario, pero se recibió un símbolo inválido`);
+		const textCase = toLowerCaseNormalized(caseToken.value);
+
+		const upperCaseWords = [ 'mayus', 'mayuscula', 'mayusculas' ];
+		const lowerCaseWords = [ 'minus', 'minuscula', 'minusculas' ];
+
+		if(!upperCaseWords.includes(textCase) && !lowerCaseWords.includes(textCase))
+			throw parser.TuberParserError(`Se esperaba: \`mayusculas\`, \`minusculas\` o similares en definición de formato de Entrada de Usuario. Sin embargo, se recibió: \`${textCase}\``, caseToken);
+
+		const upperCase = upperCaseWords.includes(textCase);
+		return upperCase
+			? (/**@type {import('../../interpreter/values.js').TextValue}*/ v) => makeText(v.value.toUpperCase())
+			: (/**@type {import('../../interpreter/values.js').TextValue}*/ v) => makeText(v.value.toLowerCase());
+	}
+
+	const opToken = parser.expect(TokenKinds.IDENTIFIER, `Se esperaba un operador de formato para la definición de Entrada de Usuario, pero se recibió: *${parser.current.translated}*`);
+	const name = toLowerCaseNormalized(opToken.value);
+
+	if(dataKind.is(TokenKinds.NUMBER) && name === 'entre') {
+		const left = parser.parseExpression(BindingPowers.LOGICAL_CONJUNCTION);
+		parser.expect(TokenKinds.AND);
+		const right = parser.parseExpression(BindingPowers.LOGICAL_CONJUNCTION);
+
+		return (/**@type {import('../../interpreter/values.js').NumberValue}*/ v, it, scope) => {
+			it.rememberNode(left);
+			const leftVal = it.evaluateAs(left, scope, ValueKinds.NUMBER);
+			it.forgetLastNode();
+			it.rememberNode(right);
+			const rightVal = it.evaluateAs(right, scope, ValueKinds.NUMBER);
+			it.forgetLastNode();
+
+			if(v.value < leftVal.value)
+				return leftVal;
+			
+			if(v.value > rightVal.value)
+				return rightVal;
+
+			return v;
+		};
+	}
+
+	throw parser.TuberParserError(`El operador \`${name}\` no es válido para una Entrada de ${dataKind.translated}`, opToken);
 }
 
 /**
@@ -399,21 +439,17 @@ function parseDeclarationStatement(parser) {
 
 		return {
 			kind: StatementKinds.DECLARATION,
-			line: startToken.line,
-			start: startToken.start,
-			end: lastIdentifier.end,
 			declarations,
-			dataKind: dataKind,
+			dataKind,
+			...makeMetadata(startToken, lastIdentifier),
 		};
 	}
 
 	return {
 		kind: StatementKinds.DECLARATION,
-		line: startToken.line,
-		start: startToken.start,
-		end: lastIdentifier.end,
 		declarations,
-		dataKind: dataKind,
+		dataKind,
+		...makeMetadata(startToken, lastIdentifier),
 	};
 }
 
@@ -435,19 +471,15 @@ function parseSaveStatement(parser) {
 	} else
 		expression = {
 			kind: ExpressionKinds.IDENTIFIER,
-			line: identifier.line,
-			start: identifier.start,
-			end: identifier.end,
 			name: identifier.value,
+			...makeMetadata(identifier),
 		};
 
 	return {
 		kind: StatementKinds.SAVE,
-		line: startToken.line,
-		start: startToken.start,
-		end: expression.end,
 		identifier: identifier.value,
 		expression,
+		...makeMetadata(startToken, expression),
 	}
 }
 
@@ -463,31 +495,29 @@ function parseAssignmentStatement(parser) {
 	parser.ensureExpression(
 		`Se esperaba una expresión receptora válida luego del indicador ${operatorString}. Sin embargo, se recibió: *${parser.current.translated}*`,
 		parser.previous);
+	
+	const receptorToken = parser.current;
 	const receptor = parser.parseExpression(BindingPowers.COMMA);
 
 	if(receptor.kind !== ExpressionKinds.IDENTIFIER && receptor.kind !== ExpressionKinds.ARROW)
-		throw parser.TuberParserError(`Se esperaba una expresión receptora asignable en Sentencia ${operatorString}. Sin embargo, se recibió: *${parser.current.translated}*`);
+		throw parser.TuberParserError(`Se esperaba una expresión receptora asignable en Sentencia ${operatorString}. Sin embargo, se recibió: *${receptorToken.translated}*`, receptorToken);
 
 	if(!parser.current.is(TokenKinds.ASSIGNMENT)) {
 		if(operator.isAny(TokenKinds.ADD, TokenKinds.SUBTRACT)) {
 			return ({
 				kind: StatementKinds.ASSIGNMENT,
-				line: operator.line,
-				start: operator.start,
-				end: receptor.end,
 				operator,
 				receptor,
 				reception: null,
+				...makeMetadata(operator, receptor),
 			});
 		}
 
 		if(operator.is(TokenKinds.LOAD) && parser.current.isStatement && receptor.kind === ExpressionKinds.IDENTIFIER) {
 			return ({
 				kind: StatementKinds.LOAD,
-				line: operator.line,
-				start: operator.start,
-				end: receptor.end,
 				identifier: receptor.name,
+				...makeMetadata(operator, receptor),
 			});
 		}
 	}
@@ -501,12 +531,10 @@ function parseAssignmentStatement(parser) {
 
 	return ({
 		kind: StatementKinds.ASSIGNMENT,
-		line: operator.line,
-		start: operator.start,
-		end: reception.end,
 		operator,
 		receptor,
 		reception,
+		...makeMetadata(operator, receptor),
 	});
 }
 
@@ -523,11 +551,9 @@ function parseReturnStatement(parser) {
 
 	return {
 		kind: StatementKinds.RETURN,
-		line: startToken.line,
-		start: startToken.start,
-		end: expression.end,
 		expression,
-	}
+		...makeMetadata(startToken, expression),
+	};
 }
 
 /**
@@ -540,9 +566,7 @@ function parseEndStatement(parser) {
 
 	return {
 		kind: StatementKinds.END,
-		line: token.line,
-		start: token.start,
-		end: token.end,
+		...makeMetadata(token),
 	};
 }
 
@@ -565,11 +589,9 @@ function parseStopStatement(parser) {
 
 	return {
 		kind: StatementKinds.STOP,
-		line: startToken.line,
-		start: startToken.start,
-		end: condition.end,
 		stopMessage,
 		condition,
+		...makeMetadata(startToken, condition),
 	};
 }
 
@@ -586,10 +608,8 @@ function parseSendStatement(parser) {
 
 	return {
 		kind: StatementKinds.SEND,
-		line: startToken.line,
-		start: startToken.start,
-		end: expression.end,
 		expression,
+		...makeMetadata(startToken, expression),
 	};
 }
 

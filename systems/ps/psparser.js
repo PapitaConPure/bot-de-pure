@@ -531,8 +531,8 @@ class TuberParser {
 
 		if(this.#current.type === LexerTokenTypes.ConditionChange && this.#digest()) {
 			if(/**@type {import('./commons.js').LexerTokenType}*/(this.#current.type) === LexerTokenTypes.ConditionOpen)
-				return /**@type {import('./commons.js').ParserBlockItem}*/
-					({ ...this.#parseConditional(), number: this.#statementNumber++ });
+				return (/**@type {(import('./commons.js').ParserConditionalStatementNode&import('./commons.js').ParserStatementMetadata)}*/
+					({ ...this.#parseConditional(), number: this.#statementNumber++ }));
 
 			if(/**@type {import('./commons.js').LexerTokenType}*/(this.#current.type) !== LexerTokenTypes.BlockClose)
 				body.push({ ...this.#parseStatement(), number: this.#statementNumber++ });

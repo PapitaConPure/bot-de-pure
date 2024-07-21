@@ -33,11 +33,13 @@ const ScopeAbortKinds = [
 
 /**
  * @template {StatementKind} [T=StatementKind]
- * @typedef {Object} BaseStatementData
- * @property {NonNullable<T>} kind
- * @property {Number} start
- * @property {Number} end
- * @property {Number} line
+ * @typedef {Object} EmptyStatement
+ * @property {Readonly<NonNullable<T>>} kind
+ */
+
+/**
+ * @template {StatementKind} [T=StatementKind]
+ * @typedef {EmptyStatement<T> & import('./ast').NodeMetadata} BaseStatementData
  */
 
 /**
@@ -112,11 +114,14 @@ const ScopeAbortKinds = [
  */
 
 /**
+ * @typedef {(v: import('../interpreter/values').RuntimeValue, it: import('../interpreter/interpreter').Interpreter, scope: import('../interpreter/scope').Scope) => import('../interpreter/values').RuntimeValue} ReadStatementModifier
+ * 
  * @typedef {Object} ReadStatementData
  * @property {Token} dataKind
  * @property {import('./expressions.js').Expression} receptor
  * @property {import('./expressions.js').Expression} fallback
  * @property {Boolean} optional
+ * @property {ReadStatementModifier} modifier
  * @typedef {BaseStatementData<'ReadStatement'> & ReadStatementData} ReadStatement
  */
 

@@ -160,6 +160,38 @@ let localesObject = /**@type {const}*/({
 		es: 'Segundos',
 		en: 'Seconds',
 	},
+	yes: {
+		es: 'Sí',
+		en: 'Yes',
+	},
+	no: {
+		es: 'No',
+		en: 'No',
+	},
+	on: {
+		es: 'Activo',
+		en: 'On',
+	},
+	off: {
+		es: 'Inactivo',
+		en: 'Off',
+	},
+	enabled: {
+		es: 'Activado',
+		en: 'Enabled',
+	},
+	disabled: {
+		es: 'Desactivado',
+		en: 'Disabled',
+	},
+	always: {
+		es: 'Siempre',
+		en: 'Always',
+	},
+	never: {
+		es: 'Nunca',
+		en: 'Never',
+	},
 
 	buttonStart: {
 		es: 'Comenzar',
@@ -575,15 +607,65 @@ let localesObject = /**@type {const}*/({
 	},
 	yoDashboardMenuConfigFeedDesc: {
 		es: 'Administra tus tags seguidas en Feeds de imágenes',
-		en: 'Preferences',
+		en: 'Manage your followed tags in Imageboard Feeds',
+	},
+	yoDashboardMenuConfigVoiceDesc: {
+		es: 'Configura preferencias personales de sesiones PuréVoice',
+		en: 'Configure personal preferences for PuréVoice sessions',
 	},
 	yoDashboardMenuConfigPixixDesc: {
 		es: 'Corrige el formato de enlaces de pixiv automáticamente',
 		en: 'Fixes pixiv embeds automatically',
 	},
 	yoDashboardMenuConfigTwitterDesc: {
-		es: 'Corrige el formato de enlaces de Twitter automáticamente (VX/FX)',
-		en: 'Fixes Twitter embeds automatically (VX/FX)',
+		es: 'Corrige el formato de enlaces de X automáticamente (VX/FX)',
+		en: 'Fixes X embeds automatically (VX/FX)',
+	},
+	yoFeedEmptyError: {
+		es: paragraph(
+			'¡No tienes ninguna suscripción a Feeds de imágenes!',
+			'Puedes comenzar a seguir tags en cualquier canal con un Sistema PuréFeed instalado',
+		),
+		en: paragraph(
+			'You\'re not subscribed to any image Feeds!',
+			'You can start following tags in any channel that has a PuréFeed system installed',
+		),
+	},
+	yoVoiceStep: {
+		es: 'Preferencias personales de PuréVoice',
+		en: 'PuréVoice personal preferences',
+	},
+	yoVoiceTitle: {
+		es: 'Configura tus preferencias personales del sistema PuréVoice',
+		en: 'Configure your personal preferences for the PuréVoice system',
+	},
+	yoVoicePingName: {
+		es: 'Menciones',
+		en: 'Pings',
+	},
+	yoVoiceAutonameName: {
+		es: 'Nombre automático',
+		en: 'Autoname',
+	},
+	yoVoiceMenuPing: {
+		es: 'Configurar menciones...',
+		en: 'Configure pings...',
+	},
+	yoVoiceMenuPingAlwaysDesc: {
+		es: 'Serás mencionado al crear o unirte a una sesión',
+		en: 'You\'ll be pinged when creating or joining a session',
+	},
+	yoVoiceMenuPingOnCreateLabel: {
+		es: 'Al crear',
+		en: 'On creation',
+	},
+	yoVoiceMenuPingOnCreateDesc: {
+		es: 'Solo serás mencionado al crear una nueva sesión',
+		en: 'You\'ll only be pinged when creating a new session',
+	},
+	yoVoiceMenuPingNeverDesc: {
+		es: 'No serás mencionado al crear o unirte a una sesión',
+		en: 'You won\'t be pinged when creating or joining a session',
 	},
 	yoPixivStep: {
 		es: 'Conversor de enlaces de pixiv',
@@ -718,7 +800,7 @@ class Translator {
 		if(!translationTemplate) throw RangeError(`Se esperaba una clave de localización válida. Se recibió: ${id} :: ${locale}`);
 	
 		//Ejemplo: 1{...}<?{'por defecto'}
-		const subLocaleRegex = /(\d+){\.\.\.}(?:<!{((?:[=<>]{1}|(?:[!<>]=))[0-9]+)\|'((?:(?!'}).)*)'})?(?:<\?{'((?:(?!'}).)*)'})?/g;
+		const subLocaleRegex = /(\d+){\.\.\.}(?:<!{((?:[!=<>]{1,2}):[0-9]+)\|'((?:(?!'}).)*)'})?(?:<\?{'((?:(?!'}).)*)'})?/g;
 		const translation = translationTemplate.replace(subLocaleRegex, (_, i, condition, whenTrue, defaultValue) => {
 			const value = values[i];
 	

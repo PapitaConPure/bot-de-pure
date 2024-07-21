@@ -2,7 +2,19 @@ const { TokenKinds } = require('../lexer/tokens');
 const { ValueKinds, coerceValue, makeNumber, makeText, makeBoolean, toggleBoolean } = require('./values');
 
 /**
- * @param {import('../lexer/tokens').TokenKind} op
+ * @typedef {import('../lexer/tokens').TokenKind} TokenKind
+ * @typedef {import('../ast/expressions').Expression} Expression
+ * @typedef {import('./values').RuntimeValue} RuntimeValue
+ * @typedef {import('./values').ValueKind} ValueKind
+ */
+
+/**
+ * @typedef {(it: import('./interpreter').Interpreter, arg: RuntimeValue, expr: Expression) => RuntimeValue} UnaryExpressionFunction
+ * @typedef {(it: import('./interpreter').Interpreter, l: RuntimeValue, r: RuntimeValue, le: Expression, re: Expression) => import('./values').RuntimeValue} BinaryExpressionFunction
+ */
+
+/**
+ * @param {TokenKind} op
  * @returns {UnaryExpressionFunction}
  */
 function makeUnaryOperation(op) {
@@ -11,19 +23,34 @@ function makeUnaryOperation(op) {
 
 	switch(op) {
 	case TokenKinds.PLUS:
-		operation = (it, arg) => coerceValue(it, arg, ValueKinds.NUMBER);
+		operation = (it, arg, expr) => {
+			it.rememberNode(expr);
+			const val = coerceValue(it, arg, ValueKinds.NUMBER);
+			it.forgetLastNode();
+
+			return val;
+		};
 		break;
 
 	case TokenKinds.DASH:
-		operation = (it, arg) => {
+		operation = (it, arg, expr) => {
+			it.rememberNode(expr);
 			const val = coerceValue(it, arg, ValueKinds.NUMBER);
+			it.forgetLastNode();
+
 			val.value *= -1;
 			return val;
 		};
 		break;
 
 	case TokenKinds.NOT:
-		operation = (it, arg) => toggleBoolean(coerceValue(it, arg, ValueKinds.BOOLEAN));
+		operation = (it, arg, expr) => {
+			it.rememberNode(expr);
+			const val = coerceValue(it, arg, ValueKinds.BOOLEAN);
+			it.forgetLastNode();
+
+			return toggleBoolean(val);
+		};
 		break;
 
 	default:
@@ -33,35 +60,40 @@ function makeUnaryOperation(op) {
 	return operation;
 }
 
-/**
- * @typedef {(it: import('./interpreter').Interpreter, arg: import('./values').RuntimeValue) => import('./values').RuntimeValue} UnaryExpressionFunction
- * @type {Map<import('../lexer/tokens').TokenKind, UnaryExpressionFunction>}
- */
-const UnaryExpressionLookups = new Map();
-UnaryExpressionLookups
+/**@type {Map<TokenKind, UnaryExpressionFunction>}*/
+const UnaryOperationLookups = new Map();
+UnaryOperationLookups
 	.set(TokenKinds.PLUS, makeUnaryOperation(TokenKinds.PLUS))
 	.set(TokenKinds.DASH, makeUnaryOperation(TokenKinds.DASH))
 	.set(TokenKinds.NOT, makeUnaryOperation(TokenKinds.NOT));
 
-/**
- * @param {import("./interpreter").Interpreter} it
- * @param {import("./values").RuntimeValue} l
- * @param {import("./values").RuntimeValue} r
- */
-function plusBinaryOperation(it, l, r) {
+/**@type {BinaryExpressionFunction}*/
+function plusBinaryOperation(it, l, r, le, re) {
 	if(l.kind === ValueKinds.TEXT || r.kind === ValueKinds.TEXT) {
+		it.rememberNode(le);
 		const leftVal = coerceValue(it, l, ValueKinds.TEXT).value;
+		it.forgetLastNode();
+
+		it.rememberNode(re);
 		const rightVal = coerceValue(it, r, ValueKinds.TEXT).value;
+		it.forgetLastNode();
+		
 		return makeText(leftVal + rightVal);
 	}
 
+	it.rememberNode(le);
 	const leftVal = coerceValue(it, l, ValueKinds.NUMBER).value;
+	it.forgetLastNode();
+
+	it.rememberNode(re);
 	const rightVal = coerceValue(it, r, ValueKinds.NUMBER).value;
+	it.forgetLastNode();
+
 	return makeNumber(leftVal + rightVal);
 }
 
 /**
- * @param {import('../lexer/tokens').TokenKind} op
+ * @param {TokenKind} op
  * @returns {BinaryExpressionFunction}
  */
 function makeArithmeticBinaryOperation(op) {
@@ -77,19 +109,72 @@ function makeArithmeticBinaryOperation(op) {
 	default: throw `Operación inválida: ${op}`;
 	}
 
-	return function(it, l, r) {
-		const leftVal = coerceValue(it, l, ValueKinds.NUMBER).value;
-		const rightVal = coerceValue(it, r, ValueKinds.NUMBER).value;
+	return function(it, l, r, le, re) {
+		it.rememberNode(le);
+		const leftRawVal = coerceValue(it, l, ValueKinds.NUMBER).value;
+		it.forgetLastNode();
 		
-		if((op === TokenKinds.SLASH || op === TokenKinds.PERCENT) && rightVal === 0)
+		it.rememberNode(re);
+		const rightRawVal = coerceValue(it, r, ValueKinds.NUMBER).value;
+		it.forgetLastNode();
+		
+		if((op === TokenKinds.SLASH || op === TokenKinds.PERCENT) && rightRawVal === 0)
 			throw it.TuberInterpreterError('División por cero');
 
-		return operation(leftVal, rightVal);
+		return operation(leftRawVal, rightRawVal);
 	};
 }
 
+const nonCoercibleKinds = [
+	ValueKinds.EMBED,
+	ValueKinds.FUNCTION,
+	ValueKinds.NATIVE_FN,
+];
+
 /**
- * @param {import('../lexer/tokens').TokenKind} op
+ * @param {import("./interpreter").Interpreter} it
+ * @param {RuntimeValue} l
+ * @param {RuntimeValue} r
+ */
+function seems(it, l, r) {
+	if(l.kind === r.kind)
+		return l.equals(r);
+
+	//Evitar fallos de coerciones
+	if(it.isAnyOf(l, ...nonCoercibleKinds) || it.isAnyOf(r, ...nonCoercibleKinds))
+		return makeBoolean(false);
+
+	if(l.kind === ValueKinds.NADA || r.kind === ValueKinds.NADA) {
+		if(l.kind === ValueKinds.NUMBER)
+			return makeNumber(0).equals(l);
+
+		if(r.kind === ValueKinds.NUMBER)
+			return makeNumber(0).equals(r);
+
+		if(it.isAnyOf(l, ValueKinds.TEXT, ValueKinds.BOOLEAN))
+			return coerceValue(it, r, l.kind).equals(l);
+
+		if(it.isAnyOf(r, ValueKinds.TEXT, ValueKinds.BOOLEAN))
+			return coerceValue(it, l, r.kind).equals(r);
+
+		return makeBoolean(false);
+	}
+
+	let coercedL, coercedR;
+
+	if(it.isAnyOf(l, ValueKinds.TEXT, ValueKinds.LIST, ValueKinds.REGISTRY) || it.isAnyOf(r, ValueKinds.TEXT, ValueKinds.LIST, ValueKinds.REGISTRY)) {
+		coercedL = coerceValue(it, l, ValueKinds.TEXT);
+		coercedR = coerceValue(it, r, ValueKinds.TEXT);
+	} else {
+		coercedL = coerceValue(it, l, ValueKinds.NUMBER);
+		coercedR = coerceValue(it, r, ValueKinds.NUMBER);
+	}
+
+	return coercedL.equals(coercedR);
+}
+
+/**
+ * @param {TokenKind} op
  * @returns {BinaryExpressionFunction}
  */
 function makeRelationalBinaryOperation(op) {
@@ -109,6 +194,12 @@ function makeRelationalBinaryOperation(op) {
 	case TokenKinds.NOT_EQUALS:
 		operation = (it, l, r) => toggleBoolean(l.equals(r));
 		break;
+	case TokenKinds.SEEMS:
+		operation = (it, l, r) => seems(it, l, r);
+		break;
+	case TokenKinds.NOT_SEEMS:
+		operation = (it, l, r) => toggleBoolean(seems(it, l, r));
+		break;
 	case TokenKinds.LESS:
 		operation = (it, l, r) => makeBoolean(l.compareTo(r).value < 0);
 		break;
@@ -127,12 +218,9 @@ function makeRelationalBinaryOperation(op) {
 	return operation;
 }
 
-/**
- * @typedef {(it: import('./interpreter').Interpreter, l: import('./values').RuntimeValue, r: import('./values').RuntimeValue) => import('./values').RuntimeValue} BinaryExpressionFunction
- * @type {Map<import('../lexer/tokens').TokenKind, BinaryExpressionFunction>}
- */
-const BinaryExpressionLookups = new Map();
-BinaryExpressionLookups
+/**@type {Map<TokenKind, BinaryExpressionFunction>}*/
+const BinaryOperationLookups = new Map();
+BinaryOperationLookups
 	.set(TokenKinds.ADD, plusBinaryOperation)
 	.set(TokenKinds.SUBTRACT, makeArithmeticBinaryOperation(TokenKinds.DASH))
 	.set(TokenKinds.MULTIPLY, makeArithmeticBinaryOperation(TokenKinds.STAR))
@@ -147,15 +235,19 @@ BinaryExpressionLookups
 
 	.set(TokenKinds.OR, makeRelationalBinaryOperation(TokenKinds.OR))
 	.set(TokenKinds.AND, makeRelationalBinaryOperation(TokenKinds.AND))
+
 	.set(TokenKinds.EQUALS, makeRelationalBinaryOperation(TokenKinds.EQUALS))
 	.set(TokenKinds.NOT_EQUALS, makeRelationalBinaryOperation(TokenKinds.NOT_EQUALS))
+	.set(TokenKinds.SEEMS, makeRelationalBinaryOperation(TokenKinds.SEEMS))
+	.set(TokenKinds.NOT_SEEMS, makeRelationalBinaryOperation(TokenKinds.NOT_SEEMS))	
+
 	.set(TokenKinds.LESS, makeRelationalBinaryOperation(TokenKinds.LESS))
 	.set(TokenKinds.LESS_EQUALS, makeRelationalBinaryOperation(TokenKinds.LESS_EQUALS))
 	.set(TokenKinds.GREATER, makeRelationalBinaryOperation(TokenKinds.GREATER))
 	.set(TokenKinds.GREATER_EQUALS, makeRelationalBinaryOperation(TokenKinds.GREATER_EQUALS));
 
 /**
- * @type {Map<import('../lexer/tokens').TokenKind, import('./values').ValueKind>}
+ * @type {Map<TokenKind, ValueKind>}
  */
 const ValueKindLookups = new Map();
 ValueKindLookups
@@ -169,7 +261,7 @@ ValueKindLookups
 	.set(TokenKinds.NADA, ValueKinds.NADA);
 
 module.exports = {
-	UnaryExpressionLookups,
-	BinaryExpressionLookups,
+	UnaryOperationLookups,
+	BinaryOperationLookups,
 	ValueKindLookups,
 };

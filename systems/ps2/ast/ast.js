@@ -3,7 +3,7 @@ const Ut = require('../../../utils');
 /**Contiene niveles de vínculo de operadores*/
 const BindingPowers = /**@type {const}*/({
     /**Vínculo más débil. Usado por defecto, para sentencias y agrupamiento*/
-    DEFAULT: Ut.siota(),
+    DEFAULT: Ut.Iota(),
     /**Segundo vínculo más débil. A veces usado para el operador de coma*/
     COMMA: Ut.iota,
     /**Tercer vínculo más débil. Usado para operadores a nivel de asignación y misceláneos*/
@@ -41,6 +41,14 @@ const Associativities = /**@type {const}*/({
     RIGHT: -0.5,
 });
 /**@typedef {import('types').ValuesOf<Associativities>} Associativity*/
+
+/**
+ * @typedef {Object} NodeMetadata
+ * @property {Number} line
+ * @property {Number} column
+ * @property {Number} start
+ * @property {Number} end
+ */
 
 module.exports = {
     BindingPowers,

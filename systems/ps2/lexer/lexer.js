@@ -35,9 +35,10 @@ class Lexer {
 			{ match: 'verdadero', kind: TokenKinds.LIT_BOOLEAN, value: true },
 			{ match: 'falso', kind: TokenKinds.LIT_BOOLEAN, value: false },
 			
+			{ match: 'es', kind:TokenKinds.EQUALS },
+			{ match: 'parece', kind:TokenKinds.SEEMS },
 			{ match: 'precede', kind: TokenKinds.LESS },
 			{ match: 'excede', kind: TokenKinds.GREATER },
-			{ match: 'es', kind:TokenKinds.EQUALS },
 
 			{ match: 'o', kind: TokenKinds.OR },
 			{ match: 'y', kind: TokenKinds.AND },
@@ -80,7 +81,7 @@ class Lexer {
 
 			{ match: 'numero', kind: TokenKinds.NUMBER },
 			{ match: 'texto', kind: TokenKinds.TEXT },
-			{ match: 'dupla', kind: TokenKinds.BOOLEAN },
+			{ match: 'logico', kind: TokenKinds.BOOLEAN },
 			{ match: 'lista', kind: TokenKinds.LIST },
 			{ match: 'registro', kind: TokenKinds.REGISTRY },
 			{ match: 'marco', kind: TokenKinds.EMBED },
@@ -124,6 +125,7 @@ class Lexer {
 			{ match: 'no excede', handler: this.#makeDefaultHandler(TokenKinds.LESS_EQUALS) },
 			{ match: 'no precede', handler: this.#makeDefaultHandler(TokenKinds.GREATER_EQUALS) },
 			{ match: 'no es', handler: this.#makeDefaultHandler(TokenKinds.NOT_EQUALS) },
+			{ match: 'no parece', handler: this.#makeDefaultHandler(TokenKinds.NOT_SEEMS) },
 			{ match: 'sino si', handler: this.#makeDefaultHandler(TokenKinds.ELSE_IF) },
 			{ match: 'para cada', handler: this.#makeDefaultHandler(TokenKinds.FOR_EACH) },
 
@@ -241,12 +243,12 @@ class Lexer {
 			}
 
 			if(match == null) {
-				const wsIndex = this.remainder.match(/[\r\s\b]/).index;
+				const wsIndex = this.remainder.match(/[\r\s\b]/)?.index ?? this.remainder.length;
 				throw this.TuberLexerError(`Símbolo no reconocido: \`${shortenText(this.remainder.slice(0, wsIndex), 12, ' (...)')}\``);
 			}
 		}
 
-		this.addToken(new Token(this, TokenKinds.EOF, 'Fin de Código', this.#line, this.#col));
+		this.addToken(new Token(this, TokenKinds.EOF, 'Fin de Código', this.#line, this.#col, this.#pos - 1, 1));
 		return [ ...this.#tokens ];
 	}
 
@@ -297,7 +299,7 @@ class Lexer {
 		const lexer = this;
 		return function(_, rawMatch) {
 			const len = `${rawMatch}`.length;
-			lexer.addToken(new Token(lexer, kind, rawMatch, lexer.line, lexer.col, len));
+			lexer.addToken(new Token(lexer, kind, rawMatch, lexer.line, lexer.col, lexer.pos - 1, len));
 			lexer.advance(len, { advanceColumns: true });
 		};
 	}
@@ -315,7 +317,7 @@ class Lexer {
 			if(isNaN(num))
 				throw lexer.TuberLexerError('Valor inválido en tokenización de número');
 
-			lexer.addToken(new Token(lexer, TokenKinds.LIT_NUMBER, num, lexer.line, lexer.col, len));
+			lexer.addToken(new Token(lexer, TokenKinds.LIT_NUMBER, num, lexer.line, lexer.col, lexer.pos - 1, len));
 			lexer.advance(len, { advanceColumns: true });
 		};
 	}
@@ -367,7 +369,7 @@ class Lexer {
 			col++; //Sumar los "" removidos
 			rawMatch = chars.join('');
 
-			lexer.addToken(new Token(lexer, TokenKinds.LIT_TEXT, rawMatch, lexer.line, lexer.col, len));
+			lexer.addToken(new Token(lexer, TokenKinds.LIT_TEXT, rawMatch, lexer.line, lexer.col, lexer.pos - 1, len));
 			lexer.advance(len, { override: { col, line } }); //Aplicar cambios de columna y línea locales
 			lexer.handleCommentStatement = false;
 		};
@@ -385,11 +387,11 @@ class Lexer {
 			
 			if(keyword) {
 				if(keyword.kind !== TokenKinds.COMMENT)
-					lexer.addToken(new Token(lexer, keyword.kind, rawMatch, lexer.line, lexer.col, len));
+					lexer.addToken(new Token(lexer, keyword.kind, rawMatch, lexer.line, lexer.col, lexer.pos - 1, len));
 				else
 					lexer.handleCommentStatement = true;
 			} else {
-				lexer.addToken(new Token(lexer, TokenKinds.IDENTIFIER, rawMatch, lexer.line, lexer.col, len));
+				lexer.addToken(new Token(lexer, TokenKinds.IDENTIFIER, rawMatch, lexer.line, lexer.col, lexer.pos - 1, len));
 			}
 
 			lexer.advance(len, { advanceColumns: true });

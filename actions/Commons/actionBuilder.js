@@ -3,7 +3,12 @@ const { Translator } = require('../../internationalization');
 
 /**
  * @typedef {'ChatInput' | 'Message' | 'User'} CommandTypes
- * @typedef {ContextMenuCommandInteraction<'cached'>|MessageContextMenuCommandInteraction<'cached'>|UserContextMenuCommandInteraction<'cached'>} ContextMenuAction
+ * @typedef {ContextMenuCommandInteraction<'cached'>|MessageContextMenuCommandInteraction<'cached'>|UserContextMenuCommandInteraction<'cached'>} ContextMenuInteraction
+ */
+
+/**
+ * @template {ContextMenuInteraction} [T=ContextMenuInteraction]
+ * @typedef {(request: T) => Promise<*>} ContextMenuAction
  */
 
 /**Representa una acción de menú contextual*/
@@ -14,7 +19,7 @@ class ContextMenuActionManager {
     localizations;
     /**@type {ApplicationCommandType}*/
     type;
-    /**@type {(interaction: ContextMenuAction) => Promise<*>}*/
+    /**@type {ContextMenuAction}*/
     execute;
 
     /**
@@ -34,23 +39,20 @@ class ContextMenuActionManager {
         this.localizations.set(Locale.EnglishGB, translation['en']);
     }
 
-    /** @param {ContextMenuCommandInteraction<'cached'>} responseFn Acción a realizar al indicarse su ejecución*/
+    /** @param {ContextMenuAction<ContextMenuCommandInteraction<'cached'>>} responseFn Acción a realizar al indicarse su ejecución*/
     setResponse(responseFn) {
-        // @ts-expect-error
         this.execute = responseFn;
         return this;
     }
 
-    /** @param {MessageContextMenuCommandInteraction<'cached'>} responseFn Acción a realizar al indicarse su ejecución*/
+    /** @param {ContextMenuAction<MessageContextMenuCommandInteraction<'cached'>>} responseFn Acción a realizar al indicarse su ejecución*/
     setMessageResponse(responseFn) {
-        // @ts-expect-error
         this.execute = responseFn;
         return this;
     }
 
-    /** @param {UserContextMenuCommandInteraction<'cached'>} responseFn Acción a realizar al indicarse su ejecución*/
+    /** @param {ContextMenuAction<UserContextMenuCommandInteraction<'cached'>>} responseFn Acción a realizar al indicarse su ejecución*/
     setUserResponse(responseFn) {
-        // @ts-expect-error
         this.execute = responseFn;
         return this;
     }

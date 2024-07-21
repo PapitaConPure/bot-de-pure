@@ -45,7 +45,7 @@ function esTexto(self, [ x ], scope) {
  * @param {Scope} scope 
  * @returns {BooleanValue}
  */
-function esDupla(self, [ x ], scope) {
+function esLogico(self, [ x ], scope) {
 	const test = isBoolean(x);
 	return makeBoolean(test);
 }
@@ -143,7 +143,7 @@ const kindFunctions = [
 	{ id: 'esNumero', fn: esNúmero },
 	{ id: 'esNúmero', fn: esNúmero },
 	{ id: 'esTexto', fn: esTexto },
-	{ id: 'esDupla', fn: esDupla },
+	{ id: 'esLogico', fn: esLogico },
 	{ id: 'esLista', fn: esLista },
 	{ id: 'esRegistro', fn: esRegistro },
 	{ id: 'esMarco', fn: esMarco },

@@ -15,7 +15,7 @@ function declareNatives(scope) {
     scope.assignVariable('E', makeNumber(Math.E));
 
     for(const [traducción, original] of NativeColorsLookup)
-        scope.assignVariable(traducción, makeText(original.toString(16)));
+        scope.assignVariable(traducción, makeText('#' + original.toString(16)));
 
 	for(const { id, fn } of NativeFunctions)
 		scope.assignVariable(id, makeNativeFunction(null, fn));
@@ -65,7 +65,6 @@ function recursiveConvertRegistry(value) {
 }
 
 /**
- * @template {import('../values').ValueKind} T
  * @param {import('../values').RuntimeValue} node 
  * @returns {Extract<import('../values').RuntimeValue, { kind: node['kind'] }>}
  */

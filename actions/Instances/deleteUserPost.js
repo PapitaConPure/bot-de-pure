@@ -9,7 +9,7 @@ const action = new ContextMenuActionManager('actionDeleteUserPost', 'Message')
         const uid = interaction.user.id;
         const translator = await Translator.from(uid);
 
-        if(message.webhookId == undefined || message.webhookId.length == 0)
+        if((message.webhookId == undefined || message.webhookId.length == 0) && message.author.id !== interaction.client.user.id)
             return interaction.reply({
                 content: translator.getText('invalidMessage'),
                 ephemeral: true,

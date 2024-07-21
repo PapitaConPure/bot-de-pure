@@ -20,7 +20,7 @@ function makeKindFromValue(kind, ...values) {
 	case ValueKinds.BOOLEAN:
 		return /**@type {Extract<import('../values').RuntimeValue, { kind: T }>}*/(makeBoolean(values[0]));
 	case ValueKinds.LIST:
-		return /**@type {Extract<import('../values').RuntimeValue, { kind: T }>}*/(makeList(values[0]));
+		return /**@type {Extract<import('../values').RuntimeValue, { kind: T }>}*/(makeList(Array.isArray(values[0]) ? values[0] : values));
 	case ValueKinds.REGISTRY:
 		return /**@type {Extract<import('../values').RuntimeValue, { kind: T }>}*/(makeRegistry(values[0]));
 	case ValueKinds.NATIVE_FN:
@@ -38,6 +38,7 @@ function makeKindFromValue(kind, ...values) {
 
 /**
  * @template {import('../values').ValueKind} T
+ * @param {String} name
  * @param {Extract<import('../values').RuntimeValue, { kind: T }>} coerced 
  * @param {T} kind 
  * @param {Scope} scope
@@ -147,12 +148,31 @@ function calculatePositionOffset(value, length) {
 	return value;
 }
 
+/**
+ * @param {String} name
+ * @param {import('../values').FunctionValue} fn
+ * @param {Scope} scope
+ * @returns {(...args: Array<import('../values').RuntimeValue>) => import('../values').RuntimeValue}
+ */
+function makePredicateFn(name, fn, scope) {
+	const it = scope.interpreter;
+
+	if(fn == null)
+		throw it.TuberInterpreterError(`Se esperaba un valor para el parámetro requerido \`${name}\` en Función nativa`);
+	
+	if(!it.isAnyOf(fn, ValueKinds.FUNCTION, ValueKinds.NATIVE_FN))
+		throw it.TuberInterpreterError(`Se esperaba una Función para el parámetro requerido \`${name}\` en Función nativa`);
+
+	return (...args) => it.callFunction(fn, args, scope);
+}
+
 module.exports = {
 	expectParam,
 	getParamOrDefault,
 	getParamOrNada,
 	calculatePositionOffset,
 	makeKindFromValue,
+	makePredicateFn,
 	fileRegex,
 	imageRegex,
 	linkRegex,

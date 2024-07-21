@@ -162,8 +162,8 @@ class InputReader {
 	 * @param {import('../lexer/tokens').Token} dataKind
 	 */
 	ensureValidInputKind(name, dataKind) {
-		if(!dataKind.isAny(TokenKinds.NUMBER, TokenKinds.TEXT, TokenKinds.BOOLEAN, TokenKinds.LIST))
-			throw this.interpreter.TuberInterpreterError(`El tipo de dato de la Entrada \`${name}\` es inválido. Se recibió: ${dataKind.translated}`);
+		if(!dataKind.isAny(TokenKinds.NUMBER, TokenKinds.TEXT, TokenKinds.BOOLEAN))
+			throw this.interpreter.TuberInterpreterError(`El tipo de dato de la Entrada \`${name}\` es inválido. Se recibió: ${dataKind.translated}`, dataKind);
 	}
 
 	/**
@@ -178,7 +178,7 @@ class InputReader {
 				`La Entrada anterior, \`${this.spreadInputName}\`, se detectó como extensiva. Sin embargo, luego se leyó una Entrada con otro nombre: \`${input.name}\`.`,
 				`Acomoda tu código de forma tal que la Entrada extensiva sea la última en ser leída`,
 			].join('\n'));
-			
+		
 		if(this.#inputLookup.has(input.name))
 			throw 'Entrada duplicada';
 
@@ -221,24 +221,23 @@ class TestDriveInputReader extends InputReader {
 		const { receptor, dataKind, optional, fallback } = node;
 		
 		//Cargar valor de prueba
-		const name = this.interpreter.expressionString(receptor);
+		const name = this.interpreter.astString(receptor);
 		const valueKind = ValueKindLookups.get(dataKind.kind);
 		const fallbackValue = (fallback != null) ? this.interpreter.evaluate(fallback, scope) : defaultValueOf(valueKind);
 
 		this.ensureValidInputKind(name, dataKind);
 		
-		if(this.hasInput(name)) {
+		if(this.hasInput(name))
 			this.setInputAsSpread(name);
-			//throw this.interpreter.TuberInterpreterError(`Se intentó leer 2 Entradas con el mismo nombre en una sola ejecución: \`${name}\` de ${dataKind.translated}`);
-		} else
+		else
 			this.addInput(new Input(name, valueKind, optional));
 
 		try {
 			const coercedValue = coerceValue(this.interpreter, fallbackValue, valueKind);
 			return coercedValue;
 		} catch {
-			const fallbackString = this.interpreter.expressionString(fallback);
-			throw this.interpreter.TuberInterpreterError(`Se recibió una Entrada con formato inválido. Se esperaba un valor convertible a ${dataKind.translated}, pero \`${fallbackString}\` no lo era`);
+			const fallbackString = this.interpreter.astString(fallback);
+			throw this.interpreter.TuberInterpreterError(`Se recibió una Entrada con formato inválido. Se esperaba un valor convertible a ${dataKind.translated}, pero \`${fallbackString}\` no lo era`, fallback ?? dataKind);
 		}
 	}
 }
@@ -258,9 +257,9 @@ class ProductionInputReader extends InputReader {
 	 * @type {(node: import('../ast/statements').ReadStatement, scope: Scope) => import('./values').RuntimeValue}
 	 */
 	readInput(node, scope) {
-		const { receptor, dataKind, optional, fallback } = node;
+		const { receptor, dataKind, optional, fallback, modifier } = node;
 
-		const name = this.interpreter.expressionString(receptor);
+		const name = this.interpreter.astString(receptor);
 		const valueKind = ValueKindLookups.get(dataKind.kind);
 		const arg = this.dequeueArg();
 
@@ -268,7 +267,6 @@ class ProductionInputReader extends InputReader {
 		
 		if(this.hasInput(name))
 			this.setInputAsSpread(name);
-			//throw this.interpreter.TuberInterpreterError(`Se intentó leer 2 Entradas con el mismo nombre en una sola ejecución: \`${name}\` de ${dataKind.translated}`);
 		else
 			this.addInput(new Input(name, valueKind, optional));
 		
@@ -284,7 +282,7 @@ class ProductionInputReader extends InputReader {
 
 		try {
 			const coercedValue = coerceValue(this.interpreter, receptionValue, valueKind);
-			return coercedValue;
+			return modifier(coercedValue, this.interpreter, scope);
 		} catch {
 			throw TuberInputError(`Se recibió una Entrada con formato inválido. Se esperaba un valor conversible a ${dataKind.translated}, pero se recibió: \`${arg}\``);
 		}

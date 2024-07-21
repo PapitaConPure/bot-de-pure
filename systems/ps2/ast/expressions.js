@@ -21,12 +21,14 @@ const ExpressionKinds = /**@type {const}*/({
 /**@typedef {import('types').ValuesOf<typeof ExpressionKinds>} ExpressionKind*/
 
 /**
- * @template {ExpressionKind} [T=ExpressionKind]
- * @typedef {Object} BaseExpressionData
+ * @template {ExpressionKind} T
+ * @typedef {Object} EmptyExpression
  * @property {Readonly<NonNullable<T>>} kind
- * @property {Number} line
- * @property {Number} start
- * @property {Number} end
+ */
+
+/**
+ * @template {ExpressionKind} [T=ExpressionKind]
+ * @typedef {EmptyExpression<T> & import('./ast').NodeMetadata} BaseExpressionData
  */
 
 //#region Literales

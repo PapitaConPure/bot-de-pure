@@ -43,6 +43,8 @@ const TokenKinds = /**@type {const}*/({
 
 	EQUALS: 'Equals',
 	NOT_EQUALS: 'NotEquals',
+	SEEMS: 'Seems',
+	NOT_SEEMS: 'NotSeems',
 	LESS: 'Less',
 	LESS_EQUALS: 'LessEquals',
 	GREATER: 'Greater',
@@ -87,7 +89,7 @@ const TokenKindTranslations = new Map();
 TokenKindTranslations
 	.set(TokenKinds.LIT_NUMBER, 'Literal de Número')
 	.set(TokenKinds.LIT_TEXT, 'Literal de Texto')
-	.set(TokenKinds.LIT_BOOLEAN, 'Literal de Dupla')
+	.set(TokenKinds.LIT_BOOLEAN, 'Literal de Lógico')
 	.set(TokenKinds.IDENTIFIER, 'Identificador')
 
 	.set(TokenKinds.PAREN_OPEN, 'Inicio de agrupamiento \`(\`')
@@ -125,6 +127,8 @@ TokenKindTranslations
 
 	.set(TokenKinds.EQUALS, 'Operador \`es\`')
 	.set(TokenKinds.NOT_EQUALS, 'Operador \`no es\`')
+	.set(TokenKinds.EQUALS, 'Operador \`parece\`')
+	.set(TokenKinds.NOT_EQUALS, 'Operador \`no parece\`')
 	.set(TokenKinds.LESS, 'Operador \`precede\`')
 	.set(TokenKinds.LESS_EQUALS, 'Operador \`no excede\`')
 	.set(TokenKinds.GREATER, 'Operador \`excede\`')
@@ -148,7 +152,7 @@ TokenKindTranslations
 
 	.set(TokenKinds.NUMBER, 'Tipo Número')
 	.set(TokenKinds.TEXT, 'Tipo Texto')
-	.set(TokenKinds.BOOLEAN, 'Tipo Dupla')
+	.set(TokenKinds.BOOLEAN, 'Tipo Lógico')
 	.set(TokenKinds.LIST, 'Tipo Lista')
 	.set(TokenKinds.REGISTRY, 'Tipo Registro')
 	.set(TokenKinds.EMBED, 'Tipo Marco')
@@ -203,7 +207,7 @@ const StatementVerbs = /**@type {const}*/([
 const DataKindValues = /**@type {const}*/({
 	NUMBER: 'Número',
 	TEXT: 'Texto',
-	BOOLEAN: 'Dupla',
+	BOOLEAN: 'Lógico',
 	LIST: 'Lista',
 	REGISTRY: 'Registro',
 	EMBED: 'Marco',
@@ -238,6 +242,10 @@ class Token {
 	#line;
 	/**
 	 * La columna inicial del token
+	 */
+	#column;
+	/**
+	 * La posición del primer caracter del token en el código 
 	 * @type {Number}
 	 */
 	#start;
@@ -257,16 +265,19 @@ class Token {
 	 * @param {TokenKind} kind El tipo de token
 	 * @param {any} value El valor del token
 	 * @param {number} line La línea del inicio del token
-	 * @param {number} start La columna inicial del token
-	 * @param {number} [length=1] El largo del token
+	 * @param {number} column La columna inicial del token
+	 * @param {number} start La posición del primer caracter del token en el código 
+	 * @param {number} length El largo del token
 	 */
-	constructor(lexer, kind, value, line, start, length = 1) {
+	constructor(lexer, kind, value, line, column, start, length) {
 		if(!Object.values(TokenKinds).includes(kind))
-			throw 'La posición de inicio del token debe ser al menos 1';
+			throw `Tipo de token inválido: ${kind}`;
 		if(line < 1)
 			throw 'La línea de inicio del token debe ser al menos 1';
-		if(start < 1)
-			throw 'La posición de columna de inicio del token debe ser al menos 1';
+		if(column < 1)
+			throw 'La columna inicial del token debe ser al menos 1';
+		if(start < 0)
+			throw 'La posición de inicio del token debe ser al menos 0';
 		if(length < 1)
 			throw 'El largo del token debe ser al menos 1';
 
@@ -274,6 +285,7 @@ class Token {
 		this.#kind = kind;
 		this.#value = value;
 		this.#line = line;
+		this.#column = column;
 		this.#start = start;
 		this.#length = length;
 		this.isStatement = StatementVerbs.includes(this.#kind);
@@ -291,19 +303,27 @@ class Token {
 	
 	/**La línea inicial del token*/
 	get line() { return this.#line; }
-
+	
 	/**La columna inicial del token*/
+	get column() { return this.#column; }
+
+	/**La posición del primer caracter del token*/
 	get start() { return this.#start; }
 
-	/**La columna final (estimada) del token*/
+	/**La posición del caracter al final del token*/
 	get end() { return this.#start + this.#length; }
 
 	/**El largo del token*/
 	get length() { return this.#length; }
 
-	/**El texto fuente de la línea de origen del token*/
+	/**El fragmento de código fuente de la línea de origen del token*/
 	get lineString() {
 		return this.#lexer.sourceLines[this.#line - 1];
+	}
+
+	/**El fragmento de código fuente que este token representa*/
+	get sourceString() {
+		return this.#lexer.source.slice(this.start, this.end);
 	}
 
 	get json() {
@@ -311,10 +331,12 @@ class Token {
 			kind: this.#kind,
 			value: this.#value,
 			line: this.#line,
+			column: this.#column,
 			start: this.#start,
 			end: this.end,
 			length: this.#length,
 			lineString: this.lineString,
+			sourceString: this.sourceString,
 		};
 	};
 

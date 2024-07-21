@@ -120,6 +120,8 @@ function createLookups() {
     //Equitativo
     led(TokenKinds.EQUALS, BindingPowers.EQUALITY, Associativities.LEFT, parseBinaryExpression);
     led(TokenKinds.NOT_EQUALS, BindingPowers.EQUALITY, Associativities.LEFT, parseBinaryExpression);
+    led(TokenKinds.SEEMS, BindingPowers.EQUALITY, Associativities.LEFT, parseBinaryExpression);
+    led(TokenKinds.NOT_SEEMS, BindingPowers.EQUALITY, Associativities.LEFT, parseBinaryExpression);
 
     //Relacional
     led(TokenKinds.LESS, BindingPowers.RELATIONAL, Associativities.LEFT, parseBinaryExpression);

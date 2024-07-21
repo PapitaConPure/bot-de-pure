@@ -5,6 +5,8 @@ class Scope {
 	#interpreter;
 	/**@type {Scope}*/
 	#parent;
+    /**@type {Scope}*/
+    #mirror;
 	/**@type {Map<String, import('./values').RuntimeValue>}*/
 	variables;
     /**@type {Boolean}*/
@@ -20,6 +22,7 @@ class Scope {
 		this.#parent = parent;
 		this.variables = new Map();
         this.global = false;
+        this.#mirror = this.resolveClosestGlobalMirror();
 	}
 
     get interpreter() {
@@ -98,6 +101,9 @@ class Scope {
             return this;
 
         if(this.#parent == null) {
+            if(this.#mirror)
+                return this.#mirror.resolve(identifier, mustBeDeclared);
+
             if(mustBeDeclared)
                 throw this.#interpreter.TuberInterpreterError(`El identificador \`${identifier}\` no representa ninguna variable ni función`);
             
@@ -116,8 +122,29 @@ class Scope {
             this.include(scope.parent);
 
         scope.variables.forEach((variable, key) => {
-            this.variables.set(key, variable);
+            if(!this.variables.has(key))
+                this.variables.set(key, variable);
         });
+
+        this.#mirror = scope.resolveClosestGlobalMirror();
+
+        return this;
+    }
+
+    /**
+     * Encuentra el mirror global usando el Scope especificado
+     */
+    resolveClosestGlobalMirror() {
+        if(this.#mirror != null)
+            return this.#mirror;
+
+        if(!this.hasParent)
+            return null;
+
+        if(this.#parent.global)
+            return this.#parent;
+
+        return this.#parent.resolveClosestGlobalMirror();
     }
 }
 
