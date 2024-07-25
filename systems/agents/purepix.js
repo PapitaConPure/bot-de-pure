@@ -109,13 +109,14 @@ const formatPixivPostsMessage = async (urls) => {
                     .replace('\n', '')
                     .replace('*', '\\*')
                     .replace(/<\/?strong>/g, '*')
-                    .replace(/<br ?\/?>/g, '\n'),
+                    .replace(/<br ?\/?>/g, '\n')
+                    .replace('&#44;', ','),
                     //.replace(/<[^>]*>/g, ''),
                 256,
                 960,
                 ' (...)',
             )
-            .replace(/<a href=["'](https?:[^"']+)["']( \w+=["'][^"']+["'])*>([^<]+)<\/a>/g, (_substr, url) => {
+            .replace(/<a href=["']((https?:[^"']+)|(pixiv:\/\/[^"']+))["']( \w+=["'][^"']+["'])*>([^<]+)<\/a>/g, (_substr, url) => {
                 const labelLink = (icon, label) => `[ ${icon} ${label}](${url})`;
                 
                 if(url.includes('x.com') ||url.includes('twitter.com') || url.includes('nitter.net'))
@@ -135,6 +136,10 @@ const formatPixivPostsMessage = async (urls) => {
 
                 return labelLink('🔗', 'Link');
             });
+        
+        const discordCaptionLines = discordCaption.split('\n');
+        if(discordCaptionLines.length > 8)
+            discordCaption = [ ...discordCaptionLines.slice(0, 7), '(...)' ].join('\n');
 
         let postTypeText;
         if(metaPages?.length > 1)
