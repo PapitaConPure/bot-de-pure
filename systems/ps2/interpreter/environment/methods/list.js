@@ -1,5 +1,5 @@
 const { ValueKinds, makeText, makeBoolean, makeList, makeRegistry, makeNada, coerceValue, makeNumber } = require('../../values');
-const { expectParam, getParamOrNada, makePredicateFn } = require('../nativeUtils');
+const { expectParam, getParamOrNada, makePredicateFn, getParamOrDefault } = require('../nativeUtils');
 const { Scope } = require('../../scope');
 const { stringifyPSAST } = require('../../../debug');
 
@@ -23,6 +23,33 @@ const { stringifyPSAST } = require('../../../debug');
  */
 function listaAInvertido(self, [], scope) {
 	return makeList(self.elements.toReversed());
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {BooleanValue}
+ */
+function listaAlguno(self, [ predicado ], scope) {
+	const fn = makePredicateFn('predicado', predicado, scope);
+	const test = self.elements.some((el, i) => coerceValue(scope.interpreter, fn(el, makeNumber(i), self), ValueKinds.BOOLEAN).value);
+	return makeBoolean(test);
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {ListValue}
+ */
+function listaAOrdenada(self, [ criterio ], scope) {
+	if(criterio == null)
+		return makeList(self.elements.toSorted((a, b) => a.compareTo(b).value));
+	
+	const fn = makePredicateFn('criterio', criterio, scope);
+	const processedElements = self.elements.toSorted((a, b) => coerceValue(scope.interpreter, fn(a, b), ValueKinds.NUMBER).value);
+	return makeList(processedElements);
 }
 
 /**
@@ -67,12 +94,113 @@ function listaCortar(self, [ inicio, fin ], scope) {
 
 /**
  * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {RuntimeValue}
+ */
+function listaEncontrar(self, [ predicado ], scope) {
+	const fn = makePredicateFn('predicado', predicado, scope);
+	const element = self.elements.find((el, i) => coerceValue(scope.interpreter, fn(el, makeNumber(i), self), ValueKinds.BOOLEAN).value) ?? makeNada();
+	return element;
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {RuntimeValue}
+ */
+function listaEncontrarÚltimo(self, [ predicado ], scope) {
+	const fn = makePredicateFn('predicado', predicado, scope);
+	const element = self.elements.findLast((el, i) => coerceValue(scope.interpreter, fn(el, makeNumber(i), self), ValueKinds.BOOLEAN).value) ?? makeNada();
+	return element;
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {NumberValue}
+ */
+function listaEncontrarId(self, [ predicado ], scope) {
+	const fn = makePredicateFn('predicado', predicado, scope);
+	const idx = self.elements.findIndex((el, i) => coerceValue(scope.interpreter, fn(el, makeNumber(i), self), ValueKinds.BOOLEAN).value);
+	return makeNumber(idx);
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {NumberValue}
+ */
+function listaEncontrarÚltimoId(self, [ predicado ], scope) {
+	const fn = makePredicateFn('predicado', predicado, scope);
+	const idx = self.elements.findLastIndex((el, i) => coerceValue(scope.interpreter, fn(el, makeNumber(i), self), ValueKinds.BOOLEAN).value);
+	return makeNumber(idx);
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {ListValue}
+ */
+function listaFiltrar(self, [ filtro ], scope) {
+	const fn = makePredicateFn('filtro', filtro, scope);
+	const processedElements = self.elements.filter((el, i) => coerceValue(scope.interpreter, fn(el, makeNumber(i), self), ValueKinds.BOOLEAN).value);
+	return makeList(processedElements);
+}
+
+/**
+ * @param {ListValue} self
  * @param {[]} args
  * @param {Scope} scope
  * @returns {NadaValue}
  */
 function listaInvertir(self, [], scope) {
 	self.elements.reverse();
+	return makeNada();
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {ListValue}
+ */
+function listaMapear(self, [ mapeo ], scope) {
+	const fn = makePredicateFn('mapeo', mapeo, scope);
+	const processedElements = self.elements.map((el, i) => fn(el, makeNumber(i), self));
+	return makeList(processedElements);
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {NadaValue}
+ */
+function listaOrdenar(self, [ criterio ], scope) {
+	if(criterio == null) {
+		self.elements.sort((a, b) => a.compareTo(b).value);
+	} else {
+		const fn = makePredicateFn('criterio', criterio, scope);
+		self.elements.sort((a, b) => coerceValue(scope.interpreter, fn(a, b), ValueKinds.NUMBER).value);
+	}
+	
+	return makeNada();
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[ FunctionValue ]} args
+ * @param {Scope} scope
+ * @returns {NadaValue}
+ */
+function listaParaCada(self, [ procedimiento ], scope) {
+	const fn = makePredicateFn('procedimiento', procedimiento, scope);
+	self.elements.slice().forEach((el, i) => fn(el, makeNumber(i), self));
 	return makeNada();
 }
 
@@ -123,147 +251,6 @@ function listaRobarÚltimo(self, [], scope) {
 
 /**
  * @param {ListValue} self
- * @param {[ TextValue ]} args
- * @param {Scope} scope
- * @returns {TextValue}
- */
-function listaUnir(self, [ separador ], scope) {
-	if(!self.elements.length)
-		return makeText('');
-
-	const separadorResult = expectParam('separador', separador, ValueKinds.TEXT, scope);
-	const elementTextValues = self.elements.map(el => coerceValue(scope.interpreter, el, ValueKinds.TEXT).value);
-	return makeText(elementTextValues.join(separadorResult.value));
-}
-
-/**
- * @param {ListValue} self
- * @param {[]} args
- * @param {Scope} scope
- * @returns {BooleanValue}
- */
-function listaVacía(self, [], scope) {
-	return makeBoolean(self.elements.length === 0);
-}
-
-/**
- * @param {ListValue} self
- * @param {[ FunctionValue ]} args
- * @param {Scope} scope
- * @returns {ListValue}
- */
-function listaFiltrar(self, [ predicado ], scope) {
-	const fn = makePredicateFn('filtro', predicado, scope);
-	const processedElements = self.elements.filter((el, i) => coerceValue(scope.interpreter, fn(el, makeNumber(i), self), ValueKinds.BOOLEAN).value);
-	return makeList(processedElements);
-}
-
-/**
- * @param {ListValue} self
- * @param {[ FunctionValue ]} args
- * @param {Scope} scope
- * @returns {ListValue}
- */
-function listaMapear(self, [ predicado ], scope) {
-	const fn = makePredicateFn('mapeo', predicado, scope);
-	const processedElements = self.elements.map((el, i) => fn(el, makeNumber(i), self));
-	return makeList(processedElements);
-}
-
-/**
- * @param {ListValue} self
- * @param {[ FunctionValue ]} args
- * @param {Scope} scope
- * @returns {RuntimeValue}
- */
-function listaEncontrar(self, [ predicado ], scope) {
-	const fn = makePredicateFn('búsqueda', predicado, scope);
-	const element = self.elements.find((el, i) => coerceValue(scope.interpreter, fn(el, makeNumber(i), self), ValueKinds.BOOLEAN).value) ?? makeNada();
-	return element;
-}
-
-/**
- * @param {ListValue} self
- * @param {[ FunctionValue ]} args
- * @param {Scope} scope
- * @returns {RuntimeValue}
- */
-function listaEncontrarÚltimo(self, [ predicado ], scope) {
-	const fn = makePredicateFn('búsqueda', predicado, scope);
-	const element = self.elements.findLast((el, i) => coerceValue(scope.interpreter, fn(el, makeNumber(i), self), ValueKinds.BOOLEAN).value) ?? makeNada();
-	return element;
-}
-
-/**
- * @param {ListValue} self
- * @param {[ FunctionValue ]} args
- * @param {Scope} scope
- * @returns {NumberValue}
- */
-function listaEncontrarId(self, [ predicado ], scope) {
-	const fn = makePredicateFn('búsqueda', predicado, scope);
-	const idx = self.elements.findIndex((el, i) => coerceValue(scope.interpreter, fn(el, makeNumber(i), self), ValueKinds.BOOLEAN).value);
-	return makeNumber(idx);
-}
-
-/**
- * @param {ListValue} self
- * @param {[ FunctionValue ]} args
- * @param {Scope} scope
- * @returns {NumberValue}
- */
-function listaEncontrarÚltimaId(self, [ predicado ], scope) {
-	const fn = makePredicateFn('búsqueda', predicado, scope);
-	const idx = self.elements.findLastIndex((el, i) => coerceValue(scope.interpreter, fn(el, makeNumber(i), self), ValueKinds.BOOLEAN).value);
-	return makeNumber(idx);
-}
-
-/**
- * @param {ListValue} self
- * @param {[ FunctionValue ]} args
- * @param {Scope} scope
- * @returns {NadaValue}
- */
-function listaOrdenar(self, [ predicado ], scope) {
-	if(predicado == null) {
-		self.elements.sort((a, b) => a.compareTo(b).value);
-	} else {
-		const fn = makePredicateFn('criterio', predicado, scope);
-		self.elements.sort((a, b) => coerceValue(scope.interpreter, fn(a, b), ValueKinds.NUMBER).value);
-	}
-	
-	return makeNada();
-}
-
-/**
- * @param {ListValue} self
- * @param {[ FunctionValue ]} args
- * @param {Scope} scope
- * @returns {ListValue}
- */
-function listaAOrdenada(self, [ predicado ], scope) {
-	if(predicado == null)
-		return makeList(self.elements.toSorted((a, b) => a.compareTo(b).value));
-	
-	const fn = makePredicateFn('criterio', predicado, scope);
-	const processedElements = self.elements.toSorted((a, b) => coerceValue(scope.interpreter, fn(a, b), ValueKinds.NUMBER).value);
-	return makeList(processedElements);
-}
-
-/**
- * @param {ListValue} self
- * @param {[ FunctionValue ]} args
- * @param {Scope} scope
- * @returns {BooleanValue}
- */
-function listaAlguno(self, [ predicado ], scope) {
-	const fn = makePredicateFn('predicado', predicado, scope);
-	const test = self.elements.some((el, i) => coerceValue(scope.interpreter, fn(el, makeNumber(i), self), ValueKinds.BOOLEAN).value);
-	return makeBoolean(test);
-}
-
-/**
- * @param {ListValue} self
  * @param {[ FunctionValue ]} args
  * @param {Scope} scope
  * @returns {BooleanValue}
@@ -276,14 +263,37 @@ function listaTodos(self, [ predicado ], scope) {
 
 /**
  * @param {ListValue} self
- * @param {[ FunctionValue ]} args
+ * @param {[ TextValue ]} args
  * @param {Scope} scope
- * @returns {NadaValue}
+ * @returns {TextValue}
  */
-function listaParaCada(self, [ predicado ], scope) {
-	const fn = makePredicateFn('procedimiento', predicado, scope);
-	self.elements.slice().forEach((el, i) => fn(el, makeNumber(i), self));
-	return makeNada();
+function listaUnir(self, [ separador ], scope) {
+	if(!self.elements.length)
+		return makeText('');
+
+	const separadorResult = getParamOrDefault('separador', separador, ValueKinds.TEXT, scope, ',');
+	const elementTextValues = self.elements.map(el => coerceValue(scope.interpreter, el, ValueKinds.TEXT).value);
+	return makeText(elementTextValues.join(separadorResult.value));
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[]} args
+ * @param {Scope} scope
+ * @returns {RuntimeValue}
+ */
+function listaÚltimo(self, [], scope) {
+	return self.elements[self.elements.length];
+}
+
+/**
+ * @param {ListValue} self
+ * @param {[]} args
+ * @param {Scope} scope
+ * @returns {BooleanValue}
+ */
+function listaVacía(self, [], scope) {
+	return makeBoolean(self.elements.length === 0);
 }
 
 /**@type Map<String, import('../../values').NativeFunction<ListValue>>*/
@@ -301,8 +311,10 @@ listMethods
 	.set('cortar', listaCortar)
 	.set('encontrar', listaEncontrar)
 	.set('encontrarId', listaEncontrarId)
-	.set('encontrarUltimaId', listaEncontrarÚltimaId)
-	.set('encontrarÚltimaId', listaEncontrarÚltimaId)
+	.set('encontrarUltimaId', listaEncontrarÚltimoId)
+	.set('encontrarÚltimaId', listaEncontrarÚltimoId)
+	.set('encontrarUltimoId', listaEncontrarÚltimoId)
+	.set('encontrarÚltimoId', listaEncontrarÚltimoId)
 	.set('encontrarUltimo', listaEncontrarÚltimo)
 	.set('encontrarÚltimo', listaEncontrarÚltimo)
 	.set('filtrar', listaFiltrar)
@@ -319,6 +331,8 @@ listMethods
 	.set('robarÚltimo', listaRobarÚltimo)
 	.set('todos', listaTodos)
 	.set('unir', listaUnir)
+	.set('ultimo', listaÚltimo)
+	.set('último', listaÚltimo)
 	.set('vacia', listaVacía)
 	.set('vacía', listaVacía);
 

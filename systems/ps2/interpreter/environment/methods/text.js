@@ -32,8 +32,8 @@ function textoALista(self, [], scope) {
  * @param {Scope} scope 
  * @returns {TextValue}
  */
-function textoAMinúsculas(self, [], scope) {
-	return makeText(self.value.toLowerCase());
+function textoAMayúsculas(self, [], scope) {
+	return makeText(self.value.toUpperCase());
 }
 
 /**
@@ -43,8 +43,8 @@ function textoAMinúsculas(self, [], scope) {
  * @param {Scope} scope 
  * @returns {TextValue}
  */
-function textoAMayúsculas(self, [], scope) {
-	return makeText(self.value.toUpperCase());
+function textoAMinúsculas(self, [], scope) {
+	return makeText(self.value.toLowerCase());
 }
 
 /**
@@ -69,6 +69,64 @@ function textoCaracterEn(self, [ posición ], scope) {
  * @param {TextValue} self
  * @param {[ TextValue ]} args
  * @param {Scope} scope 
+ * @returns {BooleanValue}
+ */
+function textoComienzaCon(self, [ subCadena ], scope) {
+	const subCadenaResult = expectParam('subCadena', subCadena, ValueKinds.TEXT, scope);
+	return makeBoolean(self.value.startsWith(subCadenaResult.value));
+}
+
+/**
+ * @param {TextValue} self
+ * @param {[ TextValue ]} args
+ * @param {Scope} scope 
+ * @returns {BooleanValue}
+ */
+function textoContiene(self, [ subCadena ], scope) {
+	const subCadenaResult = expectParam('subCadena', subCadena, ValueKinds.TEXT, scope);
+	return makeBoolean(self.value.includes(subCadenaResult.value));
+}
+
+/**
+ * @param {TextValue} self
+ * @param {[ NumberValue, NumberValue ]} args
+ * @param {Scope} scope 
+ * @returns {TextValue}
+ */
+function textoCortar(self, [ inicio, fin ], scope) {
+	const inicioResult = getParamOrDefault('inicio', inicio, ValueKinds.NUMBER, scope, 0);
+	const finResult = getParamOrDefault('fin', fin, ValueKinds.NUMBER, scope, self.value.length);
+
+	return makeText(self.value.slice(inicioResult.value, finResult.value));
+}
+
+/**
+ * @param {TextValue} self
+ * @param {[]} args
+ * @param {Scope} scope 
+ * @returns {TextValue}
+ */
+function textoNormalizar(self, [], scope) {
+	return makeText(self.value.trim());
+}
+
+/**
+ * @param {TextValue} self
+ * @param {[ TextValue ]} args
+ * @param {Scope} scope 
+ * @returns {ListValue}
+ */
+function textoPartir(self, [separador], scope) {
+	if(separador.kind !== ValueKinds.TEXT)
+		throw scope.interpreter.TuberInterpreterError('Se esperaba un Texto válido como argumento separador de Texto');
+	
+	return makeList(self.value.split(separador.value).map(split => makeText(split)));
+}
+
+/**
+ * @param {TextValue} self
+ * @param {[ TextValue ]} args
+ * @param {Scope} scope 
  * @returns {NumberValue}
  */
 function textoPosiciónDe(self, [ texto ], scope) {
@@ -76,74 +134,6 @@ function textoPosiciónDe(self, [ texto ], scope) {
 		throw scope.interpreter.TuberInterpreterError('Se esperaba un Texto válido como argumento de búsqueda de sub-texto');
 	
 	return makeNumber(self.value.indexOf(texto.value));
-}
-
-/**
- * @param {TextValue} self
- * @param {[ TextValue ]} args
- * @param {Scope} scope 
- * @returns {NumberValue}
- */
-function textoÚltimaPosiciónDe(self, [ texto ], scope) {
-	if(texto.kind !== ValueKinds.TEXT)
-		throw scope.interpreter.TuberInterpreterError('Se esperaba un Texto válido como argumento de búsqueda de sub-texto');
-	
-	return makeNumber(self.value.lastIndexOf(texto.value));
-}
-
-/**
- * @param {TextValue} self
- * @param {[ TextValue ]} args
- * @param {Scope} scope 
- * @returns {BooleanValue}
- */
-function textoComienzaCon(self, [ texto ], scope) {
-	if(texto?.kind !== ValueKinds.TEXT)
-		throw scope.interpreter.TuberInterpreterError('Se esperaba un Texto válido como argumento de comprobación de sub-texto');
-	
-	return makeBoolean(self.value.startsWith(texto.value));
-}
-
-/**
- * @param {TextValue} self
- * @param {[ TextValue ]} args
- * @param {Scope} scope 
- * @returns {BooleanValue}
- */
-function textoTerminaCon(self, [ texto ], scope) {
-	if(texto?.kind !== ValueKinds.TEXT)
-		throw scope.interpreter.TuberInterpreterError('Se esperaba un Texto válido como argumento de comprobación de sub-texto');
-	
-	return makeBoolean(self.value.endsWith(texto.value));
-}
-
-/**
- * @param {TextValue} self
- * @param {[ TextValue ]} args
- * @param {Scope} scope 
- * @returns {BooleanValue}
- */
-function textoContiene(self, [ texto ], scope) {
-	if(texto?.kind !== ValueKinds.TEXT)
-		throw scope.interpreter.TuberInterpreterError('Se esperaba un Texto válido como argumento de comprobación de sub-texto');
-	
-	return makeBoolean(self.value.includes(texto.value));
-}
-
-/**
- * @param {TextValue} self
- * @param {[ NumberValue ]} args
- * @param {Scope} scope 
- * @returns {TextValue}
- */
-function textoRepetido(self, [ veces ], scope) {
-	if(veces.kind !== ValueKinds.NUMBER || !isInternalOperable(veces.value))
-		throw scope.interpreter.TuberInterpreterError('Se esperaba un Número válido como argumento de repeticiones de Texto');
-	let pos = Math.floor(veces.value);
-	if(pos < 0 || (pos * self.value.length) > 1024)
-		throw scope.interpreter.TuberInterpreterError('Se esperaba un Número positivo hasta 1024 como argumento de repeticiones de Texto');
-
-	return makeText(self.value.repeat(pos));
 }
 
 /**
@@ -163,42 +153,44 @@ function textoReemplazar(self, [ocurrencia, reemplazo], scope) {
 
 /**
  * @param {TextValue} self
+ * @param {[ NumberValue ]} args
+ * @param {Scope} scope 
+ * @returns {TextValue}
+ */
+function textoRepetido(self, [ veces ], scope) {
+	const vecesResult = expectParam('veces', veces, ValueKinds.NUMBER, scope);
+
+	let times = Math.floor(vecesResult.value);
+	if(times < 0 || (times * self.value.length) > 1024)
+		throw scope.interpreter.TuberInterpreterError('Se esperaba un Número positivo hasta 1024 como argumento de repeticiones de Texto');
+
+	return makeText(self.value.repeat(times));
+}
+
+/**
+ * @param {TextValue} self
  * @param {[ TextValue ]} args
  * @param {Scope} scope 
- * @returns {ListValue}
+ * @returns {BooleanValue}
  */
-function textoPartir(self, [separador], scope) {
-	if(separador.kind !== ValueKinds.TEXT)
-		throw scope.interpreter.TuberInterpreterError('Se esperaba un Texto válido como argumento separador de Texto');
+function textoTerminaCon(self, [ texto ], scope) {
+	if(texto?.kind !== ValueKinds.TEXT)
+		throw scope.interpreter.TuberInterpreterError('Se esperaba un Texto válido como argumento de comprobación de sub-texto');
 	
-	return makeList(self.value.split(separador.value).map(split => makeText(split)));
+	return makeBoolean(self.value.endsWith(texto.value));
 }
 
 /**
  * @param {TextValue} self
- * @param {[ NumberValue, NumberValue ]} args
+ * @param {[ TextValue ]} args
  * @param {Scope} scope 
- * @returns {TextValue}
+ * @returns {NumberValue}
  */
-function textoCortar(self, [ inicio, fin ], scope) {
-	if(inicio == undefined || inicio.kind !== ValueKinds.NUMBER || !isInternalOperable(inicio.value))
-		throw scope.interpreter.TuberInterpreterError('Se esperaba un Número válido como primer argumento de recorte de Texto');
-	if(fin == undefined)
-		return makeText(self.value.slice(inicio.value));
-	if(fin.kind !== ValueKinds.NUMBER || !isInternalOperable(fin.value))
-		throw scope.interpreter.TuberInterpreterError('Se esperaba un Número válido como segundo argumento de recorte de Texto');
-
-	return makeText(self.value.slice(inicio.value, fin.value));
-}
-
-/**
- * @param {TextValue} self
- * @param {[]} args
- * @param {Scope} scope 
- * @returns {TextValue}
- */
-function textoNormalizar(self, [], scope) {
-	return makeText(self.value.trim());
+function textoÚltimaPosiciónDe(self, [ texto ], scope) {
+	if(texto.kind !== ValueKinds.TEXT)
+		throw scope.interpreter.TuberInterpreterError('Se esperaba un Texto válido como argumento de búsqueda de sub-texto');
+	
+	return makeNumber(self.value.lastIndexOf(texto.value));
 }
 
 /**@type Map<String, import('../../values').NativeFunction<TextValue>>>*/
@@ -213,20 +205,23 @@ textMethods
 	.set('aMinúsculas', textoAMinúsculas)
 	.set('aMayusculas', textoAMayúsculas)
 	.set('aMayúsculas', textoAMayúsculas)
+	.set('aRepetida', textoRepetido)
+	.set('aRepetido', textoRepetido)
 	.set('caracterEn', textoCaracterEn)
+	.set('comienzaCon', textoComienzaCon)
+	.set('contiene', textoContiene)
+	.set('cortar', textoCortar)
+	.set('incluye', textoContiene)
+	.set('normalizar', textoNormalizar)
+	.set('partir', textoPartir)
 	.set('posicionDe', textoPosiciónDe)
 	.set('posiciónDe', textoPosiciónDe)
-	.set('ultimaPosicionDe', textoÚltimaPosiciónDe)
-	.set('últimaPosiciónDe', textoÚltimaPosiciónDe)
-	.set('comienzaCon', textoComienzaCon)
-	.set('terminaCon', textoTerminaCon)
-	.set('contiene', textoContiene)
-	.set('repetido', textoRepetido)
-	.set('repetida', textoRepetido)
 	.set('reemplazar', textoReemplazar)
-	.set('partir', textoPartir)
-	.set('cortar', textoCortar)
-	.set('normalizar', textoNormalizar);
+	.set('repetida', textoRepetido)
+	.set('repetido', textoRepetido)
+	.set('terminaCon', textoTerminaCon)
+	.set('ultimaPosicionDe', textoÚltimaPosiciónDe)
+	.set('últimaPosiciónDe', textoÚltimaPosiciónDe);
 
 module.exports = {
 	textMethods,
