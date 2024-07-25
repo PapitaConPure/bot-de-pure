@@ -149,10 +149,11 @@ function calculatePositionOffset(value, length) {
 }
 
 /**
- * @param {String} name
- * @param {import('../values').FunctionValue} fn
- * @param {Scope} scope
- * @returns {(...args: Array<import('../values').RuntimeValue>) => import('../values').RuntimeValue}
+ * Dispone una evaluación de llamado de PuréScript por medio de una Función nativa
+ * @param {String} name 
+ * @param {import('../values').FunctionValue} fn 
+ * @param {Scope} scope 
+ * @returns {(...args: Array<import('../values').RuntimeValue>) => import('../values').RuntimeValue} Una Función que recibe parámetros RuntimeValue y realiza una evaluación de PuréScript
  */
 function makePredicateFn(name, fn, scope) {
 	const it = scope.interpreter;
