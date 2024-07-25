@@ -1,7 +1,37 @@
 const { TokenKinds } = require('../lexer/tokens');
 const { Scope } = require('./scope');
-const { makeText, makeNada, coerceValue, defaultValueOf, ValueKinds, ValueKindTranslationLookups } = require('./values');
+const { makeText, makeNada, coerceValue, defaultValueOf, ValueKinds, ValueKindTranslationLookups, makeNumber, makeBoolean } = require('./values');
 const { ValueKindLookups } = require('./lookups');
+
+const boolWords = {
+	TRUE: [
+		'verdadero',
+		'encendido',
+		'prendido',
+		'si',
+		'verdad',
+		'activado',
+		'activo',
+		'true',
+		'yes',
+		'on',
+		'enabled',
+		'1',
+		'o',
+	],
+	FALSE: [
+		'falso',
+		'apagado',
+		'no',
+		'desactivado',
+		'inactivo',
+		'false',
+		'off',
+		'disabled',
+		'0',
+		'x',
+	],
+};
 
 class Input {
 	/**@type {String}*/
@@ -112,10 +142,24 @@ class InputReader {
 	 */
 	constructor(interpreter, args) {
 		this.interpreter = interpreter;
-		this.#args = args.slice();
+		this.#args = [];
 		this.#inputStack = [];
 		this.#inputLookup = new Map();
 		this.#spreadInput = null;
+		
+		let arg, delim;
+		for(let i = 0; i < args.length; i++) {
+			arg = args[i];
+
+			if((arg.startsWith('"') && (delim = '"')) || (arg.startsWith("'") && (delim = "'"))) {
+				while(!arg.endsWith(delim) && ++i < args.length)
+					arg += ' ' + args[i];
+					
+				arg = arg.slice(1, -1);
+			}
+
+			this.#args.push(arg);
+		}
 	}
 
 	get hasArgs() {
@@ -272,19 +316,56 @@ class ProductionInputReader extends InputReader {
 		
 		let receptionValue;
 		if(arg != null)
-			receptionValue = makeText(arg);
-		else if(optional)
-			receptionValue = (fallback != null)
-				? this.interpreter.evaluate(fallback, scope)
-				: defaultValueOf(valueKind);
-		else
+			receptionValue = this.#getValueFromArg(name, arg, valueKind);
+		else if(optional) {
+			try {
+				receptionValue = (fallback != null)
+					? this.interpreter.evaluateAs(fallback, scope, valueKind)
+					: defaultValueOf(valueKind);
+			} catch {
+				throw TuberInputError(`Se recibió una Entrada con formato inválido. Se esperaba un valor conversible a ${dataKind.translated}, pero se recibió: \`${arg}\``);
+			}
+		} else
 			throw TuberInputError(`No se recibió un valor para la Entrada obligatoria \`${name}\` de ${dataKind.translated}`);
 
-		try {
-			const coercedValue = coerceValue(this.interpreter, receptionValue, valueKind);
-			return modifier(coercedValue, this.interpreter, scope);
-		} catch {
-			throw TuberInputError(`Se recibió una Entrada con formato inválido. Se esperaba un valor conversible a ${dataKind.translated}, pero se recibió: \`${arg}\``);
+		return modifier(receptionValue, this.interpreter, scope);
+	}
+
+	/**
+	 * 
+	 * @param {String} name 
+	 * @param {String} arg 
+	 * @param {import('./values').ValueKind} valueKind
+	 * @returns {import('./values').RuntimeValue}
+	 */
+	#getValueFromArg(name, arg, valueKind) {
+		switch(valueKind) {
+		case ValueKinds.NUMBER: {
+			const narg = +arg;
+
+			if(isNaN(narg))
+				throw TuberInputError(`Se esperaba un Número para la entrada \`${name}\``);
+
+			return makeNumber(narg);
+		}
+
+		case ValueKinds.TEXT:
+			return makeText(arg);
+
+		case ValueKinds.BOOLEAN: {
+			const lowerArg = arg.toLowerCase();
+
+			if(boolWords.TRUE.includes(lowerArg))
+				return makeBoolean(true);
+			
+			if(boolWords.FALSE.includes(lowerArg))
+				return makeBoolean(false);
+
+			throw TuberInputError(`Se esperaba un valor Lógico ("verdadero" o "falso", "si" o "no", etc...) para la entrada \`${name}\`. Sin embargo, se recibió: \`${arg}\``);
+		}
+
+		default:
+			throw 'Tipo de Entrada inválido detectado en lugar inesperado';
 		}
 	}
 }
