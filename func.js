@@ -246,6 +246,111 @@ module.exports = {
     },
 
     /**
+     * 
+     * @param {Discord.Guild} guild 
+     */
+    calculateRealMemberCount: async function(guild) {
+        const members = await guild.members.fetch().catch(_ => guild.members.cache);
+        return members.filter(member => !member.user.bot).size;
+    },
+
+    /**
+     * @typedef {Object} CanvasTextDrawAreaOptions
+     * @property {Canvas.CanvasTextAlign} [halign] Alineado horizontal del área de texto
+     * @property {Canvas.CanvasTextBaseline} [valign] Alineado vertical del área de texto
+     * @property {Number} [maxSize] Regula el tamaño de fuente para que el texto no se pase de la tamaño horizontal máximo indicado en pixeles
+     */
+    /**
+     * @typedef {Object} CanvasTextDrawFillOptions
+     * @property {Boolean} [enabled] Habilita (`true`) o deshabilita (`false`) el relleno
+     * @property {Boolean} [onTop] Dibuja el relleno por encima (`true`) o por debajo (`false`) del contorno
+     * @property {String} [color] Color del relleno (hexadecimal con #)
+     */
+    /**
+     * @typedef {Object} CanvasTextDrawStrokeOptions
+     * @property {Boolean} [widthAsFactor] Indica si tratar el valor de width como un factor del tamaño de fuente (`true`) o tratarlo como pixeles absolutos (`falso`)
+     * @property {Number} [width] Ancho de contorno. Se escribe en pixeles si `widthAsFactor` es `false`; de lo contrario, se escribe como un factor del tamaño de fuente
+     * @property {String} [color] Color del contorno (hexadecimal con #)
+     */
+    /**
+     * @typedef {Object} CanvasTextDrawFontOptions
+     * @property {'headline'} [family] Tipografía
+     * @property {Number} [size] Tamaño de fuente
+     * @property {Array<'regular'|'bold'|'italic'|'underline'>} [styles] Estilos de fuente
+     */
+    /**
+     * @typedef {Object} CanvasTextDrawOptions
+     * @property {CanvasTextDrawAreaOptions} [area] Por defecto: `halign: 'center'` `valign: 'middle'`
+     * @property {CanvasTextDrawFillOptions} [fill] Por defecto: `enabled: true` `onTop: true` `color: '#ffffff'`
+     * @property {CanvasTextDrawStrokeOptions} [stroke] Por defecto: `widthAsFactor: false` `width: 0px` `color: '#000000'`
+     * @property {CanvasTextDrawFontOptions} [font] Por defecto: `family: 'headline'` `size: 12px` `styles: [ 'regular' ]`
+     */
+    /**
+     * Dibuja un avatar circular con Node Canvas
+     * @param {import('canvas').CanvasRenderingContext2D} ctx El Canvas context2D utilizado
+     * @param {Number} x La posición X del origen del texto
+     * @param {Number} y La posición Y del origen del texto
+     * @param {String} text El usuario del cual dibujar la foto de perfil
+     * @param {CanvasTextDrawOptions} options Opciones de renderizado de texto
+     * @returns {void}
+     */
+    drawText: function(ctx, x, y, text, options = {}) {
+        //#region Parámetros opcionales
+        options.area ??= {};
+        options.area.halign ??= 'left';
+        options.area.valign ??= 'top';
+        options.area.maxSize ??= ctx.canvas.width;
+
+        options.fill ??= {};
+        options.fill.enabled ??= true;
+        options.fill.onTop ??= true;
+        options.fill.color ??= '#ffffff';
+
+        options.stroke ??= {};
+        options.stroke.widthAsFactor ??= false;
+        options.stroke.width ??= 0;
+        options.stroke.color ??= '#000000';
+
+        options.font ??= {};
+        options.font.family ??= 'headline';
+        options.font.size ??= 12;
+        options.font.styles ??= [ 'regular' ];
+        //#endregion
+
+        const { halign, valign, maxSize } = options.area;
+        const { enabled: fillEnabled, onTop: fillOnTop, color: fillColor } = options.fill;
+        const { color: strokeColor, width: strokeWidth, widthAsFactor: strokeWidthAsFactor } = options.stroke;
+        const { family: fontFamily, size: fontSize, styles: fontStyles } = options.font;
+
+		ctx.textAlign = halign;
+        ctx.textBaseline = valign;
+
+        const dynamicStepSize = 2;
+        let dynamicFontSize = fontSize + dynamicStepSize;
+        do ctx.font = `${fontStyles.join(' ')} ${dynamicFontSize -= dynamicStepSize}px "${fontFamily}"`;
+        while(ctx.measureText(text).width > maxSize);
+
+        const fill = () => {
+            ctx.fillStyle = fillColor;
+            ctx.fillText(text, x, y);
+        };
+        const stroke = () => {
+            ctx.lineWidth = Math.ceil(strokeWidthAsFactor ? Math.ceil(fontSize * strokeWidth) : strokeWidth);
+            ctx.strokeStyle = strokeColor;
+            ctx.strokeText(text, x, y);
+        };
+        
+        if(fillEnabled && !fillOnTop)
+            fill();
+
+        if(strokeWidth > 0)
+            stroke();
+
+        if(fillEnabled && fillOnTop)
+            fill();
+    },
+
+    /**
      * @typedef {Object} CanvasAvatarDrawOptions
      * @property {String} [circleStrokeColor]
      * @property {Number} [circleStrokeFactor]
@@ -260,9 +365,10 @@ module.exports = {
      * @param {CanvasAvatarDrawOptions} options 
      * @returns {Promise<void>}
      */
-    dibujarAvatar: async function(ctx, user, xcenter, ycenter, radius, options = {}) {
+    drawCircularImage: async function(ctx, user, xcenter, ycenter, radius, options = {}) {
         options.circleStrokeColor ??= '#000000';
         options.circleStrokeFactor ??= 0.02;
+
         //Fondo
         ctx.fillStyle = '#36393f';
         ctx.arc(xcenter, ycenter, radius, 0, Math.PI * 2, true);
@@ -285,129 +391,226 @@ module.exports = {
 
     /**
      * 
-     * @param {Discord.GuildMember} miembro 
-     * @param {*} forceHourai 
-     * @returns 
+     * @param {Discord.GuildMember} member 
+     * @param {Boolean} forceSaki 
      */
-    dibujarBienvenida: async function(miembro, forceHourai = false) {
+    dibujarBienvenida: async function(member, forceSaki = false) {
         //Dar bienvenida a un miembro nuevo de un servidor
-        const servidor = miembro.guild; //Servidor
+        const guild = member.guild; //Servidor
 
-        const canal = servidor.systemChannel; //Canal de mensajes de sistema
+        const channel = guild.systemChannel; //Canal de mensajes de sistema
+
         //#region Comprobación de miembro y servidor
-        if(canal === undefined) {
+        if(guild.systemChannel == null) {
             console.log(chalk.blue('El servidor no tiene canal de mensajes de sistema.'));
-            servidor.fetchOwner().then(ow => ow.user.send({
+            guild.fetchOwner().then(ow => ow.user.send({
                 content:
                     '¡Hola, soy Bot de Puré!\n' +
-                    `¡Un nuevo miembro, **<@${miembro.id}> (${miembro.id})**, ha entrado a tu servidor **${servidor.name}**!\n\n` +
+                    `¡Un nuevo miembro, **${member} (${member.user.username} / ${member.id})**, ha entrado a tu servidor **${guild.name}**!\n\n` +
                     '*Si deseas que envíe una bienvenida a los miembros nuevos en lugar de enviarte un mensaje privado, selecciona un canal de mensajes de sistema en tu servidor.*\n' +
-                    '*__Nota:__ Bot de Puré no opera con mensajes privados.*'
+                    '-# Nota: Bot de Puré no opera con mensajes privados.'
             }));
             return;
         }
 
-        console.log(concol.purple`Un usuario ha entrado a ${servidor.name}...`);
-        if(!servidor.members.me.permissionsIn(canal).has([ 'SendMessages', 'ViewChannel' ])) {
-            console.log(chalk.red('No se puede enviar un mensaje de bienvenida en este canal.'));
+        if(!guild.members.me.permissionsIn(channel).has([ 'SendMessages', 'ViewChannel' ]))
             return;
-        }
-        canal.sendTyping();
+
+        console.log(concol.purple`Un usuario ha entrado a ${guild.name}...`);
         //#endregion
-        
-        //#region Creación de imagen
+
+        await channel.sendTyping();
+
+        if(forceSaki || guild.id === global.serverid.saki)
+            module.exports.drawWelcomeSaki(member, { force: forceSaki });
+        else 
+            module.exports.drawWelcomeStandard(member);
+    },
+
+    /**
+     * 
+     * @param {Discord.GuildMember} member 
+     */
+    drawWelcomeStandard: async function(member) {
+        const { guild, user, displayName } = member;
+        const channel = guild.systemChannel;
+
+        //Creación de imagen
         const canvas = Canvas.createCanvas(1275, 825);
         const ctx = canvas.getContext('2d');
 
-        const fondo = await Canvas.loadImage((servidor.id === global.serverid.saki) ? global.hourai.images.welcome : images.announcements.welcome);
+        const fondo = await Canvas.loadImage(images.announcements.welcome);
         ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
-        //#endregion
 
         //#region Texto
-        //#region Propiedades de texto
+        //#region Propiedades Básicas de texto
         const strokeFactor = 0.09;
-        ctx.fillStyle = '#ffffff';
-        ctx.strokeStyle = '#000000';
+        const maxSize = canvas.width * 0.9;
+        const vmargin = 15;
+
+        /**@type {CanvasTextDrawStrokeOptions}*/
+        const defaultStroke = {
+            widthAsFactor: true,
+            width: strokeFactor,
+            color: '#000000',
+        };
+
+        /**@type {CanvasTextDrawFontOptions}*/
+        const defaultFont = {
+            family: 'headline',
+            size: 100,
+            styles: [ 'bold' ],
+        };
         //#endregion
 
-        //#region Nombre del usuario
-        ctx.textBaseline = 'top';
-		ctx.textAlign = 'center';
-        const xcenter = canvas.width / 2;
-        let Texto = `${miembro.displayName}`;
-        let fontSize = 100;
-        ctx.font = `bold ${fontSize}px "headline"`;
-        console.log(fontSize);
-        ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
-        ctx.strokeText(Texto, xcenter, 15);
-        ctx.fillText(Texto, xcenter, 15);
-        //#endregion
+        //Nombre del miembro
+        module.exports.drawText(ctx, canvas.width / 2, vmargin, `${displayName}`, {
+            area: { halign: 'center', valign: 'top', maxSize },
+            stroke: defaultStroke,
+            font: defaultFont,
+        });
+
+        //Complemento encima del Nombre de Servidor
+        module.exports.drawText(ctx, canvas.width / 2, canvas.height - 105 - vmargin, '¡Bienvenid@ a', {
+            area: { halign: 'center', valign: 'bottom', maxSize },
+            stroke: { ...defaultStroke, width: 56 * strokeFactor },
+            font: { ...defaultFont, size: 56 },
+        });
         
-        //#region Texto inferior
-        ctx.textBaseline = 'bottom';
-        if(servidor.id === global.serverid.ar) Texto = 'Animal Realm!';
-        else Texto = `${servidor.name}!`;
-        fontSize = 100;
-        ctx.font = `bold ${fontSize}px "headline"`;
-        ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
-        ctx.strokeText(Texto, xcenter, canvas.height - 15);
-        ctx.fillText(Texto, xcenter, canvas.height - 15);
-        Texto = '¡Bienvenid@ a';
-        ctx.lineWidth = Math.ceil(56 * strokeFactor);
-        ctx.font = `bold 56px "headline"`;
-        ctx.strokeText(Texto, xcenter, canvas.height - fontSize - 20);
-        ctx.fillText(Texto, xcenter, canvas.height - fontSize - 20);
+        //Nombre de Servidor
+        module.exports.drawText(ctx, canvas.width / 2, canvas.height - vmargin, `${guild.name}!`, {
+            area: { halign: 'center', valign: 'bottom', maxSize },
+            stroke: defaultStroke,
+            font: defaultFont,
+        });
         //#endregion
-        //#endregion
-        
-        await module.exports.dibujarAvatar(ctx, miembro.user, canvas.width / 2, (canvas.height - 56) / 2, 200, { circleStrokeFactor: strokeFactor });
+
+        //Foto de perfil
+        await module.exports.drawCircularImage(ctx, user, canvas.width / 2, (canvas.height - 56) / 2, 200, { circleStrokeFactor: strokeFactor });
         
         const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'bienvenida.png' });
 
-        //#region Imagen y Mensaje extra
-        const members = await servidor.members.fetch().catch(_ => servidor.members.cache);
-        const peoplecnt = members.filter(member => !member.user.bot).size;
-        if(forceHourai || servidor.id === global.serverid.saki) {
-            const hourai = await Hourai.findOne() || new Hourai();
-            //@ts-expect-error
-            if(hourai.configs?.bienvenida == false)
-                return;
-            
-            await canal.send({files: [imagen]});
+        const [ peoplecnt ] = await Promise.all([
+            this.calculateRealMemberCount(guild),
+            channel.send({ files: [imagen] }),
+        ]);
 
-            const toSend = [
-                `Wena po <@${miembro.user.id}> conchetumare, como estai.`,
-                'Como tradición, elige un color con el menú de abajo <:mayuwu:1107843515385389128>',
-                'Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:1107847991580164106>',
-            ];
-
-            //@ts-expect-error
-            if(hourai.configs?.pingBienvenida)
-                toSend.push('<@&1107831054791876694>, vengan a saludar po maricones <:hl:797294230359375912><:miyoi:1107848008005062727><:hr:797294230463840267>');
-
-            toSend.push(`*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:1107880958981587004>`);
-            toSend.push(global.hourai.images.colors);
-
-            hourai.save().catch(_ => undefined);
-
-            return canal.send({
-                content: toSend.join('\n'),
-                // @ts-expect-error
-                components: [colorsRow],
-            }).then(sent => {
-                setTimeout(module.exports.askForRole, 1000, miembro, canal, 3 * 4);
-                console.log('Esperando evento personalizado de Saki Scans en unos minutos...');
-                return sent;
-            });
-        } else
-            await canal.send({files: [imagen]});
-        
-        return canal.send({
+        return channel.send({
             content:
-                `¡Bienvenido al servidor **${miembro.displayName}**!\n` +
-                `*Ahora hay **${peoplecnt}** usuarios en el server.*`
+                `¡Bienvenido al servidor **${displayName}**!\n` +
+                `-# Ahora hay **${peoplecnt}** usuarios en el server.`
+        });
+    },
+
+    /**
+     * @typedef {Object} SakiWelcomeDrawOptions
+     * @property {Boolean} [force]
+     */
+    /**
+     * 
+     * @param {Discord.GuildMember} member 
+     * @param {SakiWelcomeDrawOptions} [options]
+     */
+    drawWelcomeSaki: async function(member, options = {}) {
+        options.force ??= false;
+
+        const saki = (await Hourai.findOne()) || new Hourai();
+        
+        //@ts-expect-error
+        if(!options.force && saki.configs?.bienvenida == false)
+            return;
+
+        const { guild, user, displayName } = member;
+        const channel = guild.systemChannel;
+
+        //Creación de imagen
+        const canvas = Canvas.createCanvas(1366, 768);
+        const ctx = canvas.getContext('2d');
+
+        const fondo = await Canvas.loadImage(global.hourai.images.welcome);
+        ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+
+        //#region Texto
+        //#region Propiedades Básicas de texto
+        const strokeFactor = 0.09;
+        const maxSize = canvas.width * 0.6;
+        const vmargin = 40;
+
+        /**@type {CanvasTextDrawStrokeOptions}*/
+        const defaultStroke = {
+            widthAsFactor: true,
+            width: strokeFactor,
+            color: '#000000',
+        };
+
+        /**@type {CanvasTextDrawFontOptions}*/
+        const defaultFont = {
+            family: 'headline',
+            size: 100,
+            styles: [ 'bold' ],
+        };
+        //#endregion
+
+        //Nombre del miembro
+        module.exports.drawText(ctx, canvas.width * 0.334, vmargin, `${displayName}`, {
+            area: { halign: 'center', valign: 'top', maxSize },
+            stroke: defaultStroke,
+            font: defaultFont,
+        });
+
+        // ctx.font = 'bold 100px "headline"';
+        // const guildText = `${guild.name}!`;
+        // const xcenterGuild = canvas.width - 15 - ctx.measureText(guildText).width * 0.5;
+        const xcenterGuild = canvas.width * 0.667;
+
+        //Complemento encima del Nombre de Servidor
+        module.exports.drawText(ctx, xcenterGuild, canvas.height - 105 - vmargin, '¡Bienvenid@ a', {
+            area: { halign: 'center', valign: 'bottom', maxSize },
+            stroke: defaultStroke,
+            font: { ...defaultFont, size: 56 },
+        });
+        
+        //Nombre de Servidor
+        module.exports.drawText(ctx, xcenterGuild, canvas.height - vmargin, `${guild.name}!`, {
+            area: { halign: 'center', valign: 'bottom', maxSize },
+            stroke: defaultStroke,
+            font: defaultFont,
         });
         //#endregion
+
+        //Foto de perfil
+        await module.exports.drawCircularImage(ctx, user, canvas.width * 0.334, canvas.height * 0.5, 200, { circleStrokeFactor: strokeFactor });
+        
+        const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'bienvenida.png' });
+
+        const [ peoplecnt ] = await Promise.all([
+            this.calculateRealMemberCount(guild),
+            channel.send({ files: [imagen] }),
+        ]);
+
+        const toSend = [
+            `Wena po <@${user.id}> conchetumare, como estai.`,
+            'Como tradición, elige un color con el menú de abajo <:mayuwu:1107843515385389128>',
+            '-# Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:1107847991580164106>',
+        ];
+
+        //@ts-expect-error
+        if(saki.configs?.pingBienvenida)
+            toSend.push('<@&1107831054791876694>, vengan a saludar po maricones <:hl:797294230359375912><:miyoi:1107848008005062727><:hr:797294230463840267>');
+
+        toSend.push(`*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:1107880958981587004>`);
+        toSend.push(global.hourai.images.colors);
+
+        saki.save().catch(_ => undefined);
+
+        return channel.send({
+            content: toSend.join('\n'),
+            components: [colorsRow],
+        }).then(sent => {
+            setTimeout(module.exports.askForRole, 1000, member, channel, 3 * 4);
+            console.log('Esperando evento personalizado de Saki Scans en unos minutos...');
+            return sent;
+        });
     },
 
     /**
@@ -462,7 +665,7 @@ module.exports = {
         //#endregion
         //#endregion
 
-        await module.exports.dibujarAvatar(ctx, miembro.user, canvas.width / 2, 80 + 200, 200, { circleStrokeFactor: strokeFactor });
+        await module.exports.drawCircularImage(ctx, miembro.user, canvas.width / 2, 80 + 200, 200, { circleStrokeFactor: strokeFactor });
 
         //#region Imagen y Mensaje extra
         const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'despedida.png' });
@@ -1115,8 +1318,6 @@ module.exports = {
         const whitespaces = [ ' ', '\n', '\t' ];
         let calculatedMax = max;
         while(calculatedMax < trueMax && !whitespaces.includes(text[calculatedMax])) calculatedMax++;
-
-        console.log({ calculatedMax, length: text.length });
         
         if(calculatedMax + suspensor.length > hardMax)
             calculatedMax = hardMax - suspensor.length;
@@ -1125,6 +1326,46 @@ module.exports = {
             return text;
 
         return `${text.slice(0, calculatedMax)}${suspensor}`;
+    },
+
+    /**
+     * @typedef {Object} SmartShortenStructDefinition
+     * @prop {String} start
+     * @prop {String} end
+     * @prop {Boolean} dynamic
+     */
+    /**
+     * @typedef {Object} SmartShortenOptions
+     * @prop {Number} max
+     * @prop {Number} hardMax
+     * @prop {String} suspensor
+     * @prop {Array<SmartShortenStructDefinition>} structs
+     */
+    /**
+     * Limita un string a una cantidad definida de caracteres de forma inteligente (no recorta palabras ni estructuras).
+     * @param {String} text 
+     * @param {Partial<SmartShortenOptions>} options
+     * @returns {String}
+     */
+    shortenTextSmart: function(text, options) {
+        options ??= {};
+        options.max ??= 200;
+        options.hardMax ??= 256;
+        options.suspensor ??= '...';
+        options.structs ??= [];
+        const { max, hardMax, suspensor } = options;
+
+        if(text.length < max)
+            return text;
+
+        const trueHardMax = Math.min(text.length, hardMax);
+        
+        const whitespaceOffset = /\s/.exec(text.slice(max, trueHardMax - suspensor.length)).index;
+        const trueMax = max + (whitespaceOffset > 0 ? whitespaceOffset : 0);
+
+        //PENDIENTE
+
+        return `${text.slice(0, trueMax)}${suspensor}`;
     },
 
     /**
