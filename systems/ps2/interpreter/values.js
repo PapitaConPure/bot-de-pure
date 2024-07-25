@@ -274,7 +274,7 @@ ValueKindTranslationLookups
 	.set(ValueKinds.NUMBER, 'Número')
 	.set(ValueKinds.TEXT, 'Texto')
 	.set(ValueKinds.BOOLEAN, 'Lógico')
-	.set(ValueKinds.LIST, 'List')
+	.set(ValueKinds.LIST, 'Lista')
 	.set(ValueKinds.REGISTRY, 'Registro')
 	.set(ValueKinds.EMBED, 'Marco')
 	.set(ValueKinds.FUNCTION, 'Función')
