@@ -6,6 +6,7 @@ const { StatementKinds } = require('../ast/statements');
 const { ValueKinds, makeNumber, makeText, makeBoolean, makeList, makeRegistry, makeEmbed, makeNada, coerceValue, isInternalOperable, makeNativeFunction, makeFunction, makeLambda, ValueKindTranslationLookups, defaultValueOf } = require('./values');
 const { UnaryOperationLookups, BinaryOperationLookups, ValueKindLookups } = require('./lookups');
 const { NativeMethodsLookup } = require('./environment/environment');
+const { shortenText } = require('../../../func');
 const Ut = require('../../../utils');
 
 const Stops = /**@type {const}*/({
@@ -754,12 +755,16 @@ class Interpreter {
 		
 		if(reception == null) {
 			if(!operator.isAny(TokenKinds.ADD, TokenKinds.SUBTRACT))
-				throw this.TuberInterpreterError('La omisión del valor de recepción en una sentencia de asignación solo puede hacerse con los indicadores de Sentencia "SUMAR" y "RESTAR"', operator);
+				throw this.TuberInterpreterError('La omisión del valor de recepción en una sentencia de asignación solo puede hacerse con los indicadores de Sentencia \`SUMAR\` y \`RESTAR\`', operator);
 
 			receptionValue = makeNumber(1);
 			implicit = true;
-		} else
+		} else {
 			receptionValue = this.evaluate(reception, scope, false);
+			
+			if(this.is(receptionValue, ValueKinds.FUNCTION))
+				receptionValue.name = shortenText(this.astString(receptor), 96);
+		}
 
 		if(operator.is(TokenKinds.EXTEND)) {
 			const receptorValue = this.evaluate(receptor, scope, false);
@@ -909,17 +914,7 @@ class Interpreter {
 			return makeLambda(node.body, node.args);
 
 		const fnValue = makeFunction(node.body, node.args, new Scope(this).include(scope));
-
-		let name = '[Función]';
-		const variables = scope.variables.entries();
-		for(const [ identifier, variable ] of variables) {
-			if(variable.equals(fnValue)) {
-				name = identifier;
-				break;
-			}
-		}
-
-		fnValue.name = name;
+		fnValue.name = '[Función]';
 		return fnValue;
 	}
 
@@ -1164,7 +1159,7 @@ class Interpreter {
 				else if(arg.optional)
 					value = this.evaluate(arg.fallback, scope);
 				else
-					throw this.TuberInterpreterError(`Se esperaba un valor para el argumento "${arg.identifier}" de la Función ${fnValue.name}`, arg);
+					throw this.TuberInterpreterError(`Se esperaba un valor para el parámetro \`${arg.identifier}\` de la Función \`${fnValue.name}\``, arg);
 
 				fnScope.declareVariable(arg.identifier, ValueKinds.NADA);
 				fnScope.assignVariable(arg.identifier, value);
