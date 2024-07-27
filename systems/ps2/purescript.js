@@ -9,6 +9,7 @@ const { ValueKinds, coerceValue, makeNada } = require('./interpreter/values');
 const { declareNatives, declareContext } = require('./interpreter/environment/environment');
 const { EmbedBuilder, Colors, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
 const { shortenText } = require('../../func');
+const { default: sizeof } = require('object-sizeof');
 
 const CURRENT_PS_VERSION = 1.1;
 
@@ -64,7 +65,6 @@ const interpreter = new Interpreter();
 
 /**
  * Evalua el tipo de Tubérculo (básico o avanzado) y lo ejecuta. Si es avanzado, se ejecutará con PuréScript
- * @function
  * @param {import('../../commands/Commons/typings.js').ComplexCommandRequest} request
  * @param {Tubercle} tuber 
  * @param {TuberExecutionOptions} [inputOptions]
@@ -105,12 +105,12 @@ async function executeTuber(request, tuber, inputOptions) {
         logOptions.interpreter && console.log(`Resultado: ${stringifyPSAST(result)}`);
     } catch(error) {
         const errorNames = {
-            'TuberVersionError':     { color: Colors.Greyple, icon: '🏚️', translation: `Se requiere actualización de PuréScript: ${tuber.psVersion} → ${CURRENT_PS_VERSION}` },
-            'TuberInputError':       { color: Colors.Blue, icon: '📥', translation: 'Problema de Entrada de Usuario' },
-            'TuberLexerError':       { color: Colors.Yellow, icon: '⚠️', translation: 'Error en tiempo de análisis léxico' },
-            'TuberParserError':      { color: Colors.Orange, icon: '⚠️', translation: 'Error en tiempo de análisis sintáctico' },
-            'TuberInterpreterError': { color: Colors.Red, icon: '⚠️', translation: 'Error en tiempo de ejecución' },
-            'TuberSendError':        { color: Colors.Orange, icon: '❌', translation: 'Error de envío' },
+            'TuberVersionError':     { color: Colors.Greyple, icon: '🏚️', translation: `Se requiere actualizar PuréScript: ${tuber.psVersion} → ${CURRENT_PS_VERSION}` },
+            'TuberInputError':       { color: Colors.Blue,    icon: '📥', translation: 'Problema de Entrada de Usuario' },
+            'TuberLexerError':       { color: Colors.Yellow,  icon: '⚠️', translation: 'Error en tiempo de análisis léxico' },
+            'TuberParserError':      { color: Colors.Orange,  icon: '⚠️', translation: 'Error en tiempo de análisis sintáctico' },
+            'TuberInterpreterError': { color: Colors.Red,     icon: '⚠️', translation: 'Error en tiempo de ejecución' },
+            'TuberSendError':        { color: Colors.Orange,  icon: '❌', translation: 'Error de envío' },
         };
         const err = errorNames[error.name];
         const errorColor = err?.color ?? 0x0000ff;
@@ -195,7 +195,26 @@ async function executeTuber(request, tuber, inputOptions) {
             tuber.inputs.push(inputStack);
     }
 
-    tuber.saved = saveTable;
+    let mergedSaveData;
+    if(typeof tuber.saved === 'object')
+        mergedSaveData = new Map(Object.entries(tuber.saved));
+    else
+        mergedSaveData = new Map();
+
+    for(const [ id, value ] of saveTable)
+        if(value.kind === ValueKinds.NADA)
+            mergedSaveData.delete(id);
+        else
+            mergedSaveData.set(id, value);
+
+    const maxKiBytes = 256;
+    const savedBytes = sizeof(mergedSaveData);
+    if(savedBytes >= maxKiBytes * 1024) {
+        return sendDatabaseError(request,
+            `Límite de tamaño de guardado excedido. Los datos que se guardan no deben superar los **${maxKiBytes}KiB**\nTu Tubérculo guarda un total de **${savedBytes / 1024}KiB** en datos propios`);
+    }
+
+    tuber.saved = mergedSaveData;
 
     await request.editReply(replyObject).catch(async () => {
         await request.editReply({ content: `⚠️ No se puede enviar el mensaje. Revisa el largo y la validez de los datos` });
@@ -209,6 +228,25 @@ function TuberVersionError(message) {
     const err = new Error(message);
     err.name = 'TuberVersionError';
     return err;
+}
+
+/**
+ * @param {import('../../commands/Commons/typings.js').ComplexCommandRequest} request
+ */
+function sendDatabaseError(request, message = '_Este error no tiene descripción_') {
+    const embed = new EmbedBuilder()
+        .setTitle(`🧳 TuberDatabaseError`)
+        .setColor(0x9b59b6)
+        .setAuthor({
+            name: 'Error de PuréScript',
+            iconURL: request.client.user.avatarURL({ size: 128 })
+        })
+        .addFields({
+            name: 'Error de Guardado de Base de Datos',
+            value: message,
+        });
+        
+    return request.editReply({ embeds: [embed] });
 }
 
 module.exports = {
