@@ -534,7 +534,7 @@ module.exports = {
         //#region Propiedades Básicas de texto
         const strokeFactor = 0.09;
         const maxSize = canvas.width * 0.6;
-        const vmargin = 40;
+        const vmargin = 15;
 
         /**@type {CanvasTextDrawStrokeOptions}*/
         const defaultStroke = {
@@ -552,7 +552,7 @@ module.exports = {
         //#endregion
 
         //Nombre del miembro
-        module.exports.drawText(ctx, canvas.width * 0.334, vmargin, `${displayName}`, {
+        module.exports.drawText(ctx, canvas.width * 0.5, vmargin, `${displayName}`, {
             area: { halign: 'center', valign: 'top', maxSize },
             stroke: defaultStroke,
             font: defaultFont,
@@ -561,7 +561,7 @@ module.exports = {
         // ctx.font = 'bold 100px "headline"';
         // const guildText = `${guild.name}!`;
         // const xcenterGuild = canvas.width - 15 - ctx.measureText(guildText).width * 0.5;
-        const xcenterGuild = canvas.width * 0.667;
+        const xcenterGuild = canvas.width * 0.5;
 
         //Complemento encima del Nombre de Servidor
         module.exports.drawText(ctx, xcenterGuild, canvas.height - 105 - vmargin, '¡Bienvenid@ a', {
@@ -579,7 +579,7 @@ module.exports = {
         //#endregion
 
         //Foto de perfil
-        await module.exports.drawCircularImage(ctx, user, canvas.width * 0.334, canvas.height * 0.5, 200, { circleStrokeFactor: strokeFactor });
+        await module.exports.drawCircularImage(ctx, user, canvas.width * 0.5, (canvas.height - 56) * 0.5, 200, { circleStrokeFactor: strokeFactor * 0.75 });
         
         const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'bienvenida.png' });
 
