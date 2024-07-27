@@ -352,6 +352,10 @@ class Interpreter {
 		case StatementKinds.ASSIGNMENT:
 			returnValue = this.#evaluateAssignmentStatement(node, scope);
 			break;
+			
+		case StatementKinds.DELETE:
+			returnValue = this.#evaluateDeleteStatement(node, scope);
+			break;
 
 		case StatementKinds.RETURN:
 			returnValue = this.#evaluateReturnStatement(node, scope);
@@ -711,6 +715,7 @@ class Interpreter {
 		const { identifier, expression } = node;
 
 		const value = this.evaluate(expression, scope);
+		
 		if(!this.isAnyOf(value, ValueKinds.NUMBER, ValueKinds.TEXT, ValueKinds.BOOLEAN, ValueKinds.LIST, ValueKinds.REGISTRY)) {
 			const kindStr = ValueKindTranslationLookups.get(value.kind) ?? 'Desconocido';
 			throw this.TuberInterpreterError(`Tipo de dato inválido al intentar guardar un valor bajo el nombre: \`${identifier}\`. El tipo del valor recibido fue: _${kindStr}_`, expression);
@@ -718,6 +723,19 @@ class Interpreter {
 
 		this.#saveTable.set(identifier, value);
 
+		return makeNada();
+	}
+
+	/**
+	 * Evalúa una sentencia de borrado de variable guardada.
+	 * 
+	 * La variable se borra de la base de datos para no recuperarla en ejecuciones subsecuentes
+	 * @param {import('../ast/statements').DeleteStatement} node 
+	 * @param {Scope} scope 
+	 */
+	#evaluateDeleteStatement(node, scope) {
+		const { identifier } = node;
+		this.#saveTable.set(identifier, makeNada());
 		return makeNada();
 	}
 
@@ -840,7 +858,7 @@ class Interpreter {
 
 		if(conditionValue.value) {
 			this.#stop = Stops.ABORT;
-			this.#sendStack.push(stopMessageValue);
+			this.#sendStack = [ stopMessageValue ];
 			return stopMessageValue;
 		}
 

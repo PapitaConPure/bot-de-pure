@@ -30,6 +30,7 @@ const TokenKinds = /**@type {const}*/({
 	MULTIPLY: 'Multiply',
 	DIVIDE: 'Divide',
 	EXTEND: 'Extend',
+	DELETE: 'Delete',
 	EXECUTE: 'Execute',
 	RETURN: 'Return',
 	END: 'End',
@@ -114,6 +115,7 @@ TokenKindTranslations
 	.set(TokenKinds.MULTIPLY, 'Sentencia \`MULTIPLICAR\`')
 	.set(TokenKinds.DIVIDE, 'Sentencia \`DIVIDIR\`')
 	.set(TokenKinds.EXTEND, 'Sentencia \`EXTENDER\`')
+	.set(TokenKinds.DELETE, 'Sentencia \`BORRAR\`')
 	.set(TokenKinds.EXECUTE, 'Sentencia \`EJECUTAR\`')
 	.set(TokenKinds.RETURN, 'Sentencia \`DEVOLVER\`')
 	.set(TokenKinds.END, 'Sentencia \`TERMINAR\`')
@@ -195,6 +197,7 @@ const StatementVerbs = /**@type {const}*/([
 	TokenKinds.MULTIPLY,
 	TokenKinds.DIVIDE,
 	TokenKinds.EXTEND,
+	TokenKinds.DELETE,
 	TokenKinds.EXECUTE,
 	TokenKinds.RETURN,
 	TokenKinds.END,

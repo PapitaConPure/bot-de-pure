@@ -70,6 +70,7 @@ class Lexer {
 			{ match: 'multiplicar', kind: TokenKinds.MULTIPLY },
 			{ match: 'dividir', kind: TokenKinds.DIVIDE },
 			{ match: 'extender', kind: TokenKinds.EXTEND },
+			{ match: 'borrar', kind: TokenKinds.DELETE },
 			{ match: 'ejecutar', kind: TokenKinds.EXECUTE },
 			{ match: 'usar', kind: TokenKinds.EXECUTE },
 			{ match: 'devolver', kind: TokenKinds.RETURN },

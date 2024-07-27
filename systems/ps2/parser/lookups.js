@@ -27,6 +27,7 @@ const {
     parseDeclarationStatement,
     parseSaveStatement,
     parseAssignmentStatement,
+    parseDeleteStatement,
     parseReturnStatement,
     parseEndStatement,
     parseStopStatement,
@@ -101,6 +102,7 @@ function createLookups() {
     stmt(TokenKinds.SUBTRACT, parseAssignmentStatement);
     stmt(TokenKinds.MULTIPLY, parseAssignmentStatement);
     stmt(TokenKinds.DIVIDE, parseAssignmentStatement);
+    stmt(TokenKinds.DELETE, parseDeleteStatement);
     stmt(TokenKinds.EXTEND, parseAssignmentStatement);
     stmt(TokenKinds.RETURN, parseReturnStatement);
     stmt(TokenKinds.END, parseEndStatement);

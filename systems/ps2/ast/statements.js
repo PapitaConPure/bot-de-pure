@@ -17,6 +17,7 @@ const StatementKinds = /**@type {const}*/({
     DECLARATION: 'DeclarationStatement',
     SAVE: 'SaveStatement',
     LOAD: 'LoadStatement',
+    DELETE: 'DeleteStatement',
     ASSIGNMENT: 'AssignmentStatement',
     RETURN: 'ReturnStatement',
     END: 'EndStatement',
@@ -146,6 +147,12 @@ const ScopeAbortKinds = [
  */
 
 /**
+ * @typedef {Object} DeleteStatementData
+ * @property {String} identifier
+ * @typedef {BaseStatementData<'DeleteStatement'> & DeleteStatementData} DeleteStatement
+ */
+
+/**
  * @typedef {Object} AssignmentStatementData
  * @property {Token} operator
  * @property {import('./expressions.js').Expression} receptor
@@ -183,6 +190,7 @@ const ScopeAbortKinds = [
  *          |SaveStatement
  *          |LoadStatement
  *          |AssignmentStatement
+ *          |DeleteStatement
  *          |ReturnStatement
  *          |StopStatement
  *          |SendStatement

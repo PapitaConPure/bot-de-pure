@@ -539,6 +539,22 @@ function parseAssignmentStatement(parser) {
 }
 
 /**
+ * Parsea una Sentencia de Guardado de Dato
+ * @param {import('../parser.js').Parser} parser
+ * @returns {import('../../ast/statements.js').DeleteStatement}
+ */
+function parseDeleteStatement(parser) {
+	const startToken = parser.advance();
+	const identifier = parser.expect(TokenKinds.IDENTIFIER, `Se esperaba un identificador en Sentencia \`BORRAR\`, pero se recibió: *${parser.current.value}*`);
+
+	return {
+		kind: StatementKinds.DELETE,
+		identifier: identifier.value,
+		...makeMetadata(startToken, identifier),
+	};
+}
+
+/**
  * Parsea una Sentencia de Retorno de Valor
  * @param {import('../parser.js').Parser} parser
  * @returns {import('../../ast/statements.js').ReturnStatement}
@@ -581,6 +597,20 @@ function parseStopStatement(parser) {
 
 	parser.ensureExpression(`Se esperaba un mensaje de corte luego de \`con\` en Sentencia \`PARAR\`. Sin embargo, se recibió: *${parser.current.translated}*`);
 	const stopMessage = parser.parseExpression(BindingPowers.COMMA);
+
+	if(!parser.hasTokens || (parser.current.isStatement && !parser.current.is(TokenKinds.IF))) {
+		const metadata = makeMetadata(startToken, stopMessage);
+		return {
+			kind: StatementKinds.STOP,
+			stopMessage,
+			condition: {
+				kind: ExpressionKinds.BOOLEAN_LITERAL,
+				value: true,
+				...metadata,
+			},
+			...metadata,
+		};
+	}
 
 	parser.expect(TokenKinds.IF, `Se esperaba \`SI\` y una condición luego de mensaje de corte en Sentencia \`PARAR\`. Sin embargo, se recibió: *${parser.current.translated}*`);
 	
@@ -629,6 +659,7 @@ module.exports = {
 	parseDeclarationStatement,
 	parseSaveStatement,
 	parseAssignmentStatement,
+	parseDeleteStatement,
 	parseReturnStatement,
 	parseEndStatement,
 	parseStopStatement,
