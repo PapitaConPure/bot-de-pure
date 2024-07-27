@@ -72,22 +72,29 @@ function makeDate(date) {
  * @returns {RegistryValue}
  */
 function makeDiscordMember(member) {
+    //const user = await member.user.fetch(true);
     const values = {
         id: makeText(member.id),
         avatar: makeText(member.displayAvatarURL()),
+        //color: makeText(user.hexAccentColor),
         nombre: makeText(member.displayName),
         mención: makeText(`${member}`),
+        //portada: makeText(user.bannerURL())
     };
     
     /**@type {Map<String, RuntimeValue>}*/
     const miembro = new Map();
     miembro
         .set('id',      values.id)
+        //.set('acento',  values.color)
         .set('avatar',  values.avatar)
+        //.set('color',   values.color)
         .set('icono',   values.avatar)
         .set('ícono',   values.avatar)
-        .set('pfp',     values.avatar)
+        //.set('imagen',  values.portada)
         .set('perfil',  values.avatar)
+        .set('pfp',     values.avatar)
+        //.set('portada', values.portada)
         .set('nombre',  values.nombre)
         .set('mencion', values.mención)
         .set('mención', values.mención);
