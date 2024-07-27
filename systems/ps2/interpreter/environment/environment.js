@@ -4,6 +4,7 @@ const { NativeColorsLookup } = require('./variables/colors');
 const { NativeFunctions } = require('./functions/functions');
 const { NativeMethodsLookup } = require('./methods/methods');
 const { makeDiscordMember, makeDiscordChannel, makeDiscordGuild } = require('./registryPrefabs');
+const { makeKindFromValue } = require('./nativeUtils');
 
 /**
  * @param {Scope} scope
@@ -28,7 +29,7 @@ function declareNatives(scope) {
  */
 async function declareContext(scope, request, savedData = null) {
 	if(request != null) {
-		scope.assignVariable('usuario', makeDiscordMember(request.member));
+		scope.assignVariable('usuario', await makeDiscordMember(request.member));
 		scope.assignVariable('canal', makeDiscordChannel(request.channel));
 		scope.assignVariable('servidor', await makeDiscordGuild(request.guild));
 	} else {
@@ -39,8 +40,7 @@ async function declareContext(scope, request, savedData = null) {
 	
 	if(savedData != null) {
 		savedData.forEach((node, key) => {
-			recursiveConvertRegistry(node);
-			scope.assignVariable(key, makeValueFromSaved(node));
+			scope.assignVariable(key, recursiveRecoverSavedValues(node));
 		});
 	}
 }
@@ -48,38 +48,24 @@ async function declareContext(scope, request, savedData = null) {
 /**
  * Convierte recursivamente entradas de Registros, de formato JSON a Mapas ES6
  * @param {import('../values').RuntimeValue} value 
+ * @returns {import('../values').RuntimeValue}
  */
-function recursiveConvertRegistry(value) {
-	if(value.kind === ValueKinds.LIST) {
-		value.elements.forEach(el => recursiveConvertRegistry(el));
-	}
-
-	if(value.kind === ValueKinds.REGISTRY) {
-		const mapEntries = new Map();
-		for(const [k, v] of Object.entries(value.entries)) {
-			recursiveConvertRegistry(v);
-			mapEntries.set(k, v);
-		}
-		value.entries = mapEntries;
-	}
-}
-
-/**
- * @param {import('../values').RuntimeValue} node 
- * @returns {Extract<import('../values').RuntimeValue, { kind: node['kind'] }>}
- */
-function makeValueFromSaved(node) {
-	switch(node.kind) {
+function recursiveRecoverSavedValues(value) {
+	switch(value.kind) {
 	case ValueKinds.NUMBER:
-		return makeNumber(node.value);
 	case ValueKinds.TEXT:
-		return makeText(node.value);
 	case ValueKinds.BOOLEAN:
-		return makeBoolean(node.value);
+		return makeKindFromValue(value.kind, value.value);
+
 	case ValueKinds.LIST:
-		return makeList(node.elements);
+		return makeList(value.elements.map(el => recursiveRecoverSavedValues(el)));
+
 	case ValueKinds.REGISTRY:
-		return makeRegistry(node.entries);
+		const mapEntries = new Map();
+		for(const [k, v] of Object.entries(value.entries))
+			mapEntries.set(k, recursiveRecoverSavedValues(v));
+		return makeRegistry(mapEntries);
+
 	default:
 		return makeNada();
 	}
