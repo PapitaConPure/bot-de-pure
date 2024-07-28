@@ -9,7 +9,7 @@ const { ValueKinds, coerceValue, makeNada } = require('./interpreter/values');
 const { declareNatives, declareContext } = require('./interpreter/environment/environment');
 const { EmbedBuilder, Colors, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
 const { shortenText } = require('../../func');
-const { default: sizeof } = require('object-sizeof');
+const sizeof = /**@type {import('object-sizeof')['default']}*/(/**@type {unknown}*/(require('object-sizeof')));
 
 const CURRENT_PS_VERSION = 1.1;
 
@@ -207,12 +207,13 @@ async function executeTuber(request, tuber, inputOptions) {
         else
             mergedSaveData.set(id, value);
 
-    const maxKiBytes = 256;
+    const maxKiBytes = 128;
     const savedBytes = sizeof(mergedSaveData);
     if(savedBytes >= maxKiBytes * 1024) {
         return sendDatabaseError(request,
             `Límite de tamaño de guardado excedido. Los datos que se guardan no deben superar los **${maxKiBytes}KiB**\nTu Tubérculo guarda un total de **${savedBytes / 1024}KiB** en datos propios`);
-    }
+    } else
+        console.log(`Saved data was ${(savedBytes / 1024).toFixed(2)}KiB / ${maxKiBytes.toFixed(2)}KiB`);
 
     tuber.saved = mergedSaveData;
 
