@@ -1,4 +1,4 @@
-const { REST, Client, ApplicationCommandType, ContextMenuCommandBuilder, Collection } = require('discord.js');
+const { REST, Client, ApplicationCommandType, ContextMenuCommandBuilder, Collection, Guild } = require('discord.js');
 const { Routes } = require('discord-api-types/v9');
 
 const mongoose = require('mongoose');
@@ -197,7 +197,7 @@ async function onStartup(client) {
     
     /**@param {String} id*/
     async function getEmoteCell(id) {
-        const image = await loadImage(client.emojis.cache.get(id).url);
+        const image = await loadImage(client.emojis.cache.get(id).imageURL({ extension: 'png', size: 64 }));
         return { id, image };
     }
 
@@ -214,11 +214,11 @@ async function onStartup(client) {
         globalConfigs.loademotes[cell.id] = cell.image;
     
     console.log(chalk.gray('Preparando imágenes extra...'));
-    const slot3Emojis = globalConfigs.slots.slot3.emojis.cache;
+    const slot3Emojis = (/**@type {Guild}*/(globalConfigs.slots.slot3)).emojis.cache;
     const [ WHITE, BLACK, pawn ] = await Promise.all([
-        loadImage(slot3Emojis.find(e => e.name === 'wCell').url),
-        loadImage(slot3Emojis.find(e => e.name === 'bCell').url),
-        loadImage(slot3Emojis.find(e => e.name === 'pawn').url),
+        loadImage(slot3Emojis.find(e => e.name === 'wCell').imageURL({ extension: 'png', size: 256 })),
+        loadImage(slot3Emojis.find(e => e.name === 'bCell').imageURL({ extension: 'png', size: 256 })),
+        loadImage(slot3Emojis.find(e => e.name === 'pawn').imageURL({ extension: 'png', size: 256 })),
     ]);
     globalConfigs.loademotes['chess'] = { WHITE, BLACK, pawn };
     

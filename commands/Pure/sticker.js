@@ -1,6 +1,5 @@
 const { CommandTags, CommandManager, CommandOptions, CommandOptionSolver } = require("../Commons/commands");
-const {  } = require("../../func");
-const { Message, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
 const flags = new CommandTags().add('COMMON');
 const options = new CommandOptions()
@@ -15,7 +14,11 @@ const command = new CommandManager('sticker', flags)
 		if(!message || !message.stickers.size)
 			return request.reply({ content: '⚠️️ Debes especificar un mensaje con un sticker' });
 
-        const sticker = await message.stickers.first().fetch().catch(console.error);
+        const sticker = await message.stickers.first()?.fetch().catch(console.error);
+        
+        if(!sticker)
+            return request.reply({ content: 'No se encontraron Stickers...' });
+
 
         const embed = new EmbedBuilder()
             .setColor('Blurple')

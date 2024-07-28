@@ -262,7 +262,7 @@ const command = new CommandManager('anarquia', flags)
 
 		//Cargar imagen nueva si no está registrada
 		if(!loadEmotes.hasOwnProperty(e.id))
-			loadEmotes[e.id] = await loadImage(request.client.emojis.cache.get(e.id).url);
+			loadEmotes[e.id] = await loadImage(request.client.emojis.cache.get(e.id).imageURL());
 
 		//Habilidades
 		if(!h && !v)
