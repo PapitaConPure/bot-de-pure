@@ -129,11 +129,9 @@ function textoPartir(self, [separador], scope) {
  * @param {Scope} scope 
  * @returns {NumberValue}
  */
-function textoPosiciónDe(self, [ texto ], scope) {
-	if(texto.kind !== ValueKinds.TEXT)
-		throw scope.interpreter.TuberInterpreterError('Se esperaba un Texto válido como argumento de búsqueda de sub-texto');
-	
-	return makeNumber(self.value.indexOf(texto.value));
+function textoPosiciónDe(self, [ búsqueda ], scope) {
+	const búsquedaValue = expectParam('búsqueda', búsqueda, ValueKinds.TEXT, scope).value;
+	return makeNumber(self.value.indexOf(búsquedaValue));
 }
 
 /**
@@ -143,12 +141,13 @@ function textoPosiciónDe(self, [ texto ], scope) {
  * @returns {TextValue}
  */
 function textoReemplazar(self, [ocurrencia, reemplazo], scope) {
-	if(ocurrencia.kind !== ValueKinds.TEXT)
-		throw scope.interpreter.TuberInterpreterError('Se esperaba un Texto válido como argumento de ocurrencia a reemplazar');
-	if(reemplazo.kind !== ValueKinds.TEXT)
-		throw scope.interpreter.TuberInterpreterError('Se esperaba un Texto como argumento de reemplazo de ocurrencia');
-	
-	return makeText(self.value.replace(ocurrencia.value, reemplazo.value));
+	const ocurrenciaValue = expectParam('ocurrencia', ocurrencia, ValueKinds.TEXT, scope).value;
+
+	if(ocurrenciaValue.length === 0)
+		throw scope.interpreter.TuberInterpreterError(`Se esperaba un Texto no-vacío como ocurrencia de Función \`reemplazar\``)
+
+	const reemplazoValue = expectParam('reemplazo', reemplazo, ValueKinds.TEXT, scope).value;
+	return makeText(self.value.replace(ocurrenciaValue, reemplazoValue));
 }
 
 /**

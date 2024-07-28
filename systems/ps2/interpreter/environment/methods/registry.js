@@ -43,43 +43,10 @@ function registroContiene(self, [ clave ], scope) {
  * @param {Scope} scope
  * @returns {ListValue}
  */
-function registroValores(self, [], scope) {
-	const valuesArray = [ ...self.entries.values() ];
-	return makeList(valuesArray);
-}
-
-/**
- * @param {RegistryValue} self
- * @param {[]} args
- * @param {Scope} scope
- * @returns {ListValue}
- */
 function registroEntradas(self, [], scope) {
 	const entriesArray = [ ...self.entries.entries() ];
 	const entriesRVal = entriesArray.map(([ k, v ]) => makeList([ makeText(k), v ]));
 	return makeList(entriesRVal);
-}
-
-/**
- * @param {RegistryValue} self
- * @param {[ TextValue ]} args
- * @param {Scope} scope
- * @returns {BooleanValue}
- */
-function registroQuitar(self, [ clave ], scope) {
-	const claveResult = expectParam('clave', clave, ValueKinds.TEXT, scope);
-	const deleted = self.entries.delete(claveResult.value);
-	return makeBoolean(deleted);
-}
-
-/**
- * @param {RegistryValue} self
- * @param {[]} args
- * @param {Scope} scope
- * @returns {BooleanValue}
- */
-function registroVacío(self, [], scope) {
-	return makeBoolean(self.entries.size === 0);
 }
 
 /**
@@ -116,6 +83,39 @@ function registroParaCada(self, [ predicado ], scope) {
 		fn(makeText(key), value);
 
 	return makeNada();
+}
+
+/**
+ * @param {RegistryValue} self
+ * @param {[ TextValue ]} args
+ * @param {Scope} scope
+ * @returns {BooleanValue}
+ */
+function registroQuitar(self, [ clave ], scope) {
+	const claveResult = expectParam('clave', clave, ValueKinds.TEXT, scope);
+	const deleted = self.entries.delete(claveResult.value);
+	return makeBoolean(deleted);
+}
+
+/**
+ * @param {RegistryValue} self
+ * @param {[]} args
+ * @param {Scope} scope
+ * @returns {BooleanValue}
+ */
+function registroVacío(self, [], scope) {
+	return makeBoolean(self.entries.size === 0);
+}
+
+/**
+ * @param {RegistryValue} self
+ * @param {[]} args
+ * @param {Scope} scope
+ * @returns {ListValue}
+ */
+function registroValores(self, [], scope) {
+	const valuesArray = [ ...self.entries.values() ];
+	return makeList(valuesArray);
 }
 
 /**@type Map<String, import('../../values').NativeFunction<RegistryValue>>*/
