@@ -143,6 +143,7 @@ function createLookups() {
 
     //Exponencial
     led(TokenKinds.CARET, BindingPowers.EXPONENTIAL, Associativities.RIGHT, parseBinaryExpression);
+    led(TokenKinds.DOUBLE_STAR, BindingPowers.EXPONENTIAL, Associativities.RIGHT, parseBinaryExpression);
 
     //Unarios
     nud(TokenKinds.NOT, parseUnaryExpression);
