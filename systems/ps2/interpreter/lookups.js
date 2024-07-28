@@ -100,12 +100,13 @@ function makeArithmeticBinaryOperation(op) {
 	let operation;
 
 	switch(op) {
-	case TokenKinds.PLUS:    operation = (/**@type {Number}*/ l, /**@type {Number}*/ r) => makeNumber(l + r); break;
-	case TokenKinds.DASH:    operation = (/**@type {Number}*/ l, /**@type {Number}*/ r) => makeNumber(l - r); break;
-	case TokenKinds.STAR:    operation = (/**@type {Number}*/ l, /**@type {Number}*/ r) => makeNumber(l * r); break;
-	case TokenKinds.SLASH:   operation = (/**@type {Number}*/ l, /**@type {Number}*/ r) => makeNumber(l / r); break;
-	case TokenKinds.PERCENT: operation = (/**@type {Number}*/ l, /**@type {Number}*/ r) => makeNumber(l % r); break;
-	case TokenKinds.CARET:   operation = (/**@type {Number}*/ l, /**@type {Number}*/ r) => makeNumber(l ** r); break;
+	case TokenKinds.PLUS:        operation = (/**@type {Number}*/ l, /**@type {Number}*/ r) => makeNumber(l + r); break;
+	case TokenKinds.DASH:        operation = (/**@type {Number}*/ l, /**@type {Number}*/ r) => makeNumber(l - r); break;
+	case TokenKinds.STAR:        operation = (/**@type {Number}*/ l, /**@type {Number}*/ r) => makeNumber(l * r); break;
+	case TokenKinds.SLASH:       operation = (/**@type {Number}*/ l, /**@type {Number}*/ r) => makeNumber(l / r); break;
+	case TokenKinds.PERCENT:     operation = (/**@type {Number}*/ l, /**@type {Number}*/ r) => makeNumber(l % r); break;
+	case TokenKinds.CARET:       operation = (/**@type {Number}*/ l, /**@type {Number}*/ r) => makeNumber(l ** r); break;
+	case TokenKinds.DOUBLE_STAR: operation = (/**@type {Number}*/ l, /**@type {Number}*/ r) => makeNumber(l ** r); break;
 	default: throw `Operación inválida: ${op}`;
 	}
 
@@ -232,6 +233,7 @@ BinaryOperationLookups
 	.set(TokenKinds.SLASH, makeArithmeticBinaryOperation(TokenKinds.SLASH))
 	.set(TokenKinds.PERCENT, makeArithmeticBinaryOperation(TokenKinds.PERCENT))
 	.set(TokenKinds.CARET, makeArithmeticBinaryOperation(TokenKinds.CARET))
+	.set(TokenKinds.DOUBLE_STAR, makeArithmeticBinaryOperation(TokenKinds.DOUBLE_STAR))
 
 	.set(TokenKinds.OR, makeRelationalBinaryOperation(TokenKinds.OR))
 	.set(TokenKinds.AND, makeRelationalBinaryOperation(TokenKinds.AND))

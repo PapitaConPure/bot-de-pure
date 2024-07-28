@@ -53,9 +53,9 @@ const TokenKinds = /**@type {const}*/({
 
 	ASSIGNMENT: 'Assignment',
 	ARROW: 'Arrow',
-	LAMBDA: 'Lambda',
 	COLON: 'Colon',
 	COMMA: 'Comma',
+	LAMBDA: 'Lambda',
 	TIMES: 'Times',
 	IN: 'In',
 	FROM: 'From',
@@ -67,6 +67,7 @@ const TokenKinds = /**@type {const}*/({
 	SLASH: 'Slash',
 	PERCENT: 'Percent',
 	CARET: 'Caret',
+	DOUBLE_STAR: 'DoubleStar',
 
 	NUMBER: 'NumberKind',
 	TEXT: 'TextKind',
@@ -106,6 +107,7 @@ TokenKindTranslations
 	.set(TokenKinds.REPEAT, 'Sentencia \`REPETIR\`')
 	.set(TokenKinds.FOR_EACH, 'Sentencia \`PARA CADA\`')
 	.set(TokenKinds.FOR, 'Sentencia \`PARA\`')
+	
 	.set(TokenKinds.READ, 'Sentencia \`LEER\`')
 	.set(TokenKinds.CREATE, 'Sentencia \`CREAR\`')
 	.set(TokenKinds.SAVE, 'Sentencia \`GUARDAR\`')
@@ -129,8 +131,8 @@ TokenKindTranslations
 
 	.set(TokenKinds.EQUALS, 'Operador \`es\`')
 	.set(TokenKinds.NOT_EQUALS, 'Operador \`no es\`')
-	.set(TokenKinds.EQUALS, 'Operador \`parece\`')
-	.set(TokenKinds.NOT_EQUALS, 'Operador \`no parece\`')
+	.set(TokenKinds.SEEMS, 'Operador \`parece\`')
+	.set(TokenKinds.NOT_SEEMS, 'Operador \`no parece\`')
 	.set(TokenKinds.LESS, 'Operador \`precede\`')
 	.set(TokenKinds.LESS_EQUALS, 'Operador \`no excede\`')
 	.set(TokenKinds.GREATER, 'Operador \`excede\`')
@@ -151,6 +153,8 @@ TokenKindTranslations
 	.set(TokenKinds.STAR, 'Operador \`*\`')
 	.set(TokenKinds.SLASH, 'Operador \`/\`')
 	.set(TokenKinds.PERCENT, 'Operador \`%\`')
+	.set(TokenKinds.CARET, 'Operador \`^\`')
+	.set(TokenKinds.DOUBLE_STAR, 'Operador \`**\`')
 
 	.set(TokenKinds.NUMBER, 'Tipo Número')
 	.set(TokenKinds.TEXT, 'Tipo Texto')

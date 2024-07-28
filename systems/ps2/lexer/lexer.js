@@ -109,6 +109,7 @@ class Lexer {
 			{ match: '/', handler: this.#makeDefaultHandler(TokenKinds.SLASH) },
 			{ match: '%', handler: this.#makeDefaultHandler(TokenKinds.PERCENT) },
 			{ match: '^', handler: this.#makeDefaultHandler(TokenKinds.CARET) },
+			{ match: '**', handler: this.#makeDefaultHandler(TokenKinds.DOUBLE_STAR) },
 			
 			{ match: '<=', handler: this.#makeDefaultHandler(TokenKinds.LESS_EQUALS) },
 			{ match: '<', handler: this.#makeDefaultHandler(TokenKinds.LESS) },
