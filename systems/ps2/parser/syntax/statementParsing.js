@@ -539,6 +539,64 @@ function parseAssignmentStatement(parser) {
 }
 
 /**
+ * Parsea una Sentencia de Asignación de Variable de caracter de EXTENDER
+ * @param {import('../parser.js').Parser} parser
+ * @returns {import('../../ast/statements.js').AssignmentStatement|import('../../ast/statements.js').InsertionStatement}
+ */
+function parseExtendStatement(parser) {
+	const operator = parser.advance();
+	const operatorString = `\`${`${operator.value}`.toUpperCase()}\``;
+
+	parser.ensureExpression(
+		`Se esperaba una expresión receptora válida luego del indicador ${operatorString}. Sin embargo, se recibió: *${parser.current.translated}*`,
+		parser.previous);
+	
+	const receptorToken = parser.current;
+	const receptor = parser.parseExpression(BindingPowers.COMMA);
+
+	if(receptor.kind !== ExpressionKinds.IDENTIFIER && receptor.kind !== ExpressionKinds.ARROW)
+		throw parser.TuberParserError(`Se esperaba una expresión receptora asignable en Sentencia ${operatorString}. Sin embargo, se recibió: *${receptorToken.translated}*`, receptorToken);
+
+	const parseReception = () => {
+		parser.expect(TokenKinds.ASSIGNMENT, `Se esperaba \`con\` y una expresión luego de expresión receptora en Sentencia ${operatorString}. Sin embargo, se recibió: ${parser.current.translated}`);
+	
+		parser.ensureExpression(
+			`Se esperaba una expresión de recepción válida luego del operador \`con\` en Sentencia ${operatorString}. Sin embargo, se recibió: *${parser.current.translated}*`,
+			parser.previous);
+		return parser.parseExpression(BindingPowers.COMMA);
+	}
+
+	if(parser.current.is(TokenKinds.IN)) {
+		parser.advance();
+		const kind = StatementKinds.INSERTION;
+
+		parser.ensureExpression(
+			`Se esperaba una expresión de recepción válida luego del operador \`en\` en Sentencia ${operatorString}. Sin embargo, se recibió: *${parser.current.translated}*`,
+			parser.previous);
+		const index = parser.parseExpression(BindingPowers.COMMA);
+
+		const reception = parseReception();
+
+		return ({
+			kind,
+			receptor,
+			reception,
+			index,
+			...makeMetadata(operator, receptor),
+		});
+	}
+
+	const reception = parseReception();
+	return ({
+		kind: StatementKinds.ASSIGNMENT,
+		operator,
+		receptor,
+		reception,
+		...makeMetadata(operator, receptor),
+	});
+}
+
+/**
  * Parsea una Sentencia de Guardado de Dato
  * @param {import('../parser.js').Parser} parser
  * @returns {import('../../ast/statements.js').DeleteStatement}
@@ -659,6 +717,7 @@ module.exports = {
 	parseDeclarationStatement,
 	parseSaveStatement,
 	parseAssignmentStatement,
+	parseExtendStatement,
 	parseDeleteStatement,
 	parseReturnStatement,
 	parseEndStatement,

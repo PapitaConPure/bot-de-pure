@@ -19,6 +19,7 @@ const StatementKinds = /**@type {const}*/({
     LOAD: 'LoadStatement',
     DELETE: 'DeleteStatement',
     ASSIGNMENT: 'AssignmentStatement',
+    INSERTION: 'InsertionStatement',
     RETURN: 'ReturnStatement',
     END: 'EndStatement',
     STOP: 'StopStatement',
@@ -160,6 +161,14 @@ const ScopeAbortKinds = [
  * @typedef {BaseStatementData<'AssignmentStatement'> & AssignmentStatementData} AssignmentStatement
  */
 
+/**
+ * @typedef {Object} InsertionStatementData
+ * @property {import('./expressions.js').Expression} receptor
+ * @property {import('./expressions.js').Expression} reception
+ * @property {import('./expressions.js').Expression} index
+ * @typedef {BaseStatementData<'InsertionStatement'> & InsertionStatementData} InsertionStatement
+ */
+
 /**@typedef {BaseStatementData<'ReturnStatement'> & ExpressionStatementData} ReturnStatement*/
 
 /**
@@ -190,6 +199,7 @@ const ScopeAbortKinds = [
  *          |SaveStatement
  *          |LoadStatement
  *          |AssignmentStatement
+ *          |InsertionStatement
  *          |DeleteStatement
  *          |ReturnStatement
  *          |StopStatement

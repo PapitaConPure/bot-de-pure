@@ -352,6 +352,10 @@ class Interpreter {
 		case StatementKinds.ASSIGNMENT:
 			returnValue = this.#evaluateAssignmentStatement(node, scope);
 			break;
+
+		case StatementKinds.INSERTION:
+			returnValue = this.#evaluateInsertionStatement(node, scope);
+			break;
 			
 		case StatementKinds.DELETE:
 			returnValue = this.#evaluateDeleteStatement(node, scope);
@@ -760,7 +764,7 @@ class Interpreter {
 	/**
 	 * Evalúa una sentencia de asignación de variable.
 	 * 
-	 * Si la variable no está declarada en este ámbito o los ámbitos padre, se la declara en este ámbito
+	 * Si la variable no está declarada en este ámbito o los ámbitos padre y la sentencia es CARGAR, se la declara en este ámbito
 	 * @param {import('../ast/statements').AssignmentStatement} node 
 	 * @param {import('./scope').Scope} scope
 	 */
@@ -812,6 +816,28 @@ class Interpreter {
 		}
 
 		this.#assignValueToExpression(receptor, receptionValue, scope);
+
+		return makeNada();
+	}
+
+	/**
+	 * Evalúa una sentencia de inserción de variable de Lista.
+	 * 
+	 * La variable debe estar declarada y debe ser una Lista
+	 * @param {import('../ast/statements').InsertionStatement} node 
+	 * @param {import('./scope').Scope} scope
+	 */
+	#evaluateInsertionStatement(node, scope) {
+		const { receptor, reception, index } = node;
+		
+		const receptorValue = this.evaluate(receptor, scope, false);
+		if(receptorValue.kind !== ValueKinds.LIST)
+			throw this.TuberInterpreterError(`El receptor en Sentencia \`EXTENDER\` debe ser una Lista, y \`${this.astString(receptor)}\` no lo era`, receptor);
+		
+		const receptionValue = this.evaluate(reception, scope, false);
+		const indexValue = this.evaluateAs(index, scope, ValueKinds.NUMBER, true);
+
+		receptorValue.elements.splice(indexValue.value, 0, receptionValue);
 
 		return makeNada();
 	}
