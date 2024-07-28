@@ -6,6 +6,8 @@
         "resolveJsonModule": true,
         "resolvePackageJsonImports": true,
         "resolvePackageJsonExports": true,
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
         "paths": {
             "types": ["./types.js"]
         }
