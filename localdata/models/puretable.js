@@ -1,6 +1,6 @@
 const Mongoose = require('mongoose');
 
-const defaultEmote = '828736342372253697';
+const defaultEmote = '1267233873864032318';
 
 const PuretableSchema = new Mongoose.Schema({
     cells: {
