@@ -1,7 +1,7 @@
 const { makeNumber, makeText, ValueKinds } = require('../../values');
 const { Scope } = require('../../scope');
 const { expectParam, getParamOrDefault } = require('../nativeUtils');
-const { improveNumber } = require('../../../../../func');
+const { improveNumber, clamp } = require('../../../../../func');
 
 /**
  * @typedef {import('../../values').NumberValue} NumberValue
@@ -14,6 +14,17 @@ const { improveNumber } = require('../../../../../func');
  * @typedef {import('../../values').NadaValue} NadaValue
  * @typedef {import('../../values').RuntimeValue} RuntimeValue
  */
+
+/**
+ * 
+ * @param {NumberValue} self
+ * @param {[]} args 
+ * @param {Scope} scope 
+ * @returns {NumberValue}
+ */
+function númeroAbsoluto(self, [], scope) {
+	return makeNumber(Math.abs(self.value));
+}
 
 /**
  * 
@@ -95,6 +106,32 @@ function númeroFormatear(self, [ acortar, mínimoDígitos ], scope) {
 /**
  * 
  * @param {NumberValue} self
+ * @param {[ BooleanValue, NumberValue ]} args 
+ * @param {Scope} scope 
+ * @returns {NumberValue}
+ */
+function númeroLimitar(self, [ mínimo, máximo ], scope) {
+	const mínimoValue = expectParam('mínimo', mínimo, ValueKinds.NUMBER, scope).value;
+	const máximoValue = expectParam('máximo', máximo, ValueKinds.NUMBER, scope).value;
+
+	const clamped = clamp(self.value, mínimoValue, máximoValue);
+	return makeNumber(clamped);
+}
+
+/**
+ * 
+ * @param {NumberValue} self
+ * @param {[]} args 
+ * @param {Scope} scope 
+ * @returns {NumberValue}
+ */
+function númeroSigno(self, [], scope) {
+	return makeNumber(Math.sign(self.value));
+}
+
+/**
+ * 
+ * @param {NumberValue} self
  * @param {[]} args 
  * @param {Scope} scope 
  * @returns {NumberValue}
@@ -128,6 +165,7 @@ function númeroRedondear(self, [], scope) {
 /**@type Map<String, import('../../values').NativeFunction<NumberValue>>*/
 const numberMethods = new Map();
 numberMethods
+	.set('absoluto', númeroAbsoluto)
 	.set('aEntero', númeroAEntero)
 	.set('aFijo', númeroAFijo)
 	.set('aFormateado', númeroFormatear)
@@ -138,7 +176,9 @@ numberMethods
 	.set('aTruncado', númeroAEntero)
 	.set('entero', númeroAEntero)
 	.set('formatear', númeroFormatear)
+	.set('limitar', númeroLimitar)
 	.set('redondear', númeroRedondear)
+	.set('signo', númeroSigno)
 	.set('suelo', númeroSuelo)
 	.set('techo', númeroTecho)
 	.set('truncar', númeroAEntero);

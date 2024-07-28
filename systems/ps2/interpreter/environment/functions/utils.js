@@ -22,14 +22,6 @@ const { rgb2hex, hsl2hex, hsv2hex } = require('../../../../../colorUtils');
  * @typedef {import('../../values').NativeFunction<null, TArg, TResult>} NativeFunction
  */
 
-/**@type {NativeFunction<[ NumberValue ], NumberValue | NadaValue>}*/
-function absoluto(self, [ valor ], scope) {
-	const valorValue = expectParam('valor',  valor,  ValueKinds.NUMBER, scope).value;
-	
-	const abs = Math.abs(valorValue);
-	return makeNumber(abs);
-}
-
 /**@type {NativeFunction<[ NumberValue, NumberValue ], NumberValue>}*/
 function aleatorio(self, [ n, m ], scope) {
 	const [ nExists, nResult ] = getParamOrNada('n', n, ValueKinds.NUMBER, scope);
@@ -140,17 +132,7 @@ function elegir(self, valores, scope) {
 	return valores[idx];
 }
 
-/**@type {NativeFunction<[ NumberValue, NumberValue, NumberValue ], NumberValue | NadaValue>}*/
-function limitar(self, [ valor, mínimo, máximo ], scope) {
-	const valorValue  = expectParam('valor',  valor,  ValueKinds.NUMBER, scope).value;
-	const mínimoValue = expectParam('mínimo', mínimo, ValueKinds.NUMBER, scope).value;
-	const máximoValue = expectParam('máximo', máximo, ValueKinds.NUMBER, scope).value;
-
-	const clamped = clamp(valorValue, mínimoValue, máximoValue);
-	return makeNumber(clamped);
-}
-
-/**@type {NativeFunction<Array<NumberValue>, NumberValue | NadaValue>}*/
+/**@type {NativeFunction<Array<NumberValue>, NumberValue>}*/
 function maximizar(self, números, scope) {
 	if(números.length === 0)
 		throw scope.interpreter.TuberInterpreterError(`Se esperaba un valor para el parámetro requerido \`x1\` para obtener un máximo`);
@@ -162,7 +144,7 @@ function maximizar(self, números, scope) {
 	return makeNumber(max);
 }
 
-/**@type {NativeFunction<Array<NumberValue>, NumberValue | NadaValue>}*/
+/**@type {NativeFunction<Array<NumberValue>, NumberValue>}*/
 function minimizar(self, números, scope) {
 	if(números.length === 0)
 		throw scope.interpreter.TuberInterpreterError(`Se esperaba un valor para el parámetro requerido \`x1\` para obtener un mínimo`);
@@ -180,6 +162,14 @@ function quedanEntradas(self, [], scope) {
 	return makeBoolean(test);
 }
 
+/**@type {NativeFunction<[ NumberValue ], NumberValue>}*/
+function radianes(self, [ grados ], scope) {
+	const gradosValue = expectParam('grados', grados, ValueKinds.NUMBER, scope).value;
+
+	const radianes = gradosValue * Math.PI / 180;
+	return makeNumber(radianes);
+}
+
 /**@type {NativeFunction<[ NumberValue, NumberValue ], NumberValue | NadaValue>}*/
 function raíz(self, [ radicando, grado ], scope) {
 	const radicandoValue = expectParam('radicando', radicando, ValueKinds.NUMBER, scope);
@@ -193,7 +183,7 @@ function raíz(self, [ radicando, grado ], scope) {
 	return makeNumber(root);
 }
 
-/**@type {NativeFunction<[ NumberValue ], NumberValue | NadaValue>}*/
+/**@type {NativeFunction<[ NumberValue ], NumberValue>}*/
 function sen(self, [ valor ], scope) {
 	const valorValue = expectParam('valor',  valor,  ValueKinds.NUMBER, scope).value;
 	
@@ -201,15 +191,7 @@ function sen(self, [ valor ], scope) {
 	return makeNumber(sin);
 }
 
-/**@type {NativeFunction<[ NumberValue ], NumberValue | NadaValue>}*/
-function signo(self, [ valor ], scope) {
-	const valorValue = expectParam('valor',  valor,  ValueKinds.NUMBER, scope).value;
-	
-	const sign = Math.sign(valorValue);
-	return makeNumber(sign);
-}
-
-/**@type {NativeFunction<[ NumberValue ], NumberValue | NadaValue>}*/
+/**@type {NativeFunction<[ NumberValue ], NumberValue>}*/
 function tan(self, [ valor ], scope) {
 	const valorValue = expectParam('valor',  valor,  ValueKinds.NUMBER, scope).value;
 	
@@ -219,7 +201,6 @@ function tan(self, [ valor ], scope) {
 
 /**@type {Array<{ id: String, fn: NativeFunction }>}*/
 const utilFunctions = [
-	{ id: 'absoluto', fn: absoluto },
 	{ id: 'aleatorio', fn: aleatorio },
 	{ id: 'colorAleatorio', fn: colorAleatorio },
 	{ id: 'cos', fn: cos },
@@ -228,15 +209,14 @@ const utilFunctions = [
 	{ id: 'hsl', fn: colorHSL },
 	{ id: 'hsb', fn: colorHSV },
 	{ id: 'hsv', fn: colorHSV },
-	{ id: 'limitar', fn: limitar },
 	{ id: 'maximizar', fn: maximizar },
 	{ id: 'minimizar', fn: minimizar },
 	{ id: 'quedanEntradas', fn: quedanEntradas },
+	{ id: 'radianes', fn: radianes },
 	{ id: 'raiz', fn: raíz },
 	{ id: 'raíz', fn: raíz },
 	{ id: 'rgb', fn: colorRGB },
 	{ id: 'sen', fn: sen },
-	{ id: 'signo', fn: signo },
 	{ id: 'tan', fn: tan },
 ];
 
