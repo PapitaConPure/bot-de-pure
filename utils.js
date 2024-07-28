@@ -31,6 +31,23 @@ class Ut {
 		const value = Ut.#iota.next().value;
 		return /**@type {Number}*/(value);
 	}
+
+	/**
+	 * Limita el valor al rango descrito (inclusive)
+	 * @param {Number} value 
+	 * @param {Number} min 
+	 * @param {Number} max 
+	 * @returns {Number}
+	 */
+	static clamp(value, min, max) {
+        if(min > max) {
+            const temp = min;
+            min = max;
+            max = temp;
+        }
+
+        return Math.max(min, Math.min(value, max));
+    }
 }
 
 module.exports = Ut;
