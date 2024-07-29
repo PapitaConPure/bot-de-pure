@@ -60,7 +60,7 @@ const helpRows = () => [
 	makeButtonRowBuilder().addComponents(
 		new ButtonBuilder()
 			.setURL('https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link')
-			.setLabel('Aprende PuréScript')
+			.setLabel(`Aprende PuréScript (v${CURRENT_PS_VERSION})`)
 			.setEmoji('📖')
 			.setStyle(ButtonStyle.Link),
 	)
@@ -143,7 +143,7 @@ const helpString = (/**@type {import('../Commons/typings.js').ComplexCommandRequ
 	'* 🔍 **Ver Tubérculo** — `p!t --ver saludo` o `p!t -v saludo`',
 	'* 🗑️ **Borrar Tubérculo** — `p!t --borrar saludo` o `p!t -b saludo`',
 	'* ✏️ **Crear o editar Tubérculo simple** — `p!t --crear saludo ¡Hola!` o `p!t -c saludo ¡Hola!`',
-	`-# Usa \`${p_pure(request.guildId).raw}ayuda tubérculo\` para más información. Si quieres crear un Tubérculo avanzado, puedes leer la [documentación más reciente de PuréScript](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link).`,
+	`-# Usa \`${p_pure(request.guildId).raw}ayuda tubérculo\` para más información. Si quieres crear un Tubérculo avanzado, puedes leer la [documentación más reciente de PuréScript](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link) (**v${CURRENT_PS_VERSION}**).`,
 ].join('\n');
 
 const options = new CommandOptions()
@@ -374,6 +374,11 @@ const command = new CommandManager('tubérculo', flags)
 		if(!gcfg.tubers[tuberId])
 			return interaction.editReply({ content: '⚠️ Esta TuberID ya no existe' });
 
+		if(isNotModerator(interaction.member) && gcfg.tubers[tuberId].author !== interaction.user.id) {
+			const member = interaction.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? interaction.guild.members.me;
+			return interaction.reply({ content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${member.user.username}*` });
+		}
+
 		const desc = interaction.fields.getTextInputValue('descInput');
 		gcfg.tubers[tuberId].desc = desc;
 		gcfg.markModified(`tubers.${tuberId}`);
@@ -393,22 +398,39 @@ const command = new CommandManager('tubérculo', flags)
 
 		if(!Array.isArray(gcfg.tubers[tuberId]?.inputs))
 			return interaction.editReply({ content: '⚠️ Esta TuberID ya no existe, o no contiene entradas válidas' });
+
+		if(isNotModerator(interaction.member) && gcfg.tubers[tuberId].author !== interaction.user.id) {
+			const member = interaction.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? interaction.guild.members.me;
+			return interaction.reply({ content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${member.user.username}*` });
+		}
 		
 		const name = interaction.fields.getTextInputValue('nameInput');
+		const desc = interaction.fields.getTextInputValue('descInput');
 
 		if(gcfg.tubers[tuberId].psVersion == null) {
 			const inputIndex = gcfg.tubers[tuberId].inputs.findIndex(input => (input.identifier ?? input.name) === name);
 			if(inputIndex < 0)
 				return interaction.editReply({ content: `⚠️ La entrada "${shortenText(name, 128)}" no existe para el Tubérculo **${shortenText(tuberId, 256)}**` });
 			
-			const desc = interaction.fields.getTextInputValue('descInput');
 			gcfg.tubers[tuberId].inputs[inputIndex].desc = desc;
+		} else {
+			const variants = /**@type {Array<Array<*>>}*/(gcfg.tubers[tuberId].inputs);
+			let found = false;
+			variants.forEach((variant, variantIndex) => variant.forEach((input, inputIndex) => {
+				if(Input.from(input).name === name) {
+					gcfg.tubers[tuberId].inputs[variantIndex][inputIndex].desc = desc;
+					found = true;
+				}
+			}));
+
+			if(!found)
+				return interaction.editReply({ content: `⚠️ El nombre de Entrada \`${shortenText(name, 128)}\` no existe en ninguna variante del Tubérculo **${shortenText(tuberId, 256)}**` });
 		}
 		
 		gcfg.markModified(`tubers.${tuberId}`);
 		await gcfg.save();
 
-		return interaction.editReply({ content: `✅ Descripción de entrada "${shortenText(name, 256)}" actualizada` });
+		return interaction.editReply({ content: `✅ Descripción de Entrada \`${shortenText(name, 256)}\` actualizada` });
 	});
 
 /**
@@ -584,10 +606,15 @@ function viewTuber(interaction, item, tuberId, inputVariant, updateMessage) {
 				descriptionButtons.push(
 					new ButtonBuilder()
 						.setCustomId(`t_gID_${tuberId}_${compressId(item.author)}`)
-						.setLabel('Describir entrada')
+						.setLabel('Describir Entrada')
 						.setEmoji('🏷')
 						.setStyle(ButtonStyle.Success),
 				);
+			} else {
+				embed.addFields({
+					name: inputTitle,
+					value: '_(Variante sin Entradas)_',
+				});
 			}
 		}
 
@@ -647,8 +674,9 @@ function viewTuber(interaction, item, tuberId, inputVariant, updateMessage) {
 function deleteTuber(tuberId, gcfg, request) {
 	if(!gcfg.tubers[tuberId])
 		return request.reply({ content: `⚠️️ El Tubérculo **${tuberId}** no existe` });
+
 	if(isNotModerator(request.member) && gcfg.tubers[tuberId].author !== request.userId)
-		return request.reply({ content: `⛔ Acción denegada. Esta TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.members.me).user.username}*` });
+		return request.reply({ content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.members.me).user.username}*` });
 
 	gcfg.tubers[tuberId] = null;
 	delete gcfg.tubers[tuberId];

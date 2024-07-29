@@ -96,13 +96,15 @@ class Input {
 	}
 
 	/**
+	 * Comprueba si 2 Entradas son suficientemente equivalentes
+	 * Comprueba nombre, tipo, opcionalidad y expansiva
+	 * No comprueba la descripción
 	 * @param {Input} other 
 	 */
 	equals(other) {
 		return this.name === other.name
 			&& this.kind === other.kind
-			&& this.optional === other.optional
-			&& this.spread === other.spread;
+			&& this.optional === other.optional;
 	}
 
 	toString() {

@@ -7,7 +7,7 @@ const { Scope } = require('./interpreter/scope');
 const { Input } = require('../ps2/interpreter/inputReader');
 const { ValueKinds, coerceValue, makeNada } = require('./interpreter/values');
 const { declareNatives, declareContext } = require('./interpreter/environment/environment');
-const { EmbedBuilder, Colors, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
+const { EmbedBuilder, Colors, ButtonBuilder, ActionRowBuilder, ButtonStyle, blockQuote } = require('discord.js');
 const { shortenText } = require('../../func');
 const sizeof = /**@type {import('object-sizeof')['default']}*/(/**@type {unknown}*/(require('object-sizeof')));
 
@@ -18,6 +18,26 @@ const logOptions = {
     parser: true,
     interpreter: true,
 };
+
+/**
+ * Esta Función se ejecuta DESPUÉS de comprobar que ambas variantes tienen el mismo largo
+ * Verifica si todas las Entradas de la variante A se corresponden suficientemente con las Entradas de la variante B
+ * Si un par de Entradas coinciden en nombre, tipo y opcionalidad pero no en extensividad, se hacen ambas extensivos y se consideran equivalentes
+ * @param {Array<import('../ps2/interpreter/inputReader').Input>} a
+ * @param {Array<import('../ps2/interpreter/inputReader').Input>} b
+ */
+const variantEquals = (a, b) => a.every((input1, i) => {
+    const input2 = b[i];
+    if(!input1.equals(input2))
+        return false;
+
+    if(input1.spread !== input2.spread) {
+        input1.setSpread(true);
+        input2.setSpread(true);
+    }
+
+    return true;
+});
 
 /**
  * @typedef {Object} BaseTubercle
@@ -152,7 +172,7 @@ async function executeTuber(request, tuber, inputOptions) {
         throw error;
     }
 
-    let { sendStack, inputStack, saveTable, returned } = result;
+    let { sendStack, inputStack: inputVariant, saveTable, returned } = result;
     
     if(!sendStack.length) {
         await request.editReply({ content: `⚠️ Se esperaba un envío de mensaje` });
@@ -183,16 +203,26 @@ async function executeTuber(request, tuber, inputOptions) {
         replyObject.content = replyStacks.content.join('\n');
     
     if(overwrite) {
-        tuber.inputs = [ inputStack ];
+        tuber.inputs = [ inputVariant ];
     } else {
         tuber.inputs ??= [];
-        /**
-         * @param {Array<import('../ps2/interpreter/inputReader').Input>} a
-         * @param {Array<import('../ps2/interpreter/inputReader').Input>} b
-         */
-        const variantEquals = (a, b) => a.every(input1 => b.every(input2 => input1.equals(input2)));
-        if(!tuber.inputs.some(otherStack => variantEquals(inputStack, otherStack)))
-            tuber.inputs.push(inputStack);
+        tuber.inputs = tuber.inputs.map(variant => variant.map(i => Input.from(i)));
+
+        const isNewVariant = () => {
+            if(tuber.inputs.length === 0)
+                return true;
+
+            if(inputVariant.length === 0)
+                return !tuber.inputs.some(otherVariant => otherVariant.length === 0);
+            
+            return !tuber.inputs.some(otherVariant => inputVariant.length === otherVariant.length && variantEquals(inputVariant, otherVariant));
+        };
+
+        if(isNewVariant()) {
+            //PENDIENTE: Hacer que se transfieran descripciones de viejas variantes a nuevas si hay nombres coincidentes
+            tuber.inputs.push(inputVariant);
+            tuber.inputs.sort((a, b) => a.length - b.length);
+        }
     }
 
     let mergedSaveData;
