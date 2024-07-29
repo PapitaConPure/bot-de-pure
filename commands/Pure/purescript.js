@@ -9,7 +9,7 @@ const { makeButtonRowBuilder } = require('../../tsCasts');
 
 const psDocsButton = new ButtonBuilder()
 	.setURL('https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link')
-	.setLabel('Aprende PuréScript')
+	.setLabel(`Aprende PuréScript (v${CURRENT_PS_VERSION})`)
 	.setEmoji('📖')
 	.setStyle(ButtonStyle.Link);
 
@@ -38,12 +38,13 @@ const command = new CommandManager('purescript', flags)
 	.setLongDescription(
 		'Interpreta y ejecuta el código PuréScript ingresado',
 		'',
-		'Por facilidad de uso, puedes usar formato de código (.arm recomendado):',
+		'Por mejor legibilidad, puedes usar algún coloreado (`arm` recomendado):',
 		'> p!purescript \\`\\`\\`arm',
 		'> ENVIAR "Hola mundo"',
 		'> \\`\\`\\`',
 		'',
-		'Puedes leer o descargar la documentación de PuréScript desde [aquí](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link) (~3MiB)',
+		'Puedes obtener la documentación de PuréScript desde [aquí](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link) (~6MiB)',
+		`Última versión: **v${CURRENT_PS_VERSION}**`
 	)
 	.setOptions(options)
 	.setExecution(async function (request, args, isSlash, rawArgs) {
