@@ -219,7 +219,14 @@ async function executeTuber(request, tuber, inputOptions) {
         };
 
         if(isNewVariant()) {
-            //PENDIENTE: Hacer que se transfieran descripciones de viejas variantes a nuevas si hay nombres coincidentes
+            inputVariant.forEach(input1 => tuber.inputs.some(variant => variant.some(input2 => {
+                if(input1.name !== input2.name)
+                    return false;
+
+                input1.setDesc(input2.desc);
+                return true;
+            })));
+
             tuber.inputs.push(inputVariant);
             tuber.inputs.sort((a, b) => a.length - b.length);
         }
