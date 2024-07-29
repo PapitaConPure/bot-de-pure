@@ -206,6 +206,7 @@ const utilFunctions = [
 	{ id: 'cos', fn: cos },
 	{ id: 'dado', fn: dado },
 	{ id: 'elegir', fn: elegir },
+	{ id: 'hayEntradas', fn: quedanEntradas },
 	{ id: 'hsl', fn: colorHSL },
 	{ id: 'hsb', fn: colorHSV },
 	{ id: 'hsv', fn: colorHSV },
