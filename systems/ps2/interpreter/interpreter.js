@@ -17,25 +17,65 @@ const Stops = /**@type {const}*/({
 });
 /**@typedef {import('types').ValuesOf<Stops>} StopKind*/
 
+//#region Atajos de Tipado
+/**
+ * @typedef {import('../../../commands/Commons/typings').ComplexCommandRequest} ComplexCommandRequest
+ * 
+ * @typedef {import('../lexer/tokens').Token} Token
+ * @typedef {import('../ast/statements').Statement} Statement
+ * @typedef {import('../ast/expressions').Expression} Expression
+ * 
+ * @typedef {import('../ast/statements').ProgramStatement} ProgramStatement
+ * 
+ * @typedef {import('./values').RuntimeValue} RuntimeValue
+ * @typedef {import('./values').ValueKind} ValueKind
+ * @typedef {import('./values').NumberValue} NumberValue
+ * @typedef {import('./values').TextValue} TextValue
+ * @typedef {import('./values').BooleanValue} BooleanValue
+ * @typedef {import('./values').ListValue} ListValue
+ * @typedef {import('./values').RegistryValue} RegistryValue
+ * @typedef {import('./values').EmbedValue} EmbedValue
+ * @typedef {import('./values').FunctionValue} FunctionValue
+ * @typedef {import('./values').NativeFunctionValue} NativeFunctionValue
+ * @typedef {import('./values').AnyFunctionValue} AnyFunctionValue
+ * @typedef {import('./values').NadaValue} NadaValue
+ * @typedef {import('./inputReader').InputReader} InputReader
+ * @typedef {import('./inputReader').Input} Input
+ */
+/**
+ * @template {ValueKind} T
+ * @typedef {Extract<RuntimeValue, { kind: T }>} InferredRuntimeValue
+ */
+/**
+ * @typedef {Object} EvaluationResult
+ * @prop {RuntimeValue} returned 
+ * @prop {Array<import('./inputReader').Input>} inputStack 
+ * @prop {Array<RuntimeValue>} sendStack 
+ * @prop {Map<String, RuntimeValue>} saveTable 
+ * @prop {Array<RuntimeValue>} sendStack 
+ * @prop {Array<Error>} errorStack 
+ */
+//#endregion
+
 /**Representa un Intérprete de PuréScript*/
 class Interpreter {
-	/**@type {import('./inputReader').InputReader}*/
+	/**@type {InputReader}*/
 	#inputReader;
 	/**@type {Array<Error>}*/
 	#errorStack;
-	/**@type {Array<import('./values').RuntimeValue>}*/
+	/**@type {Array<RuntimeValue>}*/
 	#sendStack;
-	/**@type {Map<String, import('./values').RuntimeValue>}*/
+	/**@type {Map<String, RuntimeValue>}*/
 	#saveTable;
 	/**@type {String}*/
 	#source;
-	/**@type {import('../../../commands/Commons/typings').ComplexCommandRequest?}*/
+	/**@type {ComplexCommandRequest?}*/
 	#request;
 	/**@type {StopKind}*/
 	#stop;
 	/**@type {Number}*/
 	#quota;
-	/**@type {Array<import('../ast/statements').Statement | import('../ast/expressions').Expression>}*/
+	/**@type {Array<Statement | Expression>}*/
 	#lastNodes;
 
 	constructor() {
@@ -59,7 +99,7 @@ class Interpreter {
 
 	/**
 	 * @param {String} message
-	 * @param {import('../ast/expressions').Expression | import('../ast/statements').Statement | import('../lexer/tokens').Token} node
+	 * @param {Expression | Statement | Token} node
 	 */
 	TuberInterpreterError(message, node = null) {
 		node ??= this.#lastNodes[0];
@@ -76,7 +116,7 @@ class Interpreter {
 
 	/**
 	 * @param {String} message
-	 * @param {import('../ast/expressions').Expression | import('../ast/statements').Statement | import('../lexer/tokens').Token} node
+	 * @param {Expression | Statement | Token} node
 	 */
 	TuberSendError(message, node = null) {
 		node ??= this.#lastNodes[0];
@@ -91,7 +131,7 @@ class Interpreter {
 
 	/**
 	 * 
-	 * @param {import('../ast/expressions').Expression | import('../ast/statements').Statement | import('../lexer/tokens').Token} node
+	 * @param {Expression | Statement | Token} node
 	 * @returns {{ lineString: String, offset: Number, markLength: Number }}
 	 */
 	#setupInterpreterErrorDisplay(node) {
@@ -145,7 +185,7 @@ class Interpreter {
 
 	/**
 	 * 
-	 * @param {import('../ast/expressions').Expression | import('../ast/statements').Statement | import('../lexer/tokens').Token} node
+	 * @param {Expression | Statement | Token} node
 	 * @param {String} lineString 
 	 * @param {Number} offset 
 	 * @param {Number} markLength 
@@ -182,9 +222,9 @@ class Interpreter {
 
 	/**
 	 * @template {import('./values').ValueKind} T
-	 * @param {import('./values').RuntimeValue} value
+	 * @param {RuntimeValue} value
 	 * @param {T} valueKind
-	 * @returns {value is Extract<import('./values').RuntimeValue, { kind: T }>}
+	 * @returns {value is InferredRuntimeValue<T>}
 	 */
 	is(value, valueKind) {
 		return value.kind === valueKind;
@@ -192,9 +232,9 @@ class Interpreter {
 
 	/**
 	 * @template {import('./values').ValueKind} T
-	 * @param {import('./values').RuntimeValue} value
+	 * @param {RuntimeValue} value
 	 * @param {...T} valueKinds
-	 * @returns {value is Extract<import('./values').RuntimeValue, { kind: T }>}
+	 * @returns {value is InferredRuntimeValue<T>}
 	 */
 	isAnyOf(value, ...valueKinds) {
 		return valueKinds.some(valueKind => value.kind === valueKind);
@@ -220,13 +260,16 @@ class Interpreter {
 	}
 
 	/**
-	 * 
-	 * @param {import('../ast/expressions').Expression | import('../ast/statements').Statement} node 
+	 * Agrega el nodo indicado a una pila de nodos para diagnóstico de errores
+	 * @param {Expression | Statement} node 
 	 */
 	rememberNode(node) {
 		this.#lastNodes.unshift(node);
 	}
 
+	/**
+	 * Elimina el último nodo recordado de la pila para diagnóstico de errores y lo devuelve
+	 */
 	forgetLastNode() {
 		return this.#lastNodes.shift();
 	}
@@ -234,22 +277,23 @@ class Interpreter {
 	/**
 	 * @template {import('./values').ValueKind} T
 	 * @param {import('../ast/expressions').Expression} node
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 * @param {T} as
-	 * @returns {Extract<import('./values').RuntimeValue, { kind: T }>}
+	 * @returns {InferredRuntimeValue<T>}
 	 */
 	evaluateAs(node, scope, as, mustBeDeclared = true) {
-		return /**@type {Extract<import('./values').RuntimeValue, { kind: T }>}*/(coerceValue(this, this.evaluate(node, scope, mustBeDeclared), as));
+		return /**@type {InferredRuntimeValue<T>}*/(coerceValue(this, this.evaluate(node, scope, mustBeDeclared), as));
 	}
 
 	/**
 	 * Evalúa un nodo programa
-	 * @param {import('../ast/statements').ProgramStatement} ast
-	 * @param {import('./scope').Scope} scope
+	 * @param {ProgramStatement} ast
+	 * @param {Scope} scope
 	 * @param {String} source
-	 * @param {import('../../../commands/Commons/typings').ComplexCommandRequest} request
+	 * @param {ComplexCommandRequest} request
 	 * @param {Array<String>} args
 	 * @param {Boolean} [isTestDrive]
+	 * @returns {EvaluationResult}
 	 */
 	evaluateProgram(ast, scope, source, request, args, isTestDrive = false) {
 		if(ast == null || ast.kind !== StatementKinds.PROGRAM || ast.body == null)
@@ -287,9 +331,9 @@ class Interpreter {
 
 	/**
 	 * Evalúa una sentencia y devuelve el valor Nada
-	 * @param {import('../ast/statements').Statement} node
-	 * @param {import('./scope').Scope} scope
-	 * @returns {import('./values').RuntimeValue}
+	 * @param {Statement} node
+	 * @param {Scope} scope
+	 * @returns {RuntimeValue}
 	 */
 	evaluateStatement(node, scope) {
 		if(this.#quota-- <= 0)
@@ -387,10 +431,10 @@ class Interpreter {
 
 	/**
 	 * Evalúa una sentencia o expresión y devuelve un valor extraído de las mismas
-	 * @param {import('../ast/expressions').Expression} node
-	 * @param {import('./scope').Scope} scope
+	 * @param {Expression} node
+	 * @param {Scope} scope
 	 * @param {Boolean} [mustBeDeclared]
-	 * @returns {import('./values').RuntimeValue}
+	 * @returns {RuntimeValue}
 	 */
 	evaluate(node, scope, mustBeDeclared = true) {
 		this.rememberNode(node)
@@ -468,8 +512,8 @@ class Interpreter {
 
 	/**
 	 * 
-	 * @param {import('../ast/statements').ProgramStatement|import('../ast/statements').BlockStatement} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {ProgramStatement | import('../ast/statements').BlockStatement} node 
+	 * @param {Scope} scope
 	 */
 	#evaluateBlock(node, scope) {
 		/**@type {import('./values').RuntimeValue}*/
@@ -487,7 +531,7 @@ class Interpreter {
 	/**
 	 * 
 	 * @param {import('../ast/statements').ConditionalStatement} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateConditional(node, scope) {
 		const { test, consequent, alternate } = node;
@@ -505,7 +549,7 @@ class Interpreter {
 	/**
 	 * 
 	 * @param {import('../ast/statements').WhileStatement} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateWhile(node, scope) {
 		const { test, body } = node;
@@ -524,7 +568,7 @@ class Interpreter {
 	/**
 	 * 
 	 * @param {import('../ast/statements').DoUntilStatement} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateDoUntil(node, scope) {
 		const { test, body } = node;
@@ -543,7 +587,7 @@ class Interpreter {
 	/**
 	 * 
 	 * @param {import('../ast/statements').RepeatStatement} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateRepeat(node, scope) {
 		const { times, body } = node;
@@ -563,7 +607,7 @@ class Interpreter {
 	/**
 	 * 
 	 * @param {import('../ast/statements').ForEachStatement} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateForEach(node, scope) {
 		const { identifier, container, body } = node;
@@ -593,7 +637,7 @@ class Interpreter {
 	/**
 	 * 
 	 * @param {import('../ast/statements').ForStatement} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateFor(node, scope) {
 		return (node.full === true)
@@ -604,7 +648,7 @@ class Interpreter {
 	/**
 	 * 
 	 * @param {import('../ast/statements').FullForStatement} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateFullFor(node, scope) {
 		const { init, test, step, identifier, body } = node;
@@ -632,7 +676,7 @@ class Interpreter {
 	/**
 	 * 
 	 * @param {import('../ast/statements').ShortForStatement} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateShortFor(node, scope) {
 		const { from, to, identifier, body } = node;
@@ -682,7 +726,7 @@ class Interpreter {
 	 *   3. Si la Entrada es opcional y no tiene valor de falla, se asume el valor por defecto del tipo esperado de la Entrada
 	 *   4. Se lanza un error
 	 * @param {import('../ast/statements').ReadStatement} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateReadStatement(node, scope) {
 		const coercedValue = this.#inputReader.readInput(node, scope);
@@ -696,7 +740,7 @@ class Interpreter {
 	 * La variable no debe estar ya declarada en el mismo ámbito.
 	 * Si la variable existía en un ámbito padre, se declara otra en el ámbito actual que opaca la del ámbito padre
 	 * @param {import('../ast/statements').DeclarationStatement} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateDeclarationStatement(node, scope) {
 		const { dataKind, declarations } = node;
@@ -766,7 +810,7 @@ class Interpreter {
 	 * 
 	 * Si la variable no está declarada en este ámbito o los ámbitos padre y la sentencia es CARGAR, se la declara en este ámbito
 	 * @param {import('../ast/statements').AssignmentStatement} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateAssignmentStatement(node, scope) {
 		const { operator, receptor, reception } = node;
@@ -825,7 +869,7 @@ class Interpreter {
 	 * 
 	 * La variable debe estar declarada y debe ser una Lista
 	 * @param {import('../ast/statements').InsertionStatement} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateInsertionStatement(node, scope) {
 		const { receptor, reception, index } = node;
@@ -848,7 +892,7 @@ class Interpreter {
 	 * Devuelve el valor de la expresión indicada.
 	 * Todas las sentencias luego de esta se ignoran hasta que finaliza un ámbito de Función o el Programa
 	 * @param {import('../ast/statements').ReturnStatement} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateReturnStatement(node, scope) {
 		const returned = this.evaluate(node.expression, scope, false);
@@ -874,7 +918,7 @@ class Interpreter {
 	 * 
 	 * Los ámbitos de Función son irrelevantes para esta sentencia
 	 * @param {import('../ast/statements').StopStatement} node
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateStopStatement(node, scope) {
 		const { condition, stopMessage } = node;
@@ -897,7 +941,7 @@ class Interpreter {
 	 * Añade un valor a la pila de valores enviados.
 	 * Dichos valores serían enviados en conjunto al finalizar el Programa.
 	 * @param {import('../ast/statements').SendStatement} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateSendStatement(node, scope) {
 		let sendValue = this.evaluate(node.expression, scope, false);
@@ -918,7 +962,7 @@ class Interpreter {
 	/**
 	 * Evalúa una expresión de Lista y retorna un valor de Lista
 	 * @param {import('../ast/expressions').ListLiteralExpression} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateList(node, scope) {
 		const { elements } = node;
@@ -929,7 +973,7 @@ class Interpreter {
 	/**
 	 * Evalúa una expresión de Registro y retorna un valor de Registro
 	 * @param {import('../ast/expressions').RegistryLiteralExpression} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateRegistry(node, scope) {
 		const { entries } = node;
@@ -951,7 +995,7 @@ class Interpreter {
 	/**
 	 * Evalúa una expresión de Función de usuario y devuelve un valor de Función de usuario
 	 * @param {import('../ast/expressions').FunctionExpression} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateFunction(node, scope) {
 		if(node.expression === true)
@@ -965,7 +1009,7 @@ class Interpreter {
 	/**
 	 * Evalúa una expresión unaria y devuelve el valor resultante de la operación
 	 * @param {import('../ast/expressions').UnaryExpression} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateUnary(node, scope, mustBeDeclared = true) {
 		const { operator, argument } = node;
@@ -982,7 +1026,7 @@ class Interpreter {
 	/**
 	 * Evalúa una expresión binaria y devuelve el valor resultante de la operación
 	 * @param {import('../ast/expressions').BinaryExpression} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateBinary(node, scope, mustBeDeclared = true) {
 		const { operator, left, right } = node;
@@ -1005,7 +1049,7 @@ class Interpreter {
 	/**
 	 * Evalúa una expresión binaria lógica y devuelve el valor resultante de la operación
 	 * @param {import('../ast/expressions').BinaryExpression} node 
-	 * @param {import('./scope').Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateLogical(node, scope, mustBeDeclared = true) {
 		const { operator, left, right } = node;
@@ -1027,13 +1071,13 @@ class Interpreter {
 	 * 
 	 * Si es posible, convierte un valor de un cierto tipo al tipo indicado
 	 * @param {import('../ast/expressions').CastExpression} node 
-	 * @param {import("./scope").Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateCast(node, scope, mustBeDeclared = true) {
 		const { argument, as } = node;
 		const value = this.evaluate(argument, scope, false);
 		const valueKind = ValueKindLookups.get(as.kind);
-		return coerceValue(this, value, valueKind);
+		return /**@type {RuntimeValue}*/(coerceValue(this, value, valueKind));
 	}
 
 	/**
@@ -1041,7 +1085,7 @@ class Interpreter {
 	 * 
 	 * Evalúa todas las expresiones en orden de izquierda a derecha y devuelve el valor de la última expresión evaluada
 	 * @param {import('../ast/expressions').SequenceExpression} node 
-	 * @param {import("./scope").Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateSequence(node, scope) {
 		/**@type {import('./values').RuntimeValue}*/
@@ -1056,7 +1100,7 @@ class Interpreter {
 	/**
 	 * Satanás está DIRECTAMENTE INVOLUCRADO en esta función
 	 * @param {import('../ast/expressions').ArrowExpression} node 
-	 * @param {import("./scope").Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateArrow(node, scope) {
 		const { holder } = node;
@@ -1156,7 +1200,7 @@ class Interpreter {
 	 * 
 	 * Es irrelevante si la Función es nativa o de usuario. Superficialmente, se ejecutarán de forma similar
 	 * @param {import('../ast/expressions').CallExpression} node 
-	 * @param {import("./scope").Scope} scope
+	 * @param {Scope} scope
 	 */
 	#evaluateCall(node, scope) {
 		const { fn, args } = node;
@@ -1176,9 +1220,9 @@ class Interpreter {
 	 * Ejecuta el valor de Función especificado, con los argumentos indicados, si aplica.
 	 * 
 	 * Es irrelevante si la Función es nativa o de usuario. Superficialmente, se ejecutarán de forma similar
-	 * @param {import('./values').FunctionValue | import('./values').NativeFunctionValue} fnValue
-	 * @param {Array<import('./values').RuntimeValue>} argValues
-	 * @param {import("./scope").Scope} scope
+	 * @param {AnyFunctionValue} fnValue
+	 * @param {Array<RuntimeValue>} argValues
+	 * @param {Scope} scope
 	 */
 	callFunction(fnValue, argValues, scope) {
 		let returnedValue;
@@ -1223,7 +1267,7 @@ class Interpreter {
 	 * Función de utilidad para intentar encontrar un método nativo y enlazarlo a un valor correspondiente.
 	 * 
 	 * Si no se encuentra un método con el nombre solicitado para el tipo del valor indicado, se devuelve `null`
-	 * @param {import('./values').RuntimeValue} value 
+	 * @param {RuntimeValue} value 
 	 * @param {String} key 
 	 */
 	#tryFindNativeMethod(value, key) {
@@ -1238,9 +1282,9 @@ class Interpreter {
 
 	/**
 	 * Asigna un valor concreto a un valor receptor. La expresión receptora DEBE evaluar a una referencia asignable
-	 * @param {import('../ast/expressions').Expression} receptor
-	 * @param {import('./values').RuntimeValue} receptionValue
-	 * @param {import("./scope").Scope} scope
+	 * @param {Expression} receptor
+	 * @param {RuntimeValue} receptionValue
+	 * @param {Scope} scope
 	 */
 	#assignValueToExpression(receptor, receptionValue, scope) {
 		/**@type {String}*/
@@ -1288,7 +1332,7 @@ class Interpreter {
 
 	/**
 	 * Devuelve el fragmento de código fuento del cual se originó el nodo AST indicado
-	 * @param {import('../ast/expressions').Expression | import('../ast/statements').Statement | import('../lexer/tokens').Token} node
+	 * @param {Expression | Statement | Token} node
 	 * @returns {String} 
 	 */
 	astString(node) {
