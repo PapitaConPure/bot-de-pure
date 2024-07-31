@@ -353,6 +353,11 @@ class Lexer {
 						case 'n':
 							chars[rePos] = '\n';
 							break;
+
+						case 'T':
+						case 't':
+							chars[rePos] = '\t';
+							break;
 	
 						case '"': break;
 						case "'": break;
