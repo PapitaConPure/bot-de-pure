@@ -95,7 +95,7 @@ function colorHSV(self, [ matiz, saturación, brillo ], scope) {
 	if(brilloValue < 0 || brilloValue > 1)
 		throw scope.interpreter.TuberInterpreterError(`El brillo del color debe ser un valor entre 0 y 1 inclusive`);
 
-	const colorString = hsl2hex(matizValue, saturaciónValue, brilloValue);
+	const colorString = hsv2hex(matizValue, saturaciónValue, brilloValue);
 	return makeText(colorString);
 }
 
