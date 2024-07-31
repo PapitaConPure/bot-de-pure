@@ -96,6 +96,8 @@ const ValueKinds = /**@type {const}*/({
  */
 
 /**
+ * @typedef {FunctionValue | NativeFunctionValue} AnyFunctionValue
+ * 
  * @typedef {NumberValue
  *          |TextValue
  *          |BooleanValue
@@ -105,8 +107,7 @@ const ValueKinds = /**@type {const}*/({
  * @typedef {ListValue
  *          |RegistryValue
  *          |EmbedValue
- *          |NativeFunctionValue
- *          |FunctionValue
+ *          |AnyFunctionValue
  * } ComplexValue
  * 
  * @typedef {PrimitiveValue | ComplexValue} RuntimeValue
