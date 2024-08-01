@@ -9,7 +9,7 @@ const command = new CommandManager('sticker', flags)
 	.setDescription('Muestra el enlace del sticker especificado')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const message = CommandOptionSolver.asMessage(await options.in(request).fetchParam(args, 'mensaje', true)) ?? request.channel.messages.cache.get(request.reference?.messageId);
+		const message = CommandOptionSolver.asMessage(await options.in(request).fetchParam(args, 'mensaje', true)) ?? request.channel.messages.cache.get(/**@type {import('discord.js').Message}*/(request).reference?.messageId);
 
 		if(!message || !message.stickers.size)
 			return request.reply({ content: '⚠️️ Debes especificar un mensaje con un sticker' });
