@@ -505,6 +505,10 @@ const command = new CommandManager('yo', flags)
 
         let service = interaction.values[0];
         if(service === 'none') service = '';
+
+        if(service !== '' && service !== 'vx' && service !== 'fx')
+            throw 'Resultado de servicio de conversión de Twitter inesperado';
+
         userConfigs.twitterPrefix = service;
         
         return Promise.all([
