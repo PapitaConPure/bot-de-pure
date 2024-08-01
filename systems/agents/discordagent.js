@@ -133,10 +133,14 @@ class DiscordAgent {
 async function initializeWebhookMessageOwners() {
 	const webhookOwners = await WebhookOwner.find({});
 	const now = Date.now();
-	webhookOwners.forEach(owner => {
+	for(const owner of webhookOwners) {
 		if(now < owner.expirationDate)
 			owners.set(owner.messageId, { userId: owner.userId, expirationDate: owner.expirationDate });
-	});
+		else {
+			owner.delete();
+			await owner.save();
+		}
+	}
 }
 
 /**
