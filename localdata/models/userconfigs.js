@@ -5,11 +5,19 @@ const UserConfigSchema = new Mongoose.Schema({
         type: String,
         required: true,
     },
-    prc: { type: Number, default: 0 },
-    lastCultivate: { type: Number, default: 0 },
+    
+    prc: {
+        type: Number,
+        default: 0
+    },
+    lastCultivate: {
+        type: Number,
+        default: 0
+    },
     
     language: {
         type: String,
+        enum: [ 'es', 'en' ],
         default: 'es',
         required: true,
     },
@@ -30,10 +38,23 @@ const UserConfigSchema = new Mongoose.Schema({
         required: true,
     },
     convertPixiv: { type: Boolean, default: true, },
-    twitterPrefix: { type: String, default: '' },
-    showLevelUp: { type: Boolean, default: true },
-    collectMessageData: { type: Boolean, default: true },
-    banned: { type: Boolean, default: false },
+    twitterPrefix: {
+        type: String,
+        enum: [ '', 'vx', 'fx' ],
+        default: '',
+    },
+    showLevelUp: {
+        type: Boolean,
+        default: true
+    },
+    collectMessageData: {
+        type: Boolean,
+        default: true
+    },
+    banned: {
+        type: Boolean,
+        default: false
+    },
 });
 
 const model = Mongoose.model('UserConfig', UserConfigSchema);

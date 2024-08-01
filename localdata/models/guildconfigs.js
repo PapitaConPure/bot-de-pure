@@ -1,16 +1,24 @@
 const Mongoose = require('mongoose');
+const { makeStringIdValidator } = require('./modelUtils');
 
 /** Describe la configuración de un servidor. */
 const GuildConfigSchema = new Mongoose.Schema({
-	guildId: { type: String, required: true },
+	guildId: {
+		type: String,
+		required: true,
+        validator: makeStringIdValidator('Se esperaba una ID de servidor que no estuviera vacía'),
+	},
+
 	/** Habilitar modo caótico del servidor. */
 	chaos: { type: Boolean, default: false },
-	/** Papas del servidor. */
+	
+	/** Tubérculos del servidor. */
 	tubers: {
 		type: Object,
 		default: {},
 		required: true,
 	},
+
 	/** Feeds de imágenes del servidor. */
 	feeds: {
 		type: Object,
