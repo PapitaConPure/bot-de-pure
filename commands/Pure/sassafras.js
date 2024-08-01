@@ -91,7 +91,7 @@ sassadata.recomm.total = (() => {
 	].map(coll => coll.length).reduce((a,b) => a + b);
 })();
 
-const flags = new CommandTags().add('MEME');
+const flags = new CommandTags().add('MEME', 'OUTDATED');
 const options = new CommandOptions()
 	.addFlag('sd', ['sassamodo', 'dross'], 'para despertar al demonio interno de Sassa')
 	.addFlag('t', 'total', 'para saber la cantidad total de recomendaciones');
