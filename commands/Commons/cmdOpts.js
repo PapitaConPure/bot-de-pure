@@ -160,6 +160,7 @@ class CommandOption {
 
     /**@returns {this is CommandParam}*/
     isCommandParam() { return false; }
+
     /**@returns {this is CommandFlag}*/
     isCommandFlag() { return false; }
 };
@@ -223,6 +224,7 @@ class CommandParam extends CommandOption {
         return this;
     };
 
+    /**@returns {this is CommandParam}*/
     isCommandParam() {
         return true;
     }
@@ -311,6 +313,7 @@ class CommandFlag extends CommandOption {
         return this._expressive;
     }
 
+    /**@returns {this is CommandFlag}*/
     isCommandFlag() {
         return true;
     }
@@ -806,6 +809,10 @@ class CommandOptionSolver {
 
     get rawArgs() {
         return this.#rawArgs;
+    }
+
+    get empty() {
+        return this.isMessageSolver(this.#args) && this.#args.length === 0;
     }
 
     //#region What is "this"
