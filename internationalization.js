@@ -229,6 +229,10 @@ let localesObject = /**@type {const}*/({
 		es: 'Finalizar',
 		en: 'Finish',
 	},
+	buttonRegister: {
+		es: 'Registrar',
+		en: 'Register',
+	},
 	
 	actionDeleteUserPost: {
 		es: 'Borrar Post',
@@ -781,8 +785,11 @@ class Translator {
 		return 'en';
 	}
 
-	/**@param {String} userId*/
-	static async from(userId) {
+	/**
+	 * @param {import('discord.js').User | import('discord.js').GuildMember | String} user
+	 */
+	static async from(user) {
+		const userId = (typeof user === 'string') ? user : user.id;
 		const userCache = await fetchUserCache(userId);
 		return new Translator(userCache.language);
 	}
