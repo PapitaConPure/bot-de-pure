@@ -5,6 +5,12 @@ const { shortenTextLoose } = require('../../func');
 const { DiscordAgent } = require('./discordagent.js');
 const pixiv = new PixivApi();
 
+/**
+ * @typedef {Object} ImageRequestOptions
+ * @property {Object} headers
+ * @property {import('axios').ResponseType} responseType
+ */
+
 const pageSep = '_';
 const pixivRegex = /<?((http:\/\/|https:\/\/)(www\.)?)(pixiv.net(\/en)?)\/artworks\/([0-9]{6,9})(_[0-9]+)?>?/g;
 let lastPixivTokenRefresh = 0;
@@ -61,6 +67,8 @@ const formatPixivPostsMessage = async (urls) => {
         if(!post) return;
 
         const baseUrl = url.split(pageSep).shift();
+
+        /**@type {ImageRequestOptions}*/
         const imageRequestOptions = {
             headers: {
                 'Referer': 'http://www.pixiv.net',
@@ -81,8 +89,6 @@ const formatPixivPostsMessage = async (urls) => {
             const selectedPageUrls = metaPages?.[selectedPageNumber]?.image_urls
                 || post.image_urls;
 
-            //console.log({ postId, pageId, selectedPageNumber, selectedPageUrls });
-
             illustBuffers.push(pixiv.requestUrl(selectedPageUrls.large || selectedPageUrls.medium, imageRequestOptions));
         }
 
@@ -102,8 +108,8 @@ const formatPixivPostsMessage = async (urls) => {
         illustImages.forEach((illustImage, j) => postAttachments.push(new AttachmentBuilder(illustImage, { name: `thumb${i}_p${j}.png` })));
         postAttachments.push(new AttachmentBuilder(profileImage, { name: `pfp${i}.png` }));
 
-        let discordCaption;
-        if(post.caption?.length)
+        let discordCaption = null;
+        if(post.caption?.length) {
             discordCaption = shortenTextLoose(
                 post.caption
                     .replace('\n', '')
@@ -137,9 +143,10 @@ const formatPixivPostsMessage = async (urls) => {
                 return labelLink('🔗', 'Link');
             });
         
-        const discordCaptionLines = discordCaption.split('\n');
-        if(discordCaptionLines.length > 8)
-            discordCaption = [ ...discordCaptionLines.slice(0, 7), '(...)' ].join('\n');
+            const discordCaptionLines = discordCaption.split('\n');
+            if(discordCaptionLines.length > 8)
+                discordCaption = [ ...discordCaptionLines.slice(0, 7), '(...)' ].join('\n');
+        }
 
         let postTypeText;
         if(metaPages?.length > 1)
@@ -162,7 +169,7 @@ const formatPixivPostsMessage = async (urls) => {
                     iconURL: `attachment://pfp${i}.png`,
                 })
                 .setTitle(post.title)
-                .setDescription(discordCaption ?? null)
+                .setDescription(discordCaption)
                 .setURL(baseUrl)
                 .setImage(`attachment://thumb${i}_p0.png`)
                 .setFooter({ text: `pixiv • ${postTypeText}`, iconURL: 'https://i.imgur.com/GDJ3mof.png' })
