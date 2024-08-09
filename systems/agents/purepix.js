@@ -112,11 +112,11 @@ const formatPixivPostsMessage = async (urls) => {
         if(post.caption?.length) {
             discordCaption = shortenTextLoose(
                 post.caption
-                    .replace('\n', '')
-                    .replace('*', '\\*')
+                    .replace(/\n/g, '')
+                    .replace(/\*/g, '\\*')
                     .replace(/<\/?strong>/g, '*')
                     .replace(/<br ?\/?>/g, '\n')
-                    .replace('&#44;', ','),
+                    .replace(/&#44;/g, ','),
                     //.replace(/<[^>]*>/g, ''),
                 256,
                 960,
