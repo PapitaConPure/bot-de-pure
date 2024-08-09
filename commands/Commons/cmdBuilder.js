@@ -3,7 +3,7 @@ const { CommandTags } = require('./cmdTags');
 // @ts-ignore
 const { CommandRequest, ComplexCommandRequest, CommandArguments } = require('./typings');
 // @ts-ignore
-const { Snowflake, User, Interaction, ButtonInteraction, SelectMenuInteraction, MessagePayload, InteractionReplyOptions, CommandInteractionOptionResolver, Message, CommandInteraction, PermissionsBitField, Collection, Attachment, MessageActivity, InteractionDeferReplyOptions, MessageEditOptions, InteractionEditReplyOptions } = require('discord.js');
+const { Snowflake, User, Interaction, ButtonInteraction, SelectMenuInteraction, MessagePayload, InteractionReplyOptions, Message, CommandInteraction, PermissionsBitField, Collection, Attachment, MessageActivity, InteractionDeferReplyOptions, MessageEditOptions, InteractionEditReplyOptions, ChatInputCommandInteraction } = require('discord.js');
 const { CommandPermissions } = require('./cmdPerms');
 
 /**
@@ -11,6 +11,8 @@ const { CommandPermissions } = require('./cmdPerms');
  * @property {Message<Boolean>} initialReply The command's initial reply
  * @property {Boolean} isMessage Whether the command is a message command (true) or not (false)
  * @property {Boolean} isInteraction Whether the command is an interaction or Slash command (true) or not (false)
+ * @property {() => Message<true>} inferAsMessage Infers the command as a guild Message Command. Throws an error if the command isn't really a Message Command
+ * @property {() => ChatInputCommandInteraction<'cached'>} inferAsSlash Infers the command as a cached Slash Command Interaction. Throws an error if the command isn't really a Slash Command
  * 
  * @property {MessageActivity?} activity If the command is a message command, returns the message's activity (if any)
  * @property {Collection<Snowflake, Attachment>} attachments A collection of the command's attachments, if it's a message command and it has attachments
@@ -36,6 +38,8 @@ const extendedCommandRequestPrototype = {
     initialReply: undefined,
     isInteraction: false,
     isMessage: false,
+    inferAsMessage: undefined,
+    inferAsSlash: undefined,
     
     activity: undefined,
     attachments: undefined,
@@ -66,6 +70,8 @@ function extendRequest(request) {
     
     if(CommandManager.requestIsMessage(request)) {
         extension.isMessage = true;
+        extension.inferAsMessage = () => request;
+        extension.inferAsSlash = () => { throw 'Invalid inference of a Message Command into a Slash Command' };
 
         extension.appPermisions = request.guild.members.me.permissionsIn(request.channel);
         extension.deferred = false;
@@ -98,7 +104,9 @@ function extendRequest(request) {
         extension.wasReplied = () => extension.replied;
     } else {
         extension.isInteraction = true;
-
+        extension.inferAsMessage = () => { throw 'Invalid inference of a Slash Command into a Message Command' };
+        extension.inferAsSlash = () => request;
+        
         extension.activity = null;
         extension.attachments = new Collection();
         extension.userId = request.user.id;
@@ -260,7 +268,8 @@ class CommandManager {
 
     /**@param {ExperimentalExecuteFunction} exeFn*/
     setExperimentalExecution(exeFn) {
-        // @ts-ignore
+        this.experimental = true;
+        //@ts-expect-error
         this.execute = exeFn;
         return this;
     }
