@@ -29,12 +29,12 @@ module.exports = {
         //Actualización de actividad
         try {
             const status = presence.status[await getQueueItem({ queueId: 'presenceStatus', length: presence.status.length, sort: 'RANDOM' })];
-            const stream = presence.stream[await getQueueItem({ queueId: 'presenceStream', length: presence.stream.length, sort: 'RANDOM' })];
+            //const stream = presence.stream[await getQueueItem({ queueId: 'presenceStream', length: presence.stream.length, sort: 'RANDOM' })];
 
             client.user.setActivity({
-                name: status,
-                type: ActivityType.Streaming,
-                url: `https://www.youtube.com/watch?v=${stream}`,
+                type: ActivityType.Custom,
+                name: 'customstatus',
+                state: `🥔 ${status}`,
             });
             
             //Programar próxima actualización de actividad

@@ -9,7 +9,7 @@ const QueueModel = Mongoose.model('Queue', QueueSchema);
 
 /**
  * @typedef {{ queueId: String }} QueueQuery
- * @typedef {{ length: Number, mapFn: (v, k) => *, sort: Sort }} QueueGenerationOptions
+ * @typedef {{ length: Number, mapFn?: (v, k) => *, sort: Sort }} QueueGenerationOptions
  * @typedef {*} QueueItem
  */
 
