@@ -136,10 +136,8 @@ async function initializeWebhookMessageOwners() {
 	for(const owner of webhookOwners) {
 		if(now < owner.expirationDate)
 			owners.set(owner.messageId, { userId: owner.userId, expirationDate: owner.expirationDate });
-		else {
-			owner.delete();
-			await owner.save();
-		}
+		else
+			await owner.delete();
 	}
 }
 
