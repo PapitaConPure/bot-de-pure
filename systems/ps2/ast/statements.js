@@ -123,7 +123,7 @@ const ScopeAbortKinds = [
  * @property {import('./expressions.js').Expression} receptor
  * @property {import('./expressions.js').Expression} fallback
  * @property {Boolean} optional
- * @property {ReadStatementModifier} modifier
+ * @property {Array<ReadStatementModifier>} modifiers
  * @typedef {BaseStatementData<'ReadStatement'> & ReadStatementData} ReadStatement
  */
 

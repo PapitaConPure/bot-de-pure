@@ -321,7 +321,7 @@ function parseReadStatement(parser) {
 	let fallback = null;
 
 	if(!parser.current.is(TokenKinds.ASSIGNMENT)) {
-		const modifier = parseReadStmtModifier(parser, dataKind);
+		const modifiers = parseReadStmtModifiers(parser, dataKind);
 
 		if(this.hasTokens && !this.current.isStatement)
 			throw parser.TuberParserError(`Se esperaba \`con\` y una expresión (o palabra clave \`opcional\`) luego de expresión receptora en Sentencia \`LEER\`. Sin embargo, se recibió: *${parser.current.translated}*`);
@@ -334,7 +334,7 @@ function parseReadStatement(parser) {
 			receptor,
 			fallback,
 			optional,
-			modifier,
+			modifiers,
 			...makeMetadata(startToken, receptor),
 		};
 	}
@@ -343,7 +343,7 @@ function parseReadStatement(parser) {
 	parser.ensureExpression(`Se esperaba una expresión de valor de respaldo luego de \`con\` en Sentencia \`LEER\`, pero la instrucción finalizó sin más con: *${parser.current.translated}*`);
 	fallback = parser.parseExpression(BindingPowers.COMMA);
 
-	const modifier = parseReadStmtModifier(parser, dataKind);
+	const modifiers = parseReadStmtModifiers(parser, dataKind);
 
 	return {
 		kind: StatementKinds.READ,
@@ -351,9 +351,23 @@ function parseReadStatement(parser) {
 		receptor,
 		fallback,
 		optional,
-		modifier,
+		modifiers,
 		...makeMetadata(startToken, fallback),
 	};
+}
+
+/**
+ * @param {import('../parser.js').Parser} parser
+ * @param {Token} dataKind
+ * @returns {Array<import('../../ast/statements.js').ReadStatementModifier>}
+ */
+function parseReadStmtModifiers(parser, dataKind) {
+	const modifiers = [];
+
+	while(parser.hasTokens && !parser.current.isStatement)
+		modifiers.push(parseReadStmtModifier(parser, dataKind));
+
+	return modifiers;
 }
 
 /**
@@ -362,9 +376,6 @@ function parseReadStatement(parser) {
  * @returns {import('../../ast/statements.js').ReadStatementModifier}
  */
 function parseReadStmtModifier(parser, dataKind) {
-	if(!parser.hasTokens || parser.current.isStatement)
-		return v => v;
-	
 	if(dataKind.is(TokenKinds.TEXT)) {
 		parser.expect(TokenKinds.IN, `Se esperaba un operador de formato para la definición de Entrada de Usuario, pero se recibió: *${parser.current.translated}*`);
 		const caseToken = parser.expect(TokenKinds.IDENTIFIER, `Se esperaba: \`mayusculas\`, \`minusculas\` o similares en definición de formato de Entrada de Usuario, pero se recibió un símbolo inválido`);

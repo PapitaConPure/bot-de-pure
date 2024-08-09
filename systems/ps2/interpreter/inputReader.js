@@ -185,9 +185,7 @@ class InputReader {
 		return makeNada();
 	}
 
-	/**
-	 * @param {String} arg
-	 */
+	/**@param {String} arg*/
 	queueArg(arg) {
 		this.#args.push(arg);
 	}
@@ -196,9 +194,7 @@ class InputReader {
 		return this.#args.shift();
 	}
 
-	/**
-	 * @param {String} name
-	 */
+	/**@param {String} name*/
 	hasInput(name) {
 		return this.#inputLookup.has(name);
 	}
@@ -303,7 +299,7 @@ class ProductionInputReader extends InputReader {
 	 * @type {(node: import('../ast/statements').ReadStatement, scope: Scope) => import('./values').RuntimeValue}
 	 */
 	readInput(node, scope) {
-		const { receptor, dataKind, optional, fallback, modifier } = node;
+		const { receptor, dataKind, optional, fallback, modifiers } = node;
 
 		const name = this.interpreter.astString(receptor);
 		const valueKind = ValueKindLookups.get(dataKind.kind);
@@ -329,8 +325,8 @@ class ProductionInputReader extends InputReader {
 			}
 		} else
 			throw TuberInputError(`No se recibió un valor para la Entrada obligatoria \`${name}\` de ${dataKind.translated}`);
-
-		return modifier(receptionValue, this.interpreter, scope);
+		
+		return modifiers.reduce((acc, modifier) => modifier(acc, this.interpreter, scope), receptionValue);
 	}
 
 	/**
