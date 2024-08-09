@@ -317,7 +317,7 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
         }));
         if(userTags.length)
             // @ts-ignore
-            messages[posts.length - 1].embeds[0].addFields({ name: 'Tu búsqueda', value: `:mag_right: *${userTags.trim().replace('*', '\\*').split(/ +/).join(', ')}*` });
+            messages[posts.length - 1].embeds[0].addFields({ name: 'Tu búsqueda', value: `:mag_right: *${userTags.trim().replace(/\*/g, '\\*').split(/ +/).join(', ')}*` });
 
         //Enviar mensajes
         const replyOptions = messages.shift();
