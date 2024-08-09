@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "checkJs": true,
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "resolveJsonModule": true,
+        "resolvePackageJsonImports": true,
+        "resolvePackageJsonExports": true,
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "paths": {
+            "types": ["./types.js"]
+        }
+    },
+    "exclude": [
+        "node_modules",
+        "CommandBuilder",
+        "PS Docs"
+    ],
+}

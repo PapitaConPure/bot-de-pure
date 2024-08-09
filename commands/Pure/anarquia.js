@@ -4,7 +4,7 @@ const { createCanvas, loadImage } = require('canvas');
 const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { Puretable, AUser, pureTableImage } = require('../../localdata/models/puretable.js');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
+const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
 
 const shapes = {
 	x: [
@@ -91,13 +91,13 @@ const shapes = {
 };
 const maxExp = 30;
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addParam('posición', 	   'NUMBER',   'para especificar una celda a modificar', { poly: ['x','y'], optional: true })
 	.addParam('emote', 		   'EMOTE',    'para especificar un emote a agregar',    {                  optional: true })
 	.addFlag('h', 'horizontal', 		   'para usar la habilidad de línea horizontal')
 	.addFlag('v', 'vertical', 			   'para usar la habilidad de línea vertical')
 	.addFlag('s', ['especial', 'special'], 'para usar una habilidad especial', { name: 'habilidad', type: 'TEXT' });
-const flags = new CommandMetaFlagsManager().add(
+const flags = new CommandTags().add(
 	'COMMON',
 	'GAME',
 );
@@ -262,7 +262,7 @@ const command = new CommandManager('anarquia', flags)
 
 		//Cargar imagen nueva si no está registrada
 		if(!loadEmotes.hasOwnProperty(e.id))
-			loadEmotes[e.id] = await loadImage(request.client.emojis.cache.get(e.id).url);
+			loadEmotes[e.id] = await loadImage(request.client.emojis.cache.get(e.id).imageURL());
 
 		//Habilidades
 		if(!h && !v)

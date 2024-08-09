@@ -2,7 +2,7 @@ const PureVoice = require('../../localdata/models/purevoice.js');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, MessageCollector, ButtonStyle, Colors, ChannelType } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { isNotModerator, defaultEmoji } = require('../../func.js');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
 const cancelbutton = (id) => new ButtonBuilder()
 	.setCustomId(`voz_cancelWizard_${id}`)
@@ -27,12 +27,12 @@ const wizEmbed = (iconUrl, stepName, stepColor) => {
 		.setFooter({ text: stepName });
 };
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addParam('nombre', 'TEXT', 'para decidir el nombre de la sesión actual', { optional: true })
 	.addFlag('e', ['emote', 'emoji'], 'para determinar el emote de la sesión actual', { name: 'emt', type: 'EMOTE' })
 	.addFlag('i', ['invitar', 'invite'], 'para invitar del canal a la sesión actual')
 	.addFlag('aw', ['asistente','instalador','wizard'], 'para inicializar el Asistente de Configuración');
-const flags = new CommandMetaFlagsManager().add('COMMON');
+const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('voz', flags)
 	.setAliases(
 		'purévoz', 'purevoz',

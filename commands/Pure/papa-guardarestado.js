@@ -1,9 +1,9 @@
 const global = require('../../localdata/config.json'); //Variables globales
 const imgs = require('../../localdata/drawings.json'); //Variables globales
 const fs = require('fs');
-const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandTags, CommandManager } = require('../Commons/commands');
 
-const flags = new CommandMetaFlagsManager().add(
+const flags = new CommandTags().add(
     'PAPA',
     'OUTDATED',
 );

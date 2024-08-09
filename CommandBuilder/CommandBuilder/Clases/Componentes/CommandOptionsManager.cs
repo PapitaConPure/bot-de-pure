@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CommandBuilder {
-	public class CommandOptionsManager: CommandComponent {
+	public class CommandOptions: CommandComponent {
 		public List<CommandOption> options;
 
-		public CommandOptionsManager(): base(8, CommandBuilder.ComponentType.CommandOptionsManager) {
+		public CommandOptions(): base(8, CommandBuilder.ComponentType.CommandOptions) {
 			this.options = new List<CommandOption>();
 		}
 
@@ -38,7 +38,7 @@ namespace CommandBuilder {
 			foreach(CommandOption option in this.options)
 				optionsProcesadas.Append($"\n{option.Imprimir()}");
 
-			return $"const options = new CommandOptionsManager(){optionsProcesadas};";
+			return $"const options = new CommandOptions(){optionsProcesadas};";
 		}
 	}
 }

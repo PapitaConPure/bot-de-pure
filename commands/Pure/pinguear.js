@@ -1,7 +1,7 @@
 const uses = require('../../localdata/sguses.json'); //Funciones globales
 const { fetchUser, randRange } = require('../../func.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
 const frase = [
 	'Oe po [m] <:junkNo:1107847991580164106>',
@@ -30,11 +30,11 @@ async function pinguear(request, user, cnt, isFirst) {
 	if(cnt > 1) setTimeout(pinguear, 800, request, user, cnt - 1, false);
 }
 
-const flags = new CommandMetaFlagsManager().add(
+const flags = new CommandTags().add(
 	'MEME',
 	'CHAOS',
 );
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addParam('cantidad', 'NUMBER', 'para indicar la cantidad de veces que se debe pinguear')
 	.addParam('usuario', 'USER', 'para indicar el usuario a pinguear');
 const command = new CommandManager('pinguear', flags)

@@ -4,11 +4,11 @@ const axios = require('axios');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addFlag('d', ['del', 'delete'], 'para eliminar el mensaje original');
-const flags = new CommandMetaFlagsManager().add('PAPA');
+const flags = new CommandTags().add('PAPA');
 const command = new CommandManager('papa-eval', flags)
 	.setDescription(
 		'Evalúa una función de JavaScript en el contexto de la función `execute` de un módulo de comando.',
@@ -26,7 +26,7 @@ const command = new CommandManager('papa-eval', flags)
 		`brief: String //Descripción breve del comando (para /comandos)`,
 		`desc: String //Descripción del comando`,
 		`flags?: [ 'papa' ] //Flags del comando, como COMMON y MOD`,
-		`options: CommandOptionsManager //<banderas> y --flags`,
+		`options: CommandOptions //<banderas> y --flags`,
 		`experimental: false //Forma experimental de interpretar cmdos.`,
 		'execute(request: CommandRequest, args: CommandOptions, isSlash: false) //Usar esto en la elavuación puede resultar en un bucle infinito (función recursiva sin condición)',
 		'```',

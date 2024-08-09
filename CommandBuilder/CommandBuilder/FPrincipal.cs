@@ -76,11 +76,11 @@ namespace CommandBuilder {
 					commandBuilder.AgregarComponente(commandTagsManager);
 
 					if(this.options.Count > 0) {
-						CommandOptionsManager commandOptionsManager = new CommandOptionsManager();
-						commandBuilder.AgregarComponente(commandOptionsManager);
+						CommandOptions CommandOptions = new CommandOptions();
+						commandBuilder.AgregarComponente(CommandOptions);
 
 						foreach(CommandOption option in this.options)
-							commandOptionsManager.AgregarOpción(option);
+							CommandOptions.AgregarOpción(option);
 					}
 
 					string código = commandBuilder.ImprimirTodo();

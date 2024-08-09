@@ -2,21 +2,12 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "2.9.2F",
-            "name": "Cisne Cristalino"
+            "number": "3.0.0",
+            "name": "Flamenco Perlado"
         },
         "note": "Operando casi con normalidad",
         "changelog": [
-            "Se terminaron tareas varias de reestructuración interna",
-            "Se implementó un nuevo modelo de Comandos Duales (mensaje+Slash)",
-            "Se agregaron diversas mejoras de \"calidad de vida\"",
-            "Se reescribió y documentó PuréScript...",
-            "Se actualizó a discord.js v14",
-            "p!yo añadido y Preferencias parcialmente implementadas",
-            "p!feed ahora es más sencillo de utilizar",
-            "Se agregó un sistema de suscripción a Feeds",
-            "Notificaciones de Feeds ahora muestran vistas previas",
-            "p!puréscript implementado para ejecutar código PS independiente"
+            "Se actualizó PuréScript a v1.1"
         ],
         "todo": [
             "Agregar comando de Stable Diffusion",
@@ -38,6 +29,7 @@
     },
     "maintenance": "",
     "seed": 0,
+    "startupTime": 0,
     "lechitauses": 0,
     "tenshiColor": 6327283,
     "serverid": {
@@ -57,9 +49,21 @@
     "peopleid": {
         "papita": "423129757954211880"
     },
-    "slots": {},
-    "booruCredentials": {},
+    "slots": {
+        "slot1": null,
+        "slot2": null,
+        "slot3": null
+    },
+    "logch": null,
+
     "reportFormUrl": "https://forms.gle/tHFXxbsTmuJTQm1z7",
+    "booruCredentials": {
+        "apiKey": "",
+        "userId": ""
+    },
+
+    "pureTableImage": null,
+    "loademotes": {},
     
     "hourai": {
         "config": {
@@ -81,7 +85,7 @@
         },
         "warn": 0,
         "images": {
-            "welcome": "https://i.imgur.com/PdcilW3.png",
+            "welcome": "https://i.imgur.com/inyqr67.png",
             "colors": "https://i.imgur.com/7t7m3PS.png",
             "forcecolors": "https://i.imgur.com/eHbSCHK.png"
         },

@@ -4,7 +4,7 @@ const func = require('../../func.js'); //Funciones globales
 const axios = require('axios');
 const Canvas = require('canvas');
 const { utils } = require('../../localdata/images.json'); //Funciones globales
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 const { isThread } = require('../../func.js');
 
 async function resolverLink(req, linkRes, iSize, isnsfw, isSlash) {
@@ -59,9 +59,9 @@ async function dibujarCum(msg, link) {
 	return msg.reply({ files: [imagen] });
 };
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addParam('objetivo', { name: 'Texto', expression: [ 'USER', 'EMOTE', 'IMAGE' ] },  'para disparar a un usuario, emote o imagen (<=256KB)', { optional: true });
-const flags = new CommandMetaFlagsManager().add(
+const flags = new CommandTags().add(
 	'MEME',
 	'CHAOS',
 );

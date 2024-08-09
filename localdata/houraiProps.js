@@ -1,4 +1,5 @@
 const { StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
+const { makeStringSelectMenuRowBuilder } = require('../tsCasts');
 const { hourai } = require('./config.json');
 const { colorsList } = hourai;
 
@@ -19,7 +20,7 @@ const roleList = (() => {
 		.addOptions(menuOptions);
 })();
 
-const colorsRow = new ActionRowBuilder().addComponents(roleList);
+const colorsRow = makeStringSelectMenuRowBuilder().addComponents(roleList);
 
 module.exports = {
     colorsRow,

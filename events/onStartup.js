@@ -1,7 +1,7 @@
-const { REST, Client } = require('discord.js');
+const { REST, Client, ApplicationCommandType, ContextMenuCommandBuilder, Collection, Guild } = require('discord.js');
 const { Routes } = require('discord-api-types/v9');
 
-const { connect } = require('mongoose');
+const mongoose = require('mongoose');
 const PrefixPair = require('../localdata/models/prefixpair.js');
 const UserConfigs = require('../localdata/models/userconfigs.js');
 const { Puretable, defaultEmote } = require('../localdata/models/puretable.js');
@@ -9,21 +9,27 @@ const HouraiDB = require('../localdata/models/hourai.js');
 
 const globalConfigs = require('../localdata/config.json');
 const envPath = globalConfigs.remoteStartup ? '../remoteenv.json' : '../localenv.json';
+
+/**@type {String}*/
 const mongoUri = process.env.MONGODB_URI ?? (require(envPath)?.dburi);
+
+/**@type {String}*/
 const discordToken = process.env.I_LOVE_MEGUMIN ?? (require(envPath)?.token);
+/**@type {String}*/
 const booruApiKey = process.env.BOORU_APIKEY ?? (require(envPath)?.booruapikey);
+/**@type {String}*/
 const booruUserId = process.env.BOORU_USERID ?? (require(envPath)?.booruuserid);
 
-const { setupGuildFeedUpdateStack, feedTagSuscriptionsCache } = require('../systems/boorufeed');
+const { setupGuildFeedUpdateStack, feedTagSuscriptionsCache } = require('../systems/booru/boorufeed.js');
 const { modifyPresence } = require('../presence.js');
-const { auditSystem } = require('../systems/auditor.js');
+const { auditSystem } = require('../systems/others/auditor.js');
 
 const { registerFont, loadImage } = require('canvas');
 const { lookupService } = require('dns');
 const { promisify } = require('util');
 const chalk = require('chalk');
 const Poll = require('../localdata/models/poll.js');
-const { fetchChannel } = require('../func.js');
+const { initializeWebhookMessageOwners } = require('../systems/agents/discordagent.js');
 
 const logOptions = {
     slash: false,
@@ -36,23 +42,32 @@ async function onStartup(client) {
     const confirm = () => console.log(chalk.green('Hecho.'));
     globalConfigs.maintenance = '1';
 
+    console.log(chalk.bold.magentaBright('Cargando comandos Slash y Contextuales...'));
+    const restGlobal = new REST({ version: '9' }).setToken(discordToken);
+    const commandData = {
+        //@ts-expect-error
+        global: client.SlashPure.concat(client.ContextPure),
+        //@ts-expect-error
+        saki: client.SlashHouraiPure,
+    };
+
     try {
-        console.log(chalk.bold.magentaBright('Cargando comandos slash...'));
-        const restGlobal = new REST({ version: '9' }).setToken(discordToken);
         await restGlobal.put(
             Routes.applicationCommands(client.application.id),
-            { body: client.SlashPure },
+            { body: commandData.global },
         );
-        // const dedicatedServerId = (process.env.I_LOVE_MEGUMIN) ? globalConfigs.serverid.saki : globalConfigs.serverid.slot1;
+        
         const dedicatedServerId = globalConfigs.serverid.saki;
-        await restGlobal.put(
-            Routes.applicationGuildCommands(client.application.id, dedicatedServerId),
-            { body: client.SlashHouraiPure },
-        );
+        if(client.guilds.cache.get(dedicatedServerId))
+            await restGlobal.put(
+                Routes.applicationGuildCommands(client.application.id, dedicatedServerId),
+                { body: commandData.saki },
+            );
+
         logOptions.slash && console.log(`Comandos registrados + hourai (${dedicatedServerId} :: ${client.guilds.cache.get(dedicatedServerId).name}):`, restGlobal);
         confirm();
-    } catch (error) {
-        console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos slash'));
+    } catch(error) {
+        console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos Slash y/o Contextuales'));
         console.error(error);
     }
 
@@ -86,7 +101,10 @@ async function onStartup(client) {
     //Cargado de datos de base de datos
     console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
     console.log(chalk.gray('Conectando a Cluster en la nube...'));
-    await connect(mongoUri, {
+    mongoose.set("strictQuery", false);
+
+    mongoose.connect(mongoUri, {
+        //@ts-expect-error
         useUnifiedTopology: true,
         useNewUrlParser: true,
     });
@@ -119,21 +137,23 @@ async function onStartup(client) {
         const now = Date.now();
         let wasModified = false;
         Object.entries(hourai.userInfractions).forEach(([userId, infractions]) => {
-            const previousInfractionsLength = infractions.length;
-            infractions = infractions.filter(inf => (now - inf) < (60e3 * 60 * 4)); //Eliminar antiguas
-            //console.log(`${userId}:`, infractions);
+            let infr = /**@type {Array}*/(/**@type {unknown}*/(infractions));
+            
+            const previousInfractionsLength = infr.length;
+            infr = infr.filter(inf => (now - inf) < (60e3 * 60 * 4)); //Eliminar antiguas
+            //console.log(`${userId}:`, infr);
 
-            if(previousInfractionsLength === infractions.length) return;
+            if(previousInfractionsLength === infr.length) return;
             wasModified = true;
 
-            if(!infractions.length) {
+            if(!infr.length) {
                 hourai.userInfractions[userId] = null;
                 delete hourai.userInfractions[userId];
                 return;
             }
             
-            globalConfigs.hourai.infr.users[userId] = infractions;
-            hourai.userInfractions[userId] = infractions;
+            globalConfigs.hourai.infr.users[userId] = infr;
+            hourai.userInfractions[userId] = infr;
         });
         if(wasModified) hourai.markModified('userInfractions');
     }
@@ -153,10 +173,15 @@ async function onStartup(client) {
 
         const timeUntil = poll.end - Date.now();
         if(timeUntil < 1000)
+            //@ts-expect-error
             return pollCommand.concludePoll(pollChannel, resultsChannel, poll.id);
 
+        //@ts-expect-error
         setTimeout(pollCommand.concludePoll, timeUntil, pollChannel, resultsChannel, poll.id);
     });
+
+    console.log(chalk.gray('Preparando Dueños de Mensajes de Agentes Puré...'));
+    await initializeWebhookMessageOwners();
 
     console.log(chalk.gray('Preparando Tabla de Puré...'));
     const pureTableDocument = await Puretable.findOne({});
@@ -172,7 +197,7 @@ async function onStartup(client) {
     
     /**@param {String} id*/
     async function getEmoteCell(id) {
-        const image = await loadImage(client.emojis.cache.get(id).url);
+        const image = await loadImage(client.emojis.cache.get(id).imageURL({ extension: 'png', size: 64 }));
         return { id, image };
     }
 
@@ -189,11 +214,11 @@ async function onStartup(client) {
         globalConfigs.loademotes[cell.id] = cell.image;
     
     console.log(chalk.gray('Preparando imágenes extra...'));
-    const slot3Emojis = globalConfigs.slots.slot3.emojis.cache;
+    const slot3Emojis = (/**@type {Guild}*/(globalConfigs.slots.slot3)).emojis.cache;
     const [ WHITE, BLACK, pawn ] = await Promise.all([
-        loadImage(slot3Emojis.find(e => e.name === 'wCell').url),
-        loadImage(slot3Emojis.find(e => e.name === 'bCell').url),
-        loadImage(slot3Emojis.find(e => e.name === 'pawn').url),
+        loadImage(slot3Emojis.find(e => e.name === 'wCell').imageURL({ extension: 'png', size: 256 })),
+        loadImage(slot3Emojis.find(e => e.name === 'bCell').imageURL({ extension: 'png', size: 256 })),
+        loadImage(slot3Emojis.find(e => e.name === 'pawn').imageURL({ extension: 'png', size: 256 })),
     ]);
     globalConfigs.loademotes['chess'] = { WHITE, BLACK, pawn };
     

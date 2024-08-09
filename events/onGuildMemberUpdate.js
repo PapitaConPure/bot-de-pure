@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const { hourai, serverid } = require('../localdata/config.json');
 
 /**
- * @param {Discord.GuildMember} oldMember
+ * @param {Discord.GuildMember|Discord.PartialGuildMember} oldMember
  * @param {Discord.GuildMember} newMember
  */
 async function onGuildMemberUpdate(oldMember, newMember) {

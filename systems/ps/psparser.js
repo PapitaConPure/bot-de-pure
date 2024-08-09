@@ -1,1210 +1,1273 @@
-const { TokenTypes } = require('./pslexer.js');
 const {
-    TuberToken,
-    NodeStatementType,
-    NodeLiteralType,
-    NodeType,
-    TuberNode,
-    TuberIdentifierNode,
-    TuberBinaryNode,
-    TuberStatementNode,
-    TuberBlockNode,
-    TuberProgramNode,
+	LexerTokenTypes,
+	ParserExpressionNodeTypes,
+	LanguageToLexerType,
+	LexerToParserType,
+	ParserToLanguageType,
+	LexerToLanguageType,
+	ParserNodeTypes,
+	LanguageDataToParserType,
+	ParserLiteralNodeTypes,
+	ParserStatementNodeTypes,
+	parserNodeWithin,
 } = require('./commons.js');
-
-/**
- * @readonly
- * @enum {String}
- */
-const NodeTypes = {
-    PROGRAM: 'Program',
-
-    STATEMENT:   'Statement',
-    EXPRESSION:  'ExpressionStatement',
-    BLOCK:       'BlockStatement',
-    CONDITIONAL: 'ConditionalStatement',
-    WHILE:       'WhileLoopStatement',
-    DO_WHILE:    'DoWhileLoopStatement',
-    FOR:         'ForLoopStatement',
-    FOR_IN:      'ForInLoopStatement',
-    DECLARE:     'DeclareStatement',
-    REGISTRY:    'RegistryStatement',
-    RELATION:    'RelationalStatement',
-    SEND:        'SendStatement',
-    RETURN:      'ReturnStatement',
-    BREAK:       'BreakStatement',
-    COMMENT:     'CommentStatement',
-    
-    IDENTIFIER:    'Identifier',
-    ASSIGN:        'AssignExpression',
-    UPDATE:        'UpdateExpression',
-    LOGIC:         'LogicalExpression',
-    SEQUENCE:      'SequenceExpression',
-    FUNCTION_CALL: 'CallExpression',
-    ARGUMENTS:     'ArgumentsExpression',
-    ARROW:         'ArrowExpression',
-    UNARY:         'UnaryExpression',
-    BINARY:        'BinaryExpression',
-    PROPERTY:      'Property',
-
-    NUMBER_LITERAL:   'NumericLiteral',
-    TEXT_LITERAL:     'TextLiteral',
-    TEXT_TEMPLATE:    'TextTemplateExpression',
-    BOOLEAN_LITERAL:  'BooleanLiteral',
-    LIST_LITERAL:     'ListExpression',
-    GLOSSARY_LITERAL: 'GlossaryExpression',
-    NADA_LITERAL:     'NadaLiteral',
-    INPUT:            'InputExpression',
-    EMBED:            'EmbedExpression',
-};
-
-const LanguageToToken = {
-    'con': TokenTypes.ASSIGN,
-    'numero': TokenTypes.NUMBER,
-    'texto': TokenTypes.TEXT,
-    'dupla': TokenTypes.BOOLEAN,
-    'entrada': TokenTypes.INPUT,
-    'lista': TokenTypes.LIST,
-    'glosario': TokenTypes.GLOSSARY,
-    'marco': TokenTypes.EMBED,
-    'identificador': TokenTypes.IDENTIFIER,
-};
-
-const TokenToLanguage = {};
-Object.entries(LanguageToToken).forEach(([k, v]) => {
-    TokenToLanguage[v] = k;
-});
-TokenToLanguage['STATEMENT'] = 'sentencia';
-TokenToLanguage['EXPRESSION'] = 'expresión';
-TokenToLanguage['BLOCK'] = 'bloque';
-TokenToLanguage['RELATION'] = 'relacional';
-TokenToLanguage['DATA_TYPE'] = 'tipo de dato';
-TokenToLanguage['ARROW'] = 'flecha';
-TokenToLanguage['COLON'] = 'dos puntos';
-TokenToLanguage['NADA'] = 'nada';
-TokenToLanguage['EOF'] = 'fin de código';
-
-/**
- * @type {Map<String, NodeType>}
- */
-const TokenToNode = new Map();
-TokenToNode
-    .set(TokenTypes.ASSIGN,     'AssignExpression')
-    .set(TokenTypes.NUMBER,     'NumericLiteral')
-    .set(TokenTypes.TEXT,       'TextLiteral')
-    .set(TokenTypes.BOOLEAN,    'BooleanLiteral')
-    .set(TokenTypes.INPUT,      'InputExpression')
-    .set(TokenTypes.LIST,       'ListExpression')
-    .set(TokenTypes.GLOSSARY,   'GlossaryExpression')
-    .set(TokenTypes.EMBED,      'EmbedExpression')
-    .set(TokenTypes.IDENTIFIER, 'Identifier');
-
-/**
- * @type {Map<NodeType, String>}
- */
-const NodeToLanguage = new Map();
-NodeToLanguage
-    .set('Statement',            'sentencia')
-    .set('BlockStatement',       'bloque')
-    .set('ConditionalStatement', 'si')
-    .set('WhileLoopStatement',   'mientras')
-    .set('DoWhileLoopStatement', 'hacer...mientras')
-    .set('ForLoopStatement',     'para')
-    .set('ForInLoopStatement',   'para cada')
-    .set('DeclareStatement',     'crear')
-    .set('RegistryStatement',    'registrar')
-    .set('RelationalStatement',  'relacional')
-    .set('SendStatement',        'enviar')
-    .set('ReturnStatement',      'devolver')
-    .set('BreakStatement',       'terminar')
-    .set('CommentStatement',     'comentar')
-
-    .set('AssignExpression',     'con')
-    .set('NumericLiteral',       'numero')
-    .set('TextLiteral',          'texto')
-    .set('BooleanLiteral',       'dupla')
-    .set('InputExpression',      'entrada')
-    .set('ListExpression',       'lista')
-    .set('GlossaryExpression',   'glosario')
-    .set('EmbedExpression',      'marco')
-    .set('Identifier',           'identificador');
 
 /**@class Clase para parsear tokens de PuréScript*/
 class TuberParser {
-    #tokens = [];
-    #cursor = 0;
-    #statement = '';
-    #statementNumber = 1;
-    #insideTemplate;
-    #insideListing;
-
-    /**
-     * @constructor
-     * @param {Array<TuberToken>} tokens Los tokens a parsear
-     */
-    constructor(tokens) {
-        this.#tokens = tokens;
-        this.#insideListing = false;
-        this.#insideTemplate = false;
-    }
-
-    /**
-     * El Token en la posición actual del cursor
-     * @returns {TuberToken}
-     */
-    get #current() {
-        return this.#tokens[this.#cursor];
-    }
-
-    /**
-     * El Token en la siguiente posición del cursor
-     * @returns {TuberToken}
-     */
-    get #next() {
-        return this.#tokens[this.#cursor + 1];
-    }
-
-    /**
-     * Devuelve si un Nodo es un Literal
-     * @param {TuberNode} nodeType
-     * @returns {Boolean}
-     */
-    #isLiteral(nodeType) {
-        /**@type {Array<NodeType>}*/
-        const literals = [
-            TokenTypes.IDENTIFIER,
-            TokenTypes.NUMBER,
-            TokenTypes.TEXT,
-            TokenTypes.BOOLEAN,
-            TokenTypes.LIST,
-            TokenTypes.GLOSSARY,
-            TokenTypes.IDENTIFIER,
-        ];
-        return literals.includes(nodeType);
-    }
-
-    get #endOfStatement() {
-        return this.#current.type !== TokenTypes.STATEMENT && this.#current.type !== TokenTypes.EOF;
-    }
-
-    TuberParserError(message = `Se encontró un Token inesperado: ${TokenToLanguage.get(this.#current.type)}; con valor: ${this.#current.value}`) {
-        const err = new Error(message);
-        err.name = 'TuberParserError';
-        return err;
-    }
-
-    /**
-     * Digiere un Token
-     * @returns {TuberToken}
-     */
-    #digest() {
-        const current = this.#current;
-        // console.log('Se digerió', this.#current);
-        this.#cursor++;
-        return current;
-    }
-
-    /**
-     * Digiere un Token y verifica que sea del tipo correcto
-     * @param {TokenTypes} tokenType Un string de `TokenTypes` especificando el tipo de Token
-     * @param {String} errorMessage Mensaje de error al fallar la verificación de Token
-     * @returns {TuberToken}
-     */
-    #expect(tokenType, errorMessage) {
-        if(this.#current.type !== tokenType)
-            throw this.TuberParserError(errorMessage ?? `Se esperaba un Token de tipo: ${TokenToLanguage[tokenType] ?? tokenType}; se encontró: ${TokenToLanguage[this.#current.type] ?? this.#current.type}; con valor: ${this.#current.value ?? 'Nada'}`);
-
-        const current = this.#current;
-        // console.log('Se digerió', this.#current);
-        this.#cursor++;
-        return current;
-    }
-
-    #ommitRemainingScope(hasToReturn) {
-        const openStatements = [
-            TokenTypes.BLOCK_OPEN,
-            TokenTypes.CONDITION_OPEN,
-            TokenTypes.DO_OPEN,
-            TokenTypes.WHILE,
-            TokenTypes.DO_OPEN,
-            TokenTypes.FOR,
-        ];
-        const originalCursor = this.#cursor;
-        let blockLevels = 0;
-        do {
-            if(openStatements.includes(this.#current.type) && this.#current.value !== 'cada')
-                blockLevels++;
-                
-            if(this.#current.type === TokenTypes.BLOCK_CLOSE || blockLevels === 0 && this.#current.type === TokenTypes.CONDITION_CHANGE)
-                blockLevels--;
-            
-            if([ TokenTypes.DO_OPEN, TokenTypes.DO_CLOSE ].includes(this.#current.type)) {
-                this.#cursor = originalCursor;
-                break;
-            }
-            
-            if(this.#current.type === TokenTypes.EOF) {
-                if(hasToReturn)
-                    throw this.TuberParserError('DEVOLVER no puede ser usado en el bloque Programa');
-                break;
-            }
-        } while(blockLevels >= 0 && this.#digest());
-    }
-
-    /**
-     * Parsea Tokens de PuréScript y devuelve un árbol de Tokens listos para ejecutar
-     * Si la sintaxis es incorrecta, se alzará un error
-     * @typedef {{ type: 'PROGRAM', body: Array<TuberToken> }} Program
-     * @returns {TuberProgramNode} El programa devuelto
-     */
-    parse() {
-        return this.#parseProgram()
-    }
-
-    /**
-     * Parsea un programa
-     * @returns {TuberProgramNode}
-     */
-    #parseProgram() {
-        const program = {
-            type: NodeTypes.PROGRAM,
-            body: [],
-        };
-
-        while(this.#current.type !== TokenTypes.EOF) {
-            const statementNumber = this.#statementNumber++;
-            const statement = this.#parseStatement();
-            program.body.push({ ...statement, number: statementNumber });
-        }
-
-        return program;
-    }
-
-    /**
-     * Parsea una sentencia
-     * @returns {TuberStatementNode}
-     */
-    #parseStatement() {
-        switch(this.#current.type) {
-        case TokenTypes.BLOCK_OPEN:
-        case TokenTypes.CONDITION_OPEN: {
-            const statement = this.#parseConditional();
-            this.#expect(TokenTypes.BLOCK_CLOSE);
-            return statement;
-        }
-        case TokenTypes.WHILE: {
-            const statement = this.#parseWhile();
-            this.#expect(TokenTypes.BLOCK_CLOSE);
-            return statement;
-        }
-        case TokenTypes.DO_OPEN: {
-            const statement = this.#parseDoWhile();
-            // this.#expect(TokenTypes.BLOCK_CLOSE);
-            return statement;
-        }
-        case TokenTypes.FOR: {
-            const statement = this.#parseFor();
-            this.#expect(TokenTypes.BLOCK_CLOSE);
-            return statement;
-        }
-        case TokenTypes.GROUP_OPEN: {
-            return {
-                type: NodeTypes.EXPRESSION,
-                expression: this.#parseExpression(),
-            };
-        }
-        case TokenTypes.DATA_TYPE:
-        case TokenTypes.IDENTIFIER:
-        // case TokenTypes.NUMBER:
-        // case TokenTypes.TEXT:
-        // case TokenTypes.BOOLEAN:
-            return {
-                type: NodeTypes.EXPRESSION,
-                expression: this.#parseGlossary()
-            };
-        }
-
-        // console.log('Sentencia:', this.#current)
-        let statement = this.#expect(TokenTypes.STATEMENT);
-        this.#statement = statement.value;
-        // console.log('A punto de:', this.#current)
-        
-        switch(statement.value) {
-        case 'crear':
-            statement = this.#parseDeclare();
-            break;
-        //<identifier> CON <expression>
-        case 'registrar': {
-            const registryType = this.#expect(TokenTypes.DATA_TYPE);
-            return {
-                type: NodeTypes.REGISTRY,
-                initialize: this.#parseAssign(registryType),
-                as: registryType.value,
-            }
-        }
-
-        case 'sumar':
-        case 'restar':
-            if(this.#next.type !== TokenTypes.ASSIGN)
-                return {
-                    type: NodeTypes.EXPRESSION,
-                    expression: this.#parseUpdate()
-                };
-
-        case 'multiplicar':
-        case 'dividir':
-        case 'guardar':
-        case 'cargar':
-        case 'extender':
-            return {
-                type: NodeTypes.RELATION,
-                operator: this.#statement,
-                expression: this.#parseAssign(),
-            };
-        
-        case 'ejecutar': {
-            let expression = this.#parseMemberCall();
-            if(expression.type === 'Identifier')
-                expression = {
-                    type: NodeTypes.FUNCTION_CALL,
-                    emitter: expression,
-                    arguments: [],
-                };
-            statement = {
-                type: NodeTypes.EXPRESSION,
-                expression,
-            };
-            break;
-        }
-        case 'enviar':
-            statement = {
-                type: NodeTypes.SEND,
-                value: this.#parseExpression(),
-            };
-            break;
-        case 'devolver':
-            statement = {
-                type: NodeTypes.RETURN,
-                value: this.#parseExpression(),
-            };
-            this.#ommitRemainingScope(true);
-            break;
-        case 'terminar':
-            statement = {
-                type: NodeTypes.BREAK,
-            };
-            this.#ommitRemainingScope(false);
-            break;
-        case 'comentar':
-            statement = {
-                type: NodeTypes.COMMENT,
-                value: this.#parseComment(),
-            };
-            break;
-        default:
-            statement.context = this.#parseExpression();
-        }
-
-        return statement;
-    }
-
-    /**
-     * 
-     * @returns {TuberBlockNode}
-     */
-    #parseConditional() {
-        let statement = this.#parseBlock();
-
-        if(this.#current.type === TokenTypes.CONDITION_OPEN && this.#digest()) {
-            const test = this.#parseOr();
-
-            while(![ TokenTypes.CONDITION_CHANGE, TokenTypes.BLOCK_CLOSE ].includes(this.#current.type))
-                statement.body.push({ ...this.#parseStatement(), number: this.#statementNumber++ });
-
-            statement = {
-                type: NodeTypes.CONDITIONAL,
-                test,
-                consequent: statement,
-            }
-        }
-
-        if(this.#current.type === TokenTypes.CONDITION_CHANGE) {
-            const alternateNumber = this.#statementNumber++;
-            statement.alternate = { ...this.#parseBlock(), number: alternateNumber };
-        }
-
-        return statement;
-    }
-
-    /**
-     * 
-     * @returns {TuberBlockNode}
-     */
-    #parseWhile() {
-        let statement = this.#parseBlock();
-
-        this.#expect(TokenTypes.WHILE);
-        const test = this.#parseOr();
-
-        while(this.#current.type !== TokenTypes.BLOCK_CLOSE)
-            statement.body.push({ ...this.#parseStatement(), number: this.#statementNumber++ });
-        
-        statement.type = NodeTypes.WHILE;
-        statement.test = test;
-        
-        return statement;
-    }
-
-    /**
-     * 
-     * @returns {TuberBlockNode}
-     */
-    #parseDoWhile() {
-        let statement = this.#parseBlock();
-
-        this.#expect(TokenTypes.DO_OPEN);
-        while(this.#current.type !== TokenTypes.DO_CLOSE)
-            statement.body.push({ ...this.#parseStatement(), number: this.#statementNumber++ });
-        
-        this.#digest();
-        this.#expect(TokenTypes.WHILE);
-        
-        statement.type = NodeTypes.DO_WHILE;
-        statement.test = this.#parseOr();
-        
-        return statement;
-    }
-
-    /**
-     * 
-     * @returns {TuberBlockNode}
-     */
-    #parseFor() {
-        let statement = this.#parseSimpleFor();
-
-        if(this.#current.type === TokenTypes.FOR && this.#current.value === 'cada' && this.#digest()) {
-            statement.type = NodeTypes.FOR_IN;
-            statement.element = this.#parseExpression();
-            this.#expect(TokenTypes.IN, 'Se esperaba el operador especial "en" entre el identificador de elemento y el identificador de Lista en estructura PARA CADA');
-            statement.list = this.#parseExpression();
-        }
-
-        statement = { ...statement, body: statement.body };
-
-        while(this.#current.type !== TokenTypes.BLOCK_CLOSE)
-            statement.body.push({ ...this.#parseStatement(), number: this.#statementNumber++ });
-        
-        return statement;
-    }
-
-    #parseSimpleFor() {
-        let statement = this.#parseBlock();
-
-        this.#expect(TokenTypes.FOR);
-
-        if(this.#current.type !== TokenTypes.FOR) {
-            statement.type = NodeTypes.FOR;
-            statement.assignment = this.#parseAssign();
-            this.#expect(TokenTypes.WHILE);
-            statement.test = this.#parseOr();
-            statement.step = this.#parseStatement();
-            if(statement.step.type !== 'ExpressionStatement' || statement.step.expression?.type !== 'UpdateExpression')
-                throw this.TuberParserError('Se esperaba una sentencia SUMAR o RESTAR como tercer componente de estructura PARA');
-        }
-
-        return statement;
-    }
-
-    /**
-     * 
-     * @returns {TuberBlockNode}
-     */
-    #parseBlock() {
-        let block = {
-            type: NodeTypes.BLOCK,
-            body: [],
-        };
-
-        if(this.#current.type === TokenTypes.BLOCK_OPEN && this.#digest()) {
-            while(this.#current.type !== TokenTypes.BLOCK_CLOSE) {
-                const statementNumber = this.#statementNumber++;
-                block.body.push({ ...this.#parseStatement(), number: statementNumber });
-            }
-            this.#statementNumber++;
-        }
-
-        if(this.#current.type === TokenTypes.CONDITION_CHANGE && this.#digest()) {
-            if(this.#current.type === TokenTypes.CONDITION_OPEN)
-                return { ...this.#parseConditional(), number: this.#statementNumber++ };
-            if(this.#current.type !== TokenTypes.BLOCK_CLOSE)
-                block.body.push({ ...this.#parseStatement(), number: this.#statementNumber++ });
-            this.#statementNumber++;
-        }
-
-        return block;
-    }
-
-    /**
-     * Ignora expresiones hasta la próxima orden y retorna los valores de cada expresión, unidos con espacios
-     * @returns {TuberToken} El contenido del comentario
-     */
-    #parseComment() {
-        let data = this.#expect(TokenTypes.TEXT);
-
-        return data;
-    }
-
-    /**
-     * Parsea una expresión
-     * @returns {TuberNode}
-     */
-    #parseExpression() {
-        let block = this.#parseAssign();
-
-        return block;
-    }
-
-    /**
-     * Parsea una asignación
-     * @returns {TuberStatementNode}
-     */
-    #parseDeclare() {
-        const typeToken = this.#expect(TokenTypes.DATA_TYPE);
-        /**@type {TuberToken}*/
-        let identifier = this.#expect(TokenTypes.IDENTIFIER);
-        const idType = LanguageToToken[typeToken.value];
-
-        if(idType === TokenTypes.INPUT)
-            throw this.TuberParserError(`Tipo inválido en declaración: ${typeToken.value}`);
-
-        // console.log('Maquetando una declaración...');
-        /**@type {TuberStatementNode}*/
-        const result = {
-            type: 'DeclareStatement',
-            identifier: {
-                type: TokenToNode.get(identifier.type),
-                name: identifier.value,
-            },
-            as: TokenToNode.get(idType),
-        };
-
-        return result;
-    }
-
-    /**
-     * Parsea una actualización de valor
-     * @returns {TuberNode}
-     */
-    #parseUpdate() {
-        let argument = this.#parseGlossary();
-
-        if(argument.type !== TokenToNode.get(TokenTypes.IDENTIFIER))
-            throw this.TuberParserError('El receptor de la asignación debe ser un identificador');
-
-        // console.log('Maquetando un aumento o decremento...');
-        argument = {
-            type: NodeTypes.UPDATE,
-            operator: this.#statement,
-            argument,
-        };
-        // console.log(argument);
-
-        return argument;
-    }
-
-    /**
-     * Parsea una asignación
-     * @param {TuberToken} registryType
-     * @returns {TuberNode}
-     */
-    #parseAssign(registryType) {
-        /**@type {TuberNode}*/
-        let receptor = this.#parseText();
-        // console.log(receptor);
-
-        if(this.#current.type === TokenTypes.ASSIGN) {
-            this.#digest();
-
-            // console.log(registryType, receptor.type, this.#current);
-
-            if(registryType?.value === 'funcion') {
-                if(receptor.type !== 'CallExpression')
-                    throw this.TuberParserError('El receptor de la asignación debe ser una maqueta de Función');
-
-                const reception = this.#parseBlock();
-                this.#expect(TokenTypes.BLOCK_CLOSE, 'Se esperaba un cierre de cuerpo de Función');
-
-                return {
-                    type: 'AssignExpression',
-                    receptor,
-                    reception,
-                };
-            }
-
-            if(receptor.type !== 'Identifier' && receptor.type !== 'ArrowExpression')
-                throw this.TuberParserError('El receptor de la asignación debe ser un identificador, elemento de lista o propiedad de glosario');
-
-            let reception;
-            if(this.#current.type === TokenTypes.DATA_TYPE && this.#current.value === 'funcion' && this.#digest()) {
-                // console.log(this.#current);
-                let identifier = receptor;
-                if(this.#current.type === TokenTypes.IDENTIFIER)
-                    identifier = this.#parsePrimary();
-
-                receptor = {
-                    type: 'CallExpression',
-                    emitter: receptor,
-                    arguments: this.#parseArguments(),
-                };
-                // console.log('Esto debería ser una apertura', this.#current);
-                const { type, ...restOfBlock } = this.#parseBlock();
-                reception = { type, identifier, ...restOfBlock };
-                this.#expect(TokenTypes.BLOCK_CLOSE, 'Se esperaba un cierre de Función');
-            } else
-                reception = this.#parseAssign();
-
-            return {
-                type: 'AssignExpression',
-                receptor,
-                reception,
-            };
-        }
-
-        return receptor;
-    }
-
-    /**
-     * Parsea un texto
-     * @returns {TuberNode}
-     */
-    #parseText() {
-        if(this.#current.type !== TokenTypes.DATA_TYPE)
-            return this.#parseOr();
-
-        if(this.#current.value === TokenTypes.INPUT)
-            throw this.TuberParserError(`Tipo de asignación inválido: ${this.#current.value}`);
-
-        const tokenType = LanguageToToken[this.#current.value];
-        if(tokenType !== TokenTypes.TEXT)
-            return this.#parseGlossary();
-
-        this.#digest();
-        let expectGroupClose = false;
-        if(this.#current.value === TokenTypes.GROUP_OPEN) {
-            this.#digest();
-            expectGroupClose = true;
-        }
-        const text = this.#parseTextTemplate();
-        if(expectGroupClose)
-            this.#expect(TokenTypes.GROUP_CLOSE);
-
-        return text;
-    }
-
-    /**
-     * Parsea un glosario
-     * @returns {TuberNode}
-     */
-    #parseGlossary() {
-        if(this.#current.type !== TokenTypes.DATA_TYPE)
-            return this.#parseOr();
-
-        if(this.#current.value === TokenTypes.INPUT)
-            throw this.TuberParserError(`Tipo de asignación inválido: ${this.#current.value}`);
-
-        const tokenType = LanguageToToken[this.#current.value];
-        if(tokenType !== TokenTypes.GLOSSARY)
-            return this.#parseList();
-
-        this.#digest();
-        let expectGroupClose = false;
-        if(this.#current.value === TokenTypes.GROUP_OPEN) {
-            this.#digest();
-            expectGroupClose = true;
-        }
-
-        const properties = [];
-        this.#insideListing = true;
-        while(![ TokenTypes.STATEMENT, TokenTypes.GROUP_CLOSE, TokenTypes.EOF ].includes(this.#current.type)) {
-            let key = this.#parseExpression();
-            if(key.type !== 'Identifier')
-                throw this.TuberParserError('Se esperaba un identificador de miembro de Glosario');
-            this.#expect(TokenTypes.COLON);
-            const value = this.#parseExpression();
-            properties.push({
-                type: NodeTypes.PROPERTY,
-                key,
-                value,
-            });
-            
-            if(this.#current.type !== TokenTypes.COMMA)
-                break;
-            this.#digest();
-            if(this.#current.type === TokenTypes.COMMA)
-                throw this.TuberParserError('No se pueden añadir comas extra en expresiones de Glosario');
-        }
-        this.#insideListing = false;
-
-        if(expectGroupClose)
-            this.#expect(TokenTypes.GROUP_CLOSE);
-
-        return {
-            type: NodeTypes.GLOSSARY_LITERAL,
-            properties,
-        }
-    }
-
-    /**
-     * Parsea una lista
-     * @returns {TuberNode}
-     */
-    #parseList() {
-        if(this.#current.type !== TokenTypes.DATA_TYPE)
-            return this.#parseMember();
-        
-        const tokenType = LanguageToToken[this.#current.value];
-        if(tokenType !== TokenTypes.LIST)
-            return this.#parseLiteral();
-
-        this.#digest();
-        let expectGroupClose = false;
-        if(this.#current.value === TokenTypes.GROUP_OPEN) {
-            this.#digest();
-            expectGroupClose = true;
-        }
-
-        const elements = [];
-        this.#insideListing = true;
-        while(![
-            TokenTypes.GROUP_CLOSE,
-            TokenTypes.STATEMENT,
-            TokenTypes.CONDITION_OPEN,
-            TokenTypes.CONDITION_CHANGE,
-            TokenTypes.WHILE,
-            TokenTypes.DO_OPEN,
-            TokenTypes.FOR,
-            TokenTypes.BLOCK_OPEN,
-            TokenTypes.BLOCK_CLOSE,
-            TokenTypes.DO_CLOSE,
-            TokenTypes.IN,
-            TokenTypes.EOF,
-        ].includes(this.#current.type)) {
-            elements.push(this.#parseExpression());
-            if(this.#current.type !== TokenTypes.COMMA)
-                break;
-            this.#digest();
-            while(this.#current.type === TokenTypes.COMMA && this.#digest())
-                elements.push(null);
-        }
-        this.#insideListing = false;
-        
-        if(expectGroupClose)
-            this.#expect(TokenTypes.GROUP_CLOSE);
-
-        return {
-            type: NodeTypes.LIST_LITERAL,
-            elements,
-        }
-    }
-
-    /**
-     * Parsea un literal
-     * @returns {TuberNode}
-     */
-    #parseLiteral() {
-        if(this.#current.type !== TokenTypes.DATA_TYPE)
-            return this.#parseOr();
-    
-        const targetType = LanguageToToken[this.#digest().value];
-        const reception = this.#parseCombination();
-            
-        return {
-            ...reception,
-            as: TokenToNode.get(targetType),
-        };
-    }
-
-    /**
-     * Parsea un "O" lógico
-     * @returns {TuberNode}
-     */
-    #parseOr() {
-        let leftHand = this.#parseAnd();
-
-        while(this.#current.type === TokenTypes.OR) {
-            this.#digest();
-            // console.log('Maquetando una comprobación lógica O...', this.#current.type);
-            const rightHand = this.#parseAnd();
-            leftHand = {
-                type: NodeTypes.LOGIC,
-                leftHand,
-                operator: 'o',
-                rightHand,
-            };
-        }
-        
-        return leftHand;
-    }
-    
-    /**
-     * Parsea un "Y" lógico
-     * @returns {TuberNode}
-    */
-    #parseAnd() {
-        let leftHand = this.#parseEquality();
-
-        while(this.#current.type === TokenTypes.AND) {
-            this.#digest();
-            // console.log('Maquetando una comprobación lógica Y...', this.#current.type);
-            const rightHand = this.#parseEquality();
-            leftHand = {
-                type: NodeTypes.LOGIC,
-                leftHand,
-                operator: 'y',
-                rightHand,
-            };
-        }
-
-        return leftHand;
-    }
-
-    /**
-     * Parsea una igualdad lógica
-     * @returns {TuberNode}
-    */
-    #parseEquality() {
-        let leftHand = this.#parseComparison();
-
-        while(this.#current.type === TokenTypes.EQUALS || this.#current.type === TokenTypes.NOT) {
-            let operator = this.#digest().value;
-            if(operator === 'no')
-                operator += ` ${this.#expect(TokenTypes.EQUALS).value}`;
-
-            // console.log('Maquetando una comprobación de igualdad...', this.#current.type);
-            const rightHand = this.#parseComparison();
-            leftHand = {
-                type: NodeTypes.LOGIC,
-                leftHand,
-                operator,
-                rightHand,
-            };
-        }
-
-        if(this.#current.type === TokenTypes.NOT && ![ TokenTypes.EQUALS, TokenTypes.COMPARE ].includes(this.#next.type))
-            throw this.TuberParserError('Operador lógico inválido');
-
-        return leftHand;
-    }
-
-    /**
-     * Parsea una comparación lógica
-     * @returns {TuberNode}
-     */
-    #parseComparison() {
-        let leftHand = this.#parseCombination();
-
-        while(this.#current.type === TokenTypes.COMPARE || this.#current.type === TokenTypes.NOT && this.#next.type === TokenTypes.COMPARE) {
-            let operator = this.#digest().value;
-            if(operator === 'no')
-                operator += ` ${this.#expect(TokenTypes.COMPARE).value}`;
-            // console.log('Maquetando una comparación...', this.#current.type);
-            const rightHand = this.#parseCombination();
-            leftHand = {
-                type: NodeTypes.LOGIC,
-                leftHand,
-                operator,
-                rightHand,
-            };
-        }
-
-        return leftHand;
-    }
-
-    /**
-     * Parsea sumas y restas
-     * @returns {TuberNode}
-     */
-    #parseCombination() {
-        let leftOperand = this.#parseFactor();
-        
-        while(this.#current.type === TokenTypes.COMBINATION) {
-            const operator = this.#current.value;
-            this.#digest();
-            let rightOperand = this.#parseFactor();
-            leftOperand = {
-                type: NodeTypes.BINARY,
-                operator,
-                leftOperand,
-                rightOperand,
-            };
-        }
-
-        return leftOperand;
-    }
-
-    /**
-     * Parsea multiplicaciones, divisiones y operaciones de módulo
-     * @returns {TuberNode}
-     */
-    #parseFactor() {
-        let leftOperand = this.#parsePowers();
-        
-        while(this.#current.type === TokenTypes.FACTOR) {
-            const operator = this.#current.value;
-            this.#digest();
-            let rightOperand = this.#parsePowers();
-            leftOperand = {
-                type: NodeTypes.BINARY,
-                operator,
-                leftOperand,
-                rightOperand
-            };
-        }
-        
-        return leftOperand;
-    }
-
-    /**
-     * Parsea potencias y funciones matemáticas
-     * @returns {TuberNode}
-     */
-    #parsePowers() {
-        let leftOperand = this.#parseUnary();
-        
-        while(this.#current.type === TokenTypes.POWER) {
-            const operator = this.#current.value;
-            this.#digest();
-            let rightOperand = this.#parsePowers();
-            
-            leftOperand = {
-                type: NodeTypes.BINARY,
-                operator,
-                leftOperand,
-                rightOperand
-            };
-        }
-
-        return leftOperand;
-    }
-
-    #parseUnary() {
-        if(
-            this.#current.type === TokenTypes.COMBINATION
-            || (this.#current.type === TokenTypes.NOT && !([ TokenTypes.EQUALS, TokenTypes.COMPARE ].includes(this.#next.type)))
-        ) {
-            return {
-                type: 'UnaryExpression',
-                operator: this.#digest().value,
-                argument: this.#parseMemberCall(),
-            };
-        }
-
-        return this.#parseMemberCall();
-    }
-
-    /**
-     * Parsea llamados de miembros
-     * @returns {TuberNode}
-     */
-    #parseMemberCall() {
-        let member = this.#parseMember();
-
-        if([ TokenTypes.GROUP_OPEN ].includes(this.#current.type))
-            member = this.#parseFunctionCall(member);
-        
-        if(this.#current.type === TokenTypes.ARROW)
-            throw this.TuberParserError('No se permiten expresiones de miembro luego de una función');
-
-        return member;
-    }
-
-    /**
-     * Parsea una llamada de función desde un miembro emisor
-     * @param {TuberToken} emitter El emisor de la llamada de función
-     * @returns {TuberNode}
-     */
-    #parseFunctionCall(emitter) {
-        let expr = {
-            type: NodeTypes.FUNCTION_CALL,
-            emitter,
-            arguments: this.#parseArguments(),
-        };
-
-        if([ TokenTypes.GROUP_OPEN ].includes(this.#current.type))
-            expr = this.#parseFunctionCall(expr);
-
-        return expr;
-    }
-
-    /**
-     * Evalúa 1 ó más expresiones y las devuelve como un arreglo de argumentos
-     * @returns {Array<TuberNode>} El arreglo de argumentos
-     */
-    #parseArguments() {
-        // console.log('En parseArguments:', this.#current);
-        this.#expect(TokenTypes.GROUP_OPEN, 'Se esperaba una apertura de función');
-
-        const wasInsideListing = this.#insideListing;
-        this.#insideListing = true;
-
-        const args = [ TokenTypes.GROUP_CLOSE, TokenTypes.STATEMENT, TokenTypes.EOF ].includes(this.#current.type)
-            ? []
-            : this.#parseArgumentsList();
-        
-        this.#insideListing = wasInsideListing;
-
-        this.#expect(TokenTypes.GROUP_CLOSE, 'Se esperaba un cierre de función');
-
-        return args;
-    }
-
-    /**
-     * Evalúa una secuencia de expresiones separadas por coma y las devuelve como un arreglo de argumentos
-     * @returns {Array<TuberNode>} El arreglo de argumentos
-     */
-    #parseArgumentsList() {
-        const args = [ this.#parseAssign(TokenTypes.IDENTIFIER) ];
-
-        while(this.#current.type === TokenTypes.COMMA && this.#digest()) {
-            const arg = this.#parseText();
-
-            if(this.#current.type === TokenTypes.COLON && this.#digest())
-                arg.default = this.#parseExpression();
-            
-            args.push(arg);
-        }
-
-        return args;
-    }
-
-    /**
-     * Parsea miembros y busca propiedades de miembro
-     * @returns {TuberNode}
-     */
-    #parseMember() {
-        let memberExpr = this.#parsePrimary();
-
-        while(this.#current.type === TokenTypes.ARROW && this.#digest()) {
-            let property = this.#parsePrimary();
-
-            if(![ NodeTypes.IDENTIFIER, NodeTypes.NUMBER_LITERAL ].includes(property.type))
-                throw this.TuberParserError('Se esperaba un identificador o expresión entre paréntesis a la derecha de una expresión de flecha');
-
-            memberExpr = {
-                type: NodeTypes.ARROW,
-                container: memberExpr,
-                property: property,
-            };
-        }
-
-        return memberExpr;
-    }
-    
-    /**
-     * Parsea una expresión primaria
-     * @returns {Array<TuberNode>} La expresión evaluada
-     */
-    #parsePrimary() {
-        const tokenType = this.#current.type;
-        // console.log('Verificando casos de parsePrimary con:', this.#current);
-        switch(tokenType) {
-        case TokenTypes.GROUP_OPEN: {
-            this.#digest();
-            const wasInsideTemplate = this.#insideTemplate;
-            const wasInsideListing = this.#insideListing;
-            this.#insideTemplate = false;
-            this.#insideListing = false;
-            const expr = this.#parseExpression();
-            this.#insideTemplate = wasInsideTemplate;
-            this.#insideListing = wasInsideListing;
-            this.#expect(TokenTypes.GROUP_CLOSE);
-            return expr;
-        }
-        
-        case TokenTypes.IDENTIFIER:
-            return {
-                type: NodeTypes.IDENTIFIER,
-                name: this.#digest().value,
-            };
-
-        case TokenTypes.NUMBER:
-            return {
-                type: NodeTypes.NUMBER_LITERAL,
-                value: this.#digest().value,
-            };
-
-        case TokenTypes.TEXT:
-            return this.#parseTextTemplate();
-
-        case TokenTypes.BOOLEAN:
-            return {
-                type: NodeTypes.BOOLEAN_LITERAL,
-                value: this.#digest().value,
-            };
-        
-        case TokenTypes.NADA:
-            this.#digest();
-            return {
-                type: NodeTypes.NADA_LITERAL,
-                value: null,
-            };
-
-        case TokenTypes.GROUP_CLOSE:
-            throw this.TuberParserError('Se esperaba una expresión entre paréntesis');
-        }
-
-        throw this.TuberParserError(`Token inesperado: ${this.#current.value}`);
-    }
-
-    /**
-     * Parsea una plantilla de texto
-     * @returns {TuberNode} El valor de texto o la plantilla de texto evaluados
-     */
-    #parseTextTemplate() {
-        let text;
-        // console.log(this.#current);
-        if(this.#current.type === TokenTypes.TEXT)
-            text = { ...this.#digest(), type: 'TextLiteral' };
-        else
-            text = this.#parseExpression();
-
-        // console.log('parseTextTemplate está en ejecución con', text, { alreadyInsideList: this.#insideListing, alreadyInsideTemplate: this.#insideTemplate, type: this.#current.type });
-
-        if(!this.#insideTemplate && !this.#insideListing && this.#current.type === TokenTypes.COMMA) {
-            const expressions = [ text ];
-            
-            this.#insideTemplate = true;
-            while(this.#current.type === TokenTypes.COMMA) {
-                this.#digest();
-                expressions.push(this.#parseExpression());
-                // console.log(this.#current);
-            }
-            this.#insideTemplate = false;
-            
-            return {
-                type: NodeTypes.TEXT_TEMPLATE,
-                expressions,
-            }
-        }
-
-        if(typeof text.value !== 'string')
-            return {
-                ...text,
-                as: 'TextLiteral',
-            };
-
-        return {
-            type: 'TextLiteral',
-            value: text.value,
-        }
-    }
+	#tokens = [];
+	#cursor = 0;
+	#statement = '';
+	#statementNumber = 1;
+	#insideTemplate;
+	#insideListing;
+
+	/**
+	 * @constructor
+	 * @param {Array<import('./commons.js').LexerToken>} tokens Los tokens a parsear
+	 */
+	constructor(tokens) {
+		this.#tokens = tokens;
+		this.#insideListing = false;
+		this.#insideTemplate = false;
+	}
+
+	/**
+	 * El Token en la posición actual del cursor
+	 * @returns {import('./commons.js').LexerToken}
+	 */
+	get #current() {
+		return this.#tokens[this.#cursor];
+	}
+
+	/**
+	 * Para que Typescript no se confunda
+	 * @param {import('./commons.js').LexerToken} token
+	 * @returns {import('./commons.js').LexerToken}
+	 */
+	#assert(token) {
+		if(token === this.#current)
+			return this.#current;
+		
+		if(token === this.#next)
+			return this.#next;
+
+		throw new Error(`Ocurrió un error inesperado al leer un símbolo de lenguaje. No se sabe qué pasó`);
+	}
+
+	/**
+	 * El Token en la siguiente posición del cursor
+	 * @returns {import('./commons.js').LexerToken}
+	 */
+	get #next() {
+		return this.#tokens[this.#cursor + 1];
+	}
+
+	get #endOfStatement() {
+		return this.#current.type !== LexerTokenTypes.Statement && this.#current.type !== LexerTokenTypes.EoF;
+	}
+
+	TuberParserError(message = `Se encontró un Token inesperado [${LexerToLanguageType.get(this.#current.type)}] con el valor: ${this.#current.value}`) {
+		const specifier = `Línea: ${this.#current.line} / Posición: (${this.#current.start}:${this.#current.end}) - `;
+		const err = new Error(specifier + message);
+		err.name = 'TuberParserError';
+		return err;
+	}
+
+	/**
+	 * Digiere un Token
+	 * @returns {import('./commons.js').LexerToken}
+	 */
+	#digest() {
+		const current = this.#current;
+		// console.log('Se digerió', this.#current);
+		this.#cursor++;
+		return current;
+	}
+
+	/**
+	 * Digiere un Token y verifica que sea del tipo correcto
+	 * @template {import('./commons.js').LexerTokenType} T
+	 * @param {T} tokenType Un string de `TokenTypes` especificando el tipo de Token
+	 * @param {String} [errorMessage] Mensaje de error al fallar la verificación de Token
+	 * @returns {import('./commons.js').LexerToken<T>}
+	 */
+	#expect(tokenType, errorMessage) {
+		if(this.#current.type !== tokenType)
+			throw this.TuberParserError(errorMessage ?? `Se esperaba un Token de tipo [${LexerToLanguageType.get(tokenType) ?? tokenType}], pero se encontró [${LexerToLanguageType.get(this.#current.type) ?? this.#current.type}] con el valor: ${this.#current.value ?? 'Nada'}`);
+
+		const current = this.#current;
+		this.#cursor++;
+		return /**@type {import('./commons.js').LexerToken<T>}*/(current);
+	}
+
+	/**
+	 * @template {import('./commons.js').LexerTokenType} T
+	 * @param {Array<T>} tokenTypes 
+	 * @param {String} [errorMessage]
+	 * @returns {import('./commons.js').LexerToken<T>}
+	 */
+	#expectAny(tokenTypes, errorMessage) {
+		if(!tokenTypes.some(tokenType => this.#current.type !== tokenType)) {
+			const tokenTypesExpr = tokenTypes.map(tokenType => LexerToLanguageType.get(tokenType) ?? tokenType).join(' o ');
+			throw this.TuberParserError(errorMessage ?? `Se esperaba un Token de tipo: ${tokenTypesExpr}; se encontró: ${LexerToLanguageType.get(this.#current.type) ?? this.#current.type}; con valor: ${this.#current.value ?? 'Nada'}`);
+		}
+
+		const current = this.#current;
+		this.#cursor++;
+		return /**@type {import('./commons.js').LexerToken<T>}*/(current);
+	}
+
+	/**
+	 * @template {import('./commons.js').LexerTokenType} T
+	 * @param {Readonly<Array<T>>} tokenTypes
+	 * @returns {this is { #current: { type: T, value: * } }}
+	 */
+	#verify(...tokenTypes) {
+		return /**@type {Readonly<Array<import('./commons.js').LexerTokenType>>}*/(tokenTypes).includes(this.#current.type);
+	}
+
+	/**
+	 * @template {import('./commons.js').LexerTokenType} T
+	 * @param {Readonly<Array<T>>} tokenTypes
+	 * @returns {this is { #next: { type: T, value: * } }}
+	 */
+	#verifyNext(...tokenTypes) {
+		return /**@type {Readonly<Array<import('./commons.js').LexerTokenType>>}*/(tokenTypes).includes(this.#next.type);
+	}
+
+	/**@param {Boolean} hasToReturn*/
+	#ommitRemainingScope(hasToReturn) {
+		const openStatements = [
+			LexerTokenTypes.BlockOpen,
+			LexerTokenTypes.ConditionOpen,
+			LexerTokenTypes.DoOpen,
+			LexerTokenTypes.While,
+			LexerTokenTypes.DoOpen,
+			LexerTokenTypes.For,
+		];
+		const originalCursor = this.#cursor;
+		let blockLevels = 0;
+		do {
+			if(this.#verify(...openStatements) && this.#current.value !== 'cada')
+				blockLevels++;
+				
+			if(blockLevels === 0 || this.#verify(LexerTokenTypes.BlockClose, LexerTokenTypes.ConditionChange))
+				blockLevels--;
+			
+			if(this.#verify(LexerTokenTypes.DoOpen, LexerTokenTypes.DoClose)) {
+				this.#cursor = originalCursor;
+				break;
+			}
+			
+			if(this.#verify(LexerTokenTypes.EoF)) {
+				if(hasToReturn)
+					throw this.TuberParserError('DEVOLVER no puede ser usado en el bloque Programa');
+				break;
+			}
+		} while(blockLevels >= 0 && this.#digest());
+	}
+
+	/**
+	 * Parsea Tokens de PuréScript y devuelve un árbol de Tokens listos para ejecutar
+	 * Si la sintaxis es incorrecta, se alzará un error
+	 * @typedef {{ type: 'PROGRAM', body: Array<import('./commons.js').LexerToken> }} Program
+	 * @returns {import('./commons.js').ParserProgramNode} El programa devuelto
+	 */
+	parse() {
+		return this.#parseProgram()
+	}
+
+	/**
+	 * Parsea un programa
+	 * @returns {import('./commons.js').ParserProgramNode}
+	 */
+	#parseProgram() {
+		const program = {
+			type: ParserNodeTypes.Program,
+			body: [],
+		};
+
+		while(this.#current.type !== LexerTokenTypes.EoF) {
+			const statementNumber = this.#statementNumber++;
+			const statement = this.#parseStatement();
+			program.body.push({ ...statement, number: statementNumber });
+		}
+
+		return program;
+	}
+
+	/**
+	 * Parsea una sentencia
+	 * @returns {import('./commons.js').ParserStatementNode|import('./commons.js').ParserBasicScopeNode}
+	 */
+	#parseStatement() {
+		switch(this.#current.type) {
+		case LexerTokenTypes.BlockOpen:
+		case LexerTokenTypes.ConditionOpen: {
+			const statement = this.#parseConditional();
+			this.#expect(LexerTokenTypes.BlockClose);
+			return statement;
+		}
+		case LexerTokenTypes.While: {
+			const statement = this.#parseWhile();
+			this.#expect(LexerTokenTypes.BlockClose);
+			return statement;
+		}
+		case LexerTokenTypes.DoOpen: {
+			const statement = this.#parseDoWhile();
+			return statement;
+		}
+		case LexerTokenTypes.For: {
+			const statement = this.#parseFor();
+			this.#expect(LexerTokenTypes.BlockClose);
+			return statement;
+		}
+		case LexerTokenTypes.GroupOpen: {
+			return {
+				type: ParserNodeTypes.Expression,
+				expression: this.#parseExpression(),
+			};
+		}
+		case LexerTokenTypes.DataType:
+		case LexerTokenTypes.Identifier:
+			return {
+				type: ParserNodeTypes.Expression,
+				expression: this.#parseGlossary()
+			};
+		}
+
+		let statement = this.#expect(LexerTokenTypes.Statement);
+		this.#statement = statement.value;
+
+		switch(statement.value) {
+		case 'crear':
+			return this.#parseDeclare();
+		
+		case 'registrar': {
+			const registryTypeNode = this.#expect(LexerTokenTypes.DataType);
+			const registryValue = LanguageDataToParserType.get(registryTypeNode.value);
+
+			if(registryValue !== ParserNodeTypes.CallExpression
+			&& registryValue !== ParserNodeTypes.Input
+			&& registryValue !== ParserNodeTypes.List)
+				throw this.TuberParserError(`Tipo de registro inesperado en sentencia de registro: ${registryTypeNode.value}`);
+
+			const assignment = this.#parseAssign(registryTypeNode);
+
+			if(assignment.type !== ParserNodeTypes.AssignExpression)
+				throw this.TuberParserError(`Expresión inesperada en sentencia de registro: ${ParserToLanguageType.get(assignment?.type) ?? 'Nada'}`);
+
+			return {
+				type: ParserNodeTypes.Registry,
+				initialize: assignment,
+				as: registryValue,
+			};
+		}
+
+		case 'sumar':
+		case 'restar':
+			if(this.#next.type !== LexerTokenTypes.Assign)
+				return {
+					type: ParserNodeTypes.Expression,
+					expression: this.#parseUpdate()
+				};
+
+		case 'multiplicar':
+		case 'dividir':
+		case 'guardar':
+		case 'cargar':
+		case 'extender': {
+			const assignment = this.#parseAssign();
+
+			if(assignment.type !== ParserNodeTypes.AssignExpression)
+				throw this.TuberParserError(`Expresión inesperada en sentencia de registro: ${ParserToLanguageType.get(assignment?.type) ?? 'Nada'}`);
+
+			return {
+				type: ParserNodeTypes.Relational,
+				operator: statement.value,
+				expression: assignment,
+			};
+		}
+		
+		case 'usar':
+		case 'ejecutar': {
+			let expression = this.#parseMemberCall();
+			if(expression.type === ParserNodeTypes.Identifier)
+				expression = {
+					type: ParserNodeTypes.CallExpression,
+					emitter: expression,
+					arguments: [],
+				};
+			return {
+				type: ParserNodeTypes.Expression,
+				expression,
+			};
+		}
+
+		case 'decir':
+		case 'enviar':
+			return {
+				type: ParserNodeTypes.Send,
+				value: this.#parseExpression(),
+			};
+
+		case 'devolver': {
+			const returnValue = this.#parseExpression();
+			this.#ommitRemainingScope(true);
+			return {
+				type: ParserNodeTypes.Return,
+				value: returnValue,
+			};
+		}
+
+		case 'terminar':
+			this.#ommitRemainingScope(false);
+			return { type: ParserNodeTypes.Break };
+
+		case 'parar':
+			return this.#parseStop();
+
+		case 'comentar':
+			return { type: ParserNodeTypes.Comment };
+		}
+
+		return {
+			type: ParserNodeTypes.Expression,
+			expression: this.#parseExpression(),
+		};
+	}
+
+	/**
+	 * @returns {import('./commons.js').ParserBasicScopeNode|import('./commons.js').ParserConditionalStatementNode}
+	 */
+	#parseConditional() {
+		let statement = this.#parseBlock();
+
+		if(this.#current.type === LexerTokenTypes.ConditionOpen && this.#digest()) {
+			const test = /**@type {import('./commons.js').ParserExpressionNode}*/(this.#parseOr());
+
+			/**@type {Array<import('./commons.js').ParserBlockItem>}*/
+			const body = [];
+
+			while(!/**@type {Array<import('./commons.js').LexerTokenType>}*/([ LexerTokenTypes.ConditionChange, LexerTokenTypes.BlockClose ]).includes(this.#current.type))
+				body.push({ ...this.#parseStatement(), number: this.#statementNumber++ });
+
+			/**@type {import('./commons.js').ParserBlockNode}*/
+			const consequent = { type: ParserNodeTypes.Block, body };
+
+			const conditionalStatement = /**@type {import('./commons.js').ParserConditionalStatementNode}*/({
+				type: ParserNodeTypes.Conditional,
+				test,
+				consequent,
+			});
+
+			if(this.#verify(LexerTokenTypes.ConditionChange)) {
+				const alternateNumber = this.#statementNumber++;
+				const alternateBlock = this.#parseBlock();
+
+				if(alternateBlock.type !== ParserNodeTypes.Block && alternateBlock.type !== ParserNodeTypes.Conditional)
+					throw this.TuberParserError(`Se esperaba un bloque o condicional simples luego de sentencia de condición alternativa, pero se recibió: ${ParserToLanguageType.get(alternateBlock.type)}`);
+
+				conditionalStatement.alternate = { ...alternateBlock, number: alternateNumber };
+			}
+
+			return conditionalStatement;
+		}
+
+		return statement;
+	}
+
+	/**
+	 * 
+	 * @returns {import('./commons.js').ParserWhileStatementNode}
+	 */
+	#parseWhile() {
+		const statement = this.#parseBlock();
+
+		this.#expect(LexerTokenTypes.While);
+
+		const test = /**@type {import('./commons.js').ParserExpressionNode}*/(this.#parseOr());
+		if(!parserNodeWithin(ParserExpressionNodeTypes, test.type))
+			throw this.TuberParserError(`Se esperaba una expresión lógica o verificable en condición de repetición`);
+
+		if(statement.type === ParserNodeTypes.Conditional)
+			throw this.TuberParserError('Sentencia condicional inesperada en medio del análisis una sentencia MIENTRAS');
+
+		const body = /**@type {import('./commons.js').ParserBlockBody}*/(statement.body);
+
+		while(this.#current.type !== LexerTokenTypes.BlockClose)
+			body.push({ ...this.#parseStatement(), number: this.#statementNumber++ });
+		
+		return {
+			...statement,
+			type: ParserNodeTypes.WhileLoop,
+			test: test,
+			body,
+		};
+	}
+
+	/**
+	 * 
+	 * @returns {import('./commons.js').ParserWhileStatementNode}
+	 */
+	#parseDoWhile() {
+		const statement = this.#parseBlock();
+
+		this.#expect(LexerTokenTypes.DoOpen);
+
+		if(statement.type === ParserNodeTypes.Conditional)
+			throw this.TuberParserError('Sentencia condicional inesperada en medio del análisis una sentencia HACER...YSEGUIR MIENTRAS');
+
+		const body = /**@type {import('./commons.js').ParserBlockBody}*/(statement.body);
+
+		while(this.#current.type !== LexerTokenTypes.DoClose)
+			body.push({ ...this.#parseStatement(), number: this.#statementNumber++ });
+		
+		this.#digest();
+		this.#expect(LexerTokenTypes.While);
+
+		const test = /**@type {import('./commons.js').ParserExpressionNode}*/(this.#parseOr());
+		if(!parserNodeWithin(ParserExpressionNodeTypes, test.type))
+			throw this.TuberParserError(`Se esperaba una expresión lógica o verificable en condición de repetición`);
+		
+		return {
+			...statement,
+			type: ParserNodeTypes.DoWhileLoop,
+			test: test,
+			body,
+		};
+	}
+
+	/**
+	 * 
+	 * @returns {import('./commons.js').ParserForStatementNode|import('./commons.js').ParserForInStatementNode}
+	 */
+	#parseFor() {
+		let statement = /**@type {import('./commons.js').ParserForStatementNode|import('./commons.js').ParserForInStatementNode}*/
+			(this.#parseSimpleFor());
+			
+		const body = /**@type {import('./commons.js').ParserBlockBody}*/(statement.body);
+
+		if(this.#verify(LexerTokenTypes.For) && this.#current.value === 'cada' && this.#digest()) {
+			const element = this.#parseExpression();
+			if(element.type !== ParserNodeTypes.Identifier)
+				throw this.TuberParserError(`Se esperaba un identificador como elemento de iteración de sentencia PARA CADA, pero se recibió: ${ParserToLanguageType.get(element.type) ?? 'Nada'}`);
+
+			this.#expect(LexerTokenTypes.In, 'Se esperaba el operador "en" entre el identificador de elemento y el identificador de Lista en estructura PARA CADA');
+
+			const list = this.#parseExpression();
+
+			while(this.#assert(this.#current).type !== LexerTokenTypes.BlockClose)
+				body.push({ ...this.#parseStatement(), number: this.#statementNumber++ });
+
+			return {
+				type: ParserNodeTypes.ForInLoop,
+				element,
+				list,
+				body,
+			};
+		}
+
+		while(this.#current.type !== LexerTokenTypes.BlockClose)
+			body.push({ ...this.#parseStatement(), number: this.#statementNumber++ });
+		
+		return statement;
+	}
+
+	#parseSimpleFor() {
+		let statement = this.#parseBlock();
+
+		if(statement.type !== ParserNodeTypes.Block)
+			throw this.TuberParserError(`Se esperaba un bloque en sentencia PARA, pero se recibió: ${statement?.type ?? 'Nada'}`);
+
+		this.#expect(LexerTokenTypes.For);
+
+		if(this.#current.type !== LexerTokenTypes.For) {
+			const assignment = /**@type {import('./commons.js').ParserAssignmentExpressionNode}*/(this.#parseAssign());
+			if(assignment.type !== ParserNodeTypes.AssignExpression)
+				throw this.TuberParserError(`Se esperaba una expresión de asignación como primer expresión de sentencia PARA`);
+
+			this.#expect(LexerTokenTypes.While);
+			const test = /**@type {import('./commons.js').ParserExpressionNode}*/(this.#parseOr());
+			if(!parserNodeWithin(ParserExpressionNodeTypes, test.type))
+				throw this.TuberParserError(`Se esperaba una expresión condicional, lógica o verificable como segunda expresión de sentencia PARA`);
+			
+			const step = this.#parseStatement();
+			if(step.type !== ParserNodeTypes.Expression)
+				throw this.TuberParserError(`Se esperaba una sentencia de expresión como tercer componente de estructura PARA, pero se recibió: ${ParserToLanguageType.get(step.type) ?? 'Nada'}`);
+			
+			if(/**@type {import('./commons.js').ParserExpressionStatementNode}*/(step).expression.type !== ParserNodeTypes.UpdateExpression)
+				throw this.TuberParserError('Se esperaba una sentencia de expresión de actualización como tercer componente de estructura PARA');
+
+			/**@type {import('./commons.js').ParserForStatementNode}*/
+			const forStatement = {
+				type: ParserNodeTypes.ForLoop,
+				body: statement.body,
+				assignment,
+				test,
+				step,
+			};
+
+			return forStatement;
+		}
+
+		return statement;
+	}
+
+	/**
+	 * @returns {import('./commons.js').ParserBasicScopeNode|(import('./commons.js').ParserConditionalStatementNode&import('./commons.js').ParserStatementMetadata)}
+	 */
+	#parseBlock() {
+		/**@type {import('./commons.js').ParserBlockBody}*/
+		const body = [];
+
+		if(this.#current.type === LexerTokenTypes.BlockOpen && this.#digest()) {
+			while(/**@type {import('./commons.js').LexerTokenType}*/(this.#current.type) !== LexerTokenTypes.BlockClose) {
+				const statementNumber = this.#statementNumber++;
+				body.push({ ...this.#parseStatement(), number: statementNumber });
+			}
+			this.#statementNumber++;
+		}
+
+		if(this.#current.type === LexerTokenTypes.ConditionChange && this.#digest()) {
+			if(/**@type {import('./commons.js').LexerTokenType}*/(this.#current.type) === LexerTokenTypes.ConditionOpen)
+				return (/**@type {(import('./commons.js').ParserConditionalStatementNode&import('./commons.js').ParserStatementMetadata)}*/
+					({ ...this.#parseConditional(), number: this.#statementNumber++ }));
+
+			if(/**@type {import('./commons.js').LexerTokenType}*/(this.#current.type) !== LexerTokenTypes.BlockClose)
+				body.push({ ...this.#parseStatement(), number: this.#statementNumber++ });
+
+			this.#statementNumber++;
+		}
+		
+		let block = {
+			type: ParserNodeTypes.Block,
+			body,
+		};
+
+		return block;
+	}
+
+	/**
+	 * Parsea una expresión
+	 * @returns {import('./commons.js').ParserExpressionNode}
+	 */
+	#parseExpression() {
+		let block = this.#parseAssign();
+
+		return /**@type {import('./commons.js').ParserExpressionNode}*/(block);
+	}
+
+	/**
+	 * Parsea una asignación
+	 * @returns {import('./commons.js').ParserStatementNode}
+	 */
+	#parseDeclare() {
+		const typeToken = this.#expect(LexerTokenTypes.DataType);
+		const identifier = this.#expect(LexerTokenTypes.Identifier);
+		const idType = LanguageToLexerType.get(typeToken.value);
+
+		if(idType === LexerTokenTypes.Input)
+			throw this.TuberParserError(`Tipo inválido en declaración: ${typeToken.value}`);
+
+		/**@type {import('./commons.js').ParserStatementNode}*/
+		const result = {
+			type: ParserNodeTypes.Declare,
+			identifier: {
+				type: ParserNodeTypes.Identifier,
+				name: identifier.value,
+			},
+			as: /**@type {import('./commons.js').ParserDataNodeType}*/(LexerToParserType.get(idType)),
+		};
+
+		return result;
+	}
+
+	/**
+	 * Parsea una actualización de valor
+	 * @returns {import('./commons.js').ParserNode}
+	 */
+	#parseUpdate() {
+		let argument = this.#parseGlossary();
+
+		if(argument.type !== LexerToParserType.get(LexerTokenTypes.Identifier))
+			throw this.TuberParserError('El receptor de la asignación debe ser un identificador');
+
+		argument = {
+			type: ParserNodeTypes.UpdateExpression,
+			operator: this.#statement,
+			argument,
+		};
+
+		return argument;
+	}
+
+	/**
+	 * Parsea un verificador de interrupción
+	 * @returns {import('./commons.js').ParserStopStatementNode}
+	 */
+	#parseStop() {
+		this.#expect(LexerTokenTypes.Assign);
+		
+		const stopMessage = this.#parseText();
+		this.#expect(LexerTokenTypes.ConditionOpen);
+		const test = /**@type {import('./commons.js').ParserExpressionNode}*/(this.#parseOr());
+		if(!parserNodeWithin(ParserExpressionNodeTypes, test.type))
+			throw this.TuberParserError(`Se esperaba una expresión condicional, lógica o verificable como condición de corte en sentencia PARAR`);
+
+		return {
+			type: ParserNodeTypes.Stop,
+			test,
+			stopMessage,
+		};
+	}
+
+	/**
+	 * Parsea una asignación
+	 * @param {import('./commons.js').LexerToken} [registryType]
+	 * @returns {import('./commons.js').ParserNode|import('./commons.js').ParserFunctionAssignmentExpressionNode}
+	 */
+	#parseAssign(registryType) {
+		let receptor = this.#parseText();
+
+		if(this.#verify(LexerTokenTypes.Assign)) {
+			this.#digest();
+
+			if(registryType && registryType.value === 'funcion') {
+				if(receptor.type !== 'CallExpression')
+					throw this.TuberParserError('El receptor de la asignación debe ser una maqueta de Función');
+				
+				return this.#parseRegistryAssignment(receptor);
+			}
+
+			if(receptor.type !== ParserNodeTypes.Identifier && receptor.type !== ParserNodeTypes.ArrowExpression)
+				throw this.TuberParserError('El receptor de la asignación debe ser un identificador, elemento de lista o propiedad de glosario');
+
+			if(this.#verify(LexerTokenTypes.DataType) && this.#assert(this.#current).value === 'funcion' && this.#digest())
+				return this.#parseFunctionAssignment(receptor);
+			else
+				return this.#parseExpressionAssignment(receptor);
+		}
+
+		return receptor;
+	}
+
+	/**@param {import('./commons.js').ParserCallExpressionNode} receptor*/
+	/**@returns {import('./commons.js').ParserFunctionAssignmentExpressionNode}*/
+	#parseRegistryAssignment(receptor) {
+		const reception = /**@type {import('./commons.js').ParserBlockNode}*/(this.#parseBlock());
+		this.#expect(LexerTokenTypes.BlockClose, 'Se esperaba un cierre de cuerpo de Función');
+
+		if(reception.type !== ParserNodeTypes.Block)
+			throw this.TuberParserError('Se esperaba un cuerpo de función en modo de registro de función, en sentencia de registro');
+
+		return {
+			type: ParserNodeTypes.AssignExpression,
+			receptor,
+			reception,
+		};
+	}
+
+	/**@returns {import('./commons.js').ParserFunctionAssignmentExpressionNode}*/
+	#parseFunctionAssignment(receptor) {
+		let identifier = receptor;
+		if(this.#verify(LexerTokenTypes.Identifier))
+			identifier = this.#parsePrimary();
+
+		const args = this.#parseArguments();
+
+		const call = {
+			type: ParserNodeTypes.CallExpression,
+			emitter: receptor,
+			arguments: args,
+		};
+		
+		const { type, ...restOfBlock } = this.#parseBlock();
+		const reception = /**@type {import('./commons.js').ParserNamedBlockNode}*/({ type, identifier, ...restOfBlock });
+		this.#expect(LexerTokenTypes.BlockClose, 'Se esperaba un cierre de Función');
+
+		if(reception.type !== ParserNodeTypes.Block)
+			throw this.TuberParserError(`Se esperaba un cuerpo de función como recepción para la expresión de función receptora en sentencia de asignación. Sin embargo, se recibió: ${reception.type}`);
+
+		return {
+			type: ParserNodeTypes.AssignExpression,
+			receptor: call,
+			reception,
+		};
+	}
+
+	/**@returns {import('./commons.js').ParserAssignmentExpressionNode}*/
+	#parseExpressionAssignment(receptor) {
+		const reception = /**@type {import('./commons.js').ParserExpressionNode}*/(this.#parseAssign());
+		if(!parserNodeWithin(ParserLiteralNodeTypes, reception.type)
+		&& !parserNodeWithin(ParserExpressionNodeTypes, reception.type))
+			throw this.TuberParserError(`Se esperaba una expresión como recepción en sentencia de asignación, pero se recibió: ${ParserToLanguageType.get(reception.type)}`);
+
+		return {
+			type: ParserNodeTypes.AssignExpression,
+			receptor,
+			reception,
+		};
+	}
+
+	/**
+	 * Parsea un texto
+	 * @returns {import('./commons.js').ParserExpressionNode}
+	 */
+	#parseText() {
+		if(this.#current.type !== LexerTokenTypes.DataType)
+			return this.#parseOr();
+
+		if(this.#current.value === LexerTokenTypes.Input)
+			throw this.TuberParserError(`Tipo de asignación inválido: ${this.#current.value}`);
+
+		const tokenType = LanguageToLexerType.get(this.#current.value);
+		if(tokenType !== LexerTokenTypes.Text)
+			return this.#parseGlossary();
+
+		this.#digest();
+		let expectGroupClose = false;
+		if(this.#current.value === LexerTokenTypes.GroupOpen) {
+			this.#digest();
+			expectGroupClose = true;
+		}
+		const text = this.#parseTextTemplate();
+		if(expectGroupClose)
+			this.#expect(LexerTokenTypes.GroupClose);
+
+		return text;
+	}
+
+	/**
+	 * Parsea un glosario
+	 * @returns {import('./commons.js').ParserExpressionNode}
+	 */
+	#parseGlossary() {
+		if(this.#current.type !== LexerTokenTypes.DataType)
+			return this.#parseOr();
+
+		if(this.#current.value === LexerTokenTypes.Input)
+			throw this.TuberParserError(`Tipo de asignación inválido: ${this.#current.value}`);
+
+		const tokenType = LanguageToLexerType.get(this.#current.value);
+		if(tokenType !== LexerTokenTypes.Glossary)
+			return this.#parseList();
+
+		this.#digest();
+		let expectGroupClose = false;
+		if(this.#current.value === LexerTokenTypes.GroupOpen) {
+			this.#digest();
+			expectGroupClose = true;
+		}
+
+		const properties = /**@type {Array<import('./commons.js').ParserPropertyExpressionNode>}*/([]);
+		this.#insideListing = true;
+		while(!this.#verify(LexerTokenTypes.Statement, LexerTokenTypes.GroupClose, LexerTokenTypes.EoF)) {
+			let key = this.#parseExpression();
+			if(key.type !== ParserNodeTypes.Identifier)
+				throw this.TuberParserError('Se esperaba un identificador de miembro de Glosario');
+			this.#expect(LexerTokenTypes.Colon);
+			const value = this.#parseExpression();
+			properties.push({
+				type: ParserNodeTypes.Property,
+				key,
+				value,
+			});
+			
+			if(!this.#verify(LexerTokenTypes.Comma))
+				break;
+			this.#digest();
+			if(this.#verify(LexerTokenTypes.Comma))
+				throw this.TuberParserError('No se pueden añadir comas extra en expresiones de Glosario');
+		}
+		this.#insideListing = false;
+
+		if(expectGroupClose)
+			this.#expect(LexerTokenTypes.GroupClose);
+
+		return {
+			type: ParserNodeTypes.Glossary,
+			properties,
+		}
+	}
+
+	/**
+	 * Parsea una lista
+	 * @returns {import('./commons.js').ParserExpressionNode}
+	 */
+	#parseList() {
+		if(this.#current.type !== LexerTokenTypes.DataType)
+			return this.#parseMember();
+		
+		const tokenType = LanguageToLexerType.get(this.#current.value);
+		if(tokenType !== LexerTokenTypes.List)
+			return this.#parseLiteral();
+
+		this.#digest();
+		let expectGroupClose = false;
+		if(this.#current.value === LexerTokenTypes.GroupOpen) {
+			this.#digest();
+			expectGroupClose = true;
+		}
+
+		/**@type {Array<import('./commons.js').ParserEvaluableExpressionNode>}*/
+		const elements = [];
+		this.#insideListing = true;
+		while(/**@type {import('./commons.js').LexerTokenType}*/(this.#current.type) !== LexerTokenTypes.Statement) {
+			const expression = this.#parseExpression();
+
+			if(expression.type === ParserNodeTypes.AssignExpression)
+				throw this.TuberParserError(`Se esperaba una expresión que pudiera evaluarse a un valor primitivo u de estructura, pero se recibió: ${expression.type}`);
+
+			elements.push(expression);
+
+			if(!this.#verify(LexerTokenTypes.Comma))
+				break;
+			this.#digest();
+			while(this.#verify(LexerTokenTypes.Comma) && this.#digest())
+				elements.push(null);
+		}
+		this.#insideListing = false;
+		
+		if(expectGroupClose)
+			this.#expect(LexerTokenTypes.GroupClose);
+
+		return {
+			type: ParserNodeTypes.List,
+			elements,
+		}
+	}
+
+	/**
+	 * Parsea un literal
+	 * @returns {import('./commons.js').ParserExpressionNode}
+	 */
+	#parseLiteral() {
+		if(this.#current.type !== LexerTokenTypes.DataType)
+			return this.#parseOr();
+		
+		const dataTypeValue = this.#digest().value;
+		const targetType = LanguageDataToParserType.get(dataTypeValue);
+		if(targetType == undefined)
+			throw this.TuberParserError(`Se esperaba un literal de tipo de dato, pero se recibió: ${dataTypeValue}`);
+
+		const reception = /**@type {import('./commons.js').ParserExpressionNode}*/(this.#parseCombination());
+
+		if(!parserNodeWithin(ParserExpressionNodeTypes, reception.type))
+			throw this.TuberParserError(`Se esperaba una expresión literal, pero se recibió: ${ParserToLanguageType.get(reception.type) ?? 'Nada'}`);
+		
+		return /**@type {import('./commons.js').ParserEvaluableExpressionNode}*/({
+			...reception,
+			as: targetType,
+		});
+	}
+
+	/**
+	 * Parsea un "O" lógico
+	 * @returns {import('./commons.js').ParserExpressionNode}
+	 */
+	#parseOr() {
+		let leftOperand = this.#parseAnd();
+
+		while(this.#current.type === LexerTokenTypes.Or) {
+			this.#digest();
+			const rightOperand = this.#parseAnd();
+			leftOperand = {
+				type: ParserNodeTypes.LogicalExpression,
+				leftOperand,
+				operator: 'o',
+				rightOperand,
+			};
+		}
+		
+		return leftOperand;
+	}
+	
+	/**
+	 * Parsea un "Y" lógico
+	 * @returns {import('./commons.js').ParserExpressionNode}
+	*/
+	#parseAnd() {
+		let leftOperand = this.#parseEquality();
+
+		while(this.#current.type === LexerTokenTypes.And) {
+			this.#digest();
+			const rightOperand = this.#parseEquality();
+			leftOperand = {
+				type: ParserNodeTypes.LogicalExpression,
+				leftOperand,
+				operator: 'y',
+				rightOperand,
+			};
+		}
+
+		return leftOperand;
+	}
+
+	/**
+	 * Parsea una igualdad lógica
+	 * @returns {import('./commons.js').ParserExpressionNode}
+	*/
+	#parseEquality() {
+		let leftOperand = this.#parseComparison();
+
+		while(this.#verify(LexerTokenTypes.Equals, LexerTokenTypes.Not)) {
+			let operator = this.#digest().value;
+			if(operator === 'no')
+				operator += ` ${this.#expect(LexerTokenTypes.Equals).value}`;
+
+			const rightOperand = this.#parseComparison();
+			leftOperand = {
+				type: ParserNodeTypes.LogicalExpression,
+				leftOperand,
+				operator,
+				rightOperand,
+			};
+		}
+
+		if(this.#verify(LexerTokenTypes.Not) && !/**@type {Array<import('./commons.js').LexerTokenType>}*/([ LexerTokenTypes.Equals, LexerTokenTypes.Compare ]).includes(this.#next.type))
+			throw this.TuberParserError('Operador lógico inválido');
+
+		return leftOperand;
+	}
+
+	/**
+	 * Parsea una comparación lógica
+	 * @returns {import('./commons.js').ParserExpressionNode}
+	 */
+	#parseComparison() {
+		let leftOperand = this.#parseCombination();
+
+		while(this.#current.type === LexerTokenTypes.Compare || this.#current.type === LexerTokenTypes.Not && this.#next.type === LexerTokenTypes.Compare) {
+			let operator = this.#digest().value;
+			if(operator === 'no')
+				operator += ` ${this.#expect(LexerTokenTypes.Compare).value}`;
+			const rightOperand = this.#parseCombination();
+			leftOperand = {
+				type: ParserNodeTypes.LogicalExpression,
+				leftOperand,
+				operator,
+				rightOperand,
+			};
+		}
+
+		return leftOperand;
+	}
+
+	/**
+	 * Parsea sumas y restas
+	 * @returns {import('./commons.js').ParserExpressionNode}
+	 */
+	#parseCombination() {
+		let leftOperand = this.#parseFactor();
+		
+		while(this.#current.type === LexerTokenTypes.Combination) {
+			const operator = this.#current.value;
+			this.#digest();
+			let rightOperand = this.#parseFactor();
+			leftOperand = {
+				type: ParserNodeTypes.BinaryExpression,
+				operator,
+				leftOperand,
+				rightOperand,
+			};
+		}
+
+		return leftOperand;
+	}
+
+	/**
+	 * Parsea multiplicaciones, divisiones y operaciones de módulo
+	 * @returns {import('./commons.js').ParserExpressionNode}
+	 */
+	#parseFactor() {
+		let leftOperand = this.#parsePowers();
+		
+		while(this.#current.type === LexerTokenTypes.Factor) {
+			const operator = this.#current.value;
+			this.#digest();
+			let rightOperand = this.#parsePowers();
+			leftOperand = {
+				type: ParserNodeTypes.BinaryExpression,
+				operator,
+				leftOperand,
+				rightOperand
+			};
+		}
+		
+		return leftOperand;
+	}
+
+	/**
+	 * Parsea potencias y funciones matemáticas
+	 * @returns {import('./commons.js').ParserExpressionNode}
+	 */
+	#parsePowers() {
+		let leftOperand = this.#parseUnary();
+		
+		while(this.#current.type === LexerTokenTypes.Power) {
+			const operator = this.#current.value;
+			this.#digest();
+			let rightOperand = this.#parsePowers();
+			
+			leftOperand = {
+				type: ParserNodeTypes.BinaryExpression,
+				operator,
+				leftOperand,
+				rightOperand
+			};
+		}
+
+		return leftOperand;
+	}
+
+	/**
+	 * Parsea expresiones unarias
+	 * @returns {import('./commons.js').ParserExpressionNode}
+	 */
+	#parseUnary() {
+		if(this.#verify(LexerTokenTypes.Combination)
+		|| (this.#verify(LexerTokenTypes.Not) && !this.#verifyNext(LexerTokenTypes.Equals, LexerTokenTypes.Compare))) {
+			return {
+				type: ParserNodeTypes.UnaryExpression,
+				operator: this.#digest().value,
+				argument: this.#parseMemberCall(),
+			};
+		}
+
+		return this.#parseMemberCall();
+	}
+
+	/**
+	 * Parsea llamados de miembros
+	 * @returns {import('./commons.js').ParserExpressionNode}
+	 */
+	#parseMemberCall() {
+		let member = this.#parseMember();
+
+		if(this.#verify(LexerTokenTypes.GroupOpen)) {
+			if(member.type === ParserNodeTypes.AssignExpression)
+				throw this.TuberParserError(`Se esperaba una expresión que pueda contener una función, pero se recibió: ${member.type}`);
+
+			member = this.#parseFunctionCall(member);
+				
+			if(this.#verify(LexerTokenTypes.Arrow))
+				throw this.TuberParserError('No se permiten expresiones de miembro luego de una función');
+		}
+
+		return member;
+	}
+
+	/**
+	 * Parsea una llamada de función desde un miembro emisor
+	 * @param {import('./commons.js').ParserEvaluableExpressionNode} emitter El emisor de la llamada de función
+	 * @returns {import('./commons.js').ParserExpressionNode}
+	 */
+	#parseFunctionCall(emitter) {
+		/**@type {import('./commons.js').ParserCallExpressionNode}*/
+		let expr = {
+			type: ParserNodeTypes.CallExpression,
+			emitter,
+			arguments: this.#parseArguments(),
+		};
+
+		if(this.#verify(LexerTokenTypes.GroupOpen))
+			return this.#parseFunctionCall(expr);
+
+		return expr;
+	}
+
+	/**
+	 * Evalúa 1 ó más expresiones y las devuelve como un arreglo de argumentos
+	 * @returns {Array<import('./commons.js').ParserArgumentNode>} El arreglo de argumentos
+	 */
+	#parseArguments() {
+		// console.log('En parseArguments:', this.#current);
+		this.#expect(LexerTokenTypes.GroupOpen, 'Se esperaba una apertura de función');
+
+		const wasInsideListing = this.#insideListing;
+		this.#insideListing = true;
+
+		const args = this.#verify(LexerTokenTypes.GroupClose, LexerTokenTypes.Statement, LexerTokenTypes.EoF)
+			? []
+			: this.#parseArgumentsList();
+		
+		this.#insideListing = wasInsideListing;
+
+		this.#expect(LexerTokenTypes.GroupClose, 'Se esperaba un cierre de función');
+
+		return args;
+	}
+
+	/**
+	 * Evalúa una secuencia de expresiones separadas por coma y las devuelve como un arreglo de argumentos
+	 * @returns {Array<import('./commons.js').ParserArgumentNode>} El arreglo de argumentos
+	 */
+	#parseArgumentsList() {
+		const args = [ this.#parseArgument() ];
+		let foundOptional = args[0].default != undefined;
+
+		while(this.#current.type === LexerTokenTypes.Comma && this.#digest()) {
+			const arg = this.#parseArgument();
+			if(foundOptional && arg.default == undefined)
+				throw this.TuberParserError(`Los parámetros obligatorios deben escribirse antes que los parámetros opcionales en las declaraciones de función`);
+			
+			args.push(arg);
+			foundOptional ||= arg.default != undefined;
+		}
+
+		return args;
+	}
+
+	/**
+	 * 
+	 * @returns {import('./commons.js').ParserArgumentNode}
+	 */
+	#parseArgument() {
+		const expr = this.#parseExpression();
+		if(expr.type === ParserNodeTypes.AssignExpression)
+			throw this.TuberParserError('No se permite tratar una expresión de asignación como argumento de función');
+
+		let defExpr;
+		if(this.#verify(LexerTokenTypes.Colon) && this.#digest()) {
+			defExpr = this.#parseExpression();
+			
+			if(defExpr.type === ParserNodeTypes.AssignExpression)
+				throw this.TuberParserError('No se permite tratar una expresión de asignación como argumento de función');
+		}
+
+		return {
+			...expr,
+			default: defExpr,
+		};
+	}
+
+	/**
+	 * Parsea miembros y busca propiedades de miembro
+	 * @returns {import('./commons.js').ParserExpressionNode}
+	 */
+	#parseMember() {
+		let memberExpr = this.#parsePrimary();
+
+		while(this.#current.type === LexerTokenTypes.Arrow && this.#digest()) {
+			let property = this.#parsePrimary();
+
+			if(property.type !== ParserNodeTypes.Identifier && property.type !== ParserNodeTypes.Numeric)
+				throw this.TuberParserError('Se esperaba un identificador o expresión entre paréntesis a la derecha de una expresión de flecha');
+
+			return {
+				type: ParserNodeTypes.ArrowExpression,
+				container: memberExpr,
+				property: property,
+			};
+		}
+
+		return memberExpr;
+	}
+	
+	/**
+	 * Parsea una expresión primaria
+	 * @returns {import('./commons.js').ParserExpressionNode} La expresión evaluada
+	 */
+	#parsePrimary() {
+		const tokenType = this.#current.type;
+		// console.log('Verificando casos de parsePrimary con:', this.#current);
+		switch(tokenType) {
+		case LexerTokenTypes.GroupOpen: {
+			this.#digest();
+			const wasInsideTemplate = this.#insideTemplate;
+			const wasInsideListing = this.#insideListing;
+			this.#insideTemplate = false;
+			this.#insideListing = false;
+			const expr = this.#parseExpression();
+			this.#insideTemplate = wasInsideTemplate;
+			this.#insideListing = wasInsideListing;
+			this.#expect(LexerTokenTypes.GroupClose);
+			return expr;
+		}
+		
+		case LexerTokenTypes.Identifier:
+			return {
+				type: ParserNodeTypes.Identifier,
+				name: this.#digest().value,
+			};
+
+		case LexerTokenTypes.Number:
+			return {
+				type: ParserNodeTypes.Numeric,
+				value: this.#digest().value,
+			};
+
+		case LexerTokenTypes.Text:
+			return this.#parseTextTemplate();
+
+		case LexerTokenTypes.Boolean:
+			return {
+				type: ParserNodeTypes.Boolean,
+				value: this.#digest().value,
+			};
+		
+		case LexerTokenTypes.Nada:
+			this.#digest();
+			return {
+				type: ParserNodeTypes.Nada,
+				value: null,
+			};
+
+		case LexerTokenTypes.GroupClose:
+			throw this.TuberParserError('Se esperaba una expresión entre paréntesis');
+		}
+
+		throw this.TuberParserError(`Token inesperado: ${this.#current.value}`);
+	}
+
+	/**
+	 * Parsea una plantilla de texto
+	 * @returns {import('./commons.js').ParserEvaluableExpressionNode | import('./commons.js').ParserTextTemplateExpressionNode} El valor de texto o la plantilla de texto evaluados
+	 */
+	#parseTextTemplate() {
+		let text;
+		if(this.#current.type === LexerTokenTypes.Text)
+			text = { type: ParserNodeTypes.Text, value: this.#digest().value };
+		else
+			text = this.#parseExpression();
+
+		if(!this.#insideTemplate && !this.#insideListing && this.#current.type === LexerTokenTypes.Comma) {
+			const expressions = [ text ];
+			
+			this.#insideTemplate = true;
+			while(this.#current.type === LexerTokenTypes.Comma) {
+				this.#digest();
+				expressions.push(this.#parseExpression());
+			}
+			this.#insideTemplate = false;
+			
+			return {
+				type: ParserNodeTypes.TextTemplate,
+				expressions,
+			}
+		}
+
+		if(text.type === ParserNodeTypes.AssignExpression)
+			throw this.TuberParserError('No se permiten expresiones de asignación en maquetaciones de plantillas de Texto');
+
+		if(text.type !== ParserNodeTypes.Text || typeof text.value !== 'string') {
+			return {
+				...text,
+				as: ParserNodeTypes.Text,
+			};
+		}
+
+		return {
+			type: ParserNodeTypes.Text,
+			value: text.value,
+		}
+	}
 };
 
 module.exports = {
-    NodeTypes,
-    LanguageToToken,
-    TokenToLanguage,
-    TokenToNode,
-    NodeToLanguage,
-    TuberParser,
+	ParserNodeTypes,
+	LexerToParserType,
+	ParserToLanguageType,
+	TuberParser,
 };

@@ -1,9 +1,9 @@
 const { EmbedBuilder } = require('discord.js');
 const { tenshiColor } = require('../../localdata/config.json');
-const { CommandMetaFlagsManager, CommandManager, CommandOptionsManager } = require('../Commons/commands');
+const { CommandTags, CommandManager, CommandOptions } = require('../Commons/commands');
 
-const flags = new CommandMetaFlagsManager().add('PAPA');
-const options = new CommandOptionsManager()
+const flags = new CommandTags().add('PAPA');
+const options = new CommandOptions()
 	.addParam('anuncio', 'TEXT', 'para anunciar algo a todos los servers posibles')
 	.addFlag('tn', 'título', 'para especificar un título', { name: 'ttl', type: 'TEXT' });
 const command = new CommandManager('papa-anunciar', flags)
@@ -15,7 +15,7 @@ const command = new CommandManager('papa-anunciar', flags)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const title = options.fetchFlag(args, 'título');
-		const announcement = options.fetchParam(args, 'anuncio', true);
+		const announcement = await options.fetchParam(args, 'anuncio', true);
 		const guilds = request.client.guilds.cache;
 		guilds.forEach(guild => {
 			const embed = new EmbedBuilder()

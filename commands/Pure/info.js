@@ -1,8 +1,9 @@
-const { EmbedBuilder, ChannelType } = require('discord.js'); //Integrar discord.js
+const { EmbedBuilder, ChannelType, User } = require('discord.js'); //Integrar discord.js
 const { fetchArrows, fetchUser, improveNumber, isShortenedNumberString } = require('../../func');
 const global = require('../../localdata/config.json'); //Variables globales
 const { ChannelStats, Stats } = require('../../localdata/models/stats');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandPermissions } = require('../Commons/cmdPerms');
 
 /**@param {Number} number*/
 const counterDisplay = (number) => {
@@ -12,10 +13,10 @@ const counterDisplay = (number) => {
     return numberString;
 }
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addParam('canal', 'CHANNEL', 'para mostrar estadísticas extra de un canal', { optional: true })
 	.addFlag('m', 'miembro', 'para mostrar estadísticas extra de un usuario');
-const flags = new CommandMetaFlagsManager().add('MOD');
+const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('info', flags)
 	.setAliases(
 		'informacion', 'información', 'inf',
@@ -27,14 +28,13 @@ const command = new CommandManager('info', flags)
 	.setExecution(async (request, args, isSlash) => {
 		if(!request.guild.available)
 			return request.reply(':interrobang: E-el servidor está en corte ahora mismo. Intenta usar el comando más tarde');
-		if(isSlash)
-			await request.deferReply();
-		else
-			await request.channel.sendTyping();
 
-		const stats = await Stats.findOne({});
+		const [stats] = await Promise.all([
+			Stats.findOne({}),
+			request.deferReply(),
+		]);
 		const servidor = request.guild; //Variable que almacena un objeto del servidor a analizar
-		const miembro = options.fetchFlag(args, 'miembro', { callback: f => fetchUser(f, message) });
+		const miembro = options.fetchFlag(args, 'miembro', { callback: (/** @type {string | User} */ f) => fetchUser(f, { client: request.client, guild: request.guild }) });
 
 		//Contadores de usuarios
 		const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size; //Biológicos
@@ -138,7 +138,7 @@ const command = new CommandManager('info', flags)
 				),
 		);
 
-		const tiempoguild = Date.now() - servidor.createdAt;
+		const tiempoguild = Date.now() - (+servidor.createdAt);
 		const serverms = Math.floor(tiempoguild) % 100;
 		const serversec = Math.floor(tiempoguild / 1000) % 60;
 		const servermin = Math.floor(tiempoguild / 1000 / 60) % 60;
@@ -171,9 +171,7 @@ const command = new CommandManager('info', flags)
 		
 		const replyContent = { embeds: [pages[0]] };
 		/**@type {import('discord.js').Message}*/
-		const sent = await (isSlash
-			? request.editReply(replyContent)
-			: request.reply(replyContent));
+		const sent = await request.editReply(replyContent);
 		const arrows = fetchArrows(request.client.emojis.cache);
 		await sent.react(arrows[0]);
 		await sent.react(arrows[1]);

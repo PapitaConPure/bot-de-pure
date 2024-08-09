@@ -1,10 +1,14 @@
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId } = require('../../func.js');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, TextInputBuilder, CommandInteraction, ButtonInteraction, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder } = require('discord.js');
-const { ProgramToLanguage } = require('../../systems/ps/commons.js');
-const { executeTuber } = require('../../systems/purescript.js');
+const { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId, warn } = require('../../func.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, TextInputBuilder, CommandInteraction, ButtonInteraction, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder, ModalSubmitInteraction, StringSelectMenuBuilder, CommandInteractionOptionResolver, Message, ChatInputCommandInteraction } = require('discord.js');
+const { RuntimeToLanguageType } = require('../../systems/ps/commons.js');
+const { executeTuber: executeTuberPS1 } = require('../../systems/ps/purescript.js');
+const { executeTuber: executeTuberPS2, CURRENT_PS_VERSION } = require('../../systems/ps2/purescript.js');
+const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts.js');
+const { ValueKindTranslationLookups } = require('../../systems/ps2/interpreter/values');
+const { Input } = require('../../systems/ps2/interpreter/inputReader.js');
 
 const pageMax = 10;
 const filters = {
@@ -21,20 +25,18 @@ const filters = {
 /**
  * Retorna un arreglo de ActionRowBuilders en respecto a la página actual y si la navegación por página está permitida
  * @param {Number} page 
- * @param {Number} backward 
- * @param {Number} forward 
  * @param {Number} lastPage 
- * @param {Boolean} navigationEnabled 
- * @returns {Array<ActionRowBuilder>}
+ * @param {Boolean} [navigationEnabled=true] 
  */
-const paginationRows = (page, lastPage, navigationEnabled = true) => {
+function paginationRows(page, lastPage, navigationEnabled = true) {
+	/**@type {Array<ActionRowBuilder<ButtonBuilder>|ActionRowBuilder<StringSelectMenuBuilder>>}*/
 	const rows = [];
 
 	if(navigationEnabled)
 		rows.push(...navigationRows('tubérculo', page, lastPage));
 
 	rows.push(
-		new ActionRowBuilder().addComponents(
+		makeButtonRowBuilder().addComponents(
 			new ButtonBuilder()
 				.setCustomId('tubérculo_filterItems_AUTHOR')
 				.setLabel('Filtrar Autor')
@@ -51,24 +53,25 @@ const paginationRows = (page, lastPage, navigationEnabled = true) => {
 				.setEmoji('936531643496288288')
 				.setStyle(ButtonStyle.Danger),
 		),
-		new ActionRowBuilder().addComponents(
-			new ButtonBuilder()
-				.setURL('https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link')
-				.setLabel('Aprende PuréScript')
-				.setEmoji('📖')
-				.setStyle(ButtonStyle.Link),
-		),
 	);
 	return rows;
-};
+}
+const helpRows = () => [
+	makeButtonRowBuilder().addComponents(
+		new ButtonBuilder()
+			.setURL('https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link')
+			.setLabel(`Aprende PuréScript (v${CURRENT_PS_VERSION})`)
+			.setEmoji('📖')
+			.setStyle(ButtonStyle.Link),
+	)
+];
 
 /**
  * @param {import('discord.js').Guild} guild 
- * @param {String?} content 
+ * @param {String} [content] 
  */
-const getItemsList = async(guild, content) => {
+async function getItemsList(guild, content = undefined) {
 	const gcfg = await GuildConfig.findOne({ guildId: guild.id });
-	/**@type {Array<[String, String]>}*/
 	let items = Object.entries(gcfg.tubers).reverse();
 	if(content) {
 		const filter = content.split(': ');
@@ -82,20 +85,21 @@ const getItemsList = async(guild, content) => {
 	const lastPage = Math.ceil(items.length / pageMax) - 1;
 	
 	return { items, lastPage };
-};
+}
 
 /**
- * @param {import('discord.js').ButtonInteraction | import('discord.js').SelectMenuInteraction} interaction 
+ * @param {import('discord.js').ButtonInteraction | import('discord.js').SelectMenuInteraction | ModalSubmitInteraction} interaction 
  * @param {Number} page 
+ * @param {String} [setFilter]
  */
-const loadPageNumber = async(interaction, page, setFilter = undefined) => {
-	page = parseInt(page);
+async function loadPageNumber(interaction, page, setFilter = undefined) {
 	const { guild, message } = interaction;
-	const { items, lastPage } = await getItemsList(guild, setFilter ?? message.content, page);
+	const { items, lastPage } = await getItemsList(guild, setFilter ?? message.content);
 	const members = guild.members.cache;
 	const oembed = message.embeds[0];
 	const paginationEnabled = items.length >= pageMax
 
+	/**@type {import('discord.js').MessageEditOptions}*/
 	const listUpdate = {
 		embeds: [
 			new EmbedBuilder()
@@ -112,9 +116,12 @@ const loadPageNumber = async(interaction, page, setFilter = undefined) => {
 							: `Ningún Tubérculo coincide con la búsqueda actual`,
 					inline: true,
 				})
-				.setFooter({ iconUrl: guild.iconURL({ size: 256 }), text: `Total • ${items.length}` }),
+				.setFooter({ iconURL: guild.iconURL({ size: 256 }), text: `Total • ${items.length}` }),
 		],
-		components: paginationRows(page, lastPage, paginationEnabled),
+		components: [
+			...paginationRows(page, lastPage, paginationEnabled),
+			...helpRows(),
+		],
 	};
 
 	if(setFilter !== undefined) {
@@ -124,100 +131,22 @@ const loadPageNumber = async(interaction, page, setFilter = undefined) => {
 			listUpdate.content = null;
 	}
 
-	return interaction.update(listUpdate);
+	if(interaction.isModalSubmit())
+		return interaction.message.edit(listUpdate);
+	else
+		return interaction.update(listUpdate);
 };
 
-/**
- * 
- * @param {CommandInteraction | ButtonInteraction} interaction 
- * @param {*} item 
- * @param {*} tuberId 
- * @returns 
- */
-function viewTuber(interaction, item, tuberId) {
-	if(!item)
-		return interaction.reply({ content: `⚠️️ El Tubérculo **${tuberId}** no existe` });
+const helpString = (/**@type {import('../Commons/typings.js').ComplexCommandRequest}*/ request) => [
+	'## Ejemplos de Uso',
+	'Supongamos que queremos crear, ver o editar un Tubérculo llamado **"saludo"**:',
+	'* 🔍 **Ver Tubérculo** — `p!t --ver saludo` o `p!t -v saludo`',
+	'* 🗑️ **Borrar Tubérculo** — `p!t --borrar saludo` o `p!t -b saludo`',
+	'* ✏️ **Crear o editar Tubérculo simple** — `p!t --crear saludo ¡Hola!` o `p!t -c saludo ¡Hola!`',
+	`-# Usa \`${p_pure(request.guildId).raw}ayuda tubérculo\` para más información. Si quieres crear un Tubérculo avanzado, puedes leer la [documentación más reciente de PuréScript](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link) (**v${CURRENT_PS_VERSION}**).`,
+].join('\n');
 
-	const author = interaction.guild.members.cache.get(item.author) ?? interaction.guild.members.me;
-
-	let components = [
-		new ButtonBuilder()
-			.setCustomId(`t_getDesc_${tuberId}_${compressId(item.author)}`)
-			.setLabel('Describir Tubérculo')
-			.setEmoji('ℹ')
-			.setStyle(ButtonStyle.Primary),
-	];
-	let files = [];
-	const embed = new EmbedBuilder()
-		.setColor(Colors.DarkVividPink)
-		.setAuthor({ name: interaction.guild.name, iconURL: interaction.guild.iconURL({ size: 256 }) })
-		.setTitle('Visor de Tubérculos')
-		.addFields(
-			{
-				name: 'TuberID',
-				value: tuberId,
-				inline: true,
-			},
-			{
-				name: 'Autor',
-				value: author.user.username,
-				inline: true,
-			},
-		);
-	
-	if(item.desc)
-		embed.addFields({
-			name: 'Descripción',
-			value: item.desc ?? '*Este Tubérculo no tiene descripción*',
-		});
-	
-	if(item.script) {
-		if(item.inputs?.length){
-			embed.addFields({
-				name: 'Entradas',
-				value: item.inputs.map(i => `**(${ProgramToLanguage.get(i.type) ?? 'Nada'})** \`${i.name ?? 'desconocido'}\`: ${i.desc ?? 'Sin descripción'}`).join('\n'),
-			});
-			components.push(
-				new ButtonBuilder()
-					.setCustomId(`t_gID_${tuberId}_${compressId(item.author)}`)
-					.setLabel('Describir entrada')
-					.setEmoji('🏷')
-					.setStyle(ButtonStyle.Success),
-			);
-		}
-
-		const visualPS = item.script.map
-			? item.script.map(expr => expr.join(' ')).join(';\n')
-			: item.script;
-		if(visualPS.length >= 1020)
-			files = [new AttachmentBuilder(Buffer.from(visualPS, 'utf-8'), { name: 'PuréScript.txt' })];
-		else
-			embed.addFields({
-				name: 'PuréScript',
-				value: [
-					'```arm',
-					`${visualPS}`,
-					'```',
-				].join('\n'),
-			});
-	} else {
-		if(item.content) embed.addFields({ name: 'Mensaje', value: item.content });
-		if(item.files && item.files.length) embed.addFields({
-			name: 'Archivos',
-			value: item.files.map((f,i) => `[${i}](${f})`).join(', '),
-		});
-	}
-
-	components = [new ActionRowBuilder().addComponents(...components)];
-
-	return interaction.reply({
-		embeds: [embed],
-		files,
-		components,
-	});
-}
-
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addParam('id', 	  'TEXT',           'para especificar sobre qué Tubérculo operar',          { optional: true })
 	.addParam('mensaje',  'TEXT',           'para especificar el texto del mensaje',                { optional: true })
 	.addParam('archivos', ['FILE','IMAGE'], 'para especificar los archivos del mensaje',            { optional: true, poly: 'MULTIPLE', polymax: 8 })
@@ -226,35 +155,30 @@ const options = new CommandOptionsManager()
 	.addFlag('v', 		'ver', 		  				  'para ver detalles de un Tubérculo')
 	.addFlag(['b','d'], ['borrar','eliminar'], 		  'para eliminar un Tubérculo')
 	.addFlag('s', 		['script','puré','pure'], 	  'para usar PuréScript (junto a `-c`); reemplaza la función de `<mensaje>`');
-const flags = new CommandMetaFlagsManager().add('COMMON');
+const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('tubérculo', flags)
 	.setAliases('tuberculo', 'tubercle', 'tuber', 't')
 	.setBriefDescription('Permite crear, editar, listar, borrar o ejecutar comandos personalizados de servidor')
 	.setLongDescription(
-		'Permite *listar*, `--crear`/editar, `--borrar` o __ejecutar__ Tubérculos (comandos personalizados de servidor).',
-		'Usar el comando sin más listará todos los Tubérculos de los que dispone el servidor actual',
-		'En caso de estar creando un Tubérculo, se requerirá un `<mensaje>` y/o `<archivos>`, junto a la `<id>` que quieras darle al mismo. Si la ID ya está registrada, será *editada*',
-		'En cualquier parte del contenido del mensaje, coloca "#FIN#" para bajar un renglón (no es necesario con PuréScript)',
-		'En caso de estar editando o borrando un Tubérculo existente, se requerirá su TuberID',
-		'Puedes leer o descargar la documentación de PuréScript desde [aquí](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link) (~3MiB)',
-		'Nótese que el lenguaje se encuentra en una etapa prematura y puede tener bugs o cambiar considerablemente',
+		'Ofrece acciones de Tubérculos (comandos personalizados de servidor).',
+		'Usar el comando sin nada lista todos los Tubérculos de este servidor',
+		'Para `--crear` (o *editar*) un Tubérculo, se requerirá un `<mensaje>` y/o `<archivos>`, junto a la `<id>` que quieras darle al mismo. Si la ID ya existe, será *editada*',
+		'Para `--borrar` un Tubérculo, igualmente debes indicar su `<id>`',
+		'Escribe los indicadores `--crear --script` (o `-cs`) para crear un **Tubérculo avanzado con PuréScript**',
+		'[Clickea esto para leer la documentación de PuréScript](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link)'
 	)
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash = false, rawArgs) => {
-		const helpString = `Usa \`${p_pure(request.guildId).raw}ayuda tubérculo\` para más información`;
-		const operation = options.fetchFlag(args, 'crear', { callback: 'crear' })
-			|| options.fetchFlag(args, 'ver', { callback: 'ver' })
-			|| options.fetchFlag(args, 'borrar', { callback: 'borrar' });
-		const isPureScript = options.fetchFlag(args, 'script');
+	.setExperimental(true)
+	.setExperimentalExecution(async (request, args, rawArgs) => {
+		const operation = args.parseFlagExt('crear', 'crear')
+			|| args.parseFlagExt('ver', 'ver')
+			|| args.parseFlagExt('borrar', 'borrar');
 
-		/**@type {String?}*/
-		const tuberId = isSlash ? args.getString('id')?.replace(/ +/, '') : args.shift();
+		const isPureScript = args.parseFlag('script');
+		const tuberId = args.getString('id');
 		const members = request.guild.members.cache;
 
-		if(!tuberId) {
-			if(operation)
-				return request.reply({ content: `⚠️️ Debes ingresar una TuberID válida\n${helpString}` });
-				
+		if(operation == null && tuberId == null) {
 			//Listar Tubérculos
 			const { items, lastPage } = await getItemsList(request.guild);
 			return request.reply({
@@ -272,9 +196,18 @@ const command = new CommandManager('tubérculo', flags)
 								: `Este servidor no tiene ningún Tubérculo.\nComienza a desplegar TuberIDs con \`${p_pure(request.guildId).raw}tubérculo --crear\``,
 							inline: true,
 						})
-						.setFooter({ iconUrl: request.guild.iconURL({ size: 256 }), text: `Total • ${items.length}` }),
+						.setFooter({ iconURL: request.guild.iconURL({ size: 256 }), text: `Total • ${items.length}` }),
 				],
-				components: (items.length < pageMax) ? null : paginationRows(0, lastPage),
+				components: [
+					...((items.length < pageMax) ? [] : paginationRows(0, lastPage)),
+					...helpRows(),
+				],
+			});
+		}
+
+		if(tuberId == null) {
+			return request.reply({
+				content: warn(`Debes indicar una TuberID válida para realizar una acción\n${helpString(request)}`)
 			});
 		}
 
@@ -283,168 +216,32 @@ const command = new CommandManager('tubérculo', flags)
 		const guildquery = { guildId: gid };
 		const gcfg = (await GuildConfig.findOne(guildquery)) || new GuildConfig(guildquery);
 		gcfg.tubers ||= {};
+
 		switch(operation) {
-			case 'crear':
-				if(tuberId.length > 24)
-					return request.reply({ content: '⚠️️ Las TuberID solo pueden medir hasta 24 caracteres' });
-				if(gcfg.tubers[tuberId] && isNotModerator(request.member) && gcfg.tubers[tuberId].author !== (request.author ?? request.user).id)
-					return request.reply({ content: `⛔ Acción denegada. Esta TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.members.me).user.username}*` });
-				
-				const tuberContent = { author: (request.user ?? request.author).id };
-				const codeTag = isSlash ? 0 : rawArgs.match(/```[A-Za-z0-9]*/)?.[0];
-				/**@type {String}*/
-				let mcontent;
-				if(isSlash)
-					mcontent = args.getString('mensaje');
-				else {
-					if(isPureScript) {
-						if(!codeTag)
-							return request.reply({
-								content: [
-									'Debes poner **\\`\\`\\`** antes y después del código.',
-									'Esto hará que Discord le ponga el formato adecuado al código y que sea más fácil programar.',
-									'Opcionalmente, puedes poner **\\`\\`\\`arm** en el del principio para colorear el código'
-								].join('\n'),
-							});
-						const firstIndex = rawArgs.indexOf(codeTag);
-						const lastIndex = rawArgs.lastIndexOf('```');
-						mcontent = rawArgs.slice(firstIndex + codeTag.length, lastIndex > firstIndex ? lastIndex : rawArgs.length).trim();
-					} else
-						mcontent = (isSlash ? args.getString('mensaje') : args.join(' ')).split(/[\n ]*##[\n ]*/).join('\n');
-				}
-				const mfiles = isSlash ? options.fetchParamPoly(args, 'archivos', args.getString, null).filter(att => att) : (request.attachments || []).map(att => att.proxyURL);
-
-				//Incluir Tubérculo; crear colección de Tubérculos si es necesario
-				if(isPureScript) {
-					if(!mcontent)
-						return request.reply({ content: `⚠️️ Este Tubérculo requiere ingresar PuréScript\n${helpString}` });
-					tuberContent.script = mcontent.replace(/```[A-Za-z0-9]*/, '');
-					console.log({ script: tuberContent.script });
-				} else {
-					if(!mcontent && !mfiles.length)
-						return request.reply({ content: `⚠️️ Debes ingresar un mensaje o archivo para registrar un Tubérculo\n${helpString}` });
-					if(mcontent) tuberContent.content = mcontent;
-					if(mfiles.length) tuberContent.files = mfiles;
-				}
-
-				gcfg.tubers[tuberId] = tuberContent;
-				
-				try {
-					console.log('Ejecutando PuréScript:', gcfg.tubers[tuberId]);
-					gcfg.tubers[tuberId].tuberId = tuberId;
-					if(isSlash) await request.deferReply();
-					await executeTuber(request, gcfg.tubers[tuberId], { isSlash });
-					console.log('PuréScript ejecutado:', gcfg.tubers[tuberId]);
-					if(gcfg.tubers[tuberId].script)
-						gcfg.tubers[tuberId].script = gcfg.tubers[tuberId].script;
-					gcfg.markModified('tubers');
-				} catch(error) {
-					console.log('Ocurrió un error al añadir un nuevo Tubérculo');
-					console.error(error);
-					const errorContent = { content: '❌ Hay un problema con el Tubérculo que intentaste crear, por lo que no se registrará' };
-					return request.deferred
-						? request.editReply(errorContent)
-						: request.reply(errorContent);
-				}
-				break;
-
-			case 'ver':
-				return viewTuber(request, gcfg.tubers[tuberId], tuberId);
-			
-			case 'borrar':
-				if(!gcfg.tubers[tuberId])
-					return request.reply({ content: `⚠️️ El Tubérculo **${tuberId}** no existe` });
-				if(isNotModerator(request.member) && gcfg.tubers[tuberId].author !== (request.author ?? request.user).id)
-					return request.reply({ content: `⛔ Acción denegada. Esta TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.members.me).user.username}*` });
-
-				gcfg.tubers[tuberId] = null;
-				delete gcfg.tubers[tuberId];
-				gcfg.markModified('tubers');
-				request.reply({ content: '✅ Tubérculo eliminado con éxito' });
-				break;
-			
-			default:
-				let tid = tuberId;
-				if(!gcfg.tubers[tuberId]) {
-					const notFoundEmbed = new EmbedBuilder()
-						.setColor(Colors.Orange)
-						.setTitle(`⚠️️ El Tubérculo **${shortenText(tuberId, 64)}** no existe`)
-						.setImage('https://i.imgur.com/LFzqoJX.jpg');
-
-					const row = new ActionRowBuilder().addComponents(
-						new ButtonBuilder()
-							.setCustomId(`tubérculo_getHelp_${(request.author ?? request.user).id}`)
-							.setLabel('Necesito ayuda')
-							.setEmoji('💡')
-							.setStyle(ButtonStyle.Primary),
-					);
-
-					/**@type {Array<{ name: String, distance: Number }>}*/
-					let similar = [];
-					let superSimilar;
-					if(tuberId.length > 1)
-						similar = Object.keys(gcfg.tubers)
-							.filter(name => name.length > 1)
-							.map(name => ({ name, distance: edlDistance(tuberId, name) }))
-							.filter(t => t.distance <= 3.5)
-							.sort((a, b) => a.distance - b.distance)
-							.slice(0, 5);
-					
-					if(similar[0]?.distance <= 0 && (similar[1] == undefined || similar[1].distance > 0)) {
-						superSimilar = similar[0];
-						tid = superSimilar.name;
-					}
-
-					if(!superSimilar) {
-						if(similar.length) {
-							notFoundEmbed.addFields({
-								name: `TuberIDs similares a "${shortenText(tuberId, 80)}"`,
-								value: similar.map(t => `• **${shortenText(t.name, 152)}** (${t.distance > 0 ? `~${Math.round(100 - t.distance / 3.5 * 100)}` : '>99'}%)`).join('\n'),
-							});
-						} else
-							notFoundEmbed.addFields({
-								name: 'Creación de Tubérculos',
-								value: [
-									`No se encontraron Tubérculos similares a "${shortenText(tuberId, 80)}".`,
-									'¿Quieres crear un Tubérculo simple? ¡Usa la bandera `--crear` y maqueta la respuesta que desees!',
-								].join('\n'),
-							});
-						
-						if(isPureScript)
-							notFoundEmbed.addFields({
-								name: 'Crear Tubérculo avanzado',
-								value: '¿Estás intentando crear un Tubérculo con PuréScript? Usa la bandera `--crear` junto a `--script` (o `-cs` para la versión corta)',
-							});
-						
-						return request.reply({
-							embeds: [notFoundEmbed],
-							components: [row],
-						});
-					}
-				}
-				console.log(args);
-				const tuberArgs = Array.isArray(args)
-					? args
-					: options.fetchParamPoly(args, 'entradas', args.getString, null).filter(input => input);
-				console.log('tuberArgs:', tuberArgs);
-				if(isSlash) await request.deferReply();
-				await executeTuber(request, { ...gcfg.tubers[tid], tuberId: tid }, { tuberArgs, isSlash })
-				.catch(error => {
-					console.log('Ocurrió un error al ejecutar un Tubérculo');
-					console.error(error);
-					if(!gcfg.tubers[tid].script && error.name !== 'TuberInitializerError')
-						request.reply({ content: '❌ Parece que hay un problema con este Tubérculo. Si eres el creador, puedes modificarlo o eliminarlo. Si no, avísale al creador' });
-				});
-				break;
+		case 'crear':
+			await createTuber(tuberId, gcfg, isPureScript, request, args);
+			break;
+		case 'ver':
+			await viewTuber(request, gcfg.tubers[tuberId], tuberId, 0);
+			break;
+		case 'borrar':
+			await deleteTuber(tuberId, gcfg, request);
+			break;
+		default:
+			await opExecuteTuber(tuberId, gcfg, isPureScript, request, args);
+			break;
 		}
+
 		return gcfg.save(); //Guardar en Configuraciones de Servidor si se cambió algo
 	})
 	.setButtonResponse(function getHelp(interaction, userId) {
 		if(interaction.user.id !== userId)
 			return interaction.reply({ content: 'No tienes permiso para hacer eso', ephemeral: true });
+		
+		//@ts-expect-error
 		return require('./ayuda.js').execute(interaction, [ 'tubérculo' ], false);
 	})
-	.setButtonResponse(async function getTuberHelp(interaction, tuberId) {
+	.setButtonResponse(async function getTuberHelp(interaction, tuberId, variant, updateMessage) {
 		if(!tuberId)
 			return interaction.reply({ content: '⚠️ Se esperaba una TuberID válida', ephemeral: true });
 
@@ -455,10 +252,10 @@ const command = new CommandManager('tubérculo', flags)
 		if(!tuber)
 			return interaction.reply({ content: '⚠️ Esta TuberID ya no existe', ephemeral: true });
 		
-		return viewTuber(interaction, tuber, tuberId);
+		return viewTuber(interaction, tuber, tuberId, +variant, updateMessage);
 	})
 	.setButtonResponse(async function loadPage(interaction, page) {
-		return loadPageNumber(interaction, page);
+		return loadPageNumber(interaction, parseInt(page));
 	})
 	.setButtonResponse(async function filterItems(interaction, target) {
 		const filter = filters[target];
@@ -470,7 +267,7 @@ const command = new CommandManager('tubérculo', flags)
 			.setStyle(TextInputStyle.Short)
 			.setMaxLength(48)
 			.setRequired(true);
-		const row = new ActionRowBuilder().addComponents(filterInput);
+		const row = makeTextInputRowBuilder().addComponents(filterInput);
 		const modal = new ModalBuilder()
 			.setCustomId(`tubérculo_filterSubmit_${target}`)
 			.setTitle('Filtro de búsqueda')
@@ -522,7 +319,7 @@ const command = new CommandManager('tubérculo', flags)
 			.setLabel('Descripción')
 			.setStyle(TextInputStyle.Paragraph)
 			.setMaxLength(512);
-		const row = new ActionRowBuilder().addComponents(descInput);
+		const row = makeTextInputRowBuilder().addComponents(descInput);
 		const modal = new ModalBuilder()
 			.setCustomId(`t_setDesc_${tuberId}`)
 			.setTitle('Describir Tubérculo')
@@ -530,14 +327,16 @@ const command = new CommandManager('tubérculo', flags)
 
 		return interaction.showModal(modal);
 	})
-	.setButtonResponse(function gID(interaction, tuberId, userId) {
+	.setButtonResponse(async function gID(interaction, tuberId, userId) {
 		userId = decompressId(userId);
 		
-		if(isNotModerator(interaction.member) && userId !== interaction.user.id)
+		if(isNotModerator(interaction.member) && userId !== interaction.user.id) {
+			const gcfg = await GuildConfig.findOne({ guildId: interaction.guildId });
 			return interaction.reply({
 				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(interaction.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? interaction.guild.members.me).user.username}*`,
 				ephemeral: true,
 			});
+		}
 
 		const nameInput = new TextInputBuilder()
 			.setCustomId('nameInput')
@@ -550,8 +349,8 @@ const command = new CommandManager('tubérculo', flags)
 			.setLabel('Descripción')
 			.setStyle(TextInputStyle.Paragraph)
 			.setMaxLength(512);
-		const nameRow = new ActionRowBuilder().addComponents(nameInput);
-		const descRow = new ActionRowBuilder().addComponents(descInput);
+		const nameRow = makeTextInputRowBuilder().addComponents(nameInput);
+		const descRow = makeTextInputRowBuilder().addComponents(descInput);
 		const modal = new ModalBuilder()
 			.setCustomId(`t_setIDesc_${tuberId}`)
 			.setTitle('Describir Entrada')
@@ -560,7 +359,7 @@ const command = new CommandManager('tubérculo', flags)
 		return interaction.showModal(modal);
 	})
 	.setSelectMenuResponse(async function loadPageExact(interaction) {
-		return loadPageNumber(interaction, interaction.values[0]);
+		return loadPageNumber(interaction, parseInt(interaction.values[0]));
 	})
 	.setModalResponse(async function setDesc(interaction, tuberId) {
 		if(!tuberId)
@@ -574,6 +373,11 @@ const command = new CommandManager('tubérculo', flags)
 
 		if(!gcfg.tubers[tuberId])
 			return interaction.editReply({ content: '⚠️ Esta TuberID ya no existe' });
+
+		if(isNotModerator(interaction.member) && gcfg.tubers[tuberId].author !== interaction.user.id) {
+			const member = interaction.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? interaction.guild.members.me;
+			return interaction.reply({ content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${member.user.username}*` });
+		}
 
 		const desc = interaction.fields.getTextInputValue('descInput');
 		gcfg.tubers[tuberId].desc = desc;
@@ -594,19 +398,387 @@ const command = new CommandManager('tubérculo', flags)
 
 		if(!Array.isArray(gcfg.tubers[tuberId]?.inputs))
 			return interaction.editReply({ content: '⚠️ Esta TuberID ya no existe, o no contiene entradas válidas' });
+
+		if(isNotModerator(interaction.member) && gcfg.tubers[tuberId].author !== interaction.user.id) {
+			const member = interaction.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? interaction.guild.members.me;
+			return interaction.reply({ content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${member.user.username}*` });
+		}
 		
 		const name = interaction.fields.getTextInputValue('nameInput');
-		const inputIndex = gcfg.tubers[tuberId].inputs.findIndex(input => (input.identifier ?? input.name) === name);
-		if(inputIndex < 0)
-			return interaction.editReply({ content: `⚠️ La entrada "${shortenText(name, 128)}" no existe para el Tubérculo **${shortenText(tuberId, 256)}**` });
-
 		const desc = interaction.fields.getTextInputValue('descInput');
-		gcfg.tubers[tuberId].inputs[inputIndex].desc = desc;
-		console.log(tuberId, name, inputIndex, ':', desc);
+
+		if(gcfg.tubers[tuberId].psVersion == null) {
+			const inputIndex = gcfg.tubers[tuberId].inputs.findIndex(input => (input.identifier ?? input.name) === name);
+			if(inputIndex < 0)
+				return interaction.editReply({ content: `⚠️ La entrada "${shortenText(name, 128)}" no existe para el Tubérculo **${shortenText(tuberId, 256)}**` });
+			
+			gcfg.tubers[tuberId].inputs[inputIndex].desc = desc;
+		} else {
+			const variants = /**@type {Array<Array<*>>}*/(gcfg.tubers[tuberId].inputs);
+			let found = false;
+			variants.forEach((variant, variantIndex) => variant.forEach((input, inputIndex) => {
+				if(Input.from(input).name === name) {
+					gcfg.tubers[tuberId].inputs[variantIndex][inputIndex].desc = desc;
+					found = true;
+				}
+			}));
+
+			if(!found)
+				return interaction.editReply({ content: `⚠️ El nombre de Entrada \`${shortenText(name, 128)}\` no existe en ninguna variante del Tubérculo **${shortenText(tuberId, 256)}**` });
+		}
+		
 		gcfg.markModified(`tubers.${tuberId}`);
 		await gcfg.save();
 
-		return interaction.editReply({ content: `✅ Descripción de entrada "${shortenText(name, 256)}" actualizada` });
+		return interaction.editReply({ content: `✅ Descripción de Entrada \`${shortenText(name, 256)}\` actualizada` });
 	});
+
+/**
+ * 
+ * @param {String} tuberId 
+ * @param {import('../../localdata/models/guildconfigs.js').GuildConfigDocument} gcfg 
+ * @param {Boolean} isPureScript 
+ * @param {import('../Commons/typings.js').ComplexCommandRequest} request 
+ * @param {CommandOptionSolver} args 
+ */	
+async function createTuber(tuberId, gcfg, isPureScript, request, args) {
+	if(tuberId.length > 24)
+		return request.reply({ content: '⚠️️ Las TuberID solo pueden medir hasta 24 caracteres' });
+	if(gcfg.tubers[tuberId] && isNotModerator(request.member) && gcfg.tubers[tuberId].author !== request.user.id)
+		return request.reply({ content: `⛔ Acción denegada. Esta TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.members.me).user.username}*` });
+	
+	const tuberContent = {
+		author: request.userId,
+		advanced: false,
+	};
+	const codeTag = args.isInteractionSolver() ? 0 : args.rawArgs.match(/```[A-Za-z0-9]*/)?.[0];
+	/**@type {String}*/
+	let mcontent;
+	if(args.isInteractionSolver()) {
+		mcontent = args.getString('mensaje');
+	} else {
+		if(isPureScript) {
+			if(!codeTag)
+				return request.reply({
+					content: [
+						'Debes poner **\\`\\`\\`** antes y después del código.',
+						'Esto hará que Discord le ponga el formato adecuado al código y que sea más fácil programar.',
+						'Opcionalmente, puedes poner **\\`\\`\\`arm** en el del principio para colorear el código',
+					].join('\n'),
+				});
+			const firstIndex = args.rawArgs.indexOf(codeTag);
+			const lastIndex = args.rawArgs.lastIndexOf('```');
+			mcontent = args.rawArgs.slice(firstIndex + codeTag.length, lastIndex > firstIndex ? lastIndex : args.rawArgs.length).trim();
+		} else {
+			mcontent = args.remainder.split(/[\n ]*##[\n ]*/).join('\n');
+		}
+	}
+	const mfiles = args.isInteractionSolver()
+		? args.parsePolyParam('archivos', args.getString).filter(att => att)
+		: request.attachments.map(att => att.proxyURL);
+
+	//Incluir Tubérculo; crear colección de Tubérculos si es necesario
+	if(isPureScript) {
+		if(!mcontent)
+			return request.reply({ content: `⚠️️ Este Tubérculo requiere ingresar PuréScript\n${helpString(request)}` });
+		tuberContent.advanced = true;
+		tuberContent.script = mcontent.replace(/```[A-Za-z0-9]*/, '');
+		console.log({ script: tuberContent.script });
+	} else {
+		if(!mcontent && !mfiles.length)
+			return request.reply({ content: `⚠️️ Debes ingresar un mensaje o archivo para registrar un Tubérculo\n${helpString(request)}` });
+		if(mcontent) tuberContent.content = mcontent;
+		if(mfiles.length) tuberContent.files = mfiles;
+	}
+
+	gcfg.tubers[tuberId] = tuberContent;
+	
+	try {
+		console.log('Ejecutando PuréScript:', gcfg.tubers[tuberId]);
+
+		gcfg.tubers[tuberId].id = tuberId;
+		gcfg.tubers[tuberId].advanced = tuberContent.advanced;
+		if(tuberContent.advanced)
+			gcfg.tubers[tuberId].psVersion = CURRENT_PS_VERSION;
+
+		await request.deferReply();
+		await executeTuberPS2(request, gcfg.tubers[tuberId], { isTestDrive: true });
+
+		if(tuberContent.advanced) {
+			gcfg.tubers[tuberId].script = gcfg.tubers[tuberId].script;
+			gcfg.tubers[tuberId].inputs = gcfg.tubers[tuberId].inputs
+				.map(variant => variant.map(input => input.json));
+			gcfg.tubers[tuberId].saved = gcfg.tubers[tuberId].saved;
+		}
+
+		console.log('PuréScript ejecutado:', gcfg.tubers[tuberId]);
+		gcfg.markModified(`tubers`);
+	} catch(error) {
+		console.log('Ocurrió un error al añadir un nuevo Tubérculo');
+		console.error(error);
+		const errorContent = { content: '❌ Hay un problema con el Tubérculo que intentaste crear, por lo que no se registrará' };
+		return request.editReply(errorContent);
+	}
+}
+
+/**
+ * 
+ * @param {import('../Commons/typings.js').ComplexCommandRequest | ButtonInteraction<'cached'>} interaction 
+ * @param {*} item 
+ * @param {String} tuberId 
+ * @param {Number} inputVariant 
+ * @param {*} updateMessage 
+ */
+function viewTuber(interaction, item, tuberId, inputVariant, updateMessage) {
+	if(!item)
+		return interaction.reply({ content: `⚠️️ El Tubérculo **${tuberId}** no existe` });
+
+	const author = interaction.guild.members.cache.get(item.author) ?? interaction.guild.members.me;
+
+	const descriptionButtons = [
+		new ButtonBuilder()
+			.setCustomId(`t_getDesc_${tuberId}_${compressId(item.author)}`)
+			.setLabel('Describir Tubérculo')
+			.setEmoji('ℹ')
+			.setStyle(ButtonStyle.Primary),
+	];
+	const variantButtons = [];
+	/**@type {Array<AttachmentBuilder>}*/
+	let files = [];
+	const embed = new EmbedBuilder()
+		.setColor(Colors.DarkVividPink)
+		.setAuthor({ name: interaction.guild.name, iconURL: interaction.guild.iconURL({ size: 256 }) })
+		.setTitle('Visor de Tubérculos')
+		.addFields(
+			{
+				name: 'TuberID',
+				value: tuberId,
+				inline: true,
+			},
+			{
+				name: 'Autor',
+				value: author.user.username,
+				inline: true,
+			},
+		);
+
+	if(item.psVersion)
+		embed.addFields({
+			name: 'Versión',
+			value: `\`PS v${item.psVersion}\``,
+			inline: true,
+		});
+	
+	if(item.desc)
+		embed.addFields({
+			name: 'Descripción',
+			value: item.desc ?? '*Este Tubérculo no tiene descripción*',
+		});
+	
+	if(item.script) {
+		const pageCount = item.inputs.length;
+
+		if(item.inputs?.length) {
+			let inputTitle;
+			let inputStrings;
+			let actuallyValid = true;
+			
+			if(!item.psVersion) {
+				inputTitle = 'Entradas';
+				inputStrings = item.inputs
+					.map(i => `**(${RuntimeToLanguageType.get(i.type) ?? ValueKindTranslationLookups.get(i.kind) ?? 'Nada'})** \`${i.name ?? 'desconocido'}\`: ${i.desc ?? 'Sin descripción'}`)
+					.join('\n');
+			} else {
+				inputTitle = `Entradas (variante ${inputVariant + 1} de ${pageCount})`;
+				if(item.inputs[inputVariant].length === 0)
+					actuallyValid = false;
+				else
+					inputStrings = item.inputs[inputVariant]
+						.map(i => Input.from(i).toString())
+						.join('\n');
+			}
+
+			if(actuallyValid) {
+				embed.addFields({
+					name: inputTitle,
+					value: inputStrings,
+				});
+				descriptionButtons.push(
+					new ButtonBuilder()
+						.setCustomId(`t_gID_${tuberId}_${compressId(item.author)}`)
+						.setLabel('Describir Entrada')
+						.setEmoji('🏷')
+						.setStyle(ButtonStyle.Success),
+				);
+			} else {
+				embed.addFields({
+					name: inputTitle,
+					value: '_(Variante sin Entradas)_',
+				});
+			}
+		}
+
+		const visualPS = item.script.map
+			? item.script.map(expr => expr.join(' ')).join(';\n')
+			: item.script;
+		if(visualPS.length >= 1020)
+			files = [new AttachmentBuilder(Buffer.from(visualPS, 'utf-8'), { name: 'PuréScript.txt' })];
+		else
+			embed.addFields({
+				name: 'PuréScript',
+				value: [
+					'```arm',
+					`${visualPS}`,
+					'```',
+				].join('\n'),
+			});
+
+		if(item.psVersion && item.inputs.length > 1) {
+			const previousPage = (inputVariant === 0) ? (pageCount - 1) : (inputVariant - 1);
+			const nextPage = (inputVariant === pageCount - 1) ? 0 : (inputVariant + 1);
+			variantButtons.push(
+				new ButtonBuilder()
+					.setCustomId(`tubérculo_getTuberHelp_${tuberId}_${previousPage}_A`)
+					.setEmoji('934430008343158844')
+					.setStyle(ButtonStyle.Secondary),
+				new ButtonBuilder()
+					.setCustomId(`tubérculo_getTuberHelp_${tuberId}_${nextPage}_B`)
+					.setEmoji('934430008250871818')
+					.setStyle(ButtonStyle.Secondary),
+				);
+		}
+	} else {
+		if(item.content) embed.addFields({ name: 'Mensaje', value: item.content });
+		if(item.files && item.files.length) embed.addFields({
+			name: 'Archivos',
+			value: item.files.map((f,i) => `[${i}](${f})`).join(', '),
+		});
+	}
+
+	const embeds = [embed];
+	const components = [ makeButtonRowBuilder().addComponents(...descriptionButtons) ]
+	if(variantButtons.length > 0)
+		components.push(makeButtonRowBuilder().addComponents(...variantButtons));
+
+	return updateMessage
+		? /**@type {ButtonInteraction<'cached'>}*/(interaction).update({ embeds, files, components })
+		: interaction.reply({ embeds, files, components });
+}
+
+/**
+ * 
+ * @param {String} tuberId
+ * @param {import('../../localdata/models/guildconfigs.js').GuildConfigDocument} gcfg 
+ * @param {import('../Commons/typings.js').ComplexCommandRequest} request 
+ */
+function deleteTuber(tuberId, gcfg, request) {
+	if(!gcfg.tubers[tuberId])
+		return request.reply({ content: `⚠️️ El Tubérculo **${tuberId}** no existe` });
+
+	if(isNotModerator(request.member) && gcfg.tubers[tuberId].author !== request.userId)
+		return request.reply({ content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.members.me).user.username}*` });
+
+	gcfg.tubers[tuberId] = null;
+	delete gcfg.tubers[tuberId];
+	gcfg.markModified('tubers');
+	request.reply({ content: '✅ Tubérculo eliminado con éxito' });
+}
+
+/**
+ * 
+ * @param {String} tuberId
+ * @param {import('../../localdata/models/guildconfigs.js').GuildConfigDocument} gcfg 
+ * @param {Boolean} isPureScript 
+ * @param {import('../Commons/typings.js').ComplexCommandRequest} request 
+ * @param {CommandOptionSolver} args 
+ */
+async function opExecuteTuber(tuberId, gcfg, isPureScript, request, args) {
+	let tid = tuberId;
+	if(!gcfg.tubers[tuberId]) {
+		const notFoundEmbed = new EmbedBuilder()
+			.setColor(Colors.Orange)
+			.setTitle(`⚠️️ El Tubérculo **${shortenText(tuberId, 64)}** no existe`)
+			.setImage('https://i.imgur.com/LFzqoJX.jpg');
+
+		const row = makeButtonRowBuilder().addComponents(
+			new ButtonBuilder()
+				.setCustomId(`tubérculo_getHelp_${request.userId}`)
+				.setLabel('Necesito ayuda')
+				.setEmoji('💡')
+				.setStyle(ButtonStyle.Primary),
+		);
+
+		/**@type {Array<{ name: String, distance: Number }>}*/
+		let similar = [];
+		let superSimilar;
+		if(tuberId.length > 1)
+			similar = Object.keys(gcfg.tubers)
+				.filter(name => name.length > 1)
+				.map(name => ({ name, distance: edlDistance(tuberId, name) }))
+				.filter(t => t.distance <= 3.5)
+				.sort((a, b) => a.distance - b.distance)
+				.slice(0, 5);
+		
+		if(similar[0]?.distance <= 0 && (similar[1] == undefined || similar[1].distance > 0)) {
+			superSimilar = similar[0];
+			tid = superSimilar.name;
+		}
+
+		if(!superSimilar) {
+			if(similar.length) {
+				notFoundEmbed.addFields({
+					name: `TuberIDs similares a "${shortenText(tuberId, 80)}"`,
+					value: similar.map(t => `• **${shortenText(t.name, 152)}** (${t.distance > 0 ? `~${Math.round(100 - t.distance / 3.5 * 100)}` : '>99'}%)`).join('\n'),
+				});
+			} else
+				notFoundEmbed.addFields({
+					name: 'Creación de Tubérculos',
+					value: [
+						`No se encontraron Tubérculos similares a "${shortenText(tuberId, 80)}".`,
+						'¿Quieres crear un Tubérculo simple? ¡Usa la bandera `--crear` y maqueta la respuesta que desees!',
+					].join('\n'),
+				});
+			
+			if(isPureScript)
+				notFoundEmbed.addFields({
+					name: 'Crear Tubérculo avanzado',
+					value: '¿Estás intentando crear un Tubérculo con PuréScript? Usa la bandera `--crear` junto a `--script` (o `-cs` para la versión corta)',
+				});
+			
+			return request.reply({
+				embeds: [notFoundEmbed],
+				components: [row],
+			});
+		}
+	}
+	console.log(args);
+	const tuberArgs = args.isInteractionSolver()
+		? args.parsePolyParam('entradas', args.getString).filter(input => input)
+		: /**@type {Array<String>}*/(args.args);
+	console.log('tuberArgs:', tuberArgs);
+	await request.deferReply();
+	let executeFn;
+	
+	if(gcfg.tubers[tid].psVersion == null)
+		executeFn = executeTuberPS1;
+	else
+		executeFn = executeTuberPS2;
+
+	const savedData = gcfg.tubers[tid].saved && new Map(Object.entries(gcfg.tubers[tid].saved));
+	await executeFn(request, gcfg.tubers[tid], { args: tuberArgs, isTestDrive: false, overwrite: false, savedData })
+	.then(() => {
+		gcfg.tubers[tid].saved = gcfg.tubers[tid].saved;
+		if(gcfg.tubers[tid].psVersion != null)
+			gcfg.tubers[tid].inputs = gcfg.tubers[tid].inputs
+				.map(variant => variant.map(input => input.json ?? input));
+		gcfg.markModified('tubers');
+	})
+	.catch(error => {
+		console.log('Ocurrió un error al ejecutar un Tubérculo');
+		console.error(error);
+		if(!gcfg.tubers[tid].script && error.name !== 'TuberInitializerError')
+			request.editReply({ content: '❌ Parece que hay un problema con este Tubérculo. Si eres el creador, puedes modificarlo o eliminarlo. Si no, avísale al creador' });
+	});
+}
 
 module.exports = command;

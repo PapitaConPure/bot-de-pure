@@ -1,7 +1,7 @@
 const UserConfigs = require("./localdata/models/userconfigs");
 
 /**
- * @typedef {{ language: import("./internationalization").LocaleKey, banned: Boolean }} UserCache
+ * @typedef {{ language: import("./internationalization").LocaleKey, convertPixiv: Boolean, twitterPrefix: 'vx' | 'fx' | '', banned: Boolean }} UserCache
  * @type {Map<String, UserCache>}
  */
 const userCache = new Map();
@@ -20,7 +20,11 @@ async function cacheUser(userId) {
     }
 
     return userCache.set(userId, {
+        // @ts-ignore
         language: userConfigs.language,
+        convertPixiv: userConfigs.convertPixiv ?? true,
+        // @ts-ignore
+        twitterPrefix: userConfigs.twitterPrefix || '',
         banned: userConfigs.banned,
     });
 }

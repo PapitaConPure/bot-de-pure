@@ -1,7 +1,7 @@
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandTags, CommandManager } = require('../Commons/commands');
 
-const flags = new CommandMetaFlagsManager().add('GUIDE');
+const flags = new CommandTags().add('GUIDE');
 const command = new CommandManager('g-opciones', flags)
 	.setAliases(
 		'g-banderas',

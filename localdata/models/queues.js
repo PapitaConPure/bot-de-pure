@@ -9,14 +9,15 @@ const QueueModel = Mongoose.model('Queue', QueueSchema);
 
 /**
  * @typedef {{ queueId: String }} QueueQuery
- * @typedef {{length: Number, mapFn: (v, k) => *, sort: Sort}} QueueGenerationOptions
+ * @typedef {{ length: Number, mapFn?: (v, k) => *, sort: Sort }} QueueGenerationOptions
  * @typedef {*} QueueItem
  */
 
 /**
  * Genera una nueva Queue sin guardarla en la base de datos.
  * Es probable que prefieras usar getQueueItem antes que solamente esta función
- * @typedef {'NONE'|'REVERSE'|'ABC'|'ABC_R'|'VALUE'|'VALUE_R'|'RANDOM'|(a, b) => *} Sort
+ * @typedef {(a: *, b: *) => *} SortFn
+ * @typedef {'NONE'|'REVERSE'|'ABC'|'ABC_R'|'VALUE'|'VALUE_R'|'RANDOM'|SortFn} Sort
  * @param {QueueGenerationOptions} options Largo, mapeado y ordenamiento de la Queue
  * @returns {Array<QueueItem>} Queue generada
  */
@@ -51,7 +52,7 @@ const saveQueue = async (queueQuery) => {
 /**
  * Sustrae el primer elemento de la Queue especificada, lo devuelve y guarda los cambios en la base de datos.
  * Si la Queue no existe o está vacía, se genera una nueva basada en las opciones proporcionadas o valores de generación por defecto
- * @param {QueueQuery | QueueGenerationOptions} subtractOptions
+ * @param {QueueQuery & QueueGenerationOptions} subtractOptions
  * @returns {Promise<QueueItem>}
  */
 const getQueueItem = async (subtractOptions) => {

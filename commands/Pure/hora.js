@@ -1,10 +1,10 @@
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addParam('hora', 'TEXT', 'para establecer la hora a convertir')
 	.addFlag('l', ['gmt', 'utc', 'huso'], 'para especificar tu huso horario', { name: 'l', type: 'NUMBER' })
 	.addFlag(['f','d'], ['fecha','día','dia'], 'para ingresar un día en formato DD/MM/AAAA', { name: 'dma', type: { name: 'dma', expression: 'dd/MM/AAAA' } });
-const flags = new CommandMetaFlagsManager().add('COMMON');
+const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('hora', flags)
 	.setAliases(
 		'horario',

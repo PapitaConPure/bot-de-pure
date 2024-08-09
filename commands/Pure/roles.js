@@ -3,8 +3,8 @@ const Hourai = require('../../localdata/models/hourai.js');
 const axios = require('axios').default;
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors, ActionRow, ComponentType } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes');
-const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
-const { auditError } = require('../../systems/auditor');
+const { CommandTags, CommandManager } = require('../Commons/commands');
+const { auditError } = require('../../systems/others/auditor');
 const { colorsRow } = require('../../localdata/houraiProps');
 const { subdivideArray, isBoosting, stringHexToNumber } = require('../../func');
 
@@ -147,7 +147,7 @@ const getEditButtonRow = (member, category) => {
 	];
 }
 
-const flags = new CommandMetaFlagsManager().add('HOURAI');
+const flags = new CommandTags().add('HOURAI');
 
 const command = new CommandManager('roles', flags)
 	.setAliases('rol', 'role')
@@ -347,7 +347,7 @@ const command = new CommandManager('roles', flags)
 		if(edit) return interaction.update(messageActions);
 		return interaction.reply(messageActions);
 	})
-	.setInteractionResponse(async function selectReligion(interaction, section, edit = false) {
+	.setSelectMenuResponse(async function selectReligion(interaction, section, edit = false) {
 		section = parseInt(section);
 		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
 
@@ -389,6 +389,9 @@ const command = new CommandManager('roles', flags)
 		});
 	})
 	.setInteractionResponse(async function selectCandy(interaction) {
+		if(!interaction.member.roles.cache.has('1107831054791876691'))
+			return interaction.reply({ content: '🚫 No tienes permiso para hacer eso', ephemeral: true });
+		
 		const candyRole = hourai.candyRoleId;
 		const hasCandy = interaction.member.roles.cache.has(candyRole);
 		return interaction.reply({
@@ -397,7 +400,11 @@ const command = new CommandManager('roles', flags)
 					.setColor(Colors.DarkPurple)
 					.addFields({
 						name: '¡Caramelos mágicos!',
-						value: 'Antiguos relatos cuentan que permiten ver trazos de lujuria grabados en el aire.\nSe aceptan devoluciones para aplicantes previos, solo vomítalos con cuidado de dañarlos.',
+						value: [
+							'Antiguos relatos cuentan que permiten ver trazos de lujuria grabados en el aire.',
+							'Se aceptan devoluciones para aplicantes previos, solo vomítalos con cuidado de dañarlos.',
+							'**ADVERTENCIA:** al recibir estos caramelos, aceptas ser mayor de edad y ser responsable por lo que veas y publiques en los callejones que se revelen',
+						].join('\n'),
 					})
 			],
 			components: [new ActionRowBuilder().addComponents([

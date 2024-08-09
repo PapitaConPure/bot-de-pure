@@ -1,17 +1,72 @@
-const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { InteractionResponse, Message, CommandInteraction } = require('discord.js');
+const { CommandTags, CommandManager } = require('../Commons/commands');
+const { improveNumber, sleep } = require('../../func');
 
-const flags = new CommandMetaFlagsManager().add('COMMON');
+const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('ping', flags)
 	.setLongDescription('Muestra el tiempo de respuesta del Bot y la API')
-	.setExecution(async (request, _, __) => {
-		const rtime = Date.now() - request.createdTimestamp;
+	.setExecution(async (request, _, isSlash) => {
+		const sent = await request.reply({
+			content: 
+				'Pong~♪\n' +
+				`**Latencia de la API** ${request.client.ws.ping}ms\n` +
+				`**Tiempo de respuesta** _comprobando..._`,
+		});
 
-		return request.reply({
+		const wsPing = request.client.ws.ping;
+
+		let start, end;
+		start = Date.now();
+		await editSent(sent, request, isSlash, {
+			content: 
+				'Pong~♪\n' +
+				`**Latencia de la API** ${wsPing}ms\n` +
+				`**Tiempo de respuesta** _enviando..._`,
+		});
+		end = Date.now();
+
+		const max = 4;
+		let amount = end - start;
+		let count;
+		for(count = 1; count < max; count++) {
+			start = Date.now();
+			await editSent(sent, request, isSlash, {
+				content:
+					'Pong~♪\n' +
+					`**Latencia de la API** ${wsPing}ms\n` +
+					`**Tiempo de respuesta** ${improveNumber(amount / count)}ms... (${count}/${max})`,
+			});
+			end = Date.now();
+
+			amount += end - start;
+
+			await sleep(3000);
+		}
+
+		return editSent(sent, request, isSlash, {
 			content:
 				'Pong~♪\n' +
-				`**Tiempo de respuesta** ${Math.max(1, rtime)}ms\n` +
-				`**Latencia de la API** ${Math.round(request.client.ws.ping)}ms`
+				`**Latencia de la API** ${wsPing}ms\n` +
+				`**Tiempo de respuesta** ${improveNumber(amount / count)}ms`,
 		});
 	});
+
+/**
+ * @param {Message<true> | InteractionResponse<false>} sent 
+ * @param {import('../Commons/typings').ComplexCommandRequest} request
+ * @param {Boolean | undefined} isSlash
+ * @param {string | import('discord.js').MessagePayloadOption | import('discord.js').InteractionEditReplyOptions} editOptions
+ */
+function editSent(sent, request, isSlash, editOptions) {
+	if(isSlash) {
+		/**@type {CommandInteraction<true>}*/
+		const interaction = request;
+		return interaction.editReply(editOptions);
+	} else {
+		/**@type {Message<true>}*/
+		const message = sent;
+		return message.edit(editOptions);
+	}
+}
 
 module.exports = command;

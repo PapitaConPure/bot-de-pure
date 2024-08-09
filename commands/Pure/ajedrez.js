@@ -1,7 +1,7 @@
 const global = require('../../localdata/config.json');
 const { guildEmoji } = require("../../func");
 const { createCanvas, loadImage, NodeCanvasRenderingContext2D } = require('canvas');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 const { AttachmentBuilder } = require('discord.js');
 
 /**
@@ -76,11 +76,11 @@ const generateBoardImage = async (board, teamColors = { white: '#fff', black: '#
 	return new AttachmentBuilder(canvas.toBuffer(), { name: `ajedrez_${(Date.now() + 0)}.png` });
 }
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addParam('adversario', 'USER', 	   			   'para especificar el jugador contrario')
 	.addFlag('sgp', ['conjunto', 'set', 'piezas'],     'para usar un set de piezas personalizado')
 	.addFlag('cs',  ['configurar', 'config', 'setup'], 'para configurar un conjunto de piezas antes de comenzar');
-const flags = new CommandMetaFlagsManager().add(
+const flags = new CommandTags().add(
 	'COMMON',
 	'GAME',
 	'MAINTENANCE',

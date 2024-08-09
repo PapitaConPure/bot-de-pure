@@ -4,16 +4,17 @@ const { TextChannel, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle,
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const ConfessionSystems = require('../../localdata/models/confessionSystems.js');
 const PendingConfessions = require('../../localdata/models/pendingConfessions.js');
-const { CommandManager, CommandMetaFlagsManager, CommandOptionsManager } = require('../Commons/commands.js');
+const { CommandManager, CommandTags, CommandOptions } = require('../Commons/commands.js');
 const confessionSystems = require('../../localdata/models/confessionSystems.js');
-const { auditError } = require('../../systems/auditor.js');
+const { auditError } = require('../../systems/others/auditor.js');
+const { CommandPermissions } = require('../Commons/cmdPerms.js');
+const { makeTextInputRowBuilder, makeButtonRowBuilder } = require('../../tsCasts.js');
 
-const flags = new CommandMetaFlagsManager().add(
-	'MOD',
-	'HOURAI',
-);
-
-const command = new CommandManager('confesión', flags)
+const perms = new CommandPermissions()
+	.requireAnyOf('ManageMessages')
+	.requireAnyOf([ 'ManageChannels', 'ManageGuild' ]);
+const tags = new CommandTags().add('MOD');
+const command = new CommandManager('confesión', tags)
 	.setAliases(
 		'confesion',
 		'confesiones',
@@ -26,6 +27,7 @@ const command = new CommandManager('confesión', flags)
 	.setLongDescription(
 		'Muestra un Asistente de Configuración de Sistema de Confesiones.',
 	)
+	.setPermissions(perms)
 	.setExecution(async (request) => {
 		let query = { guildId: request.guildId };
 		const confSystem = await ConfessionSystems.findOne(query);
@@ -81,7 +83,7 @@ const command = new CommandManager('confesión', flags)
 		});
 	}).setButtonResponse(async function installSystem(interaction) {
 		const rows = [
-			new ActionRowBuilder().addComponents(
+			makeTextInputRowBuilder().addComponents(
 				new TextInputBuilder()
 					.setCustomId('inputConfessionalChannel')
 					.setLabel('Canal de confesionario')
@@ -91,7 +93,7 @@ const command = new CommandManager('confesión', flags)
 					.setStyle(TextInputStyle.Short)
 					.setRequired(true),
 			),
-			new ActionRowBuilder().addComponents(
+			makeTextInputRowBuilder().addComponents(
 				new TextInputBuilder()
 					.setCustomId('inputConfessionsChannel')
 					.setLabel('Canal de confesiones')
@@ -101,7 +103,7 @@ const command = new CommandManager('confesión', flags)
 					.setStyle(TextInputStyle.Short)
 					.setRequired(true),
 			),
-			new ActionRowBuilder().addComponents(
+			makeTextInputRowBuilder().addComponents(
 				new TextInputBuilder()
 					.setCustomId('inputLogChannel')
 					.setLabel('Canal de auditoría de confesiones')
@@ -160,13 +162,13 @@ const command = new CommandManager('confesión', flags)
 			);
 
 		const rows = [
-			new ActionRowBuilder().addComponents([
+			makeButtonRowBuilder().addComponents([
 				new ButtonBuilder()
 					.setCustomId(`confesión_confess_anon`)
 					.setLabel('Confesar (anónimo)')
 					.setStyle(ButtonStyle.Primary),
 			]),
-			new ActionRowBuilder().addComponents([
+			makeButtonRowBuilder().addComponents([
 				new ButtonBuilder()
 					.setCustomId(`confesión_confess`)
 					.setLabel('Confesar (+ nombre)')
@@ -181,7 +183,7 @@ const command = new CommandManager('confesión', flags)
 
 		return interaction.update({ content: '✅ Sistema configurado exitosamente', embeds: [], components: [] });
 	}).setButtonResponse(async function confess(interaction, anonymous) {
-		const row = new ActionRowBuilder().addComponents(
+		const row = makeTextInputRowBuilder().addComponents(
 			new TextInputBuilder()
 				.setCustomId('inputConfession')
 				.setLabel(`Confesión (${anonymous ? 'anónima': 'con nombre'})`)
@@ -198,12 +200,12 @@ const command = new CommandManager('confesión', flags)
 		return interaction.showModal(modal);
 	}).setModalResponse(async function confessionFilled(interaction, anonymous) {
 		const data = await getConfessionSystemAndChannels(interaction);
-		if(!data.success)
+		if(data.success === false)
 			return interaction.reply({ content: data.message, ephemeral: true });
 
 		const { confSystem, logChannel } = data;
 
-		anonymous = anonymous.length > 0;
+		const isAnonymous = anonymous.length > 0;
 		const userId = compressId(interaction.user.id);
 		const confId = compressId(interaction.id);
 		const confContent = interaction.fields.getTextInputValue('inputConfession');
@@ -211,7 +213,7 @@ const command = new CommandManager('confesión', flags)
 			id: confId,
 			channelId: confSystem.confessionsChannelId,
 			content: confContent,
-			anonymous,
+			anonymous: isAnonymous,
 		});
 		confSystem.pending[confSystem.pending.length] = confId;
 		confSystem.markModified('pending');
@@ -221,10 +223,10 @@ const command = new CommandManager('confesión', flags)
 			.setColor(0x8334eb)
 			.addFields(
 				{ name: 'Confesado', value: `${confContent}` },
-				{ name: '¿Anónimo?', value: anonymous ? 'Sí' : 'No' },
+				{ name: '¿Anónimo?', value: isAnonymous ? 'Sí' : 'No' },
 			);
 
-		const row = new ActionRowBuilder().addComponents([
+		const row = makeButtonRowBuilder().addComponents([
 			new ButtonBuilder()
 				.setCustomId(`confesión_acceptConfession_${confId}_${userId}`)
 				.setEmoji('1163687887120891955')
@@ -247,8 +249,7 @@ const command = new CommandManager('confesión', flags)
 
 		await Promise.all([
 			logChannel.send({ embeds: [embed], components: [row] }),
-			confSystem.save(),
-			pendingConf.save(),
+			confSystem.save().then(_ => pendingConf.save()),
 		]);
 
 		const confirmationEmbed = new EmbedBuilder()
@@ -258,7 +259,7 @@ const command = new CommandManager('confesión', flags)
 			.addFields(
 				{
 					name: 'Proceso de Aprobación',
-					value: `Tu confesión será accesible públicamente luego de ser aprobada${anonymous ? '' : ' y recién entonces se revelará tu nombre'}`,
+					value: `Tu confesión será accesible públicamente luego de ser aprobada${isAnonymous ? '' : ' y recién entonces se revelará tu nombre'}`,
 				},
 				{
 					name: 'Medidas Protectivas',
@@ -275,16 +276,16 @@ const command = new CommandManager('confesión', flags)
 		});
 	}).setButtonResponse(async function acceptConfession(interaction, confId, userId) {
 		const data = await getConfessionSystemAndChannels(interaction);
-		if(!data.success)
+		if(data.success === false)
 			return interaction.reply({ content: data.message, ephemeral: true });
 
 		const { confSystem, confChannel } = data;
 
 		const confession = await PendingConfessions.findOne({ id: confId });
 		if(!confession)
-			return interaction.reply({ content: '⚠️ La confesión indicada acaba de ser atendida', ephemeral: true });
+			return interaction.update({ content: '⚠️ La confesión ya se atendió, pero no se registró aquí por un error externo', components: [] });
 
-		const embed = new EmbedBuilder()
+		const confessionEmbed = new EmbedBuilder()
 			.setColor(0x8334eb)
 			.addFields(
 				{ name: 'Confesión', value: confession.content },
@@ -294,10 +295,10 @@ const command = new CommandManager('confesión', flags)
 			const gmid = decompressId(userId);
 			const miembro = interaction.guild.members.cache.get(gmid);
 			if(miembro)
-				embed.setAuthor({ name: miembro.displayName ?? '[!] No se pudo resolver el autor', iconURL: miembro.displayAvatarURL({ size: 256 }) });
+				confessionEmbed.setAuthor({ name: miembro.displayName ?? '[!] No se pudo resolver el autor', iconURL: miembro.displayAvatarURL({ size: 256 }) });
 		}
 		
-		await confChannel.send({ embeds: [embed] });
+		await confChannel.send({ embeds: [confessionEmbed] });
 
 		confSystem.pending = confSystem.pending.filter(p => p !== confId);
 		confSystem.markModified('pending');
@@ -307,24 +308,20 @@ const command = new CommandManager('confesión', flags)
 		]);
 
 		const confirmationEmbed = new EmbedBuilder()
-			.setAuthor({ name: 'Confesión aceptada' })
-			.setColor(0x8334eb)
-			.setDescription('Esta confesión fue aceptada. Aparecerá en el foro de confesiones configurado');
+			.setColor(0x32e698)
+			.setDescription(`Confesión aceptada por ${interaction.user}. Aparecerá en ${confChannel}`);
 
-		return Promise.all([
-			interaction.message.delete().catch(_ => undefined),
-			interaction.reply({ embeds: [confirmationEmbed], ephemeral: true }),
-		]);
+		return interaction.update({ embeds: [confirmationEmbed], components: [] });
 	}).setButtonResponse(async function rejectConfession(interaction, confId) {
 		const data = await getConfessionSystemAndChannels(interaction);
-		if(!data.success)
+		if(data.success === false)
 			return interaction.reply({ content: data.message, ephemeral: true });
 
 		const { confSystem } = data;
 
 		const index = confSystem.pending.indexOf(confId);
 		if(index < 0)
-			return interaction.reply({ content: '⚠️ La confesión indicada no está pendiente', ephemeral: true });
+			return interaction.update({ content: '⚠️ Esta confesión ya no está pendiente', components: [] });
 		
 		confSystem.pending.splice(index, 1);
 		confSystem.markModified('pending');
@@ -333,25 +330,21 @@ const command = new CommandManager('confesión', flags)
 			PendingConfessions.findOneAndDelete({ id: confId }),
 		]);
 
-		const embed = new EmbedBuilder()
-			.setAuthor({ name: 'Confesión rechazada' })
-			.setColor(0x8334eb)
-			.setDescription('Esta confesión fue rechazada. No se le notificará al autor');
+		const confirmationEmbed = new EmbedBuilder()
+			.setColor(0xeb345c)
+			.setDescription(`Confesión rechazada por ${interaction.user}. No se le notificará al autor`);
 
-		return Promise.all([
-			interaction.message.delete().catch(_ => undefined),
-			interaction.reply({ embeds: [embed], ephemeral: true }),
-		]);
+		return interaction.update({ embeds: [confirmationEmbed], components: [] });
 	}).setButtonResponse(async function timeoutConfessant(interaction, confId, userId) {
 		const data = await getConfessionSystemAndChannels(interaction);
-		if(!data.success)
+		if(data.success === false)
 			return interaction.reply({ content: data.message, ephemeral: true });
 
 		const { confSystem } = data;
 
 		const index = confSystem.pending.indexOf(confId);
 		if(index < 0)
-			return interaction.reply({ content: '⚠️ La confesión indicada no está pendiente', ephemeral: true });
+			return interaction.update({ content: '⚠️ La confesión ya se atendió, pero no se registró aquí por un error externo', components: [] });
 		
 		confSystem.pending.splice(index, 1);
 		confSystem.markModified('pending');
@@ -362,22 +355,22 @@ const command = new CommandManager('confesión', flags)
 
 		const gmid = decompressId(userId);
 		const miembro = interaction.guild.members.cache.get(gmid);
-		let embed;
+		let confirmationEmbed;
 		try {
 			if(miembro)
-				miembro.timeout(120_000, `Aislado por ${interaction.user.username} por confesión malintencionada`);
+				await miembro.timeout(120_000, `Aislado por ${interaction.user.username} por confesión malintencionada`);
 			else
 				throw new ReferenceError('No se pudo encontrar el autor de esta confesión');
 
-			embed = new EmbedBuilder()
+			confirmationEmbed = new EmbedBuilder()
 				.setAuthor({ name: 'Confesante aislado' })
 				.setColor(Colors.Orange)
-				.setDescription('Esta confesión fue rechazada y su confesante fue aislado');
+				.setDescription(`Esta confesión fue rechazada por ${interaction.user} y su confesante fue aislado`);
 		} catch(err) {
-			embed = new EmbedBuilder()
+			confirmationEmbed = new EmbedBuilder()
 				.setAuthor({ name: 'Confesión rechazada con errores' })
 				.setColor(Colors.Red)
-				.setDescription(`Esta confesión fue rechazada, pero el confesante ${miembro} no pudo ser aislado`)
+				.setDescription(`Confesión rechazada por ${interaction.user}. Se intentó aislar al confesante (${miembro}), pero algo lo impidió`)
 				.addFields(
 					{ name: 'Error', value: `\`\`\`\n${err.message}\n\`\`\`` || '_No hay un mensaje de error disponible_' },
 				);
@@ -386,20 +379,17 @@ const command = new CommandManager('confesión', flags)
 				auditError(err, { request: interaction, brief: 'Ha ocurrido un error al aislar un confesante', ping: false });
 		}
 
-		return Promise.all([
-			interaction.message.delete().catch(_ => undefined),
-			interaction.reply({ embeds: [embed], ephemeral: true }),
-		]);
+		return interaction.update({ embeds: [confirmationEmbed], components: [] });
 	}).setButtonResponse(async function banConfessant(interaction, confId, userId) {
 		const data = await getConfessionSystemAndChannels(interaction);
-		if(!data.success)
+		if(data.success === false)
 			return interaction.reply({ content: data.message, ephemeral: true });
 
 		const { confSystem } = data;
 
 		const index = confSystem.pending.indexOf(confId);
 		if(index < 0)
-			return interaction.reply({ content: '⚠️ La confesión indicada no está pendiente', ephemeral: true });
+			return interaction.update({ content: '⚠️ La confesión ya se atendió, pero no se registró aquí por un error externo', components: [] });
 		
 		confSystem.pending.splice(index, 1);
 		confSystem.markModified('pending');
@@ -410,22 +400,22 @@ const command = new CommandManager('confesión', flags)
 
 		const gmid = decompressId(userId);
 		const miembro = interaction.guild.members.cache.get(gmid);
-		let embed;
+		let confirmationEmbed;
 		try {
 			if(miembro)
-				miembro.ban({ reason: `Banneado por ${interaction.user.username} por confesión malintencionada` });
+				await miembro.ban({ reason: `Banneado por ${interaction.user.username} por confesión malintencionada` });
 			else
 				throw new ReferenceError('No se pudo encontrar el autor de esta confesión');
 
-			embed = new EmbedBuilder()
+			confirmationEmbed = new EmbedBuilder()
 				.setAuthor({ name: 'Confesante banneado' })
 				.setColor(Colors.Orange)
-				.setDescription('Esta confesión fue rechazada y su confesante fue banneado');
+				.setDescription(`Esta confesión fue rechazada por ${interaction.user} y su confesante fue banneado`);
 		} catch(err) {
-			embed = new EmbedBuilder()
+			confirmationEmbed = new EmbedBuilder()
 				.setAuthor({ name: 'Confesión rechazada con errores' })
 				.setColor(Colors.Red)
-				.setDescription(`Esta confesión fue rechazada, pero el confesante ${miembro} no pudo ser banneado`)
+				.setDescription(`Confesión rechazada por ${interaction.user}. Se intentó bannear al confesante (${miembro}), pero algo lo impidió`)
 				.addFields(
 					{ name: 'Error', value: `\`\`\`\n${err.message}\n\`\`\`` || '_No hay un mensaje de error disponible_' },
 				);
@@ -434,10 +424,7 @@ const command = new CommandManager('confesión', flags)
 				auditError(err, { request: interaction, brief: 'Ha ocurrido un error al bannear un confesante', ping: false });
 		}
 
-		return Promise.all([
-			interaction.message.delete().catch(_ => undefined),
-			interaction.reply({ embeds: [embed], ephemeral: true }),
-		]);
+		return interaction.update({ embeds: [confirmationEmbed], components: [] });
 	});
 
 /**
@@ -460,12 +447,10 @@ async function getConfessionSystemAndChannels(interaction) {
 	if(!confSystem)
 		return makeErr('⚠️ No se ha configurado un sistema de confesiones en este server');
 	
-	/**@type {TextChannel}*/
 	const logChannel = interaction.guild.channels.cache.get(confSystem.logChannelId);
 	if(!logChannel || logChannel.type !== ChannelType.GuildText)
 		return makeErr('⚠️ No se encontró un canal de auditoría de confesiones válido');
 
-	/**@type {TextChannel}*/
 	const confChannel = interaction.guild.channels.cache.get(confSystem.confessionsChannelId);
 	if(!confChannel || confChannel.type !== ChannelType.GuildText)
 		return makeErr('⚠️ No se encontró un canal de confesiones válido');

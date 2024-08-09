@@ -1,5 +1,5 @@
 const { randRange } = require('../../func.js');
-const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandTags, CommandManager } = require('../Commons/commands');
 
 const phrases = [
 	'Ahora sí vení que te saco la cresta',
@@ -15,7 +15,7 @@ const phrases = [
 ];
 const tenshiurl = 'https://i.imgur.com/eMyvXiC.png';
 
-const flags = new CommandMetaFlagsManager().add('COMMON');
+const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('rakkidei', flags)
 	.setAliases('rakki', 'tenshi')
 	.setBriefDescription('Comando de trompada de Rakkidei')

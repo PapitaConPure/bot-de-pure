@@ -2,9 +2,10 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, Colors, Moda
 const { compressId, decompressId, shortenText, fetchChannel, toPrecision, improveNumber, clamp } = require('../../func.js');
 const { Translator } = require('../../internationalization.js');
 const { CommandManager } = require('../Commons/cmdBuilder.js');
-const { CommandMetaFlagsManager } = require('../Commons/cmdFlags.js');
-const { CommandOptionsManager } = require('../Commons/cmdOpts.js');
+const { CommandTags } = require('../Commons/cmdTags.js');
+const { CommandOptions } = require('../Commons/cmdOpts.js');
 const Poll = require('../../localdata/models/poll.js');
+const { CommandPermissions } = require('../Commons/cmdPerms.js');
 
 /**
  * @typedef {{ question?: string, answers: Map<string, string>, endTime: number, anon: Boolean }} PollMemory
@@ -293,8 +294,9 @@ async function concludePoll(pollChannel, resultsChannel, pollId) {
 	]);
 }
 
-const options = new CommandOptionsManager();
-const flags = new CommandMetaFlagsManager().add('MOD');
+const perms = new CommandPermissions([ 'ManageGuild', 'ManageChannels', 'ManageRoles', 'ModerateMembers', 'KickMembers', 'BanMembers' ]);
+const options = new CommandOptions();
+const flags = new CommandTags().add('MOD', 'OUTDATED');
 const command = new CommandManager('encuesta', flags)
 	.setAliases(
 		'votación', 'votacion', 'voto',
@@ -308,6 +310,7 @@ const command = new CommandManager('encuesta', flags)
 		'Debido a la naturaleza de las votaciones, no podrás editar ningún aspecto de la encuesta una vez ya esté enviada. Si cometes un error, bórrala y usa el comando nuevamente',
 		'Por defecto, el periodo de votación es un minuto. Puedes cambiarlo en `--horas`, `--minutos` y `--segundos`',
 	)
+	.setPermissions(perms)
 	.setOptions(options)
 	.setExecution(async function(request) {
 		const translator = await Translator.from(request.userId);

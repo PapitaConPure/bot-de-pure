@@ -1,8 +1,8 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const global = require('../../localdata/config.json'); //Variables globales
-const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandTags, CommandManager } = require('../Commons/commands');
 
-const flags = new CommandMetaFlagsManager().add('COMMON');
+const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('sugerir', flags)
 	.setAliases('reportar', 'informar', 's')
 	.setDescription('Para sugerir mejoras sobre Bot de Puré, o reportar un error')

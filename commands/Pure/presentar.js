@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require('discord.js'); //Integrar discord.js
 const { readdirSync } = require('fs'); //Para el contador de comandos
 const { tenshiColor } = require('../../localdata/config.json');
-const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandTags, CommandManager } = require('../Commons/commands');
 
 const embed = new EmbedBuilder()
     .setColor(tenshiColor)
@@ -48,7 +48,7 @@ const embed = new EmbedBuilder()
         },
     );
 
-const flags = new CommandMetaFlagsManager().add('COMMON');
+const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('presentar', flags)
     .setAliases('presentacion', 'presentación', 'hola', 'saludar', 'presentarse', 'puré', 'pure')
     .setDescription('Me presento y digo cositas sobre mí~')

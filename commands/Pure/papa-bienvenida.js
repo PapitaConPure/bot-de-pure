@@ -1,9 +1,9 @@
 const {} = require('discord.js'); //Librería de Discord.js
 const {} = require('../../localdata/config.json'); //Datos globales
 const { dibujarBienvenida } = require('../../func.js'); //Funciones globales
-const { CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandTags, CommandManager } = require('../Commons/commands');
 
-const flags = new CommandMetaFlagsManager().add('PAPA');
+const flags = new CommandTags().add('PAPA');
 const command = new CommandManager('papa-bienvenida', flags)
 	.setAliases('papa-welcome')
 	.setDescription('Para simular una bienvenida.')

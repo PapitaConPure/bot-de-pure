@@ -1,70 +1,14 @@
-const { TuberToken } = require('./commons.js');
-
-/**
- * @readonly
- * @enum {String}
- */
-const TokenTypes = {
-    STATEMENT: 'STATEMENT',
-
-    BLOCK_OPEN:       'BLOCK_OPEN',
-    BLOCK_CLOSE:      'BLOCK_CLOSE',
-    CONDITION_OPEN:   'CONDITION_OPEN',
-    CONDITION_CHANGE: 'CONDITION_CHANGE',
-    WHILE:            'WHILE',
-    DO_OPEN:          'DO_OPEN',
-    DO_CLOSE:         'DO_CLOSE',
-    FOR:              'FOR',
-    IN:               'IN',
-    
-    COMMA:       'COMMA',
-    GROUP_OPEN:  'GROUP_OPEN',
-    GROUP_CLOSE: 'GROUP_CLOSE',
-
-    ASSIGN:      'ASSIGN',
-    EQUALS:      'EQUALS',
-    COMPARE:     'COMPARE',
-    NOT:         'NOT',
-    AND:         'AND',
-    OR:          'OR',
-    COMBINATION: 'COMBINATION',
-    FACTOR:      'FACTOR',
-    POWER:       'POWER',
-    ARROW:       'ARROW',
-    COLON:       'COLON',
-
-    IDENTIFIER:    'IDENTIFIER',
-    NUMBER:        'NUMBER',
-    TEXT:          'TEXT',
-    BOOLEAN:       'BOOLEAN',
-    LIST:          'LIST',
-    INPUT:         'INPUT',
-    GLOSSARY:      'GLOSSARY',
-    EMBED:         'EMBED',
-    NADA:          'NADA',
-    DATA_TYPE:     'DATA_TYPE',
-
-    EOF: 'EOF',
-};
-
-/**
- * Crea un Token con el valor especificado
- * @param {String} type Un string de `TokenTypes` especificando el tipo de Token
- * @param {String} value El valor del Token
- * @returns {TuberToken}
- */
-function createToken(type, value) {
-    return {
-        type,
-        value,
-    };
-}
+const { LexerTokenTypes } = require('./commons.js');
 
 function TuberLexerError(message) {
     const error = new Error(message);
     error.name = 'TuberLexerError';
     return error;
 }
+
+/**
+ * @typedef {(match: RegExpExecArray) => void} RegExpHandler
+ */
 
 /**@class Clase para parsear tokens de PuréScript*/
 class TuberLexer {
@@ -74,11 +18,42 @@ class TuberLexer {
     #stream = '';
 
     /**
+     * Crea un Token con el valor especificado
+     * @param {import('./commons.js').LexerTokenType} type Un string de `TokenTypes` especificando el tipo de Token
+     * @param {*} value El valor del Token
+     * @param {Number} length El valor del Token
+     * @param {Number} [start] El valor del Token
+     * @param {Number} [line] El valor del Token
+     * @returns {import("./commons.js").LexerToken}
+     */
+    createToken(type, value, length = 1, start = this.#column, line = this.#line) {
+        return {
+            type,
+            value,
+            start,
+            end: start + length,
+            line,
+        };
+    }
+
+    get #lineString () {
+        return this.#stream.split('\n')[this.#line - 1];
+    }
+
+    /**
      * El caracter en la posición actual del cursor
      * @returns {String}
      */
     get #current() {
         return this.#stream.charAt(this.#cursor);
+    }
+
+    /**
+     * El caracter en la anterior posición del cursor
+     * @returns {String}
+     */
+    get #previous() {
+        return this.#stream.charAt(this.#cursor - 1);
     }
 
     /**
@@ -115,14 +90,11 @@ class TuberLexer {
     #processSimilar(match) {
         let matched = '';
 
-        if(typeof match === 'string') {
-            match = {
-                value: match,
-                test: (str) => match.value === str,
-            };
-        }
+        const testFn = (typeof match === 'string')
+            ? ((/**@type {string} */ str) => match === str)
+            : ((/**@type {string}*/ str) => match.test(str));
 
-        while(match.test(this.#current) && this.#cursor < this.#stream.length) {
+        while(this.#cursor < this.#stream.length && testFn(this.#current)) {
             matched += this.#current;
             this.#augmentCursor();
         }
@@ -131,35 +103,43 @@ class TuberLexer {
         return matched;
     }
 
+    get #remainder() {
+        return this.#stream.slice(this.#cursor);
+    }
+
+    /**
+     * @typedef {Object} ProcessOptions
+     * @property {Boolean} [includeMatches]
+     * @property {Boolean} [checkFirst]
+     * @property {String} [escapeCharacter]
+     */
+
     /**
      * Procesa caracteres hasta que se encuentra el caracter buscado.
      * Devuelve todos los caracteres procesados
      * @param {RegExp | String} match El caracter a buscar
-     * @param {{ includeMatches: Boolean, checkFirst: Boolean, escapeCharacter: String }} processOptions Opciones de procesado
+     * @param {ProcessOptions} [processOptions] Opciones de procesado
      */
     #processUntil(match, processOptions = {}) {
         processOptions.includeMatches ??= false;
         processOptions.checkFirst ??= false;
         processOptions.escapeCharacter ??= '\\';
+
         const { includeMatches, checkFirst, escapeCharacter } = processOptions;
 
         let matched = '';
 
-        if(typeof match === 'string') {
-            match = {
-                value: match,
-                test: (str) => match.value === str,
-            };
-        }
+        const testFn = (typeof match === 'string')
+            ? ((/** @type {string} */ str) => match === str)
+            : match.test;
 
         if(!checkFirst) {
             matched += this.#current;
             this.#augmentCursor();
         }
 
-        while(!match.test(this.#current) && this.#cursor < this.#stream.length) {
+        while(!testFn(this.#current) && this.#cursor < this.#stream.length) {
             if(this.#current === escapeCharacter) {
-                // console.log(this.#current);
                 this.#augmentCursor();
                 switch(this.#current) {
                 case '\\':
@@ -190,7 +170,7 @@ class TuberLexer {
     /**
      * Procesa uno o más caracteres y devuelve un token con los mismos
      * Si el caracter es ignorable, se devuelve `undefined`
-     * @returns {TuberToken | undefined}
+     * @returns {import("./commons.js").LexerToken | undefined}
      */
     #processCharacters() {
         if(/[\s;]/.test(this.#current)) {
@@ -201,82 +181,128 @@ class TuberLexer {
             return;
         }
 
+        if(this.#current === '!')
+            return this.createToken(LexerTokenTypes.Not, 'no');
+
+        if(this.#current === '=') {
+            if(this.#next === '=' || this.#previous === '!') {
+                this.#augmentCursor();
+                return this.createToken(LexerTokenTypes.Equals, 'es');
+            }
+
+            if(this.#previous === '<')
+                return this.createToken(LexerTokenTypes.Compare, 'excede');
+
+            if(this.#previous === '>')
+                return this.createToken(LexerTokenTypes.Compare, 'precede');
+
+            return this.createToken(LexerTokenTypes.Assign, 'con');
+        }
+
+        if(this.#current === '~' && (this.#previous === '!' || this.#next === '~'))
+            return this.createToken(LexerTokenTypes.Equals, 'parece');
+        
+        if(this.#current === '<') {
+            if(this.#next === '=')
+                return this.createToken(LexerTokenTypes.Not, 'no');
+            else
+                return this.createToken(LexerTokenTypes.Compare, 'precede');
+        }
+        
+        if(this.#current === '>'){
+            if(this.#next === '=')
+                return this.createToken(LexerTokenTypes.Not, 'no');
+            else
+                return this.createToken(LexerTokenTypes.Compare, 'excede');
+        }
+
+        if(this.#current === '&' && this.#next === '&')
+            return this.createToken(LexerTokenTypes.And, 'y');
+
+        if(this.#current === '|' && this.#next === '|')
+            return this.createToken(LexerTokenTypes.And, 'y');
+
         const symbol = this.#current.match(/[+\-*/^%]/)?.[0];
         if(symbol) {
             let tokenType;
             if(symbol === '-') {
                 if(this.#next === '>') {
                     this.#augmentCursor();
-                    return createToken(TokenTypes.ARROW, '->');
+                    return this.createToken(LexerTokenTypes.Arrow, '->', 2);
                 }
                 
-                return createToken(TokenTypes.COMBINATION, '-');
+                return this.createToken(LexerTokenTypes.Combination, '-');
             }
-            else if(symbol == '+') tokenType = TokenTypes.COMBINATION;
-            else if('*/%'.includes(symbol)) tokenType = TokenTypes.FACTOR;
-            else if('^'.includes(symbol)) tokenType = TokenTypes.POWER;
-            return createToken(tokenType, symbol);
+            else if(symbol == '+') tokenType = LexerTokenTypes.Combination;
+            else if('*/%'.includes(symbol)) tokenType = LexerTokenTypes.Factor;
+            else if('^'.includes(symbol)) tokenType = LexerTokenTypes.Power;
+            return this.createToken(tokenType, symbol);
         }
 
         if('()'.includes(this.#current)) {
-            const tokenType = this.#current === '(' ? TokenTypes.GROUP_OPEN : TokenTypes.GROUP_CLOSE;
-            return createToken(tokenType, this.#current);
+            const tokenType = this.#current === '(' ? LexerTokenTypes.GroupOpen : LexerTokenTypes.GroupClose;
+            return this.createToken(tokenType, this.#current);
         }
 
         if(/[\d\.]/.test(this.#current)) {
             const numberString = this.#processSimilar(/[\d\.]/);
-            const numberValue = parseFloat(numberString);
+            const numberValue = +numberString;
 
             if(isNaN(numberValue))
                 throw new Error(`Número inválido en posición ${this.#cursor}: ${this.#current}`);
 
-            return createToken(TokenTypes.NUMBER, numberValue);
+            return this.createToken(LexerTokenTypes.Number, numberValue, numberString.length);
         }
         
         if(/[\wÁ-öø-ÿ]/.test(this.#current)) {
+            const start = this.#column;
             const rawWord = this.#processSimilar(/[\wÁ-öø-ÿ]/);
             const word = rawWord.toLowerCase().normalize('NFD').replace(/([aeiou])\u0301/gi, '$1');
 
             switch(word) {
             case 'con':
-                return createToken(TokenTypes.ASSIGN, 'con');
+                return this.createToken(LexerTokenTypes.Assign, 'con', word.length, start);
             case 'en':
-                return createToken(TokenTypes.IN, 'en');
+                return this.createToken(LexerTokenTypes.In, 'en', word.length, start);
             case 'no':
-                return createToken(TokenTypes.NOT, 'no');
+                return this.createToken(LexerTokenTypes.Not, 'no', word.length, start);
             case 'falso':
-                return createToken(TokenTypes.BOOLEAN, false);
+                return this.createToken(LexerTokenTypes.Boolean, false, word.length, start);
             case 'verdadero':
-                return createToken(TokenTypes.BOOLEAN, true);
+                return this.createToken(LexerTokenTypes.Boolean, true, word.length, start);
             case 'y':
-                return createToken(TokenTypes.AND, 'y');
+                return this.createToken(LexerTokenTypes.And, 'y', word.length, start);
             case 'o':
-                return createToken(TokenTypes.OR, 'o');
+                return this.createToken(LexerTokenTypes.Or, 'o', word.length, start);
             case 'es':
-                return createToken(TokenTypes.EQUALS, 'es');
+                return this.createToken(LexerTokenTypes.Equals, 'es', word.length, start);
             case 'parece':
-                return createToken(TokenTypes.EQUALS, 'parece');
+                return this.createToken(LexerTokenTypes.Equals, 'parece', word.length, start);
             case 'precede':
-                return createToken(TokenTypes.COMPARE, 'precede');
+                return this.createToken(LexerTokenTypes.Compare, 'precede', word.length, start);
             case 'excede':
-                return createToken(TokenTypes.COMPARE, 'excede');
+                return this.createToken(LexerTokenTypes.Compare, 'excede', word.length, start);
             case 'bloque':
-                return createToken(TokenTypes.BLOCK_OPEN, 'bloque');
+                return this.createToken(LexerTokenTypes.BlockOpen, 'bloque', word.length, start);
             case 'fin':
-                return createToken(TokenTypes.BLOCK_CLOSE, 'fin');
+                return this.createToken(LexerTokenTypes.BlockClose, 'fin', word.length, start);
             case 'si':
-                return createToken(TokenTypes.CONDITION_OPEN, 'si');
+                return this.createToken(LexerTokenTypes.ConditionOpen, 'si', word.length, start);
             case 'sino':
-                return createToken(TokenTypes.CONDITION_CHANGE, 'sino');
+                return this.createToken(LexerTokenTypes.ConditionChange, 'sino', word.length, start);
             case 'mientras':
-                return createToken(TokenTypes.WHILE, 'mientras');
+                return this.createToken(LexerTokenTypes.While, 'mientras', word.length, start);
             case 'hacer':
-                return createToken(TokenTypes.DO_OPEN, 'hacer');
+                return this.createToken(LexerTokenTypes.DoOpen, 'hacer', word.length, start);
             case 'yseguir':
-                return createToken(TokenTypes.DO_CLOSE, 'yseguir');
+                return this.createToken(LexerTokenTypes.DoClose, 'yseguir', word.length, start);
+            case 'repetir':
+                return this.createToken(LexerTokenTypes.Repeat, 'repetir', word.length, start);
+            case 'veces':
+                return this.createToken(LexerTokenTypes.RepeatOpen, 'veces', word.length, start);
             case 'para':
             case 'cada':
-                return createToken(TokenTypes.FOR, word);
+                return this.createToken(LexerTokenTypes.For, word, word.length, start);
             case 'registrar':
             case 'crear':
             case 'guardar':
@@ -287,11 +313,14 @@ class TuberLexer {
             case 'dividir':
             case 'extender':
             case 'ejecutar':
+            case 'usar':
             case 'devolver':
             case 'terminar':
+            case 'parar':
             case 'enviar':
+            case 'decir':
             case 'comentar':
-                return createToken(TokenTypes.STATEMENT, word);
+                return this.createToken(LexerTokenTypes.Statement, word, word.length, start);
             case 'numero':
             case 'texto':
             case 'dupla':
@@ -300,37 +329,43 @@ class TuberLexer {
             case 'marco':
             case 'entrada':
             case 'funcion':
-                return createToken(TokenTypes.DATA_TYPE, word);
+                return this.createToken(LexerTokenTypes.DataType, word, word.length, start);
             case 'nada':
-                return createToken(TokenTypes.NADA, null);
-            // case 'detener':
-            //     this.#cursor = this.#stream.length;
-            //     return;
+                return this.createToken(LexerTokenTypes.Nada, null, word.length, start);
             default:
-                return createToken(TokenTypes.IDENTIFIER, rawWord);
+                return this.createToken(LexerTokenTypes.Identifier, rawWord, rawWord.length, start);
             }
         }
             
         if(this.#current === '"') {
-            let text = this.#processUntil('"');
+            const start = this.#column;
+            const text = this.#processUntil('"');
 
-            return createToken(TokenTypes.TEXT, text);
+            return this.createToken(LexerTokenTypes.Text, text, text.length, start);
         }
 
         if(this.#current === ':')
-            return createToken(TokenTypes.COLON, ':');
+            return this.createToken(LexerTokenTypes.Colon, ':');
 
         if(this.#current === ',')
-            return createToken(TokenTypes.COMMA, ',');
+            return this.createToken(LexerTokenTypes.Comma, ',');
 
-        throw TuberLexerError(`Caracter inválido en línea ${this.#line}, columna ${this.#column} (posición ${this.#cursor + 1}): ${this.#current}`);
+        const errPointerString = ' '.repeat(this.#column - 1)  + '↑'
+
+        throw TuberLexerError([
+            '',
+            this.#lineString,
+            errPointerString,
+            '',
+            `Caracter inválido en línea ${this.#line}, columna ${this.#column}: ${this.#current}`
+        ].join('\n'));
     }
 
     /**
-     * Devuelve un arreglo de {@link TuberToken}s según el string de PuréScript ingresado.
+     * Devuelve un arreglo de {@link LexerToken}s según el string de PuréScript ingresado.
      * Si el string no es PuréScript válido, se devuelve un error
      * @param {String} input El string de PuréScript
-     * @returns {Array<TuberToken>}
+     * @returns {Array<import("./commons.js").LexerToken>}
      */
     tokenize(input) {
         if(Array.isArray(input)) {
@@ -343,7 +378,7 @@ class TuberLexer {
         this.#line = 1;
         this.#column = 1;
 
-        /**@type {Array<TuberToken>}*/
+        /**@type {Array<import("./commons.js").LexerToken>}*/
         const tokens = [];
         while(this.#cursor < this.#stream.length) {
             const token = this.#processCharacters();
@@ -354,13 +389,12 @@ class TuberLexer {
             this.#augmentCursor();
         }
         
-        tokens.push(createToken(TokenTypes.EOF, 'eof'));
+        tokens.push(this.createToken(LexerTokenTypes.EoF, 'eof'));
 
         return tokens;
     }
 };
 
 module.exports = {
-    TokenTypes,
     TuberLexer,
 };

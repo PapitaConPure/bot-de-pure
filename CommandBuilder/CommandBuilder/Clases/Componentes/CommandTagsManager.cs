@@ -6,7 +6,7 @@ namespace CommandBuilder {
 	public class CommandTagsManager: CommandComponent {
 		private readonly List<CommandTag> flags;
 
-		public CommandTagsManager(): base(9, "CommandMetaFlagsManager", CommandBuilder.ComponentType.CommandTagsManager) {
+		public CommandTagsManager(): base(9, "CommandTags", CommandBuilder.ComponentType.CommandTagsManager) {
 			this.flags = new List<CommandTag>();
 		}
 
@@ -30,23 +30,23 @@ namespace CommandBuilder {
 		}
 
 		/// <summary>
-		/// Genera código para instanciar este CommandMetaFlagsManager en JavaScript, con las MetaFlags indicadas
+		/// Genera código para instanciar este CommandTags en JavaScript, con las MetaFlags indicadas
 		/// </summary>
-		/// <returns>El código JavaScript requerido para instanciar el CommandMetaFlagsManager representado por la instancia</returns>
+		/// <returns>El código JavaScript requerido para instanciar el CommandTags representado por la instancia</returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		public override string Imprimir() {
 			if(this.flags.Count == 0)
 				throw new InvalidOperationException("Se debe especificar al menos una MetaFlag de comando");
 
 			if(this.flags.Count == 1)
-				return $"const flags = new CommandMetaFlagsManager().add('{this.flags[0].ToString().ToUpper()}');";
+				return $"const flags = new CommandTags().add('{this.flags[0].ToString().ToUpper()}');";
 
 			StringBuilder flagsProcesadas = new StringBuilder();
 
 			foreach(CommandTag flag in this.flags)
 				flagsProcesadas.AppendLine($"\t'{flag.ToString().ToUpper()}',");
 
-			return $"const flags = new CommandMetaFlagsManager().add(\n{flagsProcesadas});";
+			return $"const flags = new CommandTags().add(\n{flagsProcesadas});";
 		}
 	}
 }

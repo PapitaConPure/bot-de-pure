@@ -1,17 +1,17 @@
 const UserConfig = require("../../localdata/models/userconfigs");
-const { CommandManager, CommandMetaFlagsManager, CommandOptionsManager } = require("../Commons/commands");
+const { CommandManager, CommandTags, CommandOptions } = require("../Commons/commands");
 const { recacheUser } = require("../../usercache");
 const { peopleid } = require("../../localdata/config.json");
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addParam('usuario', 'USER', 'para especificar el usuario a bannear');
-const flags = new CommandMetaFlagsManager().add('PAPA');
+const flags = new CommandTags().add('PAPA');
 const command = new CommandManager('papa-ban', flags)
 	.setAliases('papa-bannear', 'papa-banear')
 	.setDescription('Para bannear a un usuario de usar a Bot de Puré')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const user = options.in(request).fetchParam(args, 'usuario', true);
+		const user = await options.in(request).fetchParam(args, 'usuario', true);
 
 		if(!user || user.id === peopleid.papita)
 			return request.reply({ content: '⚠️ Usuario inválido' });

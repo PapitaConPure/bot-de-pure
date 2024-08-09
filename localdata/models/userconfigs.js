@@ -5,11 +5,19 @@ const UserConfigSchema = new Mongoose.Schema({
         type: String,
         required: true,
     },
-    prc: { type: Number, default: 0 },
-    lastCultivate: { type: Number, default: 0 },
+    
+    prc: {
+        type: Number,
+        default: 0
+    },
+    lastCultivate: {
+        type: Number,
+        default: 0
+    },
     
     language: {
         type: String,
+        enum: [ 'es', 'en' ],
         default: 'es',
         required: true,
     },
@@ -29,9 +37,29 @@ const UserConfigSchema = new Mongoose.Schema({
         default: [],
         required: true,
     },
-    showLevelUp: { type: Boolean, default: true },
-    collectMessageData: { type: Boolean, default: true },
-    banned: { type: Boolean, default: false },
+    convertPixiv: { type: Boolean, default: true, },
+    twitterPrefix: {
+        type: String,
+        enum: [ '', 'vx', 'fx' ],
+        default: '',
+    },
+    showLevelUp: {
+        type: Boolean,
+        default: true
+    },
+    collectMessageData: {
+        type: Boolean,
+        default: true
+    },
+    banned: {
+        type: Boolean,
+        default: false
+    },
 });
 
-module.exports = Mongoose.model('UserConfig', UserConfigSchema);
+const model = Mongoose.model('UserConfig', UserConfigSchema);
+
+function m() { return new model({}); }
+/**@typedef {ReturnType<(typeof m)>} UserConfigDocument*/
+
+module.exports = model;

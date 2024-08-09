@@ -13,9 +13,9 @@ namespace CommandBuilder {
 			None = 0,
 			CommandManager = 1,
 			CommandTagsManager = 2,
-			CommandOptionsManager = 4,
+			CommandOptions = 4,
 			AllRequired = CommandManager | CommandTagsManager,
-			All = AllRequired | CommandOptionsManager,
+			All = AllRequired | CommandOptions,
 		}
 
 		public CommandBuilder(List<CommandComponent> components) {
@@ -42,7 +42,7 @@ namespace CommandBuilder {
 			if(!this.tipos.HasFlag(ComponentType.CommandManager))
 				throw new NullReferenceException("Se debe definir un CommandManager para construir un archivo de comando");
 			if(!this.tipos.HasFlag(ComponentType.CommandTagsManager))
-				throw new NullReferenceException("Se debe definir un CommandMetaFlagsManager para construir un archivo de comando");
+				throw new NullReferenceException("Se debe definir un CommandTags para construir un archivo de comando");
 
 			this.components.Sort();
 
@@ -53,7 +53,7 @@ namespace CommandBuilder {
 			total.AppendLine("const { p_pure } = require('../../localdata/customization/prefixes.js');");
 			total.AppendLine($"const {{ {string.Join(", ", this.components.Select(c => c.Requiere))} }} = require('../Commons/commands.js');");
 
-			if(this.tipos.HasFlag(ComponentType.CommandOptionsManager)) {
+			if(this.tipos.HasFlag(ComponentType.CommandOptions)) {
 				CommandManager manager = this.components.Find(c => c.Tipo == ComponentType.CommandManager) as CommandManager;
 				manager.UsaOpciones = true;
 			}

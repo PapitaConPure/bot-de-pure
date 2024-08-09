@@ -1,5 +1,5 @@
 const Canvas = require('canvas');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { AttachmentBuilder, GuildMember } = require('discord.js');
 const { improveNumber } = require('../../func');
@@ -53,8 +53,8 @@ const highlights = {
 	],
 };
 
-const flags = new CommandMetaFlagsManager().add('COMMON');
-const options = new CommandOptionsManager()
+const flags = new CommandTags().add('COMMON');
+const options = new CommandOptions()
 	.addParam('juego', 		['TEXT','NUMBER'], 												'para elegir el juego')
 	.addParam('dificultad', 'TEXT', 														'para establecer la dificultad jugada')
 	.addParam('survival', 	{ name: 'calidad', expression: '"clear", "1cc" o "nomiss"' }, 	'para establecer la calidad de supervivencia')

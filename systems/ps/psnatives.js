@@ -1,14 +1,23 @@
 const { TuberScope } = require('./psscope.js');
 const { randRange, fetchUserID, shortenText, rand, fetchMember, fetchChannel, fetchRole, stringHexToNumber } = require('../../func.js');
 const {
+    //@ts-expect-error
     RuntimeValue,
+    //@ts-expect-error
     NumericValue,
+    //@ts-expect-error
     TextValue,
+    //@ts-expect-error
     BooleanValue,
+    //@ts-expect-error
     ListValue,
+    //@ts-expect-error
     GlossaryValue,
+    //@ts-expect-error
     EmbedValue,
+    //@ts-expect-error
     NadaValue,
+    //@ts-expect-error
     NativeFunctionValue,
     makeNumber,
     makeText,
@@ -32,7 +41,7 @@ const { Colors, GuildPremiumTier } = require('discord.js');
 
 //#region Discord
 //#region Colores
-/**@type {Map<String, import('discord.js').ColorResolvable>}*/
+/**@type {Map<String, Number>}*/
 const colors = new Map();
 colors
     .set('colorAleatorio',     Math.floor(Math.random() * 0xfffffe) + 1)
@@ -68,7 +77,7 @@ colors
 //#endregion
 
 /**
- * @param {[ EmbedValue, TextValue, TextValue ]} param0 
+ * @param {[ EmbedValue, TextValue, TextValue, BooleanValue ]} param0 
  * @param {CurrentStatement} currentStatement
  */
 function marcoAgregarCampo([marco, nombre, valor, alineado], currentStatement) {
@@ -233,10 +242,10 @@ function createDiscordMember(member) {
 }
 
 /**
- * @param {import('discord.js').GuildChannel | import('discord.js').TextChannel | import('discord.js').VoiceChannel} channel 
+ * @param {import('discord.js').GuildBasedChannel} channel 
  */
 function createDiscordChannel(channel) {
-    const isNSFW = channel.nsfw
+    const isNSFW = 'nsfw' in channel;
     /**@type {Map<String, RuntimeValue>}*/
     const canal = new Map();
     canal
@@ -281,9 +290,9 @@ async function createDiscordGuild(guild) {
         .set('ícono',            iconUrl ? makeText(iconUrl) : makeNada())
         .set('descripción',      description ? makeText(description) : makeNada())
         .set('canalSistema',     systemChannel ? makeGlossary(createDiscordChannel(systemChannel)) : makeNada())
-        .set('cartel',           bannerUrl ? makeGlossary(bannerUrl) : makeNada())
+        .set('cartel',           bannerUrl ? makeText(bannerUrl) : makeNada())
         .set('nivel',            makeText(premiumTier))
-        .set('imagenInvitación', splashUrl ? makeGlossary(splashUrl) : makeNada())
+        .set('imagenInvitación', splashUrl ? makeText(splashUrl) : makeNada())
         .set('dueño',            makeGlossary(createDiscordMember(await guild.fetchOwner())));
 
     return servidor;
@@ -295,7 +304,7 @@ async function createDiscordGuild(guild) {
  * @param {import('../../commands/Commons/typings.js').CommandRequest} request
  */
 function buscarMiembro([búsqueda], currentStatement, _, request) {
-    if(isNotValidText(búsqueda))
+    if(búsqueda?.type !== 'Text')
         throw TuberInterpreterError('Se esperaba un texto de búsqueda de miembro como argumento de función', currentStatement);
 
     const miembro = fetchMember(búsqueda.value, request);
@@ -311,11 +320,11 @@ function buscarMiembro([búsqueda], currentStatement, _, request) {
  * @param {import('../../commands/Commons/typings.js').CommandRequest} request
  */
 function buscarCanal([búsqueda], currentStatement, _, request) {
-    if(isNotValidText(búsqueda))
+    if(búsqueda?.type !== 'Text')
         throw TuberInterpreterError('Se esperaba un texto de búsqueda de canal como argumento de función', currentStatement);
 
     const canal = fetchChannel(búsqueda.value, request.guild);
-    if(!canal)
+    if(!canal || !canal)
         return makeNada();
 
     return makeGlossary(createDiscordChannel(canal));
@@ -327,7 +336,7 @@ function buscarCanal([búsqueda], currentStatement, _, request) {
  * @param {import('../../commands/Commons/typings.js').CommandRequest} request
  */
 function buscarRol([búsqueda], currentStatement, _, request) {
-    if(isNotValidText(búsqueda))
+    if(búsqueda?.type !== 'Text')
         throw TuberInterpreterError('Se esperaba un texto de búsqueda de rol como argumento de función', currentStatement);
 
     const rol = fetchRole(búsqueda.value, request.guild);
@@ -350,6 +359,8 @@ function esNúmero([x]) {
     if(x == undefined) throw Error('Se esperaba un argumento en comprobación de tipo');
     return makeBoolean(x?.type === 'Number');
 }
+
+function esNumero([x]) { return esNúmero([x]); }
 
 /**@param {Array<RuntimeValue>} param0*/
 function esTexto([x]) {
@@ -420,7 +431,7 @@ function dado([x, y, z], currentStatement) {
         return makeNumber(rand(x.value));
 
     if(y.type === 'Boolean')
-        return makeNumber(rand(x.value, true) + y.value);
+        return makeNumber(rand(x.value, true) + (+y.value));
     
     if(y.type !== 'Number' || isNotOperable(y.value))
         throw TuberInterpreterError('Se esperaba un Número o Dupla de segundo argumento', currentStatement);
@@ -431,7 +442,7 @@ function dado([x, y, z], currentStatement) {
     if(z.type !== 'Boolean')
         throw TuberInterpreterError('Se esperaba una Dupla de tercer argumento', currentStatement);
 
-    return makeNumber(randRange(x.value, y.value, true) + z.value);
+    return makeNumber(randRange(x.value, y.value, true) + (+z.value));
 }
 
 /**@type {Array<Function>}*/
@@ -439,6 +450,7 @@ const nativeFunctions = [
     dado,
 
     esNúmero,
+    esNumero,
     esTexto,
     esDupla,
     esLista,
@@ -531,7 +543,7 @@ function textoCaracterEn(member, [posición], currentStatement) {
  * @param {CurrentStatement} currentStatement
  */
 function textoPosiciónDe(member, [texto], currentStatement) {
-    if(isNotValidText(texto))
+    if(texto?.type !== 'Text')
         throw TuberInterpreterError('Se esperaba un Texto válido como argumento de búsqueda de sub-texto', currentStatement);
     
     return makeNumber(member.value.indexOf(texto.value));
@@ -543,7 +555,7 @@ function textoPosiciónDe(member, [texto], currentStatement) {
  * @param {CurrentStatement} currentStatement
  */
 function textoÚltimaPosiciónDe(member, [texto], currentStatement) {
-    if(isNotValidText(texto))
+    if(texto?.type !== 'Text')
         throw TuberInterpreterError('Se esperaba un Texto válido como argumento de búsqueda de sub-texto', currentStatement);
     
     return makeNumber(member.value.lastIndexOf(texto.value));
@@ -555,7 +567,7 @@ function textoÚltimaPosiciónDe(member, [texto], currentStatement) {
  * @param {CurrentStatement} currentStatement
  */
 function textoComienzaCon(member, [texto], currentStatement) {
-    if(isNotValidText(texto))
+    if(texto?.type !== 'Text')
         throw TuberInterpreterError('Se esperaba un Texto válido como argumento de comprobación de sub-texto', currentStatement);
     
     return makeBoolean(member.value.startsWith(texto.value));
@@ -567,7 +579,7 @@ function textoComienzaCon(member, [texto], currentStatement) {
  * @param {CurrentStatement} currentStatement
  */
 function textoTerminaCon(member, [texto], currentStatement) {
-    if(isNotValidText(texto))
+    if(texto?.type !== 'Text')
         throw TuberInterpreterError('Se esperaba un Texto válido como argumento de comprobación de sub-texto', currentStatement);
     
     return makeBoolean(member.value.endsWith(texto.value));
@@ -579,7 +591,7 @@ function textoTerminaCon(member, [texto], currentStatement) {
  * @param {CurrentStatement} currentStatement
  */
 function textoIncluye(member, [texto], currentStatement) {
-    if(isNotValidText(texto))
+    if(texto?.type !== 'Text')
         throw TuberInterpreterError('Se esperaba un Texto válido como argumento de comprobación de sub-texto', currentStatement);
     
     return makeBoolean(member.value.includes(texto.value));
@@ -593,7 +605,7 @@ function textoIncluye(member, [texto], currentStatement) {
 function textoRepetir(member, [veces], currentStatement) {
     veces ??= makeNumber(0);
     if(veces == undefined)
-        return makeText();
+        return makeText('');
     if(veces.type !== 'Number' || isNotOperable(veces.value))
         throw TuberInterpreterError('Se esperaba un Número válido como argumento de repeticiones de Texto', currentStatement);
     let pos = Math.floor(veces.value);
@@ -609,7 +621,7 @@ function textoRepetir(member, [veces], currentStatement) {
  * @param {CurrentStatement} currentStatement
  */
 function textoReemplazar(member, [ocurrencia, reemplazo], currentStatement) {
-    if(isNotValidText(ocurrencia))
+    if(ocurrencia?.type !== 'Text')
         throw TuberInterpreterError('Se esperaba un Texto válido como argumento de ocurrencia a reemplazar', currentStatement);
     if(reemplazo?.type !== 'Text')
         throw TuberInterpreterError('Se esperaba un Texto como argumento de reemplazo de ocurrencia', currentStatement);
@@ -623,7 +635,7 @@ function textoReemplazar(member, [ocurrencia, reemplazo], currentStatement) {
  * @param {CurrentStatement} currentStatement
  */
 function textoPartir(member, [separador], currentStatement) {
-    if(isNotValidText(separador))
+    if(separador?.type !== 'Text')
         throw TuberInterpreterError('Se esperaba un Texto válido como argumento separador de Texto', currentStatement);
     
     return makeList(member.value.split(separador.value).map(split => makeText(split)));
@@ -647,7 +659,7 @@ function textoCortar(member, [inicio, fin], currentStatement) {
 
 /**
  * @param {TextValue} member
- * @param {CurrentStatement} currentStatement
+ * @param {CurrentStatement} _
  */
 function textoAMinúsculas(member, _) {    
     return makeText(member.value.toLowerCase());
@@ -655,7 +667,7 @@ function textoAMinúsculas(member, _) {
 
 /**
  * @param {TextValue} member
- * @param {CurrentStatement} currentStatement
+ * @param {CurrentStatement} _
  */
 function textoAMayúsculas(member, _) {    
     return makeText(member.value.toUpperCase());
@@ -663,7 +675,7 @@ function textoAMayúsculas(member, _) {
 
 /**
  * @param {TextValue} member
- * @param {CurrentStatement} currentStatement
+ * @param {CurrentStatement} _
  */
 function textoNormalizar(member, _) {    
     return makeText(member.value.trim());
@@ -671,7 +683,7 @@ function textoNormalizar(member, _) {
 
 /**
  * @param {TextValue} member
- * @param {CurrentStatement} currentStatement
+ * @param {CurrentStatement} _
  */
 function aLista(member, _) {    
     return makeList([ ...member.value ].map(character => makeText(character)));
@@ -682,7 +694,9 @@ const Texto = new Map();
 Texto
     .set('caracterEn',       makeNativeFunction(textoCaracterEn))
     .set('posiciónDe',       makeNativeFunction(textoPosiciónDe))
+    .set('posicionDe',       makeNativeFunction(textoPosiciónDe))
     .set('últimaPosiciónDe', makeNativeFunction(textoÚltimaPosiciónDe))
+    .set('ultimaPosicionDe', makeNativeFunction(textoÚltimaPosiciónDe))
     .set('comienzaCon',      makeNativeFunction(textoComienzaCon))
     .set('terminaCon',       makeNativeFunction(textoTerminaCon))
     .set('incluye',          makeNativeFunction(textoIncluye))
@@ -691,7 +705,9 @@ Texto
     .set('partir',           makeNativeFunction(textoPartir))
     .set('cortar',           makeNativeFunction(textoCortar))
     .set('aMinúsculas',      makeNativeFunction(textoAMinúsculas))
+    .set('aMinusculas',      makeNativeFunction(textoAMinúsculas))
     .set('aMayúsculas',      makeNativeFunction(textoAMayúsculas))
+    .set('aMayusculas',      makeNativeFunction(textoAMayúsculas))
     .set('normalizar',       makeNativeFunction(textoNormalizar))
     .set('aLista',           makeNativeFunction(aLista));
 
@@ -712,7 +728,7 @@ function listaUnir(member, [seperator], currentStatement) {
 }
 /**
  * @param {ListValue} member
- * @returns {TextValue}
+ * @returns {BooleanValue}
  */
 function listaVacía(member, _) {
     return makeBoolean(member.elements.length === 0);
@@ -722,17 +738,18 @@ function listaVacía(member, _) {
  * @param {ListValue} member
  * @param {Array<RuntimeValue>} param1
  * @param {CurrentStatement} currentStatement
- * @returns {TextValue}
+ * @returns {BooleanValue}
  */
 function listaIncluye(member, [ criteria ], currentStatement) {
     if(criteria == undefined)
         throw TuberInterpreterError('Se esperaba un valor como argumento de búsqueda en Lista', currentStatement);
-    return makeBoolean(member.elements.some(el => el.value === criteria.value));
+
+    return makeBoolean(member.elements.some(el => el.equals(criteria)));
 }
 
 /**
  * @param {ListValue} member
- * @param {CurrentStatement} currentStatement
+ * @param {CurrentStatement} _
  */
 function listaInvertir(member, _) {    
     return makeList(member.elements.slice().reverse());
@@ -740,10 +757,10 @@ function listaInvertir(member, _) {
 
 /**
  * @param {ListValue} member
- * @param {CurrentStatement} currentStatement
+ * @param {CurrentStatement} _
  */
 function listaOrdenar(member, _) {
-    return makeList(member.elements.slice().sort((a, b) => (a.value < b.value) ? -1 : 1));
+    return makeList(member.elements.slice().sort((a, b) => a.compareTo(b).value));
 }
 
 /**
@@ -755,13 +772,13 @@ function listaCortar(member, [inicio, fin], currentStatement) {
     if(inicio == undefined || inicio.type !== 'Number' || isNotOperable(inicio.value))
         throw TuberInterpreterError('Se esperaba un Número válido como primer argumento de recorte de Lista', currentStatement);
     if(fin == undefined)
-        return makeText(member.elements.slice(inicio.value));
+        return makeList(member.elements.slice(inicio.value));
     if(fin.type !== 'Number' || isNotOperable(fin.value))
         throw TuberInterpreterError('Se esperaba un Número válido como segundo argumento de recorte de Lista', currentStatement);
     // const pos1 = calculatePositionOffset(inicio.value, member.elements.length);
     // const pos2 = calculatePositionOffset(fin.value,    member.elements.length);
 
-    return makeText(member.elements.slice(inicio.value, fin.value));
+    return makeList(member.elements.slice(inicio.value, fin.value));
 }
 
 /**
@@ -814,7 +831,7 @@ function listaRobarÚltimo(member, _) {
 
 /**
  * @param {ListValue} member
- * @param {CurrentStatement} currentStatement
+ * @param {CurrentStatement} _
  */
 function listaAGlosario(member, _) {
     const glossaryContent = new Map();
@@ -829,14 +846,17 @@ const Lista = new Map();
 Lista
     .set('unir',         makeNativeFunction(listaUnir))
     .set('vacía',        makeNativeFunction(listaVacía))
+    .set('vacia',        makeNativeFunction(listaVacía))
     .set('incluye',      makeNativeFunction(listaIncluye))
     .set('invertir',     makeNativeFunction(listaInvertir))
     .set('ordenar',      makeNativeFunction(listaOrdenar))
     .set('cortar',       makeNativeFunction(listaCortar))
     .set('último',       makeNativeFunction(listaÚltimo))
+    .set('ultimo',       makeNativeFunction(listaÚltimo))
     .set('robar',        makeNativeFunction(listaRobar))
     .set('robarPrimero', makeNativeFunction(listaRobarPrimero))
     .set('robarÚltimo',  makeNativeFunction(listaRobarÚltimo))
+    .set('robarUltimo',  makeNativeFunction(listaRobarÚltimo))
     .set('aGlosario',    makeNativeFunction(listaAGlosario));
 
 /**
@@ -869,15 +889,116 @@ function glosarioValores(member, _, currentStatement) {
 function glosarioPropiedades(member, _, currentStatement) {
     if(member?.type !== 'Glossary')
         throw TuberInterpreterError('Se esperaba un Glosario válido del cuál extraer propiedades', currentStatement);
+
     return makeList(Array.from(member.properties.entries()).map(([ key, value ]) => makeList([ makeText(key), value ])));
 }
 
 /**@type {Map<String, NativeFunctionValue>}*/
 const Glosario = new Map();
 Glosario
-    .set('nombres',      makeNativeFunction(glosarioClaves))
+    .set('nombres',     makeNativeFunction(glosarioClaves))
     .set('valores',     makeNativeFunction(glosarioValores))
     .set('miembros',    makeNativeFunction(glosarioPropiedades));
+
+/**
+ * 
+ * @param {EmbedValue} member 
+ * @param {[ TextValue, TextValue, BooleanValue ]} param1 
+ * @param {CurrentStatement} currentStatement 
+ * @returns {NadaValue}
+ */
+function wrapperMarcoAgregarCampo(member, [ nombre, valor, alineado ], currentStatement) {
+    return marcoAgregarCampo([ member, nombre, valor, alineado ], currentStatement);
+}
+
+/**
+ * 
+ * @param {EmbedValue} member 
+ * @param {Array<TextValue>} param1 
+ * @param {CurrentStatement} currentStatement 
+ * @returns {NadaValue}
+ */
+function wrapperMarcoAsignarAutor(member, [ nombre, autor ], currentStatement) {
+    return marcoAsignarAutor([ member, nombre, autor ], currentStatement);
+}
+
+/**
+ * 
+ * @param {EmbedValue} member 
+ * @param {[ NumericValue | TextValue ]} param1 
+ * @param {CurrentStatement} currentStatement 
+ * @returns {NadaValue}
+ */
+function wrapperMarcoAsignarColor(member, [ color ], currentStatement) {
+    return marcoAsignarColor([ member, color ], currentStatement);
+}
+
+/**
+ * 
+ * @param {EmbedValue} member 
+ * @param {Array<TextValue>} param1 
+ * @param {CurrentStatement} currentStatement 
+ * @returns {NadaValue}
+ */
+function wrapperMarcoAsignarDescripción(member, [ descripción ], currentStatement) {
+    return marcoAsignarDescripción([ member, descripción ], currentStatement);
+} 
+/**
+ * 
+ * @param {EmbedValue} member 
+ * @param {Array<TextValue>} param1 
+ * @param {CurrentStatement} currentStatement 
+ * @returns {NadaValue}
+ */
+function wrapperMarcoAsignarImagen(member, [ imagen ], currentStatement) {
+    return marcoAsignarImagen([ member, imagen ], currentStatement);
+}
+
+/**
+ * 
+ * @param {EmbedValue} member 
+ * @param {Array<TextValue>} param1 
+ * @param {CurrentStatement} currentStatement 
+ * @returns {NadaValue}
+ */
+function wrapperMarcoAsignarMiniatura(member, [ imagen ], currentStatement) {
+    return marcoAsignarMiniatura([ member, imagen ], currentStatement);
+}
+
+/**
+ * 
+ * @param {EmbedValue} member 
+ * @param {Array<TextValue>} param1 
+ * @param {CurrentStatement} currentStatement 
+ * @returns {NadaValue}
+ */
+function wrapperMarcoAsignarPie(member, [ pie, imagen ], currentStatement) {
+    return marcoAsignarPie([ member, pie, imagen ], currentStatement);
+}
+
+/**
+ * 
+ * @param {EmbedValue} member 
+ * @param {Array<TextValue>} param1 
+ * @param {CurrentStatement} currentStatement 
+ * @returns {NadaValue}
+ */
+function wrapperMarcoAsignarTítulo(member, [ título ], currentStatement) {
+    return marcoAsignarTítulo([ member, título ], currentStatement);
+}
+
+const Marco = new Map();
+Marco
+    .set('agregarCampo',       makeNativeFunction(wrapperMarcoAgregarCampo))
+    .set('asignarAutor',       makeNativeFunction(wrapperMarcoAsignarAutor))
+    .set('asignarColor',       makeNativeFunction(wrapperMarcoAsignarColor))
+    .set('asignarDescripción', makeNativeFunction(wrapperMarcoAsignarDescripción))
+    .set('asignarDescripcion', makeNativeFunction(wrapperMarcoAsignarDescripción))
+    .set('asignarImagen',      makeNativeFunction(wrapperMarcoAsignarImagen))
+    .set('asignarMiniatura',   makeNativeFunction(wrapperMarcoAsignarMiniatura))
+    .set('asignarPie',         makeNativeFunction(wrapperMarcoAsignarPie))
+    .set('asignarTítulo',      makeNativeFunction(wrapperMarcoAsignarTítulo))
+    .set('asignarTitulo',      makeNativeFunction(wrapperMarcoAsignarTítulo))
 //#endregion
 
 /**@param {TuberScope} scope*/
@@ -888,6 +1009,7 @@ function declareNatives(scope) {
     scope.assignVariable('Texto',    makeGlossary(Texto));
     scope.assignVariable('Lista',    makeGlossary(Lista));
     scope.assignVariable('Glosario', makeGlossary(Glosario));
+    scope.assignVariable('Marco',    makeGlossary(Marco));
     scope.assignVariable('pi',       makeNumber(Math.PI));
     for(const [traducción, original] of colors)
         scope.assignVariable(traducción, makeNumber(original));
@@ -902,7 +1024,8 @@ function TuberInitializerError(message) {
 /**
  * 
  * @param {TuberScope} scope 
- * @param {import('../../commands/Commons/typings.js').CommandRequest} request 
+ * @param {import('../../commands/Commons/typings.js').ComplexCommandRequest} request 
+ * @param {import('./purescript.js').Tubercle} tuber
  * @param {Array<String>} args 
  */
 async function declareContext(scope, request, tuber, args) {
@@ -915,30 +1038,30 @@ async function declareContext(scope, request, tuber, args) {
         const contentsList = argsList.filter(arg => arg);
         
         tuber.inputs.forEach(input => {
+            //@ts-expect-error
             let arg = input.isAttachment ? attachmentsList.shift() : contentsList.shift();
             if(!arg) throw TuberInitializerError(`Se esperaba una entrada para "${input.name}"`);
-            let makeFunction;
             switch(input.type) {
             case 'Number':
-                makeFunction = makeNumber;
-                arg = parseFloat(arg);
-                if(isNotOperable(arg))
+                if(isNotOperable(+arg))
                     throw TuberInitializerError('Se esperaba un Número válido en entrada de Tubérculo');
+
+                scope.assignVariable(input.name, makeNumber(+arg));
                 break;
             case 'Text':
-                makeFunction = makeText;
+                scope.assignVariable(input.name, makeText(arg));
                 break;
             case 'Boolean':
-                makeFunction = makeBoolean;
                 arg = arg.toLowerCase();
+
                 if(![ 'verdadero', 'falso' ].includes(arg))
                     throw TuberInitializerError('Se esperaba "Verdadero" o "Falso" en entrada de Tubérculo');
-                arg = arg === 'verdadero';
+
+                scope.assignVariable(input.name, makeBoolean(arg === 'verdadero'))
                 break;
             default:
-                makeFunction = makeNada;
+                scope.assignVariable(input.name, makeNada());
             }
-            scope.assignVariable(input.name, makeFunction(arg));
         });
     }
 

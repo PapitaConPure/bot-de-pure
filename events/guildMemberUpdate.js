@@ -40,9 +40,8 @@ function handleError(error, guild, user, errorMessage) {
 }
 
 /**
- * @param {Discord.GuildMember} member 
+ * @param {Discord.GuildMember|Discord.PartialGuildMember} member 
  * @param {Function} fn 
- * @param {String?} errorMessage
  */
 function announceMemberUpdate(member, fn) {
     const { user, guild } = member;

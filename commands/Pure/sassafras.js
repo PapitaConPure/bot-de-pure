@@ -1,6 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { randRange } = require('../../func');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
 const sassadata = {
 	sassamodo:
@@ -62,7 +62,7 @@ const sassadata = {
 					'vJzZ_LkYEb8', 'dQw4w9WgXcQ', 'X-cfWM0BC_4', '7jRnpUKHCTg', 'sC0cvwnG0Ik', '-GeC0kanxPQ', 'fZdBVzSGudA', 'MmwMVBrMRHI', 'ZcJjMnHoIBI', '0tdyU_gW6WE',
 					'li5mXnHyg9w', 'czTksCF6X8Y'
 				],
-				birthday: ['xdCv0TAp4hc?t=3', 'E3tkgU0pQmQ'],
+				birthday: [ 'xdCv0TAp4hc', 'E3tkgU0pQmQ' ],
 				halloween: [
 					'jHg1_AloGEk', 'tgUu8N05N24', 'jLUaYqH-1hw', 'nK8uH34mpnE', '0K_xO8JltXc', 'b677_os3s34', 'R4LlkoVBPFY', 'qcoXUuq1At8', 'G2oq0lVmIwU', 'fkZkN7uSZfk',
 					'I3kGiA3EGP4', 'krD919h-UpE', 'oY9m2sHQwLs', 'cDd_GlynA6A', 'j90KEYE4LkU', '3_puJwNY4gM', 'w7VORG3t2sA', 'HcwyDL3-Qqo', 'yPnCwRGkg1E', 'Fi1WNXgkshk',
@@ -91,8 +91,8 @@ sassadata.recomm.total = (() => {
 	].map(coll => coll.length).reduce((a,b) => a + b);
 })();
 
-const flags = new CommandMetaFlagsManager().add('MEME');
-const options = new CommandOptionsManager()
+const flags = new CommandTags().add('MEME', 'OUTDATED');
+const options = new CommandOptions()
 	.addFlag('sd', ['sassamodo', 'dross'], 'para despertar al demonio interno de Sassa')
 	.addFlag('t', 'total', 'para saber la cantidad total de recomendaciones');
 const command = new CommandManager('sassafras', flags)

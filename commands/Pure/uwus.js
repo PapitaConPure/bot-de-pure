@@ -1,10 +1,10 @@
 const { EmbedBuilder, Collection } = require('discord.js');
 const { paginateRaw } = require('../../func');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
     .addParam('tiempo', 'NUMBER', 'para establecer la duración del evento, en segundos', { optional: true });
-const flags = new CommandMetaFlagsManager().add(
+const flags = new CommandTags().add(
     'MEME',
     'GAME',
     'CHAOS',

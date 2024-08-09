@@ -1,12 +1,24 @@
+#NodeJS
 node_modules
-images
-Command Makefile
+
+#ENVs artificiales
 localenv.json
 remoteenv.json
+
+#Dev
+images
+tests
+
+#Binarios
+Command Makefile
 b4a.exe
 mkf.exe
-Nota.txt
-Git GUI.lnk
-tests
-PS Docs
+*.txt
+
+#PSDocs
+PS Docs/.~lock*
+PS Docs/*.pdf
+PS Docs/*.txt
+
+#VSCode
 .vscode

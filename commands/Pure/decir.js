@@ -1,11 +1,11 @@
 const { serverid } = require('../../localdata/config.json'); //Variables globales
 const { Permissions } = require('discord.js');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require("../Commons/commands");
+const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
     .addParam('mensaje', 'TEXT', 'para especificar qué decir')
     .addFlag(['b', 'd'], ['borrar', 'delete'], 'para borrar el mensaje original');
-const flags = new CommandMetaFlagsManager().add(
+const flags = new CommandTags().add(
     'COMMON',
     'EMOTE',
 );

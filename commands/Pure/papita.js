@@ -1,11 +1,10 @@
 const { randRange, isThread } = require('../../func');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
 const paputa = [
-	'Lechita:tm: uwu :milk:',
 	'Romper al bot <:sagumeBlush:1108315844045455410>',
 	'¿Qué es "Manzanas contra Bananas"? <:mayuwu:1107843515385389128>',
-	'J-j-jueguen Palactis <:kogaBlush:1108605873326141500>',
+	'J-jueguen Palactis <:kogaBlush:1108605873326141500>',
 	'Meguuuu <:aliceHug:1107848230420623361>',
 	'Sagume <:aliceHug:1107848230420623361>',
 	'*KONOSUBA!*',
@@ -13,8 +12,8 @@ const paputa = [
 	'https://i.imgur.com/HxTxjdL.png',
 ];
 
-const flags = new CommandMetaFlagsManager().add('MEME');
-const options = new CommandOptionsManager()
+const flags = new CommandTags().add('MEME');
+const options = new CommandOptions()
 	.addParam('frase', 'TEXT', 'para indicar una frase a patentar', { optional: true });
 const command = new CommandManager('papita', flags)
 	.setAliases(

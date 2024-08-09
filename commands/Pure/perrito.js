@@ -1,7 +1,7 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const global = require('../../localdata/config.json'); //Variables globales
 const { paginate, navigationRows, rand } = require('../../func');
-const { CommandOptionsManager, CommandMetaFlagsManager, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
 const { InteractionType } = require('discord.js');
 
 /**@param {import('discord.js').Interaction} interaction*/
@@ -54,11 +54,11 @@ async function loadPageNumber(request, page) {
 	return request.update(content);
 }
 
-const options = new CommandOptionsManager()
+const options = new CommandOptions()
 	.addParam('perrito', 'TEXT', 'para especificar un perrito a enviar (por nombres identificadores)', { optional: true })
 	.addFlag('ltaeh', [ 'lista', 'todo', 'todos', 'ayuda', 'everything', 'all', 'help' ], 'para mostrar una lista de todos los perritos')
 	.addFlag('bd', ['borrar', 'delete'], 'para borrar el mensaje original');
-const flags = new CommandMetaFlagsManager().add(
+const flags = new CommandTags().add(
 	'MEME',
 	'EMOTE',
 );
@@ -77,7 +77,7 @@ const command = new CommandManager('perrito', flags)
 			return loadPageNumber(request, 0);
 		
 		const emotes = getEmotesList(request);
-		let perrito = options.fetchParam(args, 'perrito');
+		let perrito = CommandOptionSolver.asString(await options.fetchParam(args, 'perrito'));
 
 		if(!perrito)
 			return request.reply({ content: `${emotes[rand(emotes.length)]}` });
