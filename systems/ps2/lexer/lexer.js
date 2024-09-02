@@ -338,6 +338,7 @@ class Lexer {
 
 			let col = lexer.col + 1; //Sumar los "" removidos
 			let line = lexer.line;
+			let rePos = -1;
 
 			for(const c of chars) {
 				if(c === '\n') {
@@ -345,7 +346,7 @@ class Lexer {
 					line++;
 				} else {
 					if(c === '\\') {
-						const rePos = chars.indexOf('\\');
+						rePos = chars.indexOf('\\', rePos + 1);
 						chars.splice(rePos, 1);
 						
 						switch(chars[rePos]) {
@@ -360,12 +361,13 @@ class Lexer {
 							break;
 	
 						case '"': break;
+						case '`': break;
 						case "'": break;
 						case '\\': break;
 	
 						default:
 							const lineString = lexer.source.split(/\r?\n/g)[line - 1];
-							throw lexer.TuberLexerError(`Caracter de escape inválido en literal de Texto: ${rawMatch}`, { col, line, lineString });
+							throw lexer.TuberLexerError(`Caracter de escape inválido en literal de Texto: \`${c}\``, { col, line, lineString });
 						}
 					}
 
