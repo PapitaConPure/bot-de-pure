@@ -227,7 +227,7 @@ Enforzando convenciones que a nadie le importan en el 80~90% de mi código
 Espero que nadie se haya dado cuenta de que tenía un estado que decía "Feliz 2021" en pleno marzo de 2022. Habrá que poner X
 Sabés qué, podría aprovechar que nadie lee estas frases para usar esto como diario
 Antes esta cosa se actualizaba cada una hora, no sé en qué momento bajó tanto
-Acabo de recordar que, cuando metí esto de las frases, eran caritas y se actualizaba cada hora. Como tal, era por puro testeo
+Cuando introduje estas frases, eran caritas y se actualizaba cada hora. Era por puro testeo
 Nunca verifico que estas frases de hecho se vean bien. Podrían perfectamente estar fallando la mitad y yo ni enterado
 Actualizando dependencias para "humor"
 Humor - notas del parche: "¡más abstracto, menos lógico y más!"
@@ -255,7 +255,7 @@ Speaking Spanish
 Escapando de Latinoamérica
 Canalizando Gatos Galleta Arcoíris Espaciales
 "Olympus, I accept this tubercle"
-Siendo (ligeramente) grosero
+Siendo (ligeramente) grosera
 INSPECCIÓN DE SEMILLAS
 Durmiendo (por supuesto que no)
 Durmiendo con los ojos abiertos
@@ -274,7 +274,7 @@ No puedo creer que esto llegó a 250 frases
 Reinstalling "Spanish Language Pack"
 Construyendo el futuro
 Que el click de hoy sea el hacer de mañana
-Socorro, el IntelliSense se volvió loco
+Socorro, el IntelliSense se rompió
 Recorriendo la World Wide web
 PAN, LAN, MAN, WAN
 Encriptando a mi diario 🧙
@@ -397,6 +397,7 @@ Soy técnicamente una aplicación de consola... espera, qué
 There is No Escape
 Comprándole cartitas a Takane
 Riesgo de Lluvia de Balas
+¿Te lo puedes creer? Pueden salir 400 frases aquí mismo
 Nuestra preciada aldea...
 Nuestro preciado servidor...
 Is the Order a Nuke?
@@ -409,3 +410,36 @@ PuréScript Overdose
 ぴえん🥺
 ぱおん🥺
 🥺
+ボットのこと好きすぎ～
+Che
+Quemando la base de datos (tengo frio)
+Tubercular Engineering Enigma
+AdP [BdP] CdP DdP EdP...
+Alzando banderas (de bits)
+Usando la licuadora (renderiza en 3D)
+Bug in C Major
+Puré en Fa Menor
+Debuggeando (en realidad, eso nunca pasó)
+Invocando un PDF de la mismísima nada
+Realizando ataques DDoS por accidente
+Dañando sectores del disco
+Se me cayó una papa en el teclado
+Solo un poco tonta
+Se va a estabilizar
+Rayos Ultrapuré
+『＃あくあ色ぱれっと』
+『For The Win』
+『aqua iro palette』
+『きらきら』
+『uni-birth』
+『あくたんのこと好きすぎ☆ソング』
+『あいわな』
+『回送列車』
+『未だ、青い』
+『カシオペア』
+『君の最推しにしてよ！』
+『エイムに愛されしガール』
+『プリンセス・キャリー』
+『恋愛ストラテジック』
+『キズナトキセキ』
+『＃きみいろプリンセス』
