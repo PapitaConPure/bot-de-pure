@@ -26,7 +26,7 @@ const tiers = [
 	{ n: 2, weight: 0.700, hex: 0x4CAF50, label: 'Raro',         img: '', karl: 'Buenas, soy Karl. Combina estas weás, créeme soy licenciado <:reibu:1107876018171162705> :thumbsup:' },
 	{ n: 3, weight: 0.300, hex: 0x2196F3, label: 'Épico',        img: '', karl: 'Aló, soy Karl. ¿Y esa mamasita? Te traes unos MIDIS muy buenos eh <:reibu:1107876018171162705> :thumbsup:' },
 	{ n: 4, weight: 0.150, hex: 0x9C27B0, label: 'Pachamama',    img: '', karl: 'Mucho gusto, soy Karl. Te traes unas trompetas muy chad la verdad :muscle: <:reibu:1107876018171162705>' },
-	{ n: 5, weight: 0.020, hex: 0xFF9800, label: 'Machu Picchu', img: '', karl: 'Muy buenas tardes, soy Karl. y... QUÉ ES ESO LOCO, TREMENDO MIDI <:reibu:1107876018171162705> :ok_hand:' },
+	{ n: 5, weight: 0.020, hex: 0xFF9800, label: 'Machu Picchu', img: '', karl: 'Muy buenas tardes, soy Karl y... QUÉ ES ESO LOCO, TREMENDO MIDI <:reibu:1107876018171162705> :ok_hand:' },
 	{ n: 6, weight: 0.001, hex: 0xE53935, label: 'Perútensoku',  img: '', karl: 'TAMARE OE, QUE SOY KARL CAUSA. AHORA SÍ ME LAS VAS A PAGAR ZUN :muscle: <:reibu:1107876018171162705> :trumpet:' },
 ];
 
