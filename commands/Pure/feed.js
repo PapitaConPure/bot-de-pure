@@ -5,7 +5,7 @@ const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { auditError } = require('../../systems/others/auditor.js');
 const { CommandTags } = require('../Commons/cmdTags.js');
 const globalConfigs = require('../../localdata/config.json');
-const { Booru } = require('../../systems/booru/boorufetch.js');
+const { Booru, TagTypes } = require('../../systems/booru/boorufetch.js');
 const { CommandManager } = require('../Commons/cmdBuilder.js');
 const { addGuildToFeedUpdateStack } = require('../../systems/booru/boorufeed.js');
 const { Translator } = require('../../internationalization.js');
@@ -26,11 +26,11 @@ const finishButton = (translator) => new ButtonBuilder()
 const safeTags = (_tags = '') => _tags.replace(/\\*\*/g,'\\*').replace(/\\*_/g,'\\_');
 /**
  * @param {import('discord.js').ButtonInteraction} interaction 
- * @returns {Promise<Array<import('discord.js').MessageSelectOptionData>>}
+ * @returns {Promise<Array<import('discord.js').SelectMenuComponentOptionData>>}
  */
 const generateFeedOptions = async (interaction) => {
-	const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-	const feeds = Object.entries(gcfg.feeds).map(([chid, feed]) => {
+	const gcfg = /**@type {import('../../localdata/models/guildconfigs.js').GuildConfigDocument}*/(await GuildConfig.findOne({ guildId: interaction.guild.id }));
+	const feedOptions = Object.entries(gcfg.feeds).map(([chid, feed]) => {
 		const channel = interaction.guild.channels.cache.get(chid);
 		if(!channel) {
 			delete gcfg.feeds[chid];
@@ -44,7 +44,7 @@ const generateFeedOptions = async (interaction) => {
 		});
 	}).filter(feed => feed);
 	gcfg.save();
-	return feeds;
+	return feedOptions;
 }
 /**
  * @param {import('discord.js').Message | import('discord.js').ButtonInteraction} interaction
@@ -896,17 +896,63 @@ const command = new CommandManager('feed', flags)
 		const booru = new Booru(globalConfigs.booruCredentials);
 		try {
 			const post = await booru.fetchPostByUrl(url);
-			const tags = shortenText(`\`\`\`${post.tags.join(' ')}\`\`\``, 1024);
+			const postTags = await booru.fetchPostTags(post);
+
+			const postArtistTags   = postTags
+				.filter(t => t.type === TagTypes.ARTIST)
+				.map(t => t.name);
+			const postCharacterTags = postTags
+				.filter(t => t.type === TagTypes.CHARACTER)
+				.map(t => t.name);
+			const postCopyrightTags = postTags
+				.filter(t => t.type === TagTypes.COPYRIGHT)
+				.map(t => t.name);
+		
+			const otherTagTypes = /**@type {Array<import('../../systems/booru/boorufetch').TagType>}*/([
+				TagTypes.ARTIST,
+				TagTypes.CHARACTER,
+				TagTypes.COPYRIGHT,
+			]);
+			const postOtherTags = postTags
+				.filter(t => !otherTagTypes.includes(t.type))
+				.map(t => t.name);
+
+			/**
+			 * @param {Array<String>} tagNames 
+			 * @param {String} sep 
+			 */
+			const formatTagNameList = (tagNames, sep) => tagNames.join(sep)
+				.replace(/\\/g,'\\\\')
+				.replace(/\*/g,'\\*')
+				.replace(/_/g,'\\_')
+				.replace(/\|/g,'\\|');
+
+			const tagEmoji = guildEmoji('tagswhite', globalConfigs.slots.slot3);
+			const tagsContent = formatTagNameList(postOtherTags, ' ');
+
 			const source = post.source;
 			const tagsEmbed = new EmbedBuilder()
-				.setColor(Colors.Purple)
-				.addFields(
-					{ name: '<:tagswhite:921788204540100608> Tags', value: tags },
-					{
-						name: '<:urlwhite:922669195521568818> ' + translator.getText('feedViewUrlsName'),
-						value: `[<:gelbooru:919398540172750878> **Post**](${url})${ source ? ` [<:heartwhite:969664712604262400> **Fuente**](${source})` : '' }`,
-					},
-				);
+				.setColor(Colors.Purple);
+
+			if(postArtistTags.length > 0) {
+				const artistTagsContent = formatTagNameList(postArtistTags, '\n');
+				tagsEmbed.addFields({ name: `${tagEmoji} Artistas`, value: shortenText(artistTagsContent, 1020), inline: true })
+			}
+			if(postCharacterTags.length > 0) {
+				const characterTagsContent = formatTagNameList(postCharacterTags, '\n');
+				tagsEmbed.addFields({ name: `${tagEmoji} Personajes`, value: shortenText(characterTagsContent, 1020), inline: true })
+			}
+			if(postCopyrightTags.length > 0) {
+				const copyrightTagsContent = formatTagNameList(postCopyrightTags, '\n');
+				tagsEmbed.addFields({ name: `${tagEmoji} Copyright`, value: shortenText(copyrightTagsContent, 1020), inline: true })
+			}
+			tagsEmbed.addFields(
+				{ name: `${tagEmoji} Tags`, value: shortenText(tagsContent, 1020) },
+				{
+					name: '<:urlwhite:922669195521568818> ' + translator.getText('feedViewUrlsName'),
+					value: `[<:gelbooru:919398540172750878> **Post**](${url})${ source ? ` [<:heartwhite:969664712604262400> **Fuente**](${source})` : '' }`,
+				},
+			)
 			const userId = compressId(interaction.user.id);
 			const tagsEditRow = new ActionRowBuilder();
 

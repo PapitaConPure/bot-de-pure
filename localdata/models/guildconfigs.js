@@ -19,8 +19,9 @@ const GuildConfigSchema = new Mongoose.Schema({
 		required: true,
 	},
 
-	/** Feeds de imágenes del servidor. */
+	/**@type {import('../../systems/booru/boorufetch').FeedData} Feeds de imágenes del servidor. */
 	feeds: {
+		//@ts-expect-error
 		type: Object,
 		default: {},
 		required: true,

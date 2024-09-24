@@ -11,14 +11,15 @@ const { paginateRaw, sleep } = require('../../func.js');
 /**@type {Map<Discord.Snowflake, Map<Discord.Snowflake, Array<String>>>}*/
 const feedTagSuscriptionsCache = new Map();
 const feedUpdateInterval = 60e3 * 30;
+const maxFeedDocuments = 32;
 const chunkMax = 5;
-const logMore = false;
+const logMore = true;
 
 /**
  * Discord es ciertamente una aplicación
  * @param {Array<Promise<Discord.Message<true> | void>>} messagesToSend
  */
-async function correctEmbedsAfterSent(messagesToSend, ms = 1000) {
+async function correctEmbedsAfterSent(messagesToSend, ms = 8000) {
     try {
         /**@type {Array<Discord.Message<true>>}*/
         let messages = await Promise.all(messagesToSend);
@@ -39,8 +40,8 @@ async function correctEmbedsAfterSent(messagesToSend, ms = 1000) {
 
         return correctEmbedsAfterSent(messagesToSend, ms * 2);
     } catch(e) {
-        console.error(error);
-        auditError(error, { brief: 'Ocurrió un error al corregir embeds de Feed' });
+        console.error(e);
+        auditError(e, { brief: 'Ocurrió un error al corregir embeds de Feed' });
     }
 }
 
@@ -51,20 +52,18 @@ async function correctEmbedsAfterSent(messagesToSend, ms = 1000) {
 /**
  * @param {Booru} booru El Booru a comprobar
  * @param {Discord.Collection<Discord.Snowflake, Discord.Guild>} guilds Colección de Guilds a procesar
- * @returns {Object} Cantidad de imágenes enviadas
  */
 async function checkFeeds(booru, guilds) {
-    const maxDocuments = 32;
     let promisesCount = { total: 0, feeds: 0 };
     await Promise.all(guilds.map(async guild => {
         promisesCount[guild] = 0;
-        const gcfg = await GuildConfig.findOne({ guildId: guild.id }).catch(console.error);
+        const gcfg = /**@type {import('../../localdata/models/guildconfigs.js').GuildConfigDocument}*/(await GuildConfig.findOne({ guildId: guild.id }).catch(console.error));
         if(!gcfg?.feeds) return;
         await Promise.all(Object.entries(gcfg.feeds).filter(([_, feed]) => !feed.faults || feed.faults < 10).map(/**@param {[String, import('./boorufetch.js').FeedData]}*/ async ([chid, feed]) => {
             //Recolectar últimas imágenes para el Feed
             let fetchedProperly = true;
             /**@type {Array<import('./boorufetch').Post>}*/
-            const response = await booru.search(feed.tags, { limit: maxDocuments })
+            const response = await booru.search(feed.tags, { limit: maxFeedDocuments })
             .catch(error => {
                 console.log(chalk.redBright('Ocurrió un problema mientras se esperaban los resultados de búsqueda de un Feed'));
                 console.log({
@@ -119,11 +118,12 @@ async function checkFeeds(booru, guilds) {
             
             //Comprobar recolectado en busca de imágenes nuevas
             if(logMore) console.log(`Preparándose para enviar imágenes en ${channel.name} ${response.map(post => post.id)}`);
-            /**@type {Array<Promise<Discord.Message<true>>>}*/
+            /**@type {Array<Discord.Message<true>>}*/
             const messagesToSend = [];
-            response.reverse().forEach(post => {
+            await Promise.all(response.reverse().map(async post => {
                 //Revisar si el documento no fue anteriormente enviado por este Feed
-                if(feed.ids.includes(post.id)) return;
+                if(feed.ids.includes(post.id))
+                    return;
                 if(logMore) console.log('feed.ids:', feed.ids, '\npost.id:', post.id);
 
                 //Agregar documento a IDs enviadas
@@ -134,25 +134,23 @@ async function checkFeeds(booru, guilds) {
                 if(logMore) console.log(guild.id, 'gcfg.feeds[chid].ids:', gcfg.feeds[chid].ids);
                 gcfg.markModified('feeds');
                 if(logMore) console.dir({ post });
-                messagesToSend.push(
-                    channel.send(formatBooruPostMessage(post, feed))
-                    .then(async sent => {
-                        await notifyUsers(post, sent, feedSuscriptions);
-                        return sent;
-                    })
-                    .catch(error => {
+                try {
+                    const formatted = await formatBooruPostMessage(booru, post, feed);
+                    const sent = await channel.send(formatted);
+                    await notifyUsers(post, sent, feedSuscriptions);
+                    messagesToSend.push(sent);
+                } catch(error) {
                         console.log(`Ocurrió un error al enviar la imagen de Feed: ${post.source ?? post.id} para ${channel.name}`);
                         console.error(error);
                         auditError(error, { brief: 'Ocurrió un error al enviar una imagen de Feed', details: `\`Post<"${post.source ?? post.id}">\`\n${channel}` });
-                    })
-                );
+                }
                 promisesCount[guild]++;
                 promisesCount.total++;
                 if(logMore) console.log(`EJECUTADO`);
-            });
+            }));
             promisesCount.feeds++;
 
-            correctEmbedsAfterSent(messagesToSend);
+            //correctEmbedsAfterSent(messagesToSend);
         }));
 
         if(logMore) console.log(`GUARDANDO:`, Object.entries(gcfg.feeds).map(([chid, feed]) => `${guild.channels.cache.get(chid).name}: ${feed.ids}`));

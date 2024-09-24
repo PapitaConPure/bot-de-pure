@@ -5,7 +5,7 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Mess
 const { ComplexCommandRequest, CommandArguments } = require('../../commands/Commons/typings');
 const { CommandOptions } = require('../../commands/Commons/cmdOpts');
 const { guildEmoji, shortenText, isThread } = require('../../func');
-const { Post, Booru } = require('./boorufetch');
+const { Post, Booru, TagTypes } = require('./boorufetch');
 const { getBaseTags, getSearchTags, tagMaps } = require('../../localdata/booruprops');
 const globalConfigs = require('../../localdata/config.json');
 const rakki = require('../../commands/Pure/rakkidei');
@@ -13,11 +13,12 @@ const { Translator } = require('../../internationalization');
 
 /**
  * Genera un {@linkcode EmbedBuilder} a base de un {@linkcode Post} de {@linkcode Booru}
+ * @param {Booru} booru
  * @param {Post} post Post de Booru
  * @param {import('./boorufetch').PostFormatData} data Información adicional a mostrar en el Embed. Se puede pasar un feed directamente
- * @returns {MessageCreateOptions}
+ * @returns {Promise<MessageCreateOptions>}
  */
-function formatBooruPostMessage(post, data) {
+async function formatBooruPostMessage(booru, post, data) {
     data ??= {};
     const maxTags = data.maxTags ?? 20;
     //Botón de Post de Gelbooru
@@ -145,14 +146,56 @@ function formatBooruPostMessage(post, data) {
     const postEmbed = new EmbedBuilder()
         .setColor(embedColor)
         .setAuthor({ name: 'Desde Gelbooru', iconURL: data.cornerIcon ?? 'https://i.imgur.com/outZ5Hm.png' });
-    const filteredTags = post.tags.slice(0, maxTags);
-    const tagsTitle = `${guildEmoji('tagswhite', globalConfigs.slots.slot3)} Tags (${filteredTags.length}/${post.tags.length})`;
-    const tagsContent = `*${filteredTags.join(' ')
+
+    //Tags
+    const postTags = await booru.fetchPostTags(post);
+
+    const postArtistTags   = postTags
+        .filter(t => t.type === TagTypes.ARTIST)
+        .map(t => t.name);
+    const postCharacterTags = postTags
+        .filter(t => t.type === TagTypes.CHARACTER)
+        .map(t => t.name);
+    const postCopyrightTags = postTags
+        .filter(t => t.type === TagTypes.COPYRIGHT)
+        .map(t => t.name);
+
+    const otherTypes = /**@type {Array<import('./boorufetch').TagType>}*/([
+        TagTypes.ARTIST,
+        TagTypes.CHARACTER,
+        TagTypes.COPYRIGHT,
+    ]);
+    const postOtherTags = postTags
+        .filter(t => !otherTypes.includes(t.type))
+        .map(t => t.name);
+
+    /**
+     * @param {Array<String>} tagNames 
+     * @param {String} sep 
+     */
+    const formatTagNameList = (tagNames, sep) => tagNames.join(sep)
         .replace(/\\/g,'\\\\')
         .replace(/\*/g,'\\*')
         .replace(/_/g,'\\_')
-        .replace(/\|/g,'\\|')}*`;
+        .replace(/\|/g,'\\|');
 
+    const filteredTags = postOtherTags.slice(0, maxTags);
+    const tagEmoji = guildEmoji('tagswhite', globalConfigs.slots.slot3);
+    const tagsTitle = `${tagEmoji} Tags (${filteredTags.length}/${post.tags.length})`;
+    const tagsContent = formatTagNameList(filteredTags, ' ');
+
+    if(postArtistTags.length > 0) {
+        const artistTagsContent = formatTagNameList(postArtistTags.slice(0, 3), '\n');
+        postEmbed.addFields({ name: `${tagEmoji} Artistas`, value: shortenText(artistTagsContent, 1020), inline: true })
+    }
+    if(postCharacterTags.length > 0) {
+        const characterTagsContent = formatTagNameList(postCharacterTags.slice(0, 3), '\n');
+        postEmbed.addFields({ name: `${tagEmoji} Personajes`, value: shortenText(characterTagsContent, 1020), inline: true })
+    }
+    if(postCopyrightTags.length > 0) {
+        const copyrightTagsContent = formatTagNameList(postCopyrightTags.slice(0, 3), '\n');
+        postEmbed.addFields({ name: `${tagEmoji} Copyright`, value: shortenText(copyrightTagsContent, 1020), inline: true })
+    }
     if(maxTags > 0)
         postEmbed.addFields({ name: tagsTitle, value: `_${shortenText(tagsContent, 1020)}_` });
     if(data.title)
@@ -308,13 +351,13 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
             .slice(0, poolSize);
 
         //Crear presentaciones
-        const messages = posts.map(post => formatBooruPostMessage(post, {
+        const messages = await Promise.all(posts.map(post => formatBooruPostMessage(booru, post, {
             maxTags: 40,
             title: isnsfw ? searchOpt.nsfwtitle : searchOpt.sfwtitle,
             cornerIcon: author.avatarURL({ size: 128 }),
             manageableBy: author.id,
             isNotFeed: true,
-        }));
+        })));
         if(userTags.length)
             // @ts-ignore
             messages[posts.length - 1].embeds[0].addFields({ name: 'Tu búsqueda', value: `:mag_right: *${userTags.trim().replace(/\*/g, '\\*').split(/ +/).join(', ')}*` });

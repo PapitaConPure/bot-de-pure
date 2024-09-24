@@ -4,6 +4,7 @@ const { Routes } = require('discord-api-types/v9');
 const mongoose = require('mongoose');
 const PrefixPair = require('../localdata/models/prefixpair.js');
 const UserConfigs = require('../localdata/models/userconfigs.js');
+const BooruTags = require('../localdata/models/boorutags.js');
 const { Puretable, defaultEmote } = require('../localdata/models/puretable.js');
 const HouraiDB = require('../localdata/models/hourai.js');
 
@@ -21,6 +22,7 @@ const booruApiKey = process.env.BOORU_APIKEY ?? (require(envPath)?.booruapikey);
 const booruUserId = process.env.BOORU_USERID ?? (require(envPath)?.booruuserid);
 
 const { setupGuildFeedUpdateStack, feedTagSuscriptionsCache } = require('../systems/booru/boorufeed.js');
+const { Booru, Tag } = require('../systems/booru/boorufetch.js');
 const { modifyPresence } = require('../presence.js');
 const { auditSystem } = require('../systems/others/auditor.js');
 
@@ -34,6 +36,7 @@ const { initializeWebhookMessageOwners } = require('../systems/agents/discordage
 const logOptions = {
     slash: false,
     prefixes: false,
+    booruTags: true,
     feedSuscriptions: false,
 };
 
@@ -102,17 +105,20 @@ async function onStartup(client) {
     console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
     console.log(chalk.gray('Conectando a Cluster en la nube...'));
     mongoose.set("strictQuery", false);
-
     mongoose.connect(mongoUri, {
         //@ts-expect-error
         useUnifiedTopology: true,
         useNewUrlParser: true,
     });
-    console.log(chalk.gray('Facilitando prefijos'));
-    const [ prefixPairs, userConfigs ] = await Promise.all([
+
+    console.log(chalk.gray('Obteniendo documentos...'));
+    const [ prefixPairs, userConfigs, booruTags ] = await Promise.all([
         PrefixPair.find({}),
         UserConfigs.find({}),
+        BooruTags.find({}),
     ]);
+
+    console.log(chalk.gray('Facilitando prefijos'));
     prefixPairs.forEach(pp => {
         globalConfigs.p_pure[pp.guildId] = {
             raw: pp.pure.raw,
@@ -120,6 +126,10 @@ async function onStartup(client) {
         };
     });
     logOptions.prefixes && console.table(globalConfigs.p_pure);
+
+    console.log(chalk.gray('Preparando Tags de Booru...'));
+    booruTags.forEach(tag => Booru.tagsCache.set(tag.name, new Tag(tag)));
+    logOptions.booruTags && console.table([...Booru.tagsCache.values()].sort((a, b) => a.id - b.id));
 
     console.log(chalk.gray('Preparando Suscripciones de Feeds...'));
     userConfigs.forEach(config => {
