@@ -57,6 +57,7 @@ const TokenKinds = /**@type {const}*/({
 	COMMA: 'Comma',
 	LAMBDA: 'Lambda',
 	TIMES: 'Times',
+	DOT: 'Dot',
 	IN: 'In',
 	FROM: 'From',
 	OPTIONAL: 'Optional',
@@ -144,6 +145,7 @@ TokenKindTranslations
 	.set(TokenKinds.COMMA, 'Operador \`,\`')
 	.set(TokenKinds.LAMBDA, 'Operador Lambda')
 	.set(TokenKinds.TIMES, 'Operador especial \`veces\`')
+	.set(TokenKinds.DOT, 'Operador \`.\`')
 	.set(TokenKinds.IN, 'Operador especial \`en\`')
 	.set(TokenKinds.FROM, 'Operador especial \`desde\`')
 	.set(TokenKinds.OPTIONAL, 'Operador especial \`opcional\`')

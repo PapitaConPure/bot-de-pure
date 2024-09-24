@@ -134,6 +134,8 @@ class Lexer {
 			{ match: /^[A-Za-z_][A-Za-z0-9_]{0,99}/, handler: this.#makeSymbolHandler() },
 
 			{ match: /^(?!_)(([0-9_]+([.][0-9]*)?)|([.][0-9]+))/, handler: this.#makeNumberHandler() },
+			{ match: '.', handler: this.#makeDefaultHandler(TokenKinds.DOT) },
+			
 			{ match: /^"(\\"|[^"])*"/, handler: this.#makeStringHandler() },
 			{ match: /^'(\\'|[^'])*'/, handler: this.#makeStringHandler() },
 
