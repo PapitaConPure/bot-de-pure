@@ -13,7 +13,7 @@ const feedTagSuscriptionsCache = new Map();
 const feedUpdateInterval = 60e3 * 30;
 const maxFeedDocuments = 32;
 const chunkMax = 5;
-const logMore = true;
+const logMore = false;
 
 /**
  * Discord es ciertamente una aplicación
