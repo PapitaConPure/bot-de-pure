@@ -4,7 +4,7 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Mess
 // @ts-ignore
 const { ComplexCommandRequest, CommandArguments } = require('../../commands/Commons/typings');
 const { CommandOptions } = require('../../commands/Commons/cmdOpts');
-const { guildEmoji, shortenText, isThread } = require('../../func');
+const { guildEmoji: gEmo, shortenText, isThread } = require('../../func');
 const { Post, Booru, TagTypes } = require('./boorufetch');
 const { getBaseTags, getSearchTags, tagMaps } = require('../../localdata/booruprops');
 const globalConfigs = require('../../localdata/config.json');
@@ -179,22 +179,25 @@ async function formatBooruPostMessage(booru, post, data) {
         .replace(/_/g,'\\_')
         .replace(/\|/g,'\\|');
 
+    const s3 = globalConfigs.slots.slot3;
     const filteredTags = postOtherTags.slice(0, maxTags);
-    const tagEmoji = guildEmoji('tagswhite', globalConfigs.slots.slot3);
-    const tagsTitle = `${tagEmoji} Tags (${filteredTags.length}/${post.tags.length})`;
+    const tagsTitle = `${gEmo('tagswhite', s3)} Tags (${filteredTags.length}/${post.tags.length})`;
     const tagsContent = formatTagNameList(filteredTags, ' ');
 
     if(postArtistTags.length > 0) {
         const artistTagsContent = formatTagNameList(postArtistTags.slice(0, 3), '\n');
-        postEmbed.addFields({ name: `${tagEmoji} Artistas`, value: shortenText(artistTagsContent, 1020), inline: true })
+        if(artistTagsContent.length > 0)
+            postEmbed.addFields({ name: `${gEmo('pencilwhite', s3)} Artistas`, value: shortenText(artistTagsContent, 1020), inline: true })
     }
     if(postCharacterTags.length > 0) {
         const characterTagsContent = formatTagNameList(postCharacterTags.slice(0, 3), '\n');
-        postEmbed.addFields({ name: `${tagEmoji} Personajes`, value: shortenText(characterTagsContent, 1020), inline: true })
+        if(characterTagsContent.length > 0)
+            postEmbed.addFields({ name: `${gEmo('personwhite', s3)} Personajes`, value: shortenText(characterTagsContent, 1020), inline: true })
     }
     if(postCopyrightTags.length > 0) {
         const copyrightTagsContent = formatTagNameList(postCopyrightTags.slice(0, 3), '\n');
-        postEmbed.addFields({ name: `${tagEmoji} Copyright`, value: shortenText(copyrightTagsContent, 1020), inline: true })
+        if(copyrightTagsContent.length > 0)
+            postEmbed.addFields({ name: `${gEmo('questionwhite', s3)} Copyright`, value: shortenText(copyrightTagsContent, 1020), inline: true })
     }
     if(maxTags > 0)
         postEmbed.addFields({ name: tagsTitle, value: `_${shortenText(tagsContent, 1020)}_` });
