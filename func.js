@@ -435,71 +435,75 @@ module.exports = {
         const { guild, user, displayName } = member;
         const channel = guild.systemChannel;
 
-        //Creación de imagen
-        const canvas = Canvas.createCanvas(1275, 825);
-        const ctx = canvas.getContext('2d');
-
-        const fondo = await Canvas.loadImage(images.announcements.welcome);
-        ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
-
-        //#region Texto
-        //#region Propiedades Básicas de texto
-        const strokeFactor = 0.09;
-        const maxSize = canvas.width * 0.9;
-        const vmargin = 15;
-
-        /**@type {CanvasTextDrawStrokeOptions}*/
-        const defaultStroke = {
-            widthAsFactor: true,
-            width: strokeFactor,
-            color: '#000000',
-        };
-
-        /**@type {CanvasTextDrawFontOptions}*/
-        const defaultFont = {
-            family: 'headline',
-            size: 100,
-            styles: [ 'bold' ],
-        };
-        //#endregion
-
-        //Nombre del miembro
-        module.exports.drawText(ctx, canvas.width / 2, vmargin, `${displayName}`, {
-            area: { halign: 'center', valign: 'top', maxSize },
-            stroke: defaultStroke,
-            font: defaultFont,
-        });
-
-        //Complemento encima del Nombre de Servidor
-        module.exports.drawText(ctx, canvas.width / 2, canvas.height - 105 - vmargin, '¡Bienvenid@ a', {
-            area: { halign: 'center', valign: 'bottom', maxSize },
-            stroke: { ...defaultStroke, width: 56 * strokeFactor },
-            font: { ...defaultFont, size: 56 },
-        });
-        
-        //Nombre de Servidor
-        module.exports.drawText(ctx, canvas.width / 2, canvas.height - vmargin, `${guild.name}!`, {
-            area: { halign: 'center', valign: 'bottom', maxSize },
-            stroke: defaultStroke,
-            font: defaultFont,
-        });
-        //#endregion
-
-        //Foto de perfil
-        await module.exports.drawCircularImage(ctx, user, canvas.width / 2, (canvas.height - 56) / 2, 200, { circleStrokeFactor: strokeFactor });
-        
-        const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'bienvenida.png' });
-
-        const [ peoplecnt ] = await Promise.all([
-            this.calculateRealMemberCount(guild),
-            channel.send({ files: [imagen] }),
-        ]);
-
-        return channel.send({
-            content:
-                `¡Bienvenido al servidor **${displayName}**!\n` +
-                `-# Ahora hay **${peoplecnt}** usuarios en el server.`
-        });
+        try {
+            //Creación de imagen
+            const canvas = Canvas.createCanvas(1275, 825);
+            const ctx = canvas.getContext('2d');
+    
+            const fondo = await Canvas.loadImage(images.announcements.welcome);
+            ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+    
+            //#region Texto
+            //#region Propiedades Básicas de texto
+            const strokeFactor = 0.09;
+            const maxSize = canvas.width * 0.9;
+            const vmargin = 15;
+    
+            /**@type {CanvasTextDrawStrokeOptions}*/
+            const defaultStroke = {
+                widthAsFactor: true,
+                width: strokeFactor,
+                color: '#000000',
+            };
+    
+            /**@type {CanvasTextDrawFontOptions}*/
+            const defaultFont = {
+                family: 'headline',
+                size: 100,
+                styles: [ 'bold' ],
+            };
+            //#endregion
+    
+            //Nombre del miembro
+            module.exports.drawText(ctx, canvas.width / 2, vmargin, `${displayName}`, {
+                area: { halign: 'center', valign: 'top', maxSize },
+                stroke: defaultStroke,
+                font: defaultFont,
+            });
+    
+            //Complemento encima del Nombre de Servidor
+            module.exports.drawText(ctx, canvas.width / 2, canvas.height - 105 - vmargin, '¡Bienvenid@ a', {
+                area: { halign: 'center', valign: 'bottom', maxSize },
+                stroke: { ...defaultStroke, width: 56 * strokeFactor },
+                font: { ...defaultFont, size: 56 },
+            });
+            
+            //Nombre de Servidor
+            module.exports.drawText(ctx, canvas.width / 2, canvas.height - vmargin, `${guild.name}!`, {
+                area: { halign: 'center', valign: 'bottom', maxSize },
+                stroke: defaultStroke,
+                font: defaultFont,
+            });
+            //#endregion
+    
+            //Foto de perfil
+            await module.exports.drawCircularImage(ctx, user, canvas.width / 2, (canvas.height - 56) / 2, 200, { circleStrokeFactor: strokeFactor });
+            
+            const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'bienvenida.png' });
+            const [ peoplecnt ] = await Promise.all([
+                this.calculateRealMemberCount(guild),
+                channel.send({ files: [imagen] }),
+            ]);
+    
+            return channel.send({
+                content:
+                    `¡Bienvenido al servidor **${displayName}**!\n` +
+                    `-# Ahora hay **${peoplecnt}** usuarios en el server.`
+            });
+        } catch(err) {
+            console.log(chalk.redBright.bold('Error de bienvenida genérica'));
+            console.error(err);
+        }
     },
 
     /**
@@ -523,94 +527,96 @@ module.exports = {
         const { guild, user, displayName } = member;
         const channel = guild.systemChannel;
 
-        //Creación de imagen
-        const canvas = Canvas.createCanvas(1366, 768);
-        const ctx = canvas.getContext('2d');
-
-        const fondo = await Canvas.loadImage(global.hourai.images.welcome);
-        ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
-
-        //#region Texto
-        //#region Propiedades Básicas de texto
-        const strokeFactor = 0.09;
-        const maxSize = canvas.width * 0.6;
-        const vmargin = 15;
-
-        /**@type {CanvasTextDrawStrokeOptions}*/
-        const defaultStroke = {
-            widthAsFactor: true,
-            width: strokeFactor,
-            color: '#000000',
-        };
-
-        /**@type {CanvasTextDrawFontOptions}*/
-        const defaultFont = {
-            family: 'headline',
-            size: 100,
-            styles: [ 'bold' ],
-        };
-        //#endregion
-
-        //Nombre del miembro
-        module.exports.drawText(ctx, canvas.width * 0.5, vmargin, `${displayName}`, {
-            area: { halign: 'center', valign: 'top', maxSize },
-            stroke: defaultStroke,
-            font: defaultFont,
-        });
-
-        // ctx.font = 'bold 100px "headline"';
-        // const guildText = `${guild.name}!`;
-        // const xcenterGuild = canvas.width - 15 - ctx.measureText(guildText).width * 0.5;
-        const xcenterGuild = canvas.width * 0.5;
-
-        //Complemento encima del Nombre de Servidor
-        module.exports.drawText(ctx, xcenterGuild, canvas.height - 105 - vmargin, '¡Bienvenid@ a', {
-            area: { halign: 'center', valign: 'bottom', maxSize },
-            stroke: defaultStroke,
-            font: { ...defaultFont, size: 56 },
-        });
-        
-        //Nombre de Servidor
-        module.exports.drawText(ctx, xcenterGuild, canvas.height - vmargin, `${guild.name}!`, {
-            area: { halign: 'center', valign: 'bottom', maxSize },
-            stroke: defaultStroke,
-            font: defaultFont,
-        });
-        //#endregion
-
-        //Foto de perfil
-        await module.exports.drawCircularImage(ctx, user, canvas.width * 0.5, (canvas.height - 56) * 0.5, 200, { circleStrokeFactor: strokeFactor * 0.75 });
-        
-        const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'bienvenida.png' });
-
-        const [ peoplecnt ] = await Promise.all([
-            this.calculateRealMemberCount(guild),
-            channel.send({ files: [imagen] }),
-        ]);
-
-        const toSend = [
-            `Wena po <@${user.id}> conchetumare, como estai.`,
-            'Como tradición, elige un color con el menú de abajo <:mayuwu:1107843515385389128>',
-            '-# Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:1107847991580164106>',
-        ];
-
-        //@ts-expect-error
-        if(saki.configs?.pingBienvenida)
-            toSend.push('<@&1107831054791876694>, vengan a saludar po maricones <:hl:797294230359375912><:miyoi:1107848008005062727><:hr:797294230463840267>');
-
-        toSend.push(`*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:1107880958981587004>`);
-        toSend.push(global.hourai.images.colors);
-
-        saki.save().catch(_ => undefined);
-
-        return channel.send({
-            content: toSend.join('\n'),
-            components: [colorsRow],
-        }).then(sent => {
-            setTimeout(module.exports.askForRole, 1000, member, channel, 3 * 4);
-            console.log('Esperando evento personalizado de Saki Scans en unos minutos...');
-            return sent;
-        });
+        try {
+            //Creación de imagen
+            const canvas = Canvas.createCanvas(1366, 768);
+            const ctx = canvas.getContext('2d');
+    
+            const fondo = await Canvas.loadImage(global.hourai.images.welcome);
+            ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+    
+            //#region Texto
+            //#region Propiedades Básicas de texto
+            const strokeFactor = 0.09;
+            const maxSize = canvas.width * 0.6;
+            const vmargin = 15;
+    
+            /**@type {CanvasTextDrawStrokeOptions}*/
+            const defaultStroke = {
+                widthAsFactor: true,
+                width: strokeFactor,
+                color: '#000000',
+            };
+    
+            /**@type {CanvasTextDrawFontOptions}*/
+            const defaultFont = {
+                family: 'headline',
+                size: 100,
+                styles: [ 'bold' ],
+            };
+            //#endregion
+    
+            //Nombre del miembro
+            module.exports.drawText(ctx, canvas.width * 0.5, vmargin, `${displayName}`, {
+                area: { halign: 'center', valign: 'top', maxSize },
+                stroke: defaultStroke,
+                font: defaultFont,
+            });
+    
+            const xcenterGuild = canvas.width * 0.5;
+    
+            //Complemento encima del Nombre de Servidor
+            module.exports.drawText(ctx, xcenterGuild, canvas.height - 105 - vmargin, '¡Bienvenid@ a', {
+                area: { halign: 'center', valign: 'bottom', maxSize },
+                stroke: defaultStroke,
+                font: { ...defaultFont, size: 56 },
+            });
+            
+            //Nombre de Servidor
+            module.exports.drawText(ctx, xcenterGuild, canvas.height - vmargin, `${guild.name}!`, {
+                area: { halign: 'center', valign: 'bottom', maxSize },
+                stroke: defaultStroke,
+                font: defaultFont,
+            });
+            //#endregion
+    
+            //Foto de perfil
+            await module.exports.drawCircularImage(ctx, user, canvas.width * 0.5, (canvas.height - 56) * 0.5, 200, { circleStrokeFactor: strokeFactor * 0.75 });
+            
+            const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'bienvenida.png' });
+    
+            const [ peoplecnt ] = await Promise.all([
+                this.calculateRealMemberCount(guild),
+                channel.send({ files: [imagen] }),
+            ]);
+    
+            const toSend = [
+                `Wena po <@${user.id}> conchetumare, como estai.`,
+                'Como tradición, elige un color con el menú de abajo <:mayuwu:1107843515385389128>',
+                '-# Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:1107847991580164106>',
+            ];
+    
+            //@ts-expect-error
+            if(saki.configs?.pingBienvenida)
+                toSend.push('<@&1107831054791876694>, vengan a saludar po maricones <:hl:797294230359375912><:miyoi:1107848008005062727><:hr:797294230463840267>');
+    
+            toSend.push(`*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:1107880958981587004>`);
+            toSend.push(global.hourai.images.colors);
+    
+            saki.save().catch(_ => undefined);
+    
+            return channel.send({
+                content: toSend.join('\n'),
+                components: [colorsRow],
+            }).then(sent => {
+                setTimeout(module.exports.askForRole, 1000, member, channel, 3 * 4);
+                console.log('Esperando evento personalizado de Saki Scans en unos minutos...');
+                return sent;
+            });
+        } catch(err) {
+            console.log(chalk.redBright.bold('Error de bienvenida de Saki Scans'));
+            console.error(err);
+        }
     },
 
     /**
@@ -637,61 +643,66 @@ module.exports = {
         canal.sendTyping();
         //#endregion
         
-        //#region Creación de imagen
-        const canvas = Canvas.createCanvas(1500, 900);
-        const ctx = canvas.getContext('2d');
-
-        const fondo = await Canvas.loadImage(images.announcements.farewell);
-        ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
-        //#endregion
-
-        //#region Texto
-        //#region Propiedades de Texto
-        const strokeFactor = 0.09;
-        ctx.fillStyle = '#ffffff';
-        ctx.strokeStyle = '#000000';
-        //#endregion
-
-        //#region Nombre del usuario
-        ctx.textBaseline = 'bottom';
-		ctx.textAlign = 'center';
-        const xcenter = canvas.width / 2;
-        let Texto = `Adiós, ${miembro.displayName}`;
-        let fontSize = 90;
-        ctx.font = `bold ${fontSize}px "headline"`;
-        ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
-        ctx.strokeText(Texto, xcenter, canvas.height - 40);
-        ctx.fillText(Texto, xcenter, canvas.height - 40);
-        //#endregion
-        //#endregion
-
-        await module.exports.drawCircularImage(ctx, miembro.user, canvas.width / 2, 80 + 200, 200, { circleStrokeFactor: strokeFactor });
-
-        //#region Imagen y Mensaje extra
-        const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'despedida.png' });
-        const members = await servidor.members.fetch().catch(_ => servidor.members.cache);
-        const peoplecnt = members.filter(member => !member.user.bot).size;
-        if(servidor.id === global.serverid.saki) {
-            const hourai = await Hourai.findOne() || new Hourai();
-            //@ts-expect-error
-            if(hourai.configs?.despedida == false)
-                return;
-
-            await canal.send({ files: [imagen] });
-            await canal.send({
-                content:
-                    'Nooooo po csm, perdimo otro weón <:meguDerp:1107848004775465032>\n' +
-                    `*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
-            });
-
-            hourai.save().catch(_ => undefined);
-        } else { //Otros servidores
-            await canal.send({ files: [imagen] });
-            await canal.send({ content: `*Ahora hay **${peoplecnt}** usuarios en el server.*`});
+        try {
+            //#region Creación de imagen
+            const canvas = Canvas.createCanvas(1500, 900);
+            const ctx = canvas.getContext('2d');
+    
+            const fondo = await Canvas.loadImage(images.announcements.farewell);
+            ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+            //#endregion
+    
+            //#region Texto
+            //#region Propiedades de Texto
+            const strokeFactor = 0.09;
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#000000';
+            //#endregion
+    
+            //#region Nombre del usuario
+            ctx.textBaseline = 'bottom';
+            ctx.textAlign = 'center';
+            const xcenter = canvas.width / 2;
+            let Texto = `Adiós, ${miembro.displayName}`;
+            let fontSize = 90;
+            ctx.font = `bold ${fontSize}px "headline"`;
+            ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
+            ctx.strokeText(Texto, xcenter, canvas.height - 40);
+            ctx.fillText(Texto, xcenter, canvas.height - 40);
+            //#endregion
+            //#endregion
+    
+            await module.exports.drawCircularImage(ctx, miembro.user, canvas.width / 2, 80 + 200, 200, { circleStrokeFactor: strokeFactor });
+    
+            //#region Imagen y Mensaje extra
+            const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'despedida.png' });
+            const members = await servidor.members.fetch().catch(_ => servidor.members.cache);
+            const peoplecnt = members.filter(member => !member.user.bot).size;
+            if(servidor.id === global.serverid.saki) {
+                const hourai = await Hourai.findOne() || new Hourai();
+                //@ts-expect-error
+                if(hourai.configs?.despedida == false)
+                    return;
+    
+                await canal.send({ files: [imagen] });
+                await canal.send({
+                    content:
+                        'Nooooo po csm, perdimo otro weón <:meguDerp:1107848004775465032>\n' +
+                        `*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
+                });
+    
+                hourai.save().catch(_ => undefined);
+            } else { //Otros servidores
+                await canal.send({ files: [imagen] });
+                await canal.send({ content: `*Ahora hay **${peoplecnt}** usuarios en el server.*`});
+            }
+            
+            //#endregion
+            console.log('Despedida finalizada.');
+        } catch(err) {
+            console.log(chalk.redBright.bold('Error de despedida'));
+            console.error(err);
         }
-        
-        //#endregion
-        console.log('Despedida finalizada.');
     },
     //#endregion
 
