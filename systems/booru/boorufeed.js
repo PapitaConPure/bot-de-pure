@@ -3,7 +3,7 @@ const Discord = require('discord.js');
 const { formatBooruPostMessage, notifyUsers } = require('./boorusend.js');
 const { auditError, auditAction, auditSystem } = require('../others/auditor.js');
 const chalk = require('chalk');
-const { Booru } = require('./boorufetch.js');
+const { Booru, Post } = require('./boorufetch.js');
 const globalConfigs = require('../../localdata/config.json');
 const { paginateRaw, sleep } = require('../../func.js');
 
@@ -17,11 +17,10 @@ const logMore = false;
 
 /**
  * Discord es ciertamente una aplicación
- * @param {Array<Promise<Discord.Message<true> | void>>} messagesToSend
+ * @param {Array<Promise<Discord.Message<true>>>} messagesToSend
  */
 async function correctEmbedsAfterSent(messagesToSend, ms = 8000) {
     try {
-        /**@type {Array<Discord.Message<true>>}*/
         let messages = await Promise.all(messagesToSend);
         messages = messages.filter(message => message);
         if(!messages.length)
@@ -49,6 +48,11 @@ async function correctEmbedsAfterSent(messagesToSend, ms = 8000) {
 
 // }
 
+/**@param {import('./boorufetch.js').FeedData} feed*/
+function feedIsWorking(feed) {
+    return !feed.faults || feed.faults < 10;
+}
+
 /**
  * @param {Booru} booru El Booru a comprobar
  * @param {Discord.Collection<Discord.Snowflake, Discord.Guild>} guilds Colección de Guilds a procesar
@@ -59,10 +63,9 @@ async function checkFeeds(booru, guilds) {
         promisesCount[guild] = 0;
         const gcfg = /**@type {import('../../localdata/models/guildconfigs.js').GuildConfigDocument}*/(await GuildConfig.findOne({ guildId: guild.id }).catch(console.error));
         if(!gcfg?.feeds) return;
-        await Promise.all(Object.entries(gcfg.feeds).filter(([_, feed]) => !feed.faults || feed.faults < 10).map(/**@param {[String, import('./boorufetch.js').FeedData]}*/ async ([chid, feed]) => {
+        await Promise.all(Object.entries(gcfg.feeds).filter(([_, feed]) => feedIsWorking(feed)).map(async ([chid, feed]) => {
             //Recolectar últimas imágenes para el Feed
             let fetchedProperly = true;
-            /**@type {Array<import('./boorufetch').Post>}*/
             const response = await booru.search(feed.tags, { limit: maxFeedDocuments })
             .catch(error => {
                 console.log(chalk.redBright('Ocurrió un problema mientras se esperaban los resultados de búsqueda de un Feed'));
@@ -74,13 +77,12 @@ async function checkFeeds(booru, guilds) {
                 });
                 console.error(error);
                 fetchedProperly = false;
-                return [ 'error' ];
+                return /**@type {Array<Post>}*/([]);
             });
             if(!fetchedProperly) return;
 
             //Prepararse para enviar imágenes
-            /** @type {import('discord.js').TextChannel} */
-            const channel = guild.channels.cache.get(chid);
+            const channel = /**@type {import('discord.js').TextChannel | import('discord.js').ThreadChannel}*/(guild.channels.cache.get(chid));
 
             ///Eliminar Feed si las tags ingresadas no devuelven ninguna imagen
             feed.faults ??= 0;
@@ -172,11 +174,10 @@ async function updateBooruFeeds(guilds) {
     const promisesCount = await checkFeeds(booru, guilds)
     .catch(e => {
         console.error(e);
-        return -1;
+        return { feeds: -1, total: -1 };
     });
 
     const delayMs = Date.now() - startMs;
-    
     setTimeout(updateBooruFeeds, 60e3 * 30 - delayMs, guilds);
     auditAction('Se procesaron Feeds',
         { name: 'Servers',  value: `${guilds.size}`,         inline: true },
@@ -210,7 +211,7 @@ async function setupGuildFeedUpdateStack(client) {
     const guildChunks = paginateRaw(client.guilds.cache.filter(guild => guildConfigs.some(gcfg => gcfg.guildId === guild.id)), chunkMax)
         .map((g) => ({ tid: null, guilds: g }));
     const chunkAmount = guildChunks.length;
-    let shortestTime;
+    let shortestTime = 0;
     guildChunks.forEach((chunk, i) => {
         const guilds = new Discord.Collection(chunk.guilds);
         let chunkUpdateStart = feedUpdateStart + feedUpdateInterval * (i / chunkAmount);
@@ -223,7 +224,7 @@ async function setupGuildFeedUpdateStack(client) {
         // console.log(new Date(now.getTime() + chunkUpdateStart).toString());
         guildChunks[i].tid = setTimeout(updateBooruFeeds, chunkUpdateStart, guilds);
     });
-    globalConfigs.feedGuildChunks = guildChunks;
+    globalConfigs['feedGuildChunks'] = guildChunks;
 
     auditAction('Se prepararon Feeds',
         { name: 'Primer Envío',   value: `<t:${Math.floor((Date.now() + shortestTime) * 0.001)}:R>`, inline: true },
@@ -240,8 +241,13 @@ async function setupGuildFeedUpdateStack(client) {
  * @returns {Boolean} Si se añadió una nueva Guild o no
  */
 function addGuildToFeedUpdateStack(guild) {
+    if(!('feedGuildChunks' in globalConfigs))
+        return false;
+
+    if(!Array.isArray(globalConfigs.feedGuildChunks))
+        return false;
+
     //Retornar temprano si la guild ya está integrada al stack
-    console.log(globalConfigs.feedGuildChunks)
     if(globalConfigs.feedGuildChunks.some(chunk => chunk.guilds.some(g => guild.id === g[0])))
         return false;
 
@@ -253,7 +259,7 @@ function addGuildToFeedUpdateStack(guild) {
         //Subdividir 1 nivel más
         guildChunks.push({ tid: null, guilds: [[guild.id, guild]] });
         const chunkAmount = guildChunks.length;
-        let shortestTime;
+        let shortestTime = 0;
         guildChunks.forEach((chunk, i) => {
             let chunkUpdateStart = feedUpdateStart + feedUpdateInterval * (i / chunkAmount);
             if((chunkUpdateStart - feedUpdateInterval) > 0)
