@@ -8,8 +8,10 @@ const BooruTags = require('../../localdata/models/boorutags');
 class Booru {
 	/**@typedef {{ apiKey: String, userId: String }} Credentials*/
 
-	/**@type {Readonly<Number>}*/ static TAGS_SEMAPHORE_MAX = 100_000_000;
-	/**@type {Readonly<Number>}*/ static TAGS_CACHE_LIFETIME = 4 * 60 * 60e3;
+	/**@readonly @type {Number}*/ static TAGS_SEMAPHORE_MAX = 100_000_000;
+	/**@readonly @type {Number}*/ static TAGS_CACHE_LIFETIME = 4 * 60 * 60e3;
+	/**@readonly @type {Number}*/ static TAGS_DB_LIFETIME = 4 * 60 * 60e3; //De momento, exactamente igual que la vida en caché
+
 	/**@type {Map<String, Tag>}*/ static tagsCache = new Map();
 	/**@type {Number}*/ static tagsSemaphoreCount = 0;
 	/**@type {Number}*/ static tagsSemaphoreDone = 0;
@@ -40,12 +42,12 @@ class Booru {
 	 * @returns {Promise<Array<Post>>}
 	 */
 	async search(tags, searchOptions = { limit: 1 }) {
-		const { apiKey, userId } = this.getCredentials();
+		const { apiKey, userId } = this.#getCredentials();
 		if(Array.isArray(tags))
 			tags = tags.join(' ');
 		const response = await axios.get(`${this.apiPostsUrl}&json=1&api_key=${apiKey}&user_id=${userId}&limit=${searchOptions.limit}&tags=${tags}`);
 		if(!response.data?.post?.length) return [];
-		return response.data.post.map(p => new Post(p));
+		return (/**@type {Array<PostResolvable>}*/(response.data.post)).map(p => new Post(p));
 	}
 
 	/**
@@ -53,9 +55,10 @@ class Booru {
 	 * @returns {Promise<Post | undefined>}
 	 */
 	 async fetchPostById(postId) {
-		const { apiKey, userId } = this.getCredentials();
+		const { apiKey, userId } = this.#getCredentials();
 		if(![ 'string', 'number' ].includes(typeof postId))
 			throw TypeError('ID de Post inválida');
+
 		const response = await axios.get(`${this.apiPostsUrl}&json=1&api_key=${apiKey}&user_id=${userId}&id=${postId}`);
 		if(!response.data?.post?.length) return undefined;
 		return new Post(response.data.post[0]);
@@ -66,8 +69,10 @@ class Booru {
 	 * @returns {Promise<Post | undefined>}
 	 */
 	 async fetchPostByUrl(postUrl) {
-		const { apiKey, userId } = this.getCredentials();
-		if(typeof postUrl !== 'string') throw TypeError('URL de Post inválida');
+		const { apiKey, userId } = this.#getCredentials();
+		if(typeof postUrl !== 'string')
+			throw TypeError('URL de Post inválida');
+
 		postUrl = postUrl
 			.replace(
 				'page=post&s=view',
@@ -76,6 +81,7 @@ class Booru {
 				/&tags=[^&]+/,
 				'');
 		postUrl = `${postUrl}&api_key=${apiKey}&user_id=${userId}`;
+		
 		const response = await axios.get(postUrl);
 		if(!response.data?.post?.length) return undefined;
 		return new Post(response.data.post[0]);
@@ -85,7 +91,21 @@ class Booru {
 	 * @param {Post} post
 	 */
 	async fetchPostTags(post) {
+		if(!Array.isArray(post?.tags))
+			throw ReferenceError('Post inválido');
+
 		return this.fetchTagsByNames(...post.tags);
+	}
+
+	/**
+	 * 
+	 * @param {String} postUrl 
+	 */
+	async fetchPostTagsByUrl(postUrl) {
+		const post = await this.fetchPostByUrl(postUrl);
+		return post
+			? this.fetchTagsByNames(...post.tags)
+			: undefined;
 	}
 
 	/**
@@ -94,7 +114,9 @@ class Booru {
 	 */
 	async fetchPostTagsById(postId) {
 		const post = await this.fetchPostById(postId);
-		return this.fetchTagsByNames(...post.tags);
+		return post
+			? this.fetchTagsByNames(...post.tags)
+			: undefined;
 	}
 
 	/**
@@ -104,7 +126,7 @@ class Booru {
 	async fetchTagsByNames(...tagNames) {
 		const semaphoreId = Booru.tagsSemaphoreCount++ % Booru.TAGS_SEMAPHORE_MAX
 
-		const { apiKey, userId } = this.getCredentials();
+		const { apiKey, userId } = this.#getCredentials();
 
 		if(tagNames.some(t => typeof t !== 'string'))
 			throw TypeError('Tags inválidas');
@@ -157,7 +179,7 @@ class Booru {
 							filter: { id: t.id },
 							update: { $set: t },
 							upsert: true,
-						}
+						},
 					}));
 		
 					await BooruTags.bulkWrite(bulkOps);
@@ -178,7 +200,7 @@ class Booru {
 	 * @param {Credentials} credentials Credenciales para autorizarse en la API
 	 */
 	setCredentials(credentials) {
-		this.expectCredentials(credentials);
+		this.#expectCredentials(credentials);
 		this.credentials = credentials;
 		return this;
 	}
@@ -186,8 +208,8 @@ class Booru {
 	/**
 	 * Recupera las credenciales de búsqueda establecidas
 	 */
-	getCredentials() {
-		this.expectCredentials(this.credentials);
+	#getCredentials() {
+		this.#expectCredentials(this.credentials);
 		return this.credentials;
 	}
 
@@ -195,7 +217,7 @@ class Booru {
 	 * Establece las credenciales a usar para cada búsqueda
 	 * @param {Credentials} credentials Credenciales para autorizarse en la API
 	 */
-	expectCredentials(credentials) {
+	#expectCredentials(credentials) {
 		if(!credentials) throw ReferenceError('No se han definido credenciales');
 		if(!credentials.apiKey || typeof credentials.apiKey !== 'string') throw TypeError('La clave de API es inválida');
 		if(!credentials.userId || ![ 'string', 'number' ].includes(typeof credentials.userId)) throw TypeError('La ID de usuario es inválida');
@@ -206,7 +228,7 @@ class Booru {
  * @typedef {Post | Object} PostResolvable
  * @typedef {'general'|'sensitive'|'questionable'|'explicit'} Rating
  * @typedef {{ maxTags?: Number, title?: String, footer?: String, cornerIcon?: String, manageableBy?: String, isNotFeed?: Boolean }} PostFormatData
- * @typedef {PostFormatData & { ids: Array<String>, tags: String, faults?: Number }} FeedData
+ * @typedef {PostFormatData & { ids: Array<Number>, tags: String, faults?: Number }} FeedData
  */
 
 /**
@@ -271,6 +293,10 @@ const TagTypes = /**@type {const}*/({
  * @typedef {Tag | TagData} TagResolvable
  */
 
+/**
+ * @class
+ * Representa una tag de {@linkcode Post} de un {@linkcode Booru}
+ */
 class Tag {
 	/**@type {Number}*/ id;
 	/**@type {String}*/ name;
@@ -311,32 +337,6 @@ class Tag {
 		return `{${this.id} / ${this.typeName}} ${this.count} ${this.name}`;
 	}
 }
-
-/*async function booruTagsFetchTest() {
-	const mongoose = require('mongoose');
-	mongoose.set("strictQuery", false);
-	mongoose.connect(require('../../localenv.json')?.dburi, {
-		//@ts-expect-error
-		useUnifiedTopology: true,
-		useNewUrlParser: true,
-	});
-
-	const booruApiKey = require('../../localenv.json')?.booruapikey;
-	const booruUserId = require('../../localenv.json')?.booruuserid;
-	const booru = new Booru({ apiKey: booruApiKey, userId: booruUserId });
-	const post1 = await booru.fetchPostByUrl('https://gelbooru.com/index.php?page=post&s=view&id=10729083&tags=minato_aqua');
-	const post2 = await booru.fetchPostByUrl('https://gelbooru.com/index.php?page=post&s=view&id=10721010&tags=minato_aqua');
-	const [ tags1, tags2 ] = await Promise.all([
-		booru.fetchPostTagsById(post1.id),
-		booru.fetchPostTagsById(post2.id),
-	]);
-	console.log('tags1');
-	console.table(tags1.map(t => ({ id: t.id, name: t.name, count: t.count, type: t.typeName, ambiguous: t.ambiguous })));
-	console.log('tags2');
-	console.table(tags2.map(t => ({ id: t.id, name: t.name, count: t.count, type: t.typeName, ambiguous: t.ambiguous })));
-	console.log('finished');
-}
-booruTagsFetchTest();*/
 
 module.exports = {
 	Booru,
