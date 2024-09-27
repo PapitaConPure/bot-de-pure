@@ -36,7 +36,7 @@ const { initializeWebhookMessageOwners } = require('../systems/agents/discordage
 const logOptions = {
     slash: false,
     prefixes: false,
-    booruTags: true,
+    booruTags: false,
     feedSuscriptions: false,
 };
 
@@ -44,6 +44,11 @@ const logOptions = {
 async function onStartup(client) {
     const confirm = () => console.log(chalk.green('Hecho.'));
     globalConfigs.maintenance = '1';
+
+    if(globalConfigs.remoteStartup)
+        console.log(chalk.redBright.bold('Inicializando entorno de producción'));
+    else
+        console.log(chalk.cyanBright.bold('Inicializando entorno de desarrollo'));
 
     console.log(chalk.bold.magentaBright('Cargando comandos Slash y Contextuales...'));
     const restGlobal = new REST({ version: '9' }).setToken(discordToken);
@@ -128,6 +133,9 @@ async function onStartup(client) {
     logOptions.prefixes && console.table(globalConfigs.p_pure);
 
     console.log(chalk.gray('Preparando Tags de Booru...'));
+    await BooruTags.deleteMany({ fetchTimestamp: { $lt: new Date(Date.now() - Booru.TAGS_DB_LIFETIME) } }).catch(console.error);
+    await BooruTags.syncIndexes();
+    await BooruTags.createIndexes();
     booruTags.forEach(tag => Booru.tagsCache.set(tag.name, new Tag(tag)));
     logOptions.booruTags && console.table([...Booru.tagsCache.values()].sort((a, b) => a.id - b.id));
 

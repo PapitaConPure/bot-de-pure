@@ -1,6 +1,9 @@
 console.time('Carga de inicio');
-const client = require('./client.js');
 const globalConfigs = require('./localdata/config.json');
+const argv = require('minimist')(process.argv.slice(2));
+globalConfigs.remoteStartup = ((+!!argv.p) - (+!!argv.d)) > 0;
+
+const client = require('./client.js');
 const { registerCommandFiles } = require('./commandInit.js');
 const { events, startupData, onCriticalError } = require('./events/events.js');
 
