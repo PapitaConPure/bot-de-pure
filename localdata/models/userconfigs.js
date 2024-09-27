@@ -41,7 +41,7 @@ const UserConfigSchema = new Mongoose.Schema({
     twitterPrefix: {
         type: String,
         enum: [ '', 'vx', 'fx' ],
-        default: '',
+        default: 'vx',
     },
     showLevelUp: {
         type: Boolean,

@@ -104,10 +104,9 @@ class DiscordAgent {
 				content: messageOptions.content,
 				files: messageOptions.files,
 				embeds: messageOptions.embeds,
-				//nonce: undefined,
 			});
 
-			addAgentMessageOwner(sent);
+			addAgentMessageOwner(sent, this.user.id);
 		} catch(e) {
 			console.error(e);
 		} finally {
@@ -154,11 +153,12 @@ function getAgentMessageOwnerId(messageId) {
 /**
  * 
  * @param {Message<Boolean>} sent 
+ * @param {String} [ownerId] 
  */
-async function addAgentMessageOwner(sent) {
+async function addAgentMessageOwner(sent, ownerId = undefined) {
 	//Crear nuevo
 	const messageId = sent.id;
-	const userId = sent.author.id;
+	const userId = ownerId ?? sent.mentions?.repliedUser?.id ?? sent.author.id;
 	const expirationDate = Date.now() + 3600e3;
 	const webhookOwner = new WebhookOwner({ messageId, userId, expirationDate });
 	owners.set(messageId, { userId, expirationDate });
