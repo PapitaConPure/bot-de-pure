@@ -244,11 +244,12 @@ const command = new CommandManager('feed', flags)
 		const input = interaction.fields.getTextInputValue('tagsInput').toLowerCase().trim();
 
 		const guildQuery = { guildId: interaction.guild.id };
-		const gcfg = (await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery);
+		const gcfg = /**@type {import('../../localdata/models/guildconfigs').GuildConfigDocument}*/((await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery));
 		gcfg.feeds ??= {};
-		gcfg.feeds[fetchedChannel.id] ??= { ids: (new Array(16)).fill(0) };
+		gcfg.feeds[fetchedChannel.id] ??= { ids: (new Array(16)).fill(0), tags: null };
 		gcfg.feeds[fetchedChannel.id].tags = input;
-        addGuildToFeedUpdateStack(interaction.guild);
+		gcfg.feeds[fetchedChannel.id].lastFetchedAt = new Date(Date.now());
+        const firstUpdateDelay = addGuildToFeedUpdateStack(interaction.guild);
 		gcfg.markModified('feeds');
 		await gcfg.save();
 
@@ -259,6 +260,7 @@ const command = new CommandManager('feed', flags)
 			.addFields(
 				{ name: 'Feed configurado', value: `Se ha configurado un Feed con las tags _"${safeTags(input)}"_ para el canal **${fetchedChannel.name}**` },
 				{ name: 'Control del Feed', value: 'Puedes modificar, personalizar o eliminar este Feed en cualquier momento siguiendo el Asistente una vez más' },
+				{ name: 'Actualización Programada', value: `Este Feed se actualizará por primera vez <t:${Math.round((Date.now() + firstUpdateDelay) / 1000)}:R>` },
 			);
 		return interaction.update({
 			embeds: [concludedEmbed],
@@ -1045,46 +1047,57 @@ const command = new CommandManager('feed', flags)
 			]);
 		
 		const booru = new Booru(globalConfigs.booruCredentials);
-		const post = await booru.fetchPostByUrl(url);
-		if(!post)
+
+		try {
+			const post = await booru.fetchPostByUrl(url);
+			if(!post)
+				return Promise.all([
+					interaction.reply({
+						content: `<:gelbooru:919398540172750878> **${translator.getText('feedDeletePostTitle')}** <${url}>`,
+						ephemeral: true,
+					}),
+					message.delete().catch(console.error),
+				]);
+	
+			const tags = shortenText(`\`\`\`\n${post.tags.join(' ')}\n\`\`\``, 1024);
+			const embed = new EmbedBuilder()
+				.setColor(Colors.DarkRed)
+				.setTitle(translator.getText('feedDeletePostTitle'))
+				.setDescription(translator.getText('feedDeletePostAdvice'))
+				.addFields(
+					{
+						name: `<:tagswhite:921788204540100608> ${translator.getText('feedDeletePostTagsName')}`,
+						value: tags,
+					},
+					{
+						name: `<:urlwhite:922669195521568818> ${translator.getText('feedDeletePostLinkName')}`,
+						value: `[Gelbooru](${url})`,
+					},
+				);
+			const row = new ActionRowBuilder().addComponents(
+				new ButtonBuilder()
+					.setCustomId('feed_startWizard')
+					.setLabel('Configurar Feeds...')
+					.setStyle(ButtonStyle.Primary),
+			);
+	
 			return Promise.all([
 				interaction.reply({
-					content: `<:gelbooru:919398540172750878> **${translator.getText('feedDeletePostTitle')}** <${url}>`,
+					embeds: [embed],
+					components: [row],
 					ephemeral: true,
 				}),
 				message.delete().catch(console.error),
 			]);
-
-		const tags = shortenText(`\`\`\`\n${post.tags.join(' ')}\n\`\`\``, 1024);
-		const embed = new EmbedBuilder()
-			.setColor(Colors.DarkRed)
-			.setTitle(translator.getText('feedDeletePostTitle'))
-			.setDescription(translator.getText('feedDeletePostAdvice'))
-			.addFields(
-				{
-					name: `<:tagswhite:921788204540100608> ${translator.getText('feedDeletePostTagsName')}`,
-					value: tags,
-				},
-				{
-					name: `<:urlwhite:922669195521568818> ${translator.getText('feedDeletePostLinkName')}`,
-					value: `[Gelbooru](${url})`,
-				},
-			);
-		const row = new ActionRowBuilder().addComponents(
-			new ButtonBuilder()
-				.setCustomId('feed_startWizard')
-				.setLabel('Configurar Feeds...')
-				.setStyle(ButtonStyle.Primary),
-		);
-
-		return Promise.all([
-			interaction.reply({
-				embeds: [embed],
-				components: [row],
-				ephemeral: true,
-			}),
-			message.delete().catch(console.error),
-		]);
+		} catch {
+			return Promise.all([
+				interaction.reply({
+					content: 'Post eliminado (no se pudo recuperar la información del Post y/o sus tags)',
+					ephemeral: true,
+				}),
+				message.delete().catch(console.error),
+			]);
+		}
 	})
 	.setButtonResponse(async function shock(interaction) {
 		const { member, guild, channel } = interaction;
