@@ -8,6 +8,8 @@
   },
   "main": "index.js",
   "scripts": {
+    "dev": "node . -d",
+    "prod": "node . -p",
     "start": "pm2-runtime start ecosystem.config.js --env production",
     "cmdbuild": ".\\CommandBuilder\\CommandBuilder\\bin\\Release\\CommandBuilder.exe",
     "lint": "eslint ."
