@@ -2,22 +2,45 @@ const { default: axios } = require('axios');
 const BooruTags = require('../../localdata/models/boorutags');
 
 /**
+ * @typedef {Object} APIPostData
+ * @property {Number} id
+ * @property {String} title
+ * @property {Array<String> | String} tags
+ * @property {String} source
+ * @property {Number} score
+ * @property {Rating} rating
+ * @property {Date | String | Number} created_at
+ * @property {Number} creator_id
+ * @property {String} file_url
+ * @property {Number} width
+ * @property {Number} height
+ * @property {String} [preview_url]
+ * @property {Number} [preview_width]
+ * @property {Number} [preview_height]
+ * @property {String} [sample_url]
+ * @property {Number} [sample_width]
+ * @property {Number} [sample_height]
+ * @typedef {Post | APIPostData} PostResolvable
+ * @typedef {'general'|'sensitive'|'questionable'|'explicit'} Rating
+ */
+
+/**
  * @class
  * Representa una conexión a un sitio Booru
  */
 class Booru {
-	/**@typedef {{ apiKey: String, userId: String }} Credentials*/
-
+	/**@readonly @type {String}*/ static API_POSTS_URL = 'https://gelbooru.com/index.php?page=dapi&s=post&q=index';
+	/**@readonly @type {String}*/ static API_TAGS_URL  = 'https://gelbooru.com/index.php?page=dapi&s=tag&q=index';
 	/**@readonly @type {Number}*/ static TAGS_SEMAPHORE_MAX = 100_000_000;
 	/**@readonly @type {Number}*/ static TAGS_CACHE_LIFETIME = 4 * 60 * 60e3;
-	/**@readonly @type {Number}*/ static TAGS_DB_LIFETIME = 4 * 60 * 60e3; //De momento, exactamente igual que la vida en caché
+	/**@readonly @type {Number}*/ static TAGS_DB_LIFETIME    = 4 * 60 * 60e3; //De momento, exactamente igual que la vida en caché
 
 	/**@type {Map<String, Tag>}*/ static tagsCache = new Map();
 	/**@type {Number}*/ static tagsSemaphoreCount = 0;
 	/**@type {Number}*/ static tagsSemaphoreDone = 0;
 	
-	/**@type {String}*/ apiPostsUrl;
-	/**@type {String}*/ apiTagsUrl;
+	/**@typedef {{ apiKey: String, userId: String }} Credentials*/
+	/**@type {Credentials}*/ credentials;
 
 	/**
 	 * @constructor
@@ -25,8 +48,67 @@ class Booru {
 	 */
 	constructor(credentials) {
 		this.setCredentials(credentials);
-		this.apiPostsUrl = 'https://gelbooru.com/index.php?page=dapi&s=post&q=index';
-		this.apiTagsUrl  = 'https://gelbooru.com/index.php?page=dapi&s=tag&q=index';
+	}
+
+	/**
+	 * Libera memoria de Tags guardadas en caché que no se han refrescado en mucho tiempo
+	 * Se recomienda usar esto luego de llamar cualquier función que recupere Tags de un Post
+	 */
+	static cleanupTagsCache() {
+		const now = Date.now();
+		for(const [key, tag] of Booru.tagsCache.entries())
+			if((now - (+tag.fetchTimestamp)) > Booru.TAGS_CACHE_LIFETIME)
+				Booru.tagsCache.delete(key);
+	}
+
+	/**
+	 * @typedef {Object} ExpectAPIFetchOptions
+	 * @property {Boolean} [dontThrowOnEmptyFetch=false]
+	 */
+	/**
+	 * Verifica que el código de estado de una respuesta sea 200 y que los datos de Post sean válidos
+	 * @param {import('axios').AxiosResponse} response 
+	 * @param {ExpectAPIFetchOptions} options
+	 * @returns {Array<PostResolvable>}
+	 * @throws {BooruError}
+	 */
+	static #expectPosts(response, options = {}) {
+		options.dontThrowOnEmptyFetch ??= false;
+
+		if(response.status !== 200)
+			throw new BooruError(`Recolección de Posts de API de Booru fallida: ${response.statusText ?? 'Error desconocido'}`);
+
+		if(!Array.isArray(response.data?.post)) {
+			if(options.dontThrowOnEmptyFetch)
+				return [];
+			else
+				throw new BooruError(`No se recolectó ningún Post de API de Booru`);
+		}
+
+		return response.data.post;
+	}
+
+	/**
+	 * Verifica que el código de estado de una respuesta sea 200 y que los datos de Post sean válidos
+	 * @param {import('axios').AxiosResponse} response 
+	 * @param {ExpectAPIFetchOptions} options
+	 * @returns {Array<TagResolvable>}
+	 * @throws {BooruError}
+	 */
+	static #expectTags(response, options = {}) {
+		options.dontThrowOnEmptyFetch ??= false;
+
+		if(response.status !== 200 || !Array.isArray(response.data?.tag))
+			throw new BooruError(`Recolección de Tags de API de Booru fallida: ${response.statusText ?? 'Error desconocido'}`);
+
+		if(!Array.isArray(response.data?.tag)) {
+			if(options.dontThrowOnEmptyFetch)
+				return [];
+			else
+				throw new BooruError(`No se recolectó ninguna Tag de API de Booru`);
+		}
+
+		return response.data.tag;
 	}
 
 	/**
@@ -45,30 +127,32 @@ class Booru {
 		const { apiKey, userId } = this.#getCredentials();
 		if(Array.isArray(tags))
 			tags = tags.join(' ');
-		const response = await axios.get(`${this.apiPostsUrl}&json=1&api_key=${apiKey}&user_id=${userId}&limit=${searchOptions.limit}&tags=${tags}`);
-		if(!response.data?.post?.length) return [];
-		return (/**@type {Array<PostResolvable>}*/(response.data.post)).map(p => new Post(p));
+		
+		const response = await axios.get(`${Booru.API_POSTS_URL}&json=1&api_key=${apiKey}&user_id=${userId}&limit=${searchOptions.limit}&tags=${tags}`);
+		const posts = Booru.#expectPosts(response, { dontThrowOnEmptyFetch: true });
+		return posts.map(p => new Post(p));
 	}
 
 	/**
 	 * @param {String | Number} postId 
 	 * @returns {Promise<Post | undefined>}
 	 */
-	 async fetchPostById(postId) {
+	async fetchPostById(postId) {
 		const { apiKey, userId } = this.#getCredentials();
 		if(![ 'string', 'number' ].includes(typeof postId))
 			throw TypeError('ID de Post inválida');
 
-		const response = await axios.get(`${this.apiPostsUrl}&json=1&api_key=${apiKey}&user_id=${userId}&id=${postId}`);
-		if(!response.data?.post?.length) return undefined;
-		return new Post(response.data.post[0]);
+		const response = await axios.get(`${Booru.API_POSTS_URL}&json=1&api_key=${apiKey}&user_id=${userId}&id=${postId}`);
+		const [ post ] = Booru.#expectPosts(response);
+		return new Post(post);
 	}
 
 	/**
 	 * @param {String} postUrl
 	 * @returns {Promise<Post | undefined>}
+	 * @throws {TypeError | BooruError}
 	 */
-	 async fetchPostByUrl(postUrl) {
+	async fetchPostByUrl(postUrl) {
 		const { apiKey, userId } = this.#getCredentials();
 		if(typeof postUrl !== 'string')
 			throw TypeError('URL de Post inválida');
@@ -83,12 +167,13 @@ class Booru {
 		postUrl = `${postUrl}&api_key=${apiKey}&user_id=${userId}`;
 		
 		const response = await axios.get(postUrl);
-		if(!response.data?.post?.length) return undefined;
-		return new Post(response.data.post[0]);
+		const [ post ] = Booru.#expectPosts(response);
+		return new Post(post);
 	}
 
 	/**
 	 * @param {Post} post
+	 * @throws {ReferenceError | TypeError | BooruError}
 	 */
 	async fetchPostTags(post) {
 		if(!Array.isArray(post?.tags))
@@ -100,6 +185,7 @@ class Booru {
 	/**
 	 * 
 	 * @param {String} postUrl 
+	 * @throws {TypeError | BooruError}
 	 */
 	async fetchPostTagsByUrl(postUrl) {
 		const post = await this.fetchPostByUrl(postUrl);
@@ -111,6 +197,7 @@ class Booru {
 	/**
 	 * 
 	 * @param {String | Number} postId 
+	 * @throws {TypeError | BooruError}
 	 */
 	async fetchPostTagsById(postId) {
 		const post = await this.fetchPostById(postId);
@@ -122,6 +209,7 @@ class Booru {
 	/**
 	 * 
 	 * @param {Array<String>} tagNames 
+	 * @throws {TypeError | BooruError}
 	 */
 	async fetchTagsByNames(...tagNames) {
 		const semaphoreId = Booru.tagsSemaphoreCount++ % Booru.TAGS_SEMAPHORE_MAX
@@ -147,9 +235,7 @@ class Booru {
 		});
 
 		if(!uncachedTagNames.length) {
-			Booru.tagsSemaphoreDone++;
-			if(Booru.tagsSemaphoreDone > Booru.TAGS_SEMAPHORE_MAX)
-				Booru.tagsSemaphoreDone = 0;
+			Booru.tagsSemaphoreDone = (Booru.tagsSemaphoreDone + 1) % Booru.TAGS_SEMAPHORE_MAX;
 			return cachedTags;
 		}
 		
@@ -165,9 +251,11 @@ class Booru {
 
 				for(let i = 0; i < missingTagNames.length; i += 100) {
 					const namesBatch = missingTagNames.slice(i, i + 100).join('%20');
-					const response = await axios.get(`${this.apiTagsUrl}&json=1&api_key=${apiKey}&user_id=${userId}&names=${namesBatch}`);
-					if(response.data?.tag?.length) {
-						const newTags = (/**@type {Array<TagResolvable>}*/(response.data.tag)).map(t => new Tag(t));
+					const response = await axios.get(`${Booru.API_TAGS_URL}&json=1&api_key=${apiKey}&user_id=${userId}&names=${namesBatch}`);
+					const tags = Booru.#expectTags(response);
+					
+					if(tags.length) {
+						const newTags = tags.map(t => new Tag(t));
 						fetchedTags.push(...newTags);
 					}
 				}
@@ -189,15 +277,14 @@ class Booru {
 			savedTags.forEach(t => Booru.tagsCache.set(t.name, t));
 			return [ ...cachedTags, ...savedTags ];
 		} finally {
-			Booru.tagsSemaphoreDone++;
-			if(Booru.tagsSemaphoreDone > Booru.TAGS_SEMAPHORE_MAX)
-				Booru.tagsSemaphoreDone = 0;
+			Booru.tagsSemaphoreDone = (Booru.tagsSemaphoreDone + 1) % Booru.TAGS_SEMAPHORE_MAX;
 		}
 	}
 
 	/**
 	 * Establece las credenciales a usar para cada búsqueda
 	 * @param {Credentials} credentials Credenciales para autorizarse en la API
+	 * @throws {ReferenceError | TypeError}
 	 */
 	setCredentials(credentials) {
 		this.#expectCredentials(credentials);
@@ -207,6 +294,7 @@ class Booru {
 
 	/**
 	 * Recupera las credenciales de búsqueda establecidas
+	 * @throws {ReferenceError | TypeError}
 	 */
 	#getCredentials() {
 		this.#expectCredentials(this.credentials);
@@ -216,6 +304,7 @@ class Booru {
 	/**
 	 * Establece las credenciales a usar para cada búsqueda
 	 * @param {Credentials} credentials Credenciales para autorizarse en la API
+	 * @throws {ReferenceError | TypeError}
 	 */
 	#expectCredentials(credentials) {
 		if(!credentials) throw ReferenceError('No se han definido credenciales');
@@ -223,13 +312,6 @@ class Booru {
 		if(!credentials.userId || ![ 'string', 'number' ].includes(typeof credentials.userId)) throw TypeError('La ID de usuario es inválida');
 	}
 }
-
-/**
- * @typedef {Post | Object} PostResolvable
- * @typedef {'general'|'sensitive'|'questionable'|'explicit'} Rating
- * @typedef {{ maxTags?: Number, title?: String, footer?: String, cornerIcon?: String, manageableBy?: String, isNotFeed?: Boolean }} PostFormatData
- * @typedef {PostFormatData & { ids: Array<Number>, tags: String, faults?: Number }} FeedData
- */
 
 /**
  * @class
@@ -262,17 +344,29 @@ class Post {
 		this.source = data.source;
 		this.score = data.score;
 		this.rating = data.rating;
-		this.createdAt = data.created_at;
-		this.creatorId = data.creator_id;
-		this.fileUrl = data.file_url;
-		this.size = [ data.width, data.height ];
-		if(data.preview_url) {
+		this.creatorId = ('creatorId' in data) ? data.creatorId : data.creator_id;
+
+		const createdAt = ('createdAt' in data) ? data.createdAt : data.created_at;
+		this.createdAt = (typeof createdAt === 'string' || typeof createdAt === 'number') ? new Date(createdAt) : createdAt;
+
+		
+		this.fileUrl = ('fileUrl' in data) ? data.fileUrl : data.file_url;
+		this.size = ('size' in data) ? data.size : [ data.width, data.height ];
+
+		if('preview_url' in data) {
 			this.previewUrl = data.preview_url;
 			this.previewSize = [ data.preview_width, data.preview_height ];
+		} else if('previewUrl' in data) {
+			this.previewUrl = data.previewUrl;
+			this.previewSize = data.size;
 		}
-		if(data.sample_url) {
+
+		if('sample_url' in data) {
 			this.sampleUrl = data.sample_url;
 			this.sampleSize = [ data.sample_width, data.sample_height ];
+		} else if('sampleUrl' in data) {
+			this.sampleUrl = data.sampleUrl;
+			this.sampleSize = data.size;
 		}
 	}
 }
@@ -311,7 +405,7 @@ class Tag {
 	 */
 	constructor(data) {
 		if(!Object.values(TagTypes).some(t => t === data.type))
-			throw 'Tipo de tag inválido. Solo se aceptan números: 0, 1, 2, 3, 4, 5, 6';
+			throw RangeError('Tipo de tag inválido. Solo se aceptan números: 0, 1, 2, 3, 4, 5, 6');
 
 		this.id = data.id;
 		this.name = data.name;
@@ -338,9 +432,20 @@ class Tag {
 	}
 }
 
+class BooruError extends Error {
+    /**
+	 * @param {String} message Mensaje del error
+	 */
+    constructor(message) {
+        super(message);
+        this.name = 'BooruError';
+    }
+}
+
 module.exports = {
 	Booru,
 	Post,
 	Tag,
+	BooruError,
 	TagTypes,
 };
