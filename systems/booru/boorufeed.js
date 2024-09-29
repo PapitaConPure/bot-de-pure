@@ -344,7 +344,10 @@ class BooruFeed {
             
             fetched.reverse();
             const lastFetchedAt = new Date(this.lastFetchedAt);
-            this.lastFetchedAt = fetched[fetched.length - 1].createdAt;
+            const firstPost = fetched[0];
+            const lastPost = fetched[fetched.length - 1];
+            const mostRecentPost = firstPost.createdAt > lastPost.createdAt ? firstPost : lastPost;
+            this.lastFetchedAt = mostRecentPost.createdAt;
 
             const newPosts = fetched.filter(post => post.createdAt > lastFetchedAt);
 
