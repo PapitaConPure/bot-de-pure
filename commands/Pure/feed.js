@@ -246,7 +246,7 @@ const command = new CommandManager('feed', flags)
 		const guildQuery = { guildId: interaction.guild.id };
 		const gcfg = /**@type {import('../../localdata/models/guildconfigs').GuildConfigDocument}*/((await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery));
 		gcfg.feeds ??= {};
-		gcfg.feeds[fetchedChannel.id] ??= { ids: (new Array(16)).fill(0), tags: null };
+		gcfg.feeds[fetchedChannel.id] ??= { tags: null };
 		gcfg.feeds[fetchedChannel.id].tags = input;
 		gcfg.feeds[fetchedChannel.id].lastFetchedAt = new Date(Date.now());
         const firstUpdateDelay = addGuildToFeedUpdateStack(interaction.guild);
@@ -1100,14 +1100,10 @@ const command = new CommandManager('feed', flags)
 		}
 	})
 	.setButtonResponse(async function shock(interaction) {
-		const { member, guild, channel } = interaction;
+		//No hace nada. Permanece por botones antiguos que ya fueron posteados
+		const { member } = interaction;
 		if(isNotModerator(member))
 			return interaction.reply({ content: '❌ No tienes permiso para hacer eso, teehee~', ephemeral: true });
-		const gcfg = await GuildConfig.findOne({ guildId: guild.id });
-		const booru = new Booru(globalConfigs.booruCredentials);
-		gcfg.feeds[channel.id].ids = (await booru.search(gcfg.feeds[channel.id].tags, { limit: 32 })).map(r => r.id);
-		gcfg.markModified('feeds');
-		await gcfg.save();
 		return interaction.reply({ content: 'Shock aplicado.', ephemeral: true });
 	});
 
