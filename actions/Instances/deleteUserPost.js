@@ -15,8 +15,7 @@ const action = new ContextMenuActionManager('actionDeleteUserPost', 'Message')
                 ephemeral: true,
             });
 
-
-        if(uid !== getAgentMessageOwnerId(message.id) && isNotModerator(interaction.member)) {
+        if(uid !== getAgentMessageOwnerId(message.id) && !interaction.member.permissionsIn(interaction.channel).has('ManageMessages')) {
             return interaction.reply({
                 content: translator.getText('unauthorizedInteraction'),
                 ephemeral: true,

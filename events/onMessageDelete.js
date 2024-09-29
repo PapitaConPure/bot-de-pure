@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const MessageCascades = require('../localdata/models/messageCascades.js');
 const { channelIsBlocked, isUsageBanned, fetchMessage } = require('../func.js');
 
-/**@type {Map<String, String}*/
+/**@type {Map<String, String>}*/
 const messageCascadesCache = new Map();
 
 /**
@@ -11,7 +11,7 @@ const messageCascadesCache = new Map();
 async function onMessageDelete(message) {
 	const { author } = message;
 	
-	if(author.bot || !message.inGuild() || channelIsBlocked(message.channel) || (await isUsageBanned(author)))
+	if(!author || author.bot || !message.inGuild() || channelIsBlocked(message.channel) || (await isUsageBanned(author)))
 		return;
 
 	const { id: messageId, guild, channel } = message;
