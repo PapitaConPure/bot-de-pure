@@ -22,6 +22,8 @@ client.on('ready', events.onStartup);
 
 client.on('messageCreate', message => events.onMessage(message, client).catch(onCriticalError));
 
+client.on('messageDelete', message => events.onMessageDelete(message).catch(onCriticalError));
+
 client.on('interactionCreate', interaction => events.onInteraction(interaction, client).catch(onCriticalError));
 
 client.on('voiceStateUpdate', (oldState, newState) => events.onVoiceUpdate(oldState, newState).catch(onCriticalError));

@@ -1,5 +1,6 @@
-const { Message, ChannelType, GuildForumThreadManager } = require('discord.js');
+const { Message, ChannelType } = require('discord.js');
 const { addAgentMessageOwner } = require('./discordagent.js');
+const { addMessageCascade } = require('../../events/onMessageDelete.js');
 
 const tweetRegex = /(?:<|\|{2})? ?((?:https?:\/\/)(?:www.)?(?:twitter|x).com\/(\w+)\/status\/(\d+)) ?(?:>|\|{2})?/g;
 const configProps = {
@@ -53,7 +54,10 @@ const sendTweetsAsWebhook = async (message, configPrefix) => {
 			message.suppressEmbeds(true),
 		]);
 
-		addAgentMessageOwner(sent, author.id);
+		await Promise.all([
+			addAgentMessageOwner(sent, author.id),
+			addMessageCascade(message.id, sent.id, new Date(+message.createdAt + 4 * 60 * 60e3)),
+		]);
 	} catch(e) {
 		console.error(e);
 	}
