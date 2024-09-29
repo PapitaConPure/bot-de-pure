@@ -8,7 +8,7 @@ const globalConfigs = require('../../localdata/config.json');
 const { paginateRaw, sleep, success } = require('../../func.js');
 
 /**
- * @typedef {import('./boorusend').PostFormatData & { ids: Array<Number>, tags: String, faults?: Number, lastFetchedAt?: Date }} FeedData
+ * @typedef {import('./boorusend').PostFormatData & { tags: String, lastFetchedAt?: Date, faults?: Number }} FeedData
  */
 
 //Configuraciones globales de actualización de Feeds
@@ -88,8 +88,6 @@ async function processFeeds(booru, guilds) {
             const channel = feed.channel;
             const messagesToSend = /**@type {Array<Discord.Message<true>>}*/([]);
             await Promise.all(newPosts.map(async post => {
-                feed.ids.unshift(post.id);
-                
                 try {
                     const formatted = await formatBooruPostMessage(booru, post, feed);
                     const sent = await feed.channel.send(formatted);
@@ -103,10 +101,6 @@ async function processFeeds(booru, guilds) {
             }));
 
             //Eliminar aquellos Posts no coincidentes con lo encontrado y guardar
-            const remainingIds = feed.ids.filter(id => posts.some(p => p.id === id));
-            if(remainingIds.length)
-                toSave.ids = remainingIds;
-
             toSave.lastFetchedAt = feed.lastFetchedAt;
 
             const $set = {};
@@ -284,7 +278,6 @@ function updateFollowedFeedTagsCache(userId, channelId, newTags) {
 class BooruFeed {
     /**@type {Booru}*/ booru;
     /**@type {Discord.GuildTextBasedChannel}*/ channel;
-    /**@type {Array<Number>}*/ ids;
     /**@type {String}*/ tags;
 
     /**@type {Date}*/ lastFetchedAt;
@@ -296,7 +289,6 @@ class BooruFeed {
 
     /**
      * @typedef {Object} FeedOptions
-     * @property {Array<Number>} [ids]
      * @property {Date} [lastFetchedAt]
      * @property {Number} [faults]
      * @property {Number} [maxTags]
@@ -319,7 +311,6 @@ class BooruFeed {
         this.tags = tags;
         
         options ??= {};
-        this.ids = (options.ids ?? []).slice();
         this.lastFetchedAt = options.lastFetchedAt ?? new Date(Math.floor(Date.now() - FEED_UPDATE_INTERVAL / 2));
         this.faults = options.faults ?? 0;
         this.maxTags = options.maxTags ?? 20;
@@ -353,9 +344,9 @@ class BooruFeed {
             
             fetched.reverse();
             const lastFetchedAt = new Date(this.lastFetchedAt);
-            this.lastFetchedAt = fetched[0].createdAt;
+            this.lastFetchedAt = fetched[fetched.length - 1].createdAt;
 
-            const newPosts = fetched.filter(post => !this.ids.includes(post.id) && post.createdAt > lastFetchedAt);
+            const newPosts = fetched.filter(post => post.createdAt > lastFetchedAt);
 
             return { success: true, posts: fetched, newPosts: newPosts };
         } catch(error) {
@@ -363,7 +354,6 @@ class BooruFeed {
             console.log({
                 guildName: this.channel.guild.name,
                 channelId: this.channel.id,
-                feedStack: this.ids,
                 feedTags: this.tags,
             });
             console.error(error);
