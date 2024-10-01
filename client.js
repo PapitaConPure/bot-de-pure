@@ -6,12 +6,9 @@ const botIntents = new IntentsBitField().add(
     intentBits.GuildMembers,
     intentBits.GuildEmojisAndStickers,
     intentBits.GuildIntegrations,
-    intentBits.GuildPresences,
     intentBits.GuildMessages,
     intentBits.GuildMessageReactions,
-    intentBits.GuildMessageTyping,
     intentBits.GuildVoiceStates,
-    intentBits.DirectMessages,
     intentBits.MessageContent,
 );
 
@@ -24,8 +21,6 @@ const botPartials = [
 const client = new Client({
     intents: botIntents,
     partials: botPartials,
-    //@ts-expect-error
-    fetchAllMembers: true,
     allowedMentions: {
         parse: [ 'users', 'roles' ],
         repliedUser: false,
