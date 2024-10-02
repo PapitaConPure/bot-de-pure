@@ -1035,6 +1035,49 @@ module.exports = {
     
     /**@param {String} text*/
     unable: text => `❌ ${text}`,
+
+    decodeEntities: function(encodedString) {
+        //Fuente: https://stackoverflow.com/questions/44195322/a-plain-javascript-way-to-decode-html-entities-works-on-both-browsers-and-node
+
+        const translate = {
+            nbsp:   ' ',
+            amp:    '&',
+            quot:   '"',
+            lt:     '<',
+            gt:     '>',
+            tilde:  '~',
+            apos:   '\'',
+            '#039': '\'',
+            cent:   '¢',
+            pound:  '£',
+            euro:   '€',
+            yen:    '¥',
+            copy:   '©',
+            reg:    '®',
+            iexcl:  '¡',
+            brvbar: '¦',
+            sect:   '§',
+            uml:    '¨',
+            not:    '¬',
+            deg:    'º',
+            acute:  '`',
+            micro:  'µ',
+            para:   '¶',
+            ordm:   'º',
+            laquo:  '«',
+            raquo:  '»',
+            circ:   '^',
+        };
+        const keys = Object.keys(translate).join('|');
+        const translate_re = new RegExp(`&(${keys});`, 'g');
+
+        return encodedString.replace(translate_re, function(match, entity) {
+            return translate[entity] ?? match;
+        }).replace(/&#(\d+);/gi, function(_, numStr) {
+            const num = parseInt(numStr, 10);
+            return String.fromCharCode(num);
+        });
+    },
     //#endregion
 
     //#region Otros
