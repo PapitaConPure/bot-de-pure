@@ -12,7 +12,6 @@ const pixiv = new PixivApi();
  * @property {import('axios').ResponseType} responseType
  */
 
-console.log(process.env.REGION);
 /**@type {ImageRequestOptions}*/
 const PIXIV_IMAGE_REQUEST_OPTIONS = {
 	headers: {

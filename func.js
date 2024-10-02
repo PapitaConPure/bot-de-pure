@@ -740,22 +740,18 @@ module.exports = {
             return data.username ? data : undefined;
         
         const uc = client.users.cache;
-        //console.log(`Buscando: ${data}`);
         //Descifrar posible mención
         data = module.exports.extractUserID(data);
         
         //Prioridad 1: Intentar encontrar por ID
-        //console.log('Prioridad 1 alcanzada');
         if(!isNaN(+data)) return uc.find(u => u.id === data);
 
         //Prioridad 2: Intentar encontrar por tag
-        //console.log('Prioridad 2 alcanzada');
         data = data.toLowerCase();
         const taggeduser = uc.find(u => u.tag.toLowerCase() === data);
         if(taggeduser) return taggeduser;
 
         //Prioridad 3: Intentar encontrar por nombre de usuario en guild actual
-        //console.log('Prioridad 3 alcanzada: nombres de usuario en servidor');
         const cmpnames = (a, b) => (a.toLowerCase().indexOf(data) <= b.toLowerCase().indexOf(data) && a.length <= b.length);
         /**@type {*}*/
         let people = guild.members.cache.map(m => m.user).filter(u => u.username.toLowerCase().indexOf(data) !== -1);
@@ -765,7 +761,6 @@ module.exports = {
                 .reduce((a, b) => cmpnames(a.username, b.username)?a:b);
 
         //Prioridad 4: Intentar encontrar por apodo en guild actual
-        //console.log('Prioridad 4 alcanzada: apodos en servidor');
         people = guild.members.cache.filter(m => m.nickname && m.nickname.toLowerCase().indexOf(data) !== -1);
         if(people.size)
             return people
@@ -774,7 +769,6 @@ module.exports = {
                 .user;
         
         //Prioridad 5: Intentar encontrar por nombre de usuario en cualquier guild
-        //console.log('Prioridad 5 alcanzada: nombres de usuario globales');
         people = uc.filter(u => u.username.toLowerCase().indexOf(data) !== -1);
         if(people.size)
             return people
@@ -782,7 +776,6 @@ module.exports = {
                 .reduce((a, b) => cmpnames(a.username, b.username) ? a : b);
 
         //Búsqueda sin resultados
-        //console.log('Sin resultados');
         return undefined;
     },
 

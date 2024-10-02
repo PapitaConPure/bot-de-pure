@@ -156,13 +156,11 @@ async function setupGuildFeedUpdateStack(client) {
     guildChunks.forEach((chunk, i) => {
         const guilds = new Discord.Collection(chunk.guilds);
         let chunkUpdateStart = feedUpdateStart + FEED_UPDATE_INTERVAL * (i / chunkAmount);
-        // console.log(i, (chunkUpdateStart - feedUpdateInterval));
         if((chunkUpdateStart - FEED_UPDATE_INTERVAL) > 0)
             chunkUpdateStart -= FEED_UPDATE_INTERVAL;
         if(!shortestTime || chunkUpdateStart < shortestTime)
             shortestTime = chunkUpdateStart;
 
-        // console.log(new Date(now.getTime() + chunkUpdateStart).toString());
         guildChunks[i].tid = setTimeout(updateBooruFeeds, chunkUpdateStart, guilds);
         guildChunks[i].timestamp = new Date(Date.now() + chunkUpdateStart);
     });
@@ -236,7 +234,6 @@ function addGuildToFeedUpdateStack(guild) {
     }
 
     auditAction(`Guild ${guild.id} Incorporada a Feeds`);
-    console.log(guildChunks);
     globalConfigs.feedGuildChunks = guildChunks;
     return newGuildChunkUpdateDelay;
 };

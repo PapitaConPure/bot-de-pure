@@ -40,7 +40,6 @@ module.exports = {
             //Programar próxima actualización de actividad
             const stepTime = randRange(20, 35);
             setTimeout(module.exports.modifyPresence, 60e3 * stepTime, client, steps + 1);
-            // console.log(chalkOrange(`Cambio de presencia ${steps} realizado. Próximo ciclo en ${stepTime} minutos...`));
         } catch(err) {
             console.log(chalk.redBright.bold('Ocurrió un error al intentar realizar un cambio de presencia.'));
             console.error(err);
