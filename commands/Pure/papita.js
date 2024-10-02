@@ -18,7 +18,7 @@ const options = new CommandOptions()
 const command = new CommandManager('papita', flags)
 	.setAliases(
 		'papa', 'apita', 'ure', 'uré',
-		'potato', 'p', '🥔',
+		'potato', '🥔',
 	)
 	.setBriefDescription('Comando de frases de Papita con Puré')
 	.setLongDescription(

@@ -33,6 +33,8 @@ const { lookupService } = require('dns');
 const { promisify } = require('util');
 const chalk = require('chalk');
 const Poll = require('../localdata/models/poll.js');
+
+const { prepareYouTubePlayer } = require('../systems/youtubePlayer.js')
 const { initializeWebhookMessageOwners } = require('../systems/agents/discordagent.js');
 const { refreshPixivAccessToken } = require('../systems/agents/purepix.js');
 
@@ -107,6 +109,10 @@ async function onStartup(client) {
 		client.guilds.fetch(globalConfigs.serverid.slot3),
 	])).forEach((guild, i) => { globalConfigs.slots[`slot${i + 1}`] = guild; });
 	globalConfigs.logch = await globalConfigs.slots.slot1.channels.resolve('870347940181471242');
+	confirm();
+	
+	console.log((chalk.rgb(255, 0, 0))('Preparando Reproductor de YouTube...'));
+	await prepareYouTubePlayer(client);
 	confirm();
 	
 	//Cargado de datos de base de datos
