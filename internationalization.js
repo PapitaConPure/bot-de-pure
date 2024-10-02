@@ -95,6 +95,15 @@ let localesObject = /**@type {const}*/({
 		en: '❌ This Wizard uses session memory, but no session was found. Use the command again to start a new session of this Wizard',
 	},
 
+	somethingWentWrong: {
+		es: '⚠️️ Algo salió mal',
+		en: '⚠️️ Something went wrong',
+	},
+	voiceExpected: {
+		es: '❌ Debes conectarte a un canal de voz primero',
+		en: '❌ You need to connect to a voice channel first',
+	},
+
 	invalidInput: {
 		es: '⚠️️ Entrada inválida',
 		en: '⚠️️ Invalid input',
@@ -320,6 +329,27 @@ let localesObject = /**@type {const}*/({
 	transferCodeName: {
 		es: 'Código de referencia',
 		en: 'Reference Code',
+	},
+
+	playSearchExpected: {
+		es: '⚠️ Se esperaba una búsqueda',
+		en: '⚠️ Search expected',
+	},
+	playTitleQueueAdded: {
+		es: 'Se agregó a la cola...',
+		en: 'Added to queue...',
+	},
+	playTitleQueueNew: {
+		es: 'Se comenzó a reproducir...',
+		en: 'Started playing...',
+	},
+	playFooterTextQueueSize: {
+		es: `${subl(0)} videos en cola`,
+		en: `${subl(0)} queued videos`,
+	},
+	playFooterTextQueueEmpty: {
+		es: 'La cola está vacía',
+		en: 'The queue is empty',
 	},
 
 	poll: {

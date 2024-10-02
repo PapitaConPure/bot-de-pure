@@ -138,7 +138,7 @@ const command = new CommandManager('imgur', flags)
 				return request.reply({
 					embeds: [
 						new EmbedBuilder()
-							.setTitle('⚠️ Algo salió mal')
+							.setTitle(translator.getText('somethingWentWrong'))
 							.setDescription('Si es un problema de frecuencia de subida, prueba registrar tu propia aplicación para subir imágenes sin restricción global')
 							.setColor(Colors.Red)
 							.addFields({
