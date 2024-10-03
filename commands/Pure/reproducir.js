@@ -4,7 +4,7 @@ const { Translator } = require('../../internationalization.js');
 const { useMainPlayer } = require('discord-player');
 
 const options = new CommandOptions()
-	.addParam('búsqueda', 'TEXT', 'para realizar una búsqueda de YouTube');
+	.addParam('búsqueda', 'TEXT', 'para realizar una búsqueda');
 
 const tags = new CommandTags().add('COMMON');
 
@@ -47,17 +47,43 @@ const command = new CommandManager('reproducir', tags)
 				nodeOptions: { metadata: request },
 			});
 
-			const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size) : translator.getText('playFooterTextQueueEmpty');
-			const videoEmbed = makeReplyEmbed(0xff0000)
+			const trackSource = (() => {
+				switch(track.source) {
+				case 'youtube':
+					return 'YouTube';
+				case 'spotify':
+					return 'Spotify';
+				case 'apple_music':
+					return 'Apple Music';
+				case 'soundcloud':
+					return 'SoundCloud'
+				default:
+					return translator.getText('playValueTrackSourceArbitrary');
+				}
+			})();
+			const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted) : translator.getText('playFooterTextQueueEmpty');
+			const trackEmbed = makeReplyEmbed(0xff0000)
 				.setTitle(queue.size ? translator.getText('playTitleQueueAdded') : translator.getText('playTitleQueueNew'))
 				.setDescription(`[${track.title}](${track.url})`)
 				.setThumbnail(track.thumbnail)
 				.setFooter({
 					text: `${channel.name} • ${queueInfo}`,
 					iconURL: 'https://i.imgur.com/irsTBIH.png',
-				});
+				})
+				.addFields(
+					{
+						name: translator.getText('duration'),
+						value: track.duration,
+						inline: true,
+					},
+					{
+						name: translator.getText('source'),
+						value: trackSource,
+						inline: true,
+					},
+				);
 
-			return request.editReply({ embeds: [ videoEmbed ] });
+			return request.editReply({ embeds: [ trackEmbed ] });
 		} catch (e) {
 			console.error(e);
 

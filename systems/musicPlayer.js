@@ -12,7 +12,7 @@ const QUEUE_PAGE_TRACKS_MAX = 5;
  * Registra un reproductor y extractor de YouTube
  * @param {import('discord.js').Client} client
  */
-async function prepareYouTubePlayer(client) {
+async function prepareTracksPlayer(client) {
 	const player = new Player(client, {
 		ytdlOptions: {
 			quality: 'highestaudio',
@@ -70,7 +70,10 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 	const makeReplyEmbed = () => new EmbedBuilder()
 		.setColor(0xff0000)
 		.setTitle(translator.getText('queueTitle'))
-		.setAuthor({ name: request.member.displayName, iconURL: request.member.displayAvatarURL({ size: 128 }) });
+		.setAuthor({
+			name: request.member.displayName,
+			iconURL: request.member.displayAvatarURL({ size: 128 }),
+		});
 
 	const player = useMainPlayer();
 	const queue = player.queues.get(request.guildId);
@@ -94,7 +97,7 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 		offset = (op === 'DE') ? Math.max(0, offset - QUEUE_PAGE_TRACKS_MAX) : 0;
 	
 	const tracks = queue.tracks.toArray().slice(offset, offset + QUEUE_PAGE_TRACKS_MAX);
-	const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size) : translator.getText('playFooterTextQueueSize', queue.size);
+	const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted) : translator.getText('playFooterTextQueueEmpty');
 	
 	const lastPage = queue.size ? (Math.ceil(queue.size / QUEUE_PAGE_TRACKS_MAX) - 1) : 0;
 	const previousPage = page === 0 ? lastPage : page - 1;
@@ -104,16 +107,16 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 	const queueEmbed = makeReplyEmbed()
 		.addFields(
 			{
-				name: `${translator.getText('queueNowPlayingName')}`,
+				name: `${translator.getText('queueNowPlayingName')}  ⏱️ ${currentTrack.duration}`,
 				value: `[${currentTrack.title}](${currentTrack.url})`,
 			},
 			...tracks.map((t, i) => ({
-				name: `${i + offset + 1}. - - -`,
-				value: `[${t.title || '<<Video>>'}](${t.url})`,
+				name: `${i + offset + 1}.  ⏱️ ${t.duration}`,
+				value: `[${t.title || '<<???>>'}](${t.url})`,
 			}),
 		))
 		.setFooter({
-			text: `${shortChannelName} • ${queueInfo} • ${page + 1} / ${lastPage + 1}`,
+			text: `${shortChannelName} • ${queueInfo} • ${page + 1}/${lastPage + 1}`,
 			iconURL: 'https://i.imgur.com/irsTBIH.png',
 		})
 		.setThumbnail(currentTrack.thumbnail)
@@ -122,10 +125,7 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 	const compressedUserId = compressId(request.user.id);
 
 	const components = [];
-	const buttonsRow = makeButtonRowBuilder();
-	components.push(buttonsRow);
-
-	buttonsRow.addComponents(
+	const actionRow = makeButtonRowBuilder().addComponents(
 		new ButtonBuilder()
 			.setCustomId(`cola_skip_${compressedUserId}_${page}`)
 			.setEmoji('934430008619962428')
@@ -134,7 +134,7 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 	);
 
 	if(queue.size) {
-		buttonsRow.addComponents(
+		actionRow.addComponents(
 			new ButtonBuilder()
 				.setCustomId(`cola_clearQueue_${compressedUserId}`)
 				.setEmoji('921751138997514290')
@@ -142,8 +142,17 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 				.setStyle(ButtonStyle.Danger),
 		);
 		
-		if(queue.size > QUEUE_PAGE_TRACKS_MAX)
-			buttonsRow.addComponents(
+		const refreshButtonBuilder = new ButtonBuilder()
+			.setCustomId(`cola_showPage_CU_${compressedUserId}_${page}`)
+			.setEmoji('934432754173624373')
+			.setStyle(ButtonStyle.Primary);
+
+		if(queue.size > QUEUE_PAGE_TRACKS_MAX) {
+			const navigationRow = makeButtonRowBuilder().addComponents(
+				new ButtonBuilder()
+					.setCustomId(`cola_showPage_FP_${compressedUserId}_0`)
+					.setEmoji('934430008586403900')
+					.setStyle(ButtonStyle.Secondary),
 				new ButtonBuilder()
 					.setCustomId(`cola_showPage_PV_${compressedUserId}_${previousPage}`)
 					.setEmoji('934430008343158844')
@@ -152,20 +161,32 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 					.setCustomId(`cola_showPage_NX_${compressedUserId}_${nextPage}`)
 					.setEmoji('934430008250871818')
 					.setStyle(ButtonStyle.Secondary),
+				new ButtonBuilder()
+					.setCustomId(`cola_showPage_LP_${compressedUserId}_${lastPage}`)
+					.setEmoji('934430008619962428')
+					.setStyle(ButtonStyle.Secondary),
+				refreshButtonBuilder,
 			);
+
+			components.push(navigationRow);
+		} else
+			actionRow.addComponents(refreshButtonBuilder);
 
 		const menuRow = makeStringSelectMenuRowBuilder().addComponents(
 			new StringSelectMenuBuilder()
 				.setCustomId(`cola_dequeue_${compressedUserId}_${page}`)
 				.setPlaceholder(translator.getText('queueMenuDequeuePlaceholder'))
 				.setMaxValues(1)
-				.addOptions(tracks.map(t => ({
+				.addOptions(tracks.map((t, i) => ({
 					label: shortenText(t.title, 48),
-					value: t.id,
+					value: `${page}:${i}:${t.id}`,
 				})))
 		);
+		
+		components.push(actionRow);
 		components.push(menuRow);
-	}
+	} else
+		components.push(actionRow);
 
 	const replyObj = {
 		embeds: [ queueEmbed ],
@@ -176,7 +197,18 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 		: /**@type {ButtonInteraction<'cached'>}*/(request).update(replyObj);
 }
 
+/**
+ * 
+ * @param {Number} page 
+ * @param {Number} num 
+ */
+function getPageAndNumberTrackIndex(page, num) {
+	const pageOffset = page * QUEUE_PAGE_TRACKS_MAX;
+	return pageOffset + num;
+}
+
 module.exports = {
-	prepareYouTubePlayer,
+	prepareTracksPlayer,
 	showQueuePage,
+	getPageAndNumberTrackIndex,
 };

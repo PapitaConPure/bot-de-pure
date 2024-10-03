@@ -157,6 +157,10 @@ let localesObject = /**@type {const}*/({
 		es: 'Ícono',
 		en: 'Icon',
 	},
+	duration: {
+		es: 'Duración',
+		en: 'Duration',
+	},
 	hours: {
 		es: 'Horas',
 		en: 'Hours',
@@ -200,6 +204,10 @@ let localesObject = /**@type {const}*/({
 	never: {
 		es: 'Nunca',
 		en: 'Never',
+	},
+	source: {
+		es: 'Origen',
+		en: 'Source',
 	},
 
 	buttonStart: {
@@ -344,12 +352,16 @@ let localesObject = /**@type {const}*/({
 		en: 'Started playing...',
 	},
 	playFooterTextQueueSize: {
-		es: `${subl(0)} pistas en cola`,
-		en: `${subl(0)} queued tracks`,
+		es: `${subl(0)} pistas en cola (${subl(1)})`,
+		en: `${subl(0)} queued tracks (${subl(1)})`,
 	},
 	playFooterTextQueueEmpty: {
 		es: 'La cola está vacía',
 		en: 'The queue is empty',
+	},
+	playValueTrackSourceArbitrary: {
+		es: 'Fuente arbitraria',
+		en: 'Arbitrary source',
 	},
 	
 	pauseTitleNoTrack: {
@@ -399,8 +411,8 @@ let localesObject = /**@type {const}*/({
 		en: 'Queue has been cleared',
 	},
 	queueMenuDequeuePlaceholder: {
-		es: 'Quitar un video de la cola...',
-		en: 'Dequeue a video...',
+		es: 'Quitar una pista de la cola...',
+		en: 'Dequeue a track...',
 	},
 	queueDequeueTitleTrackNotFound: {
 		es: 'No se encontró la pista a quitar',

@@ -19,7 +19,7 @@ const command = new CommandManager('pausar', tags)
 
 		const channel = request.member.voice?.channel;
 		if(!channel)
-			return request.reply(translator.getText('voiceExpected'));
+			return request.reply({ content: translator.getText('voiceExpected'), ephemeral: true });
 		
 		const makeReplyEmbed = () => new EmbedBuilder()
 			.setColor(0xff0000)
@@ -32,7 +32,7 @@ const command = new CommandManager('pausar', tags)
 		const player = useMainPlayer();
 		const queue = player.queues.get(request.guildId);
 
-		if(!queue.currentTrack) {
+		if(!queue?.currentTrack) {
 			const embed = makeReplyEmbed()
 				.setTitle(translator.getText('pauseTitleNoTrack'));
 			return request.reply({ embeds: [ embed ], ephemeral: true });

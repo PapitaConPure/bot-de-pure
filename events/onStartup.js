@@ -34,7 +34,7 @@ const { promisify } = require('util');
 const chalk = require('chalk');
 const Poll = require('../localdata/models/poll.js');
 
-const { prepareYouTubePlayer } = require('../systems/musicPlayer.js')
+const { prepareTracksPlayer } = require('../systems/musicPlayer.js')
 const { initializeWebhookMessageOwners } = require('../systems/agents/discordagent.js');
 const { refreshPixivAccessToken } = require('../systems/agents/purepix.js');
 
@@ -112,7 +112,7 @@ async function onStartup(client) {
 	confirm();
 	
 	console.log((chalk.rgb(255, 0, 0))('Preparando Reproductor de YouTube...'));
-	await prepareYouTubePlayer(client);
+	await prepareTracksPlayer(client);
 	confirm();
 	
 	//Cargado de datos de base de datos
