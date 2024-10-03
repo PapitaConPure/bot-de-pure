@@ -1,7 +1,8 @@
 const { EmbedBuilder } = require('discord.js'); //Integrar discord.js
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands.js');
-const { Translator } = require('../../internationalization.js');
 const { useMainPlayer } = require('discord-player');
+const { Translator } = require('../../internationalization.js');
+const { saveTracksQueue, tryRecoverSavedTracksQueue } = require('../../localdata/models/playerQueue.js');
 
 const options = new CommandOptions()
 	.addParam('búsqueda', 'TEXT', 'para realizar una búsqueda');
@@ -43,6 +44,8 @@ const command = new CommandManager('reproducir', tags)
 			})
 			.setTimestamp(Date.now());
 		try {
+			await tryRecoverSavedTracksQueue(request, false);
+
 			const { track, queue } = await player.play(channel, query, {
 				nodeOptions: { metadata: request },
 			});
@@ -83,13 +86,15 @@ const command = new CommandManager('reproducir', tags)
 					},
 				);
 
-			return request.editReply({ embeds: [ trackEmbed ] });
+			return Promise.all([
+				saveTracksQueue(request, queue),
+				request.editReply({ embeds: [ trackEmbed ] }),
+			]);
 		} catch (e) {
 			console.error(e);
 
 			const errorEmbed = makeReplyEmbed(0x990000)
 				.setTitle(translator.getText('somethingWentWrong'));
-
 			return request.editReply({ embeds: [ errorEmbed ] });
 		}
 	});

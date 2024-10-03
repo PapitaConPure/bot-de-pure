@@ -4,6 +4,7 @@ const { EmbedBuilder, ButtonBuilder, ButtonStyle, ButtonInteraction, StringSelec
 const { compressId, decompressId, shortenText } = require('../func.js'); //Funciones globales
 const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } = require('../tsCasts.js');
 const { Translator } = require('../internationalization.js');
+const { tryRecoverSavedTracksQueue, saveTracksQueue } = require('../localdata/models/playerQueue.js');
 
 /**Cantidad máxima de pistas por página al mostrar la cola de reproducción*/
 const QUEUE_PAGE_TRACKS_MAX = 5;
@@ -27,9 +28,10 @@ async function prepareTracksPlayer(client) {
 	});
 	await player.extractors.loadDefault();
 	
-	//player.events.on('playerStart', (queue, track) => {
-	//	queue.metadata.channel.send(`Started playing **${track.title}**!`);
-	//});
+	player.events.on('playerFinish', (queue, _track) => {
+		saveTracksQueue(queue.metadata, queue);
+	});
+
 	player.events.on('error', (err) => {
 		console.log('Error general de reproductor');
 		console.log({ err });
@@ -44,7 +46,7 @@ async function prepareTracksPlayer(client) {
 		console.log(`Error emitted from the player: ${error.message}`);
 	});
 	player.events.on('connectionDestroyed', (queue) => {
-		console.log(`[${queue.guild.name}] Error emitted from the connection`);
+		console.log(`[${queue.guild.name}] Connection destroyed`);
 	});
 }
 
@@ -76,7 +78,7 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 		});
 
 	const player = useMainPlayer();
-	const queue = player.queues.get(request.guildId);
+	const queue = player.queues.get(request.guildId) ?? (await tryRecoverSavedTracksQueue(request));
 
 	if(!queue?.currentTrack) {
 		const embed = makeReplyEmbed()
@@ -107,7 +109,7 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 	const queueEmbed = makeReplyEmbed()
 		.addFields(
 			{
-				name: `${translator.getText('queueNowPlayingName')}  ⏱️ ${currentTrack.duration}`,
+				name: `${queue.node.isPaused() ? '0.' : translator.getText('queueNowPlayingName')}  ⏱️ ${currentTrack.duration}`,
 				value: `[${currentTrack.title}](${currentTrack.url})`,
 			},
 			...tracks.map((t, i) => ({

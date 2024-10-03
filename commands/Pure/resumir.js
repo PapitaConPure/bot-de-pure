@@ -3,6 +3,7 @@ const { shortenText } = require('../../func.js');
 const { CommandTags, CommandManager } = require('../Commons/commands.js');
 const { Translator } = require('../../internationalization.js');
 const { useMainPlayer } = require('discord-player');
+const { tryRecoverSavedTracksQueue } = require('../../localdata/models/playerQueue.js');
 
 const tags = new CommandTags().add('COMMON');
 
@@ -17,11 +18,14 @@ const command = new CommandManager('resumir', tags)
 		'Resume la reproducción de la pista de audio actual si es que estaba pausada',
 	)
 	.setExperimentalExecution(async (request, args) => {
-		const translator = await Translator.from(request.userId);
+		const [ translator ] = await Promise.all([
+			Translator.from(request.userId),
+			request.deferReply(),
+		]);
 
 		const channel = request.member.voice?.channel;
 		if(!channel)
-			return request.reply({ content: translator.getText('voiceExpected'), ephemeral: true });
+			return request.editReply({ content: translator.getText('voiceExpected'), ephemeral: true });
 		
 		const makeReplyEmbed = () => new EmbedBuilder()
 			.setColor(0xff0000)
@@ -32,12 +36,12 @@ const command = new CommandManager('resumir', tags)
 			});
 
 		const player = useMainPlayer();
-		const queue = player.queues.get(request.guildId);
+		const queue = player.queues.get(request.guildId) ?? (await tryRecoverSavedTracksQueue(request));
 
 		if(!queue?.currentTrack) {
 			const embed = makeReplyEmbed()
 				.setTitle(translator.getText('pauseTitleNoTrack'));
-			return request.reply({ embeds: [ embed ], ephemeral: true });
+			return request.editReply({ embeds: [ embed ], ephemeral: true });
 		}
 
 		const currentTrack = queue.currentTrack;
@@ -47,13 +51,13 @@ const command = new CommandManager('resumir', tags)
 		
 		if(!queue.node.isPaused() && queue.node.isPlaying()) {
 			embed.setTitle(translator.getText('resumirTitleTrackAlreadyResumed'));
-			return request.reply({ embeds: [ embed ], ephemeral: true });
+			return request.editReply({ embeds: [ embed ], ephemeral: true });
 		}
 
 		queue.node.resume();
 
 		embed.setTitle(translator.getText('resumirTitleResumed'));
-		return request.reply({ embeds: [ embed ] });
+		return request.editReply({ embeds: [ embed ] });
 	});
 
 module.exports = command;

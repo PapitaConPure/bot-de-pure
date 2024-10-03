@@ -1,9 +1,10 @@
 const { EmbedBuilder } = require('discord.js'); //Integrar discord.js
 const { decompressId, shortenText, sleep } = require('../../func.js'); //Funciones globales
 const { CommandTags, CommandManager } = require('../Commons/commands.js');
-const { Translator } = require('../../internationalization.js');
-const { useMainPlayer } = require('discord-player');
+const { useMainPlayer, serialize, deserialize } = require('discord-player');
 const { showQueuePage, getPageAndNumberTrackIndex } = require('../../systems/musicPlayer.js');
+const { Translator } = require('../../internationalization.js');
+const { tryRecoverSavedTracksQueue } = require('../../localdata/models/playerQueue.js');
 
 const tags = new CommandTags().add('COMMON');
 
@@ -41,7 +42,7 @@ const command = new CommandManager('cola', tags)
 			});
 
 		const player = useMainPlayer();
-		const queue = player.queues.get(interaction.guildId);
+		const queue = player.queues.get(interaction.guildId) ?? (await tryRecoverSavedTracksQueue(interaction));
 		if(!queue?.currentTrack) {
 			const embed = makeReplyEmbed()
 				.setTitle(translator.getText('queueSkipTitleNoTrack'));
@@ -131,7 +132,7 @@ const command = new CommandManager('cola', tags)
 
 		const [ delPage, delNum, delId ] = interaction.values[0].split(':');
 		const delIndex = getPageAndNumberTrackIndex(+delPage, +delNum);
-		if(delIndex < 0 || delIndex >= queue.size) {
+		if(delIndex < 0 || delIndex >= (queue?.size ?? 0)) {
 			const embed = makeReplyEmbed()
 				.setTitle(translator.getText('queueDequeueTitleTrackNotFound'))
 				.setDescription(translator.getText('queueDequeueDescriptionTrackNotFound'));
