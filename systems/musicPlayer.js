@@ -106,11 +106,19 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 	const nextPage = page === lastPage ? 0 : page + 1;
 	
 	const currentTrack = queue.currentTrack;
+	const isPaused = queue.node.isPaused();
+	const progressBar = isPaused ? '' : `\n${queue.node.createProgressBar({
+		length: 42,
+		queue: false,
+		timecodes: false,
+		leftChar:  '▰',
+		rightChar: ' ',
+	})}`;
 	const queueEmbed = makeReplyEmbed()
 		.addFields(
 			{
-				name: `${queue.node.isPaused() ? '0.' : translator.getText('queueNowPlayingName')}  ⏱️ ${currentTrack.duration}`,
-				value: `[${currentTrack.title}](${currentTrack.url})`,
+				name: `${isPaused ? '0.' : translator.getText('queueNowPlayingName')}  ⏱️ ${currentTrack.duration}`,
+				value: `[${currentTrack.title}](${currentTrack.url})${progressBar}`,
 			},
 			...tracks.map((t, i) => ({
 				name: `${i + offset + 1}.  ⏱️ ${t.duration}`,
