@@ -34,7 +34,7 @@ const { promisify } = require('util');
 const chalk = require('chalk');
 const Poll = require('../localdata/models/poll.js');
 
-const { prepareYouTubePlayer } = require('../systems/youtubePlayer.js')
+const { prepareYouTubePlayer } = require('../systems/musicPlayer.js')
 const { initializeWebhookMessageOwners } = require('../systems/agents/discordagent.js');
 const { refreshPixivAccessToken } = require('../systems/agents/purepix.js');
 

@@ -1,5 +1,4 @@
 const { EmbedBuilder } = require('discord.js'); //Integrar discord.js
-const { warn, unable } = require('../../func.js'); //Funciones globales
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands.js');
 const { Translator } = require('../../internationalization.js');
 const { useMainPlayer } = require('discord-player');
@@ -15,9 +14,9 @@ const command = new CommandManager('reproducir', tags)
 		'play',
 		'p',
 	)
-	.setBriefDescription('Reproduce música de YouTube')
+	.setBriefDescription('Reproduce pistas de audio')
 	.setLongDescription(
-		'Reproduce el audio de un video de YouTube según la `búsqueda` realizada.',
+		'Reproduce una pista de audio según la `búsqueda` realizada.',
 	)
 	.setOptions(options)
 	.setExperimentalExecution(async (request, args) => {
@@ -27,7 +26,7 @@ const command = new CommandManager('reproducir', tags)
 			return request.reply({ content: translator.getText('playSearchExpected'), ephemeral: true });
 
 		const player = useMainPlayer();
-		const channel = request.member.voice.channel;
+		const channel = request.member.voice?.channel;
 
 		if(!channel)
 			return request.reply(translator.getText('voiceExpected'));
@@ -48,13 +47,14 @@ const command = new CommandManager('reproducir', tags)
 				nodeOptions: { metadata: request },
 			});
 
+			const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size) : translator.getText('playFooterTextQueueEmpty');
 			const videoEmbed = makeReplyEmbed(0xff0000)
 				.setTitle(queue.size ? translator.getText('playTitleQueueAdded') : translator.getText('playTitleQueueNew'))
 				.setDescription(`[${track.title}](${track.url})`)
 				.setThumbnail(track.thumbnail)
 				.setFooter({
-					text: queue.size ? translator.getText('playFooterTextQueueSize', queue.size) : translator.getText('playFooterTextQueueEmpty'),
-					iconURL: 'https://i.imgur.com/g4CBKd7.png',
+					text: `${channel.name} • ${queueInfo}`,
+					iconURL: 'https://i.imgur.com/irsTBIH.png',
 				});
 
 			return request.editReply({ embeds: [ videoEmbed ] });

@@ -40,6 +40,7 @@
     "mongoose": "^6.2.7",
     "mongoose-int32": "^0.6.0",
     "object-sizeof": "^2.6.5",
-    "pixiv-api-client": "^0.25.0"
+    "pixiv-api-client": "^0.25.0",
+    "ytdl-core": "^4.11.5"
   }
 }

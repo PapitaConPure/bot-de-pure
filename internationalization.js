@@ -344,12 +344,79 @@ let localesObject = /**@type {const}*/({
 		en: 'Started playing...',
 	},
 	playFooterTextQueueSize: {
-		es: `${subl(0)} videos en cola`,
-		en: `${subl(0)} queued videos`,
+		es: `${subl(0)} pistas en cola`,
+		en: `${subl(0)} queued tracks`,
 	},
 	playFooterTextQueueEmpty: {
 		es: 'La cola está vacía',
 		en: 'The queue is empty',
+	},
+	
+	pauseTitleNoTrack: {
+		es: 'No hay ninguna pista a pausar actualmente',
+		en: 'No track currently playing to pause',
+	},
+	pauseTitleTrackAlreadyPaused: {
+		es: 'La pista actual ya está pausada',
+		en: 'The current track is already paused',
+	},
+	pauseTitlePaused: {
+		es: 'Pista pausada',
+		en: 'Track paused',
+	},
+	
+	resumirTitleTrackAlreadyResumed: {
+		es: 'La pista actual ya está pausada',
+		en: 'The current track is already paused',
+	},
+	resumirTitleResumed: {
+		es: 'Pista resumida',
+		en: 'Track resumed',
+	},
+
+	queueTitle: {
+		es: 'Cola de reproducción',
+		en: 'Music Queue',
+	},
+	queueDescriptionEmptyQueue: {
+		es: 'La cola de reproducción está vacía',
+		en: 'The queue is empty',
+	},
+	queueNowPlayingName: {
+		es: 'Escuchando Ahora',
+		en: 'Now Playing',
+	},
+	queueButtonSkip: {
+		es: 'Saltar Pista Actual',
+		en: 'Skip Current Track',
+	},
+	queueButtonClearQueue: {
+		es: 'Vaciar Cola',
+		en: 'Clear Queue',
+	},
+	queueClearTitleQueueCleared: {
+		es: 'La cola de reproducción fue vaciada',
+		en: 'Queue has been cleared',
+	},
+	queueMenuDequeuePlaceholder: {
+		es: 'Quitar un video de la cola...',
+		en: 'Dequeue a video...',
+	},
+	queueDequeueTitleTrackNotFound: {
+		es: 'No se encontró la pista a quitar',
+		en: 'Couldn\'t find the track to remove',
+	},
+	queueDequeueDescriptionTrackNotFound: {
+		es: 'Puedes usar p!cola nuevamente e intentarlo otra vez',
+		en: 'You can use p!queue once more and try it again',
+	},
+	queueSkipTitleNoTrack: {
+		es: 'No hay ninguna pista a saltar actualmente',
+		en: 'No track currently playing to skip',
+	},
+	queueSkipTitleSkipped: {
+		es: 'Pista saltada',
+		en: 'Track skipped',
 	},
 
 	poll: {
