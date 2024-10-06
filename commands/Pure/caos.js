@@ -1,4 +1,4 @@
-const { readdirSync } = require('fs'); //Integrar operaciones sistema de archivos de consola
+const { readdir } = require('fs/promises'); //Integrar operaciones sistema de archivos de consola
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
@@ -33,7 +33,7 @@ const command = new CommandManager('caos', tags)
 			return request.reply({ content: '😴 Se desactivaron los comandos caóticos' });
 		}
 
-		const cfiles = readdirSync('./commands/Pure').filter(file => file.endsWith('.js'));
+		const cfiles = (await readdir('./commands/Pure')).filter(file => file.endsWith('.js'));
 		const chaosnames = [];
 		for(const file of cfiles) {
 			const command = require(`../../commands/Pure/${file}`);
