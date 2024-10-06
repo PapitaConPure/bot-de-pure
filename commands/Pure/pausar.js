@@ -1,13 +1,15 @@
-const { EmbedBuilder } = require('discord.js'); //Integrar discord.js
+const { EmbedBuilder, Colors } = require('discord.js'); //Integrar discord.js
 const { shortenText } = require('../../func.js');
 const { CommandTags, CommandManager } = require('../Commons/commands.js');
 const { Translator } = require('../../internationalization.js');
 const { useMainPlayer } = require('discord-player');
+const { isPlayerUnavailable, SERVICES } = require('../../systems/musicPlayer.js');
 
 const tags = new CommandTags().add('COMMON');
 
 const command = new CommandManager('pausar', tags)
 	.setAliases(
+		'pausa',
 		'pause',
 	)
 	.setBriefDescription('Pausa una pista de audio en reproducción')
@@ -23,29 +25,37 @@ const command = new CommandManager('pausar', tags)
 		const channel = request.member.voice?.channel;
 		if(!channel)
 			return request.editReply({ content: translator.getText('voiceExpected'), ephemeral: true });
+
+		if(isPlayerUnavailable(channel))
+			return request.editReply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
 		
-		const makeReplyEmbed = () => new EmbedBuilder()
-			.setColor(0xff0000)
+		/**
+		 * @param {import('discord.js').ColorResolvable} color
+		 * @param {String} [iconUrl]
+		 */
+		const makeReplyEmbed = (color, iconUrl = 'https://i.imgur.com/irsTBIH.png') => new EmbedBuilder()
+			.setColor(color)
 			.setAuthor({
 				name: request.member.displayName,
 				iconURL: request.member.displayAvatarURL({ size: 128 }),
 			})
 			.setFooter({
 				text: `${shortenText(channel.name, 32)}`,
-				iconURL: 'https://i.imgur.com/irsTBIH.png',
+				iconURL: iconUrl,
 			});
 
 		const player = useMainPlayer();
 		const queue = player.queues.get(request.guildId);
 
 		if(!queue?.currentTrack) {
-			const embed = makeReplyEmbed()
+			const embed = makeReplyEmbed(Colors.Blurple)
 				.setTitle(translator.getText('pauseTitleNoTrack'));
 			return request.editReply({ embeds: [ embed ], ephemeral: true });
 		}
 
 		const currentTrack = queue.currentTrack;
-		const embed = makeReplyEmbed()
+		const service = SERVICES[currentTrack.source];
+		const embed = makeReplyEmbed(service.color, service.iconUrl)
 			.setDescription(`[${currentTrack.title}](${currentTrack.url})`)
 			.setThumbnail(currentTrack.thumbnail);
 		

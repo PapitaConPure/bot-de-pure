@@ -3,6 +3,7 @@ const { CommandOptions, CommandTags, CommandManager } = require('../Commons/comm
 const { useMainPlayer } = require('discord-player');
 const { Translator } = require('../../internationalization.js');
 const { saveTracksQueue, tryRecoverSavedTracksQueue } = require('../../localdata/models/playerQueue.js');
+const { isPlayerUnavailable, SERVICES } = require('../../systems/musicPlayer.js');
 
 const options = new CommandOptions()
 	.addParam('búsqueda', 'TEXT', 'para realizar una búsqueda');
@@ -26,11 +27,12 @@ const command = new CommandManager('reproducir', tags)
 		if(args.empty)
 			return request.reply({ content: translator.getText('playSearchExpected'), ephemeral: true });
 
-		const player = useMainPlayer();
 		const channel = request.member.voice?.channel;
-
 		if(!channel)
-			return request.reply(translator.getText('voiceExpected'));
+			return request.reply({ content: translator.getText('voiceExpected') });
+
+		if(isPlayerUnavailable(channel))
+			return request.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
 		
 		const query = args.getString('búsqueda', true);
 		await request.deferReply();
@@ -46,32 +48,21 @@ const command = new CommandManager('reproducir', tags)
 		try {
 			await tryRecoverSavedTracksQueue(request, false);
 
+			const player = useMainPlayer();
 			const { track, queue } = await player.play(channel, query, {
 				nodeOptions: { metadata: request },
 			});
 
-			const trackSource = (() => {
-				switch(track.source) {
-				case 'youtube':
-					return 'YouTube';
-				case 'spotify':
-					return 'Spotify';
-				case 'apple_music':
-					return 'Apple Music';
-				case 'soundcloud':
-					return 'SoundCloud'
-				default:
-					return translator.getText('playValueTrackSourceArbitrary');
-				}
-			})();
+			const service = SERVICES[track.source];
+			const trackSourceName = service.name ?? translator.getText('playValueTrackSourceArbitrary');
 			const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted) : translator.getText('playFooterTextQueueEmpty');
-			const trackEmbed = makeReplyEmbed(0xff0000)
+			const trackEmbed = makeReplyEmbed(service.color)
 				.setTitle(queue.size ? translator.getText('playTitleQueueAdded') : translator.getText('playTitleQueueNew'))
 				.setDescription(`[${track.title}](${track.url})`)
 				.setThumbnail(track.thumbnail)
 				.setFooter({
 					text: `${channel.name} • ${queueInfo}`,
-					iconURL: 'https://i.imgur.com/irsTBIH.png',
+					iconURL: service.iconUrl,
 				})
 				.addFields(
 					{
@@ -81,7 +72,7 @@ const command = new CommandManager('reproducir', tags)
 					},
 					{
 						name: translator.getText('source'),
-						value: trackSource,
+						value: trackSourceName,
 						inline: true,
 					},
 				);
@@ -94,7 +85,11 @@ const command = new CommandManager('reproducir', tags)
 			console.error(e);
 
 			const errorEmbed = makeReplyEmbed(0x990000)
-				.setTitle(translator.getText('somethingWentWrong'));
+				.setTitle(translator.getText('somethingWentWrong'))
+				.addFields({
+					name: 'Error',
+					value: `\`\`\`\n${e?.message ?? e?.name ?? e ?? 'Error desconocido'}\n\`\`\``,
+				});
 			return request.editReply({ embeds: [ errorEmbed ] });
 		}
 	});

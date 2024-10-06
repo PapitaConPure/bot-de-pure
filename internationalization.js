@@ -87,8 +87,8 @@ let localesObject = /**@type {const}*/({
 		en: '☕ Seems like you found a button, select menu, or modal window without a function. While I wire some things up, take this coffee',
 	},
 	unauthorizedInteraction: {
-		es: '❌ No puedes hacer eso',
-		en: '❌ You can\'t do that',
+		es: '❌ No puedes hacer eso. Si intentaste interactuar con un mensaje de comando, prueba usando el comando tú mismo',
+		en: '❌ You can\'t do that. If you tried to interact with a command message, try calling the command yourself',
 	},
 	expiredWizardData: {
 		es: '❌ Este asistente hace uso de memoria de sesión, pero no se encontró ninguna sesión. Vuelve a usar el comando para crear una nueva sesión de este asistente',
@@ -102,6 +102,10 @@ let localesObject = /**@type {const}*/({
 	voiceExpected: {
 		es: '❌ Debes conectarte a un canal de voz primero',
 		en: '❌ You need to connect to a voice channel first',
+	},
+	voiceSameChannelExpected: {
+		es: '❌ Ya estoy conectada a otro chat de voz. ¡Ven conmigo antes de hacer eso!',
+		en: '❌ I\'m already connected to another voice channel. Come here before doing that!',
 	},
 
 	invalidInput: {
@@ -377,9 +381,13 @@ let localesObject = /**@type {const}*/({
 		en: 'Track paused',
 	},
 	
+	resumirTitleNoTrack: {
+		es: 'No hay ninguna pista a resumir actualmente',
+		en: 'No track currently playing to resume',
+	},
 	resumirTitleTrackAlreadyResumed: {
-		es: 'La pista actual ya está pausada',
-		en: 'The current track is already paused',
+		es: 'La pista actual ya está sonando',
+		en: 'The current track is already playing',
 	},
 	resumirTitleResumed: {
 		es: 'Pista resumida',
@@ -398,9 +406,17 @@ let localesObject = /**@type {const}*/({
 		es: 'Escuchando Ahora',
 		en: 'Now Playing',
 	},
+	queueModalAddQueryLabel: {
+		es: 'Busca una pista',
+		en: 'Track query',
+	},
+	queueModalAddQueryPlaceholder: {
+		es: 'Busca una pista',
+		en: 'Track query',
+	},
 	queueButtonSkip: {
-		es: 'Saltar Pista Actual',
-		en: 'Skip Current Track',
+		es: 'Saltar Pista',
+		en: 'Skip Track',
 	},
 	queueButtonClearQueue: {
 		es: 'Vaciar Cola',
@@ -421,6 +437,10 @@ let localesObject = /**@type {const}*/({
 	queueDequeueDescriptionTrackNotFound: {
 		es: 'Puedes usar p!cola nuevamente e intentarlo otra vez',
 		en: 'You can use p!queue once more and try it again',
+	},
+	queueDequeueTitleDequeued: {
+		es: 'Pista quitada',
+		en: 'Track removed',
 	},
 	queueSkipTitleNoTrack: {
 		es: 'No hay ninguna pista a saltar actualmente',

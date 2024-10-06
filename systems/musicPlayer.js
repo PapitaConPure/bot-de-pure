@@ -1,10 +1,37 @@
 const { Player, useMainPlayer } = require('discord-player');
 const { YoutubeiExtractor } = require('discord-player-youtubei');
-const { EmbedBuilder, ButtonBuilder, ButtonStyle, ButtonInteraction, StringSelectMenuBuilder, StringSelectMenuInteraction } = require('discord.js'); //Integrar discord.js
+const { EmbedBuilder, ButtonBuilder, ButtonStyle, ButtonInteraction, StringSelectMenuBuilder, StringSelectMenuInteraction, ModalSubmitInteraction, Colors } = require('discord.js'); //Integrar discord.js
 const { compressId, decompressId, shortenText } = require('../func.js'); //Funciones globales
 const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } = require('../tsCasts.js');
 const { Translator } = require('../internationalization.js');
 const { tryRecoverSavedTracksQueue, saveTracksQueue } = require('../localdata/models/playerQueue.js');
+
+/**
+ * @typedef {import('discord-player').Track['source']} ServiceKey
+ * 
+ * @typedef {Object}  BaseServiceInfo
+ * @property {Number} color
+ * @property {String} iconUrl
+ * 
+ * @typedef {Object} KnownServiceInfo
+ * @property {String} name
+ * @property {false} isArbitrary
+ * 
+ * @typedef {Object} ArbitraryServiceInfo
+ * @property {null} name
+ * @property {true} isArbitrary
+ * 
+ * @typedef {BaseServiceInfo & (KnownServiceInfo | ArbitraryServiceInfo)} ServiceInfo
+ */
+
+/**@type {{ [K in ServiceKey]: ServiceInfo }}*/
+const SERVICES = {
+	youtube:     { name: 'YouTube',     color: 0xff0000, iconUrl: 'https://i.imgur.com/0k9tFqd.png', isArbitrary: false },
+	spotify:     { name: 'Spotify',     color: 0x1db954, iconUrl: 'https://i.imgur.com/qpCz3Ug.png', isArbitrary: false },
+	soundcloud:  { name: 'SoundCloud',  color: 0xff7e19, iconUrl: 'https://i.imgur.com/UVx6eva.png', isArbitrary: false },
+	apple_music: { name: 'Apple Music', color: 0xfc334a, iconUrl: 'https://i.imgur.com/Nw0aLwN.png', isArbitrary: false },
+	arbitrary:   { name: null,          color: 0x9e3845, iconUrl: 'https://i.imgur.com/LC5Ic3R.png', isArbitrary: true  },
+};
 
 /**Cantidad máxima de pistas por página al mostrar la cola de reproducción*/
 const QUEUE_PAGE_TRACKS_MAX = 5;
@@ -37,9 +64,10 @@ async function prepareTracksPlayer(client) {
 		console.log({ err });
 	});
 
-	player.events.on('playerError', (err) => {
+	player.events.on('playerError', (queue, err) => {
 		console.log('Error de reproductor');
-		console.log({ err });
+		console.log({ queue });
+		console.error(err);
 	});
 
 	player.on('error', (error) => {
@@ -52,7 +80,7 @@ async function prepareTracksPlayer(client) {
 
 /**
  * Muestra una página de la queue de la Guild actual
- * @param {import('../commands/Commons/typings.js').ComplexCommandRequest | ButtonInteraction<'cached'> | StringSelectMenuInteraction<'cached'>} request El request que desencadenó esta petición
+ * @param {import('../commands/Commons/typings.js').ComplexCommandRequest | ButtonInteraction<'cached'> | StringSelectMenuInteraction<'cached'> | ModalSubmitInteraction<'cached'>} request El request que desencadenó esta petición
  * @param {String} [op] La operación particular que desencadena esta función
  * @param {String} [authorId] ID del autor para verificar permisos de botón
  * @param {Number} [page=0] Número de página, enumerado desde 0 y por defecto 0
@@ -65,33 +93,44 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 	
 	const channel = request.member.voice?.channel;
 	if(!channel)
-		return request.reply({ content: translator.getText('voiceExpected') });
+		return (request.reply)({ content: translator.getText('voiceExpected'), ephemeral: true });
+
+	if(isPlayerUnavailable(channel))
+		return request.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
 	
 	const shortChannelName = shortenText(channel.name, 20);
 
-	const makeReplyEmbed = () => new EmbedBuilder()
-		.setColor(0xff0000)
+	/**@param {import('discord.js').ColorResolvable} color*/
+	const makeReplyEmbed = (color) => new EmbedBuilder()
+		.setColor(color)
 		.setTitle(translator.getText('queueTitle'))
 		.setAuthor({
 			name: request.member.displayName,
 			iconURL: request.member.displayAvatarURL({ size: 128 }),
 		});
+	
+	if(op !== 'PL') {
+		await ((!op || op === 'CM')
+			? request.deferReply()
+			: /**@type {ButtonInteraction<'cached'>}*/(request).deferUpdate());
+	}
 
 	const player = useMainPlayer();
 	const queue = player.queues.get(request.guildId) ?? (await tryRecoverSavedTracksQueue(request));
 
-	if(!queue?.currentTrack) {
-		const embed = makeReplyEmbed()
+	if(!queue?.currentTrack && !queue?.size) {
+		const embed = makeReplyEmbed(Colors.Blurple)
 			.setDescription(translator.getText('queueDescriptionEmptyQueue'))
 			.setFooter({
 				text: `${shortChannelName}`,
 				iconURL: 'https://i.imgur.com/irsTBIH.png',
 			});
 
-		const replyObj = { embeds: [ embed ] };
-		return (!op || op === 'CM')
-			? request.reply(replyObj)
-			: /**@type {ButtonInteraction<'cached'>}*/(request).update(replyObj);
+		const replyObj = {
+			embeds: [ embed ],
+			components: [ getQueueActionRow(queue, page, request.user.id, translator) ],
+		};
+		return request.editReply(replyObj);
 	}
 
 	let offset = page * QUEUE_PAGE_TRACKS_MAX;
@@ -104,59 +143,54 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 	const lastPage = queue.size ? (Math.ceil(queue.size / QUEUE_PAGE_TRACKS_MAX) - 1) : 0;
 	const previousPage = page === 0 ? lastPage : page - 1;
 	const nextPage = page === lastPage ? 0 : page + 1;
+	const footerText = `${shortChannelName} • ${queueInfo} • ${page + 1}/${lastPage + 1}`;
+
+	let queueEmbed;
 	
-	const currentTrack = queue.currentTrack;
-	const isPaused = queue.node.isPaused();
-	const progressBar = isPaused ? '' : `\n${queue.node.createProgressBar({
-		length: 42,
-		queue: false,
-		timecodes: false,
-		leftChar:  '▰',
-		rightChar: ' ',
-	})}`;
-	const queueEmbed = makeReplyEmbed()
-		.addFields(
-			{
-				name: `${isPaused ? '0.' : translator.getText('queueNowPlayingName')}  ⏱️ ${currentTrack.duration}`,
+	if(queue.currentTrack) {
+		const currentTrack = queue.currentTrack;
+		const isPaused = queue.node.isPaused();
+		const progressBar = isPaused ? '' : `\n${queue.node.createProgressBar({
+			length: 16,
+			queue: false,
+			timecodes: false,
+			leftChar:  '▰',
+			indicator: '',
+			rightChar: '▱',
+		})}`;
+		
+		const service = SERVICES[currentTrack.source];
+		queueEmbed = makeReplyEmbed(service.color)
+			.setThumbnail(currentTrack.thumbnail)
+			.addFields({
+				name: `${isPaused ? '0.' : translator.getText('queueNowPlayingName')}  ⏱️ ${currentTrack.duration}${ currentTrack.requestedBy ? `  👤 ${currentTrack.requestedBy.username}` : '' }`,
 				value: `[${currentTrack.title}](${currentTrack.url})${progressBar}`,
-			},
-			...tracks.map((t, i) => ({
-				name: `${i + offset + 1}.  ⏱️ ${t.duration}`,
-				value: `[${t.title || '<<???>>'}](${t.url})`,
-			}),
-		))
-		.setFooter({
-			text: `${shortChannelName} • ${queueInfo} • ${page + 1}/${lastPage + 1}`,
-			iconURL: 'https://i.imgur.com/irsTBIH.png',
-		})
-		.setThumbnail(currentTrack.thumbnail)
+			})
+			.setFooter({
+				text: footerText,
+				iconURL: service.iconUrl,
+			});
+	} else {
+		queueEmbed = makeReplyEmbed(Colors.Blurple)
+			.setFooter({
+				text: footerText,
+				iconURL: 'https://i.imgur.com/irsTBIH.png',
+			});
+	}
+	
+	queueEmbed
+		.addFields(...tracks.map((t, i) => ({
+			name: `${i + offset + 1}.  ⏱️ ${t.duration}${ t.requestedBy ? `  👤 ${t.requestedBy.username}` : '' }`,
+			value: `[${t.title || '<<???>>'}](${t.url})`,
+		})))
 		.setTimestamp(Date.now());
 	
 	const compressedUserId = compressId(request.user.id);
 
 	const components = [];
-	const actionRow = makeButtonRowBuilder().addComponents(
-		new ButtonBuilder()
-			.setCustomId(`cola_skip_${compressedUserId}_${page}`)
-			.setEmoji('934430008619962428')
-			.setLabel(translator.getText('queueButtonSkip'))
-			.setStyle(ButtonStyle.Primary),
-	);
+	const actionRow = getQueueActionRow(queue, page, request.user.id, translator);
 
 	if(queue.size) {
-		actionRow.addComponents(
-			new ButtonBuilder()
-				.setCustomId(`cola_clearQueue_${compressedUserId}`)
-				.setEmoji('921751138997514290')
-				.setLabel(translator.getText('queueButtonClearQueue'))
-				.setStyle(ButtonStyle.Danger),
-		);
-		
-		const refreshButtonBuilder = new ButtonBuilder()
-			.setCustomId(`cola_showPage_CU_${compressedUserId}_${page}`)
-			.setEmoji('934432754173624373')
-			.setStyle(ButtonStyle.Primary);
-
 		if(queue.size > QUEUE_PAGE_TRACKS_MAX) {
 			const navigationRow = makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
@@ -175,12 +209,14 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 					.setCustomId(`cola_showPage_LP_${compressedUserId}_${lastPage}`)
 					.setEmoji('934430008619962428')
 					.setStyle(ButtonStyle.Secondary),
-				refreshButtonBuilder,
+				new ButtonBuilder()
+					.setCustomId(`cola_showPage_CU_${compressedUserId}_${page}`)
+					.setEmoji('1292310983527632967')
+					.setStyle(ButtonStyle.Primary),
 			);
 
 			components.push(navigationRow);
-		} else
-			actionRow.addComponents(refreshButtonBuilder);
+		}
 
 		const menuRow = makeStringSelectMenuRowBuilder().addComponents(
 			new StringSelectMenuBuilder()
@@ -202,9 +238,75 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 		embeds: [ queueEmbed ],
 		components,
 	};
-	return (!op || op === 'CM')
-		? request.reply(replyObj)
-		: /**@type {ButtonInteraction<'cached'>}*/(request).update(replyObj);
+	return request.editReply(replyObj);
+}
+
+/**
+ * 
+ * @param {import('discord-player').GuildQueue} queue 
+ * @param {Number} page
+ * @param {String} userId 
+ * @param {Translator} translator 
+ */
+function getQueueActionRow(queue, page, userId, translator) {
+	const compressedUserId = compressId(userId);
+
+	const actionRow = makeButtonRowBuilder().addComponents(
+		new ButtonBuilder()
+			.setCustomId(`cola_add_${compressedUserId}_${page}`)
+			.setEmoji('1291900911643263008')
+			.setStyle(ButtonStyle.Success),
+	);
+
+	if(!queue)
+		return actionRow.addComponents(
+			new ButtonBuilder()
+				.setCustomId(`cola_showPage_CU_${compressedUserId}_${page}`)
+				.setEmoji('1292310983527632967')
+				.setStyle(ButtonStyle.Primary),
+		);
+
+	if(queue.currentTrack) {
+		const pauseOrResumeButton = queue.node.isPaused()
+			? new ButtonBuilder()
+				.setCustomId(`cola_resume_${compressedUserId}_${page}`)
+				.setEmoji('934430008250871818')
+				.setStyle(ButtonStyle.Primary)
+			: new ButtonBuilder()
+				.setCustomId(`cola_pause_${compressedUserId}_${page}`)
+				.setEmoji('1291898882204110879')
+				.setStyle(ButtonStyle.Primary);
+		
+		actionRow.addComponents(
+			pauseOrResumeButton,
+			new ButtonBuilder()
+				.setCustomId(`cola_skip_${compressedUserId}_${page}`)
+				.setEmoji('934430008619962428')
+				.setLabel(translator.getText('queueButtonSkip'))
+				.setStyle(ButtonStyle.Primary),
+		);
+	}
+
+	const refreshButton = new ButtonBuilder()
+		.setCustomId(`cola_showPage_CU_${compressedUserId}_${page}`)
+		.setEmoji('1292310983527632967')
+		.setStyle(ButtonStyle.Primary);
+	if(queue.size) {
+		actionRow.addComponents(
+			new ButtonBuilder()
+				.setCustomId(`cola_clearQueue_${compressedUserId}`)
+				.setEmoji('921751138997514290')
+				.setLabel(translator.getText('queueButtonClearQueue'))
+				.setStyle(ButtonStyle.Danger),
+		);
+
+		if(queue.size <= QUEUE_PAGE_TRACKS_MAX)
+			actionRow.addComponents(refreshButton);
+	} else {
+		actionRow.addComponents(refreshButton);
+	}
+
+	return actionRow;
 }
 
 /**
@@ -217,8 +319,20 @@ function getPageAndNumberTrackIndex(page, num) {
 	return pageOffset + num;
 }
 
+/**
+ * 
+ * @param {import('discord.js').BaseGuildVoiceChannel} targetChannel 
+ */
+function isPlayerUnavailable(targetChannel) {
+	const playerChannel = targetChannel.guild?.members?.me?.voice?.channel;
+	if(!playerChannel) return false;
+	return playerChannel.id !== targetChannel.id;
+}
+
 module.exports = {
+	SERVICES,
 	prepareTracksPlayer,
 	showQueuePage,
 	getPageAndNumberTrackIndex,
+	isPlayerUnavailable,
 };
