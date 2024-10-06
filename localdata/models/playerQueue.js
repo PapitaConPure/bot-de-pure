@@ -20,7 +20,7 @@ function m() { return new model({}); }
 
 /**
  * 
- * @param {import('../../commands/Commons/typings').ComplexCommandRequest} request 
+ * @param {import('../../commands/Commons/typings').ComplexCommandRequest | import('discord.js').Interaction} request 
  * @param {import('discord-player').GuildQueue} queue 
  * @returns 
  */
@@ -65,31 +65,73 @@ async function tryRecoverSavedTracksQueue(request, pauseOnInit = true) {
 	console.log('Saved queue data retrieved!');
 	console.log({ currentTrack, restOfTracks });
 	
-	const channel = /**@type {import('discord.js').GuildMember}*/(member).voice?.channel;
+	return attemptDatabaseQueueRecovery({
+		request,
+		pauseOnInit,
+		currentTrack,
+		restOfTracks,
+	});
+}
+
+/**
+ * @typedef {Object} __attempDatabaseQueueRecoveryData
+ * @property {import('../../commands/Commons/typings').ComplexCommandRequest | import('discord.js').Interaction} request
+ * @property {Boolean} pauseOnInit
+ * @property {Track<unknown>} currentTrack
+ * @property {Array<Track<unknown>>} restOfTracks
+ * 
+ * @param {__attempDatabaseQueueRecoveryData} data 
+ * @param {Number} retries 
+ * @returns 
+ */
+async function attemptDatabaseQueueRecovery(data, retries = 3) {
+	const {
+		request,
+		pauseOnInit,
+		currentTrack,
+		restOfTracks,
+	} = data;
+	
+	const channel = /**@type {import('discord.js').GuildMember}*/(request.member).voice?.channel;
 	if(!channel)
 		return null;
-	
-	try {
-		console.log('Request member is in voice channel. Reconstructing queue...');
-		queue = player.queues.create(guild, { metadata: request });
-		console.log({ creadedQueue: queue.connection });
 
-		if(!queue.connection)
-			await queue.connect(channel);
-		if(!queue.isPlaying()) {
-			await queue.play(currentTrack);
-			if(pauseOnInit)
-				queue.node.pause();
+	console.log('Request member is in voice channel. Recovering "current track" and rest of queue...');
+	try {
+		const player = useMainPlayer();
+		const { queue } = await player.play(channel, currentTrack.url ?? currentTrack, {
+			nodeOptions: { metadata: request },
+		});
+
+		console.log('"Current track" was set.');
+		
+		if(pauseOnInit) {
+			console.log('Caller requested to keep recovered "current track" paused.');
+			queue.node.pause();
 		}
+
+		console.log(`Reconstructing rest of queue with ${restOfTracks.length} tracks...`);
 		if(restOfTracks.length)
 			queue.tracks.add(restOfTracks);
-		console.log({ recoveredQueue: queue.connection });
+
+		console.log({
+			recoveredConnection: queue.connection.state,
+			recoveredTracks: queue.tracks.map(t => t.toString()),
+		});
 
 		return queue;
 	} catch(err) {
 		console.log('Saved queue data retrieval failed');
 		console.error(err);
-		return null;
+
+		if(retries === 0) {
+			console.log('Saved queue was deemed irrecoverable. Return value will be null');
+			return null;
+		}
+
+		const remainingRetries = retries - 1;
+		console.log(`Reattempting to recover saved queue (remaining retries: ${remainingRetries})`);
+		return attemptDatabaseQueueRecovery(data, remainingRetries);
 	}
 }
 
