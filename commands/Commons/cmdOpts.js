@@ -835,8 +835,8 @@ class CommandOptionSolver {
 
     //#region Getters
     /**
-     * @param {String} identifier 
-     * @param {Boolean} [getRestOfMessageWords=false] 
+     * @param {String} identifier El identificador del parámetro
+     * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
      */
     getString(identifier, getRestOfMessageWords = false) {
         if(this.isInteractionSolver(this.#args))
@@ -1186,7 +1186,6 @@ class CommandOptionSolver {
         const option = this.#options.options.get(identifier);
         if(!option.isCommandParam())
             throw "Se esperaba un identificador de parámetro de comando";
-
 
         let finalResult;
         if(Array.isArray(option._type)) {
