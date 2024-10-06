@@ -61,7 +61,7 @@ const command = new CommandManager('confesión', tags)
 					new ButtonBuilder()
 						.setCustomId(`confesión_installSystem`)
 						.setLabel('Configurar Nuevo Sistema')
-						.setEmoji('1051265601152229436')
+						.setEmoji('1291900911643263008')
 						.setStyle(ButtonStyle.Primary),
 				]),
 			];
@@ -237,12 +237,12 @@ const command = new CommandManager('confesión', tags)
 				.setStyle(ButtonStyle.Secondary),
 			new ButtonBuilder()
 				.setCustomId(`confesión_timeoutConfessant_${confId}_${userId}`)
-				.setEmoji('935665140601327626')
+				.setEmoji('936531643496288288')
 				.setLabel('Rechazar y Aislar')
 				.setStyle(ButtonStyle.Danger),
 			new ButtonBuilder()
 				.setCustomId(`confesión_banConfessant_${confId}_${userId}`)
-				.setEmoji('935665140601327626')
+				.setEmoji('936531643496288288')
 				.setLabel('Rechazar y Bannear')
 				.setStyle(ButtonStyle.Danger),
 		]);
