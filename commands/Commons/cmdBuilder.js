@@ -138,6 +138,10 @@ async function executeFnSample(request, args, isSlash = false, rawArgs = undefin
 /**
  * @typedef {(request: ComplexCommandRequest, args: CommandOptionSolver, rawArgs?: String | null) => Promise<*>} ExperimentalExecuteFunction
  */
+/**
+ * @typedef {Object} InteractionResponseOptions
+ * @property {Number} [userFilterIndex] Índice donde se recibirá la ID del único usuario permitido para esta interacción. La misma deberá estar comprimida con la función `compressId`. Si es `null` o `undefined`, esta interacción será pública
+ */
 
 /**Representa un comando*/
 class CommandManager {
@@ -199,6 +203,11 @@ class CommandManager {
         this.memory = new Map();
         this.execute = (request, _args, _isSlash) => request.reply(this.reply);
     };
+
+    /**Alias de `<CommandManager>.flags`*/
+    get tags() {
+        return this.flags;
+    }
 
     /**@param {...String} aliases*/
     setAliases(...aliases) {
@@ -274,31 +283,47 @@ class CommandManager {
         return this;
     }
 
-    /**@param {Function} fn Una función no anónima*/
-    setFunction(fn) {
+    /**
+     * @param {Function} fn Una función no anónima
+     * @param {InteractionResponseOptions} [options] Opciones de respuesta de interacción
+     */
+    setFunction(fn, options = {}) {
         const functionName = fn.name;
         this[functionName] = fn;
+        fn['userFilterIndex'] = options.userFilterIndex;
         return this;
     }
 
-    /**@param {InteractionResponseFunction} responseFn Una función no anónima a ejecutar al recibir una interacción*/
-    setInteractionResponse(responseFn) {
-        return this.setFunction(responseFn);
+    /**
+     * @param {InteractionResponseFunction} responseFn Una función no anónima a ejecutar al recibir una interacción
+     * @param {InteractionResponseOptions} [options] Opciones adicionales para controlar las respuestas de interacción
+     */
+    setInteractionResponse(responseFn, options = {}) {
+        return this.setFunction(responseFn, options);
     };
 
-    /**@param {ButtonResponseFunction} responseFn Una función no anónima a ejecutar al recibir una interacción*/
-    setButtonResponse(responseFn) {
-        return this.setFunction(responseFn);
+    /**
+     * @param {ButtonResponseFunction} responseFn Una función no anónima a ejecutar al recibir una interacción
+     * @param {InteractionResponseOptions} [options] Opciones adicionales para controlar las respuestas de interacción
+     */
+    setButtonResponse(responseFn, options = {}) {
+        return this.setFunction(responseFn, options);
     };
 
-    /**@param {SelectMenuResponseFunction} responseFn Una función no anónima a ejecutar al recibir una interacción*/
-    setSelectMenuResponse(responseFn) {
-        return this.setFunction(responseFn);
+    /**
+     * @param {SelectMenuResponseFunction} responseFn Una función no anónima a ejecutar al recibir una interacción
+     * @param {InteractionResponseOptions} [options] Opciones adicionales para controlar las respuestas de interacción
+     */
+    setSelectMenuResponse(responseFn, options = {}) {
+        return this.setFunction(responseFn, options);
     };
 
-    /**@param {ModalResponseFunction} responseFn Una función no anónima a ejecutar al recibir una interacción*/
-    setModalResponse(responseFn) {
-        return this.setFunction(responseFn);
+    /**
+     * @param {ModalResponseFunction} responseFn Una función no anónima a ejecutar al recibir una interacción
+     * @param {InteractionResponseOptions} [options] Opciones adicionales para controlar las respuestas de interacción
+     */
+    setModalResponse(responseFn, options = {}) {
+        return this.setFunction(responseFn, options);
     };
 
     /**

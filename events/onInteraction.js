@@ -1,18 +1,17 @@
 //#region Carga de módulos necesarios
 const { Stats } = require('../localdata/models/stats.js');
 const { peopleid } = require('../localdata/config.json');
-const { channelIsBlocked, isUsageBanned } = require('../func.js');
+const { channelIsBlocked, isUsageBanned, decompressId } = require('../func.js');
 const { auditRequest } = require('../systems/others/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../localdata/cmdExceptions.js');
 const { Translator } = require('../internationalization.js');
 const { CommandManager } = require('../commands/Commons/cmdBuilder.js');
-// @ts-ignore
-const { Interaction, CommandInteraction, ButtonInteraction, StringSelectMenuInteraction, ModalSubmitInteraction, Client, ContextMenuCommandInteraction, ChatInputCommandInteraction, CommandInteractionOptionResolver } = require('discord.js');
+const { ButtonInteraction, StringSelectMenuInteraction, ModalSubmitInteraction, Client, ContextMenuCommandInteraction, ChatInputCommandInteraction, CommandInteractionOptionResolver } = require('discord.js');
 const { ContextMenuActionManager } = require('../actions/Commons/actionBuilder.js');
 const { CommandOptionSolver } = require('../commands/Commons/cmdOpts.js');
 
 /**
- * @param {Interaction} interaction 
+ * @param {import('discord.js').Interaction} interaction 
  * @param {Client} client 
  */
 async function onInteraction(interaction, client) {
@@ -107,19 +106,19 @@ async function handleCommand(interaction, client, stats) {
 async function handleAction(interaction, client, stats) {
     const { commandName } = interaction;
 
-    // @ts-ignore
+    //@ts-expect-error
     const action = client.ContextPure.get(commandName);
     if(!action) return;
 
     try {
         /**@type {ContextMenuActionManager | undefined}*/
-        // @ts-ignore
+        //@ts-expect-error
         const command = client.AccionesPure.get(commandName);
         
         await command.execute(interaction);
         stats.commands.succeeded++;
     } catch(error) {
-        // @ts-ignore
+        //@ts-expect-error
         const isPermissionsError = handleAndAuditError(error, interaction, { details: `/${commandName}` });
         if(!isPermissionsError)
             stats.commands.failed++;
@@ -143,17 +142,37 @@ async function handleComponent(interaction, client, stats) {
         /**@type {Array<String>}*/
         const funcStream = interaction.customId.split('_');
         let commandName = funcStream.shift();
-        const func = funcStream.shift();
-        console.log(commandName, func, funcStream);
-        if(!commandName || !func)
+        const commandFnName = funcStream.shift();
+
+        console.log(commandName, commandFnName, funcStream);
+
+        if(!commandName || !commandFnName)
             return handleUnknownInteraction(interaction);
 
-        // @ts-ignore
+        //@ts-expect-error
         const command = client.ComandosPure.get(commandName) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
-        if(typeof command[func] !== 'function')
+        if(typeof command[commandFnName] !== 'function')
             return handleHuskInteraction(interaction);
 
-        return command[func](interaction, ...funcStream);
+        const commandFn = command[commandFnName];
+        
+        //Filtros
+        const userFilterIndex = commandFn['userFilterIndex'];
+        if(userFilterIndex != undefined) {
+            if(typeof userFilterIndex !== 'number')
+                throw new TypeError(`Se esperaba un valor numérico como índice de parámetro de interacción para filtro de ID de usuario, pero se recibió: ${userFilterIndex} (${typeof userFilterIndex})`);
+
+            const authorId = funcStream[userFilterIndex];
+            if(typeof authorId !== 'string')
+                throw new RangeError(`Se esperaba una ID de usuario en el parámetro de interacción ${userFilterIndex}. Sin embargo, ninguna ID fue recibida en la posición`);
+            
+            if(interaction.user.id !== decompressId(authorId)) {
+                const translator = await Translator.from(interaction.user.id);
+                return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
+            }
+        }
+
+        return commandFn(interaction, ...funcStream);
     } catch(error) {
         const isPermissionsError = handleAndAuditError(error, interaction, { details: `"${interaction.customId}"` });
         if(!isPermissionsError)
@@ -162,7 +181,7 @@ async function handleComponent(interaction, client, stats) {
 }
 
 //#region Casos extremos
-/**@param {Interaction} interaction*/
+/**@param {import('discord.js').Interaction} interaction*/
 async function handleDMInteraction(interaction) {
     const translator = await Translator.from(interaction.user.id);
 
@@ -178,7 +197,7 @@ async function handleDMInteraction(interaction) {
     }
 }
 
-/**@param {Interaction} interaction*/
+/**@param {import('discord.js').Interaction} interaction*/
 async function handleBlockedInteraction(interaction) {
     const translator = await Translator.from(interaction.user.id);
     if(interaction.isRepliable()) {
@@ -191,7 +210,7 @@ async function handleBlockedInteraction(interaction) {
     }
 }
 
-/**@param {Interaction} interaction*/
+/**@param {import('discord.js').Interaction} interaction*/
 async function handleUnknownInteraction(interaction) {
     const translator = await Translator.from(interaction.user.id);
     if(interaction.isRepliable()) {
@@ -204,7 +223,7 @@ async function handleUnknownInteraction(interaction) {
     }
 }
 
-/**@param {Interaction} interaction*/
+/**@param {import('discord.js').Interaction} interaction*/
 async function handleHuskInteraction(interaction) {
     const translator = await Translator.from(interaction.user.id);
     if(interaction.isRepliable()) {
