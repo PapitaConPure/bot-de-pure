@@ -64,7 +64,7 @@ function getAnswersPageData(cmd, interaction, requestId, translator) {
 			.setStyle(ButtonStyle.Primary),
 		new ButtonBuilder()
 			.setCustomId(`poll_addAnswerShow_${userId}_${requestId}`)
-			.setEmoji('1051265601152229436')
+			.setEmoji('1291900911643263008')
 			.setStyle(ButtonStyle.Success),
 		new ButtonBuilder()
 			.setCustomId(`poll_rmAnswerShow_${userId}_${requestId}`)

@@ -1254,7 +1254,7 @@ module.exports = {
                     .setStyle(ButtonStyle.Secondary),
                 new Discord.ButtonBuilder()
                     .setCustomId(`${commandFilename}_loadPage_${page}_RELOAD`)
-                    .setEmoji('934432754173624373')
+                    .setEmoji('1292310983527632967')
                     .setStyle(ButtonStyle.Primary),
             ),
             makeStringSelectMenuRowBuilder().addComponents(

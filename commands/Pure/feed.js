@@ -133,7 +133,7 @@ const command = new CommandManager('feed', flags)
 				new ActionRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_createNew')
-						.setEmoji('1051265601152229436')
+						.setEmoji('1291900911643263008')
 						.setLabel(translator.getText('buttonCreate'))
 						.setStyle(ButtonStyle.Success),
 					new ButtonBuilder()
