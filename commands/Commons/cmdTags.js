@@ -9,27 +9,26 @@
  */
 const bigIntField = (n) => 2n ** BigInt(n);
 
-const CommandTag = {
-    COMMON: bigIntField(1),
-    MOD: bigIntField(2),
-    EMOTE: bigIntField(3),
-    MEME: bigIntField(4),
-    CHAOS: bigIntField(5),
-    GAME: bigIntField(6),
-    MAINTENANCE: bigIntField(7),
-    OUTDATED: bigIntField(8),
-    GUIDE: bigIntField(9),
-    PAPA: bigIntField(10),
-    HOURAI: bigIntField(11),
-};
+const CommandTag = /**@type {const}*/({
+    COMMON      : bigIntField( 1),
+    MOD         : bigIntField( 2),
+    EMOTE       : bigIntField( 3),
+    MEME        : bigIntField( 4),
+    CHAOS       : bigIntField( 5),
+    GAME        : bigIntField( 6),
+    MAINTENANCE : bigIntField( 7),
+    OUTDATED    : bigIntField( 8),
+    GUIDE       : bigIntField( 9),
+    PAPA        : bigIntField(10),
+    HOURAI      : bigIntField(11),
+    MUSIC       : bigIntField(12),
+});
 
 /**
- * @typedef {keyof CommandTag} CommandTagFields
- * @typedef {CommandTagFields|bigint|number} CommandTagResolvable
- * @type {ReadonlyArray<CommandTagFields>}
+ * @typedef {keyof CommandTag} CommandTagField
+ * @typedef {CommandTagField | bigint | number} CommandTagResolvable
  */
-//@ts-ignore
-const metaFlagValues = Object.keys(CommandTag);
+const metaFlagValues = /**@type {ReadonlyArray<CommandTagField>}*/(Object.keys(CommandTag));
 
 /**
  * Devuelve la profundidad de una tag de comando
@@ -44,16 +43,17 @@ function resolveTagNumber(tag) {
 
     if(typeof tag === 'string') {
         const tagFromObject = CommandTag[tag];
-        if(typeof tagFromObject === 'bigint')
-            return tagFromObject;
 
-        throw `Se recibió una cadena de etiqueta de comando cuyo valor no está dentro de los admitidos: ${tag}`;
+        if(typeof tagFromObject !== 'bigint')
+            throw new TypeError(`Se recibió una cadena de etiqueta de comando cuyo valor no está dentro de los admitidos: ${tag}`);
+
+        return tagFromObject;
     }
 
-    if(Array.isArray(tag))
-        return resolveTagNumber(tag.reduce((a, b) => resolveTagNumber(a) | resolveTagNumber(b)));
-
-    throw `Se recibió una etiqueta de comando cuyo tipo es inválido: ${tag} (${typeof tag})`;
+    if(!Array.isArray(tag))
+        throw new TypeError(`Se recibió una etiqueta de comando cuyo tipo es inválido: ${tag} (${typeof tag})`);
+        
+    return resolveTagNumber(tag.reduce((a, b) => resolveTagNumber(a) | resolveTagNumber(b)));
 }
 
 /**@class Representa un conjunto de etiquetas de comando*/
