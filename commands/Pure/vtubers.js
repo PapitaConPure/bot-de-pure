@@ -11,6 +11,6 @@ const command = new CommandManager('vtubers', flags)
 		'**Nota:** en canales NSFW, los resultados serán NSFW',
 	)
 	.setOptions(options)
-	.setExecution((request, args, isSlash) => searchAndReplyWithPost(request, args, isSlash, options, { cmdtag: 'virtual_youtuber', sfwtitle: 'Vtubers uwu', nsfwtitle: 'Vtubas O//w//O' }));
+	.setExecution((request, args, isSlash) => searchAndReplyWithPost(request, args, isSlash, options, { cmdtag: 'virtual_youtuber', sfwtitle: 'Vtubers', nsfwtitle: 'Vtubas' }));
 
 module.exports = command;

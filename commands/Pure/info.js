@@ -106,7 +106,7 @@ const command = new CommandManager('info', flags)
 		pages.push(
 			new EmbedBuilder()
 				.setColor(0xffd500)
-				.setTitle('Información del servidor OwO')
+				.setTitle('Información del servidor')
 				.setImage(servidor.iconURL({ size: 256 }))
 				.setThumbnail(owner.user.avatarURL({ size: 256 }))
 				.setAuthor({ name: `Comando invocado por ${author.username}`, iconURL: author.avatarURL({ size: 256 }) })
@@ -129,7 +129,7 @@ const command = new CommandManager('info', flags)
 		pages.push(
 			new EmbedBuilder()
 			.setColor(0xeebb00)
-				.setTitle('Estadísticas de actividad ÛwÕ')
+				.setTitle('Estadísticas de actividad')
 				.setAuthor({ name: `Comando invocado por ${author.username}`, iconURL: author.avatarURL() })
 				.setFooter({ text: `Estas estadísticas toman información desde el ${dbStart.slice(0, dbStart.indexOf(' '))}` })
 				.addFields(
@@ -156,7 +156,7 @@ const command = new CommandManager('info', flags)
 		pages.push(
 			new EmbedBuilder()
 				.setColor(0xe99979)
-				.setTitle('Estadísticas de tiempo UwU')
+				.setTitle('Estadísticas de tiempo')
 				.addFields(
 					{
 						name: 'Tiempo de vida del servidor', 

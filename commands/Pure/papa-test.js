@@ -4,7 +4,6 @@ const { formatPixivPostsMessage } = require('../../systems/agents/purepix.js');
 const { CommandTags, CommandManager, CommandOptions } = require('../Commons/commands');
 //const global = require('../../localdata/config.json'); //Variables globales
 // const { dibujarDespedida } = require('../../func.js');
-//const uwu = require('./uwu.js');
 //const Canvas = require('canvas');
 
 const options = new CommandOptions()
@@ -21,7 +20,6 @@ const command = new CommandManager('papa-test', tags)
     .setOptions(options)
     .setExperimental(true)
     .setExperimentalExecution(async (request, args) => {
-        //uwu.execute(message, args);
         //func.dibujarBienvenida(message.member);
         //func.dibujarDespedida(message.member);
         //func.dibujarMillion(message);

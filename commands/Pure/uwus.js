@@ -49,7 +49,7 @@ const command = new CommandManager('uwus', flags)
             // console.log(collectedSlices);
             
             const embed = new EmbedBuilder()
-                .setColor('ffbbbb')
+                .setColor(0xffbbbb)
                 .setTitle('Evento UWU finalizado')
                 .addFields(
                     {
@@ -77,7 +77,7 @@ const command = new CommandManager('uwus', flags)
         const user = request.author ?? request.user;
 
         const embed = new EmbedBuilder()
-            .setColor('ffbbbb')
+            .setColor(0xffbbbb)
             .setTitle('Evento UWU')
             .addFields(
                 {
