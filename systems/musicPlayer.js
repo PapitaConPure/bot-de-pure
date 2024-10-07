@@ -7,6 +7,33 @@ const { Translator } = require('../internationalization.js');
 const { tryRecoverSavedTracksQueue, saveTracksQueue } = require('../localdata/models/playerQueue.js');
 
 /**
+ * @param {import('../commands/Commons/typings.js').ComplexCommandRequest | ButtonInteraction<'cached'> | import('discord.js').StringSelectMenuInteraction<'cached'> | ModalSubmitInteraction<'cached'>} request
+ * @param {import('discord.js').ColorResolvable} [color]
+ * @param {String} [iconUrl]
+ * @param {Array<String>} [additionalFooterData]
+ */
+function makePuréMusicEmbed(request, color = Colors.Blurple, iconUrl = 'https://i.imgur.com/irsTBIH.png', additionalFooterData = []) {
+	const { channel } = request.member.voice;
+
+	const footerExtraContent = additionalFooterData.length ? ` • ${additionalFooterData.join(' • ')}` : '';
+
+	const embed = new EmbedBuilder()
+		.setColor(color)
+		.setAuthor({
+			name: request.member.displayName,
+			iconURL: request.member.displayAvatarURL({ size: 128 }),
+		});
+
+	if(iconUrl != null)
+		embed.setFooter({
+			text: `${shortenText(channel.name, 32)}${footerExtraContent}`,
+			iconURL: iconUrl,
+		});
+
+	return embed;
+}
+
+/**
  * @typedef {import('discord-player').Track['source']} ServiceKey
  * 
  * @typedef {Object}  BaseServiceInfo
@@ -335,4 +362,5 @@ module.exports = {
 	showQueuePage,
 	getPageAndNumberTrackIndex,
 	isPlayerUnavailable,
+	makePuréMusicEmbed,
 };

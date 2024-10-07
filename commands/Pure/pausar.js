@@ -3,7 +3,7 @@ const { shortenText } = require('../../func.js');
 const { CommandTags, CommandManager } = require('../Commons/commands.js');
 const { Translator } = require('../../internationalization.js');
 const { useMainPlayer } = require('discord-player');
-const { isPlayerUnavailable, SERVICES } = require('../../systems/musicPlayer.js');
+const { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/musicPlayer.js');
 
 const tags = new CommandTags().add('COMMON');
 
@@ -17,57 +17,42 @@ const command = new CommandManager('pausar', tags)
 		'Pausa la reproducción de la pista de audio actual si es que se estaba reproduciendo alguna',
 	)
 	.setExperimentalExecution(async (request, args) => {
-		const [ translator ] = await Promise.all([
-			Translator.from(request.userId),
-			request.deferReply(),
-		]);
+		const translator = await Translator.from(request.userId);
 
 		const channel = request.member.voice?.channel;
 		if(!channel)
-			return request.editReply({ content: translator.getText('voiceExpected'), ephemeral: true });
+			return request.reply({ content: translator.getText('voiceExpected'), ephemeral: true });
 
 		if(isPlayerUnavailable(channel))
-			return request.editReply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
-		
-		/**
-		 * @param {import('discord.js').ColorResolvable} color
-		 * @param {String} [iconUrl]
-		 */
-		const makeReplyEmbed = (color, iconUrl = 'https://i.imgur.com/irsTBIH.png') => new EmbedBuilder()
-			.setColor(color)
-			.setAuthor({
-				name: request.member.displayName,
-				iconURL: request.member.displayAvatarURL({ size: 128 }),
-			})
-			.setFooter({
-				text: `${shortenText(channel.name, 32)}`,
-				iconURL: iconUrl,
-			});
+			return request.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
 
 		const player = useMainPlayer();
 		const queue = player.queues.get(request.guildId);
 
 		if(!queue?.currentTrack) {
-			const embed = makeReplyEmbed(Colors.Blurple)
+			const embed = makePuréMusicEmbed(request)
 				.setTitle(translator.getText('pauseTitleNoTrack'));
-			return request.editReply({ embeds: [ embed ], ephemeral: true });
+			return request.reply({ embeds: [ embed ], ephemeral: true });
 		}
 
 		const currentTrack = queue.currentTrack;
 		const service = SERVICES[currentTrack.source];
-		const embed = makeReplyEmbed(service.color, service.iconUrl)
+		const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted) : translator.getText('playFooterTextQueueEmpty');
+		const embed = makePuréMusicEmbed(request, service.color, service.iconUrl, [ queueInfo ])
 			.setDescription(`[${currentTrack.title}](${currentTrack.url})`)
 			.setThumbnail(currentTrack.thumbnail);
 		
 		if(queue.node.isPaused()) {
 			embed.setTitle(translator.getText('pauseTitleTrackAlreadyPaused'));
-			return request.editReply({ embeds: [ embed ], ephemeral: true });
+			return request.reply({ embeds: [ embed ], ephemeral: true });
 		}
 
 		queue.node.pause();
 
-		embed.setTitle(translator.getText('pauseTitlePaused'));
-		return request.editReply({ embeds: [ embed ] });
+		embed
+			.setTitle(translator.getText('pauseTitlePaused'))
+			.setTimestamp(Date.now());
+		return request.reply({ embeds: [ embed ] });
 	});
 
 module.exports = command;

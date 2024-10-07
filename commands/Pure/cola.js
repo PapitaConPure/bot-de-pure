@@ -2,7 +2,7 @@ const { EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, Colors } =
 const { decompressId, shortenText, sleep, compressId } = require('../../func.js'); //Funciones globales
 const { CommandTags, CommandManager } = require('../Commons/commands.js');
 const { useMainPlayer, serialize, deserialize } = require('discord-player');
-const { showQueuePage, getPageAndNumberTrackIndex, isPlayerUnavailable, SERVICES } = require('../../systems/musicPlayer.js');
+const { showQueuePage, getPageAndNumberTrackIndex, isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/musicPlayer.js');
 const { Translator } = require('../../internationalization.js');
 const { tryRecoverSavedTracksQueue, saveTracksQueue } = require('../../localdata/models/playerQueue.js');
 const { makeTextInputRowBuilder } = require('../../tsCasts.js');
@@ -67,15 +67,6 @@ const command = new CommandManager('cola', tags)
 		
 		const query = interaction.fields.getTextInputValue('query');
 		await interaction.deferUpdate();
-
-		/**@param {import('discord.js').ColorResolvable} color*/
-		const makeReplyEmbed = (color) => new EmbedBuilder()
-			.setColor(color)
-			.setAuthor({
-				name: interaction.member.displayName,
-				iconURL: interaction.member.displayAvatarURL({ size: 128 })
-			})
-			.setTimestamp(Date.now());
 		
 		try {
 			await tryRecoverSavedTracksQueue(interaction, false);
@@ -88,14 +79,10 @@ const command = new CommandManager('cola', tags)
 			const service = SERVICES[track.source];
 			const trackSource = service.name ?? translator.getText('playValueTrackSourceArbitrary');
 			const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted) : translator.getText('playFooterTextQueueEmpty');
-			const trackEmbed = makeReplyEmbed(service.color)
+			const trackEmbed = makePuréMusicEmbed(interaction, service.color, service.iconUrl, [ queueInfo ])
 				.setTitle(queue.size ? translator.getText('playTitleQueueAdded') : translator.getText('playTitleQueueNew'))
 				.setDescription(`[${track.title}](${track.url})`)
 				.setThumbnail(track.thumbnail)
-				.setFooter({
-					text: `${channel.name} • ${queueInfo}`,
-					iconURL: service.iconUrl,
-				})
 				.addFields(
 					{
 						name: translator.getText('duration'),
@@ -107,7 +94,8 @@ const command = new CommandManager('cola', tags)
 						value: trackSource,
 						inline: true,
 					},
-				);
+				)
+				.setTimestamp(Date.now());
 
 			await Promise.all([
 				saveTracksQueue(interaction, queue),
@@ -118,7 +106,7 @@ const command = new CommandManager('cola', tags)
 		} catch (e) {
 			console.error(e);
 
-			const errorEmbed = makeReplyEmbed(0x990000)
+			const errorEmbed = makePuréMusicEmbed(interaction, 0x990000, null)
 				.setTitle(translator.getText('somethingWentWrong'))
 				.addFields({
 					name: 'Error',
@@ -140,38 +128,26 @@ const command = new CommandManager('cola', tags)
 		if(isPlayerUnavailable(channel))
 			return interaction.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
 		
-		/**
-		 * @param {import('discord.js').ColorResolvable} color
-		 * @param {String} [iconUrl]
-		 */
-		const makeReplyEmbed = (color, iconUrl = null) => new EmbedBuilder()
-			.setColor(color)
-			.setAuthor({
-				name: interaction.member.displayName,
-				iconURL: interaction.member.displayAvatarURL({ size: 128 }),
-			})
-			.setFooter({
-				text: `${shortenText(channel.name, 32)}`,
-				iconURL: iconUrl ?? 'https://i.imgur.com/irsTBIH.png',
-			});
-
 		const player = useMainPlayer();
 		const queue = player.queues.get(interaction.guildId);
 
 		if(!queue?.currentTrack) {
-			const embed = makeReplyEmbed(Colors.Blurple)
+			const embed = makePuréMusicEmbed(interaction, Colors.Blurple)
 				.setTitle(translator.getText('pauseTitleNoTrack'));
 			return interaction.reply({ embeds: [ embed ], ephemeral: true });
 		}
 
 		const currentTrack = queue.currentTrack;
 		const service = SERVICES[currentTrack.source];
-		const embed = makeReplyEmbed(service.color, service.iconUrl)
-			.setDescription(`[${currentTrack.title}](${currentTrack.url})`)
-			.setThumbnail(currentTrack.thumbnail);
+		const currentTrackHyperlink = `[${currentTrack.title}](${currentTrack.url})`;
 		
 		if(queue.node.isPaused()) {
-			embed.setTitle(translator.getText('pauseTitleTrackAlreadyPaused'));
+			await showQueuePage(interaction, 'PA', authorId, +page);
+
+			const embed = makePuréMusicEmbed(interaction, service.color, service.iconUrl)
+				.setTitle(translator.getText('pauseTitleTrackAlreadyPaused'))
+				.setDescription(currentTrackHyperlink)
+				.setThumbnail(currentTrack.thumbnail);
 			return interaction.reply({ embeds: [ embed ], ephemeral: true });
 		}
 
@@ -179,7 +155,12 @@ const command = new CommandManager('cola', tags)
 
 		await showQueuePage(interaction, 'PA', authorId, +page);
 
-		embed.setTitle(translator.getText('pauseTitlePaused'));
+		const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted) : translator.getText('playFooterTextQueueEmpty');
+		const embed = makePuréMusicEmbed(interaction, service.color, service.iconUrl, [ queueInfo ])
+			.setTitle(translator.getText('pauseTitlePaused'))
+			.setDescription(currentTrackHyperlink)
+			.setThumbnail(currentTrack.thumbnail)
+			.setTimestamp(Date.now());
 		return interaction.message.reply({ embeds: [ embed ] });
 	})
 	.setButtonResponse(async function resume(interaction, authorId, page) {
@@ -194,40 +175,27 @@ const command = new CommandManager('cola', tags)
 
 		if(isPlayerUnavailable(channel))
 			return interaction.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
-		
-		/**
-		 * @param {import('discord.js').ColorResolvable} color
-		 * @param {String} [iconUrl]
-		 */
-		const makeReplyEmbed = (color, iconUrl = null) => new EmbedBuilder()
-			.setColor(color)
-			.setAuthor({
-				name: interaction.member.displayName,
-				iconURL: interaction.member.displayAvatarURL({ size: 128 }),
-			})
-			.setFooter({
-				text: `${shortenText(channel.name, 32)}`,
-				iconURL: iconUrl ?? 'https://i.imgur.com/irsTBIH.png',
-			})
-			.setTimestamp(Date.now());
 
 		const player = useMainPlayer();
 		const queue = player.queues.get(interaction.guildId);
 
 		if(!queue?.currentTrack) {
-			const embed = makeReplyEmbed(Colors.Blurple)
+			const embed = makePuréMusicEmbed(interaction)
 				.setTitle(translator.getText('resumirTitleNoTrack'));
 			return interaction.reply({ embeds: [ embed ], ephemeral: true });
 		}
 
 		const currentTrack = queue.currentTrack;
 		const service = SERVICES[currentTrack.source];
-		const embed = makeReplyEmbed(service.color, service.iconUrl)
-			.setDescription(`[${currentTrack.title}](${currentTrack.url})`)
-			.setThumbnail(currentTrack.thumbnail);
+		const currentTrackHyperlink = `[${currentTrack.title}](${currentTrack.url})`;
 		
 		if(!queue.node.isPaused() && queue.node.isPlaying()) {
-			embed.setTitle(translator.getText('resumirTitleTrackAlreadyResumed'));
+			await showQueuePage(interaction, 'PA', authorId, +page);
+			
+			const embed = makePuréMusicEmbed(interaction, service.color, service.iconUrl)
+				.setTitle(translator.getText('resumirTitleTrackAlreadyResumed'))
+				.setDescription(currentTrackHyperlink)
+				.setThumbnail(currentTrack.thumbnail);
 			return interaction.reply({ embeds: [ embed ], ephemeral: true });
 		}
 
@@ -235,7 +203,12 @@ const command = new CommandManager('cola', tags)
 
 		await showQueuePage(interaction, 'PA', authorId, +page);
 
-		embed.setTitle(translator.getText('resumirTitleResumed'));
+		const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted) : translator.getText('playFooterTextQueueEmpty');
+		const embed = makePuréMusicEmbed(interaction, service.color, service.iconUrl, [ queueInfo ])
+			.setTitle(translator.getText('resumirTitleResumed'))
+			.setDescription(currentTrackHyperlink)
+			.setThumbnail(currentTrack.thumbnail)
+			.setTimestamp(Date.now());
 		return interaction.message.reply({ embeds: [ embed ] });
 	})
 	.setButtonResponse(async function skip(interaction, authorId, page) {
@@ -251,23 +224,10 @@ const command = new CommandManager('cola', tags)
 		if(isPlayerUnavailable(channel))
 			return interaction.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
 
-		/**
-		 * @param {import('discord.js').ColorResolvable} color
-		 * @param {String} [iconUrl]
-		 */
-		const makeReplyEmbed = (color, iconUrl = null) => new EmbedBuilder()
-			.setColor(color)
-			.setAuthor({ name: interaction.member.displayName, iconURL: interaction.member.displayAvatarURL({ size: 128 }) })
-			.setFooter({
-				text: `${shortenText(channel.name, 32)}`,
-				iconURL: iconUrl ?? 'https://i.imgur.com/irsTBIH.png',
-			})
-			.setTimestamp(Date.now());
-
 		const player = useMainPlayer();
 		const queue = player.queues.get(interaction.guildId) ?? (await tryRecoverSavedTracksQueue(interaction));
 		if(!queue?.currentTrack) {
-			const embed = makeReplyEmbed(Colors.Blurple)
+			const embed = makePuréMusicEmbed(interaction)
 				.setTitle(translator.getText('queueSkipTitleNoTrack'));
 			return interaction.reply({ embeds: [ embed ], ephemeral: true });
 		}
@@ -284,10 +244,12 @@ const command = new CommandManager('cola', tags)
 			queue.node.skip();
 
 		const service = SERVICES[queue.currentTrack.source];
-		const embed = makeReplyEmbed(service.color, service.iconUrl)
+		const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted) : translator.getText('playFooterTextQueueEmpty');
+		const embed = makePuréMusicEmbed(interaction, service.color, service.iconUrl, [ queueInfo ])
 			.setTitle(translator.getText('queueSkipTitleSkipped'))
 			.setDescription(`[${skippedTitle}](${skippedUrl})`)
-			.setThumbnail(skippedThumbnail);
+			.setThumbnail(skippedThumbnail)
+			.setTimestamp(Date.now());
 		interaction.message.reply({ embeds: [ embed ] }).catch(console.error);
 
 		await sleep(1250);
@@ -309,27 +271,22 @@ const command = new CommandManager('cola', tags)
 		const player = useMainPlayer();
 		const queue = player.queues.get(interaction.guildId);
 
-		const makeReplyEmbed = () => new EmbedBuilder()
-			.setColor(Colors.Blurple)
-			.setAuthor({ name: interaction.member.displayName, iconURL: interaction.member.displayAvatarURL({ size: 128 }) })
-			.setFooter({
-				text: `${shortenText(channel.name, 32)}`,
-				iconURL: 'https://i.imgur.com/irsTBIH.png',
-			})
-			.setTimestamp(Date.now());
-
 		if(!queue?.size) {
-			const embed = makeReplyEmbed()
+			const embed = makePuréMusicEmbed(interaction)
 				.setDescription(translator.getText('queueDescriptionEmptyQueue'));
 			return interaction.reply({ embeds: [ embed ], ephemeral: true });
 		}
 
 		queue.clear();
 
-		const embed = makeReplyEmbed()
-			.setTitle(translator.getText('queueClearTitleQueueCleared'));
+		const embed = makePuréMusicEmbed(interaction)
+			.setTitle(translator.getText('queueClearTitleQueueCleared'))
+			.setTimestamp(Date.now());
 		interaction.message.reply({ embeds: [ embed ] }).catch(console.error);
-		return showQueuePage(interaction, 'CL', authorId);
+		return Promise.all([
+			saveTracksQueue(interaction, queue),
+			showQueuePage(interaction, 'CL', authorId),
+		]);
 	})
 	.setSelectMenuResponse(async function dequeue(interaction, authorId, page) {
 		const translator = await Translator.from(interaction.user.id);
@@ -344,29 +301,13 @@ const command = new CommandManager('cola', tags)
 		if(interaction.guild?.members?.me?.voice?.channel && interaction.guild.members.me.voice.channel.id !== channel.id)
 			return interaction.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
 
-		/**
-		 * @param {import('discord.js').ColorResolvable} color
-		 * @param {String} [iconUrl]
-		 */
-		const makeReplyEmbed = (color, iconUrl = null) => new EmbedBuilder()
-			.setColor(color)
-			.setAuthor({
-				name: interaction.member.displayName,
-				iconURL: interaction.member.displayAvatarURL({ size: 128 }),
-			})
-			.setFooter({
-				text: `${shortenText(channel.name, 32)}`,
-				iconURL: iconUrl ?? 'https://i.imgur.com/irsTBIH.png',
-			})
-			.setTimestamp(Date.now());
-
 		const player = useMainPlayer();
 		const queue = player.queues.get(interaction.guildId);
 
 		const [ delPage, delNum, delId ] = interaction.values[0].split(':');
 		const delIndex = getPageAndNumberTrackIndex(+delPage, +delNum);
 		if(delIndex < 0 || delIndex >= (queue?.size ?? 0)) {
-			const embed = makeReplyEmbed(Colors.Blurple)
+			const embed = makePuréMusicEmbed(interaction)
 				.setTitle(translator.getText('queueDequeueTitleTrackNotFound'))
 				.setDescription(translator.getText('queueDequeueDescriptionTrackNotFound'));
 			return interaction.reply({ embeds: [ embed ], ephemeral: true });
@@ -374,7 +315,7 @@ const command = new CommandManager('cola', tags)
 
 		const track = queue.tracks.at(delIndex);
 		if(!track || track.id !== delId) {
-			const embed = makeReplyEmbed(Colors.Blurple)
+			const embed = makePuréMusicEmbed(interaction)
 				.setTitle(translator.getText('queueDequeueTitleTrackNotFound'))
 				.setDescription(translator.getText('queueDequeueDescriptionTrackNotFound'));
 			return interaction.reply({ embeds: [ embed ], ephemeral: true });
@@ -389,7 +330,8 @@ const command = new CommandManager('cola', tags)
 		
 		queue.removeTrack(track);
 
-		const embed = makeReplyEmbed(service.color, service.iconUrl)
+		const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted) : translator.getText('playFooterTextQueueEmpty');
+		const embed = makePuréMusicEmbed(interaction, service.color, service.iconUrl, [ queueInfo ])
 			.setTitle(translator.getText('queueDequeueTitleDequeued'))
 			.setDescription(`[${removedTitle}](${removedUrl})`)
 			.setThumbnail(removedThumbnail)
