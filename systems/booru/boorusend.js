@@ -150,6 +150,9 @@ async function formatBooruPostMessage(booru, post, data) {
 	try {
 		const postTags = await booru.fetchPostTags(post);
 		
+		if(postTags.some(t => t.name === 'ai-generated'))
+			postEmbed.setThumbnail('https://i.imgur.com/1Q41hhC.png');
+
 		const postArtistTags   = postTags
 			.filter(t => t.type === TagTypes.ARTIST)
 			.map(t => t.name);
