@@ -1,9 +1,9 @@
 const { readdirSync } = require('fs'); //Integrar operaciones sistema de archivos de consola
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, StringSelectMenuInteraction } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, StringSelectMenuInteraction, AutocompleteInteraction } = require('discord.js');
 const { serverid, tenshiColor, peopleid } = require('../../localdata/config.json'); //Variables globales
-const { isNotModerator, compressId, decompressId } = require('../../func');
+const { isNotModerator, compressId, decompressId, shortenText, edlDistance } = require('../../func');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager, CommandParam } = require('../Commons/commands');
 const { makeStringSelectMenuRowBuilder } = require('../../tsCasts');
 
 const commandFilenames = readdirSync('./commands/Pure').filter(file => file.endsWith('.js'));
@@ -142,8 +142,24 @@ const makeExcludedTags = (request) => {
 };
 
 const flags = new CommandTags().add('COMMON');
+
 const options = new CommandOptions()
-	.addParam('comando', 'TEXT', 'para ver ayuda en un comando en específico', { optional: true });
+	.addOptions(
+		new CommandParam('comando', 'TEXT')
+			.setDesc('para ver ayuda en un comando en específico')
+			.setOptional(true)
+			.setAutocomplete((interaction, query) => {
+				return interaction.respond(
+					searchCommands(interaction, query)
+						.slice(0, 10)
+						.sort(({ distance: a }, { distance: b }) => a - b)
+						.map(({ command }) => ({
+							name: shortenText(`${command.name} - ${command.brief ?? command.desc ?? '...'}`, 100),
+							value: command.name,
+						})),
+				);
+			}),
+	);
 
 const command = new CommandManager('ayuda', flags)
 	.setAliases('comandos', 'acciones', 'help', 'commands', 'h')
@@ -348,6 +364,46 @@ function searchCommand(request, nameOrAlias) {
 	}
 
 	return null;
+}
+
+/**
+ * Devuelte un {@linkcode CommandManager} según el `name` indicado.
+ * Si no se encuentran resultados, se devuelve `null`
+ * @param {import('../Commons/typings').ComplexCommandRequest | StringSelectMenuInteraction<'cached'> | AutocompleteInteraction<'cached'>} request 
+ * @param {String} query 
+ */
+function searchCommands(request, query) {
+	const commands = [];
+
+	for(const filename of commandFilenames) {
+		const commandFile = require(`../../commands/Pure/${filename}`);
+		const command = /**@type {CommandManager}*/(commandFile.command ?? commandFile);
+
+		if(command.tags.any('GUIDE', 'MAINTENANCE', 'OUTDATED'))
+			continue;
+
+		let distance = edlDistance(command.name, query)
+		if(distance > 3) {
+			distance = command.aliases
+				.map(alias => edlDistance(alias, query))
+				.reduce((a, b) => a < b ? a : b, 999);
+			
+			if(distance > 3)
+				continue;
+		}
+		
+		if((command.tags.has('PAPA') && request.user.id !== peopleid.papita)
+		|| (command.tags.has('MOD') && isNotModerator(request.member))
+		|| (command.tags.has('HOURAI') && request.guild.id !== serverid.saki))
+			continue;
+		
+		commands.push({
+			command,
+			distance,
+		});
+	}
+
+	return commands;
 }
 
 /**
