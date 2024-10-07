@@ -209,7 +209,7 @@ const command = new CommandManager('ayuda', flags)
 					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}comando <comando>\` para ver un comando en específico`,
 				}));
 		
-		components.push(makeGuideRow(request));
+		components.unshift(makeGuideRow(request));
 
 		return request.reply({ embeds, components });
 	})
@@ -283,7 +283,7 @@ const command = new CommandManager('ayuda', flags)
 					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}comando <comando>\` para ver un comando en específico`,
 				}));
 		
-		components.push(makeGuideRow(interaction));
+		components.unshift(makeGuideRow(interaction));
 
 		return interaction.update({ embeds, components });
 	}, { userFilterIndex: 0 });
