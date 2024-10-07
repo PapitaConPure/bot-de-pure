@@ -5,7 +5,10 @@ const { Translator } = require('../../internationalization.js');
 const { useMainPlayer } = require('discord-player');
 const { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/musicPlayer.js');
 
-const tags = new CommandTags().add('COMMON');
+const tags = new CommandTags().add(
+	'COMMON',
+	'MUSIC',
+);
 
 const command = new CommandManager('pausar', tags)
 	.setAliases(

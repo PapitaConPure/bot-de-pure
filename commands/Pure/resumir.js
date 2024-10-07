@@ -6,7 +6,10 @@ const { useMainPlayer } = require('discord-player');
 const { tryRecoverSavedTracksQueue } = require('../../localdata/models/playerQueue.js');
 const { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/musicPlayer.js');
 
-const tags = new CommandTags().add('COMMON');
+const tags = new CommandTags().add(
+	'COMMON',
+	'MUSIC',
+);
 
 const command = new CommandManager('resumir', tags)
 	.setAliases(

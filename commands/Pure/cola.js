@@ -7,7 +7,10 @@ const { Translator } = require('../../internationalization.js');
 const { tryRecoverSavedTracksQueue, saveTracksQueue } = require('../../localdata/models/playerQueue.js');
 const { makeTextInputRowBuilder } = require('../../tsCasts.js');
 
-const tags = new CommandTags().add('COMMON');
+const tags = new CommandTags().add(
+	'COMMON',
+	'MUSIC',
+);
 
 const command = new CommandManager('cola', tags)
 	.setAliases(

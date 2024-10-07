@@ -8,7 +8,10 @@ const { isPlayerUnavailable, SERVICES } = require('../../systems/musicPlayer.js'
 const options = new CommandOptions()
 	.addParam('búsqueda', 'TEXT', 'para realizar una búsqueda');
 
-const tags = new CommandTags().add('COMMON');
+const tags = new CommandTags().add(
+	'COMMON',
+	'MUSIC',
+);
 
 const command = new CommandManager('reproducir', tags)
 	.setAliases(
