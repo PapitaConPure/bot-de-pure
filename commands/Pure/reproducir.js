@@ -1,12 +1,32 @@
 const { EmbedBuilder } = require('discord.js'); //Integrar discord.js
-const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands.js');
+const { CommandOptions, CommandTags, CommandManager, CommandParam } = require('../Commons/commands.js');
 const { useMainPlayer } = require('discord-player');
 const { Translator } = require('../../internationalization.js');
 const { saveTracksQueue, tryRecoverSavedTracksQueue } = require('../../localdata/models/playerQueue.js');
 const { isPlayerUnavailable, SERVICES } = require('../../systems/musicPlayer.js');
+const { shortenText } = require('../../func.js');
 
 const options = new CommandOptions()
-	.addParam('búsqueda', 'TEXT', 'para realizar una búsqueda');
+	.addOptions(
+		new CommandParam('búsqueda', 'TEXT')
+			.setDesc('para realizar una búsqueda')
+			.setAutocomplete(async (interaction, query) => {
+				if(!query)
+					return interaction.respond([]);
+
+				const player = useMainPlayer();
+				const results = await player.search(query, { searchEngine: 'auto' });
+
+				return interaction.respond(
+					results.tracks
+						.slice(0, 10)
+						.map(t => ({
+							name: shortenText(t.title, 100),
+							value: t.url,
+						})),
+				);
+			})
+	);
 
 const tags = new CommandTags().add(
 	'COMMON',
@@ -38,6 +58,9 @@ const command = new CommandManager('reproducir', tags)
 			return request.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
 		
 		const query = args.getString('búsqueda', true);
+		if(!query)
+			return request.reply({ content: translator.getText('playSearchExpected'), ephemeral: true });
+
 		await request.deferReply();
 
 		/**@param {import('discord.js').ColorResolvable} color*/
