@@ -67,7 +67,7 @@ const makeCategoriesRow = (request, selections) => {
 			.setValue('MUSIC')
 			.setEmoji('🎵')
 			.setLabel('Música')
-			.setDescription('Comandos PuréMusic para reproducir música')
+			.setDescription('Comandos PuréMusic para reproducir música.')
 			.setDefault(getDefault('MUSIC')),
 		new StringSelectMenuOptionBuilder()
 			.setValue('EMOTE')
