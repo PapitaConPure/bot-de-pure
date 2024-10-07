@@ -6,9 +6,9 @@ const { auditRequest } = require('../systems/others/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../localdata/cmdExceptions.js');
 const { Translator } = require('../internationalization.js');
 const { CommandManager } = require('../commands/Commons/cmdBuilder.js');
-const { ButtonInteraction, StringSelectMenuInteraction, ModalSubmitInteraction, Client, ContextMenuCommandInteraction, ChatInputCommandInteraction, CommandInteractionOptionResolver } = require('discord.js');
+const { ButtonInteraction, StringSelectMenuInteraction, ModalSubmitInteraction, Client, ContextMenuCommandInteraction, ChatInputCommandInteraction, CommandInteractionOptionResolver, AutocompleteInteraction } = require('discord.js');
 const { ContextMenuActionManager } = require('../actions/Commons/actionBuilder.js');
-const { CommandOptionSolver } = require('../commands/Commons/cmdOpts.js');
+const { CommandOptionSolver, CommandFlagExpressive, CommandParam } = require('../commands/Commons/cmdOpts.js');
 
 /**
  * @param {import('discord.js').Interaction} interaction 
@@ -25,10 +25,10 @@ async function onInteraction(interaction, client) {
     
     const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
 
-    auditRequest(interaction);
-
     if(interaction.isAutocomplete())
-        return handleUnknownInteraction(interaction);
+        return handleAutocompleteInteraction(interaction, client, stats);
+
+    auditRequest(interaction);
 
     if(interaction.isChatInputCommand())
         return handleCommand(interaction, client, stats);
@@ -55,8 +55,8 @@ async function handleCommand(interaction, client, stats) {
 
     try {
         //Detectar problemas con el comando basado en flags
-        /**@type {CommandManager | undefined}*/
-        // @ts-ignore
+        /**@type {CommandManager}*/
+        //@ts-expect-error
         const command = client.ComandosPure.get(commandName);
 
         if(command.permissions && !command.permissions.isAllowed(interaction.member)) {
@@ -149,6 +149,7 @@ async function handleComponent(interaction, client, stats) {
         if(!commandName || !commandFnName)
             return handleUnknownInteraction(interaction);
 
+        /**@type {CommandManager}*/
         //@ts-expect-error
         const command = client.ComandosPure.get(commandName) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
         if(typeof command[commandFnName] !== 'function')
@@ -180,6 +181,43 @@ async function handleComponent(interaction, client, stats) {
     }
 }
 
+/**
+ * @param {AutocompleteInteraction<'cached'>} interaction 
+ * @param {Client} client 
+ * @param {import('../localdata/models/stats.js').StatsDocument} stats 
+*/
+async function handleAutocompleteInteraction(interaction, client, stats) {
+    const { commandName, options } = interaction;
+    const focusedOption = options.getFocused(true);
+
+    if(!focusedOption) return;
+
+    const optionName = focusedOption.name;
+    const optionValue = focusedOption.value;
+
+    console.log([ commandName, optionName, '«?»', optionValue ]);
+
+    try {
+        /**@type {CommandManager}*/
+        //@ts-expect-error
+        const command = /***/client.ComandosPure.get(commandName) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+        const option = /**@type {CommandParam | CommandFlagExpressive}*/(command.options.options.get(optionName));
+
+        if(!option)
+            return interaction.respond([{
+                name: 'Ocurrió un error. Disculpa las molestias',
+                value: 'error',
+            }]);
+        
+        return option.autocomplete(interaction, optionValue);
+    } catch(error) {
+        const isPermissionsError = handleAndAuditError(error, interaction, { details: `"${optionName}"` });
+        if(!isPermissionsError)
+            console.error(error);
+    }
+}
+
+
 //#region Casos extremos
 /**@param {import('discord.js').Interaction} interaction*/
 async function handleDMInteraction(interaction) {
@@ -206,7 +244,7 @@ async function handleBlockedInteraction(interaction) {
             ephemeral: true,
         });
     } else {
-        interaction.respond([{ name: 'No permitido', value: -1 }]);
+        interaction.respond([]);
     }
 }
 
@@ -219,7 +257,7 @@ async function handleUnknownInteraction(interaction) {
             ephemeral: true,
         });
     } else {
-        interaction.respond([{ name: 'No permitido', value: -1 }]);
+        interaction.respond([]);
     }
 }
 
@@ -232,7 +270,7 @@ async function handleHuskInteraction(interaction) {
             ephemeral: true,
         });
     } else {
-        interaction.respond([{ name: 'No permitido', value: -1 }]);
+        interaction.respond([]);
     }
 }
 //#endregion

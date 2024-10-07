@@ -145,6 +145,16 @@ async function executeFnSample(request, args, isSlash = false, rawArgs = undefin
 
 /**Representa un comando*/
 class CommandManager {
+    /**
+     * @typedef {typeof executeFnSample} ExecutionFunction
+     * @typedef {(interaction: Interaction, ...args: String[]) => Promise<*>} InteractionResponseFunction
+     * @typedef {import('discord.js').ModalMessageModalSubmitInteraction<'cached'>} ModalResponseInteraction
+     * @typedef {(interaction: ButtonInteraction<'cached'>, ...args: String[]) => Promise<*>} ButtonResponseFunction
+     * @typedef {(interaction: SelectMenuInteraction<'cached'>, ...args: String[]) => Promise<*>} SelectMenuResponseFunction
+     * @typedef {(interaction: ModalResponseInteraction, ...args: String[]) => Promise<*>} ModalResponseFunction
+     * @typedef {(String | MessagePayload | import('discord.js').MessageReplyOptions) & InteractionReplyOptions & { fetchReply: Boolean }} ReplyOptions
+     */
+
     /**@type {String}*/
     name;
     /**@type {Array<String>?}*/
@@ -164,25 +174,13 @@ class CommandManager {
     /**
      * Define si usar un {@link CommandOptionSolver} en lugar de la unión `string[] | CommandInteractionOptionResolver`
      * @type {Boolean?}
-     * 
      */
 	experimental;
     /**@type {Map<String, any>}*/
     memory;
-    /**
-     * @typedef {(String | MessagePayload | import('discord.js').MessageReplyOptions) & InteractionReplyOptions & { fetchReply: Boolean }} ReplyOptions
-     * @type {ReplyOptions}
-     */
+    /**@type {ReplyOptions}*/
     reply;
-    /**
-     * @typedef {typeof executeFnSample} ExecutionFunction
-     * @typedef {(interaction: Interaction, ...args: String[]) => Promise<*>} InteractionResponseFunction
-     * @typedef {import('discord.js').ModalMessageModalSubmitInteraction<'cached'>} ModalResponseInteraction
-     * @typedef {(interaction: ButtonInteraction<'cached'>, ...args: String[]) => Promise<*>} ButtonResponseFunction
-     * @typedef {(interaction: SelectMenuInteraction<'cached'>, ...args: String[]) => Promise<*>} SelectMenuResponseFunction
-     * @typedef {(interaction: ModalResponseInteraction, ...args: String[]) => Promise<*>} ModalResponseFunction
-     * @type {ExecutionFunction}
-     */
+    /**@type {ExecutionFunction}*/
     execute;
     
     /**
@@ -255,10 +253,10 @@ class CommandManager {
     
     /**
      * Define si usar un {@link CommandOptionSolver} en lugar de la unión `string[] | CommandInteractionOptionResolver`
-     * @param {Boolean} [experimental=false] Si establecer el comando como experimental (true) o no (false)
+     * @param {Boolean} [experimental=true] Si establecer el comando como experimental (true) o no (false)
      * 
      */
-    setExperimental(experimental = false) {
+    setExperimental(experimental = true) {
         this.experimental = experimental ?? false;
         return this;
     };
@@ -275,7 +273,10 @@ class CommandManager {
         return this;
     };
 
-    /**@param {ExperimentalExecuteFunction} exeFn*/
+    /**
+     * Habilita {@linkcode CommandManager.experimental} y establece la función de ejecución de este comando
+     * @param {ExperimentalExecuteFunction} exeFn
+     */
     setExperimentalExecution(exeFn) {
         this.experimental = true;
         //@ts-expect-error

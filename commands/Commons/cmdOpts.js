@@ -1,4 +1,4 @@
-const { User, GuildMember, Message, TextChannel, VoiceChannel, GuildChannel, CommandInteractionOptionResolver, BaseGuildTextChannel, BaseGuildVoiceChannel, ChannelType, Role } = require('discord.js');
+const { User, GuildMember, Message, GuildChannel, CommandInteractionOptionResolver, Role, AutocompleteInteraction } = require('discord.js');
 const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSentence, toLowerCaseNormalized } = require('../../func');
 
 /**
@@ -167,6 +167,10 @@ class CommandOption {
 
 /**Representa un parámetro de comando*/
 class CommandParam extends CommandOption {
+    /**
+     * @typedef {(interaction: AutocompleteInteraction<'cached'>, query: String) => Promise<*>} AutocompleteFunction
+     */
+
     /**@type {String}*/
     _name;
     /**@type {ParamType|Array<ParamType>}*/
@@ -177,6 +181,8 @@ class CommandParam extends CommandOption {
     _poly;
     /**@type {Number}*/
     _polymax;
+    /**@type {AutocompleteFunction}*/
+    autocomplete;
 
     /**
      * @constructor
@@ -222,7 +228,16 @@ class CommandParam extends CommandOption {
         this._poly = poly;
         if(max) this._polymax = max;
         return this;
-    };
+    }
+
+    /**
+     * Establece una función de autocompletado para este parámetro
+     * @param {AutocompleteFunction} autocompleteFn
+     */
+    setAutocomplete(autocompleteFn) {
+        this.autocomplete = autocompleteFn;
+        return this;
+    }
 
     /**@returns {this is CommandParam}*/
     isCommandParam() {
@@ -269,6 +284,10 @@ class CommandParam extends CommandOption {
 
         return `\`<${identifier.join('')}>\` _(${this.typeDisplay})_ ${this._desc}`;
     };
+
+    get hasAutocomplete() {
+        return this.autocomplete != null;
+    }
 };
 
 /**Representa una bandera de comando*/
@@ -345,12 +364,20 @@ class CommandFlag extends CommandOption {
     get structure() {
         return { property: this.isExpressive(), short: this._short, long: this._long };
     }
+
+    get identifier() {
+        return this._long.length
+            ? (Array.isArray(this._long) ? this._long[0] : this._long)
+            : this._short[0];
+    }
 };
 
 /**Representa una bandera expresiva de comando*/
 class CommandFlagExpressive extends CommandFlag {
     /**@type {String}*/
     _name;
+    /**@type {AutocompleteFunction}*/
+    autocomplete;
 
     /**
      * @constructor
@@ -385,6 +412,15 @@ class CommandFlagExpressive extends CommandFlag {
     };
 
     /**
+     * Establece una función de autocompletado para este parámetro
+     * @param {AutocompleteFunction} autocompleteFn
+     */
+    setAutocomplete(autocompleteFn) {
+        this.autocomplete = autocompleteFn;
+        return this;
+    }
+
+    /**
      *String del tipo de bandera
      * @returns {String}
      */
@@ -401,6 +437,10 @@ class CommandFlagExpressive extends CommandFlag {
         if(Array.isArray(short) && short.length) flagString.push(`\`-${short[0]} <${name}>\``);
         if(Array.isArray(long) && long.length)  flagString.push(`\`--${long[0]} <${name}>\``);
         return `${flagString.join(' o ')} _(${type})_ ${desc}`;
+    }
+
+    get hasAutocomplete() {
+        return this.autocomplete != null;
     }
 };
 
@@ -484,13 +524,33 @@ class CommandOptions {
             .setShort(short)
             .setLong(long)
             .setDesc(desc);
-        const flagIdentifier = commandFlag._long.length
-            ? (Array.isArray(commandFlag._long) ? commandFlag._long[0] : commandFlag._long)
-            : commandFlag._short[0];
+        const flagIdentifier = commandFlag.identifier;
         this.options.set(flagIdentifier, commandFlag);
         this.flags.set(flagIdentifier, commandFlag);
         return this;
     };
+
+    /**
+     * Añade opciones al administrador
+     * @param {...CommandOption} options
+     */
+    addOptions(...options) {
+        for(const option of options) {
+            let identifier;
+
+            if(option.isCommandParam()) {
+                identifier = option.name;
+                this.params.set(identifier, option);
+            } else if(option.isCommandFlag()) {
+                identifier = option.identifier;
+                this.flags.set(identifier, option);
+            }
+
+            this.options.set(identifier, option);
+        };
+
+        return this;
+    }
 
     /**
      * Crea una copia del administrador de opciones bajo el contexto de ejecución actual
@@ -1222,6 +1282,9 @@ class CommandOptionSolver {
 
 module.exports = {
     typeHelp,
+    CommandParam,
+    CommandFlag,
+    CommandFlagExpressive,
     CommandOptions,
     CommandOptionSolver,
 };

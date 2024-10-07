@@ -1,27 +1,66 @@
 const { Collection, PermissionFlagsBits, SlashCommandBuilder, Client, ContextMenuCommandBuilder } = require('discord.js');
-const { CommandManager, CommandOptions } = require('./commands/Commons/commands.js');
+const { CommandManager, CommandOptions, CommandFlagExpressive } = require('./commands/Commons/commands.js');
 const { shortenText } = require('./func.js');
 const { readdirSync } = require('fs');
 const { ContextMenuActionManager } = require('./actions/Commons/actionBuilder.js');
+
+/**+
+ * @typedef {import('discord.js').SlashCommandBooleanOption
+ *         | import('discord.js').SlashCommandChannelOption
+ *         | import('discord.js').SlashCommandIntegerOption
+ *         | import('discord.js').SlashCommandMentionableOption
+ *         | import('discord.js').SlashCommandNumberOption
+ *         | import('discord.js').SlashCommandRoleOption
+ *         | import('discord.js').SlashCommandStringOption
+ *         | import('discord.js').SlashCommandUserOption
+ * } AnySlashCommandOption
+ */
 
 /**
  * @param {import('discord.js').SlashCommandBuilder} slash
  * @param {CommandOptions} options
  */
 function setupOptionBuilders(slash, options) {
-    /**@type {Map<import('./commands/Commons/cmdOpts.js').ParamType, String>} type*/
-    const addFunctionNames = new Map()
-    addFunctionNames.set('NUMBER',  'addNumberOption')
-                    .set('USER',    'addUserOption')
-                    .set('MEMBER',  'addUserOption')
-                    .set('ROLE',    'addRoleOption')
-                    .set('CHANNEL', 'addChannelOption')
-                    .set('ID',      'addIntegerOption');
+    /**@type {{ [K in import('./commands/Commons/cmdOpts.js').BaseParamType]: String }}*/
+    const addFunctionNames = /**@type {const}*/({
+        NUMBER:  'addNumberOption',
+        USER:    'addUserOption',
+        MEMBER:  'addUserOption',
+        ROLE:    'addRoleOption',
+        CHANNEL: 'addChannelOption',
+        ID:      'addIntegerOption',
+        EMOTE:   'addStringOption',
+        FILE:    'addStringOption',
+        GUILD:   'addStringOption',
+        IMAGE:   'addStringOption',
+        MESSAGE: 'addStringOption',
+        TEXT:    'addStringOption',
+        URL:     'addStringOption',
+    });
     const defaultAddFunctionName =  'addStringOption';
 
     options.params.forEach(p => {
-        const addFunctionName = addFunctionNames.get(p._type) ?? defaultAddFunctionName;
-        const optionBuilder = (opt, name, fullyOptional = false) => opt.setName(name).setDescription(p._desc).setRequired(!(fullyOptional || p._optional));
+        /**
+         * @param {AnySlashCommandOption} option 
+         * @param {String} name 
+         * @param {Boolean} fullyOptional 
+         */
+        const optionBuilder = (option, name, fullyOptional = false) => {
+            option
+                .setName(name)
+                .setDescription(p._desc)
+                .setRequired(!(fullyOptional || p._optional));
+
+            if(p.hasAutocomplete)
+                /**@type {import('discord.js').SlashCommandStringOption}*/(option).setAutocomplete(true);
+
+            return option;
+        };
+
+        const addFunctionName = (typeof p._type === 'string')
+            ? (addFunctionNames[p._type] ?? defaultAddFunctionName)
+            : defaultAddFunctionName;
+
         if(p._poly === 'SINGLE')
             return slash[addFunctionName](opt => optionBuilder(opt, p._name));
         if(p._poly === 'MULTIPLE') {
@@ -35,10 +74,30 @@ function setupOptionBuilders(slash, options) {
     });
     
     options.flags.forEach(f => {
-        const addFunctionName = addFunctionNames.get(f._type) ?? defaultAddFunctionName;
-        const optionBuilder = (opt) => opt.setName(f._long[0] || f._short[0]).setDescription(f._desc).setRequired(false);
-        if(f._expressive)
+        const addFunctionName = (typeof f._type === 'string')
+            ? (addFunctionNames[f._type] ?? defaultAddFunctionName)
+            : defaultAddFunctionName;
+        
+        /**
+         * @param {AnySlashCommandOption} option 
+         */
+        const optionBuilder = (option) => {
+            option
+                .setName(f._long[0] || f._short[0])
+                .setDescription(f._desc)
+                .setRequired(false);
+
+            if(f._expressive && /**@type {CommandFlagExpressive}*/(f).hasAutocomplete)
+                /**@type {import('discord.js').SlashCommandStringOption}*/(option).setAutocomplete(true);
+
+            return option;
+        };
+
+        if(f._expressive) {
             return slash[addFunctionName](optionBuilder);
+        }
+
+        //@ts-expect-error
         return slash.addBooleanOption(optionBuilder);
     });
 }
