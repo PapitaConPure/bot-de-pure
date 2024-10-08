@@ -1,8 +1,8 @@
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
-const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver, CommandParam } = require('../Commons/commands');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId, warn } = require('../../func.js');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, TextInputBuilder, CommandInteraction, ButtonInteraction, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder, ModalSubmitInteraction, StringSelectMenuBuilder, CommandInteractionOptionResolver, Message, ChatInputCommandInteraction } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, TextInputBuilder, ButtonInteraction, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder, ModalSubmitInteraction, StringSelectMenuBuilder } = require('discord.js');
 const { RuntimeToLanguageType } = require('../../systems/ps/commons.js');
 const { executeTuber: executeTuberPS1 } = require('../../systems/ps/purescript.js');
 const { executeTuber: executeTuberPS2, CURRENT_PS_VERSION } = require('../../systems/ps2/purescript.js');
@@ -147,7 +147,53 @@ const helpString = (/**@type {import('../Commons/typings.js').ComplexCommandRequ
 ].join('\n');
 
 const options = new CommandOptions()
-	.addParam('id', 	  'TEXT',           'para especificar sobre qué Tubérculo operar',          { optional: true })
+	.addOptions(
+		new CommandParam('id', 'TEXT')
+			.setDesc('para especificar sobre qué Tubérculo operar')
+			.setOptional(true)
+			.setAutocomplete(async (interaction, query) => {
+				if(!query) return;
+
+				const gcfg = await GuildConfig.findOne({ guildId: interaction.guildId });
+				if(!gcfg) return;
+
+				const tubers = /**@type {{ [K: String]: import('../../systems/ps2/purescript.js').Tubercle }}*/(gcfg.tubers);
+				const tubersArr = Object.entries(tubers)
+					.map(([ name, tuber ]) => /**@type {const}*/([ name, tuber, edlDistance(name, query) ]))
+					.filter(([ ,, distance ]) => distance < 3);
+				const existingTuber = tubersArr.find(([ id ]) => id === query);
+
+				const membersCache = interaction.guild.members.cache;
+				const clientDisplayName = interaction.guild.members.me.displayName;
+
+				/**@type {Array<import('discord.js').ApplicationCommandOptionChoiceData>}*/
+				const options = tubersArr
+					.sort(([ ,, aDistance ], [ ,, bDistance ]) => aDistance - bDistance)
+					.slice(0, +!!existingTuber + 24)
+					.map(([ name, tuber ]) => {
+						const value = name;
+						
+						name = `${name} - 👤 ${membersCache.get(tuber.author)?.displayName ?? clientDisplayName}`;
+						
+						if(tuber.advanced)
+							name = `【📜】${name} - 🧩 ${tuber.inputs?.length}`;
+						else
+							name = `【🥔】${name}`;
+
+						name = shortenText(name, 100);
+
+						return { name, value };
+					});
+
+				if(!existingTuber)
+					options.unshift({
+						name: `【✨】${query}`,
+						value: query,
+					});
+
+				return interaction.respond(options);
+			}),
+	)
 	.addParam('mensaje',  'TEXT',           'para especificar el texto del mensaje',                { optional: true })
 	.addParam('archivos', ['FILE','IMAGE'], 'para especificar los archivos del mensaje',            { optional: true, poly: 'MULTIPLE', polymax: 8 })
 	.addParam('entradas', 'TEXT',           'para especificar las entradas del Tubérculo avanzado', { optional: true, poly: 'MULTIPLE', polymax: 8 })
@@ -155,7 +201,9 @@ const options = new CommandOptions()
 	.addFlag('v', 		'ver', 		  				  'para ver detalles de un Tubérculo')
 	.addFlag(['b','d'], ['borrar','eliminar'], 		  'para eliminar un Tubérculo')
 	.addFlag('s', 		['script','puré','pure'], 	  'para usar PuréScript (junto a `-c`); reemplaza la función de `<mensaje>`');
+
 const flags = new CommandTags().add('COMMON');
+
 const command = new CommandManager('tubérculo', flags)
 	.setAliases('tuberculo', 'tubercle', 'tuber', 't')
 	.setBriefDescription('Permite crear, editar, listar, borrar o ejecutar comandos personalizados de servidor')
@@ -219,6 +267,8 @@ const command = new CommandManager('tubérculo', flags)
 
 		switch(operation) {
 		case 'crear':
+			if(tuberId === '```arm')
+				return request.reply({ content: '¡No olvides indicar una TuberID al crear un Tubérculo!' });
 			await createTuber(tuberId, gcfg, isPureScript, request, args);
 			break;
 		case 'ver':
