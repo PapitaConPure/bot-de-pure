@@ -8,6 +8,7 @@ const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSent
  * @typedef {'SINGLE'|'MULTIPLE'|Array<String>} ParamPoly Capacidad de entradas de parámetro de CommandOption
  * @typedef {'getBoolean'|'getString'|'getNumber'|'getInteger'|'getChannel'|'getMessage'|'getUser'|'getMember'|'getRole'|'getAttachment'} GetMethodName
  * @typedef {Number | String | User | GuildMember | import('discord.js').GuildBasedChannel | Message<Boolean> | Role | undefined} ParamResult
+ * @typedef {(interaction: AutocompleteInteraction<'cached'>, query: String) => Promise<*>} AutocompleteFunction
  */
 
 /**
@@ -143,6 +144,25 @@ const isBaseParamType = (pt) => typeof pt === 'string' && PARAM_TYPES.get(pt) !=
  */
 const isParamTypeStrict = (pt) => (typeof pt === 'object') && pt?.name != undefined && pt?.expression != undefined;
 
+/**
+ * 
+ * @param {AutocompleteFunction} fn 
+ * @param {AutocompleteInteraction<'cached'>} interaction 
+ * @param {String} query 
+ */
+async function handleAutocomplete(fn, interaction, query) {
+    const result = await fn(interaction, query);
+
+    if(!interaction.responded) {
+        if(Array.isArray(result) && result.every(r => r.name && r.value))
+            return interaction.respond(result.slice(0, 10));
+        
+        return interaction.respond([]);
+    }
+
+    return result;
+}
+
 /**Representa una opción de comando*/
 class CommandOption {
     /**@type {String}*/
@@ -167,9 +187,6 @@ class CommandOption {
 
 /**Representa un parámetro de comando*/
 class CommandParam extends CommandOption {
-    /**
-     * @typedef {(interaction: AutocompleteInteraction<'cached'>, query: String) => Promise<*>} AutocompleteFunction
-     */
 
     /**@type {String}*/
     _name;
@@ -182,7 +199,7 @@ class CommandParam extends CommandOption {
     /**@type {Number}*/
     _polymax;
     /**@type {AutocompleteFunction}*/
-    autocomplete;
+    #autocompleteInner;
 
     /**
      * @constructor
@@ -235,13 +252,18 @@ class CommandParam extends CommandOption {
      * @param {AutocompleteFunction} autocompleteFn
      */
     setAutocomplete(autocompleteFn) {
-        this.autocomplete = autocompleteFn;
+        this.#autocompleteInner = autocompleteFn;
         return this;
     }
 
     /**@returns {this is CommandParam}*/
     isCommandParam() {
         return true;
+    }
+
+    /**@type {AutocompleteFunction}*/
+    autocomplete(interaction, query) {
+        return handleAutocomplete(this.#autocompleteInner, interaction, query);
     }
 
     /**
@@ -286,7 +308,7 @@ class CommandParam extends CommandOption {
     };
 
     get hasAutocomplete() {
-        return this.autocomplete != null;
+        return this.#autocompleteInner != null;
     }
 };
 
@@ -377,7 +399,7 @@ class CommandFlagExpressive extends CommandFlag {
     /**@type {String}*/
     _name;
     /**@type {AutocompleteFunction}*/
-    autocomplete;
+    #autocompleteInner;
 
     /**
      * @constructor
@@ -416,8 +438,13 @@ class CommandFlagExpressive extends CommandFlag {
      * @param {AutocompleteFunction} autocompleteFn
      */
     setAutocomplete(autocompleteFn) {
-        this.autocomplete = autocompleteFn;
+        this.#autocompleteInner = autocompleteFn;
         return this;
+    }
+
+    /**@type {AutocompleteFunction}*/
+    autocomplete(interaction, query) {
+        return handleAutocomplete(this.#autocompleteInner, interaction, query);
     }
 
     /**
@@ -440,7 +467,7 @@ class CommandFlagExpressive extends CommandFlag {
     }
 
     get hasAutocomplete() {
-        return this.autocomplete != null;
+        return this.#autocompleteInner != null;
     }
 };
 
