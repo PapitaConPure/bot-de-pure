@@ -9,11 +9,6 @@ const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } = require('../../
 const { auditError } = require('../../systems/others/auditor');
 const { updateFollowedFeedTagsCache } = require('../../systems/booru/boorufeed');
 
-const languageEmote = {
-    en: '<:en:1084646415319453756>',
-    es: '<:es:1084646419853488209>',
-};
-
 /**
  * @param {Boolean} toggle
  * @param {Translator} translator
@@ -96,8 +91,8 @@ const dashboardRows = (userId, userConfigs, translator) => [
     makeButtonRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`yo_toggleLanguage_${userId}`)
-            .setLabel(translator.getText('yoDashboardButtonLanguage'))
-            .setEmoji(languageEmote[translator.next])
+            .setLabel(translator.nextTranslator.getText('currentLanguage'))
+            .setEmoji(translator.nextTranslator.getText('currentLanguageEmoji'))
             .setStyle(ButtonStyle.Primary),
         new ButtonBuilder()
             .setCustomId(`yo_exitWizard_${userId}`)
@@ -119,15 +114,12 @@ const dashboardEmbed = (request, userConfigs, translator) => {
         .addFields(
             {
                 name: translator.getText('yoDashboardLanguageName'),
-                value: `${languageEmote[translator.locale]} ${translator.getText('currentLanguage')}`,
+                value: `${translator.getText('currentLanguageEmoji')} ${translator.getText('currentLanguage')}`,
                 inline: true,
             },
             {
                 name: translator.getText('yoDashboardPRCName'),
-                value: [
-                    `<:prc:1097208828946301123> ${improveNumber(userConfigs.prc, true)}`,
-                    'Acerca de PuréCoin (PDF pendiente)',
-                ].join('\n'),
+                value: `<:prc:1097208828946301123> ${improveNumber(userConfigs.prc, true)}`,
                 inline: true,
             },
             {
@@ -310,7 +302,7 @@ const command = new CommandManager('yo', flags)
 			
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
-            return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
+            return interaction.reply({ content: warn('Usuario inexistente / Unexistent user / 存在しないユーザー'), ephemeral: true });
 
         // @ts-ignore
         let translator = new Translator(userConfigs.language);

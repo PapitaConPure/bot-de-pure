@@ -17,7 +17,7 @@ const UserConfigSchema = new Mongoose.Schema({
     
     language: {
         type: String,
-        enum: [ 'es', 'en' ],
+        enum: [ 'es', 'en', 'ja' ],
         default: 'es',
         required: true,
     },
