@@ -31,7 +31,7 @@ const BooruTags = require('../../localdata/models/boorutags');
 class Booru {
 	/**@readonly @type {String}*/ static API_POSTS_URL = 'https://gelbooru.com/index.php?page=dapi&s=post&q=index';
 	/**@readonly @type {String}*/ static API_TAGS_URL  = 'https://gelbooru.com/index.php?page=dapi&s=tag&q=index';
-	/**@readonly @type {Number}*/ static TAGS_SEMAPHORE_MAX = 100_000_000;
+	/**@readonly @type {Number}*/ static TAGS_SEMAPHORE_MAX  = 100_000_000;
 	/**@readonly @type {Number}*/ static TAGS_CACHE_LIFETIME = 4 * 60 * 60e3;
 	/**@readonly @type {Number}*/ static TAGS_DB_LIFETIME    = 4 * 60 * 60e3; //De momento, exactamente igual que la vida en caché
 
@@ -70,19 +70,20 @@ class Booru {
 	 * @param {import('axios').AxiosResponse} response 
 	 * @param {ExpectAPIFetchOptions} options
 	 * @returns {Array<PostResolvable>}
-	 * @throws {BooruError}
+	 * @throws {BooruFetchError}
+	 * @throws {BooruUnknownPostError}
 	 */
 	static #expectPosts(response, options = {}) {
 		options.dontThrowOnEmptyFetch ??= false;
 
 		if(response.status !== 200)
-			throw new BooruError(`Recolección de Posts de API de Booru fallida: ${response.statusText ?? 'Error desconocido'}`);
+			throw new BooruFetchError(`Booru API Posts fetch failed: ${response.status} ${response.statusText ?? 'Unknown Error'}`);
 
 		if(!Array.isArray(response.data?.post)) {
 			if(options.dontThrowOnEmptyFetch)
 				return [];
 			else
-				throw new BooruError(`No se recolectó ningún Post de API de Booru`);
+				throw new BooruUnknownPostError(`Couldn't fetch any Posts from the Booru API`);
 		}
 
 		return response.data.post;
@@ -93,19 +94,20 @@ class Booru {
 	 * @param {import('axios').AxiosResponse} response 
 	 * @param {ExpectAPIFetchOptions} options
 	 * @returns {Array<TagResolvable>}
-	 * @throws {BooruError}
+	 * @throws {BooruFetchError}
+	 * @throws {BooruUnknownTagError}
 	 */
 	static #expectTags(response, options = {}) {
 		options.dontThrowOnEmptyFetch ??= false;
 
-		if(response.status !== 200 || !Array.isArray(response.data?.tag))
-			throw new BooruError(`Recolección de Tags de API de Booru fallida: ${response.statusText ?? 'Error desconocido'}`);
+		if(response.status !== 200)
+			throw new BooruFetchError(`Booru API Tags fetch failed: ${response.statusText ?? 'Unknown Error'}`);
 
 		if(!Array.isArray(response.data?.tag)) {
 			if(options.dontThrowOnEmptyFetch)
 				return [];
 			else
-				throw new BooruError(`No se recolectó ninguna Tag de API de Booru`);
+				throw new BooruUnknownTagError(`Couldn't fetch any Tags from the Booru API`);
 		}
 
 		return response.data.tag;
@@ -122,6 +124,9 @@ class Booru {
 	 * @param {String | Array<String>} tags Tags a buscar
 	 * @param {BooruSearchOptions} searchOptions Opciones de búsqueda
 	 * @returns {Promise<Array<Post>>}
+	 * @throws {ReferenceError}
+	 * @throws {TypeError}
+	 * @throws {BooruFetchError}
 	 */
 	async search(tags, searchOptions = { limit: 1 }) {
 		const { apiKey, userId } = this.#getCredentials();
@@ -134,13 +139,18 @@ class Booru {
 	}
 
 	/**
+	 * Obtiene y devuelve un {@linkcode Post} por ID
 	 * @param {String | Number} postId 
 	 * @returns {Promise<Post | undefined>}
+	 * @throws {ReferenceError}
+	 * @throws {TypeError}
+	 * @throws {BooruFetchError}
+	 * @throws {BooruUnknownPostError}
 	 */
 	async fetchPostById(postId) {
 		const { apiKey, userId } = this.#getCredentials();
 		if(![ 'string', 'number' ].includes(typeof postId))
-			throw TypeError('ID de Post inválida');
+			throw TypeError('Invalid Post ID');
 
 		const response = await axios.get(`${Booru.API_POSTS_URL}&json=1&api_key=${apiKey}&user_id=${userId}&id=${postId}`);
 		const [ post ] = Booru.#expectPosts(response);
@@ -148,14 +158,17 @@ class Booru {
 	}
 
 	/**
+	 * Obtiene y devuelve un {@linkcode Post} por enlace
 	 * @param {String} postUrl
 	 * @returns {Promise<Post | undefined>}
-	 * @throws {TypeError | BooruError}
+	 * @throws {ReferenceError}
+	 * @throws {TypeError}
+	 * @throws {BooruFetchError}
 	 */
 	async fetchPostByUrl(postUrl) {
 		const { apiKey, userId } = this.#getCredentials();
 		if(typeof postUrl !== 'string')
-			throw TypeError('URL de Post inválida');
+			throw TypeError('Invalid Post URL');
 
 		postUrl = postUrl
 			.replace(
@@ -172,20 +185,25 @@ class Booru {
 	}
 
 	/**
+	 * Obtiene y devuelve las {@linkcode Tag}s del {@linkcode Post} indicado
 	 * @param {Post} post
-	 * @throws {ReferenceError | TypeError | BooruError}
+	 * @throws {ReferenceError}
+	 * @throws {TypeError}
+	 * @throws {BooruFetchError}
 	 */
 	async fetchPostTags(post) {
 		if(!Array.isArray(post?.tags))
-			throw ReferenceError('Post inválido');
+			throw ReferenceError('Invalid Post');
 
 		return this.fetchTagsByNames(...post.tags);
 	}
 
 	/**
-	 * 
+	 * Obtiene un {@linkcode Post} desde el enlace indicado y devuelve sus {@linkcode Tag}s
 	 * @param {String} postUrl 
-	 * @throws {TypeError | BooruError}
+	 * @throws {ReferenceError}
+	 * @throws {TypeError}
+	 * @throws {BooruFetchError}
 	 */
 	async fetchPostTagsByUrl(postUrl) {
 		const post = await this.fetchPostByUrl(postUrl);
@@ -195,9 +213,11 @@ class Booru {
 	}
 
 	/**
-	 * 
+	 * Obtiene el {@linkcode Post} con la ID indicada y devuelve sus {@linkcode Tag}s
 	 * @param {String | Number} postId 
-	 * @throws {TypeError | BooruError}
+	 * @throws {ReferenceError}
+	 * @throws {TypeError}
+	 * @throws {BooruFetchError}
 	 */
 	async fetchPostTagsById(postId) {
 		const post = await this.fetchPostById(postId);
@@ -209,15 +229,17 @@ class Booru {
 	/**
 	 * 
 	 * @param {Array<String>} tagNames 
-	 * @throws {TypeError | BooruError}
+	 * @throws {ReferenceError}
+	 * @throws {TypeError}
+	 * @throws {BooruFetchError}
 	 */
 	async fetchTagsByNames(...tagNames) {
-		const semaphoreId = Booru.tagsSemaphoreCount++ % Booru.TAGS_SEMAPHORE_MAX
+		const semaphoreId = Booru.tagsSemaphoreCount++ % Booru.TAGS_SEMAPHORE_MAX;
 
 		const { apiKey, userId } = this.#getCredentials();
 
 		if(tagNames.some(t => typeof t !== 'string'))
-			throw TypeError('Tags inválidas');
+			throw TypeError('Invalid Tags');
 
 		while(semaphoreId !== Booru.tagsSemaphoreDone)
 			await new Promise(resolve => setTimeout(resolve, 50));
@@ -284,7 +306,8 @@ class Booru {
 	/**
 	 * Establece las credenciales a usar para cada búsqueda
 	 * @param {Credentials} credentials Credenciales para autorizarse en la API
-	 * @throws {ReferenceError | TypeError}
+	 * @throws {ReferenceError}
+	 * @throws {TypeError}
 	 */
 	setCredentials(credentials) {
 		this.#expectCredentials(credentials);
@@ -294,7 +317,8 @@ class Booru {
 
 	/**
 	 * Recupera las credenciales de búsqueda establecidas
-	 * @throws {ReferenceError | TypeError}
+	 * @throws {ReferenceError}
+	 * @throws {TypeError}
 	 */
 	#getCredentials() {
 		this.#expectCredentials(this.credentials);
@@ -304,12 +328,13 @@ class Booru {
 	/**
 	 * Establece las credenciales a usar para cada búsqueda
 	 * @param {Credentials} credentials Credenciales para autorizarse en la API
-	 * @throws {ReferenceError | TypeError}
+	 * @throws {ReferenceError}
+	 * @throws {TypeError}
 	 */
 	#expectCredentials(credentials) {
-		if(!credentials) throw ReferenceError('No se han definido credenciales');
-		if(!credentials.apiKey || typeof credentials.apiKey !== 'string') throw TypeError('La clave de API es inválida');
-		if(!credentials.userId || ![ 'string', 'number' ].includes(typeof credentials.userId)) throw TypeError('La ID de usuario es inválida');
+		if(!credentials) throw ReferenceError('No credentials were defined');
+		if(!credentials.apiKey || typeof credentials.apiKey !== 'string') throw TypeError('API Key is invalid');
+		if(!credentials.userId || ![ 'string', 'number' ].includes(typeof credentials.userId)) throw TypeError('User ID is invalid');
 	}
 }
 
@@ -433,12 +458,34 @@ class Tag {
 }
 
 class BooruError extends Error {
-    /**
-	 * @param {String} message Mensaje del error
-	 */
+    /**@param {String} message Error message*/
     constructor(message) {
         super(message);
         this.name = 'BooruError';
+    }
+}
+
+class BooruFetchError extends BooruError {
+    /**@param {String} message Error message*/
+    constructor(message) {
+        super(message);
+        this.name = 'BooruFetchError';
+    }
+}
+
+class BooruUnknownPostError extends BooruError {
+    /**@param {String} message Error message*/
+    constructor(message) {
+        super(message);
+        this.name = 'BooruUnknownPostError';
+    }
+}
+
+class BooruUnknownTagError extends BooruError {
+    /**@param {String} message Error message*/
+    constructor(message) {
+        super(message);
+        this.name = 'BooruUnknownTagError';
     }
 }
 
@@ -447,5 +494,8 @@ module.exports = {
 	Post,
 	Tag,
 	BooruError,
+	BooruFetchError,
+	BooruUnknownPostError,
+	BooruUnknownTagError,
 	TagTypes,
 };
