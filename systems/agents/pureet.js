@@ -53,6 +53,11 @@ const sendTweetsAsWebhook = async (message, configPrefix) => {
 			message.reply({ content: formattedTweetUrls.join(' ') }),
 			message.suppressEmbeds(true),
 		]);
+		
+		setTimeout(() => {
+			if(!message?.embeds) return;
+			message.suppressEmbeds(true).catch(_ => undefined);
+		}, 3000);
 
 		await Promise.all([
 			addAgentMessageOwner(sent, author.id),
