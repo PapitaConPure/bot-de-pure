@@ -1,6 +1,6 @@
 const { makeButtonRowBuilder } = require('../../tsCasts');
 // @ts-ignore
-const { EmbedBuilder, ButtonBuilder, ButtonStyle, Colors, Message, User, MessageCreateOptions, Snowflake } = require('discord.js');
+const { EmbedBuilder, ButtonBuilder, ButtonStyle, Colors, Message, User, MessageCreateOptions, Snowflake, Emoji } = require('discord.js');
 // @ts-ignore
 const { ComplexCommandRequest, CommandArguments } = require('../../commands/Commons/typings');
 const { CommandOptions } = require('../../commands/Commons/cmdOpts');
@@ -153,45 +153,49 @@ async function formatBooruPostMessage(booru, post, data) {
 		if(postTags.some(t => t.name === 'ai-generated'))
 			postEmbed.setThumbnail('https://i.imgur.com/1Q41hhC.png');
 
-		const postArtistTags   = postTags
-			.filter(t => t.type === TagTypes.ARTIST)
-			.map(t => t.name);
-		const postCharacterTags = postTags
-			.filter(t => t.type === TagTypes.CHARACTER)
-			.map(t => t.name);
-		const postCopyrightTags = postTags
-			.filter(t => t.type === TagTypes.COPYRIGHT)
-			.map(t => t.name);
-			
-		const otherTypes = /**@type {Array<import('./boorufetch').TagType>}*/([
-			TagTypes.ARTIST,
-			TagTypes.CHARACTER,
-			TagTypes.COPYRIGHT,
-		]);
-		const postOtherTags = postTags
-			.filter(t => !otherTypes.includes(t.type))
-			.map(t => t.name);
-	   
-	   const s3 = globalConfigs.slots.slot3;
-	   const filteredTags = postOtherTags.slice(0, maxTags);
-	   const tagsTitle = `${gEmo('tagswhite', s3)} Tags (${filteredTags.length}/${post.tags.length})`;
-	   const tagsContent = formatTagNameList(filteredTags, ' ');
-	   
-	   if(postArtistTags.length > 0) {
-		   const artistTagsContent = formatTagNameList(postArtistTags.slice(0, 3), '\n');
-		   if(artistTagsContent.length > 0)
-			postEmbed.addFields({ name: `${gEmo('pencilwhite', s3)} Artistas`, value: shortenText(artistTagsContent, 1020), inline: true })
+		const postArtistTags    = /**@type {Array<String>}*/([]);
+		const postCharacterTags = /**@type {Array<String>}*/([]);
+		const postCopyrightTags = /**@type {Array<String>}*/([]);
+		const postOtherTags     = /**@type {Array<String>}*/([]);
+
+		postTags.forEach(tag => {
+			const { name } = tag;
+
+			switch(tag.type) {
+			case TagTypes.ARTIST:
+				return postArtistTags.push(name);
+			case TagTypes.CHARACTER:
+				return postCharacterTags.push(name);
+			case TagTypes.COPYRIGHT:
+				return postCopyrightTags.push(name);
+			default:
+				return postOtherTags.push(name);
+			}
+		});
+
+		const s3 = globalConfigs.slots.slot3;
+		const filteredTags = postOtherTags.slice(0, maxTags);
+		const tagsTitle = `${gEmo('tagswhite', s3)} Tags (${filteredTags.length}/${post.tags.length})`;
+		const tagsContent = formatTagNameList(filteredTags, ' ');
+
+		const addTagCategoryField = (/**@type {String}*/ fieldName, /**@type {Array<String>}*/arr) => {
+			if(arr.length < 0) return;
+
+			if(arr.length > 4) {
+				arr = arr
+					.with(3, '*(...)*')
+					.slice(0, 4);
+			}
+
+			const content = formatTagNameList(arr, '\n');
+			if(!content.length) return;
+
+			postEmbed.addFields({ name: fieldName, value: shortenText(content, 1020), inline: true });
 		}
-		if(postCharacterTags.length > 0) {
-			const characterTagsContent = formatTagNameList(postCharacterTags.slice(0, 3), '\n');
-			if(characterTagsContent.length > 0)
-				postEmbed.addFields({ name: `${gEmo('personwhite', s3)} Personajes`, value: shortenText(characterTagsContent, 1020), inline: true })
-		}
-		if(postCopyrightTags.length > 0) {
-			const copyrightTagsContent = formatTagNameList(postCopyrightTags.slice(0, 3), '\n');
-			if(copyrightTagsContent.length > 0)
-				postEmbed.addFields({ name: `${gEmo('questionwhite', s3)} Copyright`, value: shortenText(copyrightTagsContent, 1020), inline: true })
-		}
+		
+		addTagCategoryField(`${gEmo('pencilwhite', s3)} Artistas`,    postArtistTags);
+		addTagCategoryField(`${gEmo('personwhite', s3)} Personajes`,  postCharacterTags);
+		addTagCategoryField(`${gEmo('questionwhite', s3)} Copyright`, postCopyrightTags);
 
 		if(maxTags > 0)
 			postEmbed.addFields({ name: tagsTitle, value: `_${shortenText(tagsContent, 1020)}_` });
