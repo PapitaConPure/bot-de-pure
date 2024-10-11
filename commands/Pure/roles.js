@@ -1,4 +1,4 @@
-const { hourai, peopleid, tenshiColor } = require('../../localdata/config.json');
+const { hourai, tenshiColor } = require('../../localdata/config.json');
 const Hourai = require('../../localdata/models/hourai.js');
 const axios = require('axios').default;
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors, ActionRow, ComponentType } = require('discord.js');
@@ -7,6 +7,7 @@ const { CommandTags, CommandManager } = require('../Commons/commands');
 const { auditError } = require('../../systems/others/auditor');
 const { colorsRow } = require('../../localdata/houraiProps');
 const { subdivideArray, isBoosting, stringHexToNumber } = require('../../func');
+const { makeStringSelectMenuRowBuilder } = require('../../tsCasts');
 
 /**
  * @typedef {{id: String, label: String, emote: String}} RoleData Datos de un rol para el propósito del comando
@@ -14,50 +15,6 @@ const { subdivideArray, isBoosting, stringHexToNumber } = require('../../func');
  * @typedef {'GAMES' | 'DRINKS' | 'FAITH'} CategoryIndex índice de categoría de autogestión de roles
  * @typedef {{ functionName: String, rolePool: RoleDataPool, exclusive: Boolean }} CategoryContent Contenido de categoría de autogestión de roles
  */
-
-// const gameRoles = [
-// 	{ id: '943412899689414726',  label: 'Minecraft', 		 emote: '🧊' },
-// 	{ id: '763945846705487884',  label: 'Terraria', 		 emote: '🌳' },
-// 	{ id: '1046526864560230440', label: 'Left 4 Dead', 	     emote: '🧟' },
-// 	{ id: '936360594028757053',  label: 'League of Legends', emote: '👶' },
-// 	{ id: '936360389711626280',  label: 'Tetris', 			 emote: '🟨' },
-// 	{ id: '943412943159189537',  label: 'Risk of Rain 2', 	 emote: '🌧️' },
-// 	{ id: '981040691981459476',  label: 'PAYDAY 2', 		 emote: '🗄️' },
-// 	{ id: '938949774462304256',  label: 'Duck Game', 		 emote: '🦆' },
-// 	{ id: '693886880667795577',  label: '100% OJ', 			 emote: '🍊' },
-// 	{ id: '1046980064815890562', label: 'Power Bomberman', 	 emote: '💣' },
-// 	{ id: '936360704783577178',  label: 'Ajedrez', 			 emote: '♟️' },
-// 	{ id: '1044399017498525706', label: 'Sven', 		 	 emote: '🪕' },
-// 	{ id: '936361454121132162',  label: 'Pokémon', 			 emote: '🦀' },
-// 	{ id: '1014494653262856262', label: 'SRB2Kart', 		 emote: '🏎️' },
-// ];
-// /**@type {RoleDataPool}*/
-// const drinkRoles = [
-// 	{ id: '727951667513000007',  label: 'Té',          emote: '🍵' },
-// 	{ id: '727951545509085204',  label: 'Café',        emote: '☕' },
-// 	{ id: '727951759263137912',  label: 'Mate',        emote: '🧉' },
-// 	{ id: '1049551360300945488', label: 'Chocolatada', emote: '🥛' },
-// ];
-// /**@type {RoleDataPool}*/
-// const faithRoles = [
-// 	{ id: '695744222850056212', label: 'Blessed', emote: '😇' },
-// 	{ id: '695743527383990422', label: 'Blursed', emote: '🙃' },
-// 	{ id: '694358587451113564', label: 'Cursed',  emote: '💀' },
-// ];
-
-// /**
-//  * @type {{GAMES: CategoryContent, DRINKS: CategoryContent, FAITH: CategoryContent}}
-//  */
-// const categories = {
-// 	GAMES:  { functionName: 'selectGame',     rolePool: gameRoles,  exclusive: false },
-// 	DRINKS: { functionName: 'selectDrink',    rolePool: drinkRoles, exclusive: false },
-// 	FAITH:  { functionName: 'selectReligion', rolePool: faithRoles, exclusive: true  },
-// };
-// for(const [i, category] of Object.entries(categories)) {
-// 	categories[i].exlusive ??= false;
-// 	categories[i].rolePool = subdivideArray(category.rolePool, 5);
-// 	console.log(categories[i].rolePool);
-// }
 
 /**
  * @param {import('discord.js').GuildMember} member 
@@ -222,10 +179,10 @@ const command = new CommandManager('roles', flags)
 		const received = interaction.values[0].split('_');
 		const operation = received.shift();
 		const selectMenu = StringSelectMenuBuilder.from(interaction.component);
-		interaction.message.edit({ components: [ new ActionRowBuilder().addComponents(selectMenu) ] }).catch(auditError);
+		interaction.message.edit({ components: [ makeStringSelectMenuRowBuilder().addComponents(selectMenu) ] }).catch(auditError);
 		if(!received)
-			return this[operation](interaction);
-		return this[operation](interaction, ...received);
+			return command[operation](interaction);
+		return command[operation](interaction, ...received);
 	})
 	.setInteractionResponse(async function selectCustomRole(interaction) {
 		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
