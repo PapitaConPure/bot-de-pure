@@ -160,7 +160,7 @@ const options = new CommandOptions()
 				const tubers = /**@type {{ [K: String]: import('../../systems/ps2/purescript.js').Tubercle }}*/(gcfg.tubers);
 				const tubersArr = Object.entries(tubers)
 					.map(([ name, tuber ]) => /**@type {const}*/([ name, tuber, edlDistance(name, query) ]))
-					.filter(([ ,, distance ]) => distance < 3);
+					.filter(([ , , distance ]) => distance < 8);
 				const existingTuber = tubersArr.find(([ id ]) => id === query);
 
 				const membersCache = interaction.guild.members.cache;
