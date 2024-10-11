@@ -114,27 +114,32 @@ const ValueKinds = /**@type {const}*/({
  */
 
 /**
+ * @template {ValueKind} T
+ * @typedef {Extract<RuntimeValue, { kind: T }>} AssertedRuntimeValue
+ */
+
+/**
  * 
  * @template {ValueKind} T
  * @param {T} dataKind 
- * @returns {Extract<RuntimeValue, { kind: T }>}
+ * @returns {AssertedRuntimeValue<T>}
  */
 function defaultValueOf(dataKind) {
 	switch(dataKind) {
 	case ValueKinds.NUMBER:
-		return /**@type {Extract<RuntimeValue, { kind: T }>}*/(makeNumber(0));
+		return /**@type {AssertedRuntimeValue<T>}*/(makeNumber(0));
 	case ValueKinds.TEXT:
-		return /**@type {Extract<RuntimeValue, { kind: T }>}*/(makeText(''));
+		return /**@type {AssertedRuntimeValue<T>}*/(makeText(''));
 	case ValueKinds.BOOLEAN:
-		return /**@type {Extract<RuntimeValue, { kind: T }>}*/(makeBoolean(false));
+		return /**@type {AssertedRuntimeValue<T>}*/(makeBoolean(false));
 	case ValueKinds.EMBED:
-		return /**@type {Extract<RuntimeValue, { kind: T }>}*/(makeEmbed());
+		return /**@type {AssertedRuntimeValue<T>}*/(makeEmbed());
 	case ValueKinds.LIST:
-		return /**@type {Extract<RuntimeValue, { kind: T }>}*/(makeList([]));
+		return /**@type {AssertedRuntimeValue<T>}*/(makeList([]));
 	case ValueKinds.REGISTRY:
-		return /**@type {Extract<RuntimeValue, { kind: T }>}*/(makeRegistry(new Map()));
+		return /**@type {AssertedRuntimeValue<T>}*/(makeRegistry(new Map()));
 	case ValueKinds.NADA:
-		return /**@type {Extract<RuntimeValue, { kind: T }>}*/(makeNada());
+		return /**@type {AssertedRuntimeValue<T>}*/(makeNada());
 	default:
 		throw 'Tipo de dato inválido al intentar crear valor por defecto';
 	}
@@ -484,11 +489,11 @@ valueMakers
  * @template {ValueKind} T
  * @param {T} kind
  * @param {*} value
- * @returns {Extract<RuntimeValue, { kind: T }>}
+ * @returns {AssertedRuntimeValue<T>}
  */
 function makeValue(kind, value) {
 	const makerFunction = valueMakers.get(kind);
-	return /**@type {Extract<RuntimeValue, { kind: T }>}*/(makerFunction(value));
+	return /**@type {AssertedRuntimeValue<T>}*/(makerFunction(value));
 }
 
 /**@type {Map<ValueKind, Map<ValueKind, (x: *, interpreter: import('./interpreter').Interpreter) => RuntimeValue>>}*/
@@ -570,20 +575,20 @@ coercions.get(ValueKinds.NADA)
  * @param {import('./interpreter').Interpreter} interpreter
  * @param {RuntimeValue} value
  * @param {T} as
- * @returns {Extract<RuntimeValue, { kind: T }>}
+ * @returns {AssertedRuntimeValue<T>}
  */
 function coerceValue(interpreter, value, as) {
 	if(value == null || !value.kind)
 		throw interpreter.TuberInterpreterError('Valor de origen corrupto al intentar convertirlo a otro tipo');
 
 	if(value.kind === as)
-		return /**@type {Extract<RuntimeValue, { kind: T }>}*/(value);
+		return /**@type {AssertedRuntimeValue<T>}*/(value);
 
 	const coercionOrigin = coercions.get(value.kind);
 	if(coercionOrigin == null)
 		throw interpreter.TuberInterpreterError('Tipo de origen inválido al intentar convertir un valor a otro tipo');
 
-	const coercionFn = /**@type {(x: *, interpreter: import('./interpreter').Interpreter) => Extract<RuntimeValue, { kind: T }>}*/(coercionOrigin.get(as));
+	const coercionFn = /**@type {(x: *, interpreter: import('./interpreter').Interpreter) => AssertedRuntimeValue<T>}*/(coercionOrigin.get(as));
 	if(coercionFn == null)
 		throw interpreter.TuberInterpreterError(`No se puede convertir un valor de tipo ${ValueKindTranslationLookups.get(value.kind)} a ${ValueKindTranslationLookups.get(as) ?? 'Desconocido'}`);
 
