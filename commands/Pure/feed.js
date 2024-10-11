@@ -1,15 +1,15 @@
-const { default: axios } = require('axios');
-const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType, ButtonComponent } = require('discord.js');
 const { isNotModerator, shortenText, guildEmoji, decompressId, compressId } = require('../../func.js');
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { auditError } = require('../../systems/others/auditor.js');
 const { CommandTags } = require('../Commons/cmdTags.js');
 const globalConfigs = require('../../localdata/config.json');
-const { Booru, TagTypes } = require('../../systems/booru/boorufetch.js');
+const { Booru, TagTypes, BooruUnknownPostError } = require('../../systems/booru/boorufetch.js');
 const { CommandManager } = require('../Commons/cmdBuilder.js');
 const { addGuildToFeedUpdateStack } = require('../../systems/booru/boorufeed.js');
 const { Translator } = require('../../internationalization.js');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
+const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts.js');
 
 /**@param {Translator} translator*/
 const wizTitle = (translator) => translator.getText('feedAuthor');
@@ -47,12 +47,12 @@ const generateFeedOptions = async (interaction) => {
 	return feedOptions;
 }
 /**
- * @param {import('discord.js').Message | import('discord.js').ButtonInteraction} interaction
+ * @param {import('discord.js').Message | import('discord.js').ButtonInteraction | import('discord.js').StringSelectMenuInteraction | import('discord.js').ModalSubmitInteraction} interaction
  * @param {String} channelId
  * @param {Translator} translator
  */
 function tagsSetupPrompt(interaction, channelId, translator) {
-	const fetchedChannel = interaction.guild.channels.cache.get(channelId);
+	const fetchedChannel = /**@type {import('discord.js').BaseGuildTextChannel}*/(interaction.guild.channels.cache.get(channelId));
 	const gelEmoji = guildEmoji('gelbooru', globalConfigs.slots.slot3);
 	const embed = new EmbedBuilder()
 		.setColor(Colors.Blurple)
@@ -130,7 +130,7 @@ const command = new CommandManager('feed', flags)
 		return interaction.update({
 			embeds: [wizard],
 			components: [
-				new ActionRowBuilder().addComponents(
+				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_createNew')
 						.setEmoji('1291900911643263008')
@@ -144,7 +144,7 @@ const command = new CommandManager('feed', flags)
 						.setDisabled(!premade),
 					finishButton(translator),
 				),
-				new ActionRowBuilder().addComponents(
+				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_selectEdit')
 						.setEmoji('921788204540100608')
@@ -174,7 +174,7 @@ const command = new CommandManager('feed', flags)
 			.setPlaceholder(`Ej: #${interaction.channel.name} / ${interaction.channel.id}`)
 			.setStyle(TextInputStyle.Short)
 			.setRequired(true);
-		const row = new ActionRowBuilder().addComponents(channelInput);
+		const row = makeTextInputRowBuilder().addComponents(channelInput);
 		const modal = new ModalBuilder()
 			.setCustomId('feed_createOnChannel')
 			.setTitle('Creación de Feed')
@@ -194,7 +194,7 @@ const command = new CommandManager('feed', flags)
 		const channels = interaction.guild.channels.cache;
 		const textChannels = channels.filter(c => [ ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread ].includes(c.type));
 		console.log({ channels, textChannels });
-		const fetchedChannel = isNaN(input)
+		const fetchedChannel = isNaN(+input)
 			? textChannels.find(c => c.name.toLowerCase().includes(input))
 			: textChannels.get(input);
 			
@@ -210,7 +210,7 @@ const command = new CommandManager('feed', flags)
 		const wizard = tagsSetupPrompt(interaction, fetchedChannel.id, translator);
 		return interaction.update({
 			embeds: [wizard],
-			components: [new ActionRowBuilder().addComponents(
+			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId(`feed_editTags_${fetchedChannel.id}`)
 					.setLabel('Ingresar Tags')
@@ -231,7 +231,7 @@ const command = new CommandManager('feed', flags)
 			.setStyle(TextInputStyle.Paragraph)
 			.setRequired(true)
 			.setMaxLength(4000);
-		const row = new ActionRowBuilder().addComponents(tagsInput);
+		const row = makeTextInputRowBuilder().addComponents(tagsInput);
 		const modal = new ModalBuilder()
 			.setCustomId(`feed_setTags_${channelId}`)
 			.setTitle('Personalización de Feed')
@@ -265,7 +265,7 @@ const command = new CommandManager('feed', flags)
 		return interaction.update({
 			embeds: [concludedEmbed],
 			components: [
-				new ActionRowBuilder().addComponents(
+				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_startWizard')
 						.setLabel('Seguir configurando')
@@ -287,13 +287,13 @@ const command = new CommandManager('feed', flags)
 		return interaction.update({
 			embeds: [wizard],
 			components: [
-				new ActionRowBuilder().addComponents(
+				makeStringSelectMenuRowBuilder().addComponents(
 					new StringSelectMenuBuilder()
 						.setCustomId('feed_selectedEdit')
 						.setPlaceholder('Selecciona un Feed')
 						.addOptions(feeds),
 				),
-				new ActionRowBuilder().addComponents(
+				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_startWizard')
 						.setLabel('Volver')
@@ -315,13 +315,13 @@ const command = new CommandManager('feed', flags)
 		return interaction.update({
 			embeds: [wizard],
 			components: [
-				new ActionRowBuilder().addComponents(
+				makeStringSelectMenuRowBuilder().addComponents(
 					new StringSelectMenuBuilder()
 						.setCustomId('feed_selectedCustomize')
 						.setPlaceholder('Selecciona un Feed')
 						.addOptions(feeds),
 				),
-				new ActionRowBuilder().addComponents(
+				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_startWizard')
 						.setLabel('Volver')
@@ -343,13 +343,13 @@ const command = new CommandManager('feed', flags)
 		return interaction.update({
 			embeds: [wizard],
 			components: [
-				new ActionRowBuilder().addComponents(
+				makeStringSelectMenuRowBuilder().addComponents(
 					new StringSelectMenuBuilder()
 						.setCustomId('feed_selectedView')
 						.setPlaceholder('Selecciona un Feed')
 						.addOptions(feeds),
 				),
-				new ActionRowBuilder().addComponents(
+				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_startWizard')
 						.setLabel('Volver')
@@ -371,13 +371,13 @@ const command = new CommandManager('feed', flags)
 		return interaction.update({
 			embeds: [wizard],
 			components: [
-				new ActionRowBuilder().addComponents(
+				makeStringSelectMenuRowBuilder().addComponents(
 					new StringSelectMenuBuilder()
 						.setCustomId('feed_selectedDelete')
 						.setPlaceholder('Selecciona un Feed')
 						.addOptions(feeds),
 				),
-				new ActionRowBuilder().addComponents(
+				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_startWizard')
 						.setLabel('Volver')
@@ -393,7 +393,7 @@ const command = new CommandManager('feed', flags)
 		const wizard = tagsSetupPrompt(interaction, channelId, translator);
 		return interaction.update({
 			embeds: [wizard],
-			components: [new ActionRowBuilder().addComponents(
+			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId(`feed_editTags_${channelId}`)
 					.setLabel('Ingresar Tags')
@@ -408,7 +408,7 @@ const command = new CommandManager('feed', flags)
 	})
 	.setSelectMenuResponse(async function selectedCustomize(interaction) {
 		const translator = await Translator.from(interaction.user.id);
-		const fetchedChannel = interaction.guild.channels.cache.get(interaction.values[0] || interaction.channel.id);
+		const fetchedChannel = /**@type {import('discord.js').BaseGuildTextChannel}*/(interaction.guild.channels.cache.get(interaction.values[0] || interaction.channel.id));
 		const wizard = new EmbedBuilder()
 			.setColor(Colors.Blurple)
 			.setAuthor({ name: wizTitle(translator), iconURL: interaction.client.user.avatarURL() })
@@ -421,7 +421,7 @@ const command = new CommandManager('feed', flags)
 		return interaction.update({
 			embeds: [wizard],
 			components: [
-				new ActionRowBuilder().addComponents(
+				makeStringSelectMenuRowBuilder().addComponents(
 					new StringSelectMenuBuilder()
 						.setCustomId(`feed_selectItemCustomize_${fetchedChannel.id}`)
 						.setPlaceholder('Selecciona un elemento')
@@ -448,7 +448,7 @@ const command = new CommandManager('feed', flags)
 							},
 						]),
 				),
-				new ActionRowBuilder().addComponents(
+				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_selectCustomize')
 						.setLabel('Volver')
@@ -460,7 +460,7 @@ const command = new CommandManager('feed', flags)
 	})
 	.setSelectMenuResponse(async function selectedView(interaction) {
 		const translator = await Translator.from(interaction.user.id);
-		const fetchedChannel = interaction.guild.channels.cache.get(interaction.values[0] || interaction.channel.id);
+		const fetchedChannel = /**@type {import('discord.js').BaseGuildTextChannel}*/(interaction.guild.channels.cache.get(interaction.values[0] || interaction.channel.id));
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 		const feed = gcfg.feeds[fetchedChannel.id];
 		const wizard = new EmbedBuilder()
@@ -475,7 +475,7 @@ const command = new CommandManager('feed', flags)
 		return interaction.update({
 			embeds: [wizard],
 			components: [
-				new ActionRowBuilder().addComponents(
+				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_selectView')
 						.setLabel('Volver')
@@ -500,7 +500,7 @@ const command = new CommandManager('feed', flags)
 			});
 		return interaction.update({
 			embeds: [wizard],
-			components: [new ActionRowBuilder().addComponents(
+			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId(`feed_deleteOne_${chid}`)
 					.setLabel('Borrar')
@@ -520,7 +520,7 @@ const command = new CommandManager('feed', flags)
 			.setAuthor({ name: wizTitle(translator), iconURL: interaction.client.user.avatarURL() })
 			.setFooter({ text: 'Operación finalizada' })
 			.addFields({ name: 'Feed eliminado', value: 'Se ha eliminado el Feed acordado. Si te arrepientes, tendrás que crearlo otra vez' });
-		const rows = new ActionRowBuilder().addComponents(
+		const rows = makeButtonRowBuilder().addComponents(
 			new ButtonBuilder()
 				.setCustomId('feed_startWizard')
 				.setLabel('Seguir configurando')
@@ -542,7 +542,7 @@ const command = new CommandManager('feed', flags)
 	.setSelectMenuResponse(async function selectItemCustomize(interaction, channelId) {
 		const translator = await Translator.from(interaction.user.id);
 		const customizeTarget = interaction.values[0];
-		const fetchedChannel = interaction.guild.channels.cache.get(channelId);
+		const fetchedChannel = /**@type {import('discord.js').BaseGuildTextChannel}*/(interaction.guild.channels.cache.get(channelId));
 		console.log(channelId, fetchedChannel);
 		
 		const wizard = new EmbedBuilder()
@@ -551,7 +551,7 @@ const command = new CommandManager('feed', flags)
 			.setFooter({ text: 'Personalizar elemento' })
 			.addFields({ name: 'Destino', value: `**${fetchedChannel.name}** (canal ${fetchedChannel.nsfw ? 'NSFW' : 'SFW'})` });
 		
-		const row = new ActionRowBuilder();
+		const row = makeButtonRowBuilder();
 		switch(customizeTarget) {
 			case 'title':
 				wizard.addFields({
@@ -644,7 +644,7 @@ const command = new CommandManager('feed', flags)
 			.setStyle(TextInputStyle.Short)
 			.setRequired(true)
 			.setMaxLength(255);
-		const row = new ActionRowBuilder().addComponents(titleInput);
+		const row = makeTextInputRowBuilder().addComponents(titleInput);
 		const modal = new ModalBuilder()
 			.setCustomId(`feed_setCustomTitle_${channelId}`)
 			.setTitle('Personalización de Feed')
@@ -661,7 +661,7 @@ const command = new CommandManager('feed', flags)
 			.setRequired(true)
 			.setMinLength(1)
 			.setMaxLength(2);
-		const row = new ActionRowBuilder().addComponents(tagsInput);
+		const row = makeTextInputRowBuilder().addComponents(tagsInput);
 		const modal = new ModalBuilder()
 			.setCustomId(`feed_setCustomMaxTags_${channelId}`)
 			.setTitle('Personalización de Feed')
@@ -677,7 +677,7 @@ const command = new CommandManager('feed', flags)
 			.setStyle(TextInputStyle.Short)
 			.setRequired(true)
 			.setMaxLength(255);
-		const row = new ActionRowBuilder().addComponents(footerInput);
+		const row = makeTextInputRowBuilder().addComponents(footerInput);
 		const modal = new ModalBuilder()
 			.setCustomId(`feed_setCustomFooter_${channelId}`)
 			.setTitle('Personalización de Feed')
@@ -689,11 +689,11 @@ const command = new CommandManager('feed', flags)
 		const iconInput = new TextInputBuilder()
 			.setCustomId('iconInput')
 			.setLabel('Enlace de ícono de esquina')
-			.setPlaceholder('Ejemplo:\nhttps://cdn.discordapp.com/attachments/956023682734624838/1001416736261799937/doremy.png')
+			.setPlaceholder('Ejemplo: https://i.imgur.com/LFzqoJX.jpeg')
 			.setStyle(TextInputStyle.Paragraph)
 			.setRequired(true)
 			.setMaxLength(255);
-		const row = new ActionRowBuilder().addComponents(iconInput);
+		const row = makeTextInputRowBuilder().addComponents(iconInput);
 		const modal = new ModalBuilder()
 			.setCustomId(`feed_setCustomIcon_${channelId}`)
 			.setTitle('Personalización de Feed')
@@ -779,7 +779,7 @@ const command = new CommandManager('feed', flags)
 			});
 		return interaction.update({
 			embeds: [concludedEmbed],
-			components: [new ActionRowBuilder().addComponents(
+			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId('feed_selectCustomize')
 					.setLabel('Seguir personalizando')
@@ -805,7 +805,7 @@ const command = new CommandManager('feed', flags)
 			});
 		return interaction.update({
 			embeds: [concludedEmbed],
-			components: [new ActionRowBuilder().addComponents(
+			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId('feed_selectCustomize')
 					.setLabel('Seguir personalizando')
@@ -831,7 +831,7 @@ const command = new CommandManager('feed', flags)
 			});
 		return interaction.update({
 			embeds: [concludedEmbed],
-			components: [new ActionRowBuilder().addComponents(
+			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId('feed_selectCustomize')
 					.setLabel('Seguir personalizando')
@@ -857,7 +857,7 @@ const command = new CommandManager('feed', flags)
 			});
 		return interaction.update({
 			embeds: [concludedEmbed],
-			components: [new ActionRowBuilder().addComponents(
+			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId('feed_selectCustomize')
 					.setLabel('Seguir personalizando')
@@ -894,7 +894,7 @@ const command = new CommandManager('feed', flags)
 	.setButtonResponse(async function showFeedImageTags(interaction, isNotFeed) {
         const translator = await Translator.from(interaction.user.id);
 
-		const url = interaction.message.components[0].components[0].url;
+		const url = (/**@type {ButtonComponent}*/(interaction.message.components[0].components[0])).url;
 		const booru = new Booru(globalConfigs.booruCredentials);
 		try {
 			const post = await booru.fetchPostByUrl(url);
@@ -956,7 +956,7 @@ const command = new CommandManager('feed', flags)
 				},
 			)
 			const userId = compressId(interaction.user.id);
-			const tagsEditRow = new ActionRowBuilder();
+			const tagsEditRow = makeButtonRowBuilder();
 
 			if(isNotFeed)
 				tagsEditRow.addComponents([
@@ -991,7 +991,12 @@ const command = new CommandManager('feed', flags)
 				ephemeral: true,
 			});
 		} catch(error) {
+			console.error(error);
 			auditError(error, { brief: 'Ha ocurrido un error al procesar Feed' });
+			
+			if(error instanceof BooruUnknownPostError)
+				return interaction.reply({ content: 'Puede que el Post del que se intentó recuperar las tags se haya eliminado', ephemeral: true });
+
 			return interaction.reply({
 				content: 'Ocurrió un problema al contactar con el Booru para recuperar las tags.\nInténtalo de nuevo, si el problema persiste, es probable que el objetivo no esté disponible o que se trate de un bug de mi parte',
 				ephemeral: true,
@@ -1017,7 +1022,7 @@ const command = new CommandManager('feed', flags)
 			title = translator.getText('feedEditTagsTitleRemove');
 		}
 
-		const row = new ActionRowBuilder().addComponents(tagsInput);
+		const row = makeTextInputRowBuilder().addComponents(tagsInput);
 
 		const modal = new ModalBuilder()
 			.setCustomId(`yo_setFollowedTags_${operation}`)
@@ -1036,7 +1041,7 @@ const command = new CommandManager('feed', flags)
 			});
 		
 		const { message } = interaction;
-		const url = message.components[0].components[0].url;
+		const url = (/**@type {ButtonComponent}*/(message.components[0].components[0])).url;
 		if(isNotFeed || !url)
 			return Promise.all([
 				interaction.reply({
@@ -1074,7 +1079,7 @@ const command = new CommandManager('feed', flags)
 						value: `[Gelbooru](${url})`,
 					},
 				);
-			const row = new ActionRowBuilder().addComponents(
+			const row = makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId('feed_startWizard')
 					.setLabel('Configurar Feeds...')
@@ -1089,7 +1094,16 @@ const command = new CommandManager('feed', flags)
 				}),
 				message.delete().catch(console.error),
 			]);
-		} catch {
+		} catch(error) {
+			console.error(error);
+			auditError(error, { brief: 'Ha ocurrido un error al procesar Feed' });
+			
+			if(error instanceof BooruUnknownPostError)
+				return interaction.reply({
+					content: 'Puede que el Post eliminado de Discord haya sido también eliminado del Booru del que se originó, pues no se pudieron recuperar sus tags',
+					ephemeral: true,
+				});
+
 			return Promise.all([
 				interaction.reply({
 					content: 'Post eliminado (no se pudo recuperar la información del Post y/o sus tags)',
