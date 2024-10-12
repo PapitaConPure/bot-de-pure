@@ -1,5 +1,5 @@
 const { User, GuildMember, Message, GuildChannel, CommandInteractionOptionResolver, Role, AutocompleteInteraction } = require('discord.js');
-const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSentence, toLowerCaseNormalized } = require('../../func');
+const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSentence, toLowerCaseNormalized, regroupText } = require('../../func');
 
 /**
  * @typedef {{name: String, expression: String|Number}} ParamTypeStrict Parámetros de CommandOption que siguen una sintaxis estricta
@@ -187,7 +187,6 @@ class CommandOption {
 
 /**Representa un parámetro de comando*/
 class CommandParam extends CommandOption {
-
     /**@type {String}*/
     _name;
     /**@type {ParamType|Array<ParamType>}*/
@@ -881,6 +880,12 @@ class CommandOptionSolver {
         this.#rawArgs = rawArgs;
         this.#options = options;
         this.#isSlash = args instanceof CommandInteractionOptionResolver;
+
+        //this.getNumber['message']  = (/**@type {String}*/data) => treatNumber(data);
+        //this.getUser['message']    = (/**@type {String}*/data) => this.ensureRequistified() && fetchUser(data, this.#request);
+        //this.getMember['message']  = (/**@type {String}*/data) => this.ensureRequistified() && fetchMember(data, this.#request);
+        //this.getChannel['message'] = (/**@type {String}*/data) => this.ensureRequistified() && fetchChannel(data, this.#request.guild);
+        //this.getMessage['message'] = (/**@type {String}*/data) => this.ensureRequistified() && fetchMessage(data, this.#request);
     }
 
     get remainder() {
@@ -1040,18 +1045,100 @@ class CommandOptionSolver {
 
     /**
      * @template {(identifier: String, required?: Boolean) => *} TMethod
-     * @template [TFallback=null]
+     * @template {*} [TFallback=undefined]
      * @param {String} identifier 
      * @param {TMethod} method 
-     * @param {TFallback} [fallback=null]
-     * @returns {Array<ReturnType<TMethod>>|Array<TFallback>}
+     * @param {String} messageSep 
+     * @param {TFallback} [fallback=undefined]
+     * @returns {Promise<Array<ReturnType<TMethod> | TFallback>>}
      */
-    parsePolyParam(identifier, method, fallback) {
-        if(this.isMessageSolver(this.#args))
-            throw 'Función parsePolyParam no permitida para comandos de mensaje';
+    async parsePolyParam(identifier, method, messageSep, fallback = undefined) {
+        const option = this.#options.options.get(identifier);
+
+        if(!option)
+            throw `No se encontró una opción bajo el identificador: ${identifier}`;
+
+        if(!option.isCommandParam())
+            throw 'Se esperaba un identificador de parámetro de comando';
+
+        if(this.isMessageSolver(this.#args)) {
+            const arrArgs = regroupText(this.#args, messageSep);
+            if(!arrArgs.length)
+                return fallback != undefined
+                    ? [ (typeof fallback === 'function') ? fallback() : fallback ]
+                    : [];
+                
+            const results = [];
+            let i = 0;
+            while(arrArgs.length && i++ < option._polymax) {
+                let result;
+
+                if(Array.isArray(option._type)) {
+                    const results = await Promise.all(option._type.map(pt => this.#options.fetchMessageParam(arrArgs, pt, false)));
+                    result = results.find(r => r);
+                } else
+                    result = await this.#options.fetchMessageParam(arrArgs, option._type, false);
+
+                results.push(/**@type {ReturnType<TMethod>}*/(result));
+            }
+            
+            return results;
+        }
+
+        const realMethod = (Array.isArray(option._type) || isParamTypeStrict(option._type)) ? this.#args.getString : (this.#args[PARAM_TYPES.get(option._type).getMethod]);
 
         return this.#options
-            .fetchParamPoly(this.#args, identifier, this.#args.getString, fallback)
+            .fetchParamPoly(this.#args, identifier, realMethod, fallback)
+            .filter(input => input);
+    }
+
+    /**
+     * @template {(identifier: String, required?: Boolean) => *} TMethod
+     * @template {*} [TFallback=undefined]
+     * @param {String} identifier 
+     * @param {TMethod} method 
+     * @param {String} messageSep 
+     * @param {TFallback} [fallback=undefined]
+     * @returns {Array<ReturnType<TMethod> | TFallback>}
+     */
+    parsePolyParamSync(identifier, method, messageSep, fallback = undefined) {
+        const option = this.#options.options.get(identifier);
+
+        if(!option)
+            throw `No se encontró una opción bajo el identificador: ${identifier}`;
+
+        if(!option.isCommandParam())
+            throw 'Se esperaba un identificador de parámetro de comando';
+
+        if(this.isMessageSolver(this.#args)) {
+            const arrArgs = regroupText(this.#args, messageSep);
+            if(!arrArgs.length)
+                return fallback != undefined
+                    ? [ (typeof fallback === 'function') ? fallback() : fallback ]
+                    : [];
+                
+            const results = [];
+            let i = 0;
+            while(arrArgs.length && i++ < option._polymax) {
+                let result;
+
+                if(Array.isArray(option._type)) {
+                    const results = option._type.map(pt => this.#options.fetchMessageParamSync(arrArgs, pt, false));
+                    result = results.find(r => r);
+                } else
+                    result = this.#options.fetchMessageParamSync(arrArgs, option._type, false);
+
+                results.push(/**@type {ReturnType<TMethod>}*/(result));
+                console.log({ results });
+            }
+            
+            return results;
+        }
+
+        const realMethod = (Array.isArray(option._type) || isParamTypeStrict(option._type)) ? this.#args.getString : (this.#args[PARAM_TYPES.get(option._type).getMethod]);
+
+        return this.#options
+            .fetchParamPoly(this.#args, identifier, realMethod, fallback)
             .filter(input => input);
     }
 
