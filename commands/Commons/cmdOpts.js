@@ -1101,7 +1101,7 @@ class CommandOptionSolver {
      * @param {TFallback} [fallback=undefined]
      * @returns {Array<ReturnType<TMethod> | TFallback>}
      */
-    parsePolyParamSync(identifier, method, messageSep, fallback = undefined) {
+    parsePolyParamSync(identifier, method, messageSep = ',', fallback = undefined) {
         const option = this.#options.options.get(identifier);
 
         if(!option)
