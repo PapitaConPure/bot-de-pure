@@ -63,6 +63,7 @@ let localesObject = /**@type {const}*/({
 		es: '<:es:1084646419853488209>',
 		ja: '🇯🇵',
 	},
+	
 	dmDisclaimer: {
 		es: 'Nota: Bot de Puré no opera con mensajes privados',
 		en: 'Note: Bot de Puré does not reply to DMs',
@@ -96,18 +97,19 @@ let localesObject = /**@type {const}*/({
 	unknownInteraction: {
 		es: '🍔 Recibí una acción, pero no sé cómo responderla. Esto es un problema... mientras arreglo algunas cosas, toma una hamburguesa',
 		en: '🍔 I received an action, but I don\'t know how to reply to it. This is a problem... while I fix some things, take this burger',
-		ja: '🍔 I received an action, but I don\'t know how to reply to it. This is a problem... while I fix some things, take this burger',
+		ja: '🍔 リクエストを受け取ったのですが、返信の仕方がわかりません。これは問題です...いくつか修正している間、このハンバーガーを受け取ってください',
 	},
 	huskInteraction: {
 		es: '☕ Parece que encontraste un botón, menú desplegable o ventana modal sin función. Mientras conecto algunos cables, ten un café',
 		en: '☕ Seems like you found a button, select menu, or modal window without a function. While I wire some things up, have this coffee',
-		ja: '☕ Seems like you found a button, select menu, or modal window without a function. While I wire some things up, have this coffee',
+		ja: '☕ 機能のないボタン、選択メニュー、またはモーダルウィンドウを見つけたようです。配線している間にコーヒーを飲みましょう',
 	},
 	unauthorizedInteraction: {
 		es: '❌ No puedes hacer eso. Si intentaste interactuar con un mensaje de comando, prueba usando el comando tú mismo',
 		en: '❌ You can\'t do that. If you tried to interact with a command message, try calling the command yourself',
-		ja: '❌ You can\'t do that. If you tried to interact with a command message, try calling the command yourself',
+		ja: '❌ それはできません。コマンドメッセージとやり取りしようとした場合は、自分でコマンドを呼び出してみてください',
 	},
+	
 	expiredWizardData: {
 		es: '❌ Este asistente hace uso de memoria de sesión, pero no se encontró ninguna sesión. Vuelve a usar el comando para crear una nueva sesión de este asistente',
 		en: '❌ This Wizard uses session memory, but no session was found. Use the command again to start a new session of this Wizard',
@@ -117,12 +119,17 @@ let localesObject = /**@type {const}*/({
 	missingMemberChannelPermissionsTitle: {
 		es: 'Permisos insuficientes',
 		en: 'Insufficient permissions',
-		ja: 'Insufficient permissions',
+		ja: '権限が不十分です',
 	},
 	missingMemberChannelPermissionsDescription: {
 		es: 'Este comando u esta acción requiere permisos para ejecutarse que no tienes actualmente',
 		en: 'This command or action requires permissions that you don\'t currently have to execute',
-		ja: 'This command or action requires permissions that you don\'t currently have to execute',
+		ja: 'このコマンドまたはアクションを実行するには、現在所有していない権限が必要です',
+	},
+	missingMemberChannelPermissionsFullRequisitesName: {
+		es: 'Árbol de requisitos',
+		en: 'Requisites tree',
+		ja: '権限ツリー',
 	},
 	missingClientChannelPermissionsDescription: {
 		es: paragraph(
@@ -379,6 +386,32 @@ let localesObject = /**@type {const}*/({
 		es: 'Preferencias de Usuario',
 		en: 'User Preferences',
 		ja: 'ユーザー設定',
+	},
+
+	aislarNoTimeProvided: {
+		es: '⚠️ Debes indicar la duración del castigo en minutos',
+		en: '⚠️ You need to indicate the timeout duration in minutes',
+		ja: '⚠️ You need to indicate the timeout duration in minutes',
+	},
+	aislarInvalidTime: {
+		es: '⚠️ Debes indicar la duración del castigo en minutos. Ingresa 0 para revocarlo',
+		en: '⚠️ You need to indicate the timeout duration in minutes. Use 0 to revoke a timeout',
+		ja: '⚠️ You need to indicate the timeout duration in minutes. Use 0 to revoke a timeout',
+	},
+	aislarNoMembersMentioned: {
+		es: '⚠️ Debes mencionar al menos un miembro a aislar',
+		en: '⚠️ You need to mention at least one member to timeout',
+		ja: '⚠️ You need to mention at least one member to timeout',
+	},
+	aislarSomeMembersWereInvalid: {
+		es: 'Algunos de los miebros que se intentó aislar fueron inválidos',
+		en: 'Some of the members you tried to timeout were invalid',
+		ja: 'Some of the members you tried to timeout were invalid',
+	},
+	aislarNoUpdatedMembers: {
+		es: '⚠️ No pude actualizar ninguno de los miembros mencionados. Revisa que tenga permisos para administrar miembros',
+		en: '⚠️ None of the mentioned members were updated. It could be that I don\'t have permission to manage members',
+		ja: '⚠️ None of the mentioned members were updated. It could be that I don\'t have permission to manage members',
 	},
 
 	cultivarUnauthorized: {
@@ -1149,7 +1182,7 @@ class Translator {
 	}
 
 	/**
-	 * Devuelve la siguiente clave del lenguaje del traductor actual
+	 * Devuelve el traductor del siguiente lenguaje al actual
 	 * @returns {Translator}
 	 */
 	get nextTranslator() {
