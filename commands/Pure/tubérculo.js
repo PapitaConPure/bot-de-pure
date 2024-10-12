@@ -524,7 +524,7 @@ async function createTuber(tuberId, gcfg, isPureScript, request, args) {
 		}
 	}
 	const mfiles = args.isInteractionSolver()
-		? args.parsePolyParam('archivos', args.getString).filter(att => att)
+		? args.parsePolyParamSync('archivos', args.getString).filter(att => att)
 		: request.attachments.map(att => att.proxyURL);
 
 	//Incluir Tubérculo; crear colección de Tubérculos si es necesario
@@ -803,7 +803,7 @@ async function opExecuteTuber(tuberId, gcfg, isPureScript, request, args) {
 	}
 	console.log(args);
 	const tuberArgs = args.isInteractionSolver()
-		? args.parsePolyParam('entradas', args.getString).filter(input => input)
+		? args.parsePolyParamSync('entradas', args.getString).filter(input => input)
 		: /**@type {Array<String>}*/(args.args);
 	console.log('tuberArgs:', tuberArgs);
 	await request.deferReply();
