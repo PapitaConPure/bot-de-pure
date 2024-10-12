@@ -10,6 +10,7 @@ const { Puretable, defaultEmote } = require('../localdata/models/puretable.js');
 const { deleteExpiredMessageCascades, cacheMessageCascade } = require('./onMessageDelete.js');
 const HouraiDB = require('../localdata/models/hourai.js');
 
+const { puré } = require('../commandInit.js');
 const globalConfigs = require('../localdata/config.json');
 const envPath = globalConfigs.remoteStartup ? '../remoteenv.json' : '../localenv.json';
 
@@ -58,10 +59,8 @@ async function onStartup(client) {
 	console.log(chalk.bold.magentaBright('Cargando comandos Slash y Contextuales...'));
 	const restGlobal = new REST({ version: '9' }).setToken(discordToken);
 	const commandData = {
-		//@ts-expect-error
-		global: client.SlashPure.concat(client.ContextPure),
-		//@ts-expect-error
-		saki: client.SlashHouraiPure,
+		global: puré.slash.concat(/**@type {*}*/(puré.contextMenu)),
+		saki: puré.slashHourai,
 	};
 
 	try {
@@ -77,7 +76,7 @@ async function onStartup(client) {
 				{ body: commandData.saki },
 			);
 
-		logOptions.slash && console.log(`Comandos registrados + hourai (${dedicatedServerId} :: ${client.guilds.cache.get(dedicatedServerId).name}):`, restGlobal);
+		logOptions.slash && console.log(`Comandos registrados + hourai (${dedicatedServerId} :: ${client.guilds.cache.get(dedicatedServerId)?.name}):`, restGlobal);
 		confirm();
 	} catch(error) {
 		console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos Slash y/o Contextuales'));

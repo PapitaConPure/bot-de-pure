@@ -1,4 +1,5 @@
 //#region Carga de módulos necesarios
+const { puré } = require('../commandInit.js');
 const { Stats } = require('../localdata/models/stats.js');
 const { peopleid } = require('../localdata/config.json');
 const { channelIsBlocked, isUsageBanned, decompressId } = require('../func.js');
@@ -9,6 +10,7 @@ const { CommandManager } = require('../commands/Commons/cmdBuilder.js');
 const { ButtonInteraction, StringSelectMenuInteraction, ModalSubmitInteraction, Client, ContextMenuCommandInteraction, ChatInputCommandInteraction, CommandInteractionOptionResolver, AutocompleteInteraction } = require('discord.js');
 const { ContextMenuActionManager } = require('../actions/Commons/actionBuilder.js');
 const { CommandOptionSolver, CommandFlagExpressive, CommandParam } = require('../commands/Commons/cmdOpts.js');
+//#endregion
 
 /**
  * @param {import('discord.js').Interaction} interaction 
@@ -49,31 +51,46 @@ async function onInteraction(interaction, client) {
  */
 async function handleCommand(interaction, client, stats) {
     const { commandName } = interaction;
-    // @ts-ignore
-    const slash = client.SlashPure.get(commandName) ?? client.SlashHouraiPure.get(commandName);
+    const slash = puré.slash.get(commandName) ?? puré.slashHourai.get(commandName);
     if(!slash) return;
 
     try {
         //Detectar problemas con el comando basado en flags
         /**@type {CommandManager}*/
-        //@ts-expect-error
-        const command = client.ComandosPure.get(commandName);
+        const command = puré.commands.get(commandName);
 
-        if(command.permissions && !command.permissions.isAllowed(interaction.member)) {
-            return interaction.channel.send({ embeds: [
-                generateExceptionEmbed({
-                    tag: undefined,
-                    title: 'Permisos insuficientes',
-                    desc: 'Este comando requiere permisos para ejecutarse que no tienes actualmente',
-                    isException: undefined,
-                }, { cmdString: `/${commandName}` })
-                .addFields({
-                    name: 'Requisitos completos',
-                    value: command.permissions.matrix
-                        .map((requisite, n) => `${n + 1}. ${requisite.map(p => `\`${p}\``).join(' **o** ')}`)
-                        .join('\n')
-                })
-            ]});
+        if(command.permissions) {
+            if(!command.permissions.isAllowedIn(interaction.member, interaction.channel)) {
+                const translator = await Translator.from(interaction.member);
+                return interaction.channel.send({ embeds: [
+                    generateExceptionEmbed({
+                        title: translator.getText('missingMemberChannelPermissionsTitle'),
+                        desc: translator.getText('missingMemberChannelPermissionsDescription'),
+                    }, { cmdString: `/${commandName}` })
+                    .addFields({
+                        name: translator.getText('missingMemberChannelPermissionsFullRequisitesName'),
+                        value: command.permissions.matrix
+                            .map((requisite, n) => `${n + 1}. ${requisite.map(p => `\`${p}\``).join(' **o** ')}`)
+                            .join('\n'),
+                    }),
+                ]});
+            }
+            
+            if(!command.permissions.amAllowedIn(interaction.channel)) {
+                const translator = await Translator.from(interaction.member);
+                return interaction.channel.send({ embeds: [
+                    generateExceptionEmbed({
+                        title: translator.getText('missingMemberChannelPermissionsTitle'),
+                        desc: translator.getText('missingClientChannelPermissionsDescription'),
+                    }, { cmdString: `/${commandName}` })
+                    .addFields({
+                        name: translator.getText('missingMemberChannelPermissionsFullRequisitesName'),
+                        value: command.permissions.matrix
+                            .map((requisite, n) => `${n + 1}. ${requisite.map(p => `\`${p}\``).join(' **o** ')}`)
+                            .join('\n'),
+                    }),
+                ]});
+            }
         }
 
         const exception = await findFirstException(command, interaction);
@@ -106,16 +123,13 @@ async function handleCommand(interaction, client, stats) {
 async function handleAction(interaction, client, stats) {
     const { commandName } = interaction;
 
-    //@ts-expect-error
-    const action = client.ContextPure.get(commandName);
-    if(!action) return;
+    const contextMenu = puré.contextMenu.get(commandName);
+    if(!contextMenu) return;
 
     try {
-        /**@type {ContextMenuActionManager | undefined}*/
-        //@ts-expect-error
-        const command = client.AccionesPure.get(commandName);
+        const action = puré.actions.get(commandName);
         
-        await command.execute(interaction);
+        await action.execute(interaction);
         stats.commands.succeeded++;
     } catch(error) {
         //@ts-expect-error
@@ -150,8 +164,7 @@ async function handleComponent(interaction, client, stats) {
             return handleUnknownInteraction(interaction);
 
         /**@type {CommandManager}*/
-        //@ts-expect-error
-        const command = client.ComandosPure.get(commandName) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+        const command = puré.commands.get(commandName) || puré.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
         if(typeof command[commandFnName] !== 'function')
             return handleHuskInteraction(interaction);
 
@@ -199,8 +212,7 @@ async function handleAutocompleteInteraction(interaction, client, stats) {
 
     try {
         /**@type {CommandManager}*/
-        //@ts-expect-error
-        const command = /***/client.ComandosPure.get(commandName) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+        const command = puré.commands.get(commandName) || puré.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
         const option = /**@type {CommandParam | CommandFlagExpressive}*/(command.options.options.get(optionName));
 
         if(!option)

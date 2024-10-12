@@ -1,5 +1,5 @@
 // @ts-ignore
-const { PermissionResolvable, PermissionFlagsBits, GuildMember, PermissionsBitField, BitField } = require('discord.js');
+const { PermissionResolvable, PermissionFlagsBits, GuildMember, PermissionsBitField, BitField, Guild, GuildChannel } = require('discord.js');
 
 /**Representa un conjunto de permisos de comando*/
 class CommandPermissions {
@@ -46,6 +46,38 @@ class CommandPermissions {
 
         return true;
     };
+
+    /**
+     * Comprueba si el miembro cumple todos los requisitos impuestos por este conjunto en este canal
+     * @param {GuildMember} member Miembro a comprobar
+     * @param {import('discord.js').GuildChannelResolvable} channel Canal en el cual comprobar
+     */
+    isAllowedIn(member, channel) {
+        const memberChannelPermissions = member?.permissionsIn?.(channel);
+        
+        if(memberChannelPermissions?.bitfield == undefined)
+            throw new TypeError("Se esperaba un miembro de un servidor de Discord");
+
+        const mbf = memberChannelPermissions.bitfield;
+
+        if(mbf & PermissionFlagsBits.Administrator)
+            return true;
+
+        for(const requisite of this.#requisites) {
+            const filter = mbf & requisite;
+            if(!filter) return false;
+        }
+
+        return true;
+    };
+
+    /**
+     * @param {import('discord.js').GuildBasedChannel} channel
+     */
+    amAllowedIn(channel) {
+        const { guild } = channel;
+        return this.isAllowedIn(guild.members.me, channel);
+    }
 
     /**
      * Añade un nuevo requisito inclusivo de permisos

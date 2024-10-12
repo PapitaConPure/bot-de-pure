@@ -15,7 +15,7 @@ const { Translator } = require('../../internationalization');
 class ContextMenuActionManager {
     /**@type {String}*/
     name;
-    /**@type {Map<String, String>}*/
+    /**@type {Map<import('discord.js').LocaleString, String>}*/
     localizations;
     /**@type {ApplicationCommandType}*/
     type;
@@ -37,6 +37,7 @@ class ContextMenuActionManager {
         this.localizations = new Map();
         this.localizations.set(Locale.EnglishUS, translation['en']);
         this.localizations.set(Locale.EnglishGB, translation['en']);
+        this.localizations.set(Locale.Japanese,  translation['ja']);
     }
 
     /** @param {ContextMenuAction<ContextMenuCommandInteraction<'cached'>>} responseFn Acción a realizar al indicarse su ejecución*/
