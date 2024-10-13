@@ -1,6 +1,6 @@
 const { GuildMember } = require('discord.js');
 const { fetchMember, regroupText } = require('../../func');
-const { CommandTags, CommandOptions, CommandManager } = require('../Commons/commands');
+const { CommandTags, CommandOptions, CommandManager, CommandOptionSolver } = require('../Commons/commands');
 const { CommandPermissions } = require('../Commons/cmdPerms');
 const { Translator } = require('../../internationalization');
 
@@ -36,7 +36,7 @@ const command = new CommandManager('aislar', flags)
 			duration = duration * 60e3;
 
 		args.ensureRequistified();
-		const members = args.parsePolyParamSync('miembros', args.getMember);
+		const members = CommandOptionSolver.asMembers(args.parsePolyParamSync('miembros'));
 		if(!members.length)
 			return request.reply({ content: translator.getText('aislarNoMembersMentioned'), ephemeral: true });
 

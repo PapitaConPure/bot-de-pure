@@ -1066,15 +1066,13 @@ class CommandOptionSolver {
 	}
 
 	/**
-	 * @template {(identifier: String, required?: Boolean) => *} TMethod
 	 * @template {*} [TFallback=undefined]
 	 * @param {String} identifier 
-	 * @param {TMethod} method 
 	 * @param {String} messageSep 
 	 * @param {TFallback} [fallback=undefined]
-	 * @returns {Promise<Array<ReturnType<TMethod> | TFallback>>}
+	 * @returns {Promise<Array<ParamResult | TFallback>>}
 	 */
-	async parsePolyParam(identifier, method, messageSep, fallback = undefined) {
+	async parsePolyParam(identifier, messageSep, fallback = undefined) {
 		const option = this.#options.options.get(identifier);
 
 		if(!option)
@@ -1086,7 +1084,7 @@ class CommandOptionSolver {
 		if(this.isMessageSolver(this.#args)) {
 			if(PARAM_TYPES.get(/**@type {BaseParamType}*/(option._type))?.getMethod === 'getAttachment') {
 				this.ensureRequistified();
-				return /**@type {Array<ReturnType<TMethod>>}*/([ ...this.#request.attachments.values() ]);
+				return /**@type {Array<ParamResult>}*/([ ...this.#request.attachments.values() ]);
 			}
 
 			const arrArgs = regroupText(this.#args, messageSep);
@@ -1106,29 +1104,29 @@ class CommandOptionSolver {
 				} else
 					result = await this.#options.fetchMessageParam(arrArgs, option._type, false);
 
-				result && results.push(/**@type {ReturnType<TMethod>}*/(result));
+				result && results.push(result);
 			}
 			
 			return results;
 		}
 
-		const realMethod = (Array.isArray(option._type) || isParamTypeStrict(option._type)) ? this.#args.getString : (this.#args[PARAM_TYPES.get(option._type).getMethod]);
+		const method = (Array.isArray(option._type) || isParamTypeStrict(option._type))
+			? this.#args.getString
+			: (this.#args[PARAM_TYPES.get(option._type).getMethod]);
 
 		return this.#options
-			.fetchParamPoly(this.#args, identifier, realMethod, fallback)
+			.fetchParamPoly(this.#args, identifier, method, fallback)
 			.filter(input => input);
 	}
 
 	/**
-	 * @template {(identifier: String, required?: Boolean) => *} TMethod
 	 * @template {*} [TFallback=undefined]
 	 * @param {String} identifier 
-	 * @param {TMethod} method 
 	 * @param {String} messageSep 
 	 * @param {TFallback} [fallback=undefined]
-	 * @returns {Array<ReturnType<TMethod> | TFallback>}
+	 * @returns {Array<ParamResult | TFallback>}
 	 */
-	parsePolyParamSync(identifier, method, messageSep = ',', fallback = undefined) {
+	parsePolyParamSync(identifier, messageSep = ',', fallback = undefined) {
 		const option = this.#options.options.get(identifier);
 
 		if(!option)
@@ -1140,7 +1138,7 @@ class CommandOptionSolver {
 		if(this.isMessageSolver(this.#args)) {
 			if(PARAM_TYPES.get(/**@type {BaseParamType}*/(option._type))?.getMethod === 'getAttachment') {
 				this.ensureRequistified();
-				return /**@type {Array<ReturnType<TMethod>>}*/([ ...this.#request.attachments.values() ]);
+				return [ ...this.#request.attachments.values() ];
 			}
 
 			const arrArgs = regroupText(this.#args, messageSep);
@@ -1160,16 +1158,18 @@ class CommandOptionSolver {
 				} else
 					result = this.#options.fetchMessageParamSync(arrArgs, option._type, false);
 
-				result && results.push(/**@type {ReturnType<TMethod>}*/(result));
+				result && results.push(result);
 			}
 			
 			return results;
 		}
 
-		const realMethod = (Array.isArray(option._type) || isParamTypeStrict(option._type)) ? this.#args.getString : (this.#args[PARAM_TYPES.get(option._type).getMethod]);
+		const method = (Array.isArray(option._type) || isParamTypeStrict(option._type))
+			? this.#args.getString
+			: (this.#args[PARAM_TYPES.get(option._type).getMethod]);
 
 		return this.#options
-			.fetchParamPoly(this.#args, identifier, realMethod, fallback)
+			.fetchParamPoly(this.#args, identifier, method, fallback)
 			.filter(input => input);
 	}
 
@@ -1234,13 +1234,18 @@ class CommandOptionSolver {
 	//#region Casters
 	/**
 	 * @param {ParamResult} paramResult The ParamResult to treat
-	 * @returns {Boolean|undefined}
+	 * @returns {Boolean}
 	 */
 	static asBoolean(paramResult) {
 		if(paramResult == undefined) return;
 		if(typeof paramResult !== 'boolean')
 			throw `Se esperaba el tipo de parámetro: Boolean, pero se recibió: ${typeof paramResult}`;
 		return paramResult;
+	}
+	
+	/**@param {Array<ParamResult>} paramResults The ParamResult to treat*/
+	static asBooleans(paramResults) {
+		return paramResults.map(r => CommandOptionSolver.asBoolean(r));
 	}
 
 	/**
@@ -1253,6 +1258,11 @@ class CommandOptionSolver {
 			throw `Se esperaba el tipo de parámetro: String, pero se recibió: ${typeof paramResult}`;
 		return paramResult;
 	}
+	
+	/**@param {Array<ParamResult>} paramResults The ParamResult to treat*/
+	static asStrings(paramResults) {
+		return paramResults.map(r => CommandOptionSolver.asString(r));
+	}
 
 	/**
 	 * @param {ParamResult} paramResult The ParamResult to treat
@@ -1263,6 +1273,11 @@ class CommandOptionSolver {
 		if(typeof paramResult !== 'number')
 			throw `Se esperaba el tipo de parámetro: Number, pero se recibió: ${typeof paramResult}`;
 		return paramResult;
+	}
+	
+	/**@param {Array<ParamResult>} paramResults The ParamResult to treat*/
+	static asNumbers(paramResults) {
+		return paramResults.map(r => CommandOptionSolver.asNumber(r));
 	}
 
 	/**
@@ -1275,6 +1290,11 @@ class CommandOptionSolver {
 			throw `Se esperaba el tipo de parámetro: User, pero se recibió: ${typeof paramResult}`;
 		return paramResult;
 	}
+	
+	/**@param {Array<ParamResult>} paramResults The ParamResult to treat*/
+	static asUsers(paramResults) {
+		return paramResults.map(r => CommandOptionSolver.asUser(r));
+	}
 
 	/**
 	 * @param {ParamResult} paramResult The ParamResult to treat
@@ -1285,6 +1305,11 @@ class CommandOptionSolver {
 		if(!CommandOptionSolver.isMember(paramResult))
 			throw `Se esperaba el tipo de parámetro: GuildMember, pero se recibió: ${typeof paramResult}`;
 		return paramResult;
+	}
+	
+	/**@param {Array<ParamResult>} paramResults The ParamResult to treat*/
+	static asMembers(paramResults) {
+		return paramResults.map(r => CommandOptionSolver.asMember(r));
 	}
 
 	/**
@@ -1297,6 +1322,11 @@ class CommandOptionSolver {
 			throw `Se esperaba el tipo de parámetro: Channel, pero se recibió: ${typeof paramResult}`;
 		return paramResult;
 	}
+	
+	/**@param {Array<ParamResult>} paramResults The ParamResult to treat*/
+	static asChannels(paramResults) {
+		return paramResults.map(r => CommandOptionSolver.asChannel(r));
+	}
 
 	/**
 	 * @param {ParamResult} paramResult The ParamResult to treat
@@ -1307,6 +1337,11 @@ class CommandOptionSolver {
 		if(!CommandOptionSolver.isAttachment(paramResult))
 			throw `Se esperaba el tipo de parámetro: Attachment, pero se recibió: ${typeof paramResult}`;
 		return paramResult;
+	}
+	
+	/**@param {Array<ParamResult>} paramResults The ParamResult to treat*/
+	static asAttachments(paramResults) {
+		return paramResults.map(r => CommandOptionSolver.asAttachment(r));
 	}
 
 	/**
@@ -1319,6 +1354,11 @@ class CommandOptionSolver {
 			throw `Se esperaba el tipo de parámetro: Message<true>, pero se recibió: ${typeof paramResult}`;
 		return paramResult;
 	}
+	
+	/**@param {Array<ParamResult>} paramResults The ParamResult to treat*/
+	static asMessages(paramResults) {
+		return paramResults.map(r => CommandOptionSolver.asMessage(r));
+	}
 
 	/**
 	 * @param {ParamResult} paramResult The ParamResult to treat
@@ -1329,6 +1369,11 @@ class CommandOptionSolver {
 		if(!CommandOptionSolver.isRole(paramResult))
 			throw `Se esperaba el tipo de parámetro: Role, pero se recibió: ${typeof paramResult}`;
 		return paramResult;
+	}
+	
+	/**@param {Array<ParamResult>} paramResults The ParamResult to treat*/
+	static asRoles(paramResults) {
+		return paramResults.map(r => CommandOptionSolver.asRole(r));
 	}
 	//#endregion
 

@@ -523,7 +523,7 @@ async function createTuber(tuberId, gcfg, isPureScript, request, args) {
 			mcontent = args.remainder.split(/[\n ]*##[\n ]*/).join('\n');
 		}
 	}
-	const mfiles = args.parsePolyParamSync('archivos', args.getAttachment).filter(att => att);
+	const mfiles = CommandOptionSolver.asAttachments(args.parsePolyParamSync('archivos')).filter(att => att);
 
 	//Incluir Tubérculo; crear colección de Tubérculos si es necesario
 	if(isPureScript) {
