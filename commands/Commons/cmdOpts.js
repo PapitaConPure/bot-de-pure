@@ -1,4 +1,4 @@
-const { User, GuildMember, Message, GuildChannel, CommandInteractionOptionResolver, Role, AutocompleteInteraction } = require('discord.js');
+const { User, GuildMember, Message, GuildChannel, CommandInteractionOptionResolver, Role, AutocompleteInteraction, Attachment } = require('discord.js');
 const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSentence, toLowerCaseNormalized, regroupText } = require('../../func');
 
 /**
@@ -7,7 +7,7 @@ const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSent
  * @typedef {BaseParamType|ParamTypeStrict} ParamType Tipos de parámetro de CommandOption
  * @typedef {'SINGLE'|'MULTIPLE'|Array<String>} ParamPoly Capacidad de entradas de parámetro de CommandOption
  * @typedef {'getBoolean'|'getString'|'getNumber'|'getInteger'|'getChannel'|'getMessage'|'getUser'|'getMember'|'getRole'|'getAttachment'} GetMethodName
- * @typedef {Number | String | User | GuildMember | import('discord.js').GuildBasedChannel | Message<Boolean> | Role | undefined} ParamResult
+ * @typedef {Number | String | User | GuildMember | import('discord.js').GuildBasedChannel | Message<Boolean> | Role | Attachment | undefined} ParamResult
  * @typedef {(interaction: AutocompleteInteraction<'cached'>, query: String) => Promise<*>} AutocompleteFunction
  */
 
@@ -865,6 +865,8 @@ class CommandOptionSolver {
     #options;
     /**@type {Boolean}*/
     #isSlash = false;
+    /**@type {Number}*/
+    #nextAttachmentIndex = 0;
 
     /**
      * 
@@ -970,9 +972,9 @@ class CommandOptionSolver {
     getMember(identifier, getRestOfMessageWords = false) {
         if(this.isInteractionSolver(this.#args)) {
             const member = this.#args.getMember(identifier);
+            const valid = member instanceof GuildMember;
 
-            if(member == undefined) return;
-            if(!(member instanceof GuildMember)) return;
+            if(!valid) return;
 
             return member;
         }
@@ -1001,6 +1003,26 @@ class CommandOptionSolver {
 
         const result = this.#getResultFromParamSync(identifier, getRestOfMessageWords);
         return CommandOptionSolver.asChannel(result);
+    }
+
+    /**
+     * @param {String} identifier 
+     */
+    getAttachment(identifier) {
+        if(this.isInteractionSolver(this.#args)) {
+            const attachment = this.#args.getAttachment(identifier);
+            const valid = attachment instanceof Attachment;
+
+            if(!valid) return;
+            
+            return attachment;
+        }
+
+        this.ensureRequistified();
+
+        const result = this.#request.attachments.at(this.#nextAttachmentIndex++);
+        if(!result) return;
+        return result;
     }
 
     /**
@@ -1062,6 +1084,11 @@ class CommandOptionSolver {
             throw 'Se esperaba un identificador de parámetro de comando';
 
         if(this.isMessageSolver(this.#args)) {
+            if(PARAM_TYPES.get(/**@type {BaseParamType}*/(option._type))?.getMethod === 'getAttachment') {
+                this.ensureRequistified();
+                return /**@type {Array<ReturnType<TMethod>>}*/([ ...this.#request.attachments.values() ]);
+            }
+
             const arrArgs = regroupText(this.#args, messageSep);
             if(!arrArgs.length)
                 return fallback != undefined
@@ -1079,7 +1106,7 @@ class CommandOptionSolver {
                 } else
                     result = await this.#options.fetchMessageParam(arrArgs, option._type, false);
 
-                results.push(/**@type {ReturnType<TMethod>}*/(result));
+                result && results.push(/**@type {ReturnType<TMethod>}*/(result));
             }
             
             return results;
@@ -1111,6 +1138,11 @@ class CommandOptionSolver {
             throw 'Se esperaba un identificador de parámetro de comando';
 
         if(this.isMessageSolver(this.#args)) {
+            if(PARAM_TYPES.get(/**@type {BaseParamType}*/(option._type))?.getMethod === 'getAttachment') {
+                this.ensureRequistified();
+                return /**@type {Array<ReturnType<TMethod>>}*/([ ...this.#request.attachments.values() ]);
+            }
+
             const arrArgs = regroupText(this.#args, messageSep);
             if(!arrArgs.length)
                 return fallback != undefined
@@ -1128,8 +1160,7 @@ class CommandOptionSolver {
                 } else
                     result = this.#options.fetchMessageParamSync(arrArgs, option._type, false);
 
-                results.push(/**@type {ReturnType<TMethod>}*/(result));
-                console.log({ results });
+                result && results.push(/**@type {ReturnType<TMethod>}*/(result));
             }
             
             return results;
@@ -1269,6 +1300,17 @@ class CommandOptionSolver {
 
     /**
      * @param {ParamResult} paramResult The ParamResult to treat
+     * @returns {Attachment|undefined}
+     */
+    static asAttachment(paramResult) {
+        if(paramResult == undefined) return;
+        if(!CommandOptionSolver.isAttachment(paramResult))
+            throw `Se esperaba el tipo de parámetro: Attachment, pero se recibió: ${typeof paramResult}`;
+        return paramResult;
+    }
+
+    /**
+     * @param {ParamResult} paramResult The ParamResult to treat
      * @returns {Message<true>|undefined}
      */
     static asMessage(paramResult) {
@@ -1316,6 +1358,15 @@ class CommandOptionSolver {
     static isChannel(paramResult) {
         if(paramResult == undefined) return false;
         return paramResult instanceof GuildChannel;
+    }
+
+    /**
+     * @param {ParamResult} paramResult The ParamResult to treat
+     * @returns {paramResult is Attachment}
+     */
+    static isAttachment(paramResult) {
+        if(paramResult == undefined) return false;
+        return paramResult instanceof Attachment;
     }
 
     /**

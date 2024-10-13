@@ -1,10 +1,10 @@
-const { Collection, PermissionFlagsBits, SlashCommandBuilder, Client, ContextMenuCommandBuilder } = require('discord.js');
+const { Collection, PermissionFlagsBits, SlashCommandBuilder, Client, ContextMenuCommandBuilder, CommandInteractionOptionResolver } = require('discord.js');
 const { CommandManager, CommandOptions, CommandFlagExpressive } = require('./commands/Commons/commands.js');
 const { shortenText } = require('./func.js');
 const { readdirSync } = require('fs');
 const { ContextMenuActionManager } = require('./actions/Commons/actionBuilder.js');
 
-/**+
+/**
  * @typedef {import('discord.js').SlashCommandBooleanOption
  *         | import('discord.js').SlashCommandChannelOption
  *         | import('discord.js').SlashCommandIntegerOption
@@ -12,38 +12,42 @@ const { ContextMenuActionManager } = require('./actions/Commons/actionBuilder.js
  *         | import('discord.js').SlashCommandNumberOption
  *         | import('discord.js').SlashCommandRoleOption
  *         | import('discord.js').SlashCommandStringOption
+ *         | import('discord.js').SlashCommandAttachmentOption
+ *         | import('discord.js').SlashCommandMentionableOption
  *         | import('discord.js').SlashCommandUserOption
  * } AnySlashCommandOption
  */
+
+/**@satisfies {Record<import('./commands/Commons/cmdOpts.js').BaseParamType, keyof SlashCommandBuilder>}*/
+const addFunctionNames = /**@type {const}*/({
+    NUMBER:  'addNumberOption',
+    USER:    'addUserOption',
+    MEMBER:  'addUserOption',
+    ROLE:    'addRoleOption',
+    CHANNEL: 'addChannelOption',
+    ID:      'addIntegerOption',
+    EMOTE:   'addStringOption',
+    FILE:    'addAttachmentOption',
+    IMAGE:   'addAttachmentOption',
+    GUILD:   'addStringOption',
+    MESSAGE: 'addStringOption',
+    TEXT:    'addStringOption',
+    URL:     'addStringOption',
+});
+const defaultAddFunctionName =  'addStringOption';
 
 /**
  * @param {import('discord.js').SlashCommandBuilder} slash
  * @param {CommandOptions} options
  */
 function setupOptionBuilders(slash, options, log = false) {
-    /**@type {{ [K in import('./commands/Commons/cmdOpts.js').BaseParamType]: String }}*/
-    const addFunctionNames = /**@type {const}*/({
-        NUMBER:  'addNumberOption',
-        USER:    'addUserOption',
-        MEMBER:  'addUserOption',
-        ROLE:    'addRoleOption',
-        CHANNEL: 'addChannelOption',
-        ID:      'addIntegerOption',
-        EMOTE:   'addStringOption',
-        FILE:    'addStringOption',
-        GUILD:   'addStringOption',
-        IMAGE:   'addStringOption',
-        MESSAGE: 'addStringOption',
-        TEXT:    'addStringOption',
-        URL:     'addStringOption',
-    });
-    const defaultAddFunctionName =  'addStringOption';
-
     options.params.forEach(p => {
         /**
-         * @param {AnySlashCommandOption} option 
+         * @template {AnySlashCommandOption} T
+         * @param {T} option 
          * @param {String} name 
          * @param {Boolean} fullyOptional 
+         * @returns {T}
          */
         const optionBuilder = (option, name, fullyOptional = false) => {
             option
@@ -79,7 +83,9 @@ function setupOptionBuilders(slash, options, log = false) {
             : defaultAddFunctionName;
         
         /**
-         * @param {AnySlashCommandOption} option 
+         * @template {AnySlashCommandOption} T
+         * @param {T} option 
+         * @returns {T}
          */
         const optionBuilder = (option) => {
             option
@@ -93,11 +99,9 @@ function setupOptionBuilders(slash, options, log = false) {
             return option;
         };
 
-        if(f._expressive) {
+        if(f._expressive)
             return slash[addFunctionName](optionBuilder);
-        }
 
-        //@ts-expect-error
         return slash.addBooleanOption(optionBuilder);
     });
 
