@@ -116,7 +116,7 @@ async function processFeeds(booru, guilds) {
         }));
     }));
 
-    console.dir(bulkOps, { depth: null });
+    LOG_MORE && console.dir(bulkOps, { depth: null });
     if(bulkOps.length)
         await GuildConfigs.bulkWrite(bulkOps);
 }
