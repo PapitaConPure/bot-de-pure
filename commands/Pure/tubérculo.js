@@ -194,9 +194,9 @@ const options = new CommandOptions()
 				return interaction.respond(options);
 			}),
 	)
-	.addParam('mensaje',  'TEXT',           'para especificar el texto del mensaje',                { optional: true })
-	.addParam('archivos', ['FILE','IMAGE'], 'para especificar los archivos del mensaje',            { optional: true, poly: 'MULTIPLE', polymax: 8 })
-	.addParam('entradas', 'TEXT',           'para especificar las entradas del Tubérculo avanzado', { optional: true, poly: 'MULTIPLE', polymax: 8 })
+	.addParam('mensaje',  'TEXT', 'para especificar el texto del mensaje',                { optional: true })
+	.addParam('archivos', 'FILE', 'para especificar los archivos del mensaje',            { optional: true, poly: 'MULTIPLE', polymax: 8 })
+	.addParam('entradas', 'TEXT', 'para especificar las entradas del Tubérculo avanzado', { optional: true, poly: 'MULTIPLE', polymax: 8 })
 	.addFlag(['c','m'], ['crear','agregar','añadir'], 'para crear o editar un Tubérculo')
 	.addFlag('v', 		'ver', 		  				  'para ver detalles de un Tubérculo')
 	.addFlag(['b','d'], ['borrar','eliminar'], 		  'para eliminar un Tubérculo')
@@ -523,9 +523,7 @@ async function createTuber(tuberId, gcfg, isPureScript, request, args) {
 			mcontent = args.remainder.split(/[\n ]*##[\n ]*/).join('\n');
 		}
 	}
-	const mfiles = args.isInteractionSolver()
-		? args.parsePolyParamSync('archivos', args.getString).filter(att => att)
-		: request.attachments.map(att => att.proxyURL);
+	const mfiles = args.parsePolyParamSync('archivos', args.getAttachment).filter(att => att);
 
 	//Incluir Tubérculo; crear colección de Tubérculos si es necesario
 	if(isPureScript) {
