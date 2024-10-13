@@ -32,9 +32,12 @@ function paragraph(...lines) {
  */
 function subl(i, defaultValue) {
 	if(i == undefined) throw ReferenceError('Se esperaba un índice de componente de traducción');
+
 	const baseSub = `${i}{...}`
+
 	if(!defaultValue)
 		return baseSub;
+	
 	return `${baseSub}<?{'${defaultValue}'}`;
 }
 
@@ -48,6 +51,10 @@ function subl(i, defaultValue) {
 function subif(i, condition, rightOperand, whenTrue, whenFalse = '') {
 	if(i == undefined) throw ReferenceError('Se esperaba un índice de componente de traducción');
 	if(!whenTrue) throw ReferenceError('Se esperaba un valor para verdadero en componente de traducción');
+
+	if(typeof rightOperand === 'boolean')
+		rightOperand = `__${rightOperand}__`;
+
 	return `${i}{...}<!{${condition}:${rightOperand}|'${whenTrue}'}<?{'${whenFalse}'}`;
 }
 
@@ -160,7 +167,122 @@ let localesObject = /**@type {const}*/({
 	voiceSameChannelExpected: {
 		es: '❌ Ya estoy conectada a otro chat de voz. ¡Ven conmigo antes de hacer eso!',
 		en: '❌ I\'m already connected to another voice channel. Come here before doing that!',
-		ja: '❌ I\'m already connected to another voice channel. Come here before doing that!',
+		ja: '❌ すでに別の音声チャネルに接続しています。その前にここに来てください！',
+	},
+	voiceSessionReasonFirstMemberAdd: {
+		es: 'Inclusión de primer miembro en sesión PuréVoice',
+		en: 'First member addition in PuréVoice Session',
+		ja: 'Purevoiceセッションに最初のメンバーを含める',
+	},
+	voiceSessionReasonMemberAdd: {
+		es: 'Inclusión de miembro en sesión PuréVoice',
+		en: 'Member addition in PuréVoice Session',
+		ja: 'メンバーがPuréVoiceセッションに参加しました',
+	},
+	voiceSessionReasonRoleCreate: {
+		es: 'Inyectar Rol Efímero PuréVoice',
+		en: 'Inject PuréVoice Ephemeral Rol',
+		ja: 'PuréVoice一時的なロールを注入する',
+	},
+	voiceSessionReasonRoleEdit: {
+		es: 'Conceder envío de mensajes a rol de sesión PuréVoice',
+		en: 'Grant permission to send messages for PuréVoice session role',
+		ja: 'PuréVoiceセッションロールのメッセージを送信する許可を付与します',
+	},
+	voiceSessionReasonChannelCreate: {
+		es: 'Desplegar Canal Automutable PuréVoice',
+		en: 'Deploy PuréVoice Automutable Channel',
+		ja: 'PuréVoice自動可変チャネルのデプロイ',
+	},
+	voiceSessionReasonChannelForceName: {
+		es: 'Renombrar sesión PuréVoice (forzado automáticamente)',
+		en: 'Rename PuréVoice session (automatically forced)',
+		ja: 'PuréVoiceセッションの名前を変更する (自動的に強制)',
+	},
+	voiceSessionNewMemberName: {
+		es: 'Nueva conexión',
+		en: 'Member addition in PuréVoice Session',
+		ja: 'メンバーがPuréVoiceセッションに参加しました',
+	},
+	voiceSessionNewMemberValueMemberIntegrated: {
+		es: `El miembro **${subl(0)}** fue incorporado a la sesión`,
+		en: `The miembro **${subl(0)}** was attached to the session`,
+		ja: `メンバー**${subl(0)}**がセッションに接続されました`,
+	},
+	voiceSessionNewMemberValueBotAttached: {
+		es: `El bot **${subl(0)}** fue anexado a la sesión`,
+		en: `The bot **${subl(0)}** was attached to the session`,
+		ja: `ボット**${subl(0)}**がセッションに接続されました`,
+	},
+	voiceSessionNewMemberContentHint: {
+		es: `👋 ${subl(0)}, ¡puedes conversar por aquí!`,
+		en: `👋 ${subl(0)}, you can chat over here!`,
+		ja: `👋 ${subl(0)}、ここでチャットできますよ！`,
+	},
+	voiceSessionNewSessionTitle: {
+		es: '✅ Sesión inicializada',
+		en: '✅ Session initialized',
+		ja: '✅ セッション初期化',
+	},
+	voiceSessionNewSessionCustomizeName: {
+		es: '🎨 Personalizar sesión',
+		en: '🎨 Customize session',
+		ja: '🎨 セッションをカスタマイズ',
+	},
+	voiceSessionNewSessionCustomizeValue: {
+		es: `Puedes personalizar el nombre y emote del canal y rol de la sesión\n\`\`\`${subl(0)}voz <Nombre>[ -e <Emote>]\`\`\``,
+		en: `You can customize the channel name and emote as well as the session role\n\`\`\`${subl(0)}vc <Name>[ -e <Emote>]\`\`\``,
+		ja: `チャンネル名とエモート、セッションロールをカスタマイズできます\n\`\`\`${subl(0)}vc 「名前」[ -e 「エモート」]\`\`\``,
+	},
+	voiceSessionNewSessionNamingName: {
+		es: '🏷️ Nombre',
+		en: '🏷️ Name',
+		ja: '🏷️ 名前',
+	},
+	voiceSessionNewSessionNamingValue: {
+		es: `Puedes usar \`${subl(0)}voz <Nombre>\` para cambiar el nombre`,
+		en: `You can use \`${subl(0)}vc <Name>\` to change the name`,
+		ja: `\`${subl(0)}vc 「名前」\`を使用して名前を変更できます`,
+	},
+	voiceSessionNewSessionEmoteName: {
+		es: '🐴 Emote',
+		en: '🐴 Emote',
+		ja: '🐴 エモート',
+	},
+	voiceSessionNewSessionEmoteValue: {
+		es: 'Añade `--emote <Emote>` o `-e <Emote>` para cambiar el emote',
+		en: 'Add `--emote <Emote>` or `-e <Emote>` to change the emote',
+		ja: 'エモートを変更するには、`--emote 「エモート」`または`-e 「エモート」`を追加します',
+	},
+	voiceSessionNewSessionRoleName: {
+		es: '📣 Rol Efímero',
+		en: '📣 Ephemeral Role',
+		ja: '📣 一時的なロール',
+	},
+	voiceSessionNewSessionRoleValue: {
+		es: `Este rol menciona a todos en la sesión\n${subl(0)}`,
+		en: `This role mentions everyone in the session\n${subl(0)}`,
+		ja: `この役割はセッション内の全員にメンションします\n${subl(0)}`,
+	},
+	voiceSessionNewSessionRenameName: {
+		es: '🧹 Renombrar sesión',
+		en: '🧹 Rename Session',
+		ja: '🧹 セッション名前を変更',
+	},
+	voiceSessionNewSessionRenameValue: {
+		es: 'Debes esperar 20 minutos entre cada renombrado de la sesión',
+		en: 'You must wait 20 minutes between each session renaming',
+		ja: '各セッションの名前変更の間には20分待つ必要があります',
+	},
+	voiceSessionNewSessionAutonameName: {
+		es: '⏱️ Nombre automático',
+		en: '⏱️ Auto-naming',
+		ja: '⏱️ 自動命名',
+	},
+	voiceSessionNewSessionAutonameValue: {
+		es: 'Si no escribes un nombre de sesión en 3 minutos, se nombrará automáticamente',
+		en: 'If you don\'t enter a session name within 3 minutes, it\'ll be automatically renamed',
+		ja: '3分以内にセッション名を入力しないと、自動的に名前が変更されます',
 	},
 
 	invalidInput: {
@@ -294,6 +416,16 @@ let localesObject = /**@type {const}*/({
 		en: 'Source',
 		ja: '出典',
 	},
+	emoji: {
+		es: 'Emoji',
+		en: 'Emoji',
+		ja: '絵文字',
+	},
+	emote: {
+		es: 'Emote',
+		en: 'Emote',
+		ja: 'エモート',
+	},
 
 	buttonStart: {
 		es: 'Comenzar',
@@ -344,6 +476,11 @@ let localesObject = /**@type {const}*/({
 		es: 'Registrar',
 		en: 'Register',
 		ja: '登録',
+	},
+	buttonShowMeHow: {
+		es: 'Muéstrame cómo',
+		en: 'Show me how',
+		ja: 'やり方を見せて',
 	},
 	
 	actionDeleteUserPost: {
@@ -1025,7 +1162,37 @@ let localesObject = /**@type {const}*/({
 	yoVoiceAutonameName: {
 		es: 'Nombre automático',
 		en: 'Autoname',
-		ja: '自動命名',
+		ja: '自動名',
+	},
+	yoVoiceAutonameValueNone: {
+		es: '_Ninguno._',
+		en: '_None._',
+		ja: '「なし。」',
+	},
+	yoVoiceAutonameButtonLabel: {
+		es: 'Nombre de sesión automático...',
+		en: 'Session autoname...',
+		ja: 'セッション自動名…',
+	},
+	yoVoiceAutonameModalTitle: {
+		es: 'Dar Nombre Automático',
+		en: 'Set Autoname',
+		ja: '自動名を設定',
+	},
+	yoVoiceAutonameModalNamingPlaceholder: {
+		es: 'Bhava-Agra',
+		en: 'Bhava-Agra',
+		ja: '有頂天',
+	},
+	yoVoiceAutonameModalEmojiPlaceholder: {
+		es: 'Emoji unicode. Ejemplo: 🍑',
+		en: 'Unicode emoji. Example: 🍑',
+		ja: 'Unicode絵文字。例: 🍑',
+	},
+	yoVoiceAutonameSuccess: {
+		es: '✅ Nombre automático actualizado',
+		en: '✅ Autoname updated',
+		ja: '✅ 自動名が更新されました',
 	},
 	yoVoiceMenuPing: {
 		es: 'Configurar menciones...',
@@ -1058,9 +1225,9 @@ let localesObject = /**@type {const}*/({
 		ja: 'pixivリンクコンバーター',
 	},
 	yoPixivTitle: {
-		es: 'Activa o desactiva el servicio de conversión',
-		en: 'Enable or disable the conversion service',
-		ja: '変換サービスを有効または無効にする',
+		es: `El conversor de enlaces de pixiv está actualmente ${subif(0, '=', true, 'activado', 'desactivado')}`,
+		en: `The pixiv link converter is currently ${subif(0, '=', true, 'enabled', 'disabled')}`,
+		ja: `pixivリンクコンバーターは現在${subif(0, '=', true, '有効', '無効')}です`,
 	},
 	yoPixivStateAlreadySet: {
 		es: `⚠️️ El servicio ya estaba ${subif(0, '=', true, 'activado', 'desactivado')}`,
@@ -1211,27 +1378,17 @@ class Translator {
 		if(!translationTemplate) throw RangeError(`Se esperaba una clave de localización válida. Se recibió: ${id} :: ${locale}`);
 	
 		//Ejemplo: 1{...}<?{'por defecto'}
-		const subLocaleRegex = /(\d+){\.\.\.}(?:<!{((?:[!=<>]{1,2}):[0-9]+)\|'((?:(?!'}).)*)'})?(?:<\?{'((?:(?!'}).)*)'})?/g;
-		const translation = translationTemplate.replace(subLocaleRegex, (_, i, condition, whenTrue, defaultValue) => {
+		const subLocaleRegex = /(\d+){\.\.\.}(?:<!{((?:[!=<>]{1,2}):[^\|]+)\|'((?:(?!'}).)*)'})?(?:<\?{'((?:(?!'}).)*)'})?/g;
+		const translation = translationTemplate.replace(subLocaleRegex, (_match, /**@type {String}*/i, /**@type {String}*/condition, /**@type {String}*/whenTrue, /**@type {String}*/defaultValue) => {
 			const value = values[i];
 	
 			if(condition != undefined) {
-				const leftValue = `${value}`;
-				let rightValue = '';
-				let operator = '';
-				let cursor = 0;
+				const leftValue = (typeof value === 'boolean') ? `__${value}__` : `${value}`;
+				const [ operator, rightValue ] = /**@type {[ ConditionString, String ]}*/(condition.split(':'));
+				
+				if(!conditionFns.has(operator))
+					throw 'Operador inválido';
 
-				while(condition[cursor] !== ':') {
-					operator += condition[cursor];
-					cursor++;
-				}
-				cursor++;
-				while(cursor < condition.length) {
-					rightValue += condition[cursor];
-					cursor++;
-				}
-
-				//@ts-expect-error
 				const conditionFn = conditionFns.get(operator);
 				return conditionFn(leftValue, rightValue) ? whenTrue : (defaultValue ?? '');
 			}
