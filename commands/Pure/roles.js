@@ -144,7 +144,7 @@ const command = new CommandManager('roles', flags)
 						{
 							label: 'Juegos',
 							description: 'Roles mencionables para jugar juntos',
-							emoji: '919133024770211880',
+							emoji: '1237762773006680124',
 							value: 'selectGame_0',
 						},
 						{

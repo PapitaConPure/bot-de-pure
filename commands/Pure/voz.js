@@ -6,7 +6,7 @@ const { CommandOptions, CommandTags, CommandManager } = require('../Commons/comm
 
 const cancelbutton = (id) => new ButtonBuilder()
 	.setCustomId(`voz_cancelWizard_${id}`)
-	.setLabel('Cancelar')
+	.setEmoji('936531643496288288')
 	.setStyle(ButtonStyle.Secondary);
 const collectors = {};
 /**
@@ -316,7 +316,7 @@ const command = new CommandManager('voz', flags)
 		const row = new ActionRowBuilder().addComponents(
 			new ButtonBuilder()
 				.setCustomId(`voz_startWizard_${uid}`)
-				.setLabel('Volver')
+				.setEmoji('934432754173624373')
 				.setStyle(ButtonStyle.Secondary),
 			cancelbutton(uid),
 		);
@@ -345,7 +345,7 @@ const command = new CommandManager('voz', flags)
 				.setStyle(ButtonStyle.Danger),
 			new ButtonBuilder()
 				.setCustomId(`voz_startWizard_${uid}`)
-				.setLabel('Volver')
+				.setEmoji('934432754173624373')
 				.setStyle(ButtonStyle.Secondary),
 			cancelbutton(uid),
 		);

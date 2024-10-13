@@ -16,7 +16,7 @@ const wizTitle = (translator) => translator.getText('feedAuthor');
 /**@param {Translator} translator*/
 const cancelbutton = (translator) => new ButtonBuilder()
 	.setCustomId('feed_cancelWizard')
-	.setLabel(translator.getText('buttonCancel'))
+	.setEmoji('936531643496288288')
 	.setStyle(ButtonStyle.Secondary);
 /**@param {Translator} translator*/
 const finishButton = (translator) => new ButtonBuilder()
@@ -153,7 +153,7 @@ const command = new CommandManager('feed', flags)
 						.setDisabled(!premade),
 					new ButtonBuilder()
 						.setCustomId('feed_selectCustomize')
-						.setEmoji('935665140601327626')
+						.setEmoji('1288444896331698241')
 						.setLabel(translator.getText('buttonCustomize'))
 						.setStyle(ButtonStyle.Primary)
 						.setDisabled(!premade),
@@ -193,7 +193,6 @@ const command = new CommandManager('feed', flags)
 			
 		const channels = interaction.guild.channels.cache;
 		const textChannels = channels.filter(c => [ ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread ].includes(c.type));
-		console.log({ channels, textChannels });
 		const fetchedChannel = isNaN(+input)
 			? textChannels.find(c => c.name.toLowerCase().includes(input))
 			: textChannels.get(input);
@@ -217,7 +216,7 @@ const command = new CommandManager('feed', flags)
 					.setStyle(ButtonStyle.Primary),
 				new ButtonBuilder()
 					.setCustomId('feed_startWizard')
-					.setLabel('Volver')
+					.setEmoji('934432754173624373')
 					.setStyle(ButtonStyle.Secondary),
 				cancelbutton(translator),
 			)],
@@ -296,7 +295,7 @@ const command = new CommandManager('feed', flags)
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_startWizard')
-						.setLabel('Volver')
+						.setEmoji('934432754173624373')
 						.setStyle(ButtonStyle.Secondary),
 					cancelbutton(translator),
 				),
@@ -324,7 +323,7 @@ const command = new CommandManager('feed', flags)
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_startWizard')
-						.setLabel('Volver')
+						.setEmoji('934432754173624373')
 						.setStyle(ButtonStyle.Secondary),
 					cancelbutton(translator),
 				),
@@ -352,7 +351,7 @@ const command = new CommandManager('feed', flags)
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_startWizard')
-						.setLabel('Volver')
+						.setEmoji('934432754173624373')
 						.setStyle(ButtonStyle.Secondary),
 					cancelbutton(translator),
 				),
@@ -380,7 +379,7 @@ const command = new CommandManager('feed', flags)
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_startWizard')
-						.setLabel('Volver')
+						.setEmoji('934432754173624373')
 						.setStyle(ButtonStyle.Secondary),
 					cancelbutton(translator),
 				),
@@ -400,7 +399,7 @@ const command = new CommandManager('feed', flags)
 					.setStyle(ButtonStyle.Primary),
 				new ButtonBuilder()
 					.setCustomId('feed_selectEdit')
-					.setLabel('Volver')
+					.setEmoji('934432754173624373')
 					.setStyle(ButtonStyle.Secondary),
 				finishButton(translator),
 			)],
@@ -451,7 +450,7 @@ const command = new CommandManager('feed', flags)
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_selectCustomize')
-						.setLabel('Volver')
+						.setEmoji('934432754173624373')
 						.setStyle(ButtonStyle.Secondary),
 					finishButton(translator),
 				),
@@ -478,7 +477,7 @@ const command = new CommandManager('feed', flags)
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_selectView')
-						.setLabel('Volver')
+						.setEmoji('934432754173624373')
 						.setStyle(ButtonStyle.Secondary),
 					finishButton(translator),
 				),
@@ -507,7 +506,7 @@ const command = new CommandManager('feed', flags)
 					.setStyle(ButtonStyle.Danger),
 				new ButtonBuilder()
 					.setCustomId('feed_selectDelete')
-					.setLabel('Volver')
+					.setEmoji('934432754173624373')
 					.setStyle(ButtonStyle.Secondary),
 				cancelbutton(translator),
 			)],
@@ -627,7 +626,7 @@ const command = new CommandManager('feed', flags)
 		row.addComponents(
 			new ButtonBuilder()
 				.setCustomId('feed_selectCustomize')
-				.setLabel('Volver')
+				.setEmoji('934432754173624373')
 				.setStyle(ButtonStyle.Secondary),
 			cancelbutton(translator),
 		);
