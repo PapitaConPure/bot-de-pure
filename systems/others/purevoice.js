@@ -1,13 +1,32 @@
-const PureVoice = require('../../localdata/models/purevoice');
+const PureVoice = require('../../localdata/models/purevoice.js');
 const UserConfigs = require('../../localdata/models/userconfigs')
 const Discord = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes');
+const { Translator } = require('../../internationalization');
 const chalk = require('chalk');
 const { ButtonStyle, ChannelType } = require('discord.js');
 const { makeButtonRowBuilder } = require('../../tsCasts');
 
+/**
+ * 
+ * @param {import('../../localdata/models/userconfigs').UserConfigDocument} userConfig 
+ */
+function makeSessionAutoname(userConfig) {
+    if(!userConfig?.voice?.autoname) return null;
+    return `${userConfig.voice.autoemoji || '💠'}【${userConfig.voice.autoname}】`;
+}
+
+/**
+ * 
+ * @param {import('../../localdata/models/userconfigs').UserConfigDocument} userConfig 
+ */
+function makeSessionRoleAutoname(userConfig) {
+    if(!userConfig?.voice?.autoname) return null;
+    return `${userConfig.voice.autoemoji || '💠'} ${userConfig.voice.autoname}`;
+}
+
 class PureVoiceUpdateHandler {
-    /**@typedef {import('../../localdata/models/purevoice').PureVoiceDocument}*/
+    /**@type {import('../../localdata/models/purevoice.js').PureVoiceDocument}*/
     pvDocument;
     /**@type {Discord.VoiceState}*/
     oldState;
@@ -30,12 +49,12 @@ class PureVoiceUpdateHandler {
      * @returns {Promise<void>}
      */
     async getSystemDocument(documentQuery) {
-        this.pvDocument = await PureVoice.findOne(documentQuery).catch(console.error);
+        this.pvDocument = await PureVoice.findOne(documentQuery).catch(err => { console.error(err); return undefined; });
     };
 
     async relinkDocument() {
         const documentId = this.pvDocument.id;
-        this.pvDocument = await PureVoice.findById(documentId).catch(console.error);
+        this.pvDocument = await PureVoice.findById(documentId).catch(err => { console.error(err); return undefined; });
     };
 
     /** Comprueba si hay un sistema PuréVoice instalado en el servidor actual o no */
@@ -54,7 +73,7 @@ class PureVoiceUpdateHandler {
      * Si la sesión no se elimina, en cambio se le revoca el rol de sesión al miembro que se desconectó
      * @returns {Promise<*>}
      */
-    handleDisconnection() {
+    async handleDisconnection() {
         if(this.isNotConnectionUpdate()) return;
 
         const { pvDocument, oldState, prematureError } = this;
@@ -62,7 +81,6 @@ class PureVoiceUpdateHandler {
         if(!oldChannel) return;
 
         try {
-            // console.log('Desconexión del canal', oldChannel.name, 'con', oldChannel.members.filter(member => !member.user.bot).size, 'miembros');
             const sessionIndex = pvDocument.sessions.findIndex(s => s.voiceId === oldChannel.id);
             if(sessionIndex === -1) return;
 
@@ -116,6 +134,8 @@ class PureVoiceUpdateHandler {
             .setAuthor({ name: 'PuréVoice', iconURL: state.client.user.avatarURL({ size: 128 }) })
             .setFooter({ text: `👥 ${channel.members?.size}` });
 
+        const translator = member.user.bot ? (new Translator('es')) : (await Translator.from(member));
+
         if(channel.id !== pvDocument.voiceMakerId) {
             const currentSession = pvDocument.sessions.find(session => session.voiceId === channel.id);
             if(!currentSession) return;
@@ -123,25 +143,21 @@ class PureVoiceUpdateHandler {
             const sessionRole = guild.roles.cache.get(currentSession.roleId);
             if(!sessionRole || !channel) return;
     
-            await member.roles.add(sessionRole, 'Inclusión de miembro en sesión PuréVoice');
+            await member.roles.add(sessionRole, translator.getText('voiceSessionReasonMemberAdd'));
 
             if(currentSession.joinedOnce?.includes(member.id)) return;
             
             const userConfigs = await UserConfigs.findOne({ userId: member.id }) || new UserConfigs({ userId: member.id });
-            userConfigs.voice ??= {};
-            userConfigs.voice.ping ??= 'always';
             if(userConfigs.voice.ping !== 'always') return;
 
             embed.setColor(0x00ff7f)
                 .addFields({
-                    name: `${member.user.bot ? '🤖' : '👤'} Nueva conexión`,
-                    value: member.user.bot
-                        ? `El bot **${member.user.tag}** fue anexado a la sesión`
-                        : `El miembro **${member.user.tag}** fue incorporado a la sesión`,
+                    name: `${member.user.bot ? '🤖' : '👤'} ${translator.getText('voiceSessionNewMemberName')}`,
+                    value: translator.getText(member.user.bot ? 'voiceSessionNewMemberValueBotAttached' : 'voiceSessionNewMemberValueMemberIntegrated', member.user.tag),
                 });
 
             await channel?.send({
-                content: member.user.bot ? null : `👋 ${member}, ¡puedes conversar por aquí!`,
+                content: member.user.bot ? null : translator.getText('voiceSessionNewMemberContentHint', `${member}`),
                 embeds: [embed],
             }).catch(prematureError);
             currentSession.joinedOnce.push(member.id);
@@ -150,20 +166,22 @@ class PureVoiceUpdateHandler {
         }
 
         try {
+            const userConfigs = await UserConfigs.findOne({ userId: member.id }) || new UserConfigs({ userId: member.id });
+
             const defaultName = member.user.username.slice(0, 24);
             const sessionRole = await guild.roles.create({
-                name: `🔶 PV ${defaultName}`,
+                name: makeSessionRoleAutoname(userConfigs) ?? `🔶 PV ${defaultName}`,
                 color: global.tenshiColor,
                 mentionable: true,
-                reason: 'Inyectar Rol Efímero PuréVoice',
+                reason: translator.getText('voiceSessionReasonRoleCreate'),
             });
             const newSession = await guild.channels.create({
-                name: '➕ Nueva Sesión',
+                name: '➕',
                 type: ChannelType.GuildVoice,
                 parent: pvDocument.categoryId,
                 bitrate: 64e3,
                 userLimit: 1,
-                reason: 'Desplegar Canal Automutable PuréVoice'
+                reason: translator.getText('voiceSessionReasonChannelCreate'),
             });
             
             pvDocument.voiceMakerId = newSession.id;
@@ -174,57 +192,53 @@ class PureVoiceUpdateHandler {
                 nameChanged: 0,
             });
             pvDocument.markModified('sessions');
-            console.log(chalk.gray('Se marcó para guardar'));
 
             await newSession.lockPermissions().catch(prematureError);
             await newSession.permissionOverwrites.edit(guild.roles.everyone, { SendMessages: false }).catch(prematureError);
             await Promise.all([
                 newSession.permissionOverwrites.edit(guild.members.me, { SendMessages: false }),
-                member.roles.add(sessionRole, 'Inclusión de primer miembro en sesión PuréVoice'),
+                member.roles.add(sessionRole, translator.getText('voiceSessionReasonFirstMemberAdd')),
             ]).catch(prematureError);
-            await channel?.permissionOverwrites?.edit(sessionRole, { SendMessages: true, reason: 'Conceder envío de mensajes a rol de sesión PuréVoice' }).catch(prematureError);
-            await channel?.setName('🔶').catch(prematureError);
+            await channel?.permissionOverwrites?.edit(sessionRole, { SendMessages: true }, { reason: translator.getText('voiceSessionReasonRoleEdit') }).catch(prematureError);
+            await channel?.setName(makeSessionAutoname(userConfigs) ?? '🔶').catch(prematureError);
             await channel?.setUserLimit(0).catch(prematureError);
 
             embed.setColor(0x21abcd)
-                .setTitle('✅ Sesión inicializada')
+                .setTitle(translator.getText('voiceSessionNewSessionTitle'))
                 .addFields(
                     {
-                        name: '🎨 Personalizar sesión',
-                        value: `Puedes personalizar el nombre y emote del canal y rol de la sesión\n\`\`\`${p_pure(guild.id).raw}voz <Nombre>[ -e <Emote>]\`\`\``
+                        name: translator.getText('voiceSessionNewSessionCustomizeName'),
+                        value: translator.getText('voiceSessionNewSessionCustomizeValue', p_pure(guild.id).raw)
                     },
                     
                     {
-                        name: '🏷️ Nombre',
-                        value: `Puedes usar \`${p_pure(guild.id).raw}voz <Nombre>\` para cambiar el nombre`,
+                        name: translator.getText('voiceSessionNewSessionNamingName'),
+                        value: translator.getText('voiceSessionNewSessionNamingValue', p_pure(guild.id).raw),
                         inline: true,
                     },
                     {
-                        name: '🐴 Emote',
-                        value: 'Añade `--emote <Emote>` o `-e <Emote>` para cambiar el emote',
-                        inline: true,
-                    },
-                    {
-                        name: '📣 Rol Efímero',
-                        value: `Este rol menciona a todos en la sesión\n${sessionRole}`,
+                        name: translator.getText('voiceSessionNewSessionEmoteName'),
+                        value: translator.getText('voiceSessionNewSessionEmoteValue'),
                         inline: true,
                     },
 
                     {
-                        name: '🧹 Renombrar sesión',
-                        value: 'Debes esperar 20 minutos entre cada renombrado de la sesión',
-                        inline: true,
+                        name: translator.getText('voiceSessionNewSessionRoleName'),
+                        value: translator.getText('voiceSessionNewSessionRoleValue', `${sessionRole}`),
                     },
+
                     {
-                        name: '⏱️ Nombre automático',
-                        value: 'Si no escribes un nombre de sesión en 3 minutos, se nombrará automáticamente',
+                        name: translator.getText('voiceSessionNewSessionRenameName'),
+                        value: translator.getText('voiceSessionNewSessionRenameValue'),
                         inline: true,
                     },
                 );
 
-            const userConfigs = await UserConfigs.findOne({ userId: member.id }) || new UserConfigs({ userId: member.id });
-            userConfigs.voice ??= {};
-            userConfigs.voice.ping ??= 'always';
+            userConfigs.voice.autoname || embed.addFields({
+                name: translator.getText('voiceSessionNewSessionAutonameName'),
+                value: translator.getText('voiceSessionNewSessionAutonameValue'),
+                inline: true,
+            });
             
             /**@type {String | Discord.MessagePayload | Discord.MessageCreateOptions}*/
             const startMessage = {
@@ -233,7 +247,7 @@ class PureVoiceUpdateHandler {
                     makeButtonRowBuilder().addComponents(
                         new Discord.ButtonBuilder({
                             customId: 'voz_showMeHow',
-                            label: 'Muéstrame cómo',
+                            label: translator.getText('buttonShowMeHow'),
                             style: ButtonStyle.Primary,
                             emoji: '📖',
                         }),
@@ -245,7 +259,7 @@ class PureVoiceUpdateHandler {
 
             await channel.send(startMessage).catch(prematureError);
             
-            setTimeout(async () => {
+            userConfigs.voice.autoname || setTimeout(async () => {
                 await this.relinkDocument();
                 const { pvDocument } = this;
                 if(!pvDocument) return;
@@ -257,7 +271,7 @@ class PureVoiceUpdateHandler {
                 pvDocument.markModified('sessions');
                 
                 const name = member.user.username.slice(0, 24);
-                const namingReason = 'Renombrar sesión PuréVoice (forzado automáticamente)';
+                const namingReason = translator.getText('voiceSessionReasonChannelForceName');
                 return Promise.all([
                     pvDocument.save(),
                     channel?.send({ content: '🔹 Se asignó un nombre a la sesión automáticamente' }),
@@ -311,6 +325,10 @@ class PureVoiceOrchestrator {
     /**@type {Boolean}*/
     #busy;
 
+    /**
+     * 
+     * @param {String} guildId 
+     */
     constructor(guildId) {
         this.#guildId = guildId;
         this.#handlers = [];
@@ -346,6 +364,7 @@ class PureVoiceOrchestrator {
             await this.consumeHandler();
             return false;
         }
+
         this.#busy = false;
         return false;
     }
@@ -354,4 +373,6 @@ class PureVoiceOrchestrator {
 module.exports = {
     PureVoiceUpdateHandler,
     PureVoiceOrchestrator,
+    makeSessionAutoname,
+    makeSessionRoleAutoname,
 };

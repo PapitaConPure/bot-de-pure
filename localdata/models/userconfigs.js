@@ -28,9 +28,19 @@ const UserConfigSchema = new Mongoose.Schema({
         required: true,
     },
     voice: {
-        type: Mongoose.SchemaTypes.Mixed,
-        default: {},
-        required: true,
+        ping: {
+            type: String,
+            enum: [ 'always', 'onCreate', 'never' ],
+            default: 'always',
+        },
+        autoname: {
+            type: String,
+            default: '',
+        },
+        autoemoji: {
+            type: String,
+            default: '',
+        },
     },
     flags: {
         type: Array,
