@@ -36,7 +36,7 @@ const command = new CommandManager('aislar', flags)
 			duration = duration * 60e3;
 
 		args.ensureRequistified();
-		const members = args.parsePolyParamSync('miembros', args.getMember, ',');
+		const members = args.parsePolyParamSync('miembros', args.getMember);
 		if(!members.length)
 			return request.reply({ content: translator.getText('aislarNoMembersMentioned'), ephemeral: true });
 
