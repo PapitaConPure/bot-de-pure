@@ -183,7 +183,7 @@ async function formatBooruPostMessage(booru, post, data) {
 
 			if(arr.length > 4) {
 				arr = arr
-					.with(3, '*(...)*')
+					.with(3, '(...)')
 					.slice(0, 4);
 			}
 
