@@ -179,7 +179,7 @@ async function formatBooruPostMessage(booru, post, data) {
 		const tagsContent = formatTagNameList(filteredTags, ' ');
 
 		const addTagCategoryField = (/**@type {String}*/ fieldName, /**@type {Array<String>}*/arr) => {
-			if(arr.length < 0) return;
+			if(!arr.length) return;
 
 			if(arr.length > 4) {
 				arr = arr
@@ -187,8 +187,9 @@ async function formatBooruPostMessage(booru, post, data) {
 					.slice(0, 4);
 			}
 
-			const content = formatTagNameList(arr, '\n');
+			let content = formatTagNameList(arr, '\n').replace('\n', '\n* ');
 			if(!content.length) return;
+			content = `* ${content}`;
 
 			postEmbed.addFields({ name: fieldName, value: shortenText(content, 1020), inline: true });
 		}
@@ -320,16 +321,13 @@ function isUnholy(isNsfw, request, terms) {
  * @returns {Promise<Array<Message<true>> | Message<true>>}
  */
 async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt = { cmdtag: 'general', nsfwtitle: 'Búsqueda NSFW', sfwtitle: 'Búsqueda' }) {
-	// @ts-ignore
 	const isnsfw = isThread(request.channel)
-		// @ts-ignore
 		? request.channel.parent.nsfw
-		// @ts-ignore
 		: request.channel.nsfw;
 	
-	const poolSize = options.fetchFlag(args, 'bomba', { callback: f => Math.max(2, Math.min(f, 10)), fallback: 1 });
+	const poolSize = options.fetchFlag(args, 'bomba', { callback: f => Math.max(2, Math.min(+f, 10)), fallback: 1 });
 	const words = isSlash
-		// @ts-ignore
+		// @ts-expect-error
 		? (args.getString('etiquetas') ?? '').split(/ +/)
 		: args;
 
@@ -347,13 +345,12 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
 	
 	//Petición
 	try {
-		// @ts-ignore
 		const booru = new Booru(globalConfigs.booruCredentials);
 		const response = await booru.search([ searchTags, userTags ], { limit: 100, random: true });
 		//Manejo de respuesta
 		if(!response.length) {
 			const replyOptions = { content: `⚠️ No hay resultados en **Gelbooru** para las tags **"${userTags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` };
-			// @ts-ignore
+			//@ts-expect-error
 			return request.editReply(replyOptions);
 		}
 
@@ -371,7 +368,7 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
 			isNotFeed: true,
 		})));
 		if(userTags.length)
-			// @ts-ignore
+			//@ts-expect-error
 			messages[posts.length - 1].embeds[0].addFields({ name: 'Tu búsqueda', value: `:mag_right: *${userTags.trim().replace(/\*/g, '\\*').split(/ +/).join(', ')}*` });
 
 		//Enviar mensajes
@@ -391,7 +388,7 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
 					'```',
 				].join('\n'),
 			});
-		// @ts-ignore
+		//@ts-expect-error
 		return request.editReply({ embeds: [errorembed] });
 	}
 };
