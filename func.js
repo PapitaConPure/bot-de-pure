@@ -782,7 +782,7 @@ module.exports = {
     /**
      * Busca un usuario basado en la data ingresada.
      * Devuelve el usuario que más coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún usuario, se devuelve undefined.
-     * @param {String} data 
+     * @param {Discord.GuildMember | String} data 
      * @param {FetchUserContext} context 
      * @returns { Discord.GuildMember }
      */
@@ -790,6 +790,8 @@ module.exports = {
         if(!data || !context) return;
         let { guild: thisGuild, client } = context;
         if(!thisGuild || !client) throw 'Se requiere la guild actual y el cliente en búsqueda de miembro';
+        if(typeof data !== 'string')
+            return data.user?.username ? data : undefined;
         // console.time('Buscar miembro');
         
         const otherGuilds = client.guilds.cache.filter(g => g.id !== thisGuild.id);
