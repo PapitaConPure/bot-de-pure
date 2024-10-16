@@ -1,19 +1,20 @@
-const PureVoice = require('../../localdata/models/purevoice.js');
+const { PureVoiceModel: PureVoice, PureVoiceSessionModel: PureVoiceSession } = require('../../localdata/models/purevoice.js');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, MessageCollector, ButtonStyle, Colors, ChannelType } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { isNotModerator, defaultEmoji } = require('../../func.js');
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
+const { makeButtonRowBuilder } = require('../../tsCasts.js');
 
 const cancelbutton = (id) => new ButtonBuilder()
 	.setCustomId(`voz_cancelWizard_${id}`)
 	.setEmoji('936531643496288288')
 	.setStyle(ButtonStyle.Secondary);
 const collectors = {};
+
 /**
- * @param {Number} stepCount
+ * @param {String} iconUrl
  * @param {String} stepName
  * @param {import('discord.js').ColorResolvable} stepColor
- * @param {String} route
  */
 const wizEmbed = (iconUrl, stepName, stepColor) => {
 	//const routes = {
@@ -25,6 +26,27 @@ const wizEmbed = (iconUrl, stepName, stepColor) => {
 		.setColor(stepColor)
 		.setAuthor({ name: 'Asistente de Configuración de Sistema PuréVoice', iconURL: iconUrl })
 		.setFooter({ text: stepName });
+};
+
+/**@param {import('../Commons/typings.js').ComplexCommandRequest} request*/
+const generateFirstWizard = (request) => {
+	if(isNotModerator(request.member)) return request.reply({ content: '❌ No tienes permiso para hacer esto', ephemeral: true });
+	const wizard = wizEmbed(request.client.user.avatarURL(), '1/? • Comenzar', Colors.Aqua)
+		.addFields({
+			name: 'Bienvenido',
+			value: 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes! Solo sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras',
+		});
+	const uid = request.userId;
+	return request.reply({
+		embeds: [wizard],
+		components: [new ActionRowBuilder().addComponents(
+			new ButtonBuilder()
+				.setCustomId(`voz_startWizard_${uid}`)
+				.setLabel('Comenzar')
+				.setStyle(ButtonStyle.Primary),
+			cancelbutton(uid),
+		)],
+	});
 };
 
 const options = new CommandOptions()
@@ -42,37 +64,15 @@ const command = new CommandManager('voz', flags)
 	.setBriefDescription('Para inyectar un Sistema PuréVoice en una categoria por medio de un Asistente')
 	.setLongDescription('Para inyectar un Sistema PuréVoice en una categoria. Simplemente usa el comando y sigue los pasos del Asistente para configurar todo')
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash = false) => {
-		const generateWizard = options.fetchFlag(args, 'asistente');
-	
-		if(generateWizard) {
-			//Inicializar instalador PuréVoice
-			if(isNotModerator(request.member)) return request.reply({ content: '❌ No tienes permiso para hacer esto', ephemeral: true });
-			const wizard = wizEmbed(request.client.user.avatarURL(), '1/? • Comenzar', Colors.Aqua)
-				.addFields({
-					name: 'Bienvenido',
-					value: 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes! Solo sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras',
-				});
-			const uid = (request.author ?? request.user).id;
-			return request.reply({
-				embeds: [wizard],
-				components: [new ActionRowBuilder().addComponents(
-					new ButtonBuilder()
-						.setCustomId(`voz_startWizard_${uid}`)
-						.setLabel('Comenzar')
-						.setStyle(ButtonStyle.Primary),
-					cancelbutton(uid),
-				)],
-			});
-		}
+	.setExperimentalExecution(async (request, args) => {
+		if(args.parseFlag('asistente'))
+			return generateFirstWizard(request);
 		
 		//Cambiar nombre de canal de voz de sesión
 		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda voz\` para más información`;
-		const emoteString = options.fetchFlag(args, 'emote', { fallback: '💠' });
+		const emoteString = args.parseFlagExpr('emote', x => `${x}`, '💠');
 		const sessionEmote = defaultEmoji(emoteString);
-		const sessionName = isSlash
-			? args.getString('nombre')
-			: args.join(' ');
+		const sessionName = args.getString('nombre', true);
 		
 		if(!sessionName)
 			return request.reply({
@@ -101,7 +101,6 @@ const command = new CommandManager('voz', flags)
 			});
 
 		//Comprobar si se está en una sesión
-		/**@type {import('discord.js').VoiceState}*/
 		const voiceState = request.member.voice;
 		const warnNotInSession = () => request.reply({
 			content: [
@@ -110,10 +109,11 @@ const command = new CommandManager('voz', flags)
 			].join('\n'),
 			ephemeral: true,
 		}).catch(console.error);
-		if(!voiceState.channelId)
+
+		if(!voiceState?.channelId)
 			return warnNotInSession();
 
-		const createInvite = options.fetchFlag(args, 'invitar');
+		const createInvite = args.parseFlag('invitar');
 
 		if(createInvite) {
 			const invite = await request.guild.invites.create(voiceState.channel, { maxAge: 5 * 60 }).catch(_ => null);
@@ -136,24 +136,23 @@ const command = new CommandManager('voz', flags)
 		//Modificar sesión y confirmar
 		const pv = await PureVoice.findOne({ guildId: request.guildId });
 		if(!pv) return warnNotInSession();
-		const sessionIndex = pv.sessions.findIndex(session => session.voiceId === voiceState.channelId);
-		const session = pv.sessions[sessionIndex];
+		const sessionId = pv.sessions.find(sid => sid === voiceState.channelId);
+		const session = await PureVoiceSession.findOne({ channelId: sessionId });
 		if(!session) return warnNotInSession();
-		const { voiceId, roleId, nameChanged } = session;
-		if((Date.now() - nameChanged) < 60e3 * 20)
+		const { channelId: voiceId, roleId, nameChanged } = session;
+		if((Date.now() - (+nameChanged)) < 60e3 * 20)
 			return request.reply({
 				content: [
 					'❌ Por cuestiones técnicas, solo puedes cambiar el nombre de la sesión una vez cada 20 minutos.',
-					`Inténtalo de nuevo <t:${Math.round(nameChanged / 1000 + 60 * 20)}:R>, o conéctate a una nueva sesión`,
+					`Inténtalo de nuevo <t:${Math.round(+nameChanged / 1000 + 60 * 20)}:R>, o conéctate a una nueva sesión`,
 				].join('\n'),
 			});
-		pv.sessions[sessionIndex].nameChanged = Date.now();
-		pv.markModified('sessions');
+		session.nameChanged = new Date(Date.now());
 
 		const guildChannels = request.guild.channels.cache;
 		const guildRoles = request.guild.roles.cache;
 		return Promise.all([
-			pv.save(),
+			session.save(),
 			guildChannels.get(voiceId)?.setName(`${sessionEmote}【${sessionName}】`, 'Renombrar sesión PuréVoice'),
 			guildRoles.get(roleId)?.setName(`${sessionEmote} ${sessionName}`, 'Renombrar sesión PuréVoice'),
 			request.reply({ content: '✅ Nombre aplicado', ephemeral: true }),
@@ -173,7 +172,7 @@ const command = new CommandManager('voz', flags)
 			
 		const pv = await PureVoice.findOne({ guildId: guild.id });
 		const uid = user.id;
-		const row = new ActionRowBuilder();
+		const row = makeButtonRowBuilder();
 		const isInstalled = pv && guild.channels.cache.get(pv.categoryId) && guild.channels.cache.get(pv.voiceMakerId);
 		if(!isInstalled)
 			row.addComponents(
@@ -212,7 +211,7 @@ const command = new CommandManager('voz', flags)
 				name: 'Instalación',
 				value: 'Selecciona el tipo de instalación que deseas realizar',
 			});
-		const row = new ActionRowBuilder().addComponents(
+		const row = makeButtonRowBuilder().addComponents(
 			new ButtonBuilder()
 				.setCustomId(`voz_installSystem_${authorId}_new`)
 				.setLabel('Crear categoría con PuréVoice')
@@ -313,7 +312,7 @@ const command = new CommandManager('voz', flags)
 				value: 'Menciona el nombre de la categoría antes de inyectarle PuréVoice',
 			});
 		const uid = interaction.user.id;
-		const row = new ActionRowBuilder().addComponents(
+		const row = makeButtonRowBuilder().addComponents(
 			new ButtonBuilder()
 				.setCustomId(`voz_startWizard_${uid}`)
 				.setEmoji('934432754173624373')
@@ -338,7 +337,7 @@ const command = new CommandManager('voz', flags)
 				].join('\n'),
 			});
 		const uid = interaction.user.id;
-		const row = new ActionRowBuilder().addComponents(
+		const row = makeButtonRowBuilder().addComponents(
 			new ButtonBuilder()
 				.setCustomId(`voz_deleteSystemConfirmed_${uid}`)
 				.setLabel('DESINSTALAR')

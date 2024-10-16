@@ -1,4 +1,4 @@
-const PureVoice = require('../../localdata/models/purevoice.js');
+const { PureVoiceModel: PureVoice, PureVoiceSessionModel: PureVoiceSession, PureVoiceSessionMember, PureVoiceSessionMemberRoles } = require('../../localdata/models/purevoice.js');
 const UserConfigs = require('../../localdata/models/userconfigs')
 const Discord = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes');
@@ -81,10 +81,12 @@ class PureVoiceUpdateHandler {
         if(!oldChannel) return;
 
         try {
-            const sessionIndex = pvDocument.sessions.findIndex(s => s.voiceId === oldChannel.id);
-            if(sessionIndex === -1) return;
+            const sessionId = pvDocument.sessions.find(sid => sid === oldChannel.id);
+            if(!sessionId) return;
 
-            const session = pvDocument.sessions[sessionIndex];
+            const session = await PureVoiceSession.findOne({ channelId: sessionId });
+            if(!session) return;
+
             const sessionRole = guild.roles.cache.get(session.roleId);
 
             if(oldChannel.members.filter(member => !member.user.bot).size) {
@@ -92,11 +94,10 @@ class PureVoiceUpdateHandler {
                 return;
             }
             
-            pvDocument.sessions.splice(sessionIndex, 1);
-            pvDocument.markModified('sessions');
             const deletionMessage = 'Eliminar componentes de sesión PuréVoice';
             return Promise.all([
-                guild.channels.cache.get(session.voiceId)?.delete(deletionMessage)?.catch(prematureError),
+                session.remove(),
+                guild.channels.cache.get(session.channelId)?.delete(deletionMessage)?.catch(prematureError),
                 sessionRole?.delete(deletionMessage)?.catch(prematureError),
             ]);
         } catch(error) {
@@ -137,15 +138,18 @@ class PureVoiceUpdateHandler {
         const translator = member.user.bot ? (new Translator('es')) : (await Translator.from(member));
 
         if(channel.id !== pvDocument.voiceMakerId) {
-            const currentSession = pvDocument.sessions.find(session => session.voiceId === channel.id);
+            const currentSessionId = pvDocument.sessions.find(sid => sid === channel.id);
+            if(!currentSessionId) return;
+
+            const currentSession = await PureVoiceSession.findOne({ channelId: currentSessionId });
             if(!currentSession) return;
 
             const sessionRole = guild.roles.cache.get(currentSession.roleId);
             if(!sessionRole || !channel) return;
     
-            await member.roles.add(sessionRole, translator.getText('voiceSessionReasonMemberAdd'));
+            await member.roles.add(sessionRole, translator.getText('voiceSessionReasonMemberAdd')).catch(console.error);
 
-            if(currentSession.joinedOnce?.includes(member.id)) return;
+            if(currentSession.members.has(member.id)) return;
             
             const userConfigs = await UserConfigs.findOne({ userId: member.id }) || new UserConfigs({ userId: member.id });
             if(userConfigs.voice.ping !== 'always') return;
@@ -160,8 +164,15 @@ class PureVoiceUpdateHandler {
                 content: member.user.bot ? null : translator.getText('voiceSessionNewMemberContentHint', `${member}`),
                 embeds: [embed],
             }).catch(prematureError);
-            currentSession.joinedOnce.push(member.id);
-            pvDocument.markModified('sessions');
+            currentSession.members.set(
+                member.id,
+                (new PureVoiceSessionMember({
+                    id: member.id,
+                    role: PureVoiceSessionMemberRoles.GUEST,
+                })).toJSON(),
+            );
+            currentSession.markModified('members');
+            await currentSession.save();
             return;
         }
 
@@ -185,12 +196,7 @@ class PureVoiceUpdateHandler {
             });
             
             pvDocument.voiceMakerId = newSession.id;
-            pvDocument.sessions.push({
-                voiceId: channel.id,
-                roleId: sessionRole.id,
-                joinedOnce: [ member.id ],
-                nameChanged: 0,
-            });
+            pvDocument.sessions.push(channel.id);
             pvDocument.markModified('sessions');
 
             await newSession.lockPermissions().catch(prematureError);
@@ -201,7 +207,23 @@ class PureVoiceUpdateHandler {
             ]).catch(prematureError);
             await channel?.permissionOverwrites?.edit(sessionRole, { SendMessages: true }, { reason: translator.getText('voiceSessionReasonRoleEdit') }).catch(prematureError);
             await channel?.setName(makeSessionAutoname(userConfigs) ?? '🔶').catch(prematureError);
-            await channel?.setUserLimit(0).catch(prematureError);
+            
+            await Promise.all([
+                channel?.setUserLimit(0).catch(prematureError),
+                PureVoiceSession.create({
+                    channelId: channel.id,
+                    roleId: sessionRole.id,
+                    adminId: member.id,
+                    members: new Map().set(
+                        member.id,
+                        (new PureVoiceSessionMember({
+                            id: member.id,
+                            role: PureVoiceSessionMemberRoles.ADMIN,
+                        })).toJSON(),
+                    ),
+                    killDelaySeconds: 0, //PENDIENTE: UserConfig
+                }),
+            ]);
 
             embed.setColor(0x21abcd)
                 .setTitle(translator.getText('voiceSessionNewSessionTitle'))
@@ -264,16 +286,18 @@ class PureVoiceUpdateHandler {
                 const { pvDocument } = this;
                 if(!pvDocument) return;
 
-                const sessionIndex = pvDocument.sessions.findIndex(session => session.voiceId === channel.id);
-                const session = pvDocument.sessions[sessionIndex];
+                const sessionId = pvDocument.sessions.find(sid => sid === channel.id);
+                if(!sessionId) return;
+
+                const session = await PureVoiceSession.findOne({ channelId: sessionId });
                 if(!session || session.nameChanged) return;
-                pvDocument.sessions[sessionIndex].nameChanged = Date.now();
-                pvDocument.markModified('sessions');
+                
+                session.nameChanged = new Date(Date.now());
                 
                 const name = member.user.username.slice(0, 24);
                 const namingReason = translator.getText('voiceSessionReasonChannelForceName');
                 return Promise.all([
-                    pvDocument.save(),
+                    session.save(),
                     channel?.send({ content: '🔹 Se asignó un nombre a la sesión automáticamente' }),
                     channel?.setName(`💠【${name}】`, namingReason),
                     sessionRole?.setName(`💠 ${name}`, namingReason),
@@ -301,20 +325,21 @@ class PureVoiceUpdateHandler {
     async checkFaultySessions() {
         const { pvDocument, state } = this;
         const guildChannels = state.guild.channels.cache;
-        let deleted = 0;
+        const invalidSessionIds = [];
 
-        pvDocument.sessions = pvDocument.sessions.filter(session => {
-            const voiceChannel = guildChannels.get(session.voiceId);
-            if(voiceChannel) {
-                deleted += 1;
-                return true;
-            }
+        pvDocument.sessions = pvDocument.sessions.filter(sid => {
+            const channelExists = guildChannels.has(sid);
+            !channelExists && invalidSessionIds.push(sid);
+            return channelExists;
         });
-        if(deleted)
-            pvDocument.markModified('sessions');
 
-        return deleted;
-    };
+        if(invalidSessionIds.length) {
+            await PureVoiceSession.deleteMany({ channelId: { $in: invalidSessionIds } });
+            pvDocument.markModified('sessions');
+        }
+
+        return invalidSessionIds.length;
+    }
 }
 
 class PureVoiceOrchestrator {
