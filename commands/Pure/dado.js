@@ -1,11 +1,51 @@
 const { EmbedBuilder } = require('discord.js');
 const { randRange } = require('../../func.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
+const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver, CommandParam } = require("../Commons/commands");
+
+const diceRegex = /([0-9]+)\s*[Dd]\s*([0-9]+)/;
 
 const options = new CommandOptions()
-	.addParam('dados', { name: 'conjunto', expression: '`<cantidad>`"d"`<caras>`' }, 'para especificar la cantidad y caras de un conjunto de dados', { poly: 'MULTIPLE' });
+	.addOptions(
+		new CommandParam('dados', { name: 'conjunto', expression: '`<cantidad>`"d"`<caras>`' })
+			.setDesc('para especificar la cantidad y caras de un conjunto de dados')
+			.setPoly('MULTIPLE', 16)
+			.setAutocomplete(async (interaction, query) => {
+				let queryMatch = query.match(diceRegex);
+
+				if(queryMatch) {
+					const [ , dices, faces ] = queryMatch;
+					return interaction.respond([{
+						name: `${dices}d${faces}`,
+						value: `${dices}d${faces}`,
+					}]);
+				}
+
+				queryMatch = query.match(/(.*)[Dd](.*)/);
+				if(!queryMatch) return interaction.respond([{
+					name: '1d6',
+					value: '1d6',
+				}]);
+
+				const [ , dices, faces ] = queryMatch;
+
+				const dd = (isNaN(+dices) || !+dices)
+					? ({ name: '❌', value: 1 })
+					: ({ name: dices.trim(), value: +dices });
+					
+				const ff = (isNaN(+faces) || !+faces)
+					? ({ name: '❌', value: 6 })
+					: ({ name: faces.trim(), value: +faces });
+
+				return interaction.respond([{
+					name:  `${dd.name}d${ff.name}`,
+					value: `${dd.value}d${ff.value}`,
+				}]);
+			}),
+	);
+
 const flags = new CommandTags().add('COMMON');
+
 const command = new CommandManager('dados', flags)
 	.setAliases(
 		'dado', 'tirar', 'random',
@@ -17,11 +57,13 @@ const command = new CommandManager('dados', flags)
 		'**Ejemplo de dados:** `1d6` = 1 dado de 6 caras; `5d4` = 5 dados de 4 caras; `15d20` = 15 dados de 20 caras',
 	)
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash) => {
-		let diceInputs = isSlash
-			? options.fetchParamPoly(args, 'dados', args.getString, [])
-			: args;
-			
+	.setExperimentalExecution(async (request, args, rawArgs) => {
+		let diceInputs = (
+			args.isInteractionSolver()
+				? CommandOptionSolver.asStrings(args.parsePolyParamSync('dados', ' ')).map(v => v.match(diceRegex))
+				: [ ...rawArgs.matchAll(new RegExp(diceRegex, 'g')) ]
+		).filter(v => v);
+
 		if(!diceInputs.length)
 			return request.reply({
 				content: [
@@ -30,35 +72,14 @@ const command = new CommandManager('dados', flags)
 				].join('\n')
 			});
 
-		let dices = diceInputs.map((arg, i) => {
-			if(isNaN(arg)) {
-				const dice = arg.split(/[Dd]/).filter(a => a);
-				if(dice.length === 2)
-					return ({
-						d: dice[0],
-						f: dice[1]
-					});
-			} else if(diceInputs[i + 1]?.startsWith(/[Dd]/))
-				return ({
-					d: arg,
-					f: diceInputs[i + 1]
-				});
-		}).filter(dice => dice);
+		let dices = diceInputs
+			.slice(0, 16)
+			.map(parseDice);
 
-		if(!dices.length)
+		if(dices.some(dice => dice == undefined))
 			return request.reply({ content: '⚠️ Entrada inválida' })
-		
-		if(dices.length > 16 || dices.some(dice => dice.d > 999))
-			return request.reply({ content: 'PERO NO SEAS TAN ENFERMO <:zunWTF:757163179569840138>' });
 
-		dices.forEach(dice => {
-			dice.d = parseInt(dice.d);
-			dice.f = parseInt(dice.f);
-			dice.r = Array(dice.d).fill().map(_ => randRange(1, dice.f + 1));
-			dice.t = dice.r.reduce((a,b) => a + b);
-		});
-
-		const user = request.author ?? request.user;
+		const { user } = request;
 		const embed = new EmbedBuilder()
 			.setColor(0x3f4581)
 			.setAuthor({ name: `${user.username} tiró los dados...`, iconURL: user.avatarURL({ extension: 'png', size: 512 }) })
@@ -76,5 +97,28 @@ const command = new CommandManager('dados', flags)
 		return request.reply({ embeds: [embed] })
 		.catch(() => request.reply({ content: '❌ No te pasei de gracioso, ¿tamo? <:junkWTF:796930821260836864> <:pistolaR:697351201301463060>' }));
 	});
+
+/**
+ * 
+ * @param {RegExpMatchArray} diceInput 
+ * @returns {{ d: Number, f: Number, r: Array<Number>, t: Number }}
+ */
+function parseDice(diceInput) {
+	if(!diceInput) return;
+	
+	const [ match, dices, faces ] = diceInput;
+
+	if(+dices > 999) return;
+
+	const r = Array(+dices).fill().map(_ => randRange(1, +faces + 1));
+	const t = r.reduce((a, b) => a + b);
+	
+	return ({
+		d: +dices,
+		f: +faces,
+		r,
+		t,
+	});
+}
 
 module.exports = command;

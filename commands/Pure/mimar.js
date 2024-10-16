@@ -20,11 +20,11 @@ const command = new CommandManager('mimar', flags)
 	.setBriefDescription('Mima al usuario mencionado y te da un resumen de cómo estuvo el mimo para ambas partes')
 	.setLongDescription('Mima al `<usuario>` mencionado y te da un resumen de cómo estuvo el mimo para ambas partes')
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash = false) => {
+	.setExperimentalExecution(async (request, args) => {
 		//Acción de comando
-		const user2 = isSlash ? args.getUser('persona') : fetchUser(args.join(' '), request);
+		const user2 = args.getUser('persona', true);
 		if(!user2) return request.reply('⚠️️ Debes especificar una persona a mimar');
-		const user1 = request.author ?? request.user;
+		const user1 = request.user;
 		if(user1.id === user2.id) return request.reply('⚠️️ El único mimo que puedes darte a ti mismo es el de vivir una vida de la que no te arrepentirás');
 
 		const embed = new EmbedBuilder()
@@ -35,6 +35,7 @@ const command = new CommandManager('mimar', flags)
 				{ name: user2.username, value: lovestats(), inline: true },
 			)
 			.setImage('https://i.imgur.com/HwqSNyy.jpg');
+		
 		return request.reply({ embeds: [embed] });
 	});
 

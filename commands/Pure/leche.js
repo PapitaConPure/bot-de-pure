@@ -1,32 +1,42 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const global = require('../../localdata/config.json'); //Variables globales
 const func = require('../../func.js'); //Funciones globales
-const axios = require('axios');
+const { default: axios } = require('axios');
 const Canvas = require('canvas');
 const { utils } = require('../../localdata/images.json'); //Funciones globales
-const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
 const { isThread } = require('../../func.js');
 
-async function resolverLink(req, linkRes, iSize, isnsfw, isSlash) {
+/**
+ * 
+ * @param {import('../Commons/typings').ComplexCommandRequest} request 
+ * @param {String} linkRes 
+ * @param {Discord.ImageURLOptions['size']} iSize 
+ * @param {Boolean} isnsfw 
+ * @param {CommandOptionSolver} args 
+ */
+async function resolverLink(request, linkRes, iSize, isnsfw, args) {
 	let iurl;
+
+	const reply = async (/**@type {String | Discord.MessagePayload | Discord.MessageCreateOptions | Discord.MessageReplyOptions}*/responseBody) => {
+		return args.isInteractionSolver()
+			? request.channel.send(responseBody)
+			: request.reply(responseBody);
+	}
 
 	const response = await axios.get(linkRes).catch(() => null);
 
 	if(response) {
-		const user = req.author ?? req.user;
+		const user = request.user;
 		//Si se pasó un enlace, comprobar su funcionamiento y devolverlo si es accesible
 		if(response.status !== 200) {
-			const errorResponse = { content: '⚠️ Ocurrió un error al descargar la imagen\n```\n' + response.status + '\n```\nToma cum.' };
-			if(isSlash) req.channel.send(errorResponse);
-			else req.reply(errorResponse);
+			reply({ content: '⚠️ Ocurrió un error al descargar la imagen\n```\n' + response.status + '\n```\nToma cum.' });
 			return user.avatarURL({ extension: 'png', size: iSize });
 		}
 		if(isnsfw || (!linkRes.includes('.gif') && !linkRes.includes('.mp4') && (response.data.toString().length / 1024) < 256))
 			return linkRes;
 		
-		const errorResponse = { content: '⚠️ La imagen es muy grande (>256KB) o tiene un formato inválido. Toma cum.' };
-		if(isSlash) req.channel.send(errorResponse);
-		else req.reply(errorResponse);
+		reply({ content: '⚠️ La imagen es muy grande (>256KB) o tiene un formato inválido. Toma cum.' });
 
 		return user.avatarURL({ extension: 'png', size: iSize });
 	}
@@ -35,22 +45,22 @@ async function resolverLink(req, linkRes, iSize, isnsfw, isSlash) {
 	if((linkRes.startsWith('<:') || linkRes.startsWith('<a:')) && linkRes.endsWith('>')) {
 		//Resolver de emote
 		linkRes = linkRes.slice(linkRes.lastIndexOf(':') + 1, -1);
-		return req.guild.emojis.resolve(linkRes).url;
+		return request.guild.emojis.resolve(linkRes).url;
 	}
 
 	//Resolver de usuario
-	linkRes = func.fetchUserID(linkRes, req);
+	linkRes = func.fetchUserID(linkRes, request);
 	if(linkRes !== undefined)
-		return req.client.users.cache.get(linkRes).avatarURL({ extension: 'png', size: iSize });
+		return request.client.users.cache.get(linkRes).avatarURL({ extension: 'png', size: iSize });
 
 	return iurl;
 };
 
 async function dibujarCum(msg, link) {
-	cum = await Canvas.loadImage(utils.cum);
-	fondo = await Canvas.loadImage(link);
-	canvas = Canvas.createCanvas(fondo.width, fondo.height);
-	ctx = canvas.getContext('2d');
+	const cum = await Canvas.loadImage(utils.cum);
+	const fondo = await Canvas.loadImage(link);
+	const canvas = Canvas.createCanvas(fondo.width, fondo.height);
+	const ctx = canvas.getContext('2d');
 
 	ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 	ctx.drawImage(cum, 0, 0, canvas.width, canvas.height);
@@ -61,29 +71,30 @@ async function dibujarCum(msg, link) {
 
 const options = new CommandOptions()
 	.addParam('objetivo', { name: 'Texto', expression: [ 'USER', 'EMOTE', 'IMAGE' ] },  'para disparar a un usuario, emote o imagen (<=256KB)', { optional: true });
+
 const flags = new CommandTags().add(
 	'MEME',
 	'CHAOS',
 );
-const command = new CommandManager('lechita', flags)
-	.setAliases('leche', 'cum', 'cummies', 'milk', 'milkies')
+const command = new CommandManager('leche', flags)
+	.setAliases('lechita', 'cum', 'cummies', 'milk', 'milkies')
 	.setBriefDescription('Disparo lechita a ti o a quien especifiques. Funciona un poco diferente en canales NSFW')
 	.setLongDescription(
 		'Disparo leche a ti o a lo que especifiques 😳',
 		'**Nota:** en canales marcados como NSFW, el resultado será diferente',
 	)
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash) => {
+	.setExperimentalExecution(async (request, args) => {
 		const isnsfw = isThread(request.channel)
 			? request.channel.parent.nsfw
 			: request.channel.nsfw;
 		
-		const target = isSlash ? (args.getString('objetivo')?.trim() ?? '') : args.join(' ');
-		const user = request.author ?? request.user;
+		const target = args.getString('objetivo');
+		const user = request.user;
 
 		if(isnsfw) {
 			let bglink;
-			if(args.length) bglink = await resolverLink(request, target, 1024, true, isSlash);
+			if(!args.empty) bglink = await resolverLink(request, target, 1024, true, args);
 			else bglink = user.avatarURL({ extension: 'png', size: 1024 });
 
 			return dibujarCum(request, bglink);
@@ -93,7 +104,7 @@ const command = new CommandManager('lechita', flags)
 		if(!target)
 			bglink = user.avatarURL({ extension: 'png', size: 256 });
 		else if(!(target.startsWith('<:') || target.startsWith('<a:')) || !target.endsWith('>'))
-			bglink = await resolverLink(request, target, 256, false, isSlash);
+			bglink = await resolverLink(request, target, 256, false, args);
 
 		const coomer = [
 			'<:merryawaise:1108320072491073576>',

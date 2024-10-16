@@ -458,6 +458,9 @@ const command = new CommandManager('yo', flags)
             return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
 
         const translator = new Translator(/**@type {import('../../internationalization').LocaleKey}*/(userConfigs.language));
+		
+		if(user.id !== authorId)
+			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
 
         const modal = new ModalBuilder()
             .setCustomId(`yo_applyVoiceAutoname_${authorId}`)

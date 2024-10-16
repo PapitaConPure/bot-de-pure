@@ -1,7 +1,7 @@
 const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType, ButtonComponent } = require('discord.js');
 const { isNotModerator, shortenText, guildEmoji, decompressId, compressId } = require('../../func.js');
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
-const { auditError } = require('../../systems/others/auditor.js');
+const { auditError, auditAction } = require('../../systems/others/auditor.js');
 const { CommandTags } = require('../Commons/cmdTags.js');
 const globalConfigs = require('../../localdata/config.json');
 const { Booru, TagTypes, BooruUnknownPostError } = require('../../systems/booru/boorufetch.js');
@@ -91,7 +91,7 @@ const flags = new CommandTags().add('COMMON', 'MOD');
 const command = new CommandManager('feed', flags)
 	.setBriefDescription('Inicializa un Feed en un canal por medio de un Asistente.')
 	.setLongDescription('Inicializa un Feed de imágenes en un canal. Simplemente usa el comando y sigue los pasos del Asistente para configurar y personalizar todo')
-	.setExecution(async (request, _args, _isSlash) => {
+	.setExecution(async request => {
 		const translator = await Translator.from(request.userId);
 		const wizard = new EmbedBuilder()
 			.setColor(Colors.Aqua)
@@ -751,7 +751,7 @@ const command = new CommandManager('feed', flags)
 			console.log(sent.embeds[0].author);
 			if(sent.embeds[0].author.iconURL)
 				gcfg.feeds[channelId].cornerIcon = input;
-			setTimeout(() => { if(sent.deletable) sent.delete().catch(console.error) }, 1500);
+			setTimeout(() => { if(sent?.deletable) sent.delete().catch(console.error); }, 1500);
 			gcfg.markModified('feeds');
 			gcfg.save();
 			return interaction.editReply({ content: '✅ Ícono actualizado' });
@@ -1118,6 +1118,48 @@ const command = new CommandManager('feed', flags)
 		if(isNotModerator(member))
 			return interaction.reply({ content: '❌ No tienes permiso para hacer eso, teehee~', ephemeral: true });
 		return interaction.reply({ content: 'Shock aplicado.', ephemeral: true });
+	})
+	.setButtonResponse(async function giveFeedback(interaction, type) {
+		const translator = await Translator.from(interaction.user);
+		//return interaction.reply({ content: translator.getText('feedFeedbackExpired'), ephemeral: true });
+
+		//type = 'Y' | 'N' | 'F'
+		if(type === 'Y' || type === 'N') {
+			auditAction(`PuréFeed • Feedback • ${interaction.user.username}`, {
+				name: 'Calificación',
+				value: type === 'Y' ? '✅ Satisfecho' : '❌ Insatisfecho',
+			});
+
+			return interaction.reply({ content: translator.getText('feedFeedbackThanks'), ephemeral: true });
+		}
+
+		if(type !== 'F')
+			return interaction.reply({ content: translator.getText('unknownInteraction'), ephemeral: true });
+
+		const modal = new ModalBuilder()
+			.setCustomId('feed_sendFeedback')
+			.setTitle(translator.getText('feedFeedbackTitle'))
+			.setComponents(makeTextInputRowBuilder().addComponents(
+				new TextInputBuilder()
+					.setCustomId('feedback')
+					.setLabel(translator.getText('feedFeedbackName'))
+					.setMinLength(20)
+					.setMaxLength(250)
+					.setRequired(true)
+					.setStyle(TextInputStyle.Paragraph)
+			));
+
+		return interaction.showModal(modal);
+	}).setModalResponse(async function sendFeedback(interaction) {
+		const translator = await Translator.from(interaction.user);
+		const feedback = interaction.fields.getTextInputValue('feedback');
+
+		auditAction(`PuréFeed • Feedback • ${interaction.user.username}`, {
+			name: 'Mensaje',
+			value: feedback,
+		});
+
+		return interaction.reply({ content: translator.getText('feedFeedbackThanks'), ephemeral: true });
 	});
 
 module.exports = command;

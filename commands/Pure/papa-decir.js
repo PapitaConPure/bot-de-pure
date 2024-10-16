@@ -41,7 +41,7 @@ const command = new CommandManager('papa-decir', flags)
         if(!channel)
             return message.reply({ content: '⚠️ debes especificar un canal de la guild que ingresaste.' });
         
-        if(deleteAfter && message.deletable && message.guild.members.me.permissions.has('ManageMessages'))
+        if(deleteAfter && message?.deletable && message.guild.members.me.permissions.has('ManageMessages'))
             message.delete().catch(auditError);
 
         return channel.send(args.join(' ').split(/ +#ENDL +/g).join('\n'));

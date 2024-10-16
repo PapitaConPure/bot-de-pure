@@ -1,11 +1,11 @@
-const { EmbedBuilder } = require('discord.js'); //Integrar discord.js
+const { EmbedBuilder, CommandInteraction, Message } = require('discord.js'); //Integrar discord.js
 const { bot_status } = require('../../localdata/config.json'); //Variables globales
-const ayuda = require('./ayuda.js'); //Variables globales
 const { readdirSync } = require('fs'); //Para el contador de comandos
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { Stats } = require('../../localdata/models/stats');
 const { improveNumber, isShortenedNumberString } = require('../../func');
 const { CommandTags, CommandManager } = require('../Commons/commands');
+const ayuda = /**@type {CommandManager}*/(require('./ayuda.js')); //Variables globales
 
 const { host, version, note, changelog, todo } = bot_status;
 const cmsearch = new RegExp(`${p_pure().raw}[A-Za-zÁÉÍÓÚáéíóúÑñ0-9_.-]*`, 'g');
@@ -61,9 +61,9 @@ const command = new CommandManager('estado', flags)
 
         const sentquery = (await Promise.all([
             request.reply({ embeds: [embed] }),
-            isSlash ? request.fetchReply() : null,
+            isSlash ? /**@type {CommandInteraction}*/(request).fetchReply() : null,
         ])).filter(sq => sq);
-        const sent = sentquery.pop();
+        const sent = /**@type {Message<true>}*/(sentquery.pop());
         if(cm === null) return;
         Promise.all(cm.map(async (_, i) => sent.react(ne[i])));
         const coll = sent.createReactionCollector({ filter: (_, u) => !u.bot, max: cm.length, time: 1000 * 60 * 2 });
@@ -71,7 +71,7 @@ const command = new CommandManager('estado', flags)
             const i = ne.indexOf(nc.emoji.name);
             if(i < 0) return;
             const search = cm[i].slice(2);
-            ayuda.execute(sent, [ search ]);
+            ayuda.execute(CommandManager.requestize(sent), [ search ]);
         });
     })
 
