@@ -1038,6 +1038,26 @@ let localesObject = /**@type {const}*/({
 		en: 'Link',
 		ja: 'リンク',
 	},
+	feedFeedbackExpired: {
+		es: '❌ Esta campaña de retroalimentación ha finalizado',
+		en: '❌ This feedback campaign has already finished',
+		ja: '❌ このフィードバックキャンペーンはすでに終了しています',
+	},
+	feedFeedbackThanks: {
+		es: '💖 ¡Gracias por responder!',
+		en: '💖 Thanks for your feedback!',
+		ja: '💖 フィードバックありがとうございます！',
+	},
+	feedFeedbackTitle: {
+		es: 'Dar Retroalimentación',
+		en: 'Give Feedback',
+		ja: 'フィードバックを送る',
+	},
+	feedFeedbackName: {
+		es: 'Retroalimentación',
+		en: 'Feedback',
+		ja: 'フィードバック',
+	},
 
 	booruNotifTitle: {
 		es: 'Notificación de Feed Suscripto',
