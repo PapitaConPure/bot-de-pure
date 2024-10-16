@@ -213,12 +213,16 @@ async function handleAutocompleteInteraction(interaction, client, stats) {
     try {
         /**@type {CommandManager}*/
         const command = puré.commands.get(commandName) || puré.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
-        const option = /**@type {CommandParam | CommandFlagExpressive}*/(command.options.options.get(optionName));
+        const option = /**@type {CommandParam | CommandFlagExpressive}*/(
+            command.options.options.get(optionName)
+            ?? command.options.options.get(`${optionName.slice(0, optionName.lastIndexOf('_'))}s`)
+            ?? command.options.options.get(`${optionName.slice(0, optionName.lastIndexOf('_'))}`)
+        );
 
         if(!option)
             return interaction.respond([{
                 name: 'Ocurrió un error. Disculpa las molestias',
-                value: 'error',
+                value: 'BDP_ERR_NOOPTION',
             }]);
         
         return option.autocomplete(interaction, optionValue);

@@ -7,7 +7,7 @@ const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSent
  * @typedef {BaseParamType|ParamTypeStrict} ParamType Tipos de parámetro de CommandOption
  * @typedef {'SINGLE'|'MULTIPLE'|Array<String>} ParamPoly Capacidad de entradas de parámetro de CommandOption
  * @typedef {'getBoolean'|'getString'|'getNumber'|'getInteger'|'getChannel'|'getMessage'|'getUser'|'getMember'|'getRole'|'getAttachment'} GetMethodName
- * @typedef {Number | String | User | GuildMember | import('discord.js').GuildBasedChannel | Message<Boolean> | Role | Attachment | undefined} ParamResult
+ * @typedef {Number | String | Boolean | User | GuildMember | import('discord.js').GuildBasedChannel | Message<Boolean> | Role | Attachment | undefined} ParamResult
  * @typedef {(interaction: AutocompleteInteraction<'cached'>, query: String) => Promise<*>} AutocompleteFunction
  */
 
@@ -56,13 +56,15 @@ const fetchMessageFlagText = (args, i) => {
 }
 
 /**
- * @template [T=*]
- * @typedef {(value: any, isSlash: Boolean) => T} FlagCallback
+ * @template {ParamResult} [T=ParamResult]
+ * @typedef {(value: ParamResult, isSlash: Boolean) => T} FlagCallback
  */
 /**
+ * @template {ParamResult} [T=ParamResult]
+ * @template {ParamResult} [N=ParamResult]
  * @typedef {Object} FeedbackOptions
- * @property {FlagCallback|number|string|boolean|bigint|object} [callback] Una función de mapeo de retorno o un valor de retorno positivo
- * @property {*} [fallback] Un valor de retorno negativo
+ * @property {FlagCallback<T> | T} [callback] Una función de mapeo de retorno o un valor de retorno positivo
+ * @property {N} [fallback] Un valor de retorno negativo
  */
 /**
  * @typedef {Object} FetchMessageFlagOptions
@@ -800,13 +802,15 @@ class CommandOptions {
 	};
 
 	/**
+	 * @template {ParamResult} [T=ParamResult]
+	 * @template {ParamResult} [N=ParamResult]
 	 * Devuelve un valor o función basado en si se ingresó la flag buscada o no.
 	 * Si no se recibe ninguna entrada, se devuelve fallback.
 	 * Si callback no está definido, se devuelve el valor encontrado
 	 * @param {import('discord.js').CommandInteractionOptionResolver | Array<String>} input Los datos de entrada
 	 * @param {String} identifier El identificador de la flag
-	 * @param {FeedbackOptions} output Define la respuestas en cada caso
-	 * @returns {*} El valor de retorno de callback si la flag fue respondida, o en cambio, el de fallback
+	 * @param {FeedbackOptions<T, N>} output Define la respuestas en cada caso
+	 * @returns {T | N} El valor de retorno de callback si la flag fue respondida, o en cambio, el de fallback
 	 */
 	fetchFlag(input, identifier, output = { callback: undefined, fallback: undefined }) {
 		const flag = this.flags.get(identifier);
@@ -815,7 +819,7 @@ class CommandOptions {
 			throw new ReferenceError(`No se pudo encontrar una Flag con el identificador: ${identifier}`);
 
 		if(Array.isArray(input))
-			// @ts-ignore
+			// @ts-expect-error
 			return fetchMessageFlag(input, {
 				property: flag.isExpressive(),
 				...this.flags.get(identifier).structure,
@@ -909,6 +913,46 @@ class CommandOptionSolver {
 		return this.isMessageSolver(this.#args) && this.#args.length === 0;
 	}
 
+	/**
+	 * @returns {IterableIterator<String>}
+	 * @throws {Error} When used with a Slash Command Option Solver
+	 */
+	get iterator() {
+		const self = this;
+		return {
+			[Symbol.iterator]() {
+				return this;
+			},
+			next() {
+				return (self.hasNext())
+					? ({ value: self.next(), done: false })
+					: ({ value: undefined,   done: true });
+			},
+		};
+	}
+
+	/**
+	 * @returns {String}
+	 * @throws {Error} When used with a Slash Command Option Solver
+	 */
+	next() {
+		if(!this.isMessageSolver(this.#args))
+			throw 'No se puede extraer un "siguiente parámetro" de un Comando Slash';
+
+		return this.#args.shift();
+	}
+
+	/**
+	 * @returns {Boolean}
+	 * @throws {Error} When used with a Slash Command Option Solver
+	 */
+	hasNext() {
+		if(!this.isMessageSolver(this.#args))
+			throw 'No se puede extraer un "siguiente parámetro" de un Comando Slash';
+
+		return this.#args.length > 0;
+	}
+
 	//#region What is "this"
 	/**
 	 * @param {*} args
@@ -928,6 +972,19 @@ class CommandOptionSolver {
 	//#endregion
 
 	//#region Getters
+	/**
+	 * Devuelve un String sin comprobar su tipo. Esto solo debe hacerse con comandos de mensaje
+	 * @param {String} identifier El identificador del parámetro
+	 * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
+	 */
+	getStringUnchecked(identifier, getRestOfMessageWords = false) {
+		if(this.isInteractionSolver(this.#args))
+			throw 'Esta característica solo está permitida con comandos de mensaje';
+
+		const result = this.#getResultFromParamSync(identifier, getRestOfMessageWords);
+		return `${result}`;
+	}
+
 	/**
 	 * @param {String} identifier El identificador del parámetro
 	 * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
@@ -1192,34 +1249,41 @@ class CommandOptionSolver {
 
 	/**
 	 * Devuelve {@linkcode P} si se ingresó la bandera especificada, o {@linkcode N} de lo contrario
-	 * @template P
-	 * @template [N=undefined]
+	 * @template {ParamResult} P
+	 * @template {ParamResult} [N=undefined]
 	 * @param {String} identifier
 	 * @param {P} positiveResult
 	 * @param {N} [negativeResult=undefined]
-	 * @returns {P|N}
 	 */
 	parseFlagExt(identifier, positiveResult, negativeResult = undefined) {
-		return this.#options.fetchFlag(
+		return /**@type {P|N}*/(this.#options.fetchFlag(
 			this.#args,
 			identifier,
 			{
 				callback: positiveResult,
 				fallback: negativeResult,
 			},
-		);
+		));
 	}
 
 	/**
-	 * Devuelve {@linkcode P} si se ingresó la bandera especificada, o {@linkcode N} de lo contrario
-	 * @template P
-	 * @template [N=undefined]
-	 * @param {string} identifier
+	 * @template {ParamResult} P
+	 * @template {ParamResult} [N=undefined]
+	 * 
+	 * @overload
+	 * Devuelve el valor ingresado como un String si se ingresó la bandera especificada, o `undefined` de lo contrario
+	 * @param {String} identifier
+	 * @returns {ReturnType<FlagCallback<ParamResult>>|undefined}
+	 * 
+	 * @overload
+	 * Devuelve un valor de tipo {@linkcode P} si se ingresó la bandera especificada, o {@linkcode N} de lo contrario
+	 * @param {String} identifier
 	 * @param {FlagCallback<P>} callback
 	 * @param {N} [fallback=undefined]
 	 * @returns {ReturnType<FlagCallback<P>>|N}
 	 */
-	parseFlagExpr(identifier, callback, fallback = undefined) {
+	parseFlagExpr(identifier, callback = undefined, fallback = undefined) {
+		callback ??= (/**@type {ParamResult}*/x) => x;
 		return this.#options.fetchFlag(
 			this.#args,
 			identifier,

@@ -132,7 +132,7 @@ async function handleMessageCommand(message, command, stats, args, rawArgs, exce
 	if(command.experimental) {
 		const solver = new CommandOptionSolver(complex, args, command.options, rawArgs);
 		// @ts-expect-error
-		await command.execute(complex, solver);
+		await /**@type {import('../commands/Commons/cmdBuilder.js').ExperimentalExecuteFunction}*/(command.execute)(complex, solver, rawArgs);
 	} else
 		await command.execute(complex, args, false, rawArgs);
 	stats.commands.succeeded++;
@@ -238,7 +238,7 @@ async function onMessage(message, client) {
 		sendTweetsAsWebhook(message, userCache.twitterPrefix).catch(console.error),
 	]);
 
-	if(results.includes(true) && message.deletable)
+	if(results.includes(true) && message?.deletable)
 		message.delete().catch(console.error);
 
 	updateAgentMessageOwners().catch(console.error);
