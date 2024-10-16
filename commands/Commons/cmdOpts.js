@@ -1183,7 +1183,7 @@ class CommandOptionSolver {
 				} else
 					result = await this.#options.fetchMessageParam(arrArgs, option._type, false);
 
-				result && results.push(result);
+				(result != null) && results.push(result);
 			}
 			
 			return results;
@@ -1195,7 +1195,7 @@ class CommandOptionSolver {
 
 		return this.#options
 			.fetchParamPoly(this.#args, identifier, method, fallback)
-			.filter(input => input);
+			.filter(input => input != null);
 	}
 
 	/**
@@ -1263,7 +1263,7 @@ class CommandOptionSolver {
 				} else
 					result = this.#options.fetchMessageParamSync(arrArgs, option._type, false);
 
-				result && results.push(result);
+				(result != null) && results.push(result);
 			}
 			
 			return results;
@@ -1275,7 +1275,7 @@ class CommandOptionSolver {
 
 		return this.#options
 			.fetchParamPoly(this.#args, identifier, method, fallback)
-			.filter(input => input);
+			.filter(input => input != null);
 	}
 
 	/**
