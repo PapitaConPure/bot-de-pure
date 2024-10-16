@@ -641,18 +641,13 @@ class CommandOptions {
 	 * @returns {Promise<ParamResult>}
 	 */
 	async fetchMessageParam(args, type, whole = false) {
+		if(type !== 'MESSAGE')
+			return this.fetchMessageParamSync(args, type, whole);
+
 		if(CommandOptions.requestDependantTypes.includes(type.toString()) && !this.#request)
 			throw ReferenceError('Se requiere un contexto para realizar este fetch. Usa <CommandOptions>.in(request)');
-
-		const getArgsPrototype = () => (whole ? args.join(' ') : fetchSentence(args, 0)) || undefined;
 		
-		if(isParamTypeStrict(type))
-			return getArgsPrototype();
-
-		if(type === 'MESSAGE')
-			return fetchMessage(getArgsPrototype(), this.#request);
-
-		return this.fetchMessageParamSync(args, type, whole);
+		return fetchMessage(this.getArgsPrototype(args, whole), this.#request);
 	}
 
 	/**
@@ -666,7 +661,7 @@ class CommandOptions {
 		if(CommandOptions.requestDependantTypes.includes(type.toString()) && !this.#request)
 			throw ReferenceError('Se requiere un contexto para realizar este fetch. Usa <CommandOptions>.in(request)');
 
-		const argsPrototype = whole ? args.join(' ') : fetchSentence(args, 0);
+		const argsPrototype = this.getArgsPrototype(args, whole);
 		if(!argsPrototype) return;
 		
 		if(isParamTypeStrict(type))
@@ -685,7 +680,6 @@ class CommandOptions {
 		case 'IMAGE':
 			return argsPrototype;
 		case 'NUMBER':
-			//No quiero pelotudeces con números de JavaScript por favor
 			if(argsPrototype == undefined)
 				return;
 
@@ -698,6 +692,14 @@ class CommandOptions {
 		default:
 			return argsPrototype;
 		}
+	}
+
+	/**
+	 * @param {Array<String>} args
+	 * @param {Boolean} whole
+	 */
+	getArgsPrototype(args, whole) {
+		return (whole ? args.join(' ') : fetchSentence(args, 0)) || undefined;
 	}
 
 	/**
@@ -837,17 +839,14 @@ class CommandOptions {
 				getMethod = ParamTypes(flag._type)?.getMethod ?? 'getString';
 		}
 		
-		// @ts-ignore
-		flagValue = input[getMethod](identifier);
+		flagValue = (/**@type {(name: String) => T}*/(input[getMethod]))(identifier);
 		
 		if(flagValue == undefined)
 			return output.fallback;
 
-		// @ts-ignore
 		if(output.callback == undefined)
 			return flagValue;
 
-		// @ts-ignore
 		return typeof output.callback === 'function' ? output.callback(flagValue, true) : output.callback;
 	};
 };
@@ -873,7 +872,8 @@ class CommandOptionSolver {
 	#nextAttachmentIndex = 0;
 
 	/**
-	 * 
+	 * Crea un nuevo {@linkcode CommandOptionSolver} basado en el `request` indicado.
+	 * El tipo de argumentos es lo que ultimadamente decide el comportamiento particular de esta instancia
 	 * @param {import('./typings').ComplexCommandRequest} request 
 	 * @param {TArgs} args 
 	 * @param {CommandOptions} options 
@@ -886,14 +886,9 @@ class CommandOptionSolver {
 		this.#rawArgs = rawArgs;
 		this.#options = options;
 		this.#isSlash = args instanceof CommandInteractionOptionResolver;
-
-		//this.getNumber['message']  = (/**@type {String}*/data) => treatNumber(data);
-		//this.getUser['message']    = (/**@type {String}*/data) => this.ensureRequistified() && fetchUser(data, this.#request);
-		//this.getMember['message']  = (/**@type {String}*/data) => this.ensureRequistified() && fetchMember(data, this.#request);
-		//this.getChannel['message'] = (/**@type {String}*/data) => this.ensureRequistified() && fetchChannel(data, this.#request.guild);
-		//this.getMessage['message'] = (/**@type {String}*/data) => this.ensureRequistified() && fetchMessage(data, this.#request);
 	}
 
+	/**Devuelve los argumentos sin utilizar de este {@linkcode CommandOptionSolver} en texto*/
 	get remainder() {
 		if(this.isMessageSolver(this.#args))
 			return this.#args.join(' ');
@@ -901,39 +896,47 @@ class CommandOptionSolver {
 		return `${this.#args}`;
 	}
 
+	/**Devuelve los argumentos de este {@linkcode CommandOptionSolver}, ya sean un array de strings o un {@linkcode CommandInteractionOptionResolver}*/
 	get args() {
 		return this.#args;
 	}
 
+	/**Devuelve los argumentos de este {@linkcode CommandOptionSolver} como texto plano sin modificar del mensaje original. Si el comando es Slash, devuelve `null`*/
 	get rawArgs() {
 		return this.#rawArgs;
 	}
 
+	/**Verifica si este {@linkcode CommandOptionSolver} opera sobre un comando de mensaje y el mismo no tiene entradas*/
 	get empty() {
 		return this.isMessageSolver(this.#args) && this.#args.length === 0;
 	}
 
 	/**
+	 * Crea un iterador no destructivo de los argumentos de este {@linkcode CommandOptionSolver<String[]>}
 	 * @returns {IterableIterator<String>}
-	 * @throws {Error} When used with a Slash Command Option Solver
+	 * @throws {Error} Al usarse con un {@linkcode CommandOptionSolver<CommandInteractionOptionResolver>}
 	 */
 	get iterator() {
-		const self = this;
+		if(!this.isMessageSolver(this.#args))
+			throw 'No se puede extraer un "siguiente parámetro" de un Comando Slash';
+
+		const args = this.#args.slice();
 		return {
 			[Symbol.iterator]() {
 				return this;
 			},
 			next() {
-				return (self.hasNext())
-					? ({ value: self.next(), done: false })
+				return (args.length)
+					? ({ value: args.shift(), done: false })
 					: ({ value: undefined,   done: true });
 			},
 		};
 	}
 
 	/**
+	 * Arranca y devuelve la siguiente entrada de este {@linkcode CommandOptionSolver<String[]>}
 	 * @returns {String}
-	 * @throws {Error} When used with a Slash Command Option Solver
+	 * @throws {Error} Al usarse con un {@linkcode CommandOptionSolver<CommandInteractionOptionResolver>}
 	 */
 	next() {
 		if(!this.isMessageSolver(this.#args))
@@ -943,8 +946,9 @@ class CommandOptionSolver {
 	}
 
 	/**
+	 * Verifica si existe una siguiente entrada en este {@linkcode CommandOptionSolver<String[]>}
 	 * @returns {Boolean}
-	 * @throws {Error} When used with a Slash Command Option Solver
+	 * @throws {Error} Al usarse con un {@linkcode CommandOptionSolver<CommandInteractionOptionResolver>}
 	 */
 	hasNext() {
 		if(!this.isMessageSolver(this.#args))
@@ -955,6 +959,7 @@ class CommandOptionSolver {
 
 	//#region What is "this"
 	/**
+	 * Indica si esto es un {@linkcode CommandOptionSolver<String[]>}
 	 * @param {*} args
 	 * @returns {args is Array<String>}
 	 */
@@ -963,6 +968,7 @@ class CommandOptionSolver {
 	}
 
 	/**
+	 * Indica si esto es un {@linkcode CommandOptionSolver<CommandInteractionOptionResolver>}
 	 * @param {*} args
 	 * @returns {args is CommandInteractionOptionResolver}
 	 */
@@ -974,7 +980,7 @@ class CommandOptionSolver {
 	//#region Getters
 	/**
 	 * Devuelve un String sin comprobar su tipo. Esto solo debe hacerse con comandos de mensaje
-	 * @param {String} identifier El identificador del parámetro
+	 * @param {String} identifier El identificador del {@linkcode CommandParam}
 	 * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
 	 */
 	getStringUnchecked(identifier, getRestOfMessageWords = false) {
@@ -986,7 +992,7 @@ class CommandOptionSolver {
 	}
 
 	/**
-	 * @param {String} identifier El identificador del parámetro
+	 * @param {String} identifier El identificador del {@linkcode CommandParam}
 	 * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
 	 */
 	getString(identifier, getRestOfMessageWords = false) {
@@ -998,7 +1004,7 @@ class CommandOptionSolver {
 	}
 
 	/**
-	 * @param {String} identifier 
+	 * @param {String} identifier El identificador del {@linkcode CommandParam}
 	 */
 	getNumber(identifier) {
 		if(this.isInteractionSolver(this.#args))
@@ -1009,8 +1015,8 @@ class CommandOptionSolver {
 	}
 
 	/**
-	 * @param {String} identifier 
-	 * @param {Boolean} [getRestOfMessageWords=false] 
+	 * @param {String} identifier El identificador del {@linkcode CommandParam}
+	 * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
 	 */
 	getUser(identifier, getRestOfMessageWords = false) {
 		if(this.isInteractionSolver(this.#args))
@@ -1023,8 +1029,8 @@ class CommandOptionSolver {
 	}
 
 	/**
-	 * @param {String} identifier 
-	 * @param {Boolean} [getRestOfMessageWords=false] 
+	 * @param {String} identifier El identificador del {@linkcode CommandParam}
+	 * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
 	 */
 	getMember(identifier, getRestOfMessageWords = false) {
 		if(this.isInteractionSolver(this.#args)) {
@@ -1043,8 +1049,8 @@ class CommandOptionSolver {
 	}
 
 	/**
-	 * @param {String} identifier 
-	 * @param {Boolean} [getRestOfMessageWords=false] 
+	 * @param {String} identifier El identificador del {@linkcode CommandParam}
+	 * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
 	 */
 	getChannel(identifier, getRestOfMessageWords = false) {
 		if(this.isInteractionSolver(this.#args)) {
@@ -1063,7 +1069,7 @@ class CommandOptionSolver {
 	}
 
 	/**
-	 * @param {String} identifier 
+	 * @param {String} identifier El identificador del {@linkcode CommandParam}
 	 */
 	getAttachment(identifier) {
 		if(this.isInteractionSolver(this.#args)) {
@@ -1083,8 +1089,8 @@ class CommandOptionSolver {
 	}
 
 	/**
-	 * @param {String} identifier 
-	 * @param {Boolean} [getRestOfMessageWords=false] 
+	 * @param {String} identifier El identificador del {@linkcode CommandParam}
+	 * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
 	 */
 	async getMessage(identifier, getRestOfMessageWords = false) {
 		if(this.isInteractionSolver(this.#args)) {
@@ -1103,8 +1109,8 @@ class CommandOptionSolver {
 	}
 
 	/**
-	 * @param {String} identifier 
-	 * @param {Boolean} [getRestOfMessageWords] 
+	 * @param {String} identifier El identificador del {@linkcode CommandParam}
+	 * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
 	 */
 	getRole(identifier, getRestOfMessageWords = false) {
 		if(this.isInteractionSolver(this.#args)) {
@@ -1124,12 +1130,28 @@ class CommandOptionSolver {
 
 	/**
 	 * @template {*} [TFallback=undefined]
-	 * @param {String} identifier 
-	 * @param {String} messageSep 
-	 * @param {TFallback} [fallback=undefined]
+	 * @typedef {Object} PolyParamParsingOptions
+	 * @property {Boolean} [groupMentionables]
+	 * @property {String} [messageSep]
+	 * @property {TFallback} [fallback]
+	 */
+
+	/**
+	 * Obtiene de forma asíncrona valores de usuario a partir del poli-parámetro bajo el `identifier` indicado y devuelve un array de resultado
+	 * * Si se obtienen valores de usuario para el poli-parámetro, se devuelve un array cuyos valores son de tipo {@linkcode ParamResult}, correspondientes a los valores de usuario
+	 * * Si no se obtiene ningún valor para el poli-parámetro y {@linkcode TFallback} no es `null` ni `undefined`, se devuelve un array cuyo único valor es `fallback`
+	 * * Si no se obtiene ningún valor para el poli-parámetro y {@linkcode TFallback} es `null` o `undefined`, se devuelve un array vacía
+	 * @template {*} [TFallback=undefined]
+	 * @param {String} identifier El identificador del poli-parámetro que representa a cada {@linkcode CommandParam} asociado
+	 * @param {PolyParamParsingOptions<TFallback>} [parseOptions]
 	 * @returns {Promise<Array<ParamResult | TFallback>>}
 	 */
-	async parsePolyParam(identifier, messageSep, fallback = undefined) {
+	async parsePolyParam(identifier, parseOptions = {}) {
+		parseOptions.messageSep ??= ',';
+		parseOptions.fallback ??= undefined;
+		parseOptions.groupMentionables ??= false;
+		const { groupMentionables, messageSep, fallback } = parseOptions;
+
 		const option = this.#options.options.get(identifier);
 
 		if(!option)
@@ -1177,13 +1199,21 @@ class CommandOptionSolver {
 	}
 
 	/**
+	 * Obtiene de forma síncrona valores de usuario a partir del poli-parámetro bajo el `identifier` indicado y devuelve un array de resultado
+	 * * Si se obtienen valores de usuario para el poli-parámetro, se devuelve un array cuyos valores son de tipo {@linkcode ParamResult}, correspondientes a los valores de usuario
+	 * * Si no se obtiene ningún valor para el poli-parámetro y {@linkcode TFallback} no es `null` ni `undefined`, se devuelve un array cuyo único valor es `fallback`
+	 * * Si no se obtiene ningún valor para el poli-parámetro y {@linkcode TFallback} es `null` o `undefined`, se devuelve un array vacía
 	 * @template {*} [TFallback=undefined]
-	 * @param {String} identifier 
-	 * @param {String} messageSep 
-	 * @param {TFallback} [fallback=undefined]
+	 * @param {String} identifier El identificador del poli-parámetro que representa a cada {@linkcode CommandParam} asociado
+	 * @param {PolyParamParsingOptions<TFallback>} [parseOptions]
 	 * @returns {Array<ParamResult | TFallback>}
 	 */
-	parsePolyParamSync(identifier, messageSep = ',', fallback = undefined) {
+	parsePolyParamSync(identifier, parseOptions = {}) {
+		parseOptions.messageSep ??= ',';
+		parseOptions.fallback ??= undefined;
+		parseOptions.groupMentionables ??= false;
+		const { groupMentionables, messageSep, fallback } = parseOptions;
+
 		const option = this.#options.options.get(identifier);
 
 		if(!option)
@@ -1198,7 +1228,25 @@ class CommandOptionSolver {
 				return [ ...this.#request.attachments.values() ];
 			}
 
-			const arrArgs = regroupText(this.#args, messageSep);
+			let arrArgs = /**@type {Array<String>}*/(this.#args);
+
+			if(groupMentionables) {
+				if(option._type === 'USER' || option._type === 'MEMBER') {
+					this.ensureRequistified();
+					const userMentionRegex = /(<@[0-9]{16,}>)/g;
+					arrArgs = arrArgs.map(a => a.replaceAll(userMentionRegex, `${messageSep} $&${messageSep}`));
+				} else if(option._type === 'ROLE') {
+					this.ensureRequistified();
+					const roleMentionRegex = /(<@&[0-9]{16,}>)/g;
+					arrArgs = arrArgs.map(a => a.replaceAll(roleMentionRegex, `${messageSep} $&${messageSep}`));
+				} else if(option._type === 'CHANNEL') {
+					this.ensureRequistified();
+					const channelMentionRegex = /(<#[0-9]{16,}>)/g;
+					arrArgs = arrArgs.map(a => a.replaceAll(channelMentionRegex, `${messageSep} $&${messageSep}`));
+				}
+			}
+			
+			arrArgs = regroupText(arrArgs, messageSep);
 			if(!arrArgs.length)
 				return fallback != undefined
 					? [ (typeof fallback === 'function') ? fallback() : fallback ]
@@ -1267,23 +1315,32 @@ class CommandOptionSolver {
 	}
 
 	/**
-	 * @template {ParamResult} P
+	 * @template {ParamResult} CallbackType
 	 * @template {ParamResult} [N=undefined]
-	 * 
 	 * @overload
 	 * Devuelve el valor ingresado como un String si se ingresó la bandera especificada, o `undefined` de lo contrario
 	 * @param {String} identifier
-	 * @returns {ReturnType<FlagCallback<ParamResult>>|undefined}
-	 * 
+	 * @returns {ReturnType<FlagCallback<ParamResult>> | undefined}
+	 */
+	/**
+	 * @template {ParamResult} CallbackType
+	 * @template {ParamResult} [N=undefined]
 	 * @overload
-	 * Devuelve un valor de tipo {@linkcode P} si se ingresó la bandera especificada, o {@linkcode N} de lo contrario
+	 * Devuelve un valor de tipo {@linkcode CallbackType} si se ingresó la bandera especificada, o {@linkcode N} de lo contrario
 	 * @param {String} identifier
-	 * @param {FlagCallback<P>} callback
+	 * @param {FlagCallback<CallbackType>} callback
 	 * @param {N} [fallback=undefined]
-	 * @returns {ReturnType<FlagCallback<P>>|N}
+	 * @returns {ReturnType<FlagCallback<CallbackType>> | N}
+	 */
+	/**
+	 * @template {ParamResult} CallbackType
+	 * @template {ParamResult} [N=undefined]
+	 * @param {String} identifier
+	 * @param {FlagCallback<CallbackType>} [callback]
+	 * @param {N} [fallback]
 	 */
 	parseFlagExpr(identifier, callback = undefined, fallback = undefined) {
-		callback ??= (/**@type {ParamResult}*/x) => x;
+		callback ??= (/**@type {CallbackType}*/ x) => x;
 		return this.#options.fetchFlag(
 			this.#args,
 			identifier,
@@ -1297,7 +1354,7 @@ class CommandOptionSolver {
 
 	//#region Casters
 	/**
-	 * @param {ParamResult} paramResult The ParamResult to treat
+	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
 	 * @returns {Boolean}
 	 */
 	static asBoolean(paramResult) {
@@ -1307,14 +1364,14 @@ class CommandOptionSolver {
 		return paramResult;
 	}
 	
-	/**@param {Array<ParamResult>} paramResults The ParamResult to treat*/
+	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
 	static asBooleans(paramResults) {
 		return paramResults.map(r => CommandOptionSolver.asBoolean(r));
 	}
 
 	/**
-	 * @param {ParamResult} paramResult The ParamResult to treat
-	 * @returns {String|undefined}
+	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
+	 * @returns {String}
 	 */
 	static asString(paramResult) {
 		if(paramResult == undefined) return;
@@ -1323,14 +1380,14 @@ class CommandOptionSolver {
 		return paramResult;
 	}
 	
-	/**@param {Array<ParamResult>} paramResults The ParamResult to treat*/
+	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
 	static asStrings(paramResults) {
 		return paramResults.map(r => CommandOptionSolver.asString(r));
 	}
 
 	/**
-	 * @param {ParamResult} paramResult The ParamResult to treat
-	 * @returns {Number|undefined}
+	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
+	 * @returns {Number}
 	 */
 	static asNumber(paramResult) {
 		if(paramResult == undefined) return;
@@ -1339,14 +1396,14 @@ class CommandOptionSolver {
 		return paramResult;
 	}
 	
-	/**@param {Array<ParamResult>} paramResults The ParamResult to treat*/
+	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
 	static asNumbers(paramResults) {
 		return paramResults.map(r => CommandOptionSolver.asNumber(r));
 	}
 
 	/**
-	 * @param {ParamResult} paramResult The ParamResult to treat
-	 * @returns {User|undefined}
+	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
+	 * @returns {User}
 	 */
 	static asUser(paramResult) {
 		if(paramResult == undefined) return;
@@ -1355,14 +1412,14 @@ class CommandOptionSolver {
 		return paramResult;
 	}
 	
-	/**@param {Array<ParamResult>} paramResults The ParamResult to treat*/
+	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
 	static asUsers(paramResults) {
 		return paramResults.map(r => CommandOptionSolver.asUser(r));
 	}
 
 	/**
-	 * @param {ParamResult} paramResult The ParamResult to treat
-	 * @returns {GuildMember|undefined}
+	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
+	 * @returns {GuildMember}
 	 */
 	static asMember(paramResult) {
 		if(paramResult == undefined) return;
@@ -1371,14 +1428,14 @@ class CommandOptionSolver {
 		return paramResult;
 	}
 	
-	/**@param {Array<ParamResult>} paramResults The ParamResult to treat*/
+	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
 	static asMembers(paramResults) {
 		return paramResults.map(r => CommandOptionSolver.asMember(r));
 	}
 
 	/**
-	 * @param {ParamResult} paramResult The ParamResult to treat
-	 * @returns {GuildChannel|undefined}
+	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
+	 * @returns {GuildChannel}
 	 */
 	static asChannel(paramResult) {
 		if(paramResult == undefined) return;
@@ -1387,14 +1444,14 @@ class CommandOptionSolver {
 		return paramResult;
 	}
 	
-	/**@param {Array<ParamResult>} paramResults The ParamResult to treat*/
+	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
 	static asChannels(paramResults) {
 		return paramResults.map(r => CommandOptionSolver.asChannel(r));
 	}
 
 	/**
-	 * @param {ParamResult} paramResult The ParamResult to treat
-	 * @returns {Attachment|undefined}
+	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
+	 * @returns {Attachment}
 	 */
 	static asAttachment(paramResult) {
 		if(paramResult == undefined) return;
@@ -1403,14 +1460,14 @@ class CommandOptionSolver {
 		return paramResult;
 	}
 	
-	/**@param {Array<ParamResult>} paramResults The ParamResult to treat*/
+	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
 	static asAttachments(paramResults) {
 		return paramResults.map(r => CommandOptionSolver.asAttachment(r));
 	}
 
 	/**
-	 * @param {ParamResult} paramResult The ParamResult to treat
-	 * @returns {Message<true>|undefined}
+	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
+	 * @returns {Message<true>}
 	 */
 	static asMessage(paramResult) {
 		if(paramResult == undefined) return;
@@ -1419,13 +1476,13 @@ class CommandOptionSolver {
 		return paramResult;
 	}
 	
-	/**@param {Array<ParamResult>} paramResults The ParamResult to treat*/
+	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
 	static asMessages(paramResults) {
 		return paramResults.map(r => CommandOptionSolver.asMessage(r));
 	}
 
 	/**
-	 * @param {ParamResult} paramResult The ParamResult to treat
+	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
 	 * @returns {Role|undefined}
 	 */
 	static asRole(paramResult) {
@@ -1435,7 +1492,7 @@ class CommandOptionSolver {
 		return paramResult;
 	}
 	
-	/**@param {Array<ParamResult>} paramResults The ParamResult to treat*/
+	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
 	static asRoles(paramResults) {
 		return paramResults.map(r => CommandOptionSolver.asRole(r));
 	}
@@ -1443,7 +1500,7 @@ class CommandOptionSolver {
 
 	//#region Type Guards
 	/**
-	 * @param {ParamResult} paramResult The ParamResult to treat
+	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
 	 * @returns {paramResult is User}
 	 */
 	static isUser(paramResult) {
@@ -1452,7 +1509,7 @@ class CommandOptionSolver {
 	}
 
 	/**
-	 * @param {ParamResult} paramResult The ParamResult to treat
+	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
 	 * @returns {paramResult is GuildMember}
 	 */
 	static isMember(paramResult) {
@@ -1461,7 +1518,7 @@ class CommandOptionSolver {
 	}
 
 	/**
-	 * @param {ParamResult} paramResult The ParamResult to treat
+	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
 	 * @returns {paramResult is GuildChannel}
 	 */
 	static isChannel(paramResult) {
@@ -1470,7 +1527,7 @@ class CommandOptionSolver {
 	}
 
 	/**
-	 * @param {ParamResult} paramResult The ParamResult to treat
+	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
 	 * @returns {paramResult is Attachment}
 	 */
 	static isAttachment(paramResult) {
@@ -1479,7 +1536,7 @@ class CommandOptionSolver {
 	}
 
 	/**
-	 * @param {ParamResult} paramResult The ParamResult to treat
+	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
 	 * @returns {paramResult is Message<true>}
 	 */
 	static isMessage(paramResult) {
@@ -1488,7 +1545,7 @@ class CommandOptionSolver {
 	}
 
 	/**
-	 * @param {ParamResult} paramResult The ParamResult to treat
+	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
 	 * @returns {paramResult is Role}
 	 */
 	static isRole(paramResult) {
