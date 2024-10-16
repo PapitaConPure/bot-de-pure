@@ -2,7 +2,7 @@ const { Message, ChannelType } = require('discord.js');
 const { addAgentMessageOwner } = require('./discordagent.js');
 const { addMessageCascade } = require('../../events/onMessageDelete.js');
 
-const tweetRegex = /(?:<|\|{2})? ?((?:https?:\/\/)(?:www.)?(?:twitter|x).com\/(\w+)\/status\/(\d+)) ?(?:>|\|{2})?/g;
+const tweetRegex = /(?:<|\|{2})? ?((?:https?:\/\/)(?:www.)?(?:twitter|x).com\/(\w+)\/status\/(\d+)(?:\/([A-Za-z]+))?) ?(?:>|\|{2})?/g;
 const configProps = {
 	vx: { name: 'vxTwitter', service: 'https://fixvx.com' },
 	fx: { name: 'fixTwitter', service: 'https://fxtwitter.com' },
@@ -38,19 +38,27 @@ const sendTweetsAsWebhook = async (message, configPrefix) => {
 	if(configProp == undefined)
 		return false;
 	
+	let warnAboutVXNotSupportingTranslationUrls = false;
 	const service = configProp.service;
 	const formattedTweetUrls = tweetUrls
 		.map(u => {
-			const [ match, _url, artist, id ] = u;
+			const [ match, _url, artist, id, ls ] = u;
 			const spoiler = (match.startsWith('||') && match.endsWith('||'))
 				? '||'
 				: '';
-			return `${spoiler}[${artist}/${id}](${service}/${artist}/status/${id})${spoiler}`;
+			const langSuffix = ls ? `/${ls}` : '';
+			warnAboutVXNotSupportingTranslationUrls ||= (ls && configPrefix === 'vx');
+			return `${spoiler}[${artist}/${id}](${service}/${artist}/status/${id}${langSuffix})${spoiler}`;
 		});
 	
 	try {
+		let content = formattedTweetUrls.join(' ');
+
+		if(warnAboutVXNotSupportingTranslationUrls)
+			content += '\n-# ⚠️️ El conversor de vxTwitter todavía no tiene una característica de traducción';
+
 		const [ sent ] = await Promise.all([
-			message.reply({ content: formattedTweetUrls.join(' ') }),
+			message.reply({ content }),
 			message.suppressEmbeds(true),
 		]);
 		
