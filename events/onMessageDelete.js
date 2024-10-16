@@ -21,7 +21,7 @@ async function onMessageDelete(message) {
 	
 	const otherMessage = await fetchMessage(otherMessageId, { guild, channel });
 	messageCascadesCache.delete(messageId);
-	return otherMessage.deletable && otherMessage.delete().catch(console.error);
+	return otherMessage?.deletable && otherMessage.delete().catch(console.error);
 }
 
 /**
