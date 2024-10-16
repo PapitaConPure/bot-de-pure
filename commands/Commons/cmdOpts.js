@@ -742,7 +742,7 @@ class CommandOptions {
 					getMethodName = ParamTypes(pt).getMethod;
 
 				try {
-					// @ts-ignore
+					//@ts-expect-error
 					result = input[getMethodName](slashIdentifier, !param._optional);
 				} catch {
 					result = undefined;
@@ -756,7 +756,7 @@ class CommandOptions {
 			if(!isParamTypeStrict(param._type))
 				getMethodName = ParamTypes(param._type).getMethod;
 			
-			// @ts-ignore
+			//@ts-expect-error
 			return input[getMethodName](slashIdentifier, !param._optional);
 		}
 	};
