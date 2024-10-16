@@ -2,7 +2,7 @@ const { ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonSty
 const { radix10to64 } = require('../../func.js'); //Funciones globales
 const { remoteStartup } = require('../../localdata/config.json'); //Configuraciones
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands.js');
+const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands.js');
 const { makeTextInputRowBuilder, makeButtonRowBuilder } = require('../../tsCasts.js');
 const { Translator } = require('../../internationalization.js');
 const { ImgurClient } = require('imgur');
@@ -11,7 +11,7 @@ const ImgurUser = require('../../localdata/models/imgurUsers.js');
 const envPath = remoteStartup ? '../../remoteenv.json' : '../../localenv.json';
 
 const options = new CommandOptions()
-	.addParam('imagen', 'IMAGE', 'para indicar una imagen a subir. Puedes subir múltiples imágenes si son adjuntos de mensaje', { optional: true })
+	.addParam('imagens', 'IMAGE', 'para indicar una imagen a subir. Puedes subir múltiples imágenes si son adjuntos de mensaje', { optional: true, poly: 'MULTIPLE', polymax: 5 })
 	.addFlag('r', [ 'registrar' ], 'para registrar una ID de cliente y evitar el límite global');
 
 const flags = new CommandTags().add('COMMON');
@@ -77,86 +77,79 @@ const command = new CommandManager('imgur', flags)
 			});
 		}
 
+		await request.deferReply();
+
 		const imgurUser = (await ImgurUser.findOne({ userId: request.userId })) || new ImgurUser({ userId: request.userId });
 		const clientId = imgurUser.clientId ?? require(envPath).imgurclientid;
 		const client = new ImgurClient({ clientId });
+		const attachments = CommandOptionSolver.asAttachments(args.parsePolyParamSync('imagens')).filter(a => a);
+		const imageStreams = await Promise.all(attachments
+			.map(async attachment => /**@type {ReadableStream}*/((await axios.get(attachment.url, { responseType: 'stream' })).data))
+			.slice(0, 5));
 
-		let image;
-		
-		if(args.empty) {
-			const message = request.inferAsMessage();
-
-			if(!message.attachments.size)
-				return request.reply({ content: '⚠️ Debes indicar un enlace de imagen o una imagen directa a subir a Imgur', ephemeral: true });
-			
-			const imageStreams = await Promise.all(
-				message.attachments
-					.map(async attachment => (await axios.get(attachment.url, { responseType: 'stream' })).data)
-					.slice(0, 5)
-			);
-			
-			const images = [];
-			const failures = [];
-			let count = 1;
-			for(const stream of imageStreams) {
-				image = await client.upload({
-					image: stream,
-					type: 'stream',
-				});
-			
-				if(image?.success)
-					images.push(
-						new EmbedBuilder()
-							.setTitle('Tu imagen')
-							.setColor(Colors.Green)
-							.setURL(image.data.link)
-							.setDescription(image.data.link)
-							.setImage(image.data.link));
-				else
-					failures.push(
-						new EmbedBuilder()
-							.setTitle(`⚠️ No se pudo subir la imagen Nº${count}`)
-							.setDescription('Si es un problema de frecuencia de subida, prueba registrar tu propia aplicación para subir imágenes sin restricción global')
-							.setColor(Colors.Red)
-							.addFields({
-								name: `Código de Error: ${image.status}`,
-								value: `\`\`\`\n${image.data}\n\`\`\``,
-							}));
-				
-				count++;
-			}
-
-			return request.reply({ embeds: [ ...images, ...failures ] });
-		} else {
-			const imageUrl = args.getString('imagen');
-			image = await client.upload({
-				image: imageUrl,
-				type: 'url',
+		const uploads = [];
+		const failures = [];
+		let count = 1;
+		for(const stream of imageStreams) {
+			const image = await client.upload({
+				image: stream,
+				type: 'stream',
 			});
-			
-			if(!image?.success)
-				return request.reply({
-					embeds: [
-						new EmbedBuilder()
-							.setTitle(translator.getText('somethingWentWrong'))
-							.setDescription('Si es un problema de frecuencia de subida, prueba registrar tu propia aplicación para subir imágenes sin restricción global')
-							.setColor(Colors.Red)
-							.addFields({
-								name: `Código de Error: ${image.status}`,
-								value: `\`\`\`\n${image.data}\n\`\`\``,
-							}),
-					],
-				});
-	
-			return request.reply({ embeds: [
-				new EmbedBuilder()
+		
+			if(image?.success)
+				uploads.push(new EmbedBuilder()
 					.setTitle('Tu imagen')
 					.setColor(Colors.Green)
 					.setURL(image.data.link)
 					.setDescription(image.data.link)
-					.setImage(image.data.link)
-			]});
+					.setImage(image.data.link));
+			else
+				failures.push(new EmbedBuilder()
+					.setTitle(`⚠️ No se pudo subir la imagen Nº${count}`)
+					.setDescription('Si es un problema de frecuencia de subida, prueba registrar tu propia aplicación para subir imágenes sin restricción global')
+					.setColor(Colors.Red)
+					.addFields({
+						name: `Código de Error: ${image.status}`,
+						value: `\`\`\`\n${image.data}\n\`\`\``,
+					}));
+			
+			count++;
 		}
+		
+		if(args.isMessageSolver()) {
+			if(args.empty && !attachments.length)
+				return request.editReply({ content: '⚠️ Debes indicar un enlace de imagen o una imagen directa a subir a Imgur', ephemeral: true });
+
+			const imageUrls = [ ...args.iterator ];
+			if(!imageUrls.length)
+				return request.editReply({ content: '⚠️ Debes indicar un enlace de imagen o una imagen directa a subir a Imgur', ephemeral: true });
+
+			for(const imageUrl of imageUrls) {
+				const image = await client.upload({
+					image: imageUrl,
+					type: 'url',
+				});
+	
+				if(!image?.success)
+					uploads.push(new EmbedBuilder()
+						.setTitle(translator.getText('somethingWentWrong'))
+						.setDescription('Si es un problema de frecuencia de subida, prueba registrar tu propia aplicación para subir imágenes sin restricción global')
+						.setColor(Colors.Red)
+						.addFields({
+							name: `Código de Error: ${image.status}`,
+							value: `\`\`\`\n${image.data}\n\`\`\``,
+						}));
+				else
+					failures.push(new EmbedBuilder()
+						.setTitle('Tu imagen')
+						.setColor(Colors.Green)
+						.setURL(image.data.link)
+						.setDescription(image.data.link)
+						.setImage(image.data.link));
+			}
+		}
+
+		return request.editReply({ embeds: [ ...uploads, ...failures ] });
 	}).setButtonResponse(async function onButtonRegisterRequest(interaction) {
 		const modal = makeRegisterModal();
 		return interaction.showModal(modal);
