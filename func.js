@@ -1327,7 +1327,10 @@ module.exports = {
     },
     
     /**@param {String[]} arr*/
-    regroupText: (arr, sep = ',') => arr.join(' ').replace(/([\n ]*,[\n ]*)+/g, sep).split(sep).filter(a => a.length),
+    regroupText: (arr, sep = ',') => {
+        const sepRegex = new RegExp(`([\\n ]*${sep}[\\n ]*)+`, 'g');
+        return arr.join(' ').replace(sepRegex, sep).split(sep).filter(a => a.length);
+    },
 
     /**
      * Limita un string a una cantidad definida de caracteres.
