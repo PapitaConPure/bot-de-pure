@@ -151,8 +151,8 @@ const options = new CommandOptions()
 			.setAutocomplete((interaction, query) => {
 				return interaction.respond(
 					searchCommands(interaction, query)
-						.slice(0, 10)
 						.sort(({ distance: a }, { distance: b }) => a - b)
+						.slice(0, 10)
 						.map(({ command }) => ({
 							name: shortenText(`${command.name} - ${command.brief ?? command.desc ?? '...'}`, 100),
 							value: command.name,
@@ -374,6 +374,7 @@ function searchCommand(request, nameOrAlias) {
  */
 function searchCommands(request, query) {
 	const commands = [];
+	const nameBias = 0.334;
 
 	for(const filename of commandFilenames) {
 		const commandFile = require(`../../commands/Pure/${filename}`);
@@ -382,11 +383,11 @@ function searchCommands(request, query) {
 		if(command.tags.any('GUIDE', 'MAINTENANCE', 'OUTDATED'))
 			continue;
 
-		let distance = edlDistance(command.name, query)
+		let distance = edlDistance(command.name, query);
 		if(distance > 3) {
 			distance = command.aliases
 				.map(alias => edlDistance(alias, query))
-				.reduce((a, b) => a < b ? a : b, 999);
+				.reduce((a, b) => a < b ? a : b, 999) + nameBias;
 			
 			if(distance > 3)
 				continue;
