@@ -1,4 +1,4 @@
-const { PureVoiceModel: PureVoice, PureVoiceSessionModel: PureVoiceSession, PureVoiceSessionMember, PureVoiceSessionMemberRoles } = require('../../localdata/models/purevoice.js');
+const { PureVoiceModel: PureVoice, PureVoiceSessionModel: PureVoiceSession } = require('../../localdata/models/purevoice.js');
 const UserConfigs = require('../../localdata/models/userconfigs')
 const Discord = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes');
@@ -393,6 +393,68 @@ class PureVoiceOrchestrator {
         this.#busy = false;
         return false;
     }
+}
+
+const PureVoiceSessionMemberRoles = /**@type {const}*/({
+	GUEST: 0,
+	MOD: 1,
+	ADMIN: 2,
+});
+/**@typedef {import('types').ValuesOf<typeof PureVoiceSessionMemberRoles>} PureVoiceSessionMemberRole*/
+
+/**
+ * @typedef {Object} PureVoiceSessionMemberJSONBody
+ * @property {String} id
+ * @property {Boolean} whitelisted
+ * @property {Boolean} banned
+ * @property {PureVoiceSessionMemberRole} role
+ */
+
+class PureVoiceSessionMember {
+	id;
+	role;
+	#whitelisted;
+	#banned;
+
+	/**@param {Partial<PureVoiceSessionMemberJSONBody>} data*/
+	constructor(data) {
+		this.id = data?.id ?? null;
+		this.role = data?.role ?? PureVoiceSessionMemberRoles.GUEST;
+		this.#whitelisted = !!(data?.whitelisted ?? false);
+		this.#banned = !!(data?.banned ?? false);
+	}
+
+	/**@param {Boolean} whitelist*/
+	setWhitelisted(whitelist) {
+		this.#whitelisted = !!whitelist;
+	}
+	
+	/**@param {Boolean} ban*/
+	setBanned(ban) {
+		this.#banned = !!ban;
+	}
+
+	isWhitelisted() {
+		return this.role === PureVoiceSessionMemberRoles.ADMIN
+			|| this.role === PureVoiceSessionMemberRoles.MOD
+			|| this.#whitelisted;
+	}
+
+	isBanned() {
+		return this.role === PureVoiceSessionMemberRoles.ADMIN
+			|| this.role === PureVoiceSessionMemberRoles.MOD
+			|| this.#whitelisted;
+	}
+
+	/**@returns {PureVoiceSessionMemberJSONBody} */
+	toJSON() {
+		return {
+			id: this.id,
+			role: this.role,
+			banned: this.#banned,
+			whitelisted: this.#whitelisted,
+		};
+	}
 }
 
 module.exports = {
