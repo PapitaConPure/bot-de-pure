@@ -165,6 +165,37 @@ async function handleAutocomplete(fn, interaction, query) {
 	return result;
 }
 
+/**
+ * @param {Array<String>} args 
+ * @returns {Array<String>}
+ */
+function groupQuoted(args) {
+	const result = [];
+
+	let isInsideQuotes = false;
+	let groupedTemp = [];
+
+	for(let arg of args) {
+		if(arg.startsWith('"') && !isInsideQuotes) {
+			isInsideQuotes = true;
+			groupedTemp.push(arg.slice(1));
+		} else if(arg.endsWith('"') && isInsideQuotes && !arg.endsWith('\\"')) {
+			groupedTemp.push(arg.slice(0, -1));
+			result.push(groupedTemp.join(' ').trim());
+			groupedTemp = [];
+			isInsideQuotes = false;
+		} else if(isInsideQuotes)
+			groupedTemp.push(arg);
+		else
+			result.push(arg);
+	}
+
+	if(isInsideQuotes)
+		result.push(groupedTemp.join(' '));
+
+	return result;
+}
+
 /**Representa una opción de comando*/
 class CommandOption {
 	/**@type {String}*/
@@ -1129,11 +1160,15 @@ class CommandOptionSolver {
 	}
 
 	/**
+	 * @typedef {'NONE'|'SEPARATOR'|'MENTIONABLES-WITH-SEP'|'DOUBLE-QUOTES'} RegroupMethod
+	 */
+
+	/**
 	 * @template {*} [TFallback=undefined]
 	 * @typedef {Object} PolyParamParsingOptions
-	 * @property {Boolean} [groupMentionables]
-	 * @property {String} [messageSep]
-	 * @property {TFallback} [fallback]
+	 * @property {RegroupMethod} [regroupMethod='SEPARATOR'] El método de reagrupación de los argumentos de comando de mensaje. Por defecto: 'SEPARATOR'
+	 * @property {String} [messageSep=','] El separador a considerar al reagrupar por separador. Por defecto: ','
+	 * @property {TFallback} [fallback] El valor usado en ausencia de valores de usuario
 	 */
 
 	/**
@@ -1147,18 +1182,8 @@ class CommandOptionSolver {
 	 * @returns {Promise<Array<ParamResult | TFallback>>}
 	 */
 	async parsePolyParam(identifier, parseOptions = {}) {
-		parseOptions.messageSep ??= ',';
-		parseOptions.fallback ??= undefined;
-		parseOptions.groupMentionables ??= false;
-		const { groupMentionables, messageSep, fallback } = parseOptions;
-
-		const option = this.#options.options.get(identifier);
-
-		if(!option)
-			throw `No se encontró una opción bajo el identificador: ${identifier}`;
-
-		if(!option.isCommandParam())
-			throw 'Se esperaba un identificador de parámetro de comando';
+		const { regroupMethod = 'SEPARATOR', messageSep = ',', fallback = undefined } = parseOptions;
+		const option = this.#expectParam(identifier);
 
 		if(this.isMessageSolver(this.#args)) {
 			if(PARAM_TYPES.get(/**@type {BaseParamType}*/(option._type))?.getMethod === 'getAttachment') {
@@ -1166,7 +1191,8 @@ class CommandOptionSolver {
 				return /**@type {Array<ParamResult>}*/([ ...this.#request.attachments.values() ]);
 			}
 
-			const arrArgs = regroupText(this.#args, messageSep);
+			const mentionableType = option._type;
+			const arrArgs = this.#regroupMessageArgs(this.#args, regroupMethod, { mentionableType, messageSep });
 			if(!arrArgs.length)
 				return fallback != undefined
 					? [ (typeof fallback === 'function') ? fallback() : fallback ]
@@ -1209,18 +1235,8 @@ class CommandOptionSolver {
 	 * @returns {Array<ParamResult | TFallback>}
 	 */
 	parsePolyParamSync(identifier, parseOptions = {}) {
-		parseOptions.messageSep ??= ',';
-		parseOptions.fallback ??= undefined;
-		parseOptions.groupMentionables ??= false;
-		const { groupMentionables, messageSep, fallback } = parseOptions;
-
-		const option = this.#options.options.get(identifier);
-
-		if(!option)
-			throw `No se encontró una opción bajo el identificador: ${identifier}`;
-
-		if(!option.isCommandParam())
-			throw 'Se esperaba un identificador de parámetro de comando';
+		const { regroupMethod = 'SEPARATOR', messageSep = ',', fallback = undefined } = parseOptions;
+		const option = this.#expectParam(identifier);
 
 		if(this.isMessageSolver(this.#args)) {
 			if(PARAM_TYPES.get(/**@type {BaseParamType}*/(option._type))?.getMethod === 'getAttachment') {
@@ -1228,25 +1244,8 @@ class CommandOptionSolver {
 				return [ ...this.#request.attachments.values() ];
 			}
 
-			let arrArgs = /**@type {Array<String>}*/(this.#args);
-
-			if(groupMentionables) {
-				if(option._type === 'USER' || option._type === 'MEMBER') {
-					this.ensureRequistified();
-					const userMentionRegex = /(<@[0-9]{16,}>)/g;
-					arrArgs = arrArgs.map(a => a.replaceAll(userMentionRegex, `${messageSep} $&${messageSep}`));
-				} else if(option._type === 'ROLE') {
-					this.ensureRequistified();
-					const roleMentionRegex = /(<@&[0-9]{16,}>)/g;
-					arrArgs = arrArgs.map(a => a.replaceAll(roleMentionRegex, `${messageSep} $&${messageSep}`));
-				} else if(option._type === 'CHANNEL') {
-					this.ensureRequistified();
-					const channelMentionRegex = /(<#[0-9]{16,}>)/g;
-					arrArgs = arrArgs.map(a => a.replaceAll(channelMentionRegex, `${messageSep} $&${messageSep}`));
-				}
-			}
-			
-			arrArgs = regroupText(arrArgs, messageSep);
+			const mentionableType = option._type;
+			const arrArgs = this.#regroupMessageArgs(this.#args, regroupMethod, { mentionableType, messageSep });
 			if(!arrArgs.length)
 				return fallback != undefined
 					? [ (typeof fallback === 'function') ? fallback() : fallback ]
@@ -1276,6 +1275,44 @@ class CommandOptionSolver {
 		return this.#options
 			.fetchParamPoly(this.#args, identifier, method, fallback)
 			.filter(input => input != null);
+	}
+
+	/**
+	 * 
+	 * @param {Array<String>} args 
+	 * @param {RegroupMethod} regroupMethod 
+	 * @param {{ mentionableType?: ParamType | Array<ParamType>, messageSep?: String }} [options] 
+	 */
+	#regroupMessageArgs(args, regroupMethod, options = {}) {
+		options.mentionableType ??= 'USER';
+		options.messageSep ??= ',';
+		const { mentionableType: type, messageSep: sep } = options;
+
+		switch(regroupMethod) {
+		case 'MENTIONABLES-WITH-SEP':
+			if(type === 'USER' || type === 'MEMBER') {
+				this.ensureRequistified();
+				const userMentionRegex = /(<@[0-9]{16,}>)/g;
+				args = args.map(a => a.replaceAll(userMentionRegex, `${sep} $&${sep}`));
+			} else if(type === 'ROLE') {
+				this.ensureRequistified();
+				const roleMentionRegex = /(<@&[0-9]{16,}>)/g;
+				args = args.map(a => a.replaceAll(roleMentionRegex, `${sep} $&${sep}`));
+			} else if(type === 'CHANNEL') {
+				this.ensureRequistified();
+				const channelMentionRegex = /(<#[0-9]{16,}>)/g;
+				args = args.map(a => a.replaceAll(channelMentionRegex, `${sep} $&${sep}`));
+			}
+
+		case 'SEPARATOR':
+			return regroupText(args, sep);
+
+		case 'DOUBLE-QUOTES':
+			return groupQuoted(args);
+
+		default:
+			return args;
+		}
 	}
 
 	/**
@@ -1315,8 +1352,6 @@ class CommandOptionSolver {
 	}
 
 	/**
-	 * @template {ParamResult} CallbackType
-	 * @template {ParamResult} [N=undefined]
 	 * @overload
 	 * Devuelve el valor ingresado como un String si se ingresó la bandera especificada, o `undefined` de lo contrario
 	 * @param {String} identifier
@@ -1333,8 +1368,6 @@ class CommandOptionSolver {
 	 * @returns {ReturnType<FlagCallback<CallbackType>> | N}
 	 */
 	/**
-	 * @template {ParamResult} CallbackType
-	 * @template {ParamResult} [N=undefined]
 	 * @param {String} identifier
 	 * @param {FlagCallback<CallbackType>} [callback]
 	 * @param {N} [fallback]
@@ -1562,6 +1595,19 @@ class CommandOptionSolver {
 			return true;
 		}
 		return false;
+	}
+
+	/**@param {String} identifier*/
+	#expectParam(identifier) {
+		const option = this.#options.options.get(identifier);
+
+		if(!option)
+			throw `No se encontró una opción bajo el identificador: ${identifier}`;
+
+		if(!option.isCommandParam())
+			throw 'Se esperaba un identificador de parámetro de comando';
+
+		return option;
 	}
 
 	/**
