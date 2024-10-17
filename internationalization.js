@@ -482,6 +482,12 @@ let localesObject = /**@type {const}*/({
 		en: 'Show me how',
 		ja: 'やり方を見せて',
 	},
+
+	commandByName: {
+		es: `Comando invocado por ${subl(0)}`,
+		en: `Command called by ${subl(0)}`,
+		ja: `${subl(0)}によって呼び出されたコマンド`,
+	},
 	
 	actionDeleteUserPost: {
 		es: 'Borrar Post',
@@ -1073,6 +1079,57 @@ let localesObject = /**@type {const}*/({
 		es: 'Tags de Interés',
 		en: 'Tags of Interest',
 		ja: 'Tags of Interest',
+	},
+
+	inforolNoRoleProvided: {
+		es: '❌ ¡Debes indicar al menos un rol!',
+		en: '❌ You must indicate at least one role!',
+		ja: '❌ 少なくとも1つのロールを指定する必要があります',
+	},
+	inforolNoMembersFound: {
+		es: '⚠️ No se encontró ningún miembro con los roles indicados...',
+		en: '⚠️ Couldn\'t find any member with the provided roles...',
+		ja: '⚠️ 指定されたロールを持つメンバーが見つかりませんでした…',
+	},
+	inforolDashboardTitle: {
+		es: 'Análisis de roles (Total)',
+		en: 'Roles analysis (Total)',
+		ja: 'ロール分析（合計）',
+	},
+	inforolDashboardRolesListName: {
+		es: 'Roles en análisis',
+		en: 'Analyzed roles',
+		ja: '分析中のロール',
+	},
+	inforolDashboardCaseName: {
+		es: 'Criterio',
+		en: 'Criterion',
+		ja: '条件',
+	},
+	inforolDashboardCaseValue: {
+		es: `Coincidencia *${subif(0, '=', true, 'exacta', 'parcial')}*`,
+		en: `*${subif(0, '=', true, 'Exact', 'Partial')}* match`,
+		ja: `*${subif(0, '=', true, '厳密', '部分')}*一致`,
+	},
+	inforolDashboardCountName: {
+		es: 'Cuenta total',
+		en: 'Total count',
+		ja: '合計数',
+	},
+	inforolDashboardFooter: {
+		es: 'Página principal',
+		en: 'Main page',
+		ja: '全体図',
+	},
+	inforolDetailTitle: {
+		es: 'Análisis de roles (Detalle)',
+		en: 'Roles analysis (Detail)',
+		ja: 'ロール分析（詳細）',
+	},
+	inforolDetailMembersListName: {
+		es: 'Lista de usuarios',
+		en: 'Users list',
+		ja: 'ユーザーリスト',
 	},
 
 	yoCancelledStep: {

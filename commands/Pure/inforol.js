@@ -12,6 +12,7 @@ const perms = new CommandPermissions('ManageRoles');
 const options = new CommandOptions()
 	.addParam('términos', 'ROLE', 'para especificar los roles que quieres buscar', { poly: 'MULTIPLE', polymax: 8 })
 	.addFlag('xe', ['estricta', 'estricto', 'exclusivo'], 'para especificar si la búsqueda es estricta');
+
 const flags = new CommandTags().add('MOD');
 const command = new CommandManager('inforol', flags)
 	.setAliases(
@@ -31,43 +32,44 @@ const command = new CommandManager('inforol', flags)
 		const translator = await Translator.from(request.user);
 		
 		if(args.empty)
-			return request.reply({ content: `❌ ¡Debes indicar al menos un rol!\nUsa \`${p_pure(request.guildId).raw}ayuda inforol\` para más información` });
+			return request.reply({ content: translator.getText('inforolNoRoleProvided') });
 
 		const strict = args.parseFlag('estricta');
 		const roles = CommandOptionSolver.asRoles(args.parsePolyParamSync('términos', { regroupMethod: 'MENTIONABLES-WITH-SEP' }));
 
 		const roleIds = roles.map(role => role.id);
 		if(!roleIds.length)
-			return request.reply({ content: '⚠️ No se encontró ningún rol...', ephemeral: true });
+			return request.reply({ content: translator.getText('invalidRole'), ephemeral: true });
 
-		const members = request.guild.members.cache.filter(member =>
-			strict
-				? roleIds.every(arg => member.roles.cache.has(arg))
-				: roleIds.some(arg => member.roles.cache.has(arg))
-		);
+		const members = request.guild.members.cache.filter(member => {
+			const rolesCache = member.roles.cache;
+			return strict
+				? roleIds.every(arg => rolesCache.has(arg))
+				: roleIds.some(arg => rolesCache.has(arg));
+		});
         const query = { strict, roles, members };
 		const requestId = compressId(request.id);
 		command.memory.set(requestId, query);
 
-		return showInforolPage(request, 0, requestId, query);
+		return showInforolPage(request, 0, requestId, translator, query);
 	}).setButtonResponse(async function showPage(interaction, page, requestId) {
+		const translator = await Translator.from(interaction.user);
+
 		const query = command.memory.get(requestId);
-
-		if(!query) {
-			const translator = await Translator.from(interaction.user);
+		if(!query)
 			return interaction.reply({ content: translator.getText('expiredWizardData') });
-		}
 
-		return showInforolPage(interaction, +page, requestId, query);
+		return showInforolPage(interaction, +page, requestId, translator, query);
 	}, { userFilterIndex: 2 });
 
 /**
  * @param {import('../Commons/typings').ComplexCommandRequest | Discord.ButtonInteraction<'cached'>} request
  * @param {Number} page
  * @param {String} requestId
+ * @param {Translator} translator
  * @param {{ strict: Boolean, roles: Array<Discord.Role>, members: Discord.Collection<String, Discord.GuildMember> }} query
  */
-function showInforolPage(request, page, requestId, query) {
+function showInforolPage(request, page, requestId, translator, query) {
 	const { strict, roles, members } = query;
 	const { guild, user } = request;
 
@@ -78,7 +80,7 @@ function showInforolPage(request, page, requestId, query) {
 	
 	const membersCount = members.size;
 	if(!membersCount)
-		return replyOrUpdate({ content: '⚠️ No se encontró ningún miembro...', ephemeral: true });
+		return replyOrUpdate({ content: translator.getText('inforolNoMembersFound'), ephemeral: true });
 
 	const lastPage = Math.ceil(membersCount / MEMBERS_PER_PAGE);
 	const previousPage = page > 0 ? (page - 1) : lastPage;
@@ -108,15 +110,15 @@ function showInforolPage(request, page, requestId, query) {
 		
 		embed = new Discord.EmbedBuilder()
 			.setColor(0xff00ff)
-			.setTitle(`Análisis del roles (Total)`)
-			.addFields(
-				{ name: 'Roles en análisis', value: rolesContent },
-				{ name: 'Caso', value: `**${strict ? 'Estricto' : 'Flojo'}**`, inline: true },
-				{ name: 'Cuenta total', value: `:wrestlers: x ${humansCount}\n:robot: x ${botsCount}`, inline: true },
-			)
+			.setTitle(translator.getText('inforolDashboardTitle'))
 			.setThumbnail(guild.iconURL({ size: 256 }))
-			.setAuthor({ name: `Comando invocado por ${user.username}`, iconURL: user.avatarURL() })
-			.setFooter({ text: `Página principal` });
+			.setAuthor({ name: translator.getText('commandByName', user.username), iconURL: user.avatarURL() })
+			.setFooter({ text: translator.getText('inforolDashboardFooter') })
+			.addFields(
+				{ name: translator.getText('inforolDashboardRolesListName'), value: rolesContent },
+				{ name: translator.getText('inforolDashboardCaseName'), value: translator.getText('inforolDashboardCaseValue', strict), inline: true },
+				{ name: translator.getText('inforolDashboardCountName'), value: `👤 x ${humansCount}\n🤖 x ${botsCount}`, inline: true },
+			);
 	
 		return replyOrUpdate({
 			embeds: [embed],
@@ -133,10 +135,10 @@ function showInforolPage(request, page, requestId, query) {
 	
 		embed = new Discord.EmbedBuilder()
 			.setColor(0xff00ff)
-			.setTitle('Análisis del roles (Detalle)')
-			.setAuthor({ name: `Comando invocado por ${user.username}`, iconURL: user.avatarURL() })
-			.setFooter({ text: `Página de lista ${page}/${lastPage}` })
-			.addFields({ name: 'Lista de usuarios', value: memberListContent });
+			.setTitle(translator.getText('inforolDetailTitle'))
+			.setAuthor({ name: translator.getText('commandByName', user.username), iconURL: user.avatarURL() })
+			.setFooter({ text: `${page}/${lastPage}` })
+			.addFields({ name: translator.getText('inforolDetailMembersListName'), value: memberListContent });
 	}
 
 	return replyOrUpdate({
