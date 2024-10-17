@@ -60,7 +60,7 @@ const command = new CommandManager('dados', flags)
 	.setExperimentalExecution(async (request, args, rawArgs) => {
 		let diceInputs = (
 			args.isInteractionSolver()
-				? CommandOptionSolver.asStrings(args.parsePolyParamSync('dados', ' ')).map(v => v.match(diceRegex))
+				? CommandOptionSolver.asStrings(args.parsePolyParamSync('dados', { messageSep: ' ' })).map(v => v.match(diceRegex))
 				: [ ...rawArgs.matchAll(new RegExp(diceRegex, 'g')) ]
 		).filter(v => v);
 

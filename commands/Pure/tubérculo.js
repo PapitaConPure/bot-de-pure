@@ -799,9 +799,8 @@ async function opExecuteTuber(tuberId, gcfg, isPureScript, request, args) {
 			});
 		}
 	}
-	console.log(args);
-	const tuberArgs = CommandOptionSolver.asStrings(args.parsePolyParamSync('entradas', ' ')).filter(input => input);
-	console.log('tuberArgs:', tuberArgs);
+	
+	const tuberArgs = CommandOptionSolver.asStrings(args.parsePolyParamSync('entradas', { regroupMethod: 'DOUBLE-QUOTES' })).filter(input => input);
 	await request.deferReply();
 	let executeFn;
 	
