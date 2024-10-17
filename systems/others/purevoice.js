@@ -460,6 +460,8 @@ class PureVoiceSessionMember {
 module.exports = {
     PureVoiceUpdateHandler,
     PureVoiceOrchestrator,
+    PureVoiceSessionMember,
     makeSessionAutoname,
     makeSessionRoleAutoname,
+    PureVoiceSessionMemberRoles,
 };
