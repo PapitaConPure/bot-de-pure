@@ -127,7 +127,7 @@ async function formatBooruPostMessage(booru, post, data) {
 		new ButtonBuilder()
 			.setEmoji('921751138997514290')
 			.setStyle(ButtonStyle.Danger)
-			.setCustomId(`feed_deletePost${data.manageableBy ?? ''}_${data.isNotFeed ?? ''}`),
+			.setCustomId(`feed_deletePost_${data.manageableBy ?? ''}_${data.isNotFeed ?? ''}`),
 	);
 
 	//Preparar Embed final
