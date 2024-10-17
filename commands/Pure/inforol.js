@@ -1,8 +1,12 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const { fetchArrows, regroupText } = require('../../func');
+const { compressId } = require('../../func');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
+const { Translator } = require('../../internationalization');
+const { makeButtonRowBuilder } = require('../../tsCasts');
+
+const MEMBERS_PER_PAGE = 10;
 
 const perms = new CommandPermissions('ManageRoles');
 const options = new CommandOptions()
@@ -23,113 +27,123 @@ const command = new CommandManager('inforol', flags)
 	)
 	.setPermissions(perms)
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash) => {
-		if(!isSlash && args.length < 1)
-			return request.reply({ content: `❌ ¡Debes ingresar al menos un parámetro!\nUsa \`${p_pure(request.guildId).raw}ayuda inforol\` para más información` });
+	.setExperimentalExecution(async (request, args) => {
+		const translator = await Translator.from(request.user);
+		
+		if(args.empty)
+			return request.reply({ content: `❌ ¡Debes indicar al menos un rol!\nUsa \`${p_pure(request.guildId).raw}ayuda inforol\` para más información` });
 
-		//Parámetros
-		const servidor = request.guild;
-        const strict = options.fetchFlag(args, 'estricta');
-		let roleIds;
+		const strict = args.parseFlag('estricta');
+		const roles = CommandOptionSolver.asRoles(args.parsePolyParamSync('términos', { regroupMethod: 'MENTIONABLES-WITH-SEP' }));
 
-		if(!isSlash) {
-			args = args.map(arg => {
-				if(arg.startsWith('<@&') && arg.endsWith('>'))
-					return `,${arg},`;
-				return arg;
-			})
-			args = regroupText(args);
-
-			//Adquirir ID de roles
-			request.channel.sendTyping();
-			roleIds = args.map(arg => {
-				if(arg.startsWith('<@&') && arg.endsWith('>'))
-					arg = arg.slice(3, -1);
-				if(isNaN(arg)) {
-					arg = arg.toLowerCase();
-					arg = servidor.roles.cache.find(r => r.name.toLowerCase().indexOf(arg) >= 0);
-					if(arg == undefined)
-						arg = null;
-					else
-						arg = arg.id;
-				}
-				return arg;
-			}).filter(arg => arg);
-		} else
-			roleIds = options.fetchParamPoly(args, 'términos', args.getRole, []).map(role => role.id);
-
+		const roleIds = roles.map(role => role.id);
 		if(!roleIds.length)
-			return request.reply({ content: '⚠️ No se encontró ningún rol...' });
+			return request.reply({ content: '⚠️ No se encontró ningún rol...', ephemeral: true });
 
-		//Contadores de usuarios
-		const rolemembers = servidor.members.cache.filter(member => //Usuarios con rol
+		const members = request.guild.members.cache.filter(member =>
 			strict
 				? roleIds.every(arg => member.roles.cache.has(arg))
 				: roleIds.some(arg => member.roles.cache.has(arg))
 		);
-		const totalcnt = rolemembers.size;
-		const peoplecnt = rolemembers.filter(member => !member.user.bot).size;
-		const botcnt = totalcnt - peoplecnt;
+        const query = { strict, roles, members };
+		const requestId = compressId(request.id);
+		command.memory.set(requestId, query);
 
-		//Crear y usar embed
-		const user = request.author ?? request.user;
-		let SelectedEmbed = 0;
-		let Embed = [];
-		let peoplelist = [...rolemembers.values()];
-		const anaroles = roleIds.map(ar => `<@&${ar}>`).join(', ');
+		return showInforolPage(request, 0, requestId, query);
+	}).setButtonResponse(async function showPage(interaction, page, requestId) {
+		const query = command.memory.get(requestId);
 
-		if(anaroles.length === 0)
-			return request.reply({ content: '⚠️ Entrada inválida' });
+		if(!query) {
+			const translator = await Translator.from(interaction.user);
+			return interaction.reply({ content: translator.getText('expiredWizardData') });
+		}
 
-		Embed[0] = new Discord.EmbedBuilder()
+		return showInforolPage(interaction, +page, requestId, query);
+	}, { userFilterIndex: 2 });
+
+/**
+ * @param {import('../Commons/typings').ComplexCommandRequest | Discord.ButtonInteraction<'cached'>} request
+ * @param {Number} page
+ * @param {String} requestId
+ * @param {{ strict: Boolean, roles: Array<Discord.Role>, members: Discord.Collection<String, Discord.GuildMember> }} query
+ */
+function showInforolPage(request, page, requestId, query) {
+	const { strict, roles, members } = query;
+	const { guild, user } = request;
+
+	const isCommand = compressId(request.id) === requestId;
+
+	/**@param {Discord.MessagePayload | (Discord.InteractionReplyOptions & Discord.InteractionUpdateOptions)} replyBody*/
+	const replyOrUpdate = (replyBody) => isCommand ? (request.reply(replyBody)) : (/**@type {Discord.ButtonInteraction}*/(request).update(replyBody));
+	
+	const membersCount = members.size;
+	if(!membersCount)
+		return replyOrUpdate({ content: '⚠️ No se encontró ningún miembro...', ephemeral: true });
+
+	const lastPage = Math.ceil(membersCount / MEMBERS_PER_PAGE);
+	const previousPage = page > 0 ? (page - 1) : lastPage;
+	const nextPage = page < lastPage ? (page + 1) : 0;
+	
+	const authorId = compressId(user.id);
+	const components = [makeButtonRowBuilder().addComponents(
+			new Discord.ButtonBuilder()
+				.setCustomId(`inforol_showPage_0_${requestId}_${authorId}_F`)
+				.setEmoji('1087075525245272104')
+				.setStyle(Discord.ButtonStyle.Primary),
+			new Discord.ButtonBuilder()
+				.setCustomId(`inforol_showPage_${previousPage}_${requestId}_${authorId}_P`)
+				.setEmoji('934430008343158844')
+				.setStyle(Discord.ButtonStyle.Secondary),
+			new Discord.ButtonBuilder()
+				.setCustomId(`inforol_showPage_${nextPage}_${requestId}_${authorId}_N`)
+				.setEmoji('934430008343158844')
+				.setStyle(Discord.ButtonStyle.Secondary),
+		)];
+	
+	let embed;
+	if(page === 0) {
+		const botsCount = members.filter(member => member.user.bot).size;
+		const humansCount = membersCount - botsCount;
+		const rolesContent = roles.map(r => `${r}`).join(', ');
+		
+		embed = new Discord.EmbedBuilder()
 			.setColor(0xff00ff)
 			.setTitle(`Análisis del roles (Total)`)
 			.addFields(
-				{ name: 'Roles en análisis', value: anaroles },
+				{ name: 'Roles en análisis', value: rolesContent },
 				{ name: 'Caso', value: `**${strict ? 'Estricto' : 'Flojo'}**`, inline: true },
-				{ name: 'Cuenta total', value: `:wrestlers: x ${peoplecnt}\n:robot: x ${botcnt}`, inline: true },
+				{ name: 'Cuenta total', value: `:wrestlers: x ${humansCount}\n:robot: x ${botsCount}`, inline: true },
 			)
-			.setThumbnail(servidor.iconURL({ size: 256 }))
+			.setThumbnail(guild.iconURL({ size: 256 }))
 			.setAuthor({ name: `Comando invocado por ${user.username}`, iconURL: user.avatarURL() })
 			.setFooter({ text: `Página principal` });
-
-		for(let i = 0; i < (totalcnt / 10); i++) {
-			let plrange = '';
-			for(let listrange = i * 10; listrange < Math.min(i * 10 + 10, totalcnt); listrange++) {
-				plrange += `${peoplelist[listrange]}`;
-				if(peoplelist[listrange].user.bot) plrange += ' **[BOT]**';
-				plrange += '\n';
-			}
-
-			Embed[i + 1] = new Discord.EmbedBuilder()
-				.setColor(0xff00ff)
-				.setTitle('Análisis del roles (Detalle)')
-
-				.addFields({ name: 'Lista de usuarios', value: plrange })
-
-				.setAuthor({ name: `Comando invocado por ${user.username}`, iconURL: user.avatarURL() })
-				.setFooter({ text: `Página de lista ${i + 1}/${Math.ceil(totalcnt / 10)}` });
-		}
-		
-		const arrows = fetchArrows(request.client.emojis.cache);
-		const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
-		return request.reply({
-			embeds: [Embed[0]],
-			fetchReply: true
-		}).then(sent => {
-			sent.react(arrows[0])
-				.then(() => sent.react(arrows[1]))
-				.then(() => {
-					const collector = sent.createReactionCollector({ filter: filter, time: 8 * 60 * 1000 });
-					collector.on('collect', (reaction, ruser) => {
-						const maxpage = Math.ceil(totalcnt / 10);
-						if(reaction.emoji.id === arrows[0].id) SelectedEmbed = (SelectedEmbed > 0)?(SelectedEmbed - 1):maxpage;
-						else SelectedEmbed = (SelectedEmbed < maxpage)?(SelectedEmbed + 1):0;
-						sent.edit({ embeds: [Embed[SelectedEmbed]] });
-						reaction.users.remove(ruser);
-					});
-				})
+	
+		return replyOrUpdate({
+			embeds: [embed],
+			components,
 		});
+	} else {
+		const pageStart = (page - 1) * MEMBERS_PER_PAGE;
+		const pageEnd = pageStart + MEMBERS_PER_PAGE;
+	
+		const memberListContent = members
+			.map(m => m.user.bot ? `${m} (🤖)` : `${m}`)
+			.slice(pageStart, pageEnd)
+			.join('\n');
+	
+		embed = new Discord.EmbedBuilder()
+			.setColor(0xff00ff)
+			.setTitle('Análisis del roles (Detalle)')
+			.setAuthor({ name: `Comando invocado por ${user.username}`, iconURL: user.avatarURL() })
+			.setFooter({ text: `Página de lista ${page}/${lastPage}` })
+			.addFields({ name: 'Lista de usuarios', value: memberListContent });
+	}
+
+	return replyOrUpdate({
+		content: '',
+		embeds: [embed],
+		components,
 	});
+}
 
 module.exports = command;
