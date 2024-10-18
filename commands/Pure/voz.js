@@ -364,7 +364,7 @@ const command = new CommandManager('voz', flags)
 			const guildChannels = interaction.guild.channels.cache;
 			await Promise.all([
 				guildChannels.get(pv.voiceMakerId)?.delete(`PuréVoice desinstalado por ${interaction.user.username}`).catch(console.error),
-				guildChannels.get(pv.controlPannelId)?.delete(`PuréVoice desinstalado por ${interaction.user.username}`).catch(console.error),
+				guildChannels.get(pv.controlPanelId)?.delete(`PuréVoice desinstalado por ${interaction.user.username}`).catch(console.error),
 			]);
 
 			await Promise.all([

@@ -16,6 +16,11 @@ const PureVoiceSchema = new Mongoose.Schema({
 		type: String,
 		default: '',
 	},
+	/**Canal de despliegue de Sesiones del sistema*/
+	controlPanelId: {
+		type: String,
+		default: '',
+	},
 	/**Listado de Sesiones del sistema*/
 	sessions: {
 		type: Array,
