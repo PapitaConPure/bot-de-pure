@@ -105,6 +105,12 @@ class PureVoiceUpdateHandler {
                 member.roles.remove(sessionRole, 'Desconexión de miembro de sesión PuréVoice').catch(prematureError);
                 return;
             }
+
+            const indexToDelete = pvDocument.sessions.indexOf(oldChannel.id);
+            if(indexToDelete >= 0) {
+                pvDocument.sessions.splice(indexToDelete);
+                pvDocument.markModified('sessions');
+            }
             
             const controlPannel = /**@type {Discord.TextChannel}*/(guild.channels.cache.get(pvDocument.controlPanelId));
             
