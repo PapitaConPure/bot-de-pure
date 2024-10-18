@@ -256,7 +256,7 @@ const command = new CommandManager('voz', flags)
 			
 			try {
 				const voiceMaker = await interaction.guild.channels.create({
-					name: '➕ Nueva Sesión',
+					name: '➕',
 					type: ChannelType.GuildVoice,
 					parent: category.id,
 					bitrate: 64 * 1000,
@@ -358,17 +358,20 @@ const command = new CommandManager('voz', flags)
 			return interaction.reply({ content: '❌ No puedes hacer esto', ephemeral: true });
 
 		//Eliminar Sistema PuréVoice
-		const guildQuery = { guildId: interaction.guild.id };
+		const guildQuery = { guildId: interaction.guildId };
 		const pv = await PureVoice.findOne(guildQuery);
 		if(pv) {
 			const guildChannels = interaction.guild.channels.cache;
-			await guildChannels.get(pv.voiceMakerId).delete(`PuréVoice desinstalado por ${interaction.user.tag}`);
-			await Promise.all(pv.sessions.map(({ textId, voiceId }) => Promise.all([
-				guildChannels.get(textId).delete().catch(console.error),
-				guildChannels.get(voiceId).delete().catch(console.error),
-			])));
+			await Promise.all([
+				guildChannels.get(pv.voiceMakerId)?.delete(`PuréVoice desinstalado por ${interaction.user.username}`).catch(console.error),
+				guildChannels.get(pv.controlPannelId)?.delete(`PuréVoice desinstalado por ${interaction.user.username}`).catch(console.error),
+			]);
+
+			await Promise.all([
+				PureVoiceSession.deleteMany({ channelId: { $in: pv.sessions } }),
+				PureVoice.deleteOne(guildQuery),
+			]);
 		}
-		await PureVoice.deleteOne(guildQuery);
 		
 		const deleteEmbed = wizEmbed(interaction.client.user.avatarURL(), 'Operación finalizada', Colors.Red)
 			.addFields({
