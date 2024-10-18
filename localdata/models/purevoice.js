@@ -50,6 +50,11 @@ const PureVoiceSessionSchema = new Mongoose.Schema({
 		type: String,
 		required: true,
 	},
+	/** */
+	modIds: {
+		type: Array,
+		default: [],
+	},
 	frozen: {
 		type: Boolean,
 		default: false,
@@ -57,11 +62,6 @@ const PureVoiceSessionSchema = new Mongoose.Schema({
 	killDelaySeconds: {
 		type: Number,
 		default: 0,
-	},
-	/** */
-	modIds: {
-		type: Array,
-		default: [],
 	},
 	/** */
 	members: {
