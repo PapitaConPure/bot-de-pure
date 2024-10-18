@@ -494,6 +494,31 @@ let localesObject = /**@type {const}*/({
 		en: 'Delete Post',
 		ja: '投稿を削除',
 	},
+	actionPVTransferAdmin: {
+		es: 'Sesión PV • Ceder Administrador',
+		en: 'PV Session • Transfer Admin',
+		ja: 'PVセッション・アドミンを移行る',
+	},
+	actionPVGiveMod: {
+		es: 'Sesión PV • Volver Moderador',
+		en: 'PV Session • Promote to Mod',
+		ja: 'PVセッション・モデレーターを与える',
+	},
+	actionPVRemoveMod: {
+		es: 'Sesión PV • Quitar Moderador',
+		en: 'PV Session • Demote Mod ',
+		ja: 'PVセッション・モデレーターを与える',
+	},
+	actionPVBanMember: {
+		es: 'Sesión PV • Expulsar',
+		en: 'PV Session • Ban',
+		ja: 'PVセッション・禁止する',
+	},
+	actionPVUnbanMember: {
+		es: 'Sesión PV • Remover Expulsión',
+		en: 'PV Session • Unban',
+		ja: 'PVセッション・禁止を解除',
+	},
 
 	cancelledStepName: {
 		es: 'Asistente cancelado',
