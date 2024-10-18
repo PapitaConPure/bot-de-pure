@@ -166,9 +166,25 @@ class PureVoiceUpdateHandler {
             if(!sessionRole) return;
     
             const translator = member.user.bot ? (new Translator('es')) : await Translator.from(member);
-            await member.roles.add(sessionRole, translator.getText('voiceSessionReasonMemberAdd')).catch(console.error);
 
-            if(currentSession.members.has(member.id)) return;
+            const dbMember = currentSession.members.get(member.id);
+            const sessionMember = new PureVoiceSessionMember(dbMember || {
+                id: member.id,
+                role: PureVoiceSessionMemberRoles.GUEST,
+            });
+
+            if(currentSession.frozen && !sessionMember.isAllowedEvenWhenFreezed())
+                return member.voice.disconnect('Desconexión forzada de usuario que no forma parte de una sesión PuréVoice congelada').catch(prematureError);
+
+            if(sessionMember.isBanned())
+                return member.voice.disconnect('Desconexión forzada de usuario no permitido en una sesión PuréVoice').catch(prematureError);
+
+            await Promise.all([
+                member.roles.add(sessionRole, translator.getText('voiceSessionReasonMemberAdd')).catch(prematureError),
+                /**@type {Discord.TextChannel}*/(guild.channels.cache.get(pvDocument.controlPanelId))?.permissionOverwrites.edit(member, { ViewChannel: true }).catch(prematureError),
+            ]);
+
+            if(dbMember) return;
             
             const userConfigs = await UserConfigs.findOne({ userId: member.id }) || new UserConfigs({ userId: member.id });
 
@@ -184,10 +200,7 @@ class PureVoiceUpdateHandler {
             }).catch(prematureError);
             currentSession.members.set(
                 member.id,
-                (new PureVoiceSessionMember({
-                    id: member.id,
-                    role: PureVoiceSessionMemberRoles.GUEST,
-                })).toJSON(),
+                sessionMember.toJSON(),
             );
             currentSession.markModified('members');
             await currentSession.save();
@@ -235,15 +248,19 @@ class PureVoiceUpdateHandler {
             const prepareControlPanel = async () => {
                 let controlPanel = /**@type {Discord.TextChannel}*/(guild.channels.cache.get(pvDocument.controlPanelId));
 
-                if(controlPanel) return controlPanel;
+                if(controlPanel) {
+                    await controlPanel.permissionOverwrites.edit(member, { ViewChannel: true }).catch(prematureError);
+                    return controlPanel;
+                }
 
                 const result = await createPVControlPanelChannel(guild, pvDocument.categoryId);
 
                 if(result.success) {
                     controlPanel = result.controlPanel;
                     pvDocument.controlPanelId = controlPanel.id;
-                    await controlPanel.permissionOverwrites.edit(member, { ViewChannel: true }).catch(prematureError);
                 }
+
+                await controlPanel.permissionOverwrites.edit(member, { ViewChannel: true }).catch(prematureError);
 
                 return controlPanel;
             };
@@ -482,26 +499,75 @@ class PureVoiceSessionMember {
 		this.#banned = !!(data?.banned ?? false);
 	}
 
+    /**@param {PureVoiceSessionMember} other*/
+    exchangeAdmin(other) {
+        if(this.role === other.role || (!this.isAdmin() && !other.isAdmin()))
+            return false;
+
+        const tempRole = other.role;
+        other.role = this.role;
+        this.role = tempRole;
+
+        return true;
+    }
+
+    /**@param {PureVoiceSessionMember} other*/
+    giveMod(other) {
+        if(!this.isAdmin() || other.isMod())
+            return false;
+
+        other.role = PureVoiceSessionMemberRoles.MOD;
+        return true;
+    }
+
+    /**@param {PureVoiceSessionMember} other*/
+    revokeMod(other) {
+        if(!this.isAdmin() || !other.isMod())
+            return false;
+
+        other.role = PureVoiceSessionMemberRoles.GUEST;
+        return true;
+    }
+
 	/**@param {Boolean} whitelist*/
 	setWhitelisted(whitelist) {
 		this.#whitelisted = !!whitelist;
+        return this;
 	}
 	
 	/**@param {Boolean} ban*/
 	setBanned(ban) {
 		this.#banned = !!ban;
+        return this;
 	}
 
-	isWhitelisted() {
-		return this.role === PureVoiceSessionMemberRoles.ADMIN
-			|| this.role === PureVoiceSessionMemberRoles.MOD
-			|| this.#whitelisted;
+    isGuest() {
+        return this.role === PureVoiceSessionMemberRoles.GUEST;
+    }
+
+    isMod() {
+        return this.role === PureVoiceSessionMemberRoles.MOD;
+    }
+
+    isAdmin() {
+        return this.role === PureVoiceSessionMemberRoles.ADMIN;
+    }
+
+	isAllowed() {
+        return !this.isBanned();
 	}
+
+    isAllowedEvenWhenFreezed() {
+        if(this.isBanned()) return false;
+
+		return this.isAdmin()
+			|| this.isMod()
+			|| this.#whitelisted;
+    }
 
 	isBanned() {
-		return this.role === PureVoiceSessionMemberRoles.ADMIN
-			|| this.role === PureVoiceSessionMemberRoles.MOD
-			|| this.#whitelisted;
+		return this.isGuest()
+			&& this.#banned;
 	}
 
 	/**@returns {PureVoiceSessionMemberJSONBody} */
@@ -602,6 +668,24 @@ async function createPVControlPanelChannel(guild, categoryId) {
     return { success: true, status: 'Success', controlPanel: controlPanelChannel };
 }
 
+/**
+ * @param {Discord.VoiceBasedChannel} voiceChannel
+ * @param {Map<String, Partial<PureVoiceSessionMemberJSONBody>>} dbMembers
+ */
+function getFrozenSessionAllowedMembers(voiceChannel, dbMembers) {
+    const voiceMembers = voiceChannel.members;
+    
+    const allowedSessionMembers = /**@type {Map<String, PureVoiceSessionMember>}*/(new Map());
+
+    for(const [ id, dbMember ] of dbMembers) {
+        const sessionMember = new PureVoiceSessionMember(dbMember);
+        if(sessionMember.isAllowedEvenWhenFreezed() || voiceMembers.has(dbMember.id))
+            allowedSessionMembers.set(id, sessionMember);
+    }
+
+    return allowedSessionMembers;
+}
+
 module.exports = {
     PureVoiceUpdateHandler,
     PureVoiceOrchestrator,
@@ -609,5 +693,6 @@ module.exports = {
     makeSessionAutoname,
     makeSessionRoleAutoname,
     createPVControlPanelChannel,
+    getFrozenSessionAllowedMembers,
     PureVoiceSessionMemberRoles,
 };

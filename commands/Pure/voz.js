@@ -1,4 +1,5 @@
 const { PureVoiceModel: PureVoice, PureVoiceSessionModel: PureVoiceSession } = require('../../localdata/models/purevoice.js');
+const { PureVoiceSessionMember, getFrozenSessionAllowedMembers } = require('../../systems/others/purevoice.js');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, MessageCollector, ButtonStyle, Colors, ChannelType } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { isNotModerator, defaultEmoji } = require('../../func.js');
@@ -137,6 +138,7 @@ const command = new CommandManager('voz', flags)
 		const pv = await PureVoice.findOne({ guildId: request.guildId });
 		if(!pv) return warnNotInSession();
 		const sessionId = pv.sessions.find(sid => sid === voiceState.channelId);
+		if(!sessionId) return warnNotInSession();
 		const session = await PureVoiceSession.findOne({ channelId: sessionId });
 		if(!session) return warnNotInSession();
 		const { channelId: voiceId, roleId, nameChanged } = session;
@@ -395,6 +397,52 @@ const command = new CommandManager('voz', flags)
 		return interaction.update({
 			embeds: [cancelEmbed],
 			components: [],
+		});
+	})
+	.setButtonResponse(async function freezeSession(interaction) {
+		const warnNotInSession = () => interaction.reply({
+			content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción',
+			ephemeral: true,
+		}).catch(console.error);
+
+		const voiceState = interaction.member.voice;
+		if(!voiceState) return warnNotInSession();
+
+		const voiceChannel = voiceState.channel;
+		if(!voiceChannel) return warnNotInSession();
+
+		const pv = await PureVoice.findOne({ guildId: interaction.guildId });
+		if(!pv) return warnNotInSession();
+
+		const sessionId = pv.sessions.find(sid => sid === voiceChannel.id);
+		if(!sessionId) return warnNotInSession();
+
+		const session = await PureVoiceSession.findOne({ channelId: sessionId });
+		if(!session) return warnNotInSession();
+
+		const sessionMember = new PureVoiceSessionMember(session.members.get(interaction.member.id) ?? {});
+		if(sessionMember.isGuest())
+			return interaction.reply({
+				content: '❌ Solo el administrador y los moderadores de una sesión PuréVoice pueden congelarla',
+				ephemeral: true,
+			});
+
+		session.frozen = !session.frozen;
+
+		const allowedMembers = getFrozenSessionAllowedMembers(voiceChannel, session.members);
+		const userLimit = session.frozen ? allowedMembers.size : 0;
+
+		allowedMembers.forEach((member, id) => session.members.set(id, member.setWhitelisted(true).toJSON()));
+		session.markModified('members');
+
+		await Promise.all([
+			voiceChannel.setUserLimit(userLimit, `Actualizar límite de usuarios de sesión PuréVoice ${session.frozen ? 'congelada' : 'descongelada'}`),
+			session.save(),
+		]);
+
+		return interaction.reply({
+			content: `❄️ La sesión ${voiceChannel} fue **${session.frozen ? 'congelada' : 'descongelada'}**`,
+			ephemeral: true,
 		});
 	})
 	.setButtonResponse(async function showMeHow(interaction) {
