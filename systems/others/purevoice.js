@@ -258,9 +258,8 @@ class PureVoiceUpdateHandler {
                 if(result.success) {
                     controlPanel = result.controlPanel;
                     pvDocument.controlPanelId = controlPanel.id;
+                    await controlPanel.permissionOverwrites.edit(member, { ViewChannel: true }).catch(prematureError);
                 }
-
-                await controlPanel.permissionOverwrites.edit(member, { ViewChannel: true }).catch(prematureError);
 
                 return controlPanel;
             };
@@ -501,7 +500,7 @@ class PureVoiceSessionMember {
 
     /**@param {PureVoiceSessionMember} other*/
     exchangeAdmin(other) {
-        if(this.role === other.role || (!this.isAdmin() && !other.isAdmin()))
+        if(this.role === other.role || !this.isAdmin())
             return false;
 
         const tempRole = other.role;
@@ -513,7 +512,7 @@ class PureVoiceSessionMember {
 
     /**@param {PureVoiceSessionMember} other*/
     giveMod(other) {
-        if(!this.isAdmin() || other.isMod())
+        if(!this.isAdmin() || !other.isGuest())
             return false;
 
         other.role = PureVoiceSessionMemberRoles.MOD;
