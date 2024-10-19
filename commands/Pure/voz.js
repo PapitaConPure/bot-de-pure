@@ -1,10 +1,11 @@
 const { PureVoiceModel: PureVoice, PureVoiceSessionModel: PureVoiceSession } = require('../../localdata/models/purevoice.js');
 const { PureVoiceSessionMember, getFrozenSessionAllowedMembers } = require('../../systems/others/purevoice.js');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, MessageCollector, ButtonStyle, Colors, ChannelType } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, MessageCollector, ButtonStyle, Colors, ChannelType, Collection, ModalBuilder, TextInputStyle, TextInputBuilder } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { isNotModerator, defaultEmoji } = require('../../func.js');
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
-const { makeButtonRowBuilder } = require('../../tsCasts.js');
+const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts.js');
+const { Translator } = require('../../internationalization');
 
 const cancelbutton = (id) => new ButtonBuilder()
 	.setCustomId(`voz_cancelWizard_${id}`)
@@ -399,19 +400,69 @@ const command = new CommandManager('voz', flags)
 			components: [],
 		});
 	})
-	.setButtonResponse(async function freezeSession(interaction) {
+	.setButtonResponse(async function renameSession(interaction) {
+		const { guildId, member } = interaction;
+        const translator = await Translator.from(member);
+
 		const warnNotInSession = () => interaction.reply({
 			content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción',
 			ephemeral: true,
 		}).catch(console.error);
 
-		const voiceState = interaction.member.voice;
+		const voiceChannel = member.voice?.channel;
+		if(!voiceChannel) return warnNotInSession();
+
+		const pv = await PureVoice.findOne({ guildId });
+		if(!pv) return warnNotInSession();
+
+		const sessionId = pv.sessions.find(sid => sid === voiceChannel.id);
+		if(!sessionId) return warnNotInSession();
+
+		const session = await PureVoiceSession.findOne({ channelId: sessionId });
+		if(!session) return warnNotInSession();
+		
+        const modal = new ModalBuilder()
+            .setCustomId(`voz_applySessionRename`)
+            .setTitle(translator.getText('yoVoiceAutonameModalTitle'))
+            .addComponents(
+                makeTextInputRowBuilder().addComponents(new TextInputBuilder()
+                    .setCustomId('inputName')
+                    .setLabel(translator.getText('name'))
+                    .setPlaceholder(translator.getText('yoVoiceAutonameModalNamingPlaceholder'))
+                    .setMinLength(0)
+                    .setMaxLength(24)
+                    .setRequired(false)
+					//.setValue(session.name ?? '')
+                    .setStyle(TextInputStyle.Short)),
+                makeTextInputRowBuilder().addComponents(new TextInputBuilder()
+                    .setCustomId('inputEmoji')
+                    .setLabel(translator.getText('emoji'))
+                    .setPlaceholder(translator.getText('yoVoiceAutonameModalEmojiPlaceholder'))
+                    .setMinLength(0)
+                    .setMaxLength(2)
+                    .setRequired(false)
+					//.setValue(session.emoji ?? '')
+                    .setStyle(TextInputStyle.Short)),
+            );
+
+        return interaction.showModal(modal);
+	})
+	.setButtonResponse(async function freezeSession(interaction) {
+		const { guildId, member } = interaction;
+        const translator = await Translator.from(member);
+
+		const warnNotInSession = () => interaction.reply({
+			content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción',
+			ephemeral: true,
+		}).catch(console.error);
+
+		const voiceState = member.voice;
 		if(!voiceState) return warnNotInSession();
 
 		const voiceChannel = voiceState.channel;
 		if(!voiceChannel) return warnNotInSession();
 
-		const pv = await PureVoice.findOne({ guildId: interaction.guildId });
+		const pv = await PureVoice.findOne({ guildId });
 		if(!pv) return warnNotInSession();
 
 		const sessionId = pv.sessions.find(sid => sid === voiceChannel.id);
@@ -420,7 +471,7 @@ const command = new CommandManager('voz', flags)
 		const session = await PureVoiceSession.findOne({ channelId: sessionId });
 		if(!session) return warnNotInSession();
 
-		const sessionMember = new PureVoiceSessionMember(session.members.get(interaction.member.id) ?? {});
+		const sessionMember = new PureVoiceSessionMember(session.members.get(member.id) ?? {});
 		if(sessionMember.isGuest())
 			return interaction.reply({
 				content: '❌ Solo el administrador y los moderadores de una sesión PuréVoice pueden congelarla',
@@ -432,14 +483,19 @@ const command = new CommandManager('voz', flags)
 		const allowedMembers = getFrozenSessionAllowedMembers(voiceChannel, session.members);
 		const userLimit = session.frozen ? allowedMembers.size : 0;
 
-		allowedMembers.forEach((member, id) => session.members.set(id, member.setWhitelisted(true).toJSON()));
+		for(const [ memberId, member ] of allowedMembers) {
+			session.members.set(memberId, member.setWhitelisted(true).toJSON());
+			await voiceChannel.permissionOverwrites.edit(memberId, { Connect: true }, { reason: 'PLACEHOLDER_PV_REASON_FREEZE_CONNECT_ENABLE' }).catch(console.error);
+		}
+
 		session.markModified('members');
 
 		await Promise.all([
-			voiceChannel.setUserLimit(userLimit, `Actualizar límite de usuarios de sesión PuréVoice ${session.frozen ? 'congelada' : 'descongelada'}`),
+			voiceChannel.setUserLimit(userLimit, `Actualizar límite de usuarios de sesión PuréVoice ${session.frozen ? 'congelada' : 'descongelada'}`).catch(console.error),
+			voiceChannel.permissionOverwrites.edit(interaction.guild.roles.everyone, { Connect: false }, { reason: 'PLACEHOLDER_PV_REASON_FREEZE_CONNECT_DISABLE' }).catch(console.error),
 			session.save(),
 		]);
-
+		
 		return interaction.reply({
 			content: `❄️ La sesión ${voiceChannel} fue **${session.frozen ? 'congelada' : 'descongelada'}**`,
 			ephemeral: true,
