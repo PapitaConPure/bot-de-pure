@@ -11,7 +11,8 @@ const ImgurUser = require('../../localdata/models/imgurUsers.js');
 const envPath = remoteStartup ? '../../remoteenv.json' : '../../localenv.json';
 
 const options = new CommandOptions()
-	.addParam('imagens', 'IMAGE', 'para indicar una imagen a subir. Puedes subir múltiples imágenes si son adjuntos de mensaje', { optional: true, poly: 'MULTIPLE', polymax: 5 })
+	.addParam('enlaces', 'TEXT', 'para indicar enlaces de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
+	.addParam('imagens', 'IMAGE', 'para indicar archivos de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
 	.addFlag('r', [ 'registrar' ], 'para registrar una ID de cliente y evitar el límite global');
 
 const flags = new CommandTags().add('COMMON');
@@ -21,10 +22,10 @@ const command = new CommandManager('imgur', flags)
 		'subir',
 		'upload',
 	)
-	.setBriefDescription('Permite subir una imagen con un enlace')
+	.setBriefDescription('Permite subir imágenes')
 	.setLongDescription(
-		'Permite subir hasta 5 imágenes por día por usuario, limitado a un máximo global.',
-		'Para evitar el máximo de subida global, puedes \`--registrar\` tu propia ID de cliente. [Revisa cómo]().',
+		'Permite subir imágenes, limitado a un máximo diario global.',
+		'Para evitar el máximo de subida global, puedes \`--registrar\` tu propia ID de cliente (explicado al usar la bandera de comando)',
 	)
 	.setOptions(options)
 	.setExperimentalExecution(async (request, args) => {
@@ -82,22 +83,31 @@ const command = new CommandManager('imgur', flags)
 		const imgurUser = (await ImgurUser.findOne({ userId: request.userId })) || new ImgurUser({ userId: request.userId });
 		const clientId = imgurUser.clientId ?? require(envPath).imgurclientid;
 		const client = new ImgurClient({ clientId });
+		
+		const imageUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(u => u);
 		const attachments = CommandOptionSolver.asAttachments(args.parsePolyParamSync('imagens')).filter(a => a);
 		const imageStreams = await Promise.all(attachments
 			.map(async attachment => /**@type {ReadableStream}*/((await axios.get(attachment.url, { responseType: 'stream' })).data))
 			.slice(0, 5));
 
-		const uploads = [];
-		const failures = [];
+		const uploads = [
+			...imageUrls.map(url => ({ image: url, type: /**@type {const}*/('url') })),
+			...imageStreams.map(stream => ({ image: stream, type: /**@type {const}*/('stream') })),
+		];
+
+		console.log(uploads);
+
+		if(!uploads.length)
+			return request.editReply({ content: '⚠️ Debes indicar un enlace de imagen o una imagen directa a subir a Imgur', ephemeral: true });
+
 		let count = 1;
-		for(const stream of imageStreams) {
-			const image = await client.upload({
-				image: stream,
-				type: 'stream',
-			});
+		const successes = [];
+		const failures = [];
+		for(const upload of uploads) {
+			const image = await client.upload(upload);
 		
 			if(image?.success)
-				uploads.push(new EmbedBuilder()
+				successes.push(new EmbedBuilder()
 					.setTitle('Tu imagen')
 					.setColor(Colors.Green)
 					.setURL(image.data.link)
@@ -115,41 +125,8 @@ const command = new CommandManager('imgur', flags)
 			
 			count++;
 		}
-		
-		if(args.isMessageSolver()) {
-			if(args.empty && !attachments.length)
-				return request.editReply({ content: '⚠️ Debes indicar un enlace de imagen o una imagen directa a subir a Imgur', ephemeral: true });
 
-			const imageUrls = [ ...args.iterator ];
-			if(!imageUrls.length)
-				return request.editReply({ content: '⚠️ Debes indicar un enlace de imagen o una imagen directa a subir a Imgur', ephemeral: true });
-
-			for(const imageUrl of imageUrls) {
-				const image = await client.upload({
-					image: imageUrl,
-					type: 'url',
-				});
-	
-				if(!image?.success)
-					uploads.push(new EmbedBuilder()
-						.setTitle(translator.getText('somethingWentWrong'))
-						.setDescription('Si es un problema de frecuencia de subida, prueba registrar tu propia aplicación para subir imágenes sin restricción global')
-						.setColor(Colors.Red)
-						.addFields({
-							name: `Código de Error: ${image.status}`,
-							value: `\`\`\`\n${image.data}\n\`\`\``,
-						}));
-				else
-					failures.push(new EmbedBuilder()
-						.setTitle('Tu imagen')
-						.setColor(Colors.Green)
-						.setURL(image.data.link)
-						.setDescription(image.data.link)
-						.setImage(image.data.link));
-			}
-		}
-
-		return request.editReply({ embeds: [ ...uploads, ...failures ] });
+		return request.editReply({ embeds: [ ...successes, ...failures ] });
 	}).setButtonResponse(async function onButtonRegisterRequest(interaction) {
 		const modal = makeRegisterModal();
 		return interaction.showModal(modal);
