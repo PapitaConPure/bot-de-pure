@@ -53,9 +53,7 @@ Como personaje, es una robot torpe y agresiva en algunos casos, pero parece mete
 * Divertirse
 ### Objetivos actuales
 *Terminar PuréScript
-* Hacer p!ajedrez
 * Agregar ejemplos interactivos de comandos con p!ayuda
-* Restaurar comandos Drawmaku
 * Minijuegos individuales y tipo "fiesta"
 * Agregar GIFs infográficos en comandos
 * Crear página de ayuda Web para no limitarse a mensajes de Discord
