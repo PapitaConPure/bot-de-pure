@@ -142,8 +142,9 @@ async function formatBooruPostMessage(booru, post, data) {
 	//Tags
 	try {
 		const postTags = await booru.fetchPostTags(post);
-		
-		if(postTags.some(t => t.name === 'ai-generated'))
+
+		//Advertencia de IA
+		if(postTags.some(t => [ 'ai-generated', 'ai-assisted' ].includes(t.name)))
 			postEmbed.setThumbnail('https://i.imgur.com/1Q41hhC.png');
 
 		const postArtistTags    = /**@type {Array<String>}*/([]);
