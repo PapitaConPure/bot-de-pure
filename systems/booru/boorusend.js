@@ -140,18 +140,6 @@ async function formatBooruPostMessage(booru, post, data) {
 	data.cornerIcon && postEmbed.setAuthor({ name: 'Desde Gelbooru', iconURL: data.cornerIcon });
 
 	//Tags
-	/**@type {(tag: String) => String}*/
-	const formatTagName = tag => tag
-		.replace(/\\/g, '\\\\')
-		.replace(/\*/g, '\\*')
-		.replace(/_/g,  '\\_')
-		.replace(/\|/g, '\\|');
-
-	/**@type {(tagNames: Array<String>, sep: String) => String} tagNames*/
-	const formatTagNameList = (tagNames, sep) => tagNames
-		.map(tagName => `* ${formatTagName(tagName)}`)
-		.join(sep);
-	
 	try {
 		const postTags = await booru.fetchPostTags(post);
 		
@@ -397,8 +385,29 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
 	}
 };
 
+/**@param {String} tag*/
+function formatTagName(tag) {
+	return tag
+		.replace(/\\/g, '\\\\')
+		.replace(/\*/g, '\\*')
+		.replace(/_/g,  '\\_')
+		.replace(/\|/g, '\\|');
+}
+
+/**
+ * @param {Array<String>} tagNames
+ * @param {String} sep
+ */
+function formatTagNameList(tagNames, sep) {
+	return tagNames
+		.map(tagName => `* ${formatTagName(tagName)}`)
+		.join(sep);
+}
+
 module.exports = {
 	formatBooruPostMessage,
 	notifyUsers,
 	searchAndReplyWithPost,
-}
+	formatTagName,
+	formatTagNameList,
+};
