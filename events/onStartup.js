@@ -175,7 +175,6 @@ async function onStartup(client) {
 			
 			const previousInfractionsLength = infr.length;
 			infr = infr.filter(inf => (now - inf) < (60e3 * 60 * 4)); //Eliminar antiguas
-			//console.log(`${userId}:`, infr);
 
 			if(previousInfractionsLength === infr.length) return;
 			wasModified = true;

@@ -1,4 +1,4 @@
-const { Collection, PermissionFlagsBits, SlashCommandBuilder, Client, ContextMenuCommandBuilder, CommandInteractionOptionResolver } = require('discord.js');
+const { Collection, PermissionFlagsBits, SlashCommandBuilder, Client, ContextMenuCommandBuilder } = require('discord.js');
 const { CommandManager, CommandOptions, CommandFlagExpressive } = require('./commands/Commons/commands.js');
 const { shortenText } = require('./func.js');
 const { readdirSync } = require('fs');
