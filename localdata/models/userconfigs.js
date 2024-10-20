@@ -17,7 +17,7 @@ const UserConfigSchema = new Mongoose.Schema({
     
     language: {
         type: String,
-        enum: [ 'es', 'en' ],
+        enum: [ 'es', 'en', 'ja' ],
         default: 'es',
         required: true,
     },
@@ -28,9 +28,19 @@ const UserConfigSchema = new Mongoose.Schema({
         required: true,
     },
     voice: {
-        type: Mongoose.SchemaTypes.Mixed,
-        default: {},
-        required: true,
+        ping: {
+            type: String,
+            enum: [ 'always', 'onCreate', 'never' ],
+            default: 'always',
+        },
+        autoname: {
+            type: String,
+            default: '',
+        },
+        autoemoji: {
+            type: String,
+            default: '',
+        },
     },
     flags: {
         type: Array,
@@ -41,7 +51,7 @@ const UserConfigSchema = new Mongoose.Schema({
     twitterPrefix: {
         type: String,
         enum: [ '', 'vx', 'fx' ],
-        default: '',
+        default: 'vx',
     },
     showLevelUp: {
         type: Boolean,

@@ -1,5 +1,4 @@
 const { serverid } = require('../../localdata/config.json'); //Variables globales
-const { Permissions } = require('discord.js');
 const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
 
 const options = new CommandOptions()
@@ -16,18 +15,15 @@ const command = new CommandManager('decir', flags)
     )
     .setLongDescription('Me hace decir lo que quieras que diga')
     .setOptions(options)
-    .setExecution(async (request, args, isSlash) => {
-        const deleteFlag = options.fetchFlag(args, 'borrar');
+    .setExperimentalExecution(async (request, args) => {
+        const deleteFlag = args.parseFlag('borrar');
 
-        if(!(args.data ?? args).length)
+        if(args.empty)
             return request.reply({ content: '⚠️ tienes que especificar lo que quieres que diga.' });
 
-        const sentence = isSlash ? args.getString('mensaje') : args.join(' ');
-        if(request.guild.id === serverid.saki && sentence.toLowerCase().indexOf(/h+(\W*_*)*o+(\W*_*)*u+(\W*_*)*r+(\W*_*)*a+(\W*_*)*i+(\W*_*)*/g) !== -1)
-            return request.reply({ content: 'No me hagai decir weas de hourai, ¿yapo? Gracias <:haniwaSmile:1107847987201318944>' });
-        
-        if(!isSlash && deleteFlag && request.deletable && request.guild.members.me.permissions.has('ManageMessages'))
-            request.delete();
+        const sentence = args.getString('mensaje', true);
+        if(deleteFlag && request.guild.members.me.permissions.has('ManageMessages'))
+            request.delete().catch(_ => _);
         
         return request.reply({ content: sentence.split(/ +#[Nn] +/g).join('\n') });
     });

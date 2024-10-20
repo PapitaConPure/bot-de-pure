@@ -1,8 +1,8 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { fetchMember } = require('../../func');
+const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { hourai } = require('../../localdata/config.json');
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require("../Commons/commands");
 const { CommandPermissions } = require('../Commons/cmdPerms');
+const { makeButtonRowBuilder } = require('../../tsCasts');
 
 const hangedDollId = hourai.hangedRoleId;
 
@@ -23,12 +23,9 @@ const command = new CommandManager('colgar', tags)
 	)
 	.setPermissions(perms)
 	.setOptions(options)
-	.setExecution(async (request, args) => {
-		if(!request.guild.members.me.permissions.has('ManageRoles'))
-			return request.reply({ content: '⚠️ ¡No tengo permiso para hacer eso!', ephemeral: true });
-
+	.setExperimentalExecution(async (request, args) => {
 		const user = request.user;
-		const everyone = options.fetchFlag(args, 'todos');
+		const everyone = args.parseFlag('todos');
 
 		if(everyone) {
 			const embed = new EmbedBuilder()
@@ -36,8 +33,7 @@ const command = new CommandManager('colgar', tags)
 				.addFields({ name: 'Confirmar operación', value: '¿Quieres colgar o descolgar a todos?' });
 			return request.reply({
 				embeds: [embed],
-				// @ts-ignore
-				components: [new ActionRowBuilder().addComponents(
+				components: [makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId(`colgar_addHanged_${user.id}`)
 						.setLabel('Colgar')
@@ -48,14 +44,13 @@ const command = new CommandManager('colgar', tags)
 						.setStyle(ButtonStyle.Secondary),
 					new ButtonBuilder()
 						.setCustomId(`colgar_cancelHanged_${user.id}`)
-						.setLabel('Cancelar')
+						.setEmoji('936531643496288288')
 						.setStyle(ButtonStyle.Secondary),
 				)],
 			});
 		}
 
-		const member = CommandOptionSolver.asMember(await options.in(request).fetchParam(args, 'miembro', false));
-
+		const member = args.getMember('miembro', false);
 		if(!member)
 			return request.reply({ content: '⚠️ Debes indicar un miembro a colgar (y no, "ESTAAAAAA" no es un miembro válido)', ephemeral: true });
 

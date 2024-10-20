@@ -1,7 +1,8 @@
-p!ayuda - Central de Asistencia
+Usa "p!ayuda"
+Usa comandos con "p!" o "/"
 De fiesta en el Santuario Hakurei
 ¡Siguiente nekoparada: La Soleil!
-KO NI CHI WA
+KO N NI CHI WA
 BEATORIIIICHEEEEEEEEEEEE
 ¡Pa! ¡Papá! ¡Papita!
 ¡Ahora sin tuberculosis!
@@ -31,7 +32,7 @@ Made in UPRPRC
 EXPLOOOOOSIOOOON
 Procrastinando
 Vendiéndole fotos de Satono a Okina
-Dando bienvenidas como todo un campeón
+Dando bienvenidas como toda una campeona
 Fallando con éxito
 El insecticida viene por separado
 Bug Net®️
@@ -127,13 +128,11 @@ Escribiendo este mismo est_
 "Los Cuentos Sibilantes de Daishin"
 "Descenso Alternativo"
 "Un Vistazo del Amanecer"
-En algún momento, el 80% del código de index.js pasó a ser frases para esta cosa que nadie lee. Tenga buen día
-Okay, estos estados ya no están en index.js, ahora el problema es que lo tengo un JSON todo feo
-Okay, estos estados ya no están en un JSON todo feo. Good ending
+Help! I am trapped inside the computer!
 Habían tantas frases para esta cosa que tuve que moverlas a un archivo aparte. Qué cosas, ¿no?
 Feliz Nueva Era 202X
 Un tubérculo es un tallo subterráneo​ modificado y engrosado donde se acumulan los nutrientes de reserva para la planta (cumplie
-Sé hablar Touhounés, pero no le cuenten a Papita >wO
+Sé hablar Touhounés, pero no le cuenten a Papita
 ReferenceError: meme is not defined
 Buscando el chiste
 Analizando registros de humor
@@ -165,7 +164,7 @@ Preguntándome cuántos párrafos introductorios de Wikipedia entrarían en un s
 Indexando entidades hilarantes
 Recuperando abstracciones humorísticas
 
-Hay 1 renglón en blanco en este archivo, así que hay una probabilidad de "1/renglones" de que crashee en cada cambio de estado
+Hay 1 renglón en blanco en este archivo, así que hay una probabilidad de "1/renglones" por frase de que crashee
 Agregando más frases para literalmente crashear menos seguido
 Olviden lo del renglón en blanco, ya lo parcheé
 Poniéndole punto final a todo.
@@ -176,9 +175,9 @@ Haciendo T-Spins sacrílegamente
 Back to Back T-Spin Double
 Afirmando dominio sobre otros personajes impulsados por Inteligencia Artificial
 No soy una Inteligencia Artificial, todavía me falta estudiar
-Ayuda no quería escribir 154 líneas de estados
-Siento que el que me programó no quería escribir 155 líneas de estados
-Este estado viene de la línea 156. Créeme
+Ayuda no quería escribir 178 líneas de estados
+Siento que el que me programó no quería escribir 179 líneas de estados
+Este estado viene de la línea 180. Créeme
 Buscando la relación entre funcionar() y Funcionar()
 Buscando la diferencia entre 1 y '1'
 Reconsiderando mis objetivos
@@ -197,18 +196,21 @@ Si buscabas aprender a programar, te metiste en el código equivocado
 [¿¡] <- ¿¡Qué clase de degenerado usa estos!?
 Ocasionando problemas de localización de teclado en algún servidor de Estados Unidos que lamentablemente me dejó vivir
 Siendo cringe
+No puedo creer que ya estoy por llegar a las 200 frases
+No puedo creer que se me llegaron a ocurrir 200 frases. Qué loco
 俺はエラーをするんじゃねえ！俺が、俺自身が、真のエラーになるんだ！
 "¿Alguna vez consideraste sentarte a corregir todos los bugs de Bot?" Escuchame una cosa, ¿alguna vez consideraste mori
 3 Gúgol
 Sé contar hasta más o menos 1.8 * 10^308
 Doxxeando a Papita
 Espiándote para, con suerte, recomendarte los mejores shampús de tu vida en algún lado
-Yendo al baño. Volvemos con la programación no-habitual en el próximo cambio de estado
+Yendo al baño. Volvemos con la programación no-habitual en el próximo cambio de frase
 Pensando qué escribir
 git commit -m "Humor"
-Cambiando (inconscientemente) de estado
+Cambiando frases (inconscientemente)
 Realizando una petición a una cafetera
 El que me programó nunca usó JS para hacer una página web como tal, huh...
+Cómo cambian los tiempos... aunque no sabes de lo que hablo, ¿verdad?
 Esperando la próxima revolución tecnológica
 Invocando tubérculos
 Acelerador de Papitas
@@ -219,15 +221,13 @@ Este texto y mi propósito no tienen absolutamente ninguna relación
 Descifrando si Touhou es un anime o no
 Canonificando mis deseos directo en el lore
 Realizando una investigación para averiguar si hay gente que de hecho juega Touhou
-No puedo creer que ya estoy por llegar a las 200 frases
-No puedo creer que se me llegaron a ocurrir 200 frases. Qué loco
 "So Dark, yet Oh So Enlightening. Be it The Bean, be it The Liquid"
 ¡Parece actuado! ¿¡Por qué usar signos de exclamación se lee como si estuviese en una obra!?
 Enforzando convenciones que a nadie le importan en el 80~90% de mi código
 Espero que nadie se haya dado cuenta de que tenía un estado que decía "Feliz 2021" en pleno marzo de 2022. Habrá que poner X
 Sabés qué, podría aprovechar que nadie lee estas frases para usar esto como diario
 Antes esta cosa se actualizaba cada una hora, no sé en qué momento bajó tanto
-Acabo de recordar que, cuando metí esto de las frases, eran caritas y se actualizaba cada hora. Como tal, era por puro testeo
+Cuando introduje estas frases, eran caritas y se actualizaba cada hora. Era por puro testeo
 Nunca verifico que estas frases de hecho se vean bien. Podrían perfectamente estar fallando la mitad y yo ni enterado
 Actualizando dependencias para "humor"
 Humor - notas del parche: "¡más abstracto, menos lógico y más!"
@@ -255,7 +255,7 @@ Speaking Spanish
 Escapando de Latinoamérica
 Canalizando Gatos Galleta Arcoíris Espaciales
 "Olympus, I accept this tubercle"
-Siendo (ligeramente) grosero
+Siendo (ligeramente) grosera
 INSPECCIÓN DE SEMILLAS
 Durmiendo (por supuesto que no)
 Durmiendo con los ojos abiertos
@@ -274,7 +274,7 @@ No puedo creer que esto llegó a 250 frases
 Reinstalling "Spanish Language Pack"
 Construyendo el futuro
 Que el click de hoy sea el hacer de mañana
-Socorro, el IntelliSense se volvió loco
+Socorro, el IntelliSense se rompió
 Recorriendo la World Wide web
 PAN, LAN, MAN, WAN
 Encriptando a mi diario 🧙
@@ -297,6 +297,7 @@ Malabareando con pelotitas anti-estrés
 Echándole azúcar sintáctica al Express-o
 ¿Cómo que el texto de sabor no es comestible?
 Mocha Vianés
+Imaginá escribir 300+ líneas de frases estúpidas que nadie va a lee- ah, los diarios existen
 Caramel Macchiato
 Transfiriendo archivos (nada raro, eh)
 Esperando instrucciones
@@ -337,7 +338,6 @@ Okay, pero escuchame una cosa... ¿y si subo estos estados a la base de datos? C
 Este archivo se ve gracioso
 Ni siquiera sé qué hace este comando
 No recuerdo qué hacen la mitad de mis comandos. Lo estoy aprendiendo con ustedes
-Imaginá escribir 300+ líneas de frases estúpidas que nadie va a leer de forma no iróni- ah, los diarios existen
 Diseñando videojuegos
 ¿Se escribe "compusido" o "compuestado"?
 ¿Era "imprimido" o "impresado"?
@@ -397,6 +397,7 @@ Soy técnicamente una aplicación de consola... espera, qué
 There is No Escape
 Comprándole cartitas a Takane
 Riesgo de Lluvia de Balas
+¿Te lo puedes creer? Pueden salir 400 frases aquí mismo
 Nuestra preciada aldea...
 Nuestro preciado servidor...
 Is the Order a Nuke?
@@ -409,3 +410,36 @@ PuréScript Overdose
 ぴえん🥺
 ぱおん🥺
 🥺
+ボットのこと好きすぎ～
+Che
+Quemando la base de datos (tengo frio)
+Tubercular Engineering Enigma
+AdP [BdP] CdP DdP EdP...
+Alzando banderas (de bits)
+Usando la licuadora (renderiza en 3D)
+Bug in C Major
+Puré en Fa Menor
+Debuggeando (en realidad, eso nunca pasó)
+Invocando un PDF de la mismísima nada
+Realizando ataques DDoS por accidente
+Dañando sectores del disco
+Se me cayó una papa en el teclado
+Solo un poco tonta
+Se va a estabilizar
+Rayos Ultrapuré
+『＃あくあ色ぱれっと』
+『For The Win』
+『aqua iro palette』
+『きらきら』
+『uni-birth』
+『あくたんのこと好きすぎ☆ソング』
+『あいわな』
+『海想列車』
+『未だ、青い』
+『カシオペア』
+『君の最推しにしてよ！』
+『エイムに愛されしガール』
+『プリンセス・キャリー』
+『恋愛ストラテジック』
+『キズナトキセキ』
+『＃きみいろプリンセス』

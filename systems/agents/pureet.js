@@ -1,92 +1,76 @@
-const { sleep } = require('../../func.js');
+const { Message, ChannelType } = require('discord.js');
+const { addAgentMessageOwner } = require('./discordagent.js');
+const { addMessageCascade } = require('../../events/onMessageDelete.js');
 
-const { Message, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessagePayload, EmbedBuilder, AttachmentBuilder } = require('discord.js');
-const { DiscordAgent, addAgentMessageOwner } = require('./discordagent.js');
-
-const tweetRegex = /<?(https?:\/\/)(www.)?(twitter|x).com\/(\w+)\/status\/(\d+)>?/g;
+const tweetRegex = /(?:<|\|{2})? ?((?:https?:\/\/)(?:www.)?(?:twitter|x).com\/(\w+)\/status\/(\d+)(?:\/([A-Za-z]+))?) ?(?:>|\|{2})?/g;
+const configProps = {
+	vx: { name: 'vxTwitter', service: 'https://fixvx.com' },
+	fx: { name: 'fixTwitter', service: 'https://fxtwitter.com' },
+};
 
 /**
  * Detecta enlaces de Tweeter en un mensaje y los reenvía con un Embed corregido, a través de un Agente Webhook.
  * @param {Message<true>} message El mensaje a analizar
- * @param {String} configPrefix El mensaje a analizar
+ * @param {''|'vx'|'fx'} configPrefix El mensaje a analizar
  */
 const sendTweetsAsWebhook = async (message, configPrefix) => {
 	if(configPrefix === '') return;
 
 	const { content, channel, author } = message;
-	if(!message.guild.members.me.permissionsIn(channel).has([ /*'ManageWebhooks', */'SendMessages', 'AttachFiles' ]))
+	
+	if(!message.guild.members.me.permissionsIn(channel).has([ 'SendMessages', 'ManageMessages', 'AttachFiles' ]))
 		return false;
 
-	const matches = content.match(tweetRegex);
+	if(channel.type === ChannelType.PublicThread) {
+		const { parent } = channel;
+		if(parent.type === ChannelType.GuildForum && (await channel.fetchStarterMessage()).id === message.id)
+			return false;
+	}
 
-	if(matches === null)
-		return false;
-
-	const tweetUrls = matches.filter(u => !(u[0].startsWith('<') && u[0].endsWith('>')));
+	const tweetUrls = [ ...content.matchAll(tweetRegex) ]
+		.filter(u => !(u[0].startsWith('<') && u[0].endsWith('>')))
+		.slice(0, 16);
 
 	if(!tweetUrls.length)
 		return false;
 
-	const configProps = {
-		vx: { name: 'vxTwitter', service: 'https://fixvx.com' },
-		fx: { name: 'fixTwitter', service: 'https://fxtwitter.com' },
-	};
 	const configProp = configProps[configPrefix];
-
 	if(configProp == undefined)
 		return false;
 	
-	let service = configProp.service;
-
+	let warnAboutVXNotSupportingTranslationUrls = false;
+	const service = configProp.service;
+	const formattedTweetUrls = tweetUrls
+		.map(u => {
+			const [ match, _url, artist, id, ls ] = u;
+			const spoiler = (match.startsWith('||') && match.endsWith('||'))
+				? '||'
+				: '';
+			const langSuffix = ls ? `/${ls}` : '';
+			warnAboutVXNotSupportingTranslationUrls ||= (ls && configPrefix === 'vx');
+			return `${spoiler}[${artist}/${id}](${service}/${artist}/status/${id}${langSuffix})${spoiler}`;
+		});
+	
 	try {
-		const fixedMessage = await message.reply({ content: message.content.replace(/https:\/\/(twitter|x).com/g, service) });
-		await sleep(750 + fixedMessage.embeds.length * 450);
+		let content = formattedTweetUrls.join(' ');
 
-		const timestamps = message.embeds
-			.filter(embed => embed.timestamp)
-			.map(embed => new Date(embed.timestamp));
+		if(warnAboutVXNotSupportingTranslationUrls)
+			content += '\n-# ⚠️️ El conversor de vxTwitter todavía no tiene una característica de traducción';
 
-		const videos = [];
-		fixedMessage.embeds = fixedMessage.embeds.map(embed => {
-			const e = EmbedBuilder.from(embed);
-
-			if(embed.url.startsWith(service)) {
-				e.setAuthor(null)
-					.setColor(0x1da0f2)
-					.setFooter({ text: configProp.name, iconURL: 'https://i.imgur.com/qJmRBJZ.png' })
-					.setTimestamp(timestamps.shift() ?? null);
-
-				if(embed.thumbnail?.url) {
-					e.setThumbnail(null)
-					 .setImage(embed.thumbnail.url);
-				}
-			}
-			
-			if(embed.video?.url) {
-				videos.push(`[Video ${videos.length + 1}](${embed.url})`);
-				return null;
-			}
-
-			return e;
-		}).filter(embed => embed);
-
-		let secondarySent = null;
-		const agent = await (new DiscordAgent().setup(channel));
-		agent.setUser(author);
-		if(fixedMessage.embeds.length > 0) {
-			const fixedSent = await agent.sendAsUser(fixedMessage, false);
-			if(videos.length > 0)
-				secondarySent = await (fixedSent ?? message).reply({ content: videos.join(', ') });
-		} else {
-			secondarySent = await message.reply({ content: fixedMessage.content });
-		}
-
-		if(secondarySent != null)
-			addAgentMessageOwner(secondarySent);
+		const [ sent ] = await Promise.all([
+			message.reply({ content }),
+			message.suppressEmbeds(true),
+		]);
 		
-		await fixedMessage.delete().catch(_ => null);
+		setTimeout(() => {
+			if(!message?.embeds) return;
+			message.suppressEmbeds(true).catch(_ => undefined);
+		}, 3000);
 
-		return true;
+		await Promise.all([
+			addAgentMessageOwner(sent, author.id),
+			addMessageCascade(message.id, sent.id, new Date(+message.createdAt + 4 * 60 * 60e3)),
+		]);
 	} catch(e) {
 		console.error(e);
 	}

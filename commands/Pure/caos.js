@@ -1,4 +1,4 @@
-const { readdirSync } = require('fs'); //Integrar operaciones sistema de archivos de consola
+const { readdir } = require('fs/promises'); //Integrar operaciones sistema de archivos de consola
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
@@ -15,9 +15,9 @@ const command = new CommandManager('caos', tags)
 	.setLongDescription('Para activar o desactivar comandos caóticos en un servidor')
 	.setPermissions(perms)
 	.setOptions(options)
-	.setExecution(async (request, args) => {
-		const activate = options.fetchFlag(args, 'activar');
-		const deactivate = options.fetchFlag(args, 'desactivar');
+	.setExperimentalExecution(async (request, args) => {
+		const activate = args.parseFlag('activar');
+		const deactivate = args.parseFlag('desactivar');
 		const guildsearch = { guildId: request.guild.id };
 		const gcfg = (await GuildConfig.findOne(guildsearch)) || new GuildConfig(guildsearch);
 
@@ -33,7 +33,7 @@ const command = new CommandManager('caos', tags)
 			return request.reply({ content: '😴 Se desactivaron los comandos caóticos' });
 		}
 
-		const cfiles = readdirSync('./commands/Pure').filter(file => file.endsWith('.js'));
+		const cfiles = (await readdir('./commands/Pure')).filter(file => file.endsWith('.js'));
 		const chaosnames = [];
 		for(const file of cfiles) {
 			const command = require(`../../commands/Pure/${file}`);

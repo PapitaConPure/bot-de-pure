@@ -7,10 +7,12 @@ const { CommandPermissions } = require('../Commons/cmdPerms.js');
 let crazyBackupId = hourai.crazyBackupChannelId;
 
 const perms = new CommandPermissions([ 'ManageGuild', 'ManageChannels', 'ManageMessages' ]);
+
 const flags = new CommandTags().add(
 	'MOD',
-	'HOURAI',
+	//'HOURAI',
 );
+
 const command = new CommandManager('exhibir', flags)
 	.setAliases(
 		'exhibirpins', 'migrarpins',
@@ -23,9 +25,9 @@ const command = new CommandManager('exhibir', flags)
 		'Esto eliminará todos los pins en el canal luego de reenviarlos',
 	)
 	.setPermissions(perms)
-	.setExecution(async (request) => {
+	.setExperimentalExecution(async request => {
 		const pinnedMessages = await request.channel.messages.fetchPinned();
-		const user = request.author ?? request.user;
+		const user = request.user;
 
 		const embed = new EmbedBuilder()
 			.setTitle('Exhibir pins')
@@ -42,7 +44,7 @@ const command = new CommandManager('exhibir', flags)
 					.setStyle(ButtonStyle.Danger),
 				new ButtonBuilder()
 					.setCustomId(`exhibir_cancelFlush_${user.id}`)
-					.setLabel('Cancelar')
+					.setEmoji('936531643496288288')
 					.setStyle(ButtonStyle.Secondary),
 			)],
 			ephemeral: true,
@@ -56,8 +58,8 @@ const command = new CommandManager('exhibir', flags)
 		const { channel } = interaction;
 		const [ pinnedMessages, backupChannel ] = await Promise.all([
 			(await channel.messages.fetchPinned()).reverse(),
-			interaction.guild.channels.fetch(crazyBackupId),
-			// interaction.guild.channels.fetch('870347940181471242'), //Puré I
+			///**@type {Promise<import('discord.js').GuildTextBasedChannel>}*/(interaction.guild.channels.fetch(crazyBackupId)),
+			/**@type {Promise<import('discord.js').GuildTextBasedChannel>}*/(interaction.guild.channels.fetch('1232090120581156905')), //Puré I
 		]);
 
 		if(!pinnedMessages?.size)
@@ -69,16 +71,22 @@ const command = new CommandManager('exhibir', flags)
 		const agent = await (new DiscordAgent().setup(backupChannel));
 		let flushing = [];
 
-		for(const [_, message] of pinnedMessages.entries()) {
+		for(const message of pinnedMessages.values()) {
 			const formattedMessage = message;
 			message.embeds ??= [];
+			//@ts-expect-error
 			message.files ??= [];
+
 			formattedMessage.embeds = message.embeds.map(embed => {
+				//@ts-expect-error
 				if(embed.type === 'video')
 					return null;
 				
+				//@ts-expect-error
 				if(embed.type === 'image' && embed.thumbnail && !embed.image) {
+					//@ts-expect-error
 					embed.image = embed.thumbnail;
+					//@ts-expect-error
 					embed.thumbnail = null;
 				}
 				
@@ -86,25 +94,23 @@ const command = new CommandManager('exhibir', flags)
 			}).filter(embed => embed);
 			
 			if(message.embeds.length < 10) {
-				formattedMessage.embeds.push(
+				let text = '\n-# ';
+
+				const fetchedMessage = await message.fetch(true);
+				if(fetchedMessage.reactions.cache.size)
+					text += `${fetchedMessage.reactions.cache.first(3).map(reaction => `${reaction.emoji} ${reaction.count}`).join(' ')} • `;
+
+				text += `[#${channel.name}](<${message.url}>) • <t:${Math.round(message.createdTimestamp / 1000)}:F>`;
+				
+				/**@type {Array<EmbedBuilder>}*/(/**@type {Array<unknown>}*/(formattedMessage.embeds)).push(
 					new EmbedBuilder()
 						.setColor(Colors.Gold)
-						.setDescription(`Destacado en ${channel}`)
-						// .setTimestamp(message.createdTimestamp),
+						.setDescription(text),
 				);
-				// message.channel.messages.fetch(message.id)
-				// .then(original => {
-				// 	console.log(original.reactions.cache);
-				// 	if(message.reactions.cache.size)
-				// 		console.log(message.reactions.cache.first(3));
-				// 		formattedMessage.embeds[embedsCount - 1].setFooter({
-				// 			text: message.reactions.cache.first(3).map(reaction => `${reaction.emoji} ${reaction.count}`).join(' ')
-				// 		});
-				// })
 			}
 
-			agent.setMember(message.member ?? message.author);
-			const sent = await agent.sendAsUser(formattedMessage);
+			message.member ? agent.setMember(message.member) : agent.setUser(message.author);
+			const sent = await agent.sendAsUser(/**@type {import('discord.js').WebhookMessageCreateOptions}*/(/**@type {unknown}*/(formattedMessage)));
 			if(!sent)
 				interaction.channel.send({ content: '⚠️ Se omitió un pin debido a un error al trasladarlo' });
 			else

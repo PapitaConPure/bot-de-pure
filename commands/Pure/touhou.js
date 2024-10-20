@@ -15,6 +15,6 @@ const command = new CommandManager('touhou', flags)
 		'**Nota:** en canales NSFW, los resultados serán NSFW',
 	)
 	.setOptions(options)
-	.setExecution((request, args, isSlash) => searchAndReplyWithPost(request, args, isSlash, options, { cmdtag: 'touhou', sfwtitle: 'Tohas uwu', nsfwtitle: 'Tohitas O//w//O' }));
+	.setExecution((request, args, isSlash) => searchAndReplyWithPost(request, args, isSlash, options, { cmdtag: 'touhou', sfwtitle: 'Tohas', nsfwtitle: 'Tohitas' }));
 
 module.exports = command;

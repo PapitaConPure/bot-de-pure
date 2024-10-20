@@ -1,13 +1,14 @@
 const { GuildMember } = require('discord.js');
 const { fetchMember, regroupText } = require('../../func');
-const { CommandTags, CommandOptions, CommandManager } = require('../Commons/commands');
+const { CommandTags, CommandOptions, CommandManager, CommandOptionSolver } = require('../Commons/commands');
 const { CommandPermissions } = require('../Commons/cmdPerms');
+const { Translator } = require('../../internationalization');
 
 const perms = new CommandPermissions('ModerateMembers');
 
 const options = new CommandOptions()
 	.addParam('duración', 'NUMBER', 'para especificar el tiempo en minutos')
-	.addParam('miembros', 'USER', 'para aislar miembros', { poly: 'MULTIPLE', polymax: 8 });
+	.addParam('miembros', 'MEMBER', 'para aislar miembros', { poly: 'MULTIPLE', polymax: 8 });
 	
 const flags = new CommandTags().add('MOD');
 const command = new CommandManager('aislar', flags)
@@ -19,46 +20,44 @@ const command = new CommandManager('aislar', flags)
 	)
 	.setPermissions(perms)
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash) => {
-		if(!request.guild.members.me.permissions.has('ModerateMembers'))
-			return request.reply({ content: '⚠️ ¡No tengo permiso para hacer eso!', ephemeral: true });
+	.setExperimentalExecution(async (request, args) => {
+		const translator = await Translator.from(request.member);
 
-		if(!isSlash && !args.length)
-			return request.reply({ content: '⚠️ Debes indicar la duración del castigo en minutos', ephemeral: true });
+		if(args.empty)
+			return request.reply({ content: translator.getText('aislarNoTimeProvided'), ephemeral: true });
 
-		let duration = isSlash ? args.getNumber('duración') : +(args.shift());
-		if(duration === undefined || duration < 0 || isNaN(duration))
-			return request.reply({ content: '⚠️ Debes especificar la duración del aislamiento en minutos\nIngresa 0 para revocarlo', ephemeral: true });
+		let duration = args.getNumber('duración');
+		if(isNaN(duration) || duration < 0)
+			return request.reply({ content: translator.getText('aislarInvalidTime'), ephemeral: true });
 
 		if(duration === 0) 
 			duration = null;
 		else 
 			duration = duration * 60e3;
-		
-		if(!isSlash && !args.length)
-			return request.reply({ content: '⚠️ Debes indicar un usuario luego de la duración', ephemeral: true });
 
-		/**@type {Array<GuildMember>}*/
-		const members = isSlash
-			? options.fetchParamPoly(args, 'miembros', args.getMember, [])
-			: regroupText(args).map(data => fetchMember(data, request)).filter(member => member);
-		
+		args.ensureRequistified();
+		const members = CommandOptionSolver.asMembers(args.parsePolyParamSync('miembros'));
 		if(!members.length)
-			return request.reply({ content: '⚠️ Debes mencionar al menos un miembro a aislar', ephemeral: true });
+			return request.reply({ content: translator.getText('aislarNoMembersMentioned'), ephemeral: true });
 
-		const succeeded = [];
-		const failed = [];
+		if(members.some(member => !member))
+			await request.reply({ content: translator.getText('aislarSomeMembersWereInvalid') });
 
-		await Promise.all(members.map(member => 
-			member.timeout(duration, `Aislado por ${request.member.user.tag}`)
-			.then(_ => succeeded.push(member))
-			.catch(_ => failed.push(member))
+		const succeeded = /**@type {Array<GuildMember>}*/([]);
+		const failed    = /**@type {Array<GuildMember>}*/([]);
+
+		await Promise.all(members
+			.filter(member => member)
+			.map(member => member
+				.timeout(duration, `Aislado por ${request.member.user.tag}`)
+				.then(_ => succeeded.push(member))
+				.catch(_ => failed.push(member))
 		));
 		
 		if(!succeeded.length)
-			return request.reply({ content: '⚠️ No pude actualizar ninguno de los miembros mencionados. Revisa que tenga permisos para administrar miembros' });
+			return request.reply({ content: translator.getText('aislarNoUpdatedMembers') });
 		
-		const membersList = members => members.map(member => member.user.tag).join(', ');
+		const membersList = (/**@type {Array<GuildMember>}*/members) => members.map(member => member.user.tag).join(', ');
 		return request.reply({
 			content: [
 				duration

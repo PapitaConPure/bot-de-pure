@@ -9,18 +9,17 @@ const command = new CommandManager('g-índice', flags)
 		'g-ind', 'g-i',
 	)
 	.setLongDescription(
-		`Esta es la página de introducción de Bot de Puré. Si ni sabes del todo cómo usar \`${p_pure().raw}ayuda\`, esto puede serte útil`,
+		'👋 ¡Buenas!',
 		'',
-		'En general, usas comandos para hacer cosas y en algunos casos querrás ingresar `<parámetros>` y/o `--banderas`',
-		'Los `<parámetros>` y las `--banderas` son solo 2 formas de similares y a la vez diferentes manipular un comando',
-		'Basándose en conveniencia de uso, algunos comportamientos se definirán con `<uno>` u con `--otro`.',
+		'Los comandos de Bot de Puré vienen en 2 formas:',
+		'* **Comando de Mensaje** — se usan con `p!` al inicio de un mensaje',
+		'* **Comandos Slash** — se usan como un comando convencional, con `/`',
 		'',
-		'Referencia:',
-		`\`${p_pure().raw}ayuda g-parametros\`: introducción a \`<parámetros>\``,
-		`\`${p_pure().raw}ayuda g-opciones\`: introducción a opciones y \`--banderas\``,
-		`\`${p_pure().raw}ayuda g-tipos\`: introducción a _(tipos)_ y definiciones de _(tipos)_`,
+		'Los comandos suelen tener **opciones**: `<parámetros>` y/o `--banderas`.',
+		'Los parámetros y las banderas son dos formas similares y a la vez diferentes manipular un comando.',
+		'En Comandos Slash no hay mucha diferencia, pero con Comandos de Mensaje los parámetros siguen un cierto orden mientras que las banderas pueden indicarse como sea',
 		'',
-		'_"¿Quién necesita Wikipedia cuando tenés un Bot chatarra?" ~Papita_',
+		'Usa el menú de abajo para aprender más',
 	);
 
 module.exports = command;

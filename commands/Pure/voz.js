@@ -1,19 +1,22 @@
-const PureVoice = require('../../localdata/models/purevoice.js');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, MessageCollector, ButtonStyle, Colors, ChannelType } = require('discord.js');
+const { PureVoiceModel: PureVoice, PureVoiceSessionModel: PureVoiceSession } = require('../../localdata/models/purevoice.js');
+const { PureVoiceSessionMember, getFrozenSessionAllowedMembers, makePVSessionName } = require('../../systems/others/purevoice.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, MessageCollector, ButtonStyle, Colors, ChannelType, Collection, ModalBuilder, TextInputStyle, TextInputBuilder } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { isNotModerator, defaultEmoji } = require('../../func.js');
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
+const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts.js');
+const { Translator } = require('../../internationalization');
 
 const cancelbutton = (id) => new ButtonBuilder()
 	.setCustomId(`voz_cancelWizard_${id}`)
-	.setLabel('Cancelar')
+	.setEmoji('936531643496288288')
 	.setStyle(ButtonStyle.Secondary);
 const collectors = {};
+
 /**
- * @param {Number} stepCount
+ * @param {String} iconUrl
  * @param {String} stepName
  * @param {import('discord.js').ColorResolvable} stepColor
- * @param {String} route
  */
 const wizEmbed = (iconUrl, stepName, stepColor) => {
 	//const routes = {
@@ -25,6 +28,27 @@ const wizEmbed = (iconUrl, stepName, stepColor) => {
 		.setColor(stepColor)
 		.setAuthor({ name: 'Asistente de Configuración de Sistema PuréVoice', iconURL: iconUrl })
 		.setFooter({ text: stepName });
+};
+
+/**@param {import('../Commons/typings.js').ComplexCommandRequest} request*/
+const generateFirstWizard = (request) => {
+	if(isNotModerator(request.member)) return request.reply({ content: '❌ No tienes permiso para hacer esto', ephemeral: true });
+	const wizard = wizEmbed(request.client.user.avatarURL(), '1/? • Comenzar', Colors.Aqua)
+		.addFields({
+			name: 'Bienvenido',
+			value: 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes! Solo sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras',
+		});
+	const uid = request.userId;
+	return request.reply({
+		embeds: [wizard],
+		components: [new ActionRowBuilder().addComponents(
+			new ButtonBuilder()
+				.setCustomId(`voz_startWizard_${uid}`)
+				.setLabel('Comenzar')
+				.setStyle(ButtonStyle.Primary),
+			cancelbutton(uid),
+		)],
+	});
 };
 
 const options = new CommandOptions()
@@ -42,37 +66,15 @@ const command = new CommandManager('voz', flags)
 	.setBriefDescription('Para inyectar un Sistema PuréVoice en una categoria por medio de un Asistente')
 	.setLongDescription('Para inyectar un Sistema PuréVoice en una categoria. Simplemente usa el comando y sigue los pasos del Asistente para configurar todo')
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash = false) => {
-		const generateWizard = options.fetchFlag(args, 'asistente');
-	
-		if(generateWizard) {
-			//Inicializar instalador PuréVoice
-			if(isNotModerator(request.member)) return request.reply({ content: '❌ No tienes permiso para hacer esto', ephemeral: true });
-			const wizard = wizEmbed(request.client.user.avatarURL(), '1/? • Comenzar', Colors.Aqua)
-				.addFields({
-					name: 'Bienvenido',
-					value: 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes! Solo sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras',
-				});
-			const uid = (request.author ?? request.user).id;
-			return request.reply({
-				embeds: [wizard],
-				components: [new ActionRowBuilder().addComponents(
-					new ButtonBuilder()
-						.setCustomId(`voz_startWizard_${uid}`)
-						.setLabel('Comenzar')
-						.setStyle(ButtonStyle.Primary),
-					cancelbutton(uid),
-				)],
-			});
-		}
+	.setExperimentalExecution(async (request, args) => {
+		if(args.parseFlag('asistente'))
+			return generateFirstWizard(request);
 		
 		//Cambiar nombre de canal de voz de sesión
 		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda voz\` para más información`;
-		const emoteString = options.fetchFlag(args, 'emote', { fallback: '💠' });
+		const emoteString = args.parseFlagExpr('emote', x => `${x}`, '💠');
 		const sessionEmote = defaultEmoji(emoteString);
-		const sessionName = isSlash
-			? args.getString('nombre')
-			: args.join(' ');
+		const sessionName = args.getString('nombre', true);
 		
 		if(!sessionName)
 			return request.reply({
@@ -101,7 +103,6 @@ const command = new CommandManager('voz', flags)
 			});
 
 		//Comprobar si se está en una sesión
-		/**@type {import('discord.js').VoiceState}*/
 		const voiceState = request.member.voice;
 		const warnNotInSession = () => request.reply({
 			content: [
@@ -110,10 +111,11 @@ const command = new CommandManager('voz', flags)
 			].join('\n'),
 			ephemeral: true,
 		}).catch(console.error);
-		if(!voiceState.channelId)
+
+		if(!voiceState?.channelId)
 			return warnNotInSession();
 
-		const createInvite = options.fetchFlag(args, 'invitar');
+		const createInvite = args.parseFlag('invitar');
 
 		if(createInvite) {
 			const invite = await request.guild.invites.create(voiceState.channel, { maxAge: 5 * 60 }).catch(_ => null);
@@ -136,24 +138,24 @@ const command = new CommandManager('voz', flags)
 		//Modificar sesión y confirmar
 		const pv = await PureVoice.findOne({ guildId: request.guildId });
 		if(!pv) return warnNotInSession();
-		const sessionIndex = pv.sessions.findIndex(session => session.voiceId === voiceState.channelId);
-		const session = pv.sessions[sessionIndex];
+		const sessionId = pv.sessions.find(sid => sid === voiceState.channelId);
+		if(!sessionId) return warnNotInSession();
+		const session = await PureVoiceSession.findOne({ channelId: sessionId });
 		if(!session) return warnNotInSession();
-		const { voiceId, roleId, nameChanged } = session;
-		if((Date.now() - nameChanged) < 60e3 * 20)
+		const { channelId: voiceId, roleId, nameChanged } = session;
+		if((Date.now() - (+nameChanged)) < 60e3 * 20)
 			return request.reply({
 				content: [
 					'❌ Por cuestiones técnicas, solo puedes cambiar el nombre de la sesión una vez cada 20 minutos.',
-					`Inténtalo de nuevo <t:${Math.round(nameChanged / 1000 + 60 * 20)}:R>, o conéctate a una nueva sesión`,
+					`Inténtalo de nuevo <t:${Math.round(+nameChanged / 1000 + 60 * 20)}:R>, o conéctate a una nueva sesión`,
 				].join('\n'),
 			});
-		pv.sessions[sessionIndex].nameChanged = Date.now();
-		pv.markModified('sessions');
+		session.nameChanged = new Date(Date.now());
 
 		const guildChannels = request.guild.channels.cache;
 		const guildRoles = request.guild.roles.cache;
 		return Promise.all([
-			pv.save(),
+			session.save(),
 			guildChannels.get(voiceId)?.setName(`${sessionEmote}【${sessionName}】`, 'Renombrar sesión PuréVoice'),
 			guildRoles.get(roleId)?.setName(`${sessionEmote} ${sessionName}`, 'Renombrar sesión PuréVoice'),
 			request.reply({ content: '✅ Nombre aplicado', ephemeral: true }),
@@ -173,7 +175,7 @@ const command = new CommandManager('voz', flags)
 			
 		const pv = await PureVoice.findOne({ guildId: guild.id });
 		const uid = user.id;
-		const row = new ActionRowBuilder();
+		const row = makeButtonRowBuilder();
 		const isInstalled = pv && guild.channels.cache.get(pv.categoryId) && guild.channels.cache.get(pv.voiceMakerId);
 		if(!isInstalled)
 			row.addComponents(
@@ -212,7 +214,7 @@ const command = new CommandManager('voz', flags)
 				name: 'Instalación',
 				value: 'Selecciona el tipo de instalación que deseas realizar',
 			});
-		const row = new ActionRowBuilder().addComponents(
+		const row = makeButtonRowBuilder().addComponents(
 			new ButtonBuilder()
 				.setCustomId(`voz_installSystem_${authorId}_new`)
 				.setLabel('Crear categoría con PuréVoice')
@@ -257,7 +259,7 @@ const command = new CommandManager('voz', flags)
 			
 			try {
 				const voiceMaker = await interaction.guild.channels.create({
-					name: '➕ Nueva Sesión',
+					name: '➕',
 					type: ChannelType.GuildVoice,
 					parent: category.id,
 					bitrate: 64 * 1000,
@@ -313,10 +315,10 @@ const command = new CommandManager('voz', flags)
 				value: 'Menciona el nombre de la categoría antes de inyectarle PuréVoice',
 			});
 		const uid = interaction.user.id;
-		const row = new ActionRowBuilder().addComponents(
+		const row = makeButtonRowBuilder().addComponents(
 			new ButtonBuilder()
 				.setCustomId(`voz_startWizard_${uid}`)
-				.setLabel('Volver')
+				.setEmoji('934432754173624373')
 				.setStyle(ButtonStyle.Secondary),
 			cancelbutton(uid),
 		);
@@ -338,14 +340,14 @@ const command = new CommandManager('voz', flags)
 				].join('\n'),
 			});
 		const uid = interaction.user.id;
-		const row = new ActionRowBuilder().addComponents(
+		const row = makeButtonRowBuilder().addComponents(
 			new ButtonBuilder()
 				.setCustomId(`voz_deleteSystemConfirmed_${uid}`)
 				.setLabel('DESINSTALAR')
 				.setStyle(ButtonStyle.Danger),
 			new ButtonBuilder()
 				.setCustomId(`voz_startWizard_${uid}`)
-				.setLabel('Volver')
+				.setEmoji('934432754173624373')
 				.setStyle(ButtonStyle.Secondary),
 			cancelbutton(uid),
 		);
@@ -359,17 +361,20 @@ const command = new CommandManager('voz', flags)
 			return interaction.reply({ content: '❌ No puedes hacer esto', ephemeral: true });
 
 		//Eliminar Sistema PuréVoice
-		const guildQuery = { guildId: interaction.guild.id };
+		const guildQuery = { guildId: interaction.guildId };
 		const pv = await PureVoice.findOne(guildQuery);
 		if(pv) {
 			const guildChannels = interaction.guild.channels.cache;
-			await guildChannels.get(pv.voiceMakerId).delete(`PuréVoice desinstalado por ${interaction.user.tag}`);
-			await Promise.all(pv.sessions.map(({ textId, voiceId }) => Promise.all([
-				guildChannels.get(textId).delete().catch(console.error),
-				guildChannels.get(voiceId).delete().catch(console.error),
-			])));
+			await Promise.all([
+				guildChannels.get(pv.voiceMakerId)?.delete(`PuréVoice desinstalado por ${interaction.user.username}`).catch(console.error),
+				guildChannels.get(pv.controlPanelId)?.delete(`PuréVoice desinstalado por ${interaction.user.username}`).catch(console.error),
+			]);
+
+			await Promise.all([
+				PureVoiceSession.deleteMany({ channelId: { $in: pv.sessions } }),
+				PureVoice.deleteOne(guildQuery),
+			]);
 		}
-		await PureVoice.deleteOne(guildQuery);
 		
 		const deleteEmbed = wizEmbed(interaction.client.user.avatarURL(), 'Operación finalizada', Colors.Red)
 			.addFields({
@@ -393,6 +398,142 @@ const command = new CommandManager('voz', flags)
 		return interaction.update({
 			embeds: [cancelEmbed],
 			components: [],
+		});
+	})
+	.setButtonResponse(async function setSessionName(interaction) {
+		const { guildId, member } = interaction;
+        const translator = await Translator.from(member);
+
+		const warnNotInSession = () => interaction.reply({
+			content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción',
+			ephemeral: true,
+		}).catch(console.error);
+
+		const voiceChannel = member.voice?.channel;
+		if(!voiceChannel) return warnNotInSession();
+
+		const pv = await PureVoice.findOne({ guildId });
+		if(!pv) return warnNotInSession();
+
+		const sessionId = pv.sessions.find(sid => sid === voiceChannel.id);
+		if(!sessionId) return warnNotInSession();
+
+		const session = await PureVoiceSession.findOne({ channelId: sessionId });
+		if(!session) return warnNotInSession();
+		
+        const modal = new ModalBuilder()
+            .setCustomId(`voz_applySessionRename`)
+            .setTitle(translator.getText('yoVoiceAutonameModalTitle'))
+            .addComponents(
+                makeTextInputRowBuilder().addComponents(new TextInputBuilder()
+                    .setCustomId('inputName')
+                    .setLabel(translator.getText('name'))
+                    .setPlaceholder(translator.getText('yoVoiceAutonameModalNamingPlaceholder'))
+                    .setMinLength(1)
+                    .setMaxLength(24)
+                    .setRequired(true)
+					//.setValue(session.name ?? '')
+                    .setStyle(TextInputStyle.Short)),
+                makeTextInputRowBuilder().addComponents(new TextInputBuilder()
+                    .setCustomId('inputEmoji')
+                    .setLabel(translator.getText('emoji'))
+                    .setPlaceholder(translator.getText('yoVoiceAutonameModalEmojiPlaceholder'))
+                    .setMinLength(0)
+                    .setMaxLength(2)
+                    .setRequired(false)
+					//.setValue(session.emoji ?? '')
+                    .setStyle(TextInputStyle.Short)),
+            );
+
+        return interaction.showModal(modal);
+	})
+	.setModalResponse(async function applySessionName(interaction) {
+		await interaction.deferReply({ ephemeral: true });
+
+		const { guildId, member } = interaction;
+        const translator = await Translator.from(member);
+
+		const warnNotInSession = () => interaction.editReply({
+			content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción',
+		}).catch(console.error);
+
+		const voiceChannel = member.voice?.channel;
+
+		const pv = await PureVoice.findOne({ guildId });
+		if(!pv) return;
+
+		const sessionId = pv.sessions.find(sid => sid === voiceChannel.id);
+		if(!sessionId) return warnNotInSession();
+
+		const session = await PureVoiceSession.findOne({ channelId: sessionId });
+		if(!session) return warnNotInSession();
+
+		const name = interaction.fields.getTextInputValue('inputName');
+		const emoji = interaction.fields.getTextInputValue('inputEmoji');
+
+		if(!emoji) {
+			voiceChannel.setName(makePVSessionName(name)).catch(console.error);
+			return interaction.editReply({ content: '✅ Nombre aplicado' });
+		}
+
+		const defEmoji = defaultEmoji(emoji);
+		if(!defEmoji)
+			return interaction.reply({ content: '⚠️ El emoji indicado no es un emoji Unicode válido' });
+		
+		voiceChannel.setName(makePVSessionName(name, defEmoji)).catch(console.error);
+		return interaction.editReply({ content: '✅ Nombre aplicado' });
+	})
+	.setButtonResponse(async function freezeSession(interaction) {
+		await interaction.deferReply({ ephemeral: true });
+
+		const { guildId, member } = interaction;
+        const translator = await Translator.from(member);
+
+		const warnNotInSession = () => interaction.editReply({
+			content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción',
+		}).catch(console.error);
+
+		const voiceState = member.voice;
+		if(!voiceState) return warnNotInSession();
+
+		const voiceChannel = voiceState.channel;
+		if(!voiceChannel) return warnNotInSession();
+
+		const pv = await PureVoice.findOne({ guildId });
+		if(!pv) return warnNotInSession();
+
+		const sessionId = pv.sessions.find(sid => sid === voiceChannel.id);
+		if(!sessionId) return warnNotInSession();
+
+		const session = await PureVoiceSession.findOne({ channelId: sessionId });
+		if(!session) return warnNotInSession();
+
+		const sessionMember = new PureVoiceSessionMember(session.members.get(member.id) ?? {});
+		if(sessionMember.isGuest())
+			return interaction.editReply({
+				content: '❌ Solo el administrador y los moderadores de una sesión PuréVoice pueden congelarla',
+			});
+
+		session.frozen = !session.frozen;
+
+		const allowedMembers = getFrozenSessionAllowedMembers(voiceChannel, session.members);
+		const userLimit = session.frozen ? allowedMembers.size : 0;
+
+		for(const [ memberId, member ] of allowedMembers) {
+			session.members.set(memberId, member.setWhitelisted(true).toJSON());
+			await voiceChannel.permissionOverwrites.edit(memberId, { Connect: true }, { reason: 'PLACEHOLDER_PV_REASON_FREEZE_CONNECT_ENABLE' }).catch(console.error);
+		}
+
+		session.markModified('members');
+
+		await Promise.all([
+			voiceChannel.setUserLimit(userLimit, `Actualizar límite de usuarios de sesión PuréVoice ${session.frozen ? 'congelada' : 'descongelada'}`).catch(console.error),
+			voiceChannel.permissionOverwrites.edit(interaction.guild.roles.everyone, { Connect: false }, { reason: 'PLACEHOLDER_PV_REASON_FREEZE_CONNECT_DISABLE' }).catch(console.error),
+			session.save(),
+		]);
+		
+		return interaction.editReply({
+			content: `❄️ La sesión ${voiceChannel} fue **${session.frozen ? 'congelada' : 'descongelada'}**`,
 		});
 	})
 	.setButtonResponse(async function showMeHow(interaction) {

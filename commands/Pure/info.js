@@ -1,5 +1,5 @@
-const { EmbedBuilder, ChannelType, User } = require('discord.js'); //Integrar discord.js
-const { fetchArrows, fetchUser, improveNumber, isShortenedNumberString } = require('../../func');
+const { EmbedBuilder, ChannelType, User, GuildMember } = require('discord.js'); //Integrar discord.js
+const { fetchArrows, fetchUser, improveNumber, isShortenedNumberString, fetchMember } = require('../../func');
 const global = require('../../localdata/config.json'); //Variables globales
 const { ChannelStats, Stats } = require('../../localdata/models/stats');
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
@@ -15,7 +15,7 @@ const counterDisplay = (number) => {
 
 const options = new CommandOptions()
 	.addParam('canal', 'CHANNEL', 'para mostrar estadísticas extra de un canal', { optional: true })
-	.addFlag('m', 'miembro', 'para mostrar estadísticas extra de un usuario');
+	.addFlag('m', 'miembro', 'para mostrar estadísticas extra de un usuario (no implementado)', { name: 'objetivo', type: 'MEMBER' });
 const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('info', flags)
 	.setAliases(
@@ -25,7 +25,7 @@ const command = new CommandManager('info', flags)
 	)
 	.setLongDescription('Muestra información estadística paginada del servidor')
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash) => {
+	.setExperimentalExecution(async (request, args) => {
 		if(!request.guild.available)
 			return request.reply(':interrobang: E-el servidor está en corte ahora mismo. Intenta usar el comando más tarde');
 
@@ -33,12 +33,12 @@ const command = new CommandManager('info', flags)
 			Stats.findOne({}),
 			request.deferReply(),
 		]);
-		const servidor = request.guild; //Variable que almacena un objeto del servidor a analizar
-		const miembro = options.fetchFlag(args, 'miembro', { callback: (/** @type {string | User} */ f) => fetchUser(f, { client: request.client, guild: request.guild }) });
+		const servidor = request.guild;
+		const miembro = args.parseFlagExpr('miembro', (/** @type {string | GuildMember} */ f) => fetchMember(f, request));
 
 		//Contadores de usuarios
-		const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size; //Biológicos
-		const botcnt = servidor.memberCount - peoplecnt; //Bots
+		const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
+		const botcnt = servidor.memberCount - peoplecnt;
 
 		let channelCounts = {
 			text: 0,
@@ -63,22 +63,8 @@ const command = new CommandManager('info', flags)
 		});
 		
 		//Análisis de actividad
-		const textChannelsCache = servidor.channels.cache.filter(c => c.type === ChannelType.GuildText);
-		let targetChannel;
-		if(isSlash) 
-			targetChannel = args.getChannel('canal');
-		else if(args.length) {
-			let search = args[0];
-			if(search.startsWith('<#') && search.endsWith('>')) {
-				search = search.slice(2, -1);
-				if(search.startsWith('!')) search = search.slice(1);
-			}
-			targetChannel = isNaN(search)
-				? textChannelsCache.find(c => c.name.toLowerCase().includes(search))
-				: textChannelsCache.get(search);
-		}
-
-		targetChannel ||= request.channel;
+		args.ensureRequistified();
+		let targetChannel = args.getChannel('canal') || request.channel;
 
 		const channelQuery = {
 			guildId: servidor.id,
@@ -94,7 +80,7 @@ const command = new CommandManager('info', flags)
 		const msgcnt = Object.values(await ChannelStats.find({ guildId: servidor.id }))
 			.sort((a, b) => b.cnt - a.cnt)
 			.slice(0, 5)
-			.map((obj) => [obj.channelId, obj.cnt]);
+			.map((obj) => /**@type {[String, Number]}*/([obj.channelId, obj.cnt]));
 			
 		//Creacion de tops 5
 		const peotop = peocnt ? peocnt.map(([id, count]) => `<@${id}>: **${counterDisplay(count)}** mensajes`).join('\n') : '_Este canal no tiene mensajes_';
@@ -102,11 +88,11 @@ const command = new CommandManager('info', flags)
 
 		const pages = [];
 		const owner = await servidor.fetchOwner();
-		const author = request.author ?? request.user;
+		const author = request.user;
 		pages.push(
 			new EmbedBuilder()
 				.setColor(0xffd500)
-				.setTitle('Información del servidor OwO')
+				.setTitle('Información del servidor')
 				.setImage(servidor.iconURL({ size: 256 }))
 				.setThumbnail(owner.user.avatarURL({ size: 256 }))
 				.setAuthor({ name: `Comando invocado por ${author.username}`, iconURL: author.avatarURL({ size: 256 }) })
@@ -129,7 +115,7 @@ const command = new CommandManager('info', flags)
 		pages.push(
 			new EmbedBuilder()
 			.setColor(0xeebb00)
-				.setTitle('Estadísticas de actividad ÛwÕ')
+				.setTitle('Estadísticas de actividad')
 				.setAuthor({ name: `Comando invocado por ${author.username}`, iconURL: author.avatarURL() })
 				.setFooter({ text: `Estas estadísticas toman información desde el ${dbStart.slice(0, dbStart.indexOf(' '))}` })
 				.addFields(
@@ -138,33 +124,18 @@ const command = new CommandManager('info', flags)
 				),
 		);
 
-		const tiempoguild = Date.now() - (+servidor.createdAt);
-		const serverms = Math.floor(tiempoguild) % 100;
-		const serversec = Math.floor(tiempoguild / 1000) % 60;
-		const servermin = Math.floor(tiempoguild / 1000 / 60) % 60;
-		const serverhour = Math.floor(tiempoguild / 1000 / 3600) % 24;
-		const serverday = Math.floor(tiempoguild / 1000 / 3600 / 24) % 30;
-		const servermonth = Math.floor(tiempoguild / 1000 / 3600 / 24 / 30) % 12;
-		const serveryear = Math.floor(tiempoguild / 1000 / 3600 / 24 / 365);
-
-		const tiempobot = Date.now() - global.startupTime;
-		const botms = Math.floor(tiempobot) % 100;
-		const botsec = Math.floor(tiempobot / 1000) % 60;
-		const botmin = Math.floor(tiempobot / 1000 / 60) % 60;
-		const bothour = Math.floor(tiempobot / 1000 / 3600) % 24;
-
 		pages.push(
 			new EmbedBuilder()
 				.setColor(0xe99979)
-				.setTitle('Estadísticas de tiempo UwU')
+				.setTitle('Estadísticas de tiempo')
 				.addFields(
 					{
 						name: 'Tiempo de vida del servidor', 
-						value: `**${serveryear}** años, **${servermonth}** meses, **${serverday}** días, **${serverhour}**º **${servermin}**' **${serversec}.${serverms}**''`,
+						value: `<t:${Math.round(+servidor.createdAt / 1000)}:R>`,
 					},
 					{
 						name: 'Tiempo de funcionamiento del bot', 
-						value: `**${bothour}**hs. **${botmin}**min. **${botsec}.${botms}**seg.`,
+						value: `<t:${Math.round(+global.startupTime / 1000)}:R>`,
 					},
 				),
 		);
@@ -173,8 +144,8 @@ const command = new CommandManager('info', flags)
 		/**@type {import('discord.js').Message}*/
 		const sent = await request.editReply(replyContent);
 		const arrows = fetchArrows(request.client.emojis.cache);
-		await sent.react(arrows[0]);
-		await sent.react(arrows[1]);
+		await sent.react(/**@type {import('discord.js').EmojiIdentifierResolvable}*/(arrows[0]));
+		await sent.react(/**@type {import('discord.js').EmojiIdentifierResolvable}*/(arrows[1]));
 
 		let selectedPage = 0;
 		const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);

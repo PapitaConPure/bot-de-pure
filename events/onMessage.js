@@ -1,12 +1,12 @@
-const { updateAgentMessageOwners } = require('../systems/agents/discordagent.js');
-
 //#region Carga de módulos necesarios
+const { puré } = require('../commandInit.js');
 const Discord = require('discord.js');
 const { CommandManager, CommandOptionSolver } = require('../commands/Commons/commands.js');
 
 const { Stats, ChannelStats } = require('../localdata/models/stats.js');
 const { p_pure } = require('../localdata/customization/prefixes.js');
 
+const { updateAgentMessageOwners } = require('../systems/agents/discordagent.js');
 const { channelIsBlocked, rand, edlDistance, isUsageBanned } = require('../func.js');
 const globalGuildFunctions = require('../localdata/customization/guildFunctions.js');
 const { auditRequest } = require('../systems/others/auditor.js');
@@ -15,7 +15,9 @@ const { sendPixivPostsAsWebhook } = require('../systems/agents/purepix.js');
 const { tenshiColor } = require('../localdata/config.json');
 const UserConfigs = require('../localdata/models/userconfigs.js');
 const { sendTweetsAsWebhook } = require('../systems/agents/pureet.js');
+const { Translator } = require('../internationalization.js');
 const { fetchUserCache } = require('../usercache.js');
+//#endregion
 
 /**
  * 
@@ -52,8 +54,7 @@ async function handleInvalidCommand(message, client, commandName, prefixPair) {
 	if(commandName.length < 2)
 		return replyAndDelete();
 
-	// @ts-ignore
-	const allowedGuesses = client.ComandosPure.filter(cmd => !cmd.flags.any('OUTDATED', 'MAINTENANCE'));
+	const allowedGuesses = puré.commands.filter(cmd => !cmd.flags.any('OUTDATED', 'MAINTENANCE'));
 	const foundList = [];
 	for(const [ cmn, cmd ] of allowedGuesses) {
 		const lDistances = [ cmn, ...(cmd.aliases?.filter(a => a.length > 1) ?? []) ].map(c => ({ n: c, d: edlDistance(commandName, c) }));
@@ -89,21 +90,38 @@ async function handleInvalidCommand(message, client, commandName, prefixPair) {
  * @param {String} [exceptionString]
  */
 async function handleMessageCommand(message, command, stats, args, rawArgs, exceptionString) {
-	if(command.permissions && !command.permissions.isAllowed(message.member)) {
-		return exceptionString && message.channel.send({ embeds: [
-			generateExceptionEmbed({
-				tag: undefined,
-				isException: undefined,
-				title: 'Permisos insuficientes',
-				desc: 'Este comando requiere permisos para ejecutarse que no tienes actualmente',
-			}, { cmdString: exceptionString })
-			.addFields({
-				name: 'Requisitos completos',
-				value: command.permissions.matrix
-					.map((requisite, n) => `${n + 1}. ${requisite.map(p => `\`${p}\``).join(' **o** ')}`)
-					.join('\n')
-			})
-		]});
+	if(command.permissions) {
+		if(!command.permissions.isAllowedIn(message.member, message.channel)) {
+			const translator = await Translator.from(message.member);
+			return exceptionString && message.channel.send({ embeds: [
+				generateExceptionEmbed({
+					title: translator.getText('missingMemberChannelPermissionsTitle'),
+					desc: translator.getText('missingMemberChannelPermissionsDescription'),
+				}, { cmdString: exceptionString })
+				.addFields({
+					name: translator.getText('missingMemberChannelPermissionsFullRequisitesName'),
+					value: command.permissions.matrix
+						.map((requisite, n) => `${n + 1}. ${requisite.map(p => `\`${p}\``).join(' **o** ')}`)
+						.join('\n'),
+				}),
+			]});
+		}
+		
+		if(!command.permissions.amAllowedIn(message.channel)) {
+			const translator = await Translator.from(message.member);
+			return exceptionString && message.channel.send({ embeds: [
+				generateExceptionEmbed({
+					title: translator.getText('missingMemberChannelPermissionsTitle'),
+					desc: translator.getText('missingClientChannelPermissionsDescription'),
+				}, { cmdString: exceptionString })
+				.addFields({
+					name: translator.getText('missingMemberChannelPermissionsFullRequisitesName'),
+					value: command.permissions.matrix
+						.map((requisite, n) => `${n + 1}. ${requisite.map(p => `\`${p}\``).join(' **o** ')}`)
+						.join('\n'),
+				}),
+			]});
+		}
 	}
 
 	const exception = await findFirstException(command, message);
@@ -114,7 +132,7 @@ async function handleMessageCommand(message, command, stats, args, rawArgs, exce
 	if(command.experimental) {
 		const solver = new CommandOptionSolver(complex, args, command.options, rawArgs);
 		// @ts-expect-error
-		await command.execute(complex, solver);
+		await /**@type {import('../commands/Commons/cmdBuilder.js').ExperimentalExecuteFunction}*/(command.execute)(complex, solver, rawArgs);
 	} else
 		await command.execute(complex, args, false, rawArgs);
 	stats.commands.succeeded++;
@@ -147,8 +165,7 @@ async function checkEmoteCommand(message, client, stats) {
 	auditRequest(message);
 	const args = words.slice(emoteCommandIndex + 1);
 	const commandName = words[emoteCommandIndex].toLowerCase().slice(1);
-	// @ts-ignore
-	const command = client.EmotesPure.get(commandName) || client.EmotesPure.find(cmd => cmd.aliases?.includes(commandName));
+	const command = puré.emotes.get(commandName) || puré.emotes.find(cmd => cmd.aliases?.includes(commandName));
 	if(!command) return;
 
 	await handleMessageCommand(message, command, stats, args)
@@ -172,8 +189,7 @@ async function checkCommand(message, client, stats) {
 
 	const args = content.replace(ppure.regex, '').split(/[\n ]+/); //Argumentos ingresados
 	let commandName = args.shift().toLowerCase(); //Comando ingresado
-	// @ts-ignore
-	let command = client.ComandosPure.get(commandName) || client.ComandosPure.find(cmd => cmd.aliases?.includes(commandName));
+	let command = puré.commands.get(commandName) || puré.commands.find(cmd => cmd.aliases?.includes(commandName));
 	
 	if(!command)
 		return handleInvalidCommand(message, client, commandName, ppure);
@@ -222,7 +238,7 @@ async function onMessage(message, client) {
 		sendTweetsAsWebhook(message, userCache.twitterPrefix).catch(console.error),
 	]);
 
-	if(results.includes(true) && message.deletable)
+	if(results.includes(true) && message?.deletable)
 		message.delete().catch(console.error);
 
 	updateAgentMessageOwners().catch(console.error);

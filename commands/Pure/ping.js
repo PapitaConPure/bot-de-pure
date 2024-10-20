@@ -6,12 +6,12 @@ const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('ping', flags)
 	.setLongDescription('Muestra el tiempo de respuesta del Bot y la API')
 	.setExecution(async (request, _, isSlash) => {
-		const sent = await request.reply({
+		const sent = /**@type {Message<true>}*/(await request.reply({
 			content: 
 				'Pong~♪\n' +
 				`**Latencia de la API** ${request.client.ws.ping}ms\n` +
 				`**Tiempo de respuesta** _comprobando..._`,
-		});
+		}));
 
 		const wsPing = request.client.ws.ping;
 
@@ -55,17 +55,15 @@ const command = new CommandManager('ping', flags)
  * @param {Message<true> | InteractionResponse<false>} sent 
  * @param {import('../Commons/typings').ComplexCommandRequest} request
  * @param {Boolean | undefined} isSlash
- * @param {string | import('discord.js').MessagePayloadOption | import('discord.js').InteractionEditReplyOptions} editOptions
+ * @param {string | import('discord.js').MessagePayloadOption | import('discord.js').MessageEditOptions | import('discord.js').InteractionEditReplyOptions} editOptions
  */
 function editSent(sent, request, isSlash, editOptions) {
 	if(isSlash) {
-		/**@type {CommandInteraction<true>}*/
-		const interaction = request;
+		const interaction = /**@type {CommandInteraction<'cached'>}*/(request);
 		return interaction.editReply(editOptions);
 	} else {
-		/**@type {Message<true>}*/
-		const message = sent;
-		return message.edit(editOptions);
+		const message = /**@type {Message<true>}*/(sent);
+		return message.edit(/**@type {import('discord.js').MessageEditOptions}*/(editOptions));
 	}
 }
 

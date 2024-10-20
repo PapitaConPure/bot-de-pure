@@ -1,4 +1,4 @@
-const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
 
 const options = new CommandOptions()
 	.addParam('hora', 'TEXT', 'para establecer la hora a convertir')
@@ -16,15 +16,15 @@ const command = new CommandManager('hora', flags)
 		'Recuerda que no soy adivina, así que siempre ingresa tu huso local si no quieres que se tome como GMT+0',
 	)
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash) => {
-		const gmt = options.fetchFlag(args, 'gmt', { callback: x => x * 1, fallback: 0 });
+	.setExperimentalExecution(async (request, args, isSlash) => {
+		const gmt = args.parseFlagExpr('gmt', x => +x, 0);
 
 		//Definir fecha
-		const dateStr = options.fetchFlag(args, 'fecha');
+		const dateStr = CommandOptionSolver.asString(args.parseFlagExpr('fecha'));
 		let year, month, day;
 		if(dateStr) {
 			let isInvalidDate = false;
-			const date = dateStr.split(/[\/ ]+/).map(d => d * 1);
+			const date = dateStr.split(/[\/ ]+/).map(d => +d);
 			if(date.some(d => isNaN(d))) isInvalidDate = true;
 			if(date.length < 3 || date.some(d => d < 1)) isInvalidDate = true;
 			[ day, month, year ] = date;
@@ -43,7 +43,7 @@ const command = new CommandManager('hora', flags)
 		}
 
 		/**@type {String}*/
-		let rawTime = isSlash ? args.getString('hora') : args.shift();
+		let rawTime = args.getString('hora');
 
 		if(rawTime == undefined)
 			return request.reply('⚠️ Debes ingresar una hora');
@@ -56,7 +56,7 @@ const command = new CommandManager('hora', flags)
 			rawTime = rawTime.slice(0, -2);
 		}
 		/**@type {Array<Number>}*/
-		const time = rawTime.split(':').map(t => (t * 1));
+		const time = rawTime.split(':').map(t => (+t));
 		
 		let hours, minutes, seconds;
 		minutes = seconds = 0;
@@ -69,25 +69,25 @@ const command = new CommandManager('hora', flags)
 			case 1: {
 				[ hours ] = time;
 
-				const possibleMinutes = args.shift?.();
+				const possibleMinutes = args.next();
 				if(possibleMinutes?.toLowerCase() === 'pm') {
 					plus12 = true;
 					break;
 				}
-				minutes = possibleMinutes ?? 0;
+				minutes = (possibleMinutes != null) ? +possibleMinutes : 0;
 
-				const possibleSeconds = args.shift?.();
+				const possibleSeconds = args.next();
 				if(possibleSeconds?.toLowerCase() === 'pm') {
 					plus12 = true;
 					break;
 				}
-				seconds = possibleSeconds ?? 0;
+				seconds = (possibleSeconds != null) ? +possibleSeconds : 0;
 
 				break;
 			}
 		}
 
-		if(!isSlash && args.shift()?.toLowerCase() === 'pm')
+		if(args.isMessageSolver() && args.next()?.toLowerCase() === 'pm')
 			plus12 = true;
 
 		const isInvalidTime = (timeArray) => {
@@ -114,6 +114,7 @@ const command = new CommandManager('hora', flags)
 
 		if(!dateStr)
 			return request.reply(`<t:${unixDate}:T>`);
+		
 		return request.reply(`<t:${unixDate}:T> <t:${unixDate}:D>`);
 	});
 

@@ -1,22 +1,22 @@
-const { default: axios } = require('axios');
-const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType, ButtonComponent } = require('discord.js');
 const { isNotModerator, shortenText, guildEmoji, decompressId, compressId } = require('../../func.js');
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
-const { auditError } = require('../../systems/others/auditor.js');
+const { auditError, auditAction } = require('../../systems/others/auditor.js');
 const { CommandTags } = require('../Commons/cmdTags.js');
 const globalConfigs = require('../../localdata/config.json');
-const { Booru } = require('../../systems/booru/boorufetch.js');
+const { Booru, TagTypes, BooruUnknownPostError } = require('../../systems/booru/boorufetch.js');
 const { CommandManager } = require('../Commons/cmdBuilder.js');
 const { addGuildToFeedUpdateStack } = require('../../systems/booru/boorufeed.js');
 const { Translator } = require('../../internationalization.js');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
+const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts.js');
 
 /**@param {Translator} translator*/
 const wizTitle = (translator) => translator.getText('feedAuthor');
 /**@param {Translator} translator*/
 const cancelbutton = (translator) => new ButtonBuilder()
 	.setCustomId('feed_cancelWizard')
-	.setLabel(translator.getText('buttonCancel'))
+	.setEmoji('936531643496288288')
 	.setStyle(ButtonStyle.Secondary);
 /**@param {Translator} translator*/
 const finishButton = (translator) => new ButtonBuilder()
@@ -26,11 +26,11 @@ const finishButton = (translator) => new ButtonBuilder()
 const safeTags = (_tags = '') => _tags.replace(/\\*\*/g,'\\*').replace(/\\*_/g,'\\_');
 /**
  * @param {import('discord.js').ButtonInteraction} interaction 
- * @returns {Promise<Array<import('discord.js').MessageSelectOptionData>>}
+ * @returns {Promise<Array<import('discord.js').SelectMenuComponentOptionData>>}
  */
 const generateFeedOptions = async (interaction) => {
-	const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-	const feeds = Object.entries(gcfg.feeds).map(([chid, feed]) => {
+	const gcfg = /**@type {import('../../localdata/models/guildconfigs.js').GuildConfigDocument}*/(await GuildConfig.findOne({ guildId: interaction.guild.id }));
+	const feedOptions = Object.entries(gcfg.feeds).map(([chid, feed]) => {
 		const channel = interaction.guild.channels.cache.get(chid);
 		if(!channel) {
 			delete gcfg.feeds[chid];
@@ -44,15 +44,15 @@ const generateFeedOptions = async (interaction) => {
 		});
 	}).filter(feed => feed);
 	gcfg.save();
-	return feeds;
+	return feedOptions;
 }
 /**
- * @param {import('discord.js').Message | import('discord.js').ButtonInteraction} interaction
+ * @param {import('discord.js').Message | import('discord.js').ButtonInteraction | import('discord.js').StringSelectMenuInteraction | import('discord.js').ModalSubmitInteraction} interaction
  * @param {String} channelId
  * @param {Translator} translator
  */
 function tagsSetupPrompt(interaction, channelId, translator) {
-	const fetchedChannel = interaction.guild.channels.cache.get(channelId);
+	const fetchedChannel = /**@type {import('discord.js').BaseGuildTextChannel}*/(interaction.guild.channels.cache.get(channelId));
 	const gelEmoji = guildEmoji('gelbooru', globalConfigs.slots.slot3);
 	const embed = new EmbedBuilder()
 		.setColor(Colors.Blurple)
@@ -91,7 +91,7 @@ const flags = new CommandTags().add('COMMON', 'MOD');
 const command = new CommandManager('feed', flags)
 	.setBriefDescription('Inicializa un Feed en un canal por medio de un Asistente.')
 	.setLongDescription('Inicializa un Feed de imágenes en un canal. Simplemente usa el comando y sigue los pasos del Asistente para configurar y personalizar todo')
-	.setExecution(async (request, _args, _isSlash) => {
+	.setExecution(async request => {
 		const translator = await Translator.from(request.userId);
 		const wizard = new EmbedBuilder()
 			.setColor(Colors.Aqua)
@@ -130,10 +130,10 @@ const command = new CommandManager('feed', flags)
 		return interaction.update({
 			embeds: [wizard],
 			components: [
-				new ActionRowBuilder().addComponents(
+				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_createNew')
-						.setEmoji('1051265601152229436')
+						.setEmoji('1291900911643263008')
 						.setLabel(translator.getText('buttonCreate'))
 						.setStyle(ButtonStyle.Success),
 					new ButtonBuilder()
@@ -144,7 +144,7 @@ const command = new CommandManager('feed', flags)
 						.setDisabled(!premade),
 					finishButton(translator),
 				),
-				new ActionRowBuilder().addComponents(
+				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_selectEdit')
 						.setEmoji('921788204540100608')
@@ -153,7 +153,7 @@ const command = new CommandManager('feed', flags)
 						.setDisabled(!premade),
 					new ButtonBuilder()
 						.setCustomId('feed_selectCustomize')
-						.setEmoji('935665140601327626')
+						.setEmoji('1288444896331698241')
 						.setLabel(translator.getText('buttonCustomize'))
 						.setStyle(ButtonStyle.Primary)
 						.setDisabled(!premade),
@@ -174,7 +174,7 @@ const command = new CommandManager('feed', flags)
 			.setPlaceholder(`Ej: #${interaction.channel.name} / ${interaction.channel.id}`)
 			.setStyle(TextInputStyle.Short)
 			.setRequired(true);
-		const row = new ActionRowBuilder().addComponents(channelInput);
+		const row = makeTextInputRowBuilder().addComponents(channelInput);
 		const modal = new ModalBuilder()
 			.setCustomId('feed_createOnChannel')
 			.setTitle('Creación de Feed')
@@ -193,8 +193,7 @@ const command = new CommandManager('feed', flags)
 			
 		const channels = interaction.guild.channels.cache;
 		const textChannels = channels.filter(c => [ ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread ].includes(c.type));
-		console.log({ channels, textChannels });
-		const fetchedChannel = isNaN(input)
+		const fetchedChannel = isNaN(+input)
 			? textChannels.find(c => c.name.toLowerCase().includes(input))
 			: textChannels.get(input);
 			
@@ -210,14 +209,14 @@ const command = new CommandManager('feed', flags)
 		const wizard = tagsSetupPrompt(interaction, fetchedChannel.id, translator);
 		return interaction.update({
 			embeds: [wizard],
-			components: [new ActionRowBuilder().addComponents(
+			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId(`feed_editTags_${fetchedChannel.id}`)
 					.setLabel('Ingresar Tags')
 					.setStyle(ButtonStyle.Primary),
 				new ButtonBuilder()
 					.setCustomId('feed_startWizard')
-					.setLabel('Volver')
+					.setEmoji('934432754173624373')
 					.setStyle(ButtonStyle.Secondary),
 				cancelbutton(translator),
 			)],
@@ -231,7 +230,7 @@ const command = new CommandManager('feed', flags)
 			.setStyle(TextInputStyle.Paragraph)
 			.setRequired(true)
 			.setMaxLength(4000);
-		const row = new ActionRowBuilder().addComponents(tagsInput);
+		const row = makeTextInputRowBuilder().addComponents(tagsInput);
 		const modal = new ModalBuilder()
 			.setCustomId(`feed_setTags_${channelId}`)
 			.setTitle('Personalización de Feed')
@@ -244,11 +243,12 @@ const command = new CommandManager('feed', flags)
 		const input = interaction.fields.getTextInputValue('tagsInput').toLowerCase().trim();
 
 		const guildQuery = { guildId: interaction.guild.id };
-		const gcfg = (await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery);
+		const gcfg = /**@type {import('../../localdata/models/guildconfigs').GuildConfigDocument}*/((await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery));
 		gcfg.feeds ??= {};
-		gcfg.feeds[fetchedChannel.id] ??= { ids: (new Array(16)).fill(0) };
+		gcfg.feeds[fetchedChannel.id] ??= { tags: null };
 		gcfg.feeds[fetchedChannel.id].tags = input;
-        addGuildToFeedUpdateStack(interaction.guild);
+		gcfg.feeds[fetchedChannel.id].lastFetchedAt = new Date(Date.now());
+        const firstUpdateDelay = addGuildToFeedUpdateStack(interaction.guild);
 		gcfg.markModified('feeds');
 		await gcfg.save();
 
@@ -259,11 +259,12 @@ const command = new CommandManager('feed', flags)
 			.addFields(
 				{ name: 'Feed configurado', value: `Se ha configurado un Feed con las tags _"${safeTags(input)}"_ para el canal **${fetchedChannel.name}**` },
 				{ name: 'Control del Feed', value: 'Puedes modificar, personalizar o eliminar este Feed en cualquier momento siguiendo el Asistente una vez más' },
+				{ name: 'Actualización Programada', value: `Este Feed se actualizará por primera vez <t:${Math.round((Date.now() + firstUpdateDelay) / 1000)}:R>` },
 			);
 		return interaction.update({
 			embeds: [concludedEmbed],
 			components: [
-				new ActionRowBuilder().addComponents(
+				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_startWizard')
 						.setLabel('Seguir configurando')
@@ -285,16 +286,16 @@ const command = new CommandManager('feed', flags)
 		return interaction.update({
 			embeds: [wizard],
 			components: [
-				new ActionRowBuilder().addComponents(
+				makeStringSelectMenuRowBuilder().addComponents(
 					new StringSelectMenuBuilder()
 						.setCustomId('feed_selectedEdit')
 						.setPlaceholder('Selecciona un Feed')
 						.addOptions(feeds),
 				),
-				new ActionRowBuilder().addComponents(
+				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_startWizard')
-						.setLabel('Volver')
+						.setEmoji('934432754173624373')
 						.setStyle(ButtonStyle.Secondary),
 					cancelbutton(translator),
 				),
@@ -313,16 +314,16 @@ const command = new CommandManager('feed', flags)
 		return interaction.update({
 			embeds: [wizard],
 			components: [
-				new ActionRowBuilder().addComponents(
+				makeStringSelectMenuRowBuilder().addComponents(
 					new StringSelectMenuBuilder()
 						.setCustomId('feed_selectedCustomize')
 						.setPlaceholder('Selecciona un Feed')
 						.addOptions(feeds),
 				),
-				new ActionRowBuilder().addComponents(
+				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_startWizard')
-						.setLabel('Volver')
+						.setEmoji('934432754173624373')
 						.setStyle(ButtonStyle.Secondary),
 					cancelbutton(translator),
 				),
@@ -341,16 +342,16 @@ const command = new CommandManager('feed', flags)
 		return interaction.update({
 			embeds: [wizard],
 			components: [
-				new ActionRowBuilder().addComponents(
+				makeStringSelectMenuRowBuilder().addComponents(
 					new StringSelectMenuBuilder()
 						.setCustomId('feed_selectedView')
 						.setPlaceholder('Selecciona un Feed')
 						.addOptions(feeds),
 				),
-				new ActionRowBuilder().addComponents(
+				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_startWizard')
-						.setLabel('Volver')
+						.setEmoji('934432754173624373')
 						.setStyle(ButtonStyle.Secondary),
 					cancelbutton(translator),
 				),
@@ -369,16 +370,16 @@ const command = new CommandManager('feed', flags)
 		return interaction.update({
 			embeds: [wizard],
 			components: [
-				new ActionRowBuilder().addComponents(
+				makeStringSelectMenuRowBuilder().addComponents(
 					new StringSelectMenuBuilder()
 						.setCustomId('feed_selectedDelete')
 						.setPlaceholder('Selecciona un Feed')
 						.addOptions(feeds),
 				),
-				new ActionRowBuilder().addComponents(
+				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_startWizard')
-						.setLabel('Volver')
+						.setEmoji('934432754173624373')
 						.setStyle(ButtonStyle.Secondary),
 					cancelbutton(translator),
 				),
@@ -391,14 +392,14 @@ const command = new CommandManager('feed', flags)
 		const wizard = tagsSetupPrompt(interaction, channelId, translator);
 		return interaction.update({
 			embeds: [wizard],
-			components: [new ActionRowBuilder().addComponents(
+			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId(`feed_editTags_${channelId}`)
 					.setLabel('Ingresar Tags')
 					.setStyle(ButtonStyle.Primary),
 				new ButtonBuilder()
 					.setCustomId('feed_selectEdit')
-					.setLabel('Volver')
+					.setEmoji('934432754173624373')
 					.setStyle(ButtonStyle.Secondary),
 				finishButton(translator),
 			)],
@@ -406,7 +407,7 @@ const command = new CommandManager('feed', flags)
 	})
 	.setSelectMenuResponse(async function selectedCustomize(interaction) {
 		const translator = await Translator.from(interaction.user.id);
-		const fetchedChannel = interaction.guild.channels.cache.get(interaction.values[0] || interaction.channel.id);
+		const fetchedChannel = /**@type {import('discord.js').BaseGuildTextChannel}*/(interaction.guild.channels.cache.get(interaction.values[0] || interaction.channel.id));
 		const wizard = new EmbedBuilder()
 			.setColor(Colors.Blurple)
 			.setAuthor({ name: wizTitle(translator), iconURL: interaction.client.user.avatarURL() })
@@ -419,7 +420,7 @@ const command = new CommandManager('feed', flags)
 		return interaction.update({
 			embeds: [wizard],
 			components: [
-				new ActionRowBuilder().addComponents(
+				makeStringSelectMenuRowBuilder().addComponents(
 					new StringSelectMenuBuilder()
 						.setCustomId(`feed_selectItemCustomize_${fetchedChannel.id}`)
 						.setPlaceholder('Selecciona un elemento')
@@ -446,10 +447,10 @@ const command = new CommandManager('feed', flags)
 							},
 						]),
 				),
-				new ActionRowBuilder().addComponents(
+				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_selectCustomize')
-						.setLabel('Volver')
+						.setEmoji('934432754173624373')
 						.setStyle(ButtonStyle.Secondary),
 					finishButton(translator),
 				),
@@ -458,7 +459,7 @@ const command = new CommandManager('feed', flags)
 	})
 	.setSelectMenuResponse(async function selectedView(interaction) {
 		const translator = await Translator.from(interaction.user.id);
-		const fetchedChannel = interaction.guild.channels.cache.get(interaction.values[0] || interaction.channel.id);
+		const fetchedChannel = /**@type {import('discord.js').BaseGuildTextChannel}*/(interaction.guild.channels.cache.get(interaction.values[0] || interaction.channel.id));
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 		const feed = gcfg.feeds[fetchedChannel.id];
 		const wizard = new EmbedBuilder()
@@ -473,10 +474,10 @@ const command = new CommandManager('feed', flags)
 		return interaction.update({
 			embeds: [wizard],
 			components: [
-				new ActionRowBuilder().addComponents(
+				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId('feed_selectView')
-						.setLabel('Volver')
+						.setEmoji('934432754173624373')
 						.setStyle(ButtonStyle.Secondary),
 					finishButton(translator),
 				),
@@ -498,14 +499,14 @@ const command = new CommandManager('feed', flags)
 			});
 		return interaction.update({
 			embeds: [wizard],
-			components: [new ActionRowBuilder().addComponents(
+			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId(`feed_deleteOne_${chid}`)
 					.setLabel('Borrar')
 					.setStyle(ButtonStyle.Danger),
 				new ButtonBuilder()
 					.setCustomId('feed_selectDelete')
-					.setLabel('Volver')
+					.setEmoji('934432754173624373')
 					.setStyle(ButtonStyle.Secondary),
 				cancelbutton(translator),
 			)],
@@ -518,7 +519,7 @@ const command = new CommandManager('feed', flags)
 			.setAuthor({ name: wizTitle(translator), iconURL: interaction.client.user.avatarURL() })
 			.setFooter({ text: 'Operación finalizada' })
 			.addFields({ name: 'Feed eliminado', value: 'Se ha eliminado el Feed acordado. Si te arrepientes, tendrás que crearlo otra vez' });
-		const rows = new ActionRowBuilder().addComponents(
+		const rows = makeButtonRowBuilder().addComponents(
 			new ButtonBuilder()
 				.setCustomId('feed_startWizard')
 				.setLabel('Seguir configurando')
@@ -540,7 +541,7 @@ const command = new CommandManager('feed', flags)
 	.setSelectMenuResponse(async function selectItemCustomize(interaction, channelId) {
 		const translator = await Translator.from(interaction.user.id);
 		const customizeTarget = interaction.values[0];
-		const fetchedChannel = interaction.guild.channels.cache.get(channelId);
+		const fetchedChannel = /**@type {import('discord.js').BaseGuildTextChannel}*/(interaction.guild.channels.cache.get(channelId));
 		console.log(channelId, fetchedChannel);
 		
 		const wizard = new EmbedBuilder()
@@ -549,7 +550,7 @@ const command = new CommandManager('feed', flags)
 			.setFooter({ text: 'Personalizar elemento' })
 			.addFields({ name: 'Destino', value: `**${fetchedChannel.name}** (canal ${fetchedChannel.nsfw ? 'NSFW' : 'SFW'})` });
 		
-		const row = new ActionRowBuilder();
+		const row = makeButtonRowBuilder();
 		switch(customizeTarget) {
 			case 'title':
 				wizard.addFields({
@@ -625,7 +626,7 @@ const command = new CommandManager('feed', flags)
 		row.addComponents(
 			new ButtonBuilder()
 				.setCustomId('feed_selectCustomize')
-				.setLabel('Volver')
+				.setEmoji('934432754173624373')
 				.setStyle(ButtonStyle.Secondary),
 			cancelbutton(translator),
 		);
@@ -642,7 +643,7 @@ const command = new CommandManager('feed', flags)
 			.setStyle(TextInputStyle.Short)
 			.setRequired(true)
 			.setMaxLength(255);
-		const row = new ActionRowBuilder().addComponents(titleInput);
+		const row = makeTextInputRowBuilder().addComponents(titleInput);
 		const modal = new ModalBuilder()
 			.setCustomId(`feed_setCustomTitle_${channelId}`)
 			.setTitle('Personalización de Feed')
@@ -659,7 +660,7 @@ const command = new CommandManager('feed', flags)
 			.setRequired(true)
 			.setMinLength(1)
 			.setMaxLength(2);
-		const row = new ActionRowBuilder().addComponents(tagsInput);
+		const row = makeTextInputRowBuilder().addComponents(tagsInput);
 		const modal = new ModalBuilder()
 			.setCustomId(`feed_setCustomMaxTags_${channelId}`)
 			.setTitle('Personalización de Feed')
@@ -675,7 +676,7 @@ const command = new CommandManager('feed', flags)
 			.setStyle(TextInputStyle.Short)
 			.setRequired(true)
 			.setMaxLength(255);
-		const row = new ActionRowBuilder().addComponents(footerInput);
+		const row = makeTextInputRowBuilder().addComponents(footerInput);
 		const modal = new ModalBuilder()
 			.setCustomId(`feed_setCustomFooter_${channelId}`)
 			.setTitle('Personalización de Feed')
@@ -687,11 +688,11 @@ const command = new CommandManager('feed', flags)
 		const iconInput = new TextInputBuilder()
 			.setCustomId('iconInput')
 			.setLabel('Enlace de ícono de esquina')
-			.setPlaceholder('Ejemplo:\nhttps://cdn.discordapp.com/attachments/956023682734624838/1001416736261799937/doremy.png')
+			.setPlaceholder('Ejemplo: https://i.imgur.com/LFzqoJX.jpeg')
 			.setStyle(TextInputStyle.Paragraph)
 			.setRequired(true)
 			.setMaxLength(255);
-		const row = new ActionRowBuilder().addComponents(iconInput);
+		const row = makeTextInputRowBuilder().addComponents(iconInput);
 		const modal = new ModalBuilder()
 			.setCustomId(`feed_setCustomIcon_${channelId}`)
 			.setTitle('Personalización de Feed')
@@ -750,7 +751,7 @@ const command = new CommandManager('feed', flags)
 			console.log(sent.embeds[0].author);
 			if(sent.embeds[0].author.iconURL)
 				gcfg.feeds[channelId].cornerIcon = input;
-			setTimeout(() => { if(sent.deletable) sent.delete().catch(console.error) }, 1500);
+			setTimeout(() => { if(sent?.deletable) sent.delete().catch(console.error); }, 1500);
 			gcfg.markModified('feeds');
 			gcfg.save();
 			return interaction.editReply({ content: '✅ Ícono actualizado' });
@@ -777,7 +778,7 @@ const command = new CommandManager('feed', flags)
 			});
 		return interaction.update({
 			embeds: [concludedEmbed],
-			components: [new ActionRowBuilder().addComponents(
+			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId('feed_selectCustomize')
 					.setLabel('Seguir personalizando')
@@ -803,7 +804,7 @@ const command = new CommandManager('feed', flags)
 			});
 		return interaction.update({
 			embeds: [concludedEmbed],
-			components: [new ActionRowBuilder().addComponents(
+			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId('feed_selectCustomize')
 					.setLabel('Seguir personalizando')
@@ -829,7 +830,7 @@ const command = new CommandManager('feed', flags)
 			});
 		return interaction.update({
 			embeds: [concludedEmbed],
-			components: [new ActionRowBuilder().addComponents(
+			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId('feed_selectCustomize')
 					.setLabel('Seguir personalizando')
@@ -855,7 +856,7 @@ const command = new CommandManager('feed', flags)
 			});
 		return interaction.update({
 			embeds: [concludedEmbed],
-			components: [new ActionRowBuilder().addComponents(
+			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId('feed_selectCustomize')
 					.setLabel('Seguir personalizando')
@@ -892,23 +893,69 @@ const command = new CommandManager('feed', flags)
 	.setButtonResponse(async function showFeedImageTags(interaction, isNotFeed) {
         const translator = await Translator.from(interaction.user.id);
 
-		const url = interaction.message.components[0].components[0].url;
+		const url = (/**@type {ButtonComponent}*/(interaction.message.components[0].components[0])).url;
 		const booru = new Booru(globalConfigs.booruCredentials);
 		try {
 			const post = await booru.fetchPostByUrl(url);
-			const tags = shortenText(`\`\`\`${post.tags.join(' ')}\`\`\``, 1024);
+			const postTags = await booru.fetchPostTags(post);
+
+			const postArtistTags   = postTags
+				.filter(t => t.type === TagTypes.ARTIST)
+				.map(t => t.name);
+			const postCharacterTags = postTags
+				.filter(t => t.type === TagTypes.CHARACTER)
+				.map(t => t.name);
+			const postCopyrightTags = postTags
+				.filter(t => t.type === TagTypes.COPYRIGHT)
+				.map(t => t.name);
+		
+			const otherTagTypes = /**@type {Array<import('../../systems/booru/boorufetch').TagType>}*/([
+				TagTypes.ARTIST,
+				TagTypes.CHARACTER,
+				TagTypes.COPYRIGHT,
+			]);
+			const postOtherTags = postTags
+				.filter(t => !otherTagTypes.includes(t.type))
+				.map(t => t.name);
+
+			/**
+			 * @param {Array<String>} tagNames 
+			 * @param {String} sep 
+			 */
+			const formatTagNameList = (tagNames, sep) => tagNames.join(sep)
+				.replace(/\\/g,'\\\\')
+				.replace(/\*/g,'\\*')
+				.replace(/_/g,'\\_')
+				.replace(/\|/g,'\\|');
+
+			const tagEmoji = guildEmoji('tagswhite', globalConfigs.slots.slot3);
+			const tagsContent = formatTagNameList(postOtherTags, ' ');
+
 			const source = post.source;
 			const tagsEmbed = new EmbedBuilder()
-				.setColor(Colors.Purple)
-				.addFields(
-					{ name: '<:tagswhite:921788204540100608> Tags', value: tags },
-					{
-						name: '<:urlwhite:922669195521568818> ' + translator.getText('feedViewUrlsName'),
-						value: `[<:gelbooru:919398540172750878> **Post**](${url})${ source ? ` [<:heartwhite:969664712604262400> **Fuente**](${source})` : '' }`,
-					},
-				);
+				.setColor(Colors.Purple);
+
+			if(postArtistTags.length > 0) {
+				const artistTagsContent = formatTagNameList(postArtistTags, '\n');
+				tagsEmbed.addFields({ name: `${tagEmoji} Artistas`, value: shortenText(artistTagsContent, 1020), inline: true })
+			}
+			if(postCharacterTags.length > 0) {
+				const characterTagsContent = formatTagNameList(postCharacterTags, '\n');
+				tagsEmbed.addFields({ name: `${tagEmoji} Personajes`, value: shortenText(characterTagsContent, 1020), inline: true })
+			}
+			if(postCopyrightTags.length > 0) {
+				const copyrightTagsContent = formatTagNameList(postCopyrightTags, '\n');
+				tagsEmbed.addFields({ name: `${tagEmoji} Copyright`, value: shortenText(copyrightTagsContent, 1020), inline: true })
+			}
+			tagsEmbed.addFields(
+				{ name: `${tagEmoji} Tags`, value: shortenText(tagsContent, 1020) },
+				{
+					name: '<:urlwhite:922669195521568818> ' + translator.getText('feedViewUrlsName'),
+					value: `[<:gelbooru:919398540172750878> **Post**](${url})${ source ? ` [<:heartwhite:969664712604262400> **Fuente**](${source})` : '' }`,
+				},
+			)
 			const userId = compressId(interaction.user.id);
-			const tagsEditRow = new ActionRowBuilder();
+			const tagsEditRow = makeButtonRowBuilder();
 
 			if(isNotFeed)
 				tagsEditRow.addComponents([
@@ -943,7 +990,12 @@ const command = new CommandManager('feed', flags)
 				ephemeral: true,
 			});
 		} catch(error) {
+			console.error(error);
 			auditError(error, { brief: 'Ha ocurrido un error al procesar Feed' });
+			
+			if(error instanceof BooruUnknownPostError)
+				return interaction.reply({ content: 'Puede que el Post del que se intentó recuperar las tags se haya eliminado', ephemeral: true });
+
 			return interaction.reply({
 				content: 'Ocurrió un problema al contactar con el Booru para recuperar las tags.\nInténtalo de nuevo, si el problema persiste, es probable que el objetivo no esté disponible o que se trate de un bug de mi parte',
 				ephemeral: true,
@@ -969,7 +1021,7 @@ const command = new CommandManager('feed', flags)
 			title = translator.getText('feedEditTagsTitleRemove');
 		}
 
-		const row = new ActionRowBuilder().addComponents(tagsInput);
+		const row = makeTextInputRowBuilder().addComponents(tagsInput);
 
 		const modal = new ModalBuilder()
 			.setCustomId(`yo_setFollowedTags_${operation}`)
@@ -988,7 +1040,7 @@ const command = new CommandManager('feed', flags)
 			});
 		
 		const { message } = interaction;
-		const url = message.components[0].components[0].url;
+		const url = (/**@type {ButtonComponent}*/(message.components[0].components[0])).url;
 		if(isNotFeed || !url)
 			return Promise.all([
 				interaction.reply({
@@ -999,57 +1051,115 @@ const command = new CommandManager('feed', flags)
 			]);
 		
 		const booru = new Booru(globalConfigs.booruCredentials);
-		const post = await booru.fetchPostByUrl(url);
-		if(!post)
+
+		try {
+			const post = await booru.fetchPostByUrl(url);
+			if(!post)
+				return Promise.all([
+					interaction.reply({
+						content: `<:gelbooru:919398540172750878> **${translator.getText('feedDeletePostTitle')}** <${url}>`,
+						ephemeral: true,
+					}),
+					message.delete().catch(console.error),
+				]);
+	
+			const tags = shortenText(`\`\`\`\n${post.tags.join(' ')}\n\`\`\``, 1024);
+			const embed = new EmbedBuilder()
+				.setColor(Colors.DarkRed)
+				.setTitle(translator.getText('feedDeletePostTitle'))
+				.setDescription(translator.getText('feedDeletePostAdvice'))
+				.addFields(
+					{
+						name: `<:tagswhite:921788204540100608> ${translator.getText('feedDeletePostTagsName')}`,
+						value: tags,
+					},
+					{
+						name: `<:urlwhite:922669195521568818> ${translator.getText('feedDeletePostLinkName')}`,
+						value: `[Gelbooru](${url})`,
+					},
+				);
+			const row = makeButtonRowBuilder().addComponents(
+				new ButtonBuilder()
+					.setCustomId('feed_startWizard')
+					.setLabel('Configurar Feeds...')
+					.setStyle(ButtonStyle.Primary),
+			);
+	
 			return Promise.all([
 				interaction.reply({
-					content: `<:gelbooru:919398540172750878> **${translator.getText('feedDeletePostTitle')}** <${url}>`,
+					embeds: [embed],
+					components: [row],
 					ephemeral: true,
 				}),
 				message.delete().catch(console.error),
 			]);
+		} catch(error) {
+			console.error(error);
+			auditError(error, { brief: 'Ha ocurrido un error al procesar Feed' });
+			
+			if(error instanceof BooruUnknownPostError)
+				return interaction.reply({
+					content: 'Puede que el Post eliminado de Discord haya sido también eliminado del Booru del que se originó, pues no se pudieron recuperar sus tags',
+					ephemeral: true,
+				});
 
-		const tags = shortenText(`\`\`\`\n${post.tags.join(' ')}\n\`\`\``, 1024);
-		const embed = new EmbedBuilder()
-			.setColor(Colors.DarkRed)
-			.setTitle(translator.getText('feedDeletePostTitle'))
-			.setDescription(translator.getText('feedDeletePostAdvice'))
-			.addFields(
-				{
-					name: `<:tagswhite:921788204540100608> ${translator.getText('feedDeletePostTagsName')}`,
-					value: tags,
-				},
-				{
-					name: `<:urlwhite:922669195521568818> ${translator.getText('feedDeletePostLinkName')}`,
-					value: `[Gelbooru](${url})`,
-				},
-			);
-		const row = new ActionRowBuilder().addComponents(
-			new ButtonBuilder()
-				.setCustomId('feed_startWizard')
-				.setLabel('Configurar Feeds...')
-				.setStyle(ButtonStyle.Primary),
-		);
-
-		return Promise.all([
-			interaction.reply({
-				embeds: [embed],
-				components: [row],
-				ephemeral: true,
-			}),
-			message.delete().catch(console.error),
-		]);
+			return Promise.all([
+				interaction.reply({
+					content: 'Post eliminado (no se pudo recuperar la información del Post y/o sus tags)',
+					ephemeral: true,
+				}),
+				message.delete().catch(console.error),
+			]);
+		}
 	})
 	.setButtonResponse(async function shock(interaction) {
-		const { member, guild, channel } = interaction;
+		//No hace nada. Permanece por botones antiguos que ya fueron posteados
+		const { member } = interaction;
 		if(isNotModerator(member))
 			return interaction.reply({ content: '❌ No tienes permiso para hacer eso, teehee~', ephemeral: true });
-		const gcfg = await GuildConfig.findOne({ guildId: guild.id });
-		const booru = new Booru(globalConfigs.booruCredentials);
-		gcfg.feeds[channel.id].ids = (await booru.search(gcfg.feeds[channel.id].tags, { limit: 32 })).map(r => r.id);
-		gcfg.markModified('feeds');
-		await gcfg.save();
 		return interaction.reply({ content: 'Shock aplicado.', ephemeral: true });
+	})
+	.setButtonResponse(async function giveFeedback(interaction, type) {
+		const translator = await Translator.from(interaction.user);
+		//return interaction.reply({ content: translator.getText('feedFeedbackExpired'), ephemeral: true });
+
+		//type = 'Y' | 'N' | 'F'
+		if(type === 'Y' || type === 'N') {
+			auditAction(`PuréFeed • Feedback • ${interaction.user.username}`, {
+				name: 'Calificación',
+				value: type === 'Y' ? '✅ Satisfecho' : '❌ Insatisfecho',
+			});
+
+			return interaction.reply({ content: translator.getText('feedFeedbackThanks'), ephemeral: true });
+		}
+
+		if(type !== 'F')
+			return interaction.reply({ content: translator.getText('unknownInteraction'), ephemeral: true });
+
+		const modal = new ModalBuilder()
+			.setCustomId('feed_sendFeedback')
+			.setTitle(translator.getText('feedFeedbackTitle'))
+			.setComponents(makeTextInputRowBuilder().addComponents(
+				new TextInputBuilder()
+					.setCustomId('feedback')
+					.setLabel(translator.getText('feedFeedbackName'))
+					.setMinLength(20)
+					.setMaxLength(250)
+					.setRequired(true)
+					.setStyle(TextInputStyle.Paragraph)
+			));
+
+		return interaction.showModal(modal);
+	}).setModalResponse(async function sendFeedback(interaction) {
+		const translator = await Translator.from(interaction.user);
+		const feedback = interaction.fields.getTextInputValue('feedback');
+
+		auditAction(`PuréFeed • Feedback • ${interaction.user.username}`, {
+			name: 'Mensaje',
+			value: feedback,
+		});
+
+		return interaction.reply({ content: translator.getText('feedFeedbackThanks'), ephemeral: true });
 	});
 
 module.exports = command;

@@ -1,18 +1,19 @@
 //#region Carga de módulos necesarios
+const { puré } = require('../commandInit.js');
 const { Stats } = require('../localdata/models/stats.js');
 const { peopleid } = require('../localdata/config.json');
-const { channelIsBlocked, isUsageBanned } = require('../func.js');
+const { channelIsBlocked, isUsageBanned, decompressId } = require('../func.js');
 const { auditRequest } = require('../systems/others/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../localdata/cmdExceptions.js');
 const { Translator } = require('../internationalization.js');
 const { CommandManager } = require('../commands/Commons/cmdBuilder.js');
-// @ts-ignore
-const { Interaction, CommandInteraction, ButtonInteraction, StringSelectMenuInteraction, ModalSubmitInteraction, Client, ContextMenuCommandInteraction, ChatInputCommandInteraction, CommandInteractionOptionResolver } = require('discord.js');
+const { ButtonInteraction, StringSelectMenuInteraction, ModalSubmitInteraction, Client, ContextMenuCommandInteraction, ChatInputCommandInteraction, CommandInteractionOptionResolver, AutocompleteInteraction } = require('discord.js');
 const { ContextMenuActionManager } = require('../actions/Commons/actionBuilder.js');
-const { CommandOptionSolver } = require('../commands/Commons/cmdOpts.js');
+const { CommandOptionSolver, CommandFlagExpressive, CommandParam } = require('../commands/Commons/cmdOpts.js');
+//#endregion
 
 /**
- * @param {Interaction} interaction 
+ * @param {import('discord.js').Interaction} interaction 
  * @param {Client} client 
  */
 async function onInteraction(interaction, client) {
@@ -26,10 +27,10 @@ async function onInteraction(interaction, client) {
     
     const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
 
-    auditRequest(interaction);
-
     if(interaction.isAutocomplete())
-        return handleUnknownInteraction(interaction);
+        return handleAutocompleteInteraction(interaction, client, stats);
+
+    auditRequest(interaction);
 
     if(interaction.isChatInputCommand())
         return handleCommand(interaction, client, stats);
@@ -50,31 +51,46 @@ async function onInteraction(interaction, client) {
  */
 async function handleCommand(interaction, client, stats) {
     const { commandName } = interaction;
-    // @ts-ignore
-    const slash = client.SlashPure.get(commandName) ?? client.SlashHouraiPure.get(commandName);
+    const slash = puré.slash.get(commandName) ?? puré.slashHourai.get(commandName);
     if(!slash) return;
 
     try {
         //Detectar problemas con el comando basado en flags
-        /**@type {CommandManager | undefined}*/
-        // @ts-ignore
-        const command = client.ComandosPure.get(commandName);
+        /**@type {CommandManager}*/
+        const command = puré.commands.get(commandName);
 
-        if(command.permissions && !command.permissions.isAllowed(interaction.member)) {
-            return interaction.channel.send({ embeds: [
-                generateExceptionEmbed({
-                    tag: undefined,
-                    title: 'Permisos insuficientes',
-                    desc: 'Este comando requiere permisos para ejecutarse que no tienes actualmente',
-                    isException: undefined,
-                }, { cmdString: `/${commandName}` })
-                .addFields({
-                    name: 'Requisitos completos',
-                    value: command.permissions.matrix
-                        .map((requisite, n) => `${n + 1}. ${requisite.map(p => `\`${p}\``).join(' **o** ')}`)
-                        .join('\n')
-                })
-            ]});
+        if(command.permissions) {
+            if(!command.permissions.isAllowedIn(interaction.member, interaction.channel)) {
+                const translator = await Translator.from(interaction.member);
+                return interaction.channel.send({ embeds: [
+                    generateExceptionEmbed({
+                        title: translator.getText('missingMemberChannelPermissionsTitle'),
+                        desc: translator.getText('missingMemberChannelPermissionsDescription'),
+                    }, { cmdString: `/${commandName}` })
+                    .addFields({
+                        name: translator.getText('missingMemberChannelPermissionsFullRequisitesName'),
+                        value: command.permissions.matrix
+                            .map((requisite, n) => `${n + 1}. ${requisite.map(p => `\`${p}\``).join(' **o** ')}`)
+                            .join('\n'),
+                    }),
+                ]});
+            }
+            
+            if(!command.permissions.amAllowedIn(interaction.channel)) {
+                const translator = await Translator.from(interaction.member);
+                return interaction.channel.send({ embeds: [
+                    generateExceptionEmbed({
+                        title: translator.getText('missingMemberChannelPermissionsTitle'),
+                        desc: translator.getText('missingClientChannelPermissionsDescription'),
+                    }, { cmdString: `/${commandName}` })
+                    .addFields({
+                        name: translator.getText('missingMemberChannelPermissionsFullRequisitesName'),
+                        value: command.permissions.matrix
+                            .map((requisite, n) => `${n + 1}. ${requisite.map(p => `\`${p}\``).join(' **o** ')}`)
+                            .join('\n'),
+                    }),
+                ]});
+            }
         }
 
         const exception = await findFirstException(command, interaction);
@@ -107,19 +123,16 @@ async function handleCommand(interaction, client, stats) {
 async function handleAction(interaction, client, stats) {
     const { commandName } = interaction;
 
-    // @ts-ignore
-    const action = client.ContextPure.get(commandName);
-    if(!action) return;
+    const contextMenu = puré.contextMenu.get(commandName);
+    if(!contextMenu) return;
 
     try {
-        /**@type {ContextMenuActionManager | undefined}*/
-        // @ts-ignore
-        const command = client.AccionesPure.get(commandName);
+        const action = puré.actions.get(commandName);
         
-        await command.execute(interaction);
+        await action.execute(interaction);
         stats.commands.succeeded++;
     } catch(error) {
-        // @ts-ignore
+        //@ts-expect-error
         const isPermissionsError = handleAndAuditError(error, interaction, { details: `/${commandName}` });
         if(!isPermissionsError)
             stats.commands.failed++;
@@ -143,17 +156,37 @@ async function handleComponent(interaction, client, stats) {
         /**@type {Array<String>}*/
         const funcStream = interaction.customId.split('_');
         let commandName = funcStream.shift();
-        const func = funcStream.shift();
-        console.log(commandName, func, funcStream);
-        if(!commandName || !func)
+        const commandFnName = funcStream.shift();
+
+        console.log(commandName, commandFnName, funcStream);
+
+        if(!commandName || !commandFnName)
             return handleUnknownInteraction(interaction);
 
-        // @ts-ignore
-        const command = client.ComandosPure.get(commandName) || client.ComandosPure.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
-        if(typeof command[func] !== 'function')
+        /**@type {CommandManager}*/
+        const command = puré.commands.get(commandName) || puré.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+        if(typeof command[commandFnName] !== 'function')
             return handleHuskInteraction(interaction);
 
-        return command[func](interaction, ...funcStream);
+        const commandFn = command[commandFnName];
+        
+        //Filtros
+        const userFilterIndex = commandFn['userFilterIndex'];
+        if(userFilterIndex != undefined) {
+            if(typeof userFilterIndex !== 'number')
+                throw new TypeError(`Se esperaba un valor numérico como índice de parámetro de interacción para filtro de ID de usuario, pero se recibió: ${userFilterIndex} (${typeof userFilterIndex})`);
+
+            const authorId = funcStream[userFilterIndex];
+            if(typeof authorId !== 'string')
+                throw new RangeError(`Se esperaba una ID de usuario en el parámetro de interacción ${userFilterIndex}. Sin embargo, ninguna ID fue recibida en la posición`);
+            
+            if(interaction.user.id !== decompressId(authorId)) {
+                const translator = await Translator.from(interaction.user.id);
+                return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
+            }
+        }
+
+        return commandFn(interaction, ...funcStream);
     } catch(error) {
         const isPermissionsError = handleAndAuditError(error, interaction, { details: `"${interaction.customId}"` });
         if(!isPermissionsError)
@@ -161,8 +194,48 @@ async function handleComponent(interaction, client, stats) {
     }
 }
 
+/**
+ * @param {AutocompleteInteraction<'cached'>} interaction 
+ * @param {Client} client 
+ * @param {import('../localdata/models/stats.js').StatsDocument} stats 
+*/
+async function handleAutocompleteInteraction(interaction, client, stats) {
+    const { commandName, options } = interaction;
+    const focusedOption = options.getFocused(true);
+
+    if(!focusedOption) return;
+
+    const optionName = focusedOption.name;
+    const optionValue = focusedOption.value;
+
+    console.log([ commandName, optionName, '«?»', optionValue ]);
+
+    try {
+        /**@type {CommandManager}*/
+        const command = puré.commands.get(commandName) || puré.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+        const option = /**@type {CommandParam | CommandFlagExpressive}*/(
+            command.options.options.get(optionName)
+            ?? command.options.options.get(`${optionName.slice(0, optionName.lastIndexOf('_'))}s`)
+            ?? command.options.options.get(`${optionName.slice(0, optionName.lastIndexOf('_'))}`)
+        );
+
+        if(!option)
+            return interaction.respond([{
+                name: 'Ocurrió un error. Disculpa las molestias',
+                value: 'BDP_ERR_NOOPTION',
+            }]);
+        
+        return option.autocomplete(interaction, optionValue);
+    } catch(error) {
+        const isPermissionsError = handleAndAuditError(error, interaction, { details: `"${optionName}"` });
+        if(!isPermissionsError)
+            console.error(error);
+    }
+}
+
+
 //#region Casos extremos
-/**@param {Interaction} interaction*/
+/**@param {import('discord.js').Interaction} interaction*/
 async function handleDMInteraction(interaction) {
     const translator = await Translator.from(interaction.user.id);
 
@@ -178,7 +251,7 @@ async function handleDMInteraction(interaction) {
     }
 }
 
-/**@param {Interaction} interaction*/
+/**@param {import('discord.js').Interaction} interaction*/
 async function handleBlockedInteraction(interaction) {
     const translator = await Translator.from(interaction.user.id);
     if(interaction.isRepliable()) {
@@ -187,11 +260,11 @@ async function handleBlockedInteraction(interaction) {
             ephemeral: true,
         });
     } else {
-        interaction.respond([{ name: 'No permitido', value: -1 }]);
+        interaction.respond([]);
     }
 }
 
-/**@param {Interaction} interaction*/
+/**@param {import('discord.js').Interaction} interaction*/
 async function handleUnknownInteraction(interaction) {
     const translator = await Translator.from(interaction.user.id);
     if(interaction.isRepliable()) {
@@ -200,11 +273,11 @@ async function handleUnknownInteraction(interaction) {
             ephemeral: true,
         });
     } else {
-        interaction.respond([{ name: 'No permitido', value: -1 }]);
+        interaction.respond([]);
     }
 }
 
-/**@param {Interaction} interaction*/
+/**@param {import('discord.js').Interaction} interaction*/
 async function handleHuskInteraction(interaction) {
     const translator = await Translator.from(interaction.user.id);
     if(interaction.isRepliable()) {
@@ -213,7 +286,7 @@ async function handleHuskInteraction(interaction) {
             ephemeral: true,
         });
     } else {
-        interaction.respond([{ name: 'No permitido', value: -1 }]);
+        interaction.respond([]);
     }
 }
 //#endregion

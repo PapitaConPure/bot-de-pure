@@ -1,166 +1,24 @@
-const GuildConfig = require('../../localdata/models/guildconfigs.js');
+const GuildConfigs = require('../../localdata/models/guildconfigs.js');
 const Discord = require('discord.js');
 const { formatBooruPostMessage, notifyUsers } = require('./boorusend.js');
 const { auditError, auditAction, auditSystem } = require('../others/auditor.js');
 const chalk = require('chalk');
-const { Booru } = require('./boorufetch.js');
+const { Booru, Post } = require('./boorufetch.js');
 const globalConfigs = require('../../localdata/config.json');
-const { paginateRaw, sleep } = require('../../func.js');
+const { paginateRaw, sleep, success } = require('../../func.js');
+
+/**
+ * @typedef {import('./boorusend').PostFormatData & { tags: String, lastFetchedAt?: Date, faults?: Number }} FeedData
+ */
 
 //Configuraciones globales de actualización de Feeds
 /**@type {Map<Discord.Snowflake, Map<Discord.Snowflake, Array<String>>>}*/
 const feedTagSuscriptionsCache = new Map();
-const feedUpdateInterval = 60e3 * 30;
-const chunkMax = 5;
-const logMore = false;
 
-/**
- * Discord es ciertamente una aplicación
- * @param {Array<Promise<Discord.Message<true> | void>>} messagesToSend
- */
-async function correctEmbedsAfterSent(messagesToSend, ms = 1000) {
-    try {
-        /**@type {Array<Discord.Message<true>>}*/
-        let messages = await Promise.all(messagesToSend);
-        messages = messages.filter(message => message);
-        if(!messages.length)
-            return [];
-        await sleep(ms);
-        const correctedMessages = messages.map(message => {
-            const embed = message.embeds[0];
-            const newEmbed = Discord.EmbedBuilder.from(message.embeds[0]);
-            if(embed.image.width > 0 && embed.image.height > 0)
-                return Promise.resolve();
-            newEmbed.setImage(embed.image.url);
-            return message.edit({ embeds: [newEmbed] }).catch(console.error);
-        });
-        if(ms >= 32000)
-            return correctedMessages;
-
-        return correctEmbedsAfterSent(messagesToSend, ms * 2);
-    } catch(e) {
-        console.error(error);
-        auditError(error, { brief: 'Ocurrió un error al corregir embeds de Feed' });
-    }
-}
-
-// async function checkGuildFeeds(guild) {
-
-// }
-
-/**
- * @param {Booru} booru El Booru a comprobar
- * @param {Discord.Collection<Discord.Snowflake, Discord.Guild>} guilds Colección de Guilds a procesar
- * @returns {Object} Cantidad de imágenes enviadas
- */
-async function checkFeeds(booru, guilds) {
-    const maxDocuments = 32;
-    let promisesCount = { total: 0, feeds: 0 };
-    await Promise.all(guilds.map(async guild => {
-        promisesCount[guild] = 0;
-        const gcfg = await GuildConfig.findOne({ guildId: guild.id }).catch(console.error);
-        if(!gcfg?.feeds) return;
-        await Promise.all(Object.entries(gcfg.feeds).filter(([_, feed]) => !feed.faults || feed.faults < 10).map(/**@param {[String, import('./boorufetch.js').FeedData]}*/ async ([chid, feed]) => {
-            //Recolectar últimas imágenes para el Feed
-            let fetchedProperly = true;
-            /**@type {Array<import('./boorufetch').Post>}*/
-            const response = await booru.search(feed.tags, { limit: maxDocuments })
-            .catch(error => {
-                console.log(chalk.redBright('Ocurrió un problema mientras se esperaban los resultados de búsqueda de un Feed'));
-                console.log({
-                    guildName: guild.name,
-                    channelId: chid,
-                    feedStack: feed.ids,
-                    feedTags: feed.tags,
-                });
-                console.error(error);
-                fetchedProperly = false;
-                return [ 'error' ];
-            });
-            if(!fetchedProperly) return;
-
-            //Prepararse para enviar imágenes
-            /** @type {import('discord.js').TextChannel} */
-            const channel = guild.channels.cache.get(chid);
-
-            ///Eliminar Feed si las tags ingresadas no devuelven ninguna imagen
-            feed.faults ??= 0;
-            if(channel == undefined || !response.length) {
-                auditAction('Comprobando eliminación de un Feed no disponible',
-                    { name: 'Servidor', value: `${guild}`, inline: true },
-                    { name: 'Canal', value: `${channel ?? 'No disponible'}`, inline: true },
-                    { name: 'Reintentos',  value: `${feed.faults + 1} / 10`, inline: true },
-                );
-                console.log(channel?.name, response.length);
-                // if(feed.faults >= 10)
-                //     delete gcfg.feeds[chid];
-                // else
-                if(feed.faults < 10) {
-                    gcfg.feeds[chid].faults = feed.faults + 1;
-                    gcfg.markModified('feeds');
-                }
-
-                return;
-            }
-            if(feed.faults > 0) {
-                gcfg.feeds[chid].faults = Math.max(0, feed.faults - 2);
-                gcfg.markModified('feeds');
-            }
-
-            //Preparar suscripciones a Feeds
-            /**@type {Array<import('./boorusend.js').Suscription>}*/
-            const feedSuscriptions = [];
-            for(const [ userId , feedSuscription ] of feedTagSuscriptionsCache) {
-                if(!feedSuscription.has(chid))
-                    continue;
-                const followedTags = feedSuscription.get(chid);
-                feedSuscriptions.push({ userId, followedTags });
-            }
-            
-            //Comprobar recolectado en busca de imágenes nuevas
-            if(logMore) console.log(`Preparándose para enviar imágenes en ${channel.name} ${response.map(post => post.id)}`);
-            /**@type {Array<Promise<Discord.Message<true>>>}*/
-            const messagesToSend = [];
-            response.reverse().forEach(post => {
-                //Revisar si el documento no fue anteriormente enviado por este Feed
-                if(feed.ids.includes(post.id)) return;
-                if(logMore) console.log('feed.ids:', feed.ids, '\npost.id:', post.id);
-
-                //Agregar documento a IDs enviadas
-                feed.ids.unshift(post.id);
-
-                //Eliminar de la base de datos aquellas imágenes no coincidentes con lo encontrado
-                gcfg.feeds[chid].ids = feed.ids.filter(id => response.some(p => p.id === id));
-                if(logMore) console.log(guild.id, 'gcfg.feeds[chid].ids:', gcfg.feeds[chid].ids);
-                gcfg.markModified('feeds');
-                if(logMore) console.dir({ post });
-                messagesToSend.push(
-                    channel.send(formatBooruPostMessage(post, feed))
-                    .then(async sent => {
-                        await notifyUsers(post, sent, feedSuscriptions);
-                        return sent;
-                    })
-                    .catch(error => {
-                        console.log(`Ocurrió un error al enviar la imagen de Feed: ${post.source ?? post.id} para ${channel.name}`);
-                        console.error(error);
-                        auditError(error, { brief: 'Ocurrió un error al enviar una imagen de Feed', details: `\`Post<"${post.source ?? post.id}">\`\n${channel}` });
-                    })
-                );
-                promisesCount[guild]++;
-                promisesCount.total++;
-                if(logMore) console.log(`EJECUTADO`);
-            });
-            promisesCount.feeds++;
-
-            correctEmbedsAfterSent(messagesToSend);
-        }));
-
-        if(logMore) console.log(`GUARDANDO:`, Object.entries(gcfg.feeds).map(([chid, feed]) => `${guild.channels.cache.get(chid).name}: ${feed.ids}`));
-        await gcfg.save();
-    }));
-
-    return promisesCount;
-}
+/**@readonly*/const FEED_UPDATE_INTERVAL = 60e3 * 30;
+/**@readonly*/const FEED_UPDATE_MAX_POST_COUNT = 32;
+/**@readonly*/const FEED_BATCH_MAX_COUNT = 5;
+/**@readonly*/const LOG_MORE = false;
 
 /**
  * @param {Discord.Collection<Discord.Snowflake, Discord.Guild>} guilds
@@ -168,68 +26,149 @@ async function checkFeeds(booru, guilds) {
  */
 async function updateBooruFeeds(guilds) {
     const booru = new Booru(globalConfigs.booruCredentials);
-    // console.log(guilds);
-
     const startMs = Date.now();
-    const promisesCount = await checkFeeds(booru, guilds)
-    .catch(e => {
-        console.error(e);
-        return -1;
-    });
+
+    await processFeeds(booru, guilds).catch(console.error);
+    Booru.cleanupTagsCache();
 
     const delayMs = Date.now() - startMs;
-    
     setTimeout(updateBooruFeeds, 60e3 * 30 - delayMs, guilds);
     auditAction('Se procesaron Feeds',
-        { name: 'Servers',  value: `${guilds.size}`,         inline: true },
-        { name: 'Feeds',    value: `${promisesCount.feeds}`, inline: true },
-        { name: 'Imágenes', value: `${promisesCount.total}`, inline: true },
+        { name: 'Servers', value: `${guilds.size}`, inline: true },
     );
 };
+
+/**
+ * @param {Booru} booru El Booru a comprobar
+ * @param {Discord.Collection<Discord.Snowflake, Discord.Guild>} guilds Colección de Guilds a procesar
+ */
+async function processFeeds(booru, guilds) {
+    const guildIds = guilds.map(g => g.id);
+    const guildConfigs = /**@type {Array<import('../../localdata/models/guildconfigs.js').GuildConfigDocument>}*/(await GuildConfigs.find({
+        guildId: { $in: guildIds },
+        feeds: { $exists: true, $ne: {} },
+    }));
+
+    const bulkOps = [];
+    await Promise.all(guildConfigs.map(async gcfg => {
+        const guild = guilds.get(gcfg.guildId);
+        if(!guild) return;
+
+        await Promise.all(Object.entries(gcfg.feeds).map(async ([ channelId, feedData ]) => {
+            const feed = new BooruFeed(booru, guild.channels.cache.get(channelId), feedData.tags, feedData);
+            if(!feed.isRunning) return;
+            if(!feed.isProcessable)
+                return feed.faults < 10 && bulkOps.push(feed.addFault());
+
+            //Recolectar últimas imágenes para el Feed
+            const { success, posts, newPosts } = await feed.fetchPosts();
+            if(!success) return;
+            if(!posts.length)
+                return feed.faults < 10 && bulkOps.push(feed.addFault());
+            if(!newPosts.length) 
+                return bulkOps.push(feed.reduceFaults());
+
+            /**@type {Partial<FeedData>}*/
+            const toSave = {};
+
+            if(feed.faults > 0)
+                toSave.faults = Math.max(0, feed.faults - 2);
+
+            //Preparar suscripciones a Feeds
+            /**@type {Array<import('./boorusend.js').Suscription>}*/
+            const feedSuscriptions = [];
+            for(const [ userId, feedSuscription ] of feedTagSuscriptionsCache) {
+                if(!feedSuscription.has(channelId)) continue;
+
+                const followedTags = feedSuscription.get(channelId);
+                feedSuscriptions.push({ userId, followedTags });
+            }
+            
+            //Comprobar recolectado en busca de imágenes nuevas
+            const channel = feed.channel;
+            const messagesToSend = /**@type {Array<Discord.Message<true>>}*/([]);
+            await Promise.all(newPosts.map(async post => {
+                try {
+                    const formatted = await formatBooruPostMessage(booru, post, feed);
+                    const sent = await feed.channel.send(formatted);
+                    await notifyUsers(post, sent, feedSuscriptions);
+                    messagesToSend.push(sent);
+                } catch(error) {
+                    console.log(`Ocurrió un error al enviar la imagen de Feed: ${post.source ?? post.id} para ${channel.name}`);
+                    console.error(error);
+                    auditError(error, { brief: 'Ocurrió un error al enviar una imagen de Feed', details: `\`Post<"${post.source ?? post.id}">\`\n${channel}` });
+                }
+            }));
+
+            //Eliminar aquellos Posts no coincidentes con lo encontrado y guardar
+            toSave.lastFetchedAt = feed.lastFetchedAt;
+
+            const $set = {};
+            for(const [ key, value ] of Object.entries(toSave))
+                $set[`feeds.${channelId}.${key}`] = value;
+
+            return bulkOps.push({
+                updateOne: {
+                    filter: { guildId: gcfg.guildId },
+                    update: { $set },
+                },
+            });
+        }));
+    }));
+
+    LOG_MORE && console.dir(bulkOps, { depth: null });
+    if(bulkOps.length)
+        await GuildConfigs.bulkWrite(bulkOps);
+}
 
 /**@returns {Number}*/
 function getNextBaseUpdateStart() {
     //Encontrar próximo inicio de fracción de hora para actualizar Feeds
     const now = new Date();
-    let feedUpdateStart = feedUpdateInterval - (
+    let feedUpdateStart = FEED_UPDATE_INTERVAL - (
         now.getMinutes() * 60e3 +
         now.getSeconds() * 1e3 +
         now.getMilliseconds());
     while(feedUpdateStart <= 0)
-        feedUpdateStart += feedUpdateInterval;
+        feedUpdateStart += FEED_UPDATE_INTERVAL;
     feedUpdateStart += 30e3; //Añadir 30 segundos para dar ventana de tiempo razonable al update de Gelbooru
     return feedUpdateStart;
 };
 
+/**
+ * @typedef {Object} GuildFeedChunk
+ * @property {Date} timestamp
+ * @property {NodeJS.Timeout} tid
+ * @property {Array<[ Discord.Snowflake, Discord.Guild ]>} guilds
+ */
 /**
  * Inicializa una cadena de actualización de Feeds en todas las Guilds que cuentan con uno
  * @param {Discord.Client} client 
  */
 async function setupGuildFeedUpdateStack(client) {
     const feedUpdateStart = getNextBaseUpdateStart();
-    const guildConfigs = await GuildConfig.find({ feeds: { $exists: true } });
-    /**@type {Array<{ tid: *, guilds: Array<[Discord.Snowflake, Discord.Guild]> }>}*/
-    const guildChunks = paginateRaw(client.guilds.cache.filter(guild => guildConfigs.some(gcfg => gcfg.guildId === guild.id)), chunkMax)
-        .map((g) => ({ tid: null, guilds: g }));
+    const guildConfigs = await GuildConfigs.find({ feeds: { $exists: true } });
+    /**@type {Array<GuildFeedChunk>}*/
+    const guildChunks = paginateRaw(client.guilds.cache.filter(guild => guildConfigs.some(gcfg => gcfg.guildId === guild.id)), FEED_BATCH_MAX_COUNT)
+        .map((g) => ({ tid: null, guilds: g, timestamp: null }));
     const chunkAmount = guildChunks.length;
-    let shortestTime;
+    let shortestTime = 0;
     guildChunks.forEach((chunk, i) => {
         const guilds = new Discord.Collection(chunk.guilds);
-        let chunkUpdateStart = feedUpdateStart + feedUpdateInterval * (i / chunkAmount);
-        // console.log(i, (chunkUpdateStart - feedUpdateInterval));
-        if((chunkUpdateStart - feedUpdateInterval) > 0)
-            chunkUpdateStart -= feedUpdateInterval;
+        let chunkUpdateStart = feedUpdateStart + FEED_UPDATE_INTERVAL * (i / chunkAmount);
+        if((chunkUpdateStart - FEED_UPDATE_INTERVAL) > 0)
+            chunkUpdateStart -= FEED_UPDATE_INTERVAL;
         if(!shortestTime || chunkUpdateStart < shortestTime)
             shortestTime = chunkUpdateStart;
 
-        // console.log(new Date(now.getTime() + chunkUpdateStart).toString());
         guildChunks[i].tid = setTimeout(updateBooruFeeds, chunkUpdateStart, guilds);
+        guildChunks[i].timestamp = new Date(Date.now() + chunkUpdateStart);
     });
-    globalConfigs.feedGuildChunks = guildChunks;
+    globalConfigs['feedGuildChunks'] = guildChunks;
 
     auditAction('Se prepararon Feeds',
         { name: 'Primer Envío',   value: `<t:${Math.floor((Date.now() + shortestTime) * 0.001)}:R>`, inline: true },
-        { name: 'Intervalo Base', value: `${feedUpdateInterval / 60e3} minutos`,                     inline: true },
+        { name: 'Intervalo Base', value: `${FEED_UPDATE_INTERVAL / 60e3} minutos`,                   inline: true },
         { name: 'Subdivisiones',  value: `${chunkAmount}`,                                           inline: true },
     );
 
@@ -237,35 +176,47 @@ async function setupGuildFeedUpdateStack(client) {
 };
 
 /**
- * Añade la Guild actual a la cadena de actualización de Feeds su aún no está en ella
+ * Añade la Guild actual a la cadena de actualización de Feeds si aún no está en ella
  * @param {Discord.Guild} guild 
- * @returns {Boolean} Si se añadió una nueva Guild o no
+ * @returns {Number} La cantidad de milisegundos que faltan para actualizar el Feed añadido por primera vez, ó -1 si no se pudo agregar
  */
 function addGuildToFeedUpdateStack(guild) {
+    if(!('feedGuildChunks' in globalConfigs))
+        return -1;
+
+    if(!Array.isArray(globalConfigs.feedGuildChunks))
+        return -1;
+
+    /**@type {Array<GuildFeedChunk>}*/
+    const guildChunks = globalConfigs.feedGuildChunks;
+    const chunkAmount = guildChunks.length;
+
     //Retornar temprano si la guild ya está integrada al stack
-    console.log(globalConfigs.feedGuildChunks)
-    if(globalConfigs.feedGuildChunks.some(chunk => chunk.guilds.some(g => guild.id === g[0])))
-        return false;
+    const chunkIndexWithThisGuild = guildChunks.findIndex(chunk => chunk.guilds.some(g => guild.id === g[0]));
+    if(chunkIndexWithThisGuild)
+        return getNextBaseUpdateStart() + FEED_UPDATE_INTERVAL * (chunkIndexWithThisGuild / chunkAmount);
 
     //Añadir guild a stack en un chunk nuevo o uno ya definido
-    /**@type {Array<{ tid: *, guilds: Array<[Discord.Snowflake, Discord.Guild]> }>}*/
-    let guildChunks = globalConfigs.feedGuildChunks;
     const feedUpdateStart = getNextBaseUpdateStart();
-    if(guildChunks[guildChunks.length - 1].guilds.length >= chunkMax) {
+    let newGuildChunkUpdateDelay = 0;
+    if(guildChunks[guildChunks.length - 1].guilds.length >= FEED_BATCH_MAX_COUNT) {
         //Subdividir 1 nivel más
-        guildChunks.push({ tid: null, guilds: [[guild.id, guild]] });
+        guildChunks.push({ tid: null, guilds: [[guild.id, guild]], timestamp: null });
         const chunkAmount = guildChunks.length;
-        let shortestTime;
+        let shortestTime = 0;
         guildChunks.forEach((chunk, i) => {
-            let chunkUpdateStart = feedUpdateStart + feedUpdateInterval * (i / chunkAmount);
-            if((chunkUpdateStart - feedUpdateInterval) > 0)
-                chunkUpdateStart -= feedUpdateInterval;
+            let chunkUpdateStart = feedUpdateStart + FEED_UPDATE_INTERVAL * (i / chunkAmount);
+            if((chunkUpdateStart - FEED_UPDATE_INTERVAL) > 0)
+                chunkUpdateStart -= FEED_UPDATE_INTERVAL;
             if(!shortestTime || chunkUpdateStart < shortestTime)
                 shortestTime = chunkUpdateStart;
 
             clearTimeout(chunk.tid);
             guildChunks[i].tid = setTimeout(updateBooruFeeds, chunkUpdateStart, new Discord.Collection(chunk.guilds));
+            guildChunks[i].timestamp = new Date(Date.now() + chunkUpdateStart);
         });
+
+        newGuildChunkUpdateDelay = +guildChunks[chunkAmount - 1].timestamp - Date.now();
 
         auditAction('Intervalos de Feed Reescritos',
             { name: 'Primer Envío',   value: `<t:${Math.floor((Date.now() + shortestTime) * 0.001)}:R>`, inline: true },
@@ -276,15 +227,15 @@ function addGuildToFeedUpdateStack(guild) {
         guildChunks[guildChunks.length - 1].guilds.push([guild.id, guild]);
         const chunk = guildChunks[guildChunks.length - 1];
         const chunkAmount = guildChunks.length;
-        const chunkUpdateStart = feedUpdateStart + feedUpdateInterval * (chunkAmount - 1) / chunkAmount;
+        newGuildChunkUpdateDelay = feedUpdateStart + FEED_UPDATE_INTERVAL * (chunkAmount - 1) / chunkAmount;
         clearTimeout(chunk.tid);
-        guildChunks[guildChunks.length - 1].tid = setTimeout(updateBooruFeeds, chunkUpdateStart, new Discord.Collection(chunk.guilds));
+        guildChunks[guildChunks.length - 1].tid = setTimeout(updateBooruFeeds, newGuildChunkUpdateDelay, new Discord.Collection(chunk.guilds));
+        guildChunks[guildChunks.length - 1].timestamp = new Date(Date.now() + newGuildChunkUpdateDelay);
     }
 
     auditAction(`Guild ${guild.id} Incorporada a Feeds`);
-    console.log(guildChunks);
     globalConfigs.feedGuildChunks = guildChunks;
-    return true;
+    return newGuildChunkUpdateDelay;
 };
 
 /**
@@ -317,9 +268,153 @@ function updateFollowedFeedTagsCache(userId, channelId, newTags) {
     return;
 }
 
+/**
+ * @class
+ * Representa un Feed programado de imágenes de {@linkcode Booru}
+ */
+class BooruFeed {
+    /**@type {Booru}*/ booru;
+    /**@type {Discord.GuildTextBasedChannel}*/ channel;
+    /**@type {String}*/ tags;
+
+    /**@type {Date}*/ lastFetchedAt;
+    /**@type {Number}*/ faults;
+    /**@type {Number}*/ maxTags;
+    /**@type {String}*/ cornerIcon;
+    /**@type {String}*/ title;
+    /**@type {String}*/ footer;
+
+    /**
+     * @typedef {Object} FeedOptions
+     * @property {Date} [lastFetchedAt]
+     * @property {Number} [faults]
+     * @property {Number} [maxTags]
+     * @property {String} [cornerIcon]
+     * @property {String} [title]
+     * @property {String} [footer]
+     */
+
+    /**
+     * Crea una representación de un Feed programado de imágenes de {@linkcode Booru}
+     * @param {Booru} booru
+     * @param {Discord.GuildBasedChannel} channel
+     * @param {String} tags
+     * @param {FeedOptions} options 
+     * @throws {TypeError}
+     */
+    constructor(booru, channel, tags, options = undefined) {
+        this.booru = booru;
+        this.channel = channel?.isTextBased() ? channel : null;
+        this.tags = tags;
+        
+        options ??= {};
+        this.lastFetchedAt = options.lastFetchedAt ?? new Date(Math.floor(Date.now() - FEED_UPDATE_INTERVAL / 2));
+        this.faults = options.faults ?? 0;
+        this.maxTags = options.maxTags ?? 20;
+        this.cornerIcon = options.cornerIcon ?? null;
+        this.title = options.title ?? null;
+        this.footer = options.footer ?? null;
+    }
+
+    get isProcessable() {
+        if(!this.booru || !this.channel || !this.tags)
+            return false;
+
+        return this.channel.id
+            && this.channel.guild
+            && this.channel.guild.channels.cache.has(this.channel.id);
+    }
+
+    get isRunning() {
+        return !this.faults || this.faults < 10;
+    }
+
+    /**
+     * Obtiene {@linkcode Post}s que no han sido publicados
+     * @returns {Promise<{ success: true, posts: Array<Post>, newPosts: Array<Post> } | { success: false, posts: [], newPosts: [] }>}
+     */
+    async fetchPosts() {
+        try {
+            const fetched = await this.booru.search(this.tags, { limit: FEED_UPDATE_MAX_POST_COUNT });
+            if(!fetched.length)
+                return { success: true, posts: [], newPosts: [] };
+            
+            fetched.reverse();
+            const lastFetchedAt = new Date(this.lastFetchedAt);
+            const firstPost = fetched[0];
+            const lastPost = fetched[fetched.length - 1];
+            const mostRecentPost = firstPost.createdAt > lastPost.createdAt ? firstPost : lastPost;
+            this.lastFetchedAt = mostRecentPost.createdAt;
+
+            const newPosts = fetched.filter(post => post.createdAt > lastFetchedAt);
+
+            return { success: true, posts: fetched, newPosts: newPosts };
+        } catch(error) {
+            console.log(chalk.redBright('Ocurrió un problema mientras se esperaban los resultados de búsqueda de un Feed'));
+            console.log({
+                guildName: this.channel.guild.name,
+                channelId: this.channel.id,
+                feedTags: this.tags,
+            });
+            console.error(error);
+
+            return { success: false, posts: [], newPosts: [] };
+        };
+    }
+
+    /**
+     * Aumenta el número de fallas del Feed en pasos de 1
+     * @returns Una bulkOp de `updateOne` para un modelo {@linkcode GuildConfigs}, o `undefined` si ya se registraron 10 fallas
+     */
+    addFault() {
+        const channel = this.channel;
+        const guild = channel.guild;
+
+        auditAction('Comprobando eliminación de un Feed no disponible',
+            { name: 'Servidor', value: `${guild}`, inline: true },
+            { name: 'Canal', value: `${channel ?? 'No disponible'}`, inline: true },
+            { name: 'Reintentos',  value: `${this.faults + 1} / 10`, inline: true },
+        );
+
+        if(this.faults >= 10)
+            return undefined;
+
+        this.faults += 1;
+        return {
+            updateOne: {
+                filter: { guildId: guild.id },
+                update: { $set: { [`feeds.${channel.id}.faults`]: this.faults } },
+            },
+        };
+    }
+
+    /**
+     * Reduce progresivamente las fallas detectadas del Feed en pasos de 2
+     * @returns Una bulkOp de `updateOne` para un modelo {@linkcode GuildConfigs}
+     */
+    reduceFaults() {
+        const channel = this.channel;
+
+        this.faults = Math.max(0, this.faults - 2);
+        this.lastFetchedAt = new Date(Date.now());
+        return {
+            updateOne: {
+                filter: { guildId: channel.guild.id },
+                update: {
+                    $set: {
+                        [`feeds.${channel.id}.faults`]: this.faults,
+                        [`feeds.${channel.id}.lastFetchedAt`]: this.lastFetchedAt,
+                    }
+                },
+            },
+        };
+    }
+}
+
 module.exports = {
     setupGuildFeedUpdateStack,
     addGuildToFeedUpdateStack,
     feedTagSuscriptionsCache,
     updateFollowedFeedTagsCache,
+    BooruFeed,
 };

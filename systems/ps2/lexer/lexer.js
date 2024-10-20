@@ -134,6 +134,8 @@ class Lexer {
 			{ match: /^[A-Za-z_][A-Za-z0-9_]{0,99}/, handler: this.#makeSymbolHandler() },
 
 			{ match: /^(?!_)(([0-9_]+([.][0-9]*)?)|([.][0-9]+))/, handler: this.#makeNumberHandler() },
+			{ match: '.', handler: this.#makeDefaultHandler(TokenKinds.DOT) },
+			
 			{ match: /^"(\\"|[^"])*"/, handler: this.#makeStringHandler() },
 			{ match: /^'(\\'|[^'])*'/, handler: this.#makeStringHandler() },
 
@@ -338,6 +340,7 @@ class Lexer {
 
 			let col = lexer.col + 1; //Sumar los "" removidos
 			let line = lexer.line;
+			let rePos = -1;
 
 			for(const c of chars) {
 				if(c === '\n') {
@@ -345,7 +348,7 @@ class Lexer {
 					line++;
 				} else {
 					if(c === '\\') {
-						const rePos = chars.indexOf('\\');
+						rePos = chars.indexOf('\\', rePos + 1);
 						chars.splice(rePos, 1);
 						
 						switch(chars[rePos]) {
@@ -360,12 +363,13 @@ class Lexer {
 							break;
 	
 						case '"': break;
+						case '`': break;
 						case "'": break;
 						case '\\': break;
 	
 						default:
 							const lineString = lexer.source.split(/\r?\n/g)[line - 1];
-							throw lexer.TuberLexerError(`Caracter de escape inválido en literal de Texto: ${rawMatch}`, { col, line, lineString });
+							throw lexer.TuberLexerError(`Caracter de escape inválido en literal de Texto: \`${c}\``, { col, line, lineString });
 						}
 					}
 

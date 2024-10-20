@@ -1,7 +1,12 @@
 const Mongoose = require('mongoose');
 const { makeStringIdValidator } = require('./modelUtils');
 
-/** Describe la configuración de un servidor. */
+/**
+ * Perdoname por todos mis pecados
+ * @typedef {{ [x: String]: import('../../systems/booru/boorufeed').FeedData }} FeedsDict 
+ */
+
+/**@type {Mongoose.Schema<any, Mongoose.Model<any, any, any, any, any>, {}, {}, {}, {}, Mongoose.DefaultSchemaOptions, { guildId: String, chaos?: Boolean, tubers: Object, feeds: FeedsDict }>} Describe la configuración de un servidor.*/
 const GuildConfigSchema = new Mongoose.Schema({
 	guildId: {
 		type: String,
@@ -19,9 +24,9 @@ const GuildConfigSchema = new Mongoose.Schema({
 		required: true,
 	},
 
-	/** Feeds de imágenes del servidor. */
+	/**Feeds de imágenes del servidor. */
 	feeds: {
-		type: Object,
+		type: /**@type {{ [x: String]: import('../../systems/booru/boorufeed').FeedData }}*/(/**@type {unknown}*/(Object)),
 		default: {},
 		required: true,
 	},

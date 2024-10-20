@@ -10,19 +10,19 @@ const command = new CommandManager('g-parametros', flags)
 	)
 	.setLongDescription(
 		'Algunos comandos pueden requerir `<parámetros>`',
-		'Los `<parámetros>` se ingresan generalmente de forma ordenada, con el _(tipo)_ de valor que se pide',
+		'Los parámetros generalmente se escriben en un cierto orden, y piden un cierto _(tipo)_ de valor',
 		'',
-		'En la ayuda de cada comando, en la sección **"Llamado"**, se detallan los nombres y el orden de sus parámetros',
-		'Para notar el llamado de los comandos, se usa esta convención:',
-		'`<parámetro>`: entrada obligatoria',
-		'`<parámetro?>`: entrada opcional',
-		'`<parámetro (...)>`: múltiples entradas (libre)',
-		'`<parámetro (a,b,c)>`: múltiples entradas en sucesión para `(a)`, `(b)` y `(c)`',
-		'`[<parám1><parám2>(...)]`: múltiples grupos de entradas ordenadas (los grupos pueden o no separarse por espacios)',
-		'`[<parám1?>/<parám2?>]`: entradas intercambiables (en un solo puesto)',
+		'En la sección **"Llamado"** de la ayuda de cada comando se detallan los nombres y el orden de sus parámetros',
 		'',
-		`Para aprender más sobre las \`--opciones\` de comando, usa \`${p_pure().raw}ayuda g-opciones\``,
-		`Para ver sobre los _(tipos)_ de valores de parámetro, usa \`${p_pure().raw}ayuda g-tipos\``,
+		'El llamado de un comando se denota así:',
+		'* `<parámetro>`: entrada obligatoria',
+		'* `<parámetro?>`: entrada opcional',
+		'* `<parámetro (...)>`: múltiples entradas (libre)',
+		'* `<parámetro (a,b,c)>`: múltiples entradas en sucesión para `(a)`, `(b)` y `(c)`',
+		'* `[<parám1><parám2>(...)]`: múltiples grupos de entradas ordenadas (los grupos pueden o no separarse por espacios)',
+		'* `[<parám1?>/<parám2?>]`: entradas intercambiables (en un solo puesto)',
+		'',
+		'Usa el menú de abajo para aprender más',
 	);
 
 module.exports = command;

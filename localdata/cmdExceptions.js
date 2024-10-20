@@ -4,12 +4,10 @@ const GuildConfig = require('./models/guildconfigs.js');
 const { isNotModerator } = require('../func');
 const chalk = require('chalk');
 const { auditError } = require('../systems/others/auditor.js');
-// @ts-ignore
-const { CommandRequest } = require('../commands/Commons/typings');
 const { CommandManager } = require('../commands/Commons/cmdBuilder.js');
 
 /**
- * @typedef {(request: CommandRequest) => Promise<Boolean>} ExceptionTestFn
+ * @typedef {(request: import('../commands/Commons/typings').CommandRequest) => Promise<Boolean>} ExceptionTestFn
  */
 /**
  * @typedef {Object} ExceptionSummary
@@ -29,19 +27,19 @@ module.exports = {
             tag: 'OUTDATED',
             title: 'Comando desactualizado',
             desc: 'El comando no se encuentra disponible debido a que su función ya no es requerida en absoluto o su mantención no se encontró justificada',
-            isException: async request => isNotByPapita(request)
+            isException: async request => isNotByPapita(request),
         },
         {
             tag: 'MAINTENANCE',
             title: 'Comando en mantenimiento',
             desc: 'El comando no se encuentra disponible debido a que está en proceso de actualización o reparación en este momento. Espera a que se actualice~',
-            isException: async request => isNotByPapita(request)
+            isException: async request => isNotByPapita(request),
         },
         {
             tag: 'MOD',
             title: 'Comando exclusivo para moderación',
             desc: 'El comando es de uso restringido para moderación.\n**Considero a alguien como moderador cuando** tiene permisos para administrar roles *(MANAGE_ROLES)* o mensajes *(MANAGE_MESSAGES)*\nNota: esto cambiará en una futura actualización, o puede ya haber cambiado pero no se ha actualizado este mensaje de error',
-            isException: async request => isNotModerator(request.member)
+            isException: async request => isNotModerator(request.member),
         },
         {
             tag: 'CHAOS',
@@ -50,19 +48,19 @@ module.exports = {
             isException: async request => {
                 const gcfg = (await GuildConfig.findOne({ guildId: request.guild.id })) || new GuildConfig({ guildId: request.guild.id });
                 return isNotByPapita(request) && !gcfg.chaos;
-            }
+            },
         },
         {
             tag: 'GUIDE',
             title: 'Símbolo de página de guía',
             desc: 'Esto no es un comando, sino que una *página de guía* para buscarse con el comando de ayuda (`p!ayuda <guía>`)',
-            isException: async _ => true
+            isException: async _ => true,
         },
         {
             tag: 'PAPA',
             title: 'Comando exclusivo de Papita con Puré',
             desc: 'El comando es de uso restringido para el usuario __Papita con Puré#6932__. Esto generalmente se debe a que el comando es usado para pruebas o ajustes globales/significativos/sensibles del Bot',
-            isException: async request => isNotByPapita(request)
+            isException: async request => isNotByPapita(request),
         },
         {
             tag: 'HOURAI',
@@ -70,9 +68,9 @@ module.exports = {
             desc: [
                 'El comando es de uso restringido para el servidor __Saki Scans (anteriormente Hourai Doll)__.',
                 'Esto generalmente se debe a que cumple funciones que solo funcionan allí o que solo tiene sentido que se mantengan en dicho lugar',
-                'Si te interesa, puedes [unirte al servidor](https://discord.gg/pPwP2UNvAC)'
+                'Si te interesa, puedes [unirte al servidor](https://discord.gg/pPwP2UNvAC)',
             ].join('\n'),
-            isException: async request => isNotByPapita(request) && request.guild.id !== global.serverid.saki
+            isException: async request => isNotByPapita(request) && request.guild.id !== global.serverid.saki,
         },
     ],
 
@@ -97,7 +95,7 @@ module.exports = {
 
     /**
      * @typedef {{cmdString: String}} ExceptionOptions
-     * @param {ExceptionSummary} exception 
+     * @param {Omit<ExceptionSummary, 'tag' | 'isException'>} exception 
      * @param {ExceptionOptions} options 
      * @returns {EmbedBuilder}
      */
@@ -151,7 +149,6 @@ module.exports = {
             return true;
         }
         
-        //Los mensajes no tienen una propiedad de "token", las interacciones sí
         let { brief, details } = logOptions;
         if(!brief) {
             if(CommandManager.requestIsMessage(request)) brief = 'Ha ocurrido un error al ejecutar un comando';

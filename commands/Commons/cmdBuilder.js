@@ -138,9 +138,23 @@ async function executeFnSample(request, args, isSlash = false, rawArgs = undefin
 /**
  * @typedef {(request: ComplexCommandRequest, args: CommandOptionSolver, rawArgs?: String | null) => Promise<*>} ExperimentalExecuteFunction
  */
+/**
+ * @typedef {Object} InteractionResponseOptions
+ * @property {Number} [userFilterIndex] Índice donde se recibirá la ID del único usuario permitido para esta interacción. La misma deberá estar comprimida con la función `compressId`. Si es `null` o `undefined`, esta interacción será pública
+ */
 
 /**Representa un comando*/
 class CommandManager {
+    /**
+     * @typedef {typeof executeFnSample} ExecutionFunction
+     * @typedef {(interaction: Interaction, ...args: String[]) => Promise<*>} InteractionResponseFunction
+     * @typedef {import('discord.js').ModalMessageModalSubmitInteraction<'cached'>} ModalResponseInteraction
+     * @typedef {(interaction: ButtonInteraction<'cached'>, ...args: String[]) => Promise<*>} ButtonResponseFunction
+     * @typedef {(interaction: SelectMenuInteraction<'cached'>, ...args: String[]) => Promise<*>} SelectMenuResponseFunction
+     * @typedef {(interaction: ModalResponseInteraction, ...args: String[]) => Promise<*>} ModalResponseFunction
+     * @typedef {(String | MessagePayload | import('discord.js').MessageReplyOptions) & InteractionReplyOptions & { fetchReply: Boolean }} ReplyOptions
+     */
+
     /**@type {String}*/
     name;
     /**@type {Array<String>?}*/
@@ -160,25 +174,13 @@ class CommandManager {
     /**
      * Define si usar un {@link CommandOptionSolver} en lugar de la unión `string[] | CommandInteractionOptionResolver`
      * @type {Boolean?}
-     * 
      */
 	experimental;
     /**@type {Map<String, any>}*/
     memory;
-    /**
-     * @typedef {(String | MessagePayload | import('discord.js').MessageReplyOptions) & InteractionReplyOptions & { fetchReply: Boolean }} ReplyOptions
-     * @type {ReplyOptions}
-     */
+    /**@type {ReplyOptions}*/
     reply;
-    /**
-     * @typedef {typeof executeFnSample} ExecutionFunction
-     * @typedef {(interaction: Interaction, ...args: String[]) => Promise<*>} InteractionResponseFunction
-     * @typedef {import('discord.js').ModalMessageModalSubmitInteraction<'cached'>} ModalResponseInteraction
-     * @typedef {(interaction: ButtonInteraction<'cached'>, ...args: String[]) => Promise<*>} ButtonResponseFunction
-     * @typedef {(interaction: SelectMenuInteraction<'cached'>, ...args: String[]) => Promise<*>} SelectMenuResponseFunction
-     * @typedef {(interaction: ModalResponseInteraction, ...args: String[]) => Promise<*>} ModalResponseFunction
-     * @type {ExecutionFunction}
-     */
+    /**@type {ExecutionFunction}*/
     execute;
     
     /**
@@ -199,6 +201,11 @@ class CommandManager {
         this.memory = new Map();
         this.execute = (request, _args, _isSlash) => request.reply(this.reply);
     };
+
+    /**Alias de `<CommandManager>.flags`*/
+    get tags() {
+        return this.flags;
+    }
 
     /**@param {...String} aliases*/
     setAliases(...aliases) {
@@ -246,10 +253,10 @@ class CommandManager {
     
     /**
      * Define si usar un {@link CommandOptionSolver} en lugar de la unión `string[] | CommandInteractionOptionResolver`
-     * @param {Boolean} [experimental=false] Si establecer el comando como experimental (true) o no (false)
+     * @param {Boolean} [experimental=true] Si establecer el comando como experimental (true) o no (false)
      * 
      */
-    setExperimental(experimental = false) {
+    setExperimental(experimental = true) {
         this.experimental = experimental ?? false;
         return this;
     };
@@ -266,7 +273,10 @@ class CommandManager {
         return this;
     };
 
-    /**@param {ExperimentalExecuteFunction} exeFn*/
+    /**
+     * Habilita {@linkcode CommandManager.experimental} y establece la función de ejecución de este comando
+     * @param {ExperimentalExecuteFunction} exeFn
+     */
     setExperimentalExecution(exeFn) {
         this.experimental = true;
         //@ts-expect-error
@@ -274,31 +284,47 @@ class CommandManager {
         return this;
     }
 
-    /**@param {Function} fn Una función no anónima*/
-    setFunction(fn) {
+    /**
+     * @param {Function} fn Una función no anónima
+     * @param {InteractionResponseOptions} [options] Opciones de respuesta de interacción
+     */
+    setFunction(fn, options = {}) {
         const functionName = fn.name;
         this[functionName] = fn;
+        fn['userFilterIndex'] = options.userFilterIndex;
         return this;
     }
 
-    /**@param {InteractionResponseFunction} responseFn Una función no anónima a ejecutar al recibir una interacción*/
-    setInteractionResponse(responseFn) {
-        return this.setFunction(responseFn);
+    /**
+     * @param {InteractionResponseFunction} responseFn Una función no anónima a ejecutar al recibir una interacción
+     * @param {InteractionResponseOptions} [options] Opciones adicionales para controlar las respuestas de interacción
+     */
+    setInteractionResponse(responseFn, options = {}) {
+        return this.setFunction(responseFn, options);
     };
 
-    /**@param {ButtonResponseFunction} responseFn Una función no anónima a ejecutar al recibir una interacción*/
-    setButtonResponse(responseFn) {
-        return this.setFunction(responseFn);
+    /**
+     * @param {ButtonResponseFunction} responseFn Una función no anónima a ejecutar al recibir una interacción
+     * @param {InteractionResponseOptions} [options] Opciones adicionales para controlar las respuestas de interacción
+     */
+    setButtonResponse(responseFn, options = {}) {
+        return this.setFunction(responseFn, options);
     };
 
-    /**@param {SelectMenuResponseFunction} responseFn Una función no anónima a ejecutar al recibir una interacción*/
-    setSelectMenuResponse(responseFn) {
-        return this.setFunction(responseFn);
+    /**
+     * @param {SelectMenuResponseFunction} responseFn Una función no anónima a ejecutar al recibir una interacción
+     * @param {InteractionResponseOptions} [options] Opciones adicionales para controlar las respuestas de interacción
+     */
+    setSelectMenuResponse(responseFn, options = {}) {
+        return this.setFunction(responseFn, options);
     };
 
-    /**@param {ModalResponseFunction} responseFn Una función no anónima a ejecutar al recibir una interacción*/
-    setModalResponse(responseFn) {
-        return this.setFunction(responseFn);
+    /**
+     * @param {ModalResponseFunction} responseFn Una función no anónima a ejecutar al recibir una interacción
+     * @param {InteractionResponseOptions} [options] Opciones adicionales para controlar las respuestas de interacción
+     */
+    setModalResponse(responseFn, options = {}) {
+        return this.setFunction(responseFn, options);
     };
 
     /**

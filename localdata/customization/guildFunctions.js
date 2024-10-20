@@ -15,12 +15,12 @@ function fuckEveryOtherBot(message) {
 	const hraifound = hrai !== -1 && !(hraipf.some(pf => content.indexOf(`${pf}hourai`) === (hrai - pf.length)) || hraisf.some(sf => content.indexOf(`hourai${sf}`) === hrai));
 	if(hraifound) {
 		const fuckustr = (content.indexOf('puré') !== -1 || content.indexOf('pure') !== -1) ? reps.compare : reps.taunt;
-		channel.send({ content: fuckustr[Math.floor(Math.random() * fuckustr.length)]});
+		channel.isSendable() && channel.send({ content: fuckustr[Math.floor(Math.random() * fuckustr.length)]});
 		//message.channel.send({ content: 'Descanse en paz, mi pana <:pensaki:852779998351458344>' });
 	} else if(content.startsWith('~echo ') || content.startsWith('$say '))
 		setTimeout(() => {
 			const fuckustr = reps.reply;
-			channel.send({ content: fuckustr[Math.floor(Math.random() * fuckustr.length)] });
+			channel.isSendable() && channel.send({ content: fuckustr[Math.floor(Math.random() * fuckustr.length)] });
 		}, 800);
 };
 
@@ -45,7 +45,7 @@ async function findBotInfraction(message) {
 		member = message.member;
 	} else {
 		//Método de detección de respuesta
-		if(!author.bot || !message.deletable || author.id === '647368715742216193') return;
+		if(!author.bot || !message?.deletable || author.id === '647368715742216193') return;
 		infractionMessage = await channel.messages.fetch(message.reference?.messageId).catch(_ => null);
 		if(!infractionMessage?.deletable) return;
 

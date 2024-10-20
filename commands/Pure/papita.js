@@ -18,7 +18,7 @@ const options = new CommandOptions()
 const command = new CommandManager('papita', flags)
 	.setAliases(
 		'papa', 'apita', 'ure', 'uré',
-		'potato', 'p', '🥔',
+		'potato', '🥔',
 	)
 	.setBriefDescription('Comando de frases de Papita con Puré')
 	.setLongDescription(
@@ -27,12 +27,12 @@ const command = new CommandManager('papita', flags)
 		'**NSFW:** muestra _otra_ frase _tal vez_ de Papita',
 	)
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash = false) => {
+	.setExperimentalExecution(async (request, args) => {
 		const isnsfw = isThread(request.channel)
 			? request.channel.parent.nsfw
 			: request.channel.nsfw;
 		
-		const words = isSlash ? (args.getString('frase')?.split(/[ \n]+/) ?? []) : args;
+		const words = args.getString('frase')?.split(/[ \n]+/);
 		if(words.length) {
 			const newmsg = `***:copyright: ${words.shift()}:registered: ${words.join(' ').replace(/[a-zA-Z0-9áéíóúÁÉÍÓÚüÑñ;:]+/g, '$&:tm:')}***`;
 			return request.reply({ content: newmsg });

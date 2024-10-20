@@ -158,6 +158,7 @@ function createLookups() {
 
     //Miembros
     led(TokenKinds.ARROW, BindingPowers.MEMBER, Associativities.LEFT, parseArrowExpression);
+    led(TokenKinds.DOT,   BindingPowers.MEMBER, Associativities.LEFT, parseArrowExpression);
     
     //Primarios
     nud(TokenKinds.LIT_NUMBER, parsePrimaryExpression);

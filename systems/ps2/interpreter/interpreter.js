@@ -44,7 +44,7 @@ const Stops = /**@type {const}*/({
  */
 /**
  * @template {ValueKind} T
- * @typedef {Extract<RuntimeValue, { kind: T }>} InferredRuntimeValue
+ * @typedef {Extract<RuntimeValue, { kind: T }>} AssertedRuntimeValue
  */
 /**
  * @typedef {Object} EvaluationResult
@@ -224,7 +224,7 @@ class Interpreter {
 	 * @template {import('./values').ValueKind} T
 	 * @param {RuntimeValue} value
 	 * @param {T} valueKind
-	 * @returns {value is InferredRuntimeValue<T>}
+	 * @returns {value is AssertedRuntimeValue<T>}
 	 */
 	is(value, valueKind) {
 		return value.kind === valueKind;
@@ -234,7 +234,7 @@ class Interpreter {
 	 * @template {import('./values').ValueKind} T
 	 * @param {RuntimeValue} value
 	 * @param {...T} valueKinds
-	 * @returns {value is InferredRuntimeValue<T>}
+	 * @returns {value is AssertedRuntimeValue<T>}
 	 */
 	isAnyOf(value, ...valueKinds) {
 		return valueKinds.some(valueKind => value.kind === valueKind);
@@ -279,10 +279,10 @@ class Interpreter {
 	 * @param {import('../ast/expressions').Expression} node
 	 * @param {Scope} scope
 	 * @param {T} as
-	 * @returns {InferredRuntimeValue<T>}
+	 * @returns {AssertedRuntimeValue<T>}
 	 */
 	evaluateAs(node, scope, as, mustBeDeclared = true) {
-		return /**@type {InferredRuntimeValue<T>}*/(coerceValue(this, this.evaluate(node, scope, mustBeDeclared), as));
+		return /**@type {AssertedRuntimeValue<T>}*/(coerceValue(this, this.evaluate(node, scope, mustBeDeclared), as));
 	}
 
 	/**

@@ -20,7 +20,6 @@ function generateRequestRecord(request) {
  */
 function getRequestContent(request) {
     if(CommandManager.requestIsInteraction(request)) {
-        // @ts-ignore
         if(request.isContextMenuCommand())
             return `**\\*. ${request.commandName}** ${request.options.data.map(({ name, value }) => `${name}:\`${value}\``).join(' ')}`;
         return `**/${request.commandName}** ${request.options.data.map(({ name, value }) => `${name}:\`${value}\``).join(' ')}`;

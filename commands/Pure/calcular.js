@@ -15,10 +15,10 @@ const command = new CommandManager('calcular', flags)
 		'Usa + para sumar, - para restar, * para multiplicar, / para dividir, ^ para exponenciar, % para sacar módulo y () para asociar términos',
 	)
 	.setOptions(options)
-	.setExecution(async (request, args) => {
-		const shorten = options.fetchFlag(args, 'acortar');
-		const min = CommandOptionSolver.asNumber(options.fetchFlag(args, 'mínimo', { fallback: 1 }));
-		const operation = CommandOptionSolver.asString(await options.fetchParam(args, 'operación', true));
+	.setExperimentalExecution(async (request, args) => {
+		const shorten = args.parseFlag('acortar');
+		const min = args.parseFlagExpr('mínimo', v => +v, 1);
+		const operation = args.getString('operación', true);
 
 		if(!operation)
 			return request.reply({ content: '⚠️ Debes ingresar una operación' });
