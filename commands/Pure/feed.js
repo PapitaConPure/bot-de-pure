@@ -13,17 +13,24 @@ const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder, makeTextInputRowBu
 
 /**@param {Translator} translator*/
 const wizTitle = (translator) => translator.getText('feedAuthor');
-/**@param {Translator} translator*/
-const cancelbutton = (translator) => new ButtonBuilder()
-	.setCustomId('feed_cancelWizard')
+
+/**@param {String} compressedAuthorId*/
+const cancelbutton = (compressedAuthorId) => new ButtonBuilder()
+	.setCustomId(`feed_cancelWizard_${compressedAuthorId}`)
 	.setEmoji('936531643496288288')
 	.setStyle(ButtonStyle.Secondary);
-/**@param {Translator} translator*/
-const finishButton = (translator) => new ButtonBuilder()
-	.setCustomId('feed_finishWizard')
+
+/**
+ * @param {Translator} translator
+ * @param {String} compressedAuthorId
+ */
+const finishButton = (translator, compressedAuthorId) => new ButtonBuilder()
+	.setCustomId(`feed_finishWizard_${compressedAuthorId}`)
 	.setLabel(translator.getText('buttonFinish'))
 	.setStyle(ButtonStyle.Secondary);
+
 const safeTags = (_tags = '') => _tags.replace(/\\*\*/g,'\\*').replace(/\\*_/g,'\\_');
+
 /**
  * @param {import('discord.js').ButtonInteraction} interaction 
  * @returns {Promise<Array<import('discord.js').SelectMenuComponentOptionData>>}
@@ -46,6 +53,7 @@ const generateFeedOptions = async (interaction) => {
 	gcfg.save();
 	return feedOptions;
 }
+
 /**
  * @param {import('discord.js').Message | import('discord.js').ButtonInteraction | import('discord.js').StringSelectMenuInteraction | import('discord.js').ModalSubmitInteraction} interaction
  * @param {String} channelId
@@ -87,10 +95,13 @@ function tagsSetupPrompt(interaction, channelId, translator) {
 const perms = new CommandPermissions()
 	.requireAnyOf([ 'ManageGuild', 'ManageChannels' ])
 	.requireAnyOf('ManageMessages');
+
 const flags = new CommandTags().add('COMMON', 'MOD');
+
 const command = new CommandManager('feed', flags)
 	.setBriefDescription('Inicializa un Feed en un canal por medio de un Asistente.')
 	.setLongDescription('Inicializa un Feed de imágenes en un canal. Simplemente usa el comando y sigue los pasos del Asistente para configurar y personalizar todo')
+	.setPermissions(perms)
 	.setExecution(async request => {
 		const translator = await Translator.from(request.userId);
 		const wizard = new EmbedBuilder()
@@ -101,6 +112,8 @@ const command = new CommandManager('feed', flags)
 				name: 'Bienvenido',
 				value: 'Si es la primera vez que configuras un Feed de imágenes con Bot de Puré, ¡no te preocupes! Simplemente sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras',
 			});
+
+		const authorId = compressId(request.userId);
 		return request.reply({
 			embeds: [wizard],
 			components: [new ActionRowBuilder().addComponents(
@@ -108,7 +121,7 @@ const command = new CommandManager('feed', flags)
 					.setCustomId('feed_startWizard')
 					.setLabel('Comenzar')
 					.setStyle(ButtonStyle.Primary),
-				cancelbutton(translator),
+				cancelbutton(authorId),
 			)],
 		});
 	})
@@ -122,43 +135,45 @@ const command = new CommandManager('feed', flags)
 		const translator = promises[1];
 		const premade = gcfg.feeds && Object.keys(gcfg.feeds).length;
 
+		const authorId = compressId(interaction.user.id);
 		const wizard = new EmbedBuilder()
 			.setColor(Colors.Navy)
 			.setAuthor({ name: wizTitle(translator), iconURL: interaction.client.user.avatarURL() })
 			.setFooter({ text: 'Seleccionar operación' })
 			.addFields({ name: 'Selecciona una operación', value: '¿Qué deseas hacer ahora mismo?' });
+		
 		return interaction.update({
 			embeds: [wizard],
 			components: [
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
-						.setCustomId('feed_createNew')
+						.setCustomId(`feed_createNew_${authorId}`)
 						.setEmoji('1291900911643263008')
 						.setLabel(translator.getText('buttonCreate'))
 						.setStyle(ButtonStyle.Success),
 					new ButtonBuilder()
-						.setCustomId('feed_selectDelete')
+						.setCustomId(`feed_selectDelete_${authorId}`)
 						.setEmoji('921751138997514290')
 						.setLabel(translator.getText('buttonDelete'))
 						.setStyle(ButtonStyle.Danger)
 						.setDisabled(!premade),
-					finishButton(translator),
+					finishButton(translator, authorId),
 				),
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
-						.setCustomId('feed_selectEdit')
+						.setCustomId(`feed_selectEdit_${authorId}`)
 						.setEmoji('921788204540100608')
 						.setLabel(translator.getText('buttonEdit'))
 						.setStyle(ButtonStyle.Primary)
 						.setDisabled(!premade),
 					new ButtonBuilder()
-						.setCustomId('feed_selectCustomize')
+						.setCustomId(`feed_selectCustomize_${authorId}`)
 						.setEmoji('1288444896331698241')
 						.setLabel(translator.getText('buttonCustomize'))
 						.setStyle(ButtonStyle.Primary)
 						.setDisabled(!premade),
 					new ButtonBuilder()
-						.setCustomId('feed_selectView')
+						.setCustomId(`feed_selectView_${authorId}`)
 						.setEmoji('1087075525245272104')
 						.setLabel(translator.getText('buttonView'))
 						.setStyle(ButtonStyle.Primary)
@@ -167,7 +182,7 @@ const command = new CommandManager('feed', flags)
 			],
 		});
 	})
-	.setButtonResponse(async function createNew(interaction) {
+	.setButtonResponse(async function createNew(interaction, authorId) {
 		const channelInput = new TextInputBuilder()
 			.setCustomId('channelInput')
 			.setLabel('Canal')
@@ -176,12 +191,12 @@ const command = new CommandManager('feed', flags)
 			.setRequired(true);
 		const row = makeTextInputRowBuilder().addComponents(channelInput);
 		const modal = new ModalBuilder()
-			.setCustomId('feed_createOnChannel')
+			.setCustomId(`feed_createOnChannel_${authorId}`)
 			.setTitle('Creación de Feed')
 			.addComponents(row);
 		return interaction.showModal(modal);
-	})
-	.setModalResponse(async function createOnChannel(interaction) {
+	}, { userFilterIndex: 0 })
+	.setModalResponse(async function createOnChannel(interaction, authorId) {
 		const translator = await Translator.from(interaction.user.id);
 		let input = interaction.fields.getTextInputValue('channelInput');
 		if(input.startsWith('<') && input.endsWith('>'))
@@ -211,18 +226,18 @@ const command = new CommandManager('feed', flags)
 			embeds: [wizard],
 			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
-					.setCustomId(`feed_editTags_${fetchedChannel.id}`)
+					.setCustomId(`feed_editTags_${fetchedChannel.id}_${authorId}`)
 					.setLabel('Ingresar Tags')
 					.setStyle(ButtonStyle.Primary),
 				new ButtonBuilder()
-					.setCustomId('feed_startWizard')
+					.setCustomId(`feed_startWizard_${authorId}`)
 					.setEmoji('934432754173624373')
 					.setStyle(ButtonStyle.Secondary),
-				cancelbutton(translator),
+				cancelbutton(authorId),
 			)],
 		});
-	})
-	.setButtonResponse(async function editTags(interaction, channelId) {
+	}, { userFilterIndex: 0 })
+	.setButtonResponse(async function editTags(interaction, channelId, authorId) {
 		const tagsInput = new TextInputBuilder()
 			.setCustomId('tagsInput')
 			.setPlaceholder('rating:general touhou animated* -chibi')
@@ -232,12 +247,12 @@ const command = new CommandManager('feed', flags)
 			.setMaxLength(4000);
 		const row = makeTextInputRowBuilder().addComponents(tagsInput);
 		const modal = new ModalBuilder()
-			.setCustomId(`feed_setTags_${channelId}`)
+			.setCustomId(`feed_setTags_${channelId}_${authorId}`)
 			.setTitle('Personalización de Feed')
 			.addComponents(row);
 		return interaction.showModal(modal);
-	})
-	.setModalResponse(async function setTags(interaction, channelId) {
+	}, { userFilterIndex: 1 })
+	.setModalResponse(async function setTags(interaction, channelId, authorId) {
 		const translator = await Translator.from(interaction.user.id);
 		const fetchedChannel = interaction.guild.channels.cache.get(channelId);
 		const input = interaction.fields.getTextInputValue('tagsInput').toLowerCase().trim();
@@ -266,15 +281,15 @@ const command = new CommandManager('feed', flags)
 			components: [
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
-						.setCustomId('feed_startWizard')
+						.setCustomId(`feed_startWizard_${authorId}`)
 						.setLabel('Seguir configurando')
 						.setStyle(ButtonStyle.Primary),
-					finishButton(translator),
+					finishButton(translator, authorId),
 				)
 			],
 		});
-	})
-	.setButtonResponse(async function selectEdit(interaction) {
+	}, { userFilterIndex: 1 })
+	.setButtonResponse(async function selectEdit(interaction, authorId) {
 		const translator = await Translator.from(interaction.user.id);
 		const wizard = new EmbedBuilder()
 			.setColor(Colors.Greyple)
@@ -288,21 +303,21 @@ const command = new CommandManager('feed', flags)
 			components: [
 				makeStringSelectMenuRowBuilder().addComponents(
 					new StringSelectMenuBuilder()
-						.setCustomId('feed_selectedEdit')
+						.setCustomId(`feed_selectedEdit_${authorId}`)
 						.setPlaceholder('Selecciona un Feed')
 						.addOptions(feeds),
 				),
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
-						.setCustomId('feed_startWizard')
+						.setCustomId(`feed_startWizard_${authorId}`)
 						.setEmoji('934432754173624373')
 						.setStyle(ButtonStyle.Secondary),
-					cancelbutton(translator),
+					cancelbutton(authorId),
 				),
 			],
 		});
-	})
-	.setButtonResponse(async function selectCustomize(interaction) {
+	}, { userFilterIndex: 0 })
+	.setButtonResponse(async function selectCustomize(interaction, authorId) {
 		const translator = await Translator.from(interaction.user.id);
 		const wizard = new EmbedBuilder()
 			.setColor(Colors.Greyple)
@@ -316,21 +331,21 @@ const command = new CommandManager('feed', flags)
 			components: [
 				makeStringSelectMenuRowBuilder().addComponents(
 					new StringSelectMenuBuilder()
-						.setCustomId('feed_selectedCustomize')
+						.setCustomId(`feed_selectedCustomize_${authorId}`)
 						.setPlaceholder('Selecciona un Feed')
 						.addOptions(feeds),
 				),
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
-						.setCustomId('feed_startWizard')
+						.setCustomId(`feed_startWizard_${authorId}`)
 						.setEmoji('934432754173624373')
 						.setStyle(ButtonStyle.Secondary),
-					cancelbutton(translator),
+					cancelbutton(authorId),
 				),
 			],
 		});
-	})
-	.setButtonResponse(async function selectView(interaction) {
+	}, { userFilterIndex: 0 })
+	.setButtonResponse(async function selectView(interaction, authorId) {
 		const translator = await Translator.from(interaction.user.id);
 		const wizard = new EmbedBuilder()
 			.setColor(Colors.Greyple)
@@ -344,21 +359,21 @@ const command = new CommandManager('feed', flags)
 			components: [
 				makeStringSelectMenuRowBuilder().addComponents(
 					new StringSelectMenuBuilder()
-						.setCustomId('feed_selectedView')
+						.setCustomId(`feed_selectedView_${authorId}`)
 						.setPlaceholder('Selecciona un Feed')
 						.addOptions(feeds),
 				),
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
-						.setCustomId('feed_startWizard')
+						.setCustomId(`feed_startWizard_${authorId}`)
 						.setEmoji('934432754173624373')
 						.setStyle(ButtonStyle.Secondary),
-					cancelbutton(translator),
+					cancelbutton(authorId),
 				),
 			],
 		});
-	})
-	.setButtonResponse(async function selectDelete(interaction) {
+	}, { userFilterIndex: 0 })
+	.setButtonResponse(async function selectDelete(interaction, authorId) {
 		const translator = await Translator.from(interaction.user.id);
 		const wizard = new EmbedBuilder()
 			.setColor(Colors.Greyple)
@@ -372,21 +387,21 @@ const command = new CommandManager('feed', flags)
 			components: [
 				makeStringSelectMenuRowBuilder().addComponents(
 					new StringSelectMenuBuilder()
-						.setCustomId('feed_selectedDelete')
+						.setCustomId(`feed_selectedDelete_${authorId}`)
 						.setPlaceholder('Selecciona un Feed')
 						.addOptions(feeds),
 				),
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
-						.setCustomId('feed_startWizard')
+						.setCustomId(`feed_startWizard_${authorId}`)
 						.setEmoji('934432754173624373')
 						.setStyle(ButtonStyle.Secondary),
-					cancelbutton(translator),
+					cancelbutton(authorId),
 				),
 			],
 		});
-	})
-	.setSelectMenuResponse(async function selectedEdit(interaction) {
+	}, { userFilterIndex: 0 })
+	.setSelectMenuResponse(async function selectedEdit(interaction, authorId) {
 		const translator = await Translator.from(interaction.user.id);
 		const channelId = interaction.values[0];
 		const wizard = tagsSetupPrompt(interaction, channelId, translator);
@@ -395,17 +410,17 @@ const command = new CommandManager('feed', flags)
 			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId(`feed_editTags_${channelId}`)
-					.setLabel('Ingresar Tags')
+					.setLabel(`Ingresar Tags_${authorId}`)
 					.setStyle(ButtonStyle.Primary),
 				new ButtonBuilder()
-					.setCustomId('feed_selectEdit')
+					.setCustomId(`feed_selectEdit_${authorId}`)
 					.setEmoji('934432754173624373')
 					.setStyle(ButtonStyle.Secondary),
-				finishButton(translator),
+				finishButton(translator, authorId),
 			)],
 		});
-	})
-	.setSelectMenuResponse(async function selectedCustomize(interaction) {
+	}, { userFilterIndex: 0 })
+	.setSelectMenuResponse(async function selectedCustomize(interaction, authorId) {
 		const translator = await Translator.from(interaction.user.id);
 		const fetchedChannel = /**@type {import('discord.js').BaseGuildTextChannel}*/(interaction.guild.channels.cache.get(interaction.values[0] || interaction.channel.id));
 		const wizard = new EmbedBuilder()
@@ -422,7 +437,7 @@ const command = new CommandManager('feed', flags)
 			components: [
 				makeStringSelectMenuRowBuilder().addComponents(
 					new StringSelectMenuBuilder()
-						.setCustomId(`feed_selectItemCustomize_${fetchedChannel.id}`)
+						.setCustomId(`feed_selectItemCustomize_${fetchedChannel.id}_${authorId}`)
 						.setPlaceholder('Selecciona un elemento')
 						.setOptions([
 							{
@@ -449,15 +464,15 @@ const command = new CommandManager('feed', flags)
 				),
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
-						.setCustomId('feed_selectCustomize')
+						.setCustomId(`feed_selectCustomize_${authorId}`)
 						.setEmoji('934432754173624373')
 						.setStyle(ButtonStyle.Secondary),
-					finishButton(translator),
+					finishButton(translator, authorId),
 				),
 			],
 		});
-	})
-	.setSelectMenuResponse(async function selectedView(interaction) {
+	}, { userFilterIndex: 0 })
+	.setSelectMenuResponse(async function selectedView(interaction, authorId) {
 		const translator = await Translator.from(interaction.user.id);
 		const fetchedChannel = /**@type {import('discord.js').BaseGuildTextChannel}*/(interaction.guild.channels.cache.get(interaction.values[0] || interaction.channel.id));
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
@@ -476,15 +491,15 @@ const command = new CommandManager('feed', flags)
 			components: [
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
-						.setCustomId('feed_selectView')
+						.setCustomId(`feed_selectView_${authorId}`)
 						.setEmoji('934432754173624373')
 						.setStyle(ButtonStyle.Secondary),
-					finishButton(translator),
+					finishButton(translator, authorId),
 				),
 			],
 		});
-	})
-	.setSelectMenuResponse(async function selectedDelete(interaction) {
+	}, { userFilterIndex: 0 })
+	.setSelectMenuResponse(async function selectedDelete(interaction, authorId) {
 		const translator = await Translator.from(interaction.user.id);
 		const chid = interaction.values[0];
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
@@ -505,14 +520,14 @@ const command = new CommandManager('feed', flags)
 					.setLabel('Borrar')
 					.setStyle(ButtonStyle.Danger),
 				new ButtonBuilder()
-					.setCustomId('feed_selectDelete')
+					.setCustomId(`feed_selectDelete_${authorId}`)
 					.setEmoji('934432754173624373')
 					.setStyle(ButtonStyle.Secondary),
-				cancelbutton(translator),
+				cancelbutton(authorId),
 			)],
 		});
-	})
-	.setButtonResponse(async function deleteOne(interaction, channelId) {
+	}, { userFilterIndex: 0 })
+	.setButtonResponse(async function deleteOne(interaction, channelId, authorId) {
 		const translator = await Translator.from(interaction.user.id);
 		const wizard = new EmbedBuilder()
 			.setColor(Colors.DarkRed)
@@ -521,10 +536,10 @@ const command = new CommandManager('feed', flags)
 			.addFields({ name: 'Feed eliminado', value: 'Se ha eliminado el Feed acordado. Si te arrepientes, tendrás que crearlo otra vez' });
 		const rows = makeButtonRowBuilder().addComponents(
 			new ButtonBuilder()
-				.setCustomId('feed_startWizard')
+				.setCustomId(`feed_startWizard_${authorId}`)
 				.setLabel('Seguir configurando')
 				.setStyle(ButtonStyle.Primary),
-			finishButton(translator),
+			finishButton(translator, authorId),
 		);
 		
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
@@ -537,8 +552,8 @@ const command = new CommandManager('feed', flags)
 				components: [rows],
 			}),
 		]);
-	})
-	.setSelectMenuResponse(async function selectItemCustomize(interaction, channelId) {
+	}, { userFilterIndex: 1 })
+	.setSelectMenuResponse(async function selectItemCustomize(interaction, channelId, authorId) {
 		const translator = await Translator.from(interaction.user.id);
 		const customizeTarget = interaction.values[0];
 		const fetchedChannel = /**@type {import('discord.js').BaseGuildTextChannel}*/(interaction.guild.channels.cache.get(channelId));
@@ -559,11 +574,11 @@ const command = new CommandManager('feed', flags)
 				});
 				row.addComponents(
 					new ButtonBuilder()
-						.setCustomId(`feed_customizeTitle_${channelId}`)
+						.setCustomId(`feed_customizeTitle_${channelId}_${authorId}`)
 						.setLabel('Personalizar')
 						.setStyle(ButtonStyle.Primary),
 					new ButtonBuilder()
-						.setCustomId(`feed_removeCustomTitle_${channelId}`)
+						.setCustomId(`feed_removeCustomTitle_${channelId}_${authorId}`)
 						.setLabel('Eliminar título')
 						.setStyle(ButtonStyle.Danger),
 				);
@@ -579,11 +594,11 @@ const command = new CommandManager('feed', flags)
 				);
 				row.addComponents(
 					new ButtonBuilder()
-						.setCustomId(`feed_customizeTags_${channelId}`)
+						.setCustomId(`feed_customizeTags_${channelId}_${authorId}`)
 						.setLabel('Personalizar')
 						.setStyle(ButtonStyle.Primary),
 					new ButtonBuilder()
-						.setCustomId(`feed_removeCustomTags_${channelId}`)
+						.setCustomId(`feed_removeCustomTags_${channelId}_${authorId}`)
 						.setLabel('Restaurar cantidad por defecto')
 						.setStyle(ButtonStyle.Danger),
 				);
@@ -596,11 +611,11 @@ const command = new CommandManager('feed', flags)
 				});
 				row.addComponents(
 					new ButtonBuilder()
-						.setCustomId(`feed_customizeFooter_${channelId}`)
+						.setCustomId(`feed_customizeFooter_${channelId}_${authorId}`)
 						.setLabel('Personalizar')
 						.setStyle(ButtonStyle.Primary),
 					new ButtonBuilder()
-						.setCustomId(`feed_removeCustomFooter_${channelId}`)
+						.setCustomId(`feed_removeCustomFooter_${channelId}_${authorId}`)
 						.setLabel('Eliminar pie')
 						.setStyle(ButtonStyle.Danger),
 				);
@@ -613,11 +628,11 @@ const command = new CommandManager('feed', flags)
 				});
 				row.addComponents(
 					new ButtonBuilder()
-						.setCustomId(`feed_customizeIcon_${channelId}`)
+						.setCustomId(`feed_customizeIcon_${channelId}_${authorId}`)
 						.setLabel('Personalizar')
 						.setStyle(ButtonStyle.Primary),
 					new ButtonBuilder()
-						.setCustomId(`feed_removeCustomIcon_${channelId}`)
+						.setCustomId(`feed_removeCustomIcon_${channelId}_${authorId}`)
 						.setLabel('Restaurar ícono por defecto')
 						.setStyle(ButtonStyle.Danger),
 				);
@@ -625,16 +640,16 @@ const command = new CommandManager('feed', flags)
 		}
 		row.addComponents(
 			new ButtonBuilder()
-				.setCustomId('feed_selectCustomize')
+				.setCustomId(`feed_selectCustomize_${authorId}`)
 				.setEmoji('934432754173624373')
 				.setStyle(ButtonStyle.Secondary),
-			cancelbutton(translator),
+			cancelbutton(authorId),
 		);
 		return interaction.update({
 			embeds: [wizard],
 			components: [row],
 		});
-	})
+	}, { userFilterIndex: 1 })
 	.setButtonResponse(async function customizeTitle(interaction, channelId) {
 		const titleInput = new TextInputBuilder()
 			.setCustomId('titleInput')
@@ -650,8 +665,8 @@ const command = new CommandManager('feed', flags)
 			.addComponents(row);
 
 		interaction.showModal(modal);
-	})
-	.setButtonResponse(async function customizeTags(interaction, channelId) {
+	}, { userFilterIndex: 1 })
+	.setButtonResponse(async function customizeTags(interaction, channelId, authorId) {
 		const tagsInput = new TextInputBuilder()
 			.setCustomId('tagsInput')
 			.setLabel('Cantidad de tags a mostrar')
@@ -662,13 +677,13 @@ const command = new CommandManager('feed', flags)
 			.setMaxLength(2);
 		const row = makeTextInputRowBuilder().addComponents(tagsInput);
 		const modal = new ModalBuilder()
-			.setCustomId(`feed_setCustomMaxTags_${channelId}`)
+			.setCustomId(`feed_setCustomMaxTags_${channelId}_${authorId}`)
 			.setTitle('Personalización de Feed')
 			.addComponents(row);
 
 		interaction.showModal(modal);
-	})
-	.setButtonResponse(async function customizeFooter(interaction, channelId) {
+	}, { userFilterIndex: 1 })
+	.setButtonResponse(async function customizeFooter(interaction, channelId, authorId) {
 		const footerInput = new TextInputBuilder()
 			.setCustomId('footerInput')
 			.setLabel('Pie de imagen')
@@ -678,13 +693,13 @@ const command = new CommandManager('feed', flags)
 			.setMaxLength(255);
 		const row = makeTextInputRowBuilder().addComponents(footerInput);
 		const modal = new ModalBuilder()
-			.setCustomId(`feed_setCustomFooter_${channelId}`)
+			.setCustomId(`feed_setCustomFooter_${channelId}_${authorId}`)
 			.setTitle('Personalización de Feed')
 			.addComponents(row);
 
 		interaction.showModal(modal);
-	})
-	.setButtonResponse(async function customizeIcon(interaction, channelId) {
+	}, { userFilterIndex: 1 })
+	.setButtonResponse(async function customizeIcon(interaction, channelId, authorId) {
 		const iconInput = new TextInputBuilder()
 			.setCustomId('iconInput')
 			.setLabel('Enlace de ícono de esquina')
@@ -694,12 +709,12 @@ const command = new CommandManager('feed', flags)
 			.setMaxLength(255);
 		const row = makeTextInputRowBuilder().addComponents(iconInput);
 		const modal = new ModalBuilder()
-			.setCustomId(`feed_setCustomIcon_${channelId}`)
+			.setCustomId(`feed_setCustomIcon_${channelId}_${authorId}`)
 			.setTitle('Personalización de Feed')
 			.addComponents(row);
 
 		interaction.showModal(modal);
-	})
+	}, { userFilterIndex: 1 })
 	.setModalResponse(async function setCustomTitle(interaction, channelId) {
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 		const input = interaction.fields.getTextInputValue('titleInput');
@@ -709,7 +724,7 @@ const command = new CommandManager('feed', flags)
 
 		return interaction.reply({ content: '✅ Título actualizado', ephemeral: true });
 
-	})
+	}, { userFilterIndex: 1 })
 	.setModalResponse(async function setCustomMaxTags(interaction, channelId) {
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 		const input = interaction.fields.getTextInputValue('tagsInput');
@@ -723,7 +738,7 @@ const command = new CommandManager('feed', flags)
 		gcfg.feeds[channelId].maxTags = maxTags;
 
 		return interaction.reply({ content: '✅ Cantidad de tags máxima actualizada', ephemeral: true });
-	})
+	}, { userFilterIndex: 1 })
 	.setModalResponse(async function setCustomFooter(interaction, channelId) {
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 		const input = interaction.fields.getTextInputValue('footerInput');
@@ -733,7 +748,7 @@ const command = new CommandManager('feed', flags)
 		gcfg.save();
 
 		return interaction.reply({ content: '✅ Pie de imagen actualizado', ephemeral: true });
-	})
+	}, { userFilterIndex: 1 })
 	.setModalResponse(async function setCustomIcon(interaction, channelId) {
 		const [ gcfg ] = await Promise.all([
 			GuildConfig.findOne({ guildId: interaction.guild.id }),
@@ -759,8 +774,8 @@ const command = new CommandManager('feed', flags)
 			auditError(error, { brief: 'Ha ocurrido un error al procesar Feed' });
 			return interaction.editReply({ content: '⚠️ Enlace inválido. Asegúrate de proveer un enlace completo y directo a la imagen' })
 		}
-	})
-	.setButtonResponse(async function removeCustomTitle(interaction, channelId) {
+	}, { userFilterIndex: 1 })
+	.setButtonResponse(async function removeCustomTitle(interaction, channelId, authorId) {
 		const translator = await Translator.from(interaction.user.id);
 		const fetchedChannel = interaction.guild.channels.cache.get(channelId);
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
@@ -780,13 +795,13 @@ const command = new CommandManager('feed', flags)
 			embeds: [concludedEmbed],
 			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
-					.setCustomId('feed_selectCustomize')
+					.setCustomId(`feed_selectCustomize_${authorId}`)
 					.setLabel('Seguir personalizando')
 					.setStyle(ButtonStyle.Primary),
 			)],
 		});
-	})
-	.setButtonResponse(async function removeCustomTags(interaction, channelId) {
+	}, { userFilterIndex: 1 })
+	.setButtonResponse(async function removeCustomTags(interaction, channelId, authorId) {
 		const translator = await Translator.from(interaction.user.id);
 		const fetchedChannel = interaction.guild.channels.cache.get(channelId);
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
@@ -806,13 +821,13 @@ const command = new CommandManager('feed', flags)
 			embeds: [concludedEmbed],
 			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
-					.setCustomId('feed_selectCustomize')
+					.setCustomId(`feed_selectCustomize_${authorId}`)
 					.setLabel('Seguir personalizando')
 					.setStyle(ButtonStyle.Primary),
 			)],
 		});
-	})
-	.setButtonResponse(async function removeCustomFooter(interaction, channelId) {
+	}, { userFilterIndex: 1 })
+	.setButtonResponse(async function removeCustomFooter(interaction, channelId, authorId) {
 		const translator = await Translator.from(interaction.user.id);
 		const fetchedChannel = interaction.guild.channels.cache.get(channelId);
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
@@ -832,13 +847,13 @@ const command = new CommandManager('feed', flags)
 			embeds: [concludedEmbed],
 			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
-					.setCustomId('feed_selectCustomize')
+					.setCustomId(`feed_selectCustomize_${authorId}`)
 					.setLabel('Seguir personalizando')
 					.setStyle(ButtonStyle.Primary),
 			)],
 		});
-	})
-	.setButtonResponse(async function removeCustomIcon(interaction, channelId) {
+	}, { userFilterIndex: 1 })
+	.setButtonResponse(async function removeCustomIcon(interaction, channelId, authorId) {
 		const translator = await Translator.from(interaction.user.id);
 		const fetchedChannel = interaction.guild.channels.cache.get(channelId);
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
@@ -858,12 +873,12 @@ const command = new CommandManager('feed', flags)
 			embeds: [concludedEmbed],
 			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
-					.setCustomId('feed_selectCustomize')
+					.setCustomId(`feed_selectCustomize_${authorId}`)
 					.setLabel('Seguir personalizando')
 					.setStyle(ButtonStyle.Primary),
 			)],
 		});
-	})
+	}, { userFilterIndex: 1 })
 	.setButtonResponse(async function cancelWizard(interaction) {
 		const translator = await Translator.from(interaction.user.id);
 		const cancelEmbed = new EmbedBuilder()
@@ -874,7 +889,7 @@ const command = new CommandManager('feed', flags)
 			embeds: [cancelEmbed],
 			components: [],
 		});
-	})
+	}, { userFilterIndex: 0 })
 	.setButtonResponse(async function finishWizard(interaction) {
 		const translator = await Translator.from(interaction.user.id);
 		const cancelEmbed = new EmbedBuilder()
@@ -885,7 +900,7 @@ const command = new CommandManager('feed', flags)
 			embeds: [cancelEmbed],
 			components: [],
 		});
-	})
+	}, { userFilterIndex: 0 })
 	.setButtonResponse(async function showFeedImageUrl(interaction) {
 		//Función en desuso. Permanece por compatibilidad
 		return this.showFeedImageTags(interaction);
@@ -984,7 +999,6 @@ const command = new CommandManager('feed', flags)
 				]);
 
 			return interaction.reply({
-				// content: `<:tagswhite:921788204540100608> **Tags**\n${tags}\n<:gelbooru:919398540172750878> **Post** <${url}>${ source ? `\n<:urlwhite:922669195521568818> **Fuente** <${source}>` : '' }`,
 				embeds: [tagsEmbed],
 				components: [tagsEditRow],
 				ephemeral: true,
