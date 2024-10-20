@@ -95,8 +95,6 @@ const command = new CommandManager('imgur', flags)
 			...imageStreams.map(stream => ({ image: stream, type: /**@type {const}*/('stream') })),
 		];
 
-		console.log(uploads);
-
 		if(!uploads.length)
 			return request.editReply({ content: '⚠️ Debes indicar un enlace de imagen o una imagen directa a subir a Imgur', ephemeral: true });
 
