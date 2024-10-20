@@ -10,11 +10,20 @@ const { makeButtonRowBuilder } = require('../../tsCasts');
 
 /**
  * 
+ * @param {String} name 
+ * @param {String} [emoji]
+ */
+function makePVSessionName(name, emoji = null) {
+    return `${emoji || '💠'}【${name}】`;
+}
+
+/**
+ * 
  * @param {import('../../localdata/models/userconfigs').UserConfigDocument} userConfig 
  */
 function makeSessionAutoname(userConfig) {
     if(!userConfig?.voice?.autoname) return null;
-    return `${userConfig.voice.autoemoji || '💠'}【${userConfig.voice.autoname}】`;
+    return makePVSessionName(userConfig.voice.autoname, userConfig.voice.autoemoji);
 }
 
 /**
@@ -179,9 +188,11 @@ class PureVoiceUpdateHandler {
             if(sessionMember.isBanned())
                 return member.voice.disconnect('Desconexión forzada de usuario no permitido en una sesión PuréVoice').catch(prematureError);
 
+            const controlPanel = /**@type {Discord.TextChannel}*/(guild.channels.cache.get(pvDocument.controlPanelId));
+
             await Promise.all([
                 member.roles.add(sessionRole, translator.getText('voiceSessionReasonMemberAdd')).catch(prematureError),
-                /**@type {Discord.TextChannel}*/(guild.channels.cache.get(pvDocument.controlPanelId))?.permissionOverwrites.edit(member, { ViewChannel: true }).catch(prematureError),
+                !sessionMember.isGuest() && controlPanel?.permissionOverwrites.edit(member, { ViewChannel: true }).catch(prematureError),
             ]);
 
             if(dbMember) return;
@@ -351,7 +362,7 @@ class PureVoiceUpdateHandler {
             };
 
             if(userConfigs.voice.ping !== 'never')
-                startMessage.content = `👋 ¡Buenas, ${member}!`;
+                startMessage.content = translator.getText('voiceSessionNewMemberContentHint', member);
 
             await channel.send(startMessage).catch(prematureError);
             
@@ -400,12 +411,23 @@ class PureVoiceUpdateHandler {
         const { pvDocument, state } = this;
         const guildChannels = state.guild.channels.cache;
         const invalidSessionIds = [];
+        const members = /**@type {Map<String, Discord.GuildMember>}*/(new Map());
 
         pvDocument.sessions = pvDocument.sessions.filter(sid => {
             const channelExists = guildChannels.has(sid);
-            !channelExists && invalidSessionIds.push(sid);
+
+            if(!channelExists) {
+                state.guild.members.cache.forEach((member, memberId) => members.set(memberId, member));
+                invalidSessionIds.push(sid);
+            }
+
             return channelExists;
         });
+
+        const controlPanel = /**@type {Discord.TextChannel}*/(guildChannels.get(pvDocument.controlPanelId));
+
+        for(const [ , member ] of members)
+            await controlPanel.permissionOverwrites.delete(member, 'PLACEHOLDER_REASON_PV_CLEANUP_VIEWCHANNEL_DISABLE');
 
         if(invalidSessionIds.length) {
             await PureVoiceSessionModel.deleteMany({ channelId: { $in: invalidSessionIds } });
@@ -621,7 +643,7 @@ async function createPVControlPanelChannel(guild, categoryId) {
 
     const controlPanelEmbed = new Discord.EmbedBuilder()
         .setColor(tenshiColor)
-        .setAuthor({ name: 'Bot de Puré', url: 'https://i.imgur.com/P9eeVWC.png' })
+        .setAuthor({ name: 'Bot de Puré • PuréVoice', url: 'https://i.imgur.com/P9eeVWC.png' })
         .addFields(
             {
                 name: '<:es:1084646419853488209> Panel de Control',
@@ -689,6 +711,7 @@ module.exports = {
     PureVoiceUpdateHandler,
     PureVoiceOrchestrator,
     PureVoiceSessionMember,
+    makePVSessionName,
     makeSessionAutoname,
     makeSessionRoleAutoname,
     createPVControlPanelChannel,
