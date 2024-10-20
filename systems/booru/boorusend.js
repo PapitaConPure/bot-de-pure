@@ -1,7 +1,7 @@
 const { makeButtonRowBuilder } = require('../../tsCasts');
-// @ts-ignore
-const { EmbedBuilder, ButtonBuilder, ButtonStyle, Colors, Message, User, MessageCreateOptions, Snowflake, Emoji } = require('discord.js');
-// @ts-ignore
+//@ts-expect-error
+const { EmbedBuilder, ButtonBuilder, ButtonStyle, Colors, Message, User, MessageCreateOptions, Snowflake } = require('discord.js');
+//@ts-expect-error
 const { ComplexCommandRequest, CommandArguments } = require('../../commands/Commons/typings');
 const { CommandOptions } = require('../../commands/Commons/cmdOpts');
 const { guildEmoji: gEmo, shortenText, isThread } = require('../../func');
@@ -140,12 +140,17 @@ async function formatBooruPostMessage(booru, post, data) {
 	data.cornerIcon && postEmbed.setAuthor({ name: 'Desde Gelbooru', iconURL: data.cornerIcon });
 
 	//Tags
+	/**@type {(tag: String) => String}*/
+	const formatTagName = tag => tag
+		.replace(/\\/g, '\\\\')
+		.replace(/\*/g, '\\*')
+		.replace(/_/g,  '\\_')
+		.replace(/\|/g, '\\|');
+
 	/**@type {(tagNames: Array<String>, sep: String) => String} tagNames*/
-	const formatTagNameList = (tagNames, sep) => tagNames.join(sep)
-		.replace(/\\/g,'\\\\')
-		.replace(/\*/g,'\\*')
-		.replace(/_/g,'\\_')
-		.replace(/\|/g,'\\|');
+	const formatTagNameList = (tagNames, sep) => tagNames
+		.map(tagName => `* ${formatTagName(tagName)}`)
+		.join(sep);
 	
 	try {
 		const postTags = await booru.fetchPostTags(post);
@@ -174,9 +179,9 @@ async function formatBooruPostMessage(booru, post, data) {
 		});
 
 		const s3 = globalConfigs.slots.slot3;
-		const filteredTags = postOtherTags.slice(0, maxTags);
-		const tagsTitle = `${gEmo('tagswhite', s3)} Tags (${filteredTags.length}/${post.tags.length})`;
-		const tagsContent = formatTagNameList(filteredTags, ' ');
+		const otherTags = postOtherTags.slice(0, maxTags);
+		const tagsTitle = `${gEmo('tagswhite', s3)} Tags (${otherTags.length}/${post.tags.length})`;
+		const tagsContent = formatTagNameList(otherTags, ' ');
 
 		const addTagCategoryField = (/**@type {String}*/ fieldName, /**@type {Array<String>}*/arr) => {
 			if(!arr.length) return;
@@ -187,9 +192,8 @@ async function formatBooruPostMessage(booru, post, data) {
 					.slice(0, 4);
 			}
 
-			let content = formatTagNameList(arr, '\n').replace('\n', '\n* ');
+			let content = formatTagNameList(arr, '\n');
 			if(!content.length) return;
-			content = `* ${content}`;
 
 			postEmbed.addFields({ name: fieldName, value: shortenText(content, 1020), inline: true });
 		}
