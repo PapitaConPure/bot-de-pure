@@ -15,6 +15,27 @@ const { Translator } = require('../../internationalization');
  * @typedef {{ maxTags?: Number, title?: String, footer?: String, cornerIcon?: String, manageableBy?: String, isNotFeed?: Boolean }} PostFormatData
  */
 
+/**@typedef {{ emoji: string, color: import('discord.js').ColorResolvable }} SourceStyle*/
+/**@type {ReadonlyArray<SourceStyle & { pattern: RegExp }>}*/
+const sources = [
+	{ color: 0x0096fa, emoji: '919403803126661120',  pattern: /pixiv\.net/ },
+	{ color: 0x040404, emoji: '1232243415165440040', pattern: /(twitter\.com)|(twimg\.com)|(x\.com)/ },
+	{ color: 0xfaf18a, emoji: '999783444655648869',  pattern: /fanbox\.cc/ },
+	{ color: 0xea4c89, emoji: '1000265840182181899', pattern: /fantia\.jp/ },
+	{ color: 0x28837f, emoji: '1001397393511682109', pattern: /skeb\.jp/ },
+	{ color: 0x009c94, emoji: '1297689776941568073', pattern: /lofter\.com/ },
+	{ color: 0x23aee5, emoji: '1297697987014824066', pattern: /t\.bilibili\.com/ },
+	{ color: 0xff6c60, emoji: '919403803114094682',  pattern: /nitter\.net/ },
+	{ color: 0x36465d, emoji: '969666470252511232',  pattern: /tumblr\.com/ },
+	{ color: 0xff4500, emoji: '969666029045317762',  pattern: /(reddit\.com)|(i\.redd\.it)/ },
+];
+
+/**@type {SourceStyle}*/
+const noSource = { color: Colors.Aqua, emoji: undefined };
+
+/**@type {SourceStyle}*/
+const unknownSource = { color: 0x1bb76e, emoji: '969664712604262400' };
+
 /**
  * Genera un {@linkcode EmbedBuilder} a base de un {@linkcode Post} de {@linkcode Booru}
  * @param {Booru} booru
@@ -33,18 +54,16 @@ async function formatBooruPostMessage(booru, post, data) {
 			.setURL(`https://gelbooru.com/index.php?page=post&s=view&id=${post.id}`),
 	);
 	/**@type {import('discord.js').ColorResolvable}*/
-	let embedColor = Colors.Aqua;
+	let embedColor;
 	let sourceNumber = 0;
 
 	//Botón de Fuente (si está disponible)
 	const addSourceButton = (/**@type {String}*/ source) => {
 		if(!source) return;
 
-		let emoji;
-		
 		if(!source.match(/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-])+\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/)) {
 			//Si no es un enlace, mostrar el source en texto
-			emoji = '969664712604262400';
+			const emoji = '969664712604262400';
 			return row.addComponents(
 				new ButtonBuilder()
 					.setCustomId(`feed_plainText${sourceNumber++}`)
@@ -53,41 +72,15 @@ async function formatBooruPostMessage(booru, post, data) {
 					.setLabel(shortenText(source, 72))
 					.setDisabled(true),
 			);
-		} else {
-			const rawPixivAsset = source.match(/https:\/\/i.pximg.net\/img-original\/img\/[0-9\/]{19}\/([0-9]+)_p[0-9]+\.[A-Za-z]{2,4}/);
-			if(rawPixivAsset)
-				source = `https://www.pixiv.net/artworks/${rawPixivAsset[1]}`;
-
-			//Dar estilo a Embed según fuente de la imagen
-			if(source.includes('pixiv.net')) {
-				emoji = '919403803126661120';
-				embedColor = 0x0096fa;
-			} else if(source.match(/(twitter\.com)|(twimg\.com)|(x\.com)/)) {
-				emoji = '1232243415165440040';
-				embedColor = 0x040404;
-			} else if(source.includes('nitter.net')) {
-				emoji = '919403803114094682';
-				embedColor = 0xff6c60;
-			} else if(source.includes('fanbox.cc')) {
-				emoji = '999783444655648869';
-				embedColor = 0xfaf18a;
-			} else if(source.includes('fantia.jp')) {
-				emoji = '1000265840182181899';
-				embedColor = 0xea4c89;
-			} else if(source.includes('skeb.jp')) {
-				emoji = '1001397393511682109';
-				embedColor = 0x28837f;
-			} else if(source.includes('tumblr.com')) {
-				emoji = '969666470252511232';
-				embedColor = 0x36465d;
-			} else if(source.match(/(reddit\.com)|(i\.redd\.it)/)) {
-				emoji = '969666029045317762';
-				embedColor = 0xff4500;
-			} else {
-				emoji = '969664712604262400';
-				embedColor = 0x1bb76e;
-			}
 		}
+		const rawPixivAsset = source.match(/https:\/\/i.pximg.net\/img-original\/img\/[0-9\/]{19}\/([0-9]+)_p[0-9]+\.[A-Za-z]{2,4}/);
+		if(rawPixivAsset)
+			source = `https://www.pixiv.net/artworks/${rawPixivAsset[1]}`;
+
+		//Dar estilo a Embed según fuente de la imagen
+		const sourceStyle = sources.find(s => s.pattern.test(source)) ?? unknownSource;
+		const emoji = sourceStyle.emoji;
+		embedColor ??= sourceStyle.color;
 
 		if(source.length > 512)
 			return row.addComponents(
@@ -113,6 +106,8 @@ async function formatBooruPostMessage(booru, post, data) {
 			: source.split(/[ \n]+/);
 		sources.slice(0, 2).forEach(addSourceButton);
 	}
+
+	embedColor ??= noSource.color;
 	
 	//Botón de tags
 	row.addComponents(
@@ -181,7 +176,7 @@ async function formatBooruPostMessage(booru, post, data) {
 					.slice(0, 4);
 			}
 
-			let content = formatTagNameList(arr, '\n');
+			let content = formatTagNameList(arr, '\n', { leftStr: '* ' });
 			if(!content.length) return;
 
 			postEmbed.addFields({ name: fieldName, value: shortenText(content, 1020), inline: true });
@@ -398,10 +393,12 @@ function formatTagName(tag) {
 /**
  * @param {Array<String>} tagNames
  * @param {String} sep
+ * @param {{ leftStr?: String, rightStr?: String }} options
  */
-function formatTagNameList(tagNames, sep) {
+function formatTagNameList(tagNames, sep, options = {}) {
+	const { leftStr = '', rightStr = '' } = options;
 	return tagNames
-		.map(tagName => `* ${formatTagName(tagName)}`)
+		.map(tagName => `${leftStr}${formatTagName(tagName)}${rightStr}`)
 		.join(sep);
 }
 
