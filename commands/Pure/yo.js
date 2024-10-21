@@ -163,6 +163,11 @@ const voiceEmbed = (interaction, userConfigs, translator) => {
                 value: makeSessionAutoname(userConfigs) ?? translator.getText('yoVoiceAutonameValueNone'),
                 inline: true,
             },
+            {
+                name: translator.getText('yoVoiceKillDelayName'),
+                value: '4m 45s',
+                inline: true,
+            },
         );
 };
 

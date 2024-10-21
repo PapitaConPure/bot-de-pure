@@ -1266,6 +1266,11 @@ let localesObject = /**@type {const}*/({
 		en: 'Autoname',
 		ja: '自動名',
 	},
+	yoVoiceKillDelayName: {
+		es: 'Retardo de muerte',
+		en: 'Kill delay',
+		ja: 'キル遅延',
+	},
 	yoVoiceAutonameValueNone: {
 		es: '_Ninguno._',
 		en: '_None._',
