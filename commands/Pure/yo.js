@@ -344,6 +344,7 @@ const command = new CommandManager('yo', flags)
 
         userConfigs.voice.ping ??= 'always';
 
+        const compressedAuthorId = compressId(authorId);
         switch(selected) {
         case 'voice':
             embed = voiceEmbed(interaction, userConfigs, translator);
@@ -372,9 +373,13 @@ const command = new CommandManager('yo', flags)
                 ),
                 makeButtonRowBuilder().addComponents(
                     new ButtonBuilder()
-                        .setCustomId(`yo_setVoiceAutoname_${authorId}`)
+                        .setCustomId(`yo_setVoiceAutoname_${compressedAuthorId}`)
                         .setStyle(ButtonStyle.Primary)
                         .setLabel(translator.getText('yoVoiceAutonameButtonLabel')),
+                    new ButtonBuilder()
+                        .setCustomId(`yo_setVoiceKillDelay_${compressedAuthorId}`)
+                        .setStyle(ButtonStyle.Primary)
+                        .setLabel(translator.getText('yoVoiceKillDelayButtonLabel')),
                     backToDashboardButton(authorId, translator),
                     cancelButton(authorId, translator),
                 ),
@@ -450,7 +455,7 @@ const command = new CommandManager('yo', flags)
             }),
         ]);
     })
-    .setButtonResponse(async function setVoiceAutoname(interaction, authorId) {
+    .setButtonResponse(async function setVoiceAutoname(interaction) {
 		const { user } = interaction;
 			
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
@@ -459,11 +464,8 @@ const command = new CommandManager('yo', flags)
 
         const translator = new Translator(/**@type {import('../../internationalization').LocaleKey}*/(userConfigs.language));
 		
-		if(user.id !== authorId)
-			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
-
         const modal = new ModalBuilder()
-            .setCustomId(`yo_applyVoiceAutoname_${authorId}`)
+            .setCustomId('yo_applyVoiceAutoname')
             .setTitle(translator.getText('yoVoiceAutonameModalTitle'))
             .addComponents(
                 makeTextInputRowBuilder().addComponents(new TextInputBuilder()
@@ -487,8 +489,8 @@ const command = new CommandManager('yo', flags)
             );
 
         return interaction.showModal(modal);
-    })
-    .setModalResponse(async function applyVoiceAutoname(interaction, authorId) {
+    }, { userFilterIndex: 0 })
+    .setModalResponse(async function applyVoiceAutoname(interaction) {
         await interaction.deferReply({ ephemeral: true });
         
 		const { user } = interaction;
@@ -507,6 +509,53 @@ const command = new CommandManager('yo', flags)
         const embed = voiceEmbed(interaction, userConfigs, translator);
         await interaction.message.edit({ embeds: [embed] }).catch(console.error);
         return interaction.editReply({ content: translator.getText('yoVoiceAutonameSuccess') });
+    })
+    .setButtonResponse(async function setVoiceKillDelay(interaction) {
+		const { user } = interaction;
+			
+		const userConfigs = await UserConfigs.findOne({ userId: user.id });
+        if(!userConfigs)
+            return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
+
+        const translator = new Translator(/**@type {import('../../internationalization').LocaleKey}*/(userConfigs.language));
+		
+        const modal = new ModalBuilder()
+            .setCustomId('yo_applyVoiceKillDelay')
+            .setTitle(translator.getText('yoVoiceKillDelayModalTitle'))
+            .addComponents(
+                makeTextInputRowBuilder().addComponents(new TextInputBuilder()
+                    .setCustomId('inputDuration')
+                    .setLabel(translator.getText('yoVoiceKillDelayModalDelayLabel'))
+                    .setPlaceholder(translator.getText('yoVoiceKillDelayModalDelayPlaceholder'))
+                    .setMinLength(0)
+                    .setMaxLength(10)
+                    .setRequired(false)
+                    .setValue(userConfigs.voice?.killDelay ? `${userConfigs.voice.killDelay}` : '')
+                    .setStyle(TextInputStyle.Short)),
+            );
+
+        return interaction.showModal(modal);
+    }, { userFilterIndex: 0 })
+    .setModalResponse(async function applyVoiceKillDelay_PENDING(interaction) {
+        await interaction.deferReply({ ephemeral: true });
+        
+		const { user } = interaction;
+			
+		const userConfigs = await UserConfigs.findOne({ userId: user.id });
+        if(!userConfigs)
+            return interaction.editReply({ content: warn('Usuario inexistente / Unexistent user') });
+        
+        //Nota: esto está completamente mal. Parsear formato XXm XXs luego
+        const killDelay = +interaction.fields.getTextInputValue('inputDuration');
+        userConfigs.voice.killDelay = isNaN(killDelay) ? 0 : killDelay;
+        
+        await userConfigs.save();
+        
+        const translator = new Translator(/**@type {import('../../internationalization').LocaleKey}*/(userConfigs.language));
+        
+        const embed = voiceEmbed(interaction, userConfigs, translator);
+        await interaction.message.edit({ embeds: [embed] }).catch(console.error);
+        return interaction.editReply({ content: translator.getText('yoVoiceKillDelaySuccess') });
     })
     .setButtonResponse(async function setPixivConvert(interaction, authorId, enable) {
 		const { user } = interaction;

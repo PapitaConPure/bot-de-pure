@@ -1272,8 +1272,8 @@ let localesObject = /**@type {const}*/({
 		ja: '「なし。」',
 	},
 	yoVoiceAutonameButtonLabel: {
-		es: 'Nombre de sesión automático...',
-		en: 'Session autoname...',
+		es: 'Nombre de Sesión Automático...',
+		en: 'Session Autoname...',
 		ja: 'セッション自動名…',
 	},
 	yoVoiceAutonameModalTitle: {
@@ -1287,14 +1287,39 @@ let localesObject = /**@type {const}*/({
 		ja: '有頂天',
 	},
 	yoVoiceAutonameModalEmojiPlaceholder: {
-		es: 'Emoji unicode. Ejemplo: 🍑',
-		en: 'Unicode emoji. Example: 🍑',
-		ja: 'Unicode絵文字。例: 🍑',
+		es: 'Emoji unicode. (Ejemplo: 🍑)',
+		en: 'Unicode emoji. (Example: 🍑)',
+		ja: 'Unicode絵文字。(例: 🍑)',
 	},
 	yoVoiceAutonameSuccess: {
 		es: '✅ Nombre automático actualizado',
 		en: '✅ Autoname updated',
 		ja: '✅ 自動名が更新されました',
+	},
+	yoVoiceKillDelayButtonLabel: {
+		es: 'Retardo de Muerte de Sesión...',
+		en: 'Session Kill Delay...',
+		ja: 'セッションキル遅延…',
+	},
+	yoVoiceKillDelayModalTitle: {
+		es: 'Indicar Retardo de Muerte',
+		en: 'Set Kill Delay',
+		ja: 'キル遅延を設定',
+	},
+	yoVoiceKillDelayModalDelayLabel: {
+		es: 'Duración de retardo',
+		en: 'Delay duration',
+		ja: '遅延期間',
+	},
+	yoVoiceKillDelayModalDelayPlaceholder: {
+		es: 'Ejemplo: 4m 45s. 0 = inactivo. 10m máx.',
+		en: 'e.g., 4m 45s. 0 = disabled. 10m max.',
+		ja: 'たとえば、4m 45s。0＝無効。最大10m。',
+	},
+	yoVoiceKillDelaySuccess: {
+		es: '✅ Retardo de muerte actualizado',
+		en: '✅ Kill delay updated',
+		ja: '✅ キル遅延が更新されました',
 	},
 	yoVoiceMenuPing: {
 		es: 'Configurar menciones...',

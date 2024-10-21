@@ -41,6 +41,10 @@ const UserConfigSchema = new Mongoose.Schema({
             type: String,
             default: '',
         },
+        killDelay: {
+            type: Number,
+            default: 0,
+        },
     },
     flags: {
         type: Array,
