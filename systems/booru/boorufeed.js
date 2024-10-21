@@ -411,7 +411,10 @@ class BooruFeed {
     }
 
     get allowNSFW() {
-        return 'nsfw' in this.channel && this.channel.nsfw;
+        if(this.channel.isThread())
+            return this.channel.parent.nsfw;
+
+        return this.channel.nsfw;
     }
 }
 
