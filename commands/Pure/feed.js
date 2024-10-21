@@ -409,8 +409,8 @@ const command = new CommandManager('feed', flags)
 			embeds: [wizard],
 			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
-					.setCustomId(`feed_editTags_${channelId}`)
-					.setLabel(`Ingresar Tags_${authorId}`)
+					.setCustomId(`feed_editTags_${channelId}_${authorId}`)
+					.setLabel('Ingresar Tags')
 					.setStyle(ButtonStyle.Primary),
 				new ButtonBuilder()
 					.setCustomId(`feed_selectEdit_${authorId}`)
