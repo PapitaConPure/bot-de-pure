@@ -12,7 +12,7 @@ const rakki = require('../../commands/Pure/rakkidei');
 const { Translator } = require('../../internationalization');
 
 /**
- * @typedef {{ maxTags?: Number, title?: String, footer?: String, cornerIcon?: String, manageableBy?: String, isNotFeed?: Boolean }} PostFormatData
+ * @typedef {{ maxTags?: Number, title?: String, footer?: String, cornerIcon?: String, manageableBy?: String, allowNSFW?: boolean, isNotFeed?: Boolean }} PostFormatData
  */
 
 /**@typedef {{ emoji: string, color: import('discord.js').ColorResolvable }} SourceStyle*/
@@ -38,13 +38,12 @@ const unknownSource = { color: 0x1bb76e, emoji: '969664712604262400' };
 
 /**
  * Genera un {@linkcode EmbedBuilder} a base de un {@linkcode Post} de {@linkcode Booru}
- * @param {Booru} booru
+ * @param {Booru} booru Instancia de Booru
  * @param {Post} post Post de Booru
- * @param {PostFormatData} data Información adicional a mostrar en el Embed. Se puede pasar un feed directamente
+ * @param {PostFormatData} data Información adicional a mostrar en el Embed. Se puede pasar un Feed directamente
  * @returns {Promise<MessageCreateOptions>}
  */
-async function formatBooruPostMessage(booru, post, data) {
-	data ??= {};
+async function formatBooruPostMessage(booru, post, data = {}) {
 	const maxTags = data.maxTags ?? 20;
 	//Botón de Post de Gelbooru
 	const row = makeButtonRowBuilder().addComponents(
@@ -201,20 +200,27 @@ async function formatBooruPostMessage(booru, post, data) {
 	
 	if(data.title)
 		postEmbed.setTitle(data.title);
-	if(data.footer)
+
+	const shouldBlock = (post.rating === 'explicit' || post.rating === 'questionable') && !data.allowNSFW;
+
+	if(shouldBlock)
+		postEmbed.setFooter({ text: data.footer || (post.rating === 'explicit' ? '❗' : '❓'), iconURL: 'https://i.imgur.com/jJD57ue.png' });
+	else if(data.footer)
 		postEmbed.setFooter({ text: data.footer });
 	
-	if(post.fileUrl.match(/\.(mp4|webm|webp)/)) {
-		postEmbed.addFields({ name: 'Video', value: `[Míralo en tu navegador (<:gelbooru:919398540172750878>)](${post.fileUrl})` });
-		postEmbed.setImage(post.sampleUrl || post.previewUrl);
-	} else if(post.fileUrl.match(/\.gif/))
-		postEmbed.setImage(post.fileUrl);
-	else
-		postEmbed.setImage(
-			post.sampleUrl
-			|| post.fileUrl
-			|| post.previewUrl
-		);
+	if(!shouldBlock) {
+		if(/\.(mp4|webm|webp)/.test(post.fileUrl)) {
+			postEmbed.addFields({ name: 'Video', value: `[Míralo en tu navegador (<:gelbooru:919398540172750878>)](${post.fileUrl})` });
+			postEmbed.setImage(post.sampleUrl || post.previewUrl);
+		} else if(/\.gif/.test(post.fileUrl))
+			postEmbed.setImage(post.fileUrl);
+		else
+			postEmbed.setImage(
+				post.sampleUrl
+				|| post.fileUrl
+				|| post.previewUrl
+			);
+	}
 	
 	feedMessage.embeds = [postEmbed];
 	
@@ -353,6 +359,7 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
 			title: isnsfw ? searchOpt.nsfwtitle : searchOpt.sfwtitle,
 			cornerIcon: author.avatarURL({ size: 128 }),
 			manageableBy: author.id,
+			allowNSFW: isnsfw,
 			isNotFeed: true,
 		})));
 		if(userTags.length)
