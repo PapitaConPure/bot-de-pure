@@ -609,25 +609,40 @@ let localesObject = /**@type {const}*/({
 		ja: `You now have <:prc:1097208828946301123> ${subl(0)}`,
 	},
 
-	transferInputExpected: {
-		es: '⚠️ Se esperaba que especifiques el monto a transferir y el usuario objetivo',
-		en: '⚠️ Amount to transfer and target user to expected',
-		ja: '⚠️ Amount to transfer and target user to expected',
+	transferAmountExpected: {
+		es: '⚠️ Se esperaba que especifiques el monto a transferir',
+		en: '⚠️ Amount to transfer expected',
+		ja: '⚠️ 送金金額を示すことが期待されていました',
+	},
+	transferTargetExpected: {
+		es: '⚠️ Se esperaba que indiques el usuario objetivo',
+		en: '⚠️ Target user expected',
+		ja: '⚠️ 対象ユーザーを示すことが期待されていました',
 	},
 	transferHumanExpected: {
-		es: '❌ No se puede transferir PRC a bots',
-		en: '❌ Can\'t transfer PRC to bots',
-		ja: '❌ Can\'t transfer PRC to bots',
+		es: '❌ No se puede transferir <:prc:1097208828946301123> a bots',
+		en: '❌ Can\'t transfer <:prc:1097208828946301123> to bots',
+		ja: '❌ <:prc:1097208828946301123>をボットに転送できません',
 	},
 	transferOtherExpected: {
-		es: '❌ No puedes transferirte a ti mismo',
-		en: '❌ You can\'t transfer PRC to yourself',
-		ja: '❌ You can\'t transfer PRC to yourself',
+		es: '❌ No puedes transferirte <:prc:1097208828946301123> a ti mismo',
+		en: '❌ You can\'t transfer <:prc:1097208828946301123> to yourself',
+		ja: '❌ <:prc:1097208828946301123>を自分自身に譲渡することはできません',
+	},
+	transferAmountTooLow: {
+		es: '❌ El monto de la transferencia es demasiado bajo. Debes transferir al menos <:prc:1097208828946301123> 1',
+		en: '❌ The transfer amount is too low. You must transfer at least <:prc:1097208828946301123> 1',
+		ja: '❌ 転送量が少なすぎます。少なくとも<:prc:1097208828946301123> 1を転送する必要があります',
 	},
 	transferInsufficient: {
 		es: '⚠️ Saldo insuficiente',
 		en: '⚠️ Insufficient funds',
-		ja: '⚠️ Insufficient funds',
+		ja: '⚠️ 残高不足',
+	},
+	transferError: {
+		es: '⚠️ Ocurrió un error interno durante la transacción',
+		en: '⚠️ An internal error occurred during the transaction',
+		ja: '⚠️ トランザクション中に内部エラーが発生しました',
 	},
 	transferTitle: {
 		es: 'Transferencia completada',
