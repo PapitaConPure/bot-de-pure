@@ -101,6 +101,11 @@ let localesObject = /**@type {const}*/({
 			`If you're not sure, you can tell my creator about the problem: <@${subl(0)}>`,
 		),
 	},
+	insufficientPermissions: {
+		es: '❌ No tienes permiso para hacer esto',
+		en: '❌ You\'re not allowed to do that',
+		ja: '❌ あなたにはそれをする許可がありません',
+	},
 	unknownInteraction: {
 		es: '🍔 Recibí una acción, pero no sé cómo responderla. Esto es un problema... mientras arreglo algunas cosas, toma una hamburguesa',
 		en: '🍔 I received an action, but I don\'t know how to reply to it. This is a problem... while I fix some things, take this burger',
@@ -270,9 +275,9 @@ let localesObject = /**@type {const}*/({
 		ja: '🧹 セッション名前を変更',
 	},
 	voiceSessionNewSessionRenameValue: {
-		es: 'Debes esperar 20 minutos entre cada renombrado de la sesión',
-		en: 'You must wait 20 minutes between each session renaming',
-		ja: '各セッションの名前変更の間には20分待つ必要があります',
+		es: '⌛ Debes esperar 20 minutos entre cada renombrado de la sesión',
+		en: '⌛ You must wait 20 minutes between each session renaming',
+		ja: '⌛ 各セッションの名前変更の間には20分待つ必要があります',
 	},
 	voiceSessionNewSessionAutonameName: {
 		es: '⏱️ Nombre automático',
@@ -283,6 +288,26 @@ let localesObject = /**@type {const}*/({
 		es: 'Si no escribes un nombre de sesión en 3 minutos, se nombrará automáticamente',
 		en: 'If you don\'t enter a session name within 3 minutes, it\'ll be automatically renamed',
 		ja: '3分以内にセッション名を入力しないと、自動的に名前が変更されます',
+	},
+	voiceSessionAdminExpected: {
+		es: '❌ Debes ser administrador de la sesión para hacer esto',
+		en: '❌ You must be the session administrator to do this',
+		ja: '❌ これを行うにはセッション管理者である必要があります',
+	},
+	voiceSessionModExpected: {
+		es: '❌ Debes ser moderador de la sesión para hacer esto',
+		en: '❌ You must be a moderator of the session to do this',
+		ja: '❌ これを行うにはセッションモデレータである必要があります',
+	},
+	voiceSessionAdminOrModExpected: {
+		es: '❌ Debes ser administrador o moderador de la sesión para hacer esto',
+		en: '❌ You must be the administrator or a moderator of the session to do this',
+		ja: '❌ これを行うには、セッションの管理者またはモデレータである必要があります',
+	},
+	voiceSessionMemberExpected: {
+		es: '❌ Debes formar parte de la sesión para hacer esto',
+		en: '❌ You must be a part of the session to do this',
+		ja: '❌ これを行うにはセッションに参加する必要があります',
 	},
 
 	invalidInput: {
@@ -337,7 +362,7 @@ let localesObject = /**@type {const}*/({
 	},
 
 	welcome: {
-		es: 'Bienvenido',
+		es: 'Bienvenid@',
 		en: 'Welcome',
 		ja: 'ようこそ',
 	},
