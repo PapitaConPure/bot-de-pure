@@ -1010,7 +1010,7 @@ module.exports = {
      * @param {Number} i Index from which to extract a sentence, be it a single word or a group
      */
     fetchSentence: function(args, i) {
-        if(i == undefined || i >= args.length)
+        if(i == undefined || i >= args.length || args[i] == undefined)
             return undefined;
         if(!args[i].startsWith('"'))
             return args.splice(i, 1)[0];
