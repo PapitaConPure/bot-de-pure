@@ -213,11 +213,17 @@ const command = new CommandManager('anarquia', flags)
 					.filter(s => s)
 					.join('\n');
 				
+				const exp = auser.exp % maxExp;
+				const progress = exp / maxExp;
+				const progressBarLength = 6;
+				const progressChars = Math.round(progressBarLength * progress);
+				const emptyChars = progressBarLength - progressChars;
+				const progressBar = '▰'.repeat(progressChars) + '▱'.repeat(emptyChars);
 				embed
 					.setTitle('Perfil anárquico')
 					.addFields(
-						{ name: 'Inventario', value: skillContent, inline: true },
-						{ name: 'Rango', value: `Nivel ${Math.floor(auser.exp / 30) + 1} (exp: ${auser.exp % maxExp})`, inline: true },
+						{ name: 'Inventario', value: skillContent || '_Todavía no has obtenido nada_', inline: true },
+						{ name: 'Rango', value: `Nivel ${Math.floor(auser.exp / 30) + 1}\n**Exp**\n${exp} / ${maxExp}\n${progressBar}`, inline: true },
 					);
 			} else
 				embed.setTitle('Perfil inexistente')
@@ -230,9 +236,9 @@ const command = new CommandManager('anarquia', flags)
 			return request.reply({ embeds: [embed] });
 		}
 		
-		const reactIfMessage = async (/**@type {String}*/ reaction) => request.isMessage && request.inferAsMessage().react(reaction);
+		const reactIfMessage = async (/**@type {String}*/ reaction) => request.isMessage && request.inferAsMessage().react(reaction).catch(_ => _);
 		
-		const skill = CommandOptionSolver.asString(args.parseFlagExpr('skill'));
+		const skill = args.parseFlag('skill');
 		const inverted = args.isMessageSolver() && isNaN(+args.args[0]);
 		let pos, emote;
 		if(inverted) emote = args.getString('emote');
@@ -241,7 +247,8 @@ const command = new CommandManager('anarquia', flags)
 
 		if((pos.length === 2 && !emote)
 		|| (pos.length  <  2 &&  emote)
-		|| (pos.length  <  2 &&  skill)) {
+		|| (pos.length  <  2 &&  skill)
+		|| (pos.length !== 2 && pos.length > 0)) {
 			reactIfMessage('⚠️');
 			return request.reply({ content: translator.getText('invalidInput'), ephemeral: true });
 		}
@@ -255,7 +262,7 @@ const command = new CommandManager('anarquia', flags)
 			const auser = (await AUser.findOne({ userId })) || new AUser({ userId });
 			
 			//Tiempo de enfriamiento por usuario
-			if((Date.now() - auser.last) / 1000 < 3) {
+			if((Date.now() - auser.last) / 1000 < 5) {
 				reactIfMessage('⌛');
 				return request.reply({ content: '⌛ ¡No tan rápido!', ephemeral: true });
 			} else
@@ -263,14 +270,14 @@ const command = new CommandManager('anarquia', flags)
 			
 			const emoteMatch = emote.match(/^<a*:\w+:([0-9]+)>$/);
 			if(!emoteMatch) {
-				reactIfMessage('⚠️️');
+				reactIfMessage('⚠️');
 				return request.reply({ content: translator.getText('invalidEmoji'), ephemeral: true });
 			}
 			const emoteId = emoteMatch[1];
 	
 			//Variables de ingreso
 			if(!request.client.emojis.cache.has(emoteId)) {
-				reactIfMessage('⚠️️');
+				reactIfMessage('⚠️');
 				return request.reply({ content: '⚠️️ No reconozco ese emoji. Solo puedo usar emojis de servidores en los que esté', ephemeral: true });
 			}
 
@@ -306,7 +313,7 @@ const command = new CommandManager('anarquia', flags)
 								.addOptions(
 									Object.entries(skills).map(([ key, skill ]) => ({
 										value: key,
-										label: skill.name,
+										label: `${skill.name} (${auser.skills?.[key] ?? 0})`,
 										emoji: skill.emoji,
 									}))
 								)
@@ -444,7 +451,6 @@ async function drawPureTable(cells) {
 	const emoteSize = 48;
 	const tableX = canvas.width / 2 - emoteSize * cells.length / 2;
 	const tableY = ctx.measureText('M').actualBoundingBoxDescent + 65;
-	console.dir({cells}, { depth: null });
 	cells.map((arr, y) => {
 		arr.map((cell, x) => {
 			ctx.drawImage(loadedEmotes[cell], tableX + x * emoteSize, tableY + y * emoteSize, emoteSize, emoteSize);
