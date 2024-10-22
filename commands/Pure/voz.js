@@ -1,4 +1,4 @@
-const { PureVoiceModel: PureVoice, PureVoiceSessionModel: PureVoiceSession } = require('../../localdata/models/purevoice.js');
+const { PureVoiceModel: PureVoice, PureVoiceSessionModel } = require('../../localdata/models/purevoice.js');
 const { PureVoiceSessionMember, getFrozenSessionAllowedMembers, makePVSessionName } = require('../../systems/others/purevoice.js');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, MessageCollector, ButtonStyle, Colors, ChannelType, Collection, ModalBuilder, TextInputStyle, TextInputBuilder } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
@@ -12,44 +12,6 @@ const cancelbutton = (id) => new ButtonBuilder()
 	.setEmoji('936531643496288288')
 	.setStyle(ButtonStyle.Secondary);
 const collectors = {};
-
-/**
- * @param {String} iconUrl
- * @param {String} stepName
- * @param {import('discord.js').ColorResolvable} stepColor
- */
-const wizEmbed = (iconUrl, stepName, stepColor) => {
-	//const routes = {
-	//	['create']: 	5, //2 + seleccionar categoría + seleccionar/crear canal de texto + seleccionar/crear/ignorar canal de voz AFK
-	//	['edit']: 		4, //2 + seleccionar operación + operación
-	//	['delete']: 	3, //2 + confirmación/opciones de borrado
-	//};
-	return new EmbedBuilder()
-		.setColor(stepColor)
-		.setAuthor({ name: 'Asistente de Configuración de Sistema PuréVoice', iconURL: iconUrl })
-		.setFooter({ text: stepName });
-};
-
-/**@param {import('../Commons/typings.js').ComplexCommandRequest} request*/
-const generateFirstWizard = (request) => {
-	if(isNotModerator(request.member)) return request.reply({ content: '❌ No tienes permiso para hacer esto', ephemeral: true });
-	const wizard = wizEmbed(request.client.user.avatarURL(), '1/? • Comenzar', Colors.Aqua)
-		.addFields({
-			name: 'Bienvenido',
-			value: 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes! Solo sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras',
-		});
-	const uid = request.userId;
-	return request.reply({
-		embeds: [wizard],
-		components: [new ActionRowBuilder().addComponents(
-			new ButtonBuilder()
-				.setCustomId(`voz_startWizard_${uid}`)
-				.setLabel('Comenzar')
-				.setStyle(ButtonStyle.Primary),
-			cancelbutton(uid),
-		)],
-	});
-};
 
 const options = new CommandOptions()
 	.addParam('nombre', 'TEXT', 'para decidir el nombre de la sesión actual', { optional: true })
@@ -67,8 +29,10 @@ const command = new CommandManager('voz', flags)
 	.setLongDescription('Para inyectar un Sistema PuréVoice en una categoria. Simplemente usa el comando y sigue los pasos del Asistente para configurar todo')
 	.setOptions(options)
 	.setExperimentalExecution(async (request, args) => {
+		const translator = await Translator.from(request.user);
+
 		if(args.parseFlag('asistente'))
-			return generateFirstWizard(request);
+			return generateFirstWizard(request, translator);
 		
 		//Cambiar nombre de canal de voz de sesión
 		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda voz\` para más información`;
@@ -105,10 +69,7 @@ const command = new CommandManager('voz', flags)
 		//Comprobar si se está en una sesión
 		const voiceState = request.member.voice;
 		const warnNotInSession = () => request.reply({
-			content: [
-				'⚠️ Debes entrar a una sesión PuréVoice para ejecutar este comando de esta forma.',
-				helpstr,
-			].join('\n'),
+			content: translator.getText('voiceCommandRenameMemberExpected', p_pure(request.guildId).raw),
 			ephemeral: true,
 		}).catch(console.error);
 
@@ -136,12 +97,15 @@ const command = new CommandManager('voz', flags)
 		}
 
 		//Modificar sesión y confirmar
-		const pv = await PureVoice.findOne({ guildId: request.guildId });
-		if(!pv) return warnNotInSession();
-		const sessionId = pv.sessions.find(sid => sid === voiceState.channelId);
-		if(!sessionId) return warnNotInSession();
-		const session = await PureVoiceSession.findOne({ channelId: sessionId });
+		const session = await PureVoiceSessionModel.findOne({ channelId: voiceState.channelId });
 		if(!session) return warnNotInSession();
+
+		const sessionMember = new PureVoiceSessionMember(session.members.get(request.member.id));
+		if(!sessionMember) return warnNotInSession();
+
+		if(sessionMember.isGuest())
+			return request.reply({ content: translator.getText('voiceSessionAdminOrModExpected'), ephemeral: true });
+
 		const { channelId: voiceId, roleId, nameChanged } = session;
 		if((Date.now() - (+nameChanged)) < 60e3 * 20)
 			return request.reply({
@@ -371,7 +335,7 @@ const command = new CommandManager('voz', flags)
 			]);
 
 			await Promise.all([
-				PureVoiceSession.deleteMany({ channelId: { $in: pv.sessions } }),
+				PureVoiceSessionModel.deleteMany({ channelId: { $in: pv.sessions } }),
 				PureVoice.deleteOne(guildQuery),
 			]);
 		}
@@ -412,13 +376,7 @@ const command = new CommandManager('voz', flags)
 		const voiceChannel = member.voice?.channel;
 		if(!voiceChannel) return warnNotInSession();
 
-		const pv = await PureVoice.findOne({ guildId });
-		if(!pv) return warnNotInSession();
-
-		const sessionId = pv.sessions.find(sid => sid === voiceChannel.id);
-		if(!sessionId) return warnNotInSession();
-
-		const session = await PureVoiceSession.findOne({ channelId: sessionId });
+		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
 		if(!session) return warnNotInSession();
 		
         const modal = new ModalBuilder()
@@ -459,13 +417,7 @@ const command = new CommandManager('voz', flags)
 
 		const voiceChannel = member.voice?.channel;
 
-		const pv = await PureVoice.findOne({ guildId });
-		if(!pv) return;
-
-		const sessionId = pv.sessions.find(sid => sid === voiceChannel.id);
-		if(!sessionId) return warnNotInSession();
-
-		const session = await PureVoiceSession.findOne({ channelId: sessionId });
+		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
 		if(!session) return warnNotInSession();
 
 		const name = interaction.fields.getTextInputValue('inputName');
@@ -486,7 +438,7 @@ const command = new CommandManager('voz', flags)
 	.setButtonResponse(async function freezeSession(interaction) {
 		await interaction.deferReply({ ephemeral: true });
 
-		const { guildId, member } = interaction;
+		const { member } = interaction;
         const translator = await Translator.from(member);
 
 		const warnNotInSession = () => interaction.editReply({
@@ -499,13 +451,7 @@ const command = new CommandManager('voz', flags)
 		const voiceChannel = voiceState.channel;
 		if(!voiceChannel) return warnNotInSession();
 
-		const pv = await PureVoice.findOne({ guildId });
-		if(!pv) return warnNotInSession();
-
-		const sessionId = pv.sessions.find(sid => sid === voiceChannel.id);
-		if(!sessionId) return warnNotInSession();
-
-		const session = await PureVoiceSession.findOne({ channelId: sessionId });
+		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
 		if(!session) return warnNotInSession();
 
 		const sessionMember = new PureVoiceSessionMember(session.members.get(member.id) ?? {});
@@ -554,5 +500,41 @@ const command = new CommandManager('voz', flags)
 			ephemeral: true,
 		});
 	});
+
+/**
+ * @param {String} iconUrl
+ * @param {String} stepName
+ * @param {import('discord.js').ColorResolvable} stepColor
+ */
+function wizEmbed(iconUrl, stepName, stepColor) {
+	return new EmbedBuilder()
+		.setColor(stepColor)
+		.setAuthor({ name: 'Asistente de Configuración de Sistema PuréVoice', iconURL: iconUrl })
+		.setFooter({ text: stepName });
+}
+
+/**
+ * @param {import('../Commons/typings.js').ComplexCommandRequest} request
+ * @param {Translator} translator
+ */
+function generateFirstWizard(request, translator) {
+	if(isNotModerator(request.member)) return request.reply({ content: translator.getText('insufficientPermissions'), ephemeral: true });
+	const wizard = wizEmbed(request.client.user.avatarURL(), '1/? • Comenzar', Colors.Aqua)
+		.addFields({
+			name: translator.getText('welcome'),
+			value: 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes! Solo sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras',
+		});
+	const uid = request.userId;
+	return request.reply({
+		embeds: [wizard],
+		components: [new ActionRowBuilder().addComponents(
+			new ButtonBuilder()
+				.setCustomId(`voz_startWizard_${uid}`)
+				.setLabel('Comenzar')
+				.setStyle(ButtonStyle.Primary),
+			cancelbutton(uid),
+		)],
+	});
+}
 
 module.exports = command;
