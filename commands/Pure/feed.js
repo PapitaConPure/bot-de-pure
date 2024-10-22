@@ -516,7 +516,7 @@ const command = new CommandManager('feed', flags)
 			embeds: [wizard],
 			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
-					.setCustomId(`feed_deleteOne_${chid}`)
+					.setCustomId(`feed_deleteOne_${chid}_${authorId}`)
 					.setLabel('Borrar')
 					.setStyle(ButtonStyle.Danger),
 				new ButtonBuilder()
