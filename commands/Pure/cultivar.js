@@ -7,7 +7,11 @@ const { Translator } = require("../../internationalization");
 
 const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('cultivar', flags)
-    .setAliases('cultivate', 'cv', 'c')
+    .setAliases(
+        'cosechar', 'cosecha', 'recolectar',
+        'cultivate', 'farm',
+        'cv', 'c'
+    )
     .setBriefDescription('Permite cultivar entre 54 y 66 PRC diario')
     .setDescription(
         'Permite cultivar <:prc:1097208828946301123> 54~66',
