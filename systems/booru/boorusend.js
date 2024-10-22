@@ -19,14 +19,16 @@ const { Translator } = require('../../internationalization');
 /**@type {ReadonlyArray<SourceStyle & { pattern: RegExp }>}*/
 const sources = [
 	{ color: 0x0096fa, emoji: '919403803126661120',  pattern: /pixiv\.net/ },
-	{ color: 0x040404, emoji: '1232243415165440040', pattern: /(twitter\.com)|(twimg\.com)|(x\.com)/ },
+	{ color: 0x040404, emoji: '1232243415165440040', pattern: /(twitter|twimg|x)\.com/ },
 	{ color: 0xfaf18a, emoji: '999783444655648869',  pattern: /fanbox\.cc/ },
 	{ color: 0xea4c89, emoji: '1000265840182181899', pattern: /fantia\.jp/ },
 	{ color: 0x28837f, emoji: '1001397393511682109', pattern: /skeb\.jp/ },
+	{ color: 0x0085ff, emoji: '1298259199477678115', pattern: /bsky\.app/ },
 	{ color: 0x009c94, emoji: '1297689776941568073', pattern: /lofter\.com/ },
 	{ color: 0x23aee5, emoji: '1297697987014824066', pattern: /t\.bilibili\.com/ },
-	{ color: 0xff6c60, emoji: '919403803114094682',  pattern: /nitter\.net/ },
+	{ color: 0x020814, emoji: '1298264258991095850', pattern: /cara\.app/ },
 	{ color: 0x36465d, emoji: '969666470252511232',  pattern: /tumblr\.com/ },
+	{ color: 0xff6c60, emoji: '919403803114094682',  pattern: /nitter\.net/ },
 	{ color: 0xff4500, emoji: '969666029045317762',  pattern: /(reddit\.com)|(i\.redd\.it)/ },
 ];
 
