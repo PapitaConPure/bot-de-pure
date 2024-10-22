@@ -8,9 +8,9 @@ const { Translator } = require("../../internationalization");
 const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('cultivar', flags)
     .setAliases('cultivate', 'cv', 'c')
-    .setBriefDescription('Permite cultivar entre 37 y 43 PRC diario')
+    .setBriefDescription('Permite cultivar entre 54 y 66 PRC diario')
     .setDescription(
-        'Permite cultivar <:prc:1097208828946301123> 37~43',
+        'Permite cultivar <:prc:1097208828946301123> 54~66',
         'Solo se puede hacer una vez por día',
     )
     .setExperimentalExecution(async request => {
@@ -27,7 +27,7 @@ const command = new CommandManager('cultivar', flags)
 
         userConfigs.lastCultivate = now;
 
-        const reward = 40 + randRange(-3, 3, false);
+        const reward = 60 + randRange(-6, 6, false);
         userConfigs.prc += reward;
 
         const embed = new EmbedBuilder()
