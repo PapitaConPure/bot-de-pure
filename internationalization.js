@@ -309,6 +309,11 @@ let localesObject = /**@type {const}*/({
 		en: '❌ You must be a part of the session to do this',
 		ja: '❌ これを行うにはセッションに参加する必要があります',
 	},
+	voiceCommandRenameMemberExpected: {
+		es: `⚠️ Debes entrar a una sesión PuréVoice para ejecutar este comando de esta forma.\nUsa \`${subl(0)}ayuda voz\` para más información`,
+		en: `⚠️ You must join a PuréVoice session to use this command this way.\nUse \`${subl(0)}help voice\` for more information`,
+		ja: `⚠️ これを行うにはセッションに参加する必要があります。\n詳細については、\`${subl(0)}help voice\`を使用してください`,
+	},
 
 	invalidInput: {
 		es: '⚠️️ Entrada inválida',
