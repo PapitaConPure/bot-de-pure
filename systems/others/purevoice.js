@@ -161,8 +161,7 @@ class PureVoiceUpdateHandler {
         
         //Embed de notificación
         const embed = new Discord.EmbedBuilder()
-            .setAuthor({ name: 'PuréVoice', iconURL: state.client.user.avatarURL({ size: 128 }) })
-            .setFooter({ text: `👥 ${channel.members?.size}` });
+            .setAuthor({ name: 'PuréVoice', iconURL: state.client.user.avatarURL({ size: 128 }) });
 
         if(channel.id !== pvDocument.voiceMakerId) {
             const currentSessionId = pvDocument.sessions.find(sid => sid === channel.id);
@@ -199,7 +198,9 @@ class PureVoiceUpdateHandler {
             
             const userConfigs = await UserConfigs.findOne({ userId: member.id }) || new UserConfigs({ userId: member.id });
 
-            embed.setColor(0x00ff7f)
+            embed
+                .setColor(0x00ff7f)
+                .setFooter({ text: `👥 ${currentSession.members.size}` })
                 .addFields({
                     name: `${member.user.bot ? '🤖' : '👤'} ${translator.getText('voiceSessionNewMemberName')}`,
                     value: translator.getText(member.user.bot ? 'voiceSessionNewMemberValueBotAttached' : 'voiceSessionNewMemberValueMemberIntegrated', `${member}`),
@@ -312,6 +313,7 @@ class PureVoiceUpdateHandler {
 
             embed.setColor(0x21abcd)
                 .setTitle(translator.getText('voiceSessionNewSessionTitle'))
+                .setFooter({ text: `👥 1` })
                 .addFields(
                     {
                         name: translator.getText('voiceSessionNewSessionCustomizeName'),
