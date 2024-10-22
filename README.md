@@ -13,11 +13,34 @@
 Bot de entretenimiento, búsqueda de imágenes y utilidades generales varias para Discord. Utiliza comandos tradicionales con adiciones inspiradas en terminales como `--flags` o los nuevamente introducidos comandos estandarizados de /barra.<br>
 Como personaje, es una robot torpe y agresiva en algunos casos, pero parece meterle ganas.
 
+> [!IMPORTANT]
+> Ejecutar una copia local te dará una experiencia más responsiva con Bot de Puré y te permitirá modificar su comportamiento a gusto.
+> 
+> Para aquellos que quieran ejecutar una copia local:
+> * Introduce los archivos `./localenv.json` y `./remoteenv.json`, ambos con el siguiente formato (no compartas los datos con nadie):
+>   ```js
+>   {
+>     "token": "<<El Token de la aplicación de Discord sobre la cual operarás el bot>>",
+>     "dburi": "<<La URI de la Base de Datos de MongoDB que usarás>>",
+>     "booruapikey": "<<La clave de API de una cuenta de Gelbooru>>",
+>     "booruuserid": "<<La ID de usuario de la misma cuenta de Gelbooru>>",
+>     "pixivtoken": "<<El Refresh Token de una cuenta de pixiv>>",
+>     "imgurclientid": "<<La ID de cliente de una cuenta de Gelbooru>>"
+>   }
+>   ```
+> * `localenv.json` se usa para un entorno de **desarrollo**, mientras que `remoteenv.json` se usa para un entorno de **producción**. Esta solución no es para nada elegante pero me ha estado funcionando bien de momento
+> * Al ejecutar con Node, usas la bandera `-d` para usar el entorno de **desarrollo** y `-p` para el entorno de **producción**
+>   ```cmd
+>   node . -d
+>   ```
+
 ## Índice
 * [Tecnologías Principales](#tecnologías-principales)
 * [Características](#características)
 * [Convenciones de Desarrollo](#convenciones-de-desarrollo)
 * [Integrantes](#integrantes)
+
+<hr><br>
 
 ## Tecnologías Principales
 * [Node.js](https://nodejs.org)
@@ -27,20 +50,35 @@ Como personaje, es una robot torpe y agresiva en algunos casos, pero parece mete
 ## Características
 * Personalización a nivel de servidor y usuario
 * Soporte de comandos por mensaje (p!) y por uso de barra (/)
+  Comando de Mensaje | Comando Slash
+  -------------------|--------------
+  ![mensaje](https://github.com/user-attachments/assets/900d1723-1215-45b9-94e8-4caf1f014dbf) | ![slash](https://github.com/user-attachments/assets/2e5ac62d-0d41-4921-8b3c-4b067a3d9927)
+
+
 * Fácil y rápida automatización en servidores gracias al uso de Asistentes de Configuración:
-  - Usa el Asistente PuréFeed para **programar envío de imágenes de Gelbooru** en un canal, con las tags que quieras
-  - Usa el Asistente PuréVoice para configurar una categoría de **canales de voz dinámicos con características avanzadas** (sesiones PuréVoice)
-* Fáciles y rápidas configuraciones de usuario por medio del comando `p!yo` o `/yo`
+  - Usa el Asistente PuréFeed para **programar el envío de imágenes de Gelbooru** en un canal, con las tags que quieras<br>
+    ![purefeed](https://github.com/user-attachments/assets/680fb037-a08e-44cb-a992-1fcb2f4e2d46)
+  - Usa el Asistente PuréVoice para configurar una categoría de **canales de voz dinámicos avanzados** (sesiones PuréVoice)<br>
+    ![purevoice](https://github.com/user-attachments/assets/cdeb7d40-29f8-47bf-99ca-c469c6b65752)
+  - Usa el Asistente de Confesiones para facilitar la distribución de confesiones anónimas, seguras y con protección contra abusos<br>
+    ![confesion](https://github.com/user-attachments/assets/53ab6d7d-af77-4fe2-b7e5-14de714a9e74)
+* Fáciles y rápidas configuraciones de usuario por medio del comando `p!yo` o `/yo`<br>
+  ![userconfigs](https://github.com/user-attachments/assets/72bad62e-27e1-4b44-aa85-3dfea173d0c6)
   - Configura nombres automáticos de sesión y otras preferencias de usuario para sesiones de voz (PuréVoice)
   - Corrección automática de previsualizaciones de enlaces de **Twitter/X** (Puréet) y pixiv (Purépix)
   - Edita tus suscripciones a tags de Feeds de imágenes (PuréFeed)
   - Soporte de español, inglés y (parcialmente) japonés
-* Fácil reproducción de música con sencilla gestión de colas de reproducción
-* Soporte de **comandos personalizados** de servidor:
-  - Se los llama "Tubérculos", contienen una TuberID y una respuesta que ejecutan al ser invocados
-  - Los "Tubérculos simples" envían texto y/o archivos
-  - Los "Tubérculos avanzados" ejecutan una serie de instrucciones **PuréScript** para enviar respuestas más elaboradas
-  - Puedes leer la documentación detallada del lenguaje PuréScript en [aquí](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link)
+* Fácil reproducción de música con sencilla gestión de colas de reproducción<br>
+  ![puremusic](https://github.com/user-attachments/assets/9168f6fd-2c8c-409b-8745-b8f64cab3258)
+* Soporte de **comandos personalizados** de servidor
+  - Se los llama "Tubérculos", contienen una TuberID y una respuesta que ejecutan al ser invocados<br>
+    ![tubers](https://github.com/user-attachments/assets/90d67499-5002-4b56-9d4e-530cbf78869c)
+  - Los "Tubérculos simples" envían texto y/o archivos<br>
+    ![simpletuber](https://github.com/user-attachments/assets/5175ccc6-7089-4cd4-a4d2-d26746eda544)
+  - Los "Tubérculos avanzados" ejecutan una serie de instrucciones **PuréScript** para enviar respuestas más elaboradas<br>
+    ![pstuber](https://github.com/user-attachments/assets/a434e3c5-8993-4672-bc04-5564c7418d7b)
+  - Puedes leer la documentación detallada del lenguaje PuréScript [aquí](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link)<br>
+    ![psdocs](https://i.imgur.com/T6kxYxq.png)
 * Herramientas de moderación y estadísticas (más por venir)
 * Minijuegos (más por venir)
 * Wiki de comandos y guías de uso básico por medio del comando `p!ayuda`
@@ -52,7 +90,7 @@ Como personaje, es una robot torpe y agresiva en algunos casos, pero parece mete
 * Tropezarse y aprender sobre la marcha
 * Divertirse
 ### Objetivos actuales
-*Terminar PuréScript
+* Terminar PuréScript
 * Agregar ejemplos interactivos de comandos con p!ayuda
 * Minijuegos individuales y tipo "fiesta"
 * Agregar GIFs infográficos en comandos
@@ -89,6 +127,10 @@ Personas involucradas en el desarrollo de Bot de Puré, con sus tags de Discord.
 * `superarathys12` Super Arathy's 12#8235
 * `taton` Taton#0122
 
+<hr><br>
 
 > [!NOTE]
 > Empecé este proyecto con 0 conocimiento sobre JavaScript y para cuando me di cuenta creció demasiado, así que ando navegando unos 5 años de mi propia deuda técnica.
+
+> [!NOTE]
+> No esperes ningún tipo de madurez tanto emocional como intelectual si lees el código o usas a Bot de Puré
