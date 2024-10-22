@@ -1,11 +1,10 @@
-import { auditError } from '../../systems/others/auditor';
-
 const { improveNumber, compressId, sleep } = require('../../func');
 const { CommandTags, CommandManager, CommandOptions, CommandOptionSolver } = require('../Commons/commands');
 const UserConfigs = require('../../localdata/models/userconfigs.js');
 const { EmbedBuilder } = require("discord.js");
 const { Translator } = require("../../internationalization");
 const globalConfigs = require('../../localdata/config.json');
+const { auditError } = require('../../systems/others/auditor');
 
 const transferLocks = new Set();
 
