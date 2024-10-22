@@ -10,7 +10,7 @@ const transferLocks = new Set();
 
 const options = new CommandOptions()
     .addParam('monto', 'NUMBER', 'para especificar el monto a pagar en PRC')
-    .addParam('usuario', 'MEMBER', 'para especificar el usuario al cual transferir PRC');
+    .addParam('usuario', 'USER', 'para especificar el usuario al cual transferir PRC');
 const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('transferir', flags)
     .setAliases('transfer', 'tf')
