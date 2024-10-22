@@ -6,7 +6,7 @@ const PrefixPair = require('../localdata/models/prefixpair.js');
 const UserConfigs = require('../localdata/models/userconfigs.js');
 const BooruTags = require('../localdata/models/boorutags.js');
 const MessageCascades = require('../localdata/models/messageCascades.js');
-const { Puretable, defaultEmote } = require('../localdata/models/puretable.js');
+const { Puretable, pureTableAssets } = require('../localdata/models/puretable.js');
 const { deleteExpiredMessageCascades, cacheMessageCascade } = require('./onMessageDelete.js');
 const HouraiDB = require('../localdata/models/hourai.js');
 
@@ -222,7 +222,7 @@ async function onStartup(client) {
 	if(!puretable) puretable = new Puretable();
 	else //Limpiar emotes eliminados / no accesibles
 		puretable.cells = puretable.cells.map(arr =>
-			arr.map(cell => client.emojis.cache.get(cell) ? cell : defaultEmote )
+			arr.map(cell => client.emojis.cache.get(cell) ? cell : pureTableAssets.defaultEmote )
 		);
 	const uniqueEmoteIds = new Set();
 	const pendingEmoteCells = [];
@@ -241,7 +241,7 @@ async function onStartup(client) {
 		loadImage('https://i.imgur.com/TIL0jPV.png'),
 		Promise.all(pendingEmoteCells),
 	]);
-	globalConfigs.pureTableImage = pureTableImage;
+	pureTableAssets.image = pureTableImage;
 	globalConfigs.loademotes = {};
 	for(const cell of emoteCells)
 		globalConfigs.loademotes[cell.id] = cell.image;

@@ -1,11 +1,14 @@
 const Mongoose = require('mongoose');
 
-const defaultEmote = '1267233873864032318';
+const pureTableAssets = {
+    defaultEmote: '1267233873864032318',
+    image: null,
+};
 
 const PuretableSchema = new Mongoose.Schema({
     cells: {
         type: Array,
-        default: Array(16).fill(null).map(() => Array(16).fill(defaultEmote))
+        default: Array(16).fill(null).map(() => Array(16).fill(pureTableAssets.defaultEmote))
     }
 });
 
@@ -34,7 +37,7 @@ function aum() { return new aUserModel({}); }
 /**@typedef {ReturnType<(typeof aum)>} AUserDocument*/
 
 module.exports = {
-    defaultEmote,
+    pureTableAssets,
     Puretable: pureTableModel,
     AUser: aUserModel,
 };

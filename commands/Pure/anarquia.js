@@ -1,102 +1,171 @@
 const global = require('../../localdata/config.json'); //Variables globales
-const { fetchUserID } = require('../../func.js');
+const { makeWeightedDecision, compressId } = require('../../func.js');
 const { createCanvas, loadImage } = require('canvas');
-const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
+const { EmbedBuilder, AttachmentBuilder, StringSelectMenuBuilder, Colors, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { Puretable, AUser, pureTableImage } = require('../../localdata/models/puretable.js');
-const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
+const { Puretable, AUser, pureTableAssets } = require('../../localdata/models/puretable.js');
+const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require("../Commons/commands");
+const { makeStringSelectMenuRowBuilder, makeButtonRowBuilder } = require('../../tsCasts');
+const { Translator } = require('../../internationalization');
 
-const shapes = {
-	x: [
-		'#     #',
-		' #   # ',
-		'  # #  ',
-		'   #   ',
-		'  # #  ',
-		' #   # ',
-		'#     #',
-	],
-	square: [
-		'       ',
-		' ##### ',
-		' #   # ',
-		' #   # ',
-		' #   # ',
-		' ##### ',
-		'       ',
-	],
-	circle: [
-		'  ###  ',
-		' #   # ',
-		'#     #',
-		'#     #',
-		'#     #',
-		' #   # ',
-		'  ###  ',
-	],
-	diamond: [
-		'   #   ',
-		'  # #  ',
-		' #   # ',
-		'#     #',
-		' #   # ',
-		'  # #  ',
-		'   #   ',
-	],
-	tetris: [
-		'##     ',
-		'#   ## ',
-		'#  ##  ',
-		'      #',
-		'  #   #',
-		' ###  #',
-		'      #',
-	],
-	p: [
-		'###### ',
-		' #    #',
-		' #    #',
-		' # # # ',
-		' #     ',
-		' #     ',
-		'###    ',
-	],
-	exclamation: [
-		'   ##   ',
-		'  ####  ',
-		'  ####  ',
-		'   ##   ',
-		'        ',
-		'   ##   ',
-		'   ##   ',
-	],
-	a: [
-		'   #   ',
-		'  # #  ',
-		'  # #  ',
-		' #   # ',
-		' ##### ',
-		'#     #',
-		'#     #',
-	],
-	ultimate: [
-		' ##### ',
-		'## # ##',
-		'# ### #',
-		'### ###',
-		'# ### #',
-		'## # ##',
-		' ##### ',
-	],
-};
+/**@typedef {{ name: string, emoji: string, weight: number, shape: Array<Array<number>> }} Skill*/
+
+/**@satisfies {Record<string, Skill>} */
+const skills = /**@type {const}*/({
+	hline: {
+		name: 'Habilidad Horizontal',
+		emoji: '↔️',
+		weight: 3,
+		shape: [ Array(32).fill(1) ], //Cappeado a 16 emojis
+	},
+	vline: {
+		name: 'Habilidad Vertical',
+		emoji: '↕️',
+		weight: 3,
+		shape: Array(32).fill(1), //Cappeado a 16 emojis
+	},
+	x: {
+		name: 'Habilidad Cruzada',
+		emoji: '❌',
+		weight: 3,
+		shape: [ //17 emojis
+			[ 1,  ,  ,  ,  ,  ,  ,  , 1 ],
+			[  , 1,  ,  ,  ,  ,  , 1,   ],
+			[  ,  , 1,  ,  ,  , 1,  ,   ],
+			[  ,  ,  , 1,  , 1,  ,  ,   ],
+			[  ,  ,  ,  , 1,  ,  ,  ,   ],
+			[  ,  ,  , 1,  , 1,  ,  ,   ],
+			[  ,  , 1,  ,  ,  , 1,  ,   ],
+			[  , 1,  ,  ,  ,  ,  , 1,   ],
+			[ 1,  ,  ,  ,  ,  ,  ,  , 1 ],
+		],
+	},
+	square: {
+		name: 'Habilidad Cuadrada',
+		emoji: '🟥',
+		weight: 3,
+		shape: [ //16 emojis
+			[ 1, 1, 1, 1, 1 ],
+			[ 1,  ,  ,  , 1 ],
+			[ 1,  ,  ,  , 1 ],
+			[ 1,  ,  ,  , 1 ],
+			[ 1, 1, 1, 1, 1 ],
+		],
+	},
+	circle: {
+		name: 'Habilidad Circular',
+		emoji: '🔵',
+		weight: 3,
+		shape: [ //16 emojis
+			[  ,  , 1, 1, 1,  ,   ],
+			[  , 1,  ,  ,  , 1,   ],
+			[ 1,  ,  ,  ,  ,  , 1 ],
+			[ 1,  ,  ,  ,  ,  , 1 ],
+			[ 1,  ,  ,  ,  ,  , 1 ],
+			[  , 1,  ,  ,  , 1,   ],
+			[  ,  , 1, 1, 1,  ,   ],
+		],
+	},
+	diamond: {
+		name: 'Habilidad Diamante',
+		emoji: '💎',
+		weight: 4,
+		shape: [ //12 emojis
+			[  ,  ,  , 1,  ,  ,   ],
+			[  ,  , 1,  , 1,  ,   ],
+			[  , 1,  ,  ,  , 1,   ],
+			[ 1,  ,  ,  ,  ,  , 1 ],
+			[  , 1,  ,  ,  , 1,   ],
+			[  ,  , 1,  , 1,  ,   ],
+			[  ,  ,  , 1,  ,  ,   ],
+		],
+	},
+	tetris: {
+		name: 'Habilidad Tetrápeda',
+		emoji: '🕹️',
+		weight: 3,
+		shape: [ //16 emojis
+			[ 1, 1,  ,  ,  ,  ,   ],
+			[ 1,  ,  ,  , 1, 1,   ],
+			[ 1,  ,  , 1, 1,  ,   ],
+			[  ,  ,  ,  ,  ,  , 1 ],
+			[  ,  , 1,  ,  ,  , 1 ],
+			[  , 1, 1, 1,  ,  , 1 ],
+			[  ,  ,  ,  ,  ,  , 1 ],
+		],
+	},
+	p: {
+		name: 'Habilidad Tubércula',
+		emoji: '🥔',
+		weight: 3,
+		shape: [ //16 emojis
+			[ 1, 1, 1, 1,   ],
+			[  , 1,  ,  , 1 ],
+			[  , 1,  ,  , 1 ],
+			[  , 1, 1, 1,   ],
+			[  , 1,  ,  ,   ],
+			[  , 1,  ,  ,   ],
+			[ 1, 1, 1,  ,   ],
+		],
+	},
+	exclamation: {
+		name: 'Habilidad Exclamativa',
+		emoji: '❗',
+		weight: 2.5,
+		shape: [ //22 emojis
+			[  , 1, 1,   ],
+			[ 1, 1, 1, 1 ],
+			[ 1, 1, 1, 1 ],
+			[ 1, 1, 1, 1 ],
+			[  , 1, 1,   ],
+			[  , 1, 1,   ],
+			[  ,  ,  ,   ],
+			[  , 1, 1,   ],
+			[  , 1, 1,   ],
+		],
+	},
+	a: {
+		name: 'Habilidad Anárquica',
+		emoji: '🅰',
+		weight: 3,
+		shape: [ //16 emojis
+			[  ,  , 1,  ,   ],
+			[  , 1,  , 1,   ],
+			[  , 1,  , 1,   ],
+			[ 1,  ,  ,  , 1 ],
+			[ 1, 1, 1, 1, 1 ],
+			[ 1,  ,  ,  , 1 ],
+			[ 1,  ,  ,  , 1 ],
+		],
+	},
+	ultimate: {
+		name: 'Habilidad Definitiva',
+		emoji: '👑',
+		weight: 1,
+		shape: [ //52 emojis
+			[  ,  , 1, 1, 1, 1, 1,  ,   ],
+			[  , 1, 1,  , 1,  , 1, 1,   ],
+			[ 1, 1,  ,  , 1, 1,  , 1, 1 ],
+			[ 1,  , 1, 1, 1, 1,  ,  , 1 ],
+			[ 1, 1, 1, 1,  , 1, 1, 1, 1 ],
+			[ 1,  ,  , 1, 1, 1, 1,  , 1 ],
+			[ 1, 1,  , 1, 1,  ,  , 1, 1 ],
+			[  , 1, 1,  , 1,  , 1, 1,   ],
+			[  ,  , 1, 1, 1, 1, 1,  ,   ],
+		],
+	},
+});
+const skillOptions = Object.entries(skills).map(([ key, skill ]) => ({ weight: skill.weight, value: { key, skill } }));
+
+const baseDropRate = 0.01;
+const userLevelDropRateIncrease = 0.69;
 const maxExp = 30;
 
 const options = new CommandOptions()
-	.addParam('posición', 	   'NUMBER',   'para especificar una celda a modificar', { poly: ['x','y'], optional: true })
-	.addParam('emote', 		   'EMOTE',    'para especificar un emote a agregar',    {                  optional: true })
-	.addFlag('h', 'horizontal', 		   'para usar la habilidad de línea horizontal')
-	.addFlag('v', 'vertical', 			   'para usar la habilidad de línea vertical')
-	.addFlag('s', ['especial', 'special'], 'para usar una habilidad especial', { name: 'habilidad', type: 'TEXT' });
+	.addParam('posición', 'NUMBER', 'para especificar una celda a modificar', { poly: [ 'x', 'y' ], optional: true })
+	.addParam('emote',    'EMOTE',  'para especificar un emote a agregar',    {                     optional: true })
+	.addFlag('p', 'perfil', 'para ver tu perfil anárquico')
+	.addFlag('sh', [ 'skill', 'habilidad', 'especial', 'special' ], 'para usar una habilidad especial');
 const flags = new CommandTags().add(
 	'COMMON',
 	'GAME',
@@ -115,23 +184,21 @@ const command = new CommandManager('anarquia', flags)
 		`Ingresa únicamente \`p\` para ver tu perfil anárquico`
 	)
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash) => {
+	.setExperimentalExecution(async (request, args) => {
+		const { image: pureTableImage } = pureTableAssets;
 		const loadEmotes = global.loademotes;
 
+		const translator = await Translator.from(request.user);
+
 		//Revisar perfil
-		if((isSlash ? args.data : args)[0] === 'p') {
-			args.shift();
-			const search = (args.length) ? args.join(' ') : undefined;
-			const aid = (search) ? fetchUserID(search, request) : request.author.id;
-			const auser = await AUser.findOne({ userId: aid });
-			if(!aid) {
-				request.reply({ content: `⚠️ Usuario **${search}** no encontrado` });
-				return;
-			}
-			const user = request.client.users.cache.get(aid);
+		const perfil = args.parseFlag('perfil');
+		if(perfil) {
+			const { user, member, userId } = request;
+			const auser = await AUser.findOne({ userId });
+
 			const embed = new EmbedBuilder()
 				.setColor(0xbd0924)
-				.setAuthor({ name: user.username, iconURL: user.avatarURL({ extension: 'png', size: 512 }) });
+				.setAuthor({ name: user.username, iconURL: member.displayAvatarURL({ extension: 'png', size: 512 }) });
 			if(auser)
 				embed.setTitle('Perfil anárquico')
 					.addFields(
@@ -148,184 +215,195 @@ const command = new CommandManager('anarquia', flags)
 					});
 			return request.reply({ embeds: [embed] });
 		}
+		
+		const reactIfMessage = async (/**@type {String}*/ reaction) => request.isMessage && request.inferAsMessage().react(reaction);
+		
+		const skill = CommandOptionSolver.asString(args.parseFlagExpr('skill'));
+		const inverted = args.isMessageSolver() && isNaN(+args.args[0]);
+		let pos, emote;
+		if(inverted) emote = args.getString('emote');
+		pos = CommandOptionSolver.asNumbers(args.parsePolyParamSync('posición', { regroupMethod: 'NONE' })).filter(x => !isNaN(x));
+		if(!inverted) emote = args.getString('emote');
+
+		console.log(skill, pos, emote);
+
+		if((pos.length === 2 && !emote)
+		|| (pos.length  <  2 &&  emote)
+		|| (pos.length  <  2 &&  skill)) {
+			reactIfMessage('⚠️');
+			return request.reply({ content: '⚠️️ Entrada inválida', ephemeral: true });
+		}
+
+		/**@type {Array<EmbedBuilder>} */
+		const embeds = [];
+
+		//Ingresar emotes a tabla
+		if(pos.length) {
+			const { userId } = request;
+			const auser = (await AUser.findOne({ userId })) || new AUser({ userId });
+			
+			//Tiempo de enfriamiento por usuario
+			if((Date.now() - auser.last) / 1000 < 3) {
+				reactIfMessage('⌛');
+				return request.reply({ content: '⌛ ¡No tan rápido!', ephemeral: true });
+			} else
+				auser.last = Date.now();
+			
+			const emoteMatch = emote.match(/^<a*:\w+:([0-9]+)>$/);
+			if(!emoteMatch) {
+				reactIfMessage('⚠️️');
+				return request.reply({ content: '⚠️️ Emoji inválido', ephemeral: true });
+			}
+			const emoteId = emoteMatch[1];
+	
+			//Variables de ingreso
+			if(!request.client.emojis.cache.has(emoteId)) {
+				reactIfMessage('⚠️️');
+				return request.reply({ content: '⚠️️ No reconozco ese emoji. Solo puedo usar emojis de servidores en los que esté', ephemeral: true });
+			}
+
+			await request.deferReply();
+
+			//Posición de emote
+			const cells = (await Puretable.findOne({})).cells;
+			const originalX = Math.floor(pos[0]) - 1;
+			const originalY = Math.floor(pos[1]) - 1;
+			const correctedX = Math.max(0, Math.min(originalX, cells[0].length - 1));
+			const correctedY = Math.max(0, Math.min(originalY, cells.length - 1));
+	
+			//Cargar imagen nueva si no está registrada
+			if(!loadEmotes.hasOwnProperty(emoteId))
+				loadEmotes[emoteId] = await loadImage(request.client.emojis.cache.get(emoteId).imageURL({ extension: 'png', size: 64 }));
+	
+			//Insertar emote en posición
+			if(skill) {
+				const authorId = compressId(userId);
+				return request.editReply({
+					embeds: [new EmbedBuilder()
+						.setColor(Colors.Fuchsia)
+						.setAuthor({ name: request.user.username, iconURL: request.member.displayAvatarURL({ size: 256 })})
+						.setTitle('¡A punto de usar una habilidad!')
+						.setDescription(`Centrada en la posición (${correctedX + 1}, ${correctedY + 1}) del tablero`)
+						.setThumbnail(request.client.emojis.cache.get(emoteId).imageURL({ extension: 'png', size: 512 }))
+					],
+					components: [
+						makeStringSelectMenuRowBuilder().addComponents(
+							new StringSelectMenuBuilder()
+								.setCustomId(`anarquia_selectSkill${authorId}_${compressId(emoteId)}`)
+								.setPlaceholder('Escoge una habilidad...')
+								.addOptions(
+									Object.entries(skills).map(([ key, skill ]) => ({
+										value: key,
+										label: skill.name,
+										emoji: skill.emoji,
+									}))
+								)
+						),
+						makeButtonRowBuilder().addComponents(
+							new ButtonBuilder()
+								.setCustomId(`anarquia_cancel_${authorId}`)
+								.setLabel(translator.getText('buttonCancel'))
+								.setEmoji('936531643496288288')
+								.setStyle(ButtonStyle.Danger)
+						),
+					],
+				});
+			}
+
+			cells[correctedY][correctedX] = emoteId;
+			
+			await Puretable.updateOne({}, { cells });
+	
+			//Sistema de nivel de jugador y adquisición de habilidades
+			const userLevel = Math.floor(auser.exp / maxExp) + 1;
+			const dropRate = baseDropRate + (userLevelDropRateIncrease * userLevel / (1 + userLevel));
+			if(Math.random() < dropRate) {
+				const droppedSkill = makeWeightedDecision(skillOptions);
+				auser.skills[droppedSkill.key] ??= 0;
+				auser.skills[droppedSkill.key]++;
+				auser.markModified('skills');
+			}
+			auser.exp++;
+			await auser.save();
+	
+			const wasCorrected = originalX !== correctedX || originalY !== correctedY;
+			reactIfMessage(wasCorrected ? '☑️' : '✅');
+			embeds.push(new EmbedBuilder()
+				.setColor(Colors.DarkVividPink)
+				.setTitle('¡Hecho!')
+				.setDescription(
+					(wasCorrected
+						? '☑️ Emote[s] colocado[s] con *posición corregida*'
+						: '✅ Emote[s] colocado[s]'
+					).replace(/\[s\]/g, skill ? 's' : '')));
+	
+			if((auser.exp % maxExp) == 0) {
+				embeds.push(new EmbedBuilder()
+					.setColor(Colors.Gold)
+					.setTitle('¡Subida de nivel!')
+					.setDescription(`${request.user} subió a nivel **${userLevel + 1}**`));
+			}
+		} else
+			await request.deferReply();
 
 		//Ver tabla
-		if(!(isSlash ? args.data : args).length) {
-			const canvas = createCanvas(864, 996);
-			const ctx = canvas.getContext('2d');
+		const canvas = createCanvas(864, 996);
+		const ctx = canvas.getContext('2d');
 
-			//Optimizar dibujados estáticos
-			ctx.drawImage(global.pureTableImage, 0, 0, canvas.width, canvas.height);
+		ctx.drawImage(pureTableImage, 0, 0, canvas.width, canvas.height);
 
-			//#region Encabezado
-			ctx.fillStyle = '#ffffff';
-			ctx.textBaseline = 'top';
-			ctx.font = `bold 116px "headline"`;
-			/*ctx.strokeStyle = '#bd0924';
-			ctx.lineWidth = 9;
-			const Texto = 'Tabla de Puré';
-			const xCenter = (canvas.width / 2) - (ctx.measureText(Texto).width / 2);
-			ctx.strokeText(Texto, xCenter, 4);
-			ctx.fillText(Texto, xCenter, 4);*/
-			//#endregion
+		//Encabezado
+		ctx.fillStyle = '#ffffff';
+		ctx.textBaseline = 'top';
+		ctx.font = `bold 116px "headline"`;
 
-			//Dibujar emotes en imagen
-			const pureTable = (await Puretable.findOne({})).cells;
-			const emoteSize = 48;
-			const tableX = canvas.width / 2 - emoteSize * pureTable.length / 2;
-			const tableY = ctx.measureText('M').emHeightDescent + 24 + 13; //Por alguna razón, el measureText ha de tener medidas diferentes en local y Heroku, así que agrego un +9
-			/*ctx.font = '32px "cuyabra"';
-			ctx.textBaseline = 'middle';*/
-			pureTable.map((arr, y) => {
-				/*const halfSize = emoteSize * 0.5;
-				ctx.textAlign = 'center';
-				ctx.fillText(y + 1, tableX + halfSize - emoteSize,      tableY + halfSize + y * emoteSize);
-				ctx.fillText(y + 1, tableX + halfSize + 16 * emoteSize, tableY + halfSize + y * emoteSize);*/
-				arr.map((item, x) => {
-					/*if(y === 0) {
-						ctx.fillText(x + 1, tableX + halfSize + x * emoteSize, tableY + halfSize - emoteSize);
-						ctx.fillText(x + 1, tableX + halfSize + x * emoteSize, tableY + halfSize + 16 * emoteSize);
-					}
-					const diag = x === y;
-					if(diag || (arr.length - x - 1) === y) {
-						ctx.fillStyle = diag ? '#ff0000' : '#0000ff';
-						ctx.globalAlpha = 0.5;
-						ctx.fillRect(tableX + x * emoteSize, tableY + y * emoteSize, emoteSize, emoteSize);
-						ctx.fillStyle = '#ffffff';
-						ctx.globalAlpha = 1;
-					};*/
-					ctx.drawImage(loadEmotes[item], tableX + x * emoteSize, tableY + y * emoteSize, emoteSize, emoteSize);
-				});
+		//Dibujar emotes en imagen
+		const pureTable = (await Puretable.findOne({})).cells;
+		const emoteSize = 48;
+		const tableX = canvas.width / 2 - emoteSize * pureTable.length / 2;
+		const tableY = ctx.measureText('M').actualBoundingBoxDescent + 65;
+		pureTable.map((arr, y) => {
+			arr.map((item, x) => {
+				ctx.drawImage(loadEmotes[item], tableX + x * emoteSize, tableY + y * emoteSize, emoteSize, emoteSize);
 			});
-			
-			const imagen = new AttachmentBuilder(canvas.toBuffer(), { name: 'anarquia.png' });
-			return request.reply({ files: [imagen] });
-		}
+		});
 		
-		//Ingresar emotes a tabla
-		const author = request.author || request.user;
-		const auser = (await AUser.findOne({ userId: author.id }))
-			|| new AUser({ userId: author.id });
-		//Tiempo de enfriamiento por usuario
-		if((Date.now() - auser.last) / 1000 < 3) {
-			if(isSlash)
-				return request.reply({ content: '⌛ ¡No tan rápido!', ephemeral: true });
-			return request.react('⌛');
-		} else
-			auser.last = Date.now();
-
-		//Variables de ingreso
-		const h = options.fetchFlag(args, 'horizontal', { callback: (auser.skills.h > 0) });
-		const v = options.fetchFlag(args, 'vertical', { callback: (auser.skills.h > 0) });
-		let e = {};
-		let ematch = isSlash
-			? args.getString('emote')
-			: args.find(arg => arg.match(/^<a*:\w+:[0-9]+>\B/));
-		if(ematch) {
-			ematch = ematch.slice(ematch.lastIndexOf(':') + 1, -1);
-			if(request.client.emojis.cache.has(ematch))
-				e.id = ematch;
-		}
-
-		if(isSlash) {
-			e.x = Math.floor(args.getNumber('posición_x')) - 1;
-			e.y = Math.floor(args.getNumber('posición_y')) - 1;
-		} else {
-			const axis = args.findIndex((arg, i) => !isNaN(arg) && !isNaN(args[i + 1]));
-			if(axis >= 0) {
-				e.x = args[axis] - 1;
-				e.y = args[axis + 1] - 1;
-			}
-		}
-		
-		if(Object.keys(e).length !== 3 || !e.id || e.x === undefined) {
-			const errorcomms = [];
-			if(!isSlash)
-				errorcomms.push(request.react('⚠️️'));
-			errorcomms.push(request.reply({
-				content:
-					'⚠️️ Entrada inválida\n' +
-					`Usa \`${p_pure(request.guildId).raw}ayuda anarquia\` para más información`,
-				ephemeral: true,
-			}));
-			await Promise.all(errorcomms);
-			return;
-		}
-
-		//Insertar emote en x,y
-		const cells = (await Puretable.findOne({})).cells;
-		const stx = e.x, sty = e.y;
-		e.x = Math.max(0, Math.min(e.x, cells[0].length - 1));
-		e.y = Math.max(0, Math.min(e.y, cells.length - 1));
-		const replyquery = [];
-		let ephemeral = true;
-
-		//Cargar imagen nueva si no está registrada
-		if(!loadEmotes.hasOwnProperty(e.id))
-			loadEmotes[e.id] = await loadImage(request.client.emojis.cache.get(e.id).imageURL());
-
-		//Habilidades
-		if(!h && !v)
-			cells[e.y][e.x] = e.id;
-		else {
-			if(h) { for(let i = 0; i < cells[0].length; i++) cells[e.y][i] = e.id; auser.skills.h--; }
-			if(v) { for(let i = 0; i < cells.length; i++)    cells[i][e.x] = e.id; auser.skills.v--; }
-			auser.markModified('skills');
-			if(isSlash) { replyquery.push('⚡ ***¡Habilidad usada!***'); ephemeral = false; }
-			else await request.react('⚡');
-		}
-		await Puretable.updateOne({}, { cells: cells });
-
-		//Sistema de nivel de jugador y adquisición de habilidades
-		const userLevel = Math.floor(auser.exp / maxExp) + 1;
-		const probs = [
-			{ base: 1.2, to: 'x', name: 'Habilidad Cruzada',     emote: '❌' },
-			{ base: 1.0, to: 'h', name: 'Habilidad Horizontal',  emote: '↔' },
-			{ base: 1.0, to: 'v', name: 'Habilidad Vertical',    emote: '↕' },
-			{ base: 0.9, to: 'q', name: 'Habilidad Cuadradá',    emote: '🟥' },
-			{ base: 0.8, to: 'o', name: 'Habilidad Circular',    emote: '🔵' },
-			{ base: 0.7, to: 'd', name: 'Habilidad Diamante',    emote: '💎' },
-			{ base: 0.6, to: 't', name: 'Habilidad Tetrápeda',   emote: '🕹' },
-			{ base: 0.5, to: 'p', name: 'Habilidad Tubércula',   emote: '🥔' },
-			{ base: 0.5, to: 'e', name: 'Habilidad Exclamativa', emote: '❗' },
-			{ base: 0.5, to: 'a', name: 'Habilidad Anárquica',   emote: '🅰' },
-			{ base: 0.1, to: 'u', name: 'Habilidad Definitiva',  emote: '👑' },
-		];
-		const r = Math.random();
-		if(r < userLevel / 100) {
-			if(Math.random() < 0.5) {
-				auser.skills.h++;
-				if(isSlash) { replyquery.push('🌟 ¡Recibiste **1** ↔️ *Habilidad Horizontal*!'); ephemeral = false; }
-				else await request.react('↔');
-			} else {
-				auser.skills.v++;
-				if(isSlash) { replyquery.push('🌟 ¡Recibiste **1** ↕️ *Habilidad Vertical*!'); ephemeral = false; }
-				else await request.react('↕');
-			}
-			auser.markModified('skills');
-		}
-		auser.exp++;
-		await auser.save();
-
-		const offlimits = (stx !== e.x || sty !== e.y) ? true : false;
-		if(isSlash)
-			replyquery.push(
-				(offlimits
-					? '☑️ Emote[s] colocado[s] con *posición corregida*'
-					: '✅ Emote[s] colocado[s]'
-				).replace(/\[s\]/g, (h || v) ? 's' : '')
-			);
-		else await request.react(offlimits ? '☑️' : '✅');
-
-		if((auser.exp % maxExp) == 0) {
-			if(!isSlash)
-				return request.reply({ content: `¡**${request.author.username}** subió a nivel **${userLevel + 1}**!` });
-			replyquery.push(`¡**${request.user.username}** subió a nivel **${userLevel + 1}**!`);
-			ephemeral = false;
-		}
-
-		if(isSlash)
-			return request.reply({ content: replyquery.join('\n'), ephemeral });
+		const imagen = new AttachmentBuilder(canvas.toBuffer(), { name: 'anarquia.png' });
+		return request.editReply({ embeds, files: [imagen] });
 	})
+	.setButtonResponse(async function cancel(interaction) {
+		return interaction.deleteReply();
+	}, { userFilterIndex: 0 });
+
+/**
+ * @param {Array<Array<string>>} puretable La tabla de p!anarquía
+ * @param {string} id Una ID de emoji con la cual usar la skill
+ * @param {{x: number, y: number}} position La posición central donde se utiliza la skill en el tablero
+ * @param {Array<Array<number>>} mask Una matriz máscara centrada a la posición indicada para determinar dónde colocar emotes
+ */
+function useSkill(puretable, id, position, mask) {
+	const ptH = puretable.length;
+	const ptW = puretable[0].length;
+	const maskH = mask.length;
+	const maskW = mask[0].length;
+
+	const startX = position.x - Math.floor(maskW / 2);
+	const startY = position.y - Math.floor(maskH / 2);
+
+	const maskX1 = Math.max(0, -startX);
+	const maskX2 = Math.min(maskW, ptW - startX);
+	const maskY1 = Math.max(0, -startY);
+	const maskY2 = Math.min(maskH, ptH - startY);
+
+	for(let i = maskY1; i < maskY2; i++) {
+		for(let j = maskX1; j < maskX2; j++) {
+			const ptX = startX + j;
+			const ptY = startY + i;
+
+			if(mask[i][j] === 1)
+				puretable[ptY][ptX] = id;
+		}
+	}
+}
 
 module.exports = command;
