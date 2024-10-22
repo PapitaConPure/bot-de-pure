@@ -1,5 +1,5 @@
 const global = require('../../localdata/config.json'); //Variables globales
-const { makeWeightedDecision, compressId } = require('../../func.js');
+const { makeWeightedDecision, compressId, decompressId } = require('../../func.js');
 const { createCanvas, loadImage } = require('canvas');
 const { EmbedBuilder, AttachmentBuilder, StringSelectMenuBuilder, Colors, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
@@ -15,14 +15,14 @@ const skills = /**@type {const}*/({
 	hline: {
 		name: 'Habilidad Horizontal',
 		emoji: '↔️',
-		weight: 3,
+		weight: 4,
 		shape: [ Array(32).fill(1) ], //Cappeado a 16 emojis
 	},
 	vline: {
 		name: 'Habilidad Vertical',
 		emoji: '↕️',
-		weight: 3,
-		shape: Array(32).fill(1), //Cappeado a 16 emojis
+		weight: 4,
+		shape: Array(32).fill([ 1 ]), //Cappeado a 16 emojis
 	},
 	x: {
 		name: 'Habilidad Cruzada',
@@ -43,7 +43,7 @@ const skills = /**@type {const}*/({
 	square: {
 		name: 'Habilidad Cuadrada',
 		emoji: '🟥',
-		weight: 3,
+		weight: 3.5,
 		shape: [ //16 emojis
 			[ 1, 1, 1, 1, 1 ],
 			[ 1,  ,  ,  , 1 ],
@@ -55,7 +55,7 @@ const skills = /**@type {const}*/({
 	circle: {
 		name: 'Habilidad Circular',
 		emoji: '🔵',
-		weight: 3,
+		weight: 3.25,
 		shape: [ //16 emojis
 			[  ,  , 1, 1, 1,  ,   ],
 			[  , 1,  ,  ,  , 1,   ],
@@ -69,7 +69,7 @@ const skills = /**@type {const}*/({
 	diamond: {
 		name: 'Habilidad Diamante',
 		emoji: '💎',
-		weight: 4,
+		weight: 3.75,
 		shape: [ //12 emojis
 			[  ,  ,  , 1,  ,  ,   ],
 			[  ,  , 1,  , 1,  ,   ],
@@ -97,7 +97,7 @@ const skills = /**@type {const}*/({
 	p: {
 		name: 'Habilidad Tubércula',
 		emoji: '🥔',
-		weight: 3,
+		weight: 3.25,
 		shape: [ //16 emojis
 			[ 1, 1, 1, 1,   ],
 			[  , 1,  ,  , 1 ],
@@ -127,7 +127,7 @@ const skills = /**@type {const}*/({
 	a: {
 		name: 'Habilidad Anárquica',
 		emoji: '🅰',
-		weight: 3,
+		weight: 3.25,
 		shape: [ //16 emojis
 			[  ,  , 1,  ,   ],
 			[  , 1,  , 1,   ],
@@ -157,9 +157,10 @@ const skills = /**@type {const}*/({
 });
 const skillOptions = Object.entries(skills).map(([ key, skill ]) => ({ weight: skill.weight, value: { key, skill } }));
 
-const baseDropRate = 0.01;
-const userLevelDropRateIncrease = 0.69;
-const maxExp = 30;
+const baseDropRate = 0.01; //La chance de drop base, incrementada con las propiedades de abajo según el nivel de usuario
+const userLevelDropRateMaxIncrease = 0.5; //El máximo hacia el cual tiende el incremento por nivel de usuario
+const userLevelDropRateHalfIncreaseLength = 100; //El nivel de usuario en el cual se alcanza la mitad del incremento máximo
+const maxExp = 30; //Cantidad de experiencia requerida para subir de nivel
 
 const options = new CommandOptions()
 	.addParam('posición', 'NUMBER', 'para especificar una celda a modificar', { poly: [ 'x', 'y' ], optional: true })
@@ -185,7 +186,6 @@ const command = new CommandManager('anarquia', flags)
 	)
 	.setOptions(options)
 	.setExperimentalExecution(async (request, args) => {
-		const { image: pureTableImage } = pureTableAssets;
 		const loadEmotes = global.loademotes;
 
 		const translator = await Translator.from(request.user);
@@ -199,13 +199,27 @@ const command = new CommandManager('anarquia', flags)
 			const embed = new EmbedBuilder()
 				.setColor(0xbd0924)
 				.setAuthor({ name: user.username, iconURL: member.displayAvatarURL({ extension: 'png', size: 512 }) });
-			if(auser)
-				embed.setTitle('Perfil anárquico')
+			if(auser) {
+				const skillContent = Object.entries(auser.skills)
+					.sort(([ , amountA ], [ , amountB ]) => amountB - amountA)
+					.map(([ key, amount ]) => {
+						const skill = skills[/**@type {keyof skills}*/(key)];
+						if(!skill) return;
+
+						const decor = !amount ? '~~' : '';
+
+						return `${decor}${skill.emoji} x **${amount}**${decor}`;
+					})
+					.filter(s => s)
+					.join('\n');
+				
+				embed
+					.setTitle('Perfil anárquico')
 					.addFields(
-						{ name: 'Inventario', value: `↔️ x ${auser.skills.h}\n↕ x ${auser.skills.v}`, inline: true },
+						{ name: 'Inventario', value: skillContent, inline: true },
 						{ name: 'Rango', value: `Nivel ${Math.floor(auser.exp / 30) + 1} (exp: ${auser.exp % maxExp})`, inline: true },
 					);
-			else
+			} else
 				embed.setTitle('Perfil inexistente')
 					.addFields({
 						name: 'Este perfil anárquico no existe todavía',
@@ -225,17 +239,15 @@ const command = new CommandManager('anarquia', flags)
 		pos = CommandOptionSolver.asNumbers(args.parsePolyParamSync('posición', { regroupMethod: 'NONE' })).filter(x => !isNaN(x));
 		if(!inverted) emote = args.getString('emote');
 
-		console.log(skill, pos, emote);
-
 		if((pos.length === 2 && !emote)
 		|| (pos.length  <  2 &&  emote)
 		|| (pos.length  <  2 &&  skill)) {
 			reactIfMessage('⚠️');
-			return request.reply({ content: '⚠️️ Entrada inválida', ephemeral: true });
+			return request.reply({ content: translator.getText('invalidInput'), ephemeral: true });
 		}
 
-		/**@type {Array<EmbedBuilder>} */
-		const embeds = [];
+		let cells;
+		const embeds = /**@type {Array<EmbedBuilder>}*/([]);
 
 		//Ingresar emotes a tabla
 		if(pos.length) {
@@ -252,7 +264,7 @@ const command = new CommandManager('anarquia', flags)
 			const emoteMatch = emote.match(/^<a*:\w+:([0-9]+)>$/);
 			if(!emoteMatch) {
 				reactIfMessage('⚠️️');
-				return request.reply({ content: '⚠️️ Emoji inválido', ephemeral: true });
+				return request.reply({ content: translator.getText('invalidEmoji'), ephemeral: true });
 			}
 			const emoteId = emoteMatch[1];
 	
@@ -265,7 +277,7 @@ const command = new CommandManager('anarquia', flags)
 			await request.deferReply();
 
 			//Posición de emote
-			const cells = (await Puretable.findOne({})).cells;
+			cells = /**@type {Array<Array<string>>}*/((await Puretable.findOne({})).cells);
 			const originalX = Math.floor(pos[0]) - 1;
 			const originalY = Math.floor(pos[1]) - 1;
 			const correctedX = Math.max(0, Math.min(originalX, cells[0].length - 1));
@@ -289,7 +301,7 @@ const command = new CommandManager('anarquia', flags)
 					components: [
 						makeStringSelectMenuRowBuilder().addComponents(
 							new StringSelectMenuBuilder()
-								.setCustomId(`anarquia_selectSkill${authorId}_${compressId(emoteId)}`)
+								.setCustomId(`anarquia_selectSkill_${correctedX}_${correctedY}_${compressId(emoteId)}_${authorId}`)
 								.setPlaceholder('Escoge una habilidad...')
 								.addOptions(
 									Object.entries(skills).map(([ key, skill ]) => ({
@@ -315,16 +327,6 @@ const command = new CommandManager('anarquia', flags)
 			await Puretable.updateOne({}, { cells });
 	
 			//Sistema de nivel de jugador y adquisición de habilidades
-			const userLevel = Math.floor(auser.exp / maxExp) + 1;
-			const dropRate = baseDropRate + (userLevelDropRateIncrease * userLevel / (1 + userLevel));
-			if(Math.random() < dropRate) {
-				const droppedSkill = makeWeightedDecision(skillOptions);
-				auser.skills[droppedSkill.key] ??= 0;
-				auser.skills[droppedSkill.key]++;
-				auser.markModified('skills');
-			}
-			auser.exp++;
-			await auser.save();
 	
 			const wasCorrected = originalX !== correctedX || originalY !== correctedY;
 			reactIfMessage(wasCorrected ? '☑️' : '✅');
@@ -333,62 +335,165 @@ const command = new CommandManager('anarquia', flags)
 				.setTitle('¡Hecho!')
 				.setDescription(
 					(wasCorrected
-						? '☑️ Emote[s] colocado[s] con *posición corregida*'
-						: '✅ Emote[s] colocado[s]'
-					).replace(/\[s\]/g, skill ? 's' : '')));
+						? '☑️ Emote colocado con *posición corregida*'
+						: '✅ Emote colocado'
+					)));
+
+			const { userLevel, leveledUp, droppedSkill } = levelUpAndGetSkills(auser);
+			auser.markModified('skills');
+			auser.save();
 	
-			if((auser.exp % maxExp) == 0) {
+			if(leveledUp) {
+				reactIfMessage('✨');
 				embeds.push(new EmbedBuilder()
 					.setColor(Colors.Gold)
 					.setTitle('¡Subida de nivel!')
-					.setDescription(`${request.user} subió a nivel **${userLevel + 1}**`));
+					.setDescription(`✨ ${request.user} subió a nivel **${userLevel}**`));
 			}
-		} else
+
+			if(droppedSkill) {
+				reactIfMessage(droppedSkill.emoji);
+				embeds.push(new EmbedBuilder()
+					.setColor(Colors.Gold)
+					.setTitle('¡Habilidad especial obtenida!')
+					.setDescription(`${request.user} obtuvo **1** x ${droppedSkill.emoji} *${droppedSkill.name}*`));
+			}
+		} else {
 			await request.deferReply();
+			cells = /**@type {Array<Array<string>>}*/((await Puretable.findOne({})).cells);
+		}
 
 		//Ver tabla
-		const canvas = createCanvas(864, 996);
-		const ctx = canvas.getContext('2d');
-
-		ctx.drawImage(pureTableImage, 0, 0, canvas.width, canvas.height);
-
-		//Encabezado
-		ctx.fillStyle = '#ffffff';
-		ctx.textBaseline = 'top';
-		ctx.font = `bold 116px "headline"`;
-
-		//Dibujar emotes en imagen
-		const pureTable = (await Puretable.findOne({})).cells;
-		const emoteSize = 48;
-		const tableX = canvas.width / 2 - emoteSize * pureTable.length / 2;
-		const tableY = ctx.measureText('M').actualBoundingBoxDescent + 65;
-		pureTable.map((arr, y) => {
-			arr.map((item, x) => {
-				ctx.drawImage(loadEmotes[item], tableX + x * emoteSize, tableY + y * emoteSize, emoteSize, emoteSize);
-			});
-		});
-		
-		const imagen = new AttachmentBuilder(canvas.toBuffer(), { name: 'anarquia.png' });
+		const imagen = await drawPureTable(cells);
 		return request.editReply({ embeds, files: [imagen] });
 	})
+	.setSelectMenuResponse(async function selectSkill(interaction, x, y, emoteId) {
+		const translator = await Translator.from(interaction.user);
+		const { user } = interaction;
+		const userId = user.id;
+		
+		const auser = (await AUser.findOne({ userId })) || new AUser({ userId });
+		const cells = /**@type {Array<Array<string>>}*/((await Puretable.findOne({})).cells);
+		const embeds = [];
+	
+		const skillKey = /**@type {keyof skills}*/(interaction.values[0]);
+		const skill = skills[skillKey];
+
+		if(!auser.skills[skillKey])
+			return interaction.reply({ content: translator.getText('anarquiaSkillIssue'), ephemeral: true });
+
+		useSkill(cells, decompressId(emoteId), [ +x, +y ], skill.shape);
+		await Puretable.updateOne({}, { cells });
+
+		const react = (/**@type {string}*/ reaction) => interaction.message.react(reaction);
+
+		react('⚡');
+		embeds.push(new EmbedBuilder()
+			.setColor(Colors.DarkVividPink)
+			.setTitle('Habilidad utilizada')
+			.setDescription(`⚡ Se usó la ${skill.name}`));
+
+		const { userLevel, leveledUp, droppedSkill } = levelUpAndGetSkills(auser);
+		auser.skills[skillKey]--;
+		auser.markModified('skills');
+		auser.save();
+
+		if(leveledUp) {
+			react('✨');
+			embeds.push(new EmbedBuilder()
+				.setColor(Colors.Gold)
+				.setTitle('¡Subida de nivel!')
+				.setDescription(`✨ ${user} subió a nivel **${userLevel}**`));
+		}
+
+		if(droppedSkill) {
+			react(droppedSkill.emoji);
+			embeds.push(new EmbedBuilder()
+				.setColor(Colors.Gold)
+				.setTitle('¡Habilidad especial obtenida!')
+				.setDescription(`${user} obtuvo **1** x ${droppedSkill.emoji} *${droppedSkill.name}*`));
+		}
+		
+		const imagen = await drawPureTable(cells);
+		return interaction.update({ embeds, files: [imagen], components: [] });
+	}, { userFilterIndex: 3 })
 	.setButtonResponse(async function cancel(interaction) {
-		return interaction.deleteReply();
+		const translator = await Translator.from(interaction.user);
+		return interaction.update({
+			embeds: [ new EmbedBuilder().setFooter({ text: translator.getText('cancelledStepFooterName') }) ],
+			components: [],
+		});
 	}, { userFilterIndex: 0 });
 
+/**@param {Array<Array<string>>} cells*/
+async function drawPureTable(cells) {
+	const { image: pureTableImage } = pureTableAssets;
+	const loadedEmotes = global.loademotes;
+	
+	const canvas = createCanvas(864, 996);
+	const ctx = canvas.getContext('2d');
+
+	ctx.drawImage(pureTableImage, 0, 0, canvas.width, canvas.height);
+
+	//Encabezado
+	ctx.fillStyle = '#ffffff';
+	ctx.textBaseline = 'top';
+	ctx.font = `bold 116px "headline"`;
+
+	//Dibujar emotes en imagen
+	const emoteSize = 48;
+	const tableX = canvas.width / 2 - emoteSize * cells.length / 2;
+	const tableY = ctx.measureText('M').actualBoundingBoxDescent + 65;
+	console.dir({cells}, { depth: null });
+	cells.map((arr, y) => {
+		arr.map((cell, x) => {
+			ctx.drawImage(loadedEmotes[cell], tableX + x * emoteSize, tableY + y * emoteSize, emoteSize, emoteSize);
+		});
+	});
+	
+	return new AttachmentBuilder(canvas.toBuffer(), { name: 'anarquia.png' });
+}
+
 /**
- * @param {Array<Array<string>>} puretable La tabla de p!anarquía
+ * Sube de nivel al jugador, da la posibilidad de que obtenga habilidades especiales, NO GUARDA el documento
+ * @param {import('../../localdata/models/puretable.js').AUserDocument} auser
+ */
+function levelUpAndGetSkills(auser) {
+	const userLevel = Math.floor(auser.exp / maxExp) + 1;
+
+	const dropRate = baseDropRate + (userLevelDropRateMaxIncrease * userLevel / (userLevelDropRateHalfIncreaseLength + userLevel));
+	let droppedSkill;
+	if(Math.random() < dropRate) {
+		droppedSkill = makeWeightedDecision(skillOptions);
+		auser.skills[droppedSkill.key] ??= 0;
+		auser.skills[droppedSkill.key]++;
+	}
+
+	auser.exp++;
+
+	const leveledUp = (auser.exp % maxExp) === 0;
+	return {
+		leveledUp,
+		userLevel: userLevel + 1,
+		droppedSkill: droppedSkill?.skill,
+	};
+}
+
+/**
+ * @param {Array<Array<string>>} cells La tabla de p!anarquía
  * @param {string} id Una ID de emoji con la cual usar la skill
- * @param {{x: number, y: number}} position La posición central donde se utiliza la skill en el tablero
+ * @param {[ number, number ]} position La posición central donde se utiliza la skill en el tablero
  * @param {Array<Array<number>>} mask Una matriz máscara centrada a la posición indicada para determinar dónde colocar emotes
  */
-function useSkill(puretable, id, position, mask) {
-	const ptH = puretable.length;
-	const ptW = puretable[0].length;
+function useSkill(cells, id, position, mask) {
+	const [ centerX, centerY ] = position;
+	const ptH = cells.length;
+	const ptW = calcMatrixWidth(cells);
 	const maskH = mask.length;
-	const maskW = mask[0].length;
+	const maskW = calcMatrixWidth(mask);
 
-	const startX = position.x - Math.floor(maskW / 2);
-	const startY = position.y - Math.floor(maskH / 2);
+	const startX = centerX - Math.floor(maskW / 2);
+	const startY = centerY - Math.floor(maskH / 2);
 
 	const maskX1 = Math.max(0, -startX);
 	const maskX2 = Math.min(maskW, ptW - startX);
@@ -401,9 +506,14 @@ function useSkill(puretable, id, position, mask) {
 			const ptY = startY + i;
 
 			if(mask[i][j] === 1)
-				puretable[ptY][ptX] = id;
+				cells[ptY][ptX] = id;
 		}
 	}
+}
+
+/**@param {Array<Array<*>>} matrix*/
+function calcMatrixWidth(matrix) {
+	return matrix.map(r => r.length).reduce((a, b) => a > b ? a : b, 0);
 }
 
 module.exports = command;

@@ -330,6 +330,11 @@ let localesObject = /**@type {const}*/({
 		en: '⚠️️ Invalid time',
 		ja: '⚠️️ 無効な時刻',
 	},
+	invalidEmoji: {
+		es: '⚠️️ Emoji inválido',
+		en: '⚠️️ Invalid emoji',
+		ja: '⚠️️ 無効な絵文字',
+	},
 
 	welcome: {
 		es: 'Bienvenido',
@@ -580,6 +585,12 @@ let localesObject = /**@type {const}*/({
 		es: '⚠️ No pude actualizar ninguno de los miembros mencionados. Revisa que tenga permisos para administrar miembros',
 		en: '⚠️ None of the mentioned members were updated. It could be that I don\'t have permission to manage members',
 		ja: '⚠️ None of the mentioned members were updated. It could be that I don\'t have permission to manage members',
+	},
+
+	anarquiaSkillIssue: {
+		es: '❌ No tienes ninguna carga de esta habilidad. Interactúa más con la Tabla de Puré para tener oportunidad de recibir habilidades especiales',
+		en: '❌ You have no stacks of this skill. Interact more with the Puré Matrix for a chance to receive special skills',
+		ja: '❌ このスキルのスタックはありません。特別なスキルを受け取る機会を得るために、Puré Matrixともっと交流する',
 	},
 
 	cultivarUnauthorized: {
