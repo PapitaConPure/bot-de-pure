@@ -201,12 +201,12 @@ let localesObject = /**@type {const}*/({
 	},
 	voiceSessionNewMemberName: {
 		es: 'Nueva conexión',
-		en: 'Member addition in PuréVoice Session',
-		ja: 'メンバーがPuréVoiceセッションに参加しました',
+		en: 'New connection',
+		ja: '新しい接続',
 	},
 	voiceSessionNewMemberValueMemberIntegrated: {
 		es: `El miembro **${subl(0)}** fue incorporado a la sesión`,
-		en: `The miembro **${subl(0)}** was attached to the session`,
+		en: `The member **${subl(0)}** was incorporated to the session`,
 		ja: `メンバー**${subl(0)}**がセッションに接続されました`,
 	},
 	voiceSessionNewMemberValueBotAttached: {
