@@ -1080,6 +1080,28 @@ module.exports = {
             return String.fromCharCode(num);
         });
     },
+
+    /**
+     * @template T
+     * @param {Array<{ weight: number, value: T }>} options
+     * @returns {T}
+     */
+    makeWeightedDecision: function(options) {
+        if(!options.length) return null;
+    
+        const total = options.map(option => option.weight).reduce((a, b) => a + b);
+        const count = options.length;
+        
+        let r = Math.random() * total;
+        for(let i = 0; i < count; i++) {
+            if(r < options[i].weight)
+                return options[i].value;
+            else
+                r -= options[i].weight;
+        }
+    
+        return options[count - 1].value;
+    },
     //#endregion
 
     //#region Otros
