@@ -29,6 +29,7 @@ const sources = [
 	{ color: 0x020814, emoji: '1298264258991095850', pattern: /cara\.app/ },
 	{ color: 0x36465d, emoji: '969666470252511232',  pattern: /tumblr\.com/ },
 	{ color: 0xff6c60, emoji: '919403803114094682',  pattern: /nitter\.net/ },
+	{ color: 0xfcbd00, emoji: '1298305816247664640', pattern: /drive\.google\.com/ },
 	{ color: 0xff4500, emoji: '969666029045317762',  pattern: /(reddit\.com)|(i\.redd\.it)/ },
 ];
 
