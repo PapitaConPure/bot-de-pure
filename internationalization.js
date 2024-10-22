@@ -9,6 +9,11 @@ const ConditionFields = /**@type {const}*/({
 	GreaterOrEqual: '>=',
 });
 
+/**
+ * Idiomas disponibles
+ * @see {@linkcode Translator.next}
+ * @see UserConfigDocument (./localdata/models/userconfigs.js)
+ */
 const Locales = /**@type {const}*/({
 	Spanish:  'es',
 	English:  'en',
