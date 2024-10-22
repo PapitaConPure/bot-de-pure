@@ -409,6 +409,13 @@ class BooruFeed {
             },
         };
     }
+
+    get allowNSFW() {
+        if(this.channel.isThread())
+            return this.channel.parent.nsfw;
+
+        return this.channel.nsfw;
+    }
 }
 
 module.exports = {

@@ -821,7 +821,7 @@ class CommandOptions {
 				params = [ identifier ];
 				break;
 			default:
-				params = option._poly;
+				params = option._poly.map(polyname => `${singlename}_${polyname}`);
 				if(!Array.isArray(params))
 					throw TypeError('Se esperaba un arreglo como Poly-parámetro');
 				break;
@@ -880,6 +880,15 @@ class CommandOptions {
 
 		return typeof output.callback === 'function' ? output.callback(flagValue, true) : output.callback;
 	};
+
+	toJSON() {
+		return JSON.parse(JSON.stringify({
+			options: Object.fromEntries(this.options.entries()),
+			params: Object.fromEntries(this.params.entries()),
+			flags: Object.fromEntries(this.flags.entries()),
+			defaults: this.#defaults,
+		}));
+	}
 };
 
 /**
@@ -1251,9 +1260,10 @@ class CommandOptionSolver {
 					? [ (typeof fallback === 'function') ? fallback() : fallback ]
 					: [];
 				
+			const polymax = Array.isArray(option._poly) ? option._poly.length : option._polymax;
 			const results = [];
 			let i = 0;
-			while(arrArgs.length && i++ < option._polymax) {
+			while(arrArgs.length && i++ < polymax) {
 				let result;
 
 				if(Array.isArray(option._type)) {
@@ -1284,9 +1294,7 @@ class CommandOptionSolver {
 	 * @param {{ mentionableType?: ParamType | Array<ParamType>, messageSep?: String }} [options] 
 	 */
 	#regroupMessageArgs(args, regroupMethod, options = {}) {
-		options.mentionableType ??= 'USER';
-		options.messageSep ??= ',';
-		const { mentionableType: type, messageSep: sep } = options;
+		const { mentionableType: type = 'USER', messageSep: sep = ',' } = options;
 
 		switch(regroupMethod) {
 		case 'MENTIONABLES-WITH-SEP':
@@ -1653,6 +1661,16 @@ class CommandOptionSolver {
 			return results.find(r => r);
 		} else
 			return await this.#options.fetchMessageParam(arrArgs, option._type, getRestOfMessageWords);
+	}
+
+	toJSON() {
+		return JSON.parse(JSON.stringify({
+			isSlash: this.#isSlash,
+			requestified: this.#requestified,
+			args: this.#args,
+			options: this.#options,
+			nextAttachmentIndex: this.#nextAttachmentIndex,
+		}));
 	}
 	//#endregion
 }
