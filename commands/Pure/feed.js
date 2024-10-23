@@ -1,5 +1,5 @@
 const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType, ButtonComponent } = require('discord.js');
-const { isNotModerator, shortenText, guildEmoji, decompressId, compressId } = require('../../func.js');
+const { isNotModerator, shortenText, guildEmoji, decompressId, compressId, isNSFWChannel, randInArray } = require('../../func.js');
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { auditError, auditAction } = require('../../systems/others/auditor.js');
 const { CommandTags } = require('../Commons/cmdTags.js');
@@ -7,6 +7,7 @@ const globalConfigs = require('../../localdata/config.json');
 const { Booru, TagTypes, BooruUnknownPostError } = require('../../systems/booru/boorufetch.js');
 const { CommandManager } = require('../Commons/cmdBuilder.js');
 const { addGuildToFeedUpdateStack } = require('../../systems/booru/boorufeed.js');
+const { formatBooruPostMessage } = require('../../systems/booru/boorusend.js');
 const { Translator } = require('../../internationalization.js');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts.js');
@@ -478,31 +479,49 @@ const command = new CommandManager('feed', flags)
 		});
 	}, { userFilterIndex: 0 })
 	.setSelectMenuResponse(async function selectedView(interaction, authorId) {
-		const translator = await Translator.from(interaction.user.id);
-		const fetchedChannel = /**@type {import('discord.js').BaseGuildTextChannel}*/(interaction.guild.channels.cache.get(interaction.values[0] || interaction.channel.id));
-		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-		const feed = gcfg.feeds[fetchedChannel.id];
+		const [ translator ] = await Promise.all([
+			Translator.from(interaction.user.id),
+			interaction.deferReply({ ephemeral: true }),
+		]);
+
+		const feedChannel = interaction.guild.channels.cache.get(interaction.values[0] || interaction.channelId);
+		if(!feedChannel) return interaction.editReply({ content: translator.getText('invalidChannel') });
+
+		const allowNSFW = isNSFWChannel(feedChannel);
+
+		const gcfg = await GuildConfig.findOne({ guildId: interaction.guildId });
+		if(!gcfg) return interaction.editReply({ content: translator.getText('invalidChannel') });
+
+		const feed = gcfg.feeds[feedChannel.id];
+		if(!feed) return interaction.editReply({ content: translator.getText('invalidChannel') });
+		
 		const wizard = new EmbedBuilder()
 			.setColor(Colors.Blurple)
 			.setAuthor({ name: wizTitle(translator), iconURL: interaction.client.user.avatarURL() })
-			.setFooter({ text: 'Visualizando tags' })
+			.setFooter({ text: 'Visualizando Feed' })
 			.addFields(
-				{ name: 'Destino', value: `**${fetchedChannel.name}** (canal ${fetchedChannel.nsfw ? 'NSFW' : 'SFW'})` },
+				{ name: 'Destino', value: `**${feedChannel.name}** (canal ${allowNSFW ? 'NSFW' : 'SFW'})` },
 				{ name: 'Tags del Feed', value: `\`\`\`${feed?.tags}\`\`\`` },
 			);
 		
-		return interaction.update({
+		await interaction.message.edit({
 			embeds: [wizard],
-			components: [
-				makeButtonRowBuilder().addComponents(
-					new ButtonBuilder()
-						.setCustomId(`feed_selectView_${authorId}`)
-						.setEmoji('934432754173624373')
-						.setStyle(ButtonStyle.Secondary),
-					finishButton(translator, authorId),
-				),
-			],
-		});
+			components: [makeButtonRowBuilder().addComponents(
+				new ButtonBuilder()
+					.setCustomId(`feed_selectView_${authorId}`)
+					.setEmoji('934432754173624373')
+					.setStyle(ButtonStyle.Secondary),
+				finishButton(translator, authorId),
+			)],
+		}).catch(console.error);
+
+		const booru = new Booru(globalConfigs.booruCredentials);
+		const post = randInArray(await booru.search(feed.tags, { limit: 42 }));
+		if(!post) return interaction.editReply({ content: 'Las tags del feed no dieron ningún resultado' });
+
+		const preview = await formatBooruPostMessage(booru, post, { ...feed, allowNSFW });
+		preview.components.forEach(row => row.components.forEach(button => button.data.style !== ButtonStyle.Link && button.setDisabled(true)));
+		return interaction.editReply({ ...preview, content: '-# Esto es una vista previa. Las imágenes NSFW solo pueden previsualizarse en canales NSFW' });
 	}, { userFilterIndex: 0 })
 	.setSelectMenuResponse(async function selectedDelete(interaction, authorId) {
 		const translator = await Translator.from(interaction.user.id);
