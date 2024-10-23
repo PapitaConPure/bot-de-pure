@@ -5,7 +5,7 @@ const { auditError, auditAction, auditSystem } = require('../others/auditor.js')
 const chalk = require('chalk');
 const { Booru, Post } = require('./boorufetch.js');
 const globalConfigs = require('../../localdata/config.json');
-const { paginateRaw, sleep, success } = require('../../func.js');
+const { paginateRaw } = require('../../func.js');
 
 /**
  * @typedef {import('./boorusend').PostFormatData & { tags: String, lastFetchedAt?: Date, faults?: Number }} FeedData
@@ -282,6 +282,7 @@ class BooruFeed {
     /**@type {Number}*/ maxTags;
     /**@type {String}*/ cornerIcon;
     /**@type {String}*/ title;
+    /**@type {String}*/ subtitle;
     /**@type {String}*/ footer;
 
     /**
@@ -291,6 +292,7 @@ class BooruFeed {
      * @property {Number} [maxTags]
      * @property {String} [cornerIcon]
      * @property {String} [title]
+     * @property {String} [subtitle]
      * @property {String} [footer]
      */
 
@@ -313,6 +315,7 @@ class BooruFeed {
         this.maxTags = options.maxTags ?? 20;
         this.cornerIcon = options.cornerIcon ?? null;
         this.title = options.title ?? null;
+        this.subtitle = options.subtitle ?? null;
         this.footer = options.footer ?? null;
     }
 
