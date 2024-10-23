@@ -13,9 +13,22 @@ const { Translator } = require('../../internationalization');
 
 /**
  * @typedef {{ maxTags?: Number, title?: String, footer?: String, cornerIcon?: String, manageableBy?: String, allowNSFW?: boolean, isNotFeed?: Boolean }} PostFormatData
+ * @typedef {{ emoji: string, color: import('discord.js').ColorResolvable }} SourceStyle
  */
 
-/**@typedef {{ emoji: string, color: import('discord.js').ColorResolvable }} SourceStyle*/
+/**
+ * Algunos enlaces pueden pertenecer a dominios asociados de un sitio para alojar recursos. Cosas como enlaces de CDNs.
+ * Estos enlaces generalmente expiran y no tienen un patrón reconocible para darles estilo, por lo que deben ser convertidos a enlaces de las publicaciones que contienen el recurso.
+ * Aquellos con conversiones conocidas aparecen en este mapeado para recuperar el enlace de publicación al que están asociados
+ * @type {ReadonlyArray<{ pattern: RegExp, replacement: string }>}
+ */
+const sourceMappings = [
+	{
+		pattern: /https:\/\/i.pximg.net\/img-original\/img\/[0-9\/]{19}\/([0-9]+)_p[0-9]+\.[A-Za-z]{2,4}/,
+		replacement: 'https://www.pixiv.net/artworks/$1',
+	},
+];
+
 /**@type {ReadonlyArray<SourceStyle & { pattern: RegExp }>}*/
 const sources = [
 	{ color: 0x0096fa, emoji: '919403803126661120',  pattern: /pixiv\.net/ },
@@ -30,7 +43,7 @@ const sources = [
 	{ color: 0x36465d, emoji: '969666470252511232',  pattern: /tumblr\.com/ },
 	{ color: 0xff6c60, emoji: '919403803114094682',  pattern: /nitter\.net/ },
 	{ color: 0xfcbd00, emoji: '1298305816247664640', pattern: /drive\.google\.com/ },
-	{ color: 0xff4500, emoji: '969666029045317762',  pattern: /(reddit\.com)|(i\.redd\.it)/ },
+	{ color: 0xff4500, emoji: '969666029045317762',  pattern: /(reddit\.com)|(([iv]\.)?redd\.it)/ },
 ];
 
 /**@type {SourceStyle}*/
@@ -63,21 +76,22 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 	const addSourceButton = (/**@type {String}*/ source) => {
 		if(!source) return;
 
+		//Si no es un enlace, mostrar el source en texto
 		if(!source.match(/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-])+\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/)) {
-			//Si no es un enlace, mostrar el source en texto
-			const emoji = '969664712604262400';
 			return row.addComponents(
 				new ButtonBuilder()
 					.setCustomId(`feed_plainText${sourceNumber++}`)
-					.setEmoji(emoji)
+					.setEmoji(unknownSource.emoji)
 					.setStyle(ButtonStyle.Secondary)
 					.setLabel(shortenText(source, 72))
 					.setDisabled(true),
 			);
 		}
-		const rawPixivAsset = source.match(/https:\/\/i.pximg.net\/img-original\/img\/[0-9\/]{19}\/([0-9]+)_p[0-9]+\.[A-Za-z]{2,4}/);
-		if(rawPixivAsset)
-			source = `https://www.pixiv.net/artworks/${rawPixivAsset[1]}`;
+
+		//Convertir enlaces que no estén del todo correctos
+		sourceMappings.forEach(mapping => {
+			source = source.replace(mapping.pattern, mapping.replacement);
+		});
 
 		//Dar estilo a Embed según fuente de la imagen
 		const sourceStyle = sources.find(s => s.pattern.test(source)) ?? unknownSource;
