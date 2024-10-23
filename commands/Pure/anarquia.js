@@ -242,7 +242,7 @@ const command = new CommandManager('anarquia', flags)
 								progressBar,
 
 								'**Eficiencia**',
-								`${improveNumber(dropRate * 100, false, 0)}%`,
+								`${improveNumber(dropRate * 100)}%`,
 							].join('\n'),
 							inline: true,
 						},
