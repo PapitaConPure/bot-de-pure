@@ -1,4 +1,5 @@
 const { default: axios } = require('axios');
+const { shuffleArray } = require('../../func');
 const BooruTags = require('../../localdata/models/boorutags');
 
 /**
@@ -116,7 +117,6 @@ class Booru {
 	/**
 	 * @typedef {Object} BooruSearchOptions
 	 * @property {Number} [limit=1] Límite de resultados de la búsqueda
-	 * @property {Boolean} [showDeleted] Si mostrar posts que fueron eliminados del Booru (true) o no (false)
 	 * @property {Boolean} [random] Si los resultados se ordenan de forma aleatoria (true) o no (false)
 	 */
 	/**
@@ -128,13 +128,16 @@ class Booru {
 	 * @throws {TypeError}
 	 * @throws {BooruFetchError}
 	 */
-	async search(tags, searchOptions = { limit: 1 }) {
+	async search(tags, searchOptions = {}) {
+		const { limit = 1, random = false } = searchOptions;
+		
 		const { apiKey, userId } = this.#getCredentials();
 		if(Array.isArray(tags))
 			tags = tags.join(' ');
 		
-		const response = await axios.get(`${Booru.API_POSTS_URL}&json=1&api_key=${apiKey}&user_id=${userId}&limit=${searchOptions.limit}&tags=${tags}`);
+		const response = await axios.get(`${Booru.API_POSTS_URL}&json=1&api_key=${apiKey}&user_id=${userId}&limit=${limit}&tags=${tags}`);
 		const posts = Booru.#expectPosts(response, { dontThrowOnEmptyFetch: true });
+		if(random) shuffleArray(posts);
 		return posts.map(p => new Post(p));
 	}
 
