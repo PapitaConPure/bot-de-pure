@@ -1,6 +1,6 @@
 const { makeButtonRowBuilder } = require('../../tsCasts');
 //@ts-expect-error
-const { EmbedBuilder, ButtonBuilder, ButtonStyle, Colors, Message, User, MessageCreateOptions, Snowflake } = require('discord.js');
+const { EmbedBuilder, ButtonBuilder, ButtonStyle, Colors, Message, User, Snowflake, ActionRowBuilder } = require('discord.js');
 //@ts-expect-error
 const { ComplexCommandRequest, CommandArguments } = require('../../commands/Commons/typings');
 const { CommandOptions } = require('../../commands/Commons/cmdOpts');
@@ -14,6 +14,7 @@ const { Translator } = require('../../internationalization');
 /**
  * @typedef {{ maxTags?: number, title?: string, subtitle?: string, footer?: string, cornerIcon?: string, manageableBy?: string, allowNSFW?: boolean, isNotFeed?: boolean }} PostFormatData
  * @typedef {{ emoji: string, color: import('discord.js').ColorResolvable }} SourceStyle
+ * @typedef {{ embeds: Array<EmbedBuilder>, components: Array<ActionRowBuilder<ButtonBuilder>> }} PostMessageOptions
  */
 
 /**
@@ -57,7 +58,7 @@ const unknownSource = { color: 0x1bb76e, emoji: '969664712604262400' };
  * @param {Booru} booru Instancia de Booru
  * @param {Post} post Post de Booru
  * @param {PostFormatData} data Información adicional a mostrar en el Embed. Se puede pasar un Feed directamente
- * @returns {Promise<MessageCreateOptions>}
+ * @returns {Promise<PostMessageOptions>}
  */
 async function formatBooruPostMessage(booru, post, data = {}) {
 	const maxTags = data.maxTags ?? 20;
@@ -141,10 +142,14 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 	);
 
 	//Preparar Embed final
-	/**@type {MessageCreateOptions} */
-	const feedMessage = { components: [row] };
 	const postEmbed = new EmbedBuilder()
 		.setColor(embedColor);
+	
+	/**@type {PostMessageOptions} */
+	const postMessageData = {
+		components: [row],
+		embeds: [postEmbed],
+	};
 	
 	//Subtítulo e ícono
 	if(data.cornerIcon)
@@ -244,9 +249,7 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 			);
 	}
 	
-	feedMessage.embeds = [postEmbed];
-	
-	return feedMessage;
+	return postMessageData;
 };
 
 /**
@@ -385,7 +388,6 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
 			isNotFeed: true,
 		})));
 		if(userTags.length)
-			//@ts-expect-error
 			messages[posts.length - 1].embeds[0].addFields({ name: 'Tu búsqueda', value: `:mag_right: *${userTags.trim().replace(/\*/g, '\\*').split(/ +/).join(', ')}*` });
 
 		//Enviar mensajes
