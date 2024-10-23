@@ -1,5 +1,5 @@
 const global = require('../../localdata/config.json'); //Variables globales
-const { makeWeightedDecision, compressId, decompressId } = require('../../func.js');
+const { makeWeightedDecision, compressId, decompressId, sleep, improveNumber } = require('../../func.js');
 const { createCanvas, loadImage } = require('canvas');
 const { EmbedBuilder, AttachmentBuilder, StringSelectMenuBuilder, Colors, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
@@ -7,8 +7,13 @@ const { Puretable, AUser, pureTableAssets } = require('../../localdata/models/pu
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require("../Commons/commands");
 const { makeStringSelectMenuRowBuilder, makeButtonRowBuilder } = require('../../tsCasts');
 const { Translator } = require('../../internationalization');
+const { scheduleTask } = require('../../concurrency');
+const Ut = require('../../utils');
 
 /**@typedef {{ name: string, emoji: string, weight: number, shape: Array<Array<number>> }} Skill*/
+
+/**@type {Array<() => Promise<*>>}*/
+const queue = [];
 
 /**@satisfies {Record<string, Skill>} */
 const skills = /**@type {const}*/({
@@ -157,10 +162,10 @@ const skills = /**@type {const}*/({
 });
 const skillOptions = Object.entries(skills).map(([ key, skill ]) => ({ weight: skill.weight, value: { key, skill } }));
 
-const baseDropRate = 0.01; //La chance de drop base, incrementada con las propiedades de abajo según el nivel de usuario
+const baseDropRate = 0.02; //La chance de drop base, incrementada con las propiedades de abajo según el nivel de usuario
 const userLevelDropRateMaxIncrease = 0.5; //El máximo hacia el cual tiende el incremento por nivel de usuario
 const userLevelDropRateHalfIncreaseLength = 100; //El nivel de usuario en el cual se alcanza la mitad del incremento máximo
-const maxExp = 30; //Cantidad de experiencia requerida para subir de nivel
+const maxExp = 20; //Cantidad de experiencia requerida para subir de nivel
 
 const options = new CommandOptions()
 	.addParam('posición', 'NUMBER', 'para especificar una celda a modificar', { poly: [ 'x', 'y' ], optional: true })
@@ -180,14 +185,12 @@ const command = new CommandManager('anarquia', flags)
 		'Puedes ingresar un `<emote>` en una `<posición(x,y)>` o, al no ingresar nada, ver la tabla\n' +
 		'La `<posicion(x,y)>` se cuenta desde 1x,1y, y el `<emote>` designado debe ser de un server del que yo forme parte~\n\n' +
 		'De forma aleatoria, puedes ir desbloqueando habilidades para rellenar líneas completas en `--horizontal` o `--vertical`. La probabilidad inicial es 1% en conjunto, y aumenta +1% por cada __nivel__\n' +
-		`**Nivel**: nivel de usuario en minijuego Anarquía. +1 por cada *30 usos*\n\n` +
+		`**Nivel**: nivel de usuario en minijuego Anarquía. +1 por cada *${maxExp} usos*\n\n` +
 		'Incluso si usas una habilidad de línea, debes ingresar ambos ejes (`x,y`) en orden\n' +
 		`Ingresa únicamente \`p\` para ver tu perfil anárquico`
 	)
 	.setOptions(options)
 	.setExperimentalExecution(async (request, args) => {
-		const loadEmotes = global.loademotes;
-
 		const translator = await Translator.from(request.user);
 
 		//Revisar perfil
@@ -214,6 +217,8 @@ const command = new CommandManager('anarquia', flags)
 					.join('\n');
 				
 				const exp = auser.exp % maxExp;
+				const userLevel = calcUserLevel(auser);
+				const dropRate = calcDropRate(userLevel);
 				const progress = exp / maxExp;
 				const progressBarLength = 6;
 				const progressChars = Math.round(progressBarLength * progress);
@@ -222,8 +227,25 @@ const command = new CommandManager('anarquia', flags)
 				embed
 					.setTitle('Perfil anárquico')
 					.addFields(
-						{ name: 'Inventario', value: skillContent || '_Todavía no has obtenido nada_', inline: true },
-						{ name: 'Rango', value: `Nivel ${Math.floor(auser.exp / 30) + 1}\n**Exp**\n${exp} / ${maxExp}\n${progressBar}`, inline: true },
+						{
+							name: 'Inventario',
+							value: skillContent || '_Todavía no has obtenido nada_',
+							inline: true,
+						},
+						{
+							name: 'Rango',
+							value: [
+								`Nivel ${userLevel}`,
+
+								'**Experiencia**',
+								`${exp} / ${maxExp}`,
+								progressBar,
+
+								'**Eficiencia**',
+								`${improveNumber(dropRate * 100, false, 0)}%`,
+							].join('\n'),
+							inline: true,
+						},
 					);
 			} else
 				embed.setTitle('Perfil inexistente')
@@ -262,7 +284,7 @@ const command = new CommandManager('anarquia', flags)
 			const auser = (await AUser.findOne({ userId })) || new AUser({ userId });
 			
 			//Tiempo de enfriamiento por usuario
-			if((Date.now() - auser.last) / 1000 < 5) {
+			if((Date.now() - auser.last) < 5000) {
 				reactIfMessage('⌛');
 				return request.reply({ content: '⌛ ¡No tan rápido!', ephemeral: true });
 			} else
@@ -275,7 +297,6 @@ const command = new CommandManager('anarquia', flags)
 			}
 			const emoteId = emoteMatch[1];
 	
-			//Variables de ingreso
 			if(!request.client.emojis.cache.has(emoteId)) {
 				reactIfMessage('⚠️');
 				return request.reply({ content: '⚠️️ No reconozco ese emoji. Solo puedo usar emojis de servidores en los que esté', ephemeral: true });
@@ -284,68 +305,40 @@ const command = new CommandManager('anarquia', flags)
 			await request.deferReply();
 
 			//Posición de emote
-			cells = /**@type {Array<Array<string>>}*/((await Puretable.findOne({})).cells);
 			const originalX = Math.floor(pos[0]) - 1;
 			const originalY = Math.floor(pos[1]) - 1;
-			const correctedX = Math.max(0, Math.min(originalX, cells[0].length - 1));
-			const correctedY = Math.max(0, Math.min(originalY, cells.length - 1));
-	
-			//Cargar imagen nueva si no está registrada
-			if(!loadEmotes.hasOwnProperty(emoteId))
-				loadEmotes[emoteId] = await loadImage(request.client.emojis.cache.get(emoteId).imageURL({ extension: 'png', size: 64 }));
-	
-			//Insertar emote en posición
+
 			if(skill) {
-				const authorId = compressId(userId);
-				return request.editReply({
-					embeds: [new EmbedBuilder()
-						.setColor(Colors.Fuchsia)
-						.setAuthor({ name: request.user.username, iconURL: request.member.displayAvatarURL({ size: 256 })})
-						.setTitle('¡A punto de usar una habilidad!')
-						.setDescription(`Centrada en la posición (${correctedX + 1}, ${correctedY + 1}) del tablero`)
-						.setThumbnail(request.client.emojis.cache.get(emoteId).imageURL({ extension: 'png', size: 512 }))
-					],
-					components: [
-						makeStringSelectMenuRowBuilder().addComponents(
-							new StringSelectMenuBuilder()
-								.setCustomId(`anarquia_selectSkill_${correctedX}_${correctedY}_${compressId(emoteId)}_${authorId}`)
-								.setPlaceholder('Escoge una habilidad...')
-								.addOptions(
-									Object.entries(skills).map(([ key, skill ]) => ({
-										value: key,
-										label: `${skill.name} (${auser.skills?.[key] ?? 0})`,
-										emoji: skill.emoji,
-									}))
-								)
-						),
-						makeButtonRowBuilder().addComponents(
-							new ButtonBuilder()
-								.setCustomId(`anarquia_cancel_${authorId}`)
-								.setLabel(translator.getText('buttonCancel'))
-								.setEmoji('936531643496288288')
-								.setStyle(ButtonStyle.Danger)
-						),
-					],
-				});
+				cells = await fetchPureTableCells();
+				const correctedX = Ut.clamp(originalX, 0, cells[0].length - 1);
+				const correctedY = Ut.clamp(originalY, 0, cells.length - 1);
+				return makeSkillSelectReply(request, translator, auser, [ correctedX, correctedY ], emoteId);
 			}
 
-			cells[correctedY][correctedX] = emoteId;
-			
-			await Puretable.updateOne({}, { cells });
+			let wasCorrected;
+			await scheduleTask(async () => {
+				cells = await fetchPureTableCells();
+				const correctedX = Ut.clamp(originalX, 0, cells[0].length - 1);
+				const correctedY = Ut.clamp(originalY, 0, cells.length - 1);
+				wasCorrected = originalX !== correctedX || originalY !== correctedY;
+				
+				//Insertar emote en posición
+				await loadEmoteIfNotLoaded(request, emoteId);
+				cells[correctedY][correctedX] = emoteId;
+				await Puretable.updateOne({}, { cells });
+			});
 	
-			//Sistema de nivel de jugador y adquisición de habilidades
-	
-			const wasCorrected = originalX !== correctedX || originalY !== correctedY;
 			reactIfMessage(wasCorrected ? '☑️' : '✅');
 			embeds.push(new EmbedBuilder()
-				.setColor(Colors.DarkVividPink)
-				.setTitle('¡Hecho!')
-				.setDescription(
-					(wasCorrected
-						? '☑️ Emote colocado con *posición corregida*'
-						: '✅ Emote colocado'
-					)));
-
+			.setColor(Colors.DarkVividPink)
+			.setTitle('¡Hecho!')
+			.setDescription(
+				(wasCorrected
+					? '☑️ Emote colocado con *posición corregida*'
+					: '✅ Emote colocado'
+				)));
+			
+			//Sistema de nivel de jugador y adquisición de habilidades
 			const { userLevel, leveledUp, droppedSkill } = levelUpAndGetSkills(auser);
 			auser.markModified('skills');
 			auser.save();
@@ -366,8 +359,10 @@ const command = new CommandManager('anarquia', flags)
 					.setDescription(`${request.user} obtuvo **1** x ${droppedSkill.emoji} *${droppedSkill.name}*`));
 			}
 		} else {
-			await request.deferReply();
-			cells = /**@type {Array<Array<string>>}*/((await Puretable.findOne({})).cells);
+			[ cells ] = await Promise.all([
+				fetchPureTableCells(),
+				request.deferReply(),
+			]);
 		}
 
 		//Ver tabla
@@ -380,7 +375,7 @@ const command = new CommandManager('anarquia', flags)
 		const userId = user.id;
 		
 		const auser = (await AUser.findOne({ userId })) || new AUser({ userId });
-		const cells = /**@type {Array<Array<string>>}*/((await Puretable.findOne({})).cells);
+		const cells = await fetchPureTableCells();
 		const embeds = [];
 	
 		const skillKey = /**@type {keyof skills}*/(interaction.values[0]);
@@ -432,6 +427,66 @@ const command = new CommandManager('anarquia', flags)
 		});
 	}, { userFilterIndex: 0 });
 
+module.exports = command;
+
+async function fetchPureTableCells() {
+	return /**@type {Array<Array<string>>}*/((await Puretable.findOne({})).cells)
+}
+
+/**
+ * @param {import('../Commons/typings').ComplexCommandRequest} request 
+ * @param {string} emoteId 
+ */
+async function loadEmoteIfNotLoaded(request, emoteId) {
+	const loadEmotes = global.loademotes;
+	if(!loadEmotes.hasOwnProperty(emoteId))
+		loadEmotes[emoteId] = await loadImage(request.client.emojis.cache.get(emoteId).imageURL({ extension: 'png', size: 64 }));
+}
+
+/**
+ * @param {import('../Commons/typings').ComplexCommandRequest} request
+ * @param {Translator} translator
+ * @param {import('../../localdata/models/puretable.js').AUserDocument} auser
+ * @param {[ number, number ]} position
+ * @param {string} emoteId
+ */
+async function makeSkillSelectReply(request, translator, auser, position, emoteId) {
+	const userId = request.user.id;
+	const authorId = compressId(userId);
+	const [ x, y ] = position;
+
+	return request.editReply({
+		embeds: [new EmbedBuilder()
+			.setColor(Colors.Fuchsia)
+			.setAuthor({ name: request.user.username, iconURL: request.member.displayAvatarURL({ size: 256 })})
+			.setTitle('¡A punto de usar una habilidad!')
+			.setDescription(`Centrada en la posición (${x + 1}, ${y + 1}) del tablero`)
+			.setThumbnail(request.client.emojis.cache.get(emoteId).imageURL({ extension: 'png', size: 512 }))
+		],
+		components: [
+			makeStringSelectMenuRowBuilder().addComponents(
+				new StringSelectMenuBuilder()
+					.setCustomId(`anarquia_selectSkill_${x}_${y}_${compressId(emoteId)}_${authorId}`)
+					.setPlaceholder('Escoge una habilidad...')
+					.addOptions(
+						Object.entries(skills).map(([ key, skill ]) => ({
+							value: key,
+							label: `${skill.name} (${auser.skills?.[key] ?? 0})`,
+							emoji: skill.emoji,
+						}))
+					)
+			),
+			makeButtonRowBuilder().addComponents(
+				new ButtonBuilder()
+					.setCustomId(`anarquia_cancel_${authorId}`)
+					.setLabel(translator.getText('buttonCancel'))
+					.setEmoji('936531643496288288')
+					.setStyle(ButtonStyle.Danger)
+			),
+		],
+	});
+}
+
 /**@param {Array<Array<string>>} cells*/
 async function drawPureTable(cells) {
 	const { image: pureTableImage } = pureTableAssets;
@@ -465,9 +520,9 @@ async function drawPureTable(cells) {
  * @param {import('../../localdata/models/puretable.js').AUserDocument} auser
  */
 function levelUpAndGetSkills(auser) {
-	const userLevel = Math.floor(auser.exp / maxExp) + 1;
+	const userLevel = calcUserLevel(auser);
+	const dropRate = calcDropRate(userLevel);
 
-	const dropRate = baseDropRate + (userLevelDropRateMaxIncrease * userLevel / (userLevelDropRateHalfIncreaseLength + userLevel));
 	let droppedSkill;
 	if(Math.random() < dropRate) {
 		droppedSkill = makeWeightedDecision(skillOptions);
@@ -483,6 +538,16 @@ function levelUpAndGetSkills(auser) {
 		userLevel: userLevel + 1,
 		droppedSkill: droppedSkill?.skill,
 	};
+}
+
+/**@param {import('../../localdata/models/puretable.js').AUserDocument} auser*/
+function calcUserLevel(auser) {
+	return Math.floor(auser.exp / maxExp) + 1;
+}
+
+/**@param {number} userLevel*/
+function calcDropRate(userLevel) {
+	return baseDropRate + (userLevelDropRateMaxIncrease * userLevel / (userLevelDropRateHalfIncreaseLength + userLevel));
 }
 
 /**
@@ -521,5 +586,3 @@ function useSkill(cells, id, position, mask) {
 function calcMatrixWidth(matrix) {
 	return matrix.map(r => r.length).reduce((a, b) => a > b ? a : b, 0);
 }
-
-module.exports = command;
