@@ -1139,6 +1139,20 @@ module.exports = {
     emoji: (emoji, guild) => module.exports.defaultEmoji(emoji) ?? module.exports.guildEmoji(emoji, guild),
 
     /**
+     * 
+     * @param {import('discord.js').GuildBasedChannel} channel 
+     */
+    isNSFWChannel: function(channel) {
+        if(channel.isThread())
+            return channel.parent.nsfw;
+
+        if(channel.isSendable())
+            return channel.nsfw;
+
+        return false;
+    },
+
+    /**
      * Devuelve un valor acomodado al rango facilitado
      * @param {Number} value El valor a acomodar
      * @param {Number} min El mínimo del rango
@@ -1170,7 +1184,7 @@ module.exports = {
     /**
      * Devuelve un valor aleatorio entre 0 y otro valor
      * @param {Number} maxExclusive Máximo valor; excluído del resultado. 1 por defecto
-     * @param {Boolean} [round=false] Si el número debería ser redondeado hacia abajo. Falso por defecto
+     * @param {Boolean} [round=false] Si el número debería ser redondeado hacia abajo. `true` por defecto
      * @returns 
      */
     rand: function(maxExclusive, round = true) {
@@ -1185,7 +1199,7 @@ module.exports = {
      * Devuelve un valor aleatorio dentro de un rango entre 2 valores
      * @param {Number} minInclusive Mínimo valor; puede ser incluído en el resultado
      * @param {Number} maxExclusive Máximo valor; excluído del resultado
-     * @param {Boolean} [round=false] Si el número debería ser redondeado hacia abajo. Falso por defecto
+     * @param {Boolean} [round=false] Si el número debería ser redondeado hacia abajo. `false` por defecto
      * @returns 
      */
     randRange: function(minInclusive, maxExclusive, round = true) {
@@ -1203,8 +1217,24 @@ module.exports = {
      * @returns {T} elemento
      */
     randInArray: function(array) {
+        if(!array.length) return undefined;
         const randomIndex = module.exports.rand(array.length);
         return array[randomIndex];
+    },
+
+    /**
+     * @param {Array<*>} array
+     * @see {@link https://stackoverflow.com/a/2450976}
+     */
+    shuffleArray: function(array) {
+        let currentIndex = array.length;
+        
+        while(currentIndex !== 0) {
+            let randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+      
+            [ array[currentIndex], array[randomIndex] ] = [ array[randomIndex], array[currentIndex] ];
+        }
     },
     
     /**
