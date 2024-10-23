@@ -12,7 +12,7 @@ const rakki = require('../../commands/Pure/rakkidei');
 const { Translator } = require('../../internationalization');
 
 /**
- * @typedef {{ maxTags?: Number, title?: String, footer?: String, cornerIcon?: String, manageableBy?: String, allowNSFW?: boolean, isNotFeed?: Boolean }} PostFormatData
+ * @typedef {{ maxTags?: number, title?: string, subtitle?: string, footer?: string, cornerIcon?: string, manageableBy?: string, allowNSFW?: boolean, isNotFeed?: boolean }} PostFormatData
  * @typedef {{ emoji: string, color: import('discord.js').ColorResolvable }} SourceStyle
  */
 
@@ -73,7 +73,7 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 	let sourceNumber = 0;
 
 	//Botón de Fuente (si está disponible)
-	const addSourceButton = (/**@type {String}*/ source) => {
+	const addSourceButtonAndApplyStyle = (/**@type {String}*/ source) => {
 		if(!source) return;
 
 		//Si no es un enlace, mostrar el source en texto
@@ -88,7 +88,6 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 			);
 		}
 
-		//Convertir enlaces que no estén del todo correctos
 		sourceMappings.forEach(mapping => {
 			source = source.replace(mapping.pattern, mapping.replacement);
 		});
@@ -115,14 +114,14 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		);
 	};
 
+	//Aplicar estilo y botones de source
 	const source = post.source;
 	if(source) {
 		const sources = (typeof source === 'object')
 			? Object.values(source)
 			: source.split(/[ \n]+/);
-		sources.slice(0, 2).forEach(addSourceButton);
+		sources.slice(0, 2).forEach(addSourceButtonAndApplyStyle);
 	}
-
 	embedColor ??= noSource.color;
 	
 	//Botón de tags
@@ -146,8 +145,15 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 	const feedMessage = { components: [row] };
 	const postEmbed = new EmbedBuilder()
 		.setColor(embedColor);
-		
-	data.cornerIcon && postEmbed.setAuthor({ name: 'Desde Gelbooru', iconURL: data.cornerIcon });
+	
+	//Subtítulo e ícono
+	if(data.cornerIcon)
+		postEmbed.setAuthor({
+			name: data.subtitle || 'Gelbooru',
+			iconURL: data.cornerIcon,
+		});
+	else if(data.subtitle)
+		postEmbed.setAuthor({ name: data.subtitle });
 
 	//Tags
 	try {

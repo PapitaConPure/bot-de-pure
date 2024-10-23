@@ -451,14 +451,19 @@ const command = new CommandManager('feed', flags)
 								value: 'tags',
 							},
 							{
-								label: 'Pie',
-								description: 'Asigna o elimina un texto a mostrar debajo de cada imagen',
-								value: 'footer',
+								label: 'Antetítulo',
+								description: 'Asigna o elimina un antetítulo a mostrar en cada imagen',
+								value: 'subtitle',
 							},
 							{
 								label: 'Ícono de esquina',
 								description: 'Elige un ícono de esquina personalizado para cada imagen',
 								value: 'cornerIcon',
+							},
+							{
+								label: 'Pie',
+								description: 'Asigna o elimina un texto a mostrar debajo de cada imagen',
+								value: 'footer',
 							},
 						]),
 				),
@@ -604,19 +609,19 @@ const command = new CommandManager('feed', flags)
 				);
 				break;
 
-			case 'footer':
+			case 'subtitle':
 				wizard.addFields({
-					name: 'Personaliza el pie',
-					value: 'Clickea "Personalizar" e introduce un texto breve. Si quieres eliminar el pie actual, usa el respectivo botón',
+					name: 'Personaliza el antetítulo',
+					value: 'Clickea "Personalizar" e introduce un texto breve. Si quieres eliminar el antetítulo actual, usa el respectivo botón',
 				});
 				row.addComponents(
 					new ButtonBuilder()
-						.setCustomId(`feed_customizeFooter_${channelId}_${authorId}`)
+						.setCustomId(`feed_customizeSubtitle_${channelId}_${authorId}`)
 						.setLabel('Personalizar')
 						.setStyle(ButtonStyle.Primary),
 					new ButtonBuilder()
-						.setCustomId(`feed_removeCustomFooter_${channelId}_${authorId}`)
-						.setLabel('Eliminar pie')
+						.setCustomId(`feed_removeCustomSubtitle_${channelId}_${authorId}`)
+						.setLabel('Eliminar antetítulo')
 						.setStyle(ButtonStyle.Danger),
 				);
 				break;
@@ -634,6 +639,23 @@ const command = new CommandManager('feed', flags)
 					new ButtonBuilder()
 						.setCustomId(`feed_removeCustomIcon_${channelId}_${authorId}`)
 						.setLabel('Restaurar ícono por defecto')
+						.setStyle(ButtonStyle.Danger),
+				);
+				break;
+
+			case 'footer':
+				wizard.addFields({
+					name: 'Personaliza el pie',
+					value: 'Clickea "Personalizar" e introduce un texto breve. Si quieres eliminar el pie actual, usa el respectivo botón',
+				});
+				row.addComponents(
+					new ButtonBuilder()
+						.setCustomId(`feed_customizeFooter_${channelId}_${authorId}`)
+						.setLabel('Personalizar')
+						.setStyle(ButtonStyle.Primary),
+					new ButtonBuilder()
+						.setCustomId(`feed_removeCustomFooter_${channelId}_${authorId}`)
+						.setLabel('Eliminar pie')
 						.setStyle(ButtonStyle.Danger),
 				);
 				break;
@@ -678,6 +700,22 @@ const command = new CommandManager('feed', flags)
 		const row = makeTextInputRowBuilder().addComponents(tagsInput);
 		const modal = new ModalBuilder()
 			.setCustomId(`feed_setCustomMaxTags_${channelId}_${authorId}`)
+			.setTitle('Personalización de Feed')
+			.addComponents(row);
+
+		interaction.showModal(modal);
+	}, { userFilterIndex: 1 })
+	.setButtonResponse(async function customizeSubtitle(interaction, channelId, authorId) {
+		const footerInput = new TextInputBuilder()
+			.setCustomId('subtitleInput')
+			.setLabel('Antetítulo')
+			.setPlaceholder('Texto encima del título')
+			.setStyle(TextInputStyle.Short)
+			.setRequired(true)
+			.setMaxLength(255);
+		const row = makeTextInputRowBuilder().addComponents(footerInput);
+		const modal = new ModalBuilder()
+			.setCustomId(`feed_setCustomSubtitle_${channelId}_${authorId}`)
 			.setTitle('Personalización de Feed')
 			.addComponents(row);
 
@@ -738,6 +776,16 @@ const command = new CommandManager('feed', flags)
 		gcfg.feeds[channelId].maxTags = maxTags;
 
 		return interaction.reply({ content: '✅ Cantidad de tags máxima actualizada', ephemeral: true });
+	}, { userFilterIndex: 1 })
+	.setModalResponse(async function setCustomSubtitle(interaction, channelId) {
+		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
+		const input = interaction.fields.getTextInputValue('subtitleInput');
+
+		gcfg.feeds[channelId].subtitle = input;
+		gcfg.markModified('feeds');
+		gcfg.save();
+
+		return interaction.reply({ content: '✅ Antetítulo actualizado', ephemeral: true });
 	}, { userFilterIndex: 1 })
 	.setModalResponse(async function setCustomFooter(interaction, channelId) {
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
@@ -816,6 +864,32 @@ const command = new CommandManager('feed', flags)
 			.addFields({
 				name: 'Feed personalizado',
 				value: `Se ha restaurado la cantidad de tags máxima por defecto del Feed con las tags _"${safeTags(gcfg.feeds[channelId].tags)}"_ para el canal **${fetchedChannel.name}**`,
+			});
+		return interaction.update({
+			embeds: [concludedEmbed],
+			components: [makeButtonRowBuilder().addComponents(
+				new ButtonBuilder()
+					.setCustomId(`feed_selectCustomize_${authorId}`)
+					.setLabel('Seguir personalizando')
+					.setStyle(ButtonStyle.Primary),
+			)],
+		});
+	}, { userFilterIndex: 1 })
+	.setButtonResponse(async function removeCustomFooter(interaction, channelId, authorId) {
+		const translator = await Translator.from(interaction.user.id);
+		const fetchedChannel = interaction.guild.channels.cache.get(channelId);
+		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
+		delete gcfg.feeds[fetchedChannel.id].subtitle;
+		gcfg.markModified('feeds');
+		await gcfg.save();
+
+		const concludedEmbed = new EmbedBuilder()
+			.setColor(Colors.DarkGreen)
+			.setAuthor({ name: wizTitle(translator), iconURL: interaction.client.user.avatarURL() })
+			.setFooter({ text: 'Operación finalizada' })
+			.addFields({
+				name: 'Feed personalizado',
+				value: `Se ha eliminado el subtítulo personalizado del Feed con las tags _"${safeTags(gcfg.feeds[fetchedChannel.id].tags)}"_ para el canal **${fetchedChannel.name}**`,
 			});
 		return interaction.update({
 			embeds: [concludedEmbed],
