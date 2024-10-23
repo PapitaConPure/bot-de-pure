@@ -146,7 +146,6 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 	const feedMessage = { components: [row] };
 	const postEmbed = new EmbedBuilder()
 		.setColor(embedColor);
-		//.setAuthor({ name: 'Desde Gelbooru', iconURL: data.cornerIcon ?? 'https://i.imgur.com/outZ5Hm.png' });
 		
 	data.cornerIcon && postEmbed.setAuthor({ name: 'Desde Gelbooru', iconURL: data.cornerIcon });
 
