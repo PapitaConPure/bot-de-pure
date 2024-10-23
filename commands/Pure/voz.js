@@ -380,7 +380,7 @@ const command = new CommandManager('voz', flags)
 		if(!session) return warnNotInSession();
 		
         const modal = new ModalBuilder()
-            .setCustomId(`voz_applySessionRename`)
+            .setCustomId(`voz_applySessionName`)
             .setTitle(translator.getText('yoVoiceAutonameModalTitle'))
             .addComponents(
                 makeTextInputRowBuilder().addComponents(new TextInputBuilder()
