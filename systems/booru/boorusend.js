@@ -28,6 +28,10 @@ const sourceMappings = [
 		pattern: /https:\/\/i.pximg.net\/img-original\/img\/[0-9\/]{19}\/([0-9]+)_p[0-9]+\.[A-Za-z]{2,4}/,
 		replacement: 'https://www.pixiv.net/artworks/$1',
 	},
+	{
+		pattern: /https:\/\/booth\.pximg\.net\/[0-9a-z]+(?:-[0-9a-z]+){4}\/i\/([0-9]+)\/[0-9a-z]+(?:-[0-9a-z]+){4}(?:[a-z_]+)?\.[a-z0-9]{2,4}/,
+		replacement: 'https://booth.pm/en/items/$1',
+	},
 ];
 
 /**@type {ReadonlyArray<SourceStyle & { pattern: RegExp }>}*/
@@ -45,6 +49,8 @@ const sources = [
 	{ color: 0xff6c60, emoji: '919403803114094682',  pattern: /nitter\.net/ },
 	{ color: 0xfcbd00, emoji: '1298305816247664640', pattern: /drive\.google\.com/ },
 	{ color: 0xff4500, emoji: '969666029045317762',  pattern: /(reddit\.com)|(([iv]\.)?redd\.it)/ },
+	{ color: 0xff5c67, emoji: '1298674477470716106', pattern: /booth\.pm/ },
+	{ color: 0xff0000, emoji: '1298671334246715453', pattern: /youtube\.com/ },
 ];
 
 /**@type {SourceStyle}*/
