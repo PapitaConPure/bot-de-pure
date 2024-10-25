@@ -1,5 +1,5 @@
 const global = require('../../localdata/config.json'); //Variables globales
-const { makeWeightedDecision, compressId, decompressId, sleep, improveNumber } = require('../../func.js');
+const { makeWeightedDecision, compressId, decompressId, improveNumber } = require('../../func.js');
 const { createCanvas, loadImage } = require('canvas');
 const { EmbedBuilder, AttachmentBuilder, StringSelectMenuBuilder, Colors, ButtonBuilder, ButtonStyle, StringSelectMenuInteraction } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
@@ -376,10 +376,12 @@ const command = new CommandManager('anarquia', flags)
 		const imagen = await drawPureTable(cells);
 		return request.editReply({ embeds, files: [imagen] });
 	})
-	.setSelectMenuResponse(async function selectSkill(interaction, x, y, emoteId) {
+	.setSelectMenuResponse(async function selectSkill(interaction, x, y, compressedEmoteId) {
 		const translator = await Translator.from(interaction.user);
 		const { user } = interaction;
 		const userId = user.id;
+
+		const emoteId = decompressId(compressedEmoteId);
 
 		const react = (/**@type {string}*/ reaction) => interaction.message.react(reaction);
 	
@@ -400,7 +402,7 @@ const command = new CommandManager('anarquia', flags)
 			cells = await fetchPureTableCells();
 			couldLoadEmote = await loadEmoteIfNotLoaded(interaction, emoteId);
 			if(couldLoadEmote) {
-				useSkill(cells, +x, +y, decompressId(emoteId), skill.shape);
+				useSkill(cells, +x, +y, emoteId, skill.shape);
 				await Puretable.updateOne({}, { cells });
 			}
 		});
@@ -465,8 +467,10 @@ async function loadEmoteIfNotLoaded(request, emoteId) {
 	const loadEmotes = global.loademotes;
 
 	if(!loadEmotes.hasOwnProperty(emoteId)) {
-		const image = await loadImage(request.client.emojis.cache.get(emoteId).imageURL({ extension: 'png', size: 64 }));
-		
+		const imageUrl = request.client.emojis.cache.get(emoteId)?.imageURL({ extension: 'png', size: 64 });
+		if(!imageUrl) return false;
+
+		const image = await loadImage(imageUrl);
 		if(!image) return false;
 		
 		loadEmotes[emoteId] = image;
