@@ -622,6 +622,11 @@ let localesObject = /**@type {const}*/({
 		ja: '⚠️ None of the mentioned members were updated. It could be that I don\'t have permission to manage members',
 	},
 
+	anarquiaCouldNotLoadEmoji: {
+		es: '⚠️ No pude cargar la imagen del emote que mencionaste. ¡Prueba una vez más! Si sigues sin poder, puede ser un problema con el emote en cuestión',
+		en: '⚠️ Couldn\'t load the image for the emote you mentioned. Try it again! If you still can\'t, it could be due to an issue with the emote in question',
+		ja: '⚠️ 指定したエモートの画像を読み込めませんでした。もう一度お試しください！それでも読み込めない場合は、問題のエモートに問題がある可能性があります',
+	},
 	anarquiaSkillIssue: {
 		es: '❌ No tienes ninguna carga de esta habilidad. Interactúa más con la Tabla de Puré para tener oportunidad de recibir habilidades especiales',
 		en: '❌ You have no stacks of this skill. Interact more with the Puré Matrix for a chance to receive special skills',
