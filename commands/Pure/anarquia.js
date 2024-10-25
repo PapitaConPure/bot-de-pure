@@ -392,16 +392,15 @@ const command = new CommandManager('anarquia', flags)
 			return interaction.reply({ content: translator.getText('anarquiaSkillIssue'), ephemeral: true });
 		}
 
-		
-		await interaction.deferUpdate();
-		
 		const skill = skills[skillKey];
 		let cells;
 		let couldLoadEmote;
+
 		await ptTaskScheduler.scheduleTask(async () => {
-			cells = await fetchPureTableCells();
 			couldLoadEmote = await loadEmoteIfNotLoaded(interaction, emoteId);
 			if(couldLoadEmote) {
+				await interaction.deferUpdate();
+				cells = await fetchPureTableCells();
 				useSkill(cells, +x, +y, emoteId, skill.shape);
 				await Puretable.updateOne({}, { cells });
 			}
@@ -442,7 +441,7 @@ const command = new CommandManager('anarquia', flags)
 		}
 		
 		const imagen = await drawPureTable(cells);
-		return interaction.update({ embeds, files: [imagen], components: [] });
+		return interaction.editReply({ embeds, files: [imagen], components: [] });
 	}, { userFilterIndex: 3 })
 	.setButtonResponse(async function cancel(interaction) {
 		const translator = await Translator.from(interaction.user);
