@@ -408,7 +408,7 @@ const command = new CommandManager('voz', flags)
 	.setModalResponse(async function applySessionName(interaction) {
 		await interaction.deferReply({ ephemeral: true });
 
-		const { guildId, member } = interaction;
+		const { member } = interaction;
         const translator = await Translator.from(member);
 
 		const warnNotInSession = () => interaction.editReply({
@@ -430,7 +430,7 @@ const command = new CommandManager('voz', flags)
 
 		const defEmoji = defaultEmoji(emoji);
 		if(!defEmoji)
-			return interaction.reply({ content: '⚠️ El emoji indicado no es un emoji Unicode válido' });
+			return interaction.editReply({ content: '⚠️ El emoji indicado no es un emoji Unicode admitido' });
 		
 		voiceChannel.setName(makePVSessionName(name, defEmoji)).catch(console.error);
 		return interaction.editReply({ content: '✅ Nombre aplicado' });
