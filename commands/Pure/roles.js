@@ -1,13 +1,13 @@
 const { hourai, tenshiColor } = require('../../localdata/config.json');
 const Hourai = require('../../localdata/models/hourai.js');
 const axios = require('axios').default;
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors, ActionRow, ComponentType } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors, ActionRow, ComponentType, GuildMember, ButtonComponent } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes');
-const { CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandTags, CommandManager, CommandOptions, CommandParam } = require('../Commons/commands');
 const { auditError } = require('../../systems/others/auditor');
 const { colorsRow } = require('../../localdata/houraiProps');
 const { subdivideArray, isBoosting, stringHexToNumber } = require('../../func');
-const { makeStringSelectMenuRowBuilder } = require('../../tsCasts');
+const { makeStringSelectMenuRowBuilder, makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts');
 
 /**
  * @typedef {{id: String, label: String, emote: String}} RoleData Datos de un rol para el propósito del comando
@@ -30,7 +30,7 @@ const getAutoRoleRows = (member, categories, category, section = null, exclusive
 	const rows = [];
 	if(pageRoles.length)
 		rows.push(
-			new ActionRowBuilder().addComponents(pageRoles.map(role => {
+			makeButtonRowBuilder().addComponents(pageRoles.map(role => {
 				const button = new ButtonBuilder()
 					.setEmoji(role.emote)
 					.setLabel(role.label);
@@ -47,7 +47,7 @@ const getAutoRoleRows = (member, categories, category, section = null, exclusive
 			})),
 		);
 	rows.push(
-		new ActionRowBuilder().addComponents([
+		makeButtonRowBuilder().addComponents([
 			new ButtonBuilder()
 				.setCustomId(`roles_removeAll_${category}`)
 				.setEmoji('704612795072774164')
@@ -59,20 +59,20 @@ const getAutoRoleRows = (member, categories, category, section = null, exclusive
 	return rows;
 };
 /**
- * @param {CategoryIndex} category 
+ * @param {{ [ K: String ]: CategoryContent}} categories
+ * @param {CategoryIndex} categoryName
  * @param {Number?} section 
- * @returns {Array<ActionRowBuilder>}
  */
-const getPaginationControls = (categories, category, section = 0) => {
-	category = categories[category];
-	const rolePool = subdivideArray(category.rolePool, 5);
+const getPaginationControls = (categories, categoryName, section = 0) => {
+	const category = categories[categoryName];
+	const rolePool = subdivideArray(/**@type {Array}*/(category.rolePool), 5);
 	if(rolePool.length < 2) return [];
 
 	const functionName = category.functionName;
 	const nextPage = section > 0 ? (section - 1) : (rolePool.length - 1)
 	const prevPage = section < (rolePool.length - 1) ? (section + 1) : 0;
 	return [
-		new ActionRowBuilder().addComponents([
+		makeButtonRowBuilder().addComponents([
 			new ButtonBuilder()
 				.setCustomId(`roles_${functionName}_${nextPage}_1`)
 				.setEmoji('934430008343158844')
@@ -87,14 +87,14 @@ const getPaginationControls = (categories, category, section = 0) => {
 /**
  * @param {import('discord.js').GuildMember} member 
  * @param {CategoryIndex} category 
- * @param {Number?} section
+ * /@/param {Number?} section
  */
 const getEditButtonRow = (member, category) => {
 	if(!member.permissions.has('ManageRoles'))
 		return [];
 
 	return [
-		new ActionRowBuilder().addComponents([
+		makeButtonRowBuilder().addComponents([
 			new ButtonBuilder()
 				.setCustomId(`roles_poolEdit_${category}`)
 				.setLabel('Editar categoría')
@@ -104,17 +104,69 @@ const getEditButtonRow = (member, category) => {
 	];
 }
 
+const options = new CommandOptions()
+	.addOptions(
+		new CommandParam('búsqueda', 'ROLE')
+			.setDesc('para ofrecer colocarse un rol')
+			.setOptional(true),
+	);
+
 const flags = new CommandTags().add('HOURAI');
 
 const command = new CommandManager('roles', flags)
 	.setAliases('rol', 'role')
+	.setOptions(options)
 	.setBriefDescription('Pemite a todos elegir algunos roles')
-	.setLongDescription('Establece un punto de reparto de roles para uso colectivo (solo Saki Scans')
-	.setExecution(async request => {
+	.setLongDescription('Establece un punto de reparto de roles para uso colectivo (solo Saki Scans). Alternativamente, puedes indicar un rol que quieras compartir')
+	.setExperimentalExecution(async (request, args) => {
+		const role = args.getRole('búsqueda', true);
+
+		if(role) {
+			const houraiDB = /**@type {import('../../localdata/models/hourai.js').HouraiDocument}*/((await Hourai.findOne({})) || new Hourai({}));
+			const mentionRoles = /**@type {{ [ K: String ]: CategoryContent }}*/(/**@type {unknown}*/(houraiDB.mentionRoles));
+
+			const roleFound = Object.values(mentionRoles).some(category => category.rolePool.some(roleItem => {
+				if(Array.isArray(roleItem))
+					return roleItem.some(r => r.id === role.id);
+
+				return (roleItem.id === role.id)
+			}));
+
+			if(!roleFound)
+				return request.reply({
+					embeds: [
+						new EmbedBuilder()
+							.setColor(Colors.Red)
+							.setTitle('Sin resultados')
+							.setDescription(`❌ No se encontró el rol ${role} entre las categorías de roles de mención auto-asignables`)
+					]
+				});
+
+			return request.reply({
+				embeds: [
+					new EmbedBuilder()
+						.setColor(Colors.Gold)
+						.setAuthor({ name: 'Punto de Reparto desplegado', iconURL: request.user.avatarURL() })
+						.setDescription(`Puedes ponerte o quitarte el rol ${role} con los botones debajo`)
+						.setFooter({ text: 'Usa p!roles sin parámetros para obtener más opciones' })
+				],
+				components: [makeButtonRowBuilder().addComponents(
+					new ButtonBuilder()
+						.setCustomId(`roles_addRole_${role.id}__q`)
+						.setEmoji('1291900911643263008')
+						.setStyle(ButtonStyle.Success),
+					new ButtonBuilder()
+						.setCustomId(`roles_removeRole_${role.id}_q`)
+						.setEmoji('1051265954312617994')
+						.setStyle(ButtonStyle.Danger),
+				)]
+			});
+		}
+
 		return request.reply({
 			embeds: [
 				new EmbedBuilder()
-					.setAuthor({ name: 'Punto de Reparto desplegado', iconURL: (request.author ?? request.user).avatarURL() })
+					.setAuthor({ name: 'Punto de Reparto desplegado', iconURL: request.user.avatarURL() })
 					.setColor(Colors.Gold)
 					.addFields({ name: '¡Se están repartiendo roles!', value: 'Se ha establecido una campaña de suministro de roles. Usa el menú de abajo y selecciona la categoría que quieras' })
 			],
@@ -185,6 +237,12 @@ const command = new CommandManager('roles', flags)
 		return command[operation](interaction, ...received);
 	})
 	.setInteractionResponse(async function selectCustomRole(interaction) {
+		if(!interaction.isRepliable())
+			return;
+
+		if(!interaction.inCachedGuild())
+			return interaction.reply({ content: '❌' });
+
 		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
 		const boostedRecently = isBoosting(interaction.member) || interaction.user.id === require('../../localdata/config.json').peopleid.papita;
 		const customRoleId = houraiDB.customRoles?.[interaction.user.id];
@@ -210,7 +268,7 @@ const command = new CommandManager('roles', flags)
 						},
 					),
 			],
-			components: [new ActionRowBuilder().addComponents(
+			components: [makeButtonRowBuilder().addComponents(
 				(!interaction.member.roles.cache.get(customRoleId)) ? [
 					new ButtonBuilder()
 						.setCustomId('roles_customRole_CREATE')
@@ -236,6 +294,12 @@ const command = new CommandManager('roles', flags)
 		});
 	})
 	.setInteractionResponse(async function selectColor(interaction) {
+		if(!interaction.isRepliable())
+			return;
+
+		if(!interaction.inCachedGuild())
+			return interaction.reply({ content: '❌' });
+
 		return interaction.reply({
 			content: hourai.images.colors,
 			components: [colorsRow],
@@ -243,6 +307,12 @@ const command = new CommandManager('roles', flags)
 		});
 	})
 	.setInteractionResponse(async function selectAnnouncement(interaction) {
+		if(!interaction.isRepliable())
+			return;
+
+		if(!interaction.inCachedGuild())
+			return interaction.reply({ content: '❌' });
+		
 		const newsRole = '1107852759442665592';
 		const hasNews = interaction.member.roles.cache.has(newsRole);
 		return interaction.reply({
@@ -254,7 +324,7 @@ const command = new CommandManager('roles', flags)
 						value: `Serás notificado en <#${hourai.announcementChannelId}> por noticias importantes, eventos y ocasionalmente festividades.\nEste rol te será útil si te interesa alguna o todas esas cosas. No mencionamos muy seguido, tranquilo`,
 					})
 			],
-			components: [new ActionRowBuilder().addComponents([
+			components: [makeButtonRowBuilder().addComponents([
 				new ButtonBuilder()
 					.setEmoji('1107843515385389128')
 					.setLabel('Anuncios')
@@ -264,9 +334,13 @@ const command = new CommandManager('roles', flags)
 			ephemeral: true,
 		});
 	})
-	.setInteractionResponse(async function selectGame(interaction, section, edit = false) {
-		section = parseInt(section);
+	.setInteractionResponse(async function selectGame(interaction, sectionNumber, edit) {
+		if(!interaction.inCachedGuild())
+			return interaction.isRepliable() && interaction.reply({ content: '❌' });
+		
+		const section = parseInt(sectionNumber);
 		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
+		const mentionRoles = /**@type {{ [ K: String ]: CategoryContent }}*/(/**@type {unknown}*/(houraiDB.mentionRoles));
 		const messageActions = {
 			embeds: [
 				new EmbedBuilder()
@@ -274,19 +348,26 @@ const command = new CommandManager('roles', flags)
 					.addFields({ name: 'Roles de Juego', value: 'Roles mencionables para llamar gente a jugar algunos juegos. Si piensas ser de los que llaman a jugar, intenta no abusar las menciones' }),
 			],
 			components: [
-				...getAutoRoleRows(interaction.member, houraiDB.mentionRoles, 'GAMES', section),
-				...getPaginationControls(houraiDB.mentionRoles, 'GAMES', section),
+				...getAutoRoleRows(interaction.member, mentionRoles, 'GAMES', section),
+				...getPaginationControls(mentionRoles, 'GAMES', section),
 				...getEditButtonRow(interaction.member, 'GAMES'),
 			],
 			ephemeral: true,
 		};
 
-		if(edit) return interaction.update(messageActions);
-		return interaction.reply(messageActions);
+		if(edit) return interaction.isMessageComponent() && interaction.update(messageActions);
+		return interaction.isRepliable() && interaction.reply(messageActions);
 	})
-	.setInteractionResponse(async function selectDrink(interaction, section, edit = false) {
-		section = parseInt(section);
+	.setInteractionResponse(async function selectDrink(interaction, sectionNumber, edit) {
+		if(!interaction.isRepliable())
+			return;
+
+		if(!interaction.inCachedGuild())
+			return interaction.reply({ content: '❌' });
+		
+		const section = parseInt(sectionNumber);
 		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
+		const mentionRoles = /**@type {{ [ K: String ]: CategoryContent }}*/(/**@type {unknown}*/(houraiDB.mentionRoles));
 		const messageActions = {
 			embeds: [
 				new EmbedBuilder()
@@ -294,19 +375,20 @@ const command = new CommandManager('roles', flags)
 					.addFields({ name: 'Roles de Bebidas', value: 'Roles decorativos para dar a conocer qué bebidas calientes disfrutas' }),
 			],
 			components: [
-				...getAutoRoleRows(interaction.member, houraiDB.mentionRoles, 'DRINKS', section),
-				...getPaginationControls(houraiDB.mentionRoles, 'DRINKS', section),
+				...getAutoRoleRows(interaction.member, mentionRoles, 'DRINKS', section),
+				...getPaginationControls(mentionRoles, 'DRINKS', section),
 				...getEditButtonRow(interaction.member, 'DRINKS'),
 			],
 			ephemeral: true,
 		};
 
-		if(edit) return interaction.update(messageActions);
+		if(edit) return ('update' in interaction) && interaction.update(messageActions);
 		return interaction.reply(messageActions);
 	})
-	.setSelectMenuResponse(async function selectReligion(interaction, section, edit = false) {
-		section = parseInt(section);
+	.setSelectMenuResponse(async function selectReligion(interaction, sectionNumber, edit) {
+		const section = parseInt(sectionNumber);
 		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
+		const mentionRoles = /**@type {{ [ K: String ]: CategoryContent }}*/(/**@type {unknown}*/(houraiDB.mentionRoles));
 
 		return interaction.reply({
 			embeds: [
@@ -315,37 +397,29 @@ const command = new CommandManager('roles', flags)
 					.addFields({ name: 'Roles de Religión', value: 'Roles para describir tu actitud, ideas y forma de ser. No lo tomes muy en serio... ¿o tal vez sí?' })
 			],
 			components: [
-				...getAutoRoleRows(interaction.member, houraiDB.mentionRoles, 'FAITH', section, true, 'Eliminar Religión'),
-				...getPaginationControls(houraiDB.mentionRoles, 'FAITH', section),
+				...getAutoRoleRows(interaction.member, mentionRoles, 'FAITH', section, true, 'Eliminar Religión'),
+				...getPaginationControls(mentionRoles, 'FAITH', section),
 				...getEditButtonRow(interaction.member, 'FAITH'),
 			],
 			ephemeral: true,
 		});
 	})
 	.setInteractionResponse(async function selectGacha(interaction) {
+		if(!interaction.isRepliable())
+			return;
+
+		if(!interaction.inCachedGuild())
+			return interaction.reply({ content: '❌' });
+
 		return interaction.reply({ content: '🚫 Desactivado por tiempo indefinido', ephemeral: true });
-		const gachaRole = '813194804161806436';
-		const hasGacha = interaction.member.roles.cache.has(gachaRole);
-		return interaction.reply({
-			embeds: [
-				new EmbedBuilder()
-					.setColor(Colors.DarkGold)
-					.addFields({
-						name: 'Mercado de waifus',
-						value: 'Ha de advertirse: una vez dentro, salir es complicado. Entra solo si estás preparado para lo que es básicamente una carrera de gacha con desconocidos y comercio sin regulación (incluye extorsiones)',
-					})
-			],
-			components: [new ActionRowBuilder().addComponents([
-				new ButtonBuilder()
-					.setEmoji('697321858407727224')
-					.setLabel('Gacha')
-					.setCustomId(`roles_${hasGacha ? 'removeRole' : 'addRole'}_${gachaRole}`)
-					.setStyle(hasGacha ? ButtonStyle.Primary : ButtonStyle.Secondary),
-			])],
-			ephemeral: true,
-		});
 	})
 	.setInteractionResponse(async function selectCandy(interaction) {
+		if(!interaction.isRepliable())
+			return;
+
+		if(!interaction.inCachedGuild())
+			return interaction.reply({ content: '❌' });
+		
 		if(!interaction.member.roles.cache.has('1107831054791876691'))
 			return interaction.reply({ content: '🚫 No tienes permiso para hacer eso', ephemeral: true });
 		
@@ -364,7 +438,7 @@ const command = new CommandManager('roles', flags)
 						].join('\n'),
 					})
 			],
-			components: [new ActionRowBuilder().addComponents([
+			components: [makeButtonRowBuilder().addComponents([
 				new ButtonBuilder()
 					.setEmoji('778180421304188939')
 					.setLabel('Caramelos (+18)')
@@ -374,15 +448,31 @@ const command = new CommandManager('roles', flags)
 			ephemeral: true,
 		});
 	})
-	.setButtonResponse(async function addRole(interaction, roleId, category = null) {
+	.setButtonResponse(async function addRole(interaction, roleId, category, requested) {
 		const { member } = interaction;
 
 		if(member.roles.cache.has(roleId))
 			return interaction.reply({ content: '⚠️️ Ya tienes ese rol', ephemeral: true });
 
+		if(requested === 'q') {
+			await Promise.all([
+				interaction.deferReply({ ephemeral: true }),
+				interaction.member.roles.add(roleId),
+			]);
+			return interaction.editReply({
+				embeds: [
+					new EmbedBuilder()
+						.setColor(Colors.Green)
+						.setTitle('✅ Hecho')
+						.setDescription(`Se te asignó el rol <@&${roleId}> correctamente`)
+				],
+			});
+		}
+
 		const newComponents = interaction.message.components;
+		//@ts-expect-error
 		newComponents[0].components = newComponents[0].components.map(component => {
-			const newComponent = ButtonBuilder.from(component);
+			const newComponent = ButtonBuilder.from(/**@type {import('discord.js').JSONEncodable<import('discord.js').APIButtonComponent>}*/(component));
 			const componentRid = component.customId.split('_')[2];
 			
 			if(roleId === componentRid) {
@@ -410,19 +500,35 @@ const command = new CommandManager('roles', flags)
 		]);
 		return interaction.editReply({ components: newComponents });
 	})
-	.setButtonResponse(async function removeRole(interaction, roleId) {
+	.setButtonResponse(async function removeRole(interaction, roleId, requested) {
 		const { member } = interaction;
 
 		if(!member.roles.cache.has(roleId))
 			return interaction.reply({ content: '⚠️️ No tienes ese rol', ephemeral: true });
 
+		if(requested === 'q') {
+			await Promise.all([
+				interaction.deferReply({ ephemeral: true }),
+				interaction.member.roles.remove(roleId),
+			]);
+			return interaction.editReply({
+				embeds: [
+					new EmbedBuilder()
+						.setColor(Colors.Green)
+						.setTitle('✅ Hecho')
+						.setDescription(`Se te quitó el rol <@&${roleId}> correctamente`)
+				],
+			});
+		}
+
 		const newComponents = interaction.message.components;
+		//@ts-expect-error
 		newComponents[0].components = newComponents[0].components.map(component => {
-			const newComponent = ButtonBuilder.from(component);
+			const newComponent = ButtonBuilder.from(/**@type {import('discord.js').JSONEncodable<import('discord.js').APIButtonComponent>}*/(component));
 			const componentRid = component.customId.split('_')[2];
 			if(roleId !== componentRid) return newComponent;
 			
-			if(component.style === ButtonStyle.Primary)
+			if(/**@type {ButtonComponent}*/(component).style === ButtonStyle.Primary)
 				return newComponent
 					.setCustomId(`roles_addRole_${componentRid}`)
 					.setStyle(ButtonStyle.Secondary);
@@ -445,12 +551,12 @@ const command = new CommandManager('roles', flags)
 		if(!rolePool.length)
 			return interaction.reply({ content: '❌ No tienes ningún rol de esta categoría', ephemeral: true });
 
-		/**@type {Array<ActionRowBuilder>}*/
 		const newComponents = interaction.message.components;
+		//@ts-expect-error
 		newComponents[0].components = newComponents[0].components.map(component => {
-			const newComponent = ButtonBuilder.from(component);
+			const newComponent = ButtonBuilder.from(/**@type {import('discord.js').JSONEncodable<import('discord.js').APIButtonComponent>}*/(component));
 			const [ _, functionName, componentRid ] = component.customId.split('_');
-			if(component.style === ButtonStyle.Secondary) return newComponent;
+			if(/**@type {ButtonComponent}*/(component).style === ButtonStyle.Secondary) return newComponent;
 			if(functionName === 'removeRole')
 				newComponent.setCustomId(`roles_addRole_${componentRid}`)
 			return newComponent.setStyle(ButtonStyle.Secondary);
@@ -463,9 +569,8 @@ const command = new CommandManager('roles', flags)
 		interaction.editReply({ components: newComponents });
 	})
 	.setButtonResponse(async function customRole(interaction, operation) {
-		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
+		const houraiDB = (await Hourai.findOne({})) || new Hourai({ customRoles: {} });
 		const userId = interaction.user.id;
-		houraiDB.customRoles ??= {};
 
 		switch(operation) {
 			case 'CREATE': {
@@ -505,7 +610,6 @@ const command = new CommandManager('roles', flags)
 						content: '🗑 Rol personalizado eliminado',
 						embeds: [],
 						components: [],
-						ephemeral: true,
 					}),
 				]);
 			}
@@ -545,9 +649,9 @@ const command = new CommandManager('roles', flags)
 			.setPlaceholder('Ejemplo: https://cdn.discordapp.com/emojis/828736342372253697.webp');
 
 		const rows = [
-			new ActionRowBuilder().addComponents(nameInput),
-			new ActionRowBuilder().addComponents(colorInput),
-			new ActionRowBuilder().addComponents(emoteUrlInput),
+			makeTextInputRowBuilder().addComponents(nameInput),
+			makeTextInputRowBuilder().addComponents(colorInput),
+			makeTextInputRowBuilder().addComponents(emoteUrlInput),
 		];
 
 		const modal = new ModalBuilder()
@@ -574,9 +678,9 @@ const command = new CommandManager('roles', flags)
 			);
 
 		if(roleColor.length) {
-			roleColor = stringHexToNumber(roleColor);
+			const roleColorNumber = stringHexToNumber(roleColor);
 			editStack.push(
-				customRole.edit({ color: roleColor })
+				customRole.edit({ color: roleColorNumber })
 				.catch(_ => replyStack.push('⚠️ No se pudo actualizar el color del rol'))
 			);
 		}

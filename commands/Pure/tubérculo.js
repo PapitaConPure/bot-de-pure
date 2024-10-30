@@ -59,7 +59,7 @@ function paginationRows(page, lastPage, navigationEnabled = true) {
 const helpRows = () => [
 	makeButtonRowBuilder().addComponents(
 		new ButtonBuilder()
-			.setURL('https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link')
+			.setURL('https://papitaconpure.github.io/ps-docs/')
 			.setLabel(`Aprende PuréScript (v${CURRENT_PS_VERSION})`)
 			.setEmoji('📖')
 			.setStyle(ButtonStyle.Link),
@@ -143,7 +143,7 @@ const helpString = (/**@type {import('../Commons/typings.js').ComplexCommandRequ
 	'* 🔍 **Ver Tubérculo** — `p!t --ver saludo` o `p!t -v saludo`',
 	'* 🗑️ **Borrar Tubérculo** — `p!t --borrar saludo` o `p!t -b saludo`',
 	'* ✏️ **Crear o editar Tubérculo simple** — `p!t --crear saludo ¡Hola!` o `p!t -c saludo ¡Hola!`',
-	`-# Usa \`${p_pure(request.guildId).raw}ayuda tubérculo\` para más información. Si quieres crear un Tubérculo avanzado, puedes leer la [documentación más reciente de PuréScript](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link) (**v${CURRENT_PS_VERSION}**).`,
+	`-# Usa \`${p_pure(request.guildId).raw}ayuda tubérculo\` para más información. Si quieres crear un Tubérculo avanzado, puedes leer la [documentación más reciente de PuréScript](https://papitaconpure.github.io/ps-docs/read/purescript1.10.pdf) (**v${CURRENT_PS_VERSION}**).`,
 ].join('\n');
 
 const options = new CommandOptions()
@@ -213,7 +213,7 @@ const command = new CommandManager('tubérculo', flags)
 		'Para `--crear` (o *editar*) un Tubérculo, se requerirá un `<mensaje>` y/o `<archivos>`, junto a la `<id>` que quieras darle al mismo. Si la ID ya existe, será *editada*',
 		'Para `--borrar` un Tubérculo, igualmente debes indicar su `<id>`',
 		'Escribe los indicadores `--crear --script` (o `-cs`) para crear un **Tubérculo avanzado con PuréScript**',
-		'[Clickea esto para leer la documentación de PuréScript](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link)'
+		'[Clickea esto para leer la documentación de PuréScript](https://papitaconpure.github.io/ps-docs/)'
 	)
 	.setOptions(options)
 	.setExperimental(true)

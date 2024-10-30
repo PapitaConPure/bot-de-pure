@@ -8,7 +8,7 @@ const { tenshiColor } = require('../../localdata/config.json');
 const { makeButtonRowBuilder } = require('../../tsCasts');
 
 const psDocsButton = new ButtonBuilder()
-	.setURL('https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link')
+	.setURL('https://papitaconpure.github.io/ps-docs/')
 	.setLabel(`Aprende PuréScript (v${CURRENT_PS_VERSION})`)
 	.setEmoji('📖')
 	.setStyle(ButtonStyle.Link);
@@ -43,7 +43,7 @@ const command = new CommandManager('purescript', flags)
 		'> ENVIAR "Hola mundo"',
 		'> \\`\\`\\`',
 		'',
-		'Puedes obtener la documentación de PuréScript desde [aquí](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link) (~6MiB)',
+		'Puedes leer la documentación de PuréScript [aquí](https://papitaconpure.github.io/ps-docs/)',
 		`Última versión: **v${CURRENT_PS_VERSION}**`
 	)
 	.setOptions(options)
