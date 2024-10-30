@@ -77,7 +77,7 @@ Como personaje, es una robot torpe y agresiva en algunos casos, pero parece mete
     ![simpletuber](https://github.com/user-attachments/assets/5175ccc6-7089-4cd4-a4d2-d26746eda544)
   - Los "Tubérculos avanzados" ejecutan una serie de instrucciones **PuréScript** para enviar respuestas más elaboradas<br>
     ![pstuber](https://github.com/user-attachments/assets/a434e3c5-8993-4672-bc04-5564c7418d7b)
-  - Puedes leer la documentación detallada del lenguaje PuréScript [aquí](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link)<br>
+  - Puedes leer la documentación detallada del lenguaje PuréScript [aquí](https://papitaconpure.github.io/ps-docs/)<br>
     ![psdocs](https://i.imgur.com/T6kxYxq.png)
 * Herramientas de moderación y estadísticas (más por venir)
 * Minijuegos (más por venir)
