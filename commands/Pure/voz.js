@@ -463,20 +463,36 @@ const command = new CommandManager('voz', flags)
 		session.frozen = !session.frozen;
 
 		const allowedMembers = getFrozenSessionAllowedMembers(voiceChannel, session.members);
-		const userLimit = session.frozen ? allowedMembers.size : 0;
+		const userLimitReason = `Actualizar límite de usuarios de sesión PuréVoice ${session.frozen ? 'congelada' : 'descongelada'}`;
+		const everyone = interaction.guild.roles.everyone;
 
-		for(const [ memberId, member ] of allowedMembers) {
-			session.members.set(memberId, member.setWhitelisted(true).toJSON());
-			await voiceChannel.permissionOverwrites.edit(memberId, { Connect: true }, { reason: 'PLACEHOLDER_PV_REASON_FREEZE_CONNECT_ENABLE' }).catch(console.error);
+		if(session.frozen) {
+			for(const [ memberId, member ] of allowedMembers) {
+				session.members.set(memberId, member.setWhitelisted(true).toJSON());
+				await voiceChannel.permissionOverwrites.edit(memberId, { Connect: true }, { reason: 'PLACEHOLDER_PV_REASON_FREEZE_CONNECT_ENABLE' }).catch(console.error);
+			}
+			
+			session.markModified('members');
+
+			await Promise.all([
+				voiceChannel.setUserLimit(allowedMembers.size, userLimitReason).catch(console.error),
+				voiceChannel.permissionOverwrites.edit(everyone, { Connect: false }, { reason: 'PLACEHOLDER_PV_REASON_FREEZE_CONNECT_DISABLE' }).catch(console.error),
+				session.save(),
+			]);
+		} else {
+			await Promise.all([
+				voiceChannel.setUserLimit(0, userLimitReason).catch(console.error),
+				voiceChannel.permissionOverwrites.delete(everyone, 'PLACEHOLDER_PV_REASON_UNFREEZE_CONNECT_DEFAULT').catch(console.error),
+			]);
+
+			for(const [ memberId, member ] of allowedMembers) {
+				session.members.set(memberId, member.setWhitelisted(true).toJSON());
+				await voiceChannel.permissionOverwrites.delete(memberId, 'PLACEHOLDER_PV_REASON_UNFREEZE_CONNECT_DEFAULT').catch(console.error);
+			}
+
+			session.markModified('members');
+			await session.save();
 		}
-
-		session.markModified('members');
-
-		await Promise.all([
-			voiceChannel.setUserLimit(userLimit, `Actualizar límite de usuarios de sesión PuréVoice ${session.frozen ? 'congelada' : 'descongelada'}`).catch(console.error),
-			voiceChannel.permissionOverwrites.edit(interaction.guild.roles.everyone, { Connect: false }, { reason: 'PLACEHOLDER_PV_REASON_FREEZE_CONNECT_DISABLE' }).catch(console.error),
-			session.save(),
-		]);
 		
 		return interaction.editReply({
 			content: `❄️ La sesión ${voiceChannel} fue **${session.frozen ? 'congelada' : 'descongelada'}**`,
