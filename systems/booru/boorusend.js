@@ -53,6 +53,7 @@ const sources = [
 	{ color: 0xff6c60, emoji: '919403803114094682',  pattern: /nitter\.net/ },
 	{ color: 0xff5c67, emoji: '1298674477470716106', pattern: /booth\.pm/ },
 	{ color: 0xff0000, emoji: '1298671334246715453', pattern: /youtube\.com/ },
+	{ color: 0x1e2327, emoji: '1303457942468690050', pattern: /github\.com/ },
 ];
 
 /**@type {SourceStyle}*/
