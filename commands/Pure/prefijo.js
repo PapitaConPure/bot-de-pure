@@ -40,12 +40,11 @@ const command = new CommandManager('prefijo', flags)
 		if(!prefix) {
 			const embed = new EmbedBuilder()
 				.setColor(global.tenshiColor)
-				.setAuthor({ name: request.guild.name, iconURL: request.guild.iconURL({ size: 128 }) ?? request.client.user.displayAvatarURL({ size: 128 }) })
 				.setFooter({ text: `Usa "${preraw}ayuda" para más información` })
 				.addFields(
 					{
 						name: 'Prefijo actual',
-						value: 'preraw',
+						value: preraw,
 						inline: true,
 					},
 					{
