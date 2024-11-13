@@ -8,8 +8,8 @@ const { registerCommandFiles } = require('./commandInit.js');
 const { events, startupData, onCriticalError } = require('./events/events.js');
 console.timeEnd('Carga de inicio');
 
-// @ts-ignore
-globalConfigs.p_pure['0'] = { raw: 'p!', regex: /^[Pp] *![\n ]*/ };
+// @ts-expect-error
+globalConfigs.p_pure['0'] = { raw: 'p!', regex: /^p *!\s*/i };
 globalConfigs.booruCredentials.apiKey = startupData.booruApiKey;
 globalConfigs.booruCredentials.userId = startupData.booruUserId;
 
