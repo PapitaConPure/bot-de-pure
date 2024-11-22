@@ -285,7 +285,11 @@ function convertToDiscordEmbed(embedData) {
     const data = embedData.data;
 
     if(data.author)
-        embed.setAuthor(data.author);
+        embed.setAuthor({
+            name: data.author.name,
+            iconURL: data.author.iconUrl,
+            url: data.author.url,
+        });
 
     if(data.color)
         embed.setColor(data.color);
@@ -297,7 +301,10 @@ function convertToDiscordEmbed(embedData) {
         embed.addFields(...data.fields);
 
     if(data.footer)
-        embed.setFooter(data.footer);
+        embed.setFooter({
+            text: data.footer.text,
+            iconURL: data.footer.iconUrl,
+        });
 
     if(data.imageUrl)
         embed.setImage(data.imageUrl);
@@ -317,6 +324,7 @@ function convertToDiscordEmbed(embedData) {
     return embed;
 }
 
+/**@param {*} message*/
 function TuberVersionError(message) {
     const err = new Error(message);
     err.name = 'TuberVersionError';
