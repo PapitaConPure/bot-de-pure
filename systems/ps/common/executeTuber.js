@@ -129,6 +129,7 @@ async function executeTuber(request, tuber, inputOptions = {}) {
 
         const scope = new Scope(interpreter);
 		const envProvider = new DiscordEnvironmentProvider(request);
+        await envProvider.prefetchOwner();
         declareNatives(scope);
         await declareContext(scope, envProvider, savedData);
         result = interpreter.evaluateProgram(program, scope, tuber.script, envProvider, args, isTestDrive);
@@ -199,7 +200,7 @@ async function executeTuber(request, tuber, inputOptions = {}) {
     for(const sendItem of sendStack) {
         switch(sendItem.kind) {
         case ValueKinds.EMBED:
-            replyStacks.embeds.push(sendItem.value);
+            replyStacks.embeds.push(convertToDiscordEmbed(sendItem.value));
             break;
         default:
             replyStacks.content.push(coerceValue(interpreter, sendItem, 'Text').value);
@@ -273,6 +274,48 @@ async function executeTuber(request, tuber, inputOptions = {}) {
 
     return returned;
 };
+
+/**
+ * 
+ * @param {import('../v1.1/embedData').EmbedData} embedData 
+ * @returns {EmbedBuilder}
+ */
+function convertToDiscordEmbed(embedData) {
+    const embed = new EmbedBuilder();
+    const data = embedData.data;
+
+    if(data.author)
+        embed.setAuthor(data.author);
+
+    if(data.color)
+        embed.setColor(data.color);
+
+    if(data.description)
+        embed.setDescription(data.description);
+
+    if(data.fields?.length)
+        embed.addFields(...data.fields);
+
+    if(data.footer)
+        embed.setFooter(data.footer);
+
+    if(data.imageUrl)
+        embed.setImage(data.imageUrl);
+
+    if(data.thumbUrl)
+        embed.setThumbnail(data.thumbUrl);
+
+    if(data.timestamp)
+        embed.setTimestamp(data.timestamp);
+
+    if(data.title)
+        embed.setTitle(data.title);
+
+    if(data.url)
+        embed.setURL(data.url);
+
+    return embed;
+}
 
 function TuberVersionError(message) {
     const err = new Error(message);
