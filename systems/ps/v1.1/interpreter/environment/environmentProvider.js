@@ -117,8 +117,16 @@ class PSGuild {
 		}
 
 		const owner = this.members.get(ownerId);
-		if(!owner) throw new ReferenceError('Owner not found');
-		this.owner = owner;
+		this.owner = owner ?? new PSMember({
+			user: new PSUser({
+				id: ownerId,
+				username: 'Dueño desconocido',
+				displayName: 'Nombre de dueño desconocido',
+			}),
+			guild: this,
+			roleIds: [],
+			displayAvatarUrlHandler: options => '',
+		});
 		
 		if(systemChannelId) {
 			const systemChannel = this.channels.get(systemChannelId)

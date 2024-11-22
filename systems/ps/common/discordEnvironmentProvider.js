@@ -3,8 +3,13 @@ const { EnvironmentProvider, PSGuild, PSChannel, PSRole, PSUser, PSMember } = re
 
 /**@implements {EnvironmentProvider}*/
 class DiscordEnvironmentProvider {
+	/**@readonly @type {number}*/
+	static CACHE_LIFETIME = 5e3;
+
 	/**@type {Map<string, { validUntil: number, guild: PSGuild }>}*/
 	static #GUILDS = new Map();
+	/**@type {Map<string, { validUntil: number, owner: import('discord.js').GuildMember? }>}*/
+	static #OWNERS = new Map();
 
 	/**@type {import('../../../commands/Commons/typings').ComplexCommandRequest}*/
 	#request;
@@ -15,6 +20,13 @@ class DiscordEnvironmentProvider {
 	 */
 	constructor(request) {
 		this.#request = request;
+	}
+
+	async prefetchOwner() {
+		DiscordEnvironmentProvider.#OWNERS.set(this.#request.guild.ownerId, {
+			validUntil: Date.now() + DiscordEnvironmentProvider.CACHE_LIFETIME,
+			owner: await this.#request.guild.fetchOwner(),
+		});
 	}
 
 	/**
@@ -92,6 +104,32 @@ class DiscordEnvironmentProvider {
 		if(existingPsGuild && Date.now() < existingPsGuild.validUntil)
 			return existingPsGuild.guild;
 
+		/**@type {Array<Omit<import('../v1.1/interpreter/environment/environmentProvider').PSMemberCreationData, 'guild'>>}*/
+		const members = guild.members.cache.map((m, id) => ({
+			user: new PSUser({
+				id,
+				username: m.user.username,
+				displayName: m.user.displayName,
+			}),
+			displayAvatarUrlHandler: options => m.displayAvatarURL(options),
+			roleIds: m.roles.cache.map(r => r.id),
+			nickname: m.nickname,
+		}));
+
+		if(!guild.members.cache.get(guild.ownerId)) {
+			const owner = DiscordEnvironmentProvider.#OWNERS.get(guild.ownerId).owner;
+			owner && members.push({
+				user: new PSUser({
+					id: owner.id,
+					username: owner.user.username,
+					displayName: owner.user.displayName,
+				}),
+				nickname: owner.nickname,
+				roleIds: owner.roles.cache.map(r => r.id),
+				displayAvatarUrlHandler: options => owner.displayAvatarURL(options),
+			});
+		}
+
 		const psGuild = new PSGuild({
 			id: guild.id,
 			name: guild.name,
@@ -103,16 +141,7 @@ class DiscordEnvironmentProvider {
 				name: ch.name,
 				nsfw: ch.isSendable() ? (ch.isThread() ? ch.parent.nsfw : ch.nsfw) : false,
 			})),
-			members: guild.members.cache.map((m, id) => ({
-				user: new PSUser({
-					id,
-					username: m.user.username,
-					displayName: m.user.displayName,
-				}),
-				displayAvatarUrlHandler: options => m.displayAvatarURL(options),
-				roleIds: m.roles.cache.map(r => r.id),
-				nickname: m.nickname,
-			})),
+			members,
 			roles: guild.roles.cache.map((r, id) => ({
 				id,
 				name: r.name,
@@ -125,7 +154,7 @@ class DiscordEnvironmentProvider {
 		});
 
 		DiscordEnvironmentProvider.#GUILDS.set(guild.id, {
-			validUntil: Date.now() + 5e3, //5 segundos
+			validUntil: Date.now() + DiscordEnvironmentProvider.CACHE_LIFETIME, //5 segundos
 			guild: psGuild,
 		});
 
