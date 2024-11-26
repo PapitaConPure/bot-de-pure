@@ -691,7 +691,7 @@ const command = new CommandManager('feed', flags)
 			components: [row],
 		});
 	}, { userFilterIndex: 1 })
-	.setButtonResponse(async function customizeTitle(interaction, channelId) {
+	.setButtonResponse(async function customizeTitle(interaction, channelId, authorId) {
 		const titleInput = new TextInputBuilder()
 			.setCustomId('titleInput')
 			.setLabel('Título')
@@ -701,7 +701,7 @@ const command = new CommandManager('feed', flags)
 			.setMaxLength(255);
 		const row = makeTextInputRowBuilder().addComponents(titleInput);
 		const modal = new ModalBuilder()
-			.setCustomId(`feed_setCustomTitle_${channelId}`)
+			.setCustomId(`feed_setCustomTitle_${channelId}_${authorId}`)
 			.setTitle('Personalización de Feed')
 			.addComponents(row);
 
