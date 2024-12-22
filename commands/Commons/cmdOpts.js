@@ -865,7 +865,7 @@ class CommandOptions {
 
 		if(flag.isExpressive()) {
 			if(isParamTypeStrict(flag._type))
-				throw "No se pueden tener expresiones estrictas en una flag de comando";
+				getMethod = 'getString';
 			else
 				getMethod = ParamTypes(flag._type)?.getMethod ?? 'getString';
 		}
@@ -958,7 +958,7 @@ class CommandOptionSolver {
 	 */
 	get iterator() {
 		if(!this.isMessageSolver(this.#args))
-			throw 'No se puede extraer un "siguiente parámetro" de un Comando Slash';
+			throw new Error('No se puede extraer un "siguiente parámetro" de un Comando Slash');
 
 		const args = this.#args.slice();
 		return {
@@ -980,7 +980,7 @@ class CommandOptionSolver {
 	 */
 	next() {
 		if(!this.isMessageSolver(this.#args))
-			throw 'No se puede extraer un "siguiente parámetro" de un Comando Slash';
+			throw new Error('No se puede extraer un "siguiente parámetro" de un Comando Slash');
 
 		return this.#args.shift();
 	}
@@ -992,7 +992,7 @@ class CommandOptionSolver {
 	 */
 	hasNext() {
 		if(!this.isMessageSolver(this.#args))
-			throw 'No se puede extraer un "siguiente parámetro" de un Comando Slash';
+			throw new Error('No se puede extraer un "siguiente parámetro" de un Comando Slash');
 
 		return this.#args.length > 0;
 	}
