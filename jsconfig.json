@@ -1,11 +1,10 @@
 {
     "compilerOptions": {
+        "target": "ES2023",
         "checkJs": true,
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
+        "module": "CommonJS",
+        "moduleResolution": "node",
         "resolveJsonModule": true,
-        "resolvePackageJsonImports": true,
-        "resolvePackageJsonExports": true,
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
         "paths": {
