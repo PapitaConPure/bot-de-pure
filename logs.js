@@ -29,8 +29,12 @@ const LogLevelColors = /**@type {const}*/({
     FATAL: chalk.whiteBright.bgRgb(0, 0, 255),
 });
 
+const longestLogLevelName = Object.values(LogLevelNames)
+    .map(name => name.length)
+    .reduce((a, b) => a > b ? a : b, 0);
+
 /**@param {keyof LogLevels} logLevel*/
-const logLevelPrefix = logLevel => LogLevelColors[logLevel](LogLevelNames[logLevel]);
+const logLevelPrefix = logLevel => LogLevelColors[logLevel](LogLevelNames[logLevel].padEnd(longestLogLevelName));
 
 /**@param {keyof LogLevels} logLevel*/
 const logLevelOutput = (logLevel, ...data) => LogLevelColors[logLevel](...data);
