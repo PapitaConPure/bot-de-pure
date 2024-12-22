@@ -16,7 +16,7 @@ const command = new CommandManager('hora', flags)
 		'Recuerda que no soy adivina, así que siempre ingresa tu huso local si no quieres que se tome como GMT+0',
 	)
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args, isSlash) => {
+	.setExperimentalExecution(async (request, args) => {
 		const gmt = args.parseFlagExpr('gmt', x => +x, 0);
 
 		//Definir fecha
@@ -31,7 +31,6 @@ const command = new CommandManager('hora', flags)
 			if(month > 12 || year > 9999) isInvalidDate = true;
 			month -= 1;
 			const lastDay = (new Date(year, month + 1, 0)).getDate();
-			console.log(day, lastDay);
 			if(day > lastDay) isInvalidDate = true;
 			if(isInvalidDate) return request.reply('⚠️ Fecha inválida. Asegúrate de seguir el formato DD/MM/AAAA');
 		} else {
