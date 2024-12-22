@@ -12,3 +12,5 @@
  * @template T
  * @typedef {{[K in keyof T]: T[K]} & {}} Flatten
  */
+
+module.exports = {};
