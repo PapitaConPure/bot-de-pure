@@ -30,12 +30,46 @@ const command = new CommandManager('voz', flags)
 	.setOptions(options)
 	.setExperimentalExecution(async (request, args) => {
 		const translator = await Translator.from(request.user);
+		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda voz\` para más información`;
 
 		if(args.parseFlag('asistente'))
 			return generateFirstWizard(request, translator);
+
+		//Comprobar si se está en una sesión
+		const voiceState = request.member.voice;
+		const warnNotInSession = () => request.reply({
+			content: translator.getText('voiceCommandRenameMemberExpected', p_pure(request.guildId).raw),
+			ephemeral: true,
+		}).catch(console.error);
+
+		const createInvite = args.parseFlag('invitar');
+		if(createInvite) {
+			if(!voiceState?.channelId)
+				return warnNotInSession();
+			
+			try {
+				const invite = await request.guild.invites.create(voiceState.channel, { maxAge: 5 * 60 });
+
+				if(invite)
+					return request.reply({ content: `${invite}` });
+
+				const channelRef = `${voiceState.channel ?? '⚠️️ Canal inválido'}`;
+				const embed = new EmbedBuilder()
+					.setColor('Blurple')
+					.setAuthor({
+						name: request.member.displayName,
+						iconURL: request.member.displayAvatarURL(),
+					})
+					.addFields({ name: 'Invitación a canal', value: channelRef });
+
+				return request.reply({ embeds: [embed] });
+			} catch(err) {
+				console.error(err);
+				return request.reply({ content: '⚠️️ ¡Ocurrió un problema al crear la invitación! Por favor inténtalo nuevamente' })
+			}
+		}
 		
 		//Cambiar nombre de canal de voz de sesión
-		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda voz\` para más información`;
 		const emoteString = args.parseFlagExpr('emote', x => `${x}`, '💠');
 		const sessionEmote = defaultEmoji(emoteString);
 		const sessionName = args.getString('nombre', true);
@@ -66,35 +100,8 @@ const command = new CommandManager('voz', flags)
 				ephemeral: true,
 			});
 
-		//Comprobar si se está en una sesión
-		const voiceState = request.member.voice;
-		const warnNotInSession = () => request.reply({
-			content: translator.getText('voiceCommandRenameMemberExpected', p_pure(request.guildId).raw),
-			ephemeral: true,
-		}).catch(console.error);
-
 		if(!voiceState?.channelId)
 			return warnNotInSession();
-
-		const createInvite = args.parseFlag('invitar');
-
-		if(createInvite) {
-			const invite = await request.guild.invites.create(voiceState.channel, { maxAge: 5 * 60 }).catch(_ => null);
-
-			if(invite)
-				return request.reply({ content: `${invite}` });
-
-			const channelRef = `${voiceState.channel ?? '⚠️️ Canal inválido'}`;
-			const embed = new EmbedBuilder()
-				.setColor('Blurple')
-				.setAuthor({
-					name: request.member.displayName,
-					iconURL: request.member.displayAvatarURL(),
-				})
-				.addFields({ name: 'Invitación a canal', value: channelRef });
-
-			return request.reply({ embeds: [embed] });
-		}
 
 		//Modificar sesión y confirmar
 		const session = await PureVoiceSessionModel.findOne({ channelId: voiceState.channelId });
