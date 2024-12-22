@@ -7,6 +7,9 @@ const { Translator } = require('../../internationalization');
 const chalk = require('chalk');
 const { ButtonStyle, ChannelType } = require('discord.js');
 const { makeButtonRowBuilder } = require('../../tsCasts');
+const Logger = require('../../logs.js');
+
+const { debug, info, warn, error, fatal } = Logger('DEBUG', 'PV');
 
 /**
  * 
@@ -59,19 +62,19 @@ class PureVoiceUpdateHandler {
      * @returns {Promise<void>}
      */
     async getSystemDocument(documentQuery) {
-        this.pvDocument = await PureVoiceModel.findOne(documentQuery).catch(err => { console.error(err); return undefined; });
+        this.pvDocument = await PureVoiceModel.findOne(documentQuery).catch(err => { error(err); return undefined; });
     };
 
     async relinkDocument() {
         const documentId = this.pvDocument.id;
-        this.pvDocument = await PureVoiceModel.findById(documentId).catch(err => { console.error(err); return undefined; });
+        this.pvDocument = await PureVoiceModel.findById(documentId).catch(err => { error(err); return undefined; });
     };
 
     /** Comprueba si hay un sistema PuréVoice instalado en el servidor actual o no */
     systemIsInstalled = () => (!!(this.pvDocument && this.state.guild.channels.cache.get(this.pvDocument.categoryId)));
     
     /** Para controlar errores ocasionados por una eliminación prematura de uno de los canales asociados a una sesión */
-    prematureError = _ => console.log(chalk.gray('Canal probablemente eliminado prematuramente'));
+    prematureError = _ => warn(chalk.gray('Canal probablemente eliminado prematuramente'));
     
     /** Comprueba si el cambio de estado no es un movimiento entre canales de voz */
     isNotConnectionUpdate = _ => (this.oldState.channelId === this.state.channelId);
@@ -87,17 +90,29 @@ class PureVoiceUpdateHandler {
 
         const { pvDocument, oldState, prematureError } = this;
         const { guild, channel: oldChannel, member } = oldState;
-        if(!oldChannel) return;
+        if(!oldChannel) {
+            debug('No hubo un canal anterior en proceso de desconexión. Se trata de una conexión pura. Descartando');
+            return;
+        }
+
+        info(`Desconexión de canal de voz detectada para #${oldChannel.name} (${oldChannel.id})`);
 
         try {
             const sessionId = pvDocument.sessions.find(sid => sid === oldChannel.id);
-            if(!sessionId) return;
+            if(!sessionId) {
+                debug('El canal no forma parte del sistema PuréVoice del servidor. Ignorando');
+                return;
+            };
 
             const session = await PureVoiceSessionModel.findOne({ channelId: sessionId });
-            if(!session) return;
+            if(!session) {
+                warn(`Se encontró la ID de sesión "${sessionId}" en el servidor, pero no se encontró un documento PureVoiceSessionModel acorde a la misma`);
+                return;
+            }
 
             const sessionRole = guild.roles.cache.get(session.roleId);
 
+            //Si la desconexión no es "fatal", simplemente asegurarse que haya un panel de control y quitarle los permisos del mismo al miembro
             if(oldChannel.members.filter(member => !member.user.bot).size) {
                 let controlPannel = /**@type {Discord.TextChannel}*/(guild.channels.cache.get(pvDocument.controlPanelId));
                 if(!controlPannel) {
@@ -112,6 +127,7 @@ class PureVoiceUpdateHandler {
                     controlPannel.permissionOverwrites.delete(member);
 
                 member.roles.remove(sessionRole, 'Desconexión de miembro de sesión PuréVoice').catch(prematureError);
+                info('La desconexión no es fatal. Se adaptó el panel de control acordemente');
                 return;
             }
 
@@ -123,6 +139,7 @@ class PureVoiceUpdateHandler {
             
             const controlPannel = /**@type {Discord.TextChannel}*/(guild.channels.cache.get(pvDocument.controlPanelId));
             
+            debug('Eliminando componentes de sesión PuréVoice...');
             const deletionMessage = 'Eliminar componentes de sesión PuréVoice';
             return Promise.all([
                 session.remove(),
@@ -130,20 +147,20 @@ class PureVoiceUpdateHandler {
                 controlPannel?.permissionOverwrites?.delete(member, deletionMessage)?.catch(prematureError),
                 sessionRole?.delete(deletionMessage)?.catch(prematureError),
             ]);
-        } catch(error) {
-            console.error(error);
+        } catch(err) {
+            error(err);
             if(!guild.systemChannelId)
                 return guild.fetchOwner().then(owner => owner.send({ content: [
                     `⚠️ Ocurrió un problema en un intento de remover una sesión del Sistema PuréVoice de tu servidor **${guild.name}**.`,
                     'Esto puede deberse a una conexión en una sesión PuréVoice que estaba siendo eliminada.',
                     'Si el par de canales relacionales de la sesión fueron eliminados, puedes ignorar este mensaje.',
-                ].join('\n') }).catch(console.error));
+                ].join('\n') }).catch(error));
             
             return guild.systemChannel.send({ content: [
                 '⚠️ Ocurrió un problema en un intento de remover una sesión del Sistema PuréVoice del servidor.',
                 'Esto puede deberse a una conexión en una sesión PuréVoice que estaba siendo eliminada.',
                 'Si el par de canales relacionales de la sesión fueron eliminados, puedes ignorar este mensaje',
-            ].join('\n') }).catch(console.error);
+            ].join('\n') }).catch(error);
         }
     };
 
@@ -158,6 +175,8 @@ class PureVoiceUpdateHandler {
         const { pvDocument, state, prematureError } = this;
         const { guild, channel, member } = state;
         if(!channel || channel?.parentId !== pvDocument.categoryId) return;
+
+        info(`Conexión a canal de voz detectada para #${channel.name} (${channel.id})`);
         
         //Embed de notificación
         const embed = new Discord.EmbedBuilder()
@@ -165,14 +184,24 @@ class PureVoiceUpdateHandler {
 
         if(channel.id !== pvDocument.voiceMakerId) {
             const currentSessionId = pvDocument.sessions.find(sid => sid === channel.id);
-            if(!currentSessionId) return;
+            if(!currentSessionId) {
+                debug('El canal no forma parte del sistema PuréVoice del servidor. Ignorando');
+                return;
+            }
 
             const currentSession = await PureVoiceSessionModel.findOne({ channelId: currentSessionId });
-            if(!currentSession) return;
-
+            if(!currentSession) {
+                warn(`Se encontró la ID de sesión "${currentSessionId}" en el servidor, pero no se encontró un documento PureVoiceSessionModel acorde a la misma`);
+                return;
+            }
+            
             const sessionRole = guild.roles.cache.get(currentSession.roleId);
-            if(!sessionRole) return;
-    
+            if(!sessionRole) {
+                warn(`Se encontró la ID de sesión "${currentSessionId}" en el servidor, y el documento PureVoiceSessionModel acorde a la misma.`
+                    + ` Sin embargo, no se encontró el rol "${currentSession.roleId}" que debía estar relacionado a la sesión`);
+                return;
+            }
+
             const translator = member.user.bot ? (new Translator('es')) : await Translator.from(member);
 
             const dbMember = currentSession.members.get(member.id);
@@ -181,11 +210,17 @@ class PureVoiceUpdateHandler {
                 role: PureVoiceSessionMemberRoles.GUEST,
             });
 
-            if(currentSession.frozen && !sessionMember.isAllowedEvenWhenFreezed())
+            if(currentSession.frozen && !sessionMember.isAllowedEvenWhenFreezed()) {
+                info(`Se desconectó al miembro "${member.user.username}" (${member.id}) del canal de voz de sesión: #${channel.name} (${channel.id}),`
+                    + ` debido a que no está autorizado a ingresar al mismo`);
                 return member.voice.disconnect('Desconexión forzada de usuario que no forma parte de una sesión PuréVoice congelada').catch(prematureError);
+            }
 
-            if(sessionMember.isBanned())
+            if(sessionMember.isBanned()) {
+                info(`Se desconectó al miembro "${member.user.username}" (${member.id}) del canal de voz de sesión: #${channel.name} (${channel.id}),`
+                    + ` debido a que su entrada al mismo fue explícitamente prohibida por un administrador o moderador de sesión`);
                 return member.voice.disconnect('Desconexión forzada de usuario no permitido en una sesión PuréVoice').catch(prematureError);
+            }
 
             const controlPanel = /**@type {Discord.TextChannel}*/(guild.channels.cache.get(pvDocument.controlPanelId));
 
@@ -195,6 +230,8 @@ class PureVoiceUpdateHandler {
             ]);
 
             if(dbMember) return;
+
+            info(`Dará lugar el registro de un nuevo miembro de sesión: "${member.user.username}" (${member.id}), para la sesión del canal: #${channel.name} (${channel.id})`);
             
             const userConfigs = await UserConfigs.findOne({ userId: member.id }) || new UserConfigs({ userId: member.id });
 
@@ -388,10 +425,10 @@ class PureVoiceUpdateHandler {
                     channel?.send({ content: '🔹 Se asignó un nombre a la sesión automáticamente' }),
                     channel?.setName(`💠【${name}】`, namingReason),
                     sessionRole?.setName(`💠 ${name}`, namingReason),
-                ]).catch(console.error);
+                ]).catch(error);
             }, 60e3 * 3);
-        } catch(error) {
-            console.error(error);
+        } catch(err) {
+            error(err);
             if(!guild.systemChannelId)
                 return guild.fetchOwner().then(owner => owner.send({ content: [
                     `⚠️ Ocurrió un problema al crear una nueva sesión para el Sistema PuréVoice de tu servidor **${guild.name}**. Esto puede deberse a una saturación de acciones o a falta de permisos.`,
@@ -468,7 +505,7 @@ class PureVoiceOrchestrator {
 
     async consumeHandler() {
         const pv = this.#handlers.shift();
-        await pv.getSystemDocument({ guildId: this.#guildId }).catch(console.error);
+        await pv.getSystemDocument({ guildId: this.#guildId }).catch(error);
         if(!pv.systemIsInstalled()) return false;
         
         try {
@@ -478,9 +515,8 @@ class PureVoiceOrchestrator {
                 pv.handleConnection(),
             ]);
             await pv.saveChanges();
-        } catch(error) {
-            console.log(chalk.redBright('Ocurrió un error mientras se analizaba un cambio de estado en una sesión Purévoice'));
-            console.error(error);
+        } catch(err) {
+            error(err, 'Ocurrió un error mientras se analizaba un cambio de estado en una sesión Purévoice');
         }
         
         if(this.#handlers.length) {
