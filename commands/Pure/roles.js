@@ -146,9 +146,8 @@ const command = new CommandManager('roles', flags)
 				embeds: [
 					new EmbedBuilder()
 						.setColor(Colors.Gold)
-						.setAuthor({ name: 'Punto de Reparto desplegado', iconURL: request.user.avatarURL() })
-						.setDescription(`Puedes ponerte o quitarte el rol ${role} con los botones debajo`)
-						.setFooter({ text: 'Usa p!roles sin parámetros para obtener más opciones' })
+						.setTitle('Ponte o quítate el rol')
+						.setDescription(`${role}`),
 				],
 				components: [makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
@@ -166,9 +165,9 @@ const command = new CommandManager('roles', flags)
 		return request.reply({
 			embeds: [
 				new EmbedBuilder()
-					.setAuthor({ name: 'Punto de Reparto desplegado', iconURL: request.user.avatarURL() })
 					.setColor(Colors.Gold)
-					.addFields({ name: '¡Se están repartiendo roles!', value: 'Se ha establecido una campaña de suministro de roles. Usa el menú de abajo y selecciona la categoría que quieras' })
+					.setTitle('Selector de Roles')
+					.setDescription('Cualquiera puede usar el menú debajo para elegir roles.'),
 			],
 			components: [new ActionRowBuilder().addComponents(
 				new StringSelectMenuBuilder()
