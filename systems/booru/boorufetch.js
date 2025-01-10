@@ -75,13 +75,13 @@ class Booru {
 	 * @throws {BooruUnknownPostError}
 	 */
 	static #expectPosts(response, options = {}) {
-		options.dontThrowOnEmptyFetch ??= false;
+		const { dontThrowOnEmptyFetch = false } = options;
 
 		if(response.status !== 200)
 			throw new BooruFetchError(`Booru API Posts fetch failed: ${response.status} ${response.statusText ?? 'Unknown Error'}`);
 
 		if(!Array.isArray(response.data?.post)) {
-			if(options.dontThrowOnEmptyFetch)
+			if(dontThrowOnEmptyFetch)
 				return [];
 			else
 				throw new BooruUnknownPostError(`Couldn't fetch any Posts from the Booru API`);
@@ -91,24 +91,31 @@ class Booru {
 	}
 
 	/**
+	 * @typedef {Object} ExpectAPITagFetchOptions
+	 * @property {String?} [tags=null]
+	 */
+	/**
 	 * Verifica que el código de estado de una respuesta sea 200 y que los datos de Post sean válidos
 	 * @param {import('axios').AxiosResponse} response 
-	 * @param {ExpectAPIFetchOptions} options
+	 * @param {ExpectAPIFetchOptions & ExpectAPITagFetchOptions} options
 	 * @returns {Array<TagResolvable>}
 	 * @throws {BooruFetchError}
 	 * @throws {BooruUnknownTagError}
 	 */
 	static #expectTags(response, options = {}) {
-		options.dontThrowOnEmptyFetch ??= false;
+		const {
+			dontThrowOnEmptyFetch = false,
+			tags = null,
+		} = options;
 
 		if(response.status !== 200)
 			throw new BooruFetchError(`Booru API Tags fetch failed: ${response.statusText ?? 'Unknown Error'}`);
 
 		if(!Array.isArray(response.data?.tag)) {
-			if(options.dontThrowOnEmptyFetch)
+			if(dontThrowOnEmptyFetch)
 				return [];
 			else
-				throw new BooruUnknownTagError(`Couldn't fetch any Tags from the Booru API`);
+				throw new BooruUnknownTagError(`Couldn't fetch any Tags from the Booru API${tags ? `. Tried to fetch: ${tags}` : ''}`);
 		}
 
 		return response.data.tag;
@@ -277,7 +284,7 @@ class Booru {
 				for(let i = 0; i < missingTagNames.length; i += 100) {
 					const namesBatch = missingTagNames.slice(i, i + 100).join('%20');
 					const response = await axios.get(`${Booru.API_TAGS_URL}&json=1&api_key=${apiKey}&user_id=${userId}&names=${namesBatch}`);
-					const tags = Booru.#expectTags(response);
+					const tags = Booru.#expectTags(response, { tags: namesBatch });
 					
 					if(tags.length) {
 						const newTags = tags.map(t => new Tag(t));
