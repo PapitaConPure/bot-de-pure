@@ -87,7 +87,8 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		if(!source) return;
 
 		//Si no es un enlace, mostrar el source en texto
-		if(!source.match(/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-])+\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/)) {
+		const smatch = source.match(/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-])+\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/);
+		if(!smatch) {
 			return row.addComponents(
 				new ButtonBuilder()
 					.setCustomId(`feed_plainText${sourceNumber++}`)
@@ -97,6 +98,7 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 					.setDisabled(true),
 			);
 		}
+		source = source.slice(smatch.index, smatch.index + smatch[0].length);
 
 		sourceMappings.forEach(mapping => {
 			source = source.replace(mapping.pattern, mapping.replacement);
