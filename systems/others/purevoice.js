@@ -134,7 +134,7 @@ class PureVoiceUpdateHandler {
             const controlPannel = /**@type {Discord.TextChannel}*/(guild.channels.cache.get(pvDocument.controlPanelId));
             
             const pvChannelToRemove = guild.channels.cache.get(session.channelId);
-            const pvSessionName = pvChannelToRemove?.name ? `#${pvChannelToRemove.name}` : session.channelId;
+            const pvSessionName = pvChannelToRemove?.name ? `#${pvChannelToRemove.name} (${session.channelId})` : session.channelId;
             const deletionMessage = 'Eliminar componentes de sesión PuréVoice';
             debug(`A punto de eliminar componentes de sesión PuréVoice: ${pvSessionName}...`);
 
