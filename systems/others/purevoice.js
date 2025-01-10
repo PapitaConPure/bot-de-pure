@@ -131,22 +131,67 @@ class PureVoiceUpdateHandler {
                 return;
             }
 
+            const controlPannel = /**@type {Discord.TextChannel}*/(guild.channels.cache.get(pvDocument.controlPanelId));
+            
+            const pvChannelToRemove = guild.channels.cache.get(session.channelId);
+            const pvSessionName = pvChannelToRemove?.name ? `#${pvChannelToRemove.name}` : session.channelId;
+            const deletionMessage = 'Eliminar componentes de sesión PuréVoice';
+            debug(`A punto de eliminar componentes de sesión PuréVoice: ${pvSessionName}...`);
+
+            let success = true;
+            const results = await Promise.all([
+                pvChannelToRemove?.delete(deletionMessage)?.catch(err => {
+                    error(new Error(`La eliminación del canal de Sesión PuréVoice falló para la sesión: ${pvSessionName}`));
+                    error(err);
+                    success = false;
+                }),
+                controlPannel?.permissionOverwrites?.delete(member, deletionMessage)?.catch(err => {
+                    error(new Error(`La eliminación de permisos en el Panel de Control PuréVoice falló para la sesión: ${pvSessionName}`));
+                    error(err);
+                    success = false;
+                }),
+                sessionRole?.delete(deletionMessage)?.catch(err => {
+                    error(new Error(`La eliminación del rol de Sesión PuréVoice falló para la sesión: ${pvSessionName}`));
+                    error(err);
+                    success = false;
+                }),
+            ]);
+
+            if(!success) {
+                warn(`No se pudieron eliminar los componentes de la sesión PuréVoice, por lo que los registros permaneceran vivos`);
+                return results;
+            }
+
+            info(`Se eliminaron los componentes de la sesión PuréVoice: ${pvSessionName}`);
+            debug(`A punto de eliminar registros restantes de sesión PuréVoice: ${pvSessionName}...`);
+
             const indexToDelete = pvDocument.sessions.indexOf(oldChannel.id);
             if(indexToDelete >= 0) {
                 pvDocument.sessions.splice(indexToDelete);
                 pvDocument.markModified('sessions');
             }
+
+            let removed;
+            let reattempts = 3;
+            do {
+                removed = true;
+                await session.remove().catch(err => {
+                    removed = false;
+                    
+                    error(new Error(`La eliminación del registro de Sesión PuréVoice falló para la sesión: #${pvSessionName}`));
+                    error(err);
+
+                    if(reattempts > 0)
+                        info(`Reintentando eliminación (${reattempts} intentos restantes)...`)
+                });
+            } while(!removed && reattempts-- > 0);
             
-            const controlPannel = /**@type {Discord.TextChannel}*/(guild.channels.cache.get(pvDocument.controlPanelId));
-            
-            debug('Eliminando componentes de sesión PuréVoice...');
-            const deletionMessage = 'Eliminar componentes de sesión PuréVoice';
-            return Promise.all([
-                session.remove(),
-                guild.channels.cache.get(session.channelId)?.delete(deletionMessage)?.catch(prematureError),
-                controlPannel?.permissionOverwrites?.delete(member, deletionMessage)?.catch(prematureError),
-                sessionRole?.delete(deletionMessage)?.catch(prematureError),
-            ]);
+            if(removed)
+                info(`Se eliminaron los registros restantes de la sesión PuréVoice: #${pvSessionName}`);
+            else
+                warn(`No se pudieron eliminar los registros restantes de la sesión PuréVoice: #${pvSessionName}`);
+
+            return results;
         } catch(err) {
             error(err);
             if(!guild.systemChannelId)
