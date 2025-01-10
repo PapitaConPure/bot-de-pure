@@ -517,6 +517,11 @@ let localesObject = /**@type {const}*/({
 		en: 'Register',
 		ja: '登録',
 	},
+	buttonExpand: {
+		es: 'Expandir',
+		en: 'Expand',
+		ja: '拡大',
+	},
 	buttonShowMeHow: {
 		es: 'Muéstrame cómo',
 		en: 'Show me how',
@@ -847,6 +852,11 @@ let localesObject = /**@type {const}*/({
 		es: 'Pista saltada',
 		en: 'Track skipped',
 		ja: 'トラックがスキップされました',
+	},
+	sonandoTitle: {
+		es: 'Escuchando Ahora',
+		en: 'Now Playing',
+		ja: '今聴いている',
 	},
 
 	poll: {
