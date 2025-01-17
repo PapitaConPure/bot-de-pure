@@ -167,7 +167,7 @@ class PureVoiceUpdateHandler {
 
             const indexToDelete = pvDocument.sessions.indexOf(oldChannel.id);
             if(indexToDelete >= 0) {
-                pvDocument.sessions.splice(indexToDelete);
+                pvDocument.sessions.splice(indexToDelete, 1);
                 pvDocument.markModified('sessions');
             }
 
