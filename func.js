@@ -14,6 +14,41 @@ const concol = {
     purple: chalk.rgb(158, 114,214),
 };
 
+const HTTP_ENTITIES = /**@type {const}*/({
+    nbsp:   ' ',
+    amp:    '&',
+    quot:   '"',
+    lt:     '<',
+    gt:     '>',
+    tilde:  '~',
+    apos:   '\'',
+    '#039': '\'',
+    cent:   '¢',
+    pound:  '£',
+    euro:   '€',
+    yen:    '¥',
+    copy:   '©',
+    reg:    '®',
+    iexcl:  '¡',
+    brvbar: '¦',
+    sect:   '§',
+    uml:    '¨',
+    not:    '¬',
+    deg:    'º',
+    acute:  '`',
+    micro:  'µ',
+    para:   '¶',
+    ordm:   'º',
+    laquo:  '«',
+    raquo:  '»',
+    circ:   '^',
+});
+
+const HTTP_ENTITIES_REGEX = (() => {
+    const keys = Object.keys(HTTP_ENTITIES).join('|');
+    return new RegExp(`&(${keys});`, 'g');
+})();
+
 module.exports = {
     //#region Lista
     /**
@@ -1038,43 +1073,11 @@ module.exports = {
     /**@param {String} text*/
     unable: text => `❌ ${text}`,
 
+    /**@param {string} encodedString*/
     decodeEntities: function(encodedString) {
         //Fuente: https://stackoverflow.com/questions/44195322/a-plain-javascript-way-to-decode-html-entities-works-on-both-browsers-and-node
-
-        const translate = {
-            nbsp:   ' ',
-            amp:    '&',
-            quot:   '"',
-            lt:     '<',
-            gt:     '>',
-            tilde:  '~',
-            apos:   '\'',
-            '#039': '\'',
-            cent:   '¢',
-            pound:  '£',
-            euro:   '€',
-            yen:    '¥',
-            copy:   '©',
-            reg:    '®',
-            iexcl:  '¡',
-            brvbar: '¦',
-            sect:   '§',
-            uml:    '¨',
-            not:    '¬',
-            deg:    'º',
-            acute:  '`',
-            micro:  'µ',
-            para:   '¶',
-            ordm:   'º',
-            laquo:  '«',
-            raquo:  '»',
-            circ:   '^',
-        };
-        const keys = Object.keys(translate).join('|');
-        const translate_re = new RegExp(`&(${keys});`, 'g');
-
-        return encodedString.replace(translate_re, function(match, entity) {
-            return translate[entity] ?? match;
+        return encodedString.replace(HTTP_ENTITIES_REGEX, function(match, entity) {
+            return HTTP_ENTITIES[entity] ?? match;
         }).replace(/&#(\d+);/gi, function(_, numStr) {
             const num = parseInt(numStr, 10);
             return String.fromCharCode(num);
