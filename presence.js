@@ -19,6 +19,22 @@ const presence = {
 
 const PRESENCE_TICK_INTERVAL_RANGE = [ 20, 35 ];
 
+/**@satisfies {Record<`${number}-${number}`, (today: Date) => string>}*/
+const specialDates = /**@type {const}*/({
+    '01-01': _ => '¡Feliz año nuevo! 🎉',
+    '02-14': _ => '¡Feliz día de San Valentín!',
+    '04-01': _ => Math.random() < 0.5 ? '127.0.0.1' : '255.255.255.0',
+    '04-22': _ => '¡Feliz día, Tierra!',
+    '06-02': _ => '¡Feliz cumpleaños a mi creador!',
+    '07-30': _ => '¡Feliz día de la amistad!',
+    '09-13': _ => '¡Feliz día del programador!',
+    '10-04': _ => '¡Feliz día de Tenshi! 🍑',
+    '10-05': _ => '¿Feliz día de Tenshi?',
+    '10-31': _ => 'Bú 👻 oOoOo 👻',
+    '12-03': today => `¡Hoy cumplo ${today.getUTCFullYear() - 2019} años!`,
+    '12-25': _ => '¡Feliz navidad!',
+});
+
 /**
  * Cambia la frase que muestra el usuario de Bot de Puré y reprograma dicha acción en un intervalo de tiempo predeterminado
  * 
@@ -30,20 +46,15 @@ const PRESENCE_TICK_INTERVAL_RANGE = [ 20, 35 ];
 async function modifyPresence(client, steps = 0) {
     try {
         const now = new Date(Date.now());
-        const thisDay = now.getUTCDate();
-        const thisMonth = now.getUTCMonth();
-        //const thisYear = now.getUTCFullYear();
+        const dayKey = `${now.getUTCDate()}`.padStart(2, '0');
+        const monthKey = `${now.getUTCMonth() + 1}`.padStart(2, '0');
+        const specialDateKey = `${monthKey}-${dayKey}`;
 
-        let status;
-        if(thisMonth === 12 && thisDay === 25)
-            status = '¡Feliz navidad!';
-        else {
-            status = presence.status[await getQueueItem({
-                queueId: 'presenceStatus',
-                length: presence.status.length,
-                sort: 'RANDOM',
-            })];
-        }
+        const status = specialDates[specialDateKey] ?? presence.status[await getQueueItem({
+            queueId: 'presenceStatus',
+            length: presence.status.length,
+            sort: 'RANDOM',
+        })];
 
         client.user.setActivity({
             type: ActivityType.Custom,
