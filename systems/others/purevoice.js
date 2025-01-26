@@ -9,7 +9,7 @@ const { ButtonStyle, ChannelType } = require('discord.js');
 const { makeButtonRowBuilder } = require('../../tsCasts');
 const Logger = require('../../logs.js');
 
-const { debug, info, warn, error, fatal } = Logger('DEBUG', 'PV');
+const { debug, info, warn, error, fatal } = Logger('WARN', 'PV');
 
 /**
  * 
