@@ -36,9 +36,9 @@ const sourceMappings = [
 
 /**@type {ReadonlyArray<SourceStyle & { pattern: RegExp }>}*/
 const sources = [
-	{ color: 0x0096fa, emoji: '919403803126661120',  pattern: /pixiv\.net/ },
+	{ color: 0x0096fa, emoji: '919403803126661120' , pattern: /pixiv\.net/ },
 	{ color: 0x040404, emoji: '1232243415165440040', pattern: /(twitter|twimg|x)\.com/ },
-	{ color: 0xfaf18a, emoji: '999783444655648869',  pattern: /fanbox\.cc/ },
+	{ color: 0xfaf18a, emoji: '999783444655648869' , pattern: /fanbox\.cc/ },
 	{ color: 0xea4c89, emoji: '1000265840182181899', pattern: /fantia\.jp/ },
 	{ color: 0x28837f, emoji: '1001397393511682109', pattern: /skeb\.jp/ },
 	{ color: 0x0085ff, emoji: '1298259199477678115', pattern: /bsky\.app/ },
@@ -46,14 +46,17 @@ const sources = [
 	{ color: 0x009c94, emoji: '1297689776941568073', pattern: /lofter\.com/ },
 	{ color: 0x23aee5, emoji: '1297697987014824066', pattern: /t\.bilibili\.com/ },
 	{ color: 0x020814, emoji: '1298264258991095850', pattern: /cara\.app/ },
-	{ color: 0x36465d, emoji: '969666470252511232',  pattern: /tumblr\.com/ },
+	{ color: 0x36465d, emoji: '969666470252511232' , pattern: /tumblr\.com/ },
+	{ color: 0x252525, emoji: '1334123400024817724', pattern: /seiga\.nicovideo\.jp/ },
+	{ color: 0x0b69b7, emoji: '1334123419733721153', pattern: /www.patreon.com/ },
 	{ color: 0xfcbd00, emoji: '1298305816247664640', pattern: /drive\.google\.com/ },
-	{ color: 0xff4500, emoji: '969666029045317762',  pattern: /(reddit\.com)|(([iv]\.)?redd\.it)/ },
+	{ color: 0xff4500, emoji: '969666029045317762' , pattern: /(reddit\.com)|(([iv]\.)?redd\.it)/ },
 	{ color: 0xff9a30, emoji: '1299753011932827749', pattern: /weibo\.com/ },
-	{ color: 0xff6c60, emoji: '919403803114094682',  pattern: /nitter\.net/ },
+	{ color: 0xff6c60, emoji: '919403803114094682' , pattern: /nitter\.net/ },
 	{ color: 0xff5c67, emoji: '1298674477470716106', pattern: /booth\.pm/ },
 	{ color: 0xff0000, emoji: '1298671334246715453', pattern: /youtube\.com/ },
 	{ color: 0x1e2327, emoji: '1303457942468690050', pattern: /github\.com/ },
+	{ color: 0x252525, emoji: '1334123400024817724', pattern: /www\.nicovideo\.jp/ },
 ];
 
 /**@type {SourceStyle}*/
