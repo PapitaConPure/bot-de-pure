@@ -36,7 +36,7 @@ const sourceMappings = [
 
 /**@type {ReadonlyArray<SourceStyle & { pattern: RegExp }>}*/
 const sources = [
-	{ color: 0x0096fa, emoji: '919403803126661120' , pattern: /pixiv\.net/ },
+	{ color: 0x0096fa, emoji: '1334816111270563880' , pattern: /pixiv\.net/ },
 	{ color: 0x040404, emoji: '1232243415165440040', pattern: /(twitter|twimg|x)\.com/ },
 	{ color: 0xfaf18a, emoji: '999783444655648869' , pattern: /fanbox\.cc/ },
 	{ color: 0xea4c89, emoji: '1000265840182181899', pattern: /fantia\.jp/ },
@@ -55,6 +55,7 @@ const sources = [
 	{ color: 0xff6c60, emoji: '919403803114094682' , pattern: /nitter\.net/ },
 	{ color: 0xff5c67, emoji: '1298674477470716106', pattern: /booth\.pm/ },
 	{ color: 0xff0000, emoji: '1298671334246715453', pattern: /youtube\.com/ },
+	{ color: 0xfda238, emoji: '1334813506599649311', pattern: /www\.newgrounds\.com/ },
 	{ color: 0x1e2327, emoji: '1303457942468690050', pattern: /github\.com/ },
 	{ color: 0x252525, emoji: '1334123400024817724', pattern: /www\.nicovideo\.jp/ },
 ];
