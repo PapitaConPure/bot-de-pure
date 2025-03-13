@@ -20,6 +20,8 @@ console.timeEnd('Detección de archivos de comando');
 console.time('Registro de eventos del cliente');
 client.on('ready', events.onStartup);
 client.on('messageCreate', message => events.onMessage(message, client).catch(onCriticalError));
+client.on('messageReactionAdd', (reaction, user, details) => events.onReactionAdd(reaction, user, details).catch(onCriticalError));
+client.on('messageReactionRemove', (reaction, user, details) => events.onReactionRemove(reaction, user, details).catch(onCriticalError));
 client.on('messageDelete', message => events.onMessageDelete(message).catch(onCriticalError));
 client.on('interactionCreate', interaction => events.onInteraction(interaction, client).catch(onCriticalError));
 client.on('voiceStateUpdate', (oldState, newState) => events.onVoiceUpdate(oldState, newState).catch(onCriticalError));

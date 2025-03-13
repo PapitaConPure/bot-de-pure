@@ -201,11 +201,26 @@ async function checkCommand(message, client, stats) {
 	stats.markModified('commands');
 }
 
-/**@param {String} userId*/
-async function gainPRC(userId) {
+/**
+ * @param {Discord.Guild} guild
+ * @param {String} userId
+ */
+async function gainPRC(guild, userId) {
+	if(guild.memberCount < 100) return;
+
 	const userConfigs = (await UserConfigs.findOne({ userId })) || new UserConfigs({ userId });
 
-	userConfigs.prc += 1;
+	const then = userConfigs.lastDateReceived;
+	const today = new Date(Date.now());
+	if(then.getDate() < today.getDate() || then.getMonth() < today.getMonth() || then.getFullYear() < today.getFullYear()) {
+		userConfigs.reactionsReceivedToday = 0;
+		userConfigs.highlightedToday = false;
+		userConfigs.messagesToday = 0;
+		userConfigs.lastDateReceived = today;
+	}
+	
+	userConfigs.messagesToday++;
+	userConfigs.prc += 1 / ((userConfigs.messagesToday + 260) / 300);
 	
 	return userConfigs.save();
 }
@@ -229,7 +244,7 @@ async function onMessage(message, client) {
 		}));
 	if(author.bot) return;
 
-	gainPRC(author.id);
+	gainPRC(guild, author.id);
 
 	const userCache = await fetchUserCache(author.id);
 
