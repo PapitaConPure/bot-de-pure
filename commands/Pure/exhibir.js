@@ -1,7 +1,7 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
 const { CommandTags, CommandManager } = require("../Commons/commands");
 const { DiscordAgent } = require('../../systems/agents/discordagent.js');
-const { hourai } = require('../../localdata/config.json');
+const { hourai, serverid } = require('../../localdata/config.json');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 
 let crazyBackupId = hourai.crazyBackupChannelId;
@@ -58,8 +58,10 @@ const command = new CommandManager('exhibir', flags)
 		const { channel } = interaction;
 		const [ pinnedMessages, backupChannel ] = await Promise.all([
 			(await channel.messages.fetchPinned()).reverse(),
-			///**@type {Promise<import('discord.js').GuildTextBasedChannel>}*/(interaction.guild.channels.fetch(crazyBackupId)),
-			/**@type {Promise<import('discord.js').GuildTextBasedChannel>}*/(interaction.guild.channels.fetch('1232090120581156905')), //Puré I
+			(interaction.guild.id === serverid.saki
+				? /**@type {Promise<import('discord.js').GuildTextBasedChannel>}*/(interaction.guild.channels.fetch(crazyBackupId)) //crazy-backup
+				: /**@type {Promise<import('discord.js').GuildTextBasedChannel>}*/(interaction.guild.channels.fetch('1232090120581156905')) //Puré I (tests)
+			),
 		]);
 
 		if(!pinnedMessages?.size)
