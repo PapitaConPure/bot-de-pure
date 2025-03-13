@@ -48,9 +48,12 @@ namespace CommandBuilder {
 
 			StringBuilder total = new StringBuilder();
 			total.AppendLine("const {  } = require('discord.js'); //Integrar discord.js");
-			total.AppendLine("const {  } = require('../../func.js'); //Funciones globales");
+			total.AppendLine("const {  } = require('../../func.js'); //Funciones de utilidad");
 			total.AppendLine("const {  } = require('../../localdata/config.json'); //Configuraciones");
+			total.AppendLine("const { CommandTags, CommandManager } = require('../Commons/commands.js');");
+			total.AppendLine("const { Translator } = require('../../internationalization.js'); //Internacionalización");
 			total.AppendLine("const { p_pure } = require('../../localdata/customization/prefixes.js');");
+			
 			total.AppendLine($"const {{ {string.Join(", ", this.components.Select(c => c.Requiere))} }} = require('../Commons/commands.js');");
 
 			if(this.tipos.HasFlag(ComponentType.CommandOptions)) {

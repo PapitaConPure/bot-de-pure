@@ -87,6 +87,7 @@ namespace CommandBuilder {
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.btnLimpiar = new ControLib.SleekButton();
 			this.btnGenerar = new ControLib.SleekButton();
+			this.cbEtiquetaMusic = new System.Windows.Forms.CheckBox();
 			this.pnlMetadatos.SuspendLayout();
 			this.pnlContenidoMetadatos.SuspendLayout();
 			this.pnlEtiquetas.SuspendLayout();
@@ -153,7 +154,6 @@ namespace CommandBuilder {
 			this.tlpEtiquetas.ColumnCount = 2;
 			this.tlpEtiquetas.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
 			this.tlpEtiquetas.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-			this.tlpEtiquetas.Controls.Add(this.cbEtiquetaHourai, 1, 4);
 			this.tlpEtiquetas.Controls.Add(this.cbEtiquetaMaintenance, 0, 3);
 			this.tlpEtiquetas.Controls.Add(this.cbEtiquetaOutdated, 0, 3);
 			this.tlpEtiquetas.Controls.Add(this.cbEtiquetaMeme, 1, 1);
@@ -162,8 +162,10 @@ namespace CommandBuilder {
 			this.tlpEtiquetas.Controls.Add(this.cbEtiquetaEmote, 0, 1);
 			this.tlpEtiquetas.Controls.Add(this.cbEtiquetaChaos, 0, 2);
 			this.tlpEtiquetas.Controls.Add(this.cbEtiquetaGame, 1, 2);
-			this.tlpEtiquetas.Controls.Add(this.cbEtiquetaGuide, 0, 5);
 			this.tlpEtiquetas.Controls.Add(this.cbEtiquetaPapa, 0, 4);
+			this.tlpEtiquetas.Controls.Add(this.cbEtiquetaMusic, 1, 4);
+			this.tlpEtiquetas.Controls.Add(this.cbEtiquetaGuide, 1, 5);
+			this.tlpEtiquetas.Controls.Add(this.cbEtiquetaHourai, 0, 5);
 			this.tlpEtiquetas.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tlpEtiquetas.Location = new System.Drawing.Point(0, 15);
 			this.tlpEtiquetas.Name = "tlpEtiquetas";
@@ -181,9 +183,9 @@ namespace CommandBuilder {
 			// 
 			this.cbEtiquetaHourai.AutoSize = true;
 			this.cbEtiquetaHourai.Font = new System.Drawing.Font("Segoe UI Semibold", 9F);
-			this.cbEtiquetaHourai.Location = new System.Drawing.Point(131, 99);
+			this.cbEtiquetaHourai.Location = new System.Drawing.Point(3, 123);
 			this.cbEtiquetaHourai.Name = "cbEtiquetaHourai";
-			this.cbEtiquetaHourai.Size = new System.Drawing.Size(71, 18);
+			this.cbEtiquetaHourai.Size = new System.Drawing.Size(71, 19);
 			this.cbEtiquetaHourai.TabIndex = 9;
 			this.cbEtiquetaHourai.Text = "HOURAI";
 			this.cbEtiquetaHourai.UseVisualStyleBackColor = true;
@@ -282,7 +284,7 @@ namespace CommandBuilder {
 			// 
 			this.cbEtiquetaGuide.AutoSize = true;
 			this.cbEtiquetaGuide.Font = new System.Drawing.Font("Segoe UI Semibold", 9F);
-			this.cbEtiquetaGuide.Location = new System.Drawing.Point(3, 123);
+			this.cbEtiquetaGuide.Location = new System.Drawing.Point(131, 123);
 			this.cbEtiquetaGuide.Name = "cbEtiquetaGuide";
 			this.cbEtiquetaGuide.Size = new System.Drawing.Size(61, 19);
 			this.cbEtiquetaGuide.TabIndex = 10;
@@ -1005,6 +1007,17 @@ namespace CommandBuilder {
 			this.btnGenerar.UseVisualStyleBackColor = false;
 			this.btnGenerar.Click += new System.EventHandler(this.BtnGenerar_Click);
 			// 
+			// cbEtiquetaMusic
+			// 
+			this.cbEtiquetaMusic.AutoSize = true;
+			this.cbEtiquetaMusic.Font = new System.Drawing.Font("Segoe UI Semibold", 9F);
+			this.cbEtiquetaMusic.Location = new System.Drawing.Point(131, 99);
+			this.cbEtiquetaMusic.Name = "cbEtiquetaMusic";
+			this.cbEtiquetaMusic.Size = new System.Drawing.Size(63, 18);
+			this.cbEtiquetaMusic.TabIndex = 11;
+			this.cbEtiquetaMusic.Text = "MUSIC";
+			this.cbEtiquetaMusic.UseVisualStyleBackColor = true;
+			// 
 			// FPrincipal
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -1118,6 +1131,7 @@ namespace CommandBuilder {
 		private System.Windows.Forms.Panel panel1;
 		private ControLib.SleekButton btnLimpiar;
 		private ControLib.SleekButton btnGenerar;
+		private System.Windows.Forms.CheckBox cbEtiquetaMusic;
 	}
 }
 

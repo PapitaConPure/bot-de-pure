@@ -330,6 +330,9 @@ namespace CommandBuilder {
 			if(this.cbEtiquetaPapa.Checked)
 				etiquetas.Add(CommandTagsManager.CommandTag.Papa);
 
+			if(this.cbEtiquetaMusic.Checked)
+				etiquetas.Add(CommandTagsManager.CommandTag.Music);
+
 			if(this.cbEtiquetaHourai.Checked)
 				etiquetas.Add(CommandTagsManager.CommandTag.Hourai);
 
