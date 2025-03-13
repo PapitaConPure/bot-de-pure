@@ -4,12 +4,12 @@ const { CommandTags, CommandManager } = require('../Commons/commands');
 
 const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('sugerir', flags)
-	.setAliases('reportar', 'informar', 's')
+	.setAliases('reportar', 'informar')
 	.setDescription('Para sugerir mejoras sobre Bot de Puré, o reportar un error')
 	.setExecution(async request => {
 		const embed = new Discord.EmbedBuilder()
 			.setColor(global.tenshiColor)
-			.setAuthor({ name: 'Bot de Puré • Comentarios', iconURL: request.client.user.avatarURL({ size: 256, format: 'jpg' }) })
+			.setAuthor({ name: 'Bot de Puré • Comentarios', iconURL: request.client.user.avatarURL({ size: 256, extension: 'jpg' }) })
 			.setThumbnail('https://i.imgur.com/Ah7G6iV.jpg')
 			.addFields(
 				{
