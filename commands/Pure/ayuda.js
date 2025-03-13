@@ -1,5 +1,5 @@
 const { readdirSync } = require('fs'); //Integrar operaciones sistema de archivos de consola
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, StringSelectMenuInteraction, AutocompleteInteraction } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, StringSelectMenuInteraction, AutocompleteInteraction, GuildMember } = require('discord.js');
 const { serverid, tenshiColor, peopleid } = require('../../localdata/config.json'); //Variables globales
 const { isNotModerator, compressId, decompressId, shortenText, edlDistance } = require('../../func');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
@@ -177,7 +177,10 @@ const command = new CommandManager('ayuda', flags)
 		
 		//Análisis de comandos
 		if(!search) {
-			const commands = lookupCommands({ excludedTags: makeExcludedTags(request) });
+			const commands = lookupCommands({
+				excludedTags: makeExcludedTags(request), 
+				context: request,
+			});
 			
 			//Embed de metadatos
 			const embed = new EmbedBuilder()
@@ -236,6 +239,7 @@ const command = new CommandManager('ayuda', flags)
 		const commands = lookupCommands({
 			tags: /**@type {Array<import('../Commons/cmdTags').CommandTagResolvable>}*/(interaction.values),
 			excludedTags: makeExcludedTags(interaction),
+			context: interaction,
 		});
 
 		//Embed de metadatos
@@ -308,21 +312,28 @@ const command = new CommandManager('ayuda', flags)
  * @typedef {Object} CommandsLookupQuery
  * @property {Array<import('../Commons/cmdTags').CommandTagResolvable>} [tags]
  * @property {Array<import('../Commons/cmdTags').CommandTagResolvable>} [excludedTags]
+ * @property {{ member: GuildMember, channel: import('discord.js').GuildChannelResolvable }} [context]
  * 
  * @param {CommandsLookupQuery} [query]
  */
 function lookupCommands(query = {}) {
 	query.tags ??= [];
 	query.excludedTags ??= [];
-	const { tags, excludedTags } = query;
+	const { tags, excludedTags, context } = query;
+
+	let commandIsAllowed;
+	if(context)
+		commandIsAllowed = (/**@type {CommandManager}*/ command) => command.permissions?.isAllowedIn(context.member, context.channel) ?? true;
+	else
+		commandIsAllowed = (/**@type {CommandManager}*/ command) => true;
 
 	let commandMeetsCriteria;
 	if(tags.length && excludedTags.length)
-		commandMeetsCriteria = (/**@type {CommandManager}*/ command) => !excludedTags.some(tag => command.tags.has(tag)) && tags.every(tag => command.tags.has(tag))
+		commandMeetsCriteria = (/**@type {CommandManager}*/ command) => !excludedTags.some(tag => command.tags.has(tag)) && tags.every(tag => command.tags.has(tag));
 	else if(tags.length)
-		commandMeetsCriteria = (/**@type {CommandManager}*/ command) => tags.every(tag => command.tags.has(tag))
+		commandMeetsCriteria = (/**@type {CommandManager}*/ command) => tags.every(tag => command.tags.has(tag));
 	else if(excludedTags.length)
-		commandMeetsCriteria = (/**@type {CommandManager}*/ command) => !excludedTags.some(tag => command.tags.has(tag))
+		commandMeetsCriteria = (/**@type {CommandManager}*/ command) => !excludedTags.some(tag => command.tags.has(tag));
 	else
 		commandMeetsCriteria = (/**@type {CommandManager}*/ command) => true;
 
@@ -333,7 +344,7 @@ function lookupCommands(query = {}) {
 		const commandFile = require(`../../commands/Pure/${file}`);
 		const command = /**@type {CommandManager}*/(commandFile.command ?? commandFile);
 
-		if(commandMeetsCriteria(command))
+		if(commandIsAllowed(command) && commandMeetsCriteria(command))
 			commands.push(command);
 	}
 
