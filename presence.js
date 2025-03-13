@@ -50,7 +50,7 @@ async function modifyPresence(client, steps = 0) {
         const monthKey = `${now.getUTCMonth() + 1}`.padStart(2, '0');
         const specialDateKey = `${monthKey}-${dayKey}`;
 
-        const status = specialDates[specialDateKey] ?? presence.status[await getQueueItem({
+        const status = specialDates[specialDateKey]?.(now) ?? presence.status[await getQueueItem({
             queueId: 'presenceStatus',
             length: presence.status.length,
             sort: 'RANDOM',
