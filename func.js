@@ -1108,6 +1108,9 @@ module.exports = {
     //#endregion
 
     //#region Otros
+    unicodeEmojiRegex: /\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu,
+    emojiRegex: /<a?:\w+:([0-9]+)>/gi,
+
     /**
      * Devuelve el primer emoji global encontrado en el string
      * @param {String} emoji 
