@@ -1,7 +1,5 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, Colors } = require('discord.js'); //Integrar discord.js
-const { shortenText } = require('../../func.js'); //Funciones globales
-const {  } = require('../../localdata/config.json'); //Configuraciones
-const { p_pure } = require('../../localdata/customization/prefixes.js');
+const { shortenText, compressId } = require('../../func.js'); //Funciones globales
 const { CommandTags, CommandManager } = require('../Commons/commands.js');
 const { showQueuePage, makePuréMusicEmbed, SERVICES } = require('../../systems/musicPlayer.js');
 const { Translator } = require('../../internationalization.js');
@@ -80,10 +78,10 @@ const command = new CommandManager('sonando', flags)
 				components: [
 					new ActionRowBuilder().addComponents(
 							new ButtonBuilder()
-								.setCustomId('sonando_expand')
+								.setCustomId(`sonando_expand_${compressId(request.userId)}`)
 								.setStyle(ButtonStyle.Secondary)
 								.setLabel(translator.getText('buttonExpand'))
-								.setEmoji(''),
+								.setEmoji('1354424220452651185'),
 					),
 				]
 			});
