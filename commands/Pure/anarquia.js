@@ -1,5 +1,5 @@
 const global = require('../../localdata/config.json'); //Variables globales
-const { makeWeightedDecision, compressId, decompressId, improveNumber } = require('../../func.js');
+const { makeWeightedDecision, compressId, decompressId, improveNumber, emojiRegex } = require('../../func.js');
 const { createCanvas, loadImage } = require('canvas');
 const { EmbedBuilder, AttachmentBuilder, StringSelectMenuBuilder, Colors, ButtonBuilder, ButtonStyle, StringSelectMenuInteraction } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
@@ -303,7 +303,7 @@ const command = new CommandManager('anarquia', flags)
 			} else
 				auser.last = Date.now();
 			
-			const emoteMatch = emote.match(/^<a*:\w+:([0-9]+)>$/);
+			const emoteMatch = emote.match(emojiRegex);
 			if(!emoteMatch) {
 				reactIfMessage('⚠️');
 				return request.reply({ content: translator.getText('invalidEmoji'), ephemeral: true });
