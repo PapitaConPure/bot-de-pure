@@ -81,7 +81,7 @@ function Logger(logLevel, prefix = '') {
     }
 
     /**
-     * Realiza la auditoría de un error no controlado junto a la pila de ejecución.
+     * Realiza la auditoría de un error junto a la pila de ejecución, sin arrojar el error.
      * La auditoría primaria requiere un nivel de advertencias hasta "ERROR".
      * @param {Error} err El error que ocasionó este evento.
      * @param {Array<*>} data Los datos de interés del evento.
