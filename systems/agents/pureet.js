@@ -9,12 +9,13 @@ const configProps = {
 };
 
 /**
- * Detecta enlaces de Tweeter en un mensaje y los reenvía con un Embed corregido, a través de un Agente Webhook.
+ * Detecta enlaces de Twitter en un mensaje y los reenvía con un Embed corregido, a través de un Agente Webhook.
  * @param {Message<true>} message El mensaje a analizar
  * @param {''|'vx'|'fx'} configPrefix El mensaje a analizar
  */
-const sendTweetsAsWebhook = async (message, configPrefix) => {
-	if(configPrefix === '') return;
+async function sendConvertedTweets(message, configPrefix) {
+	if(configPrefix === '')
+		return false;
 
 	const { content, channel, author } = message;
 	
@@ -48,7 +49,7 @@ const sendTweetsAsWebhook = async (message, configPrefix) => {
 				: '';
 			const langSuffix = ls ? `/${ls}` : '';
 			warnAboutVXNotSupportingTranslationUrls ||= (ls && configPrefix === 'vx');
-			return `${spoiler}[${artist}/${id}](${service}/${artist}/status/${id}${langSuffix})${spoiler}`;
+			return `${spoiler}<:twitter2:1232243415165440040>[\`${artist}/${id}\`](${service}/${artist}/status/${id}${langSuffix})${spoiler}`;
 		});
 	
 	try {
@@ -80,5 +81,5 @@ const sendTweetsAsWebhook = async (message, configPrefix) => {
 
 module.exports = {
 	tweetRegex,
-	sendTweetsAsWebhook,
+	sendConvertedTweets,
 };

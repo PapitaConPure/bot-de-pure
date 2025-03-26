@@ -11,10 +11,10 @@ const { channelIsBlocked, rand, edlDistance, isUsageBanned } = require('../func.
 const globalGuildFunctions = require('../localdata/customization/guildFunctions.js');
 const { auditRequest } = require('../systems/others/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../localdata/cmdExceptions.js');
-const { sendPixivPostsAsWebhook } = require('../systems/agents/purepix.js');
 const { tenshiColor } = require('../localdata/config.json');
 const UserConfigs = require('../localdata/models/userconfigs.js');
-const { sendTweetsAsWebhook } = require('../systems/agents/pureet.js');
+const { sendConvertedPixivPosts } = require('../systems/agents/purepix.js');
+const { sendConvertedTweets } = require('../systems/agents/pureet.js');
 const { Translator } = require('../internationalization.js');
 const { fetchUserCache } = require('../usercache.js');
 //#endregion
@@ -249,8 +249,8 @@ async function onMessage(message, client) {
 	const userCache = await fetchUserCache(author.id);
 
 	const results = await Promise.all([
-		sendPixivPostsAsWebhook(message, userCache.convertPixiv).catch(console.error),
-		sendTweetsAsWebhook(message, userCache.twitterPrefix).catch(console.error),
+		sendConvertedPixivPosts(message, userCache.pixivConverter).catch(console.error),
+		sendConvertedTweets(message, userCache.twitterPrefix).catch(console.error),
 	]);
 
 	if(results.includes(true) && message?.deletable)
