@@ -1109,6 +1109,11 @@ module.exports = {
 
     //#region Otros
     unicodeEmojiRegex: /\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu,
+    /**
+     * @type {RegExp}
+     * @desc Resultado de un elemento del retorno de `string.prototype.matchAll`:
+     * * `[1]`: La ID del emoji
+     */
     emojiRegex: /<a?:\w+:([0-9]+)>/gi,
 
     /**
