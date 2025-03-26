@@ -25,6 +25,7 @@ const command = new CommandManager('sticker', flags)
             .setColor('Blurple')
             .setAuthor({ name: 'Sticker' })
             .setTitle(sticker.name)
+            .setTimestamp(sticker.createdTimestamp)
             .setImage(sticker.url);
         
         const row = new ActionRowBuilder().addComponents(
