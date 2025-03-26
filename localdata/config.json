@@ -2,17 +2,16 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "3.2.0",
+            "number": "3.3.0",
             "name": "Flamenco Perlado"
         },
         "note": "Operando casi con normalidad",
         "changelog": [
-            "Se actualizó PuréScript a v1.1",
-            "p!yo ahora tiene más configuraciones",
-            "Rama **PuréMusic** incorporada",
-            "p!reproducir, p!cola, p!pausar y p!resumir agregados",
-            "PuréVoice ahora hace uso de un panel de control",
-            "PuréFeed recibió mejoras generales"
+            "p!sonando y p!saltar agregados",
+            "p!emote ahora obtiene emotes de un mensaje",
+            "p!ayuda ahora filtra correctamente los comandos que puedes usar",
+            "**PuréPix** ahora permite utilizar el servicio de conversión \"phixiv\"",
+            "**PuréPix** ahora usa \"phixiv\" como servicio de conversión por defecto"
         ],
         "todo": [
             "Agregar comando de Stable Diffusion",
