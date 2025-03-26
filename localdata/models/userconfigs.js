@@ -67,7 +67,11 @@ const UserConfigSchema = new Mongoose.Schema({
         default: [],
         required: true,
     },
-    convertPixiv: { type: Boolean, default: true, },
+    pixivConverter: {
+        type: String,
+        enum: [ '', 'phixiv', 'webhook' ],
+        default: 'phixiv',
+    },
     twitterPrefix: {
         type: String,
         enum: [ '', 'vx', 'fx' ],
