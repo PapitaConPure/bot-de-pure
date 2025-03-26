@@ -3,7 +3,7 @@ const { CommandTags, CommandManager, CommandOptions, CommandOptionSolver } = req
 const { emojiRegex } = require('../../func');
 
 const options = new CommandOptions()
-	.addParam('mensaje', 'MESSAGE', 'para especificar un mensaje por ID o respuesta (si es un comando de mensaje, por defecto se usa el mensaje del comando)');
+	.addParam('mensaje', 'MESSAGE', 'para especificar un mensaje por ID o respuesta');
 
 const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('emote', flags)
