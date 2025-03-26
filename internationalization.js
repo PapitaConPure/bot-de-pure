@@ -1427,20 +1427,50 @@ let localesObject = /**@type {const}*/({
 		en: 'You won\'t be pinged when creating or joining a session',
 		ja: 'セッションの作成時またはセッションへの参加時にメンションされることはありません',
 	},
+	yoConversionServiceMenuService: {
+		es: 'Servicio',
+		en: 'Service',
+		ja: 'サービス',
+	},
+	yoConversionServiceMenuServiceNoneLabel: {
+		es: 'Ninguno',
+		en: 'None',
+		ja: 'なし',
+	},
+	yoConversionServiceSuccess: {
+		es: '✅ Servicio de conversión actualizado',
+		en: '✅ Converter service updated',
+		ja: '✅ コンバーターサービスが更新されました',
+	},
 	yoPixivStep: {
 		es: 'Conversor de enlaces de pixiv',
 		en: 'pixiv link converter',
 		ja: 'pixivリンクコンバーター',
 	},
 	yoPixivTitle: {
-		es: `El conversor de enlaces de pixiv está actualmente ${subif(0, '=', true, 'activado', 'desactivado')}`,
-		en: `The pixiv link converter is currently ${subif(0, '=', true, 'enabled', 'disabled')}`,
-		ja: `pixivリンクコンバーターは現在${subif(0, '=', true, '有効', '無効')}です`,
+		es: 'Elige el servicio de conversión a usar para pixiv',
+		en: 'Choose which conversion service to use for pixiv',
+		ja: 'pixivに使用する変換サービスを選択してください',
 	},
-	yoPixivStateAlreadySet: {
-		es: `⚠️️ El servicio ya estaba ${subif(0, '=', true, 'activado', 'desactivado')}`,
-		en: `⚠️️ The service was already ${subif(0, '=', true, 'enabled', 'disabled')}`,
-		ja: `⚠️️ サービスはすでに${subif(0, '=', true, '有効', '無効')}になっています`,
+	yoPixivMenuServicePhixivDesc: {
+		es: 'Opción recomendada',
+		en: 'Recommended solution',
+		ja: '推奨される解決策',
+	},
+	yoPixivMenuServiceWebhookLabel: {
+		es: 'Webhook de Agente Puré',
+		en: 'Puré Agent Webhook',
+		ja: 'エージェントPuréウェブフック',
+	},
+	yoPixivMenuServiceWebhookDesc: {
+		es: 'Alternativa estéticamente agradable, pero menos compatible',
+		en: 'Aesthetically pleasing alternative, but less compatible',
+		ja: '見た目も美しい代替品だが、互換性は低い',
+	},
+	yoPixivMenuServiceNoneDesc: {
+		es: 'No convertir enlaces de pixiv automáticamente',
+		en: 'Do not convert pixiv links automatically',
+		ja: 'pixivリンクを自動的に変換しない',
 	},
 	yoTwitterStep: {
 		es: 'Conversor de enlaces de Twitter/X',
@@ -1452,11 +1482,6 @@ let localesObject = /**@type {const}*/({
 		en: 'Choose which conversion service to use for Twitter/X',
 		ja: 'Twitter/Xに使用する変換サービスを選択してください',
 	},
-	yoTwitterMenuService: {
-		es: 'Servicio',
-		en: 'Service',
-		ja: 'サービス',
-	},
 	yoTwitterMenuServiceVxDesc: {
 		es: 'Opción recomendada',
 		en: 'Recommended solution',
@@ -1467,20 +1492,10 @@ let localesObject = /**@type {const}*/({
 		en: 'Good alternative, but less safe and private',
 		ja: '良い代替手段だが、安全性とプライバシーは劣る',
 	},
-	yoTwitterMenuServiceNoneLabel: {
-		es: 'Ninguno',
-		en: 'None',
-		ja: 'なし',
-	},
 	yoTwitterMenuServiceNoneDesc: {
 		es: 'No convertir enlaces de Twitter/X automáticamente',
 		en: 'Do not convert Twitter/X links automatically',
 		ja: 'Twitter/Xリンクを自動的に変換しない',
-	},
-	yoTwitterSuccess: {
-		es: '✅ Servicio de conversión actualizado',
-		en: '✅ Converter service updated',
-		ja: '✅ コンバーターサービスが更新されました',
 	},
 	yoSelectTagsChannelTitle: {
 		es: 'Selecciona uno de tus Feeds seguidos',
