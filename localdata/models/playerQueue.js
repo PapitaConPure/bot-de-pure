@@ -27,7 +27,7 @@ function m() { return new model({}); }
 async function saveTracksQueue(request, queue) {
 	if(!queue) return;
 
-	const pqQuery = { guildId: request.guildId };
+	const pqQuery = { guildId: request.guild.id };
 	const playerQueue = (await model.findOne(pqQuery)) || new model(pqQuery);
 	const serializedTracks = queue.tracks.map(serializeTrack);
 	if(queue.currentTrack)

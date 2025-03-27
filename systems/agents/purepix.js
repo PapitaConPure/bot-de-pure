@@ -4,6 +4,7 @@ const PixivApi = require('pixiv-api-client');
 const { shortenTextLoose } = require('../../func');
 const { DiscordAgent, addAgentMessageOwner } = require('./discordagent.js');
 const { addMessageCascade } = require('../../events/onMessageDelete');
+const { ConverterEmptyPayload } = require('./converters');
 
 const pixiv = new PixivApi();
 
@@ -231,17 +232,18 @@ function replacer(match, _p1, _p2, _p3, _p4, _p5, p6) {
 /**
  * Detecta enlaces de pixiv en un mensaje y los reenvía con un Embed corregido, a través de un Agente Webhook.
  * @param {Message<true>} message El mensaje a analizar
+ * @returns {Promise<import('./converters').ConverterPayload>}
  */
 async function sendPixivPostsAsWebhook(message) {
 	const { content, channel, member } = message;
 	if(!message.guild.members.me.permissionsIn(channel).has([ 'ManageWebhooks', 'SendMessages', 'AttachFiles' ]))
-		return false;
+		return ConverterEmptyPayload;
 
 	const pixivUrls = Array.from(content.matchAll(PIXIV_REGEX))
 		.filter(u => !(u[0].startsWith('<') && u[0].endsWith('>')));
 
 	if(!pixivUrls.length)
-		return false;
+		return ConverterEmptyPayload;
 	
 	const newMessage = await formatPixivPostsMessage(pixivUrls.map(pixivUrl => pixivUrl[0]));
 	message.content = content.replace(PIXIV_REGEX, replacer);
@@ -281,37 +283,41 @@ async function sendPixivPostsAsWebhook(message) {
 	message.embeds.push(...newMessage.embeds);
 
 	try {
-		const agent = await (new DiscordAgent().setup(channel));
-		agent.setMember(member);
-		//@ts-expect-error
-		agent.sendAsUser(message);
-
-		return true;
+		return {
+			shouldReplace: true,
+			shouldReply: false,
+			content: message.content,
+			//@ts-expect-error
+			embeds: message.embeds,
+			//@ts-expect-error
+			files: message.files,
+		};
 	} catch(e) {
 		console.error(e);
 	}
 
-	return false;
+	return ConverterEmptyPayload;
 };
 
 /**
  * Detecta enlaces de pixiv en un mensaje y los reenvía con un Embed corregido, a través de una respuesta.
  * @param {Message<true>} message El mensaje a analizar
  * @param {''|'phixiv'|'webhook'} configConverter El identificador de servicio de conversión a utilizar
+ * @returns {Promise<import('./converters').ConverterPayload>}
  */
 async function sendPixivPostsAsReply(message, configConverter) {
 	if(configConverter === '')
-		return false;
+		return ConverterEmptyPayload;
 
 	const { content, channel, author } = message;
 	
 	if(!message.guild.members.me.permissionsIn(channel).has([ 'SendMessages', 'ManageMessages', 'AttachFiles' ]))
-		return false;
+		return ConverterEmptyPayload;
 
 	if(channel.type === ChannelType.PublicThread) {
 		const { parent } = channel;
 		if(parent.type === ChannelType.GuildForum && (await channel.fetchStarterMessage()).id === message.id)
-			return false;
+			return ConverterEmptyPayload;
 	}
 
 	const pixivUrls = [ ...content.matchAll(PIXIV_REPLY_REGEX) ]
@@ -319,11 +325,11 @@ async function sendPixivPostsAsReply(message, configConverter) {
 		.slice(0, 16);
 
 	if(!pixivUrls.length)
-		return false;
+		return ConverterEmptyPayload;
 
 	const configProp = PIXIV_3P_CONVERTERS[configConverter];
 	if(configProp == undefined)
-		return false;
+		return ConverterEmptyPayload;
 	
 	const service = configProp.service;
 	const formattedPixivUrls = pixivUrls
@@ -336,34 +342,18 @@ async function sendPixivPostsAsReply(message, configConverter) {
 			return `${spoiler}<:pixiv2:1334816111270563880>[\`${idAndPage}\`](${service}${lang}/artworks/${idAndPage})${spoiler}`;
 		});
 	
-	try {
-		let content = formattedPixivUrls.join(' ');
-
-		const [ sent ] = await Promise.all([
-			message.reply({ content }),
-			message.suppressEmbeds(true),
-		]);
-		
-		setTimeout(() => {
-			if(!message?.embeds) return;
-			message.suppressEmbeds(true).catch(_ => undefined);
-		}, 3000);
-
-		await Promise.all([
-			addAgentMessageOwner(sent, author.id),
-			addMessageCascade(message.id, sent.id, new Date(+message.createdAt + 4 * 60 * 60e3)),
-		]);
-	} catch(e) {
-		console.error(e);
-	}
-
-	return false;
+	return {
+		shouldReplace: false,
+		shouldReply: true,
+		content: formattedPixivUrls.join(' '),
+	};
 }
 
 /**
  * Detecta enlaces de pixiv en un mensaje y los reenvía con un Embed corregido.
  * @param {Message<true>} message El mensaje a analizar
  * @param {''|'phixiv'|'webhook'} configConverter El identificador de servicio de conversión a utilizar
+ * @returns {Promise<import('./converters').ConverterPayload>}
  */
 async function sendConvertedPixivPosts(message, configConverter) {
 	switch(configConverter) {
@@ -374,7 +364,10 @@ async function sendConvertedPixivPosts(message, configConverter) {
 		return sendPixivPostsAsWebhook(message);
 
 	default:
-		return false;
+		return {
+			shouldReplace: false,
+			shouldReply: false,
+		};
 	}
 }
 

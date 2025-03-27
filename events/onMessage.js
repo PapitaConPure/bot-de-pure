@@ -6,7 +6,7 @@ const { CommandManager, CommandOptionSolver } = require('../commands/Commons/com
 const { Stats, ChannelStats } = require('../localdata/models/stats.js');
 const { p_pure } = require('../localdata/customization/prefixes.js');
 
-const { updateAgentMessageOwners } = require('../systems/agents/discordagent.js');
+const { updateAgentMessageOwners, addAgentMessageOwner, DiscordAgent } = require('../systems/agents/discordagent.js');
 const { channelIsBlocked, rand, edlDistance, isUsageBanned } = require('../func.js');
 const globalGuildFunctions = require('../localdata/customization/guildFunctions.js');
 const { auditRequest } = require('../systems/others/auditor.js');
@@ -17,6 +17,8 @@ const { sendConvertedPixivPosts } = require('../systems/agents/purepix.js');
 const { sendConvertedTweets } = require('../systems/agents/pureet.js');
 const { Translator } = require('../internationalization.js');
 const { fetchUserCache } = require('../usercache.js');
+const { ConverterEmptyPayload } = require('../systems/agents/converters.js');
+const { addMessageCascade } = require('./onMessageDelete.js');
 //#endregion
 
 /**
@@ -248,13 +250,50 @@ async function onMessage(message, client) {
 
 	const userCache = await fetchUserCache(author.id);
 
+	const logAndReturnEmpty = (/**@type {Error}*/err) => {
+		console.error(err);
+		return ConverterEmptyPayload;
+	};
 	const results = await Promise.all([
-		sendConvertedPixivPosts(message, userCache.pixivConverter).catch(console.error),
-		sendConvertedTweets(message, userCache.twitterPrefix).catch(console.error),
+		sendConvertedPixivPosts(message, userCache.pixivConverter).catch(logAndReturnEmpty),
+		sendConvertedTweets(message, userCache.twitterPrefix).catch(logAndReturnEmpty),
 	]);
+	const result = /**@type {import('../systems/agents/converters.js').ConverterPayload}*/({
+		shouldReplace: results.some(r => r.shouldReplace),
+		shouldReply: results.some(r => r.shouldReply),
+		content: results.map(r => r.content).join(' '),
+		embeds: results.map(r => r.embeds).flat().filter(e => e),
+		files: results.map(r => r.files).flat().filter(f => f),
+	});
+	const { shouldReplace, shouldReply, ...messageResult } = result;
 
-	if(results.includes(true) && message?.deletable)
-		message.delete().catch(console.error);
+	try {
+		if(result.shouldReply) {
+			const [ sent ] = await Promise.all([
+				message.reply(messageResult),
+				message.suppressEmbeds(true),
+			]);
+			
+			setTimeout(() => {
+				if(!message?.embeds) return;
+				message.suppressEmbeds(true).catch(_ => undefined);
+			}, 3000);
+		
+			await Promise.all([
+				addAgentMessageOwner(sent, author.id),
+				addMessageCascade(message.id, sent.id, new Date(+message.createdAt + 4 * 60 * 60e3)),
+			]);
+		} else if(result.shouldReplace) {
+			const agent = await (new DiscordAgent().setup(channel));
+			agent.setMember(message.member);
+			await agent.sendAsUser(messageResult);
+			
+			if(message?.deletable)
+				await message.delete();
+		}
+	} catch(err) {
+		console.error(err);
+	}
 
 	updateAgentMessageOwners().catch(console.error);
 	

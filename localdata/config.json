@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "3.3.0",
+            "number": "3.3.3",
             "name": "Flamenco Perlado"
         },
         "note": "Operando casi con normalidad",
@@ -11,7 +11,9 @@
             "p!emote ahora obtiene emotes de un mensaje",
             "p!ayuda ahora filtra correctamente los comandos que puedes usar",
             "**PuréPix** ahora permite utilizar el servicio de conversión \"phixiv\"",
-            "**PuréPix** ahora usa \"phixiv\" como servicio de conversión por defecto"
+            "**PuréPix** ahora usa \"phixiv\" como servicio de conversión por defecto",
+            "Interoperabilidad parcial entre **PuréPix** y **Puréet**",
+            "Corregido (espero) un problema con el streaming de YouTube"
         ],
         "todo": [
             "Agregar comando de Stable Diffusion",
