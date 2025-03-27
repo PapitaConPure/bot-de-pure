@@ -48,7 +48,7 @@ async function sendConvertedTweets(message, configPrefix) {
 				? '||'
 				: '';
 			let langSuffix = '';
-			if(ls.length <= 2) {
+			if(ls && ls.length <= 2) {
 				langSuffix = `/${ls}`;
 				warnAboutVXNotSupportingTranslationUrls ||= (ls && configPrefix === 'vx');
 			}
