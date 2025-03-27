@@ -47,8 +47,11 @@ async function sendConvertedTweets(message, configPrefix) {
 			const spoiler = (match.startsWith('||') && match.endsWith('||'))
 				? '||'
 				: '';
-			const langSuffix = ls ? `/${ls}` : '';
-			warnAboutVXNotSupportingTranslationUrls ||= (ls && configPrefix === 'vx');
+			let langSuffix = '';
+			if(ls.length <= 2) {
+				langSuffix = `/${ls}`;
+				warnAboutVXNotSupportingTranslationUrls ||= (ls && configPrefix === 'vx');
+			}
 			return `${spoiler}<:twitter2:1232243415165440040>[\`${artist}/${id}\`](${service}/${artist}/status/${id}${langSuffix})${spoiler}`;
 		});
 	
