@@ -39,6 +39,7 @@
     "minimist": "^1.2.8",
     "mongoose": "^6.2.7",
     "mongoose-int32": "^0.6.0",
+    "node-catbox": "^3.3.0",
     "object-sizeof": "^2.6.5",
     "pixiv-api-client": "^0.25.0"
   }
