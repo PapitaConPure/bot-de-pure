@@ -4,7 +4,7 @@ const { Flags: intentBits } = IntentsBitField;
 const botIntents = new IntentsBitField().add(
     intentBits.Guilds,
     intentBits.GuildMembers,
-    intentBits.GuildEmojisAndStickers,
+    intentBits.GuildExpressions,
     intentBits.GuildIntegrations,
     intentBits.GuildMessages,
     intentBits.GuildMessageReactions,
