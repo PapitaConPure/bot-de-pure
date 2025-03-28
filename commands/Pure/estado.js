@@ -1,20 +1,26 @@
-const { EmbedBuilder, CommandInteraction, Message } = require('discord.js'); //Integrar discord.js
+const { EmbedBuilder, CommandInteraction, Message, StringSelectMenuBuilder, ChatInputCommandInteraction, Colors } = require('discord.js'); //Integrar discord.js
 const { bot_status } = require('../../localdata/config.json'); //Variables globales
 const { readdirSync } = require('fs'); //Para el contador de comandos
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { Stats } = require('../../localdata/models/stats');
-const { improveNumber, isShortenedNumberString } = require('../../func');
+const { improveNumber, isShortenedNumberString, compressId } = require('../../func');
 const { CommandTags, CommandManager } = require('../Commons/commands');
-const ayuda = /**@type {CommandManager}*/(require('./ayuda.js')); //Variables globales
+const { makeStringSelectMenuRowBuilder } = require('../../tsCasts');
+const { injectWikiPage, searchCommand } = require('../../wiki');
+const { Translator } = require('../../internationalization');
 
-const { host, version, note, changelog, todo } = bot_status;
-const cmsearch = new RegExp(`${p_pure().raw}[A-Za-zÁÉÍÓÚáéíóúÑñ0-9_.-]*`, 'g');
-const ne = [ '0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣' ];
-const listFormat = (str, addIndex, guildId) => {
-    let cmindex = 0;
-    return str.replace(cmsearch, match => `${addIndex?`**[${cmindex++}]**`:''}\`${p_pure(guildId).raw}${match.slice(p_pure().raw.length)}\``);
+const { host, version, note, changelog, todo: toDo } = bot_status;
+const COMMAND_REGEX = new RegExp(`(${p_pure().raw})([a-záéíóúñ0-9_.-]+)`, 'gi');
+
+/**
+ * @param {string} str 
+ * @param {import('../Commons/typings').ComplexCommandRequest} request
+ */
+function listFormat(str, request) {
+    return str.replace(COMMAND_REGEX, `\`${p_pure(request).raw}$2\``);
 };
-const counterDisplay = (number) => {
+/**@param {number} number*/
+function counterDisplay(number) {
     const numberString = improveNumber(number, true);
     if(isShortenedNumberString(numberString))
         return `${numberString} de`;
@@ -25,13 +31,14 @@ const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('estado', flags)
     .setAliases('status', 'botstatus')
     .setLongDescription('Muestra mi estado actual. Eso incluye versión, host, registro de cambios, cosas por hacer, etc')
-    .setExecution(async (request, _, isSlash) => {
+    .setExperimentalExecution(async request => {
+        const translator = await Translator.from(request.member);
         const stats = (await Stats.findOne({})) || new Stats({ since: Date.now( )});
-        const clformat = changelog.map(item => `- ${item}`).join('\n');
-        const tdformat = todo.map(item => `- ${item}`).join('\n');
-        const cm = changelog.join().match(cmsearch);
-        const cnt = {
-            cmds: readdirSync('./commands/Pure').filter(file => file.endsWith('.js')).length,
+        const formattedChangelog = changelog.map(item => `- ${item}`).join('\n');
+        const formattedToDo = toDo.map(item => `- ${item}`).join('\n');
+        const matchedCommands = changelog.join().matchAll(COMMAND_REGEX);
+        const counts = {
+            commands: readdirSync('./commands/Pure').filter(file => file.endsWith('.js')).length,
             guilds: request.client.guilds.cache.size
         }
         const totalCommands = stats.commands.succeeded + stats.commands.failed;
@@ -40,14 +47,14 @@ const command = new CommandManager('estado', flags)
             .setColor(0x608bf3)
             .setAuthor({ name: 'Estado del Bot', iconURL: request.client.user.avatarURL({ extension: 'png', size: 1024 }) })
             .setThumbnail('https://i.imgur.com/HxTxjdL.png')
-            .setFooter({ text: `Ofreciendo un total de ${cnt.cmds} comandos en ${cnt.guilds} servidores` })
+            .setFooter({ text: `Ofreciendo un total de ${counts.commands} comandos en ${counts.guilds} servidores` })
             .addFields(
                 { name: 'Creador', value: `Papita con Puré\n[423129757954211880]`, inline: true },
                 { name: 'Host', value: (host === 'https://localhost/') ? 'https://heroku.com/' : 'localhost', inline: true },
                 { name: 'Versión', value: `#️⃣ ${version.number}\n📜 ${version.name}`, inline: true },
                 { name: 'Visión general', value: note },
-                { name: 'Cambios', value: listFormat(clformat, true, request.guild.id) },
-                { name: 'Lo que sigue', value: listFormat(tdformat, false, request.guild.id) },
+                { name: 'Cambios', value: listFormat(formattedChangelog, request) },
+                { name: 'Lo que sigue', value: listFormat(formattedToDo, request) },
                 {
                     name: 'Estadísticas',
                     value: [
@@ -59,20 +66,51 @@ const command = new CommandManager('estado', flags)
                 },
             );
 
-        const sentquery = (await Promise.all([
-            request.reply({ embeds: [embed] }),
-            isSlash ? /**@type {CommandInteraction}*/(request).fetchReply() : null,
-        ])).filter(sq => sq);
-        const sent = /**@type {Message<true>}*/(sentquery.pop());
-        if(cm === null) return;
-        Promise.all(cm.map(async (_, i) => sent.react(ne[i])));
-        const coll = sent.createReactionCollector({ filter: (_, u) => !u.bot, max: cm.length, time: 1000 * 60 * 2 });
-        coll.on('collect', nc => {
-            const i = ne.indexOf(nc.emoji.name);
-            if(i < 0) return;
-            const search = cm[i].slice(2);
-            ayuda.execute(CommandManager.requestize(sent), [ search ]);
-        });
+        const embeds = [embed];
+        const components = [];
+        if(matchedCommands != null) {
+            /**@type {Array<import('discord.js').SelectMenuComponentOptionData | import('discord.js').APISelectMenuOption>}*/
+            const commandOptions = [];
+            for(const matchedCommand of matchedCommands) {
+                const commandName = matchedCommand[2];
+                commandOptions.push({
+                    label: `${p_pure(request).raw}${commandName}`,
+                    value: commandName,
+                });
+            }
+
+            components.push(makeStringSelectMenuRowBuilder().addComponents(
+                new StringSelectMenuBuilder()
+                    .setCustomId(`estado_getHelp_${compressId(request.userId)}`)
+                    .setPlaceholder('Comandos mencionados...')
+                    .addOptions(commandOptions),
+            ));
+        }
+
+        return request.reply({ embeds, components });
     })
+    .setSelectMenuResponse(async function getHelp(interaction) {
+        const embeds = [];
+        const components = [];
+
+        const query = interaction.values[0];
+        const foundCommand = searchCommand(interaction, query);
+        if(foundCommand) {
+            injectWikiPage(foundCommand, interaction.guildId, { embeds, components });
+        } else {
+            const translator = await Translator.from(interaction.member);
+            embeds.push(
+                new EmbedBuilder()
+                    .setColor(Colors.Red)
+                    .setTitle(translator.getText('somethingWentWrong')),
+            );
+        }
+
+        return interaction.reply({
+            embeds,
+            components,
+            ephemeral: true,
+        });
+    }, { userFilterIndex: 0 });
 
 module.exports = command;
