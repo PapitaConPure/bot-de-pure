@@ -327,7 +327,7 @@ function getQueueActionRow(queue, page, userId, translator) {
 		actionRow.addComponents(
 			new ButtonBuilder()
 				.setCustomId(`cola_clearQueue_${compressedUserId}`)
-				.setEmoji('921751138997514290')
+				.setEmoji('1355143793577426962')
 				.setLabel(translator.getText('queueButtonClearQueue'))
 				.setStyle(ButtonStyle.Danger),
 		);

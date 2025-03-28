@@ -10,6 +10,7 @@ const { getBaseTags, getSearchTags, tagMaps } = require('../../localdata/boorupr
 const globalConfigs = require('../../localdata/config.json');
 const rakki = require('../../commands/Pure/rakkidei');
 const { Translator } = require('../../internationalization');
+const Client = require('../../client');
 
 /**
  * @typedef {{ maxTags?: number, title?: string, subtitle?: string, footer?: string, cornerIcon?: string, manageableBy?: string, allowNSFW?: boolean, isNotFeed?: boolean }} PostFormatData
@@ -151,7 +152,7 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 	//Botón de eliminación
 	row.addComponents(
 		new ButtonBuilder()
-			.setEmoji('921751138997514290')
+			.setEmoji('1355143793577426962')
 			.setStyle(ButtonStyle.Danger)
 			.setCustomId(`feed_deletePost_${data.manageableBy ?? ''}_${data.isNotFeed ?? ''}`),
 	);
@@ -223,9 +224,9 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 			postEmbed.addFields({ name: fieldName, value: shortenText(content, 1020), inline: true });
 		}
 		
-		addTagCategoryField(`${gEmo('pencilwhite', s3)} Artistas`,    postArtistTags);
-		addTagCategoryField(`${gEmo('personwhite', s3)} Personajes`,  postCharacterTags);
-		addTagCategoryField(`${gEmo('questionwhite', s3)} Copyright`, postCopyrightTags);
+		addTagCategoryField(`<:palette:1355128249658638488> Artistas`,   postArtistTags);
+		addTagCategoryField(`<:person:1355128242993893539> Personajes`,  postCharacterTags);
+		addTagCategoryField(`<:landmark:1355128256432443584> Copyright`, postCopyrightTags);
 
 		if(maxTags > 0)
 			postEmbed.addFields({ name: tagsTitle, value: `_${shortenText(tagsContent, 1020)}_` });
@@ -403,7 +404,7 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
 			isNotFeed: true,
 		})));
 		if(userTags.length)
-			messages[posts.length - 1].embeds[0].addFields({ name: 'Tu búsqueda', value: `:mag_right: *${userTags.trim().replace(/\*/g, '\\*').split(/ +/).join(', ')}*` });
+			messages[posts.length - 1].embeds[0].addFields({ name: 'Tu búsqueda', value: `<:magGlassRight:1355133928721088592> *${userTags.trim().replace(/\*/g, '\\*').split(/ +/).join(', ')}*` });
 
 		//Enviar mensajes
 		const replyOptions = messages.shift();

@@ -18,7 +18,7 @@ const wizTitle = (translator) => translator.getText('feedAuthor');
 /**@param {String} compressedAuthorId*/
 const cancelbutton = (compressedAuthorId) => new ButtonBuilder()
 	.setCustomId(`feed_cancelWizard_${compressedAuthorId}`)
-	.setEmoji('936531643496288288')
+	.setEmoji('1355143793577426962')
 	.setStyle(ButtonStyle.Secondary);
 
 /**
@@ -154,7 +154,7 @@ const command = new CommandManager('feed', flags)
 						.setStyle(ButtonStyle.Success),
 					new ButtonBuilder()
 						.setCustomId(`feed_selectDelete_${authorId}`)
-						.setEmoji('921751138997514290')
+						.setEmoji('1355143793577426962')
 						.setLabel(translator.getText('buttonDelete'))
 						.setStyle(ButtonStyle.Danger)
 						.setDisabled(!premade),
@@ -232,7 +232,7 @@ const command = new CommandManager('feed', flags)
 					.setStyle(ButtonStyle.Primary),
 				new ButtonBuilder()
 					.setCustomId(`feed_startWizard_${authorId}`)
-					.setEmoji('934432754173624373')
+					.setEmoji('1355128236790644868')
 					.setStyle(ButtonStyle.Secondary),
 				cancelbutton(authorId),
 			)],
@@ -311,7 +311,7 @@ const command = new CommandManager('feed', flags)
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId(`feed_startWizard_${authorId}`)
-						.setEmoji('934432754173624373')
+						.setEmoji('1355128236790644868')
 						.setStyle(ButtonStyle.Secondary),
 					cancelbutton(authorId),
 				),
@@ -339,7 +339,7 @@ const command = new CommandManager('feed', flags)
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId(`feed_startWizard_${authorId}`)
-						.setEmoji('934432754173624373')
+						.setEmoji('1355128236790644868')
 						.setStyle(ButtonStyle.Secondary),
 					cancelbutton(authorId),
 				),
@@ -367,7 +367,7 @@ const command = new CommandManager('feed', flags)
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId(`feed_startWizard_${authorId}`)
-						.setEmoji('934432754173624373')
+						.setEmoji('1355128236790644868')
 						.setStyle(ButtonStyle.Secondary),
 					cancelbutton(authorId),
 				),
@@ -395,7 +395,7 @@ const command = new CommandManager('feed', flags)
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId(`feed_startWizard_${authorId}`)
-						.setEmoji('934432754173624373')
+						.setEmoji('1355128236790644868')
 						.setStyle(ButtonStyle.Secondary),
 					cancelbutton(authorId),
 				),
@@ -415,7 +415,7 @@ const command = new CommandManager('feed', flags)
 					.setStyle(ButtonStyle.Primary),
 				new ButtonBuilder()
 					.setCustomId(`feed_selectEdit_${authorId}`)
-					.setEmoji('934432754173624373')
+					.setEmoji('1355128236790644868')
 					.setStyle(ButtonStyle.Secondary),
 				finishButton(translator, authorId),
 			)],
@@ -471,7 +471,7 @@ const command = new CommandManager('feed', flags)
 				makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId(`feed_selectCustomize_${authorId}`)
-						.setEmoji('934432754173624373')
+						.setEmoji('1355128236790644868')
 						.setStyle(ButtonStyle.Secondary),
 					finishButton(translator, authorId),
 				),
@@ -509,7 +509,7 @@ const command = new CommandManager('feed', flags)
 			components: [makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId(`feed_selectView_${authorId}`)
-					.setEmoji('934432754173624373')
+					.setEmoji('1355128236790644868')
 					.setStyle(ButtonStyle.Secondary),
 				finishButton(translator, authorId),
 			)],
@@ -545,7 +545,7 @@ const command = new CommandManager('feed', flags)
 					.setStyle(ButtonStyle.Danger),
 				new ButtonBuilder()
 					.setCustomId(`feed_selectDelete_${authorId}`)
-					.setEmoji('934432754173624373')
+					.setEmoji('1355128236790644868')
 					.setStyle(ButtonStyle.Secondary),
 				cancelbutton(authorId),
 			)],
@@ -682,7 +682,7 @@ const command = new CommandManager('feed', flags)
 		row.addComponents(
 			new ButtonBuilder()
 				.setCustomId(`feed_selectCustomize_${authorId}`)
-				.setEmoji('934432754173624373')
+				.setEmoji('1355128236790644868')
 				.setStyle(ButtonStyle.Secondary),
 			cancelbutton(authorId),
 		);
@@ -1042,18 +1042,20 @@ const command = new CommandManager('feed', flags)
 			const source = post.source;
 			const tagsEmbed = new EmbedBuilder()
 				.setColor(Colors.Purple);
-
+				
+			const characterEmoji = interaction.client.emojis.cache.get('1355128242993893539');
+			const copyrightEmoji = interaction.client.emojis.cache.get('1355128256432443584');
 			if(postArtistTags.length > 0) {
 				const artistTagsContent = formatTagNameList(postArtistTags, '\n');
-				tagsEmbed.addFields({ name: `${tagEmoji} Artistas`, value: shortenText(artistTagsContent, 1020), inline: true })
+				tagsEmbed.addFields({ name: `$<:palette:1355128249658638488> Artistas`, value: shortenText(artistTagsContent, 1020), inline: true })
 			}
 			if(postCharacterTags.length > 0) {
 				const characterTagsContent = formatTagNameList(postCharacterTags, '\n');
-				tagsEmbed.addFields({ name: `${tagEmoji} Personajes`, value: shortenText(characterTagsContent, 1020), inline: true })
+				tagsEmbed.addFields({ name: `<:person:1355128242993893539> Personajes`, value: shortenText(characterTagsContent, 1020), inline: true })
 			}
 			if(postCopyrightTags.length > 0) {
 				const copyrightTagsContent = formatTagNameList(postCopyrightTags, '\n');
-				tagsEmbed.addFields({ name: `${tagEmoji} Copyright`, value: shortenText(copyrightTagsContent, 1020), inline: true })
+				tagsEmbed.addFields({ name: `<:landmark:1355128256432443584> Copyright`, value: shortenText(copyrightTagsContent, 1020), inline: true })
 			}
 			tagsEmbed.addFields(
 				{ name: `${tagEmoji} Tags`, value: shortenText(tagsContent, 1020) },

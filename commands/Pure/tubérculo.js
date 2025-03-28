@@ -42,17 +42,17 @@ function paginationRows(page, lastPage, navigationEnabled = true) {
 			new ButtonBuilder()
 				.setCustomId('tubérculo_filterItems_AUTHOR')
 				.setLabel('Filtrar Autor')
-				.setEmoji('936530498061213756')
+				.setEmoji('1355133341984100483')
 				.setStyle(ButtonStyle.Success),
 			new ButtonBuilder()
 				.setCustomId('tubérculo_filterItems_TID')
 				.setLabel('Filtrar TuberID')
-				.setEmoji('936530498061213756')
+				.setEmoji('1355133341984100483')
 				.setStyle(ButtonStyle.Success),
 			new ButtonBuilder()
 				.setCustomId('tubérculo_filterClear')
 				.setLabel('Mostrar todo')
-				.setEmoji('936531643496288288')
+				.setEmoji('1355143793577426962')
 				.setStyle(ButtonStyle.Danger),
 		),
 	);

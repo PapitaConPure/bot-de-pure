@@ -44,7 +44,7 @@ const command = new CommandManager('exhibir', flags)
 					.setStyle(ButtonStyle.Danger),
 				new ButtonBuilder()
 					.setCustomId(`exhibir_cancelFlush_${user.id}`)
-					.setEmoji('936531643496288288')
+					.setEmoji('1355143793577426962')
 					.setStyle(ButtonStyle.Secondary),
 			)],
 			ephemeral: true,

@@ -44,7 +44,7 @@ const command = new CommandManager('papa-feedback', tags)
                     .setStyle(ButtonStyle.Success),
                 new ButtonBuilder()
                     .setCustomId('feed_giveFeedback_N')
-                    .setEmoji('936531643496288288')
+                    .setEmoji('1355143793577426962')
                     .setLabel('No me gusta / I don\'t like it / 良くないです')
                     .setStyle(ButtonStyle.Danger),
             ),

@@ -24,7 +24,7 @@ function displayToggle(toggle, translator) {
  */
 const backToDashboardButton = (id, translator) => new ButtonBuilder()
     .setCustomId(`yo_goToDashboard_${compressId(id)}`)
-    .setEmoji('934432754173624373')
+    .setEmoji('1355128236790644868')
     .setStyle(ButtonStyle.Secondary);
 
 /**
@@ -33,7 +33,7 @@ const backToDashboardButton = (id, translator) => new ButtonBuilder()
  */
 const cancelButton = (id, translator) => new ButtonBuilder()
 	.setCustomId(`yo_cancelWizard_${id}`)
-    .setEmoji('936531643496288288')
+    .setEmoji('1355143793577426962')
 	.setStyle(ButtonStyle.Secondary);
 
 /**
@@ -219,7 +219,7 @@ const followedTagsRows = (userId, channelId, translator, isAlt) => [
             .setStyle(ButtonStyle.Danger),
         new ButtonBuilder()
             .setCustomId(`yo_selectFTC_${userId}`)
-            .setEmoji('934432754173624373')
+            .setEmoji('1355128236790644868')
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(!!isAlt),
         cancelButton(userId, translator)

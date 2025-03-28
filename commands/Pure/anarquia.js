@@ -529,7 +529,7 @@ async function makeSkillSelectReply(request, translator, auser, position, emoteI
 				new ButtonBuilder()
 					.setCustomId(`anarquia_cancel_${authorId}`)
 					.setLabel(translator.getText('buttonCancel'))
-					.setEmoji('936531643496288288')
+					.setEmoji('921751138997514290')
 					.setStyle(ButtonStyle.Danger)
 			),
 		],

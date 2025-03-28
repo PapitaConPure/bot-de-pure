@@ -9,7 +9,7 @@ const { Translator } = require('../../internationalization');
 
 const cancelbutton = (id) => new ButtonBuilder()
 	.setCustomId(`voz_cancelWizard_${id}`)
-	.setEmoji('936531643496288288')
+	.setEmoji('1355143793577426962')
 	.setStyle(ButtonStyle.Secondary);
 const collectors = {};
 
@@ -289,7 +289,7 @@ const command = new CommandManager('voz', flags)
 		const row = makeButtonRowBuilder().addComponents(
 			new ButtonBuilder()
 				.setCustomId(`voz_startWizard_${uid}`)
-				.setEmoji('934432754173624373')
+				.setEmoji('1355128236790644868')
 				.setStyle(ButtonStyle.Secondary),
 			cancelbutton(uid),
 		);
@@ -318,7 +318,7 @@ const command = new CommandManager('voz', flags)
 				.setStyle(ButtonStyle.Danger),
 			new ButtonBuilder()
 				.setCustomId(`voz_startWizard_${uid}`)
-				.setEmoji('934432754173624373')
+				.setEmoji('1355128236790644868')
 				.setStyle(ButtonStyle.Secondary),
 			cancelbutton(uid),
 		);
