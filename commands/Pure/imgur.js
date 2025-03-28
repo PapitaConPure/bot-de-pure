@@ -22,9 +22,9 @@ const command = new CommandManager('imgur', flags)
 		'subir',
 		'upload',
 	)
-	.setBriefDescription('Permite subir imágenes')
+	.setBriefDescription('Permite subir imágenes con Imgur')
 	.setLongDescription(
-		'Permite subir imágenes, limitado a un máximo diario global.',
+		'Permite subir imágenes por medio de la plataforma de Imgur, limitado a un máximo diario global.',
 		'Para evitar el máximo de subida global, puedes \`--registrar\` tu propia ID de cliente (explicado al usar la bandera de comando)',
 	)
 	.setOptions(options)
@@ -96,7 +96,7 @@ const command = new CommandManager('imgur', flags)
 		];
 
 		if(!uploads.length)
-			return request.editReply({ content: '⚠️ Debes indicar un enlace de imagen o una imagen directa a subir a Imgur', ephemeral: true });
+			return request.editReply({ content: translator.getText('imgurInvalidImage'), ephemeral: true });
 
 		let count = 1;
 		const successes = [];
@@ -106,18 +106,18 @@ const command = new CommandManager('imgur', flags)
 		
 			if(image?.success)
 				successes.push(new EmbedBuilder()
-					.setTitle('Tu imagen')
+					.setTitle(translator.getText('imgurUploadSuccessTitle'))
 					.setColor(Colors.Green)
 					.setURL(image.data.link)
 					.setDescription(image.data.link)
 					.setImage(image.data.link));
 			else
 				failures.push(new EmbedBuilder()
-					.setTitle(`⚠️ No se pudo subir la imagen Nº${count}`)
-					.setDescription('Si es un problema de frecuencia de subida, prueba registrar tu propia aplicación para subir imágenes sin restricción global')
+					.setTitle(translator.getText('imgurUploadErrorTitle', count))
+					.setDescription(translator.getText('imgurUploadErrorDesc'))
 					.setColor(Colors.Red)
 					.addFields({
-						name: `Código de Error: ${image.status}`,
+						name: `Error ${image.status}`,
 						value: `\`\`\`\n${image.data}\n\`\`\``,
 					}));
 			
