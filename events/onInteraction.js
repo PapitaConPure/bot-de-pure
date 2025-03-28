@@ -165,6 +165,8 @@ async function handleComponent(interaction, client, stats) {
 
         /**@type {CommandManager}*/
         const command = puré.commands.get(commandName) || puré.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+        if(!command)
+            throw new ReferenceError(`El comando ${commandName} no existe`);
         if(typeof command[commandFnName] !== 'function')
             return handleHuskInteraction(interaction);
 
