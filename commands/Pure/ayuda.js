@@ -1,12 +1,10 @@
-const { readdirSync } = require('fs'); //Integrar operaciones sistema de archivos de consola
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, StringSelectMenuInteraction, AutocompleteInteraction, GuildMember } = require('discord.js');
+const { EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, GuildMember } = require('discord.js');
 const { serverid, tenshiColor, peopleid } = require('../../localdata/config.json'); //Variables globales
 const { isNotModerator, compressId, decompressId, shortenText, edlDistance } = require('../../func');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptions, CommandTags, CommandManager, CommandParam } = require('../Commons/commands');
+const { commandFilenames, CommandOptions, CommandTags, CommandManager, CommandParam } = require('../Commons/commands');
+const { injectWikiPage, searchCommand, searchCommands } = require('../../wiki');
 const { makeStringSelectMenuRowBuilder } = require('../../tsCasts');
-
-const commandFilenames = readdirSync('./commands/Pure').filter(file => file.endsWith('.js'));
 
 /**
  * @param {import('../Commons/typings').ComplexCommandRequest | import('discord.js').StringSelectMenuInteraction<'cached'>} request
@@ -173,7 +171,7 @@ const command = new CommandManager('ayuda', flags)
 	.setExperimentalExecution(async (request, args) => {
 		const search = args.getString('comando');
 		const guildPrefix = p_pure(request.guildId).raw;
-		const helpCommand = `${guildPrefix}${module.exports.name}`;
+		const helpCommand = `${guildPrefix}${command.name}`;
 		
 		//Análisis de comandos
 		if(!search) {
@@ -215,11 +213,11 @@ const command = new CommandManager('ayuda', flags)
 
 		const embeds = [];
 		const components = [];
-		const command = searchCommand(request, search);
+		const foundCommand = searchCommand(request, search);
 
-		if(command)
-			injectWikiPage(request, command, embeds, components);
-		else
+		if(foundCommand) {
+			injectWikiPage(foundCommand, request.guildId, { embeds, components });
+		} else {
 			embeds.push(new EmbedBuilder()
 				.setColor(0xe44545)
 				.setTitle('Sin resultados')
@@ -227,6 +225,7 @@ const command = new CommandManager('ayuda', flags)
 					name: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
 					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}comando <comando>\` para ver un comando en específico`,
 				}));
+		}
 		
 		components.unshift(makeGuideRow(request));
 
@@ -234,7 +233,7 @@ const command = new CommandManager('ayuda', flags)
 	})
 	.setSelectMenuResponse(async function viewCategory(interaction) {
 		const guildPrefix = p_pure(interaction.guildId).raw;
-		const helpCommand = `${guildPrefix}${module.exports.name}`;
+		const helpCommand = `${guildPrefix}${command.name}`;
 
 		const commands = lookupCommands({
 			tags: /**@type {Array<import('../Commons/cmdTags').CommandTagResolvable>}*/(interaction.values),
@@ -277,7 +276,7 @@ const command = new CommandManager('ayuda', flags)
 	}, { userFilterIndex: 0 })
 	.setSelectMenuResponse(async function viewGuideWiki(interaction) {
 		const guildPrefix = p_pure(interaction.guildId).raw;
-		const helpCommand = `${guildPrefix}${module.exports.name}`;
+		const helpCommand = `${guildPrefix}${command.name}`;
 
 		let search;
 		switch(interaction.values[0]) {
@@ -290,11 +289,11 @@ const command = new CommandManager('ayuda', flags)
 
 		const embeds = [];
 		const components = [];
-		const command = searchCommand(interaction, search);
+		const foundCommand = searchCommand(interaction, search);
 
-		if(command)
-			injectWikiPage(interaction, command, embeds, components);
-		else
+		if(foundCommand) {
+			injectWikiPage(foundCommand, interaction.guildId, { embeds, components });
+		} else {
 			embeds.push(new EmbedBuilder()
 				.setColor(0xe44545)
 				.setTitle('Sin resultados')
@@ -302,6 +301,7 @@ const command = new CommandManager('ayuda', flags)
 					name: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
 					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}comando <comando>\` para ver un comando en específico`,
 				}));
+		}
 		
 		components.unshift(makeGuideRow(interaction));
 
@@ -309,6 +309,7 @@ const command = new CommandManager('ayuda', flags)
 	}, { userFilterIndex: 0 });
 
 /**
+ * Recupera un arreglo de {@linkcode CommandManager} según la `query` proporcionada.
  * @typedef {Object} CommandsLookupQuery
  * @property {Array<import('../Commons/cmdTags').CommandTagResolvable>} [tags]
  * @property {Array<import('../Commons/cmdTags').CommandTagResolvable>} [excludedTags]
@@ -349,137 +350,6 @@ function lookupCommands(query = {}) {
 	}
 
 	return commands;
-}
-
-/**
- * Devuelte un {@linkcode CommandManager} según el `name` indicado.
- * Si no se encuentran resultados, se devuelve `null`
- * @param {import('../Commons/typings').ComplexCommandRequest | StringSelectMenuInteraction<'cached'>} request 
- * @param {String} nameOrAlias 
- */
-function searchCommand(request, nameOrAlias) {
-	for(const filename of commandFilenames) {
-		const commandFile = require(`../../commands/Pure/${filename}`);
-		const command = /**@type {CommandManager}*/(commandFile.command ?? commandFile);
-
-		if(command.name !== nameOrAlias
-		&& !command.aliases.some(alias => alias === nameOrAlias))
-			continue;
-		
-		if((command.tags.has('PAPA') && request.user.id !== peopleid.papita)
-		|| (command.tags.has('MOD') && isNotModerator(request.member))
-		|| (command.tags.has('HOURAI') && request.guild.id !== serverid.saki))
-			continue;
-		
-		return command;
-	}
-
-	return null;
-}
-
-/**
- * Devuelte un {@linkcode CommandManager} según el `name` indicado.
- * Si no se encuentran resultados, se devuelve `null`
- * @param {import('../Commons/typings').ComplexCommandRequest | StringSelectMenuInteraction<'cached'> | AutocompleteInteraction<'cached'>} request 
- * @param {String} query 
- */
-function searchCommands(request, query) {
-	const commands = [];
-	const nameBias = 0.334;
-
-	for(const filename of commandFilenames) {
-		const commandFile = require(`../../commands/Pure/${filename}`);
-		const command = /**@type {CommandManager}*/(commandFile.command ?? commandFile);
-
-		if(command.tags.any('GUIDE', 'MAINTENANCE', 'OUTDATED'))
-			continue;
-
-		let distance = edlDistance(command.name, query);
-		if(distance > 3) {
-			distance = command.aliases
-				.map(alias => edlDistance(alias, query))
-				.reduce((a, b) => a < b ? a : b, 999) + nameBias;
-			
-			if(distance > 3)
-				continue;
-		}
-		
-		if((command.tags.has('PAPA') && request.user.id !== peopleid.papita)
-		|| (command.tags.has('MOD') && isNotModerator(request.member))
-		|| (command.tags.has('HOURAI') && request.guild.id !== serverid.saki))
-			continue;
-		
-		commands.push({
-			command,
-			distance,
-		});
-	}
-
-	return commands;
-}
-
-/**
- * 
- * @param {import('../Commons/typings').ComplexCommandRequest | StringSelectMenuInteraction<'cached'>} request 
- * @param {CommandManager} command
- * @param {Array<EmbedBuilder>} embeds 
- * @param {Array<ActionRowBuilder<import('discord.js').AnyComponentBuilder>>} components 
- */
-function injectWikiPage(request, command, embeds, components) {
-	const { name, aliases, flags } = command;
-
-	const title = (/**@type {String}*/ commandName) => {
-		const pfi = commandName.indexOf('-') + 1;
-		commandName = (flags.has('GUIDE')) ? `${commandName.slice(pfi)} (Página de Guía)`  : commandName;
-		commandName = (flags.has('MOD'))   ? `${commandName} (Mod)`                        : commandName;
-		commandName = (flags.has('PAPA'))  ? `${commandName.slice(pfi)} (Papita con Puré)` : commandName;
-		return `${commandName[0].toUpperCase()}${commandName.slice(1)}`;
-	};
-	const isNotGuidePage = !(flags.has('GUIDE'));
-	const listExists = (/**@type {Array<String>}*/ l) => l?.[0]?.length;
-
-	//Embed de metadatos
-	embeds.push(new EmbedBuilder()
-		.setColor(tenshiColor)
-		.setAuthor({ name: title(name), iconURL: request.client.user.avatarURL({ extension: 'png', size: 512 }) })
-		.addFields(
-			{ name: 'Nombre', value: `\`${name}\``, inline: true },
-			{
-				name: 'Alias',
-				value: listExists(aliases)
-					? (aliases.map(i => `\`${i}\``).join(', '))
-					: ':label: Sin alias',
-				inline: true,
-			},
-			{ name: 'Etiquetas', value: flags.keys.map(f => `\`${f}\``).join(', '), inline: true },
-		));
-	
-	//Embed de información
-	const infoEmbed = new EmbedBuilder()
-		.setColor(0xbf94e4)
-		.addFields({
-			name: 'Descripción',
-			value: command.desc || '⚠️ Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde',
-		});
-
-	embeds.push(infoEmbed);
-
-	if(isNotGuidePage)
-		infoEmbed.addFields(
-			{ name: 'Llamado', value: `\`${p_pure(request.guildId).raw}${command.name}${command.callx ? ` ${command.callx}` : ''}\`` },
-			{ name: 'Opciones', value: command.options?.display || ':abacus: Sin opciones' },
-		);
-
-	components.push(new ActionRowBuilder()
-		.addComponents([
-			new ButtonBuilder()
-				.setCustomId('ayuda_porfavorayuden')
-				.setLabel('Muéstrame cómo')
-				.setStyle(ButtonStyle.Primary)
-				.setEmoji('📖')
-				.setDisabled(true),
-		]),
-	);
 }
 
 module.exports = command;
