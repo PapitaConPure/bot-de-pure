@@ -638,6 +638,12 @@ let localesObject = /**@type {const}*/({
 		ja: '❌ このスキルのスタックはありません。特別なスキルを受け取る機会を得るために、Puré Matrixともっと交流する',
 	},
 
+	catboxInvalidImage: {
+		es: '⚠️ Debes indicar un enlace de imagen o una imagen directa a subir a Catbox',
+		en: '⚠️ You must supply an image link or file to upload to Catbox',
+		ja: '⚠️ Catboxにアップロードするイメージのリンクまたはファイルを提供する必要があります',
+	},
+
 	cultivarUnauthorized: {
 		es: `¡Solo puedes cultivar una vez por día! Podrás volver a cultivar <t:${subl(0)}:R>`,
 		en: `You can only cultivate once per day! You'll be able to cultivate again <t:${subl(0)}:R>`,
@@ -652,6 +658,27 @@ let localesObject = /**@type {const}*/({
 		es: `Ahora tienes <:prc:1097208828946301123> ${subl(0)}`,
 		en: `You now have <:prc:1097208828946301123> ${subl(0)}`,
 		ja: `You now have <:prc:1097208828946301123> ${subl(0)}`,
+	},
+
+	imgurInvalidImage: {
+		es: '⚠️ Debes indicar un enlace de imagen o una imagen directa a subir a Imgur',
+		en: '⚠️ You must supply an image link or file to upload to Imgur',
+		ja: '⚠️ Imgurにアップロードするイメージのリンクまたはファイルを提供する必要があります',
+	},
+	imgurUploadSuccessTitle: {
+		es: 'Tu imagen',
+		en: 'Your image',
+		ja: 'あなたのイメーギ'
+	},
+	imgurUploadErrorTitle: {
+		es: `⚠️ No se pudo subir la imagen Nº${subl(0)}`,
+		en: `⚠️ Could not upload image No. ${subl(0)}`,
+		ja: `⚠️ イメージ${subl(0)}をアップロードできません`,
+	},
+	imgurUploadErrorDesc: {
+		es: 'Si es un problema de frecuencia de subida, prueba registrar tu propia aplicación para subir imágenes sin restricción global',
+		en: 'Si es un problema de frecuencia de subida, prueba registrar tu propia aplicación para subir imágenes sin restricción global',
+		ja: 'Si es un problema de frecuencia de subida, prueba registrar tu propia aplicación para subir imágenes sin restricción global',
 	},
 
 	transferAmountExpected: {
