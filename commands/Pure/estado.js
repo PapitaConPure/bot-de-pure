@@ -1,5 +1,6 @@
 const { EmbedBuilder, CommandInteraction, Message, StringSelectMenuBuilder, ChatInputCommandInteraction, Colors } = require('discord.js'); //Integrar discord.js
-const { bot_status } = require('../../localdata/config.json'); //Variables globales
+const globalConfigs = require('../../localdata/config.json'); //Variables globales
+const { bot_status } = globalConfigs;
 const { readdirSync } = require('fs'); //Para el contador de comandos
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { Stats } = require('../../localdata/models/stats');
@@ -33,7 +34,7 @@ const command = new CommandManager('estado', flags)
     .setLongDescription('Muestra mi estado actual. Eso incluye versión, host, registro de cambios, cosas por hacer, etc')
     .setExperimentalExecution(async request => {
         const translator = await Translator.from(request.member);
-        const stats = (await Stats.findOne({})) || new Stats({ since: Date.now( )});
+        const stats = (!globalConfigs.noDataBase && await Stats.findOne({})) || new Stats({ since: Date.now( )});
         const formattedChangelog = changelog.map(item => `- ${item}`).join('\n');
         const formattedToDo = toDo.map(item => `- ${item}`).join('\n');
         const matchedCommands = changelog.join().matchAll(COMMAND_REGEX);

@@ -136,11 +136,9 @@ const puré = {
 };
 
 /**
- * 
- * @param {Client} client 
  * @param {Boolean} log 
  */
-function registerCommandFiles(client, log = false) {
+function registerCommandFiles(log = false) {
     const commandFiles = readdirSync('./commands/Pure').filter(file => file.endsWith('.js'));
     /**@type {{ name: string, flags: string, tieneEmote: string, tieneMod: string }[]}*/
     const commandTableStack = [];

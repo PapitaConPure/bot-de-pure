@@ -1,14 +1,14 @@
 //#region Carga de módulos necesarios
 const { puré } = require('../commandInit.js');
 const { Stats } = require('../localdata/models/stats.js');
-const { peopleid } = require('../localdata/config.json');
+const globalConfigs = require('../localdata/config.json');
+const { peopleid } = globalConfigs;
 const { channelIsBlocked, isUsageBanned, decompressId } = require('../func.js');
 const { auditRequest } = require('../systems/others/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../localdata/cmdExceptions.js');
 const { Translator } = require('../internationalization.js');
 const { CommandManager } = require('../commands/Commons/cmdBuilder.js');
 const { ButtonInteraction, StringSelectMenuInteraction, ModalSubmitInteraction, Client, ContextMenuCommandInteraction, ChatInputCommandInteraction, CommandInteractionOptionResolver, AutocompleteInteraction } = require('discord.js');
-const { ContextMenuActionManager } = require('../actions/Commons/actionBuilder.js');
 const { CommandOptionSolver, CommandFlagExpressive, CommandParam } = require('../commands/Commons/cmdOpts.js');
 //#endregion
 
@@ -25,7 +25,7 @@ async function onInteraction(interaction, client) {
     if(channelIsBlocked(channel) || (await isUsageBanned(user)))
         return handleBlockedInteraction(interaction).catch(console.error);
     
-    const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
+    const stats = (!globalConfigs.noDataBase && await Stats.findOne({})) || new Stats({ since: Date.now() });
 
     if(interaction.isAutocomplete())
         return handleAutocompleteInteraction(interaction, client, stats);
@@ -111,6 +111,9 @@ async function handleCommand(interaction, client, stats) {
         if(!isPermissionsError)
             stats.commands.failed++;
     }
+
+    if(globalConfigs.noDataBase) return;
+    
     stats.markModified('commands');
     return stats.save();
 }
@@ -137,6 +140,8 @@ async function handleAction(interaction, client, stats) {
         if(!isPermissionsError)
             stats.commands.failed++;
     }
+
+    if(globalConfigs.noDataBase) return;
 
     stats.markModified('commands');
     return stats.save();

@@ -11,7 +11,8 @@ const { channelIsBlocked, rand, edlDistance, isUsageBanned } = require('../func.
 const globalGuildFunctions = require('../localdata/customization/guildFunctions.js');
 const { auditRequest } = require('../systems/others/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../localdata/cmdExceptions.js');
-const { tenshiColor } = require('../localdata/config.json');
+const globalConfigs = require('../localdata/config.json');
+const { tenshiColor } = globalConfigs;
 const UserConfigs = require('../localdata/models/userconfigs.js');
 const { sendConvertedPixivPosts } = require('../systems/agents/purepix.js');
 const { sendConvertedTweets } = require('../systems/agents/pureet.js');
@@ -28,6 +29,8 @@ const { addMessageCascade } = require('./onMessageDelete.js');
  * @param {String} userId 
  */
 async function updateChannelMessageCounter(guildId, channelId, userId) {
+	if(globalConfigs.noDataBase) return;
+
 	const channelQuery = { guildId, channelId };
 	const channelStats = (await ChannelStats.findOne(channelQuery)) || new ChannelStats(channelQuery);
 	channelStats.cnt++;
@@ -208,6 +211,7 @@ async function checkCommand(message, client, stats) {
  * @param {String} userId
  */
 async function gainPRC(guild, userId) {
+	if(globalConfigs.noDataBase) return;
 	if(guild.memberCount < 100) return;
 
 	const userConfigs = (await UserConfigs.findOne({ userId })) || new UserConfigs({ userId });
@@ -298,13 +302,15 @@ async function onMessage(message, client) {
 	updateAgentMessageOwners().catch(console.error);
 	
 	//Estadísticas
-	const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
+	const stats = (!globalConfigs.noDataBase && await Stats.findOne({})) || new Stats({ since: Date.now() });
 	stats.read++;
 	updateChannelMessageCounter(guild.id, channel.id, author.id);
 
 	//Leer comando
 	checkCommand(message, client, stats);
-	stats.save();
+
+    if(!globalConfigs.noDataBase)
+		stats.save();
 
 	//Ayuda para principiantes
 	if(content.includes(`${client.user}`)) {

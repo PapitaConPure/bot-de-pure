@@ -4,7 +4,7 @@ const { commandFilenames } = require('./commands/Commons/commands');
 const { CommandManager } = require('./commands/Commons/cmdBuilder');
 const { p_pure } = require('./localdata/customization/prefixes');
 const { isNotModerator, edlDistance } = require('./func');
-const Client = require('./client');
+const { client } = require('./client');
 
 /**
  * Devuelve un {@linkcode CommandManager} según el `nameOrAlias` indicado.
@@ -102,7 +102,7 @@ function injectWikiPage(command, guildId, payload) {
 	//Embed de metadatos
 	embeds.push(new EmbedBuilder()
 		.setColor(tenshiColor)
-		.setAuthor({ name: title(name), iconURL: Client.user.avatarURL({ extension: 'png', size: 512 }) })
+		.setAuthor({ name: title(name), iconURL: client.user.avatarURL({ extension: 'png', size: 512 }) })
 		.addFields(
 			{ name: 'Nombre', value: `\`${name}\``, inline: true },
 			{

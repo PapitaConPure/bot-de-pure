@@ -43,6 +43,8 @@ async function updateBooruFeeds(guilds) {
  * @param {Discord.Collection<Discord.Snowflake, Discord.Guild>} guilds Colección de Guilds a procesar
  */
 async function processFeeds(booru, guilds) {
+    if(globalConfigs.noDataBase) return;
+
     const guildIds = guilds.map(g => g.id);
     const guildConfigs = /**@type {Array<import('../../localdata/models/guildconfigs.js').GuildConfigDocument>}*/(await GuildConfigs.find({
         guildId: { $in: guildIds },
@@ -146,6 +148,8 @@ function getNextBaseUpdateStart() {
  * @param {Discord.Client} client 
  */
 async function setupGuildFeedUpdateStack(client) {
+    if(globalConfigs.noDataBase) return;
+
     const feedUpdateStart = getNextBaseUpdateStart();
     const guildConfigs = await GuildConfigs.find({ feeds: { $exists: true } });
     /**@type {Array<GuildFeedChunk>}*/

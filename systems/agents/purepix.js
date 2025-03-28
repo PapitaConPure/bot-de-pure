@@ -1,9 +1,8 @@
-const { EmbedBuilder, Message, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Embed, ChannelType } = require('discord.js');
+const { EmbedBuilder, Message, AttachmentBuilder, Embed, ChannelType } = require('discord.js');
 const pixivToken = process.env.PIXIV_REFRESH_TOKEN ?? (require('../../localenv.json')?.pixivtoken);
 const PixivApi = require('pixiv-api-client');
 const { shortenTextLoose } = require('../../func');
-const { DiscordAgent, addAgentMessageOwner } = require('./discordagent.js');
-const { addMessageCascade } = require('../../events/onMessageDelete');
+const globalConfigs = require('../../localdata/config.json');
 const { ConverterEmptyPayload } = require('./converters');
 
 const pixiv = new PixivApi();
@@ -33,7 +32,9 @@ const PIXIV_3P_CONVERTERS = {
 let performingAuthentication = false;
 
 const refreshPixivAccessToken = async () => {
+	if(globalConfigs.noDataBase) return;
 	if(performingAuthentication) return;
+	
 	performingAuthentication = true;
 	
 	let authSuccess = false;

@@ -10,7 +10,7 @@ const { getBaseTags, getSearchTags, tagMaps } = require('../../localdata/boorupr
 const globalConfigs = require('../../localdata/config.json');
 const rakki = require('../../commands/Pure/rakkidei');
 const { Translator } = require('../../internationalization');
-const Client = require('../../client');
+const { client } = require('../../client');
 
 /**
  * @typedef {{ maxTags?: number, title?: string, subtitle?: string, footer?: string, cornerIcon?: string, manageableBy?: string, allowNSFW?: boolean, isNotFeed?: boolean }} PostFormatData

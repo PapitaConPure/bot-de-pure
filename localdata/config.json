@@ -27,6 +27,7 @@
         ]
     },
     "remoteStartup": false,
+    "noDataBase": false,
     "p_pure": {
         "0": {
             "raw": "",
