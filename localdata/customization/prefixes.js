@@ -1,13 +1,23 @@
-const { p_pure } = require('../config.json');
+const { p_pure: prefixes } = require('../config.json');
 
 /**
  * @typedef {{raw: String, regex: RegExp}} PrefixPair
  */
 
+/**@type {PrefixPair}*/
+const slashPrefixPair = { raw: '/', regex: /\//i };
+
+/**
+ * @param {import('../../commands/Commons/typings').ComplexCommandRequest | string} context Contexto de servidor o request
+ * @returns {PrefixPair} Un objeto conteniendo el texto crudo y RegExp del prefijo
+ */
+function p_pure(context = '0') {
+    if(typeof context === 'string')
+        return prefixes[context] || prefixes['0'];
+    
+    return context.isInteraction ? slashPrefixPair : p_pure(context.guildId);
+}
 module.exports = {
-    /**
-     * @param {String} gid La id del servidor
-     * @returns {PrefixPair} Un objeto conteniendo el texto crudo y RegExp del prefijo
-     */
-    p_pure: (gid = '0') => p_pure[gid] || p_pure['0'],
+    slashPrefixPair,
+    p_pure,
 }
