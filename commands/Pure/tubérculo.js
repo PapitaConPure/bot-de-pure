@@ -284,8 +284,10 @@ const command = new CommandManager('tubérculo', flags)
 		if(interaction.user.id !== userId)
 			return interaction.reply({ content: 'No tienes permiso para hacer eso', ephemeral: true });
 		
+		//FIXME: Cambiar esta solución para usar ayuda.js » injectWikiPage(...)
+		
 		//@ts-expect-error
-		return require('./ayuda.js').execute(interaction, [ 'tubérculo' ], false);
+		return require('./ayuda.js').command.execute(interaction, [ 'tubérculo' ], false);
 	})
 	.setButtonResponse(async function getTuberHelp(interaction, tuberId, variant, updateMessage) {
 		if(!tuberId)
