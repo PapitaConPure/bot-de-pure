@@ -405,6 +405,7 @@ class Post {
 	/**@type {Number}*/ id;
 	/**@type {String}*/ title;
 	/**@type {Array<String>}*/ tags;
+	/**@type {Array<String>}*/ sources;
 	/**@type {String}*/ source;
 	/**@type {Number}*/ score;
 	/**@type {Rating}*/ rating;
@@ -425,7 +426,13 @@ class Post {
 		this.id = data.id;
 		this.title = data.title;
 		this.tags = Array.isArray(data.tags) ? data.tags.map(decodeEntities) : decodeEntities(data.tags ?? '').split(' ');
-		this.source = data.source;
+		if(data.source) {
+			const sources = (typeof data.source === 'object')
+				? (Array.isArray(data.source) ? data.source : Object.values(data.source))
+				: (data.source.split(/[ \n]+/));
+			this.sources = sources;
+			this.source = sources.join(' ');
+		}
 		this.score = data.score;
 		this.rating = data.rating;
 		this.creatorId = ('creatorId' in data) ? data.creatorId : data.creator_id;
@@ -452,6 +459,37 @@ class Post {
 			this.sampleUrl = data.sampleUrl;
 			this.sampleSize = data.size;
 		}
+	}
+
+	/**
+	 * Tries to find sources that match an URL pattern, and returns all matches (if any)
+	 */
+	findUrlSources() {
+		return this.sources
+			.map(getSourceUrl)
+			.filter(s => s);
+	}
+
+	/**
+	 * Finds and returns the first source that matches an URL pattern.
+	 * 
+	 * If no URL source is found, `undefined` is returned
+	 */
+	findFirstUrlSource() {
+		return this.sources
+			.map(getSourceUrl)
+			.find(s => s);
+	}
+
+	/**
+	 * Finds and returns the last source that matches an URL pattern.
+	 * 
+	 * If no URL source is found, `undefined` is returned.
+	 */
+	findLastUrlSource() {
+		return this.sources
+			.map(getSourceUrl)
+			.findLast(s => s);
 	}
 }
 
@@ -514,6 +552,14 @@ class Tag {
 	toString() {
 		return `{${this.id} / ${this.typeName}} ${this.count} ${this.name}`;
 	}
+}
+
+/**@param {string} source*/
+function getSourceUrl(source) {
+	if(!source) return null;
+	const smatch = source.match(/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-])+\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/);
+	if(!smatch) return null;
+	return source.slice(smatch.index, smatch.index + smatch[0].length);
 }
 
 class BooruError extends Error {

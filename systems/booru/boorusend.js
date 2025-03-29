@@ -36,7 +36,7 @@ const sourceMappings = [
 ];
 
 /**@type {ReadonlyArray<SourceStyle & { pattern: RegExp }>}*/
-const sources = [
+const SOURCE_STYLES = [
 	{ color: 0x0096fa, emoji: '1334816111270563880' , pattern: /pixiv\.net/ },
 	{ color: 0x040404, emoji: '1232243415165440040', pattern: /(twitter|twimg|x)\.com/ },
 	{ color: 0xfaf18a, emoji: '999783444655648869' , pattern: /fanbox\.cc/ },
@@ -101,7 +101,7 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		});
 
 		//Dar estilo a Embed según fuente de la imagen
-		const sourceStyle = sources.find(s => s.pattern.test(source)) ?? unknownSource;
+		const sourceStyle = SOURCE_STYLES.find(s => s.pattern.test(source)) ?? unknownSource;
 		const emoji = sourceStyle.emoji;
 		embedColor ??= sourceStyle.color;
 
@@ -123,14 +123,8 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 	};
 
 	//Aplicar estilo y botones de source
-	const source = post.source;
-	if(source) {
-		const sources = (typeof source === 'object')
-			? (Array.isArray(source) ? source : Object.values(source))
-			: (source.split(/[ \n]+/));
-		const sourceUrl = sources
-			.map(getSourceUrl)
-			.find(s => s);
+	if(post.source) {
+		const sourceUrl = post.findFirstUrlSource();
 
 		if(sourceUrl)
 			addSourceButtonAndApplyStyle(sourceUrl);
@@ -139,7 +133,7 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 				new ButtonBuilder()
 					.setCustomId('feed_plainText')
 					.setStyle(ButtonStyle.Secondary)
-					.setLabel(shortenText(sources.join(' '), 72))
+					.setLabel(shortenText(post.source, 72))
 					.setDisabled(true),
 			);
 	}
@@ -503,6 +497,7 @@ function formatTagNameListNew(tagNames, sep) {
 }
 
 module.exports = {
+	SOURCE_STYLES,
 	formatBooruPostMessage,
 	notifyUsers,
 	searchAndReplyWithPost,
