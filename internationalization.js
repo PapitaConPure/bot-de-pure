@@ -1009,6 +1009,11 @@ let localesObject = /**@type {const}*/({
 		en: `Image No. ${subl(0)} result`,
 		ja: `画像${subl(0)}結果`,
 	},
+	saucenaoSearchNoResult: {
+		es: `No se encontraron resultados para la imagen Nº${subl(0)}`,
+		en: `No results were found for image No. ${subl(0)}`,
+		ja: `画像${subl(0)}に該当する結果は見つかりませんでした`,
+	},
 	saucenaoSearchErrorTitle: {
 		es: `Resultado parcial de la imagen Nº${subl(0)}`,
 		en: `Image No. ${subl(0)} partial result`,
