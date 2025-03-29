@@ -90,6 +90,11 @@ const command = new CommandManager('saucenao', flags)
 			...otherMessageUrls,
 		].slice(0, 5);
 
+		if(!queries.length) {
+			if(message?.stickers.size)
+				queries.push(...message.stickers.map(s => s.url));
+		}
+
 		if(!queries.length)
 			return request.reply({
 				content: translator.getText('saucenaoInvalidImage'),
