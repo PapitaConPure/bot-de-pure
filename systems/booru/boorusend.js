@@ -259,9 +259,9 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 			postEmbed.addFields({ name: `${fieldName}${infoSuffix}`, value: shortenText(content, 1020), inline: true });
 		}
 		
-		addTagCategoryField('<:palette:1355128249658638488> Artistas',  postArtistTags);
-		addTagCategoryField('<:person:1355128242993893539> Personajes', postCharacterTags);
-		addTagCategoryField('<:globe:1355488586883137697> Copyright',   postCopyrightTags);
+		addTagCategoryField('<:palette:1355128249658638488> Artistas',   postArtistTags);
+		addTagCategoryField('<:person:1355128242993893539> Personajes',  postCharacterTags);
+		addTagCategoryField('<:landmark:1355128256432443584> Copyright', postCopyrightTags);
 
 		if(maxTags > 0)
 			postEmbed.addFields({ name: tagsTitle, value: shortenText(tagsContent, 1020) });
