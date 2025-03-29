@@ -73,7 +73,9 @@ const command = new CommandManager('saucenao', flags)
 		
 		const message = (request.isInteraction && CommandOptionSolver.asMessage(await args.getMessage('mensaje')))
 			|| (request.isMessage && request.channel.messages.cache.get(request.inferAsMessage().reference?.messageId));
-		const messageAttachments = message?.attachments ? message.attachments.values() : /**@type {Array<Attachment>}*/([]);
+		const messageAttachments = message?.attachments
+			? message.attachments.values()
+			: /**@type {Array<Attachment>}*/([]);
 		
 		const imageUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(u => u);
 		const commandAttachments = CommandOptionSolver.asAttachments(args.parsePolyParamSync('imagens')).filter(a => a);
