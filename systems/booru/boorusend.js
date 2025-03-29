@@ -183,6 +183,8 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		//Advertencia de IA
 		if(postTags.some(t => [ 'ai-generated', 'ai-assisted' ].includes(t.name)))
 			postEmbed.setThumbnail('https://i.imgur.com/1Q41hhC.png');
+		else if((post.size?.[0] ?? 0) > (post.size?.[1] ?? 0))
+			postEmbed.setThumbnail('https://i.imgur.com/oXE6CeF.png');
 
 		const postArtistTags    = /**@type {Array<String>}*/([]);
 		const postCharacterTags = /**@type {Array<String>}*/([]);
@@ -207,7 +209,7 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		const s3 = globalConfigs.slots.slot3;
 		const otherTags = postOtherTags.slice(0, maxTags);
 		const tagsTitle = `${gEmo('tagswhite', s3)} Tags (${otherTags.length}/${post.tags.length})`;
-		const tagsContent = formatTagNameList(otherTags, ' ');
+		const tagsContent = formatTagNameListNew(otherTags, ' ');
 
 		const addTagCategoryField = (/**@type {String}*/ fieldName, /**@type {Array<String>}*/arr) => {
 			if(!arr.length) return;
@@ -218,7 +220,7 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 					.slice(0, 4);
 			}
 
-			let content = formatTagNameList(arr, '\n', { leftStr: '* ' });
+			let content = formatTagNameListNew(arr, '\n');
 			if(!content.length) return;
 
 			postEmbed.addFields({ name: fieldName, value: shortenText(content, 1020), inline: true });
@@ -229,15 +231,15 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		addTagCategoryField(`<:landmark:1355128256432443584> Copyright`, postCopyrightTags);
 
 		if(maxTags > 0)
-			postEmbed.addFields({ name: tagsTitle, value: `_${shortenText(tagsContent, 1020)}_` });
+			postEmbed.addFields({ name: tagsTitle, value: shortenText(tagsContent, 1020) });
 	} catch(err) {
 		console.error(err);
 		const postTags = post.tags;
 		if(maxTags > 0 && postTags.length) {
 			const filteredTags = postTags.slice(0, maxTags);
 			const tagsTitle = `${gEmo('tagswhite', globalConfigs.slots.slot3)} Tags (${filteredTags.length}/${post.tags.length})`;
-			const tagsContent = formatTagNameList(filteredTags, ' ');
-			postEmbed.addFields({ name: tagsTitle, value: `_${shortenText(tagsContent, 1020)}_` });
+			const tagsContent = formatTagNameListNew(filteredTags, ' ');
+			postEmbed.addFields({ name: tagsTitle, value: shortenText(tagsContent, 1020) });
 		}
 	}
 	
@@ -404,7 +406,7 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
 			isNotFeed: true,
 		})));
 		if(userTags.length)
-			messages[posts.length - 1].embeds[0].addFields({ name: 'Tu búsqueda', value: `<:magGlassRight:1355133928721088592> *${userTags.trim().replace(/\*/g, '\\*').split(/ +/).join(', ')}*` });
+			messages[posts.length - 1].embeds[0].addFields({ name: 'Tu búsqueda', value: `<:magGlassRight:1355133928721088592> *${formatTagNameListNew(userTags.trim().split(/ +/), ' ')}*` });
 
 		//Enviar mensajes
 		const replyOptions = messages.shift();
@@ -437,6 +439,14 @@ function formatTagName(tag) {
 		.replace(/\|/g, '\\|');
 }
 
+/**@param {String} tag*/
+function formatTagNameNew(tag) {
+	if(!tag.includes('`'))
+		return `\`${tag}\``;
+
+	return `\`\`${tag.replace(/`$/g, '` ')}\`\``;
+}
+
 /**
  * @param {Array<String>} tagNames
  * @param {String} sep
@@ -446,6 +456,16 @@ function formatTagNameList(tagNames, sep, options = {}) {
 	const { leftStr = '', rightStr = '' } = options;
 	return tagNames
 		.map(tagName => `${leftStr}${formatTagName(tagName)}${rightStr}`)
+		.join(sep);
+}
+
+/**
+ * @param {Array<String>} tagNames
+ * @param {String} sep
+ */
+function formatTagNameListNew(tagNames, sep) {
+	return tagNames
+		.map(tagName => tagName === '(...)' ? '-# …' : formatTagNameNew(tagName))
 		.join(sep);
 }
 
