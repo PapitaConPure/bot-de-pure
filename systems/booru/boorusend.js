@@ -214,21 +214,25 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		const addTagCategoryField = (/**@type {String}*/ fieldName, /**@type {Array<String>}*/arr) => {
 			if(!arr.length) return;
 
+			const totalCount = arr.length;
+			let partialCount = arr.length;
 			if(arr.length > 4) {
 				arr = arr
 					.with(3, '(...)')
 					.slice(0, 4);
+				partialCount = 3;
 			}
 
 			let content = formatTagNameListNew(arr, '\n');
 			if(!content.length) return;
-
-			postEmbed.addFields({ name: fieldName, value: shortenText(content, 1020), inline: true });
+			
+			const infoSuffix = partialCount < totalCount ? ` (${partialCount}/${totalCount})` : '';
+			postEmbed.addFields({ name: `${fieldName}${infoSuffix}`, value: shortenText(content, 1020), inline: true });
 		}
 		
-		addTagCategoryField(`<:palette:1355128249658638488> Artistas`,   postArtistTags);
-		addTagCategoryField(`<:person:1355128242993893539> Personajes`,  postCharacterTags);
-		addTagCategoryField(`<:landmark:1355128256432443584> Copyright`, postCopyrightTags);
+		addTagCategoryField('<:palette:1355128249658638488> Artistas',  postArtistTags);
+		addTagCategoryField('<:person:1355128242993893539> Personajes', postCharacterTags);
+		addTagCategoryField('<:globe:1355488586883137697> Copyright',   postCopyrightTags);
 
 		if(maxTags > 0)
 			postEmbed.addFields({ name: tagsTitle, value: shortenText(tagsContent, 1020) });
