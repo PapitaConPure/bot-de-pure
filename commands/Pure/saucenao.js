@@ -1,10 +1,11 @@
-const { EmbedBuilder, Colors } = require('discord.js'); //Integrar discord.js
+const { EmbedBuilder, Colors, ButtonBuilder, ButtonStyle, TextInputBuilder, TextInputStyle, ModalBuilder } = require('discord.js'); //Integrar discord.js
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands.js');
 const { Translator } = require('../../internationalization');
 const SauceNAOUser = require('../../localdata/models/saucenaoUsers');
 const ___ = require('sagiri');
 const sagiri = ___.default ? ___.default : /**@type {null}*/(___);
 const { encryptString, decryptString } = require('../../security');
+const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts.js');
 
 const options = new CommandOptions()
 	.addParam('mensaje', 'MESSAGE', 'para dar un mensaje por respuesta o por ID/enlace (Slash)', { optional: true })
@@ -19,11 +20,42 @@ const command = new CommandManager('saucenao', flags)
 		'salsa', 'fuente',
 		'sauce', 'source',
 	)
-	.setBriefDescription('Permite subir imágenes con Catbox')
-	.setLongDescription('Permite subir imágenes por medio de la plataforma de Catbox.')
+	.setBriefDescription('Permite buscar fuentes de imágenes con SauceNAO')
+	.setLongDescription('Permite realizar búsqueda reversa de imágenes por medio de la plataforma de SauceNAO.')
 	.setOptions(options)
 	.setExperimentalExecution(async (request, args) => {
 		const translator = await Translator.from(request.userId);
+
+		if(args.parseFlag('registrar')) {
+			const embeds = [new EmbedBuilder()
+				.setColor(0x151515)
+				.setTitle(translator.getText('saucenaoRegisterTitle'))
+				.addFields(
+					{
+						name: translator.getText('saucenaoRegisterAccountName'),
+						value: translator.getText('saucenaoRegisterAccountValue'),
+					},
+					{
+						name: translator.getText('saucenaoRegisterAfterName'),
+						value: translator.getText('saucenaoRegisterAfterValue'),
+					},
+				),
+			];
+
+			const components = [makeButtonRowBuilder().addComponents(
+				new ButtonBuilder()
+					.setCustomId(`saucenao_onButtonRegisterRequest`)
+					.setLabel(translator.getText('buttonRegister'))
+					.setEmoji('1355488586883137697')
+					.setStyle(ButtonStyle.Primary),
+			)];
+
+			return request.reply({
+				embeds,
+				components,
+				ephemeral: true,
+			});
+		}
 
 		await request.deferReply();
 
@@ -77,9 +109,7 @@ const command = new CommandManager('saucenao', flags)
 						.setDescription(result.url)
 						.setURL(result.url)
 						.setThumbnail(result.thumbnail)
-						.setFooter({
-							text: `~${result.similarity}% • ${result.site} • #${result.index}`,
-						}));
+						.setFooter({ text: `${result.similarity}%` }));
 				}
 			} catch(err) {
 				failures.push(new EmbedBuilder()
@@ -95,6 +125,47 @@ const command = new CommandManager('saucenao', flags)
 		}
 
 		return request.editReply({ embeds: [ ...successes, ...failures ] });
+	}).setButtonResponse(async function onButtonRegisterRequest(interaction) {
+		const translator = await Translator.from(interaction.user.id);
+
+		const modal = makeRegisterModal(translator);
+		return interaction.showModal(modal);
+	}).setModalResponse(async function onRegisterRequest(interaction) {
+		const translator = await Translator.from(interaction.user.id);
+
+		const sauceNAOUser = (await SauceNAOUser.findOne({ userId: interaction.user.id })) || new SauceNAOUser({ userId: interaction.user.id });
+		const clientId = interaction.fields.getTextInputValue('clientId');
+		sauceNAOUser.clientId = encryptString(clientId);
+		await sauceNAOUser.save();
+		return interaction.reply({
+			embeds: [
+				new EmbedBuilder()
+					.setColor(0x151515)
+					.setTitle(translator.getText('saucenaoRegisterSuccess')),
+			],
+			ephemeral: true,
+		});
 	});
+
+/**@param {Translator} translator*/
+function makeRegisterModal(translator) {
+	const clientIdRow = makeTextInputRowBuilder().addComponents(
+		new TextInputBuilder()
+			.setCustomId('clientId')
+			.setLabel(translator.getText('saucenaoRegisterModalApiKeyLabel'))
+			.setRequired(true)
+			.setMinLength(16)
+			.setMaxLength(56)
+			.setStyle(TextInputStyle.Short)
+			.setPlaceholder('XXXXXXXXXXXXXXX'),
+	);
+
+	const modal = new ModalBuilder()
+		.setCustomId('saucenao_onRegisterRequest')
+		.setTitle(translator.getText('saucenaoRegisterModalTitle'))
+		.addComponents(clientIdRow);
+
+	return modal;
+}
 
 module.exports = command;
