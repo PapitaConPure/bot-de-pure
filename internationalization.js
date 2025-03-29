@@ -668,7 +668,7 @@ let localesObject = /**@type {const}*/({
 	imgurRegisterDesc: {
 		es: 'Precisarás la ID de cliente de la misma para registrar la aplicación en Bot de Puré. Si no tienes cuenta de Imgur, deberás crear una primero',
 		en: 'You\'ll need this App\'s client ID to register it within Bot de Puré. If you don\'t have an Imgur account, you\'ll have to sign up first',
-		ja: 'Bot de Puréにアプリケーションを登録するには、アプリケーションのクライアントIDが必要になります。 Imgurアカウントをお持ちでない場合は、まずアカウントを作成する必要があります',
+		ja: 'Bot de Puréにアプリを登録するには、アプリのクライアントIDが必要になります。 Imgurアカウントをお持ちでない場合は、まずアカウントを作成する必要があります',
 	},
 	imgurRegisterAuthTypeValue: {
 		es: 'Selecciona la tercera opción (uso anónimo sin autorización)',
@@ -703,6 +703,11 @@ let localesObject = /**@type {const}*/({
 			'キャプチャを確認し、アプリケーション作成リクエストフォームを送信します。',
 			'アプリケーションを作成したら、表示されるクライアントID(Client ID)をコピーし、このメッセージのボタンを押した後に貼り付けます。',
 		),
+	},
+	imgurRegisterSuccess: {
+		es: 'Se registró una Aplicación de Imgur personal',
+		en: 'Personal Imgur Application has been registered',
+		ja: '個人用のImgurアプリケーションが登録されました',
 	},
 	imgurInvalidImage: {
 		es: '⚠️ Debes indicar un enlace de imagen o una imagen directa a subir a Imgur',
