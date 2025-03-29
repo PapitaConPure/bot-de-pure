@@ -67,6 +67,14 @@ const noSource = { color: Colors.Aqua, emoji: undefined };
 /**@type {SourceStyle}*/
 const unknownSource = { color: 0x1bb76e, emoji: '969664712604262400' };
 
+/**@param {string} source*/
+function getSourceUrl(source) {
+	if(!source) return null;
+	const smatch = source.match(/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-])+\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/);
+	if(!smatch) return null;
+	return source.slice(smatch.index, smatch.index + smatch[0].length);
+}
+
 /**
  * Genera un {@linkcode EmbedBuilder} a base de un {@linkcode Post} de {@linkcode Booru}
  * @param {Booru} booru Instancia de Booru
@@ -85,26 +93,9 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 	);
 	/**@type {import('discord.js').ColorResolvable}*/
 	let embedColor;
-	let sourceNumber = 0;
 
 	//Botón de Fuente (si está disponible)
 	const addSourceButtonAndApplyStyle = (/**@type {String}*/ source) => {
-		if(!source) return;
-
-		//Si no es un enlace, mostrar el source en texto
-		const smatch = source.match(/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-])+\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/);
-		if(!smatch) {
-			return row.addComponents(
-				new ButtonBuilder()
-					.setCustomId(`feed_plainText${sourceNumber++}`)
-					.setEmoji(unknownSource.emoji)
-					.setStyle(ButtonStyle.Secondary)
-					.setLabel(shortenText(source, 72))
-					.setDisabled(true),
-			);
-		}
-		source = source.slice(smatch.index, smatch.index + smatch[0].length);
-
 		sourceMappings.forEach(mapping => {
 			source = source.replace(mapping.pattern, mapping.replacement);
 		});
@@ -135,9 +126,22 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 	const source = post.source;
 	if(source) {
 		const sources = (typeof source === 'object')
-			? Object.values(source)
-			: source.split(/[ \n]+/);
-		sources.slice(0, 2).forEach(addSourceButtonAndApplyStyle);
+			? (Array.isArray(source) ? source : Object.values(source))
+			: (source.split(/[ \n]+/));
+		const sourceUrl = sources
+			.map(getSourceUrl)
+			.find(s => s);
+
+		if(sourceUrl)
+			addSourceButtonAndApplyStyle(sourceUrl);
+		else
+			row.addComponents(
+				new ButtonBuilder()
+					.setCustomId('feed_plainText')
+					.setStyle(ButtonStyle.Secondary)
+					.setLabel(shortenText(sources.join(' '), 72))
+					.setDisabled(true),
+			);
 	}
 	embedColor ??= noSource.color;
 	
@@ -148,6 +152,31 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 			.setStyle(ButtonStyle.Primary)
 			.setCustomId(`feed_showFeedImageTags_${data.isNotFeed ? 'NaF' : ''}`),
 	);
+	
+	//Botón de contribución
+	let hasTagMe = false;
+	let hasRequestTags = false;
+	post.tags = post.tags.filter(t => {
+		if(t === 'tagme') {
+			hasTagMe = true;
+			return false;
+		}
+
+		if(t.endsWith('_request')) {
+			hasRequestTags = (t !== 'commentary_request'); //commentary_request suele venir de Danbooru y se el contexto de artista se ignora en Gelbooru
+			return false;
+		}
+
+		return true;
+	});
+
+	if(hasTagMe || hasRequestTags)
+		row.addComponents(
+			new ButtonBuilder()
+				.setEmoji('1355496081550606486')
+				.setStyle(ButtonStyle.Success)
+				.setCustomId(`feed_contribute`),
+		);
 	
 	//Botón de eliminación
 	row.addComponents(
@@ -479,4 +508,6 @@ module.exports = {
 	searchAndReplyWithPost,
 	formatTagName,
 	formatTagNameList,
+	formatTagNameNew,
+	formatTagNameListNew,
 };

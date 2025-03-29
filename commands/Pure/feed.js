@@ -7,7 +7,7 @@ const globalConfigs = require('../../localdata/config.json');
 const { Booru, TagTypes, BooruUnknownPostError } = require('../../systems/booru/boorufetch.js');
 const { CommandManager } = require('../Commons/cmdBuilder.js');
 const { addGuildToFeedUpdateStack } = require('../../systems/booru/boorufeed.js');
-const { formatBooruPostMessage } = require('../../systems/booru/boorusend.js');
+const { formatBooruPostMessage, formatTagNameListNew } = require('../../systems/booru/boorusend.js');
 const { Translator } = require('../../internationalization.js');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts.js');
@@ -1026,35 +1026,23 @@ const command = new CommandManager('feed', flags)
 				.filter(t => !otherTagTypes.includes(t.type))
 				.map(t => t.name);
 
-			/**
-			 * @param {Array<String>} tagNames 
-			 * @param {String} sep 
-			 */
-			const formatTagNameList = (tagNames, sep) => tagNames.join(sep)
-				.replace(/\\/g,'\\\\')
-				.replace(/\*/g,'\\*')
-				.replace(/_/g,'\\_')
-				.replace(/\|/g,'\\|');
-
 			const tagEmoji = guildEmoji('tagswhite', globalConfigs.slots.slot3);
-			const tagsContent = formatTagNameList(postOtherTags, ' ');
+			const tagsContent = formatTagNameListNew(postOtherTags, ' ');
 
 			const source = post.source;
 			const tagsEmbed = new EmbedBuilder()
 				.setColor(Colors.Purple);
-				
-			const characterEmoji = interaction.client.emojis.cache.get('1355128242993893539');
-			const copyrightEmoji = interaction.client.emojis.cache.get('1355128256432443584');
+
 			if(postArtistTags.length > 0) {
-				const artistTagsContent = formatTagNameList(postArtistTags, '\n');
+				const artistTagsContent = formatTagNameListNew(postArtistTags, '\n');
 				tagsEmbed.addFields({ name: `$<:palette:1355128249658638488> Artistas`, value: shortenText(artistTagsContent, 1020), inline: true })
 			}
 			if(postCharacterTags.length > 0) {
-				const characterTagsContent = formatTagNameList(postCharacterTags, '\n');
+				const characterTagsContent = formatTagNameListNew(postCharacterTags, '\n');
 				tagsEmbed.addFields({ name: `<:person:1355128242993893539> Personajes`, value: shortenText(characterTagsContent, 1020), inline: true })
 			}
 			if(postCopyrightTags.length > 0) {
-				const copyrightTagsContent = formatTagNameList(postCopyrightTags, '\n');
+				const copyrightTagsContent = formatTagNameListNew(postCopyrightTags, '\n');
 				tagsEmbed.addFields({ name: `<:landmark:1355128256432443584> Copyright`, value: shortenText(copyrightTagsContent, 1020), inline: true })
 			}
 			tagsEmbed.addFields(
@@ -1100,7 +1088,7 @@ const command = new CommandManager('feed', flags)
 			});
 		} catch(error) {
 			console.error(error);
-			auditError(error, { brief: 'Ha ocurrido un error al procesar Feed' });
+			auditError(error, { brief: 'Ha ocurrido un error al procesar un Post de Feed' });
 			
 			if(error instanceof BooruUnknownPostError)
 				return interaction.reply({ content: 'Puede que el Post del que se intentó recuperar las tags se haya eliminado', ephemeral: true });
@@ -1219,6 +1207,59 @@ const command = new CommandManager('feed', flags)
 				}),
 				message.delete().catch(console.error),
 			]);
+		}
+	})
+	.setButtonResponse(async function contribute(interaction) {
+        const translator = await Translator.from(interaction.user.id);
+
+		const url = (/**@type {ButtonComponent}*/(interaction.message.components[0].components[0])).url;
+		const booru = new Booru(globalConfigs.booruCredentials);
+		try {
+			const post = await booru.fetchPostByUrl(url);
+			const requestTags = post.tags.filter(t => t === 'tagme' || (t !== 'commentary_request' && t.endsWith('_request')));
+
+			if(!requestTags.length) {
+				return interaction.reply({
+					content: '¡Este post ya no tiene pedidos pendientes! ¡Bien!',
+					ephemeral: true,
+				});
+			}
+
+			const embed = new EmbedBuilder()
+				.setColor(Colors.Gold)
+				.setTitle('Contribuye')
+				.setDescription('Este Post tiene etiquetas que indican pedidos pendientes. Puedes contribuir a la calidad de Gelbooru ayudando a etiquetar correctamente, entre otras cosas.')
+				.addFields(
+					{
+						name: '<:handshake:1355496081550606486> Tags de pedidos pendientes',
+						value: formatTagNameListNew(requestTags, ' '),
+					});
+			
+			//Danbooru
+			if(post.creatorId == 6498)
+				embed.setFooter({
+					text: 'Este Post fue automáticamente portado desde Danbooru, por lo que es mejor concretar los pedidos ahí.'
+					+ ' Los cambios utilitarios hechos en Danbooru se verán reflejados en Gelbooru.',
+				});
+
+			return interaction.reply({
+				embeds: [embed],
+				ephemeral: true,
+			});
+		} catch(error) {
+			console.error(error);
+			auditError(error, { brief: 'Ha ocurrido un error al procesar un Post de Feed' });
+			
+			if(error instanceof BooruUnknownPostError)
+				return interaction.reply({
+					content: 'Puede que el Post del que se intentó recuperar las tags se haya eliminado',
+					ephemeral: true,
+				});
+
+			return interaction.reply({
+				content: 'Ocurrió un problema al contactar con el Booru para recuperar las tags.\nInténtalo de nuevo, si el problema persiste, es probable que el objetivo no esté disponible o que se trate de un bug de mi parte',
+				ephemeral: true,
+			});
 		}
 	})
 	.setButtonResponse(async function shock(interaction) {
