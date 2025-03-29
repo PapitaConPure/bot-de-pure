@@ -533,7 +533,12 @@ let localesObject = /**@type {const}*/({
 		en: `Command called by ${subl(0)}`,
 		ja: `${subl(0)}によって呼び出されたコマンド`,
 	},
-	
+
+	actionFindSource: {
+		es: 'Buscar Fuente',
+		en: 'Find Source',
+		ja: 'ソースを検索',
+	},
 	actionDeleteUserPost: {
 		es: 'Borrar Post',
 		en: 'Delete Post',
