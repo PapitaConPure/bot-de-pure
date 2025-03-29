@@ -123,9 +123,13 @@ const command = new CommandManager('imgur', flags)
 
 		return request.editReply({ embeds: [ ...successes, ...failures ] });
 	}).setButtonResponse(async function onButtonRegisterRequest(interaction) {
-		const modal = makeRegisterModal();
+		const translator = await Translator.from(interaction.user.id);
+
+		const modal = makeRegisterModal(translator);
 		return interaction.showModal(modal);
 	}).setModalResponse(async function onRegisterRequest(interaction) {
+		const translator = await Translator.from(interaction.user.id);
+
 		const imgurUser = (await ImgurUser.findOne({ userId: interaction.user.id })) || new ImgurUser({ userId: interaction.user.id });
 		const clientId = interaction.fields.getTextInputValue('clientId');
 		imgurUser.clientId = clientId;
@@ -134,17 +138,18 @@ const command = new CommandManager('imgur', flags)
 			embeds: [
 				new EmbedBuilder()
 					.setColor('#1bb76e')
-					.setTitle('Aplicación de Imgur Personal Registrada'),
+					.setTitle(translator.getText('imgurRegisterSuccess')),
 			],
 			ephemeral: true,
 		});
 	});
 
-function makeRegisterModal() {
+/**@param {Translator} translator*/
+function makeRegisterModal(translator) {
 	const clientIdRow = makeTextInputRowBuilder().addComponents(
 		new TextInputBuilder()
 			.setCustomId('clientId')
-			.setLabel('ID de Cliente de Imgur')
+			.setLabel(translator.getText('imgurRegisterModalClientIdLabel'))
 			.setRequired(true)
 			.setMinLength(8)
 			.setMaxLength(32)
@@ -154,7 +159,7 @@ function makeRegisterModal() {
 
 	const modal = new ModalBuilder()
 		.setCustomId('imgur_onRegisterRequest')
-		.setTitle('Registrar Aplicación de Imgur')
+		.setTitle(translator.getText('imgurRegisterModalTitle'))
 		.addComponents(clientIdRow);
 
 	return modal;

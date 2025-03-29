@@ -704,6 +704,16 @@ let localesObject = /**@type {const}*/({
 			'アプリケーションを作成したら、表示されるクライアントID(Client ID)をコピーし、このメッセージのボタンを押した後に貼り付けます。',
 		),
 	},
+	imgurRegisterModalTitle: {
+		es: 'Registrar Aplicación de Imgur',
+		en: 'Register Imgur Application',
+		ja: 'Imgurアプリを登録する',
+	},
+	imgurRegisterModalClientIdLabel: {
+		es: 'ID de Cliente de Imgur',
+		en: 'Imgur Client ID',
+		ja: 'ImgurクライアントID',
+	},
 	imgurRegisterSuccess: {
 		es: 'Se registró una Aplicación de Imgur personal',
 		en: 'Personal Imgur Application has been registered',
