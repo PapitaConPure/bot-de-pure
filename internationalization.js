@@ -1005,9 +1005,14 @@ let localesObject = /**@type {const}*/({
 		ja: '⚠️ Saucenaoで検索するには、画像リンクまたは直接画像を示す必要があります',
 	},
 	saucenaoSearchSuccess: {
-		es: `⚠️ Resultado de la imagen Nº${subl(0)}`,
-		en: `⚠️ Image No. ${subl(0)} result`,
-		ja: `⚠️ 画像結果${subl(0)}`,
+		es: `Resultado de la imagen Nº${subl(0)}`,
+		en: `Image No. ${subl(0)} result`,
+		ja: `画像${subl(0)}結果`,
+	},
+	saucenaoSearchErrorTitle: {
+		es: `Resultado parcial de la imagen Nº${subl(0)}`,
+		en: `Image No. ${subl(0)} partial result`,
+		ja: `画像${subl(0)}の部分結果`,
 	},
 
 	poll: {
