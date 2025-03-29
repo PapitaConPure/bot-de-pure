@@ -12,7 +12,7 @@ const options = new CommandOptions()
 	.addParam('imagens', 'IMAGE', 'para indicar archivos de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
 	.addFlag('r', [ 'registrar', 'register' ], 'para registrar una ID de usuario de SauceNAO');
 
-const flags = new CommandTags().add('COMMON', 'MAINTENANCE');
+const flags = new CommandTags().add('COMMON');
 
 const command = new CommandManager('saucenao', flags)
 	.setAliases(
