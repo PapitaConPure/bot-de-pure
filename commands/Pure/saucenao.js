@@ -1,4 +1,4 @@
-const { EmbedBuilder, Colors, ButtonBuilder, ButtonStyle, TextInputBuilder, TextInputStyle, ModalBuilder } = require('discord.js'); //Integrar discord.js
+const { EmbedBuilder, Colors, ButtonBuilder, ButtonStyle, TextInputBuilder, TextInputStyle, ModalBuilder, Attachment } = require('discord.js'); //Integrar discord.js
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands.js');
 const { Translator } = require('../../internationalization');
 const SauceNAOUser = require('../../localdata/models/saucenaoUsers');
@@ -73,20 +73,26 @@ const command = new CommandManager('saucenao', flags)
 		
 		const message = (request.isInteraction && CommandOptionSolver.asMessage(await args.getMessage('mensaje')))
 			|| (request.isMessage && request.channel.messages.cache.get(request.inferAsMessage().reference?.messageId));
-		const messageAttachments = message?.attachments.values() || [];
-
+		const messageAttachments = message?.attachments.values() || /**@type {Array<Attachment>}*/([]);
+		
 		const imageUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(u => u);
 		const commandAttachments = CommandOptionSolver.asAttachments(args.parsePolyParamSync('imagens')).filter(a => a);
-
+		
 		const attachments = [
 			...messageAttachments,
 			...commandAttachments,
 		];
+		
 		const attachmentUrls = attachments.map(att => att.url);
+		const otherMessageUrls = message?.embeds
+			?.flatMap(e => [ e.image?.url, e.thumbnail?.url ])
+			.filter(u => u)
+			|| [];
 
 		const queries = [
 			...imageUrls,
 			...attachmentUrls,
+			...otherMessageUrls,
 		].slice(0, 5);
 
 		if(!queries.length)
@@ -101,8 +107,13 @@ const command = new CommandManager('saucenao', flags)
 				const results = (await findSauce(query))
 					.filter(result => result.similarity > 50);
 
-				if(results.length === 0)
+				if(results.length === 0) {
+					successes.push(new EmbedBuilder()
+						.setColor(Colors.Greyple)
+						.setTitle(translator.getText('saucenaoSearchNoResult', count))
+						.setThumbnail(query));
 					continue;
+				}
 
 				await Promise.all(results.map(async result => {
 					try {
