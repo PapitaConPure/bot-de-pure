@@ -59,11 +59,12 @@ const command = new CommandManager('saucenao', flags)
 			});
 		}
 
-		await request.deferReply();
-
 		const sauceNAOUser = (await SauceNAOUser.findOne({ userId: request.userId }));
 		if(!sauceNAOUser)
-			return request.reply(translator.getText('saucenaoUnregisteredNotice'));
+			return request.reply({
+				content: translator.getText('saucenaoUnregisteredNotice'),
+				ephemeral: true,
+			});
 
 		const clientId = decryptString(sauceNAOUser.clientId);
 		const findSauce = sagiri(clientId, {
@@ -100,6 +101,8 @@ const command = new CommandManager('saucenao', flags)
 
 		if(!queries.length)
 			return request.editReply({ content: translator.getText('saucenaoInvalidImage'), ephemeral: true });
+
+		await request.deferReply();
 
 		const booru = new Booru(globalConfigs.booruCredentials);
 		const successes = [];
@@ -176,7 +179,7 @@ const command = new CommandManager('saucenao', flags)
 		const translator = await Translator.from(interaction.user.id);
 
 		const sauceNAOUser = (await SauceNAOUser.findOne({ userId: interaction.user.id })) || new SauceNAOUser({ userId: interaction.user.id });
-		const clientId = interaction.fields.getTextInputValue('clientId');
+		const clientId = interaction.fields.getTextInputValue('clientId').trim();
 		sauceNAOUser.clientId = encryptString(clientId);
 		await sauceNAOUser.save();
 		return interaction.reply({
