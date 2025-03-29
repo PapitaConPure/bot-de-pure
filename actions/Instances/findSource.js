@@ -9,12 +9,6 @@ const action = new ContextMenuActionManager('actionFindSource', 'Message')
         const message = interaction.targetMessage;
         const uid = interaction.user.id;
         const translator = await Translator.from(uid);
-
-        if((message.webhookId == undefined || message.webhookId.length == 0) && message.author.id !== interaction.client.user.id)
-            return interaction.reply({
-                content: translator.getText('invalidMessage'),
-                ephemeral: true,
-            });
             
         const sauceNAOUser = (await SauceNAOUser.findOne({ userId: interaction.user.id }));
         if(!sauceNAOUser)
