@@ -1035,7 +1035,7 @@ const command = new CommandManager('feed', flags)
 
 			if(postArtistTags.length > 0) {
 				const artistTagsContent = formatTagNameListNew(postArtistTags, '\n');
-				tagsEmbed.addFields({ name: `$<:palette:1355128249658638488> Artistas`, value: shortenText(artistTagsContent, 1020), inline: true })
+				tagsEmbed.addFields({ name: `<:palette:1355128249658638488> Artistas`, value: shortenText(artistTagsContent, 1020), inline: true })
 			}
 			if(postCharacterTags.length > 0) {
 				const characterTagsContent = formatTagNameListNew(postCharacterTags, '\n');
