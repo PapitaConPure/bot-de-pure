@@ -1126,7 +1126,7 @@ let localesObject = /**@type {const}*/({
 			'After signing up, you can copy your API key [here](https://saucenao.com/user.php?page=search-api "This link will take you to your SauceNAO dashboard")'
 		),
 		ja: paragraph(
-			'❌ このコマンドを使用するには、[SauceNAOにサインアップ](https://saucenao.com/user.php)して`/saucenao register`を使用する必要があります。',
+			'❌ このコマンドを使用するには、[SauceNAOにサインアップ](https://saucenao.com/user.php)して`p!saucenao --register 「APIキー」`を使用する必要があります。',
 			'登録後、APIキー[こちら](https://saucenao.com/user.php?page=search-api "このリンクはSauceNAOダッシュボードにリンクします")からコピーできます'
 		),
 	},
