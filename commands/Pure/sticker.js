@@ -2,7 +2,7 @@ const { CommandTags, CommandManager, CommandOptions, CommandOptionSolver } = req
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
 const options = new CommandOptions()
-	.addParam('mensaje', 'MESSAGE', 'para especificar un mensaje por ID o respuesta');
+	.addParam('mensaje', 'MESSAGE', 'para especificar un mensaje por ID, enlace o respuesta');
 
 const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('sticker', flags)

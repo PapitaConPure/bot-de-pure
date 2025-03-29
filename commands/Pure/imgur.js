@@ -34,13 +34,13 @@ const command = new CommandManager('imgur', flags)
 		if(args.parseFlag('registrar')) {
 			const embeds = [new EmbedBuilder()
 				.setColor('#1bb76e')
-				.setTitle('Haz click aquí para crear una Aplicación de Imgur')
+				.setTitle(translator.getText('imgurRegisterTitle'))
 				.setURL('https://api.imgur.com/oauth2/addclient')
-				.setDescription('Precisarás la ID de cliente de la misma para registrar la aplicación en Bot de Puré. Si no tienes cuenta de Imgur, deberás crear una primero')
+				.setDescription(translator.getText('imgurRegisterDesc'))
 				.addFields(
 					{
 						name: 'Authorization Type',
-						value: 'Selecciona la tercera opción (uso anónimo sin autorización)',
+						value: translator.getText('imgurRegisterAuthTypeValue'),
 						inline: true,
 					},
 					{
@@ -49,16 +49,13 @@ const command = new CommandManager('imgur', flags)
 						inline: true,
 					},
 					{
-						name: 'Rellenar formulario',
-						value: 'El resto de campos son irrelevantes, rellena con cualquier dato válido',
+						name: translator.getText('imgurRegisterFillFormName'),
+						value: translator.getText('imgurRegisterFillFormValue'),
 						inline: true,
 					},
 					{
-						name: 'Por último...',
-						value: [
-							'Verifica el Captcha y envía el formulario de solicitud de creación de aplicación.',
-							'Luego de crear la aplicación, copia la ID de Cliente (Client ID) que se te presenta y pégala luego de presionar el botón de este mensaje',
-						].join('\n'),
+						name: translator.getText('imgurRegisterLastlyName'),
+						value: translator.getText('imgurRegisterLastlyValue'),
 					},
 				),
 			];
