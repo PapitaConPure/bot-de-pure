@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "3.5.0",
+            "number": "3.5.2",
             "name": "Flamenco Perlado"
         },
         "note": "Operando con normalidad",
@@ -17,7 +17,8 @@
             "p!catbox agregado",
             "p!gatos corregido",
             "Apariencia de **PuréFeed** mejorada",
-            "p!saucenao agregado"
+            "p!saucenao agregado",
+            "Acción contextual \"Buscar Fuente\" agregada"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos",
