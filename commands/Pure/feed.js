@@ -1220,7 +1220,7 @@ const command = new CommandManager('feed', flags)
 
 			if(!requestTags.length) {
 				return interaction.reply({
-					content: '¡Este post ya no tiene pedidos pendientes! ¡Bien!',
+					content: '¡Este post ya no tiene pedidos pendientes relevantes! ¡Bien!',
 					ephemeral: true,
 				});
 			}
