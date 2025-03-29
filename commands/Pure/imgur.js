@@ -64,7 +64,7 @@ const command = new CommandManager('imgur', flags)
 				new ButtonBuilder()
 					.setCustomId(`imgur_onButtonRegisterRequest`)
 					.setLabel(translator.getText('buttonRegister'))
-					.setEmoji('1087075525245272104')
+					.setEmoji('1355488586883137697')
 					.setStyle(ButtonStyle.Primary),
 			)];
 
