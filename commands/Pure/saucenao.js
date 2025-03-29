@@ -1,13 +1,10 @@
 const { EmbedBuilder, Colors, ButtonBuilder, ButtonStyle, TextInputBuilder, TextInputStyle, ModalBuilder, Attachment } = require('discord.js'); //Integrar discord.js
-const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands.js');
+const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
+const { injectSauceNAOEmbeds } = require('../../systems/others/saucenao');
 const { Translator } = require('../../internationalization');
+const { encryptString } = require('../../security');
+const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts');
 const SauceNAOUser = require('../../localdata/models/saucenaoUsers');
-const ___ = require('sagiri');
-const sagiri = ___.default ? ___.default : /**@type {null}*/(___);
-const globalConfigs = require('../../localdata/config.json');
-const { encryptString, decryptString } = require('../../security');
-const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts.js');
-const { Booru } = require('../../systems/booru/boorufetch.js');
 
 const options = new CommandOptions()
 	.addParam('mensaje', 'MESSAGE', 'para dar un mensaje por respuesta o por ID/enlace (Slash)', { optional: true })
@@ -65,12 +62,6 @@ const command = new CommandManager('saucenao', flags)
 				content: translator.getText('saucenaoUnregisteredNotice'),
 				ephemeral: true,
 			});
-
-		const clientId = decryptString(sauceNAOUser.clientId);
-		const findSauce = sagiri(clientId, {
-			results: 3,
-			mask: [25], //Gelbooru
-		});
 		
 		const message = (request.isInteraction && CommandOptionSolver.asMessage(await args.getMessage('mensaje')))
 			|| (request.isMessage && request.channel.messages.cache.get(request.inferAsMessage().reference?.messageId));
@@ -107,70 +98,13 @@ const command = new CommandManager('saucenao', flags)
 
 		await request.deferReply();
 
-		const booru = new Booru(globalConfigs.booruCredentials);
 		const successes = [];
 		const failures = [];
-		let count = 1;
-		for(const query of queries) {
-			try {
-				const results = (await findSauce(query))
-					.filter(result => result.similarity > 50);
-
-				if(results.length === 0) {
-					successes.push(new EmbedBuilder()
-						.setColor(Colors.Greyple)
-						.setTitle(translator.getText('saucenaoSearchNoResult', count))
-						.setThumbnail(query));
-					continue;
-				}
-
-				await Promise.all(results.map(async result => {
-					try {
-						const post = await booru.fetchPostByUrl(result.url);
-						const sources = post.findUrlSources();
-						const sourcesText = `${result.url}\n${sources.join('\n')}`;
-	
-						successes.push(new EmbedBuilder()
-							.setColor(Colors.Green)
-							.setAuthor({
-								name: result.authorName,
-								url: result.authorUrl,
-							})
-							.setTitle(translator.getText('saucenaoSearchSuccess', count))
-							.setDescription(sourcesText)
-							.setURL(result.url)
-							.setThumbnail(result.thumbnail)
-							.setFooter({ text: `${result.similarity}%` }));
-					} catch(err) {
-						console.error(err);
-						successes.push(new EmbedBuilder()
-							.setColor(Colors.Orange)
-							.setAuthor({
-								name: result.authorName,
-								url: result.authorUrl,
-							})
-							.setTitle(translator.getText('saucenaoSearchErrorTitle', count))
-							.setDescription(result.url)
-							.setURL(result.url)
-							.setThumbnail(result.thumbnail)
-							.setFooter({ text: `${result.similarity}%` }));
-					}
-				}));
-			} catch(err) {
-				failures.push(new EmbedBuilder()
-					.setTitle(translator.getText('imgurUploadErrorTitle', count))
-					.setColor(Colors.Red)
-					.addFields({
-						name: err.name || 'Error',
-						value: `\`\`\`\n${err.message || err}\n\`\`\``,
-					}));
-			}
-
-			count++;
-		}
+		
+		await injectSauceNAOEmbeds(sauceNAOUser.clientId, queries, translator, { successes, failures });
 
 		if(!successes.length && !failures.length)
-			return request.editReply({ content: translator.getText('saucenaoInvalidImage') });	
+			return request.editReply({ content: translator.getText('saucenaoInvalidImage') });
 
 		return request.editReply({ embeds: [ ...successes, ...failures ] });
 	}).setButtonResponse(async function onButtonRegisterRequest(interaction) {
