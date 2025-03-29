@@ -2,26 +2,26 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "3.4.1",
+            "number": "3.5.0",
             "name": "Flamenco Perlado"
         },
-        "note": "Operando casi con normalidad",
+        "note": "Operando con normalidad",
         "changelog": [
             "p!sonando y p!saltar agregados",
             "p!emote ahora obtiene emotes de un mensaje",
-            "p!ayuda ahora filtra correctamente los comandos que puedes usar",
+            "Filtros de p!ayuda corregidos",
             "**PuréPix** ahora permite utilizar el servicio de conversión \"phixiv\"",
             "**PuréPix** ahora usa \"phixiv\" como servicio de conversión por defecto",
             "Interoperabilidad parcial entre **PuréPix** y **Puréet**",
             "Corregido (espero) un problema con el streaming de YouTube",
             "p!catbox agregado",
-            "p!gatos corregido"
+            "p!gatos corregido",
+            "Apariencia de **PuréFeed** mejorada"
         ],
         "todo": [
-            "Agregar comando de Stable Diffusion",
-            "Agregar ejemplos interactivos de comandos con p!ayuda",
+            "Agregar ejemplos interactivos de comandos",
             "Minijuegos individuales y tipo-fiesta",
-            "Gráficos analíticos (rama PuréLytics, posiblemente contenida en p!info y aquí)",
+            "Estadísticas y gráficos analíticos (rama **PuréLytics**)",
             "Agregar GIFs infográficos en comandos",
             "Crear página de ayuda Web para entenderme mejor"
         ]
