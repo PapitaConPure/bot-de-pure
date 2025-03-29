@@ -100,7 +100,10 @@ const command = new CommandManager('saucenao', flags)
 		].slice(0, 5);
 
 		if(!queries.length)
-			return request.editReply({ content: translator.getText('saucenaoInvalidImage'), ephemeral: true });
+			return request.editReply({
+				content: translator.getText('saucenaoInvalidImage'),
+				ephemeral: true,
+			});
 
 		await request.deferReply();
 
