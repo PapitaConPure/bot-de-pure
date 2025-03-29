@@ -660,6 +660,50 @@ let localesObject = /**@type {const}*/({
 		ja: `You now have <:prc:1097208828946301123> ${subl(0)}`,
 	},
 
+	imgurRegisterTitle: {
+		es: 'Haz click aquí para crear una Aplicación de Imgur',
+		en: 'Click here to create an Imgur Application',
+		ja: 'Imgurアプリケーションを作成するにはこちらをクリックしてください',
+	},
+	imgurRegisterDesc: {
+		es: 'Precisarás la ID de cliente de la misma para registrar la aplicación en Bot de Puré. Si no tienes cuenta de Imgur, deberás crear una primero',
+		en: 'You\'ll need this App\'s client ID to register it within Bot de Puré. If you don\'t have an Imgur account, you\'ll have to sign up first',
+		ja: 'Bot de Puréにアプリケーションを登録するには、アプリケーションのクライアントIDが必要になります。 Imgurアカウントをお持ちでない場合は、まずアカウントを作成する必要があります',
+	},
+	imgurRegisterAuthTypeValue: {
+		es: 'Selecciona la tercera opción (uso anónimo sin autorización)',
+		en: 'Select the third option (anonymous usage without authorization)',
+		ja: '3番目のオプション（許可なしの匿名使用）を選択します',
+	},
+	imgurRegisterFillFormName: {
+		es: 'Rellenar formulario',
+		en: 'Fill out the form',
+		ja: 'フォームに記入する',
+	},
+	imgurRegisterFillFormValue: {
+		es: 'El resto de campos son irrelevantes, rellena con cualquier dato válido',
+		en: 'Remaining fields are irrelevant, fill them with any valid data',
+		ja: '残りのフィールドは無関係なので、有効なデータを入力してください',
+	},
+	imgurRegisterLastlyName: {
+		es: 'Por último...',
+		en: 'Lastly...',
+		ja: 'ついに…',
+	},
+	imgurRegisterLastlyValue: {
+		es: paragraph(
+			'Verifica el Captcha y envía el formulario de solicitud de creación de aplicación.',
+			'Luego de crear la aplicación, copia la ID de Cliente (Client ID) que se te presenta y pégala luego de presionar el botón de este mensaje',
+		),
+		en: paragraph(
+			'Verify the Captcha and submit the application creation request form.',
+			'After creating the application, copy the Client ID that appears and paste it after pressing the button below this message',
+		),
+		ja: paragraph(
+			'キャプチャを確認し、アプリケーション作成リクエストフォームを送信します。',
+			'アプリケーションを作成したら、表示されるクライアントID(Client ID)をコピーし、このメッセージのボタンを押した後に貼り付けます。',
+		),
+	},
 	imgurInvalidImage: {
 		es: '⚠️ Debes indicar un enlace de imagen o una imagen directa a subir a Imgur',
 		en: '⚠️ You must supply an image link or file to upload to Imgur',
@@ -1070,6 +1114,31 @@ let localesObject = /**@type {const}*/({
 		es: '⚠️ ¡Tiempo insuficiente! Pon al menos 10 segundos',
 		en: '⚠️ Insufficient time! Set at least 10 seconds',
 		ja: '⚠️ Insufficient time! Set at least 10 seconds',
+	},
+
+	saucenaoUnregisteredNotice: {
+		es: paragraph(
+			'❌ Para usar este comando, debes [registrarte en SauceNAO](https://saucenao.com/user.php) y usar `p!saucenao --registrar <Clave API>`.',
+			'Luego de haberte registrado en SauceNAO, puedes copiar tu clave API [aquí](https://saucenao.com/user.php?page=search-api "Este enlace lleva a tu panel de control de SauceNAO")'
+		),
+		en: paragraph(
+			'❌ To use this command, you need to [sign up on SauceNAO](https://saucenao.com/user.php) and use `p!saucenao --register <API key>`.',
+			'After signing up, you can copy your API key [here](https://saucenao.com/user.php?page=search-api "This link will take you to your SauceNAO dashboard")'
+		),
+		ja: paragraph(
+			'❌ このコマンドを使用するには、[SauceNAOにサインアップ](https://saucenao.com/user.php)して`/saucenao register`を使用する必要があります。',
+			'登録後、APIキー[こちら](https://saucenao.com/user.php?page=search-api "このリンクはSauceNAOダッシュボードにリンクします")からコピーできます'
+		),
+	},
+	saucenaoInvalidImage: {
+		es: '⚠️ Debes indicar un enlace de imagen o una imagen directa a buscar en SauceNAO',
+		en: '⚠️ You must supply an image link or file to search on SauceNAO',
+		ja: '⚠️ Saucenaoで検索するには、画像リンクまたは直接画像を示す必要があります',
+	},
+	saucenaoSearchSuccess: {
+		es: `⚠️ Resultado de la imagen Nº${subl(0)}`,
+		en: `⚠️ Image No. ${subl(0)} result`,
+		ja: `⚠️ 画像結果${subl(0)}`,
 	},
 	
 	feedAuthor: {
