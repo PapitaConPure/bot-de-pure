@@ -36,9 +36,9 @@ const sourceMappings = [
 
 /**@type {ReadonlyArray<SourceStyle & { pattern: RegExp }>}*/
 const SOURCE_STYLES = [
-	{ color: 0x0096fa, emoji: '1334816111270563880' , pattern: /pixiv\.net/ },
+	{ color: 0x0096fa, emoji: '1334816111270563880' , pattern: /pixiv\.net(?!\/fanbox)/ },
 	{ color: 0x040404, emoji: '1232243415165440040', pattern: /(twitter|twimg|x)\.com/ },
-	{ color: 0xfaf18a, emoji: '999783444655648869' , pattern: /fanbox\.cc/ },
+	{ color: 0xfaf18a, emoji: '999783444655648869' , pattern: /pixiv\.net\/fanbox|fanbox\.cc/ },
 	{ color: 0xea4c89, emoji: '1000265840182181899', pattern: /fantia\.jp/ },
 	{ color: 0x28837f, emoji: '1001397393511682109', pattern: /skeb\.jp/ },
 	{ color: 0x0085ff, emoji: '1298259199477678115', pattern: /bsky\.app/ },
