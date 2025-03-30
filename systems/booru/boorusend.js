@@ -1,8 +1,5 @@
 const { makeButtonRowBuilder } = require('../../tsCasts');
-//@ts-expect-error
-const { EmbedBuilder, ButtonBuilder, ButtonStyle, Colors, Message, User, Snowflake, ActionRowBuilder } = require('discord.js');
-//@ts-expect-error
-const { ComplexCommandRequest, CommandArguments } = require('../../commands/Commons/typings');
+const { EmbedBuilder, ButtonBuilder, ButtonStyle, Colors, Message, User, ActionRowBuilder, ChatInputCommandInteraction, CommandInteraction, CommandInteractionOptionResolver } = require('discord.js');
 const { CommandOptions } = require('../../commands/Commons/cmdOpts');
 const { guildEmoji: gEmo, shortenText, isThread } = require('../../func');
 const { Post, Booru, TagTypes } = require('./boorufetch');
@@ -10,6 +7,9 @@ const { getBaseTags, getSearchTags, tagMaps } = require('../../localdata/boorupr
 const globalConfigs = require('../../localdata/config.json');
 const rakki = require('../../commands/Pure/rakkidei');
 const { Translator } = require('../../internationalization');
+
+const Logger = require('../../logs');
+const { debug, info, warn, error, fatal } = Logger('WARN', 'BooruSend');
 
 /**
  * @typedef {{ maxTags?: number, title?: string, subtitle?: string, footer?: string, cornerIcon?: string, manageableBy?: string, allowNSFW?: boolean, isNotFeed?: boolean }} PostFormatData
@@ -95,7 +95,8 @@ const disallowedTagsIfSexCount = new Set([
  * @returns {Promise<PostMessageOptions>}
  */
 async function formatBooruPostMessage(booru, post, data = {}) {
-	const maxTags = data.maxTags ?? 20;
+	info('Se recibió una solicitud de formato de mensaje con Post de Booru');
+
 	//Botón de Post de Gelbooru
 	const row = makeButtonRowBuilder().addComponents(
 		new ButtonBuilder()
@@ -117,7 +118,8 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		const emoji = sourceStyle.emoji;
 		embedColor ??= sourceStyle.color;
 
-		if(source.length > 512)
+		if(source.length > 512) {
+			warn('El texto de una fuente del Post sobrepasa los 512 caracteres');
 			return row.addComponents(
 				new ButtonBuilder()
 					.setEmoji(emoji)
@@ -125,6 +127,7 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 					.setCustomId('feed_invalidUrl')
 					.setDisabled(true),
 			);
+		}
 
 		row.addComponents(
 			new ButtonBuilder()
@@ -135,12 +138,16 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 	};
 
 	//Aplicar estilo y botones de source
+	debug('Se está por decidir el estilo del Embed del mensaje');
 	if(post.source) {
+		debug('El Post tiene fuentes. Se buscarán enlaces');
 		const sourceUrl = post.findFirstUrlSource();
 
-		if(sourceUrl)
+		if(sourceUrl) {
+			debug('El Post tiene enlaces como fuentes. Se aplicará un botón de enlace a fuente y el estilo de la fuente primaria');
 			addSourceButtonAndApplyStyle(sourceUrl);
-		else
+		} else {
+			debug('El Post no tiene enlaces como fuentes. Se aplicará un botón de texto plano');
 			row.addComponents(
 				new ButtonBuilder()
 					.setCustomId('feed_plainText')
@@ -148,10 +155,12 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 					.setLabel(shortenText(post.source, 72))
 					.setDisabled(true),
 			);
+		}
 	}
 	embedColor ??= noSource.color;
 	
 	//Filtrar tags con estilos especiales
+	debug('A punto de procesar tags especiales');
 	const originalPostTags = [ ...post.tags ];
 	let maxResOrder = -1;
 	let resTag = '';
@@ -165,7 +174,8 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		}
 
 		if(t.endsWith('_request')) {
-			hasRequestTags = (t !== 'commentary_request'); //commentary_request suele venir de Danbooru y se el contexto de artista se ignora en Gelbooru
+			//"commentary_request" suele venir de Danbooru y el contexto de artista se ignora en Gelbooru
+			hasRequestTags = (t !== 'commentary_request');
 			return false;
 		}
 
@@ -188,6 +198,8 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		return true;
 	});
 
+	debug('resTag =', resTag, 'sexTags =', sexTags);
+
 	if(sexTags.length)
 		post.tags = post.tags.filter(t => !disallowedTagsIfSexCount.has(t));
 
@@ -195,6 +207,10 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		...sexTags,
 		...(resTag ? [resTag] : []),
 	];
+
+	debug('specialTags =', specialTags);
+
+	debug('Aplicando botones adicionales...');
 	
 	//Botón de tags
 	row.addComponents(
@@ -222,6 +238,7 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 	);
 
 	//Preparar Embed final
+	info('Se comenzará a preparar el Embed final del Post');
 	const postEmbed = new EmbedBuilder()
 		.setColor(embedColor);
 	
@@ -241,17 +258,22 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		postEmbed.setAuthor({ name: data.subtitle });
 
 	//Tags
+	debug('A punto de intentar procesar las tags del Post');
+	const maxTags = data.maxTags ?? 20;
 	const actualMaxTags = Math.max(0, maxTags - specialTags.length);
 	const actualTotalTags = post.tags.length + specialTags.length;
 	try {
+		debug('Obteniendo información adicional de tags...');
 		const postTags = await booru.fetchPostTags(post);
 
 		//Advertencia de IA
+		debug('Se determinará la miniatura del Embed del mensaje');
 		if(postTags.some(t => [ 'ai-generated', 'ai-assisted' ].includes(t.name)))
 			postEmbed.setThumbnail('https://i.imgur.com/1Q41hhC.png');
 		else if((post.size?.[0] ?? 0) >= (post.size?.[1] ?? 0))
 			postEmbed.setThumbnail('https://i.imgur.com/oXE6CeF.png');
 
+		debug('A punto de distribuir las etiquetas en categorías');
 		const postArtistTags    = /**@type {Array<String>}*/([]);
 		const postCharacterTags = /**@type {Array<String>}*/([]);
 		const postCopyrightTags = /**@type {Array<String>}*/([]);
@@ -271,6 +293,8 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 				return postOtherTags.push(name);
 			}
 		});
+
+		debug('artistas =', postArtistTags, 'personajes =', postCharacterTags, 'copyright =', postCopyrightTags);
 
 		const s3 = globalConfigs.slots.slot3;
 		const otherTags = postOtherTags.slice(0, actualMaxTags);
@@ -297,73 +321,114 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 			postEmbed.addFields({ name: `${fieldName}${infoSuffix}`, value: shortenText(content, 1020), inline: true });
 		}
 		
+		debug('A punto de formular etiquetas en el Embed del mensaje');
 		addTagCategoryField('<:palette:1355128249658638488> Artistas',   postArtistTags);
 		addTagCategoryField('<:person:1355128242993893539> Personajes',  postCharacterTags);
 		addTagCategoryField('<:landmark:1355128256432443584> Copyright', postCopyrightTags);
 
-		if(displayedTagsCount > 0)
+		debug('Comprobando si se debe insertar un campo de tags sin categoría');
+		debug('displayedTagsCount =', displayedTagsCount);
+		if(displayedTagsCount > 0) {
+			debug('A punto de insertar un campo de tags sin categoría');
 			postEmbed.addFields({ name: tagsTitle, value: shortenText(tagsContent, 1020) });
+		}
 	} catch(err) {
-		console.error(err);
-		const postTags = post.tags;
+		error(err, 'Ocurrió un problema al procesar y formatear las tags de un Post de Booru para un mensaje');
+		info('Intentando formatear tags con método alternativo sin categorías');
 
+		const postTags = post.tags;
 		const filteredTags = postTags.slice(0, actualMaxTags);
 		const displayedTagsCount = Math.min(filteredTags.length + specialTags.length, maxTags);
-		const tagsTitle = `${gEmo('tagswhite', globalConfigs.slots.slot3)} Tags (${displayedTagsCount}/${actualTotalTags})`;
-		const tagsContent = `${specialTags.join(' ')} ${formatTagNameListNew(filteredTags, ' ')}`.trim();
 
-		if(displayedTagsCount > 0)
+		debug('Comprobando si se debe insertar un campo de tags');
+		debug('displayedTagsCount =', displayedTagsCount);
+		if(displayedTagsCount > 0) {
+			debug('A punto de insertar un campo de tags');
+			const tagsTitle = `${gEmo('tagswhite', globalConfigs.slots.slot3)} Tags (${displayedTagsCount}/${actualTotalTags})`;
+			const tagsContent = `${specialTags.join(' ')} ${formatTagNameListNew(filteredTags, ' ')}`.trim();
 			postEmbed.addFields({ name: tagsTitle, value: shortenText(tagsContent, 1020) });
+		}
 	}
 
 	post.tags = originalPostTags;
 	
+	info('Finalizando preparación del Embed del mensaje');
+
+	debug('Procesando título');
 	if(data.title)
 		postEmbed.setTitle(data.title);
 
+	debug('Comprobando bloqueo de contenido explícito de Post según el canal del mensaje');
 	const shouldBlock = (post.rating === 'explicit' || post.rating === 'questionable') && !data.allowNSFW;
-
 	if(shouldBlock)
 		postEmbed.setFooter({ text: data.footer || (post.rating === 'explicit' ? '❗' : '❓'), iconURL: 'https://i.imgur.com/jJD57ue.png' });
 	else if(data.footer)
 		postEmbed.setFooter({ text: data.footer });
 	
 	if(!shouldBlock) {
+		debug('El contenido no fue bloqueado. Se agregará al mensaje a continuación');
 		if(/\.(mp4|webm|webp)/.test(post.fileUrl)) {
-			postEmbed.addFields({ name: 'Video', value: `[Míralo en tu navegador (<:gelbooru:919398540172750878>)](${post.fileUrl})` });
+			debug('El contenido es un video');
+			postEmbed.addFields({ name: '<:video:1355885122846720041> Video', value: `[Mirar en navegador](${post.fileUrl})` });
 			postEmbed.setImage(post.sampleUrl || post.previewUrl);
-		} else if(/\.gif/.test(post.fileUrl))
+		} else if(/\.gif/.test(post.fileUrl)) {
+			debug('El contenido es un GIF');
 			postEmbed.setImage(post.fileUrl);
-		else
+		} else {
+			debug('El contenido es probablemente una imagen estática');
 			postEmbed.setImage(
 				post.sampleUrl
 				|| post.fileUrl
 				|| post.previewUrl
 			);
+		}
 	}
+
+	info('Se terminó de formatear el mensaje acorde a un Post de Booru');
 	
 	return postMessageData;
 };
 
 /**
  * Envía una notificación de {@linkcode Post} de {@linkcode Booru} a todos los {@linkcode User} suscriptos a las tags del mismo
- * @typedef {{ userId: Snowflake, followedTags: Array<String> }} Suscription
+ * @typedef {{ userId: import('discord.js').Snowflake, followedTags: Array<String> }} Suscription
  * @param {Post} post
  * @param {Message<true>} sent
  * @param {Array<Suscription>} feedSuscriptions 
  */
 async function notifyUsers(post, sent, feedSuscriptions) {
-	if(!sent) throw 'Se esperaba un mensaje para el cuál notificar';
-	if(!sent.embeds?.[0] || !sent.components?.[0]) throw 'Se esperaba un mensaje de Feed válido';
+	info('Se recibió una orden para notificar sobre un nuevo Post a usuarios suscriptos aplicables');
+
+	//No sé qué habré estado pensando cuando escribí esto, pero no pienso volver a tocarlo
+	
+	if(!sent)
+		throw 'Se esperaba un mensaje para el cuál notificar';
+
+	if(!sent.embeds?.[0] || !sent.components?.[0])
+		throw 'Se esperaba un mensaje de Feed válido';
+
 	const channel = sent.channel;
-	if(!channel) throw 'No se encontró un canal para el mensaje enviado';
+	if(!channel)
+		throw 'No se encontró un canal para el mensaje enviado';
+
 	const guild = channel.guild;
 	const matchingSuscriptions = feedSuscriptions.filter(suscription => suscription.followedTags.some(tag => post.tags.includes(tag)));
+	if(!matchingSuscriptions.length) {
+		info('No se encontraron suscripciones aplicables para el Post procesado');
+		return [];
+	}
+
+	info('Se encontraron suscripciones aplicables, intentando enviar notificaciones...');
+
+	debug('Obteniendo miembros de suscripciones aplicables...');
 	const members = await guild.members.fetch();
 
+	debug('Intentando enviar notificaciones...');
 	return Promise.all(matchingSuscriptions.map(async ({ userId, followedTags }) => {
 		const member = members.get(userId);
-		if(!channel || !member) return Promise.resolve(null);
+		if(!channel || !member)
+			return Promise.resolve(null);
+
 		const translator = await Translator.from(member.id);
 		const matchingTags = followedTags.filter(tag => post.tags.includes(tag));
 
@@ -398,7 +463,7 @@ async function notifyUsers(post, sent, feedSuscriptions) {
 		return member.send({
 			embeds: [userEmbed],
 			components: [postRow],
-		}).catch(_ => null);
+		}).catch(error);
 	}));
 }
 
@@ -406,7 +471,7 @@ async function notifyUsers(post, sent, feedSuscriptions) {
  * De naturaleza memética.
  * Comprueba si la búsqueda de tags de {@linkcode Booru} no es aprobada por Dios
  * @param {Boolean} isNsfw 
- * @param {ComplexCommandRequest} request 
+ * @param {import('../../commands/Commons/typings').ComplexCommandRequest} request 
  * @param {Array<String>} terms 
  * @returns {Boolean}
  */
@@ -425,53 +490,70 @@ function isUnholy(isNsfw, request, terms) {
 
 /**
  * Busca las tags de {@linkcode Booru} deseadas y envía {@linkcode Message}s acorde a la petición
- * @param {ComplexCommandRequest} request
- * @param {CommandArguments} args
+ * @param {import('../../commands/Commons/typings').ComplexCommandRequest} request
+ * @param {import('../../commands/Commons/typings').CommandArguments} args
  * @param {Boolean} isSlash
  * @param {CommandOptions} options
  * @param {{ cmdtag: keyof tagMaps, nsfwtitle: String, sfwtitle: String }} [searchOpt]
  * @returns {Promise<Array<Message<true>> | Message<true>>}
  */
 async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt = { cmdtag: 'general', nsfwtitle: 'Búsqueda NSFW', sfwtitle: 'Búsqueda' }) {
+	info('Se recibió una solicitud de respuesta con Posts resultados de búsqueda de Booru');
+
 	const isnsfw = isThread(request.channel)
 		? request.channel.parent.nsfw
 		: request.channel.nsfw;
 	
 	const poolSize = options.fetchFlag(args, 'bomba', { callback: f => Math.max(2, Math.min(+f, 10)), fallback: 1 });
 	const words = isSlash
-		// @ts-expect-error
-		? (args.getString('etiquetas') ?? '').split(/ +/)
-		: args;
+		? ((/**@type {import('../../commands/Commons/typings').SlashArguments}*/(args)).getString('etiquetas') ?? '').split(/ +/)
+		: (/**@type {Array<string>}*/(args));
+	debug('poolSize =', poolSize);
 
-	//Bannear lewds de Megumin y Holo >:C
+	debug('Verificando que la solicitud haya sido aprobada por el Vaticano');
 	if(isUnholy(isnsfw, request, [ searchOpt.cmdtag, ...words ]))
 		return rakki.execute(request, [], isSlash);
 
+	debug('Comunicando retraso de respuesta a interacción...');
 	await request.deferReply();
 
+	debug('Se están por obtener tags de búsqueda a partir de la consulta del usuario');
 	const baseTags = getBaseTags('gelbooru', isnsfw);
 	const searchTags = [ searchOpt.cmdtag, baseTags ].join(' ');
 	const userTags = getSearchTags(words, 'gelbooru', searchOpt.cmdtag);
+	const finalTags = [ searchTags, userTags ];
+	debug('baseTags =', baseTags);
+	debug('searchTags =', searchTags);
+	debug('userTags =', userTags);
+	debug('finalTags =', finalTags);
+	
 	/**@type {import('discord.js').User} */
 	const author = request.user;
 	
 	//Petición
 	try {
+		info('Buscando Posts...');
 		const booru = new Booru(globalConfigs.booruCredentials);
-		const response = await booru.search([ searchTags, userTags ], { limit: 100, random: true });
+		const response = await booru.search(finalTags, { limit: 100, random: true });
+
 		//Manejo de respuesta
 		if(!response.length) {
+			warn('La respuesta de búsqueda no tiene resultados');
 			const replyOptions = { content: `⚠️ No hay resultados en **Gelbooru** para las tags **"${userTags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` };
-			//@ts-expect-error
-			return request.editReply(replyOptions);
+			return /**@type {Promise<Message<true>>}*/(request.editReply(replyOptions));
 		}
+
+		debug('Se obtuvieron resultados de búsqueda válidos');
 
 		//Seleccionar imágenes
 		const posts = response
 			.sort(() => 0.5 - Math.random())
 			.slice(0, poolSize);
 
+		debug('posts =', posts);
+
 		//Crear presentaciones
+		info('Preparando mensaje(s) de respuesta de búsqueda...');
 		const messages = await Promise.all(posts.map(post => formatBooruPostMessage(booru, post, {
 			maxTags: 40,
 			title: isnsfw ? searchOpt.nsfwtitle : searchOpt.sfwtitle,
@@ -480,28 +562,34 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
 			allowNSFW: isnsfw,
 			isNotFeed: true,
 		})));
+
 		if(userTags.length)
-			messages[posts.length - 1].embeds[0].addFields({ name: 'Tu búsqueda', value: `<:magGlassRight:1355133928721088592> *${formatTagNameListNew(userTags.trim().split(/ +/), ' ')}*` });
+			messages[posts.length - 1].embeds[0].addFields({ name: '<:magGlassRight:1355133928721088592> Tu búsqueda', value: formatTagNameListNew(userTags.trim().split(/ +/), ' ') });
 
 		//Enviar mensajes
+		info('Enviando mensaje(s) de respuesta de búsqueda...');
 		const replyOptions = messages.shift();
 		await request.editReply(replyOptions);
-		return Promise.all(messages.map(message => request.channel.send(message))).catch(_ => console.error && []);
-	} catch(error) {
-		console.error(error);
-		const errorembed = new EmbedBuilder()
+		return Promise.all(messages.map(message => request.channel.send(message)))
+			.catch(err => {
+				error(err, 'Ocurrió un problema al intentar enviar los resultados de búsqueda de Booru');
+				return /**@type {Array<Message<true>>}*/([]);
+			});
+	} catch(err) {
+		error(err, 'Ocurrió un problema al procesar una petición de búsqueda de Booru');
+		const errorEmbed = new EmbedBuilder()
 			.setColor(Colors.Red)
 			.addFields({
 				name: 'Ocurrió un error al realizar una petición',
 				value: [
 					'Es probable que le hayan pegado un tiro al que me suministra las imágenes, así que prueba buscar más tarde, a ver si revive 👉👈',
 					'```js',
-					`${[error.name, error.message].join(': ')}\n`,
+					`${[err.name, err.message].join(': ')}\n`,
 					'```',
 				].join('\n'),
 			});
-		//@ts-expect-error
-		return request.editReply({ embeds: [errorembed] });
+			
+		return /**@type {Promise<Message<true>>}*/(request.editReply({ embeds: [errorEmbed] }));
 	}
 };
 
