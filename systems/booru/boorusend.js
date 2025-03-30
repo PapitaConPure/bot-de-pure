@@ -10,7 +10,6 @@ const { getBaseTags, getSearchTags, tagMaps } = require('../../localdata/boorupr
 const globalConfigs = require('../../localdata/config.json');
 const rakki = require('../../commands/Pure/rakkidei');
 const { Translator } = require('../../internationalization');
-const { client } = require('../../client');
 
 /**
  * @typedef {{ maxTags?: number, title?: string, subtitle?: string, footer?: string, cornerIcon?: string, manageableBy?: string, allowNSFW?: boolean, isNotFeed?: boolean }} PostFormatData
@@ -67,13 +66,26 @@ const noSource = { color: Colors.Aqua, emoji: undefined };
 /**@type {SourceStyle}*/
 const unknownSource = { color: 0x1bb76e, emoji: '969664712604262400' };
 
-/**@param {string} source*/
-function getSourceUrl(source) {
-	if(!source) return null;
-	const smatch = source.match(/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-])+\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/);
-	if(!smatch) return null;
-	return source.slice(smatch.index, smatch.index + smatch[0].length);
-}
+/**@type {{ [K: string]: { order: number, emote: string } }}*/
+const resMappings = /**@type {const}*/({
+	'lowres'               : { order: 0, emote: '<:lowres:1355765055945310238>' },
+	'highres'              : { order: 1, emote: '<:highres:1355765065772699719>' },
+	'absurdres'            : { order: 2, emote: '<:absurdres:1355765080800890891>' },
+	'incredibly_absurdres' : { order: 3, emote: '<:incrediblyAbsurdres:1355765110387507374>' },
+});
+
+/**@type {{ [K: string]: string }}*/
+const sexEmotes = /**@type {const}*/({
+	girl : '<:girl:1355803255481045053>',
+	boy  : '<:boy:1355803803248623646>',
+	futa : '<:futa:1355803817089831055>',
+});
+
+const disallowedTagsIfSexCount = new Set([
+	'multiple_girls',
+	'multiple_boys',
+	'multiple_futa',
+]);
 
 /**
  * Genera un {@linkcode EmbedBuilder} a base de un {@linkcode Post} de {@linkcode Booru}
@@ -139,15 +151,11 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 	}
 	embedColor ??= noSource.color;
 	
-	//Botón de tags
-	row.addComponents(
-		new ButtonBuilder()
-			.setEmoji('921788204540100608')
-			.setStyle(ButtonStyle.Primary)
-			.setCustomId(`feed_showFeedImageTags_${data.isNotFeed ? 'NaF' : ''}`),
-	);
-	
-	//Botón de contribución
+	//Filtrar tags con estilos especiales
+	const originalPostTags = [ ...post.tags ];
+	let maxResOrder = -1;
+	let resTag = '';
+	const sexTags = /**@type {Array<String>}*/([]);
 	let hasTagMe = false;
 	let hasRequestTags = false;
 	post.tags = post.tags.filter(t => {
@@ -161,9 +169,42 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 			return false;
 		}
 
+		const resMapping = resMappings[t];
+		if(resMapping) {
+			const { order: resOrder, emote: resEmote } = resMapping;
+			if(resOrder > maxResOrder) {
+				resTag = resEmote;
+				maxResOrder = resOrder;
+			}
+			return false;
+		}
+
+		const sexTag = t.match(/([0-9]\+?)(girl|boy|futa)s?/);
+		if(sexTag) {
+			sexTags.push(`${sexEmotes[sexTag[2]]}${sexTag[1]}`);
+			return false;
+		}
+
 		return true;
 	});
 
+	if(sexTags.length)
+		post.tags = post.tags.filter(t => !disallowedTagsIfSexCount.has(t));
+
+	const specialTags = [
+		...sexTags,
+		...(resTag ? [resTag] : []),
+	];
+	
+	//Botón de tags
+	row.addComponents(
+		new ButtonBuilder()
+			.setEmoji('921788204540100608')
+			.setStyle(ButtonStyle.Primary)
+			.setCustomId(`feed_showFeedImageTags_${data.isNotFeed ? 'NaF' : ''}`),
+	);
+
+	//Botón de contribución
 	if(hasTagMe || hasRequestTags)
 		row.addComponents(
 			new ButtonBuilder()
@@ -200,6 +241,8 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		postEmbed.setAuthor({ name: data.subtitle });
 
 	//Tags
+	const actualMaxTags = Math.max(0, maxTags - specialTags.length);
+	const actualTotalTags = post.tags.length + specialTags.length;
 	try {
 		const postTags = await booru.fetchPostTags(post);
 
@@ -230,9 +273,10 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		});
 
 		const s3 = globalConfigs.slots.slot3;
-		const otherTags = postOtherTags.slice(0, maxTags);
-		const tagsTitle = `${gEmo('tagswhite', s3)} Tags (${otherTags.length}/${post.tags.length})`;
-		const tagsContent = formatTagNameListNew(otherTags, ' ');
+		const otherTags = postOtherTags.slice(0, actualMaxTags);
+		const displayedTagsCount = Math.min(otherTags.length + specialTags.length, maxTags);
+		const tagsTitle = `${gEmo('tagswhite', s3)} Tags (${displayedTagsCount}/${actualTotalTags})`;
+		const tagsContent = `${specialTags.join(' ')} ${formatTagNameListNew(otherTags, ' ')}`.trim();
 
 		const addTagCategoryField = (/**@type {String}*/ fieldName, /**@type {Array<String>}*/arr) => {
 			if(!arr.length) return;
@@ -257,18 +301,22 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		addTagCategoryField('<:person:1355128242993893539> Personajes',  postCharacterTags);
 		addTagCategoryField('<:landmark:1355128256432443584> Copyright', postCopyrightTags);
 
-		if(maxTags > 0)
+		if(displayedTagsCount > 0)
 			postEmbed.addFields({ name: tagsTitle, value: shortenText(tagsContent, 1020) });
 	} catch(err) {
 		console.error(err);
 		const postTags = post.tags;
-		if(maxTags > 0 && postTags.length) {
-			const filteredTags = postTags.slice(0, maxTags);
-			const tagsTitle = `${gEmo('tagswhite', globalConfigs.slots.slot3)} Tags (${filteredTags.length}/${post.tags.length})`;
-			const tagsContent = formatTagNameListNew(filteredTags, ' ');
+
+		const filteredTags = postTags.slice(0, actualMaxTags);
+		const displayedTagsCount = Math.min(filteredTags.length + specialTags.length, maxTags);
+		const tagsTitle = `${gEmo('tagswhite', globalConfigs.slots.slot3)} Tags (${displayedTagsCount}/${actualTotalTags})`;
+		const tagsContent = `${specialTags.join(' ')} ${formatTagNameListNew(filteredTags, ' ')}`.trim();
+
+		if(displayedTagsCount > 0)
 			postEmbed.addFields({ name: tagsTitle, value: shortenText(tagsContent, 1020) });
-		}
 	}
+
+	post.tags = originalPostTags;
 	
 	if(data.title)
 		postEmbed.setTitle(data.title);
