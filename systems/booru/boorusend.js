@@ -198,7 +198,8 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		return true;
 	});
 
-	debug('resTag =', resTag, 'sexTags =', sexTags);
+	debug('resTag =', resTag);
+	debug('sexTags =', sexTags);
 
 	if(sexTags.length)
 		post.tags = post.tags.filter(t => !disallowedTagsIfSexCount.has(t));
@@ -209,6 +210,7 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 	];
 
 	debug('specialTags =', specialTags);
+	debug('postTags =', post.tags);
 
 	debug('Aplicando botones adicionales...');
 	
@@ -265,12 +267,15 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 	try {
 		debug('Obteniendo información adicional de tags...');
 		const postTags = await booru.fetchPostTags(post);
+		debug('fetchedPostTags =', postTags);
 
 		//Advertencia de IA
 		debug('Se determinará la miniatura del Embed del mensaje');
-		if(postTags.some(t => [ 'ai-generated', 'ai-assisted' ].includes(t.name)))
+		const aiGeneratedTagIndex = postTags.findIndex(t => [ 'ai-generated', 'ai-assisted' ].includes(t.name));
+		if(aiGeneratedTagIndex >= 0) {
+			postTags.splice(aiGeneratedTagIndex, 1);
 			postEmbed.setThumbnail('https://i.imgur.com/1Q41hhC.png');
-		else if((post.size?.[0] ?? 0) >= (post.size?.[1] ?? 0))
+		} else if((post.size?.[0] ?? 0) >= (post.size?.[1] ?? 0))
 			postEmbed.setThumbnail('https://i.imgur.com/oXE6CeF.png');
 
 		debug('A punto de distribuir las etiquetas en categorías');
@@ -294,7 +299,10 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 			}
 		});
 
-		debug('artistas =', postArtistTags, 'personajes =', postCharacterTags, 'copyright =', postCopyrightTags);
+		debug('artistas =', postArtistTags);
+		debug('personajes =', postCharacterTags);
+		debug('copyright =', postCopyrightTags);
+		debug('restantes =', postOtherTags);
 
 		const s3 = globalConfigs.slots.slot3;
 		const otherTags = postOtherTags.slice(0, actualMaxTags);
@@ -555,7 +563,7 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
 		//Crear presentaciones
 		info('Preparando mensaje(s) de respuesta de búsqueda...');
 		const messages = await Promise.all(posts.map(post => formatBooruPostMessage(booru, post, {
-			maxTags: 40,
+			maxTags: 20,
 			title: isnsfw ? searchOpt.nsfwtitle : searchOpt.sfwtitle,
 			cornerIcon: author.avatarURL({ size: 128 }),
 			manageableBy: author.id,
