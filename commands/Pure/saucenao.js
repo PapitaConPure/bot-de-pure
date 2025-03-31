@@ -1,10 +1,13 @@
 const { EmbedBuilder, Colors, ButtonBuilder, ButtonStyle, TextInputBuilder, TextInputStyle, ModalBuilder, Attachment } = require('discord.js'); //Integrar discord.js
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
-const { injectSauceNAOEmbeds } = require('../../systems/others/saucenao');
+const { injectSauceNAOEmbeds, testSauceNAOToken } = require('../../systems/others/saucenao');
 const { Translator } = require('../../internationalization');
 const { encryptString } = require('../../security');
 const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts');
 const SauceNAOUser = require('../../localdata/models/saucenaoUsers');
+
+const Logger = require('../../logs');
+const { debug, info, warn, error, fatal } = Logger('ERROR', 'p!saucenao');
 
 const options = new CommandOptions()
 	.addParam('mensaje', 'MESSAGE', 'para dar un mensaje por respuesta o por ID/enlace (Slash)', { optional: true })
@@ -25,7 +28,9 @@ const command = new CommandManager('saucenao', flags)
 	.setExperimentalExecution(async (request, args) => {
 		const translator = await Translator.from(request.userId);
 
+		debug('Verificando flag --registrar');
 		if(args.parseFlag('registrar')) {
+			debug('Se enviará el mensaje de registro');
 			const embeds = [new EmbedBuilder()
 				.setColor(0x151515)
 				.setTitle(translator.getText('saucenaoRegisterTitle'))
@@ -57,11 +62,17 @@ const command = new CommandManager('saucenao', flags)
 		}
 
 		const sauceNAOUser = (await SauceNAOUser.findOne({ userId: request.userId }));
-		if(!sauceNAOUser)
+		if(!sauceNAOUser) {
+			debug('Usuario no tiene una cuenta de sauceNAO válida. Abortando...')
+			const embed = new EmbedBuilder()
+				.setColor(0x151515)
+				.setDescription(translator.getText('saucenaoUnregisteredNotice'));
+
 			return request.reply({
-				content: translator.getText('saucenaoUnregisteredNotice'),
+				embeds: [embed],
 				ephemeral: true,
 			});
+		}
 		
 		const message = (request.isInteraction && CommandOptionSolver.asMessage(await args.getMessage('mensaje')))
 			|| (request.isMessage && request.channel.messages.cache.get(request.inferAsMessage().reference?.messageId));
@@ -89,6 +100,8 @@ const command = new CommandManager('saucenao', flags)
 			...attachmentUrls,
 			...otherMessageUrls,
 		].slice(0, 5);
+
+		debug('queries = ', queries);
 
 		if(!queries.length) {
 			if(message?.stickers.size)
@@ -119,9 +132,20 @@ const command = new CommandManager('saucenao', flags)
 		return interaction.showModal(modal);
 	}).setModalResponse(async function onRegisterRequest(interaction) {
 		const translator = await Translator.from(interaction.user.id);
+		
+		const clientId = interaction.fields.getTextInputValue('clientId').trim();
+
+		if(!testSauceNAOToken(clientId)) {
+			return interaction.reply({
+				embeds: [
+					new EmbedBuilder()
+						.setColor(Colors.Red)
+						.setTitle(translator.getText('saucenaoInvalidToken')),
+				],
+			});
+		}
 
 		const sauceNAOUser = (await SauceNAOUser.findOne({ userId: interaction.user.id })) || new SauceNAOUser({ userId: interaction.user.id });
-		const clientId = interaction.fields.getTextInputValue('clientId').trim();
 		sauceNAOUser.clientId = encryptString(clientId);
 		await sauceNAOUser.save();
 		return interaction.reply({

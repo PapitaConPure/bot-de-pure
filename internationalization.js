@@ -1007,7 +1007,12 @@ let localesObject = /**@type {const}*/({
 	saucenaoInvalidImage: {
 		es: '⚠️ Debes indicar un enlace de imagen o una imagen directa a buscar en SauceNAO',
 		en: '⚠️ You must supply an image link or file to search on SauceNAO',
-		ja: '⚠️ Saucenaoで検索するには、画像リンクまたは直接画像を示す必要があります',
+		ja: '⚠️ SauceNAOで検索するには、画像リンクまたは直接画像を示す必要があります',
+	},
+	saucenaoInvalidToken: {
+		es: '⚠️ Clave de API de SauceNAO inválida',
+		en: '⚠️ Invalid SauceNAO API key',
+		ja: '⚠️ 無効なSauceNAO APIキー',
 	},
 	saucenaoSearchSuccess: {
 		es: `Resultado de la imagen Nº${subl(0)}`,

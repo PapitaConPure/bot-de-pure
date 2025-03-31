@@ -5,6 +5,17 @@ const { Translator } = require("../../internationalization");
 const { EmbedBuilder, Colors } = require("discord.js");
 const { decryptString } = require('../../security');
 const { Booru } = require('../booru/boorufetch');
+const { auditError } = require('./auditor');
+
+/**@param {string} token*/
+function testSauceNAOToken(token) {
+	try {
+		sagiri(token);
+		return true;
+	} catch {
+		return false;
+	}
+}
 
 /**
  * Based on the supplied queries, injects corresponding SauceNAO result embeds into the specified payload
@@ -14,13 +25,24 @@ const { Booru } = require('../booru/boorufetch');
  * @param {{ successes: Array<EmbedBuilder>, failures: Array<EmbedBuilder> }} payload
  */
 async function injectSauceNAOEmbeds(clientId, queries, translator, payload) {
-	const token = decryptString(clientId);
-	const findSauce = sagiri(token, {
-		results: 3,
-		mask: [25], //Gelbooru
-	});
-
 	const { successes, failures } = payload;
+
+	const token = decryptString(clientId);
+	let findSauce;
+	try {
+		findSauce = sagiri(token, {
+			results: 3,
+			mask: [25], //Gelbooru
+		});
+	} catch {
+		const embed = new EmbedBuilder()
+			.setColor(Colors.Red)
+			.setTitle(translator.getText('saucenaoInvalidToken'));
+
+		failures.push(embed);
+		return;
+	}
+
 	const booru = new Booru(globalConfigs.booruCredentials);
 	let count = 1;
 	for(const query of queries) {
@@ -51,7 +73,7 @@ async function injectSauceNAOEmbeds(clientId, queries, translator, payload) {
 						.setTitle(translator.getText('saucenaoSearchSuccess', count))
 						.setDescription(sourcesText)
 						.setURL(result.url)
-						.setThumbnail(result.thumbnail)
+						.setThumbnail(post.previewUrl || post.sampleUrl || result.thumbnail)
 						.setFooter({ text: `${result.similarity}%` }));
 				} catch(err) {
 					console.error(err);
@@ -69,6 +91,8 @@ async function injectSauceNAOEmbeds(clientId, queries, translator, payload) {
 				}
 			}));
 		} catch(err) {
+			console.error(err);
+			auditError(err, { brief: 'Ocurrió un problema al buscar una fuente en SauceNAO' });
 			failures.push(new EmbedBuilder()
 				.setTitle(translator.getText('imgurUploadErrorTitle', count))
 				.setColor(Colors.Red)
@@ -83,5 +107,6 @@ async function injectSauceNAOEmbeds(clientId, queries, translator, payload) {
 }
 
 module.exports = {
+	testSauceNAOToken,
 	injectSauceNAOEmbeds,
 };
