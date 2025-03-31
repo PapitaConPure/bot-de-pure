@@ -1,7 +1,8 @@
 const Discord = require('discord.js');
-const {  } = require('../func.js');
-const { tenshiColor } = require('../localdata/config.json');
 const UserConfigs = require('../localdata/models/userconfigs.js');
+
+const Logger = require('../logs');
+const { warn } = Logger('WARN', 'onReactionRemove');
 
 /**
  * 
@@ -13,11 +14,16 @@ const UserConfigs = require('../localdata/models/userconfigs.js');
 async function onReactionRemove(reaction, user, details) {
 	/**@type {Discord.Message}*/
 	let message;
-	[ message, user ] = await Promise.all([
-		//reaction.partial === true ? reaction.fetch() : reaction,
-		reaction.message.partial === true ? reaction.message.fetch() : reaction.message,
-		user.partial === true ? user.fetch() : user,
-	]);
+	try {
+		[ message, user ] = await Promise.all([
+			//reaction.partial === true ? reaction.fetch() : reaction,
+			reaction.message.partial === true ? reaction.message.fetch() : reaction.message,
+			user.partial === true ? user.fetch() : user,
+		]);
+	} catch {
+		warn('No se puede recuperar información necesaria de una reacción');
+		return;
+	}
 
 	if(message.author.bot || user.bot) return;
 
