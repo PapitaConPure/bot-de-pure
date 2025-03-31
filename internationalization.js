@@ -965,15 +965,32 @@ let localesObject = /**@type {const}*/({
 		en: 'If you don\' have a SauceNAO account, you can create one [here](https://saucenao.com/user.php)',
 		ja: 'SauceNAOアカウントをお持ちでない場合は、[こちら](https://saucenao.com/user.php)から作成できます',
 	},
+	saucenaoRegisterFooter: {
+		es: 'Si seguir estos pasos no funciona, presiona el botón "regen" en la página del paso 2, copia la nueva clave y repite el paso 3',
+		en: 'If following these steps doesn\'t work, press the "regen" button in the page from step 2, copy the new key and repeat step 3',
+		ja: 'これらの手順に従っても機能しない場合は、手順2のページで「regen」ボタンを押し、新しいキーをコピーして手順 3 を繰り返します',
+	},
 	saucenaoRegisterAfterName: {
-		es: 'Enlazar cuenta',
-		en: 'Link account',
+		es: 'Enlaza tu cuenta',
+		en: 'Link your account',
 		ja: 'アカウントをリンクする',
 	},
 	saucenaoRegisterAfterValue: {
-		es: 'Inicia sesión en tu cuenta de SauceNAO, dirígete [aquí](https://saucenao.com/user.php?page=search-api), copia la clave de API (api key) que se te presenta y pégala luego de presionar el botón de este mensaje',
-		en: 'Log in to your SauceNAO account, go [here](https://saucenao.com/user.php?page=search-api), copy the API key that is presented to you and paste it after pressing the button in this message',
-		ja: 'SauceNAOアカウントにログインし、[こちら](https://saucenao.com/user.php?page=search-api)にアクセスして、表示されるAPIキー（api key）をコピーし、このメッセージ内のボタンを押した後に貼り付けます',
+		es: paragraph(
+			'1. Inicia sesión en SauceNAO y dirígete [aquí](https://saucenao.com/user.php?page=search-api)',
+			'2. Copia la clave de API (api key) que se te presenta',
+			'3. Presiona el botón de este mensaje y pega la clave',
+		),
+		en: paragraph(
+			'1. Log in to SauceNAO and go [here](https://saucenao.com/user.php?page=search-api)',
+			'2. Copy the API key that is presented to you',
+			'3. Press the button below this message and paste the key'
+		),
+		ja: paragraph(
+			'1. SauceNAOにログインして[こちら](https://saucenao.com/user.php?page=search-api)へ',
+			'2. 提示されたAPIキー（api key）をコピーします',
+			'3. このメッセージのボタンを押してキーを貼り付けます',
+		),
 	},
 	saucenaoRegisterModalTitle: {
 		es: 'Registrar Aplicación de SauceNAO',

@@ -29,37 +29,8 @@ const command = new CommandManager('saucenao', flags)
 		const translator = await Translator.from(request.userId);
 
 		debug('Verificando flag --registrar');
-		if(args.parseFlag('registrar')) {
-			debug('Se enviará el mensaje de registro');
-			const embeds = [new EmbedBuilder()
-				.setColor(0x151515)
-				.setTitle(translator.getText('saucenaoRegisterTitle'))
-				.addFields(
-					{
-						name: translator.getText('saucenaoRegisterAccountName'),
-						value: translator.getText('saucenaoRegisterAccountValue'),
-					},
-					{
-						name: translator.getText('saucenaoRegisterAfterName'),
-						value: translator.getText('saucenaoRegisterAfterValue'),
-					},
-				),
-			];
-
-			const components = [makeButtonRowBuilder().addComponents(
-				new ButtonBuilder()
-					.setCustomId(`saucenao_onButtonRegisterRequest`)
-					.setLabel(translator.getText('buttonRegister'))
-					.setEmoji('1355488586883137697')
-					.setStyle(ButtonStyle.Primary),
-			)];
-
-			return request.reply({
-				embeds,
-				components,
-				ephemeral: true,
-			});
-		}
+		if(args.parseFlag('registrar'))
+			return makeRegisterRequestResponse(request, translator);
 
 		const sauceNAOUser = (await SauceNAOUser.findOne({ userId: request.userId }));
 		if(!sauceNAOUser) {
@@ -157,6 +128,45 @@ const command = new CommandManager('saucenao', flags)
 			ephemeral: true,
 		});
 	});
+
+/**
+ * @param {import('../Commons/typings').ComplexCommandRequest} request
+ * @param {Translator} translator
+ */
+function makeRegisterRequestResponse(request, translator) {
+	debug('Se enviará el mensaje de registro');
+	const embeds = [new EmbedBuilder()
+		.setColor(0x151515)
+		.setTitle(translator.getText('saucenaoRegisterTitle'))
+		.setFooter({
+			text: translator.getText('saucenaoRegisterFooter'),
+		})
+		.addFields(
+			{
+				name: translator.getText('saucenaoRegisterAccountName'),
+				value: translator.getText('saucenaoRegisterAccountValue'),
+			},
+			{
+				name: translator.getText('saucenaoRegisterAfterName'),
+				value: translator.getText('saucenaoRegisterAfterValue'),
+			},
+		),
+	];
+
+	const components = [makeButtonRowBuilder().addComponents(
+		new ButtonBuilder()
+			.setCustomId(`saucenao_onButtonRegisterRequest`)
+			.setLabel(translator.getText('buttonRegister'))
+			.setEmoji('1355488586883137697')
+			.setStyle(ButtonStyle.Primary),
+	)];
+
+	return request.reply({
+		embeds,
+		components,
+		ephemeral: true,
+	});
+}
 
 /**@param {Translator} translator*/
 function makeRegisterModal(translator) {
