@@ -98,7 +98,7 @@ function showInforolPage(request, page, requestId, translator, query) {
 				.setStyle(Discord.ButtonStyle.Secondary),
 			new Discord.ButtonBuilder()
 				.setCustomId(`inforol_showPage_${nextPage}_${requestId}_${authorId}_N`)
-				.setEmoji('934430008343158844')
+				.setEmoji('934430008250871818')
 				.setStyle(Discord.ButtonStyle.Secondary),
 		)];
 	

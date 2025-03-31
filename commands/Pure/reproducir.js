@@ -85,10 +85,10 @@ const command = new CommandManager('reproducir', tags)
 			const trackEmbed = makeReplyEmbed(service.color)
 				.setTitle(queue.size ? translator.getText('playTitleQueueAdded') : translator.getText('playTitleQueueNew'))
 				.setDescription(`[${track.title}](${track.url})`)
-				.setThumbnail(track.thumbnail)
+				.setThumbnail(track.thumbnail || request.client.user.displayAvatarURL({ size: 256 }))
 				.setFooter({
-					text: `${channel.name} • ${queueInfo}`,
-					iconURL: service.iconUrl,
+					text: `${channel.name ?? '???'} • ${queueInfo}`,
+					iconURL: service.iconUrl || request.client.user.displayAvatarURL({ size: 256 }),
 				})
 				.addFields(
 					{

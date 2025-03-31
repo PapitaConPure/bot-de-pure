@@ -233,16 +233,16 @@ const command = new CommandManager('confesión', tags)
 				.setStyle(ButtonStyle.Success),
 			new ButtonBuilder()
 				.setCustomId(`confesión_rejectConfession_${confId}`)
-				.setEmoji('936531643496288288')
+				.setEmoji('1355143793577426962')
 				.setStyle(ButtonStyle.Secondary),
 			new ButtonBuilder()
 				.setCustomId(`confesión_timeoutConfessant_${confId}_${userId}`)
-				.setEmoji('936531643496288288')
+				.setEmoji('1355143793577426962')
 				.setLabel('Rechazar y Aislar')
 				.setStyle(ButtonStyle.Danger),
 			new ButtonBuilder()
 				.setCustomId(`confesión_banConfessant_${confId}_${userId}`)
-				.setEmoji('936531643496288288')
+				.setEmoji('1355143793577426962')
 				.setLabel('Rechazar y Bannear')
 				.setStyle(ButtonStyle.Danger),
 		]);

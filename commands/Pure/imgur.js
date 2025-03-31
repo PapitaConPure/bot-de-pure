@@ -13,7 +13,7 @@ const envPath = remoteStartup ? '../../remoteenv.json' : '../../localenv.json';
 const options = new CommandOptions()
 	.addParam('enlaces', 'TEXT', 'para indicar enlaces de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
 	.addParam('imagens', 'IMAGE', 'para indicar archivos de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
-	.addFlag('r', [ 'registrar' ], 'para registrar una ID de cliente y evitar el límite global');
+	.addFlag('r', [ 'registrar', 'register' ], 'para registrar una ID de cliente y evitar el límite global');
 
 const flags = new CommandTags().add('COMMON');
 
@@ -22,9 +22,9 @@ const command = new CommandManager('imgur', flags)
 		'subir',
 		'upload',
 	)
-	.setBriefDescription('Permite subir imágenes')
+	.setBriefDescription('Permite subir imágenes con Imgur')
 	.setLongDescription(
-		'Permite subir imágenes, limitado a un máximo diario global.',
+		'Permite subir imágenes por medio de la plataforma de Imgur, limitado a un máximo diario global.',
 		'Para evitar el máximo de subida global, puedes \`--registrar\` tu propia ID de cliente (explicado al usar la bandera de comando)',
 	)
 	.setOptions(options)
@@ -34,13 +34,13 @@ const command = new CommandManager('imgur', flags)
 		if(args.parseFlag('registrar')) {
 			const embeds = [new EmbedBuilder()
 				.setColor('#1bb76e')
-				.setTitle('Haz click aquí para crear una Aplicación de Imgur')
+				.setTitle(translator.getText('imgurRegisterTitle'))
 				.setURL('https://api.imgur.com/oauth2/addclient')
-				.setDescription('Precisarás la ID de cliente de la misma para registrar la aplicación en Bot de Puré. Si no tienes cuenta de Imgur, deberás crear una primero')
+				.setDescription(translator.getText('imgurRegisterDesc'))
 				.addFields(
 					{
 						name: 'Authorization Type',
-						value: 'Selecciona la tercera opción (uso anónimo sin autorización)',
+						value: translator.getText('imgurRegisterAuthTypeValue'),
 						inline: true,
 					},
 					{
@@ -49,16 +49,13 @@ const command = new CommandManager('imgur', flags)
 						inline: true,
 					},
 					{
-						name: 'Rellenar formulario',
-						value: 'El resto de campos son irrelevantes, rellena con cualquier dato válido',
+						name: translator.getText('imgurRegisterFillFormName'),
+						value: translator.getText('imgurRegisterFillFormValue'),
 						inline: true,
 					},
 					{
-						name: 'Por último...',
-						value: [
-							'Verifica el Captcha y envía el formulario de solicitud de creación de aplicación.',
-							'Luego de crear la aplicación, copia la ID de Cliente (Client ID) que se te presenta y pégala luego de presionar el botón de este mensaje',
-						].join('\n'),
+						name: translator.getText('imgurRegisterLastlyName'),
+						value: translator.getText('imgurRegisterLastlyValue'),
 					},
 				),
 			];
@@ -67,7 +64,7 @@ const command = new CommandManager('imgur', flags)
 				new ButtonBuilder()
 					.setCustomId(`imgur_onButtonRegisterRequest`)
 					.setLabel(translator.getText('buttonRegister'))
-					.setEmoji('1087075525245272104')
+					.setEmoji('1355488586883137697')
 					.setStyle(ButtonStyle.Primary),
 			)];
 
@@ -96,7 +93,7 @@ const command = new CommandManager('imgur', flags)
 		];
 
 		if(!uploads.length)
-			return request.editReply({ content: '⚠️ Debes indicar un enlace de imagen o una imagen directa a subir a Imgur', ephemeral: true });
+			return request.editReply({ content: translator.getText('imgurInvalidImage'), ephemeral: true });
 
 		let count = 1;
 		const successes = [];
@@ -106,18 +103,18 @@ const command = new CommandManager('imgur', flags)
 		
 			if(image?.success)
 				successes.push(new EmbedBuilder()
-					.setTitle('Tu imagen')
+					.setTitle(translator.getText('imgurUploadSuccessTitle'))
 					.setColor(Colors.Green)
 					.setURL(image.data.link)
 					.setDescription(image.data.link)
 					.setImage(image.data.link));
 			else
 				failures.push(new EmbedBuilder()
-					.setTitle(`⚠️ No se pudo subir la imagen Nº${count}`)
-					.setDescription('Si es un problema de frecuencia de subida, prueba registrar tu propia aplicación para subir imágenes sin restricción global')
+					.setTitle(translator.getText('imgurUploadErrorTitle', count))
+					.setDescription(translator.getText('imgurUploadErrorDesc'))
 					.setColor(Colors.Red)
 					.addFields({
-						name: `Código de Error: ${image.status}`,
+						name: `Error ${image.status}`,
 						value: `\`\`\`\n${image.data}\n\`\`\``,
 					}));
 			
@@ -126,9 +123,13 @@ const command = new CommandManager('imgur', flags)
 
 		return request.editReply({ embeds: [ ...successes, ...failures ] });
 	}).setButtonResponse(async function onButtonRegisterRequest(interaction) {
-		const modal = makeRegisterModal();
+		const translator = await Translator.from(interaction.user.id);
+
+		const modal = makeRegisterModal(translator);
 		return interaction.showModal(modal);
 	}).setModalResponse(async function onRegisterRequest(interaction) {
+		const translator = await Translator.from(interaction.user.id);
+
 		const imgurUser = (await ImgurUser.findOne({ userId: interaction.user.id })) || new ImgurUser({ userId: interaction.user.id });
 		const clientId = interaction.fields.getTextInputValue('clientId');
 		imgurUser.clientId = clientId;
@@ -137,17 +138,18 @@ const command = new CommandManager('imgur', flags)
 			embeds: [
 				new EmbedBuilder()
 					.setColor('#1bb76e')
-					.setTitle('Aplicación de Imgur Personal Registrada'),
+					.setTitle(translator.getText('imgurRegisterSuccess')),
 			],
 			ephemeral: true,
 		});
 	});
 
-function makeRegisterModal() {
+/**@param {Translator} translator*/
+function makeRegisterModal(translator) {
 	const clientIdRow = makeTextInputRowBuilder().addComponents(
 		new TextInputBuilder()
 			.setCustomId('clientId')
-			.setLabel('ID de Cliente de Imgur')
+			.setLabel(translator.getText('imgurRegisterModalClientIdLabel'))
 			.setRequired(true)
 			.setMinLength(8)
 			.setMaxLength(32)
@@ -157,7 +159,7 @@ function makeRegisterModal() {
 
 	const modal = new ModalBuilder()
 		.setCustomId('imgur_onRegisterRequest')
-		.setTitle('Registrar Aplicación de Imgur')
+		.setTitle(translator.getText('imgurRegisterModalTitle'))
 		.addComponents(clientIdRow);
 
 	return modal;

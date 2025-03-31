@@ -4,7 +4,7 @@
  * @typedef {Map<String, String>} TagMap
  */
 
-const basetags = '-guro -furry -vore -webm -video -audio -comic -4koma';
+const basetags = '-guro -furry -vore -comic -4koma';
 
 /**@type {RestrictionsMap}*/
 const nsfwRating = new Map();

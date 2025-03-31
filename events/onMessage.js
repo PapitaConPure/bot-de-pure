@@ -6,17 +6,20 @@ const { CommandManager, CommandOptionSolver } = require('../commands/Commons/com
 const { Stats, ChannelStats } = require('../localdata/models/stats.js');
 const { p_pure } = require('../localdata/customization/prefixes.js');
 
-const { updateAgentMessageOwners } = require('../systems/agents/discordagent.js');
+const { updateAgentMessageOwners, addAgentMessageOwner, DiscordAgent } = require('../systems/agents/discordagent.js');
 const { channelIsBlocked, rand, edlDistance, isUsageBanned } = require('../func.js');
 const globalGuildFunctions = require('../localdata/customization/guildFunctions.js');
 const { auditRequest } = require('../systems/others/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../localdata/cmdExceptions.js');
-const { sendPixivPostsAsWebhook } = require('../systems/agents/purepix.js');
-const { tenshiColor } = require('../localdata/config.json');
+const globalConfigs = require('../localdata/config.json');
+const { tenshiColor } = globalConfigs;
 const UserConfigs = require('../localdata/models/userconfigs.js');
-const { sendTweetsAsWebhook } = require('../systems/agents/pureet.js');
+const { sendConvertedPixivPosts } = require('../systems/agents/purepix.js');
+const { sendConvertedTweets } = require('../systems/agents/pureet.js');
 const { Translator } = require('../internationalization.js');
 const { fetchUserCache } = require('../usercache.js');
+const { ConverterEmptyPayload } = require('../systems/agents/converters.js');
+const { addMessageCascade } = require('./onMessageDelete.js');
 //#endregion
 
 /**
@@ -26,6 +29,8 @@ const { fetchUserCache } = require('../usercache.js');
  * @param {String} userId 
  */
 async function updateChannelMessageCounter(guildId, channelId, userId) {
+	if(globalConfigs.noDataBase) return;
+
 	const channelQuery = { guildId, channelId };
 	const channelStats = (await ChannelStats.findOne(channelQuery)) || new ChannelStats(channelQuery);
 	channelStats.cnt++;
@@ -201,11 +206,27 @@ async function checkCommand(message, client, stats) {
 	stats.markModified('commands');
 }
 
-/**@param {String} userId*/
-async function gainPRC(userId) {
+/**
+ * @param {Discord.Guild} guild
+ * @param {String} userId
+ */
+async function gainPRC(guild, userId) {
+	if(globalConfigs.noDataBase) return;
+	if(guild.memberCount < 100) return;
+
 	const userConfigs = (await UserConfigs.findOne({ userId })) || new UserConfigs({ userId });
 
-	userConfigs.prc += 1;
+	const then = userConfigs.lastDateReceived;
+	const today = new Date(Date.now());
+	if(then.getDate() < today.getDate() || then.getMonth() < today.getMonth() || then.getFullYear() < today.getFullYear()) {
+		userConfigs.reactionsReceivedToday = 0;
+		userConfigs.highlightedToday = false;
+		userConfigs.messagesToday = 0;
+		userConfigs.lastDateReceived = today;
+	}
+	
+	userConfigs.messagesToday++;
+	userConfigs.prc += 1 / ((userConfigs.messagesToday + 260) / 300);
 	
 	return userConfigs.save();
 }
@@ -229,28 +250,67 @@ async function onMessage(message, client) {
 		}));
 	if(author.bot) return;
 
-	gainPRC(author.id);
+	gainPRC(guild, author.id);
 
 	const userCache = await fetchUserCache(author.id);
 
+	const logAndReturnEmpty = (/**@type {Error}*/err) => {
+		console.error(err);
+		return ConverterEmptyPayload;
+	};
 	const results = await Promise.all([
-		sendPixivPostsAsWebhook(message, userCache.convertPixiv).catch(console.error),
-		sendTweetsAsWebhook(message, userCache.twitterPrefix).catch(console.error),
+		sendConvertedPixivPosts(message, userCache.pixivConverter).catch(logAndReturnEmpty),
+		sendConvertedTweets(message, userCache.twitterPrefix).catch(logAndReturnEmpty),
 	]);
+	const result = /**@type {import('../systems/agents/converters.js').ConverterPayload}*/({
+		shouldReplace: results.some(r => r.shouldReplace),
+		shouldReply: results.some(r => r.shouldReply),
+		content: results.map(r => r.content).join(' '),
+		embeds: results.map(r => r.embeds).flat().filter(e => e),
+		files: results.map(r => r.files).flat().filter(f => f),
+	});
+	const { shouldReplace, shouldReply, ...messageResult } = result;
 
-	if(results.includes(true) && message?.deletable)
-		message.delete().catch(console.error);
+	try {
+		if(result.shouldReply) {
+			const [ sent ] = await Promise.all([
+				message.reply(messageResult),
+				message.suppressEmbeds(true),
+			]);
+			
+			setTimeout(() => {
+				if(!message?.embeds) return;
+				message.suppressEmbeds(true).catch(_ => undefined);
+			}, 3000);
+		
+			await Promise.all([
+				addAgentMessageOwner(sent, author.id),
+				addMessageCascade(message.id, sent.id, new Date(+message.createdAt + 4 * 60 * 60e3)),
+			]);
+		} else if(result.shouldReplace) {
+			const agent = await (new DiscordAgent().setup(channel));
+			agent.setMember(message.member);
+			await agent.sendAsUser(messageResult);
+			
+			if(message?.deletable)
+				await message.delete();
+		}
+	} catch(err) {
+		console.error(err);
+	}
 
 	updateAgentMessageOwners().catch(console.error);
 	
 	//Estadísticas
-	const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
+	const stats = (!globalConfigs.noDataBase && await Stats.findOne({})) || new Stats({ since: Date.now() });
 	stats.read++;
 	updateChannelMessageCounter(guild.id, channel.id, author.id);
 
 	//Leer comando
 	checkCommand(message, client, stats);
-	stats.save();
+
+    if(!globalConfigs.noDataBase)
+		stats.save();
 
 	//Ayuda para principiantes
 	if(content.includes(`${client.user}`)) {

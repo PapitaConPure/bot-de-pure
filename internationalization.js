@@ -9,6 +9,11 @@ const ConditionFields = /**@type {const}*/({
 	GreaterOrEqual: '>=',
 });
 
+/**
+ * Idiomas disponibles
+ * @see {@linkcode Translator.next}
+ * @see UserConfigDocument (./localdata/models/userconfigs.js)
+ */
 const Locales = /**@type {const}*/({
 	Spanish:  'es',
 	English:  'en',
@@ -512,6 +517,11 @@ let localesObject = /**@type {const}*/({
 		en: 'Register',
 		ja: '登録',
 	},
+	buttonExpand: {
+		es: 'Expandir',
+		en: 'Expand',
+		ja: '拡大',
+	},
 	buttonShowMeHow: {
 		es: 'Muéstrame cómo',
 		en: 'Show me how',
@@ -523,7 +533,12 @@ let localesObject = /**@type {const}*/({
 		en: `Command called by ${subl(0)}`,
 		ja: `${subl(0)}によって呼び出されたコマンド`,
 	},
-	
+
+	actionFindSource: {
+		es: 'Buscar Fuente',
+		en: 'Find Source',
+		ja: 'ソースを検索',
+	},
 	actionDeleteUserPost: {
 		es: 'Borrar Post',
 		en: 'Delete Post',
@@ -617,6 +632,11 @@ let localesObject = /**@type {const}*/({
 		ja: '⚠️ None of the mentioned members were updated. It could be that I don\'t have permission to manage members',
 	},
 
+	anarquiaCouldNotLoadEmoji: {
+		es: '⚠️ No pude cargar la imagen del emote que mencionaste. ¡Prueba una vez más! Si sigues sin poder, puede ser un problema con el emote en cuestión',
+		en: '⚠️ Couldn\'t load the image for the emote you mentioned. Try it again! If you still can\'t, it could be due to an issue with the emote in question',
+		ja: '⚠️ 指定したエモートの画像を読み込めませんでした。もう一度お試しください！それでも読み込めない場合は、問題のエモートに問題がある可能性があります',
+	},
 	anarquiaSkillIssue: {
 		es: '❌ No tienes ninguna carga de esta habilidad. Interactúa más con la Tabla de Puré para tener oportunidad de recibir habilidades especiales',
 		en: '❌ You have no stacks of this skill. Interact more with the Puré Matrix for a chance to receive special skills',
@@ -837,6 +857,194 @@ let localesObject = /**@type {const}*/({
 		es: 'Pista saltada',
 		en: 'Track skipped',
 		ja: 'トラックがスキップされました',
+	},
+	sonandoTitle: {
+		es: 'Escuchando Ahora',
+		en: 'Now Playing',
+		ja: '今聴いている',
+	},
+
+	catboxInvalidImage: {
+		es: '⚠️ Debes indicar un enlace de imagen o una imagen directa a subir a Catbox',
+		en: '⚠️ You must supply an image link or file to upload to Catbox',
+		ja: '⚠️ Catboxにアップロードするイメージのリンクまたはファイルを提供する必要があります',
+	},
+
+	imgurRegisterTitle: {
+		es: 'Haz click aquí para crear una Aplicación de Imgur',
+		en: 'Click here to create an Imgur Application',
+		ja: 'Imgurアプリケーションを作成するにはこちらをクリックしてください',
+	},
+	imgurRegisterDesc: {
+		es: 'Precisarás la ID de cliente de la misma para registrar la aplicación en Bot de Puré. Si no tienes cuenta de Imgur, deberás crear una primero',
+		en: 'You\'ll need this App\'s client ID to register it within Bot de Puré. If you don\'t have an Imgur account, you\'ll have to sign up first',
+		ja: 'Bot de Puréにアプリを登録するには、アプリのクライアントIDが必要になります。Imgurアカウントをお持ちでない場合は、まずアカウントを作成する必要があります',
+	},
+	imgurRegisterAuthTypeValue: {
+		es: 'Selecciona la tercera opción (uso anónimo sin autorización)',
+		en: 'Select the third option (anonymous usage without authorization)',
+		ja: '3番目のオプション（許可なしの匿名使用）を選択します',
+	},
+	imgurRegisterFillFormName: {
+		es: 'Rellenar formulario',
+		en: 'Fill out the form',
+		ja: 'フォームに記入する',
+	},
+	imgurRegisterFillFormValue: {
+		es: 'El resto de campos son irrelevantes, rellena con cualquier dato válido',
+		en: 'Remaining fields are irrelevant, fill them with any valid data',
+		ja: '残りのフィールドは無関係なので、有効なデータを入力してください',
+	},
+	imgurRegisterLastlyName: {
+		es: 'Por último...',
+		en: 'Lastly...',
+		ja: 'ついに…',
+	},
+	imgurRegisterLastlyValue: {
+		es: paragraph(
+			'Verifica el Captcha y envía el formulario de solicitud de creación de aplicación.',
+			'Luego de crear la aplicación, copia la ID de Cliente (Client ID) que se te presenta y pégala luego de presionar el botón de este mensaje',
+		),
+		en: paragraph(
+			'Verify the Captcha and submit the application creation request form.',
+			'After creating the application, copy the Client ID that appears and paste it after pressing the button below this message',
+		),
+		ja: paragraph(
+			'キャプチャを確認し、アプリケーション作成リクエストフォームを送信します。',
+			'アプリケーションを作成したら、表示されるクライアントID(Client ID)をコピーし、このメッセージのボタンを押した後に貼り付けます。',
+		),
+	},
+	imgurRegisterModalTitle: {
+		es: 'Registrar Aplicación de Imgur',
+		en: 'Register Imgur Application',
+		ja: 'Imgurアプリを登録する',
+	},
+	imgurRegisterModalClientIdLabel: {
+		es: 'ID de Cliente de Imgur',
+		en: 'Imgur Client ID',
+		ja: 'ImgurクライアントID',
+	},
+	imgurRegisterSuccess: {
+		es: 'Se registró una Aplicación de Imgur personal',
+		en: 'Personal Imgur Application has been registered',
+		ja: '個人用のImgurアプリケーションが登録されました',
+	},
+	imgurInvalidImage: {
+		es: '⚠️ Debes indicar un enlace de imagen o una imagen directa a subir a Imgur',
+		en: '⚠️ You must supply an image link or file to upload to Imgur',
+		ja: '⚠️ Imgurにアップロードするイメージのリンクまたはファイルを提供する必要があります',
+	},
+	imgurUploadSuccessTitle: {
+		es: 'Tu imagen',
+		en: 'Your image',
+		ja: 'あなたのイメーギ'
+	},
+	imgurUploadErrorTitle: {
+		es: `⚠️ No se pudo subir la imagen Nº${subl(0)}`,
+		en: `⚠️ Could not upload image No. ${subl(0)}`,
+		ja: `⚠️ イメージ${subl(0)}をアップロードできません`,
+	},
+	imgurUploadErrorDesc: {
+		es: 'Si es un problema de frecuencia de subida, prueba registrar tu propia aplicación para subir imágenes sin restricción global',
+		en: 'Si es un problema de frecuencia de subida, prueba registrar tu propia aplicación para subir imágenes sin restricción global',
+		ja: 'Si es un problema de frecuencia de subida, prueba registrar tu propia aplicación para subir imágenes sin restricción global',
+	},
+
+	saucenaoRegisterTitle: {
+		es: 'Registra tu cuenta de SauceNAO en Bot de Puré',
+		en: 'Register your SauceNAO account within Bot de Puré',
+		ja: 'Bot de PuréでSauceNAOアカウントを登録する',
+	},
+	saucenaoRegisterAccountName: {
+		es: 'Crea una cuenta',
+		en: 'Create an account',
+		ja: 'アカウントを作成する',
+	},
+	saucenaoRegisterAccountValue: {
+		es: 'Si no tienes una cuenta de SauceNAO, puedes crearla [aquí](https://saucenao.com/user.php)',
+		en: 'If you don\' have a SauceNAO account, you can create one [here](https://saucenao.com/user.php)',
+		ja: 'SauceNAOアカウントをお持ちでない場合は、[こちら](https://saucenao.com/user.php)から作成できます',
+	},
+	saucenaoRegisterFooter: {
+		es: 'Si seguir estos pasos no funciona, presiona el botón "regen" en la página del paso 2, copia la nueva clave y repite el paso 3',
+		en: 'If following these steps doesn\'t work, press the "regen" button in the page from step 2, copy the new key and repeat step 3',
+		ja: 'これらの手順に従っても機能しない場合は、手順2のページで「regen」ボタンを押し、新しいキーをコピーして手順 3 を繰り返します',
+	},
+	saucenaoRegisterAfterName: {
+		es: 'Enlaza tu cuenta',
+		en: 'Link your account',
+		ja: 'アカウントをリンクする',
+	},
+	saucenaoRegisterAfterValue: {
+		es: paragraph(
+			'1. Inicia sesión en SauceNAO y dirígete [aquí](https://saucenao.com/user.php?page=search-api)',
+			'2. Copia la clave de API (api key) que se te presenta',
+			'3. Presiona el botón de este mensaje y pega la clave',
+		),
+		en: paragraph(
+			'1. Log in to SauceNAO and go [here](https://saucenao.com/user.php?page=search-api)',
+			'2. Copy the API key that is presented to you',
+			'3. Press the button below this message and paste the key'
+		),
+		ja: paragraph(
+			'1. SauceNAOにログインして[こちら](https://saucenao.com/user.php?page=search-api)へ',
+			'2. 提示されたAPIキー（api key）をコピーします',
+			'3. このメッセージのボタンを押してキーを貼り付けます',
+		),
+	},
+	saucenaoRegisterModalTitle: {
+		es: 'Registrar Aplicación de SauceNAO',
+		en: 'Register SauceNAO Application',
+		ja: 'SauceNAOアプリを登録する',
+	},
+	saucenaoRegisterModalApiKeyLabel: {
+		es: 'Clave de API de SauceNAO',
+		en: 'SauceNAO API key',
+		ja: 'SauceNAO APIキー',
+	},
+	saucenaoRegisterSuccess: {
+		es: 'Se registró una Aplicación de SauceNAO personal',
+		en: 'Personal SauceNAO Application has been registered',
+		ja: '個人用のSauceNAOアプリケーションが登録されました',
+	},
+	saucenaoUnregisteredNotice: {
+		es: paragraph(
+			'❌ Para usar este comando, debes [registrarte en SauceNAO](https://saucenao.com/user.php) y usar `p!saucenao --registrar`.',
+			'Luego de haberte registrado en SauceNAO, puedes copiar tu clave API [aquí](https://saucenao.com/user.php?page=search-api "Este enlace lleva a tu panel de control de SauceNAO")'
+		),
+		en: paragraph(
+			'❌ To use this command, you need to [sign up on SauceNAO](https://saucenao.com/user.php) and use `p!saucenao --register`.',
+			'After signing up, you can copy your API key [here](https://saucenao.com/user.php?page=search-api "This link will take you to your SauceNAO dashboard")'
+		),
+		ja: paragraph(
+			'❌ このコマンドを使用するには、[SauceNAOにサインアップ](https://saucenao.com/user.php)して`p!saucenao --register`を使用する必要があります。',
+			'登録後、APIキー[こちら](https://saucenao.com/user.php?page=search-api "このリンクはSauceNAOダッシュボードにリンクします")からコピーできます'
+		),
+	},
+	saucenaoInvalidImage: {
+		es: '⚠️ Debes indicar un enlace de imagen o una imagen directa a buscar en SauceNAO',
+		en: '⚠️ You must supply an image link or file to search on SauceNAO',
+		ja: '⚠️ SauceNAOで検索するには、画像リンクまたは直接画像を示す必要があります',
+	},
+	saucenaoInvalidToken: {
+		es: '⚠️ Clave de API de SauceNAO inválida',
+		en: '⚠️ Invalid SauceNAO API key',
+		ja: '⚠️ 無効なSauceNAO APIキー',
+	},
+	saucenaoSearchSuccess: {
+		es: `Resultado de la imagen Nº${subl(0)}`,
+		en: `Image No. ${subl(0)} result`,
+		ja: `画像${subl(0)}結果`,
+	},
+	saucenaoSearchNoResult: {
+		es: `No se encontraron resultados para la imagen Nº${subl(0)}`,
+		en: `No results were found for image No. ${subl(0)}`,
+		ja: `画像${subl(0)}に該当する結果は見つかりませんでした`,
+	},
+	saucenaoSearchErrorTitle: {
+		es: `Resultado parcial de la imagen Nº${subl(0)}`,
+		en: `Image No. ${subl(0)} partial result`,
+		ja: `画像${subl(0)}の部分結果`,
 	},
 
 	poll: {
@@ -1407,20 +1615,50 @@ let localesObject = /**@type {const}*/({
 		en: 'You won\'t be pinged when creating or joining a session',
 		ja: 'セッションの作成時またはセッションへの参加時にメンションされることはありません',
 	},
+	yoConversionServiceMenuService: {
+		es: 'Servicio',
+		en: 'Service',
+		ja: 'サービス',
+	},
+	yoConversionServiceMenuServiceNoneLabel: {
+		es: 'Ninguno',
+		en: 'None',
+		ja: 'なし',
+	},
+	yoConversionServiceSuccess: {
+		es: '✅ Servicio de conversión actualizado',
+		en: '✅ Converter service updated',
+		ja: '✅ コンバーターサービスが更新されました',
+	},
 	yoPixivStep: {
 		es: 'Conversor de enlaces de pixiv',
 		en: 'pixiv link converter',
 		ja: 'pixivリンクコンバーター',
 	},
 	yoPixivTitle: {
-		es: `El conversor de enlaces de pixiv está actualmente ${subif(0, '=', true, 'activado', 'desactivado')}`,
-		en: `The pixiv link converter is currently ${subif(0, '=', true, 'enabled', 'disabled')}`,
-		ja: `pixivリンクコンバーターは現在${subif(0, '=', true, '有効', '無効')}です`,
+		es: 'Elige el servicio de conversión a usar para pixiv',
+		en: 'Choose which conversion service to use for pixiv',
+		ja: 'pixivに使用する変換サービスを選択してください',
 	},
-	yoPixivStateAlreadySet: {
-		es: `⚠️️ El servicio ya estaba ${subif(0, '=', true, 'activado', 'desactivado')}`,
-		en: `⚠️️ The service was already ${subif(0, '=', true, 'enabled', 'disabled')}`,
-		ja: `⚠️️ サービスはすでに${subif(0, '=', true, '有効', '無効')}になっています`,
+	yoPixivMenuServicePhixivDesc: {
+		es: 'Opción recomendada',
+		en: 'Recommended solution',
+		ja: '推奨される解決策',
+	},
+	yoPixivMenuServiceWebhookLabel: {
+		es: 'Webhook de Agente Puré',
+		en: 'Puré Agent Webhook',
+		ja: 'エージェントPuréウェブフック',
+	},
+	yoPixivMenuServiceWebhookDesc: {
+		es: 'Alternativa estéticamente agradable, pero menos compatible',
+		en: 'Aesthetically pleasing alternative, but less compatible',
+		ja: '見た目も美しい代替品だが、互換性は低い',
+	},
+	yoPixivMenuServiceNoneDesc: {
+		es: 'No convertir enlaces de pixiv automáticamente',
+		en: 'Do not convert pixiv links automatically',
+		ja: 'pixivリンクを自動的に変換しない',
 	},
 	yoTwitterStep: {
 		es: 'Conversor de enlaces de Twitter/X',
@@ -1432,11 +1670,6 @@ let localesObject = /**@type {const}*/({
 		en: 'Choose which conversion service to use for Twitter/X',
 		ja: 'Twitter/Xに使用する変換サービスを選択してください',
 	},
-	yoTwitterMenuService: {
-		es: 'Servicio',
-		en: 'Service',
-		ja: 'サービス',
-	},
 	yoTwitterMenuServiceVxDesc: {
 		es: 'Opción recomendada',
 		en: 'Recommended solution',
@@ -1447,20 +1680,10 @@ let localesObject = /**@type {const}*/({
 		en: 'Good alternative, but less safe and private',
 		ja: '良い代替手段だが、安全性とプライバシーは劣る',
 	},
-	yoTwitterMenuServiceNoneLabel: {
-		es: 'Ninguno',
-		en: 'None',
-		ja: 'なし',
-	},
 	yoTwitterMenuServiceNoneDesc: {
 		es: 'No convertir enlaces de Twitter/X automáticamente',
 		en: 'Do not convert Twitter/X links automatically',
 		ja: 'Twitter/Xリンクを自動的に変換しない',
-	},
-	yoTwitterSuccess: {
-		es: '✅ Servicio de conversión actualizado',
-		en: '✅ Converter service updated',
-		ja: '✅ コンバーターサービスが更新されました',
 	},
 	yoSelectTagsChannelTitle: {
 		es: 'Selecciona uno de tus Feeds seguidos',

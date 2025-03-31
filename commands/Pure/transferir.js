@@ -1,24 +1,26 @@
-import { auditError } from '../../systems/others/auditor';
-
 const { improveNumber, compressId, sleep } = require('../../func');
 const { CommandTags, CommandManager, CommandOptions, CommandOptionSolver } = require('../Commons/commands');
 const UserConfigs = require('../../localdata/models/userconfigs.js');
 const { EmbedBuilder } = require("discord.js");
 const { Translator } = require("../../internationalization");
 const globalConfigs = require('../../localdata/config.json');
+const { auditError } = require('../../systems/others/auditor');
 
 const transferLocks = new Set();
 
 const options = new CommandOptions()
     .addParam('monto', 'NUMBER', 'para especificar el monto a pagar en PRC')
-    .addParam('usuario', 'MEMBER', 'para especificar el usuario al cual transferir PRC');
+    .addParam('usuario', 'USER', 'para especificar el usuario al cual transferir PRC');
 const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('transferir', flags)
     .setAliases('transfer', 'tf')
     .setDescription('Permite transferir PRC a otro usuario')
     .setOptions(options)
     .setExperimentalExecution(async (request, args) => {
-        const translator = await Translator.from(request.userId);
+        const [ translator ] = await Promise.all([
+            Translator.from(request.userId),
+            request.deferReply({ ephemeral: true }),
+        ]);
 
         if(args.isMessageSolver())
             swapIfNeeded(/**@type {CommandOptionSolver<string[]>}*/(args).args);
@@ -27,21 +29,19 @@ const command = new CommandManager('transferir', flags)
         const target = args.getUser('usuario');
 
         if(!amount || isNaN(amount))
-            return request.reply({ content: translator.getText('transferAmountExpected'), ephemeral: true });
+            return request.editReply({ content: translator.getText('transferAmountExpected') });
 
         if(!target)
-            return request.reply({ content: translator.getText('transferTargetExpected'), ephemeral: true });
+            return request.editReply({ content: translator.getText('transferTargetExpected') });
 
         if(target.bot)
-            return request.reply({ content: translator.getText('transferHumanExpected'), ephemeral: true });
+            return request.editReply({ content: translator.getText('transferHumanExpected') });
 
         if(request.userId === target.id)
-            return request.reply({ content: translator.getText('transferOtherExpected'), ephemeral: true });
+            return request.editReply({ content: translator.getText('transferOtherExpected') });
 
         if(amount < 1)
-            return request.reply({ content: translator.getText('transferAmountTooLow'), ephemeral: true });
-
-        await request.deferReply();
+            return request.editReply({ content: translator.getText('transferAmountTooLow') });
         
         const { userId } = request;
         const { id: targetId } = target;
@@ -61,7 +61,7 @@ const command = new CommandManager('transferir', flags)
             ]);
     
             if(amount > userConfigs.prc)
-                return request.reply({ content: translator.getText('transferInsufficient') });
+                return request.editReply({ content: translator.getText('transferInsufficient') });
     
             userConfigs.prc -= amount;
             targetConfigs.prc += amount;
@@ -100,10 +100,10 @@ const command = new CommandManager('transferir', flags)
 
             const receipt = { embeds: [embed] };
             return Promise.all([
-                request.reply(receipt),
-                request.user.send(receipt),
-                target.send(receipt),
-                globalConfigs.logch?.send(receipt),
+                request.editReply(receipt).catch(_ => _),
+                request.user.send(receipt).catch(_ => _),
+                target.send(receipt).catch(_ => _),
+                globalConfigs.logch?.send(receipt).catch(console.error),
             ]);
         } catch(error) {
             console.error(error);
@@ -113,7 +113,7 @@ const command = new CommandManager('transferir', flags)
                 details: `${request.isInteraction ? '/' : 'p!'}${command.name} ${amount} ${userId}`,
                 ping: true,
             });
-            return request.reply({ content: translator.getText('transferError'), ephemeral: true });
+            return request.editReply({ content: translator.getText('transferError') });
         } finally {
             transferLocks.delete(userId);
             transferLocks.delete(targetId);

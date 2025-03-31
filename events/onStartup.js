@@ -13,6 +13,7 @@ const HouraiDB = require('../localdata/models/hourai.js');
 const { puré } = require('../commandInit.js');
 const globalConfigs = require('../localdata/config.json');
 const envPath = globalConfigs.remoteStartup ? '../remoteenv.json' : '../localenv.json';
+const noDB = globalConfigs.noDataBase;
 
 /**@type {String}*/
 const mongoUri = process.env.MONGODB_URI ?? (require(envPath)?.dburi);
@@ -115,149 +116,153 @@ async function onStartup(client) {
 	confirm();
 	
 	//Cargado de datos de base de datos
-	console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
-	console.log(chalk.gray('Conectando a Cluster en la nube...'));
-	mongoose.set("strictQuery", false);
-	mongoose.connect(mongoUri, {
-		//@ts-expect-error
-		useUnifiedTopology: true,
-		useNewUrlParser: true,
-	});
-
-	console.log(chalk.gray('Obteniendo documentos...'));
-	const [ prefixPairs, userConfigs, booruTags, messageCascades ] = await Promise.all([
-		PrefixPair.find({}),
-		UserConfigs.find({}),
-		BooruTags.find({}),
-		MessageCascades.find({}),
-	]);
-
-	console.log(chalk.gray('Facilitando prefijos'));
-	prefixPairs.forEach(pp => {
-		globalConfigs.p_pure[pp.guildId] = {
-			raw: pp.pure.raw,
-			regex: pp.pure.regex,
-		};
-	});
-	logOptions.prefixes && console.table(globalConfigs.p_pure);
-
-	console.log(chalk.gray('Preparando Tags de Booru...'));
-	await BooruTags.deleteMany({ fetchTimestamp: { $lt: new Date(Date.now() - Booru.TAGS_DB_LIFETIME) } }).catch(console.error);
-	await BooruTags.syncIndexes();
-	await BooruTags.createIndexes();
-	booruTags.forEach(tag => Booru.tagsCache.set(tag.name, new Tag(tag)));
-	logOptions.booruTags && console.table([...Booru.tagsCache.values()].sort((a, b) => a.id - b.id));
-	
-	console.log(chalk.gray('Preparando Cascadas de Mensajes...'));
-	deleteExpiredMessageCascades();
-	setInterval(deleteExpiredMessageCascades, 60 * 60e3);
-	await MessageCascades.syncIndexes();
-	await MessageCascades.createIndexes();
-	messageCascades.forEach(({ messageId, otherMessageId, expirationDate }) => cacheMessageCascade(messageId, otherMessageId));
-
-	console.log(chalk.gray('Preparando Suscripciones de Feeds...'));
-	userConfigs.forEach(config => {
-		/**@type {Map<String, Array<String>>}*/
-		const suscriptions = new Map();
-		for(const [ chId, tags ] of config.feedTagSuscriptions)
-			suscriptions.set(chId, tags);
-		feedTagSuscriptionsCache.set(config.userId, suscriptions);
-	});
-	logOptions.feedSuscriptions && console.log({ feedTagSuscriptionsCache });
-
-	console.log(chalk.gray('Preparando Infracciones de Hourai...'));
-	const hourai = (await HouraiDB.findOne({})) || new HouraiDB({});
-	{
-		const now = Date.now();
-		let wasModified = false;
-		Object.entries(hourai.userInfractions).forEach(([userId, infractions]) => {
-			let infr = /**@type {Array}*/(/**@type {unknown}*/(infractions));
-			
-			const previousInfractionsLength = infr.length;
-			infr = infr.filter(inf => (now - inf) < (60e3 * 60 * 4)); //Eliminar antiguas
-
-			if(previousInfractionsLength === infr.length) return;
-			wasModified = true;
-
-			if(!infr.length) {
-				hourai.userInfractions[userId] = null;
-				delete hourai.userInfractions[userId];
-				return;
-			}
-			
-			globalConfigs.hourai.infr.users[userId] = infr;
-			hourai.userInfractions[userId] = infr;
-		});
-		if(wasModified) hourai.markModified('userInfractions');
-	}
-	await hourai.save();
-
-	console.log(chalk.gray('Preparando Encuestas...'));
-	const polls = (await Poll.find({}));
-	const pollCommand = require('../commands/Pure/encuesta.js');
-	polls.forEach(poll => {
-		const pollChannel = client.channels.cache.get(poll.pollChannelId);
-		if(!pollChannel)
-			return poll.delete();
-
-		const resultsChannel = client.channels.cache.get(poll.resultsChannelId);
-		if(!resultsChannel)
-			return poll.delete();
-
-		const timeUntil = poll.end - Date.now();
-		if(timeUntil < 1000)
+	if(noDB) {
+		console.log(chalk.yellow.italic('Se saltará la inicialización de base de datos a petición del usuario'));
+	} else {
+		console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
+		console.log(chalk.gray('Conectando a Cluster en la nube...'));
+		mongoose.set("strictQuery", false);
+		mongoose.connect(mongoUri, {
 			//@ts-expect-error
-			return pollCommand.concludePoll(pollChannel, resultsChannel, poll.id);
+			useUnifiedTopology: true,
+			useNewUrlParser: true,
+		});
 
-		//@ts-expect-error
-		setTimeout(pollCommand.concludePoll, timeUntil, pollChannel, resultsChannel, poll.id);
-	});
+		console.log(chalk.gray('Obteniendo documentos...'));
+		const [ prefixPairs, userConfigs, booruTags, messageCascades ] = await Promise.all([
+			PrefixPair.find({}),
+			UserConfigs.find({}),
+			BooruTags.find({}),
+			MessageCascades.find({}),
+		]);
 
-	console.log(chalk.gray('Preparando Dueños de Mensajes de Agentes Puré...'));
-	await initializeWebhookMessageOwners();
+		console.log(chalk.gray('Facilitando prefijos'));
+		prefixPairs.forEach(pp => {
+			globalConfigs.p_pure[pp.guildId] = {
+				raw: pp.pure.raw,
+				regex: pp.pure.regex,
+			};
+		});
+		logOptions.prefixes && console.table(globalConfigs.p_pure);
 
-	console.log(chalk.gray('Preparando Tabla de Puré...'));
-	const pureTableDocument = await Puretable.findOne({});
-	let puretable = pureTableDocument;
-	if(!puretable) puretable = new Puretable();
-	else //Limpiar emotes eliminados / no accesibles
-		puretable.cells = puretable.cells.map(arr =>
-			arr.map(cell => client.emojis.cache.get(cell) ? cell : pureTableAssets.defaultEmote )
-		);
-	const uniqueEmoteIds = new Set();
-	const pendingEmoteCells = [];
-	puretable.cells.flat().forEach(cell => uniqueEmoteIds.add(cell));
-	
-	/**@param {String} id*/
-	async function getEmoteCell(id) {
-		const image = await loadImage(client.emojis.cache.get(id).imageURL({ extension: 'png', size: 64 }));
-		return { id, image };
+		console.log(chalk.gray('Preparando Tags de Booru...'));
+		await BooruTags.deleteMany({ fetchTimestamp: { $lt: new Date(Date.now() - Booru.TAGS_DB_LIFETIME) } }).catch(console.error);
+		await BooruTags.syncIndexes();
+		await BooruTags.createIndexes();
+		booruTags.forEach(tag => Booru.tagsCache.set(tag.name, new Tag(tag)));
+		logOptions.booruTags && console.table([...Booru.tagsCache.values()].sort((a, b) => a.id - b.id));
+		
+		console.log(chalk.gray('Preparando Cascadas de Mensajes...'));
+		deleteExpiredMessageCascades();
+		setInterval(deleteExpiredMessageCascades, 60 * 60e3);
+		await MessageCascades.syncIndexes();
+		await MessageCascades.createIndexes();
+		messageCascades.forEach(({ messageId, otherMessageId, expirationDate }) => cacheMessageCascade(messageId, otherMessageId));
+
+		console.log(chalk.gray('Preparando Suscripciones de Feeds...'));
+		userConfigs.forEach(config => {
+			/**@type {Map<String, Array<String>>}*/
+			const suscriptions = new Map();
+			for(const [ chId, tags ] of config.feedTagSuscriptions)
+				suscriptions.set(chId, tags);
+			feedTagSuscriptionsCache.set(config.userId, suscriptions);
+		});
+		logOptions.feedSuscriptions && console.log({ feedTagSuscriptionsCache });
+
+		console.log(chalk.gray('Preparando Infracciones de Hourai...'));
+		const hourai = (await HouraiDB.findOne({})) || new HouraiDB({});
+		{
+			const now = Date.now();
+			let wasModified = false;
+			Object.entries(hourai.userInfractions).forEach(([userId, infractions]) => {
+				let infr = /**@type {Array}*/(/**@type {unknown}*/(infractions));
+				
+				const previousInfractionsLength = infr.length;
+				infr = infr.filter(inf => (now - inf) < (60e3 * 60 * 4)); //Eliminar antiguas
+
+				if(previousInfractionsLength === infr.length) return;
+				wasModified = true;
+
+				if(!infr.length) {
+					hourai.userInfractions[userId] = null;
+					delete hourai.userInfractions[userId];
+					return;
+				}
+				
+				globalConfigs.hourai.infr.users[userId] = infr;
+				hourai.userInfractions[userId] = infr;
+			});
+			if(wasModified) hourai.markModified('userInfractions');
+		}
+		await hourai.save();
+
+		console.log(chalk.gray('Preparando Encuestas...'));
+		const polls = (await Poll.find({}));
+		const pollCommand = require('../commands/Pure/encuesta.js');
+		polls.forEach(poll => {
+			const pollChannel = client.channels.cache.get(poll.pollChannelId);
+			if(!pollChannel)
+				return poll.delete();
+
+			const resultsChannel = client.channels.cache.get(poll.resultsChannelId);
+			if(!resultsChannel)
+				return poll.delete();
+
+			const timeUntil = poll.end - Date.now();
+			if(timeUntil < 1000)
+				//@ts-expect-error
+				return pollCommand.concludePoll(pollChannel, resultsChannel, poll.id);
+
+			//@ts-expect-error
+			setTimeout(pollCommand.concludePoll, timeUntil, pollChannel, resultsChannel, poll.id);
+		});
+
+		console.log(chalk.gray('Preparando Dueños de Mensajes de Agentes Puré...'));
+		await initializeWebhookMessageOwners();
+
+		console.log(chalk.gray('Preparando Tabla de Puré...'));
+		const pureTableDocument = await Puretable.findOne({});
+		let puretable = pureTableDocument;
+		if(!puretable) puretable = new Puretable();
+		else //Limpiar emotes eliminados / no accesibles
+			puretable.cells = puretable.cells.map(arr =>
+				arr.map(cell => client.emojis.cache.get(cell) ? cell : pureTableAssets.defaultEmote )
+			);
+		const uniqueEmoteIds = new Set();
+		const pendingEmoteCells = [];
+		puretable.cells.flat().forEach(cell => uniqueEmoteIds.add(cell));
+		
+		/**@param {String} id*/
+		async function getEmoteCell(id) {
+			const image = await loadImage(client.emojis.cache.get(id).imageURL({ extension: 'png', size: 64 }));
+			return { id, image };
+		}
+
+		for(const id of uniqueEmoteIds)
+			pendingEmoteCells.push(getEmoteCell(id));
+		const [ _, pureTableImage, emoteCells ] = await Promise.all([
+			puretable.save(),
+			loadImage('https://i.imgur.com/TIL0jPV.png'),
+			Promise.all(pendingEmoteCells),
+		]);
+		pureTableAssets.image = pureTableImage;
+		globalConfigs.loademotes = {};
+		for(const cell of emoteCells)
+			globalConfigs.loademotes[cell.id] = cell.image;
+		
+		console.log(chalk.gray('Preparando imágenes extra...'));
+		const slot3Emojis = (/**@type {Guild}*/(globalConfigs.slots.slot3)).emojis.cache;
+		const [ WHITE, BLACK, pawn ] = await Promise.all([
+			loadImage(slot3Emojis.find(e => e.name === 'wCell').imageURL({ extension: 'png', size: 256 })),
+			loadImage(slot3Emojis.find(e => e.name === 'bCell').imageURL({ extension: 'png', size: 256 })),
+			loadImage(slot3Emojis.find(e => e.name === 'pawn').imageURL({ extension: 'png', size: 256 })),
+		]);
+		globalConfigs.loademotes['chess'] = { WHITE, BLACK, pawn };
+		
+		console.log(chalk.gray('Iniciando cambios de presencia periódicos'));
+		modifyPresence(client);
+		confirm();
 	}
-
-	for(const id of uniqueEmoteIds)
-		pendingEmoteCells.push(getEmoteCell(id));
-	const [ _, pureTableImage, emoteCells ] = await Promise.all([
-		puretable.save(),
-		loadImage('https://i.imgur.com/TIL0jPV.png'),
-		Promise.all(pendingEmoteCells),
-	]);
-	pureTableAssets.image = pureTableImage;
-	globalConfigs.loademotes = {};
-	for(const cell of emoteCells)
-		globalConfigs.loademotes[cell.id] = cell.image;
-	
-	console.log(chalk.gray('Preparando imágenes extra...'));
-	const slot3Emojis = (/**@type {Guild}*/(globalConfigs.slots.slot3)).emojis.cache;
-	const [ WHITE, BLACK, pawn ] = await Promise.all([
-		loadImage(slot3Emojis.find(e => e.name === 'wCell').imageURL({ extension: 'png', size: 256 })),
-		loadImage(slot3Emojis.find(e => e.name === 'bCell').imageURL({ extension: 'png', size: 256 })),
-		loadImage(slot3Emojis.find(e => e.name === 'pawn').imageURL({ extension: 'png', size: 256 })),
-	]);
-	globalConfigs.loademotes['chess'] = { WHITE, BLACK, pawn };
-	
-	console.log(chalk.gray('Iniciando cambios de presencia periódicos'));
-	modifyPresence(client);
-	confirm();
 
 	console.log(chalk.rgb(158,114,214)('Registrando fuentes'));
 	registerFont('fonts/Alice-Regular.ttf',             { family: 'headline' });

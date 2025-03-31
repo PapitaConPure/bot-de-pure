@@ -1,10 +1,14 @@
 const { Player, useMainPlayer } = require('discord-player');
+const { DefaultExtractors } = require('@discord-player/extractor');
 const { YoutubeiExtractor } = require('discord-player-youtubei');
 const { EmbedBuilder, ButtonBuilder, ButtonStyle, ButtonInteraction, StringSelectMenuBuilder, StringSelectMenuInteraction, ModalSubmitInteraction, Colors } = require('discord.js'); //Integrar discord.js
 const { compressId, decompressId, shortenText } = require('../func.js'); //Funciones globales
 const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } = require('../tsCasts.js');
 const { Translator } = require('../internationalization.js');
 const { tryRecoverSavedTracksQueue, saveTracksQueue } = require('../localdata/models/playerQueue.js');
+const Logger = require('../logs.js');
+
+const { debug, info, warning, error } = Logger('DEBUG', 'PuréMusic');
 
 /**
  * @param {import('../commands/Commons/typings.js').ComplexCommandRequest | ButtonInteraction<'cached'> | import('discord.js').StringSelectMenuInteraction<'cached'> | ModalSubmitInteraction<'cached'>} request
@@ -53,11 +57,13 @@ function makePuréMusicEmbed(request, color = Colors.Blurple, iconUrl = 'https:/
 
 /**@type {{ [K in ServiceKey]: ServiceInfo }}*/
 const SERVICES = {
-	youtube:     { name: 'YouTube',     color: 0xff0000, iconUrl: 'https://i.imgur.com/0k9tFqd.png', isArbitrary: false },
-	spotify:     { name: 'Spotify',     color: 0x1db954, iconUrl: 'https://i.imgur.com/qpCz3Ug.png', isArbitrary: false },
-	soundcloud:  { name: 'SoundCloud',  color: 0xff7e19, iconUrl: 'https://i.imgur.com/UVx6eva.png', isArbitrary: false },
-	apple_music: { name: 'Apple Music', color: 0xfc334a, iconUrl: 'https://i.imgur.com/Nw0aLwN.png', isArbitrary: false },
-	arbitrary:   { name: null,          color: 0x9e3845, iconUrl: 'https://i.imgur.com/LC5Ic3R.png', isArbitrary: true  },
+	youtube:      { name: 'YouTube',      color: 0xff0000, iconUrl: 'https://i.imgur.com/0k9tFqd.png', isArbitrary: false },
+	spotify:      { name: 'Spotify',      color: 0x1db954, iconUrl: 'https://i.imgur.com/qpCz3Ug.png', isArbitrary: false },
+	soundcloud:   { name: 'SoundCloud',   color: 0xff7e19, iconUrl: 'https://i.imgur.com/UVx6eva.png', isArbitrary: false },
+	apple_music:  { name: 'Apple Music',  color: 0xfc334a, iconUrl: 'https://i.imgur.com/Nw0aLwN.png', isArbitrary: false },
+	vimeo:        { name: 'Vimeo',        color: 0x9e3845, iconUrl: 'https://i.imgur.com/LC5Ic3R.png', isArbitrary: false },
+	reverbnation: { name: 'Reverbnation', color: 0x9e3845, iconUrl: 'https://i.imgur.com/LC5Ic3R.png', isArbitrary: false },
+	arbitrary:    { name: null,           color: 0x9e3845, iconUrl: 'https://i.imgur.com/LC5Ic3R.png', isArbitrary: true  },
 };
 
 /**Cantidad máxima de pistas por página al mostrar la cola de reproducción*/
@@ -69,39 +75,38 @@ const QUEUE_PAGE_TRACKS_MAX = 5;
  */
 async function prepareTracksPlayer(client) {
 	const player = new Player(client, {
-		ytdlOptions: {
-			quality: 'highestaudio',
-			highWaterMark: 1 << 25,
-		},
-		skipFFmpeg: true,
+		lagMonitor: -1,
 	});
-	player.extractors.register(YoutubeiExtractor, {
+	info('Music Player created.');
+
+	debug('Loading default extractors...');
+	await player.extractors.loadMulti(DefaultExtractors);
+	debug('Loading YouTube extractor...');
+	await player.extractors.register(YoutubeiExtractor, {
 		streamOptions: {
 			highWaterMark: 1 << 25,
 		},
 	});
-	await player.extractors.loadDefault();
+	info('Extractors have been loaded.');
+
+	player.on('debug', debug);
+	player.on('error', (err) => {
+		error(err, `Error emitted from the player: ${err.message}`);
+	});
 	
 	player.events.on('playerFinish', (queue, _track) => {
 		saveTracksQueue(queue.metadata, queue);
 	});
-
-	player.events.on('error', (err) => {
-		console.log('Error general de reproductor');
-		console.log({ err });
-	});
-
-	player.events.on('playerError', (queue, err) => {
-		console.log('Error de reproductor');
-		console.log({ queue });
-		console.error(err);
-	});
-
-	player.on('error', (error) => {
-		console.log(`Error emitted from the player: ${error.message}`);
-	});
 	player.events.on('connectionDestroyed', (queue) => {
-		console.log(`[${queue.guild.name}] Connection destroyed`);
+		info(`[${queue.guild.name}] Connection destroyed`);
+	});
+	player.events.on('error', (err) => {
+		warning('Error general de reproductor');
+		warning({ err });
+	});
+	player.events.on('playerError', (queue, err) => {
+		error(err, 'Error de reproductor');
+		info({ queue });
 	});
 }
 
@@ -322,7 +327,7 @@ function getQueueActionRow(queue, page, userId, translator) {
 		actionRow.addComponents(
 			new ButtonBuilder()
 				.setCustomId(`cola_clearQueue_${compressedUserId}`)
-				.setEmoji('921751138997514290')
+				.setEmoji('1355143793577426962')
 				.setLabel(translator.getText('queueButtonClearQueue'))
 				.setStyle(ButtonStyle.Danger),
 		);

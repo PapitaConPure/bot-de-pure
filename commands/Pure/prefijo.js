@@ -1,3 +1,4 @@
+const { EmbedBuilder } = require('discord.js');
 const global = require('../../localdata/config.json');
 const { shortenText } = require('../../func.js');
 const PrefixPair = require('../../localdata/models/prefixpair.js');
@@ -36,14 +37,25 @@ const command = new CommandManager('prefijo', flags)
 
 		const prefix = (isSlash ? args.getString('prefijo') : args[0])?.toLowerCase();
 
-		if(!prefix)
-			return request.reply({
-				content: [
-					`El prefijo actual es **${preraw}**`,
-					`Usa \`${preraw}ayuda\` para más información`,
-					`||Expresión Regular (avanzado): \`${shortenText(preregex.toString(), 500)}\`||`,
-				].join('\n')
-			});
+		if(!prefix) {
+			const embed = new EmbedBuilder()
+				.setColor(global.tenshiColor)
+				.setFooter({ text: `Usa "${preraw}ayuda" para más información` })
+				.addFields(
+					{
+						name: 'Prefijo actual',
+						value: preraw,
+						inline: true,
+					},
+					{
+						name: 'Patrón (avanzado)',
+						value: `\`\`\`\n${shortenText(preregex.toString(), 500)}\n\`\`\``,
+						inline: true,
+					},
+				);
+			
+			return request.reply({ embeds: [embed] });
+		}
 		
 		await PrefixPair.findOneAndRemove(guildsearch);
 		const pfpair = (await PrefixPair.findOne(guildsearch)) || new PrefixPair(guildsearch);

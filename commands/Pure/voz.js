@@ -9,7 +9,7 @@ const { Translator } = require('../../internationalization');
 
 const cancelbutton = (id) => new ButtonBuilder()
 	.setCustomId(`voz_cancelWizard_${id}`)
-	.setEmoji('936531643496288288')
+	.setEmoji('1355143793577426962')
 	.setStyle(ButtonStyle.Secondary);
 const collectors = {};
 
@@ -30,12 +30,46 @@ const command = new CommandManager('voz', flags)
 	.setOptions(options)
 	.setExperimentalExecution(async (request, args) => {
 		const translator = await Translator.from(request.user);
+		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda voz\` para más información`;
 
 		if(args.parseFlag('asistente'))
 			return generateFirstWizard(request, translator);
+
+		//Comprobar si se está en una sesión
+		const voiceState = request.member.voice;
+		const warnNotInSession = () => request.reply({
+			content: translator.getText('voiceCommandRenameMemberExpected', p_pure(request.guildId).raw),
+			ephemeral: true,
+		}).catch(console.error);
+
+		const createInvite = args.parseFlag('invitar');
+		if(createInvite) {
+			if(!voiceState?.channelId)
+				return warnNotInSession();
+			
+			try {
+				const invite = await request.guild.invites.create(voiceState.channel, { maxAge: 5 * 60 });
+
+				if(invite)
+					return request.reply({ content: `${invite}` });
+
+				const channelRef = `${voiceState.channel ?? '⚠️️ Canal inválido'}`;
+				const embed = new EmbedBuilder()
+					.setColor('Blurple')
+					.setAuthor({
+						name: request.member.displayName,
+						iconURL: request.member.displayAvatarURL(),
+					})
+					.addFields({ name: 'Invitación a canal', value: channelRef });
+
+				return request.reply({ embeds: [embed] });
+			} catch(err) {
+				console.error(err);
+				return request.reply({ content: '⚠️️ ¡Ocurrió un problema al crear la invitación! Por favor inténtalo nuevamente' })
+			}
+		}
 		
 		//Cambiar nombre de canal de voz de sesión
-		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda voz\` para más información`;
 		const emoteString = args.parseFlagExpr('emote', x => `${x}`, '💠');
 		const sessionEmote = defaultEmoji(emoteString);
 		const sessionName = args.getString('nombre', true);
@@ -66,35 +100,8 @@ const command = new CommandManager('voz', flags)
 				ephemeral: true,
 			});
 
-		//Comprobar si se está en una sesión
-		const voiceState = request.member.voice;
-		const warnNotInSession = () => request.reply({
-			content: translator.getText('voiceCommandRenameMemberExpected', p_pure(request.guildId).raw),
-			ephemeral: true,
-		}).catch(console.error);
-
 		if(!voiceState?.channelId)
 			return warnNotInSession();
-
-		const createInvite = args.parseFlag('invitar');
-
-		if(createInvite) {
-			const invite = await request.guild.invites.create(voiceState.channel, { maxAge: 5 * 60 }).catch(_ => null);
-
-			if(invite)
-				return request.reply({ content: `${invite}` });
-
-			const channelRef = `${voiceState.channel ?? '⚠️️ Canal inválido'}`;
-			const embed = new EmbedBuilder()
-				.setColor('Blurple')
-				.setAuthor({
-					name: request.member.displayName,
-					iconURL: request.member.displayAvatarURL(),
-				})
-				.addFields({ name: 'Invitación a canal', value: channelRef });
-
-			return request.reply({ embeds: [embed] });
-		}
 
 		//Modificar sesión y confirmar
 		const session = await PureVoiceSessionModel.findOne({ channelId: voiceState.channelId });
@@ -282,7 +289,7 @@ const command = new CommandManager('voz', flags)
 		const row = makeButtonRowBuilder().addComponents(
 			new ButtonBuilder()
 				.setCustomId(`voz_startWizard_${uid}`)
-				.setEmoji('934432754173624373')
+				.setEmoji('1355128236790644868')
 				.setStyle(ButtonStyle.Secondary),
 			cancelbutton(uid),
 		);
@@ -311,7 +318,7 @@ const command = new CommandManager('voz', flags)
 				.setStyle(ButtonStyle.Danger),
 			new ButtonBuilder()
 				.setCustomId(`voz_startWizard_${uid}`)
-				.setEmoji('934432754173624373')
+				.setEmoji('1355128236790644868')
 				.setStyle(ButtonStyle.Secondary),
 			cancelbutton(uid),
 		);
@@ -380,7 +387,7 @@ const command = new CommandManager('voz', flags)
 		if(!session) return warnNotInSession();
 		
         const modal = new ModalBuilder()
-            .setCustomId(`voz_applySessionRename`)
+            .setCustomId(`voz_applySessionName`)
             .setTitle(translator.getText('yoVoiceAutonameModalTitle'))
             .addComponents(
                 makeTextInputRowBuilder().addComponents(new TextInputBuilder()
@@ -408,7 +415,7 @@ const command = new CommandManager('voz', flags)
 	.setModalResponse(async function applySessionName(interaction) {
 		await interaction.deferReply({ ephemeral: true });
 
-		const { guildId, member } = interaction;
+		const { member } = interaction;
         const translator = await Translator.from(member);
 
 		const warnNotInSession = () => interaction.editReply({
@@ -430,7 +437,7 @@ const command = new CommandManager('voz', flags)
 
 		const defEmoji = defaultEmoji(emoji);
 		if(!defEmoji)
-			return interaction.reply({ content: '⚠️ El emoji indicado no es un emoji Unicode válido' });
+			return interaction.editReply({ content: '⚠️ El emoji indicado no es un emoji Unicode admitido' });
 		
 		voiceChannel.setName(makePVSessionName(name, defEmoji)).catch(console.error);
 		return interaction.editReply({ content: '✅ Nombre aplicado' });
@@ -463,20 +470,36 @@ const command = new CommandManager('voz', flags)
 		session.frozen = !session.frozen;
 
 		const allowedMembers = getFrozenSessionAllowedMembers(voiceChannel, session.members);
-		const userLimit = session.frozen ? allowedMembers.size : 0;
+		const userLimitReason = `Actualizar límite de usuarios de sesión PuréVoice ${session.frozen ? 'congelada' : 'descongelada'}`;
+		const everyone = interaction.guild.roles.everyone;
 
-		for(const [ memberId, member ] of allowedMembers) {
-			session.members.set(memberId, member.setWhitelisted(true).toJSON());
-			await voiceChannel.permissionOverwrites.edit(memberId, { Connect: true }, { reason: 'PLACEHOLDER_PV_REASON_FREEZE_CONNECT_ENABLE' }).catch(console.error);
+		if(session.frozen) {
+			for(const [ memberId, member ] of allowedMembers) {
+				session.members.set(memberId, member.setWhitelisted(true).toJSON());
+				await voiceChannel.permissionOverwrites.edit(memberId, { Connect: true }, { reason: 'PLACEHOLDER_PV_REASON_FREEZE_CONNECT_ENABLE' }).catch(console.error);
+			}
+			
+			session.markModified('members');
+
+			await Promise.all([
+				voiceChannel.setUserLimit(allowedMembers.size, userLimitReason).catch(console.error),
+				voiceChannel.permissionOverwrites.edit(everyone, { Connect: false }, { reason: 'PLACEHOLDER_PV_REASON_FREEZE_CONNECT_DISABLE' }).catch(console.error),
+				session.save(),
+			]);
+		} else {
+			await Promise.all([
+				voiceChannel.setUserLimit(0, userLimitReason).catch(console.error),
+				voiceChannel.permissionOverwrites.delete(everyone, 'PLACEHOLDER_PV_REASON_UNFREEZE_CONNECT_DEFAULT').catch(console.error),
+			]);
+
+			for(const [ memberId, member ] of allowedMembers) {
+				session.members.set(memberId, member.setWhitelisted(true).toJSON());
+				await voiceChannel.permissionOverwrites.delete(memberId, 'PLACEHOLDER_PV_REASON_UNFREEZE_CONNECT_DEFAULT').catch(console.error);
+			}
+
+			session.markModified('members');
+			await session.save();
 		}
-
-		session.markModified('members');
-
-		await Promise.all([
-			voiceChannel.setUserLimit(userLimit, `Actualizar límite de usuarios de sesión PuréVoice ${session.frozen ? 'congelada' : 'descongelada'}`).catch(console.error),
-			voiceChannel.permissionOverwrites.edit(interaction.guild.roles.everyone, { Connect: false }, { reason: 'PLACEHOLDER_PV_REASON_FREEZE_CONNECT_DISABLE' }).catch(console.error),
-			session.save(),
-		]);
 		
 		return interaction.editReply({
 			content: `❄️ La sesión ${voiceChannel} fue **${session.frozen ? 'congelada' : 'descongelada'}**`,

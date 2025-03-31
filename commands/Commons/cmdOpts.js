@@ -865,7 +865,7 @@ class CommandOptions {
 
 		if(flag.isExpressive()) {
 			if(isParamTypeStrict(flag._type))
-				throw "No se pueden tener expresiones estrictas en una flag de comando";
+				getMethod = 'getString';
 			else
 				getMethod = ParamTypes(flag._type)?.getMethod ?? 'getString';
 		}
@@ -958,7 +958,7 @@ class CommandOptionSolver {
 	 */
 	get iterator() {
 		if(!this.isMessageSolver(this.#args))
-			throw 'No se puede extraer un "siguiente parámetro" de un Comando Slash';
+			throw new Error('No se puede extraer un "siguiente parámetro" de un Comando Slash');
 
 		const args = this.#args.slice();
 		return {
@@ -980,7 +980,7 @@ class CommandOptionSolver {
 	 */
 	next() {
 		if(!this.isMessageSolver(this.#args))
-			throw 'No se puede extraer un "siguiente parámetro" de un Comando Slash';
+			throw new Error('No se puede extraer un "siguiente parámetro" de un Comando Slash');
 
 		return this.#args.shift();
 	}
@@ -992,7 +992,7 @@ class CommandOptionSolver {
 	 */
 	hasNext() {
 		if(!this.isMessageSolver(this.#args))
-			throw 'No se puede extraer un "siguiente parámetro" de un Comando Slash';
+			throw new Error('No se puede extraer un "siguiente parámetro" de un Comando Slash');
 
 		return this.#args.length > 0;
 	}
@@ -1169,13 +1169,17 @@ class CommandOptionSolver {
 	}
 
 	/**
-	 * @typedef {'NONE'|'SEPARATOR'|'MENTIONABLES-WITH-SEP'|'DOUBLE-QUOTES'} RegroupMethod
+	 * @typedef {'NONE'|'SEPARATOR'|'MENTIONABLES-WITH-SEP'|'DOUBLE-QUOTES'} RegroupMethod Define un método de reagrupación de los argumentos recibidos para poli-parámetros
 	 */
 
 	/**
 	 * @template {*} [TFallback=undefined]
 	 * @typedef {Object} PolyParamParsingOptions
 	 * @property {RegroupMethod} [regroupMethod='SEPARATOR'] El método de reagrupación de los argumentos de comando de mensaje. Por defecto: 'SEPARATOR'
+	 * * `NONE`: Los argumentos recibidos mantienen su agrupación de palabra-por-palabra
+	 * * `SEPARATOR`: Los argumentos recibidos se reagrupan según el separador indicado
+	 * * `MENTIONABLES-WITH-SEP`: Los argumentos recibidos se reagrupan según el separador indicado, aislando además todas las menciones como su propio grupo
+	 * * `DOUBLE-QUOTES`: Los argumentos encerrados entre comillas dobles se reagrupan entre sí, mientras que aquellos que no lo están mantienen su agrupación de palabra-por-palabra
 	 * @property {String} [messageSep=','] El separador a considerar al reagrupar por separador. Por defecto: ','
 	 * @property {TFallback} [fallback] El valor usado en ausencia de valores de usuario
 	 */

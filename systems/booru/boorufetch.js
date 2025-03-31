@@ -1,4 +1,5 @@
 const { default: axios } = require('axios');
+const { shuffleArray, decodeEntities } = require('../../func');
 const BooruTags = require('../../localdata/models/boorutags');
 
 /**
@@ -29,8 +30,34 @@ const BooruTags = require('../../localdata/models/boorutags');
  * Representa una conexión a un sitio Booru
  */
 class Booru {
-	/**@readonly @type {String}*/ static API_POSTS_URL = 'https://gelbooru.com/index.php?page=dapi&s=post&q=index';
+	/**@readonly @type {String}*/ static API_URI = 'https://gelbooru.com/index.php';
+	/**@readonly @type {String}*/ static API_POSTS_URL = 'https://gelbooru.com/index.php';
 	/**@readonly @type {String}*/ static API_TAGS_URL  = 'https://gelbooru.com/index.php?page=dapi&s=tag&q=index';
+	
+	/**@readonly @type {import('axios').AxiosInstance}*/
+	static POSTS_API = axios.create({
+		baseURL: Booru.API_URI,
+		timeout: 10000,
+		params: {
+			'page': 'dapi',
+			's': 'post',
+			'q': 'index',
+			'json': '1',
+		},
+	});
+	
+	/**@readonly @type {import('axios').AxiosInstance}*/
+	static TAGS_API = axios.create({
+		baseURL: Booru.API_URI,
+		timeout: 10000,
+		params: {
+			'page': 'dapi',
+			's': 'tag',
+			'q': 'index',
+			'json': '1',
+		},
+	});
+
 	/**@readonly @type {Number}*/ static TAGS_SEMAPHORE_MAX  = 100_000_000;
 	/**@readonly @type {Number}*/ static TAGS_CACHE_LIFETIME = 4 * 60 * 60e3;
 	/**@readonly @type {Number}*/ static TAGS_DB_LIFETIME    = 4 * 60 * 60e3; //De momento, exactamente igual que la vida en caché
@@ -74,13 +101,13 @@ class Booru {
 	 * @throws {BooruUnknownPostError}
 	 */
 	static #expectPosts(response, options = {}) {
-		options.dontThrowOnEmptyFetch ??= false;
+		const { dontThrowOnEmptyFetch = false } = options;
 
 		if(response.status !== 200)
 			throw new BooruFetchError(`Booru API Posts fetch failed: ${response.status} ${response.statusText ?? 'Unknown Error'}`);
 
 		if(!Array.isArray(response.data?.post)) {
-			if(options.dontThrowOnEmptyFetch)
+			if(dontThrowOnEmptyFetch)
 				return [];
 			else
 				throw new BooruUnknownPostError(`Couldn't fetch any Posts from the Booru API`);
@@ -90,24 +117,31 @@ class Booru {
 	}
 
 	/**
+	 * @typedef {Object} ExpectAPITagFetchOptions
+	 * @property {String?} [tags=null]
+	 */
+	/**
 	 * Verifica que el código de estado de una respuesta sea 200 y que los datos de Post sean válidos
 	 * @param {import('axios').AxiosResponse} response 
-	 * @param {ExpectAPIFetchOptions} options
+	 * @param {ExpectAPIFetchOptions & ExpectAPITagFetchOptions} options
 	 * @returns {Array<TagResolvable>}
 	 * @throws {BooruFetchError}
 	 * @throws {BooruUnknownTagError}
 	 */
 	static #expectTags(response, options = {}) {
-		options.dontThrowOnEmptyFetch ??= false;
+		const {
+			dontThrowOnEmptyFetch = false,
+			tags = null,
+		} = options;
 
 		if(response.status !== 200)
 			throw new BooruFetchError(`Booru API Tags fetch failed: ${response.statusText ?? 'Unknown Error'}`);
 
 		if(!Array.isArray(response.data?.tag)) {
-			if(options.dontThrowOnEmptyFetch)
+			if(dontThrowOnEmptyFetch)
 				return [];
 			else
-				throw new BooruUnknownTagError(`Couldn't fetch any Tags from the Booru API`);
+				throw new BooruUnknownTagError(`Couldn't fetch any Tags from the Booru API${tags ? `. Tried to fetch: ${tags}` : ''}`);
 		}
 
 		return response.data.tag;
@@ -116,7 +150,6 @@ class Booru {
 	/**
 	 * @typedef {Object} BooruSearchOptions
 	 * @property {Number} [limit=1] Límite de resultados de la búsqueda
-	 * @property {Boolean} [showDeleted] Si mostrar posts que fueron eliminados del Booru (true) o no (false)
 	 * @property {Boolean} [random] Si los resultados se ordenan de forma aleatoria (true) o no (false)
 	 */
 	/**
@@ -128,13 +161,23 @@ class Booru {
 	 * @throws {TypeError}
 	 * @throws {BooruFetchError}
 	 */
-	async search(tags, searchOptions = { limit: 1 }) {
+	async search(tags, searchOptions = {}) {
+		const { limit = 1, random = false } = searchOptions;
+		
 		const { apiKey, userId } = this.#getCredentials();
 		if(Array.isArray(tags))
 			tags = tags.join(' ');
 		
-		const response = await axios.get(`${Booru.API_POSTS_URL}&json=1&api_key=${apiKey}&user_id=${userId}&limit=${searchOptions.limit}&tags=${tags}`);
+		const response = await Booru.POSTS_API.get('', {
+			params: {
+				'api_key': apiKey,
+				'user_id': userId,
+				'limit': limit,
+				'tags': tags,
+			},
+		});
 		const posts = Booru.#expectPosts(response, { dontThrowOnEmptyFetch: true });
+		if(random) shuffleArray(posts);
 		return posts.map(p => new Post(p));
 	}
 
@@ -152,7 +195,13 @@ class Booru {
 		if(![ 'string', 'number' ].includes(typeof postId))
 			throw TypeError('Invalid Post ID');
 
-		const response = await axios.get(`${Booru.API_POSTS_URL}&json=1&api_key=${apiKey}&user_id=${userId}&id=${postId}`);
+		const response = await Booru.POSTS_API.get('', {
+			params: {
+				'api_key': apiKey,
+				'user_id': userId,
+				'id': postId,
+			},
+		});
 		const [ post ] = Booru.#expectPosts(response);
 		return new Post(post);
 	}
@@ -167,6 +216,7 @@ class Booru {
 	 */
 	async fetchPostByUrl(postUrl) {
 		const { apiKey, userId } = this.#getCredentials();
+
 		if(typeof postUrl !== 'string')
 			throw TypeError('Invalid Post URL');
 
@@ -248,7 +298,10 @@ class Booru {
 		const cachedTags = [];
 		/**@type {Array<String>}*/
 		const uncachedTagNames = [];
-		tagNames.forEach(tn => {
+		
+		tagNames
+		.map(decodeEntities)
+		.forEach(tn => {
 			const cachedTag = Booru.tagsCache.get(tn);
 			if(cachedTag && (Date.now() - Booru.TAGS_CACHE_LIFETIME) < (+cachedTag.fetchTimestamp))
 				cachedTags.push(cachedTag);
@@ -272,9 +325,15 @@ class Booru {
 				const fetchedTags = [];
 
 				for(let i = 0; i < missingTagNames.length; i += 100) {
-					const namesBatch = missingTagNames.slice(i, i + 100).join('%20');
-					const response = await axios.get(`${Booru.API_TAGS_URL}&json=1&api_key=${apiKey}&user_id=${userId}&names=${namesBatch}`);
-					const tags = Booru.#expectTags(response);
+					const namesBatch = missingTagNames.slice(i, i + 100).join(' ');
+					const response = await Booru.TAGS_API.get('', {
+						params: {
+							'api_key': apiKey,
+							'user_id': userId,
+							'names': namesBatch,
+						},
+					});
+					const tags = Booru.#expectTags(response, { tags: namesBatch });
 					
 					if(tags.length) {
 						const newTags = tags.map(t => new Tag(t));
@@ -346,6 +405,7 @@ class Post {
 	/**@type {Number}*/ id;
 	/**@type {String}*/ title;
 	/**@type {Array<String>}*/ tags;
+	/**@type {Array<String>}*/ sources;
 	/**@type {String}*/ source;
 	/**@type {Number}*/ score;
 	/**@type {Rating}*/ rating;
@@ -365,8 +425,14 @@ class Post {
 	constructor(data) {
 		this.id = data.id;
 		this.title = data.title;
-		this.tags = Array.isArray(data.tags) ? data.tags : data.tags?.split(' ');
-		this.source = data.source;
+		this.tags = Array.isArray(data.tags) ? data.tags.map(decodeEntities) : decodeEntities(data.tags ?? '').split(' ');
+		if(data.source) {
+			const sources = (typeof data.source === 'object')
+				? (Array.isArray(data.source) ? data.source : Object.values(data.source))
+				: (data.source.split(/[ \n]+/));
+			this.sources = sources;
+			this.source = sources.join(' ');
+		}
 		this.score = data.score;
 		this.rating = data.rating;
 		this.creatorId = ('creatorId' in data) ? data.creatorId : data.creator_id;
@@ -393,6 +459,37 @@ class Post {
 			this.sampleUrl = data.sampleUrl;
 			this.sampleSize = data.size;
 		}
+	}
+
+	/**
+	 * Tries to find sources that match an URL pattern, and returns all matches (if any)
+	 */
+	findUrlSources() {
+		return this.sources
+			.map(getSourceUrl)
+			.filter(s => s);
+	}
+
+	/**
+	 * Finds and returns the first source that matches an URL pattern.
+	 * 
+	 * If no URL source is found, `undefined` is returned
+	 */
+	findFirstUrlSource() {
+		return this.sources
+			.map(getSourceUrl)
+			.find(s => s);
+	}
+
+	/**
+	 * Finds and returns the last source that matches an URL pattern.
+	 * 
+	 * If no URL source is found, `undefined` is returned.
+	 */
+	findLastUrlSource() {
+		return this.sources
+			.map(getSourceUrl)
+			.findLast(s => s);
 	}
 }
 
@@ -433,7 +530,7 @@ class Tag {
 			throw RangeError('Tipo de tag inválido. Solo se aceptan números: 0, 1, 2, 3, 4, 5, 6');
 
 		this.id = data.id;
-		this.name = data.name;
+		this.name = decodeEntities(data.name);
 		this.count = data.count;
 		this.type = /**@type {TagType}*/(data.type);
 		this.ambiguous = !!data.ambiguous;
@@ -455,6 +552,14 @@ class Tag {
 	toString() {
 		return `{${this.id} / ${this.typeName}} ${this.count} ${this.name}`;
 	}
+}
+
+/**@param {string} source*/
+function getSourceUrl(source) {
+	if(!source) return null;
+	const smatch = source.match(/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-])+\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/);
+	if(!smatch) return null;
+	return source.slice(smatch.index, smatch.index + smatch[0].length);
 }
 
 class BooruError extends Error {

@@ -9,9 +9,13 @@ const command = new CommandManager('gatos', flags)
         'gato', 'felino', 'gatito', 'gatitos', 'miau', 'michi', 'michis',
         'cats', 'cat', 'meow', 'nya', 'kitty', 'kitties'
     )
-	.setLongDescription('Muestra imágenes de gatitos. API: https://cataas.com')
+	.setLongDescription('Muestra imágenes de gatitos')
+	.setLongDescription(
+		'Muestra imágenes de gatitos.',
+		'Fuente: https://cataas.com'
+	)
 	.setExecution(async request => {
-		const kittenData = (await axios.get('https://cataas.com/cat').catch(auditError));
+		const kittenData = (await axios.get('https://cataas.com/cat?json=true').catch(auditError));
 
 		const embed = new EmbedBuilder();
 
@@ -21,8 +25,7 @@ const command = new CommandManager('gatos', flags)
 			return request.reply({ embeds: [embed] });
 		}
 		
-		const { _id } = kittenData.data;
-		const catUrl = `https://cataas.com/cat/${_id}`;
+		const { url: catUrl } = kittenData.data;
 		
 		embed.setTitle('Gatitos 🥺')
 			.setImage(catUrl)

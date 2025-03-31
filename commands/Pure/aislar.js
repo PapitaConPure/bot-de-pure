@@ -36,7 +36,7 @@ const command = new CommandManager('aislar', flags)
 			duration = duration * 60e3;
 
 		args.ensureRequistified();
-		const members = CommandOptionSolver.asMembers(args.parsePolyParamSync('miembros'));
+		const members = CommandOptionSolver.asMembers(args.parsePolyParamSync('miembros', { regroupMethod: 'MENTIONABLES-WITH-SEP' }));
 		if(!members.length)
 			return request.reply({ content: translator.getText('aislarNoMembersMentioned'), ephemeral: true });
 

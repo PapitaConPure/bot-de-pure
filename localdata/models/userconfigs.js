@@ -14,6 +14,22 @@ const UserConfigSchema = new Mongoose.Schema({
         type: Number,
         default: 0
     },
+    reactionsReceivedToday: {
+        type: Number,
+        default: 0,
+    },
+    highlightedToday: {
+        type: Boolean,
+        default: false,
+    },
+    messagesToday: {
+        type: Number,
+        default: 0,
+    },
+    lastDateReceived: {
+        type: Date,
+        default: () => new Date(0),
+    },
     
     language: {
         type: String,
@@ -51,7 +67,11 @@ const UserConfigSchema = new Mongoose.Schema({
         default: [],
         required: true,
     },
-    convertPixiv: { type: Boolean, default: true, },
+    pixivConverter: {
+        type: String,
+        enum: [ '', 'phixiv', 'webhook' ],
+        default: 'phixiv',
+    },
     twitterPrefix: {
         type: String,
         enum: [ '', 'vx', 'fx' ],

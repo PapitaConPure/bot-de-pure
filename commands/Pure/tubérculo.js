@@ -1,14 +1,16 @@
+const { default: axios } = require('axios');
+const { psDocsButton, psEditorButton } = require('./purescript.js');
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver, CommandParam } = require('../Commons/commands');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId, warn } = require('../../func.js');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, TextInputBuilder, ButtonInteraction, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder, ModalSubmitInteraction, StringSelectMenuBuilder } = require('discord.js');
-const { RuntimeToLanguageType } = require('../../systems/ps/commons.js');
-const { executeTuber: executeTuberPS1 } = require('../../systems/ps/purescript.js');
-const { executeTuber: executeTuberPS2, CURRENT_PS_VERSION } = require('../../systems/ps2/purescript.js');
+const { RuntimeToLanguageType } = require('../../systems/ps/v1.0/commons.js');
+const { executeTuber: executeTuberPS1 } = require('../../systems/ps/v1.0/purescript.js');
+const { executeTuber: executeTuberPS2, CURRENT_PS_VERSION } = require('../../systems/ps/common/executeTuber.js');
 const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts.js');
-const { ValueKindTranslationLookups } = require('../../systems/ps2/interpreter/values');
-const { Input } = require('../../systems/ps2/interpreter/inputReader.js');
+const { ValueKindTranslationLookups } = require('../../systems/ps/v1.1/interpreter/values');
+const { Input } = require('../../systems/ps/v1.1/interpreter/inputReader.js');
 
 const pageMax = 10;
 const filters = {
@@ -40,30 +42,24 @@ function paginationRows(page, lastPage, navigationEnabled = true) {
 			new ButtonBuilder()
 				.setCustomId('tubérculo_filterItems_AUTHOR')
 				.setLabel('Filtrar Autor')
-				.setEmoji('936530498061213756')
+				.setEmoji('1355133341984100483')
 				.setStyle(ButtonStyle.Success),
 			new ButtonBuilder()
 				.setCustomId('tubérculo_filterItems_TID')
 				.setLabel('Filtrar TuberID')
-				.setEmoji('936530498061213756')
+				.setEmoji('1355133341984100483')
 				.setStyle(ButtonStyle.Success),
 			new ButtonBuilder()
 				.setCustomId('tubérculo_filterClear')
 				.setLabel('Mostrar todo')
-				.setEmoji('936531643496288288')
+				.setEmoji('1355143793577426962')
 				.setStyle(ButtonStyle.Danger),
 		),
 	);
 	return rows;
 }
 const helpRows = () => [
-	makeButtonRowBuilder().addComponents(
-		new ButtonBuilder()
-			.setURL('https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link')
-			.setLabel(`Aprende PuréScript (v${CURRENT_PS_VERSION})`)
-			.setEmoji('📖')
-			.setStyle(ButtonStyle.Link),
-	)
+	makeButtonRowBuilder().addComponents(psEditorButton, psDocsButton)
 ];
 
 /**
@@ -71,7 +67,7 @@ const helpRows = () => [
  * @param {String} [content] 
  */
 async function getItemsList(guild, content = undefined) {
-	const gcfg = await GuildConfig.findOne({ guildId: guild.id });
+	const gcfg = await GuildConfig.findOne({ guildId: guild.id }) || new GuildConfig({ guildId: guild.id });
 	let items = Object.entries(gcfg.tubers).reverse();
 	if(content) {
 		const filter = content.split(': ');
@@ -143,7 +139,7 @@ const helpString = (/**@type {import('../Commons/typings.js').ComplexCommandRequ
 	'* 🔍 **Ver Tubérculo** — `p!t --ver saludo` o `p!t -v saludo`',
 	'* 🗑️ **Borrar Tubérculo** — `p!t --borrar saludo` o `p!t -b saludo`',
 	'* ✏️ **Crear o editar Tubérculo simple** — `p!t --crear saludo ¡Hola!` o `p!t -c saludo ¡Hola!`',
-	`-# Usa \`${p_pure(request.guildId).raw}ayuda tubérculo\` para más información. Si quieres crear un Tubérculo avanzado, puedes leer la [documentación más reciente de PuréScript](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link) (**v${CURRENT_PS_VERSION}**).`,
+	`-# Usa \`${p_pure(request.guildId).raw}ayuda tubérculo\` para más información. Si quieres crear un Tubérculo avanzado, puedes leer la [documentación más reciente de PuréScript](https://papitaconpure.github.io/ps-docs/read/purescript1.10.pdf) (**v${CURRENT_PS_VERSION}**).`,
 ].join('\n');
 
 const options = new CommandOptions()
@@ -157,7 +153,7 @@ const options = new CommandOptions()
 				const gcfg = await GuildConfig.findOne({ guildId: interaction.guildId });
 				if(!gcfg) return;
 
-				const tubers = /**@type {{ [K: String]: import('../../systems/ps2/purescript.js').Tubercle }}*/(gcfg.tubers);
+				const tubers = /**@type {{ [K: String]: import('../../systems/ps/v1.1').Tubercle }}*/(gcfg.tubers);
 				const tubersArr = Object.entries(tubers)
 					.map(([ name, tuber ]) => /**@type {const}*/([ name, tuber, edlDistance(name, query) ]))
 					.filter(([ , , distance ]) => distance < 8);
@@ -213,7 +209,7 @@ const command = new CommandManager('tubérculo', flags)
 		'Para `--crear` (o *editar*) un Tubérculo, se requerirá un `<mensaje>` y/o `<archivos>`, junto a la `<id>` que quieras darle al mismo. Si la ID ya existe, será *editada*',
 		'Para `--borrar` un Tubérculo, igualmente debes indicar su `<id>`',
 		'Escribe los indicadores `--crear --script` (o `-cs`) para crear un **Tubérculo avanzado con PuréScript**',
-		'[Clickea esto para leer la documentación de PuréScript](https://drive.google.com/drive/folders/1wv2-n4J5SSZNH9oQ5gNEPpptm7rNFEnV?usp=share_link)'
+		'[Clickea esto para leer la documentación de PuréScript](https://papitaconpure.github.io/ps-docs/)'
 	)
 	.setOptions(options)
 	.setExperimental(true)
@@ -288,8 +284,10 @@ const command = new CommandManager('tubérculo', flags)
 		if(interaction.user.id !== userId)
 			return interaction.reply({ content: 'No tienes permiso para hacer eso', ephemeral: true });
 		
+		//FIXME: Cambiar esta solución para usar ayuda.js » injectWikiPage(...)
+		
 		//@ts-expect-error
-		return require('./ayuda.js').execute(interaction, [ 'tubérculo' ], false);
+		return require('./ayuda.js').command.execute(interaction, [ 'tubérculo' ], false);
 	})
 	.setButtonResponse(async function getTuberHelp(interaction, tuberId, variant, updateMessage) {
 		if(!tuberId)
@@ -499,37 +497,73 @@ async function createTuber(tuberId, gcfg, isPureScript, request, args) {
 	
 	const tuberContent = {
 		author: request.userId,
-		advanced: false,
+		advanced: isPureScript,
 	};
 	const codeTag = args.isInteractionSolver() ? 0 : args.rawArgs.match(/```[A-Za-z0-9]*/)?.[0];
-	/**@type {String}*/
-	let mcontent;
-	if(args.isInteractionSolver()) {
-		mcontent = args.getString('mensaje');
-	} else {
-		if(isPureScript) {
-			if(!codeTag)
-				return request.reply({
-					content: [
-						'Debes poner **\\`\\`\\`** antes y después del código.',
-						'Esto hará que Discord le ponga el formato adecuado al código y que sea más fácil programar.',
-						'Opcionalmente, puedes poner **\\`\\`\\`arm** en el del principio para colorear el código',
-					].join('\n'),
-				});
-			const firstIndex = args.rawArgs.indexOf(codeTag);
-			const lastIndex = args.rawArgs.lastIndexOf('```');
-			mcontent = args.rawArgs.slice(firstIndex + codeTag.length, lastIndex > firstIndex ? lastIndex : args.rawArgs.length).trim();
-		} else {
-			mcontent = args.remainder.split(/[\n ]*##[\n ]*/).join('\n');
-		}
-	}
 	const mfiles = CommandOptionSolver.asAttachments(args.parsePolyParamSync('archivos')).filter(att => att);
+	const contentResult = await (async () => {
+		const hasCodeImport = mfiles[0]?.name.toLowerCase().endsWith('.tuber');
+		const importCode = async () => {
+			const response = await axios.get(mfiles[0].url);
+
+			if(response.status !== 200)
+				return {
+					error: response.statusText,
+					result: /**@type {null}*/(null),
+				};
+			
+			return {
+				error: /**@type {null}*/(null),
+				result: /**@type {string}*/(response.data),
+			};
+		}
+
+		if(args.isInteractionSolver()) {
+			if(isPureScript && hasCodeImport)
+				return importCode();
+
+			return {
+				error: /**@type {null}*/(null),
+				result: args.getString('mensaje'),
+			};
+		}
+
+		if(!isPureScript)
+			return {
+				error: /**@type {null}*/(null),
+				result: args.remainder.split(/[\n ]*##[\n ]*/).join('\n'),
+			};
+
+		if(hasCodeImport)
+			return importCode();
+
+		if(!codeTag)
+			return {
+				error: [
+					'Debes poner **\\`\\`\\`** antes y después del código.',
+					'Esto hará que Discord le ponga el formato adecuado al código y que sea más fácil programar.',
+					'Opcionalmente, puedes poner **\\`\\`\\`arm** en el del principio para colorear el código',
+				].join('\n'),
+				result: /**@type {null}*/(null),
+			};
+
+		const firstIndex = args.rawArgs.indexOf(codeTag);
+		const lastIndex = args.rawArgs.lastIndexOf('```');
+		return {
+			error: /**@type {null}*/(null),
+			result: args.rawArgs.slice(firstIndex + codeTag.length, lastIndex > firstIndex ? lastIndex : args.rawArgs.length).trim(),
+		};
+	})();
+
+	if(contentResult.error != null)
+		return request.reply({ content: contentResult.error });
+
+	const mcontent = contentResult.result;
 
 	//Incluir Tubérculo; crear colección de Tubérculos si es necesario
 	if(isPureScript) {
 		if(!mcontent)
 			return request.reply({ content: `⚠️️ Este Tubérculo requiere ingresar PuréScript\n${helpString(request)}` });
-		tuberContent.advanced = true;
 		tuberContent.script = mcontent.replace(/```[A-Za-z0-9]*/, '');
 		console.log({ script: tuberContent.script });
 	} else {

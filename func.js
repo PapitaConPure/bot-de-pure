@@ -14,6 +14,41 @@ const concol = {
     purple: chalk.rgb(158, 114,214),
 };
 
+const HTTP_ENTITIES = /**@type {const}*/({
+    nbsp:   ' ',
+    amp:    '&',
+    quot:   '"',
+    lt:     '<',
+    gt:     '>',
+    tilde:  '~',
+    apos:   '\'',
+    '#039': '\'',
+    cent:   '¢',
+    pound:  '£',
+    euro:   '€',
+    yen:    '¥',
+    copy:   '©',
+    reg:    '®',
+    iexcl:  '¡',
+    brvbar: '¦',
+    sect:   '§',
+    uml:    '¨',
+    not:    '¬',
+    deg:    'º',
+    acute:  '`',
+    micro:  'µ',
+    para:   '¶',
+    ordm:   'º',
+    laquo:  '«',
+    raquo:  '»',
+    circ:   '^',
+});
+
+const HTTP_ENTITIES_REGEX = (() => {
+    const keys = Object.keys(HTTP_ENTITIES).join('|');
+    return new RegExp(`&(${keys});`, 'g');
+})();
+
 module.exports = {
     //#region Lista
     /**
@@ -1010,7 +1045,7 @@ module.exports = {
      * @param {Number} i Index from which to extract a sentence, be it a single word or a group
      */
     fetchSentence: function(args, i) {
-        if(i == undefined || i >= args.length)
+        if(i == undefined || i >= args.length || args[i] == undefined)
             return undefined;
         if(!args[i].startsWith('"'))
             return args.splice(i, 1)[0];
@@ -1038,43 +1073,11 @@ module.exports = {
     /**@param {String} text*/
     unable: text => `❌ ${text}`,
 
+    /**@param {string} encodedString*/
     decodeEntities: function(encodedString) {
         //Fuente: https://stackoverflow.com/questions/44195322/a-plain-javascript-way-to-decode-html-entities-works-on-both-browsers-and-node
-
-        const translate = {
-            nbsp:   ' ',
-            amp:    '&',
-            quot:   '"',
-            lt:     '<',
-            gt:     '>',
-            tilde:  '~',
-            apos:   '\'',
-            '#039': '\'',
-            cent:   '¢',
-            pound:  '£',
-            euro:   '€',
-            yen:    '¥',
-            copy:   '©',
-            reg:    '®',
-            iexcl:  '¡',
-            brvbar: '¦',
-            sect:   '§',
-            uml:    '¨',
-            not:    '¬',
-            deg:    'º',
-            acute:  '`',
-            micro:  'µ',
-            para:   '¶',
-            ordm:   'º',
-            laquo:  '«',
-            raquo:  '»',
-            circ:   '^',
-        };
-        const keys = Object.keys(translate).join('|');
-        const translate_re = new RegExp(`&(${keys});`, 'g');
-
-        return encodedString.replace(translate_re, function(match, entity) {
-            return translate[entity] ?? match;
+        return encodedString.replace(HTTP_ENTITIES_REGEX, function(match, entity) {
+            return HTTP_ENTITIES[entity] ?? match;
         }).replace(/&#(\d+);/gi, function(_, numStr) {
             const num = parseInt(numStr, 10);
             return String.fromCharCode(num);
@@ -1105,6 +1108,14 @@ module.exports = {
     //#endregion
 
     //#region Otros
+    unicodeEmojiRegex: /\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu,
+    /**
+     * @type {RegExp}
+     * @desc Resultado de un elemento del retorno de `string.prototype.matchAll`:
+     * * `[1]`: La ID del emoji
+     */
+    emojiRegex: /<a?:\w+:([0-9]+)>/gi,
+
     /**
      * Devuelve el primer emoji global encontrado en el string
      * @param {String} emoji 
@@ -1139,6 +1150,20 @@ module.exports = {
     emoji: (emoji, guild) => module.exports.defaultEmoji(emoji) ?? module.exports.guildEmoji(emoji, guild),
 
     /**
+     * 
+     * @param {import('discord.js').GuildBasedChannel} channel 
+     */
+    isNSFWChannel: function(channel) {
+        if(channel.isThread())
+            return channel.parent.nsfw;
+
+        if(channel.isSendable())
+            return channel.nsfw;
+
+        return false;
+    },
+
+    /**
      * Devuelve un valor acomodado al rango facilitado
      * @param {Number} value El valor a acomodar
      * @param {Number} min El mínimo del rango
@@ -1170,7 +1195,7 @@ module.exports = {
     /**
      * Devuelve un valor aleatorio entre 0 y otro valor
      * @param {Number} maxExclusive Máximo valor; excluído del resultado. 1 por defecto
-     * @param {Boolean} [round=false] Si el número debería ser redondeado hacia abajo. Falso por defecto
+     * @param {Boolean} [round=false] Si el número debería ser redondeado hacia abajo. `true` por defecto
      * @returns 
      */
     rand: function(maxExclusive, round = true) {
@@ -1185,7 +1210,7 @@ module.exports = {
      * Devuelve un valor aleatorio dentro de un rango entre 2 valores
      * @param {Number} minInclusive Mínimo valor; puede ser incluído en el resultado
      * @param {Number} maxExclusive Máximo valor; excluído del resultado
-     * @param {Boolean} [round=false] Si el número debería ser redondeado hacia abajo. Falso por defecto
+     * @param {Boolean} [round=false] Si el número debería ser redondeado hacia abajo. `false` por defecto
      * @returns 
      */
     randRange: function(minInclusive, maxExclusive, round = true) {
@@ -1203,8 +1228,24 @@ module.exports = {
      * @returns {T} elemento
      */
     randInArray: function(array) {
+        if(!array.length) return undefined;
         const randomIndex = module.exports.rand(array.length);
         return array[randomIndex];
+    },
+
+    /**
+     * @param {Array<*>} array
+     * @see {@link https://stackoverflow.com/a/2450976}
+     */
+    shuffleArray: function(array) {
+        let currentIndex = array.length;
+        
+        while(currentIndex !== 0) {
+            let randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+      
+            [ array[currentIndex], array[randomIndex] ] = [ array[randomIndex], array[currentIndex] ];
+        }
     },
     
     /**

@@ -20,6 +20,7 @@ namespace CommandBuilder {
 			Outdated,
 			Maintenance,
 			Papa,
+			Music,
 			Hourai,
 			Guide,
 		}

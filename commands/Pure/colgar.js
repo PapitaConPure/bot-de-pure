@@ -44,7 +44,7 @@ const command = new CommandManager('colgar', tags)
 						.setStyle(ButtonStyle.Secondary),
 					new ButtonBuilder()
 						.setCustomId(`colgar_cancelHanged_${user.id}`)
-						.setEmoji('936531643496288288')
+						.setEmoji('1355143793577426962')
 						.setStyle(ButtonStyle.Secondary),
 				)],
 			});

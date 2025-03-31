@@ -1,6 +1,6 @@
 const { EmbedBuilder, ChannelType, User, GuildMember } = require('discord.js'); //Integrar discord.js
 const { fetchArrows, fetchUser, improveNumber, isShortenedNumberString, fetchMember } = require('../../func');
-const global = require('../../localdata/config.json'); //Variables globales
+const globalConfigs = require('../../localdata/config.json'); //Variables globales
 const { ChannelStats, Stats } = require('../../localdata/models/stats');
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 const { CommandPermissions } = require('../Commons/cmdPerms');
@@ -30,7 +30,7 @@ const command = new CommandManager('info', flags)
 			return request.reply(':interrobang: E-el servidor está en corte ahora mismo. Intenta usar el comando más tarde');
 
 		const [stats] = await Promise.all([
-			Stats.findOne({}),
+			globalConfigs.noDataBase ? new Stats({ since: Date.now() }) : Stats.findOne({}),
 			request.deferReply(),
 		]);
 		const servidor = request.guild;
@@ -70,14 +70,14 @@ const command = new CommandManager('info', flags)
 			guildId: servidor.id,
 			channelId: targetChannel.id,
 		};
-		const channelStats = (await ChannelStats.findOne(channelQuery)) || new ChannelStats(channelQuery);
+		const channelStats = (!globalConfigs.noDataBase && await ChannelStats.findOne(channelQuery)) || new ChannelStats(channelQuery);
 		
 		const peocnt = Object.keys(channelStats.sub).length
 			? Object.entries(channelStats.sub)
 				.sort((a, b) => b[1] - a[1])
 				.slice(0, 5)
 			: undefined;
-		const msgcnt = Object.values(await ChannelStats.find({ guildId: servidor.id }))
+		const msgcnt = Object.values(!globalConfigs.noDataBase ? new ChannelStats(channelQuery) : await ChannelStats.find({ guildId: servidor.id }))
 			.sort((a, b) => b.cnt - a.cnt)
 			.slice(0, 5)
 			.map((obj) => /**@type {[String, Number]}*/([obj.channelId, obj.cnt]));
@@ -135,7 +135,7 @@ const command = new CommandManager('info', flags)
 					},
 					{
 						name: 'Tiempo de funcionamiento del bot', 
-						value: `<t:${Math.round(+global.startupTime / 1000)}:R>`,
+						value: `<t:${Math.round(+globalConfigs.startupTime / 1000)}:R>`,
 					},
 				),
 		);

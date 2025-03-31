@@ -1,7 +1,8 @@
 const UserConfigs = require("./localdata/models/userconfigs");
+const globalConfigs = require('./localdata/config.json');
 
 /**
- * @typedef {{ language: import("./internationalization").LocaleKey, convertPixiv: Boolean, twitterPrefix: 'vx' | 'fx' | '', banned: Boolean }} UserCache
+ * @typedef {{ language: import("./internationalization").LocaleKey, pixivConverter: 'phixiv' | 'webhook' | '', twitterPrefix: 'vx' | 'fx' | '', banned: Boolean }} UserCache
  * @type {Map<String, UserCache>}
  */
 const userCache = new Map();
@@ -12,18 +13,22 @@ const userCache = new Map();
  */
 async function cacheUser(userId) {
     if(!userId) throw ReferenceError('Se esperaba una ID de usuario');
+    
     const userQuery = { userId };
-    let userConfigs = await UserConfigs.findOne(userQuery);
-    if(!userConfigs) {
+    let userConfigs;
+    if(globalConfigs.noDataBase) {
         userConfigs = new UserConfigs(userQuery);
-        await userConfigs.save();
+    } else {
+        userConfigs = await UserConfigs.findOne(userQuery);
+        if(!userConfigs) {
+            userConfigs = new UserConfigs(userQuery);
+            await userConfigs.save();
+        }
     }
 
     return userCache.set(userId, {
-        // @ts-ignore
         language: userConfigs.language,
-        convertPixiv: userConfigs.convertPixiv ?? true,
-        // @ts-ignore
+        pixivConverter: userConfigs.pixivConverter || '',
         twitterPrefix: userConfigs.twitterPrefix || '',
         banned: userConfigs.banned,
     });

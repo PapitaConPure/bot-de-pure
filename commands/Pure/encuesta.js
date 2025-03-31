@@ -30,7 +30,7 @@ const wizEmbed = (iconUrl, stepName, stepColor, translator) => {
  */
 const cancelButton = (id, translator) => new ButtonBuilder()
 	.setCustomId(`poll_cancelWizard_${id}`)
-	.setEmoji('936531643496288288')
+	.setEmoji('1355143793577426962')
 	.setStyle(ButtonStyle.Secondary);
 
 /**
@@ -114,7 +114,7 @@ function getFinishPageData(cmd, interaction, requestId, translator) {
 			.setStyle(pollMemory.anon ? ButtonStyle.Primary : ButtonStyle.Secondary),
 		new ButtonBuilder()
 			.setCustomId(`poll_goToAnswersPage_${userId}_${requestId}`)
-			.setEmoji('934432754173624373')
+			.setEmoji('1355128236790644868')
 			.setStyle(ButtonStyle.Secondary),
 		cancelButton(userId, translator),
 	);

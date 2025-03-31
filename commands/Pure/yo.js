@@ -24,7 +24,7 @@ function displayToggle(toggle, translator) {
  */
 const backToDashboardButton = (id, translator) => new ButtonBuilder()
     .setCustomId(`yo_goToDashboard_${compressId(id)}`)
-    .setEmoji('934432754173624373')
+    .setEmoji('1355128236790644868')
     .setStyle(ButtonStyle.Secondary);
 
 /**
@@ -33,7 +33,7 @@ const backToDashboardButton = (id, translator) => new ButtonBuilder()
  */
 const cancelButton = (id, translator) => new ButtonBuilder()
 	.setCustomId(`yo_cancelWizard_${id}`)
-    .setEmoji('936531643496288288')
+    .setEmoji('1355143793577426962')
 	.setStyle(ButtonStyle.Secondary);
 
 /**
@@ -72,7 +72,7 @@ const dashboardRows = (userId, userConfigs, translator) => [
                 {
                     label: 'PuréVoice',
                     description: translator.getText('yoDashboardMenuConfigVoiceDesc'),
-                    emoji: '1260802777320263690',
+                    emoji: '1354500099799257319',
                     value: 'voice',
                 },
                 {
@@ -173,22 +173,6 @@ const voiceEmbed = (interaction, userConfigs, translator) => {
 
 /**
  * @param {String} userId 
- * @param {import('../../localdata/models/userconfigs').UserConfigDocument} userConfigs 
- * @param {Translator} translator 
- */
-const pixivRows = (userId, userConfigs, translator) => [
-    makeButtonRowBuilder().addComponents(
-        new ButtonBuilder()
-            .setCustomId(`yo_setPixivConvert_${userId}_${userConfigs.convertPixiv ? '': 'enable'}`)
-            .setStyle(userConfigs.convertPixiv ? ButtonStyle.Primary : ButtonStyle.Secondary)
-            .setEmoji(userConfigs.convertPixiv ? '919403803126661120' : '1138853641600643174'),
-        backToDashboardButton(userId, translator),
-        cancelButton(userId, translator),
-    ),
-];
-
-/**
- * @param {String} userId 
  * @param {import('discord.js').ButtonInteraction} interaction 
  * @param {import('../../localdata/models/userconfigs').UserConfigDocument} userConfigs 
  * @param {Translator} translator 
@@ -235,7 +219,7 @@ const followedTagsRows = (userId, channelId, translator, isAlt) => [
             .setStyle(ButtonStyle.Danger),
         new ButtonBuilder()
             .setCustomId(`yo_selectFTC_${userId}`)
-            .setEmoji('934432754173624373')
+            .setEmoji('1355128236790644868')
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(!!isAlt),
         cancelButton(userId, translator)
@@ -393,8 +377,35 @@ const command = new CommandManager('yo', flags)
             
         case 'pixiv':
             embed = wizEmbed(interaction.client.user.avatarURL(), 'yoPixivStep', 0x0096fa, translator)
-                .setTitle(translator.getText('yoPixivTitle', userConfigs.convertPixiv));
-            components = pixivRows(authorId, userConfigs, translator);
+                .setTitle(translator.getText('yoPixivTitle'));
+            components = [
+                makeStringSelectMenuRowBuilder().addComponents(
+                    new StringSelectMenuBuilder()
+                        .setCustomId(`yo_setPixivConvert_${authorId}`)
+                        .setPlaceholder(translator.getText('yoConversionServiceMenuService'))
+                        .setOptions(
+                            {
+                                value: 'phixiv',
+                                label: 'phixiv',
+                                description: translator.getText('yoPixivMenuServicePhixivDesc'),
+                            },
+                            {
+                                value: 'webhook',
+                                label: translator.getText('yoPixivMenuServiceWebhookLabel'),
+                                description: translator.getText('yoPixivMenuServiceWebhookDesc'),
+                            },
+                            {
+                                value: 'none',
+                                label: translator.getText('yoConversionServiceMenuServiceNoneLabel'),
+                                description: translator.getText('yoPixivMenuServiceNoneDesc'),
+                            },
+                        )
+                ),
+                makeButtonRowBuilder().addComponents(
+                    backToDashboardButton(authorId, translator),
+                    cancelButton(authorId, translator),
+                ),
+            ];
             break;
 
         default:
@@ -404,7 +415,7 @@ const command = new CommandManager('yo', flags)
                 makeStringSelectMenuRowBuilder().addComponents(
                     new StringSelectMenuBuilder()
                         .setCustomId(`yo_setTwitterConvert_${authorId}`)
-                        .setPlaceholder(translator.getText('yoTwitterMenuService'))
+                        .setPlaceholder(translator.getText('yoConversionServiceMenuService'))
                         .setOptions(
                             {
                                 value: 'vx',
@@ -418,7 +429,7 @@ const command = new CommandManager('yo', flags)
                             },
                             {
                                 value: 'none',
-                                label: translator.getText('yoTwitterMenuServiceNoneLabel'),
+                                label: translator.getText('yoConversionServiceMenuServiceNoneLabel'),
                                 description: translator.getText('yoTwitterMenuServiceNoneDesc'),
                             },
                         )
@@ -562,40 +573,29 @@ const command = new CommandManager('yo', flags)
         await interaction.message.edit({ embeds: [embed] }).catch(console.error);
         return interaction.editReply({ content: translator.getText('yoVoiceKillDelaySuccess') });
     })
-    .setButtonResponse(async function setPixivConvert(interaction, authorId, enable) {
+    .setSelectMenuResponse(async function setPixivConvert(interaction, authorId, enable) {
 		const { user } = interaction;
 			
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
             return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
 
-        const translator = new Translator(/**@type {import('../../internationalization').LocaleKey}*/(userConfigs.language));
+        const translator = new Translator(userConfigs.language);
 		
 		if(user.id !== authorId)
 			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
 
-        const convertPixiv = !!enable;
+        let service = interaction.values[0];
+        if(service === 'none') service = '';
 
-        const embed = wizEmbed(interaction.client.user.avatarURL(), 'yoPixivStep', 0x0096fa, translator)
-            .setTitle(translator.getText('yoPixivTitle', convertPixiv));
+        if(service !== '' && service !== 'phixiv' && service !== 'webhook')
+            throw 'Resultado de servicio de conversión de pixiv inesperado';
 
-        if(convertPixiv === userConfigs.convertPixiv) {
-            return interaction.update({
-                content: translator.getText('yoPixivStateAlreadySet', convertPixiv),
-                embeds: [embed],
-                components: pixivRows(authorId, userConfigs, translator),
-            });
-        }
-
-        userConfigs.convertPixiv = convertPixiv;
+        userConfigs.pixivConverter = service;
         
         return Promise.all([
             userConfigs.save().then(() => recacheUser(user.id)),
-            interaction.update({
-                content: null,
-                embeds: [embed],
-                components: pixivRows(authorId, userConfigs, translator),
-            }),
+            interaction.reply({ content: translator.getText('yoConversionServiceSuccess'), ephemeral: true }),
         ]);
     })
     .setSelectMenuResponse(async function setTwitterConvert(interaction, authorId, enable) {
@@ -605,7 +605,6 @@ const command = new CommandManager('yo', flags)
         if(!userConfigs)
             return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
 
-        // @ts-ignore
         const translator = new Translator(userConfigs.language);
 		
 		if(user.id !== authorId)
@@ -621,7 +620,7 @@ const command = new CommandManager('yo', flags)
         
         return Promise.all([
             userConfigs.save().then(() => recacheUser(user.id)),
-            interaction.reply({ content: translator.getText('yoTwitterSuccess'), ephemeral: true }),
+            interaction.reply({ content: translator.getText('yoConversionServiceSuccess'), ephemeral: true }),
         ]);
     })
 	.setButtonResponse(async function selectFTC(interaction, authorId) {

@@ -5,7 +5,7 @@ const { auditError, auditAction, auditSystem } = require('../others/auditor.js')
 const chalk = require('chalk');
 const { Booru, Post } = require('./boorufetch.js');
 const globalConfigs = require('../../localdata/config.json');
-const { paginateRaw, sleep, success } = require('../../func.js');
+const { paginateRaw } = require('../../func.js');
 
 /**
  * @typedef {import('./boorusend').PostFormatData & { tags: String, lastFetchedAt?: Date, faults?: Number }} FeedData
@@ -43,6 +43,8 @@ async function updateBooruFeeds(guilds) {
  * @param {Discord.Collection<Discord.Snowflake, Discord.Guild>} guilds Colección de Guilds a procesar
  */
 async function processFeeds(booru, guilds) {
+    if(globalConfigs.noDataBase) return;
+
     const guildIds = guilds.map(g => g.id);
     const guildConfigs = /**@type {Array<import('../../localdata/models/guildconfigs.js').GuildConfigDocument>}*/(await GuildConfigs.find({
         guildId: { $in: guildIds },
@@ -146,6 +148,8 @@ function getNextBaseUpdateStart() {
  * @param {Discord.Client} client 
  */
 async function setupGuildFeedUpdateStack(client) {
+    if(globalConfigs.noDataBase) return;
+
     const feedUpdateStart = getNextBaseUpdateStart();
     const guildConfigs = await GuildConfigs.find({ feeds: { $exists: true } });
     /**@type {Array<GuildFeedChunk>}*/
@@ -282,6 +286,7 @@ class BooruFeed {
     /**@type {Number}*/ maxTags;
     /**@type {String}*/ cornerIcon;
     /**@type {String}*/ title;
+    /**@type {String}*/ subtitle;
     /**@type {String}*/ footer;
 
     /**
@@ -291,6 +296,7 @@ class BooruFeed {
      * @property {Number} [maxTags]
      * @property {String} [cornerIcon]
      * @property {String} [title]
+     * @property {String} [subtitle]
      * @property {String} [footer]
      */
 
@@ -313,6 +319,7 @@ class BooruFeed {
         this.maxTags = options.maxTags ?? 20;
         this.cornerIcon = options.cornerIcon ?? null;
         this.title = options.title ?? null;
+        this.subtitle = options.subtitle ?? null;
         this.footer = options.footer ?? null;
     }
 

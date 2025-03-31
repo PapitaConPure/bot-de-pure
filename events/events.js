@@ -1,5 +1,7 @@
 const { onStartup, discordToken, booruApiKey, booruUserId } = require('../events/onStartup.js');
 const { onMessage } = require('../events/onMessage.js');
+const { onReactionAdd } = require('../events/onReactionAdd.js');
+const { onReactionRemove } = require('../events/onReactionRemove.js');
 const { onMessageDelete } = require('../events/onMessageDelete.js');
 const { onInteraction } = require('../events/onInteraction.js');
 const { onVoiceUpdate } = require('../events/onVoiceUpdate.js');
@@ -24,6 +26,8 @@ module.exports = {
     events: {
         onStartup,
         onMessage,
+        onReactionAdd,
+        onReactionRemove,
         onMessageDelete,
         onInteraction,
         onVoiceUpdate,

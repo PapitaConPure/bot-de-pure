@@ -1,8 +1,9 @@
-const { EmbedBuilder, Message, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Embed } = require('discord.js');
+const { EmbedBuilder, Message, AttachmentBuilder, Embed, ChannelType } = require('discord.js');
 const pixivToken = process.env.PIXIV_REFRESH_TOKEN ?? (require('../../localenv.json')?.pixivtoken);
 const PixivApi = require('pixiv-api-client');
 const { shortenTextLoose } = require('../../func');
-const { DiscordAgent } = require('./discordagent.js');
+const globalConfigs = require('../../localdata/config.json');
+const { ConverterEmptyPayload } = require('./converters');
 
 const pixiv = new PixivApi();
 
@@ -22,12 +23,18 @@ const PIXIV_IMAGE_REQUEST_OPTIONS = {
 	responseType: 'arraybuffer',
 };
 const PIXIV_GALLERY_PAGE_SEPARATOR = '_';
-const PIXIV_REGEX = /<?((http:\/\/|https:\/\/)(www\.)?)(pixiv.net(\/en)?)\/artworks\/([0-9]{6,9})(_[0-9]+)?>?/g;
+const PIXIV_REGEX = /<?((http:\/\/|https:\/\/)(www\.)?)(pixiv.net(\/en)?)\/artworks\/([0-9]{6,9})(_[0-9]{1,4})?>?/g;
+const PIXIV_REPLY_REGEX = /(?<st>(?:\<|\|\|){0,2}) ?(?:(?:http:\/\/|https:\/\/)(?:www\.))?(?:pixiv.net(?<lang>\/en)?)\/artworks\/(?<id>[0-9]{6,9})(?:\/(?<page>[0-9]{1,4}))? ?(?<ed>(?:\>|\|\|){0,2})/g;
+const PIXIV_3P_CONVERTERS = {
+	phixiv: { name: 'phixiv', service: 'https://www.phixiv.net' },
+};
 
 let performingAuthentication = false;
 
 const refreshPixivAccessToken = async () => {
+	if(globalConfigs.noDataBase) return;
 	if(performingAuthentication) return;
+	
 	performingAuthentication = true;
 	
 	let authSuccess = false;
@@ -226,40 +233,46 @@ function replacer(match, _p1, _p2, _p3, _p4, _p5, p6) {
 /**
  * Detecta enlaces de pixiv en un mensaje y los reenvía con un Embed corregido, a través de un Agente Webhook.
  * @param {Message<true>} message El mensaje a analizar
+ * @returns {Promise<import('./converters').ConverterPayload>}
  */
-const sendPixivPostsAsWebhook = async (message, enabled) => {
-	if(!enabled) return;
-	
+async function sendPixivPostsAsWebhook(message) {
 	const { content, channel, member } = message;
 	if(!message.guild.members.me.permissionsIn(channel).has([ 'ManageWebhooks', 'SendMessages', 'AttachFiles' ]))
-		return false;
+		return ConverterEmptyPayload;
 
 	const pixivUrls = Array.from(content.matchAll(PIXIV_REGEX))
 		.filter(u => !(u[0].startsWith('<') && u[0].endsWith('>')));
 
 	if(!pixivUrls.length)
-		return false;
+		return ConverterEmptyPayload;
 	
 	const newMessage = await formatPixivPostsMessage(pixivUrls.map(pixivUrl => pixivUrl[0]));
 	message.content = content.replace(PIXIV_REGEX, replacer);
+	//@ts-expect-error
 	message.files ??= [];
+	//@ts-expect-error
 	message.files.push(...newMessage.files);
 	message.embeds ??= [];
 	
+	//@ts-expect-error
 	message.embeds = message.embeds
+		//@ts-expect-error
 		.filter(embed => embed.type === 'rich' || !embed.url.includes('pixiv.net'))
 		.map(/**@type {Embed}*/embed => {
 			console.log(embed);
 			
+			//@ts-expect-error
 			if(embed.type === 'rich')
 				return EmbedBuilder.from(embed);
 			
 			if(embed.data.thumbnail && embed.data.type === 'image' && !embed.data.image) {
+				//@ts-expect-error
 				message.files.push(embed.thumbnail.url);
 				return null;
 			}
 
 			if(embed.data.type === 'video') {
+				//@ts-expect-error
 				message.files.push(embed.video.url);
 				return null;
 			}
@@ -267,24 +280,102 @@ const sendPixivPostsAsWebhook = async (message, enabled) => {
 			return EmbedBuilder.from(embed);
 		}).filter(embed => embed);
 
+	//@ts-expect-error
 	message.embeds.push(...newMessage.embeds);
 
 	try {
-		const agent = await (new DiscordAgent().setup(channel));
-		agent.setMember(member);
-		agent.sendAsUser(message);
-
-		return true;
+		return {
+			shouldReplace: true,
+			shouldReply: false,
+			content: message.content,
+			//@ts-expect-error
+			embeds: message.embeds,
+			//@ts-expect-error
+			files: message.files,
+		};
 	} catch(e) {
 		console.error(e);
 	}
 
-	return false;
+	return ConverterEmptyPayload;
 };
+
+/**
+ * Detecta enlaces de pixiv en un mensaje y los reenvía con un Embed corregido, a través de una respuesta.
+ * @param {Message<true>} message El mensaje a analizar
+ * @param {''|'phixiv'|'webhook'} configConverter El identificador de servicio de conversión a utilizar
+ * @returns {Promise<import('./converters').ConverterPayload>}
+ */
+async function sendPixivPostsAsReply(message, configConverter) {
+	if(configConverter === '')
+		return ConverterEmptyPayload;
+
+	const { content, channel, author } = message;
+	
+	if(!message.guild.members.me.permissionsIn(channel).has([ 'SendMessages', 'ManageMessages', 'AttachFiles' ]))
+		return ConverterEmptyPayload;
+
+	if(channel.type === ChannelType.PublicThread) {
+		const { parent } = channel;
+		if(parent.type === ChannelType.GuildForum && (await channel.fetchStarterMessage()).id === message.id)
+			return ConverterEmptyPayload;
+	}
+
+	const pixivUrls = [ ...content.matchAll(PIXIV_REPLY_REGEX) ]
+		.filter(u => !(u.groups.st?.includes('<') && u.groups.ed?.includes('>')))
+		.slice(0, 16);
+
+	if(!pixivUrls.length)
+		return ConverterEmptyPayload;
+
+	const configProp = PIXIV_3P_CONVERTERS[configConverter];
+	if(configProp == undefined)
+		return ConverterEmptyPayload;
+	
+	const service = configProp.service;
+	const formattedPixivUrls = pixivUrls
+		.map(u => {
+			const { st = '', id, lang = '', page = null, ed = '' } = u.groups;
+			const spoiler = st.includes('||') && ed.includes('||')
+				? '||'
+				: '';
+			const idAndPage = page ? `${id}/${page}`: id;
+			return `${spoiler}<:pixiv2:1334816111270563880>[\`${idAndPage}\`](${service}${lang}/artworks/${idAndPage})${spoiler}`;
+		});
+	
+	return {
+		shouldReplace: false,
+		shouldReply: true,
+		content: formattedPixivUrls.join(' '),
+	};
+}
+
+/**
+ * Detecta enlaces de pixiv en un mensaje y los reenvía con un Embed corregido.
+ * @param {Message<true>} message El mensaje a analizar
+ * @param {''|'phixiv'|'webhook'} configConverter El identificador de servicio de conversión a utilizar
+ * @returns {Promise<import('./converters').ConverterPayload>}
+ */
+async function sendConvertedPixivPosts(message, configConverter) {
+	switch(configConverter) {
+	case 'phixiv':
+		return sendPixivPostsAsReply(message, configConverter);
+		
+	case 'webhook':
+		return sendPixivPostsAsWebhook(message);
+
+	default:
+		return {
+			shouldReplace: false,
+			shouldReply: false,
+		};
+	}
+}
 
 module.exports = {
 	pixivRegex: PIXIV_REGEX,
 	refreshPixivAccessToken,
 	formatPixivPostsMessage,
 	sendPixivPostsAsWebhook,
+	sendConvertedPixivPosts,
 };
