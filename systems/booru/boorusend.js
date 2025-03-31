@@ -48,7 +48,7 @@ const SOURCE_STYLES = [
 	{ color: 0x020814, emoji: '1298264258991095850', pattern: /cara\.app/ },
 	{ color: 0x36465d, emoji: '969666470252511232' , pattern: /tumblr\.com/ },
 	{ color: 0x252525, emoji: '1334123400024817724', pattern: /seiga\.nicovideo\.jp/ },
-	{ color: 0x0b69b7, emoji: '1334123419733721153', pattern: /www.patreon.com/ },
+	{ color: 0x0b69b7, emoji: '1334123419733721153', pattern: /www\.patreon\.com/ },
 	{ color: 0xfcbd00, emoji: '1298305816247664640', pattern: /drive\.google\.com/ },
 	{ color: 0xff4500, emoji: '969666029045317762' , pattern: /(reddit\.com)|(([iv]\.)?redd\.it)/ },
 	{ color: 0xff9a30, emoji: '1299753011932827749', pattern: /weibo\.com/ },
