@@ -1,10 +1,11 @@
-const { EmbedBuilder, InteractionType, Emoji, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js'); //Integrar discord.js
-const { CommandTags, CommandManager, CommandOptions, CommandOptionSolver } = require("../Commons/commands");
+const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js'); //Integrar discord.js
+const { CommandTags, CommandManager, CommandOptions } = require("../Commons/commands");
 const { emojiRegex } = require('../../func');
 const { makeButtonRowBuilder } = require('../../tsCasts');
 
 const options = new CommandOptions()
-	.addParam('mensaje', 'MESSAGE', 'para especificar un mensaje por ID, enlace o respuesta');
+	.addParam('mensaje', 'MESSAGE', 'para especificar un mensaje por ID, enlace o respuesta', { optional: true })
+	.addParam('emote', 'EMOTE', 'para indicar un emote (si no especificaste un mensaje)', { optional: true });
 
 const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('emote', flags)
@@ -15,22 +16,28 @@ const command = new CommandManager('emote', flags)
 	)
 	.setDescription('Muestra el enlace del emote especificado')
 	.setOptions(options)
-	.setExecution(async (request, args) => {
-		const message = CommandOptionSolver.asMessage(await options.in(request).fetchParam(args, 'mensaje', true))
+	.setExperimentalExecution(async (request, args) => {
+		const message = (await args.getMessage('mensaje', true))
 			?? request.channel.messages.cache.get(/**@type {import('discord.js').Message}*/(request).reference?.messageId)
-			?? (request.isMessage ? /**@type {import('discord.js').Message<true>}*/(request) : null);
+			?? (request.isMessage ? request.inferAsMessage() : null);
 
-		if(!message)
-			return request.reply({ content: '⚠️️ Debes especificar un mensaje' });
+		let content = null;
+		if(message)
+			content = message.content;
+		else if(request.isInteraction)
+			content = args.getString('emote');
 
-		const emojisMatches = message.content.matchAll(emojiRegex);
+		if(!content)
+			return request.reply({ content: '⚠️️ Debes especificar un emote o un mensaje con un emote' });
+
+		const emojisMatches = content.matchAll(emojiRegex);
 		if(!emojisMatches)
 			return request.reply({ content: 'No se encontraron emotes...' });
 
 		/**@type {Array<EmbedBuilder>}*/
 		const embeds = [];
 
-		/**@type {Array<ActionRowBuilder>}*/
+		/**@type {Array<import('discord.js').ActionRowBuilder>}*/
 		const components = [];
 
 		for(const emojiMatch of emojisMatches) {

@@ -7,7 +7,6 @@ const { makeButtonRowBuilder } = require('../../tsCasts.js');
 const tags = new CommandTags().add('PAPA');
 const command = new CommandManager('papa-feedback', tags)
     .setLongDescription('Comando de feedback')
-    .setExperimental(true)
     .setExperimentalExecution(async request => {
         const { client } = request;
         
@@ -62,7 +61,7 @@ const command = new CommandManager('papa-feedback', tags)
         guildConfigs.forEach(guildConfig => {
             const guild = guilds.get(guildConfig.guildId);
             const channels = guild.channels.cache;
-            Object.entries(guildConfig.feeds).forEach(([ channelId, feed ]) => {
+            Object.entries(guildConfig.feeds).forEach(([ channelId ]) => {
                 const channel = channels.get(channelId);
                 if(!channel.isSendable()) return;
                 channel.send({

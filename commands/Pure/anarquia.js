@@ -1,7 +1,9 @@
+/* eslint-disable no-sparse-arrays */
+
 const global = require('../../localdata/config.json'); //Variables globales
 const { makeWeightedDecision, compressId, decompressId, improveNumber, emojiRegex } = require('../../func.js');
 const { createCanvas, loadImage } = require('canvas');
-const { EmbedBuilder, AttachmentBuilder, StringSelectMenuBuilder, Colors, ButtonBuilder, ButtonStyle, StringSelectMenuInteraction } = require('discord.js');
+const { EmbedBuilder, AttachmentBuilder, StringSelectMenuBuilder, Colors, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { Puretable, AUser, pureTableAssets } = require('../../localdata/models/puretable.js');
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require("../Commons/commands");
@@ -472,14 +474,14 @@ async function fetchPureTableCells() {
 }
 
 /**
- * @param {import('../Commons/typings').ComplexCommandRequest | StringSelectMenuInteraction} request 
+ * @param {import('../Commons/typings').ComplexCommandRequest | import('discord.js').StringSelectMenuInteraction} request 
  * @param {string} emoteId 
  * @returns {Promise<boolean>} Whether the emote could be loaded (`true`) or not (`false`)
  */
 async function loadEmoteIfNotLoaded(request, emoteId) {
 	const loadEmotes = global.loademotes;
 
-	if(!loadEmotes.hasOwnProperty(emoteId)) {
+	if(!Object.prototype.hasOwnProperty.call(loadEmotes, emoteId)) {
 		const imageUrl = request.client.emojis.cache.get(emoteId)?.imageURL({ extension: 'png', size: 64 });
 		if(!imageUrl) return false;
 

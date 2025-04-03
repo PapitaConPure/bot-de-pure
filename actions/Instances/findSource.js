@@ -1,7 +1,6 @@
-const { Attachment } = require('discord.js');
 const { Translator } = require('../../internationalization.js');
 const { ContextMenuActionManager } = require('../Commons/actionBuilder.js');
-const { injectSauceNAOEmbeds } = require('../../systems/others/saucenao.js');
+const { pourSauce } = require('../../systems/others/saucenao.js');
 const SauceNAOUser = require('../../localdata/models/saucenaoUsers');
 
 const action = new ContextMenuActionManager('actionFindSource', 'Message')
@@ -19,7 +18,7 @@ const action = new ContextMenuActionManager('actionFindSource', 'Message')
 
         const messageAttachments = message.attachments
             ? [ ...message.attachments.values() ]
-            : /**@type {Array<Attachment>}*/([]);
+            : /**@type {Array<import('discord.js').Attachment>}*/([]);
 		
 		const attachmentUrls = messageAttachments.map(att => att.url);
 		const otherMessageUrls = message.embeds
@@ -43,7 +42,7 @@ const action = new ContextMenuActionManager('actionFindSource', 'Message')
 		const successes = [];
 		const failures = [];
 		
-		await injectSauceNAOEmbeds(sauceNAOUser.clientId, queries, translator, { successes, failures });
+		await pourSauce(sauceNAOUser.clientId, queries, interaction, { successes, failures });
 
 		if(!successes.length && !failures.length)
 			return interaction.editReply({ content: translator.getText('saucenaoInvalidImage') });

@@ -13,13 +13,13 @@ const flags = new CommandTags().add(
 
 const command = new CommandManager('bienvenida', flags)
 	.setBriefDescription('Configura una bienvenida para este servidor')
-	.setLongDescription([
+	.setLongDescription(
 		'Edita el mensaje de bienvenida para este servidor.',
 		'Las bienvenidas se envían en el canal de mensajes de sistema o en el `--canal` que especifiques',
-	])
+	)
 	.setPermissions(perms)
 	.setOptions(options)
-	.setExecution(async (request) => {
+	.setExperimentalExecution(async (request) => {
 		request.reply('a');
 	});
 

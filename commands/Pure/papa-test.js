@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ModalBuilder, TextInputBuilder, GuildMember } = require('discord.js'); //Integrar discord.js
 const { fetchMember, isBoosting, fetchChannel, fetchRole } = require('../../func.js');
 const { formatPixivPostsMessage } = require('../../systems/agents/purepix.js');
@@ -18,7 +19,6 @@ const tags = new CommandTags().add('PAPA');
 const command = new CommandManager('papa-test', tags)
     .setLongDescription('Comando de pruebas 😳👉👈')
     .setOptions(options)
-    .setExperimental(true)
     .setExperimentalExecution(async (request, args) => {
         //func.dibujarBienvenida(message.member);
         //func.dibujarDespedida(message.member);

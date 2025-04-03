@@ -1,7 +1,7 @@
-const { EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, Colors } = require('discord.js'); //Integrar discord.js
-const { decompressId, shortenText, sleep, compressId } = require('../../func.js'); //Funciones globales
+const { ModalBuilder, TextInputBuilder, TextInputStyle, Colors } = require('discord.js'); //Integrar discord.js
+const { decompressId, sleep } = require('../../func.js'); //Funciones globales
 const { CommandTags, CommandManager } = require('../Commons/commands.js');
-const { useMainPlayer, serialize, deserialize } = require('discord-player');
+const { useMainPlayer } = require('discord-player');
 const { showQueuePage, getPageAndNumberTrackIndex, isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/musicPlayer.js');
 const { Translator } = require('../../internationalization.js');
 const { tryRecoverSavedTracksQueue, saveTracksQueue } = require('../../localdata/models/playerQueue.js');
@@ -257,6 +257,32 @@ const command = new CommandManager('cola', tags)
 
 		await sleep(1250);
 		return showQueuePage(interaction, 'SK', authorId, +page);
+	})
+	.setSelectMenuResponse(async function shuffle(interaction, authorId, page) {
+		const translator = await Translator.from(interaction.user.id);
+
+		if(authorId && interaction.user.id !== decompressId(authorId))
+			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
+
+		const channel = interaction.member.voice?.channel;
+		if(!channel)
+			return interaction.reply({ content: translator.getText('voiceExpected'), ephemeral: true });
+
+		if(interaction.guild?.members?.me?.voice?.channel && interaction.guild.members.me.voice.channel.id !== channel.id)
+			return interaction.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
+
+		const player = useMainPlayer();
+		const queue = player.queues.get(interaction.guildId);
+		
+		queue.toggleShuffle();
+
+		const embed = makePuréMusicEmbed(interaction)
+			.setTitle(translator.getText('queueShuffleTitle', queue.isShuffling))
+			.setTimestamp(Date.now());
+		interaction.message.reply({ embeds: [ embed ] }).catch(console.error);
+		
+		await sleep(1250);
+		return showQueuePage(interaction, 'SF', authorId, +page);
 	})
 	.setButtonResponse(async function clearQueue(interaction, authorId) {
 		const translator = await Translator.from(interaction.user.id);

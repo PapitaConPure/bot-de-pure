@@ -103,9 +103,9 @@ const command = new CommandManager('sassafras', flags)
 		'Cuidado con hacer enojar al tío Sassa, o puede que active su `--sassamodo`',
 	)
 	.setOptions(options)
-	.setExecution(async (request, args) => {
-		const showTotal = options.fetchFlag(args, 'total');
-		const sassamodo = options.fetchFlag(args, 'sassamodo');
+	.setExperimentalExecution(async (request, args) => {
+		const showTotal = args.parseFlag('total');
+		const sassamodo = args.parseFlag('sassamodo');
 		
 		if(!showTotal && sassamodo)
 			return request.reply({ content: sassadata.sassamodo });

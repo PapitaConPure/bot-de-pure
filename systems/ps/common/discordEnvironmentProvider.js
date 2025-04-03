@@ -1,4 +1,5 @@
-const { fetchChannel, fetchRole, fetchMember } = require('../../../func');
+const { fetchChannel, fetchRole, fetchMemberSync } = require('../../../func');
+// eslint-disable-next-line no-unused-vars
 const { EnvironmentProvider, PSGuild, PSChannel, PSRole, PSUser, PSMember } = require('../v1.1');
 
 /**@implements {EnvironmentProvider}*/
@@ -54,7 +55,7 @@ class DiscordEnvironmentProvider {
 	 * @return {PSMember?}
 	 */
 	fetchMember(query) {
-		const member = fetchMember(query, this.#request);
+		const member = fetchMemberSync(query, this.#request);
 		const psGuild = DiscordEnvironmentProvider.#getOrMakePSGuild(member.guild);
 		return psGuild.members.get(member.id) ?? null;
 	}

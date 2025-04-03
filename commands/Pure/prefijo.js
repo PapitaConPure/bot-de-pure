@@ -20,8 +20,8 @@ const command = new CommandManager('prefijo', flags)
 	.setLongDescription('Cambia o muestra el prefijo del servidor actual')
 	.setPermissions(perms)
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash) => {
-		const reset = options.fetchFlag(args, 'reestablecer', { callback: true });
+	.setExperimentalExecution(async (request, args) => {
+		const reset = args.parseFlag('reestablecer');
 		const guildsearch = { guildId: request.guildId };
 		const { raw: preraw, regex: preregex } = prefixes.p_pure(request.guildId);
 
@@ -35,8 +35,7 @@ const command = new CommandManager('prefijo', flags)
 			});
 		}
 
-		const prefix = (isSlash ? args.getString('prefijo') : args[0])?.toLowerCase();
-
+		const prefix = args.getString('prefijo');
 		if(!prefix) {
 			const embed = new EmbedBuilder()
 				.setColor(global.tenshiColor)

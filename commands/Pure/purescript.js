@@ -3,7 +3,7 @@ const { CommandTags } = require("../Commons/cmdTags");
 const { CommandManager } = require("../Commons/cmdBuilder");
 const { executeTuber, CURRENT_PS_VERSION } = require("../../systems/ps/common/executeTuber");
 const { CommandOptions } = require("../Commons/cmdOpts");
-const { ButtonBuilder, ButtonStyle, EmbedBuilder, CommandInteractionOptionResolver } = require("discord.js");
+const { ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js");
 const { p_pure } = require("../../localdata/customization/prefixes");
 const { tenshiColor } = require('../../localdata/config.json');
 const { makeButtonRowBuilder } = require('../../tsCasts');
@@ -93,7 +93,6 @@ const command = new CommandManager('purescript', flags)
 		`Última versión: **v${CURRENT_PS_VERSION}**`
 	)
 	.setOptions(options)
-	.setExperimental(true)
 	.setExperimentalExecution(async function (request, args, rawArgs) {
 		const helpString = `-# Usa \`${p_pure(request.guildId).raw}ayuda puréscript\` para más información`;
 		const scriptResult = await getScriptString(args, rawArgs);

@@ -1,5 +1,5 @@
 const uses = require('../../localdata/sguses.json'); //Funciones globales
-const { fetchUser, randRange } = require('../../func.js');
+const { randRange } = require('../../func.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
@@ -21,13 +21,24 @@ const frase = [
 	'[m] uy se me resbaló el dedo <:cursed:657680175584247812>',
 	'Se te ve la raja [m] <:detective:720736199727251536>',
 ];
+
+/**
+ * 
+ * @param {import('../Commons/typings').ComplexCommandRequest} request 
+ * @param {import('discord.js').User} user 
+ * @param {number} cnt 
+ * @param {boolean} isFirst 
+ */
 async function pinguear(request, user, cnt, isFirst) {
 	const replyContent = { content: frase[randRange(0, frase.length)].replace('[m]', `${user}`) };
+
 	if(isFirst)
 		await request.reply(replyContent);
 	else
-		await request.channel.send(replyContent).catch(_ => undefined);
-	if(cnt > 1) setTimeout(pinguear, 800, request, user, cnt - 1, false);
+		await request.channel.send(replyContent).catch(() => undefined);
+
+	if(cnt > 1)
+		setTimeout(pinguear, 800, request, user, cnt - 1, false);
 }
 
 const flags = new CommandTags().add(
@@ -42,28 +53,50 @@ const command = new CommandManager('pinguear', flags)
 	.setBriefDescription('Pingea a un usuario una cantidad de veces')
 	.setLongDescription('Pingea a un `<usuario>` una `<cantidad>` de veces')
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash = false) => {
+	.setExperimentalExecution(async (request, args) => {
 		const now = Date.now() * 1;
-		const uid = (request.author ?? request.user).id;
+		const uid = request.userId;
+
 		if(now - (uses.pinguear[uid] ?? 0) < 1000 * 60)
-			return isSlash ? request.reply({ content: '⏳ Pero no seas tan degenerado, aflójale un poco', ephemeral: true }) : request.react('⏳');
-		if(!isSlash && args.length < 2)
+			return request.isInteraction
+				? request.reply({ content: '⏳ Pero no seas tan degenerado, aflójale un poco', ephemeral: true })
+				: request.inferAsMessage().react('⏳');
+		
+		if(request.isMessage && args.count < 2)
 			return request.reply({ content: `⚠️ Debes ingresar 2 parámetros (\`${p_pure(request.guild.id).raw}pinguear <cantidad> <usuario>\`)`, ephemeral: true });
 		
 		let repeats = -1;
-		let userSearch;
-		
-		if(isSlash) repeats = Math.floor(args.getNumber('cantidad'));
-		else {
-			if(!isNaN(args[0])) { repeats = args[0]; userSearch = args[1]; }
-			else if(!isNaN(args[1])) { repeats = args[1]; userSearch = args[0]; }
-		}
-		if(repeats < 2 || repeats > 10)
-			return request.reply({ content: '⚠️ Solo puedes pinguear a alguien entre 2 y 10 veces', ephemeral: true });
+		let user;
 
-		const user = isSlash ? args.getUser('usuario') : fetchUser(userSearch, request);
+		if(request.isInteraction) {
+			repeats = Math.floor(args.getNumber('cantidad', 3));
+			user = await args.getUser('usuario');
+		} else {
+			if(!isNaN(+args.args[0])) {
+				repeats = Math.floor(args.getNumber('cantidad', 3));
+				user = await args.getUser('usuario');
+			} else if(!isNaN(+args.args[1])) {
+				user = await args.getUser('usuario');
+				repeats = Math.floor(args.getNumber('cantidad', 3));
+			} else {
+				return request.reply({
+					content: `⚠️ Debes indicar un número y un usuario: (\`${p_pure(request.guild.id).raw}pinguear <cantidad> <usuario>\`)`,
+					ephemeral: true,
+				});
+			}
+		}
+
+		if(repeats < 2 || repeats > 10)
+			return request.reply({
+				content: '⚠️ Solo puedes pinguear a alguien entre 2 y 10 veces',
+				ephemeral: true,
+			});
+
 		if(!user)
-			return request.reply({ content: '⚠️ Usuario inválido', ephemeral: true });
+			return request.reply({
+				content: '⚠️ Usuario inválido',
+				ephemeral: true,
+			});
 
 		uses.pinguear[uid] = now * 1;
 		return pinguear(request, user, repeats, true);

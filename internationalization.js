@@ -798,6 +798,21 @@ let localesObject = /**@type {const}*/({
 		en: 'The music queue is empty',
 		ja: '再生キューが空です',
 	},
+	queueDescriptionLoopTrack: {
+		es: '🔁 Modo de repetición de pista activo',
+		en: '🔁 Track loop mode is enabled',
+		ja: '🔁 トラックループモードが有効になりました',
+	},
+	queueDescriptionLoopQueue: {
+		es: '🔁 Modo de repetición de cola activo',
+		en: '🔁 Queue loop mode is enabled',
+		ja: '🔁 キューループモードが有効になりました',
+	},
+	queueDescriptionLoopAutoplay: {
+		es: '🎧 Auto-DJ activo',
+		en: '🎧 Auto DJ is enabled',
+		ja: '🎧 オートDJが有効になりました',
+	},
 	queueNowPlayingName: {
 		es: 'Escuchando Ahora',
 		en: 'Now Playing',
@@ -850,13 +865,88 @@ let localesObject = /**@type {const}*/({
 	},
 	queueSkipTitleNoTrack: {
 		es: 'No hay ninguna pista a saltar actualmente',
-		en: 'No track currently playing to skip',
+		en: 'No currently playing track to skip',
 		ja: 'スキップできる現在再生中のトラックはありません',
 	},
 	queueSkipTitleSkipped: {
 		es: 'Pista saltada',
 		en: 'Track skipped',
 		ja: 'トラックがスキップされました',
+	},
+	queueShuffleTitle: {
+		es: `Se ${subif(0, '=', true, 'activó', 'desactivó')} el modo de cola aleatoria`,
+		en: `Queue shuffle mode ${subif(0, '=', true, 'enabled', 'disabled')}`,
+		ja: `キューシャッフルが${subif(0, '=', true, '有効', '無効')}になりました`,
+	},
+	queueLoopTitle: {
+		es: 'Establece un modo de repetición',
+		en: 'Set a loop mode',
+		ja: 'リピートモードを設定',
+	},
+	queueLoopMenuPlaceholder: {
+		es: 'Modo de repetición...',
+		en: 'Loop mode...',
+		ja: 'リピートモード…',
+	},
+	queueLoopMenuOffDesc: {
+		es: 'Desactivar cualquier modo de repetición activo',
+		en: 'Disable any active loop mode',
+		ja: 'リピートを無効にします',
+	},
+	queueLoopMenuTrackLabel: {
+		es: 'Pista',
+		en: 'Track',
+		ja: 'トラック',
+	},
+	queueLoopMenuTrackDesc: {
+		es: 'Repetir la pista actual',
+		en: 'Loop the current track',
+		ja: '現在のトラックをリピートします',
+	},
+	queueLoopMenuQueueLabel: {
+		es: 'Cola',
+		en: 'Queue',
+		ja: 'キュー',
+	},
+	queueLoopMenuQueueDesc: {
+		es: 'Repetir la cola completa',
+		en: 'Loop the entire queue',
+		ja: 'キュー全体をリピートします',
+	},
+	queueLoopMenuAutoplayLabel: {
+		es: 'Auto-DJ',
+		en: 'Auto DJ',
+		ja: 'オートDJ',
+	},
+	queueLoopMenuAutoplayDesc: {
+		es: 'Agregar pistas similares indefinidamente',
+		en: 'Queue up similar tracks indefinitely',
+		ja: '類似のトラックを無限に追加します',
+	},
+	queueLoopTitleNoTrack: {
+		es: 'No hay ninguna pista a repetir actualmente',
+		en: 'No currently playing track to loop',
+		ja: 'ループできる現在再生中のトラックはありません',
+	},
+	queueLoopOffTitle: {
+		es: 'Se desactivó el modo de repetición activo',
+		en: 'Active loop mode has been disabled',
+		ja: 'アクティブリピートモードが無効になりました',
+	},
+	queueLoopTrackTitle: {
+		es: 'Se activó el modo de repetición de pista',
+		en: 'Track loop mode has been enabled',
+		ja: 'トラックのリピートモードが有効になりました',
+	},
+	queueLoopQueueTitle: {
+		es: 'Se activó el modo de repetición de cola',
+		en: 'Queue loop mode has been enabled',
+		ja: 'キューのリピートモードが有効になりました',
+	},
+	queueLoopAutoplayTitle: {
+		es: 'Se activó el Auto-DJ',
+		en: 'Auto DJ has been enabled',
+		ja: '自動DJが有効になりました',
 	},
 	sonandoTitle: {
 		es: 'Escuchando Ahora',
@@ -1034,17 +1124,27 @@ let localesObject = /**@type {const}*/({
 	saucenaoSearchSuccess: {
 		es: `Resultado de la imagen Nº${subl(0)}`,
 		en: `Image No. ${subl(0)} result`,
-		ja: `画像${subl(0)}結果`,
+		ja: `画像#${subl(0)}結果`,
+	},
+	saucenaoSearchRedactedTitle: {
+		es: `🔞 Se ocultó un resultado de la imagen Nº${subl(0)}`,
+		en: `🔞 A result for image No. ${subl(0)} was hidden`,
+		ja: `🔞 画像#${subl(0)}の結果は非表示になりました`,
+	},
+	saucenaoSearchRedactedDesc: {
+		es: 'Puedes ver resultados NSFW en canales NSFW',
+		en: `You can get NSFW results in NSFW channels`,
+		ja: `NSFWチャンネルでNSFWの結果を得ることができます`,
 	},
 	saucenaoSearchNoResult: {
 		es: `No se encontraron resultados para la imagen Nº${subl(0)}`,
 		en: `No results were found for image No. ${subl(0)}`,
-		ja: `画像${subl(0)}に該当する結果は見つかりませんでした`,
+		ja: `画像#${subl(0)}に該当する結果は見つかりませんでした`,
 	},
 	saucenaoSearchErrorTitle: {
 		es: `Resultado parcial de la imagen Nº${subl(0)}`,
 		en: `Image No. ${subl(0)} partial result`,
-		ja: `画像${subl(0)}の部分結果`,
+		ja: `画像#${subl(0)}の部分結果`,
 	},
 
 	poll: {
@@ -1789,7 +1889,7 @@ class Translator {
 		if(!translationTemplate) throw RangeError(`Se esperaba una clave de localización válida. Se recibió: ${id} :: ${locale}`);
 	
 		//Ejemplo: 1{...}<?{'por defecto'}
-		const subLocaleRegex = /(\d+){\.\.\.}(?:<!{((?:[!=<>]{1,2}):[^\|]+)\|'((?:(?!'}).)*)'})?(?:<\?{'((?:(?!'}).)*)'})?/g;
+		const subLocaleRegex = /(\d+){\.\.\.}(?:<!{((?:[!=<>]{1,2}):[^|]+)\|'((?:(?!'}).)*)'})?(?:<\?{'((?:(?!'}).)*)'})?/g;
 		const translation = translationTemplate.replace(subLocaleRegex, (_match, /**@type {String}*/i, /**@type {String}*/condition, /**@type {String}*/whenTrue, /**@type {String}*/defaultValue) => {
 			const value = values[i];
 	

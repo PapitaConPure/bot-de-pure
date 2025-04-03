@@ -1,11 +1,9 @@
-const { EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, Colors } = require('discord.js'); //Integrar discord.js
-const { decompressId, shortenText, sleep, compressId } = require('../../func.js'); //Funciones globales
+const { Colors } = require('discord.js'); //Integrar discord.js
 const { CommandTags, CommandManager } = require('../Commons/commands.js');
-const { useMainPlayer, serialize, deserialize } = require('discord-player');
-const { showQueuePage, getPageAndNumberTrackIndex, isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/musicPlayer.js');
+const { useMainPlayer } = require('discord-player');
+const { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/musicPlayer.js');
 const { Translator } = require('../../internationalization.js');
-const { tryRecoverSavedTracksQueue, saveTracksQueue } = require('../../localdata/models/playerQueue.js');
-const { makeTextInputRowBuilder } = require('../../tsCasts.js');
+const { tryRecoverSavedTracksQueue } = require('../../localdata/models/playerQueue.js');
 
 const tags = new CommandTags().add(
 	'COMMON',
@@ -51,9 +49,11 @@ const command = new CommandManager('saltar', tags)
 				queue.node.stop();
 			else
 				queue.node.skip();
-	
+
 			const service = SERVICES[queue.currentTrack.source];
-			const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted) : translator.getText('playFooterTextQueueEmpty');
+			const queueInfo = queue.size
+				? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted)
+				: translator.getText('playFooterTextQueueEmpty');
 			const embed = makePuréMusicEmbed(request, service.color, service.iconUrl, [ queueInfo ])
 				.setTitle(translator.getText('queueSkipTitleSkipped'))
 				.setDescription(`[${skippedTitle}](${skippedUrl})`)

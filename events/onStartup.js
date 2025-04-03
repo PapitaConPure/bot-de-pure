@@ -196,27 +196,6 @@ async function onStartup(client) {
 		}
 		await hourai.save();
 
-		console.log(chalk.gray('Preparando Encuestas...'));
-		const polls = (await Poll.find({}));
-		const pollCommand = require('../commands/Pure/encuesta.js');
-		polls.forEach(poll => {
-			const pollChannel = client.channels.cache.get(poll.pollChannelId);
-			if(!pollChannel)
-				return poll.delete();
-
-			const resultsChannel = client.channels.cache.get(poll.resultsChannelId);
-			if(!resultsChannel)
-				return poll.delete();
-
-			const timeUntil = poll.end - Date.now();
-			if(timeUntil < 1000)
-				//@ts-expect-error
-				return pollCommand.concludePoll(pollChannel, resultsChannel, poll.id);
-
-			//@ts-expect-error
-			setTimeout(pollCommand.concludePoll, timeUntil, pollChannel, resultsChannel, poll.id);
-		});
-
 		console.log(chalk.gray('Preparando Dueños de Mensajes de Agentes Puré...'));
 		await initializeWebhookMessageOwners();
 

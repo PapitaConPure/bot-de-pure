@@ -1,6 +1,4 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
 const { CommandTags, CommandManager, CommandOptions } = require("../Commons/commands");
-const { DiscordAgent } = require('../../systems/agents/discordagent.js');
 const { hourai } = require('../../localdata/config.json');
 const HouraiCfg = require('../../localdata/models/hourai.js');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
@@ -82,10 +80,10 @@ const command = new CommandManager('saki', flags)
 	)
     .setPermissions(perms)
     .setOptions(options)
-	.setExecution(async (request, args) => {
-		const bienvenida = options.fetchFlag(args, 'bienvenida');
-		const despedida = options.fetchFlag(args, 'despedida');
-		const pingBienvenida = options.fetchFlag(args, 'ping');
+	.setExperimentalExecution(async (request, args) => {
+		const bienvenida = args.parseFlagExpr('bienvenida');
+		const despedida = args.parseFlagExpr('despedida');
+		const pingBienvenida = args.parseFlagExpr('ping');
         
         const houraiCfg = (await HouraiCfg.findOne({})) || new HouraiCfg();
         const applied = [];

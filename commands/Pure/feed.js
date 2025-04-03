@@ -1,5 +1,5 @@
-const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType, ButtonComponent } = require('discord.js');
-const { isNotModerator, shortenText, guildEmoji, decompressId, compressId, isNSFWChannel, randInArray } = require('../../func.js');
+const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType } = require('discord.js');
+const { isNotModerator, shortenText, guildEmoji, compressId, isNSFWChannel, randInArray } = require('../../func.js');
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { auditError, auditAction } = require('../../systems/others/auditor.js');
 const { CommandTags } = require('../Commons/cmdTags.js');
@@ -103,7 +103,7 @@ const command = new CommandManager('feed', flags)
 	.setBriefDescription('Inicializa un Feed en un canal por medio de un Asistente.')
 	.setLongDescription('Inicializa un Feed de imágenes en un canal. Simplemente usa el comando y sigue los pasos del Asistente para configurar y personalizar todo')
 	.setPermissions(perms)
-	.setExecution(async request => {
+	.setExperimentalExecution(async request => {
 		const translator = await Translator.from(request.userId);
 		const wizard = new EmbedBuilder()
 			.setColor(Colors.Aqua)
@@ -219,7 +219,7 @@ const command = new CommandManager('feed', flags)
 		const guildQuery = { guildId: interaction.guild.id };
 		const gcfg = (await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery);
 
-		if(gcfg?.feeds && gcfg.feeds.hasOwnProperty(fetchedChannel.id))
+		if(gcfg?.feeds && Object.prototype.hasOwnProperty.call(gcfg.feeds, fetchedChannel.id))
 			return interaction.reply({ content: '⚠️ Ya existe un Feed en el canal solicitado. Prueba editarlo o crear un Feed en otro canal', ephemeral: true });
 
 		const wizard = tagsSetupPrompt(interaction, fetchedChannel.id, translator);
@@ -1001,7 +1001,7 @@ const command = new CommandManager('feed', flags)
 	.setButtonResponse(async function showFeedImageTags(interaction, isNotFeed) {
         const translator = await Translator.from(interaction.user.id);
 
-		const url = (/**@type {ButtonComponent}*/(interaction.message.components[0].components[0])).url;
+		const url = (/**@type {import('discord.js').ButtonComponent}*/(interaction.message.components[0].components[0])).url;
 		const booru = new Booru(globalConfigs.booruCredentials);
 		try {
 			const post = await booru.fetchPostByUrl(url);
@@ -1137,7 +1137,7 @@ const command = new CommandManager('feed', flags)
 			});
 		
 		const { message } = interaction;
-		const url = (/**@type {ButtonComponent}*/(message.components[0].components[0])).url;
+		const url = (/**@type {import('discord.js').ButtonComponent}*/(message.components[0].components[0])).url;
 		if(isNotFeed || !url)
 			return Promise.all([
 				interaction.reply({
@@ -1212,7 +1212,7 @@ const command = new CommandManager('feed', flags)
 	.setButtonResponse(async function contribute(interaction) {
         const translator = await Translator.from(interaction.user.id);
 
-		const url = (/**@type {ButtonComponent}*/(interaction.message.components[0].components[0])).url;
+		const url = (/**@type {import('discord.js').ButtonComponent}*/(interaction.message.components[0].components[0])).url;
 		const booru = new Booru(globalConfigs.booruCredentials);
 		try {
 			const post = await booru.fetchPostByUrl(url);

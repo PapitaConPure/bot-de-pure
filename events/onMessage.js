@@ -53,7 +53,7 @@ async function handleInvalidCommand(message, client, commandName, prefixPair) {
 	async function replyAndDelete() {
 		const content = selectedReply.text.replace('{commandName}', commandName);
 		const notice = await message.reply({ content }).catch(() => undefined);
-		return setTimeout(() => notice?.delete().catch(_ => undefined), 6000);
+		return setTimeout(() => notice?.delete().catch(() => undefined), 6000);
 	}
 
 	if(commandName.length < 2)
@@ -272,7 +272,7 @@ async function onMessage(message, client) {
 	const { shouldReplace, shouldReply, ...messageResult } = result;
 
 	try {
-		if(result.shouldReply) {
+		if(shouldReply) {
 			const [ sent ] = await Promise.all([
 				message.reply(messageResult),
 				message.suppressEmbeds(true),
@@ -280,14 +280,14 @@ async function onMessage(message, client) {
 			
 			setTimeout(() => {
 				if(!message?.embeds) return;
-				message.suppressEmbeds(true).catch(_ => undefined);
+				message.suppressEmbeds(true).catch(() => undefined);
 			}, 3000);
 		
 			await Promise.all([
 				addAgentMessageOwner(sent, author.id),
 				addMessageCascade(message.id, sent.id, new Date(+message.createdAt + 4 * 60 * 60e3)),
 			]);
-		} else if(result.shouldReplace) {
+		} else if(shouldReplace) {
 			const agent = await (new DiscordAgent().setup(channel));
 			agent.setMember(message.member);
 			await agent.sendAsUser(messageResult);
@@ -314,11 +314,13 @@ async function onMessage(message, client) {
 
 	//Ayuda para principiantes
 	if(content.includes(`${client.user}`)) {
+		const command = require('../commands/Pure/prefijo.js');
 		const complex = CommandManager.requestize(message);
-		return require('../commands/Pure/prefijo.js').execute(complex, []);
+		const solver = new CommandOptionSolver(complex, [], command.options);
+		return /**@type {import('../commands/Commons/cmdBuilder.js').ExperimentalExecuteFunction}*/(/**@type {unknown}*/(command.execute))(complex, solver);
 	}
 }
 
 module.exports = {
 	onMessage,
-}
+};

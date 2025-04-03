@@ -1,5 +1,5 @@
-const { User, GuildMember, Message, GuildChannel, CommandInteractionOptionResolver, Role, AutocompleteInteraction, Attachment } = require('discord.js');
-const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSentence, toLowerCaseNormalized, regroupText } = require('../../func');
+const { User, GuildMember, Message, GuildChannel, CommandInteractionOptionResolver, Role, Attachment, Guild } = require('discord.js');
+const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSentence, regroupText, fetchGuild } = require('../../func');
 
 /**
  * @typedef {{name: String, expression: String|Number}} ParamTypeStrict Parámetros de CommandOption que siguen una sintaxis estricta
@@ -7,8 +7,8 @@ const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSent
  * @typedef {BaseParamType|ParamTypeStrict} ParamType Tipos de parámetro de CommandOption
  * @typedef {'SINGLE'|'MULTIPLE'|Array<String>} ParamPoly Capacidad de entradas de parámetro de CommandOption
  * @typedef {'getBoolean'|'getString'|'getNumber'|'getInteger'|'getChannel'|'getMessage'|'getUser'|'getMember'|'getRole'|'getAttachment'} GetMethodName
- * @typedef {Number | String | Boolean | User | GuildMember | import('discord.js').GuildBasedChannel | Message<Boolean> | Role | Attachment | undefined} ParamResult
- * @typedef {(interaction: AutocompleteInteraction<'cached'>, query: String) => Promise<*>} AutocompleteFunction
+ * @typedef {Number | String | Boolean | User | GuildMember | Guild | import('discord.js').GuildBasedChannel | Message<Boolean> | Role | Attachment | undefined} ParamResult
+ * @typedef {(interaction: import('discord.js').AutocompleteInteraction<'cached'>, query: String) => Promise<*>} AutocompleteFunction
  */
 
 /**
@@ -149,7 +149,7 @@ const isParamTypeStrict = (pt) => (typeof pt === 'object') && pt?.name != undefi
 /**
  * 
  * @param {AutocompleteFunction} fn 
- * @param {AutocompleteInteraction<'cached'>} interaction 
+ * @param {import('discord.js').AutocompleteInteraction<'cached'>} interaction 
  * @param {String} query 
  */
 async function handleAutocomplete(fn, interaction, query) {
@@ -646,7 +646,6 @@ class CommandOptions {
 	 */
 	get callSyntax() {
 		/**@type {Array<CommandParam>}*/
-		// @ts-ignore
 		const params = [...this.params.values()];
 		return params.map(p => {
 			const paramExpressions = [ p.name ];
@@ -657,11 +656,27 @@ class CommandOptions {
 		}).join(' ');
 	};
 
-	/**@returns {Array<string>}*/
+	static #fetchDependantTypes = new Set(/**@type {ReadonlyArray<BaseParamType>}*/([
+		'USER',
+		'MEMBER',
+		'MESSAGE',
+		'GUILD',
+	]));
+
+	static #requestDependantTypes = new Set(/**@type {ReadonlyArray<BaseParamType>}*/([
+		'USER',
+		'MEMBER',
+		'MESSAGE',
+		'CHANNEL',
+		'ROLE',
+	]));
+
+	static get fetchDependantTypes() {
+		return this.#fetchDependantTypes;
+	}
+
 	static get requestDependantTypes() {
-		/**@type {Array<BaseParamType>}*/
-		const t = [ 'USER', 'MEMBER', 'MESSAGE', 'CHANNEL', 'ROLE' ];
-		return t;
+		return this.#requestDependantTypes;
 	}
 
 	/**
@@ -672,13 +687,25 @@ class CommandOptions {
 	 * @returns {Promise<ParamResult>}
 	 */
 	async fetchMessageParam(args, type, whole = false) {
-		if(type !== 'MESSAGE')
+		if(isBaseParamType(type) && !CommandOptions.fetchDependantTypes.has(type))
 			return this.fetchMessageParamSync(args, type, whole);
 
-		if(CommandOptions.requestDependantTypes.includes(type.toString()) && !this.#request)
+		if(!this.#request)
 			throw ReferenceError('Se requiere un contexto para realizar este fetch. Usa <CommandOptions>.in(request)');
+
+		const argsPrototype = this.getArgsPrototype(args, whole);
+		if(!argsPrototype) return;
 		
-		return fetchMessage(this.getArgsPrototype(args, whole), this.#request);
+		switch(type) {
+		case 'USER':
+			return fetchUser(argsPrototype, this.#request);
+		case 'MEMBER':
+			return fetchMember(argsPrototype, this.#request);
+		case 'MESSAGE':
+			return fetchMessage(argsPrototype, this.#request);
+		case 'GUILD':
+			return fetchGuild(argsPrototype);
+		}
 	}
 
 	/**
@@ -689,7 +716,7 @@ class CommandOptions {
 	 * @returns {ParamResult}
 	 */
 	fetchMessageParamSync(args, type, whole = false) {
-		if(CommandOptions.requestDependantTypes.includes(type.toString()) && !this.#request)
+		if(isBaseParamType(type) && CommandOptions.requestDependantTypes.has(type) && !this.#request)
 			throw ReferenceError('Se requiere un contexto para realizar este fetch. Usa <CommandOptions>.in(request)');
 
 		const argsPrototype = this.getArgsPrototype(args, whole);
@@ -697,11 +724,12 @@ class CommandOptions {
 		
 		if(isParamTypeStrict(type))
 			return argsPrototype;
+
 		switch(type) {
 		case 'USER':
-			return fetchUser(argsPrototype, this.#request);
+			throw 'Los parámetros de usuario solo pueden ser manejados mediante promesas';
 		case 'MEMBER':
-			return fetchMember(argsPrototype, this.#request);
+			throw 'Los parámetros de miembro solo pueden ser manejados mediante promesas';
 		case 'ROLE':
 			return fetchRole(argsPrototype, this.#request.guild);
 		case 'MESSAGE':
@@ -710,16 +738,17 @@ class CommandOptions {
 			return fetchChannel(argsPrototype, this.#request.guild);
 		case 'IMAGE':
 			return argsPrototype;
-		case 'NUMBER':
+		case 'NUMBER': {
 			if(argsPrototype == undefined)
 				return;
 
 			const correctedNumber = argsPrototype
 				.replace(/,/g, '.')
 				.replace(/_+/g, '')
-				.replace(/^([\d\.]+) .*/, '$1');
+				.replace(/^([\d.]+) .*/, '$1');
 
 			return +correctedNumber;
+		}
 		default:
 			return argsPrototype;
 		}
@@ -941,9 +970,22 @@ class CommandOptionSolver {
 		return this.#args;
 	}
 
-	/**Devuelve los argumentos de este {@linkcode CommandOptionSolver} como texto plano sin modificar del mensaje original. Si el comando es Slash, devuelve `null`*/
+	/**
+	 * Devuelve los argumentos de este {@linkcode CommandOptionSolver} como texto plano sin modificar del mensaje original.
+	 * 
+	 * Si el comando es Slash, devuelve `null`.
+	 */
 	get rawArgs() {
 		return this.#rawArgs;
+	}
+
+	/**
+	 * Devuelve la cantidad de entradas de este {@linkcode CommandOptionSolver} si el mismo opera sobre un comando de mensaje.
+	 * 
+	 * Si el comando es Slash, devuelve `-1`.
+	 */
+	get count() {
+		return this.isMessageSolver(this.#args) ? this.#args.length : -1;
 	}
 
 	/**Verifica si este {@linkcode CommandOptionSolver} opera sobre un comando de mensaje y el mismo no tiene entradas*/
@@ -1003,6 +1045,7 @@ class CommandOptionSolver {
 	 * @param {*} args
 	 * @returns {args is Array<String>}
 	 */
+	// eslint-disable-next-line no-unused-vars
 	isMessageSolver(args) {
 		return !this.#isSlash;
 	}
@@ -1012,6 +1055,7 @@ class CommandOptionSolver {
 	 * @param {*} args
 	 * @returns {args is CommandInteractionOptionResolver}
 	 */
+	// eslint-disable-next-line no-unused-vars
 	isInteractionSolver(args) {
 		return this.#isSlash;
 	}
@@ -1045,12 +1089,13 @@ class CommandOptionSolver {
 
 	/**
 	 * @param {String} identifier El identificador del {@linkcode CommandParam}
+	 * @param {number?} [defaultValue]
 	 */
-	getNumber(identifier) {
+	getNumber(identifier, defaultValue = null) {
 		if(this.isInteractionSolver(this.#args))
-			return this.#args.getNumber(identifier);
+			return this.#args.getNumber(identifier) ?? defaultValue;
 
-		const result = this.#getResultFromParamSync(identifier, false);
+		const result = this.#getResultFromParamSync(identifier, false) ?? defaultValue;
 		return CommandOptionSolver.asNumber(result);
 	}
 
@@ -1058,13 +1103,13 @@ class CommandOptionSolver {
 	 * @param {String} identifier El identificador del {@linkcode CommandParam}
 	 * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
 	 */
-	getUser(identifier, getRestOfMessageWords = false) {
+	async getUser(identifier, getRestOfMessageWords = false) {
 		if(this.isInteractionSolver(this.#args))
 			return this.#args.getUser(identifier);
 
 		this.ensureRequistified();
 
-		const result = this.#getResultFromParamSync(identifier, getRestOfMessageWords);
+		const result = await this.#getResultFromParam(identifier, getRestOfMessageWords);
 		return CommandOptionSolver.asUser(result);
 	}
 
@@ -1072,7 +1117,7 @@ class CommandOptionSolver {
 	 * @param {String} identifier El identificador del {@linkcode CommandParam}
 	 * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
 	 */
-	getMember(identifier, getRestOfMessageWords = false) {
+	async getMember(identifier, getRestOfMessageWords = false) {
 		if(this.isInteractionSolver(this.#args)) {
 			const member = this.#args.getMember(identifier);
 			const valid = member instanceof GuildMember;
@@ -1084,8 +1129,20 @@ class CommandOptionSolver {
 
 		this.ensureRequistified();
 
-		const result = this.#getResultFromParamSync(identifier, getRestOfMessageWords);
+		const result = await this.#getResultFromParam(identifier, getRestOfMessageWords);
 		return CommandOptionSolver.asMember(result);
+	}
+
+	/**
+	 * @param {String} identifier El identificador del {@linkcode CommandParam}
+	 * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
+	 */
+	async getGuild(identifier, getRestOfMessageWords = false) {
+		if(this.isInteractionSolver(this.#args))
+			return fetchGuild(this.#args.getString(identifier));
+
+		const result = await this.#getResultFromParam(identifier, getRestOfMessageWords);
+		return CommandOptionSolver.asGuild(result);
 	}
 
 	/**
@@ -1182,6 +1239,7 @@ class CommandOptionSolver {
 	 * * `DOUBLE-QUOTES`: Los argumentos encerrados entre comillas dobles se reagrupan entre sí, mientras que aquellos que no lo están mantienen su agrupación de palabra-por-palabra
 	 * @property {String} [messageSep=','] El separador a considerar al reagrupar por separador. Por defecto: ','
 	 * @property {TFallback} [fallback] El valor usado en ausencia de valores de usuario
+	 * @property {Array<string>} [failedPayload] Al trabajar con comandos de mensaje, se usa para obtener el listado de argumentos post-reagrupación cuyo resultado fue `null` o `undefined`
 	 */
 
 	/**
@@ -1195,7 +1253,7 @@ class CommandOptionSolver {
 	 * @returns {Promise<Array<ParamResult | TFallback>>}
 	 */
 	async parsePolyParam(identifier, parseOptions = {}) {
-		const { regroupMethod = 'SEPARATOR', messageSep = ',', fallback = undefined } = parseOptions;
+		const { regroupMethod = 'SEPARATOR', messageSep = ',', fallback = undefined, failedPayload = undefined } = parseOptions;
 		const option = this.#expectParam(identifier);
 
 		if(this.isMessageSolver(this.#args)) {
@@ -1213,7 +1271,8 @@ class CommandOptionSolver {
 				
 			const results = [];
 			let i = 0;
-			while(arrArgs.length && i++ < option._polymax) {
+			let arrArg;
+			while(arrArgs.length && (arrArg = arrArgs[i], i++) < option._polymax) {
 				let result;
 
 				if(Array.isArray(option._type)) {
@@ -1222,7 +1281,10 @@ class CommandOptionSolver {
 				} else
 					result = await this.#options.fetchMessageParam(arrArgs, option._type, false);
 
-				(result != null) && results.push(result);
+				if(result != null)
+					results.push(result);
+				else
+					failedPayload?.push(arrArg);
 			}
 			
 			return results;
@@ -1316,6 +1378,7 @@ class CommandOptionSolver {
 				args = args.map(a => a.replaceAll(channelMentionRegex, `${sep} $&${sep}`));
 			}
 
+		// eslint-disable-next-line no-fallthrough
 		case 'SEPARATOR':
 			return regroupText(args, sep);
 
@@ -1496,6 +1559,22 @@ class CommandOptionSolver {
 
 	/**
 	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
+	 * @returns {Guild}
+	 */
+	static asGuild(paramResult) {
+		if(paramResult == undefined) return;
+		if(!CommandOptionSolver.isGuild(paramResult))
+			throw `Se esperaba el tipo de parámetro: Guild, pero se recibió: ${typeof paramResult}`;
+		return paramResult;
+	}
+	
+	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
+	static asGuilds(paramResults) {
+		return paramResults.map(r => CommandOptionSolver.asGuild(r));
+	}
+
+	/**
+	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
 	 * @returns {Attachment}
 	 */
 	static asAttachment(paramResult) {
@@ -1569,6 +1648,15 @@ class CommandOptionSolver {
 	static isChannel(paramResult) {
 		if(paramResult == undefined) return false;
 		return paramResult instanceof GuildChannel;
+	}
+
+	/**
+	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
+	 * @returns {paramResult is Guild}
+	 */
+	static isGuild(paramResult) {
+		if(paramResult == undefined) return false;
+		return paramResult instanceof Guild;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 const { TuberScope } = require('./psscope.js');
-const { randRange, fetchUserID, shortenText, rand, fetchMember, fetchChannel, fetchRole, stringHexToNumber } = require('../../../func.js');
+const { randRange, fetchUserID, shortenText, rand, fetchMember, fetchChannel, fetchRole, stringHexToNumber, fetchMemberSync } = require('../../../func.js');
 const {
     //@ts-expect-error
     RuntimeValue,
@@ -307,7 +307,7 @@ function buscarMiembro([búsqueda], currentStatement, _, request) {
     if(búsqueda?.type !== 'Text')
         throw TuberInterpreterError('Se esperaba un texto de búsqueda de miembro como argumento de función', currentStatement);
 
-    const miembro = fetchMember(búsqueda.value, request);
+    const miembro = fetchMemberSync(búsqueda.value, request);
     if(!miembro)
         return makeNada();
 

@@ -1,7 +1,7 @@
 const { hourai, tenshiColor } = require('../../localdata/config.json');
 const Hourai = require('../../localdata/models/hourai.js');
 const axios = require('axios').default;
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors, ActionRow, ComponentType, GuildMember, ButtonComponent } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors } = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes');
 const { CommandTags, CommandManager, CommandOptions, CommandParam } = require('../Commons/commands');
 const { auditError } = require('../../systems/others/auditor');
@@ -384,7 +384,7 @@ const command = new CommandManager('roles', flags)
 		if(edit) return ('update' in interaction) && interaction.update(messageActions);
 		return interaction.reply(messageActions);
 	})
-	.setSelectMenuResponse(async function selectReligion(interaction, sectionNumber, edit) {
+	.setSelectMenuResponse(async function selectReligion(interaction, sectionNumber) {
 		const section = parseInt(sectionNumber);
 		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
 		const mentionRoles = /**@type {{ [ K: String ]: CategoryContent }}*/(/**@type {unknown}*/(houraiDB.mentionRoles));
@@ -527,7 +527,7 @@ const command = new CommandManager('roles', flags)
 			const componentRid = component.customId.split('_')[2];
 			if(roleId !== componentRid) return newComponent;
 			
-			if(/**@type {ButtonComponent}*/(component).style === ButtonStyle.Primary)
+			if(/**@type {import('discord.js').ButtonComponent}*/(component).style === ButtonStyle.Primary)
 				return newComponent
 					.setCustomId(`roles_addRole_${componentRid}`)
 					.setStyle(ButtonStyle.Secondary);
@@ -554,8 +554,8 @@ const command = new CommandManager('roles', flags)
 		//@ts-expect-error
 		newComponents[0].components = newComponents[0].components.map(component => {
 			const newComponent = ButtonBuilder.from(/**@type {import('discord.js').JSONEncodable<import('discord.js').APIButtonComponent>}*/(component));
-			const [ _, functionName, componentRid ] = component.customId.split('_');
-			if(/**@type {ButtonComponent}*/(component).style === ButtonStyle.Secondary) return newComponent;
+			const [ , functionName, componentRid ] = component.customId.split('_');
+			if(/**@type {import('discord.js').ButtonComponent}*/(component).style === ButtonStyle.Secondary) return newComponent;
 			if(functionName === 'removeRole')
 				newComponent.setCustomId(`roles_addRole_${componentRid}`)
 			return newComponent.setStyle(ButtonStyle.Secondary);
@@ -658,9 +658,9 @@ const command = new CommandManager('roles', flags)
 			.setTitle('Edita tu Rol Personalizado')
 			.addComponents(rows);
 		
-		return interaction.showModal(modal).catch(e => {});
+		return interaction.showModal(modal).catch(() => {});
 	})
-	.setModalResponse(async function applyCustomRoleChanges(interaction, roleId, category = null) {
+	.setModalResponse(async function applyCustomRoleChanges(interaction, roleId) {
 		/**@type {import('discord.js').Role}*/
 		const customRole = interaction.member.roles.cache.get(roleId);
 		if(!customRole) return interaction.reply({ content: '⚠️ No se encontró el rol personalizado. Intenta crearlo otra vez', ephemeral: true });
@@ -673,14 +673,14 @@ const command = new CommandManager('roles', flags)
 		if(roleName.length)
 			editStack.push(
 				customRole.edit({ name: `✨ ${roleName}` })
-				.catch(_ => replyStack.push('⚠️ No se pudo actualizar el nombre del rol'))
+				.catch(() => replyStack.push('⚠️ No se pudo actualizar el nombre del rol'))
 			);
 
 		if(roleColor.length) {
 			const roleColorNumber = stringHexToNumber(roleColor);
 			editStack.push(
 				customRole.edit({ color: roleColorNumber })
-				.catch(_ => replyStack.push('⚠️ No se pudo actualizar el color del rol'))
+				.catch(() => replyStack.push('⚠️ No se pudo actualizar el color del rol'))
 			);
 		}
 
@@ -700,9 +700,9 @@ const command = new CommandManager('roles', flags)
 				const roleEmoteBuffer = Buffer.from(response?.data, "utf-8")
 				editStack.push(
 					customRole.edit({ icon: roleEmoteBuffer })
-					.catch(_ => replyStack.push('⚠️ No se pudo actualizar el ícono del rol. Puede que el servidor sea de nivel muy bajo o no hayas proporcionado un enlace directo a la imagen'))
+					.catch(() => replyStack.push('⚠️ No se pudo actualizar el ícono del rol. Puede que el servidor sea de nivel muy bajo o no hayas proporcionado un enlace directo a la imagen'))
 				);
-			} catch(error) {
+			} catch {
 				replyStack.push('⚠️ No se pudo actualizar el ícono del rol. Puede que no hayas proporcionado un enlace directo a la imagen o el enlace sea inválido');
 			}
 		}

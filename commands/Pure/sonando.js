@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, Colors } = require('discord.js'); //Integrar discord.js
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js'); //Integrar discord.js
 const { shortenText, compressId } = require('../../func.js'); //Funciones globales
 const { CommandTags, CommandManager } = require('../Commons/commands.js');
 const { showQueuePage, makePuréMusicEmbed, SERVICES } = require('../../systems/musicPlayer.js');
@@ -23,7 +23,7 @@ const command = new CommandManager('sonando', flags)
 	.setLongDescription(
 		'Indica la pista que está sonando (si hay alguna) en el chat de voz en el que estoy conectada',
 	)
-	.setExperimentalExecution(async (request, args) => {
+	.setExperimentalExecution(async request => {
 		const [ translator ] = await Promise.all([
 			Translator.from(request.user),
 			request.deferReply(),
@@ -80,8 +80,7 @@ const command = new CommandManager('sonando', flags)
 							new ButtonBuilder()
 								.setCustomId(`sonando_expand_${compressId(request.userId)}`)
 								.setStyle(ButtonStyle.Secondary)
-								.setLabel(translator.getText('buttonExpand'))
-								.setEmoji('1354424220452651185'),
+								.setEmoji('1356977730754842684'),
 					),
 				]
 			});

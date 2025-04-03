@@ -2,12 +2,12 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "3.5.2",
+            "number": "3.6.2",
             "name": "Flamenco Perlado"
         },
         "note": "Operando con normalidad",
         "changelog": [
-            "p!sonando y p!saltar agregados",
+            "p!sonando, p!saltar y p!repetir agregados",
             "p!emote ahora obtiene emotes de un mensaje",
             "Filtros de p!ayuda corregidos",
             "**PuréPix** ahora permite utilizar el servicio de conversión \"phixiv\"",
@@ -18,7 +18,8 @@
             "p!gatos corregido",
             "Apariencia de **PuréFeed** mejorada",
             "p!saucenao agregado",
-            "Acción contextual \"Buscar Fuente\" agregada"
+            "Acción contextual \"Buscar Fuente\" agregada",
+            "p!cola ahora tiene controles adicionales"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos",

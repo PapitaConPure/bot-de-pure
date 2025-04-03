@@ -1,13 +1,13 @@
-const { EmbedBuilder, Colors, ButtonBuilder, ButtonStyle, TextInputBuilder, TextInputStyle, ModalBuilder, Attachment } = require('discord.js'); //Integrar discord.js
+const { EmbedBuilder, Colors, ButtonBuilder, ButtonStyle, TextInputBuilder, TextInputStyle, ModalBuilder } = require('discord.js'); //Integrar discord.js
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
-const { injectSauceNAOEmbeds, testSauceNAOToken } = require('../../systems/others/saucenao');
+const { pourSauce, testSauceNAOToken } = require('../../systems/others/saucenao');
 const { Translator } = require('../../internationalization');
 const { encryptString } = require('../../security');
 const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts');
 const SauceNAOUser = require('../../localdata/models/saucenaoUsers');
 
 const Logger = require('../../logs');
-const { debug, info, warn, error, fatal } = Logger('ERROR', 'p!saucenao');
+const { debug } = Logger('ERROR', 'p!saucenao');
 
 const options = new CommandOptions()
 	.addParam('mensaje', 'MESSAGE', 'para dar un mensaje por respuesta o por ID/enlace (Slash)', { optional: true })
@@ -49,7 +49,7 @@ const command = new CommandManager('saucenao', flags)
 			|| (request.isMessage && request.channel.messages.cache.get(request.inferAsMessage().reference?.messageId));
 		const messageAttachments = message?.attachments
 			? message.attachments.values()
-			: /**@type {Array<Attachment>}*/([]);
+			: /**@type {Array<import('discord.js').Attachment>}*/([]);
 		
 		const imageUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(u => u);
 		const commandAttachments = CommandOptionSolver.asAttachments(args.parsePolyParamSync('imagens')).filter(a => a);
@@ -90,7 +90,7 @@ const command = new CommandManager('saucenao', flags)
 		const successes = [];
 		const failures = [];
 		
-		await injectSauceNAOEmbeds(sauceNAOUser.clientId, queries, translator, { successes, failures });
+		await pourSauce(sauceNAOUser.clientId, queries, request, { successes, failures });
 
 		if(!successes.length && !failures.length)
 			return request.editReply({ content: translator.getText('saucenaoInvalidImage') });

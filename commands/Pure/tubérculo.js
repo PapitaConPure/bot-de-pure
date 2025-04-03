@@ -4,7 +4,7 @@ const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver, CommandParam } = require('../Commons/commands');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId, warn } = require('../../func.js');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, TextInputBuilder, ButtonInteraction, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder, ModalSubmitInteraction, StringSelectMenuBuilder } = require('discord.js');
+const { EmbedBuilder, ButtonBuilder, TextInputBuilder, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder } = require('discord.js');
 const { RuntimeToLanguageType } = require('../../systems/ps/v1.0/commons.js');
 const { executeTuber: executeTuberPS1 } = require('../../systems/ps/v1.0/purescript.js');
 const { executeTuber: executeTuberPS2, CURRENT_PS_VERSION } = require('../../systems/ps/common/executeTuber.js');
@@ -31,7 +31,7 @@ const filters = {
  * @param {Boolean} [navigationEnabled=true] 
  */
 function paginationRows(page, lastPage, navigationEnabled = true) {
-	/**@type {Array<ActionRowBuilder<ButtonBuilder>|ActionRowBuilder<StringSelectMenuBuilder>>}*/
+	/**@type {Array<import('discord.js').ActionRowBuilder<ButtonBuilder> | import('discord.js').ActionRowBuilder<import('discord.js').StringSelectMenuBuilder>>}*/
 	const rows = [];
 
 	if(navigationEnabled)
@@ -73,9 +73,9 @@ async function getItemsList(guild, content = undefined) {
 		const filter = content.split(': ');
 		const [ target, value ] = filter;
 		if(target === 'Autor')
-			items = items.filter(([_,tuber]) => tuber.author === value);
+			items = items.filter(([    , tuber ]) => tuber.author === value);
 		else
-			items = items.filter(([tid,_]) => tid.toLowerCase().indexOf(value) !== -1);
+			items = items.filter(([ tid,       ]) => tid.toLowerCase().indexOf(value) !== -1);
 	}
 
 	const lastPage = Math.ceil(items.length / pageMax) - 1;
@@ -84,7 +84,7 @@ async function getItemsList(guild, content = undefined) {
 }
 
 /**
- * @param {import('discord.js').ButtonInteraction | import('discord.js').SelectMenuInteraction | ModalSubmitInteraction} interaction 
+ * @param {import('discord.js').ButtonInteraction | import('discord.js').SelectMenuInteraction | import('discord.js').ModalSubmitInteraction} interaction 
  * @param {Number} page 
  * @param {String} [setFilter]
  */
@@ -212,8 +212,7 @@ const command = new CommandManager('tubérculo', flags)
 		'[Clickea esto para leer la documentación de PuréScript](https://papitaconpure.github.io/ps-docs/)'
 	)
 	.setOptions(options)
-	.setExperimental(true)
-	.setExperimentalExecution(async (request, args, rawArgs) => {
+	.setExperimentalExecution(async (request, args) => {
 		const operation = args.parseFlagExt('crear', 'crear')
 			|| args.parseFlagExt('ver', 'ver')
 			|| args.parseFlagExt('borrar', 'borrar');
@@ -330,7 +329,7 @@ const command = new CommandManager('tubérculo', flags)
 		if(target === 'AUTHOR') {
 			if(filter.startsWith('@'))
 				filter = filter.slice(1);
-			const userId = fetchUserID(filter, { guild, client });
+			const userId = await fetchUserID(filter, { guild, client });
 			if(!userId)
 				return interaction.reply({
 					content: '⚠️ Usuario no encontrado',
@@ -587,9 +586,11 @@ async function createTuber(tuberId, gcfg, isPureScript, request, args) {
 		await executeTuberPS2(request, gcfg.tubers[tuberId], { isTestDrive: true });
 
 		if(tuberContent.advanced) {
+			// eslint-disable-next-line no-self-assign
 			gcfg.tubers[tuberId].script = gcfg.tubers[tuberId].script;
 			gcfg.tubers[tuberId].inputs = gcfg.tubers[tuberId].inputs
 				.map(variant => variant.map(input => input.json));
+			// eslint-disable-next-line no-self-assign
 			gcfg.tubers[tuberId].saved = gcfg.tubers[tuberId].saved;
 		}
 
@@ -605,7 +606,7 @@ async function createTuber(tuberId, gcfg, isPureScript, request, args) {
 
 /**
  * 
- * @param {import('../Commons/typings.js').ComplexCommandRequest | ButtonInteraction<'cached'>} interaction 
+ * @param {import('../Commons/typings.js').ComplexCommandRequest | import('discord.js').ButtonInteraction<'cached'>} interaction 
  * @param {*} item 
  * @param {String} tuberId 
  * @param {Number} inputVariant 
@@ -743,7 +744,7 @@ function viewTuber(interaction, item, tuberId, inputVariant, updateMessage) {
 		components.push(makeButtonRowBuilder().addComponents(...variantButtons));
 
 	return updateMessage
-		? /**@type {ButtonInteraction<'cached'>}*/(interaction).update({ embeds, files, components })
+		? /**@type {import('discord.js').ButtonInteraction<'cached'>}*/(interaction).update({ embeds, files, components })
 		: interaction.reply({ embeds, files, components });
 }
 
@@ -846,6 +847,7 @@ async function opExecuteTuber(tuberId, gcfg, isPureScript, request, args) {
 	const savedData = gcfg.tubers[tid].saved && new Map(Object.entries(gcfg.tubers[tid].saved));
 	await executeFn(request, gcfg.tubers[tid], { args: tuberArgs, isTestDrive: false, overwrite: false, savedData })
 	.then(() => {
+		// eslint-disable-next-line no-self-assign
 		gcfg.tubers[tid].saved = gcfg.tubers[tid].saved;
 		if(gcfg.tubers[tid].psVersion != null)
 			gcfg.tubers[tid].inputs = gcfg.tubers[tid].inputs

@@ -1,5 +1,3 @@
-const { GuildMember } = require('discord.js');
-const { fetchMember, regroupText } = require('../../func');
 const { CommandTags, CommandOptions, CommandManager, CommandOptionSolver } = require('../Commons/commands');
 const { CommandPermissions } = require('../Commons/cmdPerms');
 const { Translator } = require('../../internationalization');
@@ -43,21 +41,21 @@ const command = new CommandManager('aislar', flags)
 		if(members.some(member => !member))
 			await request.reply({ content: translator.getText('aislarSomeMembersWereInvalid') });
 
-		const succeeded = /**@type {Array<GuildMember>}*/([]);
-		const failed    = /**@type {Array<GuildMember>}*/([]);
+		const succeeded = /**@type {Array<import('discord.js').GuildMember>}*/([]);
+		const failed    = /**@type {Array<import('discord.js').GuildMember>}*/([]);
 
 		await Promise.all(members
 			.filter(member => member)
 			.map(member => member
 				.timeout(duration, `Aislado por ${request.member.user.tag}`)
-				.then(_ => succeeded.push(member))
-				.catch(_ => failed.push(member))
+				.then(() => succeeded.push(member))
+				.catch(() => failed.push(member))
 		));
 		
 		if(!succeeded.length)
 			return request.reply({ content: translator.getText('aislarNoUpdatedMembers') });
 		
-		const membersList = (/**@type {Array<GuildMember>}*/members) => members.map(member => member.user.tag).join(', ');
+		const membersList = (/**@type {Array<import('discord.js').GuildMember>}*/members) => members.map(member => member.user.tag).join(', ');
 		return request.reply({
 			content: [
 				duration

@@ -5,10 +5,15 @@ const flags = new CommandTags().add('PAPA');
 const command = new CommandManager('papa-próximo', flags)
 	.setAliases('papa-proximo')
 	.setDescription('...')
-	.setExecution(async request => {
+	.setExperimentalExecution(async request => {
+		if(request.isInteraction)
+			return request.reply({ content: '❌ Este comando solo puede ser llamado por mensaje' });
+
+		const message = request.inferAsMessage();
+
 		return Promise.all([
-			modifyPresence(request.client),
-			request.react('✅'),
+			modifyPresence(message.client),
+			message.react('✅'),
 		])
 	});
 

@@ -1,16 +1,16 @@
-const { fetchUser, sleep } = require('../../func.js');
+const { sleep, fetchUser } = require('../../func.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
-const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require("../Commons/commands");
+const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
 
-/**@param {import('discord.js').Message<true>} message*/
+/**@param {import('../Commons/typings.js').ComplexCommandRequest} message*/
 function safeDelete(message) {
 	if(!message?.delete) return;
-	return message.delete().catch(_ => undefined);
+	return message.delete().catch(() => undefined);
 }
 
 /**
- * @param {import('discord.js').TextChannel} channel
+ * @param {import('discord.js').GuildTextBasedChannel} channel
  * @param {Number} amount
  * @param {import('discord.js').User} user
  */
@@ -24,13 +24,13 @@ async function bulkDeleteMessages(channel, amount, user) {
 }
 
 /**
- * @param {import('discord.js').Message<true>} original 
- * @param {import('discord.js').Message<true>} reply 
+ * @param {import('../Commons/typings.js').ComplexCommandRequest} request 
+ * @param {import('discord.js').Message} reply 
  */
-function deleteOriginalAndReply(original, reply) {
+function deleteOriginalAndReply(request, reply) {
 	return Promise.all([
-		safeDelete(original),
-		sleep(1000 * 5).then(() => reply.delete().catch(_ => undefined)),
+		safeDelete(request),
+		request.isMessage && sleep(1000 * 5).then(() => reply.delete().catch(() => undefined)),
 	]);
 }
 
@@ -48,35 +48,37 @@ const command = new CommandManager('borrar', tags)
 	.setLongDescription('Elimina una cierta cantidad de mensajes entre 2 y 100')
 	.setPermissions(perms)
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash) => {
-		const user = options.fetchFlag(args, 'usuario', { callback: (f) => fetchUser(f, request) });
-		let amount = CommandOptionSolver.asNumber((await options.fetchParam(args, 'cantidad')) ?? 100);
+	.setExperimentalExecution(async (request, args) => {
+		const userResult = /**@type {string | import('discord.js').User}*/(args.parseFlagExpr('usuario'));
+		const user = userResult ? await fetchUser(userResult, request) : undefined;
+		const amount = args.getNumber('cantidad', 100);
 
 		if(!user && !amount) {
 			const sent = await request.reply({ content: '⚠️ Debes especificar la cantidad o el autor de los mensajes a borrar', ephemeral: true });
-			return !isSlash && deleteOriginalAndReply(request, sent);
+			return request.isMessage && deleteOriginalAndReply(request, sent);
 		}
 
 		if(isNaN(amount)) {
-			const sent = request.reply({
+			const sent = await request.reply({
 				content:
 					'⚠️ Debes especificar la cantidad de mensajes a borrar\n' +
 					`Revisa \`${p_pure(request.guildId).raw}ayuda borrar\` para más información`,
 				ephemeral: true,
 			});
-			return !isSlash && deleteOriginalAndReply(request, sent);
+			return deleteOriginalAndReply(request, sent);
 		}
 
-		if(isSlash)
+		if(request.isInteraction)
 			await request.deferReply({ ephemeral: true });
-		else
+
+		if(request.isMessage)
 			await safeDelete(request);
 
-		amount = Math.max(2, Math.min(amount, 100));
+		const cappedAmount = Math.max(2, Math.min(amount, 100));
 		
-		await bulkDeleteMessages(request.channel, amount, user);
+		await bulkDeleteMessages(request.channel, cappedAmount, user);
 
-		if(isSlash)
+		if(request.isInteraction)
 			return request.editReply({ content: '✅ Mensajes eliminados' });
 	});
 

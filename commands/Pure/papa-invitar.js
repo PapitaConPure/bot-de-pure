@@ -5,7 +5,7 @@ const { CommandTags, CommandManager } = require('../Commons/commands');
 const flags = new CommandTags().add('PAPA');
 const command = new CommandManager('papa-invitar', flags)
     .setDescription('Muestra una carta de invitación para agregarme a otro servidor')
-    .setExecution(async request => {
+    .setExperimentalExecution(async request => {
         const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${request.client.application.id}&scope=bot&permissions=1394522582224`;
         const embed = new EmbedBuilder()
             .setTitle('Invitación')

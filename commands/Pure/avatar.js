@@ -1,12 +1,10 @@
 const { EmbedBuilder } = require('discord.js'); //Integrar discord.js
-const { regroupText, fetchMember } = require('../../func.js'); //Funciones globales
 const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
+const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require("../Commons/commands");
 
-const maxusers = 10;
 /**@param {import('discord.js').GuildMember} member*/
 const getAvatarEmbed = (member) => {
-    const urlDisplayOptions = { size: 1024 };
+    const urlDisplayOptions = /**@type {const}*/({ size: 1024 });
     const memberAvatarUrl = member.displayAvatarURL(urlDisplayOptions);
     const embed = new EmbedBuilder()
         .setColor(0xfaa61a)
@@ -17,12 +15,14 @@ const getAvatarEmbed = (member) => {
     const userAvatarUrl = member.user.displayAvatarURL(urlDisplayOptions);
     if(userAvatarUrl !== memberAvatarUrl)
         embed.setThumbnail(userAvatarUrl)
-            .setDescription(`Visto desde "${member.guild}"`, true)
+            .setDescription(`Visto desde "${member.guild}"`)
             .addFields({ name: 'Global', value: `[🔗 Enlace](${userAvatarUrl})`, inline: true });
     
     return embed;
 };
-const generateAvatarEmbeds = (members = [], guildId = '0') => {
+
+/**@param {Array<import('discord.js').GuildMember>} members*/
+const generateAvatarEmbeds = (members = []) => {
     const embeds = [];
 
     if(members.length)
@@ -30,31 +30,37 @@ const generateAvatarEmbeds = (members = [], guildId = '0') => {
     
     return embeds;
 };
-function getMembers(request, args, isSlash) {
-    if(isSlash)
-        return [ options.fetchParamPoly(args, 'usuarios', args.getMember, request.member), [] ];
 
-    if(!args.length)
-        return [ [ request.member ], [] ];
-    
-    args = regroupText(args);
-    if(args.length > maxusers)
-        args = args.slice(0, 8);
-    
-    const members = [];
-    const notFound = [];
-    args.forEach(arg => {
-        const member = fetchMember(arg, request);
-        if(!member) return notFound.push(arg);
-        members.push(member);
-    });
+/**
+ * @param {import('../Commons/typings.js').ComplexCommandRequest} request 
+ * @param {CommandOptionSolver<import('../Commons/typings.js').CommandArguments>} args 
+ */
+async function getMembers(request, args) {
+    const notFound = /**@type {Array<string>}*/([]);
+    const members = CommandOptionSolver.asMembers(await args.parsePolyParam('miembros', {
+        fallback: request.member,
+        regroupMethod: 'MENTIONABLES-WITH-SEP',
+        failedPayload: notFound,
+    })).filter(m => m || (notFound.push(), false));
+    console.log({ members, notFound });
 
-    return [ members, notFound ];
+    if(request.isInteraction)
+        return {
+            found: members,
+            notFound,
+        };
+
+    return {
+        found: members,
+        notFound,
+    };
 }
 
 const options = new CommandOptions()
-    .addParam('usuarios', 'USER', 'para especificar usuarios', { optional: true, poly: 'MULTIPLE' });
+    .addParam('miembros', 'MEMBER', 'para indicar miembros de los cuales obtener avatares', { optional: true, poly: 'MULTIPLE', polymax: 10 });
+
 const flags = new CommandTags().add('COMMON');
+
 const command = new CommandManager('avatar', flags)
     .setAliases(
         'perfil', 'fotoperfil',
@@ -68,17 +74,24 @@ const command = new CommandManager('avatar', flags)
         'Se priorizan resultados del servidor actual, pero la búsqueda tiene un rango de todos los servidores a los que tengo acceso',
     )
     .setOptions(options)
-    .setExecution(async (request, args, isSlash) => {
-        const [ members, notFound ] = getMembers(request, args, isSlash);
-        let replyStack = {};
+    .setExperimentalExecution(async (request, args) => {
+        const { found: members, notFound } = await getMembers(request, args);
+        const replyStack = {};
+
+        await request.guild.members.fetch();
         
-        if(notFound.length)
+        if(notFound.length) {
+            const [ templateA, templateC ] = [
+                '⚠️ ¡Usuario[s] **', '** no encontrado[s]!'
+            ].map(s => s.replace(/\[s\]/g, (notFound.length !== 1) ? 's' : ''));
+            const templateB = notFound.join(', ');
             replyStack.content = [
-                `⚠️ ¡Usuario[s] **${notFound.join(', ')}** no encontrado[s]!`.replace(/\[s\]/g, (notFound.length > 1) ? 's' : ''),
-                `Recuerda separar cada usuario con una coma y escribir correctamente. Usa \`${p_pure(request.guildId).raw}ayuda avatar\` para más información`,
+                [ templateA, templateB, templateC ].join(''),
+                `Recuerda separar cada usuario con una coma y escribir correctamente. Usa \`${p_pure(request).raw}ayuda avatar\` para más información`,
             ].join('\n');
+        }
         if(members?.length)
-            replyStack.embeds = generateAvatarEmbeds(members, request.guildId) ?? null;
+            replyStack.embeds = generateAvatarEmbeds(members) ?? null;
 
         await request.reply(replyStack);
     });

@@ -1,7 +1,6 @@
-const { EmbedBuilder, ButtonInteraction, StringSelectMenuInteraction, AutocompleteInteraction, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { serverid, tenshiColor, peopleid } = require('./localdata/config.json');
 const { commandFilenames } = require('./commands/Commons/commands');
-const { CommandManager } = require('./commands/Commons/cmdBuilder');
 const { p_pure } = require('./localdata/customization/prefixes');
 const { isNotModerator, edlDistance } = require('./func');
 const { client } = require('./client');
@@ -10,13 +9,13 @@ const { client } = require('./client');
  * Devuelve un {@linkcode CommandManager} según el `nameOrAlias` indicado.
  * 
  * Si no se encuentran resultados, se devuelve `null`
- * @param {import('./commands/Commons/typings').ComplexCommandRequest | ButtonInteraction<'cached'> | StringSelectMenuInteraction<'cached'> | AutocompleteInteraction<'cached'>} request 
+ * @param {import('./commands/Commons/typings').AnyRequest} request 
  * @param {String} nameOrAlias 
  */
 function searchCommand(request, nameOrAlias) {
 	for(const filename of commandFilenames) {
 		const commandFile = require(`./commands/Pure/${filename}`);
-		const command = /**@type {CommandManager}*/(commandFile.command ?? commandFile);
+		const command = /**@type {import('./commands/Commons/commands').CommandManager}*/(commandFile.command ?? commandFile);
 
 		if(command.name !== nameOrAlias
 		&& !command.aliases.some(alias => alias === nameOrAlias))
@@ -38,7 +37,7 @@ function searchCommand(request, nameOrAlias) {
  * 
  * Los objetos devueltos contienen un {@linkcode CommandManager} y la distancia Damerau-Levenshtein con peso euclideano respecto a la `query`.
  * Si no se encuentran resultados, se devuelve `null`
- * @param {import('./commands/Commons/typings').ComplexCommandRequest | ButtonInteraction<'cached'> | StringSelectMenuInteraction<'cached'> | AutocompleteInteraction<'cached'>} request 
+ * @param {import('./commands/Commons/typings').AnyRequest} request 
  * @param {String} query 
  */
 function searchCommands(request, query) {
@@ -47,7 +46,7 @@ function searchCommands(request, query) {
 
 	for(const filename of commandFilenames) {
 		const commandFile = require(`./commands/Pure/${filename}`);
-		const command = /**@type {CommandManager}*/(commandFile.command ?? commandFile);
+		const command = /**@type {import('./commands/Commons/commands').CommandManager}*/(commandFile.command ?? commandFile);
 
 		if(command.tags.any('GUIDE', 'MAINTENANCE', 'OUTDATED'))
 			continue;
@@ -81,7 +80,7 @@ function searchCommands(request, query) {
  * @typedef {Object} WikiPageInjectionPayload
  * @property {Array<EmbedBuilder>} embeds 
  * @property {Array<ActionRowBuilder<import('discord.js').AnyComponentBuilder>>} components 
- * @param {CommandManager} command
+ * @param {import('./commands/Commons/commands').CommandManager} command
  * @param {string} guildId 
  * @param {WikiPageInjectionPayload} payload
  */

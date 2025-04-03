@@ -253,7 +253,7 @@ const command = new CommandManager('yo', flags)
         'Para ver y configurar tus preferencias.',
         'Si quieres cambiar alguna configuración, puedes presionar cualquier botón para proceder con el Asistente',
     )
-	.setExecution(async request => {
+	.setExperimentalExecution(async request => {
         const userQuery = { userId: request.userId };
 		let userConfigs = await UserConfigs.findOne(userQuery);
         if(!userConfigs) {
@@ -261,7 +261,6 @@ const command = new CommandManager('yo', flags)
             await userConfigs.save();
         }
 
-        // @ts-ignore
         const translator = new Translator(userConfigs.language);
         const wizard = dashboardEmbed(request, userConfigs, translator);
         return request.reply({

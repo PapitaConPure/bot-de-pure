@@ -34,7 +34,8 @@ const command = new CommandManager('info', flags)
 			request.deferReply(),
 		]);
 		const servidor = request.guild;
-		const miembro = args.parseFlagExpr('miembro', (/** @type {string | GuildMember} */ f) => fetchMember(f, request));
+		const miembroResult = /**@type {string | import('discord.js').GuildMember}*/(args.parseFlagExpr('miembro'));
+		const miembro = await fetchMember(miembroResult, request);
 
 		//Contadores de usuarios
 		const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;

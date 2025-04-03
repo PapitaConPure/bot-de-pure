@@ -1,71 +1,59 @@
-const {
-    ActionRowBuilder,
-    ButtonBuilder,
-    ChannelSelectMenuBuilder,
-    MentionableSelectMenuBuilder,
-    RoleSelectMenuBuilder,
-    StringSelectMenuBuilder,
-    UserSelectMenuBuilder,
-    TextInputBuilder,
-    ComponentType,
-} = require('discord.js');
-
-/**@typedef {import('discord.js').AnyComponentBuilder} awasd*/
+const { ActionRowBuilder } = require('discord.js');
 
 //@ts-expect-error
 /**@param {import('discord.js').JSONEncodable<import('discord.js').APIActionRowComponent<ReturnType<ComponentType['toJSON']>>>|import('discord.js').APIActionRowComponent<ReturnType<ComponentType['toJSON']>>} [component]*/
 function makeButtonRowBuilder(component) {
     if(component)
-        return /**@type {ActionRowBuilder<ButtonBuilder>}*/(ActionRowBuilder.from(component));
-    return /**@type {ActionRowBuilder<ButtonBuilder>}*/(new ActionRowBuilder());
+        return /**@type {ActionRowBuilder<import('discord.js').ButtonBuilder>}*/(ActionRowBuilder.from(component));
+    return /**@type {ActionRowBuilder<import('discord.js').ButtonBuilder>}*/(new ActionRowBuilder());
 }
 
 //@ts-expect-error
 /**@param {import('discord.js').JSONEncodable<import('discord.js').APIActionRowComponent<ReturnType<ComponentType['toJSON']>>>|import('discord.js').APIActionRowComponent<ReturnType<ComponentType['toJSON']>>} [component]*/
 function makeChannelSelectMenuRowBuilder(component) {
     if(component)
-        return /**@type {ActionRowBuilder<ChannelSelectMenuBuilder>}*/(ActionRowBuilder.from(component));
-    return /**@type {ActionRowBuilder<ChannelSelectMenuBuilder>}*/(new ActionRowBuilder());
+        return /**@type {ActionRowBuilder<import('discord.js').ChannelSelectMenuBuilder>}*/(ActionRowBuilder.from(component));
+    return /**@type {ActionRowBuilder<import('discord.js').ChannelSelectMenuBuilder>}*/(new ActionRowBuilder());
 }
 
 //@ts-expect-error
 /**@param {import('discord.js').JSONEncodable<import('discord.js').APIActionRowComponent<ReturnType<ComponentType['toJSON']>>>|import('discord.js').APIActionRowComponent<ReturnType<ComponentType['toJSON']>>} [component]*/
 function makeMentionableSelectMenuRowBuilder(component) {
     if(component)
-        return /**@type {ActionRowBuilder<MentionableSelectMenuBuilder>}*/(ActionRowBuilder.from(component));
-    return /**@type {ActionRowBuilder<MentionableSelectMenuBuilder>}*/(new ActionRowBuilder());
+        return /**@type {ActionRowBuilder<import('discord.js').MentionableSelectMenuBuilder>}*/(ActionRowBuilder.from(component));
+    return /**@type {ActionRowBuilder<import('discord.js').MentionableSelectMenuBuilder>}*/(new ActionRowBuilder());
 }
 
 //@ts-expect-error
 /**@param {import('discord.js').JSONEncodable<import('discord.js').APIActionRowComponent<ReturnType<ComponentType['toJSON']>>>|import('discord.js').APIActionRowComponent<ReturnType<ComponentType['toJSON']>>} [component]*/
 function makeRoleSelectMenuRowBuilder(component) {
     if(component)
-        return /**@type {ActionRowBuilder<RoleSelectMenuBuilder>}*/(ActionRowBuilder.from(component));
-    return /**@type {ActionRowBuilder<RoleSelectMenuBuilder>}*/(new ActionRowBuilder());
+        return /**@type {ActionRowBuilder<import('discord.js').RoleSelectMenuBuilder>}*/(ActionRowBuilder.from(component));
+    return /**@type {ActionRowBuilder<import('discord.js').RoleSelectMenuBuilder>}*/(new ActionRowBuilder());
 }
 
 //@ts-expect-error
 /**@param {import('discord.js').JSONEncodable<import('discord.js').APIActionRowComponent<ReturnType<ComponentType['toJSON']>>>|import('discord.js').APIActionRowComponent<ReturnType<ComponentType['toJSON']>>} [component]*/
 function makeStringSelectMenuRowBuilder(component) {
     if(component)
-        return /**@type {ActionRowBuilder<StringSelectMenuBuilder>}*/(ActionRowBuilder.from(component));
-    return /**@type {ActionRowBuilder<StringSelectMenuBuilder>}*/(new ActionRowBuilder());
+        return /**@type {ActionRowBuilder<import('discord.js').StringSelectMenuBuilder>}*/(ActionRowBuilder.from(component));
+    return /**@type {ActionRowBuilder<import('discord.js').StringSelectMenuBuilder>}*/(new ActionRowBuilder());
 }
 
 //@ts-expect-error
 /**@param {import('discord.js').JSONEncodable<import('discord.js').APIActionRowComponent<ReturnType<ComponentType['toJSON']>>>|import('discord.js').APIActionRowComponent<ReturnType<ComponentType['toJSON']>>} [component]*/
 function makeUserSelectMenuRowBuilder(component) {
     if(component)
-        return /**@type {ActionRowBuilder<UserSelectMenuBuilder>}*/(ActionRowBuilder.from(component));
-    return /**@type {ActionRowBuilder<UserSelectMenuBuilder>}*/(new ActionRowBuilder());
+        return /**@type {ActionRowBuilder<import('discord.js').UserSelectMenuBuilder>}*/(ActionRowBuilder.from(component));
+    return /**@type {ActionRowBuilder<import('discord.js').UserSelectMenuBuilder>}*/(new ActionRowBuilder());
 }
 
 //@ts-expect-error
 /**@param {import('discord.js').JSONEncodable<import('discord.js').APIActionRowComponent<ReturnType<ComponentType['toJSON']>>>|import('discord.js').APIActionRowComponent<ReturnType<ComponentType['toJSON']>>} [component]*/
 function makeTextInputRowBuilder(component) {
     if(component)
-        return /**@type {ActionRowBuilder<TextInputBuilder>}*/(ActionRowBuilder.from(component));
-    return /**@type {ActionRowBuilder<TextInputBuilder>}*/(new ActionRowBuilder());
+        return /**@type {ActionRowBuilder<import('discord.js').TextInputBuilder>}*/(ActionRowBuilder.from(component));
+    return /**@type {ActionRowBuilder<import('discord.js').TextInputBuilder>}*/(new ActionRowBuilder());
 }
 
 module.exports = {

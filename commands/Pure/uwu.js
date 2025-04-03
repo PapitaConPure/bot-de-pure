@@ -21,7 +21,6 @@ const command = new CommandManager('uwu', flags)
 	.setAliases('uwu')
 	.setLongDescription('uwu')
 	.setOptions(options)
-	.setExperimental(true)
 	.setExperimentalExecution(async (request, args) => {
 		const deleteOriginal = args.parseFlag('borrar');
 		const randomUwu = randInArray(uwusopt);

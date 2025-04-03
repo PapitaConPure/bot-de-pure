@@ -1,4 +1,4 @@
-const { CommandTags, CommandManager, CommandOptions, CommandOptionSolver } = require("../Commons/commands");
+const { CommandTags, CommandManager, CommandOptions } = require("../Commons/commands");
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
 const options = new CommandOptions()
@@ -9,10 +9,10 @@ const command = new CommandManager('sticker', flags)
 	.setAliases('stickers', 'pegatina')
 	.setDescription('Muestra el enlace del sticker especificado')
 	.setOptions(options)
-	.setExecution(async (request, args) => {
-		const message = CommandOptionSolver.asMessage(await options.in(request).fetchParam(args, 'mensaje', true))
-            ?? request.channel.messages.cache.get(/**@type {import('discord.js').Message}*/(request).reference?.messageId)
-            ?? (request.isMessage ? /**@type {import('discord.js').Message<true>}*/(request) : null);
+	.setExperimentalExecution(async (request, args) => {
+		const message = (await args.getMessage('mensaje', true))
+			?? request.channel.messages.cache.get(/**@type {import('discord.js').Message}*/(request).reference?.messageId)
+			?? (request.isMessage ? request.inferAsMessage() : null);
 
 		if(!message || !message.stickers.size)
 			return request.reply({ content: '⚠️️ Debes especificar un mensaje con un sticker' });

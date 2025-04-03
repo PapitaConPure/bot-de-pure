@@ -1,12 +1,11 @@
-const { InteractionResponse, Message, CommandInteraction } = require('discord.js');
 const { CommandTags, CommandManager } = require('../Commons/commands');
 const { improveNumber, sleep } = require('../../func');
 
 const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('ping', flags)
 	.setLongDescription('Muestra el tiempo de respuesta del Bot y la API')
-	.setExecution(async (request, _, isSlash) => {
-		const sent = /**@type {Message<true>}*/(await request.reply({
+	.setExperimentalExecution(async request => {
+		const sent = /**@type {import('discord.js').Message<true>}*/(await request.reply({
 			content: 
 				'Pong~♪\n' +
 				`**Latencia de la API** ${request.client.ws.ping}ms\n` +
@@ -17,7 +16,7 @@ const command = new CommandManager('ping', flags)
 
 		let start, end;
 		start = Date.now();
-		await editSent(sent, request, isSlash, {
+		await editSent(sent, request, {
 			content: 
 				'Pong~♪\n' +
 				`**Latencia de la API** ${wsPing}ms\n` +
@@ -30,7 +29,7 @@ const command = new CommandManager('ping', flags)
 		let count;
 		for(count = 1; count < max; count++) {
 			start = Date.now();
-			await editSent(sent, request, isSlash, {
+			await editSent(sent, request, {
 				content:
 					'Pong~♪\n' +
 					`**Latencia de la API** ${wsPing}ms\n` +
@@ -43,7 +42,7 @@ const command = new CommandManager('ping', flags)
 			await sleep(3000);
 		}
 
-		return editSent(sent, request, isSlash, {
+		return editSent(sent, request, {
 			content:
 				'Pong~♪\n' +
 				`**Latencia de la API** ${wsPing}ms\n` +
@@ -52,17 +51,16 @@ const command = new CommandManager('ping', flags)
 	});
 
 /**
- * @param {Message<true> | InteractionResponse<false>} sent 
+ * @param {import('discord.js').Message<true> | import('discord.js').InteractionResponse<false>} sent 
  * @param {import('../Commons/typings').ComplexCommandRequest} request
- * @param {Boolean | undefined} isSlash
- * @param {string | import('discord.js').MessagePayloadOption | import('discord.js').MessageEditOptions | import('discord.js').InteractionEditReplyOptions} editOptions
+ * @param {string | import('discord.js').MessagePayload | import('discord.js').MessageEditOptions | import('discord.js').InteractionEditReplyOptions} editOptions
  */
-function editSent(sent, request, isSlash, editOptions) {
-	if(isSlash) {
-		const interaction = /**@type {CommandInteraction<'cached'>}*/(request);
+function editSent(sent, request, editOptions) {
+	if(request.isInteraction) {
+		const interaction = /**@type {import('discord.js').CommandInteraction<'cached'>}*/(request);
 		return interaction.editReply(editOptions);
 	} else {
-		const message = /**@type {Message<true>}*/(sent);
+		const message = /**@type {import('discord.js').Message<true>}*/(sent);
 		return message.edit(/**@type {import('discord.js').MessageEditOptions}*/(editOptions));
 	}
 }

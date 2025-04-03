@@ -1,7 +1,7 @@
-const { Player, useMainPlayer } = require('discord-player');
+const { Player, useMainPlayer, QueueRepeatMode } = require('discord-player');
 const { DefaultExtractors } = require('@discord-player/extractor');
 const { YoutubeiExtractor } = require('discord-player-youtubei');
-const { EmbedBuilder, ButtonBuilder, ButtonStyle, ButtonInteraction, StringSelectMenuBuilder, StringSelectMenuInteraction, ModalSubmitInteraction, Colors } = require('discord.js'); //Integrar discord.js
+const { EmbedBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, Colors } = require('discord.js'); //Integrar discord.js
 const { compressId, decompressId, shortenText } = require('../func.js'); //Funciones globales
 const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } = require('../tsCasts.js');
 const { Translator } = require('../internationalization.js');
@@ -11,12 +11,12 @@ const Logger = require('../logs.js');
 const { debug, info, warning, error } = Logger('DEBUG', 'PuréMusic');
 
 /**
- * @param {import('../commands/Commons/typings.js').ComplexCommandRequest | ButtonInteraction<'cached'> | import('discord.js').StringSelectMenuInteraction<'cached'> | ModalSubmitInteraction<'cached'>} request
+ * @param {import('../commands/Commons/typings.js').ComplexCommandRequest | import('discord.js').ButtonInteraction<'cached'> | import('discord.js').StringSelectMenuInteraction<'cached'> | import('discord.js').ModalSubmitInteraction<'cached'>} request
  * @param {import('discord.js').ColorResolvable} [color]
  * @param {String} [iconUrl]
  * @param {Array<String>} [additionalFooterData]
  */
-function makePuréMusicEmbed(request, color = Colors.Blurple, iconUrl = 'https://i.imgur.com/irsTBIH.png', additionalFooterData = []) {
+function makePuréMusicEmbed(request, color = Colors.Blurple, iconUrl = 'https://cdn.discordapp.com/emojis/1354500099799257319.webp?size=32&quality=lossless', additionalFooterData = []) {
 	const { channel } = request.member.voice;
 
 	const footerExtraContent = additionalFooterData.length ? ` • ${additionalFooterData.join(' • ')}` : '';
@@ -94,7 +94,7 @@ async function prepareTracksPlayer(client) {
 		error(err, `Error emitted from the player: ${err.message}`);
 	});
 	
-	player.events.on('playerFinish', (queue, _track) => {
+	player.events.on('playerFinish', (queue) => {
 		saveTracksQueue(queue.metadata, queue);
 	});
 	player.events.on('connectionDestroyed', (queue) => {
@@ -112,7 +112,7 @@ async function prepareTracksPlayer(client) {
 
 /**
  * Muestra una página de la queue de la Guild actual
- * @param {import('../commands/Commons/typings.js').ComplexCommandRequest | ButtonInteraction<'cached'> | StringSelectMenuInteraction<'cached'> | ModalSubmitInteraction<'cached'>} request El request que desencadenó esta petición
+ * @param {import('../commands/Commons/typings.js').ComplexCommandRequest | import('discord.js').ButtonInteraction<'cached'> | import('discord.js').StringSelectMenuInteraction<'cached'> | import('discord.js').ModalSubmitInteraction<'cached'>} request El request que desencadenó esta petición
  * @param {String} [op] La operación particular que desencadena esta función
  * @param {String} [authorId] ID del autor para verificar permisos de botón
  * @param {Number} [page=0] Número de página, enumerado desde 0 y por defecto 0
@@ -144,23 +144,26 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 	if(op !== 'PL') {
 		await ((!op || op === 'CM')
 			? request.deferReply()
-			: /**@type {ButtonInteraction<'cached'>}*/(request).deferUpdate());
+			: /**@type {import('discord.js').ButtonInteraction<'cached'>}*/(request).deferUpdate());
 	}
 
 	const player = useMainPlayer();
 	const queue = player.queues.get(request.guildId) ?? (await tryRecoverSavedTracksQueue(request));
+	let fullRows = [ 'EX', 'SF', 'LP' ].includes(op);
 
 	if(!queue?.currentTrack && !queue?.size) {
 		const embed = makeReplyEmbed(Colors.Blurple)
 			.setDescription(translator.getText('queueDescriptionEmptyQueue'))
 			.setFooter({
 				text: `${shortChannelName}`,
-				iconURL: 'https://i.imgur.com/irsTBIH.png',
+				iconURL: 'https://cdn.discordapp.com/emojis/1354500099799257319.webp?size=32&quality=lossless',
 			});
 
 		const replyObj = {
 			embeds: [ embed ],
-			components: [ getQueueActionRow(queue, page, request.user.id, translator) ],
+			components: [
+				getTrackActionRow(queue, page, request.user.id, fullRows),
+			],
 		};
 		return request.editReply(replyObj);
 	}
@@ -175,7 +178,7 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 	const lastPage = queue.size ? (Math.ceil(queue.size / QUEUE_PAGE_TRACKS_MAX) - 1) : 0;
 	const previousPage = page === 0 ? lastPage : page - 1;
 	const nextPage = page === lastPage ? 0 : page + 1;
-	const footerText = `${shortChannelName} • ${queueInfo} • ${page + 1}/${lastPage + 1}`;
+	const footerText = `${shortChannelName} • ${queueInfo}`;
 
 	let queueEmbed;
 	
@@ -202,11 +205,23 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 				text: footerText,
 				iconURL: service.iconUrl,
 			});
+
+		switch(queue.repeatMode) {
+		case QueueRepeatMode.TRACK:
+			queueEmbed.setDescription(translator.getText('queueDescriptionLoopTrack'));
+			break;
+		case QueueRepeatMode.QUEUE:
+			queueEmbed.setDescription(translator.getText('queueDescriptionLoopQueue'));
+			break;
+		case QueueRepeatMode.AUTOPLAY:
+			queueEmbed.setDescription(translator.getText('queueDescriptionLoopAutoplay'));
+			break;
+		}
 	} else {
 		queueEmbed = makeReplyEmbed(Colors.Blurple)
 			.setFooter({
 				text: footerText,
-				iconURL: 'https://i.imgur.com/irsTBIH.png',
+				iconURL: 'https://cdn.discordapp.com/emojis/1354500099799257319.webp?size=32&quality=lossless',
 			});
 	}
 	
@@ -220,36 +235,8 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 	const compressedUserId = compressId(request.user.id);
 
 	const components = [];
-	const actionRow = getQueueActionRow(queue, page, request.user.id, translator);
 
 	if(queue.size) {
-		if(queue.size > QUEUE_PAGE_TRACKS_MAX) {
-			const navigationRow = makeButtonRowBuilder().addComponents(
-				new ButtonBuilder()
-					.setCustomId(`cola_showPage_FP_${compressedUserId}_0`)
-					.setEmoji('934430008586403900')
-					.setStyle(ButtonStyle.Secondary),
-				new ButtonBuilder()
-					.setCustomId(`cola_showPage_PV_${compressedUserId}_${previousPage}`)
-					.setEmoji('934430008343158844')
-					.setStyle(ButtonStyle.Secondary),
-				new ButtonBuilder()
-					.setCustomId(`cola_showPage_NX_${compressedUserId}_${nextPage}`)
-					.setEmoji('934430008250871818')
-					.setStyle(ButtonStyle.Secondary),
-				new ButtonBuilder()
-					.setCustomId(`cola_showPage_LP_${compressedUserId}_${lastPage}`)
-					.setEmoji('934430008619962428')
-					.setStyle(ButtonStyle.Secondary),
-				new ButtonBuilder()
-					.setCustomId(`cola_showPage_CU_${compressedUserId}_${page}`)
-					.setEmoji('1292310983527632967')
-					.setStyle(ButtonStyle.Primary),
-			);
-
-			components.push(navigationRow);
-		}
-
 		const menuRow = makeStringSelectMenuRowBuilder().addComponents(
 			new StringSelectMenuBuilder()
 				.setCustomId(`cola_dequeue_${compressedUserId}_${page}`)
@@ -260,11 +247,45 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 					value: `${page}:${i}:${t.id}`,
 				})))
 		);
-		
-		components.push(actionRow);
+
 		components.push(menuRow);
-	} else
-		components.push(actionRow);
+
+		if(queue.size > QUEUE_PAGE_TRACKS_MAX) {
+			const navigationRow = makeButtonRowBuilder().addComponents(
+				new ButtonBuilder()
+					.setCustomId(`cola_showPage_FP_${compressedUserId}_0`)
+					.setEmoji('1357002075531382805')
+					.setStyle(ButtonStyle.Secondary),
+				new ButtonBuilder()
+					.setCustomId(`cola_showPage_PV_${compressedUserId}_${previousPage}`)
+					.setEmoji('934430008343158844')
+					.setStyle(ButtonStyle.Secondary),
+				new ButtonBuilder()
+					.setCustomId(`cola_showPage_IN_${compressedUserId}_${previousPage}`)
+					.setLabel(`${page + 1}/${lastPage + 1}`)
+					.setStyle(ButtonStyle.Secondary)
+					.setDisabled(),
+				new ButtonBuilder()
+					.setCustomId(`cola_showPage_NX_${compressedUserId}_${nextPage}`)
+					.setEmoji('934430008250871818')
+					.setStyle(ButtonStyle.Secondary),
+				new ButtonBuilder()
+					.setCustomId(`cola_showPage_LP_${compressedUserId}_${lastPage}`)
+					.setEmoji('1356975962990051472')
+					.setStyle(ButtonStyle.Secondary),
+			);
+
+			components.push(navigationRow);
+		}
+	}
+
+	const trackRow = getTrackActionRow(queue, page, request.user.id, fullRows);
+	components.push(trackRow);
+	
+	if(fullRows) {
+		const queueRow = getQueueActionRow(queue, page, request.user.id, translator);
+		components.push(queueRow);
+	}
 
 	const replyObj = {
 		embeds: [ queueEmbed ],
@@ -274,13 +295,12 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 }
 
 /**
- * 
  * @param {import('discord-player').GuildQueue} queue 
  * @param {Number} page
  * @param {String} userId 
- * @param {Translator} translator 
+ * @param {boolean} fullRows
  */
-function getQueueActionRow(queue, page, userId, translator) {
+function getTrackActionRow(queue, page, userId, fullRows) {
 	const compressedUserId = compressId(userId);
 
 	const actionRow = makeButtonRowBuilder().addComponents(
@@ -294,7 +314,7 @@ function getQueueActionRow(queue, page, userId, translator) {
 		return actionRow.addComponents(
 			new ButtonBuilder()
 				.setCustomId(`cola_showPage_CU_${compressedUserId}_${page}`)
-				.setEmoji('1292310983527632967')
+				.setEmoji('1357001126674825379')
 				.setStyle(ButtonStyle.Primary),
 		);
 
@@ -302,28 +322,57 @@ function getQueueActionRow(queue, page, userId, translator) {
 		const pauseOrResumeButton = queue.node.isPaused()
 			? new ButtonBuilder()
 				.setCustomId(`cola_resume_${compressedUserId}_${page}`)
-				.setEmoji('934430008250871818')
+				.setEmoji('1356977685468942416')
 				.setStyle(ButtonStyle.Primary)
 			: new ButtonBuilder()
 				.setCustomId(`cola_pause_${compressedUserId}_${page}`)
-				.setEmoji('1291898882204110879')
+				.setEmoji('1356977691122995371')
 				.setStyle(ButtonStyle.Primary);
 		
 		actionRow.addComponents(
 			pauseOrResumeButton,
 			new ButtonBuilder()
 				.setCustomId(`cola_skip_${compressedUserId}_${page}`)
-				.setEmoji('934430008619962428')
-				.setLabel(translator.getText('queueButtonSkip'))
+				.setEmoji('1356974499542732902')
 				.setStyle(ButtonStyle.Primary),
 		);
 	}
 
-	const refreshButton = new ButtonBuilder()
-		.setCustomId(`cola_showPage_CU_${compressedUserId}_${page}`)
-		.setEmoji('1292310983527632967')
-		.setStyle(ButtonStyle.Primary);
-	if(queue.size) {
+	actionRow.addComponents(
+		new ButtonBuilder()
+			.setCustomId(`cola_showPage_${fullRows ? 'NX' : 'EX'}_${compressedUserId}_${page}`)
+			.setEmoji('1357007956947767498')
+			.setStyle(ButtonStyle.Secondary),
+		new ButtonBuilder()
+			.setCustomId(`cola_showPage_CU_${compressedUserId}_${page}`)
+			.setEmoji('1357001126674825379')
+			.setStyle(ButtonStyle.Secondary),
+	);
+
+	return actionRow;
+}
+
+/**
+ * @param {import('discord-player').GuildQueue} queue 
+ * @param {Number} page
+ * @param {String} userId 
+ * @param {Translator} translator 
+ */
+function getQueueActionRow(queue, page, userId, translator) {
+	const compressedUserId = compressId(userId);
+
+	const actionRow = makeButtonRowBuilder().addComponents(
+		new ButtonBuilder()
+			.setCustomId(`cola_repeat_${compressedUserId}_${page}`)
+			.setEmoji('1356977712149037087')
+			.setStyle(ButtonStyle.Primary),
+		new ButtonBuilder()
+			.setCustomId(`cola_shuffle_${compressedUserId}_${page}`)
+			.setEmoji(queue.isShuffling ? '1356993337843781722' : '1356977721799868426')
+			.setStyle(ButtonStyle.Primary),
+	);
+
+	if(queue.size)
 		actionRow.addComponents(
 			new ButtonBuilder()
 				.setCustomId(`cola_clearQueue_${compressedUserId}`)
@@ -331,12 +380,6 @@ function getQueueActionRow(queue, page, userId, translator) {
 				.setLabel(translator.getText('queueButtonClearQueue'))
 				.setStyle(ButtonStyle.Danger),
 		);
-
-		if(queue.size <= QUEUE_PAGE_TRACKS_MAX)
-			actionRow.addComponents(refreshButton);
-	} else {
-		actionRow.addComponents(refreshButton);
-	}
 
 	return actionRow;
 }

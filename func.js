@@ -253,16 +253,14 @@ module.exports = {
         try {
             canal.send({
                 content: [
-                    //`Una última cosita ${miembro}, recuerda revisar el canal <#671817759268536320> en algún momento <:Junkoborga:751938096550903850>`,
-                    //`También, si te interesa, puedes revisar los mensajes pinneados de este canal <:tenshipeacheems:854408293258493962>`,
-                    `Okay, ya \'tamos ${miembro}, recuerda convivir adecuadamente con el resto <:comodowo:1107847983065747476>`,
+                    `Okay, ya 'tamos ${miembro}, recuerda convivir adecuadamente con el resto <:comodowo:1107847983065747476>`,
                     'Si te interesa, puedes revisar los mensajes pinneados de este canal <:tenshiJuguito:1107843487891734588>',
                     'Y estate tranqui, que ya no vas a recibir tantos pings <:dormidowo:1108318689624866846>',
-                    `Dicho esto, ¡disfruta el server po\'! Si quieres más roles, puedes usar \`${p_pure(global.serverid.saki).raw}roles\``,
+                    `Dicho esto, ¡disfruta el server po'! Si quieres más roles, puedes usar \`${p_pure(global.serverid.saki).raw}roles\``,
                 ].join('\n')
             });
 
-            //Sugerir p!suicidio con 41% de probabilidad
+            //Sugerir p!suicidio con 30% de probabilidad
             if(Math.random() < 0.3)
                 setTimeout(() => {
                     canal.send({
@@ -285,7 +283,7 @@ module.exports = {
      * @param {Discord.Guild} guild 
      */
     calculateRealMemberCount: async function(guild) {
-        const members = await guild.members.fetch().catch(_ => guild.members.cache);
+        const members = await guild.members.fetch().catch(() => guild.members.cache);
         return members.filter(member => !member.user.bot).size;
     },
 
@@ -638,7 +636,7 @@ module.exports = {
             toSend.push(`*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:1107880958981587004>`);
             toSend.push(global.hourai.images.colors);
     
-            saki.save().catch(_ => undefined);
+            saki.save().catch(() => undefined);
     
             return channel.send({
                 content: toSend.join('\n'),
@@ -711,7 +709,7 @@ module.exports = {
     
             //#region Imagen y Mensaje extra
             const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'despedida.png' });
-            const members = await servidor.members.fetch().catch(_ => servidor.members.cache);
+            const members = await servidor.members.fetch().catch(() => servidor.members.cache);
             const peoplecnt = members.filter(member => !member.user.bot).size;
             if(servidor.id === global.serverid.saki) {
                 const hourai = await Hourai.findOne() || new Hourai();
@@ -726,7 +724,7 @@ module.exports = {
                         `*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
                 });
     
-                hourai.save().catch(_ => undefined);
+                hourai.save().catch(() => undefined);
             } else { //Otros servidores
                 await canal.send({ files: [imagen] });
                 await canal.send({ content: `*Ahora hay **${peoplecnt}** usuarios en el server.*`});
@@ -754,155 +752,305 @@ module.exports = {
         }
         return data;
     },
-    
+
+    /**
+     * @typedef {Object} MemberMatch
+     * @property {Discord.GuildMember} member
+     * @property {string} rawTarget
+     * @property {number} length
+     * @property {number} matchIndex
+     */
+    /**
+     * @ignore
+     * @param {MemberMatch} a 
+     * @param {MemberMatch} b 
+     * @returns {number}
+     */
+    memberMatchComparer(a, b) {
+        //Favorecer coincidencia temprana
+        if(a.matchIndex < b.matchIndex)
+            return -1;
+        if(a.matchIndex > b.matchIndex)
+            return 1;
+
+        //Favorecer nombre corto
+        if(a.length < b.length)
+            return -1;
+        if(a.length > b.length)
+            return 1;
+
+        //Favorecer orden lexicográfico
+        if(a.rawTarget < b.rawTarget)
+            return -1;
+        if(a.rawTarget > b.rawTarget)
+            return 1;
+
+        return 0;
+    },
+
+    findMemberByTagname() {
+        
+    },
+
+    /**
+     * @param {Discord.Collection<string, Discord.GuildMember>} members
+     * @param {string} query Consulta (en minúsculas)
+     * @returns {Discord.GuildMember}
+     */
+    findMemberByUsername(members, query) {
+        const processedMembers = members.map(m => ({
+            member: m,
+            rawTarget: m.user.username,
+            length: m.user.username.length,
+            matchIndex: m.user.username.toLowerCase().indexOf(query),
+        }));
+
+        const qualifiedMembers = processedMembers.filter(m => m.matchIndex !== -1);
+        if(qualifiedMembers.length) {
+            qualifiedMembers.sort(module.exports.memberMatchComparer);
+            return qualifiedMembers[0]?.member;
+        }
+
+        return undefined;
+    },
+
+    /**
+     * @param {Discord.Collection<string, Discord.GuildMember>} members
+     * @param {string} query
+     * @returns {Discord.GuildMember}
+     */
+    findMemberByNickname(members, query) {
+        const processedMembers = members
+            .filter(m => m.nickname)
+            .map(m => ({
+                member: m,
+                rawTarget: m.nickname,
+                length: m.nickname.length,
+                matchIndex: m.nickname.toLowerCase().indexOf(query),
+            }));
+
+        const qualifiedMembers = processedMembers.filter(m => m.matchIndex !== -1);
+        if(qualifiedMembers.length) {
+            qualifiedMembers.sort(module.exports.memberMatchComparer);
+            return qualifiedMembers[0]?.member;
+        }
+
+        return undefined;
+    },
+
+    /**
+     * Busca miembros de Discord según la consulta y el contexto proporcionados.
+     * 
+     * Devuelve el {@link Discord.GuildMember miembro} de mayor coincidencia.
+     * Si no se encuentra ningún miembro, se devuelve `undefined`.
+     * @param {Discord.GuildMember | string} query 
+     * @param {FetchUserContext} context 
+     * @returns {Promise<Discord.GuildMember>}
+     */
+    fetchMember: async function(query, context) {
+        if(!query)
+            throw new Error('Se requiere un criterio de búsqueda');
+        
+        if(typeof query !== 'string')
+            return query.user?.username ? query : undefined;
+
+        const { guild: thisGuild, client } = context ?? {};
+        if(!thisGuild || !client)
+            throw new Error('Se requieren la guild actual y el cliente en búsqueda de miembro');
+
+        const allGuilds = client.guilds.cache;
+        const otherGuilds = allGuilds.filter(g => g.id !== thisGuild.id);
+        query = module.exports.extractUserID(query);
+
+        //Prioridad 1: Intentar encontrar por ID
+        if(!isNaN(+query)) {
+            return thisGuild.members.cache.find(m => m.id === query)
+                ?? otherGuilds
+                    .map(guild => guild.members.cache.find(m => m.id === query))
+                    .find(m => m)
+                ?? undefined;
+        }
+
+        //Prioridad 2: Intentar encontrar por tag
+        const lowerQuery = query.toLowerCase();
+        const taggedUser = allGuilds
+            .flatMap(g => g.members.cache)
+            .find(m => m.user.tag === lowerQuery);
+        if(taggedUser)
+            return taggedUser;
+
+        //Prioridad 3: Intentar encontrar por nombres
+        const thisGuildMembers = await thisGuild.members.fetch();
+        const otherGuildsCache = otherGuilds.flatMap(g => g.members.cache);
+        return module.exports.findMemberByUsername(thisGuildMembers, lowerQuery)
+            ?? module.exports.findMemberByNickname(thisGuildMembers, lowerQuery)
+            ?? module.exports.findMemberByUsername(otherGuildsCache, lowerQuery)
+            ?? module.exports.findMemberByNickname(otherGuildsCache, lowerQuery)
+            ?? undefined;
+    },
+
     /**
      * @typedef {Object} FetchUserContext
      * @property {Discord.Guild} [guild] La guild de la que se quiere obtener un mensaje
      * @property {Discord.Client} [client] El canal del que se quiere obtener un mensaje
      */
     /**
-     * Busca un usuario basado en la data ingresada.
-     * Devuelve el usuario que más coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún usuario, se devuelve undefined.
-     * @param {Discord.User | String} data 
+     * Busca usuarios de Discord según la consulta y el contexto proporcionados.
+     * 
+     * Devuelve el {@link Discord.User usuario} de mayor coincidencia.
+     * Si no se encuentra ningún usuario, se devuelve `undefined`.
+     * @param {Discord.User | string} query 
      * @param {FetchUserContext} context 
-     * @returns { Discord.User }
+     * @returns {Promise<Discord.User>}
      */
-    fetchUser: function(data, context) {
-        if(!data || !context) return;
-        let { guild, client } = context;
-        if(!guild || !client) throw 'Se requiere la guild actual y el cliente en búsqueda de usuario';
-        if(typeof data !== 'string')
-            return data.username ? data : undefined;
+    fetchUser: async function(query, context) {
+        if(!query)
+            throw new Error('Se requiere un criterio de búsqueda');
+
+        if(typeof query !== 'string')
+            return query.username ? query : undefined;
         
-        const uc = client.users.cache;
-        //Descifrar posible mención
-        data = module.exports.extractUserID(data);
-        
+        const { guild: thisGuild, client } = context ?? {};
+        if(!query || !thisGuild || !client)
+            throw new Error('Se requieren la guild actual y el cliente en búsqueda de usuario');
+
+        const usersCache = client.users.cache;
+        query = module.exports.extractUserID(query);
+
         //Prioridad 1: Intentar encontrar por ID
-        if(!isNaN(+data)) return uc.find(u => u.id === data);
+        if(!isNaN(+query))
+            return usersCache.find(u => u.id === query);
 
         //Prioridad 2: Intentar encontrar por tag
-        data = data.toLowerCase();
-        const taggeduser = uc.find(u => u.tag.toLowerCase() === data);
-        if(taggeduser) return taggeduser;
+        const lowerQuery = query.toLowerCase();
+        const taggedUser = usersCache.find(u => u.tag.toLowerCase() === lowerQuery);
+        if(taggedUser)
+            return taggedUser;
 
-        //Prioridad 3: Intentar encontrar por nombre de usuario en guild actual
-        const cmpnames = (a, b) => (a.toLowerCase().indexOf(data) <= b.toLowerCase().indexOf(data) && a.length <= b.length);
-        /**@type {*}*/
-        let people = guild.members.cache.map(m => m.user).filter(u => u.username.toLowerCase().indexOf(data) !== -1);
-        if(people.length)
-            return people
-                .sort()
-                .reduce((a, b) => cmpnames(a.username, b.username)?a:b);
+        //Prioridad 3: Intentar encontrar por nombres
+        const allGuilds = client.guilds.cache;
+        const otherGuilds = allGuilds.filter(g => g.id !== thisGuild.id);
+        const otherGuildsCache = otherGuilds.flatMap(g => g.members.cache);
+        const thisGuildMembers = await thisGuild.members.fetch();
+        const member = module.exports.findMemberByUsername(thisGuildMembers, lowerQuery)
+            ?? module.exports.findMemberByNickname(thisGuildMembers, lowerQuery)
+            ?? module.exports.findMemberByUsername(otherGuildsCache, lowerQuery)
+            ?? module.exports.findMemberByNickname(otherGuildsCache, lowerQuery)
+            ?? undefined;
 
-        //Prioridad 4: Intentar encontrar por apodo en guild actual
-        people = guild.members.cache.filter(m => m.nickname && m.nickname.toLowerCase().indexOf(data) !== -1);
-        if(people.size)
-            return people
-                .sort()
-                .reduce((a, b) => cmpnames(a.nickname, b.nickname) ? a : b)
-                .user;
-        
-        //Prioridad 5: Intentar encontrar por nombre de usuario en cualquier guild
-        people = uc.filter(u => u.username.toLowerCase().indexOf(data) !== -1);
-        if(people.size)
-            return people
-                .sort()
-                .reduce((a, b) => cmpnames(a.username, b.username) ? a : b);
+        if(member)
+            return member.user;
 
-        //Búsqueda sin resultados
-        return undefined;
-    },
-
-    /**
-     * Busca un usuario basado en la data ingresada.
-     * Devuelve el usuario que más coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún usuario, se devuelve undefined.
-     * @param {Discord.GuildMember | String} data 
-     * @param {FetchUserContext} context 
-     * @returns { Discord.GuildMember }
-     */
-    fetchMember: function(data, context) {
-        if(!data || !context) return;
-        let { guild: thisGuild, client } = context;
-        if(!thisGuild || !client) throw 'Se requiere la guild actual y el cliente en búsqueda de miembro';
-        if(typeof data !== 'string')
-            return data.user?.username ? data : undefined;
-        // console.time('Buscar miembro');
-        
-        const otherGuilds = client.guilds.cache.filter(g => g.id !== thisGuild.id);
-        data = module.exports.extractUserID(data);
-        
-        //Prioridad 1: Intentar encontrar por ID o tag
-        let searchFn = (m) => m.id === data
-        if(isNaN(+data)) {
-            data = data.toLowerCase();
-            searchFn = (m) => m.tag.toLowerCase();
-        }
-
-        let member = thisGuild.members.cache.find(m => m.id === data);
-        if(member) return member;
-        member = otherGuilds.map(guild => guild.members.cache.find(m => m.id === data)).find(m => m);
-        if(member) return member;
-
-        //Prioridad 3: Intentar encontrar por nombre de usuario en guild actual
-        const compareNames = (a, b) => (a.toLowerCase().indexOf(data) <= b.toLowerCase().indexOf(data) && a.length <= b.length);
-        {
-            const people = thisGuild.members.cache.filter(m => m.user.username.toLowerCase().indexOf(data) !== -1);
-            if(people.size)
-                return people
-                    .sort()
-                    .reduce((a, b) => compareNames(a.user.username, b.user.username) ? a : b);
-        }
-
-        //Prioridad 4: Intentar encontrar por apodo en guild actual
-        {
-            const people = thisGuild.members.cache.filter(m => m.nickname && m.nickname.toLowerCase().indexOf(data) !== -1);
-            if(people.size)
-                return people
-                    .sort()
-                    .reduce((a, b) => compareNames(a.nickname, b.nickname) ? a : b);
-        }
-        //Prioridad 5: Intentar encontrar por nombre de usuario en cualquier guild
-        {
-            const people = otherGuilds.map(guild => guild.members.cache.find(m => m.user.username.toLowerCase().indexOf(data) !== -1)).filter(m => m);
-            if(people.length)
-                return people
-                    .sort()
-                    .reduce((a, b) => compareNames(a.user.username, b.user.username) ? a : b);
-        }
-        // console.timeEnd('Buscar miembro');
-
-        //Búsqueda sin resultados
         return undefined;
     },
 
     /**
      * Busca un usuario basado en la data ingresada.
      * Devuelve la ID del usuario que más coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún usuario, se devuelve undefined.
-     * @param {String} data 
+     * @param {string} query 
      * @param {FetchUserContext} context 
-     * @returns {String}
+     * @returns {Promise<string>}
      */
-    fetchUserID: function(data, context) {
-        const user = module.exports.fetchUser(data, context);
+    fetchUserID: async function(query, context) {
+        const user = await module.exports.fetchUser(query, context);
         return (user === undefined) ? undefined : user.id;
     },
 
     /**
+     * Busca miembros de Discord según la consulta y el contexto proporcionados.
+     * 
+     * Devuelve el {@link Discord.GuildMember miembro} de mayor coincidencia.
+     * Si no se encuentra ningún miembro, se devuelve `undefined`.
+     * @param {Discord.GuildMember | string} query 
+     * @param {FetchUserContext} context 
+     * @returns {Discord.GuildMember}
+     */
+    fetchMemberSync: function(query, context) {
+        if(!query)
+            throw new Error('Se requiere un criterio de búsqueda');
+        
+        if(typeof query !== 'string')
+            return query.user?.username ? query : undefined;
+
+        const { guild: thisGuild, client } = context ?? {};
+        if(!thisGuild || !client)
+            throw new Error('Se requieren la guild actual y el cliente en búsqueda de miembro');
+
+        const allGuilds = client.guilds.cache;
+        const otherGuilds = allGuilds.filter(g => g.id !== thisGuild.id);
+        query = module.exports.extractUserID(query);
+
+        //Prioridad 1: Intentar encontrar por ID
+        if(!isNaN(+query)) {
+            return thisGuild.members.cache.find(m => m.id === query)
+                ?? otherGuilds
+                    .map(guild => guild.members.cache.find(m => m.id === query))
+                    .find(m => m)
+                ?? undefined;
+        }
+
+        //Prioridad 2: Intentar encontrar por tag
+        const lowerQuery = query.toLowerCase();
+        const taggedUser = allGuilds
+            .flatMap(g => g.members.cache)
+            .find(m => m.user.tag === lowerQuery);
+        if(taggedUser)
+            return taggedUser;
+
+        //Prioridad 3: Intentar encontrar por nombres
+        return module.exports.findMemberByUsername(thisGuild.members.cache, lowerQuery)
+            ?? module.exports.findMemberByNickname(thisGuild.members.cache, lowerQuery)
+            ?? module.exports.findMemberByNickname(otherGuilds.flatMap(g => g.members.cache), lowerQuery)
+            ?? undefined;
+    },
+
+    /**
+     * Busca un servidor basado en la data ingresada.
+     * Devuelve el servidor que coincide con el término de búsqueda (si se encuentra alguno). Si no se encuentra ningún servidor, se devuelve `undefined`.
+     * @param {String} query 
+     * @returns {Promise<Discord.Guild>}
+     */
+    fetchGuild: async function(query) {
+        if(typeof query !== 'string' || !query.length) return;
+
+        const client = require('./client').client;
+
+        if(!isNaN(+query))
+            return client.guilds.cache.get(query)
+                ?? client.guilds.fetch(query);
+
+        const allGuilds = (await client.guilds.fetch());
+
+        let bestDistance = -1;
+        return allGuilds
+            .reduce((bestMatch, guild) => {
+                const distance = module.exports.levenshteinDistance(guild.name, query);
+
+                if(bestMatch && distance < bestDistance) {
+                    bestDistance = distance;
+                    return guild;
+                }
+
+                return bestMatch;
+            }, undefined)
+            .fetch();
+    },
+
+    /**
      * Busca un canal basado en la data ingresada.
-     * Devuelve el canal que coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún canal, se devuelve undefined.
-     * @param {String} data 
+     * Devuelve el canal que coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún canal, se devuelve `undefined`.
+     * @param {String} query 
      * @param {Discord.Guild} guild 
      * @returns {Discord.GuildBasedChannel}
      */
-    fetchChannel: function(data, guild) {
-        if(typeof data !== 'string' || !data.length) return;
+    fetchChannel: function(query, guild) {
+        if(typeof query !== 'string' || !query.length) return;
 
         const ccache = guild.channels.cache;
-        if(data.startsWith('<#') && data.endsWith('>'))
-            data = data.slice(2, -1);
+        if(query.startsWith('<#') && query.endsWith('>'))
+            query = query.slice(2, -1);
 
-        const channel = ccache.get(data) || ccache.filter(c => [ ChannelType.GuildText, ChannelType.GuildVoice ].includes(c.type)).find(c => c.name.toLowerCase().includes(data));
+        const channel = ccache.get(query) || ccache.filter(c => [ ChannelType.GuildText, ChannelType.GuildVoice ].includes(c.type)).find(c => c.name.toLowerCase().includes(query));
 
         if(!channel)
             return;

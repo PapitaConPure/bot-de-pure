@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require('discord.js');
 const { tenshiColor } = require('../../localdata/config.json');
-const { CommandTags, CommandManager, CommandOptions } = require('../Commons/commands');
+const { CommandTags, CommandManager, CommandOptions, CommandOptionSolver } = require('../Commons/commands');
 
 const flags = new CommandTags().add('PAPA');
 const options = new CommandOptions()
@@ -13,9 +13,9 @@ const command = new CommandManager('papa-anunciar', flags)
 	)
 	.setDescription('Da un anuncio a todos los canales de sistema posibles')
 	.setOptions(options)
-	.setExecution(async (request, args) => {
-		const title = options.fetchFlag(args, 'título');
-		const announcement = await options.fetchParam(args, 'anuncio', true);
+	.setExperimentalExecution(async (request, args) => {
+		const title = CommandOptionSolver.asString(args.parseFlagExpr('título'));
+		const announcement = args.getString('anuncio', true);
 		const guilds = request.client.guilds.cache;
 		guilds.forEach(guild => {
 			const embed = new EmbedBuilder()

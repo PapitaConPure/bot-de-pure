@@ -1,7 +1,3 @@
-const global = require('../../localdata/config.json'); //Variables globales
-const func = require('../../func.js');
-const axios = require('axios');
-const Canvas = require('canvas');
 const Discord = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
@@ -33,25 +29,30 @@ const command = new CommandManager('papa-eval', flags)
 		'Se pueden realizar modificaciones a las configuraciones comunes en la caché del proceso. No se puede acceder a la Base de Datos con esto',
 	)
 	.setOptions(options)
-	.setExecution(async (request, args) => {
-		const deleteAfter = options.fetchFlag(args, 'del');
+	.setExperimentalExecution(async (request, args) => {
+		if(request.isInteraction)
+			return request.reply({ content: '❌ No permitido con comandos Slash.' });
+
+		const message = request.inferAsMessage();
+
+		const deleteAfter = args.parseFlag('del');
 		try {
-			const fnString = args.join(' ');
+			const fnString = args.rawArgs;
 			console.log(fnString);
 			await eval(fnString);
-			await request.react('✅');
+			await message.react('✅');
 		} catch(error) {
 			const embed = new Discord.EmbedBuilder()
 				.setColor(0x0000ff)
-				.setAuthor({ name: `${request.guild.name} • ${request.channel.name}`, iconURL: request.author.avatarURL(), url: request.url })
+				.setAuthor({ name: `${message.guild.name} • ${message.channel.name}`, iconURL: message.author.avatarURL(), url: message.url })
 				.addFields({
 					name: 'Ha ocurrido un error al ingresar un comando',
 					value: `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``,
 				});
-			await request.reply({ embeds: [embed] });
+			await message.reply({ embeds: [embed] });
 		}
 		if(deleteAfter)
-			request.delete();
+			message.delete();
 	});
 
 module.exports = command;
