@@ -1541,6 +1541,11 @@ let localesObject = /**@type {const}*/({
 		en: 'Language',
 		ja: '言語',
 	},
+	yoDashboardTimezoneName: {
+		es: 'Huso Horario',
+		en: 'Time Zone',
+		ja: '時間帯',
+	},
 	yoDashboardPRCName: {
 		es: 'Créditos',
 		en: 'Credits',
@@ -1595,6 +1600,31 @@ let localesObject = /**@type {const}*/({
 		es: 'Corrige el formato de enlaces de X automáticamente (VX/FX)',
 		en: 'Fixes X embeds automatically (VX/FX)',
 		ja: 'Xの埋め込みを自動的に修正します (VX/FX)',
+	},
+	yoDashboardTimezone: {
+		es: 'Huso Horario...',
+		en: 'Time Zone...',
+		ja: '時間帯…',
+	},
+	yoTimezoneModalTitle: {
+		es: 'Establecer Huso Horario',
+		en: 'Set Time Zone',
+		ja: '時間帯を設定',
+	},
+	yoTimezoneModalTimezoneLabel: {
+		es: 'Huso horario',
+		en: 'Time zone',
+		ja: '時間帯',
+	},
+	yoTimezoneModalTimezonePlaceholder: {
+		es: 'GMT, JST, -3, GMT+5, UTC-4, etc.',
+		en: 'GMT, JST, -3, GMT+5, UTC-4, etc.',
+		ja: 'GMT、JST、-3、GMT+5、UTC-4など',
+	},
+	yoTimezoneInvalidTimezone: {
+		es: '⚠️ El huso horario especificado tiene un formato inválido',
+		en: '⚠️ The specified timezone has an invalid format',
+		ja: '⚠️ 指定されたタイムゾーンは無効な形式です',
 	},
 	yoFeedEmptyError: {
 		es: paragraph(

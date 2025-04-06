@@ -1,8 +1,12 @@
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
+const UserConfigs = require('../../localdata/models/userconfigs');
+const { toUtcOffset, toTimeZoneAlias } = require('../../timezones');
+const { dateToUTCFormat } = require('../../func');
+const { Translator } = require('../../internationalization');
 
 const options = new CommandOptions()
-	.addParam('hora', 'TEXT', 'para establecer la hora a convertir')
-	.addFlag('l', ['gmt', 'utc', 'huso'], 'para especificar tu huso horario', { name: 'l', type: 'NUMBER' })
+	.addParam('hora', 'TEXT', 'para establecer la hora a convertir', { optional: true })
+	.addFlag('lzt', ['huso', 'franja', 'zona', 'zone', 'timezone', 'offset'], 'para especificar un huso horario de referencia', { name: 'z', type: 'TEXT' })
 	.addFlag(['f','d'], ['fecha','día','dia'], 'para ingresar un día en formato DD/MM/AAAA', { name: 'dma', type: { name: 'dma', expression: 'dd/MM/AAAA' } });
 const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('hora', flags)
@@ -13,18 +17,22 @@ const command = new CommandManager('hora', flags)
 	.setBriefDescription('Muestra una fecha y hora automáticamente adaptados según el huso horario que proporciones')
 	.setLongDescription(
 		'Muestra una `--fecha` y `<hora>` automáticamente adaptados a lo que ingreses.',
-		'Recuerda que no soy adivina, así que siempre ingresa tu huso local si no quieres que se tome como GMT+0',
+		'Puedes indicar el `--huso` horario que quieres usar como referencia. Si no se especifica un huso, se usará el de tu configuración de usuario ó GMT+0',
 	)
 	.setOptions(options)
 	.setExperimentalExecution(async (request, args) => {
-		const gmt = args.parseFlagExpr('gmt', x => +x, 0);
+		const translator = await Translator.from(request.user);
+
+		const utcOffset = toUtcOffset(CommandOptionSolver.asString(args.parseFlagExpr('huso')))
+			?? (await UserConfigs.findOne({ userId: request.userId }))?.utcOffset
+			?? 0;
 
 		//Definir fecha
 		const dateStr = CommandOptionSolver.asString(args.parseFlagExpr('fecha'));
 		let year, month, day;
 		if(dateStr) {
 			let isInvalidDate = false;
-			const date = dateStr.split(/[\/ ]+/).map(d => +d);
+			const date = dateStr.split(/[/ ]+/).map(d => +d);
 			if(date.some(d => isNaN(d))) isInvalidDate = true;
 			if(date.length < 3 || date.some(d => d < 1)) isInvalidDate = true;
 			[ day, month, year ] = date;
@@ -35,14 +43,16 @@ const command = new CommandManager('hora', flags)
 			if(isInvalidDate) return request.reply('⚠️ Fecha inválida. Asegúrate de seguir el formato DD/MM/AAAA');
 		} else {
 			const now = new Date(Date.now());
-			now.setTime(now.valueOf() + gmt * 60 * 60 * 1000);
+			now.setTime(now.valueOf() + utcOffset * 60 * 60 * 1000);
 			day = now.getUTCDate();
 			month = now.getUTCMonth();
 			year = now.getUTCFullYear();
 		}
 
 		/**@type {String}*/
-		let rawTime = args.getString('hora');
+		const argTime = args.getString('hora');
+		let rawTime = argTime
+			?? dateToUTCFormat(new Date(Date.now() + utcOffset * 60 * 60e3), 'HH:mm:ss');
 
 		if(rawTime == undefined)
 			return request.reply('⚠️ Debes ingresar una hora');
@@ -92,7 +102,7 @@ const command = new CommandManager('hora', flags)
 		const isInvalidTime = (timeArray) => {
 			if(timeArray.some(t => isNaN(t) || t < 0 || t >= 60)) return true;
 			
-			const [ hh, ..._ ] = timeArray;
+			const [ hh ] = timeArray;
 			if(isShortened && (hh < 1 || hh > 12)) return true;
 			if(hh >= 24) return true;
 			
@@ -108,13 +118,25 @@ const command = new CommandManager('hora', flags)
 		}
 
 		const issueDate = new Date(Date.UTC(year, month, day, hours, minutes, seconds));
-		issueDate.setTime(issueDate.getTime() - gmt * 60 * 60 * 1000);
+		issueDate.setTime(issueDate.getTime() - utcOffset * 60 * 60 * 1000);
 		const unixDate = issueDate.valueOf() / 1000;
 
+		if(!argTime) {
+			const originDate = new Date(Date.now() + utcOffset * 60 * 60e3);
+			const localeMappings = /**@type {const}*/({
+				'es': 'es-ES',
+				'en': 'en-US',
+				'ja': 'ja-JP',
+			});
+			const mappedLocale = localeMappings[translator.locale];
+			
+			return request.reply(`${dateToUTCFormat(originDate, '`HH:mm:ss` `yyyy-MM-dd`', mappedLocale)} — <:clock:1357498813144760603> ${toTimeZoneAlias(utcOffset)}`);
+		}
+
 		if(!dateStr)
-			return request.reply(`<t:${unixDate}:T>`);
+			return request.reply(`<t:${unixDate}:T> — :index_pointing_at_the_viewer: Adaptado a tu huso horario`);
 		
-		return request.reply(`<t:${unixDate}:T> <t:${unixDate}:D>`);
+		return request.reply(`<t:${unixDate}:T> <t:${unixDate}:D> — :index_pointing_at_the_viewer: Adaptado a tu huso horario`);
 	});
 
 module.exports = command;

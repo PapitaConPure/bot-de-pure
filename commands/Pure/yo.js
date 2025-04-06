@@ -1,5 +1,5 @@
 const UserConfigs = require('../../localdata/models/userconfigs');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, Embed, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder } = require('discord.js');
 const { CommandTags, CommandManager } = require('../Commons/commands');
 const { tenshiColor } = require('../../localdata/config.json');
 const { Translator } = require('../../internationalization');
@@ -9,29 +9,16 @@ const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder, makeTextInputRowBu
 const { auditError } = require('../../systems/others/auditor');
 const { updateFollowedFeedTagsCache } = require('../../systems/booru/boorufeed');
 const { makeSessionAutoname } = require('../../systems/others/purevoice');
+const { toUtcOffset: toUTCOffset, toTimeZoneAlias } = require('../../timezones');
 
-/**
- * @param {Boolean} toggle
- * @param {Translator} translator
- */
-function displayToggle(toggle, translator) {
-    return translator.getText(toggle ? 'toggledOn' : 'toggledOff');
-}
-
-/**
- * @param {String} id
- * @param {Translator} translator
- */
-const backToDashboardButton = (id, translator) => new ButtonBuilder()
+/**@param {String} id*/
+const backToDashboardButton = id => new ButtonBuilder()
     .setCustomId(`yo_goToDashboard_${compressId(id)}`)
     .setEmoji('1355128236790644868')
     .setStyle(ButtonStyle.Secondary);
 
-/**
- * @param {String} id
- * @param {Translator} translator
- */
-const cancelButton = (id, translator) => new ButtonBuilder()
+/**@param {String} id*/
+const cancelButton = id => new ButtonBuilder()
 	.setCustomId(`yo_cancelWizard_${id}`)
     .setEmoji('1355143793577426962')
 	.setStyle(ButtonStyle.Secondary);
@@ -91,10 +78,15 @@ const dashboardRows = (userId, userConfigs, translator) => [
     ),
     makeButtonRowBuilder().addComponents(
         new ButtonBuilder()
-            .setCustomId(`yo_toggleLanguage_${userId}`)
+            .setCustomId(`yo_toggleLanguage_${compressId(userId)}`)
             .setLabel(translator.nextTranslator.getText('currentLanguage'))
             .setEmoji(translator.nextTranslator.getText('currentLanguageEmoji'))
             .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
+            .setCustomId(`yo_setTimezone_${compressId(userId)}`)
+            .setLabel(translator.getText('yoDashboardTimezone'))
+            .setEmoji('1357498813144760603')
+            .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
             .setCustomId(`yo_exitWizard_${userId}`)
             .setLabel(translator.getText('buttonFinish'))
@@ -116,6 +108,11 @@ const dashboardEmbed = (request, userConfigs, translator) => {
             {
                 name: translator.getText('yoDashboardLanguageName'),
                 value: `${translator.getText('currentLanguageEmoji')} ${translator.getText('currentLanguage')}`,
+                inline: true,
+            },
+            {
+                name: translator.getText('yoDashboardTimezoneName'),
+                value: `<:clock:1357498813144760603> ${toTimeZoneAlias(userConfigs.utcOffset)}`,
                 inline: true,
             },
             {
@@ -189,8 +186,8 @@ const selectTagsChannelRows = (userId, interaction, userConfigs, translator) => 
             .setPlaceholder(translator.getText('feedSelectFeed')),
     ),
     new ActionRowBuilder().addComponents(
-        backToDashboardButton(userId, translator),
-        cancelButton(userId, translator),
+        backToDashboardButton(userId),
+        cancelButton(userId),
     ),
 ];
 
@@ -222,7 +219,7 @@ const followedTagsRows = (userId, channelId, translator, isAlt) => [
             .setEmoji('1355128236790644868')
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(!!isAlt),
-        cancelButton(userId, translator)
+        cancelButton(userId)
             .setDisabled(!!isAlt),
     ),
 ];
@@ -286,18 +283,14 @@ const command = new CommandManager('yo', flags)
 			components: dashboardRows(user.id, userConfigs, translator),
 		});
 	})
-	.setButtonResponse(async function toggleLanguage(interaction, authorId) {
+	.setButtonResponse(async function toggleLanguage(interaction) {
 		const { user } = interaction;
 			
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
             return interaction.reply({ content: warn('Usuario inexistente / Unexistent user / 存在しないユーザー'), ephemeral: true });
 
-        // @ts-ignore
         let translator = new Translator(userConfigs.language);
-		
-		if(user.id !== authorId)
-			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
 
         userConfigs.language = translator.next;
         translator = new Translator(translator.next);
@@ -309,7 +302,64 @@ const command = new CommandManager('yo', flags)
                 components: dashboardRows(user.id, userConfigs, translator),
             }),
         ]);
-	})
+	}, { userFilterIndex: 0 })
+    .setButtonResponse(async function setTimezone(interaction) {
+		const { user } = interaction;
+			
+		const userConfigs = await UserConfigs.findOne({ userId: user.id });
+        if(!userConfigs)
+            return interaction.reply({ content: warn('Usuario inexistente / Unexistent user / 存在しないユーザー'), ephemeral: true });
+
+        const translator = new Translator(userConfigs.language);
+		
+        const modal = new ModalBuilder()
+            .setCustomId('yo_applyTimezone')
+            .setTitle(translator.getText('yoTimezoneModalTitle'))
+            .addComponents(
+                makeTextInputRowBuilder().addComponents(new TextInputBuilder()
+                    .setCustomId('inputTimezone')
+                    .setLabel(translator.getText('yoTimezoneModalTimezoneLabel'))
+                    .setPlaceholder(translator.getText('yoTimezoneModalTimezonePlaceholder'))
+                    .setMinLength(0)
+                    .setMaxLength(7)
+                    .setRequired(false)
+                    .setValue(`${userConfigs.utcOffset || ''}`)
+                    .setStyle(TextInputStyle.Short)),
+            );
+
+        return interaction.showModal(modal);
+    }, { userFilterIndex: 0 })
+    .setModalResponse(async function applyTimezone(interaction) {
+		const { user } = interaction;
+			
+		const userConfigs = await UserConfigs.findOne({ userId: user.id });
+        if(!userConfigs)
+            return interaction.reply({
+                content: warn('Usuario inexistente / Unexistent user / 存在しないユーザー'),
+                ephemeral: true,
+            });
+
+        const translator = new Translator(userConfigs.language);
+
+        const inputTimezone = interaction.fields.getTextInputValue('inputTimezone');
+        const utcOffset = toUTCOffset(inputTimezone);
+
+        if(utcOffset == null)
+            return interaction.reply({
+                content: translator.getText('yoTimezoneInvalidTimezone'),
+                ephemeral: true,
+            });
+
+        userConfigs.utcOffset = utcOffset;
+
+        return Promise.all([
+            userConfigs.save().then(() => recacheUser(user.id)),
+            interaction.update({
+                embeds: [dashboardEmbed(interaction, userConfigs, translator)],
+                components: dashboardRows(user.id, userConfigs, translator),
+            }),
+        ]);
+    })
     .setSelectMenuResponse(async function selectConfig(interaction, authorId) {
         const selected = interaction.values[0];
 
@@ -322,7 +372,7 @@ const command = new CommandManager('yo', flags)
         if(!userConfigs)
             return interaction.reply({ content: '⚠️ Usuario inexistente / Unexistent user', ephemeral: true });
 
-        const translator = new Translator(/**@type {'es'|'en'}*/(userConfigs.language));
+        const translator = new Translator(userConfigs.language);
 		
 		if(user.id !== authorId)
 			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
@@ -368,8 +418,8 @@ const command = new CommandManager('yo', flags)
                         .setCustomId(`yo_setVoiceKillDelay_${compressedAuthorId}`)
                         .setStyle(ButtonStyle.Primary)
                         .setLabel(translator.getText('yoVoiceKillDelayButtonLabel')),
-                    backToDashboardButton(authorId, translator),
-                    cancelButton(authorId, translator),
+                    backToDashboardButton(authorId),
+                    cancelButton(authorId),
                 ),
             ];
             break;
@@ -401,8 +451,8 @@ const command = new CommandManager('yo', flags)
                         )
                 ),
                 makeButtonRowBuilder().addComponents(
-                    backToDashboardButton(authorId, translator),
-                    cancelButton(authorId, translator),
+                    backToDashboardButton(authorId),
+                    cancelButton(authorId),
                 ),
             ];
             break;
@@ -434,8 +484,8 @@ const command = new CommandManager('yo', flags)
                         )
                 ),
                 makeButtonRowBuilder().addComponents(
-                    backToDashboardButton(authorId, translator),
-                    cancelButton(authorId, translator),
+                    backToDashboardButton(authorId),
+                    cancelButton(authorId),
                 ),
             ];
             break;
@@ -447,7 +497,7 @@ const command = new CommandManager('yo', flags)
             components,
         });
     })
-    .setSelectMenuResponse(async function setVoicePing(interaction, authorId, enable) {
+    .setSelectMenuResponse(async function setVoicePing(interaction, authorId) {
         const { user } = interaction;
             
         const userConfigs = await UserConfigs.findOne({ userId: user.id });
@@ -572,7 +622,7 @@ const command = new CommandManager('yo', flags)
         await interaction.message.edit({ embeds: [embed] }).catch(console.error);
         return interaction.editReply({ content: translator.getText('yoVoiceKillDelaySuccess') });
     })
-    .setSelectMenuResponse(async function setPixivConvert(interaction, authorId, enable) {
+    .setSelectMenuResponse(async function setPixivConvert(interaction, authorId) {
 		const { user } = interaction;
 			
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
@@ -597,7 +647,7 @@ const command = new CommandManager('yo', flags)
             interaction.reply({ content: translator.getText('yoConversionServiceSuccess'), ephemeral: true }),
         ]);
     })
-    .setSelectMenuResponse(async function setTwitterConvert(interaction, authorId, enable) {
+    .setSelectMenuResponse(async function setTwitterConvert(interaction, authorId) {
 		const { user } = interaction;
 			
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });

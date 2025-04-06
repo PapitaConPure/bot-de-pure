@@ -1826,6 +1826,59 @@ module.exports = {
         return result;
     },
 
+    /**
+     * @param {Date} date
+     * @param {string} template
+     * @param {string} locale Por ejemplo, "en-Us" o "es-ES"
+     * @returns {string}
+     */
+    dateToUTCFormat: function(date, template, locale = 'en-US') {
+        if (!(date instanceof Date))
+            throw new TypeError("Se esperaba un objeto Date");
+
+        if (typeof template !== "string" || !template.length)
+            throw new TypeError("Se esperaba un string válido como plantilla de formato");
+
+        const year = date.getUTCFullYear().toString();
+        const month = (date.getUTCMonth() + 1).toString();
+        const day = date.getUTCDate().toString();
+        const hours = date.getUTCHours().toString();
+        const minutes = date.getUTCMinutes().toString();
+        const seconds = date.getUTCSeconds().toString();
+        const milliseconds = date.getUTCMilliseconds().toString();
+
+        const replacements = {
+            'yyyy' : year,
+            'yy'   : year.slice(-2),
+            'MMMM' : date.toLocaleDateString(locale, { month: 'long', timeZone: 'UTC' }),
+            'MMM'  : date.toLocaleDateString(locale, { month: 'short', timeZone: 'UTC' }),
+            'MM'   : month.padStart(2, '0'),
+            'M'    : month,
+            'dddd' : date.toLocaleDateString(locale, { weekday: 'long', timeZone: 'UTC' }),
+            'ddd'  : date.toLocaleDateString(locale, { weekday: 'short', timeZone: 'UTC' }),
+            'dd'   : day.padStart(2, '0'),
+            'd'    : day,
+            'HH'   : hours.padStart(2, '0'),
+            'H'    : hours,
+            'mm'   : minutes.padStart(2, '0'),
+            'm'    : minutes,
+            'ss'   : seconds.padStart(2, '0'),
+            's'    : seconds,
+            'fff'  : milliseconds.padStart(3, '0'),
+            'ff'   : milliseconds.slice(0, 2).padStart(2, '0'),
+            'f'    : milliseconds.slice(0, 1),
+        };
+
+        let formatted = template;
+
+        for(const key in replacements) {
+            const regex = new RegExp(`\\b${key}\\b`, 'g');
+            formatted = formatted.replace(regex, replacements[key]);
+        }
+
+        return formatted;
+    },
+
     /**@param {String} id*/
     compressId: function(id) {
         if(typeof id !== 'string')
