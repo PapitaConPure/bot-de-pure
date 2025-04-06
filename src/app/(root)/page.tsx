@@ -21,7 +21,7 @@ export default function Home() {
                 className="bg-discord hover:bg-discord/80 flex h-10 w-full items-center justify-center gap-2 rounded-md border border-solid border-transparent px-4 text-sm font-medium text-white transition-colors sm:h-12 sm:text-base md:w-auto md:px-5"
                 href="https://discord.com/oauth2/authorize?client_id=651250669390528561"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noopener noreferrer" 
               >
                 <FontAwesomeIcon icon={faDiscord} />
                 <span className="hidden lg:inline">Agregar Aplicación</span>
