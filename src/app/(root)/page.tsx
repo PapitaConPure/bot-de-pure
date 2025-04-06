@@ -42,7 +42,7 @@ export default function Home() {
             <div className="shadow-primary/60 bg-primary/60 absolute inset-0 h-48 scale-120 animate-[pulse_16s_cubic-bezier(0.4,0,0.6,1)_infinite] rounded-full mix-blend-lighten shadow-[0_0_600px] blur-2xl transition-all sm:h-64 md:h-72 lg:h-88 xl:h-112" />
             <div className="border-primary/30 absolute inset-0 h-48 animate-[ping_3s_cubic-bezier(0,0,0.3,1)_infinite] rounded-full border mix-blend-lighten transition-transform motion-reduce:hidden sm:h-64 md:h-72 lg:h-88 xl:h-112" />
             <img
-              src="/boticon.png"
+              src="./boticon.png"
               alt="Logo de Bot de Puré"
               className="relative h-48 rounded-full transition-transform duration-300 ease-in-out hover:scale-105 sm:h-64 md:h-72 lg:h-88 xl:h-112"
             />
