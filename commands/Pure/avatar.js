@@ -42,7 +42,6 @@ async function getMembers(request, args) {
         regroupMethod: 'MENTIONABLES-WITH-SEP',
         failedPayload: notFound,
     })).filter(m => m || (notFound.push(), false));
-    console.log({ members, notFound });
 
     if(request.isInteraction)
         return {

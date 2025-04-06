@@ -77,17 +77,21 @@ const UserConfigSchema = new Mongoose.Schema({
         enum: [ '', 'vx', 'fx' ],
         default: 'vx',
     },
+    utcOffset: {
+        type: Number,
+        default: 0,
+    },
     showLevelUp: {
         type: Boolean,
-        default: true
+        default: true,
     },
     collectMessageData: {
         type: Boolean,
-        default: true
+        default: true,
     },
     banned: {
         type: Boolean,
-        default: false
+        default: false,
     },
 });
 

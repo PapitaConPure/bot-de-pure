@@ -50,7 +50,7 @@ const command = new CommandManager('colgar', tags)
 			});
 		}
 
-		const member = args.getMember('miembro', false);
+		const member = await args.getMember('miembro', false);
 		if(!member)
 			return request.reply({ content: '⚠️ Debes indicar un miembro a colgar (y no, "ESTAAAAAA" no es un miembro válido)', ephemeral: true });
 

@@ -1,20 +1,19 @@
 const { makeButtonRowBuilder } = require('../../tsCasts');
-const { EmbedBuilder, ButtonBuilder, ButtonStyle, Colors, Message, User, ActionRowBuilder, ChatInputCommandInteraction, CommandInteraction, CommandInteractionOptionResolver } = require('discord.js');
-const { CommandOptions } = require('../../commands/Commons/cmdOpts');
+const { EmbedBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
 const { guildEmoji: gEmo, shortenText, isThread } = require('../../func');
-const { Post, Booru, TagTypes } = require('./boorufetch');
-const { getBaseTags, getSearchTags, tagMaps } = require('../../localdata/booruprops');
+const { Booru, TagTypes } = require('./boorufetch');
+const { getBaseTags, getSearchTags } = require('../../localdata/booruprops');
 const globalConfigs = require('../../localdata/config.json');
 const rakki = require('../../commands/Pure/rakkidei');
 const { Translator } = require('../../internationalization');
 
 const Logger = require('../../logs');
-const { debug, info, warn, error, fatal } = Logger('WARN', 'BooruSend');
+const { debug, info, warn, error } = Logger('WARN', 'BooruSend');
 
 /**
  * @typedef {{ maxTags?: number, title?: string, subtitle?: string, footer?: string, cornerIcon?: string, manageableBy?: string, allowNSFW?: boolean, isNotFeed?: boolean }} PostFormatData
  * @typedef {{ emoji: string, color: import('discord.js').ColorResolvable }} SourceStyle
- * @typedef {{ embeds: Array<EmbedBuilder>, components: Array<ActionRowBuilder<ButtonBuilder>> }} PostMessageOptions
+ * @typedef {{ embeds: Array<EmbedBuilder>, components: Array<import('discord.js').ActionRowBuilder<ButtonBuilder>> }} PostMessageOptions
  */
 
 /**
@@ -25,7 +24,7 @@ const { debug, info, warn, error, fatal } = Logger('WARN', 'BooruSend');
  */
 const sourceMappings = [
 	{
-		pattern: /https:\/\/i.pximg.net\/img-original\/img\/[0-9\/]{19}\/([0-9]+)_p[0-9]+\.[A-Za-z]{2,4}/,
+		pattern: /https:\/\/i.pximg.net\/img-original\/img\/[0-9/]{19}\/([0-9]+)_p[0-9]+\.[A-Za-z]{2,4}/,
 		replacement: 'https://www.pixiv.net/artworks/$1',
 	},
 	{
@@ -68,10 +67,10 @@ const unknownSource = { color: 0x1bb76e, emoji: '969664712604262400' };
 
 /**@type {{ [K: string]: { order: number, emote: string } }}*/
 const resMappings = /**@type {const}*/({
-	'lowres'               : { order: 0, emote: '<:lowres:1355765055945310238>' },
-	'highres'              : { order: 1, emote: '<:highres:1355765065772699719>' },
-	'absurdres'            : { order: 2, emote: '<:absurdres:1355765080800890891>' },
-	'incredibly_absurdres' : { order: 3, emote: '<:incrediblyAbsurdres:1355765110387507374>' },
+	'lowres'               : { order: 0, emote: '<:lowRes:1355765055945310238>' },
+	'highres'              : { order: 1, emote: '<:highRes:1355765065772699719>' },
+	'absurdres'            : { order: 2, emote: '<:absurdRes:1355765080800890891>' },
+	'incredibly_absurdres' : { order: 3, emote: '<:incrediblyAbsurdRes:1355765110387507374>' },
 });
 
 /**@type {{ [K: string]: string }}*/
@@ -90,7 +89,7 @@ const disallowedTagsIfSexCount = new Set([
 /**
  * Genera un {@linkcode EmbedBuilder} a base de un {@linkcode Post} de {@linkcode Booru}
  * @param {Booru} booru Instancia de Booru
- * @param {Post} post Post de Booru
+ * @param {import('./boorufetch').Post} post Post de Booru
  * @param {PostFormatData} data Información adicional a mostrar en el Embed. Se puede pasar un Feed directamente
  * @returns {Promise<PostMessageOptions>}
  */
@@ -400,8 +399,8 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 /**
  * Envía una notificación de {@linkcode Post} de {@linkcode Booru} a todos los {@linkcode User} suscriptos a las tags del mismo
  * @typedef {{ userId: import('discord.js').Snowflake, followedTags: Array<String> }} Suscription
- * @param {Post} post
- * @param {Message<true>} sent
+ * @param {import('./boorufetch').Post} post
+ * @param {import('discord.js').Message<true>} sent
  * @param {Array<Suscription>} feedSuscriptions 
  */
 async function notifyUsers(post, sent, feedSuscriptions) {
@@ -460,7 +459,8 @@ async function notifyUsers(post, sent, feedSuscriptions) {
 			);
 		
 		const postRow = makeButtonRowBuilder(sent.components[0]);
-		postRow.components.splice(postRow.components.length - 2);
+		const spliceIndex = postRow.components.findLastIndex(component => component.data.style === ButtonStyle.Link);
+		postRow.components.splice(spliceIndex + 1);
 		postRow.addComponents(
 			new ButtonBuilder()
 				.setURL(sent.url)
@@ -501,9 +501,9 @@ function isUnholy(isNsfw, request, terms) {
  * @param {import('../../commands/Commons/typings').ComplexCommandRequest} request
  * @param {import('../../commands/Commons/typings').CommandArguments} args
  * @param {Boolean} isSlash
- * @param {CommandOptions} options
- * @param {{ cmdtag: keyof tagMaps, nsfwtitle: String, sfwtitle: String }} [searchOpt]
- * @returns {Promise<Array<Message<true>> | Message<true>>}
+ * @param {import('../../commands/Commons/cmdOpts').CommandOptions} options
+ * @param {{ cmdtag: keyof import('../../localdata/booruprops')['tagMaps'], nsfwtitle: String, sfwtitle: String }} [searchOpt]
+ * @returns {Promise<Array<import('discord.js').Message<true>> | import('discord.js').Message<true>>}
  */
 async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt = { cmdtag: 'general', nsfwtitle: 'Búsqueda NSFW', sfwtitle: 'Búsqueda' }) {
 	info('Se recibió una solicitud de respuesta con Posts resultados de búsqueda de Booru');
@@ -548,7 +548,7 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
 		if(!response.length) {
 			warn('La respuesta de búsqueda no tiene resultados');
 			const replyOptions = { content: `⚠️ No hay resultados en **Gelbooru** para las tags **"${userTags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` };
-			return /**@type {Promise<Message<true>>}*/(request.editReply(replyOptions));
+			return /**@type {Promise<import('discord.js').Message<true>>}*/(request.editReply(replyOptions));
 		}
 
 		debug('Se obtuvieron resultados de búsqueda válidos');
@@ -581,7 +581,7 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
 		return Promise.all(messages.map(message => request.channel.send(message)))
 			.catch(err => {
 				error(err, 'Ocurrió un problema al intentar enviar los resultados de búsqueda de Booru');
-				return /**@type {Array<Message<true>>}*/([]);
+				return /**@type {Array<import('discord.js').Message<true>>}*/([]);
 			});
 	} catch(err) {
 		error(err, 'Ocurrió un problema al procesar una petición de búsqueda de Booru');
@@ -597,7 +597,7 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
 				].join('\n'),
 			});
 			
-		return /**@type {Promise<Message<true>>}*/(request.editReply({ embeds: [errorEmbed] }));
+		return /**@type {Promise<import('discord.js').Message<true>>}*/(request.editReply({ embeds: [errorEmbed] }));
 	}
 };
 

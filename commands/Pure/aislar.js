@@ -28,13 +28,13 @@ const command = new CommandManager('aislar', flags)
 		if(isNaN(duration) || duration < 0)
 			return request.reply({ content: translator.getText('aislarInvalidTime'), ephemeral: true });
 
-		if(duration === 0) 
+		if(duration === 0)
 			duration = null;
 		else 
 			duration = duration * 60e3;
 
 		args.ensureRequistified();
-		const members = CommandOptionSolver.asMembers(args.parsePolyParamSync('miembros', { regroupMethod: 'MENTIONABLES-WITH-SEP' }));
+		const members = CommandOptionSolver.asMembers(await args.parsePolyParam('miembros', { regroupMethod: 'MENTIONABLES-WITH-SEP' }));
 		if(!members.length)
 			return request.reply({ content: translator.getText('aislarNoMembersMentioned'), ephemeral: true });
 
