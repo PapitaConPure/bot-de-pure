@@ -4,7 +4,7 @@ import "./globals.css";
 import { config as fontAwesomeConfig } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import Footer from "../components/layout/Footer";
-import { PageContent } from "../components/layout/PageContent";
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
 
 fontAwesomeConfig.autoAddCss = false;
 
@@ -29,18 +29,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preload" href="./boticon.webp" as="image" />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <PageContent>
-          {children}
-          <Footer />
-        </PageContent>
-      </body>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem>
+            <div className={`flex min-h-screen font-sans`}>
+              <div
+                className={`min-h-full min-w-full bg-background text-foreground duration-300 transition-colors`}
+              >
+                {children}
+                <Footer />
+              </div>
+            </div>
+          </ThemeProvider>
+        </body>
     </html>
   );
 }
