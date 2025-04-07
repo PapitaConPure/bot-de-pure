@@ -32,7 +32,7 @@ export default function Home() {
             <h1 className="mb-1 max-w-74 text-center text-2xl font-extrabold tracking-[-.01em] sm:mb-2 sm:max-w-84 sm:text-[27px] md:mb-0 md:max-w-94 md:text-left md:text-3xl lg:max-w-150 lg:text-5xl xl:max-w-188 xl:text-6xl">
               Dale a tu servidor el gusto que se merece
             </h1>
-            <p className="text-center text-xs sm:text-left sm:text-sm md:text-base lg:text-lg md:max-w-94 lg:max-w-150 xl:max-w-188">
+            <p className="text-center text-xs sm:text-left sm:text-sm md:max-w-94 md:text-base lg:max-w-150 lg:text-lg xl:max-w-188">
               Utilidad. Administración. Personalización. Entretenimiento.
               Potencia.
             </p>
@@ -63,8 +63,10 @@ export default function Home() {
             <Image
               src="./boticon.webp"
               alt="Logo de Bot de Puré"
+              priority
               fill
               style={{ objectFit: 'cover' }}
+              sizes="(max-width: 639px) 192px, (max-width: 767px) 256px, (max-width: 1023px) 288px, (max-width: 1279px) 352px, 448px"
               className="relative h-48 rounded-full transition-transform duration-300 ease-in-out hover:scale-105 sm:h-64 md:h-72 lg:h-88 xl:h-112"
             />
           </div>
@@ -124,7 +126,10 @@ export default function Home() {
             </h1>
             <ul className="mx-auto flex flex-col gap-y-6 text-xs sm:text-left sm:text-sm md:gap-y-5 lg:text-lg">
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon className="text-accent w-4" icon={faGrinTongueWink} />
+                <FontAwesomeIcon
+                  className="text-accent w-4"
+                  icon={faGrinTongueWink}
+                />
                 <span>Comandos de memes, respuestas y emotes.</span>
               </li>
               <li className="flex flex-row items-center gap-x-4">
@@ -132,10 +137,7 @@ export default function Home() {
                 <span>Búsqueda de multimedia de anime y manga.</span>
               </li>
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon
-                  className="text-accent w-4"
-                  icon={faMusic}
-                />
+                <FontAwesomeIcon className="text-accent w-4" icon={faMusic} />
                 <span>Reproducción de música fácil y sin rodeos.</span>
               </li>
             </ul>
