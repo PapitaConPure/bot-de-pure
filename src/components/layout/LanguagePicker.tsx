@@ -8,7 +8,7 @@ import { faLanguage } from '@fortawesome/free-solid-svg-icons';
 const LanguagePicker = () => {
   const [ droppingDown, setDroppingDown ] = React.useState(false);
   return (
-    <Select onOpenChange={open => setDroppingDown(open)} defaultValue="en">
+    <Select onOpenChange={open => setDroppingDown(open)} defaultValue="es">
       <SelectTrigger className={`${droppingDown ? 'dropping-down' : ''} w-max`}>
         <div className="flex flex-row items-center justify-between gap-x-2">
           <FontAwesomeIcon className='text-foreground' icon={faLanguage} />
@@ -20,8 +20,8 @@ const LanguagePicker = () => {
       <SelectContent>
         <SelectGroup>
           <SelectItem value="es">Español</SelectItem>
-          <SelectItem value="en">English</SelectItem>
-          <SelectItem value="ja">日本語</SelectItem>
+          {false && <SelectItem value="en">English</SelectItem>}
+          {false && <SelectItem value="ja">日本語</SelectItem>}
         </SelectGroup>
       </SelectContent>
     </Select>

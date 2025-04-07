@@ -6,6 +6,7 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { ThemePicker } from '@/components/layout/ThemePicker'
 import { Button } from '@/components/ui/button'
+import LanguagePicker from '@/components/layout/LanguagePicker'
 
 const NavBar = () => {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -55,6 +56,9 @@ const NavBar = () => {
       </div>
       <nav>
         <ul className="animate-colors items-center space-y-2 md:flex md:space-y-0 md:space-x-4">
+          <li>
+            <LanguagePicker />
+          </li>
           <li>
             <ThemePicker />
           </li>
