@@ -51,7 +51,7 @@ export default function Home() {
                 href="/learn"
               >
                 <span className="inline sm:hidden lg:inline">
-                  Obtener Ayuda
+                  Aprender Más
                 </span>
                 <span className="hidden sm:inline lg:hidden">Ayuda</span>
               </Link>

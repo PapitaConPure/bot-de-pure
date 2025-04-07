@@ -41,7 +41,7 @@ const NavBar = () => {
             </li>
             <li>
               <Link
-                href="/modules"
+                href="/learn"
                 className="text-foreground hover:text-primary duration-200"
               >
                 Guías
@@ -55,6 +55,7 @@ const NavBar = () => {
           <li>
             <button
               onClick={rotateTheme}
+              aria-label='Switch Theme'
               className="border-foreground/8 bg-foreground/2 hover:bg-foreground/5 h-8 w-8 cursor-pointer rounded-md border"
             >
               <FontAwesomeIcon icon={faPalette} />
