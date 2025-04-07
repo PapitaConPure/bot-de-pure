@@ -20,7 +20,7 @@ const NavBar = () => {
         >
           <FontAwesomeIcon icon={faBars} className="fa-fw" />
         </button>
-        <div className="text-primary text-xl font-bold">Bot de Puré</div>
+        <Link href="/" className="text-primary text-xl font-bold">Bot de Puré</Link>
         <nav>
           <ul className="animate-colors hidden items-center space-y-0 space-x-4 md:flex">
             <li>

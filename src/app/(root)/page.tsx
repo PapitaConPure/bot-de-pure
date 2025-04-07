@@ -1,5 +1,24 @@
 import { faDiscord } from '@fortawesome/free-brands-svg-icons'
-import { faStar } from '@fortawesome/free-solid-svg-icons'
+import {
+  faBan,
+  faBookBookmark,
+  faChartDiagram,
+  faClipboardCheck,
+  faCode,
+  faCogs,
+  faCouch,
+  faFaceGrin,
+  faHeadphonesAlt,
+  faImage,
+  faList,
+  faRobot,
+  faScrewdriver,
+  faScrewdriverWrench,
+  faServer,
+  faShieldAlt,
+  faStar,
+  faUser,
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
 
@@ -21,7 +40,7 @@ export default function Home() {
                 className="bg-discord hover:bg-discord/80 flex h-10 w-full items-center justify-center gap-2 rounded-md border border-solid border-transparent px-4 text-sm font-medium text-white transition-colors sm:h-12 sm:text-base md:w-auto md:px-5"
                 href="https://discord.com/oauth2/authorize?client_id=651250669390528561"
                 target="_blank"
-                rel="noopener noreferrer" 
+                rel="noopener noreferrer"
               >
                 <FontAwesomeIcon icon={faDiscord} />
                 <span className="hidden lg:inline">Agregar Aplicación</span>
@@ -51,133 +70,124 @@ export default function Home() {
       </section>
       <section className="border-t-foreground/6 flex w-full flex-col gap-y-6 border-t px-8 py-4 sm:px-10 sm:py-6 lg:px-14 lg:py-10 xl:px-16 xl:py-12">
         <div className="flex flex-col flex-nowrap gap-x-6 gap-y-6 md:flex-row md:justify-center">
-          <div className="rounded-md bg-secondary/20 flex grow flex-col gap-y-6 px-6 pt-4 pb-6 md:w-1/2 md:grow-0 lg:px-8 lg:py-6">
-            <h1 className="border-b-foreground/8 font-bold border-b pb-2 text-center text-lg md:text-xl">
+          <div className="bg-secondary/20 flex flex-col gap-y-6 self-start md:self-auto rounded-md px-6 pt-4 pb-6 w-2/3 md:w-1/2 md:grow-0 lg:px-8 lg:py-6">
+            <h1 className="border-b-foreground/8 border-b pb-2 text-center text-lg font-bold md:text-xl">
               Utilidad Ante Todo
             </h1>
-            <ul className="mx-auto flex flex-col gap-y-3 text-xs sm:text-left sm:text-sm lg:text-lg">
+            <ul className="mx-auto flex flex-col gap-y-4 text-xs sm:text-left sm:text-sm lg:text-lg">
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
+                <FontAwesomeIcon
+                  className="text-accent w-4"
+                  icon={faClipboardCheck}
+                />
                 <span>Simplifica tareas por defecto.</span>
               </li>
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Lorem Ipsum dolor sit amet.</span>
+                <FontAwesomeIcon className="text-accent w-4" icon={faCouch} />
+                <span>Brinda cómodo acceso a servicios comunes.</span>
               </li>
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Lorem Ipsum dolor sit amet.</span>
+                <FontAwesomeIcon className="text-accent w-4" icon={faRobot} />
+                <span>Ofrece poderosos sistemas automáticos.</span>
               </li>
             </ul>
           </div>
-          <div className="rounded-md bg-secondary/20 flex grow flex-col gap-y-6 px-6 pt-4 pb-6 md:w-1/2 md:grow-0 lg:px-8 lg:py-6">
-            <h1 className="border-b-foreground/8 font-bold border-b pb-2 text-center text-lg md:text-xl">
-              Administración
+          <div className="bg-secondary/20 flex flex-col gap-y-6 self-end md:self-auto rounded-md px-6 pt-4 pb-6 w-2/3 md:w-1/2 md:grow-0 lg:px-8 lg:py-6">
+            <h1 className="border-b-foreground/8 border-b pb-2 text-center text-lg font-bold md:text-xl">
+              Moderación
             </h1>
-            <ul className="mx-auto flex flex-col gap-y-3 text-xs sm:text-left sm:text-sm lg:text-lg">
+            <ul className="mx-auto flex flex-col gap-y-4 text-xs sm:text-left sm:text-sm lg:text-lg">
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Lorem Ipsum dolor sit amet.</span>
+                <FontAwesomeIcon className="text-accent w-4" icon={faList} />
+                <span>Especifica reglas flojas o estrictas.</span>
               </li>
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Lorem Ipsum dolor sit amet.</span>
+                <FontAwesomeIcon className="text-accent w-4" icon={faScrewdriverWrench} />
+                <span>Define acceso y permisos con precisión.</span>
               </li>
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Lorem Ipsum dolor sit amet.</span>
+                <FontAwesomeIcon className="text-accent w-4" icon={faBan} />
+                <span>Castiga miembros rápidamente.</span>
               </li>
             </ul>
           </div>
         </div>
         <div className="flex flex-col flex-nowrap gap-x-6 gap-y-6 md:flex-row md:justify-center">
-          <div className="rounded-md bg-secondary/20 flex grow flex-col gap-y-6 px-6 pt-4 pb-6 md:w-1/2 md:grow-0 lg:px-8 lg:py-6">
-            <h1 className="border-b-foreground/8 font-bold border-b pb-2 text-center text-lg md:text-xl">
+          <div className="bg-secondary/20 flex flex-col gap-y-6 self-start md:self-auto rounded-md px-6 pt-4 pb-6 w-2/3 md:w-1/2 md:grow-0 lg:px-8 lg:py-6">
+            <h1 className="border-b-foreground/8 border-b pb-2 text-center text-lg font-bold md:text-xl">
               Entretenimiento
             </h1>
-            <ul className="mx-auto flex flex-col gap-y-3 text-xs sm:text-left sm:text-sm lg:text-lg">
+            <ul className="mx-auto flex flex-col gap-y-4 text-xs sm:text-left sm:text-sm lg:text-lg">
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Lorem Ipsum dolor sit amet.</span>
+                <FontAwesomeIcon className="text-accent w-4" icon={faStar} />
+                <span>Comandos de memes, respuestas y emotes.</span>
               </li>
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Lorem Ipsum dolor sit amet.</span>
+                <FontAwesomeIcon className="text-accent w-4" icon={faImage} />
+                <span>Búsqueda de multimedia de anime y manga.</span>
               </li>
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Lorem Ipsum dolor sit amet.</span>
+                <FontAwesomeIcon className="text-accent w-4" icon={faFaceGrin} />
+                <span>Genéticamente modificada para ser tonta.</span>
               </li>
             </ul>
           </div>
-          <div className="rounded-md bg-secondary/20 flex grow flex-col gap-y-6 px-6 pt-4 pb-6 md:w-1/2 md:grow-0 lg:px-8 lg:py-6">
-            <h1 className="border-b-foreground/8 font-bold border-b pb-2 text-center text-lg md:text-xl">
-              Título de Carta
+          <div className="bg-secondary/20 flex flex-col gap-y-6 self-end md:self-auto rounded-md px-6 pt-4 pb-6 w-2/3 md:w-1/2 md:grow-0 lg:px-8 lg:py-6">
+            <h1 className="border-b-foreground/8 border-b pb-2 text-center text-lg font-bold md:text-xl">
+              Personalización de Usuario
             </h1>
-            <ul className="mx-auto flex flex-col gap-y-3 text-xs sm:text-left sm:text-sm lg:text-lg">
+            <ul className="mx-auto flex flex-col gap-y-4 text-xs sm:text-left sm:text-sm lg:text-lg">
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Lorem Ipsum dolor sit amet.</span>
+                <FontAwesomeIcon className="text-accent w-4" icon={faUser} />
+                <span>Todas tus preferencias en un solo lugar.</span>
               </li>
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Lorem Ipsum dolor sit amet.</span>
+                <FontAwesomeIcon className="text-accent w-4" icon={faServer} />
+                <span>Interoperabilidad con sistemas de servidor.</span>
               </li>
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Lorem Ipsum dolor sit amet.</span>
+                <FontAwesomeIcon className="text-accent w-4" icon={faScrewdriver} />
+                <span>Configuración directa, intuitiva y fácil.</span>
               </li>
             </ul>
           </div>
         </div>
         <div className="flex flex-col flex-nowrap gap-x-6 gap-y-6 md:flex-row md:place-content-evenly md:content-evenly md:justify-center">
-          <div className="rounded-md bg-secondary/20 flex grow flex-col gap-y-6 px-6 pt-4 pb-6 md:w-1/2 md:grow-0 lg:px-8 lg:py-6">
-            <h1 className="border-b-foreground/8 font-bold border-b pb-2 text-center text-lg md:text-xl">
-              Título de Carta
+          <div className="bg-secondary/20 flex flex-col gap-y-6 self-start md:self-auto rounded-md px-6 pt-4 pb-6 w-2/3 md:w-1/2 md:grow-0 lg:px-8 lg:py-6">
+            <h1 className="border-b-foreground/8 border-b pb-2 text-center text-lg font-bold md:text-xl">
+              Personalización de Servidor
             </h1>
-            <ul className="mx-auto flex flex-col gap-y-3 text-xs sm:text-left sm:text-sm lg:text-lg">
+            <ul className="mx-auto flex flex-col gap-y-4 text-xs sm:text-left sm:text-sm lg:text-lg">
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Lorem Ipsum dolor sit amet.</span>
+                <FontAwesomeIcon className="text-accent w-4" icon={faChartDiagram} />
+                <span>Comandos personalizados de servidor.</span>
               </li>
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Lorem Ipsum dolor sit amet.</span>
+                <FontAwesomeIcon className="text-accent w-4" icon={faCogs} />
+                <span>Mecanismos absurdamente configurables.</span>
               </li>
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Lorem Ipsum dolor sit amet.</span>
+                <FontAwesomeIcon className="text-accent w-4" icon={faShieldAlt} />
+                <span>Medidas de seguridad cuando las necesites.</span>
               </li>
             </ul>
           </div>
-          <div className="rounded-md bg-secondary/20 flex grow flex-col gap-y-6 px-6 pt-4 pb-6 md:w-1/2 md:grow-0 lg:px-8 lg:py-6">
-            <h1 className="border-b-foreground/8 font-bold border-b pb-2 text-center text-lg md:text-xl">
-              Título de Carta
+          <div className="bg-secondary/20 flex flex-col gap-y-6 self-end md:self-auto rounded-md px-6 pt-4 pb-6 w-2/3 md:w-1/2 md:grow-0 lg:px-8 lg:py-6">
+            <h1 className="border-b-foreground/8 border-b pb-2 text-center text-lg font-bold md:text-xl">
+              Funcionalidad Avanzada
             </h1>
-            <ul className="mx-auto flex flex-col gap-y-3 text-xs sm:text-left sm:text-sm lg:text-lg">
+            <ul className="mx-auto flex flex-col gap-y-4 text-xs sm:text-left sm:text-sm lg:text-lg">
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Utilidad y herramientas ante todo.</span>
+                <FontAwesomeIcon className="text-accent w-4" icon={faCode} />
+                <span>Crea comandos avanzados con PuréScript.</span>
               </li>
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Entretenimiento y administración.</span>
+                <FontAwesomeIcon className="text-accent w-4" icon={faHeadphonesAlt} />
+                <span>Despliega sesiones de voz dinámicamente.</span>
               </li>
               <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Personalización a nivel de usuario.</span>
-              </li>
-              <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Personalización a nivel de servidor.</span>
-              </li>
-              <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Configuración poderosa e intuitiva.</span>
-              </li>
-              <li className="flex flex-row items-center gap-x-4">
-                <FontAwesomeIcon icon={faStar} />
-                <span>Funcionalidad avanzada si gustas.</span>
+                <FontAwesomeIcon className="text-accent w-4" icon={faBookBookmark} />
+                <span>Documentación extensiva y detallada.</span>
               </li>
             </ul>
           </div>
