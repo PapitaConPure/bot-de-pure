@@ -28,7 +28,7 @@ const command = new CommandManager('inforol', flags)
 	)
 	.setPermissions(perms)
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request.user);
 		
 		if(args.empty)

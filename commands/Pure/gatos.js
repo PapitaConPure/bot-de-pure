@@ -14,7 +14,7 @@ const command = new CommandManager('gatos', flags)
 		'Muestra imágenes de gatitos.',
 		'Fuente: https://cataas.com'
 	)
-	.setExperimentalExecution(async request => {
+	.setExecution(async request => {
 		const kittenData = (await axios.get('https://cataas.com/cat?json=true').catch(auditError));
 
 		const embed = new EmbedBuilder();

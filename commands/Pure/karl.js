@@ -45,7 +45,7 @@ const flags = new CommandTags().add(
 const command = new CommandManager('karl', flags)
 	.setAliases('karlos', 'zupija')
 	.setDescription('Comando de gacha musical de Karl Zuñiga')
-	.setExperimentalExecution(async request => {
+	.setExecution(async request => {
 		const tier = getKarlTier();
 		const stars = Array(tier.n).fill(star).join('');
 		const pulled = pullInstruments(tier.n);

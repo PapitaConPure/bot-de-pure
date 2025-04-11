@@ -5,7 +5,7 @@ const flags = new CommandTags().add('PAPA');
 const command = new CommandManager('papa-próximo', flags)
 	.setAliases('papa-proximo')
 	.setDescription('...')
-	.setExperimentalExecution(async request => {
+	.setExecution(async request => {
 		if(request.isInteraction)
 			return request.reply({ content: '❌ Este comando solo puede ser llamado por mensaje' });
 

@@ -21,7 +21,7 @@ const command = new CommandManager('repetir', tags)
 	.setLongDescription(
 		'Detiene la pista que se esté reproduciendo actualmente en VC y comienza a reproducir en su lugar la que se encuentre a continuación en la cola de reproducción',
 	)
-	.setExperimentalExecution(async request => {
+	.setExecution(async request => {
 		const userId = request.userId;
 		const translator = await Translator.from(userId);
 

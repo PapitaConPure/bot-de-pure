@@ -84,7 +84,7 @@ const command = new CommandManager('leche', flags)
 		'**Nota:** en canales marcados como NSFW, el resultado será diferente',
 	)
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const isnsfw = isThread(request.channel)
 			? request.channel.parent.nsfw
 			: request.channel.nsfw;

@@ -57,7 +57,7 @@ const command = new CommandManager('dados', flags)
 		'**Ejemplo de dados:** `1d6` = 1 dado de 6 caras; `5d4` = 5 dados de 4 caras; `15d20` = 15 dados de 20 caras',
 	)
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args, rawArgs) => {
+	.setExecution(async (request, args, rawArgs) => {
 		let diceInputs = (
 			args.isInteractionSolver()
 				? CommandOptionSolver.asStrings(args.parsePolyParamSync('dados', { messageSep: ' ' })).map(v => v.match(diceRegex))

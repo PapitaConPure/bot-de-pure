@@ -7,7 +7,7 @@ const flags = new CommandTags().add('PAPA');
 const command = new CommandManager('papa-bienvenida', flags)
 	.setAliases('papa-welcome')
 	.setDescription('Para simular una bienvenida.')
-	.setExperimentalExecution(async message => {
+	.setExecution(async message => {
 		return dibujarBienvenida(message.member, true);
 	});
 

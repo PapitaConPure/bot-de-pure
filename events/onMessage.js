@@ -133,13 +133,14 @@ async function handleMessageCommand(message, command, stats, args, rawArgs, exce
 	if(exception)
 		return exceptionString && message.channel.send({ embeds: [ generateExceptionEmbed(exception, { cmdString: exceptionString }) ]});
 
-	const complex = CommandManager.requestize(message);
-	if(command.experimental) {
-		const solver = new CommandOptionSolver(complex, args, command.options, rawArgs);
+	const completeExtendedRequest = CommandManager.requestize(message);
+	if(!command.legacy) {
+		const optionSolver = new CommandOptionSolver(completeExtendedRequest, args, command.options, rawArgs);
+		await command.execute(completeExtendedRequest, optionSolver, rawArgs);
+	} else {
 		// @ts-expect-error
-		await /**@type {import('../commands/Commons/cmdBuilder.js').ExperimentalExecuteFunction}*/(command.execute)(complex, solver, rawArgs);
-	} else
-		await command.execute(complex, args, false, rawArgs);
+		await command.execute(completeExtendedRequest, args, false, rawArgs);
+	}
 	stats.commands.succeeded++;
 }
 
@@ -315,9 +316,9 @@ async function onMessage(message, client) {
 	//Ayuda para principiantes
 	if(content.includes(`${client.user}`)) {
 		const command = require('../commands/Pure/prefijo.js');
-		const complex = CommandManager.requestize(message);
-		const solver = new CommandOptionSolver(complex, [], command.options);
-		return /**@type {import('../commands/Commons/cmdBuilder.js').ExperimentalExecuteFunction}*/(/**@type {unknown}*/(command.execute))(complex, solver);
+		const request = CommandManager.requestize(message);
+		const solver = new CommandOptionSolver(request, [], command.options);
+		return command.execute(request, solver);
 	}
 }
 

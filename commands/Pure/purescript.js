@@ -93,7 +93,7 @@ const command = new CommandManager('purescript', flags)
 		`Última versión: **v${CURRENT_PS_VERSION}**`
 	)
 	.setOptions(options)
-	.setExperimentalExecution(async function (request, args, rawArgs) {
+	.setExecution(async function (request, args, rawArgs) {
 		const helpString = `-# Usa \`${p_pure(request.guildId).raw}ayuda puréscript\` para más información`;
 		const scriptResult = await getScriptString(args, rawArgs);
 

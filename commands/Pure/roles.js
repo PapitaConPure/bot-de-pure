@@ -118,7 +118,7 @@ const command = new CommandManager('roles', flags)
 	.setOptions(options)
 	.setBriefDescription('Pemite a todos elegir algunos roles')
 	.setLongDescription('Establece un punto de reparto de roles para uso colectivo (solo Saki Scans). Alternativamente, puedes indicar un rol que quieras compartir')
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const role = args.getRole('búsqueda', true);
 
 		if(role) {

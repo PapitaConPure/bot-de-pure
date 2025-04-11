@@ -58,7 +58,7 @@ const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('presentar', flags)
     .setAliases('presentacion', 'presentación', 'hola', 'saludar', 'presentarse', 'puré', 'pure')
     .setDescription('Me presento y digo cositas sobre mí~')
-    .setExperimentalExecution(async request => {
+    .setExecution(async request => {
         return request.reply({ embeds });
     });
 

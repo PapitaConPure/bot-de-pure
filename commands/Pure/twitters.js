@@ -7,6 +7,7 @@ const perms = CommandPermissions.adminOnly();
 const flags = new CommandTags().add(
 	'MOD',
 	'HOURAI',
+	'MAINTENANCE',
 );
 const options = new CommandOptions()
 	.addParam('twitters', { name: 'enlace', expression: 'https://twitter.com/' }, 'para colocar uno o más Twitters en un nuevo tablón', { poly: 'MULTIPLE', polymax: 12 })
@@ -29,7 +30,7 @@ const command = new CommandManager('twitters', flags)
 	)
 	.setPermissions(perms)
 	.setOptions(options)
-	.setExecution(async (request, args, isSlash = false) => {
+	.setLegacyExecution(async (request, args, isSlash = false) => {
 		if(!isSlash && !args.length)
 			return request.reply({ content: '⚠️ Necesitas ingresar al menos un enlace de Twitter o propiedad de tablón' });
 

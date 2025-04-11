@@ -44,7 +44,7 @@ const command = new CommandManager('reproducir', tags)
 		'Reproduce una pista de audio según la `búsqueda` realizada.',
 	)
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request.userId);
 
 		if(args.empty)

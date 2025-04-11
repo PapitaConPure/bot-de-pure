@@ -250,7 +250,7 @@ const command = new CommandManager('yo', flags)
         'Para ver y configurar tus preferencias.',
         'Si quieres cambiar alguna configuración, puedes presionar cualquier botón para proceder con el Asistente',
     )
-	.setExperimentalExecution(async request => {
+	.setExecution(async request => {
         const userQuery = { userId: request.userId };
 		let userConfigs = await UserConfigs.findOne(userQuery);
         if(!userConfigs) {

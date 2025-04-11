@@ -23,7 +23,7 @@ const command = new CommandManager('colgar', tags)
 	)
 	.setPermissions(perms)
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const user = request.user;
 		const everyone = args.parseFlag('todos');
 

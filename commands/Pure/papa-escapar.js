@@ -8,7 +8,7 @@ const command = new CommandManager('papa-escapar', flags)
 	.setAliases('papa-abandonar')
 	.setDescription('Abandono.')
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		if(args.empty)
 			return request.reply({ content: request.client.guilds.cache.map(g => `**${g.name}** ${g.id}`).join('\n') });
 

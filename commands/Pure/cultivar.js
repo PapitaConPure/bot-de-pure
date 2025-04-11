@@ -17,7 +17,7 @@ const command = new CommandManager('cultivar', flags)
         'Permite cultivar <:prc:1097208828946301123> 54~66',
         'Solo se puede hacer una vez por día',
     )
-    .setExperimentalExecution(async request => {
+    .setExecution(async request => {
         const userQuery = { userId: request.userId };
         const userConfigs = (await UserConfigs.findOne(userQuery)) || new UserConfigs(userQuery);
         const translator = await Translator.from(request.userId);

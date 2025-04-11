@@ -1,10 +1,4 @@
-const { CommandOptions, CommandOptionSolver } = require('./cmdOpts');
-const { CommandTags } = require('./cmdTags');
-// @ts-ignore
-const { CommandRequest, ComplexCommandRequest, CommandArguments } = require('./typings');
-// @ts-ignore
-const { Snowflake, User, Interaction, ButtonInteraction, SelectMenuInteraction, MessagePayload, InteractionReplyOptions, Message, CommandInteraction, PermissionsBitField, Collection, Attachment, MessageActivity, InteractionDeferReplyOptions, MessageEditOptions, InteractionEditReplyOptions, ChatInputCommandInteraction } = require('discord.js');
-const { CommandPermissions } = require('./cmdPerms');
+const { Message, CommandInteraction, Collection } = require('discord.js');
 
 /**
  * @typedef {Object} ExtendedCommandRequestPrototype
@@ -12,23 +6,23 @@ const { CommandPermissions } = require('./cmdPerms');
  * @property {Boolean} isMessage Whether the command is a message command (true) or not (false)
  * @property {Boolean} isInteraction Whether the command is an interaction or Slash command (true) or not (false)
  * @property {() => Message<true>} inferAsMessage Infers the command as a guild Message Command. Throws an error if the command isn't really a Message Command
- * @property {() => ChatInputCommandInteraction<'cached'>} inferAsSlash Infers the command as a cached Slash Command Interaction. Throws an error if the command isn't really a Slash Command
+ * @property {() => import('discord.js').ChatInputCommandInteraction<'cached'>} inferAsSlash Infers the command as a cached Slash Command Interaction. Throws an error if the command isn't really a Slash Command
  * 
- * @property {MessageActivity?} activity If the command is a message command, returns the message's activity (if any)
- * @property {Collection<Snowflake, Attachment>} attachments A collection of the command's attachments, if it's a message command and it has attachments
- * @property {Readonly<PermissionsBitField>} appPermisions The permissions of the application or bot in the current channel
+ * @property {import('discord.js').MessageActivity?} activity If the command is a message command, returns the message's activity (if any)
+ * @property {Collection<import('discord.js').Snowflake, import('discord.js').Attachment>} attachments A collection of the command's attachments, if it's a message command and it has attachments
+ * @property {Readonly<import('discord.js').PermissionsBitField>} appPermisions The permissions of the application or bot in the current channel
  * @property {Boolean} deferred
  * @property {Boolean} replied
- * @property {Readonly<PermissionsBitField>} memberPermissions The permissions within the current channel of the member who started the command
- * @property {User} user The user who started the command
+ * @property {Readonly<import('discord.js').PermissionsBitField>} memberPermissions The permissions within the current channel of the member who started the command
+ * @property {import('discord.js').User} user The user who started the command
  * @property {String} userId The id of the user who started the command
  * 
- * @property {(options?: (string|MessagePayload)&(MessageEditOptions|InteractionReplyOptions)|{}|undefined) => Promise<Message<Boolean>>} reply If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply
- * @property {(options?: (string|MessagePayload)&(MessageEditOptions|InteractionReplyOptions)|{}|undefined) => Promise<Message<Boolean>>} replyFirst If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply
- * @property {(options?: InteractionDeferReplyOptions) => Promise<Message<Boolean>>} deferReply If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply
+ * @property {(options?: (string|import('discord.js').MessagePayload)&(import('discord.js').MessageEditOptions|import('discord.js').InteractionReplyOptions)|{}|undefined) => Promise<Message<Boolean>>} reply If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply
+ * @property {(options?: (string|import('discord.js').MessagePayload)&(import('discord.js').MessageEditOptions|import('discord.js').InteractionReplyOptions)|{}|undefined) => Promise<Message<Boolean>>} replyFirst If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply
+ * @property {(options?: import('discord.js').InteractionDeferReplyOptions) => Promise<Message<Boolean>>} deferReply If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply
  * @property {() => Promise<Message<Boolean>>} delete Deletes the original message if the command is a message command
  * @property {() => Promise<Message<Boolean>>} deleteReply Deletes the initial reply
- * @property {(options: (string|MessagePayload)&(MessageEditOptions|InteractionEditReplyOptions)|{}|undefined) => Promise<Message<Boolean>>} editReply Edits the initial reply
+ * @property {(options: (string|import('discord.js').MessagePayload)&(import('discord.js').MessageEditOptions|import('discord.js').InteractionEditReplyOptions)|{}|undefined) => Promise<Message<Boolean>>} editReply Edits the initial reply
  * @property {() => Boolean} wasDeferred Determines whether the initial reply was deferred (true) or not (false)
  * @property {() => Boolean} wasReplied Determines whether the initial reply was sent (true) or not (false)
  */
@@ -61,8 +55,8 @@ const extendedCommandRequestPrototype = {
 };
 
 /**
- * @param {CommandRequest} request
- * @returns {ComplexCommandRequest}
+ * @param {import('./typings').CommandRequest} request
+ * @returns {import('./typings').ComplexCommandRequest}
  */
 function extendRequest(request) {
     /**@type {ExtendedCommandRequestPrototype}*/
@@ -80,7 +74,7 @@ function extendRequest(request) {
         extension.user = request.author;
         extension.userId = request.author.id;
 
-        extension.deferReply = async(_) => {
+        extension.deferReply = async() => {
             const initialReply = await request.reply({ content: '...' });
             extension.initialReply = initialReply;
             extension.deferred = true;
@@ -127,16 +121,17 @@ function extendRequest(request) {
 
 /**
  * 
- * @param {ComplexCommandRequest} request El comando disparado, ya sea de mensaje o Slash
- * @param {CommandArguments} args El administrador de opciones del comando
+ * @param {import('./typings').ComplexCommandRequest} request El comando disparado, ya sea de mensaje o Slash
+ * @param {import('./typings').CommandArguments} args El administrador de opciones del comando
  * @param {Boolean} [isSlash] Si es un comando Slash (true) o no (false)
  * @param {String} [rawArgs] Argumentos sin modificar, como una sola cadena
  * @returns {Promise<*>}
  */
+// eslint-disable-next-line no-unused-vars
 async function executeFnSample(request, args, isSlash = false, rawArgs = undefined) {}
 
 /**
- * @typedef {(request: ComplexCommandRequest, args: CommandOptionSolver, rawArgs?: String | null) => Promise<*>} ExperimentalExecuteFunction
+ * @typedef {(request: import('./typings').ComplexCommandRequest, args: import('./cmdOpts').CommandOptionSolver, rawArgs?: String | null) => Promise<*>} ExecutionFunction
  */
 /**
  * @typedef {Object} InteractionResponseOptions
@@ -146,13 +141,13 @@ async function executeFnSample(request, args, isSlash = false, rawArgs = undefin
 /**Representa un comando*/
 class CommandManager {
     /**
-     * @typedef {typeof executeFnSample} ExecutionFunction
-     * @typedef {(interaction: Interaction, ...args: String[]) => Promise<*>} InteractionResponseFunction
+     * @typedef {typeof executeFnSample} CompatibilityExecutionFunction
+     * @typedef {(interaction: import('discord.js').Interaction, ...args: String[]) => Promise<*>} InteractionResponseFunction
      * @typedef {import('discord.js').ModalMessageModalSubmitInteraction<'cached'>} ModalResponseInteraction
-     * @typedef {(interaction: ButtonInteraction<'cached'>, ...args: String[]) => Promise<*>} ButtonResponseFunction
-     * @typedef {(interaction: SelectMenuInteraction<'cached'>, ...args: String[]) => Promise<*>} SelectMenuResponseFunction
+     * @typedef {(interaction: import('discord.js').ButtonInteraction<'cached'>, ...args: String[]) => Promise<*>} ButtonResponseFunction
+     * @typedef {(interaction: import('discord.js').SelectMenuInteraction<'cached'>, ...args: String[]) => Promise<*>} SelectMenuResponseFunction
      * @typedef {(interaction: ModalResponseInteraction, ...args: String[]) => Promise<*>} ModalResponseFunction
-     * @typedef {(String | MessagePayload | import('discord.js').MessageReplyOptions) & InteractionReplyOptions & { fetchReply: Boolean }} ReplyOptions
+     * @typedef {(String | import('discord.js').MessagePayload | import('discord.js').MessageReplyOptions) & import('discord.js').InteractionReplyOptions & { fetchReply: Boolean }} ReplyOptions
      */
 
     /**@type {String}*/
@@ -163,19 +158,19 @@ class CommandManager {
 	desc;
     /**@type {String?}*/
 	brief;
-    /**@type {CommandTags}*/
+    /**@type {import('./cmdTags').CommandTags}*/
 	flags;
-    /**@type {CommandPermissions}*/
+    /**@type {import('./cmdPerms').CommandPermissions}*/
     permissions;
-    /**@type {CommandOptions?}*/
+    /**@type {import('./cmdOpts').CommandOptions?}*/
 	options;
     /**@type {String?}*/
 	callx;
     /**
-     * Define si usar un {@link CommandOptionSolver} en lugar de la unión `string[] | CommandInteractionOptionResolver`
+     * Define si usar una unión `string[] | CommandInteractionOptionResolver` por compatibilidad en lugar de un {@link CommandOptionSolver} para los `args`
      * @type {Boolean?}
      */
-	experimental;
+	legacy;
     /**@type {Map<String, any>}*/
     memory;
     /**@type {ReplyOptions}*/
@@ -186,7 +181,7 @@ class CommandManager {
     /**
      * Crea un comando
      * @param {String} name El nombre identificador del comando
-     * @param {CommandTags} tags Un objeto {@linkcode CommandTags} con las flags del comando
+     * @param {import('./cmdTags').CommandTags} tags Un objeto {@linkcode CommandTags} con las flags del comando
      */
     constructor(name, tags) {
         if(typeof name !== 'string') throw new TypeError('El nombre debe ser un string');
@@ -197,9 +192,9 @@ class CommandManager {
         this.aliases = [];
         this.flags = tags;
         this.actions = [];
-        this.experimental = false;
+        this.legacy = false;
         this.memory = new Map();
-        this.execute = (request, _args, _isSlash) => request.reply(this.reply);
+        this.execute = request => request.reply(this.reply);
     };
 
     /**Alias de `<CommandManager>.flags`*/
@@ -234,7 +229,7 @@ class CommandManager {
         return this.setLongDescription(...desc);
     };
     
-    /**@param {CommandPermissions} permissions*/
+    /**@param {import('./cmdPerms').CommandPermissions} permissions*/
     setPermissions(permissions) {
         if(typeof (permissions?.isAllowed) !== 'function')
             throw new TypeError('Las opciones deben ser una instancia de CommandPermissions');
@@ -243,21 +238,11 @@ class CommandManager {
         return this;
     };
     
-    /**@param {CommandOptions} options*/
+    /**@param {import('./cmdOpts').CommandOptions} options*/
     setOptions(options) {
         if(!options.options) throw new Error('Las opciones deben ser un CommandOptions');
         this.options = options;
         this.callx = options.callSyntax;
-        return this;
-    };
-    
-    /**
-     * Define si usar un {@link CommandOptionSolver} en lugar de la unión `string[] | CommandInteractionOptionResolver`
-     * @param {Boolean} [experimental=true] Si establecer el comando como experimental (true) o no (false)
-     * 
-     */
-    setExperimental(experimental = true) {
-        this.experimental = experimental ?? false;
         return this;
     };
 
@@ -267,19 +252,22 @@ class CommandManager {
         return this;
     }
 
-    /**@param {ExecutionFunction} exeFn*/
-    setExecution(exeFn) {
+    /**
+     * Habilita {@linkcode CommandManager.legacy} y establece la función de ejecución de este comando
+     * @param {CompatibilityExecutionFunction} exeFn
+     */
+    setLegacyExecution(exeFn) {
+        this.legacy = true;
+        //@ts-expect-error
         this.execute = exeFn;
         return this;
-    };
+    }
 
     /**
-     * Habilita {@linkcode CommandManager.experimental} y establece la función de ejecución de este comando
-     * @param {ExperimentalExecuteFunction} exeFn
+     * Establece la función de ejecución de este comando
+     * @param {ExecutionFunction} exeFn
      */
-    setExperimentalExecution(exeFn) {
-        this.experimental = true;
-        //@ts-expect-error
+    setExecution(exeFn) {
         this.execute = exeFn;
         return this;
     }
@@ -328,7 +316,7 @@ class CommandManager {
     };
 
     /**
-     * @param {CommandRequest|Interaction} request
+     * @param {import('./typings').CommandRequest|import('discord.js').Interaction} request
      * @returns {request is Message<true>}
      */
     static requestIsMessage(request) {
@@ -336,14 +324,14 @@ class CommandManager {
     }
 
     /**
-     * @param {CommandRequest|Interaction} request
+     * @param {import('./typings').CommandRequest|import('discord.js').Interaction} request
      * @returns {request is CommandInteraction<'cached'>}
      */
     static requestIsInteraction(request) {
         return request instanceof CommandInteraction;
     }
 
-    /**@param {CommandRequest} request*/
+    /**@param {import('./typings').CommandRequest} request*/
     static requestize(request) {
         return extendRequest(request);
     }

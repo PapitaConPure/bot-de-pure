@@ -4,7 +4,7 @@ const { improveNumber, sleep } = require('../../func');
 const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('ping', flags)
 	.setLongDescription('Muestra el tiempo de respuesta del Bot y la API')
-	.setExperimentalExecution(async request => {
+	.setExecution(async request => {
 		const sent = /**@type {import('discord.js').Message<true>}*/(await request.reply({
 			content: 
 				'Pong~♪\n' +

@@ -11,6 +11,8 @@ const { executeTuber: executeTuberPS2, CURRENT_PS_VERSION } = require('../../sys
 const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts.js');
 const { ValueKindTranslationLookups } = require('../../systems/ps/v1.1/interpreter/values');
 const { Input } = require('../../systems/ps/v1.1/interpreter/inputReader.js');
+const { injectWikiPage } = require('../../wiki.js');
+const { Translator } = require('../../internationalization.js');
 
 const pageMax = 10;
 const filters = {
@@ -212,7 +214,7 @@ const command = new CommandManager('tubérculo', flags)
 		'[Clickea esto para leer la documentación de PuréScript](https://papitaconpure.github.io/ps-docs/)'
 	)
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const operation = args.parseFlagExt('crear', 'crear')
 			|| args.parseFlagExt('ver', 'ver')
 			|| args.parseFlagExt('borrar', 'borrar');
@@ -279,14 +281,17 @@ const command = new CommandManager('tubérculo', flags)
 
 		return gcfg.save(); //Guardar en Configuraciones de Servidor si se cambió algo
 	})
-	.setButtonResponse(function getHelp(interaction, userId) {
+	.setButtonResponse(async function getHelp(interaction, userId) {
+		const translator = await Translator.from(interaction.user);
+
 		if(interaction.user.id !== userId)
-			return interaction.reply({ content: 'No tienes permiso para hacer eso', ephemeral: true });
+			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
 		
-		//FIXME: Cambiar esta solución para usar ayuda.js » injectWikiPage(...)
+		const components = [];
+		const embeds = [];
+		injectWikiPage(command, interaction.guildId, { components, embeds });
 		
-		//@ts-expect-error
-		return require('./ayuda.js').command.execute(interaction, [ 'tubérculo' ], false);
+		return interaction.reply({ components, embeds });
 	})
 	.setButtonResponse(async function getTuberHelp(interaction, tuberId, variant, updateMessage) {
 		if(!tuberId)

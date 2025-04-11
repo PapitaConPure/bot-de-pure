@@ -11,7 +11,7 @@ const command = new CommandManager('número', flags)
 	.setAliases('numero', 'núm', 'num')
 	.setDescription('Para operar un número. Sí, solo eso, tenía ganas de jugar con algo')
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		//Acción de comando
 		const shorten = args.parseFlag('acortar');
 		const min = args.parseFlagExpr('mínimo',    (/**@type {Number}*/x) => x, 1);

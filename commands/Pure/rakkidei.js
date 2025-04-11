@@ -23,7 +23,7 @@ const command = new CommandManager('rakkidei', flags)
 		'Comando de trompada de Rakkidei',
 		'[<:twitter:919403803114094682> Twitter](https://twitter.com/rakkidei)\n[<:pixiv:919403803126661120> pixiv](https://www.pixiv.net/users/58442175)',
 	)
-	.setExperimentalExecution(async function (request) {
+	.setExecution(async function (request) {
 		return request.reply({
 			content: phrases[randRange(0, phrases.length)],
 			files: [tenshiurl],

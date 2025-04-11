@@ -20,7 +20,7 @@ const command = new CommandManager('prefijo', flags)
 	.setLongDescription('Cambia o muestra el prefijo del servidor actual')
 	.setPermissions(perms)
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const reset = args.parseFlag('reestablecer');
 		const guildsearch = { guildId: request.guildId };
 		const { raw: preraw, regex: preregex } = prefixes.p_pure(request.guildId);

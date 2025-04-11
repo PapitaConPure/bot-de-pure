@@ -25,7 +25,7 @@ const command = new CommandManager('info', flags)
 	)
 	.setLongDescription('Muestra información estadística paginada del servidor')
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		if(!request.guild.available)
 			return request.reply(':interrobang: E-el servidor está en corte ahora mismo. Intenta usar el comando más tarde');
 

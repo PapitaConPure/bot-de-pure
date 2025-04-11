@@ -12,7 +12,7 @@ const command = new CommandManager('elegir', flags)
 	.setAliases('choose')
 	.setLongDescription('Elige una de las opciones que hayas especificado, puedes separar opciones con comas')
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const choices = CommandOptionSolver.asStrings(args.parsePolyParamSync('opciones'));
 		
 		if(choices.length < 2)

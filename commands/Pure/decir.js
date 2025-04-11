@@ -15,7 +15,7 @@ const command = new CommandManager('decir', flags)
     )
     .setLongDescription('Me hace decir lo que quieras que diga')
     .setOptions(options)
-    .setExperimentalExecution(async (request, args) => {
+    .setExecution(async (request, args) => {
         const deleteFlag = args.parseFlag('borrar');
 
         if(args.empty)

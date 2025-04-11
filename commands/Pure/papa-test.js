@@ -19,7 +19,7 @@ const tags = new CommandTags().add('PAPA');
 const command = new CommandManager('papa-test', tags)
     .setLongDescription('Comando de pruebas 😳👉👈')
     .setOptions(options)
-    .setExperimentalExecution(async (request, args) => {
+    .setExecution(async (request, args) => {
         //func.dibujarBienvenida(message.member);
         //func.dibujarDespedida(message.member);
         //func.dibujarMillion(message);

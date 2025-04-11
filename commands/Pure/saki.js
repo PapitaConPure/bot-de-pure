@@ -80,7 +80,7 @@ const command = new CommandManager('saki', flags)
 	)
     .setPermissions(perms)
     .setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const bienvenida = args.parseFlagExpr('bienvenida');
 		const despedida = args.parseFlagExpr('despedida');
 		const pingBienvenida = args.parseFlagExpr('ping');

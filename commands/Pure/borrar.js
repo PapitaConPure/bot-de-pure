@@ -48,7 +48,7 @@ const command = new CommandManager('borrar', tags)
 	.setLongDescription('Elimina una cierta cantidad de mensajes entre 2 y 100')
 	.setPermissions(perms)
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const userResult = /**@type {string | import('discord.js').User}*/(args.parseFlagExpr('usuario'));
 		const user = userResult ? await fetchUser(userResult, request) : undefined;
 		const amount = args.getNumber('cantidad', 100);

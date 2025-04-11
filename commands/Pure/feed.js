@@ -103,7 +103,7 @@ const command = new CommandManager('feed', flags)
 	.setBriefDescription('Inicializa un Feed en un canal por medio de un Asistente.')
 	.setLongDescription('Inicializa un Feed de imágenes en un canal. Simplemente usa el comando y sigue los pasos del Asistente para configurar y personalizar todo')
 	.setPermissions(perms)
-	.setExperimentalExecution(async request => {
+	.setExecution(async request => {
 		const translator = await Translator.from(request.userId);
 		const wizard = new EmbedBuilder()
 			.setColor(Colors.Aqua)

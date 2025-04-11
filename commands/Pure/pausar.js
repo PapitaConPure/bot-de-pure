@@ -19,7 +19,7 @@ const command = new CommandManager('pausar', tags)
 	.setLongDescription(
 		'Pausa la reproducción de la pista de audio actual si es que se estaba reproduciendo alguna',
 	)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request.userId);
 
 		const channel = request.member.voice?.channel;

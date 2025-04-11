@@ -25,7 +25,7 @@ const command = new CommandManager('saucenao', flags)
 	.setBriefDescription('Permite buscar fuentes de imágenes con SauceNAO')
 	.setLongDescription('Permite realizar búsqueda reversa de imágenes por medio de la plataforma de SauceNAO.')
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request.userId);
 
 		debug('Verificando flag --registrar');

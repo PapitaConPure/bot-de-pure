@@ -15,7 +15,7 @@ const command = new CommandManager('calcular', flags)
 		'Usa + para sumar, - para restar, * para multiplicar, / para dividir, ^ para exponenciar, % para sacar módulo y () para asociar términos',
 	)
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const shorten = args.parseFlag('acortar');
 		const min = args.parseFlagExpr('mínimo', v => +v, 1);
 		const operation = args.getString('operación', true);

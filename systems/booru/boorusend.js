@@ -484,51 +484,51 @@ async function notifyUsers(post, sent, feedSuscriptions) {
  * @returns {Boolean}
  */
 function isUnholy(isNsfw, request, terms) {
-	if(!isNsfw)
-		return false;
-	if(terms.includes('holo'))
-		return true;
-	if(!terms.includes('megumin'))
-		return false;
-	if(request.userId === globalConfigs.peopleid.papita)
-		return false;
-
-	return true;
+	return isNsfw
+		&& (request.userId !== globalConfigs.peopleid.papita)
+		&& (terms.includes('holo') || terms.includes('megumin'));
 }
 
 /**
+ * @typedef {Object} CommandSearchOptions
+ * @property {keyof import('../../localdata/booruprops')['tagMaps']} [cmdtag] 
+ * @property {string} [nsfwtitle] 
+ * @property {string} [sfwtitle] 
+ */
+/**
  * Busca las tags de {@linkcode Booru} deseadas y envía {@linkcode Message}s acorde a la petición
  * @param {import('../../commands/Commons/typings').ComplexCommandRequest} request
- * @param {import('../../commands/Commons/typings').CommandArguments} args
- * @param {Boolean} isSlash
- * @param {import('../../commands/Commons/cmdOpts').CommandOptions} options
- * @param {{ cmdtag: keyof import('../../localdata/booruprops')['tagMaps'], nsfwtitle: String, sfwtitle: String }} [searchOpt]
- * @returns {Promise<Array<import('discord.js').Message<true>> | import('discord.js').Message<true>>}
+ * @param {import('../../commands/Commons/cmdOpts').CommandOptionSolver} args
+ * @param {CommandSearchOptions} [options]
  */
-async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt = { cmdtag: 'general', nsfwtitle: 'Búsqueda NSFW', sfwtitle: 'Búsqueda' }) {
+async function searchAndReplyWithPost(request, args, options = {}) {
 	info('Se recibió una solicitud de respuesta con Posts resultados de búsqueda de Booru');
+
+	const {
+		cmdtag: commandTag = null,
+		nsfwtitle: nsfwTitle = 'Búsqueda  NSFW',
+		sfwtitle: sfwTitle = 'Búsqueda',
+	} = options;
 
 	const isnsfw = isThread(request.channel)
 		? request.channel.parent.nsfw
 		: request.channel.nsfw;
 	
-	const poolSize = options.fetchFlag(args, 'bomba', { callback: f => Math.max(2, Math.min(+f, 10)), fallback: 1 });
-	const words = isSlash
-		? ((/**@type {import('../../commands/Commons/typings').SlashArguments}*/(args)).getString('etiquetas') ?? '').split(/ +/)
-		: (/**@type {Array<string>}*/(args));
+	const poolSize = args.parseFlagExpr('bomba', x => Math.max(2, Math.min(+x, 10)), 1);
+	const words = args.getString('etiquetas').split(/\s+/);
 	debug('poolSize =', poolSize);
 
 	debug('Verificando que la solicitud haya sido aprobada por el Vaticano');
-	if(isUnholy(isnsfw, request, [ searchOpt.cmdtag, ...words ]))
-		return rakki.execute(request, [], isSlash);
+	if(isUnholy(isnsfw, request, [ commandTag, ...words ]))
+		return rakki.execute(request, args);
 
 	debug('Comunicando retraso de respuesta a interacción...');
 	await request.deferReply();
 
 	debug('Se están por obtener tags de búsqueda a partir de la consulta del usuario');
 	const baseTags = getBaseTags('gelbooru', isnsfw);
-	const searchTags = [ searchOpt.cmdtag, baseTags ].join(' ');
-	const userTags = getSearchTags(words, 'gelbooru', searchOpt.cmdtag);
+	const searchTags = [ commandTag ?? '', baseTags ].join(' ').trim();
+	const userTags = getSearchTags(words, 'gelbooru', commandTag || 'general');
 	const finalTags = [ searchTags, userTags ];
 	debug('baseTags =', baseTags);
 	debug('searchTags =', searchTags);
@@ -564,7 +564,7 @@ async function searchAndReplyWithPost(request, args, isSlash, options, searchOpt
 		info('Preparando mensaje(s) de respuesta de búsqueda...');
 		const messages = await Promise.all(posts.map(post => formatBooruPostMessage(booru, post, {
 			maxTags: 20,
-			title: isnsfw ? searchOpt.nsfwtitle : searchOpt.sfwtitle,
+			title: isnsfw ? nsfwTitle : sfwTitle,
 			cornerIcon: author.avatarURL({ size: 128 }),
 			manageableBy: author.id,
 			allowNSFW: isnsfw,

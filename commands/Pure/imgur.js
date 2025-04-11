@@ -28,7 +28,7 @@ const command = new CommandManager('imgur', flags)
 		'Para evitar el máximo de subida global, puedes \`--registrar\` tu propia ID de cliente (explicado al usar la bandera de comando)',
 	)
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request.userId);
 
 		if(args.parseFlag('registrar')) {

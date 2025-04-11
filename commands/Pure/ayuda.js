@@ -168,7 +168,7 @@ const command = new CommandManager('ayuda', flags)
 		'Puedes hacer una búsqueda `--exclusiva` si solo quieres los comandos que tengan **todos** los identificadores buscados',
 	)
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const search = args.getString('comando');
 		const guildPrefix = p_pure(request.guildId).raw;
 		const helpCommand = `${guildPrefix}${command.name}`;

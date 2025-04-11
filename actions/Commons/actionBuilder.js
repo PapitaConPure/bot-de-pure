@@ -1,9 +1,9 @@
-const { ApplicationCommandType, Locale, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction } = require('discord.js');
+const { ApplicationCommandType, Locale } = require('discord.js');
 const { Translator } = require('../../internationalization');
 
 /**
  * @typedef {'ChatInput' | 'Message' | 'User'} CommandTypes
- * @typedef {ContextMenuCommandInteraction<'cached'>|MessageContextMenuCommandInteraction<'cached'>|UserContextMenuCommandInteraction<'cached'>} ContextMenuInteraction
+ * @typedef {import('discord.js').ContextMenuCommandInteraction<'cached'>|import('discord.js').MessageContextMenuCommandInteraction<'cached'>|import('discord.js').UserContextMenuCommandInteraction<'cached'>} ContextMenuInteraction
  */
 
 /**
@@ -40,19 +40,19 @@ class ContextMenuActionManager {
         this.localizations.set(Locale.Japanese,  translation['ja']);
     }
 
-    /** @param {ContextMenuAction<ContextMenuCommandInteraction<'cached'>>} responseFn Acción a realizar al indicarse su ejecución*/
+    /** @param {ContextMenuAction<import('discord.js').ContextMenuCommandInteraction<'cached'>>} responseFn Acción a realizar al indicarse su ejecución*/
     setResponse(responseFn) {
         this.execute = responseFn;
         return this;
     }
 
-    /** @param {ContextMenuAction<MessageContextMenuCommandInteraction<'cached'>>} responseFn Acción a realizar al indicarse su ejecución*/
+    /** @param {ContextMenuAction<import('discord.js').MessageContextMenuCommandInteraction<'cached'>>} responseFn Acción a realizar al indicarse su ejecución*/
     setMessageResponse(responseFn) {
         this.execute = responseFn;
         return this;
     }
 
-    /** @param {ContextMenuAction<UserContextMenuCommandInteraction<'cached'>>} responseFn Acción a realizar al indicarse su ejecución*/
+    /** @param {ContextMenuAction<import('discord.js').UserContextMenuCommandInteraction<'cached'>>} responseFn Acción a realizar al indicarse su ejecución*/
     setUserResponse(responseFn) {
         this.execute = responseFn;
         return this;

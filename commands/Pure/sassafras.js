@@ -103,7 +103,7 @@ const command = new CommandManager('sassafras', flags)
 		'Cuidado con hacer enojar al tío Sassa, o puede que active su `--sassamodo`',
 	)
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const showTotal = args.parseFlag('total');
 		const sassamodo = args.parseFlag('sassamodo');
 		

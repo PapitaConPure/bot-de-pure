@@ -16,7 +16,7 @@ const command = new CommandManager('transferir', flags)
     .setAliases('transfer', 'tf')
     .setDescription('Permite transferir PRC a otro usuario')
     .setOptions(options)
-    .setExperimentalExecution(async (request, args) => {
+    .setExecution(async (request, args) => {
         const [ translator ] = await Promise.all([
             Translator.from(request.userId),
             request.deferReply({ ephemeral: true }),

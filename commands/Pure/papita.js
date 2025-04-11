@@ -27,7 +27,7 @@ const command = new CommandManager('papita', flags)
 		'**NSFW:** muestra _otra_ frase _tal vez_ de Papita',
 	)
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const isnsfw = isThread(request.channel)
 			? request.channel.parent.nsfw
 			: request.channel.nsfw;

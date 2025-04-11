@@ -53,7 +53,7 @@ const command = new CommandManager('pinguear', flags)
 	.setBriefDescription('Pingea a un usuario una cantidad de veces')
 	.setLongDescription('Pingea a un `<usuario>` una `<cantidad>` de veces')
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const now = Date.now() * 1;
 		const uid = request.userId;
 

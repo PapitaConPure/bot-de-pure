@@ -13,7 +13,7 @@ const command = new CommandManager('papa-anunciar', flags)
 	)
 	.setDescription('Da un anuncio a todos los canales de sistema posibles')
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const title = CommandOptionSolver.asString(args.parseFlagExpr('título'));
 		const announcement = args.getString('anuncio', true);
 		const guilds = request.client.guilds.cache;

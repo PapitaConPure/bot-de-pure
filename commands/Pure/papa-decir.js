@@ -11,7 +11,7 @@ const options = new CommandOptions()
 const command = new CommandManager('papa-decir', flags)
     .setDescription('Me hace decir lo que quieras que diga (privilegios elevados')
     .setOptions(options)
-    .setExecution(async (message, args) => {
+    .setLegacyExecution(async (message, args) => {
         const deleteAfter = options.fetchFlag(args, 'borrar');
         const guildsCache = message.client.guilds.cache;
         let guild = options.fetchFlag(args, 'servidor', {

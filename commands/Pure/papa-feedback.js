@@ -7,7 +7,7 @@ const { makeButtonRowBuilder } = require('../../tsCasts.js');
 const tags = new CommandTags().add('PAPA');
 const command = new CommandManager('papa-feedback', tags)
     .setLongDescription('Comando de feedback')
-    .setExperimentalExecution(async request => {
+    .setExecution(async request => {
         const { client } = request;
         
         const feedbackEmbed = new EmbedBuilder()

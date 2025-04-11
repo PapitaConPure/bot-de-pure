@@ -21,7 +21,7 @@ const command = new CommandManager('cola', tags)
 	.setLongDescription(
 		'Muestra la cola de reproducción de pistas que se encuentran encoladas actualmente. Las pistas se encolan automáticamente con **p!reproducir**',
 	)
-	.setExperimentalExecution(async request => {
+	.setExecution(async request => {
 		return showQueuePage(request, 'CM');
 	})
 	.setButtonResponse(async function showPage(interaction, op, authorId, page) {

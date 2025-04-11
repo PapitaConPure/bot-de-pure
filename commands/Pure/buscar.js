@@ -19,6 +19,6 @@ const command = new CommandManager('buscar', flags)
 		'**Nota:** en canales NSFW, los resultados serán NSFW',
 	)
 	.setOptions(options)
-	.setExecution((request, args, isSlash) => searchAndReplyWithPost(request, args, isSlash, options));
+	.setExecution((request, args) => searchAndReplyWithPost(request, args));
 
 module.exports = command;

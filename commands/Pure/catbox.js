@@ -19,7 +19,7 @@ const command = new CommandManager('catbox', flags)
 	.setBriefDescription('Permite subir imágenes con Catbox')
 	.setLongDescription('Permite subir imágenes por medio de la plataforma de Catbox.')
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request.userId);
 
 		await request.deferReply();

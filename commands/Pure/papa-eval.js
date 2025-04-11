@@ -29,7 +29,7 @@ const command = new CommandManager('papa-eval', flags)
 		'Se pueden realizar modificaciones a las configuraciones comunes en la caché del proceso. No se puede acceder a la Base de Datos con esto',
 	)
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		if(request.isInteraction)
 			return request.reply({ content: '❌ No permitido con comandos Slash.' });
 

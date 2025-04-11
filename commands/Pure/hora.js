@@ -20,7 +20,7 @@ const command = new CommandManager('hora', flags)
 		'Puedes indicar el `--huso` horario que quieres usar como referencia. Si no se especifica un huso, se usará el de tu configuración de usuario ó GMT+0',
 	)
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request.user);
 
 		const utcOffset = toUtcOffset(CommandOptionSolver.asString(args.parseFlagExpr('huso')))

@@ -10,7 +10,7 @@ const perms = new CommandPermissions([ 'ManageGuild', 'ManageChannels', 'ManageM
 
 const flags = new CommandTags().add(
 	'MOD',
-	//'HOURAI',
+	'HOURAI',
 );
 
 const command = new CommandManager('exhibir', flags)
@@ -25,7 +25,7 @@ const command = new CommandManager('exhibir', flags)
 		'Esto eliminará todos los pins en el canal luego de reenviarlos',
 	)
 	.setPermissions(perms)
-	.setExperimentalExecution(async request => {
+	.setExecution(async request => {
 		const pinnedMessages = await request.channel.messages.fetchPinned();
 		const user = request.user;
 

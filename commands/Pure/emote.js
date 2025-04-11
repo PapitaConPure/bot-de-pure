@@ -16,7 +16,7 @@ const command = new CommandManager('emote', flags)
 	)
 	.setDescription('Muestra el enlace del emote especificado')
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const message = (await args.getMessage('mensaje', true))
 			?? request.channel.messages.cache.get(/**@type {import('discord.js').Message}*/(request).reference?.messageId)
 			?? (request.isMessage ? request.inferAsMessage() : null);

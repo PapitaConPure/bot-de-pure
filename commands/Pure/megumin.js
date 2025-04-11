@@ -17,6 +17,6 @@ const command = new CommandManager('megumin', flags)
 		'❤️🤎🧡💛💚💙💜🤍💟♥️❣️💕💞💓💗💖💝',
 	)
 	.setOptions(options)
-	.setExecution((request, args, isSlash) => searchAndReplyWithPost(request, args, isSlash, options, { cmdtag: 'megumin', sfwtitle: 'MEGUMIN 🥹', nsfwtitle: 'MEGUMIN 🫣' }));
+	.setExecution((request, args) => searchAndReplyWithPost(request, args, { cmdtag: 'megumin', sfwtitle: 'MEGUMIN 🥹', nsfwtitle: 'MEGUMIN 🫣' }));
 
 module.exports = command;

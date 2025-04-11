@@ -98,13 +98,13 @@ async function handleCommand(interaction, client, stats) {
             return interaction.reply({ embeds: [ generateExceptionEmbed(exception, { cmdString: `/${commandName}` }) ], ephemeral: true });
         
         const complex = CommandManager.requestize(interaction);
-        if(command.experimental) {
+        if(!command.legacy) {
             const solver = new CommandOptionSolver(complex, /**@type {CommandInteractionOptionResolver}*/(interaction.options), command.options);
-            // @ts-expect-error
             await command.execute(complex, solver);
-        } else
+        } else {
             // @ts-expect-error
             await command.execute(complex, interaction.options, true);
+        }
         stats.commands.succeeded++;
     } catch(error) {
         const isPermissionsError = handleAndAuditError(error, interaction, { details: `/${commandName}` });

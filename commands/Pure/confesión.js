@@ -28,7 +28,7 @@ const command = new CommandManager('confesión', tags)
 		'Muestra un Asistente de Configuración de Sistema de Confesiones.',
 	)
 	.setPermissions(perms)
-	.setExperimentalExecution(async request => {
+	.setExecution(async request => {
 		let query = { guildId: request.guildId };
 		const confSystem = await ConfessionSystems.findOne(query);
 		const logChannel = fetchChannel(confSystem?.logChannelId, request.guild);

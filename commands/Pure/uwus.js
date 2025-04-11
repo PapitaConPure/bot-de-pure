@@ -17,7 +17,7 @@ const command = new CommandManager('uwus', flags)
         'Al finalizar el evento, se muestran los resultados y se borran todos los mensajes con "uwu" enviados durante el mismo.',
     )
     .setOptions(options)
-    .setExecution(async (request, args) => {
+    .setLegacyExecution(async (request, args) => {
         const secs = isNaN(args[0]) ? 30 : Math.max(0.1, Math.min(args[0], 3600 * 2));
         
         let uwuUsers = {};

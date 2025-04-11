@@ -73,7 +73,7 @@ const command = new CommandManager('avatar', flags)
         'Se priorizan resultados del servidor actual, pero la búsqueda tiene un rango de todos los servidores a los que tengo acceso',
     )
     .setOptions(options)
-    .setExperimentalExecution(async (request, args) => {
+    .setExecution(async (request, args) => {
         const { found: members, notFound } = await getMembers(request, args);
         const replyStack = {};
 

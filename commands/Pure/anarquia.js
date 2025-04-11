@@ -205,7 +205,7 @@ const command = new CommandManager('anarquia', flags)
 		`Ingresa únicamente \`p\` para ver tu perfil anárquico`
 	)
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request.user);
 
 		//Revisar perfil

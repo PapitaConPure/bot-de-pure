@@ -13,7 +13,7 @@ const command = new CommandManager('colores', flags)
 		'colours', 'colour', 'colors',
 	)
 	.setLongDescription('Muestra un tablón de roles de colores básicos para Saki Scans')
-	.setExperimentalExecution(async request => {
+	.setExecution(async request => {
 		return request.reply({
 			content: `Aquí teni los colore po **${request.user.username}** <:reibu:1107876018171162705>`,
 			files: [hourai.images.colors],

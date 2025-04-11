@@ -6,7 +6,7 @@ const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('café', flags)
 	.setAliases('cafe', 'cafecito', 'coffee', 'cawfee')
 	.setLongDescription('Muestra imágenes de café. API: https://coffee.alexflipnote.dev')
-	.setExperimentalExecution(async request => {
+	.setExecution(async request => {
 		const fetched = await axios.get('https://coffee.alexflipnote.dev/random', { responseType: 'arraybuffer' });
 
 		const replyBody = {

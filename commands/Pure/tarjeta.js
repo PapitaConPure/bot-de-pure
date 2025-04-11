@@ -73,7 +73,7 @@ const command = new CommandManager('tarjeta', flags)
 		'Adicionalmente, puedes especificar si el logro incluye desafíos personales como `--nobomb`, `--nospecial` y/o `--pacifista`',
 	)
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		//Cargar imágenes derivadas de flags
 		const canvas = Canvas.createCanvas(640, 1120);
 		const ctx = canvas.getContext('2d');

@@ -18,7 +18,7 @@ const command = new CommandManager('aislar', flags)
 	)
 	.setPermissions(perms)
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request.member);
 
 		if(args.empty)

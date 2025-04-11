@@ -20,7 +20,7 @@ const command = new CommandManager('mimar', flags)
 	.setBriefDescription('Mima al usuario mencionado y te da un resumen de cómo estuvo el mimo para ambas partes')
 	.setLongDescription('Mima al `<usuario>` mencionado y te da un resumen de cómo estuvo el mimo para ambas partes')
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		//Acción de comando
 		const user2 = args.getUser('persona', true);
 		if(!user2) return request.reply('⚠️️ Debes especificar una persona a mimar');

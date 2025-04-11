@@ -28,7 +28,7 @@ const command = new CommandManager('voz', flags)
 	.setBriefDescription('Para inyectar un Sistema PuréVoice en una categoria por medio de un Asistente')
 	.setLongDescription('Para inyectar un Sistema PuréVoice en una categoria. Simplemente usa el comando y sigue los pasos del Asistente para configurar todo')
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request.user);
 		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda voz\` para más información`;
 

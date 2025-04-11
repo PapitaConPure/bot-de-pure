@@ -19,7 +19,7 @@ const command = new CommandManager('bienvenida', flags)
 	)
 	.setPermissions(perms)
 	.setOptions(options)
-	.setExperimentalExecution(async (request) => {
+	.setExecution(async (request) => {
 		request.reply('a');
 	});
 

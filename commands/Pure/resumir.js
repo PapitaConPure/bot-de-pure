@@ -21,7 +21,7 @@ const command = new CommandManager('resumir', tags)
 	.setLongDescription(
 		'Resume la reproducción de la pista de audio actual si es que estaba pausada',
 	)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request.userId);
 
 		const channel = request.member.voice?.channel;

@@ -10,7 +10,7 @@ const command = new CommandManager('papa-ban', flags)
 	.setAliases('papa-bannear', 'papa-banear')
 	.setDescription('Para bannear a un usuario de usar a Bot de Puré')
 	.setOptions(options)
-	.setExperimentalExecution(async (request, args) => {
+	.setExecution(async (request, args) => {
 		const user = await args.getUser('usuario', true);
 
 		if(!user || user.id === peopleid.papita)

@@ -32,7 +32,7 @@ const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('estado', flags)
     .setAliases('status', 'botstatus')
     .setLongDescription('Muestra mi estado actual. Eso incluye versión, host, registro de cambios, cosas por hacer, etc')
-    .setExperimentalExecution(async request => {
+    .setExecution(async request => {
         const translator = await Translator.from(request.member);
         const stats = (!globalConfigs.noDataBase && await Stats.findOne({})) || new Stats({ since: Date.now( )});
         const formattedChangelog = changelog.map(item => `- ${item}`).join('\n');

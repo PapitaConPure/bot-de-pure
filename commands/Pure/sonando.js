@@ -23,7 +23,7 @@ const command = new CommandManager('sonando', flags)
 	.setLongDescription(
 		'Indica la pista que está sonando (si hay alguna) en el chat de voz en el que estoy conectada',
 	)
-	.setExperimentalExecution(async request => {
+	.setExecution(async request => {
 		const [ translator ] = await Promise.all([
 			Translator.from(request.user),
 			request.deferReply(),

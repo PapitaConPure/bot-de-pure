@@ -6,7 +6,7 @@ const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('sugerir', flags)
 	.setAliases('reportar', 'informar')
 	.setDescription('Para sugerir mejoras sobre Bot de Puré, o reportar un error')
-	.setExperimentalExecution(async request => {
+	.setExecution(async request => {
 		const embed = new Discord.EmbedBuilder()
 			.setColor(global.tenshiColor)
 			.setAuthor({ name: 'Bot de Puré • Comentarios', iconURL: request.client.user.avatarURL({ size: 256, extension: 'jpg' }) })
