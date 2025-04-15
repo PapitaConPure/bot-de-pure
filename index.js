@@ -3,10 +3,11 @@ const globalConfigs = require('./localdata/config.json');
 const argv = require('minimist')(process.argv.slice(2));
 globalConfigs.remoteStartup = ((+!!argv.p) - (+!!argv.d)) > 0;
 globalConfigs.noDataBase = argv.nodb;
+process.env.DP_FORCE_YTDL_MOD = "@distube/ytdl-core"
 
 const { initializeClient } = require('./client');
 const { registerCommandFiles } = require('./commandInit.js');
-const { events, startupData, onCriticalError } = require('./events/events.js');
+const { events, startupData, onCriticalError } = require('./events/events');
 console.timeEnd('Carga de inicio');
 
 // @ts-expect-error
@@ -21,6 +22,11 @@ console.timeEnd('Creación de cliente de Discord');
 console.time('Detección de archivos de comando');
 registerCommandFiles();
 console.timeEnd('Detección de archivos de comando');
+
+console.time('Registro de eventos de proceso');
+process.on('uncaughtException', events.onUncaughtException);
+process.on('unhandledRejection', events.onUnhandledRejection);
+console.timeEnd('Registro de eventos de proceso');
 
 console.time('Registro de eventos del cliente');
 client.on('ready', events.onStartup);

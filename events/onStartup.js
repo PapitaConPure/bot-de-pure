@@ -1,4 +1,4 @@
-const { REST, Client, Guild } = require('discord.js');
+const { REST } = require('discord.js');
 const { Routes } = require('discord-api-types/v9');
 
 const mongoose = require('mongoose');
@@ -34,7 +34,6 @@ const { registerFont, loadImage } = require('canvas');
 const { lookupService } = require('dns');
 const { promisify } = require('util');
 const chalk = require('chalk');
-const Poll = require('../localdata/models/poll.js');
 
 const { prepareTracksPlayer } = require('../systems/musicPlayer.js')
 const { initializeWebhookMessageOwners } = require('../systems/agents/discordagent.js');
@@ -47,7 +46,7 @@ const logOptions = {
 	feedSuscriptions: false,
 };
 
-/**@param {Client} client*/
+/**@param {import('discord.js').Client} client*/
 async function onStartup(client) {
 	const confirm = () => console.log(chalk.green('Hecho.'));
 	globalConfigs.maintenance = '1';
@@ -157,7 +156,7 @@ async function onStartup(client) {
 		setInterval(deleteExpiredMessageCascades, 60 * 60e3);
 		await MessageCascades.syncIndexes();
 		await MessageCascades.createIndexes();
-		messageCascades.forEach(({ messageId, otherMessageId, expirationDate }) => cacheMessageCascade(messageId, otherMessageId));
+		messageCascades.forEach(({ messageId, otherMessageId }) => cacheMessageCascade(messageId, otherMessageId));
 
 		console.log(chalk.gray('Preparando Suscripciones de Feeds...'));
 		userConfigs.forEach(config => {
@@ -219,7 +218,7 @@ async function onStartup(client) {
 
 		for(const id of uniqueEmoteIds)
 			pendingEmoteCells.push(getEmoteCell(id));
-		const [ _, pureTableImage, emoteCells ] = await Promise.all([
+		const [ , pureTableImage, emoteCells ] = await Promise.all([
 			puretable.save(),
 			loadImage('https://i.imgur.com/TIL0jPV.png'),
 			Promise.all(pendingEmoteCells),
@@ -230,7 +229,7 @@ async function onStartup(client) {
 			globalConfigs.loademotes[cell.id] = cell.image;
 		
 		console.log(chalk.gray('Preparando imágenes extra...'));
-		const slot3Emojis = (/**@type {Guild}*/(globalConfigs.slots.slot3)).emojis.cache;
+		const slot3Emojis = (/**@type {import('discord.js').Guild}*/(globalConfigs.slots.slot3)).emojis.cache;
 		const [ WHITE, BLACK, pawn ] = await Promise.all([
 			loadImage(slot3Emojis.find(e => e.name === 'wCell').imageURL({ extension: 'png', size: 256 })),
 			loadImage(slot3Emojis.find(e => e.name === 'bCell').imageURL({ extension: 'png', size: 256 })),

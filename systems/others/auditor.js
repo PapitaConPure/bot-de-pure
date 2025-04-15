@@ -28,9 +28,9 @@ function getRequestContent(request) {
     if(CommandManager.requestIsMessage(request))
         return request.content?.slice(0, 1023) || '*Mensaje vacío.*'
 
-    // @ts-ignore
+    // @ts-expect-error
     if(request.customId)
-        // @ts-ignore
+        // @ts-expect-error
         return `**-=-[**\`${request.customId}\`**]**`;
 
     return '???';
@@ -116,7 +116,7 @@ async function auditError(error, { request = undefined, brief = undefined, detai
         .setColor(0x0000ff);
     
     if(request) {
-        // @ts-ignore
+        // @ts-expect-error
         const userTag = (request.author ?? request.user).tag;
         embed.addFields({ name: userTag, value: getRequestContent(request) });
     }
@@ -126,7 +126,6 @@ async function auditError(error, { request = undefined, brief = undefined, detai
     if(details)
         embed.addFields({ name: 'Detalle', value: details });
     
-    // @ts-ignore
     return globalConf.logch?.send({
         content: ping ? `<@${globalConf.peopleid.papita}>` : null,
         embeds: [embed],

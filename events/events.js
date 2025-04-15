@@ -1,15 +1,16 @@
-const { onStartup, discordToken, booruApiKey, booruUserId } = require('../events/onStartup.js');
-const { onMessage } = require('../events/onMessage.js');
-const { onReactionAdd } = require('../events/onReactionAdd.js');
-const { onReactionRemove } = require('../events/onReactionRemove.js');
-const { onMessageDelete } = require('../events/onMessageDelete.js');
-const { onInteraction } = require('../events/onInteraction.js');
-const { onVoiceUpdate } = require('../events/onVoiceUpdate.js');
-const { onRateLimit } = require('../events/onRateLimit.js');
-const { onGuildMemberAdd } = require('../events/onGuildMemberAdd.js');
-const { onGuildMemberRemove } = require('../events/onGuildMemberRemove.js');
-const { onGuildMemberUpdate } = require('../events/onGuildMemberUpdate.js');
-const { auditError } = require('../systems/others/auditor.js');
+const { onUncaughtException, onUnhandledRejection } = require('./process');
+const { onStartup, discordToken, booruApiKey, booruUserId } = require('./onStartup');
+const { onMessage } = require('./onMessage');
+const { onReactionAdd } = require('./onReactionAdd');
+const { onReactionRemove } = require('./onReactionRemove');
+const { onMessageDelete } = require('./onMessageDelete');
+const { onInteraction } = require('./onInteraction');
+const { onVoiceUpdate } = require('./onVoiceUpdate');
+const { onRateLimit } = require('./onRateLimit');
+const { onGuildMemberAdd } = require('./onGuildMemberAdd');
+const { onGuildMemberRemove } = require('./onGuildMemberRemove');
+const { onGuildMemberUpdate } = require('./onGuildMemberUpdate');
+const { auditError } = require('../systems/others/auditor');
 const chalk = require('chalk');
 
 /**
@@ -24,6 +25,8 @@ function onCriticalError(error) {
 
 module.exports = {
     events: {
+        onUncaughtException,
+        onUnhandledRejection,
         onStartup,
         onMessage,
         onReactionAdd,

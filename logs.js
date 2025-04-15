@@ -6,6 +6,7 @@ const LogLevels = /**@type {const}*/({
     WARN: 2,
     ERROR: 3,
     FATAL: 4,
+    CATAS: 5,
 });
 /**
  * @typedef {import('types').ValuesOf<LogLevels>} LogLevel
@@ -18,6 +19,7 @@ const LogLevelNames = /**@type {const}*/({
     WARN: '{WARN}',
     ERROR: '{ERROR}',
     FATAL: '{FATAL}',
+    CATAS: '{CATAS}',
 });
 
 /**@satisfies {Record<keyof LogLevels, chalk.Chalk>}*/
@@ -27,6 +29,7 @@ const LogLevelColors = /**@type {const}*/({
     WARN: chalk.rgb(255, 140, 70),
     ERROR: chalk.redBright,
     FATAL: chalk.whiteBright.bgRgb(0, 0, 255),
+    CATAS: chalk.whiteBright.bgRgb(0, 0, 255),
 });
 
 const longestLogLevelName = Object.values(LogLevelNames)
@@ -93,7 +96,7 @@ function Logger(logLevel, prefix = '') {
 
     /**
      * Realiza la auditoría de un error fatal junto a la pila de ejecución y arroja el error
-     * La auditoría primaria requiere un nivel de advertencias hasta "ERROR".
+     * La auditoría primaria requiere un nivel de advertencias hasta "FATAL".
      * El error se arrojará sin importar el nivel de auditoría.
      * @param {Error} err El error que ocasionó este evento.
      * @param {Array<*>} data Los datos de interés del evento.
@@ -103,7 +106,18 @@ function Logger(logLevel, prefix = '') {
         throw err;
     }
 
-    return { debug, info, warn, error, fatal };
+    /**
+     * Realiza la auditoría de un error fatal junto a la pila de ejecución y arroja el error
+     * Resultará en una auditoría y la interrupción del proceso sin importar el nivel de auditoría.
+     * @param {Error} err El error que ocasionó este evento.
+     * @param {Array<*>} data Los datos de interés del evento.
+     */
+    function catastrophic(err, ...data) {
+        console.error(logLevelPrefix('CATAS'), prefix, logLevelOutput('CATAS', err, ...data));
+        process.exit(1);
+    }
+
+    return { debug, info, warn, error, fatal, catastrophic };
 }
 
 module.exports = Logger;

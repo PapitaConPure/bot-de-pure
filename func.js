@@ -1827,9 +1827,47 @@ module.exports = {
     },
 
     /**
-     * @param {Date} date
-     * @param {string} template
-     * @param {string} locale Por ejemplo, "en-Us" o "es-ES"
+     * 
+     * @param {number} hour 
+     */
+    fullToShortHour: function(hour) {
+        if(hour < 1)
+            return { value: 12, meridian: /**@type {const}*/('AM') };
+        if(hour < 12)
+            return { value: hour, meridian: /**@type {const}*/('AM') };
+        
+        return { value: hour - 12, meridian: /**@type {const}*/('PM') };
+    },
+
+    /**
+     * @param {Date} date La fecha a la cual dar formato.
+     * @param {string} template La plantilla de formato para la fecha indicada.
+     * 
+     *   Ejemplos para la fecha: "Martes, 9 de abril de 2025, 2:48:06.092 PM", con el locale "es-ES"
+     *   - yyyy: 2025
+     *   - yy: 25
+     *   - MMMM: Abril
+     *   - MMM: Ene
+     *   - MM: 04
+     *   - M: 4
+     *   - dddd: Martes
+     *   - ddd: Mar
+     *   - dd: 09
+     *   - d: 9
+     *   - hhhh: 2:48:06 PM
+     *   - hhh: 2:48 PM
+     *   - hh: 02
+     *   - h: 2
+     *   - HH: 14
+     *   - H: 14
+     *   - mm: 48
+     *   - m: 48
+     *   - ss: 06
+     *   - s: 6
+     *   - fff: 092
+     *   - ff: 09
+     *   - f: 1
+     * @param {string} [locale] Por ejemplo, "en-US" o "es-ES".
      * @returns {string}
      */
     dateToUTCFormat: function(date, template, locale = 'en-US') {
@@ -1842,7 +1880,8 @@ module.exports = {
         const year = date.getUTCFullYear().toString();
         const month = (date.getUTCMonth() + 1).toString();
         const day = date.getUTCDate().toString();
-        const hours = date.getUTCHours().toString();
+        const hours = date.getUTCHours();
+        const hoursInfo = module.exports.fullToShortHour(hours);
         const minutes = date.getUTCMinutes().toString();
         const seconds = date.getUTCSeconds().toString();
         const milliseconds = date.getUTCMilliseconds().toString();
@@ -1858,8 +1897,12 @@ module.exports = {
             'ddd'  : date.toLocaleDateString(locale, { weekday: 'short', timeZone: 'UTC' }),
             'dd'   : day.padStart(2, '0'),
             'd'    : day,
-            'HH'   : hours.padStart(2, '0'),
-            'H'    : hours,
+            'hhhh'  : `${hoursInfo.value.toString()}:${minutes.padStart(2, '0')}:${seconds.padStart(2, '0')} ${hoursInfo.meridian}`,
+            'hhh'  : `${hoursInfo.value.toString()}:${minutes.padStart(2, '0')} ${hoursInfo.meridian}`,
+            'hh'   : hoursInfo.value.toString().padStart(2, '0'),
+            'h'    : hoursInfo.value.toString(),
+            'HH'   : hours.toString().padStart(2, '0'),
+            'H'    : hours.toString(),
             'mm'   : minutes.padStart(2, '0'),
             'm'    : minutes,
             'ss'   : seconds.padStart(2, '0'),

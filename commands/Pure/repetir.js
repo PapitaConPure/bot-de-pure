@@ -17,9 +17,9 @@ const command = new CommandManager('repetir', tags)
 		'loop', 'repeat',
 		'dj', 'l',
 	)
-	.setBriefDescription('Salta la pista actual')
+	.setBriefDescription('Cambia el modo de repetición de la cola de reproducción')
 	.setLongDescription(
-		'Detiene la pista que se esté reproduciendo actualmente en VC y comienza a reproducir en su lugar la que se encuentre a continuación en la cola de reproducción',
+		'Permite seleccionar y cambiar el modo de repetición de la cola de reproducción actual.',
 	)
 	.setExecution(async request => {
 		const userId = request.userId;
