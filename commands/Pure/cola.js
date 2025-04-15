@@ -1,11 +1,12 @@
 const { ModalBuilder, TextInputBuilder, TextInputStyle, Colors } = require('discord.js'); //Integrar discord.js
 const { decompressId, sleep } = require('../../func.js'); //Funciones globales
 const { CommandTags, CommandManager } = require('../Commons/commands.js');
-const { useMainPlayer } = require('discord-player');
+const { useMainPlayer, QueueRepeatMode } = require('discord-player');
 const { showQueuePage, getPageAndNumberTrackIndex, isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/musicPlayer.js');
 const { Translator } = require('../../internationalization.js');
 const { tryRecoverSavedTracksQueue, saveTracksQueue } = require('../../localdata/models/playerQueue.js');
 const { makeTextInputRowBuilder } = require('../../tsCasts.js');
+const { p_pure } = require('../../localdata/customization/prefixes.js');
 
 const tags = new CommandTags().add(
 	'COMMON',
@@ -257,6 +258,75 @@ const command = new CommandManager('cola', tags)
 
 		await sleep(1250);
 		return showQueuePage(interaction, 'SK', authorId, +page);
+	})
+	.setButtonResponse(async function autoplay(interaction, authorId, page) {
+		const userId = interaction.user.id;
+		const translator = await Translator.from(userId);
+
+		if(authorId && interaction.user.id !== decompressId(authorId))
+			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
+
+		const channel = interaction.member.voice?.channel;
+		if(!channel)
+			return interaction.reply({ content: translator.getText('voiceExpected'), ephemeral: true });
+
+		if(isPlayerUnavailable(channel))
+			return interaction.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
+
+		const player = useMainPlayer();
+		const queue = player.queues.get(interaction.guildId) ?? (await tryRecoverSavedTracksQueue(interaction));
+		if(!queue?.currentTrack) {
+			const embed = makePuréMusicEmbed(interaction)
+				.setTitle(translator.getText('queueSkipTitleNoTrack'));
+			return interaction.reply({ embeds: [ embed ], ephemeral: true });
+		}
+
+		queue.setRepeatMode(
+			(queue.repeatMode === QueueRepeatMode.AUTOPLAY)
+				? QueueRepeatMode.OFF
+				: QueueRepeatMode.AUTOPLAY);
+
+		return showQueuePage(interaction, 'AP', authorId, +page);
+	})
+	.setButtonResponse(async function repeat(interaction, authorId, page) {
+		const userId = interaction.user.id;
+		const translator = await Translator.from(userId);
+
+		if(authorId && interaction.user.id !== decompressId(authorId))
+			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
+
+		const channel = interaction.member.voice?.channel;
+		if(!channel)
+			return interaction.reply({ content: translator.getText('voiceExpected'), ephemeral: true });
+
+		if(isPlayerUnavailable(channel))
+			return interaction.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
+
+		const player = useMainPlayer();
+		const queue = player.queues.get(interaction.guildId) ?? (await tryRecoverSavedTracksQueue(interaction));
+		if(!queue?.currentTrack) {
+			const embed = makePuréMusicEmbed(interaction)
+				.setTitle(translator.getText('queueSkipTitleNoTrack'));
+			return interaction.reply({ embeds: [embed], ephemeral: true });
+		}
+
+		if(queue.repeatMode === QueueRepeatMode.AUTOPLAY) {
+			const embed = makePuréMusicEmbed(interaction)
+				.setTitle(translator.getText('queueLoopTitleAutoplayEnabled'))
+				.setDescription(translator.getText('queueLoopDescAutoplayEnabled', p_pure(interaction.guildId)));
+			return interaction.reply({ embeds: [embed], ephemeral: true, });
+		}
+
+		/**@type {Map<QueueRepeatMode, QueueRepeatMode>}*/
+		const repeatModeWheel = new Map();
+		repeatModeWheel
+			.set(QueueRepeatMode.OFF, QueueRepeatMode.QUEUE)
+			.set(QueueRepeatMode.QUEUE, QueueRepeatMode.TRACK)
+			.set(QueueRepeatMode.TRACK, QueueRepeatMode.OFF);
+
+		queue.setRepeatMode(repeatModeWheel.get(queue.repeatMode) ?? QueueRepeatMode.OFF);
+
+		return showQueuePage(interaction, 'RP', authorId, +page);
 	})
 	.setSelectMenuResponse(async function shuffle(interaction, authorId, page) {
 		const translator = await Translator.from(interaction.user.id);

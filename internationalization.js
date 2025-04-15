@@ -799,19 +799,24 @@ let localesObject = /**@type {const}*/({
 		ja: '再生キューが空です',
 	},
 	queueDescriptionLoopTrack: {
-		es: '🔁 Modo de repetición de pista activo',
-		en: '🔁 Track loop mode is enabled',
-		ja: '🔁 トラックループモードが有効になりました',
+		es: '<:repeat:1356977712149037087> Modo de repetición de pista activo',
+		en: '<:repeat:1356977712149037087> Track loop mode is enabled',
+		ja: '<:repeat:1356977712149037087> トラックループモードが有効になりました',
 	},
 	queueDescriptionLoopQueue: {
-		es: '🔁 Modo de repetición de cola activo',
-		en: '🔁 Queue loop mode is enabled',
-		ja: '🔁 キューループモードが有効になりました',
+		es: '<:repeat:1356977712149037087> Modo de repetición de cola activo',
+		en: '<:repeat:1356977712149037087> Queue loop mode is enabled',
+		ja: '<:repeat:1356977712149037087> キューループモードが有効になりました',
 	},
 	queueDescriptionLoopAutoplay: {
-		es: '🎧 Auto-DJ activo',
-		en: '🎧 Auto DJ is enabled',
-		ja: '🎧 オートDJが有効になりました',
+		es: '<:headphonessimple:1360868342411427892> Auto-DJ activo',
+		en: '<:headphonessimple:1360868342411427892> Auto DJ is enabled',
+		ja: '<:headphonessimple:1360868342411427892> オートDJが有効になりました',
+	},
+	queueDescriptionShuffle: {
+		es: '<:shuffle:1356977721799868426> Modo de cola aleatoria activo',
+		en: '<:shuffle:1356977721799868426> Queue shuffle mode is enabled',
+		ja: '<:shuffle:1356977721799868426> キューシャッフルが有効になりました',
 	},
 	queueNowPlayingName: {
 		es: 'Escuchando Ahora',
@@ -877,6 +882,25 @@ let localesObject = /**@type {const}*/({
 		es: `Se ${subif(0, '=', true, 'activó', 'desactivó')} el modo de cola aleatoria`,
 		en: `Queue shuffle mode ${subif(0, '=', true, 'enabled', 'disabled')}`,
 		ja: `キューシャッフルが${subif(0, '=', true, '有効', '無効')}になりました`,
+	},
+	queueLoopTitleAutoplayEnabled: {
+		es: '⚠️ El modo de repetición no se puede alternar.',
+		en: '⚠️ Loop mode cannot be toggled',
+		ja: '⚠️ リピートモードを切り替えることはできません。',
+	},
+	queueLoopDescAutoplayEnabled: {
+		es: paragraph(
+			'El modo de repetición no se puede alternar porque el <:headphonessimple:1360868342411427892> Auto-DJ está activo.',
+			`Debes desactivar el <:headphonessimple:1360868342411427892> Auto-DJ para usar este botón. También puedes usar \`${subl(0), '/'}repetir\`.`,
+		),
+		en: paragraph(
+			'Loop mode cannot be toggled because <:headphonessimple:1360868342411427892> Auto-DJ is active.',
+			`You must turn off <:headphonessimple:1360868342411427892> Auto DJ to use this button. You can also use \`${subl(0), '/'}loop\`.`,
+		),
+		ja: paragraph(
+			'リピートモードは、<:headphonessimple:1360868342411427892> オートDJがアクティブなため変更できません。',
+			`このボタンを使用するには、<:headphonessimple:1360868342411427892> オートDJをオフにする必要があります。\`${subl(0), '/'}loop\`を使用することもできます。`,
+		),
 	},
 	queueLoopTitle: {
 		es: 'Establece un modo de repetición',

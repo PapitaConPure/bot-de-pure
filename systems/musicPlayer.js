@@ -149,7 +149,7 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 
 	const player = useMainPlayer();
 	const queue = player.queues.get(request.guildId) ?? (await tryRecoverSavedTracksQueue(request));
-	let fullRows = [ 'EX', 'SF', 'LP' ].includes(op);
+	let fullRows = [ 'EX', 'SF', 'AP', 'RP', 'LP' ].includes(op);
 
 	if(!queue?.currentTrack && !queue?.size) {
 		const embed = makeReplyEmbed(Colors.Blurple)
@@ -179,6 +179,7 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 	const previousPage = page === 0 ? lastPage : page - 1;
 	const nextPage = page === lastPage ? 0 : page + 1;
 	const footerText = `${shortChannelName} • ${queueInfo}`;
+	const labels = [];
 
 	let queueEmbed;
 	
@@ -208,13 +209,13 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 
 		switch(queue.repeatMode) {
 		case QueueRepeatMode.TRACK:
-			queueEmbed.setDescription(translator.getText('queueDescriptionLoopTrack'));
+			labels.push(translator.getText('queueDescriptionLoopTrack'));
 			break;
 		case QueueRepeatMode.QUEUE:
-			queueEmbed.setDescription(translator.getText('queueDescriptionLoopQueue'));
+			labels.push(translator.getText('queueDescriptionLoopQueue'));
 			break;
 		case QueueRepeatMode.AUTOPLAY:
-			queueEmbed.setDescription(translator.getText('queueDescriptionLoopAutoplay'));
+			labels.push(translator.getText('queueDescriptionLoopAutoplay'));
 			break;
 		}
 	} else {
@@ -224,6 +225,12 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 				iconURL: 'https://cdn.discordapp.com/emojis/1354500099799257319.webp?size=32&quality=lossless',
 			});
 	}
+
+	if(queue.isShuffling)
+		labels.push(translator.getText('queueDescriptionShuffle'));
+
+	if(labels.length)
+		queueEmbed.setDescription(labels.join('\n'));
 	
 	queueEmbed
 		.addFields(...tracks.map((t, i) => ({
@@ -362,6 +369,10 @@ function getQueueActionRow(queue, page, userId, translator) {
 	const compressedUserId = compressId(userId);
 
 	const actionRow = makeButtonRowBuilder().addComponents(
+		new ButtonBuilder()
+			.setCustomId(`cola_autoplay_${compressedUserId}_${page}`)
+			.setEmoji('1360868342411427892')
+			.setStyle(ButtonStyle.Primary),
 		new ButtonBuilder()
 			.setCustomId(`cola_repeat_${compressedUserId}_${page}`)
 			.setEmoji('1356977712149037087')
