@@ -33,7 +33,7 @@ const command = new CommandManager('papita', flags)
 			: request.channel.nsfw;
 		
 		const words = args.getString('frase')?.split(/[ \n]+/);
-		if(words.length) {
+		if(words?.length) {
 			const newmsg = `***:copyright: ${words.shift()}:registered: ${words.join(' ').replace(/[a-zA-Z0-9áéíóúÁÉÍÓÚüÑñ;:]+/g, '$&:tm:')}***`;
 			return request.reply({ content: newmsg });
 		}
