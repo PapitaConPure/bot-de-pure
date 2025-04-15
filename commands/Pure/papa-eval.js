@@ -1,4 +1,3 @@
-const Discord = require('discord.js');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
@@ -9,27 +8,35 @@ const command = new CommandManager('papa-eval', flags)
 	.setDescription(
 		'Evalúa una función de JavaScript en el contexto de la función `execute` de un módulo de comando.',
 		'```ts',
-		'global //Propiedades comunes en caché',
+		'globalConfigs //Propiedades comunes en caché',
 		'func //Funciones comunes en caché',
 		'Discord //Librería discord.js',
 		'Canvas //Librería Node Canvas',
-		'p_pure: {',
+		'p_pure: () => {',
 		`  raw: '${p_pure().raw}'`,
 		`  regex: /${p_pure().regex.source}/`,
 		'}',
 		`name: 'papa-eval' //Nombre del comando`,
-		`aliases: [] //Alias del comando`,
-		`brief: String //Descripción breve del comando (para /comandos)`,
-		`desc: String //Descripción del comando`,
+		`aliases: string[] //Alias del comando`,
+		`brief: string //Descripción breve del comando (para /comandos)`,
+		`desc: string //Descripción del comando`,
 		`flags?: [ 'papa' ] //Flags del comando, como COMMON y MOD`,
 		`options: CommandOptions //<banderas> y --flags`,
-		`experimental: false //Forma experimental de interpretar cmdos.`,
-		'execute(request: CommandRequest, args: CommandOptions, isSlash: false) //Usar esto en la elavuación puede resultar en un bucle infinito (función recursiva sin condición)',
+		'request: ComplexCommandRequest //El mensaje o interacción que desencadenó este comando',
+		'args: CommandOptionSolver<CommandArguments> //El proveedor de argumentos del comando',
 		'```',
 		'Se pueden realizar modificaciones a las configuraciones comunes en la caché del proceso. No se puede acceder a la Base de Datos con esto',
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
+		// eslint-disable-next-line no-unused-vars
+		const globalConfigs = require('../../localdata/config.json');
+		// eslint-disable-next-line no-unused-vars
+		const func = require('../../func');
+		const Discord = require('discord.js');
+		// eslint-disable-next-line no-unused-vars
+		const Canvas = require('canvas');
+
 		if(request.isInteraction)
 			return request.reply({ content: '❌ No permitido con comandos Slash.' });
 
