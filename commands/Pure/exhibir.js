@@ -118,7 +118,7 @@ const command = new CommandManager('exhibir', flags)
 			else
 				flushing.push(
 					message.unpin()
-					.catch(_ => interaction.channel.send({ content: `⚠️ No se pudo despinnear un mensaje\n${message.url}` }))
+					.catch(() => interaction.channel.send({ content: `⚠️ No se pudo despinnear un mensaje\n${message.url}` }))
 				);
 		}
 		const flushed = (await Promise.all(flushing)).length;
