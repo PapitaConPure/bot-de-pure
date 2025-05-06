@@ -25,10 +25,10 @@ const CommandTag = /**@type {const}*/({
 });
 
 /**
- * @typedef {keyof CommandTag} CommandTagField
- * @typedef {CommandTagField | bigint | number} CommandTagResolvable
+ * @typedef {keyof CommandTag} CommandTagStringField
+ * @typedef {CommandTagStringField | bigint | number} CommandTagResolvable
  */
-const metaFlagValues = /**@type {ReadonlyArray<CommandTagField>}*/(Object.keys(CommandTag));
+const metaFlagValues = /**@type {ReadonlyArray<CommandTagStringField>}*/(Object.keys(CommandTag));
 
 /**
  * Devuelve la profundidad de una tag de comando
@@ -122,6 +122,7 @@ class CommandTags {
         return values;
     };
 
+    /**@returns {Array<CommandTagStringField>}*/
     get keys() {
         return metaFlagValues.filter(key => this.has(key));
     };
