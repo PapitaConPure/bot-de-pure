@@ -1,3 +1,5 @@
+import Main from '@/components/layout/Main'
+import Section from '@/components/layout/Section'
 import { Button } from '@/components/ui/button'
 import { faDiscord } from '@fortawesome/free-brands-svg-icons'
 import {
@@ -28,7 +30,7 @@ import Link from 'next/link'
 
 export default function Home() {
   return (
-    <main className="flex w-full flex-col items-center gap-y-10 scroll-smooth font-[family-name:var(--font-geist-sans)] motion-reduce:scroll-auto">
+    <Main>
       <section className="grid max-h-[75vh] min-h-[75vh] grid-rows-[1fr_max-content_1fr] items-center px-8 sm:items-start sm:px-10 md:px-8 lg:px-10 xl:px-12">
         <div className="row-start-2 flex flex-col-reverse items-center justify-center gap-6 sm:gap-10 md:flex-row md:gap-20 lg:gap-20 xl:gap-26">
           <div className="flex flex-col items-center gap-2 md:items-start md:gap-[32px]">
@@ -82,7 +84,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <section className="border-t-foreground/6 flex w-full flex-col gap-y-6 border-t px-8 py-4 sm:px-10 sm:py-6 lg:px-14 lg:py-10 xl:px-16 xl:py-12">
+      <Section variant={'delimited'} className="my-0 border-t-foreground/6 flex w-full flex-col gap-y-6 border-t px-8 py-4 sm:px-10 sm:py-6 lg:px-14 lg:py-10 xl:px-16 xl:py-12">
         <div className="flex flex-col flex-nowrap gap-x-6 gap-y-6 md:flex-row md:justify-center">
           <div className="bg-secondary/20 flex min-w-5/6 flex-col gap-y-6 self-start rounded-md px-6 pt-4 pb-6 sm:w-2/3 md:w-1/2 md:min-w-0 md:self-auto lg:px-8 lg:py-6">
             <h1 className="border-b-foreground/8 border-b pb-2 text-center text-lg font-bold md:text-xl">
@@ -227,8 +229,8 @@ export default function Home() {
             </ul>
           </div>
         </div>
-      </section>
-      <section className="from-primary to-accent text-primary-foreground my-4 flex w-full flex-col gap-y-6 bg-gradient-to-b px-8 py-4 sm:my-6 sm:px-10 sm:py-6 md:bg-linear-150 lg:bg-linear-120 md:py-8 lg:my-10 lg:px-14 lg:py-16 xl:my-12 xl:px-16 xl:py-24">
+      </Section>
+      <Section size={'full'} variant={'accent'} className="my-4 flex w-full flex-col gap-y-6 px-8 py-4 sm:my-6 sm:px-10 sm:py-6 md:py-8 lg:my-10 lg:px-14 lg:py-16 xl:my-12 xl:px-16 xl:py-24">
         <div className="flex flex-col items-center gap-x-16 gap-y-4 md:flex-row md:justify-between lg:justify-center lg:gap-x-32 xl:gap-x-48">
           <div className="bg-accent text-accent-foreground md:text-primary-foreground/25 flex h-16 w-16 items-center justify-center rounded-full md:h-full md:min-h-full md:w-auto md:flex-col md:bg-inherit">
             <div className="md:hidden">
@@ -275,7 +277,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
-    </main>
+      </Section>
+    </Main>
   )
 }

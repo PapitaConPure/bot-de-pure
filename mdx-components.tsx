@@ -32,7 +32,9 @@ const components: MDXComponents = {
   h6: (props: HeadingProps) => (
     <h3 className="mt-6 mb-2 text-xs font-extrabold md:text-sm" {...props} />
   ),
-  p: (props: ParagraphProps) => <p className="mt-4 mb-1" {...props} />,
+  p: (props: ParagraphProps) => (
+    <p className="mt-4 mb-1 text-sm md:text-base" {...props} />
+  ),
   ol: (props: ListProps) => (
     <ol
       className="mt-4 mb-6 list-inside list-decimal space-y-3 sm:ml-6 sm:list-outside sm:*:pl-2"
