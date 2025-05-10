@@ -31,7 +31,7 @@ import Link from 'next/link'
 export default function Home() {
   return (
     <Main>
-      <section className="grid max-h-[75vh] min-h-[75vh] grid-rows-[1fr_max-content_1fr] items-center px-8 sm:items-start sm:px-10 md:px-8 lg:px-10 xl:px-12">
+      <section className="grid grid-rows-[1fr_max-content_1fr] items-center px-8 py-8 sm:items-start sm:px-10 md:max-h-[75vh] md:min-h-[75vh] md:px-8 md:py-4 lg:px-10 lg:py-0 xl:px-12">
         <div className="row-start-2 flex flex-col-reverse items-center justify-center gap-6 sm:gap-10 md:flex-row md:gap-20 lg:gap-20 xl:gap-26">
           <div className="flex flex-col items-center gap-2 md:items-start md:gap-[32px]">
             <h1 className="mb-1 max-w-74 text-center text-2xl font-extrabold tracking-[-.01em] sm:mb-2 sm:max-w-84 sm:text-[27px] md:-mb-2 md:max-w-94 md:text-left md:text-3xl lg:max-w-150 lg:text-5xl xl:max-w-188 xl:text-6xl">
@@ -84,7 +84,10 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <Section variant={'delimited'} className="my-0 border-t-foreground/6 flex w-full flex-col gap-y-6 border-t px-8 py-4 sm:px-10 sm:py-6 lg:px-14 lg:py-10 xl:px-16 xl:py-12">
+      <Section
+        variant={'delimited'}
+        className="border-t-foreground/6 my-0 flex w-full flex-col gap-y-6 border-t px-8 py-4 sm:px-10 sm:py-6 lg:px-14 lg:py-10 xl:px-16 xl:py-12"
+      >
         <div className="flex flex-col flex-nowrap gap-x-6 gap-y-6 md:flex-row md:justify-center">
           <div className="bg-secondary/20 flex min-w-5/6 flex-col gap-y-6 self-start rounded-md px-6 pt-4 pb-6 sm:w-2/3 md:w-1/2 md:min-w-0 md:self-auto lg:px-8 lg:py-6">
             <h1 className="border-b-foreground/8 border-b pb-2 text-center text-lg font-bold md:text-xl">
@@ -230,7 +233,11 @@ export default function Home() {
           </div>
         </div>
       </Section>
-      <Section size={'full'} variant={'accent'} className="my-4 flex w-full flex-col gap-y-6 px-8 py-4 sm:my-6 sm:px-10 sm:py-6 md:py-8 lg:my-10 lg:px-14 lg:py-16 xl:my-12 xl:px-16 xl:py-24">
+      <Section
+        size={'full'}
+        variant={'accent'}
+        className="my-4 flex w-full flex-col gap-y-6 px-8 py-4 sm:my-6 sm:px-10 sm:py-6 md:py-8 lg:my-10 lg:px-14 lg:py-16 xl:my-12 xl:px-16 xl:py-24"
+      >
         <div className="flex flex-col items-center gap-x-16 gap-y-4 md:flex-row md:justify-between lg:justify-center lg:gap-x-32 xl:gap-x-48">
           <div className="bg-accent text-accent-foreground md:text-primary-foreground/25 flex h-16 w-16 items-center justify-center rounded-full md:h-full md:min-h-full md:w-auto md:flex-col md:bg-inherit">
             <div className="md:hidden">
@@ -246,10 +253,12 @@ export default function Home() {
             </h2>
             <div className="mt-4 flex flex-col gap-y-2 md:max-w-100">
               <p>
-                La mejor forma de no cometer errores es evitar que puedas cometerlos en primer lugar.
+                La mejor forma de no cometer errores es evitar que puedas
+                cometerlos en primer lugar.
               </p>
               <p>
-                Por esto, las funcionalidades más comunes de Bot de Puré suelen requerir pocos y sencillos pasos.
+                Por esto, las funcionalidades más comunes de Bot de Puré suelen
+                requerir pocos y sencillos pasos.
               </p>
             </div>
           </div>
@@ -267,12 +276,14 @@ export default function Home() {
             <h2 className="text-center text-3xl font-extrabold sm:text-4xl md:w-max md:min-w-full md:text-left">
               Complejidad A Voluntad
             </h2>
-            <div className="mt-4 flex flex-col gap-y-2 max-w-112">
+            <div className="mt-4 flex max-w-112 flex-col gap-y-2">
               <p>
-                Si los mecanismos comunes no son suficientes para tus necesidades, te tenemos cubierto.
+                Si los mecanismos comunes no son suficientes para tus
+                necesidades, te tenemos cubierto.
               </p>
               <p>
-                Para usuarios que buscan sacarle el máximo provecho a Bot de Puré.
+                Para usuarios que buscan sacarle el máximo provecho a Bot de
+                Puré.
               </p>
             </div>
           </div>

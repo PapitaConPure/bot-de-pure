@@ -1,13 +1,15 @@
 'use client'
 
+import Main from '@/components/layout/Main'
+import Section from '@/components/layout/Section'
 import TermsOfService from '../../../content/tos.mdx'
 
-export default function Home() {
+export default function Terms() {
   return (
-    <main className="flex w-full flex-col items-center gap-y-10 scroll-smooth font-[family-name:var(--font-geist-sans)] motion-reduce:scroll-auto">
-      <section className="my-12 max-w-180 px-8 sm:px-10 md:px-8 lg:px-10 xl:px-12">
+    <Main>
+      <Section size={'book'}>
         <TermsOfService />
-      </section>
-    </main>
+      </Section>
+    </Main>
   )
 }
