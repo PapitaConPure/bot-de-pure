@@ -11,6 +11,7 @@ import {
   faCode,
   faCogs,
   faCouch,
+  faExternalLink,
   faGrinTongueWink,
   faHeadphonesAlt,
   faHexagonNodes,
@@ -42,16 +43,21 @@ export default function Home() {
               personalización única.
             </p>
 
-            <div className="mt-6 flex w-3/4 flex-col items-center gap-4 sm:w-5/6 md:mt-0 md:w-full md:flex-row">
+            <div className="relative mt-6 flex w-3/4 flex-col items-center gap-4 sm:w-5/6 md:static md:mt-0 md:w-full md:flex-row">
               <a
                 className="bg-discord hover:bg-discord/80 flex h-10 w-full items-center justify-center gap-2 rounded-md border border-solid border-transparent px-4 text-sm font-medium text-white transition-colors sm:h-12 sm:text-base md:w-auto md:px-5"
                 href="https://discord.com/oauth2/authorize?client_id=651250669390528561"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <FontAwesomeIcon icon={faDiscord} />
+                <FontAwesomeIcon
+                  icon={faDiscord}
+                  className="absolute left-4 md:static md:left-auto md:mr-3"
+                />
                 <span className="hidden lg:inline">Agregar Aplicación</span>
-                <span className="inline lg:hidden">Agregar App</span>
+                <span className="mr-auto ml-auto inline lg:hidden">
+                  Agregar App
+                </span>
               </a>
               <Link
                 href="/learn"
@@ -89,7 +95,7 @@ export default function Home() {
         className="border-t-foreground/6 my-0 flex w-full flex-col gap-y-6 border-t px-8 py-4 sm:px-10 sm:py-6 lg:px-14 lg:py-10 xl:px-16 xl:py-12"
       >
         <div className="flex flex-col flex-nowrap gap-x-6 gap-y-6 md:flex-row md:justify-center">
-          <div className="bg-secondary/20 flex min-w-5/6 flex-col gap-y-6 self-start rounded-md px-6 pt-4 pb-6 sm:w-2/3 md:w-1/2 md:min-w-0 md:self-auto lg:px-8 lg:py-6">
+          <div className="bg-secondary/25 flex min-w-5/6 flex-col gap-y-6 self-start rounded-md px-6 pt-4 pb-6 sm:w-2/3 md:w-1/2 md:min-w-0 md:self-auto lg:px-8 lg:py-6">
             <h1 className="border-b-foreground/8 border-b pb-2 text-center text-lg font-bold md:text-xl">
               Utilidad Ante Todo
             </h1>
@@ -111,7 +117,7 @@ export default function Home() {
               </li>
             </ul>
           </div>
-          <div className="bg-secondary/20 flex min-w-5/6 flex-col gap-y-6 self-end rounded-md px-6 pt-4 pb-6 sm:w-2/3 md:w-1/2 md:min-w-0 md:self-auto lg:px-8 lg:py-6">
+          <div className="bg-secondary/25 flex min-w-5/6 flex-col gap-y-6 self-end rounded-md px-6 pt-4 pb-6 sm:w-2/3 md:w-1/2 md:min-w-0 md:self-auto lg:px-8 lg:py-6">
             <h1 className="border-b-foreground/8 border-b pb-2 text-center text-lg font-bold md:text-xl">
               Moderación
             </h1>
@@ -135,7 +141,7 @@ export default function Home() {
           </div>
         </div>
         <div className="flex flex-col flex-nowrap gap-x-6 gap-y-6 md:flex-row md:justify-center">
-          <div className="bg-secondary/20 flex min-w-5/6 flex-col gap-y-6 self-start rounded-md px-6 pt-4 pb-6 sm:w-2/3 md:w-1/2 md:min-w-0 md:self-auto lg:px-8 lg:py-6">
+          <div className="bg-secondary/25 flex min-w-5/6 flex-col gap-y-6 self-start rounded-md px-6 pt-4 pb-6 sm:w-2/3 md:w-1/2 md:min-w-0 md:self-auto lg:px-8 lg:py-6">
             <h1 className="border-b-foreground/8 border-b pb-2 text-center text-lg font-bold md:text-xl">
               Entretenimiento
             </h1>
@@ -157,7 +163,7 @@ export default function Home() {
               </li>
             </ul>
           </div>
-          <div className="bg-secondary/20 flex min-w-5/6 flex-col gap-y-6 self-end rounded-md px-6 pt-4 pb-6 sm:w-2/3 md:w-1/2 md:min-w-0 md:self-auto lg:px-8 lg:py-6">
+          <div className="bg-secondary/25 flex min-w-5/6 flex-col gap-y-6 self-end rounded-md px-6 pt-4 pb-6 sm:w-2/3 md:w-1/2 md:min-w-0 md:self-auto lg:px-8 lg:py-6">
             <h1 className="border-b-foreground/8 border-b pb-2 text-center text-lg font-bold md:text-xl">
               Personalización de Usuario
             </h1>
@@ -181,7 +187,7 @@ export default function Home() {
           </div>
         </div>
         <div className="flex flex-col flex-nowrap gap-x-6 gap-y-6 md:flex-row md:place-content-evenly md:content-evenly md:justify-center">
-          <div className="bg-secondary/20 flex min-w-5/6 flex-col gap-y-6 self-start rounded-md px-6 pt-4 pb-6 sm:w-2/3 md:w-1/2 md:min-w-0 md:self-auto lg:px-8 lg:py-6">
+          <div className="bg-secondary/25 flex min-w-5/6 flex-col gap-y-6 self-start rounded-md px-6 pt-4 pb-6 sm:w-2/3 md:w-1/2 md:min-w-0 md:self-auto lg:px-8 lg:py-6">
             <h1 className="border-b-foreground/8 border-b pb-2 text-center text-lg font-bold md:text-xl">
               Personalización de Servidor
             </h1>
@@ -206,7 +212,7 @@ export default function Home() {
               </li>
             </ul>
           </div>
-          <div className="bg-secondary/20 flex min-w-5/6 flex-col gap-y-6 self-end rounded-md px-6 pt-4 pb-6 sm:w-2/3 md:w-1/2 md:min-w-0 md:self-auto lg:px-8 lg:py-6">
+          <div className="bg-secondary/25 flex min-w-5/6 flex-col gap-y-6 self-end rounded-md px-6 pt-4 pb-6 sm:w-2/3 md:w-1/2 md:min-w-0 md:self-auto lg:px-8 lg:py-6">
             <h1 className="border-b-foreground/8 border-b pb-2 text-center text-lg font-bold md:text-xl">
               Funcionalidad Avanzada
             </h1>
@@ -286,6 +292,69 @@ export default function Home() {
                 Puré.
               </p>
             </div>
+          </div>
+        </div>
+      </Section>
+      <Section>
+        <h2 className="text-center text-2xl font-extrabold sm:text-3xl md:text-4xl">
+          Soporte
+        </h2>
+        <p className="mt-4 text-center text-xs sm:text-sm md:text-base lg:text-lg">
+          ¿Dudas? ¿Problemas? ¿Sugerencias? ¿Solicitudes?
+        </p>
+        <p className="mt-1 mb-4 text-center text-xs font-medium sm:text-sm md:text-base lg:text-lg">
+          ¡Descuida! ¡Estamos aquí para ayudarte!
+        </p>
+        <div className="flex w-full items-center justify-center space-x-4 lg:w-auto">
+          <Link href="/learn">
+            <Button
+              variant="outline"
+              className="px-4 text-sm font-medium sm:h-12 sm:text-base md:px-5"
+            >
+              <span>Documentación</span>
+            </Button>
+          </Link>
+          <a
+            href={'https://forms.gle/psJ2AEGbFZ8hMu426'}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button
+              variant="outline"
+              className="px-4 text-sm font-medium sm:h-12 sm:text-base md:px-5 "
+            >
+              <span>Contáctanos</span>
+              <span>
+                <FontAwesomeIcon icon={faExternalLink} className="ml-2" />
+              </span>
+            </Button>
+          </a>
+        </div>
+      </Section>
+      <Section
+        variant={'delimited'}
+        size={'full'}
+        className="border-y-primary bg-primary/25 my-16 w-full border-y-4 py-8"
+      >
+        <div className="flex w-full flex-col items-center justify-center">
+          <h2
+            className='text-center text-2xl font-extrabold sm:text-3xl md:text-4xl'>
+            Comencemos
+          </h2>
+          <p className='mt-4 text-xs sm:text-sm md:text-base'>
+            Agrega a Bot de Puré a tu servidor y empieza a disfrutar de todas sus
+            funcionalidades.
+          </p>
+          <div className="mt-4 flex w-full items-center justify-center space-x-4 lg:w-auto">
+            <a
+              className="bg-discord hover:bg-discord/80 flex h-10 w-auto items-center justify-center gap-2 rounded-md border border-solid border-transparent px-4 text-sm font-medium text-white transition-colors sm:h-12 sm:text-base md:px-5"
+              href="https://discord.com/oauth2/authorize?client_id=651250669390528561"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FontAwesomeIcon icon={faDiscord} className="mr-3" />
+              <span>Agregar Aplicación</span>
+            </a>
           </div>
         </div>
       </Section>
