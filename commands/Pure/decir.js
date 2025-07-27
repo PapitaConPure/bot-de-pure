@@ -1,4 +1,3 @@
-const { serverid } = require('../../localdata/config.json'); //Variables globales
 const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
 
 const options = new CommandOptions()
