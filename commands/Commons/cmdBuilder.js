@@ -55,7 +55,7 @@ const extendedCommandRequestPrototype = {
 };
 
 /**
- * @param {import('./typings').CommandRequest} request
+ * @param {import('./typings').CommandRequest | import('./typings').ComponentInteraction} request
  * @returns {import('./typings').ComplexCommandRequest}
  */
 function extendRequest(request) {
@@ -99,15 +99,20 @@ function extendRequest(request) {
     } else {
         extension.isInteraction = true;
         extension.inferAsMessage = () => { throw 'Invalid inference of a Slash Command into a Message Command' };
-        extension.inferAsSlash = () => request;
+        extension.inferAsSlash = () => {
+            if(request.isChatInputCommand())
+                return request;
+            else
+                throw 'Invalid inference of a non-Slash Command Interaction into a Slash Command';
+            };
         
         extension.activity = null;
         extension.attachments = new Collection();
         extension.userId = request.user.id;
 
         extension.delete = async() => undefined;
-        extension.wasDeferred = () => request.deferred;
-        extension.wasReplied = () => request.replied;
+        extension.wasDeferred = () => request.isCommand() && request.deferred;
+        extension.wasReplied = () => request.isCommand() && request.replied;
     }
 
     for(const [k, v] of Object.entries(extension)) {
@@ -136,6 +141,13 @@ async function executeFnSample(request, args, isSlash = false, rawArgs = undefin
 /**
  * @typedef {Object} InteractionResponseOptions
  * @property {Number} [userFilterIndex] Índice donde se recibirá la ID del único usuario permitido para esta interacción. La misma deberá estar comprimida con la función `compressId`. Si es `null` o `undefined`, esta interacción será pública
+ */
+
+/**
+ * @typedef {(request: import('./typings').ComplexCommandRequest | import('discord.js').MessageComponentInteraction<'cached'>) => import('discord.js').MessageActionRowComponentBuilder} WikiComponentEvaluator
+ * @typedef {Array<WikiComponentEvaluator>} WikiRowDefinition
+ * @typedef {Object} CommandWikiData
+ * @property {Array<WikiRowDefinition>} rows Filas de botones adicionales
  */
 
 /**Representa un comando*/
@@ -173,6 +185,8 @@ class CommandManager {
 	legacy;
     /**@type {Map<String, any>}*/
     memory;
+    /**@type {CommandWikiData}*/
+    wiki;
     /**@type {ReplyOptions}*/
     reply;
     /**@type {ExecutionFunction}*/
@@ -194,6 +208,9 @@ class CommandManager {
         this.actions = [];
         this.legacy = false;
         this.memory = new Map();
+        this.wiki = {
+            rows: [],
+        };
         this.execute = request => request.reply(this.reply);
     };
 
@@ -228,6 +245,20 @@ class CommandManager {
     setDescription(...desc) {
         return this.setLongDescription(...desc);
     };
+
+    /**
+     * @typedef {import('discord.js').MessageActionRowComponentBuilder | WikiComponentEvaluator} WikiComponentResolvable
+     * @param {...WikiComponentResolvable} components
+     */
+    addWikiRow(...components) {
+        if(!components.length) throw new Error('Debes pasar al menos un botón');
+        if(components.length > 5) throw new Error('No puedes pasar más de 5 botones a la vez');
+
+        const row = components.map(c => typeof c === 'function' ? c : (() => c));
+        this.wiki.rows.push(row);
+
+        return this;
+    }
     
     /**@param {import('./cmdPerms').CommandPermissions} permissions*/
     setPermissions(permissions) {
@@ -331,7 +362,7 @@ class CommandManager {
         return request instanceof CommandInteraction;
     }
 
-    /**@param {import('./typings').CommandRequest} request*/
+    /**@param {import('./typings').CommandRequest | import('./typings').ComponentInteraction} request*/
     static requestize(request) {
         return extendRequest(request);
     }

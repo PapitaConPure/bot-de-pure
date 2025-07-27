@@ -633,10 +633,8 @@ class CommandOptions {
 	 */
 	get display() {
 		return [
-			// @ts-ignore
-			...[...this.params.values()].map(p => p.display),
-			// @ts-ignore
-			...[...this.flags.values()].map(f => f.display)
+			...[...this.params.values()].map(p => `* ${p.display}`),
+			...[...this.flags.values()].map(f => `* ${f.display}`)
 		].join('\n');
 	};
 
@@ -1042,7 +1040,7 @@ class CommandOptionSolver {
 	//#region What is "this"
 	/**
 	 * Indica si esto es un {@linkcode CommandOptionSolver<String[]>}
-	 * @param {*} args
+	 * @param {import('./typings').CommandArguments} args
 	 * @returns {args is Array<String>}
 	 */
 	// eslint-disable-next-line no-unused-vars
@@ -1193,7 +1191,7 @@ class CommandOptionSolver {
 		if(this.isInteractionSolver(this.#args)) {
 			const message = this.#args.getMessage(identifier);
 			
-			if(!message.inGuild())
+			if(!message?.inGuild())
 				return undefined;
 
 			return message;

@@ -8,13 +8,12 @@ const { auditRequest } = require('../systems/others/auditor.js');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../localdata/cmdExceptions.js');
 const { Translator } = require('../internationalization.js');
 const { CommandManager } = require('../commands/Commons/cmdBuilder.js');
-const { ButtonInteraction, StringSelectMenuInteraction, ModalSubmitInteraction, Client, ContextMenuCommandInteraction, ChatInputCommandInteraction, CommandInteractionOptionResolver, AutocompleteInteraction } = require('discord.js');
-const { CommandOptionSolver, CommandFlagExpressive, CommandParam } = require('../commands/Commons/cmdOpts.js');
+const { CommandOptionSolver } = require('../commands/Commons/cmdOpts.js');
 //#endregion
 
 /**
  * @param {import('discord.js').Interaction} interaction 
- * @param {Client} client 
+ * @param {import('discord.js').Client} client 
  */
 async function onInteraction(interaction, client) {
     if(!interaction.inCachedGuild())
@@ -45,8 +44,8 @@ async function onInteraction(interaction, client) {
 }
 
 /**
- * @param {ChatInputCommandInteraction<'cached'>} interaction 
- * @param {Client} client 
+ * @param {import('discord.js').ChatInputCommandInteraction<'cached'>} interaction 
+ * @param {import('discord.js').Client} client 
  * @param {import('../localdata/models/stats.js').StatsDocument} stats 
  */
 async function handleCommand(interaction, client, stats) {
@@ -96,10 +95,10 @@ async function handleCommand(interaction, client, stats) {
         const exception = await findFirstException(command, interaction);
         if(exception)
             return interaction.reply({ embeds: [ generateExceptionEmbed(exception, { cmdString: `/${commandName}` }) ], ephemeral: true });
-        
+
         const complex = CommandManager.requestize(interaction);
         if(!command.legacy) {
-            const solver = new CommandOptionSolver(complex, /**@type {CommandInteractionOptionResolver}*/(interaction.options), command.options);
+            const solver = new CommandOptionSolver(complex, /**@type {import('discord.js').CommandInteractionOptionResolver}*/(interaction.options), command.options);
             await command.execute(complex, solver);
         } else {
             // @ts-expect-error
@@ -119,8 +118,8 @@ async function handleCommand(interaction, client, stats) {
 }
 
 /**
- * @param {ContextMenuCommandInteraction<'cached'>} interaction 
- * @param {Client} client 
+ * @param {import('discord.js').ContextMenuCommandInteraction<'cached'>} interaction 
+ * @param {import('discord.js').Client} client 
  * @param {import('../localdata/models/stats.js').StatsDocument} stats 
  */
 async function handleAction(interaction, client, stats) {
@@ -149,8 +148,8 @@ async function handleAction(interaction, client, stats) {
 
 /**
  * 
- * @param {ButtonInteraction | StringSelectMenuInteraction | ModalSubmitInteraction} interaction 
- * @param {Client} client 
+ * @param {import('discord.js').ButtonInteraction | import('discord.js').StringSelectMenuInteraction | import('discord.js').ModalSubmitInteraction} interaction 
+ * @param {import('discord.js').Client} client 
  * @param {import('../localdata/models/stats.js').StatsDocument} stats 
 */
 async function handleComponent(interaction, client, stats) {
@@ -202,8 +201,8 @@ async function handleComponent(interaction, client, stats) {
 }
 
 /**
- * @param {AutocompleteInteraction<'cached'>} interaction 
- * @param {Client} client 
+ * @param {import('discord.js').AutocompleteInteraction<'cached'>} interaction 
+ * @param {import('discord.js').Client} client 
  * @param {import('../localdata/models/stats.js').StatsDocument} stats 
 */
 async function handleAutocompleteInteraction(interaction, client, stats) {
@@ -220,7 +219,7 @@ async function handleAutocompleteInteraction(interaction, client, stats) {
     try {
         /**@type {CommandManager}*/
         const command = puré.commands.get(commandName) || puré.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
-        const option = /**@type {CommandParam | CommandFlagExpressive}*/(
+        const option = /**@type {import('../commands/Commons/cmdOpts.js').CommandParam | import('../commands/Commons/cmdOpts.js').CommandFlagExpressive}*/(
             command.options.options.get(optionName)
             ?? command.options.options.get(`${optionName.slice(0, optionName.lastIndexOf('_'))}s`)
             ?? command.options.options.get(`${optionName.slice(0, optionName.lastIndexOf('_'))}`)

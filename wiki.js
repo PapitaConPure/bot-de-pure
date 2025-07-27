@@ -1,9 +1,130 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { ButtonBuilder, ButtonStyle, ContainerBuilder, TextDisplayBuilder, SectionBuilder, SeparatorBuilder, EmbedBuilder, ActionRowBuilder, SeparatorSpacingSize, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
 const { serverid, tenshiColor, peopleid } = require('./localdata/config.json');
 const { commandFilenames } = require('./commands/Commons/commands');
 const { p_pure } = require('./localdata/customization/prefixes');
-const { isNotModerator, edlDistance } = require('./func');
+const { isNotModerator, edlDistance, toCapitalized, compressId } = require('./func');
 const { client } = require('./client');
+const { makeStringSelectMenuRowBuilder, makeMessageActionRowBuilder } = require('./tsCasts');
+
+/**
+ * @param {import('./commands/Commons/typings').ComplexCommandRequest | import('discord.js').StringSelectMenuInteraction<'cached'>} request
+ * @param {Array<String>} selections
+ */
+const makeCategoriesRow = (request, selections) => {
+	const getDefault = (/**@type {String}*/d) => !!selections.includes(d);
+
+	const categoriesMenu = new StringSelectMenuBuilder()
+		.setCustomId(`ayuda_viewCategory_${compressId(request.user.id)}`)
+		.setPlaceholder('Categorías de Comandos...')
+		.setMinValues(0)
+		.setMaxValues(6)
+		.addOptions(new StringSelectMenuOptionBuilder()
+			.setValue('COMMON')
+			.setEmoji('828736342372253697')
+			.setLabel('General')
+			.setDescription('Comandos comunes, de propósito general.')
+			.setDefault(getDefault('COMMON')));
+	
+	!isNotModerator(request.member) && categoriesMenu.addOptions(new StringSelectMenuOptionBuilder()
+		.setValue('MOD')
+		.setEmoji('704612794921779290')
+		.setLabel('Moderación')
+		.setDescription('Comandos limitados a moderadores.')
+		.setDefault(getDefault('MOD')));
+	
+	request.user.id === peopleid.papita && categoriesMenu.addOptions(
+		new StringSelectMenuOptionBuilder()
+			.setValue('PAPA')
+			.setEmoji('797295151356969030')
+			.setLabel('Papita con Puré')
+			.setDescription('Comandos restringidos a Papita con Puré.')
+			.setDefault(getDefault('PAPA')),
+		new StringSelectMenuOptionBuilder()
+			.setValue('OUTDATED')
+			.setEmoji('657367372285476905')
+			.setLabel('Desactualizado')
+			.setDescription('Comandos en desuso, ya no pueden llamarse.')
+			.setDefault(getDefault('OUTDATED')),
+		new StringSelectMenuOptionBuilder()
+			.setValue('MAINTENANCE')
+			.setEmoji('🛠️')
+			.setLabel('En mantenimiento')
+			.setDescription('Comandos en desarrollo o mantenimiento.')
+			.setDefault(getDefault('MAINTENANCE')),
+	);
+
+	request.guildId === serverid.saki && categoriesMenu.addOptions(new StringSelectMenuOptionBuilder()
+		.setValue('HOURAI')
+		.setEmoji('1108197083334316183')
+		.setLabel('Saki Scans')
+		.setDescription('Comandos exclusivos para Saki Scans.')
+		.setDefault(getDefault('HOURAI')));
+	
+	categoriesMenu.addOptions(
+		new StringSelectMenuOptionBuilder()
+			.setValue('MUSIC')
+			.setEmoji('🎵')
+			.setLabel('Música')
+			.setDescription('Comandos PuréMusic para reproducir música.')
+			.setDefault(getDefault('MUSIC')),
+		new StringSelectMenuOptionBuilder()
+			.setValue('EMOTE')
+			.setEmoji('704612794921779290')
+			.setLabel('Emotes')
+			.setDescription('Comandos de emotes. Puedes llamarlos &así.')
+			.setDefault(getDefault('EMOTE')),
+		new StringSelectMenuOptionBuilder()
+			.setValue('MEME')
+			.setEmoji('721973016455807017')
+			.setLabel('Memes')
+			.setDescription('Comandos de carácter memético.')
+			.setDefault(getDefault('MEME')),
+		new StringSelectMenuOptionBuilder()
+			.setValue('GAME')
+			.setEmoji('🎲')
+			.setLabel('Juegos')
+			.setDescription('Comandos de juego y/o fiesta.')
+			.setDefault(getDefault('GAME')),
+		new StringSelectMenuOptionBuilder()
+			.setValue('CHAOS')
+			.setEmoji('👹')
+			.setLabel('Caos')
+			.setDescription('Comandos caóticos. Requieren habilitarse.')
+			.setDefault(getDefault('CHAOS')),
+	);
+
+	return makeStringSelectMenuRowBuilder().addComponents(categoriesMenu);
+}
+
+/**@param {import('./commands/Commons/typings').ComplexCommandRequest | import('discord.js').MessageComponentInteraction<'cached'>} request*/
+const makeGuideMenu = (request) => new StringSelectMenuBuilder()
+	.setCustomId(`ayuda_viewGuideWiki_${compressId(request.user.id)}`)
+	.setPlaceholder('Guías...')
+	.setOptions(
+		new StringSelectMenuOptionBuilder()
+			.setValue('index')
+			.setEmoji('📚')
+			.setLabel('Guía Introductoria')
+			.setDescription('Pantallazo general del modo de utilización de Bot de Puré.'),
+		new StringSelectMenuOptionBuilder()
+			.setValue('options')
+			.setEmoji('🧮')
+			.setLabel('Guía de Opciones')
+			.setDescription('Información acerca de las Opciones de Comando.'),
+		new StringSelectMenuOptionBuilder()
+			.setValue('params')
+			.setEmoji('🎛️')
+			.setLabel('Guía de Parámetros')
+			.setDescription('Explicación detallada sobre los Parámetros de Comando.'),
+		new StringSelectMenuOptionBuilder()
+			.setValue('types')
+			.setEmoji('❔')
+			.setLabel('Guía de Tipos de Parámetro')
+			.setDescription('Detalles sobre los Tipos de Parámetro u Expresiones de Bandera.'),
+	);
+
+/**@param {import('./commands/Commons/typings').ComplexCommandRequest | import('discord.js').MessageComponentInteraction<'cached'>} request*/
+const makeGuideRow = (request) => makeStringSelectMenuRowBuilder().addComponents(makeGuideMenu(request));
 
 /**
  * Devuelve un {@linkcode CommandManager} según el `nameOrAlias` indicado.
@@ -76,10 +197,35 @@ function searchCommands(request, query) {
 }
 
 /**
- * Añade embeds y componentes de una wiki de comando a la carga indicada.
+ * Representa un objeto de carga útil para inyectar en una página de wiki de comando.
  * @typedef {Object} WikiPageInjectionPayload
  * @property {Array<EmbedBuilder>} embeds 
  * @property {Array<ActionRowBuilder<import('discord.js').AnyComponentBuilder>>} components 
+ */
+
+/**
+ * Representa un objeto de carga útil para inyectar en una página de wiki de comando.
+ * @typedef {Array<import('types').MessageComponentDataResolvable>} WikiPageInjectionPayloadV2
+ */
+
+/**@satisfies {Record<import('./commands/Commons/cmdTags').CommandTagStringField, string>}*/
+const displayTagMappings = /**@type {const}*/({
+	GUIDE       : 'Página de Guía',
+	MOD         : 'Mod',
+	PAPA        : 'Papita con Puré',
+	MAINTENANCE : 'Mantenimiento',
+	OUTDATED    : 'Obsoleto',
+	HOURAI      : 'Saki Scans',
+	CHAOS       : 'Caos',
+	COMMON      : 'Común',
+	EMOTE       : 'Emote',
+	GAME        : 'Juego',
+	MEME        : 'Meme',
+	MUSIC       : 'Música',
+});
+
+/**
+ * Añade embeds y componentes de una wiki de comando a la carga indicada.
  * @param {import('./commands/Commons/commands').CommandManager} command
  * @param {string} guildId 
  * @param {WikiPageInjectionPayload} payload
@@ -142,8 +288,108 @@ function injectWikiPage(command, guildId, payload) {
 	);
 }
 
+/**
+ * Añade embeds y componentes de una wiki de comando a la carga indicada (utiliza Componentes V2)
+ * @param {import('./commands/Commons/commands').CommandManager} command
+ * @param {import('./commands/Commons/typings').ComplexCommandRequest} request 
+ * @returns {WikiPageInjectionPayloadV2}
+ */
+function getWikiPageComponentsV2(command, request) {
+	const { name: commandName, aliases, flags: commandTags } = command;
+
+	const components = /**@type {WikiPageInjectionPayloadV2}*/([]);
+
+	const getDisplayFlags = () =>  `${commandTags.keys.map(t => displayTagMappings[t]).join(', ')}`;
+	const isNotGuidePage = !(commandTags.has('GUIDE'));
+	const listExists = (/**@type {Array<String>}*/ l) => l?.[0]?.length;
+	
+	//Contenedor de metadatos
+	const titleTextBuilder = new TextDisplayBuilder().setContent(
+		isNotGuidePage
+			? `# <:command:1369424059871395950> ${toCapitalized(commandName)}`
+			: `# <:guide:1369552945309290647> ${toCapitalized(commandName.slice(2))}`
+	);
+	const taglineTextBuilder = new TextDisplayBuilder().setContent(
+		isNotGuidePage
+			? `-# Comando • ${getDisplayFlags()}`
+			: `-# ${getDisplayFlags()}`
+	);
+
+	const namesHeaderTextBuilder = new TextDisplayBuilder().setContent('### Nombres');
+	const namesContent = `\`${commandName}\`, ${listExists(aliases) ? (aliases.map(i => `\`${i}\``).join(', ')) : ''}`;
+	const namesTextBuilder = new TextDisplayBuilder().setContent(namesContent);
+
+	const metadataContainerBuilder = new ContainerBuilder()
+		.setAccentColor(tenshiColor)
+		.addTextDisplayComponents(titleTextBuilder, taglineTextBuilder)
+		.addSeparatorComponents(new SeparatorBuilder())
+		.addTextDisplayComponents(namesHeaderTextBuilder, namesTextBuilder);
+
+	components.push(metadataContainerBuilder);
+
+	//Contenedor de información
+	const descriptionHeaderTextBuilder = new TextDisplayBuilder().setContent(isNotGuidePage ? '### Descripción' : '### Explicación');
+	const descriptionTextBuilder = new TextDisplayBuilder().setContent(command.desc || '⚠️ Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde');
+	
+	const wikiRows = command.wiki.rows.map(row => makeMessageActionRowBuilder()
+		.addComponents(row.map(componentEvaluator => componentEvaluator(request)))
+	);
+	const infoContainerBuilder = new ContainerBuilder()
+		.setAccentColor(0xbf94e4)
+		.addTextDisplayComponents(descriptionHeaderTextBuilder, descriptionTextBuilder)
+		.addActionRowComponents(wikiRows);
+
+	components.push(infoContainerBuilder);
+
+	if(isNotGuidePage) {
+		const showMeHowButton = new ButtonBuilder()
+			.setCustomId('ayuda_porfavorayuden')
+			.setLabel('Probar')
+			.setStyle(ButtonStyle.Primary)
+			.setDisabled(true);
+
+	 	const usageHeaderTextBuilder = new TextDisplayBuilder().setContent('### Uso (plantilla)');
+	 	const usageTextBuilder = new TextDisplayBuilder().setContent(`\`\`\`bnf\n${p_pure(request).raw}${commandName}${command.callx ? ` ${command.callx}` : ''}\n\`\`\``);
+	 	const usageSectionBuilder = new SectionBuilder()
+	 		.addTextDisplayComponents(usageHeaderTextBuilder, usageTextBuilder)
+	 		.setButtonAccessory(showMeHowButton);
+
+	 	infoContainerBuilder
+			.addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large))
+			.addSectionComponents(usageSectionBuilder)
+			.addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large));
+
+		if(command.options?.display) {
+			const composeButton = new ButtonBuilder()
+				.setCustomId('ayuda_compose')
+				.setLabel('Componer...')
+				.setStyle(ButtonStyle.Secondary)
+				.setDisabled(true);
+	
+			 const optionsHeaderTextBuilder = new TextDisplayBuilder().setContent('### Opciones');
+			 const optionsTextBuilder = new TextDisplayBuilder().setContent(command.options?.display);
+			 const optionsSectionBuilder = new SectionBuilder()
+				.addTextDisplayComponents(optionsHeaderTextBuilder, optionsTextBuilder)
+				.setButtonAccessory(composeButton);
+				
+			infoContainerBuilder
+				.addSectionComponents(optionsSectionBuilder);
+		} else {
+			const optionsTextBuilder = new TextDisplayBuilder().setContent(':abacus: _Sin opciones._');
+			infoContainerBuilder
+				.addTextDisplayComponents(optionsTextBuilder);
+		}
+	}
+
+	return components;
+}
+
 module.exports = {
+	makeCategoriesRow,
+	makeGuideMenu,
+	makeGuideRow,
 	searchCommand,
 	searchCommands,
 	injectWikiPage,
+	getWikiPageComponentsV2,
 };

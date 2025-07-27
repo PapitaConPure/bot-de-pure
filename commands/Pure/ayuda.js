@@ -1,131 +1,9 @@
-const { EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, GuildMember } = require('discord.js');
+const { EmbedBuilder, MessageFlags } = require('discord.js');
 const { serverid, tenshiColor, peopleid } = require('../../localdata/config.json'); //Variables globales
-const { isNotModerator, compressId, decompressId, shortenText, edlDistance } = require('../../func');
+const { isNotModerator, shortenText } = require('../../func');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { commandFilenames, CommandOptions, CommandTags, CommandManager, CommandParam } = require('../Commons/commands');
-const { injectWikiPage, searchCommand, searchCommands } = require('../../wiki');
-const { makeStringSelectMenuRowBuilder } = require('../../tsCasts');
-
-/**
- * @param {import('../Commons/typings').ComplexCommandRequest | import('discord.js').StringSelectMenuInteraction<'cached'>} request
- * @param {Array<String>} selections
- */
-const makeCategoriesRow = (request, selections) => {
-	const getDefault = (/**@type {String}*/d) => !!selections.includes(d);
-
-	const categoriesMenu = new StringSelectMenuBuilder()
-		.setCustomId(`ayuda_viewCategory_${compressId(request.user.id)}`)
-		.setPlaceholder('Categorías de Comandos...')
-		.setMinValues(0)
-		.setMaxValues(6)
-		.addOptions(new StringSelectMenuOptionBuilder()
-			.setValue('COMMON')
-			.setEmoji('828736342372253697')
-			.setLabel('General')
-			.setDescription('Comandos comunes, de propósito general.')
-			.setDefault(getDefault('COMMON')));
-	
-	!isNotModerator(request.member) && categoriesMenu.addOptions(new StringSelectMenuOptionBuilder()
-		.setValue('MOD')
-		.setEmoji('704612794921779290')
-		.setLabel('Moderación')
-		.setDescription('Comandos limitados a moderadores.')
-		.setDefault(getDefault('MOD')));
-	
-	request.user.id === peopleid.papita && categoriesMenu.addOptions(
-		new StringSelectMenuOptionBuilder()
-			.setValue('PAPA')
-			.setEmoji('797295151356969030')
-			.setLabel('Papita con Puré')
-			.setDescription('Comandos restringidos a Papita con Puré.')
-			.setDefault(getDefault('PAPA')),
-		new StringSelectMenuOptionBuilder()
-			.setValue('OUTDATED')
-			.setEmoji('657367372285476905')
-			.setLabel('Desactualizado')
-			.setDescription('Comandos en desuso, ya no pueden llamarse.')
-			.setDefault(getDefault('OUTDATED')),
-		new StringSelectMenuOptionBuilder()
-			.setValue('MAINTENANCE')
-			.setEmoji('🛠️')
-			.setLabel('En mantenimiento')
-			.setDescription('Comandos en desarrollo o mantenimiento.')
-			.setDefault(getDefault('MAINTENANCE')),
-	);
-
-	request.guildId === serverid.saki && categoriesMenu.addOptions(new StringSelectMenuOptionBuilder()
-		.setValue('HOURAI')
-		.setEmoji('1108197083334316183')
-		.setLabel('Saki Scans')
-		.setDescription('Comandos exclusivos para Saki Scans.')
-		.setDefault(getDefault('HOURAI')));
-	
-	categoriesMenu.addOptions(
-		new StringSelectMenuOptionBuilder()
-			.setValue('MUSIC')
-			.setEmoji('🎵')
-			.setLabel('Música')
-			.setDescription('Comandos PuréMusic para reproducir música.')
-			.setDefault(getDefault('MUSIC')),
-		new StringSelectMenuOptionBuilder()
-			.setValue('EMOTE')
-			.setEmoji('704612794921779290')
-			.setLabel('Emotes')
-			.setDescription('Comandos de emotes. Puedes llamarlos &así.')
-			.setDefault(getDefault('EMOTE')),
-		new StringSelectMenuOptionBuilder()
-			.setValue('MEME')
-			.setEmoji('721973016455807017')
-			.setLabel('Memes')
-			.setDescription('Comandos de carácter memético.')
-			.setDefault(getDefault('MEME')),
-		new StringSelectMenuOptionBuilder()
-			.setValue('GAME')
-			.setEmoji('🎲')
-			.setLabel('Juegos')
-			.setDescription('Comandos de juego y/o fiesta.')
-			.setDefault(getDefault('GAME')),
-		new StringSelectMenuOptionBuilder()
-			.setValue('CHAOS')
-			.setEmoji('👹')
-			.setLabel('Caos')
-			.setDescription('Comandos caóticos. Requieren habilitarse.')
-			.setDefault(getDefault('CHAOS')),
-	);
-
-	return makeStringSelectMenuRowBuilder().addComponents(categoriesMenu);
-}
-		
-/**
- * @param {import('../Commons/typings').ComplexCommandRequest | import('discord.js').StringSelectMenuInteraction<'cached'>} request
- */
-const makeGuideRow = (request) => makeStringSelectMenuRowBuilder().addComponents(
-	new StringSelectMenuBuilder()
-		.setCustomId(`ayuda_viewGuideWiki_${compressId(request.user.id)}`)
-		.setPlaceholder('Guías...')
-		.setOptions(
-			new StringSelectMenuOptionBuilder()
-				.setValue('index')
-				.setEmoji('📚')
-				.setLabel('Guía Introductoria')
-				.setDescription('Pantallazo general del modo de utilización de Bot de Puré.'),
-			new StringSelectMenuOptionBuilder()
-				.setValue('options')
-				.setEmoji('🧮')
-				.setLabel('Guía de Opciones')
-				.setDescription('Información acerca de las Opciones de Comando.'),
-			new StringSelectMenuOptionBuilder()
-				.setValue('params')
-				.setEmoji('🎛️')
-				.setLabel('Guía de Parámetros')
-				.setDescription('Explicación detallada sobre los Parámetros de Comando.'),
-			new StringSelectMenuOptionBuilder()
-				.setValue('types')
-				.setEmoji('❔')
-				.setLabel('Guía de Tipos de Parámetro')
-				.setDescription('Detalles sobre los Tipos de Parámetro u Expresiones de Bandera.'),
-		),
-);
+const { searchCommand, searchCommands, getWikiPageComponentsV2, makeCategoriesRow, makeGuideRow } = require('../../wiki');
 
 /**@param {import('../Commons/typings').ComplexCommandRequest | import('discord.js').StringSelectMenuInteraction<'cached'>} request*/
 const makeExcludedTags = (request) => {
@@ -206,30 +84,27 @@ const command = new CommandManager('ayuda', flags)
 				embeds: [ embed ],
 				components: [
 					makeCategoriesRow(request, []),
-					makeGuideRow(request)
+					makeGuideRow(request),
 				],
 			});
 		}
 
-		const embeds = [];
-		const components = [];
 		const foundCommand = searchCommand(request, search);
-
-		if(foundCommand) {
-			injectWikiPage(foundCommand, request.guildId, { embeds, components });
-		} else {
-			embeds.push(new EmbedBuilder()
+		
+		if(!foundCommand) {
+			const embed = new EmbedBuilder()
 				.setColor(0xe44545)
 				.setTitle('Sin resultados')
 				.addFields({
 					name: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
 					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}comando <comando>\` para ver un comando en específico`,
-				}));
+				});
+			const components = [makeGuideRow(request)];
+			return request.reply({ embeds: [embed], components });
 		}
-		
-		components.unshift(makeGuideRow(request));
 
-		return request.reply({ embeds, components });
+		const components = getWikiPageComponentsV2(foundCommand, request);
+		return request.reply({ flags: MessageFlags.IsComponentsV2, components });
 	})
 	.setSelectMenuResponse(async function viewCategory(interaction) {
 		const guildPrefix = p_pure(interaction.guildId).raw;
@@ -270,10 +145,39 @@ const command = new CommandManager('ayuda', flags)
 			embeds: [ embed ],
 			components: [
 				makeCategoriesRow(interaction, interaction.values),
-				makeGuideRow(interaction)
+				makeGuideRow(interaction),
 			],
 		});
 	}, { userFilterIndex: 0 })
+	.setButtonResponse(async function showCommand(interaction, search) {
+		const request = CommandManager.requestize(interaction);
+		const guildPrefix = p_pure(request).raw;
+		const helpCommand = `${guildPrefix}${command.name}`;
+
+		const foundCommand = searchCommand(interaction, search);
+		
+		if(!foundCommand) {
+			const embed = new EmbedBuilder()
+				.setColor(0xe44545)
+				.setTitle('Sin resultados')
+				.addFields({
+					name: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
+					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}comando <comando>\` para ver un comando en específico`,
+				});
+			const components = [makeGuideRow(request)];
+			return interaction.reply({
+				flags: MessageFlags.Ephemeral,
+				embeds: [embed],
+				components
+			});
+		}
+
+		const components = getWikiPageComponentsV2(foundCommand, CommandManager.requestize(interaction));
+		return interaction.reply({
+			flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
+			components,
+		});
+	})
 	.setSelectMenuResponse(async function viewGuideWiki(interaction) {
 		const guildPrefix = p_pure(interaction.guildId).raw;
 		const helpCommand = `${guildPrefix}${command.name}`;
@@ -287,25 +191,22 @@ const command = new CommandManager('ayuda', flags)
 		default: search = ''; break;
 		}
 
-		const embeds = [];
-		const components = [];
 		const foundCommand = searchCommand(interaction, search);
-
-		if(foundCommand) {
-			injectWikiPage(foundCommand, interaction.guildId, { embeds, components });
-		} else {
-			embeds.push(new EmbedBuilder()
+		
+		if(!foundCommand) {
+			const embed = new EmbedBuilder()
 				.setColor(0xe44545)
 				.setTitle('Sin resultados')
 				.addFields({
 					name: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
 					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}comando <comando>\` para ver un comando en específico`,
-				}));
+				});
+			const components = [makeGuideRow(interaction)];
+			return interaction.update({ embeds: [embed], components });
 		}
 		
-		components.unshift(makeGuideRow(interaction));
-
-		return interaction.update({ embeds, components });
+		const components = getWikiPageComponentsV2(foundCommand, CommandManager.requestize(interaction));
+		return interaction.reply({ flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2, components: components });
 	}, { userFilterIndex: 0 });
 
 /**
@@ -313,7 +214,7 @@ const command = new CommandManager('ayuda', flags)
  * @typedef {Object} CommandsLookupQuery
  * @property {Array<import('../Commons/cmdTags').CommandTagResolvable>} [tags]
  * @property {Array<import('../Commons/cmdTags').CommandTagResolvable>} [excludedTags]
- * @property {{ member: GuildMember, channel: import('discord.js').GuildChannelResolvable }} [context]
+ * @property {{ member: import('discord.js').GuildMember, channel: import('discord.js').GuildChannelResolvable }} [context]
  * 
  * @param {CommandsLookupQuery} [query]
  */
@@ -322,21 +223,23 @@ function lookupCommands(query = {}) {
 	query.excludedTags ??= [];
 	const { tags, excludedTags, context } = query;
 
+	/**@type {(command: CommandManager) => boolean} */
 	let commandIsAllowed;
 	if(context)
-		commandIsAllowed = (/**@type {CommandManager}*/ command) => command.permissions?.isAllowedIn(context.member, context.channel) ?? true;
+		commandIsAllowed = (command) => command.permissions?.isAllowedIn(context.member, context.channel) ?? true;
 	else
-		commandIsAllowed = (/**@type {CommandManager}*/ command) => true;
+		commandIsAllowed = () => true;
 
+	/**@type {(command: CommandManager) => boolean} */
 	let commandMeetsCriteria;
 	if(tags.length && excludedTags.length)
-		commandMeetsCriteria = (/**@type {CommandManager}*/ command) => !excludedTags.some(tag => command.tags.has(tag)) && tags.every(tag => command.tags.has(tag));
+		commandMeetsCriteria = (command) => !excludedTags.some(tag => command.tags.has(tag)) && tags.every(tag => command.tags.has(tag));
 	else if(tags.length)
-		commandMeetsCriteria = (/**@type {CommandManager}*/ command) => tags.every(tag => command.tags.has(tag));
+		commandMeetsCriteria = (command) => tags.every(tag => command.tags.has(tag));
 	else if(excludedTags.length)
-		commandMeetsCriteria = (/**@type {CommandManager}*/ command) => !excludedTags.some(tag => command.tags.has(tag));
+		commandMeetsCriteria = (command) => !excludedTags.some(tag => command.tags.has(tag));
 	else
-		commandMeetsCriteria = (/**@type {CommandManager}*/ command) => true;
+		commandMeetsCriteria = () => true;
 
 	/**@type {Array<CommandManager>}*/
 	const commands = [];

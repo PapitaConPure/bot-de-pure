@@ -7,7 +7,7 @@ const { Stats } = require('../../localdata/models/stats');
 const { improveNumber, isShortenedNumberString, compressId } = require('../../func');
 const { CommandTags, CommandManager } = require('../Commons/commands');
 const { makeStringSelectMenuRowBuilder } = require('../../tsCasts');
-const { injectWikiPage, searchCommand } = require('../../wiki');
+const { getWikiPageComponentsV2: injectWikiPage, searchCommand } = require('../../wiki');
 const { Translator } = require('../../internationalization');
 
 const { host, version, note, changelog, todo: toDo } = bot_status;
