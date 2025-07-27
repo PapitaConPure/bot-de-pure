@@ -2,7 +2,7 @@ const { CommandTags, CommandManager, CommandOptions } = require('../Commons/comm
 const globalConfigs = require('../../localdata/config.json');
 const { Groq } = require('groq-sdk');
 const { Translator } = require('../../internationalization');
-const { fetchChannel, fetchRole, fetchMemberSync } = require('../../func');
+const { fetchChannel, fetchRole, fetchMemberSync, compressId } = require('../../func');
 const envPath = globalConfigs.remoteStartup ? '../../remoteenv.json' : '../../localenv.json';
 
 const groq = new Groq({
@@ -65,9 +65,10 @@ const command = new CommandManager('preguntar', flags)
 					content: userPrompt,
 				},
 			],
+			user: compressId(request.userId),
 			model: 'meta-llama/llama-4-scout-17b-16e-instruct',
 			temperature: 1.42,
-			max_completion_tokens: 1690,
+			max_completion_tokens: 2000,
 			top_p: 0.9,
 			stream: true,
 			stop: null,
