@@ -49,7 +49,7 @@ async function resolverLink(request, linkRes, iSize, isnsfw, args) {
 	}
 
 	//Resolver de usuario
-	linkRes = func.fetchUserID(linkRes, request);
+	linkRes = await func.fetchUserID(linkRes, request);
 	if(linkRes !== undefined)
 		return request.client.users.cache.get(linkRes).avatarURL({ extension: 'png', size: iSize });
 
