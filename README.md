@@ -25,7 +25,8 @@ Como personaje, es una robot torpe y agresiva en algunos casos, pero parece mete
 >     "booruapikey": "<<La clave de API de una cuenta de Gelbooru>>",
 >     "booruuserid": "<<La ID de usuario de la misma cuenta de Gelbooru>>",
 >     "pixivtoken": "<<El Refresh Token de una cuenta de pixiv>>",
->     "imgurclientid": "<<La ID de cliente de una cuenta de Gelbooru>>"
+>     "imgurclientid": "<<La ID de cliente de una cuenta de Gelbooru>>",
+>     "aikey": "<<Una clave de API de Groq.com para comandos de IA>>"
 >   }
 >   ```
 > * `localenv.json` se usa para un entorno de **desarrollo**, mientras que `remoteenv.json` se usa para un entorno de **producción**. Esta solución no es para nada elegante pero me ha estado funcionando bien de momento
