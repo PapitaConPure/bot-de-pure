@@ -1,5 +1,5 @@
 const { improveNumber, compressId, sleep } = require('../../func');
-const { CommandTags, CommandManager, CommandOptions, CommandOptionSolver } = require('../Commons/commands');
+const { CommandTags, CommandManager, CommandOptions } = require('../Commons/commands');
 const UserConfigs = require('../../localdata/models/userconfigs.js');
 const { EmbedBuilder } = require("discord.js");
 const { Translator } = require("../../internationalization");
@@ -11,6 +11,7 @@ const transferLocks = new Set();
 const options = new CommandOptions()
     .addParam('monto', 'NUMBER', 'para especificar el monto a pagar en PRC')
     .addParam('usuario', 'USER', 'para especificar el usuario al cual transferir PRC');
+
 const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('transferir', flags)
     .setAliases('transfer', 'tf')
@@ -22,11 +23,11 @@ const command = new CommandManager('transferir', flags)
             request.deferReply({ ephemeral: true }),
         ]);
 
-        if(args.isMessageSolver())
-            swapIfNeeded(/**@type {CommandOptionSolver<string[]>}*/(args).args);
+        if(args.isMessageSolver(args.args))
+            swapIfNeeded(args.args);
 
         const amount = args.getNumber('monto');
-        const target = args.getUser('usuario');
+        const target = await args.getUser('usuario');
 
         if(!amount || isNaN(amount))
             return request.editReply({ content: translator.getText('transferAmountExpected') });
