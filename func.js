@@ -1631,6 +1631,8 @@ module.exports = {
         return `${text.slice(0, trueMax)}${suspensor}`;
     },
 
+    toCapitalized: (text) => `${text.slice(0, 1).toUpperCase()}${text.slice(1)}`,
+
     /**
      * @typedef {Object} LowerCaseNormalizationOptions
      * @property {Boolean} [removeCarriageReturns=false] Indica si remover los caracteres de retorno de carro "\r"
