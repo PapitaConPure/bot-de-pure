@@ -1,4 +1,4 @@
-const { p_pure } = require('../../localdata/customization/prefixes.js');
+const { makeGuideMenu } = require('../../wiki.js');
 const { CommandTags, CommandManager } = require('../Commons/commands');
 
 const flags = new CommandTags().add('GUIDE');
@@ -27,6 +27,7 @@ const command = new CommandManager('g-opciones', flags)
 		'* `-xy <número>` — `x` = `y` = `<número>`',
 		'',
 		'Usa el menú de abajo para aprender más',
-	);
+	)
+	.addWikiRow(makeGuideMenu);
 
 module.exports = command;

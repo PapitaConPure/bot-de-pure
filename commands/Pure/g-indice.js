@@ -1,4 +1,4 @@
-const { p_pure } = require('../../localdata/customization/prefixes.js');
+const { makeGuideMenu } = require('../../wiki.js');
 const { CommandTags, CommandManager } = require('../Commons/commands');
 
 const flags = new CommandTags().add('GUIDE');
@@ -18,8 +18,7 @@ const command = new CommandManager('g-índice', flags)
 		'Los comandos suelen tener **opciones**: `<parámetros>` y/o `--banderas`.',
 		'Los parámetros y las banderas son dos formas similares y a la vez diferentes manipular un comando.',
 		'En Comandos Slash no hay mucha diferencia, pero con Comandos de Mensaje los parámetros siguen un cierto orden mientras que las banderas pueden indicarse como sea',
-		'',
-		'Usa el menú de abajo para aprender más',
-	);
+	)
+	.addWikiRow(makeGuideMenu);
 
 module.exports = command;
