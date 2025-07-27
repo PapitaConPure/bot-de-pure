@@ -1,3 +1,4 @@
+const { ButtonBuilder, ButtonStyle } = require('discord.js');
 const { randRange } = require('../../func.js');
 const { CommandTags, CommandManager } = require('../Commons/commands');
 
@@ -18,10 +19,16 @@ const tenshiurl = 'https://i.imgur.com/eMyvXiC.png';
 const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('rakkidei', flags)
 	.setAliases('rakki', 'tenshi')
-	.setBriefDescription('Comando de trompada de Rakkidei')
-	.setLongDescription(
-		'Comando de trompada de Rakkidei',
-		'[<:twitter:919403803114094682> Twitter](https://twitter.com/rakkidei)\n[<:pixiv:919403803126661120> pixiv](https://www.pixiv.net/users/58442175)',
+	.setDescription('Comando de trompada de Rakkidei')
+	.addWikiRow(
+		new ButtonBuilder()
+			.setStyle(ButtonStyle.Link)
+			.setURL('https://twitter.com/rakkidei')
+			.setEmoji('1232243415165440040'),
+		new ButtonBuilder()
+			.setStyle(ButtonStyle.Link)
+			.setURL('https://www.pixiv.net/users/58442175')
+			.setEmoji('1334816111270563880'),
 	)
 	.setExecution(async function (request) {
 		return request.reply({

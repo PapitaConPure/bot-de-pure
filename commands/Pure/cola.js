@@ -1,4 +1,4 @@
-const { ModalBuilder, TextInputBuilder, TextInputStyle, Colors } = require('discord.js'); //Integrar discord.js
+const { ModalBuilder, TextInputBuilder, TextInputStyle, Colors, ButtonBuilder, ButtonStyle } = require('discord.js'); //Integrar discord.js
 const { decompressId, sleep } = require('../../func.js'); //Funciones globales
 const { CommandTags, CommandManager } = require('../Commons/commands.js');
 const { useMainPlayer, QueueRepeatMode } = require('discord-player');
@@ -20,7 +20,16 @@ const command = new CommandManager('cola', tags)
 	)
 	.setBriefDescription('Muestra la cola de reproducción')
 	.setLongDescription(
-		'Muestra la cola de reproducción de pistas que se encuentran encoladas actualmente. Las pistas se encolan automáticamente con **p!reproducir**',
+		'Muestra un listado de las pistas que se encuentran en la cola de reproducción del canal de voz.',
+		'Además, provee controles para agregar o quitar pistas de la cola, junto con opciones para pausar, reanudar o alterar la cola.',
+		'También permite consultar la pista que se está reproduciendo actualmente (si aplica).',
+	)
+	.addWikiRow(
+		new ButtonBuilder()
+			.setCustomId('ayuda_showCommand_reproducir')
+			.setEmoji('1369424059871395950')
+			.setLabel('¿Cómo puedo reproducir pistas?')
+			.setStyle(ButtonStyle.Secondary),
 	)
 	.setExecution(async request => {
 		return showQueuePage(request, 'CM');

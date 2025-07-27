@@ -1,5 +1,4 @@
-const { EmbedBuilder, Colors } = require('discord.js'); //Integrar discord.js
-const { shortenText } = require('../../func.js');
+const { ButtonBuilder, ButtonStyle } = require('discord.js'); //Integrar discord.js
 const { CommandTags, CommandManager } = require('../Commons/commands.js');
 const { Translator } = require('../../internationalization.js');
 const { useMainPlayer } = require('discord-player');
@@ -17,9 +16,16 @@ const command = new CommandManager('pausar', tags)
 	)
 	.setBriefDescription('Pausa una pista de audio en reproducción')
 	.setLongDescription(
-		'Pausa la reproducción de la pista de audio actual si es que se estaba reproduciendo alguna',
+		'Pausa la reproducción de la pista de audio actual, si es que se estaba reproduciendo alguna.',
 	)
-	.setExecution(async (request, args) => {
+	.addWikiRow(
+		new ButtonBuilder()
+			.setCustomId('ayuda_showCommand_resumir')
+			.setEmoji('1369424059871395950')
+			.setLabel('¿Cómo resumo una pista pausada?')
+			.setStyle(ButtonStyle.Secondary),
+	)
+	.setExecution(async request => {
 		const translator = await Translator.from(request.userId);
 
 		const channel = request.member.voice?.channel;

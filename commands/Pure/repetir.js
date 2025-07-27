@@ -1,4 +1,4 @@
-const { Colors, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js'); //Integrar discord.js
+const { Colors, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonBuilder, ButtonStyle } = require('discord.js'); //Integrar discord.js
 const { CommandTags, CommandManager } = require('../Commons/commands.js');
 const { useMainPlayer, QueueRepeatMode } = require('discord-player');
 const { isPlayerUnavailable, makePuréMusicEmbed, SERVICES } = require('../../systems/musicPlayer.js');
@@ -20,6 +20,13 @@ const command = new CommandManager('repetir', tags)
 	.setBriefDescription('Cambia el modo de repetición de la cola de reproducción')
 	.setLongDescription(
 		'Permite seleccionar y cambiar el modo de repetición de la cola de reproducción actual.',
+	)
+	.addWikiRow(
+		new ButtonBuilder()
+			.setCustomId('ayuda_showCommand_reproducir')
+			.setEmoji('1369424059871395950')
+			.setLabel('¿Cómo puedo reproducir pistas?')
+			.setStyle(ButtonStyle.Secondary),
 	)
 	.setExecution(async request => {
 		const userId = request.userId;

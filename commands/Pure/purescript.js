@@ -92,6 +92,10 @@ const command = new CommandManager('purescript', flags)
 		'Puedes leer la documentación de PuréScript [aquí](https://papitaconpure.github.io/ps-docs/)',
 		`Última versión: **v${CURRENT_PS_VERSION}**`
 	)
+	.addWikiRow(
+		psEditorButton,
+		psDocsButton,
+	)
 	.setOptions(options)
 	.setExecution(async function (request, args, rawArgs) {
 		const helpString = `-# Usa \`${p_pure(request.guildId).raw}ayuda puréscript\` para más información`;

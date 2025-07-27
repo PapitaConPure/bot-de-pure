@@ -4,14 +4,14 @@ const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver, CommandParam } = require('../Commons/commands');
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId, warn } = require('../../func.js');
-const { EmbedBuilder, ButtonBuilder, TextInputBuilder, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder } = require('discord.js');
+const { EmbedBuilder, ButtonBuilder, TextInputBuilder, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder, MessageFlags } = require('discord.js');
 const { RuntimeToLanguageType } = require('../../systems/ps/v1.0/commons.js');
 const { executeTuber: executeTuberPS1 } = require('../../systems/ps/v1.0/purescript.js');
 const { executeTuber: executeTuberPS2, CURRENT_PS_VERSION } = require('../../systems/ps/common/executeTuber.js');
 const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts.js');
 const { ValueKindTranslationLookups } = require('../../systems/ps/v1.1/interpreter/values');
 const { Input } = require('../../systems/ps/v1.1/interpreter/inputReader.js');
-const { injectWikiPage } = require('../../wiki.js');
+const { getWikiPageComponentsV2 } = require('../../wiki.js');
 const { Translator } = require('../../internationalization.js');
 
 const pageMax = 10;
@@ -210,8 +210,19 @@ const command = new CommandManager('tubérculo', flags)
 		'Usar el comando sin nada lista todos los Tubérculos de este servidor',
 		'Para `--crear` (o *editar*) un Tubérculo, se requerirá un `<mensaje>` y/o `<archivos>`, junto a la `<id>` que quieras darle al mismo. Si la ID ya existe, será *editada*',
 		'Para `--borrar` un Tubérculo, igualmente debes indicar su `<id>`',
-		'Escribe los indicadores `--crear --script` (o `-cs`) para crear un **Tubérculo avanzado con PuréScript**',
-		'[Clickea esto para leer la documentación de PuréScript](https://papitaconpure.github.io/ps-docs/)'
+		'Escribe los indicadores `--crear --script` (o `-cs`) para crear un **Tubérculo avanzado con PuréScript**'
+	)
+	.addWikiRow(
+		new ButtonBuilder()
+			.setURL('https://papitaconpure.github.io/ps/')
+			.setLabel(`Abrir editor de PuréScript (v${CURRENT_PS_VERSION})`)
+			.setEmoji('1309359188929151098')
+			.setStyle(ButtonStyle.Link),
+		new ButtonBuilder()
+			.setURL('https://papitaconpure.github.io/ps-docs/')
+			.setLabel(`Aprende PuréScript`)
+			.setEmoji('📖')
+			.setStyle(ButtonStyle.Link),
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
@@ -287,11 +298,9 @@ const command = new CommandManager('tubérculo', flags)
 		if(interaction.user.id !== userId)
 			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
 		
-		const components = [];
-		const embeds = [];
-		injectWikiPage(command, interaction.guildId, { components, embeds });
+		const components = getWikiPageComponentsV2(command, CommandManager.requestize(interaction));
 		
-		return interaction.reply({ components, embeds });
+		return interaction.reply({ flags: MessageFlags.IsComponentsV2, components });
 	})
 	.setButtonResponse(async function getTuberHelp(interaction, tuberId, variant, updateMessage) {
 		if(!tuberId)
