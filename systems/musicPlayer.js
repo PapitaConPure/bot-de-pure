@@ -8,7 +8,7 @@ const { Translator } = require('../internationalization.js');
 const { tryRecoverSavedTracksQueue, saveTracksQueue } = require('../localdata/models/playerQueue.js');
 const Logger = require('../logs.js');
 
-const { debug, info, warning, error } = Logger('DEBUG', 'PuréMusic');
+const { debug, info, warn, error } = Logger('DEBUG', 'PuréMusic');
 
 /**
  * @param {import('../commands/Commons/typings.js').ComplexCommandRequest | import('discord.js').ButtonInteraction<'cached'> | import('discord.js').StringSelectMenuInteraction<'cached'> | import('discord.js').ModalSubmitInteraction<'cached'>} request
@@ -101,8 +101,8 @@ async function prepareTracksPlayer(client) {
 		info(`[${queue.guild.name}] Connection destroyed`);
 	});
 	player.events.on('error', (err) => {
-		warning('Error general de reproductor');
-		warning({ err });
+		warn('Error general de reproductor');
+		warn({ err });
 	});
 	player.events.on('playerError', (queue, err) => {
 		error(err, 'Error de reproductor');
