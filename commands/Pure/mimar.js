@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require("discord.js");
-const { fetchUser, randRange } = require("../../func");
+const { randRange } = require("../../func");
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
 const lovestats = () => [
@@ -22,7 +22,7 @@ const command = new CommandManager('mimar', flags)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		//Acción de comando
-		const user2 = args.getUser('persona', true);
+		const user2 = await args.getUser('persona', true);
 		if(!user2) return request.reply('⚠️️ Debes especificar una persona a mimar');
 		const user1 = request.user;
 		if(user1.id === user2.id) return request.reply('⚠️️ El único mimo que puedes darte a ti mismo es el de vivir una vida de la que no te arrepentirás');
