@@ -458,6 +458,7 @@ async function notifyUsers(post, sent, feedSuscriptions) {
 				},
 			);
 		
+		//@ts-expect-error
 		const postRow = makeButtonRowBuilder(sent.components[0]);
 		const spliceIndex = postRow.components.findLastIndex(component => component.data.style === ButtonStyle.Link);
 		postRow.components.splice(spliceIndex + 1);
@@ -515,7 +516,7 @@ async function searchAndReplyWithPost(request, args, options = {}) {
 		: request.channel.nsfw;
 	
 	const poolSize = args.parseFlagExpr('bomba', x => Math.max(2, Math.min(+x, 10)), 1);
-	const words = args.getString('etiquetas').split(/\s+/);
+	const words = (args.getString('etiquetas', true) ?? '').split(/\s+/);
 	debug('poolSize =', poolSize);
 
 	debug('Verificando que la solicitud haya sido aprobada por el Vaticano');
