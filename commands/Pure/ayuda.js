@@ -97,7 +97,7 @@ const command = new CommandManager('ayuda', flags)
 				.setTitle('Sin resultados')
 				.addFields({
 					name: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
-					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}comando <comando>\` para ver un comando en específico`,
+					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}ayuda <comando>\` para ver un comando en específico`,
 				});
 			const components = [makeGuideRow(request)];
 			return request.reply({ embeds: [embed], components });
@@ -162,7 +162,7 @@ const command = new CommandManager('ayuda', flags)
 				.setTitle('Sin resultados')
 				.addFields({
 					name: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
-					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}comando <comando>\` para ver un comando en específico`,
+					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}ayuda <comando>\` para ver un comando en específico`,
 				});
 			const components = [makeGuideRow(request)];
 			return interaction.reply({
@@ -199,7 +199,7 @@ const command = new CommandManager('ayuda', flags)
 				.setTitle('Sin resultados')
 				.addFields({
 					name: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
-					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}comando <comando>\` para ver un comando en específico`,
+					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}ayuda <comando>\` para ver un comando en específico`,
 				});
 			const components = [makeGuideRow(interaction)];
 			return interaction.update({ embeds: [embed], components });

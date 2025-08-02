@@ -37,7 +37,7 @@ const command = new CommandManager('papa-test', tags)
                 .setTitle('Sin resultados')
                 .addFields({
                     name: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
-                    value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}comando <comando>\` para ver un comando en específico`,
+                    value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}ayuda <comando>\` para ver un comando en específico`,
                 });
     
             return request.reply({
