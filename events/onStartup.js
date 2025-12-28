@@ -50,6 +50,10 @@ const logOptions = {
 async function onStartup(client) {
 	const confirm = () => console.log(chalk.green('Hecho.'));
 	globalConfigs.maintenance = '1';
+	
+	console.log(chalk.magenta('Obteniendo miembros de servidores de Discord...'));
+	await client.guilds.fetch().then(() => client.guilds.cache.forEach(guild => guild.members.fetch()));
+	confirm();
 
 	if(globalConfigs.remoteStartup)
 		console.log(chalk.redBright.bold('Inicializando entorno de producción'));
@@ -103,9 +107,9 @@ async function onStartup(client) {
 
 	console.log(chalk.magenta('Indexando Slots de Puré...'));
 	(await Promise.all([
-		client.guilds.fetch(globalConfigs.serverid.slot1),
-		client.guilds.fetch(globalConfigs.serverid.slot2),
-		client.guilds.fetch(globalConfigs.serverid.slot3),
+		client.guilds.cache.get(globalConfigs.serverid.slot1),
+		client.guilds.cache.get(globalConfigs.serverid.slot2),
+		client.guilds.cache.get(globalConfigs.serverid.slot3),
 	])).forEach((guild, i) => { globalConfigs.slots[`slot${i + 1}`] = guild; });
 	globalConfigs.logch = await globalConfigs.slots.slot1.channels.resolve('870347940181471242');
 	confirm();
