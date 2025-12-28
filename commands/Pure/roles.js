@@ -58,6 +58,7 @@ const getAutoRoleRows = (member, categories, category, section = null, exclusive
 	
 	return rows;
 };
+
 /**
  * @param {{ [ K: String ]: CategoryContent}} categories
  * @param {CategoryIndex} categoryName
@@ -84,6 +85,7 @@ const getPaginationControls = (categories, categoryName, section = 0) => {
 		]),
 	];
 };
+
 /**
  * @param {import('discord.js').GuildMember} member 
  * @param {CategoryIndex} category 
