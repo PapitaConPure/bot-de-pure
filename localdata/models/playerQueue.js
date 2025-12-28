@@ -44,7 +44,7 @@ async function saveTracksQueue(request, queue) {
  */
 async function tryRecoverSavedTracksQueue(request, pauseOnInit = true) {
 	console.log('Attempting recovery of possible saved queue');
-	const { guild, member } = request;
+	const { guild } = request;
 	const guildId = guild.id;
 
 	const player = useMainPlayer();
