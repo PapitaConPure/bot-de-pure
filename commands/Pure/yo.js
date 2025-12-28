@@ -10,6 +10,7 @@ const { auditError } = require('../../systems/others/auditor');
 const { updateFollowedFeedTagsCache } = require('../../systems/booru/boorufeed');
 const { makeSessionAutoname } = require('../../systems/others/purevoice');
 const { toUtcOffset: toUTCOffset, toTimeZoneAlias } = require('../../timezones');
+const { acceptedTwitterConverters } = require('../../systems/agents/pureet');
 
 /**@param {String} id*/
 const backToDashboardButton = id => new ButtonBuilder()
@@ -35,7 +36,8 @@ const wizEmbed = (iconUrl, stepName, stepColor, translator) => {
     return new EmbedBuilder()
         .setColor(stepColor)
         .setAuthor(author)
-        .setFooter({ text: translator.getText(stepName) });
+        .setFooter({ text: translator.getText(stepName) })
+        .setTimestamp(Date.now());
 };
 
 /**
@@ -169,6 +171,100 @@ const voiceEmbed = (interaction, userConfigs, translator) => {
 };
 
 /**
+ * 
+ * @param {import('discord.js').Interaction} interaction 
+ * @param {string} currentPrefix
+ * @param {Translator} translator 
+ * @param {string} authorId
+ */
+const getTwitterConversionPickerResponseContent = (interaction, currentPrefix, translator, authorId) => {
+    return {
+        embed: wizEmbed(interaction.client.user.avatarURL(), 'yoTwitterStep', 0x040404, translator)
+        .setTitle(translator.getText('yoTwitterTitle'))
+        .setDescription(translator.getText('yoConversionServiceDescription', currentPrefix || translator.getText('yoConversionServiceMenuServiceNoneLabel'))),
+        components: [
+            makeStringSelectMenuRowBuilder().addComponents(
+                new StringSelectMenuBuilder()
+                    .setCustomId(`yo_setTwitterConvert_${authorId}`)
+                    .setPlaceholder(translator.getText('yoConversionServiceMenuService'))
+                    .setOptions(
+                        {
+                            value: 'none',
+                            label: translator.getText('yoConversionServiceMenuServiceNoneLabel'),
+                            description: translator.getText('yoTwitterMenuServiceNoneDesc'),
+                        },
+                        {
+                            value: 'vx',
+                            label: 'vxTwitter / fixvx',
+                            description: translator.getText('yoTwitterMenuServiceVxDesc'),
+                        },
+                        {
+                            value: 'fx',
+                            label: 'FxTwitter / FixupX',
+                            description: translator.getText('yoTwitterMenuServiceFxDesc'),
+                        },
+                        {
+                            value: 'girlcockx',
+                            label: 'girlcockx.com',
+                        },
+                        {
+                            value: 'cunnyx',
+                            label: 'cunnyx.com',
+                        },
+                    )
+            ),
+            makeButtonRowBuilder().addComponents(
+                backToDashboardButton(authorId),
+                cancelButton(authorId),
+            ),
+        ],
+    };
+}
+
+/**
+ * 
+ * @param {import('discord.js').Interaction} interaction 
+ * @param {string} currentPrefix 
+ * @param {Translator} translator
+ * @param {string} authorId
+ */
+const getPixivConversionPickerResponseContent = (interaction, currentPrefix, translator, authorId) => {
+    return {
+        embed: wizEmbed(interaction.client.user.avatarURL(), 'yoPixivStep', 0x0096fa, translator)
+                .setTitle(translator.getText('yoPixivTitle'))
+                .setDescription(translator.getText('yoConversionServiceDescription', currentPrefix || translator.getText('yoConversionServiceMenuServiceNoneLabel'))),
+        components: [
+            makeStringSelectMenuRowBuilder().addComponents(
+                new StringSelectMenuBuilder()
+                    .setCustomId(`yo_setPixivConvert_${authorId}`)
+                    .setPlaceholder(translator.getText('yoConversionServiceMenuService'))
+                    .setOptions(
+                        {
+                            value: 'phixiv',
+                            label: 'phixiv',
+                            description: translator.getText('yoPixivMenuServicePhixivDesc'),
+                        },
+                        {
+                            value: 'webhook',
+                            label: translator.getText('yoPixivMenuServiceWebhookLabel'),
+                            description: translator.getText('yoPixivMenuServiceWebhookDesc'),
+                        },
+                        {
+                            value: 'none',
+                            label: translator.getText('yoConversionServiceMenuServiceNoneLabel'),
+                            description: translator.getText('yoPixivMenuServiceNoneDesc'),
+                        },
+                    )
+            ),
+            makeButtonRowBuilder().addComponents(
+                backToDashboardButton(authorId),
+                cancelButton(authorId),
+            ),
+        ],
+    };
+}
+
+/**
  * @param {String} userId 
  * @param {import('discord.js').ButtonInteraction} interaction 
  * @param {import('../../localdata/models/userconfigs').UserConfigDocument} userConfigs 
@@ -272,7 +368,6 @@ const command = new CommandManager('yo', flags)
         if(!userConfigs)
             return interaction.reply({ content: '⚠️ Usuario inexistente / Unexistent user', ephemeral: true });
         
-        // @ts-ignore
         const translator = new Translator(userConfigs.language);
 
 		if(compressId(user.id) !== authorId)
@@ -425,69 +520,11 @@ const command = new CommandManager('yo', flags)
             break;
             
         case 'pixiv':
-            embed = wizEmbed(interaction.client.user.avatarURL(), 'yoPixivStep', 0x0096fa, translator)
-                .setTitle(translator.getText('yoPixivTitle'));
-            components = [
-                makeStringSelectMenuRowBuilder().addComponents(
-                    new StringSelectMenuBuilder()
-                        .setCustomId(`yo_setPixivConvert_${authorId}`)
-                        .setPlaceholder(translator.getText('yoConversionServiceMenuService'))
-                        .setOptions(
-                            {
-                                value: 'phixiv',
-                                label: 'phixiv',
-                                description: translator.getText('yoPixivMenuServicePhixivDesc'),
-                            },
-                            {
-                                value: 'webhook',
-                                label: translator.getText('yoPixivMenuServiceWebhookLabel'),
-                                description: translator.getText('yoPixivMenuServiceWebhookDesc'),
-                            },
-                            {
-                                value: 'none',
-                                label: translator.getText('yoConversionServiceMenuServiceNoneLabel'),
-                                description: translator.getText('yoPixivMenuServiceNoneDesc'),
-                            },
-                        )
-                ),
-                makeButtonRowBuilder().addComponents(
-                    backToDashboardButton(authorId),
-                    cancelButton(authorId),
-                ),
-            ];
+            ({ embed, components } = getPixivConversionPickerResponseContent(interaction, userConfigs.pixivConverter, translator, authorId));
             break;
 
         default:
-            embed = wizEmbed(interaction.client.user.avatarURL(), 'yoTwitterStep', 0x040404, translator)
-                .setTitle(translator.getText('yoTwitterTitle'));
-            components = [
-                makeStringSelectMenuRowBuilder().addComponents(
-                    new StringSelectMenuBuilder()
-                        .setCustomId(`yo_setTwitterConvert_${authorId}`)
-                        .setPlaceholder(translator.getText('yoConversionServiceMenuService'))
-                        .setOptions(
-                            {
-                                value: 'vx',
-                                label: 'vxTwitter / fixvx',
-                                description: translator.getText('yoTwitterMenuServiceVxDesc'),
-                            },
-                            {
-                                value: 'fx',
-                                label: 'FxTwitter / FixupX',
-                                description: translator.getText('yoTwitterMenuServiceFxDesc'),
-                            },
-                            {
-                                value: 'none',
-                                label: translator.getText('yoConversionServiceMenuServiceNoneLabel'),
-                                description: translator.getText('yoTwitterMenuServiceNoneDesc'),
-                            },
-                        )
-                ),
-                makeButtonRowBuilder().addComponents(
-                    backToDashboardButton(authorId),
-                    cancelButton(authorId),
-                ),
-            ];
+            ({ embed, components } = getTwitterConversionPickerResponseContent(interaction, userConfigs.twitterPrefix, translator, authorId));
             break;
         }
 
@@ -641,9 +678,10 @@ const command = new CommandManager('yo', flags)
             throw 'Resultado de servicio de conversión de pixiv inesperado';
 
         userConfigs.pixivConverter = service;
-        
+
         return Promise.all([
             userConfigs.save().then(() => recacheUser(user.id)),
+            interaction.message.edit(getPixivConversionPickerResponseContent(interaction, service, translator, authorId)),
             interaction.reply({ content: translator.getText('yoConversionServiceSuccess'), ephemeral: true }),
         ]);
     })
@@ -659,16 +697,17 @@ const command = new CommandManager('yo', flags)
 		if(user.id !== authorId)
 			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
 
-        let service = interaction.values[0];
+        let service = /**@type {import('../../systems/agents/pureet.js').AcceptedTwitterConverterKey | 'none' | ''}*/(interaction.values[0]);
         if(service === 'none') service = '';
 
-        if(service !== '' && service !== 'vx' && service !== 'fx')
+        if(!acceptedTwitterConverters.includes(service))
             throw 'Resultado de servicio de conversión de Twitter inesperado';
 
         userConfigs.twitterPrefix = service;
-        
+
         return Promise.all([
             userConfigs.save().then(() => recacheUser(user.id)),
+            interaction.message.edit(getTwitterConversionPickerResponseContent(interaction, service, translator, authorId)),
             interaction.reply({ content: translator.getText('yoConversionServiceSuccess'), ephemeral: true }),
         ]);
     })
@@ -679,7 +718,6 @@ const command = new CommandManager('yo', flags)
         if(!userConfigs)
             return interaction.reply({ content: '⚠️ Usuario inexistente / Unexistent user', ephemeral: true });
 
-        // @ts-ignore
         const translator = new Translator(userConfigs.language);
 		
 		if(user.id !== authorId)
@@ -693,7 +731,7 @@ const command = new CommandManager('yo', flags)
             interaction.update({
                 content: null,
                 embeds: [selectTagsChannelEmbed(interaction, translator)],
-                // @ts-ignore
+                // @ts-expect-error
                 components: selectTagsChannelRows(user.id, interaction, userConfigs, translator),
             }),
         ]);
@@ -706,7 +744,6 @@ const command = new CommandManager('yo', flags)
         if(!userConfigs)
             return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
 
-        // @ts-ignore
         const translator = new Translator(userConfigs.language);
 		
 		if(compressId(user.id) !== authorId)
@@ -716,7 +753,7 @@ const command = new CommandManager('yo', flags)
             userConfigs.save(),
             interaction.update({
                 embeds: [followedTagsEmbed(interaction, userConfigs, channelId, translator)],
-                // @ts-ignore
+                // @ts-expect-error
                 components: followedTagsRows(user.id, channelId, translator, isAlt),
             }),
         ]);

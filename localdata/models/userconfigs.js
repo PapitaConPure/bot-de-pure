@@ -1,4 +1,5 @@
 const Mongoose = require('mongoose');
+const { acceptedTwitterConverters } = require('../../systems/agents/pureet');
 
 const UserConfigSchema = new Mongoose.Schema({
     userId: {
@@ -74,7 +75,7 @@ const UserConfigSchema = new Mongoose.Schema({
     },
     twitterPrefix: {
         type: String,
-        enum: [ '', 'vx', 'fx' ],
+        enum: acceptedTwitterConverters,
         default: 'vx',
     },
     utcOffset: {
