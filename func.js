@@ -283,7 +283,7 @@ module.exports = {
      * @param {Discord.Guild} guild 
      */
     calculateRealMemberCount: async function(guild) {
-        const members = await guild.members.fetch().catch(() => guild.members.cache);
+        const members = await guild.members.fetch();
         return members.filter(member => !member.user.bot).size;
     },
 
@@ -849,7 +849,7 @@ module.exports = {
      */
     fetchMember: async function(query, context) {
         if(!query)
-            throw new Error('Se requiere un criterio de búsqueda');
+            throw new Error('fetchMember: Se requiere un criterio de búsqueda');
         
         if(typeof query !== 'string')
             return query.user?.username ? query : undefined;
@@ -905,7 +905,7 @@ module.exports = {
      */
     fetchUser: async function(query, context) {
         if(!query)
-            throw new Error('Se requiere un criterio de búsqueda');
+            throw new Error('fetchUser: Se requiere un criterio de búsqueda');
 
         if(typeof query !== 'string')
             return query.username ? query : undefined;
@@ -967,7 +967,7 @@ module.exports = {
      */
     fetchMemberSync: function(query, context) {
         if(!query)
-            throw new Error('Se requiere un criterio de búsqueda');
+            throw new Error('fetchMemberSync: Se requiere un criterio de búsqueda');
         
         if(typeof query !== 'string')
             return query.user?.username ? query : undefined;
@@ -1019,10 +1019,8 @@ module.exports = {
             return client.guilds.cache.get(query)
                 ?? client.guilds.fetch(query);
 
-        const allGuilds = (await client.guilds.fetch());
-
         let bestDistance = -1;
-        return allGuilds
+        return client.guilds.cache
             .reduce((bestMatch, guild) => {
                 const distance = module.exports.levenshteinDistance(guild.name, query);
 
