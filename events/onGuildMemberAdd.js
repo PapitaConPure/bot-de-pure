@@ -1,11 +1,10 @@
-const Discord = require('discord.js');
 const { dibujarBienvenida } = require('../func.js');
 const { guildIsAvailable, announceMemberUpdate } = require('./guildMemberUpdate');
 
 const Logger = require('../logs.js');
 const { debug } = Logger('DEBUG', 'GMemberAdd');
 
-/**@param {Discord.GuildMember} member*/
+/**@param {import('discord.js').GuildMember} member*/
 async function onGuildMemberAdd(member) {
     debug(`Evento disparado - ${member.user.username} → ${member.guild.name} (${member.guild.id})`);
     if(!guildIsAvailable(member.guild)) return;
@@ -17,7 +16,7 @@ async function onGuildMemberAdd(member) {
     announceMemberUpdate(member, dibujarBienvenida);
 }
 
-/**@param {Discord.GuildMember} member*/
+/**@param {import('discord.js').GuildMember} member*/
 async function equisde(member) {
     return member.roles.remove('1107831054791876691')
     .catch(error => {
