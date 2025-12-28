@@ -1,9 +1,10 @@
-const { EmbedBuilder, ChannelType, User, GuildMember } = require('discord.js'); //Integrar discord.js
-const { fetchArrows, fetchUser, improveNumber, isShortenedNumberString, fetchMember } = require('../../func');
+const { ChannelType, ButtonBuilder, ButtonStyle, MessageFlags, ContainerBuilder } = require('discord.js'); //Integrar discord.js
+const { improveNumber, isShortenedNumberString, fetchMember, compressId, shortenText } = require('../../func');
 const globalConfigs = require('../../localdata/config.json'); //Variables globales
 const { ChannelStats, Stats } = require('../../localdata/models/stats');
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
-const { CommandPermissions } = require('../Commons/cmdPerms');
+const { makeButtonRowBuilder } = require('../../tsCasts');
+const { Translator } = require('../../internationalization');
 
 /**@param {Number} number*/
 const counterDisplay = (number) => {
@@ -12,6 +13,26 @@ const counterDisplay = (number) => {
         return `${numberString} de`;
     return numberString;
 }
+
+/**
+ * @param {String} requestId
+ * @param {Number} pageCount
+ * @param {Number?} page 
+ */
+const getPaginationControls = (page, pageCount, requestId) => {
+	const prevPage = page > 0 ? (page - 1) : (pageCount)
+	const nextPage = page < (pageCount - 1) ? (page + 1) : 0;
+	return makeButtonRowBuilder().addComponents([
+		new ButtonBuilder()
+			.setCustomId(`info_navigate_${prevPage}_${requestId}_PV`)
+			.setEmoji('934430008343158844')
+			.setStyle(ButtonStyle.Secondary),
+		new ButtonBuilder()
+			.setCustomId(`info_navigate_${nextPage}_${requestId}_NX`)
+			.setEmoji('934430008250871818')
+			.setStyle(ButtonStyle.Secondary),
+	]);
+};
 
 const options = new CommandOptions()
 	.addParam('canal', 'CHANNEL', 'para mostrar estadísticas extra de un canal', { optional: true })
@@ -33,13 +54,18 @@ const command = new CommandManager('info', flags)
 			globalConfigs.noDataBase ? new Stats({ since: Date.now() }) : Stats.findOne({}),
 			request.deferReply(),
 		]);
-		const servidor = request.guild;
-		const miembroResult = /**@type {string | import('discord.js').GuildMember}*/(args.parseFlagExpr('miembro'));
-		const miembro = await fetchMember(miembroResult, request);
+		const guild = request.guild;
+		const memberResult = /**@type {string | import('discord.js').GuildMember}*/(args.parseFlagExpr('miembro'));
+		const member = memberResult ? await fetchMember(memberResult, request) : undefined;
 
-		//Contadores de usuarios
-		const peoplecnt = servidor.members.cache.filter(member => !member.user.bot).size;
-		const botcnt = servidor.memberCount - peoplecnt;
+		const pages = /**@type {ContainerBuilder[]}*/([]);
+
+		//Página principal
+		const mainCointainer = new ContainerBuilder()
+			.setAccentColor(0xffd500);
+
+		const humanCount = guild.members.cache.filter(member => !member.user.bot).size;
+		const botCount = guild.memberCount - humanCount;
 
 		let channelCounts = {
 			text: 0,
@@ -49,7 +75,7 @@ const command = new CommandManager('info', flags)
 			news: 0,
 		};
 		
-		servidor.channels.cache.forEach(channel => {
+		guild.channels.cache.forEach(channel => {
 			switch(channel.type) {
 				case ChannelType.GuildAnnouncement:  channelCounts.news++;     break;
 				case ChannelType.GuildForum:         channelCounts.text++;     break;
@@ -63,100 +89,185 @@ const command = new CommandManager('info', flags)
 			}
 		});
 		
-		//Análisis de actividad
+		const owner = await guild.fetchOwner();
+		const guildIsDiscoverable = guild.features.includes('DISCOVERABLE');
+		const bannerURL = guild.bannerURL();
+		if(bannerURL)
+			mainCointainer.addMediaGalleryComponents(mediaGallery =>
+				mediaGallery.addItems(
+					mgItem => mgItem
+						.setDescription('Portada del servidor')
+						.setURL(bannerURL),
+				)
+			)
+
+		mainCointainer
+			.addSectionComponents(section =>
+				section
+					.addTextDisplayComponents(
+						textDisplay => textDisplay.setContent(`-# Servidor ${guildIsDiscoverable ? 'público' : 'privado'}`),
+						textDisplay => textDisplay.setContent(`# ${shortenText(guild.name, 100, '…')}`),
+						textDisplay => textDisplay.setContent([
+							`🗓️ Creado en <t:${Math.floor(guild.createdTimestamp / 1000)}:f>`,
+							`🆔 \`${guild.id}\``,
+						].join('\n')),
+					)
+					.setThumbnailAccessory(accessory =>
+						accessory
+							.setDescription('Ícono del servidor')
+							.setURL(guild.iconURL({ size: 256 }))
+					)
+			)
+			.addSeparatorComponents(separator => separator.setDivider(true))
+			.addSectionComponents(section =>
+				section
+					.setThumbnailAccessory(accessory =>
+						accessory
+							.setDescription('Avatar del dueño del servidor')
+							.setURL(owner.displayAvatarURL({ size: 256 }))
+					)
+					.addTextDisplayComponents(
+						textDisplay => textDisplay.setContent('-# Dueño del servidor'),
+						textDisplay => textDisplay.setContent(`## ${owner.displayName}`),
+						textDisplay => textDisplay.setContent([
+							`👤 ${owner}`,
+							`🆔 \`${owner.id}\``,
+						].join('\n')),
+					)
+			)
+			.addSeparatorComponents(separator => separator.setDivider(true))
+			.addTextDisplayComponents(textDisplay =>
+				textDisplay.setContent('## Información')
+			)
+			.addTextDisplayComponents(textDisplay =>
+				textDisplay.setContent([
+					'### Usuarios',
+					`🧑‍🦲 **${humanCount}** humanos (aproximado)`,
+					`🤖 **${botCount}** bots (aproximado)`,
+					`👥 **${guild.memberCount}** miembros totales`,
+				].join('\n')),
+			)
+			.addTextDisplayComponents(textDisplay =>
+				textDisplay.setContent([
+					'### Canales',
+					`#️⃣ **${channelCounts.text}** canales de texto`,
+					`🔊 **${channelCounts.voice}** canales de voz`,
+					`📣 **${channelCounts.news}** canales de noticias`,
+					`🏷️ **${channelCounts.category}** categorías`,
+					`🧵 **${channelCounts.thread}** hilos`,
+				].join('\n')),
+			)
+			.addTextDisplayComponents(textDisplay =>
+				textDisplay.setContent([
+					'### Seguridad',
+					`Verificación Nivel **${guild.verificationLevel}**`,
+					`MFA Nivel **${guild.mfaLevel}**`,
+				].join('\n')),
+			)
+
+		pages.push(mainCointainer);
+		
+		
+		//Página de estadísticas de actividad
+		const activityStatsContainer = new ContainerBuilder()
+			.setAccentColor(0xeebb00);
+
 		args.ensureRequistified();
 		let targetChannel = args.getChannel('canal') || request.channel;
 
 		const channelQuery = {
-			guildId: servidor.id,
+			guildId: guild.id,
 			channelId: targetChannel.id,
 		};
-		const channelStats = (!globalConfigs.noDataBase && await ChannelStats.findOne(channelQuery)) || new ChannelStats(channelQuery);
+		const targetChannelStats = /**@type {import('../../localdata/models/stats.js').ChannelStatsDocument}*/((!globalConfigs.noDataBase && await ChannelStats.findOne(channelQuery)) || new ChannelStats(channelQuery));
+		const guildChannelStats = /**@type {import('../../localdata/models/stats.js').ChannelStatsDocument[]}*/(!globalConfigs.noDataBase ? await ChannelStats.find({ guildId: guild.id }) : [new ChannelStats(channelQuery)]);
+		const targetChannelHasMessages = Object.keys(targetChannelStats.sub).length;
 		
-		const peocnt = Object.keys(channelStats.sub).length
-			? Object.entries(channelStats.sub)
+		const membersRanking = targetChannelHasMessages
+			? Object.entries(targetChannelStats.sub)
 				.sort((a, b) => b[1] - a[1])
 				.slice(0, 5)
 			: undefined;
-		const msgcnt = Object.values(!globalConfigs.noDataBase ? new ChannelStats(channelQuery) : await ChannelStats.find({ guildId: servidor.id }))
+		const channelsRanking = Object.values(guildChannelStats)
 			.sort((a, b) => b.cnt - a.cnt)
 			.slice(0, 5)
 			.map((obj) => /**@type {[String, Number]}*/([obj.channelId, obj.cnt]));
+		
+		const formattedMembersRanking = membersRanking ? membersRanking.map(([id, count]) => `<@${id}>: **${counterDisplay(count)}** mensajes`).join('\n') : '_Este canal no tiene mensajes_';
+
+		const statsSinceDateString = new Date(stats.since)
+			.toLocaleString('es-419', { year: 'numeric', month: '2-digit', day: '2-digit' });
+
+		activityStatsContainer
+			.addTextDisplayComponents(
+				textDisplay => textDisplay.setContent('## Estadísticas de actividad'),
+				textDisplay => textDisplay.setContent(`### Usuarios más activos (canal: ${targetChannel.name})\n${formattedMembersRanking}`),
+			);
+
+		if(member) {
+			//TODO: Completar comportamiento al pasar un --miembro a p!info
+			const formattedChannelsRanking = channelsRanking.map(([id, count]) => `<#${id}>: **${counterDisplay(count)}** mensajes`).join('\n');
+
+			activityStatsContainer.addTextDisplayComponents(textDisplay =>
+				textDisplay.setContent(`### Canales más activos (miembro: ${member})\n${formattedChannelsRanking}`)
+			);
+		} else {
+			const formattedChannelsRanking = channelsRanking.map(([id, count]) => `<#${id}>: **${counterDisplay(count)}** mensajes`).join('\n');
 			
-		//Creacion de tops 5
-		const peotop = peocnt ? peocnt.map(([id, count]) => `<@${id}>: **${counterDisplay(count)}** mensajes`).join('\n') : '_Este canal no tiene mensajes_';
-		const chtop = msgcnt.map(([id, count]) => `<#${id}>: **${counterDisplay(count)}** mensajes`).join('\n');
+			activityStatsContainer.addTextDisplayComponents(textDisplay =>
+				textDisplay.setContent(`### Canales más activos\n${formattedChannelsRanking}`)
+			);
+		}
 
-		const pages = [];
-		const owner = await servidor.fetchOwner();
-		const author = request.user;
-		pages.push(
-			new EmbedBuilder()
-				.setColor(0xffd500)
-				.setTitle('Información del servidor')
-				.setImage(servidor.iconURL({ size: 256 }))
-				.setThumbnail(owner.user.avatarURL({ size: 256 }))
-				.setAuthor({ name: `Comando invocado por ${author.username}`, iconURL: author.avatarURL({ size: 256 }) })
-				.setFooter({ text: `Estas estadísticas toman información concreta.` })
-				.addFields(
-					{ name: 'Nombre', 				 value: servidor.name, 														  					   inline: true },
-					{ name: 'Dueño', 				 value: `${owner.user.username}\n\`${servidor.ownerId}\``, 					  					   inline: true },
-					{ name: 'Nivel de verificación', value: `Nivel ${servidor.verificationLevel}`, 										  					   inline: true },
-
-					{ name: 'Canales', 				 value: `#️⃣ x ${channelCounts.text}\n🔊 x ${channelCounts.voice}\n🏷 x ${channelCounts.category}`, inline: true },
-					{ name: '• • •', 				 value: `🗨️ x ${channelCounts.thread}\n📣 x ${channelCounts.news}`, 							    inline: true },
-					{ name: 'Usuarios', 			 value: `🧑‍🦲 x ${peoplecnt}\n🤖 x ${botcnt}\n👥 x ${servidor.memberCount}`, 					   inline: true },
-
-					{ name: 'Fecha de creación', 	 value: `<t:${Math.floor(servidor.createdTimestamp / 1000)}:f>`, 			  					   inline: true },
-					{ name: 'ID', 					 value: servidor.id, 														  					   inline: true },
-				),
+		activityStatsContainer.addTextDisplayComponents(textDisplay =>
+			textDisplay.setContent(`-# Estas estadísticas toman información desde el ${statsSinceDateString}`),
 		);
+
+		pages.push(activityStatsContainer);
+
+
+		//Página de estadísticas de tiempo
+		const timeStatsContainer = new ContainerBuilder()
+			.setAccentColor(0xe99979);
+
+		timeStatsContainer
+			.addTextDisplayComponents(
+				textDisplay => textDisplay.setContent('## Estadísticas de tiempo'),
+				textDisplay => textDisplay.setContent([
+					`🗓️ El servidor se creó <t:${Math.round(+guild.createdAt / 1000)}:R>`,
+					`🕰️ Me reinicié por última vez <t:${Math.round(+globalConfigs.startupTime / 1000)}:R>`,
+				].join('\n')),
+			);
+
+		pages.push(timeStatsContainer);
+
+
+		//Finalizar páginas y responder
+		const requestId = compressId(request.id);
+		pages.forEach((page, pageNumber) =>
+			page
+				.addSeparatorComponents(separator => separator.setDivider(true))
+				.addActionRowComponents(getPaginationControls(pageNumber, pages.length, requestId))
+		);
+		command.memory.set(requestId, pages);
 		
-		const dbStart = new Date(stats.since).toLocaleString('es-ES');
-		pages.push(
-			new EmbedBuilder()
-			.setColor(0xeebb00)
-				.setTitle('Estadísticas de actividad')
-				.setAuthor({ name: `Comando invocado por ${author.username}`, iconURL: author.avatarURL() })
-				.setFooter({ text: `Estas estadísticas toman información desde el ${dbStart.slice(0, dbStart.indexOf(' '))}` })
-				.addFields(
-					{ name: `Usuarios más activos (canal: ${targetChannel.name})`, value: peotop },
-					{ name: 'Canales más activos', value: chtop },
-				),
-		);
+		return request.editReply({
+			flags: MessageFlags.IsComponentsV2,
+			components: [mainCointainer],
+		});
+	})
+	.setButtonResponse(async function navigate(interaction, page, requestId) {
+		const translator = await Translator.from(interaction.user);
 
-		pages.push(
-			new EmbedBuilder()
-				.setColor(0xe99979)
-				.setTitle('Estadísticas de tiempo')
-				.addFields(
-					{
-						name: 'Tiempo de vida del servidor', 
-						value: `<t:${Math.round(+servidor.createdAt / 1000)}:R>`,
-					},
-					{
-						name: 'Tiempo de funcionamiento del bot', 
-						value: `<t:${Math.round(+globalConfigs.startupTime / 1000)}:R>`,
-					},
-				),
-		);
+		const pageNumber = +page;
+		const pages = command.memory.get(requestId);
+
+		if(!pages)
+			return interaction.reply({ content: translator.getText('expiredWizardData'), flags: MessageFlags.Ephemeral });
 		
-		const replyContent = { embeds: [pages[0]] };
-		/**@type {import('discord.js').Message}*/
-		const sent = await request.editReply(replyContent);
-		const arrows = fetchArrows(request.client.emojis.cache);
-		await sent.react(/**@type {import('discord.js').EmojiIdentifierResolvable}*/(arrows[0]));
-		await sent.react(/**@type {import('discord.js').EmojiIdentifierResolvable}*/(arrows[1]));
-
-		let selectedPage = 0;
-		const filter = (rc, user) => !user.bot && arrows.some(arrow => rc.emoji.id === arrow.id);
-		const collector = sent.createReactionCollector({ filter: filter, time: 8 * 60 * 1000 });
-		collector.on('collect', (reaction, ruser) => {
-			const maxpage = 2;
-			if(reaction.emoji.id === arrows[0].id) selectedPage = (selectedPage > 0) ? (selectedPage - 1) : maxpage;
-			else selectedPage = (selectedPage < maxpage) ? (selectedPage + 1) : 0;
-			sent.edit({ embeds: [pages[selectedPage]] });
-			reaction.users.remove(ruser);
+		return interaction.update({
+			flags: MessageFlags.IsComponentsV2,
+			components: [pages[pageNumber]],
 		});
 	});
 
