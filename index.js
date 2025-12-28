@@ -3,7 +3,7 @@ const globalConfigs = require('./localdata/config.json');
 const argv = require('minimist')(process.argv.slice(2));
 globalConfigs.remoteStartup = ((+!!argv.p) - (+!!argv.d)) > 0;
 globalConfigs.noDataBase = argv.nodb;
-process.env.DP_FORCE_YTDL_MOD = "@distube/ytdl-core"
+//process.env.DP_FORCE_YTDL_MOD = "@distube/ytdl-core"
 
 const { initializeClient } = require('./client');
 const { registerCommandFiles } = require('./commandInit.js');
@@ -29,7 +29,7 @@ process.on('unhandledRejection', events.onUnhandledRejection);
 console.timeEnd('Registro de eventos de proceso');
 
 console.time('Registro de eventos del cliente');
-client.on('ready', events.onStartup);
+client.on('clientReady', events.onStartup);
 client.on('messageCreate', message => events.onMessage(message, client).catch(onCriticalError));
 client.on('messageReactionAdd', (reaction, user, details) => events.onReactionAdd(reaction, user, details).catch(onCriticalError));
 client.on('messageReactionRemove', (reaction, user, details) => events.onReactionRemove(reaction, user, details).catch(onCriticalError));
