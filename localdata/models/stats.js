@@ -45,6 +45,9 @@ const channelModel = Mongoose.model('ChannelStats', ChannelStatsSchema);
 function m() { return new model({}); }
 /**@typedef {ReturnType<(typeof m)>} StatsDocument*/
 
+function cm() { return new channelModel({}); }
+/**@typedef {ReturnType<(typeof cm)>} ChannelStatsDocument*/
+
 module.exports = {
     Stats: model,
     ChannelStats: channelModel
