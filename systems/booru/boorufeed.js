@@ -1,11 +1,14 @@
 const GuildConfigs = require('../../localdata/models/guildconfigs.js');
 const Discord = require('discord.js');
 const { formatBooruPostMessage, notifyUsers } = require('./boorusend.js');
-const { auditError, auditAction, auditSystem } = require('../others/auditor.js');
+const { auditError, auditAction } = require('../others/auditor.js');
 const chalk = require('chalk');
-const { Booru, Post } = require('./boorufetch.js');
+const { Booru } = require('./boorufetch.js');
 const globalConfigs = require('../../localdata/config.json');
 const { paginateRaw } = require('../../func.js');
+
+//const Logger = require('../../logs');
+//const { debug } = Logger('WARN', 'BooruSend');
 
 /**
  * @typedef {import('./boorusend').PostFormatData & { tags: String, lastFetchedAt?: Date, faults?: Number }} FeedData
@@ -56,6 +59,8 @@ async function processFeeds(booru, guilds) {
         const guild = guilds.get(gcfg.guildId);
         if(!guild) return;
 
+        const members = guild.members.cache;
+
         await Promise.all(Object.entries(gcfg.feeds).map(async ([ channelId, feedData ]) => {
             const feed = new BooruFeed(booru, guild.channels.cache.get(channelId), feedData.tags, feedData);
             if(!feed.isRunning) return;
@@ -93,7 +98,7 @@ async function processFeeds(booru, guilds) {
                 try {
                     const formatted = await formatBooruPostMessage(booru, post, feed);
                     const sent = await feed.channel.send(formatted);
-                    await notifyUsers(post, sent, feedSuscriptions);
+                    await notifyUsers(post, sent, members, feedSuscriptions);
                     messagesToSend.push(sent);
                 } catch(error) {
                     console.log(`Ocurrió un error al enviar la imagen de Feed: ${post.source ?? post.id} para ${channel.name}`);
@@ -338,7 +343,7 @@ class BooruFeed {
 
     /**
      * Obtiene {@linkcode Post}s que no han sido publicados
-     * @returns {Promise<{ success: true, posts: Array<Post>, newPosts: Array<Post> } | { success: false, posts: [], newPosts: [] }>}
+     * @returns {Promise<{ success: true, posts: Array<import('./boorufetch.js').Post>, newPosts: Array<import('./boorufetch.js').Post> } | { success: false, posts: [], newPosts: [] }>}
      */
     async fetchPosts() {
         try {

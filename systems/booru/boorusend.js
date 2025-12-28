@@ -401,9 +401,10 @@ async function formatBooruPostMessage(booru, post, data = {}) {
  * @typedef {{ userId: import('discord.js').Snowflake, followedTags: Array<String> }} Suscription
  * @param {import('./boorufetch').Post} post
  * @param {import('discord.js').Message<true>} sent
+ * @param {import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').GuildMember>} members
  * @param {Array<Suscription>} feedSuscriptions 
  */
-async function notifyUsers(post, sent, feedSuscriptions) {
+async function notifyUsers(post, sent, members, feedSuscriptions) {
 	info('Se recibió una orden para notificar sobre un nuevo Post a usuarios suscriptos aplicables');
 
 	//No sé qué habré estado pensando cuando escribí esto, pero no pienso volver a tocarlo
@@ -418,7 +419,6 @@ async function notifyUsers(post, sent, feedSuscriptions) {
 	if(!channel)
 		throw 'No se encontró un canal para el mensaje enviado';
 
-	const guild = channel.guild;
 	const matchingSuscriptions = feedSuscriptions.filter(suscription => suscription.followedTags.some(tag => post.tags.includes(tag)));
 	if(!matchingSuscriptions.length) {
 		info('No se encontraron suscripciones aplicables para el Post procesado');
@@ -426,9 +426,6 @@ async function notifyUsers(post, sent, feedSuscriptions) {
 	}
 
 	info('Se encontraron suscripciones aplicables, intentando enviar notificaciones...');
-
-	debug('Obteniendo miembros de suscripciones aplicables...');
-	const members = await guild.members.fetch();
 
 	debug('Intentando enviar notificaciones...');
 	return Promise.all(matchingSuscriptions.map(async ({ userId, followedTags }) => {
