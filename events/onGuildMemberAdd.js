@@ -2,9 +2,12 @@ const Discord = require('discord.js');
 const { dibujarBienvenida } = require('../func.js');
 const { guildIsAvailable, announceMemberUpdate } = require('./guildMemberUpdate');
 
+const Logger = require('../logs.js');
+const { debug } = Logger('DEBUG', 'GMemberAdd');
+
 /**@param {Discord.GuildMember} member*/
 async function onGuildMemberAdd(member) {
-    console.log('Evento de entrada de miembro a servidor desencadenado');
+    debug(`Evento disparado - ${member.user.username} → ${member.guild.name} (${member.guild.id})`);
     if(!guildIsAvailable(member.guild)) return;
     if(member.user.id === '239550977638793217') {
         setTimeout(equisde, 1000 * 2, member);
