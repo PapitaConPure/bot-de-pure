@@ -1774,6 +1774,11 @@ let localesObject = /**@type {const}*/({
 		en: 'Service',
 		ja: 'サービス',
 	},
+	yoConversionServiceDescription: {
+		es: `Servicio de conversión actual: \`${subl(0)}\``,
+		en: `Current conversion service: \`${subl(0)}\``,
+		ja: `現在の変換サービス：\`${subl(0)}\``,
+	},
 	yoConversionServiceMenuServiceNoneLabel: {
 		es: 'Ninguno',
 		en: 'None',
