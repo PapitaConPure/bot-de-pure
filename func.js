@@ -831,6 +831,30 @@ module.exports = {
     },
 
     /**
+     * @param {Discord.Collection<string, Discord.GuildMember>} members
+     * @param {string} query
+     * @returns {Discord.GuildMember}
+     */
+    findMemberByGlobalName(members, query) {
+        const processedMembers = members
+            .filter(m => m.user.globalName)
+            .map(m => ({
+                member: m,
+                rawTarget: m.user.globalName,
+                length: m.user.globalName.length,
+                matchIndex: m.user.globalName.toLowerCase().indexOf(query),
+            }));
+
+        const qualifiedMembers = processedMembers.filter(m => m.matchIndex !== -1);
+        if(qualifiedMembers.length) {
+            qualifiedMembers.sort(module.exports.memberMatchComparer);
+            return qualifiedMembers[0]?.member;
+        }
+
+        return undefined;
+    },
+
+    /**
      * Busca miembros de Discord según la consulta y el contexto proporcionados.
      * 
      * Devuelve el {@link Discord.GuildMember miembro} de mayor coincidencia.
@@ -867,7 +891,8 @@ module.exports = {
         //Prioridad 2: Intentar encontrar por nombres (este server)
         const lowerQuery = query.toLowerCase();
         const thisGuildMembers = thisGuild.members.cache;
-        const memberInThisGuild = module.exports.findMemberByUsername(thisGuildMembers, lowerQuery)
+        const memberInThisGuild = module.exports.findMemberByGlobalName(thisGuildMembers, lowerQuery)
+            ?? module.exports.findMemberByUsername(thisGuildMembers, lowerQuery)
             ?? module.exports.findMemberByNickname(thisGuildMembers, lowerQuery);
 
         if(memberInThisGuild)
@@ -875,7 +900,8 @@ module.exports = {
 
         //Prioridad 3: Intentar encontrar por nombres (otros servers)
         const otherGuildsMembers = otherGuilds.flatMap(g => g.members.cache);
-        const memberInOtherGuilds = module.exports.findMemberByUsername(otherGuildsMembers, lowerQuery)
+        const memberInOtherGuilds = module.exports.findMemberByGlobalName(otherGuildsMembers, lowerQuery)
+            ?? module.exports.findMemberByUsername(otherGuildsMembers, lowerQuery)
             ?? module.exports.findMemberByNickname(otherGuildsMembers, lowerQuery);
 
         if(memberInOtherGuilds)
@@ -919,7 +945,8 @@ module.exports = {
         //Prioridad 2: Intentar encontrar por nombres (este server)
         const lowerQuery = query.toLowerCase();
         const thisGuildMembers = thisGuild.members.cache;
-        const memberInThisGuild = module.exports.findMemberByUsername(thisGuildMembers, lowerQuery)
+        const memberInThisGuild = module.exports.findMemberByGlobalName(thisGuildMembers, lowerQuery)
+            ?? module.exports.findMemberByUsername(thisGuildMembers, lowerQuery)
             ?? module.exports.findMemberByNickname(thisGuildMembers, lowerQuery);
 
         if(memberInThisGuild)
@@ -929,7 +956,8 @@ module.exports = {
         const allGuilds = client.guilds.cache;
         const otherGuilds = allGuilds.filter(g => g.id !== thisGuild.id);
         const otherGuildsMembers = otherGuilds.flatMap(g => g.members.cache);
-        const memberInOtherGuilds = module.exports.findMemberByUsername(otherGuildsMembers, lowerQuery)
+        const memberInOtherGuilds = module.exports.findMemberByGlobalName(otherGuildsMembers, lowerQuery)
+            ?? module.exports.findMemberByUsername(otherGuildsMembers, lowerQuery)
             ?? module.exports.findMemberByNickname(otherGuildsMembers, lowerQuery);
 
         if(memberInOtherGuilds)
