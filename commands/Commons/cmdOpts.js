@@ -1262,22 +1262,21 @@ class CommandOptionSolver {
 		const option = this.#expectParam(identifier);
 
 		if(this.isMessageSolver(this.#args)) {
-			if(PARAM_TYPES.get(/**@type {BaseParamType}*/(option._type))?.getMethod === 'getAttachment') {
+			if(!Array.isArray(option._type) && !isParamTypeStrict(option._type) && PARAM_TYPES.get((option._type))?.getMethod === 'getAttachment') {
 				this.ensureRequistified();
-				return /**@type {Array<ParamResult>}*/([ ...this.#request.attachments.values() ]);
+				return [ ...this.#request.attachments.values() ];
 			}
 
 			const mentionableType = option._type;
 			const arrArgs = this.#regroupMessageArgs(this.#args, regroupMethod, { mentionableType, messageSep });
 			if(!arrArgs.length)
-				return fallback != undefined
-					? [ (typeof fallback === 'function') ? fallback() : fallback ]
-					: [];
+				return this.#makePolyParamFallbackResult(fallback);
 				
+			const polymax = Array.isArray(option._poly) ? option._poly.length : option._polymax;
 			const results = [];
 			let i = 0;
 			let arrArg;
-			while(arrArgs.length && (arrArg = arrArgs[i], i++) < option._polymax) {
+			while(arrArgs.length && (arrArg = arrArgs[i], i++) < polymax) {
 				let result;
 
 				if(Array.isArray(option._type)) {
@@ -1315,11 +1314,11 @@ class CommandOptionSolver {
 	 * @returns {Array<ParamResult | TFallback>}
 	 */
 	parsePolyParamSync(identifier, parseOptions = {}) {
-		const { regroupMethod = 'SEPARATOR', messageSep = ',', fallback = undefined } = parseOptions;
+		const { regroupMethod = 'SEPARATOR', messageSep = ',', fallback = undefined, failedPayload = undefined } = parseOptions;
 		const option = this.#expectParam(identifier);
 
 		if(this.isMessageSolver(this.#args)) {
-			if(PARAM_TYPES.get(/**@type {BaseParamType}*/(option._type))?.getMethod === 'getAttachment') {
+			if(!Array.isArray(option._type) && !isParamTypeStrict(option._type) && PARAM_TYPES.get((option._type))?.getMethod === 'getAttachment') {
 				this.ensureRequistified();
 				return [ ...this.#request.attachments.values() ];
 			}
@@ -1327,13 +1326,12 @@ class CommandOptionSolver {
 			const mentionableType = option._type;
 			const arrArgs = this.#regroupMessageArgs(this.#args, regroupMethod, { mentionableType, messageSep });
 			if(!arrArgs.length)
-				return fallback != undefined
-					? [ (typeof fallback === 'function') ? fallback() : fallback ]
-					: [];
+				return this.#makePolyParamFallbackResult(fallback);
 				
 			const polymax = Array.isArray(option._poly) ? option._poly.length : option._polymax;
 			const results = [];
 			let i = 0;
+			let arrArg;
 			while(arrArgs.length && i++ < polymax) {
 				let result;
 
@@ -1343,7 +1341,10 @@ class CommandOptionSolver {
 				} else
 					result = this.#options.fetchMessageParamSync(arrArgs, option._type, false);
 
-				(result != null) && results.push(result);
+				if(result != null)
+					results.push(result);
+				else
+					failedPayload?.push(arrArg);
 			}
 			
 			return results;
@@ -1356,6 +1357,17 @@ class CommandOptionSolver {
 		return this.#options
 			.fetchParamPoly(this.#args, identifier, method, fallback)
 			.filter(input => input != null);
+	}
+
+	/**
+	 * @template {*} [TFallback=undefined]
+	 * @param {TFallback} fallback 
+	 * @returns {Array<TFallback>}
+	 */
+	#makePolyParamFallbackResult(fallback) {
+		return fallback != undefined
+			? [ (typeof fallback === 'function') ? fallback() : fallback ]
+			: [];
 	}
 
 	/**
