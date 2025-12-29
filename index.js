@@ -3,7 +3,7 @@ const globalConfigs = require('./localdata/config.json');
 const argv = require('minimist')(process.argv.slice(2));
 globalConfigs.remoteStartup = ((+!!argv.p) - (+!!argv.d)) > 0;
 globalConfigs.noDataBase = argv.nodb;
-process.env.DP_FORCE_YTDL_MOD = "@distube/ytdl-core"
+//process.env.DP_FORCE_YTDL_MOD = "@distube/ytdl-core"
 
 const { initializeClient } = require('./client');
 const { registerCommandFiles } = require('./commandInit.js');

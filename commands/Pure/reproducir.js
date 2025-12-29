@@ -15,10 +15,14 @@ const options = new CommandOptions()
 					return interaction.respond([]);
 
 				const player = useMainPlayer();
-				const results = await player.search(query, { searchEngine: 'auto' });
+				const results = await player.search(query, {
+					searchEngine: 'auto',
+					fallbackSearchEngine: 'autoSearch',
+				});
 
 				return interaction.respond(
 					results.tracks
+						.filter(t => t.url.length <= 100)
 						.slice(0, 10)
 						.map(t => ({
 							name: shortenText(t.title, 100),
@@ -71,6 +75,7 @@ const command = new CommandManager('reproducir', tags)
 				iconURL: request.member.displayAvatarURL({ size: 128 })
 			})
 			.setTimestamp(Date.now());
+
 		try {
 			await tryRecoverSavedTracksQueue(request, false);
 

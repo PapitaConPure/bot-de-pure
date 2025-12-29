@@ -1,6 +1,7 @@
 const { Player, useMainPlayer, QueueRepeatMode } = require('discord-player');
 const { DefaultExtractors } = require('@discord-player/extractor');
-const { YoutubeiExtractor } = require('discord-player-youtubei');
+const { SoundcloudExtractor } = require('discord-player-soundcloud');
+const { YoutubeSabrExtractor } = require('discord-player-googlevideo');
 const { EmbedBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, Colors } = require('discord.js'); //Integrar discord.js
 const { compressId, decompressId, shortenText } = require('../func.js'); //Funciones globales
 const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } = require('../tsCasts.js');
@@ -79,14 +80,16 @@ async function prepareTracksPlayer(client) {
 	});
 	info('Music Player created.');
 
-	debug('Loading default extractors...');
-	await player.extractors.loadMulti(DefaultExtractors);
 	debug('Loading YouTube extractor...');
-	await player.extractors.register(YoutubeiExtractor, {
+	await player.extractors.register(YoutubeSabrExtractor, {
 		streamOptions: {
 			highWaterMark: 1 << 25,
 		},
 	});
+	debug('Loading Soundcloud extractor...');
+	await player.extractors.register(SoundcloudExtractor, {});
+	debug('Loading default extractors...');
+	await player.extractors.loadMulti(DefaultExtractors.filter(ext => ext.identifier !== 'com.discord-player.soundcloudextractor'));
 	info('Extractors have been loaded.');
 
 	player.on('debug', debug);
