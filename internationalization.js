@@ -1356,6 +1356,22 @@ let localesObject = /**@type {const}*/({
 		en: '⚠️ Insufficient time! Set at least 10 seconds',
 		ja: '⚠️ Insufficient time! Set at least 10 seconds',
 	},
+
+	booruNotifTitle: {
+		es: 'Notificación de Feed Suscripto',
+		en: 'Subscribed Feed Notification',
+		ja: 'Subscribed Feed Notification',
+	},
+	booruNotifDescription: {
+		es: '¡Esta publicación podría interesarte!',
+		en: 'This post could catch your eye!',
+		ja: 'This post could catch your eye!',
+	},
+	booruNotifTagsName: {
+		es: 'Tags de Interés',
+		en: 'Tags of Interest',
+		ja: 'Tags of Interest',
+	},
 	
 	feedAuthor: {
 		es: 'Asistente de configuración de Feed de imágenes',
@@ -1476,22 +1492,6 @@ let localesObject = /**@type {const}*/({
 		es: 'Retroalimentación',
 		en: 'Feedback',
 		ja: 'フィードバック',
-	},
-
-	booruNotifTitle: {
-		es: 'Notificación de Feed Suscripto',
-		en: 'Subscribed Feed Notification',
-		ja: 'Subscribed Feed Notification',
-	},
-	booruNotifDescription: {
-		es: '¡Esta publicación podría interesarte!',
-		en: 'This post could catch your eye!',
-		ja: 'This post could catch your eye!',
-	},
-	booruNotifTagsName: {
-		es: 'Tags de Interés',
-		en: 'Tags of Interest',
-		ja: 'Tags of Interest',
 	},
 
 	inforolNoRoleProvided: {
@@ -1927,11 +1927,10 @@ class Translator {
 	}
 
 	/**
-	 * @param {import('discord.js').User | import('discord.js').GuildMember | String} user
+	 * @param {import('./usercache.js').UserCacheResolvable} user
 	 */
 	static async from(user) {
-		const userId = (typeof user === 'string') ? user : user.id;
-		const userCache = await fetchUserCache(userId);
+		const userCache = await fetchUserCache(user);
 		return new Translator(userCache.language);
 	}
 

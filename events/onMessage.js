@@ -253,7 +253,7 @@ async function onMessage(message, client) {
 
 	gainPRC(guild, author.id);
 
-	const userCache = await fetchUserCache(author.id);
+	const userCache = await fetchUserCache(author);
 
 	const logAndReturnEmpty = (/**@type {Error}*/err) => {
 		console.error(err);

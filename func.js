@@ -207,7 +207,7 @@ module.exports = {
      * @param {Discord.User | Discord.GuildMember} user
      */
     isUsageBanned: async function(user) {
-        const userCache = await fetchUserCache(user.id);
+        const userCache = await fetchUserCache(user);
         return userCache.banned;
     },
 
