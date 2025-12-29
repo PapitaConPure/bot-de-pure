@@ -59,7 +59,7 @@ const command = new CommandManager('info', flags)
 		]);
 		const guild = request.guild;
 		const memberResult = /**@type {string | import('discord.js').GuildMember}*/(args.parseFlagExpr('miembro'));
-		const targetMember = memberResult ? await fetchMember(memberResult, request) : undefined;
+		const targetMember = memberResult ? fetchMember(memberResult, request) : undefined;
 		const targetChannel = args.getChannel('canal') || request.channel;
 
 		const pages = /**@type {ContainerBuilder[]}*/([]);
