@@ -14,7 +14,7 @@ const getAvatarContainer = (member) => {
     const hasServerBannerOverride = memberBannerURL !== userBannerURL;
 
     const container = new ContainerBuilder()
-        .setAccentColor(0xfaa61a);
+        .setAccentColor(member.user.accentColor || member.displayColor || 0xfaa61a);
 
     if(userBannerURL)
         container.addMediaGalleryComponents(mediaGallery =>
