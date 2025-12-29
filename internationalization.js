@@ -1549,9 +1549,9 @@ let localesObject = /**@type {const}*/({
 		),
 		ja: paragraph(
 			'### メンバー',
-			`🧑‍🦲 **${subl(0)}** 人間（近似）`,
-			`🤖 **${subl(1)}** ボット（近似）`,
-			`👥 **${subl(2)}** メンバー総数`,
+			`🧑‍🦲 **${subl(0)}人**の人間（近似）`,
+			`🤖 **${subl(1)}体**のボット（近似）`,
+			`👥 **${subl(2)}名**のメンバー総数`,
 		),
 	},
 	infoGuildChannelCount: {
@@ -1573,11 +1573,11 @@ let localesObject = /**@type {const}*/({
 		),
 		ja: paragraph(
 			'### チャネル',
-			`#️⃣ **${subl(0)}** テキストチャンネル`,
-			`🔊 **${subl(1)}** ボイスチャンネル`,
-			`📣 **${subl(2)}** ニュースチャンネル`,
-			`🏷️ **${subl(3)}** カテゴリー`,
-			`🧵 **${subl(4)}** スレッド`,
+			`#️⃣ **${subl(0)}つ**のテキストチャンネル`,
+			`🔊 **${subl(1)}つ**のボイスチャンネル`,
+			`📣 **${subl(2)}つ**のニュースチャンネル`,
+			`🏷️ **${subl(3)}つ**のカテゴリー`,
+			`🧵 **${subl(4)}つ**のスレッド`,
 		),
 	},
 	infoGuildSecurity: {
@@ -1600,12 +1600,12 @@ let localesObject = /**@type {const}*/({
 	infoStatsMemberMessageCountItem: {
 		es: `<@${subl(0)}>: **${subl(1)}** mensajes`,
 		en: `<@${subl(0)}>: **${subl(1)}** messages`,
-		ja: `<@${subl(0)}>さん: **${subl(1)}** メッセージ`,
+		ja: `<@${subl(0)}>さん：**${subl(1)}件**のメッセージ`,
 	},
 	infoStatsChannelMessageCountItem: {
 		es: `<#${subl(0)}>: **${subl(1)}** mensajes`,
 		en: `<#${subl(0)}>: **${subl(1)}** messages`,
-		ja: `<#${subl(0)}>: **${subl(1)}** メッセージ`,
+		ja: `<#${subl(0)}>：**${subl(1)}件**のメッセージ`,
 	},
 	infoStatsChannelEmptyNotice: {
 		es: '_Este canal no tiene mensajes_',
@@ -1628,9 +1628,9 @@ let localesObject = /**@type {const}*/({
 		ja: '### 最もアクティブなチャネル',
 	},
 	infoStatsTargetMemberTotalMessageSum: {
-		es: `${subl(0)} envió un total de **${subl(1)}** mensajes en *${subl(2)}*`,
-		en: `${subl(0)} has sent a total of **${subl(1)}** messages on *${subl(2)}*`,
-		ja: `${subl(0)}さんは *${subl(2)}* で合計 **${subl(1)}件** のメッセージを送信しました`,
+		es: `${subl(0)} envió un total de **${subl(1)}** mensajes en *"${subl(2)}"*`,
+		en: `${subl(0)} has sent a total of **${subl(1)}** messages on *"${subl(2)}"*`,
+		ja: `${subl(0)}さんは*『${subl(2)}』*で合計**${subl(1)}件**のメッセージを送信しました。`,
 	},
 	infoStatsTargetMemberTitle: {
 		es: `## Actividad de ${subl(0)}`,
