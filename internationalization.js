@@ -1649,7 +1649,7 @@ let localesObject = /**@type {const}*/({
 	},
 	infoStatsSinceFooter: {
 		es: `-# Estas estadísticas toman información desde el <t:${subl(0)}:d>`,
-		en: `-# These stats are being collected since 03/04/2025 <t:${subl(0)}:d>`,
+		en: `-# These stats are being collected since <t:${subl(0)}:d>`,
 		ja: `-# これらの統計は<t:${subl(0)}:d>から収集されています`,
 	},
 	infoTimeTitle: {
