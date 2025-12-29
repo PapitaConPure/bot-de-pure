@@ -35,8 +35,8 @@ const ChannelStatsSchema = new Mongoose.Schema({
     },
     sub: {
         type: Object,
-        default: {}
-    }
+        default: {},
+    },
 });
 
 const model = Mongoose.model('Stats', StatsSchema);
