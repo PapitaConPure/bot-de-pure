@@ -18,7 +18,7 @@ const configProps = {
 /**
  * Detecta enlaces de Twitter en un mensaje y los reenvía con un Embed corregido, a través de un Agente Webhook.
  * @param {import('discord.js').Message<true>} message El mensaje a analizar
- * @param {''|'vx'|'fx'} configPrefix El mensaje a analizar
+ * @param {AcceptedTwitterConverterKey | ''} configPrefix El mensaje a analizar
  * @returns {Promise<import('./converters').ConverterPayload>}
  */
 async function sendConvertedTweets(message, configPrefix) {
@@ -51,7 +51,7 @@ async function sendConvertedTweets(message, configPrefix) {
 	const service = configProp.service;
 	const formattedTweetUrls = tweetUrls
 		.map(u => {
-			const [ match, _url, artist, id, ls ] = u;
+			const [ match, /*url*/, artist, id, ls ] = u;
 			const spoiler = (match.startsWith('||') && match.endsWith('||'))
 				? '||'
 				: '';
