@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "3.8.1",
+            "number": "3.8.2",
             "name": "Flamenco Perlado"
         },
         "note": "Operando con normalidad",
@@ -12,14 +12,14 @@
             "**PuréPix** ahora permite utilizar el servicio de conversión \"phixiv\"",
             "**PuréPix** ahora usa \"phixiv\" como servicio de conversión por defecto",
             "Interoperabilidad parcial entre **PuréPix** y **Puréet**",
-            "Corregido (espero) un problema con el streaming de YouTube",
             "p!catbox agregado",
-            "p!gatos corregido",
             "Apariencia de **PuréFeed** mejorada",
             "p!saucenao agregado",
             "Acción contextual \"Buscar Fuente\" agregada",
             "p!cola ahora tiene controles adicionales",
-            "**Puréet** ahora permite usar los servicios de conversión \"girlcockx\" y \"cunnyx\""
+            "**Puréet** ahora permite usar los servicios de conversión \"girlcockx\" y \"cunnyx\"",
+            "p!info ha sido renovado y ahora permite especificar un `--miembro`",
+            "Operabilidad de **PuréMusic** amendada"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos",
