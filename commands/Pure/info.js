@@ -59,7 +59,8 @@ const command = new CommandManager('info', flags)
 		]);
 		const guild = request.guild;
 		const memberResult = /**@type {string | import('discord.js').GuildMember}*/(args.parseFlagExpr('miembro'));
-		const member = memberResult ? await fetchMember(memberResult, request) : undefined;
+		const targetMember = memberResult ? await fetchMember(memberResult, request) : undefined;
+		const targetChannel = args.getChannel('canal') || request.channel;
 
 		const pages = /**@type {ContainerBuilder[]}*/([]);
 
@@ -170,9 +171,6 @@ const command = new CommandManager('info', flags)
 		const activityStatsContainer = new ContainerBuilder()
 			.setAccentColor(0xeebb00);
 
-		args.ensureRequistified();
-		let targetChannel = args.getChannel('canal') || request.channel;
-
 		const channelQuery = {
 			guildId: guild.id,
 			channelId: targetChannel.id,
@@ -211,18 +209,18 @@ const command = new CommandManager('info', flags)
 				textDisplay => textDisplay.setContent(`${translator.getText('infoStatsTopChannelsSubtitle')}\n${formattedChannelsRanking}`)
 			);
 
-		if(member) {
+		if(targetMember) {
 			const memberSectionBuilder = new SectionBuilder()
 				.setThumbnailAccessory(accessory =>
 					accessory
-						.setDescription(translator.getText('infoTargetMemberAvatarAlt', member.displayName))
-						.setURL(member.displayAvatarURL())
+						.setDescription(translator.getText('infoTargetMemberAvatarAlt', targetMember.displayName))
+						.setURL(targetMember.displayAvatarURL())
 				);
 			activityStatsContainer
 				.addSeparatorComponents(separator => separator.setDivider(true))
 				.addSectionComponents(memberSectionBuilder);
 
-			const memberId = member.id;
+			const memberId = targetMember.id;
 			const channelAndMemberMessageCountPairs = Object.values(guildChannelStats)
 				.filter(channelStats => channelStats.sub[memberId])
 				.map(channelStats => /**@type {const}*/([ channelStats.channelId, /**@type {number}*/(channelStats.sub[memberId]) ]));
@@ -231,7 +229,7 @@ const command = new CommandManager('info', flags)
 				const memberActivitySum = channelAndMemberMessageCountPairs
 					.map(memberChannelMessageCount => memberChannelMessageCount[1])
 					.reduce((a, b) => a + b, 0);
-				const formattedMemberActivitySum = translator.getText('infoStatsTargetMemberTotalMessageSum', member, counterDisplay(memberActivitySum), guild);
+				const formattedMemberActivitySum = translator.getText('infoStatsTargetMemberTotalMessageSum', targetMember, counterDisplay(memberActivitySum), guild);
 
 				const memberChannelsRanking = channelAndMemberMessageCountPairs
 					.sort((a, b) => b[1] - a[1])
@@ -243,7 +241,7 @@ const command = new CommandManager('info', flags)
 	
 				memberSectionBuilder.addTextDisplayComponents(
 					textDisplay => textDisplay.setContent(
-						`${translator.getText('infoStatsTargetMemberTitle', member.displayName)}\n${formattedMemberActivitySum}\n­ ­`
+						`${translator.getText('infoStatsTargetMemberTitle', targetMember.displayName)}\n${formattedMemberActivitySum}\n­ ­`
 					),
 					textDisplay => textDisplay.setContent(
 						`${translator.getText('infoStatsTargetMemberTopChannelsSubtitle')}\n${formattedMemberChannelsRanking}`
@@ -252,8 +250,8 @@ const command = new CommandManager('info', flags)
 			} else {
 				memberSectionBuilder.addTextDisplayComponents(textDisplay =>
 					textDisplay.setContent([
-						translator.getText('infoStatsTargetMemberTitle', member.displayName),
-						translator.getText('infoStatsTargetMemberNoDataNotice', `${member}`),
+						translator.getText('infoStatsTargetMemberTitle', targetMember.displayName),
+						translator.getText('infoStatsTargetMemberNoDataNotice', `${targetMember}`),
 					].join('\n'))
 				);
 			}
