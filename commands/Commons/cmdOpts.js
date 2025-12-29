@@ -1332,7 +1332,7 @@ class CommandOptionSolver {
 			const results = [];
 			let i = 0;
 			let arrArg;
-			while(arrArgs.length && i++ < polymax) {
+			while(arrArgs.length && (arrArg = arrArgs[i], i++) < polymax) {
 				let result;
 
 				if(Array.isArray(option._type)) {
