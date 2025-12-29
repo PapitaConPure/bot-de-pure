@@ -1,4 +1,4 @@
-const { ChannelType, ButtonBuilder, ButtonStyle, MessageFlags, ContainerBuilder } = require('discord.js'); //Integrar discord.js
+const { ChannelType, ButtonBuilder, ButtonStyle, MessageFlags, ContainerBuilder, SectionBuilder } = require('discord.js'); //Integrar discord.js
 const { improveNumber, isShortenedNumberString, fetchMember, compressId, shortenText } = require('../../func');
 const globalConfigs = require('../../localdata/config.json'); //Variables globales
 const { ChannelStats, Stats } = require('../../localdata/models/stats');
@@ -20,8 +20,10 @@ const counterDisplay = (number) => {
  * @param {Number?} page 
  */
 const getPaginationControls = (page, pageCount, requestId) => {
-	const prevPage = page > 0 ? (page - 1) : (pageCount)
-	const nextPage = page < (pageCount - 1) ? (page + 1) : 0;
+	const firstPage = 0;
+	const lastPage = pageCount - 1;
+	const prevPage = page > firstPage ? (page - 1) : lastPage
+	const nextPage = page < lastPage ? (page + 1) : firstPage;
 	return makeButtonRowBuilder().addComponents([
 		new ButtonBuilder()
 			.setCustomId(`info_navigate_${prevPage}_${requestId}_PV`)
@@ -48,10 +50,11 @@ const command = new CommandManager('info', flags)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		if(!request.guild.available)
-			return request.reply(':interrobang: E-el servidor está en corte ahora mismo. Intenta usar el comando más tarde');
+			return request.reply('⁉️');
 
-		const [stats] = await Promise.all([
+		const [stats, translator] = await Promise.all([
 			globalConfigs.noDataBase ? new Stats({ since: Date.now() }) : Stats.findOne({}),
+			Translator.from(request),
 			request.deferReply(),
 		]);
 		const guild = request.guild;
@@ -188,12 +191,14 @@ const command = new CommandManager('info', flags)
 				.sort((a, b) => b[1] - a[1])
 				.slice(0, 5)
 			: undefined;
+		
+		const formattedMembersRanking = membersRanking ? membersRanking.map(([id, count]) => `<@${id}>: **${counterDisplay(count)}** mensajes`).join('\n') : '_Este canal no tiene mensajes_';
+		
 		const channelsRanking = Object.values(guildChannelStats)
 			.sort((a, b) => b.cnt - a.cnt)
 			.slice(0, 5)
-			.map((obj) => /**@type {[String, Number]}*/([obj.channelId, obj.cnt]));
-		
-		const formattedMembersRanking = membersRanking ? membersRanking.map(([id, count]) => `<@${id}>: **${counterDisplay(count)}** mensajes`).join('\n') : '_Este canal no tiene mensajes_';
+			.map(channelStats => /**@type {[String, Number]}*/([channelStats.channelId, channelStats.cnt]));
+		const formattedChannelsRanking = channelsRanking.map(([id, count]) => `<#${id}>: **${counterDisplay(count)}** mensajes`).join('\n');
 
 		const statsSinceDateString = new Date(stats.since)
 			.toLocaleString('es-419', { year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -201,22 +206,46 @@ const command = new CommandManager('info', flags)
 		activityStatsContainer
 			.addTextDisplayComponents(
 				textDisplay => textDisplay.setContent('## Estadísticas de actividad'),
-				textDisplay => textDisplay.setContent(`### Usuarios más activos (canal: ${targetChannel.name})\n${formattedMembersRanking}`),
+				textDisplay => textDisplay.setContent(`### Usuarios más activos (canal: ${targetChannel})\n${formattedMembersRanking}`),
+				textDisplay => textDisplay.setContent(`### Canales más activos\n${formattedChannelsRanking}`)
 			);
 
 		if(member) {
-			//TODO: Completar comportamiento al pasar un --miembro a p!info
-			const formattedChannelsRanking = channelsRanking.map(([id, count]) => `<#${id}>: **${counterDisplay(count)}** mensajes`).join('\n');
+			const memberSectionBuilder = new SectionBuilder()
+				.setThumbnailAccessory(accessory =>
+					accessory
+						.setDescription(`Avatar de ${member.displayName || member.user.username}`)
+						.setURL(member.displayAvatarURL())
+				);
+			activityStatsContainer
+				.addSeparatorComponents(separator => separator.setDivider(true))
+				.addSectionComponents(memberSectionBuilder);
 
-			activityStatsContainer.addTextDisplayComponents(textDisplay =>
-				textDisplay.setContent(`### Canales más activos (miembro: ${member})\n${formattedChannelsRanking}`)
-			);
-		} else {
-			const formattedChannelsRanking = channelsRanking.map(([id, count]) => `<#${id}>: **${counterDisplay(count)}** mensajes`).join('\n');
-			
-			activityStatsContainer.addTextDisplayComponents(textDisplay =>
-				textDisplay.setContent(`### Canales más activos\n${formattedChannelsRanking}`)
-			);
+			const memberId = member.id;
+			const channelAndMemberMessageCountPairs = Object.values(guildChannelStats)
+				.filter(channelStats => channelStats.sub[memberId])
+				.map(channelStats => /**@type {const}*/([ channelStats.channelId, /**@type {number}*/(channelStats.sub[memberId]) ]));
+
+			if(channelAndMemberMessageCountPairs.length) {
+				const memberActivitySum = channelAndMemberMessageCountPairs
+					.map(memberChannelMessageCount => memberChannelMessageCount[1])
+					.reduce((a, b) => a + b, 0);
+				const formattedMemberActivitySum = `${member} envió un total de **${memberActivitySum}** mensajes en *${guild}*`;
+
+				const memberChannelsRanking = channelAndMemberMessageCountPairs
+					.sort((a, b) => b[1] - a[1])
+					.slice(0, 5);
+				const formattedMemberChannelsRanking = memberChannelsRanking.map(([id, count]) => `<#${id}>: **${counterDisplay(count)}** mensajes`).join('\n');
+	
+				memberSectionBuilder.addTextDisplayComponents(
+					textDisplay => textDisplay.setContent(`## Actividad de ${member.displayName}\n${formattedMemberActivitySum}\n­ ­`),
+					textDisplay => textDisplay.setContent(`### Su mayor participación\n${formattedMemberChannelsRanking}`),
+				);
+			} else {
+				memberSectionBuilder.addTextDisplayComponents(textDisplay =>
+					textDisplay.setContent(`## Actividad de ${member.displayName}\n_No hay actividad de ${member} para mostrar._`)
+				);
+			}
 		}
 
 		activityStatsContainer.addTextDisplayComponents(textDisplay =>
