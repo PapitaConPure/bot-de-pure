@@ -13,6 +13,7 @@ const { ValueKindTranslationLookups } = require('../../systems/ps/v1.1/interpret
 const { Input } = require('../../systems/ps/v1.1/interpreter/inputReader.js');
 const { getWikiPageComponentsV2 } = require('../../wiki.js');
 const { Translator } = require('../../internationalization.js');
+const { fetchGuildMembers } = require('../../guildratekeeper.js');
 
 const pageMax = 10;
 const filters = {
@@ -597,6 +598,7 @@ async function createTuber(tuberId, gcfg, isPureScript, request, args) {
 			gcfg.tubers[tuberId].psVersion = CURRENT_PS_VERSION;
 
 		await request.deferReply();
+		await fetchGuildMembers(request.guild);
 		await executeTuberPS2(request, gcfg.tubers[tuberId], { isTestDrive: true });
 
 		if(tuberContent.advanced) {
@@ -859,6 +861,7 @@ async function opExecuteTuber(tuberId, gcfg, isPureScript, request, args) {
 		executeFn = executeTuberPS2;
 
 	const savedData = gcfg.tubers[tid].saved && new Map(Object.entries(gcfg.tubers[tid].saved));
+	await fetchGuildMembers(request.guild);
 	await executeFn(request, gcfg.tubers[tid], { args: tuberArgs, isTestDrive: false, overwrite: false, savedData })
 	.then(() => {
 		// eslint-disable-next-line no-self-assign
