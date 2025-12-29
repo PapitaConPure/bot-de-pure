@@ -643,6 +643,56 @@ let localesObject = /**@type {const}*/({
 		ja: '❌ このスキルのスタックはありません。特別なスキルを受け取る機会を得るために、Puré Matrixともっと交流する',
 	},
 
+	avatarUserNotFoundNotice: {
+		es: paragraph(
+			`⚠️ ¡Usuario${subif(1, '!=', 1, 's')} **${subl(0)}** no encontrado${subif(1, '!=', 1, 's')}!`,
+			`-# Recuerda separar cada usuario con una coma y escribir correctamente. Usa \`${subl(2)}ayuda avatar\` para más información`,
+		),
+		en: paragraph(
+			`⚠️ User${subif(1, '!=', 1, 's')} **${subl(0)}** ${subif(1, '!=', 1, 'were', 'was')} not found!`,
+			`-# Remember to separate each username with a comma and spell correctly. Use \`${subl(2)}help avatar\` for more information`,
+		),
+		ja: paragraph(
+			`⚠️ ユーザー**${subl(0)}**が見つかりませんでした！`,
+			`各ユーザー名はカンマで区切り、正しく入力してください。詳細については \`${subl(2)}help avatar\` を使用してください。`,
+		),
+	},
+	avatarGlobalProfileEpigraph: {
+		es: '-# Perfil global',
+		en: '-# Global profile',
+		ja: '-# グローバルプロフィール',
+	},
+	avatarGuildProfileEpigraph: {
+		es: '-# Perfil de servidor',
+		en: '-# Guild Profile',
+		ja: '-# サーバープロファイル',
+	},
+	avatarGuildProfileSource: {
+		es: `📍 En _${subl(0)}_`,
+		en: `📍 On _${subl(0)}_`,
+		ja: `📍 _${subl(0)}_に`,
+	},
+	avatarAvatar: {
+		es: 'Avatar',
+		en: 'Avatar',
+		ja: 'アバター',
+	},
+	avatarBanner: {
+		es: 'Portada',
+		en: 'Banner',
+		ja: 'バナー',
+	},
+	avatarAvatarAlt: {
+		es: `Avatar global de ${subl(0)}`,
+		en: `${subl(0)}'s global avatar`,
+		ja: `${subl(0)}さんのグローバルアバター`,
+	},
+	avatarBannerAlt: {
+		es: 'Portada',
+		en: 'Banner',
+		ja: 'バナー',
+	},
+
 	cultivarUnauthorized: {
 		es: `¡Solo puedes cultivar una vez por día! Podrás volver a cultivar <t:${subl(0)}:R>`,
 		en: `You can only cultivate once per day! You'll be able to cultivate again <t:${subl(0)}:R>`,

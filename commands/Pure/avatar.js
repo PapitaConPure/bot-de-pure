@@ -1,11 +1,16 @@
 const { MessageFlags, TextDisplayBuilder, ContainerBuilder } = require('discord.js'); //Integrar discord.js
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require("../Commons/commands");
+const { Translator } = require('../../internationalization.js');
+const { fetchGuildMembers } = require('../../guildratekeeper.js');
 
-/**@param {import('discord.js').GuildMember} member*/
-const getAvatarContainer = (member) => {
-    const avatarURLDisplayOptions = /**@type {import('discord.js').ImageURLOptions}*/({ size: 1024 });
-    const bannerURLDisplayOptions = /**@type {import('discord.js').ImageURLOptions}*/({ size: 512 });
+/**
+ * @param {import('discord.js').GuildMember} member
+ * @param {Translator} translator
+ */
+const getAvatarContainer = (member, translator) => {
+    const avatarURLDisplayOptions = /**@type {import('discord.js').ImageURLOptions}*/({ size: 4096 });
+    const bannerURLDisplayOptions = /**@type {import('discord.js').ImageURLOptions}*/({ size: 4096 });
     const userAvatarURL = member.user.displayAvatarURL(avatarURLDisplayOptions);
     const userBannerURL = member.user.bannerURL(bannerURLDisplayOptions);
     const memberAvatarURL = member.displayAvatarURL(avatarURLDisplayOptions);
@@ -20,7 +25,7 @@ const getAvatarContainer = (member) => {
         container.addMediaGalleryComponents(mediaGallery =>
             mediaGallery.addItems(mediaGalleryItem =>
                 mediaGalleryItem
-                    .setDescription(`Portada de ${member.displayName}`)
+                    .setDescription(translator.getText('avatarBannerAlt', member.user.displayName))
                     .setURL(userBannerURL)
             )
         );
@@ -29,17 +34,17 @@ const getAvatarContainer = (member) => {
         .addSectionComponents(section =>
             section
                 .addTextDisplayComponents(
-                    textDisplay => textDisplay.setContent('-# Perfil global'),
+                    textDisplay => textDisplay.setContent(translator.getText('avatarGlobalProfileEpigraph')),
                     textDisplay => textDisplay.setContent(`## ${member.user.displayName}`),
                     textDisplay => textDisplay.setContent([
                         `👤 ${member.user}`,
-                        `🔗 [Avatar](${userAvatarURL})`,
-                        userBannerURL ? `🔗 [Portada](${userBannerURL})` : '',
+                        `🔗 [${translator.getText('avatarAvatar')}](${userAvatarURL})`,
+                        userBannerURL ? `🔗 [${translator.getText('avatarBanner')}](${userBannerURL})` : '',
                     ].join('\n')),
                 )
                 .setThumbnailAccessory(accessory =>
                     accessory
-                        .setDescription(`Avatar global de ${member.user.displayName}`)
+                        .setDescription(translator.getText('avatarAvatarAlt', member.user.displayName))
                         .setURL(userAvatarURL)
                 )
         );
@@ -54,7 +59,7 @@ const getAvatarContainer = (member) => {
         container.addMediaGalleryComponents(mediaGallery =>
             mediaGallery.addItems(mediaGalleryItem =>
                 mediaGalleryItem
-                    .setDescription(`Portada de ${member.displayName}`)
+                    .setDescription(translator.getText('avatarBannerAlt', member.displayName))
                     .setURL(userBannerURL)
             )
         );
@@ -63,17 +68,17 @@ const getAvatarContainer = (member) => {
         container.addSectionComponents(section =>
             section
                 .addTextDisplayComponents(
-                    textDisplay => textDisplay.setContent('-# Perfil de servidor'),
+                    textDisplay => textDisplay.setContent(translator.getText('avatarGuildProfileEpigraph')),
                     textDisplay => textDisplay.setContent(`## ${member.displayName}`),
                     textDisplay => textDisplay.setContent([
-                        `📍 En _"${member.guild}"_`,
-                        `🔗 [Avatar](${memberAvatarURL})`,
-                        memberBannerURL ? `🔗 [Portada](${memberBannerURL})` : '',
+                        translator.getText('avatarGuildProfileSource', member.guild),
+                        `🔗 [${translator.getText('avatarAvatar')}](${memberAvatarURL})`,
+                        memberBannerURL ? `🔗 [${translator.getText('avatarBanner')}](${memberBannerURL})` : '',
                     ].join('\n')),
                 )
                 .setThumbnailAccessory(accessory =>
                     accessory
-                        .setDescription(`Avatar de servidor de ${member.displayName}`)
+                        .setDescription(translator.getText('avatarAvatarAlt', member.displayName))
                         .setURL(memberAvatarURL)
                 )
         );
@@ -118,33 +123,33 @@ const command = new CommandManager('avatar', flags)
     )
     .setOptions(options)
     .setExecution(async (request, args) => {
+        const [ translator ] = await Promise.all([
+            Translator.from(request),
+            fetchGuildMembers(request.guild),
+        ]);
+
         const components = /**@type {import('discord.js').ComponentBuilder[]}*/([]);
         const { found: members, notFound } = getMembers(request, args);
         
         if(notFound.length) {
-            const [ templateA, templateC ] = [
-                '⚠️ ¡Usuario[s] **', '** no encontrado[s]!'
-            ].map(s => s.replace(/\[s\]/g, (notFound.length !== 1) ? 's' : ''));
-            const templateB = notFound.join(', ');
             components.push(
-                new TextDisplayBuilder().setContent([
-                    [ templateA, templateB, templateC ].join(''),
-                    `-# Recuerda separar cada usuario con una coma y escribir correctamente. Usa \`${p_pure(request).raw}ayuda avatar\` para más información`,
-                ].join('\n'))
+                new TextDisplayBuilder().setContent(
+                    translator.getText('avatarUserNotFoundNotice', notFound.join(', '), notFound.length, p_pure(request).raw)
+                )
             );
         }
 
         if(members?.length) {
             const fetchedMembers = await Promise.all(members.map(m => m.fetch(true)));
             fetchedMembers?.forEach(member => {
-                const avatarContainer = getAvatarContainer(member);
+                const avatarContainer = getAvatarContainer(member, translator);
                 avatarContainer && components.push(avatarContainer);
             });
         }
 
         if(!components.length) {
             await request.member.fetch(true);
-            const avatarContainer = getAvatarContainer(request.member);
+            const avatarContainer = getAvatarContainer(request.member, translator);
             components.push(avatarContainer);
         }
 
