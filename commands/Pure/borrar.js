@@ -50,7 +50,7 @@ const command = new CommandManager('borrar', tags)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const userResult = /**@type {string | import('discord.js').User}*/(args.parseFlagExpr('usuario'));
-		const user = userResult ? await fetchUser(userResult, request) : undefined;
+		const user = userResult ? fetchUser(userResult, request) : undefined;
 		const amount = args.getNumber('cantidad', 100);
 
 		if(!user && !amount) {

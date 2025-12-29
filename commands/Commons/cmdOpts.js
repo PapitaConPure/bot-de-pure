@@ -1,6 +1,9 @@
 const { User, GuildMember, Message, GuildChannel, CommandInteractionOptionResolver, Role, Attachment, Guild } = require('discord.js');
 const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSentence, regroupText, fetchGuild } = require('../../func');
 
+const Logger = require('../../logs');
+const { warn } = Logger('WARN', 'CmdOpts')
+
 /**
  * @typedef {{name: String, expression: String|Number}} ParamTypeStrict Parámetros de CommandOption que siguen una sintaxis estricta
  * @typedef {'NUMBER'|'TEXT'|'USER'|'MEMBER'|'ROLE'|'GUILD'|'CHANNEL'|'MESSAGE'|'EMOTE'|'IMAGE'|'FILE'|'URL'|'ID'} BaseParamType
@@ -696,8 +699,10 @@ class CommandOptions {
 		
 		switch(type) {
 		case 'USER':
+			warn('USER ya no es un parámetro asíncrono. Se recomienda usar fetchMessageParamSync para este tipo de comandos');
 			return fetchUser(argsPrototype, this.#request);
 		case 'MEMBER':
+			warn('MEMBER ya no es un parámetro asíncrono. Se recomienda usar fetchMessageParamSync para este tipo de comandos');
 			return fetchMember(argsPrototype, this.#request);
 		case 'MESSAGE':
 			return fetchMessage(argsPrototype, this.#request);
@@ -725,13 +730,15 @@ class CommandOptions {
 
 		switch(type) {
 		case 'USER':
-			throw 'Los parámetros de usuario solo pueden ser manejados mediante promesas';
+			return fetchUser(argsPrototype, this.#request);
 		case 'MEMBER':
-			throw 'Los parámetros de miembro solo pueden ser manejados mediante promesas';
+			return fetchMember(argsPrototype, this.#request);
 		case 'ROLE':
 			return fetchRole(argsPrototype, this.#request.guild);
 		case 'MESSAGE':
 			throw 'Los parámetros de mensaje solo pueden ser manejados mediante promesas';
+		case 'GUILD':
+			throw 'Los parámetros de servidor solo pueden ser manejados mediante promesas';
 		case 'CHANNEL':
 			return fetchChannel(argsPrototype, this.#request.guild);
 		case 'IMAGE':
@@ -1101,13 +1108,13 @@ class CommandOptionSolver {
 	 * @param {String} identifier El identificador del {@linkcode CommandParam}
 	 * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
 	 */
-	async getUser(identifier, getRestOfMessageWords = false) {
+	getUser(identifier, getRestOfMessageWords = false) {
 		if(this.isInteractionSolver(this.#args))
 			return this.#args.getUser(identifier);
 
 		this.ensureRequistified();
 
-		const result = await this.#getResultFromParam(identifier, getRestOfMessageWords);
+		const result = this.#getResultFromParamSync(identifier, getRestOfMessageWords);
 		return CommandOptionSolver.asUser(result);
 	}
 
@@ -1115,7 +1122,7 @@ class CommandOptionSolver {
 	 * @param {String} identifier El identificador del {@linkcode CommandParam}
 	 * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
 	 */
-	async getMember(identifier, getRestOfMessageWords = false) {
+	getMember(identifier, getRestOfMessageWords = false) {
 		if(this.isInteractionSolver(this.#args)) {
 			const member = this.#args.getMember(identifier);
 			const valid = member instanceof GuildMember;
@@ -1127,7 +1134,7 @@ class CommandOptionSolver {
 
 		this.ensureRequistified();
 
-		const result = await this.#getResultFromParam(identifier, getRestOfMessageWords);
+		const result = this.#getResultFromParamSync(identifier, getRestOfMessageWords);
 		return CommandOptionSolver.asMember(result);
 	}
 
