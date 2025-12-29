@@ -52,7 +52,7 @@ async function onStartup(client) {
 	globalConfigs.maintenance = '1';
 	
 	console.log(chalk.magenta('Obteniendo miembros de servidores de Discord...'));
-	await client.guilds.fetch().then(() => client.guilds.cache.forEach(guild => guild.members.fetch()));
+	await client.guilds.fetch().then(() => client.guilds.cache.forEach(guild => guild.members.fetch({ withPresences: true })));
 	confirm();
 
 	if(globalConfigs.remoteStartup)

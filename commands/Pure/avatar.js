@@ -76,8 +76,6 @@ const command = new CommandManager('avatar', flags)
     .setExecution(async (request, args) => {
         const { found: members, notFound } = await getMembers(request, args);
         const replyStack = {};
-
-        await request.guild.members.fetch();
         
         if(notFound.length) {
             const [ templateA, templateC ] = [
