@@ -5,6 +5,7 @@ const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = req
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 const { Translator } = require('../../internationalization');
 const { makeButtonRowBuilder } = require('../../tsCasts');
+const { fetchGuildMembers } = require('../../guildratekeeper');
 
 const MEMBERS_PER_PAGE = 10;
 
@@ -29,7 +30,10 @@ const command = new CommandManager('inforol', flags)
 	.setPermissions(perms)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const translator = await Translator.from(request.user);
+		const [translator] = await Promise.all([
+			await Translator.from(request),
+			fetchGuildMembers(request.guild),
+		]);
 		
 		if(args.empty)
 			return request.reply({ content: translator.getText('inforolNoRoleProvided') });

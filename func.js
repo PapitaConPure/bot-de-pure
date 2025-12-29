@@ -9,6 +9,7 @@ const { ButtonStyle, ChannelType } = require('discord.js');
 const { fetchUserCache } = require('./usercache');
 const Hourai = require('./localdata/models/hourai');
 const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } = require('./tsCasts');
+const { fetchGuildMembers } = require('./guildratekeeper');
 const concol = {
     orange: chalk.rgb(255, 140, 70),
     purple: chalk.rgb(158, 114,214),
@@ -279,7 +280,7 @@ module.exports = {
     },
 
     /**
-     * 
+     * Se debe llamar {@link fetchGuildMembers} antes para obtener buenos resultados
      * @param {Discord.Guild} guild 
      */
     calculateRealMemberCount: function(guild) {
@@ -473,7 +474,10 @@ module.exports = {
             const canvas = Canvas.createCanvas(1275, 825);
             const ctx = canvas.getContext('2d');
     
-            const fondo = await Canvas.loadImage(images.announcements.welcome);
+            const [fondo] = await Promise.all([
+                Canvas.loadImage(images.announcements.welcome),
+                fetchGuildMembers(guild),
+            ]);
             ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
     
             //#region Texto
@@ -563,7 +567,10 @@ module.exports = {
             const canvas = Canvas.createCanvas(1366, 768);
             const ctx = canvas.getContext('2d');
     
-            const fondo = await Canvas.loadImage(global.hourai.images.welcome);
+            const [fondo] = await Promise.all([
+                Canvas.loadImage(global.hourai.images.welcome),
+                fetchGuildMembers(guild),
+            ]);
             ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
     
             //#region Texto
@@ -677,7 +684,10 @@ module.exports = {
             const canvas = Canvas.createCanvas(1500, 900);
             const ctx = canvas.getContext('2d');
     
-            const fondo = await Canvas.loadImage(images.announcements.farewell);
+            const [fondo] = await Promise.all([
+                Canvas.loadImage(images.announcements.farewell),
+                fetchGuildMembers(servidor),
+            ]);
             ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
             //#endregion
     

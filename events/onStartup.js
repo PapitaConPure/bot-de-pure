@@ -38,6 +38,7 @@ const chalk = require('chalk');
 const { prepareTracksPlayer } = require('../systems/musicPlayer.js')
 const { initializeWebhookMessageOwners } = require('../systems/agents/discordagent.js');
 const { refreshPixivAccessToken } = require('../systems/agents/purepix.js');
+const { fetchGuildMembers } = require('../guildratekeeper.js');
 
 const logOptions = {
 	slash: false,
@@ -52,7 +53,8 @@ async function onStartup(client) {
 	globalConfigs.maintenance = '1';
 	
 	console.log(chalk.magenta('Obteniendo miembros de servidores de Discord...'));
-	await client.guilds.fetch().then(() => client.guilds.cache.forEach(guild => guild.members.fetch({ withPresences: true })));
+	await client.guilds.fetch();
+	await Promise.all(client.guilds.cache.map(guild => fetchGuildMembers(guild, { withPresences: true })));
 	confirm();
 
 	if(globalConfigs.remoteStartup)

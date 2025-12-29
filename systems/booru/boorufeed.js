@@ -6,6 +6,7 @@ const chalk = require('chalk');
 const { Booru } = require('./boorufetch.js');
 const globalConfigs = require('../../localdata/config.json');
 const { paginateRaw } = require('../../func.js');
+const { fetchGuildMembers } = require('../../guildratekeeper.js');
 
 //const Logger = require('../../logs');
 //const { debug } = Logger('WARN', 'BooruSend');
@@ -59,6 +60,7 @@ async function processFeeds(booru, guilds) {
         const guild = guilds.get(gcfg.guildId);
         if(!guild) return;
 
+        await fetchGuildMembers(guild);
         const members = guild.members.cache;
 
         await Promise.all(Object.entries(gcfg.feeds).map(async ([ channelId, feedData ]) => {

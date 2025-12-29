@@ -5,6 +5,7 @@ const { ChannelStats, Stats } = require('../../localdata/models/stats');
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 const { makeButtonRowBuilder } = require('../../tsCasts');
 const { Translator } = require('../../internationalization');
+const { fetchGuildMembers } = require('../../guildratekeeper');
 
 /**@param {Number} number*/
 const counterDisplay = (number) => {
@@ -52,12 +53,13 @@ const command = new CommandManager('info', flags)
 		if(!request.guild.available)
 			return request.reply('⁉️');
 
+		const guild = request.guild;
 		const [stats, translator] = await Promise.all([
 			globalConfigs.noDataBase ? new Stats({ since: Date.now() }) : Stats.findOne({}),
 			Translator.from(request),
 			request.deferReply(),
+			fetchGuildMembers(guild),
 		]);
-		const guild = request.guild;
 		const memberResult = /**@type {string | import('discord.js').GuildMember}*/(args.parseFlagExpr('miembro'));
 		const targetMember = memberResult ? fetchMember(memberResult, request) : undefined;
 		const targetChannel = args.getChannel('canal') || request.channel;
