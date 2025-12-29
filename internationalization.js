@@ -1494,6 +1494,180 @@ let localesObject = /**@type {const}*/({
 		ja: 'フィードバック',
 	},
 
+	infoGuildBannerAlt: {
+		es: 'Portada del servidor',
+		en: 'Guild banner',
+		ja: 'サーバーバナー',
+	},
+	infoGuildIconAlt: {
+		es: 'Ícono del servidor',
+		en: 'Guild Icon',
+		ja: 'サーバーアイコン',
+	},
+	infoGuildOwnerAvatarAlt: {
+		es: 'Avatar del dueño del servidor',
+		en: 'Guild Owner Avatar',
+		ja: 'サーバー所有者のアバター',
+	},
+	infoTargetMemberAvatarAlt: {
+		es: `Avatar de ${subl(0)}`,
+		en: `${subl(0)}'s Avatar`,
+		ja: `${subl(0)}さんのアバター`,
+	},
+	infoGuildEpigraph: {
+		es: `-# Servidor ${subif(0, '=', true, 'público', 'privado')}`,
+		en: `-# ${subif(0, '=', true, 'Public', 'Private')} Guild`,
+		ja: `-# ${subif(0, '=', true, '公開', '非公開')}サーバー`,
+	},
+	infoGuildCreatedAt: {
+		es: `🗓️ Creado el <t:${subl(0)}:f>`,
+		en: `🗓️ Created on <t:${subl(0)}:f>`,
+		ja: `🗓️ <t:${subl(0)}:f>作成`,
+	},
+	infoGuildOwnerEpigraph: {
+		es: '-# Dueño del servidor',
+		en: '-# Guild Owner',
+		ja: '-# サーバー所有者',
+	},
+	infoGuildBasicInfoTitle: {
+		es: '## Información básica',
+		en: '## Basic Information',
+		ja: '## 基本情報',
+	},
+	infoGuildMemberCount: {
+		es: paragraph(
+			'### Miembros',
+			`🧑‍🦲 **${subl(0)}** humanos (aproximado)`,
+			`🤖 **${subl(1)}** bots (aproximado)`,
+			`👥 **${subl(2)}** miembros totales`,
+		),
+		en: paragraph(
+			'### Members',
+			`🧑‍🦲 **${subl(0)}** humans (approximate)`,
+			`🤖 **${subl(1)}** bots (approximate)`,
+			`👥 **${subl(2)}** total members`,
+		),
+		ja: paragraph(
+			'### メンバー',
+			`🧑‍🦲 **${subl(0)}** 人間（近似）`,
+			`🤖 **${subl(1)}** ボット（近似）`,
+			`👥 **${subl(2)}** メンバー総数`,
+		),
+	},
+	infoGuildChannelCount: {
+		es: paragraph(
+			'### Canales',
+			`#️⃣ **${subl(0)}** canales de texto`,
+			`🔊 **${subl(1)}** canales de voz`,
+			`📣 **${subl(2)}** canales de noticias`,
+			`🏷️ **${subl(3)}** categorías`,
+			`🧵 **${subl(4)}** hilos`,
+		),
+		en: paragraph(
+			'### Channels',
+			`#️⃣ **${subl(0)}** text channels`,
+			`🔊 **${subl(1)}** voice channels`,
+			`📣 **${subl(2)}** news channels`,
+			`🏷️ **${subl(3)}** categories`,
+			`🧵 **${subl(4)}** threads`,
+		),
+		ja: paragraph(
+			'### チャネル',
+			`#️⃣ **${subl(0)}** テキストチャンネル`,
+			`🔊 **${subl(1)}** ボイスチャンネル`,
+			`📣 **${subl(2)}** ニュースチャンネル`,
+			`🏷️ **${subl(3)}** カテゴリー`,
+			`🧵 **${subl(4)}** スレッド`,
+		),
+	},
+	infoGuildSecurity: {
+		es: paragraph(
+			'### Seguridad',
+			`Verificación Nivel **${subl(0)}**`,
+			`MFA Nivel **${subl(1)}**`,
+		),
+		en: paragraph(
+			'### Security',
+			`Verificación Level **${subl(0)}**`,
+			`MFA Level **${subl(1)}**`,
+		),
+		ja: paragraph(
+			'### 安全',
+			`検証レベル **${subl(0)}**`,
+			`多要素認証レベル **${subl(1)}**`,
+		),
+	},
+	infoStatsMemberMessageCountItem: {
+		es: `<@${subl(0)}>: **${subl(1)}** mensajes`,
+		en: `<@${subl(0)}>: **${subl(1)}** messages`,
+		ja: `<@${subl(0)}>さん: **${subl(1)}** メッセージ`,
+	},
+	infoStatsChannelMessageCountItem: {
+		es: `<#${subl(0)}>: **${subl(1)}** mensajes`,
+		en: `<#${subl(0)}>: **${subl(1)}** messages`,
+		ja: `<#${subl(0)}>: **${subl(1)}** メッセージ`,
+	},
+	infoStatsChannelEmptyNotice: {
+		es: '_Este canal no tiene mensajes_',
+		en: '_This channel has no messages_',
+		ja: '_このチャンネルにはメッセージがありません_',
+	},
+	infoStatsTitle: {
+		es: '## Estadísticas de actividad',
+		en: '## Activity Stats',
+		ja: '## アクティビティ統計',
+	},
+	infoStatsTopMembersSubtitle: {
+		es: `### Miembros más activos (canal: ${subl(0)})`,
+		en: `### Most active members (channel: ${subl(0)})`,
+		ja: `### 最もアクティブなメンバー（チャネル：${subl(0)}）`,
+	},
+	infoStatsTopChannelsSubtitle: {
+		es: `### Canales más activos`,
+		en: '### Most active channels',
+		ja: '### 最もアクティブなチャネル',
+	},
+	infoStatsTargetMemberTotalMessageSum: {
+		es: `${subl(0)} envió un total de **${subl(1)}** mensajes en *${subl(2)}*`,
+		en: `${subl(0)} has sent a total of **${subl(1)}** messages on *${subl(2)}*`,
+		ja: `${subl(0)}さんは *${subl(2)}* で合計 **${subl(1)}件** のメッセージを送信しました`,
+	},
+	infoStatsTargetMemberTitle: {
+		es: `## Actividad de ${subl(0)}`,
+		en: `## ${subl(0)}'s Activity`,
+		ja: `## ${subl(0)}さんのアクティビティ`,
+	},
+	infoStatsTargetMemberTopChannelsSubtitle: {
+		es: '### Su mayor participación',
+		en: '### Most concurred channels',
+		ja: '### 彼らのより大きな参加',
+	},
+	infoStatsTargetMemberNoDataNotice: {
+		es: `_No hay datos de ${subl(0)} para mostrar._`,
+		en: `_There is no data on ${subl(0)} to show._`,
+		ja: `_${subl(0)}さんに関して表示できるデータはありません。_`,
+	},
+	infoStatsSinceFooter: {
+		es: `-# Estas estadísticas toman información desde el <t:${subl(0)}:d>`,
+		en: `-# These stats are being collected since 03/04/2025 <t:${subl(0)}:d>`,
+		ja: `-# これらの統計は<t:${subl(0)}:d>から収集されています`,
+	},
+	infoTimeTitle: {
+		es: '## Estadísticas de tiempo',
+		en: '## Time Stats',
+		ja: '## 時間統計',
+	},
+	infoTimeGuildCreatedAt: {
+		es: `🗓️ El servidor se creó <t:${subl(0)}:R>`,
+		en: `🗓️ The guild was created <t:${subl(0)}:R>`,
+		ja: `🗓️ ギルドは<t:${subl(0)}:R>に作成されました`,
+	},
+	infoTimeBotLastResetAt: {
+		es: `🕰️ Me reinicié por última vez <t:${subl(0)}:R>`,
+		en: `🕰️ I was last reset <t:${subl(0)}:R>`,
+		ja: `🕰️ 最後にリセットされたのは<t:${subl(0)}:R>です`,
+	},
+
 	inforolNoRoleProvided: {
 		es: '❌ ¡Debes indicar al menos un rol!',
 		en: '❌ You must indicate at least one role!',

@@ -92,32 +92,34 @@ const command = new CommandManager('info', flags)
 			}
 		});
 		
-		const owner = await guild.fetchOwner();
-		const guildIsDiscoverable = guild.features.includes('DISCOVERABLE');
 		const bannerURL = guild.bannerURL();
 		if(bannerURL)
 			mainCointainer.addMediaGalleryComponents(mediaGallery =>
 				mediaGallery.addItems(
 					mgItem => mgItem
-						.setDescription('Portada del servidor')
+						.setDescription(translator.getText('infoGuildBannerAlt'))
 						.setURL(bannerURL),
 				)
-			)
+			);
+
+		const owner = await guild.fetchOwner();
+		const guildIsDiscoverable = guild.features.includes('DISCOVERABLE');
+		const guildCreatedAtUnix = Math.floor(guild.createdTimestamp / 1000)
 
 		mainCointainer
 			.addSectionComponents(section =>
 				section
 					.addTextDisplayComponents(
-						textDisplay => textDisplay.setContent(`-# Servidor ${guildIsDiscoverable ? 'público' : 'privado'}`),
+						textDisplay => textDisplay.setContent(translator.getText('infoGuildEpigraph', guildIsDiscoverable)),
 						textDisplay => textDisplay.setContent(`# ${shortenText(guild.name, 100, '…')}`),
 						textDisplay => textDisplay.setContent([
-							`🗓️ Creado en <t:${Math.floor(guild.createdTimestamp / 1000)}:f>`,
+							translator.getText('infoGuildCreatedAt', guildCreatedAtUnix),
 							`🆔 \`${guild.id}\``,
 						].join('\n')),
 					)
 					.setThumbnailAccessory(accessory =>
 						accessory
-							.setDescription('Ícono del servidor')
+							.setDescription(translator.getText('infoGuildIconAlt'))
 							.setURL(guild.iconURL({ size: 256 }))
 					)
 			)
@@ -126,11 +128,11 @@ const command = new CommandManager('info', flags)
 				section
 					.setThumbnailAccessory(accessory =>
 						accessory
-							.setDescription('Avatar del dueño del servidor')
+							.setDescription(translator.getText('infoGuildOwnerAvatarAlt'))
 							.setURL(owner.displayAvatarURL({ size: 256 }))
 					)
 					.addTextDisplayComponents(
-						textDisplay => textDisplay.setContent('-# Dueño del servidor'),
+						textDisplay => textDisplay.setContent(translator.getText('infoGuildOwnerEpigraph')),
 						textDisplay => textDisplay.setContent(`## ${owner.displayName}`),
 						textDisplay => textDisplay.setContent([
 							`👤 ${owner}`,
@@ -140,33 +142,26 @@ const command = new CommandManager('info', flags)
 			)
 			.addSeparatorComponents(separator => separator.setDivider(true))
 			.addTextDisplayComponents(textDisplay =>
-				textDisplay.setContent('## Información')
+				textDisplay.setContent(translator.getText('infoGuildBasicInfoTitle'))
 			)
 			.addTextDisplayComponents(textDisplay =>
-				textDisplay.setContent([
-					'### Usuarios',
-					`🧑‍🦲 **${humanCount}** humanos (aproximado)`,
-					`🤖 **${botCount}** bots (aproximado)`,
-					`👥 **${guild.memberCount}** miembros totales`,
-				].join('\n')),
+				textDisplay.setContent(
+					translator.getText('infoGuildMemberCount', humanCount, botCount, guild.memberCount)
+				)
 			)
 			.addTextDisplayComponents(textDisplay =>
-				textDisplay.setContent([
-					'### Canales',
-					`#️⃣ **${channelCounts.text}** canales de texto`,
-					`🔊 **${channelCounts.voice}** canales de voz`,
-					`📣 **${channelCounts.news}** canales de noticias`,
-					`🏷️ **${channelCounts.category}** categorías`,
-					`🧵 **${channelCounts.thread}** hilos`,
-				].join('\n')),
+				textDisplay.setContent(
+					translator.getText('infoGuildChannelCount',
+						channelCounts.text, channelCounts.voice, channelCounts.news,
+						channelCounts.category, channelCounts.thread,
+					) 
+				)
 			)
 			.addTextDisplayComponents(textDisplay =>
-				textDisplay.setContent([
-					'### Seguridad',
-					`Verificación Nivel **${guild.verificationLevel}**`,
-					`MFA Nivel **${guild.mfaLevel}**`,
-				].join('\n')),
-			)
+				textDisplay.setContent(
+					translator.getText('infoGuildSecurity', guild.verificationLevel, guild.mfaLevel)
+				)
+			);
 
 		pages.push(mainCointainer);
 		
@@ -192,29 +187,35 @@ const command = new CommandManager('info', flags)
 				.slice(0, 5)
 			: undefined;
 		
-		const formattedMembersRanking = membersRanking ? membersRanking.map(([id, count]) => `<@${id}>: **${counterDisplay(count)}** mensajes`).join('\n') : '_Este canal no tiene mensajes_';
+		const formattedMembersRanking = membersRanking
+			? membersRanking
+				.map(([id, count]) => `${translator.getText('infoStatsMemberMessageCountItem', id, counterDisplay(count))}`)
+				.join('\n')
+			: translator.getText('infoStatsChannelEmptyNotice');
 		
 		const channelsRanking = Object.values(guildChannelStats)
 			.sort((a, b) => b.cnt - a.cnt)
 			.slice(0, 5)
 			.map(channelStats => /**@type {[String, Number]}*/([channelStats.channelId, channelStats.cnt]));
-		const formattedChannelsRanking = channelsRanking.map(([id, count]) => `<#${id}>: **${counterDisplay(count)}** mensajes`).join('\n');
+		const formattedChannelsRanking =
+			channelsRanking
+				.map(([id, count]) => `${translator.getText('infoStatsChannelMessageCountItem', id, counterDisplay(count))}`)
+				.join('\n');
 
-		const statsSinceDateString = new Date(stats.since)
-			.toLocaleString('es-419', { year: 'numeric', month: '2-digit', day: '2-digit' });
+		const statsSinceUnix = Math.round(stats.since / 1000);
 
 		activityStatsContainer
 			.addTextDisplayComponents(
-				textDisplay => textDisplay.setContent('## Estadísticas de actividad'),
-				textDisplay => textDisplay.setContent(`### Usuarios más activos (canal: ${targetChannel})\n${formattedMembersRanking}`),
-				textDisplay => textDisplay.setContent(`### Canales más activos\n${formattedChannelsRanking}`)
+				textDisplay => textDisplay.setContent(translator.getText('infoStatsTitle')),
+				textDisplay => textDisplay.setContent(`${translator.getText('infoStatsTopMembersSubtitle', `${targetChannel}`)}\n${formattedMembersRanking}`),
+				textDisplay => textDisplay.setContent(`${translator.getText('infoStatsTopChannelsSubtitle')}\n${formattedChannelsRanking}`)
 			);
 
 		if(member) {
 			const memberSectionBuilder = new SectionBuilder()
 				.setThumbnailAccessory(accessory =>
 					accessory
-						.setDescription(`Avatar de ${member.displayName || member.user.username}`)
+						.setDescription(translator.getText('infoTargetMemberAvatarAlt', member.displayName))
 						.setURL(member.displayAvatarURL())
 				);
 			activityStatsContainer
@@ -230,26 +231,36 @@ const command = new CommandManager('info', flags)
 				const memberActivitySum = channelAndMemberMessageCountPairs
 					.map(memberChannelMessageCount => memberChannelMessageCount[1])
 					.reduce((a, b) => a + b, 0);
-				const formattedMemberActivitySum = `${member} envió un total de **${memberActivitySum}** mensajes en *${guild}*`;
+				const formattedMemberActivitySum = translator.getText('infoStatsTargetMemberTotalMessageSum', member, counterDisplay(memberActivitySum), guild);
 
 				const memberChannelsRanking = channelAndMemberMessageCountPairs
 					.sort((a, b) => b[1] - a[1])
 					.slice(0, 5);
-				const formattedMemberChannelsRanking = memberChannelsRanking.map(([id, count]) => `<#${id}>: **${counterDisplay(count)}** mensajes`).join('\n');
+				const formattedMemberChannelsRanking =
+					memberChannelsRanking
+						.map(([id, count]) => translator.getText('infoStatsChannelMessageCountItem', id, counterDisplay(count)))
+						.join('\n');
 	
 				memberSectionBuilder.addTextDisplayComponents(
-					textDisplay => textDisplay.setContent(`## Actividad de ${member.displayName}\n${formattedMemberActivitySum}\n­ ­`),
-					textDisplay => textDisplay.setContent(`### Su mayor participación\n${formattedMemberChannelsRanking}`),
+					textDisplay => textDisplay.setContent(
+						`${translator.getText('infoStatsTargetMemberTitle', member.displayName)}\n${formattedMemberActivitySum}\n­ ­`
+					),
+					textDisplay => textDisplay.setContent(
+						`${translator.getText('infoStatsTargetMemberTopChannelsSubtitle')}\n${formattedMemberChannelsRanking}`
+					),
 				);
 			} else {
 				memberSectionBuilder.addTextDisplayComponents(textDisplay =>
-					textDisplay.setContent(`## Actividad de ${member.displayName}\n_No hay actividad de ${member} para mostrar._`)
+					textDisplay.setContent([
+						translator.getText('infoStatsTargetMemberTitle', member.displayName),
+						translator.getText('infoStatsTargetMemberNoDataNotice', `${member}`),
+					].join('\n'))
 				);
 			}
 		}
 
 		activityStatsContainer.addTextDisplayComponents(textDisplay =>
-			textDisplay.setContent(`-# Estas estadísticas toman información desde el ${statsSinceDateString}`),
+			textDisplay.setContent(translator.getText('infoStatsSinceFooter', statsSinceUnix)),
 		);
 
 		pages.push(activityStatsContainer);
@@ -259,12 +270,14 @@ const command = new CommandManager('info', flags)
 		const timeStatsContainer = new ContainerBuilder()
 			.setAccentColor(0xe99979);
 
+		const botLastResetUnix = Math.round(+globalConfigs.startupTime / 1000);
+
 		timeStatsContainer
 			.addTextDisplayComponents(
 				textDisplay => textDisplay.setContent('## Estadísticas de tiempo'),
 				textDisplay => textDisplay.setContent([
-					`🗓️ El servidor se creó <t:${Math.round(+guild.createdAt / 1000)}:R>`,
-					`🕰️ Me reinicié por última vez <t:${Math.round(+globalConfigs.startupTime / 1000)}:R>`,
+					translator.getText('infoTimeGuildCreatedAt', guildCreatedAtUnix),
+					translator.getText('infoTimeBotLastResetAt', botLastResetUnix),
 				].join('\n')),
 			);
 
