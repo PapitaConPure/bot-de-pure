@@ -1,53 +1,97 @@
-const { EmbedBuilder } = require('discord.js'); //Integrar discord.js
+const { MessageFlags, TextDisplayBuilder, ContainerBuilder } = require('discord.js'); //Integrar discord.js
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require("../Commons/commands");
 
 /**@param {import('discord.js').GuildMember} member*/
-const getAvatarEmbed = (member) => {
-    const urlDisplayOptions = /**@type {const}*/({ size: 1024 });
-    const memberAvatarUrl = member.displayAvatarURL(urlDisplayOptions);
-    const embed = new EmbedBuilder()
-        .setColor(0xfaa61a)
-        .setImage(memberAvatarUrl)
-        .addFields({ name: `Avatar de ${member.displayName}`, value: `[🔗 Enlace](${memberAvatarUrl})`, inline: true });
+const getAvatarContainer = (member) => {
+    const avatarURLDisplayOptions = /**@type {import('discord.js').ImageURLOptions}*/({ size: 1024 });
+    const bannerURLDisplayOptions = /**@type {import('discord.js').ImageURLOptions}*/({ size: 512 });
+    const userAvatarURL = member.user.displayAvatarURL(avatarURLDisplayOptions);
+    const userBannerURL = member.user.bannerURL(bannerURLDisplayOptions);
+    const memberAvatarURL = member.displayAvatarURL(avatarURLDisplayOptions);
+    const memberBannerURL = member.displayBannerURL(bannerURLDisplayOptions);
+    const hasServerAvatarOverride = memberAvatarURL !== userAvatarURL;
+    const hasServerBannerOverride = memberBannerURL !== userBannerURL;
+
+    const container = new ContainerBuilder()
+        .setAccentColor(0xfaa61a);
+
+    if(userBannerURL)
+        container.addMediaGalleryComponents(mediaGallery =>
+            mediaGallery.addItems(mediaGalleryItem =>
+                mediaGalleryItem
+                    .setDescription(`Portada de ${member.displayName}`)
+                    .setURL(userBannerURL)
+            )
+        );
+
+    container
+        .addSectionComponents(section =>
+            section
+                .addTextDisplayComponents(
+                    textDisplay => textDisplay.setContent('-# Perfil global'),
+                    textDisplay => textDisplay.setContent(`## ${member.user.displayName}`),
+                    textDisplay => textDisplay.setContent([
+                        `👤 ${member.user}`,
+                        `🔗 [Avatar](${userAvatarURL})`,
+                        userBannerURL ? `🔗 [Portada](${userBannerURL})` : '',
+                    ].join('\n')),
+                )
+                .setThumbnailAccessory(accessory =>
+                    accessory
+                        .setDescription(`Avatar global de ${member.user.displayName}`)
+                        .setURL(userAvatarURL)
+                )
+        );
     
     //En caso de tener un override para el server
-    const userAvatarUrl = member.user.displayAvatarURL(urlDisplayOptions);
-    if(userAvatarUrl !== memberAvatarUrl)
-        embed.setThumbnail(userAvatarUrl)
-            .setDescription(`Visto desde "${member.guild}"`)
-            .addFields({ name: 'Global', value: `[🔗 Enlace](${userAvatarUrl})`, inline: true });
+    if(hasServerAvatarOverride || hasServerBannerOverride)
+        container.addSeparatorComponents(separator =>
+            separator.setDivider(true)
+        );
     
-    return embed;
-};
-
-/**@param {Array<import('discord.js').GuildMember>} members*/
-const generateAvatarEmbeds = (members = []) => {
-    const embeds = [];
-
-    if(members.length)
-        members.forEach(member => embeds.push(getAvatarEmbed(member)));
+    if(hasServerBannerOverride)
+        container.addMediaGalleryComponents(mediaGallery =>
+            mediaGallery.addItems(mediaGalleryItem =>
+                mediaGalleryItem
+                    .setDescription(`Portada de ${member.displayName}`)
+                    .setURL(userBannerURL)
+            )
+        );
     
-    return embeds;
+    if(hasServerAvatarOverride)
+        container.addSectionComponents(section =>
+            section
+                .addTextDisplayComponents(
+                    textDisplay => textDisplay.setContent('-# Perfil de servidor'),
+                    textDisplay => textDisplay.setContent(`## ${member.displayName}`),
+                    textDisplay => textDisplay.setContent([
+                        `📍 En _"${member.guild}"_`,
+                        `🔗 [Avatar](${memberAvatarURL})`,
+                        memberBannerURL ? `🔗 [Portada](${memberBannerURL})` : '',
+                    ].join('\n')),
+                )
+                .setThumbnailAccessory(accessory =>
+                    accessory
+                        .setDescription(`Avatar de servidor de ${member.displayName}`)
+                        .setURL(memberAvatarURL)
+                )
+        );
+    
+    return container;
 };
 
 /**
  * @param {import('../Commons/typings.js').ComplexCommandRequest} request 
  * @param {CommandOptionSolver<import('../Commons/typings.js').CommandArguments>} args 
  */
-async function getMembers(request, args) {
+function getMembers(request, args) {
     const notFound = /**@type {Array<string>}*/([]);
-    const members = CommandOptionSolver.asMembers(await args.parsePolyParam('miembros', {
+    const members = CommandOptionSolver.asMembers(args.parsePolyParamSync('miembros', {
         fallback: request.member,
         regroupMethod: 'MENTIONABLES-WITH-SEP',
         failedPayload: notFound,
-    })).filter(m => m || (notFound.push(), false));
-
-    if(request.isInteraction)
-        return {
-            found: members,
-            notFound,
-        };
+    }));
 
     return {
         found: members,
@@ -74,23 +118,40 @@ const command = new CommandManager('avatar', flags)
     )
     .setOptions(options)
     .setExecution(async (request, args) => {
-        const { found: members, notFound } = await getMembers(request, args);
-        const replyStack = {};
+        const components = /**@type {import('discord.js').ComponentBuilder[]}*/([]);
+        const { found: members, notFound } = getMembers(request, args);
         
         if(notFound.length) {
             const [ templateA, templateC ] = [
                 '⚠️ ¡Usuario[s] **', '** no encontrado[s]!'
             ].map(s => s.replace(/\[s\]/g, (notFound.length !== 1) ? 's' : ''));
             const templateB = notFound.join(', ');
-            replyStack.content = [
-                [ templateA, templateB, templateC ].join(''),
-                `Recuerda separar cada usuario con una coma y escribir correctamente. Usa \`${p_pure(request).raw}ayuda avatar\` para más información`,
-            ].join('\n');
+            components.push(
+                new TextDisplayBuilder().setContent([
+                    [ templateA, templateB, templateC ].join(''),
+                    `-# Recuerda separar cada usuario con una coma y escribir correctamente. Usa \`${p_pure(request).raw}ayuda avatar\` para más información`,
+                ].join('\n'))
+            );
         }
-        if(members?.length)
-            replyStack.embeds = generateAvatarEmbeds(members) ?? null;
 
-        await request.reply(replyStack);
+        if(members?.length) {
+            const fetchedMembers = await Promise.all(members.map(m => m.fetch(true)));
+            fetchedMembers?.forEach(member => {
+                const avatarContainer = getAvatarContainer(member);
+                avatarContainer && components.push(avatarContainer);
+            });
+        }
+
+        if(!components.length) {
+            await request.member.fetch(true);
+            const avatarContainer = getAvatarContainer(request.member);
+            components.push(avatarContainer);
+        }
+
+        return request.reply({
+            flags: MessageFlags.IsComponentsV2,
+            components,
+        });
     });
 
 module.exports = command;
