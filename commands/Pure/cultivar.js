@@ -38,7 +38,7 @@ const command = new CommandManager('cultivar', flags)
             .setColor(tenshiColor)
             .setAuthor({ name: request.member.displayName, iconURL: request.member.displayAvatarURL({ size: 256 }) })
             .setTitle(translator.getText('cultivarTitle'))
-            .setDescription(translator.getText('cultivarDescription', improveNumber(userConfigs.prc, true)));
+            .setDescription(translator.getText('cultivarDescription', improveNumber(userConfigs.prc, { shorten: true })));
 
         await userConfigs.save();
         return request.reply({ embeds: [embed] });

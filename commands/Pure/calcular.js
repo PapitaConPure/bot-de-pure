@@ -1,5 +1,5 @@
 const { improveNumber } = require("../../func");
-const { CommandTags, CommandManager, CommandOptions, CommandOptionSolver } = require("../Commons/commands");
+const { CommandTags, CommandManager, CommandOptions } = require("../Commons/commands");
 const { calc } = require('../../systems/others/mathreader.js');
 
 const flags = new CommandTags().add('COMMON');
@@ -17,7 +17,7 @@ const command = new CommandManager('calcular', flags)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const shorten = args.parseFlag('acortar');
-		const min = args.parseFlagExpr('mínimo', v => +v, 1);
+		const minDigits = args.parseFlagExpr('mínimo', v => +v, 1);
 		const operation = args.getString('operación', true);
 
 		if(!operation)
@@ -29,7 +29,7 @@ const command = new CommandManager('calcular', flags)
 			if(isNaN(result))
 				return request.reply({ content: '⚠️ La operación no pertenece al dominio de los números Reales' });
 			
-			return request.reply({ content: improveNumber(result, shorten, min) });
+			return request.reply({ content: improveNumber(result, { shorten, minDigits }) });
 		} catch(error) {
 			console.log(error);
 			return request.reply({ content: '⚠️ Operación inválida' });

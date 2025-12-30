@@ -85,7 +85,7 @@ const command = new CommandManager('transferir', flags)
                     },
                     {
                         name: translator.getText('transferAmountName'),
-                        value: `<:prc:1097208828946301123>  ${improveNumber(amount, true)}`,
+                        value: `<:prc:1097208828946301123>  ${improveNumber(amount, { shorten: true })}`,
                         inline: true,
                     },
                     {

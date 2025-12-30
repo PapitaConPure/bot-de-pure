@@ -528,6 +528,23 @@ let localesObject = /**@type {const}*/({
 		ja: 'やり方を見せて',
 	},
 
+	genericCounter: {
+		es: `${subl(0)}${subif(1, '=', true, ' de')}`,
+		en: `${subl(0)}${subif(1, '=', true, ' of')}`,
+		ja: `${subl(0)}`,
+	},
+
+	genericNumberOfPrefix: {
+		es: '',
+		en: '',
+		ja: '',
+	},
+	genericNumberOfSuffix: {
+		es: ' de',
+		en: ' of',
+		ja: '',
+	},
+
 	commandByName: {
 		es: `Comando invocado por ${subl(0)}`,
 		en: `Command called by ${subl(0)}`,
@@ -1795,44 +1812,64 @@ let localesObject = /**@type {const}*/({
 		ja: `${subl(0)}のアバター`,
 	},
 	estadoCommandsAndServersCount: {
-		es: `🍑 Ofreciendo un total de **${subl(0)}** comandos en **${subl(1)}** servidores`,
-		en: `🍑 Offering **${subl(0)}** commands total on **${subl(1)}** guilds`,
-		ja: `🍑 **${subl(1)}**のギルドで合計**${subl(0)}**のコマンドを提供`,
-	},
-	estadoRegisteredMessagesCount: {
-		es: `🎦 **${subl(0)}** mensajes registrados`,
-		en: `🎦 **${subl(0)}** messages recorded`,
-		ja: `🎦 **${subl(0)}件**のメッセージが記録されました`,
-	},
-	estadoProcessedCommandsCount: {
-		es: `⚙️ **${subl(0)}** comandos procesados`,
-		en: `⚙️ **${subl(0)}** commands processed`,
-		ja: `⚙️ **${subl(0)}件**のコマンドが処理されました`,
-	},
-	estadoSuccessfulCommandsCount: {
-		es: `✅ **${subl(0)}** (${subl(1)}%) ejecuciones de comando exitosas`,
-		en: `✅ **${subl(0)}** (${subl(1)}%) successful command executions`,
-		ja: `✅ **${subl(0)}件**（${subl(1)}％）のコマンド実行が成功しました`,
-	},
-	estadoFailedCommandsCount: {
-		es: `⚠️️ **${subl(0)}** (${subl(1)}%) ejecuciones de comando fallidas`,
-		en: `⚠️️ **${subl(0)}** (${subl(1)}%) failed command executions`,
-		ja: `⚠️️ **${subl(0)}件**（${subl(1)}％）のコマンド実行が失敗しました`,
+		es: `Ofreciendo un total de **${subl(0)}** comandos en **${subl(1)}** servidores`,
+		en: `Offering **${subl(0)}** commands total on **${subl(1)}** guilds`,
+		ja: `**${subl(1)}**のギルドで合計**${subl(0)}**のコマンドを提供`,
 	},
 	estadoBotOwnerEpigrapgh: {
 		es: '-# Creador',
 		en: '-# Creator',
 		ja: '-# クリエイター',
 	},
-	estadoChangesSubtitle: {
-		es: '### Cambios',
-		en: '### Changelog',
-		ja: '### 変更履歴',
+	estadoDevelopmentTitle: {
+		es: '## Desarrollo',
+		en: '## Development',
+		ja: '## 開発',
 	},
-	estadoUpcomingSubtitle: {
-		es: '### Lo que sigue',
-		en: '### Planned features',
-		ja: '### 計画されている機能',
+	estadoDevelopmentChangesButton: {
+		es: 'Notas de cambios',
+		en: 'Changelog',
+		ja: '変更履歴を表示',
+	},
+	estadoDevelopmentUpcomingButton: {
+		es: 'Características planeadas',
+		en: 'Planned features',
+		ja: '計画されている機能',
+	},
+	estadoChangesTitle: {
+		es: '## Notas de cambios',
+		en: '## Changelog',
+		ja: '## 変更履歴',
+	},
+	estadoUpcomingTitle: {
+		es: '## Características planeadas',
+		en: '## Planned features',
+		ja: '## 計画されている機能',
+	},
+	estadoStatsTitle: {
+		es: '## Estadísticas de uso',
+		en: '## Usage Stats',
+		ja: '## 使用状況統計',
+	},
+	estadoStatsRegisteredMessagesCount: {
+		es: `🎦 **${subl(0)}** mensajes registrados`,
+		en: `🎦 **${subl(0)}** messages recorded`,
+		ja: `🎦 **${subl(0)}件**のメッセージが記録されました`,
+	},
+	estadoStatsProcessedCommandsCount: {
+		es: `⚙️ **${subl(0)}** comandos procesados`,
+		en: `⚙️ **${subl(0)}** commands processed`,
+		ja: `⚙️ **${subl(0)}件**のコマンドが処理されました`,
+	},
+	estadoStatsSuccessfulCommandsCount: {
+		es: `✅ **${subl(0)}** (${subl(1)}%) ejecuciones de comando exitosas`,
+		en: `✅ **${subl(0)}** (${subl(1)}%) successful command executions`,
+		ja: `✅ **${subl(0)}件**（${subl(1)}％）のコマンド実行が成功しました`,
+	},
+	estadoStatsFailedCommandsCount: {
+		es: `⚠️️ **${subl(0)}** (${subl(1)}%) ejecuciones de comando fallidas`,
+		en: `⚠️️ **${subl(0)}** (${subl(1)}%) failed command executions`,
+		ja: `⚠️️ **${subl(0)}件**（${subl(1)}％）のコマンド実行が失敗しました`,
 	},
 
 	yoCancelledStep: {
@@ -2234,7 +2271,7 @@ class Translator {
 		const localeSet = locales.get(id);
 		if(!localeSet) throw ReferenceError(`Se esperaba una id de texto localizado válido. Se recibió: ${id}`);
 		const translationTemplate = localeSet[locale];
-		if(!translationTemplate) throw RangeError(`Se esperaba una clave de localización válida. Se recibió: ${id} :: ${locale}`);
+		if(translationTemplate == null) throw RangeError(`Se esperaba una clave de localización válida. Se recibió: ${id} :: ${locale}`);
 	
 		//Ejemplo: 1{...}<?{'por defecto'}
 		const subLocaleRegex = /(\d+){\.\.\.}(?:<!{((?:[!=<>]{1,2}):[^|]+)\|'((?:(?!'}).)*)'})?(?:<\?{'((?:(?!'}).)*)'})?/g;

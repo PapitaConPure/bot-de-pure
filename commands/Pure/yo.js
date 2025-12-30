@@ -119,7 +119,7 @@ const dashboardEmbed = (request, userConfigs, translator) => {
             },
             {
                 name: translator.getText('yoDashboardPRCName'),
-                value: `<:prc:1097208828946301123> ${improveNumber(userConfigs.prc, true)}`,
+                value: `<:prc:1097208828946301123> ${improveNumber(userConfigs.prc, { shorten: true })}`,
                 inline: true,
             },
             {

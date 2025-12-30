@@ -1,19 +1,11 @@
 const { ChannelType, ButtonBuilder, ButtonStyle, MessageFlags, ContainerBuilder, SectionBuilder } = require('discord.js'); //Integrar discord.js
-const { improveNumber, isShortenedNumberString, fetchMember, compressId, shortenText } = require('../../func');
+const { fetchMember, compressId, shortenText, quantityDisplay } = require('../../func');
 const globalConfigs = require('../../localdata/config.json'); //Variables globales
 const { ChannelStats, Stats } = require('../../localdata/models/stats');
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 const { makeButtonRowBuilder } = require('../../tsCasts');
 const { Translator } = require('../../internationalization');
 const { fetchGuildMembers } = require('../../guildratekeeper');
-
-/**@param {Number} number*/
-const counterDisplay = (number) => {
-    const numberString = improveNumber(number, true);
-    if(isShortenedNumberString(numberString))
-        return `${numberString} de`;
-    return numberString;
-}
 
 /**
  * @param {String} requestId
@@ -189,7 +181,7 @@ const command = new CommandManager('info', flags)
 		
 		const formattedMembersRanking = membersRanking
 			? membersRanking
-				.map(([id, count]) => `${translator.getText('infoStatsMemberMessageCountItem', id, counterDisplay(count))}`)
+				.map(([id, count]) => `${translator.getText('infoStatsMemberMessageCountItem', id, quantityDisplay(count, translator))}`)
 				.join('\n')
 			: translator.getText('infoStatsChannelEmptyNotice');
 		
@@ -199,7 +191,7 @@ const command = new CommandManager('info', flags)
 			.map(channelStats => /**@type {[String, Number]}*/([channelStats.channelId, channelStats.cnt]));
 		const formattedChannelsRanking =
 			channelsRanking
-				.map(([id, count]) => `${translator.getText('infoStatsChannelMessageCountItem', id, counterDisplay(count))}`)
+				.map(([id, count]) => `${translator.getText('infoStatsChannelMessageCountItem', id, quantityDisplay(count, translator))}`)
 				.join('\n');
 
 		const statsSinceUnix = Math.round(stats.since / 1000);
@@ -231,14 +223,14 @@ const command = new CommandManager('info', flags)
 				const memberActivitySum = channelAndMemberMessageCountPairs
 					.map(memberChannelMessageCount => memberChannelMessageCount[1])
 					.reduce((a, b) => a + b, 0);
-				const formattedMemberActivitySum = translator.getText('infoStatsTargetMemberTotalMessageSum', targetMember, counterDisplay(memberActivitySum), guild);
+				const formattedMemberActivitySum = translator.getText('infoStatsTargetMemberTotalMessageSum', targetMember, quantityDisplay(memberActivitySum, translator), guild);
 
 				const memberChannelsRanking = channelAndMemberMessageCountPairs
 					.sort((a, b) => b[1] - a[1])
 					.slice(0, 5);
 				const formattedMemberChannelsRanking =
 					memberChannelsRanking
-						.map(([id, count]) => translator.getText('infoStatsChannelMessageCountItem', id, counterDisplay(count)))
+						.map(([id, count]) => translator.getText('infoStatsChannelMessageCountItem', id, quantityDisplay(count, translator)))
 						.join('\n');
 	
 				memberSectionBuilder.addTextDisplayComponents(

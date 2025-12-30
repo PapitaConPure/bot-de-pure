@@ -10,6 +10,7 @@ const { fetchUserCache } = require('./usercache');
 const Hourai = require('./localdata/models/hourai');
 const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } = require('./tsCasts');
 const { fetchGuildMembers } = require('./guildratekeeper');
+const { Translator } = require('./internationalization');
 const concol = {
     orange: chalk.rgb(255, 140, 70),
     purple: chalk.rgb(158, 114,214),
@@ -1464,24 +1465,50 @@ module.exports = {
         ];
     },
 
-    shortNumberNames: [
-        'millones', 'miles de millones', 'billones', 'miles de billones', 'trillones', 'miles de trillones', 'cuatrillones', 'miles de cuatrillones',
-        'quintillones', 'miles de quintillones', 'sextillones', 'miles de sextillones', 'septillones', 'miles de septillones',
-        'octillones', 'miles de octillones', 'nonillones', 'miles de nonillones', 'decillones', 'miles de decillones', 'undecillones', 'miles de undecillones',
-        'duodecillones', 'miles de duodecillones', 'tredecillones', 'miles de tredecillones', 'quattuordecillones', 'miles de quattuordecillones',
-        'quindecillones', 'miles de quindecillones', 'sexdecillones', 'miles de sexdecillones'
-    ],
+    shortNumberNames: {
+        es: [
+            'millones', 'miles de millones', 'billones', 'miles de billones', 'trillones', 'miles de trillones', 'cuatrillones', 'miles de cuatrillones',
+            'quintillones', 'miles de quintillones', 'sextillones', 'miles de sextillones', 'septillones', 'miles de septillones', 'octillones', 'miles de octillones', 'nonillones', 'miles de nonillones',
+            'decillones', 'miles de decillones', 'undecillones', 'miles de undecillones', 'duodecillones', 'miles de duodecillones', 'tredecillones', 'miles de tredecillones', 'quattuordecillones', 'miles de quattuordecillones',
+            'quindecillones', 'miles de quindecillones', 'sexdecillones', 'miles de sexdecillones',
+        ],
+        en: [
+            'millions', 'billions', 'trillions', 'quadrillions', 'quintillions', 'sextillions', 'septillions', 'octillions', 'nonillions',
+            'decillions', 'undecillions', 'duodecillions', 'tredecillions', 'quattuordecillions', 'quindecillions', 'sexdecillions', 'septendecillions', 'octodecillions', 'novemdecillions',
+            'vigintillions', 'unvigintillions', 'duovigintillions', 'trevigintillions', 'quattuorvigintillions', 'quinvigintillions', 'sexvigintillions', 'septenvigintillions', 'octovigintillions', 'novemvigintillions',
+            'trigintillions', 'untrigintillions', 'duotrigintillions',
+        ],
+        ja: [
+            'millions', 'billions', 'trillions', 'quadrillions', 'quintillions', 'sextillions', 'septillions', 'octillions', 'nonillions',
+            'decillions', 'undecillions', 'duodecillions', 'tredecillions', 'quattuordecillions', 'quindecillions', 'sexdecillions', 'septendecillions', 'octodecillions', 'novemdecillions',
+            'vigintillions', 'unvigintillions', 'duovigintillions', 'trevigintillions', 'quattuorvigintillions', 'quinvigintillions', 'sexvigintillions', 'septenvigintillions', 'octovigintillions', 'novemvigintillions',
+            'trigintillions', 'untrigintillions', 'duotrigintillions',
+        ],
+    },
 
     /**
+     * @typedef {Object} ImproveNumberOptions
+     * @property {boolean} [appendOf] Añadir el equivalente a "of" (inglés) en el idioma utilizado si el número se acorta. Si es prefijo o sufijo también depende del idioma
+     * @property {boolean} [shorten] Si acortar el número para volverlo más fácil de leer
+     * @property {Translator} [translator] Traductor a utilizar
+     * @property {Number} [minDigits] Cantidad mínima de dígitos para rellenar con 0s a la izquierda
+     * 
      * @function
      * @param {Number | String} num El número a mejorarle la visibilidad
-     * @param {Boolean} shorten Si acortar el número para volverlo más fácil de leer
-     * @param {Number} minDigits Cantidad mínima de dígitos para rellenar con 0s a la izquierda
+     * @param {ImproveNumberOptions} [options] Opciones para mejorar el número
      * @returns {String}
      */
-    improveNumber: function(num, shorten = false, minDigits = 1) {
+    improveNumber: function(num, options = {}) {
+        const {
+            appendOf = false,
+            shorten = false,
+            translator = new Translator('es'),
+            minDigits = 1,
+        } = options;
+
         if(typeof num === 'string')
             num = parseFloat(num);
+        
         if(isNaN(num))
             return '0';
         
@@ -1489,34 +1516,40 @@ module.exports = {
          * @param {Number} n
          * @param {Intl.NumberFormatOptions} nopt
          */
-        const formatNumber = (n, nopt = {}) => n.toLocaleString('en', { maximumFractionDigits: 2, minimumIntegerDigits: minDigits, ...nopt });
+        const formatNumber = (n, nopt = {}) => n.toLocaleString(translator.locale, { maximumFractionDigits: 2, minimumIntegerDigits: minDigits, ...nopt });
         if((num < 1000000) || !shorten)
             return formatNumber(num);
-        
-        const googol = Math.pow(10, 100);
-        if(num >= googol)
-            return `${formatNumber(num / googol, { maximumFractionDigits: 4 })} Gúgol`;
 
-        const jesus = module.exports.shortNumberNames;
-        const ni = (num < Math.pow(10, 6 + jesus.length * 3))
-            ? Math.floor((num.toLocaleString('fullwide', { useGrouping: false }).length - 7) / 3)
-            : jesus.length - 1;
-        const snum = formatNumber(num / Math.pow(1000, ni + 2), { minimumFractionDigits: 2 });
+        const ofPrefix = appendOf ? translator.getText('genericNumberOfPrefix') : '';
+        const ofSuffix = appendOf ? translator.getText('genericNumberOfSuffix') : '';
         
-        return [ snum, jesus[ni] ].join(' ');
+        const obtainShortenedNumber = () => {
+            const googol = Math.pow(10, 100);
+            if(num >= googol)
+                return `${formatNumber(num / googol, { maximumFractionDigits: 4 })} Gúgol`;
+    
+            const jesus = module.exports.shortNumberNames[translator.locale];
+            const ni = (num < Math.pow(10, 6 + jesus.length * 3))
+                ? Math.floor((num.toLocaleString('fullwide', { useGrouping: false }).length - 7) / 3)
+                : jesus.length - 1;
+            const snum = formatNumber(num / Math.pow(1000, ni + 2), { minimumFractionDigits: 2 });
             
+            return [ snum, jesus[ni] ].join(' ');
+        }
+        
+        return `${ofPrefix}${obtainShortenedNumber()}${ofSuffix}`;
     },
 
-    isShortenedNumberString: function(numberString) {
-        return module.exports.shortNumberNames.some(snn => numberString.indexOf(snn) >= 0);
-    },
-
-    /**@param {Number} num*/
-    quantityDisplay: function(num) {
-        const numberString = module.exports.improveNumber(num, true);
-        if(module.exports.isShortenedNumberString(numberString))
-            return `${numberString} de`;
-        return numberString;
+    /**
+     * @param {Number} num
+     * @param {Translator} translator
+     */
+    quantityDisplay: function(num, translator) {
+        return module.exports.improveNumber(num, {
+            appendOf: true,
+            shorten: true,
+            translator,
+        });
     },
     
     /**@param {String[]} arr*/

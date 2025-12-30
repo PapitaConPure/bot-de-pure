@@ -93,7 +93,7 @@ const command = new CommandManager('tarjeta', flags)
 		const survivalname = args.getString('survival')?.toLowerCase();
 		if(!highlights.survival[survivalname]) return request.reply(`⚠️ Debes ingresar una calidad de survival válida.\n${helpstr}`);
 		
-		const score = improveNumber(args.getNumber('puntaje'), false, 10);
+		const score = improveNumber(args.getNumber('puntaje'), { minDigits: 10 });
 		if(!score || +score >= Math.pow(10, 12)) return request.reply(`⚠️ Debes ingresar un puntaje final válido.\n${helpstr}`);
 
 		/**@type {String}*/

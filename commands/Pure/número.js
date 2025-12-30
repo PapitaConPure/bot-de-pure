@@ -14,13 +14,13 @@ const command = new CommandManager('número', flags)
 	.setExecution(async (request, args) => {
 		//Acción de comando
 		const shorten = args.parseFlag('acortar');
-		const min = args.parseFlagExpr('mínimo',    (/**@type {Number}*/x) => x, 1);
+		const minDigits = args.parseFlagExpr('mínimo',    (/**@type {Number}*/x) => x, 1);
 		const exp = args.parseFlagExpr('exponente', (/**@type {Number}*/x) => x, 1);
 		
 		let num = args.getNumber('num');
 		if(!num) return request.reply({ content: '⚠️ Debes ingresar un número' });
 		num = Math.pow(num, exp);
-		return request.reply({ content: improveNumber(num, shorten, min) });
+		return request.reply({ content: improveNumber(num, { shorten, minDigits }) });
 	});
 
 module.exports = command;
