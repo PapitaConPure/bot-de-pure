@@ -45,7 +45,7 @@ const command = new CommandManager('saucenao', flags)
 			});
 		}
 		
-		const message = (request.isInteraction && CommandOptionSolver.asMessage(await args.getMessage('mensaje')))
+		const message = (request.isInteraction && await args.getMessage('mensaje'))
 			|| (request.isMessage && request.channel.messages.cache.get(request.inferAsMessage().reference?.messageId));
 		const messageAttachments = message?.attachments
 			? message.attachments.values()
