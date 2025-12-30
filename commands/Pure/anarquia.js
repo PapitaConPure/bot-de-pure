@@ -276,7 +276,7 @@ const command = new CommandManager('anarquia', flags)
 		const reactIfMessage = async (/**@type {String}*/ reaction) => request.isMessage && request.inferAsMessage().react(reaction).catch(_ => _);
 		
 		const skill = args.parseFlag('skill');
-		const inverted = args.isMessageSolver() && isNaN(+args.args[0]);
+		const inverted = args.isMessageSolver(args.args) && isNaN(+args.args[0]);
 		let pos, emote;
 		if(inverted) emote = args.getString('emote');
 		pos = CommandOptionSolver.asNumbers(args.parsePolyParamSync('posición', { regroupMethod: 'NONE' })).filter(x => !isNaN(x));
