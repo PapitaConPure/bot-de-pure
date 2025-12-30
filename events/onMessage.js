@@ -22,6 +22,13 @@ const { ConverterEmptyPayload } = require('../systems/agents/converters.js');
 const { addMessageCascade } = require('./onMessageDelete.js');
 //#endregion
 
+const CommandResults = /**@type {const}*/({
+	VOID: 0,
+	SUCCEEDED: 1,
+	FAILED: 2,
+});
+/**@typedef {import('types').ValuesOf<typeof CommandResults>} CommandResult*/
+
 /**
  * 
  * @param {String} guildId 
@@ -42,18 +49,19 @@ async function updateChannelMessageCounter(guildId, channelId, userId) {
 
 /**
  * @param {Discord.Message<true>} message
- * @param {Discord.Client} client
  * @param {String} commandName
  * @param {import('../localdata/customization/prefixes.js').PrefixPair} prefixPair
+ * @returns {Promise<CommandResult>}
  */
-async function handleInvalidCommand(message, client, commandName, prefixPair) {
+async function handleInvalidCommand(message, commandName, prefixPair) {
 	const replies = require('./unknownCommandReplies.json');
 	
 	const selectedReply = replies[rand(replies.length)];
 	async function replyAndDelete() {
 		const content = selectedReply.text.replace('{commandName}', commandName);
 		const notice = await message.reply({ content }).catch(() => undefined);
-		return setTimeout(() => notice?.delete().catch(() => undefined), 6000);
+		setTimeout(() => notice?.delete().catch(() => undefined), 6000);
+		return CommandResults.VOID;
 	}
 
 	if(commandName.length < 2)
@@ -83,18 +91,19 @@ async function handleInvalidCommand(message, client, commandName, prefixPair) {
 			name: `Comandos similares a "${commandName}"`,
 			value: suggestions.map(found => `• ${prefixPair.raw}${found.command.name}`).join('\n'),
 		});
-	return message.reply({ embeds: [ mockEmbed, suggestionEmbed ] });
+	message.reply({ embeds: [ mockEmbed, suggestionEmbed ] });
+	return CommandResults.VOID;
 }
 
 /**
  * @param {Discord.Message<true>} message
  * @param {CommandManager} command
- * @param {import('../localdata/models/stats.js').StatsDocument} stats
  * @param {Array<String>} args
  * @param {String} [rawArgs]
  * @param {String} [exceptionString]
+ * @returns {Promise<*>}
  */
-async function handleMessageCommand(message, command, stats, args, rawArgs, exceptionString) {
+async function handleMessageCommand(message, command, args, rawArgs, exceptionString) {
 	if(command.permissions) {
 		if(!command.permissions.isAllowedIn(message.member, message.channel)) {
 			const translator = await Translator.from(message.member);
@@ -141,55 +150,57 @@ async function handleMessageCommand(message, command, stats, args, rawArgs, exce
 		// @ts-expect-error
 		await command.execute(completeExtendedRequest, args, false, rawArgs);
 	}
-	stats.commands.succeeded++;
 }
 
 /**
  * @param {Error} error
  * @param {Discord.Message<true>} message
- * @param {import('../localdata/models/stats.js').StatsDocument} stats
  * @param {String} commandName
  * @param {Array<String>} args
+ * @returns {CommandResult}
  */
-function handleMessageCommandError(error, message, stats, commandName, args) {
+function handleMessageCommandError(error, message, commandName, args) {
 	const isPermissionsError = handleAndAuditError(error, message, { details: `"${message.content?.slice(0, 699)}"\n[${commandName} :: ${args}]` });
-	if(!isPermissionsError)
-		stats.commands.failed++;
+	return isPermissionsError ? CommandResults.VOID : CommandResults.FAILED;
 }
 
 /**
  * @param {Discord.Message<true>} message
- * @param {Discord.Client} client
- * @param {import('../localdata/models/stats.js').StatsDocument} stats
+ * @returns {Promise<CommandResult>}
  */
-async function checkEmoteCommand(message, client, stats) {
+async function checkEmoteCommand(message) {
 	const { content } = message;
+
 	const words = content.split(/[\n ]+/);
 	const emoteCommandIndex = words.findIndex(word => word.startsWith('&'));
-	if(emoteCommandIndex === -1) return;
+	if(emoteCommandIndex === -1)
+		return CommandResults.VOID;
 
 	auditRequest(message);
+	
 	const args = words.slice(emoteCommandIndex + 1);
 	const commandName = words[emoteCommandIndex].toLowerCase().slice(1);
 	const command = puré.emotes.get(commandName) || puré.emotes.find(cmd => cmd.aliases?.includes(commandName));
-	if(!command) return;
+	if(!command)
+		return CommandResults.VOID;
 
-	await handleMessageCommand(message, command, stats, args)
-	.catch(error => handleMessageCommandError(error, message, stats, commandName, args));
-	stats.markModified('commands');
+	try {
+		return handleMessageCommand(message, command, args);
+	} catch(error) {
+		return handleMessageCommandError(error, message, commandName, args);
+	}
 }
 
 /**
  * @param {Discord.Message<true>} message
- * @param {Discord.Client} client
- * @param {import('../localdata/models/stats.js').StatsDocument} stats
+ * @returns {Promise<CommandResult>}
  */
-async function checkCommand(message, client, stats) {
+async function checkCommand(message) {
 	const { content, guildId } = message;
 	const ppure = p_pure(guildId);
 
 	if(!content.toLowerCase().match(ppure.regex))
-		return checkEmoteCommand(message, client, stats);
+		return checkEmoteCommand(message);
 
 	auditRequest(message);
 
@@ -198,13 +209,17 @@ async function checkCommand(message, client, stats) {
 	let command = puré.commands.get(commandName) || puré.commands.find(cmd => cmd.aliases?.includes(commandName));
 	
 	if(!command)
-		return handleInvalidCommand(message, client, commandName, ppure);
+		return handleInvalidCommand(message, commandName, ppure);
 	//#endregion
 
 	const rawArgs = content.slice(content.indexOf(commandName) + commandName.length).trim();
-	await handleMessageCommand(message, command, stats, args, rawArgs, `${ppure.raw}${commandName}`)
-	.catch(error => handleMessageCommandError(error, message, stats, commandName, args));
-	stats.markModified('commands');
+	try {
+		await handleMessageCommand(message, command, args, rawArgs, `${ppure.raw}${commandName}`);
+		return CommandResults.SUCCEEDED;
+	} catch(error) {
+		handleMessageCommandError(error, message, commandName, args);
+		return CommandResults.FAILED;
+	}
 }
 
 /**
@@ -308,18 +323,28 @@ async function onMessage(message, client) {
 	updateChannelMessageCounter(guild.id, channel.id, author.id);
 
 	//Leer comando
-	checkCommand(message, client, stats);
+	const commandResult = await checkCommand(message);
+	
+	if(commandResult === CommandResults.VOID) {
+		//Ayuda para principiantes
+		if(!content.includes(`${client.user}`))
+			return;
 
-    if(!globalConfigs.noDataBase)
-		stats.save();
-
-	//Ayuda para principiantes
-	if(content.includes(`${client.user}`)) {
 		const command = require('../commands/Pure/prefijo.js');
 		const request = CommandManager.requestize(message);
 		const solver = new CommandOptionSolver(request, [], command.options);
 		return command.execute(request, solver);
 	}
+
+	if(globalConfigs.noDataBase)
+		return;
+
+	//Grabar estadísticas
+	console.log('Guardando...');
+	commandResult === CommandResults.SUCCEEDED && stats.commands.succeeded++;
+	commandResult === CommandResults.FAILED && stats.commands.failed++;
+	stats.markModified('commands');
+	stats.save();
 }
 
 module.exports = {

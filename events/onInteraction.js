@@ -27,7 +27,7 @@ async function onInteraction(interaction, client) {
     const stats = (!globalConfigs.noDataBase && await Stats.findOne({})) || new Stats({ since: Date.now() });
 
     if(interaction.isAutocomplete())
-        return handleAutocompleteInteraction(interaction, client, stats);
+        return handleAutocompleteInteraction(interaction);
 
     auditRequest(interaction);
 
@@ -38,7 +38,7 @@ async function onInteraction(interaction, client) {
         return handleAction(interaction, client, stats);
 
     if(interaction.isButton() || interaction.isStringSelectMenu() || interaction.isModalSubmit())
-        return handleComponent(interaction, client, stats);
+        return handleComponent(interaction);
 
     return handleUnknownInteraction(interaction);
 }
@@ -149,10 +149,8 @@ async function handleAction(interaction, client, stats) {
 /**
  * 
  * @param {import('discord.js').ButtonInteraction | import('discord.js').StringSelectMenuInteraction | import('discord.js').ModalSubmitInteraction} interaction 
- * @param {import('discord.js').Client} client 
- * @param {import('../localdata/models/stats.js').StatsDocument} stats 
 */
-async function handleComponent(interaction, client, stats) {
+async function handleComponent(interaction) {
     if(!interaction.customId)
         return handleUnknownInteraction(interaction);
 
@@ -202,10 +200,8 @@ async function handleComponent(interaction, client, stats) {
 
 /**
  * @param {import('discord.js').AutocompleteInteraction<'cached'>} interaction 
- * @param {import('discord.js').Client} client 
- * @param {import('../localdata/models/stats.js').StatsDocument} stats 
 */
-async function handleAutocompleteInteraction(interaction, client, stats) {
+async function handleAutocompleteInteraction(interaction) {
     const { commandName, options } = interaction;
     const focusedOption = options.getFocused(true);
 
