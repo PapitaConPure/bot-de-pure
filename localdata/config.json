@@ -2,13 +2,16 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "3.8.2",
+            "number": "3.8.3",
             "name": "Flamenco Perlado"
         },
-        "note": "Operando con normalidad",
+        "note": {
+            "es": "Operando con normalidad",
+            "en": "Operating normally",
+            "ja": "正常に動作"
+        },
         "changelog": [
             "p!emote ahora obtiene emotes de un mensaje",
-            "Filtros de p!ayuda corregidos",
             "**PuréPix** ahora permite utilizar el servicio de conversión \"phixiv\"",
             "**PuréPix** ahora usa \"phixiv\" como servicio de conversión por defecto",
             "Interoperabilidad parcial entre **PuréPix** y **Puréet**",
@@ -18,8 +21,9 @@
             "Acción contextual \"Buscar Fuente\" agregada",
             "p!cola ahora tiene controles adicionales",
             "**Puréet** ahora permite usar los servicios de conversión \"girlcockx\" y \"cunnyx\"",
-            "p!info ha sido renovado y ahora permite especificar un `--miembro`",
-            "Operabilidad de **PuréMusic** amendada"
+            "p!info ha sido renovado, traducido y ahora permite especificar un `--miembro`",
+            "Operabilidad de **PuréMusic** amendada",
+            "p!estado ha sido renovado y traducido"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos",

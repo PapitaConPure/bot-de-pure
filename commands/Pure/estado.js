@@ -1,32 +1,24 @@
-const { EmbedBuilder, CommandInteraction, Message, StringSelectMenuBuilder, ChatInputCommandInteraction, Colors } = require('discord.js'); //Integrar discord.js
+const { EmbedBuilder, StringSelectMenuBuilder, MessageFlags, ContainerBuilder, ButtonStyle, ButtonBuilder, SeparatorSpacingSize } = require('discord.js'); //Integrar discord.js
 const globalConfigs = require('../../localdata/config.json'); //Variables globales
 const { bot_status } = globalConfigs;
 const { readdirSync } = require('fs'); //Para el contador de comandos
 const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { Stats } = require('../../localdata/models/stats');
-const { improveNumber, isShortenedNumberString, compressId } = require('../../func');
+const { quantityDisplay } = require('../../func');
 const { CommandTags, CommandManager } = require('../Commons/commands');
-const { makeStringSelectMenuRowBuilder } = require('../../tsCasts');
-const { getWikiPageComponentsV2: injectWikiPage, searchCommand } = require('../../wiki');
+const { searchCommand, makeGuideRow, getWikiPageComponentsV2 } = require('../../wiki');
 const { Translator } = require('../../internationalization');
 
-const { host, version, note, changelog, todo: toDo } = bot_status;
+const { version, note, changelog, todo: toDo } = bot_status;
 const COMMAND_REGEX = new RegExp(`(${p_pure().raw})([a-záéíóúñ0-9_.-]+)`, 'gi');
 
 /**
  * @param {string} str 
- * @param {import('../Commons/typings').ComplexCommandRequest} request
+ * @param {import('../Commons/typings').AnyRequest} request
  */
 function listFormat(str, request) {
-    return str.replace(COMMAND_REGEX, `\`${p_pure(request).raw}$2\``);
+    return str.replace(COMMAND_REGEX, `\`${p_pure(request.guildId).raw}$2\``);
 };
-/**@param {number} number*/
-function counterDisplay(number) {
-    const numberString = improveNumber(number, true);
-    if(isShortenedNumberString(numberString))
-        return `${numberString} de`;
-    return numberString;
-}
 
 const flags = new CommandTags().add('COMMON');
 const command = new CommandManager('estado', flags)
@@ -35,83 +27,170 @@ const command = new CommandManager('estado', flags)
     .setExecution(async request => {
         const translator = await Translator.from(request.member);
         const stats = (!globalConfigs.noDataBase && await Stats.findOne({})) || new Stats({ since: Date.now( )});
-        const formattedChangelog = changelog.map(item => `- ${item}`).join('\n');
-        const formattedToDo = toDo.map(item => `- ${item}`).join('\n');
-        const matchedCommands = changelog.join().matchAll(COMMAND_REGEX);
         const counts = {
             commands: readdirSync('./commands/Pure').filter(file => file.endsWith('.js')).length,
             guilds: request.client.guilds.cache.size
         }
         const totalCommands = stats.commands.succeeded + stats.commands.failed;
+        const me = request.client.user;
+        const papita = await request.client.users.fetch(globalConfigs.peopleid.papita);
 
-        const embed = new EmbedBuilder()
-            .setColor(0x608bf3)
-            .setAuthor({ name: 'Estado del Bot', iconURL: request.client.user.avatarURL({ extension: 'png', size: 1024 }) })
-            .setThumbnail('https://i.imgur.com/HxTxjdL.png')
-            .setFooter({ text: `Ofreciendo un total de ${counts.commands} comandos en ${counts.guilds} servidores` })
-            .addFields(
-                { name: 'Creador', value: `Papita con Puré\n[423129757954211880]`, inline: true },
-                { name: 'Host', value: (host === 'https://localhost/') ? 'https://heroku.com/' : 'localhost', inline: true },
-                { name: 'Versión', value: `#️⃣ ${version.number}\n📜 ${version.name}`, inline: true },
-                { name: 'Visión general', value: note },
-                { name: 'Cambios', value: listFormat(formattedChangelog, request) },
-                { name: 'Lo que sigue', value: listFormat(formattedToDo, request) },
-                {
-                    name: 'Estadísticas',
-                    value: [
-                        `🎦 ${counterDisplay(stats.read)} mensajes registrados`,
-                        `⚙️ ${counterDisplay(totalCommands)} comandos procesados`,
-                        `✅ ${counterDisplay(stats.commands.succeeded)} (${(stats.commands.succeeded / totalCommands * 100).toFixed(2)}%) ejecuciones de comando exitosas`,
-                        `⚠️️ ${counterDisplay(stats.commands.failed)} (${(stats.commands.failed / totalCommands * 100).toFixed(2)}%) ejecuciones de comando fallidas`,
-                    ].join('\n'),
-                },
+        const container = new ContainerBuilder()
+            .setAccentColor(globalConfigs.tenshiColor)
+            .addMediaGalleryComponents(mediaGallery =>
+                mediaGallery.addItems(MediaGalleryItem =>
+                    MediaGalleryItem.setURL('https://i.imgur.com/HxwHF2i.jpeg')
+                )
+            )
+            .addSectionComponents(section =>
+                section
+                    .addTextDisplayComponents(
+                        textDisplay => textDisplay.setContent(translator.getText('estadoVersion', version.number)),
+                        textDisplay => textDisplay.setContent(translator.getText('estadoTitle', me.displayName)),
+                        textDisplay => textDisplay.setContent(translator.getText('estadoCommandsAndServersCount', counts.commands, counts.guilds)),
+                    )
+                    .setThumbnailAccessory(accessory =>
+                        accessory
+                            .setDescription(translator.getText('estadoAvatarAlt', me.displayName))
+                            .setURL(me.avatarURL({ extension: 'png', size: 1024 }))
+                    )
+            )
+            .addSeparatorComponents(separator => separator.setDivider(true))
+            .addTextDisplayComponents(textDisplay =>
+                textDisplay.setContent(`## ${note[translator.locale]}`)
+            )
+            .addActionRowComponents(actionRow =>
+                actionRow.addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('estado_showChanges')
+                        .setEmoji(globalConfigs.remoteStartup ? '1356977730754842684' : '👁️')
+                        .setLabel(translator.getText('estadoDevelopmentChangesButton'))
+                        .setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder()
+                        .setCustomId('estado_showUpcoming')
+                        .setEmoji(globalConfigs.remoteStartup ? '1356977730754842684' : '👁️')
+                        .setLabel(translator.getText('estadoDevelopmentUpcomingButton'))
+                        .setStyle(ButtonStyle.Secondary),
+                )
+            )
+            .addSeparatorComponents(separator => separator.setDivider(false))
+            .addTextDisplayComponents(textDisplay =>
+                textDisplay.setContent([
+                    translator.getText('estadoStatsTitle'),
+                    translator.getText('estadoStatsRegisteredMessagesCount', quantityDisplay(stats.read, translator)),
+                    translator.getText('estadoStatsProcessedCommandsCount', quantityDisplay(totalCommands, translator)),
+                    translator.getText('estadoStatsSuccessfulCommandsCount', quantityDisplay(stats.commands.succeeded, translator), (stats.commands.succeeded / totalCommands * 100).toFixed(2)),
+                    translator.getText('estadoStatsFailedCommandsCount', quantityDisplay(stats.commands.failed, translator), (stats.commands.failed / totalCommands * 100).toFixed(2)),
+                ].join('\n'))
+            )
+            .addSeparatorComponents(separator =>
+                separator
+                    .setDivider(true)
+                    .setSpacing(SeparatorSpacingSize.Large)
+            )
+            .addSectionComponents(section =>
+                section
+                    .addTextDisplayComponents(
+                        textDisplay => textDisplay.setContent(translator.getText('estadoBotOwnerEpigrapgh')),
+                        textDisplay => textDisplay.setContent(`## ${papita.displayName}`),
+                        textDisplay => textDisplay.setContent([
+                            `🆔 \`${papita.id}\``,
+                            `#️⃣ \`${papita.username}\``,
+                        ].join('\n')),
+                    )
+                    .setThumbnailAccessory(accessory =>
+                        accessory
+                            .setDescription(translator.getText('avatarGlobalAvatarAlt', papita.displayName))
+                            .setURL(papita.avatarURL({ extension: 'png', size: 1024 }))
+                    )
             );
 
-        const embeds = [embed];
-        const components = [];
+        return request.reply({
+            flags: MessageFlags.IsComponentsV2,
+            components: [container],
+        });
+    })
+    .setSelectMenuResponse(async function getHelp(interaction) {
+		const guildPrefix = p_pure(interaction.guildId).raw;
+		const helpCommand = `${guildPrefix}${command.name}`;
+        const query = interaction.values[0];
+        const foundCommand = searchCommand(interaction, query);
+
+		if(!foundCommand) {
+			const embed = new EmbedBuilder()
+				.setColor(0xe44545)
+				.setTitle('Sin resultados')
+				.addFields({
+					name: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
+					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}ayuda <comando>\` para ver un comando en específico`,
+				});
+			const components = [makeGuideRow(interaction)];
+			return interaction.update({ embeds: [embed], components });
+		}
+
+        const components = getWikiPageComponentsV2(foundCommand, CommandManager.requestize(interaction));
+        return interaction.reply({
+            flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+            components: components,
+        });
+    })
+    .setButtonResponse(async function showChanges(interaction) {
+        const translator = await Translator.from(interaction);
+
+        const matchedCommands = changelog.join().matchAll(COMMAND_REGEX);
+        const formattedChangelog = changelog.map(item => `- ${item}`).join('\n');
+        const container = new ContainerBuilder()
+            .setAccentColor(globalConfigs.tenshiColor)
+            .addTextDisplayComponents(
+                textDisplay => textDisplay.setContent([
+                    translator.getText('estadoChangesTitle'),
+                    listFormat(formattedChangelog, interaction),
+                ].join('\n')),
+            );
+        
         if(matchedCommands != null) {
-            /**@type {Array<import('discord.js').SelectMenuComponentOptionData | import('discord.js').APISelectMenuOption>}*/
-            const commandOptions = [];
+            const prefix = p_pure(interaction.guildId).raw;
+            const commandOptions = /**@type {(import('discord.js').SelectMenuComponentOptionData|import('discord.js').APISelectMenuOption)[]}*/([]);
             for(const matchedCommand of matchedCommands) {
                 const commandName = matchedCommand[2];
                 commandOptions.push({
-                    label: `${p_pure(request).raw}${commandName}`,
+                    label: `${prefix}${commandName}`,
                     value: commandName,
                 });
             }
 
-            components.push(makeStringSelectMenuRowBuilder().addComponents(
-                new StringSelectMenuBuilder()
-                    .setCustomId(`estado_getHelp_${compressId(request.userId)}`)
-                    .setPlaceholder('Comandos mencionados...')
-                    .addOptions(commandOptions),
-            ));
-        }
-
-        return request.reply({ embeds, components });
-    })
-    .setSelectMenuResponse(async function getHelp(interaction) {
-        const embeds = [];
-        const components = [];
-
-        const query = interaction.values[0];
-        const foundCommand = searchCommand(interaction, query);
-        if(foundCommand) {
-            injectWikiPage(foundCommand, interaction.guildId, { embeds, components });
-        } else {
-            const translator = await Translator.from(interaction.member);
-            embeds.push(
-                new EmbedBuilder()
-                    .setColor(Colors.Red)
-                    .setTitle(translator.getText('somethingWentWrong')),
+            container.addActionRowComponents(actionRow =>
+                actionRow.addComponents(
+                    new StringSelectMenuBuilder()
+                        .setCustomId('estado_getHelp')
+                        .setPlaceholder('Comandos mencionados...')
+                        .addOptions(commandOptions),
+                )
             );
         }
 
         return interaction.reply({
-            embeds,
-            components,
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+            components: [container],
         });
-    }, { userFilterIndex: 0 });
+    })
+    .setButtonResponse(async function showUpcoming(interaction) {
+        const translator = await Translator.from(interaction);
+        
+        const formattedToDo = toDo.map(item => `- ${item}`).join('\n');
+        const container = new ContainerBuilder()
+            .setAccentColor(globalConfigs.tenshiColor)
+            .addTextDisplayComponents(
+                textDisplay => textDisplay.setContent([
+                    translator.getText('estadoUpcomingTitle'),
+                    listFormat(formattedToDo, interaction),
+                ].join('\n')),
+            );
+
+        return interaction.reply({
+            flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+            components: [container],
+        });
+    });
 
 module.exports = command;
