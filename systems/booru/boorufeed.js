@@ -98,8 +98,8 @@ async function processFeeds(booru, guilds) {
             const messagesToSend = /**@type {Array<Discord.Message<true>>}*/([]);
             await Promise.all(newPosts.map(async post => {
                 try {
-                    const formatted = await formatBooruPostMessage(booru, post, feed);
-                    const sent = await feed.channel.send(formatted);
+                    const formattedContainer = await formatBooruPostMessage(booru, post, feed);
+                    const sent = await feed.channel.send({ flags: Discord.MessageFlags.IsComponentsV2, components: [formattedContainer] });
                     await notifyUsers(post, sent, members, feedSuscriptions);
                     messagesToSend.push(sent);
                 } catch(error) {

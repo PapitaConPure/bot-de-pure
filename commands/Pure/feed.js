@@ -1,4 +1,4 @@
-const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType, MessageFlags } = require('discord.js');
 const { isNotModerator, shortenText, guildEmoji, compressId, isNSFWChannel, randInArray } = require('../../func.js');
 const GuildConfig = require('../../localdata/models/guildconfigs.js');
 const { auditError, auditAction } = require('../../systems/others/auditor.js');
@@ -7,7 +7,7 @@ const globalConfigs = require('../../localdata/config.json');
 const { Booru, TagTypes, BooruUnknownPostError } = require('../../systems/booru/boorufetch.js');
 const { CommandManager } = require('../Commons/cmdBuilder.js');
 const { addGuildToFeedUpdateStack } = require('../../systems/booru/boorufeed.js');
-const { formatBooruPostMessage, formatTagNameListNew } = require('../../systems/booru/boorusend.js');
+const { formatBooruPostMessage, formatTagNameListNew, getPostUrlFromContainer } = require('../../systems/booru/boorusend.js');
 const { Translator } = require('../../internationalization.js');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts.js');
@@ -519,9 +519,15 @@ const command = new CommandManager('feed', flags)
 		const post = randInArray(await booru.search(feed.tags, { limit: 42 }));
 		if(!post) return interaction.editReply({ content: 'Las tags del feed no dieron ningún resultado' });
 
-		const preview = await formatBooruPostMessage(booru, post, { ...feed, allowNSFW });
-		preview.components.forEach(row => row.components.forEach(button => button.data.style !== ButtonStyle.Link && button.setDisabled(true)));
-		return interaction.editReply({ ...preview, content: '-# Esto es una vista previa. Las imágenes NSFW solo pueden previsualizarse en canales NSFW' });
+		const preview = await formatBooruPostMessage(booru, post, { ...feed, allowNSFW, disableActions: true });
+		return interaction.editReply({
+			flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+			components: [
+				preview.addTextDisplayComponents(textDisplay =>
+					textDisplay.setContent('-# Esto es una vista previa. Las imágenes NSFW solo pueden previsualizarse en canales NSFW')
+				)
+			],
+		});
 	}, { userFilterIndex: 0 })
 	.setSelectMenuResponse(async function selectedDelete(interaction, authorId) {
 		const translator = await Translator.from(interaction.user.id);
@@ -1000,14 +1006,15 @@ const command = new CommandManager('feed', flags)
 	})
 	.setButtonResponse(async function showFeedImageTags(interaction, isNotFeed) {
         const translator = await Translator.from(interaction.user.id);
-
-		const url = (/**@type {import('discord.js').ButtonComponent}*/(interaction.message.components[0].components[0])).url;
+		
+		const container = /**@type {import('discord.js').ContainerComponent}*/(interaction.message.components[0]);
+		const url = getPostUrlFromContainer(container);
 		const booru = new Booru(globalConfigs.booruCredentials);
 		try {
 			const post = await booru.fetchPostByUrl(url);
 			const postTags = await booru.fetchPostTags(post);
 
-			const postArtistTags   = postTags
+			const postArtistTags = postTags
 				.filter(t => t.type === TagTypes.ARTIST)
 				.map(t => t.name);
 			const postCharacterTags = postTags
@@ -1137,7 +1144,8 @@ const command = new CommandManager('feed', flags)
 			});
 		
 		const { message } = interaction;
-		const url = (/**@type {import('discord.js').ButtonComponent}*/(message.components[0].components[0])).url;
+		const container = /**@type {import('discord.js').ContainerComponent}*/(message.components[0]);
+		const url = getPostUrlFromContainer(container);
 		if(isNotFeed || !url)
 			return Promise.all([
 				interaction.reply({
@@ -1212,7 +1220,8 @@ const command = new CommandManager('feed', flags)
 	.setButtonResponse(async function contribute(interaction) {
         const translator = await Translator.from(interaction.user.id);
 
-		const url = (/**@type {import('discord.js').ButtonComponent}*/(interaction.message.components[0].components[0])).url;
+		const container = /**@type {import('discord.js').ContainerComponent}*/(interaction.message.components[0]);
+		const url = getPostUrlFromContainer(container);
 		const booru = new Booru(globalConfigs.booruCredentials);
 		try {
 			const post = await booru.fetchPostByUrl(url);

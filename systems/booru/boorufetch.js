@@ -1,6 +1,7 @@
 const { default: axios } = require('axios');
 const { shuffleArray, decodeEntities } = require('../../func');
 const BooruTags = require('../../localdata/models/boorutags');
+const globalConfigs = require('../../localdata/config.json');
 
 /**
  * @typedef {Object} APIPostData
@@ -316,7 +317,7 @@ class Booru {
 		
 		try {
 			const query = { name: { $in: uncachedTagNames } };
-			const savedTags = (await BooruTags.find(query)).map(t => new Tag(t));
+			const savedTags = (globalConfigs.noDataBase ? [] : await BooruTags.find(query)).map(t => new Tag(t));
 
 			const savedTagNames = savedTags.map(t => t.name);
 			const missingTagNames = uncachedTagNames.filter(tn => !savedTagNames.includes(tn));
@@ -351,7 +352,7 @@ class Booru {
 						},
 					}));
 		
-					await BooruTags.bulkWrite(bulkOps);
+					!globalConfigs.noDataBase && await BooruTags.bulkWrite(bulkOps);
 				}
 			};
 
@@ -557,7 +558,7 @@ class Tag {
 /**@param {string} source*/
 function getSourceUrl(source) {
 	if(!source) return null;
-	const smatch = source.match(/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-])+\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_\/\.0-9#:?=&;,]*)?)?/);
+	const smatch = source.match(/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-])+\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_/.0-9#:?=&;,]*)?)?/);
 	if(!smatch) return null;
 	return source.slice(smatch.index, smatch.index + smatch[0].length);
 }
