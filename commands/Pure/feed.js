@@ -878,7 +878,7 @@ const command = new CommandManager('feed', flags)
 		const translator = await Translator.from(interaction.user.id);
 		const fetchedChannel = interaction.guild.channels.cache.get(channelId);
 		const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-		delete gcfg.feeds[channelId].tags;
+		delete gcfg.feeds[channelId].maxTags;
 		gcfg.markModified('feeds');
 		await gcfg.save();
 
