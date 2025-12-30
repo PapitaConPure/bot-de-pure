@@ -76,13 +76,11 @@ const command = new CommandManager('dados', flags)
 			.slice(0, 16)
 			.map(parseDice);
 
-		if(dices.some(dice => dice == null || dice.d <= 0))
+		if(dices.some(dice => dice == null))
 			return request.reply({ content: '⚠️ Entrada inválida' })
 
-		const { user } = request;
 		const embed = new EmbedBuilder()
 			.setColor(0x3f4581)
-			.setAuthor({ name: `${user.username} tiró los dados...`, iconURL: user.avatarURL({ extension: 'png', size: 512 }) })
 			.addFields({
 				name: 'Salió:',
 				value: dices.map(dice => `${dice.d} x 🎲(${dice.f}) → [${dice.r.join(',')}] = **${dice.t}**`).join('\n**+** '),
@@ -95,7 +93,7 @@ const command = new CommandManager('dados', flags)
 			});
 		
 		return request.reply({ embeds: [embed] })
-		.catch(() => request.reply({ content: '❌ No te pasei de gracioso, ¿tamo? <:junkWTF:796930821260836864> <:pistolaR:697351201301463060>' }));
+		.catch(() => request.reply({ content: '⚠️ Entrada inválida' }));
 	});
 
 /**
@@ -106,16 +104,19 @@ const command = new CommandManager('dados', flags)
 function parseDice(diceInput) {
 	if(!diceInput) return;
 	
-	const [ match, dices, faces ] = diceInput;
+	const [ , dices, faces ] = diceInput;
+	const diceNumber = +dices;
+	const faceNumber = +faces;
 
-	if(+dices > 999) return;
+	if(diceNumber < 1 || diceNumber > 999) return;
+	if(faceNumber < 2 || faceNumber > 999) return;
 
-	const r = Array(+dices).fill().map(_ => randRange(1, +faces + 1));
+	const r = Array(+dices).fill().map(() => randRange(1, +faces + 1));
 	const t = r.reduce((a, b) => a + b);
 	
 	return ({
-		d: +dices,
-		f: +faces,
+		d: diceNumber,
+		f: faceNumber,
 		r,
 		t,
 	});
