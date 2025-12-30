@@ -76,7 +76,7 @@ const command = new CommandManager('dados', flags)
 			.slice(0, 16)
 			.map(parseDice);
 
-		if(dices.some(dice => dice == undefined))
+		if(dices.some(dice => dice == null || dice.d <= 0))
 			return request.reply({ content: '⚠️ Entrada inválida' })
 
 		const { user } = request;
