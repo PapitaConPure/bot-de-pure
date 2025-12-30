@@ -71,7 +71,7 @@ const command = new CommandManager('emote', flags)
 		}
 
 		if(!embeds.length)
-			return request.reply({ content: '⚠️️ Los emotes mencionados son inválidos o inaccesibles. Verifica que yo esté en el servidor con el emote.' });
+			return request.reply({ content: '⚠️️ Los emotes mencionados son inválidos o inaccesibles. Verifica que yo esté en el servidor con el emote' });
 		
 		return request.reply({ embeds, components });
 	});

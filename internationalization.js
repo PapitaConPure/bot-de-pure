@@ -551,6 +551,16 @@ let localesObject = /**@type {const}*/({
 		ja: `${subl(0)}によって呼び出されたコマンド`,
 	},
 
+	actionGetEmojis: {
+		es: 'Obtener Emojis',
+		en: 'Fetch Emojis',
+		ja: '絵文字を取得',
+	},
+	actionGetSticker: {
+		es: 'Obtener Sticker',
+		en: 'Fetch Sticker',
+		ja: 'ステッカーを取得',
+	},
 	actionFindSource: {
 		es: 'Buscar Fuente',
 		en: 'Find Source',
