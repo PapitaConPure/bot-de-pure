@@ -4,6 +4,9 @@ const { toUtcOffset, toTimeZoneAlias } = require('../../timezones');
 const { dateToUTCFormat } = require('../../func');
 const { Translator } = require('../../internationalization');
 
+/**@param {string} text*/
+const hasShortenedFormat = text => text && (['am','pm'].some(m => text.toLowerCase().endsWith(m)));
+
 const options = new CommandOptions()
 	.addParam('hora', 'TEXT', 'para establecer la hora a convertir', { optional: true })
 	.addFlag('lzt', ['huso', 'franja', 'zona', 'zone', 'timezone', 'offset'], 'para especificar un huso horario de referencia', { name: 'z', type: 'TEXT' })
@@ -59,7 +62,7 @@ const command = new CommandManager('hora', flags)
 		
 		let isShortened = false;
 		let plus12;
-		if(['am','pm'].some(m => rawTime.toLowerCase().endsWith(m))) {
+		if(hasShortenedFormat(rawTime)) {
 			isShortened = true;
 			plus12 = rawTime.toLowerCase().endsWith('pm');
 			rawTime = rawTime.slice(0, -2);
@@ -77,28 +80,39 @@ const command = new CommandManager('hora', flags)
 			case 2: [ hours, minutes, seconds ] = [ ...time, 0 ]; break;
 			case 1: {
 				[ hours ] = time;
+				
+				if(request.isMessage) {
+					const possibleMinutes = args.next();
+					if(hasShortenedFormat(possibleMinutes)) {
+						plus12 = possibleMinutes.toLowerCase().endsWith('pm');
+						isShortened = true;
+						break;
+					}
+					minutes = (possibleMinutes != null) ? +possibleMinutes : 0;
 
-				const possibleMinutes = args.next();
-				if(possibleMinutes?.toLowerCase() === 'pm') {
-					plus12 = true;
-					break;
+					const possibleSeconds = args.next();
+					if(hasShortenedFormat(possibleSeconds)) {
+						plus12 = possibleSeconds.toLowerCase().endsWith('pm');
+						isShortened = true;
+						break;
+					}
+					seconds = (possibleSeconds != null) ? +possibleSeconds : 0;
 				}
-				minutes = (possibleMinutes != null) ? +possibleMinutes : 0;
-
-				const possibleSeconds = args.next();
-				if(possibleSeconds?.toLowerCase() === 'pm') {
-					plus12 = true;
-					break;
-				}
-				seconds = (possibleSeconds != null) ? +possibleSeconds : 0;
 
 				break;
 			}
 		}
 
-		if(args.isMessageSolver() && args.next()?.toLowerCase() === 'pm')
-			plus12 = true;
+		if(request.isMessage) {
+			const finalTestArg = args.next();
 
+			if(hasShortenedFormat(finalTestArg)) {
+				plus12 = finalTestArg.toLowerCase().endsWith('pm');
+				isShortened = true;
+			}
+		}
+
+		
 		const isInvalidTime = (timeArray) => {
 			if(timeArray.some(t => isNaN(t) || t < 0 || t >= 60)) return true;
 			
