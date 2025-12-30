@@ -10,8 +10,7 @@ const client = new Catbox();
 
 const options = new CommandOptions()
 	.addParam('enlaces', 'TEXT', 'para indicar enlaces de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
-	.addParam('imagens', 'IMAGE', 'para indicar archivos de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
-	.addFlag('r', [ 'registrar' ], 'para registrar una ID de cliente y evitar el límite global');
+	.addParam('imagens', 'IMAGE', 'para indicar archivos de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 });
 
 const flags = new CommandTags().add('COMMON');
 
