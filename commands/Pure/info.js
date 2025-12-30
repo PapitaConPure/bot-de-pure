@@ -87,7 +87,7 @@ const command = new CommandManager('info', flags)
 			}
 		});
 		
-		const bannerURL = guild.bannerURL();
+		const bannerURL = guild.bannerURL({ size: 4096 });
 		if(bannerURL)
 			mainCointainer.addMediaGalleryComponents(mediaGallery =>
 				mediaGallery.addItems(
