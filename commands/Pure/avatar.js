@@ -25,7 +25,7 @@ const getAvatarContainer = (member, translator) => {
         container.addMediaGalleryComponents(mediaGallery =>
             mediaGallery.addItems(mediaGalleryItem =>
                 mediaGalleryItem
-                    .setDescription(translator.getText('avatarBannerAlt', member.user.displayName))
+                    .setDescription(translator.getText('avatarGlobalBannerAlt', member.user.displayName))
                     .setURL(userBannerURL)
             )
         );
@@ -44,7 +44,7 @@ const getAvatarContainer = (member, translator) => {
                 )
                 .setThumbnailAccessory(accessory =>
                     accessory
-                        .setDescription(translator.getText('avatarAvatarAlt', member.user.displayName))
+                        .setDescription(translator.getText('avatarGlobalAvatarAlt', member.user.displayName))
                         .setURL(userAvatarURL)
                 )
         );
@@ -59,8 +59,8 @@ const getAvatarContainer = (member, translator) => {
         container.addMediaGalleryComponents(mediaGallery =>
             mediaGallery.addItems(mediaGalleryItem =>
                 mediaGalleryItem
-                    .setDescription(translator.getText('avatarBannerAlt', member.displayName))
-                    .setURL(userBannerURL)
+                    .setDescription(translator.getText('avatarGuildBannerAlt', member.displayName))
+                    .setURL(memberBannerURL)
             )
         );
     
@@ -78,7 +78,7 @@ const getAvatarContainer = (member, translator) => {
                 )
                 .setThumbnailAccessory(accessory =>
                     accessory
-                        .setDescription(translator.getText('avatarAvatarAlt', member.displayName))
+                        .setDescription(translator.getText('avatarGuildAvatarAlt', member.displayName))
                         .setURL(memberAvatarURL)
                 )
         );

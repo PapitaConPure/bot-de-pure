@@ -682,15 +682,25 @@ let localesObject = /**@type {const}*/({
 		en: 'Banner',
 		ja: 'バナー',
 	},
-	avatarAvatarAlt: {
+	avatarGlobalAvatarAlt: {
 		es: `Avatar global de ${subl(0)}`,
 		en: `${subl(0)}'s global avatar`,
 		ja: `${subl(0)}さんのグローバルアバター`,
 	},
-	avatarBannerAlt: {
-		es: 'Portada',
-		en: 'Banner',
-		ja: 'バナー',
+	avatarGlobalBannerAlt: {
+		es: `Portada global de ${subl(0)}`,
+		en: `${subl(0)}'s global banner`,
+		ja: `${subl(0)}さんのグローバルバナー`,
+	},
+	avatarGuildAvatarAlt: {
+		es: `Avatar global de ${subl(0)}`,
+		en: `${subl(0)}'s global avatar`,
+		ja: `${subl(0)}さんのグローバルアバター`,
+	},
+	avatarGuildBannerAlt: {
+		es: `Portada de servidor de ${subl(0)}`,
+		en: `${subl(0)}'s guild banner`,
+		ja: `${subl(0)}さんのサーバーバナー`,
 	},
 
 	cultivarUnauthorized: {
@@ -1767,6 +1777,62 @@ let localesObject = /**@type {const}*/({
 		es: 'Lista de usuarios',
 		en: 'Users list',
 		ja: 'ユーザーリスト',
+	},
+
+	estadoTitle: {
+		es: `# Estado de ${subl(0)}`,
+		en: `# ${subl(0)}'s Status`,
+		ja: `# ${subl(0)}の状態`,
+	},
+	estadoVersion: {
+		es: `-# Versión ${subl(0)}`,
+		en: `-# Version ${subl(0)}`,
+		ja: `-# Version ${subl(0)}`,
+	},
+	estadoAvatarAlt: {
+		es: `Avatar de ${subl(0)}`,
+		en: `${subl(0)}\`s avatar`,
+		ja: `${subl(0)}のアバター`,
+	},
+	estadoCommandsAndServersCount: {
+		es: `🍑 Ofreciendo un total de **${subl(0)}** comandos en **${subl(1)}** servidores`,
+		en: `🍑 Offering **${subl(0)}** commands total on **${subl(1)}** guilds`,
+		ja: `🍑 **${subl(1)}**のギルドで合計**${subl(0)}**のコマンドを提供`,
+	},
+	estadoRegisteredMessagesCount: {
+		es: `🎦 **${subl(0)}** mensajes registrados`,
+		en: `🎦 **${subl(0)}** messages recorded`,
+		ja: `🎦 **${subl(0)}件**のメッセージが記録されました`,
+	},
+	estadoProcessedCommandsCount: {
+		es: `⚙️ **${subl(0)}** comandos procesados`,
+		en: `⚙️ **${subl(0)}** commands processed`,
+		ja: `⚙️ **${subl(0)}件**のコマンドが処理されました`,
+	},
+	estadoSuccessfulCommandsCount: {
+		es: `✅ **${subl(0)}** (${subl(1)}%) ejecuciones de comando exitosas`,
+		en: `✅ **${subl(0)}** (${subl(1)}%) successful command executions`,
+		ja: `✅ **${subl(0)}件**（${subl(1)}％）のコマンド実行が成功しました`,
+	},
+	estadoFailedCommandsCount: {
+		es: `⚠️️ **${subl(0)}** (${subl(1)}%) ejecuciones de comando fallidas`,
+		en: `⚠️️ **${subl(0)}** (${subl(1)}%) failed command executions`,
+		ja: `⚠️️ **${subl(0)}件**（${subl(1)}％）のコマンド実行が失敗しました`,
+	},
+	estadoBotOwnerEpigrapgh: {
+		es: '-# Creador',
+		en: '-# Creator',
+		ja: '-# クリエイター',
+	},
+	estadoChangesSubtitle: {
+		es: '### Cambios',
+		en: '### Changelog',
+		ja: '### 変更履歴',
+	},
+	estadoUpcomingSubtitle: {
+		es: '### Lo que sigue',
+		en: '### Planned features',
+		ja: '### 計画されている機能',
 	},
 
 	yoCancelledStep: {
