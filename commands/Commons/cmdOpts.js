@@ -1195,16 +1195,16 @@ class CommandOptionSolver {
 	 * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
 	 */
 	async getMessage(identifier, getRestOfMessageWords = false) {
+		this.ensureRequistified();
+
 		if(this.isInteractionSolver(this.#args)) {
-			const message = this.#args.getMessage(identifier);
+			const message = await fetchMessage(this.#args.getString(identifier), this.#request);
 			
 			if(!message?.inGuild())
 				return undefined;
 
-			return message;
+			return CommandOptionSolver.asMessage(message);
 		}
-
-		this.ensureRequistified();
 
 		const result = await this.#getResultFromParam(identifier, getRestOfMessageWords);
 		return CommandOptionSolver.asMessage(result);
