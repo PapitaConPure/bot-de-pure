@@ -340,7 +340,6 @@ async function onMessage(message, client) {
 		return;
 
 	//Grabar estadísticas
-	console.log('Guardando...');
 	commandResult === CommandResults.SUCCEEDED && stats.commands.succeeded++;
 	commandResult === CommandResults.FAILED && stats.commands.failed++;
 	stats.markModified('commands');
