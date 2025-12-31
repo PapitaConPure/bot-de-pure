@@ -19,9 +19,13 @@ const PIXIV_IMAGE_REQUEST_OPTIONS = {
 	},
 	responseType: 'arraybuffer',
 };
+
 const PIXIV_GALLERY_PAGE_SEPARATOR = '_';
-const PIXIV_REGEX = /<?((http:\/\/|https:\/\/)(www\.)?)(pixiv.net(\/en)?)\/artworks\/([0-9]{6,9})(_[0-9]{1,4})?>?/g;
+const PIXIV_DOMAIN_REGEX_PART = /((http:\/\/|https:\/\/)(www\.)?)(pixiv.net(\/en)?)/;
+const PIXIV_ARTWORKS_REGEX_PART = /\/artworks\/([0-9]{6,9})(_[0-9]{1,4})?/;
+const PIXIV_REGEX = new RegExp(/<?/.source + PIXIV_DOMAIN_REGEX_PART.source + PIXIV_ARTWORKS_REGEX_PART.source + />?/.source, 'g');
 const PIXIV_REPLY_REGEX = /(?<st>(?:<|\|\|){0,2}) ?(?:(?:http:\/\/|https:\/\/)(?:www\.))?(?:pixiv.net(?<lang>\/en)?)\/artworks\/(?<id>[0-9]{6,9})(?:\/(?<page>[0-9]{1,4}))? ?(?<ed>(?:>|\|\|){0,2})/g;
+
 const PIXIV_3P_CONVERTERS = {
 	phixiv: { name: 'phixiv', service: 'https://www.phixiv.net' },
 };
@@ -267,11 +271,13 @@ async function sendPixivPostsAsWebhook(message) {
 	//@ts-expect-error
 	message.files.push(...newMessage.files);
 	message.embeds ??= [];
-	
+
+	const pixivDomainStart = new RegExp(/^/.source + PIXIV_DOMAIN_REGEX_PART.source);
+
 	//@ts-expect-error
 	message.embeds = message.embeds
 		//@ts-expect-error
-		.filter(embed => embed.type === 'rich' || !embed.url.includes('pixiv.net'))
+		.filter(embed => embed.type === 'rich' || !pixivDomainStart.test(embed.url))
 		.map(embed => {
 			console.log(embed);
 			
