@@ -365,6 +365,7 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		}
 		
 		debug('A punto de formular etiquetas en el Embed del mensaje');
+		if(postArtistTags.length + postCharacterTags.length + postCopyrightTags.length > 0)
 		container.addTextDisplayComponents(textDisplay =>
 			textDisplay.setContent([
 				maxTags > 0 ? '###' : '',
