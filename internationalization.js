@@ -1,4 +1,5 @@
 const { fetchUserCache } = require('./usercache.js');
+const Locales = require('./locales.js');
 
 const ConditionFields = /**@type {const}*/({
 	Equal: '=',
@@ -7,17 +8,6 @@ const ConditionFields = /**@type {const}*/({
 	Greater: '>',
 	LesserOrEqual: '<=',
 	GreaterOrEqual: '>=',
-});
-
-/**
- * Idiomas disponibles
- * @see {@linkcode Translator.next}
- * @see UserConfigDocument (./localdata/models/userconfigs.js)
- */
-const Locales = /**@type {const}*/({
-	Spanish:  'es',
-	English:  'en',
-	Japanese: 'ja',
 });
 
 /**

@@ -1,6 +1,6 @@
 const Mongoose = require('mongoose');
+const Locales = require('../../locales');
 const { acceptedTwitterConverters } = require('../../systems/agents/pureet');
-const { Locales } = require('../../internationalization');
 
 const UserConfigSchema = new Mongoose.Schema({
     userId: {
