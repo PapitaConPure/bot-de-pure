@@ -1,7 +1,5 @@
 const { ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonStyle, EmbedBuilder, Colors } = require('discord.js'); //Integrar discord.js
-const { radix10to64 } = require('../../func.js'); //Funciones globales
 const { remoteStartup } = require('../../localdata/config.json'); //Configuraciones
-const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands.js');
 const { makeTextInputRowBuilder, makeButtonRowBuilder } = require('../../tsCasts.js');
 const { Translator } = require('../../internationalization.js');
@@ -25,7 +23,7 @@ const command = new CommandManager('imgur', flags)
 	.setBriefDescription('Permite subir imágenes con Imgur')
 	.setLongDescription(
 		'Permite subir imágenes por medio de la plataforma de Imgur, limitado a un máximo diario global.',
-		'Para evitar el máximo de subida global, puedes \`--registrar\` tu propia ID de cliente (explicado al usar la bandera de comando)',
+		'Para evitar el máximo de subida global, puedes `--registrar` tu propia ID de cliente (explicado al usar la bandera de comando)',
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {

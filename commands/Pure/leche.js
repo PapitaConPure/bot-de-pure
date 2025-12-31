@@ -4,7 +4,7 @@ const func = require('../../func.js'); //Funciones globales
 const { default: axios } = require('axios');
 const Canvas = require('canvas');
 const { utils } = require('../../localdata/images.json'); //Funciones globales
-const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
+const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 const { isThread } = require('../../func.js');
 
 /**
@@ -13,7 +13,7 @@ const { isThread } = require('../../func.js');
  * @param {String} linkRes 
  * @param {Discord.ImageURLOptions['size']} iSize 
  * @param {Boolean} isnsfw 
- * @param {CommandOptionSolver} args 
+ * @param {import('../Commons/commands').CommandOptionSolver} args 
  */
 async function resolverLink(request, linkRes, iSize, isnsfw, args) {
 	let iurl;
@@ -70,7 +70,7 @@ async function dibujarCum(msg, link) {
 };
 
 const options = new CommandOptions()
-	.addParam('objetivo', { name: 'Texto', expression: [ 'USER', 'EMOTE', 'IMAGE' ] },  'para disparar a un usuario, emote o imagen (<=256KB)', { optional: true });
+	.addParam('objetivo', [ 'USER', 'EMOTE', 'IMAGE' ],  'para disparar a un usuario, emote o imagen (<=256KB)', { optional: true });
 
 const flags = new CommandTags().add(
 	'MEME',
@@ -78,7 +78,7 @@ const flags = new CommandTags().add(
 );
 const command = new CommandManager('leche', flags)
 	.setAliases('lechita', 'cum', 'cummies', 'milk', 'milkies')
-	.setBriefDescription('Disparo lechita a ti o a quien especifiques. Funciona un poco diferente en canales NSFW')
+	.setBriefDescription('Disparo leche a ti o a quien especifiques. Funciona un poco diferente en canales NSFW')
 	.setLongDescription(
 		'Disparo leche a ti o a lo que especifiques 😳',
 		'**Nota:** en canales marcados como NSFW, el resultado será diferente',
