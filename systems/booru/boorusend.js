@@ -367,11 +367,11 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		debug('A punto de formular etiquetas en el Embed del mensaje');
 		container.addTextDisplayComponents(textDisplay =>
 			textDisplay.setContent([
-				'###',
+				maxTags > 0 ? '###' : '',
 				getCategoryFieldString('<:palette:1355128249658638488>', postArtistTags),
 				getCategoryFieldString('<:person:1355128242993893539>', postCharacterTags),
 				getCategoryFieldString('<:landmark:1355128256432443584>', postCopyrightTags),
-			].join(' '))
+			].join(' ').trim())
 		);
 
 		debug('Comprobando si se debe insertar un campo de tags sin categoría');
@@ -423,7 +423,7 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		.addSeparatorComponents(separator =>
 			separator
 				.setDivider(true)
-				.setSpacing(SeparatorSpacingSize.Large)
+				.setSpacing(maxTags > 0 ? SeparatorSpacingSize.Large : SeparatorSpacingSize.Small)
 		)
 		.addActionRowComponents(buttonRow);
 
