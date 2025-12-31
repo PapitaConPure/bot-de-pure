@@ -4,7 +4,7 @@ const globalConfigs = require('./localdata/config.json');
 /**
  * @typedef {{
  * 	language: import("./internationalization").LocaleKey,
- * 	pixivConverter: 'phixiv' | 'webhook' | '',
+ * 	pixivConverter: 'phixiv' | '',
  * 	twitterPrefix: import("./systems/agents/pureet").AcceptedTwitterConverterKey | '',
  * 	banned: Boolean
  * }} UserCache

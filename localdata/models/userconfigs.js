@@ -1,5 +1,6 @@
 const Mongoose = require('mongoose');
 const { acceptedTwitterConverters } = require('../../systems/agents/pureet');
+const { Locales } = require('../../internationalization');
 
 const UserConfigSchema = new Mongoose.Schema({
     userId: {
@@ -34,8 +35,8 @@ const UserConfigSchema = new Mongoose.Schema({
     
     language: {
         type: String,
-        enum: [ 'es', 'en', 'ja' ],
-        default: 'es',
+        enum: Object.values(Locales),
+        default: Locales.Spanish,
         required: true,
     },
     feedTagSuscriptions: {
@@ -70,7 +71,7 @@ const UserConfigSchema = new Mongoose.Schema({
     },
     pixivConverter: {
         type: String,
-        enum: [ '', 'phixiv', 'webhook' ],
+        enum: [ '', 'phixiv' ],
         default: 'phixiv',
     },
     twitterPrefix: {
@@ -98,6 +99,7 @@ const UserConfigSchema = new Mongoose.Schema({
 
 const model = Mongoose.model('UserConfig', UserConfigSchema);
 
+// eslint-disable-next-line no-unused-vars
 function m() { return new model({}); }
 /**@typedef {ReturnType<(typeof m)>} UserConfigDocument*/
 

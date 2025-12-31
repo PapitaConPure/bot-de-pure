@@ -244,11 +244,11 @@ const getPixivConversionPickerResponseContent = (interaction, currentPrefix, tra
                             label: 'phixiv',
                             description: translator.getText('yoPixivMenuServicePhixivDesc'),
                         },
-                        {
-                            value: 'webhook',
-                            label: translator.getText('yoPixivMenuServiceWebhookLabel'),
-                            description: translator.getText('yoPixivMenuServiceWebhookDesc'),
-                        },
+                        // {
+                        //     value: 'webhook',
+                        //     label: translator.getText('yoPixivMenuServiceWebhookLabel'),
+                        //     description: translator.getText('yoPixivMenuServiceWebhookDesc'),
+                        // },
                         {
                             value: 'none',
                             label: translator.getText('yoConversionServiceMenuServiceNoneLabel'),
@@ -674,7 +674,7 @@ const command = new CommandManager('yo', flags)
         let service = interaction.values[0];
         if(service === 'none') service = '';
 
-        if(service !== '' && service !== 'phixiv' && service !== 'webhook')
+        if(service !== '' && service !== 'phixiv')
             throw 'Resultado de servicio de conversión de pixiv inesperado';
 
         userConfigs.pixivConverter = service;
