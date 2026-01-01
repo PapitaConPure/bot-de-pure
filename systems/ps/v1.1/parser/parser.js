@@ -1,5 +1,4 @@
-const { Lexer } = require('../lexer/lexer');
-const { Token, TokenKinds, translateTokenKind, translateTokenKinds } = require('../lexer/tokens');
+const { TokenKinds, translateTokenKind, translateTokenKinds } = require('../lexer/tokens');
 const { Associativities } = require('../ast/ast');
 const { StatementKinds } = require('../ast/statements');
 const { parseBlock } = require('./syntax/statementParsing');
@@ -9,7 +8,7 @@ const { stmtLookup, nudLookup, ledLookup, bpLookup, createLookups, assLookup } =
 class Parser {
 	/**@type {Array<Error>}*/
 	errorStack;
-	/**@type {Array<Token>}*/
+	/**@type {Array<import('../lexer/tokens').Token>}*/
 	tokens;
 	/**@type {Number}*/
 	#pos;
@@ -23,7 +22,7 @@ class Parser {
 
 	/**
 	 * @param {String} message 
-	 * @param {Token} [token]
+	 * @param {import('../lexer/tokens').Token} [token]
 	 */
 	TuberParserError(message, token = null) {
 		token ??= this.current;
@@ -47,7 +46,7 @@ class Parser {
 	}
 
 	/**
-	 * @param {Token} token
+	 * @param {import('../lexer/tokens').Token} token
 	 */
 	#formatParserErrorDisplay(token) {
 		const suspensor = '(...)'
@@ -86,7 +85,7 @@ class Parser {
 
 	/**
 	 * Devuelve el token actual, sin consumirlo
-	 * @returns {Token}
+	 * @returns {import('../lexer/tokens').Token}
 	 */
 	get previous() {
 		return this.tokens[Math.max(0, this.#pos - 1)];
@@ -94,7 +93,7 @@ class Parser {
 
 	/**
 	 * Devuelve el token actual, sin consumirlo
-	 * @returns {Token}
+	 * @returns {import('../lexer/tokens').Token}
 	 */
 	get current() {
 		return this.tokens[this.#pos];
@@ -110,7 +109,7 @@ class Parser {
 
 	/**
 	 * Consume el token actual y lo devuelve
-	 * @returns {Token}
+	 * @returns {import('../lexer/tokens').Token}
 	 */
 	advance() {
 		return this.tokens[this.#pos++];
@@ -120,7 +119,7 @@ class Parser {
 	 * Se asegura de que el token actual sea del tipo indicado. Si lo es, lo consume y devuelve; si no, alza un error.
 	 * @param {import('../lexer/tokens').TokenKind} tokenKind
 	 * @param {String} [errorMessage]
-	 * @returns {Token}
+	 * @returns {import('../lexer/tokens').Token}
 	 */
 	expect(tokenKind, errorMessage = null) {
 		const token = this.advance();
@@ -140,7 +139,7 @@ class Parser {
 	 * 
 	 * Al momento de arrojar un error, si se usa un mensaje personalizado en el método orFail, `this.current` será el token que lo ocasionó (caso especial)
 	 * @param {...import('../lexer/tokens').TokenKind} tokenKinds
-	 * @returns {{ orFail: (errorMessage?: String, token?: Token) => Token }}
+	 * @returns {{ orFail: (errorMessage?: String, token?: import('../lexer/tokens').Token) => import('../lexer/tokens').Token }}
 	 */
 	expectAny(...tokenKinds) {
 		const expectedToken = this.advance();
@@ -157,7 +156,7 @@ class Parser {
 		}
 			
 		return {
-			orFail: function(errorMessage = null, token = null) {
+			orFail: function() {
 				return expectedToken;
 			},
 		};
@@ -167,7 +166,7 @@ class Parser {
 	 * Se asegura de que el token actual sea del tipo indicado. Si lo es, lo devuelve sin consumirlo; si no, alza un error
 	 * @param {import('../lexer/tokens').TokenKind} tokenKind
 	 * @param {String} [errorMessage]
-	 * @returns {Token}
+	 * @returns {import('../lexer/tokens').Token}
 	 */
 	ensure(tokenKind, errorMessage = null) {
 		const token = this.current;
@@ -184,7 +183,7 @@ class Parser {
 	 * Se asegura de que el token actual sea de alguno de los tipos indicados y devuelve un objeto con el método "orFail", sin consumir el token.
 	 * Si el token era del tipo indicado, "orFail" devuelve el mismo; si no, "orFail" alza un error
 	 * @param {...import('../lexer/tokens').TokenKind} tokenKinds
-	 * @returns {{ orFail: (errorMessage?: String) => Token }}
+	 * @returns {{ orFail: (errorMessage?: String) => import('../lexer/tokens').Token }}
 	 */
 	ensureAny(...tokenKinds) {
 		const token = this.current;
@@ -199,7 +198,7 @@ class Parser {
 		}
 			
 		return {
-			orFail: function(errorMessage = null) {
+			orFail: function() {
 				return token;
 			},
 		};
@@ -208,7 +207,7 @@ class Parser {
 	/**
 	 * Tira un error si el Token actual no representa una expresión (no es un indicador de Sentencia)
 	 * @param {String} errorMessage
-	 * @param {Token} [token]
+	 * @param {import('../lexer/tokens').Token} [token]
 	 */
 	ensureExpression(errorMessage, token = null) {
 		if(!this.hasTokens || this.current.isStatement)
@@ -218,7 +217,7 @@ class Parser {
 	/**
 	 * Tira un error si el Token actual no es un indicador de Sentencia
 	 * @param {String} errorMessage
-	 * @param {Token} [token]
+	 * @param {import('../lexer/tokens').Token} [token]
 	 */
 	ensureStatement(errorMessage, token = null) {
 		if(!this.hasTokens || !this.current.isStatement)
@@ -227,7 +226,7 @@ class Parser {
 
 	/**
 	 * Analiza sintácticamente un conjunto de Tokens previamente extraídos de un análisis léxico por medio de un {@link Lexer}
-	 * @param {Array<Token>} tokens Los tokens extraídos del análisis léxico de PuréScript
+	 * @param {Array<import('../lexer/tokens').Token>} tokens Los tokens extraídos del análisis léxico de PuréScript
 	 * @returns {import('../ast/statements').ProgramStatement}
 	 */
 	parse(tokens) {

@@ -1,19 +1,19 @@
 const { default: axios } = require('axios');
 const { psDocsButton, psEditorButton } = require('./purescript.js');
-const GuildConfig = require('../../localdata/models/guildconfigs.js');
+const GuildConfig = require('../../models/guildconfigs.js');
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver, CommandParam } = require('../Commons/commands');
-const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId, warn } = require('../../func.js');
+const { p_pure } = require('../../utils/prefixes');
+const { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId, warn } = require('../../func');
 const { EmbedBuilder, ButtonBuilder, TextInputBuilder, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder, MessageFlags } = require('discord.js');
 const { RuntimeToLanguageType } = require('../../systems/ps/v1.0/commons.js');
 const { executeTuber: executeTuberPS1 } = require('../../systems/ps/v1.0/purescript.js');
 const { executeTuber: executeTuberPS2, CURRENT_PS_VERSION } = require('../../systems/ps/common/executeTuber.js');
-const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts.js');
+const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts.js');
 const { ValueKindTranslationLookups } = require('../../systems/ps/v1.1/interpreter/values');
 const { Input } = require('../../systems/ps/v1.1/interpreter/inputReader.js');
-const { getWikiPageComponentsV2 } = require('../../wiki.js');
-const { Translator } = require('../../internationalization.js');
-const { fetchGuildMembers } = require('../../guildratekeeper.js');
+const { getWikiPageComponentsV2 } = require('../../systems/others/wiki.js');
+const { Translator } = require('../../i18n/internationalization');
+const { fetchGuildMembers } = require('../../utils/guildratekeeper');
 
 const pageMax = 10;
 const filters = {
@@ -498,7 +498,7 @@ const command = new CommandManager('tubérculo', flags)
 /**
  * 
  * @param {String} tuberId 
- * @param {import('../../localdata/models/guildconfigs.js').GuildConfigDocument} gcfg 
+ * @param {import('../../models/guildconfigs.js').GuildConfigDocument} gcfg 
  * @param {Boolean} isPureScript 
  * @param {import('../Commons/typings.js').ComplexCommandRequest} request 
  * @param {CommandOptionSolver} args 
@@ -767,7 +767,7 @@ function viewTuber(interaction, item, tuberId, inputVariant, updateMessage) {
 /**
  * 
  * @param {String} tuberId
- * @param {import('../../localdata/models/guildconfigs.js').GuildConfigDocument} gcfg 
+ * @param {import('../../models/guildconfigs.js').GuildConfigDocument} gcfg 
  * @param {import('../Commons/typings.js').ComplexCommandRequest} request 
  */
 function deleteTuber(tuberId, gcfg, request) {
@@ -786,7 +786,7 @@ function deleteTuber(tuberId, gcfg, request) {
 /**
  * 
  * @param {String} tuberId
- * @param {import('../../localdata/models/guildconfigs.js').GuildConfigDocument} gcfg 
+ * @param {import('../../models/guildconfigs.js').GuildConfigDocument} gcfg 
  * @param {Boolean} isPureScript 
  * @param {import('../Commons/typings.js').ComplexCommandRequest} request 
  * @param {CommandOptionSolver} args 

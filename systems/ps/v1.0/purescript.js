@@ -1,6 +1,6 @@
-const GuildConfig = require('../../../localdata/models/guildconfigs.js');
-const { p_pure } = require('../../../localdata/customization/prefixes.js');
-const { randRange, fetchUserID, shortenText } = require('../../../func.js');
+const GuildConfig = require('../../../models/guildconfigs.js');
+const { p_pure } = require('../../../utils/prefixes');
+const { randRange, fetchUserID, shortenText } = require('../../../func');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
 const { TuberLexer } = require('./pslexer.js');
 const { TuberParser } = require('./psparser.js');

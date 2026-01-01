@@ -1,10 +1,10 @@
-const { TokenKinds, translateTokenKind, Token, translateTokenKinds } = require('../../lexer/tokens.js');
+const { TokenKinds, translateTokenKind } = require('../../lexer/tokens.js');
 const { BindingPowers } = require('../../ast/ast.js');
 const { StatementKinds, ScopeAbortKinds } = require('../../ast/statements.js');
 const { ExpressionKinds } = require('../../ast/expressions.js');
 const { makeMetadata } = require('../../ast/metadata.js')
-const { makeText, makeNumber, ValueKinds } = require('../../interpreter/values.js');
-const { toLowerCaseNormalized, clamp } = require('../../util/utils.js');
+const { makeText, ValueKinds } = require('../../interpreter/values.js');
+const { toLowerCaseNormalized } = require('../../utils/utils.js');
 
 /**
  * Parsea un cuerpo de bloque. Se analizan Sentencias secuencialmente desde el Token actual hasta que se encuentra uno de los Tokens de cierre indicados (o `EOF`).
@@ -41,8 +41,8 @@ function parseBlockBody(parser, ...closeTokenKinds) {
  * 
  * El bloque contiene metadatos de rango de inicio y fin según los Tokens ingresados. `startToken` y `endToken` respectivamente
  * @param {import('../../ast/statements.js').BlockBody} body 
- * @param {Token} startToken 
- * @param {Token} [endToken]
+ * @param {import('../../lexer/tokens.js').Token} startToken 
+ * @param {import('../../lexer/tokens.js').Token} [endToken]
  * @returns {import('../../ast/statements.js').BlockStatement}
  */
 function makeBlockStmt(body, startToken, endToken = null) {
@@ -358,7 +358,7 @@ function parseReadStatement(parser) {
 
 /**
  * @param {import('../parser.js').Parser} parser
- * @param {Token} dataKind
+ * @param {import('../../lexer/tokens.js').Token} dataKind
  * @returns {Array<import('../../ast/statements.js').ReadStatementModifier>}
  */
 function parseReadStmtModifiers(parser, dataKind) {
@@ -372,7 +372,7 @@ function parseReadStmtModifiers(parser, dataKind) {
 
 /**
  * @param {import('../parser.js').Parser} parser
- * @param {Token} dataKind
+ * @param {import('../../lexer/tokens.js').Token} dataKind
  * @returns {import('../../ast/statements.js').ReadStatementModifier}
  */
 function parseReadStmtModifier(parser, dataKind) {

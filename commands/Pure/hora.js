@@ -1,8 +1,8 @@
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
-const UserConfigs = require('../../localdata/models/userconfigs');
-const { toUtcOffset, toTimeZoneAlias } = require('../../timezones');
+const UserConfigs = require('../../models/userconfigs');
+const { toUtcOffset, toTimeZoneAlias } = require('../../utils/timezones');
 const { dateToUTCFormat } = require('../../func');
-const { Translator } = require('../../internationalization');
+const { Translator } = require('../../i18n/internationalization');
 
 /**@param {string} text*/
 const hasShortenedFormat = text => text && (['am','pm'].some(m => text.toLowerCase().endsWith(m)));

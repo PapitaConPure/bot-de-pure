@@ -1,6 +1,9 @@
 #NodeJS
 node_modules
 
+#DOTENV
+.env
+
 #ENVs artificiales
 localenv.json
 remoteenv.json

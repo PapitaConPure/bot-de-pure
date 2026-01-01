@@ -1,8 +1,8 @@
 const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { hourai } = require('../../localdata/config.json');
-const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require("../Commons/commands");
+const { hourai } = require('../../data/config.json');
+const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
 const { CommandPermissions } = require('../Commons/cmdPerms');
-const { makeButtonRowBuilder } = require('../../tsCasts');
+const { makeButtonRowBuilder } = require('../../utils/tsCasts');
 
 const hangedDollId = hourai.hangedRoleId;
 
@@ -57,9 +57,9 @@ const command = new CommandManager('colgar', tags)
 		const wasHanged = !member.roles.cache.has(hangedDollId);
 		let err;
 		if(wasHanged)
-			await member.roles.add(hangedDollId, `Colgado por ${user.tag}`).catch(_ => { err = 'Oe oe espérate conchetumare eri muy poderoso wtf' });
+			await member.roles.add(hangedDollId, `Colgado por ${user.tag}`).catch(() => { err = 'Oe oe espérate conchetumare eri muy poderoso wtf' });
 		else 
-			await member.roles.remove(member.roles.cache.find(r => r.id === hangedDollId)).catch(_ => { err = 'wtf dios mío qué está pasando' });
+			await member.roles.remove(member.roles.cache.find(r => r.id === hangedDollId)).catch(() => { err = 'wtf dios mío qué está pasando' });
 
 		if(err) return request.reply({ content: err });
 

@@ -1,6 +1,6 @@
-const { Translator } = require('../../internationalization.js');
+const { Translator } = require('../../i18n/internationalization');
 const { PureVoiceSessionMember } = require('../../systems/others/purevoice.js');
-const { PureVoiceModel, PureVoiceSessionModel } = require('../../localdata/models/purevoice.js');
+const { PureVoiceModel, PureVoiceSessionModel } = require('../../models/purevoice.js');
 const { ContextMenuActionManager } = require('../Commons/actionBuilder.js');
 
 const action = new ContextMenuActionManager('actionPVBanMember', 'User')

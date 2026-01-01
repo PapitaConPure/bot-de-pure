@@ -12,7 +12,7 @@ const ValueKinds = /**@type {const}*/({
 	FUNCTION: 'Function',
 	NADA: 'Nada',
 });
-/**@typedef {import('../util/types').ValuesOf<typeof ValueKinds>} ValueKind*/
+/**@typedef {import('../utils/types').ValuesOf<typeof ValueKinds>} ValueKind*/
 
 /**
  * @template {ValueKind} [T=ValueKind]

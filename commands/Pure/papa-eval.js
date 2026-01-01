@@ -1,4 +1,4 @@
-const { p_pure } = require('../../localdata/customization/prefixes.js');
+const { p_pure } = require('../../utils/prefixes');
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
 const options = new CommandOptions()
@@ -30,7 +30,7 @@ const command = new CommandManager('papa-eval', flags)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		// eslint-disable-next-line no-unused-vars
-		const globalConfigs = require('../../localdata/config.json');
+		const globalConfigs = require('../../data/config.json');
 		// eslint-disable-next-line no-unused-vars
 		const func = require('../../func');
 		const Discord = require('discord.js');

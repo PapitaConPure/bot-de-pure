@@ -1,7 +1,7 @@
-const { dibujarBienvenida } = require('../func.js');
+const { dibujarBienvenida } = require('../func');
 const { guildIsAvailable, announceMemberUpdate } = require('./guildMemberUpdate');
 
-const Logger = require('../logs.js');
+const Logger = require('../utils/logs.js');
 const { debug } = Logger('DEBUG', 'GMemberAdd');
 
 /**@param {import('discord.js').GuildMember} member*/

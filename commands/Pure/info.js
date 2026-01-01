@@ -1,11 +1,11 @@
 const { ChannelType, ButtonBuilder, ButtonStyle, MessageFlags, ContainerBuilder, SectionBuilder } = require('discord.js'); //Integrar discord.js
 const { fetchMember, compressId, shortenText, quantityDisplay } = require('../../func');
-const globalConfigs = require('../../localdata/config.json'); //Variables globales
-const { ChannelStats, Stats } = require('../../localdata/models/stats');
+const globalConfigs = require('../../data/config.json'); //Variables globales
+const { ChannelStats, Stats } = require('../../models/stats');
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
-const { makeButtonRowBuilder } = require('../../tsCasts');
-const { Translator } = require('../../internationalization');
-const { fetchGuildMembers } = require('../../guildratekeeper');
+const { makeButtonRowBuilder } = require('../../utils/tsCasts');
+const { Translator } = require('../../i18n/internationalization');
+const { fetchGuildMembers } = require('../../utils/guildratekeeper');
 
 /**
  * @param {String} requestId
@@ -169,8 +169,8 @@ const command = new CommandManager('info', flags)
 			guildId: guild.id,
 			channelId: targetChannel.id,
 		};
-		const targetChannelStats = /**@type {import('../../localdata/models/stats.js').ChannelStatsDocument}*/((!globalConfigs.noDataBase && await ChannelStats.findOne(channelQuery)) || new ChannelStats(channelQuery));
-		const guildChannelStats = /**@type {import('../../localdata/models/stats.js').ChannelStatsDocument[]}*/(!globalConfigs.noDataBase ? await ChannelStats.find({ guildId: guild.id }) : [new ChannelStats(channelQuery)]);
+		const targetChannelStats = /**@type {import('../../models/stats.js').ChannelStatsDocument}*/((!globalConfigs.noDataBase && await ChannelStats.findOne(channelQuery)) || new ChannelStats(channelQuery));
+		const guildChannelStats = /**@type {import('../../models/stats.js').ChannelStatsDocument[]}*/(!globalConfigs.noDataBase ? await ChannelStats.find({ guildId: guild.id }) : [new ChannelStats(channelQuery)]);
 		const targetChannelHasMessages = Object.keys(targetChannelStats.sub).length;
 		
 		const membersRanking = targetChannelHasMessages

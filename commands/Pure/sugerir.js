@@ -1,5 +1,5 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const global = require('../../localdata/config.json'); //Variables globales
+const global = require('../../data/config.json'); //Variables globales
 const { CommandTags, CommandManager } = require('../Commons/commands');
 
 const flags = new CommandTags().add('COMMON');

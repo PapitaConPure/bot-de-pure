@@ -1,4 +1,4 @@
-const { makeGuideMenu } = require('../../wiki.js');
+const { makeGuideMenu } = require('../../systems/others/wiki.js');
 const { CommandTags, CommandManager } = require('../Commons/commands');
 
 const flags = new CommandTags().add('GUIDE');

@@ -1,5 +1,5 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const global = require('../../localdata/config.json'); //Variables globales
+const global = require('../../data/config.json'); //Variables globales
 const { paginate, navigationRows, rand } = require('../../func');
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
 const { InteractionType } = require('discord.js');

@@ -1,12 +1,12 @@
 /* eslint-disable no-unused-vars */
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ModalBuilder, TextInputBuilder, GuildMember, MessageFlags, TextDisplayBuilder } = require('discord.js'); //Integrar discord.js
-const { fetchMember, isBoosting, fetchChannel, fetchRole } = require('../../func.js');
-const { formatPixivPostsMessage } = require('../../systems/agents/purepix.js');
+const { fetchMember, isBoosting, fetchChannel, fetchRole } = require('../../func');
+const { formatPixivPostsMessage } = require('../../systems/agents/purepix');
 const { CommandTags, CommandManager, CommandOptions } = require('../Commons/commands');
-const { searchCommand, getWikiPageComponentsV2 } = require('../../wiki.js');
-const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { serverid, tenshiColor, peopleid } = require('../../localdata/config.json'); //Variables globales
-// const { dibujarDespedida } = require('../../func.js');
+const { searchCommand, getWikiPageComponentsV2 } = require('../../systems/others/wiki.js');
+const { p_pure } = require('../../utils/prefixes');
+const { serverid, tenshiColor, peopleid } = require('../../data/config.json'); //Variables globales
+// const { dibujarDespedida } = require('../../func');
 //const Canvas = require('canvas');
 
 const options = new CommandOptions()

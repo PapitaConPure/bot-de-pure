@@ -1,12 +1,12 @@
 const { default: axios } = require('axios');
-const { CommandTags } = require("../Commons/cmdTags");
-const { CommandManager } = require("../Commons/cmdBuilder");
-const { executeTuber, CURRENT_PS_VERSION } = require("../../systems/ps/common/executeTuber");
-const { CommandOptions } = require("../Commons/cmdOpts");
-const { ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js");
-const { p_pure } = require("../../localdata/customization/prefixes");
-const { tenshiColor } = require('../../localdata/config.json');
-const { makeButtonRowBuilder } = require('../../tsCasts');
+const { CommandTags } = require('../Commons/cmdTags');
+const { CommandManager } = require('../Commons/cmdBuilder');
+const { executeTuber, CURRENT_PS_VERSION } = require('../../systems/ps/common/executeTuber');
+const { CommandOptions } = require('../Commons/cmdOpts');
+const { ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
+const { p_pure } = require('../../utils/prefixes');
+const { tenshiColor } = require('../../data/config.json');
+const { makeButtonRowBuilder } = require('../../utils/tsCasts');
 
 const psEditorButton = new ButtonBuilder()
 	.setURL('https://papitaconpure.github.io/ps/')

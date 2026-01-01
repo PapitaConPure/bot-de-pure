@@ -1,5 +1,5 @@
 const { ButtonBuilder, ButtonStyle } = require('discord.js');
-const { randRange } = require('../../func.js');
+const { randRange } = require('../../func');
 const { CommandTags, CommandManager } = require('../Commons/commands');
 
 const phrases = [

@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { dibujarDespedida } = require('../func.js');
+const { dibujarDespedida } = require('../func');
 const { guildIsAvailable, announceMemberUpdate } = require('./guildMemberUpdate');
 
 /**@param {Discord.GuildMember|Discord.PartialGuildMember} member*/

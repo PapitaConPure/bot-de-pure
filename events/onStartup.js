@@ -2,16 +2,16 @@ const { REST } = require('discord.js');
 const { Routes } = require('discord-api-types/v9');
 
 const mongoose = require('mongoose');
-const PrefixPair = require('../localdata/models/prefixpair.js');
-const UserConfigs = require('../localdata/models/userconfigs.js');
-const BooruTags = require('../localdata/models/boorutags.js');
-const MessageCascades = require('../localdata/models/messageCascades.js');
-const { Puretable, pureTableAssets } = require('../localdata/models/puretable.js');
-const { deleteExpiredMessageCascades, cacheMessageCascade } = require('./onMessageDelete.js');
-const HouraiDB = require('../localdata/models/hourai.js');
+const PrefixPair = require('../models/prefixpair.js');
+const UserConfigs = require('../models/userconfigs');
+const BooruTags = require('../models/boorutags.js');
+const MessageCascades = require('../models/messageCascades.js');
+const { Puretable, pureTableAssets } = require('../models/puretable.js');
+const { deleteExpiredMessageCascades, cacheMessageCascade } = require('./onMessageDelete');
+const HouraiDB = require('../models/hourai.js');
 
-const { puré } = require('../commandInit.js');
-const globalConfigs = require('../localdata/config.json');
+const { puré } = require('../core/commandInit.js');
+const globalConfigs = require('../data/config.json');
 const envPath = globalConfigs.remoteStartup ? '../remoteenv.json' : '../localenv.json';
 const noDB = globalConfigs.noDataBase;
 
@@ -25,20 +25,20 @@ const booruApiKey = process.env.BOORU_APIKEY ?? (require(envPath)?.booruapikey);
 /**@type {String}*/
 const booruUserId = process.env.BOORU_USERID ?? (require(envPath)?.booruuserid);
 
-const { setupGuildFeedUpdateStack, feedTagSuscriptionsCache } = require('../systems/booru/boorufeed.js');
-const { Booru, Tag } = require('../systems/booru/boorufetch.js');
-const { modifyPresence } = require('../presence.js');
-const { auditSystem } = require('../systems/others/auditor.js');
+const { setupGuildFeedUpdateStack, feedTagSuscriptionsCache } = require('../systems/booru/boorufeed');
+const { Booru, Tag } = require('../systems/booru/boorufetch');
+const { modifyPresence } = require('../systems/presence/presence');
+const { auditSystem } = require('../systems/others/auditor');
 
 const { registerFont, loadImage } = require('canvas');
 const { lookupService } = require('dns');
 const { promisify } = require('util');
 const chalk = require('chalk');
 
-const { prepareTracksPlayer } = require('../systems/musicPlayer.js')
-const { initializeWebhookMessageOwners } = require('../systems/agents/discordagent.js');
-const { refreshPixivAccessToken } = require('../systems/agents/purepix.js');
-const { setupGuildRateKeeper, fetchAllGuildMembers } = require('../guildratekeeper.js');
+const { prepareTracksPlayer } = require('../systems/others/musicPlayer')
+const { initializeWebhookMessageOwners } = require('../systems/agents/discordagent');
+const { refreshPixivAccessToken } = require('../systems/agents/purepix');
+const { setupGuildRateKeeper, fetchAllGuildMembers } = require('../utils/guildratekeeper');
 
 const logOptions = {
 	slash: false,

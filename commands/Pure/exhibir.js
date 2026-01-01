@@ -1,7 +1,7 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
 const { CommandTags, CommandManager } = require("../Commons/commands");
-const { DiscordAgent } = require('../../systems/agents/discordagent.js');
-const { hourai, serverid } = require('../../localdata/config.json');
+const { DiscordAgent } = require('../../systems/agents/discordagent');
+const { hourai, serverid } = require('../../data/config.json');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 
 let crazyBackupId = hourai.crazyBackupChannelId;

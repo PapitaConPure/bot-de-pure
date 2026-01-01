@@ -1,5 +1,5 @@
 const { TokenKinds, Token } = require('./tokens.js');
-const { shortenText, toLowerCaseNormalized } = require('../util/utils.js');
+const { shortenText, toLowerCaseNormalized } = require('../utils/utils.js');
 
 /**Representa un Analizador Léxico de PuréScript*/
 class Lexer {
@@ -367,9 +367,10 @@ class Lexer {
 						case "'": break;
 						case '\\': break;
 	
-						default:
+						default: {
 							const lineString = lexer.source.split(/\r?\n/g)[line - 1];
 							throw lexer.TuberLexerError(`Caracter de escape inválido en literal de Texto: \`${c}\``, { col, line, lineString });
+						}
 						}
 					}
 
@@ -415,7 +416,7 @@ class Lexer {
 	 */
 	#makeNewlineHandler() {
 		const lexer = this;
-		return function(match, _) {
+		return function(match) {
 			const len = match.length;
 			lexer.advance(len, { newLine: true });
 			lexer.handleCommentStatement = false;
@@ -439,7 +440,7 @@ class Lexer {
 	 */
 	#makeInvalidHandler(errorMessage) {
 		const lexer = this;
-		return function(_, __) {
+		return function() {
 			throw lexer.TuberLexerError(errorMessage);
 		}
 	}

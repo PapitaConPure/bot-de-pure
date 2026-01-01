@@ -1,13 +1,13 @@
 const { EmbedBuilder, StringSelectMenuBuilder, MessageFlags, ContainerBuilder, ButtonStyle, ButtonBuilder, SeparatorSpacingSize } = require('discord.js'); //Integrar discord.js
-const globalConfigs = require('../../localdata/config.json'); //Variables globales
+const globalConfigs = require('../../data/config.json'); //Variables globales
 const { bot_status } = globalConfigs;
 const { readdirSync } = require('fs'); //Para el contador de comandos
-const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { Stats } = require('../../localdata/models/stats');
+const { p_pure } = require('../../utils/prefixes');
+const { Stats } = require('../../models/stats');
 const { quantityDisplay } = require('../../func');
 const { CommandTags, CommandManager } = require('../Commons/commands');
-const { searchCommand, makeGuideRow, getWikiPageComponentsV2 } = require('../../wiki');
-const { Translator } = require('../../internationalization');
+const { searchCommand, makeGuideRow, getWikiPageComponentsV2 } = require('../../systems/others/wiki');
+const { Translator } = require('../../i18n/internationalization');
 
 const { version, note, changelog, todo: toDo } = bot_status;
 const COMMAND_REGEX = new RegExp(`(${p_pure().raw})([a-záéíóúñ0-9_.-]+)`, 'gi');

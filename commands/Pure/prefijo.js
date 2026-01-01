@@ -1,8 +1,8 @@
 const { EmbedBuilder } = require('discord.js');
-const global = require('../../localdata/config.json');
-const { shortenText } = require('../../func.js');
-const PrefixPair = require('../../localdata/models/prefixpair.js');
-const prefixes = require('../../localdata/customization/prefixes.js');
+const global = require('../../data/config.json');
+const { shortenText } = require('../../func');
+const PrefixPair = require('../../models/prefixpair.js');
+const prefixes = require('../../utils/prefixes');
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 

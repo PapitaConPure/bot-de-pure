@@ -1,12 +1,12 @@
 console.time('Carga de inicio');
-const globalConfigs = require('./localdata/config.json');
+const globalConfigs = require('./data/config.json');
 const argv = require('minimist')(process.argv.slice(2));
 globalConfigs.remoteStartup = ((+!!argv.p) - (+!!argv.d)) > 0;
 globalConfigs.noDataBase = argv.nodb;
 //process.env.DP_FORCE_YTDL_MOD = "@distube/ytdl-core"
 
-const { initializeClient } = require('./client');
-const { registerCommandFiles } = require('./commandInit.js');
+const { initializeClient } = require('./core/client');
+const { registerCommandFiles } = require('./core/commandInit.js');
 const { events, startupData, onCriticalError } = require('./events/events');
 console.timeEnd('Carga de inicio');
 
@@ -31,8 +31,8 @@ console.timeEnd('Registro de eventos de proceso');
 console.time('Registro de eventos del cliente');
 client.on('clientReady', events.onStartup);
 client.on('messageCreate', message => events.onMessage(message, client).catch(onCriticalError));
-client.on('messageReactionAdd', (reaction, user, details) => events.onReactionAdd(reaction, user, details).catch(onCriticalError));
-client.on('messageReactionRemove', (reaction, user, details) => events.onReactionRemove(reaction, user, details).catch(onCriticalError));
+client.on('messageReactionAdd', (reaction, user) => events.onReactionAdd(reaction, user).catch(onCriticalError));
+client.on('messageReactionRemove', (reaction, user) => events.onReactionRemove(reaction, user).catch(onCriticalError));
 client.on('messageDelete', message => events.onMessageDelete(message).catch(onCriticalError));
 client.on('interactionCreate', interaction => events.onInteraction(interaction, client).catch(onCriticalError));
 client.on('voiceStateUpdate', (oldState, newState) => events.onVoiceUpdate(oldState, newState).catch(onCriticalError));

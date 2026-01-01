@@ -25,7 +25,7 @@ const command = new CommandManager('uwu', flags)
 		const deleteOriginal = args.parseFlag('borrar');
 		const randomUwu = randInArray(uwusopt);
 		
-		if(deleteOriginal && args.isMessageSolver()) {
+		if(deleteOriginal && request.isMessage) {
 			return Promise.all([
 				request.channel.send({ content: randomUwu }).catch(console.error),
 				request.delete().catch(console.error),

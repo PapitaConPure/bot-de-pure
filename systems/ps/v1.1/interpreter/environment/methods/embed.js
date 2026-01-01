@@ -2,7 +2,7 @@
 
 const { ValueKinds } = require('../../values');
 const { fileRegex, expectParam, getParamOrNada, getParamOrDefault, linkRegex } = require('../nativeUtils');
-const { stringHexToNumber } = require('../../../util/utils');
+const { stringHexToNumber } = require('../../../utils/utils');
 
 /**
  * @typedef {import('../../values').NumberValue} NumberValue

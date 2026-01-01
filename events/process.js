@@ -1,5 +1,5 @@
 const { auditError } = require('../systems/others/auditor');
-const Logger = require('../logs');
+const Logger = require('../utils/logs');
 const { shortenText } = require('../func');
 
 const { warn, error, fatal, catastrophic } = Logger('WARN', 'PROCESO',);

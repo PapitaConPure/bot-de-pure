@@ -1,9 +1,8 @@
-const { Scope } = require('../scope');
 const { ValueKinds, coerceValue, isOperable, makeNada, makeNativeFunction, makeFunction, makeEmbed, makeRegistry, makeList, makeNumber, makeText, makeBoolean, isValidText, ValueKindTranslationLookups } = require('../values');
 
-const fileRegex = /(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_\/\.0-9#:?=&;,]*\.(txt|png|jpg|jpeg|webp|gif|webm|mp4|mp3|wav|flac|ogg)[a-zA-Z-_\.0-9#:?=&;,]*/i;
-const imageRegex = /(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_\/\.0-9#:?=&;,]*\.(png|jpg|jpeg|webp)[a-zA-Z-_\.0-9#:?=&;,]*/i;
-const linkRegex = /(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}(\/[a-zA-Z-_\/\.0-9#:?=&;,]*)?/i;
+const fileRegex = /(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_/.0-9#:?=&;,]*\.(txt|png|jpg|jpeg|webp|gif|webm|mp4|mp3|wav|flac|ogg)[a-zA-Z-_.0-9#:?=&;,]*/i;
+const imageRegex = /(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_/.0-9#:?=&;,]*\.(png|jpg|jpeg|webp)[a-zA-Z-_.0-9#:?=&;,]*/i;
+const linkRegex = /(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}(\/[a-zA-Z-_/.0-9#:?=&;,]*)?/i;
 
 /**
  * @template {import('../values').ValueKind} T
@@ -41,7 +40,7 @@ function makeKindFromValue(kind, ...values) {
  * @param {String} name
  * @param {Extract<import('../values').RuntimeValue, { kind: T }>} coerced 
  * @param {T} kind 
- * @param {Scope} scope
+ * @param {import('../scope').Scope} scope
  */
 function verifyParam(name, coerced, kind, scope) {
 	if(kind === ValueKinds.NUMBER && !isOperable(coerced))
@@ -60,7 +59,7 @@ function verifyParam(name, coerced, kind, scope) {
  * @param {String} name
  * @param {import('../values').RuntimeValue} value 
  * @param {T} kind 
- * @param {Scope} scope 
+ * @param {import('../scope').Scope} scope 
  * @returns {Extract<import('../values').RuntimeValue, { kind: T }>}
  */
 function expectParam(name, value, kind, scope) {
@@ -89,7 +88,7 @@ function expectParam(name, value, kind, scope) {
  * @param {String} name
  * @param {import('../values').RuntimeValue} value 
  * @param {T} kind 
- * @param {Scope} scope 
+ * @param {import('../scope').Scope} scope 
  * @param {...*} fallback
  * @returns {Extract<import('../values').RuntimeValue, { kind: T }>}
  */
@@ -116,7 +115,7 @@ function getParamOrDefault(name, value, kind, scope, ...fallback) {
  * @template {import('../values').ValueKind} T
  * @param {import('../values').RuntimeValue} value 
  * @param {T} kind 
- * @param {Scope} scope 
+ * @param {import('../scope').Scope} scope 
  * @returns {[ false, import('../values').NadaValue ] | [ true, Extract<import('../values').RuntimeValue, { kind: T }> ]}
  */
 function getParamOrNada(name, value, kind, scope) {
@@ -152,7 +151,7 @@ function calculatePositionOffset(value, length) {
  * Dispone una evaluación de llamado de PuréScript por medio de una Función nativa
  * @param {String} name 
  * @param {import('../values').FunctionValue} fn 
- * @param {Scope} scope 
+ * @param {import('../scope').Scope} scope 
  * @returns {(...args: Array<import('../values').RuntimeValue>) => import('../values').RuntimeValue} Una Función que recibe parámetros RuntimeValue y realiza una evaluación de PuréScript
  */
 function makePredicateFn(name, fn, scope) {

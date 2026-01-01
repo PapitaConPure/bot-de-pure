@@ -1,8 +1,8 @@
 const { ButtonBuilder, ButtonStyle } = require('discord.js'); //Integrar discord.js
 const { CommandTags, CommandManager } = require('../Commons/commands.js');
-const { Translator } = require('../../internationalization.js');
+const { Translator } = require('../../i18n/internationalization');
 const { useMainPlayer } = require('discord-player');
-const { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/musicPlayer.js');
+const { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/others/musicPlayer');
 
 const tags = new CommandTags().add(
 	'COMMON',

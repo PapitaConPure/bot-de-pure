@@ -1,16 +1,16 @@
 const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType, MessageFlags } = require('discord.js');
-const { isNotModerator, shortenText, guildEmoji, compressId, isNSFWChannel, randInArray } = require('../../func.js');
-const GuildConfig = require('../../localdata/models/guildconfigs.js');
-const { auditError, auditAction } = require('../../systems/others/auditor.js');
+const { isNotModerator, shortenText, guildEmoji, compressId, isNSFWChannel, randInArray } = require('../../func');
+const GuildConfig = require('../../models/guildconfigs.js');
+const { auditError, auditAction } = require('../../systems/others/auditor');
 const { CommandTags } = require('../Commons/cmdTags.js');
-const globalConfigs = require('../../localdata/config.json');
-const { Booru, TagTypes, BooruUnknownPostError } = require('../../systems/booru/boorufetch.js');
+const globalConfigs = require('../../data/config.json');
+const { Booru, TagTypes, BooruUnknownPostError } = require('../../systems/booru/boorufetch');
 const { CommandManager } = require('../Commons/cmdBuilder.js');
-const { addGuildToFeedUpdateStack } = require('../../systems/booru/boorufeed.js');
+const { addGuildToFeedUpdateStack } = require('../../systems/booru/boorufeed');
 const { formatBooruPostMessage, formatTagNameListNew, getPostUrlFromContainer } = require('../../systems/booru/boorusend.js');
-const { Translator } = require('../../internationalization.js');
+const { Translator } = require('../../i18n/internationalization');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
-const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts.js');
+const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts.js');
 
 /**@param {Translator} translator*/
 const wizTitle = (translator) => translator.getText('feedAuthor');
@@ -37,7 +37,7 @@ const safeTags = (_tags = '') => _tags.replace(/\\*\*/g,'\\*').replace(/\\*_/g,'
  * @returns {Promise<Array<import('discord.js').SelectMenuComponentOptionData>>}
  */
 const generateFeedOptions = async (interaction) => {
-	const gcfg = /**@type {import('../../localdata/models/guildconfigs.js').GuildConfigDocument}*/(await GuildConfig.findOne({ guildId: interaction.guild.id }));
+	const gcfg = /**@type {import('../../models/guildconfigs.js').GuildConfigDocument}*/(await GuildConfig.findOne({ guildId: interaction.guild.id }));
 	const feedOptions = Object.entries(gcfg.feeds).map(([chid, feed]) => {
 		const channel = interaction.guild.channels.cache.get(chid);
 		if(!channel) {
@@ -259,7 +259,7 @@ const command = new CommandManager('feed', flags)
 		const input = interaction.fields.getTextInputValue('tagsInput').toLowerCase().trim();
 
 		const guildQuery = { guildId: interaction.guild.id };
-		const gcfg = /**@type {import('../../localdata/models/guildconfigs').GuildConfigDocument}*/((await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery));
+		const gcfg = /**@type {import('../../models/guildconfigs.js').GuildConfigDocument}*/((await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery));
 		gcfg.feeds ??= {};
 		gcfg.feeds[fetchedChannel.id] ??= { tags: null };
 		gcfg.feeds[fetchedChannel.id].tags = input;

@@ -1,5 +1,5 @@
 const { CommandTags, CommandManager } = require('../Commons/commands');
-const { hourai } = require('../../localdata/config.json');
+const { hourai } = require('../../data/config.json');
 
 const hd = hourai.hangedRoleId; //Hanged Doll
 

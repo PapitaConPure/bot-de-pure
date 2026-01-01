@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { hourai, serverid } = require('../localdata/config.json');
+const { hourai, serverid } = require('../data/config.json');
 
 /**
  * @param {Discord.GuildMember|Discord.PartialGuildMember} oldMember

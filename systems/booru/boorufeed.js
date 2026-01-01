@@ -1,12 +1,12 @@
-const GuildConfigs = require('../../localdata/models/guildconfigs.js');
+const GuildConfigs = require('../../models/guildconfigs.js');
 const Discord = require('discord.js');
 const { formatBooruPostMessage, notifyUsers } = require('./boorusend.js');
-const { auditError, auditAction } = require('../others/auditor.js');
+const { auditError, auditAction } = require('../others/auditor');
 const chalk = require('chalk');
-const { Booru } = require('./boorufetch.js');
-const globalConfigs = require('../../localdata/config.json');
-const { paginateRaw } = require('../../func.js');
-const { fetchGuildMembers } = require('../../guildratekeeper.js');
+const { Booru } = require('./boorufetch');
+const globalConfigs = require('../../data/config.json');
+const { paginateRaw } = require('../../func');
+const { fetchGuildMembers } = require('../../utils/guildratekeeper');
 
 //const Logger = require('../../logs');
 //const { debug } = Logger('WARN', 'BooruSend');
@@ -50,7 +50,7 @@ async function processFeeds(booru, guilds) {
     if(globalConfigs.noDataBase) return;
 
     const guildIds = guilds.map(g => g.id);
-    const guildConfigs = /**@type {Array<import('../../localdata/models/guildconfigs.js').GuildConfigDocument>}*/(await GuildConfigs.find({
+    const guildConfigs = /**@type {Array<import('../../models/guildconfigs.js').GuildConfigDocument>}*/(await GuildConfigs.find({
         guildId: { $in: guildIds },
         feeds: { $exists: true, $ne: {} },
     }));
@@ -345,7 +345,7 @@ class BooruFeed {
 
     /**
      * Obtiene {@linkcode Post}s que no han sido publicados
-     * @returns {Promise<{ success: true, posts: Array<import('./boorufetch.js').Post>, newPosts: Array<import('./boorufetch.js').Post> } | { success: false, posts: [], newPosts: [] }>}
+     * @returns {Promise<{ success: true, posts: Array<import('./boorufetch').Post>, newPosts: Array<import('./boorufetch').Post> } | { success: false, posts: [], newPosts: [] }>}
      */
     async fetchPosts() {
         try {

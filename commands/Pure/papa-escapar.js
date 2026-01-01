@@ -6,7 +6,7 @@ const options = new CommandOptions()
 const flags = new CommandTags().add('PAPA');
 const command = new CommandManager('papa-escapar', flags)
 	.setAliases('papa-abandonar')
-	.setDescription('Abandono.')
+	.setDescription('Me hace abandonar el servidor especificado.')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		if(args.empty)
@@ -14,7 +14,7 @@ const command = new CommandManager('papa-escapar', flags)
 
 		const guild = await args.getGuild('servidor');
 		if(!guild)
-			return request.reply({ content: 'Servidor inválido' });
+			return request.reply({ content: '⚠️ Servidor inválido' });
 
 		return guild.leave();
 	});

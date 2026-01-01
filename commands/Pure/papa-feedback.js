@@ -1,8 +1,8 @@
 const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { CommandTags, CommandManager } = require('../Commons/commands');
-const GuildConfig = require('../../localdata/models/guildconfigs.js');
-const { tenshiColor } = require('../../localdata/config.json');
-const { makeButtonRowBuilder } = require('../../tsCasts.js');
+const GuildConfig = require('../../models/guildconfigs.js');
+const { tenshiColor } = require('../../data/config.json');
+const { makeButtonRowBuilder } = require('../../utils/tsCasts.js');
 
 const tags = new CommandTags().add('PAPA');
 const command = new CommandManager('papa-feedback', tags)
@@ -56,7 +56,7 @@ const command = new CommandManager('papa-feedback', tags)
             ),
         ];
 
-        const guildConfigs = /**@type {Array<import('../../localdata/models/guildconfigs.js').GuildConfigDocument>}*/(await GuildConfig.find({}));
+        const guildConfigs = /**@type {Array<import('../../models/guildconfigs.js').GuildConfigDocument>}*/(await GuildConfig.find({}));
         const guilds = client.guilds.cache;
         guildConfigs.forEach(guildConfig => {
             const guild = guilds.get(guildConfig.guildId);

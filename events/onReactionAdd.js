@@ -1,20 +1,18 @@
-const Discord = require('discord.js');
-const UserConfigs = require('../localdata/models/userconfigs.js');
+const UserConfigs = require('../models/userconfigs');
 
-const Logger = require('../logs');
+const Logger = require('../utils/logs.js');
 const { warn } = Logger('WARN', 'onReactionAdd');
 
 /**
  * 
- * @param {Discord.MessageReaction | Discord.PartialMessageReaction} reaction 
- * @param {Discord.User | Discord.PartialUser} user 
- * @param {Discord.MessageReactionEventDetails} details 
+ * @param {import('discord.js').MessageReaction | import('discord.js').PartialMessageReaction} reaction 
+ * @param {import('discord.js').User | import('discord.js').PartialUser} user 
  * @returns 
  */
-async function onReactionAdd(reaction, user, details) {
+async function onReactionAdd(reaction, user) {
 	let message;
 	try {
-		/**@type {Discord.Message}*/
+		/**@type {import('discord.js').Message}*/
 		[ reaction, message, user ] = await Promise.all([
 			reaction.partial === true ? reaction.fetch() : reaction,
 			reaction.message.partial === true ? reaction.message.fetch(true) : reaction.message,

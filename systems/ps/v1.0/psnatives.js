@@ -1,5 +1,5 @@
 const { TuberScope } = require('./psscope.js');
-const { randRange, fetchUserID, shortenText, rand, fetchMember, fetchChannel, fetchRole, stringHexToNumber, fetchMemberSync } = require('../../../func.js');
+const { randRange, fetchUserID, shortenText, rand, fetchMember, fetchChannel, fetchRole, stringHexToNumber, fetchMemberSync } = require('../../../func');
 const {
     //@ts-expect-error
     RuntimeValue,

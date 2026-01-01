@@ -1,7 +1,7 @@
 const { User, GuildMember, Message, GuildChannel, CommandInteractionOptionResolver, Role, Attachment, Guild } = require('discord.js');
 const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSentence, regroupText, fetchGuild } = require('../../func');
 
-const Logger = require('../../logs');
+const Logger = require('../../utils/logs');
 const { warn } = Logger('WARN', 'CmdOpts')
 
 /**

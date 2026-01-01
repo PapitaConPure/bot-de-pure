@@ -1,15 +1,15 @@
-const { PureVoiceModel, PureVoiceSessionModel } = require('../../localdata/models/purevoice.js');
-const UserConfigs = require('../../localdata/models/userconfigs');
-const { tenshiColor }= require('../../localdata/config.json');
+const { PureVoiceModel, PureVoiceSessionModel } = require('../../models/purevoice.js');
+const UserConfigs = require('../../models/userconfigs');
+const { tenshiColor }= require('../../data/config.json');
 const Discord = require('discord.js');
-const { p_pure } = require('../../localdata/customization/prefixes');
-const { Translator } = require('../../internationalization');
+const { p_pure } = require('../../utils/prefixes');
+const { Translator } = require('../../i18n/internationalization');
 const chalk = require('chalk');
 const { ButtonStyle, ChannelType } = require('discord.js');
-const { makeButtonRowBuilder } = require('../../tsCasts');
-const Logger = require('../../logs.js');
+const { makeButtonRowBuilder } = require('../../utils/tsCasts.js');
+const Logger = require('../../utils/logs.js');
 
-const { debug, info, warn, error, fatal } = Logger('WARN', 'PV');
+const { debug, info, warn, error } = Logger('WARN', 'PV');
 
 /**
  * 
@@ -22,7 +22,7 @@ function makePVSessionName(name, emoji = null) {
 
 /**
  * 
- * @param {import('../../localdata/models/userconfigs').UserConfigDocument} userConfig 
+ * @param {import('../../models/userconfigs').UserConfigDocument} userConfig 
  */
 function makeSessionAutoname(userConfig) {
     if(!userConfig?.voice?.autoname) return null;
@@ -31,7 +31,7 @@ function makeSessionAutoname(userConfig) {
 
 /**
  * 
- * @param {import('../../localdata/models/userconfigs').UserConfigDocument} userConfig 
+ * @param {import('../../models/userconfigs').UserConfigDocument} userConfig 
  */
 function makeSessionRoleAutoname(userConfig) {
     if(!userConfig?.voice?.autoname) return null;
@@ -39,7 +39,7 @@ function makeSessionRoleAutoname(userConfig) {
 }
 
 class PureVoiceUpdateHandler {
-    /**@type {import('../../localdata/models/purevoice.js').PureVoiceDocument}*/
+    /**@type {import('../../models/purevoice.js').PureVoiceDocument}*/
     pvDocument;
     /**@type {Discord.VoiceState}*/
     oldState;
@@ -74,12 +74,12 @@ class PureVoiceUpdateHandler {
     systemIsInstalled = () => (!!(this.pvDocument && this.state.guild.channels.cache.get(this.pvDocument.categoryId)));
     
     /** Para controlar errores ocasionados por una eliminación prematura de uno de los canales asociados a una sesión */
-    prematureError = _ => warn(chalk.gray('Canal probablemente eliminado prematuramente'));
+    prematureError = () => warn(chalk.gray('Canal probablemente eliminado prematuramente'));
     
     /** Comprueba si el cambio de estado no es un movimiento entre canales de voz */
-    isNotConnectionUpdate = _ => (this.oldState.channelId === this.state.channelId);
+    isNotConnectionUpdate = () => (this.oldState.channelId === this.state.channelId);
 
-    saveChanges = _ => this.pvDocument.save();
+    saveChanges = () => this.pvDocument.save();
 
     /**
      * Comprueba si el cambio es una desconexión y verifica si el canal quedó vacío para poder eliminar la sesión.

@@ -1,4 +1,4 @@
-const { improveNumber } = require('../../func.js'); //Funciones globales
+const { improveNumber } = require('../../func'); //Funciones globales
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
 const flags = new CommandTags().add('COMMON');

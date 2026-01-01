@@ -1,6 +1,6 @@
 const { readdir } = require('fs/promises'); //Integrar operaciones sistema de archivos de consola
-const GuildConfig = require('../../localdata/models/guildconfigs.js');
-const { p_pure } = require('../../localdata/customization/prefixes.js');
+const GuildConfig = require('../../models/guildconfigs.js');
+const { p_pure } = require('../../utils/prefixes');
 const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
 const { EmbedBuilder } = require('discord.js');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
@@ -36,7 +36,7 @@ const command = new CommandManager('caos', tags)
 		const cfiles = (await readdir('./commands/Pure')).filter(file => file.endsWith('.js'));
 		const chaosnames = [];
 		for(const file of cfiles) {
-			const command = require(`../../commands/Pure/${file}`);
+			const command = require(`./${file}`);
 			if(command.flags.has('CHAOS'))
 				chaosnames.push(command.name);
 		}

@@ -1,7 +1,7 @@
-const UserConfig = require("../../localdata/models/userconfigs");
-const { CommandManager, CommandTags, CommandOptions } = require("../Commons/commands");
-const { recacheUser } = require("../../usercache");
-const { peopleid } = require("../../localdata/config.json");
+const UserConfig = require('../../models/userconfigs');
+const { CommandManager, CommandTags, CommandOptions } = require('../Commons/commands');
+const { recacheUser } = require('../../utils/usercache');
+const { peopleid } = require('../../data/config.json');
 
 const options = new CommandOptions()
 	.addParam('usuario', 'USER', 'para especificar el usuario a bannear');

@@ -1,6 +1,6 @@
 const { CommandTags, CommandManager } = require('../Commons/commands');
-const { hourai } = require('../../localdata/config.json');
-const { colorsRow } = require('../../localdata/houraiProps');
+const { hourai } = require('../../data/config.json');
+const { colorsRow } = require('../../data/houraiProps');
 const { colorsList } = hourai;
 
 const flags = new CommandTags().add(

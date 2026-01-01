@@ -1,12 +1,12 @@
 const { ModalBuilder, TextInputBuilder, TextInputStyle, Colors, ButtonBuilder, ButtonStyle } = require('discord.js'); //Integrar discord.js
-const { decompressId, sleep } = require('../../func.js'); //Funciones globales
+const { decompressId, sleep } = require('../../func'); //Funciones globales
 const { CommandTags, CommandManager } = require('../Commons/commands.js');
 const { useMainPlayer, QueueRepeatMode } = require('discord-player');
-const { showQueuePage, getPageAndNumberTrackIndex, isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/musicPlayer.js');
-const { Translator } = require('../../internationalization.js');
-const { tryRecoverSavedTracksQueue, saveTracksQueue } = require('../../localdata/models/playerQueue.js');
-const { makeTextInputRowBuilder } = require('../../tsCasts.js');
-const { p_pure } = require('../../localdata/customization/prefixes.js');
+const { showQueuePage, getPageAndNumberTrackIndex, isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/others/musicPlayer');
+const { Translator } = require('../../i18n/internationalization');
+const { tryRecoverSavedTracksQueue, saveTracksQueue } = require('../../models/playerQueue.js');
+const { makeTextInputRowBuilder } = require('../../utils/tsCasts.js');
+const { p_pure } = require('../../utils/prefixes');
 
 const tags = new CommandTags().add(
 	'COMMON',

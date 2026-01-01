@@ -1,14 +1,12 @@
-//const {  } = require('../../func.js'); //Funciones globales
-const { compressId, fetchChannel, decompressId } = require('../../func.js');
-const { TextChannel, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder, Colors, DiscordAPIError } = require('discord.js');
-const { p_pure } = require('../../localdata/customization/prefixes.js');
-const ConfessionSystems = require('../../localdata/models/confessionSystems.js');
-const PendingConfessions = require('../../localdata/models/pendingConfessions.js');
-const { CommandManager, CommandTags, CommandOptions } = require('../Commons/commands.js');
-const confessionSystems = require('../../localdata/models/confessionSystems.js');
-const { auditError } = require('../../systems/others/auditor.js');
+//const {  } = require('../../func'); //Funciones globales
+const { compressId, fetchChannel, decompressId } = require('../../func');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder, Colors, DiscordAPIError } = require('discord.js');
+const ConfessionSystems = require('../../models/confessionSystems.js');
+const PendingConfessions = require('../../models/pendingConfessions.js');
+const { CommandManager, CommandTags } = require('../Commons/commands.js');
+const { auditError } = require('../../systems/others/auditor');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
-const { makeTextInputRowBuilder, makeButtonRowBuilder } = require('../../tsCasts.js');
+const { makeTextInputRowBuilder, makeButtonRowBuilder } = require('../../utils/tsCasts.js');
 
 const perms = new CommandPermissions()
 	.requireAnyOf('ManageMessages')
@@ -249,7 +247,7 @@ const command = new CommandManager('confesión', tags)
 
 		await Promise.all([
 			logChannel.send({ embeds: [embed], components: [row] }),
-			confSystem.save().then(_ => pendingConf.save()),
+			confSystem.save().then(() => pendingConf.save()),
 		]);
 
 		const confirmationEmbed = new EmbedBuilder()
@@ -372,7 +370,7 @@ const command = new CommandManager('confesión', tags)
 				.setColor(Colors.Red)
 				.setDescription(`Confesión rechazada por ${interaction.user}. Se intentó aislar al confesante (${miembro}), pero algo lo impidió`)
 				.addFields(
-					{ name: 'Error', value: `\`\`\`\n${err.message}\n\`\`\`` || '_No hay un mensaje de error disponible_' },
+					{ name: 'Error', value: err.message ? `\`\`\`\n${err.message}\n\`\`\`` : '_No hay un mensaje de error disponible_' },
 				);
 
 			if(!(err instanceof DiscordAPIError))
@@ -417,7 +415,7 @@ const command = new CommandManager('confesión', tags)
 				.setColor(Colors.Red)
 				.setDescription(`Confesión rechazada por ${interaction.user}. Se intentó bannear al confesante (${miembro}), pero algo lo impidió`)
 				.addFields(
-					{ name: 'Error', value: `\`\`\`\n${err.message}\n\`\`\`` || '_No hay un mensaje de error disponible_' },
+					{ name: 'Error', value: err.message ? `\`\`\`\n${err.message}\n\`\`\`` : '_No hay un mensaje de error disponible_' },
 				);
 
 			if(!(err instanceof DiscordAPIError))
@@ -455,7 +453,7 @@ async function getConfessionSystemAndChannels(interaction) {
 	if(!confChannel || confChannel.type !== ChannelType.GuildText)
 		return makeErr('⚠️ No se encontró un canal de confesiones válido');
 
-	/**@type {{ success: true, confSystem: typeof confSystem, logChannel: TextChannel, confChannel: TextChannel }}*/
+	/**@type {{ success: true, confSystem: typeof confSystem, logChannel: import('discord.js').TextChannel, confChannel: import('discord.js').TextChannel }}*/
 	const ret = {
 		success: true,
 		confSystem,

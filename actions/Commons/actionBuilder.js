@@ -1,5 +1,5 @@
 const { ApplicationCommandType, Locale } = require('discord.js');
-const { Translator } = require('../../internationalization');
+const { Translator } = require('../../i18n/internationalization');
 
 /**
  * @typedef {'ChatInput' | 'Message' | 'User'} CommandTypes
@@ -24,7 +24,7 @@ class ContextMenuActionManager {
 
     /**
      * Crea una acción de menú contextual
-     * @param {import('../../internationalization').LocaleIds} nameLocaleId ID de traducción del nombre único de la acción
+     * @param {import('../../i18n/internationalization').LocaleIds} nameLocaleId ID de traducción del nombre único de la acción
      * @param {CommandTypes} type Tipo de acción de menú contextual
      * @constructor
      */

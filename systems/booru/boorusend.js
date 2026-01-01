@@ -1,13 +1,13 @@
-const { makeButtonRowBuilder } = require('../../tsCasts');
+const { makeButtonRowBuilder } = require('../../utils/tsCasts');
 const { EmbedBuilder, ButtonBuilder, ButtonStyle, Colors, ContainerBuilder, MessageFlags, SeparatorSpacingSize } = require('discord.js');
 const { guildEmoji: gEmo, shortenText, isThread } = require('../../func');
 const { Booru, TagTypes } = require('./boorufetch');
-const { getBaseTags, getSearchTags } = require('../../localdata/booruprops');
-const globalConfigs = require('../../localdata/config.json');
+const { getBaseTags, getSearchTags } = require('./booruprops');
+const globalConfigs = require('../../data/config.json');
 const rakki = require('../../commands/Pure/rakkidei');
-const { Translator } = require('../../internationalization');
+const { Translator } = require('../../i18n/internationalization');
 
-const Logger = require('../../logs');
+const Logger = require('../../utils/logs');
 const { debug, info, warn, error } = Logger('WARN', 'BooruSend');
 
 /**
@@ -528,7 +528,7 @@ function isUnholy(isNsfw, request, terms) {
 
 /**
  * @typedef {Object} CommandSearchOptions
- * @property {keyof import('../../localdata/booruprops')['tagMaps']} [cmdtag] 
+ * @property {keyof import('./booruprops')['tagMaps']} [cmdtag] 
  * @property {string} [nsfwtitle] 
  * @property {string} [sfwtitle] 
  */

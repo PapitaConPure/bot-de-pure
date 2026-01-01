@@ -1,8 +1,8 @@
 const { MessageFlags, TextDisplayBuilder, ContainerBuilder } = require('discord.js'); //Integrar discord.js
-const { p_pure } = require('../../localdata/customization/prefixes.js');
+const { p_pure } = require('../../utils/prefixes');
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require("../Commons/commands");
-const { Translator } = require('../../internationalization.js');
-const { fetchGuildMembers } = require('../../guildratekeeper.js');
+const { Translator } = require('../../i18n/internationalization');
+const { fetchGuildMembers } = require('../../utils/guildratekeeper');
 
 /**
  * @param {import('discord.js').GuildMember} member

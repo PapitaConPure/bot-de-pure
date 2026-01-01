@@ -1,6 +1,6 @@
 const { CommandTags, CommandManager, CommandOptions } = require("../Commons/commands");
-const { hourai } = require('../../localdata/config.json');
-const HouraiCfg = require('../../localdata/models/hourai.js');
+const { hourai } = require('../../data/config.json');
+const HouraiCfg = require('../../models/hourai.js');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 
 let crazyBackupId = hourai.crazyBackupChannelId;

@@ -1,5 +1,5 @@
-const { sleep, fetchUser } = require('../../func.js');
-const { p_pure } = require('../../localdata/customization/prefixes.js');
+const { sleep, fetchUser } = require('../../func');
+const { p_pure } = require('../../utils/prefixes');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
 

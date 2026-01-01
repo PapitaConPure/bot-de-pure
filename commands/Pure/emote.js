@@ -1,7 +1,7 @@
 const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js'); //Integrar discord.js
 const { CommandTags, CommandManager, CommandOptions } = require("../Commons/commands");
 const { emojiRegex } = require('../../func');
-const { makeButtonRowBuilder } = require('../../tsCasts');
+const { makeButtonRowBuilder } = require('../../utils/tsCasts');
 
 const options = new CommandOptions()
 	.addParam('mensaje', 'MESSAGE', 'para especificar un mensaje por ID, enlace o respuesta', { optional: true })

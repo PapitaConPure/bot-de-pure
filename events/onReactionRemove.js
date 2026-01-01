@@ -1,18 +1,16 @@
-const Discord = require('discord.js');
-const UserConfigs = require('../localdata/models/userconfigs.js');
+const UserConfigs = require('../models/userconfigs');
 
-const Logger = require('../logs');
+const Logger = require('../utils/logs.js');
 const { warn } = Logger('WARN', 'onReactionRemove');
 
 /**
  * 
- * @param {Discord.MessageReaction | Discord.PartialMessageReaction} reaction 
- * @param {Discord.User | Discord.PartialUser} user 
- * @param {Discord.MessageReactionEventDetails} details 
+ * @param {import('discord.js').MessageReaction | import('discord.js').PartialMessageReaction} reaction 
+ * @param {import('discord.js').User | import('discord.js').PartialUser} user 
  * @returns 
  */
-async function onReactionRemove(reaction, user, details) {
-	/**@type {Discord.Message}*/
+async function onReactionRemove(reaction, user) {
+	/**@type {import('discord.js').Message}*/
 	let message;
 	try {
 		[ message, user ] = await Promise.all([

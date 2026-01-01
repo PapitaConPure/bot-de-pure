@@ -1,25 +1,25 @@
 //#region Carga de módulos necesarios
-const { puré } = require('../commandInit.js');
+const { puré } = require('../core/commandInit.js');
 const Discord = require('discord.js');
 const { CommandManager, CommandOptionSolver } = require('../commands/Commons/commands.js');
 
-const { Stats, ChannelStats } = require('../localdata/models/stats.js');
-const { p_pure } = require('../localdata/customization/prefixes.js');
+const { Stats, ChannelStats } = require('../models/stats.js');
+const { p_pure } = require('../utils/prefixes');
 
-const { updateAgentMessageOwners, addAgentMessageOwner, DiscordAgent } = require('../systems/agents/discordagent.js');
-const { channelIsBlocked, rand, edlDistance, isUsageBanned } = require('../func.js');
-const globalGuildFunctions = require('../localdata/customization/guildFunctions.js');
-const { auditRequest } = require('../systems/others/auditor.js');
-const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../localdata/cmdExceptions.js');
-const globalConfigs = require('../localdata/config.json');
+const { updateAgentMessageOwners, addAgentMessageOwner, DiscordAgent } = require('../systems/agents/discordagent');
+const { channelIsBlocked, rand, edlDistance, isUsageBanned } = require('../func');
+const globalGuildFunctions = require('../systems/others/guildFunctions');
+const { auditRequest } = require('../systems/others/auditor');
+const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../utils/cmdExceptions');
+const globalConfigs = require('../data/config.json');
 const { tenshiColor } = globalConfigs;
-const UserConfigs = require('../localdata/models/userconfigs.js');
-const { sendConvertedPixivPosts } = require('../systems/agents/purepix.js');
-const { sendConvertedTweets } = require('../systems/agents/pureet.js');
-const { Translator } = require('../internationalization.js');
-const { fetchUserCache } = require('../usercache.js');
-const { ConverterEmptyPayload } = require('../systems/agents/converters.js');
-const { addMessageCascade } = require('./onMessageDelete.js');
+const UserConfigs = require('../models/userconfigs');
+const { sendConvertedPixivPosts } = require('../systems/agents/purepix');
+const { sendConvertedTweets } = require('../systems/agents/pureet');
+const { Translator } = require('../i18n/internationalization');
+const { fetchUserCache } = require('../utils/usercache');
+const { ConverterEmptyPayload } = require('../systems/agents/converters');
+const { addMessageCascade } = require('./onMessageDelete');
 //#endregion
 
 const CommandResults = /**@type {const}*/({
@@ -50,11 +50,11 @@ async function updateChannelMessageCounter(guildId, channelId, userId) {
 /**
  * @param {Discord.Message<true>} message
  * @param {String} commandName
- * @param {import('../localdata/customization/prefixes.js').PrefixPair} prefixPair
+ * @param {import('../utils/prefixes').PrefixPair} prefixPair
  * @returns {Promise<CommandResult>}
  */
 async function handleInvalidCommand(message, commandName, prefixPair) {
-	const replies = require('./unknownCommandReplies.json');
+	const replies = require('../data/unknownCommandReplies.json');
 	
 	const selectedReply = replies[rand(replies.length)];
 	async function replyAndDelete() {
@@ -278,7 +278,7 @@ async function onMessage(message, client) {
 		sendConvertedPixivPosts(message, userCache.pixivConverter).catch(logAndReturnEmpty),
 		sendConvertedTweets(message, userCache.twitterPrefix).catch(logAndReturnEmpty),
 	]);
-	const result = /**@type {import('../systems/agents/converters.js').ConverterPayload}*/({
+	const result = /**@type {import('../systems/agents/converters').ConverterPayload}*/({
 		shouldReplace: results.some(r => r.shouldReplace),
 		shouldReply: results.some(r => r.shouldReply),
 		content: results.map(r => r.content).join(' '),

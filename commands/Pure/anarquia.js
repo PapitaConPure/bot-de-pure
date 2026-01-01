@@ -1,16 +1,16 @@
 /* eslint-disable no-sparse-arrays */
 
-const global = require('../../localdata/config.json'); //Variables globales
-const { makeWeightedDecision, compressId, decompressId, improveNumber, emojiRegex } = require('../../func.js');
+const global = require('../../data/config.json'); //Variables globales
+const { makeWeightedDecision, compressId, decompressId, improveNumber, emojiRegex } = require('../../func');
 const { createCanvas, loadImage } = require('canvas');
 const { EmbedBuilder, AttachmentBuilder, StringSelectMenuBuilder, Colors, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { Puretable, AUser, pureTableAssets } = require('../../localdata/models/puretable.js');
+const { p_pure } = require('../../utils/prefixes');
+const { Puretable, AUser, pureTableAssets } = require('../../models/puretable.js');
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require("../Commons/commands");
-const { makeStringSelectMenuRowBuilder, makeButtonRowBuilder } = require('../../tsCasts');
-const { Translator } = require('../../internationalization');
-const { createTaskScheduler } = require('../../concurrency');
-const Ut = require('../../utils');
+const { makeStringSelectMenuRowBuilder, makeButtonRowBuilder } = require('../../utils/tsCasts');
+const { Translator } = require('../../i18n/internationalization');
+const { createTaskScheduler } = require('../../utils/concurrency');
+const Ut = require('../../utils/general');
 
 /**@typedef {{ name: string, emoji: string, weight: number, shape: Array<Array<number>> }} Skill*/
 
@@ -497,7 +497,7 @@ async function loadEmoteIfNotLoaded(request, emoteId) {
 /**
  * @param {import('../Commons/typings').ComplexCommandRequest} request
  * @param {Translator} translator
- * @param {import('../../localdata/models/puretable.js').AUserDocument} auser
+ * @param {import('../../models/puretable.js').AUserDocument} auser
  * @param {[ number, number ]} position
  * @param {string} emoteId
  */
@@ -571,7 +571,7 @@ async function drawPureTable(cells) {
 
 /**
  * Sube de nivel al jugador, da la posibilidad de que obtenga habilidades especiales, NO GUARDA el documento
- * @param {import('../../localdata/models/puretable.js').AUserDocument} auser
+ * @param {import('../../models/puretable.js').AUserDocument} auser
  */
 function levelUpAndGetSkills(auser) {
 	const userLevel = calcUserLevel(auser);
@@ -594,7 +594,7 @@ function levelUpAndGetSkills(auser) {
 	};
 }
 
-/**@param {import('../../localdata/models/puretable.js').AUserDocument} auser*/
+/**@param {import('../../models/puretable.js').AUserDocument} auser*/
 function calcUserLevel(auser) {
 	return Math.floor(auser.exp / maxExp) + 1;
 }

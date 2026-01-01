@@ -1,5 +1,5 @@
 const { CommandManager } = require('../../commands/Commons/cmdBuilder');
-const globalConf = require('../../localdata/config.json');
+const globalConf = require('../../data/config.json');
 const { EmbedBuilder, Colors } = require('discord.js');
 
 /**

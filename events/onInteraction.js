@@ -1,12 +1,12 @@
 //#region Carga de módulos necesarios
-const { puré } = require('../commandInit.js');
-const { Stats } = require('../localdata/models/stats.js');
-const globalConfigs = require('../localdata/config.json');
+const { puré } = require('../core/commandInit.js');
+const { Stats } = require('../models/stats.js');
+const globalConfigs = require('../data/config.json');
 const { peopleid } = globalConfigs;
-const { channelIsBlocked, isUsageBanned, decompressId } = require('../func.js');
-const { auditRequest } = require('../systems/others/auditor.js');
-const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../localdata/cmdExceptions.js');
-const { Translator } = require('../internationalization.js');
+const { channelIsBlocked, isUsageBanned, decompressId } = require('../func');
+const { auditRequest } = require('../systems/others/auditor');
+const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../utils/cmdExceptions.js');
+const { Translator } = require('../i18n/internationalization');
 const { CommandManager } = require('../commands/Commons/cmdBuilder.js');
 const { CommandOptionSolver } = require('../commands/Commons/cmdOpts.js');
 //#endregion
@@ -46,7 +46,7 @@ async function onInteraction(interaction, client) {
 /**
  * @param {import('discord.js').ChatInputCommandInteraction<'cached'>} interaction 
  * @param {import('discord.js').Client} client 
- * @param {import('../localdata/models/stats.js').StatsDocument} stats 
+ * @param {import('../models/stats.js').StatsDocument} stats 
  */
 async function handleCommand(interaction, client, stats) {
     const { commandName } = interaction;
@@ -120,7 +120,7 @@ async function handleCommand(interaction, client, stats) {
 /**
  * @param {import('discord.js').ContextMenuCommandInteraction<'cached'>} interaction 
  * @param {import('discord.js').Client} client 
- * @param {import('../localdata/models/stats.js').StatsDocument} stats 
+ * @param {import('../models/stats.js').StatsDocument} stats 
  */
 async function handleAction(interaction, client, stats) {
     const { commandName } = interaction;
@@ -232,24 +232,6 @@ async function handleAutocompleteInteraction(interaction) {
         const isPermissionsError = handleAndAuditError(error, interaction, { details: `"${optionName}"` });
         if(!isPermissionsError)
             console.error(error);
-    }
-}
-
-
-//#region Casos extremos
-/**@param {import('discord.js').Interaction} interaction*/
-async function handleDMInteraction(interaction) {
-    const translator = await Translator.from(interaction.user.id);
-
-    if(interaction.isAutocomplete()) {
-        return interaction.respond([
-            {
-                name: 'Esta característica no está disponible',
-                value: -1
-            }
-        ]);
-    } else {
-        return interaction.reply({ content: translator.getText('dmInteraction') });
     }
 }
 

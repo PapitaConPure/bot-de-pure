@@ -1,11 +1,10 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { compressId } = require('../../func');
-const { p_pure } = require('../../localdata/customization/prefixes.js');
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
-const { Translator } = require('../../internationalization');
-const { makeButtonRowBuilder } = require('../../tsCasts');
-const { fetchGuildMembers } = require('../../guildratekeeper');
+const { Translator } = require('../../i18n/internationalization');
+const { makeButtonRowBuilder } = require('../../utils/tsCasts');
+const { fetchGuildMembers } = require('../../utils/guildratekeeper');
 
 const MEMBERS_PER_PAGE = 10;
 

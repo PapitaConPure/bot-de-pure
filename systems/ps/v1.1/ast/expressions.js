@@ -16,7 +16,7 @@ const ExpressionKinds = /**@type {const}*/({
     FUNCTION: 'FunctionExpression',
     SEQUENCE: 'SequenceExpression',
 });
-/**@typedef {import('../util/types.js').ValuesOf<typeof ExpressionKinds>} ExpressionKind*/
+/**@typedef {import('../utils/types.js').ValuesOf<typeof ExpressionKinds>} ExpressionKind*/
 
 /**
  * @template {ExpressionKind} T

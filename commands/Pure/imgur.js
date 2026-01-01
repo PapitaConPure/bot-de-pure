@@ -1,11 +1,11 @@
 const { ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonStyle, EmbedBuilder, Colors } = require('discord.js'); //Integrar discord.js
-const { remoteStartup } = require('../../localdata/config.json'); //Configuraciones
+const { remoteStartup } = require('../../data/config.json'); //Configuraciones
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands.js');
-const { makeTextInputRowBuilder, makeButtonRowBuilder } = require('../../tsCasts.js');
-const { Translator } = require('../../internationalization.js');
+const { makeTextInputRowBuilder, makeButtonRowBuilder } = require('../../utils/tsCasts.js');
+const { Translator } = require('../../i18n/internationalization');
 const { ImgurClient } = require('imgur');
 const { default: axios } = require('axios');
-const ImgurUser = require('../../localdata/models/imgurUsers.js');
+const ImgurUser = require('../../models/imgurUsers.js');
 const envPath = remoteStartup ? '../../remoteenv.json' : '../../localenv.json';
 
 const options = new CommandOptions()

@@ -1,6 +1,5 @@
-const { isNotModerator } = require('../../func.js');
-const { Translator } = require('../../internationalization.js');
-const { getAgentMessageOwnerId, deleteAgentMessage } = require('../../systems/agents/discordagent.js');
+const { Translator } = require('../../i18n/internationalization');
+const { getAgentMessageOwnerId, deleteAgentMessage } = require('../../systems/agents/discordagent');
 const { ContextMenuActionManager } = require('../Commons/actionBuilder.js');
 
 const action = new ContextMenuActionManager('actionDeleteUserPost', 'Message')

@@ -1,9 +1,9 @@
 const { EmbedBuilder, MessageFlags } = require('discord.js');
-const { serverid, tenshiColor, peopleid } = require('../../localdata/config.json'); //Variables globales
+const { serverid, tenshiColor, peopleid } = require('../../data/config.json'); //Variables globales
 const { isNotModerator, shortenText } = require('../../func');
-const { p_pure } = require('../../localdata/customization/prefixes.js');
+const { p_pure } = require('../../utils/prefixes');
 const { commandFilenames, CommandOptions, CommandTags, CommandManager, CommandParam } = require('../Commons/commands');
-const { searchCommand, searchCommands, getWikiPageComponentsV2, makeCategoriesRow, makeGuideRow } = require('../../wiki');
+const { searchCommand, searchCommands, getWikiPageComponentsV2, makeCategoriesRow, makeGuideRow } = require('../../systems/others/wiki');
 
 /**@param {import('../Commons/typings').ComplexCommandRequest | import('discord.js').StringSelectMenuInteraction<'cached'>} request*/
 const makeExcludedTags = (request) => {
@@ -245,7 +245,7 @@ function lookupCommands(query = {}) {
 	const commands = [];
 
 	for(const file of commandFilenames) {
-		const commandFile = require(`../../commands/Pure/${file}`);
+		const commandFile = require(`./${file}`);
 		const command = /**@type {CommandManager}*/(commandFile.command ?? commandFile);
 
 		if(commandIsAllowed(command) && commandMeetsCriteria(command))

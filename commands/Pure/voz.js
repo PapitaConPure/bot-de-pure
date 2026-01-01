@@ -1,11 +1,11 @@
-const { PureVoiceModel: PureVoice, PureVoiceSessionModel } = require('../../localdata/models/purevoice.js');
+const { PureVoiceModel: PureVoice, PureVoiceSessionModel } = require('../../models/purevoice.js');
 const { PureVoiceSessionMember, getFrozenSessionAllowedMembers, makePVSessionName } = require('../../systems/others/purevoice.js');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, MessageCollector, ButtonStyle, Colors, ChannelType, Collection, ModalBuilder, TextInputStyle, TextInputBuilder } = require('discord.js');
-const { p_pure } = require('../../localdata/customization/prefixes.js');
-const { isNotModerator, defaultEmoji } = require('../../func.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, MessageCollector, ButtonStyle, Colors, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder } = require('discord.js');
+const { p_pure } = require('../../utils/prefixes');
+const { isNotModerator, defaultEmoji } = require('../../func');
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
-const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts.js');
-const { Translator } = require('../../internationalization');
+const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts.js');
+const { Translator } = require('../../i18n/internationalization');
 
 const cancelbutton = (id) => new ButtonBuilder()
 	.setCustomId(`voz_cancelWizard_${id}`)
@@ -372,7 +372,7 @@ const command = new CommandManager('voz', flags)
 		});
 	})
 	.setButtonResponse(async function setSessionName(interaction) {
-		const { guildId, member } = interaction;
+		const { member } = interaction;
         const translator = await Translator.from(member);
 
 		const warnNotInSession = () => interaction.reply({

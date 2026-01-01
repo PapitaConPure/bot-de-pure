@@ -1,16 +1,16 @@
 const Discord = require('discord.js'); //Discord.js
-const global = require('./localdata/config.json'); //Variables globales
-const images = require('./localdata/images.json'); //Imágenes globales
-const { p_pure } = require('./localdata/customization/prefixes.js'); //Imágenes globales
+const global = require('./data/config.json'); //Variables globales
+const images = require('./data/images.json'); //Imágenes globales
+const { p_pure } = require('./utils/prefixes');
 const Canvas = require('canvas'); //Node Canvas
 const chalk = require('chalk'); //Consola con formato bonito
-const { colorsRow } = require('./localdata/houraiProps');
+const { colorsRow } = require('./data/houraiProps');
 const { ButtonStyle, ChannelType } = require('discord.js');
-const { fetchUserCache } = require('./usercache');
-const Hourai = require('./localdata/models/hourai');
-const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } = require('./tsCasts');
-const { fetchGuildMembers } = require('./guildratekeeper');
-const { Translator } = require('./internationalization');
+const { fetchUserCache } = require('./utils/usercache');
+const Hourai = require('./models/hourai');
+const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } = require('./utils/tsCasts');
+const { fetchGuildMembers } = require('./utils/guildratekeeper');
+const { Translator } = require('./i18n/internationalization');
 const concol = {
     orange: chalk.rgb(255, 140, 70),
     purple: chalk.rgb(158, 114,214),
@@ -998,7 +998,7 @@ module.exports = {
     fetchGuild: async function(query) {
         if(typeof query !== 'string' || !query.length) return;
 
-        const client = require('./client').client;
+        const client = require('./core/client').client;
 
         if(!isNaN(+query))
             return client.guilds.cache.get(query)

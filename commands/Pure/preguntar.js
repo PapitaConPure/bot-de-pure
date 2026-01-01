@@ -1,8 +1,8 @@
 const { CommandTags, CommandManager, CommandOptions } = require('../Commons/commands');
-const globalConfigs = require('../../localdata/config.json');
+const globalConfigs = require('../../data/config.json');
 const { Groq } = require('groq-sdk');
-const { Translator } = require('../../internationalization');
-const { fetchChannel, fetchRole, fetchMemberSync, compressId } = require('../../func');
+const { Translator } = require('../../i18n/internationalization');
+const { fetchChannel, fetchRole, compressId, fetchMember } = require('../../func');
 const envPath = globalConfigs.remoteStartup ? '../../remoteenv.json' : '../../localenv.json';
 
 const groq = new Groq({
@@ -130,7 +130,7 @@ The User's Discord name is: "${request.member.displayName || request.user.userna
  * @param {import('../Commons/typings').ComplexCommandRequest} request 
  */
 function fetchMemberName(id, request) {
-	const member = fetchMemberSync(id, request);
+	const member = fetchMember(id, request);
 	return member?.displayName || member?.user?.username;
 }
 

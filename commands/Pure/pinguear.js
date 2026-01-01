@@ -1,6 +1,5 @@
-const uses = require('../../localdata/sguses.json'); //Funciones globales
-const { randRange } = require('../../func.js');
-const { p_pure } = require('../../localdata/customization/prefixes.js');
+const { randRange } = require('../../func');
+const { p_pure } = require('../../utils/prefixes');
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
 
 const frase = [
@@ -56,8 +55,9 @@ const command = new CommandManager('pinguear', flags)
 	.setExecution(async (request, args) => {
 		const now = Date.now() * 1;
 		const uid = request.userId;
+		const lastUse = /**@type {number}*/(command.memory.get(uid)) ?? 0;
 
-		if(now - (uses.pinguear[uid] ?? 0) < 1000 * 60)
+		if(now - lastUse < 1000 * 60)
 			return request.isInteraction
 				? request.reply({ content: '⏳ Pero no seas tan degenerado, aflójale un poco', ephemeral: true })
 				: request.inferAsMessage().react('⏳');
@@ -98,7 +98,7 @@ const command = new CommandManager('pinguear', flags)
 				ephemeral: true,
 			});
 
-		uses.pinguear[uid] = now * 1;
+		command.memory.set(uid, +now);
 		return pinguear(request, user, repeats, true);
 	});
 

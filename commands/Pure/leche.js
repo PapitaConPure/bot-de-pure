@@ -1,11 +1,11 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const global = require('../../localdata/config.json'); //Variables globales
-const func = require('../../func.js'); //Funciones globales
+const global = require('../../data/config.json'); //Variables globales
+const func = require('../../func'); //Funciones globales
 const { default: axios } = require('axios');
 const Canvas = require('canvas');
-const { utils } = require('../../localdata/images.json'); //Funciones globales
+const { utils } = require('../../data/images.json'); //Funciones globales
 const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
-const { isThread } = require('../../func.js');
+const { isThread } = require('../../func');
 
 /**
  * 

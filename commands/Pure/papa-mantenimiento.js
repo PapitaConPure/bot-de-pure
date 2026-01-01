@@ -1,4 +1,4 @@
-const global = require('../../localdata/config.json'); //Variables globales
+const global = require('../../data/config.json'); //Variables globales
 const { CommandTags, CommandManager } = require('../Commons/commands');
 
 const flags = new CommandTags().add('PAPA');

@@ -1,6 +1,6 @@
-const {} = require('discord.js'); //Librería de Discord.js
-const {} = require('../../localdata/config.json'); //Datos globales
-const { dibujarBienvenida } = require('../../func.js'); //Funciones globales
+//const {} = require('discord.js'); //Librería de Discord.js
+//const {} = require('../../data/config.json'); //Datos globales
+const { dibujarBienvenida } = require('../../func'); //Funciones globales
 const { CommandTags, CommandManager } = require('../Commons/commands');
 
 const flags = new CommandTags().add('PAPA');

@@ -1,7 +1,7 @@
-const { Translator } = require('../../internationalization.js');
+const { Translator } = require('../../i18n/internationalization');
 const { ContextMenuActionManager } = require('../Commons/actionBuilder.js');
 const { pourSauce } = require('../../systems/others/saucenao.js');
-const SauceNAOUser = require('../../localdata/models/saucenaoUsers');
+const SauceNAOUser = require('../../models/saucenaoUsers.js');
 
 const action = new ContextMenuActionManager('actionFindSource', 'Message')
     .setMessageResponse(async interaction => {

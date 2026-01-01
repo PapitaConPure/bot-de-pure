@@ -1,7 +1,7 @@
-const { EmbedBuilder, AttachmentBuilder, ChannelType } = require('discord.js');
-const pixivToken = process.env.PIXIV_REFRESH_TOKEN ?? (require('../../localenv.json')?.pixivtoken);
-const { shortenTextLoose } = require('../../func');
-const globalConfigs = require('../../localdata/config.json');
+const { EmbedBuilder, /*AttachmentBuilder, */ChannelType } = require('discord.js');
+//const pixivToken = process.env.PIXIV_REFRESH_TOKEN ?? (require('../../localenv.json')?.pixivtoken);
+//const { shortenTextLoose } = require('../../func');
+const globalConfigs = require('../../data/config.json');
 const { ConverterEmptyPayload } = require('./converters');
 
 /**
@@ -10,15 +10,15 @@ const { ConverterEmptyPayload } = require('./converters');
  * @property {import('axios').ResponseType} responseType
  */
 
-/**@type {ImageRequestOptions}*/
-const PIXIV_IMAGE_REQUEST_OPTIONS = {
-	headers: {
-		'Referer': 'http://www.pixiv.net',
-		'Accept-Language': process.env.REGION ?? 'es-AR',
-		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-	},
-	responseType: 'arraybuffer',
-};
+// /**@type {ImageRequestOptions}*/
+// const PIXIV_IMAGE_REQUEST_OPTIONS = {
+// 	headers: {
+// 		'Referer': 'http://www.pixiv.net',
+// 		'Accept-Language': process.env.REGION ?? 'es-AR',
+// 		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+// 	},
+// 	responseType: 'arraybuffer',
+// };
 
 const PIXIV_GALLERY_PAGE_SEPARATOR = '_';
 const PIXIV_DOMAIN_REGEX_PART = /((http:\/\/|https:\/\/)(www\.)?)(pixiv.net(\/en)?)/;
@@ -73,21 +73,20 @@ const refreshPixivAccessToken = async () => {
 };
 
 /**
- * 
  * @param {string} url 
  * @returns {[ Number, Number, Boolean ]}
  * @deprecated
  */
-function extractIdAndPage(url) {
-	const data = url.split('/').pop();
+// function extractIdAndPage(url) {
+// 	const data = url.split('/').pop();
 
-	if(!isNaN(+data))
-		return [ +data, 0, false ];
+// 	if(!isNaN(+data))
+// 		return [ +data, 0, false ];
 
-	const [ id, page ] = data.split(PIXIV_GALLERY_PAGE_SEPARATOR);
+// 	const [ id, page ] = data.split(PIXIV_GALLERY_PAGE_SEPARATOR);
 
-	return [ +id, +page - 1, true ];
-}
+// 	return [ +id, +page - 1, true ];
+// }
 
 /**
  * Analiza las urls ingresadas y devuelve data de mensaje con hasta 4 Embeds de pixiv relacionados
@@ -97,6 +96,9 @@ function extractIdAndPage(url) {
 const formatPixivPostsMessage = async (urls) => {
 	while(performingAuthentication)
 		await new Promise(resolve => setTimeout(resolve, 50));
+
+	//Quitar esto
+	urls.forEach(url => url);
 	
 	return { embeds: [], files: [] };
 	
@@ -254,7 +256,7 @@ function replacer(match, _p1, _p2, _p3, _p4, _p5, p6) {
  * @deprecated
  */
 async function sendPixivPostsAsWebhook(message) {
-	const { content, channel, member } = message;
+	const { content, channel } = message;
 	if(!message.guild.members.me.permissionsIn(channel).has([ 'ManageWebhooks', 'SendMessages', 'AttachFiles' ]))
 		return ConverterEmptyPayload;
 

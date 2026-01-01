@@ -1,12 +1,11 @@
-const Discord = require('discord.js');
-const MessageCascades = require('../localdata/models/messageCascades.js');
-const { channelIsBlocked, isUsageBanned, fetchMessage } = require('../func.js');
+const MessageCascades = require('../models/messageCascades.js');
+const { channelIsBlocked, isUsageBanned, fetchMessage } = require('../func');
 
 /**@type {Map<String, String>}*/
 const messageCascadesCache = new Map();
 
 /**
- * @param {Discord.Message | Discord.PartialMessage} message
+ * @param {import('discord.js').Message | import('discord.js').PartialMessage} message
  */
 async function onMessageDelete(message) {
 	const { author } = message;

@@ -1,5 +1,5 @@
 const { ValueKinds, coerceValue, makeValue, makeNumber, makeText, makeBoolean, makeList, makeRegistry, makeNativeFunction, makeFunction, makeLambda, makeEmbed, makeNada } = require('./interpreter/values');
-const { stringifyPSAST, logPSAST } = require('./util/debug');
+const { stringifyPSAST, logPSAST } = require('./utils/debug');
 const { Token } = require('./lexer/tokens');
 const { Lexer } = require('./lexer/lexer');
 const { Parser } = require('./parser/parser');
@@ -23,7 +23,7 @@ const PS_VERSION = /**@type {const}*/(1.1);
  * @property {false} advanced
  * @property {String?} [content]
  * @property {Array<String>} [files]
- * @typedef {import('./util/types.js').RequireAtLeastOne<PartialBasicTubercleData>} BasicTubercleData
+ * @typedef {import('./utils/types.js').RequireAtLeastOne<PartialBasicTubercleData>} BasicTubercleData
  */
 
 /**

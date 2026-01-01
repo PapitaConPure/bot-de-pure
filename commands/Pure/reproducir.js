@@ -1,10 +1,10 @@
 const { EmbedBuilder } = require('discord.js'); //Integrar discord.js
 const { CommandOptions, CommandTags, CommandManager, CommandParam } = require('../Commons/commands.js');
 const { useMainPlayer } = require('discord-player');
-const { Translator } = require('../../internationalization.js');
-const { saveTracksQueue, tryRecoverSavedTracksQueue } = require('../../localdata/models/playerQueue.js');
-const { isPlayerUnavailable, SERVICES } = require('../../systems/musicPlayer.js');
-const { shortenText } = require('../../func.js');
+const { Translator } = require('../../i18n/internationalization');
+const { saveTracksQueue, tryRecoverSavedTracksQueue } = require('../../models/playerQueue.js');
+const { isPlayerUnavailable, SERVICES } = require('../../systems/others/musicPlayer');
+const { shortenText } = require('../../func');
 
 const options = new CommandOptions()
 	.addOptions(

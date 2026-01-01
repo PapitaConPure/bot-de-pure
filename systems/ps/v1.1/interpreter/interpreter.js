@@ -6,7 +6,7 @@ const { StatementKinds } = require('../ast/statements');
 const { ValueKinds, makeNumber, makeText, makeBoolean, makeList, makeRegistry, makeNada, coerceValue, isInternalOperable, makeNativeFunction, makeFunction, makeLambda, ValueKindTranslationLookups } = require('./values');
 const { UnaryOperationLookups, BinaryOperationLookups, ValueKindLookups } = require('./lookups');
 const { NativeMethodsLookup } = require('./environment/environment');
-const { iota, shortenText } = require('../util/utils.js');
+const { iota, shortenText } = require('../utils/utils.js');
 
 const Stops = /**@type {const}*/({
 	NONE: iota(0),
@@ -14,7 +14,7 @@ const Stops = /**@type {const}*/({
 	RETURN: iota(),
 	ABORT: iota(),
 });
-/**@typedef {import('../util/types.js').ValuesOf<Stops>} StopKind*/
+/**@typedef {import('../utils/types.js').ValuesOf<Stops>} StopKind*/
 
 //#region Atajos de Tipado
 /**

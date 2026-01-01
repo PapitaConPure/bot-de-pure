@@ -1,6 +1,6 @@
 const { EmbedBuilder, Colors } = require('discord.js'); //Integrar discord.js
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands.js');
-const { Translator } = require('../../internationalization.js');
+const { Translator } = require('../../i18n/internationalization');
 const { default: axios } = require('axios');
 const { Catbox } = require('node-catbox');
 const { pipeline } = require('stream/promises');

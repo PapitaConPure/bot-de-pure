@@ -1,13 +1,13 @@
-const { hourai, tenshiColor } = require('../../localdata/config.json');
-const Hourai = require('../../localdata/models/hourai.js');
+const { hourai, tenshiColor } = require('../../data/config.json');
+const Hourai = require('../../models/hourai.js');
 const axios = require('axios').default;
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors } = require('discord.js');
-const { p_pure } = require('../../localdata/customization/prefixes');
+const { p_pure } = require('../../utils/prefixes');
 const { CommandTags, CommandManager, CommandOptions, CommandParam } = require('../Commons/commands');
 const { auditError } = require('../../systems/others/auditor');
-const { colorsRow } = require('../../localdata/houraiProps');
+const { colorsRow } = require('../../data/houraiProps');
 const { subdivideArray, isBoosting, stringHexToNumber } = require('../../func');
-const { makeStringSelectMenuRowBuilder, makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts');
+const { makeStringSelectMenuRowBuilder, makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts');
 
 /**
  * @typedef {{id: String, label: String, emote: String}} RoleData Datos de un rol para el propósito del comando
@@ -124,7 +124,7 @@ const command = new CommandManager('roles', flags)
 		const role = args.getRole('búsqueda', true);
 
 		if(role) {
-			const houraiDB = /**@type {import('../../localdata/models/hourai.js').HouraiDocument}*/((await Hourai.findOne({})) || new Hourai({}));
+			const houraiDB = /**@type {import('../../models/hourai.js').HouraiDocument}*/((await Hourai.findOne({})) || new Hourai({}));
 			const mentionRoles = /**@type {{ [ K: String ]: CategoryContent }}*/(/**@type {unknown}*/(houraiDB.mentionRoles));
 
 			const roleFound = Object.values(mentionRoles).some(category => category.rolePool.some(roleItem => {
@@ -245,7 +245,7 @@ const command = new CommandManager('roles', flags)
 			return interaction.reply({ content: '❌' });
 
 		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
-		const boostedRecently = isBoosting(interaction.member) || interaction.user.id === require('../../localdata/config.json').peopleid.papita;
+		const boostedRecently = isBoosting(interaction.member) || interaction.user.id === require('../../data/config.json').peopleid.papita;
 		const customRoleId = houraiDB.customRoles?.[interaction.user.id];
 
 		return interaction.reply({

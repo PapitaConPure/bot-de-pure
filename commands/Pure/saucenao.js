@@ -1,12 +1,12 @@
 const { EmbedBuilder, Colors, ButtonBuilder, ButtonStyle, TextInputBuilder, TextInputStyle, ModalBuilder } = require('discord.js'); //Integrar discord.js
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
 const { pourSauce, testSauceNAOToken } = require('../../systems/others/saucenao');
-const { Translator } = require('../../internationalization');
-const { encryptString } = require('../../security');
-const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts');
-const SauceNAOUser = require('../../localdata/models/saucenaoUsers');
+const { Translator } = require('../../i18n/internationalization');
+const { encryptString } = require('../../utils/security');
+const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts');
+const SauceNAOUser = require('../../models/saucenaoUsers');
 
-const Logger = require('../../logs');
+const Logger = require('../../utils/logs');
 const { debug } = Logger('ERROR', 'p!saucenao');
 
 const options = new CommandOptions()

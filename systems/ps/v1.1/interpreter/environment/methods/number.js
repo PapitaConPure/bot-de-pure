@@ -2,7 +2,7 @@
 
 const { makeNumber, makeText, ValueKinds } = require('../../values');
 const { expectParam, getParamOrDefault } = require('../nativeUtils');
-const { improveNumber, clamp } = require('../../../util/utils');
+const { improveNumber, clamp } = require('../../../utils/utils');
 
 /**
  * @typedef {import('../../values').NumberValue} NumberValue

@@ -1,7 +1,7 @@
 const { MessageFlags, EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { Translator } = require('../../internationalization.js');
+const { Translator } = require('../../i18n/internationalization');
 const { ContextMenuActionManager } = require('../Commons/actionBuilder.js');
-const { makeButtonRowBuilder } = require('../../tsCasts.js');
+const { makeButtonRowBuilder } = require('../../utils/tsCasts.js');
 
 const action = new ContextMenuActionManager('actionGetSticker', 'Message')
     .setMessageResponse(async interaction => {

@@ -2,8 +2,8 @@
 
 const { ValueKinds, makeNumber, makeText, makeBoolean, makeNada } = require('../../values');
 const { getParamOrNada, expectParam } = require('../nativeUtils');
-const { rand, randRange } = require('../../../util/utils');
-const { rgb2hex, hsl2hex, hsv2hex } = require('../../../util/colorUtils');
+const { rand, randRange } = require('../../../utils/utils');
+const { rgb2hex, hsl2hex, hsv2hex } = require('../../../utils/color');
 
 /**
  * @typedef {import('../../values').NumberValue} NumberValue

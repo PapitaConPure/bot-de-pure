@@ -1,6 +1,5 @@
 const { EmbedBuilder, Colors } = require('discord.js');
-const { regroupText, randRange } = require('../../func.js');
-const { p_pure } = require('../../localdata/customization/prefixes.js');
+const { randRange } = require('../../func');
 const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require("../Commons/commands");
 
 const options = new CommandOptions()

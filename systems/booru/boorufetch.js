@@ -1,7 +1,7 @@
 const { default: axios } = require('axios');
 const { shuffleArray, decodeEntities } = require('../../func');
-const BooruTags = require('../../localdata/models/boorutags');
-const globalConfigs = require('../../localdata/config.json');
+const BooruTags = require('../../models/boorutags');
+const globalConfigs = require('../../data/config.json');
 
 /**
  * @typedef {Object} APIPostData

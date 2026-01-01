@@ -1,5 +1,4 @@
-// @ts-ignore
-const { PermissionResolvable, PermissionFlagsBits, GuildMember, PermissionsBitField, BitField, Guild, GuildChannel } = require('discord.js');
+const { PermissionFlagsBits, PermissionsBitField, BitField } = require('discord.js');
 
 /**Representa un conjunto de permisos de comando*/
 class CommandPermissions {
@@ -9,7 +8,7 @@ class CommandPermissions {
     /**
      * Crea un conjunto de permisos de comando
      * @constructor
-     * @param {PermissionResolvable} permissions Primer requisito inclusivo de permisos requeridos para ejecutar el comando
+     * @param {import('discord.js').PermissionResolvable} permissions Primer requisito inclusivo de permisos requeridos para ejecutar el comando
      */
     constructor(permissions = 0n) {
         this.#requisites = [];
@@ -18,7 +17,7 @@ class CommandPermissions {
 
     /**
      * Agrega un requisito inclusivo de permisos de comando a este conjunto
-     * @param {PermissionResolvable} permissions 
+     * @param {import('discord.js').PermissionResolvable} permissions 
      * @returns 
      */
     requireAnyOf(permissions) {
@@ -28,7 +27,7 @@ class CommandPermissions {
 
     /**
      * Comprueba si el miembro cumple todos los requisitos impuestos por este conjunto
-     * @param {GuildMember} member Miembro a comprobar
+     * @param {import('discord.js').GuildMember} member Miembro a comprobar
      */
     isAllowed(member) {
         if(member?.permissions?.bitfield == undefined)
@@ -49,7 +48,7 @@ class CommandPermissions {
 
     /**
      * Comprueba si el miembro cumple todos los requisitos impuestos por este conjunto en este canal
-     * @param {GuildMember} member Miembro a comprobar
+     * @param {import('discord.js').GuildMember} member Miembro a comprobar
      * @param {import('discord.js').GuildChannelResolvable} channel Canal en el cual comprobar
      */
     isAllowedIn(member, channel) {
@@ -81,7 +80,7 @@ class CommandPermissions {
 
     /**
      * Añade un nuevo requisito inclusivo de permisos
-     * @param {PermissionResolvable} permissions Conjunto de permisos requeridos para ejecutar el comando
+     * @param {import('discord.js').PermissionResolvable} permissions Conjunto de permisos requeridos para ejecutar el comando
      */
     #add(permissions) {
         const bitfield = this.#resolveToBitfield(permissions);
@@ -92,7 +91,7 @@ class CommandPermissions {
 
     /**
      * Recupera un Bitfield de un PermissionResolvable
-     * @param {PermissionResolvable} permissions Conjunto de permisos requeridos para ejecutar el comando
+     * @param {import('discord.js').PermissionResolvable} permissions Conjunto de permisos requeridos para ejecutar el comando
      */
     #resolveToBitfield(permissions) {
         if(Array.isArray(permissions))
@@ -112,7 +111,7 @@ class CommandPermissions {
 
     /**
      * Recupera un Bitfield de un arreglo de PermissionResolvable
-     * @param {Array<PermissionResolvable>} permissions Permisos de comando a introducir
+     * @param {Array<import('discord.js').PermissionResolvable>} permissions Permisos de comando a introducir
      */
     #calcPerms(permissions) {
         let perms = 0n;

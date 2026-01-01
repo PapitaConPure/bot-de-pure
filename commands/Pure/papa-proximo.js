@@ -1,4 +1,4 @@
-const { modifyPresence } = require('../../presence.js');
+const { modifyPresence } = require('../../systems/presence/presence');
 const { CommandTags, CommandManager } = require('../Commons/commands');
 
 const flags = new CommandTags().add('PAPA');

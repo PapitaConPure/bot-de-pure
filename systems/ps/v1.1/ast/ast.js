@@ -1,4 +1,4 @@
-const { iota }= require('../util/utils');
+const { iota }= require('../utils/utils');
 
 /**Contiene niveles de vínculo de operadores*/
 const BindingPowers = /**@type {const}*/({
@@ -31,7 +31,7 @@ const BindingPowers = /**@type {const}*/({
     /**Vínculo más fuerte. Usado para expresiones primarias y símbolos*/
     PRIMARY: iota(),
 });
-/**@typedef {import('../util/types').ValuesOf<BindingPowers>} BindingPower*/
+/**@typedef {import('../utils/types').ValuesOf<BindingPowers>} BindingPower*/
 
 /**Contiene tipos de asociatividad de operadores*/
 const Associativities = /**@type {const}*/({
@@ -40,7 +40,7 @@ const Associativities = /**@type {const}*/({
     /**Asociatividad a la derecha. No es usado con frecuencia*/
     RIGHT: -0.5,
 });
-/**@typedef {import('../util/types').ValuesOf<Associativities>} Associativity*/
+/**@typedef {import('../utils/types').ValuesOf<Associativities>} Associativity*/
 
 /**
  * @typedef {Object} NodeMetadata

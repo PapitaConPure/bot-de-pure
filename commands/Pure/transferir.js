@@ -1,9 +1,9 @@
 const { improveNumber, compressId, sleep } = require('../../func');
 const { CommandTags, CommandManager, CommandOptions } = require('../Commons/commands');
-const UserConfigs = require('../../localdata/models/userconfigs.js');
+const UserConfigs = require('../../models/userconfigs');
 const { EmbedBuilder } = require("discord.js");
-const { Translator } = require("../../internationalization");
-const globalConfigs = require('../../localdata/config.json');
+const { Translator } = require("../../i18n/internationalization");
+const globalConfigs = require('../../data/config.json');
 const { auditError } = require('../../systems/others/auditor');
 
 const transferLocks = new Set();

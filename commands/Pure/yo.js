@@ -1,15 +1,15 @@
-const UserConfigs = require('../../localdata/models/userconfigs');
+const UserConfigs = require('../../models/userconfigs');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder } = require('discord.js');
 const { CommandTags, CommandManager } = require('../Commons/commands');
-const { tenshiColor } = require('../../localdata/config.json');
-const { Translator } = require('../../internationalization');
-const { recacheUser } = require('../../usercache');
+const { tenshiColor } = require('../../data/config.json');
+const { Translator } = require('../../i18n/internationalization');
+const { recacheUser } = require('../../utils/usercache');
 const { compressId, shortenText, decompressId, improveNumber, warn } = require('../../func');
-const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder, makeTextInputRowBuilder } = require('../../tsCasts');
+const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts');
 const { auditError } = require('../../systems/others/auditor');
 const { updateFollowedFeedTagsCache } = require('../../systems/booru/boorufeed');
 const { makeSessionAutoname } = require('../../systems/others/purevoice');
-const { toUtcOffset: toUTCOffset, toTimeZoneAlias } = require('../../timezones');
+const { toUtcOffset: toUTCOffset, toTimeZoneAlias } = require('../../utils/timezones');
 const { acceptedTwitterConverters } = require('../../systems/agents/pureet');
 
 /**@param {String} id*/
@@ -26,7 +26,7 @@ const cancelButton = id => new ButtonBuilder()
 
 /**
  * @param {String?} iconUrl
- * @param {import('../../internationalization').LocaleIds} stepName
+ * @param {import('../../i18n/internationalization').LocaleIds} stepName
  * @param {import('discord.js').ColorResolvable} stepColor
  * @param {Translator} translator
  */
@@ -42,7 +42,7 @@ const wizEmbed = (iconUrl, stepName, stepColor, translator) => {
 
 /**
  * @param {String} userId 
- * @param {import('../../localdata/models/userconfigs').UserConfigDocument} userConfigs 
+ * @param {import('../../models/userconfigs').UserConfigDocument} userConfigs 
  * @param {Translator} translator 
  */
 const dashboardRows = (userId, userConfigs, translator) => [
@@ -98,7 +98,7 @@ const dashboardRows = (userId, userConfigs, translator) => [
 
 /**
  * @param {import('discord.js').Interaction | import('../Commons/typings').ComplexCommandRequest} request 
- * @param {import('../../localdata/models/userconfigs').UserConfigDocument} userConfigs 
+ * @param {import('../../models/userconfigs').UserConfigDocument} userConfigs 
  * @param {Translator} translator 
  */
 const dashboardEmbed = (request, userConfigs, translator) => {
@@ -136,7 +136,7 @@ const dashboardEmbed = (request, userConfigs, translator) => {
 /**
  * 
  * @param {import('discord.js').Interaction} interaction 
- * @param {import('../../localdata/models/userconfigs').UserConfigDocument} userConfigs 
+ * @param {import('../../models/userconfigs').UserConfigDocument} userConfigs 
  * @param {Translator} translator 
  */
 const voiceEmbed = (interaction, userConfigs, translator) => {
@@ -267,7 +267,7 @@ const getPixivConversionPickerResponseContent = (interaction, currentPrefix, tra
 /**
  * @param {String} userId 
  * @param {import('discord.js').ButtonInteraction} interaction 
- * @param {import('../../localdata/models/userconfigs').UserConfigDocument} userConfigs 
+ * @param {import('../../models/userconfigs').UserConfigDocument} userConfigs 
  * @param {Translator} translator 
  */
 const selectTagsChannelRows = (userId, interaction, userConfigs, translator) => [
@@ -541,7 +541,7 @@ const command = new CommandManager('yo', flags)
         if(!userConfigs)
             return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
 
-        const translator = new Translator(/**@type {import('../../internationalization').LocaleKey}*/(userConfigs.language));
+        const translator = new Translator(/**@type {import('../../i18n/internationalization').LocaleKey}*/(userConfigs.language));
         
         if(user.id !== authorId)
             return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
@@ -564,7 +564,7 @@ const command = new CommandManager('yo', flags)
         if(!userConfigs)
             return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
 
-        const translator = new Translator(/**@type {import('../../internationalization').LocaleKey}*/(userConfigs.language));
+        const translator = new Translator(/**@type {import('../../i18n/internationalization').LocaleKey}*/(userConfigs.language));
 		
         const modal = new ModalBuilder()
             .setCustomId('yo_applyVoiceAutoname')
@@ -606,7 +606,7 @@ const command = new CommandManager('yo', flags)
         
         await userConfigs.save();
         
-        const translator = new Translator(/**@type {import('../../internationalization').LocaleKey}*/(userConfigs.language));
+        const translator = new Translator(/**@type {import('../../i18n/internationalization').LocaleKey}*/(userConfigs.language));
         
         const embed = voiceEmbed(interaction, userConfigs, translator);
         await interaction.message.edit({ embeds: [embed] }).catch(console.error);
@@ -619,7 +619,7 @@ const command = new CommandManager('yo', flags)
         if(!userConfigs)
             return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
 
-        const translator = new Translator(/**@type {import('../../internationalization').LocaleKey}*/(userConfigs.language));
+        const translator = new Translator(/**@type {import('../../i18n/internationalization').LocaleKey}*/(userConfigs.language));
 		
         const modal = new ModalBuilder()
             .setCustomId('yo_applyVoiceKillDelay')
@@ -653,7 +653,7 @@ const command = new CommandManager('yo', flags)
         
         await userConfigs.save();
         
-        const translator = new Translator(/**@type {import('../../internationalization').LocaleKey}*/(userConfigs.language));
+        const translator = new Translator(/**@type {import('../../i18n/internationalization').LocaleKey}*/(userConfigs.language));
         
         const embed = voiceEmbed(interaction, userConfigs, translator);
         await interaction.message.edit({ embeds: [embed] }).catch(console.error);
@@ -697,7 +697,7 @@ const command = new CommandManager('yo', flags)
 		if(user.id !== authorId)
 			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
 
-        let service = /**@type {import('../../systems/agents/pureet.js').AcceptedTwitterConverterKey | 'none' | ''}*/(interaction.values[0]);
+        let service = /**@type {import('../../systems/agents/pureet').AcceptedTwitterConverterKey | 'none' | ''}*/(interaction.values[0]);
         if(service === 'none') service = '';
 
         if(!acceptedTwitterConverters.includes(service))
@@ -800,7 +800,7 @@ const command = new CommandManager('yo', flags)
 		// @ts-ignore
 		const translator = new Translator(userConfigs.language);
 		let newTags = userConfigs.feedTagSuscriptions.get(channelId)?.slice(0) ?? [];
-		/**@type {import('../../internationalization.js').LocaleIds}*/
+		/**@type {import('../../i18n/internationalization').LocaleIds}*/
 		let setTagsResponse;
 		let previousLength = newTags.length;
 

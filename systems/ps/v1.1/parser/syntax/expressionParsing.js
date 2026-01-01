@@ -1,4 +1,4 @@
-const { toLowerCaseNormalized } = require('../../util/utils.js');
+const { toLowerCaseNormalized } = require('../../utils/utils.js');
 const { TokenKinds } = require('../../lexer/tokens');
 const { BindingPowers } = require('../../ast/ast');
 const { StatementKinds } = require('../../ast/statements');
@@ -49,7 +49,7 @@ function parsePrimaryExpression(parser) {
 			...metadata,
 		};
 
-	case TokenKinds.LIST:
+	case TokenKinds.LIST: {
 		const elements = parseListElements(parser);
 		const end = elements.length
 			? elements[elements.length - 1].end
@@ -61,14 +61,16 @@ function parsePrimaryExpression(parser) {
 			...metadata,
 			end,
 		};
+	}
 
-	case TokenKinds.REGISTRY:
+	case TokenKinds.REGISTRY: {
 		const entries = parseRegistryMembers(parser);
 		return {
 			kind: ExpressionKinds.REGISTRY_LITERAL,
 			entries,
 			...metadata,
 		};
+	}
 
 	case TokenKinds.NADA:
 		return {
@@ -260,11 +262,9 @@ function parseCastExpression(parser) {
 /**
  * @param {import('../parser.js').Parser} parser
  * @param {import('../../ast/expressions').Expression} left
- * @param {import('../../ast/ast').BindingPower} _bp
- * @param {import('../../ast/ast').Associativity} _ass
  * @returns {import('../../ast/expressions').ArrowExpression}
  */
-function parseArrowExpression(parser, left, _bp, _ass) {
+function parseArrowExpression(parser, left) {
 	parser.advance(); //"->"
 
 	const kind = ExpressionKinds.ARROW;
@@ -302,11 +302,9 @@ function parseArrowExpression(parser, left, _bp, _ass) {
 /**
  * @param {import('../parser.js').Parser} parser
  * @param {import('../../ast/expressions').Expression} left
- * @param {import('../../ast/ast').BindingPower} _bp
- * @param {import('../../ast/ast').Associativity} _ass
  * @returns {import('../../ast/expressions').CallExpression}
  */
-function parseCallExpression(parser, left, _bp, _ass) {
+function parseCallExpression(parser, left) {
 	parser.advance();
 
 	const args = [];
@@ -418,11 +416,9 @@ function parseFunctionExpression(parser) {
 /**
  * @param {import('../parser.js').Parser} parser
  * @param {import('../../ast/expressions').Expression} left
- * @param {import('../../ast/ast').BindingPower} bp
- * @param {import('../../ast/ast').Associativity} ass
  * @returns {import('../../ast/expressions').SequenceExpression}
  */
-function parseSequenceExpression(parser, left, bp, ass) {
+function parseSequenceExpression(parser, left) {
 	const expressions = [ left ];
 
 	do {
@@ -446,11 +442,9 @@ function parseSequenceExpression(parser, left, bp, ass) {
 /**
  * @param {import('../parser.js').Parser} parser
  * @param {import('../../ast/expressions').Expression} left
- * @param {import('../../ast/ast').BindingPower} bp
- * @param {import('../../ast/ast').Associativity} ass
  * @returns {import('../../ast/expressions').LambdaExpression}
  */
-function parseLambdaExpression(parser, left, bp, ass) {
+function parseLambdaExpression(parser, left) {
 	parser.advance();
 
 	if(left.kind !== ExpressionKinds.SEQUENCE && left.kind !== ExpressionKinds.IDENTIFIER)
