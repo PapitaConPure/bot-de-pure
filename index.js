@@ -30,7 +30,7 @@ console.timeEnd('Registro de eventos de proceso');
 
 console.time('Registro de eventos del cliente');
 client.on('clientReady', events.onStartup);
-client.on('messageCreate', message => events.onMessage(message, client).catch(onCriticalError));
+client.on('messageCreate', message => events.onMessage(message).catch(onCriticalError));
 client.on('messageReactionAdd', (reaction, user) => events.onReactionAdd(reaction, user).catch(onCriticalError));
 client.on('messageReactionRemove', (reaction, user) => events.onReactionRemove(reaction, user).catch(onCriticalError));
 client.on('messageDelete', message => events.onMessageDelete(message).catch(onCriticalError));

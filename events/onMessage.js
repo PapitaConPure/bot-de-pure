@@ -1,4 +1,3 @@
-//#region Carga de módulos necesarios
 const { puré } = require('../core/commandInit.js');
 const Discord = require('discord.js');
 const { CommandManager, CommandOptionSolver } = require('../commands/Commons/commands.js');
@@ -19,7 +18,9 @@ const { sendConvertedTwitterPosts } = require('../systems/agents/pureet');
 const { Translator } = require('../i18n/internationalization');
 const { fetchUserCache } = require('../utils/usercache');
 const { addMessageCascade } = require('./onMessageDelete');
-//#endregion
+const Logger = require('../utils/logs');
+
+const { error } = Logger('WARN', 'Message');
 
 const CommandResults = /**@type {const}*/({
 	VOID: 0,
@@ -30,9 +31,27 @@ const CommandResults = /**@type {const}*/({
 
 /**
  * 
- * @param {String} guildId 
- * @param {String} channelId 
- * @param {String} userId 
+ * @param {Discord.Message<true>} message 
+ * @returns 
+ */
+async function processGuildPlugins(message) {
+	const guildFunctions = globalGuildFunctions[message.guild.id];
+
+	if(!guildFunctions)
+		return;
+
+	return Promise.all(Object.values(guildFunctions).map(fgf => fgf(message)))
+	.catch(error => handleAndAuditError(error, message, {
+		brief: 'Ocurrió un problema al ejecutar una respuesta rápida',
+		details: message.content ? `"${message.content}"` : 'Mensaje sin contenido'
+	}));
+}
+
+/**
+ * 
+ * @param {string} guildId 
+ * @param {string} channelId 
+ * @param {string} userId 
  */
 async function updateChannelMessageCounter(guildId, channelId, userId) {
 	if(globalConfigs.noDataBase) return;
@@ -194,7 +213,7 @@ async function checkEmoteCommand(message) {
  * @param {Discord.Message<true>} message
  * @returns {Promise<CommandResult>}
  */
-async function checkCommand(message) {
+async function processCommand(message) {
 	const { content, guildId } = message;
 	const ppure = p_pure(guildId);
 
@@ -247,84 +266,91 @@ async function gainPRC(guild, userId) {
 }
 
 /**
- * @param {Discord.Message} message
- * @param {Discord.Client} client
+ * 
+ * @param {Discord.Message<true>} message 
+ * @param {import('../utils/usercache').UserCache} userCache 
  */
-async function onMessage(message, client) {
-	if(!message.inGuild()) return;
-	
-	const { content, author, channel, guild } = message;
-	const userCache = await fetchUserCache(author);
-
-	if(channelIsBlocked(channel) || userCache.banned) return;
-
-	//Plug-ins de servidor
-	const guildFunctions = globalGuildFunctions[guild.id];
-	if(guildFunctions)
-		await Promise.all(Object.values(guildFunctions).map(fgf => fgf(message)))
-		.catch(error => handleAndAuditError(error, message, {
-			brief: 'Ocurrió un problema al ejecutar una respuesta rápida',
-			details: content ? `"${content}"` : 'Mensaje sin contenido'
-		}));
-	if(author.bot) return;
-
-	gainPRC(guild, author.id);
-
+async function processLinkConverters(message, userCache) {
 	const converterPayloads = await Promise.all([
 		sendConvertedPixivPosts(message, userCache.pixivConverter),
 		sendConvertedTwitterPosts(message, userCache.twitterPrefix),
 	]);
 	const contentfulPayloads = converterPayloads.filter(r => r.contentful === true);
 	if(contentfulPayloads.length) {
-		const messageResult = contentfulPayloads.map(r => r.content).join(' ');
+		const messageResult = `-# ${contentfulPayloads.map(r => r.content).join(' ')}`;
 
-		try {
-			const [ sent ] = await Promise.all([
-				message.reply(messageResult),
-				message.suppressEmbeds(true),
-			]);
-			
-			setTimeout(() => {
-				if(!message?.embeds) return;
-				message.suppressEmbeds(true).catch(() => undefined);
-			}, 3000);
+		const [ sent ] = await Promise.all([
+			message.reply(messageResult),
+			message.suppressEmbeds(true),
+		]);
 		
-			await Promise.all([
-				addAgentMessageOwner(sent, author.id),
-				addMessageCascade(message.id, sent.id, new Date(+message.createdAt + 4 * 60 * 60e3)),
-			]);
-		} catch(err) {
-			console.error(err);
-		}
-	}
-
-	updateAgentMessageOwners().catch(console.error);
+		setTimeout(() => {
+			if(!message?.embeds) return;
+			message.suppressEmbeds(true).catch(() => undefined);
+		}, 3000);
 	
-	//Estadísticas
+		await Promise.all([
+			addAgentMessageOwner(sent, message.author.id),
+			addMessageCascade(message.id, sent.id, new Date(+message.createdAt + 4 * 60 * 60e3)),
+		]);
+	}
+}
+
+/**
+ * 
+ * @param {Discord.Message<true>} message 
+ * @returns 
+ */
+function processBeginnerHelp(message) {
+	const { content, client } = message;
+
+	if(!content.includes(`${client.user}`))
+		return;
+
+	const prefixCommand = require('../commands/Pure/prefijo.js');
+	const request = CommandManager.requestize(message);
+	const solver = new CommandOptionSolver(request, [], prefixCommand.options);
+	return prefixCommand.execute(request, solver).catch(error);
+}
+
+/**
+ * @param {Discord.Message} message
+ */
+async function onMessage(message) {
+	if(!message.inGuild()) return;
+	
+	const { author, channel, guild } = message;
+	const userCache = await fetchUserCache(author);
+
+	if(channelIsBlocked(channel) || userCache.banned) return;
+
+	await processGuildPlugins(message);
+
+	if(author.bot) return;
+	
 	const stats = (!globalConfigs.noDataBase && await Stats.findOne({})) || new Stats({ since: Date.now() });
 	stats.read++;
 	updateChannelMessageCounter(guild.id, channel.id, author.id);
 
-	//Leer comando
-	const commandResult = await checkCommand(message);
-	
-	if(commandResult === CommandResults.VOID) {
-		//Ayuda para principiantes
-		if(!content.includes(`${client.user}`))
-			return;
+	const commandResult = await processCommand(message);
 
-		const command = require('../commands/Pure/prefijo.js');
-		const request = CommandManager.requestize(message);
-		const solver = new CommandOptionSolver(request, [], command.options);
-		return command.execute(request, solver);
-	}
+	if(commandResult === CommandResults.VOID)
+		processBeginnerHelp(message);
+
+	//#region Trabajos automáticos
+	Promise.allSettled([
+		gainPRC(guild, author.id),
+		updateAgentMessageOwners(),
+		processLinkConverters(message, userCache),
+	]);
+	//#endregion
+
+	commandResult === CommandResults.SUCCEEDED && stats.commands.succeeded++;
+	commandResult === CommandResults.FAILED && stats.commands.failed++;
 
 	if(globalConfigs.noDataBase)
 		return;
 
-	//Grabar estadísticas
-	commandResult === CommandResults.SUCCEEDED && stats.commands.succeeded++;
-	commandResult === CommandResults.FAILED && stats.commands.failed++;
 	stats.markModified('commands');
 	stats.save();
 }
