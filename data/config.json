@@ -2,20 +2,18 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "3.8.4",
+            "number": "3.8.5",
             "name": "Flamenco Perlado"
         },
         "note": {
-            "es": "Inestabilidad esperada debido a una reorganización",
-            "en": "Instability expected because of a reorganization",
+            "es": "Inestabilidad esperada debido a reorganizaciones",
+            "en": "Instability expected due to reorganizations",
             "ja": "社内組織再編がありました。不安定な状況が予想されます"
         },
         "changelog": [
             "p!emote ahora obtiene emotes de un mensaje",
             "**PuréPix** ahora permite utilizar el servicio de conversión \"phixiv\"",
             "**PuréPix** ahora usa \"phixiv\" como servicio de conversión por defecto",
-            "Interoperabilidad parcial entre **PuréPix** y **Puréet**",
-            "p!catbox agregado",
             "Apariencia de **PuréFeed** mejorada",
             "p!saucenao agregado",
             "Acción contextual \"Buscar Fuente\" agregada",
@@ -23,7 +21,9 @@
             "**Puréet** ahora permite usar los servicios de conversión \"girlcockx\" y \"cunnyx\"",
             "p!info ha sido renovado, traducido y ahora permite especificar un `--miembro`",
             "Operabilidad de **PuréMusic** amendada",
-            "p!estado ha sido renovado y traducido"
+            "p!estado ha sido renovado y traducido",
+            "**PuréPix** ya no ofrece el método de conversión \"webhook\"",
+            "Procesado de mensajes optimizado"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos",
