@@ -59,7 +59,7 @@ async function onStartup(client) {
 	
 	console.log(chalk.magenta('Obteniendo miembros de servidores de Discord...'));
 	setupGuildRateKeeper({ client });
-	await fetchAllGuildMembers;
+	await fetchAllGuildMembers();
 	confirm();
 
 	console.log(chalk.bold.magentaBright('Cargando comandos Slash y Contextuales...'));
