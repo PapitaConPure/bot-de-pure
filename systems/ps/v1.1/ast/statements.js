@@ -1,5 +1,3 @@
-const { Token } = require('../lexer/tokens.js')
-
 /**Contiene tipos de sentencia*/
 const StatementKinds = /**@type {const}*/({
     PROGRAM: 'ProgramStatement',
@@ -119,7 +117,7 @@ const ScopeAbortKinds = [
  * @typedef {(v: import('../interpreter/values').RuntimeValue, it: import('../interpreter/interpreter').Interpreter, scope: import('../interpreter/scope').Scope) => import('../interpreter/values').RuntimeValue} ReadStatementModifier
  * 
  * @typedef {Object} ReadStatementData
- * @property {Token} dataKind
+ * @property {import('../lexer/tokens.js').Token} dataKind
  * @property {import('./expressions.js').Expression} receptor
  * @property {import('./expressions.js').Expression} fallback
  * @property {Boolean} optional
@@ -130,7 +128,7 @@ const ScopeAbortKinds = [
 /**
  * @typedef {Object} DeclarationStatementData
  * @property {Array<String>} declarations
- * @property {Token?} dataKind
+ * @property {import('../lexer/tokens.js').Token?} dataKind
  * @typedef {BaseStatementData<'DeclarationStatement'> & DeclarationStatementData} DeclarationStatement
  */
 
@@ -155,7 +153,7 @@ const ScopeAbortKinds = [
 
 /**
  * @typedef {Object} AssignmentStatementData
- * @property {Token} operator
+ * @property {import('../lexer/tokens.js').Token} operator
  * @property {import('./expressions.js').Expression} receptor
  * @property {import('./expressions.js').Expression?} reception
  * @typedef {BaseStatementData<'AssignmentStatement'> & AssignmentStatementData} AssignmentStatement

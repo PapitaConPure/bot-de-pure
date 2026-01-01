@@ -41,16 +41,16 @@ const variantEquals = (a, b) => a.every((input1, i) => {
 
 /**
  * @typedef {Object} BaseTubercle
- * @property {String} id
- * @property {String} author
- * @property {Array<Array<*>>} [inputs]
+ * @property {string} id
+ * @property {string} author
+ * @property {(import('../v1.1/interpreter/inputReader').InputJSONData)[][]} [inputs]
  */
 
 /**
  * @typedef {Object} PartialBasicTubercleData
  * @property {false} advanced
- * @property {String?} [content]
- * @property {Array<String>} [files]
+ * @property {string} [content]
+ * @property {string[]} [files]
  * @typedef {import('types').RequireAtLeastOne<PartialBasicTubercleData>} BasicTubercleData
  */
 
@@ -59,9 +59,9 @@ const variantEquals = (a, b) => a.every((input1, i) => {
  * @property {true} advanced
  * @property {undefined} [content]
  * @property {undefined} [files]
- * @property {String} script
- * @property {Map<String, import('../v1.1/interpreter/values').RuntimeValue>} saved
- * @property {Number} psVersion
+ * @property {string} script
+ * @property {Map<string, import('../v1.1/interpreter/values').RuntimeValue>} saved
+ * @property {number} psVersion
  */
 
 /**
@@ -103,7 +103,6 @@ async function executeTuber(request, tuber, inputOptions = {}) {
 
     const version = VERSIONS[tangibleVersion(tuber.psVersion)];
     const {
-        PS_VERSION,
         lexer,
         parser,
         interpreter,
@@ -185,7 +184,7 @@ async function executeTuber(request, tuber, inputOptions = {}) {
         throw error;
     }
 
-    let { sendStack, inputStack: inputVariant, saveTable, returned } = result;
+    let { sendStack, inputStack: newInputVariant, saveTable, returned } = result;
     
     if(!sendStack.length) {
         await request.editReply({ content: `⚠️ Se esperaba un envío de mensaje` });
@@ -216,31 +215,33 @@ async function executeTuber(request, tuber, inputOptions = {}) {
         replyObject.content = replyStacks.content.join('\n');
     
     if(overwrite) {
-        tuber.inputs = [ inputVariant ];
+        tuber.inputs = [ newInputVariant ];
     } else {
         tuber.inputs ??= [];
-        tuber.inputs = tuber.inputs.map(variant => variant.map(i => Input.from(i)));
+        const savedVariants = tuber.inputs.map(variant => variant.map(i => Input.from(i)));
 
         const isNewVariant = () => {
-            if(tuber.inputs.length === 0)
+            if(savedVariants.length === 0)
                 return true;
 
-            if(inputVariant.length === 0)
-                return !tuber.inputs.some(otherVariant => otherVariant.length === 0);
+            if(newInputVariant.length === 0)
+                return !savedVariants.some(savedVariant => savedVariant.length === 0);
             
-            return !tuber.inputs.some(otherVariant => inputVariant.length === otherVariant.length && variantEquals(inputVariant, otherVariant));
+            return !savedVariants.some(savedVariant => newInputVariant.length === savedVariant.length && variantEquals(newInputVariant, savedVariant));
         };
 
         if(isNewVariant()) {
-            inputVariant.forEach(input1 => tuber.inputs.some(variant => variant.some(input2 => {
-                if(input1.name !== input2.name)
+            newInputVariant.forEach(newInput => savedVariants.some(savedVariant => savedVariant.some(savedInput => {
+                if(newInput.name !== savedInput.name)
                     return false;
 
-                input1.setDesc(input2.desc);
+                newInput.setDesc(savedInput.desc);
                 return true;
             })));
 
-            tuber.inputs.push(inputVariant);
+            savedVariants.push(newInputVariant);
+
+            tuber.inputs = savedVariants;
             tuber.inputs.sort((a, b) => a.length - b.length);
         }
     }

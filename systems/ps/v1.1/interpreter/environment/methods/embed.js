@@ -1,5 +1,7 @@
+/* eslint-disable no-empty-pattern */
+
 const { ValueKinds } = require('../../values');
-const { fileRegex, expectParam, getParamOrNada, calculatePositionOffset, getParamOrDefault, linkRegex } = require('../nativeUtils');
+const { fileRegex, expectParam, getParamOrNada, getParamOrDefault, linkRegex } = require('../nativeUtils');
 const { stringHexToNumber } = require('../../../util/utils');
 
 /**
@@ -43,7 +45,7 @@ function marcoAgregarCampo(self, [ nombre, valor, alineado ], scope) {
 }
 
 /**@type {EmbedMethod<[], RegistryValue>}*/
-function marcoARegistro(self, [], scope) {
+function marcoARegistro(self, []) {
     return require('../registryPrefabs').makeEmbedRegistry(self.value);
 }
 
@@ -81,7 +83,7 @@ function marcoAsignarColor(self, [ color ], scope) {
     try {
         const targetColor = stringHexToNumber(colorResult.value);
         self.value.setColor(targetColor);
-    } catch(e) {
+    } catch {
         throw scope.interpreter.TuberInterpreterError(`Se recibió un código de color inválido: "${colorResult.value}", en asignación de color de Marco`);
     }
 

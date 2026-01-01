@@ -1,3 +1,5 @@
+/* eslint-disable no-empty-pattern */
+
 const { ValueKinds, makeNumber, makeText, makeBoolean, makeList, makeNada, isInternalOperable } = require('../../values');
 const { calculatePositionOffset, expectParam, getParamOrDefault } = require('../nativeUtils');
 
@@ -20,17 +22,17 @@ const { calculatePositionOffset, expectParam, getParamOrDefault } = require('../
  */
 
 /**@type {TextMethod<[], ListValue>}*/
-function textoALista(self, [], scope) {
+function textoALista(self, []) {
 	return makeList([...self.value].map(v => makeText(v)));
 }
 
 /**@type {TextMethod<[], TextValue>}*/
-function textoAMayúsculas(self, [], scope) {
+function textoAMayúsculas(self, []) {
 	return makeText(self.value.toUpperCase());
 }
 
 /**@type {TextMethod<[], TextValue>}*/
-function textoAMinúsculas(self, [], scope) {
+function textoAMinúsculas(self, []) {
 	return makeText(self.value.toLowerCase());
 }
 
@@ -68,7 +70,7 @@ function textoCortar(self, [ inicio, fin ], scope) {
 }
 
 /**@type {TextMethod<[], TextValue>}*/
-function textoNormalizar(self, [], scope) {
+function textoNormalizar(self, []) {
 	return makeText(self.value.trim());
 }
 

@@ -1,5 +1,3 @@
-const { Token } = require('../lexer/tokens.js');
-
 /**
  * @typedef {import('./expressions').Expression} Expression
  * @typedef {import('./statements').Statement} Statement
@@ -7,8 +5,8 @@ const { Token } = require('../lexer/tokens.js');
  */
 
 /**
- * @param {Token | Statement | Expression} startToken
- * @param {Token | Statement | Expression} [endToken=undefined]
+ * @param {import('../lexer/tokens.js').Token | Statement | Expression} startToken
+ * @param {import('../lexer/tokens.js').Token | Statement | Expression} [endToken=undefined]
  * @returns {NodeMetadata}
  */
 function makeMetadata(startToken, endToken = undefined) {

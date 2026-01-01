@@ -1,4 +1,3 @@
-const { PSMember, PSChannel, PSGuild, PSRole } = require('./environmentProvider');
 const { makeNumber, makeText, makeBoolean, makeList, makeRegistry, makeNada } = require('../values');
 
 /**
@@ -67,7 +66,7 @@ function makeDate(date) {
 }
 
 /**
- * @param {PSMember} member 
+ * @param {import('./environmentProvider').PSMember} member 
  * @returns {RegistryValue}
  */
 function makeDiscordMember(member) {
@@ -102,7 +101,7 @@ function makeDiscordMember(member) {
 }
 
 /**
- * @param {PSRole} role 
+ * @param {import('./environmentProvider').PSRole} role 
  * @returns {RegistryValue}
  */
 function makeDiscordRole(role) {
@@ -131,17 +130,17 @@ function makeDiscordRole(role) {
 }
 
 /**
- * @param {PSChannel} channel 
+ * @param {import('./environmentProvider').PSChannel} channel 
  * @returns {RegistryValue}
  */
 function makeDiscordChannel(channel) {
-    const isNSFW = 'nsfw' in channel;
+    const isNSFW = 'nsfw' in channel && channel.nsfw;
 	
     const values = {
         id:      makeText(channel.id),
         nombre:  makeText(channel.name),
         mención: makeText(`${channel}`),
-        nsfw:    makeBoolean(channel.nsfw),
+        nsfw:    makeBoolean(isNSFW),
     };
 
     /**@type {Map<String, RuntimeValue>}*/
@@ -157,7 +156,7 @@ function makeDiscordChannel(channel) {
 }
 
 /**
- * @param {PSGuild} guild 
+ * @param {import('./environmentProvider').PSGuild} guild 
  * @returns {Promise<RegistryValue>}
  */
 async function makeDiscordGuild(guild) {

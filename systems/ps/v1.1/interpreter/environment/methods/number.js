@@ -1,3 +1,5 @@
+/* eslint-disable no-empty-pattern */
+
 const { makeNumber, makeText, ValueKinds } = require('../../values');
 const { expectParam, getParamOrDefault } = require('../nativeUtils');
 const { improveNumber, clamp } = require('../../../util/utils');
@@ -21,12 +23,12 @@ const { improveNumber, clamp } = require('../../../util/utils');
  */
 
 /**@type {NumberMethod<[], NumberValue>}*/
-function númeroAbsoluto(self, [], scope) {
+function númeroAbsoluto(self, []) {
 	return makeNumber(Math.abs(self.value));
 }
 
 /**@type {NumberMethod<[], NumberValue>}*/
-function númeroAEntero(self, [], scope) {
+function númeroAEntero(self, []) {
 	return makeNumber(Math.trunc(self.value));
 }
 
@@ -82,22 +84,22 @@ function númeroLimitar(self, [ mínimo, máximo ], scope) {
 }
 
 /**@type {NumberMethod<[], NumberValue>}*/
-function númeroSigno(self, [], scope) {
+function númeroSigno(self, []) {
 	return makeNumber(Math.sign(self.value));
 }
 
 /**@type {NumberMethod<[], NumberValue>}*/
-function númeroSuelo(self, [], scope) {
+function númeroSuelo(self, []) {
 	return makeNumber(Math.floor(self.value));
 }
 
 /**@type {NumberMethod<[], NumberValue>}*/
-function númeroTecho(self, [], scope) {
+function númeroTecho(self, []) {
 	return makeNumber(Math.ceil(self.value));
 }
 
 /**@type {NumberMethod<[], NumberValue>}*/
-function númeroRedondear(self, [], scope) {
+function númeroRedondear(self, []) {
 	return makeNumber(Math.round(self.value));
 }
 

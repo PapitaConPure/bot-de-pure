@@ -1,3 +1,5 @@
+/* eslint-disable no-empty-pattern */
+
 const { ValueKinds, makeText, makeBoolean, makeList, makeRegistry, makeNada, coerceValue, makeNumber } = require('../../values');
 const { expectParam, getParamOrNada, makePredicateFn, getParamOrDefault } = require('../nativeUtils');
 
@@ -20,7 +22,7 @@ const { expectParam, getParamOrNada, makePredicateFn, getParamOrDefault } = requ
  */
 
 /**@type {ListMethod<[], ListValue>}*/
-function listaAInvertido(self, [], scope) {
+function listaAInvertido(self, []) {
 	return makeList(self.elements.toReversed());
 }
 
@@ -42,13 +44,13 @@ function listaAOrdenada(self, [ criterio ], scope) {
 }
 
 /**@type {ListMethod<[], RegistryValue>}*/
-function listaARegistro(self, [], scope) {
+function listaARegistro(self, []) {
 	const entries = new Map(self.elements.map((el, i) => [ `${i}`, el ]));
 	return makeRegistry(entries);
 }
 
 /**@type {ListMethod<[ RuntimeValue ], BooleanValue>}*/
-function listaContiene(self, [ x ], scope) {
+function listaContiene(self, [ x ]) {
 	const test = self.elements.some(el => el.equals(x));
 	return makeBoolean(test);
 }
@@ -102,7 +104,7 @@ function listaFiltrar(self, [ filtro ], scope) {
 }
 
 /**@type {ListMethod<[], NadaValue>}*/
-function listaInvertir(self, [], scope) {
+function listaInvertir(self, []) {
 	self.elements.reverse();
 	return makeNada();
 }
@@ -148,12 +150,12 @@ function listaRobar(self, [ índice ], scope) {
 }
 
 /**@type {ListMethod<[]>}*/
-function listaRobarPrimero(self, [], scope) {
+function listaRobarPrimero(self, []) {
 	return self.elements.shift() ?? makeNada();
 }
 
 /**@type {ListMethod<[]>}*/
-function listaRobarÚltimo(self, [], scope) {
+function listaRobarÚltimo(self, []) {
 	return self.elements.pop() ?? makeNada();
 }
 
@@ -175,12 +177,12 @@ function listaUnir(self, [ separador ], scope) {
 }
 
 /**@type {ListMethod<[]>}*/
-function listaÚltimo(self, [], scope) {
+function listaÚltimo(self, []) {
 	return self.elements[self.elements.length];
 }
 
 /**@type {ListMethod<[], BooleanValue>}*/
-function listaVacía(self, [], scope) {
+function listaVacía(self, []) {
 	return makeBoolean(self.elements.length === 0);
 }
 

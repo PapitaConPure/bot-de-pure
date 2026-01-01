@@ -3,10 +3,14 @@ const { makeStringIdValidator } = require('./modelUtils');
 
 /**
  * Perdoname por todos mis pecados
- * @typedef {{ [x: String]: import('../../systems/booru/boorufeed').FeedData }} FeedsDict 
+ * @typedef {{ [x: string]: import('../../systems/ps/common/executeTuber').Tubercle }} TubersDict 
+ * @typedef {{ [x: string]: import('../../systems/booru/boorufeed').FeedData }} FeedsDict 
  */
 
-/**@type {Mongoose.Schema<any, Mongoose.Model<any, any, any, any, any>, {}, {}, {}, {}, Mongoose.DefaultSchemaOptions, { guildId: String, chaos?: Boolean, tubers: Object, feeds: FeedsDict }>} Describe la configuración de un servidor.*/
+/**
+ * Describe la configuración de un servidor.
+ * @type {Mongoose.Schema<any, Mongoose.Model<any, any, any, any, any>, {}, {}, {}, {}, Mongoose.DefaultSchemaOptions, { guildId: String, chaos?: Boolean, tubers: Object, feeds: FeedsDict }>}
+ */
 const GuildConfigSchema = new Mongoose.Schema({
 	guildId: {
 		type: String,
@@ -19,14 +23,14 @@ const GuildConfigSchema = new Mongoose.Schema({
 	
 	/** Tubérculos del servidor. */
 	tubers: {
-		type: Object,
+		type: /**@type {TubersDict}*/(/**@type {unknown}*/(Object)),
 		default: {},
 		required: true,
 	},
 
 	/**Feeds de imágenes del servidor. */
 	feeds: {
-		type: /**@type {{ [x: String]: import('../../systems/booru/boorufeed').FeedData }}*/(/**@type {unknown}*/(Object)),
+		type: /**@type {FeedsDict}*/(/**@type {unknown}*/(Object)),
 		default: {},
 		required: true,
 	},
@@ -34,6 +38,7 @@ const GuildConfigSchema = new Mongoose.Schema({
 
 const model = Mongoose.model('GuildConfig', GuildConfigSchema);
 
+// eslint-disable-next-line no-unused-vars
 function m() { return new model({}); }
 /**@typedef {ReturnType<(typeof m)>} GuildConfigDocument*/
 

@@ -125,7 +125,7 @@ class PSGuild {
 			}),
 			guild: this,
 			roleIds: [],
-			displayAvatarUrlHandler: options => '',
+			displayAvatarUrlHandler: () => '',
 		});
 		
 		if(systemChannelId) {
@@ -443,6 +443,7 @@ EnvironmentProvider.prototype.getMember = function() {
  * @param {string} query 
  * @returns {PSChannel?}
  */
+// eslint-disable-next-line no-unused-vars
 EnvironmentProvider.prototype.fetchChannel = function(query) {
 	throw 'No implementado';
 }
@@ -452,6 +453,7 @@ EnvironmentProvider.prototype.fetchChannel = function(query) {
  * @param {string} query 
  * @returns {PSRole?}
  */
+// eslint-disable-next-line no-unused-vars
 EnvironmentProvider.prototype.fetchRole = function(query) {
 	throw 'No implementado';
 }
@@ -461,9 +463,15 @@ EnvironmentProvider.prototype.fetchRole = function(query) {
  * @param {string} query 
  * @returns {PSMember?}
  */
+// eslint-disable-next-line no-unused-vars
 EnvironmentProvider.prototype.fetchMember = function(query) {
 	throw 'No implementado';
 }
+
+EnvironmentProvider.imageUrlOptions = {
+	allowedSizes: ALLOWED_SIZES,
+	allowedExtensions: ALLOWED_EXTENSIONS,
+};
 
 module.exports = {
 	PSGuild,

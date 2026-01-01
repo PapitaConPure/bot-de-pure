@@ -1,5 +1,4 @@
 const { TokenKinds } = require('../lexer/tokens');
-const { Scope } = require('./scope');
 const { makeText, makeNada, coerceValue, defaultValueOf, ValueKinds, ValueKindTranslationLookups, makeNumber, makeBoolean } = require('./values');
 const { ValueKindLookups } = require('./lookups');
 
@@ -32,6 +31,16 @@ const boolWords = {
 		'x',
 	],
 };
+
+/**
+ * @typedef {{
+ * 	name: string,
+ * 	kind: import('./values').ValueKind,
+ * 	optional: boolean,
+ * 	spread: boolean,
+ * 	desc: string,
+ * }} InputJSONData
+ */
 
 class Input {
 	/**@type {String}*/
@@ -117,7 +126,7 @@ class Input {
 	}
 
 	/**
-	 * @param {{ name: String; kind: import('./values').ValueKind; optional: Boolean; spread: Boolean; desc: String; }} json
+	 * @param {InputJSONData} json
 	 */
 	static from(json) {
 		return new Input(json.name, json.kind, json.optional)
@@ -180,7 +189,8 @@ class InputReader {
 		return this.#spreadInput?.name;
 	}
 
-	/**@type {(node: import('../ast/statements').ReadStatement, scope: Scope) => import('./values').RuntimeValue}}*/
+	/**@type {(node: import('../ast/statements').ReadStatement, scope: import('./scope').Scope) => import('./values').RuntimeValue}}*/
+	// eslint-disable-next-line no-unused-vars
 	readInput(node, scope) {
 		return makeNada();
 	}
@@ -260,7 +270,7 @@ class TestDriveInputReader extends InputReader {
 	/**
 	 * Lee una Entrada de Ejecución de Prueba
 	 * @override
-	 * @type {(node: import('../ast/statements').ReadStatement, scope: Scope) => import('./values').RuntimeValue}
+	 * @type {(node: import('../ast/statements').ReadStatement, scope: import('./scope').Scope) => import('./values').RuntimeValue}
 	 */
 	readInput(node, scope) {
 		const { receptor, dataKind, optional, fallback } = node;
@@ -299,7 +309,7 @@ class ProductionInputReader extends InputReader {
 	/**
 	 * Lee una Entrada de Ejecución de Producción
 	 * @override
-	 * @type {(node: import('../ast/statements').ReadStatement, scope: Scope) => import('./values').RuntimeValue}
+	 * @type {(node: import('../ast/statements').ReadStatement, scope: import('./scope').Scope) => import('./values').RuntimeValue}
 	 */
 	readInput(node, scope) {
 		const { receptor, dataKind, optional, fallback, modifiers } = node;

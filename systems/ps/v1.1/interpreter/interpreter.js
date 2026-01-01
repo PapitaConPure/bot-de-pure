@@ -7,7 +7,6 @@ const { ValueKinds, makeNumber, makeText, makeBoolean, makeList, makeRegistry, m
 const { UnaryOperationLookups, BinaryOperationLookups, ValueKindLookups } = require('./lookups');
 const { NativeMethodsLookup } = require('./environment/environment');
 const { iota, shortenText } = require('../util/utils.js');
-const { EnvironmentProvider } = require('./environment/environmentProvider.js');
 
 const Stops = /**@type {const}*/({
 	NONE: iota(0),
@@ -67,7 +66,7 @@ class Interpreter {
 	#saveTable;
 	/**@type {String}*/
 	#source;
-	/**@type {EnvironmentProvider}*/
+	/**@type {import('./environment/environmentProvider.js').EnvironmentProvider}*/
 	#provider;
 	/**@type {StopKind}*/
 	#stop;
@@ -287,7 +286,7 @@ class Interpreter {
 	 * @param {ProgramStatement} ast
 	 * @param {Scope} scope
 	 * @param {string} source
-	 * @param {EnvironmentProvider} provider
+	 * @param {import('./environment/environmentProvider.js').EnvironmentProvider} provider
 	 * @param {Array<string>?} [args]
 	 * @param {boolean} [isTestDrive]
 	 * @returns {EvaluationResult}
@@ -778,6 +777,7 @@ class Interpreter {
 	 * @param {import('../ast/statements').DeleteStatement} node 
 	 * @param {Scope} scope 
 	 */
+	// eslint-disable-next-line no-unused-vars
 	#evaluateDeleteStatement(node, scope) {
 		const { identifier } = node;
 		this.#saveTable.set(identifier, makeNada());
@@ -818,7 +818,7 @@ class Interpreter {
 		
 		if(reception == null) {
 			if(!operator.isAny(TokenKinds.ADD, TokenKinds.SUBTRACT))
-				throw this.TuberInterpreterError('La omisión del valor de recepción en una sentencia de asignación solo puede hacerse con los indicadores de Sentencia \`SUMAR\` y \`RESTAR\`', operator);
+				throw this.TuberInterpreterError('La omisión del valor de recepción en una sentencia de asignación solo puede hacerse con los indicadores de Sentencia `SUMAR` y `RESTAR`', operator);
 
 			receptionValue = makeNumber(1);
 			implicit = true;
@@ -1293,7 +1293,7 @@ class Interpreter {
 			break;
 		}
 		
-		case ExpressionKinds.ARROW:
+		case ExpressionKinds.ARROW: {
 			if(receptor.computed === true) {
 				const evaluated = this.evaluate(receptor.key, scope);
 				identifier = coerceValue(this, evaluated, ValueKinds.TEXT).value;
@@ -1303,13 +1303,14 @@ class Interpreter {
 			//Modificar por referencia
 			const holderValue = this.evaluate(receptor.holder, scope);
 			switch(holderValue.kind) {
-			case ValueKinds.LIST:
+			case ValueKinds.LIST: {
 				const index = +identifier;
 				if(!isInternalOperable(index))
 					throw this.TuberInterpreterError(`Se esperaba un índice válido en lado derecho de expresión de flecha "->" para la Lista \`${this.astString(receptor.holder)}\` en expresión receptora de sentencia de asignación. Sin embargo, se recibió: ${identifier}`, receptor);
 
 				holderValue.elements[index] = receptionValue;
 				break;
+			}
 
 			case ValueKinds.REGISTRY:
 				if(receptionValue.kind === ValueKinds.NATIVE_FN)
@@ -1321,6 +1322,7 @@ class Interpreter {
 				throw this.TuberInterpreterError(`Expresión de flecha inválida como receptora de sentencia de asignación. El tipo de \`${this.astString(receptor.holder)}\` no tiene miembros asignables`, receptor);
 			}
 			break;
+		}
 
 		default:
 			throw this.TuberInterpreterError(`La expresión ${this.astString(receptor)} es inválida como receptora de una sentencia de asignación`, receptor);

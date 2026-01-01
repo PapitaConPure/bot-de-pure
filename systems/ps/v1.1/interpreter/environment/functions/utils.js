@@ -1,7 +1,8 @@
+/* eslint-disable no-empty-pattern */
+
 const { ValueKinds, makeNumber, makeText, makeBoolean, makeNada } = require('../../values');
 const { getParamOrNada, expectParam } = require('../nativeUtils');
-const { Scope } = require('../../scope');
-const { rand, randRange, clamp } = require('../../../util/utils');
+const { rand, randRange } = require('../../../util/utils');
 const { rgb2hex, hsl2hex, hsv2hex } = require('../../../util/colorUtils');
 
 /**
@@ -36,7 +37,8 @@ function aleatorio(self, [ n, m ], scope) {
 }
 
 /**@type {NativeFunction<[], TextValue>}*/
-function colorAleatorio(self, [], scope) {
+// eslint-disable-next-line no-unused-vars
+function colorAleatorio(self, []) {
 	const colorNumber = ((Math.random() * 0xfffffe) << 0) + 1;
 	const colorString = '#' + colorNumber.toString(16).padStart(6, '0');
 	return makeText(colorString);

@@ -243,6 +243,7 @@ function basicCompareTo(other) {
 }
 
 /**@param {NumberValue|TextValue|BooleanValue} other*/
+// eslint-disable-next-line no-unused-vars
 function invalidCompareTo(other) {
 	return makeNumber(-1);
 }
@@ -549,8 +550,8 @@ coercions.get(ValueKinds.REGISTRY)
 	.set(ValueKinds.BOOLEAN,  (x) => makeBoolean(x?.size ? true : false));
 
 coercions.get(ValueKinds.EMBED)
-	?.set(ValueKinds.TEXT,    (_) => makeText('[Marco]'))
-	.set(ValueKinds.BOOLEAN,  (x) => makeBoolean(true))
+	?.set(ValueKinds.TEXT,    () => makeText('[Marco]'))
+	.set(ValueKinds.BOOLEAN,  () => makeBoolean(true))
 	.set(ValueKinds.REGISTRY, (/**@type {EmbedData}*/x) => {
 		if(x == null || x.data == null)
 			return makeNada();
@@ -559,16 +560,16 @@ coercions.get(ValueKinds.EMBED)
 	});
 
 coercions.get(ValueKinds.FUNCTION)
-	?.set(ValueKinds.TEXT,    (_) => makeText('[Función]'))
-	.set(ValueKinds.BOOLEAN,  (_) => makeBoolean(true));
+	?.set(ValueKinds.TEXT,    () => makeText('[Función]'))
+	.set(ValueKinds.BOOLEAN,  () => makeBoolean(true));
 
 coercions.get(ValueKinds.NATIVE_FN)
-	?.set(ValueKinds.TEXT,    (_) => makeText('[Función nativa]'))
-	.set(ValueKinds.BOOLEAN,  (_) => makeBoolean(true));
+	?.set(ValueKinds.TEXT,    () => makeText('[Función nativa]'))
+	.set(ValueKinds.BOOLEAN,  () => makeBoolean(true));
 
 coercions.get(ValueKinds.NADA)
-	?.set(ValueKinds.TEXT,    (_) => makeText('Nada'))
-	.set(ValueKinds.BOOLEAN,  (_) => makeBoolean(false));
+	?.set(ValueKinds.TEXT,    () => makeText('Nada'))
+	.set(ValueKinds.BOOLEAN,  () => makeBoolean(false));
 
 /**
  * @template {ValueKind} T

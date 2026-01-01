@@ -1,5 +1,3 @@
-const { Token } = require('../lexer/tokens.js');
-
 const ExpressionKinds = /**@type {const}*/({
     NUMBER_LITERAL: 'NumberLiteralExpression',
     TEXT_LITERAL: 'TextLiteralExpression',
@@ -78,7 +76,7 @@ const ExpressionKinds = /**@type {const}*/({
 //#region Expresiones complejas
 /**
  * @typedef {Object} UnaryExpressionData
- * @property {Token} operator
+ * @property {import('../lexer/tokens.js').Token} operator
  * @property {Expression} argument
  * @typedef {BaseExpressionData<'UnaryExpression'> & UnaryExpressionData} UnaryExpression
  */
@@ -86,13 +84,13 @@ const ExpressionKinds = /**@type {const}*/({
 /**
  * @typedef {Object} CastExpressionData
  * @property {Expression} argument
- * @property {Token} as
+ * @property {import('../lexer/tokens.js').Token} as
  * @typedef {BaseExpressionData<'CastExpression'> & CastExpressionData} CastExpression
  */
 
 /**
  * @typedef {Object} BinaryExpressionData
- * @property {Token} operator
+ * @property {import('../lexer/tokens.js').Token} operator
  * @property {Expression} left
  * @property {Expression} right
  * @typedef {BaseExpressionData<'BinaryExpression'> & BinaryExpressionData} BinaryExpression

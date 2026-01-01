@@ -1,3 +1,5 @@
+/* eslint-disable no-empty-pattern */
+
 const { ValueKinds, makeText, makeBoolean, makeList, makeRegistry, coerceValue, makeNada } = require('../../values');
 const { expectParam, makePredicateFn } = require('../nativeUtils');
 
@@ -20,7 +22,7 @@ const { expectParam, makePredicateFn } = require('../nativeUtils');
  */
 
 /**@type {RegistryMethod<[], ListValue>}*/
-function registroClaves(self, [], scope) {
+function registroClaves(self, []) {
 	const keysArray = [ ...self.entries.keys() ];
 	const keyRVals = keysArray.map(key => makeText(key));
 	return makeList(keyRVals);
@@ -33,7 +35,7 @@ function registroContiene(self, [ clave ], scope) {
 }
 
 /**@type {RegistryMethod<[], ListValue>}*/
-function registroEntradas(self, [], scope) {
+function registroEntradas(self, []) {
 	const entriesArray = [ ...self.entries.entries() ];
 	const entriesRVal = entriesArray.map(([ k, v ]) => makeList([ makeText(k), v ]));
 	return makeList(entriesRVal);
@@ -73,12 +75,12 @@ function registroQuitar(self, [ clave ], scope) {
 }
 
 /**@type {RegistryMethod<[], BooleanValue>}*/
-function registroVacío(self, [], scope) {
+function registroVacío(self, []) {
 	return makeBoolean(self.entries.size === 0);
 }
 
 /**@type {RegistryMethod<[], ListValue>}*/
-function registroValores(self, [], scope) {
+function registroValores(self, []) {
 	const valuesArray = [ ...self.entries.values() ];
 	return makeList(valuesArray);
 }

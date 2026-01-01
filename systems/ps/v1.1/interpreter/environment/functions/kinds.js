@@ -1,6 +1,5 @@
 const { ValueKinds, makeBoolean, isOperable, isValidText, isBoolean, isList, isRegistry, isEmbed, isNada } = require('../../values');
 const { expectParam, fileRegex, linkRegex, imageRegex } = require('../nativeUtils');
-const { Scope } = require('../../scope');
 
 /**
  * @typedef {import('../../values').NumberValue} NumberValue
@@ -18,10 +17,9 @@ const { Scope } = require('../../scope');
  * 
  * @param {null} self
  * @param {[ RuntimeValue ]} args 
- * @param {Scope} scope 
  * @returns {BooleanValue}
  */
-function esNúmero(self, [ x ], scope) {
+function esNúmero(self, [ x ]) {
 	const test = isOperable(x);
 	return makeBoolean(test);
 }
@@ -30,10 +28,9 @@ function esNúmero(self, [ x ], scope) {
  * 
  * @param {null} self
  * @param {[ RuntimeValue ]} args 
- * @param {Scope} scope 
  * @returns {BooleanValue}
  */
-function esTexto(self, [ x ], scope) {
+function esTexto(self, [ x ]) {
 	const test = isValidText(x);
 	return makeBoolean(test);
 }
@@ -42,10 +39,9 @@ function esTexto(self, [ x ], scope) {
  * 
  * @param {null} self
  * @param {[ RuntimeValue ]} args 
- * @param {Scope} scope 
  * @returns {BooleanValue}
  */
-function esLogico(self, [ x ], scope) {
+function esLogico(self, [ x ]) {
 	const test = isBoolean(x);
 	return makeBoolean(test);
 }
@@ -54,10 +50,9 @@ function esLogico(self, [ x ], scope) {
  * 
  * @param {null} self
  * @param {[ RuntimeValue ]} args 
- * @param {Scope} scope 
  * @returns {BooleanValue}
  */
-function esLista(self, [ x ], scope) {
+function esLista(self, [ x ]) {
 	const test = isList(x);
 	return makeBoolean(test);
 }
@@ -66,10 +61,9 @@ function esLista(self, [ x ], scope) {
  * 
  * @param {null} self
  * @param {[ RuntimeValue ]} args 
- * @param {Scope} scope 
  * @returns {BooleanValue}
  */
-function esRegistro(self, [ x ], scope) {
+function esRegistro(self, [ x ]) {
 	const test = isRegistry(x);
 	return makeBoolean(test);
 }
@@ -78,10 +72,9 @@ function esRegistro(self, [ x ], scope) {
  * 
  * @param {null} self
  * @param {[ RuntimeValue ]} args 
- * @param {Scope} scope 
  * @returns {BooleanValue}
  */
-function esMarco(self, [ x ], scope) {
+function esMarco(self, [ x ]) {
 	const test = isEmbed(x);
 	return makeBoolean(test);
 }
@@ -90,10 +83,9 @@ function esMarco(self, [ x ], scope) {
  * 
  * @param {null} self
  * @param {[ RuntimeValue ]} args 
- * @param {Scope} scope 
  * @returns {BooleanValue}
  */
-function esNada(self, [ x ], scope) {
+function esNada(self, [ x ]) {
 	const test = isNada(x);
 	return makeBoolean(test);
 }
@@ -102,7 +94,7 @@ function esNada(self, [ x ], scope) {
  * 
  * @param {null} self
  * @param {[ TextValue ]} args 
- * @param {Scope} scope 
+ * @param {import('../../scope').Scope} scope 
  * @returns {BooleanValue}
  */
 function esEnlace(self, [ x ], scope) {
@@ -115,7 +107,7 @@ function esEnlace(self, [ x ], scope) {
  * 
  * @param {null} self
  * @param {[ TextValue ]} args 
- * @param {Scope} scope 
+ * @param {import('../../scope').Scope} scope 
  * @returns {BooleanValue}
  */
 function esArchivo(self, [ x ], scope) {
@@ -128,7 +120,7 @@ function esArchivo(self, [ x ], scope) {
  * 
  * @param {null} self
  * @param {[ TextValue ]} args 
- * @param {Scope} scope 
+ * @param {import('../../scope').Scope} scope 
  * @returns {BooleanValue}
  */
 function esImagen(self, [ x ], scope) {

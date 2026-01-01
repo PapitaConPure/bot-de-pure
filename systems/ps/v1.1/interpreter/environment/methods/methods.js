@@ -1,3 +1,5 @@
+/* eslint-disable no-empty-pattern */
+
 const { ValueKinds } = require('../../values');
 const { numberMethods } = require('./number');
 const { textMethods } = require('./text');
@@ -8,7 +10,7 @@ const { embedMethods } = require('./embed');
 /**@type {Map<String, import('../../values').NativeFunction<import('../../values').NativeFunctionValue>>}*/
 const nativeFunctionMethods = new Map();
 nativeFunctionMethods
-	.set('enlazar', function(self, [ valor ], scope) {
+	.set('enlazar', function(self, [ valor ]) {
 		self.self = valor;
 		return self;
 	})
@@ -18,7 +20,7 @@ nativeFunctionMethods
 
 /**@type {Map<string, import('../../values').NativeFunction<import('../../values').FunctionValue>>}*/
 const functionMethods = new Map();
-functionMethods.set('llamar', function(self, [ valor ], scope) {
+functionMethods.set('llamar', function(self, [], scope) {
 	let evaluated;
 	
 	if(self.lambda === true)
