@@ -5,7 +5,7 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, 
 const { p_pure } = require('../../utils/prefixes');
 const { CommandTags, CommandManager, CommandOptions, CommandParam } = require('../Commons/commands');
 const { auditError } = require('../../systems/others/auditor');
-const { colorsRow } = require('../../data/houraiProps');
+const { colorsRow } = require('../../data/sakiProps');
 const { subdivideArray, isBoosting, stringHexToNumber } = require('../../func');
 const { makeStringSelectMenuRowBuilder, makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts');
 
@@ -113,7 +113,7 @@ const options = new CommandOptions()
 			.setOptional(true),
 	);
 
-const flags = new CommandTags().add('HOURAI');
+const flags = new CommandTags().add('SAKI');
 
 const command = new CommandManager('roles', flags)
 	.setAliases('rol', 'role')

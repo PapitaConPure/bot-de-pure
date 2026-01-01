@@ -4,7 +4,7 @@ const images = require('./data/images.json'); //Imágenes globales
 const { p_pure } = require('./utils/prefixes');
 const Canvas = require('canvas'); //Node Canvas
 const chalk = require('chalk'); //Consola con formato bonito
-const { colorsRow } = require('./data/houraiProps');
+const { colorsRow } = require('./data/sakiProps');
 const { ButtonStyle, ChannelType } = require('discord.js');
 const { fetchUserCache } = require('./utils/usercache');
 const Hourai = require('./models/hourai');
@@ -141,7 +141,6 @@ module.exports = {
         await canal.send({
             content: `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:1107843515385389128>`,
             files: [global.hourai.images.colors],
-            // @ts-ignore
             components: [colorsRow],
         });
         setTimeout(module.exports.forceRole, 1000, miembro, canal, 2 * reps);

@@ -10,7 +10,7 @@ const perms = new CommandPermissions('ManageRoles');
 const options = new CommandOptions()
 	.addParam('miembro', 'MEMBER', 'para aplicar Hanged Doll a un miembro', { optional: true })
 	.addFlag('t', 'todos', 'para aplicar Hanged Doll a todos los usuarios');
-const tags = new CommandTags().add('MOD', 'HOURAI');
+const tags = new CommandTags().add('MOD', 'SAKI');
 const command = new CommandManager('colgar', tags)
 	.setAliases(
 		'castrar', 'colgate',

@@ -1,10 +1,10 @@
 const { CommandTags, CommandManager } = require('../Commons/commands');
 const { hourai } = require('../../data/config.json');
-const { colorsRow } = require('../../data/houraiProps');
+const { colorsRow } = require('../../data/sakiProps');
 const { colorsList } = hourai;
 
 const flags = new CommandTags().add(
-	'HOURAI',
+	'SAKI',
 	'OUTDATED',
 );
 const command = new CommandManager('colores', flags)

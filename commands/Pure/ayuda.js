@@ -11,7 +11,7 @@ const makeExcludedTags = (request) => {
 	const excludedTags = [ 'GUIDE' ];
 
 	isNotModerator(request.member) && excludedTags.push('MOD');
-	request.guildId !== serverid.saki && excludedTags.push('HOURAI');
+	request.guildId !== serverid.saki && excludedTags.push('SAKI');
 	request.user.id !== peopleid.papita && excludedTags.push('PAPA', 'MAINTENANCE', 'OUTDATED');
 
 	return excludedTags;

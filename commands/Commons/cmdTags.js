@@ -20,7 +20,7 @@ const CommandTag = /**@type {const}*/({
     OUTDATED    : bigIntField( 8),
     GUIDE       : bigIntField( 9),
     PAPA        : bigIntField(10),
-    HOURAI      : bigIntField(11),
+    SAKI        : bigIntField(11),
     MUSIC       : bigIntField(12),
 });
 

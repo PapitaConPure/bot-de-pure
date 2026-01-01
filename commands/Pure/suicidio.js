@@ -4,7 +4,7 @@ const { hourai } = require('../../data/config.json');
 const hd = hourai.hangedRoleId; //Hanged Doll
 
 const flags = new CommandTags().add(
-	'HOURAI',
+	'SAKI',
 	'MEME',
 );
 const command = new CommandManager('suicidio', flags)

@@ -1,4 +1,4 @@
-const { StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
+const { StringSelectMenuBuilder } = require('discord.js');
 const { makeStringSelectMenuRowBuilder } = require('../utils/tsCasts');
 const { hourai } = require('./config.json');
 const { colorsList } = hourai;

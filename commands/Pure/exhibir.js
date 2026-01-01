@@ -10,7 +10,7 @@ const perms = new CommandPermissions([ 'ManageGuild', 'ManageChannels', 'ManageM
 
 const flags = new CommandTags().add(
 	'MOD',
-	'HOURAI',
+	'SAKI',
 );
 
 const command = new CommandManager('exhibir', flags)

@@ -63,7 +63,7 @@ module.exports = {
             isException: async request => isNotByPapita(request),
         },
         {
-            tag: 'HOURAI',
+            tag: 'SAKI',
             title: 'Comando exclusivo de Saki Scans',
             desc: [
                 'El comando es de uso restringido para el servidor __Saki Scans (anteriormente Hourai Doll)__.',

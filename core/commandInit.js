@@ -174,7 +174,7 @@ function registerCommandFiles(log = false) {
             setupOptionBuilders(slash, options, log);
     
         const jsonData = slash.toJSON();
-        if(!command.flags.has('HOURAI'))
+        if(!command.flags.has('SAKI'))
             puré.slash.set(command.name, jsonData);
         else
             puré.slashHourai.set(command.name, jsonData);

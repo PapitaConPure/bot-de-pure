@@ -54,11 +54,11 @@ const makeCategoriesRow = (request, selections) => {
 	);
 
 	request.guildId === serverid.saki && categoriesMenu.addOptions(new StringSelectMenuOptionBuilder()
-		.setValue('HOURAI')
+		.setValue('SAKI')
 		.setEmoji('1108197083334316183')
 		.setLabel('Saki Scans')
 		.setDescription('Comandos exclusivos para Saki Scans.')
-		.setDefault(getDefault('HOURAI')));
+		.setDefault(getDefault('SAKI')));
 	
 	categoriesMenu.addOptions(
 		new StringSelectMenuOptionBuilder()
@@ -144,7 +144,7 @@ function searchCommand(request, nameOrAlias) {
 		
 		if((command.tags.has('PAPA') && request.user.id !== peopleid.papita)
 		|| (command.tags.has('MOD') && isNotModerator(request.member))
-		|| (command.tags.has('HOURAI') && request.guild.id !== serverid.saki))
+		|| (command.tags.has('SAKI') && request.guild.id !== serverid.saki))
 			continue;
 		
 		return command;
@@ -184,7 +184,7 @@ function searchCommands(request, query) {
 		
 		if((command.tags.has('PAPA') && request.user.id !== peopleid.papita)
 		|| (command.tags.has('MOD') && isNotModerator(request.member))
-		|| (command.tags.has('HOURAI') && request.guild.id !== serverid.saki))
+		|| (command.tags.has('SAKI') && request.guild.id !== serverid.saki))
 			continue;
 		
 		commands.push({
@@ -215,7 +215,7 @@ const displayTagMappings = /**@type {const}*/({
 	PAPA        : 'Papita con Puré',
 	MAINTENANCE : 'Mantenimiento',
 	OUTDATED    : 'Obsoleto',
-	HOURAI      : 'Saki Scans',
+	SAKI        : 'Saki Scans',
 	CHAOS       : 'Caos',
 	COMMON      : 'Común',
 	EMOTE       : 'Emote',

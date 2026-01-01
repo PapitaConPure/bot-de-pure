@@ -67,7 +67,7 @@ const options = new CommandOptions()
     .addFlag([], 'bienvenida', 'Para habilitar o deshabilitar la bienvenida por completo', { name: 'estado', type: 'TEXT' })
     .addFlag([], 'despedida', 'Para habilitar o deshabilitar la bienvenida por completo', { name: 'estado', type: 'TEXT' })
     .addFlag([], 'ping', 'Para habilitar o deshabilitar el ping de bienvenida', { name: 'estado', type: 'TEXT' });
-const flags = new CommandTags().add('MOD', 'HOURAI');
+const flags = new CommandTags().add('MOD', 'SAKI');
 const command = new CommandManager('saki', flags)
 	.setAliases(
 		'sakiscans',
