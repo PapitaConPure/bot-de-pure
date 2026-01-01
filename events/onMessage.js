@@ -6,8 +6,8 @@ const { CommandManager, CommandOptionSolver } = require('../commands/Commons/com
 const { Stats, ChannelStats } = require('../models/stats.js');
 const { p_pure } = require('../utils/prefixes');
 
-const { updateAgentMessageOwners, addAgentMessageOwner, DiscordAgent } = require('../systems/agents/discordagent');
-const { channelIsBlocked, rand, edlDistance, isUsageBanned } = require('../func');
+const { updateAgentMessageOwners, addAgentMessageOwner } = require('../systems/agents/discordagent');
+const { channelIsBlocked, rand, edlDistance } = require('../func');
 const globalGuildFunctions = require('../systems/others/guildFunctions');
 const { auditRequest } = require('../systems/others/auditor');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../utils/cmdExceptions');
@@ -15,10 +15,9 @@ const globalConfigs = require('../data/config.json');
 const { tenshiColor } = globalConfigs;
 const UserConfigs = require('../models/userconfigs');
 const { sendConvertedPixivPosts } = require('../systems/agents/purepix');
-const { sendConvertedTweets } = require('../systems/agents/pureet');
+const { sendConvertedTwitterPosts } = require('../systems/agents/pureet');
 const { Translator } = require('../i18n/internationalization');
 const { fetchUserCache } = require('../utils/usercache');
-const { ConverterEmptyPayload } = require('../systems/agents/converters');
 const { addMessageCascade } = require('./onMessageDelete');
 //#endregion
 
@@ -253,10 +252,13 @@ async function gainPRC(guild, userId) {
  */
 async function onMessage(message, client) {
 	if(!message.inGuild()) return;
+	
 	const { content, author, channel, guild } = message;
-	if(channelIsBlocked(channel) || (await isUsageBanned(author))) return;
+	const userCache = await fetchUserCache(author);
 
-	//Respuestas rápidas
+	if(channelIsBlocked(channel) || userCache.banned) return;
+
+	//Plug-ins de servidor
 	const guildFunctions = globalGuildFunctions[guild.id];
 	if(guildFunctions)
 		await Promise.all(Object.values(guildFunctions).map(fgf => fgf(message)))
@@ -268,27 +270,15 @@ async function onMessage(message, client) {
 
 	gainPRC(guild, author.id);
 
-	const userCache = await fetchUserCache(author);
-
-	const logAndReturnEmpty = (/**@type {Error}*/err) => {
-		console.error(err);
-		return ConverterEmptyPayload;
-	};
-	const results = await Promise.all([
-		sendConvertedPixivPosts(message, userCache.pixivConverter).catch(logAndReturnEmpty),
-		sendConvertedTweets(message, userCache.twitterPrefix).catch(logAndReturnEmpty),
+	const converterPayloads = await Promise.all([
+		sendConvertedPixivPosts(message, userCache.pixivConverter),
+		sendConvertedTwitterPosts(message, userCache.twitterPrefix),
 	]);
-	const result = /**@type {import('../systems/agents/converters').ConverterPayload}*/({
-		shouldReplace: results.some(r => r.shouldReplace),
-		shouldReply: results.some(r => r.shouldReply),
-		content: results.map(r => r.content).join(' '),
-		embeds: results.map(r => r.embeds).flat().filter(e => e),
-		files: results.map(r => r.files).flat().filter(f => f),
-	});
-	const { shouldReplace, shouldReply, ...messageResult } = result;
+	const contentfulPayloads = converterPayloads.filter(r => r.contentful === true);
+	if(contentfulPayloads.length) {
+		const messageResult = contentfulPayloads.map(r => r.content).join(' ');
 
-	try {
-		if(shouldReply) {
+		try {
 			const [ sent ] = await Promise.all([
 				message.reply(messageResult),
 				message.suppressEmbeds(true),
@@ -303,16 +293,9 @@ async function onMessage(message, client) {
 				addAgentMessageOwner(sent, author.id),
 				addMessageCascade(message.id, sent.id, new Date(+message.createdAt + 4 * 60 * 60e3)),
 			]);
-		} else if(shouldReplace) {
-			const agent = await (new DiscordAgent().setup(channel));
-			agent.setMember(message.member);
-			await agent.sendAsUser(messageResult);
-			
-			if(message?.deletable)
-				await message.delete();
+		} catch(err) {
+			console.error(err);
 		}
-	} catch(err) {
-		console.error(err);
 	}
 
 	updateAgentMessageOwners().catch(console.error);

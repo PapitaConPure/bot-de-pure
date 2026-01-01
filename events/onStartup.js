@@ -37,7 +37,6 @@ const chalk = require('chalk');
 
 const { prepareTracksPlayer } = require('../systems/others/musicPlayer')
 const { initializeWebhookMessageOwners } = require('../systems/agents/discordagent');
-const { refreshPixivAccessToken } = require('../systems/agents/purepix');
 const { setupGuildRateKeeper, fetchAllGuildMembers } = require('../utils/guildratekeeper');
 
 const logOptions = {
@@ -267,7 +266,6 @@ async function onStartup(client) {
 	);
 
 	await setupGuildFeedUpdateStack(client);
-	await refreshPixivAccessToken();
 }
 
 module.exports = {

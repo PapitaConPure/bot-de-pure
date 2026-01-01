@@ -1,14 +1,18 @@
 const { ChannelType } = require('discord.js');
 const { ConverterEmptyPayload } = require('./converters');
+const Logger = require('../../utils/logs');
+
+const { error } = Logger('WARN', 'Puréet');
 
 const acceptedTwitterConvertersWithoutNone = /**@type {const}*/([ 'vx', 'fx', 'girlcockx', 'cunnyx' ]);
 const acceptedTwitterConverters = /**@type {const}*/([ '', ...acceptedTwitterConvertersWithoutNone ]);
 const tweetRegex = /(?:<|\|{2})? ?((?:https?:\/\/)(?:www.)?(?:twitter|x).com\/(\w+)\/status\/(\d+)(?:\/([A-Za-z]+))?) ?(?:>|\|{2})?/g;
+
 /**
  * @typedef {typeof acceptedTwitterConvertersWithoutNone[number]} AcceptedTwitterConverterKey
  * @satisfies {Record<AcceptedTwitterConverterKey, { name: string, service: string }>}
  */
-const configProps = {
+const twitterConversionServices = {
 	vx: { name: 'vxTwitter', service: 'https://fixvx.com' },
 	fx: { name: 'fixTwitter', service: 'https://fxtwitter.com' },
 	girlcockx: { name: 'girlcockx', service: 'https://girlcockx.com' },
@@ -16,13 +20,13 @@ const configProps = {
 };
 
 /**
- * Detecta enlaces de Twitter en un mensaje y los reenvía con un Embed corregido, a través de un Agente Webhook.
+ * Detecta enlaces de Twitter en un mensaje y los reenvía con un Embed corregido, a través de una respuesta.
  * @param {import('discord.js').Message<true>} message El mensaje a analizar
- * @param {AcceptedTwitterConverterKey | ''} configPrefix El mensaje a analizar
+ * @param {AcceptedTwitterConverterKey | ''} converterKey El identificador de servicio de conversión a utilizar
  * @returns {Promise<import('./converters').ConverterPayload>}
  */
-async function sendConvertedTweets(message, configPrefix) {
-	if(configPrefix === '')
+async function sendConvertedTwitterPosts(message, converterKey) {
+	if(converterKey === '')
 		return ConverterEmptyPayload;
 
 	const { content: messageContent, channel } = message;
@@ -31,9 +35,14 @@ async function sendConvertedTweets(message, configPrefix) {
 		return ConverterEmptyPayload;
 
 	if(channel.type === ChannelType.PublicThread) {
-		const { parent } = channel;
-		if(parent.type === ChannelType.GuildForum && (await channel.fetchStarterMessage()).id === message.id)
+		try {
+			const { parent } = channel;
+			if(parent.type === ChannelType.GuildForum && (await channel.fetchStarterMessage()).id === message.id)
+				return ConverterEmptyPayload;
+		} catch(err) {
+			error(err);
 			return ConverterEmptyPayload;
+		}
 	}
 
 	const tweetUrls = [ ...messageContent.matchAll(tweetRegex) ]
@@ -43,7 +52,7 @@ async function sendConvertedTweets(message, configPrefix) {
 	if(!tweetUrls.length)
 		return ConverterEmptyPayload;
 
-	const configProp = configProps[configPrefix];
+	const configProp = twitterConversionServices[converterKey];
 	if(configProp == undefined)
 		return ConverterEmptyPayload;
 	
@@ -58,7 +67,7 @@ async function sendConvertedTweets(message, configPrefix) {
 			let langSuffix = '';
 			if(ls && ls.length <= 2) {
 				langSuffix = `/${ls}`;
-				warnAboutUnsupportedTranslationUrls ||= (ls && configPrefix === 'vx');
+				warnAboutUnsupportedTranslationUrls ||= (ls && converterKey === 'vx');
 			}
 			return `${spoiler}<:twitter2:1232243415165440040>[\`${artist}/${id}\`](${service}/${artist}/status/${id}${langSuffix})${spoiler}`;
 		});
@@ -68,14 +77,13 @@ async function sendConvertedTweets(message, configPrefix) {
 		content += '\n-# ⚠️️ El conversor de vxTwitter todavía no tiene una característica de traducción';
 
 	return {
-		shouldReplace: false,
-		shouldReply: true,
+		contentful: true,
 		content,
 	};
 };
 
 module.exports = {
 	tweetRegex,
-	sendConvertedTweets,
+	sendConvertedTwitterPosts,
 	acceptedTwitterConverters,
 };

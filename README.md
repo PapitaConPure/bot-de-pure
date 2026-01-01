@@ -24,7 +24,6 @@ Como personaje, es una robot torpe y agresiva en algunos casos, pero parece mete
 >     "dburi": "<<La URI de la Base de Datos de MongoDB que usarás>>",
 >     "booruapikey": "<<La clave de API de una cuenta de Gelbooru>>",
 >     "booruuserid": "<<La ID de usuario de la misma cuenta de Gelbooru>>",
->     "pixivtoken": "<<El Refresh Token de una cuenta de pixiv>>",
 >     "imgurclientid": "<<La ID de cliente de una cuenta de Gelbooru>>",
 >     "aikey": "<<Una clave de API de Groq.com para comandos de IA>>"
 >   }

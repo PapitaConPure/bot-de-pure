@@ -1,16 +1,28 @@
 /**
- * @typedef {Object} ConverterPayload
- * @property {boolean} shouldReplace
- * @property {boolean} shouldReply
- * @property {string?} [content]
- * @property {Array<import('discord.js').EmbedBuilder>?} [embeds]
- * @property {Array<import('discord.js').Attachment>?} [files]
+ * @template {boolean} TContentful
+ * @typedef {Object} ConverterBasePayload
+ * @property {TContentful} contentful
+*/
+
+/**
+ * @typedef {ConverterBasePayload<false>} EmptyConverterPayload
+*/
+
+/**
+ * @typedef {Object} ContentfulConverterPayloadData
+ * @property {string} content
+ * 
+ * @typedef {ConverterBasePayload<true> & ContentfulConverterPayloadData} ContentfulConverterPayload
  */
+
+/**
+ * @typedef {EmptyConverterPayload | ContentfulConverterPayload} ConverterPayload
+ */
+
 
 /**@type {ConverterPayload}*/
 const ConverterEmptyPayload = {
-	shouldReplace: false,
-	shouldReply: false,
+	contentful: false,
 };
 
 module.exports = {
