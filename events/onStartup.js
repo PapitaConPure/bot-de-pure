@@ -38,7 +38,7 @@ const chalk = require('chalk');
 const { prepareTracksPlayer } = require('../systems/musicPlayer.js')
 const { initializeWebhookMessageOwners } = require('../systems/agents/discordagent.js');
 const { refreshPixivAccessToken } = require('../systems/agents/purepix.js');
-const { fetchGuildMembers } = require('../guildratekeeper.js');
+const { setupGuildRateKeeper, fetchAllGuildMembers } = require('../guildratekeeper.js');
 
 const logOptions = {
 	slash: false,
@@ -51,16 +51,16 @@ const logOptions = {
 async function onStartup(client) {
 	const confirm = () => console.log(chalk.green('Hecho.'));
 	globalConfigs.maintenance = '1';
-	
-	console.log(chalk.magenta('Obteniendo miembros de servidores de Discord...'));
-	await client.guilds.fetch();
-	await Promise.all(client.guilds.cache.map(guild => fetchGuildMembers(guild, { withPresences: true })));
-	confirm();
 
 	if(globalConfigs.remoteStartup)
-		console.log(chalk.redBright.bold('Inicializando entorno de producción'));
+		console.log(chalk.redBright.bold('Se inicializará para un entorno de producción'));
 	else
-		console.log(chalk.cyanBright.bold('Inicializando entorno de desarrollo'));
+		console.log(chalk.cyanBright.bold('Se inicializará para un entorno de desarrollo'));
+	
+	console.log(chalk.magenta('Obteniendo miembros de servidores de Discord...'));
+	setupGuildRateKeeper({ client });
+	await fetchAllGuildMembers;
+	confirm();
 
 	console.log(chalk.bold.magentaBright('Cargando comandos Slash y Contextuales...'));
 	const restGlobal = new REST({ version: '9' }).setToken(discordToken);
