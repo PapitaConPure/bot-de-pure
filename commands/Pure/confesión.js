@@ -8,6 +8,7 @@ const { auditError } = require('../../systems/others/auditor');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 const { makeTextInputRowBuilder, makeButtonRowBuilder } = require('../../utils/tsCasts.js');
 const { fetchGuildMembers } = require('../../utils/guildratekeeper');
+const { DiscordAgent } = require('../../systems/agents/discordagent');
 
 const confessionTasks = [];
 
@@ -292,10 +293,9 @@ const command = new CommandManager('confesión', tags)
 			.setAccentColor(0x8334eb)
 			.addSectionComponents(confessionSection);
 		const replyButton = new ButtonBuilder()
-			.setCustomId(`confesión_replyAnon`)
-			.setLabel('Responder anónimamente')
+			.setCustomId(`confesión_promptReplyAnon`)
 			.setEmoji('1456639740974600263')
-			.setStyle(ButtonStyle.Secondary)
+			.setStyle(ButtonStyle.Secondary);
 		
 		if(confession.anonymous) {
 			confessionContent += '<:person:1355128242993893539> Confesión anónima';
@@ -312,12 +312,14 @@ const command = new CommandManager('confesión', tags)
 					.setThumbnailAccessory(accessory =>
 						accessory
 							.setURL(miembro.displayAvatarURL({ size: 256 }))
-					)
+					);
+				replyButton
+					.setLabel('Responder anónimamente');
 				confessionContainer
 					.addActionRowComponents(actionRow =>
 						actionRow
 							.setComponents(replyButton)
-					)
+					);
 			} else {
 				confessionContent += `⚠️ Confesión no-anónima, pero no se pudo recuperar el autor`;
 				confessionSection
@@ -463,6 +465,49 @@ const command = new CommandManager('confesión', tags)
 		}
 
 		return interaction.update({ embeds: [confirmationEmbed], components: [] });
+	}).setButtonResponse(async function promptReplyAnon(interaction) {
+		const modal = new ModalBuilder()
+			.setCustomId('confesión_replyAnon')
+			.setTitle('Responder a confesión')
+			.addLabelComponents(label =>
+				label
+					.setLabel('Respuesta')
+					.setTextInputComponent(textInput =>
+						textInput
+							.setCustomId('content')
+							.setPlaceholder('Contenido de tu respuesta')
+							.setStyle(TextInputStyle.Paragraph)
+							.setRequired(true)
+							.setMinLength(1)
+							.setMaxLength(1000)
+					)
+			);
+
+		return interaction.showModal(modal);
+	}).setModalResponse(async function replyAnon(interaction) {
+		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+		const { message } = interaction;
+		const responseContent = interaction.fields.getTextInputValue('content');
+
+		const thread = message.hasThread
+			? message.thread
+			: await message.startThread({
+				name: 'Respuestas',
+				reason: 'Sistema de confesiones: Respuesta anónima a confesión',
+			});
+
+		const agent = await (new DiscordAgent().setup(thread));
+		agent.setUser(interaction.client.user);
+
+		await agent.sendAsUser({
+			username: 'Respuesta anónima',
+			content: `${responseContent}`,
+		});
+
+		return interaction.editReply({
+			content: '✅ Se envió tu respuesta anónima a la confesión',
+		});
 	});
 
 /**
