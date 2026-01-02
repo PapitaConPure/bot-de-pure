@@ -9,6 +9,8 @@ const { CommandPermissions } = require('../Commons/cmdPerms.js');
 const { makeTextInputRowBuilder, makeButtonRowBuilder } = require('../../utils/tsCasts.js');
 const { fetchGuildMembers } = require('../../utils/guildratekeeper');
 
+const confessionTasks = [];
+
 const perms = new CommandPermissions()
 	.requireAnyOf('ManageMessages')
 	.requireAnyOf([ 'ManageChannels', 'ManageGuild' ]);
@@ -336,10 +338,11 @@ const command = new CommandManager('confesión', tags)
 
 		confSystem.pending = confSystem.pending.filter(p => p !== confId);
 		confSystem.markModified('pending');
-		await Promise.all([
+
+		await addAndWaitForConfessionSystemTasks(
 			confSystem.save(),
 			confession.deleteOne(),
-		]);
+		);
 
 		const confirmationEmbed = new EmbedBuilder()
 			.setColor(0x32e698)
@@ -357,12 +360,13 @@ const command = new CommandManager('confesión', tags)
 		if(index < 0)
 			return interaction.update({ content: '⚠️ Esta confesión ya no está pendiente', components: [] });
 		
+		await Promise.allSettled(confessionTasks);
 		confSystem.pending.splice(index, 1);
 		confSystem.markModified('pending');
-		await Promise.all([
+		await addAndWaitForConfessionSystemTasks(
 			confSystem.save(),
 			PendingConfessions.findOneAndDelete({ id: confId }),
-		]);
+		);
 
 		const confirmationEmbed = new EmbedBuilder()
 			.setColor(0xeb345c)
@@ -382,10 +386,10 @@ const command = new CommandManager('confesión', tags)
 		
 		confSystem.pending.splice(index, 1);
 		confSystem.markModified('pending');
-		await Promise.all([
+		await addAndWaitForConfessionSystemTasks(
 			confSystem.save(),
 			PendingConfessions.findOneAndDelete({ id: confId }),
-		]);
+		);
 
 		const gmid = decompressId(userId);
 		const miembro = interaction.guild.members.cache.get(gmid);
@@ -427,10 +431,10 @@ const command = new CommandManager('confesión', tags)
 		
 		confSystem.pending.splice(index, 1);
 		confSystem.markModified('pending');
-		await Promise.all([
+		await addAndWaitForConfessionSystemTasks(
 			confSystem.save(),
 			PendingConfessions.findOneAndDelete({ id: confId }),
-		]);
+		);
 
 		const gmid = decompressId(userId);
 		const miembro = interaction.guild.members.cache.get(gmid);
@@ -470,6 +474,8 @@ const command = new CommandManager('confesión', tags)
  * @returns un objeto con los datos obtenidos
  */
 async function getConfessionSystemAndChannels(interaction) {
+	await Promise.allSettled(confessionTasks);
+
 	/**
 	 * 
 	 * @param {string} message 
@@ -498,6 +504,11 @@ async function getConfessionSystemAndChannels(interaction) {
 	};
 
 	return ret;
+}
+
+async function addAndWaitForConfessionSystemTasks(...tasks) {
+	confessionTasks.push(...tasks);
+	return Promise.allSettled(tasks);
 }
 
 module.exports = command;
