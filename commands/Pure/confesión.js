@@ -1,12 +1,13 @@
 //const {  } = require('../../func'); //Funciones globales
 const { compressId, fetchChannel, decompressId } = require('../../func');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder, Colors, DiscordAPIError } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder, Colors, DiscordAPIError, ContainerBuilder, SectionBuilder, MessageFlags } = require('discord.js');
 const ConfessionSystems = require('../../models/confessionSystems.js');
 const PendingConfessions = require('../../models/pendingConfessions.js');
 const { CommandManager, CommandTags } = require('../Commons/commands.js');
 const { auditError } = require('../../systems/others/auditor');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 const { makeTextInputRowBuilder, makeButtonRowBuilder } = require('../../utils/tsCasts.js');
+const { fetchGuildMembers } = require('../../utils/guildratekeeper');
 
 const perms = new CommandPermissions()
 	.requireAnyOf('ManageMessages')
@@ -283,20 +284,55 @@ const command = new CommandManager('confesión', tags)
 		if(!confession)
 			return interaction.update({ content: '⚠️ La confesión ya se atendió, pero no se registró aquí por un error externo', components: [] });
 
-		const confessionEmbed = new EmbedBuilder()
-			.setColor(0x8334eb)
-			.addFields(
-				{ name: 'Confesión', value: confession.content },
-			);
+		let confessionContent = '-# ';
+		const confessionSection = new SectionBuilder();
+		const confessionContainer = new ContainerBuilder()
+			.setAccentColor(0x8334eb)
+			.addSectionComponents(confessionSection);
+		const replyButton = new ButtonBuilder()
+			.setCustomId(`confesión_replyAnon`)
+			.setLabel('Responder anónimamente')
+			.setEmoji('1456639740974600263')
+			.setStyle(ButtonStyle.Secondary)
 		
-		if(!confession.anonymous) {
+		if(confession.anonymous) {
+			confessionContent += '<:person:1355128242993893539> Confesión anónima';
+			confessionSection
+				.setButtonAccessory(replyButton)
+		} else {
+			await fetchGuildMembers(interaction.guild);
 			const gmid = decompressId(userId);
 			const miembro = interaction.guild.members.cache.get(gmid);
-			if(miembro)
-				confessionEmbed.setAuthor({ name: miembro.displayName ?? '[!] No se pudo resolver el autor', iconURL: miembro.displayAvatarURL({ size: 256 }) });
+
+			if(miembro) {
+				confessionContent += `<:person:1355128242993893539> Confesión de ${miembro}`;
+				confessionSection
+					.setThumbnailAccessory(accessory =>
+						accessory
+							.setURL(miembro.displayAvatarURL({ size: 256 }))
+					)
+				confessionContainer
+					.addActionRowComponents(actionRow =>
+						actionRow
+							.setComponents(replyButton)
+					)
+			} else {
+				confessionContent += `⚠️ Confesión no-anónima, pero no se pudo recuperar el autor`;
+				confessionSection
+					.setButtonAccessory(replyButton)
+				}
 		}
+		confessionContent += `\n${confession.content}`;
+
+		confessionSection
+			.addTextDisplayComponents(textDisplay =>
+				textDisplay.setContent(confessionContent)
+			);
 		
-		await confChannel.send({ embeds: [confessionEmbed] });
+		await confChannel.send({
+			flags: MessageFlags.IsComponentsV2,
+			components: [confessionContainer],
+		});
 
 		confSystem.pending = confSystem.pending.filter(p => p !== confId);
 		confSystem.markModified('pending');
