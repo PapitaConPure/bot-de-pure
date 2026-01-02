@@ -39,7 +39,7 @@ const command = new CommandManager('estado', flags)
             .setAccentColor(globalConfigs.tenshiColor)
             .addMediaGalleryComponents(mediaGallery =>
                 mediaGallery.addItems(MediaGalleryItem =>
-                    MediaGalleryItem.setURL('https://i.imgur.com/HxwHF2i.jpeg')
+                    MediaGalleryItem.setURL('https://i.imgur.com/lQOPok9.jpeg')
                 )
             )
             .addSectionComponents(section =>
