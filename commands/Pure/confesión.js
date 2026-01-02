@@ -466,7 +466,7 @@ const command = new CommandManager('confesión', tags)
 	});
 
 /**
- * Intenta resolver un sistema de confesiones de la BBDD y sus canales relacionados.
+ * Intenta resolver un sistema de confesiones de la BDD y sus canales relacionados.
  * 
  * Verifica que todos los componentes necesarios para sustentar un sistema de confesiones sean válidos.
  * Si no lo son, falla y devuelve un objeto con `success = false` y un `message` de diagnóstico de error
