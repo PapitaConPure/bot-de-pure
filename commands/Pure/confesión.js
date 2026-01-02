@@ -249,10 +249,10 @@ const command = new CommandManager('confesión', tags)
 				.setStyle(ButtonStyle.Danger),
 		]);
 
-		await Promise.all([
+		await delegateConfessionSystemTasks(
 			logChannel.send({ embeds: [embed], components: [row] }),
 			confSystem.save().then(() => pendingConf.save()),
-		]);
+		);
 
 		const confirmationEmbed = new EmbedBuilder()
 			.setTitle('Confesión enviada anónimamente para aprobación')
@@ -341,7 +341,7 @@ const command = new CommandManager('confesión', tags)
 		confSystem.pending = confSystem.pending.filter(p => p !== confId);
 		confSystem.markModified('pending');
 
-		await addAndWaitForConfessionSystemTasks(
+		await delegateConfessionSystemTasks(
 			confSystem.save(),
 			confession.deleteOne(),
 		);
@@ -365,7 +365,7 @@ const command = new CommandManager('confesión', tags)
 		await Promise.allSettled(confessionTasks);
 		confSystem.pending.splice(index, 1);
 		confSystem.markModified('pending');
-		await addAndWaitForConfessionSystemTasks(
+		await delegateConfessionSystemTasks(
 			confSystem.save(),
 			PendingConfessions.findOneAndDelete({ id: confId }),
 		);
@@ -388,7 +388,7 @@ const command = new CommandManager('confesión', tags)
 		
 		confSystem.pending.splice(index, 1);
 		confSystem.markModified('pending');
-		await addAndWaitForConfessionSystemTasks(
+		await delegateConfessionSystemTasks(
 			confSystem.save(),
 			PendingConfessions.findOneAndDelete({ id: confId }),
 		);
@@ -433,7 +433,7 @@ const command = new CommandManager('confesión', tags)
 		
 		confSystem.pending.splice(index, 1);
 		confSystem.markModified('pending');
-		await addAndWaitForConfessionSystemTasks(
+		await delegateConfessionSystemTasks(
 			confSystem.save(),
 			PendingConfessions.findOneAndDelete({ id: confId }),
 		);
@@ -551,7 +551,12 @@ async function getConfessionSystemAndChannels(interaction) {
 	return ret;
 }
 
-async function addAndWaitForConfessionSystemTasks(...tasks) {
+/**
+ * Delega tareas pendientes al sistema de confesiones
+ * @param  {...any} tasks Nuevas promesas a delegar al sistema de confesiones
+ * @returns 
+ */
+async function delegateConfessionSystemTasks(...tasks) {
 	confessionTasks.push(...tasks);
 	return Promise.allSettled(tasks);
 }
