@@ -1,5 +1,4 @@
 const WebhookOwner = require('../../models/webhookOwners.js');
-const { User, Webhook, GuildMember, Message } = require('discord.js');
 const { isThread } = require('../../func');
 
 /**
@@ -10,11 +9,11 @@ const owners = new Map();
 
 /**Clase para interactuar con Webhooks de Discord de forma más sencilla*/
 class DiscordAgent {
-	/**@type {Webhook}*/
+	/**@type {import('discord.js').Webhook}*/
 	webhook;
 	/**@type {String}*/
 	threadId;
-	/**@type {GuildMember | User}*/
+	/**@type {import('discord.js').GuildMember | import('discord.js').User}*/
 	user;
 	/**@type {Promise<Boolean>}*/
 	userLock;
@@ -29,7 +28,7 @@ class DiscordAgent {
 
 	/**
 	 * Conecta al Agente a un canal por medio de un Webhook. Si el canal no tiene un Webhook disponible, crea uno nuevo.
-	 * @param {import('discord.js').GuildTextBasedChannel} channel Objeto de canal o thread al cual enviar un mensaje como Agente
+	 * @param {import('discord.js').GuildTextBasedChannel | import('discord.js').AnyThreadChannel} channel Objeto de canal o thread al cual enviar un mensaje como Agente
 	 * @param {String} name Nombre de muestra de Agente
 	 */
 	async setup(channel, name = 'Agente Puré') {
@@ -52,7 +51,7 @@ class DiscordAgent {
 
 	/**
 	 * Establece el usuario a replicar por el Agente al enviar mensajes
-	 * @param {User} user
+	 * @param {import('discord.js').User} user
 	 */
 	setUser(user) {
 		this.userLock = user.fetch()
@@ -67,7 +66,7 @@ class DiscordAgent {
 
 	/**
 	 * Establece el miembro a replicar por el Agente al enviar mensajes
-	 * @param {GuildMember} member
+	 * @param {import('discord.js').GuildMember} member
 	 */
 	setMember(member) {
 		this.user = member;
@@ -76,7 +75,7 @@ class DiscordAgent {
 
 	/**
 	 * Envía un mensaje como el usuario especificado. Recuerda usar `setUser` o `setMember` antes.
-	 * @param {import('discord.js').WebhookMessageCreateOptions} messageOptions Opciones de envío. No se puede modificar el usuario ni el canal
+	 * @param {import('discord.js').WebhookMessageCreateOptions} messageOptions Opciones de envío. No se puede modificar el canal
 	 * @param {Boolean} [inheritAttachments] Si heredar los antiguos attachments del mensaje (true) o no (false)
 	 */
 	async sendAsUser(messageOptions, inheritAttachments = true) {
@@ -88,18 +87,22 @@ class DiscordAgent {
 		if(!messageOptions.content)
 			messageOptions.content = undefined;
 		
-		const { attachments } = messageOptions;
+		//@ts-expect-error
+		const { attachments, username } = messageOptions;
 		if(inheritAttachments && attachments && !Array.isArray(attachments)) {
 			messageOptions.files ??= [];
+			//@ts-expect-error
 			messageOptions.files.push(...[ ...attachments.values() ]);
+			//@ts-expect-error
 			messageOptions.attachments = [];
 		}
 		
 		let sent = null;
+		
 		try {
 			sent = await this.webhook.send({
 				threadId: this.threadId,
-				username: this.#getUserName(this.user),
+				username: username ?? this.#getUserName(this.user),
 				avatarURL: this.user.displayAvatarURL({ size: 512 }),
 				content: messageOptions.content,
 				files: messageOptions.files,
@@ -109,14 +112,14 @@ class DiscordAgent {
 			addAgentMessageOwner(sent, this.user.id);
 		} catch(e) {
 			console.error(e);
-		} finally {
-			return sent;
 		}
+
+		return sent;
 	}
 
 	/**
 	 * 
-	 * @param {User | GuildMember} user 
+	 * @param {import('discord.js').User | import('discord.js').GuildMember} user 
 	 */
 	#getUserName(user) {
 		if('nickname' in user && user.nickname != null)
@@ -125,7 +128,7 @@ class DiscordAgent {
 		if(user.displayName)
 			return user.displayName;
 
-		return (/**@type {User}*/ (user)).username;
+		return (/**@type {import('discord.js').User}*/ (user)).username;
 	}
 }
 
@@ -152,7 +155,7 @@ function getAgentMessageOwnerId(messageId) {
 
 /**
  * 
- * @param {Message<Boolean>} sent 
+ * @param {import('discord.js').Message<Boolean>} sent 
  * @param {String} [ownerId] 
  */
 async function addAgentMessageOwner(sent, ownerId = undefined) {
@@ -180,7 +183,7 @@ async function updateAgentMessageOwners() {
 }
 
 /**
- * @param {Message} message 
+ * @param {import('discord.js').Message} message 
  */
 async function deleteAgentMessage(message) {
 	const webhookOwner = await WebhookOwner.findOne({ messageId: message.id });
@@ -188,7 +191,7 @@ async function deleteAgentMessage(message) {
 	owners.delete(message.id);
 
 	return Promise.all([
-		message.delete().catch(_ => undefined),
+		message.delete().catch(() => undefined),
 		webhookOwner && webhookOwner.delete(),
 	]);
 }
