@@ -15,15 +15,14 @@
             "**PuréPix** ahora permite utilizar el servicio de conversión \"phixiv\"",
             "**PuréPix** ahora usa \"phixiv\" como servicio de conversión por defecto",
             "**PuréPix** ya no ofrece el método de conversión \"webhook\"",
+            "**Puréet** ahora permite usar los servicios de conversión \"girlcockx\" y \"cunnyx\"",
             "Apariencia de **PuréFeed** mejorada",
             "p!saucenao agregado",
-            "Acción contextual \"Buscar Fuente\" agregada",
+            "Acciones contextuales \"Buscar Fuente\", \"Obtener Emotes\" y \"Obtener Sticker\" agregadas",
             "p!cola ahora tiene controles adicionales",
-            "**Puréet** ahora permite usar los servicios de conversión \"girlcockx\" y \"cunnyx\"",
             "p!info ha sido renovado, traducido y ahora permite especificar un `--miembro`",
             "Operabilidad de **PuréMusic** amendada",
             "p!estado ha sido renovado y traducido",
-            "Procesado de mensajes optimizado",
             "Apariencia de confesiones mejorada, junto con la posibilidad de responder anónimamente"
         ],
         "todo": [
