@@ -288,6 +288,7 @@ const command = new CommandManager('info', flags)
 		return request.editReply({
 			flags: MessageFlags.IsComponentsV2,
 			components: [mainCointainer],
+			allowedMentions: {},
 		});
 	})
 	.setButtonResponse(async function navigate(interaction, page, requestId) {
