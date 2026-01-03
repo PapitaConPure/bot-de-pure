@@ -367,7 +367,7 @@ const command = new CommandManager('confesión', tags)
 
 		const confirmationEmbed = new EmbedBuilder()
 			.setColor(0x32e698)
-			.setDescription(`Confesión aceptada por ${interaction.user}. Aparecerá en ${confChannel}`);
+			.setDescription(`${messageId ? 'Respuesta anónima' : 'Confesión'} aceptada por ${interaction.user}. Aparecerá en ${confChannel}`);
 
 		return interaction.update({ embeds: [confirmationEmbed], components: [] });
 	}).setButtonResponse(async function rejectConfession(interaction, confId) {
