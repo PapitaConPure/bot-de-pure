@@ -50,7 +50,7 @@ async function onInteraction(interaction, client) {
  */
 async function handleCommand(interaction, client, stats) {
     const { commandName } = interaction;
-    const slash = puré.slash.get(commandName) ?? puré.slashHourai.get(commandName);
+    const slash = puré.slash.get(commandName) ?? puré.slashSaki.get(commandName);
     if(!slash) return;
 
     try {

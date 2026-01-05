@@ -13,7 +13,7 @@ const embeds = [
         .addFields(
             {
                 name: 'Comandos',
-                value: `¡**${readdirSync('./commands/Pure').filter(file => file.endsWith('.js')).length}** en total!`,
+                value: `¡**${readdirSync('./commands/Instances').filter(file => file.endsWith('.js')).length}** en total!`,
                 inline: true,
             },
             {

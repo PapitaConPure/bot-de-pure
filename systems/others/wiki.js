@@ -135,7 +135,7 @@ const makeGuideRow = (request) => makeStringSelectMenuRowBuilder().addComponents
  */
 function searchCommand(request, nameOrAlias) {
 	for(const filename of commandFilenames) {
-		const commandFile = require(`../../commands/Pure/${filename}`);
+		const commandFile = require(`../../commands/Instances/${filename}`);
 		const command = /**@type {import('../../commands/Commons/commands').Command}*/(commandFile.command ?? commandFile);
 
 		if(command.name !== nameOrAlias
@@ -166,7 +166,7 @@ function searchCommands(request, query) {
 	const nameBias = 0.334;
 
 	for(const filename of commandFilenames) {
-		const commandFile = require(`../../commands/Pure/${filename}`);
+		const commandFile = require(`../../commands/Instances/${filename}`);
 		const command = /**@type {import('../../commands/Commons/commands').Command}*/(commandFile.command ?? commandFile);
 
 		if(command.tags.any('GUIDE', 'MAINTENANCE', 'OUTDATED'))

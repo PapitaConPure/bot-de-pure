@@ -28,7 +28,7 @@ const command = new Command('estado', flags)
         const translator = await Translator.from(request.member);
         const stats = (!globalConfigs.noDataBase && await Stats.findOne({})) || new Stats({ since: Date.now( )});
         const counts = {
-            commands: readdirSync('./commands/Pure').filter(file => file.endsWith('.js')).length,
+            commands: readdirSync('./commands/Instances').filter(file => file.endsWith('.js')).length,
             guilds: request.client.guilds.cache.size
         }
         const totalCommands = stats.commands.succeeded + stats.commands.failed;

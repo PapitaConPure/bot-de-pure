@@ -65,7 +65,7 @@ async function onStartup(client) {
 	const restGlobal = new REST({ version: '9' }).setToken(discordToken);
 	const commandData = {
 		global: puré.slash.concat(/**@type {*}*/(puré.contextMenu)),
-		saki: puré.slashHourai,
+		saki: puré.slashSaki,
 	};
 
 	try {

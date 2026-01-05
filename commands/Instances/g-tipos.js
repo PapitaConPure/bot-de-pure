@@ -1,5 +1,5 @@
 const { makeGuideMenu } = require('../../systems/others/wiki.js');
-const { CommandTags, Command } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/commands.js');
 
 const flags = new CommandTags().add('GUIDE');
 const command = new Command('g-tipos', flags)

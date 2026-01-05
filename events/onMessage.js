@@ -307,7 +307,7 @@ function processBeginnerHelp(message) {
 	if(!content.includes(`${client.user}`))
 		return;
 
-	const prefixCommand = require('../commands/Pure/prefijo.js');
+	const prefixCommand = require('../commands/Instances/prefijo.js');
 	const request = Command.requestize(message);
 	const solver = new CommandOptionSolver(request, [], prefixCommand.options);
 	return prefixCommand.execute(request, solver).catch(error);
@@ -318,11 +318,14 @@ function processBeginnerHelp(message) {
  */
 async function onMessage(message) {
 	if(!message.inGuild()) return;
-	
+
 	const { author, channel, guild } = message;
+
+	if(channelIsBlocked(channel)) return;
+	
 	const userCache = await fetchUserCache(author);
 
-	if(channelIsBlocked(channel) || userCache.banned) return;
+	if(userCache.banned) return;
 
 	await processGuildPlugins(message);
 

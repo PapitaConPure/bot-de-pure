@@ -1,7 +1,7 @@
 const { readdir } = require('fs/promises'); //Integrar operaciones sistema de archivos de consola
 const GuildConfig = require('../../models/guildconfigs.js');
-const { p_pure } = require('../../utils/prefixes');
-const { CommandOptions, CommandTags, Command } = require("../Commons/commands");
+const { p_pure } = require('../../utils/prefixes.js');
+const { CommandOptions, CommandTags, Command } = require("../Commons/commands.js");
 const { EmbedBuilder } = require('discord.js');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 
@@ -33,7 +33,7 @@ const command = new Command('caos', tags)
 			return request.reply({ content: '😴 Se desactivaron los comandos caóticos' });
 		}
 
-		const cfiles = (await readdir('./commands/Pure')).filter(file => file.endsWith('.js'));
+		const cfiles = (await readdir('./commands/Instances')).filter(file => file.endsWith('.js'));
 		const chaosnames = [];
 		for(const file of cfiles) {
 			const command = require(`./${file}`);

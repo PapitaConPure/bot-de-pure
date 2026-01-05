@@ -4,7 +4,7 @@ const { guildEmoji: gEmo, shortenText, isThread } = require('../../func');
 const { Booru, TagTypes } = require('./boorufetch');
 const { getBaseTags, getSearchTags } = require('./booruprops');
 const globalConfigs = require('../../data/config.json');
-const rakki = require('../../commands/Pure/rakkidei');
+const rakki = require('../../commands/Instances/rakkidei');
 const { Translator } = require('../../i18n/internationalization');
 
 const Logger = require('../../utils/logs');

@@ -1,11 +1,11 @@
 const { PureVoiceModel: PureVoice, PureVoiceSessionModel } = require('../../models/purevoice.js');
 const { PureVoiceSessionMember, getFrozenSessionAllowedMembers, makePVSessionName } = require('../../systems/others/purevoice.js');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, MessageCollector, ButtonStyle, Colors, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder } = require('discord.js');
-const { p_pure } = require('../../utils/prefixes');
-const { isNotModerator, defaultEmoji } = require('../../func');
-const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
+const { p_pure } = require('../../utils/prefixes.js');
+const { isNotModerator, defaultEmoji } = require('../../func.js');
+const { CommandOptions, CommandTags, Command } = require('../Commons/commands.js');
 const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts.js');
-const { Translator } = require('../../i18n/internationalization');
+const { Translator } = require('../../i18n/internationalization.js');
 
 const cancelbutton = (id) => new ButtonBuilder()
 	.setCustomId(`voz_cancelWizard_${id}`)

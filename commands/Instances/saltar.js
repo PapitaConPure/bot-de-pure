@@ -1,8 +1,8 @@
 const { Colors } = require('discord.js'); //Integrar discord.js
 const { CommandTags, Command } = require('../Commons/commands.js');
 const { useMainPlayer } = require('discord-player');
-const { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/others/musicPlayer');
-const { Translator } = require('../../i18n/internationalization');
+const { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/others/musicPlayer.js');
+const { Translator } = require('../../i18n/internationalization.js');
 const { tryRecoverSavedTracksQueue } = require('../../models/playerQueue.js');
 
 const tags = new CommandTags().add(

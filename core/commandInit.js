@@ -129,7 +129,7 @@ const puré = {
     actions    : /**@type {Collection<String, import('../actions/Commons/actionBuilder').ContextMenuActionManager>}*/(new Collection()),
     emotes     : /**@type {Collection<String, import('../commands/Commons/cmdBuilder').Command>}*/(new Collection()),
     slash      : /**@type {Collection<String, import('discord.js').RESTPostAPIChatInputApplicationCommandsJSONBody>}*/(new Collection()),
-    slashHourai: /**@type {Collection<String, import('discord.js').RESTPostAPIChatInputApplicationCommandsJSONBody>}*/(new Collection()),
+    slashSaki: /**@type {Collection<String, import('discord.js').RESTPostAPIChatInputApplicationCommandsJSONBody>}*/(new Collection()),
     contextMenu: /**@type {Collection<String, import('discord.js').RESTPostAPIContextMenuApplicationCommandsJSONBody>}*/(new Collection()),
 };
 
@@ -137,12 +137,12 @@ const puré = {
  * @param {Boolean} log 
  */
 function registerCommandFiles(log = false) {
-    const commandFiles = readdirSync('./commands/Pure').filter(file => file.endsWith('.js'));
+    const commandFiles = readdirSync('./commands/Instances').filter(file => file.endsWith('.js'));
     /**@type {{ name: string, flags: string, tieneEmote: string, tieneMod: string }[]}*/
     const commandTableStack = [];
     
     for(const file of commandFiles) {
-        const commandModule = require(`../commands/Pure/${file}`);
+        const commandModule = require(`../commands/Instances/${file}`);
         /**@type {import('../commands/Commons/cmdBuilder').Command}*/
         const command = commandModule;
         puré.commands.set(command.name, command);
@@ -177,7 +177,7 @@ function registerCommandFiles(log = false) {
         if(!command.flags.has('SAKI'))
             puré.slash.set(command.name, jsonData);
         else
-            puré.slashHourai.set(command.name, jsonData);
+            puré.slashSaki.set(command.name, jsonData);
     }
 
     log && console.table(commandTableStack);
