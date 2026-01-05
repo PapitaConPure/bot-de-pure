@@ -5,36 +5,53 @@ const Logger = require('../../utils/logs');
 const { warn } = Logger('WARN', 'CmdOpts')
 
 /**
- * @typedef {{name: String, expression: String|Number}} ParamTypeStrict Parámetros de CommandOption que siguen una sintaxis estricta
- * @typedef {'NUMBER'|'TEXT'|'USER'|'MEMBER'|'ROLE'|'GUILD'|'CHANNEL'|'MESSAGE'|'EMOTE'|'IMAGE'|'FILE'|'URL'|'ID'} BaseParamType
+ * @typedef {{name: string, expression: string | number}} ParamTypeStrict Parámetros de CommandOption que siguen una sintaxis estricta
+ * @typedef {'NUMBER'
+ *         | 'TEXT'
+ *         | 'USER'
+ *         | 'MEMBER'
+ *         | 'ROLE'
+ *         | 'GUILD'
+ *         | 'CHANNEL'
+ *         | 'MESSAGE'
+ *         | 'EMOTE'
+ *         | 'IMAGE'
+ *         | 'FILE'
+ *         | 'URL'
+ *         | 'ID'
+ *         | 'DATE'
+ *         | 'TIME'
+ * } BaseParamType
  * @typedef {BaseParamType|ParamTypeStrict} ParamType Tipos de parámetro de CommandOption
- * @typedef {'SINGLE'|'MULTIPLE'|string[]} ParamPoly Capacidad de entradas de parámetro de CommandOption
- * @typedef {'getBoolean'|'getString'|'getNumber'|'getInteger'|'getChannel'|'getMessage'|'getUser'|'getMember'|'getRole'|'getAttachment'} GetMethodName
- * @typedef {Number | String | Boolean | User | GuildMember | Guild | import('discord.js').GuildBasedChannel | Message<Boolean> | Role | Attachment | undefined} ParamResult
- * @typedef {(interaction: import('discord.js').AutocompleteInteraction<'cached'>, query: String) => Promise<*>} AutocompleteFunction
  */
 
 /**
- * @type {Map<BaseParamType, { getMethod: GetMethodName, help: String }>}
+ * @typedef {'SINGLE' | 'MULTIPLE' | string[]} ParamPoly Capacidad de entradas de parámetro de CommandOption
+ * @typedef {keyof import('discord.js').CommandInteractionOptionResolver & `get${string}`} GetMethodName
+ * 
+ * @typedef {Object} ParamTypeSpecification
+ * @property {string} getMethod Nombre del método 'get...' de discord.js/CommandInteractionOptionResolver a emplear para este tipo de parámetro
+ * @property {string} help Cómo describir este tipo de parámetro en pocas palabras al mostrarlo en la wiki
  */
-const PARAM_TYPES = new Map();
-PARAM_TYPES
-	.set('NUMBER',  { getMethod: 'getNumber',     help: 'número' })
-	.set('TEXT',    { getMethod: 'getString',     help: 'texto' })
-	.set('USER',    { getMethod: 'getUser',       help: 'U{mención/texto/id}' })
-	.set('MEMBER',  { getMethod: 'getMember',     help: 'M{mención/texto/id}' })
-	.set('ROLE',    { getMethod: 'getRole',       help: 'R{mención/texto/id}' })
-	.set('GUILD',   { getMethod: 'getString',     help: 'g{texto/id}' })
-	.set('CHANNEL', { getMethod: 'getChannel',    help: 'C{enlace/texto/id}' })
-	.set('MESSAGE', { getMethod: 'getMessage',    help: 'm{enlace/texto/id}' })
-	.set('EMOTE',   { getMethod: 'getString',     help: 'emote' })
-	.set('IMAGE',   { getMethod: 'getAttachment', help: 'imagen/enlace' })
-	.set('FILE',    { getMethod: 'getAttachment', help: 'archivo/enlace' })
-	.set('URL',     { getMethod: 'getString',     help: 'enlace' })
-	.set('ID',      { getMethod: 'getInteger',    help: 'id' });
 
-/**@param {BaseParamType} pt*/
-const ParamTypes = (pt) => PARAM_TYPES.get(pt);
+/**@satisfies {Record<BaseParamType, { getMethod: GetMethodName, help: string }>}*/
+const paramTypes = /**@type {const}*/({
+	NUMBER:  { getMethod: 'getNumber',     help: 'número' },
+	TEXT:    { getMethod: 'getString',     help: 'texto' },
+	USER:    { getMethod: 'getUser',       help: 'U{mención/texto/id}' },
+	MEMBER:  { getMethod: 'getMember',     help: 'M{mención/texto/id}' },
+	ROLE:    { getMethod: 'getRole',       help: 'R{mención/texto/id}' },
+	GUILD:   { getMethod: 'getString',     help: 'g{texto/id}' },
+	CHANNEL: { getMethod: 'getChannel',    help: 'C{enlace/texto/id}' },
+	MESSAGE: { getMethod: 'getMessage',    help: 'm{enlace/texto/id}' },
+	EMOTE:   { getMethod: 'getString',     help: 'emote' },
+	IMAGE:   { getMethod: 'getAttachment', help: 'imagen/enlace' },
+	FILE:    { getMethod: 'getAttachment', help: 'archivo/enlace' },
+	URL:     { getMethod: 'getString',     help: 'enlace' },
+	ID:      { getMethod: 'getInteger',    help: 'id' },
+	DATE:    { getMethod: 'getString',     help: 'fecha' },
+	TIME:    { getMethod: 'getString',     help: 'hora' },
+});
 
 /**
  * @param {string[]} args
@@ -59,9 +76,14 @@ const fetchMessageFlagText = (args, i) => {
 }
 
 /**
+ * @typedef {number | string | boolean | User | GuildMember | Guild | import('discord.js').GuildBasedChannel | Message<Boolean> | Role | Attachment | undefined} ParamResult
+ */
+
+/**
  * @template {ParamResult} [T=ParamResult]
  * @typedef {(value: ParamResult, isSlash: Boolean) => T} FlagCallback
  */
+
 /**
  * @template {ParamResult} [T=ParamResult]
  * @template {ParamResult} [N=ParamResult]
@@ -69,6 +91,7 @@ const fetchMessageFlagText = (args, i) => {
  * @property {FlagCallback<T> | T} [callback] Una función de mapeo de retorno o un valor de retorno positivo
  * @property {N} [fallback] Un valor de retorno negativo
  */
+
 /**
  * @typedef {Object} FetchMessageFlagOptions
  * @property {Boolean} property
@@ -77,6 +100,7 @@ const fetchMessageFlagText = (args, i) => {
  * @property {FlagCallback} callback
  * @property {*} fallback
  */
+
 /**
  * @function
  * @param {string[]} args
@@ -129,18 +153,17 @@ const fetchMessageFlag = (args, flag = { property: undefined, short: [], long: [
 /**
  * Devuelve el tipo ingresado como texto de página de ayuda
  * @param {ParamType} type El tipo a convertir
- * @returns {string}
  */
 const typeHelp = (type) => isParamTypeStrict(type)
 	? `${type.name}: ${type.expression}`
-	: ParamTypes(type).help;
+	: paramTypes[type].help;
 
 /**
  * Devuelve si el parámetro es no-estricto
  * @param {ParamType} pt - una instancia ParamType
  * @returns {pt is BaseParamType}
  */
-const isBaseParamType = (pt) => typeof pt === 'string' && PARAM_TYPES.get(pt) != undefined;
+const isBaseParamType = (pt) => typeof pt === 'string' && paramTypes[pt] != undefined;
 
 /**
  * Devuelve si el parámetro es estricto
@@ -148,6 +171,10 @@ const isBaseParamType = (pt) => typeof pt === 'string' && PARAM_TYPES.get(pt) !=
  * @returns {pt is ParamTypeStrict}
  */
 const isParamTypeStrict = (pt) => (typeof pt === 'object') && pt?.name != undefined && pt?.expression != undefined;
+
+/**
+ * @typedef {(interaction: import('discord.js').AutocompleteInteraction<'cached'>, query: String) => Promise<*>} AutocompleteFunction
+ */
 
 /**
  * 
@@ -717,8 +744,6 @@ class CommandOptions {
 	};
 
 	static #fetchDependantTypes = new Set(/**@type {ReadonlyArray<BaseParamType>}*/([
-		'USER',
-		'MEMBER',
 		'MESSAGE',
 		'GUILD',
 	]));
@@ -835,6 +860,7 @@ class CommandOptions {
 	 * @param {string} slashIdentifier El identificador del parámetro para comandos Slash
 	 * @param {Boolean} whole Indica si devolver todas las entradas en caso de un comando de mensaje. Por defecto: false
 	 * @returns {Promise<ParamResult>} El valor del parámetro
+	 * @deprecated
 	 */
 	async fetchParam(input, slashIdentifier, whole = false) {
 		/**@type {CommandParam}*/
@@ -863,7 +889,7 @@ class CommandOptions {
 
 			for(let pt of param.type) {
 				if(!isParamTypeStrict(pt))
-					getMethodName = ParamTypes(pt).getMethod;
+					getMethodName = paramTypes[pt].getMethod;
 
 				try {
 					//@ts-expect-error
@@ -878,7 +904,7 @@ class CommandOptions {
 			return result;
 		} else {
 			if(!isParamTypeStrict(param.type))
-				getMethodName = ParamTypes(param.type).getMethod;
+				getMethodName = paramTypes[param.type].getMethod;
 			
 			//@ts-expect-error
 			return input[getMethodName](slashIdentifier, !param.optional);
@@ -960,7 +986,7 @@ class CommandOptions {
 			if(isParamTypeStrict(flag._type))
 				getMethod = 'getString';
 			else
-				getMethod = ParamTypes(flag._type)?.getMethod ?? 'getString';
+				getMethod = paramTypes[flag._type]?.getMethod ?? 'getString';
 		}
 		
 		flagValue = (/**@type {(name: String) => T}*/(input[getMethod]))(identifier);
@@ -1179,7 +1205,7 @@ class CommandOptionSolver {
 
 	/**
 	 * @param {string} identifier El identificador del {@linkcode CommandParam}
-	 * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
+	 * @param {boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
 	 */
 	getMember(identifier, getRestOfMessageWords = false) {
 		if(this.isInteractionSolver(this.#args)) {
@@ -1199,7 +1225,7 @@ class CommandOptionSolver {
 
 	/**
 	 * @param {string} identifier El identificador del {@linkcode CommandParam}
-	 * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
+	 * @param {boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
 	 */
 	async getGuild(identifier, getRestOfMessageWords = false) {
 		if(this.isInteractionSolver(this.#args))
@@ -1211,7 +1237,7 @@ class CommandOptionSolver {
 
 	/**
 	 * @param {string} identifier El identificador del {@linkcode CommandParam}
-	 * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
+	 * @param {boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
 	 */
 	getChannel(identifier, getRestOfMessageWords = false) {
 		if(this.isInteractionSolver(this.#args)) {
@@ -1271,7 +1297,7 @@ class CommandOptionSolver {
 
 	/**
 	 * @param {string} identifier El identificador del {@linkcode CommandParam}
-	 * @param {Boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
+	 * @param {boolean} [getRestOfMessageWords=false] Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
 	 */
 	getRole(identifier, getRestOfMessageWords = false) {
 		if(this.isInteractionSolver(this.#args)) {
@@ -1321,7 +1347,7 @@ class CommandOptionSolver {
 		const option = this.#expectParam(identifier);
 
 		if(this.isMessageSolver(this.#args)) {
-			if(!Array.isArray(option.type) && !isParamTypeStrict(option.type) && PARAM_TYPES.get((option.type))?.getMethod === 'getAttachment') {
+			if(!Array.isArray(option.type) && !isParamTypeStrict(option.type) && paramTypes[option.type]?.getMethod === 'getAttachment') {
 				this.ensureRequistified();
 				return [ ...this.#request.attachments.values() ];
 			}
@@ -1355,7 +1381,7 @@ class CommandOptionSolver {
 
 		const method = (Array.isArray(option.type) || isParamTypeStrict(option.type))
 			? this.#args.getString
-			: (this.#args[PARAM_TYPES.get(option.type).getMethod]);
+			: (this.#args[paramTypes[option.type].getMethod]);
 
 		return this.#options
 			.fetchParamPoly(this.#args, identifier, method, fallback)
@@ -1377,7 +1403,7 @@ class CommandOptionSolver {
 		const option = this.#expectParam(identifier);
 
 		if(this.isMessageSolver(this.#args)) {
-			if(!Array.isArray(option.type) && !isParamTypeStrict(option.type) && PARAM_TYPES.get((option.type))?.getMethod === 'getAttachment') {
+			if(!Array.isArray(option.type) && !isParamTypeStrict(option.type) && paramTypes[option.type]?.getMethod === 'getAttachment') {
 				this.ensureRequistified();
 				return [ ...this.#request.attachments.values() ];
 			}
@@ -1411,7 +1437,7 @@ class CommandOptionSolver {
 
 		const method = (Array.isArray(option.type) || isParamTypeStrict(option.type))
 			? this.#args.getString
-			: (this.#args[PARAM_TYPES.get(option.type).getMethod]);
+			: (this.#args[paramTypes[option.type].getMethod]);
 
 		return this.#options
 			.fetchParamPoly(this.#args, identifier, method, fallback)

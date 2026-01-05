@@ -16,7 +16,11 @@ const { readdirSync } = require('fs');
  * } AnySlashCommandOption
  */
 
-/**@satisfies {Record<import('../commands/Commons/cmdOpts').BaseParamType, keyof SlashCommandBuilder>}*/
+/**
+ * @typedef {keyof SlashCommandBuilder & `add${string}`} SlashCommandBuilderAddFunctionName
+ */
+
+/**@satisfies {Record<import('../commands/Commons/cmdOpts').BaseParamType, SlashCommandBuilderAddFunctionName>}*/
 const addFunctionNames = /**@type {const}*/({
     NUMBER:  'addNumberOption',
     USER:    'addUserOption',
@@ -31,7 +35,10 @@ const addFunctionNames = /**@type {const}*/({
     MESSAGE: 'addStringOption',
     TEXT:    'addStringOption',
     URL:     'addStringOption',
+    DATE:    'addStringOption',
+    TIME:    'addStringOption',
 });
+/**@type {SlashCommandBuilderAddFunctionName}*/
 const defaultAddFunctionName =  'addStringOption';
 
 /**

@@ -4,7 +4,7 @@ const { paginate, navigationRows, rand } = require('../../func');
 const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/commands');
 const { InteractionType } = require('discord.js');
 
-/**@param {import('discord.js').Interaction} interaction*/
+/**@param {import('../Commons/typings').AnyRequest} interaction*/
 function getEmotesList(interaction) {
 	const perritoNames = [
 		'perrito', 'otirrep', 'od', 'do', 'cerca', 'muycerca', 'lejos', 'muylejos', 'invertido', 'dormido', 'pistola', 'sad', 'gorrito', 'gorra', 'almirante', 'detective',
@@ -23,11 +23,11 @@ function getEmotesList(interaction) {
 }
 
 /**
- * @param {import('../Commons/typings').ComplexCommandRequest} request
- * @param {Number} page
+ * @param {Exclude<import('../Commons/typings').AnyRequest, Discord.AutocompleteInteraction>} request
+ * @param {number} page
  */
 async function loadPageNumber(request, page) {
-	page = parseInt(page);
+
 	const emotes = getEmotesList(request);
 	const emotePages = paginate(emotes);
 	const lastPage = emotePages.length - 1;
@@ -41,16 +41,17 @@ async function loadPageNumber(request, page) {
 		.setTitle(`Perritos ${perritoComun}`)
 		.setAuthor({ name: `${emotes.length} perritos en total` })
 		.setFooter({ text: `${page + 1} / ${lastPage + 1}` })
-		.addFields({ name: `${'Nombre\`'.padEnd(24)}\`Emote`, value: emotePages[page] });
+		.addFields({ name: `${'Nombre`'.padEnd(24)}\`Emote`, value: `${emotePages[page]}` });
 
 	const content = {
 		embeds: [embed],
 		components: navigationRows('perrito', page, lastPage),
 	};
 
-	if(request.author || request.type === InteractionType.ApplicationCommand)
+	if(Object.hasOwn.call(request, 'author') || request.type === InteractionType.ApplicationCommand)
 		return request.reply(content);
 	
+	//@ts-expect-error
 	return request.update(content);
 }
 
@@ -69,8 +70,9 @@ const command = new Command('perrito', flags)
 	.setOptions(options)
 	.setLegacyExecution(async (request, args, isSlash) => {
 		const deleteMessage = isSlash ? false : options.fetchFlag(args, 'borrar');
-		if(deleteMessage)
-			request.delete().catch(_ => undefined);
+
+		if(deleteMessage && request.isMessage && request.inferAsMessage().deletable)
+			request.delete().catch(() => undefined);
 
 		const mostrarLista = options.fetchFlag(args, 'lista');
 		if(mostrarLista)
@@ -83,21 +85,21 @@ const command = new Command('perrito', flags)
 			return request.reply({ content: `${emotes[rand(emotes.length)]}` });
 
 		perrito = perrito.normalize('NFD').replace(/([aeiou])\u0301/gi, '$1');
-		perrito = emotes.find(emote => emote.name.toLowerCase().startsWith(perrito.toLowerCase()));
+		const perritoEmoji = emotes.find(emote => emote.name.toLowerCase().startsWith(perrito.toLowerCase()));
 
-		if(!perrito) {
-			const perritoComun = emotes.find(perrito => perrito.name === 'perrito');
+		if(!perritoEmoji) {
+			const perritoComun = emotes.find(e => e.name === 'perrito');
 			return request.reply({ content: `${perritoComun}` });
 		}
 
-		return request.reply({ content: `${perrito}` });
+		return request.reply({ content: `${perritoEmoji}` });
 	})
 	.setButtonResponse(async function loadPage(interaction, page) {
-		return loadPageNumber(interaction, page);
+		return loadPageNumber(interaction, parseInt(page));
 	})
 	.setSelectMenuResponse(async function loadPageExact(interaction) {
 		const page = interaction.values[0];
-		return loadPageNumber(interaction, page);
+		return loadPageNumber(interaction, parseInt(page));
 	});
 
 module.exports = command;
