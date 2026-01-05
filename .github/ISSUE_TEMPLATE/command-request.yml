@@ -40,7 +40,7 @@ body:
       description: |
         Detail the options that shape the behavior command, in a way that the user can understand.
         Preferably, speaking from the perspective Bot de Puré (female). Spanish, English and Japanese allowed.
-      placeholder: "* `<option name>` _(Data type)_ option description"
+      placeholder: "* `option display` _(Option data type)_ option description"
       value: |
         * `<param>` _(Type)_ param description
         * `--flag` flag description
