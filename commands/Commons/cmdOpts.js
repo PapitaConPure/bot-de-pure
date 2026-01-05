@@ -14,8 +14,6 @@ const { warn } = Logger('WARN', 'CmdOpts')
  * @typedef {(interaction: import('discord.js').AutocompleteInteraction<'cached'>, query: String) => Promise<*>} AutocompleteFunction
  */
 
-/**@typedef {Exclude<NonNullable<string>, ''>} NonEmptyString*/
-
 /**
  * @type {Map<BaseParamType, { getMethod: GetMethodName, help: String }>}
  */
@@ -239,18 +237,18 @@ class CommandParam extends CommandOption {
 	#name;
 	/**@type {ParamType|Array<ParamType>}*/
 	#type;
-	/**@type {Boolean}*/
+	/**@type {boolean}*/
 	#optional;
 	/**@type {ParamPoly}*/
 	#poly;
-	/**@type {Number}*/
+	/**@type {number}*/
 	#polymax;
 	/**@type {AutocompleteFunction}*/
 	#autocompleteInner;
 
 	/**
 	 * @constructor
-	 * @param {NonEmptyString} name El nombre del parámetro
+	 * @param {string} name El nombre del parámetro
 	 * @param {Exclude<ParamType | ParamType[], undefined | null>} type El tipo del parámetro
 	 */
 	constructor(name, type) {
