@@ -2,7 +2,7 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('
 const { shortenText, compressId } = require('../../func'); //Funciones globales
 const { CommandTags, Command } = require('../Commons/commands.js');
 const { showQueuePage, makePuréMusicEmbed, SERVICES } = require('../../systems/others/musicPlayer');
-const { Translator } = require('../../i18n/internationalization');
+const { Translator } = require('../../i18n');
 const { tryRecoverSavedTracksQueue } = require('../../models/playerQueue.js');
 const { useMainPlayer } = require('discord-player');
 

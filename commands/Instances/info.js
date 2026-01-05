@@ -4,7 +4,7 @@ const globalConfigs = require('../../data/config.json'); //Variables globales
 const { ChannelStats, Stats } = require('../../models/stats');
 const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
 const { makeButtonRowBuilder } = require('../../utils/tsCasts');
-const { Translator } = require('../../i18n/internationalization');
+const { Translator } = require('../../i18n');
 const { fetchGuildMembers } = require('../../utils/guildratekeeper');
 
 /**

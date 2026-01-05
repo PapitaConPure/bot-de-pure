@@ -1,7 +1,7 @@
 const { MessageFlags, TextDisplayBuilder, ContainerBuilder } = require('discord.js'); //Integrar discord.js
 const { p_pure } = require('../../utils/prefixes');
 const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require("../Commons/commands");
-const { Translator } = require('../../i18n/internationalization');
+const { Translator } = require('../../i18n');
 const { fetchGuildMembers } = require('../../utils/guildratekeeper');
 
 /**

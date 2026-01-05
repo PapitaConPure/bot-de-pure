@@ -1,4 +1,4 @@
-const { Translator } = require('../../i18n/internationalization');
+const { Translator } = require('../../i18n');
 const { ContextMenuActionManager } = require('../Commons/actionBuilder.js');
 const { pourSauce } = require('../../systems/others/saucenao.js');
 const SauceNAOUser = require('../../models/saucenaoUsers.js');

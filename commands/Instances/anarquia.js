@@ -8,7 +8,7 @@ const { p_pure } = require('../../utils/prefixes');
 const { Puretable, AUser, pureTableAssets } = require('../../models/puretable.js');
 const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require("../Commons/commands");
 const { makeStringSelectMenuRowBuilder, makeButtonRowBuilder } = require('../../utils/tsCasts');
-const { Translator } = require('../../i18n/internationalization');
+const { Translator } = require('../../i18n');
 const { createTaskScheduler } = require('../../utils/concurrency');
 const Ut = require('../../utils/general');
 

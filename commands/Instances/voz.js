@@ -5,7 +5,7 @@ const { p_pure } = require('../../utils/prefixes.js');
 const { isNotModerator, defaultEmoji } = require('../../func.js');
 const { CommandOptions, CommandTags, Command } = require('../Commons/commands.js');
 const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts.js');
-const { Translator } = require('../../i18n/internationalization.js');
+const { Translator } = require('../../i18n');
 
 const cancelbutton = (id) => new ButtonBuilder()
 	.setCustomId(`voz_cancelWizard_${id}`)

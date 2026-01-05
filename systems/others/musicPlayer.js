@@ -5,7 +5,7 @@ const { YoutubeSabrExtractor } = require('discord-player-googlevideo');
 const { EmbedBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, Colors } = require('discord.js'); //Integrar discord.js
 const { compressId, decompressId, shortenText } = require('../../func'); //Funciones globales
 const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } = require('../../utils/tsCasts');
-const { Translator } = require('../../i18n/internationalization');
+const { Translator } = require('../../i18n');
 const { tryRecoverSavedTracksQueue, saveTracksQueue } = require('../../models/playerQueue');
 const Logger = require('../../utils/logs');
 

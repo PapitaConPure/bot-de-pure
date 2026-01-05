@@ -2,7 +2,7 @@ const UserConfigs = require('../../models/userconfigs');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder } = require('discord.js');
 const { CommandTags, Command } = require('../Commons/commands');
 const { tenshiColor } = require('../../data/config.json');
-const { Translator } = require('../../i18n/internationalization');
+const { Translator } = require('../../i18n');
 const { recacheUser } = require('../../utils/usercache');
 const { compressId, shortenText, decompressId, improveNumber, warn } = require('../../func');
 const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts');
@@ -26,7 +26,7 @@ const cancelButton = id => new ButtonBuilder()
 
 /**
  * @param {String?} iconUrl
- * @param {import('../../i18n/internationalization').LocaleIds} stepName
+ * @param {import('../../i18n').LocaleIds} stepName
  * @param {import('discord.js').ColorResolvable} stepColor
  * @param {Translator} translator
  */
@@ -541,7 +541,7 @@ const command = new Command('yo', flags)
         if(!userConfigs)
             return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
 
-        const translator = new Translator(/**@type {import('../../i18n/internationalization').LocaleKey}*/(userConfigs.language));
+        const translator = new Translator(/**@type {import('../../i18n').LocaleKey}*/(userConfigs.language));
         
         if(user.id !== authorId)
             return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
@@ -564,7 +564,7 @@ const command = new Command('yo', flags)
         if(!userConfigs)
             return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
 
-        const translator = new Translator(/**@type {import('../../i18n/internationalization').LocaleKey}*/(userConfigs.language));
+        const translator = new Translator(/**@type {import('../../i18n').LocaleKey}*/(userConfigs.language));
 		
         const modal = new ModalBuilder()
             .setCustomId('yo_applyVoiceAutoname')
@@ -606,7 +606,7 @@ const command = new Command('yo', flags)
         
         await userConfigs.save();
         
-        const translator = new Translator(/**@type {import('../../i18n/internationalization').LocaleKey}*/(userConfigs.language));
+        const translator = new Translator(/**@type {import('../../i18n').LocaleKey}*/(userConfigs.language));
         
         const embed = voiceEmbed(interaction, userConfigs, translator);
         await interaction.message.edit({ embeds: [embed] }).catch(console.error);
@@ -619,7 +619,7 @@ const command = new Command('yo', flags)
         if(!userConfigs)
             return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
 
-        const translator = new Translator(/**@type {import('../../i18n/internationalization').LocaleKey}*/(userConfigs.language));
+        const translator = new Translator(/**@type {import('../../i18n').LocaleKey}*/(userConfigs.language));
 		
         const modal = new ModalBuilder()
             .setCustomId('yo_applyVoiceKillDelay')
@@ -653,7 +653,7 @@ const command = new Command('yo', flags)
         
         await userConfigs.save();
         
-        const translator = new Translator(/**@type {import('../../i18n/internationalization').LocaleKey}*/(userConfigs.language));
+        const translator = new Translator(/**@type {import('../../i18n').LocaleKey}*/(userConfigs.language));
         
         const embed = voiceEmbed(interaction, userConfigs, translator);
         await interaction.message.edit({ embeds: [embed] }).catch(console.error);
@@ -800,7 +800,7 @@ const command = new Command('yo', flags)
 		// @ts-ignore
 		const translator = new Translator(userConfigs.language);
 		let newTags = userConfigs.feedTagSuscriptions.get(channelId)?.slice(0) ?? [];
-		/**@type {import('../../i18n/internationalization').LocaleIds}*/
+		/**@type {import('../../i18n').LocaleIds}*/
 		let setTagsResponse;
 		let previousLength = newTags.length;
 

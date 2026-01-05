@@ -2,7 +2,7 @@ const { improveNumber, compressId, sleep } = require('../../func');
 const { CommandTags, Command, CommandOptions } = require('../Commons/commands');
 const UserConfigs = require('../../models/userconfigs');
 const { EmbedBuilder } = require("discord.js");
-const { Translator } = require("../../i18n/internationalization");
+const { Translator } = require("../../i18n");
 const globalConfigs = require('../../data/config.json');
 const { auditError } = require('../../systems/others/auditor');
 

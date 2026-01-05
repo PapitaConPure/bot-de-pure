@@ -7,7 +7,7 @@ const { Stats } = require('../../models/stats');
 const { quantityDisplay } = require('../../func');
 const { CommandTags, Command } = require('../Commons/commands');
 const { searchCommand, makeGuideRow, getWikiPageComponentsV2 } = require('../../systems/others/wiki');
-const { Translator } = require('../../i18n/internationalization');
+const { Translator } = require('../../i18n');
 
 const { version, note, changelog, todo: toDo } = bot_status;
 const COMMAND_REGEX = new RegExp(`(${p_pure().raw})([a-záéíóúñ0-9_.-]+)`, 'gi');

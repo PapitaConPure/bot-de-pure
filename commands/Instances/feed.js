@@ -8,7 +8,7 @@ const { Booru, TagTypes, BooruUnknownPostError } = require('../../systems/booru/
 const { Command } = require('../Commons/cmdBuilder.js');
 const { addGuildToFeedUpdateStack } = require('../../systems/booru/boorufeed');
 const { formatBooruPostMessage, formatTagNameListNew, getPostUrlFromContainer } = require('../../systems/booru/boorusend.js');
-const { Translator } = require('../../i18n/internationalization');
+const { Translator } = require('../../i18n');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts.js');
 

@@ -1,4 +1,4 @@
-const { Translator } = require('../../i18n/internationalization');
+const { Translator } = require('../../i18n');
 const { getAgentMessageOwnerId, deleteAgentMessage } = require('../../systems/agents/discordagent');
 const { ContextMenuActionManager } = require('../Commons/actionBuilder.js');
 

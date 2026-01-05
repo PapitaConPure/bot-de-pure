@@ -6,7 +6,7 @@ const { peopleid } = globalConfigs;
 const { channelIsBlocked, isUsageBanned, decompressId } = require('../func');
 const { auditRequest } = require('../systems/others/auditor');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../utils/cmdExceptions.js');
-const { Translator } = require('../i18n/internationalization');
+const { Translator } = require('../i18n');
 const { Command } = require('../commands/Commons/cmdBuilder.js');
 const { CommandOptionSolver } = require('../commands/Commons/cmdOpts.js');
 //#endregion

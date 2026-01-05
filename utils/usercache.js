@@ -3,7 +3,7 @@ const globalConfigs = require('../data/config.json');
 
 /**
  * @typedef {{
- * 	language: import('../i18n/internationalization').LocaleKey,
+ * 	language: import('../i18n').LocaleKey,
  * 	pixivConverter: 'phixiv' | '',
  * 	twitterPrefix: import('../systems/agents/pureet').AcceptedTwitterConverterKey | '',
  * 	banned: Boolean

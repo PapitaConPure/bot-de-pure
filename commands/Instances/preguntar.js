@@ -1,7 +1,7 @@
 const { CommandTags, Command, CommandOptions } = require('../Commons/commands');
 const globalConfigs = require('../../data/config.json');
 const { Groq } = require('groq-sdk');
-const { Translator } = require('../../i18n/internationalization');
+const { Translator } = require('../../i18n');
 const { fetchChannel, fetchRole, compressId, fetchMember } = require('../../func');
 const envPath = globalConfigs.remoteStartup ? '../../remoteenv.json' : '../../localenv.json';
 

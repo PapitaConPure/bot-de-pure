@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require('discord.js'); //Integrar discord.js
 const { CommandOptions, CommandTags, Command, CommandParam } = require('../Commons/commands.js');
 const { useMainPlayer } = require('discord-player');
-const { Translator } = require('../../i18n/internationalization.js');
+const { Translator } = require('../../i18n');
 const { saveTracksQueue, tryRecoverSavedTracksQueue } = require('../../models/playerQueue.js');
 const { isPlayerUnavailable, SERVICES } = require('../../systems/others/musicPlayer.js');
 const { shortenText } = require('../../func.js');

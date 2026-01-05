@@ -1,6 +1,6 @@
 const { ButtonBuilder, ButtonStyle } = require('discord.js'); //Integrar discord.js
 const { CommandTags, Command } = require('../Commons/commands.js');
-const { Translator } = require('../../i18n/internationalization.js');
+const { Translator } = require('../../i18n');
 const { useMainPlayer } = require('discord-player');
 const { tryRecoverSavedTracksQueue } = require('../../models/playerQueue.js');
 const { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/others/musicPlayer.js');

@@ -1,6 +1,6 @@
 const { CommandTags, CommandOptions, Command, CommandOptionSolver } = require('../Commons/commands');
 const { CommandPermissions } = require('../Commons/cmdPerms');
-const { Translator } = require('../../i18n/internationalization');
+const { Translator } = require('../../i18n');
 
 const perms = new CommandPermissions('ModerateMembers');
 

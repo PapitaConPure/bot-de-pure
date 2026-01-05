@@ -2,7 +2,7 @@ const { Colors, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonBu
 const { CommandTags, Command } = require('../Commons/commands.js');
 const { useMainPlayer, QueueRepeatMode } = require('discord-player');
 const { isPlayerUnavailable, makePuréMusicEmbed, SERVICES } = require('../../systems/others/musicPlayer.js');
-const { Translator } = require('../../i18n/internationalization.js');
+const { Translator } = require('../../i18n');
 const { tryRecoverSavedTracksQueue } = require('../../models/playerQueue.js');
 const { makeStringSelectMenuRowBuilder } = require('../../utils/tsCasts.js');
 

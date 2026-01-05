@@ -2,7 +2,7 @@ const { ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonSty
 const { remoteStartup } = require('../../data/config.json'); //Configuraciones
 const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/commands.js');
 const { makeTextInputRowBuilder, makeButtonRowBuilder } = require('../../utils/tsCasts.js');
-const { Translator } = require('../../i18n/internationalization');
+const { Translator } = require('../../i18n');
 const { ImgurClient } = require('imgur');
 const { default: axios } = require('axios');
 const ImgurUser = require('../../models/imgurUsers.js');

@@ -12,7 +12,7 @@ const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/t
 const { ValueKindTranslationLookups } = require('../../systems/ps/v1.1/interpreter/values.js');
 const { Input } = require('../../systems/ps/v1.1/interpreter/inputReader.js');
 const { getWikiPageComponentsV2 } = require('../../systems/others/wiki.js');
-const { Translator } = require('../../i18n/internationalization.js');
+const { Translator } = require('../../i18n');
 const { fetchGuildMembers } = require('../../utils/guildratekeeper.js');
 
 const pageMax = 10;

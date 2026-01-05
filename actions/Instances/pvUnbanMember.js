@@ -1,4 +1,4 @@
-const { Translator } = require('../../i18n/internationalization');
+const { Translator } = require('../../i18n');
 const { PureVoiceSessionMember } = require('../../systems/others/purevoice.js');
 const { PureVoiceModel, PureVoiceSessionModel } = require('../../models/purevoice.js');
 const { ContextMenuActionManager } = require('../Commons/actionBuilder.js');

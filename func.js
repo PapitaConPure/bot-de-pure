@@ -10,7 +10,7 @@ const { fetchUserCache } = require('./utils/usercache');
 const Hourai = require('./models/hourai');
 const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } = require('./utils/tsCasts');
 const { fetchGuildMembers } = require('./utils/guildratekeeper');
-const { Translator } = require('./i18n/internationalization');
+const { Translator } = require('./i18n');
 const concol = {
     orange: chalk.rgb(255, 140, 70),
     purple: chalk.rgb(158, 114,214),

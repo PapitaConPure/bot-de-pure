@@ -1,7 +1,7 @@
 const { EmbedBuilder, Colors, ButtonBuilder, ButtonStyle, TextInputBuilder, TextInputStyle, ModalBuilder } = require('discord.js'); //Integrar discord.js
 const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/commands');
 const { pourSauce, testSauceNAOToken } = require('../../systems/others/saucenao');
-const { Translator } = require('../../i18n/internationalization');
+const { Translator } = require('../../i18n');
 const { encryptString } = require('../../utils/security');
 const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts');
 const SauceNAOUser = require('../../models/saucenaoUsers');

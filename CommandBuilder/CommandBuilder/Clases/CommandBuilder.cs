@@ -47,11 +47,12 @@ namespace CommandBuilder {
 			this.components.Sort();
 
 			StringBuilder total = new StringBuilder();
+			total.AppendLine("const globalConfigs = require('../../data/config.json');");
+			total.AppendLine("const { Command } = require('../Commons/commands');");
+			total.AppendLine("const { CommandTags } = require('../Commons/cmdTags.js');");
+			total.AppendLine("const { Translator } = require('../../i18n/');");
 			total.AppendLine("const {  } = require('discord.js'); //Integrar discord.js");
 			total.AppendLine("const {  } = require('../../func'); //Funciones de utilidad");
-			total.AppendLine("const {  } = require('../../data/config.json'); //Configuraciones");
-			total.AppendLine("const { CommandTags, CommandManager } = require('../Commons/commands');");
-			total.AppendLine("const { Translator } = require('../../i18n/internationalization'); //Internacionalización");
 			total.AppendLine("const { p_pure } = require('../../utils/prefixes');");
 			
 			total.AppendLine($"const {{ {string.Join(", ", this.components.Select(c => c.Requiere))} }} = require('../Commons/commands');");

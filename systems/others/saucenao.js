@@ -1,12 +1,11 @@
 const ___ = require('sagiri');
 const sagiri = ___.default ? ___.default : /**@type {null}*/(___);
 const globalConfigs = require('../../data/config.json');
-//const { Translator } = require("../../internationalization");
 const { EmbedBuilder, Colors } = require("discord.js");
 const { decryptString } = require('../../utils/security');
 const { Booru } = require('../booru/boorufetch');
 const { auditError } = require('./auditor');
-const { Translator } = require('../../i18n/internationalization');
+const { Translator } = require('../../i18n');
 const { isNSFWChannel } = require('../../func');
 
 const MATCH_COUNT_MAX = 3;

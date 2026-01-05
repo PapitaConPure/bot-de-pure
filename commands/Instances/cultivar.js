@@ -3,7 +3,7 @@ const { CommandTags, Command } = require('../Commons/commands');
 const UserConfigs = require('../../models/userconfigs');
 const { tenshiColor } = require('../../data/config.json');
 const { EmbedBuilder } = require("discord.js");
-const { Translator } = require("../../i18n/internationalization");
+const { Translator } = require("../../i18n");
 
 const flags = new CommandTags().add('COMMON');
 const command = new Command('cultivar', flags)
