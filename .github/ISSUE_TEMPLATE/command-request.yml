@@ -1,0 +1,44 @@
+name: Command request
+about: Suggest a command for Bot de Puré
+title: "p!command"
+labels: ["commands"]
+assignees: ["PapitaConPure"]
+body:
+  - type: checkboxes
+    attributes:
+      options:
+        - label: I've searched existing issues and found nothing related to my issue.
+          required: true
+  - type: input
+    id: names
+    attributes:
+      label: Command name and aliases
+      description: |
+        Specify the name and aliases you'd like this command to use. Separated by commas.
+        Spanish, English and Japanese allowed.
+      placeholder: comando, command, cmd, c
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Command description
+      description: |
+        Describe the behavior of the command, and any additional information that would be relevant to the user.
+        Preferably, speaking from the perspective Bot de Puré (female). Spanish, English and Japanese allowed.
+      placeholder: Makes me do something very silly
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Command options
+      description: |
+        Detail the options that shape the behavior command, in a way that the user can understand.
+        Preferably, speaking from the perspective Bot de Puré (female). Spanish, English and Japanese allowed.
+      placeholder: |
+        * `<param>` _(Type)_ param description
+        * `--flag` flag description
+        * `--flag2 <f2>` _(Tipo)_ expressive flag description
+    validations:
+      required: false
