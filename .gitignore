@@ -24,4 +24,4 @@ PS Docs/*.pdf
 PS Docs/*.txt
 
 #VSCode
-.vscode
+.vscode/launch.json
