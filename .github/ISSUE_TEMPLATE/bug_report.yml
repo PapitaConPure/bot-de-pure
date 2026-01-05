@@ -1,10 +1,11 @@
 name: Bug report
-about: Create a report to help us improve
+description: Create a report to help us improve
 labels: ["bug"]
 assignees: ["PapitaConPure"]
 projects: ["PapitaConPure/6"]
 body:
   - type: checkboxes
+    id: searched-issues
     attributes:
       options:
         - label: I've searched existing issues and found nothing related to my issue.

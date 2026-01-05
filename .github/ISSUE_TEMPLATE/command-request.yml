@@ -1,10 +1,11 @@
 name: Command request
-about: Suggest a command for Bot de Puré
+description: Suggest a command for Bot de Puré
 title: "p!command"
 labels: ["commands"]
 assignees: ["PapitaConPure"]
 body:
   - type: checkboxes
+    id: searched-issues
     attributes:
       options:
         - label: I've searched existing issues and found nothing related to my issue.

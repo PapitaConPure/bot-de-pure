@@ -1,9 +1,10 @@
 name: Feature request
-about: Suggest an idea for this project
+description: Suggest an idea for this project
 labels: ["enhancement"]
 assignees: ["PapitaConPure"]
 body:
   - type: checkboxes
+    id: searched-issues
     attributes:
       options:
         - label: I've searched existing issues and found nothing related to my issue.
