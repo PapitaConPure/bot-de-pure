@@ -50,8 +50,8 @@ function setupOptionBuilders(slash, options, log = false) {
         const optionBuilder = (option, name, fullyOptional = false) => {
             option
                 .setName(name)
-                .setDescription(p._desc)
-                .setRequired(!(fullyOptional || p._optional));
+                .setDescription(p.desc)
+                .setRequired(!(fullyOptional || p.optional));
 
             if(p.hasAutocomplete)
                 /**@type {import('discord.js').SlashCommandStringOption}*/(option).setAutocomplete(true);
@@ -59,25 +59,25 @@ function setupOptionBuilders(slash, options, log = false) {
             return option;
         };
 
-        const addFunctionName = (typeof p._type === 'string')
-            ? (addFunctionNames[p._type] ?? defaultAddFunctionName)
+        const addFunctionName = (typeof p.type === 'string')
+            ? (addFunctionNames[p.type] ?? defaultAddFunctionName)
             : defaultAddFunctionName;
 
-        if(p._poly === 'SINGLE')
-            return slash[addFunctionName](opt => optionBuilder(opt, p._name));
-        if(p._poly === 'MULTIPLE') {
-            const singularName = p._name.replace(/[Ss]$/, '');
+        if(p.poly === 'SINGLE')
+            return slash[addFunctionName](opt => optionBuilder(opt, p.name));
+        if(p.poly === 'MULTIPLE') {
+            const singularName = p.name.replace(/[Ss]$/, '');
             slash[addFunctionName](opt => optionBuilder(opt, `${singularName}_1`));
-            for(let i = 2; i <= p._polymax; i++)
+            for(let i = 2; i <= p.polymax; i++)
                 slash[addFunctionName](opt => optionBuilder(opt, `${singularName}_${i}`, true));
             return;
         }
-        return p._poly.forEach(entry => slash[addFunctionName](opt => optionBuilder(opt, `${p._name}_${entry}`)));
+        return p.poly.forEach(entry => slash[addFunctionName](opt => optionBuilder(opt, `${p.name}_${entry}`)));
     });
     
     options.flags.forEach(f => {
-        const addFunctionName = (typeof f._type === 'string')
-            ? (addFunctionNames[f._type] ?? defaultAddFunctionName)
+        const addFunctionName = (typeof f.type === 'string')
+            ? (addFunctionNames[f.type] ?? defaultAddFunctionName)
             : defaultAddFunctionName;
         
         /**
@@ -87,17 +87,17 @@ function setupOptionBuilders(slash, options, log = false) {
          */
         const optionBuilder = (option) => {
             option
-                .setName(f._long[0] || f._short[0])
-                .setDescription(f._desc)
+                .setName(f.long[0] || f.short[0])
+                .setDescription(f.desc)
                 .setRequired(false);
 
-            if(f._expressive && /**@type {import('../commands/Commons/cmdOpts').CommandFlagExpressive}*/(f).hasAutocomplete)
+            if(f.isExpressive() && f.hasAutocomplete)
                 /**@type {import('discord.js').SlashCommandStringOption}*/(option).setAutocomplete(true);
 
             return option;
         };
 
-        if(f._expressive)
+        if(f.isExpressive())
             return slash[addFunctionName](optionBuilder);
 
         return slash.addBooleanOption(optionBuilder);
@@ -108,13 +108,13 @@ function setupOptionBuilders(slash, options, log = false) {
         if(option.isCommandFlag())
             return {
                 name: optionName,
-                type: option._type,
+                type: option.type,
             };
         
         if(option.isCommandParam())
             return {
                 name: optionName,
-                type: option._type,
+                type: option.type,
             }
 
         return {
