@@ -4,7 +4,7 @@ const func = require('../../func'); //Funciones globales
 const { default: axios } = require('axios');
 const Canvas = require('canvas');
 const { utils } = require('../../data/images.json'); //Funciones globales
-const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
 const { isThread } = require('../../func');
 
 /**
@@ -76,7 +76,7 @@ const flags = new CommandTags().add(
 	'MEME',
 	'CHAOS',
 );
-const command = new CommandManager('leche', flags)
+const command = new Command('leche', flags)
 	.setAliases('lechita', 'cum', 'cummies', 'milk', 'milkies')
 	.setBriefDescription('Disparo leche a ti o a quien especifiques. Funciona un poco diferente en canales NSFW')
 	.setLongDescription(

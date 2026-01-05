@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require('discord.js');
 const { randRange } = require('../../func');
 const { p_pure } = require('../../utils/prefixes');
-const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver, CommandParam } = require("../Commons/commands");
+const { CommandOptions, CommandTags, Command, CommandOptionSolver, CommandParam } = require("../Commons/commands");
 
 const diceRegex = /([0-9]+)\s*[Dd]\s*([0-9]+)/;
 
@@ -46,7 +46,7 @@ const options = new CommandOptions()
 
 const flags = new CommandTags().add('COMMON');
 
-const command = new CommandManager('dados', flags)
+const command = new Command('dados', flags)
 	.setAliases(
 		'dado', 'tirar', 'random',
 		'roll', 'rolldie', 'dice', 'die',

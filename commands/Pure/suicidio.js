@@ -1,4 +1,4 @@
-const { CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/commands');
 const { hourai } = require('../../data/config.json');
 
 const hd = hourai.hangedRoleId; //Hanged Doll
@@ -7,7 +7,7 @@ const flags = new CommandTags().add(
 	'SAKI',
 	'MEME',
 );
-const command = new CommandManager('suicidio', flags)
+const command = new Command('suicidio', flags)
 	.setAliases(
 		'suicidar', 'suicidarse',
 		'suicide',

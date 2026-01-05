@@ -1,8 +1,8 @@
-const { CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/commands');
 const { improveNumber, sleep } = require('../../func');
 
 const flags = new CommandTags().add('COMMON');
-const command = new CommandManager('ping', flags)
+const command = new Command('ping', flags)
 	.setLongDescription('Muestra el tiempo de respuesta del Bot y la API')
 	.setExecution(async request => {
 		const sent = /**@type {import('discord.js').Message<true>}*/(await request.reply({

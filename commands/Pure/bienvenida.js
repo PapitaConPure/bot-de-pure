@@ -1,5 +1,5 @@
 const { CommandPermissions } = require('../Commons/cmdPerms');
-const { CommandTags, CommandManager, CommandOptions } = require('../Commons/commands');
+const { CommandTags, Command, CommandOptions } = require('../Commons/commands');
 
 const perms = new CommandPermissions('ManageGuild');
 
@@ -11,7 +11,7 @@ const flags = new CommandTags().add(
 	'MAINTENANCE',
 );
 
-const command = new CommandManager('bienvenida', flags)
+const command = new Command('bienvenida', flags)
 	.setBriefDescription('Configura una bienvenida para este servidor')
 	.setLongDescription(
 		'Edita el mensaje de bienvenida para este servidor.',

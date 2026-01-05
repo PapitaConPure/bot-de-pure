@@ -7,7 +7,7 @@ const { channelIsBlocked, isUsageBanned, decompressId } = require('../func');
 const { auditRequest } = require('../systems/others/auditor');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../utils/cmdExceptions.js');
 const { Translator } = require('../i18n/internationalization');
-const { CommandManager } = require('../commands/Commons/cmdBuilder.js');
+const { Command } = require('../commands/Commons/cmdBuilder.js');
 const { CommandOptionSolver } = require('../commands/Commons/cmdOpts.js');
 //#endregion
 
@@ -55,7 +55,7 @@ async function handleCommand(interaction, client, stats) {
 
     try {
         //Detectar problemas con el comando basado en flags
-        /**@type {CommandManager}*/
+        /**@type {Command}*/
         const command = puré.commands.get(commandName);
 
         if(command.permissions) {
@@ -96,7 +96,7 @@ async function handleCommand(interaction, client, stats) {
         if(exception)
             return interaction.reply({ embeds: [ generateExceptionEmbed(exception, { cmdString: `/${commandName}` }) ], ephemeral: true });
 
-        const complex = CommandManager.requestize(interaction);
+        const complex = Command.requestize(interaction);
         if(!command.legacy) {
             const solver = new CommandOptionSolver(complex, /**@type {import('discord.js').CommandInteractionOptionResolver}*/(interaction.options), command.options);
             await command.execute(complex, solver);
@@ -165,7 +165,7 @@ async function handleComponent(interaction) {
         if(!commandName || !commandFnName)
             return handleUnknownInteraction(interaction);
 
-        /**@type {CommandManager}*/
+        /**@type {Command}*/
         const command = puré.commands.get(commandName) || puré.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
         if(!command)
             throw new ReferenceError(`El comando ${commandName} no existe`);
@@ -213,7 +213,7 @@ async function handleAutocompleteInteraction(interaction) {
     console.log([ commandName, optionName, '«?»', optionValue ]);
 
     try {
-        /**@type {CommandManager}*/
+        /**@type {Command}*/
         const command = puré.commands.get(commandName) || puré.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
         const option = /**@type {import('../commands/Commons/cmdOpts.js').CommandParam | import('../commands/Commons/cmdOpts.js').CommandFlagExpressive}*/(
             command.options.options.get(optionName)

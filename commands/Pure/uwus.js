@@ -1,6 +1,6 @@
 const { EmbedBuilder, Collection } = require('discord.js');
 const { paginateRaw } = require('../../func');
-const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
 
 const options = new CommandOptions()
     .addParam('tiempo', 'NUMBER', 'para establecer la duración del evento, en segundos', { optional: true });
@@ -9,7 +9,7 @@ const flags = new CommandTags().add(
     'GAME',
     'CHAOS',
 );
-const command = new CommandManager('uwus', flags)
+const command = new Command('uwus', flags)
     .setBriefDescription('Inicia un evento UwU en el canal')
     .setLongDescription(
         'Inicia un __evento UwU__, que puede durar el tiempo que se desee hasta 2 horas (7200s).',

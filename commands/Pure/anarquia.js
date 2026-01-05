@@ -6,7 +6,7 @@ const { createCanvas, loadImage } = require('canvas');
 const { EmbedBuilder, AttachmentBuilder, StringSelectMenuBuilder, Colors, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { p_pure } = require('../../utils/prefixes');
 const { Puretable, AUser, pureTableAssets } = require('../../models/puretable.js');
-const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require("../Commons/commands");
+const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require("../Commons/commands");
 const { makeStringSelectMenuRowBuilder, makeButtonRowBuilder } = require('../../utils/tsCasts');
 const { Translator } = require('../../i18n/internationalization');
 const { createTaskScheduler } = require('../../utils/concurrency');
@@ -191,7 +191,7 @@ const flags = new CommandTags().add(
 	'COMMON',
 	'GAME',
 );
-const command = new CommandManager('anarquia', flags)
+const command = new Command('anarquia', flags)
 	.setAliases('anarquía', 'a')
 	.setBriefDescription('Para interactuar con la Tabla de Puré')
 	.setLongDescription(

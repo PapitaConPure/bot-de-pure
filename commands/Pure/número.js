@@ -1,5 +1,5 @@
 const { improveNumber } = require('../../func'); //Funciones globales
-const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
 
 const flags = new CommandTags().add('COMMON');
 const options = new CommandOptions()
@@ -7,7 +7,7 @@ const options = new CommandOptions()
 	.addFlag(['a','s'], 'acortar', 'para acortar el número')
 	.addFlag(['m','d'], ['mínimo','minimo','digitos'], 'para designar el mínimo de dígitos', { name: 'minimo', type: 'NUMBER' })
 	.addFlag(['n','e'], 'exponente', 'para exponenciar el número', { name: 'exp', type: 'NUMBER' });
-const command = new CommandManager('número', flags)
+const command = new Command('número', flags)
 	.setAliases('numero', 'núm', 'num')
 	.setDescription('Para operar un número. Sí, solo eso, tenía ganas de jugar con algo')
 	.setOptions(options)

@@ -1,4 +1,4 @@
-const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/commands');
 const UserConfigs = require('../../models/userconfigs');
 const { toUtcOffset, toTimeZoneAlias } = require('../../utils/timezones');
 const { dateToUTCFormat } = require('../../func');
@@ -12,7 +12,7 @@ const options = new CommandOptions()
 	.addFlag('lzt', ['huso', 'franja', 'zona', 'zone', 'timezone', 'offset'], 'para especificar un huso horario de referencia', { name: 'z', type: 'TEXT' })
 	.addFlag(['f','d'], ['fecha','día','dia'], 'para ingresar un día en formato DD/MM/AAAA', { name: 'dma', type: { name: 'dma', expression: 'dd/MM/AAAA' } });
 const flags = new CommandTags().add('COMMON');
-const command = new CommandManager('hora', flags)
+const command = new Command('hora', flags)
 	.setAliases(
 		'horario',
 		'time', 'schedule',

@@ -1,6 +1,6 @@
 const { ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonStyle, EmbedBuilder, Colors } = require('discord.js'); //Integrar discord.js
 const { remoteStartup } = require('../../data/config.json'); //Configuraciones
-const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands.js');
+const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/commands.js');
 const { makeTextInputRowBuilder, makeButtonRowBuilder } = require('../../utils/tsCasts.js');
 const { Translator } = require('../../i18n/internationalization');
 const { ImgurClient } = require('imgur');
@@ -15,7 +15,7 @@ const options = new CommandOptions()
 
 const flags = new CommandTags().add('COMMON');
 
-const command = new CommandManager('imgur', flags)
+const command = new Command('imgur', flags)
 	.setAliases(
 		'subir',
 		'upload',

@@ -1,5 +1,5 @@
 const { Colors, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonBuilder, ButtonStyle } = require('discord.js'); //Integrar discord.js
-const { CommandTags, CommandManager } = require('../Commons/commands.js');
+const { CommandTags, Command } = require('../Commons/commands.js');
 const { useMainPlayer, QueueRepeatMode } = require('discord-player');
 const { isPlayerUnavailable, makePuréMusicEmbed, SERVICES } = require('../../systems/others/musicPlayer');
 const { Translator } = require('../../i18n/internationalization');
@@ -11,7 +11,7 @@ const tags = new CommandTags().add(
 	'MUSIC',
 );
 
-const command = new CommandManager('repetir', tags)
+const command = new Command('repetir', tags)
 	.setAliases(
 		'bucle', 'autodj',
 		'loop', 'repeat',

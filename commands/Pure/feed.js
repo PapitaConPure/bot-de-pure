@@ -5,7 +5,7 @@ const { auditError, auditAction } = require('../../systems/others/auditor');
 const { CommandTags } = require('../Commons/cmdTags.js');
 const globalConfigs = require('../../data/config.json');
 const { Booru, TagTypes, BooruUnknownPostError } = require('../../systems/booru/boorufetch');
-const { CommandManager } = require('../Commons/cmdBuilder.js');
+const { Command } = require('../Commons/cmdBuilder.js');
 const { addGuildToFeedUpdateStack } = require('../../systems/booru/boorufeed');
 const { formatBooruPostMessage, formatTagNameListNew, getPostUrlFromContainer } = require('../../systems/booru/boorusend.js');
 const { Translator } = require('../../i18n/internationalization');
@@ -99,7 +99,7 @@ const perms = new CommandPermissions()
 
 const flags = new CommandTags().add('COMMON', 'MOD');
 
-const command = new CommandManager('feed', flags)
+const command = new Command('feed', flags)
 	.setBriefDescription('Inicializa un Feed en un canal por medio de un Asistente.')
 	.setLongDescription('Inicializa un Feed de imágenes en un canal. Simplemente usa el comando y sigue los pasos del Asistente para configurar y personalizar todo')
 	.setPermissions(perms)

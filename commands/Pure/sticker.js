@@ -1,11 +1,11 @@
-const { CommandTags, CommandManager, CommandOptions } = require("../Commons/commands");
+const { CommandTags, Command, CommandOptions } = require("../Commons/commands");
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
 const options = new CommandOptions()
 	.addParam('mensaje', 'MESSAGE', 'para especificar un mensaje por ID, enlace o respuesta');
 
 const flags = new CommandTags().add('COMMON');
-const command = new CommandManager('sticker', flags)
+const command = new Command('sticker', flags)
 	.setAliases('stickers', 'pegatina')
 	.setDescription('Muestra el enlace del sticker especificado')
 	.setOptions(options)

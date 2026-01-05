@@ -2,7 +2,7 @@ const { ChannelType, ButtonBuilder, ButtonStyle, MessageFlags, ContainerBuilder,
 const { fetchMember, compressId, shortenText, quantityDisplay } = require('../../func');
 const globalConfigs = require('../../data/config.json'); //Variables globales
 const { ChannelStats, Stats } = require('../../models/stats');
-const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
 const { makeButtonRowBuilder } = require('../../utils/tsCasts');
 const { Translator } = require('../../i18n/internationalization');
 const { fetchGuildMembers } = require('../../utils/guildratekeeper');
@@ -33,7 +33,7 @@ const options = new CommandOptions()
 	.addParam('canal', 'CHANNEL', 'para mostrar estadísticas extra de un canal', { optional: true })
 	.addFlag('m', 'miembro', 'para mostrar estadísticas extra de un usuario (no implementado)', { name: 'objetivo', type: 'MEMBER' });
 const flags = new CommandTags().add('COMMON');
-const command = new CommandManager('info', flags)
+const command = new Command('info', flags)
 	.setAliases(
 		'informacion', 'información', 'inf',
         'serverinfo', 'svinfo', 'svinf',

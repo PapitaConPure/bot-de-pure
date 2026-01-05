@@ -1,6 +1,6 @@
 const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { hourai } = require('../../data/config.json');
-const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
+const { CommandOptions, CommandTags, Command } = require("../Commons/commands");
 const { CommandPermissions } = require('../Commons/cmdPerms');
 const { makeButtonRowBuilder } = require('../../utils/tsCasts');
 
@@ -11,7 +11,7 @@ const options = new CommandOptions()
 	.addParam('miembro', 'MEMBER', 'para aplicar Hanged Doll a un miembro', { optional: true })
 	.addFlag('t', 'todos', 'para aplicar Hanged Doll a todos los usuarios');
 const tags = new CommandTags().add('MOD', 'SAKI');
-const command = new CommandManager('colgar', tags)
+const command = new Command('colgar', tags)
 	.setAliases(
 		'castrar', 'colgate',
 		'hang', 'hanged',

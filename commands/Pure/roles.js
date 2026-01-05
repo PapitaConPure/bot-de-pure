@@ -3,7 +3,7 @@ const Hourai = require('../../models/hourai.js');
 const axios = require('axios').default;
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors } = require('discord.js');
 const { p_pure } = require('../../utils/prefixes');
-const { CommandTags, CommandManager, CommandOptions, CommandParam } = require('../Commons/commands');
+const { CommandTags, Command, CommandOptions, CommandParam } = require('../Commons/commands');
 const { auditError } = require('../../systems/others/auditor');
 const { colorsRow } = require('../../data/sakiProps');
 const { subdivideArray, isBoosting, stringHexToNumber } = require('../../func');
@@ -115,7 +115,7 @@ const options = new CommandOptions()
 
 const flags = new CommandTags().add('SAKI');
 
-const command = new CommandManager('roles', flags)
+const command = new Command('roles', flags)
 	.setAliases('rol', 'role')
 	.setOptions(options)
 	.setBriefDescription('Pemite a todos elegir algunos roles')

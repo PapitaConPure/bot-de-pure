@@ -1,11 +1,11 @@
 const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/commands');
 const GuildConfig = require('../../models/guildconfigs.js');
 const { tenshiColor } = require('../../data/config.json');
 const { makeButtonRowBuilder } = require('../../utils/tsCasts.js');
 
 const tags = new CommandTags().add('PAPA');
-const command = new CommandManager('papa-feedback', tags)
+const command = new Command('papa-feedback', tags)
     .setLongDescription('Comando de feedback')
     .setExecution(async request => {
         const { client } = request;

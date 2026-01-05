@@ -125,9 +125,9 @@ function setupOptionBuilders(slash, options, log = false) {
 }
 
 const puré = {
-    commands   : /**@type {Collection<String, import('../commands/Commons/cmdBuilder').CommandManager>}*/(new Collection()),
+    commands   : /**@type {Collection<String, import('../commands/Commons/cmdBuilder').Command>}*/(new Collection()),
     actions    : /**@type {Collection<String, import('../actions/Commons/actionBuilder').ContextMenuActionManager>}*/(new Collection()),
-    emotes     : /**@type {Collection<String, import('../commands/Commons/cmdBuilder').CommandManager>}*/(new Collection()),
+    emotes     : /**@type {Collection<String, import('../commands/Commons/cmdBuilder').Command>}*/(new Collection()),
     slash      : /**@type {Collection<String, import('discord.js').RESTPostAPIChatInputApplicationCommandsJSONBody>}*/(new Collection()),
     slashHourai: /**@type {Collection<String, import('discord.js').RESTPostAPIChatInputApplicationCommandsJSONBody>}*/(new Collection()),
     contextMenu: /**@type {Collection<String, import('discord.js').RESTPostAPIContextMenuApplicationCommandsJSONBody>}*/(new Collection()),
@@ -143,7 +143,7 @@ function registerCommandFiles(log = false) {
     
     for(const file of commandFiles) {
         const commandModule = require(`../commands/Pure/${file}`);
-        /**@type {import('../commands/Commons/cmdBuilder').CommandManager}*/
+        /**@type {import('../commands/Commons/cmdBuilder').Command}*/
         const command = commandModule;
         puré.commands.set(command.name, command);
         

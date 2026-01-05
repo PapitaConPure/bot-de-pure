@@ -5,7 +5,7 @@ const { readdirSync } = require('fs'); //Para el contador de comandos
 const { p_pure } = require('../../utils/prefixes');
 const { Stats } = require('../../models/stats');
 const { quantityDisplay } = require('../../func');
-const { CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/commands');
 const { searchCommand, makeGuideRow, getWikiPageComponentsV2 } = require('../../systems/others/wiki');
 const { Translator } = require('../../i18n/internationalization');
 
@@ -21,7 +21,7 @@ function listFormat(str, request) {
 };
 
 const flags = new CommandTags().add('COMMON');
-const command = new CommandManager('estado', flags)
+const command = new Command('estado', flags)
     .setAliases('status', 'botstatus')
     .setLongDescription('Muestra mi estado actual. Eso incluye versión, host, registro de cambios, cosas por hacer, etc')
     .setExecution(async request => {
@@ -128,7 +128,7 @@ const command = new CommandManager('estado', flags)
 			return interaction.update({ embeds: [embed], components });
 		}
 
-        const components = getWikiPageComponentsV2(foundCommand, CommandManager.requestize(interaction));
+        const components = getWikiPageComponentsV2(foundCommand, Command.requestize(interaction));
         return interaction.reply({
             flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
             components: components,

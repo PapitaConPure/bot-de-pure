@@ -1,4 +1,4 @@
-const { CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/commands');
 const { randRange } = require("../../func");
 const { EmbedBuilder } = require('discord.js');
 
@@ -42,7 +42,7 @@ const flags = new CommandTags().add(
 	'MEME',
 	'GAME',
 );
-const command = new CommandManager('karl', flags)
+const command = new Command('karl', flags)
 	.setAliases('karlos', 'zupija')
 	.setDescription('Comando de gacha musical de Karl Zuñiga')
 	.setExecution(async request => {

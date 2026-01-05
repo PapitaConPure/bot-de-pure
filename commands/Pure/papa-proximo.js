@@ -1,8 +1,8 @@
 const { modifyPresence } = require('../../systems/presence/presence');
-const { CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/commands');
 
 const flags = new CommandTags().add('PAPA');
-const command = new CommandManager('papa-próximo', flags)
+const command = new Command('papa-próximo', flags)
 	.setAliases('papa-proximo')
 	.setDescription('...')
 	.setExecution(async request => {

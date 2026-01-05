@@ -4,7 +4,7 @@ const GuildConfig = require('../models/guildconfigs.js');
 const { isNotModerator } = require('../func');
 const chalk = require('chalk');
 const { auditError } = require('../systems/others/auditor');
-const { CommandManager } = require('../commands/Commons/cmdBuilder.js');
+const { Command } = require('../commands/Commons/cmdBuilder.js');
 
 /**
  * @typedef {(request: import('../commands/Commons/typings').CommandRequest) => Promise<Boolean>} ExceptionTestFn
@@ -76,7 +76,7 @@ module.exports = {
 
     /**
      * 
-     * @param {CommandManager} command
+     * @param {Command} command
      * @param {import('../commands/Commons/typings').CommandRequest} request 
      * @returns {Promise<ExceptionSummary?>}
      */
@@ -151,7 +151,7 @@ module.exports = {
         
         let { brief, details } = logOptions;
         if(!brief) {
-            if(CommandManager.requestIsMessage(request)) brief = 'Ha ocurrido un error al ejecutar un comando';
+            if(Command.requestIsMessage(request)) brief = 'Ha ocurrido un error al ejecutar un comando';
             else if(request.isCommand())                 brief = 'Ha ocurrido un error al procesar un comando Slash';
             else if(request.isButton())                  brief = 'Ha ocurrido un error al procesar una acción de botón';
             else if(request.isStringSelectMenu())        brief = 'Ha ocurrido un error al procesar una acción de menú desplegable';

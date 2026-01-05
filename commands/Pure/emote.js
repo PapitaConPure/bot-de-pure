@@ -1,5 +1,5 @@
 const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js'); //Integrar discord.js
-const { CommandTags, CommandManager, CommandOptions } = require("../Commons/commands");
+const { CommandTags, Command, CommandOptions } = require("../Commons/commands");
 const { emojiRegex } = require('../../func');
 const { makeButtonRowBuilder } = require('../../utils/tsCasts');
 
@@ -8,7 +8,7 @@ const options = new CommandOptions()
 	.addParam('emote', 'EMOTE', 'para indicar un emote (si no especificaste un mensaje)', { optional: true });
 
 const flags = new CommandTags().add('COMMON');
-const command = new CommandManager('emote', flags)
+const command = new Command('emote', flags)
 	.setAliases(
 		'emotes', 'emoji', 'emojis',
 		'emt', 'emj',

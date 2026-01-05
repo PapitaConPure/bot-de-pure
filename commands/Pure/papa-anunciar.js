@@ -1,12 +1,12 @@
 const { EmbedBuilder } = require('discord.js');
 const { tenshiColor } = require('../../data/config.json');
-const { CommandTags, CommandManager, CommandOptions, CommandOptionSolver } = require('../Commons/commands');
+const { CommandTags, Command, CommandOptions, CommandOptionSolver } = require('../Commons/commands');
 
 const flags = new CommandTags().add('PAPA');
 const options = new CommandOptions()
 	.addParam('anuncio', 'TEXT', 'para anunciar algo a todos los servers posibles')
 	.addFlag('tn', 'título', 'para especificar un título', { name: 'ttl', type: 'TEXT' });
-const command = new CommandManager('papa-anunciar', flags)
+const command = new Command('papa-anunciar', flags)
 	.setAliases(
 		'papa-anuncio', 'papa-actualización', 'papa-actualizacion',
 		'papa-announcement', 'papa-update',

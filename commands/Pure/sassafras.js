@@ -1,6 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { randRange } = require('../../func');
-const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
 
 const sassadata = {
 	sassamodo:
@@ -95,7 +95,7 @@ const flags = new CommandTags().add('MEME', 'OUTDATED');
 const options = new CommandOptions()
 	.addFlag('sd', ['sassamodo', 'dross'], 'para despertar al demonio interno de Sassa')
 	.addFlag('t', 'total', 'para saber la cantidad total de recomendaciones');
-const command = new CommandManager('sassafras', flags)
+const command = new Command('sassafras', flags)
 	.setAliases('sassa', 'recomendaciones', 'sassapon', 'bassado', 'drossafras', 'dross')
 	.setBriefDescription('Comando de recomendaciones de Sassafras')
 	.setLongDescription(

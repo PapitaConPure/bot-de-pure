@@ -127,7 +127,7 @@ const makeGuideMenu = (request) => new StringSelectMenuBuilder()
 const makeGuideRow = (request) => makeStringSelectMenuRowBuilder().addComponents(makeGuideMenu(request));
 
 /**
- * Devuelve un {@linkcode CommandManager} según el `nameOrAlias` indicado.
+ * Devuelve un {@linkcode Command} según el `nameOrAlias` indicado.
  * 
  * Si no se encuentran resultados, se devuelve `null`
  * @param {import('../../commands/Commons/typings').AnyRequest} request 
@@ -136,7 +136,7 @@ const makeGuideRow = (request) => makeStringSelectMenuRowBuilder().addComponents
 function searchCommand(request, nameOrAlias) {
 	for(const filename of commandFilenames) {
 		const commandFile = require(`../../commands/Pure/${filename}`);
-		const command = /**@type {import('../../commands/Commons/commands').CommandManager}*/(commandFile.command ?? commandFile);
+		const command = /**@type {import('../../commands/Commons/commands').Command}*/(commandFile.command ?? commandFile);
 
 		if(command.name !== nameOrAlias
 		&& !command.aliases.some(alias => alias === nameOrAlias))
@@ -156,7 +156,7 @@ function searchCommand(request, nameOrAlias) {
 /**
  * Devuelve un arreglo de objetos según la `query` proporcionada.
  * 
- * Los objetos devueltos contienen un {@linkcode CommandManager} y la distancia Damerau-Levenshtein con peso euclideano respecto a la `query`.
+ * Los objetos devueltos contienen un {@linkcode Command} y la distancia Damerau-Levenshtein con peso euclideano respecto a la `query`.
  * Si no se encuentran resultados, se devuelve `null`
  * @param {import('../../commands/Commons/typings').AnyRequest} request 
  * @param {String} query 
@@ -167,7 +167,7 @@ function searchCommands(request, query) {
 
 	for(const filename of commandFilenames) {
 		const commandFile = require(`../../commands/Pure/${filename}`);
-		const command = /**@type {import('../../commands/Commons/commands').CommandManager}*/(commandFile.command ?? commandFile);
+		const command = /**@type {import('../../commands/Commons/commands').Command}*/(commandFile.command ?? commandFile);
 
 		if(command.tags.any('GUIDE', 'MAINTENANCE', 'OUTDATED'))
 			continue;
@@ -226,7 +226,7 @@ const displayTagMappings = /**@type {const}*/({
 
 /**
  * Añade embeds y componentes de una wiki de comando a la carga indicada.
- * @param {import('../../commands/Commons/commands').CommandManager} command
+ * @param {import('../../commands/Commons/commands').Command} command
  * @param {string} guildId 
  * @param {WikiPageInjectionPayload} payload
  */
@@ -290,7 +290,7 @@ function injectWikiPage(command, guildId, payload) {
 
 /**
  * Añade embeds y componentes de una wiki de comando a la carga indicada (utiliza Componentes V2)
- * @param {import('../../commands/Commons/commands').CommandManager} command
+ * @param {import('../../commands/Commons/commands').Command} command
  * @param {import('../../commands/Commons/typings').ComplexCommandRequest} request 
  * @returns {WikiPageInjectionPayloadV2}
  */

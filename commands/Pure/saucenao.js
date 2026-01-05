@@ -1,5 +1,5 @@
 const { EmbedBuilder, Colors, ButtonBuilder, ButtonStyle, TextInputBuilder, TextInputStyle, ModalBuilder } = require('discord.js'); //Integrar discord.js
-const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/commands');
 const { pourSauce, testSauceNAOToken } = require('../../systems/others/saucenao');
 const { Translator } = require('../../i18n/internationalization');
 const { encryptString } = require('../../utils/security');
@@ -17,7 +17,7 @@ const options = new CommandOptions()
 
 const flags = new CommandTags().add('COMMON');
 
-const command = new CommandManager('saucenao', flags)
+const command = new Command('saucenao', flags)
 	.setAliases(
 		'salsa', 'fuente',
 		'sauce', 'source',

@@ -1,7 +1,7 @@
 const { default: axios } = require('axios');
 const { psDocsButton, psEditorButton } = require('./purescript.js');
 const GuildConfig = require('../../models/guildconfigs.js');
-const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver, CommandParam } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command, CommandOptionSolver, CommandParam } = require('../Commons/commands');
 const { p_pure } = require('../../utils/prefixes');
 const { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId, warn } = require('../../func');
 const { EmbedBuilder, ButtonBuilder, TextInputBuilder, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder, MessageFlags } = require('discord.js');
@@ -203,7 +203,7 @@ const options = new CommandOptions()
 
 const flags = new CommandTags().add('COMMON');
 
-const command = new CommandManager('tubérculo', flags)
+const command = new Command('tubérculo', flags)
 	.setAliases('tuberculo', 'tubercle', 'tuber', 't')
 	.setBriefDescription('Permite crear, editar, listar, borrar o ejecutar comandos personalizados de servidor')
 	.setLongDescription(
@@ -299,7 +299,7 @@ const command = new CommandManager('tubérculo', flags)
 		if(interaction.user.id !== userId)
 			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
 		
-		const components = getWikiPageComponentsV2(command, CommandManager.requestize(interaction));
+		const components = getWikiPageComponentsV2(command, Command.requestize(interaction));
 		
 		return interaction.reply({ flags: MessageFlags.IsComponentsV2, components });
 	})

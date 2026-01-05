@@ -1,5 +1,5 @@
 const { ButtonBuilder, ButtonStyle } = require('discord.js'); //Integrar discord.js
-const { CommandTags, CommandManager } = require('../Commons/commands.js');
+const { CommandTags, Command } = require('../Commons/commands.js');
 const { Translator } = require('../../i18n/internationalization');
 const { useMainPlayer } = require('discord-player');
 const { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/others/musicPlayer');
@@ -9,7 +9,7 @@ const tags = new CommandTags().add(
 	'MUSIC',
 );
 
-const command = new CommandManager('pausar', tags)
+const command = new Command('pausar', tags)
 	.setAliases(
 		'pausa',
 		'pause',

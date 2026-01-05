@@ -1,7 +1,7 @@
 const { readdir } = require('fs/promises'); //Integrar operaciones sistema de archivos de consola
 const GuildConfig = require('../../models/guildconfigs.js');
 const { p_pure } = require('../../utils/prefixes');
-const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
+const { CommandOptions, CommandTags, Command } = require("../Commons/commands");
 const { EmbedBuilder } = require('discord.js');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 
@@ -10,7 +10,7 @@ const options = new CommandOptions()
 	.addFlag([], ['activar', 'activate', 'on'],    'para activar los comandos caóticos del servidor')
 	.addFlag([], ['desactivar', 'deactivate', 'off'], 'para desactivar los comandos caóticos del servidor');
 const tags = new CommandTags().add('MOD');
-const command = new CommandManager('caos', tags)
+const command = new Command('caos', tags)
 	.setAliases('chaos')
 	.setLongDescription('Para activar o desactivar comandos caóticos en un servidor')
 	.setPermissions(perms)

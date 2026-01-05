@@ -1,6 +1,6 @@
 const { puré } = require('../core/commandInit.js');
 const Discord = require('discord.js');
-const { CommandManager, CommandOptionSolver } = require('../commands/Commons/commands.js');
+const { Command, CommandOptionSolver } = require('../commands/Commons/commands.js');
 
 const { Stats, ChannelStats } = require('../models/stats.js');
 const { p_pure } = require('../utils/prefixes');
@@ -115,7 +115,7 @@ async function handleInvalidCommand(message, commandName, prefixPair) {
 
 /**
  * @param {Discord.Message<true>} message
- * @param {CommandManager} command
+ * @param {Command} command
  * @param {Array<String>} args
  * @param {String} [rawArgs]
  * @param {String} [exceptionString]
@@ -160,7 +160,7 @@ async function handleMessageCommand(message, command, args, rawArgs, exceptionSt
 	if(exception)
 		return exceptionString && message.channel.send({ embeds: [ generateExceptionEmbed(exception, { cmdString: exceptionString }) ]});
 
-	const completeExtendedRequest = CommandManager.requestize(message);
+	const completeExtendedRequest = Command.requestize(message);
 	if(!command.legacy) {
 		const optionSolver = new CommandOptionSolver(completeExtendedRequest, args, command.options, rawArgs);
 		await command.execute(completeExtendedRequest, optionSolver, rawArgs);
@@ -308,7 +308,7 @@ function processBeginnerHelp(message) {
 		return;
 
 	const prefixCommand = require('../commands/Pure/prefijo.js');
-	const request = CommandManager.requestize(message);
+	const request = Command.requestize(message);
 	const solver = new CommandOptionSolver(request, [], prefixCommand.options);
 	return prefixCommand.execute(request, solver).catch(error);
 }

@@ -1,6 +1,6 @@
 const UserConfigs = require('../../models/userconfigs');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder } = require('discord.js');
-const { CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/commands');
 const { tenshiColor } = require('../../data/config.json');
 const { Translator } = require('../../i18n/internationalization');
 const { recacheUser } = require('../../utils/usercache');
@@ -336,7 +336,7 @@ const followedTagsEmbed = (request, userConfigs, channelId, translator) => wizEm
     );
 
 const flags = new CommandTags().add('COMMON');
-const command = new CommandManager('yo', flags)
+const command = new Command('yo', flags)
 	.setAliases(
 		'usuario', 'configurar', 'configuración', 'configuracion', 'preferencias',
 		'me', 'myself', 'configs', 'config',

@@ -1,5 +1,5 @@
 const { randInArray } = require('../../func');
-const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
 
 const uwusopt = [
 	'<:uwu:681935702308552730>',
@@ -17,7 +17,7 @@ const flags = new CommandTags().add(
 	'MEME',
 	'EMOTE',
 );
-const command = new CommandManager('uwu', flags)
+const command = new Command('uwu', flags)
 	.setAliases('uwu')
 	.setLongDescription('uwu')
 	.setOptions(options)

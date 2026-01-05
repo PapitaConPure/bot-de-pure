@@ -2,7 +2,7 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ModalBuilder, TextInputBuilder, GuildMember, MessageFlags, TextDisplayBuilder } = require('discord.js'); //Integrar discord.js
 const { fetchMember, isBoosting, fetchChannel, fetchRole } = require('../../func');
 const { formatPixivPostsMessage } = require('../../systems/agents/purepix');
-const { CommandTags, CommandManager, CommandOptions } = require('../Commons/commands');
+const { CommandTags, Command, CommandOptions } = require('../Commons/commands');
 const { searchCommand, getWikiPageComponentsV2 } = require('../../systems/others/wiki.js');
 const { p_pure } = require('../../utils/prefixes');
 const { serverid, tenshiColor, peopleid } = require('../../data/config.json'); //Variables globales
@@ -18,7 +18,7 @@ const options = new CommandOptions()
     .addParam('mensaje', 'MESSAGE', 'Parámetro de Mensaje', { optional: true })
     .addParam('rol', 'ROLE', 'Parámetro de Rol', { optional: true });
 const tags = new CommandTags().add('PAPA');
-const command = new CommandManager('papa-test', tags)
+const command = new Command('papa-test', tags)
     .setLongDescription('Comando de pruebas 😳👉👈')
     .setOptions(options)
     .setExecution(async (request, args) => {

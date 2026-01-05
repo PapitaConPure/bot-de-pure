@@ -1,4 +1,4 @@
-const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
+const { CommandOptions, CommandTags, Command } = require("../Commons/commands");
 const { searchAndReplyWithPost } = require('../../systems/booru/boorusend.js');
 
 const options = new CommandOptions()
@@ -7,7 +7,7 @@ const options = new CommandOptions()
 
 const flags = new CommandTags().add('COMMON');
 
-const command = new CommandManager('buscar', flags)
+const command = new Command('buscar', flags)
 	.setAliases(
 		'imágenes', 'imagenes',
 		'search', 'image',

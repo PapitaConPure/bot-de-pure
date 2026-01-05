@@ -1,6 +1,6 @@
 const { randRange } = require('../../func');
 const { p_pure } = require('../../utils/prefixes');
-const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
 
 const frase = [
 	'Oe po [m] <:junkNo:1107847991580164106>',
@@ -47,7 +47,7 @@ const flags = new CommandTags().add(
 const options = new CommandOptions()
 	.addParam('cantidad', 'NUMBER', 'para indicar la cantidad de veces que se debe pinguear')
 	.addParam('usuario', 'USER', 'para indicar el usuario a pinguear');
-const command = new CommandManager('pinguear', flags)
+const command = new Command('pinguear', flags)
 	.setAliases('pingear', 'pingeara', 'pingueara', 'mencionar', 'mention', 'pingsomeone')
 	.setBriefDescription('Pingea a un usuario una cantidad de veces')
 	.setLongDescription('Pingea a un `<usuario>` una `<cantidad>` de veces')

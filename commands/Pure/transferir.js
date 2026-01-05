@@ -1,5 +1,5 @@
 const { improveNumber, compressId, sleep } = require('../../func');
-const { CommandTags, CommandManager, CommandOptions } = require('../Commons/commands');
+const { CommandTags, Command, CommandOptions } = require('../Commons/commands');
 const UserConfigs = require('../../models/userconfigs');
 const { EmbedBuilder } = require("discord.js");
 const { Translator } = require("../../i18n/internationalization");
@@ -13,7 +13,7 @@ const options = new CommandOptions()
     .addParam('usuario', 'USER', 'para especificar el usuario al cual transferir PRC');
 
 const flags = new CommandTags().add('COMMON');
-const command = new CommandManager('transferir', flags)
+const command = new Command('transferir', flags)
     .setAliases('transfer', 'tf')
     .setDescription('Permite transferir PRC a otro usuario')
     .setOptions(options)

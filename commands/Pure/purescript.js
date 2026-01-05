@@ -1,6 +1,6 @@
 const { default: axios } = require('axios');
 const { CommandTags } = require('../Commons/cmdTags');
-const { CommandManager } = require('../Commons/cmdBuilder');
+const { Command } = require('../Commons/cmdBuilder');
 const { executeTuber, CURRENT_PS_VERSION } = require('../../systems/ps/common/executeTuber');
 const { CommandOptions } = require('../Commons/cmdOpts');
 const { ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
@@ -77,7 +77,7 @@ const options = new CommandOptions()
 	.addParam('script', 'TEXT', 'para designar código PuréScript a ejecutar')
 	.addParam('archivo', 'FILE', 'para importar código PuréScript a ejecutar');
 const flags = new CommandTags().add('COMMON');
-const command = new CommandManager('purescript', flags)
+const command = new Command('purescript', flags)
 	.setAliases('puréscript', 'ps')
 	.setBriefDescription('Interpreta y ejecuta código PuréScript')
 	.setLongDescription(

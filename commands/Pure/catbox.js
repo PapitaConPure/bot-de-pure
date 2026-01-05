@@ -1,5 +1,5 @@
 const { EmbedBuilder, Colors } = require('discord.js'); //Integrar discord.js
-const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands.js');
+const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/commands.js');
 const { Translator } = require('../../i18n/internationalization');
 const { default: axios } = require('axios');
 const { Catbox } = require('node-catbox');
@@ -14,7 +14,7 @@ const options = new CommandOptions()
 
 const flags = new CommandTags().add('COMMON');
 
-const command = new CommandManager('catbox', flags)
+const command = new Command('catbox', flags)
 	.setBriefDescription('Permite subir imágenes con Catbox')
 	.setLongDescription('Permite subir imágenes por medio de la plataforma de Catbox.')
 	.setOptions(options)

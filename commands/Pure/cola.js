@@ -1,6 +1,6 @@
 const { ModalBuilder, TextInputBuilder, TextInputStyle, Colors, ButtonBuilder, ButtonStyle } = require('discord.js'); //Integrar discord.js
 const { decompressId, sleep } = require('../../func'); //Funciones globales
-const { CommandTags, CommandManager } = require('../Commons/commands.js');
+const { CommandTags, Command } = require('../Commons/commands.js');
 const { useMainPlayer, QueueRepeatMode } = require('discord-player');
 const { showQueuePage, getPageAndNumberTrackIndex, isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/others/musicPlayer');
 const { Translator } = require('../../i18n/internationalization');
@@ -13,7 +13,7 @@ const tags = new CommandTags().add(
 	'MUSIC',
 );
 
-const command = new CommandManager('cola', tags)
+const command = new Command('cola', tags)
 	.setAliases(
 		'queue',
 		'q',

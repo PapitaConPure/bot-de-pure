@@ -1,6 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { compressId } = require('../../func');
-const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/commands');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 const { Translator } = require('../../i18n/internationalization');
 const { makeButtonRowBuilder } = require('../../utils/tsCasts');
@@ -14,7 +14,7 @@ const options = new CommandOptions()
 	.addFlag('xe', ['estricta', 'estricto', 'exclusivo'], 'para especificar si la búsqueda es estricta');
 
 const flags = new CommandTags().add('MOD');
-const command = new CommandManager('inforol', flags)
+const command = new Command('inforol', flags)
 	.setAliases(
 		'cuántos', 'cuantos', 'cuentarol',
         'rolecount', 'roleinfo',

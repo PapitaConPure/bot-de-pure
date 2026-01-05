@@ -62,7 +62,7 @@ function extendRequest(request) {
     /**@type {ExtendedCommandRequestPrototype}*/
     const extension = Object.assign({}, extendedCommandRequestPrototype);
     
-    if(CommandManager.requestIsMessage(request)) {
+    if(Command.requestIsMessage(request)) {
         extension.isMessage = true;
         extension.inferAsMessage = () => request;
         extension.inferAsSlash = () => { throw 'Invalid inference of a Message Command into a Slash Command' };
@@ -151,7 +151,7 @@ async function executeFnSample(request, args, isSlash = false, rawArgs = undefin
  */
 
 /**Representa un comando*/
-class CommandManager {
+class Command {
     /**
      * @typedef {typeof executeFnSample} CompatibilityExecutionFunction
      * @typedef {(interaction: import('discord.js').Interaction, ...args: String[]) => Promise<*>} InteractionResponseFunction
@@ -214,7 +214,7 @@ class CommandManager {
         this.execute = request => request.reply(this.reply);
     };
 
-    /**Alias de `<CommandManager>.flags`*/
+    /**Alias de `<Command>.flags`*/
     get tags() {
         return this.flags;
     }
@@ -284,7 +284,7 @@ class CommandManager {
     }
 
     /**
-     * Habilita {@linkcode CommandManager.legacy} y establece la función de ejecución de este comando
+     * Habilita {@linkcode Command.legacy} y establece la función de ejecución de este comando
      * @param {CompatibilityExecutionFunction} exeFn
      */
     setLegacyExecution(exeFn) {
@@ -369,5 +369,5 @@ class CommandManager {
 };
 
 module.exports = {
-    CommandManager,
+    Command,
 };

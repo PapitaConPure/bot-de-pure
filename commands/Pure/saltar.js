@@ -1,5 +1,5 @@
 const { Colors } = require('discord.js'); //Integrar discord.js
-const { CommandTags, CommandManager } = require('../Commons/commands.js');
+const { CommandTags, Command } = require('../Commons/commands.js');
 const { useMainPlayer } = require('discord-player');
 const { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/others/musicPlayer');
 const { Translator } = require('../../i18n/internationalization');
@@ -10,7 +10,7 @@ const tags = new CommandTags().add(
 	'MUSIC',
 );
 
-const command = new CommandManager('saltar', tags)
+const command = new Command('saltar', tags)
 	.setAliases(
 		'skip',
 		's',

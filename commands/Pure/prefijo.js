@@ -3,7 +3,7 @@ const global = require('../../data/config.json');
 const { shortenText } = require('../../func');
 const PrefixPair = require('../../models/prefixpair.js');
 const prefixes = require('../../utils/prefixes');
-const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 
 const perms = new CommandPermissions('ManageGuild');
@@ -15,7 +15,7 @@ const options = new CommandOptions()
 	.addParam('prefijo', 'TEXT', 'para cambiar el prefijo del servidor', { optional: true })
 	.addFlag('r', ['reestablecer', 'reiniciar', 'reset'], 'para volver al prefijo por defecto');
 
-const command = new CommandManager('prefijo', flags)
+const command = new Command('prefijo', flags)
 	.setAliases('prefix', 'pf')
 	.setLongDescription('Cambia o muestra el prefijo del servidor actual')
 	.setPermissions(perms)

@@ -1,4 +1,4 @@
-const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
+const { CommandOptions, CommandTags, Command } = require("../Commons/commands");
 
 const options = new CommandOptions()
     .addParam('mensaje', 'TEXT', 'para especificar qué decir')
@@ -7,7 +7,7 @@ const flags = new CommandTags().add(
     'COMMON',
     'EMOTE',
 );
-const command = new CommandManager('decir', flags)
+const command = new Command('decir', flags)
     .setAliases(
         'exclamar', 'escribir',
         'say', 'echo',

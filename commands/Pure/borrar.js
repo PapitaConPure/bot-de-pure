@@ -1,7 +1,7 @@
 const { sleep, fetchUser } = require('../../func');
 const { p_pure } = require('../../utils/prefixes');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
-const { CommandOptions, CommandTags, CommandManager } = require("../Commons/commands");
+const { CommandOptions, CommandTags, Command } = require("../Commons/commands");
 
 /**@param {import('../Commons/typings.js').ComplexCommandRequest} message*/
 function safeDelete(message) {
@@ -39,7 +39,7 @@ const options = new CommandOptions()
 	.addParam('cantidad', 'NUMBER', 'para especificar la cantidad de mensajes a borrar (sin contar el mensaje del comando)', { optional: true })
 	.addFlag('um', ['usuario', 'miembro'], 			'para especificar de qué usuario borrar mensajes', { name: 'user', type: 'USER' });
 const tags = new CommandTags().add('MOD');
-const command = new CommandManager('borrar', tags)
+const command = new Command('borrar', tags)
 	.setAliases(
 		'borrarmsg',
         'deletemsg', 'delete',

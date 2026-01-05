@@ -1,8 +1,8 @@
 const global = require('../../data/config.json'); //Variables globales
-const { CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/commands');
 
 const flags = new CommandTags().add('PAPA');
-const command = new CommandManager('papa-mantenimiento', flags)
+const command = new Command('papa-mantenimiento', flags)
 	.setAliases('papa-maintenance', 'papa-mant', 'papa-maint')
 	.setDescription(
 		'Hace que la instancia de `<proceso>` que utilizo se restrinja al canal actual',

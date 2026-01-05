@@ -3,7 +3,7 @@ const { PureVoiceSessionMember, getFrozenSessionAllowedMembers, makePVSessionNam
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, MessageCollector, ButtonStyle, Colors, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder } = require('discord.js');
 const { p_pure } = require('../../utils/prefixes');
 const { isNotModerator, defaultEmoji } = require('../../func');
-const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
 const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts.js');
 const { Translator } = require('../../i18n/internationalization');
 
@@ -19,7 +19,7 @@ const options = new CommandOptions()
 	.addFlag('i', ['invitar', 'invite'], 'para invitar del canal a la sesión actual')
 	.addFlag('aw', ['asistente','instalador','wizard'], 'para inicializar el Asistente de Configuración');
 const flags = new CommandTags().add('COMMON');
-const command = new CommandManager('voz', flags)
+const command = new Command('voz', flags)
 	.setAliases(
 		'purévoz', 'purevoz',
 		'voice', 'purévoice', 'purevoice',

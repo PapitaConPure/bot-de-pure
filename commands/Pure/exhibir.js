@@ -1,5 +1,5 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
-const { CommandTags, CommandManager } = require("../Commons/commands");
+const { CommandTags, Command } = require("../Commons/commands");
 const { DiscordAgent } = require('../../systems/agents/discordagent');
 const { hourai, serverid } = require('../../data/config.json');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
@@ -13,7 +13,7 @@ const flags = new CommandTags().add(
 	'SAKI',
 );
 
-const command = new CommandManager('exhibir', flags)
+const command = new Command('exhibir', flags)
 	.setAliases(
 		'exhibirpins', 'migrarpins',
 		'flush', 'flushpins',

@@ -1,7 +1,7 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const global = require('../../data/config.json'); //Variables globales
 const { paginate, navigationRows, rand } = require('../../func');
-const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/commands');
 const { InteractionType } = require('discord.js');
 
 /**@param {import('discord.js').Interaction} interaction*/
@@ -62,7 +62,7 @@ const flags = new CommandTags().add(
 	'MEME',
 	'EMOTE',
 );
-const command = new CommandManager('perrito', flags)
+const command = new Command('perrito', flags)
 	.setAliases('taton', 'dog', 'pe')
 	.setBriefDescription('Envía un emote de perrito o lista todos los disponibles')
 	.setLongDescription('Comando cachorro de Taton. Puedes ingresar una palabra identificadora para enviar un perrito en específico o ver una lista de perritos. Si no ingresas nada, se enviará un perrito aleatorio')

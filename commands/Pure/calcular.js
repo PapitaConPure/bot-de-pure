@@ -1,5 +1,5 @@
 const { improveNumber } = require("../../func");
-const { CommandTags, CommandManager, CommandOptions } = require("../Commons/commands");
+const { CommandTags, Command, CommandOptions } = require("../Commons/commands");
 const { calc } = require('../../systems/others/mathreader.js');
 
 const flags = new CommandTags().add('COMMON');
@@ -7,7 +7,7 @@ const options = new CommandOptions()
 	.addParam('operación', 'TEXT', ' para expresar la operación matemátca')
 	.addFlag(['a','s'], 'acortar', 'para acortar el resultado')
 	.addFlag(['m','d'], ['mínimo','minimo','digitos'], 'para designar el mínimo de dígitos', { name: 'minimo', type: 'NUMBER' });
-const command = new CommandManager('calcular', flags)
+const command = new Command('calcular', flags)
 	.setAliases('calc', 'clc', 'cx')
 	.setBriefDescription('Realiza un cálculo básico y devuelve el resultado')
 	.setLongDescription(

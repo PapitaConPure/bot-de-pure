@@ -1,10 +1,10 @@
 const { EmbedBuilder, Colors } = require('discord.js');
 const { default: axios } = require('axios');
 const { auditError } = require('../../systems/others/auditor');
-const { CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/commands');
 
 const flags = new CommandTags().add('COMMON');
-const command = new CommandManager('gatos', flags)
+const command = new Command('gatos', flags)
 	.setAliases(
         'gato', 'felino', 'gatito', 'gatitos', 'miau', 'michi', 'michis',
         'cats', 'cat', 'meow', 'nya', 'kitty', 'kitties'

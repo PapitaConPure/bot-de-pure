@@ -2,7 +2,7 @@ const { EmbedBuilder, MessageFlags } = require('discord.js');
 const { serverid, tenshiColor, peopleid } = require('../../data/config.json'); //Variables globales
 const { isNotModerator, shortenText } = require('../../func');
 const { p_pure } = require('../../utils/prefixes');
-const { commandFilenames, CommandOptions, CommandTags, CommandManager, CommandParam } = require('../Commons/commands');
+const { commandFilenames, CommandOptions, CommandTags, Command, CommandParam } = require('../Commons/commands');
 const { searchCommand, searchCommands, getWikiPageComponentsV2, makeCategoriesRow, makeGuideRow } = require('../../systems/others/wiki');
 
 /**@param {import('../Commons/typings').ComplexCommandRequest | import('discord.js').StringSelectMenuInteraction<'cached'>} request*/
@@ -37,7 +37,7 @@ const options = new CommandOptions()
 			}),
 	);
 
-const command = new CommandManager('ayuda', flags)
+const command = new Command('ayuda', flags)
 	.setAliases('comandos', 'acciones', 'help', 'commands', 'h')
 	.setBriefDescription('Muestra una lista de comandos o un comando en detalle')
 	.setLongDescription(
@@ -150,7 +150,7 @@ const command = new CommandManager('ayuda', flags)
 		});
 	}, { userFilterIndex: 0 })
 	.setButtonResponse(async function showCommand(interaction, search) {
-		const request = CommandManager.requestize(interaction);
+		const request = Command.requestize(interaction);
 		const guildPrefix = p_pure(request).raw;
 		const helpCommand = `${guildPrefix}${command.name}`;
 
@@ -172,7 +172,7 @@ const command = new CommandManager('ayuda', flags)
 			});
 		}
 
-		const components = getWikiPageComponentsV2(foundCommand, CommandManager.requestize(interaction));
+		const components = getWikiPageComponentsV2(foundCommand, Command.requestize(interaction));
 		return interaction.reply({
 			flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
 			components,
@@ -205,12 +205,12 @@ const command = new CommandManager('ayuda', flags)
 			return interaction.update({ embeds: [embed], components });
 		}
 		
-		const components = getWikiPageComponentsV2(foundCommand, CommandManager.requestize(interaction));
+		const components = getWikiPageComponentsV2(foundCommand, Command.requestize(interaction));
 		return interaction.reply({ flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2, components: components });
 	}, { userFilterIndex: 0 });
 
 /**
- * Recupera un arreglo de {@linkcode CommandManager} según la `query` proporcionada.
+ * Recupera un arreglo de {@linkcode Command} según la `query` proporcionada.
  * @typedef {Object} CommandsLookupQuery
  * @property {Array<import('../Commons/cmdTags').CommandTagResolvable>} [tags]
  * @property {Array<import('../Commons/cmdTags').CommandTagResolvable>} [excludedTags]
@@ -223,14 +223,14 @@ function lookupCommands(query = {}) {
 	query.excludedTags ??= [];
 	const { tags, excludedTags, context } = query;
 
-	/**@type {(command: CommandManager) => boolean} */
+	/**@type {(command: Command) => boolean} */
 	let commandIsAllowed;
 	if(context)
 		commandIsAllowed = (command) => command.permissions?.isAllowedIn(context.member, context.channel) ?? true;
 	else
 		commandIsAllowed = () => true;
 
-	/**@type {(command: CommandManager) => boolean} */
+	/**@type {(command: Command) => boolean} */
 	let commandMeetsCriteria;
 	if(tags.length && excludedTags.length)
 		commandMeetsCriteria = (command) => !excludedTags.some(tag => command.tags.has(tag)) && tags.every(tag => command.tags.has(tag));
@@ -241,12 +241,12 @@ function lookupCommands(query = {}) {
 	else
 		commandMeetsCriteria = () => true;
 
-	/**@type {Array<CommandManager>}*/
+	/**@type {Array<Command>}*/
 	const commands = [];
 
 	for(const file of commandFilenames) {
 		const commandFile = require(`./${file}`);
-		const command = /**@type {CommandManager}*/(commandFile.command ?? commandFile);
+		const command = /**@type {Command}*/(commandFile.command ?? commandFile);
 
 		if(commandIsAllowed(command) && commandMeetsCriteria(command))
 			commands.push(command);

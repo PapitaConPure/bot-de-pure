@@ -1,4 +1,4 @@
-const { CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/commands');
 const { hourai } = require('../../data/config.json');
 const { colorsRow } = require('../../data/sakiProps');
 const { colorsList } = hourai;
@@ -7,7 +7,7 @@ const flags = new CommandTags().add(
 	'SAKI',
 	'OUTDATED',
 );
-const command = new CommandManager('colores', flags)
+const command = new Command('colores', flags)
 	.setAliases(
 		'color',
 		'colours', 'colour', 'colors',

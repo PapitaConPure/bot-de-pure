@@ -1,12 +1,12 @@
 const { options } = require('./buscar.js');
-const { CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/commands');
 const { searchAndReplyWithPost } = require('../../systems/booru/boorusend.js');
 
 const flags = new CommandTags().add(
 	'COMMON',
 	'MEME',
 );
-const command = new CommandManager('megumin', flags)
+const command = new Command('megumin', flags)
 	.setAliases(
 		'megu', 'explosión', 'bakuretsu', 'waifu',
 		'bestgirl', 'explosion',

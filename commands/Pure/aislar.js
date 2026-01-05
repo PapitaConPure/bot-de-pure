@@ -1,4 +1,4 @@
-const { CommandTags, CommandOptions, CommandManager, CommandOptionSolver } = require('../Commons/commands');
+const { CommandTags, CommandOptions, Command, CommandOptionSolver } = require('../Commons/commands');
 const { CommandPermissions } = require('../Commons/cmdPerms');
 const { Translator } = require('../../i18n/internationalization');
 
@@ -9,7 +9,7 @@ const options = new CommandOptions()
 	.addParam('miembros', 'MEMBER', 'para aislar miembros', { poly: 'MULTIPLE', polymax: 8 });
 	
 const flags = new CommandTags().add('MOD');
-const command = new CommandManager('aislar', flags)
+const command = new Command('aislar', flags)
 	.setAliases('mutear', 'silenciar', 'mute', 'timeout', 'm')
 	.setBriefDescription('Aisla miembros en el server por un cierto tiempo')
 	.setLongDescription(

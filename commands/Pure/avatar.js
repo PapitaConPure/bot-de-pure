@@ -1,6 +1,6 @@
 const { MessageFlags, TextDisplayBuilder, ContainerBuilder } = require('discord.js'); //Integrar discord.js
 const { p_pure } = require('../../utils/prefixes');
-const { CommandOptions, CommandTags, CommandManager, CommandOptionSolver } = require("../Commons/commands");
+const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require("../Commons/commands");
 const { Translator } = require('../../i18n/internationalization');
 const { fetchGuildMembers } = require('../../utils/guildratekeeper');
 
@@ -109,7 +109,7 @@ const options = new CommandOptions()
 
 const flags = new CommandTags().add('COMMON');
 
-const command = new CommandManager('avatar', flags)
+const command = new Command('avatar', flags)
     .setAliases(
         'perfil', 'fotoperfil',
         'profile', 'profilepicture',

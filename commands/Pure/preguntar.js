@@ -1,4 +1,4 @@
-const { CommandTags, CommandManager, CommandOptions } = require('../Commons/commands');
+const { CommandTags, Command, CommandOptions } = require('../Commons/commands');
 const globalConfigs = require('../../data/config.json');
 const { Groq } = require('groq-sdk');
 const { Translator } = require('../../i18n/internationalization');
@@ -13,7 +13,7 @@ const options = new CommandOptions()
     .addParam('mensaje', 'TEXT', 'para hacer una consulta a Bot de Puré');
 
 const flags = new CommandTags().add('COMMON');
-const command = new CommandManager('preguntar', flags)
+const command = new Command('preguntar', flags)
 	.setAliases(
 		'pregunta',
 		'question',

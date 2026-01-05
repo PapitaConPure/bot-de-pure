@@ -1,5 +1,5 @@
 const Canvas = require('canvas');
-const { CommandOptions, CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
 const { p_pure } = require('../../utils/prefixes');
 const { AttachmentBuilder } = require('discord.js');
 const { improveNumber } = require('../../func');
@@ -63,7 +63,7 @@ const options = new CommandOptions()
 	.addFlag('b', 			['nobomb','nb'], 												'para especificar que se logró sin usar bombas')
 	.addFlag(['s','c'], 	['nospecial','ns','noc'], 										'para especificar que se logró sin usar la tecla C')
 	.addFlag('p', 			['pacifista', 'pacifist'],										'para especificar que se logró sin realizar daño');
-const command = new CommandManager('tarjeta', flags)
+const command = new Command('tarjeta', flags)
 	.setAliases('logro', 'achievement')
 	.setBriefDescription('Para crear una tarjeta de logro personal. Imágenes por WMX#7937')
 	.setLongDescription(

@@ -1,4 +1,4 @@
-const { CommandTags, CommandManager, CommandOptions } = require("../Commons/commands");
+const { CommandTags, Command, CommandOptions } = require("../Commons/commands");
 const { hourai } = require('../../data/config.json');
 const HouraiCfg = require('../../models/hourai.js');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
@@ -68,7 +68,7 @@ const options = new CommandOptions()
     .addFlag([], 'despedida', 'Para habilitar o deshabilitar la bienvenida por completo', { name: 'estado', type: 'TEXT' })
     .addFlag([], 'ping', 'Para habilitar o deshabilitar el ping de bienvenida', { name: 'estado', type: 'TEXT' });
 const flags = new CommandTags().add('MOD', 'SAKI');
-const command = new CommandManager('saki', flags)
+const command = new Command('saki', flags)
 	.setAliases(
 		'sakiscans',
 		'configsaki', 'sakiconfig'

@@ -1,4 +1,4 @@
-const { CommandManager } = require('../../commands/Commons/cmdBuilder');
+const { Command } = require('../../commands/Commons/cmdBuilder');
 const globalConf = require('../../data/config.json');
 const { EmbedBuilder, Colors } = require('discord.js');
 
@@ -19,13 +19,13 @@ function generateRequestRecord(request) {
  * @param {import('../../commands/Commons/typings.js').CommandRequest|import('discord.js').Interaction} request
  */
 function getRequestContent(request) {
-    if(CommandManager.requestIsInteraction(request)) {
+    if(Command.requestIsInteraction(request)) {
         if(request.isContextMenuCommand())
             return `**\\*. ${request.commandName}** ${request.options.data.map(({ name, value }) => `${name}:\`${value}\``).join(' ')}`;
         return `**/${request.commandName}** ${request.options.data.map(({ name, value }) => `${name}:\`${value}\``).join(' ')}`;
     }
 
-    if(CommandManager.requestIsMessage(request))
+    if(Command.requestIsMessage(request))
         return request.content?.slice(0, 1023) || '*Mensaje vacío.*'
 
     // @ts-expect-error

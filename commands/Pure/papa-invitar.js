@@ -1,9 +1,9 @@
 const { EmbedBuilder, Colors } = require("discord.js");
 const tenshi = { '👉👈': 'https://i.imgur.com/yeYyEvp.jpg' }; //Soy un puto meme
-const { CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/commands');
 
 const flags = new CommandTags().add('PAPA');
-const command = new CommandManager('papa-invitar', flags)
+const command = new Command('papa-invitar', flags)
     .setDescription('Muestra una carta de invitación para agregarme a otro servidor')
     .setExecution(async request => {
         const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${request.client.application.id}&scope=bot&permissions=1394522582224`;

@@ -1,6 +1,6 @@
 const { ButtonBuilder, ButtonStyle } = require('discord.js');
 const { randRange } = require('../../func');
-const { CommandTags, CommandManager } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/commands');
 
 const phrases = [
 	'Ahora sí vení que te saco la cresta',
@@ -17,7 +17,7 @@ const phrases = [
 const tenshiurl = 'https://i.imgur.com/eMyvXiC.png';
 
 const flags = new CommandTags().add('COMMON');
-const command = new CommandManager('rakkidei', flags)
+const command = new Command('rakkidei', flags)
 	.setAliases('rakki', 'tenshi')
 	.setDescription('Comando de trompada de Rakkidei')
 	.addWikiRow(
