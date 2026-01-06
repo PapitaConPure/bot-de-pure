@@ -1,5 +1,5 @@
-const { fetchUserCache } = require('../utils/usercache.js');
-const Locales = require('./locales.js');
+const { fetchUserCache } = require('../utils/usercache');
+const Locales = require('./locales');
 
 const ConditionFields = /**@type {const}*/({
 	Equal: '=',
@@ -350,6 +350,11 @@ let localesObject = /**@type {const}*/({
 		en: '⚠️️ Invalid message',
 		ja: '⚠️️ 無効なメッセーギ',
 	},
+	invalidDate: {
+		es: '⚠️️ Fecha inválida',
+		en: '⚠️️ Invalid date',
+		ja: '⚠️️ 無効な日付',
+	},
 	invalidTime: {
 		es: '⚠️️ Tiempo inválido',
 		en: '⚠️️ Invalid time',
@@ -359,6 +364,11 @@ let localesObject = /**@type {const}*/({
 		es: '⚠️️ Emoji inválido',
 		en: '⚠️️ Invalid emoji',
 		ja: '⚠️️ 無効な絵文字',
+	},
+	userConfigRecommended: {
+		es: `⚠️ Es recomendable configurar tus preferencias con \`${subl(0)}yo\` antes de usar este comando`,
+		en: `⚠️ It's recommended to configure your preferences through \`${subl(0)}me\` before using this command`,
+		ja: `⚠️ このコマンドを使用する前に、\`${subl(0)}me\`で設定を行うことをお勧めします`,
 	},
 
 	welcome: {
@@ -1872,6 +1882,47 @@ let localesObject = /**@type {const}*/({
 		ja: `⚠️️ **${subl(0)}件**（${subl(1)}％）のコマンド実行が失敗しました`,
 	},
 
+	recordarRemindersListTitle: {
+		es: '## Recordatorios',
+		en: '## Reminders',
+		ja: '## リマインダー',
+	},
+	recordarDateOrTimeRequired: {
+		es: '⚠️️ Debes indicar al menos una `--fecha` o una `--hora`',
+		en: '⚠️️ You must specify at least a `--date` or an `--hour`',
+		ja: '⚠️️ 少なくとも`--date`または`--time`を指定する必要があります',
+	},
+	recordarNoReminders: {
+		es: 'ℹ️ No tienes ningún recordatorio pendiente',
+		en: 'ℹ️ You don\'t have any pending reminders',
+		ja: 'ℹ️ 保留中のリマインダーはありません',
+	},
+	recordarReminderContentTooLong: {
+		es: '⚠️️ El recordatorio ingresado es demasiado largo. Acórtalo a 960 caracteres o menos',
+		en: '⚠️️ The reminder you entered is too long. Shorten it to 960 characters or less',
+		ja: '⚠️️ 入力したリマインダーが長すぎます。960文字以下に短縮してください',
+	},
+	recordarTooManyReminders: {
+		es: '⚠️️ Tienes demasiados recordatorios pendientes. Borra alguno para crear otro',
+		en: '⚠️️ You have too many pending reminders. Delete some to create a new one',
+		ja: '⚠️️ 保留中のリマインダーが多すぎます。1つ削除して新しいリマインダーを作成してください',
+	},
+	recordarReminderCreateTitle: {
+		es: '## Recordatorio establecido',
+		en: '## Reminder set',
+		ja: '## リマインダーを設定しました',
+	},
+	recordarReminderCreateDateDescription: {
+		es: `Se programó un recordatorio para el <t:${subl(0)}:F> (<t:${subl(0)}:R>)`,
+		en: `A reminder was scheduled for <t:${subl(0)}:F> (<t:${subl(0)}:R>)`,
+		ja: `リマインダーは<t:${subl(0)}:F>（<t:${subl(0)}:R>）に予定されています`,
+	},
+	recordarReminderCreateContentSubtitle: {
+		es: '### Contenido',
+		en: '### Content',
+		ja: '### コンテンツ',
+	},
+
 	yoCancelledStep: {
 		es: 'Se canceló la configuración de Preferencias de Usuario',
 		en: 'The User Preferences configuration was cancelled',
@@ -2203,6 +2254,13 @@ conditionFns
 	.set('<=', (a, b) => a <=  b)
 	.set('>=', (a, b) => a >=  b);
 
+/**@satisfies {Record<LocaleKey, (a: number | undefined, b: number | undefined, c: number | undefined) => ({ day: number | undefined, month: number | undefined, year: number | undefined })>}*/
+const reverseDateMappers = {
+	en: (a, b, c) => ({ day: b, month: a, year: c }),
+	es: (a, b, c) => ({ day: a, month: b, year: c }),
+	ja: (a, b, c) => ({ day: c, month: b, year: a }),
+};
+
 /**Clase de traducción de contenidos*/
 class Translator {
 	#locale;
@@ -2299,6 +2357,42 @@ class Translator {
 		});
 	
 		return translation;
+	}
+
+	/**
+	 * Mapea los componentes ingresados a día, mes y año teniendo en cuenta el orden en el que se especifican en la traducción indicada
+	 * @param {LocaleKey} id id de traducción
+	 * @param {number | undefined} [component1] primer componente de fecha, en orden traducido
+	 * @param {number | undefined} [component2] segundo componente de fecha, en orden traducido
+	 * @param {number | undefined} [component3] tercer componente de fecha, en orden traducido
+	 */
+	static mapReverseDateUTCComponents(id, component1 = null, component2 = null, component3 = null) {
+		const { day, month, year } = reverseDateMappers[id](component1, component2, component3);
+		const tzNow = new Date(Date.now());
+		const utcNow = new Date(
+			Date.UTC(
+				tzNow.getUTCFullYear(), tzNow.getUTCMonth(), tzNow.getUTCDate(),
+				tzNow.getUTCHours(), tzNow.getUTCMinutes(), tzNow.getUTCSeconds(), tzNow.getUTCMilliseconds()
+			)
+		);
+
+		return {
+			day: day ?? utcNow.getUTCDate(),
+			month: month ?? (utcNow.getUTCMonth() + 1),
+			year: year ?? utcNow.getUTCFullYear(),
+		};
+	}
+
+	/**
+	 * Mapea los componentes ingresados a día, mes y año teniendo en cuenta el orden en el que se especifican en la traducción indicada
+	 * @param {LocaleKey} id id de traducción
+	 * @param {number | undefined} [component1] primer componente de fecha, en orden traducido
+	 * @param {number | undefined} [component2] segundo componente de fecha, en orden traducido
+	 * @param {number | undefined} [component3] tercer componente de fecha, en orden traducido
+	 */
+	static reverseSearchUTCDate(id, component1 = null, component2 = null, component3 = null) {
+		const { day, month, year } = this.mapReverseDateUTCComponents(id, component1, component2, component3);
+		return new Date(year, month, day, 0, 0, 0, 0);
 	}
 
 	/**
