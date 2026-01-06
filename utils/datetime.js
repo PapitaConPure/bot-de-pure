@@ -1,5 +1,67 @@
-const { addHours, addMinutes, addSeconds, addMilliseconds } = require('date-fns');
+const { addDays, addHours, addMinutes, addSeconds, addMilliseconds, startOfYesterday, startOfToday, startOfTomorrow } = require('date-fns');
 const { Translator } = require('../i18n');
+
+const relativeDates = /**@type {const}*/({
+	beforeYesterday: {
+		match: [
+			'anteayer',
+			'before yesterday',
+			'一昨日',
+		],
+		getValue: () => addDays(startOfYesterday(), -1),
+	},
+	yesterday: {
+		match: [
+			'ayer',
+			'yesterday',
+			'昨日',
+		],
+		getValue: () => startOfYesterday(),
+	},
+	today: {
+		match: [
+			'hoy',
+			'today',
+			'今日',
+		],
+		getValue: () => startOfToday(),
+	},
+	tomorrow: {
+		match: [
+			'mañana',
+			'tomorrow',
+			'明日',
+		],
+		getValue: () => startOfTomorrow(),
+	},
+	afterTomorrow: {
+		match: [
+			'pasado mañana',
+			'after tomorrow',
+			'明後日',
+		],
+		getValue: () => addDays(startOfTomorrow(), +1),
+	},
+});
+
+const relativeTimes = /**@type {const}*/({
+	today: {
+		match: [
+			'ahora',
+			'now',
+			'今',
+		],
+		getValue: () => {
+			const now = new Date(Date.now());
+			let time = new Date(0);
+			time = addHours(time, now.getHours());
+			time = addMinutes(time, now.getMinutes());
+			time = addSeconds(time, now.getSeconds());
+			time = addMilliseconds(time, now.getMilliseconds());
+			return time;
+		},
+	},
+});
 
 /**
  * Obtiene componentes de fecha del string localizado indicado
@@ -50,6 +112,12 @@ function makeDateFromComponents(a, b, c, locale, z) {
  * @param {number} z El huso horario con el cual corregir la fecha UTC+0 obtenida
  */
 function parseDateFromNaturalLanguage(str, locale, z = 0) {
+	str = str.toLowerCase();
+
+	for(const relativeDate of Object.values(relativeDates))
+		if(relativeDate.match[str])
+			return relativeDate.getValue();
+
 	const dateComponents = getDateComponentsFromString(str);
 
 	if(dateComponents == undefined) return;
@@ -68,10 +136,14 @@ function parseTimeFromNaturalLanguage(str, z = 0) {
 	if(!str)
 		return;
 
-	str = str
-		.toLowerCase()
-		.replace(/\s+/g, '');
+	str = str.toLowerCase();
+	
+	for(const relativeTime of Object.values(relativeTimes))
+		if(relativeTime.match[str])
+			return relativeTime.getValue();
 
+	str = str.replace(/\s+/g, '');
+		
 	const timeComponents = { h: 0, m: 0, s: 0, ms: 0 };
 	const rangesInclusive = {
 		h: [ 0, 24 ],
@@ -201,6 +273,8 @@ function parseTimeFromNaturalLanguage(str, z = 0) {
 }
 
 module.exports = {
+	relativeDates,
+	relativeTimes,
 	getDateComponentsFromString,
 	makeDateFromComponents,
 	parseDateFromNaturalLanguage,

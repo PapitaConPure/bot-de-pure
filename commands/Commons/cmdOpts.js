@@ -2,7 +2,7 @@ const { User, GuildMember, Message, GuildChannel, CommandInteractionOptionResolv
 const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSentence, regroupText, fetchGuild } = require('../../func');
 
 const Logger = require('../../utils/logs');
-const { getDateComponentsFromString, makeDateFromComponents, parseTimeFromNaturalLanguage } = require('../../utils/datetime');
+const { getDateComponentsFromString, makeDateFromComponents, parseTimeFromNaturalLanguage, relativeDates } = require('../../utils/datetime');
 const { warn } = Logger('WARN', 'CmdOpts')
 
 /**
@@ -1379,10 +1379,18 @@ class CommandOptionSolver {
 	 */
 	#getDateComponentsFromInteraction(identifier) {
 		if(this.isInteractionSolver(this.#args) === false)
-			throw 'Se esperaban argumentos de comando de mensaje';
-
+			throw 'Se esperaban argumentos de comando Slash';
+		
 		const dateStr = this.#args.getString(identifier);
 		return getDateComponentsFromString(dateStr);
+	}
+	
+	#getRelativeDateCompatibleMessageArgs() {
+		if(this.isMessageSolver(this.#args) === false)
+			throw 'Se esperaban argumentos de comando de mensaje';
+
+		const relativeDateKeys = new Set(Object.keys(relativeDates).flatMap(k => k.split(' ')));
+		return this.#args.slice(0, 2).filter(a => relativeDateKeys.has(a)).join(' ');
 	}
 
 	/**
@@ -1392,6 +1400,14 @@ class CommandOptionSolver {
 	 * @param {number} z El huso horario con el cual corregir la fecha UTC+0 obtenida
 	 */
 	getDate(identifier, locale, z = 0) {
+		const str = this.isInteractionSolver(this.#args)
+			? this.#args.getString(identifier)
+			: this.#getRelativeDateCompatibleMessageArgs();
+
+		for(const relativeDate of Object.values(relativeDates))
+			if(relativeDate.match[str])
+				return relativeDate.getValue();
+		
 		const dateComponents = this.isInteractionSolver(this.#args)
 			? this.#getDateComponentsFromInteraction(identifier)
 			: this.#getDateComponentsFromMessage();
