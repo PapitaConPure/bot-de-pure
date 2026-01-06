@@ -41,9 +41,9 @@ const command = new Command('hora', flags)
 			[ day, month, year ] = date;
 			if(month > 12 || year > 9999) isInvalidDate = true;
 			month -= 1;
-			const lastDay = (new Date(year, month + 1, 0)).getDate();
+			const lastDay = (new Date(year, month, 0)).getDate();
 			if(day > lastDay) isInvalidDate = true;
-			if(isInvalidDate) return request.reply('⚠️ Fecha inválida. Asegúrate de seguir el formato DD/MM/AAAA');
+			if(isInvalidDate) return request.reply(translator.getText('invalidDate'));
 		} else {
 			const now = new Date(Date.now());
 			now.setTime(now.valueOf() + utcOffset * 60 * 60 * 1000);
@@ -58,7 +58,7 @@ const command = new Command('hora', flags)
 			?? dateToUTCFormat(new Date(Date.now() + utcOffset * 60 * 60e3), 'HH:mm:ss');
 
 		if(rawTime == undefined)
-			return request.reply('⚠️ Debes ingresar una hora');
+			return request.reply(translator.getText('invalidTime'));
 		
 		let isShortened = false;
 		let plus12;
