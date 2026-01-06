@@ -2,6 +2,7 @@ const { User, GuildMember, Message, GuildChannel, CommandInteractionOptionResolv
 const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSentence, regroupText, fetchGuild } = require('../../func');
 
 const Logger = require('../../utils/logs');
+const { getDateComponentsFromString, makeDateFromComponents, parseTimeFromNaturalLanguage } = require('../../utils/datetime');
 const { warn } = Logger('WARN', 'CmdOpts')
 
 /**
@@ -76,7 +77,7 @@ const fetchMessageFlagText = (args, i) => {
 }
 
 /**
- * @typedef {number | string | boolean | User | GuildMember | Guild | import('discord.js').GuildBasedChannel | Message<Boolean> | Role | Attachment | undefined} ParamResult
+ * @typedef {number | string | boolean | User | GuildMember | Guild | import('discord.js').GuildBasedChannel | Message<Boolean> | Role | Attachment | Date | undefined} ParamResult
  */
 
 /**
@@ -1316,6 +1317,199 @@ class CommandOptionSolver {
 	}
 
 	/**
+	 * Obtiene componentes de fecha de los argumentos de mensaje
+	 */
+	#getDateComponentsFromMessage() {
+		if(this.isMessageSolver(this.#args) === false)
+			throw 'Se esperaban argumentos de comando de mensaje';
+		
+		if(!this.#args.length)
+			return;
+
+		const firstArg = this.#args[0];
+		const rawDateStr = fetchSentence(this.#args, 0);
+		const seps = [ '/', '.', '-' ];
+		const dateComponents = rawDateStr.split(/[/.-]/).map(d => +(d.trim()));
+		
+		if(dateComponents.some(d => isNaN(d))) return;
+
+		if(seps.some(s => rawDateStr.startsWith(s)))
+			return;
+
+		if(firstArg.startsWith('"')) {
+			if(seps.some(s => rawDateStr.endsWith(s)))
+				return;
+		} else {
+			if(seps.some(s => rawDateStr.endsWith(s)) && dateComponents.length >= 3)
+				return;
+
+			let done = false;
+			while(!done && this.#args.length && dateComponents.length < 3) {
+				const arg = this.#args[0];
+
+				if(seps.includes(arg)) {
+					this.#args.unshift();
+
+					if(isNaN(+this.#args[0]))
+						return;
+
+					dateComponents.push(this.#args.unshift());
+				} else if(seps.some(s => arg.includes(s))) {
+					const subArgs = arg
+						.split(/[/.-]/)
+						.map(a => +a)
+						.filter(a => !isNaN(a));
+
+					if(!subArgs.length || (dateComponents.length + subArgs.length) > 3)
+						return;
+
+					dateComponents.push(...subArgs);
+				}
+			}
+		}
+		
+		if(dateComponents.some(d => d < 1)) return;
+
+		return dateComponents;
+	}
+
+	/**
+	 * Obtiene componentes de fecha de una opción de comando Slash
+	 * @param {string} identifier El identificador del {@linkcode CommandParam}
+	 */
+	#getDateComponentsFromInteraction(identifier) {
+		if(this.isInteractionSolver(this.#args) === false)
+			throw 'Se esperaban argumentos de comando de mensaje';
+
+		const dateStr = this.#args.getString(identifier);
+		return getDateComponentsFromString(dateStr);
+	}
+
+	/**
+	 * Obtiene un objeto {@link Date} cuyo valor equivale la fecha localizada especificada, sin componentes horarios, usando UTC
+	 * @param {string} identifier El identificador del {@linkcode CommandParam}
+	 * @param {import('../../i18n').LocaleKey} locale La clave del idioma en el cual interpretar la fecha
+	 * @param {number} z El huso horario con el cual corregir la fecha UTC+0 obtenida
+	 */
+	getDate(identifier, locale, z = 0) {
+		const dateComponents = this.isInteractionSolver(this.#args)
+			? this.#getDateComponentsFromInteraction(identifier)
+			: this.#getDateComponentsFromMessage();
+
+		if(dateComponents == undefined) return;
+		
+		const [ a, b, c ] = dateComponents;
+		return makeDateFromComponents(a, b, c, locale, z);
+	}
+
+	/**
+	 * Obtiene un texto de hora en lenguaje natural a partir de los argumentos de mensaje
+	 */
+	#getTimeStringFromMessage() {
+		if(this.isMessageSolver(this.#args) === false)
+			throw 'Se esperaban argumentos de comando de mensaje';
+		
+		if(!this.#args.length)
+			return;
+
+		const firstArg = this.#args[0].toLowerCase();
+		const rawTimeStr = fetchSentence(this.#args, 0);
+
+		if(firstArg.startsWith('"'))
+			return rawTimeStr;
+
+		let timeStr = rawTimeStr;
+
+		/**@typedef {(x: string) => void} __TimeStrMatchHandler*/
+
+		/**@type {__TimeStrMatchHandler}*/
+		const emptyHandler = () => undefined;
+		/**@type {__TimeStrMatchHandler}*/
+		const directAppendHandler = (x) => { timeStr += x; };
+
+		/**@type {{ [K: string]: ({ pattern: RegExp, limit: number, handler: __TimeStrMatchHandler, add?: K[], subtr?: K[] }) }}*/
+		const availableMatches = {
+			spaces:    { pattern: /^\s+$/,         limit: 100, handler: emptyHandler,        },
+			numbers:   { pattern: /^([0-9]+)$/,    limit: 2,   handler: directAppendHandler, },
+			decimals:  { pattern: /^\d+$/,         limit: 1,   handler: directAppendHandler, subtr: [ 'numbers', 'dots' ] },
+			colons:    { pattern: /^:$/,           limit: 2,   handler: directAppendHandler, },
+			dots:      { pattern: /^\.$/,          limit: 1,   handler: directAppendHandler, add: [ 'numbers' ], subtr: [ 'decimals' ] },
+			ampm:      { pattern: /^(am|pm)$/,     limit: 1,   handler: directAppendHandler, },
+			gozengogo: { pattern: /^(午前|午後)$/, limit: 1,   handler: directAppendHandler, },
+			ji:        { pattern: /^時$/,          limit: 1,   handler: directAppendHandler, },
+			fun:       { pattern: /^分$/,          limit: 1,   handler: directAppendHandler, },
+			byo:       { pattern: /^秒$/,          limit: 1,   handler: directAppendHandler, },
+			han:       { pattern: /^半$/,          limit: 1,   handler: directAppendHandler, },
+		};
+
+		let arg  = '';
+		while(this.hasNext()) {
+			arg = this.next();
+
+			let foundAvailableMatch = false;
+			for(const [ id, availableMatch ] of Object.entries(availableMatches)) {
+				const match = availableMatch.pattern.exec(arg);
+
+				if(!match)
+					continue;
+
+				availableMatch.handler(match[0]);
+
+				availableMatch.add.forEach(id => {
+					const m = availableMatches[id];
+					if(m) m.limit++;
+				});
+				availableMatch.subtr.forEach(id => {
+					const m = availableMatches[id];
+					if(m) m.limit--;
+					if(m.limit <= 0)
+						delete availableMatches[id];
+				});
+				
+				availableMatch.limit--;
+				if(availableMatch.limit <= 0)
+					delete availableMatches[id];
+
+				foundAvailableMatch = true;
+				break;
+			}
+
+			console.log(foundAvailableMatch, arg);
+			if(!foundAvailableMatch)
+				return;
+		}
+
+		return timeStr;
+	}
+
+	/**
+	 * Obtiene un texto de hora en lenguaje natural a partir de una opción de comando Slash
+	 * @param {string} identifier El identificador del {@linkcode CommandParam}
+	 */
+	#getTimeStringFromInteraction(identifier) {
+		if(this.isInteractionSolver(this.#args) === false)
+			throw 'Se esperaban argumentos de comando de mensaje';
+
+		const timeStr = this.#args.getString(identifier);
+		return timeStr;
+	}
+
+	/**
+	 * Obtiene un objeto {@link Date} cuyo valor equivale la hora especificada en milisegundos desde 0 absoluto, usando UTC
+	 * @param {string} identifier El identificador del {@linkcode CommandParam}
+	 * @param {number} z El huso horario con el cual corregir la fecha UTC+0 obtenida
+	 */
+	getTime(identifier, z = 0) {
+		const timeStr = this.isInteractionSolver(this.#args)
+			? this.#getTimeStringFromInteraction(identifier)
+			: this.#getTimeStringFromMessage();
+
+		if(!timeStr) return;
+
+		return parseTimeFromNaturalLanguage(timeStr, z);
+	}
+
+	/**
 	 * @typedef {'NONE'|'SEPARATOR'|'MENTIONABLES-WITH-SEP'|'DOUBLE-QUOTES'} RegroupMethod Define un método de reagrupación de los argumentos recibidos para poli-parámetros
 	 */
 
@@ -1574,7 +1768,7 @@ class CommandOptionSolver {
 		return paramResult;
 	}
 	
-	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
+	/**@param {ParamResult[]} paramResults Los {@linkcode ParamResult}s a tratar*/
 	static asBooleans(paramResults) {
 		return paramResults.map(r => CommandOptionSolver.asBoolean(r));
 	}
@@ -1590,7 +1784,7 @@ class CommandOptionSolver {
 		return paramResult;
 	}
 	
-	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
+	/**@param {ParamResult[]} paramResults Los {@linkcode ParamResult}s a tratar*/
 	static asStrings(paramResults) {
 		return paramResults.map(r => CommandOptionSolver.asString(r));
 	}
@@ -1606,7 +1800,7 @@ class CommandOptionSolver {
 		return paramResult;
 	}
 	
-	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
+	/**@param {ParamResult[]} paramResults Los {@linkcode ParamResult}s a tratar*/
 	static asNumbers(paramResults) {
 		return paramResults.map(r => CommandOptionSolver.asNumber(r));
 	}
@@ -1622,7 +1816,7 @@ class CommandOptionSolver {
 		return paramResult;
 	}
 	
-	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
+	/**@param {ParamResult[]} paramResults Los {@linkcode ParamResult}s a tratar*/
 	static asUsers(paramResults) {
 		return paramResults.map(r => CommandOptionSolver.asUser(r));
 	}
@@ -1638,7 +1832,7 @@ class CommandOptionSolver {
 		return paramResult;
 	}
 	
-	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
+	/**@param {ParamResult[]} paramResults Los {@linkcode ParamResult}s a tratar*/
 	static asMembers(paramResults) {
 		return paramResults.map(r => CommandOptionSolver.asMember(r));
 	}
@@ -1654,7 +1848,7 @@ class CommandOptionSolver {
 		return paramResult;
 	}
 	
-	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
+	/**@param {ParamResult[]} paramResults Los {@linkcode ParamResult}s a tratar*/
 	static asChannels(paramResults) {
 		return paramResults.map(r => CommandOptionSolver.asChannel(r));
 	}
@@ -1670,7 +1864,7 @@ class CommandOptionSolver {
 		return paramResult;
 	}
 	
-	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
+	/**@param {ParamResult[]} paramResults Los {@linkcode ParamResult}s a tratar*/
 	static asGuilds(paramResults) {
 		return paramResults.map(r => CommandOptionSolver.asGuild(r));
 	}
@@ -1686,7 +1880,7 @@ class CommandOptionSolver {
 		return paramResult;
 	}
 	
-	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
+	/**@param {ParamResult[]} paramResults Los {@linkcode ParamResult}s a tratar*/
 	static asAttachments(paramResults) {
 		return paramResults.map(r => CommandOptionSolver.asAttachment(r));
 	}
@@ -1702,7 +1896,7 @@ class CommandOptionSolver {
 		return paramResult;
 	}
 	
-	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
+	/**@param {ParamResult[]} paramResults Los {@linkcode ParamResult}s a tratar*/
 	static asMessages(paramResults) {
 		return paramResults.map(r => CommandOptionSolver.asMessage(r));
 	}
@@ -1718,9 +1912,25 @@ class CommandOptionSolver {
 		return paramResult;
 	}
 	
-	/**@param {Array<ParamResult>} paramResults Los {@linkcode ParamResult}s a tratar*/
+	/**@param {ParamResult[]} paramResults Los {@linkcode ParamResult}s a tratar*/
 	static asRoles(paramResults) {
 		return paramResults.map(r => CommandOptionSolver.asRole(r));
+	}
+
+	/**
+	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
+	 * @returns {Date|undefined}
+	 */
+	static asDate(paramResult) {
+		if(paramResult == undefined) return;
+		if(!CommandOptionSolver.isDate(paramResult))
+			throw `Se esperaba el tipo de parámetro: Date, pero se recibió: ${typeof paramResult}`;
+		return paramResult;
+	}
+	
+	/**@param {ParamResult[]} paramResults Los {@linkcode ParamResult}s a tratar*/
+	static asDates(paramResults) {
+		return paramResults.map(r => CommandOptionSolver.asDate(r));
 	}
 	//#endregion
 
@@ -1787,6 +1997,15 @@ class CommandOptionSolver {
 		if(paramResult == undefined) return false;
 		return paramResult instanceof Role;
 	}
+
+	/**
+	 * @param {ParamResult} paramResult El {@linkcode ParamResult} a tratar
+	 * @returns {paramResult is Date}
+	 */
+	static isDate(paramResult) {
+		if(paramResult == undefined) return false;
+		return paramResult instanceof Date;
+	}
 	//#endregion
 
 	//#region Misc
@@ -1818,13 +2037,13 @@ class CommandOptionSolver {
 	 */
 	#getResultFromParamSync(identifier, getRestOfMessageWords = false) {
 		if(!this.isMessageSolver(this.#args))
-			throw "Se esperaban argumentos de comando de mensaje";
+			throw 'Se esperaban argumentos de comando de mensaje';
 
 		const arrArgs = this.#args;
 
 		const option = this.#options.options.get(identifier);
 		if(!option.isCommandParam())
-			throw "Se esperaba un identificador de parámetro de comando";
+			throw 'Se esperaba un identificador de parámetro de comando';
 
 		let finalResult;
 		if(Array.isArray(option.type)) {
@@ -1842,13 +2061,13 @@ class CommandOptionSolver {
 	 */
 	async #getResultFromParam(identifier, getRestOfMessageWords = false) {
 		if(!this.isMessageSolver(this.#args))
-			throw "Se esperaban argumentos de comando de mensaje";
+			throw 'Se esperaban argumentos de comando de mensaje';
 
 		const arrArgs = this.#args;
 
 		const option = this.#options.options.get(identifier);
 		if(!option.isCommandParam())
-			throw "Se esperaba un identificador de parámetro de comando";
+			throw 'Se esperaba un identificador de parámetro de comando';
 
 		if(Array.isArray(option.type)) {
 			const results = await Promise.all(option.type.map(pt => this.#options.fetchMessageParam(arrArgs, pt, getRestOfMessageWords)));
