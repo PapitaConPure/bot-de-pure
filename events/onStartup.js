@@ -8,7 +8,7 @@ const BooruTags = require('../models/boorutags.js');
 const MessageCascades = require('../models/messageCascades.js');
 const { Puretable, pureTableAssets } = require('../models/puretable.js');
 const { deleteExpiredMessageCascades, cacheMessageCascade } = require('./onMessageDelete');
-const HouraiDB = require('../models/hourai.js');
+const SakiDB = require('../models/hourai.js');
 
 const { puré } = require('../core/commandInit.js');
 const globalConfigs = require('../data/config.json');
@@ -38,6 +38,7 @@ const chalk = require('chalk');
 const { prepareTracksPlayer } = require('../systems/others/musicPlayer')
 const { initializeWebhookMessageOwners } = require('../systems/agents/discordagent');
 const { setupGuildRateKeeper, fetchAllGuildMembers } = require('../utils/guildratekeeper');
+const { initRemindersScheduler, getRemindersScheduler } = require('../systems/others/remindersScheduler.js');
 
 const logOptions = {
 	slash: false,
@@ -173,8 +174,8 @@ async function onStartup(client) {
 		});
 		logOptions.feedSuscriptions && console.log({ feedTagSuscriptionsCache });
 
-		console.log(chalk.gray('Preparando Infracciones de Hourai...'));
-		const hourai = (await HouraiDB.findOne({})) || new HouraiDB({});
+		console.log(chalk.gray('Preparando Infracciones de Saki Scans...'));
+		const hourai = (await SakiDB.findOne({})) || new SakiDB({});
 		{
 			const now = Date.now();
 			let wasModified = false;
@@ -200,6 +201,10 @@ async function onStartup(client) {
 		}
 		await hourai.save();
 
+		console.log(chalk.gray('Preparando recordatorios...'));
+		initRemindersScheduler(client);
+		await getRemindersScheduler().triggerDueReminders();
+		
 		console.log(chalk.gray('Preparando Dueños de Mensajes de Agentes Puré...'));
 		await initializeWebhookMessageOwners();
 
