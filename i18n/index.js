@@ -517,6 +517,11 @@ let localesObject = /**@type {const}*/({
 		en: 'Register',
 		ja: '登録',
 	},
+	buttonRefresh: {
+		es: 'Refrescar',
+		en: 'Refresh',
+		ja: '更新',
+	},
 	buttonExpand: {
 		es: 'Expandir',
 		en: 'Expand',
@@ -1887,25 +1892,35 @@ let localesObject = /**@type {const}*/({
 		en: '## Reminders',
 		ja: '## リマインダー',
 	},
+	recordarRemindersListFooter: {
+		es: `-# **${subl(0)}/${subl(1)}** recordatorios programados`,
+		en: `-# **${subl(0)}/${subl(1)}** scheduled reminders`,
+		ja: `-# **${subl(0)}/${subl(1)}件**の予定リマインダー`,
+	},
 	recordarDateOrTimeRequired: {
 		es: '⚠️️ Debes indicar al menos una `--fecha` o una `--hora`',
 		en: '⚠️️ You must specify at least a `--date` or an `--hour`',
 		ja: '⚠️️ 少なくとも`--date`または`--time`を指定する必要があります',
 	},
 	recordarNoReminders: {
-		es: 'ℹ️ No tienes ningún recordatorio pendiente',
-		en: 'ℹ️ You don\'t have any pending reminders',
-		ja: 'ℹ️ 保留中のリマインダーはありません',
+		es: '_No tienes ningún recordatorio pendiente_',
+		en: '_You don\'t have any pending reminders_',
+		ja: '_保留中のリマインダーはありません_',
 	},
 	recordarReminderContentTooLong: {
-		es: '⚠️️ El recordatorio ingresado es demasiado largo. Acórtalo a 960 caracteres o menos',
-		en: '⚠️️ The reminder you entered is too long. Shorten it to 960 characters or less',
-		ja: '⚠️️ 入力したリマインダーが長すぎます。960文字以下に短縮してください',
+		es: `⚠️️ El recordatorio ingresado es demasiado largo. Acórtalo a ${subl(0)} caracteres o menos`,
+		en: `⚠️️ The reminder you entered is too long. Shorten it to ${subl(0)} characters or less`,
+		ja: `⚠️️ 入力したリマインダーが長すぎます。${subl(0)}文字以下に短縮してください`,
 	},
 	recordarTooManyReminders: {
 		es: '⚠️️ Tienes demasiados recordatorios pendientes. Borra alguno para crear otro',
 		en: '⚠️️ You have too many pending reminders. Delete some to create a new one',
 		ja: '⚠️️ 保留中のリマインダーが多すぎます。1つ削除して新しいリマインダーを作成してください',
+	},
+	recordarReminderTooSoon: {
+		es: `⚠️️ ¡La fecha del recordatorio (<t:${subl(0)}:F>) es muy pronto! Indica una fecha a más de 1 minuto a futuro`,
+		en: `⚠️️ The reminder scheduled date (<t:${subl(0)}:F>) is too soon! Enter a date at least 1 minute in the future`,
+		ja: `⚠️️ リマインダーの予定日（<t:${subl(0)}:F>）が早すぎます。1分以上先の日付を入力してください`,
 	},
 	recordarReminderCreateTitle: {
 		es: '## Recordatorio establecido',
@@ -1921,6 +1936,61 @@ let localesObject = /**@type {const}*/({
 		es: '### Contenido',
 		en: '### Content',
 		ja: '### コンテンツ',
+	},
+	recordarReminderNotFound: {
+		es: '⚠️️ Este recordatorio ya expiró o fue eliminado manualmente',
+		en: '⚠️️ This reminder has already expired or been manually deleted',
+		ja: '⚠️️ このリマインダーは既に期限切れか手動で削除されました',
+	},
+	recordarReminderEditSuccessTitle: {
+		es: '## Se editó el recordatorio',
+		en: '## The reminder has been edited',
+		ja: '## リマインダーが編集されました',
+	},
+	recordarReminderDeleteSuccess: {
+		es: '✅ Se eliminó el recordatorio',
+		en: '✅ The reminder has been deleted',
+		ja: '✅ リマインダーは削除されました',
+	},
+	recordarCreateReminderModalTitle: {
+		es: 'Crear recordatorio',
+		en: 'Create Reminder',
+		ja: 'リマインダーを作成',
+	},
+	recordarEditReminderModalTitle: {
+		es: 'Editar recordatorio',
+		en: 'Edit Reminder',
+		ja: 'リマインダーを編集',
+	},
+	reminderEditReminderModalDateLabel: {
+		es: 'Fecha',
+		en: 'Date',
+		ja: '日付',
+	},
+	reminderEditReminderModalDatePlaceholder: {
+		es: 'dd/MM/AAAA',
+		en: 'MM/dd/YYYY',
+		ja: 'YYYY.MM.dd',
+	},
+	reminderEditReminderModalTimeLabel: {
+		es: 'Hora',
+		en: 'Time',
+		ja: '時刻',
+	},
+	reminderEditReminderModalTimePlaceholder: {
+		es: 'hh:mm:ss',
+		en: 'HH:mm:ss AM/PM',
+		ja: '◯時◯分◯秒',
+	},
+	reminderEditReminderModalChannelLabel: {
+		es: 'Canal',
+		en: 'Channel',
+		ja: 'チャネル',
+	},
+	reminderEditReminderModalContentLabel: {
+		es: 'Contenido',
+		en: 'Content',
+		ja: '内容',
 	},
 
 	yoCancelledStep: {
