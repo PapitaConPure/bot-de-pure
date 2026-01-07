@@ -16,7 +16,6 @@ const reminderSchema = new Mongoose.Schema({
     content: {
         type: String,
         required: true,
-        unique: true,
         minLength: [ 1, 'El contenido del recordatorio no puede estar vacío' ],
     },
     date: {
