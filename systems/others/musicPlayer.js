@@ -200,7 +200,7 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 		
 		const service = SERVICES[currentTrack.source];
 		queueEmbed = makeReplyEmbed(service.color)
-			.setThumbnail(currentTrack.thumbnail)
+			.setThumbnail(currentTrack.thumbnail ?? request.client.user.displayAvatarURL())
 			.addFields({
 				name: `${isPaused ? '0.' : translator.getText('queueNowPlayingName')}  ⏱️ ${currentTrack.duration}${ currentTrack.requestedBy ? `  👤 ${currentTrack.requestedBy.username}` : '' }`,
 				value: `[${currentTrack.title}](${currentTrack.url})${progressBar}`,
