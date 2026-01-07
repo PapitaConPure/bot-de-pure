@@ -1405,7 +1405,7 @@ class CommandOptionSolver {
 			: this.#getRelativeDateCompatibleMessageArgs();
 
 		for(const relativeDate of Object.values(relativeDates))
-			if(relativeDate.match[str])
+			if(relativeDate.match.has(str))
 				return relativeDate.getValue();
 		
 		const dateComponents = this.isInteractionSolver(this.#args)
