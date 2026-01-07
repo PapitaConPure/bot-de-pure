@@ -1992,6 +1992,11 @@ let localesObject = /**@type {const}*/({
 		en: 'Content',
 		ja: '内容',
 	},
+	reminderTriggerEpigraph: {
+		es: `-# Recordatorio para ${subl(0)}`,
+		en: `-# Reminder for ${subl(0)}`,
+		ja: `-# ${subl(0)}さんへのリマインダー`,
+	},
 
 	yoCancelledStep: {
 		es: 'Se canceló la configuración de Preferencias de Usuario',
