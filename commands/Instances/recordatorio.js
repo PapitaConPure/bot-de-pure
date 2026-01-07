@@ -13,20 +13,21 @@ const maxReminderCountPerUser = 5;
 const maxReminderContentLength = 960;
 
 /**
- * 
- * @param {string} userId 
+ * Crea un contenedor con un listado CRUD de recordatorios
+ * @param {string} compressedUserId 
  * @param {Translator} translator 
  */
-async function makeRemindersContainer(userId, translator) {
-	const reminders = await Reminder.find({ userId });
+async function makeRemindersListContainer(compressedUserId, translator) {
+	const reminders = await Reminder.find({ userId: compressedUserId });
 
 	const container = new ContainerBuilder()
 		.setAccentColor(globalConfigs.tenshiColor)
 		.addTextDisplayComponents(textDisplay =>
 			textDisplay.setContent(translator.getText('recordarRemindersListTitle'))
-		);
+		)
+		.addSeparatorComponents(separator => separator.setDivider(true));
 
-	if(!reminders) {
+	if(!reminders?.length) {
 		container.addTextDisplayComponents(textDisplay =>
 			textDisplay.setContent(translator.getText('recordarNoReminders'))
 		);
@@ -35,7 +36,6 @@ async function makeRemindersContainer(userId, translator) {
 
 	reminders.forEach(reminder => {
 		container
-			.addSeparatorComponents(separator => separator.setDivider(true))
 			.addSectionComponents(section =>
 				section
 					.addTextDisplayComponents(textDisplay =>
@@ -43,9 +43,9 @@ async function makeRemindersContainer(userId, translator) {
 					)
 					.setButtonAccessory(
 						new ButtonBuilder()
-							.setCustomId(`recordar_viewReminder_${reminder._id}`)
-							.setEmoji('1356977730754842684')
-							.setLabel(translator.getText('buttonExpand'))
+							.setCustomId(`recordar_viewReminder_${reminder._id}_${compressedUserId}`)
+							.setEmoji('1458474431839076569')
+							.setLabel(translator.getText('buttonView'))
 							.setStyle(ButtonStyle.Secondary)
 					)
 			);
@@ -61,13 +61,13 @@ async function makeRemindersContainer(userId, translator) {
 			actionRow
 				.addComponents(
 					new ButtonBuilder()
-						.setCustomId('recordar_promptAddReminder')
+						.setCustomId(`recordar_promptAddReminder_${compressedUserId}`)
 						.setEmoji('1458427425271844958')
 						.setLabel(translator.getText('buttonCreate'))
 						.setStyle(ButtonStyle.Success)
 						.setDisabled(reminders.length >= maxReminderCountPerUser),
 					new ButtonBuilder()
-						.setCustomId('recordar_refreshRemindersList')
+						.setCustomId(`recordar_refreshRemindersList_${compressedUserId}`)
 						.setEmoji('1357001126674825379')
 						.setLabel(translator.getText('buttonRefresh'))
 						.setStyle(ButtonStyle.Primary),
@@ -83,10 +83,10 @@ async function makeRemindersContainer(userId, translator) {
 }
 
 /**
- * 
- * @param {import('../../models/reminders').ReminderDocument} reminder 
+ * Crea un contenedor en base al recordatorio indicado, con opciones para editar y eliminar
+ * @param {import('../../models/reminders').ReminderDocument} reminder Recordatorio a mostrar
  * @param {Translator} translator 
- * @param {string} [title] 
+ * @param {string} [title] Título alternativo
  */
 function makeReminderContainer(reminder, translator, title = undefined) {
 	const container = new ContainerBuilder()
@@ -107,12 +107,12 @@ function makeReminderContainer(reminder, translator, title = undefined) {
 		.addActionRowComponents(actionRow =>
 			actionRow.addComponents(
 				new ButtonBuilder()
-					.setCustomId(`recordar_promptEditReminder_${reminder._id}`)
+					.setCustomId(`recordar_promptEditReminder_${reminder._id}_${reminder.userId}`)
 					.setEmoji('1288444896331698241')
 					.setLabel(translator.getText('buttonEdit'))
 					.setStyle(ButtonStyle.Primary),
 				new ButtonBuilder()
-					.setCustomId(`recordar_deleteReminder_${reminder._id}`)
+					.setCustomId(`recordar_deleteReminder_${reminder._id}_${reminder.userId}`)
 					.setEmoji('1458130451834081513')
 					.setLabel(translator.getText('buttonDelete'))
 					.setStyle(ButtonStyle.Danger),
@@ -123,13 +123,13 @@ function makeReminderContainer(reminder, translator, title = undefined) {
 }
 
 /**
- * 
- * @param {import('../../models/reminders').ReminderDocument} reminder 
+ * Crea un formulario modal para crear o editar un recordatorio
  * @param {import('../Commons/typings').AnyRequest} request 
  * @param {Translator} translator 
- * @param {number} [utcOffset] 
+ * @param {number} utcOffset 
+ * @param {import('../../models/reminders').ReminderDocument} reminder 
  */
-function makeReminderModal(reminder, request, translator, utcOffset = 0) {
+function makeReminderModal(request, translator, utcOffset, reminder = undefined) {
 	const reminderId = reminder?._id;
 	const localizedReminderDate = addHours(reminder?.date || new Date(Date.now()), -utcOffset);
 
@@ -184,7 +184,7 @@ function makeReminderModal(reminder, request, translator, utcOffset = 0) {
 							ChannelType.PublicThread,
 							ChannelType.PrivateThread,
 						)
-						.setDefaultChannels([reminder?.channelId ?? request.channelId])
+						.setDefaultChannels([reminder.channelId ? decompressId(reminder.channelId) : request.channelId])
 						.setRequired(true)
 				),
 		);
@@ -239,8 +239,8 @@ const options = new CommandOptions()
 
 const command = new Command('recordatorio', tags)
 	.setAliases(
-		'recordar', 'recordatorios', 'recordarme', 'recuerdame', 'recuérdame',
-		'reminder', 'reminders', 'remindme',
+		'recordar', 'recordatorios', 'recordarme', 'recuerdame', 'recuérdame', 'alarma',
+		'reminder', 'reminders', 'remindme', 'alarm',
 	)
 	.setLongDescription(
 		'Establece un <recordatorio> a emitir a la --fecha y/o --hora especificada.',
@@ -250,9 +250,11 @@ const command = new Command('recordatorio', tags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
+		const userId = request.userId;
+		const compressedUserId = compressId(userId);
 		const [ translator, userConfigs] = await Promise.all([
 			Translator.from(request),
-			UserConfigs.findOne({ userId: request.userId }),
+			UserConfigs.findOne({ userId }),
 		]);
 
 		if(!userConfigs)
@@ -273,7 +275,7 @@ const command = new Command('recordatorio', tags)
 
 			return request.reply({
 				flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
-				components: [await makeRemindersContainer(request.userId, translator)],
+				components: [await makeRemindersListContainer(compressedUserId, translator)],
 			});
 		}
 		
@@ -304,7 +306,7 @@ const command = new Command('recordatorio', tags)
 				content: translator.getText('recordarReminderTooSoon', +datetime / 1000),
 			});
 
-		const reminderCount = (await Reminder.find({ userId: request.userId })).length;
+		const reminderCount = (await Reminder.find({ userId: compressedUserId })).length;
 		if(reminderCount > maxReminderCountPerUser)
 			return request.reply({
 				flags: MessageFlags.Ephemeral,
@@ -316,8 +318,8 @@ const command = new Command('recordatorio', tags)
 		const reminderId = compressId(request.id);
 		const reminder = new Reminder({
 			_id: reminderId,
-			userId: request.userId,
-			channelId: request.channelId,
+			userId: compressedUserId,
+			channelId: compressId(request.channelId),
 			content: reminderContent,
 			date: datetime,
 		});
@@ -333,35 +335,39 @@ const command = new Command('recordatorio', tags)
 		const [ reminder, translator ] = await Promise.all([
 			Reminder.findById(reminderId),
 			Translator.from(interaction),
+			interaction.deferReply({
+				flags: MessageFlags.Ephemeral,
+			}),
 		]);
 
 		if(!reminder)
-			return interaction.reply({
-				flags: MessageFlags.Ephemeral,
+			return interaction.editReply({
 				content: translator.getText('recordarReminderNotFound'),
 			});
 		
-		return interaction.reply({
-			flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+		return interaction.editReply({
+			flags: MessageFlags.IsComponentsV2,
 			components: [makeReminderContainer(reminder, translator)],
 		});
-	})
+	}, { userFilterIndex: 1 })
 	.setButtonResponse(async function promptAddReminder(interaction) {
+		const userId = interaction.user.id;
 		const [ translator, userConfigs ] = await Promise.all([
 			Translator.from(interaction),
-			UserConfigs.findOne({ userId: interaction.user.id }),
+			UserConfigs.findOne({ userId }),
 		]);
 		const utcOffset = userConfigs.utcOffset;
 
-		const modal = makeReminderModal(null, interaction, translator, utcOffset);
+		const modal = makeReminderModal(interaction, translator, utcOffset);
 
 		return interaction.showModal(modal);
-	})
+	}, { userFilterIndex: 0 })
 	.setButtonResponse(async function promptEditReminder(interaction, reminderId) {
+		const userId = interaction.user.id;
 		const [ reminder, translator, userConfigs ] = await Promise.all([
 			Reminder.findById(reminderId),
 			Translator.from(interaction),
-			UserConfigs.findOne({ userId: interaction.user.id }),
+			UserConfigs.findOne({ userId }),
 		]);
 		const utcOffset = userConfigs.utcOffset;
 
@@ -371,14 +377,16 @@ const command = new Command('recordatorio', tags)
 				content: translator.getText('recordarReminderNotFound'),
 			});
 
-		const modal = makeReminderModal(reminder, interaction, translator, utcOffset);
+		const modal = makeReminderModal(interaction, translator, utcOffset, reminder);
 
 		return interaction.showModal(modal);
-	})
+	}, { userFilterIndex: 1 })
 	.setModalResponse(async function addReminder(interaction) {
+		const userId = interaction.user.id;
+		const compressedUserId = compressId(userId);
 		const [ translator, userConfigs ] = await Promise.all([
 			Translator.from(interaction),
-			UserConfigs.findOne({ userId: interaction.user.id }),
+			UserConfigs.findOne({ userId }),
 		]);
 		const utcOffset = userConfigs.utcOffset;
 
@@ -420,28 +428,32 @@ const command = new Command('recordatorio', tags)
 				content: translator.getText('recordarReminderTooSoon', +datetime / 1000),
 			});
 
-		const reminderCount = (await Reminder.find({ userId: interaction.user.id })).length;
+		const reminderCount = (await Reminder.find({ userId: compressedUserId })).length;
 		if(reminderCount > maxReminderCountPerUser)
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
 				content: translator.getText('recordarTooManyReminders'),
 			});
 
-		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+		await interaction.deferUpdate();
 
 		const reminderId = compressId(interaction.id);
 		const reminder = new Reminder({
 			_id: reminderId,
-			userId: interaction.user.id,
-			channelId: interaction.channelId,
+			userId: compressedUserId,
+			channelId: compressId(interaction.channelId),
 			content: reminderContent,
 			date: datetime,
 		});
 
 		await reminder.save();
+
+		await interaction.editReply({
+			components: [await makeRemindersListContainer(compressedUserId, translator)],
+		});
 		
-		return interaction.editReply({
-			flags: MessageFlags.IsComponentsV2,
+		return interaction.followUp({
+			flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
 			components: [makeReminderContainer(reminder, translator)],
 		});
 	})
@@ -509,11 +521,10 @@ const command = new Command('recordatorio', tags)
 			components: [makeReminderContainer(reminder, translator, translator.getText('recordarReminderEditSuccessTitle'))],
 		});
 	})
-	.setButtonResponse(async function deleteReminder(interaction, reminderId) {
+	.setButtonResponse(async function deleteReminder(interaction, reminderId, compressedUserId) {
 		const [ reminder, translator ] = await Promise.all([
 			Reminder.findById(reminderId),
 			Translator.from(interaction),
-			interaction.deferUpdate(),
 		]);
 
 		if(!reminder)
@@ -522,23 +533,31 @@ const command = new Command('recordatorio', tags)
 				content: translator.getText('recordarReminderNotFound'),
 			});
 
+		await interaction.deferUpdate(),
+
 		await reminder.deleteOne();
 
 		const textDisplay = new TextDisplayBuilder()
 			.setContent(translator.getText('recordarReminderDeleteSuccess'));
 
-		return interaction.editReply({ components: [textDisplay] });
-	})
-	.setButtonResponse(async function refreshRemindersList(interaction) {
+		await interaction.editReply({
+			components: [await makeRemindersListContainer(compressedUserId, translator)],
+		});
+
+		return interaction.followUp({
+			flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+			components: [textDisplay],
+		});
+	}, { userFilterIndex: 1 })
+	.setButtonResponse(async function refreshRemindersList(interaction, compressedUserId) {
 		const [ translator ] = await Promise.all([
 			Translator.from(interaction),
 			interaction.deferUpdate(),
 		]);
-		const userId = interaction.user.id;
 
 		return interaction.editReply({
-			components: [await makeRemindersContainer(userId, translator)],
+			components: [await makeRemindersListContainer(compressedUserId, translator)],
 		});
-	});
+	}, { userFilterIndex: 0 });
 
 module.exports = command;
