@@ -42,7 +42,7 @@ async function makeRemindersListContainer(compressedUserId, translator) {
 					section
 						.addTextDisplayComponents(textDisplay =>
 							textDisplay.setContent([
-								`-# <:bell:1458732220016627734> <t:${unix}:R> → <#${decompressId(reminder.channelId)}> <:clock:1357498813144760603> <t:${unix}:T>`,
+								`-# <:bell:1458732220016627734> <t:${unix}:R> → <#${decompressId(reminder.channelId)}> <:clock:1357498813144760603> <t:${unix}:t>`,
 								shortenText(reminder.content, 64),
 							].join('\n'))
 						)
@@ -100,7 +100,7 @@ function makeReminderContainer(reminder, translator, title = undefined) {
 		.addTextDisplayComponents(
 			textDisplay => textDisplay.setContent(title ?? translator.getText('recordarReminderCreateTitle')),
 			textDisplay => textDisplay.setContent(
-				translator.getText('recordarReminderCreateDateDescription', +getUnixTime(reminder.date))
+				translator.getText('recordarReminderCreateDateDescription', getUnixTime(reminder.date))
 			),
 		)
 		.addSeparatorComponents(separator => separator.setDivider(false))
@@ -323,7 +323,7 @@ const command = new Command('recordatorio', tags)
 		if(!isReminderLateEnough(datetime))
 			return request.reply({
 				flags: MessageFlags.Ephemeral,
-				content: translator.getText('recordarReminderTooSoon', +datetime / 1000),
+				content: translator.getText('recordarReminderTooSoon', getUnixTime(datetime)),
 			});
 
 		const reminderCount = (await Reminder.find({ userId: compressedUserId })).length;
@@ -446,7 +446,7 @@ const command = new Command('recordatorio', tags)
 		if(!isReminderLateEnough(datetime))
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
-				content: translator.getText('recordarReminderTooSoon', +datetime / 1000),
+				content: translator.getText('recordarReminderTooSoon', getUnixTime(datetime)),
 			});
 
 		const reminderCount = (await Reminder.find({ userId: compressedUserId })).length;
@@ -523,7 +523,7 @@ const command = new Command('recordatorio', tags)
 		if(!isReminderLateEnough(datetime)) {
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
-				content: translator.getText('recordarReminderTooSoon', +datetime / 1000),
+				content: translator.getText('recordarReminderTooSoon', getUnixTime(datetime)),
 			});
 		}
 
