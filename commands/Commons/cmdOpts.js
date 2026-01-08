@@ -1406,7 +1406,7 @@ class CommandOptionSolver {
 
 		for(const relativeDate of Object.values(relativeDates))
 			if(relativeDate.match.has(str))
-				return relativeDate.getValue();
+				return relativeDate.getValue(z);
 		
 		const dateComponents = this.isInteractionSolver(this.#args)
 			? this.#getDateComponentsFromInteraction(identifier)
