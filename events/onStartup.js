@@ -39,6 +39,7 @@ const { prepareTracksPlayer } = require('../systems/others/musicPlayer')
 const { initializeWebhookMessageOwners } = require('../systems/agents/discordagent');
 const { setupGuildRateKeeper, fetchAllGuildMembers } = require('../utils/guildratekeeper');
 const { initRemindersScheduler, processReminders } = require('../systems/others/remindersScheduler.js');
+const { getUnixTime } = require('date-fns');
 
 const logOptions = {
 	slash: false,
@@ -267,7 +268,7 @@ async function onStartup(client) {
 	auditSystem('Bot conectado y funcionando', 
 		{ name: 'Host',             value: bot_status.host,                             inline: true },
 		{ name: 'N. de versión',    value: bot_status.version.number,                   inline: true },
-		{ name: 'Fecha',            value: `<t:${Math.floor(Date.now() / 1000)}:f>`,    inline: true },
+		{ name: 'Fecha',            value: `<t:${getUnixTime(new Date(Date.now()))}:f>`,    inline: true },
 	);
 
 	await setupGuildFeedUpdateStack(client);

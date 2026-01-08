@@ -6,6 +6,7 @@ const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
 const { makeButtonRowBuilder } = require('../../utils/tsCasts');
 const { Translator } = require('../../i18n');
 const { fetchGuildMembers } = require('../../utils/guildratekeeper');
+const { getUnixTime } = require('date-fns');
 
 /**
  * @param {String} requestId
@@ -99,7 +100,7 @@ const command = new Command('info', flags)
 
 		const owner = await guild.fetchOwner();
 		const guildIsDiscoverable = guild.features.includes('DISCOVERABLE');
-		const guildCreatedAtUnix = Math.floor(guild.createdTimestamp / 1000)
+		const guildCreatedAtUnix = Math.floor(getUnixTime(guild.createdAt))
 
 		mainCointainer
 			.addSectionComponents(section =>
@@ -194,7 +195,7 @@ const command = new Command('info', flags)
 				.map(([id, count]) => `${translator.getText('infoStatsChannelMessageCountItem', id, quantityDisplay(count, translator))}`)
 				.join('\n');
 
-		const statsSinceUnix = Math.round(stats.since / 1000);
+		const statsSinceUnix = getUnixTime(new Date(stats.since));
 
 		activityStatsContainer
 			.addTextDisplayComponents(
@@ -262,7 +263,7 @@ const command = new Command('info', flags)
 		const timeStatsContainer = new ContainerBuilder()
 			.setAccentColor(0xe99979);
 
-		const botLastResetUnix = Math.round(+globalConfigs.startupTime / 1000);
+		const botLastResetUnix = getUnixTime(new Date(globalConfigs.startupTime));
 
 		timeStatsContainer
 			.addTextDisplayComponents(

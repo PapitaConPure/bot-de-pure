@@ -6,6 +6,7 @@ const Canvas = require('canvas');
 const { utils } = require('../../data/images.json'); //Funciones globales
 const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
 const { isThread } = require('../../func');
+const { getUnixTime } = require('date-fns');
 
 /**
  * 
@@ -124,8 +125,8 @@ const command = new Command('leche', flags)
 		if(bglink == undefined)
 			return request.reply({ content: `${coomer[randcoomer]} <:lechita:931409943448420433> ${target}` });
 			
-		const guildTime = Date.now() - global.lechitauses;
-		const lastMilked = Math.floor(guildTime / 1000);
+		const guildTime = new Date(Date.now() - global.lechitauses);
+		const lastMilked = getUnixTime(guildTime);
 		const minSpan = 3;
 		
 		if(lastMilked <= minSpan) 

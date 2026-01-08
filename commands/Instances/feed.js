@@ -11,6 +11,7 @@ const { formatBooruPostMessage, formatTagNameListNew, getPostUrlFromContainer } 
 const { Translator } = require('../../i18n');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts.js');
+const { getUnixTime } = require('date-fns');
 
 /**@param {Translator} translator*/
 const wizTitle = (translator) => translator.getText('feedAuthor');
@@ -275,7 +276,7 @@ const command = new Command('feed', flags)
 			.addFields(
 				{ name: 'Feed configurado', value: `Se ha configurado un Feed con las tags _"${safeTags(input)}"_ para el canal **${fetchedChannel.name}**` },
 				{ name: 'Control del Feed', value: 'Puedes modificar, personalizar o eliminar este Feed en cualquier momento siguiendo el Asistente una vez más' },
-				{ name: 'Actualización Programada', value: `Este Feed se actualizará por primera vez <t:${Math.round((Date.now() + firstUpdateDelay) / 1000)}:R>` },
+				{ name: 'Actualización Programada', value: `Este Feed se actualizará por primera vez <t:${getUnixTime(new Date(Date.now() + firstUpdateDelay))}:R>` },
 			);
 		return interaction.update({
 			embeds: [concludedEmbed],

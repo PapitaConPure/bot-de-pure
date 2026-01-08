@@ -1,3 +1,4 @@
+const { getUnixTime } = require('date-fns');
 const { makeNumber, makeText, makeBoolean, makeList, makeRegistry, makeNada } = require('../values');
 
 /**
@@ -17,7 +18,7 @@ const { makeNumber, makeText, makeBoolean, makeList, makeRegistry, makeNada } = 
  * @returns {RegistryValue}
  */
 function makeDate(date) {
-    //PENDIENTE: Implementar una forma de lidiar con husos horarios
+    //TODO: Implementar una forma de lidiar con husos horarios
     const nombresMes = [
         'Enero',
         'Febrero',
@@ -241,7 +242,7 @@ function makeEmbedRegistry(embed) {
         ));
     
     if(embedData.timestamp)
-        properties.set('tiempo', makeText(`<t:${+embedData.timestamp / 1000}:F>`));
+        properties.set('tiempo', makeText(`<t:${getUnixTime(new Date(embedData.timestamp))}:F>`));
 
     if(embedData.imageUrl)
         properties.set('imagen', makeText(embedData.imageUrl));

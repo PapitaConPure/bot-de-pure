@@ -4,6 +4,7 @@ const UserConfigs = require('../../models/userconfigs');
 const { tenshiColor } = require('../../data/config.json');
 const { EmbedBuilder } = require("discord.js");
 const { Translator } = require("../../i18n");
+const { addDays, getUnixTime, isBefore } = require("date-fns");
 
 const flags = new CommandTags().add('COMMON');
 const command = new Command('cultivar', flags)
@@ -22,14 +23,14 @@ const command = new Command('cultivar', flags)
         const userConfigs = (await UserConfigs.findOne(userQuery)) || new UserConfigs(userQuery);
         const translator = await Translator.from(request.userId);
 
-        const now = Date.now();
-        const diffMs = now - userConfigs.lastCultivate;
-        const dayMs = 24 * 3600e3
+        const now = new Date(Date.now());
+        const lastCultivationDate = new Date(userConfigs.lastCultivate);
+        const nextCultivationDate = addDays(lastCultivationDate, 1);
 
-        if(diffMs < dayMs)
-            return request.reply({ content: translator.getText('cultivarUnauthorized', Math.round((now + dayMs - diffMs) / 1000)) });
+        if(isBefore(now, nextCultivationDate))
+            return request.reply({ content: translator.getText('cultivarUnauthorized', getUnixTime(nextCultivationDate)) });
 
-        userConfigs.lastCultivate = now;
+        userConfigs.lastCultivate = +now;
 
         const reward = 60 + randRange(-6, 6, false);
         userConfigs.prc += reward;
@@ -41,6 +42,7 @@ const command = new Command('cultivar', flags)
             .setDescription(translator.getText('cultivarDescription', improveNumber(userConfigs.prc, { shorten: true })));
 
         await userConfigs.save();
+        
         return request.reply({ embeds: [embed] });
     });
 

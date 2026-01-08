@@ -6,6 +6,7 @@ const { isNotModerator, defaultEmoji } = require('../../func.js');
 const { CommandOptions, CommandTags, Command } = require('../Commons/commands.js');
 const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts.js');
 const { Translator } = require('../../i18n');
+const { addMinutes, getUnixTime, isBefore } = require('date-fns');
 
 const cancelbutton = (id) => new ButtonBuilder()
 	.setCustomId(`voz_cancelWizard_${id}`)
@@ -114,11 +115,14 @@ const command = new Command('voz', flags)
 			return request.reply({ content: translator.getText('voiceSessionAdminOrModExpected'), ephemeral: true });
 
 		const { channelId: voiceId, roleId, nameChanged } = session;
-		if((Date.now() - (+nameChanged)) < 60e3 * 20)
+		const now = new Date(Date.now());
+		const renameUnblockDate = addMinutes(nameChanged, 20);
+
+		if(isBefore(now, renameUnblockDate))
 			return request.reply({
 				content: [
 					'❌ Por cuestiones técnicas, solo puedes cambiar el nombre de la sesión una vez cada 20 minutos.',
-					`Inténtalo de nuevo <t:${Math.round(+nameChanged / 1000 + 60 * 20)}:R>, o conéctate a una nueva sesión`,
+					`Inténtalo de nuevo <t:${getUnixTime(renameUnblockDate)}:R>, o conéctate a una nueva sesión`,
 				].join('\n'),
 			});
 		session.nameChanged = new Date(Date.now());

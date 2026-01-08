@@ -3,6 +3,7 @@ const { CommandTags, Command } = require("../Commons/commands");
 const { DiscordAgent } = require('../../systems/agents/discordagent');
 const { hourai, serverid } = require('../../data/config.json');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
+const { getUnixTime } = require('date-fns');
 
 let crazyBackupId = hourai.crazyBackupChannelId;
 
@@ -102,7 +103,7 @@ const command = new Command('exhibir', flags)
 				if(fetchedMessage.reactions.cache.size)
 					text += `${fetchedMessage.reactions.cache.first(3).map(reaction => `${reaction.emoji} ${reaction.count}`).join(' ')} • `;
 
-				text += `[#${channel.name}](<${message.url}>) • <t:${Math.round(message.createdTimestamp / 1000)}:F>`;
+				text += `[#${channel.name}](<${message.url}>) • <t:${getUnixTime(message.createdAt)}:F>`;
 				
 				/**@type {Array<EmbedBuilder>}*/(/**@type {Array<unknown>}*/(formattedMessage.embeds)).push(
 					new EmbedBuilder()
