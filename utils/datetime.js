@@ -8,7 +8,7 @@ const relativeDates = /**@type {const}*/({
 			'before yesterday',
 			'一昨日',
 		]),
-		getValue: () => addDays(startOfYesterday(), -1),
+		getValue: () => addMinutes(addDays(startOfYesterday(), -1), -new Date().getTimezoneOffset()),
 	},
 	yesterday: {
 		match: new Set([
@@ -16,7 +16,7 @@ const relativeDates = /**@type {const}*/({
 			'yesterday',
 			'昨日',
 		]),
-		getValue: () => startOfYesterday(),
+		getValue: () => addMinutes(startOfYesterday(), -new Date().getTimezoneOffset()),
 	},
 	today: {
 		match: new Set([
@@ -24,7 +24,7 @@ const relativeDates = /**@type {const}*/({
 			'today',
 			'今日',
 		]),
-		getValue: () => startOfToday(),
+		getValue: () => addMinutes(startOfToday(), -new Date().getTimezoneOffset()),
 	},
 	tomorrow: {
 		match: new Set([
@@ -32,7 +32,7 @@ const relativeDates = /**@type {const}*/({
 			'tomorrow',
 			'明日',
 		]),
-		getValue: () => startOfTomorrow(),
+		getValue: () => addMinutes(startOfTomorrow(), -new Date().getTimezoneOffset()),
 	},
 	afterTomorrow: {
 		match: new Set([
@@ -40,7 +40,7 @@ const relativeDates = /**@type {const}*/({
 			'after tomorrow',
 			'明後日',
 		]),
-		getValue: () => addDays(startOfTomorrow(), +1),
+		getValue: () => addMinutes(addDays(startOfTomorrow(), +1), -new Date().getTimezoneOffset()),
 	},
 });
 
@@ -123,7 +123,7 @@ function parseDateFromNaturalLanguage(str, locale, z = 0) {
 
 	for(const relativeDate of Object.values(relativeDates))
 		if(relativeDate.match.has(str))
-			return addHours(relativeDate.getValue(), -z);
+			return relativeDate.getValue();
 
 	const dateComponents = getDateComponentsFromString(str);
 
@@ -224,11 +224,11 @@ function parseTimeFromNaturalLanguage(str, z = 0) {
 
 		if(isShortFormat) {
 			rangesInclusive.h[1] = 12;
-			if(timeComponents.h > 12) return invalidDate();
 			if(timeComponents.h === 12) hoursPeriodOffset -= 12;
 			if(usesGogo) hoursPeriodOffset += 12;
-		} else
+		} else {
 			rangesInclusive.h[1] = 30;
+		}
 	} else { //Horas largas y cortas
 		let meridiem1 = '', meridiem2 = '';
 		let h = '0', m = '0', s = '0', ms = '0';
@@ -260,9 +260,8 @@ function parseTimeFromNaturalLanguage(str, z = 0) {
 		const isShortFormat = !!(meridiem1 || meridiem2);
 		const isPostMeridiem = (meridiem1 === 'pm' || meridiem2 === 'pm');
 
-		rangesInclusive.h[0] = 1;
 		if(isShortFormat) {
-			rangesInclusive.h[1] = 12;
+			rangesInclusive.h = [1, 12];
 			if(timeComponents.h === 12) hoursPeriodOffset -= 12;
 			if(isPostMeridiem) hoursPeriodOffset += 12;
 		} else
@@ -294,9 +293,6 @@ function invalidDate() {
 function addTime(date, time) {
 	return new Date(+date + +time);
 }
-
-console.log(parseTimeFromNaturalLanguage('11:00', -3).toUTCString());
-console.log(parseTimeFromNaturalLanguage('now', -3).toUTCString());
 
 module.exports = {
 	relativeDates,
