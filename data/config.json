@@ -2,13 +2,13 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "3.8.6",
+            "number": "3.9.0",
             "name": "Flamenco Perlado"
         },
         "note": {
-            "es": "Inestabilidad esperada debido a reorganizaciones",
-            "en": "Instability expected due to reorganizations",
-            "ja": "社内組織再編がありました。不安定な状況が予想されます"
+            "es": "Operando con normalidad",
+            "en": "Operating normally",
+            "ja": "正常に動作しています"
         },
         "changelog": [
             "p!emote ahora obtiene emotes de un mensaje",
@@ -23,7 +23,8 @@
             "p!info ha sido renovado, traducido y ahora permite especificar un `--miembro`",
             "Operabilidad de **PuréMusic** amendada",
             "p!estado ha sido renovado y traducido",
-            "Apariencia de confesiones mejorada, junto con la posibilidad de responder anónimamente"
+            "Apariencia de confesiones mejorada, junto con la posibilidad de responder anónimamente",
+            "p!recordatorio agregado"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos",

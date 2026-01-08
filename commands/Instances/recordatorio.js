@@ -2,12 +2,13 @@ const globalConfigs = require('../../data/config.json');
 const { Command, CommandTags, CommandOptions, CommandParam, CommandFlagExpressive, CommandOptionSolver } = require('../Commons/commands');
 const { p_pure } = require('../../utils/prefixes');
 const { Translator } = require('../../i18n');
-const { parseDateFromNaturalLanguage, parseTimeFromNaturalLanguage } = require('../../utils/datetime');
+const { parseDateFromNaturalLanguage, parseTimeFromNaturalLanguage, addTime, utcStartOfToday } = require('../../utils/datetime');
 const { MessageFlags, ContainerBuilder, ButtonBuilder, ButtonStyle, SeparatorSpacingSize, TextDisplayBuilder, ModalBuilder, TextInputStyle, ChannelType, TextInputBuilder } = require('discord.js');
 const { shortenText, compressId, decompressId } = require('../../func');
 const UserConfigs = require('../../models/userconfigs');
 const Reminder = require('../../models/reminders');
-const { startOfToday, isValid, addDays, isBefore, addMinutes, startOfDay, addHours } = require('date-fns');
+const { startOfToday, isValid, addDays, isBefore, addMinutes, startOfDay, addHours, getUnixTime } = require('date-fns');
+const { scheduleReminder } = require('../../systems/others/remindersScheduler');
 
 const maxReminderCountPerUser = 5;
 const maxReminderContentLength = 960;
@@ -24,22 +25,28 @@ async function makeRemindersListContainer(compressedUserId, translator) {
 		.setAccentColor(globalConfigs.tenshiColor)
 		.addTextDisplayComponents(textDisplay =>
 			textDisplay.setContent(translator.getText('recordarRemindersListTitle'))
-		)
-		.addSeparatorComponents(separator => separator.setDivider(true));
+		);
 
 	if(!reminders?.length) {
-		container.addTextDisplayComponents(textDisplay =>
-			textDisplay.setContent(translator.getText('recordarNoReminders'))
-		);
+		container
+			.addSeparatorComponents(separator => separator.setDivider(true))
+			.addTextDisplayComponents(textDisplay =>
+				textDisplay.setContent(translator.getText('recordarNoReminders'))
+			);
 		return;
 	}
 
 	reminders.forEach(reminder => {
+		const unix = getUnixTime(reminder.date);
 		container
+			.addSeparatorComponents(separator => separator.setDivider(true))
 			.addSectionComponents(section =>
 				section
 					.addTextDisplayComponents(textDisplay =>
-						textDisplay.setContent(`-# #${decompressId(reminder._id)}\n${shortenText(reminder.content, 64)}`)
+						textDisplay.setContent([
+							`-# <:bell:1458732220016627734> <t:${unix}:R> → <#${decompressId(reminder.channelId)}> <:clock:1357498813144760603> <t:${unix}:T>`,
+							shortenText(reminder.content, 64),
+						].join('\n'))
 					)
 					.setButtonAccessory(
 						new ButtonBuilder()
@@ -184,7 +191,7 @@ function makeReminderModal(request, translator, utcOffset, reminder = undefined)
 							ChannelType.PublicThread,
 							ChannelType.PrivateThread,
 						)
-						.setDefaultChannels([reminder.channelId ? decompressId(reminder.channelId) : request.channelId])
+						.setDefaultChannels([reminder?.channelId ? decompressId(reminder.channelId) : request.channelId])
 						.setRequired(true)
 				),
 		);
@@ -209,7 +216,7 @@ function makeReminderModal(request, translator, utcOffset, reminder = undefined)
 }
 
 /**@param {Date} date*/
-const validateDate = (date) => isValid(date) && !isBefore(date, startOfToday());
+const validateDate = (date) => isValid(date) && !isBefore(date, utcStartOfToday());
 
 /**@param {Date} time*/
 const validateTime = (time) => isValid(time) && Math.abs(+time) < (+addDays(new Date(0), 2));
@@ -244,9 +251,16 @@ const command = new Command('recordatorio', tags)
 	)
 	.setLongDescription(
 		'Establece un <recordatorio> a emitir a la --fecha y/o --hora especificada.',
-		'Si no se indica fecha ni hora, mostraré un asistente para elegir ambas.',
+		'Se emplea el huso horario que hayas establecido en tu **configuración de usuario** ó UTC+0.',
 		'',
-		'Usar el comando sin especificar ninguna opción mostrará un editor de recordatorios pendientes.',
+		'Si usas el comando sin especificar opciones, te mostraré un editor de tus recordatorios pendientes.',
+	)
+	.addWikiRow(
+		new ButtonBuilder()
+			.setCustomId('ayuda_showCommand_yo')
+			.setEmoji('1369424059871395950')
+			.setLabel('¿Cómo indico mi huso horario?')
+			.setStyle(ButtonStyle.Primary),
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
@@ -271,7 +285,10 @@ const command = new Command('recordatorio', tags)
 
 		if(!dateStr && !timeStr) {
 			if(reminderContent)
-				return translator.getText('recordarDateOrTimeRequired');
+				return request.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('recordarDateOrTimeRequired'),
+				});
 
 			return request.reply({
 				flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
@@ -285,21 +302,25 @@ const command = new Command('recordatorio', tags)
 				content: translator.getText('recordarReminderContentTooLong'),
 			});
 
-		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, utcOffset) ?? startOfToday();
+		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, utcOffset) ?? utcStartOfToday();
 		if(!validateDate(date))
 			return request.reply({
 				flags: MessageFlags.Ephemeral,
 				content: translator.getText('invalidDate'),
 			});
 
-		const time = parseTimeFromNaturalLanguage(timeStr) ?? new Date(0);
+		const time = parseTimeFromNaturalLanguage(timeStr, utcOffset) ?? addHours(new Date(0), -utcOffset);
 		if(!validateTime(time))
 			return request.reply({
 				flags: MessageFlags.Ephemeral,
 				content: translator.getText('invalidTime'),
 			});
 
-		const datetime = new Date((+date) + (+time));
+		let datetime = addTime(date, time);
+		
+		if(!dateStr && !isReminderLateEnough(datetime))
+			datetime = addDays(datetime, 1);
+		
 		if(!isReminderLateEnough(datetime))
 			return request.reply({
 				flags: MessageFlags.Ephemeral,
@@ -325,6 +346,7 @@ const command = new Command('recordatorio', tags)
 		});
 
 		await reminder.save();
+		scheduleReminder(reminder);
 		
 		return request.editReply({
 			flags: MessageFlags.IsComponentsV2,
@@ -414,14 +436,14 @@ const command = new Command('recordatorio', tags)
 				content: translator.getText('invalidDate'),
 			});
 
-		const time = parseTimeFromNaturalLanguage(timeStr) ?? new Date(0);
+		const time = parseTimeFromNaturalLanguage(timeStr, utcOffset) ?? addHours(new Date(0), -utcOffset);
 		if(!validateTime(time))
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
 				content: translator.getText('invalidTime'),
 			});
 
-		const datetime = new Date((+date) + (+time));
+		const datetime = addTime(date, time);
 		if(!isReminderLateEnough(datetime))
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
@@ -447,13 +469,9 @@ const command = new Command('recordatorio', tags)
 		});
 
 		await reminder.save();
-
-		await interaction.editReply({
-			components: [await makeRemindersListContainer(compressedUserId, translator)],
-		});
+		scheduleReminder(reminder);
 		
-		return interaction.followUp({
-			flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+		return interaction.editReply({
 			components: [makeReminderContainer(reminder, translator)],
 		});
 	})
@@ -495,19 +513,20 @@ const command = new Command('recordatorio', tags)
 				content: translator.getText('invalidDate'),
 			});
 
-		const time = parseTimeFromNaturalLanguage(timeStr) ?? new Date(0);
+		const time = parseTimeFromNaturalLanguage(timeStr, utcOffset) ?? addHours(new Date(0), -utcOffset);
 		if(!validateTime(time))
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
 				content: translator.getText('invalidTime'),
 			});
 
-		const datetime = new Date((+date) + (+time));
-		if(!isReminderLateEnough(datetime))
+		const datetime = addTime(date, time);
+		if(!isReminderLateEnough(datetime)) {
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
 				content: translator.getText('recordarReminderTooSoon', +datetime / 1000),
 			});
+		}
 
 		reminder.date = datetime;
 		reminder.content = reminderContent;
@@ -516,12 +535,13 @@ const command = new Command('recordatorio', tags)
 		await interaction.deferUpdate();
 
 		await reminder.save();
+		scheduleReminder(reminder);
 			
 		return interaction.editReply({
 			components: [makeReminderContainer(reminder, translator, translator.getText('recordarReminderEditSuccessTitle'))],
 		});
 	})
-	.setButtonResponse(async function deleteReminder(interaction, reminderId, compressedUserId) {
+	.setButtonResponse(async function deleteReminder(interaction, reminderId) {
 		const [ reminder, translator ] = await Promise.all([
 			Reminder.findById(reminderId),
 			Translator.from(interaction),
@@ -540,12 +560,7 @@ const command = new Command('recordatorio', tags)
 		const textDisplay = new TextDisplayBuilder()
 			.setContent(translator.getText('recordarReminderDeleteSuccess'));
 
-		await interaction.editReply({
-			components: [await makeRemindersListContainer(compressedUserId, translator)],
-		});
-
-		return interaction.followUp({
-			flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+		return interaction.editReply({
 			components: [textDisplay],
 		});
 	}, { userFilterIndex: 1 })
