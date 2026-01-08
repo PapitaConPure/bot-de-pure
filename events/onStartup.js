@@ -38,7 +38,7 @@ const chalk = require('chalk');
 const { prepareTracksPlayer } = require('../systems/others/musicPlayer')
 const { initializeWebhookMessageOwners } = require('../systems/agents/discordagent');
 const { setupGuildRateKeeper, fetchAllGuildMembers } = require('../utils/guildratekeeper');
-const { initRemindersScheduler, triggerDueReminders } = require('../systems/others/remindersScheduler.js');
+const { initRemindersScheduler, processReminders } = require('../systems/others/remindersScheduler.js');
 
 const logOptions = {
 	slash: false,
@@ -174,6 +174,10 @@ async function onStartup(client) {
 		});
 		logOptions.feedSuscriptions && console.log({ feedTagSuscriptionsCache });
 
+		console.log(chalk.gray('Preparando recordatorios...'));
+		initRemindersScheduler(client);
+		await processReminders();
+
 		console.log(chalk.gray('Preparando Infracciones de Saki Scans...'));
 		const hourai = (await SakiDB.findOne({})) || new SakiDB({});
 		{
@@ -200,10 +204,6 @@ async function onStartup(client) {
 			if(wasModified) hourai.markModified('userInfractions');
 		}
 		await hourai.save();
-
-		console.log(chalk.gray('Preparando recordatorios...'));
-		initRemindersScheduler(client);
-		await triggerDueReminders();
 		
 		console.log(chalk.gray('Preparando Dueños de Mensajes de Agentes Puré...'));
 		await initializeWebhookMessageOwners();

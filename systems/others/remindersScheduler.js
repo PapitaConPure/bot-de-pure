@@ -21,7 +21,7 @@ async function scheduleReminder(reminder) {
 		throw new TypeError(`Expected a ReminderDocument. Got: ${reminder == null ? reminder : typeof reminder}`);
 
 	debug(`Cleaning up duplicate reminders of #${reminder._id}`);
-	cleanDuplicateScheduledReminder(reminder._id);
+	clearScheduledReminder(reminder._id);
 	
 	debug('Attempting to schedule a reminder');
 
@@ -117,11 +117,11 @@ async function sendReminder(channel, user, reminderContent) {
 }
 
 /**@param {string} reminderId*/
-async function cleanDuplicateScheduledReminder(reminderId) {
+async function clearScheduledReminder(reminderId) {
 	const samePreviousReminder = scheduledIds.get(reminderId);
 
 	if(samePreviousReminder) {
-		debug(`Duplicate scheduled reminder #${reminderId} has been cleaned.`);
+		debug(`Scheduled reminder #${reminderId} has been cleared.`);
 		clearTimeout(samePreviousReminder);
 	}
 
@@ -164,5 +164,5 @@ module.exports = {
 	initRemindersScheduler,
 	scheduleReminder,
 	triggerReminder,
-	triggerDueReminders: processReminders,
+	processReminders,
 };
