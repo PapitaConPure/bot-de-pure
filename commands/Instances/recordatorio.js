@@ -33,30 +33,29 @@ async function makeRemindersListContainer(compressedUserId, translator) {
 			.addTextDisplayComponents(textDisplay =>
 				textDisplay.setContent(translator.getText('recordarNoReminders'))
 			);
-		return;
+	} else {
+		reminders.forEach(reminder => {
+			const unix = getUnixTime(reminder.date);
+			container
+				.addSeparatorComponents(separator => separator.setDivider(true))
+				.addSectionComponents(section =>
+					section
+						.addTextDisplayComponents(textDisplay =>
+							textDisplay.setContent([
+								`-# <:bell:1458732220016627734> <t:${unix}:R> → <#${decompressId(reminder.channelId)}> <:clock:1357498813144760603> <t:${unix}:T>`,
+								shortenText(reminder.content, 64),
+							].join('\n'))
+						)
+						.setButtonAccessory(
+							new ButtonBuilder()
+								.setCustomId(`recordar_viewReminder_${reminder._id}_${compressedUserId}`)
+								.setEmoji('1458474431839076569')
+								.setLabel(translator.getText('buttonView'))
+								.setStyle(ButtonStyle.Secondary)
+						)
+				);
+		});
 	}
-
-	reminders.forEach(reminder => {
-		const unix = getUnixTime(reminder.date);
-		container
-			.addSeparatorComponents(separator => separator.setDivider(true))
-			.addSectionComponents(section =>
-				section
-					.addTextDisplayComponents(textDisplay =>
-						textDisplay.setContent([
-							`-# <:bell:1458732220016627734> <t:${unix}:R> → <#${decompressId(reminder.channelId)}> <:clock:1357498813144760603> <t:${unix}:T>`,
-							shortenText(reminder.content, 64),
-						].join('\n'))
-					)
-					.setButtonAccessory(
-						new ButtonBuilder()
-							.setCustomId(`recordar_viewReminder_${reminder._id}_${compressedUserId}`)
-							.setEmoji('1458474431839076569')
-							.setLabel(translator.getText('buttonView'))
-							.setStyle(ButtonStyle.Secondary)
-					)
-			);
-	});
 
 	container
 		.addSeparatorComponents(separator =>
@@ -101,7 +100,7 @@ function makeReminderContainer(reminder, translator, title = undefined) {
 		.addTextDisplayComponents(
 			textDisplay => textDisplay.setContent(title ?? translator.getText('recordarReminderCreateTitle')),
 			textDisplay => textDisplay.setContent(
-				translator.getText('recordarReminderCreateDateDescription', +reminder.date / 1000)
+				translator.getText('recordarReminderCreateDateDescription', +getUnixTime(reminder.date))
 			),
 		)
 		.addSeparatorComponents(separator => separator.setDivider(false))
