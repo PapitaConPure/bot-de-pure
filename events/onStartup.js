@@ -38,7 +38,7 @@ const chalk = require('chalk');
 const { prepareTracksPlayer } = require('../systems/others/musicPlayer')
 const { initializeWebhookMessageOwners } = require('../systems/agents/discordagent');
 const { setupGuildRateKeeper, fetchAllGuildMembers } = require('../utils/guildratekeeper');
-const { initRemindersScheduler, getRemindersScheduler } = require('../systems/others/remindersScheduler.js');
+const { initRemindersScheduler, triggerDueReminders } = require('../systems/others/remindersScheduler.js');
 
 const logOptions = {
 	slash: false,
@@ -203,7 +203,7 @@ async function onStartup(client) {
 
 		console.log(chalk.gray('Preparando recordatorios...'));
 		initRemindersScheduler(client);
-		await getRemindersScheduler().triggerDueReminders();
+		await triggerDueReminders();
 		
 		console.log(chalk.gray('Preparando Dueños de Mensajes de Agentes Puré...'));
 		await initializeWebhookMessageOwners();

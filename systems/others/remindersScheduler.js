@@ -7,116 +7,126 @@ const { decompressId } = require('../../func');
 
 const { debug, info, error } = Logger('DEBUG', 'Reminders');
 
+/**@type {import('discord.js').Client}*/
+let schedulerClient = null;
+/**@type {Map<string, NodeJS.Timeout>}*/
+const scheduledIds = new Map();
+
 /**
- * Representa un único programador de recordatorios
- * @class
- * @static
+ * Programa el recordatorio indicado a ejecutarse en el tiempo que trae especificado
+ * @param {import('../../models/reminders').ReminderDocument} reminder El recordatorio a programar
  */
-class RemindersScheduler {
-	/**@type {import('discord.js').Client}*/
-	#client;
+async function scheduleReminder(reminder) {
+	if(!reminder)
+		throw new TypeError(`Expected a ReminderDocument. Got: ${reminder == null ? reminder : typeof reminder}`);
 
-	/**
-	 * Inicializa el programador de recordatorios, disparando todos los recordatorios pendientes que estén expirados
-	 * @param {import('discord.js').Client} client 
-	 */
-	constructor(client) {
-		this.#client = client;
-	}
-
-	/**
-	 * Dispara todos los recordatorios pendientes que ya estén expirados
-	 * @throws {RemindersSchedulerError}
-	 */
-	async triggerDueReminders() {
-		try {
-			const dueReminders = await Reminder.find({ date: { $lte: new Date(Date.now()) } });
-			const triggers = await Promise.allSettled(dueReminders.map(reminder => this.triggerReminder(reminder)));
-			const failedTriggers = triggers.filter(trigger => trigger.status === 'rejected');
-			if(failedTriggers.length)
-				throw new RemindersSchedulerError(`Couldn't trigger all reminders.\nReceived the following reasons:\n${failedTriggers.map(t => t.reason).join('\n')}`);
-		} catch(err) {
-			const message = 'Failed to trigger all due reminders.';
-			error(err, message);
-			throw new RemindersSchedulerError(message);
-		}
-	}
-
-	/**
-	 * Programa el recordatorio indicado a ejecutarse en el tiempo que trae especificado
-	 * @param {import('../../models/reminders').ReminderDocument} reminder El recordatorio a programar
-	 */
-	scheduleReminder(reminder) {
-		debug('Attempting to schedule a reminder');
-
-		const ms = timeUntil(reminder.date);
-
-		if(ms <= 0) {
-			this.triggerReminder(reminder);
-			info('A reminder was about to be scheduled, but it\'s already expired so it was triggered immediately instead.');
-		} else {
-			setTimeout(this.triggerReminder, ms, reminder);
-			info('Scheduling a reminder');
-		}
-	}
-
-	/**
-	 * Dispara el recordatorio indicado
-	 * @param {import('../../models/reminders').ReminderDocument} reminder El recordatorio a disparar
-	 */
-	async triggerReminder(reminder) {
-		debug(`Attempting to trigger reminder #${reminder._id}.`);
-		
-		const channelId = decompressId(reminder.channelId);
-		const userId = decompressId(reminder.userId);
-		
-		debug(`Fetching the specified channel for reminder #${reminder._id}.`);
-		const channel = this.#client.channels.cache.get(channelId)
-		?? await this.#client.channels.fetch(channelId);
-		
-		debug(`Fetching the specified user for reminder #${reminder._id}.`);
-		const user = this.#client.users.cache.get(userId)
-			?? await this.#client.users.fetch(userId);
-
-		try {
-			if(channel.isSendable() && channel.isTextBased() && !channel.isDMBased()) {
-				await this.#sendReminder(channel, user, reminder.content);
-				debug(`Reminder message for ${user.username} has been sent to ${channelId}.`);
-			}
+	debug(`Cleaning up duplicate reminders of #${reminder._id}`);
+	cleanDuplicateScheduledReminder(reminder._id);
 	
-			await Reminder.findByIdAndDelete(reminder._id);
+	debug('Attempting to schedule a reminder');
 
-			info(`The reminder #${reminder._id} for ${user.username} has been triggered, sent to ${channelId}, and deleted appropiately.`);
-		} catch(err) {
-			error(err);
-			throw new RemindersSchedulerError('No se pudo disparar un recordatorio.');
+	const ms = timeUntil(reminder.date);
+
+	if(ms < 1) {
+		triggerReminder(reminder);
+		info('A reminder was about to be scheduled, but it\'s already expired so it was triggered immediately instead.');
+	} else {
+		const newTimeout = setTimeout(triggerReminder, ms, reminder);
+		scheduledIds.set(reminder._id, newTimeout);
+
+		info('Scheduled a reminder');
+	}
+}
+
+/**
+ * Dispara todos los recordatorios pendientes que ya estén expirados y programa aquellos que no lo estén
+ * @throws {RemindersSchedulerError}
+ */
+async function processReminders() {
+	try {
+		const dueReminders = await Reminder.find();
+		const triggers = await Promise.allSettled(dueReminders.map(reminder => scheduleReminder(reminder)));
+		const failedTriggers = triggers.filter(trigger => trigger.status === 'rejected');
+		if(failedTriggers.length)
+			throw new RemindersSchedulerError(`Couldn't trigger all reminders.\nReceived the following reasons:\n${failedTriggers.map(t => t.reason).join('\n')}`);
+	} catch(err) {
+		const message = 'Failed to trigger all due reminders.';
+		error(err, message);
+		throw new RemindersSchedulerError(message);
+	}
+}
+
+/**
+ * Dispara el recordatorio indicado
+ * @param {import('../../models/reminders').ReminderDocument} reminder El recordatorio a disparar
+ */
+async function triggerReminder(reminder) {
+	if(!reminder)
+		throw new TypeError(`Expected a ReminderDocument. Got: ${reminder == null ? reminder : typeof reminder}`);
+
+	debug(`Attempting to trigger reminder #${reminder._id}.`);
+	
+	const channelId = decompressId(reminder.channelId);
+	const userId = decompressId(reminder.userId);
+	
+	debug(`Fetching the specified channel for reminder #${reminder._id}.`);
+	const channel = schedulerClient.channels.cache.get(channelId)
+	?? await schedulerClient.channels.fetch(channelId);
+	
+	debug(`Fetching the specified user for reminder #${reminder._id}.`);
+	const user = schedulerClient.users.cache.get(userId)
+		?? await schedulerClient.users.fetch(userId);
+
+	try {
+		if(channel.isSendable() && channel.isTextBased() && !channel.isDMBased()) {
+			await sendReminder(channel, user, reminder.content);
+			debug(`Reminder message for ${user.username} has been sent to ${channelId}.`);
 		}
+
+		await Reminder.findByIdAndDelete(reminder._id);
+
+		info(`The reminder #${reminder._id} for ${user.username} has been triggered, sent to ${channelId}, and deleted appropiately.`);
+	} catch(err) {
+		error(err);
+		throw new RemindersSchedulerError('Couldn\'t trigger a reminder.');
+	}
+}
+
+/**
+ * Envía el contenido del recordatorio en Discord
+ * @param {import('discord.js').GuildTextBasedChannel} channel El canal destino del envío
+ * @param {import('discord.js').User} user El usuario a mencionar con el recordatorio
+ * @param {string} reminderContent El contenido del recordatorio
+ */
+async function sendReminder(channel, user, reminderContent) {
+	debug('Attempting to send a reminder message.');
+
+	const translator = await Translator.from(user.id);
+
+	const container = new ContainerBuilder()
+		.setAccentColor(globalConfigs.tenshiColor)
+		.addTextDisplayComponents(
+			textDisplay => textDisplay.setContent(translator.getText('reminderTriggerEpigraph', user)),
+			textDisplay => textDisplay.setContent(reminderContent),
+		);
+
+	return channel.send({
+		flags: MessageFlags.IsComponentsV2,
+		components: [container],
+	});
+}
+
+/**@param {string} reminderId*/
+async function cleanDuplicateScheduledReminder(reminderId) {
+	const samePreviousReminder = scheduledIds.get(reminderId);
+
+	if(samePreviousReminder) {
+		debug(`Duplicate scheduled reminder #${reminderId} has been cleaned.`);
+		clearTimeout(samePreviousReminder);
 	}
 
-	/**
-	 * Envía el contenido del recordatorio en Discord
-	 * @param {import('discord.js').GuildTextBasedChannel} channel El canal destino del envío
-	 * @param {import('discord.js').User} user El usuario a mencionar con el recordatorio
-	 * @param {string} reminderContent El contenido del recordatorio
-	 */
-	async #sendReminder(channel, user, reminderContent) {
-		debug('Attempting to send a reminder message.');
-
-		const translator = await Translator.from(user.id);
-
-		const container = new ContainerBuilder()
-			.setAccentColor(globalConfigs.tenshiColor)
-			.addTextDisplayComponents(
-				textDisplay => textDisplay.setContent(translator.getText('reminderTriggerEpigraph', user)),
-				textDisplay => textDisplay.setContent(reminderContent),
-			);
-
-		return channel.send({
-			flags: MessageFlags.IsComponentsV2,
-			components: [container],
-		});
-	}
-};
+	return samePreviousReminder;
+}
 
 /**
  * * Si el resultado es positivo, devuelve cuántos milisegundos faltan para alcanzar la fecha indicada
@@ -130,37 +140,16 @@ function timeUntil(date) {
 	return then - now;
 }
 
-/**@type {RemindersScheduler}*/
-let scheduler;
-
 /**
  * Inicializa el programador de recordatorios con el cliente indicado
  * @param {import('discord.js').Client} client 
  */
 function initRemindersScheduler(client) {
+	if(!client)
+		throw new TypeError(`Expected a Discord client. Got: ${client == null ? client : typeof client}`);
+	
 	debug('Attempting to initialize the scheduler.');
-	scheduler = new RemindersScheduler(client);
-}
-
-/**
- * Obtiene el programador de recordatorios que fue previamente inicializado
- * @returns {RemindersScheduler}
- * @throws {RemindersSchedulerNotInitializedError} Si no se ha llamado la función {@link initRemindersScheduler}
- */
-function getRemindersScheduler() {
-	debug('Attempting to get the initialized scheduler.');
-
-	if(!scheduler)
-		throw new RemindersSchedulerNotInitializedError();
-
-	return scheduler;
-}
-
-class RemindersSchedulerNotInitializedError extends Error {
-	constructor() {
-		super('No se inicializó el programador de recordatorios. Usa initRemindersScheduler() primero.');
-		this.name = 'RemindersSchedulerNotInitializedError';
-	}
+	schedulerClient = client;
 }
 
 class RemindersSchedulerError extends Error {
@@ -173,5 +162,7 @@ class RemindersSchedulerError extends Error {
 
 module.exports = {
 	initRemindersScheduler,
-	getRemindersScheduler,
+	scheduleReminder,
+	triggerReminder,
+	triggerDueReminders: processReminders,
 };
