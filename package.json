@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/PapitaConPure/bot-de-pure#readme",
   "dependencies": {
+    "@date-fns/utc": "^2.1.1",
     "@discord-player/extractor": "^7.1.0",
     "@distube/ytdl-core": "^4.16.12",
     "axios": "^1.13.2",
