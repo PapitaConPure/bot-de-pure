@@ -1887,6 +1887,17 @@ let localesObject = /**@type {const}*/({
 		ja: `⚠️️ **${subl(0)}件**（${subl(1)}％）のコマンド実行が失敗しました`,
 	},
 
+	horaDateButNoTime: {
+		es: '⚠️️ No puedes indicar una `--fecha` si no especificas una `<hora>`',
+		en: '⚠️️ You can\'t provide a `--date` if you don\'t specify a `<time>`',
+		ja: '⚠️️ `<time>`を指定しないと`--date`を指定することはできません',
+	},
+	horaAdaptedToYourTimezone: {
+		es: 'Adaptado a tu huso horario',
+		en: 'Adapted to your time zone',
+		ja: 'あなたのタイムゾーンに合わせて',
+	},
+
 	recordarRemindersListTitle: {
 		es: '## Recordatorios',
 		en: '## Reminders',
