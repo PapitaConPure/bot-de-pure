@@ -1,4 +1,4 @@
-const { addDays, addHours, startOfYesterday, startOfToday, startOfTomorrow } = require('date-fns');
+const { addDays, addHours, addMinutes, addSeconds, addMilliseconds, startOfYesterday, startOfToday, startOfTomorrow } = require('date-fns');
 const { Translator } = require('../i18n');
 
 const relativeDates = /**@type {const}*/({
@@ -51,7 +51,15 @@ const relativeTimes = /**@type {const}*/({
 			'now',
 			'今',
 		]),
-		getValue: () => new Time(Time.now()),
+		getValue: () => {
+			const now = new Date(Date.now());
+			let time = new Date(0);
+			time = addHours(time, now.getHours());
+			time = addMinutes(time, now.getMinutes());
+			time = addSeconds(time, now.getSeconds());
+			time = addMilliseconds(time, now.getMilliseconds());
+			return time;
+		},
 	},
 });
 
@@ -115,7 +123,7 @@ function parseDateFromNaturalLanguage(str, locale, z = 0) {
 
 	for(const relativeDate of Object.values(relativeDates))
 		if(relativeDate.match.has(str))
-			return relativeDate.getValue();
+			return addHours(relativeDate.getValue(), -z);
 
 	const dateComponents = getDateComponentsFromString(str);
 
@@ -126,48 +134,11 @@ function parseDateFromNaturalLanguage(str, locale, z = 0) {
 }
 
 /**
- * @class
- * Representa una hora
- */
-class Time extends Date {
-	/**
-	 * Devuelve la hora actual o la hora indicada
-	 * @param {number} [hours] 
-	 * @param {number} [minutes] 
-	 * @param {number} [seconds] 
-	 * @param {number} [milliseconds] 
-	*/
-	constructor(hours = 0, minutes = 0, seconds = 0, milliseconds = 0) {
-		const value = (hours == undefined)
-			? Time.now()
-			: Date.UTC(1970, 0, 1, hours, minutes, seconds, milliseconds);
-
-		super(value);
-	}
-
-	static now() {
-		return Date.now() - +startOfToday();
-	}
-
-	/**
-	 * Crea un objeto {@link Time} a partir del valor horario del objeto {@link Date} suministrado
-	 * @param {Date} date 
-	 */
-	static fromDate(date) {
-		return new Time(date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds());
-	}
-
-	valueOf() {
-		return this.getTime();
-	}
-}
-
-/**
  * Interpreta el string de tiempo indicado y obtiene un objeto {@link Date} cuyos ticks equivalen a la hora ingresada,
  * usando UTC y compensado con la diferencia del huso horario de origen (`z`) indicado
  * @param {string} str El string del cual obtener la hora
  * @param {number} z El huso horario con el cual corregir la fecha UTC obtenida
- * @returns {Time} El tiempo correspondiente si el string pudo interpretarse,
+ * @returns {Date} El tiempo correspondiente si el string pudo interpretarse,
  * una fecha inválida si el string estaba malformado,
  * o `undefined` si el string estaba vacío
  */
@@ -176,10 +147,10 @@ function parseTimeFromNaturalLanguage(str, z = 0) {
 		return;
 
 	str = str.toLowerCase();
-	
+
 	for(const relativeTime of Object.values(relativeTimes))
 		if(relativeTime.match.has(str))
-			return relativeTime.getValue();
+			return addHours(relativeTime.getValue(), -z);
 
 	str = str.replace(/\s+/g, '');
 		
@@ -195,15 +166,15 @@ function parseTimeFromNaturalLanguage(str, z = 0) {
 
 	if(!isNaN(+str)) { //Hora militar sencilla: HHmmss
 		if(str.includes('-'))
-			return invalidTime();
+			return invalidDate();
 
 		if(str.length > 2 && str.length != 4 && str.length != 6)
-			return invalidTime();
+			return invalidDate();
 
 		const matches = str.match(/([0-9]{1,2})([0-9]{2})?([0-9]{2})?/);
 
 		if(!matches)
-			return invalidTime();
+			return invalidDate();
 
 		rangesInclusive.h[1] = 23;
 		timeComponents.h = +matches[1];
@@ -218,13 +189,13 @@ function parseTimeFromNaturalLanguage(str, z = 0) {
 		const usesGogo = str.includes(gogo);
 
 		if(usesGozen && usesGogo)
-			return invalidTime();
+			return invalidDate();
 
 		if(usesGozen && !(str.startsWith(gozen) || str.endsWith(gozen)))
-			return invalidTime();
+			return invalidDate();
 		
 		if(usesGogo && !(str.startsWith(gogo) || str.endsWith(gogo)))
-			return invalidTime();
+			return invalidDate();
 
 		const usesHan = str.includes(han);
 		const hMatch = str.match(/([0-9]{1,2})時/);
@@ -232,10 +203,10 @@ function parseTimeFromNaturalLanguage(str, z = 0) {
 		const sMatch = str.match(/([0-9]{1,2})(?:\.([0-9]{1,3}))?秒/);
 		
 		if(usesHan && (mMatch || sMatch || !str.endsWith(han)))
-			return invalidTime();
+			return invalidDate();
 		
 		if(!hMatch)
-			return invalidTime();
+			return invalidDate();
 
 		timeComponents.h = +hMatch[1];
 
@@ -253,7 +224,7 @@ function parseTimeFromNaturalLanguage(str, z = 0) {
 
 		if(isShortFormat) {
 			rangesInclusive.h[1] = 12;
-			if(timeComponents.h > 12) return invalidTime();
+			if(timeComponents.h > 12) return invalidDate();
 			if(timeComponents.h === 12) hoursPeriodOffset -= 12;
 			if(usesGogo) hoursPeriodOffset += 12;
 		} else
@@ -266,20 +237,20 @@ function parseTimeFromNaturalLanguage(str, z = 0) {
 			const matches = str.match(/(am|pm)?([0-9]{1,2}):([0-9]{2})(?::([0-9]{2}))?(?:\.([0-9]{1,3}))?(am|pm)?/);
 
 			if(!matches)
-			return invalidTime();
+				return invalidDate();
 
 			[ , meridiem1, h, m, s, ms, meridiem2 ] = matches;
 		} else { //H
 			const matches = str.match(/(am|pm)?([0-9]{1,2})(am|pm)?/);
 
 			if(!matches)
-				return invalidTime();
+				return invalidDate();
 
 			[ , meridiem1, h, meridiem2 ] = matches;
 		}
 
 		if(meridiem1 && meridiem2)
-			return invalidTime();
+			return invalidDate();
 			
 		timeComponents.h = +h;
 		timeComponents.m = +(m || 0);
@@ -298,13 +269,16 @@ function parseTimeFromNaturalLanguage(str, z = 0) {
 			rangesInclusive.h[1] = 30; //Noche extendida
 	}
 
-	if(rangesInclusive.h[0] > timeComponents.h || timeComponents.h > rangesInclusive.h[1]) return invalidTime();
-	if(rangesInclusive.m[0] > timeComponents.m || timeComponents.m > rangesInclusive.m[1]) return invalidTime();
-	if(rangesInclusive.s[0] > timeComponents.s || timeComponents.s > rangesInclusive.s[1]) return invalidTime();
-	if(rangesInclusive.ms[0] > timeComponents.ms || timeComponents.ms > rangesInclusive.ms[1]) return invalidTime();
+	if(rangesInclusive.h[0] > timeComponents.h || timeComponents.h > rangesInclusive.h[1]) return invalidDate();
+	if(rangesInclusive.m[0] > timeComponents.m || timeComponents.m > rangesInclusive.m[1]) return invalidDate();
+	if(rangesInclusive.s[0] > timeComponents.s || timeComponents.s > rangesInclusive.s[1]) return invalidDate();
+	if(rangesInclusive.ms[0] > timeComponents.ms || timeComponents.ms > rangesInclusive.ms[1]) return invalidDate();
 
-	const { h, m, s, ms } = timeComponents;
-	const time = new Time(h, m, s, ms);
+	let time = new Date(0);
+	time = addHours(time, timeComponents.h);
+	time = addMinutes(time, timeComponents.m);
+	time = addSeconds(time, timeComponents.s);
+	time = addMilliseconds(time, timeComponents.ms);
 	return addHours(time, hoursPeriodOffset - z);
 }
 
@@ -312,21 +286,19 @@ function invalidDate() {
 	return new Date(NaN);
 }
 
-function invalidTime() {
-	return Time.fromDate(invalidDate());
-}
-
 /**
  * @param {Date} date 
- * @param {Time} time 
+ * @param {Date} time 
  * @returns {Date}
  */
 function addTime(date, time) {
 	return new Date(+date + +time);
 }
 
+console.log(parseTimeFromNaturalLanguage('11:00', -3).toUTCString());
+console.log(parseTimeFromNaturalLanguage('now', -3).toUTCString());
+
 module.exports = {
-	Time,
 	relativeDates,
 	relativeTimes,
 	getDateComponentsFromString,
@@ -334,6 +306,5 @@ module.exports = {
 	parseDateFromNaturalLanguage,
 	parseTimeFromNaturalLanguage,
 	invalidDate,
-	invalidTime,
 	addTime,
 };
