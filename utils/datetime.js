@@ -1,5 +1,13 @@
 const { addDays, addHours, addMinutes, addSeconds, addMilliseconds, startOfYesterday, startOfToday, startOfTomorrow } = require('date-fns');
 const { Translator } = require('../i18n');
+const { utc } = require('@date-fns/utc')
+
+/**@param {number} tzc Compensación de zona horaria (en horas)*/
+const utcStartOfYesterday = (tzc = 0) => new Date(addHours(startOfYesterday({ in: utc }), tzc).setUTCHours(0, 0, 0, 0));
+/**@param {number} tzc Compensación de zona horaria (en horas)*/
+const utcStartOfToday     = (tzc = 0) => new Date(addHours(startOfToday    ({ in: utc }), tzc).setUTCHours(0, 0, 0, 0));
+/**@param {number} tzc Compensación de zona horaria (en horas)*/
+const utcStartOfTomorrow  = (tzc = 0) => new Date(addHours(startOfTomorrow ({ in: utc }), tzc).setUTCHours(0, 0, 0, 0));
 
 const relativeDates = /**@type {const}*/({
 	beforeYesterday: {
@@ -8,7 +16,7 @@ const relativeDates = /**@type {const}*/({
 			'before yesterday',
 			'一昨日',
 		]),
-		getValue: () => addMinutes(addDays(startOfYesterday(), -1), -new Date().getTimezoneOffset()),
+		getValue: (/**@type {number}*/tzc) => addDays(utcStartOfYesterday(tzc), -1),
 	},
 	yesterday: {
 		match: new Set([
@@ -16,7 +24,7 @@ const relativeDates = /**@type {const}*/({
 			'yesterday',
 			'昨日',
 		]),
-		getValue: () => addMinutes(startOfYesterday(), -new Date().getTimezoneOffset()),
+		getValue: (/**@type {number}*/tzc) => utcStartOfYesterday(tzc),
 	},
 	today: {
 		match: new Set([
@@ -24,7 +32,7 @@ const relativeDates = /**@type {const}*/({
 			'today',
 			'今日',
 		]),
-		getValue: () => addMinutes(startOfToday(), -new Date().getTimezoneOffset()),
+		getValue: (/**@type {number}*/tzc) => utcStartOfToday(tzc),
 	},
 	tomorrow: {
 		match: new Set([
@@ -32,7 +40,7 @@ const relativeDates = /**@type {const}*/({
 			'tomorrow',
 			'明日',
 		]),
-		getValue: () => addMinutes(startOfTomorrow(), -new Date().getTimezoneOffset()),
+		getValue: (/**@type {number}*/tzc) => utcStartOfTomorrow(tzc),
 	},
 	afterTomorrow: {
 		match: new Set([
@@ -40,7 +48,7 @@ const relativeDates = /**@type {const}*/({
 			'after tomorrow',
 			'明後日',
 		]),
-		getValue: () => addMinutes(addDays(startOfTomorrow(), +1), -new Date().getTimezoneOffset()),
+		getValue: (/**@type {number}*/tzc) => addDays(utcStartOfTomorrow(tzc), +1),
 	},
 });
 
@@ -101,8 +109,9 @@ function makeDateFromComponents(a, b, c, locale, z) {
 
 	const dateResultUTC = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
 	const dateResultTZ = addHours(dateResultUTC, -z);
+	const dateResultCrop = new Date(dateResultTZ.setUTCHours(0, 0, 0, 0));
 
-	return dateResultTZ;
+	return dateResultCrop;
 }
 
 /**
@@ -123,7 +132,7 @@ function parseDateFromNaturalLanguage(str, locale, z = 0) {
 
 	for(const relativeDate of Object.values(relativeDates))
 		if(relativeDate.match.has(str))
-			return relativeDate.getValue();
+			return relativeDate.getValue(z);
 
 	const dateComponents = getDateComponentsFromString(str);
 
@@ -291,7 +300,9 @@ function invalidDate() {
  * @returns {Date}
  */
 function addTime(date, time) {
-	return new Date(+date + +time);
+	const datetime = new Date(+date + +time);
+	console.log({ date, time, datetime });
+	return datetime;
 }
 
 module.exports = {
@@ -301,6 +312,9 @@ module.exports = {
 	makeDateFromComponents,
 	parseDateFromNaturalLanguage,
 	parseTimeFromNaturalLanguage,
+	utcStartOfYesterday,
+	utcStartOfToday,
+	utcStartOfTomorrow,
 	invalidDate,
 	addTime,
 };
