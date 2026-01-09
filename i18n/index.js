@@ -1917,10 +1917,178 @@ let localesObject = /**@type {const}*/({
 		en: '❌ You need to connect to a voice channel first',
 		ja: '❌ まず音声チャンネルに接続する必要があります',
 	},
+	voiceWizardAuthorName: {
+		es: 'Asistente de Configuración de Sistema PuréVoice',
+		en: 'PuréVoice System Configuration Wizard',
+		ja: 'PuréVoiceシステム設定ウィザード',
+	},
+	voiceWizardWelcome: {
+		es: 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes! Solo sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras',
+		en: 'If this is your first time setting up a PuréVoice System, don\'t worry! Just follow the Wizard\'s instructions and adapt your Feed to what you want',
+		ja: '初めてPuréVoiceシステムをセットアップする場合でも、心配する必要はありません。ウィザードの指示に従って、必要に応じてフィードを調整するだけです',
+	},
+	voiceInstallationStartFieldName: {
+		es: 'Inyección de Sistema PuréVoice',
+		en: 'PuréVoice System Injection',
+		ja: 'PuréVoiceシステム注入',
+	},
+	voiceInstallationStartFieldValue: {
+		es: '¿Qué deseas hacer ahora mismo?',
+		en: 'What do you want to do now?',
+		ja: '今、何をしたいですか？',
+	},
+	voiceInstallationSelectFieldName: {
+		es: 'Instalación',
+		en: 'Installation',
+		ja: 'インストール',
+	},
+	voiceInstallationSelectFieldValue: {
+		es: 'Selecciona el tipo de instalación que deseas realizar',
+		en: 'Select the installation type that best fits your needs',
+		ja: 'ご自身のニーズに最も適したインストールタイプを選択してください',
+	},
+	voiceInstallationSelectButtonCreateNew: {
+		es: 'Crear categoría con PuréVoice',
+		en: 'Create a category for PuréVoice',
+		ja: 'PuréVoiceのカテゴリを作成する',
+	},
+	voiceInstallationSelectButtonInject: {
+		es: 'Inyectar PuréVoice en categoría',
+		en: 'Inject PuréVoice into category',
+		ja: 'PuréVoiceをカテゴリーに導入',
+	},
+	voiceInstallationNameFieldName: {
+		es: `${subif(0, '=', true, 'Creación', 'Selección')} de categoría`,
+		en: `Category ${subif(0, '=', true, 'Creation', 'Selection')}`,
+		ja: `カテゴリの${subif(0, '=', true, '作成', '選択')}`,
+	},
+	voiceInstallationNameFieldValue: {
+		es: 'Menciona el nombre de la categoría a la cual inyectarle PuréVoice',
+		en: 'Mention the name of the category you want to inject PuréVoice into',
+		ja: 'PuréVoiceを導入するカテゴリ名を指定してください',
+	},
+	voiceCategoryInstalledFieldName: {
+		es: 'La categoría fue instalada',
+		en: 'The category has been installed',
+		ja: 'カテゴリがインストールされました',
+	},
+	voiceCategoryInstalledFieldValue: {
+		es: paragraph(
+			'Se ha preparado una categoría que escala de forma dinámica sus canales de voz.',
+			`Puedes reubicar el Sistema PuréVoice creado en el futuro, solo usa \`${subl(0)} voz -a\` otra vez`,
+		),
+		en: paragraph(
+			'A category that dynamically scales its voice channels has been prepared.',
+			`You can relocate the created PuréVoice System in the future, just use \`${subl(0)} voice -w\` again`,
+		),
+		ja: paragraph(
+			'動的に音声チャネルを拡張するカテゴリが用意されました。',
+			`作成したPuréVoiceシステムは将来的に再配置できます。\`${subl(0)} voice -w\`を再度使用するだけです`,
+		),
+	},
+	voiceCategoryInstallError: {
+		es: paragraph(
+			'⚠️ Ocurrió un error al inyectar PuréVoice en una categoría.',
+			'Asegúrate de que tenga los permisos necesarios para realizar esta acción (administrar canales).',
+			'También, verifica que el nombre ingresado no esté ya ocupado por alguna otra categoría o canal'
+		),
+		en: paragraph(
+			'⚠️ An error occurred while injecting PuréVoice into a category.',
+			'Make sure I have the necessary permissions to perform this action (manage channels).',
+			'Also, verify that the name entered is not already occupied by some other category or channel',
+		),
+		ja: paragraph(
+			'⚠️ PuréVoiceをカテゴリに挿入中にエラーが発生しました。',
+			'このアクション (チャネルの管理) を実行するために必要な権限があることを確認してください。',
+			'また、入力した名前が他のカテゴリやチャンネルにすでに占有されていないことを確認してください',
+		),
+	},
+	voiceUninstallFieldName: {
+		es: 'Desinstalación del Sistema PuréVoice del servidor',
+		en: 'Uninstalling the PuréVoice System from the server',
+		ja: 'PuréVoiceシステムをサーバーからアンインストールする',
+	},
+	voiceUninstallFieldValue: {
+		es: paragraph(
+			'Esto borrará todas los canales creados por el Sistema. La categoría del Sistema y los canales creados manualmente se ignorarán.',
+			'Confirma la desasociación del servidor con PuréVoice',
+		),
+		en: paragraph(
+			'This will delete all channels created by the System. The System category and manually created channels will be ignored.',
+			'Confirm the disassociation of this server with PuréVoice',
+		),
+		ja: paragraph(
+			'これにより、システムによって作成されたすべてのチャンネルが削除されます。システム カテゴリと手動で作成したチャネルは無視されます。',
+			'このサーバーとPuréVoiceの関連付けが解除されていることを確認します',
+		),
+	},
+	voiceUninstalledFieldName: {
+		es: 'Sistema PuréVoice eliminado',
+		en: 'PuréVoice System removed',
+		ja: 'PuréVoiceシステムが削除されました',
+	},
+	voiceUninstalledFieldValue: {
+		es: 'Se eliminó el Sistema PuréVoice asociado al servidor',
+		en: 'The PuréVoice System associated with the server was removed',
+		ja: 'サーバーに関連付けられたPuréVoiceシステムが削除されました',
+	},
+	voiceCancelledFieldValue: {
+		es: 'Se canceló la configuración del Sistema PuréVoice',
+		en: 'The PuréVoice System wizard has been cancelled',
+		ja: 'PuréVoiceシステムウィザードはキャンセルされました',
+	},
 	voiceSameChannelExpected: {
 		es: '❌ Ya estoy conectada a otro chat de voz. ¡Ven conmigo antes de hacer eso!',
 		en: '❌ I\'m already connected to another voice channel. Come here before doing that!',
 		ja: '❌ すでに別の音声チャネルに接続しています。その前にここに来てください！',
+	},
+	voiceSessionNameExpected: {
+		es: paragraph(
+			'⚠️ Debes ingresar un nombre de sesión para ejecutar este comando.',
+			'Si estás buscando iniciar el Asistente de configuración, usa la bandera `--asistente` o `-a`',
+		),
+		en: paragraph(
+			'⚠️ You must enter a session name to execute this command.',
+			'If you\'re trying to start the configuration Wizard, use the `--wizard` or `-w` flag',
+		),
+		ja: paragraph(
+			'⚠️ このコマンドを実行するにはセッション名を入力する必要があります。.',
+			'設定ウィザードを起動しようとしている場合は、`--wizard`または`-w`フラグを使用してください',
+		),
+	},
+	voiceSessionNameTooLong: {
+		es: '⚠️ Intenta acortar un poco el nombre. El límite para nombres de sesión es de 24(+3) caracteres',
+		en: '⚠️ Try shortening the name a bit. The limit for session names is 24(+3) characters',
+		ja: '⚠️ セッション名の長さを少し短くしてみてください。セッション名の制限は24文字（+3文字）です。',
+	},
+	voiceSessionRenameTooSoon: {
+		es: paragraph(
+			`❌ Por cuestiones técnicas, solo puedes cambiar el nombre de la sesión una vez cada 20 minutos.`,
+			`Inténtalo de nuevo <t:${subl(0)}:R> o conéctate a una nueva sesión`,
+		),
+		en: paragraph(
+			`❌ For technical reasons, you can only change the session name once every 20 minutes.`,
+			`Try again <t:${subl(0)}:R> or connect to a new session`,
+		),
+		ja: paragraph(
+			`❌ 技術的な理由により、セッション名を変更できるのは20分ごとに1回のみです。`,
+			`<t:${subl(0)}:R>にもう一度お試しいただくか、新しいセッションに接続してください`,
+		),
+	},
+	voiceReasonCategoryCreate: {
+		es: 'Preparar categoría recipiente de PuréVoice',
+		en: 'Prepare PuréVoice container category',
+		ja: 'PuréVoiceコンテナカテゴリを準備する',
+	},
+	voiceReasonSystemRemove: {
+		es: `PuréVoice desinstalado por ${subl(0)}`,
+		en: `PuréVoice uninstalled by ${subl(0)}`,
+		ja: `PuréVoiceが${subl(0)}さんによってアンインストールされました`,
+	},
+	voiceSessionReasonRename: {
+		es: 'Renombrar sesión PuréVoice',
+		en: 'PuréVoice session rename',
+		ja: 'PuréVoiceセッション名変更',
 	},
 	voiceSessionReasonFirstMemberAdd: {
 		es: 'Inclusión de primer miembro en sesión PuréVoice',
@@ -1952,6 +2120,16 @@ let localesObject = /**@type {const}*/({
 		en: 'Rename PuréVoice session (automatically forced)',
 		ja: 'PuréVoiceセッションの名前を変更する (自動的に強制)',
 	},
+	voiceSessionReasonFreeze: {
+		es: `Sesión congelada por ${subl(0)}`,
+		en: `Session freezed by ${subl(0)}`,
+		ja: `${subl(0)}さんによるセッションの軽やかさ`,
+	},
+	voiceSessionReasonUnfreeze: {
+		es: `Sesión descongelada por ${subl(0)}`,
+		en: `Session unfreezed by ${subl(0)}`,
+		ja: `${subl(0)}さんによってセッションの凍結が解除されました`,
+	},
 	voiceSessionNewMemberName: {
 		es: 'Nueva conexión',
 		en: 'New connection',
@@ -1960,7 +2138,7 @@ let localesObject = /**@type {const}*/({
 	voiceSessionNewMemberValueMemberIntegrated: {
 		es: `El miembro **${subl(0)}** fue incorporado a la sesión`,
 		en: `The member **${subl(0)}** was incorporated to the session`,
-		ja: `メンバー**${subl(0)}**がセッションに接続されました`,
+		ja: `メンバー**${subl(0)}**さんがセッションに接続されました`,
 	},
 	voiceSessionNewMemberValueBotAttached: {
 		es: `El bot **${subl(0)}** fue anexado a la sesión`,
@@ -1970,7 +2148,7 @@ let localesObject = /**@type {const}*/({
 	voiceSessionNewMemberContentHint: {
 		es: `👋 ${subl(0)}, ¡puedes conversar por aquí!`,
 		en: `👋 ${subl(0)}, you can chat over here!`,
-		ja: `👋 ${subl(0)}、ここでチャットできますよ！`,
+		ja: `👋 ${subl(0)}さん、ここでチャットできますよ！`,
 	},
 	voiceSessionNewSessionTitle: {
 		es: '✅ Sesión inicializada',
@@ -2037,15 +2215,38 @@ let localesObject = /**@type {const}*/({
 		en: 'If you don\'t enter a session name within 3 minutes, it\'ll be automatically renamed',
 		ja: '3分以内にセッション名を入力しないと、自動的に名前が変更されます',
 	},
+	
 	voiceSessionRenameInvalidEmoji: {
-		es: '⚠️️ El emoji indicado no es un emoji Unicode admitido',
-		en: '⚠️️ The supplied emoji isn\'t a valid Unicode emoji',
-		ja: '⚠️️ 示された絵文字は、サポートされている Unicode 絵文字ではありません',
+		es: paragraph(
+			'⚠️️ El emoji indicado no es un emoji Unicode admitido',
+			'Recuerda que no se pueden usar emotes personalizados para nombres de canales',
+			'También, ten en cuenta que algunos emotes estándar de Discord no son *tan estándar* y __no se espera__ que se detecten/funcionen correctamente',
+		),
+		en: paragraph(
+			'⚠️️ The supplied emoji isn\'t a valid Unicode emoji',
+			'Remember that you cannot use custom emotes for channel names.',
+			'Also, keep in mind that some standard Discord emotes aren\'t *so standard* and are __not expected__ to be detected/function correctly',
+		),
+		ja: paragraph(
+			'⚠️️ 示された絵文字は、サポートされている Unicode 絵文字ではありません。',
+			'チャンネル名にはカスタムエモートを使用できないことにご注意ください。',
+			'また、一部の標準Discord絵文字は*それほど標準的ではない*ため、正しく検出・機能することが__期待されていません__。',
+		),
 	},
 	voiceSessionRenameSuccess: {
 		es: '✅ Nombre aplicado',
 		en: '✅ Name applied',
 		ja: '✅ 名前が申請されました',
+	},
+	voiceSessionFreezeSuccess: {
+		es: `❄️ La sesión "${subl(0)}" fue **${subif(1, '=', true, 'congelada', 'descongelada')}**`,
+		en: `❄️ Session "${subl(0)}" was **${subif(1, '=', true, 'freezed', 'unfreezed')}**`,
+		ja: `❄️ セッション「${subl(0)}」が**${subif(1, '=', true, '凍結', '凍結解除')}**されました`,
+	},
+	voiceSessionRenameError: {
+		es: '⚠️ Ocurrió un error al aplicar el nombre de sesión',
+		en: '⚠️ An error occurred while applying the session name',
+		ja: '⚠️ セッション名前の適用中にエラーが発生しました',
 	},
 	voiceSessionJoinExpected: {
 		es: '❌ Debes entrar a una sesión PuréVoice para realizar esta acción',
