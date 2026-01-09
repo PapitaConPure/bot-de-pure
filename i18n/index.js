@@ -153,163 +153,17 @@ let localesObject = /**@type {const}*/({
 		),
 	},
 
+	suggestHelpForCommand: {
+		es: `Usa \`${subl(0)}ayuda ${subl(1)}\` para más información`,
+		en: `Use \`${subl(0)}help ${subl(1)}\` for more information`,
+		ja: `詳細については\`${subl(0)}help ${subl(1)}\`を使用してください`,
+	},
+
 	somethingWentWrong: {
 		es: '⚠️️ Algo salió mal',
 		en: '⚠️️ Something went wrong',
 		ja: '⚠️️ 問題が発生しました',
 	},
-
-	voiceExpected: {
-		es: '❌ Debes conectarte a un canal de voz primero',
-		en: '❌ You need to connect to a voice channel first',
-		ja: '❌ まず音声チャンネルに接続する必要があります',
-	},
-	voiceSameChannelExpected: {
-		es: '❌ Ya estoy conectada a otro chat de voz. ¡Ven conmigo antes de hacer eso!',
-		en: '❌ I\'m already connected to another voice channel. Come here before doing that!',
-		ja: '❌ すでに別の音声チャネルに接続しています。その前にここに来てください！',
-	},
-	voiceSessionReasonFirstMemberAdd: {
-		es: 'Inclusión de primer miembro en sesión PuréVoice',
-		en: 'First member addition in PuréVoice Session',
-		ja: 'Purevoiceセッションに最初のメンバーを含める',
-	},
-	voiceSessionReasonMemberAdd: {
-		es: 'Inclusión de miembro en sesión PuréVoice',
-		en: 'Member addition in PuréVoice Session',
-		ja: 'メンバーがPuréVoiceセッションに参加しました',
-	},
-	voiceSessionReasonRoleCreate: {
-		es: 'Inyectar Rol Efímero PuréVoice',
-		en: 'Inject PuréVoice Ephemeral Rol',
-		ja: 'PuréVoice一時的なロールを注入する',
-	},
-	voiceSessionReasonRoleEdit: {
-		es: 'Conceder envío de mensajes a rol de sesión PuréVoice',
-		en: 'Grant permission to send messages for PuréVoice session role',
-		ja: 'PuréVoiceセッションロールのメッセージを送信する許可を付与します',
-	},
-	voiceSessionReasonChannelCreate: {
-		es: 'Desplegar Canal Automutable PuréVoice',
-		en: 'Deploy PuréVoice Automutable Channel',
-		ja: 'PuréVoice自動可変チャネルのデプロイ',
-	},
-	voiceSessionReasonChannelForceName: {
-		es: 'Renombrar sesión PuréVoice (forzado automáticamente)',
-		en: 'Rename PuréVoice session (automatically forced)',
-		ja: 'PuréVoiceセッションの名前を変更する (自動的に強制)',
-	},
-	voiceSessionNewMemberName: {
-		es: 'Nueva conexión',
-		en: 'New connection',
-		ja: '新しい接続',
-	},
-	voiceSessionNewMemberValueMemberIntegrated: {
-		es: `El miembro **${subl(0)}** fue incorporado a la sesión`,
-		en: `The member **${subl(0)}** was incorporated to the session`,
-		ja: `メンバー**${subl(0)}**がセッションに接続されました`,
-	},
-	voiceSessionNewMemberValueBotAttached: {
-		es: `El bot **${subl(0)}** fue anexado a la sesión`,
-		en: `The bot **${subl(0)}** was attached to the session`,
-		ja: `ボット**${subl(0)}**がセッションに接続されました`,
-	},
-	voiceSessionNewMemberContentHint: {
-		es: `👋 ${subl(0)}, ¡puedes conversar por aquí!`,
-		en: `👋 ${subl(0)}, you can chat over here!`,
-		ja: `👋 ${subl(0)}、ここでチャットできますよ！`,
-	},
-	voiceSessionNewSessionTitle: {
-		es: '✅ Sesión inicializada',
-		en: '✅ Session initialized',
-		ja: '✅ セッション初期化',
-	},
-	voiceSessionNewSessionCustomizeName: {
-		es: '🎨 Personalizar sesión',
-		en: '🎨 Customize session',
-		ja: '🎨 セッションをカスタマイズ',
-	},
-	voiceSessionNewSessionCustomizeValue: {
-		es: `Puedes personalizar el nombre y emote del canal y rol de la sesión\n\`\`\`${subl(0)}voz <Nombre>[ -e <Emote>]\`\`\``,
-		en: `You can customize the channel name and emote as well as the session role\n\`\`\`${subl(0)}vc <Name>[ -e <Emote>]\`\`\``,
-		ja: `チャンネル名とエモート、セッションロールをカスタマイズできます\n\`\`\`${subl(0)}vc 「名前」[ -e 「エモート」]\`\`\``,
-	},
-	voiceSessionNewSessionNamingName: {
-		es: '🏷️ Nombre',
-		en: '🏷️ Name',
-		ja: '🏷️ 名前',
-	},
-	voiceSessionNewSessionNamingValue: {
-		es: `Puedes usar \`${subl(0)}voz <Nombre>\` para cambiar el nombre`,
-		en: `You can use \`${subl(0)}vc <Name>\` to change the name`,
-		ja: `\`${subl(0)}vc 「名前」\`を使用して名前を変更できます`,
-	},
-	voiceSessionNewSessionEmoteName: {
-		es: '🐴 Emote',
-		en: '🐴 Emote',
-		ja: '🐴 エモート',
-	},
-	voiceSessionNewSessionEmoteValue: {
-		es: 'Añade `--emote <Emote>` o `-e <Emote>` para cambiar el emote',
-		en: 'Add `--emote <Emote>` or `-e <Emote>` to change the emote',
-		ja: 'エモートを変更するには、`--emote 「エモート」`または`-e 「エモート」`を追加します',
-	},
-	voiceSessionNewSessionRoleName: {
-		es: '📣 Rol Efímero',
-		en: '📣 Ephemeral Role',
-		ja: '📣 一時的なロール',
-	},
-	voiceSessionNewSessionRoleValue: {
-		es: `Este rol menciona a todos en la sesión\n${subl(0)}`,
-		en: `This role mentions everyone in the session\n${subl(0)}`,
-		ja: `この役割はセッション内の全員にメンションします\n${subl(0)}`,
-	},
-	voiceSessionNewSessionRenameName: {
-		es: '🧹 Renombrar sesión',
-		en: '🧹 Rename Session',
-		ja: '🧹 セッション名前を変更',
-	},
-	voiceSessionNewSessionRenameValue: {
-		es: '⌛ Debes esperar 20 minutos entre cada renombrado de la sesión',
-		en: '⌛ You must wait 20 minutes between each session renaming',
-		ja: '⌛ 各セッションの名前変更の間には20分待つ必要があります',
-	},
-	voiceSessionNewSessionAutonameName: {
-		es: '⏱️ Nombre automático',
-		en: '⏱️ Auto-naming',
-		ja: '⏱️ 自動命名',
-	},
-	voiceSessionNewSessionAutonameValue: {
-		es: 'Si no escribes un nombre de sesión en 3 minutos, se nombrará automáticamente',
-		en: 'If you don\'t enter a session name within 3 minutes, it\'ll be automatically renamed',
-		ja: '3分以内にセッション名を入力しないと、自動的に名前が変更されます',
-	},
-	voiceSessionAdminExpected: {
-		es: '❌ Debes ser administrador de la sesión para hacer esto',
-		en: '❌ You must be the session administrator to do this',
-		ja: '❌ これを行うにはセッション管理者である必要があります',
-	},
-	voiceSessionModExpected: {
-		es: '❌ Debes ser moderador de la sesión para hacer esto',
-		en: '❌ You must be a moderator of the session to do this',
-		ja: '❌ これを行うにはセッションモデレータである必要があります',
-	},
-	voiceSessionAdminOrModExpected: {
-		es: '❌ Debes ser administrador o moderador de la sesión para hacer esto',
-		en: '❌ You must be the administrator or a moderator of the session to do this',
-		ja: '❌ これを行うには、セッションの管理者またはモデレータである必要があります',
-	},
-	voiceSessionMemberExpected: {
-		es: '❌ Debes formar parte de la sesión para hacer esto',
-		en: '❌ You must be a part of the session to do this',
-		ja: '❌ これを行うにはセッションに参加する必要があります',
-	},
-	voiceCommandRenameMemberExpected: {
-		es: `⚠️ Debes entrar a una sesión PuréVoice para ejecutar este comando de esta forma.\nUsa \`${subl(0)}ayuda voz\` para más información`,
-		en: `⚠️ You must join a PuréVoice session to use this command this way.\nUse \`${subl(0)}help voice\` for more information`,
-		ja: `⚠️ これを行うにはセッションに参加する必要があります。\n詳細については、\`${subl(0)}help voice\`を使用してください`,
-	},
-
 	invalidInput: {
 		es: '⚠️️ Entrada inválida',
 		en: '⚠️️ Invalid input',
@@ -1565,6 +1419,55 @@ let localesObject = /**@type {const}*/({
 		en: 'Link',
 		ja: 'リンク',
 	},
+	feedDeletePostTagsInaccessible: {
+		es: 'Puede que el Post eliminado de Discord haya sido también eliminado del Booru del que se originó, pues no se pudieron recuperar sus tags',
+		en: 'The Post just deleted from Discord may have also been deleted from the Booru, given that I couldn\'t retrieve its tags',
+		ja: 'Discordから削除された投稿は、タグを取得できなかったため、Booruからも削除された可能性があります',
+	},
+	feedDeletePostTagsUnknownError: {
+		es: 'Post eliminado (no se pudo recuperar la información del Post y/o sus tags)',
+		en: 'Post deleted (couldn\'t retrieve the Post information and/or its tags)',
+		ja: '投稿が削除されました（投稿情報やタグを取得できませんでした）',
+	},
+	feedPostTagsInaccessible: {
+		es: '⚠️ Puede que el Post del que se intentó recuperar las tags se haya eliminado',
+		en: '⚠️ The Post from which I tried to retrieve the tags may have been deleted',
+		ja: '⚠️ タグを取得したポストが削除されている可能性があります',
+	},
+	feedPostTagsUnknownError: {
+		es: paragraph(
+			'⚠️ Ocurrió un problema al contactar con el Booru para recuperar las tags.',
+			'Inténtalo de nuevo. Si el problema persiste, es probable que el objetivo no esté disponible o que se trate de un bug de mi parte',
+		),
+		en: paragraph(
+			'⚠️ There was a problem contacting the Booru to retrieve the tags.',
+			'Please try again. If the problem persists, it\'s likely that the target is unavailable or there\'s a bug on my end',
+		),
+		ja: paragraph(
+			'⚠️ booru サービスに接続してタグを取得できませんでした。',
+			'もう一度お試しください。問題が解決しない場合は、ターゲットが利用できないか、こちら側にバグがある可能性があります',
+		),
+	},
+	feedContributeNoPendingRequest: {
+		es: '¡Este post ya no tiene pedidos pendientes relevantes! ¡Bien!',
+		en: 'This post doesn\'t have relevant pending requests anymore! Sweet!',
+		ja: 'このポストには関連する保留中の注文がなくなりました。素晴らしい！',
+	},
+	feedContributeDescription: {
+		es: 'Este Post tiene etiquetas que indican pedidos pendientes. Puedes contribuir a la calidad de Gelbooru ayudando a etiquetar correctamente, entre otras cosas.',
+		en: 'This post contains tags that signal pending requests. You could help Gelbooru get better by tagging posts appropiately, among other things.',
+		ja: 'この投稿には保留中の注文を示すタグが付いています。適切なタグを付けるなど、Gelbooruの品質向上に貢献してください。',
+	},
+	feedContributeTagsName: {
+		es: '<:handshake:1355496081550606486> Tags de pedidos pendientes',
+		en: '<:handshake:1355496081550606486> Pending requests tags',
+		ja: '<:handshake:1355496081550606486> 保留中のリクエストタグ',
+	},
+	feedContributeDanbooruFooter: {
+		es: 'Este Post fue automáticamente portado desde Danbooru, por lo que es mejor concretar los pedidos ahí. Los cambios utilitarios hechos en Danbooru se verán reflejados en Gelbooru.',
+		en: 'This post was automatically ported from Danbooru, so it\'s best to concrete the requests there. Utility changes made in Danbooru will be reflected in Gelbooru.',
+		ja: 'この投稿はDanbooruから自動的に移行されたため、リクエストはDanbooruへ送信することをお勧めします。Danbooruで行われたユーティリティの変更はGelbooruにも反映されます。',
+	},
 	feedFeedbackExpired: {
 		es: '❌ Esta campaña de retroalimentación ha finalizado',
 		en: '❌ This feedback campaign has already finished',
@@ -2007,6 +1910,172 @@ let localesObject = /**@type {const}*/({
 		es: `-# Recordatorio para ${subl(0)}`,
 		en: `-# Reminder for ${subl(0)}`,
 		ja: `-# ${subl(0)}さんへのリマインダー`,
+	},
+
+	voiceExpected: {
+		es: '❌ Debes conectarte a un canal de voz primero',
+		en: '❌ You need to connect to a voice channel first',
+		ja: '❌ まず音声チャンネルに接続する必要があります',
+	},
+	voiceSameChannelExpected: {
+		es: '❌ Ya estoy conectada a otro chat de voz. ¡Ven conmigo antes de hacer eso!',
+		en: '❌ I\'m already connected to another voice channel. Come here before doing that!',
+		ja: '❌ すでに別の音声チャネルに接続しています。その前にここに来てください！',
+	},
+	voiceSessionReasonFirstMemberAdd: {
+		es: 'Inclusión de primer miembro en sesión PuréVoice',
+		en: 'First member addition in PuréVoice session',
+		ja: 'Purevoiceセッションに最初のメンバーを含める',
+	},
+	voiceSessionReasonMemberAdd: {
+		es: 'Inclusión de miembro en sesión PuréVoice',
+		en: 'Member addition in PuréVoice session',
+		ja: 'メンバーがPuréVoiceセッションに参加しました',
+	},
+	voiceSessionReasonRoleCreate: {
+		es: 'Inyectar Rol Efímero PuréVoice',
+		en: 'Inject PuréVoice Ephemeral Rol',
+		ja: 'PuréVoice一時的なロールを注入する',
+	},
+	voiceSessionReasonRoleEdit: {
+		es: 'Conceder envío de mensajes a rol de sesión PuréVoice',
+		en: 'Grant permission to send messages for PuréVoice session role',
+		ja: 'PuréVoiceセッションロールのメッセージを送信する許可を付与します',
+	},
+	voiceSessionReasonChannelCreate: {
+		es: 'Desplegar Canal Automutable PuréVoice',
+		en: 'Deploy PuréVoice Automutable Channel',
+		ja: 'PuréVoice自動可変チャネルのデプロイ',
+	},
+	voiceSessionReasonChannelForceName: {
+		es: 'Renombrar sesión PuréVoice (forzado automáticamente)',
+		en: 'Rename PuréVoice session (automatically forced)',
+		ja: 'PuréVoiceセッションの名前を変更する (自動的に強制)',
+	},
+	voiceSessionNewMemberName: {
+		es: 'Nueva conexión',
+		en: 'New connection',
+		ja: '新しい接続',
+	},
+	voiceSessionNewMemberValueMemberIntegrated: {
+		es: `El miembro **${subl(0)}** fue incorporado a la sesión`,
+		en: `The member **${subl(0)}** was incorporated to the session`,
+		ja: `メンバー**${subl(0)}**がセッションに接続されました`,
+	},
+	voiceSessionNewMemberValueBotAttached: {
+		es: `El bot **${subl(0)}** fue anexado a la sesión`,
+		en: `The bot **${subl(0)}** was attached to the session`,
+		ja: `ボット**${subl(0)}**がセッションに接続されました`,
+	},
+	voiceSessionNewMemberContentHint: {
+		es: `👋 ${subl(0)}, ¡puedes conversar por aquí!`,
+		en: `👋 ${subl(0)}, you can chat over here!`,
+		ja: `👋 ${subl(0)}、ここでチャットできますよ！`,
+	},
+	voiceSessionNewSessionTitle: {
+		es: '✅ Sesión inicializada',
+		en: '✅ Session initialized',
+		ja: '✅ セッション初期化',
+	},
+	voiceSessionNewSessionCustomizeName: {
+		es: '🎨 Personalizar sesión',
+		en: '🎨 Customize session',
+		ja: '🎨 セッションをカスタマイズ',
+	},
+	voiceSessionNewSessionCustomizeValue: {
+		es: `Puedes personalizar el nombre y emote del canal y rol de la sesión\n\`\`\`${subl(0)}voz <Nombre>[ -e <Emote>]\`\`\``,
+		en: `You can customize the channel name and emote as well as the session role\n\`\`\`${subl(0)}vc <Name>[ -e <Emote>]\`\`\``,
+		ja: `チャンネル名とエモート、セッションロールをカスタマイズできます\n\`\`\`${subl(0)}vc 「名前」[ -e 「エモート」]\`\`\``,
+	},
+	voiceSessionNewSessionNamingName: {
+		es: '🏷️ Nombre',
+		en: '🏷️ Name',
+		ja: '🏷️ 名前',
+	},
+	voiceSessionNewSessionNamingValue: {
+		es: `Puedes usar \`${subl(0)}voz <Nombre>\` para cambiar el nombre`,
+		en: `You can use \`${subl(0)}vc <Name>\` to change the name`,
+		ja: `\`${subl(0)}vc 「名前」\`を使用して名前を変更できます`,
+	},
+	voiceSessionNewSessionEmoteName: {
+		es: '🐴 Emote',
+		en: '🐴 Emote',
+		ja: '🐴 エモート',
+	},
+	voiceSessionNewSessionEmoteValue: {
+		es: 'Añade `--emote <Emote>` o `-e <Emote>` para cambiar el emote',
+		en: 'Add `--emote <Emote>` or `-e <Emote>` to change the emote',
+		ja: 'エモートを変更するには、`--emote 「エモート」`または`-e 「エモート」`を追加します',
+	},
+	voiceSessionNewSessionRoleName: {
+		es: '📣 Rol Efímero',
+		en: '📣 Ephemeral Role',
+		ja: '📣 一時的なロール',
+	},
+	voiceSessionNewSessionRoleValue: {
+		es: `Este rol menciona a todos en la sesión\n${subl(0)}`,
+		en: `This role mentions everyone in the session\n${subl(0)}`,
+		ja: `この役割はセッション内の全員にメンションします\n${subl(0)}`,
+	},
+	voiceSessionNewSessionRenameName: {
+		es: '🧹 Renombrar sesión',
+		en: '🧹 Rename Session',
+		ja: '🧹 セッション名前を変更',
+	},
+	voiceSessionNewSessionRenameValue: {
+		es: '⌛ Debes esperar 20 minutos entre cada renombrado de la sesión',
+		en: '⌛ You must wait 20 minutes between each session renaming',
+		ja: '⌛ 各セッションの名前変更の間には20分待つ必要があります',
+	},
+	voiceSessionNewSessionAutonameName: {
+		es: '⏱️ Nombre automático',
+		en: '⏱️ Auto-naming',
+		ja: '⏱️ 自動命名',
+	},
+	voiceSessionNewSessionAutonameValue: {
+		es: 'Si no escribes un nombre de sesión en 3 minutos, se nombrará automáticamente',
+		en: 'If you don\'t enter a session name within 3 minutes, it\'ll be automatically renamed',
+		ja: '3分以内にセッション名を入力しないと、自動的に名前が変更されます',
+	},
+	voiceSessionRenameInvalidEmoji: {
+		es: '⚠️️ El emoji indicado no es un emoji Unicode admitido',
+		en: '⚠️️ The supplied emoji isn\'t a valid Unicode emoji',
+		ja: '⚠️️ 示された絵文字は、サポートされている Unicode 絵文字ではありません',
+	},
+	voiceSessionRenameSuccess: {
+		es: '✅ Nombre aplicado',
+		en: '✅ Name applied',
+		ja: '✅ 名前が申請されました',
+	},
+	voiceSessionJoinExpected: {
+		es: '❌ Debes entrar a una sesión PuréVoice para realizar esta acción',
+		en: '❌ You must join a PuréVoice session to do this',
+		ja: '❌ この操作を実行するには、PuréVoiceセッションにログインする必要があります',
+	},
+	voiceSessionMemberExpected: {
+		es: '❌ Debes formar parte de la sesión para hacer esto',
+		en: '❌ You must be a part of the session to do this',
+		ja: '❌ これを行うにはセッションに参加する必要があります',
+	},
+	voiceSessionAdminOrModExpected: {
+		es: '❌ Debes ser administrador o moderador de la sesión para hacer esto',
+		en: '❌ You must be the administrator or a moderator of the session to do this',
+		ja: '❌ これを行うには、セッションの管理者またはモデレータである必要があります',
+	},
+	voiceSessionModExpected: {
+		es: '❌ Debes ser moderador de la sesión para hacer esto',
+		en: '❌ You must be a moderator of the session to do this',
+		ja: '❌ これを行うにはセッションモデレータである必要があります',
+	},
+	voiceSessionAdminExpected: {
+		es: '❌ Debes ser administrador de la sesión para hacer esto',
+		en: '❌ You must be the session administrator to do this',
+		ja: '❌ これを行うにはセッション管理者である必要があります',
+	},
+	voiceCommandRenameMemberExpected: {
+		es: `⚠️ Debes entrar a una sesión PuréVoice para ejecutar este comando de esta forma.\nUsa \`${subl(0)}ayuda voz\` para más información`,
+		en: `⚠️ You must join a PuréVoice session to use this command this way.\nUse \`${subl(0)}help voice\` for more information`,
+		ja: `⚠️ これを行うにはセッションに参加する必要があります。\n詳細については、\`${subl(0)}help voice\`を使用してください`,
 	},
 
 	yoCancelledStep: {

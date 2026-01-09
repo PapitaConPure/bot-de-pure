@@ -1099,10 +1099,13 @@ const command = new Command('feed', flags)
 			auditError(error, { brief: 'Ha ocurrido un error al procesar un Post de Feed' });
 			
 			if(error instanceof BooruUnknownPostError)
-				return interaction.reply({ content: 'Puede que el Post del que se intentó recuperar las tags se haya eliminado', ephemeral: true });
+				return interaction.reply({
+					content: translator.getText('feedPostTagsInaccessible'),
+					ephemeral: true,
+				});
 
 			return interaction.reply({
-				content: 'Ocurrió un problema al contactar con el Booru para recuperar las tags.\nInténtalo de nuevo, si el problema persiste, es probable que el objetivo no esté disponible o que se trate de un bug de mi parte',
+				content: translator.getText('feedPostTagsUnknownError'),
 				ephemeral: true,
 			});
 		}
@@ -1205,13 +1208,13 @@ const command = new Command('feed', flags)
 			
 			if(error instanceof BooruUnknownPostError)
 				return interaction.reply({
-					content: 'Puede que el Post eliminado de Discord haya sido también eliminado del Booru del que se originó, pues no se pudieron recuperar sus tags',
+					content: translator.getText('feedDeletePostTagsInaccessible'),
 					ephemeral: true,
 				});
 
 			return Promise.all([
 				interaction.reply({
-					content: 'Post eliminado (no se pudo recuperar la información del Post y/o sus tags)',
+					content: translator.getText('feedDeletePostTagsUnknownError'),
 					ephemeral: true,
 				}),
 				message.delete().catch(console.error),
@@ -1230,7 +1233,7 @@ const command = new Command('feed', flags)
 
 			if(!requestTags.length) {
 				return interaction.reply({
-					content: '¡Este post ya no tiene pedidos pendientes relevantes! ¡Bien!',
+					content: translator.getText('feedContributeNoPendingRequest'),
 					ephemeral: true,
 				});
 			}
@@ -1238,19 +1241,16 @@ const command = new Command('feed', flags)
 			const embed = new EmbedBuilder()
 				.setColor(Colors.Gold)
 				.setTitle('Contribuye')
-				.setDescription('Este Post tiene etiquetas que indican pedidos pendientes. Puedes contribuir a la calidad de Gelbooru ayudando a etiquetar correctamente, entre otras cosas.')
+				.setDescription(translator.getText('feedContributeDescription'))
 				.addFields(
 					{
-						name: '<:handshake:1355496081550606486> Tags de pedidos pendientes',
+						name: translator.getText('feedContributeTagsName'),
 						value: formatTagNameListNew(requestTags, ' '),
 					});
 			
-			//Danbooru
-			if(post.creatorId == 6498)
-				embed.setFooter({
-					text: 'Este Post fue automáticamente portado desde Danbooru, por lo que es mejor concretar los pedidos ahí.'
-					+ ' Los cambios utilitarios hechos en Danbooru se verán reflejados en Gelbooru.',
-				});
+			const danbooruCreatorId = 6498;
+			if(post.creatorId == danbooruCreatorId)
+				embed.setFooter({ text: translator.getText('feedContributeDanbooruFooter') });
 
 			return interaction.reply({
 				embeds: [embed],
@@ -1262,12 +1262,12 @@ const command = new Command('feed', flags)
 			
 			if(error instanceof BooruUnknownPostError)
 				return interaction.reply({
-					content: 'Puede que el Post del que se intentó recuperar las tags se haya eliminado',
+					content: translator.getText('feedPostTagsInaccessible'),
 					ephemeral: true,
 				});
 
 			return interaction.reply({
-				content: 'Ocurrió un problema al contactar con el Booru para recuperar las tags.\nInténtalo de nuevo, si el problema persiste, es probable que el objetivo no esté disponible o que se trate de un bug de mi parte',
+				content: translator.getText('feedPostTagsUnknownError'),
 				ephemeral: true,
 			});
 		}

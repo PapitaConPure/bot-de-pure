@@ -1,6 +1,6 @@
 const { PureVoiceModel: PureVoice, PureVoiceSessionModel } = require('../../models/purevoice.js');
 const { PureVoiceSessionMember, getFrozenSessionAllowedMembers, makePVSessionName } = require('../../systems/others/purevoice.js');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, MessageCollector, ButtonStyle, Colors, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, MessageCollector, ButtonStyle, Colors, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder, MessageFlags } = require('discord.js');
 const { p_pure } = require('../../utils/prefixes.js');
 const { isNotModerator, defaultEmoji } = require('../../func.js');
 const { CommandOptions, CommandTags, Command } = require('../Commons/commands.js');
@@ -30,31 +30,32 @@ const command = new Command('voz', flags)
 	.setLongDescription('Para inyectar un Sistema PuréVoice en una categoria. Simplemente usa el comando y sigue los pasos del Asistente para configurar todo')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const translator = await Translator.from(request.user);
-		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda voz\` para más información`;
+		const translator = await Translator.from(request);
+		const helpstr = translator.getText('suggestHelpForCommand', p_pure(request).raw, 'voz');
 
+		//TODO: Mover asistente a p!servidor y eliminar esta bandera
 		if(args.parseFlag('asistente'))
 			return generateFirstWizard(request, translator);
 
-		//Comprobar si se está en una sesión
+		//Comprobar si se está en una sesión para cualquier uso que no sea el Asistente
 		const voiceState = request.member.voice;
 		const warnNotInSession = () => request.reply({
-			content: translator.getText('voiceCommandRenameMemberExpected', p_pure(request.guildId).raw),
+			content: translator.getText('voiceCommandRenameMemberExpected', p_pure(request).raw),
 			ephemeral: true,
 		}).catch(console.error);
 
+		if(!voiceState?.channelId)
+			return warnNotInSession();
+
 		const createInvite = args.parseFlag('invitar');
 		if(createInvite) {
-			if(!voiceState?.channelId)
-				return warnNotInSession();
-			
 			try {
 				const invite = await request.guild.invites.create(voiceState.channel, { maxAge: 5 * 60 });
 
 				if(invite)
 					return request.reply({ content: `${invite}` });
 
-				const channelRef = `${voiceState.channel ?? '⚠️️ Canal inválido'}`;
+				const channelRef = `${voiceState.channel}`;
 				const embed = new EmbedBuilder()
 					.setColor('Blurple')
 					.setAuthor({
@@ -100,9 +101,6 @@ const command = new Command('voz', flags)
 				].join('\n'),
 				ephemeral: true,
 			});
-
-		if(!voiceState?.channelId)
-			return warnNotInSession();
 
 		//Modificar sesión y confirmar
 		const session = await PureVoiceSessionModel.findOne({ channelId: voiceState.channelId });
@@ -359,7 +357,7 @@ const command = new Command('voz', flags)
 		return interaction.update({
 			embeds: [deleteEmbed],
 			components: [],
-		});	
+		});
 	})
 	.setButtonResponse(async function cancelWizard(interaction, authorId) {
 		if(interaction.user.id !== authorId)
@@ -380,7 +378,7 @@ const command = new Command('voz', flags)
         const translator = await Translator.from(member);
 
 		const warnNotInSession = () => interaction.reply({
-			content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción',
+			content: translator.getText('voiceSessionJoinExpected'),
 			ephemeral: true,
 		}).catch(console.error);
 
@@ -417,13 +415,13 @@ const command = new Command('voz', flags)
         return interaction.showModal(modal);
 	})
 	.setModalResponse(async function applySessionName(interaction) {
-		await interaction.deferReply({ ephemeral: true });
+		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
 		const { member } = interaction;
         const translator = await Translator.from(member);
 
 		const warnNotInSession = () => interaction.editReply({
-			content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción',
+			content: translator.getText('voiceSessionJoinExpected'),
 		}).catch(console.error);
 
 		const voiceChannel = member.voice?.channel;
@@ -436,15 +434,15 @@ const command = new Command('voz', flags)
 
 		if(!emoji) {
 			voiceChannel.setName(makePVSessionName(name)).catch(console.error);
-			return interaction.editReply({ content: '✅ Nombre aplicado' });
+			return interaction.editReply({ content: translator.getText('voiceSessionRenameSuccess') });
 		}
 
 		const defEmoji = defaultEmoji(emoji);
 		if(!defEmoji)
-			return interaction.editReply({ content: '⚠️ El emoji indicado no es un emoji Unicode admitido' });
+			return interaction.editReply({ content: translator.getText('voiceSessionRenameInvalidEmoji') });
 		
 		voiceChannel.setName(makePVSessionName(name, defEmoji)).catch(console.error);
-		return interaction.editReply({ content: '✅ Nombre aplicado' });
+		return interaction.editReply({ content: translator.getText('voiceSessionRenameSuccess') });
 	})
 	.setButtonResponse(async function freezeSession(interaction) {
 		await interaction.deferReply({ ephemeral: true });
@@ -453,7 +451,7 @@ const command = new Command('voz', flags)
         const translator = await Translator.from(member);
 
 		const warnNotInSession = () => interaction.editReply({
-			content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción',
+			content: translator.getText('voiceSessionJoinExpected'),
 		}).catch(console.error);
 
 		const voiceState = member.voice;
@@ -468,7 +466,7 @@ const command = new Command('voz', flags)
 		const sessionMember = new PureVoiceSessionMember(session.members.get(member.id) ?? {});
 		if(sessionMember.isGuest())
 			return interaction.editReply({
-				content: '❌ Solo el administrador y los moderadores de una sesión PuréVoice pueden congelarla',
+				content: translator.getText('voiceSessionAdminOrModExpected'),
 			});
 
 		session.frozen = !session.frozen;
