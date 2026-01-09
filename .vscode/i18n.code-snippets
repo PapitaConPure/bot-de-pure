@@ -1,0 +1,79 @@
+{
+	"Instance Translator": {
+		"scope": "javascript,typescript",
+		"prefix": "tlf",
+		"body": [
+			"const translator = Translator.from($1);",
+			"$0"
+		],
+		"description": "Instances a translator from the specified argument"
+	},
+	"Get text from Translator": {
+		"scope": "javascript,typescript",
+		"prefix": "tlt",
+		"body": [
+			"translator.getText($1)$0"
+		],
+		"description": "Gets a translated string from an instanced translator based on the supplied ID"
+	},
+	"Translation Entry - Simple": {
+		"scope": "javascript,typescript",
+		"prefix": "tles",
+		"body": [
+			"${1:translationId}: {",
+			"\tes: '$2$3',",
+			"\ten: '$2$4',",
+			"\tja: '$2$5',",
+			"},"
+		],
+		"description": "Adds a single-line, simple translation entry"
+	},
+	"Translation Entry - Template": {
+		"scope": "javascript,typescript",
+		"prefix": "tlet",
+		"body": [
+			"${1:translationId}: {",
+			"\tes: `$2`,",
+			"\ten: `$3`,",
+			"\tja: `$4`,",
+			"},"
+		],
+		"description": "Adds a single-line, template translation entry"
+	},
+	"Translation Entry - Paragraph Simple": {
+		"scope": "javascript,typescript",
+		"prefix": "tleps",
+		"body": [
+			"${1:translationId}: {",
+			"\tes: paragraph(",
+			"\t\t'$2$3'",
+			"\t),",
+			"\ten: paragraph(",
+			"\t\t'$2$4'",
+			"\t),",
+			"\tja: paragraph(",
+			"\t\t'$2$5'",
+			"\t),",
+			"},"
+		],
+		"description": "Adds a single-line, template translation entry"
+	},
+	"Translation Entry - Paragraph Template": {
+		"scope": "javascript,typescript",
+		"prefix": "tlept",
+		"body": [
+			"${1:translationId}: {",
+			"\tes: paragraph(",
+			"\t\t`$2`",
+			"\t),",
+			"\ten: paragraph(",
+			"\t\t`$3`",
+			"\t),",
+			"\tja: paragraph(",
+			"\t\t`$4`",
+			"\t),",
+			"},"
+		],
+		"description": "Adds a single-line, template translation entry"
+	}
+}
