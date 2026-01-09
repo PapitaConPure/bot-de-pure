@@ -4,6 +4,7 @@ const Reminder = require('../../models/reminders');
 const Logger = require('../../utils/logs');
 const { Translator } = require('../../i18n');
 const { decompressId } = require('../../func');
+const Int32 = require('mongoose-int32');
 
 const { debug, info, error } = Logger('DEBUG', 'Reminders');
 
@@ -20,22 +21,33 @@ async function scheduleReminder(reminder) {
 	if(!reminder)
 		throw new TypeError(`Expected a ReminderDocument. Got: ${reminder == null ? reminder : typeof reminder}`);
 
-	debug(`Cleaning up duplicate reminders of #${reminder._id}`);
+	const debugId = decompressId(reminder._id);
+
+	debug(`Cleaning up duplicate reminders of #${debugId}`);
 	clearScheduledReminder(reminder._id);
 	
-	debug('Attempting to schedule a reminder');
+	debug(`Attempting to schedule reminder #${debugId}`);
 
 	const ms = timeUntil(reminder.date);
+	debug(`Reminder #${debugId} time to trigger: ${ms / 1000} seconds (${ms}ms)`);
 
 	if(ms < 1) {
 		triggerReminder(reminder);
 		info('A reminder was about to be scheduled, but it\'s already expired so it was triggered immediately instead.');
-	} else {
-		const newTimeout = setTimeout(triggerReminder, ms, reminder);
-		scheduledIds.set(reminder._id, newTimeout);
-
-		info('Scheduled a reminder');
+		return;
 	}
+
+	if(ms > Int32.INT32_MAX) {
+		const newTimeout = setTimeout(scheduleReminder, Int32.INT32_MAX, reminder);
+		scheduledIds.set(reminder._id, newTimeout);
+		info(`Reminder #${debugId} would take longer to trigger than what's representable by int32, so it will be stalled for the maximum int32 duration`);
+		return;
+	}
+
+	const newTimeout = setTimeout(triggerReminder, ms, reminder);
+	scheduledIds.set(reminder._id, newTimeout);
+
+	info(`Scheduled reminder #${debugId}`);
 }
 
 /**
@@ -44,20 +56,21 @@ async function scheduleReminder(reminder) {
  */
 async function processReminders() {
 	try {
+		debug('Attempting to process all registered reminders');
 		const dueReminders = await Reminder.find();
-		const triggers = await Promise.allSettled(dueReminders.map(reminder => scheduleReminder(reminder)));
-		const failedTriggers = triggers.filter(trigger => trigger.status === 'rejected');
-		if(failedTriggers.length)
-			throw new RemindersSchedulerError(`Couldn't trigger all reminders.\nReceived the following reasons:\n${failedTriggers.map(t => t.reason).join('\n')}`);
+		const reminders = await Promise.allSettled(dueReminders.map(reminder => scheduleReminder(reminder)));
+		const failedSchedules = reminders.filter(trigger => trigger.status === 'rejected');
+		if(failedSchedules.length)
+			throw new RemindersSchedulerError(`Couldn't process every reminder.\nReceived the following reasons:\n${failedSchedules.map(t => t.reason).join('\n')}`);
 	} catch(err) {
-		const message = 'Failed to trigger all due reminders.';
+		const message = 'Failed to process all reminders.';
 		error(err, message);
 		throw new RemindersSchedulerError(message);
 	}
 }
 
 /**
- * Dispara el recordatorio indicado
+ * Dispara el recordatorio indicado inmediatamente
  * @param {import('../../models/reminders').ReminderDocument} reminder El recordatorio a disparar
  */
 async function triggerReminder(reminder) {
@@ -93,7 +106,7 @@ async function triggerReminder(reminder) {
 }
 
 /**
- * Envía el contenido del recordatorio en Discord
+ * Envía el contenido de recordatorio indicado en el canal de Discord especificado, mencionando al miembro suministrado
  * @param {import('discord.js').GuildTextBasedChannel} channel El canal destino del envío
  * @param {import('discord.js').User} user El usuario a mencionar con el recordatorio
  * @param {string} reminderContent El contenido del recordatorio
@@ -116,8 +129,11 @@ async function sendReminder(channel, user, reminderContent) {
 	});
 }
 
-/**@param {string} reminderId*/
-async function clearScheduledReminder(reminderId) {
+/**
+ * Limpia cualquier posible timeout previamente asociado a la ID de recordatorio especificada
+ * @param {string} reminderId
+ */
+function clearScheduledReminder(reminderId) {
 	const samePreviousReminder = scheduledIds.get(reminderId);
 
 	if(samePreviousReminder) {
@@ -152,6 +168,7 @@ function initRemindersScheduler(client) {
 	schedulerClient = client;
 }
 
+/**@class Representa un error en relación al programador de recordatorios*/
 class RemindersSchedulerError extends Error {
 	/**@param {string} [message]*/
 	constructor(message = undefined) {

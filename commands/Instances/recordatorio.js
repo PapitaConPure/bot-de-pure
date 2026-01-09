@@ -7,8 +7,9 @@ const { MessageFlags, ContainerBuilder, ButtonBuilder, ButtonStyle, SeparatorSpa
 const { shortenText, compressId, decompressId } = require('../../func');
 const UserConfigs = require('../../models/userconfigs');
 const Reminder = require('../../models/reminders');
-const { startOfToday, isValid, addDays, isBefore, addMinutes, startOfDay, addHours, getUnixTime } = require('date-fns');
+const { isValid, addDays, isBefore, addMinutes, addHours, getUnixTime } = require('date-fns');
 const { scheduleReminder } = require('../../systems/others/remindersScheduler');
+const { UTCDate } = require('@date-fns/utc');
 
 const maxReminderCountPerUser = 5;
 const maxReminderContentLength = 960;
@@ -137,7 +138,7 @@ function makeReminderContainer(reminder, translator, title = undefined) {
  */
 function makeReminderModal(request, translator, utcOffset, reminder = undefined) {
 	const reminderId = reminder?._id;
-	const localizedReminderDate = addHours(reminder?.date || new Date(Date.now()), -utcOffset);
+	const reminderLocalizedDate = new UTCDate(addHours(reminder?.date ?? new Date(Date.now()), utcOffset));
 
 	const modal = new ModalBuilder()
 		.setCustomId(reminder ? `reminder_editReminder_${reminderId}` : 'reminder_addReminder')
@@ -158,7 +159,7 @@ function makeReminderModal(request, translator, utcOffset, reminder = undefined)
 						.setCustomId('date')
 						.setMinLength(1)
 						.setMaxLength(16)
-						.setValue(localizedReminderDate.toLocaleDateString(translator.locale))
+						.setValue(reminderLocalizedDate.toLocaleDateString(translator.locale))
 						.setPlaceholder(translator.getText('reminderEditReminderModalDatePlaceholder'))
 						.setStyle(TextInputStyle.Short)
 						.setRequired(true)
@@ -171,9 +172,7 @@ function makeReminderModal(request, translator, utcOffset, reminder = undefined)
 						.setCustomId('time')
 						.setMinLength(1)
 						.setMaxLength(20)
-						.setValue(
-							(new Date(+localizedReminderDate - +startOfDay(localizedReminderDate))).toLocaleTimeString(translator.locale)
-						)
+						.setValue(reminderLocalizedDate.toLocaleTimeString(translator.locale))
 						.setPlaceholder(translator.getText('reminderEditReminderModalTimePlaceholder'))
 						.setStyle(TextInputStyle.Short)
 						.setRequired(true)
@@ -414,7 +413,7 @@ const command = new Command('recordatorio', tags)
 
 		const dateStr = interaction.fields.getTextInputValue('date');
 		const timeStr = interaction.fields.getTextInputValue('time');
-		const [ channel ] = interaction.fields.getSelectedChannels('channel');
+		const channel = interaction.fields.getSelectedChannels('channel')?.first();
 		const reminderContent = interaction.fields.getTextInputValue('content');
 
 		const informIssue = async (/**@type {string}*/content) => {
@@ -426,18 +425,18 @@ const command = new Command('recordatorio', tags)
 				content,
 			});
 		}
-		
+
 		if(reminderContent.length > 960)
 			return informIssue(translator.getText('recordarReminderContentTooLong'));
-			
-		if(!channel)
+
+		if(!channel?.isSendable() || !channel.isTextBased() || channel.isDMBased())
 			return informIssue(translator.getText('invalidChannel'));
 
-		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, utcOffset) ?? startOfToday();
+		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, utcOffset);
 		if(!validateDate(date))
 			return informIssue(translator.getText('invalidDate'));
 
-		const time = parseTimeFromNaturalLanguage(timeStr, utcOffset) ?? addHours(new Date(0), -utcOffset);
+		const time = parseTimeFromNaturalLanguage(timeStr, utcOffset);
 		if(!validateTime(time))
 			return informIssue(translator.getText('invalidTime'));
 
@@ -453,7 +452,7 @@ const command = new Command('recordatorio', tags)
 		const reminder = new Reminder({
 			_id: reminderId,
 			userId: compressedUserId,
-			channelId: compressId(interaction.channelId),
+			channelId: compressId(channel.id),
 			content: reminderContent,
 			date: datetime,
 		});
@@ -466,6 +465,7 @@ const command = new Command('recordatorio', tags)
 		});
 
 		return interaction.followUp({
+			flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
 			components: [makeReminderContainer(reminder, translator)],
 		});
 	})
@@ -485,7 +485,7 @@ const command = new Command('recordatorio', tags)
 
 		const dateStr = interaction.fields.getTextInputValue('date');
 		const timeStr = interaction.fields.getTextInputValue('time');
-		const [ channel ] = interaction.fields.getSelectedChannels('channel');
+		const channel = interaction.fields.getSelectedChannels('channel')?.first();
 		const reminderContent = interaction.fields.getTextInputValue('content');
 		
 		if(reminderContent.length > 960)
@@ -494,20 +494,20 @@ const command = new Command('recordatorio', tags)
 				content: translator.getText('recordarReminderContentTooLong'),
 			});
 			
-		if(!channel)
+		if(!channel?.isSendable() || !channel.isTextBased() || channel.isDMBased())
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
 				content: translator.getText('invalidChannel'),
 			});
 
-		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, utcOffset) ?? startOfToday();
+		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, utcOffset);
 		if(!validateDate(date))
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
 				content: translator.getText('invalidDate'),
 			});
 
-		const time = parseTimeFromNaturalLanguage(timeStr, utcOffset) ?? addHours(new Date(0), -utcOffset);
+		const time = parseTimeFromNaturalLanguage(timeStr, utcOffset);
 		if(!validateTime(time))
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
@@ -524,6 +524,7 @@ const command = new Command('recordatorio', tags)
 
 		reminder.date = datetime;
 		reminder.content = reminderContent;
+		reminder.channelId = compressId(channel.id);
 		reminder.markModified('date');
 
 		await interaction.deferUpdate();
