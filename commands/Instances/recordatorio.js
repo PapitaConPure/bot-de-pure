@@ -249,7 +249,7 @@ const command = new Command('recordatorio', tags)
 		'reminder', 'reminders', 'remindme', 'alarm',
 	)
 	.setLongDescription(
-		'Establece un <recordatorio> a emitir a la --fecha y/o --hora especificada.',
+		'Establece un `<recordatorio>` a emitir a la `--fecha` y/o `--hora` especificada.',
 		'Se emplea el huso horario que hayas establecido en tu **configuración de usuario** ó UTC+0.',
 		'',
 		'Si usas el comando sin especificar opciones, te mostraré un editor de tus recordatorios pendientes.',
@@ -408,6 +408,7 @@ const command = new Command('recordatorio', tags)
 		const [ translator, userConfigs ] = await Promise.all([
 			Translator.from(interaction),
 			UserConfigs.findOne({ userId }),
+			interaction.deferUpdate(),
 		]);
 		const utcOffset = userConfigs.utcOffset;
 
@@ -415,48 +416,38 @@ const command = new Command('recordatorio', tags)
 		const timeStr = interaction.fields.getTextInputValue('time');
 		const [ channel ] = interaction.fields.getSelectedChannels('channel');
 		const reminderContent = interaction.fields.getTextInputValue('content');
+
+		const informIssue = async (/**@type {string}*/content) => {
+			await interaction.editReply({
+				components: [await makeRemindersListContainer(compressedUserId, translator)],
+			});
+			await interaction.followUp({
+				flags: MessageFlags.Ephemeral,
+				content,
+			});
+		}
 		
 		if(reminderContent.length > 960)
-			return interaction.reply({
-				flags: MessageFlags.Ephemeral,
-				content: translator.getText('recordarReminderContentTooLong'),
-			});
+			return informIssue(translator.getText('recordarReminderContentTooLong'));
 			
 		if(!channel)
-			return interaction.reply({
-				flags: MessageFlags.Ephemeral,
-				content: translator.getText('invalidChannel'),
-			});
+			return informIssue(translator.getText('invalidChannel'));
 
 		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, utcOffset) ?? startOfToday();
 		if(!validateDate(date))
-			return interaction.reply({
-				flags: MessageFlags.Ephemeral,
-				content: translator.getText('invalidDate'),
-			});
+			return informIssue(translator.getText('invalidDate'));
 
 		const time = parseTimeFromNaturalLanguage(timeStr, utcOffset) ?? addHours(new Date(0), -utcOffset);
 		if(!validateTime(time))
-			return interaction.reply({
-				flags: MessageFlags.Ephemeral,
-				content: translator.getText('invalidTime'),
-			});
+			return informIssue(translator.getText('invalidTime'));
 
 		const datetime = addTime(date, time);
 		if(!isReminderLateEnough(datetime))
-			return interaction.reply({
-				flags: MessageFlags.Ephemeral,
-				content: translator.getText('recordarReminderTooSoon', getUnixTime(datetime)),
-			});
+			return informIssue(translator.getText('recordarReminderTooSoon', getUnixTime(datetime)));
 
 		const reminderCount = (await Reminder.find({ userId: compressedUserId })).length;
 		if(reminderCount > maxReminderCountPerUser)
-			return interaction.reply({
-				flags: MessageFlags.Ephemeral,
-				content: translator.getText('recordarTooManyReminders'),
-			});
-
-		await interaction.deferUpdate();
+			return informIssue(translator.getText('recordarTooManyReminders'));
 
 		const reminderId = compressId(interaction.id);
 		const reminder = new Reminder({
@@ -470,7 +461,11 @@ const command = new Command('recordatorio', tags)
 		await reminder.save();
 		scheduleReminder(reminder);
 		
-		return interaction.editReply({
+		await interaction.editReply({
+			components: [await makeRemindersListContainer(compressedUserId, translator)],
+		});
+
+		return interaction.followUp({
 			components: [makeReminderContainer(reminder, translator)],
 		});
 	})
@@ -535,7 +530,7 @@ const command = new Command('recordatorio', tags)
 
 		await reminder.save();
 		scheduleReminder(reminder);
-			
+
 		return interaction.editReply({
 			components: [makeReminderContainer(reminder, translator, translator.getText('recordarReminderEditSuccessTitle'))],
 		});
