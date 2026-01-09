@@ -3,7 +3,7 @@
 		"scope": "javascript,typescript",
 		"prefix": "tlf",
 		"body": [
-			"const translator = Translator.from($1);",
+			"const translator = await Translator.from($1);",
 			"$0"
 		],
 		"description": "Instances a translator from the specified argument"
