@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "3.9.0",
+            "number": "3.9.1",
             "name": "Flamenco Perlado"
         },
         "note": {
@@ -13,7 +13,6 @@
         "changelog": [
             "p!emote ahora obtiene emotes de un mensaje",
             "**PuréPix** ahora permite utilizar el servicio de conversión \"phixiv\"",
-            "**PuréPix** ahora usa \"phixiv\" como servicio de conversión por defecto",
             "**PuréPix** ya no ofrece el método de conversión \"webhook\"",
             "**Puréet** ahora permite usar los servicios de conversión \"girlcockx\" y \"cunnyx\"",
             "Apariencia de **PuréFeed** mejorada",
@@ -24,7 +23,8 @@
             "Operabilidad de **PuréMusic** amendada",
             "p!estado ha sido renovado y traducido",
             "Apariencia de confesiones mejorada, junto con la posibilidad de responder anónimamente",
-            "p!recordatorio agregado"
+            "p!recordatorio agregado",
+            "p!voz --invitar eliminado (debido a que Discord implementó lo mismo)"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos",

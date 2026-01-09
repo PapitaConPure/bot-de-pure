@@ -17,7 +17,6 @@ const collectors = {};
 const options = new CommandOptions()
 	.addParam('nombre', 'TEXT', 'para decidir el nombre de la sesión actual', { optional: true })
 	.addFlag('e', ['emote', 'emoji'], 'para determinar el emote de la sesión actual', { name: 'emt', type: 'EMOTE' })
-	.addFlag('i', ['invitar', 'invite'], 'para invitar del canal a la sesión actual')
 	.addFlag('aw', ['asistente','instalador','wizard'], 'para inicializar el Asistente de Configuración');
 const flags = new CommandTags().add('COMMON');
 const command = new Command('voz', flags)
@@ -46,30 +45,6 @@ const command = new Command('voz', flags)
 
 		if(!voiceState?.channelId)
 			return warnNotInSession();
-
-		const createInvite = args.parseFlag('invitar');
-		if(createInvite) {
-			try {
-				const invite = await request.guild.invites.create(voiceState.channel, { maxAge: 5 * 60 });
-
-				if(invite)
-					return request.reply({ content: `${invite}` });
-
-				const channelRef = `${voiceState.channel}`;
-				const embed = new EmbedBuilder()
-					.setColor('Blurple')
-					.setAuthor({
-						name: request.member.displayName,
-						iconURL: request.member.displayAvatarURL(),
-					})
-					.addFields({ name: 'Invitación a canal', value: channelRef });
-
-				return request.reply({ embeds: [embed] });
-			} catch(err) {
-				console.error(err);
-				return request.reply({ content: '⚠️️ ¡Ocurrió un problema al crear la invitación! Por favor inténtalo nuevamente' })
-			}
-		}
 		
 		//Cambiar nombre de canal de voz de sesión
 		const emoteString = args.parseFlagExpr('emote', x => `${x}`, '💠');
