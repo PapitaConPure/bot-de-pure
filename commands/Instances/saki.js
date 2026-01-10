@@ -5,7 +5,7 @@ const { CommandPermissions } = require('../Commons/cmdPerms.js');
 
 let crazyBackupId = hourai.crazyBackupChannelId;
 
-const positivos = [
+const positivos = new Set([
     'habilitado',
     'habilitar',
     'encendido',
@@ -17,9 +17,9 @@ const positivos = [
     'true',
     'on',
     '1',
-];
+]);
 
-const negativos = [
+const negativos = new Set([
     'deshabilitado',
     'deshabilitar',
     'desactivado',
@@ -31,13 +31,13 @@ const negativos = [
     'false',
     'off',
     '0',
-];
+]);
 
 function recibirEstado(texto) {
-    if(positivos.includes(texto))
+    if(positivos.has(texto))
         return 1;
     
-    if(negativos.includes(texto))
+    if(negativos.has(texto))
         return -1;
 
     return 0;
