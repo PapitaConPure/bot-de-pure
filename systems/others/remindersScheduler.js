@@ -6,7 +6,7 @@ const { Translator } = require('../../i18n');
 const { decompressId } = require('../../func');
 const Int32 = require('mongoose-int32');
 
-const { debug, info, error } = Logger('DEBUG', 'Reminders');
+const { debug, info, error } = Logger('WARN', 'Reminders');
 
 /**@type {import('discord.js').Client}*/
 let schedulerClient = null;
@@ -40,7 +40,7 @@ async function scheduleReminder(reminder) {
 	if(ms > Int32.INT32_MAX) {
 		const newTimeout = setTimeout(scheduleReminder, Int32.INT32_MAX, reminder);
 		scheduledIds.set(reminder._id, newTimeout);
-		info(`Reminder #${debugId} would take longer to trigger than what's representable by int32, so it will be stalled for the maximum int32 duration`);
+		info(`Reminder #${debugId} would take longer to trigger than what's representable by int32, so it will be stalled for the maximum int32 duration and checked again`);
 		return;
 	}
 
@@ -164,7 +164,7 @@ function initRemindersScheduler(client) {
 	if(!client)
 		throw new TypeError(`Expected a Discord client. Got: ${client == null ? client : typeof client}`);
 	
-	debug('Attempting to initialize the scheduler.');
+	debug('Initializing the scheduler.');
 	schedulerClient = client;
 }
 
