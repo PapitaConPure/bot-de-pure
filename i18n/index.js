@@ -2022,6 +2022,16 @@ let localesObject = /**@type {const}*/({
 			'このサーバーとPuréVoiceの関連付けが解除されていることを確認します',
 		),
 	},
+	voiceRelocatedFieldName: {
+		es: 'Sistema PuréVoice reubicado',
+		en: 'PuréVoice System relocated',
+		ja: 'PuréVoiceシステム移転',
+	},
+	voiceRelocatedFieldValue: {
+		es: 'Se reubicó el Sistema PuréVoice asociado al servidor',
+		en: 'This server\'s PuréVoice System has been relocated',
+		ja: 'サーバーに関連付けられているPuréVoiceシステムは移転されました',
+	},
 	voiceUninstalledFieldName: {
 		es: 'Sistema PuréVoice eliminado',
 		en: 'PuréVoice System removed',
@@ -2029,7 +2039,7 @@ let localesObject = /**@type {const}*/({
 	},
 	voiceUninstalledFieldValue: {
 		es: 'Se eliminó el Sistema PuréVoice asociado al servidor',
-		en: 'The PuréVoice System associated with the server was removed',
+		en: 'This server\'s PuréVoice System has been removed',
 		ja: 'サーバーに関連付けられたPuréVoiceシステムが削除されました',
 	},
 	voiceCancelledFieldValue: {
@@ -2037,23 +2047,56 @@ let localesObject = /**@type {const}*/({
 		en: 'The PuréVoice System wizard has been cancelled',
 		ja: 'PuréVoiceシステムウィザードはキャンセルされました',
 	},
+	voiceRelocateModalTitle: {
+		es: 'Reubicar Sistema PuréVoice',
+		en: 'Relocate PuréVoice System',
+		ja: 'PuréVoiceシステムを移設する',
+	},
+	voiceRelocateModalCategoryLabel: {
+		es: 'Categoría',
+		en: 'Category',
+		ja: 'カテゴリ',
+	},
 	voiceSameChannelExpected: {
 		es: '❌ Ya estoy conectada a otro chat de voz. ¡Ven conmigo antes de hacer eso!',
 		en: '❌ I\'m already connected to another voice channel. Come here before doing that!',
 		ja: '❌ すでに別の音声チャネルに接続しています。その前にここに来てください！',
 	},
+	voiceButtonRelocate: {
+		es: 'Reubicar',
+		en: 'Relocate',
+		ja: '移転する',
+	},
+	voiceButtonInstall: {
+		es: 'Instalar',
+		en: 'Install',
+		ja: 'インストール',
+	},
+	voiceButtonUninstall: {
+		es: 'Desinstalar',
+		en: 'Uninstall',
+		ja: 'アンインストール',
+	},
+	voiceButtonUninstallConfirm: {
+		es: 'DESINSTALAR',
+		en: 'UNINSTALL',
+		ja: '本当にアンインストール',
+	},
 	voiceSessionNameExpected: {
 		es: paragraph(
 			'⚠️ Debes ingresar un nombre de sesión para ejecutar este comando.',
-			'Si estás buscando iniciar el Asistente de configuración, usa la bandera `--asistente` o `-a`',
+			'Si estás buscando iniciar el Asistente de configuración, usa la bandera `--asistente` o `-a`.',
+			`Usa \`${subl(0)}ayuda voz\` para más información`,
 		),
 		en: paragraph(
 			'⚠️ You must enter a session name to execute this command.',
-			'If you\'re trying to start the configuration Wizard, use the `--wizard` or `-w` flag',
+			'If you\'re trying to start the configuration Wizard, use the `--wizard` or `-w` flag.',
+			`Usa \`${subl(0)}help voice\` para más información`,
 		),
 		ja: paragraph(
-			'⚠️ このコマンドを実行するにはセッション名を入力する必要があります。.',
-			'設定ウィザードを起動しようとしている場合は、`--wizard`または`-w`フラグを使用してください',
+			'⚠️ このコマンドを実行するにはセッション名を入力する必要があります。',
+			'設定ウィザードを起動しようとしている場合は、`--wizard`または`-w`フラグを使用してください。',
+			`Usa \`${subl(0)}help voice\` para más información`,
 		),
 	},
 	voiceSessionNameTooLong: {
@@ -2079,6 +2122,11 @@ let localesObject = /**@type {const}*/({
 		es: 'Preparar categoría recipiente de PuréVoice',
 		en: 'Prepare PuréVoice container category',
 		ja: 'PuréVoiceコンテナカテゴリを準備する',
+	},
+	voiceReasonSystemRelocate: {
+		es: `PuréVoice reubicado por ${subl(0)}`,
+		en: `PuréVoice relocated by ${subl(0)}`,
+		ja: `PuréVoiceは${subl(0)}によって移転されました`,
 	},
 	voiceReasonSystemRemove: {
 		es: `PuréVoice desinstalado por ${subl(0)}`,
@@ -2172,7 +2220,7 @@ let localesObject = /**@type {const}*/({
 	},
 	voiceSessionNewSessionNamingValue: {
 		es: `Puedes usar \`${subl(0)}voz <Nombre>\` para cambiar el nombre`,
-		en: `You can use \`${subl(0)}vc <Name>\` to change the name`,
+		en: `You can use \`${subl(0)}vc <Name>\` to rename the session`,
 		ja: `\`${subl(0)}vc 「名前」\`を使用して名前を変更できます`,
 	},
 	voiceSessionNewSessionEmoteName: {
@@ -2182,7 +2230,7 @@ let localesObject = /**@type {const}*/({
 	},
 	voiceSessionNewSessionEmoteValue: {
 		es: 'Añade `--emote <Emote>` o `-e <Emote>` para cambiar el emote',
-		en: 'Add `--emote <Emote>` or `-e <Emote>` to change the emote',
+		en: 'Add `--emote <Emote>` or `-e <Emote>` to set the session emote',
 		ja: 'エモートを変更するには、`--emote 「エモート」`または`-e 「エモート」`を追加します',
 	},
 	voiceSessionNewSessionRoleName: {
