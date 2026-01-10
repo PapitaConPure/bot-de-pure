@@ -38,13 +38,38 @@ function makeSessionRoleAutoname(userConfig) {
     return `${userConfig.voice.autoemoji || '💠'} ${userConfig.voice.autoname}`;
 }
 
-class PureVoiceUpdateHandler {
+class PureVoiceDocumentHandler {
     /**@type {import('../../models/purevoice.js').PureVoiceDocument}*/
-    pvDocument;
+    document;
+
+    /**
+     * Intenta conseguir un documento de sistema PuréVoice del servidor relacionado al cambio detectado, en la base de datos
+     * @param {Object} documentQuery 
+     * @returns {Promise<import('../../models/purevoice.js').PureVoiceDocument>}
+     */
+    async fetchSystemDocument(documentQuery) {
+        this.document = await PureVoiceModel.findOne(documentQuery).catch(err => { error(err); return undefined; });
+        return this.document;
+    };
+
+    async relinkDocument() {
+        const documentId = this.document._id;
+        this.document = await PureVoiceModel.findById(documentId).catch(err => { error(err); return undefined; });
+        return this.document;
+    };
+
+    async saveChanges() {
+        return this.document.save();
+    }
+}
+
+class PureVoiceUpdateHandler {
+    /**@type {PureVoiceDocumentHandler}*/
+    #documentHandler;
     /**@type {Discord.VoiceState}*/
-    oldState;
+    #oldState;
     /**@type {Discord.VoiceState}*/
-    state;
+    #state;
 
     /**
      * Crea un nuevo Handler para una actualización de estado de un canal de voz con Sistema PuréVoice
@@ -52,34 +77,21 @@ class PureVoiceUpdateHandler {
      * @param {Discord.VoiceState} state 
      */
     constructor(oldState, state) {
-        this.oldState = oldState;
-        this.state = state;
-    };
-
-    /**
-     * Intenta conseguir un documento de sistema PuréVoice del servidor relacionado al cambio detectado, en la base de datos
-     * @param {Object} documentQuery 
-     * @returns {Promise<void>}
-     */
-    async getSystemDocument(documentQuery) {
-        this.pvDocument = await PureVoiceModel.findOne(documentQuery).catch(err => { error(err); return undefined; });
-    };
-
-    async relinkDocument() {
-        const documentId = this.pvDocument.id;
-        this.pvDocument = await PureVoiceModel.findById(documentId).catch(err => { error(err); return undefined; });
+        this.#documentHandler = new PureVoiceDocumentHandler();
+        this.#oldState = oldState;
+        this.#state = state;
     };
 
     /** Comprueba si hay un sistema PuréVoice instalado en el servidor actual o no */
-    systemIsInstalled = () => (!!(this.pvDocument && this.state.guild.channels.cache.get(this.pvDocument.categoryId)));
+    systemIsInstalled() {
+		return !!(this.#documentHandler.document && this.#state.guild.channels.cache.get(this.#documentHandler.document.categoryId));
+	};
     
     /** Para controlar errores ocasionados por una eliminación prematura de uno de los canales asociados a una sesión */
     prematureError = () => warn(chalk.gray('Canal probablemente eliminado prematuramente'));
     
     /** Comprueba si el cambio de estado no es un movimiento entre canales de voz */
-    isNotConnectionUpdate = () => (this.oldState.channelId === this.state.channelId);
-
-    saveChanges = () => this.pvDocument.save();
+    isNotConnectionUpdate = () => (this.#oldState.channelId === this.#state.channelId);
 
     /**
      * Comprueba si el cambio es una desconexión y verifica si el canal quedó vacío para poder eliminar la sesión.
@@ -88,8 +100,9 @@ class PureVoiceUpdateHandler {
     async handleDisconnection() {
         if(this.isNotConnectionUpdate()) return;
 
-        const { pvDocument, oldState, prematureError } = this;
-        const { guild, channel: oldChannel, member } = oldState;
+        const { guild, channel: oldChannel, member } = this.#oldState;
+        const pvDocument = this.#documentHandler.document;
+
         if(!oldChannel) {
             debug('No hubo un canal anterior en proceso de desconexión. Se trata de una conexión pura. Descartando');
             return;
@@ -125,7 +138,7 @@ class PureVoiceUpdateHandler {
                     await controlPannel.permissionOverwrites.delete(member).catch(error);
                 }
 
-                member.roles.remove(sessionRole, 'Desconexión de miembro de sesión PuréVoice').catch(prematureError);
+                member.roles.remove(sessionRole, 'Desconexión de miembro de sesión PuréVoice').catch(this.prematureError);
                 info('La desconexión no es fatal. Se adaptó el panel de control acordemente');
                 return;
             }
@@ -216,15 +229,16 @@ class PureVoiceUpdateHandler {
     async handleConnection() {
         if(this.isNotConnectionUpdate()) return;
         
-        const { pvDocument, state, prematureError } = this;
-        const { guild, channel, member } = state;
+        const { prematureError } = this;
+        const { guild, channel, member } = this.#state;
+        const pvDocument = this.#documentHandler.document;
         if(!channel || channel?.parentId !== pvDocument.categoryId) return;
 
         info(`Conexión a canal de voz detectada para #${channel.name} (${channel.id})`);
         
         //Embed de notificación
         const embed = new Discord.EmbedBuilder()
-            .setAuthor({ name: 'PuréVoice', iconURL: state.client.user.avatarURL({ size: 128 }) });
+            .setAuthor({ name: 'PuréVoice', iconURL: this.#state.client.user.avatarURL({ size: 128 }) });
 
         if(channel.id !== pvDocument.voiceMakerId) {
             const currentSessionId = pvDocument.sessions.find(sid => sid === channel.id);
@@ -450,8 +464,7 @@ class PureVoiceUpdateHandler {
             await channel.send(startMessage).catch(prematureError);
             
             userConfigs.voice.autoname || setTimeout(async () => {
-                await this.relinkDocument();
-                const { pvDocument } = this;
+                const pvDocument = await this.#documentHandler.relinkDocument();
                 if(!pvDocument) return;
 
                 const sessionId = pvDocument.sessions.find(sid => sid === channel.id);
@@ -491,8 +504,8 @@ class PureVoiceUpdateHandler {
      * @returns {Promise<Number>} la cantidad de sesiones defectuosas eliminadas
      */
     async checkFaultySessions() {
-        const { pvDocument, state } = this;
-        const guildChannels = state.guild.channels.cache;
+        const pvDocument = this.#documentHandler.document;
+        const guildChannels = this.#state.guild.channels.cache;
         const invalidSessionIds = [];
         const members = /**@type {Map<String, Discord.GuildMember>}*/(new Map());
 
@@ -500,7 +513,7 @@ class PureVoiceUpdateHandler {
             const channelExists = guildChannels.has(sid);
 
             if(!channelExists) {
-                state.guild.members.cache.forEach((member, memberId) => members.set(memberId, member));
+                this.#state.guild.members.cache.forEach((member, memberId) => members.set(memberId, member));
                 invalidSessionIds.push(sid);
             }
 
@@ -519,57 +532,163 @@ class PureVoiceUpdateHandler {
 
         return invalidSessionIds.length;
     }
+
+    /**@param {string} guildId*/
+    async fetchGuildDocument(guildId) {
+        await this.#documentHandler.fetchSystemDocument({ guildId });
+    }
+
+    async saveChanges() {
+        await this.#documentHandler.saveChanges();
+    }
 }
 
-class PureVoiceOrchestrator {
-    /**@type {String}*/
-    #guildId;
-    /**@type {Array<PureVoiceUpdateHandler>}*/
-    #handlers;
-    /**@type {Boolean}*/
-    #busy;
+/**@typedef {(documentHandler: PureVoiceDocumentHandler) => Promise<unknown>} ActionFn*/
+class PureVoiceActionHandler {
+    /**@type {PureVoiceDocumentHandler}*/
+    #documentHandler;
+    /**@type {ActionFn}*/
+    #actionFn;
+    /**@type {Discord.Guild}*/
+    #guild;
 
     /**
      * 
-     * @param {String} guildId 
+     * @param {Discord.Guild} guild 
+     * @param {ActionFn} actionHandler 
+     */
+    constructor(guild, actionHandler) {
+        this.#documentHandler = new PureVoiceDocumentHandler();
+        this.#actionFn = actionHandler;
+        this.#guild = guild;
+    }
+
+    /** Comprueba si hay un sistema PuréVoice instalado en el servidor actual o no */
+    systemIsInstalled() {
+		return !!(this.#documentHandler.document && this.#guild.channels.cache.get(this.#documentHandler.document.categoryId));
+	};
+
+    async performAction() {
+        await this.#actionFn(this.#documentHandler);
+    }
+
+    async fetchSystemDocument() {
+        await this.#documentHandler.fetchSystemDocument(this.#guild.id);
+    }
+
+    async saveChanges() {
+        await this.#documentHandler.saveChanges();
+    }
+}
+
+/**@class Representa un orquestador de sistema PuréVoice*/
+class PureVoiceOrchestrator {
+    /**@type {string}*/
+    #guildId;
+    /**@type {Array<PureVoiceUpdateHandler>}*/
+    #updates;
+    /**@type {Array<PureVoiceActionHandler>}*/
+    #actions;
+    /**@type {boolean}*/
+    #busy;
+
+    /**
+     * Instancia un orquestador de sistema PuréVoice para el servidor especificado
+     * @param {string} guildId 
      */
     constructor(guildId) {
         this.#guildId = guildId;
-        this.#handlers = [];
+        this.#updates = [];
+        this.#actions = [];
         this.#busy = false;
     }
 
-    /**@param {PureVoiceUpdateHandler} updateHandler*/
-    async orchestrate(updateHandler) {
-        this.#handlers.push(updateHandler);
+    /**
+	 * Pone en cola un análisis de cambio de estado de una sesión de voz
+	 * @param {PureVoiceUpdateHandler} handler
+	 */
+    async orchestrateUpdate(handler) {
+        this.#updates.push(handler);
+
         if(this.#busy) return true;
         this.#busy = true;
-        return this.consumeHandler();
+
+        await this.consumeUpdate();
+
+		return false;
     }
 
-    async consumeHandler() {
-        const pv = this.#handlers.shift();
-        await pv.getSystemDocument({ guildId: this.#guildId }).catch(error);
-        if(!pv.systemIsInstalled()) return false;
+    /**
+	 * Pone en cola prioritaria una ejecución de acción en una sesión de voz
+	 * @param {PureVoiceActionHandler} handler
+	 */
+    async orchestrateAction(handler) {
+        this.#actions.push(handler);
+
+        if(this.#busy) return true;
+        this.#busy = true;
+
+        await this.consumeAction();
+
+		return false;
+    }
+
+	/**Quita de la cola un análisis de cambio de estado de una sesión de voz y lo ejecuta. Si alguna cola no está vacía, se ejecuta consumeAction (prioridad) o consumeUpdate*/
+    async consumeUpdate() {
+        const handler = this.#updates.shift();
+        await handler.fetchGuildDocument(this.#guildId).catch(error);
+        if(!handler.systemIsInstalled()) return;
         
         try {
             await Promise.all([
-                pv.checkFaultySessions(),
-                pv.handleDisconnection(),
-                pv.handleConnection(),
+                handler.checkFaultySessions(),
+                handler.handleDisconnection(),
+                handler.handleConnection(),
             ]);
-            await pv.saveChanges();
+            await handler.saveChanges();
         } catch(err) {
             error(err, 'Ocurrió un error mientras se analizaba un cambio de estado en una sesión Purévoice');
         }
         
-        if(this.#handlers.length) {
-            await this.consumeHandler();
-            return false;
+        if(this.#actions.length) {
+            await this.consumeAction();
+            return;
+        }
+        
+        if(this.#updates.length) {
+            await this.consumeUpdate();
+            return;
         }
 
         this.#busy = false;
-        return false;
+        return;
+    }
+
+	/**Quita de la cola una ejecución de acción en una sesión de voz y la ejecuta. Si alguna cola no está vacía, se ejecuta consumeAction (prioridad) o consumeUpdate*/
+    async consumeAction() {
+        const handler = this.#actions.shift();
+        await handler.fetchSystemDocument().catch(error);
+        if(!handler.systemIsInstalled()) return;
+
+        try {
+            await handler.performAction().catch(error);
+            await handler.saveChanges();
+        } catch(err) {
+            error(err, 'Ocurrió un error mientras se procesaba una acción en una sesión Purévoice');
+        }
+        
+        if(this.#actions.length) {
+            await this.consumeAction();
+            return;
+        }
+
+        if(this.#updates.length) {
+            await this.consumeUpdate();
+            return;
+        }
+
+        this.#busy = false;
+        return;
     }
 }
 
@@ -750,7 +869,6 @@ async function createPVControlPanelChannel(guild, categoryId) {
 
     debug('All checks passed for control panel creation in:', categoryId);
 
-    
     debug('Fetching category channel.');
     categoryChannel = await categoryChannel.fetch(true);
 
@@ -852,7 +970,7 @@ async function requestPVControlPanel(guild, categoryId, controlPanelId) {
 
     const existingControlPanel = /**@type {Discord.TextChannel}*/(
         guild.channels.cache.get(controlPanelId)
-        ?? await guild.channels.fetch(controlPanelId)
+        ?? await guild.channels.fetch(controlPanelId).catch(() => undefined)
     );
 
     if(existingControlPanel) {
@@ -873,7 +991,7 @@ async function requestPVControlPanel(guild, categoryId, controlPanelId) {
  */
 function getFrozenSessionAllowedMembers(voiceChannel, dbMembers) {
     const voiceMembers = voiceChannel.members;
-    
+
     const allowedSessionMembers = /**@type {Map<String, PureVoiceSessionMember>}*/(new Map());
 
     for(const [ id, dbMember ] of dbMembers) {
@@ -885,8 +1003,26 @@ function getFrozenSessionAllowedMembers(voiceChannel, dbMembers) {
     return allowedSessionMembers;
 }
 
+/**@type {Map<string, PureVoiceOrchestrator>}*/
+const orchestrators = new Map();
+
+/**
+ * Obtiene el orquestador de el servidor indicado.
+ * Si el servidor aun no tiene un orquestador instanciado, se lo instancia automáticamente
+ * @param {string} guildId 
+ */
+function getOrchestrator(guildId) {
+    const orchestrator = orchestrators.get(guildId) || new PureVoiceOrchestrator(guildId);
+
+    if(!orchestrators.has(guildId))
+        orchestrators.set(guildId, orchestrator);
+
+    return orchestrator;
+}
+
 module.exports = {
     PureVoiceUpdateHandler,
+    PureVoiceActionHandler,
     PureVoiceOrchestrator,
     PureVoiceSessionMember,
     makePVSessionName,
@@ -895,6 +1031,7 @@ module.exports = {
     createPVControlPanelChannel,
     requestPVControlPanel,
     getFrozenSessionAllowedMembers,
+    getOrchestrator,
     PureVoiceSessionMemberRoles,
     PVCPSuccess,
     PVCPFailure,

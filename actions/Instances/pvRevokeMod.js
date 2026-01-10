@@ -1,21 +1,26 @@
 const { Translator } = require('../../i18n');
-const { PureVoiceSessionMember } = require('../../systems/others/purevoice.js');
+const { PureVoiceSessionMember, requestPVControlPanel, PVCPSuccess, PureVoiceActionHandler, getOrchestrator } = require('../../systems/others/purevoice.js');
 const { PureVoiceModel, PureVoiceSessionModel } = require('../../models/purevoice.js');
 const { ContextMenuActionManager } = require('../Commons/actionBuilder.js');
+const { MessageFlags } = require('discord.js');
 
 const action = new ContextMenuActionManager('actionPVRemoveMod', 'User')
     .setUserResponse(async interaction => {
-        await interaction.deferReply({ ephemeral: true });
-
         const member = interaction.member;
         const other = interaction.targetMember;
 
-        const translator = await Translator.from(member);
+        const [ translator ] = await Promise.all([
+            Translator.from(member),
+            interaction.deferReply({ flags: MessageFlags.Ephemeral }),
+        ]);
 
-        const voiceChannel = member.voice?.channel;
+        const voiceState = member.voice;
+        const voiceChannel = voiceState?.channel;
+        const { guild, guildId } = voiceChannel;
+
         if(!voiceChannel) return interaction.editReply({ content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción' });
 
-        const pv = await PureVoiceModel.findOne({ guildId: voiceChannel.guildId });
+        const pv = await PureVoiceModel.findOne({ guildId });
         if(!pv) return interaction.editReply({ content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción' });
 
         const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
@@ -32,8 +37,21 @@ const action = new ContextMenuActionManager('actionPVRemoveMod', 'User')
 
 		session.members.set(other.id, sessionOther.toJSON());
 		session.markModified('members');
+        
+        const result = await requestPVControlPanel(guild, pv.categoryId, pv.controlPanelId);
+        
+        if(!result.success)
+            return interaction.editReply({ content: 'PLACEHOLDER_PV_CONTROL_PANEL_REQUEST_FAIL' });
 
-        const controlPanel = /**@type {import('discord.js').TextChannel}*/(interaction.guild.channels.cache.get(pv.controlPanelId));
+        const controlPanel = result.controlPanel;
+
+        if(result.status === PVCPSuccess.Created) {
+            const actionHandler = new PureVoiceActionHandler(guild, async() => {
+                pv.categoryId = result.controlPanel.id;
+            });
+            const orchestrator = getOrchestrator(guildId);
+            orchestrator.orchestrateAction(actionHandler);
+        }
 
         await Promise.all([
             controlPanel.permissionOverwrites.delete(other, 'PLACEHOLDER_PV_REASON_MEMBERSCHANGED_VIEWCHANNEL_DISABLE').catch(console.error),
