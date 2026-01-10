@@ -155,7 +155,7 @@ const command = new Command('feed', flags)
 						.setStyle(ButtonStyle.Success),
 					new ButtonBuilder()
 						.setCustomId(`feed_selectDelete_${authorId}`)
-						.setEmoji('1355143793577426962')
+						.setEmoji('1458130451834081513')
 						.setLabel(translator.getText('buttonDelete'))
 						.setStyle(ButtonStyle.Danger)
 						.setDisabled(!premade),
