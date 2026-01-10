@@ -50,7 +50,7 @@ const action = new ContextMenuActionManager('actionPVBanMember', 'User')
 
 		if(result.status === PVCPSuccess.Created) {
 			const actionHandler = new PureVoiceActionHandler(guild, async(documentHandler) => {
-				documentHandler.document.categoryId = result.controlPanel.id;
+				documentHandler.document.controlPanelId = result.controlPanel.id;
 			});
 			const orchestrator = getOrchestrator(guildId);
 			await orchestrator.orchestrateAction(actionHandler);
