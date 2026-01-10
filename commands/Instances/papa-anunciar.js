@@ -14,7 +14,7 @@ const command = new Command('papa-anunciar', flags)
 	.setDescription('Da un anuncio a todos los canales de sistema posibles')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const title = CommandOptionSolver.asString(args.parseFlagExpr('título'));
+		const title = CommandOptionSolver.asString(args.flagExprIf('título'));
 		const announcement = args.getString('anuncio', true);
 		const guilds = request.client.guilds.cache;
 		guilds.forEach(guild => {

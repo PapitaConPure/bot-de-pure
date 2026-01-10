@@ -227,11 +227,11 @@ const command = new Command('tubérculo', flags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const operation = args.parseFlagExt('crear', 'crear')
-			|| args.parseFlagExt('ver', 'ver')
-			|| args.parseFlagExt('borrar', 'borrar');
+		const operation = args.flagIf('crear', 'crear')
+			|| args.flagIf('ver', 'ver')
+			|| args.flagIf('borrar', 'borrar');
 
-		const isPureScript = args.parseFlag('script');
+		const isPureScript = args.hasFlag('script');
 		const tuberId = args.getString('id');
 		const members = request.guild.members.cache;
 

@@ -21,7 +21,7 @@ const command = new Command('prefijo', flags)
 	.setPermissions(perms)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const reset = args.parseFlag('reestablecer');
+		const reset = args.hasFlag('reestablecer');
 		const guildsearch = { guildId: request.guildId };
 		const { raw: preraw, regex: preregex } = prefixes.p_pure(request.guildId);
 

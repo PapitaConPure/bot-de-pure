@@ -104,8 +104,8 @@ const command = new Command('sassafras', flags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const showTotal = args.parseFlag('total');
-		const sassamodo = args.parseFlag('sassamodo');
+		const showTotal = args.hasFlag('total');
+		const sassamodo = args.hasFlag('sassamodo');
 		
 		if(!showTotal && sassamodo)
 			return request.reply({ content: sassadata.sassamodo });

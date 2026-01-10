@@ -1706,7 +1706,7 @@ class CommandOptionSolver {
 	 * Devuelve `true` si se ingresó la bandera especificada, o `false` de lo contrario
 	 * @param {string} identifier
 	 */
-	parseFlag(identifier) {
+	hasFlag(identifier) {
 		return CommandOptionSolver.asBoolean(
 			this.#options.fetchFlag(
 				this.#args,
@@ -1720,6 +1720,21 @@ class CommandOptionSolver {
 	}
 
 	/**
+	 * Devuelve el valor ingresado como un string si se ingresó la bandera especificada, o `undefined` de lo contrario
+	 * @param {string} identifier
+	 */
+	parseFlagExpr(identifier) {
+		return CommandOptionSolver.asString(this.#options.fetchFlag(
+			this.#args,
+			identifier,
+			{
+				callback: x => x,
+				fallback: undefined,
+			},
+		));
+	}
+
+	/**
 	 * Devuelve {@linkcode P} si se ingresó la bandera especificada, o {@linkcode N} de lo contrario
 	 * @template {ParamResult} P
 	 * @template {ParamResult} [N=undefined]
@@ -1727,7 +1742,7 @@ class CommandOptionSolver {
 	 * @param {P} positiveResult
 	 * @param {N} [negativeResult=undefined]
 	 */
-	parseFlagExt(identifier, positiveResult, negativeResult = undefined) {
+	flagIf(identifier, positiveResult, negativeResult = undefined) {
 		return /**@type {P|N}*/(this.#options.fetchFlag(
 			this.#args,
 			identifier,
@@ -1740,7 +1755,7 @@ class CommandOptionSolver {
 
 	/**
 	 * @overload
-	 * Devuelve el valor ingresado como un String si se ingresó la bandera especificada, o `undefined` de lo contrario
+	 * Devuelve el valor ingresado como un string si se ingresó la bandera especificada, o `undefined` de lo contrario
 	 * @param {string} identifier
 	 * @returns {ReturnType<FlagCallback<ParamResult>> | undefined}
 	 */
@@ -1759,7 +1774,7 @@ class CommandOptionSolver {
 	 * @param {FlagCallback<CallbackType>} [callback]
 	 * @param {N} [fallback]
 	 */
-	parseFlagExpr(identifier, callback = undefined, fallback = undefined) {
+	flagExprIf(identifier, callback = undefined, fallback = undefined) {
 		callback ??= (/**@type {CallbackType}*/ x) => x;
 		return this.#options.fetchFlag(
 			this.#args,

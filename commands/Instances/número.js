@@ -13,9 +13,9 @@ const command = new Command('número', flags)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		//Acción de comando
-		const shorten = args.parseFlag('acortar');
-		const minDigits = args.parseFlagExpr('mínimo',    (/**@type {Number}*/x) => x, 1);
-		const exp = args.parseFlagExpr('exponente', (/**@type {Number}*/x) => x, 1);
+		const shorten = args.hasFlag('acortar');
+		const minDigits = args.flagExprIf('mínimo',    (/**@type {Number}*/x) => x, 1);
+		const exp = args.flagExprIf('exponente', (/**@type {Number}*/x) => x, 1);
 		
 		let num = args.getNumber('num');
 		if(!num) return request.reply({ content: '⚠️ Debes ingresar un número' });

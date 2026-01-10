@@ -78,7 +78,7 @@ const command = new Command('tarjeta', flags)
 		const canvas = Canvas.createCanvas(640, 1120);
 		const ctx = canvas.getContext('2d');
 		const challenges = ['nobomb', 'nospecial', 'pacifista']
-			.map(ch => args.parseFlagExt(ch, ch))
+			.map(ch => args.flagIf(ch, ch))
 			.filter(ch => ch);
 
 		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda ${module.exports.name}\` para más información`;

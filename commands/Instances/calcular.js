@@ -16,8 +16,8 @@ const command = new Command('calcular', flags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const shorten = args.parseFlag('acortar');
-		const minDigits = args.parseFlagExpr('mínimo', v => +v, 1);
+		const shorten = args.hasFlag('acortar');
+		const minDigits = args.flagExprIf('mínimo', v => +v, 1);
 		const operation = args.getString('operación', true);
 
 		if(!operation)

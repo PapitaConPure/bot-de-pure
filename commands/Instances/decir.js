@@ -15,7 +15,7 @@ const command = new Command('decir', flags)
     .setLongDescription('Me hace decir lo que quieras que diga')
     .setOptions(options)
     .setExecution(async (request, args) => {
-        const deleteFlag = args.parseFlag('borrar');
+        const deleteFlag = args.hasFlag('borrar');
 
         if(args.empty)
             return request.reply({ content: '⚠️ tienes que especificar lo que quieres que diga.' });

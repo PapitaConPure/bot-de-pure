@@ -34,7 +34,7 @@ const command = new Command('voz', tags)
 		const translator = await Translator.from(request);
 
 		//TODO: Mover asistente a p!servidor y eliminar esta bandera
-		if(args.parseFlag('asistente'))
+		if(args.hasFlag('asistente'))
 			return generateFirstWizard(request, translator);
 
 		const voiceState = request.member.voice;
@@ -43,7 +43,7 @@ const command = new Command('voz', tags)
 			ephemeral: true,
 		}).catch(console.error);
 
-		const emoteString = args.parseFlagExpr('emote', x => `${x}`, '💠');
+		const emoteString = args.flagExprIf('emote', x => `${x}`, '💠');
 		const sessionEmote = defaultEmoji(emoteString);
 		const sessionName = args.getString('nombre', true);
 

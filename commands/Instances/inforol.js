@@ -37,7 +37,7 @@ const command = new Command('inforol', flags)
 		if(args.empty)
 			return request.reply({ content: translator.getText('inforolNoRoleProvided') });
 
-		const strict = args.parseFlag('estricta');
+		const strict = args.hasFlag('estricta');
 		const roles = CommandOptionSolver.asRoles(args.parsePolyParamSync('términos', { regroupMethod: 'MENTIONABLES-WITH-SEP' }));
 
 		const roleIds = roles.map(role => role.id);

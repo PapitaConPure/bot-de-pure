@@ -551,7 +551,7 @@ async function searchAndReplyWithPost(request, args, options = {}) {
 		? request.channel.parent.nsfw
 		: request.channel.nsfw;
 	
-	const poolSize = args.parseFlagExpr('bomba', x => Math.max(2, Math.min(+x, 10)), 1);
+	const poolSize = args.flagExprIf('bomba', x => Math.max(2, Math.min(+x, 10)), 1);
 	const words = (args.getString('etiquetas', true) ?? '').split(/\s+/);
 	debug('poolSize =', poolSize);
 

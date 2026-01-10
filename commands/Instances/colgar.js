@@ -25,7 +25,7 @@ const command = new Command('colgar', tags)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const user = request.user;
-		const everyone = args.parseFlag('todos');
+		const everyone = args.hasFlag('todos');
 
 		if(everyone) {
 			const embed = new EmbedBuilder()

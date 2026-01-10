@@ -29,7 +29,7 @@ const command = new Command('saucenao', flags)
 		const translator = await Translator.from(request.userId);
 
 		debug('Verificando flag --registrar');
-		if(args.parseFlag('registrar'))
+		if(args.hasFlag('registrar'))
 			return makeRegisterRequestResponse(request, translator);
 
 		const sauceNAOUser = (await SauceNAOUser.findOne({ userId: request.userId }));

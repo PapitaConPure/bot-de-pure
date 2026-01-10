@@ -42,7 +42,7 @@ const command = new Command('papa-eval', flags)
 
 		const message = request.inferAsMessage();
 
-		const deleteAfter = args.parseFlag('del');
+		const deleteAfter = args.hasFlag('del');
 		try {
 			const fnString = args.rawArgs;
 			console.log(fnString);

@@ -209,7 +209,7 @@ const command = new Command('anarquia', flags)
 		const translator = await Translator.from(request.user);
 
 		//Revisar perfil
-		const perfil = args.parseFlag('perfil');
+		const perfil = args.hasFlag('perfil');
 		if(perfil) {
 			const { user, member, userId } = request;
 			const auser = await AUser.findOne({ userId });
@@ -275,7 +275,7 @@ const command = new Command('anarquia', flags)
 		
 		const reactIfMessage = async (/**@type {String}*/ reaction) => request.isMessage && request.inferAsMessage().react(reaction).catch(_ => _);
 		
-		const skill = args.parseFlag('skill');
+		const skill = args.hasFlag('skill');
 		const inverted = args.isMessageSolver(args.args) && isNaN(+args.args[0]);
 		let pos, emote;
 		if(inverted) emote = args.getString('emote');

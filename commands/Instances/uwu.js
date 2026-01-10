@@ -22,7 +22,7 @@ const command = new Command('uwu', flags)
 	.setLongDescription('uwu')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const deleteOriginal = args.parseFlag('borrar');
+		const deleteOriginal = args.hasFlag('borrar');
 		const randomUwu = randInArray(uwusopt);
 		
 		if(deleteOriginal && request.isMessage) {

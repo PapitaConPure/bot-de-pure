@@ -29,7 +29,7 @@ const command = new Command('imgur', flags)
 	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request.userId);
 
-		if(args.parseFlag('registrar')) {
+		if(args.hasFlag('registrar')) {
 			const embeds = [new EmbedBuilder()
 				.setColor('#1bb76e')
 				.setTitle(translator.getText('imgurRegisterTitle'))

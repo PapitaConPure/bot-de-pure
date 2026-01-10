@@ -81,9 +81,9 @@ const command = new Command('saki', flags)
     .setPermissions(perms)
     .setOptions(options)
 	.setExecution(async (request, args) => {
-		const bienvenida = args.parseFlagExpr('bienvenida');
-		const despedida = args.parseFlagExpr('despedida');
-		const pingBienvenida = args.parseFlagExpr('ping');
+		const bienvenida = args.flagExprIf('bienvenida');
+		const despedida = args.flagExprIf('despedida');
+		const pingBienvenida = args.flagExprIf('ping');
         
         const houraiCfg = (await HouraiCfg.findOne({})) || new HouraiCfg();
         const applied = [];

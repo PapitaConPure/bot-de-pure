@@ -16,8 +16,8 @@ const command = new Command('caos', tags)
 	.setPermissions(perms)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const activate = args.parseFlag('activar');
-		const deactivate = args.parseFlag('desactivar');
+		const activate = args.hasFlag('activar');
+		const deactivate = args.hasFlag('desactivar');
 		const guildsearch = { guildId: request.guild.id };
 		const gcfg = (await GuildConfig.findOne(guildsearch)) || new GuildConfig(guildsearch);
 

@@ -277,8 +277,8 @@ const command = new Command('recordatorio', tags)
 
 		const utcOffset = userConfigs?.utcOffset ?? 0;
 		
-		const dateStr = CommandOptionSolver.asString(args.parseFlagExpr('fecha'));
-		const timeStr = CommandOptionSolver.asString(args.parseFlagExpr('hora'));
+		const dateStr = CommandOptionSolver.asString(args.flagExprIf('fecha'));
+		const timeStr = CommandOptionSolver.asString(args.flagExprIf('hora'));
 		const reminderContent = args.getString('recordatorio', true);
 
 		if(!dateStr && !timeStr) {

@@ -35,11 +35,11 @@ const command = new Command('hora', tags)
 	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request.user);
 
-		const utcOffset = toUtcOffset(CommandOptionSolver.asString(args.parseFlagExpr('huso')))
+		const utcOffset = toUtcOffset(CommandOptionSolver.asString(args.flagExprIf('huso')))
 			?? (await UserConfigs.findOne({ userId: request.userId }))?.utcOffset
 			?? 0;
 
-		const dateStr = CommandOptionSolver.asString(args.parseFlagExpr('fecha'));
+		const dateStr = CommandOptionSolver.asString(args.flagExprIf('fecha'));
 		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, utcOffset);
 		const time = args.getTime('hora', utcOffset);
 
