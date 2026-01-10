@@ -9,7 +9,7 @@ const { ButtonStyle, ChannelType } = require('discord.js');
 const { makeButtonRowBuilder } = require('../../utils/tsCasts.js');
 const Logger = require('../../utils/logs.js');
 
-const { debug, info, warn, error } = Logger('WARN', 'PV');
+const { debug, info, warn, error } = Logger('DEBUG', 'PV');
 
 /**
  * 
@@ -114,17 +114,16 @@ class PureVoiceUpdateHandler {
 
             //Si la desconexión no es "fatal", simplemente asegurarse que haya un panel de control y quitarle los permisos del mismo al miembro
             if(oldChannel.members.filter(member => !member.user.bot).size) {
-                let controlPannel = /**@type {Discord.TextChannel}*/(guild.channels.cache.get(pvDocument.controlPanelId));
-                if(!controlPannel) {
-                    const result = await createPVControlPanelChannel(guild, pvDocument.categoryId);
-                    if(result.success) {
-                        controlPannel = result.controlPanel;
-                        pvDocument.controlPanelId = controlPannel.id;
-                    }
-                }
+                const result = await requestPVControlPanel(guild, pvDocument.categoryId, pvDocument.controlPanelId);
 
-                if(controlPannel)
-                    controlPannel.permissionOverwrites.delete(member);
+                if(result.success === true) {
+                    const controlPannel = result.controlPanel;
+
+                    if(result.status === PVCPSuccess.Created)
+                        pvDocument.controlPanelId = controlPannel.id;
+
+                    await controlPannel.permissionOverwrites.delete(member).catch(error);
+                }
 
                 member.roles.remove(sessionRole, 'Desconexión de miembro de sesión PuréVoice').catch(prematureError);
                 info('La desconexión no es fatal. Se adaptó el panel de control acordemente');
@@ -685,44 +684,98 @@ class PureVoiceSessionMember {
 	}
 }
 
+/**@enum {string}*/
+const PVCPFailure = /**@type {const}*/({
+    InvalidParams: 'InvalidParams',
+    NoChannel: 'NoChannel',
+    NoCategory: 'NoCategory',
+    NoPermissions: 'NoPermissions',
+    Unknown: 'Unknown',
+});
+/**@enum {string}*/
+const PVCPSuccess = /**@type {const}*/({
+    Created: 'Created',
+    Fetched: 'Fetched',
+});
+/**@typedef {import('types').ValuesOf<PVCPFailure>} PVCPFailureState*/
+/**@typedef {import('types').ValuesOf<PVCPSuccess>} PVCPSuccessState*/
+
 /**
- * 
+ * @template {boolean} TSuccess
+ * @typedef {Object} BasePVControlPanelResult
+ * @property {TSuccess} success
+ */
+/**
+ * @typedef {Object} PVCPFailureResultData
+ * @property {PVCPFailureState} status
+ * @typedef {BasePVControlPanelResult<false> & PVCPFailureResultData} PVControlPanelFailResult
+ */
+/**
+ * @typedef {Object} PVCPSuccessResultData
+ * @property {PVCPSuccessState} status
+ * @property {Discord.TextChannel} controlPanel
+ * @typedef {BasePVControlPanelResult<true> & PVCPSuccessResultData} PVControlPanelSuccessResult
+ */
+/**@typedef {PVControlPanelFailResult | PVControlPanelSuccessResult} PVControlPanelResult*/
+
+/**
  * @param {Discord.Guild} guild
  * @param {String} categoryId 
- * @returns {Promise<{ success: false, status: 'InvalidParams' | 'NoChannel' | 'NoCategory' | 'NameAlreadyTaken' | 'NoPermissions' } | { success: true, status: 'Success', controlPanel: Discord.TextChannel }>}
+ * @returns {Promise<PVControlPanelResult>}
  */
 async function createPVControlPanelChannel(guild, categoryId) {
-    if(!(guild instanceof Discord.Guild) || typeof categoryId !== 'string')
-        return { success: false, status: 'InvalidParams' };
+    debug('A control panel creation request for category', categoryId, 'has begun. Checking basic requirements to create...');
+
+    if(!(guild instanceof Discord.Guild) || typeof categoryId !== 'string') {
+        warn('Malformed parameters in createPVControlPanelChannel:', { guild, categoryId });
+        return { success: false, status: PVCPFailure.InvalidParams };
+    }
 
     let categoryChannel = guild.channels.cache.get(categoryId);
 
-    if(!categoryChannel)
-        return { success: false, status: 'NoChannel' };
-
-    if(categoryChannel.type !== ChannelType.GuildCategory)
-        return { success: false, status: 'NoCategory' };
-
-    if(!guild.members.me.permissions.has('ManageChannels', true))
-        return { success: false, status: 'NoPermissions' };
-
-    const controlPanelName = '💻〖𝓟𝓥〗';
+    if(!categoryChannel) {
+        warn('Couldn\'t resolve category channel from id:', categoryId);
+        return { success: false, status: PVCPFailure.NoChannel };
+    }
     
-    categoryChannel = await categoryChannel.fetch(true);
-    if(guild.channels.cache.some(channel => channel.name === controlPanelName))
-        return { success: false, status: 'NameAlreadyTaken' };
+    if(categoryChannel.type !== ChannelType.GuildCategory) {
+        warn('Supplied channel ID does not correspond to a category channel:', categoryId);
+        return { success: false, status: PVCPFailure.NoCategory };
+    }
+    
+    if(!guild.members.me.permissions.has('ManageChannels', true)) {
+        info('Unable to create channel because of missing permissions in guild:', guild.name);
+        return { success: false, status: PVCPFailure.NoPermissions };
+    }
 
-    const controlPanelChannel = await guild.channels.create({
-        type: ChannelType.GuildText,
-        parent: categoryChannel,
-        name: controlPanelName,
-        position: 999,
-        permissionOverwrites: [
-            { id: guild.roles.everyone, deny: [ 'ViewChannel', 'SendMessages' ] },
-            { id: guild.members.me, allow: [ 'ViewChannel', 'SendMessages' ] },
-        ],
-        reason: 'Crear Panel de Control PuréVoice',
-    });
+    debug('All checks passed for control panel creation in:', categoryId);
+
+    
+    debug('Fetching category channel.');
+    categoryChannel = await categoryChannel.fetch(true);
+
+    debug('Attempting to create new control panel channel...');
+    /**@type {Discord.TextChannel}*/
+    let controlPanelChannel;
+    try {
+        controlPanelChannel = await guild.channels.create({
+            type: ChannelType.GuildText,
+            parent: categoryChannel,
+            name: '💻〖𝓟𝓥〗',
+            position: 999,
+            permissionOverwrites: [
+                { id: guild.roles.everyone, deny: [ 'ViewChannel', 'SendMessages' ] },
+                { id: guild.members.me, allow: [ 'ViewChannel', 'SendMessages' ] },
+            ],
+            reason: 'Crear Panel de Control PuréVoice',
+        });
+    } catch(err) {
+        error(err);
+        return {
+            success: false,
+            status: PVCPFailure.Unknown,
+        };
+    }
 
     const controlPanelEmbed = new Discord.EmbedBuilder()
         .setColor(tenshiColor)
@@ -764,12 +817,54 @@ async function createPVControlPanelChannel(guild, categoryId) {
             .setStyle(ButtonStyle.Danger),
     );
 
-    await controlPanelChannel.send({
-        embeds: [controlPanelEmbed],
-        components: [controlPanelButtons],
-    });
+    debug('Sending menu to control panel.');
+    try {
+        await controlPanelChannel.send({
+            embeds: [controlPanelEmbed],
+            components: [controlPanelButtons],
+        });
+    } catch(err) {
+        error(err);
+        return {
+            success: false,
+            status: PVCPFailure.Unknown,
+        }
+    }
 
-    return { success: true, status: 'Success', controlPanel: controlPanelChannel };
+    info('Created a new control panel for category:', categoryId);
+
+    return {
+        success: true,
+        status: PVCPSuccess.Created,
+        controlPanel: controlPanelChannel,
+    };
+}
+
+/**
+ * 
+ * @param {Discord.Guild} guild 
+ * @param {string} categoryId 
+ * @param {string} controlPanelId 
+ * @returns {Promise<PVControlPanelResult>}
+ */
+async function requestPVControlPanel(guild, categoryId, controlPanelId) {
+    debug('Processing request for control panel:', controlPanelId, 'in category:', categoryId);
+
+    const existingControlPanel = /**@type {Discord.TextChannel}*/(
+        guild.channels.cache.get(controlPanelId)
+        ?? await guild.channels.fetch(controlPanelId)
+    );
+
+    if(existingControlPanel) {
+        debug('Fetched existing control panel.');
+        return {
+            success: true,
+            status: PVCPSuccess.Fetched,
+            controlPanel: existingControlPanel,
+        };
+    }
+
+    return createPVControlPanelChannel(guild, categoryId);
 }
 
 /**
@@ -798,6 +893,9 @@ module.exports = {
     makeSessionAutoname,
     makeSessionRoleAutoname,
     createPVControlPanelChannel,
+    requestPVControlPanel,
     getFrozenSessionAllowedMembers,
     PureVoiceSessionMemberRoles,
+    PVCPSuccess,
+    PVCPFailure,
 };
