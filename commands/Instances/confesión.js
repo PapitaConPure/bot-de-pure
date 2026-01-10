@@ -56,27 +56,23 @@ const command = new Command('confesión', tags)
 				},
 			);
 
-		let rows;
-		if(!confSystem)
-			rows = [
-				new ActionRowBuilder().addComponents([
+		const rows = [
+			confSystem
+				? new ActionRowBuilder().addComponents([
+					new ButtonBuilder()
+						.setCustomId(`confesión_deleteSystem`)
+						.setLabel('Desmontar Sistema')
+						.setEmoji('1458130451834081513')
+						.setStyle(ButtonStyle.Danger),
+				])
+				: new ActionRowBuilder().addComponents([
 					new ButtonBuilder()
 						.setCustomId(`confesión_installSystem`)
 						.setLabel('Configurar Nuevo Sistema')
 						.setEmoji('1291900911643263008')
 						.setStyle(ButtonStyle.Primary),
 				]),
-			];
-		else
-			rows = [
-				new ActionRowBuilder().addComponents([
-					new ButtonBuilder()
-						.setCustomId(`confesión_deleteSystem`)
-						.setLabel('Desmontar Sistema')
-						.setEmoji('1051265954312617994')
-						.setStyle(ButtonStyle.Danger),
-				]),
-			];
+		];
 
 		return request.reply({
 			embeds: [embed],
