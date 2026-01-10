@@ -573,7 +573,7 @@ class PureVoiceActionHandler {
 	}
 
 	async fetchSystemDocument() {
-		await this.#documentHandler.fetchSystemDocument(this.#guild.id);
+		await this.#documentHandler.fetchSystemDocument({ guildId: this.#guild.id });
 	}
 
 	async saveChanges() {
