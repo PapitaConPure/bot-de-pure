@@ -5,33 +5,33 @@ const { ContextMenuActionManager } = require('../Commons/actionBuilder.js');
 const { MessageFlags } = require('discord.js');
 
 const action = new ContextMenuActionManager('actionPVTransferAdmin', 'User')
-    .setUserResponse(async interaction => {
-        const member = interaction.member;
-        const other = interaction.targetMember;
+	.setUserResponse(async interaction => {
+		const member = interaction.member;
+		const other = interaction.targetMember;
 
-        const [ translator ] = await Promise.all([
-            Translator.from(member),
-            interaction.deferReply({ flags: MessageFlags.Ephemeral }),
-        ]);
+		const [ translator ] = await Promise.all([
+			Translator.from(member),
+			interaction.deferReply({ flags: MessageFlags.Ephemeral }),
+		]);
 
-        const voiceState = member.voice;
-        const voiceChannel = voiceState?.channel;
-        const { guild, guildId } = voiceChannel;
+		const voiceState = member.voice;
+		const voiceChannel = voiceState?.channel;
+		const { guild, guildId } = voiceChannel;
 
-        if(!voiceChannel) return interaction.editReply({ content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción' });
+		if(!voiceChannel) return interaction.editReply({ content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción' });
 
-        const pv = await PureVoiceModel.findOne({ guildId });
-        if(!pv) return interaction.editReply({ content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción' });
+		const pv = await PureVoiceModel.findOne({ guildId });
+		if(!pv) return interaction.editReply({ content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción' });
 
-        const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
-        if(!session) return interaction.editReply({ content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción' });
-        
-        const dbOther = (other.voice?.channelId === voiceChannel.id) && session.members.get(other.id);
-        if(!dbOther)
-            return interaction.editReply({ content: '❌ El miembro al que le transfieras el cargo de administrador debe estar en la misma sesión que tú' });
+		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
+		if(!session) return interaction.editReply({ content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción' });
+		
+		const dbOther = (other.voice?.channelId === voiceChannel.id) && session.members.get(other.id);
+		if(!dbOther)
+			return interaction.editReply({ content: '❌ El miembro al que le transfieras el cargo de administrador debe estar en la misma sesión que tú' });
 
-        const sessionSelf = new PureVoiceSessionMember(session.members.get(member.id));
-        const sessionOther = new PureVoiceSessionMember(dbOther);
+		const sessionSelf = new PureVoiceSessionMember(session.members.get(member.id));
+		const sessionOther = new PureVoiceSessionMember(dbOther);
 		if(!sessionSelf.exchangeAdmin(sessionOther))
 			return interaction.editReply({ content: '❌ Debes ser administrador de la sesión para transferir tu posición' });
 
@@ -40,36 +40,36 @@ const action = new ContextMenuActionManager('actionPVTransferAdmin', 'User')
 		session.markModified('members');
 
 		const tweakControlPanelPerms = async () => {
-            const result = await requestPVControlPanel(guild, pv.categoryId, pv.controlPanelId);
-            
-            if(!result.success)
-                return;
+			const result = await requestPVControlPanel(guild, pv.categoryId, pv.controlPanelId);
+			
+			if(!result.success)
+				return;
 
-            const controlPanel = result.controlPanel;
+			const controlPanel = result.controlPanel;
 
-            if(result.status === PVCPSuccess.Created) {
-                const actionHandler = new PureVoiceActionHandler(guild, async() => {
-                    pv.categoryId = result.controlPanel.id;
-                });
-                const orchestrator = getOrchestrator(guildId);
-                orchestrator.orchestrateAction(actionHandler);
-            }
+			if(result.status === PVCPSuccess.Created) {
+				const actionHandler = new PureVoiceActionHandler(guild, async() => {
+					pv.categoryId = result.controlPanel.id;
+				});
+				const orchestrator = getOrchestrator(guildId);
+				orchestrator.orchestrateAction(actionHandler);
+			}
 
 			if(sessionSelf.isGuest())
 				await controlPanel.permissionOverwrites.delete(member, 'PLACEHOLDER_PV_REASON_MEMBERSCHANGED_VIEWCHANNEL_DISABLE').catch(console.error);
-            
+			
 			await Promise.all([
-                controlPanel.permissionOverwrites.edit(other, { ViewChannel: true }, { reason: 'PLACEHOLDER_PV_REASON_MEMBERSCHANGED_VIEWCHANNEL_ENABLE' }).catch(console.error),
-                voiceChannel.permissionOverwrites.delete(other, 'PLACEHOLDER_PV_REASON_MEMBERSCHANGED_CONNECT_ENABLE').catch(console.error),
-            ]);
+				controlPanel.permissionOverwrites.edit(other, { ViewChannel: true }, { reason: 'PLACEHOLDER_PV_REASON_MEMBERSCHANGED_VIEWCHANNEL_ENABLE' }).catch(console.error),
+				voiceChannel.permissionOverwrites.delete(other, 'PLACEHOLDER_PV_REASON_MEMBERSCHANGED_CONNECT_ENABLE').catch(console.error),
+			]);
 		};
 
-        await Promise.all([
+		await Promise.all([
 			session.save(),
 			tweakControlPanelPerms(),
-        ]);
+		]);
 
 		return interaction.editReply({ content: `**${translator.getText('feedDeletePostTitle')}**` });
-    });
+	});
 
 module.exports = action;
