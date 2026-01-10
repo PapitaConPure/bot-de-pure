@@ -49,8 +49,8 @@ const command = new Command('borrar', tags)
 	.setPermissions(perms)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const userResult = /**@type {string | import('discord.js').User}*/(args.flagExprIf('usuario'));
-		const user = userResult ? fetchUser(userResult, request) : undefined;
+		const userSearch = args.parseFlagExpr('usuario');
+		const user = userSearch ? fetchUser(userSearch, request) : undefined;
 		const amount = args.getNumber('cantidad', 100);
 
 		if(!user && !amount) {

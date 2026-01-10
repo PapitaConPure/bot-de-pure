@@ -1720,16 +1720,17 @@ class CommandOptionSolver {
 	}
 
 	/**
-	 * Devuelve el valor ingresado como un string si se ingresó la bandera especificada, o `undefined` de lo contrario
+	 * Devuelve el valor ingresado como un string si se ingresó la bandera especificada. De lo contrario, se devuelve `fallback` o `undefined`
 	 * @param {string} identifier
+	 * @param {string} [fallback]
 	 */
-	parseFlagExpr(identifier) {
+	parseFlagExpr(identifier, fallback = undefined) {
 		return CommandOptionSolver.asString(this.#options.fetchFlag(
 			this.#args,
 			identifier,
 			{
 				callback: x => x,
-				fallback: undefined,
+				fallback,
 			},
 		));
 	}

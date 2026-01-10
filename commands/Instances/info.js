@@ -53,7 +53,7 @@ const command = new Command('info', flags)
 			request.deferReply(),
 			fetchGuildMembers(guild),
 		]);
-		const memberResult = /**@type {string | import('discord.js').GuildMember}*/(args.flagExprIf('miembro'));
+		const memberResult = args.parseFlagExpr('miembro');
 		const targetMember = memberResult ? fetchMember(memberResult, request) : undefined;
 		const targetChannel = args.getChannel('canal') || request.channel;
 

@@ -1,5 +1,5 @@
 const { improveNumber } = require('../../func'); //Funciones globales
-const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/commands');
 
 const flags = new CommandTags().add('COMMON');
 const options = new CommandOptions()
@@ -14,8 +14,8 @@ const command = new Command('número', flags)
 	.setExecution(async (request, args) => {
 		//Acción de comando
 		const shorten = args.hasFlag('acortar');
-		const minDigits = args.flagExprIf('mínimo',    (/**@type {Number}*/x) => x, 1);
-		const exp = args.flagExprIf('exponente', (/**@type {Number}*/x) => x, 1);
+		const minDigits = args.flagExprIf('mínimo', x => CommandOptionSolver.asNumber(x), 1);
+		const exp = args.flagExprIf('exponente', x => CommandOptionSolver.asNumber(x), 1);
 		
 		let num = args.getNumber('num');
 		if(!num) return request.reply({ content: '⚠️ Debes ingresar un número' });

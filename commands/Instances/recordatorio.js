@@ -1,5 +1,5 @@
 const globalConfigs = require('../../data/config.json');
-const { Command, CommandTags, CommandOptions, CommandParam, CommandFlagExpressive, CommandOptionSolver } = require('../Commons/commands');
+const { Command, CommandTags, CommandOptions, CommandParam, CommandFlagExpressive } = require('../Commons/commands');
 const { p_pure } = require('../../utils/prefixes');
 const { Translator } = require('../../i18n');
 const { parseDateFromNaturalLanguage, parseTimeFromNaturalLanguage, addTime, utcStartOfToday } = require('../../utils/datetime');
@@ -277,8 +277,8 @@ const command = new Command('recordatorio', tags)
 
 		const utcOffset = userConfigs?.utcOffset ?? 0;
 		
-		const dateStr = CommandOptionSolver.asString(args.flagExprIf('fecha'));
-		const timeStr = CommandOptionSolver.asString(args.flagExprIf('hora'));
+		const dateStr = args.parseFlagExpr('fecha');
+		const timeStr = args.parseFlagExpr('hora');
 		const reminderContent = args.getString('recordatorio', true);
 
 		if(!dateStr && !timeStr) {

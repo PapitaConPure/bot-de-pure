@@ -1,4 +1,4 @@
-const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
 const UserConfigs = require('../../models/userconfigs');
 const { toUtcOffset, toTimeZoneAlias } = require('../../utils/timezones');
 const { dateToUTCFormat } = require('../../func');
@@ -35,11 +35,11 @@ const command = new Command('hora', tags)
 	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request.user);
 
-		const utcOffset = toUtcOffset(CommandOptionSolver.asString(args.flagExprIf('huso')))
+		const utcOffset = toUtcOffset(args.parseFlagExpr('huso'))
 			?? (await UserConfigs.findOne({ userId: request.userId }))?.utcOffset
 			?? 0;
 
-		const dateStr = CommandOptionSolver.asString(args.flagExprIf('fecha'));
+		const dateStr = args.parseFlagExpr('fecha');
 		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, utcOffset);
 		const time = args.getTime('hora', utcOffset);
 

@@ -43,19 +43,28 @@ function recibirEstado(texto) {
     return 0;
 }
 
+/**
+ * 
+ * @param {import("../../models/hourai.js").HouraiDocument} dbDoc 
+ * @param {string[]} appliedList 
+ * @param {string} prompt 
+ * @param {string} configId 
+ * @param {string} displayText 
+ * @returns 
+ */
 function procesarConfig(dbDoc, appliedList, prompt, configId, displayText) {
-    if(prompt) {
-        const state = recibirEstado(prompt);
+    if(!prompt)
+        return true;
+    
+    const state = recibirEstado(prompt);
 
-        if(state == 0)
-            return false;
+    if(state === 0)
+        return false;
 
-        dbDoc.configs ??= {};
-        dbDoc.configs[configId] = (state == 1);
-        dbDoc.markModified('configs');
+    dbDoc.configs[configId] = (state === 1);
+    dbDoc.markModified('configs');
 
-        appliedList.push(`${displayText}: ${state == 1 ? '✅' : '❌'}`);
-    }
+    appliedList.push(`${displayText}: ${state === 1 ? '✅' : '❌'}`);
 
     return true;
 }
@@ -81,12 +90,12 @@ const command = new Command('saki', flags)
     .setPermissions(perms)
     .setOptions(options)
 	.setExecution(async (request, args) => {
-		const bienvenida = args.flagExprIf('bienvenida');
-		const despedida = args.flagExprIf('despedida');
-		const pingBienvenida = args.flagExprIf('ping');
+		const bienvenida = args.parseFlagExpr('bienvenida');
+		const despedida = args.parseFlagExpr('despedida');
+		const pingBienvenida = args.parseFlagExpr('ping');
         
         const houraiCfg = (await HouraiCfg.findOne({})) || new HouraiCfg();
-        const applied = [];
+        const applied = /**@type {string[]}*/([]);
 
         if(!procesarConfig(houraiCfg, applied, bienvenida, 'bienvenida', 'Bienvenida'))
             return request.reply({ content: tip });

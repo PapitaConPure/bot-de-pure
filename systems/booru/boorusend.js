@@ -8,6 +8,7 @@ const rakki = require('../../commands/Instances/rakkidei');
 const { Translator } = require('../../i18n');
 
 const Logger = require('../../utils/logs');
+const { CommandOptionSolver } = require('../../commands/Commons/cmdOpts');
 const { debug, info, warn, error } = Logger('WARN', 'BooruSend');
 
 /**
@@ -550,8 +551,9 @@ async function searchAndReplyWithPost(request, args, options = {}) {
 	const isnsfw = isThread(request.channel)
 		? request.channel.parent.nsfw
 		: request.channel.nsfw;
-	
-	const poolSize = args.flagExprIf('bomba', x => Math.max(2, Math.min(+x, 10)), 1);
+
+	const clampPoolSize = (/**@type {number}*/x) => Math.max(2, Math.min(x, 10));
+	const poolSize = args.flagExprIf('bomba', x => clampPoolSize(CommandOptionSolver.asNumber(x)), 1);
 	const words = (args.getString('etiquetas', true) ?? '').split(/\s+/);
 	debug('poolSize =', poolSize);
 

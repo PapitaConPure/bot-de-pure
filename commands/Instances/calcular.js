@@ -1,5 +1,5 @@
 const { improveNumber } = require("../../func");
-const { CommandTags, Command, CommandOptions } = require("../Commons/commands");
+const { CommandTags, Command, CommandOptions, CommandOptionSolver } = require("../Commons/commands");
 const { calc } = require('../../systems/others/mathreader.js');
 
 const flags = new CommandTags().add('COMMON');
@@ -17,7 +17,7 @@ const command = new Command('calcular', flags)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const shorten = args.hasFlag('acortar');
-		const minDigits = args.flagExprIf('mínimo', v => +v, 1);
+		const minDigits = args.flagExprIf('mínimo', v => CommandOptionSolver.asNumber(v), 1);
 		const operation = args.getString('operación', true);
 
 		if(!operation)
