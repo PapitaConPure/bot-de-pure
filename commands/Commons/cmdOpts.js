@@ -2089,7 +2089,7 @@ class CommandOptionSolver {
 			const results = await Promise.all(option.type.map(pt => this.#options.fetchMessageParam(arrArgs, pt, getRestOfMessageWords)));
 			return results.find(r => r);
 		} else
-			return await this.#options.fetchMessageParam(arrArgs, option.type, getRestOfMessageWords);
+			return this.#options.fetchMessageParam(arrArgs, option.type, getRestOfMessageWords);
 	}
 
 	toJSON() {
