@@ -366,35 +366,45 @@ const command = new Command('voz', tags)
 		});
 	}, { userFilterIndex: 0 })
 	.setButtonResponse(async function deleteSystemConfirmed(interaction) {
-		const translator = await Translator.from(interaction);
-
 		const guildQuery = { guildId: interaction.guildId };
-		const pv = await PureVoice.findOne(guildQuery);
+		const [ translator, pv ] = await Promise.all([
+			Translator.from(interaction),
+			PureVoice.findOne(guildQuery),
+		]);
 
 		if(!pv)
 			return interaction.deleteReply();
 
-		const guildChannels = interaction.guild.channels.cache;
-		await Promise.allSettled([
-			guildChannels.get(pv.voiceMakerId)?.delete(translator.getText('voiceReasonSystemRemove', interaction.user.username)).catch(console.error),
-			guildChannels.get(pv.controlPanelId)?.delete(translator.getText('voiceReasonSystemRemove', interaction.user.username)).catch(console.error),
-		]);
+		await interaction.deferUpdate();
 
-		await Promise.all([
-			PureVoiceSessionModel.deleteMany({ channelId: { $in: pv.sessions } }),
-			PureVoice.deleteOne(guildQuery),
-		]);
+		try {
+			const guildChannels = interaction.guild.channels.cache;
+			await Promise.all([
+				guildChannels.get(pv.voiceMakerId)?.delete(translator.getText('voiceReasonSystemRemove', interaction.user.username)).catch(console.error),
+				guildChannels.get(pv.controlPanelId)?.delete(translator.getText('voiceReasonSystemRemove', interaction.user.username)).catch(console.error),
+			]);
+	
+			await Promise.all([
+				PureVoiceSessionModel.deleteMany({ channelId: { $in: pv.sessions } }),
+				PureVoice.deleteOne(guildQuery),
+			]);
+	
+			const deleteEmbed = wizEmbed(translator, interaction.client.user.avatarURL(), Colors.Red)
+				.addFields({
+					name: translator.getText('voiceUninstalledFieldName'),
+					value: translator.getText('voiceUninstalledFieldValue'),
+				});
 
-		const deleteEmbed = wizEmbed(translator, interaction.client.user.avatarURL(), Colors.Red)
-			.addFields({
-				name: translator.getText('voiceUninstalledFieldName'),
-				value: translator.getText('voiceUninstalledFieldValue'),
+			return interaction.editReply({
+				embeds: [deleteEmbed],
+				components: [],
 			});
+		} catch {
+			return interaction.editReply({
+				content: null,
+			});
+		}
 
-		return interaction.update({
-			embeds: [deleteEmbed],
-			components: [],
-		});
 	}, { userFilterIndex: 0 })
 	.setButtonResponse(async function cancelWizard(interaction) {
 		const translator = await Translator.from(interaction);
