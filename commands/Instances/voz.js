@@ -1,25 +1,27 @@
 const { PureVoiceModel: PureVoice, PureVoiceSessionModel } = require('../../models/purevoice.js');
 const { PureVoiceSessionMember, getFrozenSessionAllowedMembers, makePVSessionName } = require('../../systems/others/purevoice.js');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, MessageCollector, ButtonStyle, Colors, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder, MessageFlags } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder, MessageFlags } = require('discord.js');
 const { p_pure } = require('../../utils/prefixes.js');
-const { isNotModerator, defaultEmoji } = require('../../func.js');
+const { isNotModerator, defaultEmoji, compressId } = require('../../func.js');
 const { CommandOptions, CommandTags, Command } = require('../Commons/commands.js');
 const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts.js');
 const { Translator } = require('../../i18n');
 const { addMinutes, getUnixTime, isBefore } = require('date-fns');
 
-const cancelbutton = (id) => new ButtonBuilder()
-	.setCustomId(`voz_cancelWizard_${id}`)
+/**@param {string} compressedUserId*/
+const cancelbutton = (compressedUserId) => new ButtonBuilder()
+	.setCustomId(`voz_cancelWizard_${compressedUserId}`)
 	.setEmoji('1355143793577426962')
 	.setStyle(ButtonStyle.Secondary);
-const collectors = {};
 
 const options = new CommandOptions()
 	.addParam('nombre', 'TEXT', 'para decidir el nombre de la sesión actual', { optional: true })
 	.addFlag('e', ['emote', 'emoji'], 'para determinar el emote de la sesión actual', { name: 'emt', type: 'EMOTE' })
 	.addFlag('aw', ['asistente','instalador','wizard'], 'para inicializar el Asistente de Configuración');
-const flags = new CommandTags().add('COMMON');
-const command = new Command('voz', flags)
+
+const tags = new CommandTags().add('COMMON');
+
+const command = new Command('voz', tags)
 	.setAliases(
 		'purévoz', 'purevoz',
 		'voice', 'purévoice', 'purevoice',
@@ -30,62 +32,55 @@ const command = new Command('voz', flags)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request);
-		const helpstr = translator.getText('suggestHelpForCommand', p_pure(request).raw, 'voz');
 
 		//TODO: Mover asistente a p!servidor y eliminar esta bandera
 		if(args.parseFlag('asistente'))
 			return generateFirstWizard(request, translator);
 
-		//Comprobar si se está en una sesión para cualquier uso que no sea el Asistente
 		const voiceState = request.member.voice;
 		const warnNotInSession = () => request.reply({
 			content: translator.getText('voiceCommandRenameMemberExpected', p_pure(request).raw),
 			ephemeral: true,
 		}).catch(console.error);
 
-		if(!voiceState?.channelId)
-			return warnNotInSession();
-		
-		//Cambiar nombre de canal de voz de sesión
 		const emoteString = args.parseFlagExpr('emote', x => `${x}`, '💠');
 		const sessionEmote = defaultEmoji(emoteString);
 		const sessionName = args.getString('nombre', true);
-		
+
 		if(!sessionName)
 			return request.reply({
-				content: [
-					'⚠️ Debes ingresar un nombre para ejecutar este comando de esta forma',
-					'Si estás buscando iniciar un Asistente de Configuración, usa la bandera `--asistente` o `-a`',
-					helpstr,
-				].join('\n'),
+				content: translator.getText('voiceSessionNameExpected', p_pure(request).raw),
 				ephemeral: true,
 			});
+
+		if(!voiceState?.channelId)
+			return warnNotInSession();
 		
 		if(sessionName.length > 24)
 			return request.reply({
-				content: '⚠️ Intenta acortar un poco el nombre. El límite para nombres de sesión es de 24(+3) caracteres',
+				content: translator.getText('voiceSessionNameTooLong'),
 				ephemeral: true,
 			});
 
 		if(!sessionEmote)
 			return request.reply({
-				content: [
-					'⚠️ Emote inválido',
-					'Recuerda que no se pueden usar emotes personalizados para nombres de canales',
-					'También, ten en cuenta que algunos emotes estándar de Discord no son *tan estándar* y __no se espera__ que se detecten/funcionen correctamente',
-				].join('\n'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('voiceSessionRenameInvalidEmoji'),
 			});
 
-		//Modificar sesión y confirmar
 		const session = await PureVoiceSessionModel.findOne({ channelId: voiceState.channelId });
-		if(!session) return warnNotInSession();
+		if(!session)
+			return warnNotInSession();
 
 		const sessionMember = new PureVoiceSessionMember(session.members.get(request.member.id));
-		if(!sessionMember) return warnNotInSession();
+		if(!sessionMember)
+			return warnNotInSession();
 
 		if(sessionMember.isGuest())
-			return request.reply({ content: translator.getText('voiceSessionAdminOrModExpected'), ephemeral: true });
+			return request.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('voiceSessionAdminOrModExpected'),
+			});
 
 		const { channelId: voiceId, roleId, nameChanged } = session;
 		const now = new Date(Date.now());
@@ -93,261 +88,328 @@ const command = new Command('voz', flags)
 
 		if(isBefore(now, renameUnblockDate))
 			return request.reply({
-				content: [
-					'❌ Por cuestiones técnicas, solo puedes cambiar el nombre de la sesión una vez cada 20 minutos.',
-					`Inténtalo de nuevo <t:${getUnixTime(renameUnblockDate)}:R>, o conéctate a una nueva sesión`,
-				].join('\n'),
+				content: translator.getText('voiceSessionRenameTooSoon', getUnixTime(renameUnblockDate))
 			});
+
 		session.nameChanged = new Date(Date.now());
 
 		const guildChannels = request.guild.channels.cache;
 		const guildRoles = request.guild.roles.cache;
-		return Promise.all([
-			session.save(),
-			guildChannels.get(voiceId)?.setName(`${sessionEmote}【${sessionName}】`, 'Renombrar sesión PuréVoice'),
-			guildRoles.get(roleId)?.setName(`${sessionEmote} ${sessionName}`, 'Renombrar sesión PuréVoice'),
-			request.reply({ content: '✅ Nombre aplicado', ephemeral: true }),
-		]).catch(() => request.reply({ content: '⚠️ Ocurrió un error al aplicar el nombre', ephemeral: true }));
+
+		try {
+			await Promise.all([
+				session.save(),
+				guildChannels.get(voiceId)?.setName(`${sessionEmote}【${sessionName}】`, translator.getText('voiceSessionReasonRename')),
+				guildRoles.get(roleId)?.setName(`${sessionEmote} ${sessionName}`, translator.getText('voiceSessionReasonRename')),
+			]);
+			
+			return request.reply({ content: translator.getText('voiceSessionRenameSuccess'), ephemeral: true });
+		} catch {
+			return request.reply({ content: translator.getText('voiceSessionRenameError'), ephemeral: true });
+		}
 	})
 	.setButtonResponse(async function startWizard(interaction, authorId) {
-		const { user, guild } = interaction;
+		const translator = await Translator.from(interaction);
+		const { guild } = interaction;
 		
-		if(user.id !== authorId)
-			return interaction.reply({ content: '❌ No puedes hacer esto', ephemeral: true });
-		
-		const wizard = wizEmbed(interaction.client.user.avatarURL(), '2/? • Seleccionar Operación', Colors.Navy)
+		const wizard = wizEmbed(translator, interaction.client.user.avatarURL(), Colors.Navy)
 			.addFields({
-				name: 'Inyección de Sistema PuréVoice',
-				value: '¿Qué deseas hacer ahora mismo?',
+				name: translator.getText('voiceInstallationStartFieldName'),
+				value: translator.getText('voiceInstallationStartFieldValue'),
 			});
 			
 		const pv = await PureVoice.findOne({ guildId: guild.id });
-		const uid = user.id;
 		const row = makeButtonRowBuilder();
 		const isInstalled = pv && guild.channels.cache.get(pv.categoryId) && guild.channels.cache.get(pv.voiceMakerId);
 		if(!isInstalled)
 			row.addComponents(
 				new ButtonBuilder()
-					.setCustomId(`voz_selectInstallation_${uid}`)
-					.setLabel('Instalar')
+					.setCustomId(`voz_selectInstallation_${authorId}`)
+					.setLabel(translator.getText('voiceButtonInstall'))
 					.setStyle(ButtonStyle.Primary),
 			);
 		else 
 			row.addComponents(
 				new ButtonBuilder()
-					.setCustomId(`voz_relocateSystem_${uid}`)
-					.setLabel('Reubicar')
+					.setCustomId(`voz_promptRelocateSystem_${authorId}`)
+					.setLabel(translator.getText('voiceButtonRelocate'))
 					.setStyle(ButtonStyle.Primary),
 			);
 
 		row.addComponents(
 			new ButtonBuilder()
-				.setCustomId(`voz_deleteSystem_${uid}`)
-				.setLabel('Desinstalar')
+				.setCustomId(`voz_deleteSystem_${authorId}`)
+				.setLabel(translator.getText('voiceButtonUninstall'))
 				.setStyle(ButtonStyle.Danger)
 				.setDisabled(!isInstalled),
-			cancelbutton(uid),
+			cancelbutton(authorId),
 		);
+
 		return interaction.update({
 			embeds: [wizard],
 			components: [row],
 		});
-	})
+	}, { userFilterIndex: 0 })
 	.setButtonResponse(async function selectInstallation(interaction, authorId) {
-		if(interaction.user.id !== authorId)
-			return interaction.reply({ content: '❌ No puedes hacer esto', ephemeral: true });
-
-		const wizard = wizEmbed(interaction.client.user.avatarURL(), '3/4 • Seleccionar instalación', Colors.Gold)
+		const translator = await Translator.from(interaction);
+		
+		const wizard = wizEmbed(translator, interaction.client.user.avatarURL(), Colors.Gold)
 			.addFields({
-				name: 'Instalación',
-				value: 'Selecciona el tipo de instalación que deseas realizar',
+				name: translator.getText('voiceInstallationSelectFieldName'),
+				value: translator.getText('voiceInstallationSelectFieldValue'),
 			});
+
 		const row = makeButtonRowBuilder().addComponents(
 			new ButtonBuilder()
-				.setCustomId(`voz_installSystem_${authorId}_new`)
-				.setLabel('Crear categoría con PuréVoice')
+				.setCustomId(`voz_promptInstallSystem_${authorId}_new`)
+				.setLabel(translator.getText('voiceInstallationSelectButtonCreateNew'))
 				.setStyle(ButtonStyle.Success),
 			new ButtonBuilder()
-				.setCustomId(`voz_installSystem_${authorId}`)
-				.setLabel('Inyectar PuréVoice en categoría')
+				.setCustomId(`voz_promptInstallSystem_${authorId}`)
+				.setLabel(translator.getText('voiceInstallationSelectButtonInject'))
 				.setStyle(ButtonStyle.Primary),
 			cancelbutton(authorId),
 		);
+
 		return interaction.update({
 			embeds: [wizard],
 			components: [row],
 		});
-	})
-	.setButtonResponse(async function installSystem(interaction, authorId, createNew) {
-		if(interaction.user.id !== authorId)
-			return interaction.reply({ content: '❌ No puedes hacer esto', ephemeral: true });
-		
-		const filter = (m) => m.author.id === authorId;
-		collectors[interaction.id] = new MessageCollector(interaction.channel, { filter, time: 1000 * 60 * 2 });
-		collectors[interaction.id].on('collect', async collected => {
-			let ccontent = collected.content;
-			let category;
-			if(!createNew) {
-				if(ccontent.startsWith('<#') && ccontent.endsWith('>')) {
-					ccontent = ccontent.slice(2, -1);
-					if(ccontent.startsWith('!')) ccontent = ccontent.slice(1);
-				}
-				const categories = interaction.guild.channels.cache.filter(c => c.type === ChannelType.GuildCategory);
-				category = isNaN(ccontent)
-					? categories.find(c => c.name.toLowerCase().indexOf(ccontent) !== -1)
-					: categories.find(c => c.id === ccontent);
-				if(category) {
-					collected.delete().catch(() => console.log('Error menor al borrar mensaje recolectado'));
-					collectors[interaction.id].stop();
-				} else return;
-			} else {
-				await collected.delete().catch(() => console.log('Error menor al borrar mensaje recolectado'));
-				category = await interaction.guild.channels.create({ name: ccontent, type: ChannelType.GuildCategory, reason: 'Categoría recipiente de PuréVoice' });
-			}
+	}, { userFilterIndex: 0 })
+	.setButtonResponse(async function promptInstallSystem(interaction, authorId, createNew) {
+		const translator = await Translator.from(interaction);
+
+		const modal = new ModalBuilder()
+			.setCustomId(`voz_installSystem_${authorId}${createNew ? `_${createNew}` : ''}`)
+			.setTitle(translator.getText('voiceRelocateModalTitle', createNew));
+
+		if(createNew) {
+			modal.addLabelComponents(label =>
+				label
+					.setLabel(translator.getText('voiceCreateCategoryModalCategoryNameLabel'))
+					.setTextInputComponent(selectMenu =>
+						selectMenu
+							.setCustomId('categoryName')
+							.setMinLength(1)
+							.setMaxLength(50)
+							.setRequired(true)
+							.setStyle(TextInputStyle.Short)
+					)
+			);
+		} else {
+			modal.addLabelComponents(label =>
+				label
+					.setLabel(translator.getText('voiceModalCategoryLabel'))
+					.setChannelSelectMenuComponent(selectMenu =>
+						selectMenu
+							.setCustomId('category')
+							.setChannelTypes(ChannelType.GuildCategory)
+							.setRequired(true)
+					)
+			);
+		}
+
+		return interaction.showModal(modal);
+	}, { userFilterIndex: 0 })
+	.setModalResponse(async function installSystem(interaction, _, createNew) {
+		const [translator] = await Promise.all([
+			Translator.from(interaction),
+			interaction.deferReply({ flags: MessageFlags.Ephemeral }),
+		]);
+
+		/**@type {import('discord.js').CategoryChannel}*/
+		let category;
+		if(createNew) {
+			const categoryName = interaction.fields.getTextInputValue('categoryName');
+			category = await interaction.guild.channels.create({
+				name: categoryName,
+				type: ChannelType.GuildCategory,
+				reason: translator.getText('voiceReasonCategoryCreate'),
+			});
+		} else {
+			category = /**@type {import('discord.js').CategoryChannel}*/(interaction.fields.getSelectedChannels('category')?.first());
+		}
+
+		try {
+			const voiceMaker = await interaction.guild.channels.create({
+				name: '➕',
+				type: ChannelType.GuildVoice,
+				parent: category.id,
+				bitrate: 64 * 1000,
+				userLimit: 1,
+				reason: translator.getText('voiceSessionReasonChannelCreate'),
+			});
+
+			await voiceMaker.lockPermissions().catch(console.error);
+			await voiceMaker.permissionOverwrites.edit(interaction.guild.roles.everyone, { SendMessages: false }).catch(console.error);
+			await voiceMaker.permissionOverwrites.edit(interaction.guild.members.me,     { SendMessages: true  }).catch(console.error);
+
+			//Guardar nueva categoría PuréVoice
+			const guildQuery = { guildId: interaction.guild.id };
+			await PureVoice.deleteOne(guildQuery);
+			const pv = new PureVoice({
+				...guildQuery,
+				categoryId: category.id,
+				voiceMakerId: voiceMaker.id,
+			});
+
+			const wizard = wizEmbed(translator, interaction.client.user.avatarURL(), Colors.Green)
+				.addFields({
+					name: translator.getText('voiceCategoryInstalledFieldName'),
+					value: translator.getText('voiceCategoryInstalledFieldValue', p_pure(interaction.guildId).raw),
+				});
+
+			await pv.save();
 			
-			try {
-				const voiceMaker = await interaction.guild.channels.create({
-					name: '➕',
-					type: ChannelType.GuildVoice,
-					parent: category.id,
-					bitrate: 64 * 1000,
-					userLimit: 1,
-					reason: 'Desplegar Canal Autoextensible PuréVoice',
-				});
-
-				await voiceMaker.lockPermissions().catch(console.error);
-				await voiceMaker.permissionOverwrites.edit(interaction.guild.roles.everyone, { SendMessages: false }).catch(console.error);
-				await voiceMaker.permissionOverwrites.edit(interaction.guild.members.me,     { SendMessages: true  }).catch(console.error);
-
-				//Guardar nueva categoría PuréVoice
-				const guildQuery = { guildId: interaction.guild.id };
-				await PureVoice.deleteOne(guildQuery);
-				const pv = new PureVoice({
-					...guildQuery,
-					categoryId: category.id,
-					voiceMakerId: voiceMaker.id,
-				});
-
-				const wizard = wizEmbed(interaction.client.user.avatarURL(), 'Operación finalizada', Colors.Green)
-					.addFields({
-						name: 'Categoría creada e inyectada',
-						value: [
-							'Se ha creado una categoría que ahora escala de forma dinámica sus canales de voz.',
-							`Puedes reubicar el Sistema PuréVoice creado en el futuro, solo usa \`${p_pure(interaction.guildId).raw}voz\` otra vez`,
-						].join('\n'),
-					});
-
-				const finished = await Promise.all([
-					pv.save(),
-					interaction.message.edit({
-						embeds: [wizard],
-						components: [],
-					}),
-				]);
-				collectors[interaction.id].stop();
-				delete collectors[interaction.id];
-				return finished;
-			} catch(error) {
-				console.error(error);
-				return interaction.channel.send({ content: [
-					'⚠️ Ocurrió un error al crear esta categoría',
-					'Asegúrate de que tenga los permisos necesarios para realizar esta acción (administrar canales)',
-					'También, verifica que el nombre ingresado no esté ya ocupado por alguna otra categoría o canal',
-				].join('\n') });
-			}
-		});
-		
-		const wizard = wizEmbed(interaction.client.user.avatarURL(), `4/4 • ${createNew ? 'Nombrar' : 'Seleccionar'} categoría`, Colors.Navy)
-			.addFields({
-				name: `${createNew ? 'Creación' : 'Selección'} de categoría`,
-				value: 'Menciona el nombre de la categoría antes de inyectarle PuréVoice',
+			return Promise.all([
+				interaction.message.edit({
+					embeds: [wizard],
+					components: [],
+				}),
+				interaction.editReply({
+					content: translator.getText('voiceCategoryInstallSuccess'),
+				}),
+			]);
+		} catch(error) {
+			console.error(error);
+			return interaction.editReply({
+				content: translator.getText('voiceCategoryInstallError'),
 			});
-		const uid = interaction.user.id;
-		const row = makeButtonRowBuilder().addComponents(
-			new ButtonBuilder()
-				.setCustomId(`voz_startWizard_${uid}`)
-				.setEmoji('1355128236790644868')
-				.setStyle(ButtonStyle.Secondary),
-			cancelbutton(uid),
-		);
-		return interaction.update({
-			embeds: [wizard],
-			components: [row],
-		});
-	})
-	.setButtonResponse(async function deleteSystem(interaction, authorId) {
-		if(interaction.user.id !== authorId)
-			return interaction.reply({ content: '❌ No puedes hacer esto', ephemeral: true });
-		
-		const wizard = wizEmbed(interaction.client.user.avatarURL(), 'Confirmar desinstalación', Colors.Yellow)
-			.addFields({
-				name: 'Desinstalación del Sistema PuréVoice del servidor',
-				value: [
-					'Esto borrará todas los canales creados por el Sistema. La categoría del Sistema y los canales creados manualmente se ignorarán.',
-					'Confirma la desasociación del servidor con PuréVoice',
-				].join('\n'),
-			});
-		const uid = interaction.user.id;
-		const row = makeButtonRowBuilder().addComponents(
-			new ButtonBuilder()
-				.setCustomId(`voz_deleteSystemConfirmed_${uid}`)
-				.setLabel('DESINSTALAR')
-				.setStyle(ButtonStyle.Danger),
-			new ButtonBuilder()
-				.setCustomId(`voz_startWizard_${uid}`)
-				.setEmoji('1355128236790644868')
-				.setStyle(ButtonStyle.Secondary),
-			cancelbutton(uid),
-		);
-		return interaction.update({
-			embeds: [wizard],
-			components: [row],
-		});
-	})
-	.setButtonResponse(async function deleteSystemConfirmed(interaction, authorId) {
-		if(interaction.user.id !== authorId)
-			return interaction.reply({ content: '❌ No puedes hacer esto', ephemeral: true });
+		}
+	}, { userFilterIndex: 0 })
+	.setButtonResponse(async function promptRelocateSystem(interaction, authorId) {
+		const translator = await Translator.from(interaction);
 
-		//Eliminar Sistema PuréVoice
 		const guildQuery = { guildId: interaction.guildId };
 		const pv = await PureVoice.findOne(guildQuery);
-		if(pv) {
-			const guildChannels = interaction.guild.channels.cache;
-			await Promise.all([
-				guildChannels.get(pv.voiceMakerId)?.delete(`PuréVoice desinstalado por ${interaction.user.username}`).catch(console.error),
-				guildChannels.get(pv.controlPanelId)?.delete(`PuréVoice desinstalado por ${interaction.user.username}`).catch(console.error),
-			]);
 
-			await Promise.all([
-				PureVoiceSessionModel.deleteMany({ channelId: { $in: pv.sessions } }),
-				PureVoice.deleteOne(guildQuery),
-			]);
-		}
+		const modal = new ModalBuilder()
+			.setCustomId(`voz_relocateSystem_${authorId}`)
+			.setTitle(translator.getText('voiceRelocateModalTitle'))
+			.addLabelComponents(label =>
+				label
+					.setLabel(translator.getText('voiceModalCategoryLabel'))
+					.setChannelSelectMenuComponent(selectMenu =>
+						selectMenu
+							.setCustomId('category')
+							.setChannelTypes(ChannelType.GuildCategory)
+							.setDefaultChannels(pv.categoryId)
+							.setRequired(true)
+					)
+			);
+
+		return interaction.showModal(modal);
+	}, { userFilterIndex: 0 })
+	.setModalResponse(async function relocateSystem(interaction) {
+		const translator = await Translator.from(interaction);
+
+		const guildQuery = { guildId: interaction.guildId };
+		const pv = await PureVoice.findOne(guildQuery);
+
+		if(!pv)
+			return interaction.deleteReply();
+
+		const channelsCache = interaction.guild.channels.cache;
+		const category = /**@type {import('discord.js').CategoryChannel}*/(interaction.fields.getSelectedChannels('category')?.first());
+		const voiceMaker = /**@type {import('discord.js').GuildChannel}*/(channelsCache.get(pv.voiceMakerId));
+		const controlPanel = /**@type {import('discord.js').GuildChannel}*/(channelsCache.get(pv.controlPanelId));
+		const relocateReason = translator.getText('voiceReasonSystemRelocate', interaction.user.username);
+
+		await Promise.all([
+			voiceMaker && category && voiceMaker.setParent(category, { lockPermissions: true, reason: relocateReason }).catch(console.error),
+			controlPanel && category && controlPanel.delete(relocateReason).catch(console.error),
+		]);
+
+		pv.categoryId = category.id;
+
+		await voiceMaker.permissionOverwrites.edit(interaction.guild.roles.everyone, { SendMessages: false }, { reason: relocateReason }).catch(console.error);
+		await Promise.all([
+			voiceMaker.permissionOverwrites.edit(interaction.guild.members.me,     { SendMessages: true  }, { reason: relocateReason }).catch(console.error),
+			pv.save(),
+		]);
 		
-		const deleteEmbed = wizEmbed(interaction.client.user.avatarURL(), 'Operación finalizada', Colors.Red)
+		const wizard = wizEmbed(translator, interaction.client.user.avatarURL(), Colors.Yellow)
 			.addFields({
-				name: 'Sistema PuréVoice eliminado',
-				value: 'Se eliminó el Sistema PuréVoice asociado al servidor',
+				name: translator.getText('voiceRelocatedFieldName'),
+				value: translator.getText('voiceRelocatedFieldValue'),
 			});
+
+		return interaction.update({
+			embeds: [wizard],
+			components: [],
+		});
+	}, { userFilterIndex: 0 })
+	.setButtonResponse(async function deleteSystem(interaction, authorId) {
+		const translator = await Translator.from(interaction);
+		
+		const wizard = wizEmbed(translator, interaction.client.user.avatarURL(), Colors.Yellow)
+			.addFields({
+				name: translator.getText('voiceUninstallFieldName'),
+				value: translator.getText('voiceUninstallFieldValue'),
+			});
+
+		const row = makeButtonRowBuilder().addComponents(
+			new ButtonBuilder()
+				.setCustomId(`voz_deleteSystemConfirmed_${authorId}`)
+				.setLabel(translator.getText('voiceButtonUninstallConfirm'))
+				.setStyle(ButtonStyle.Danger),
+			new ButtonBuilder()
+				.setCustomId(`voz_startWizard_${authorId}`)
+				.setEmoji('1355128236790644868')
+				.setStyle(ButtonStyle.Secondary),
+			cancelbutton(authorId),
+		);
+
+		return interaction.update({
+			embeds: [wizard],
+			components: [row],
+		});
+	}, { userFilterIndex: 0 })
+	.setButtonResponse(async function deleteSystemConfirmed(interaction) {
+		const translator = await Translator.from(interaction);
+
+		const guildQuery = { guildId: interaction.guildId };
+		const pv = await PureVoice.findOne(guildQuery);
+
+		if(!pv)
+			return interaction.deleteReply();
+
+		const guildChannels = interaction.guild.channels.cache;
+		await Promise.allSettled([
+			guildChannels.get(pv.voiceMakerId)?.delete(translator.getText('voiceReasonSystemRemove', interaction.user.username)).catch(console.error),
+			guildChannels.get(pv.controlPanelId)?.delete(translator.getText('voiceReasonSystemRemove', interaction.user.username)).catch(console.error),
+		]);
+
+		await Promise.all([
+			PureVoiceSessionModel.deleteMany({ channelId: { $in: pv.sessions } }),
+			PureVoice.deleteOne(guildQuery),
+		]);
+
+		const deleteEmbed = wizEmbed(translator, interaction.client.user.avatarURL(), Colors.Red)
+			.addFields({
+				name: translator.getText('voiceUninstalledFieldName'),
+				value: translator.getText('voiceUninstalledFieldValue'),
+			});
+
 		return interaction.update({
 			embeds: [deleteEmbed],
 			components: [],
 		});
-	})
-	.setButtonResponse(async function cancelWizard(interaction, authorId) {
-		if(interaction.user.id !== authorId)
-			return interaction.reply({ content: '❌ No puedes hacer esto', ephemeral: true });
-		
-		const cancelEmbed = wizEmbed(interaction.client.user.avatarURL(), 'Operación abortada', Colors.NotQuiteBlack)
+	}, { userFilterIndex: 0 })
+	.setButtonResponse(async function cancelWizard(interaction) {
+		const translator = await Translator.from(interaction);
+
+		const cancelEmbed = wizEmbed(translator, interaction.client.user.avatarURL(), Colors.NotQuiteBlack)
 			.addFields({
-				name: 'Asistente cancelado',
-				value: 'Se canceló la configuración del Sistema PuréVoice'
+				name: translator.getText('cancelledStepName'),
+				value: translator.getText('voiceCancelledFieldValue'),
 			});
+
 		return interaction.update({
 			embeds: [cancelEmbed],
 			components: [],
 		});
-	})
+	}, { userFilterIndex: 0 })
 	.setButtonResponse(async function setSessionName(interaction) {
 		const { member } = interaction;
         const translator = await Translator.from(member);
@@ -453,25 +515,25 @@ const command = new Command('voz', flags)
 		if(session.frozen) {
 			for(const [ memberId, member ] of allowedMembers) {
 				session.members.set(memberId, member.setWhitelisted(true).toJSON());
-				await voiceChannel.permissionOverwrites.edit(memberId, { Connect: true }, { reason: 'PLACEHOLDER_PV_REASON_FREEZE_CONNECT_ENABLE' }).catch(console.error);
+				await voiceChannel.permissionOverwrites.edit(memberId, { Connect: true }, { reason: translator.getText('voiceSessionReasonFreeze', interaction.user.username) }).catch(console.error);
 			}
 			
 			session.markModified('members');
 
 			await Promise.all([
 				voiceChannel.setUserLimit(allowedMembers.size, userLimitReason).catch(console.error),
-				voiceChannel.permissionOverwrites.edit(everyone, { Connect: false }, { reason: 'PLACEHOLDER_PV_REASON_FREEZE_CONNECT_DISABLE' }).catch(console.error),
+				voiceChannel.permissionOverwrites.edit(everyone, { Connect: false }, { reason: translator.getText('voiceSessionReasonFreeze', interaction.user.username) }).catch(console.error),
 				session.save(),
 			]);
 		} else {
 			await Promise.all([
 				voiceChannel.setUserLimit(0, userLimitReason).catch(console.error),
-				voiceChannel.permissionOverwrites.delete(everyone, 'PLACEHOLDER_PV_REASON_UNFREEZE_CONNECT_DEFAULT').catch(console.error),
+				voiceChannel.permissionOverwrites.delete(everyone, translator.getText('voiceSessionReasonUnfreeze', interaction.user.username)).catch(console.error),
 			]);
 
 			for(const [ memberId, member ] of allowedMembers) {
 				session.members.set(memberId, member.setWhitelisted(true).toJSON());
-				await voiceChannel.permissionOverwrites.delete(memberId, 'PLACEHOLDER_PV_REASON_UNFREEZE_CONNECT_DEFAULT').catch(console.error);
+				await voiceChannel.permissionOverwrites.delete(memberId, translator.getText('voiceSessionReasonUnfreeze', interaction.user.username)).catch(console.error);
 			}
 
 			session.markModified('members');
@@ -479,7 +541,7 @@ const command = new Command('voz', flags)
 		}
 		
 		return interaction.editReply({
-			content: `❄️ La sesión ${voiceChannel} fue **${session.frozen ? 'congelada' : 'descongelada'}**`,
+			content: translator.getText('voiceSessionFreezeSuccess', `${voiceChannel}`, session.frozen),
 		});
 	})
 	.setButtonResponse(async function showMeHow(interaction) {
@@ -502,15 +564,17 @@ const command = new Command('voz', flags)
 	});
 
 /**
+ * @param {Translator} translator
  * @param {String} iconUrl
- * @param {String} stepName
  * @param {import('discord.js').ColorResolvable} stepColor
  */
-function wizEmbed(iconUrl, stepName, stepColor) {
+function wizEmbed(translator, iconUrl, stepColor) {
 	return new EmbedBuilder()
 		.setColor(stepColor)
-		.setAuthor({ name: 'Asistente de Configuración de Sistema PuréVoice', iconURL: iconUrl })
-		.setFooter({ text: stepName });
+		.setAuthor({
+			name: translator.getText('voiceWizardAuthorName'),
+			iconURL: iconUrl,
+		});
 }
 
 /**
@@ -518,19 +582,25 @@ function wizEmbed(iconUrl, stepName, stepColor) {
  * @param {Translator} translator
  */
 function generateFirstWizard(request, translator) {
-	if(isNotModerator(request.member)) return request.reply({ content: translator.getText('insufficientPermissions'), ephemeral: true });
-	const wizard = wizEmbed(request.client.user.avatarURL(), '1/? • Comenzar', Colors.Aqua)
+	if(isNotModerator(request.member))
+		return request.reply({
+			flags: MessageFlags.Ephemeral,
+			content: translator.getText('insufficientPermissions'),
+		});
+
+	const wizard = wizEmbed(translator, request.client.user.avatarURL(), Colors.Aqua)
 		.addFields({
 			name: translator.getText('welcome'),
-			value: 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes! Solo sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras',
+			value: translator.getText('voiceWizardWelcome'),
 		});
-	const uid = request.userId;
+
+	const uid = compressId(request.userId);
 	return request.reply({
 		embeds: [wizard],
 		components: [new ActionRowBuilder().addComponents(
 			new ButtonBuilder()
 				.setCustomId(`voz_startWizard_${uid}`)
-				.setLabel('Comenzar')
+				.setLabel(translator.getText('buttonStart'))
 				.setStyle(ButtonStyle.Primary),
 			cancelbutton(uid),
 		)],
