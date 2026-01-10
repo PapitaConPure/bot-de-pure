@@ -1957,12 +1957,7 @@ let localesObject = /**@type {const}*/({
 		en: 'Inject PuréVoice into category',
 		ja: 'PuréVoiceをカテゴリーに導入',
 	},
-	voiceInstallationNameFieldName: {
-		es: `${subif(0, '=', true, 'Creación', 'Selección')} de categoría`,
-		en: `Category ${subif(0, '=', true, 'Creation', 'Selection')}`,
-		ja: `カテゴリの${subif(0, '=', true, '作成', '選択')}`,
-	},
-	voiceInstallationNameFieldValue: {
+	voiceInstallationModalDescription: {
 		es: 'Menciona el nombre de la categoría a la cual inyectarle PuréVoice',
 		en: 'Mention the name of the category you want to inject PuréVoice into',
 		ja: 'PuréVoiceを導入するカテゴリ名を指定してください',
@@ -1985,6 +1980,11 @@ let localesObject = /**@type {const}*/({
 			'動的に音声チャネルを拡張するカテゴリが用意されました。',
 			`作成したPuréVoiceシステムは将来的に再配置できます。\`${subl(0)} voice -w\`を再度使用するだけです`,
 		),
+	},
+	voiceCategoryInstallSuccess: {
+		es: '✅ Instalación de Sistema PuréVoice finalizada',
+		en: '✅ PuréVoice System installation finished',
+		ja: '✅ PuréVoiceシステムのインストールが完了しました',
 	},
 	voiceCategoryInstallError: {
 		es: paragraph(
@@ -2047,15 +2047,25 @@ let localesObject = /**@type {const}*/({
 		en: 'The PuréVoice System wizard has been cancelled',
 		ja: 'PuréVoiceシステムウィザードはキャンセルされました',
 	},
+	voiceInstallationModalTitle: {
+		es: `${subif(0, '=', true, 'Creación', 'Selección')} de categoría`,
+		en: `Category ${subif(0, '=', true, 'Creation', 'Selection')}`,
+		ja: `カテゴリの${subif(0, '=', true, '作成', '選択')}`,
+	},
 	voiceRelocateModalTitle: {
 		es: 'Reubicar Sistema PuréVoice',
 		en: 'Relocate PuréVoice System',
 		ja: 'PuréVoiceシステムを移設する',
 	},
-	voiceRelocateModalCategoryLabel: {
+	voiceModalCategoryLabel: {
 		es: 'Categoría',
 		en: 'Category',
 		ja: 'カテゴリ',
+	},
+	voiceCreateCategoryModalCategoryNameLabel: {
+		es: 'Nombre de la nueva categoría',
+		en: 'Name of the new category',
+		ja: '新しいカテゴリの名前',
 	},
 	voiceSameChannelExpected: {
 		es: '❌ Ya estoy conectada a otro chat de voz. ¡Ven conmigo antes de hacer eso!',
@@ -2263,7 +2273,6 @@ let localesObject = /**@type {const}*/({
 		en: 'If you don\'t enter a session name within 3 minutes, it\'ll be automatically renamed',
 		ja: '3分以内にセッション名を入力しないと、自動的に名前が変更されます',
 	},
-	
 	voiceSessionRenameInvalidEmoji: {
 		es: paragraph(
 			'⚠️️ El emoji indicado no es un emoji Unicode admitido',
