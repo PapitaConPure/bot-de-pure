@@ -2091,12 +2091,12 @@ let localesObject = /**@type {const}*/({
 		en: paragraph(
 			'⚠️ You must enter a session name to execute this command.',
 			'If you\'re trying to start the configuration Wizard, use the `--wizard` or `-w` flag.',
-			`Usa \`${subl(0)}help voice\` para más información`,
+			`Use \`${subl(0)}help voice\` for more information`,
 		),
 		ja: paragraph(
 			'⚠️ このコマンドを実行するにはセッション名を入力する必要があります。',
 			'設定ウィザードを起動しようとしている場合は、`--wizard`または`-w`フラグを使用してください。',
-			`Usa \`${subl(0)}help voice\` para más información`,
+			`詳細については、\`${subl(0)}help voice\`を使用してください`,
 		),
 	},
 	voiceSessionNameTooLong: {
