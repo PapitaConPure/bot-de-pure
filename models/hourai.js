@@ -1,7 +1,7 @@
 const Mongoose = require('mongoose');
 
 /** Describe la configuración de Saki Scans (Hourai Doll) */
-const HouraiSchema = new Mongoose.Schema({
+const SakiSchema = new Mongoose.Schema({
     configs: { type: Object, default: {} },
     /** Infracciones por uso de bots fuera de botposting */
     userInfractions: { type: Object, default: {} },
@@ -47,10 +47,10 @@ const HouraiSchema = new Mongoose.Schema({
     },
 });
 
-const model = Mongoose.model('Hourai', HouraiSchema);
+const model = Mongoose.model('Hourai', SakiSchema);
 
 // eslint-disable-next-line no-unused-vars
 function m() { return new model({}); }
-/**@typedef {ReturnType<(typeof m)>} HouraiDocument*/
+/**@typedef {ReturnType<(typeof m)>} SakiDocument*/
 
 module.exports = model;

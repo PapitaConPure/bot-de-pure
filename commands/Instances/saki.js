@@ -45,12 +45,11 @@ function recibirEstado(texto) {
 
 /**
  * 
- * @param {import("../../models/hourai.js").HouraiDocument} dbDoc 
+ * @param {import("../../models/hourai.js").SakiDocument} dbDoc 
  * @param {string[]} appliedList 
  * @param {string} prompt 
  * @param {string} configId 
  * @param {string} displayText 
- * @returns 
  */
 function procesarConfig(dbDoc, appliedList, prompt, configId, displayText) {
     if(!prompt)
@@ -94,22 +93,22 @@ const command = new Command('saki', flags)
 		const despedida = args.parseFlagExpr('despedida');
 		const pingBienvenida = args.parseFlagExpr('ping');
         
-        const houraiCfg = (await HouraiCfg.findOne({})) || new HouraiCfg();
+        const sakiCfg = (await HouraiCfg.findOne({})) || new HouraiCfg();
         const applied = /**@type {string[]}*/([]);
 
-        if(!procesarConfig(houraiCfg, applied, bienvenida, 'bienvenida', 'Bienvenida'))
+        if(!procesarConfig(sakiCfg, applied, bienvenida, 'bienvenida', 'Bienvenida'))
             return request.reply({ content: tip });
 
-        if(!procesarConfig(houraiCfg, applied, despedida, 'despedida', 'Despedida'))
+        if(!procesarConfig(sakiCfg, applied, despedida, 'despedida', 'Despedida'))
             return request.reply({ content: tip });
 
-        if(!procesarConfig(houraiCfg, applied, pingBienvenida, 'pingBienvenida', 'Ping de Bienvenida'))
+        if(!procesarConfig(sakiCfg, applied, pingBienvenida, 'pingBienvenida', 'Ping de Bienvenida'))
             return request.reply({ content: tip });
 
         if(!applied.length)
             return request.reply({ content: '⚠️ No se aplicaron configuraciones.\nRevisa la página de ayuda del comando con `p!ayuda saki`' });
 
-        await houraiCfg.save();
+        await sakiCfg.save();
 
         return request.reply({
             content: [

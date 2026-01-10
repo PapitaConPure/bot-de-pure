@@ -124,7 +124,7 @@ const command = new Command('roles', flags)
 		const role = args.getRole('búsqueda', true);
 
 		if(role) {
-			const houraiDB = /**@type {import('../../models/hourai.js').HouraiDocument}*/((await Hourai.findOne({})) || new Hourai({}));
+			const houraiDB = /**@type {import('../../models/hourai.js').SakiDocument}*/((await Hourai.findOne({})) || new Hourai({}));
 			const mentionRoles = /**@type {{ [ K: String ]: CategoryContent }}*/(/**@type {unknown}*/(houraiDB.mentionRoles));
 
 			const roleFound = Object.values(mentionRoles).some(category => category.rolePool.some(roleItem => {
