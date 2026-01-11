@@ -1951,7 +1951,11 @@ module.exports = {
 
         let left = id.slice(0, mid);
         let right = id.slice(mid);
-        const compr = [ left, right ].map(str => module.exports.radix10to128(parseInt(str)));
+        const compr = [ left, right ].map(str => {
+            const int = parseInt(str);
+            if(isNaN(int)) throw TypeError(`No se pudo convertir ${str} a un entero al intentar comprimir la id: ${id}`);
+            return module.exports.radix10to128(int);
+        });
         
         return compr[0].length + compr.join('');
     },
