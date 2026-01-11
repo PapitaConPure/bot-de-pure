@@ -61,7 +61,7 @@ const command = new Command('hora', tags)
 			return request.reply(translator.getText('invalidTime'));
 
 		if(!date) {
-			const issueDate = addTime(utcStartOfToday(), time);
+			const issueDate = addTime(utcStartOfToday(utcOffset), time);
 			const unixDate = getUnixTime(issueDate);
 
 			return request.reply(`<t:${unixDate}:T> — :index_pointing_at_the_viewer: ${translator.getText('horaAdaptedToYourTimezone')}`);

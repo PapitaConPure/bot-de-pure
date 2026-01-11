@@ -213,8 +213,11 @@ function makeReminderModal(request, translator, utcOffset, reminder = undefined)
 	return modal;
 }
 
-/**@param {Date} date*/
-const validateDate = (date) => isValid(date) && !isBefore(date, utcStartOfToday());
+/**
+ * @param {Date} date
+ * @param {number} utcOffset
+ */
+const validateDate = (date, utcOffset) => isValid(date) && !isBefore(date, utcStartOfToday(utcOffset));
 
 /**@param {Date} time*/
 const validateTime = (time) => isValid(time) && Math.abs(+time) < (+addDays(new Date(0), 2));
@@ -276,7 +279,7 @@ const command = new Command('recordatorio', tags)
 			});
 
 		const utcOffset = userConfigs?.utcOffset ?? 0;
-		
+
 		const dateStr = args.parseFlagExpr('fecha');
 		const timeStr = args.parseFlagExpr('hora');
 		const reminderContent = args.getString('recordatorio', true);
@@ -293,15 +296,15 @@ const command = new Command('recordatorio', tags)
 				components: [await makeRemindersListContainer(compressedUserId, translator)],
 			});
 		}
-		
+
 		if(reminderContent.length > 960)
 			return request.reply({
 				flags: MessageFlags.Ephemeral,
 				content: translator.getText('recordarReminderContentTooLong'),
 			});
 
-		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, utcOffset) ?? utcStartOfToday();
-		if(!validateDate(date))
+		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, utcOffset) ?? utcStartOfToday(utcOffset);
+		if(!validateDate(date, utcOffset))
 			return request.reply({
 				flags: MessageFlags.Ephemeral,
 				content: translator.getText('invalidDate'),
@@ -433,7 +436,7 @@ const command = new Command('recordatorio', tags)
 			return informIssue(translator.getText('invalidChannel'));
 
 		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, utcOffset);
-		if(!validateDate(date))
+		if(!validateDate(date, utcOffset))
 			return informIssue(translator.getText('invalidDate'));
 
 		const time = parseTimeFromNaturalLanguage(timeStr, utcOffset);
@@ -501,7 +504,7 @@ const command = new Command('recordatorio', tags)
 			});
 
 		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, utcOffset);
-		if(!validateDate(date))
+		if(!validateDate(date, utcOffset))
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
 				content: translator.getText('invalidDate'),
