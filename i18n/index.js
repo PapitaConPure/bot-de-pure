@@ -1,20 +1,22 @@
 const { fetchUserCache } = require('../utils/usercache');
 const Locales = require('./locales');
 
-const ConditionFields = /**@type {const}*/({
-	Equal: '=',
-	Distinct: '!=',
-	Lesser: '<',
-	Greater: '>',
-	LesserOrEqual: '<=',
-	GreaterOrEqual: '>=',
-});
-
 /**
  * @typedef {typeof ConditionFields[keyof typeof ConditionFields]} ConditionString
- * @typedef {typeof Locales[keyof typeof Locales]} LocaleKey
+ * @typedef {import('types').ValuesOf<Locales>} LocaleKey
  * @typedef {{ [P in LocaleKey]: String }} Translation
  */
+
+/**@type {string[]}*/
+const validLocaleKeys = Object.values(Locales);
+
+/**
+ * @param {unknown} locale 
+ * @returns {locale is LocaleKey}
+ */
+function isValidLocaleKey(locale) {
+	return typeof locale === 'string' && validLocaleKeys.includes(locale);
+}
 
 /**@param {...String} lines*/
 function paragraph(...lines) {
@@ -35,6 +37,15 @@ function subl(i, defaultValue) {
 	
 	return `${baseSub}<?{'${defaultValue}'}`;
 }
+
+const ConditionFields = /**@type {const}*/({
+	Equal: '=',
+	Distinct: '!=',
+	Lesser: '<',
+	Greater: '>',
+	LesserOrEqual: '<=',
+	GreaterOrEqual: '>=',
+});
 
 /**
  * @param {Number} i Índice del valor a usar como operando izquierdo de la comprobación
@@ -59,6 +70,11 @@ let localesObject = /**@type {const}*/({
 		es: 'Español',
 		en: 'English',
 		ja: '日本語',
+	},
+	currentLanguageEmojiId: {
+		en: '1084646415319453756',
+		es: '1084646419853488209',
+		ja: '🇯🇵',
 	},
 	currentLanguageEmoji: {
 		en: '<:en:1084646415319453756>',
@@ -2342,29 +2358,34 @@ let localesObject = /**@type {const}*/({
 		ja: 'ユーザー設定の構成がキャンセルされました',
 	},
 	yoFinishedStep: {
-		es: 'Se cerró el Asistente de Preferencias de Usuario',
-		en: 'The User Preferences Wizard has been closed',
-		ja: 'ユーザー設定ウィザードが閉じました',
+		es: 'Se cerró el Asistente de Preferencias de Usuario.',
+		en: 'The User Preferences Wizard has been closed.',
+		ja: 'ユーザー設定ウィザードが閉じました。',
 	},
-	yoDashboardAuthor: {
-		es: 'Preferencias de Usuario',
-		en: 'User Preferences',
-		ja: 'ユーザー設定',
+	yoDashboardAuthorEpigraph: {
+		es: '-# Preferencias de Usuario',
+		en: '-# User Preferences',
+		ja: '-# ユーザー設定',
 	},
 	yoDashboardLanguageName: {
-		es: 'Idioma',
-		en: 'Language',
-		ja: '言語',
+		es: '**Idioma**',
+		en: '**Language**',
+		ja: '**言語**',
 	},
 	yoDashboardTimezoneName: {
 		es: 'Huso Horario',
 		en: 'Time Zone',
 		ja: '時間帯',
 	},
-	yoDashboardPRCName: {
-		es: 'Créditos',
-		en: 'Credits',
-		ja: 'クレジット',
+	yoDashboardNoTZ: {
+		es: '<:clock:1357498813144760603> _Sin huso horario_',
+		en: '<:clock:1357498813144760603> _No time zone_',
+		ja: '<:clock:1357498813144760603> _時間帯なし_',
+	},
+	yoDashboardPRC: {
+		es: `<:prc:1097208828946301123> ${subl(0)} créditos`,
+		en: `<:prc:1097208828946301123> ${subl(0)} credits`,
+		ja: `<:prc:1097208828946301123> ${subl(0)}クレジット`,
 	},
 	yoDashboardFeedTagsName: {
 		es: 'Tags de Feed seguidas',
@@ -2402,19 +2423,19 @@ let localesObject = /**@type {const}*/({
 		ja: 'フォローしている画像掲示板フィードタグを管理する',
 	},
 	yoDashboardMenuConfigVoiceDesc: {
-		es: 'Configura preferencias personales de sesiones PuréVoice',
-		en: 'Configure personal preferences for PuréVoice sessions',
+		es: 'Configura tus preferencias para sesiones PuréVoice',
+		en: 'Configure your preferences for PuréVoice sessions',
 		ja: 'PuréVoiceセッションの個人設定を構成する',
 	},
 	yoDashboardMenuConfigPixixDesc: {
-		es: 'Corrige el formato de enlaces de pixiv automáticamente',
+		es: 'Corrige enlaces de pixiv que envíes',
 		en: 'Fixes pixiv embeds automatically',
 		ja: 'pixivの埋め込みを自動的に修正します',
 	},
 	yoDashboardMenuConfigTwitterDesc: {
-		es: 'Corrige el formato de enlaces de X automáticamente (VX/FX)',
-		en: 'Fixes X embeds automatically (VX/FX)',
-		ja: 'Xの埋め込みを自動的に修正します (VX/FX)',
+		es: 'Corrige enlaces de X que envíes',
+		en: 'Fixes X embeds automatically',
+		ja: 'Xの埋め込みを自動的に修正します',
 	},
 	yoDashboardTimezone: {
 		es: 'Huso Horario...',
@@ -2426,15 +2447,38 @@ let localesObject = /**@type {const}*/({
 		en: 'Set Time Zone',
 		ja: '時間帯を設定',
 	},
+	yoTimezoneModalTutorial: {
+		es: paragraph(
+			'Se aceptan:',
+			'* identificadores de zona horaria según el listado de la *Internet Assigned Numbers Authority (IANA)*.',
+			'* desplazamientos horarios relativos a UTC (en horas y minutos).',
+			'Puedes consultar [este listado](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) para indicar la zona horaria mejor adecuada a donde vives (columna "TZ Identifier"), o utilizar [esta página](https://myutcoffset.com) para conocer tu desplazamiento horario.',
+			'Si ingresas un identificador *IANA*, tu huso horario se ajustará **automáticamente** a los __horarios de verano__.',
+		),
+		en: paragraph(
+			'Accepted values:',
+			'* time zone identifiers from the *Internet Assigned Numbers Authority (IANA)* list.',
+			'* UTC-relative time offsets (in hours and minutes).',
+			'You can check [this list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) to find the time zone that best matches where you live (the "TZ Identifier" column), or use [this page](https://myutcoffset.com) to find your UTC offset.',
+			'If you enter an *IANA* identifier, your time zone will **automatically** adjust for __daylight saving time__.',
+		),
+		ja: paragraph(
+			'以下の形式が利用できます:',
+			'* *Internet Assigned Numbers Authority（IANA）* によって定義されたタイムゾーン識別子。',
+			'* UTCに対する時差（時間および分）。',
+			'[こちらの一覧](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List)（「TZ Identifier」列）から、お住まいの地域に最も近いタイムゾーンを確認するか、[こちらのページ](https://myutcoffset.com)でUTCとの時差を確認できます。',
+			'*IANA*識別子を入力した場合、__夏時間__は**自動的に**適用されます。',
+		),
+	},
 	yoTimezoneModalTimezoneLabel: {
 		es: 'Huso horario',
 		en: 'Time zone',
 		ja: '時間帯',
 	},
 	yoTimezoneModalTimezonePlaceholder: {
-		es: 'GMT, JST, -3, GMT+5, UTC-4, etc.',
-		en: 'GMT, JST, -3, GMT+5, UTC-4, etc.',
-		ja: 'GMT、JST、-3、GMT+5、UTC-4など',
+		es: 'UTC+3, GMT, JST, -3, GMT+5, UTC-4, etc.',
+		en: 'UTC+3, GMT, JST, -3, GMT+5, UTC-4, etc.',
+		ja: 'UTC+3、GMT、JST、-3、GMT+5、UTC-4など',
 	},
 	yoTimezoneInvalidTimezone: {
 		es: '⚠️ El huso horario especificado tiene un formato inválido',
@@ -2565,11 +2609,6 @@ let localesObject = /**@type {const}*/({
 		en: 'Service',
 		ja: 'サービス',
 	},
-	yoConversionServiceDescription: {
-		es: `Servicio de conversión actual: \`${subl(0)}\``,
-		en: `Current conversion service: \`${subl(0)}\``,
-		ja: `現在の変換サービス：\`${subl(0)}\``,
-	},
 	yoConversionServiceMenuServiceNoneLabel: {
 		es: 'Ninguno',
 		en: 'None',
@@ -2586,9 +2625,9 @@ let localesObject = /**@type {const}*/({
 		ja: 'pixivリンクコンバーター',
 	},
 	yoPixivTitle: {
-		es: 'Elige el servicio de conversión a usar para pixiv',
-		en: 'Choose which conversion service to use for pixiv',
-		ja: 'pixivに使用する変換サービスを選択してください',
+		es: '## Elige el servicio de conversión a usar para pixiv',
+		en: '## Choose which conversion service to use for pixiv',
+		ja: '## pixivに使用する変換サービスを選択してください',
 	},
 	yoPixivMenuServicePhixivDesc: {
 		es: 'Opción recomendada',
@@ -2616,9 +2655,9 @@ let localesObject = /**@type {const}*/({
 		ja: 'Twitter/Xリンクコンバーター',
 	},
 	yoTwitterTitle: {
-		es: 'Elige el servicio de conversión a usar para Twitter/X',
-		en: 'Choose which conversion service to use for Twitter/X',
-		ja: 'Twitter/Xに使用する変換サービスを選択してください',
+		es: '## Elige el servicio de conversión a usar para Twitter/X',
+		en: '## Choose which conversion service to use for Twitter/X',
+		ja: '## Twitter/Xに使用する変換サービスを選択してください',
 	},
 	yoTwitterMenuServiceVxDesc: {
 		es: 'Opción recomendada',
@@ -2824,4 +2863,5 @@ module.exports = {
 	Translator,
 	ConditionFields,
 	Locales,
+	isValidLocaleKey,
 };
