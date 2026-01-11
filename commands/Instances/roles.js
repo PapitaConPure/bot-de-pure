@@ -1,5 +1,5 @@
 const { hourai, tenshiColor } = require('../../data/config.json');
-const Hourai = require('../../models/hourai.js');
+const Hourai = require('../../models/saki.js');
 const axios = require('axios').default;
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors } = require('discord.js');
 const { p_pure } = require('../../utils/prefixes');
@@ -124,7 +124,7 @@ const command = new Command('roles', flags)
 		const role = args.getRole('búsqueda', true);
 
 		if(role) {
-			const houraiDB = /**@type {import('../../models/hourai.js').SakiDocument}*/((await Hourai.findOne({})) || new Hourai({}));
+			const houraiDB = /**@type {import('../../models/saki.js').SakiDocument}*/((await Hourai.findOne({})) || new Hourai({}));
 			const mentionRoles = /**@type {{ [ K: String ]: CategoryContent }}*/(/**@type {unknown}*/(houraiDB.mentionRoles));
 
 			const roleFound = Object.values(mentionRoles).some(category => category.rolePool.some(roleItem => {

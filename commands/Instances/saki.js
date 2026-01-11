@@ -1,6 +1,6 @@
 const { CommandTags, Command, CommandOptions } = require("../Commons/commands");
 const { hourai } = require('../../data/config.json');
-const HouraiCfg = require('../../models/hourai.js');
+const HouraiCfg = require('../../models/saki.js');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 
 let crazyBackupId = hourai.crazyBackupChannelId;
@@ -45,7 +45,7 @@ function recibirEstado(texto) {
 
 /**
  * 
- * @param {import("../../models/hourai.js").SakiDocument} dbDoc 
+ * @param {import("../../models/saki.js").SakiDocument} dbDoc 
  * @param {string[]} appliedList 
  * @param {string} prompt 
  * @param {string} configId 

@@ -8,7 +8,7 @@ const BooruTags = require('../models/boorutags.js');
 const MessageCascades = require('../models/messageCascades.js');
 const { Puretable, pureTableAssets } = require('../models/puretable.js');
 const { deleteExpiredMessageCascades, cacheMessageCascade } = require('./onMessageDelete');
-const SakiDB = require('../models/hourai.js');
+const SakiDB = require('../models/saki.js');
 
 const { puré } = require('../core/commandInit.js');
 const globalConfigs = require('../data/config.json');
