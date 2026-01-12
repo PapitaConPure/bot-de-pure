@@ -85,7 +85,7 @@ let localesObject = /**@type {const}*/({
 	dmDisclaimer: {
 		es: 'Nota: Bot de Puré no opera con mensajes privados',
 		en: 'Note: Bot de Puré does not reply to DMs',
-		ja: '注: ピューレボットはDMに返信しません'
+		ja: '注: ピューレボットは DM に返信しません'
 	},
 	dmInteraction: {
 		es: '❌ Solo respondo a comandos en servidores',
@@ -193,7 +193,7 @@ let localesObject = /**@type {const}*/({
 	invalidId: {
 		es: '⚠️️ ID inválida',
 		en: '⚠️️ Invalid ID',
-		ja: '⚠️️ 無効なID',
+		ja: '⚠️️ 無効な ID',
 	},
 	invalidUser: {
 		es: '⚠️️ Usuario inválido',
@@ -449,27 +449,27 @@ let localesObject = /**@type {const}*/({
 	actionPVTransferAdmin: {
 		es: 'Sesión PV • Ceder Administrador',
 		en: 'PV Session • Transfer Admin',
-		ja: 'PVセッション・アドミンを移行る',
+		ja: 'PV セッション・アドミンを移行る',
 	},
 	actionPVGiveMod: {
 		es: 'Sesión PV • Volver Moderador',
 		en: 'PV Session • Promote to Mod',
-		ja: 'PVセッション・モデレーターを与える',
+		ja: 'PV セッション・モデレーターを与える',
 	},
 	actionPVRemoveMod: {
 		es: 'Sesión PV • Quitar Moderador',
 		en: 'PV Session • Demote Mod ',
-		ja: 'PVセッション・モデレーターを与える',
+		ja: 'PV セッション・モデレーターを与える',
 	},
 	actionPVBanMember: {
 		es: 'Sesión PV • Expulsar',
 		en: 'PV Session • Ban',
-		ja: 'PVセッション・禁止する',
+		ja: 'PV セッション・禁止する',
 	},
 	actionPVUnbanMember: {
 		es: 'Sesión PV • Remover Expulsión',
 		en: 'PV Session • Unban',
-		ja: 'PVセッション・禁止を解除',
+		ja: 'PV セッション・禁止を解除',
 	},
 
 	cancelledStepName: {
@@ -542,7 +542,7 @@ let localesObject = /**@type {const}*/({
 	anarquiaSkillIssue: {
 		es: '❌ No tienes ninguna carga de esta habilidad. Interactúa más con la Tabla de Puré para tener oportunidad de recibir habilidades especiales',
 		en: '❌ You have no stacks of this skill. Interact more with the Puré Matrix for a chance to receive special skills',
-		ja: '❌ このスキルのスタックはありません。特別なスキルを受け取る機会を得るために、Puré Matrixともっと交流する',
+		ja: '❌ このスキルのスタックはありません。特別なスキルを受け取る機会を得るために、Puré Matrix ともっと交流する',
 	},
 
 	avatarUserNotFoundNotice: {
@@ -773,7 +773,7 @@ let localesObject = /**@type {const}*/({
 	queueDescriptionLoopAutoplay: {
 		es: '<:headphonessimple:1360868342411427892> Auto-DJ activo',
 		en: '<:headphonessimple:1360868342411427892> Auto DJ is enabled',
-		ja: '<:headphonessimple:1360868342411427892> オートDJが有効になりました',
+		ja: '<:headphonessimple:1360868342411427892> オート DJ が有効になりました',
 	},
 	queueDescriptionShuffle: {
 		es: '<:shuffle:1356977721799868426> Modo de cola aleatoria activo',
@@ -823,7 +823,7 @@ let localesObject = /**@type {const}*/({
 	queueDequeueDescriptionTrackNotFound: {
 		es: 'Puedes usar p!cola nuevamente e intentarlo otra vez',
 		en: 'You can use p!queue once more and try it again',
-		ja: 'もう一度p!queueを使用して再試行してください',
+		ja: 'もう一度 p!queue を使用して再試行してください',
 	},
 	queueDequeueTitleDequeued: {
 		es: 'Pista quitada',
@@ -860,8 +860,8 @@ let localesObject = /**@type {const}*/({
 			`You must turn off <:headphonessimple:1360868342411427892> Auto DJ to use this button. You can also use \`${subl(0), '/'}loop\`.`,
 		),
 		ja: paragraph(
-			'リピートモードは、<:headphonessimple:1360868342411427892> オートDJがアクティブなため変更できません。',
-			`このボタンを使用するには、<:headphonessimple:1360868342411427892> オートDJをオフにする必要があります。\`${subl(0), '/'}loop\`を使用することもできます。`,
+			'リピートモードは、<:headphonessimple:1360868342411427892> オート DJ がアクティブなため変更できません。',
+			`このボタンを使用するには、<:headphonessimple:1360868342411427892> オート DJ をオフにする必要があります。\`${subl(0), '/'}loop\`を使用することもできます。`,
 		),
 	},
 	queueLoopTitle: {
@@ -902,7 +902,7 @@ let localesObject = /**@type {const}*/({
 	queueLoopMenuAutoplayLabel: {
 		es: 'Auto-DJ',
 		en: 'Auto DJ',
-		ja: 'オートDJ',
+		ja: 'オート DJ',
 	},
 	queueLoopMenuAutoplayDesc: {
 		es: 'Agregar pistas similares indefinidamente',
@@ -932,7 +932,7 @@ let localesObject = /**@type {const}*/({
 	queueLoopAutoplayTitle: {
 		es: 'Se activó el Auto-DJ',
 		en: 'Auto DJ has been enabled',
-		ja: '自動DJが有効になりました',
+		ja: '自動 DJ が有効になりました',
 	},
 	sonandoTitle: {
 		es: 'Escuchando Ahora',
@@ -943,18 +943,18 @@ let localesObject = /**@type {const}*/({
 	catboxInvalidImage: {
 		es: '⚠️ Debes indicar un enlace de imagen o una imagen directa a subir a Catbox',
 		en: '⚠️ You must supply an image link or file to upload to Catbox',
-		ja: '⚠️ Catboxにアップロードするイメージのリンクまたはファイルを提供する必要があります',
+		ja: '⚠️ Catbox にアップロードするイメージのリンクまたはファイルを提供する必要があります',
 	},
 
 	imgurRegisterTitle: {
 		es: 'Haz click aquí para crear una Aplicación de Imgur',
 		en: 'Click here to create an Imgur Application',
-		ja: 'Imgurアプリケーションを作成するにはこちらをクリックしてください',
+		ja: 'Imgur アプリケーションを作成するにはこちらをクリックしてください',
 	},
 	imgurRegisterDesc: {
 		es: 'Precisarás la ID de cliente de la misma para registrar la aplicación en Bot de Puré. Si no tienes cuenta de Imgur, deberás crear una primero',
 		en: 'You\'ll need this App\'s client ID to register it within Bot de Puré. If you don\'t have an Imgur account, you\'ll have to sign up first',
-		ja: 'Bot de Puréにアプリを登録するには、アプリのクライアントIDが必要になります。Imgurアカウントをお持ちでない場合は、まずアカウントを作成する必要があります',
+		ja: 'Bot de Puréにアプリを登録するには、アプリのクライアント ID が必要になります。Imgur アカウントをお持ちでない場合は、まずアカウントを作成する必要があります',
 	},
 	imgurRegisterAuthTypeValue: {
 		es: 'Selecciona la tercera opción (uso anónimo sin autorización)',
@@ -987,28 +987,28 @@ let localesObject = /**@type {const}*/({
 		),
 		ja: paragraph(
 			'キャプチャを確認し、アプリケーション作成リクエストフォームを送信します。',
-			'アプリケーションを作成したら、表示されるクライアントID(Client ID)をコピーし、このメッセージのボタンを押した後に貼り付けます。',
+			'アプリケーションを作成したら、表示されるクライアント ID(Client ID)をコピーし、このメッセージのボタンを押した後に貼り付けます。',
 		),
 	},
 	imgurRegisterModalTitle: {
 		es: 'Registrar Aplicación de Imgur',
 		en: 'Register Imgur Application',
-		ja: 'Imgurアプリを登録する',
+		ja: 'Imgur アプリを登録する',
 	},
 	imgurRegisterModalClientIdLabel: {
 		es: 'ID de Cliente de Imgur',
 		en: 'Imgur Client ID',
-		ja: 'ImgurクライアントID',
+		ja: 'Imgur クライアント ID',
 	},
 	imgurRegisterSuccess: {
 		es: 'Se registró una Aplicación de Imgur personal',
 		en: 'Personal Imgur Application has been registered',
-		ja: '個人用のImgurアプリケーションが登録されました',
+		ja: '個人用の Imgur アプリケーションが登録されました',
 	},
 	imgurInvalidImage: {
 		es: '⚠️ Debes indicar un enlace de imagen o una imagen directa a subir a Imgur',
 		en: '⚠️ You must supply an image link or file to upload to Imgur',
-		ja: '⚠️ Imgurにアップロードするイメージのリンクまたはファイルを提供する必要があります',
+		ja: '⚠️ Imgur にアップロードするイメージのリンクまたはファイルを提供する必要があります',
 	},
 	imgurUploadSuccessTitle: {
 		es: 'Tu imagen',
@@ -1029,7 +1029,7 @@ let localesObject = /**@type {const}*/({
 	saucenaoRegisterTitle: {
 		es: 'Registra tu cuenta de SauceNAO en Bot de Puré',
 		en: 'Register your SauceNAO account within Bot de Puré',
-		ja: 'Bot de PuréでSauceNAOアカウントを登録する',
+		ja: 'Bot de Puréで SauceNAO アカウントを登録する',
 	},
 	saucenaoRegisterAccountName: {
 		es: 'Crea una cuenta',
@@ -1039,12 +1039,12 @@ let localesObject = /**@type {const}*/({
 	saucenaoRegisterAccountValue: {
 		es: 'Si no tienes una cuenta de SauceNAO, puedes crearla [aquí](https://saucenao.com/user.php)',
 		en: 'If you don\' have a SauceNAO account, you can create one [here](https://saucenao.com/user.php)',
-		ja: 'SauceNAOアカウントをお持ちでない場合は、[こちら](https://saucenao.com/user.php)から作成できます',
+		ja: 'SauceNAO アカウントをお持ちでない場合は、[こちら](https://saucenao.com/user.php)から作成できます',
 	},
 	saucenaoRegisterFooter: {
 		es: 'Si seguir estos pasos no funciona, presiona el botón "regen" en la página del paso 2, copia la nueva clave y repite el paso 3',
 		en: 'If following these steps doesn\'t work, press the "regen" button in the page from step 2, copy the new key and repeat step 3',
-		ja: 'これらの手順に従っても機能しない場合は、手順2のページで「regen」ボタンを押し、新しいキーをコピーして手順 3 を繰り返します',
+		ja: 'これらの手順に従っても機能しない場合は、手順 2のページで「regen」ボタンを押し、新しいキーをコピーして手順 3を繰り返します',
 	},
 	saucenaoRegisterAfterName: {
 		es: 'Enlaza tu cuenta',
@@ -1063,25 +1063,25 @@ let localesObject = /**@type {const}*/({
 			'3. Press the button below this message and paste the key'
 		),
 		ja: paragraph(
-			'1. SauceNAOにログインして[こちら](https://saucenao.com/user.php?page=search-api)へ',
-			'2. 提示されたAPIキー（api key）をコピーします',
+			'1. SauceNAO にログインして[こちら](https://saucenao.com/user.php?page=search-api)へ',
+			'2. 提示された API キー（api key）をコピーします',
 			'3. このメッセージのボタンを押してキーを貼り付けます',
 		),
 	},
 	saucenaoRegisterModalTitle: {
 		es: 'Registrar Aplicación de SauceNAO',
 		en: 'Register SauceNAO Application',
-		ja: 'SauceNAOアプリを登録する',
+		ja: 'SauceNAO アプリを登録する',
 	},
 	saucenaoRegisterModalApiKeyLabel: {
 		es: 'Clave de API de SauceNAO',
 		en: 'SauceNAO API key',
-		ja: 'SauceNAO APIキー',
+		ja: 'SauceNAO API キー',
 	},
 	saucenaoRegisterSuccess: {
 		es: 'Se registró una Aplicación de SauceNAO personal',
 		en: 'Personal SauceNAO Application has been registered',
-		ja: '個人用のSauceNAOアプリケーションが登録されました',
+		ja: '個人用の SauceNAO アプリケーションが登録されました',
 	},
 	saucenaoUnregisteredNotice: {
 		es: paragraph(
@@ -1093,19 +1093,19 @@ let localesObject = /**@type {const}*/({
 			'After signing up, you can copy your API key [here](https://saucenao.com/user.php?page=search-api "This link will take you to your SauceNAO dashboard")'
 		),
 		ja: paragraph(
-			'❌ このコマンドを使用するには、[SauceNAOにサインアップ](https://saucenao.com/user.php)して`p!saucenao --register`を使用する必要があります。',
-			'登録後、APIキー[こちら](https://saucenao.com/user.php?page=search-api "このリンクはSauceNAOダッシュボードにリンクします")からコピーできます'
+			'❌ このコマンドを使用するには、[SauceNAO にサインアップ](https://saucenao.com/user.php)して`p!saucenao --register`を使用する必要があります。',
+			'登録後、API キー[こちら](https://saucenao.com/user.php?page=search-api "このリンクは SauceNAO ダッシュボードにリンクします")からコピーできます'
 		),
 	},
 	saucenaoInvalidImage: {
 		es: '⚠️ Debes indicar un enlace de imagen o una imagen directa a buscar en SauceNAO',
 		en: '⚠️ You must supply an image link or file to search on SauceNAO',
-		ja: '⚠️ SauceNAOで検索するには、画像リンクまたは直接画像を示す必要があります',
+		ja: '⚠️ SauceNAO で検索するには、画像リンクまたは直接画像を示す必要があります',
 	},
 	saucenaoInvalidToken: {
 		es: '⚠️ Clave de API de SauceNAO inválida',
 		en: '⚠️ Invalid SauceNAO API key',
-		ja: '⚠️ 無効なSauceNAO APIキー',
+		ja: '⚠️ 無効な SauceNAO API キー',
 	},
 	saucenaoSearchSuccess: {
 		es: `Resultado de la imagen Nº${subl(0)}`,
@@ -1120,7 +1120,7 @@ let localesObject = /**@type {const}*/({
 	saucenaoSearchRedactedDesc: {
 		es: 'Puedes ver resultados NSFW en canales NSFW',
 		en: `You can get NSFW results in NSFW channels`,
-		ja: `NSFWチャンネルでNSFWの結果を得ることができます`,
+		ja: `NSFW チャンネルで NSFW の結果を得ることができます`,
 	},
 	saucenaoSearchNoResult: {
 		es: `No se encontraron resultados para la imagen Nº${subl(0)}`,
@@ -1438,7 +1438,7 @@ let localesObject = /**@type {const}*/({
 	feedDeletePostTagsInaccessible: {
 		es: 'Puede que el Post eliminado de Discord haya sido también eliminado del Booru del que se originó, pues no se pudieron recuperar sus tags',
 		en: 'The Post just deleted from Discord may have also been deleted from the Booru, given that I couldn\'t retrieve its tags',
-		ja: 'Discordから削除された投稿は、タグを取得できなかったため、Booruからも削除された可能性があります',
+		ja: 'Discord から削除された投稿は、タグを取得できなかったため、Booru からも削除された可能性があります',
 	},
 	feedDeletePostTagsUnknownError: {
 		es: 'Post eliminado (no se pudo recuperar la información del Post y/o sus tags)',
@@ -1472,7 +1472,7 @@ let localesObject = /**@type {const}*/({
 	feedContributeDescription: {
 		es: 'Este Post tiene etiquetas que indican pedidos pendientes. Puedes contribuir a la calidad de Gelbooru ayudando a etiquetar correctamente, entre otras cosas.',
 		en: 'This post contains tags that signal pending requests. You could help Gelbooru get better by tagging posts appropiately, among other things.',
-		ja: 'この投稿には保留中の注文を示すタグが付いています。適切なタグを付けるなど、Gelbooruの品質向上に貢献してください。',
+		ja: 'この投稿には保留中の注文を示すタグが付いています。適切なタグを付けるなど、Gelbooru の品質向上に貢献してください。',
 	},
 	feedContributeTagsName: {
 		es: '<:handshake:1355496081550606486> Tags de pedidos pendientes',
@@ -1482,7 +1482,7 @@ let localesObject = /**@type {const}*/({
 	feedContributeDanbooruFooter: {
 		es: 'Este Post fue automáticamente portado desde Danbooru, por lo que es mejor concretar los pedidos ahí. Los cambios utilitarios hechos en Danbooru se verán reflejados en Gelbooru.',
 		en: 'This post was automatically ported from Danbooru, so it\'s best to concrete the requests there. Utility changes made in Danbooru will be reflected in Gelbooru.',
-		ja: 'この投稿はDanbooruから自動的に移行されたため、リクエストはDanbooruへ送信することをお勧めします。Danbooruで行われたユーティリティの変更はGelbooruにも反映されます。',
+		ja: 'この投稿は Danbooru から自動的に移行されたため、リクエストは Danbooru へ送信することをお勧めします。Danbooru で行われたユーティリティの変更は Gelbooru にも反映されます。',
 	},
 	feedFeedbackExpired: {
 		es: '❌ Esta campaña de retroalimentación ha finalizado',
@@ -1682,7 +1682,7 @@ let localesObject = /**@type {const}*/({
 	inforolNoRoleProvided: {
 		es: '❌ ¡Debes indicar al menos un rol!',
 		en: '❌ You must indicate at least one role!',
-		ja: '❌ 少なくとも1つのロールを指定する必要があります',
+		ja: '❌ 少なくとも 1つのロールを指定する必要があります',
 	},
 	inforolNoMembersFound: {
 		es: '⚠️ No se encontró ningún miembro con los roles indicados...',
@@ -1936,17 +1936,17 @@ let localesObject = /**@type {const}*/({
 	voiceWizardAuthorName: {
 		es: 'Asistente de Configuración de Sistema PuréVoice',
 		en: 'PuréVoice System Configuration Wizard',
-		ja: 'PuréVoiceシステム設定ウィザード',
+		ja: 'PuréVoice システム設定ウィザード',
 	},
 	voiceWizardWelcome: {
 		es: 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes! Solo sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras',
 		en: 'If this is your first time setting up a PuréVoice System, don\'t worry! Just follow the Wizard\'s instructions and adapt your Feed to what you want',
-		ja: '初めてPuréVoiceシステムをセットアップする場合でも、心配する必要はありません。ウィザードの指示に従って、必要に応じてフィードを調整するだけです',
+		ja: '初めて PuréVoice システムをセットアップする場合でも、心配する必要はありません。ウィザードの指示に従って、必要に応じてフィードを調整するだけです',
 	},
 	voiceInstallationStartFieldName: {
 		es: 'Inyección de Sistema PuréVoice',
 		en: 'PuréVoice System Injection',
-		ja: 'PuréVoiceシステム注入',
+		ja: 'PuréVoice システム注入',
 	},
 	voiceInstallationStartFieldValue: {
 		es: '¿Qué deseas hacer ahora mismo?',
@@ -1966,17 +1966,17 @@ let localesObject = /**@type {const}*/({
 	voiceInstallationSelectButtonCreateNew: {
 		es: 'Crear categoría con PuréVoice',
 		en: 'Create a category for PuréVoice',
-		ja: 'PuréVoiceのカテゴリを作成する',
+		ja: 'PuréVoice のカテゴリを作成する',
 	},
 	voiceInstallationSelectButtonInject: {
 		es: 'Inyectar PuréVoice en categoría',
 		en: 'Inject PuréVoice into category',
-		ja: 'PuréVoiceをカテゴリーに導入',
+		ja: 'PuréVoice をカテゴリーに導入',
 	},
 	voiceInstallationModalDescription: {
 		es: 'Menciona el nombre de la categoría a la cual inyectarle PuréVoice',
 		en: 'Mention the name of the category you want to inject PuréVoice into',
-		ja: 'PuréVoiceを導入するカテゴリ名を指定してください',
+		ja: 'PuréVoice を導入するカテゴリ名を指定してください',
 	},
 	voiceCategoryInstalledFieldName: {
 		es: 'La categoría fue instalada',
@@ -1994,13 +1994,13 @@ let localesObject = /**@type {const}*/({
 		),
 		ja: paragraph(
 			'動的に音声チャネルを拡張するカテゴリが用意されました。',
-			`作成したPuréVoiceシステムは将来的に再配置できます。\`${subl(0)} voice -w\`を再度使用するだけです`,
+			`作成した PuréVoice システムは将来的に再配置できます。\`${subl(0)} voice -w\`を再度使用するだけです`,
 		),
 	},
 	voiceCategoryInstallSuccess: {
 		es: '✅ Instalación de Sistema PuréVoice finalizada',
 		en: '✅ PuréVoice System installation finished',
-		ja: '✅ PuréVoiceシステムのインストールが完了しました',
+		ja: '✅ PuréVoice システムのインストールが完了しました',
 	},
 	voiceCategoryInstallError: {
 		es: paragraph(
@@ -2014,7 +2014,7 @@ let localesObject = /**@type {const}*/({
 			'Also, verify that the name entered is not already occupied by some other category or channel',
 		),
 		ja: paragraph(
-			'⚠️ PuréVoiceをカテゴリに挿入中にエラーが発生しました。',
+			'⚠️ PuréVoice をカテゴリに挿入中にエラーが発生しました。',
 			'このアクション (チャネルの管理) を実行するために必要な権限があることを確認してください。',
 			'また、入力した名前が他のカテゴリやチャンネルにすでに占有されていないことを確認してください',
 		),
@@ -2022,7 +2022,7 @@ let localesObject = /**@type {const}*/({
 	voiceUninstallFieldName: {
 		es: 'Desinstalación del Sistema PuréVoice del servidor',
 		en: 'Uninstalling the PuréVoice System from the server',
-		ja: 'PuréVoiceシステムをサーバーからアンインストールする',
+		ja: 'PuréVoice システムをサーバーからアンインストールする',
 	},
 	voiceUninstallFieldValue: {
 		es: paragraph(
@@ -2035,33 +2035,33 @@ let localesObject = /**@type {const}*/({
 		),
 		ja: paragraph(
 			'これにより、システムによって作成されたすべてのチャンネルが削除されます。システム カテゴリと手動で作成したチャネルは無視されます。',
-			'このサーバーとPuréVoiceの関連付けが解除されていることを確認します',
+			'このサーバーと PuréVoice の関連付けが解除されていることを確認します',
 		),
 	},
 	voiceRelocatedFieldName: {
 		es: 'Sistema PuréVoice reubicado',
 		en: 'PuréVoice System relocated',
-		ja: 'PuréVoiceシステム移転',
+		ja: 'PuréVoice システム移転',
 	},
 	voiceRelocatedFieldValue: {
 		es: 'Se reubicó el Sistema PuréVoice asociado al servidor',
 		en: 'This server\'s PuréVoice System has been relocated',
-		ja: 'サーバーに関連付けられているPuréVoiceシステムは移転されました',
+		ja: 'サーバーに関連付けられている PuréVoice システムは移転されました',
 	},
 	voiceUninstalledFieldName: {
 		es: 'Sistema PuréVoice eliminado',
 		en: 'PuréVoice System removed',
-		ja: 'PuréVoiceシステムが削除されました',
+		ja: 'PuréVoice システムが削除されました',
 	},
 	voiceUninstalledFieldValue: {
 		es: 'Se eliminó el Sistema PuréVoice asociado al servidor',
 		en: 'This server\'s PuréVoice System has been removed',
-		ja: 'サーバーに関連付けられたPuréVoiceシステムが削除されました',
+		ja: 'サーバーに関連付けられた PuréVoice システムが削除されました',
 	},
 	voiceCancelledFieldValue: {
 		es: 'Se canceló la configuración del Sistema PuréVoice',
 		en: 'The PuréVoice System wizard has been cancelled',
-		ja: 'PuréVoiceシステムウィザードはキャンセルされました',
+		ja: 'PuréVoice システムウィザードはキャンセルされました',
 	},
 	voiceInstallationModalTitle: {
 		es: `${subif(0, '=', true, 'Creación', 'Selección')} de categoría`,
@@ -2071,7 +2071,7 @@ let localesObject = /**@type {const}*/({
 	voiceRelocateModalTitle: {
 		es: 'Reubicar Sistema PuréVoice',
 		en: 'Relocate PuréVoice System',
-		ja: 'PuréVoiceシステムを移設する',
+		ja: 'PuréVoice システムを移設する',
 	},
 	voiceModalCategoryLabel: {
 		es: 'Categoría',
@@ -2128,7 +2128,7 @@ let localesObject = /**@type {const}*/({
 	voiceSessionNameTooLong: {
 		es: '⚠️ Intenta acortar un poco el nombre. El límite para nombres de sesión es de 24(+3) caracteres',
 		en: '⚠️ Try shortening the name a bit. The limit for session names is 24(+3) characters',
-		ja: '⚠️ セッション名の長さを少し短くしてみてください。セッション名の制限は24文字（+3文字）です。',
+		ja: '⚠️ セッション名の長さを少し短くしてみてください。セッション名の制限は 24文字（+3文字）です。',
 	},
 	voiceSessionRenameTooSoon: {
 		es: paragraph(
@@ -2140,59 +2140,59 @@ let localesObject = /**@type {const}*/({
 			`Try again <t:${subl(0)}:R> or connect to a new session`,
 		),
 		ja: paragraph(
-			`❌ 技術的な理由により、セッション名を変更できるのは20分ごとに1回のみです。`,
+			`❌ 技術的な理由により、セッション名を変更できるのは 20分ごとに 1回のみです。`,
 			`<t:${subl(0)}:R>にもう一度お試しいただくか、新しいセッションに接続してください`,
 		),
 	},
 	voiceReasonCategoryCreate: {
 		es: 'Preparar categoría recipiente de PuréVoice',
 		en: 'Prepare PuréVoice container category',
-		ja: 'PuréVoiceコンテナカテゴリを準備する',
+		ja: 'PuréVoice コンテナカテゴリを準備する',
 	},
 	voiceReasonSystemRelocate: {
 		es: `PuréVoice reubicado por ${subl(0)}`,
 		en: `PuréVoice relocated by ${subl(0)}`,
-		ja: `PuréVoiceは${subl(0)}によって移転されました`,
+		ja: `PuréVoice は${subl(0)}によって移転されました`,
 	},
 	voiceReasonSystemRemove: {
 		es: `PuréVoice desinstalado por ${subl(0)}`,
 		en: `PuréVoice uninstalled by ${subl(0)}`,
-		ja: `PuréVoiceが${subl(0)}さんによってアンインストールされました`,
+		ja: `PuréVoice が${subl(0)}さんによってアンインストールされました`,
 	},
 	voiceSessionReasonRename: {
 		es: 'Renombrar sesión PuréVoice',
 		en: 'PuréVoice session rename',
-		ja: 'PuréVoiceセッション名変更',
+		ja: 'PuréVoice セッション名変更',
 	},
 	voiceSessionReasonFirstMemberAdd: {
 		es: 'Inclusión de primer miembro en sesión PuréVoice',
 		en: 'First member addition in PuréVoice session',
-		ja: 'Purevoiceセッションに最初のメンバーを含める',
+		ja: 'Purevoice セッションに最初のメンバーを含める',
 	},
 	voiceSessionReasonMemberAdd: {
 		es: 'Inclusión de miembro en sesión PuréVoice',
 		en: 'Member addition in PuréVoice session',
-		ja: 'メンバーがPuréVoiceセッションに参加しました',
+		ja: 'メンバーが PuréVoice セッションに参加しました',
 	},
 	voiceSessionReasonRoleCreate: {
 		es: 'Inyectar Rol Efímero PuréVoice',
 		en: 'Inject PuréVoice Ephemeral Rol',
-		ja: 'PuréVoice一時的なロールを注入する',
+		ja: 'PuréVoice 一時的なロールを注入する',
 	},
 	voiceSessionReasonRoleEdit: {
 		es: 'Conceder envío de mensajes a rol de sesión PuréVoice',
 		en: 'Grant permission to send messages for PuréVoice session role',
-		ja: 'PuréVoiceセッションロールのメッセージを送信する許可を付与します',
+		ja: 'PuréVoice セッションロールのメッセージを送信する許可を付与します',
 	},
 	voiceSessionReasonChannelCreate: {
 		es: 'Desplegar Canal Automutable PuréVoice',
 		en: 'Deploy PuréVoice Automutable Channel',
-		ja: 'PuréVoice自動可変チャネルのデプロイ',
+		ja: 'PuréVoice 自動可変チャネルのデプロイ',
 	},
 	voiceSessionReasonChannelForceName: {
 		es: 'Renombrar sesión PuréVoice (forzado automáticamente)',
 		en: 'Rename PuréVoice session (automatically forced)',
-		ja: 'PuréVoiceセッションの名前を変更する (自動的に強制)',
+		ja: 'PuréVoice セッションの名前を変更する (自動的に強制)',
 	},
 	voiceSessionReasonFreeze: {
 		es: `Sesión congelada por ${subl(0)}`,
@@ -2277,7 +2277,7 @@ let localesObject = /**@type {const}*/({
 	voiceSessionNewSessionRenameValue: {
 		es: '⌛ Debes esperar 20 minutos entre cada renombrado de la sesión',
 		en: '⌛ You must wait 20 minutes between each session renaming',
-		ja: '⌛ 各セッションの名前変更の間には20分待つ必要があります',
+		ja: '⌛ 各セッションの名前変更の間には 20分待つ必要があります',
 	},
 	voiceSessionNewSessionAutonameName: {
 		es: '⏱️ Nombre automático',
@@ -2303,7 +2303,7 @@ let localesObject = /**@type {const}*/({
 		ja: paragraph(
 			'⚠️️ 示された絵文字は、サポートされている Unicode 絵文字ではありません。',
 			'チャンネル名にはカスタムエモートを使用できないことにご注意ください。',
-			'また、一部の標準Discord絵文字は*それほど標準的ではない*ため、正しく検出・機能することが__期待されていません__。',
+			'また、一部の標準 Discord 絵文字は*それほど標準的ではない*ため、正しく検出・機能することが__期待されていません__。',
 		),
 	},
 	voiceSessionRenameSuccess: {
@@ -2324,7 +2324,7 @@ let localesObject = /**@type {const}*/({
 	voiceSessionJoinExpected: {
 		es: '❌ Debes entrar a una sesión PuréVoice para realizar esta acción',
 		en: '❌ You must join a PuréVoice session to do this',
-		ja: '❌ この操作を実行するには、PuréVoiceセッションにログインする必要があります',
+		ja: '❌ この操作を実行するには、PuréVoice セッションにログインする必要があります',
 	},
 	voiceSessionMemberExpected: {
 		es: '❌ Debes formar parte de la sesión para hacer esto',
@@ -2349,7 +2349,7 @@ let localesObject = /**@type {const}*/({
 	voiceCommandRenameMemberExpected: {
 		es: `⚠️ Debes entrar a una sesión PuréVoice para ejecutar este comando de esta forma.\nUsa \`${subl(0)}ayuda voz\` para más información`,
 		en: `⚠️ You must join a PuréVoice session to use this command this way.\nUse \`${subl(0)}help voice\` for more information`,
-		ja: `⚠️ これを行うにはセッションに参加する必要があります。\n詳細については、\`${subl(0)}help voice\`を使用してください`,
+		ja: `⚠️ これを行うにはセッションに参加する必要があります。\n 詳細については、\`${subl(0)}help voice\`を使用してください`,
 	},
 
 	yoCancelledStep: {
@@ -2425,17 +2425,17 @@ let localesObject = /**@type {const}*/({
 	yoDashboardMenuConfigVoiceDesc: {
 		es: 'Configura tus preferencias para sesiones PuréVoice',
 		en: 'Configure your preferences for PuréVoice sessions',
-		ja: 'PuréVoiceセッションの個人設定を構成する',
+		ja: 'PuréVoice セッションの個人設定を構成する',
 	},
 	yoDashboardMenuConfigPixixDesc: {
 		es: 'Corrige enlaces de pixiv que envíes',
 		en: 'Fixes pixiv embeds automatically',
-		ja: 'pixivの埋め込みを自動的に修正します',
+		ja: 'pixiv の埋め込みを自動的に修正します',
 	},
 	yoDashboardMenuConfigTwitterDesc: {
 		es: 'Corrige enlaces de X que envíes',
 		en: 'Fixes X embeds automatically',
-		ja: 'Xの埋め込みを自動的に修正します',
+		ja: 'X の埋め込みを自動的に修正します',
 	},
 	yoDashboardTimezone: {
 		es: 'Huso Horario...',
@@ -2499,18 +2499,18 @@ let localesObject = /**@type {const}*/({
 		),
 		ja: paragraph(
 			'画像掲示板のフィードを購読していません！',
-			'PuréFeedシステムがインストールされているチャンネルであれば、タグのフォローを開始できます',
+			'PuréFeed システムがインストールされているチャンネルであれば、タグのフォローを開始できます',
 		),
 	},
 	yoVoiceTitle: {
 		es: '## Preferencias de PuréVoice',
 		en: '## PuréVoice preferences',
-		ja: '## PuréVoiceの個人設定',
+		ja: '## PuréVoice の個人設定',
 	},
 	yoVoiceDescription: {
 		es: '-# Configura tus preferencias personales del sistema PuréVoice',
 		en: '-# Configure your personal preferences for the PuréVoice system',
-		ja: '-# PuréVoiceシステムの個人設定を構成する',
+		ja: '-# PuréVoice システムの個人設定を構成する',
 	},
 	yoVoicePingName: {
 		es: '### Menciones',
@@ -2550,7 +2550,7 @@ let localesObject = /**@type {const}*/({
 	yoVoiceAutonameModalEmojiPlaceholder: {
 		es: 'Emoji unicode. (Ejemplo: 🍑)',
 		en: 'Unicode emoji. (Example: 🍑)',
-		ja: 'Unicode絵文字。(例: 🍑)',
+		ja: 'Unicode 絵文字。(例: 🍑)',
 	},
 	yoVoiceAutonameSuccess: {
 		es: '✅ Nombre automático actualizado',
@@ -2575,7 +2575,7 @@ let localesObject = /**@type {const}*/({
 	yoVoiceKillDelayModalDelayPlaceholder: {
 		es: 'Ejemplo: 4m 45s. 0 = inactivo. 10m máx.',
 		en: 'e.g., 4m 45s. 0 = disabled. 10m max.',
-		ja: 'たとえば、4m 45s。0＝無効。最大10m。',
+		ja: 'たとえば、4m 45s。0＝無効。最大 10m。',
 	},
 	yoVoiceKillDelaySuccess: {
 		es: '✅ Retardo de muerte actualizado',
@@ -2625,12 +2625,12 @@ let localesObject = /**@type {const}*/({
 	yoPixivStep: {
 		es: 'Conversor de enlaces de pixiv',
 		en: 'pixiv link converter',
-		ja: 'pixivリンクコンバーター',
+		ja: 'pixiv リンクコンバーター',
 	},
 	yoPixivTitle: {
 		es: '## Elige el servicio de conversión a usar para pixiv',
 		en: '## Choose which conversion service to use for pixiv',
-		ja: '## pixivに使用する変換サービスを選択してください',
+		ja: '## pixiv に使用する変換サービスを選択してください',
 	},
 	yoPixivMenuServicePhixivDesc: {
 		es: 'Opción recomendada',
@@ -2640,7 +2640,7 @@ let localesObject = /**@type {const}*/({
 	yoPixivMenuServiceWebhookLabel: {
 		es: 'Webhook de Agente Puré',
 		en: 'Puré Agent Webhook',
-		ja: 'エージェントPuréウェブフック',
+		ja: 'エージェント Puréウェブフック',
 	},
 	yoPixivMenuServiceWebhookDesc: {
 		es: 'Alternativa estéticamente agradable, pero menos compatible',
@@ -2650,17 +2650,17 @@ let localesObject = /**@type {const}*/({
 	yoPixivMenuServiceNoneDesc: {
 		es: 'No convertir enlaces de pixiv automáticamente',
 		en: 'Do not convert pixiv links automatically',
-		ja: 'pixivリンクを自動的に変換しない',
+		ja: 'pixiv リンクを自動的に変換しない',
 	},
 	yoTwitterStep: {
 		es: 'Conversor de enlaces de Twitter/X',
 		en: 'Twitter/X link converter',
-		ja: 'Twitter/Xリンクコンバーター',
+		ja: 'Twitter/X リンクコンバーター',
 	},
 	yoTwitterTitle: {
 		es: '## Elige el servicio de conversión a usar para Twitter/X',
 		en: '## Choose which conversion service to use for Twitter/X',
-		ja: '## Twitter/Xに使用する変換サービスを選択してください',
+		ja: '## Twitter/X に使用する変換サービスを選択してください',
 	},
 	yoTwitterMenuServiceVxDesc: {
 		es: 'Opción recomendada',
@@ -2675,7 +2675,7 @@ let localesObject = /**@type {const}*/({
 	yoTwitterMenuServiceNoneDesc: {
 		es: 'No convertir enlaces de Twitter/X automáticamente',
 		en: 'Do not convert Twitter/X links automatically',
-		ja: 'Twitter/Xリンクを自動的に変換しない',
+		ja: 'Twitter/X リンクを自動的に変換しない',
 	},
 	yoSelectTagsChannelTitle: {
 		es: 'Selecciona uno de tus Feeds seguidos',
