@@ -97,25 +97,25 @@ function makeDashboardContainer(request, userConfigs, translator) {
                         {
                             label: 'PuréFeed',
                             description: translator.getText('yoDashboardMenuConfigFeedDesc'),
-                            emoji: '921788204540100608',
+                            emoji: '1460145550119669912',
                             value: 'feed',
                         },
                         {
                             label: 'PuréVoice',
                             description: translator.getText('yoDashboardMenuConfigVoiceDesc'),
-                            emoji: '1354500099799257319',
+                            emoji: '1460145551847723132',
                             value: 'voice',
                         },
                         {
                             label: 'PuréPix',
                             description: translator.getText('yoDashboardMenuConfigPixixDesc'),
-                            emoji: '919403803126661120',
+                            emoji: '1460135891841585385',
                             value: 'pixiv',
                         },
                         {
                             label: 'Puréet',
                             description: translator.getText('yoDashboardMenuConfigTwitterDesc'),
-                            emoji: '1232243415165440040',
+                            emoji: '1460135894404305019',
                             value: 'twitter',
                         },
                     ]),
@@ -144,7 +144,7 @@ function makeDashboardContainer(request, userConfigs, translator) {
  */
 const makeVoiceContainer = (compressedAuthorId, userConfigs, translator) => {
     const container = new ContainerBuilder()
-        .setAccentColor(0x0096fa) //Tema de pixiv
+        .setAccentColor(tenshiAltColor)
         .addTextDisplayComponents(textDisplay =>
             textDisplay.setContent(`${translator.getText('yoVoiceTitle')}\n${translator.getText('yoVoiceDescription')}`)
         )
@@ -233,10 +233,14 @@ const makeTwitterServicePickerContainer = (compressedAuthorId, service, translat
     const container = new ContainerBuilder()
         .setAccentColor(0x040404) //Tema de twitter/X
         .addTextDisplayComponents(textDisplay =>
-            textDisplay.setContent(translator.getText('yoTwitterTitle')),
+            textDisplay.setContent([
+                translator.getText('yoTwitterTitle'),
+                translator.getText('yoTwitterDesc')
+            ].join('\n')),
         )
         .addSeparatorComponents(separator => separator.setDivider(true))
-        .addTextDisplayComponents(
+        .addTextDisplayComponents(textDisplay =>
+            textDisplay.setContent(translator.getText('yoConversionServiceName'))
         )
         .addActionRowComponents(
             actionRow => actionRow.addComponents(
@@ -274,7 +278,10 @@ const makeTwitterServicePickerContainer = (compressedAuthorId, service, translat
                         },
                     )
             ),
-            actionRow => actionRow.addComponents(
+        )
+        .addSeparatorComponents(separator => separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large))
+        .addActionRowComponents(actionRow =>
+            actionRow.addComponents(
                 backToDashboardButton(compressedAuthorId),
                 cancelButton(compressedAuthorId),
             ),
@@ -290,9 +297,16 @@ const makeTwitterServicePickerContainer = (compressedAuthorId, service, translat
  */
 const makePixivServicePickerContainer = (compressedAuthorId, service, translator) => {
     const container = new ContainerBuilder()
-        .setAccentColor(0x0096fa)
-        .addTextDisplayComponents(
-            textDisplay => textDisplay.setContent(translator.getText('yoPixivTitle')),
+        .setAccentColor(0x0096fa) //Tema de pixiv
+        .addTextDisplayComponents(textDisplay => 
+            textDisplay.setContent([
+                translator.getText('yoPixivTitle'),
+                translator.getText('yoPixivDesc')
+            ].join('\n')),
+        )
+        .addSeparatorComponents(separator => separator.setDivider(true))
+        .addTextDisplayComponents(textDisplay =>
+            textDisplay.setContent(translator.getText('yoConversionServiceName'))
         )
         .addActionRowComponents(
             actionRow => actionRow.addComponents(
@@ -314,7 +328,10 @@ const makePixivServicePickerContainer = (compressedAuthorId, service, translator
                         },
                     )
             ),
-            actionRow => actionRow.addComponents(
+        )
+        .addSeparatorComponents(separator => separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large))
+        .addActionRowComponents(actionRow =>
+            actionRow.addComponents(
                 backToDashboardButton(compressedAuthorId),
                 cancelButton(compressedAuthorId),
             ),
