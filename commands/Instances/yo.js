@@ -1,6 +1,6 @@
 const UserConfigs = require('../../models/userconfigs');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder, ContainerBuilder, MessageFlags, StringSelectMenuOptionBuilder, SeparatorSpacingSize } = require('discord.js');
-const { CommandTags, Command } = require('../Commons/commands');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder, ContainerBuilder, MessageFlags, StringSelectMenuOptionBuilder, SeparatorSpacingSize } = require('discord.js');
+const { CommandTags, Command, CommandOptions, CommandFlag } = require('../Commons/commands');
 const { tenshiColor, tenshiAltColor } = require('../../data/config.json');
 const { Translator, Locales, isValidLocaleKey } = require('../../i18n');
 const { recacheUser } = require('../../utils/usercache');
@@ -27,22 +27,6 @@ const cancelButton = compressedAuthorId => new ButtonBuilder()
 	.setStyle(ButtonStyle.Secondary);
 
 /**
- * @param {string?} iconUrl
- * @param {import('../../i18n').LocaleIds} stepName
- * @param {import('discord.js').ColorResolvable} stepColor
- * @param {Translator} translator
- */
-const wizEmbed = (iconUrl, stepName, stepColor, translator) => {
-    const author = { name: translator.getText('yoDashboardAuthorEpigraph') };
-    if(iconUrl) author.iconURL = iconUrl;
-    return new EmbedBuilder()
-        .setColor(stepColor)
-        .setAuthor(author)
-        .setFooter({ text: translator.getText(stepName) })
-        .setTimestamp(Date.now());
-};
-
-/**
  * @param {import('discord.js').Interaction | import('../Commons/typings').ComplexCommandRequest} request 
  * @param {import('../../models/userconfigs').UserConfigDocument} userConfigs 
  * @param {Translator} translator 
@@ -61,20 +45,39 @@ function makeDashboardContainer(request, userConfigs, translator) {
         .addSectionComponents(section =>
             section
                 .addTextDisplayComponents(
-                    textDisplay => textDisplay.setContent(translator.getText('yoDashboardAuthorEpigraph')),
+                    textDisplay => textDisplay.setContent(translator.getText('yoDashboardEpigraph')),
                     textDisplay => textDisplay.setContent(`# ${request.user.displayName}`),
-                    textDisplay => textDisplay.setContent([
-                        tzCode?.length ? `<:clock:1357498813144760603> ${utcOffsetDisplayFull(tzCode)}` : translator.getText('yoDashboardNoTZ'),
-                        translator.getText('yoDashboardPRC', improveNumber(prc, { shorten: true })),
-                    ].join('\n')),
+                    textDisplay => textDisplay.setContent(
+                        translator.getText('yoDashboardPRC', improveNumber(prc, { shorten: true, translator }))
+                    ),
                 )
-                .setThumbnailAccessory(
-                    thumbnail => thumbnail
+                .setThumbnailAccessory(thumbnail =>
+                    thumbnail
                         .setDescription(translator.getText('avatarGlobalAvatarAlt', request.user.displayName))
                         .setURL(request.user.displayAvatarURL({ size: 256 }))
                 )
         )
-        .addSeparatorComponents(separator => separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large))
+        .addSeparatorComponents(separator => separator.setDivider(true))
+        .addSectionComponents(section =>
+            section
+                .addTextDisplayComponents(textDisplay =>
+                    textDisplay.setContent([
+                        translator.getText('yoDashboardTimezoneName'),
+                        tzCode?.length ? `<:clock:1357498813144760603> ${utcOffsetDisplayFull(tzCode)}` : translator.getText('yoDashboardNoTZ'),
+                    ].join('\n')),
+                )
+                .setButtonAccessory(
+                    new ButtonBuilder()
+                        .setCustomId(`yo_promptSetTimezone_${compressedUserId}`)
+                        .setEmoji('1288444896331698241')
+                        .setLabel(translator.getText('buttonEdit'))
+                        .setStyle(ButtonStyle.Primary),
+                )
+        )
+        .addSeparatorComponents(separator => separator.setDivider(true))
+        .addTextDisplayComponents(textDisplay =>
+            textDisplay.setContent(translator.getText('yoDashboardLanguageName'))
+        )
         .addActionRowComponents(
             actionRow => actionRow.addComponents(
                 new StringSelectMenuBuilder()
@@ -89,6 +92,9 @@ function makeDashboardContainer(request, userConfigs, translator) {
                             .setDefault(translator.locale === subTranslator.locale);
                     })),
             ),
+        )
+        .addSeparatorComponents(separator => separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large))
+        .addActionRowComponents(
             actionRow => actionRow.addComponents(
                 new StringSelectMenuBuilder()
                     .setCustomId(`yo_selectConfig_${compressedUserId}`)
@@ -122,13 +128,8 @@ function makeDashboardContainer(request, userConfigs, translator) {
             ),
             actionRow => actionRow.addComponents(
                 new ButtonBuilder()
-                    .setCustomId(`yo_promptSetTimezone_${compressedUserId}`)
-                    .setLabel(translator.getText('yoDashboardTimezone'))
-                    .setEmoji('1357498813144760603')
-                    .setStyle(ButtonStyle.Secondary),
-                new ButtonBuilder()
                     .setCustomId(`yo_exitWizard_${compressedUserId}`)
-                    .setLabel(translator.getText('buttonFinish'))
+                    .setLabel(translator.getText('buttonClose'))
                     .setStyle(ButtonStyle.Secondary),
             ),
         );
@@ -425,8 +426,17 @@ function makeFollowedTagsContainer(compressedAuthorId, channelId, userConfigs, t
     return container;
 }
 
-const flags = new CommandTags().add('COMMON');
-const command = new Command('yo', flags)
+const tags = new CommandTags().add('COMMON');
+
+const options = new CommandOptions()
+    .addOptions(
+		new CommandFlag()
+			.setShort('e')
+			.setLong([ 'efímero', 'efimero', 'ephemeral' ])
+			.setDesc('para que solo tú puedas ver la respuesta'),
+    );
+
+const command = new Command('yo', tags)
 	.setAliases(
 		'usuario', 'configurar', 'configuración', 'configuracion', 'preferencias',
 		'me', 'myself', 'configs', 'config',
@@ -436,9 +446,16 @@ const command = new Command('yo', flags)
         'Para ver y configurar tus preferencias.',
         'Si quieres cambiar alguna configuración, puedes presionar cualquier botón para proceder con el Asistente',
     )
-	.setExecution(async request => {
+    .setOptions(options)
+	.setExecution(async (request, args) => {
         const userQuery = { userId: request.userId };
-		let userConfigs = await UserConfigs.findOne(userQuery);
+
+		let [userConfigs] = await Promise.all([
+            UserConfigs.findOne(userQuery),
+            request.deferReply(
+                args.hasFlag('efímero') ? { flags: MessageFlags.Ephemeral } : {}
+            ),
+        ]);
 
         if(!userConfigs) {
             userConfigs = new UserConfigs(userQuery);
@@ -446,7 +463,7 @@ const command = new Command('yo', flags)
         }
 
         const translator = new Translator(userConfigs.language);
-        return request.reply({
+        return request.editReply({
             flags: MessageFlags.IsComponentsV2,
             components: [makeDashboardContainer(request, userConfigs, translator)],
         });
@@ -625,25 +642,31 @@ const command = new Command('yo', flags)
         const modal = new ModalBuilder()
             .setCustomId('yo_applyVoiceAutoname')
             .setTitle(translator.getText('yoVoiceAutonameModalTitle'))
-            .addComponents(
-                makeTextInputRowBuilder().addComponents(new TextInputBuilder()
-                    .setCustomId('inputName')
+            .addLabelComponents(
+                label => label
                     .setLabel(translator.getText('name'))
-                    .setPlaceholder(translator.getText('yoVoiceAutonameModalNamingPlaceholder'))
-                    .setMinLength(0)
-                    .setMaxLength(24)
-                    .setRequired(false)
-                    .setValue(userConfigs.voice?.autoname ?? '')
-                    .setStyle(TextInputStyle.Short)),
-                makeTextInputRowBuilder().addComponents(new TextInputBuilder()
-                    .setCustomId('inputEmoji')
+                    .setTextInputComponent(textInput =>
+                        textInput
+                            .setCustomId('inputName')
+                            .setPlaceholder(translator.getText('yoVoiceAutonameModalNamingPlaceholder'))
+                            .setMinLength(0)
+                            .setMaxLength(24)
+                            .setRequired(false)
+                            .setValue(userConfigs.voice?.autoname ?? '')
+                            .setStyle(TextInputStyle.Short)
+                    ),
+                label => label
                     .setLabel(translator.getText('emoji'))
-                    .setPlaceholder(translator.getText('yoVoiceAutonameModalEmojiPlaceholder'))
-                    .setMinLength(0)
-                    .setMaxLength(2)
-                    .setRequired(false)
-                    .setValue(userConfigs.voice?.autoemoji ?? '')
-                    .setStyle(TextInputStyle.Short)),
+                    .setTextInputComponent(textInput =>
+                        textInput
+                            .setCustomId('inputEmoji')
+                            .setPlaceholder(translator.getText('yoVoiceAutonameModalEmojiPlaceholder'))
+                            .setMinLength(0)
+                            .setMaxLength(2)
+                            .setRequired(false)
+                            .setValue(userConfigs.voice?.autoemoji ?? '')
+                            .setStyle(TextInputStyle.Short)
+                    ),
             );
 
         return interaction.showModal(modal);
@@ -911,16 +934,13 @@ const command = new Command('yo', flags)
 	.setButtonResponse(async function cancelWizard(interaction) {
         const translator = await Translator.from(interaction);
 
-		const cancelEmbed = wizEmbed(interaction.client.user.avatarURL(), 'cancelledStepFooterName', Colors.NotQuiteBlack, translator)
-			.addFields({
-				name: translator.getText('cancelledStepName'),
-				value: translator.getText('yoCancelledStep'),
-			});
+        const container = new ContainerBuilder()
+            .addTextDisplayComponents(textDisplay =>
+                textDisplay.setContent(translator.getText('yoCancelledStep'))
+            );
 
 		return interaction.update({
-            content: null,
-			embeds: [cancelEmbed],
-			components: [],
+			components: [container],
 		});
 	}, { userFilterIndex: 0 })
 	.setButtonResponse(async function exitWizard(interaction) {

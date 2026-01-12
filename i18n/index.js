@@ -365,7 +365,7 @@ let localesObject = /**@type {const}*/({
 	buttonView: {
 		es: 'Ver',
 		en: 'View',
-		ja: '表示',
+		ja: '見る',
 	},
 	buttonBack: {
 		es: 'Volver',
@@ -376,6 +376,11 @@ let localesObject = /**@type {const}*/({
 		es: 'Cancelar',
 		en: 'Cancel',
 		ja: '中止',
+	},
+	buttonClose: {
+		es: 'Cerrar',
+		en: 'Close',
+		ja: '閉じる',
 	},
 	buttonFinish: {
 		es: 'Finalizar',
@@ -2362,20 +2367,20 @@ let localesObject = /**@type {const}*/({
 		en: 'The User Preferences Wizard has been closed.',
 		ja: 'ユーザー設定ウィザードが閉じました。',
 	},
-	yoDashboardAuthorEpigraph: {
+	yoDashboardEpigraph: {
 		es: '-# Preferencias de Usuario',
 		en: '-# User Preferences',
 		ja: '-# ユーザー設定',
 	},
 	yoDashboardLanguageName: {
-		es: '**Idioma**',
-		en: '**Language**',
-		ja: '**言語**',
+		es: '### -# Idioma',
+		en: '### -# Language',
+		ja: '### -# 言語',
 	},
 	yoDashboardTimezoneName: {
-		es: 'Huso Horario',
-		en: 'Time Zone',
-		ja: '時間帯',
+		es: '### -# Huso Horario',
+		en: '### -# Time Zone',
+		ja: '### -# 時間帯',
 	},
 	yoDashboardNoTZ: {
 		es: '<:clock:1357498813144760603> _Sin huso horario_',
