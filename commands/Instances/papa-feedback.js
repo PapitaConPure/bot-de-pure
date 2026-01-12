@@ -29,7 +29,7 @@ const command = new Command('papa-feedback', tags)
                 },
                 {
                     name: '🇯🇵',
-                    value: '新しい投稿タグ形式についてどう思いますか？\nユーザーごとに登録できる回答は1つだけです',
+                    value: '新しい投稿タグ形式についてどう思いますか？\n ユーザーごとに登録できる回答は 1つだけです',
                     inline: true,
                 },
             );

@@ -1,96 +1,143 @@
-const timeZones = /**@const*/([
-	{ offset: -12.0, aliases: ["IDLW"] },
-	{ offset: -11.0, aliases: ["SST", "MIT"] },
-	{ offset: -10.0, aliases: ["HST", "HAST"] },
-	{ offset: -9.0, aliases: ["AKST", "YST"] },
-	{ offset: -8.0, aliases: ["PST", "PST8PDT"] },
-	{ offset: -7.0, aliases: ["MST"] },
-	{ offset: -6.0, aliases: ["CST"] },
-	{ offset: -5.0, aliases: ["EST"] },
-	{ offset: -4.0, aliases: ["AST"] },
-	{ offset: -3.5, aliases: ["NST"] },
-	{ offset: -3.0, aliases: ["ART", "BRT"] },
-	{ offset: -2.0, aliases: ["BRST", "FNT"] },
-	{ offset: -1.0, aliases: ["CVT", "AZOT"] },
-	{ offset: 0.0, aliases: ["GMT", "UTC", "WET"] },
-	{ offset: 1.0, aliases: ["CET", "WAT"] },
-	{ offset: 2.0, aliases: ["CAT", "EET"] },
-	{ offset: 3.0, aliases: ["MSK", "EAT"] },
-	{ offset: 3.5, aliases: ["IRDT"] },
-	{ offset: 4.0, aliases: ["AZT", "GST"] },
-	{ offset: 4.5, aliases: ["AFT"] },
-	{ offset: 5.0, aliases: ["PKT", "YEK"] },
-	{ offset: 5.5, aliases: ["IST", "SLT"] },
-	{ offset: 5.75, aliases: ["NPT"] },
-	{ offset: 6.0, aliases: ["BST", "ALMT"] },
-	{ offset: 6.5, aliases: ["MMT"] },
-	{ offset: 7.0, aliases: ["ICT", "KRAT"] },
-	{ offset: 8.0, aliases: ["AWST"] },
-	{ offset: 8.75, aliases: ["CWST"] },
-	{ offset: 9.0, aliases: ["JST", "KST"] },
-	{ offset: 9.5, aliases: ["ACST"] },
-	{ offset: 10.0, aliases: ["AEST", "PGT"] },
-	{ offset: 10.5, aliases: ["ACDT"] },
-	{ offset: 11.0, aliases: ["VUT", "SAKT"] },
-	{ offset: 11.5, aliases: ["NFT"] },
-	{ offset: 12.0, aliases: ["NZST", "IDLE"] },
-	{ offset: 12.75, aliases: ["CHAST"] },
-	{ offset: 13.0, aliases: ["NZDT", "TOT"] },
-	{ offset: 14.0, aliases: ["LINT"] },
-]);
+const { TZDate } = require("@date-fns/tz");
 
-/**@type {Map<string, number>} */
-const aliasToUtcMappings = new Map();
-/**@type {Map<number, string>} */
-const offsetToUtcMappings = new Map();
-
-timeZones.forEach(timeZone => {
-	offsetToUtcMappings.set(timeZone.offset, timeZone.aliases[0]);
-	timeZone.aliases.forEach(alias => {
-		aliasToUtcMappings.set(alias, timeZone.offset);
-	});
+const isoToIANA = /**@type {const}*/({
+	acst: 'Australia/South',
+	acdt: 'Australia/South',
+	adt: 'Canada/Atlantic',
+	aest: 'Australia/Canberra',
+	aedt: 'Australia/Canberra',
+	akst: 'America/Juneau',
+	akdt: 'America/Juneau',
+	art: 'America/Argentina/Buenos_Aires',
+	ast: 'Canada/Atlantic',
+	awst: 'Australia/Perth',
+	brt: 'America/Sao_Paulo',
+	bst: 'Europe/London',
+	cat: 'Africa/Maputo',
+	cdt: 'US/Central',
+	cest: 'Europe/Rome',
+	cet: 'Europe/Rome',
+	chst: 'Pacific/Guam',
+	clt: 'America/Santiago',
+	clst: 'America/Santiago',
+	cst: 'Mexico/General',
+	eat: 'Africa/Nairobi',
+	eest: 'Europe/Athens',
+	eet: 'Europe/Athens',
+	est: 'America/New_York',
+	gmt: 'Europe/London',
+	hdt: 'America/Adak',
+	hkt: 'Asia/Hong_Kong',
+	hst: 'America/Adak',
+	idt: 'Asia/Jerusalem',
+	ist: 'Asia/Jerusalem',
+	jst: 'Asia/Tokyo',
+	kst: 'Asia/Seoul',
+	mdt: 'America/Denver',
+	msk: 'Europe/Moscow',
+	mst: 'America/Denver',
+	ndt: 'America/St_Johns',
+	nst: 'America/St_Johns',
+	nzdt: 'Pacific/Auckland',
+	nzst: 'Pacific/Auckland',
+	pdt: 'America/Tijuana',
+	pkt: 'Asia/Karachi',
+	pst: 'America/Tijuana',
+	sast: 'Africa/Johannesburg',
+	sst: 'Pacific/Pago_Pago',
+	utc: 'Etc/UTC',
+	wat: 'Africa/Lagos',
+	west: 'Europe/Lisbon',
+	wet: 'Europe/Lisbon',
+	wib: 'Asia/Jakarta',
+	wit: 'Asia/Jayapura',
+	wita: 'Asia/Makassar',
 });
 
-/**@param {string | number} timeZone*/
-function toUtcOffset(timeZone) {
-	if(typeof timeZone !== 'string' && typeof timeZone !== 'number')
-		return null;
+const spacesRegex = /\s+/g;
+const gmtUtcStartRegex = /^gmt|utc_?/;
+const standardTimeEndRegex = /(?:_standard)?_time$/;
+const utcOffsetClockRegex = /([+-])?_?([0-9]{1,2})_?:?_?([0-9]{2})?/;
 
-	let offsetTimeZoneText = `${timeZone}`;
-	if(offsetTimeZoneText.startsWith('UTC') || offsetTimeZoneText.startsWith('GMT'))
-		offsetTimeZoneText = offsetTimeZoneText.slice(3);
-	offsetTimeZoneText = offsetTimeZoneText.trim();
-	if(!isNaN(+offsetTimeZoneText)) {
-		const timezoneNumber = +offsetTimeZoneText;
+/**@param {string | number} tzCode*/
+function sanitizeTzCode(tzCode) {
+	tzCode = `${tzCode}`.toLowerCase();
 
-		if(timezoneNumber < -12 || timezoneNumber > 14)
-			return null;
+	const isoExtractedIANA = isoToIANA[tzCode];
+	if(isoExtractedIANA)
+		return isoExtractedIANA;
 
-		return timezoneNumber;
-	}
+	return tzCode
+		.trim()
+		.replace(spacesRegex, '_') //IANA no acepta espacios
+		.replace(gmtUtcStartRegex, '') //No complicarlo de más
+		.replace(standardTimeEndRegex, '') //IANA no usa Standard Time de ISO
+		.replace(utcOffsetClockRegex, (_, sign, hour, minute) => {
+			//Número a formato válido de offset para IAMA (+XX:XX/-XX:XX)
+			if(!minute)
+				return `${sign || '+'}${hour.padStart(2, '0')}:00`;
 
-	const timeZoneKey = `${timeZone}`.toUpperCase();
-	if(aliasToUtcMappings.has(timeZoneKey))
-		return aliasToUtcMappings.get(timeZoneKey);
-
-	return null;
+			return `${sign || '+'}${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
+		})
+		.trim();
 }
 
-/**@param {number} utcOffset*/
-function toTimeZoneAlias(utcOffset) {
+/**
+ * Obtiene el huso horario especificado en minutos
+ * @param {string | number} tzCode
+ */
+function toUtcOffset(tzCode) {
+	if(typeof tzCode !== 'string' && typeof tzCode !== 'number')
+		return null;
+
+	const tzStr = sanitizeTzCode(tzCode);
+
+	if(!tzStr.length)
+		return 0;
+
+	const tzDate = new TZDate(Date.now(), tzStr);
+	const utcOffset = -tzDate.getTimezoneOffset();
+
 	if(isNaN(utcOffset))
-		return 'UTC';
+		return null;
 
-	if(offsetToUtcMappings.has(utcOffset))
-		return `${offsetToUtcMappings.get(utcOffset)} (${utcOffset >= 0 ? '+' : ''}${utcOffset})`;
+	return utcOffset;
+}
 
-	return `UTC+${utcOffset.toString()}`;
+/**
+ * "UTC+XX:XX", "UTC-XX:XX", ""
+ * @param {string} tzCode 
+ */
+function utcOffsetDisplay(tzCode) {
+	if(!tzCode?.length)
+		return '';
+
+	const utcOffset = toUtcOffset(tzCode);
+	let str = `UTC${utcOffset < 0 ? '-' : '+'}`;
+	str += `${Math.floor(Math.abs(utcOffset) / 60)}`.padStart(2, '0');
+	str += ':';
+	str += `${Math.abs(utcOffset) % 60}`.padStart(2, '0');
+	return str;
+}
+
+/**
+ * " (UTC+XX:XX)", "(UTC-XX:XX)", ""
+ * @param {string} tzCode 
+ */
+function utcOffsetDisplayFull(tzCode) {
+	if(!tzCode?.length || /^utc|gmt/i.test(tzCode))
+		return tzCode.toUpperCase();
+
+	const formattedCode = (tzCode.length <= 4)
+		? tzCode.toUpperCase()
+		: tzCode.replace(/([a-z])([a-z]*)/gi, (_, first, rest) => first.toUpperCase() + rest.toLowerCase());
+
+	return `\`${formattedCode}\` (${utcOffsetDisplay(tzCode)})`;
 }
 
 module.exports = {
-	timeZones,
-	aliasToUtcMappings,
-	offsetToUtcMappings,
-	toUtcOffset: toUtcOffset,
-	toTimeZoneAlias,
+	toUtcOffset,
+	utcOffsetDisplay,
+	utcOffsetDisplayFull,
+	sanitizeTzCode,
 };

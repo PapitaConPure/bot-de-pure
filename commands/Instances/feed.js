@@ -1,5 +1,5 @@
-const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType, MessageFlags } = require('discord.js');
-const { isNotModerator, shortenText, guildEmoji, compressId, isNSFWChannel, randInArray } = require('../../func');
+const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType, MessageFlags, ContainerBuilder } = require('discord.js');
+const { isNotModerator, shortenText, guildEmoji, compressId, isNSFWChannel, randInArray, shortenTextLoose } = require('../../func');
 const GuildConfig = require('../../models/guildconfigs.js');
 const { auditError, auditAction } = require('../../systems/others/auditor');
 const { CommandTags } = require('../Commons/cmdTags.js');
@@ -1038,61 +1038,86 @@ const command = new Command('feed', flags)
 			const tagsContent = formatTagNameListNew(postOtherTags, ' ');
 
 			const source = post.source;
-			const tagsEmbed = new EmbedBuilder()
-				.setColor(Colors.Purple);
+			const tagsContainer = new ContainerBuilder()
+				.setAccentColor(globalConfigs.tenshiAltColor);
 
 			if(postArtistTags.length > 0) {
-				const artistTagsContent = formatTagNameListNew(postArtistTags, '\n');
-				tagsEmbed.addFields({ name: `<:palette:1355128249658638488> Artistas`, value: shortenText(artistTagsContent, 1020), inline: true })
+				const artistTagsContent = formatTagNameListNew(postArtistTags, ' ');
+				tagsContainer
+					.addTextDisplayComponents(textDisplay =>
+						textDisplay.setContent(`### <:palette:1355128249658638488> Artistas\n${shortenText(artistTagsContent, 400, '…')}`)
+					)
+					.addSeparatorComponents(separator => separator.setDivider(false));
 			}
 			if(postCharacterTags.length > 0) {
-				const characterTagsContent = formatTagNameListNew(postCharacterTags, '\n');
-				tagsEmbed.addFields({ name: `<:person:1355128242993893539> Personajes`, value: shortenText(characterTagsContent, 1020), inline: true })
+				const characterTagsContent = formatTagNameListNew(postCharacterTags, ' ');
+				tagsContainer
+					.addTextDisplayComponents(textDisplay =>
+						textDisplay.setContent(`### <:person:1355128242993893539> Personajes\n${shortenText(characterTagsContent, 400, '…')}`)
+					)
+					.addSeparatorComponents(separator => separator.setDivider(false));
 			}
 			if(postCopyrightTags.length > 0) {
-				const copyrightTagsContent = formatTagNameListNew(postCopyrightTags, '\n');
-				tagsEmbed.addFields({ name: `<:landmark:1355128256432443584> Copyright`, value: shortenText(copyrightTagsContent, 1020), inline: true })
+				const copyrightTagsContent = formatTagNameListNew(postCopyrightTags, ' ');
+				tagsContainer
+					.addTextDisplayComponents(textDisplay =>
+						textDisplay.setContent(`### <:landmark:1355128256432443584> Copyright\n${shortenText(copyrightTagsContent, 400, '…')}`)
+					)
+					.addSeparatorComponents(separator => separator.setDivider(false));
 			}
-			tagsEmbed.addFields(
-				{ name: `${tagEmoji} Tags`, value: shortenText(tagsContent, 1020) },
-				{
-					name: '<:urlwhite:922669195521568818> ' + translator.getText('feedViewUrlsName'),
-					value: `[<:gelbooru:919398540172750878> **Post**](${url})${ source ? ` [<:heartwhite:969664712604262400> **Fuente**](${source})` : '' }`,
-				},
-			)
-			const userId = compressId(interaction.user.id);
-			const tagsEditRow = makeButtonRowBuilder();
+			
+			tagsContainer
+				.addTextDisplayComponents(textDisplay =>
+					textDisplay.setContent(`### ${tagEmoji} Tags\n-# ${shortenTextLoose(tagsContent, 1520, 1536, '…')}`)
+				)
+				.addSeparatorComponents(separator => separator.setDivider(true))
+				.addTextDisplayComponents(
+					textDisplay => textDisplay.setContent(`### [<:gelbooru:919398540172750878> **Post**](${url})\n\`\`\`\n${url}\n\`\`\``),
+				);
 
-			if(isNotFeed)
-				tagsEditRow.addComponents([
-					new ButtonBuilder()
-						.setCustomId(`yo_goToDashboard_${userId}`)
-						.setLabel(translator.getText('goToUserPreferences'))
-						.setStyle(ButtonStyle.Primary),
-				]);
-			else
-				tagsEditRow.addComponents([
-					new ButtonBuilder()
-						.setCustomId(`yo_modifyFollowedTags_${userId}_ALT`)
-						.setEmoji('921788204540100608')
-						.setLabel(translator.getText('feedSetTagsButtonView'))
-						.setStyle(ButtonStyle.Primary),
-					new ButtonBuilder()
-						.setCustomId('feed_editFollowedTags_ADD')
-						.setEmoji('1086797601925513337')
-						.setLabel(translator.getText('feedSetTagsButtonAdd'))
-						.setStyle(ButtonStyle.Success),
-					new ButtonBuilder()
-						.setCustomId('feed_editFollowedTags_REMOVE')
-						.setEmoji('1086797599287296140')
-						.setLabel(translator.getText('feedSetTagsButtonRemove'))
-						.setStyle(ButtonStyle.Danger),
-				]);
+			if(source) {
+				tagsContainer.addTextDisplayComponents(
+					textDisplay => textDisplay.setContent(`### [<:urlwhite:922669195521568818> **Fuente**](${source})\n\`\`\`\n${source}\n\`\`\``),
+				);
+			}
+
+			const compressedUserId = compressId(interaction.user.id);
+			tagsContainer.addSeparatorComponents(separator => separator.setDivider(true));
+
+			if(isNotFeed) {
+				tagsContainer.addActionRowComponents(
+					actionRow => actionRow.addComponents(
+						new ButtonBuilder()
+							.setCustomId(`yo_goToDashboard_${compressedUserId}`)
+							.setLabel(translator.getText('goToUserPreferences'))
+							.setStyle(ButtonStyle.Primary),
+					),
+				);
+			} else {
+				tagsContainer.addActionRowComponents(
+					actionRow => actionRow.addComponents(
+						new ButtonBuilder()
+							.setCustomId(`yo_modifyFollowedTags_${compressedUserId}_ALT`)
+							.setEmoji('921788204540100608')
+							.setLabel(translator.getText('feedSetTagsButtonView'))
+							.setStyle(ButtonStyle.Primary),
+						new ButtonBuilder()
+							.setCustomId('feed_editFollowedTags_ADD')
+							.setEmoji('1086797601925513337')
+							.setLabel(translator.getText('feedSetTagsButtonAdd'))
+							.setStyle(ButtonStyle.Success),
+						new ButtonBuilder()
+							.setCustomId('feed_editFollowedTags_REMOVE')
+							.setEmoji('1086797599287296140')
+							.setLabel(translator.getText('feedSetTagsButtonRemove'))
+							.setStyle(ButtonStyle.Danger),
+					),
+				);
+			}
 
 			return interaction.reply({
-				embeds: [tagsEmbed],
-				components: [tagsEditRow],
-				ephemeral: true,
+				flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
+				components: [tagsContainer],
 			});
 		} catch(error) {
 			console.error(error);
@@ -1100,13 +1125,13 @@ const command = new Command('feed', flags)
 			
 			if(error instanceof BooruUnknownPostError)
 				return interaction.reply({
+					flags: MessageFlags.Ephemeral,
 					content: translator.getText('feedPostTagsInaccessible'),
-					ephemeral: true,
 				});
-
+				
 			return interaction.reply({
+				flags: MessageFlags.Ephemeral,
 				content: translator.getText('feedPostTagsUnknownError'),
-				ephemeral: true,
 			});
 		}
 	})

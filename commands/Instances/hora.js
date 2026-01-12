@@ -1,10 +1,10 @@
 const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
 const UserConfigs = require('../../models/userconfigs');
-const { toUtcOffset, toTimeZoneAlias } = require('../../utils/timezones');
+const { toUtcOffset, utcOffsetDisplay } = require('../../utils/timezones');
 const { dateToUTCFormat } = require('../../func');
 const { Translator } = require('../../i18n');
 const { parseDateFromNaturalLanguage, addTime, utcStartOfToday } = require('../../utils/datetime');
-const { addHours, isValid, getUnixTime } = require('date-fns');
+const { isValid, getUnixTime, addMinutes } = require('date-fns');
 const { ButtonBuilder, ButtonStyle } = require('discord.js');
 
 const options = new CommandOptions()
@@ -35,9 +35,10 @@ const command = new Command('hora', tags)
 	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request.user);
 
-		const utcOffset = toUtcOffset(args.parseFlagExpr('huso'))
-			?? (await UserConfigs.findOne({ userId: request.userId }))?.utcOffset
-			?? 0;
+		const tzCode = args.parseFlagExpr('huso')
+			?? (await UserConfigs.findOne({ userId: request.userId }))?.tzCode
+			?? 'UTC';
+		const utcOffset = toUtcOffset(tzCode);
 
 		const dateStr = args.parseFlagExpr('fecha');
 		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, utcOffset);
@@ -51,9 +52,9 @@ const command = new Command('hora', tags)
 			}
 
 			const now = new Date(Date.now());
-			const dateAtThisTime = addHours(now, utcOffset);
+			const dateAtThisTime = addMinutes(now, utcOffset);
 			return request.reply({
-				content: `${dateToUTCFormat(dateAtThisTime, '`HH:mm:ss` `yyyy-MM-dd`', translator.locale)} — <:clock:1357498813144760603> ${toTimeZoneAlias(utcOffset)}`,
+				content: `${dateToUTCFormat(dateAtThisTime, '`HH:mm:ss` `yyyy-MM-dd`', translator.locale)} — <:clock:1357498813144760603> ${utcOffsetDisplay(tzCode)}`,
 			});
 		}
 

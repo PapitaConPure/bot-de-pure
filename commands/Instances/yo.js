@@ -1,37 +1,39 @@
 const UserConfigs = require('../../models/userconfigs');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder, ContainerBuilder, MessageFlags, StringSelectMenuOptionBuilder } = require('discord.js');
 const { CommandTags, Command } = require('../Commons/commands');
-const { tenshiColor } = require('../../data/config.json');
-const { Translator } = require('../../i18n');
+const { tenshiColor, tenshiAltColor } = require('../../data/config.json');
+const { Translator, Locales, isValidLocaleKey } = require('../../i18n');
 const { recacheUser } = require('../../utils/usercache');
-const { compressId, shortenText, decompressId, improveNumber, warn } = require('../../func');
-const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts');
+const { compressId, decompressId, improveNumber, warn, shortenText } = require('../../func');
+const { makeTextInputRowBuilder } = require('../../utils/tsCasts');
 const { auditError } = require('../../systems/others/auditor');
 const { updateFollowedFeedTagsCache } = require('../../systems/booru/boorufeed');
 const { makeSessionAutoname } = require('../../systems/others/purevoice');
-const { toUtcOffset: toUTCOffset, toTimeZoneAlias } = require('../../utils/timezones');
+const { toUtcOffset, sanitizeTzCode, utcOffsetDisplayFull } = require('../../utils/timezones');
 const { acceptedTwitterConverters } = require('../../systems/agents/pureet');
 
-/**@param {String} id*/
-const backToDashboardButton = id => new ButtonBuilder()
-    .setCustomId(`yo_goToDashboard_${compressId(id)}`)
+const userNotAvailableText = warn('Usuario no disponible / User unavailable / ユーザーは利用できません');
+
+/**@param {string} compressedAuthorId*/
+const backToDashboardButton = compressedAuthorId => new ButtonBuilder()
+    .setCustomId(`yo_goToDashboard_${compressedAuthorId}`)
     .setEmoji('1355128236790644868')
     .setStyle(ButtonStyle.Secondary);
 
-/**@param {String} id*/
-const cancelButton = id => new ButtonBuilder()
-	.setCustomId(`yo_cancelWizard_${id}`)
+/**@param {string} compressedAuthorId*/
+const cancelButton = compressedAuthorId => new ButtonBuilder()
+	.setCustomId(`yo_cancelWizard_${compressedAuthorId}`)
     .setEmoji('1355143793577426962')
 	.setStyle(ButtonStyle.Secondary);
 
 /**
- * @param {String?} iconUrl
+ * @param {string?} iconUrl
  * @param {import('../../i18n').LocaleIds} stepName
  * @param {import('discord.js').ColorResolvable} stepColor
  * @param {Translator} translator
  */
 const wizEmbed = (iconUrl, stepName, stepColor, translator) => {
-    const author = { name: translator.getText('yoDashboardAuthor') };
+    const author = { name: translator.getText('yoDashboardAuthorEpigraph') };
     if(iconUrl) author.iconURL = iconUrl;
     return new EmbedBuilder()
         .setColor(stepColor)
@@ -41,299 +43,365 @@ const wizEmbed = (iconUrl, stepName, stepColor, translator) => {
 };
 
 /**
- * @param {String} userId 
- * @param {import('../../models/userconfigs').UserConfigDocument} userConfigs 
- * @param {Translator} translator 
- */
-const dashboardRows = (userId, userConfigs, translator) => [
-    makeStringSelectMenuRowBuilder().addComponents(
-        new StringSelectMenuBuilder()
-            .setCustomId(`yo_selectConfig_${userId}`)
-            .setPlaceholder(translator.getText('yoDashboardMenuConfig'))
-            .setMaxValues(1)
-            .setOptions([
-                {
-                    label: 'PuréFeed',
-                    description: translator.getText('yoDashboardMenuConfigFeedDesc'),
-                    emoji: '921788204540100608',
-                    value: 'feed',
-                },
-                {
-                    label: 'PuréVoice',
-                    description: translator.getText('yoDashboardMenuConfigVoiceDesc'),
-                    emoji: '1354500099799257319',
-                    value: 'voice',
-                },
-                {
-                    label: 'PuréPix',
-                    description: translator.getText('yoDashboardMenuConfigPixixDesc'),
-                    emoji: '919403803126661120',
-                    value: 'pixiv',
-                },
-                {
-                    label: 'Puréet',
-                    description: translator.getText('yoDashboardMenuConfigTwitterDesc'),
-                    emoji: '1232243415165440040',
-                    value: 'twitter',
-                },
-            ]),
-    ),
-    makeButtonRowBuilder().addComponents(
-        new ButtonBuilder()
-            .setCustomId(`yo_toggleLanguage_${compressId(userId)}`)
-            .setLabel(translator.nextTranslator.getText('currentLanguage'))
-            .setEmoji(translator.nextTranslator.getText('currentLanguageEmoji'))
-            .setStyle(ButtonStyle.Primary),
-        new ButtonBuilder()
-            .setCustomId(`yo_setTimezone_${compressId(userId)}`)
-            .setLabel(translator.getText('yoDashboardTimezone'))
-            .setEmoji('1357498813144760603')
-            .setStyle(ButtonStyle.Secondary),
-        new ButtonBuilder()
-            .setCustomId(`yo_exitWizard_${userId}`)
-            .setLabel(translator.getText('buttonFinish'))
-            .setStyle(ButtonStyle.Secondary),
-    ),
-];
-
-/**
  * @param {import('discord.js').Interaction | import('../Commons/typings').ComplexCommandRequest} request 
  * @param {import('../../models/userconfigs').UserConfigDocument} userConfigs 
  * @param {Translator} translator 
  */
-const dashboardEmbed = (request, userConfigs, translator) => {
-    const suscriptions = [...userConfigs.feedTagSuscriptions.values()];
-    return wizEmbed(request.client.user.avatarURL({ size: 128 }), 'yoDashboardName', tenshiColor, translator)
-        .setTitle(request.user.tag)
-        .setThumbnail(request.user.avatarURL({ size: 512 }))
-        .addFields(
-            {
-                name: translator.getText('yoDashboardLanguageName'),
-                value: `${translator.getText('currentLanguageEmoji')} ${translator.getText('currentLanguage')}`,
-                inline: true,
-            },
-            {
-                name: translator.getText('yoDashboardTimezoneName'),
-                value: `<:clock:1357498813144760603> ${toTimeZoneAlias(userConfigs.utcOffset)}`,
-                inline: true,
-            },
-            {
-                name: translator.getText('yoDashboardPRCName'),
-                value: `<:prc:1097208828946301123> ${improveNumber(userConfigs.prc, { shorten: true })}`,
-                inline: true,
-            },
-            {
-                name: translator.getText('yoDashboardFeedTagsName'),
-                value: translator.getText(
-                    'yoDashboardFeedTagsValue',
-                    suscriptions.length ? suscriptions.map(a => a.length ?? 0).reduce((a, b) => a + b) : 0,
-                    userConfigs.feedTagSuscriptions.size,
-                ),
-            },
+function makeDashboardContainer(request, userConfigs, translator) {
+    //const suscriptions = [...userConfigs.feedTagSuscriptions.values()];
+    //const suscriptionsFeedCount = suscriptions.length ? suscriptions.map(a => a.length ?? 0).reduce((a, b) => a + b) : 0;
+    //const suscriptionsServerCount = userConfigs.feedTagSuscriptions.size;
+    //const now = new Date(Date.now());
+    //const unix = getUnixTime(now);
+    const { tzCode, prc } = userConfigs;
+    const compressedUserId = compressId(request.user.id);
+
+    const container = new ContainerBuilder()
+        .setAccentColor(tenshiColor)
+        .addSectionComponents(section =>
+            section
+                .addTextDisplayComponents(
+                    textDisplay => textDisplay.setContent(translator.getText('yoDashboardAuthorEpigraph')),
+                    textDisplay => textDisplay.setContent(`# ${request.user.displayName}`),
+                    textDisplay => textDisplay.setContent([
+                        tzCode?.length ? `<:clock:1357498813144760603> ${utcOffsetDisplayFull(tzCode)}` : translator.getText('yoDashboardNoTZ'),
+                        translator.getText('yoDashboardPRC', improveNumber(prc, { shorten: true })),
+                    ].join('\n')),
+                )
+                .setThumbnailAccessory(
+                    thumbnail => thumbnail
+                        .setDescription(translator.getText('avatarGlobalAvatarAlt', request.user.displayName))
+                        .setURL(request.user.displayAvatarURL({ size: 256 }))
+                )
+        )
+        .addSeparatorComponents(separator => separator.setDivider(true))
+        .addActionRowComponents(
+            actionRow => actionRow.addComponents(
+                new StringSelectMenuBuilder()
+                    .setCustomId(`yo_selectLanguage_${compressedUserId}`)
+                    .setPlaceholder(translator.getText('yoDashboardMenuConfig'))
+                    .setOptions(Object.values(Locales).map(locale => {
+                        const subTranslator = new Translator(locale);
+                        return new StringSelectMenuOptionBuilder()
+                            .setLabel(subTranslator.getText('currentLanguage'))
+                            .setEmoji(subTranslator.getText('currentLanguageEmojiId'))
+                            .setValue(locale)
+                            .setDefault(translator.locale === subTranslator.locale);
+                    })),
+            ),
+            actionRow => actionRow.addComponents(
+                new StringSelectMenuBuilder()
+                    .setCustomId(`yo_selectConfig_${compressedUserId}`)
+                    .setPlaceholder(translator.getText('yoDashboardMenuConfig'))
+                    .setOptions([
+                        {
+                            label: 'PuréFeed',
+                            description: translator.getText('yoDashboardMenuConfigFeedDesc'),
+                            emoji: '921788204540100608',
+                            value: 'feed',
+                        },
+                        {
+                            label: 'PuréVoice',
+                            description: translator.getText('yoDashboardMenuConfigVoiceDesc'),
+                            emoji: '1354500099799257319',
+                            value: 'voice',
+                        },
+                        {
+                            label: 'PuréPix',
+                            description: translator.getText('yoDashboardMenuConfigPixixDesc'),
+                            emoji: '919403803126661120',
+                            value: 'pixiv',
+                        },
+                        {
+                            label: 'Puréet',
+                            description: translator.getText('yoDashboardMenuConfigTwitterDesc'),
+                            emoji: '1232243415165440040',
+                            value: 'twitter',
+                        },
+                    ]),
+            ),
+            actionRow => actionRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`yo_promptSetTimezone_${compressedUserId}`)
+                    .setLabel(translator.getText('yoDashboardTimezone'))
+                    .setEmoji('1357498813144760603')
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId(`yo_exitWizard_${compressedUserId}`)
+                    .setLabel(translator.getText('buttonFinish'))
+                    .setStyle(ButtonStyle.Secondary),
+            ),
         );
+
+    return container;
 }
 
 /**
  * 
- * @param {import('discord.js').Interaction} interaction 
+ * @param {string} compressedAuthorId 
  * @param {import('../../models/userconfigs').UserConfigDocument} userConfigs 
  * @param {Translator} translator 
  */
-const voiceEmbed = (interaction, userConfigs, translator) => {
+const makeVoiceContainer = (compressedAuthorId, userConfigs, translator) => {
     const voicePingConfig = (() => {
         switch(userConfigs.voice.ping) {
         case 'always': return translator.getText('always');
         case 'onCreate': return translator.getText('yoVoiceMenuPingOnCreateLabel');
         case 'never': return translator.getText('never');
-        default: throw 'User ping config was invalid';
+        default: return '⚠️';
         }
     })();
 
-    return wizEmbed(interaction.client.user.avatarURL(), 'yoVoiceStep', 0x0096fa, translator)
-        .setTitle(translator.getText('yoVoiceTitle'))
-        .addFields(
-            {
-                name: translator.getText('yoVoicePingName'),
-                value: voicePingConfig,
-                inline: true,
-            },
-            {
-                name: translator.getText('yoVoiceAutonameName'),
-                value: makeSessionAutoname(userConfigs) ?? translator.getText('yoVoiceAutonameValueNone'),
-                inline: true,
-            },
-            {
-                name: translator.getText('yoVoiceKillDelayName'),
-                value: '4m 45s',
-                inline: true,
-            },
+    const container = new ContainerBuilder()
+        .setAccentColor(0x0096fa) //Tema de pixiv
+        .addTextDisplayComponents(textDisplay =>
+            textDisplay.setContent(`${translator.getText('yoVoiceTitle')}\n${translator.getText('yoVoiceDescription')}`)
+        )
+        .addSeparatorComponents(separator => separator.setDivider(true))
+        .addTextDisplayComponents(
+            textDisplay => textDisplay.setContent([
+                translator.getText('yoVoicePingName'),
+                voicePingConfig,
+            ].join('\n')),
+        )
+        .addSeparatorComponents(separator => separator.setDivider(false))
+        .addTextDisplayComponents(
+            textDisplay => textDisplay.setContent([
+                translator.getText('yoVoiceAutonameName'),
+                makeSessionAutoname(userConfigs) ?? translator.getText('yoVoiceAutonameValueNone'),
+            ].join('\n')),
+        )
+        .addSeparatorComponents(separator => separator.setDivider(false))
+        .addTextDisplayComponents(
+            textDisplay => textDisplay.setContent([
+                translator.getText('yoVoiceKillDelayName'),
+                '4m 45s',
+            ].join('\n')),
+        )
+        .addSeparatorComponents(separator => separator.setDivider(true))
+        .addActionRowComponents(
+            actionRow => actionRow.addComponents(
+                new StringSelectMenuBuilder()
+                    .setCustomId(`yo_setVoicePing_${compressedAuthorId}`)
+                    .setPlaceholder(translator.getText('yoVoiceMenuPing'))
+                    .setOptions(
+                        {
+                            value: 'always',
+                            label: translator.getText('always'),
+                            description: translator.getText('yoVoiceMenuPingAlwaysDesc'),
+                        },
+                        {
+                            value: 'onCreate',
+                            label: translator.getText('yoVoiceMenuPingOnCreateLabel'),
+                            description: translator.getText('yoVoiceMenuPingOnCreateDesc'),
+                        },
+                        {
+                            value: 'never',
+                            label: translator.getText('never'),
+                            description: translator.getText('yoVoiceMenuPingNeverDesc'),
+                        },
+                    )
+            ),
+            actionRow => actionRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`yo_setVoiceAutoname_${compressedAuthorId}`)
+                    .setStyle(ButtonStyle.Primary)
+                    .setLabel(translator.getText('yoVoiceAutonameButtonLabel')),
+                new ButtonBuilder()
+                    .setCustomId(`yo_setVoiceKillDelay_${compressedAuthorId}`)
+                    .setStyle(ButtonStyle.Primary)
+                    .setLabel(translator.getText('yoVoiceKillDelayButtonLabel')),
+                backToDashboardButton(compressedAuthorId),
+                cancelButton(compressedAuthorId),
+            ),
         );
+
+    return container;
 };
 
 /**
- * 
- * @param {import('discord.js').Interaction} interaction 
- * @param {string} currentPrefix
+ * @param {string} compressedAuthorId 
+ * @param {string} service 
  * @param {Translator} translator 
- * @param {string} authorId
  */
-const getTwitterConversionPickerResponseContent = (interaction, currentPrefix, translator, authorId) => {
-    return {
-        embed: wizEmbed(interaction.client.user.avatarURL(), 'yoTwitterStep', 0x040404, translator)
-        .setTitle(translator.getText('yoTwitterTitle'))
-        .setDescription(translator.getText('yoConversionServiceDescription', currentPrefix || translator.getText('yoConversionServiceMenuServiceNoneLabel'))),
-        components: [
-            makeStringSelectMenuRowBuilder().addComponents(
+const makeTwitterServicePickerContainer = (compressedAuthorId, service, translator) => {
+    const container = new ContainerBuilder()
+        .setAccentColor(0x040404) //Tema de twitter/X
+        .addTextDisplayComponents(textDisplay =>
+            textDisplay.setContent(translator.getText('yoTwitterTitle')),
+        )
+        .addSeparatorComponents(separator => separator.setDivider(true))
+        .addTextDisplayComponents(
+        )
+        .addActionRowComponents(
+            actionRow => actionRow.addComponents(
                 new StringSelectMenuBuilder()
-                    .setCustomId(`yo_setTwitterConvert_${authorId}`)
+                    .setCustomId(`yo_setTwitterConvert_${compressedAuthorId}`)
                     .setPlaceholder(translator.getText('yoConversionServiceMenuService'))
                     .setOptions(
                         {
                             value: 'none',
                             label: translator.getText('yoConversionServiceMenuServiceNoneLabel'),
                             description: translator.getText('yoTwitterMenuServiceNoneDesc'),
+                            default: service === 'none' || !service,
                         },
                         {
                             value: 'vx',
                             label: 'vxTwitter / fixvx',
                             description: translator.getText('yoTwitterMenuServiceVxDesc'),
+                            default: service === 'vx',
                         },
                         {
                             value: 'fx',
                             label: 'FxTwitter / FixupX',
                             description: translator.getText('yoTwitterMenuServiceFxDesc'),
+                            default: service === 'fx',
                         },
                         {
                             value: 'girlcockx',
                             label: 'girlcockx.com',
+                            default: service === 'girlcockx',
                         },
                         {
                             value: 'cunnyx',
                             label: 'cunnyx.com',
+                            default: service === 'cunnyx',
                         },
                     )
             ),
-            makeButtonRowBuilder().addComponents(
-                backToDashboardButton(authorId),
-                cancelButton(authorId),
+            actionRow => actionRow.addComponents(
+                backToDashboardButton(compressedAuthorId),
+                cancelButton(compressedAuthorId),
             ),
-        ],
-    };
+        );
+
+    return container;
 }
 
 /**
- * 
- * @param {import('discord.js').Interaction} interaction 
- * @param {string} currentPrefix 
+ * @param {string} compressedAuthorId
+ * @param {string} service 
  * @param {Translator} translator
- * @param {string} authorId
  */
-const getPixivConversionPickerResponseContent = (interaction, currentPrefix, translator, authorId) => {
-    return {
-        embed: wizEmbed(interaction.client.user.avatarURL(), 'yoPixivStep', 0x0096fa, translator)
-                .setTitle(translator.getText('yoPixivTitle'))
-                .setDescription(translator.getText('yoConversionServiceDescription', currentPrefix || translator.getText('yoConversionServiceMenuServiceNoneLabel'))),
-        components: [
-            makeStringSelectMenuRowBuilder().addComponents(
+const makePixivServicePickerContainer = (compressedAuthorId, service, translator) => {
+    const container = new ContainerBuilder()
+        .setAccentColor(0x0096fa)
+        .addTextDisplayComponents(
+            textDisplay => textDisplay.setContent(translator.getText('yoPixivTitle')),
+        )
+        .addActionRowComponents(
+            actionRow => actionRow.addComponents(
                 new StringSelectMenuBuilder()
-                    .setCustomId(`yo_setPixivConvert_${authorId}`)
+                    .setCustomId(`yo_setPixivConvert_${compressedAuthorId}`)
                     .setPlaceholder(translator.getText('yoConversionServiceMenuService'))
                     .setOptions(
-                        {
-                            value: 'phixiv',
-                            label: 'phixiv',
-                            description: translator.getText('yoPixivMenuServicePhixivDesc'),
-                        },
-                        // {
-                        //     value: 'webhook',
-                        //     label: translator.getText('yoPixivMenuServiceWebhookLabel'),
-                        //     description: translator.getText('yoPixivMenuServiceWebhookDesc'),
-                        // },
                         {
                             value: 'none',
                             label: translator.getText('yoConversionServiceMenuServiceNoneLabel'),
                             description: translator.getText('yoPixivMenuServiceNoneDesc'),
+                            default: service === 'none' || !service,
+                        },
+                        {
+                            value: 'phixiv',
+                            label: 'phixiv',
+                            description: translator.getText('yoPixivMenuServicePhixivDesc'),
+                            default: service === 'phixiv',
                         },
                     )
             ),
-            makeButtonRowBuilder().addComponents(
-                backToDashboardButton(authorId),
-                cancelButton(authorId),
+            actionRow => actionRow.addComponents(
+                backToDashboardButton(compressedAuthorId),
+                cancelButton(compressedAuthorId),
             ),
-        ],
-    };
+        );
+
+    return container;
 }
 
 /**
- * @param {String} userId 
- * @param {import('discord.js').ButtonInteraction} interaction 
+ * @param {string} compressedAuthorId
+ * @param {import('../Commons/typings').AnyRequest} request
+ * @param {import('../../models/userconfigs').UserConfigDocument} userConfigs
+ * @param {Translator} translator 
+ */
+function makeSelectTagsChannelContainer(compressedAuthorId, request, userConfigs, translator) {
+    const container = new ContainerBuilder()
+        .setAccentColor(tenshiAltColor)
+        .addTextDisplayComponents(
+            textDisplay => textDisplay.setContent(translator.getText('yoSelectTagsChannelTitle')),
+        )
+        .addActionRowComponents(
+            actionRow => actionRow.addComponents(
+                new StringSelectMenuBuilder()
+                    .setCustomId(`yo_modifyFollowedTags_${compressedAuthorId}`)
+                    .setOptions([...userConfigs.feedTagSuscriptions.entries()].map(([channelId, tags]) => {
+                        const channel = request.client?.channels.cache.get(channelId);
+                        if(!channel || channel.isDMBased() || !channel.isSendable())
+                            return {
+                                label: translator.getText('invalidChannel'),
+                                value: null,
+                            };
+
+                        return {
+                            label: shortenText(tags.join(' ') || '...', 99, '…'),
+                            description: `#${channel.name ?? '???'}`,
+                            value: channelId,
+                        };
+                    }))
+                    .setPlaceholder(translator.getText('feedSelectFeed')),
+            ),
+            actionRow => actionRow.addComponents(
+                backToDashboardButton(compressedAuthorId),
+                cancelButton(compressedAuthorId),
+            ),
+        );
+
+    return container;
+}
+
+/**
+ * 
+ * @param {string} compressedAuthorId 
+ * @param {string} channelId 
  * @param {import('../../models/userconfigs').UserConfigDocument} userConfigs 
  * @param {Translator} translator 
+ * @param {boolean} isAlt 
  */
-const selectTagsChannelRows = (userId, interaction, userConfigs, translator) => [
-    new ActionRowBuilder().addComponents(
-        new StringSelectMenuBuilder()
-            .setCustomId(`yo_modifyFollowedTags_${compressId(userId)}`)
-            .setOptions([...userConfigs.feedTagSuscriptions.entries()].map(([k, v]) => ({
-                label: shortenText(v.join(' ') || '<Ninguna tag>', 99),
-                description: `#${interaction.guild?.channels.cache.get(k)?.name ?? '???'}`,
-                value: k,
-            })))
-            .setPlaceholder(translator.getText('feedSelectFeed')),
-    ),
-    new ActionRowBuilder().addComponents(
-        backToDashboardButton(userId),
-        cancelButton(userId),
-    ),
-];
+function makeFollowedTagsContainer(compressedAuthorId, channelId, userConfigs, translator, isAlt) {
+    const compressedChannelId = compressId(channelId);
+    
+    const container = new ContainerBuilder()
+        .setAccentColor(Colors.LuminousVividPink)
+        .addTextDisplayComponents(
+            textDisplay => textDisplay.setContent(`## ${translator.getText('yoTagsName')}`),
+            textDisplay => textDisplay.setContent(
+                `\`\`\`\n${userConfigs.feedTagSuscriptions.get(channelId)?.join(' ') || translator.getText('yoTagsValueDefault')}\n\`\`\``
+            )
+        )
+        .addActionRowComponents(
+            actionRow => actionRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`yo_editFT_${compressedAuthorId}_${compressedChannelId}_ADD${isAlt ? '_ALT' : ''}`)
+                    .setEmoji('1086797601925513337')
+                    .setLabel(translator.getText('feedSetTagsButtonAdd'))
+                    .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
+                    .setCustomId(`yo_editFT_${compressedAuthorId}_${compressedChannelId}_REMOVE${isAlt ? '_ALT' : ''}`)
+                    .setEmoji('1086797599287296140')
+                    .setLabel(translator.getText('feedSetTagsButtonRemove'))
+                    .setStyle(ButtonStyle.Danger),
+                new ButtonBuilder()
+                    .setCustomId(`yo_selectFeedTC_${compressedAuthorId}`)
+                    .setEmoji('1355128236790644868')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(!!isAlt),
+                cancelButton(compressedAuthorId)
+                    .setDisabled(!!isAlt),
+            ),
+        );
 
-/**
- * @param {import('discord.js').Interaction | import('../Commons/typings').ComplexCommandRequest} request 
- * @param {Translator} translator 
- */
-const selectTagsChannelEmbed = (request, translator) => wizEmbed(request.client.user.avatarURL({ size: 128 }), 'yoDashboardName', Colors.Blurple, translator)
-    .setTitle(translator.getText('yoSelectTagsChannelTitle'));
-
-/**
- * @param {String} userId 
- * @param {Translator} translator 
- */
-const followedTagsRows = (userId, channelId, translator, isAlt) => [
-    new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-            .setCustomId(`yo_editFT_${compressId(userId)}_${compressId(channelId)}_ADD`)
-            .setEmoji('1086797601925513337')
-            .setLabel(translator.getText('feedSetTagsButtonAdd'))
-            .setStyle(ButtonStyle.Success),
-        new ButtonBuilder()
-            .setCustomId(`yo_editFT_${compressId(userId)}_${compressId(channelId)}_REMOVE`)
-            .setEmoji('1086797599287296140')
-            .setLabel(translator.getText('feedSetTagsButtonRemove'))
-            .setStyle(ButtonStyle.Danger),
-        new ButtonBuilder()
-            .setCustomId(`yo_selectFTC_${userId}`)
-            .setEmoji('1355128236790644868')
-            .setStyle(ButtonStyle.Secondary)
-            .setDisabled(!!isAlt),
-        cancelButton(userId)
-            .setDisabled(!!isAlt),
-    ),
-];
-
-/**
- * @function
- * @param {import('discord.js').Interaction | import('../Commons/typings').ComplexCommandRequest} request 
- * @param {*} userConfigs 
- * @param {String} channelId 
- * @param {Translator} translator 
- */
-const followedTagsEmbed = (request, userConfigs, channelId, translator) => wizEmbed(request.client.user.avatarURL({ size: 128 }), 'yoDashboardName', Colors.LuminousVividPink, translator)
-    .addFields(
-        {
-            name: translator.getText('yoTagsName'),
-            value: `\`\`\`\n${userConfigs.feedTagSuscriptions.get(channelId)?.join(' ') || translator.getText('yoTagsValueDefault')}\n\`\`\``,
-        },
-    );
+    return container;
+}
 
 const flags = new CommandTags().add('COMMON');
 const command = new Command('yo', flags)
@@ -349,16 +417,16 @@ const command = new Command('yo', flags)
 	.setExecution(async request => {
         const userQuery = { userId: request.userId };
 		let userConfigs = await UserConfigs.findOne(userQuery);
+
         if(!userConfigs) {
             userConfigs = new UserConfigs(userQuery);
             await userConfigs.save();
         }
 
         const translator = new Translator(userConfigs.language);
-        const wizard = dashboardEmbed(request, userConfigs, translator);
         return request.reply({
-            embeds: [wizard],
-            components: dashboardRows(request.userId, userConfigs, translator),
+            flags: MessageFlags.IsComponentsV2,
+            components: [makeDashboardContainer(request, userConfigs, translator)],
         });
 	})
 	.setButtonResponse(async function goToDashboard(interaction, authorId) {
@@ -366,7 +434,7 @@ const command = new Command('yo', flags)
 			
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
-            return interaction.reply({ content: '⚠️ Usuario inexistente / Unexistent user', ephemeral: true });
+            return interaction.reply({ content: userNotAvailableText, ephemeral: true });
         
         const translator = new Translator(userConfigs.language);
 
@@ -374,177 +442,143 @@ const command = new Command('yo', flags)
 			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
 		
 		return interaction.update({
-			embeds: [dashboardEmbed(interaction, userConfigs, translator)],
-			components: dashboardRows(user.id, userConfigs, translator),
+			components: [makeDashboardContainer(interaction, userConfigs, translator)],
 		});
 	})
-	.setButtonResponse(async function toggleLanguage(interaction) {
+	.setSelectMenuResponse(async function selectLanguage(interaction) {
 		const { user } = interaction;
-			
+
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
-            return interaction.reply({ content: warn('Usuario inexistente / Unexistent user / 存在しないユーザー'), ephemeral: true });
+            return interaction.reply({ content: userNotAvailableText, ephemeral: true });
 
         let translator = new Translator(userConfigs.language);
 
-        userConfigs.language = translator.next;
-        translator = new Translator(translator.next);
-        
-        return Promise.all([
-            userConfigs.save().then(() => recacheUser(user.id)),
-            interaction.update({
-                embeds: [dashboardEmbed(interaction, userConfigs, translator)],
-                components: dashboardRows(user.id, userConfigs, translator),
-            }),
-        ]);
+        const newLanguage = interaction.values[0];
+        if(!newLanguage || !isValidLocaleKey(newLanguage))
+            return interaction.deleteReply();
+
+        userConfigs.language = newLanguage;
+        translator = new Translator(newLanguage);
+
+        await userConfigs.save().then(() => recacheUser(user.id));
+
+        return interaction.update({
+            components: [makeDashboardContainer(interaction, userConfigs, translator)],
+        });
 	}, { userFilterIndex: 0 })
-    .setButtonResponse(async function setTimezone(interaction) {
+    .setButtonResponse(async function promptSetTimezone(interaction) {
 		const { user } = interaction;
 			
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
-            return interaction.reply({ content: warn('Usuario inexistente / Unexistent user / 存在しないユーザー'), ephemeral: true });
+            return interaction.reply({ content: userNotAvailableText, ephemeral: true });
 
         const translator = new Translator(userConfigs.language);
 		
         const modal = new ModalBuilder()
-            .setCustomId('yo_applyTimezone')
+            .setCustomId('yo_setTimezone')
             .setTitle(translator.getText('yoTimezoneModalTitle'))
-            .addComponents(
-                makeTextInputRowBuilder().addComponents(new TextInputBuilder()
-                    .setCustomId('inputTimezone')
+            .addTextDisplayComponents(textDisplay =>
+                textDisplay.setContent(translator.getText('yoTimezoneModalTutorial'))
+            )
+            .addLabelComponents(label =>
+                label
                     .setLabel(translator.getText('yoTimezoneModalTimezoneLabel'))
-                    .setPlaceholder(translator.getText('yoTimezoneModalTimezonePlaceholder'))
-                    .setMinLength(0)
-                    .setMaxLength(7)
-                    .setRequired(false)
-                    .setValue(`${userConfigs.utcOffset || ''}`)
-                    .setStyle(TextInputStyle.Short)),
+                    .setTextInputComponent(
+                    new TextInputBuilder()
+                        .setCustomId('inputTimezone')
+                        .setPlaceholder(translator.getText('yoTimezoneModalTimezonePlaceholder'))
+                        .setMinLength(0)
+                        .setMaxLength(32)
+                        .setRequired(false) 
+                        .setValue(`${userConfigs.tzCode || 'UTC'}`)
+                        .setStyle(TextInputStyle.Short)
+                    ),
             );
 
         return interaction.showModal(modal);
     }, { userFilterIndex: 0 })
-    .setModalResponse(async function applyTimezone(interaction) {
+    .setModalResponse(async function setTimezone(interaction) {
 		const { user } = interaction;
 			
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
             return interaction.reply({
-                content: warn('Usuario inexistente / Unexistent user / 存在しないユーザー'),
+                content: userNotAvailableText,
                 ephemeral: true,
             });
 
         const translator = new Translator(userConfigs.language);
 
-        const inputTimezone = interaction.fields.getTextInputValue('inputTimezone');
-        const utcOffset = toUTCOffset(inputTimezone);
-
-        if(utcOffset == null)
-            return interaction.reply({
-                content: translator.getText('yoTimezoneInvalidTimezone'),
-                ephemeral: true,
-            });
-
-        userConfigs.utcOffset = utcOffset;
+        const tzCode = interaction.fields.getTextInputValue('inputTimezone');
+        if(tzCode?.length) {
+            const utcOffset = toUtcOffset(tzCode);
+    
+            if(utcOffset == null)
+                return interaction.reply({
+                    flags: MessageFlags.Ephemeral,
+                    content: translator.getText('yoTimezoneInvalidTimezone'),
+                });
+    
+            userConfigs.tzCode = sanitizeTzCode(tzCode) || 'UTC';
+        } else {
+            userConfigs.tzCode = null;
+        }
 
         return Promise.all([
             userConfigs.save().then(() => recacheUser(user.id)),
             interaction.update({
-                embeds: [dashboardEmbed(interaction, userConfigs, translator)],
-                components: dashboardRows(user.id, userConfigs, translator),
+                components: [makeDashboardContainer(interaction, userConfigs, translator)],
             }),
         ]);
     })
-    .setSelectMenuResponse(async function selectConfig(interaction, authorId) {
+    .setSelectMenuResponse(async function selectConfig(interaction, compressedAuthorId) {
         const selected = interaction.values[0];
 
+        const { user } = interaction;
+
+        //FIXME: ???????????????????????
         if(selected === 'feed')
-            return command['selectFTC'](interaction, authorId);
-        
-		const { user } = interaction;
-			
+            return command['selectFeedTC'](interaction, compressedAuthorId);
+
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
-            return interaction.reply({ content: '⚠️ Usuario inexistente / Unexistent user', ephemeral: true });
+            return interaction.reply({ content: userNotAvailableText, ephemeral: true });
 
         const translator = new Translator(userConfigs.language);
-		
-		if(user.id !== authorId)
+
+		if(user.id !== decompressId(compressedAuthorId))
 			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
-        
-        let embed;
-        let components;
 
         userConfigs.voice.ping ??= 'always';
 
-        const compressedAuthorId = compressId(authorId);
         switch(selected) {
         case 'voice':
-            embed = voiceEmbed(interaction, userConfigs, translator);
-            components = [
-                makeStringSelectMenuRowBuilder().addComponents(
-                    new StringSelectMenuBuilder()
-                        .setCustomId(`yo_setVoicePing_${authorId}`)
-                        .setPlaceholder(translator.getText('yoVoiceMenuPing'))
-                        .setOptions(
-                            {
-                                value: 'always',
-                                label: translator.getText('always'),
-                                description: translator.getText('yoVoiceMenuPingAlwaysDesc'),
-                            },
-                            {
-                                value: 'onCreate',
-                                label: translator.getText('yoVoiceMenuPingOnCreateLabel'),
-                                description: translator.getText('yoVoiceMenuPingOnCreateDesc'),
-                            },
-                            {
-                                value: 'never',
-                                label: translator.getText('never'),
-                                description: translator.getText('yoVoiceMenuPingNeverDesc'),
-                            },
-                        )
-                ),
-                makeButtonRowBuilder().addComponents(
-                    new ButtonBuilder()
-                        .setCustomId(`yo_setVoiceAutoname_${compressedAuthorId}`)
-                        .setStyle(ButtonStyle.Primary)
-                        .setLabel(translator.getText('yoVoiceAutonameButtonLabel')),
-                    new ButtonBuilder()
-                        .setCustomId(`yo_setVoiceKillDelay_${compressedAuthorId}`)
-                        .setStyle(ButtonStyle.Primary)
-                        .setLabel(translator.getText('yoVoiceKillDelayButtonLabel')),
-                    backToDashboardButton(authorId),
-                    cancelButton(authorId),
-                ),
-            ];
-            break;
+            return interaction.update({
+                components: [makeVoiceContainer(compressedAuthorId, userConfigs, translator)],
+            });
             
         case 'pixiv':
-            ({ embed, components } = getPixivConversionPickerResponseContent(interaction, userConfigs.pixivConverter, translator, authorId));
-            break;
+            return interaction.update({
+                components: [makePixivServicePickerContainer(compressedAuthorId, userConfigs.pixivConverter, translator)],
+
+            });
 
         default:
-            ({ embed, components } = getTwitterConversionPickerResponseContent(interaction, userConfigs.twitterPrefix, translator, authorId));
-            break;
+            return interaction.update({
+                components: [makeTwitterServicePickerContainer(compressedAuthorId, userConfigs.twitterPrefix, translator)],
+            });
         }
-
-        return interaction.update({
-            content: null,
-            embeds: [embed],
-            components,
-        });
     })
-    .setSelectMenuResponse(async function setVoicePing(interaction, authorId) {
+    .setSelectMenuResponse(async function setVoicePing(interaction, compressedAuthorId) {
         const { user } = interaction;
             
         const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
-            return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
+            return interaction.reply({ content: userNotAvailableText, ephemeral: true });
 
         const translator = new Translator(/**@type {import('../../i18n').LocaleKey}*/(userConfigs.language));
-        
-        if(user.id !== authorId)
-            return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
 
         let pingMode = /**@type {'always'|'onCreate'|'never'}*/(interaction.values[0]);
         userConfigs.voice.ping = pingMode;
@@ -553,16 +587,16 @@ const command = new Command('yo', flags)
         return Promise.all([
             userConfigs.save(),
             interaction.update({
-                embeds: [ voiceEmbed(interaction, userConfigs, translator) ],
+                components: [makeVoiceContainer(compressedAuthorId, userConfigs, translator)],
             }),
         ]);
-    })
+    }, { userFilterIndex: 0 })
     .setButtonResponse(async function setVoiceAutoname(interaction) {
 		const { user } = interaction;
 			
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
-            return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
+            return interaction.reply({ content: userNotAvailableText, ephemeral: true });
 
         const translator = new Translator(/**@type {import('../../i18n').LocaleKey}*/(userConfigs.language));
 		
@@ -594,22 +628,24 @@ const command = new Command('yo', flags)
     }, { userFilterIndex: 0 })
     .setModalResponse(async function applyVoiceAutoname(interaction) {
         await interaction.deferReply({ ephemeral: true });
-        
+
 		const { user } = interaction;
-			
+
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
-            return interaction.editReply({ content: warn('Usuario inexistente / Unexistent user') });
-        
+            return interaction.editReply({ content: userNotAvailableText });
+
         userConfigs.voice.autoname = interaction.fields.getTextInputValue('inputName');
         userConfigs.voice.autoemoji = interaction.fields.getTextInputValue('inputEmoji');
-        
+
         await userConfigs.save();
-        
+
         const translator = new Translator(/**@type {import('../../i18n').LocaleKey}*/(userConfigs.language));
-        
-        const embed = voiceEmbed(interaction, userConfigs, translator);
-        await interaction.message.edit({ embeds: [embed] }).catch(console.error);
+
+        await interaction.message.edit({
+            components: [makeVoiceContainer(compressId(interaction.user.id), userConfigs, translator)]
+        }).catch(console.error);
+
         return interaction.editReply({ content: translator.getText('yoVoiceAutonameSuccess') });
     })
     .setButtonResponse(async function setVoiceKillDelay(interaction) {
@@ -617,7 +653,7 @@ const command = new Command('yo', flags)
 			
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
-            return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
+            return interaction.reply({ content: userNotAvailableText, ephemeral: true });
 
         const translator = new Translator(/**@type {import('../../i18n').LocaleKey}*/(userConfigs.language));
 		
@@ -640,36 +676,41 @@ const command = new Command('yo', flags)
     }, { userFilterIndex: 0 })
     .setModalResponse(async function applyVoiceKillDelay_PENDING(interaction) {
         await interaction.deferReply({ ephemeral: true });
-        
+
 		const { user } = interaction;
-			
+
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
-            return interaction.editReply({ content: warn('Usuario inexistente / Unexistent user') });
-        
-        //Nota: esto está completamente mal. Parsear formato XXm XXs luego
+            return interaction.editReply({ content: userNotAvailableText });
+
+        //FIXME: esto está completamente mal. Parsear formato XXm XXs luego
         const killDelay = +interaction.fields.getTextInputValue('inputDuration');
         userConfigs.voice.killDelay = isNaN(killDelay) ? 0 : killDelay;
-        
+
         await userConfigs.save();
-        
+
         const translator = new Translator(/**@type {import('../../i18n').LocaleKey}*/(userConfigs.language));
-        
-        const embed = voiceEmbed(interaction, userConfigs, translator);
-        await interaction.message.edit({ embeds: [embed] }).catch(console.error);
+
+        await interaction.message.edit({
+            components: [makeVoiceContainer(compressId(interaction.user.id), userConfigs, translator)],
+        }).catch(console.error);
+
         return interaction.editReply({ content: translator.getText('yoVoiceKillDelaySuccess') });
     })
-    .setSelectMenuResponse(async function setPixivConvert(interaction, authorId) {
+    .setSelectMenuResponse(async function setPixivConvert(interaction, compressedAuthorId) {
 		const { user } = interaction;
 			
-		const userConfigs = await UserConfigs.findOne({ userId: user.id });
+		const [userConfigs] = await Promise.all([
+            UserConfigs.findOne({ userId: user.id }),
+            interaction.deferReply({ flags: MessageFlags.Ephemeral }),
+        ]);
         if(!userConfigs)
-            return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
+            return interaction.editReply({ content: userNotAvailableText });
 
         const translator = new Translator(userConfigs.language);
 		
-		if(user.id !== authorId)
-			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
+		if(user.id !== decompressId(compressedAuthorId))
+			return interaction.editReply({ content: translator.getText('unauthorizedInteraction') });
 
         let service = interaction.values[0];
         if(service === 'none') service = '';
@@ -681,21 +722,26 @@ const command = new Command('yo', flags)
 
         return Promise.all([
             userConfigs.save().then(() => recacheUser(user.id)),
-            interaction.message.edit(getPixivConversionPickerResponseContent(interaction, service, translator, authorId)),
-            interaction.reply({ content: translator.getText('yoConversionServiceSuccess'), ephemeral: true }),
+            interaction.message.edit({
+                components: [makePixivServicePickerContainer(compressedAuthorId, userConfigs.pixivConverter, translator)],
+            }),
+            interaction.editReply({ content: translator.getText('yoConversionServiceSuccess') }),
         ]);
-    })
-    .setSelectMenuResponse(async function setTwitterConvert(interaction, authorId) {
+    }, { userFilterIndex: 0 })
+    .setSelectMenuResponse(async function setTwitterConvert(interaction, compressedAuthorId) {
 		const { user } = interaction;
-			
-		const userConfigs = await UserConfigs.findOne({ userId: user.id });
+
+		const [userConfigs] = await Promise.all([
+            UserConfigs.findOne({ userId: user.id }),
+            interaction.deferReply({ flags: MessageFlags.Ephemeral }),
+        ]);
         if(!userConfigs)
-            return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
+            return interaction.editReply({ content: userNotAvailableText });
 
         const translator = new Translator(userConfigs.language);
-		
-		if(user.id !== authorId)
-			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
+
+		if(user.id !== decompressId(compressedAuthorId))
+			return interaction.editReply({ content: translator.getText('unauthorizedInteraction') });
 
         let service = /**@type {import('../../systems/agents/pureet').AcceptedTwitterConverterKey | 'none' | ''}*/(interaction.values[0]);
         if(service === 'none') service = '';
@@ -707,58 +753,60 @@ const command = new Command('yo', flags)
 
         return Promise.all([
             userConfigs.save().then(() => recacheUser(user.id)),
-            interaction.message.edit(getTwitterConversionPickerResponseContent(interaction, service, translator, authorId)),
-            interaction.reply({ content: translator.getText('yoConversionServiceSuccess'), ephemeral: true }),
+            interaction.message.edit({
+                components: [makeTwitterServicePickerContainer(compressedAuthorId, userConfigs.twitterPrefix, translator)],
+            }),
+            interaction.editReply({ content: translator.getText('yoConversionServiceSuccess') }),
         ]);
-    })
-	.setButtonResponse(async function selectFTC(interaction, authorId) {
+    }, { userFilterIndex: 0 })
+	.setButtonResponse(async function selectFeedTC(interaction, compressedAuthorId) {
 		const { user } = interaction;
-			
-		const userConfigs = await UserConfigs.findOne({ userId: user.id });
+
+		const [userConfigs] = await Promise.all([
+            UserConfigs.findOne({ userId: user.id }),
+            interaction.deferReply({ flags: MessageFlags.Ephemeral }),
+        ]);
+
         if(!userConfigs)
-            return interaction.reply({ content: '⚠️ Usuario inexistente / Unexistent user', ephemeral: true });
+            return interaction.editReply({ content: userNotAvailableText });
 
         const translator = new Translator(userConfigs.language);
-		
-		if(user.id !== authorId)
-			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
+
+		if(user.id !== decompressId(compressedAuthorId))
+			return interaction.editReply({ content: translator.getText('unauthorizedInteraction') });
 
         if(userConfigs.feedTagSuscriptions.size === 0)
-            return interaction.reply({ content: translator.getText('yoFeedEmptyError'), ephemeral: true });
-        
+            return interaction.editReply({ content: translator.getText('yoFeedEmptyError') });
+
         return Promise.all([
             userConfigs.save(),
-            interaction.update({
-                content: null,
-                embeds: [selectTagsChannelEmbed(interaction, translator)],
-                // @ts-expect-error
-                components: selectTagsChannelRows(user.id, interaction, userConfigs, translator),
+            interaction.message.edit({
+                components: [makeSelectTagsChannelContainer(compressedAuthorId, interaction, userConfigs, translator)],
             }),
+            interaction.deleteReply(),
         ]);
 	})
-	.setSelectMenuResponse(async function modifyFollowedTags(interaction, authorId, isAlt) {
+	.setSelectMenuResponse(async function modifyFollowedTags(interaction, compressedAuthorId, isAlt) {
 		const { user } = interaction;
         const channelId = isAlt ? interaction.channelId : interaction.values[0];
-			
+
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
-            return interaction.reply({ content: warn('Usuario inexistente / Unexistent user'), ephemeral: true });
+            return interaction.reply({ content: userNotAvailableText, ephemeral: true });
 
         const translator = new Translator(userConfigs.language);
-		
-		if(compressId(user.id) !== authorId)
+
+		if(compressId(user.id) !== compressedAuthorId)
 			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
-        
+
         return Promise.all([
             userConfigs.save(),
             interaction.update({
-                embeds: [followedTagsEmbed(interaction, userConfigs, channelId, translator)],
-                // @ts-expect-error
-                components: followedTagsRows(user.id, channelId, translator, isAlt),
+                components: [makeFollowedTagsContainer(compressedAuthorId, channelId, userConfigs, translator, !!isAlt)],
             }),
         ]);
 	})
-	.setButtonResponse(async function editFT(interaction, authorId, channelId, operation) {
+	.setButtonResponse(async function editFT(interaction, authorId, channelId, operation, isAlt) {
         channelId = decompressId(channelId);
 		const { user } = interaction;
         const translator = await Translator.from(user.id);
@@ -783,21 +831,22 @@ const command = new Command('yo', flags)
 
         const row = new ActionRowBuilder().addComponents(tagsInput);
         const modal = new ModalBuilder()
-            .setCustomId(`yo_setFollowedTags_${operation}_${compressId(channelId)}`)
+            .setCustomId(`yo_setFollowedTags_${operation}_${compressId(channelId)}${isAlt ? '_ALT' : ''}`)
             .setTitle(title)
             // @ts-ignore
             .addComponents(row);
 
         return interaction.showModal(modal).catch(auditError);
 	})
-	.setModalResponse(async function setFollowedTags(interaction, operation, customChannelId) {
+	.setModalResponse(async function setFollowedTags(interaction, operation, customChannelId, isAlt) {
 		const channelId = customChannelId ? decompressId(customChannelId) : interaction.channelId;
 		const userId = interaction.user.id;
 		const editedTags = interaction.fields.getTextInputValue('tagsInput').toLowerCase().split(/[ \n]+/).filter(t => t.length);
 
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
 		const userQuery = { userId };
 		const userConfigs = (await UserConfigs.findOne(userQuery)) || new UserConfigs(userQuery);
-		// @ts-ignore
 		const translator = new Translator(userConfigs.language);
 		let newTags = userConfigs.feedTagSuscriptions.get(channelId)?.slice(0) ?? [];
 		/**@type {import('../../i18n').LocaleIds}*/
@@ -814,11 +863,9 @@ const command = new Command('yo', flags)
 		}
 
 		if(previousLength === newTags.length) {
-            const updateContent = {
-				content: translator.getText('feedSetTagsUnchanged'),
-                ephemeral: true,
-            };
-            return interaction.update(updateContent).catch(() => interaction.reply(updateContent));
+            return interaction.editReply({
+                content: translator.getText('feedSetTagsUnchanged'),
+            });
         }
 
 		if(newTags.length)
@@ -826,49 +873,45 @@ const command = new Command('yo', flags)
 		else
 			userConfigs.feedTagSuscriptions.delete(channelId);
 		userConfigs.markModified('feedTagSuscriptions');
-		
+
 		await userConfigs.save();
 
 		updateFollowedFeedTagsCache(userId, channelId, newTags);
 
-		const updateContent = {
-			content: translator.getText(setTagsResponse, editedTags.join(' ')),
-			embeds: [followedTagsEmbed(interaction, userConfigs, channelId, translator)],
-			ephemeral: true,
-		};
-
-		return interaction.update(updateContent).catch(() => interaction.reply(updateContent));
+		return Promise.all([
+            interaction.message.edit({
+                content: translator.getText(setTagsResponse, editedTags.join(' ')),
+                components: [makeFollowedTagsContainer(compressId(userId), channelId, userConfigs, translator, !!isAlt)],
+            }),
+            interaction.deleteReply(),
+        ]);
 	})
-	.setButtonResponse(async function cancelWizard(interaction, authorId) {
-        const translator = await Translator.from(authorId);
+	.setButtonResponse(async function cancelWizard(interaction) {
+        const translator = await Translator.from(interaction);
 
-		if(interaction.user.id !== authorId)
-			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
-		
 		const cancelEmbed = wizEmbed(interaction.client.user.avatarURL(), 'cancelledStepFooterName', Colors.NotQuiteBlack, translator)
 			.addFields({
 				name: translator.getText('cancelledStepName'),
 				value: translator.getText('yoCancelledStep'),
 			});
-		return interaction.update({
-            content: null,
-			embeds: [cancelEmbed],
-			components: [],
-		});
-	})
-	.setButtonResponse(async function exitWizard(interaction, authorId) {
-        const translator = await Translator.from(authorId);
 
-		if(interaction.user.id !== authorId)
-			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
-		
-		const cancelEmbed = wizEmbed(interaction.client.user.avatarURL(), 'finishedStepFooterName', Colors.NotQuiteBlack, translator)
-			.setDescription(translator.getText('yoFinishedStep'));
 		return interaction.update({
             content: null,
 			embeds: [cancelEmbed],
 			components: [],
 		});
-	});
+	}, { userFilterIndex: 0 })
+	.setButtonResponse(async function exitWizard(interaction) {
+        const translator = await Translator.from(interaction);
+		
+		const finishContainer = new ContainerBuilder()
+            .addTextDisplayComponents(textDisplay => 
+                textDisplay.setContent(translator.getText('yoFinishedStep'))
+            );
+
+		return interaction.update({
+			components: [finishContainer],
+		});
+	}, { userFilterIndex: 0 });
 
 module.exports = command;

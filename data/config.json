@@ -2,7 +2,7 @@
     "bot_status": {
         "host": "[no encontrado]",
         "version": {
-            "number": "3.9.1",
+            "number": "3.9.2",
             "name": "Flamenco Perlado"
         },
         "note": {
@@ -20,11 +20,11 @@
             "Acciones contextuales \"Buscar Fuente\", \"Obtener Emotes\" y \"Obtener Sticker\" agregadas",
             "p!cola ahora tiene controles adicionales",
             "p!info ha sido renovado, traducido y ahora permite especificar un `--miembro`",
-            "Operabilidad de **PuréMusic** amendada",
             "p!estado ha sido renovado y traducido",
             "Apariencia de confesiones mejorada, junto con la posibilidad de responder anónimamente",
             "p!recordatorio agregado",
-            "p!voz --invitar eliminado (debido a que Discord implementó lo mismo)"
+            "**PuréVoice** renovado y p!voz `--invitar` eliminado (Discord implementó lo mismo)",
+            "p!yo renovado"
         ],
         "todo": [
             "Agregar ejemplos interactivos de comandos",
@@ -47,6 +47,7 @@
     "startupTime": 0,
     "lechitauses": 0,
     "tenshiColor": 6327283,
+    "tenshiAltColor": 12555492,
     "serverid": {
         "bautistas":   "745003943997997056",
         "sugerencias": "826632021451341824",

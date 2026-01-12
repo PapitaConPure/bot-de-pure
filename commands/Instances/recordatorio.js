@@ -7,9 +7,10 @@ const { MessageFlags, ContainerBuilder, ButtonBuilder, ButtonStyle, SeparatorSpa
 const { shortenText, compressId, decompressId } = require('../../func');
 const UserConfigs = require('../../models/userconfigs');
 const Reminder = require('../../models/reminders');
-const { isValid, addDays, isBefore, addMinutes, addHours, getUnixTime } = require('date-fns');
+const { isValid, addDays, isBefore, addMinutes, getUnixTime } = require('date-fns');
 const { scheduleReminder } = require('../../systems/others/remindersScheduler');
 const { UTCDate } = require('@date-fns/utc');
+const { toUtcOffset } = require('../../utils/timezones');
 
 const maxReminderCountPerUser = 5;
 const maxReminderContentLength = 960;
@@ -138,7 +139,7 @@ function makeReminderContainer(reminder, translator, title = undefined) {
  */
 function makeReminderModal(request, translator, utcOffset, reminder = undefined) {
 	const reminderId = reminder?._id;
-	const reminderLocalizedDate = new UTCDate(addHours(reminder?.date ?? new Date(Date.now()), utcOffset));
+	const reminderLocalizedDate = new UTCDate(addMinutes(reminder?.date ?? new Date(Date.now()), utcOffset));
 
 	const modal = new ModalBuilder()
 		.setCustomId(reminder ? `reminder_editReminder_${reminderId}` : 'reminder_addReminder')
@@ -278,7 +279,7 @@ const command = new Command('recordatorio', tags)
 				content: translator.getText('userConfigRecommended', p_pure(request)),
 			});
 
-		const utcOffset = userConfigs?.utcOffset ?? 0;
+		const utcOffset = toUtcOffset(userConfigs?.tzCode);
 
 		const dateStr = args.parseFlagExpr('fecha');
 		const timeStr = args.parseFlagExpr('hora');
@@ -310,7 +311,7 @@ const command = new Command('recordatorio', tags)
 				content: translator.getText('invalidDate'),
 			});
 
-		const time = parseTimeFromNaturalLanguage(timeStr, utcOffset) ?? addHours(new Date(0), -utcOffset);
+		const time = parseTimeFromNaturalLanguage(timeStr, utcOffset) ?? addMinutes(new Date(0), -utcOffset);
 		if(!validateTime(time))
 			return request.reply({
 				flags: MessageFlags.Ephemeral,
@@ -379,7 +380,7 @@ const command = new Command('recordatorio', tags)
 			Translator.from(interaction),
 			UserConfigs.findOne({ userId }),
 		]);
-		const utcOffset = userConfigs.utcOffset;
+		const utcOffset = toUtcOffset(userConfigs.tzCode);
 
 		const modal = makeReminderModal(interaction, translator, utcOffset);
 
@@ -392,7 +393,7 @@ const command = new Command('recordatorio', tags)
 			Translator.from(interaction),
 			UserConfigs.findOne({ userId }),
 		]);
-		const utcOffset = userConfigs.utcOffset;
+		const utcOffset = toUtcOffset(userConfigs.tzCode);
 
 		if(!reminder)
 			return interaction.reply({
@@ -412,7 +413,7 @@ const command = new Command('recordatorio', tags)
 			UserConfigs.findOne({ userId }),
 			interaction.deferUpdate(),
 		]);
-		const utcOffset = userConfigs.utcOffset;
+		const utcOffset = toUtcOffset(userConfigs.tzCode);
 
 		const dateStr = interaction.fields.getTextInputValue('date');
 		const timeStr = interaction.fields.getTextInputValue('time');
@@ -478,7 +479,7 @@ const command = new Command('recordatorio', tags)
 			Translator.from(interaction),
 			UserConfigs.findOne({ userId: interaction.user.id }),
 		]);
-		const utcOffset = userConfigs.utcOffset;
+		const utcOffset = toUtcOffset(userConfigs.tzCode);
 
 		if(!reminder)
 			return interaction.reply({

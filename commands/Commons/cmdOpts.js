@@ -1397,7 +1397,7 @@ class CommandOptionSolver {
 	 * Obtiene un objeto {@link Date} cuyo valor equivale la fecha localizada especificada, sin componentes horarios, usando UTC
 	 * @param {string} identifier El identificador del {@linkcode CommandParam}
 	 * @param {import('../../i18n').LocaleKey} locale La clave del idioma en el cual interpretar la fecha
-	 * @param {number} z El huso horario con el cual corregir la fecha UTC+0 obtenida
+	 * @param {number} z El huso horario con el cual corregir la fecha UTC+0 obtenida, en minutos
 	 */
 	getDate(identifier, locale, z = 0) {
 		const str = this.isInteractionSolver(this.#args)
@@ -1471,11 +1471,11 @@ class CommandOptionSolver {
 
 				availableMatch.handler(match[0]);
 
-				availableMatch.add.forEach(id => {
+				availableMatch.add?.forEach(id => {
 					const m = availableMatches[id];
 					if(m) m.limit++;
 				});
-				availableMatch.subtr.forEach(id => {
+				availableMatch.subtr?.forEach(id => {
 					const m = availableMatches[id];
 					if(m) m.limit--;
 					if(m.limit <= 0)
@@ -1513,7 +1513,7 @@ class CommandOptionSolver {
 	/**
 	 * Obtiene un objeto {@link Date} cuyo valor equivale la hora especificada en milisegundos desde 0 absoluto, usando UTC
 	 * @param {string} identifier El identificador del {@linkcode CommandParam}
-	 * @param {number} z El huso horario con el cual corregir la fecha UTC+0 obtenida
+	 * @param {number} z El huso horario con el cual corregir la fecha UTC+0 obtenida, en minutos
 	 */
 	getTime(identifier, z = 0) {
 		const timeStr = this.isInteractionSolver(this.#args)
