@@ -7,6 +7,17 @@ const UserConfigSchema = new Mongoose.Schema({
         type: String,
         required: true,
     },
+
+    language: {
+        type: String,
+        enum: Object.values(Locales),
+        default: Locales.Spanish,
+        required: true,
+    },
+    tzCode: {
+        type: String,
+        default: null,
+    },
     
     prc: {
         type: Number,
@@ -33,12 +44,6 @@ const UserConfigSchema = new Mongoose.Schema({
         default: () => new Date(0),
     },
     
-    language: {
-        type: String,
-        enum: Object.values(Locales),
-        default: Locales.Spanish,
-        required: true,
-    },
     feedTagSuscriptions: {
         type: Map,
         of: [String],
@@ -78,10 +83,6 @@ const UserConfigSchema = new Mongoose.Schema({
         type: String,
         enum: acceptedTwitterConverters,
         default: 'vx',
-    },
-    utcOffset: {
-        type: Number,
-        default: 0,
     },
     showLevelUp: {
         type: Boolean,
