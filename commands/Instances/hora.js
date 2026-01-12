@@ -1,15 +1,15 @@
 const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
 const UserConfigs = require('../../models/userconfigs');
-const { toUtcOffset, utcOffsetDisplay } = require('../../utils/timezones');
+const { toUtcOffset, utcOffsetDisplay, sanitizeTzCode } = require('../../utils/timezones');
 const { dateToUTCFormat } = require('../../func');
 const { Translator } = require('../../i18n');
-const { parseDateFromNaturalLanguage, addTime, utcStartOfToday } = require('../../utils/datetime');
+const { parseDateFromNaturalLanguage, addTime, utcStartOfTzToday } = require('../../utils/datetime');
 const { isValid, getUnixTime, addMinutes } = require('date-fns');
 const { ButtonBuilder, ButtonStyle } = require('discord.js');
 
 const options = new CommandOptions()
 	.addParam('hora', 'TIME', 'para establecer la hora a convertir', { optional: true })
-	.addFlag('lzt', ['huso', 'franja', 'zona', 'zone', 'timezone', 'offset'], 'para especificar un huso horario de referencia', { name: 'z', type: 'TEXT' })
+	.addFlag('lzt', ['huso', 'franja', 'zona', 'zone', 'timezone', 'offset'], 'para especificar un huso horario de referencia', { name: 'tz', type: 'TEXT' })
 	.addFlag(['f','d'], ['fecha', 'día', 'dia', 'date'], 'para ingresar un día', { name: 'dma', type: 'DATE' });
 
 const tags = new CommandTags().add('COMMON');
@@ -38,10 +38,11 @@ const command = new Command('hora', tags)
 		const tzCode = args.parseFlagExpr('huso')
 			?? (await UserConfigs.findOne({ userId: request.userId }))?.tzCode
 			?? 'UTC';
-		const utcOffset = toUtcOffset(tzCode);
+		const sanitizedTzCode = sanitizeTzCode(tzCode);
+		const utcOffset = toUtcOffset(sanitizedTzCode);
 
 		const dateStr = args.parseFlagExpr('fecha');
-		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, utcOffset);
+		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, sanitizedTzCode);
 		const time = args.getTime('hora', utcOffset);
 
 		if(!time) {
@@ -62,7 +63,7 @@ const command = new Command('hora', tags)
 			return request.reply(translator.getText('invalidTime'));
 
 		if(!date) {
-			const issueDate = addTime(utcStartOfToday(utcOffset), time);
+			const issueDate = addTime(utcStartOfTzToday(sanitizedTzCode), time);
 			const unixDate = getUnixTime(issueDate);
 
 			return request.reply(`<t:${unixDate}:T> — :index_pointing_at_the_viewer: ${translator.getText('horaAdaptedToYourTimezone')}`);

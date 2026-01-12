@@ -2,7 +2,7 @@ const globalConfigs = require('../../data/config.json');
 const { Command, CommandTags, CommandOptions, CommandParam, CommandFlagExpressive } = require('../Commons/commands');
 const { p_pure } = require('../../utils/prefixes');
 const { Translator } = require('../../i18n');
-const { parseDateFromNaturalLanguage, parseTimeFromNaturalLanguage, addTime, utcStartOfToday } = require('../../utils/datetime');
+const { parseDateFromNaturalLanguage, parseTimeFromNaturalLanguage, addTime, utcStartOfTzToday } = require('../../utils/datetime');
 const { MessageFlags, ContainerBuilder, ButtonBuilder, ButtonStyle, SeparatorSpacingSize, TextDisplayBuilder, ModalBuilder, TextInputStyle, ChannelType, TextInputBuilder } = require('discord.js');
 const { shortenText, compressId, decompressId } = require('../../func');
 const UserConfigs = require('../../models/userconfigs');
@@ -10,7 +10,7 @@ const Reminder = require('../../models/reminders');
 const { isValid, addDays, isBefore, addMinutes, getUnixTime } = require('date-fns');
 const { scheduleReminder } = require('../../systems/others/remindersScheduler');
 const { UTCDate } = require('@date-fns/utc');
-const { toUtcOffset } = require('../../utils/timezones');
+const { toUtcOffset, sanitizeTzCode } = require('../../utils/timezones');
 
 const maxReminderCountPerUser = 5;
 const maxReminderContentLength = 960;
@@ -216,9 +216,9 @@ function makeReminderModal(request, translator, utcOffset, reminder = undefined)
 
 /**
  * @param {Date} date
- * @param {number} utcOffset
+ * @param {string} sanitizedTzCode
  */
-const validateDate = (date, utcOffset) => isValid(date) && !isBefore(date, utcStartOfToday(utcOffset));
+const validateDate = (date, sanitizedTzCode) => isValid(date) && !isBefore(date, utcStartOfTzToday(sanitizedTzCode));
 
 /**@param {Date} time*/
 const validateTime = (time) => isValid(time) && Math.abs(+time) < (+addDays(new Date(0), 2));
@@ -240,10 +240,14 @@ const options = new CommandOptions()
 			.setShort('fd')
 			.setLong([ 'fecha', 'date' ])
 			.setDesc('para indicar la fecha en la cual emitir el recordatorio'),
-		new CommandFlagExpressive('dmy', 'TIME')
+		new CommandFlagExpressive('hms', 'TIME')
 			.setShort('ht')
 			.setLong([ 'hora', 'hour', 'time' ])
 			.setDesc('para indicar la fecha en la cual emitir el recordatorio'),
+		new CommandFlagExpressive('tz', 'TEXT')
+			.setShort('lzt')
+			.setLong(['huso', 'franja', 'zona', 'zone', 'timezone', 'offset'])
+			.setDesc('para especificar un huso horario de referencia'),
 	);
 
 const command = new Command('recordatorio', tags)
@@ -279,7 +283,11 @@ const command = new Command('recordatorio', tags)
 				content: translator.getText('userConfigRecommended', p_pure(request)),
 			});
 
-		const utcOffset = toUtcOffset(userConfigs?.tzCode);
+		const tzCode = args.parseFlagExpr('huso')
+			?? userConfigs.tzCode
+			?? 'UTC';
+		const sanitizedTzCode = sanitizeTzCode(tzCode);
+		const utcOffset = toUtcOffset(sanitizedTzCode);
 
 		const dateStr = args.parseFlagExpr('fecha');
 		const timeStr = args.parseFlagExpr('hora');
@@ -304,8 +312,8 @@ const command = new Command('recordatorio', tags)
 				content: translator.getText('recordarReminderContentTooLong'),
 			});
 
-		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, utcOffset) ?? utcStartOfToday(utcOffset);
-		if(!validateDate(date, utcOffset))
+		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, ) ?? utcStartOfTzToday(sanitizedTzCode);
+		if(!validateDate(date, sanitizedTzCode))
 			return request.reply({
 				flags: MessageFlags.Ephemeral,
 				content: translator.getText('invalidDate'),
@@ -380,7 +388,16 @@ const command = new Command('recordatorio', tags)
 			Translator.from(interaction),
 			UserConfigs.findOne({ userId }),
 		]);
-		const utcOffset = toUtcOffset(userConfigs.tzCode);
+
+		if(!userConfigs)
+			return interaction.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('userConfigRecommended', p_pure(interaction.guildId)),
+			});
+
+		const tzCode = userConfigs.tzCode ?? 'Etc/UTC';
+		const sanitizedTzCode = sanitizeTzCode(tzCode);
+		const utcOffset = toUtcOffset(sanitizedTzCode);
 
 		const modal = makeReminderModal(interaction, translator, utcOffset);
 
@@ -393,7 +410,16 @@ const command = new Command('recordatorio', tags)
 			Translator.from(interaction),
 			UserConfigs.findOne({ userId }),
 		]);
-		const utcOffset = toUtcOffset(userConfigs.tzCode);
+
+		if(!userConfigs)
+			return interaction.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('userConfigRecommended', p_pure(interaction.guildId)),
+			});
+
+		const tzCode = userConfigs.tzCode ?? 'Etc/UTC';
+		const sanitizedTzCode = sanitizeTzCode(tzCode);
+		const utcOffset = toUtcOffset(sanitizedTzCode);
 
 		if(!reminder)
 			return interaction.reply({
@@ -413,7 +439,15 @@ const command = new Command('recordatorio', tags)
 			UserConfigs.findOne({ userId }),
 			interaction.deferUpdate(),
 		]);
-		const utcOffset = toUtcOffset(userConfigs.tzCode);
+
+		if(!userConfigs)
+			return interaction.editReply({
+				content: translator.getText('userConfigRecommended', p_pure(interaction.guildId)),
+			});
+
+		const tzCode = userConfigs.tzCode ?? 'Etc/UTC';
+		const sanitizedTzCode = sanitizeTzCode(tzCode);
+		const utcOffset = toUtcOffset(sanitizedTzCode);
 
 		const dateStr = interaction.fields.getTextInputValue('date');
 		const timeStr = interaction.fields.getTextInputValue('time');
@@ -436,8 +470,8 @@ const command = new Command('recordatorio', tags)
 		if(!channel?.isSendable() || !channel.isTextBased() || channel.isDMBased())
 			return informIssue(translator.getText('invalidChannel'));
 
-		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, utcOffset);
-		if(!validateDate(date, utcOffset))
+		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, sanitizedTzCode);
+		if(!validateDate(date, sanitizedTzCode))
 			return informIssue(translator.getText('invalidDate'));
 
 		const time = parseTimeFromNaturalLanguage(timeStr, utcOffset);
@@ -479,7 +513,16 @@ const command = new Command('recordatorio', tags)
 			Translator.from(interaction),
 			UserConfigs.findOne({ userId: interaction.user.id }),
 		]);
-		const utcOffset = toUtcOffset(userConfigs.tzCode);
+
+		if(!userConfigs)
+			return interaction.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('userConfigRecommended', p_pure(interaction.guildId)),
+			});
+
+		const tzCode = userConfigs.tzCode ?? 'Etc/UTC';
+		const sanitizedTzCode = sanitizeTzCode(tzCode);
+		const utcOffset = toUtcOffset(sanitizedTzCode);
 
 		if(!reminder)
 			return interaction.reply({
@@ -504,8 +547,8 @@ const command = new Command('recordatorio', tags)
 				content: translator.getText('invalidChannel'),
 			});
 
-		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, utcOffset);
-		if(!validateDate(date, utcOffset))
+		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, sanitizedTzCode);
+		if(!validateDate(date, sanitizedTzCode))
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
 				content: translator.getText('invalidDate'),

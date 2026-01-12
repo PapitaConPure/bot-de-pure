@@ -84,18 +84,13 @@ function sanitizeTzCode(tzCode) {
 
 /**
  * Obtiene el huso horario especificado en minutos
- * @param {string | number} tzCode
+ * @param {string} sanitizedTzCode
  */
-function toUtcOffset(tzCode) {
-	if(typeof tzCode !== 'string' && typeof tzCode !== 'number')
+function toUtcOffset(sanitizedTzCode) {
+	if(typeof sanitizedTzCode !== 'string')
 		return null;
 
-	const tzStr = sanitizeTzCode(tzCode);
-
-	if(!tzStr.length)
-		return 0;
-
-	const tzDate = new TZDate(Date.now(), tzStr);
+	const tzDate = new TZDate(Date.now(), sanitizedTzCode);
 	const utcOffset = -tzDate.getTimezoneOffset();
 
 	if(isNaN(utcOffset))
@@ -106,13 +101,13 @@ function toUtcOffset(tzCode) {
 
 /**
  * "UTC+XX:XX", "UTC-XX:XX", ""
- * @param {string} tzCode 
+ * @param {string} sanitizedTzCode 
  */
-function utcOffsetDisplay(tzCode) {
-	if(!tzCode?.length)
+function utcOffsetDisplay(sanitizedTzCode) {
+	if(!sanitizedTzCode?.length)
 		return '';
 
-	const utcOffset = toUtcOffset(tzCode);
+	const utcOffset = toUtcOffset(sanitizedTzCode);
 	let str = `UTC${utcOffset < 0 ? '-' : '+'}`;
 	str += `${Math.floor(Math.abs(utcOffset) / 60)}`.padStart(2, '0');
 	str += ':';
@@ -122,17 +117,17 @@ function utcOffsetDisplay(tzCode) {
 
 /**
  * " (UTC+XX:XX)", "(UTC-XX:XX)", ""
- * @param {string} tzCode 
+ * @param {string} sanitizedTzCode 
  */
-function utcOffsetDisplayFull(tzCode) {
-	if(!tzCode?.length || /^utc|gmt/i.test(tzCode))
-		return tzCode.toUpperCase();
+function utcOffsetDisplayFull(sanitizedTzCode) {
+	if(!sanitizedTzCode?.length || /^utc|gmt/i.test(sanitizedTzCode))
+		return sanitizedTzCode.toUpperCase();
 
-	const formattedCode = (tzCode.length <= 4)
-		? tzCode.toUpperCase()
-		: tzCode.replace(/([a-z])([a-z]*)/gi, (_, first, rest) => first.toUpperCase() + rest.toLowerCase());
+	const formattedCode = (sanitizedTzCode.length <= 4)
+		? sanitizedTzCode.toUpperCase()
+		: sanitizedTzCode.replace(/([a-z])([a-z]*)/gi, (_, first, rest) => first.toUpperCase() + rest.toLowerCase());
 
-	return `\`${formattedCode}\` (${utcOffsetDisplay(tzCode)})`;
+	return `\`${formattedCode}\` (${utcOffsetDisplay(sanitizedTzCode)})`;
 }
 
 module.exports = {
