@@ -1,5 +1,5 @@
 const UserConfigs = require('../../models/userconfigs');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder, ContainerBuilder, MessageFlags, StringSelectMenuOptionBuilder } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder, ContainerBuilder, MessageFlags, StringSelectMenuOptionBuilder, SeparatorSpacingSize } = require('discord.js');
 const { CommandTags, Command } = require('../Commons/commands');
 const { tenshiColor, tenshiAltColor } = require('../../data/config.json');
 const { Translator, Locales, isValidLocaleKey } = require('../../i18n');
@@ -74,7 +74,7 @@ function makeDashboardContainer(request, userConfigs, translator) {
                         .setURL(request.user.displayAvatarURL({ size: 256 }))
                 )
         )
-        .addSeparatorComponents(separator => separator.setDivider(true))
+        .addSeparatorComponents(separator => separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large))
         .addActionRowComponents(
             actionRow => actionRow.addComponents(
                 new StringSelectMenuBuilder()
@@ -143,44 +143,17 @@ function makeDashboardContainer(request, userConfigs, translator) {
  * @param {Translator} translator 
  */
 const makeVoiceContainer = (compressedAuthorId, userConfigs, translator) => {
-    const voicePingConfig = (() => {
-        switch(userConfigs.voice.ping) {
-        case 'always': return translator.getText('always');
-        case 'onCreate': return translator.getText('yoVoiceMenuPingOnCreateLabel');
-        case 'never': return translator.getText('never');
-        default: return '⚠️';
-        }
-    })();
-
     const container = new ContainerBuilder()
         .setAccentColor(0x0096fa) //Tema de pixiv
         .addTextDisplayComponents(textDisplay =>
             textDisplay.setContent(`${translator.getText('yoVoiceTitle')}\n${translator.getText('yoVoiceDescription')}`)
         )
         .addSeparatorComponents(separator => separator.setDivider(true))
-        .addTextDisplayComponents(
-            textDisplay => textDisplay.setContent([
-                translator.getText('yoVoicePingName'),
-                voicePingConfig,
-            ].join('\n')),
+        .addTextDisplayComponents(textDisplay =>
+            textDisplay.setContent(translator.getText('yoVoicePingName'))
         )
-        .addSeparatorComponents(separator => separator.setDivider(false))
-        .addTextDisplayComponents(
-            textDisplay => textDisplay.setContent([
-                translator.getText('yoVoiceAutonameName'),
-                makeSessionAutoname(userConfigs) ?? translator.getText('yoVoiceAutonameValueNone'),
-            ].join('\n')),
-        )
-        .addSeparatorComponents(separator => separator.setDivider(false))
-        .addTextDisplayComponents(
-            textDisplay => textDisplay.setContent([
-                translator.getText('yoVoiceKillDelayName'),
-                '4m 45s',
-            ].join('\n')),
-        )
-        .addSeparatorComponents(separator => separator.setDivider(true))
-        .addActionRowComponents(
-            actionRow => actionRow.addComponents(
+        .addActionRowComponents(actionRow =>
+            actionRow.addComponents(
                 new StringSelectMenuBuilder()
                     .setCustomId(`yo_setVoicePing_${compressedAuthorId}`)
                     .setPlaceholder(translator.getText('yoVoiceMenuPing'))
@@ -189,28 +162,60 @@ const makeVoiceContainer = (compressedAuthorId, userConfigs, translator) => {
                             value: 'always',
                             label: translator.getText('always'),
                             description: translator.getText('yoVoiceMenuPingAlwaysDesc'),
+                            default: userConfigs.voice.ping === 'always',
                         },
                         {
                             value: 'onCreate',
                             label: translator.getText('yoVoiceMenuPingOnCreateLabel'),
                             description: translator.getText('yoVoiceMenuPingOnCreateDesc'),
+                            default: userConfigs.voice.ping === 'onCreate',
                         },
                         {
                             value: 'never',
                             label: translator.getText('never'),
                             description: translator.getText('yoVoiceMenuPingNeverDesc'),
+                            default: userConfigs.voice.ping === 'never',
                         },
                     )
-            ),
+            )
+        )
+        .addSeparatorComponents(separator => separator.setDivider(true))
+        .addSectionComponents(section =>
+            section
+                .addTextDisplayComponents(textDisplay =>
+                    textDisplay.setContent([
+                        translator.getText('yoVoiceAutonameName'),
+                        makeSessionAutoname(userConfigs) ?? translator.getText('yoVoiceAutonameValueNone'),
+                    ].join('\n'))
+                )
+                .setButtonAccessory(
+                    new ButtonBuilder()
+                        .setCustomId(`yo_setVoiceAutoname_${compressedAuthorId}`)
+                        .setEmoji('1288444896331698241')
+                        .setLabel(translator.getText('buttonEdit'))
+                        .setStyle(ButtonStyle.Primary)
+                )
+        )
+        .addSeparatorComponents(separator => separator.setDivider(true))
+        .addSectionComponents(textDisplay =>
+            textDisplay
+                .addTextDisplayComponents(
+                    textDisplay => textDisplay.setContent([
+                        translator.getText('yoVoiceKillDelayName'),
+                        '4m 45s',
+                    ].join('\n')),
+                )
+                .setButtonAccessory(
+                    new ButtonBuilder()
+                        .setCustomId(`yo_setVoiceKillDelay_${compressedAuthorId}`)
+                        .setEmoji('1288444896331698241')
+                        .setLabel(translator.getText('buttonEdit'))
+                        .setStyle(ButtonStyle.Primary)
+                )
+        )
+        .addSeparatorComponents(separator => separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large))
+        .addActionRowComponents(
             actionRow => actionRow.addComponents(
-                new ButtonBuilder()
-                    .setCustomId(`yo_setVoiceAutoname_${compressedAuthorId}`)
-                    .setStyle(ButtonStyle.Primary)
-                    .setLabel(translator.getText('yoVoiceAutonameButtonLabel')),
-                new ButtonBuilder()
-                    .setCustomId(`yo_setVoiceKillDelay_${compressedAuthorId}`)
-                    .setStyle(ButtonStyle.Primary)
-                    .setLabel(translator.getText('yoVoiceKillDelayButtonLabel')),
                 backToDashboardButton(compressedAuthorId),
                 cancelButton(compressedAuthorId),
             ),
