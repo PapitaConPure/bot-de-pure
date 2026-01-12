@@ -1394,19 +1394,19 @@ class CommandOptionSolver {
 	}
 
 	/**
-	 * Obtiene un objeto {@link Date} cuyo valor equivale la fecha localizada especificada, sin componentes horarios, usando UTC
+	 * Obtiene un objeto {@link Date} cuyo valor equivale la fecha localizada especificada, sin componentes horarios en UTC
 	 * @param {string} identifier El identificador del {@linkcode CommandParam}
 	 * @param {import('../../i18n').LocaleKey} locale La clave del idioma en el cual interpretar la fecha
-	 * @param {number} z El huso horario con el cual corregir la fecha UTC+0 obtenida, en minutos
+	 * @param {string} tzCode El código de zona horaria en el que se espera la fecha a interpretar
 	 */
-	getDate(identifier, locale, z = 0) {
+	getDate(identifier, locale, tzCode = 'Etc/UTC') {
 		const str = this.isInteractionSolver(this.#args)
 			? this.#args.getString(identifier)
 			: this.#getRelativeDateCompatibleMessageArgs();
 
 		for(const relativeDate of Object.values(relativeDates))
 			if(relativeDate.match.has(str))
-				return relativeDate.getValue(z);
+				return relativeDate.getValue(tzCode);
 		
 		const dateComponents = this.isInteractionSolver(this.#args)
 			? this.#getDateComponentsFromInteraction(identifier)
@@ -1415,7 +1415,7 @@ class CommandOptionSolver {
 		if(dateComponents == undefined) return;
 		
 		const [ a, b, c ] = dateComponents;
-		return makeDateFromComponents(a, b, c, locale, z);
+		return makeDateFromComponents(a, b, c, locale, tzCode);
 	}
 
 	/**
@@ -1707,6 +1707,9 @@ class CommandOptionSolver {
 	 * @param {string} identifier
 	 */
 	hasFlag(identifier) {
+		if(this.isInteractionSolver(this.#args))
+			return this.#args.getBoolean(identifier) ?? false;
+
 		return CommandOptionSolver.asBoolean(
 			this.#options.fetchFlag(
 				this.#args,
