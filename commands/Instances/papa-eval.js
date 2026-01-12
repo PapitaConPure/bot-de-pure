@@ -35,7 +35,7 @@ const command = new Command('papa-eval', flags)
 		const func = require('../../func');
 		const Discord = require('discord.js');
 		// eslint-disable-next-line no-unused-vars
-		const Canvas = require('canvas');
+		const Canvas = require('@napi-rs/canvas');
 
 		if(request.isInteraction)
 			return request.reply({ content: '❌ No permitido con comandos Slash.' });

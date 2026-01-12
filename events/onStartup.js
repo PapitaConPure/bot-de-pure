@@ -30,16 +30,17 @@ const { Booru, Tag } = require('../systems/booru/boorufetch');
 const { modifyPresence } = require('../systems/presence/presence');
 const { auditSystem } = require('../systems/others/auditor');
 
-const { registerFont, loadImage } = require('canvas');
+const { GlobalFonts, loadImage } = require('@napi-rs/canvas');
+const { getUnixTime } = require('date-fns');
 const { lookupService } = require('dns');
 const { promisify } = require('util');
+const path = require('path');
 const chalk = require('chalk');
 
 const { prepareTracksPlayer } = require('../systems/others/musicPlayer')
 const { initializeWebhookMessageOwners } = require('../systems/agents/discordagent');
 const { setupGuildRateKeeper, fetchAllGuildMembers } = require('../utils/guildratekeeper');
 const { initRemindersScheduler, processReminders } = require('../systems/others/remindersScheduler.js');
-const { getUnixTime } = require('date-fns');
 
 const logOptions = {
 	slash: false,
@@ -254,13 +255,13 @@ async function onStartup(client) {
 	}
 
 	console.log(chalk.rgb(158,114,214)('Registrando fuentes'));
-	registerFont('fonts/Alice-Regular.ttf',             { family: 'headline' });
-	registerFont('fonts/cuyabra.otf',                   { family: 'cuyabra' });
-	registerFont('fonts/teen bd.ttf',                   { family: 'cardname' });
-	registerFont('fonts/kirsty rg.otf',                 { family: 'cardclass' });
-	registerFont('fonts/asap-condensed.semibold.ttf',   { family: 'cardbody' });
-	registerFont('fonts/BebasNeue_1.otf',               { family: 'bebas' });
-	registerFont('fonts/DINPro-Cond.otf',               { family: 'dinpro' });
+	GlobalFonts.registerFromPath(path.join(__dirname, '..', 'fonts', 'Alice-Regular.ttf'),             'headline');
+	GlobalFonts.registerFromPath(path.join(__dirname, '..', 'fonts', 'cuyabra.otf'),                   'cuyabra');
+	GlobalFonts.registerFromPath(path.join(__dirname, '..', 'fonts', 'teen bd.ttf'),                   'cardname');
+	GlobalFonts.registerFromPath(path.join(__dirname, '..', 'fonts', 'kirsty rg.otf'),                 'cardclass');
+	GlobalFonts.registerFromPath(path.join(__dirname, '..', 'fonts', 'asap-condensed.semibold.ttf'),   'cardbody');
+	GlobalFonts.registerFromPath(path.join(__dirname, '..', 'fonts', 'BebasNeue_1.otf'),               'bebas');
+	GlobalFonts.registerFromPath(path.join(__dirname, '..', 'fonts', 'DINPro-Cond.otf'),               'dinpro');
 
 	globalConfigs.maintenance = '';
 	console.log(chalk.greenBright.bold('Bot conectado y funcionando'));

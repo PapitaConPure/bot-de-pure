@@ -1,4 +1,4 @@
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
 const { p_pure } = require('../../utils/prefixes');
 const { AttachmentBuilder } = require('discord.js');
@@ -158,7 +158,7 @@ const command = new Command('tarjeta', flags)
 			];
 			const replyContent = {
 				content: phrases[Math.floor(Math.random() * phrases.length)],
-				files: [ new AttachmentBuilder(canvas.toBuffer(), { name: 'tarjeta.png' }) ],
+				files: [ new AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'tarjeta.webp' }) ],
 			};
 			return request.editReply(replyContent);
 		} catch {

@@ -2,7 +2,7 @@
 
 const global = require('../../data/config.json'); //Variables globales
 const { makeWeightedDecision, compressId, decompressId, improveNumber, emojiRegex } = require('../../func');
-const { createCanvas, loadImage } = require('canvas');
+const { createCanvas, loadImage } = require('@napi-rs/canvas');
 const { EmbedBuilder, AttachmentBuilder, StringSelectMenuBuilder, Colors, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { p_pure } = require('../../utils/prefixes');
 const { Puretable, AUser, pureTableAssets } = require('../../models/puretable.js');
@@ -566,7 +566,7 @@ async function drawPureTable(cells) {
 		});
 	});
 	
-	return new AttachmentBuilder(canvas.toBuffer(), { name: 'anarquia.png' });
+	return new AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'anarquia.webp' });
 }
 
 /**

@@ -7,7 +7,7 @@ const { searchCommand, getWikiPageComponentsV2 } = require('../../systems/others
 const { p_pure } = require('../../utils/prefixes');
 const { serverid, tenshiColor, peopleid } = require('../../data/config.json'); //Variables globales
 // const { dibujarDespedida } = require('../../func');
-//const Canvas = require('canvas');
+// const Canvas = require('@napi-rs/canvas');
 
 const options = new CommandOptions()
     .addParam('texto', 'TEXT', 'Parámetro de Texto', { optional: true })

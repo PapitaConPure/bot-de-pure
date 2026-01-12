@@ -2,7 +2,7 @@ const Discord = require('discord.js'); //Discord.js
 const global = require('./data/config.json'); //Variables globales
 const images = require('./data/images.json'); //Imágenes globales
 const { p_pure } = require('./utils/prefixes');
-const Canvas = require('canvas'); //Node Canvas
+const Canvas = require('@napi-rs/canvas'); //Node Canvas
 const chalk = require('chalk'); //Consola con formato bonito
 const { colorsRow } = require('./data/sakiProps');
 const { ButtonStyle, ChannelType } = require('discord.js');
@@ -321,7 +321,7 @@ module.exports = {
      */
     /**
      * Dibuja un avatar circular con Node Canvas
-     * @param {import('canvas').CanvasRenderingContext2D} ctx El Canvas context2D utilizado
+     * @param {import('@napi-rs/canvas').SKRSContext2D} ctx El Canvas context2D utilizado
      * @param {Number} x La posición X del origen del texto
      * @param {Number} y La posición Y del origen del texto
      * @param {String} text El usuario del cual dibujar la foto de perfil
@@ -391,7 +391,7 @@ module.exports = {
      */
     /**
      * Dibuja un avatar circular con Node Canvas
-     * @param {import('canvas').CanvasRenderingContext2D} ctx El Canvas context2D utilizado
+     * @param {import('@napi-rs/canvas').SKRSContext2D} ctx El Canvas context2D utilizado
      * @param {Discord.User} user El usuario del cual dibujar la foto de perfil
      * @param {Number} xcenter La posición X del centro del círculo
      * @param {Number} ycenter La posición Y del centro del círculo
@@ -526,7 +526,7 @@ module.exports = {
             //Foto de perfil
             await module.exports.drawCircularImage(ctx, user, canvas.width / 2, (canvas.height - 56) / 2, 200, { circleStrokeFactor: strokeFactor });
             
-            const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'bienvenida.png' });
+            const imagen = new Discord.AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'bienvenida.webp' });
             const peoplecnt = module.exports.calculateRealMemberCount(guild);
             await channel.send({ files: [imagen] });
     
@@ -621,7 +621,7 @@ module.exports = {
             //Foto de perfil
             await module.exports.drawCircularImage(ctx, user, canvas.width * 0.5, (canvas.height - 56) * 0.5, 200, { circleStrokeFactor: strokeFactor * 0.75 });
             
-            const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'bienvenida.png' });
+            const imagen = new Discord.AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'bienvenida.webp' });
             const peoplecnt = module.exports.calculateRealMemberCount(guild);
             
             await channel.send({ files: [imagen] });
@@ -714,7 +714,7 @@ module.exports = {
             await module.exports.drawCircularImage(ctx, miembro.user, canvas.width / 2, 80 + 200, 200, { circleStrokeFactor: strokeFactor });
     
             //#region Imagen y Mensaje extra
-            const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'despedida.png' });
+            const imagen = new Discord.AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'despedida.webp' });
             const members = servidor.members.cache;
             const peoplecnt = members.filter(member => !member.user.bot).size;
             if(servidor.id === global.serverid.saki) {

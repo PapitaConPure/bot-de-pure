@@ -2,7 +2,7 @@ const Discord = require('discord.js'); //Integrar discord.js
 const global = require('../../data/config.json'); //Variables globales
 const func = require('../../func'); //Funciones globales
 const { default: axios } = require('axios');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { utils } = require('../../data/images.json'); //Funciones globales
 const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
 const { isThread } = require('../../func');
@@ -66,7 +66,7 @@ async function dibujarCum(msg, link) {
 	ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 	ctx.drawImage(cum, 0, 0, canvas.width, canvas.height);
 
-	const imagen = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'cummies.png' });
+	const imagen = new Discord.AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'cummies.webp' });
 	return msg.reply({ files: [imagen] });
 };
 
