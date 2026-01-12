@@ -1,14 +1,13 @@
+![Bot de Puré](https://i.imgur.com/QNFStF8.png)
+
+<p align="right"><sup><i>(La ilustración original le pertenece a <a href="https://www.pixiv.net/en/artworks/73482947">カンパ</a>, quien no forma parte de ni está relacionado con el proyecto de desarrollo de Bot de Puré)</i></sup></p>
+
 ![GitHub package.json dependency version (prod)](https://img.shields.io/node/v/package-json)
 ![GitHub package.json dependency version (prod)](https://img.shields.io/github/package-json/dependency-version/PapitaConPure/bot-de-pure/discord.js)
 ![GitHub package.json dependency version (prod)](https://img.shields.io/github/package-json/dependency-version/PapitaConPure/bot-de-pure/mongoose)
-![GitHub package.json dependency version (prod)](https://img.shields.io/github/package-json/dependency-version/PapitaConPure/bot-de-pure/canvas)
 ![GitHub deployments](https://img.shields.io/github/deployments/PapitaConPure/bot-de-pure/bot-de-pure?logo=GitHub)
 ![GitHub repo size](https://img.shields.io/github/repo-size/PapitaConPure/bot-de-pure)
 ![Twitter Follow](https://img.shields.io/twitter/follow/PapitaPure?label=%40PapitaPure&style=social&link=https://twitter.com/PapitaPure)
-
-![portada](https://i.imgur.com/QNFStF8.png)
-<h1 align="center">Bot de Puré</h1>
-<p align="right"><sup><i>(La ilustración original le pertenece a <a href="https://www.pixiv.net/en/artworks/73482947">カンパ</a>, quien no forma parte de ni está relacionado con el proyecto de desarrollo de Bot de Puré)</i></sup></p>
 
 Bot de entretenimiento, búsqueda de imágenes y utilidades generales varias para Discord. Utiliza comandos tradicionales con adiciones inspiradas en terminales como `--flags` o los nuevamente introducidos comandos estandarizados de /barra.<br>
 Como personaje, es una robot torpe y agresiva en algunos casos, pero parece meterle ganas.
@@ -33,6 +32,10 @@ Como personaje, es una robot torpe y agresiva en algunos casos, pero parece mete
 >   ```cmd
 >   node . -d
 >   ```
+>   ```cmd
+>   bun . -p
+>   ```
+> * Sube emojis personalizados en [la pestaña de Emojis de tu bot](https://discord.com/developers/applications). Luego, reemplaza los markdowns y las IDs de emojis personalizados en el código.
 
 ## Índice
 * [Tecnologías Principales](#tecnologías-principales)
@@ -43,7 +46,6 @@ Como personaje, es una robot torpe y agresiva en algunos casos, pero parece mete
 <hr><br>
 
 ## Tecnologías Principales
-* [Node.js](https://nodejs.org)
 * [discord.js](https://discord.js.org)
 * [MongoDB](https://www.mongodb.com) / [Mongoose](https://github.com/Automattic/mongoose)
 
@@ -130,7 +132,4 @@ Personas involucradas en el desarrollo de Bot de Puré, con sus tags de Discord.
 <hr><br>
 
 > [!NOTE]
-> Empecé este proyecto con 0 conocimiento sobre JavaScript y para cuando me di cuenta creció demasiado, así que ando navegando unos 5 años de mi propia deuda técnica.
-
-> [!NOTE]
-> No esperes ningún tipo de madurez tanto emocional como intelectual si lees el código o usas a Bot de Puré
+> Empecé este proyecto con 0 conocimiento sobre JavaScript y para cuando me di cuenta creció demasiado, así que ando navegando unos 6 años de mi propia deuda técnica.
