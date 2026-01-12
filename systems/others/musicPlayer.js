@@ -7,7 +7,7 @@ const { compressId, decompressId, shortenText } = require('../../func'); //Funci
 const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } = require('../../utils/tsCasts');
 const { Translator } = require('../../i18n');
 const { tryRecoverSavedTracksQueue, saveTracksQueue } = require('../../models/playerQueue');
-const Logger = require('../../utils/logs');
+const Logger = require('../../utils/logs').default;
 
 const { debug, info, warn, error } = Logger('DEBUG', 'PuréMusic');
 

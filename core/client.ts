@@ -1,7 +1,9 @@
-const { Client, IntentsBitField, Partials } = require('discord.js');
+import { Client, IntentsBitField, Partials } from 'discord.js';
 const { Flags: intentBits } = IntentsBitField;
 
-function initializeClient() {
+export let client: Client<boolean> = null;
+
+export function initializeClient() {
     const botIntents = new IntentsBitField().add(
         intentBits.Guilds,
         intentBits.GuildMembers,
@@ -19,7 +21,7 @@ function initializeClient() {
         Partials.Reaction,
     ];
     
-    const client = new Client({
+    const initializedClient = new Client({
         intents: botIntents,
         partials: botPartials,
         allowedMentions: {
@@ -28,11 +30,6 @@ function initializeClient() {
         },
     });
 
-    module.exports.client = client;
-    return client;
+    client = initializedClient;
+    return initializedClient;
 }
-
-module.exports = {
-    initializeClient,
-    client: /**@type {Client<boolean>}*/(null),
-};

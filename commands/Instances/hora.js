@@ -1,5 +1,5 @@
 const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
-const UserConfigs = require('../../models/userconfigs');
+const UserConfigs = require('../../models/userconfigs').default;
 const { toUtcOffset, utcOffsetDisplay, sanitizeTzCode } = require('../../utils/timezones');
 const { dateToUTCFormat } = require('../../func');
 const { Translator } = require('../../i18n');

@@ -12,13 +12,13 @@ const { auditRequest } = require('../systems/others/auditor');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../utils/cmdExceptions');
 const globalConfigs = require('../data/config.json');
 const { tenshiColor } = globalConfigs;
-const UserConfigs = require('../models/userconfigs');
+const UserConfigs = require('../models/userconfigs').default;
 const { sendConvertedPixivPosts } = require('../systems/agents/purepix');
 const { sendConvertedTwitterPosts } = require('../systems/agents/pureet');
 const { Translator } = require('../i18n');
 const { fetchUserCache } = require('../utils/usercache');
 const { addMessageCascade } = require('./onMessageDelete');
-const Logger = require('../utils/logs');
+const Logger = require('../utils/logs').default;
 
 const { error } = Logger('WARN', 'Message');
 

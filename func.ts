@@ -1,0 +1,1887 @@
+import Discord from 'discord.js'; //Discord.js
+import global from './data/config.json'; //Variables globales
+import images from './data/images.json'; //Imágenes globales
+import { p_pure } from './utils/prefixes';
+import Canvas from '@napi-rs/canvas'; //Node Canvas
+import chalk from 'chalk'; //Consola con formato bonito
+import { colorsRow } from './data/sakiProps';
+import { ButtonStyle, ChannelType } from 'discord.js';
+import { fetchUserCache } from './utils/usercache';
+import Hourai from './models/saki';
+import { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } from './utils/tsCasts';
+import { fetchGuildMembers } from './utils/guildratekeeper';
+import { Translator } from './i18n';
+const concol = {
+    orange: chalk.rgb(255, 140, 70),
+    purple: chalk.rgb(158, 114,214),
+};
+
+const HTTP_ENTITIES = /**@type {const}*/({
+    nbsp:   ' ',
+    amp:    '&',
+    quot:   '"',
+    lt:     '<',
+    gt:     '>',
+    tilde:  '~',
+    apos:   '\'',
+    '#039': '\'',
+    cent:   '¢',
+    pound:  '£',
+    euro:   '€',
+    yen:    '¥',
+    copy:   '©',
+    reg:    '®',
+    iexcl:  '¡',
+    brvbar: '¦',
+    sect:   '§',
+    uml:    '¨',
+    not:    '¬',
+    deg:    'º',
+    acute:  '`',
+    micro:  'µ',
+    para:   '¶',
+    ordm:   'º',
+    laquo:  '«',
+    raquo:  '»',
+    circ:   '^',
+});
+
+const HTTP_ENTITIES_REGEX = (() => {
+    const keys = Object.keys(HTTP_ENTITIES).join('|');
+    return new RegExp(`&(${keys});`, 'g');
+})();
+
+//#region Lista
+export function paginateRaw<T>(array: Array<T> | Discord.Collection<Discord.Snowflake, T>, pagemax: number | null = 10): Array<Array<T>> | Array<Array<[Discord.Snowflake, T]>> {
+    if(!Array.isArray(array))
+        //@ts-expect-error
+        array = [...array.entries()];
+
+    return array
+        //@ts-expect-error
+        .map((_, i) => (i % pagemax === 0) ? array.slice(i, i + pagemax) : null)
+        .filter(item => item);
+}
+//#endregion
+
+interface PaginateOptions {
+    pagemax?: number;
+    format?: Function;
+}
+
+export function paginate<T>(array: Array<T> | Discord.Collection<string, T>, itemsOptions: PaginateOptions = { pagemax: 10, format: item => `\`${item.name.padEnd(24)}\`${item}` }): Array<Array<T>> {
+    const { pagemax, format } = itemsOptions;
+    const paginated = paginateRaw(array, pagemax);
+    return paginated.map(page => page.map(format).join('\n'));
+}
+
+//#region Temporizadores
+/**
+ * Crea una promesa que dura la cantidad de milisegundos ingresados
+ */
+export function sleep(ms: number): Promise<void> {
+    if(typeof ms !== 'number') throw 'Se esperaba un número de milisegundos durante el cuál esperar';
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export async function askForRole(miembro: Discord.GuildMember, canal: Discord.TextChannel, rep: number) {
+    const reps = 4;
+    console.log(chalk.cyan('Comprobando miembro nuevo en Saki Scans para petición de rol de color...'));
+    if(!canal.guild.members.cache.has(miembro.id)) {
+        console.log(chalk.red(`El miembro se fue del servidor. Abortando.`));
+        return canal.send({ content: `Se murió el wn de <@${miembro.user.id}> po <:mayuwu:1107843515385389128>` });
+    }
+    console.log(concol.orange('El miembro sigue en el servidor'));
+    const hasColor = hasColorRole(miembro);
+
+    //Comprobación constante para ver si el miembro ya tiene roles de colores
+    if(hasColor) {
+        console.log(chalk.green(`El miembro ha recibido sus roles básicos.`));
+        canal.send({ content: `Weno **${miembro.user.username}**, ya teni tu rol, q esti bien po <:junky:1107847993484386304>` });
+
+        //Finalizar
+        return setTimeout(finalizarHourai, 1000, miembro, canal);
+    }
+
+    if(rep > 0)
+        return setTimeout(askForRole, 1000 * 60 / reps, miembro, canal, rep - 1);
+    
+    if(!miembro.roles.cache.has('1107831054791876691')) {
+        console.log(chalk.magenta('El miembro está retenido.'));
+        global.hourai.warn++;
+        if(global.hourai.warn <= 6) {
+            if(global.hourai.warn <= 3)
+                canal.send({ content: `Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:1107843515385389128> (${global.hourai.warn}/3 llamados)` });
+            setTimeout(askForRole, 1000, miembro , canal, reps);
+            console.log(chalk.cyan(`Volviendo a esperar confirmación de miembro (${global.hourai.warn}/6)...`));
+        }
+        return;
+    }
+
+    console.log(chalk.yellow('El miembro no ha recibido roles básicos.'));
+    await canal.send({
+        content: `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:1107843515385389128>`,
+        files: [global.hourai.images.colors],
+        components: [colorsRow],
+    });
+    setTimeout(forceRole, 1000, miembro, canal, 2 * reps);
+    console.log(chalk.magentaBright(`Esperando comprobación final de miembro en unos minutos...`));
+}
+
+/**
+ * 
+ * @param {Discord.GuildMember} miembro 
+ * @param {Discord.TextChannel} canal 
+ * @param {number} rep 
+ * @returns 
+ */
+export function forceRole(miembro: Discord.GuildMember, canal: Discord.TextChannel, rep: number) {
+    const reps = 4;
+    console.log(chalk.cyan('Comprobando miembro nuevo en Saki Scans para forzado de rol de color'));
+    if(!canal.guild.members.cache.get(miembro.id))
+        return canal.send({ content: `Se fue cagando el <@${miembro?.user.id ?? 'nose'}> csm <:mayuwu:1107843515385389128>` }).catch(() => {});
+
+    console.log(concol.orange('El miembro sigue en el servidor'));
+    const hasColor = hasColorRole(miembro);
+    
+    if(hasColor) {
+        console.log(chalk.green('El miembro ya tiene los roles básicos.'));
+        canal.send({ content: `Al fin qliao ya teni tu rol. Q esti bien **${miembro.user.username}**, po <:uwu:681935702308552730>` }).catch(() => {});
+
+        //Finalizar
+        return setTimeout(finalizarHourai, 1000, miembro, canal);
+    }
+
+    if(rep > 0) {
+        setTimeout(forceRole, 1000 * 60 / reps, miembro, canal, rep - 1);
+        return;
+    }
+
+    try {
+        console.log(chalk.magentaBright('El miembro requiere roles básicos. Forzando roles...'));
+        const colores = global.hourai.colorsList.map(c => c.roleId);
+        canal.send({
+            content:
+                `**${miembro.user.username}**, cagaste altiro watón fome <:tenshiSmug:1108791369897607219>\n` +
+                `Toma un rol random po <:mayuwu:1107843515385389128> <:hr:797294230463840267>`,
+            files: [global.hourai.images.forcecolors]
+        });
+        miembro.roles.add(colores[Math.floor(Math.random() * 7)]);
+        console.log(chalk.greenBright('Roles forzados.'));
+
+        //Finalizar
+        setTimeout(finalizarHourai, 1000, miembro, canal);
+    } catch(e) {
+        console.log(chalk.red('El miembro ya no tiene ningún rol básico.'));
+        console.error(e);
+        canal.send({ content: `Espérate qué weá pasó con **${miembro.user.username}** <:reibu:1107876018171162705>\nOh bueno, ya me aburrí... chao.` }).catch(() => {});
+    }
+}
+//#endregion
+
+//#region Comprobadores
+export const isNotModerator = (member: Discord.GuildMember) => !(member.permissions.has('ManageRoles') || member.permissions.has('ManageMessages'));
+
+export async function isUsageBanned(user: Discord.User | Discord.GuildMember) {
+    const userCache = await fetchUserCache(user);
+    return userCache.banned;
+}
+
+/**@param {Discord.GuildMember} member*/
+export function hasColorRole(member: Discord.GuildMember) {
+    return member?.roles?.cache?.hasAny(...global.hourai.colorsList.map(c => c.roleId));
+}
+
+/**@param {Discord.GuildMember} member*/
+export function isBoosting(member: Discord.GuildMember) {
+    return member.roles.premiumSubscriberRole ? true : false;
+}
+
+/**
+ * 
+ * @param {Discord.GuildBasedChannel} channel 
+ * @returns {channel is Discord.AnyThreadChannel}
+ */
+export function isThread(channel: Discord.GuildBasedChannel): channel is Discord.AnyThreadChannel {
+    return [ ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.AnnouncementThread ].includes(channel.type);
+}
+
+/**@param {import('discord.js').GuildTextBasedChannel} channel*/
+export function channelIsBlocked(channel: import('discord.js').GuildTextBasedChannel) {
+    const member = channel?.guild?.members.me;
+    if(!member?.permissionsIn(channel)?.any?.([ 'SendMessages', 'SendMessagesInThreads' ], true)) return true;
+    if(global.maintenance.length === 0) return false;
+
+    return (global.maintenance.startsWith('!'))
+        ? channel.id === global.maintenance.slice(1)
+        : channel.id !== global.maintenance;
+}
+//#endregion
+
+//#region Anuncios
+/**
+ * 
+ * @param {Discord.GuildMember} miembro 
+ * @param {Discord.TextChannel} canal 
+ */
+export function finalizarHourai(miembro: Discord.GuildMember, canal: Discord.TextChannel) {
+    //Mensaje de fin de bienvenida
+    try {
+        canal.send({
+            content: [
+                `Okay, ya 'tamos ${miembro}, recuerda convivir adecuadamente con el resto <:comodowo:1107847983065747476>`,
+                'Si te interesa, puedes revisar los mensajes pinneados de este canal <:tenshiJuguito:1107843487891734588>',
+                'Y estate tranqui, que ya no vas a recibir tantos pings <:dormidowo:1108318689624866846>',
+                `Dicho esto, ¡disfruta el server po'! Si quieres más roles, puedes usar \`${p_pure(global.serverid.saki).raw}roles\``,
+            ].join('\n')
+        });
+
+        //Sugerir p!suicidio con 30% de probabilidad
+        if(Math.random() < 0.3)
+            setTimeout(() => {
+                canal.send({
+                    content: `Por cierto, tenemos una tradición un poco más oscura. ¿Te atrevei a usar \`${p_pure(global.serverid.saki).raw}suicidio\`?`
+                });
+            }, 1000 * 5);
+
+        //Otorgar rol con 50% de probabilidad
+        const gr = canal.guild.roles.cache;
+        const role50 = gr.find(r => r.name.includes('Rol con 50% de probabilidades de tenerlo'));
+        if(role50 && Math.random() < 0.5)
+            miembro.roles.add(role50);
+    } catch(e) {
+        console.error(e);
+    }
+}
+
+/**
+ * Se debe llamar {@link fetchGuildMembers} antes para obtener buenos resultados
+ * @param {Discord.Guild} guild 
+ */
+export function calculateRealMemberCount(guild: Discord.Guild) {
+    const members = guild.members.cache;
+    return members.filter(member => !member.user.bot).size;
+}
+
+interface CanvasTextDrawAreaOptions {
+    halign?: Canvas.CanvasTextAlign;
+    valign?: Canvas.CanvasTextBaseline;
+    maxSize?: number;
+}
+interface CanvasTextDrawFillOptions {
+    enabled?: Boolean;
+    onTop?: Boolean;
+    color?: string;
+}
+interface CanvasTextDrawStrokeOptions {
+    widthAsFactor?: Boolean;
+    width?: number;
+    color?: string;
+}
+interface CanvasTextDrawFontOptions {
+    family?: 'headline';
+    size?: number;
+    styles?: Array<'regular' | 'bold' | 'italic' | 'underline'>;
+}
+interface CanvasTextDrawOptions {
+    area?: CanvasTextDrawAreaOptions;
+    fill?: CanvasTextDrawFillOptions;
+    stroke?: CanvasTextDrawStrokeOptions;
+    font?: CanvasTextDrawFontOptions;
+}
+/**
+ * Dibuja un avatar circular con Node Canvas
+ * @param {import('@napi-rs/canvas').SKRSContext2D} ctx El Canvas context2D utilizado
+ * @param {number} x La posición X del origen del texto
+ * @param {number} y La posición Y del origen del texto
+ * @param {string} text El usuario del cual dibujar la foto de perfil
+ * @param {CanvasTextDrawOptions} options Opciones de renderizado de texto
+ * @returns {void}
+ */
+export function drawText(ctx: import('@napi-rs/canvas').SKRSContext2D, x: number, y: number, text: string, options: CanvasTextDrawOptions = {}): void {
+    //Parámetros opcionales
+    options.area ??= {};
+    options.area.halign ??= 'left';
+    options.area.valign ??= 'top';
+    options.area.maxSize ??= ctx.canvas.width;
+
+    options.fill ??= {};
+    options.fill.enabled ??= true;
+    options.fill.onTop ??= true;
+    options.fill.color ??= '#ffffff';
+
+    options.stroke ??= {};
+    options.stroke.widthAsFactor ??= false;
+    options.stroke.width ??= 0;
+    options.stroke.color ??= '#000000';
+
+    options.font ??= {};
+    options.font.family ??= 'headline';
+    options.font.size ??= 12;
+    options.font.styles ??= [ 'regular' ];
+
+
+    const { halign, valign, maxSize } = options.area;
+    const { enabled: fillEnabled, onTop: fillOnTop, color: fillColor } = options.fill;
+    const { color: strokeColor, width: strokeWidth, widthAsFactor: strokeWidthAsFactor } = options.stroke;
+    const { family: fontFamily, size: fontSize, styles: fontStyles } = options.font;
+
+    ctx.textAlign = halign;
+    ctx.textBaseline = valign;
+
+    const dynamicStepSize = 2;
+    let dynamicFontSize = fontSize + dynamicStepSize;
+    do ctx.font = `${fontStyles.join(' ')} ${dynamicFontSize -= dynamicStepSize}px "${fontFamily}"`;
+    while(ctx.measureText(text).width > maxSize);
+
+    const fill = () => {
+        ctx.fillStyle = fillColor;
+        ctx.fillText(text, x, y);
+    };
+    const stroke = () => {
+        ctx.lineWidth = Math.ceil(strokeWidthAsFactor ? Math.ceil(fontSize * strokeWidth) : strokeWidth);
+        ctx.strokeStyle = strokeColor;
+        ctx.strokeText(text, x, y);
+    };
+    
+    if(fillEnabled && !fillOnTop)
+        fill();
+
+    if(strokeWidth > 0)
+        stroke();
+
+    if(fillEnabled && fillOnTop)
+        fill();
+}
+
+interface CanvasAvatarDrawOptions {
+    circleStrokeColor?: string;
+    circleStrokeFactor?: number;
+}
+export async function drawCircularImage(ctx: import('@napi-rs/canvas').SKRSContext2D, user: Discord.User, xcenter: number, ycenter: number, radius: number, options: CanvasAvatarDrawOptions = {}): Promise<void> {
+    options.circleStrokeColor ??= '#000000';
+    options.circleStrokeFactor ??= 0.02;
+
+    //Fondo
+    ctx.fillStyle = '#36393f';
+    ctx.arc(xcenter, ycenter, radius, 0, Math.PI * 2, true);
+    ctx.fill();
+
+    //Foto de perfil
+    ctx.strokeStyle = options.circleStrokeColor;
+    ctx.lineWidth = radius * 0.33 * options.circleStrokeFactor;
+    ctx.arc(xcenter, ycenter, radius + ctx.lineWidth, 0, Math.PI * 2, true);
+    ctx.stroke();
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(xcenter, ycenter, radius, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.clip();
+    const avatar = await Canvas.loadImage(user.displayAvatarURL({ extension: 'png', size: 1024 }));
+    ctx.drawImage(avatar, xcenter - radius, ycenter - radius, radius * 2, radius * 2);
+    ctx.restore();
+}
+
+/**
+ * 
+ * @param {Discord.GuildMember} member 
+ * @param {Boolean} forceSaki 
+ */
+export async function dibujarBienvenida(member: Discord.GuildMember, forceSaki: boolean = false) {
+    //Dar bienvenida a un miembro nuevo de un servidor
+    const guild = member.guild; //Servidor
+
+    const channel = guild.systemChannel; //Canal de mensajes de sistema
+
+    //#region Comprobación de miembro y servidor
+    if(guild.systemChannel == null) {
+        console.log(chalk.blue('El servidor no tiene canal de mensajes de sistema.'));
+        guild.fetchOwner().then(ow => ow.user.send({
+            content:
+                '¡Hola, soy Bot de Puré!\n' +
+                `¡Un nuevo miembro, **${member} (${member.user.username} / ${member.id})**, ha entrado a tu servidor **${guild.name}**!\n\n` +
+                '*Si deseas que envíe una bienvenida a los miembros nuevos en lugar de enviarte un mensaje privado, selecciona un canal de mensajes de sistema en tu servidor.*\n' +
+                '-# Nota: Bot de Puré no opera con mensajes privados.'
+        }));
+        return;
+    }
+
+    if(!guild.members.me.permissionsIn(channel).has([ 'SendMessages', 'ViewChannel' ]))
+        return;
+
+    console.log(concol.purple`Un usuario ha entrado a ${guild.name}...`);
+    //#endregion
+
+    await channel.sendTyping();
+
+    if(forceSaki || guild.id === global.serverid.saki)
+        drawWelcomeSaki(member, { force: forceSaki });
+    else 
+        drawWelcomeStandard(member);
+}
+
+/**
+ * 
+ * @param {Discord.GuildMember} member 
+ */
+export async function drawWelcomeStandard(member: Discord.GuildMember) {
+    const { guild, user, displayName } = member;
+    const channel = guild.systemChannel;
+
+    try {
+        //Creación de imagen
+        const canvas = Canvas.createCanvas(1275, 825);
+        const ctx = canvas.getContext('2d');
+
+        const [fondo] = await Promise.all([
+            Canvas.loadImage(images.announcements.welcome),
+            fetchGuildMembers(guild),
+        ]);
+        ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+
+        //#region Texto
+        //#region Propiedades Básicas de texto
+        const strokeFactor = 0.09;
+        const maxSize = canvas.width * 0.9;
+        const vmargin = 15;
+
+        /**@type {CanvasTextDrawStrokeOptions}*/
+        const defaultStroke: CanvasTextDrawStrokeOptions = {
+            widthAsFactor: true,
+            width: strokeFactor,
+            color: '#000000',
+        };
+
+        /**@type {CanvasTextDrawFontOptions}*/
+        const defaultFont: CanvasTextDrawFontOptions = {
+            family: 'headline',
+            size: 100,
+            styles: [ 'bold' ],
+        };
+        //#endregion
+
+        //Nombre del miembro
+        drawText(ctx, canvas.width / 2, vmargin, `${displayName}`, {
+            area: { halign: 'center', valign: 'top', maxSize },
+            stroke: defaultStroke,
+            font: defaultFont,
+        });
+
+        //Complemento encima del Nombre de Servidor
+        drawText(ctx, canvas.width / 2, canvas.height - 105 - vmargin, '¡Bienvenid@ a', {
+            area: { halign: 'center', valign: 'bottom', maxSize },
+            stroke: { ...defaultStroke, width: 56 * strokeFactor },
+            font: { ...defaultFont, size: 56 },
+        });
+        
+        //Nombre de Servidor
+        drawText(ctx, canvas.width / 2, canvas.height - vmargin, `${guild.name}!`, {
+            area: { halign: 'center', valign: 'bottom', maxSize },
+            stroke: defaultStroke,
+            font: defaultFont,
+        });
+        //#endregion
+
+        //Foto de perfil
+        await drawCircularImage(ctx, user, canvas.width / 2, (canvas.height - 56) / 2, 200, { circleStrokeFactor: strokeFactor });
+        
+        const imagen = new Discord.AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'bienvenida.webp' });
+        const peoplecnt = calculateRealMemberCount(guild);
+        await channel.send({ files: [imagen] });
+
+        return channel.send({
+            content:
+                `¡Bienvenido al servidor **${displayName}**!\n` +
+                `-# Ahora hay **${peoplecnt}** usuarios en el server.`
+        });
+    } catch(err) {
+        console.log(chalk.redBright.bold('Error de bienvenida genérica'));
+        console.error(err);
+    }
+}
+
+interface SakiWelcomeDrawOptions {
+    force?: Boolean;
+}
+/**
+ * 
+ * @param {Discord.GuildMember} member 
+ * @param {SakiWelcomeDrawOptions} [options]
+ */
+export async function drawWelcomeSaki(member: Discord.GuildMember, options: SakiWelcomeDrawOptions = {}) {
+    options.force ??= false;
+
+    const saki = (await Hourai.findOne()) || new Hourai();
+    
+    //@ts-expect-error
+    if(!options.force && saki.configs?.bienvenida == false)
+        return;
+
+    const { guild, user, displayName } = member;
+    const channel = guild.systemChannel;
+
+    try {
+        //Creación de imagen
+        const canvas = Canvas.createCanvas(1366, 768);
+        const ctx = canvas.getContext('2d');
+
+        const [fondo] = await Promise.all([
+            Canvas.loadImage(global.hourai.images.welcome),
+            fetchGuildMembers(guild),
+        ]);
+        ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+
+        //#region Texto
+        //#region Propiedades Básicas de texto
+        const strokeFactor = 0.09;
+        const maxSize = canvas.width * 0.6;
+        const vmargin = 15;
+
+        /**@type {CanvasTextDrawStrokeOptions}*/
+        const defaultStroke: CanvasTextDrawStrokeOptions = {
+            widthAsFactor: true,
+            width: strokeFactor,
+            color: '#000000',
+        };
+
+        /**@type {CanvasTextDrawFontOptions}*/
+        const defaultFont: CanvasTextDrawFontOptions = {
+            family: 'headline',
+            size: 100,
+            styles: [ 'bold' ],
+        };
+        //#endregion
+
+        //Nombre del miembro
+        drawText(ctx, canvas.width * 0.5, vmargin, `${displayName}`, {
+            area: { halign: 'center', valign: 'top', maxSize },
+            stroke: defaultStroke,
+            font: defaultFont,
+        });
+
+        const xcenterGuild = canvas.width * 0.5;
+
+        //Complemento encima del Nombre de Servidor
+        drawText(ctx, xcenterGuild, canvas.height - 105 - vmargin, '¡Bienvenid@ a', {
+            area: { halign: 'center', valign: 'bottom', maxSize },
+            stroke: defaultStroke,
+            font: { ...defaultFont, size: 56 },
+        });
+        
+        //Nombre de Servidor
+        drawText(ctx, xcenterGuild, canvas.height - vmargin, `${guild.name}!`, {
+            area: { halign: 'center', valign: 'bottom', maxSize },
+            stroke: defaultStroke,
+            font: defaultFont,
+        });
+        //#endregion
+
+        //Foto de perfil
+        await drawCircularImage(ctx, user, canvas.width * 0.5, (canvas.height - 56) * 0.5, 200, { circleStrokeFactor: strokeFactor * 0.75 });
+        
+        const imagen = new Discord.AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'bienvenida.webp' });
+        const peoplecnt = calculateRealMemberCount(guild);
+        
+        await channel.send({ files: [imagen] });
+
+        const toSend = [
+            `Wena po <@${user.id}> conchetumare, como estai.`,
+            'Como tradición, elige un color con el menú de abajo <:mayuwu:1107843515385389128>',
+            '-# Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:1107847991580164106>',
+        ];
+
+        //@ts-expect-error
+        if(saki.configs?.pingBienvenida)
+            toSend.push('<@&1107831054791876694>, vengan a saludar po maricones <:hl:797294230359375912><:miyoi:1107848008005062727><:hr:797294230463840267>');
+
+        toSend.push(`*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:1107880958981587004>`);
+        toSend.push(global.hourai.images.colors);
+
+        saki.save().catch(() => undefined);
+
+        return channel.send({
+            content: toSend.join('\n'),
+            components: [colorsRow],
+        }).then(sent => {
+            setTimeout(askForRole, 1000, member, channel, 3 * 4);
+            console.log('Esperando evento personalizado de Saki Scans en unos minutos...');
+            return sent;
+        });
+    } catch(err) {
+        console.log(chalk.redBright.bold('Error de bienvenida de Saki Scans'));
+        console.error(err);
+    }
+}
+
+/**
+ * 
+ * @param {Discord.GuildMember} miembro 
+ * @returns 
+ */
+export async function dibujarDespedida(miembro: Discord.GuildMember) {
+    //Dar despedida a ex-miembros de un servidor
+    const servidor = miembro.guild;
+    const canal = servidor.systemChannel;
+
+    //#region Comprobación de miembro y servidor
+    if(!canal) {
+        console.log('El servidor no tiene canal de mensajes de sistema.');
+        return;
+    }
+
+    console.log(`Un usuario ha salido de ${servidor.name}...`);
+    if(!servidor.members.me.permissionsIn(canal).has(['SendMessages', 'ViewChannel'])) {
+        console.log('No se puede enviar un mensaje de despedida en este canal.');
+        return;
+    }
+    canal.sendTyping();
+    //#endregion
+    
+    try {
+        //#region Creación de imagen
+        const canvas = Canvas.createCanvas(1500, 900);
+        const ctx = canvas.getContext('2d');
+
+        const [fondo] = await Promise.all([
+            Canvas.loadImage(images.announcements.farewell),
+            fetchGuildMembers(servidor),
+        ]);
+        ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+        //#endregion
+
+        //#region Texto
+        //#region Propiedades de Texto
+        const strokeFactor = 0.09;
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#000000';
+        //#endregion
+
+        //#region Nombre del usuario
+        ctx.textBaseline = 'bottom';
+        ctx.textAlign = 'center';
+        const xcenter = canvas.width / 2;
+        let Texto = `Adiós, ${miembro.displayName}`;
+        let fontSize = 90;
+        ctx.font = `bold ${fontSize}px "headline"`;
+        ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
+        ctx.strokeText(Texto, xcenter, canvas.height - 40);
+        ctx.fillText(Texto, xcenter, canvas.height - 40);
+        //#endregion
+        //#endregion
+
+        await drawCircularImage(ctx, miembro.user, canvas.width / 2, 80 + 200, 200, { circleStrokeFactor: strokeFactor });
+
+        //#region Imagen y Mensaje extra
+        const imagen = new Discord.AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'despedida.webp' });
+        const members = servidor.members.cache;
+        const peoplecnt = members.filter(member => !member.user.bot).size;
+        if(servidor.id === global.serverid.saki) {
+            const hourai = await Hourai.findOne() || new Hourai();
+            //@ts-expect-error
+            if(hourai.configs?.despedida == false)
+                return;
+
+            await canal.send({ files: [imagen] });
+            await canal.send({
+                content:
+                    'Nooooo po csm, perdimo otro weón <:meguDerp:1107848004775465032>\n' +
+                    `*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
+            });
+
+            hourai.save().catch(() => undefined);
+        } else { //Otros servidores
+            await canal.send({ files: [imagen] });
+            await canal.send({ content: `*Ahora hay **${peoplecnt}** usuarios en el server.*`});
+        }
+        
+        //#endregion
+        console.log('Despedida finalizada.');
+    } catch(err) {
+        console.log(chalk.redBright.bold('Error de despedida'));
+        console.error(err);
+    }
+}
+//#endregion
+
+//#region Fetch
+export function extractUserID(data: string): string {
+    if(data.startsWith('<@') && data.endsWith('>')) {
+        data = data.slice(2, -1);
+        if(data.startsWith('!')) data = data.slice(1);
+    }
+    return data;
+}
+
+interface MemberMatch {
+    member: Discord.GuildMember;
+    rawTarget: string;
+    length: number;
+    matchIndex: number;
+}
+function memberMatchComparer(a: MemberMatch, b: MemberMatch): number {
+    //Favorecer coincidencia temprana
+    if(a.matchIndex < b.matchIndex)
+        return -1;
+    if(a.matchIndex > b.matchIndex)
+        return 1;
+
+    //Favorecer nombre corto
+    if(a.length < b.length)
+        return -1;
+    if(a.length > b.length)
+        return 1;
+
+    //Favorecer orden lexicográfico
+    if(a.rawTarget < b.rawTarget)
+        return -1;
+    if(a.rawTarget > b.rawTarget)
+        return 1;
+
+    return 0;
+}
+
+export function findMemberByUsername(members: Discord.Collection<string, Discord.GuildMember>, query: string): Discord.GuildMember {
+    const processedMembers = members.map(m => ({
+        member: m,
+        rawTarget: m.user.username,
+        length: m.user.username.length,
+        matchIndex: m.user.username.toLowerCase().indexOf(query),
+    }));
+
+    const qualifiedMembers = processedMembers.filter(m => m.matchIndex !== -1);
+    if(qualifiedMembers.length) {
+        qualifiedMembers.sort(memberMatchComparer);
+        return qualifiedMembers[0]?.member;
+    }
+
+    return undefined;
+}
+
+export function findMemberByNickname(members: Discord.Collection<string, Discord.GuildMember>, query: string): Discord.GuildMember {
+    const processedMembers = members
+        .filter(m => m.nickname)
+        .map(m => ({
+            member: m,
+            rawTarget: m.nickname,
+            length: m.nickname.length,
+            matchIndex: m.nickname.toLowerCase().indexOf(query),
+        }));
+
+    const qualifiedMembers = processedMembers.filter(m => m.matchIndex !== -1);
+    if(qualifiedMembers.length) {
+        qualifiedMembers.sort(memberMatchComparer);
+        return qualifiedMembers[0]?.member;
+    }
+
+    return undefined;
+}
+
+export function findMemberByGlobalName(members: Discord.Collection<string, Discord.GuildMember>, query: string): Discord.GuildMember {
+    const processedMembers = members
+        .filter(m => m.user.globalName)
+        .map(m => ({
+            member: m,
+            rawTarget: m.user.globalName,
+            length: m.user.globalName.length,
+            matchIndex: m.user.globalName.toLowerCase().indexOf(query),
+        }));
+
+    const qualifiedMembers = processedMembers.filter(m => m.matchIndex !== -1);
+    if(qualifiedMembers.length) {
+        qualifiedMembers.sort(memberMatchComparer);
+        return qualifiedMembers[0]?.member;
+    }
+
+    return undefined;
+}
+
+/**
+ * Busca miembros de Discord según la consulta y el contexto proporcionados.
+ * 
+ * Devuelve el {@link Discord.GuildMember miembro} de mayor coincidencia.
+ * Si no se encuentra ningún miembro, se devuelve `undefined`.
+ * @param {Discord.GuildMember | string} query 
+ * @param {FetchUserContext} context 
+ * @returns {Discord.GuildMember}
+ */
+export function fetchMember(query: Discord.GuildMember | string, context: FetchUserContext): Discord.GuildMember {
+    if(!query)
+        throw new Error('fetchMember: Se requiere un criterio de búsqueda');
+    
+    if(typeof query !== 'string')
+        return query.user?.username ? query : undefined;
+
+    const { guild: thisGuild, client } = context ?? {};
+    if(!thisGuild || !client)
+        throw new Error('Se requieren la guild actual y el cliente en búsqueda de miembro');
+
+
+    //Prioridad 1: Intentar encontrar por ID
+    const allGuilds = client.guilds.cache;
+    const otherGuilds = allGuilds.filter(g => g.id !== thisGuild.id);
+    query = extractUserID(query);
+
+    if(!isNaN(+query)) {
+        return thisGuild.members.cache.find(m => m.id === query)
+            ?? otherGuilds
+                .map(guild => guild.members.cache.find(m => m.id === query))
+                .find(m => m)
+            ?? undefined;
+    }
+
+    //Prioridad 2: Intentar encontrar por nombres (este server)
+    const lowerQuery = (query as string).toLowerCase();
+    const thisGuildMembers = thisGuild.members.cache;
+    const memberInThisGuild = findMemberByGlobalName(thisGuildMembers, lowerQuery)
+        ?? findMemberByUsername(thisGuildMembers, lowerQuery)
+        ?? findMemberByNickname(thisGuildMembers, lowerQuery);
+
+    if(memberInThisGuild)
+        return memberInThisGuild;
+
+    //Prioridad 3: Intentar encontrar por nombres (otros servers)
+    const otherGuildsMembers = otherGuilds.flatMap(g => g.members.cache);
+    const memberInOtherGuilds = findMemberByGlobalName(otherGuildsMembers, lowerQuery)
+        ?? findMemberByUsername(otherGuildsMembers, lowerQuery)
+        ?? findMemberByNickname(otherGuildsMembers, lowerQuery);
+
+    if(memberInOtherGuilds)
+        return memberInOtherGuilds;
+
+    return undefined;
+}
+
+interface FetchUserContext {
+    guild?: Discord.Guild;
+    client?: Discord.Client;
+}
+/**
+ * Busca usuarios de Discord según la consulta y el contexto proporcionados.
+ * 
+ * Devuelve el {@link Discord.User usuario} de mayor coincidencia.
+ * Si no se encuentra ningún usuario, se devuelve `undefined`.
+ */
+export function fetchUser(query: Discord.User | string, context: FetchUserContext): Discord.User {
+    if(!query)
+        throw new Error('fetchUser: Se requiere un criterio de búsqueda');
+
+    if(typeof query !== 'string')
+        return query.username ? query : undefined;
+    
+    const { guild: thisGuild, client } = context ?? {};
+    if(!query || !thisGuild || !client)
+        throw new Error('Se requieren la guild actual y el cliente en búsqueda de usuario');
+
+    //Prioridad 1: Intentar encontrar por ID
+    const usersCache = client.users.cache;
+    query = extractUserID(query);
+
+    if(!isNaN(+query))
+        return usersCache.find(u => u.id === query);
+
+    //Prioridad 2: Intentar encontrar por nombres (este server)
+    const lowerQuery = (query as string).toLowerCase();
+    const thisGuildMembers = thisGuild.members.cache;
+    const memberInThisGuild = findMemberByGlobalName(thisGuildMembers, lowerQuery)
+        ?? findMemberByUsername(thisGuildMembers, lowerQuery)
+        ?? findMemberByNickname(thisGuildMembers, lowerQuery);
+
+    if(memberInThisGuild)
+        return memberInThisGuild.user;
+
+    //Prioridad 3: Intentar encontrar por nombres (otros servers)
+    const allGuilds = client.guilds.cache;
+    const otherGuilds = allGuilds.filter(g => g.id !== thisGuild.id);
+    const otherGuildsMembers = otherGuilds.flatMap(g => g.members.cache);
+    const memberInOtherGuilds = findMemberByGlobalName(otherGuildsMembers, lowerQuery)
+        ?? findMemberByUsername(otherGuildsMembers, lowerQuery)
+        ?? findMemberByNickname(otherGuildsMembers, lowerQuery);
+
+    if(memberInOtherGuilds)
+        return memberInOtherGuilds.user;
+
+    return undefined;
+}
+
+/**
+ * Busca un usuario basado en la data ingresada.
+ * Devuelve la ID del usuario que más coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún usuario, se devuelve undefined.
+ * @param {string} query 
+ * @param {FetchUserContext} context 
+ * @returns {Promise<string>}
+ */
+export async function fetchUserID(query: string, context: FetchUserContext): Promise<string> {
+    const user = fetchUser(query, context);
+    return (user === undefined) ? undefined : user.id;
+}
+
+/**
+ * Busca un servidor basado en la data ingresada.
+ * Devuelve el servidor que coincide con el término de búsqueda (si se encuentra alguno). Si no se encuentra ningún servidor, se devuelve `undefined`.
+ * @param {string} query 
+ * @returns {Promise<Discord.Guild>}
+ */
+export async function fetchGuild(query: string): Promise<Discord.Guild> {
+    if(typeof query !== 'string' || !query.length) return;
+
+    const client = require('./core/client').client;
+
+    if(!isNaN(+query))
+        return client.guilds.cache.get(query)
+            ?? client.guilds.fetch(query);
+
+    let bestDistance = -1;
+    return client.guilds.cache
+        .reduce((bestMatch, guild) => {
+            const distance = levenshteinDistance(guild.name, query);
+
+            if(bestMatch && distance < bestDistance) {
+                bestDistance = distance;
+                return guild;
+            }
+
+            return bestMatch;
+        }, undefined)
+        .fetch();
+}
+
+/**
+ * Busca un canal basado en la data ingresada.
+ * Devuelve el canal que coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún canal, se devuelve `undefined`.
+ * @param {string} query 
+ * @param {Discord.Guild} guild 
+ * @returns {Discord.GuildBasedChannel}
+ */
+export function fetchChannel(query: string, guild: Discord.Guild): Discord.GuildBasedChannel {
+    if(typeof query !== 'string' || !query.length) return;
+
+    const ccache = guild.channels.cache;
+    if(query.startsWith('<#') && query.endsWith('>'))
+        query = query.slice(2, -1);
+
+    const channel = ccache.get(query) || ccache.filter(c => [ ChannelType.GuildText, ChannelType.GuildVoice ].includes(c.type)).find(c => c.name.toLowerCase().includes(query));
+
+    if(!channel)
+        return;
+    if(![ ChannelType.GuildText, ChannelType.GuildVoice ].includes(channel.type))
+        return;
+
+    return channel;
+}
+
+interface FetchMessageContext {
+    guild?: Discord.Guild;
+    channel?: Discord.GuildTextBasedChannel;
+}
+/**
+ * Busca un mensaje basado en la data ingresada.
+ * Devuelve el mensaje que coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún canal, se devuelve undefined.
+ */
+export async function fetchMessage(data: string, context: FetchMessageContext = {}): Promise<Discord.Message> {
+    if(typeof data !== 'string' || !data.length) return;
+
+    const acceptedChannelTypes = [
+        ChannelType.GuildText,
+        ChannelType.GuildVoice,
+        ChannelType.PublicThread,
+        ChannelType.PrivateThread,
+        ChannelType.AnnouncementThread,
+    ];
+
+    if(!acceptedChannelTypes.includes(context.channel?.type))
+        return;
+
+    const messages = context.channel?.messages;
+    const matchedUrl = data.match(/https:\/\/discord.com\/channels\/\d+\/\d+\/(\d+)/);
+    const messageId = matchedUrl ? matchedUrl[1] : data;
+    let message = messages.cache.get(messageId) || await messages.fetch(messageId).catch(_ => _);
+
+    if(!message?.channel) return;
+    if(!acceptedChannelTypes.includes(message.channel.type)) return;
+    return message;
+}
+
+/**
+ * Busca un canal basado en la data ingresada.
+ * Devuelve el canal que coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún canal, se devuelve undefined.
+ * @param {string} data 
+ * @param {Discord.Guild} guild 
+ * @returns {Discord.Role}
+ */
+export function fetchRole(data: string, guild: Discord.Guild): Discord.Role {
+    if(typeof data !== 'string' || !data.length) return;
+
+    const rcache = guild.roles.cache;
+    if(data.startsWith('<@&') && data.endsWith('>'))
+        data = data.slice(3, -1);
+    const role = rcache.get(data) || rcache.filter(r => r.name !== '@everyone').find(r => r.name.toLowerCase().includes(data));
+    if(!role) return;
+    return role;
+}
+
+/**
+ * @deprecated
+ */
+export const fetchArrows = (emojiscache: Discord.Collection<Discord.Snowflake, Discord.Emoji>): [Discord.Emoji, Discord.Emoji] => [emojiscache.get('681963688361590897'), emojiscache.get('681963688411922460')];
+
+/**
+ * @deprecated
+ * @param {Array<string>} args
+ * @param {{
+ *  property: Boolean
+ *  short: Array<string>
+ *  long: Array<string>
+ *  callback: *
+ *  fallback: *
+ * }} flag
+ */
+export function fetchFlag(args: Array<string>, flag: {
+    property: boolean;
+    short: Array<string>;
+    long: Array<string>;
+    callback: any;
+    fallback: any;
+} = { property: undefined, short: [], long: [], callback: undefined, fallback: undefined }) {
+    //Ahorrarse procesamiento en vano si no se ingresa nada
+    if(!args.length) return typeof flag.fallback === 'function' ? flag.fallback() : flag.fallback;
+
+    let target; //Retorno. Devuelve callback si se ingresa la flag buscada de forma válida, o fallback si no
+    const isFunc = (typeof flag.callback === 'function');
+
+    if(!isFunc) {
+        if(flag.property)
+            throw TypeError('Las flags de propiedad deben llamar una función.');
+        const temp = flag.callback;
+        flag.callback = () => { return temp; }
+    }
+
+    //Recorrer parámetros e intentar procesar flags
+    args.forEach((arg, i) => {
+        if(flag.property && i === (args.length - 1))
+            return;
+
+        arg = arg.toLowerCase();
+        if(flag.long?.length && arg.startsWith('--')) {
+            if(flag.long.includes(arg.slice(2))) {
+                target = flag.property
+                    ? flag.callback(args, i + 1)
+                    : flag.callback();
+                args.splice(i, flag.property?2:1);
+            }
+            return;
+        }
+
+        if(!flag.short?.length || !arg.startsWith('-'))
+            return;
+        
+        for(const c of arg.slice(1)) {
+            if(!flag.short.includes(c))
+                continue;
+
+            target = flag.property
+                ? flag.callback(args, i + 1)
+                : flag.callback();
+
+            if(arg.length <= 2) {
+                args.splice(i, flag.property ? 2 : 1);
+                continue;
+            }
+
+            const charactersToRemove = new RegExp(c, 'g')
+            let temp = args.splice(i, flag.property ? 2 : 1);
+            args.push(temp[0].replace(charactersToRemove, ''));
+            if(flag.property) args.push(temp[1]);
+        }
+    });
+
+    return target ? target : (typeof flag.fallback === 'function' ? flag.fallback() : flag.fallback);
+}
+
+/**
+ * @param {Array<string>} args An array of words, which may contain double-quote groups
+ * @param {number} i Index from which to extract a sentence, be it a single word or a group
+ */
+export function fetchSentence(args: Array<string>, i: number) {
+    if(i == undefined || i >= args.length || args[i] == undefined)
+        return undefined;
+    if(!args[i].startsWith('"'))
+        return args.splice(i, 1)[0];
+
+    let last = i;
+    let text;
+    while(last < args.length && !args[last].endsWith('"'))
+        last++;
+    text = args.splice(i, last - i + 1).join(' ').slice(1);
+
+    if(text.length === 0 || text === '"')
+        return undefined;
+
+    return text.endsWith('"') ? text.slice(0, -1) : text;
+}
+//#endregion
+
+//#region Utilidades
+/**@param {string} text*/
+export const success = (text: string) => `✅ ${text}`;
+
+/**@param {string} text*/
+export const warn = (text: string) => `⚠️ ${text}`;
+
+/**@param {string} text*/
+export const unable = (text: string) => `❌ ${text}`;
+
+/**@param {string} encodedstring*/
+export function decodeEntities(encodedstring: string) {
+    //Fuente: https://stackoverflow.com/questions/44195322/a-plain-javascript-way-to-decode-html-entities-works-on-both-browsers-and-node
+    return encodedstring.replace(HTTP_ENTITIES_REGEX, function(match, entity) {
+        return HTTP_ENTITIES[entity] ?? match;
+    }).replace(/&#(\d+);/gi, function(_, numStr) {
+        const num = parseInt(numStr, 10);
+        return String.fromCharCode(num);
+    });
+}
+
+/**
+ * @template T
+ * @param {Array<{ weight: number, value: T }>} options
+ * @returns {T}
+ */
+export function makeWeightedDecision<T>(options: Array<{ weight: number; value: T; }>): T {
+    if(!options.length) return null;
+
+    const total = options.map(option => option.weight).reduce((a, b) => a + b);
+    const count = options.length;
+    
+    let r = Math.random() * total;
+    for(let i = 0; i < count; i++) {
+        if(r < options[i].weight)
+            return options[i].value;
+        else
+            r -= options[i].weight;
+    }
+
+    return options[count - 1].value;
+}
+//#endregion
+
+//#region Otros
+export const unicodeEmojiRegex = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu;
+/**
+ * @description Resultado de un elemento del retorno de `string.prototype.matchAll`:
+ * * `[1]`: La ID del emoji
+ */
+export const emojiRegex = /<a?:\w+:([0-9]+)>/gi;
+
+/**
+ * Devuelve el primer emoji global encontrado en el string
+ * @param {string} emoji 
+ * @returns {string?}
+ */
+export function defaultEmoji(emoji: string): string | null {
+    if(typeof emoji !== 'string') return null;
+    return emoji.match(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu)?.[0]; //Expresión RegExp cursed
+}
+
+/**
+ * Devuelve el primer emoji de servidor encontrado con el string
+ * @param {string} emoji 
+ * @param {import('discord.js').Guild} guild 
+ * @returns {Discord.Emoji?}
+ */
+export function guildEmoji(emoji: string, guild: import('discord.js').Guild): Discord.Emoji | null {
+    if(typeof emoji !== 'string') return null;
+    if(!guild.emojis) throw TypeError('Debes ingresar una Guild');
+    const parsedEmoji = emoji.match(/^<a*:\w+:[0-9]+>\B/gu)?.[0];
+    if(!parsedEmoji)
+        return guild.emojis.cache.find(e => e.name === emoji) || null;
+    return guild.emojis.resolve(parsedEmoji);
+}
+
+/**
+ * Devuelve el primer emoji global o de servidor encontrado en el string
+ */
+export const emoji = (emoji: string, guild: import('discord.js').Guild): Discord.Emoji | string | null => defaultEmoji(emoji) ?? guildEmoji(emoji, guild);
+
+export function isNSFWChannel(channel: import('discord.js').GuildBasedChannel) {
+    if(channel.isThread())
+        return channel.parent.nsfw;
+
+    if(channel.isSendable())
+        return channel.nsfw;
+
+    return false;
+}
+
+/**
+ * Devuelve un valor acomodado al rango facilitado
+ * @param {number} value El valor a acomodar
+ * @param {number} min El mínimo del rango
+ * @param {number} max El máximo del rango
+ */
+export function clamp(value: number, min: number, max: number) {
+    if(min > max) {
+        const temp = min;
+        min = max;
+        max = temp;
+    }
+
+    return Math.max(min, Math.min(value, max));
+}
+
+/**
+ * Devuelve el valor mediano del conjunto especificado
+ * @param {...number} values Los valores del conjunto
+ */
+export function median(...values: number[]) {
+    if(!values.length) throw RangeError('Se esperaba al menos 1 número');
+    values = values.sort((a, b) => a - b);
+    const lowestHalf = Math.floor(values.length / 2);
+    if(values.length % 2)
+        return values[lowestHalf];
+    return (values[lowestHalf] + values[lowestHalf + 1]) / 2;
+}
+
+/**
+ * Devuelve un valor aleatorio entre 0 y otro valor
+ * @param {number} maxExclusive Máximo valor; excluído del resultado. 1 por defecto
+ * @param {Boolean} [round=false] Si el número debería ser redondeado hacia abajo. `true` por defecto
+ * @returns 
+ */
+export function rand(maxExclusive: number, round: boolean = true) {
+    maxExclusive = +maxExclusive;
+    const negativeHandler = (maxExclusive < 0) ? -1 : 1;
+    maxExclusive = maxExclusive * negativeHandler;
+    const value = ((global.seed + maxExclusive * Math.random()) % maxExclusive) * negativeHandler;
+    return round ? Math.floor(value) : value;
+}
+
+/**
+ * Devuelve un valor aleatorio dentro de un rango entre 2 valores
+ * @param {number} minInclusive Mínimo valor; puede ser incluído en el resultado
+ * @param {number} maxExclusive Máximo valor; excluído del resultado
+ * @param {Boolean} [round=false] Si el número debería ser redondeado hacia abajo. `false` por defecto
+ * @returns 
+ */
+export function randRange(minInclusive: number, maxExclusive: number, round: boolean = true) {
+    minInclusive = 1 * minInclusive;
+    maxExclusive = 1 * maxExclusive;
+    const range = maxExclusive - minInclusive;
+    const value = minInclusive + ((global.seed + range * Math.random()) % range);
+    return round ? Math.floor(value) : value;
+}
+
+/**
+ * Devuelve un elemento aleatorio dentro de la Array especificada
+ * @template T
+ * @param {Array<T>} array 
+ * @returns {T} elemento
+ */
+export function randInArray<T>(array: Array<T>): T {
+    if(!array.length) return undefined;
+    const randomIndex = rand(array.length);
+    return array[randomIndex];
+}
+
+/**
+ * @param {Array<*>} array
+ * @see {@link https://stackoverflow.com/a/2450976}
+ */
+export function shuffleArray(array: Array<any>) {
+    let currentIndex = array.length;
+    
+    while(currentIndex !== 0) {
+        let randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+    
+        [ array[currentIndex], array[randomIndex] ] = [ array[randomIndex], array[currentIndex] ];
+    }
+}
+
+export function subdivideArray<T>(array: T[], divisionSize: number): T[][] {
+    if(!array.length) return [[]];
+
+    const subdivided = [];
+    for (let i = 0; (i * divisionSize) < array.length; i++) {
+        const j = i * divisionSize;
+        subdivided[i] = array.slice(j, j + divisionSize);
+    }
+    return subdivided;
+}
+
+/**
+ * Agrega filas de control de navegación de páginas.
+ * 
+ * Tanto `loadPage` como `loadPageExact` cumplen la función de ir a un número de página resaltado.
+ * La diferencia es que en `loadPage` se extrae el número de página del primer argumento, y en `loadPageExact` se extrae de la opción seleccionada del SelectMenu
+ * 
+ * Tanto `loadPage` como `loadPageExact` deberían de usar el decorador {@linkcode loadPageWrapper}
+ * 
+ * Interacciones:
+ * 
+ * ButtonInteraction `loadPage`
+ * * `args[0]`: Número de página
+ * * `args[1]`: Contexto del salto. Solo es necesario para que cada ID sea única.
+ * * * `START`: "primera página"
+ * * * `BACKWARD`: "página atrás"
+ * * * `FORWARD`: "página delante"
+ * * * `END`: "ultima página"
+ * * * `RELOAD`: "actualizar"
+ * 
+ * SelectMenuInteraction `loadPageExact`
+ * * `.values[0]`: página seleccionada
+ * @param {string} commandFilename Nombre del archivo de comando
+ * @param {number} page Número de página actual
+ * @param {number} lastPage Número de última página
+ */
+export function navigationRows(commandFilename: string, page: number, lastPage: number) {
+    const backward = (page > 0) ? (page - 1) : lastPage;
+    const forward = (page < lastPage) ? (page + 1) : 0;
+    const maxGrowth = 12;
+    const desiredMax = page + maxGrowth;
+    const minPage = Math.max(0, page - maxGrowth - Math.max(0, desiredMax - lastPage));
+    let i = minPage;
+
+    return [
+        makeButtonRowBuilder().addComponents(
+            new Discord.ButtonBuilder()
+                .setCustomId(`${commandFilename}_loadPage_0_START`)
+                .setEmoji('934430008586403900')
+                .setStyle(ButtonStyle.Secondary),
+            new Discord.ButtonBuilder()
+                .setCustomId(`${commandFilename}_loadPage_${backward}_BACKWARD`)
+                .setEmoji('934430008343158844')
+                .setStyle(ButtonStyle.Secondary),
+            new Discord.ButtonBuilder()
+                .setCustomId(`${commandFilename}_loadPage_${forward}_FORWARD`)
+                .setEmoji('934430008250871818')
+                .setStyle(ButtonStyle.Secondary),
+            new Discord.ButtonBuilder()
+                .setCustomId(`${commandFilename}_loadPage_${lastPage}_END`)
+                .setEmoji('934430008619962428')
+                .setStyle(ButtonStyle.Secondary),
+            new Discord.ButtonBuilder()
+                .setCustomId(`${commandFilename}_loadPage_${page}_RELOAD`)
+                .setEmoji('1292310983527632967')
+                .setStyle(ButtonStyle.Primary),
+        ),
+        makeStringSelectMenuRowBuilder().addComponents(
+            new Discord.StringSelectMenuBuilder()
+                .setCustomId(`${commandFilename}_loadPageExact`)
+                .setPlaceholder('Seleccionar página')
+                .setOptions(Array(Math.min(lastPage + 1, 25)).fill(null).map(() => ({
+                    value: `${i}`,
+                    label: `Página ${++i}`,
+                }))),
+        ),
+    ];
+}
+
+export const shortnumberNames = {
+    es: [
+        'millones', 'miles de millones', 'billones', 'miles de billones', 'trillones', 'miles de trillones', 'cuatrillones', 'miles de cuatrillones',
+        'quintillones', 'miles de quintillones', 'sextillones', 'miles de sextillones', 'septillones', 'miles de septillones', 'octillones', 'miles de octillones', 'nonillones', 'miles de nonillones',
+        'decillones', 'miles de decillones', 'undecillones', 'miles de undecillones', 'duodecillones', 'miles de duodecillones', 'tredecillones', 'miles de tredecillones', 'quattuordecillones', 'miles de quattuordecillones',
+        'quindecillones', 'miles de quindecillones', 'sexdecillones', 'miles de sexdecillones',
+    ],
+    en: [
+        'millions', 'billions', 'trillions', 'quadrillions', 'quintillions', 'sextillions', 'septillions', 'octillions', 'nonillions',
+        'decillions', 'undecillions', 'duodecillions', 'tredecillions', 'quattuordecillions', 'quindecillions', 'sexdecillions', 'septendecillions', 'octodecillions', 'novemdecillions',
+        'vigintillions', 'unvigintillions', 'duovigintillions', 'trevigintillions', 'quattuorvigintillions', 'quinvigintillions', 'sexvigintillions', 'septenvigintillions', 'octovigintillions', 'novemvigintillions',
+        'trigintillions', 'untrigintillions', 'duotrigintillions',
+    ],
+    ja: [
+        'millions', 'billions', 'trillions', 'quadrillions', 'quintillions', 'sextillions', 'septillions', 'octillions', 'nonillions',
+        'decillions', 'undecillions', 'duodecillions', 'tredecillions', 'quattuordecillions', 'quindecillions', 'sexdecillions', 'septendecillions', 'octodecillions', 'novemdecillions',
+        'vigintillions', 'unvigintillions', 'duovigintillions', 'trevigintillions', 'quattuorvigintillions', 'quinvigintillions', 'sexvigintillions', 'septenvigintillions', 'octovigintillions', 'novemvigintillions',
+        'trigintillions', 'untrigintillions', 'duotrigintillions',
+    ],
+};
+
+interface ImproveNumberOptions {
+    appendOf?: boolean;
+    shorten?: boolean;
+    translator?: Translator;
+    minDigits?: number;
+}
+/**
+ * @function
+ * @param {number | string} num El número a mejorarle la visibilidad
+ * @param {ImproveNumberOptions} [options] Opciones para mejorar el número
+ * @returns {string}
+ */
+export function improveNumber(num: number | string, options: ImproveNumberOptions = {}): string {
+    const {
+        appendOf = false,
+        shorten = false,
+        translator = new Translator('es'),
+        minDigits = 1,
+    } = options;
+
+    if(typeof num === 'string')
+        num = parseFloat(num);
+    
+    if(isNaN(num))
+        return '0';
+    
+    /**
+     * @param {number} n
+     * @param {Intl.numberFormatOptions} nopt
+     */
+    const formatnumber = (n: number, nopt: Intl.NumberFormatOptions = {}) => n.toLocaleString(translator.locale, { maximumFractionDigits: 2, minimumIntegerDigits: minDigits, ...nopt });
+    if((num < 1000000) || !shorten)
+        return formatnumber(num);
+
+    const ofPrefix = appendOf ? translator.getText('genericNumberOfPrefix') : '';
+    const ofSuffix = appendOf ? translator.getText('genericNumberOfSuffix') : '';
+    
+    const obtainShortenednumber = () => {
+        const googol = Math.pow(10, 100);
+        if(num >= googol)
+            return `${formatnumber(num / googol, { maximumFractionDigits: 4 })} Gúgol`;
+
+        const jesus = shortnumberNames[translator.locale];
+        const ni = (num < Math.pow(10, 6 + jesus.length * 3))
+            ? Math.floor((num.toLocaleString('fullwide', { useGrouping: false }).length - 7) / 3)
+            : jesus.length - 1;
+        const snum = formatnumber(num / Math.pow(1000, ni + 2), { minimumFractionDigits: 2 });
+        
+        return [ snum, jesus[ni] ].join(' ');
+    }
+    
+    return `${ofPrefix}${obtainShortenednumber()}${ofSuffix}`;
+}
+
+export function quantityDisplay(num: number, translator: Translator) {
+    return improveNumber(num, {
+        appendOf: true,
+        shorten: true,
+        translator,
+    });
+}
+
+export function regroupText(arr: string[], sep = ',') {
+    const sepRegex = new RegExp(`([\\n ]*${sep}[\\n ]*)+`, 'g');
+    return arr.join(' ').replace(sepRegex, sep).split(sep).filter(a => a.length);
+}
+
+/**
+ * @description
+ * Limita un string a una cantidad definida de caracteres.
+ * Si el string sobrepasa el máximo establecido, se reemplaza el final por un string suspensor para indicar el recorte
+ */
+export function shortenText(text: string, max: number | null = 200, suspensor: string | null = '...'): string {
+    if(typeof text !== 'string') throw TypeError('El texto debe ser un string');
+    if(typeof max !== 'number') throw TypeError('El máximo debe ser un número');
+    if(typeof suspensor !== 'string') throw TypeError('El suspensor debe ser un string');
+    if(text.length < max) return text;
+    return `${text.slice(0, max - suspensor.length)}${suspensor}`;
+}
+
+/**
+ * @description
+ * Limita un string a una cantidad definida de caracteres de forma floja (no recorta palabras).
+ * Si el string sobrepasa el máximo establecido, se reemplaza el final por un string suspensor para indicar el recorte
+ */
+export function shortenTextLoose(text: string, max: number | null = 200, hardMax: number | null = 256, suspensor: string | null = '...'): string {
+    if(typeof text !== 'string') throw TypeError('El texto debe ser un string');
+    if(typeof max !== 'number') throw TypeError('El máximo debe ser un número');
+    if(typeof hardMax !== 'number') throw TypeError('El máximo verdadero debe ser un número');
+    if(typeof suspensor !== 'string') throw TypeError('El suspensor debe ser un string');
+
+    if(text.length < max)
+        return text;
+
+    const trueMax = Math.min(text.length, hardMax);
+    const whitespaces = [ ' ', '\n', '\t' ];
+    let calculatedMax = max;
+    while(calculatedMax < trueMax && !whitespaces.includes(text[calculatedMax])) calculatedMax++;
+    
+    if(calculatedMax + suspensor.length > hardMax)
+        calculatedMax = hardMax - suspensor.length;
+
+    if(calculatedMax <= text.length)
+        return text;
+
+    return `${text.slice(0, calculatedMax)}${suspensor}`;
+}
+
+interface SmartShortenStructDefinition {
+    start: string;
+    end: string;
+    dynamic: Boolean;
+}
+interface SmartShortenOptions {
+    max: number;
+    hardMax: number;
+    suspensor: string;
+    structs: Array<SmartShortenStructDefinition>;
+}
+/**
+ * @description
+ * Limita un string a una cantidad definida de caracteres de forma inteligente (no recorta palabras ni estructuras).
+ */
+export function shortenTextSmart(text: string, options: Partial<SmartShortenOptions>): string {
+    options ??= {};
+    options.max ??= 200;
+    options.hardMax ??= 256;
+    options.suspensor ??= '...';
+    options.structs ??= [];
+    const { max, hardMax, suspensor } = options;
+
+    if(text.length < max)
+        return text;
+
+    const trueHardMax = Math.min(text.length, hardMax);
+    
+    const whitespaceOffset = /\s/.exec(text.slice(max, trueHardMax - suspensor.length)).index;
+    const trueMax = max + (whitespaceOffset > 0 ? whitespaceOffset : 0);
+
+    //PENDIENTE
+
+    return `${text.slice(0, trueMax)}${suspensor}`;
+}
+
+export const toCapitalized = (text) => `${text.slice(0, 1).toUpperCase()}${text.slice(1)}`;
+
+interface LowerCaseNormalizationOptions {
+    removeCarriageReturns?: Boolean;
+}
+/**
+ * @param {string} text
+ * @param {LowerCaseNormalizationOptions} options
+ * @returns {string}
+ */
+export function toLowerCaseNormalized(/** @type {string}*/ text: string, options: LowerCaseNormalizationOptions = null): string {
+    options ??= {};
+    options.removeCarriageReturns ??= false;
+
+    text = text
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/([aeioun])[\u0300-\u030A]/gi, '$1');
+    
+    if(options.removeCarriageReturns)
+        text = text.replace(/\r/g, '');
+
+    return text;
+}
+
+/**
+ * Calcula la distancia entre dos strings con el algoritmo de distancia Levenshtein
+ * @param {string} a 
+ * @param {string} b 
+ * @returns {number}
+ */
+export function levenshteinDistance(a: string, b: string): number {
+    const m = a.length + 1;
+    const n = b.length + 1;
+    let distance = new Array(m);
+    for(let i = 0; i < m; ++i) {
+        distance[i] = new Array(n);
+        for(let j = 0; j < n; ++j)
+            distance[i][j] = 0;
+        distance[i][0] = i;
+    }
+
+    for(let j = 1; j < n; j++)
+        distance[0][j] = j;
+
+    let cost;
+    for(let i = 1; i < m; i++)
+        for(let j = 1; j < n; j++) {
+            cost = a.at(i - 1) === b.at(j - 1) ? 0 : 1;
+
+            distance[i][j] = Math.min(
+                distance[i - 1][j] + 1,
+                distance[i][j - 1] + 1,
+                distance[i - 1][j - 1] + cost,
+            );
+        }
+
+    return distance[m - 1][n - 1];
+}
+
+/**
+ * Calcula la distancia entre dos strings con el algoritmo de distancia Damerau-Levenshtein + peso Euclideano según distancia entre teclas del teclado
+ * @param {string} a 
+ * @param {string} b 
+ * @returns {number}
+ */
+export function edlDistance(a: string, b: string): number {
+    const keyboardKeys = [
+        [ ...'º1234567890\'¡' ],
+        [ ...' qwertyuiop`+' ],
+        [ ...' asdfghjklñ´ç' ],
+        [ ...'<zxcvbnm,.-  ' ],
+    ];
+    const shiftKeyboardKeys = [
+        [ ...'ª!"·$%&/()=?¿' ],
+        [ ...'           ^*' ],
+        [ ...'           ¨Ç' ],
+        [ ...'>       ;:_  ' ],
+    ];
+    const altKeyboardKeys = [
+        [ ...'\\|@#~€¬      ' ],
+        [ ... '           []' ],
+        [ ... '           {}' ],
+        [ ... '             ' ],
+    ];
+
+    const keyboardCartesians = {};
+    function assignToPlane(x, y, c) {
+        if(c == undefined) return;
+        keyboardCartesians[c] = { x, y };
+    }
+    for(let j = 0; j < keyboardKeys.length; j++) {
+        keyboardKeys[j]     .forEach((char, i) => assignToPlane(i, j, char));
+        shiftKeyboardKeys[j].forEach((char, i) => assignToPlane(i, j, char));
+        altKeyboardKeys[j]  .forEach((char, i) => assignToPlane(i, j, char));
+    }
+    assignToPlane(keyboardCartesians['b'].x, keyboardCartesians['b'].y + 1, 'SPACE');
+    const centerCartesian = { x: parseInt(`${keyboardKeys[1].length * 0.5}`), y: 1 };
+    function euclideanDistance(a = 'g', b = 'h') {
+        a = a.toLowerCase();
+        b = b.toLowerCase();
+        const aa = a === ' ' ? keyboardCartesians['SPACE'] : keyboardCartesians[a] ?? centerCartesian;
+        const bb = b === ' ' ? keyboardCartesians['SPACE'] : keyboardCartesians[b] ?? centerCartesian;
+        const x = (aa.x - bb.x) ** 2;
+        const y = (aa.y - bb.y) ** 2;
+        return Math.sqrt(x + y);
+    }
+    const normalizedEuclidean = euclideanDistance('w', 'd');
+    const halfNormalizedEuclidean = normalizedEuclidean * 0.5;
+
+    const m = a.length + 1;
+    const n = b.length + 1;
+    let distance = (new Array(m)).fill(null).map((element, i) => {
+        element = (new Array(n)).fill(0);
+        element[0] = i;
+        return element;
+    });
+    for(let j = 1; j < n; j++)
+        distance[0][j] = j;
+
+    for(let i = 1; i < m; i++)
+        for(let j = 1; j < n; j++) {
+            const aa = a.at(i - 1);
+            const bb = b.at(j - 1);
+            const cost = aa === bb ? 0 : 1;
+
+            const deletion = distance[i - 1][j] + 1;
+            const insertion = distance[i][j - 1] + 1;
+            const substitution = distance[i - 1][j - 1] + cost;
+            distance[i][j] = Math.min(deletion, insertion, substitution);
+            
+            if(a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1])
+                distance[i][j] = Math.min(
+                    distance[i][j],
+                    distance[i - 2][j - 2] + 1,
+                );
+
+            if(cost && substitution < insertion && substitution < deletion)
+                distance[i][j] += euclideanDistance(aa, bb) * halfNormalizedEuclidean - normalizedEuclidean;
+        }
+
+    return distance[m - 1][n - 1];
+}
+
+const digitsOf64 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/';
+
+/**
+ * @param {number} n 
+ * @param {string} s 
+ * @returns {string}
+ */
+export function radix10to64(n: number, s: string = ''): string {
+    const newKey = n % 64;
+    const remainder = Math.floor(n / 64);
+    const stack = digitsOf64[newKey] + s;
+    return remainder <= 0 ? stack : radix10to64(remainder, stack);
+}
+
+/**
+ * @param {string} s 
+ * @returns {number}
+ */
+export function radix64to10(s: string): number {
+    const digits = s.split('');
+    let result = 0;
+    for(const e in digits)
+        result = (result * 64) + digitsOf64.indexOf(digits[e]);
+    return result;
+}
+
+const digitsOf128 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/*ÁÉÍÓÚÀÈÌÒÙÄËÏÖÜÂÊÎÔÛÃÕáéíóúàèìòùäëïöüãõÑñÇçºª;:,.!·%¿?@#~€¬¨^<>';
+
+export function radix10to128(n: number, s: string = ''): string {
+    const newKey = n % 128;
+    const remainder = Math.floor(n / 128);
+    const stack = digitsOf128[newKey] + s;
+    return remainder <= 0 ? stack : radix10to128(remainder, stack);
+}
+
+export function radix128to10(s: string): number {
+    const digits = s.split('');
+    let result = 0;
+    for(const e in digits)
+        result = (result * 128) + digitsOf128.indexOf(digits[e]);
+    return result;
+}
+
+export function fullToShortHour(hour: number) {
+    if(hour < 1)
+        return { value: 12, meridian: /**@type {const}*/('AM') };
+    if(hour < 12)
+        return { value: hour, meridian: /**@type {const}*/('AM') };
+    
+    return { value: hour - 12, meridian: /**@type {const}*/('PM') };
+}
+
+/**
+ * @param date La fecha a la cual dar formato.
+ * @param template La plantilla de formato para la fecha indicada.
+ * 
+ * Ejemplos para la fecha: "Martes, 9 de abril de 2025, 2:48:06.092 PM", con el locale "es-ES"
+ *   - yyyy: 2025
+ *   - yy: 25
+ *   - MMMM: Abril
+ *   - MMM: Ene
+ *   - MM: 04
+ *   - M: 4
+ *   - dddd: Martes
+ *   - ddd: Mar
+ *   - dd: 09
+ *   - d: 9
+ *   - hhhh: 2:48:06 PM
+ *   - hhh: 2:48 PM
+ *   - hh: 02
+ *   - h: 2
+ *   - HH: 14
+ *   - H: 14
+ *   - mm: 48
+ *   - m: 48
+ *   - ss: 06
+ *   - s: 6
+ *   - fff: 092
+ *   - ff: 09
+ *   - f: 1
+ * @param locale Por ejemplo, "en-US" o "es-ES".
+ */
+export function dateToUTCFormat(date: Date, template: string, locale: string = 'en-US'): string {
+    if (!(date instanceof Date))
+        throw new TypeError("Se esperaba un objeto Date");
+
+    if (typeof template !== "string" || !template.length)
+        throw new TypeError("Se esperaba un string válido como plantilla de formato");
+
+    const year = date.getUTCFullYear().toString();
+    const month = (date.getUTCMonth() + 1).toString();
+    const day = date.getUTCDate().toString();
+    const hours = date.getUTCHours();
+    const hoursInfo = fullToShortHour(hours);
+    const minutes = date.getUTCMinutes().toString();
+    const seconds = date.getUTCSeconds().toString();
+    const milliseconds = date.getUTCMilliseconds().toString();
+
+    const replacements = {
+        'yyyy' : year,
+        'yy'   : year.slice(-2),
+        'MMMM' : date.toLocaleDateString(locale, { month: 'long', timeZone: 'UTC' }),
+        'MMM'  : date.toLocaleDateString(locale, { month: 'short', timeZone: 'UTC' }),
+        'MM'   : month.padStart(2, '0'),
+        'M'    : month,
+        'dddd' : date.toLocaleDateString(locale, { weekday: 'long', timeZone: 'UTC' }),
+        'ddd'  : date.toLocaleDateString(locale, { weekday: 'short', timeZone: 'UTC' }),
+        'dd'   : day.padStart(2, '0'),
+        'd'    : day,
+        'hhhh'  : `${hoursInfo.value.toString()}:${minutes.padStart(2, '0')}:${seconds.padStart(2, '0')} ${hoursInfo.meridian}`,
+        'hhh'  : `${hoursInfo.value.toString()}:${minutes.padStart(2, '0')} ${hoursInfo.meridian}`,
+        'hh'   : hoursInfo.value.toString().padStart(2, '0'),
+        'h'    : hoursInfo.value.toString(),
+        'HH'   : hours.toString().padStart(2, '0'),
+        'H'    : hours.toString(),
+        'mm'   : minutes.padStart(2, '0'),
+        'm'    : minutes,
+        'ss'   : seconds.padStart(2, '0'),
+        's'    : seconds,
+        'fff'  : milliseconds.padStart(3, '0'),
+        'ff'   : milliseconds.slice(0, 2).padStart(2, '0'),
+        'f'    : milliseconds.slice(0, 1),
+    };
+
+    let formatted = template;
+
+    for(const key in replacements) {
+        const regex = new RegExp(`\\b${key}\\b`, 'g');
+        formatted = formatted.replace(regex, replacements[key]);
+    }
+
+    return formatted;
+}
+
+export function compressId(id: string) {
+    if(typeof id !== 'string')
+        throw Error('La id debe ser un string');
+
+    let mid = Math.floor(id.length * 0.5);
+    if(id[mid] === '0')
+        mid = Math.floor(mid * 0.5) || 1;
+    while(id[mid] === '0' && mid < id.length - 1)
+        mid++;
+
+    let left = id.slice(0, mid);
+    let right = id.slice(mid);
+    const compr = [ left, right ].map(str => {
+        const int = parseInt(str);
+        if(isNaN(int)) throw TypeError(`No se pudo convertir ${str} a un entero al intentar comprimir la id: ${id}`);
+        return radix10to128(int);
+    });
+    
+    return compr[0].length + compr.join('');
+}
+
+export function decompressId(id: string) {
+    if(typeof id !== 'string')
+        throw Error('La id debe ser un string');
+
+    const mid = id[0];
+    id = id.slice(1);
+    let left = id.slice(0, +mid);
+    let right = id.slice(+mid);
+    const decomp = [ left, right ].map(str => radix128to10(str).toString());
+    
+    return decomp.join('');
+}
+
+export function stringHexToNumber(str: string): number {
+    if(typeof str !== 'string')
+        throw TypeError('Se esperaba un string de hexadecimal para convertir a número');
+    
+    if(!str.length)
+        return 0;
+    
+    if(str.startsWith('#'))
+        str = str.slice(1);
+    
+    return parseInt(`0x${str}`);
+}
+
+/**
+ * @description
+ * Reduce la presición de un número a solo los dígitos especificados.
+ * Si la parte decimal tiene menos dígitos que lo especificado, se deja como está
+ * @param num El número
+ * @param precision La precisión
+ */
+export function toPrecision(num: number, precision: number) {
+    if(typeof num !== 'number') throw TypeError('Se esperaba un número válido');
+    if(typeof precision !== 'number') throw TypeError('La presición debe ser un número');
+    if(precision < 0 || precision > 14) throw RangeError('La presición debe ser un número entre 0 y 14');
+
+    const abs = ~~num;
+    const decimal = num - abs;
+    const squash = 10 ** precision;
+    const reduced = Math.floor(decimal * squash) / squash;
+    return abs + reduced;
+}
+//#endregion

@@ -1,4 +1,4 @@
-const UserConfigs = require('../../models/userconfigs');
+const UserConfigs = require('../../models/userconfigs').default;
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder, ContainerBuilder, MessageFlags, StringSelectMenuOptionBuilder, SeparatorSpacingSize } = require('discord.js');
 const { CommandTags, Command, CommandOptions, CommandFlag } = require('../Commons/commands');
 const { tenshiColor, tenshiAltColor } = require('../../data/config.json');
@@ -362,7 +362,7 @@ function makeSelectTagsChannelContainer(compressedAuthorId, request, userConfigs
                         if(!channel || channel.isDMBased() || !channel.isSendable())
                             return {
                                 label: translator.getText('invalidChannel'),
-                                value: null,
+                                value: `!${channelId}`,
                             };
 
                         return {
@@ -424,6 +424,34 @@ function makeFollowedTagsContainer(compressedAuthorId, channelId, userConfigs, t
         );
 
     return container;
+}
+
+async function makeSelectFeedTCResponse(interaction, compressedAuthorId) {
+    const { user } = interaction;
+
+    const [userConfigs] = await Promise.all([
+        UserConfigs.findOne({ userId: user.id }),
+        interaction.deferReply({ flags: MessageFlags.Ephemeral }),
+    ]);
+
+    if(!userConfigs)
+        return interaction.editReply({ content: userNotAvailableText });
+
+    const translator = new Translator(userConfigs.language);
+
+    if(user.id !== decompressId(compressedAuthorId))
+        return interaction.editReply({ content: translator.getText('unauthorizedInteraction') });
+
+    if(userConfigs.feedTagSuscriptions.size === 0)
+        return interaction.editReply({ content: translator.getText('yoFeedEmptyError') });
+
+    return Promise.all([
+        userConfigs.save(),
+        interaction.message.edit({
+            components: [makeSelectTagsChannelContainer(compressedAuthorId, interaction, userConfigs, translator)],
+        }),
+        interaction.deleteReply(),
+    ]);
 }
 
 const tags = new CommandTags().add('COMMON');
@@ -577,9 +605,8 @@ const command = new Command('yo', tags)
 
         const { user } = interaction;
 
-        //FIXME: ???????????????????????
         if(selected === 'feed')
-            return command['selectFeedTC'](interaction, compressedAuthorId);
+            return makeSelectFeedTCResponse(interaction, compressedAuthorId);
 
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
         if(!userConfigs)
@@ -805,31 +832,7 @@ const command = new Command('yo', tags)
         ]);
     }, { userFilterIndex: 0 })
 	.setButtonResponse(async function selectFeedTC(interaction, compressedAuthorId) {
-		const { user } = interaction;
-
-		const [userConfigs] = await Promise.all([
-            UserConfigs.findOne({ userId: user.id }),
-            interaction.deferReply({ flags: MessageFlags.Ephemeral }),
-        ]);
-
-        if(!userConfigs)
-            return interaction.editReply({ content: userNotAvailableText });
-
-        const translator = new Translator(userConfigs.language);
-
-		if(user.id !== decompressId(compressedAuthorId))
-			return interaction.editReply({ content: translator.getText('unauthorizedInteraction') });
-
-        if(userConfigs.feedTagSuscriptions.size === 0)
-            return interaction.editReply({ content: translator.getText('yoFeedEmptyError') });
-
-        return Promise.all([
-            userConfigs.save(),
-            interaction.message.edit({
-                components: [makeSelectTagsChannelContainer(compressedAuthorId, interaction, userConfigs, translator)],
-            }),
-            interaction.deleteReply(),
-        ]);
+        return makeSelectFeedTCResponse(interaction, compressedAuthorId);
 	})
 	.setSelectMenuResponse(async function modifyFollowedTags(interaction, compressedAuthorId, isAlt) {
 		const { user } = interaction;
@@ -841,8 +844,17 @@ const command = new Command('yo', tags)
 
         const translator = new Translator(userConfigs.language);
 
+        if(!channelId || channelId.startsWith('!'))
+            return interaction.reply({
+                flags: MessageFlags.Ephemeral,
+                content: translator.getText('invalidChannel'),
+            });
+
 		if(compressId(user.id) !== compressedAuthorId)
-			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
+			return interaction.reply({
+                flags: MessageFlags.Ephemeral,
+                content: translator.getText('unauthorizedInteraction'),
+            });
 
         return Promise.all([
             userConfigs.save(),

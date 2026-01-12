@@ -1,12 +1,10 @@
-const { Queue } = require('./ds');
+import { Queue } from './ds';
 
-function createTaskScheduler() {
-	/**@type {Queue<() => Promise<*>>}*/
-	const queue = new Queue();
+export function createTaskScheduler() {
+	const queue: Queue<() => Promise<void>> = new Queue();
 	
-	/**@param {() => Promise<*>} callback*/
-	const scheduleTask = async function(callback) {
-		let resolveResult;
+	const scheduleTask = async function(callback: () => Promise<any>) {
+		let resolveResult: (value: any) => void;
 		const result = new Promise(resolve => {
 			resolveResult = resolve;
 		});
@@ -31,7 +29,3 @@ function createTaskScheduler() {
 		scheduleTask,
 	};
 }
-
-module.exports = {
-	createTaskScheduler,
-};

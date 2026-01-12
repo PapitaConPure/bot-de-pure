@@ -1,30 +1,36 @@
 const { hourai, tenshiColor } = require('../../data/config.json');
 const Hourai = require('../../models/saki.js');
-const axios = require('axios').default;
+const { default: axios } = require('axios');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors } = require('discord.js');
-const { p_pure } = require('../../utils/prefixes');
-const { CommandTags, Command, CommandOptions, CommandParam } = require('../Commons/commands');
-const { auditError } = require('../../systems/others/auditor');
-const { colorsRow } = require('../../data/sakiProps');
-const { subdivideArray, isBoosting, stringHexToNumber } = require('../../func');
-const { makeStringSelectMenuRowBuilder, makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts');
+const { p_pure } = require('../../utils/prefixes.js');
+const { CommandTags, Command, CommandOptions, CommandParam } = require('../Commons/commands.js');
+const { auditError } = require('../../systems/others/auditor.js');
+const { colorsRow } = require('../../data/sakiProps.js');
+const { subdivideArray, isBoosting, stringHexToNumber } = require('../../func.js');
+const { makeStringSelectMenuRowBuilder, makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts.js');
 
 /**
- * @typedef {{id: String, label: String, emote: String}} RoleData Datos de un rol para el propósito del comando
- * @typedef {Array<RoleData> | Array<Array<RoleData>>} RoleDataPool Conjunto de datos de rol o secciones de datos de rol
- * @typedef {'GAMES' | 'DRINKS' | 'FAITH'} CategoryIndex índice de categoría de autogestión de roles
- * @typedef {{ functionName: String, rolePool: RoleDataPool, exclusive: Boolean }} CategoryContent Contenido de categoría de autogestión de roles
+ * @typedef {{ id: string; label: string; emote: string; }} RoleData
+ * @typedef {RoleData[] | RoleData[][]} RoleDataPool
+ * @typedef {'GAMES' | 'DRINKS' | 'FAITH'} CategoryIndex
+ * @typedef {{ functionName: string; rolePool: RoleData[]; exclusive: boolean; }} CategoryContent
+ * @typedef {Record<CategoryIndex, CategoryContent>} CategoryMap
  */
 
 /**
+ * 
  * @param {import('discord.js').GuildMember} member 
+ * @param {CategoryMap} categories 
  * @param {CategoryIndex} category 
- * @param {Number?} section
+ * @param {number | null} [section] 
+ * @param {boolean} [exclusive] 
+ * @param {string} [removeAllLabel] 
+ * @returns 
  */
-const getAutoRoleRows = (member, categories, category, section = null, exclusive = false, removeAllLabel = 'Quitarse todos de página') => {
+function getAutoRoleRows(member, categories, category, section = null, exclusive = false, removeAllLabel = 'Quitarse todos de página') {
 	if(!section || isNaN(section))
 		section = 0;
-		
+
 	const rolePool = subdivideArray(categories[category].rolePool, 5);
 	const pageRoles = rolePool[section];
 	const rows = [];
@@ -60,13 +66,13 @@ const getAutoRoleRows = (member, categories, category, section = null, exclusive
 };
 
 /**
- * @param {{ [ K: String ]: CategoryContent}} categories
+ * @param {CategoryMap} categories
  * @param {CategoryIndex} categoryName
- * @param {Number?} section 
+ * @param {number} [section] 
  */
 const getPaginationControls = (categories, categoryName, section = 0) => {
 	const category = categories[categoryName];
-	const rolePool = subdivideArray(/**@type {Array}*/(category.rolePool), 5);
+	const rolePool = subdivideArray(category.rolePool, 5);
 	if(rolePool.length < 2) return [];
 
 	const functionName = category.functionName;
@@ -89,7 +95,6 @@ const getPaginationControls = (categories, categoryName, section = 0) => {
 /**
  * @param {import('discord.js').GuildMember} member 
  * @param {CategoryIndex} category 
- * /@/param {Number?} section
  */
 const getEditButtonRow = (member, category) => {
 	if(!member.permissions.has('ManageRoles'))
@@ -125,7 +130,7 @@ const command = new Command('roles', flags)
 
 		if(role) {
 			const houraiDB = /**@type {import('../../models/saki.js').SakiDocument}*/((await Hourai.findOne({})) || new Hourai({}));
-			const mentionRoles = /**@type {{ [ K: String ]: CategoryContent }}*/(/**@type {unknown}*/(houraiDB.mentionRoles));
+			const mentionRoles = /**@type {CategoryMap}*/(houraiDB.mentionRoles);
 
 			const roleFound = Object.values(mentionRoles).some(category => category.rolePool.some(roleItem => {
 				if(Array.isArray(roleItem))
@@ -341,7 +346,7 @@ const command = new Command('roles', flags)
 		
 		const section = parseInt(sectionNumber);
 		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
-		const mentionRoles = /**@type {{ [ K: String ]: CategoryContent }}*/(/**@type {unknown}*/(houraiDB.mentionRoles));
+		const mentionRoles = /**@type {CategoryMap}*/(houraiDB.mentionRoles);
 		const messageActions = {
 			embeds: [
 				new EmbedBuilder()
@@ -368,7 +373,7 @@ const command = new Command('roles', flags)
 		
 		const section = parseInt(sectionNumber);
 		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
-		const mentionRoles = /**@type {{ [ K: String ]: CategoryContent }}*/(/**@type {unknown}*/(houraiDB.mentionRoles));
+		const mentionRoles = /**@type {CategoryMap}*/(houraiDB.mentionRoles);
 		const messageActions = {
 			embeds: [
 				new EmbedBuilder()
@@ -389,7 +394,7 @@ const command = new Command('roles', flags)
 	.setSelectMenuResponse(async function selectReligion(interaction, sectionNumber) {
 		const section = parseInt(sectionNumber);
 		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
-		const mentionRoles = /**@type {{ [ K: String ]: CategoryContent }}*/(/**@type {unknown}*/(houraiDB.mentionRoles));
+		const mentionRoles = /**@type {CategoryMap}*/(houraiDB.mentionRoles);
 
 		return interaction.reply({
 			embeds: [

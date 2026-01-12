@@ -1,6 +1,6 @@
 const { randRange, improveNumber } = require("../../func");
 const { CommandTags, Command } = require('../Commons/commands');
-const UserConfigs = require('../../models/userconfigs');
+const UserConfigs = require('../../models/userconfigs').default;
 const { tenshiColor } = require('../../data/config.json');
 const { EmbedBuilder } = require("discord.js");
 const { Translator } = require("../../i18n");

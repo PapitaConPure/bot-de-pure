@@ -1,34 +1,32 @@
-const UserConfigs = require('../models/userconfigs');
-const globalConfigs = require('../data/config.json');
+import { LocaleKey } from '../i18n';
+import UserConfigs, { UserConfigDocument } from '../models/userconfigs';
+import globalConfigs from '../data/config.json';
+
+export type UserCache = {
+	language: LocaleKey;
+	pixivConverter: 'phixiv' | '';
+	twitterPrefix: import('../systems/agents/pureet').AcceptedTwitterConverterKey | '';
+	banned: Boolean;
+};
+
+export type UserCacheResolvable = import('../commands/Commons/typings.js').AnyRequest |
+	import('discord.js').Interaction |
+	import('discord.js').User |
+	import('discord.js').GuildMember |
+	string;
+
+const userCache = new Map<string, UserCache>();
 
 /**
- * @typedef {{
- * 	language: import('../i18n').LocaleKey,
- * 	pixivConverter: 'phixiv' | '',
- * 	twitterPrefix: import('../systems/agents/pureet').AcceptedTwitterConverterKey | '',
- * 	banned: Boolean
- * }} UserCache
- * @typedef {import('../commands/Commons/typings.js').AnyRequest
- *         | import('discord.js').Interaction
- *         | import('discord.js').User
- *         | import('discord.js').GuildMember
- *         | string
- * } UserCacheResolvable
- */
-
-/**@type {Map<String, UserCache>}*/
-const userCache = new Map();
-
-/**
+ * @description
  * Guarda una ID con caché de usuario para uso posterior frecuente
- * @param {UserCacheResolvable} user
  */
-async function cacheUser(user) {
+export async function cacheUser(user: UserCacheResolvable) {
 	const userId = resolveUserCacheId(user);
 	if(!userId) throw ReferenceError('Se esperaba una ID de usuario');
 	
 	const userQuery = { userId };
-	let userConfigs;
+	let userConfigs: UserConfigDocument;
 	if(globalConfigs.noDataBase) {
 		userConfigs = new UserConfigs(userQuery);
 	} else {
@@ -48,20 +46,19 @@ async function cacheUser(user) {
 }
 
 /**
+ * @description
  * Sobreescribe una ID en caché de usuario para uso posterior frecuente
- * @param {UserCacheResolvable} user
  */
-async function recacheUser(user) {
+export async function recacheUser(user: UserCacheResolvable) {
 	return cacheUser(user);
 }
 
 /**
+ * @description
  * Devuelve los datos vinculados a la ID de usuario cacheada.
  * Si la ID no está cacheada, se realiza una llamada a la base de datos, se cachea el usuario y se devuelve lo obtenido
- * @param {UserCacheResolvable} user
- * @returns {Promise<UserCache>}
  */
-async function fetchUserCache(user) {
+export async function fetchUserCache(user: UserCacheResolvable): Promise<UserCache> {
 	const userId = resolveUserCacheId(user);
 	if(!userId) throw ReferenceError('Se esperaba una ID de usuario al recolectar caché');
 
@@ -71,8 +68,7 @@ async function fetchUserCache(user) {
 	return userCache.get(userId);
 }
 
-/**@param {UserCacheResolvable} data*/
-function resolveUserCacheId(data) {
+export function resolveUserCacheId(data: UserCacheResolvable) {
 	if(typeof data === 'string')
 		return data;
 
@@ -81,10 +77,3 @@ function resolveUserCacheId(data) {
 
 	return data.id;
 }
-
-module.exports = {
-	cacheUser,
-	recacheUser,
-	fetchUserCache,
-	resolveUserCacheId,
-};

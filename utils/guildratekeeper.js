@@ -1,4 +1,4 @@
-const Logger = require('../utils/logs');
+const Logger = require('../utils/logs').default;
 const { debug, info, error } = Logger('WARN', 'GRK');
 
 /**

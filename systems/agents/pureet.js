@@ -1,6 +1,6 @@
 const { ChannelType } = require('discord.js');
 const { ConverterEmptyPayload } = require('./converters');
-const Logger = require('../../utils/logs');
+const Logger = require('../../utils/logs').default;
 
 const { error } = Logger('WARN', 'Puréet');
 

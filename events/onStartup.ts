@@ -1,46 +1,41 @@
-const { REST } = require('discord.js');
-const { Routes } = require('discord-api-types/v9');
+import { Collection, REST, RESTPostAPIApplicationCommandsJSONBody, RESTPostAPIChatInputApplicationCommandsJSONBody } from 'discord.js';
+import { Routes } from 'discord-api-types/v9';
 
-const mongoose = require('mongoose');
-const PrefixPair = require('../models/prefixpair.js');
-const UserConfigs = require('../models/userconfigs');
-const BooruTags = require('../models/boorutags.js');
-const MessageCascades = require('../models/messageCascades.js');
-const { Puretable, pureTableAssets } = require('../models/puretable.js');
-const { deleteExpiredMessageCascades, cacheMessageCascade } = require('./onMessageDelete');
-const SakiDB = require('../models/saki.js');
+import { set, connect } from 'mongoose';
+import PrefixPairs from '../models/prefixpair.js';
+import UserConfigs from '../models/userconfigs.js';
+import BooruTags from '../models/boorutags.js';
+import MessageCascades from '../models/messageCascades.js';
+import { Puretable, pureTableAssets } from '../models/puretable.js';
+import { deleteExpiredMessageCascades, cacheMessageCascade } from './onMessageDelete.js';
 
-const { puré } = require('../core/commandInit.js');
-const globalConfigs = require('../data/config.json');
+import { puré } from '../core/commandInit.js';
+import globalConfigs from '../data/config.json';
 const envPath = globalConfigs.remoteStartup ? '../remoteenv.json' : '../localenv.json';
 const noDB = globalConfigs.noDataBase;
 
-/**@type {String}*/
-const mongoUri = process.env.MONGODB_URI ?? (require(envPath)?.dburi);
+const mongoUri: string = process.env.MONGODB_URI ?? (require(envPath)?.dburi);
 
-/**@type {String}*/
-const discordToken = process.env.I_LOVE_MEGUMIN ?? (require(envPath)?.token);
-/**@type {String}*/
-const booruApiKey = process.env.BOORU_APIKEY ?? (require(envPath)?.booruapikey);
-/**@type {String}*/
-const booruUserId = process.env.BOORU_USERID ?? (require(envPath)?.booruuserid);
+export const discordToken: string = process.env.I_LOVE_MEGUMIN ?? (require(envPath)?.token);
+export const booruApiKey: string = process.env.BOORU_APIKEY ?? (require(envPath)?.booruapikey);
+export const booruUserId: string = process.env.BOORU_USERID ?? (require(envPath)?.booruuserid);
 
-const { setupGuildFeedUpdateStack, feedTagSuscriptionsCache } = require('../systems/booru/boorufeed');
-const { Booru, Tag } = require('../systems/booru/boorufetch');
-const { modifyPresence } = require('../systems/presence/presence');
-const { auditSystem } = require('../systems/others/auditor');
+import { setupGuildFeedUpdateStack, feedTagSuscriptionsCache } from '../systems/booru/boorufeed.js';
+import { Booru, Tag } from '../systems/booru/boorufetch.js';
+import { modifyPresence } from '../systems/presence/presence.js';
+import { auditSystem } from '../systems/others/auditor.js';
 
-const { GlobalFonts, loadImage } = require('@napi-rs/canvas');
-const { getUnixTime } = require('date-fns');
-const { lookupService } = require('dns');
-const { promisify } = require('util');
-const path = require('path');
-const chalk = require('chalk');
+import { GlobalFonts, loadImage } from '@napi-rs/canvas';
+import { getUnixTime } from 'date-fns';
+import { lookupService } from 'dns';
+import { promisify } from 'util';
+import { join } from 'path';
+import chalk from 'chalk';
 
-const { prepareTracksPlayer } = require('../systems/others/musicPlayer')
-const { initializeWebhookMessageOwners } = require('../systems/agents/discordagent');
-const { setupGuildRateKeeper, fetchAllGuildMembers } = require('../utils/guildratekeeper');
-const { initRemindersScheduler, processReminders } = require('../systems/others/remindersScheduler.js');
+import { prepareTracksPlayer } from '../systems/others/musicPlayer.js';
+import { initializeWebhookMessageOwners } from '../systems/agents/discordagent.js';
+import { setupGuildRateKeeper, fetchAllGuildMembers } from '../utils/guildratekeeper.js';
+import { initRemindersScheduler, processReminders } from '../systems/others/remindersScheduler.js';
 
 const logOptions = {
 	slash: false,
@@ -49,8 +44,7 @@ const logOptions = {
 	feedSuscriptions: false,
 };
 
-/**@param {import('discord.js').Client} client*/
-async function onStartup(client) {
+export async function onStartup(client: import('discord.js').Client) {
 	const confirm = () => console.log(chalk.green('Hecho.'));
 	globalConfigs.maintenance = '1';
 
@@ -66,8 +60,11 @@ async function onStartup(client) {
 
 	console.log(chalk.bold.magentaBright('Cargando comandos Slash y Contextuales...'));
 	const restGlobal = new REST({ version: '9' }).setToken(discordToken);
-	const commandData = {
-		global: puré.slash.concat(/**@type {*}*/(puré.contextMenu)),
+	const commandData: {
+		global: Collection<string, RESTPostAPIApplicationCommandsJSONBody>
+		saki: Collection<string, RESTPostAPIChatInputApplicationCommandsJSONBody>
+	} = {
+		global: (puré.slash as Collection<string, RESTPostAPIApplicationCommandsJSONBody>).concat(puré.contextMenu),
 		saki: puré.slashSaki,
 	};
 
@@ -128,8 +125,8 @@ async function onStartup(client) {
 	} else {
 		console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
 		console.log(chalk.gray('Conectando a Cluster en la nube...'));
-		mongoose.set("strictQuery", false);
-		mongoose.connect(mongoUri, {
+		set("strictQuery", false);
+		connect(mongoUri, {
 			//@ts-expect-error
 			useUnifiedTopology: true,
 			useNewUrlParser: true,
@@ -137,7 +134,7 @@ async function onStartup(client) {
 
 		console.log(chalk.gray('Obteniendo documentos...'));
 		const [ prefixPairs, userConfigs, booruTags, messageCascades ] = await Promise.all([
-			PrefixPair.find({}),
+			PrefixPairs.find({}),
 			UserConfigs.find({}),
 			BooruTags.find({}),
 			MessageCascades.find({}),
@@ -168,8 +165,7 @@ async function onStartup(client) {
 
 		console.log(chalk.gray('Preparando Suscripciones de Feeds...'));
 		userConfigs.forEach(config => {
-			/**@type {Map<String, Array<String>>}*/
-			const suscriptions = new Map();
+			const suscriptions = new Map<string, string[]>();
 			for(const [ chId, tags ] of config.feedTagSuscriptions)
 				suscriptions.set(chId, tags);
 			feedTagSuscriptionsCache.set(config.userId, suscriptions);
@@ -179,33 +175,6 @@ async function onStartup(client) {
 		console.log(chalk.gray('Preparando recordatorios...'));
 		initRemindersScheduler(client);
 		await processReminders();
-
-		console.log(chalk.gray('Preparando Infracciones de Saki Scans...'));
-		const hourai = (await SakiDB.findOne({})) || new SakiDB({});
-		{
-			const now = Date.now();
-			let wasModified = false;
-			Object.entries(hourai.userInfractions).forEach(([userId, infractions]) => {
-				let infr = /**@type {Array}*/(/**@type {unknown}*/(infractions));
-				
-				const previousInfractionsLength = infr.length;
-				infr = infr.filter(inf => (now - inf) < (60e3 * 60 * 4)); //Eliminar antiguas
-
-				if(previousInfractionsLength === infr.length) return;
-				wasModified = true;
-
-				if(!infr.length) {
-					hourai.userInfractions[userId] = null;
-					delete hourai.userInfractions[userId];
-					return;
-				}
-				
-				globalConfigs.hourai.infr.users[userId] = infr;
-				hourai.userInfractions[userId] = infr;
-			});
-			if(wasModified) hourai.markModified('userInfractions');
-		}
-		await hourai.save();
 		
 		console.log(chalk.gray('Preparando Dueños de Mensajes de Agentes Puré...'));
 		await initializeWebhookMessageOwners();
@@ -218,12 +187,12 @@ async function onStartup(client) {
 			puretable.cells = puretable.cells.map(arr =>
 				arr.map(cell => client.emojis.cache.get(cell) ? cell : pureTableAssets.defaultEmote )
 			);
-		const uniqueEmoteIds = new Set();
+		const uniqueEmoteIds = new Set<string>();
 		const pendingEmoteCells = [];
 		puretable.cells.flat().forEach(cell => uniqueEmoteIds.add(cell));
 		
-		/**@param {String} id*/
-		async function getEmoteCell(id) {
+		/**@param {string} id*/
+		async function getEmoteCell(id: string) {
 			const image = await loadImage(client.emojis.cache.get(id).imageURL({ extension: 'png', size: 64 }));
 			return { id, image };
 		}
@@ -255,13 +224,13 @@ async function onStartup(client) {
 	}
 
 	console.log(chalk.rgb(158,114,214)('Registrando fuentes'));
-	GlobalFonts.registerFromPath(path.join(__dirname, '..', 'fonts', 'Alice-Regular.ttf'),             'headline');
-	GlobalFonts.registerFromPath(path.join(__dirname, '..', 'fonts', 'cuyabra.otf'),                   'cuyabra');
-	GlobalFonts.registerFromPath(path.join(__dirname, '..', 'fonts', 'teen bd.ttf'),                   'cardname');
-	GlobalFonts.registerFromPath(path.join(__dirname, '..', 'fonts', 'kirsty rg.otf'),                 'cardclass');
-	GlobalFonts.registerFromPath(path.join(__dirname, '..', 'fonts', 'asap-condensed.semibold.ttf'),   'cardbody');
-	GlobalFonts.registerFromPath(path.join(__dirname, '..', 'fonts', 'BebasNeue_1.otf'),               'bebas');
-	GlobalFonts.registerFromPath(path.join(__dirname, '..', 'fonts', 'DINPro-Cond.otf'),               'dinpro');
+	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'Alice-Regular.ttf'),             'headline');
+	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'cuyabra.otf'),                   'cuyabra');
+	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'teen bd.ttf'),                   'cardname');
+	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'kirsty rg.otf'),                 'cardclass');
+	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'asap-condensed.semichalk.bold.ttf'),   'cardbody');
+	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'BebasNeue_1.otf'),               'bebas');
+	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'DINPro-Cond.otf'),               'dinpro');
 
 	globalConfigs.maintenance = '';
 	console.log(chalk.greenBright.bold('Bot conectado y funcionando'));
@@ -274,10 +243,3 @@ async function onStartup(client) {
 
 	await setupGuildFeedUpdateStack(client);
 }
-
-module.exports = {
-	onStartup,
-	discordToken,
-	booruApiKey,
-	booruUserId,
-};

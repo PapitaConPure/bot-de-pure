@@ -1,7 +1,7 @@
 const globalConfigs = require('../../data/config.json');
 const { MessageFlags, ContainerBuilder } = require('discord.js');
 const Reminder = require('../../models/reminders');
-const Logger = require('../../utils/logs');
+const Logger = require('../../utils/logs').default;
 const { Translator } = require('../../i18n');
 const { decompressId } = require('../../func');
 const Int32 = require('mongoose-int32');

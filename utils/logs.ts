@@ -1,52 +1,51 @@
-const chalk = require('chalk');
+import chalk from 'chalk';
+import { ValuesOf } from 'types';
 
-const LogLevels = /**@type {const}*/({
+const LogLevels = ({
     DEBUG: 0,
     INFO: 1,
     WARN: 2,
     ERROR: 3,
     FATAL: 4,
     CATAS: 5,
-});
-/**
- * @typedef {import('types').ValuesOf<LogLevels>} LogLevel
- */
+}) as const;
 
-/**@satisfies {Record<keyof LogLevels, `{${keyof LogLevels}}`>}*/
-const LogLevelNames = /**@type {const}*/({
+export type LogLevelKey = keyof typeof LogLevels;
+export type LogLevel = ValuesOf<typeof LogLevels>;
+
+/**@satisfies {Record<LogLevelKey, `{${LogLevelKey}}`>}*/
+const LogLevelNames = ({
     DEBUG: '{DEBUG}',
     INFO: '{INFO}',
     WARN: '{WARN}',
     ERROR: '{ERROR}',
     FATAL: '{FATAL}',
     CATAS: '{CATAS}',
-});
+}) as const;
 
-/**@satisfies {Record<keyof LogLevels, chalk.Chalk>}*/
-const LogLevelColors = /**@type {const}*/({
+/**@satisfies {Record<LogLevelKey, chalk.Chalk>}*/
+const LogLevelColors = ({
     DEBUG: chalk.white,
     INFO: chalk.blueBright,
     WARN: chalk.rgb(255, 140, 70),
     ERROR: chalk.redBright,
     FATAL: chalk.whiteBright.bgRgb(0, 0, 255),
     CATAS: chalk.whiteBright.bgRgb(0, 0, 255),
-});
+}) as const;
 
 const longestLogLevelName = Object.values(LogLevelNames)
     .map(name => name.length)
     .reduce((a, b) => a > b ? a : b, 0);
 
-/**@param {keyof LogLevels} logLevel*/
-const logLevelPrefix = logLevel => LogLevelColors[logLevel](LogLevelNames[logLevel].padEnd(longestLogLevelName));
+const logLevelPrefix = (logLevel: LogLevelKey) => LogLevelColors[logLevel](LogLevelNames[logLevel].padEnd(longestLogLevelName));
 
-/**@param {keyof LogLevels} logLevel*/
-const logLevelOutput = (logLevel, ...data) => LogLevelColors[logLevel](...data);
+const logLevelOutput = (logLevel: LogLevelKey, ...data) => LogLevelColors[logLevel](...data);
 
 /**
- * @param {keyof LogLevels} logLevel 
+ * @param {LogLevelKey} logLevel 
  * @param {string} prefix 
  */
-function Logger(logLevel, prefix = '') {
+export default function Logger(logLevel: LogLevelKey, prefix: string = '') {
     const LOG_LEVEL = LogLevels[logLevel];
 
     prefix = prefix.trim();
@@ -61,7 +60,7 @@ function Logger(logLevel, prefix = '') {
      * Requiere un nivel de advertencias de "DEBUG".
      * @param {Array<*>} data Los datos de interés del evento.
      */
-    function debug(...data) {
+    function debug(...data: Array<any>) {
         LOG_LEVEL <= LogLevels.DEBUG && console.log(logLevelPrefix('DEBUG'), prefix, logLevelOutput('DEBUG', ...data));
     }
 
@@ -70,7 +69,7 @@ function Logger(logLevel, prefix = '') {
      * Requiere un nivel de advertencias hasta "INFO".
      * @param {Array<*>} data Los datos de interés del evento.
      */
-    function info(...data) {
+    function info(...data: Array<any>) {
         LOG_LEVEL <= LogLevels.INFO && console.info(logLevelPrefix('INFO'), prefix, logLevelOutput('INFO', ...data));
     }
 
@@ -79,7 +78,7 @@ function Logger(logLevel, prefix = '') {
      * Requiere un nivel de advertencias hasta "WARN".
      * @param {Array<*>} data Los datos de interés del evento.
      */
-    function warn(...data) {
+    function warn(...data: Array<any>) {
         LOG_LEVEL <= LogLevels.WARN && console.warn(logLevelPrefix('WARN'), prefix, logLevelOutput('WARN', ...data));
     }
 
@@ -89,7 +88,7 @@ function Logger(logLevel, prefix = '') {
      * @param {Error} err El error que ocasionó este evento.
      * @param {Array<*>} data Los datos de interés del evento.
      */
-    function error(err, ...data) {
+    function error(err: Error, ...data: Array<any>) {
         LOG_LEVEL <= LogLevels.ERROR && console.error(logLevelPrefix('ERROR'), prefix, logLevelOutput('ERROR', err, ...data));
         console.error(err);
     }
@@ -101,7 +100,7 @@ function Logger(logLevel, prefix = '') {
      * @param {Error} err El error que ocasionó este evento.
      * @param {Array<*>} data Los datos de interés del evento.
      */
-    function fatal(err, ...data) {
+    function fatal(err: Error, ...data: Array<any>) {
         LOG_LEVEL <= LogLevels.FATAL && console.error(logLevelPrefix('FATAL'), prefix, logLevelOutput('FATAL', err, ...data));
         throw err;
     }
@@ -112,12 +111,10 @@ function Logger(logLevel, prefix = '') {
      * @param {Error} err El error que ocasionó este evento.
      * @param {Array<*>} data Los datos de interés del evento.
      */
-    function catastrophic(err, ...data) {
+    function catastrophic(err: Error, ...data: Array<any>) {
         console.error(logLevelPrefix('CATAS'), prefix, logLevelOutput('CATAS', err, ...data));
         process.exit(1);
     }
 
     return { debug, info, warn, error, fatal, catastrophic };
 }
-
-module.exports = Logger;

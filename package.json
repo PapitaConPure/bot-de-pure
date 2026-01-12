@@ -2,9 +2,10 @@
   "name": "bot-de-pure",
   "version": "1.0.0",
   "description": "Bot de puré es un bot de entretenimiento, búsqueda de imágenes y utilidades generales varias. Utiliza comandos tradicionales con adiciones inspiradas en terminales como <code>--flags</code>.<br>\r Como personaje, es una robot \"mujer\". Es torpe y agresiva en algunos casos, pero parece tener espíritu.",
-  "type": "commonjs",
+  "type": "module",
   "engines": {
-    "node": "^20.x"
+    "node": "^20.x",
+    "bun": "^1.3.5"
   },
   "main": "index.js",
   "scripts": {

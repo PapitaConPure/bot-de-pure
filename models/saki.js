@@ -3,8 +3,6 @@ const Mongoose = require('mongoose');
 /** Describe la configuración de Saki Scans (Hourai Doll) */
 const SakiSchema = new Mongoose.Schema({
     configs: { type: Object, default: {} },
-    /** Infracciones por uso de bots fuera de botposting */
-    userInfractions: { type: Object, default: {} },
     customRoles: { type: Object, default: {} },
     mentionRoles: {
         type: Object,

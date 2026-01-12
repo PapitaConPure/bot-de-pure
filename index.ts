@@ -1,16 +1,15 @@
 console.time('Carga de inicio');
-const globalConfigs = require('./data/config.json');
+import globalConfigs from './data/config.json';
 const argv = require('minimist')(process.argv.slice(2));
 globalConfigs.remoteStartup = ((+!!argv.p) - (+!!argv.d)) > 0;
 globalConfigs.noDataBase = argv.nodb;
-//process.env.DP_FORCE_YTDL_MOD = "@distube/ytdl-core"
 
-const { initializeClient } = require('./core/client');
-const { registerCommandFiles } = require('./core/commandInit.js');
-const { events, startupData, onCriticalError } = require('./events/events');
+import { initializeClient } from './core/client';
+import { registerCommandFiles } from './core/commandInit.js';
+import { events, startupData, onCriticalError } from './events/events';
 console.timeEnd('Carga de inicio');
 
-// @ts-expect-error
+//@ts-expect-error
 globalConfigs.p_pure['0'] = { raw: 'p!', regex: /^p *!\s*/i };
 globalConfigs.booruCredentials.apiKey = startupData.booruApiKey;
 globalConfigs.booruCredentials.userId = startupData.booruUserId;
@@ -20,7 +19,7 @@ const client = initializeClient();
 console.timeEnd('Creación de cliente de Discord');
 
 console.time('Detección de archivos de comando');
-registerCommandFiles();
+registerCommandFiles(false);
 console.timeEnd('Detección de archivos de comando');
 
 console.time('Registro de eventos de proceso');

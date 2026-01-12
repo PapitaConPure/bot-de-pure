@@ -8,7 +8,7 @@
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
         "paths": {
-            "types": ["./types.js"]
+            "types": ["./types.ts"]
         }
     },
     "exclude": [

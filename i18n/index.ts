@@ -1,33 +1,29 @@
-const { fetchUserCache } = require('../utils/usercache');
-const Locales = require('./locales');
+import { ValuesOf } from 'types';
+import { fetchUserCache, UserCacheResolvable } from '../utils/usercache';
+import Locales from './locales';
 
-/**
- * @typedef {typeof ConditionFields[keyof typeof ConditionFields]} ConditionString
- * @typedef {import('types').ValuesOf<Locales>} LocaleKey
- * @typedef {{ [P in LocaleKey]: String }} Translation
- */
+export { Locales };
 
-/**@type {string[]}*/
-const validLocaleKeys = Object.values(Locales);
+export type LocaleKey = ValuesOf<typeof Locales>;
 
-/**
- * @param {unknown} locale 
- * @returns {locale is LocaleKey}
- */
-function isValidLocaleKey(locale) {
+type ConditionString = (typeof ConditionFields)[keyof typeof ConditionFields];
+
+type Translation = Record<LocaleKey, string>;
+
+export const validLocaleKeys: string[] = Object.values(Locales);
+export function isValidLocaleKey(locale: unknown): locale is LocaleKey {
 	return typeof locale === 'string' && validLocaleKeys.includes(locale);
 }
 
-/**@param {...String} lines*/
-function paragraph(...lines) {
+function paragraph(...lines: string[]) {
 	return lines.join('\n');
 }
 
 /**
- * @param {Number} i Índice del valor de reemplazo
- * @param {String} [defaultValue] Valor por defecto si no se ingresó un valor en el índice
+ * @param i Índice del valor de reemplazo
+ * @param defaultValue Valor por defecto si no se ingresó un valor en el índice
  */
-function subl(i, defaultValue) {
+function subl(i: number, defaultValue?: string) {
 	if(i == undefined) throw ReferenceError('Se esperaba un índice de componente de traducción');
 
 	const baseSub = `${i}{...}`
@@ -38,23 +34,23 @@ function subl(i, defaultValue) {
 	return `${baseSub}<?{'${defaultValue}'}`;
 }
 
-const ConditionFields = /**@type {const}*/({
+export const ConditionFields = ({
 	Equal: '=',
 	Distinct: '!=',
 	Lesser: '<',
 	Greater: '>',
 	LesserOrEqual: '<=',
 	GreaterOrEqual: '>=',
-});
+}) as const;
 
 /**
- * @param {Number} i Índice del valor a usar como operando izquierdo de la comprobación
- * @param {ConditionString} condition Condición a evaluar con el valor de comprobación
- * @param {*} rightOperand Operando derecho de la operación. Un valor cualquiera, no un índice
- * @param {String} whenTrue Valor de reemplazo en caso de verdadero
- * @param {String?} [whenFalse] Valor de reemplazo en caso de falso
+ * @param i Índice del valor a usar como operando izquierdo de la comprobación
+ * @param condition Condición a evaluar con el valor de comprobación
+ * @param Operando derecho de la operación. Un valor cualquiera, no un índice
+ * @param whenTrue Valor de reemplazo en caso de verdadero
+ * @param whenFalse Valor de reemplazo en caso de falso
  */
-function subif(i, condition, rightOperand, whenTrue, whenFalse = '') {
+function subif(i: number, condition: ConditionString, rightOperand: any, whenTrue: string, whenFalse: string | null = '') {
 	if(i == undefined) throw ReferenceError('Se esperaba un índice de componente de traducción');
 	if(!whenTrue) throw ReferenceError('Se esperaba un valor para verdadero en componente de traducción');
 
@@ -64,8 +60,8 @@ function subif(i, condition, rightOperand, whenTrue, whenFalse = '') {
 	return `${i}{...}<!{${condition}:${rightOperand}|'${whenTrue}'}<?{'${whenFalse}'}`;
 }
 
-/**@satisfies {Record<String, Translation>}*/
-let localesObject = /**@type {const}*/({
+/**@satisfies {Record<string, Translation>}*/
+let localesObject = ({
 	currentLanguage: {
 		es: 'Español',
 		en: 'English',
@@ -2718,15 +2714,12 @@ let localesObject = /**@type {const}*/({
 		en: '<You aren\'t following any tag yet>',
 		ja: '【まだタグをフォローしていません】',
 	},
-});
+}) as const;
 
-/**@typedef {keyof localesObject} LocaleIds id de texto a mostrar en forma localizada*/
-
-const locales = new Map(Object.entries(localesObject));
-localesObject = null;
+export type LocaleIds = keyof typeof localesObject;
 
 /**@type {Map<ConditionString, (a: String, b: String) => Boolean>}*/
-const conditionFns = new Map();
+const conditionFns: Map<ConditionString, (a: string, b: string) => boolean> = new Map();
 conditionFns
 	.set('=',  (a, b) => a === b)
 	.set('!=', (a, b) => a !== b)
@@ -2735,91 +2728,79 @@ conditionFns
 	.set('<=', (a, b) => a <=  b)
 	.set('>=', (a, b) => a >=  b);
 
-/**@satisfies {Record<LocaleKey, (a: number | undefined, b: number | undefined, c: number | undefined) => ({ day: number | undefined, month: number | undefined, year: number | undefined })>}*/
-const reverseDateMappers = {
+const reverseDateMappers: Record<LocaleKey, (a?: number, b?: number, c?: number) => ({ day?: number, month?: number, year?: number })> = {
 	en: (a, b, c) => ({ day: b, month: a, year: c }),
 	es: (a, b, c) => ({ day: a, month: b, year: c }),
 	ja: (a, b, c) => ({ day: c, month: b, year: a }),
 };
 
-/**Clase de traducción de contenidos*/
-class Translator {
-	#locale;
+/**Clase de traducción de contenidos.*/
+export class Translator {
+	#locale: LocaleKey;
 
-	/**@param {LocaleKey} locale lenguaje al cual localizar el texto*/
-	constructor(locale) {
+	/**@param locale lenguaje al que traduce esta instancia*/
+	constructor(locale: LocaleKey) {
 		if(!locale) throw ReferenceError('Un Translator requiere un lenguaje para operar');
 		this.#locale = locale;
 	}
 
 	/**
-	 * Muestra un texto localizado según la configuración del usuario
-	 * @param {LocaleIds} id id de texto a mostrar en forma localizada
-	 * @param {...*} values variables a insertar en el texto seleccionado como reemplazos de campos designados
+	 * @description Muestra un texto localizado según la configuración del usuario.
+	 * @param id id de texto a mostrar en forma localizada
+	 * @param values variables a insertar en el texto seleccionado como reemplazos de campos designados
 	 */
-	getText(id, ...values) {
+	getText(id: LocaleIds, ...values: any[]) {
 		return Translator.getText(id, this.#locale, ...values);
 	}
 
-	/**
-	 * Determina si el traductor es del lenguaje ingresado
-	 * @param {LocaleKey} locale 
-	 */
-	is(locale) {
+	/**@description Determina si el traductor es del lenguaje ingresado.*/
+	is(locale: LocaleKey) {
 		return this.#locale === locale;
 	}
 
-	/**El lenguaje del traductor*/
+	/**@description El lenguaje del traductor.*/
 	get locale() {
 		return this.#locale;
 	}
 
-	/**
-	 * Devuelve la siguiente clave del lenguaje del traductor actual
-	 * @returns {LocaleKey}
-	 */
-	get next() {
+	/**@description Devuelve la siguiente clave del lenguaje del traductor actual.*/
+	get next(): LocaleKey {
 		if(this.is('en')) return 'es';
 		if(this.is('es')) return 'ja';
 		return 'en';
 	}
 
-	/**
-	 * Devuelve el traductor del siguiente lenguaje al actual
-	 * @returns {Translator}
-	 */
-	get nextTranslator() {
+	/**@description Devuelve el traductor del siguiente lenguaje al actual.*/
+	get nextTranslator(): Translator {
 		return new Translator(this.next);
 	}
 
-	/**
-	 * @param {import('../utils/usercache.js').UserCacheResolvable} user
-	 */
-	static async from(user) {
+	/**@description Instancia un {@link Translator} en base al idioma del usuario indicado*/
+	static async from(user: UserCacheResolvable) {
 		const userCache = await fetchUserCache(user);
 		return new Translator(userCache.language);
 	}
 
 	/**
-	 * Muestra un texto localizado según la configuración del usuario
-	 * @param {LocaleIds} id id de texto a mostrar en forma localizada
-	 * @param {LocaleKey} locale lenguaje al cual localizar el texto
-	 * @param {...*} values variables a insertar en el texto seleccionado como reemplazos de campos designados
+	 * @description Muestra un texto localizado según la configuración del usuario
+	 * @param id id de texto a mostrar en forma localizada
+	 * @param locale lenguaje al cual localizar el texto
+	 * @param values variables a insertar en el texto seleccionado como reemplazos de campos designados
 	 */
-	static getText(id, locale, ...values) {
-		const localeSet = locales.get(id);
+	static getText(id: LocaleIds, locale: LocaleKey, ...values: any[]) {
+		const localeSet = localesObject[id];
 		if(!localeSet) throw ReferenceError(`Se esperaba una id de texto localizado válido. Se recibió: ${id}`);
 		const translationTemplate = localeSet[locale];
 		if(translationTemplate == null) throw RangeError(`Se esperaba una clave de localización válida. Se recibió: ${id} :: ${locale}`);
 	
 		//Ejemplo: 1{...}<?{'por defecto'}
 		const subLocaleRegex = /(\d+){\.\.\.}(?:<!{((?:[!=<>]{1,2}):[^|]+)\|'((?:(?!'}).)*)'})?(?:<\?{'((?:(?!'}).)*)'})?/g;
-		const translation = translationTemplate.replace(subLocaleRegex, (_match, /**@type {String}*/i, /**@type {String}*/condition, /**@type {String}*/whenTrue, /**@type {String}*/defaultValue) => {
+		const translation = translationTemplate.replace(subLocaleRegex, (_match, /**@type {String}*/i: string, /**@type {String}*/condition: string, /**@type {String}*/whenTrue: string, /**@type {String}*/defaultValue: string) => {
 			const value = values[i];
 	
 			if(condition != undefined) {
 				const leftValue = (typeof value === 'boolean') ? `__${value}__` : `${value}`;
-				const [ operator, rightValue ] = /**@type {[ ConditionString, String ]}*/(condition.split(':'));
+				const [ operator, rightValue ] = condition.split(':') as [ ConditionString, string];
 				
 				if(!conditionFns.has(operator))
 					throw 'Operador inválido';
@@ -2841,13 +2822,13 @@ class Translator {
 	}
 
 	/**
-	 * Mapea los componentes ingresados a día, mes y año teniendo en cuenta el orden en el que se especifican en la traducción indicada
-	 * @param {LocaleKey} id id de traducción
-	 * @param {number | undefined} [component1] primer componente de fecha, en orden traducido
-	 * @param {number | undefined} [component2] segundo componente de fecha, en orden traducido
-	 * @param {number | undefined} [component3] tercer componente de fecha, en orden traducido
+	 * @description Mapea los componentes ingresados a día, mes y año teniendo en cuenta el orden en el que se especifican en la traducción indicada
+	 * @param id id de traducción
+	 * @param component1 primer componente de fecha, en orden traducido
+	 * @param component2 segundo componente de fecha, en orden traducido
+	 * @param component3 tercer componente de fecha, en orden traducido
 	 */
-	static mapReverseDateUTCComponents(id, component1 = null, component2 = null, component3 = null) {
+	static mapReverseDateUTCComponents(id: LocaleKey, component1: number | undefined = null, component2: number | undefined = null, component3: number | undefined = null) {
 		const { day, month, year } = reverseDateMappers[id](component1, component2, component3);
 		const tzNow = new Date(Date.now());
 		const utcNow = new Date(
@@ -2865,32 +2846,24 @@ class Translator {
 	}
 
 	/**
-	 * Mapea los componentes ingresados a día, mes y año teniendo en cuenta el orden en el que se especifican en la traducción indicada
-	 * @param {LocaleKey} id id de traducción
-	 * @param {number | undefined} [component1] primer componente de fecha, en orden traducido
-	 * @param {number | undefined} [component2] segundo componente de fecha, en orden traducido
-	 * @param {number | undefined} [component3] tercer componente de fecha, en orden traducido
+	 * @description Mapea los componentes ingresados a día, mes y año teniendo en cuenta el orden en el que se especifican en la traducción indicada
+	 * @param id id de traducción
+	 * @param component1 primer componente de fecha, en orden traducido
+	 * @param component2 segundo componente de fecha, en orden traducido
+	 * @param component3 tercer componente de fecha, en orden traducido
 	 */
-	static reverseSearchUTCDate(id, component1 = null, component2 = null, component3 = null) {
+	static reverseSearchUTCDate(id: LocaleKey, component1: number | undefined = null, component2: number | undefined = null, component3: number | undefined = null) {
 		const { day, month, year } = this.mapReverseDateUTCComponents(id, component1, component2, component3);
 		return new Date(year, month, day, 0, 0, 0, 0);
 	}
 
 	/**
-	 * Muestra un texto localizado según la configuración del usuario
-	 * @param {LocaleIds} id id de traducción
-	 * @returns {Translation}
+	 * @description Muestra un texto localizado según la configuración del usuario
+	 * @param id id de traducción
 	 */
-	static getTranslation(id) {
-		const localeSet = locales.get(id);
+	static getTranslation(id: LocaleIds): Translation {
+		const localeSet = localesObject[id];
 		if(!localeSet) throw ReferenceError(`Se esperaba una id de traducción válida. Se recibió: ${id}`);
 		return localeSet;
 	}
 }
-
-module.exports = {
-	Translator,
-	ConditionFields,
-	Locales,
-	isValidLocaleKey,
-};

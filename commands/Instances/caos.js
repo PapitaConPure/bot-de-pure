@@ -33,7 +33,7 @@ const command = new Command('caos', tags)
 			return request.reply({ content: '😴 Se desactivaron los comandos caóticos' });
 		}
 
-		const cfiles = (await readdir('./commands/Instances')).filter(file => file.endsWith('.js'));
+		const cfiles = (await readdir('./commands/Instances')).filter(file => /\.(js|ts)$/.test(file));
 		const chaosnames = [];
 		for(const file of cfiles) {
 			const command = require(`./${file}`);

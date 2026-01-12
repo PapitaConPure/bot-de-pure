@@ -1,11 +1,10 @@
-const { getQueueItem } = require('../../models/queues.js');
-const { randRange } = require('../../func');
-const { readFileSync, realpathSync } = require('fs');
-const chalk = require('chalk');
-const { ActivityType } = require('discord.js');
-// const chalkOrange = chalk.rgb(255, 140, 70);
+import { getQueueItem } from '../../models/queues.js';
+import { randRange } from '../../func';
+import { readFileSync, realpathSync } from 'fs';
+import chalk from 'chalk';
+import { ActivityType } from 'discord.js';
 
-const txtToArray = (/**@type {string}*/path) => readFileSync(realpathSync(path), { encoding: 'utf-8' })
+const txtToArray = (path: string) => readFileSync(realpathSync(path), { encoding: 'utf-8' })
     .split('\n')
     .map(t => { //Compatibilidad
         if(t.endsWith('\r')) return t.slice(0, -1);
@@ -17,10 +16,9 @@ const presence = {
     stream: txtToArray('./systems/presence/stream.txt'),
 };
 
-const PRESENCE_TICK_INTERVAL_RANGE = [ 20, 35 ];
+const PRESENCE_TICK_INTERVAL_RANGE = [ 20, 35 ] as const;
 
-/**@satisfies {Record<`${number}-${number}`, (today: Date) => string>}*/
-const specialDates = /**@type {const}*/({
+const specialDates: Record<`${number}-${number}`, (today: Date) => string> = {
     '01-01': () => '¡Feliz año nuevo! 🎉',
     '02-14': () => '¡Feliz día de San Valentín!',
     '04-01': () => Math.random() < 0.5 ? '127.0.0.1' : '255.255.255.0',
@@ -33,17 +31,16 @@ const specialDates = /**@type {const}*/({
     '10-31': () => 'Bú 👻 oOoOo 👻',
     '12-03': today => `¡Hoy cumplo ${today.getUTCFullYear() - 2019} años!`,
     '12-25': () => '¡Feliz navidad!',
-});
+};
 
 /**
- * Cambia la frase que muestra el usuario de Bot de Puré y reprograma dicha acción en un intervalo de tiempo predeterminado
+ * @description
+ * Cambia la frase que muestra el usuario de Bot de Puré y reprograma dicha acción en un intervalo de tiempo predeterminado.
  * 
- * Créditos a Imagine Breaker#6299 y Sassafras
- * @function Actualiza la actividad de Discord
- * @param {import('discord.js').Client} client
- * @param {Number} steps
+ * @copyright
+ * Créditos a Imagine Breaker#6299 y Sassafras.
  */
-async function modifyPresence(client, steps = 0) {
+export async function modifyPresence(client: import('discord.js').Client, steps: number = 0) {
     try {
         const now = new Date(Date.now());
         const dayKey = `${now.getUTCDate()}`.padStart(2, '0');
@@ -68,11 +65,6 @@ async function modifyPresence(client, steps = 0) {
         //Programar próxima actualización de actividad
         const [ minInterval, maxInterval ] = PRESENCE_TICK_INTERVAL_RANGE;
         const stepTime = randRange(minInterval, maxInterval);
-        setTimeout(module.exports.modifyPresence, 60e3 * stepTime, client, steps + 1);
+        setTimeout(modifyPresence, 60e3 * stepTime, client, steps + 1);
     }
 }
-
-///Iniciar actualización periódica de presencia al estar preparado
-module.exports = {
-    modifyPresence,
-};

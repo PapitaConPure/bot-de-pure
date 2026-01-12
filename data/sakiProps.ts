@@ -1,10 +1,10 @@
-const { StringSelectMenuBuilder } = require('discord.js');
-const { makeStringSelectMenuRowBuilder } = require('../utils/tsCasts');
-const { hourai } = require('./config.json');
+import { ActionRowBuilder, SelectMenuComponentOptionData, StringSelectMenuBuilder } from 'discord.js';
+import { hourai } from './config.json';
 const { colorsList } = hourai;
 
 const roleList = (() => {
-	const menuOptions = [];
+	const menuOptions: SelectMenuComponentOptionData[] = [];
+	
 	colorsList.forEach(color => menuOptions.push({
 		value: color.roleId,
 		label: color.roleName,
@@ -20,8 +20,4 @@ const roleList = (() => {
 		.addOptions(menuOptions);
 })();
 
-const colorsRow = makeStringSelectMenuRowBuilder().addComponents(roleList);
-
-module.exports = {
-    colorsRow,
-};
+export const colorsRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(roleList);

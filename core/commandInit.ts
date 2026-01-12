@@ -1,27 +1,24 @@
-const { Collection, PermissionFlagsBits, SlashCommandBuilder, ContextMenuCommandBuilder } = require('discord.js');
-const { shortenText } = require('../func');
-const { readdirSync } = require('fs');
+import { Collection, PermissionFlagsBits, SlashCommandBuilder, ContextMenuCommandBuilder, RESTPostAPIChatInputApplicationCommandsJSONBody, RESTPostAPIContextMenuApplicationCommandsJSONBody, SlashCommandStringOption, ContextMenuCommandType } from 'discord.js';
+import { shortenText } from '../func';
+import { readdirSync } from 'fs';
+import { Command } from '../commands/Commons/cmdBuilder';
+import { ContextMenuActionManager } from '../actions/Commons/actionBuilder';
+import { BaseParamType } from '../commands/Commons/cmdOpts';
 
-/**
- * @typedef {import('discord.js').SlashCommandBooleanOption
- *         | import('discord.js').SlashCommandChannelOption
- *         | import('discord.js').SlashCommandIntegerOption
- *         | import('discord.js').SlashCommandMentionableOption
- *         | import('discord.js').SlashCommandNumberOption
- *         | import('discord.js').SlashCommandRoleOption
- *         | import('discord.js').SlashCommandStringOption
- *         | import('discord.js').SlashCommandAttachmentOption
- *         | import('discord.js').SlashCommandMentionableOption
- *         | import('discord.js').SlashCommandUserOption
- * } AnySlashCommandOption
- */
+export type AnySlashCommandOption = import('discord.js').SlashCommandBooleanOption |
+    import('discord.js').SlashCommandChannelOption |
+    import('discord.js').SlashCommandIntegerOption |
+    import('discord.js').SlashCommandMentionableOption |
+    import('discord.js').SlashCommandNumberOption |
+    import('discord.js').SlashCommandRoleOption |
+    import('discord.js').SlashCommandStringOption |
+    import('discord.js').SlashCommandAttachmentOption |
+    import('discord.js').SlashCommandMentionableOption |
+    import('discord.js').SlashCommandUserOption;
 
-/**
- * @typedef {keyof SlashCommandBuilder & `add${string}`} SlashCommandBuilderAddFunctionName
- */
+export type SlashCommandBuilderAddFunctionName = keyof SlashCommandBuilder & `add${string}`;
 
-/**@satisfies {Record<import('../commands/Commons/cmdOpts').BaseParamType, SlashCommandBuilderAddFunctionName>}*/
-const addFunctionNames = /**@type {const}*/({
+const addFunctionNames: Record<BaseParamType, SlashCommandBuilderAddFunctionName> = ({
     NUMBER:  'addNumberOption',
     USER:    'addUserOption',
     MEMBER:  'addUserOption',
@@ -37,31 +34,20 @@ const addFunctionNames = /**@type {const}*/({
     URL:     'addStringOption',
     DATE:    'addStringOption',
     TIME:    'addStringOption',
-});
-/**@type {SlashCommandBuilderAddFunctionName}*/
-const defaultAddFunctionName =  'addStringOption';
+}) as const;
 
-/**
- * @param {import('discord.js').SlashCommandBuilder} slash
- * @param {import('../commands/Commons/cmdOpts').CommandOptions} options
- */
-function setupOptionBuilders(slash, options, log = false) {
+const defaultAddFunctionName: SlashCommandBuilderAddFunctionName =  'addStringOption';
+
+function setupOptionBuilders(slash: SlashCommandBuilder, options: import('../commands/Commons/cmdOpts').CommandOptions, log = false) {
     options.params.forEach(p => {
-        /**
-         * @template {AnySlashCommandOption} T
-         * @param {T} option 
-         * @param {String} name 
-         * @param {Boolean} fullyOptional 
-         * @returns {T}
-         */
-        const optionBuilder = (option, name, fullyOptional = false) => {
+        const optionBuilder = <T extends AnySlashCommandOption>(option: T, name: string, fullyOptional: boolean = false): T => {
             option
                 .setName(name)
                 .setDescription(p.desc)
                 .setRequired(!(fullyOptional || p.optional));
 
             if(p.hasAutocomplete)
-                /**@type {import('discord.js').SlashCommandStringOption}*/(option).setAutocomplete(true);
+                (option as SlashCommandStringOption).setAutocomplete(true);
 
             return option;
         };
@@ -86,20 +72,15 @@ function setupOptionBuilders(slash, options, log = false) {
         const addFunctionName = (typeof f.type === 'string')
             ? (addFunctionNames[f.type] ?? defaultAddFunctionName)
             : defaultAddFunctionName;
-        
-        /**
-         * @template {AnySlashCommandOption} T
-         * @param {T} option 
-         * @returns {T}
-         */
-        const optionBuilder = (option) => {
+
+        const optionBuilder = <T extends AnySlashCommandOption>(option: T): T => {
             option
                 .setName(f.long[0] || f.short[0])
                 .setDescription(f.desc)
                 .setRequired(false);
 
             if(f.isExpressive() && f.hasAutocomplete)
-                /**@type {import('discord.js').SlashCommandStringOption}*/(option).setAutocomplete(true);
+                (option as SlashCommandStringOption).setAutocomplete(true);
 
             return option;
         };
@@ -131,27 +112,25 @@ function setupOptionBuilders(slash, options, log = false) {
     }));
 }
 
-const puré = {
-    commands   : /**@type {Collection<String, import('../commands/Commons/cmdBuilder').Command>}*/(new Collection()),
-    actions    : /**@type {Collection<String, import('../actions/Commons/actionBuilder').ContextMenuActionManager>}*/(new Collection()),
-    emotes     : /**@type {Collection<String, import('../commands/Commons/cmdBuilder').Command>}*/(new Collection()),
-    slash      : /**@type {Collection<String, import('discord.js').RESTPostAPIChatInputApplicationCommandsJSONBody>}*/(new Collection()),
-    slashSaki: /**@type {Collection<String, import('discord.js').RESTPostAPIChatInputApplicationCommandsJSONBody>}*/(new Collection()),
-    contextMenu: /**@type {Collection<String, import('discord.js').RESTPostAPIContextMenuApplicationCommandsJSONBody>}*/(new Collection()),
+export const puré = {
+    commands   : new Collection<string, Command>(),
+    actions    : new Collection<string, ContextMenuActionManager>(),
+    emotes     : new Collection<string, Command>(),
+    slash      : new Collection<string, RESTPostAPIChatInputApplicationCommandsJSONBody>(),
+    slashSaki  : new Collection<string, RESTPostAPIChatInputApplicationCommandsJSONBody>(),
+    contextMenu: new Collection<string, RESTPostAPIContextMenuApplicationCommandsJSONBody>(),
 };
 
-/**
- * @param {Boolean} log 
- */
-function registerCommandFiles(log = false) {
-    const commandFiles = readdirSync('./commands/Instances').filter(file => file.endsWith('.js'));
+export function registerCommandFiles(log: boolean = false) {
+    const commandFiles = readdirSync('./commands/Instances').filter(file => /\.(js|ts)$/.test(file));
     /**@type {{ name: string, flags: string, tieneEmote: string, tieneMod: string }[]}*/
-    const commandTableStack = [];
+    const commandTableStack: { name: string; flags: string; tieneEmote: string; tieneMod: string; }[] = [];
     
     for(const file of commandFiles) {
         const commandModule = require(`../commands/Instances/${file}`);
+        log && console.log(file);
         /**@type {import('../commands/Commons/cmdBuilder').Command}*/
-        const command = commandModule;
+        const command: import('../commands/Commons/cmdBuilder').Command = commandModule;
         puré.commands.set(command.name, command);
         
         log && commandTableStack.push({
@@ -176,7 +155,7 @@ function registerCommandFiles(log = false) {
             slash.setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles | PermissionFlagsBits.ManageMessages);
     
         /**@type {import('../commands/Commons/cmdOpts').CommandOptions}*/
-        const options = command.options;
+        const options: import('../commands/Commons/cmdOpts').CommandOptions = command.options;
         if(options)
             setupOptionBuilders(slash, options, log);
     
@@ -189,14 +168,14 @@ function registerCommandFiles(log = false) {
 
     log && console.table(commandTableStack);
     
-    const actionFiles = readdirSync('./actions/Instances').filter(file => file.endsWith('.js'));
+    const actionFiles = readdirSync('./actions/Instances').filter(file => /\.(js|ts)$/.test(file));
     /**@type {{ name: String, type: String, tid: String }[]}*/
-    const actionTableStack = [];
+    const actionTableStack: { name: string; type: string; tid: string; }[] = [];
 
     for(const file of actionFiles) {
         const actionModule = require(`../actions/Instances/${file}`);
         /**@type {import('../actions/Commons/actionBuilder').ContextMenuActionManager}*/
-        const action = actionModule;
+        const action: import('../actions/Commons/actionBuilder').ContextMenuActionManager = actionModule;
         puré.actions.set(action.name, action);
         
         log && actionTableStack.push({
@@ -207,7 +186,7 @@ function registerCommandFiles(log = false) {
 
         const contextMenu = new ContextMenuCommandBuilder()
             .setName(action.name)
-            .setType(/**@type {import('discord.js').ContextMenuCommandType}*/(action.type))
+            .setType(action.type as ContextMenuCommandType)
             .setDMPermission(false);
 
         for(const [ localeId, localizedName ] of action.localizations)
@@ -218,8 +197,3 @@ function registerCommandFiles(log = false) {
 
     log && console.table(actionTableStack);
 }
-
-module.exports = {
-    registerCommandFiles,
-    puré,
-};

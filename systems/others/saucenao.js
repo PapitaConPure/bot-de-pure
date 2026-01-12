@@ -1,18 +1,17 @@
-const ___ = require('sagiri');
-const sagiri = ___.default ? ___.default : /**@type {null}*/(___);
-const globalConfigs = require('../../data/config.json');
-const { EmbedBuilder, Colors } = require("discord.js");
-const { decryptString } = require('../../utils/security');
-const { Booru } = require('../booru/boorufetch');
-const { auditError } = require('./auditor');
-const { Translator } = require('../../i18n');
-const { isNSFWChannel } = require('../../func');
+import sagiri from 'sagiri';
+import { booruCredentials } from '../../data/config.json';
+import { EmbedBuilder, Colors } from "discord.js";
+import { decryptString } from '../../utils/security';
+import { Booru } from '../booru/boorufetch';
+import { auditError } from './auditor';
+import { Translator } from '../../i18n';
+import { isNSFWChannel } from '../../func';
 
 const MATCH_COUNT_MAX = 3;
 const MATCH_THRESHOLD_PERCENT = 60;
 
 /**@param {string} token*/
-function testSauceNAOToken(token) {
+export function testSauceNAOToken(token) {
 	try {
 		sagiri(token);
 		return true;
@@ -28,7 +27,7 @@ function testSauceNAOToken(token) {
  * @param {import('../../commands/Commons/typings').AnyRequest} request
  * @param {{ successes: Array<EmbedBuilder>, failures: Array<EmbedBuilder> }} payload
  */
-async function pourSauce(clientId, queries, request, payload) {
+export async function pourSauce(clientId, queries, request, payload) {
 	const translator = await Translator.from(request.user.id);
 	const allowNSFW = isNSFWChannel(request.channel);
 	const { successes, failures } = payload;
@@ -50,7 +49,7 @@ async function pourSauce(clientId, queries, request, payload) {
 		return;
 	}
 
-	const booru = new Booru(globalConfigs.booruCredentials);
+	const booru = new Booru(booruCredentials);
 	for(let q = 0; q < queries.length; q++) {
 		const query = queries[q];
 		const count = q + 1;
@@ -128,8 +127,3 @@ async function pourSauce(clientId, queries, request, payload) {
 		}
 	}
 }
-
-module.exports = {
-	testSauceNAOToken,
-	pourSauce,
-};

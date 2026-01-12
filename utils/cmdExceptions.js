@@ -1,4 +1,4 @@
-const global = require('../data/config.json');
+const globalConfigs = require('../data/config.json');
 const { EmbedBuilder } = require('discord.js');
 const GuildConfig = require('../models/guildconfigs.js');
 const { isNotModerator } = require('../func');
@@ -18,7 +18,7 @@ const { Command } = require('../commands/Commons/cmdBuilder.js');
  */
 
 /**@type {ExceptionTestFn}*/
-const isNotByPapita = async request => (request.member.user.id !== global.peopleid.papita);
+const isNotByPapita = async request => (request.member.user.id !== globalConfigs.peopleid.papita);
 
 module.exports = {
     /**@type {Array<ExceptionSummary>}*/
@@ -70,7 +70,7 @@ module.exports = {
                 'Esto generalmente se debe a que cumple funciones que solo funcionan allí o que solo tiene sentido que se mantengan en dicho lugar',
                 'Si te interesa, puedes [unirte al servidor](https://discord.gg/pPwP2UNvAC)',
             ].join('\n'),
-            isException: async request => isNotByPapita(request) && request.guild.id !== global.serverid.saki,
+            isException: async request => isNotByPapita(request) && request.guild.id !== globalConfigs.serverid.saki,
         },
     ],
 
@@ -141,7 +141,7 @@ module.exports = {
                     },
                     {
                         name: 'Reportar un error',
-                        value: `¿Crees que esto se trata de otro problema? Eso nunca debería ser el caso, pero de ser así, puedes [reportarlo](${global.reportFormUrl})`,
+                        value: `¿Crees que esto se trata de otro problema? Eso nunca debería ser el caso, pero de ser así, puedes [reportarlo](${globalConfigs.reportFormUrl})`,
                     },
                 );
 

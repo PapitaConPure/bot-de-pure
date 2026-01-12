@@ -1,35 +1,25 @@
-/**@template T*/
-class LinkedListNode {
-	/**@type {T}*/
-	value;
-	/**@type {LinkedListNode<T>?}*/
-	next;
+class LinkedListNode<T> {
+	value: T;
+	next: LinkedListNode<T> | null;
 
-	/**@param {T} value*/
-	constructor(value) {
+	constructor(value: T) {
 		this.value = value;
 		this.next = null;
 	}
 }
 
-/**
- * @template T
- * Represents a Last-In First-Out dynamic data structure
- */
-class Stack {
-	/**@type {number}*/
-	count;
-	/**@type {LinkedListNode<T>?}*/
-	#head;
+/**Represents a Last-In First-Out dynamic data structure.*/
+export class Stack<T> {
+	count: number;
+	#head: LinkedListNode<T> | null;
 
-	/**Creates an empty stack*/
+	/**Creates an empty stack.*/
 	constructor() {
 		this.count = 0;
 		this.#head = null;
 	}
 
-	/**@param {T} value*/
-	push(value) {
+	push(value: T) {
 		const node = new LinkedListNode(value);
 
 		if(this.#head == null) {
@@ -59,17 +49,11 @@ class Stack {
 	}
 }
 
-/**
- * @template T
- * Represents a First-In First-Out dynamic data structure
- */
-class Queue {
-	/**@type {number}*/
-	count;
-	/**@type {LinkedListNode<T>?}*/
-	#head;
-	/**@type {LinkedListNode<T>?}*/
-	#tail;
+/**Represents a First-In First-Out dynamic data structure.*/
+export class Queue<T> {
+	count: number;
+	#head: LinkedListNode<T> | null;
+	#tail: LinkedListNode<T> | null;
 
 	constructor() {
 		this.count = 0;
@@ -78,7 +62,7 @@ class Queue {
 	}
 
 	/**@param {T} value*/
-	enqueue(value) {
+	enqueue(value: T) {
 		const node = new LinkedListNode(value);
 
 		if(this.#tail == null) {
@@ -110,8 +94,3 @@ class Queue {
 		return this.#head?.value;
 	}
 }
-
-module.exports = {
-	Stack,
-	Queue,
-};

@@ -1,6 +1,6 @@
-const UserConfigs = require('../models/userconfigs');
+const UserConfigs = require('../models/userconfigs').default;
 
-const Logger = require('../utils/logs.js');
+const Logger = require('../utils/logs.js').default;
 const { warn } = Logger('WARN', 'onReactionAdd');
 
 /**

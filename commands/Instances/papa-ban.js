@@ -1,4 +1,4 @@
-const UserConfig = require('../../models/userconfigs');
+const UserConfig = require('../../models/userconfigs').default;
 const { Command, CommandTags, CommandOptions } = require('../Commons/commands');
 const { recacheUser } = require('../../utils/usercache');
 const { peopleid } = require('../../data/config.json');

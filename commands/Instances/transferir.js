@@ -1,6 +1,6 @@
 const { improveNumber, compressId, sleep } = require('../../func');
 const { CommandTags, Command, CommandOptions } = require('../Commons/commands');
-const UserConfigs = require('../../models/userconfigs');
+const UserConfigs = require('../../models/userconfigs').default;
 const { EmbedBuilder } = require("discord.js");
 const { Translator } = require("../../i18n");
 const globalConfigs = require('../../data/config.json');

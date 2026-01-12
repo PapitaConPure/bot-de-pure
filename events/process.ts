@@ -1,13 +1,12 @@
-const { auditError } = require('../systems/others/auditor');
-const Logger = require('../utils/logs');
-const { shortenText } = require('../func');
+import { auditError } from '../systems/others/auditor';
+import { shortenText } from '../func';
 
-const { warn, error, fatal, catastrophic } = Logger('WARN', 'PROCESO',);
+import Logger from '../utils/logs';
+const { warn, error, fatal, catastrophic } = Logger('WARN', 'PROCESO');
 
-/**
- * @param {Error} err 
- */
-async function onUncaughtException(err) {
+export async function onUncaughtException(err: Error, origin: NodeJS.UncaughtExceptionOrigin) {
+	err = new UnhandledRejectionError(err, `${err}`);
+	
 	const lookups = [
 		err.message,
 		err.cause == null ? null : `${err.cause}`,
@@ -27,18 +26,14 @@ async function onUncaughtException(err) {
 			ping: true,
 		});
 
-		fatal(err);
+		fatal(err, origin);
 	} catch {
-		catastrophic(err);
+		catastrophic(err, origin);
 	}
 }
 
-/**
- * @param {unknown} reason 
- * @param {Promise<unknown>} promise 
- */
-async function onUnhandledRejection(reason, promise) {
-	const err = new UnhandledRejectionError(`${reason}`);
+export async function onUnhandledRejection(reason: unknown, promise: Promise<unknown>) {
+	const err = new UnhandledRejectionError(new Error(`${reason}`), `${reason}`);
 
 	if(err.message.includes('ECONNRESET') || err.message.includes('terminated')) {
 		warn('ECONNRESET RECIBIDO');
@@ -54,23 +49,15 @@ async function onUnhandledRejection(reason, promise) {
 			ping: true,
 		});
 
-		error(err);
+		error(err, reason, promise);
 	} catch {
-		catastrophic(err);
+		catastrophic(err, reason, promise);
 	}
 }
 
 class UnhandledRejectionError extends Error {
-	/**
-	 * @param {string} [message]
-	 */
-	constructor(message = null) {
-		super(message);
+	constructor(parent: Error, message: string = null) {
+		super(message, { cause: parent });
 		this.name = 'UnhandledRejectionError';
 	}
 }
-
-module.exports = {
-	onUncaughtException,
-	onUnhandledRejection,
-};

@@ -7,7 +7,7 @@ const globalConfigs = require('../../data/config.json');
 const rakki = require('../../commands/Instances/rakkidei');
 const { Translator } = require('../../i18n');
 
-const Logger = require('../../utils/logs');
+const Logger = require('../../utils/logs').default;
 const { CommandOptionSolver } = require('../../commands/Commons/cmdOpts');
 const { debug, info, warn, error } = Logger('WARN', 'BooruSend');
 

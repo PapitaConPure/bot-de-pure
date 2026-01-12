@@ -1,5 +1,5 @@
 const { PureVoiceModel, PureVoiceSessionModel } = require('../../models/purevoice.js');
-const UserConfigs = require('../../models/userconfigs');
+const UserConfigs = require('../../models/userconfigs').default;
 const { tenshiColor }= require('../../data/config.json');
 const Discord = require('discord.js');
 const { p_pure } = require('../../utils/prefixes');
@@ -7,7 +7,7 @@ const { Translator } = require('../../i18n');
 const chalk = require('chalk');
 const { ButtonStyle, ChannelType } = require('discord.js');
 const { makeButtonRowBuilder } = require('../../utils/tsCasts.js');
-const Logger = require('../../utils/logs.js');
+const Logger = require('../../utils/logs.js').default;
 
 const { debug, info, warn, error } = Logger('WARN', 'PV');
 

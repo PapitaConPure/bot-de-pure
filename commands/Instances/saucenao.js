@@ -6,7 +6,7 @@ const { encryptString } = require('../../utils/security');
 const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts');
 const SauceNAOUser = require('../../models/saucenaoUsers');
 
-const Logger = require('../../utils/logs');
+const Logger = require('../../utils/logs').default;
 const { debug } = Logger('ERROR', 'p!saucenao');
 
 const options = new CommandOptions()

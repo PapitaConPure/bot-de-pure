@@ -1,7 +1,7 @@
 const { User, GuildMember, Message, GuildChannel, CommandInteractionOptionResolver, Role, Attachment, Guild } = require('discord.js');
 const { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSentence, regroupText, fetchGuild } = require('../../func');
 
-const Logger = require('../../utils/logs');
+const Logger = require('../../utils/logs').default;
 const { getDateComponentsFromString, makeDateFromComponents, parseTimeFromNaturalLanguage, relativeDates } = require('../../utils/datetime');
 const { warn } = Logger('WARN', 'CmdOpts')
 

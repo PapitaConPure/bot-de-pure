@@ -8,7 +8,7 @@ const globalConfigs = require('../../data/config.json');
 const { paginateRaw } = require('../../func');
 const { fetchGuildMembers } = require('../../utils/guildratekeeper');
 
-//const Logger = require('../../logs');
+//const Logger = require('../../logs').default;
 //const { debug } = Logger('WARN', 'BooruSend');
 
 /**

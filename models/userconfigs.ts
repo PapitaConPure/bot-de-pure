@@ -1,6 +1,6 @@
-const Mongoose = require('mongoose');
-const Locales = require('../i18n/locales');
-const { acceptedTwitterConverters } = require('../systems/agents/pureet');
+import Mongoose from 'mongoose';
+import Locales from '../i18n/locales';
+import { acceptedTwitterConverters } from '../systems/agents/pureet';
 
 const UserConfigSchema = new Mongoose.Schema({
     userId: {
@@ -98,10 +98,9 @@ const UserConfigSchema = new Mongoose.Schema({
     },
 });
 
-const model = Mongoose.model('UserConfig', UserConfigSchema);
+export const UserConfigs = Mongoose.model('UserConfig', UserConfigSchema);
 
-// eslint-disable-next-line no-unused-vars
-function m() { return new model({}); }
-/**@typedef {ReturnType<(typeof m)>} UserConfigDocument*/
+function m() { return new UserConfigs({}); }
+export type UserConfigDocument = ReturnType<(typeof m)>;
 
-module.exports = model;
+export default UserConfigs;
