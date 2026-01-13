@@ -11,8 +11,8 @@ export type SlashArguments = import('discord.js').CommandInteractionOptionResolv
 export type CommandArguments = MessageArguments | import('discord.js').CommandInteractionOptionResolver;
 
 export type ComponentInteraction = import('discord.js').ButtonInteraction<'cached'> |
-    import('discord.js').StringSelectMenuInteraction<'cached'> |
-    import('discord.js').AutocompleteInteraction<'cached'> |
-    import('discord.js').MessageContextMenuCommandInteraction<'cached'>;
+	import('discord.js').StringSelectMenuInteraction<'cached'> |
+	import('discord.js').AutocompleteInteraction<'cached'> |
+	import('discord.js').MessageContextMenuCommandInteraction<'cached'>;
 
 export type AnyRequest = ComplexCommandRequest | ComponentInteraction;
