@@ -29,7 +29,7 @@ const action = new ContextMenuAction('actionGetEmojis', 'Message')
                 .setColor('Blurple')
                 .setAuthor({ name: 'Emoji' })
                 .setTitle(emoji.name)
-                .setImage(emoji.url)
+                .setImage(emoji.imageURL({ size: 4096 }))
                 .setFooter({ text: emoji.animated ? '🎞️' : '🖼️' })
                 .setTimestamp(emoji.createdTimestamp);
 
