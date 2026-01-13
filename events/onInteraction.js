@@ -97,12 +97,11 @@ async function handleCommand(interaction, client, stats) {
             return interaction.reply({ embeds: [ generateExceptionEmbed(exception, { cmdString: `/${commandName}` }) ], ephemeral: true });
 
         const complex = Command.requestize(interaction);
-        if(!command.legacy) {
-            const solver = new CommandOptionSolver(complex, /**@type {import('discord.js').CommandInteractionOptionResolver}*/(interaction.options), command.options);
+        if(command.isLegacy()) {
+            await command.execute(complex, interaction.options, true, null);
+        } else if(command.isNotLegacy()) {
+            const solver = new CommandOptionSolver(complex, interaction.options, command.options);
             await command.execute(complex, solver);
-        } else {
-            // @ts-expect-error
-            await command.execute(complex, interaction.options, true);
         }
         stats.commands.succeeded++;
     } catch(error) {

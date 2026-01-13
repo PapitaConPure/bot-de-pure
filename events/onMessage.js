@@ -160,12 +160,11 @@ async function handleMessageCommand(message, command, args, rawArgs, exceptionSt
 		return exceptionString && message.channel.send({ embeds: [ generateExceptionEmbed(exception, { cmdString: exceptionString }) ]});
 
 	const completeExtendedRequest = Command.requestize(message);
-	if(!command.legacy) {
+	if(command.isLegacy()) {
+		await command.execute(completeExtendedRequest, args, false, rawArgs);
+	} else if(command.isNotLegacy()) {
 		const optionSolver = new CommandOptionSolver(completeExtendedRequest, args, command.options, rawArgs);
 		await command.execute(completeExtendedRequest, optionSolver, rawArgs);
-	} else {
-		// @ts-expect-error
-		await command.execute(completeExtendedRequest, args, false, rawArgs);
 	}
 }
 
@@ -309,7 +308,7 @@ function processBeginnerHelp(message) {
 	const prefixCommand = require('../commands/Instances/prefijo.js');
 	const request = Command.requestize(message);
 	const solver = new CommandOptionSolver(request, [], prefixCommand.options);
-	return prefixCommand.execute(request, solver).catch(error);
+	return prefixCommand.isNotLegacy() && prefixCommand.execute(request, solver).catch(error);
 }
 
 /**

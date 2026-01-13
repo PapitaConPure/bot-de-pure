@@ -890,6 +890,7 @@ class CommandOptions {
 					getMethodName = paramTypes[pt].getMethod;
 
 				try {
+					//Este código es muy viejo y tiene mucho construído encima, por ende: no tocar en absoluto a menos que sea necesario
 					//@ts-expect-error
 					result = input[getMethodName](slashIdentifier, !param.optional);
 				} catch {
@@ -904,6 +905,7 @@ class CommandOptions {
 			if(!isParamTypeStrict(param.type))
 				getMethodName = paramTypes[param.type].getMethod;
 			
+			//Este código es muy viejo y tiene mucho construído encima, por ende: no tocar en absoluto a menos que sea necesario
 			//@ts-expect-error
 			return input[getMethodName](slashIdentifier, !param.optional);
 		}
@@ -912,7 +914,7 @@ class CommandOptions {
 	/**
 	 * Devuelve un arreglo de todas las entradas recibidas.
 	 * Si no se recibe ninguna entrada, se devuelve fallback
-	 * @param {CommandInteractionOptionResolver} input El resolvedor de opciones de interacción
+	 * @param {CommandInteractionOptionResolver | Omit<CommandInteractionOptionResolver<'cached'>, 'getMessage' | 'getFocused'>} input El resolvedor de opciones de interacción
 	 * @param {string} identifier El identificador del parámetro
 	 * @param {Function} callbackFn Una función de SlashCommandBuilder para leer un valor
 	 * @param {(Function | *)?} fallback Un valor por defecto si no se recibe ninguna entrada
@@ -957,7 +959,7 @@ class CommandOptions {
 	 * Devuelve un valor o función basado en si se ingresó la flag buscada o no.
 	 * Si no se recibe ninguna entrada, se devuelve fallback.
 	 * Si callback no está definido, se devuelve el valor encontrado
-	 * @param {import('discord.js').CommandInteractionOptionResolver | string[]} input Los datos de entrada
+	 * @param {import('discord.js').CommandInteractionOptionResolver | Omit<CommandInteractionOptionResolver<'cached'>, 'getMessage' | 'getFocused'> | string[]} input Los datos de entrada
 	 * @param {string} identifier El identificador de la flag
 	 * @param {FeedbackOptions<T, N>} output Define la respuestas en cada caso
 	 * @returns {T | N} El valor de retorno de callback si la flag fue respondida, o en cambio, el de fallback

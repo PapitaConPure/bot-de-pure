@@ -13,7 +13,7 @@ function generateRequestRecord(request: CommandRequest | Interaction) {
     return embed;
 };
 
-function getRequestContent(request: CommandRequest | Interaction<'cached'>) {
+function getRequestContent(request: CommandRequest | Interaction<import('discord.js').CacheType>) {
     if(Command.requestIsInteraction(request)) {
         if(request.isContextMenuCommand())
             return `**\\*. ${request.commandName}** ${request.options?.data?.map(({ name, value }) => `${name}:\`${value}\``).join(' ')}`;
@@ -38,18 +38,13 @@ function getRequestContent(request: CommandRequest | Interaction<'cached'>) {
 }
 
 export async function auditRequest(request: CommandRequest | Interaction) {
-    // @ts-expect-error
-    if(request.customId?.startsWith('confesión')) return;
+    if('customId' in request && request.customId?.startsWith('confesión')) return;
 
-    // @ts-expect-error
-    const userTag = (request.author ?? request.user).tag;
+    const userTag = ('author' in request ? request.author : request.user).tag;
     const embed = generateRequestRecord(request)
-        // @ts-expect-error
         .addFields({ name: userTag, value: getRequestContent(request) });
         
-    // @ts-expect-error
-    if(request.attachments?.size)
-        // @ts-expect-error
+    if('attachments' in request && request.attachments?.size)
         embed.addFields({ name: 'Adjuntado:', value: request.attachments.map(attf => attf.url ?? 'https://discord.com/').join('\n').slice(0, 1023) });
     
     return globalConfigs.logch?.send({ embeds: [embed] }).catch(console.error);
@@ -78,7 +73,7 @@ export async function auditAction(action: string, ...fields: Array<APIEmbedField
 };
 
 interface AuditErrorOptions {
-    request?: CommandRequest | Interaction<'cached'>;
+    request?: CommandRequest | Interaction<import('discord.js').CacheType>;
     brief?: string;
     details?: string;
     ping?: boolean;
