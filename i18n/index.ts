@@ -1751,10 +1751,15 @@ let localesObject = ({
 		en: `Offering **${subl(0)}** commands total on **${subl(1)}** guilds`,
 		ja: `**${subl(1)}個**のサーバーで合計**${subl(0)}個**のコマンドを提供`,
 	},
-	estadoBotOwnerEpigrapgh: {
+	presentarBotOwnerEpigrapgh: {
 		es: '-# Creador',
 		en: '-# Creator',
 		ja: '-# クリエイター',
+	},
+	presentarArtistEpigrapgh: {
+		es: '-# Artista',
+		en: '-# Artist',
+		ja: '-# アーティスト',
 	},
 	estadoDevelopmentTitle: {
 		es: '## Desarrollo',

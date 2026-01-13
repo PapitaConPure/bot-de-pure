@@ -86,7 +86,7 @@ const command = new Command('presentar', tags)
 				.addSectionComponents(section =>
 					section
 						.addTextDisplayComponents(
-							textDisplay => textDisplay.setContent(translator.getText('estadoBotOwnerEpigrapgh')),
+							textDisplay => textDisplay.setContent(translator.getText('presentarBotOwnerEpigrapgh')),
 							textDisplay => textDisplay.setContent(`## 🥔 ${papita.displayName}`),
 							textDisplay => textDisplay.setContent([
 								`🆔 \`${papita.id}\``,
@@ -103,12 +103,12 @@ const command = new Command('presentar', tags)
 				.addSectionComponents(section =>
 					section
 						.addTextDisplayComponents(
-							textDisplay => textDisplay.setContent(translator.getText('estadoBotOwnerEpigrapgh')),
+							textDisplay => textDisplay.setContent(translator.getText('presentarArtistEpigrapgh')),
 							textDisplay => textDisplay.setContent('## 🍑 rakkidei'),
 							textDisplay => textDisplay.setContent([
 								`<:pixivfullcolor:1460135891841585385> [\`rakkidei\`](https://www.pixiv.net/en/users/58442175 "Contiene enlaces a sus otras redes")`,
 								`<:twitterfullcolor:1460135894404305019> [\`@rakkidei\`](https://x.com/rakkidei "@rakkidei")`,
-							].join('\n')),
+							].join(' ')),
 						)
 						.setThumbnailAccessory(accessory =>
 							accessory
