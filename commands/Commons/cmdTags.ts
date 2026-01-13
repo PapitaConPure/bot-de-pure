@@ -1,15 +1,12 @@
-/**
+/*
  * Pequeño disclaimer: no había necesidad de optimizar esto con bitfields, pero lo hice de todas formas porque quería probar usar bitfields por primera vez, sonaba divertido.
  * En efecto, resulta que fue divertido. Tenga un buen día.
  * ~~Papita
  */
 
-/**
- * @param {number | bigint} n 
- */
-const bigIntField = (n) => 2n ** BigInt(n);
+const bigIntField = (n: number | bigint) => 2n ** BigInt(n);
 
-const CommandTag = /**@type {const}*/({
+export const CommandTag = ({
     COMMON      : bigIntField( 1),
     MOD         : bigIntField( 2),
     EMOTE       : bigIntField( 3),
@@ -22,19 +19,14 @@ const CommandTag = /**@type {const}*/({
     PAPA        : bigIntField(10),
     SAKI        : bigIntField(11),
     MUSIC       : bigIntField(12),
-});
+}) as const;
 
-/**
- * @typedef {keyof CommandTag} CommandTagStringField
- * @typedef {CommandTagStringField | bigint | number} CommandTagResolvable
- */
-const metaFlagValues = /**@type {ReadonlyArray<CommandTagStringField>}*/(Object.keys(CommandTag));
+export type CommandTagStringField = keyof typeof CommandTag;
+export type CommandTagResolvable = CommandTagStringField | bigint | number;
+const metaFlagValues = Object.keys(CommandTag) as ReadonlyArray<CommandTagStringField>;
 
-/**
- * Devuelve la profundidad de una tag de comando
- * @param {CommandTagResolvable|Array<CommandTagResolvable>} tag 
- */
-function resolveTagNumber(tag) {
+/**@description Devuelve la profundidad de una tag de comando.*/
+function resolveTagNumber(tag: CommandTagResolvable | CommandTagResolvable[]) {
     if(typeof tag === 'bigint')
         return tag;
 
@@ -57,49 +49,52 @@ function resolveTagNumber(tag) {
 }
 
 /**@class Representa un conjunto de etiquetas de comando*/
-class CommandTags {
-    /**@type {bigint}*/
-    #bitfield;
+export class CommandTags {
+    #bitfield: bigint;
 
     /**
+     * @description
      * Crea un conjunto de etiquetas de comando
-     * @constructor
-     * @param {CommandTagResolvable} [bitfield=0n] Un valor binario que representa la combinación de Flags del comando
+     * @param bitfield Un valor binario que representa la combinación de Flags del comando
      */
-    constructor(bitfield = 0n) {
+    constructor(bitfield: CommandTagResolvable = 0n) {
         this.#bitfield = resolveTagNumber(bitfield);
     };
 
     /**
+     * @description
      * Introduce Meta Flags de comando al conjunto
-     * @param  {...CommandTagResolvable} flags Meta Flags de comando a introducir
+     * @param flags Meta Flags de comando a introducir
      */
-    add(...flags) {
+    add(...flags: CommandTagResolvable[]) {
         this.#bitfield |= resolveTagNumber(flags);
         return this;
     };
 
     /**
+     * @description
      * Comprueba si el conjunto contiene una Meta Flag
-     * @param {CommandTagResolvable|Array<CommandTagResolvable>} flag Meta Flag de comando a comprobar
+     * @param flag Meta Flag de comando a comprobar
      */
-    has(flag) {
+    has(flag: CommandTagResolvable | CommandTagResolvable[]) {
         return !!(this.#bitfield & resolveTagNumber(flag));
     };
 
     /**
+     * @description
      * Comprueba si el conjunto contiene al menos una de las Meta Flag mencionadas
-     * @param  {...(CommandTagResolvable|Array<CommandTagResolvable>)} flags Meta Flags de comando a comprobar
+     * @param flags Meta Flags de comando a comprobar
      */
-    any(...flags) {
+    any(...flags: (CommandTagResolvable | CommandTagResolvable[])[]) {
         return flags.some(flag => this.has(flag));
     };
 
     /**
+     * @description
      * Comprueba si el conjunto contiene todas las Meta Flag mencionadas
-     * @param  {...(CommandTagResolvable|Array<CommandTagResolvable>)} flags Meta Flags de comando a comprobar
+     * @param flags Meta Flags de comando a comprobar
      */
-    all(...flags) {
+    all(...flags: (CommandTagResolvable | CommandTagResolvable[])[]) {
         return flags.every(flag => this.has(flag));
     };
 
@@ -107,10 +102,9 @@ class CommandTags {
         return this.#bitfield;
     };
 
-    /**Valores decimales individuales de las Meta Flags existentes en el conjunto, ordenadas de mayor a menor*/
+    /**@description Valores decimales individuales de las Meta Flags existentes en el conjunto, ordenadas de mayor a menor*/
     get rawValues() {
-        /**@type {Array<bigint>}*/
-        const values = [];
+        const values: bigint[] = [];
 
         let i = BigInt(2 ** this.#bitfield.toString(2).length);
         while(i > 0n) {
@@ -122,17 +116,11 @@ class CommandTags {
         return values;
     };
 
-    /**@returns {Array<CommandTagStringField>}*/
-    get keys() {
+    get keys(): CommandTagStringField[] {
         return metaFlagValues.filter(key => this.has(key));
     };
 
     toString() {
         return `CommandTags{${this.#bitfield}}`;
     }
-};
-
-module.exports = {
-    CommandTag,
-    CommandTags,
 };
