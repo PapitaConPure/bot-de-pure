@@ -1,13 +1,13 @@
 {
 	"host": "[no encontrado]",
 	"version": {
-		"number": "3.9.2",
+		"number": "3.10.0",
 		"name": "Flamenco Perlado"
 	},
 	"note": {
-		"es": "Operando con normalidad",
-		"en": "Operating normally",
-		"ja": "正常に動作しています"
+		"es": "Inestabilidad esperada por refactorizaciones",
+		"en": "Instability expected due to various refactors",
+		"ja": "リファクタリングによる不安定性の見込み"
 	},
 	"changelog": [
 		"p!emote ahora obtiene emotes de un mensaje",
@@ -23,7 +23,8 @@
 		"Apariencia de confesiones mejorada, junto con la posibilidad de responder anónimamente",
 		"p!recordatorio agregado",
 		"**PuréVoice** renovado y p!voz `--invitar` eliminado (Discord implementó lo mismo)",
-		"p!yo renovado"
+		"p!yo renovado",
+		"Actualizar a nuevo backend"
 	],
 	"todo": [
 		"Agregar ejemplos interactivos de comandos",
