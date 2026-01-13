@@ -1,21 +1,16 @@
-//#region Carga de módulos necesarios
-const { puré } = require('../core/commandInit.js');
-const { Stats } = require('../models/stats.js');
-const userIds = require('../data/userIds.json');
-const { channelIsBlocked, isUsageBanned, decompressId } = require('../func');
-const { auditRequest } = require('../systems/others/auditor');
-const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../utils/cmdExceptions.js');
-const { Translator } = require('../i18n');
-const { Command } = require('../commands/Commons/cmdBuilder.js');
-const { CommandOptionSolver } = require('../commands/Commons/cmdOpts.js');
-const { noDataBase } = require('../data/globalProps.js');
-//#endregion
+import { puré } from '../core/commandInit';
+import { AutocompleteInteraction, ButtonInteraction, ChatInputCommandInteraction, Client, ContextMenuCommandInteraction, Interaction, ModalSubmitInteraction, StringSelectMenuInteraction } from 'discord.js';
+import { Stats } from '../models/stats';
+import userIds from '../data/userIds.json';
+import { channelIsBlocked, isUsageBanned, decompressId } from '../func';
+import { auditRequest } from '../systems/others/auditor';
+import { findFirstException, handleAndAuditError, generateExceptionEmbed } from '../utils/cmdExceptions';
+import { Translator } from '../i18n';
+import { Command } from '../commands/Commons/cmdBuilder';
+import { CommandFlagExpressive, CommandOptionSolver, CommandParam } from '../commands/Commons/cmdOpts';
+import { noDataBase } from '../data/globalProps';
 
-/**
- * @param {import('discord.js').Interaction} interaction 
- * @param {import('discord.js').Client} client 
- */
-async function onInteraction(interaction, client) {
+export async function onInteraction(interaction: Interaction, client: Client) {
     if(!interaction.inCachedGuild())
         return handleBlockedInteraction(interaction).catch(console.error);
 
@@ -44,19 +39,18 @@ async function onInteraction(interaction, client) {
 }
 
 /**
- * @param {import('discord.js').ChatInputCommandInteraction<'cached'>} interaction 
- * @param {import('discord.js').Client} client 
- * @param {import('../models/stats.js').StatsDocument} stats 
+ {ChatInputCommandInteraction<'cached'>} interaction 
+ {Client} client 
+ {import('../models/stats.js').StatsDocument} stats 
  */
-async function handleCommand(interaction, client, stats) {
+async function handleCommand(interaction: ChatInputCommandInteraction<'cached'>, client: Client, stats: import('../models/stats.js').StatsDocument) {
     const { commandName } = interaction;
     const slash = puré.slash.get(commandName) ?? puré.slashSaki.get(commandName);
     if(!slash) return;
 
     try {
         //Detectar problemas con el comando basado en flags
-        /**@type {Command}*/
-        const command = puré.commands.get(commandName);
+        const command: Command = puré.commands.get(commandName);
 
         if(command.permissions) {
             if(!command.permissions.isAllowedIn(interaction.member, interaction.channel)) {
@@ -116,12 +110,7 @@ async function handleCommand(interaction, client, stats) {
     return stats.save();
 }
 
-/**
- * @param {import('discord.js').ContextMenuCommandInteraction<'cached'>} interaction 
- * @param {import('discord.js').Client} client 
- * @param {import('../models/stats.js').StatsDocument} stats 
- */
-async function handleAction(interaction, client, stats) {
+async function handleAction(interaction: ContextMenuCommandInteraction<'cached'>, client: Client, stats: import('../models/stats.js').StatsDocument) {
     const { commandName } = interaction;
 
     const contextMenu = puré.contextMenu.get(commandName);
@@ -145,17 +134,12 @@ async function handleAction(interaction, client, stats) {
     return stats.save();
 }
 
-/**
- * 
- * @param {import('discord.js').ButtonInteraction | import('discord.js').StringSelectMenuInteraction | import('discord.js').ModalSubmitInteraction} interaction 
-*/
-async function handleComponent(interaction) {
+async function handleComponent(interaction: ButtonInteraction | StringSelectMenuInteraction | ModalSubmitInteraction) {
     if(!interaction.customId)
         return handleUnknownInteraction(interaction);
 
     try {
-        /**@type {Array<String>}*/
-        const funcStream = interaction.customId.split('_');
+        const funcStream: string[] = interaction.customId.split('_');
         let commandName = funcStream.shift();
         const commandFnName = funcStream.shift();
 
@@ -164,8 +148,7 @@ async function handleComponent(interaction) {
         if(!commandName || !commandFnName)
             return handleUnknownInteraction(interaction);
 
-        /**@type {Command}*/
-        const command = puré.commands.get(commandName) || puré.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+        const command: Command = puré.commands.get(commandName) || puré.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
         if(!command)
             throw new ReferenceError(`El comando ${commandName} no existe`);
         if(typeof command[commandFnName] !== 'function')
@@ -197,10 +180,7 @@ async function handleComponent(interaction) {
     }
 }
 
-/**
- * @param {import('discord.js').AutocompleteInteraction<'cached'>} interaction 
-*/
-async function handleAutocompleteInteraction(interaction) {
+async function handleAutocompleteInteraction(interaction: AutocompleteInteraction<'cached'>) {
     const { commandName, options } = interaction;
     const focusedOption = options.getFocused(true);
 
@@ -212,13 +192,12 @@ async function handleAutocompleteInteraction(interaction) {
     console.log([ commandName, optionName, '«?»', optionValue ]);
 
     try {
-        /**@type {Command}*/
-        const command = puré.commands.get(commandName) || puré.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
-        const option = /**@type {import('../commands/Commons/cmdOpts.js').CommandParam | import('../commands/Commons/cmdOpts.js').CommandFlagExpressive}*/(
+        const command: Command = puré.commands.get(commandName) || puré.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+        const option = (
             command.options.options.get(optionName)
             ?? command.options.options.get(`${optionName.slice(0, optionName.lastIndexOf('_'))}s`)
             ?? command.options.options.get(`${optionName.slice(0, optionName.lastIndexOf('_'))}`)
-        );
+        ) as (CommandParam | CommandFlagExpressive);
 
         if(!option)
             return interaction.respond([{
@@ -234,8 +213,7 @@ async function handleAutocompleteInteraction(interaction) {
     }
 }
 
-/**@param {import('discord.js').Interaction} interaction*/
-async function handleBlockedInteraction(interaction) {
+async function handleBlockedInteraction(interaction: Interaction) {
     const translator = await Translator.from(interaction.user.id);
     if(interaction.isRepliable()) {
         return interaction.reply({
@@ -247,8 +225,7 @@ async function handleBlockedInteraction(interaction) {
     }
 }
 
-/**@param {import('discord.js').Interaction} interaction*/
-async function handleUnknownInteraction(interaction) {
+async function handleUnknownInteraction(interaction: Interaction) {
     const translator = await Translator.from(interaction.user.id);
     if(interaction.isRepliable()) {
         return interaction.reply({
@@ -260,8 +237,7 @@ async function handleUnknownInteraction(interaction) {
     }
 }
 
-/**@param {import('discord.js').Interaction} interaction*/
-async function handleHuskInteraction(interaction) {
+async function handleHuskInteraction(interaction: Interaction) {
     const translator = await Translator.from(interaction.user.id);
     if(interaction.isRepliable()) {
         return interaction.reply({
@@ -273,7 +249,3 @@ async function handleHuskInteraction(interaction) {
     }
 }
 //#endregion
-
-module.exports = {
-    onInteraction,
-};

@@ -1,39 +1,41 @@
-const { puré } = require('../core/commandInit.js');
-const Discord = require('discord.js');
-const { Command, CommandOptionSolver } = require('../commands/Commons/');
+import { puré } from '../core/commandInit';
+import { EmbedBuilder, Guild, Message } from 'discord.js';
+import { Command, CommandOptionSolver } from '../commands/Commons/index';
 
-const { Stats, ChannelStats } = require('../models/stats.js');
-const { p_pure } = require('../utils/prefixes');
+import { Stats, ChannelStats } from '../models/stats';
+import { p_pure } from '../utils/prefixes';
 
-const { updateAgentMessageOwners, addAgentMessageOwner } = require('../systems/agents/discordagent');
-const { channelIsBlocked, rand, edlDistance } = require('../func');
-const globalGuildFunctions = require('../systems/others/guildFunctions');
-const { auditRequest } = require('../systems/others/auditor');
-const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../utils/cmdExceptions');
-const UserConfigs = require('../models/userconfigs').default;
-const { sendConvertedPixivPosts } = require('../systems/agents/purepix');
-const { sendConvertedTwitterPosts } = require('../systems/agents/pureet');
-const { Translator } = require('../i18n');
-const { fetchUserCache } = require('../utils/usercache');
-const { addMessageCascade } = require('./onMessageDelete');
-const { noDataBase, tenshiColor } = require('../data/globalProps.js');
-const Logger = require('../utils/logs').default;
+import { updateAgentMessageOwners, addAgentMessageOwner } from '../systems/agents/discordagent';
+import { channelIsBlocked, rand, edlDistance } from '../func';
+import globalGuildFunctions from '../systems/others/guildFunctions';
+import { auditRequest } from '../systems/others/auditor';
+import { findFirstException, handleAndAuditError, generateExceptionEmbed } from '../utils/cmdExceptions';
+import UserConfigs from '../models/userconfigs';
+import { sendConvertedPixivPosts } from '../systems/agents/purepix';
+import { sendConvertedTwitterPosts } from '../systems/agents/pureet';
+import { Translator } from '../i18n/index';
+import { fetchUserCache } from '../utils/usercache';
+import { addMessageCascade } from './onMessageDelete';
+import { noDataBase, PrefixPair, tenshiColor } from '../data/globalProps';
+import Logger from '../utils/logs';
+import { ValuesOf } from 'types';
 
 const { error } = Logger('WARN', 'Message');
 
-const CommandResults = /**@type {const}*/({
+const CommandResults = ({
 	VOID: 0,
 	SUCCEEDED: 1,
 	FAILED: 2,
-});
-/**@typedef {import('types').ValuesOf<typeof CommandResults>} CommandResult*/
+}) as const;
+
+export type CommandResult = ValuesOf<typeof CommandResults>;
 
 /**
  * 
- * @param {Discord.Message<true>} message 
+ * @param {Message<true>} message 
  * @returns 
  */
-async function processGuildPlugins(message) {
+async function processGuildPlugins(message: Message<true>) {
 	const guildFunctions = globalGuildFunctions[message.guild.id];
 
 	if(!guildFunctions)
@@ -46,13 +48,7 @@ async function processGuildPlugins(message) {
 	}));
 }
 
-/**
- * 
- * @param {string} guildId 
- * @param {string} channelId 
- * @param {string} userId 
- */
-async function updateChannelMessageCounter(guildId, channelId, userId) {
+async function updateChannelMessageCounter(guildId: string, channelId: string, userId: string) {
 	if(noDataBase) return;
 
 	const channelQuery = { guildId, channelId };
@@ -64,13 +60,7 @@ async function updateChannelMessageCounter(guildId, channelId, userId) {
 	channelStats.save();
 };
 
-/**
- * @param {Discord.Message<true>} message
- * @param {String} commandName
- * @param {import('../data/globalProps').PrefixPair} prefixPair
- * @returns {Promise<CommandResult>}
- */
-async function handleInvalidCommand(message, commandName, prefixPair) {
+async function handleInvalidCommand(message: Message<true>, commandName: string, prefixPair: PrefixPair): Promise<CommandResult> {
 	const replies = require('../data/unknownCommandReplies.json');
 	
 	const selectedReply = replies[rand(replies.length)];
@@ -97,11 +87,11 @@ async function handleInvalidCommand(message, commandName, prefixPair) {
 	if(!suggestions.length)
 		return replyAndDelete();
 	
-	const mockEmbed = new Discord.EmbedBuilder()
+	const mockEmbed = new EmbedBuilder()
 		.setColor(tenshiColor)
 		.setDescription(selectedReply.text)
 		.setImage(selectedReply.imageUrl);
-	const suggestionEmbed = new Discord.EmbedBuilder()
+	const suggestionEmbed = new EmbedBuilder()
 		.setColor(0x5070bb)
 		.setFooter({ text: 'Basado en nombres y alias de comando' })
 		.addFields({
@@ -112,15 +102,7 @@ async function handleInvalidCommand(message, commandName, prefixPair) {
 	return CommandResults.VOID;
 }
 
-/**
- * @param {Discord.Message<true>} message
- * @param {Command} command
- * @param {Array<String>} args
- * @param {String} [rawArgs]
- * @param {String} [exceptionString]
- * @returns {Promise<*>}
- */
-async function handleMessageCommand(message, command, args, rawArgs, exceptionString) {
+async function handleMessageCommand(message: Message<true>, command: Command, args: string[], rawArgs?: string, exceptionString?: string): Promise<any> {
 	if(command.permissions) {
 		if(!command.permissions.isAllowedIn(message.member, message.channel)) {
 			const translator = await Translator.from(message.member);
@@ -168,23 +150,12 @@ async function handleMessageCommand(message, command, args, rawArgs, exceptionSt
 	}
 }
 
-/**
- * @param {Error} error
- * @param {Discord.Message<true>} message
- * @param {String} commandName
- * @param {Array<String>} args
- * @returns {CommandResult}
- */
-function handleMessageCommandError(error, message, commandName, args) {
+function handleMessageCommandError(error: Error, message: Message<true>, commandName: string, args: string[]): CommandResult {
 	const isPermissionsError = handleAndAuditError(error, message, { details: `"${message.content?.slice(0, 699)}"\n[${commandName} :: ${args}]` });
 	return isPermissionsError ? CommandResults.VOID : CommandResults.FAILED;
 }
 
-/**
- * @param {Discord.Message<true>} message
- * @returns {Promise<CommandResult>}
- */
-async function checkEmoteCommand(message) {
+async function checkEmoteCommand(message: Message<true>): Promise<CommandResult> {
 	const { content } = message;
 
 	const words = content.split(/[\n ]+/);
@@ -207,11 +178,7 @@ async function checkEmoteCommand(message) {
 	}
 }
 
-/**
- * @param {Discord.Message<true>} message
- * @returns {Promise<CommandResult>}
- */
-async function processCommand(message) {
+async function processCommand(message: Message<true>): Promise<CommandResult> {
 	const { content, guildId } = message;
 	const ppure = p_pure(guildId);
 
@@ -238,11 +205,7 @@ async function processCommand(message) {
 	}
 }
 
-/**
- * @param {Discord.Guild} guild
- * @param {String} userId
- */
-async function gainPRC(guild, userId) {
+async function gainPRC(guild: Guild, userId: string) {
 	if(noDataBase) return;
 	if(guild.memberCount < 100) return;
 
@@ -263,12 +226,7 @@ async function gainPRC(guild, userId) {
 	return userConfigs.save();
 }
 
-/**
- * 
- * @param {Discord.Message<true>} message 
- * @param {import('../utils/usercache').UserCache} userCache 
- */
-async function processLinkConverters(message, userCache) {
+async function processLinkConverters(message: Message<true>, userCache: import('../utils/usercache').UserCache) {
 	const converterPayloads = await Promise.all([
 		sendConvertedPixivPosts(message, userCache.pixivConverter),
 		sendConvertedTwitterPosts(message, userCache.twitterPrefix),
@@ -294,27 +252,19 @@ async function processLinkConverters(message, userCache) {
 	}
 }
 
-/**
- * 
- * @param {Discord.Message<true>} message 
- * @returns 
- */
-function processBeginnerHelp(message) {
+async function processBeginnerHelp(message: Message<true>) {
 	const { content, client } = message;
 
 	if(!content.includes(`${client.user}`))
 		return;
 
-	const prefixCommand = require('../commands/Instances/prefijo.js');
+	const prefixCommand = (await import('../commands/Instances/prefijo')).default;
 	const request = Command.requestize(message);
 	const solver = new CommandOptionSolver(request, [], prefixCommand.options);
 	return prefixCommand.isNotLegacy() && prefixCommand.execute(request, solver).catch(error);
 }
 
-/**
- * @param {Discord.Message} message
- */
-async function onMessage(message) {
+export async function onMessage(message: Message) {
 	if(!message.inGuild()) return;
 
 	const { author, channel, guild } = message;
@@ -336,7 +286,7 @@ async function onMessage(message) {
 	const commandResult = await processCommand(message);
 
 	if(commandResult === CommandResults.VOID)
-		processBeginnerHelp(message);
+		await processBeginnerHelp(message);
 
 	//#region Trabajos automáticos
 	Promise.allSettled([
@@ -355,7 +305,3 @@ async function onMessage(message) {
 	stats.markModified('commands');
 	stats.save();
 }
-
-module.exports = {
-	onMessage,
-};
