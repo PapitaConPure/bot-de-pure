@@ -1,7 +1,8 @@
 import { Command } from '../../commands/Commons/cmdBuilder';
 import { CommandRequest } from '../../commands/Commons/typings';
 import { globalConfigs } from '../../data/globalProps';
-import { EmbedBuilder, Colors, Interaction, User, APIEmbedField, InteractionType } from 'discord.js';
+import userIds from '../../data/userIds.json';
+import { EmbedBuilder, Colors, Interaction, User, APIEmbedField, CommandInteraction } from 'discord.js';
 
 function generateRequestRecord(request: CommandRequest | Interaction) {
     // @ts-expect-error
@@ -12,26 +13,28 @@ function generateRequestRecord(request: CommandRequest | Interaction) {
     return embed;
 };
 
-function getRequestContent(request: CommandRequest | InteractionType) {
-    // @ts-expect-error
+function getRequestContent(request: CommandRequest | Interaction<'cached'>) {
     if(Command.requestIsInteraction(request)) {
         if(request.isContextMenuCommand())
-            // @ts-expect-error
-            return `**\\*. ${request.commandName}** ${request.options.data.map(({ name, value }) => `${name}:\`${value}\``).join(' ')}`;
+            return `**\\*. ${request.commandName}** ${request.options?.data?.map(({ name, value }) => `${name}:\`${value}\``).join(' ')}`;
 
-        return `**/${request.commandName}** ${request.options.data.map(({ name, value }) => `${name}:\`${value}\``).join(' ')}`;
+        if(request.isChatInputCommand())
+            return `**/${request.commandName}** ${request.options?.data?.map(({ name, value }) => `${name}:\`${value}\``).join(' ')}`;
+
+        if(request.isMessageComponent())
+            return `**-=-[**\`${request.customId}\`**]**`;
+
+        if(request.isModalSubmit())
+            return `**[[${request.customId}]]** ${request.fields.fields?.map((modalData) => `\`${modalData.customId}\``).join(' ')}`
+
+        if(request.isAutocomplete())
+            return `**?:${request.commandName}** ${request.valueOf()}`;
     }
 
-    // @ts-expect-error
     if(Command.requestIsMessage(request))
         return request.content?.slice(0, 1023) || '*Mensaje vacío.*'
 
-    // @ts-expect-error
-    if(request.customId)
-        // @ts-expect-error
-        return `**-=-[**\`${request.customId}\`**]**`;
-
-    return '???';
+    return `**${request.type}/${request.id}**`;
 }
 
 export async function auditRequest(request: CommandRequest | Interaction) {
@@ -75,10 +78,10 @@ export async function auditAction(action: string, ...fields: Array<APIEmbedField
 };
 
 interface AuditErrorOptions {
-    request?: CommandRequest | Interaction;
-    brief?: String;
-    details?: String;
-    ping?: Boolean;
+    request?: CommandRequest | Interaction<'cached'>;
+    brief?: string;
+    details?: string;
+    ping?: boolean;
 };
 
 export async function auditError(error: Error, { request = undefined, brief = undefined, details = undefined, ping = false }: AuditErrorOptions = { ping: false }) {
@@ -86,22 +89,17 @@ export async function auditError(error: Error, { request = undefined, brief = un
         .setColor(0x0000ff);
     
     if(request) {
-        // @ts-expect-error
-        const userTag = (request.author ?? request.user).tag;
-        // @ts-expect-error
+        const userTag = ('author' in request ? request.author : request.user).tag;
         embed.addFields({ name: userTag, value: getRequestContent(request) });
     }
-    // @ts-expect-error
+
     embed.addFields({ name: brief || 'Ha ocurrido un error al ejecutar una acción', value: `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\`` });
-    // handleSubErrors(embed, error.errors);
         
     if(details)
-        // @ts-expect-error
         embed.addFields({ name: 'Detalle', value: details });
     
     return globalConfigs.logch?.send({
-        // @ts-expect-error
-        content: ping ? `<@${globalConfigs.peopleid.papita}>` : null,
+        content: ping ? `<@${userIds.papita}>` : null,
         embeds: [embed],
     }).catch(console.error);
 };

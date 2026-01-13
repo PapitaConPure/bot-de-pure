@@ -54,13 +54,15 @@ const HTTP_ENTITIES_REGEX = (() => {
 })();
 
 //#region Lista
-export function paginateRaw<T>(array: Array<T> | Discord.Collection<Discord.Snowflake, T>, pagemax: number | null = 10): Array<Array<T>> | Array<Array<[Discord.Snowflake, T]>> {
-    if(!Array.isArray(array))
-        //@ts-expect-error
-        array = [...array.entries()];
+export function paginateRaw<T>(array: T[] | Discord.Collection<string, T>, pagemax: number | null = 10): T[][] | ([string, T])[][] {
+    if(!Array.isArray(array)) {
+        const intermediate = [...array.entries()];
+        return intermediate
+            .map((_, i) => (i % pagemax === 0) ? intermediate.slice(i, i + pagemax) : null)
+            .filter(item => item);
+    }
 
     return array
-        //@ts-expect-error
         .map((_, i) => (i % pagemax === 0) ? array.slice(i, i + pagemax) : null)
         .filter(item => item);
 }
@@ -515,7 +517,6 @@ export async function drawWelcomeSaki(member: Discord.GuildMember, options: Saki
 
     const sakiCfg = (await Hourai.findOne()) || new Hourai();
     
-    //@ts-expect-error
     if(!options.force && sakiCfg.configs?.bienvenida == false)
         return;
 
@@ -592,7 +593,6 @@ export async function drawWelcomeSaki(member: Discord.GuildMember, options: Saki
             '-# Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:1107847991580164106>',
         ];
 
-        //@ts-expect-error
         if(sakiCfg.configs?.pingBienvenida)
             toSend.push('<@&1107831054791876694>, vengan a saludar po maricones <:hl:797294230359375912><:miyoi:1107848008005062727><:hr:797294230463840267>');
 
@@ -679,7 +679,6 @@ export async function dibujarDespedida(miembro: Discord.GuildMember) {
         const peoplecnt = members.filter(member => !member.user.bot).size;
         if(servidor.id === serverIds.saki) {
             const hourai = await Hourai.findOne() || new Hourai();
-            //@ts-expect-error
             if(hourai.configs?.despedida == false)
                 return;
 

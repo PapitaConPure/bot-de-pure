@@ -26,7 +26,6 @@ function getEmotesList(interaction) {
  * @param {number} page
  */
 async function loadPageNumber(request, page) {
-
 	const emotes = getEmotesList(request);
 	const emotePages = paginate(emotes);
 	const lastPage = emotePages.length - 1;
@@ -34,7 +33,7 @@ async function loadPageNumber(request, page) {
 		return request.reply({ content: '⚠️ Esta página no existe', ephemeral: true });
 
 	const perritoComun = emotes.find(perrito => perrito.name === 'perrito');
-	
+
 	const embed = new Discord.EmbedBuilder()
 		.setColor(0xe4d0c9)
 		.setTitle(`Perritos ${perritoComun}`)
@@ -42,16 +41,17 @@ async function loadPageNumber(request, page) {
 		.setFooter({ text: `${page + 1} / ${lastPage + 1}` })
 		.addFields({ name: `${'Nombre`'.padEnd(24)}\`Emote`, value: `${emotePages[page]}` });
 
-	const content = {
+	const content = /**@type {import('discord.js').InteractionReplyOptions & import('discord.js').InteractionUpdateOptions}*/({
 		embeds: [embed],
 		components: navigationRows('perrito', page, lastPage),
-	};
+	});
 
 	if(Object.hasOwn.call(request, 'author') || request.type === InteractionType.ApplicationCommand)
 		return request.reply(content);
-	
-	//@ts-expect-error
-	return request.update(content);
+
+	return 'update' in request
+		? request.update(content)
+		: request.edit(content);
 }
 
 const options = new CommandOptions()

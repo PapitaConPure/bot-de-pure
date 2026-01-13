@@ -1,12 +1,12 @@
 {
 	"host": "[no encontrado]",
 	"version": {
-		"number": "3.10.0",
+		"number": "3.10.1",
 		"name": "Flamenco Perlado"
 	},
 	"note": {
 		"es": "Inestabilidad esperada por refactorizaciones",
-		"en": "Instability expected due to various refactors",
+		"en": "Instability expected due to refactorings",
 		"ja": "リファクタリングによる不安定性の見込み"
 	},
 	"changelog": [

@@ -1,6 +1,6 @@
 import { Message, CommandInteraction, Collection, ChatInputCommandInteraction, Snowflake, Attachment, PermissionsBitField, MessagePayload, MessageEditOptions, InteractionReplyOptions, InteractionDeferReplyOptions, InteractionEditReplyOptions, User, MessageComponentInteraction, MessageActionRowComponentBuilder, Interaction, ModalMessageModalSubmitInteraction, ButtonInteraction, SelectMenuInteraction, MessageReplyOptions } from 'discord.js';
 import { CommandTags } from './cmdTags';
-import { ComplexCommandRequest } from './typings';
+import { CommandArguments, CommandRequest, ComplexCommandRequest, ComponentInteraction } from './typings';
 
 export interface ExtendedCommandRequestPrototype {
 	/**The command's initial reply.*/
@@ -72,10 +72,10 @@ const extendedCommandRequestPrototype: ExtendedCommandRequestPrototype = {
 };
 
 /**
- * @param {import('./typings').CommandRequest | import('./typings').ComponentInteraction} request
- * @returns {import('./typings').ComplexCommandRequest}
+ * @param {CommandRequest | ComponentInteraction} request
+ * @returns {ComplexCommandRequest}
  */
-function extendRequest(request: import('./typings').CommandRequest | import('./typings').ComponentInteraction): import('./typings').ComplexCommandRequest {
+function extendRequest(request: CommandRequest | ComponentInteraction): ComplexCommandRequest {
 	/**@type {ExtendedCommandRequestPrototype}*/
 	const extension: ExtendedCommandRequestPrototype = Object.assign({}, extendedCommandRequestPrototype);
 
@@ -140,9 +140,9 @@ function extendRequest(request: import('./typings').CommandRequest | import('./t
 	return request as ComplexCommandRequest;
 }
 
-type CompatibilityExecutionFunction = (request: import('./typings').ComplexCommandRequest, args: import('./typings').CommandArguments, isSlash: boolean, rawArgs: string) => Promise<any>;
+type CompatibilityExecutionFunction = (request: ComplexCommandRequest, args: CommandArguments, isSlash: boolean, rawArgs: string) => Promise<any>;
 
-type ExecutionFunction = (request: import('./typings').ComplexCommandRequest, args: import('./cmdOpts').CommandOptionSolver, rawArgs?: string | null) => Promise<any>;
+type ExecutionFunction = (request: ComplexCommandRequest, args: import('./cmdOpts').CommandOptionSolver, rawArgs?: string | null) => Promise<any>;
 
 type InteractionResponseFunction = (interaction: Interaction, ...args: string[]) => Promise<any>;
 
@@ -158,7 +158,7 @@ type ModalResponseFunction = (interaction: ModalMessageModalSubmitInteraction<'c
 
 export type CommandReplyOptions = (string | MessagePayload | MessageReplyOptions) & InteractionReplyOptions & { fetchReply: boolean; };
 
-export type WikiComponentEvaluator = (request: import('./typings').ComplexCommandRequest | MessageComponentInteraction<'cached'>) => MessageActionRowComponentBuilder;
+export type WikiComponentEvaluator = (request: ComplexCommandRequest | MessageComponentInteraction<'cached'>) => MessageActionRowComponentBuilder;
 
 export type WikiRowDefinition = WikiComponentEvaluator[];
 
@@ -202,8 +202,6 @@ export class Command {
 		this.name = name;
 		this.aliases = [];
 		this.flags = tags;
-		//@ts-expect-error
-		this.actions = [];
 		this.legacy = false;
 		this.memory = new Map();
 		this.wiki = {
@@ -326,16 +324,16 @@ export class Command {
 		return this.setFunction(responseFn, options);
 	};
 
-	static requestIsMessage(request: import('./typings').CommandRequest | Interaction): request is Message<true> {
+	static requestIsMessage(request: CommandRequest | Interaction): request is Message<true> {
 		return request instanceof Message;
 	}
 
-	static requestIsInteraction(request: import('./typings').CommandRequest | Interaction): request is Interaction<'cached'> {
+	static requestIsInteraction(request: CommandRequest | Interaction): request is Interaction<'cached'> {
 		return request instanceof CommandInteraction;
 	}
 
-	/**@param {import('./typings').CommandRequest | import('./typings').ComponentInteraction} request*/
-	static requestize(request: import('./typings').CommandRequest | import('./typings').ComponentInteraction) {
+	/**@param {CommandRequest | ComponentInteraction} request*/
+	static requestize(request: CommandRequest | ComponentInteraction) {
 		return extendRequest(request);
 	}
 };

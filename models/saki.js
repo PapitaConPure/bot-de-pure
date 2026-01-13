@@ -2,7 +2,13 @@ const Mongoose = require('mongoose');
 
 /** Describe la configuración de Saki Scans (Hourai Doll) */
 const SakiSchema = new Mongoose.Schema({
-    configs: { type: Object, default: {} },
+    configs: {
+        type: Object,
+        bienvenida: /**@type {boolean}*/(/**@type {unknown}*/({ type: Boolean, default: true })),
+        despedida: /**@type {boolean}*/(/**@type {unknown}*/({ type: Boolean, default: true })),
+        pingBienvenida: /**@type {boolean}*/(/**@type {unknown}*/({ type: Boolean, default: true })),
+        default: {},
+    },
     customRoles: { type: Object, default: {} },
     mentionRoles: {
         type: Object,

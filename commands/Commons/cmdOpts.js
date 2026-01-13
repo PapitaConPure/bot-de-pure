@@ -125,7 +125,6 @@ const fetchMessageFlag = (args, flag = { property: undefined, short: [], long: [
 		}
 
 		if(flag.short?.length && arg.startsWith('-') && arg !== '-') {
-			// @ts-ignore
 			const flagChars = [...arg].slice(1).filter(c => flag.short.includes(c));
 			for(let c of flagChars) {
 				flagValue = flag.property ? fetchMessageFlagText(args, i + 1) : c;
@@ -611,13 +610,11 @@ class CommandOptions {
 	 */
 	flags;
 	/**Propiedades por defecto*/
-	// @ts-ignore
 	#defaults;
 	/**
 	 * Contexto de Request
 	 * @type {import('./typings').CommandRequest?}
 	 */
-	// @ts-ignore
 	#request;
 
 	/**
