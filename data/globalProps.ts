@@ -10,7 +10,7 @@ export const remoteStartup: boolean = ((+!!argv.p) - (+!!argv.d)) > 0;
 
 export const noDataBase: boolean = !!argv.nodb;
 
-export const envPath = path.join(__dirname, remoteStartup ? '/remoteenv.json' : '../localenv.json');
+export const envPath = path.join(__dirname, remoteStartup ? '../remoteenv.json' : '../localenv.json');
 
 //Claves
 export const discordToken = process.env.I_LOVE_MEGUMIN ?? (require(envPath)?.token);
