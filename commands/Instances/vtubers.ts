@@ -1,16 +1,17 @@
-const { options } = require('./buscar.js');
-const { CommandTags, Command } = require('../Commons/');
-const { searchAndReplyWithPost } = require('../../systems/booru/boorusend.js');
+import { CommandTags, Command } from '../Commons/';
+import { searchAndReplyWithPost } from '../../systems/booru/boorusend';
+import { searchCommandOptions } from './buscar';
 
-const flags = new CommandTags().add('COMMON');
-const command = new Command('vtubers', flags)
+const tags = new CommandTags().add('COMMON');
+
+const command = new Command('vtubers', tags)
 	.setAliases('vtuber', 'vt')
 	.setBriefDescription('Muestra imágenes de vtubers')
 	.setLongDescription(
 		'Muestra imágenes de vtubers.',
 		'**Nota:** en canales NSFW, los resultados serán NSFW',
 	)
-	.setOptions(options)
+	.setOptions(searchCommandOptions)
 	.setExecution((request, args) => searchAndReplyWithPost(request, args, { cmdtag: 'virtual_youtuber', sfwtitle: 'Vtubers', nsfwtitle: 'Vtubas' }));
 
-module.exports = command;
+export default command;

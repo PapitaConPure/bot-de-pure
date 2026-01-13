@@ -1,7 +1,7 @@
-const { CommandOptions, CommandTags, Command } = require('../Commons/');
-const { searchAndReplyWithPost } = require('../../systems/booru/boorusend.js');
+import { CommandOptions, CommandTags, Command } from '../Commons';
+import { searchAndReplyWithPost } from '../../systems/booru/boorusend';
 
-const options = new CommandOptions()
+export const searchCommandOptions = new CommandOptions()
 	.addParam('etiquetas', 'TEXT',  'para filtrar resultados de búsqueda', { optional: true })
 	.addFlag([], ['bomba', 'bomb'], 'para mostrar una cierta cantidad de imágenes', { name: 'cnt', type: 'NUMBER' });
 
@@ -18,7 +18,7 @@ const command = new Command('buscar', flags)
 		'Muestra imágenes de cualquier cosa. La búsqueda se realiza con Gelbooru.',
 		'**Nota:** en canales NSFW, los resultados serán NSFW',
 	)
-	.setOptions(options)
+	.setOptions(searchCommandOptions)
 	.setExecution((request, args) => searchAndReplyWithPost(request, args));
 
-module.exports = command;
+export default command;

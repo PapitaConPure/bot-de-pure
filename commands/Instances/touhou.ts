@@ -1,9 +1,10 @@
-import { options } from './buscar.js';
 import { CommandTags, Command } from '../Commons/';
-import { searchAndReplyWithPost } from '../../systems/booru/boorusend.js';
+import { searchAndReplyWithPost } from '../../systems/booru/boorusend';
+import { searchCommandOptions } from './buscar';
 
-const flags = new CommandTags().add('COMMON');
-const command = new Command('touhou', flags)
+const tags = new CommandTags().add('COMMON');
+
+const command = new Command('touhou', tags)
 	.setAliases(
 		'imagentouhou', 'imgtouhou', 'tohas', 'touhas', 'tojas', 'tohitas', 'touhitas', 'tojitas',
         'touhoupic', '2hupic',
@@ -14,7 +15,7 @@ const command = new Command('touhou', flags)
 		'Muestra imágenes de Touhou.',
 		'**Nota:** en canales NSFW, los resultados serán NSFW',
 	)
-	.setOptions(options)
+	.setOptions(searchCommandOptions)
 	.setExecution((request, args) => searchAndReplyWithPost(request, args, { cmdtag: 'touhou', sfwtitle: 'Tohas', nsfwtitle: 'Tohitas' }));
 
 export default command;
