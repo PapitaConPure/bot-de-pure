@@ -3,7 +3,7 @@ const { CommandTags, Command, CommandOptions } = require('../Commons/');
 const UserConfigs = require('../../models/userconfigs').default;
 const { EmbedBuilder } = require("discord.js");
 const { Translator } = require("../../i18n");
-const { globalConfigs } = require('../../data/globalProps');
+const { globalConfigs, tenshiColor } = require('../../data/globalProps');
 const { auditError } = require('../../systems/others/auditor');
 
 const transferLocks = new Set();
@@ -69,7 +69,7 @@ const command = new Command('transferir', flags)
             const transactionCode = makeTransactionCode(request);
     
             const embed = new EmbedBuilder()
-                .setColor(globalConfigs.tenshiColor)
+                .setColor(tenshiColor)
                 .setAuthor({ name: translator.getText('transferAuthorName'), iconURL: request.guild.iconURL({ size: 256 }) })
                 .setTitle(translator.getText('transferTitle'))
                 .addFields(

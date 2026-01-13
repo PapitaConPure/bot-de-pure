@@ -1,8 +1,7 @@
 const { EmbedBuilder, StringSelectMenuBuilder, MessageFlags, ContainerBuilder, ButtonStyle, ButtonBuilder, SeparatorSpacingSize } = require('discord.js'); //Integrar discord.js
-const globalConfigs = require('../../data/config.json');
 const botStatus = require('../../data/botStatus.json');
 const userIds = require('../../data/userIds.json');
-const { noDataBase, remoteStartup } = require('../../data/globalProps');
+const { noDataBase, remoteStartup, tenshiColor } = require('../../data/globalProps');
 const { readdirSync } = require('fs'); //Para el contador de comandos
 const { p_pure } = require('../../utils/prefixes');
 const { Stats } = require('../../models/stats');
@@ -38,7 +37,7 @@ const command = new Command('estado', flags)
         const papita = await request.client.users.fetch(userIds.papita);
 
         const container = new ContainerBuilder()
-            .setAccentColor(globalConfigs.tenshiColor)
+            .setAccentColor(tenshiColor)
             .addMediaGalleryComponents(mediaGallery =>
                 mediaGallery.addItems(MediaGalleryItem =>
                     MediaGalleryItem.setURL('https://i.imgur.com/lQOPok9.jpeg')
@@ -142,7 +141,7 @@ const command = new Command('estado', flags)
         const matchedCommands = changelog.join().matchAll(COMMAND_REGEX);
         const formattedChangelog = changelog.map(item => `- ${item}`).join('\n');
         const container = new ContainerBuilder()
-            .setAccentColor(globalConfigs.tenshiColor)
+            .setAccentColor(tenshiColor)
             .addTextDisplayComponents(
                 textDisplay => textDisplay.setContent([
                     translator.getText('estadoChangesTitle'),
@@ -181,7 +180,7 @@ const command = new Command('estado', flags)
         
         const formattedToDo = toDo.map(item => `- ${item}`).join('\n');
         const container = new ContainerBuilder()
-            .setAccentColor(globalConfigs.tenshiColor)
+            .setAccentColor(tenshiColor)
             .addTextDisplayComponents(
                 textDisplay => textDisplay.setContent([
                     translator.getText('estadoUpcomingTitle'),

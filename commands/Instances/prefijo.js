@@ -1,8 +1,7 @@
 const { EmbedBuilder } = require('discord.js');
-const global = require('../../data/config.json');
 const { shortenText } = require('../../func');
 const PrefixPair = require('../../models/prefixpair.js');
-const { prefixes } = require('../../data/globalProps');
+const { prefixes, tenshiColor } = require('../../data/globalProps');
 const { p_pure } = require('../../utils/prefixes');
 const { CommandOptions, CommandTags, Command } = require('../Commons/');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
@@ -39,7 +38,7 @@ const command = new Command('prefijo', flags)
 		const prefix = args.getString('prefijo');
 		if(!prefix) {
 			const embed = new EmbedBuilder()
-				.setColor(global.tenshiColor)
+				.setColor(tenshiColor)
 				.setFooter({ text: `Usa "${preraw}ayuda" para más información` })
 				.addFields(
 					{

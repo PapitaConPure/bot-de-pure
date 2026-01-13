@@ -1,10 +1,10 @@
-const globalConfigs = require('../../data/config.json');
 const { MessageFlags, ContainerBuilder } = require('discord.js');
 const Reminder = require('../../models/reminders');
 const Logger = require('../../utils/logs').default;
 const { Translator } = require('../../i18n');
 const { decompressId } = require('../../func');
 const Int32 = require('mongoose-int32');
+const { tenshiColor } = require('../../data/globalProps');
 
 const { debug, info, error } = Logger('WARN', 'Reminders');
 
@@ -117,7 +117,7 @@ async function sendReminder(channel, user, reminderContent) {
 	const translator = await Translator.from(user.id);
 
 	const container = new ContainerBuilder()
-		.setAccentColor(globalConfigs.tenshiColor)
+		.setAccentColor(tenshiColor)
 		.addTextDisplayComponents(
 			textDisplay => textDisplay.setContent(translator.getText('reminderTriggerEpigraph', user)),
 			textDisplay => textDisplay.setContent(reminderContent),

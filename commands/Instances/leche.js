@@ -1,12 +1,13 @@
-const Discord = require('discord.js'); //Integrar discord.js
+const Discord = require('discord.js');
+const func = require('../../func');
 const serverIds = require('../../data/serverIds.json');
-const func = require('../../func'); //Funciones globales
 const { default: axios } = require('axios');
 const Canvas = require('@napi-rs/canvas');
-const { utils } = require('../../data/images.json'); //Funciones globales
+const { utils } = require('../../data/images.json');
 const { CommandOptions, CommandTags, Command } = require('../Commons/');
 const { isThread } = require('../../func');
 const { getUnixTime } = require('date-fns');
+const { globalConfigs } = require('../../data/globalProps');
 
 /**
  * 
@@ -125,14 +126,14 @@ const command = new Command('leche', flags)
 		if(bglink == undefined)
 			return request.reply({ content: `${coomer[randcoomer]} <:lechita:931409943448420433> ${target}` });
 			
-		const guildTime = new Date(Date.now() - global.lechitauses);
+		const guildTime = new Date(Date.now() - globalConfigs.lechitauses);
 		const lastMilked = getUnixTime(guildTime);
 		const minSpan = 3;
 		
 		if(lastMilked <= minSpan) 
 			return request.reply({ content: `⛔ Solo puedes crear emotes cada ${minSpan} segundos (compartido globalmente).` });
 
-		global.lechitauses = Date.now();
+		globalConfigs.lechitauses = Date.now();
 		const cumote = await request.client.guilds.cache.get(serverIds.slot2).emojis.create({ attachment: bglink, name: user.id })
 		return request.reply({ content: `${coomer[randcoomer]} <:lechita:931409943448420433> ${cumote}` })
 		.then(() => cumote.delete());

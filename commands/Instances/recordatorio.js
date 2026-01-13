@@ -1,4 +1,3 @@
-const globalConfigs = require('../../data/config.json');
 const { Command, CommandTags, CommandOptions, CommandParam, CommandFlagExpressive } = require('../Commons/');
 const { p_pure } = require('../../utils/prefixes');
 const { Translator } = require('../../i18n');
@@ -11,6 +10,7 @@ const { isValid, addDays, isBefore, addMinutes, getUnixTime } = require('date-fn
 const { scheduleReminder } = require('../../systems/others/remindersScheduler');
 const { UTCDate } = require('@date-fns/utc');
 const { toUtcOffset, sanitizeTzCode } = require('../../utils/timezones');
+const { tenshiColor } = require('../../data/globalProps');
 
 const maxReminderCountPerUser = 5;
 const maxReminderContentLength = 960;
@@ -24,7 +24,7 @@ async function makeRemindersListContainer(compressedUserId, translator) {
 	const reminders = await Reminder.find({ userId: compressedUserId });
 
 	const container = new ContainerBuilder()
-		.setAccentColor(globalConfigs.tenshiColor)
+		.setAccentColor(tenshiColor)
 		.addTextDisplayComponents(textDisplay =>
 			textDisplay.setContent(translator.getText('recordarRemindersListTitle'))
 		);
@@ -98,7 +98,7 @@ async function makeRemindersListContainer(compressedUserId, translator) {
  */
 function makeReminderContainer(reminder, translator, title = undefined) {
 	const container = new ContainerBuilder()
-		.setAccentColor(globalConfigs.tenshiColor)
+		.setAccentColor(tenshiColor)
 		.addTextDisplayComponents(
 			textDisplay => textDisplay.setContent(title ?? translator.getText('recordarReminderCreateTitle')),
 			textDisplay => textDisplay.setContent(

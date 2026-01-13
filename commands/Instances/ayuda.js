@@ -1,7 +1,7 @@
 const { EmbedBuilder, MessageFlags } = require('discord.js');
 const serverIds = require('../../data/serverIds.json');
 const userIds = require('../../data/userIds.json');
-const { tenshiColor } = require('../../data/config.json');
+const { tenshiColor } = require('../../data/globalProps');
 const { isNotModerator, shortenText } = require('../../func');
 const { p_pure } = require('../../utils/prefixes');
 const { commandFilenames, CommandOptions, CommandTags, Command, CommandParam } = require('../Commons/');

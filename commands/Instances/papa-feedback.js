@@ -1,7 +1,7 @@
 const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { CommandTags, Command } = require('../Commons/');
 const GuildConfig = require('../../models/guildconfigs.js');
-const { tenshiColor } = require('../../data/config.json');
+const { tenshiColor } = require('../../data/globalProps');
 const { makeButtonRowBuilder } = require('../../utils/tsCasts.js');
 
 const tags = new CommandTags().add('PAPA');

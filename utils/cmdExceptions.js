@@ -1,4 +1,3 @@
-const globalConfigs = require('../data/config.json');
 const userIds = require('../data/userIds.json');
 const serverIds = require('../data/serverIds.json');
 const { EmbedBuilder } = require('discord.js');
@@ -7,6 +6,7 @@ const { isNotModerator } = require('../func');
 const chalk = require('chalk');
 const { auditError } = require('../systems/others/auditor');
 const { Command } = require('../commands/Commons/cmdBuilder.js');
+const { reportFormUrl } = require('../data/globalProps');
 
 /**
  * @typedef {(request: import('../commands/Commons/typings').CommandRequest) => Promise<Boolean>} ExceptionTestFn
@@ -143,7 +143,7 @@ module.exports = {
                     },
                     {
                         name: 'Reportar un error',
-                        value: `¿Crees que esto se trata de otro problema? Eso nunca debería ser el caso, pero de ser así, puedes [reportarlo](${globalConfigs.reportFormUrl})`,
+                        value: `¿Crees que esto se trata de otro problema? Eso nunca debería ser el caso, pero de ser así, puedes [reportarlo](${reportFormUrl})`,
                     },
                 );
 

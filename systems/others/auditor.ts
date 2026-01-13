@@ -1,6 +1,6 @@
 import { Command } from '../../commands/Commons/cmdBuilder';
 import { CommandRequest } from '../../commands/Commons/typings';
-import globalConf from '../../data/config.json';
+import { globalConfigs } from '../../data/globalProps';
 import { EmbedBuilder, Colors, Interaction, User, APIEmbedField, InteractionType } from 'discord.js';
 
 function generateRequestRecord(request: CommandRequest | Interaction) {
@@ -49,8 +49,7 @@ export async function auditRequest(request: CommandRequest | Interaction) {
         // @ts-expect-error
         embed.addFields({ name: 'Adjuntado:', value: request.attachments.map(attf => attf.url ?? 'https://discord.com/').join('\n').slice(0, 1023) });
     
-    // @ts-expect-error
-    return globalConf.logch?.send({ embeds: [embed] }).catch(console.error);
+    return globalConfigs.logch?.send({ embeds: [embed] }).catch(console.error);
 };
 
 export async function auditSystem(title: string, ...fields: Array<APIEmbedField>) {
@@ -61,8 +60,7 @@ export async function auditSystem(title: string, ...fields: Array<APIEmbedField>
     if(fields.length)
         embed.setFields(fields);
     
-    // @ts-expect-error
-    return globalConf.logch?.send({ embeds: [embed] }).catch(console.error);
+    return globalConfigs.logch?.send({ embeds: [embed] }).catch(console.error);
 };
 
 export async function auditAction(action: string, ...fields: Array<APIEmbedField>) {
@@ -73,8 +71,7 @@ export async function auditAction(action: string, ...fields: Array<APIEmbedField
     if(fields.length)
         embed.setFields(fields);
     
-    // @ts-expect-error
-    return globalConf.logch?.send({ embeds: [embed] }).catch(console.error);
+    return globalConfigs.logch?.send({ embeds: [embed] }).catch(console.error);
 };
 
 interface AuditErrorOptions {
@@ -102,10 +99,9 @@ export async function auditError(error: Error, { request = undefined, brief = un
         // @ts-expect-error
         embed.addFields({ name: 'Detalle', value: details });
     
-    // @ts-expect-error
-    return globalConf.logch?.send({
+    return globalConfigs.logch?.send({
         // @ts-expect-error
-        content: ping ? `<@${globalConf.peopleid.papita}>` : null,
+        content: ping ? `<@${globalConfigs.peopleid.papita}>` : null,
         embeds: [embed],
     }).catch(console.error);
 };

@@ -1,12 +1,12 @@
 const { PureVoiceModel, PureVoiceSessionModel } = require('../../models/purevoice.js');
 const UserConfigs = require('../../models/userconfigs').default;
-const { tenshiColor }= require('../../data/config.json');
 const Discord = require('discord.js');
 const { p_pure } = require('../../utils/prefixes');
 const { Translator } = require('../../i18n');
 const chalk = require('chalk');
 const { ButtonStyle, ChannelType } = require('discord.js');
 const { makeButtonRowBuilder } = require('../../utils/tsCasts.js');
+const { tenshiColor } = require('../../data/globalProps.js');
 const Logger = require('../../utils/logs.js').default;
 
 const { debug, info, warn, error } = Logger('WARN', 'PV');
@@ -324,7 +324,7 @@ class PureVoiceUpdateHandler {
 				const defaultName = member.user.username.slice(0, 24);
 				const sessionRole = await guild.roles.create({
 					name: makeSessionRoleAutoname(userConfigs) ?? `🔶 PV ${defaultName}`,
-					color: global.tenshiColor,
+					color: tenshiColor,
 					mentionable: true,
 					reason: translator.getText('voiceSessionReasonRoleCreate'),
 				});

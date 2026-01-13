@@ -1,5 +1,4 @@
 import Discord from 'discord.js'; //Discord.js
-import global from './data/config.json';
 import serverIds from './data/serverIds.json';
 import { globalConfigs } from './data/globalProps';
 import { saki } from './data/sakiProps';

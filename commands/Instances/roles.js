@@ -1,4 +1,4 @@
-const { tenshiColor } = require('../../data/config.json');
+const { tenshiColor } = require('../../data/globalProps');
 const { saki } = require('../../data/sakiProps');
 const userIds = require('../../data/userIds.json');
 const Hourai = require('../../models/saki.js');
@@ -597,12 +597,12 @@ const command = new Command('roles', flags)
 					interaction.member.roles.add(customRole),
 				]);
 
-				return module.exports.customRoleWizard(interaction, customRole.id);
+				return command.customRoleWizard(interaction, customRole.id);
 			}
 			
 			case 'EDIT': {
 				const roleId = houraiDB.customRoles[userId];
-				return module.exports.customRoleWizard(interaction, roleId);
+				return command.customRoleWizard(interaction, roleId);
 			}
 
 			case 'DELETE': {

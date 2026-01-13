@@ -1,6 +1,6 @@
 import Discord from 'discord.js';
-import global from '../../data/config.json';
 import { CommandTags, Command } from '../Commons/';
+import { tenshiColor, reportFormUrl } from '../../data/globalProps';
 
 const tags = new CommandTags().add('COMMON');
 
@@ -9,13 +9,13 @@ const command = new Command('sugerir', tags)
 	.setDescription('Para sugerir mejoras sobre Bot de Puré, o reportar un error')
 	.setExecution(async request => {
 		const embed = new Discord.EmbedBuilder()
-			.setColor(global.tenshiColor)
+			.setColor(tenshiColor)
 			.setAuthor({ name: 'Bot de Puré • Comentarios', iconURL: request.client.user.avatarURL({ size: 256, extension: 'jpg' }) })
 			.setThumbnail('https://i.imgur.com/Ah7G6iV.jpg')
 			.addFields(
 				{
 					name: 'Método',
-					value: `Para enviar tus comentarios, accede a este [🔗 Formulario de Google](${global.reportFormUrl})`,
+					value: `Para enviar tus comentarios, accede a este [🔗 Formulario de Google](${reportFormUrl})`,
 					inline: true,
 				},
 				{

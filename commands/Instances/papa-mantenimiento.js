@@ -1,4 +1,5 @@
-const botStatus = require('../../data/botStatus.json'); //Variables globales
+const botStatus = require('../../data/botStatus.json');
+const { globalConfigs } = require('../../data/globalProps');
 const { CommandTags, Command } = require('../Commons/');
 
 const flags = new CommandTags().add('PAPA');
@@ -11,21 +12,21 @@ const command = new Command('papa-mantenimiento', flags)
 	)
 	.setExecution(async message => {
 		const { channel, user } = message;
-		const sent = await channel.send({ content: `**Host** \`${botStatus.host}\`\n**ID de InstProc** \`${global.startupTime}\`\n**Estado** \`[${global.maintenance.length?'PAUSADO':'OPERANDO'}]\``})
+		const sent = await channel.send({ content: `**Host** \`${botStatus.host}\`\n**ID de InstProc** \`${globalConfigs.startupTime}\`\n**Estado** \`[${globalConfigs.maintenance.length?'PAUSADO':'OPERANDO'}]\``})
 
-		const reactions = (global.maintenance.length)?['🌀']:['💤','👁️'];
+		const reactions = (globalConfigs.maintenance.length)?['🌀']:['💤','👁️'];
 		Promise.all(reactions.map(reaction => sent.react(reaction)));
 		const filter = (rc, u) => reactions.includes(rc.emoji.name) && user.id === u.id;
 		const collector = sent.createReactionCollector({ filter: filter, max: 1, time: 1000 * 30 });
 		collector.on('collect', reaction => {
-			if(global.maintenance.length) {
-				global.maintenance = '';
+			if(globalConfigs.maintenance.length) {
+				globalConfigs.maintenance = '';
 				sent.react('☑️');
 			} else {
 				if(reaction.emoji.name === reactions[0])
-					global.maintenance = channel.id;
+					globalConfigs.maintenance = channel.id;
 				else
-					global.maintenance = `!${channel.id}`;
+					globalConfigs.maintenance = `!${channel.id}`;
 				sent.react('✅');
 			}
 		});

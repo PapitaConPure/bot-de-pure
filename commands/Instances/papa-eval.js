@@ -30,7 +30,7 @@ const command = new Command('papa-eval', flags)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		// eslint-disable-next-line no-unused-vars
-		const globalConfigs = require('../../data/config.json');
+		const globalProps = require('../../data/globalProps');
 		// eslint-disable-next-line no-unused-vars
 		const func = require('../../func');
 		const Discord = require('discord.js');

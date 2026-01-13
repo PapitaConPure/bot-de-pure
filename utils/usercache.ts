@@ -1,6 +1,6 @@
 import { LocaleKey } from '../i18n';
 import UserConfigs, { UserConfigDocument } from '../models/userconfigs';
-import globalConfigs from '../data/config.json';
+import { noDataBase } from '../data/globalProps';
 
 export type UserCache = {
 	language: LocaleKey;
@@ -27,7 +27,7 @@ export async function cacheUser(user: UserCacheResolvable) {
 	
 	const userQuery = { userId };
 	let userConfigs: UserConfigDocument;
-	if(globalConfigs.noDataBase) {
+	if(noDataBase) {
 		userConfigs = new UserConfigs(userQuery);
 	} else {
 		userConfigs = await UserConfigs.findOne(userQuery);

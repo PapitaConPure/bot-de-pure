@@ -1,13 +1,12 @@
-const GuildConfigs = require('../../models/guildconfigs.js');
+const GuildConfigs = require('../../models/guildconfigs');
 const Discord = require('discord.js');
-const { formatBooruPostMessage, notifyUsers } = require('./boorusend.js');
+const { formatBooruPostMessage, notifyUsers } = require('./boorusend');
 const { auditError, auditAction } = require('../others/auditor');
 const chalk = require('chalk');
 const { Booru } = require('./boorufetch');
-const globalConfigs = require('../../data/config.json');
 const { paginateRaw } = require('../../func');
 const { fetchGuildMembers } = require('../../utils/guildratekeeper');
-const { booruApiKey, booruUserId, noDataBase } = require('../../data/globalProps.js');
+const { globalConfigs, booruApiKey, booruUserId, noDataBase } = require('../../data/globalProps');
 
 //const Logger = require('../../logs').default;
 //const { debug } = Logger('WARN', 'BooruSend');
@@ -51,7 +50,7 @@ async function processFeeds(booru, guilds) {
     if(noDataBase) return;
 
     const guildIds = guilds.map(g => g.id);
-    const guildConfigs = /**@type {Array<import('../../models/guildconfigs.js').GuildConfigDocument>}*/(await GuildConfigs.find({
+    const guildConfigs = /**@type {Array<import('../../models/guildconfigs').GuildConfigDocument>}*/(await GuildConfigs.find({
         guildId: { $in: guildIds },
         feeds: { $exists: true, $ne: {} },
     }));
@@ -85,7 +84,7 @@ async function processFeeds(booru, guilds) {
                 toSave.faults = Math.max(0, feed.faults - 2);
 
             //Preparar suscripciones a Feeds
-            /**@type {Array<import('./boorusend.js').Suscription>}*/
+            /**@type {Array<import('./boorusend').Suscription>}*/
             const feedSuscriptions = [];
             for(const [ userId, feedSuscription ] of feedTagSuscriptionsCache) {
                 if(!feedSuscription.has(channelId)) continue;

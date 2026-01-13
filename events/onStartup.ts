@@ -2,30 +2,30 @@ import { Collection, GuildTextBasedChannel, REST, RESTPostAPIApplicationCommands
 import { Routes } from 'discord-api-types/v9';
 
 import { set, connect } from 'mongoose';
-import PrefixPairs from '../models/prefixpair.js';
-import UserConfigs from '../models/userconfigs.js';
-import BooruTags from '../models/boorutags.js';
-import MessageCascades from '../models/messageCascades.js';
-import { Puretable, pureTableAssets } from '../models/puretable.js';
-import { deleteExpiredMessageCascades, cacheMessageCascade } from './onMessageDelete.js';
+import PrefixPairs from '../models/prefixpair';
+import UserConfigs from '../models/userconfigs';
+import BooruTags from '../models/boorutags';
+import MessageCascades from '../models/messageCascades';
+import { Puretable, pureTableAssets } from '../models/puretable';
+import { deleteExpiredMessageCascades, cacheMessageCascade } from './onMessageDelete';
 
-import { puré } from '../core/commandInit.js';
+import { puré } from '../core/commandInit';
 
-import { setupGuildFeedUpdateStack, feedTagSuscriptionsCache } from '../systems/booru/boorufeed.js';
-import { Booru, Tag } from '../systems/booru/boorufetch.js';
-import { modifyPresence } from '../systems/presence/presence.js';
-import { auditSystem } from '../systems/others/auditor.js';
+import { setupGuildFeedUpdateStack, feedTagSuscriptionsCache } from '../systems/booru/boorufeed';
+import { Booru, Tag } from '../systems/booru/boorufetch';
+import { modifyPresence } from '../systems/presence/presence';
+import { auditSystem } from '../systems/others/auditor';
 
 import { GlobalFonts, loadImage } from '@napi-rs/canvas';
 import { getUnixTime } from 'date-fns';
 import { join } from 'path';
 import chalk from 'chalk';
 
-import { prepareTracksPlayer } from '../systems/others/musicPlayer.js';
-import { initializeWebhookMessageOwners } from '../systems/agents/discordagent.js';
-import { setupGuildRateKeeper, fetchAllGuildMembers } from '../utils/guildratekeeper.js';
-import { initRemindersScheduler, processReminders } from '../systems/others/remindersScheduler.js';
-import { discordToken, envPath, globalConfigs, noDataBase, prefixes, remoteStartup } from '../data/globalProps.js';
+import { prepareTracksPlayer } from '../systems/others/musicPlayer';
+import { initializeWebhookMessageOwners } from '../systems/agents/discordagent';
+import { setupGuildRateKeeper, fetchAllGuildMembers } from '../utils/guildratekeeper';
+import { initRemindersScheduler, processReminders } from '../systems/others/remindersScheduler';
+import { discordToken, envPath, globalConfigs, noDataBase, prefixes, remoteStartup } from '../data/globalProps';
 
 import botStatus from '../data/botStatus.json';
 import serverIds from '../data/serverIds.json';

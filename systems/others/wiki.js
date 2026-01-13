@@ -1,5 +1,5 @@
 const { ButtonBuilder, ButtonStyle, ContainerBuilder, TextDisplayBuilder, SectionBuilder, SeparatorBuilder, EmbedBuilder, ActionRowBuilder, SeparatorSpacingSize, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
-const { tenshiColor } = require('../../data/config.json');
+const { tenshiColor } = require('../../data/globalProps');
 const serverIds = require('../../data/serverIds.json');
 const userIds = require('../../data/userIds.json');
 const { commandFilenames } = require('../../commands/Commons/');

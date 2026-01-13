@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require('discord.js'); //Integrar discord.js
 const { readdirSync } = require('fs'); //Para el contador de comandos
-const { tenshiColor } = require('../../data/config.json');
+const { tenshiColor } = require('../../data/globalProps');
 const { CommandTags, Command } = require('../Commons/');
 
 const embeds = [

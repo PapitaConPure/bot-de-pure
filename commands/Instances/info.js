@@ -1,13 +1,12 @@
 const { ChannelType, ButtonBuilder, ButtonStyle, MessageFlags, ContainerBuilder, SectionBuilder } = require('discord.js'); //Integrar discord.js
 const { fetchMember, compressId, shortenText, quantityDisplay } = require('../../func');
-const globalConfigs = require('../../data/config.json'); //Variables globales
 const { ChannelStats, Stats } = require('../../models/stats');
 const { CommandOptions, CommandTags, Command } = require('../Commons/');
 const { makeButtonRowBuilder } = require('../../utils/tsCasts');
 const { Translator } = require('../../i18n');
 const { fetchGuildMembers } = require('../../utils/guildratekeeper');
 const { getUnixTime } = require('date-fns');
-const { noDataBase } = require('../../data/globalProps');
+const { globalConfigs, noDataBase } = require('../../data/globalProps');
 
 /**
  * @param {String} requestId

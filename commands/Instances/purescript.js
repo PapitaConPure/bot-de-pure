@@ -5,7 +5,7 @@ const { executeTuber, CURRENT_PS_VERSION } = require('../../systems/ps/common/ex
 const { CommandOptions } = require('../Commons/cmdOpts');
 const { ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
 const { p_pure } = require('../../utils/prefixes');
-const { tenshiColor } = require('../../data/config.json');
+const { tenshiColor } = require('../../data/globalProps');
 const { makeButtonRowBuilder } = require('../../utils/tsCasts');
 
 const psEditorButton = new ButtonBuilder()
