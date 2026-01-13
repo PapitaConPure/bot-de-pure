@@ -12,9 +12,9 @@ const options = new CommandOptions()
 	.addParam('enlaces', 'TEXT', 'para indicar enlaces de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
 	.addParam('imagens', 'IMAGE', 'para indicar archivos de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 });
 
-const flags = new CommandTags().add('COMMON');
+const tags = new CommandTags().add('COMMON');
 
-const command = new Command('catbox', flags)
+const command = new Command('catbox', tags)
 	.setBriefDescription('Permite subir imágenes con Catbox')
 	.setLongDescription('Permite subir imágenes por medio de la plataforma de Catbox.')
 	.setOptions(options)
