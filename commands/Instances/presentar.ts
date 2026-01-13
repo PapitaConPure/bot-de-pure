@@ -23,7 +23,7 @@ const command = new Command('presentar', tags)
 				.addSectionComponents(section =>
 					section
 						.addTextDisplayComponents(
-							textDisplay => textDisplay.setContent('-# **～ 𝓔𝓷𝓲𝓰𝓶𝓪𝓽𝓲𝓬 𝓜𝓪𝓬𝓱𝓲𝓷𝓮𝓻𝔂 𝓸𝓯 𝓗𝓲𝓰𝓱𝓮𝓼𝓽 𝓑𝓱𝓪𝓿𝓪-𝓪𝓰𝓻𝓪 ～**'),
+							textDisplay => textDisplay.setContent('-# **𝓔𝓷𝓲𝓰𝓶𝓪𝓽𝓲𝓬 𝓜𝓪𝓬𝓱𝓲𝓷𝓮𝓻𝔂 𝓸𝓯 𝓗𝓲𝓰𝓱𝓮𝓼𝓽 𝓑𝓱𝓪𝓿𝓪-𝓪𝓰𝓻𝓪**'),
 							textDisplay => textDisplay.setContent('# ¡Hola! ¡Permíteme presentarme!'),
 							textDisplay => textDisplay.setContent([
 								'Me llamo __Bot de Puré__ (♀️). Soy una bot de administración, entretenimiento, utilidad general y búsqueda de imágenes.',
