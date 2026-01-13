@@ -1,5 +1,5 @@
 const UserConfigs = require('../../models/userconfigs').default;
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder, ContainerBuilder, MessageFlags, StringSelectMenuOptionBuilder, SeparatorSpacingSize } = require('discord.js');
+const { ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder, ContainerBuilder, MessageFlags, StringSelectMenuOptionBuilder, SeparatorSpacingSize, LabelBuilder } = require('discord.js');
 const { CommandTags, Command, CommandOptions, CommandFlag } = require('../Commons/');
 const { tenshiColor, tenshiAltColor } = require('../../data/globalProps');
 const { Translator, Locales, isValidLocaleKey } = require('../../i18n');
@@ -871,27 +871,29 @@ const command = new Command('yo', tags)
 		if(compressId(user.id) !== authorId)
             return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
         
-        const tagsInput = new TextInputBuilder()
-            .setCustomId('tagsInput')
-            .setMinLength(1)
-            .setMaxLength(160)
-            .setPlaceholder('touhou animated 1girl')
-            .setStyle(TextInputStyle.Paragraph);
+        const tagsLabel = new LabelBuilder()
+            .setTextInputComponent(textInput =>
+                textInput
+                    .setCustomId('tagsInput')
+                    .setMinLength(1)
+                    .setMaxLength(160)
+                    .setPlaceholder('touhou animated 1girl')
+                    .setStyle(TextInputStyle.Paragraph)
+            );
+
         let title;
         if(operation === 'ADD') {
-            tagsInput.setLabel(translator.getText('feedEditTagsInputAdd'));
+            tagsLabel.setLabel(translator.getText('feedEditTagsInputAdd'));
             title = translator.getText('feedEditTagsTitleAdd');
         } else {
-            tagsInput.setLabel(translator.getText('feedEditTagsInputRemove'));
+            tagsLabel.setLabel(translator.getText('feedEditTagsInputRemove'));
             title = translator.getText('feedEditTagsTitleRemove');
         }
 
-        const row = new ActionRowBuilder().addComponents(tagsInput);
         const modal = new ModalBuilder()
             .setCustomId(`yo_setFollowedTags_${operation}_${compressId(channelId)}${isAlt ? '_ALT' : ''}`)
             .setTitle(title)
-            // @ts-ignore
-            .addComponents(row);
+            .addLabelComponents(tagsLabel);
 
         return interaction.showModal(modal).catch(auditError);
 	})

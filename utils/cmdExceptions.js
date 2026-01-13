@@ -126,11 +126,9 @@ module.exports = {
     async handleAndAuditError(error, request, logOptions = {}) {
         if(error.message === 'Missing Permissions') {
             /**@type {import('discord.js').User}*/
-            // @ts-ignore
             const user = request.author ?? request.user;
             const permsEmbed = new EmbedBuilder()
                 .setColor(0x0000ff)
-                // @ts-ignore
                 .setAuthor({ name: `${request.guild.name} • ${request.channel.name} (Click para ver)`, iconURL: user.avatarURL({ size: 128 }), url: request.url || 'https://discordapp.com' })
                 .setThumbnail('https://i.imgur.com/ftAxUen.jpg')
                 .addFields(
