@@ -1,9 +1,9 @@
-const { Translator } = require('../../i18n');
-const { ContextMenuActionManager } = require('../Commons/actionBuilder.js');
-const { pourSauce } = require('../../systems/others/saucenao.js');
-const SauceNAOUser = require('../../models/saucenaoUsers.js');
+import { ContextMenuAction } from '../Commons/actionBuilder';
+import { pourSauce } from '../../systems/others/saucenao';
+import SauceNAOUser from '../../models/saucenaoUsers';
+import { Translator } from '../../i18n';
 
-const action = new ContextMenuActionManager('actionFindSource', 'Message')
+const action = new ContextMenuAction('actionFindSource', 'Message')
     .setMessageResponse(async interaction => {
         const message = interaction.targetMessage;
         const uid = interaction.user.id;
@@ -50,4 +50,4 @@ const action = new ContextMenuActionManager('actionFindSource', 'Message')
 		return interaction.editReply({ embeds: [ ...successes, ...failures ] });
     });
 
-module.exports = action;
+export default action;

@@ -1,10 +1,10 @@
-const { Translator } = require('../../i18n');
-const { PureVoiceSessionMember, requestPVControlPanel, PVCPSuccess, PureVoiceActionHandler, getOrchestrator } = require('../../systems/others/purevoice.js');
-const { PureVoiceModel, PureVoiceSessionModel } = require('../../models/purevoice.js');
-const { ContextMenuActionManager } = require('../Commons/actionBuilder.js');
-const { MessageFlags } = require('discord.js');
+import { ContextMenuAction } from '../Commons/actionBuilder';
+import { PureVoiceSessionMember, requestPVControlPanel, PVCPSuccess, PureVoiceActionHandler, getOrchestrator } from '../../systems/others/purevoice';
+import { PureVoiceModel, PureVoiceSessionModel } from '../../models/purevoice';
+import { MessageFlags } from 'discord.js';
+import { Translator } from '../../i18n';
 
-const action = new ContextMenuActionManager('actionPVGiveMod', 'User')
+const action = new ContextMenuAction('actionPVGiveMod', 'User')
 	.setUserResponse(async interaction => {
 		const member = interaction.member;
 		const other = interaction.targetMember;
@@ -59,4 +59,4 @@ const action = new ContextMenuActionManager('actionPVGiveMod', 'User')
 		return interaction.editReply({ content: `**${translator.getText('feedDeletePostTitle')}**` });
 	});
 
-module.exports = action;
+export default action;

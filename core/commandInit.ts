@@ -2,8 +2,8 @@ import { Collection, PermissionFlagsBits, SlashCommandBuilder, ContextMenuComman
 import { shortenText } from '../func';
 import { readdirSync } from 'fs';
 import { Command } from '../commands/Commons/cmdBuilder';
-import { ContextMenuActionManager } from '../actions/Commons/actionBuilder';
-import { BaseParamType } from '../commands/Commons/cmdOpts';
+import { ContextMenuAction } from '../actions/Commons/actionBuilder';
+import { BaseParamType, CommandOptions } from '../commands/Commons/cmdOpts';
 import { commandFilenames } from '../commands/Commons/cmdIndex';
 
 export type AnySlashCommandOption = import('discord.js').SlashCommandBooleanOption |
@@ -115,7 +115,7 @@ function setupOptionBuilders(slash: SlashCommandBuilder, options: import('../com
 
 export const puré = {
     commands   : new Collection<string, Command>(),
-    actions    : new Collection<string, ContextMenuActionManager>(),
+    actions    : new Collection<string, ContextMenuAction>(),
     emotes     : new Collection<string, Command>(),
     slash      : new Collection<string, RESTPostAPIChatInputApplicationCommandsJSONBody>(),
     slashSaki  : new Collection<string, RESTPostAPIChatInputApplicationCommandsJSONBody>(),
@@ -152,8 +152,7 @@ export function registerCommandFiles(log: boolean = false) {
         if(command.flags.has('MOD'))
             slash.setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles | PermissionFlagsBits.ManageMessages);
 
-        /**@type {import('../commands/Commons/cmdOpts').CommandOptions}*/
-        const options: import('../commands/Commons/cmdOpts').CommandOptions = command.options;
+        const options: CommandOptions = command.options;
         if(options)
             setupOptionBuilders(slash, options, log);
     
@@ -167,13 +166,11 @@ export function registerCommandFiles(log: boolean = false) {
     log && console.table(commandTableStack);
     
     const actionFiles = readdirSync('./actions/Instances').filter(file => /\.(js|ts)$/.test(file));
-    /**@type {{ name: String, type: String, tid: String }[]}*/
     const actionTableStack: { name: string; type: string; tid: string; }[] = [];
 
     for(const file of actionFiles) {
         const actionModule = require(`../actions/Instances/${file}`);
-        /**@type {import('../actions/Commons/actionBuilder').ContextMenuActionManager}*/
-        const action: import('../actions/Commons/actionBuilder').ContextMenuActionManager = actionModule;
+        const action: ContextMenuAction = actionModule instanceof ContextMenuAction ? actionModule : actionModule.default;
         puré.actions.set(action.name, action);
         
         log && actionTableStack.push({

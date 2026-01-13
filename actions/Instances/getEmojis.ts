@@ -1,10 +1,9 @@
-const { MessageFlags, EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { emojiRegex } = require('../../func');
-const { Translator } = require('../../i18n');
-const { ContextMenuActionManager } = require('../Commons/actionBuilder.js');
-const { makeButtonRowBuilder } = require('../../utils/tsCasts.js');
+import { ContextMenuAction } from '../Commons/actionBuilder';
+import { MessageFlags, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
+import { emojiRegex } from '../../func';
+import { Translator } from '../../i18n';
 
-const action = new ContextMenuActionManager('actionGetEmojis', 'Message')
+const action = new ContextMenuAction('actionGetEmojis', 'Message')
     .setMessageResponse(async interaction => {
         const message = interaction.targetMessage;
         const uid = interaction.user.id;
@@ -17,9 +16,8 @@ const action = new ContextMenuActionManager('actionGetEmojis', 'Message')
                 content: 'No se encontraron emotes...',
             });
 
-        /**@type {Array<EmbedBuilder>}*/
-        const embeds = [];
-        const components = [];
+        const embeds: EmbedBuilder[] = [];
+        const components: ActionRowBuilder<ButtonBuilder>[] = [];
 
         for(const emojiMatch of emojisMatches) {
             if(embeds.length >= 25) continue;
@@ -46,7 +44,7 @@ const action = new ContextMenuActionManager('actionGetEmojis', 'Message')
             if(components.length && components[components.length - 1].components.length < 5) {
                 components[components.length - 1].addComponents(button);
             } else {
-                const row = makeButtonRowBuilder().addComponents(button);
+                const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button);
                 components.push(row);
             }
         }
@@ -60,4 +58,4 @@ const action = new ContextMenuActionManager('actionGetEmojis', 'Message')
         return interaction.reply({ embeds, components });
     });
 
-module.exports = action;
+export default action;

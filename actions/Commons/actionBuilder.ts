@@ -11,14 +11,14 @@ export type ContextMenuInteraction =
     | MessageContextMenuCommandInteraction<'cached'>
     | UserContextMenuCommandInteraction<'cached'>;
 
-export type ContextMenuAction<T extends ContextMenuInteraction = ContextMenuInteraction> = (request: T) => Promise<any>;
+export type ContextMenuActionHandler<T extends ContextMenuInteraction = ContextMenuInteraction> = (request: T) => Promise<any>;
 
 /**Representa una acción de menú contextual*/
-export class ContextMenuActionManager {
+export class ContextMenuAction {
     name: string;
     localizations: Map<DiscordLocale, string>;
     type: ApplicationCommandType;
-    execute: ContextMenuAction;
+    execute: ContextMenuActionHandler;
 
     constructor(nameLocaleId: LocaleIds, type: ActionCommandType) {
         const translation = Translator.getTranslation(nameLocaleId);
@@ -33,19 +33,19 @@ export class ContextMenuActionManager {
     }
 
     /** @param responseFn Acción a realizar al indicarse su ejecución*/
-    setResponse(responseFn: ContextMenuAction<ContextMenuCommandInteraction<'cached'>>) {
+    setResponse(responseFn: ContextMenuActionHandler<ContextMenuCommandInteraction<'cached'>>) {
         this.execute = responseFn;
         return this;
     }
 
     /** @param responseFn Acción a realizar al indicarse su ejecución*/
-    setMessageResponse(responseFn: ContextMenuAction<MessageContextMenuCommandInteraction<'cached'>>) {
+    setMessageResponse(responseFn: ContextMenuActionHandler<MessageContextMenuCommandInteraction<'cached'>>) {
         this.execute = responseFn;
         return this;
     }
 
     /** @param responseFn Acción a realizar al indicarse su ejecución*/
-    setUserResponse(responseFn: ContextMenuAction<UserContextMenuCommandInteraction<'cached'>>) {
+    setUserResponse(responseFn: ContextMenuActionHandler<UserContextMenuCommandInteraction<'cached'>>) {
         this.execute = responseFn;
         return this;
     }

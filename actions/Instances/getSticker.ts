@@ -1,9 +1,8 @@
-const { MessageFlags, EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { Translator } = require('../../i18n');
-const { ContextMenuActionManager } = require('../Commons/actionBuilder.js');
-const { makeButtonRowBuilder } = require('../../utils/tsCasts.js');
+import { ContextMenuAction } from '../Commons/actionBuilder';
+import { MessageFlags, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
+import { Translator } from '../../i18n';
 
-const action = new ContextMenuActionManager('actionGetSticker', 'Message')
+const action = new ContextMenuAction('actionGetSticker', 'Message')
     .setMessageResponse(async interaction => {
         const message = interaction.targetMessage;
         const uid = interaction.user.id;
@@ -23,7 +22,7 @@ const action = new ContextMenuActionManager('actionGetSticker', 'Message')
             .setTimestamp(sticker.createdTimestamp)
             .setImage(sticker.url);
         
-        const row = makeButtonRowBuilder().addComponents(
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
                 .setURL(sticker.url)
                 .setEmoji('922669195521568818')
@@ -36,4 +35,4 @@ const action = new ContextMenuActionManager('actionGetSticker', 'Message')
         });
     });
 
-module.exports = action;
+export default action;

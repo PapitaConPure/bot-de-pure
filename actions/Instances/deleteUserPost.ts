@@ -1,8 +1,8 @@
-const { Translator } = require('../../i18n');
-const { getAgentMessageOwnerId, deleteAgentMessage } = require('../../systems/agents/discordagent');
-const { ContextMenuActionManager } = require('../Commons/actionBuilder.js');
+import { ContextMenuAction } from '../Commons/actionBuilder';
+import { getAgentMessageOwnerId, deleteAgentMessage } from '../../systems/agents/discordagent';
+import { Translator } from '../../i18n';
 
-const action = new ContextMenuActionManager('actionDeleteUserPost', 'Message')
+const action = new ContextMenuAction('actionDeleteUserPost', 'Message')
     .setMessageResponse(async interaction => {
         const message = interaction.targetMessage;
         const uid = interaction.user.id;
@@ -30,4 +30,4 @@ const action = new ContextMenuActionManager('actionDeleteUserPost', 'Message')
         ]);
     });
 
-module.exports = action;
+export default action;

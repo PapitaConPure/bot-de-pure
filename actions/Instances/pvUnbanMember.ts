@@ -1,10 +1,10 @@
-const { Translator } = require('../../i18n');
-const { PureVoiceSessionMember, requestPVControlPanel, PVCPSuccess, PureVoiceActionHandler, getOrchestrator } = require('../../systems/others/purevoice.js');
-const { PureVoiceModel, PureVoiceSessionModel } = require('../../models/purevoice.js');
-const { ContextMenuActionManager } = require('../Commons/actionBuilder.js');
-const { MessageFlags } = require('discord.js');
+import { ContextMenuAction } from '../Commons/actionBuilder';
+import { PureVoiceSessionMember, requestPVControlPanel, PVCPSuccess, PureVoiceActionHandler, getOrchestrator } from '../../systems/others/purevoice';
+import { PureVoiceModel, PureVoiceSessionModel } from '../../models/purevoice';
+import { MessageFlags } from 'discord.js';
+import { Translator } from '../../i18n';
 
-const action = new ContextMenuActionManager('actionPVBanMember', 'User')
+const action = new ContextMenuAction('actionPVUnbanMember', 'User')
 	.setUserResponse(async interaction => {
 		const member = interaction.member;
 		const other = interaction.targetMember;
@@ -26,21 +26,25 @@ const action = new ContextMenuActionManager('actionPVBanMember', 'User')
 		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
 		if(!session) return interaction.editReply({ content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción' });
 		
+		const dbOther = session.members.get(other.id);
+		if(!dbOther)
+			return interaction.editReply({ content: '❌ El miembro que expulses debe haber estado en la misma sesión que tú' });
+
 		const sessionSelf = new PureVoiceSessionMember(session.members.get(member.id));
 		if(sessionSelf.isGuest())
-			return interaction.editReply({ content: '❌ Debes ser administrador o moderador de la sesión para expulsar a otro miembro' });
+			return interaction.editReply({ content: '❌ Debes ser administrador o moderador de la sesión para quitarle la expulsión a un miembro' });
 		
-		const sessionOther = new PureVoiceSessionMember(session.members.get(other.id) || { id: other.id });
+		const sessionOther = new PureVoiceSessionMember(dbOther);
 		if(sessionOther.isAdmin())
 			return interaction.editReply({ content: '❌ No se puede expulsar al administrador de la sesión' });
 
 		if(sessionSelf.id === sessionOther.id)
-			return interaction.editReply({ content: '❌ No te puedes expulsar a ti mismo' });
+			return interaction.editReply({ content: '❌ No te puedes quitar una expulsión por tu cuenta' });
 
-		sessionOther.setBanned(true);
+		sessionOther.setBanned(false);
 		session.members.set(other.id, sessionOther.toJSON());
 		session.markModified('members');
-
+		
 		const result = await requestPVControlPanel(guild, pv.categoryId, pv.controlPanelId);
 		
 		if(!result.success)
@@ -53,17 +57,16 @@ const action = new ContextMenuActionManager('actionPVBanMember', 'User')
 				documentHandler.document.controlPanelId = result.controlPanel.id;
 			});
 			const orchestrator = getOrchestrator(guildId);
-			await orchestrator.orchestrateAction(actionHandler);
+			orchestrator.orchestrateAction(actionHandler);
 		}
 
 		await Promise.all([
-			controlPanel.permissionOverwrites.delete(other, 'PLACEHOLDER_PV_REASON_BAN_VIEWCHANNEL_DISABLE').catch(console.error),
-			voiceChannel.permissionOverwrites.edit(other, { Connect: false }, { reason: 'PLACEHOLDER_PV_REASON_UNBAN_CONNECT_DISABLE' }).catch(console.error),
-			other.voice?.disconnect('PLACEHOLDER_PV_REASON_BAN_MEMBER_DISCONNECT').catch(console.error),
+			controlPanel.permissionOverwrites.edit(other, { ViewChannel: true }, { reason: 'PLACEHOLDER_PV_REASON_UNBAN_VIEWCHANNEL_ENABLE' }).catch(console.error),
+			voiceChannel.permissionOverwrites.delete(other, 'PLACEHOLDER_PV_REASON_UNBAN_CONNECT_ENABLE').catch(console.error),
 			session.save(),
 		]);
 
 		return interaction.editReply({ content: `**${translator.getText('feedDeletePostTitle')}**` });
 	});
 
-module.exports = action;
+export default action;
