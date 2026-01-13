@@ -329,7 +329,7 @@ export class Command {
 	}
 
 	isNotLegacy(): this is { execute: ExecutionFunction } {
-		return this.#legacy;
+		return !this.#legacy;
 	}
 
 	static requestIsMessage(request: CommandRequest | Interaction): request is Message<true> {
