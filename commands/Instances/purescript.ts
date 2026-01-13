@@ -1,31 +1,27 @@
-const { default: axios } = require('axios');
-const { CommandTags } = require('../Commons/cmdTags');
-const { Command } = require('../Commons/cmdBuilder');
-const { executeTuber, CURRENT_PS_VERSION } = require('../../systems/ps/common/executeTuber');
-const { CommandOptions } = require('../Commons/cmdOpts');
-const { ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
-const { p_pure } = require('../../utils/prefixes');
-const { tenshiColor } = require('../../data/globalProps');
-const { makeButtonRowBuilder } = require('../../utils/tsCasts');
+import { CommandTags } from '../Commons/cmdTags';
+import { Command } from '../Commons/cmdBuilder';
+import { executeTuber, CURRENT_PS_VERSION } from '../../systems/ps/common/executeTuber';
+import { CommandOptions } from '../Commons/cmdOpts';
+import { ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
+import { p_pure } from '../../utils/prefixes';
+import { tenshiColor } from '../../data/globalProps';
+import { makeButtonRowBuilder } from '../../utils/tsCasts';
+import { Tubercle } from '../../systems/ps/v1.1';
+import axios from 'axios';
 
-const psEditorButton = new ButtonBuilder()
+export const psEditorButton = new ButtonBuilder()
 	.setURL('https://papitaconpure.github.io/ps/')
 	.setLabel(`Abrir editor de PuréScript (v${CURRENT_PS_VERSION})`)
 	.setEmoji('1309359188929151098')
 	.setStyle(ButtonStyle.Link);
 
-const psDocsButton = new ButtonBuilder()
+export const psDocsButton = new ButtonBuilder()
 	.setURL('https://papitaconpure.github.io/ps-docs/')
 	.setLabel(`Aprende PuréScript`)
 	.setEmoji('📖')
 	.setStyle(ButtonStyle.Link);
 
-/**
- * 
- * @param {import("../Commons/cmdOpts").CommandOptionSolver} args 
- * @param {string?} rawArgs 
- */
-async function getScriptString(args, rawArgs) {
+async function getScriptString(args: import("../Commons/cmdOpts").CommandOptionSolver, rawArgs?: string) {
 	const file = args.getAttachment('archivo');
 
 	if(file && file.name.toLowerCase().endsWith('.tuber')) {
@@ -49,8 +45,8 @@ async function getScriptString(args, rawArgs) {
 		return importCode();
 	}
 
-	let script;
-	if(args.isInteractionSolver()) {
+	let script: string;
+	if(args.isInteractionSolver(args)) {
 		script = args.getString('script').trim();
 	} else {
 		script = rawArgs
@@ -115,8 +111,7 @@ const command = new Command('purescript', flags)
 
 		const script = scriptResult.result;
 
-		/**@type {import('../../systems/ps/v1.1').Tubercle}*/
-		const tuber = {
+		const tuber: Tubercle = {
 			id: null,
 			author: request.userId,
 			advanced: true,
@@ -144,9 +139,4 @@ const command = new Command('purescript', flags)
 		}
 	});
 
-//@ts-expect-error
-command.psEditorButton = psEditorButton;
-//@ts-expect-error
-command.psDocsButton = psDocsButton;
-
-module.exports = command;
+export default command;
