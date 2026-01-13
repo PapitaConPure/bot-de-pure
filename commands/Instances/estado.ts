@@ -75,11 +75,6 @@ const command = new Command('estado', flags)
                     translator.getText('estadoStatsSuccessfulCommandsCount', quantityDisplay(stats.commands.succeeded, translator), (stats.commands.succeeded / totalCommands * 100).toFixed(2)),
                     translator.getText('estadoStatsFailedCommandsCount', quantityDisplay(stats.commands.failed, translator), (stats.commands.failed / totalCommands * 100).toFixed(2)),
                 ].join('\n'))
-            )
-            .addSeparatorComponents(separator =>
-                separator
-                    .setDivider(true)
-                    .setSpacing(SeparatorSpacingSize.Large)
             );
 
         return request.reply({
