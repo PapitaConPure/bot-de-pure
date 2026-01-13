@@ -1,7 +1,7 @@
-const { CommandTags, Command } = require('../Commons/commands');
-const { hourai } = require('../../data/config.json');
+const { CommandTags, Command } = require('../Commons/');
+const { saki } = require('../../data/sakiProps');
 
-const hd = hourai.hangedRoleId; //Hanged Doll
+const hd = saki.hangedRoleId; //Hanged Doll
 
 const flags = new CommandTags().add(
 	'SAKI',

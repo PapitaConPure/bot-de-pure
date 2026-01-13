@@ -1,6 +1,6 @@
-const { options } = require('./buscar.js');
-const { CommandTags, Command } = require('../Commons/commands.js');
-const { searchAndReplyWithPost } = require('../../systems/booru/boorusend.js');
+import { options } from './buscar.js';
+import { CommandTags, Command } from '../Commons/';
+import { searchAndReplyWithPost } from '../../systems/booru/boorusend.js';
 
 const flags = new CommandTags().add('COMMON');
 const command = new Command('touhou', flags)
@@ -17,4 +17,4 @@ const command = new Command('touhou', flags)
 	.setOptions(options)
 	.setExecution((request, args) => searchAndReplyWithPost(request, args, { cmdtag: 'touhou', sfwtitle: 'Tohas', nsfwtitle: 'Tohitas' }));
 
-module.exports = command;
+export default command;

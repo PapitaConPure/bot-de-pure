@@ -1,5 +1,5 @@
 const Canvas = require('@napi-rs/canvas');
-const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command } = require('../Commons/');
 const { p_pure } = require('../../utils/prefixes');
 const { AttachmentBuilder } = require('discord.js');
 const { improveNumber } = require('../../func');

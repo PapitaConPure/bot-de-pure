@@ -1,9 +1,10 @@
-const { EmbedBuilder, Colors, AttachmentBuilder } = require('discord.js');
-const { default: axios } = require('axios');
-const { CommandTags, Command } = require('../Commons/commands');
+import { EmbedBuilder, Colors, AttachmentBuilder } from 'discord.js';
+import { CommandTags, Command } from '../Commons/';
+import axios from 'axios';
 
-const flags = new CommandTags().add('COMMON');
-const command = new Command('café', flags)
+const tags = new CommandTags().add('COMMON');
+
+const command = new Command('café', tags)
 	.setAliases('cafe', 'cafecito', 'coffee', 'cawfee')
 	.setLongDescription('Muestra imágenes de café. API: https://coffee.alexflipnote.dev')
 	.setExecution(async request => {
@@ -30,4 +31,4 @@ const command = new Command('café', flags)
 		return request.reply(replyBody);
 	});
 
-module.exports = command;
+export default command;

@@ -1,5 +1,5 @@
 const { Colors, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonBuilder, ButtonStyle } = require('discord.js'); //Integrar discord.js
-const { CommandTags, Command } = require('../Commons/commands.js');
+const { CommandTags, Command } = require('../Commons/');
 const { useMainPlayer, QueueRepeatMode } = require('discord-player');
 const { isPlayerUnavailable, makePuréMusicEmbed, SERVICES } = require('../../systems/others/musicPlayer.js');
 const { Translator } = require('../../i18n');

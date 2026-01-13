@@ -1,30 +1,28 @@
-const { Command } = require('../../commands/Commons/cmdBuilder');
-const globalConf = require('../../data/config.json');
-const { EmbedBuilder, Colors } = require('discord.js');
+import { Command } from '../../commands/Commons/cmdBuilder';
+import { CommandRequest } from '../../commands/Commons/typings';
+import globalConf from '../../data/config.json';
+import { EmbedBuilder, Colors, Interaction, User, APIEmbedField, InteractionType } from 'discord.js';
 
-/**
- * @param {import('../../commands/Commons/typings.js').CommandRequest|import('discord.js').Interaction} request
- */
-function generateRequestRecord(request) {
-    /**@type {import('discord.js').User}*/
-    // @ts-ignore
-    const user = request.author ?? request.user;
+function generateRequestRecord(request: CommandRequest | Interaction) {
+    // @ts-expect-error
+    const user: User = request.user ?? request.author;
     const embed = new EmbedBuilder()
-        // @ts-ignore
+        // @ts-expect-error
         .setAuthor({ name: `${request.guild.name} • ${request.channel.name}`, iconURL: user.avatarURL({ size: 128 }), url: request.url || request.channel?.url || 'https://discordapp.com' });
     return embed;
 };
 
-/**
- * @param {import('../../commands/Commons/typings.js').CommandRequest|import('discord.js').Interaction} request
- */
-function getRequestContent(request) {
+function getRequestContent(request: CommandRequest | InteractionType) {
+    // @ts-expect-error
     if(Command.requestIsInteraction(request)) {
         if(request.isContextMenuCommand())
+            // @ts-expect-error
             return `**\\*. ${request.commandName}** ${request.options.data.map(({ name, value }) => `${name}:\`${value}\``).join(' ')}`;
+
         return `**/${request.commandName}** ${request.options.data.map(({ name, value }) => `${name}:\`${value}\``).join(' ')}`;
     }
 
+    // @ts-expect-error
     if(Command.requestIsMessage(request))
         return request.content?.slice(0, 1023) || '*Mensaje vacío.*'
 
@@ -36,16 +34,14 @@ function getRequestContent(request) {
     return '???';
 }
 
-/**
- * @param {import('../../commands/Commons/typings.js').CommandRequest|import('discord.js').Interaction} request
- */
-async function auditRequest(request) {
+export async function auditRequest(request: CommandRequest | Interaction) {
     // @ts-expect-error
     if(request.customId?.startsWith('confesión')) return;
 
     // @ts-expect-error
     const userTag = (request.author ?? request.user).tag;
     const embed = generateRequestRecord(request)
+        // @ts-expect-error
         .addFields({ name: userTag, value: getRequestContent(request) });
         
     // @ts-expect-error
@@ -57,11 +53,7 @@ async function auditRequest(request) {
     return globalConf.logch?.send({ embeds: [embed] }).catch(console.error);
 };
 
-/**
- * @param {string} title
- * @param {Array<import('discord.js').APIEmbedField>} fields
- */
-async function auditSystem(title, ...fields) {
+export async function auditSystem(title: string, ...fields: Array<APIEmbedField>) {
     const embed = new EmbedBuilder()
         .setColor(Colors.DarkVividPink)
         .setAuthor({ name: 'Mensaje de sistema' })
@@ -69,15 +61,11 @@ async function auditSystem(title, ...fields) {
     if(fields.length)
         embed.setFields(fields);
     
-    // @ts-ignore
+    // @ts-expect-error
     return globalConf.logch?.send({ embeds: [embed] }).catch(console.error);
 };
 
-/**
- * @param {string} action
- * @param {Array<import('discord.js').APIEmbedField>} fields
- */
-async function auditAction(action, ...fields) {
+export async function auditAction(action: string, ...fields: Array<APIEmbedField>) {
     const embed = new EmbedBuilder()
         .setColor(Colors.Orange)
         .setAuthor({ name: 'Acción realizada' })
@@ -85,56 +73,39 @@ async function auditAction(action, ...fields) {
     if(fields.length)
         embed.setFields(fields);
     
-    // @ts-ignore
+    // @ts-expect-error
     return globalConf.logch?.send({ embeds: [embed] }).catch(console.error);
 };
 
-// function handleSubErrors(embed, errors) {
-//     const key = errors.key;
-//     const error = errors.error;
-//     if(!Array.isArray(errors)) return;
+interface AuditErrorOptions {
+    request?: CommandRequest | Interaction;
+    brief?: String;
+    details?: String;
+    ping?: Boolean;
+};
 
-//     embed.addFields({ name: 'Sub-error', value: `\`\`\`\n${`${error.name}` || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\`` });
-
-//     handleSubErrors(embed, errors.errors);
-// }
-
-/**
- * @typedef {Object} AuditErrorOptions
- * @property {import('../../commands/Commons/typings').CommandRequest|import('discord.js').Interaction} [request]
- * @property {String} [brief]
- * @property {String} [details]
- * @property {Boolean} [ping=false]
- */
-
-/**
- * @param {Error} error
- * @param {AuditErrorOptions} param2
- */
-async function auditError(error, { request = undefined, brief = undefined, details = undefined, ping = false } = { ping: false }) {
+export async function auditError(error: Error, { request = undefined, brief = undefined, details = undefined, ping = false }: AuditErrorOptions = { ping: false }) {
     const embed = (request ? generateRequestRecord(request) : new EmbedBuilder())
         .setColor(0x0000ff);
     
     if(request) {
         // @ts-expect-error
         const userTag = (request.author ?? request.user).tag;
+        // @ts-expect-error
         embed.addFields({ name: userTag, value: getRequestContent(request) });
     }
+    // @ts-expect-error
     embed.addFields({ name: brief || 'Ha ocurrido un error al ejecutar una acción', value: `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\`` });
     // handleSubErrors(embed, error.errors);
         
     if(details)
+        // @ts-expect-error
         embed.addFields({ name: 'Detalle', value: details });
     
+    // @ts-expect-error
     return globalConf.logch?.send({
+        // @ts-expect-error
         content: ping ? `<@${globalConf.peopleid.papita}>` : null,
         embeds: [embed],
     }).catch(console.error);
-};
-
-module.exports = {
-    auditRequest,
-    auditSystem,
-    auditAction,
-    auditError,
 };

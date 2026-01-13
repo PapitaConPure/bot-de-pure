@@ -1,12 +1,13 @@
-const { options } = require('./buscar.js');
-const { CommandTags, Command } = require('../Commons/commands.js');
-const { searchAndReplyWithPost } = require('../../systems/booru/boorusend.js');
+import { CommandTags, Command } from '../Commons/';
+import { searchAndReplyWithPost } from '../../systems/booru/boorusend.js';
+import { options } from './buscar.js';
 
-const flags = new CommandTags().add(
+const tags = new CommandTags().add(
 	'COMMON',
 	'MEME',
 );
-const command = new Command('megumin', flags)
+
+const command = new Command('megumin', tags)
 	.setAliases(
 		'megu', 'explosión', 'bakuretsu', 'waifu',
 		'bestgirl', 'explosion',
@@ -19,4 +20,4 @@ const command = new Command('megumin', flags)
 	.setOptions(options)
 	.setExecution((request, args) => searchAndReplyWithPost(request, args, { cmdtag: 'megumin', sfwtitle: 'MEGUMIN 🥹', nsfwtitle: 'MEGUMIN 🫣' }));
 
-module.exports = command;
+export default command;

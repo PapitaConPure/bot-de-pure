@@ -1,9 +1,10 @@
-const Discord = require('discord.js'); //Integrar discord.js
-const global = require('../../data/config.json'); //Variables globales
-const { CommandTags, Command } = require('../Commons/commands');
+import Discord from 'discord.js';
+import global from '../../data/config.json';
+import { CommandTags, Command } from '../Commons/';
 
-const flags = new CommandTags().add('COMMON');
-const command = new Command('sugerir', flags)
+const tags = new CommandTags().add('COMMON');
+
+const command = new Command('sugerir', tags)
 	.setAliases('reportar', 'informar')
 	.setDescription('Para sugerir mejoras sobre Bot de Puré, o reportar un error')
 	.setExecution(async request => {
@@ -32,4 +33,4 @@ const command = new Command('sugerir', flags)
 		return request.reply({ embeds: [embed] });
 	});
 
-module.exports = command;
+export default command;

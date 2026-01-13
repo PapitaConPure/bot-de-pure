@@ -1,5 +1,5 @@
 const { modifyPresence } = require('../../systems/presence/presence');
-const { CommandTags, Command } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/');
 
 const flags = new CommandTags().add('PAPA');
 const command = new Command('papa-próximo', flags)

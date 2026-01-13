@@ -1,9 +1,11 @@
-const { hourai, tenshiColor } = require('../../data/config.json');
+const { tenshiColor } = require('../../data/config.json');
+const { saki } = require('../../data/sakiProps');
+const userIds = require('../../data/userIds.json');
 const Hourai = require('../../models/saki.js');
 const { default: axios } = require('axios');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors } = require('discord.js');
 const { p_pure } = require('../../utils/prefixes.js');
-const { CommandTags, Command, CommandOptions, CommandParam } = require('../Commons/commands.js');
+const { CommandTags, Command, CommandOptions, CommandParam } = require('../Commons/');
 const { auditError } = require('../../systems/others/auditor.js');
 const { colorsRow } = require('../../data/sakiProps.js');
 const { subdivideArray, isBoosting, stringHexToNumber } = require('../../func.js');
@@ -250,7 +252,7 @@ const command = new Command('roles', flags)
 			return interaction.reply({ content: '❌' });
 
 		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
-		const boostedRecently = isBoosting(interaction.member) || interaction.user.id === require('../../data/config.json').peopleid.papita;
+		const boostedRecently = isBoosting(interaction.member) || interaction.user.id === userIds.papita;
 		const customRoleId = houraiDB.customRoles?.[interaction.user.id];
 
 		return interaction.reply({
@@ -307,7 +309,7 @@ const command = new Command('roles', flags)
 			return interaction.reply({ content: '❌' });
 
 		return interaction.reply({
-			content: hourai.images.colors,
+			content: saki.images.colors,
 			components: [colorsRow],
 			ephemeral: true,
 		});
@@ -327,7 +329,7 @@ const command = new Command('roles', flags)
 					.setColor(Colors.Aqua)
 					.addFields({
 						name: 'Anuncios del servidor',
-						value: `Serás notificado en <#${hourai.announcementChannelId}> por noticias importantes, eventos y ocasionalmente festividades.\nEste rol te será útil si te interesa alguna o todas esas cosas. No mencionamos muy seguido, tranquilo`,
+						value: `Serás notificado en <#${saki.announcementChannelId}> por noticias importantes, eventos y ocasionalmente festividades.\nEste rol te será útil si te interesa alguna o todas esas cosas. No mencionamos muy seguido, tranquilo`,
 					})
 			],
 			components: [makeButtonRowBuilder().addComponents([
@@ -429,7 +431,7 @@ const command = new Command('roles', flags)
 		if(!interaction.member.roles.cache.has('1107831054791876691'))
 			return interaction.reply({ content: '🚫 No tienes permiso para hacer eso', ephemeral: true });
 		
-		const candyRole = hourai.candyRoleId;
+		const candyRole = saki.candyRoleId;
 		const hasCandy = interaction.member.roles.cache.has(candyRole);
 		return interaction.reply({
 			embeds: [

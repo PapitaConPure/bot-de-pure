@@ -1,9 +1,9 @@
-const { CommandTags, Command, CommandOptions } = require("../Commons/commands");
-const { hourai } = require('../../data/config.json');
+const { CommandTags, Command, CommandOptions } = require('../Commons/');
+const { saki } = require('../../data/sakiProps');
 const HouraiCfg = require('../../models/saki.js');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 
-let crazyBackupId = hourai.crazyBackupChannelId;
+let crazyBackupId = saki.crazyBackupChannelId;
 
 const positivos = new Set([
     'habilitado',

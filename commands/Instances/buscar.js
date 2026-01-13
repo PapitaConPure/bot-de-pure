@@ -1,4 +1,4 @@
-const { CommandOptions, CommandTags, Command } = require("../Commons/commands");
+const { CommandOptions, CommandTags, Command } = require('../Commons/');
 const { searchAndReplyWithPost } = require('../../systems/booru/boorusend.js');
 
 const options = new CommandOptions()

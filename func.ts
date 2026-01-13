@@ -1,5 +1,8 @@
 import Discord from 'discord.js'; //Discord.js
-import global from './data/config.json'; //Variables globales
+import global from './data/config.json';
+import serverIds from './data/serverIds.json';
+import { globalConfigs } from './data/globalProps';
+import { saki } from './data/sakiProps';
 import images from './data/images.json'; //Imágenes globales
 import { p_pure } from './utils/prefixes';
 import Canvas from '@napi-rs/canvas'; //Node Canvas
@@ -108,12 +111,12 @@ export async function askForRole(miembro: Discord.GuildMember, canal: Discord.Te
     
     if(!miembro.roles.cache.has('1107831054791876691')) {
         console.log(chalk.magenta('El miembro está retenido.'));
-        global.hourai.warn++;
-        if(global.hourai.warn <= 6) {
-            if(global.hourai.warn <= 3)
-                canal.send({ content: `Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:1107843515385389128> (${global.hourai.warn}/3 llamados)` });
+        saki.warn++;
+        if(saki.warn <= 6) {
+            if(saki.warn <= 3)
+                canal.send({ content: `Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:1107843515385389128> (${saki.warn}/3 llamados)` });
             setTimeout(askForRole, 1000, miembro , canal, reps);
-            console.log(chalk.cyan(`Volviendo a esperar confirmación de miembro (${global.hourai.warn}/6)...`));
+            console.log(chalk.cyan(`Volviendo a esperar confirmación de miembro (${saki.warn}/6)...`));
         }
         return;
     }
@@ -121,7 +124,7 @@ export async function askForRole(miembro: Discord.GuildMember, canal: Discord.Te
     console.log(chalk.yellow('El miembro no ha recibido roles básicos.'));
     await canal.send({
         content: `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:1107843515385389128>`,
-        files: [global.hourai.images.colors],
+        files: [saki.images.colors],
         components: [colorsRow],
     });
     setTimeout(forceRole, 1000, miembro, canal, 2 * reps);
@@ -159,12 +162,12 @@ export function forceRole(miembro: Discord.GuildMember, canal: Discord.TextChann
 
     try {
         console.log(chalk.magentaBright('El miembro requiere roles básicos. Forzando roles...'));
-        const colores = global.hourai.colorsList.map(c => c.roleId);
+        const colores = saki.colorsList.map(c => c.roleId);
         canal.send({
             content:
                 `**${miembro.user.username}**, cagaste altiro watón fome <:tenshiSmug:1108791369897607219>\n` +
                 `Toma un rol random po <:mayuwu:1107843515385389128> <:hr:797294230463840267>`,
-            files: [global.hourai.images.forcecolors]
+            files: [saki.images.forcecolors]
         });
         miembro.roles.add(colores[Math.floor(Math.random() * 7)]);
         console.log(chalk.greenBright('Roles forzados.'));
@@ -189,7 +192,7 @@ export async function isUsageBanned(user: Discord.User | Discord.GuildMember) {
 
 /**@param {Discord.GuildMember} member*/
 export function hasColorRole(member: Discord.GuildMember) {
-    return member?.roles?.cache?.hasAny(...global.hourai.colorsList.map(c => c.roleId));
+    return member?.roles?.cache?.hasAny(...saki.colorsList.map(c => c.roleId));
 }
 
 /**@param {Discord.GuildMember} member*/
@@ -210,11 +213,11 @@ export function isThread(channel: Discord.GuildBasedChannel): channel is Discord
 export function channelIsBlocked(channel: import('discord.js').GuildTextBasedChannel) {
     const member = channel?.guild?.members.me;
     if(!member?.permissionsIn(channel)?.any?.([ 'SendMessages', 'SendMessagesInThreads' ], true)) return true;
-    if(global.maintenance.length === 0) return false;
+    if(globalConfigs.maintenance.length === 0) return false;
 
-    return (global.maintenance.startsWith('!'))
-        ? channel.id === global.maintenance.slice(1)
-        : channel.id !== global.maintenance;
+    return (globalConfigs.maintenance.startsWith('!'))
+        ? channel.id === globalConfigs.maintenance.slice(1)
+        : channel.id !== globalConfigs.maintenance;
 }
 //#endregion
 
@@ -232,7 +235,7 @@ export function finalizarHourai(miembro: Discord.GuildMember, canal: Discord.Tex
                 `Okay, ya 'tamos ${miembro}, recuerda convivir adecuadamente con el resto <:comodowo:1107847983065747476>`,
                 'Si te interesa, puedes revisar los mensajes pinneados de este canal <:tenshiJuguito:1107843487891734588>',
                 'Y estate tranqui, que ya no vas a recibir tantos pings <:dormidowo:1108318689624866846>',
-                `Dicho esto, ¡disfruta el server po'! Si quieres más roles, puedes usar \`${p_pure(global.serverid.saki).raw}roles\``,
+                `Dicho esto, ¡disfruta el server po'! Si quieres más roles, puedes usar \`${p_pure(serverIds.saki).raw}roles\``,
             ].join('\n')
         });
 
@@ -240,7 +243,7 @@ export function finalizarHourai(miembro: Discord.GuildMember, canal: Discord.Tex
         if(Math.random() < 0.3)
             setTimeout(() => {
                 canal.send({
-                    content: `Por cierto, tenemos una tradición un poco más oscura. ¿Te atrevei a usar \`${p_pure(global.serverid.saki).raw}suicidio\`?`
+                    content: `Por cierto, tenemos una tradición un poco más oscura. ¿Te atrevei a usar \`${p_pure(serverIds.saki).raw}suicidio\`?`
                 });
             }, 1000 * 5);
 
@@ -414,7 +417,7 @@ export async function dibujarBienvenida(member: Discord.GuildMember, forceSaki: 
 
     await channel.sendTyping();
 
-    if(forceSaki || guild.id === global.serverid.saki)
+    if(forceSaki || guild.id === serverIds.saki)
         drawWelcomeSaki(member, { force: forceSaki });
     else 
         drawWelcomeStandard(member);
@@ -511,10 +514,10 @@ interface SakiWelcomeDrawOptions {
 export async function drawWelcomeSaki(member: Discord.GuildMember, options: SakiWelcomeDrawOptions = {}) {
     options.force ??= false;
 
-    const saki = (await Hourai.findOne()) || new Hourai();
+    const sakiCfg = (await Hourai.findOne()) || new Hourai();
     
     //@ts-expect-error
-    if(!options.force && saki.configs?.bienvenida == false)
+    if(!options.force && sakiCfg.configs?.bienvenida == false)
         return;
 
     const { guild, user, displayName } = member;
@@ -526,7 +529,7 @@ export async function drawWelcomeSaki(member: Discord.GuildMember, options: Saki
         const ctx = canvas.getContext('2d');
 
         const [fondo] = await Promise.all([
-            Canvas.loadImage(global.hourai.images.welcome),
+            Canvas.loadImage(saki.images.welcome),
             fetchGuildMembers(guild),
         ]);
         ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
@@ -591,13 +594,13 @@ export async function drawWelcomeSaki(member: Discord.GuildMember, options: Saki
         ];
 
         //@ts-expect-error
-        if(saki.configs?.pingBienvenida)
+        if(sakiCfg.configs?.pingBienvenida)
             toSend.push('<@&1107831054791876694>, vengan a saludar po maricones <:hl:797294230359375912><:miyoi:1107848008005062727><:hr:797294230463840267>');
 
         toSend.push(`*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:1107880958981587004>`);
-        toSend.push(global.hourai.images.colors);
+        toSend.push(saki.images.colors);
 
-        saki.save().catch(() => undefined);
+        sakiCfg.save().catch(() => undefined);
 
         return channel.send({
             content: toSend.join('\n'),
@@ -675,7 +678,7 @@ export async function dibujarDespedida(miembro: Discord.GuildMember) {
         const imagen = new Discord.AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'despedida.webp' });
         const members = servidor.members.cache;
         const peoplecnt = members.filter(member => !member.user.bot).size;
-        if(servidor.id === global.serverid.saki) {
+        if(servidor.id === serverIds.saki) {
             const hourai = await Hourai.findOne() || new Hourai();
             //@ts-expect-error
             if(hourai.configs?.despedida == false)
@@ -1251,7 +1254,7 @@ export function rand(maxExclusive: number, round: boolean = true) {
     maxExclusive = +maxExclusive;
     const negativeHandler = (maxExclusive < 0) ? -1 : 1;
     maxExclusive = maxExclusive * negativeHandler;
-    const value = ((global.seed + maxExclusive * Math.random()) % maxExclusive) * negativeHandler;
+    const value = ((globalConfigs.seed + maxExclusive * Math.random()) % maxExclusive) * negativeHandler;
     return round ? Math.floor(value) : value;
 }
 
@@ -1266,7 +1269,7 @@ export function randRange(minInclusive: number, maxExclusive: number, round: boo
     minInclusive = 1 * minInclusive;
     maxExclusive = 1 * maxExclusive;
     const range = maxExclusive - minInclusive;
-    const value = minInclusive + ((global.seed + range * Math.random()) % range);
+    const value = minInclusive + ((globalConfigs.seed + range * Math.random()) % range);
     return round ? Math.floor(value) : value;
 }
 

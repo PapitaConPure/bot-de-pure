@@ -1,15 +1,17 @@
 const { EmbedBuilder, StringSelectMenuBuilder, MessageFlags, ContainerBuilder, ButtonStyle, ButtonBuilder, SeparatorSpacingSize } = require('discord.js'); //Integrar discord.js
-const globalConfigs = require('../../data/config.json'); //Variables globales
-const { bot_status } = globalConfigs;
+const globalConfigs = require('../../data/config.json');
+const botStatus = require('../../data/botStatus.json');
+const userIds = require('../../data/userIds.json');
+const { noDataBase, remoteStartup } = require('../../data/globalProps');
 const { readdirSync } = require('fs'); //Para el contador de comandos
 const { p_pure } = require('../../utils/prefixes');
 const { Stats } = require('../../models/stats');
 const { quantityDisplay } = require('../../func');
-const { CommandTags, Command } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/');
 const { searchCommand, makeGuideRow, getWikiPageComponentsV2 } = require('../../systems/others/wiki');
 const { Translator } = require('../../i18n');
 
-const { version, note, changelog, todo: toDo } = bot_status;
+const { version, note, changelog, todo: toDo } = botStatus;
 const COMMAND_REGEX = new RegExp(`(${p_pure().raw})([a-záéíóúñ0-9_.-]+)`, 'gi');
 
 /**
@@ -26,14 +28,14 @@ const command = new Command('estado', flags)
     .setLongDescription('Muestra mi estado actual. Eso incluye versión, host, registro de cambios, cosas por hacer, etc')
     .setExecution(async request => {
         const translator = await Translator.from(request.member);
-        const stats = (!globalConfigs.noDataBase && await Stats.findOne({})) || new Stats({ since: Date.now( )});
+        const stats = (!noDataBase && await Stats.findOne({})) || new Stats({ since: Date.now( )});
         const counts = {
             commands: readdirSync('./commands/Instances').filter(file => /\.(js|ts)$/.test(file)).length,
             guilds: request.client.guilds.cache.size
         }
         const totalCommands = stats.commands.succeeded + stats.commands.failed;
         const me = request.client.user;
-        const papita = await request.client.users.fetch(globalConfigs.peopleid.papita);
+        const papita = await request.client.users.fetch(userIds.papita);
 
         const container = new ContainerBuilder()
             .setAccentColor(globalConfigs.tenshiColor)
@@ -63,12 +65,12 @@ const command = new Command('estado', flags)
                 actionRow.addComponents(
                     new ButtonBuilder()
                         .setCustomId('estado_showChanges')
-                        .setEmoji(globalConfigs.remoteStartup ? '1356977730754842684' : '👁️')
+                        .setEmoji(remoteStartup ? '1356977730754842684' : '👁️')
                         .setLabel(translator.getText('estadoDevelopmentChangesButton'))
                         .setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder()
                         .setCustomId('estado_showUpcoming')
-                        .setEmoji(globalConfigs.remoteStartup ? '1356977730754842684' : '👁️')
+                        .setEmoji(remoteStartup ? '1356977730754842684' : '👁️')
                         .setLabel(translator.getText('estadoDevelopmentUpcomingButton'))
                         .setStyle(ButtonStyle.Secondary),
                 )

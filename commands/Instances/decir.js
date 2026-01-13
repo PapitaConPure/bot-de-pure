@@ -1,4 +1,4 @@
-const { CommandOptions, CommandTags, Command } = require("../Commons/commands");
+const { CommandOptions, CommandTags, Command } = require('../Commons/');
 
 const options = new CommandOptions()
     .addParam('mensaje', 'TEXT', 'para especificar qué decir')

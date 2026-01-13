@@ -1,0 +1,35 @@
+{
+	"host": "[no encontrado]",
+	"version": {
+		"number": "3.9.2",
+		"name": "Flamenco Perlado"
+	},
+	"note": {
+		"es": "Operando con normalidad",
+		"en": "Operating normally",
+		"ja": "正常に動作しています"
+	},
+	"changelog": [
+		"p!emote ahora obtiene emotes de un mensaje",
+		"**PuréPix** ahora permite utilizar el servicio de conversión \"phixiv\"",
+		"**PuréPix** ya no ofrece el método de conversión \"webhook\"",
+		"**Puréet** ahora permite usar los servicios de conversión \"girlcockx\" y \"cunnyx\"",
+		"Apariencia de **PuréFeed** mejorada",
+		"p!saucenao agregado",
+		"Acciones contextuales \"Buscar Fuente\", \"Obtener Emotes\" y \"Obtener Sticker\" agregadas",
+		"p!cola ahora tiene controles adicionales",
+		"p!info ha sido renovado, traducido y ahora permite especificar un `--miembro`",
+		"p!estado ha sido renovado y traducido",
+		"Apariencia de confesiones mejorada, junto con la posibilidad de responder anónimamente",
+		"p!recordatorio agregado",
+		"**PuréVoice** renovado y p!voz `--invitar` eliminado (Discord implementó lo mismo)",
+		"p!yo renovado"
+	],
+	"todo": [
+		"Agregar ejemplos interactivos de comandos",
+		"Minijuegos individuales y tipo-fiesta",
+		"Estadísticas y gráficos analíticos (rama **PuréLytics**)",
+		"Agregar GIFs infográficos en comandos",
+		"Crear página de ayuda Web para entenderme mejor"
+	]
+}

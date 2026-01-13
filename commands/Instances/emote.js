@@ -1,5 +1,5 @@
 const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js'); //Integrar discord.js
-const { CommandTags, Command, CommandOptions } = require("../Commons/commands");
+const { CommandTags, Command, CommandOptions } = require('../Commons/');
 const { emojiRegex } = require('../../func');
 const { makeButtonRowBuilder } = require('../../utils/tsCasts');
 

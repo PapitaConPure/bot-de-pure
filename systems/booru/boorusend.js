@@ -3,7 +3,8 @@ const { EmbedBuilder, ButtonBuilder, ButtonStyle, Colors, ContainerBuilder, Mess
 const { guildEmoji: gEmo, shortenText, isThread } = require('../../func');
 const { Booru, TagTypes } = require('./boorufetch');
 const { getBaseTags, getSearchTags } = require('./booruprops');
-const globalConfigs = require('../../data/config.json');
+const { globalConfigs, booruApiKey, booruUserId } = require('../../data/globalProps');
+const userIds = require('../../data/userIds.json');
 const rakki = require('../../commands/Instances/rakkidei');
 const { Translator } = require('../../i18n');
 
@@ -523,7 +524,7 @@ async function notifyUsers(post, sent, members, feedSuscriptions) {
  */
 function isUnholy(isNsfw, request, terms) {
 	return isNsfw
-		&& (request.userId !== globalConfigs.peopleid.papita)
+		&& (request.userId !== userIds.papita)
 		&& (terms.includes('holo') || terms.includes('megumin'));
 }
 
@@ -580,7 +581,7 @@ async function searchAndReplyWithPost(request, args, options = {}) {
 	//Petición
 	try {
 		info('Buscando Posts...');
-		const booru = new Booru(globalConfigs.booruCredentials);
+		const booru = new Booru({ apiKey: booruApiKey, userId: booruUserId });
 		const response = await booru.search(finalTags, { limit: 100, random: true });
 
 		//Manejo de respuesta

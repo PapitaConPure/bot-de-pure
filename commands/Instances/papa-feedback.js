@@ -1,5 +1,5 @@
 const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { CommandTags, Command } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/');
 const GuildConfig = require('../../models/guildconfigs.js');
 const { tenshiColor } = require('../../data/config.json');
 const { makeButtonRowBuilder } = require('../../utils/tsCasts.js');

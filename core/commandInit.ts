@@ -1,9 +1,10 @@
-import { Collection, PermissionFlagsBits, SlashCommandBuilder, ContextMenuCommandBuilder, RESTPostAPIChatInputApplicationCommandsJSONBody, RESTPostAPIContextMenuApplicationCommandsJSONBody, SlashCommandStringOption, ContextMenuCommandType } from 'discord.js';
+import { Collection, PermissionFlagsBits, SlashCommandBuilder, ContextMenuCommandBuilder, RESTPostAPIChatInputApplicationCommandsJSONBody, RESTPostAPIContextMenuApplicationCommandsJSONBody, SlashCommandStringOption, ContextMenuCommandType, InteractionContextType } from 'discord.js';
 import { shortenText } from '../func';
 import { readdirSync } from 'fs';
 import { Command } from '../commands/Commons/cmdBuilder';
 import { ContextMenuActionManager } from '../actions/Commons/actionBuilder';
 import { BaseParamType } from '../commands/Commons/cmdOpts';
+import { commandFilenames } from '../commands/Commons/cmdIndex';
 
 export type AnySlashCommandOption = import('discord.js').SlashCommandBooleanOption |
     import('discord.js').SlashCommandChannelOption |
@@ -122,38 +123,35 @@ export const puré = {
 };
 
 export function registerCommandFiles(log: boolean = false) {
-    const commandFiles = readdirSync('./commands/Instances').filter(file => /\.(js|ts)$/.test(file));
     /**@type {{ name: string, flags: string, tieneEmote: string, tieneMod: string }[]}*/
     const commandTableStack: { name: string; flags: string; tieneEmote: string; tieneMod: string; }[] = [];
     
-    for(const file of commandFiles) {
+    for(const file of commandFilenames) {
         const commandModule = require(`../commands/Instances/${file}`);
-        log && console.log(file);
-        /**@type {import('../commands/Commons/cmdBuilder').Command}*/
-        const command: import('../commands/Commons/cmdBuilder').Command = commandModule;
+        const command: Command = commandModule instanceof Command ? commandModule : commandModule.default;
         puré.commands.set(command.name, command);
-        
+
         log && commandTableStack.push({
             name: command.name,
             flags: command.flags.keys.join(', '),
             tieneEmote: command.flags.has('EMOTE') ? '✅' : '❌',
             tieneMod: command.flags.has('MOD') ? '✅' : '❌',
         });
-    
+
         if(command.flags.has('EMOTE'))
             puré.emotes.set(command.name, command);
-    
+
         if(command.flags.any('PAPA', 'OUTDATED', 'MAINTENANCE', 'GUIDE'))
             continue;
-            
+
         const slash = new SlashCommandBuilder()
             .setName(command.name)
             .setDescription(command.brief || shortenText(command.desc, 100))
-            .setDMPermission(false);
-        
+            .setContexts(InteractionContextType.Guild);
+
         if(command.flags.has('MOD'))
             slash.setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles | PermissionFlagsBits.ManageMessages);
-    
+
         /**@type {import('../commands/Commons/cmdOpts').CommandOptions}*/
         const options: import('../commands/Commons/cmdOpts').CommandOptions = command.options;
         if(options)

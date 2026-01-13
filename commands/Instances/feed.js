@@ -3,7 +3,7 @@ const { isNotModerator, shortenText, guildEmoji, compressId, isNSFWChannel, rand
 const GuildConfig = require('../../models/guildconfigs.js');
 const { auditError, auditAction } = require('../../systems/others/auditor');
 const { CommandTags } = require('../Commons/cmdTags.js');
-const globalConfigs = require('../../data/config.json');
+const { globalConfigs, booruApiKey, booruUserId } = require('../../data/globalProps');
 const { Booru, TagTypes, BooruUnknownPostError } = require('../../systems/booru/boorufetch');
 const { Command } = require('../Commons/cmdBuilder.js');
 const { addGuildToFeedUpdateStack } = require('../../systems/booru/boorufeed');
@@ -98,9 +98,9 @@ const perms = new CommandPermissions()
 	.requireAnyOf([ 'ManageGuild', 'ManageChannels' ])
 	.requireAnyOf('ManageMessages');
 
-const flags = new CommandTags().add('COMMON', 'MOD');
+const tags = new CommandTags().add('COMMON', 'MOD');
 
-const command = new Command('feed', flags)
+const command = new Command('feed', tags)
 	.setBriefDescription('Inicializa un Feed en un canal por medio de un Asistente.')
 	.setLongDescription('Inicializa un Feed de imágenes en un canal. Simplemente usa el comando y sigue los pasos del Asistente para configurar y personalizar todo')
 	.setPermissions(perms)
@@ -516,7 +516,7 @@ const command = new Command('feed', flags)
 			)],
 		}).catch(console.error);
 
-		const booru = new Booru(globalConfigs.booruCredentials);
+		const booru = new Booru({ userId: booruUserId, apiKey: booruApiKey });
 		const post = randInArray(await booru.search(feed.tags, { limit: 42 }));
 		if(!post) return interaction.editReply({ content: 'Las tags del feed no dieron ningún resultado' });
 
@@ -1010,7 +1010,7 @@ const command = new Command('feed', flags)
 		
 		const container = /**@type {import('discord.js').ContainerComponent}*/(interaction.message.components[0]);
 		const url = getPostUrlFromContainer(container);
-		const booru = new Booru(globalConfigs.booruCredentials);
+		const booru = new Booru({ userId: booruUserId, apiKey: booruApiKey });
 		try {
 			const post = await booru.fetchPostByUrl(url);
 			const postTags = await booru.fetchPostTags(post);
@@ -1184,7 +1184,7 @@ const command = new Command('feed', flags)
 				message.delete().catch(console.error),
 			]);
 		
-		const booru = new Booru(globalConfigs.booruCredentials);
+		const booru = new Booru({ userId: booruUserId, apiKey: booruApiKey });
 
 		try {
 			const post = await booru.fetchPostByUrl(url);
@@ -1251,7 +1251,7 @@ const command = new Command('feed', flags)
 
 		const container = /**@type {import('discord.js').ContainerComponent}*/(interaction.message.components[0]);
 		const url = getPostUrlFromContainer(container);
-		const booru = new Booru(globalConfigs.booruCredentials);
+		const booru = new Booru({ userId: booruUserId, apiKey: booruApiKey });
 		try {
 			const post = await booru.fetchPostByUrl(url);
 			const requestTags = post.tags.filter(t => t === 'tagme' || (t !== 'commentary_request' && t.endsWith('_request')));

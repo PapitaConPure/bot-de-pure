@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require('discord.js');
 const { tenshiColor } = require('../../data/config.json');
-const { CommandTags, Command, CommandOptions } = require('../Commons/commands');
+const { CommandTags, Command, CommandOptions } = require('../Commons/');
 
 const flags = new CommandTags().add('PAPA');
 const options = new CommandOptions()

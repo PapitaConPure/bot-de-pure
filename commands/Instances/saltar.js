@@ -1,5 +1,5 @@
 const { Colors } = require('discord.js'); //Integrar discord.js
-const { CommandTags, Command } = require('../Commons/commands.js');
+const { CommandTags, Command } = require('../Commons/');
 const { useMainPlayer } = require('discord-player');
 const { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/others/musicPlayer.js');
 const { Translator } = require('../../i18n');

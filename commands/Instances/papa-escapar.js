@@ -1,4 +1,4 @@
-const { CommandTags, Command, CommandOptions } = require('../Commons/commands');
+const { CommandTags, Command, CommandOptions } = require('../Commons/');
 
 const options = new CommandOptions()
 	.addParam('servidor', 'GUILD', 'para indicar un servidor');

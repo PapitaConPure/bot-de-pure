@@ -1,6 +1,6 @@
 const { EmbedBuilder, Collection } = require('discord.js');
 const { paginateRaw } = require('../../func');
-const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command } = require('../Commons/');
 
 const options = new CommandOptions()
     .addParam('tiempo', 'NUMBER', 'para establecer la duración del evento, en segundos', { optional: true });

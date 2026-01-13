@@ -1,5 +1,5 @@
-const global = require('../../data/config.json');
-const guildIds = global.serverid;
+const { saki } = require('../../data/sakiProps');
+const serverIds = require('../../data/serverIds.json');
 
 /**@param {import('discord.js').Message} message*/
 function getAnnoyedByHourai(message) {
@@ -7,7 +7,7 @@ function getAnnoyedByHourai(message) {
 	if(author.id === message.client.user.id) return;
 	const content = message.content.toLowerCase();
 	const hrai = content.indexOf('hourai');
-	const reps = global.hourai.replies;
+	const reps = saki.replies;
 	const { prefix: hraipf, suffix: hraisf } = reps.ignore;
 	const hraifound = hrai !== -1 && !(hraipf.some(pf => content.indexOf(`${pf}hourai`) === (hrai - pf.length)) || hraisf.some(sf => content.indexOf(`hourai${sf}`) === hrai));
 	if(hraifound) {
@@ -23,15 +23,15 @@ function getAnnoyedByHourai(message) {
 
 //Funciones de Respuesta Rápida personalizadas por servidor
 module.exports = {
-	[guildIds.saki]: {
+	[serverIds.saki]: {
 		getAnnoyedByHourai,
 	},
 
-	[guildIds.nlp]: {
+	[serverIds.nlp]: {
 		getAnnoyedByHourai,
 	},
 
-	[guildIds.slot1]: {
+	[serverIds.slot1]: {
 		getAnnoyedByHourai,
 	},
 }

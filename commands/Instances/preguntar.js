@@ -1,9 +1,8 @@
-const { CommandTags, Command, CommandOptions } = require('../Commons/commands');
-const globalConfigs = require('../../data/config.json');
+const { CommandTags, Command, CommandOptions } = require('../Commons/');
 const { Groq } = require('groq-sdk');
 const { Translator } = require('../../i18n');
 const { fetchChannel, fetchRole, compressId, fetchMember } = require('../../func');
-const envPath = globalConfigs.remoteStartup ? '../../remoteenv.json' : '../../localenv.json';
+const { envPath } = require('../../data/globalProps');
 
 const groq = new Groq({
 	apiKey: process.env?.GORK_IS_THIS_TRUE ?? require(envPath)?.aikey,

@@ -2,11 +2,12 @@ const { ChannelType, ButtonBuilder, ButtonStyle, MessageFlags, ContainerBuilder,
 const { fetchMember, compressId, shortenText, quantityDisplay } = require('../../func');
 const globalConfigs = require('../../data/config.json'); //Variables globales
 const { ChannelStats, Stats } = require('../../models/stats');
-const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command } = require('../Commons/');
 const { makeButtonRowBuilder } = require('../../utils/tsCasts');
 const { Translator } = require('../../i18n');
 const { fetchGuildMembers } = require('../../utils/guildratekeeper');
 const { getUnixTime } = require('date-fns');
+const { noDataBase } = require('../../data/globalProps');
 
 /**
  * @param {String} requestId
@@ -33,8 +34,10 @@ const getPaginationControls = (page, pageCount, requestId) => {
 const options = new CommandOptions()
 	.addParam('canal', 'CHANNEL', 'para mostrar estadísticas extra de un canal', { optional: true })
 	.addFlag('m', 'miembro', 'para mostrar estadísticas extra de un usuario (no implementado)', { name: 'objetivo', type: 'MEMBER' });
-const flags = new CommandTags().add('COMMON');
-const command = new Command('info', flags)
+
+const tags = new CommandTags().add('COMMON');
+
+const command = new Command('info', tags)
 	.setAliases(
 		'informacion', 'información', 'inf',
         'serverinfo', 'svinfo', 'svinf',
@@ -48,7 +51,7 @@ const command = new Command('info', flags)
 
 		const guild = request.guild;
 		const [stats, translator] = await Promise.all([
-			globalConfigs.noDataBase ? new Stats({ since: Date.now() }) : Stats.findOne({}),
+			noDataBase ? new Stats({ since: Date.now() }) : Stats.findOne({}),
 			Translator.from(request),
 			request.deferReply(),
 			fetchGuildMembers(guild),
@@ -170,8 +173,8 @@ const command = new Command('info', flags)
 			guildId: guild.id,
 			channelId: targetChannel.id,
 		};
-		const targetChannelStats = /**@type {import('../../models/stats.js').ChannelStatsDocument}*/((!globalConfigs.noDataBase && await ChannelStats.findOne(channelQuery)) || new ChannelStats(channelQuery));
-		const guildChannelStats = /**@type {import('../../models/stats.js').ChannelStatsDocument[]}*/(!globalConfigs.noDataBase ? await ChannelStats.find({ guildId: guild.id }) : [new ChannelStats(channelQuery)]);
+		const targetChannelStats = /**@type {import('../../models/stats.js').ChannelStatsDocument}*/((!noDataBase && await ChannelStats.findOne(channelQuery)) || new ChannelStats(channelQuery));
+		const guildChannelStats = /**@type {import('../../models/stats.js').ChannelStatsDocument[]}*/(!noDataBase ? await ChannelStats.find({ guildId: guild.id }) : [new ChannelStats(channelQuery)]);
 		const targetChannelHasMessages = Object.keys(targetChannelStats.sub).length;
 		
 		const membersRanking = targetChannelHasMessages

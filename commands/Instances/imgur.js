@@ -1,21 +1,20 @@
 const { ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonStyle, EmbedBuilder, Colors } = require('discord.js'); //Integrar discord.js
-const { remoteStartup } = require('../../data/config.json'); //Configuraciones
-const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/commands.js');
+const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/');
 const { makeTextInputRowBuilder, makeButtonRowBuilder } = require('../../utils/tsCasts.js');
 const { Translator } = require('../../i18n');
 const { ImgurClient } = require('imgur');
 const { default: axios } = require('axios');
 const ImgurUser = require('../../models/imgurUsers.js');
-const envPath = remoteStartup ? '../../remoteenv.json' : '../../localenv.json';
+const { envPath } = require('../../data/globalProps');
 
 const options = new CommandOptions()
 	.addParam('enlaces', 'TEXT', 'para indicar enlaces de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
 	.addParam('imagens', 'IMAGE', 'para indicar archivos de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
 	.addFlag('r', [ 'registrar', 'register' ], 'para registrar una ID de cliente y evitar el límite global');
 
-const flags = new CommandTags().add('COMMON');
+const tags = new CommandTags().add('COMMON');
 
-const command = new Command('imgur', flags)
+const command = new Command('imgur', tags)
 	.setAliases(
 		'subir',
 		'upload',

@@ -1,4 +1,4 @@
-const { CommandTags, CommandOptions, Command, CommandOptionSolver } = require('../Commons/commands');
+const { CommandTags, CommandOptions, Command, CommandOptionSolver } = require('../Commons/');
 const { CommandPermissions } = require('../Commons/cmdPerms');
 const { Translator } = require('../../i18n');
 

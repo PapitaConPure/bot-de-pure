@@ -1,4 +1,4 @@
-const { CommandTags, Command } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/');
 const { improveNumber, sleep } = require('../../func');
 
 const flags = new CommandTags().add('COMMON');

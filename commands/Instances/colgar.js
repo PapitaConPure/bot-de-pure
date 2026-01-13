@@ -1,10 +1,10 @@
 const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { hourai } = require('../../data/config.json');
-const { CommandOptions, CommandTags, Command } = require("../Commons/commands");
+const { saki } = require('../../data/sakiProps');
+const { CommandOptions, CommandTags, Command } = require('../Commons/');
 const { CommandPermissions } = require('../Commons/cmdPerms');
 const { makeButtonRowBuilder } = require('../../utils/tsCasts');
 
-const hangedDollId = hourai.hangedRoleId;
+const hangedDollId = saki.hangedRoleId;
 
 const perms = new CommandPermissions('ManageRoles');
 const options = new CommandOptions()

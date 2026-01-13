@@ -1,9 +1,8 @@
-//const {  } = require('../../func'); //Funciones globales
 const { compressId, fetchChannel, decompressId } = require('../../func');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder, Colors, DiscordAPIError, ContainerBuilder, SectionBuilder, MessageFlags } = require('discord.js');
 const ConfessionSystems = require('../../models/confessionSystems.js');
 const PendingConfessions = require('../../models/pendingConfessions.js');
-const { Command, CommandTags } = require('../Commons/commands.js');
+const { Command, CommandTags } = require('../Commons/');
 const { auditError } = require('../../systems/others/auditor');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 const { makeTextInputRowBuilder, makeButtonRowBuilder } = require('../../utils/tsCasts.js');

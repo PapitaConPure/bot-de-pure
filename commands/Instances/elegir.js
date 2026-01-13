@@ -1,6 +1,6 @@
 const { EmbedBuilder, Colors } = require('discord.js');
 const { randRange } = require('../../func');
-const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require("../Commons/commands");
+const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/');
 
 const options = new CommandOptions()
 	.addParam('opciones', 'TEXT', 'para asignar una opción elegible', { poly: 'MULTIPLE', polymax: 20 });

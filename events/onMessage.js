@@ -1,6 +1,6 @@
 const { puré } = require('../core/commandInit.js');
 const Discord = require('discord.js');
-const { Command, CommandOptionSolver } = require('../commands/Commons/commands.js');
+const { Command, CommandOptionSolver } = require('../commands/Commons/');
 
 const { Stats, ChannelStats } = require('../models/stats.js');
 const { p_pure } = require('../utils/prefixes');
@@ -18,6 +18,7 @@ const { sendConvertedTwitterPosts } = require('../systems/agents/pureet');
 const { Translator } = require('../i18n');
 const { fetchUserCache } = require('../utils/usercache');
 const { addMessageCascade } = require('./onMessageDelete');
+const { noDataBase } = require('../data/globalProps.js');
 const Logger = require('../utils/logs').default;
 
 const { error } = Logger('WARN', 'Message');
@@ -54,7 +55,7 @@ async function processGuildPlugins(message) {
  * @param {string} userId 
  */
 async function updateChannelMessageCounter(guildId, channelId, userId) {
-	if(globalConfigs.noDataBase) return;
+	if(noDataBase) return;
 
 	const channelQuery = { guildId, channelId };
 	const channelStats = (await ChannelStats.findOne(channelQuery)) || new ChannelStats(channelQuery);
@@ -68,7 +69,7 @@ async function updateChannelMessageCounter(guildId, channelId, userId) {
 /**
  * @param {Discord.Message<true>} message
  * @param {String} commandName
- * @param {import('../utils/prefixes').PrefixPair} prefixPair
+ * @param {import('../data/globalProps').PrefixPair} prefixPair
  * @returns {Promise<CommandResult>}
  */
 async function handleInvalidCommand(message, commandName, prefixPair) {
@@ -245,7 +246,7 @@ async function processCommand(message) {
  * @param {String} userId
  */
 async function gainPRC(guild, userId) {
-	if(globalConfigs.noDataBase) return;
+	if(noDataBase) return;
 	if(guild.memberCount < 100) return;
 
 	const userConfigs = (await UserConfigs.findOne({ userId })) || new UserConfigs({ userId });
@@ -331,7 +332,7 @@ async function onMessage(message) {
 
 	if(author.bot) return;
 	
-	const stats = (!globalConfigs.noDataBase && await Stats.findOne({})) || new Stats({ since: Date.now() });
+	const stats = (!noDataBase && await Stats.findOne({})) || new Stats({ since: Date.now() });
 	stats.read++;
 	updateChannelMessageCounter(guild.id, channel.id, author.id);
 
@@ -351,7 +352,7 @@ async function onMessage(message) {
 	commandResult === CommandResults.SUCCEEDED && stats.commands.succeeded++;
 	commandResult === CommandResults.FAILED && stats.commands.failed++;
 
-	if(globalConfigs.noDataBase)
+	if(noDataBase)
 		return;
 
 	stats.markModified('commands');

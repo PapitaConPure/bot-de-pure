@@ -1,7 +1,7 @@
 const UserConfig = require('../../models/userconfigs').default;
-const { Command, CommandTags, CommandOptions } = require('../Commons/commands');
+const { Command, CommandTags, CommandOptions } = require('../Commons/');
 const { recacheUser } = require('../../utils/usercache');
-const { peopleid } = require('../../data/config.json');
+const userIds = require('../../data/userIds.json');
 
 const options = new CommandOptions()
 	.addParam('usuario', 'USER', 'para especificar el usuario a bannear');
@@ -13,7 +13,7 @@ const command = new Command('papa-ban', flags)
 	.setExecution(async (request, args) => {
 		const user = await args.getUser('usuario', true);
 
-		if(!user || user.id === peopleid.papita)
+		if(!user || user.id === userIds.papita)
 			return request.reply({ content: '⚠️ Usuario inválido' });
 
 		const userConfig = (await UserConfig.findOne({ userId: user.id })) || new UserConfig({ userId: user.id });

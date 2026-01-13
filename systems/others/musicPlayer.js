@@ -12,7 +12,7 @@ const Logger = require('../../utils/logs').default;
 const { debug, info, warn, error } = Logger('DEBUG', 'PuréMusic');
 
 /**
- * @param {import('../../commands/Commons/typings.js').ComplexCommandRequest | import('discord.js').ButtonInteraction<'cached'> | import('discord.js').StringSelectMenuInteraction<'cached'> | import('discord.js').ModalSubmitInteraction<'cached'>} request
+ * @param {import('../../commands/Commons/typings').ComplexCommandRequest | import('discord.js').ButtonInteraction<'cached'> | import('discord.js').StringSelectMenuInteraction<'cached'> | import('discord.js').ModalSubmitInteraction<'cached'>} request
  * @param {import('discord.js').ColorResolvable} [color]
  * @param {String} [iconUrl]
  * @param {Array<String>} [additionalFooterData]

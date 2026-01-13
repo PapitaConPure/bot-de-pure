@@ -1,4 +1,4 @@
-import { Collection, REST, RESTPostAPIApplicationCommandsJSONBody, RESTPostAPIChatInputApplicationCommandsJSONBody } from 'discord.js';
+import { Collection, GuildTextBasedChannel, REST, RESTPostAPIApplicationCommandsJSONBody, RESTPostAPIChatInputApplicationCommandsJSONBody } from 'discord.js';
 import { Routes } from 'discord-api-types/v9';
 
 import { set, connect } from 'mongoose';
@@ -10,15 +10,6 @@ import { Puretable, pureTableAssets } from '../models/puretable.js';
 import { deleteExpiredMessageCascades, cacheMessageCascade } from './onMessageDelete.js';
 
 import { puré } from '../core/commandInit.js';
-import globalConfigs from '../data/config.json';
-const envPath = globalConfigs.remoteStartup ? '../remoteenv.json' : '../localenv.json';
-const noDB = globalConfigs.noDataBase;
-
-const mongoUri: string = process.env.MONGODB_URI ?? (require(envPath)?.dburi);
-
-export const discordToken: string = process.env.I_LOVE_MEGUMIN ?? (require(envPath)?.token);
-export const booruApiKey: string = process.env.BOORU_APIKEY ?? (require(envPath)?.booruapikey);
-export const booruUserId: string = process.env.BOORU_USERID ?? (require(envPath)?.booruuserid);
 
 import { setupGuildFeedUpdateStack, feedTagSuscriptionsCache } from '../systems/booru/boorufeed.js';
 import { Booru, Tag } from '../systems/booru/boorufetch.js';
@@ -27,8 +18,6 @@ import { auditSystem } from '../systems/others/auditor.js';
 
 import { GlobalFonts, loadImage } from '@napi-rs/canvas';
 import { getUnixTime } from 'date-fns';
-import { lookupService } from 'dns';
-import { promisify } from 'util';
 import { join } from 'path';
 import chalk from 'chalk';
 
@@ -36,6 +25,10 @@ import { prepareTracksPlayer } from '../systems/others/musicPlayer.js';
 import { initializeWebhookMessageOwners } from '../systems/agents/discordagent.js';
 import { setupGuildRateKeeper, fetchAllGuildMembers } from '../utils/guildratekeeper.js';
 import { initRemindersScheduler, processReminders } from '../systems/others/remindersScheduler.js';
+import { discordToken, envPath, globalConfigs, noDataBase, prefixes, remoteStartup } from '../data/globalProps.js';
+
+import botStatus from '../data/botStatus.json';
+import serverIds from '../data/serverIds.json';
 
 const logOptions = {
 	slash: false,
@@ -48,7 +41,7 @@ export async function onStartup(client: import('discord.js').Client) {
 	const confirm = () => console.log(chalk.green('Hecho.'));
 	globalConfigs.maintenance = '1';
 
-	if(globalConfigs.remoteStartup)
+	if(remoteStartup)
 		console.log(chalk.redBright.bold('Se inicializará para un entorno de producción'));
 	else
 		console.log(chalk.cyanBright.bold('Se inicializará para un entorno de desarrollo'));
@@ -74,7 +67,7 @@ export async function onStartup(client: import('discord.js').Client) {
 			{ body: commandData.global },
 		);
 		
-		const dedicatedServerId = globalConfigs.serverid.saki;
+		const dedicatedServerId = serverIds.saki;
 		if(client.guilds.cache.get(dedicatedServerId))
 			await restGlobal.put(
 				Routes.applicationGuildCommands(client.application.id, dedicatedServerId),
@@ -95,24 +88,14 @@ export async function onStartup(client: import('discord.js').Client) {
 	globalConfigs.seed = currentTime / 60000;
 
 	console.log(chalk.magenta('Obteniendo información del host...'));
-	try {
-		const asyncLookupService = promisify(lookupService);
-		const host = await asyncLookupService('127.0.0.1', 443);
-		globalConfigs.bot_status.host = `${host.service}://${host.hostname}/`;
-		confirm();
-	} catch(err) {
-		globalConfigs.bot_status.host = 'Desconocido';
-		console.log(chalk.red('Fallido.'));
-		console.error(err);
-	}
 
 	console.log(chalk.magenta('Indexando Slots de Puré...'));
 	(await Promise.all([
-		client.guilds.cache.get(globalConfigs.serverid.slot1),
-		client.guilds.cache.get(globalConfigs.serverid.slot2),
-		client.guilds.cache.get(globalConfigs.serverid.slot3),
+		client.guilds.cache.get(serverIds.slot1),
+		client.guilds.cache.get(serverIds.slot2),
+		client.guilds.cache.get(serverIds.slot3),
 	])).forEach((guild, i) => { globalConfigs.slots[`slot${i + 1}`] = guild; });
-	globalConfigs.logch = await globalConfigs.slots.slot1.channels.resolve('870347940181471242');
+	globalConfigs.logch = globalConfigs.slots.slot1.channels.resolve('870347940181471242') as GuildTextBasedChannel;
 	confirm();
 	
 	console.log((chalk.rgb(255, 0, 0))('Preparando Reproductor de YouTube...'));
@@ -120,11 +103,12 @@ export async function onStartup(client: import('discord.js').Client) {
 	confirm();
 	
 	//Cargado de datos de base de datos
-	if(noDB) {
+	if(noDataBase) {
 		console.log(chalk.yellow.italic('Se saltará la inicialización de base de datos a petición del usuario'));
 	} else {
 		console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
 		console.log(chalk.gray('Conectando a Cluster en la nube...'));
+		const mongoUri: string = process.env.MONGODB_URI ?? (require(envPath)?.dburi);
 		set("strictQuery", false);
 		connect(mongoUri, {
 			//@ts-expect-error
@@ -142,12 +126,12 @@ export async function onStartup(client: import('discord.js').Client) {
 
 		console.log(chalk.gray('Facilitando prefijos'));
 		prefixPairs.forEach(pp => {
-			globalConfigs.p_pure[pp.guildId] = {
+			prefixes[pp.guildId] = {
 				raw: pp.pure.raw,
 				regex: pp.pure.regex,
 			};
 		});
-		logOptions.prefixes && console.table(globalConfigs.p_pure);
+		logOptions.prefixes && console.table(prefixes);
 
 		console.log(chalk.gray('Preparando Tags de Booru...'));
 		await BooruTags.deleteMany({ fetchTimestamp: { $lt: new Date(Date.now() - Booru.TAGS_DB_LIFETIME) } }).catch(console.error);
@@ -234,10 +218,9 @@ export async function onStartup(client: import('discord.js').Client) {
 
 	globalConfigs.maintenance = '';
 	console.log(chalk.greenBright.bold('Bot conectado y funcionando'));
-	const { bot_status } = globalConfigs;
 	auditSystem('Bot conectado y funcionando', 
-		{ name: 'Host',             value: bot_status.host,                             inline: true },
-		{ name: 'N. de versión',    value: bot_status.version.number,                   inline: true },
+		{ name: 'Host',             value: botStatus.host,                             inline: true },
+		{ name: 'N. de versión',    value: botStatus.version.number,                   inline: true },
 		{ name: 'Fecha',            value: `<t:${getUnixTime(new Date(Date.now()))}:f>`,    inline: true },
 	);
 

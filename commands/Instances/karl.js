@@ -1,4 +1,4 @@
-const { CommandTags, Command } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/');
 const { randRange } = require("../../func");
 const { EmbedBuilder } = require('discord.js');
 

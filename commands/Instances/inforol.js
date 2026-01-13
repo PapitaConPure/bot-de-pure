@@ -1,6 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { compressId } = require('../../func');
-const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 const { Translator } = require('../../i18n');
 const { makeButtonRowBuilder } = require('../../utils/tsCasts');

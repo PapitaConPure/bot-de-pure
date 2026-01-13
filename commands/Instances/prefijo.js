@@ -2,8 +2,9 @@ const { EmbedBuilder } = require('discord.js');
 const global = require('../../data/config.json');
 const { shortenText } = require('../../func');
 const PrefixPair = require('../../models/prefixpair.js');
-const prefixes = require('../../utils/prefixes');
-const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
+const { prefixes } = require('../../data/globalProps');
+const { p_pure } = require('../../utils/prefixes');
+const { CommandOptions, CommandTags, Command } = require('../Commons/');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 
 const perms = new CommandPermissions('ManageGuild');
@@ -23,15 +24,15 @@ const command = new Command('prefijo', flags)
 	.setExecution(async (request, args) => {
 		const reset = args.hasFlag('reestablecer');
 		const guildsearch = { guildId: request.guildId };
-		const { raw: preraw, regex: preregex } = prefixes.p_pure(request.guildId);
+		const { raw: preraw, regex: preregex } = p_pure(request.guildId);
 
 		if(reset) {
 			await PrefixPair.findOneAndRemove(guildsearch);
-			global.p_pure[request.guildId] = null;
+			prefixes[request.guildId] = null;
 			return request.reply({
 				content:
 					'Prefijo reestablecido a la configuración por defecto.\n' +
-					`\`${global.p_pure['0'].raw}\` <:arrowl:681963688361590897> \`${preraw}\``,
+					`\`${prefixes['0'].raw}\` <:arrowl:681963688361590897> \`${preraw}\``,
 			});
 		}
 
@@ -59,7 +60,7 @@ const command = new Command('prefijo', flags)
 		await PrefixPair.findOneAndRemove(guildsearch);
 		const pfpair = (await PrefixPair.findOne(guildsearch)) || new PrefixPair(guildsearch);
 		const regex = new RegExp(`^${prefix.replace(/[a-z]/g, l => `[${l.toUpperCase()}${l}]`).replace('\\', '\\\\')}[\n ]*`);
-		global.p_pure[request.guildId] = {
+		prefixes[request.guildId] = {
 			raw: pfpair.pure.raw = prefix,
 			regex: pfpair.pure.regex = regex,
 		};

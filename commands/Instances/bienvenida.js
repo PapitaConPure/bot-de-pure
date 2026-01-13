@@ -1,5 +1,5 @@
 const { CommandPermissions } = require('../Commons/cmdPerms');
-const { CommandTags, Command, CommandOptions } = require('../Commons/commands');
+const { CommandTags, Command, CommandOptions } = require('../Commons/');
 
 const perms = new CommandPermissions('ManageGuild');
 

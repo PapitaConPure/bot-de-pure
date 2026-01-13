@@ -1,8 +1,10 @@
 const { EmbedBuilder, MessageFlags } = require('discord.js');
-const { serverid, tenshiColor, peopleid } = require('../../data/config.json'); //Variables globales
+const serverIds = require('../../data/serverIds.json');
+const userIds = require('../../data/userIds.json');
+const { tenshiColor } = require('../../data/config.json');
 const { isNotModerator, shortenText } = require('../../func');
 const { p_pure } = require('../../utils/prefixes');
-const { commandFilenames, CommandOptions, CommandTags, Command, CommandParam } = require('../Commons/commands');
+const { commandFilenames, CommandOptions, CommandTags, Command, CommandParam } = require('../Commons/');
 const { searchCommand, searchCommands, getWikiPageComponentsV2, makeCategoriesRow, makeGuideRow } = require('../../systems/others/wiki');
 
 /**@param {import('../Commons/typings').ComplexCommandRequest | import('discord.js').StringSelectMenuInteraction<'cached'>} request*/
@@ -11,8 +13,8 @@ const makeExcludedTags = (request) => {
 	const excludedTags = [ 'GUIDE' ];
 
 	isNotModerator(request.member) && excludedTags.push('MOD');
-	request.guildId !== serverid.saki && excludedTags.push('SAKI');
-	request.user.id !== peopleid.papita && excludedTags.push('PAPA', 'MAINTENANCE', 'OUTDATED');
+	request.guildId !== serverIds.saki && excludedTags.push('SAKI');
+	request.user.id !== userIds.papita && excludedTags.push('PAPA', 'MAINTENANCE', 'OUTDATED');
 
 	return excludedTags;
 };

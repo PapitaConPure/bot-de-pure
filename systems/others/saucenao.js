@@ -1,5 +1,5 @@
 import sagiri from 'sagiri';
-import { booruCredentials } from '../../data/config.json';
+import { booruApiKey, booruUserId } from '../../data/globalProps';
 import { EmbedBuilder, Colors } from "discord.js";
 import { decryptString } from '../../utils/security';
 import { Booru } from '../booru/boorufetch';
@@ -49,7 +49,7 @@ export async function pourSauce(clientId, queries, request, payload) {
 		return;
 	}
 
-	const booru = new Booru(booruCredentials);
+	const booru = new Booru({ userId: booruUserId, apiKey: booruApiKey });
 	for(let q = 0; q < queries.length; q++) {
 		const query = queries[q];
 		const count = q + 1;

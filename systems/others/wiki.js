@@ -1,6 +1,8 @@
 const { ButtonBuilder, ButtonStyle, ContainerBuilder, TextDisplayBuilder, SectionBuilder, SeparatorBuilder, EmbedBuilder, ActionRowBuilder, SeparatorSpacingSize, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
-const { serverid, tenshiColor, peopleid } = require('../../data/config.json');
-const { commandFilenames } = require('../../commands/Commons/commands');
+const { tenshiColor } = require('../../data/config.json');
+const serverIds = require('../../data/serverIds.json');
+const userIds = require('../../data/userIds.json');
+const { commandFilenames } = require('../../commands/Commons/');
 const { p_pure } = require('../../utils/prefixes');
 const { isNotModerator, edlDistance, toCapitalized, compressId } = require('../../func');
 const { client } = require('../../core/client');
@@ -32,7 +34,7 @@ const makeCategoriesRow = (request, selections) => {
 		.setDescription('Comandos limitados a moderadores.')
 		.setDefault(getDefault('MOD')));
 	
-	request.user.id === peopleid.papita && categoriesMenu.addOptions(
+	request.user.id === userIds.papita && categoriesMenu.addOptions(
 		new StringSelectMenuOptionBuilder()
 			.setValue('PAPA')
 			.setEmoji('797295151356969030')
@@ -53,7 +55,7 @@ const makeCategoriesRow = (request, selections) => {
 			.setDefault(getDefault('MAINTENANCE')),
 	);
 
-	request.guildId === serverid.saki && categoriesMenu.addOptions(new StringSelectMenuOptionBuilder()
+	request.guildId === serverIds.saki && categoriesMenu.addOptions(new StringSelectMenuOptionBuilder()
 		.setValue('SAKI')
 		.setEmoji('1108197083334316183')
 		.setLabel('Saki Scans')
@@ -136,15 +138,15 @@ const makeGuideRow = (request) => makeStringSelectMenuRowBuilder().addComponents
 function searchCommand(request, nameOrAlias) {
 	for(const filename of commandFilenames) {
 		const commandFile = require(`../../commands/Instances/${filename}`);
-		const command = /**@type {import('../../commands/Commons/commands').Command}*/(commandFile.command ?? commandFile);
+		const command = /**@type {import('../../commands/Commons/').Command}*/(commandFile.command ?? commandFile);
 
 		if(command.name !== nameOrAlias
 		&& !command.aliases.some(alias => alias === nameOrAlias))
 			continue;
 		
-		if((command.tags.has('PAPA') && request.user.id !== peopleid.papita)
+		if((command.tags.has('PAPA') && request.user.id !== userIds.papita)
 		|| (command.tags.has('MOD') && isNotModerator(request.member))
-		|| (command.tags.has('SAKI') && request.guild.id !== serverid.saki))
+		|| (command.tags.has('SAKI') && request.guild.id !== serverIds.saki))
 			continue;
 		
 		return command;
@@ -167,7 +169,7 @@ function searchCommands(request, query) {
 
 	for(const filename of commandFilenames) {
 		const commandFile = require(`../../commands/Instances/${filename}`);
-		const command = /**@type {import('../../commands/Commons/commands').Command}*/(commandFile.command ?? commandFile);
+		const command = /**@type {import('../../commands/Commons/').Command}*/(commandFile.command ?? commandFile);
 
 		if(command.tags.any('GUIDE', 'MAINTENANCE', 'OUTDATED'))
 			continue;
@@ -182,9 +184,9 @@ function searchCommands(request, query) {
 				continue;
 		}
 		
-		if((command.tags.has('PAPA') && request.user.id !== peopleid.papita)
+		if((command.tags.has('PAPA') && request.user.id !== userIds.papita)
 		|| (command.tags.has('MOD') && isNotModerator(request.member))
-		|| (command.tags.has('SAKI') && request.guild.id !== serverid.saki))
+		|| (command.tags.has('SAKI') && request.guild.id !== serverIds.saki))
 			continue;
 		
 		commands.push({
@@ -226,7 +228,7 @@ const displayTagMappings = /**@type {const}*/({
 
 /**
  * Añade embeds y componentes de una wiki de comando a la carga indicada.
- * @param {import('../../commands/Commons/commands').Command} command
+ * @param {import('../../commands/Commons/').Command} command
  * @param {string} guildId 
  * @param {WikiPageInjectionPayload} payload
  */
@@ -290,7 +292,7 @@ function injectWikiPage(command, guildId, payload) {
 
 /**
  * Añade embeds y componentes de una wiki de comando a la carga indicada (utiliza Componentes V2)
- * @param {import('../../commands/Commons/commands').Command} command
+ * @param {import('../../commands/Commons/').Command} command
  * @param {import('../../commands/Commons/typings').ComplexCommandRequest} request 
  * @returns {WikiPageInjectionPayloadV2}
  */

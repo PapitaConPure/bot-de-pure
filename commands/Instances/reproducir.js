@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require('discord.js'); //Integrar discord.js
-const { CommandOptions, CommandTags, Command, CommandParam } = require('../Commons/commands.js');
+const { CommandOptions, CommandTags, Command, CommandParam } = require('../Commons/');
 const { useMainPlayer } = require('discord-player');
 const { Translator } = require('../../i18n');
 const { saveTracksQueue, tryRecoverSavedTracksQueue } = require('../../models/playerQueue.js');

@@ -1,14 +1,14 @@
 //#region Carga de módulos necesarios
 const { puré } = require('../core/commandInit.js');
 const { Stats } = require('../models/stats.js');
-const globalConfigs = require('../data/config.json');
-const { peopleid } = globalConfigs;
+const userIds = require('../data/userIds.json');
 const { channelIsBlocked, isUsageBanned, decompressId } = require('../func');
 const { auditRequest } = require('../systems/others/auditor');
 const { findFirstException, handleAndAuditError, generateExceptionEmbed } = require('../utils/cmdExceptions.js');
 const { Translator } = require('../i18n');
 const { Command } = require('../commands/Commons/cmdBuilder.js');
 const { CommandOptionSolver } = require('../commands/Commons/cmdOpts.js');
+const { noDataBase } = require('../data/globalProps.js');
 //#endregion
 
 /**
@@ -24,7 +24,7 @@ async function onInteraction(interaction, client) {
     if(channelIsBlocked(channel) || (await isUsageBanned(user)))
         return handleBlockedInteraction(interaction).catch(console.error);
     
-    const stats = (!globalConfigs.noDataBase && await Stats.findOne({})) || new Stats({ since: Date.now() });
+    const stats = (!noDataBase && await Stats.findOne({})) || new Stats({ since: Date.now() });
 
     if(interaction.isAutocomplete())
         return handleAutocompleteInteraction(interaction);
@@ -111,7 +111,7 @@ async function handleCommand(interaction, client, stats) {
             stats.commands.failed++;
     }
 
-    if(globalConfigs.noDataBase) return;
+    if(noDataBase) return;
     
     stats.markModified('commands');
     return stats.save();
@@ -140,7 +140,7 @@ async function handleAction(interaction, client, stats) {
             stats.commands.failed++;
     }
 
-    if(globalConfigs.noDataBase) return;
+    if(noDataBase) return;
 
     stats.markModified('commands');
     return stats.save();
@@ -240,7 +240,7 @@ async function handleBlockedInteraction(interaction) {
     const translator = await Translator.from(interaction.user.id);
     if(interaction.isRepliable()) {
         return interaction.reply({
-            content: translator.getText('blockedInteraction', peopleid.papita),
+            content: translator.getText('blockedInteraction', userIds.papita),
             ephemeral: true,
         });
     } else {

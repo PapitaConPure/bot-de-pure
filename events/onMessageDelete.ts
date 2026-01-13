@@ -1,13 +1,10 @@
-const MessageCascades = require('../models/messageCascades.js');
-const { channelIsBlocked, isUsageBanned, fetchMessage } = require('../func');
+import MessageCascades from '../models/messageCascades.js';
+import { channelIsBlocked, isUsageBanned, fetchMessage } from '../func';
+import { Message, PartialMessage } from 'discord.js';
 
-/**@type {Map<String, String>}*/
-const messageCascadesCache = new Map();
+const messageCascadesCache: Map<string, string> = new Map();
 
-/**
- * @param {import('discord.js').Message | import('discord.js').PartialMessage} message
- */
-async function onMessageDelete(message) {
+export async function onMessageDelete(message: Message | PartialMessage) {
 	const { author } = message;
 	
 	if(!author || author.bot || !message.inGuild() || channelIsBlocked(message.channel) || (await isUsageBanned(author)))
@@ -23,27 +20,16 @@ async function onMessageDelete(message) {
 	return otherMessage?.deletable && otherMessage.delete().catch(console.error);
 }
 
-/**
- * 
- * @param {String} messageId 
- * @param {String} otherMessageId 
- * @param {Date} expirationDate 
- */
-function addMessageCascade(messageId, otherMessageId, expirationDate) {
+export function addMessageCascade(messageId: string, otherMessageId: string, expirationDate: Date) {
 	messageCascadesCache.set(messageId, otherMessageId);
 	return (MessageCascades.create({ messageId, otherMessageId, expirationDate }));
 }
 
-/**
- * 
- * @param {String} messageId 
- * @param {String} otherMessageId 
- */
-function cacheMessageCascade(messageId, otherMessageId) {
+export function cacheMessageCascade(messageId: string, otherMessageId: string) {
 	messageCascadesCache.set(messageId, otherMessageId);
 }
 
-async function deleteExpiredMessageCascades() {
+export async function deleteExpiredMessageCascades() {
     const cachedMessageIds = [ ...messageCascadesCache.keys() ];
 
 	return MessageCascades.deleteMany({ 
@@ -53,10 +39,3 @@ async function deleteExpiredMessageCascades() {
         ]
 	}).catch(console.error);
 }
-
-module.exports = {
-	onMessageDelete,
-	addMessageCascade,
-	cacheMessageCascade,
-	deleteExpiredMessageCascades,
-};

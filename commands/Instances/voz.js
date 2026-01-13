@@ -3,7 +3,7 @@ const { PureVoiceSessionMember, getFrozenSessionAllowedMembers, makePVSessionNam
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder, MessageFlags } = require('discord.js');
 const { p_pure } = require('../../utils/prefixes.js');
 const { isNotModerator, defaultEmoji, compressId } = require('../../func.js');
-const { CommandOptions, CommandTags, Command } = require('../Commons/commands.js');
+const { CommandOptions, CommandTags, Command } = require('../Commons/');
 const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts.js');
 const { Translator } = require('../../i18n');
 const { addMinutes, getUnixTime, isBefore } = require('date-fns');

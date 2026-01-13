@@ -1,6 +1,6 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js'); //Integrar discord.js
 const { shortenText, compressId } = require('../../func'); //Funciones globales
-const { CommandTags, Command } = require('../Commons/commands.js');
+const { CommandTags, Command } = require('../Commons/');
 const { showQueuePage, makePuréMusicEmbed, SERVICES } = require('../../systems/others/musicPlayer');
 const { Translator } = require('../../i18n');
 const { tryRecoverSavedTracksQueue } = require('../../models/playerQueue.js');

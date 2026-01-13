@@ -1,5 +1,5 @@
-const global = require('../../data/config.json'); //Variables globales
-const { CommandTags, Command } = require('../Commons/commands');
+const botStatus = require('../../data/botStatus.json'); //Variables globales
+const { CommandTags, Command } = require('../Commons/');
 
 const flags = new CommandTags().add('PAPA');
 const command = new Command('papa-mantenimiento', flags)
@@ -11,7 +11,7 @@ const command = new Command('papa-mantenimiento', flags)
 	)
 	.setExecution(async message => {
 		const { channel, user } = message;
-		const sent = await channel.send({ content: `**Host** \`${global.bot_status.host}\`\n**ID de InstProc** \`${global.startupTime}\`\n**Estado** \`[${global.maintenance.length?'PAUSADO':'OPERANDO'}]\``})
+		const sent = await channel.send({ content: `**Host** \`${botStatus.host}\`\n**ID de InstProc** \`${global.startupTime}\`\n**Estado** \`[${global.maintenance.length?'PAUSADO':'OPERANDO'}]\``})
 
 		const reactions = (global.maintenance.length)?['🌀']:['💤','👁️'];
 		Promise.all(reactions.map(reaction => sent.react(reaction)));

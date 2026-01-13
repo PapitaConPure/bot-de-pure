@@ -1,5 +1,5 @@
 const { improveNumber } = require('../../func'); //Funciones globales
-const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/');
 
 const flags = new CommandTags().add('COMMON');
 const options = new CommandOptions()

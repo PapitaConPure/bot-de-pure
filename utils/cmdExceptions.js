@@ -1,4 +1,6 @@
 const globalConfigs = require('../data/config.json');
+const userIds = require('../data/userIds.json');
+const serverIds = require('../data/serverIds.json');
 const { EmbedBuilder } = require('discord.js');
 const GuildConfig = require('../models/guildconfigs.js');
 const { isNotModerator } = require('../func');
@@ -18,7 +20,7 @@ const { Command } = require('../commands/Commons/cmdBuilder.js');
  */
 
 /**@type {ExceptionTestFn}*/
-const isNotByPapita = async request => (request.member.user.id !== globalConfigs.peopleid.papita);
+const isNotByPapita = async request => (request.member.user.id !== userIds.papita);
 
 module.exports = {
     /**@type {Array<ExceptionSummary>}*/
@@ -70,7 +72,7 @@ module.exports = {
                 'Esto generalmente se debe a que cumple funciones que solo funcionan allí o que solo tiene sentido que se mantengan en dicho lugar',
                 'Si te interesa, puedes [unirte al servidor](https://discord.gg/pPwP2UNvAC)',
             ].join('\n'),
-            isException: async request => isNotByPapita(request) && request.guild.id !== globalConfigs.serverid.saki,
+            isException: async request => isNotByPapita(request) && request.guild.id !== serverIds.saki,
         },
     ],
 

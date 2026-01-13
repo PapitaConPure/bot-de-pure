@@ -1,5 +1,5 @@
 const { EmbedBuilder, Colors, ButtonBuilder, ButtonStyle, TextInputBuilder, TextInputStyle, ModalBuilder } = require('discord.js'); //Integrar discord.js
-const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/');
 const { pourSauce, testSauceNAOToken } = require('../../systems/others/saucenao');
 const { Translator } = require('../../i18n');
 const { encryptString } = require('../../utils/security');

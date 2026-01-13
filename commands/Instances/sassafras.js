@@ -1,6 +1,6 @@
 const Discord = require('discord.js'); //Integrar discord.js
 const { randRange } = require('../../func');
-const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command } = require('../Commons/');
 
 const sassadata = {
 	sassamodo:

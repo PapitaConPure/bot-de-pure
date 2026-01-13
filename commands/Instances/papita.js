@@ -1,5 +1,5 @@
 const { randRange, isThread } = require('../../func');
-const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command } = require('../Commons/');
 
 const paputa = [
 	'Romper al bot <:sagumeBlush:1108315844045455410>',

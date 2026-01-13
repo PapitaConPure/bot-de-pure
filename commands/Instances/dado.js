@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require('discord.js');
 const { randRange } = require('../../func');
 const { p_pure } = require('../../utils/prefixes');
-const { CommandOptions, CommandTags, Command, CommandOptionSolver, CommandParam } = require("../Commons/commands");
+const { CommandOptions, CommandTags, Command, CommandOptionSolver, CommandParam } = require('../Commons/');
 
 const diceRegex = /([0-9]+)\s*[Dd]\s*([0-9]+)/;
 

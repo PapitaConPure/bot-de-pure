@@ -1,6 +1,4 @@
-const { p_pure: prefixes } = require('../data/config.json');
-
-type PrefixPair = { raw: string; regex: RegExp; };
+import { prefixes, PrefixPair } from '../data/globalProps';
 
 export const slashPrefixPair = { raw: '/', regex: /\//i } as const;
 

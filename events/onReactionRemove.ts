@@ -1,20 +1,13 @@
-const UserConfigs = require('../models/userconfigs').default;
+import { Message, MessageReaction, PartialMessageReaction, PartialUser, User } from 'discord.js';
+import UserConfigs from '../models/userconfigs';
 
-const Logger = require('../utils/logs.js').default;
+import Logger from '../utils/logs.js';
 const { warn } = Logger('WARN', 'onReactionRemove');
 
-/**
- * 
- * @param {import('discord.js').MessageReaction | import('discord.js').PartialMessageReaction} reaction 
- * @param {import('discord.js').User | import('discord.js').PartialUser} user 
- * @returns 
- */
-async function onReactionRemove(reaction, user) {
-	/**@type {import('discord.js').Message}*/
-	let message;
+export async function onReactionRemove(reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) {
+	let message: Message;
 	try {
 		[ message, user ] = await Promise.all([
-			//reaction.partial === true ? reaction.fetch() : reaction,
 			reaction.message.partial === true ? reaction.message.fetch() : reaction.message,
 			user.partial === true ? user.fetch() : user,
 		]);
@@ -53,7 +46,3 @@ async function onReactionRemove(reaction, user) {
 	
 	return userConfigs.save();
 }
-
-module.exports = {
-	onReactionRemove,
-};

@@ -1,7 +1,7 @@
 const { default: axios } = require('axios');
 const { shuffleArray, decodeEntities } = require('../../func');
 const BooruTags = require('../../models/boorutags');
-const globalConfigs = require('../../data/config.json');
+const { noDataBase } = require('../../data/globalProps');
 
 /**
  * @typedef {Object} APIPostData
@@ -317,7 +317,7 @@ class Booru {
 		
 		try {
 			const query = { name: { $in: uncachedTagNames } };
-			const savedTags = (globalConfigs.noDataBase ? [] : await BooruTags.find(query)).map(t => new Tag(t));
+			const savedTags = (noDataBase ? [] : await BooruTags.find(query)).map(t => new Tag(t));
 
 			const savedTagNames = savedTags.map(t => t.name);
 			const missingTagNames = uncachedTagNames.filter(tn => !savedTagNames.includes(tn));
@@ -352,7 +352,7 @@ class Booru {
 						},
 					}));
 		
-					!globalConfigs.noDataBase && await BooruTags.bulkWrite(bulkOps);
+					!noDataBase && await BooruTags.bulkWrite(bulkOps);
 				}
 			};
 

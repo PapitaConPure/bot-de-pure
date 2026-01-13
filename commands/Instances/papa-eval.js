@@ -1,5 +1,5 @@
 const { p_pure } = require('../../utils/prefixes');
-const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command } = require('../Commons/');
 
 const options = new CommandOptions()
 	.addFlag('d', ['del', 'delete'], 'para eliminar el mensaje original');

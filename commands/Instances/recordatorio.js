@@ -1,5 +1,5 @@
 const globalConfigs = require('../../data/config.json');
-const { Command, CommandTags, CommandOptions, CommandParam, CommandFlagExpressive } = require('../Commons/commands');
+const { Command, CommandTags, CommandOptions, CommandParam, CommandFlagExpressive } = require('../Commons/');
 const { p_pure } = require('../../utils/prefixes');
 const { Translator } = require('../../i18n');
 const { parseDateFromNaturalLanguage, parseTimeFromNaturalLanguage, addTime, utcStartOfTzToday } = require('../../utils/datetime');

@@ -1,18 +1,9 @@
 console.time('Carga de inicio');
-import globalConfigs from './data/config.json';
-const argv = require('minimist')(process.argv.slice(2));
-globalConfigs.remoteStartup = ((+!!argv.p) - (+!!argv.d)) > 0;
-globalConfigs.noDataBase = argv.nodb;
-
 import { initializeClient } from './core/client';
 import { registerCommandFiles } from './core/commandInit.js';
-import { events, startupData, onCriticalError } from './events/events';
+import { onCriticalError, onGuildMemberAdd, onGuildMemberRemove, onGuildMemberUpdate, onInteraction, onMessage, onMessageDelete, onRateLimit, onReactionAdd, onReactionRemove, onStartup, onUncaughtException, onUnhandledRejection, onVoiceUpdate } from './events/';
+import { discordToken } from './data/globalProps';
 console.timeEnd('Carga de inicio');
-
-//@ts-expect-error
-globalConfigs.p_pure['0'] = { raw: 'p!', regex: /^p *!\s*/i };
-globalConfigs.booruCredentials.apiKey = startupData.booruApiKey;
-globalConfigs.booruCredentials.userId = startupData.booruUserId;
 
 console.time('Creación de cliente de Discord');
 const client = initializeClient();
@@ -23,22 +14,22 @@ registerCommandFiles(false);
 console.timeEnd('Detección de archivos de comando');
 
 console.time('Registro de eventos de proceso');
-process.on('uncaughtException', events.onUncaughtException);
-process.on('unhandledRejection', events.onUnhandledRejection);
+process.on('uncaughtException', onUncaughtException);
+process.on('unhandledRejection', onUnhandledRejection);
 console.timeEnd('Registro de eventos de proceso');
 
 console.time('Registro de eventos del cliente');
-client.on('clientReady', events.onStartup);
-client.on('messageCreate', message => events.onMessage(message).catch(onCriticalError));
-client.on('messageReactionAdd', (reaction, user) => events.onReactionAdd(reaction, user).catch(onCriticalError));
-client.on('messageReactionRemove', (reaction, user) => events.onReactionRemove(reaction, user).catch(onCriticalError));
-client.on('messageDelete', message => events.onMessageDelete(message).catch(onCriticalError));
-client.on('interactionCreate', interaction => events.onInteraction(interaction, client).catch(onCriticalError));
-client.on('voiceStateUpdate', (oldState, newState) => events.onVoiceUpdate(oldState, newState).catch(onCriticalError));
-client.on('guildMemberAdd', member => { events.onGuildMemberAdd(member).catch(onCriticalError) });
-client.on('guildMemberRemove', member => { events.onGuildMemberRemove(member).catch(onCriticalError) });
-client.on('guildMemberUpdate', (oldMember, newMember) => { events.onGuildMemberUpdate(oldMember, newMember).catch(onCriticalError) });
-client.rest.on('rateLimited', events.onRateLimit);
+client.on('clientReady', onStartup);
+client.on('messageCreate', message => onMessage(message).catch(onCriticalError));
+client.on('messageReactionAdd', (reaction, user) => onReactionAdd(reaction, user).catch(onCriticalError));
+client.on('messageReactionRemove', (reaction, user) => onReactionRemove(reaction, user).catch(onCriticalError));
+client.on('messageDelete', message => onMessageDelete(message).catch(onCriticalError));
+client.on('interactionCreate', interaction => onInteraction(interaction, client).catch(onCriticalError));
+client.on('voiceStateUpdate', (oldState, newState) => onVoiceUpdate(oldState, newState).catch(onCriticalError));
+client.on('guildMemberAdd', member => { onGuildMemberAdd(member).catch(onCriticalError) });
+client.on('guildMemberRemove', member => { onGuildMemberRemove(member).catch(onCriticalError) });
+client.on('guildMemberUpdate', (oldMember, newMember) => { onGuildMemberUpdate(oldMember, newMember).catch(onCriticalError) });
+client.rest.on('rateLimited', onRateLimit);
 
-client.login(startupData.discordToken);
+client.login(discordToken);
 console.timeEnd('Registro de eventos del cliente');

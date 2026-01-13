@@ -7,6 +7,7 @@ const { Booru } = require('./boorufetch');
 const globalConfigs = require('../../data/config.json');
 const { paginateRaw } = require('../../func');
 const { fetchGuildMembers } = require('../../utils/guildratekeeper');
+const { booruApiKey, booruUserId, noDataBase } = require('../../data/globalProps.js');
 
 //const Logger = require('../../logs').default;
 //const { debug } = Logger('WARN', 'BooruSend');
@@ -29,7 +30,7 @@ const feedTagSuscriptionsCache = new Map();
  * @returns {Promise<void>}
  */
 async function updateBooruFeeds(guilds) {
-    const booru = new Booru(globalConfigs.booruCredentials);
+    const booru = new Booru({ apiKey: booruApiKey, userId: booruUserId });
     const startMs = Date.now();
 
     await processFeeds(booru, guilds).catch(console.error);
@@ -47,7 +48,7 @@ async function updateBooruFeeds(guilds) {
  * @param {Discord.Collection<Discord.Snowflake, Discord.Guild>} guilds Colección de Guilds a procesar
  */
 async function processFeeds(booru, guilds) {
-    if(globalConfigs.noDataBase) return;
+    if(noDataBase) return;
 
     const guildIds = guilds.map(g => g.id);
     const guildConfigs = /**@type {Array<import('../../models/guildconfigs.js').GuildConfigDocument>}*/(await GuildConfigs.find({
@@ -155,7 +156,7 @@ function getNextBaseUpdateStart() {
  * @param {Discord.Client} client 
  */
 async function setupGuildFeedUpdateStack(client) {
-    if(globalConfigs.noDataBase) return;
+    if(noDataBase) return;
 
     const feedUpdateStart = getNextBaseUpdateStart();
     const guildConfigs = await GuildConfigs.find({ feeds: { $exists: true } });

@@ -1,6 +1,6 @@
 const { randRange } = require('../../func');
 const { p_pure } = require('../../utils/prefixes');
-const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command } = require('../Commons/');
 
 const frase = [
 	'Oe po [m] <:junkNo:1107847991580164106>',

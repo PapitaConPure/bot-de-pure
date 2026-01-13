@@ -1,11 +1,12 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
-const { CommandTags, Command } = require("../Commons/commands");
+const { CommandTags, Command } = require('../Commons/');
 const { DiscordAgent } = require('../../systems/agents/discordagent');
-const { hourai, serverid } = require('../../data/config.json');
+const { saki } = require('../../data/sakiProps');
+const serverIds = require('../../data/serverIds.json');
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 const { getUnixTime } = require('date-fns');
 
-let crazyBackupId = hourai.crazyBackupChannelId;
+let crazyBackupId = saki.crazyBackupChannelId;
 
 const perms = new CommandPermissions([ 'ManageGuild', 'ManageChannels', 'ManageMessages' ]);
 
@@ -59,7 +60,7 @@ const command = new Command('exhibir', flags)
 		const { channel } = interaction;
 		const [ pinnedMessages, backupChannel ] = await Promise.all([
 			(await channel.messages.fetchPinned()).reverse(),
-			(interaction.guild.id === serverid.saki
+			(interaction.guild.id === serverIds.saki
 				? /**@type {Promise<import('discord.js').GuildTextBasedChannel>}*/(interaction.guild.channels.fetch(crazyBackupId)) //crazy-backup
 				: /**@type {Promise<import('discord.js').GuildTextBasedChannel>}*/(interaction.guild.channels.fetch('1232090120581156905')) //Puré I (tests)
 			),

@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
 const { randRange } = require("../../func");
-const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command } = require('../Commons/');
 
 const lovestats = () => [
 	{ text: '🤝 [n]% amistad',    number: randRange(0, 100, false) },
@@ -12,10 +12,12 @@ const lovestats = () => [
 	{ text: ':people_hugging: [n] palmaditas', number: randRange(3, 32) },
 ].map(stat => stat.text.replace('[n]', stat.number.toLocaleString('en', { maximumFractionDigits: 2 }))).join('\n');
 
-const flags = new CommandTags().add('COMMON');
 const options = new CommandOptions()
 	.addParam('persona', 'USER', 'el usuario a mimar');
-const command = new Command('mimar', flags)
+
+const tags = new CommandTags().add('COMMON');
+
+const command = new Command('mimar', tags)
 	.setAliases('mimos', 'besar', 'abrazar', 'hug', 'kiss')
 	.setBriefDescription('Mima al usuario mencionado y te da un resumen de cómo estuvo el mimo para ambas partes')
 	.setLongDescription('Mima al `<usuario>` mencionado y te da un resumen de cómo estuvo el mimo para ambas partes')

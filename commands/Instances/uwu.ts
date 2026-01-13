@@ -1,5 +1,5 @@
-const { randInArray } = require('../../func');
-const { CommandOptions, CommandTags, Command } = require('../Commons/commands');
+import { randInArray } from '../../func';
+import { CommandOptions, CommandTags, Command } from '../Commons/';
 
 const uwusopt = [
 	'<:uwu:681935702308552730>',
@@ -13,11 +13,13 @@ const options = new CommandOptions()
 	.addParam('uwu', { name: 'uwu', expression: 'uwu' }, 'uwu', { optional: true })
 	.addFlag('u', 'uwuwu', 'uwu')
 	.addFlag('bd', ['borrar', 'delete'], 'para borrar el mensaje original');
-const flags = new CommandTags().add(
+
+const tags = new CommandTags().add(
 	'MEME',
 	'EMOTE',
 );
-const command = new Command('uwu', flags)
+
+const command = new Command('uwu', tags)
 	.setAliases('uwu')
 	.setLongDescription('uwu')
 	.setOptions(options)
@@ -35,4 +37,4 @@ const command = new Command('uwu', flags)
 		return request.reply({ content: randomUwu }).catch(console.error);
 	});
 
-module.exports = command;
+export default command;

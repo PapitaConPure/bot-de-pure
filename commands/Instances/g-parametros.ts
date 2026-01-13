@@ -1,8 +1,9 @@
-const { makeGuideMenu } = require('../../systems/others/wiki.js');
-const { CommandTags, Command } = require('../Commons/commands.js');
+import { makeGuideMenu } from '../../systems/others/wiki.js';
+import { CommandTags, Command } from '../Commons/';
 
-const flags = new CommandTags().add('GUIDE');
-const command = new Command('g-parametros', flags)
+const tags = new CommandTags().add('GUIDE');
+
+const command = new Command('g-parametros', tags)
 	.setAliases(
 		'g-parámetros', 'g-argumentos',
 		'g-parameters', 'g-arguments',
@@ -26,4 +27,4 @@ const command = new Command('g-parametros', flags)
 	)
 	.addWikiRow(makeGuideMenu);
 
-module.exports = command;
+export default command;

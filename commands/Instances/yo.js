@@ -1,6 +1,6 @@
 const UserConfigs = require('../../models/userconfigs').default;
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder, ContainerBuilder, MessageFlags, StringSelectMenuOptionBuilder, SeparatorSpacingSize } = require('discord.js');
-const { CommandTags, Command, CommandOptions, CommandFlag } = require('../Commons/commands');
+const { CommandTags, Command, CommandOptions, CommandFlag } = require('../Commons/');
 const { tenshiColor, tenshiAltColor } = require('../../data/config.json');
 const { Translator, Locales, isValidLocaleKey } = require('../../i18n');
 const { recacheUser } = require('../../utils/usercache');

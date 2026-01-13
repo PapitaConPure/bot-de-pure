@@ -169,7 +169,7 @@ class MathLexer {
 
                 tokens.push(createToken(TokenTypes.FUNCTION, '^'));
 
-                switch(this.#cursor++) {
+                switch((this.#cursor++, this.#current)) {
                 case '⁰':
                     tokens.push(createToken(TokenTypes.NUMBER, '0'));
                     continue;

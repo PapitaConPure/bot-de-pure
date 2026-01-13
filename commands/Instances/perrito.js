@@ -1,7 +1,7 @@
 const Discord = require('discord.js'); //Integrar discord.js
-const global = require('../../data/config.json'); //Variables globales
+const serverIds = require('../../data/serverIds.json');
 const { paginate, navigationRows, rand } = require('../../func');
-const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/commands');
+const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/');
 const { InteractionType } = require('discord.js');
 
 /**@param {import('../Commons/typings').AnyRequest} interaction*/
@@ -14,10 +14,9 @@ function getEmotesList(interaction) {
 	];
 
 	const guilds = interaction.client.guilds.cache;
-	const { serverid } = global;
 	const emotes = [
-		...guilds.get(serverid.slot1).emojis.cache.values(),
-		...guilds.get(serverid.slot2).emojis.cache.values(),
+		...guilds.get(serverIds.slot1).emojis.cache.values(),
+		...guilds.get(serverIds.slot2).emojis.cache.values(),
 	].filter(emote => perritoNames.includes(emote.name)).sort();
 	return emotes;
 }

@@ -1,17 +1,18 @@
-const { CommandTags, Command, CommandOptions } = require("../Commons/commands");
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+import { CommandTags, Command, CommandOptions } from '../Commons/';
+import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 
 const options = new CommandOptions()
 	.addParam('mensaje', 'MESSAGE', 'para especificar un mensaje por ID, enlace o respuesta');
 
-const flags = new CommandTags().add('COMMON');
-const command = new Command('sticker', flags)
+const tags = new CommandTags().add('COMMON');
+
+const command = new Command('sticker', tags)
 	.setAliases('stickers', 'pegatina')
 	.setDescription('Muestra el enlace del sticker especificado')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const message = (await args.getMessage('mensaje', true))
-			?? request.channel.messages.cache.get(/**@type {import('discord.js').Message}*/(request).reference?.messageId)
+			?? (request.isMessage ? request.channel.messages.cache.get(request.inferAsMessage().reference?.messageId) : null)
 			?? (request.isMessage ? request.inferAsMessage() : null);
 
 		if(!message || !message.stickers.size)
@@ -41,4 +42,4 @@ const command = new Command('sticker', flags)
         });
 	});
 
-module.exports = command;
+export default command;

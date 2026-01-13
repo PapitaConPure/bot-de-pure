@@ -1,13 +1,13 @@
-const { CommandTags, Command } = require('../Commons/commands');
-const { hourai } = require('../../data/config.json');
-const { colorsRow } = require('../../data/sakiProps');
-const { colorsList } = hourai;
+const { CommandTags, Command } = require('../Commons/');
+const { saki, colorsRow } = require('../../data/sakiProps');
+const { colorsList } = saki;
 
-const flags = new CommandTags().add(
+const tags = new CommandTags().add(
 	'SAKI',
 	'OUTDATED',
 );
-const command = new Command('colores', flags)
+
+const command = new Command('colores', tags)
 	.setAliases(
 		'color',
 		'colours', 'colour', 'colors',
@@ -16,7 +16,7 @@ const command = new Command('colores', flags)
 	.setExecution(async request => {
 		return request.reply({
 			content: `Aquí teni los colore po **${request.user.username}** <:reibu:1107876018171162705>`,
-			files: [hourai.images.colors],
+			files: [saki.images.colors],
 			components: [colorsRow],
 			ephemeral: true,
 		});

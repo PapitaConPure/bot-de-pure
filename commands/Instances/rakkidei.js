@@ -1,6 +1,6 @@
 const { ButtonBuilder, ButtonStyle } = require('discord.js');
 const { randRange } = require('../../func');
-const { CommandTags, Command } = require('../Commons/commands');
+const { CommandTags, Command } = require('../Commons/');
 
 const phrases = [
 	'Ahora sí vení que te saco la cresta',

@@ -1,10 +1,11 @@
-const { EmbedBuilder, Colors } = require('discord.js');
-const { default: axios } = require('axios');
-const { auditError } = require('../../systems/others/auditor');
-const { CommandTags, Command } = require('../Commons/commands');
+import { EmbedBuilder, Colors } from 'discord.js';
+import { auditError } from '../../systems/others/auditor';
+import { CommandTags, Command } from '../Commons/';
+import axios from 'axios';
 
-const flags = new CommandTags().add('COMMON');
-const command = new Command('gatos', flags)
+const tags = new CommandTags().add('COMMON');
+
+const command = new Command('gatos', tags)
 	.setAliases(
         'gato', 'felino', 'gatito', 'gatitos', 'miau', 'michi', 'michis',
         'cats', 'cat', 'meow', 'nya', 'kitty', 'kitties'
@@ -34,4 +35,4 @@ const command = new Command('gatos', flags)
 		return request.reply({ embeds: [embed] });
 	});
 
-module.exports = command;
+export default command;
