@@ -1,23 +1,16 @@
-const { EmbedBuilder, StringSelectMenuBuilder, MessageFlags, ContainerBuilder, ButtonStyle, ButtonBuilder, SeparatorSpacingSize } = require('discord.js'); //Integrar discord.js
-const botStatus = require('../../data/botStatus.json');
-const userIds = require('../../data/userIds.json');
-const { noDataBase, remoteStartup, tenshiColor } = require('../../data/globalProps');
-const { readdirSync } = require('fs'); //Para el contador de comandos
-const { p_pure } = require('../../utils/prefixes');
-const { Stats } = require('../../models/stats');
-const { quantityDisplay } = require('../../func');
-const { CommandTags, Command } = require('../Commons/');
-const { searchCommand, makeGuideRow, getWikiPageComponentsV2 } = require('../../systems/others/wiki');
-const { Translator } = require('../../i18n');
+import { EmbedBuilder, StringSelectMenuBuilder, MessageFlags, ContainerBuilder, ButtonStyle, ButtonBuilder, SeparatorSpacingSize } from 'discord.js';
+import { version, note, changelog, todo as toDo } from '../../data/botStatus.json';
+import { noDataBase, remoteStartup, tenshiColor } from '../../data/globalProps';
+import { p_pure } from '../../utils/prefixes';
+import { Stats } from '../../models/stats';
+import { quantityDisplay } from '../../func';
+import { CommandTags, Command, commandFilenames } from '../Commons';
+import { searchCommand, makeGuideRow, getWikiPageComponentsV2 } from '../../systems/others/wiki';
+import { Translator } from '../../i18n';
 
-const { version, note, changelog, todo: toDo } = botStatus;
 const COMMAND_REGEX = new RegExp(`(${p_pure().raw})([a-záéíóúñ0-9_.-]+)`, 'gi');
 
-/**
- * @param {string} str 
- * @param {import('../Commons/typings').AnyRequest} request
- */
-function listFormat(str, request) {
+function listFormat(str: string, request: import('../Commons/typings').AnyRequest) {
     return str.replace(COMMAND_REGEX, `\`${p_pure(request.guildId).raw}$2\``);
 };
 
@@ -29,12 +22,11 @@ const command = new Command('estado', flags)
         const translator = await Translator.from(request.member);
         const stats = (!noDataBase && await Stats.findOne({})) || new Stats({ since: Date.now( )});
         const counts = {
-            commands: readdirSync('./commands/Instances').filter(file => /\.(js|ts)$/.test(file)).length,
+            commands: commandFilenames.length,
             guilds: request.client.guilds.cache.size
         }
         const totalCommands = stats.commands.succeeded + stats.commands.failed;
         const me = request.client.user;
-        const papita = await request.client.users.fetch(userIds.papita);
 
         const container = new ContainerBuilder()
             .setAccentColor(tenshiColor)
@@ -88,22 +80,6 @@ const command = new Command('estado', flags)
                 separator
                     .setDivider(true)
                     .setSpacing(SeparatorSpacingSize.Large)
-            )
-            .addSectionComponents(section =>
-                section
-                    .addTextDisplayComponents(
-                        textDisplay => textDisplay.setContent(translator.getText('estadoBotOwnerEpigrapgh')),
-                        textDisplay => textDisplay.setContent(`## ${papita.displayName}`),
-                        textDisplay => textDisplay.setContent([
-                            `🆔 \`${papita.id}\``,
-                            `#️⃣ \`${papita.username}\``,
-                        ].join('\n')),
-                    )
-                    .setThumbnailAccessory(accessory =>
-                        accessory
-                            .setDescription(translator.getText('avatarGlobalAvatarAlt', papita.displayName))
-                            .setURL(papita.avatarURL({ extension: 'png', size: 1024 }))
-                    )
             );
 
         return request.reply({
@@ -194,4 +170,4 @@ const command = new Command('estado', flags)
         });
     });
 
-module.exports = command;
+export default command;
