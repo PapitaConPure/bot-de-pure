@@ -3,7 +3,7 @@ const { isNotModerator, shortenText, guildEmoji, compressId, isNSFWChannel, rand
 const GuildConfig = require('../../models/guildconfigs.js');
 const { auditError, auditAction } = require('../../systems/others/auditor');
 const { CommandTags } = require('../Commons/cmdTags.js');
-const { globalConfigs, booruApiKey, booruUserId } = require('../../data/globalProps');
+const { globalConfigs, booruApiKey, booruUserId, tenshiAltColor } = require('../../data/globalProps');
 const { Booru, TagTypes, BooruUnknownPostError } = require('../../systems/booru/boorufetch');
 const { Command } = require('../Commons/cmdBuilder.js');
 const { addGuildToFeedUpdateStack } = require('../../systems/booru/boorufeed');
@@ -1039,7 +1039,7 @@ const command = new Command('feed', tags)
 
 			const source = post.source;
 			const tagsContainer = new ContainerBuilder()
-				.setAccentColor(globalConfigs.tenshiAltColor);
+				.setAccentColor(tenshiAltColor);
 
 			if(postArtistTags.length > 0) {
 				const artistTagsContent = formatTagNameListNew(postArtistTags, ' ');
