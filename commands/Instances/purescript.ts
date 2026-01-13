@@ -46,7 +46,7 @@ async function getScriptString(args: import("../Commons/cmdOpts").CommandOptionS
 	}
 
 	let script: string;
-	if(args.isInteractionSolver(args)) {
+	if(args.isInteractionSolver()) {
 		script = args.getString('script').trim();
 	} else {
 		script = rawArgs

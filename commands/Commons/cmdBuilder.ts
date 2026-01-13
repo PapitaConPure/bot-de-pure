@@ -1,6 +1,7 @@
 import { Message, CommandInteraction, Collection, ChatInputCommandInteraction, Snowflake, Attachment, PermissionsBitField, MessagePayload, MessageEditOptions, InteractionReplyOptions, InteractionDeferReplyOptions, InteractionEditReplyOptions, User, MessageComponentInteraction, MessageActionRowComponentBuilder, Interaction, ModalMessageModalSubmitInteraction, ButtonInteraction, SelectMenuInteraction, MessageReplyOptions } from 'discord.js';
 import { CommandTags } from './cmdTags';
 import { CommandArguments, CommandRequest, ComplexCommandRequest, ComponentInteraction } from './typings';
+import { CommandOptionSolver } from './cmdOpts';
 
 export interface ExtendedCommandRequestPrototype {
 	/**The command's initial reply.*/
@@ -142,7 +143,7 @@ function extendRequest(request: CommandRequest | ComponentInteraction): ComplexC
 
 type CompatibilityExecutionFunction = (request: ComplexCommandRequest, args: CommandArguments, isSlash?: boolean, rawArgs?: string) => Promise<any>;
 
-type ExecutionFunction = (request: ComplexCommandRequest, args: import('./cmdOpts').CommandOptionSolver, rawArgs?: string) => Promise<any>;
+type ExecutionFunction = (request: ComplexCommandRequest, args: CommandOptionSolver, rawArgs?: string) => Promise<any>;
 
 type InteractionResponseFunction = (interaction: Interaction, ...args: string[]) => Promise<any>;
 
@@ -210,7 +211,7 @@ export class Command {
 			this.execute = (request => request.reply(this.reply)) as ExecutionFunction;
 	};
 
-	/**Alias de `<Command>.flags`*/
+	/**Alias de `<Command>.flags`.*/
 	get tags() {
 		return this.flags;
 	}
@@ -282,7 +283,7 @@ export class Command {
 	}
 
 	/**
-	 * @param fn Una función no anónima
+	 * @param fn Una función NO anónima
 	 * @param options Opciones de respuesta de interacción
 	 */
 	setFunction(fn: Function, options: InteractionResponseOptions = {}) {
@@ -293,7 +294,7 @@ export class Command {
 	}
 
 	/**
-	 * @param responseFn Una función no anónima a ejecutar al recibir una interacción
+	 * @param responseFn Una función NO anónima a ejecutar al recibir una interacción
 	 * @param options Opciones adicionales para controlar las respuestas de interacción
 	 */
 	setInteractionResponse(responseFn: InteractionResponseFunction, options: InteractionResponseOptions = {}) {
@@ -301,7 +302,7 @@ export class Command {
 	};
 
 	/**
-	 * @param responseFn Una función no anónima a ejecutar al recibir una interacción
+	 * @param responseFn Una función NO anónima a ejecutar al recibir una interacción
 	 * @param options Opciones adicionales para controlar las respuestas de interacción
 	 */
 	setButtonResponse(responseFn: ButtonResponseFunction, options: InteractionResponseOptions = {}) {
@@ -309,7 +310,7 @@ export class Command {
 	};
 
 	/**
-	 * @param responseFn Una función no anónima a ejecutar al recibir una interacción
+	 * @param responseFn Una función NO anónima a ejecutar al recibir una interacción
 	 * @param options Opciones adicionales para controlar las respuestas de interacción
 	 */
 	setSelectMenuResponse(responseFn: SelectMenuResponseFunction, options: InteractionResponseOptions = {}) {
@@ -317,7 +318,7 @@ export class Command {
 	};
 
 	/**
-	 * @param responseFn Una función no anónima a ejecutar al recibir una interacción
+	 * @param responseFn Una función NO anónima a ejecutar al recibir una interacción
 	 * @param options Opciones adicionales para controlar las respuestas de interacción
 	 */
 	setModalResponse(responseFn: ModalResponseFunction, options: InteractionResponseOptions = {}) {
@@ -340,7 +341,6 @@ export class Command {
 		return request instanceof CommandInteraction;
 	}
 
-	/**@param {CommandRequest | ComponentInteraction} request*/
 	static requestize(request: CommandRequest | ComponentInteraction) {
 		return extendRequest(request);
 	}

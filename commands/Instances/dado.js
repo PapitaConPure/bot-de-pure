@@ -93,7 +93,7 @@ const command = new Command('dados', flags)
 			});
 		
 		return request.reply({ embeds: [embed] })
-		.catch(() => request.reply({ content: '⚠️ Entrada inválida' }));
+		.catch(() => { request.reply({ content: '⚠️ Entrada inválida' }); });
 	});
 
 /**
