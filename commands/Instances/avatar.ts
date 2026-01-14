@@ -1,16 +1,13 @@
-const { MessageFlags, TextDisplayBuilder, ContainerBuilder } = require('discord.js'); //Integrar discord.js
-const { p_pure } = require('../../utils/prefixes');
-const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/');
-const { Translator } = require('../../i18n');
-const { fetchGuildMembers } = require('../../utils/guildratekeeper');
+import { MessageFlags, TextDisplayBuilder, ContainerBuilder, GuildMember, ImageURLOptions } from 'discord.js';
+import { p_pure } from '../../utils/prefixes';
+import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons/';
+import { Translator } from '../../i18n';
+import { fetchGuildMembers } from '../../utils/guildratekeeper';
+import { ComplexCommandRequest } from '../Commons/typings.js';
 
-/**
- * @param {import('discord.js').GuildMember} member
- * @param {Translator} translator
- */
-const getAvatarContainer = (member, translator) => {
-    const avatarURLDisplayOptions = /**@type {import('discord.js').ImageURLOptions}*/({ size: 4096 });
-    const bannerURLDisplayOptions = /**@type {import('discord.js').ImageURLOptions}*/({ size: 4096 });
+const getAvatarContainer = (member: GuildMember, translator: Translator) => {
+    const avatarURLDisplayOptions: ImageURLOptions = { size: 4096 };
+    const bannerURLDisplayOptions: ImageURLOptions = { size: 4096 };
     const userAvatarURL = member.user.displayAvatarURL(avatarURLDisplayOptions);
     const userBannerURL = member.user.bannerURL(bannerURLDisplayOptions);
     const memberAvatarURL = member.displayAvatarURL(avatarURLDisplayOptions);
@@ -86,11 +83,7 @@ const getAvatarContainer = (member, translator) => {
     return container;
 };
 
-/**
- * @param {import('../Commons/typings.js').ComplexCommandRequest} request 
- * @param {CommandOptionSolver<import('../Commons/typings.js').CommandArguments>} args 
- */
-function getMembers(request, args) {
+function getMembers(request: ComplexCommandRequest, args: CommandOptionSolver) {
     const notFound = /**@type {Array<string>}*/([]);
     const members = CommandOptionSolver.asMembers(args.parsePolyParamSync('miembros', {
         fallback: request.member,
@@ -107,9 +100,9 @@ function getMembers(request, args) {
 const options = new CommandOptions()
     .addParam('miembros', 'MEMBER', 'para indicar miembros de los cuales obtener avatares', { optional: true, poly: 'MULTIPLE', polymax: 10 });
 
-const flags = new CommandTags().add('COMMON');
+const tags = new CommandTags().add('COMMON');
 
-const command = new Command('avatar', flags)
+const command = new Command('avatar', tags)
     .setAliases(
         'perfil', 'fotoperfil',
         'profile', 'profilepicture',
@@ -159,4 +152,4 @@ const command = new Command('avatar', flags)
         });
     });
 
-module.exports = command;
+export default command;
