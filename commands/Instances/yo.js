@@ -580,7 +580,8 @@ const command = new Command('yo', tags)
 
         const tzCode = interaction.fields.getTextInputValue('inputTimezone');
         if(tzCode?.length) {
-            const utcOffset = toUtcOffset(tzCode);
+            const sanitizedTzCode = sanitizeTzCode(tzCode);
+            const utcOffset = toUtcOffset(sanitizedTzCode);
     
             if(utcOffset == null)
                 return interaction.reply({
@@ -588,7 +589,7 @@ const command = new Command('yo', tags)
                     content: translator.getText('yoTimezoneInvalidTimezone'),
                 });
     
-            userConfigs.tzCode = sanitizeTzCode(tzCode) || 'UTC';
+            userConfigs.tzCode = sanitizedTzCode || 'UTC';
         } else {
             userConfigs.tzCode = null;
         }
