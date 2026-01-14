@@ -1,8 +1,8 @@
-const { EmbedBuilder } = require("discord.js");
-const { randRange } = require("../../func");
-const { CommandOptions, CommandTags, Command } = require('../Commons/');
+import { EmbedBuilder } from 'discord.js';
+import { randRange } from '../../func';
+import { CommandOptions, CommandTags, Command } from '../Commons/';
 
-const lovestats = () => [
+const loveStats = () => [
 	{ text: '🤝 [n]% amistad',    number: randRange(0, 100, false) },
 	{ text: '❤️ [n]% cariño', 	  number: randRange(0, 100, false) },
 	{ text: '😳 [n]% pasión', 	  number: randRange(0, 100, false) },
@@ -23,23 +23,24 @@ const command = new Command('mimar', tags)
 	.setLongDescription('Mima al `<usuario>` mencionado y te da un resumen de cómo estuvo el mimo para ambas partes')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		//Acción de comando
-		const user2 = await args.getUser('persona', true);
-		if(!user2) return request.reply('⚠️️ Debes especificar una persona a mimar');
+		const user2 = args.getUser('persona', true);
+		if(!user2)
+			return request.reply('⚠️️ Debes especificar una persona a mimar');
+
 		const user1 = request.user;
-		if(user1.id === user2.id) return request.reply('⚠️️ El único mimo que puedes darte a ti mismo es el de vivir una vida de la que no te arrepentirás');
+		if(user1.id === user2.id)
+			return request.reply('⚠️️ El único mimo que puedes darte a ti mismo es el de vivir una vida de la que no te arrepentirás');
 
 		const embed = new EmbedBuilder()
 			.setColor(0xfa7b62)
 			.setTitle(`${user1.username} le ha dado mimos a ${user2.username}`)
 			.addFields(
-				{ name: user1.username, value: lovestats(), inline: true },
-				{ name: user2.username, value: lovestats(), inline: true },
+				{ name: user1.username, value: loveStats(), inline: true },
+				{ name: user2.username, value: loveStats(), inline: true },
 			)
 			.setImage('https://i.imgur.com/HwqSNyy.jpg');
 		
 		return request.reply({ embeds: [embed] });
 	});
 
-
-module.exports = command;
+export default command;
