@@ -1,19 +1,17 @@
-const { ButtonBuilder, ButtonStyle, ContainerBuilder, TextDisplayBuilder, SectionBuilder, SeparatorBuilder, EmbedBuilder, ActionRowBuilder, SeparatorSpacingSize, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
-const { tenshiColor } = require('../../data/globalProps');
-const serverIds = require('../../data/serverIds.json');
-const userIds = require('../../data/userIds.json');
-const { commandFilenames, Command } = require('../../commands/Commons/');
-const { p_pure } = require('../../utils/prefixes');
-const { isNotModerator, edlDistance, toCapitalized, compressId } = require('../../func');
-const { client } = require('../../core/client');
-const { makeStringSelectMenuRowBuilder, makeMessageActionRowBuilder } = require('../../utils/tsCasts');
+import { ButtonBuilder, ButtonStyle, ContainerBuilder, TextDisplayBuilder, SectionBuilder, SeparatorBuilder, EmbedBuilder, ActionRowBuilder, SeparatorSpacingSize, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, AnyComponentBuilder, MessageComponentInteraction } from 'discord.js';
+import { tenshiColor } from '../../data/globalProps';
+import serverIds from '../../data/serverIds.json';
+import userIds from '../../data/userIds.json';
+import { commandFilenames, Command } from '../../commands/Commons/';
+import { p_pure } from '../../utils/prefixes';
+import { isNotModerator, edlDistance, toCapitalized, compressId } from '../../func';
+import { client } from '../../core/client';
+import { makeStringSelectMenuRowBuilder, makeMessageActionRowBuilder } from '../../utils/tsCasts';
+import { AnyRequest, ComplexCommandRequest, ComponentInteraction } from '../../commands/Commons/typings';
+import { MessageComponentDataResolvable } from 'types';
 
-/**
- * @param {import('../../commands/Commons/typings').ComplexCommandRequest | import('discord.js').StringSelectMenuInteraction<'cached'>} request
- * @param {Array<String>} selections
- */
-const makeCategoriesRow = (request, selections) => {
-	const getDefault = (/**@type {String}*/d) => !!selections.includes(d);
+export const makeCategoriesRow = (request: ComplexCommandRequest | ComponentInteraction, selections: string[]) => {
+	const getDefault = (d: string) => !!selections.includes(d);
 
 	const categoriesMenu = new StringSelectMenuBuilder()
 		.setCustomId(`ayuda_viewCategory_${compressId(request.user.id)}`)
@@ -98,8 +96,7 @@ const makeCategoriesRow = (request, selections) => {
 	return makeStringSelectMenuRowBuilder().addComponents(categoriesMenu);
 }
 
-/**@param {import('../../commands/Commons/typings').ComplexCommandRequest | import('discord.js').MessageComponentInteraction<'cached'>} request*/
-const makeGuideMenu = (request) => new StringSelectMenuBuilder()
+export const makeGuideMenu = (request: ComplexCommandRequest | MessageComponentInteraction<'cached'>) => new StringSelectMenuBuilder()
 	.setCustomId(`ayuda_viewGuideWiki_${compressId(request.user.id)}`)
 	.setPlaceholder('Guías...')
 	.setOptions(
@@ -125,20 +122,18 @@ const makeGuideMenu = (request) => new StringSelectMenuBuilder()
 			.setDescription('Detalles sobre los Tipos de Parámetro u Expresiones de Bandera.'),
 	);
 
-/**@param {import('../../commands/Commons/typings').ComplexCommandRequest | import('discord.js').MessageComponentInteraction<'cached'>} request*/
-const makeGuideRow = (request) => makeStringSelectMenuRowBuilder().addComponents(makeGuideMenu(request));
+export const makeGuideRow = (request: ComplexCommandRequest | MessageComponentInteraction<'cached'>) => makeStringSelectMenuRowBuilder().addComponents(makeGuideMenu(request));
 
 /**
+ * @description
  * Devuelve un {@linkcode Command} según el `nameOrAlias` indicado.
  * 
  * Si no se encuentran resultados, se devuelve `null`
- * @param {import('../../commands/Commons/typings').AnyRequest} request 
- * @param {String} nameOrAlias 
  */
-function searchCommand(request, nameOrAlias) {
+export function searchCommand(request: AnyRequest, nameOrAlias: string) {
 	for(const filename of commandFilenames) {
 		const commandModule = require(`../../commands/Instances/${filename}`);
-		const command = /**@type {Command}*/(commandModule instanceof Command ? commandModule : commandModule.default);
+		const command: Command = commandModule instanceof Command ? commandModule : commandModule.default;
 
 		if(command.name !== nameOrAlias
 		&& !command.aliases.some(alias => alias === nameOrAlias))
@@ -156,20 +151,20 @@ function searchCommand(request, nameOrAlias) {
 }
 
 /**
+ * @description
  * Devuelve un arreglo de objetos según la `query` proporcionada.
  * 
  * Los objetos devueltos contienen un {@linkcode Command} y la distancia Damerau-Levenshtein con peso euclideano respecto a la `query`.
- * Si no se encuentran resultados, se devuelve `null`
- * @param {import('../../commands/Commons/typings').AnyRequest} request 
- * @param {String} query 
+ * 
+ * Si no se encuentran resultados, se devuelve `null`.
  */
-function searchCommands(request, query) {
+export function searchCommands(request: AnyRequest, query: string) {
 	const commands = [];
 	const nameBias = 0.334;
 
 	for(const filename of commandFilenames) {
 		const commandFile = require(`../../commands/Instances/${filename}`);
-		const command = /**@type {import('../../commands/Commons/').Command}*/(commandFile.command ?? commandFile);
+		const command = commandFile.command ?? commandFile as Command;
 
 		if(command.tags.any('GUIDE', 'MAINTENANCE', 'OUTDATED'))
 			continue;
@@ -198,20 +193,17 @@ function searchCommands(request, query) {
 	return commands;
 }
 
-/**
- * Representa un objeto de carga útil para inyectar en una página de wiki de comando.
- * @typedef {Object} WikiPageInjectionPayload
- * @property {Array<EmbedBuilder>} embeds 
- * @property {Array<ActionRowBuilder<import('discord.js').AnyComponentBuilder>>} components 
- */
+/**@description Representa un objeto de carga útil para inyectar en una página de wiki de comando.*/
+interface WikiPageInjectionPayload {
+	embeds: EmbedBuilder[];
+	components: ActionRowBuilder<AnyComponentBuilder>[];
+}
 
-/**
- * Representa un objeto de carga útil para inyectar en una página de wiki de comando.
- * @typedef {Array<import('types').MessageComponentDataResolvable>} WikiPageInjectionPayloadV2
- */
+/**@description Representa un objeto de carga útil para inyectar en una página de wiki de comando.*/
+type WikiPageInjectionPayloadV2 = MessageComponentDataResolvable[];
 
 /**@satisfies {Record<import('../../commands/Commons/cmdTags').CommandTagStringField, string>}*/
-const displayTagMappings = /**@type {const}*/({
+const displayTagMappings = ({
 	GUIDE       : 'Página de Guía',
 	MOD         : 'Mod',
 	PAPA        : 'Papita con Puré',
@@ -224,19 +216,14 @@ const displayTagMappings = /**@type {const}*/({
 	GAME        : 'Juego',
 	MEME        : 'Meme',
 	MUSIC       : 'Música',
-});
+}) as const;
 
-/**
- * Añade embeds y componentes de una wiki de comando a la carga indicada.
- * @param {import('../../commands/Commons/').Command} command
- * @param {string} guildId 
- * @param {WikiPageInjectionPayload} payload
- */
-function injectWikiPage(command, guildId, payload) {
+/**@description Añade embeds y componentes de una wiki de comando a la carga indicada.*/
+export function injectWikiPage(command: Command, guildId: string, payload: WikiPageInjectionPayload) {
 	const { name, aliases, flags } = command;
 	const { embeds, components } = payload;
 
-	const title = (/**@type {String}*/ commandName) => {
+	const title = (commandName: string) => {
 		const pfi = commandName.indexOf('-') + 1;
 		commandName = (flags.has('GUIDE')) ? `${commandName.slice(pfi)} (Página de Guía)`  : commandName;
 		commandName = (flags.has('MOD'))   ? `${commandName} (Mod)`                        : commandName;
@@ -244,7 +231,7 @@ function injectWikiPage(command, guildId, payload) {
 		return `${commandName[0].toUpperCase()}${commandName.slice(1)}`;
 	};
 	const isNotGuidePage = !(flags.has('GUIDE'));
-	const listExists = (/**@type {Array<String>}*/ l) => l?.[0]?.length;
+	const listExists = (l: string[]) => l?.[0]?.length;
 
 	//Embed de metadatos
 	embeds.push(new EmbedBuilder()
@@ -290,20 +277,15 @@ function injectWikiPage(command, guildId, payload) {
 	);
 }
 
-/**
- * Añade embeds y componentes de una wiki de comando a la carga indicada (utiliza Componentes V2)
- * @param {import('../../commands/Commons/').Command} command
- * @param {import('../../commands/Commons/typings').ComplexCommandRequest} request 
- * @returns {WikiPageInjectionPayloadV2}
- */
-function getWikiPageComponentsV2(command, request) {
+/**@description Añade embeds y componentes de una wiki de comando a la carga indicada (utiliza Componentes V2).*/
+export function getWikiPageComponentsV2(command: Command, request: ComplexCommandRequest): WikiPageInjectionPayloadV2 {
 	const { name: commandName, aliases, flags: commandTags } = command;
 
-	const components = /**@type {WikiPageInjectionPayloadV2}*/([]);
+	const components: WikiPageInjectionPayloadV2 = [];
 
 	const getDisplayFlags = () =>  `${commandTags.keys.map(t => displayTagMappings[t]).join(', ')}`;
 	const isNotGuidePage = !(commandTags.has('GUIDE'));
-	const listExists = (/**@type {Array<String>}*/ l) => l?.[0]?.length;
+	const listExists = (l: string[]) => l?.[0]?.length;
 	
 	//Contenedor de metadatos
 	const titleTextBuilder = new TextDisplayBuilder().setContent(
@@ -385,13 +367,3 @@ function getWikiPageComponentsV2(command, request) {
 
 	return components;
 }
-
-module.exports = {
-	makeCategoriesRow,
-	makeGuideMenu,
-	makeGuideRow,
-	searchCommand,
-	searchCommands,
-	injectWikiPage,
-	getWikiPageComponentsV2,
-};
