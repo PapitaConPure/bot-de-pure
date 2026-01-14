@@ -1,7 +1,7 @@
-const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js'); //Integrar discord.js
-const { CommandTags, Command, CommandOptions } = require('../Commons/');
-const { emojiRegex } = require('../../func');
-const { makeButtonRowBuilder } = require('../../utils/tsCasts');
+import { EmbedBuilder, ButtonBuilder, ButtonStyle, Message } from 'discord.js';
+import { CommandTags, Command, CommandOptions } from '../Commons';
+import { emojiRegex } from '../../func';
+import { makeButtonRowBuilder } from '../../utils/tsCasts';
 
 const options = new CommandOptions()
 	.addParam('mensaje', 'MESSAGE', 'para especificar un mensaje por ID, enlace o respuesta', { optional: true })
@@ -18,7 +18,7 @@ const command = new Command('emote', flags)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const message = (await args.getMessage('mensaje', true))
-			?? request.channel.messages.cache.get(/**@type {import('discord.js').Message}*/(request).reference?.messageId)
+			?? request.channel.messages.cache.get(request.isMessage ? (request as Message).reference?.messageId: '')
 			?? (request.isMessage ? request.inferAsMessage() : null);
 
 		let content = null;
@@ -76,4 +76,4 @@ const command = new Command('emote', flags)
 		return request.reply({ embeds, components });
 	});
 
-module.exports = command;
+export default command;

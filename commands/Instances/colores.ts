@@ -1,5 +1,5 @@
-const { CommandTags, Command } = require('../Commons/');
-const { saki, colorsRow } = require('../../data/sakiProps');
+import { CommandTags, Command } from '../Commons/';
+import { saki, colorsRow } from '../../data/sakiProps';
 const { colorsList } = saki;
 
 const tags = new CommandTags().add(
@@ -38,4 +38,4 @@ const command = new Command('colores', tags)
 		return interaction.reply({ content: 'Colores intercambiados <:monowo:1108315840404803624>', ephemeral: true });
 	});
 
-module.exports = command;
+export default command;

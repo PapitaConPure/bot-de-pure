@@ -1,8 +1,8 @@
-const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { saki } = require('../../data/sakiProps');
-const { CommandOptions, CommandTags, Command } = require('../Commons/');
-const { CommandPermissions } = require('../Commons/cmdPerms');
-const { makeButtonRowBuilder } = require('../../utils/tsCasts');
+import { EmbedBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { CommandOptions, CommandTags, Command } from '../Commons/';
+import { CommandPermissions } from '../Commons/cmdPerms';
+import { makeButtonRowBuilder } from '../../utils/tsCasts';
+import { saki } from '../../data/sakiProps';
 
 const hangedDollId = saki.hangedRoleId;
 
@@ -55,7 +55,7 @@ const command = new Command('colgar', tags)
 			return request.reply({ content: '⚠️ Debes indicar un miembro a colgar (y no, "ESTAAAAAA" no es un miembro válido)', ephemeral: true });
 
 		const wasHanged = !member.roles.cache.has(hangedDollId);
-		let err;
+		let err: string;
 		if(wasHanged)
 			await member.roles.add(hangedDollId, `Colgado por ${user.tag}`).catch(() => { err = 'Oe oe espérate conchetumare eri muy poderoso wtf' });
 		else 
@@ -110,4 +110,4 @@ const command = new Command('colgar', tags)
 		});
 	});
 
-module.exports = command;
+export default command;

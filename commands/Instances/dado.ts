@@ -1,7 +1,7 @@
-const { EmbedBuilder } = require('discord.js');
-const { randRange } = require('../../func');
-const { p_pure } = require('../../utils/prefixes');
-const { CommandOptions, CommandTags, Command, CommandOptionSolver, CommandParam } = require('../Commons/');
+import { EmbedBuilder } from 'discord.js';
+import { randRange } from '../../func';
+import { p_pure } from '../../utils/prefixes';
+import { CommandOptions, CommandTags, Command, CommandOptionSolver, CommandParam } from '../Commons/';
 
 const diceRegex = /([0-9]+)\s*[Dd]\s*([0-9]+)/;
 
@@ -96,12 +96,7 @@ const command = new Command('dados', flags)
 		.catch(() => { request.reply({ content: '⚠️ Entrada inválida' }); });
 	});
 
-/**
- * 
- * @param {RegExpMatchArray} diceInput 
- * @returns {{ d: Number, f: Number, r: Array<Number>, t: Number }}
- */
-function parseDice(diceInput) {
+function parseDice(diceInput: RegExpMatchArray): { d: number; f: number; r: Array<number>; t: number; } {
 	if(!diceInput) return;
 	
 	const [ , dices, faces ] = diceInput;
@@ -111,7 +106,7 @@ function parseDice(diceInput) {
 	if(diceNumber < 1 || diceNumber > 999) return;
 	if(faceNumber < 2 || faceNumber > 999) return;
 
-	const r = Array(+dices).fill().map(() => randRange(1, +faces + 1));
+	const r = Array(+dices).fill(null).map(() => randRange(1, +faces + 1));
 	const t = r.reduce((a, b) => a + b);
 	
 	return ({
@@ -122,4 +117,4 @@ function parseDice(diceInput) {
 	});
 }
 
-module.exports = command;
+export default command;

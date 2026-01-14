@@ -1,4 +1,4 @@
-const { CommandOptions, CommandTags, Command } = require('../Commons/');
+import { CommandOptions, CommandTags, Command } from '../Commons';
 
 const options = new CommandOptions()
     .addParam('mensaje', 'TEXT', 'para especificar qué decir')
@@ -27,4 +27,4 @@ const command = new Command('decir', flags)
         return request.reply({ content: sentence.split(/ +#[Nn] +/g).join('\n') });
     });
 
-module.exports = command;
+export default command;
