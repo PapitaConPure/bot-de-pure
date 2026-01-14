@@ -312,7 +312,7 @@ const command = new Command('recordatorio', tags)
 				content: translator.getText('recordarReminderContentTooLong'),
 			});
 
-		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, ) ?? utcStartOfTzToday(sanitizedTzCode);
+		const date = parseDateFromNaturalLanguage(dateStr, translator.locale) ?? utcStartOfTzToday(sanitizedTzCode);
 		if(!validateDate(date, sanitizedTzCode))
 			return request.reply({
 				flags: MessageFlags.Ephemeral,
@@ -445,7 +445,7 @@ const command = new Command('recordatorio', tags)
 				content: translator.getText('userConfigRecommended', p_pure(interaction.guildId)),
 			});
 
-		const tzCode = userConfigs.tzCode ?? 'Etc/UTC';
+		const tzCode = userConfigs.tzCode ?? 'UTC';
 		const sanitizedTzCode = sanitizeTzCode(tzCode);
 		const utcOffset = toUtcOffset(sanitizedTzCode);
 
