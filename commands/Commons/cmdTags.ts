@@ -26,7 +26,7 @@ export type CommandTagResolvable = CommandTagStringField | bigint | number;
 const metaFlagValues = Object.keys(CommandTag) as ReadonlyArray<CommandTagStringField>;
 
 /**@description Devuelve la profundidad de una tag de comando.*/
-function resolveTagNumber(tag: CommandTagResolvable | CommandTagResolvable[]) {
+function resolveTagNumber(tag: CommandTagResolvable | CommandTagResolvable[]): bigint {
 	if(typeof tag === 'bigint')
 		return tag;
 
@@ -42,10 +42,10 @@ function resolveTagNumber(tag: CommandTagResolvable | CommandTagResolvable[]) {
 		return tagFromObject;
 	}
 
-	if(!Array.isArray(tag))
-		throw new TypeError(`Se recibió una etiqueta de comando cuyo tipo es inválido: ${tag} (${typeof tag})`);
+	if(Array.isArray(tag))
+		return resolveTagNumber(tag.reduce((a, b) => resolveTagNumber(a) | resolveTagNumber(b), 0n));
 		
-	return resolveTagNumber(tag.reduce((a, b) => resolveTagNumber(a) | resolveTagNumber(b)));
+	throw new TypeError(`Se recibió una etiqueta de comando cuyo tipo es inválido: ${tag} (${typeof tag})`);
 }
 
 /**@class Representa un conjunto de etiquetas de comando*/
