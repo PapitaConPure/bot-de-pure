@@ -1,10 +1,11 @@
-const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { CommandTags, Command } = require('../Commons/');
-const GuildConfig = require('../../models/guildconfigs.js');
-const { tenshiColor } = require('../../data/globalProps');
-const { makeButtonRowBuilder } = require('../../utils/tsCasts.js');
+import { EmbedBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { CommandTags, Command } from '../Commons/';
+import GuildConfig from '../../models/guildconfigs.js';
+import { tenshiColor } from '../../data/globalProps';
+import { makeButtonRowBuilder } from '../../utils/tsCasts.js';
 
 const tags = new CommandTags().add('PAPA');
+
 const command = new Command('papa-feedback', tags)
     .setLongDescription('Comando de feedback')
     .setExecution(async request => {
@@ -56,7 +57,7 @@ const command = new Command('papa-feedback', tags)
             ),
         ];
 
-        const guildConfigs = /**@type {Array<import('../../models/guildconfigs.js').GuildConfigDocument>}*/(await GuildConfig.find({}));
+        const guildConfigs = await GuildConfig.find({});
         const guilds = client.guilds.cache;
         guildConfigs.forEach(guildConfig => {
             const guild = guilds.get(guildConfig.guildId);
@@ -72,4 +73,4 @@ const command = new Command('papa-feedback', tags)
         });
     });
 
-module.exports = command;
+export default command;

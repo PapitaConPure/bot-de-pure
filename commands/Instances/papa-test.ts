@@ -1,7 +1,7 @@
-const { EmbedBuilder, MessageFlags } = require('discord.js'); //Integrar discord.js
-const { CommandTags, Command, CommandOptions } = require('../Commons/');
-const { searchCommand, getWikiPageComponentsV2 } = require('../../systems/others/wiki.js');
-const { p_pure } = require('../../utils/prefixes');
+import { EmbedBuilder, MessageFlags } from 'discord.js';
+import { CommandTags, Command, CommandOptions } from '../Commons';
+import { searchCommand, getWikiPageComponentsV2 } from '../../systems/others/wiki.js';
+import { p_pure } from '../../utils/prefixes';
 
 const options = new CommandOptions()
     .addParam('texto', 'TEXT', 'Parámetro de Texto', { optional: true })
@@ -11,7 +11,9 @@ const options = new CommandOptions()
     .addParam('canal', 'CHANNEL', 'Parámetro de Canal', { optional: true })
     .addParam('mensaje', 'MESSAGE', 'Parámetro de Mensaje', { optional: true })
     .addParam('rol', 'ROLE', 'Parámetro de Rol', { optional: true });
+
 const tags = new CommandTags().add('PAPA');
+
 const command = new Command('papa-test', tags)
     .setLongDescription('Comando de pruebas 😳👉👈')
     .setOptions(options)
@@ -43,8 +45,8 @@ const command = new Command('papa-test', tags)
 
         return request.reply({
             flags: MessageFlags.IsComponentsV2,
-            components
+            components,
         });
     });
 
-module.exports = command;
+export default command;

@@ -1,6 +1,7 @@
-const { CommandTags, Command } = require('../Commons/');
+import { CommandTags, Command } from '../Commons';
 
 const flags = new CommandTags().add('PAPA');
+
 const command = new Command('papa-terminar', flags)
 	.setAliases('papa-matar')
 	.setDescription('Termina este proceso de Bot de Puré')
@@ -9,4 +10,4 @@ const command = new Command('papa-terminar', flags)
 		process.exit(0);
 	});
 
-module.exports = command;
+export default command;

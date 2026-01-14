@@ -1,6 +1,7 @@
-const { EmbedBuilder, Colors } = require("discord.js");
-const tenshi = { '👉👈': 'https://i.imgur.com/yeYyEvp.jpg' }; //Soy un puto meme
-const { CommandTags, Command } = require('../Commons/');
+import { EmbedBuilder, Colors } from 'discord.js';
+import { CommandTags, Command } from '../Commons/';
+
+const tenshi = { '👉👈': 'https://i.imgur.com/yeYyEvp.jpg' };
 
 const flags = new CommandTags().add('PAPA');
 const command = new Command('papa-invitar', flags)
@@ -19,4 +20,4 @@ const command = new Command('papa-invitar', flags)
         return request.reply({ embeds: [embed] });
     });
 
-module.exports = command;
+export default command;

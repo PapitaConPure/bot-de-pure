@@ -1,10 +1,12 @@
-const { p_pure } = require('../../utils/prefixes');
-const { CommandOptions, CommandTags, Command } = require('../Commons/');
+import { p_pure } from '../../utils/prefixes';
+import { CommandOptions, CommandTags, Command } from '../Commons/';
 
 const options = new CommandOptions()
 	.addFlag('d', ['del', 'delete'], 'para eliminar el mensaje original');
-const flags = new CommandTags().add('PAPA');
-const command = new Command('papa-eval', flags)
+
+const tags = new CommandTags().add('PAPA');
+
+const command = new Command('papa-eval', tags)
 	.setDescription(
 		'Evalúa una función de JavaScript en el contexto de la función `execute` de un módulo de comando.',
 		'```ts',
@@ -62,4 +64,4 @@ const command = new Command('papa-eval', flags)
 			message.delete();
 	});
 
-module.exports = command;
+export default command;

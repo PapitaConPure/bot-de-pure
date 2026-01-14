@@ -1,8 +1,9 @@
-const { modifyPresence } = require('../../systems/presence/presence');
-const { CommandTags, Command } = require('../Commons/');
+import { modifyPresence } from '../../systems/presence/presence';
+import { CommandTags, Command } from '../Commons';
 
-const flags = new CommandTags().add('PAPA');
-const command = new Command('papa-próximo', flags)
+const tags = new CommandTags().add('PAPA');
+
+const command = new Command('papa-próximo', tags)
 	.setAliases('papa-proximo')
 	.setDescription('...')
 	.setExecution(async request => {
@@ -17,4 +18,4 @@ const command = new Command('papa-próximo', flags)
 		])
 	});
 
-module.exports = command;
+export default command;

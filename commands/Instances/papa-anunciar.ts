@@ -1,12 +1,14 @@
-const { EmbedBuilder } = require('discord.js');
-const { tenshiColor } = require('../../data/globalProps');
-const { CommandTags, Command, CommandOptions } = require('../Commons/');
+import { EmbedBuilder } from 'discord.js';
+import { tenshiColor } from '../../data/globalProps';
+import { CommandTags, Command, CommandOptions } from '../Commons/';
 
-const flags = new CommandTags().add('PAPA');
+const tags = new CommandTags().add('PAPA');
+
 const options = new CommandOptions()
 	.addParam('anuncio', 'TEXT', 'para anunciar algo a todos los servers posibles')
 	.addFlag('tn', 'título', 'para especificar un título', { name: 'ttl', type: 'TEXT' });
-const command = new Command('papa-anunciar', flags)
+
+const command = new Command('papa-anunciar', tags)
 	.setAliases(
 		'papa-anuncio', 'papa-actualización', 'papa-actualizacion',
 		'papa-announcement', 'papa-update',
@@ -32,4 +34,4 @@ const command = new Command('papa-anunciar', flags)
 		});
 	});
 
-module.exports = command;
+export default command;

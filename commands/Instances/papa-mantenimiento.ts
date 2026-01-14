@@ -1,9 +1,10 @@
-const botStatus = require('../../data/botStatus.json');
-const { globalConfigs } = require('../../data/globalProps');
-const { CommandTags, Command } = require('../Commons/');
+import { host } from '../../data/botStatus.json';
+import { globalConfigs } from '../../data/globalProps';
+import { CommandTags, Command } from '../Commons';
 
-const flags = new CommandTags().add('PAPA');
-const command = new Command('papa-mantenimiento', flags)
+const tags = new CommandTags().add('PAPA');
+
+const command = new Command('papa-mantenimiento', tags)
 	.setAliases('papa-maintenance', 'papa-mant', 'papa-maint')
 	.setDescription(
 		'Hace que la instancia de `<proceso>` que utilizo se restrinja al canal actual',
@@ -12,7 +13,7 @@ const command = new Command('papa-mantenimiento', flags)
 	)
 	.setExecution(async message => {
 		const { channel, user } = message;
-		const sent = await channel.send({ content: `**Host** \`${botStatus.host}\`\n**ID de InstProc** \`${globalConfigs.startupTime}\`\n**Estado** \`[${globalConfigs.maintenance.length?'PAUSADO':'OPERANDO'}]\``})
+		const sent = await channel.send({ content: `**Host** \`${host}\`\n**ID de InstProc** \`${globalConfigs.startupTime}\`\n**Estado** \`[${globalConfigs.maintenance.length?'PAUSADO':'OPERANDO'}]\``})
 
 		const reactions = (globalConfigs.maintenance.length)?['🌀']:['💤','👁️'];
 		Promise.all(reactions.map(reaction => sent.react(reaction)));
@@ -32,4 +33,4 @@ const command = new Command('papa-mantenimiento', flags)
 		});
 	});
 
-module.exports = command;
+export default command;

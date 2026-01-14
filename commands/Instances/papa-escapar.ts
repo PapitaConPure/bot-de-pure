@@ -1,10 +1,11 @@
-const { CommandTags, Command, CommandOptions } = require('../Commons/');
+import { CommandTags, Command, CommandOptions } from '../Commons/';
 
 const options = new CommandOptions()
 	.addParam('servidor', 'GUILD', 'para indicar un servidor');
 
-const flags = new CommandTags().add('PAPA');
-const command = new Command('papa-escapar', flags)
+const tags = new CommandTags().add('PAPA');
+
+const command = new Command('papa-escapar', tags)
 	.setAliases('papa-abandonar')
 	.setDescription('Me hace abandonar el servidor especificado.')
 	.setOptions(options)
@@ -19,4 +20,4 @@ const command = new Command('papa-escapar', flags)
 		return guild.leave();
 	});
 
-module.exports = command;
+export default command;
