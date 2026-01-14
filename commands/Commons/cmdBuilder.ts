@@ -33,7 +33,7 @@ export interface ExtendedCommandRequestPrototype {
 	/**If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply*/
 	replyFirst: (options?: (string|MessagePayload)&(MessageEditOptions|InteractionReplyOptions)|{}|undefined) => Promise<Message<boolean>>;
 	/**If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply.*/
-	deferReply: (options?: InteractionDeferReplyOptions) => Promise<Message<boolean>>;
+	deferReply: (options?: InteractionDeferReplyOptions & { withResponse?: boolean }) => Promise<Message<boolean>>;
 	/**Deletes the original message if the command is a message command.*/
 	delete: () => Promise<Message<boolean>>;
 	/**Deletes the initial reply.*/
@@ -72,10 +72,6 @@ const extendedCommandRequestPrototype: ExtendedCommandRequestPrototype = {
 	wasReplied: undefined,
 };
 
-/**
- * @param {CommandRequest | ComponentInteraction} request
- * @returns {ComplexCommandRequest}
- */
 function extendRequest(request: CommandRequest | ComponentInteraction): ComplexCommandRequest {
 	/**@type {ExtendedCommandRequestPrototype}*/
 	const extension: ExtendedCommandRequestPrototype = Object.assign({}, extendedCommandRequestPrototype);
