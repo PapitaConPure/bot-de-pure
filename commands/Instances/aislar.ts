@@ -1,15 +1,17 @@
-const { CommandTags, CommandOptions, Command, CommandOptionSolver } = require('../Commons/');
-const { CommandPermissions } = require('../Commons/cmdPerms');
-const { Translator } = require('../../i18n');
+import { CommandTags, CommandOptions, Command, CommandOptionSolver } from '../Commons/';
+import { CommandPermissions } from '../Commons/cmdPerms';
+import { Translator } from '../../i18n';
+import { GuildMember } from 'discord.js';
 
 const perms = new CommandPermissions('ModerateMembers');
 
 const options = new CommandOptions()
 	.addParam('duración', 'NUMBER', 'para especificar el tiempo en minutos')
 	.addParam('miembros', 'MEMBER', 'para aislar miembros', { poly: 'MULTIPLE', polymax: 8 });
-	
-const flags = new CommandTags().add('MOD');
-const command = new Command('aislar', flags)
+
+const tags = new CommandTags().add('MOD');
+
+const command = new Command('aislar', tags)
 	.setAliases('mutear', 'silenciar', 'mute', 'timeout', 'm')
 	.setBriefDescription('Aisla miembros en el server por un cierto tiempo')
 	.setLongDescription(
@@ -40,8 +42,8 @@ const command = new Command('aislar', flags)
 		if(members.some(member => !member))
 			await request.reply({ content: translator.getText('aislarSomeMembersWereInvalid') });
 
-		const succeeded = /**@type {Array<import('discord.js').GuildMember>}*/([]);
-		const failed    = /**@type {Array<import('discord.js').GuildMember>}*/([]);
+		const succeeded: GuildMember[] = [];
+		const failed   : GuildMember[] = [];
 
 		await Promise.all(members
 			.filter(member => member)
@@ -50,11 +52,11 @@ const command = new Command('aislar', flags)
 				.then(() => succeeded.push(member))
 				.catch(() => failed.push(member))
 		));
-		
+
 		if(!succeeded.length)
 			return request.reply({ content: translator.getText('aislarNoUpdatedMembers') });
-		
-		const membersList = (/**@type {Array<import('discord.js').GuildMember>}*/members) => members.map(member => member.user.tag).join(', ');
+
+		const membersList = (members: GuildMember[]) => members.map(member => member.user.tag).join(', ');
 		return request.reply({
 			content: [
 				duration
@@ -68,4 +70,4 @@ const command = new Command('aislar', flags)
 		});
 	});
 
-module.exports = command;
+export default command;

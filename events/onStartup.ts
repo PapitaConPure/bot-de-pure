@@ -6,7 +6,7 @@ import PrefixPairs from '../models/prefixpair';
 import UserConfigs from '../models/userconfigs';
 import BooruTags from '../models/boorutags';
 import MessageCascades from '../models/messageCascades';
-import { Puretable, pureTableAssets } from '../models/puretable';
+import { PureTable, pureTableAssets } from '../models/puretable';
 import { deleteExpiredMessageCascades, cacheMessageCascade } from './onMessageDelete';
 
 import { puré } from '../core/commandInit';
@@ -164,9 +164,9 @@ export async function onStartup(client: import('discord.js').Client) {
 		await initializeWebhookMessageOwners();
 
 		console.log(chalk.gray('Preparando Tabla de Puré...'));
-		const pureTableDocument = await Puretable.findOne({});
+		const pureTableDocument = await PureTable.findOne({});
 		let puretable = pureTableDocument;
-		if(!puretable) puretable = new Puretable();
+		if(!puretable) puretable = new PureTable();
 		else //Limpiar emotes eliminados / no accesibles
 			puretable.cells = puretable.cells.map(arr =>
 				arr.map(cell => client.emojis.cache.get(cell) ? cell : pureTableAssets.defaultEmote )

@@ -1,35 +1,38 @@
-/* eslint-disable no-sparse-arrays */
+import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons/';
+import { makeWeightedDecision, compressId, decompressId, improveNumber, emojiRegex } from '../../func';
+import { EmbedBuilder, AttachmentBuilder, StringSelectMenuBuilder, Colors, ButtonBuilder, ButtonStyle, ActionRowBuilder, StringSelectMenuInteraction, MessageFlags } from 'discord.js';
+import { PureTable, AnarchyUser, pureTableAssets, AUserDocument } from '../../models/puretable';
+import { createTaskScheduler } from '../../utils/concurrency';
+import { ComplexCommandRequest } from '../Commons/typings';
+import { createCanvas, loadImage } from '@napi-rs/canvas';
+import { globalConfigs } from '../../data/globalProps';
+import { p_pure } from '../../utils/prefixes';
+import { Translator } from '../../i18n';
+import Ut from '../../utils/general';
 
-const { globalConfigs } = require('../../data/globalProps'); //Variables globales
-const { makeWeightedDecision, compressId, decompressId, improveNumber, emojiRegex } = require('../../func');
-const { createCanvas, loadImage } = require('@napi-rs/canvas');
-const { EmbedBuilder, AttachmentBuilder, StringSelectMenuBuilder, Colors, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { p_pure } = require('../../utils/prefixes');
-const { Puretable, AUser, pureTableAssets } = require('../../models/puretable.js');
-const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/');
-const { makeStringSelectMenuRowBuilder, makeButtonRowBuilder } = require('../../utils/tsCasts');
-const { Translator } = require('../../i18n');
-const { createTaskScheduler } = require('../../utils/concurrency');
-const Ut = require('../../utils/general');
-
-/**@typedef {{ name: string, emoji: string, weight: number, shape: Array<Array<number>> }} Skill*/
+type Skill = {
+	readonly name: string;
+	readonly emoji: string;
+	readonly weight: number;
+	readonly shape: number[][];
+};
 
 const ptTaskScheduler = createTaskScheduler();
 
 /**@satisfies {Record<string, Skill>} */
-const skills = /**@type {const}*/({
+const skills = ({
 	hline: {
 		name: 'Habilidad Horizontal',
 		emoji: '↔️',
 		weight: 4.00,
 		shape: [ Array(32).fill(1) ], //Cappeado a 16 emojis
-	},
+	} as Skill,
 	vline: {
 		name: 'Habilidad Vertical',
 		emoji: '↕️',
 		weight: 4.00,
 		shape: Array(32).fill([ 1 ]), //Cappeado a 16 emojis
-	},
+	} as Skill,
 	x: {
 		name: 'Habilidad Cruzada',
 		emoji: '❌',
@@ -45,7 +48,7 @@ const skills = /**@type {const}*/({
 			[  , 1,  ,  ,  ,  ,  , 1,  , ],
 			[ 1,  ,  ,  ,  ,  ,  ,  , 1, ],
 		],
-	},
+	} as Skill,
 	square: {
 		name: 'Habilidad Cuadrada',
 		emoji: '🟥',
@@ -57,7 +60,7 @@ const skills = /**@type {const}*/({
 			[ 1,  ,  ,  , 1, ],
 			[ 1, 1, 1, 1, 1, ],
 		],
-	},
+	} as Skill,
 	circle: {
 		name: 'Habilidad Circular',
 		emoji: '🔵',
@@ -71,7 +74,7 @@ const skills = /**@type {const}*/({
 			[  , 1,  ,  ,  , 1,  , ],
 			[  ,  , 1, 1, 1,  ,  , ],
 		],
-	},
+	} as Skill,
 	diamond: {
 		name: 'Habilidad Diamante',
 		emoji: '💎',
@@ -85,7 +88,7 @@ const skills = /**@type {const}*/({
 			[  ,  , 1,  , 1,  ,  , ],
 			[  ,  ,  , 1,  ,  ,  , ],
 		],
-	},
+	} as Skill,
 	heart: {
 		name: 'Habilidad Corazón',
 		emoji: '❤️',
@@ -99,7 +102,7 @@ const skills = /**@type {const}*/({
 			[  ,  , 1,  , 1,  ,  , ],
 			[  ,  ,  , 1,  ,  ,  , ],
 		],
-	},
+	} as Skill,
 	tetris: {
 		name: 'Habilidad Tetrápeda',
 		emoji: '🕹️',
@@ -113,7 +116,7 @@ const skills = /**@type {const}*/({
 			[  , 1, 1, 1,  ,  , 1, ],
 			[  ,  ,  ,  ,  ,  , 1, ],
 		],
-	},
+	} as Skill,
 	p: {
 		name: 'Habilidad Tubércula',
 		emoji: '🥔',
@@ -127,7 +130,7 @@ const skills = /**@type {const}*/({
 			[  , 1,  ,  ,  , ],
 			[ 1, 1, 1,  ,  , ],
 		],
-	},
+	} as Skill,
 	exclamation: {
 		name: 'Habilidad Exclamativa',
 		emoji: '❗',
@@ -143,7 +146,7 @@ const skills = /**@type {const}*/({
 			[  , 1, 1,  , ],
 			[  , 1, 1,  , ],
 		],
-	},
+	} as Skill,
 	a: {
 		name: 'Habilidad Anárquica',
 		emoji: '🅰',
@@ -157,7 +160,7 @@ const skills = /**@type {const}*/({
 			[ 1,  ,  ,  , 1, ],
 			[ 1,  ,  ,  , 1, ],
 		],
-	},
+	} as Skill,
 	ultimate: {
 		name: 'Habilidad Definitiva',
 		emoji: '👑',
@@ -173,9 +176,10 @@ const skills = /**@type {const}*/({
 			[  , 1, 1,  , 1,  , 1, 1,  , ],
 			[  ,  , 1, 1, 1, 1, 1,  ,  , ],
 		],
-	},
-});
-const skillOptions = Object.entries(skills).map(([ key, skill ]) => ({ weight: skill.weight, value: { key, skill } }));
+	} as Skill,
+}) as const;
+type WeightedSkillOption = { weight: number, value: { key: string, skill: Skill }};
+const skillOptions: WeightedSkillOption[] = Object.entries(skills).map(([ key, skill ]) => ({ weight: skill.weight, value: { key, skill } }));
 
 const baseDropRate = 0.02; //La chance de drop base, incrementada con las propiedades de abajo según el nivel de usuario
 const userLevelDropRateMaxIncrease = 0.5; //El máximo hacia el cual tiende el incremento por nivel de usuario
@@ -187,11 +191,13 @@ const options = new CommandOptions()
 	.addParam('emote',    'EMOTE',  'para especificar un emote a agregar',    {                     optional: true })
 	.addFlag('p', 'perfil', 'para ver tu perfil anárquico')
 	.addFlag('sh', [ 'skill', 'habilidad', 'especial', 'special' ], 'para usar una habilidad especial');
-const flags = new CommandTags().add(
+
+const tags = new CommandTags().add(
 	'COMMON',
 	'GAME',
 );
-const command = new Command('anarquia', flags)
+
+const command = new Command('anarquia', tags)
 	.setAliases('anarquía', 'a')
 	.setBriefDescription('Para interactuar con la Tabla de Puré')
 	.setLongDescription(
@@ -212,7 +218,7 @@ const command = new Command('anarquia', flags)
 		const perfil = args.hasFlag('perfil');
 		if(perfil) {
 			const { user, member, userId } = request;
-			const auser = await AUser.findOne({ userId });
+			const auser = await AnarchyUser.findOne({ userId });
 
 			const embed = new EmbedBuilder()
 				.setColor(0xbd0924)
@@ -221,7 +227,7 @@ const command = new Command('anarquia', flags)
 				const skillContent = Object.entries(auser.skills)
 					.sort(([ , amountA ], [ , amountB ]) => amountB - amountA)
 					.map(([ key, amount ]) => {
-						const skill = skills[/**@type {keyof skills}*/(key)];
+						const skill = skills[key as keyof typeof skills];
 						if(!skill) return;
 
 						const decor = !amount ? '~~' : '';
@@ -273,30 +279,32 @@ const command = new Command('anarquia', flags)
 			return request.reply({ embeds: [embed] });
 		}
 		
-		const reactIfMessage = async (/**@type {String}*/ reaction) => request.isMessage && request.inferAsMessage().react(reaction).catch(_ => _);
+		const reactIfMessage = async (/**@type {String}*/ reaction: string) => request.isMessage && request.inferAsMessage().react(reaction).catch(_ => _);
 		
 		const skill = args.hasFlag('skill');
 		const inverted = args.isMessageSolver(args.args) && isNaN(+args.args[0]);
-		let pos, emote;
+		let pos: number[], emote: string;
 		if(inverted) emote = args.getString('emote');
 		pos = CommandOptionSolver.asNumbers(args.parsePolyParamSync('posición', { regroupMethod: 'NONE' })).filter(x => !isNaN(x));
 		if(!inverted) emote = args.getString('emote');
 
 		if((pos.length === 2 && !emote)
-		|| (pos.length  <  2 &&  emote)
-		|| (pos.length  <  2 &&  skill)
+		|| (pos.length  <  2 && (emote || skill))
 		|| (pos.length !== 2 && pos.length > 0)) {
 			reactIfMessage('⚠️');
-			return request.reply({ content: translator.getText('invalidInput'), ephemeral: true });
+			return request.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('invalidInput'),
+			});
 		}
 
 		let cells;
-		const embeds = /**@type {Array<EmbedBuilder>}*/([]);
+		const embeds: EmbedBuilder[] = [];
 
 		//Ingresar emotes a tabla
 		if(pos.length) {
 			const { userId } = request;
-			const auser = (await AUser.findOne({ userId })) || new AUser({ userId });
+			const auser = (await AnarchyUser.findOne({ userId })) || new AnarchyUser({ userId });
 			
 			//Tiempo de enfriamiento por usuario
 			if((Date.now() - auser.last) < 5000) {
@@ -342,7 +350,7 @@ const command = new Command('anarquia', flags)
 				couldLoadEmote = await loadEmoteIfNotLoaded(request, emoteId);
 				if(couldLoadEmote) {
 					cells[correctedY][correctedX] = emoteId;
-					await Puretable.updateOne({}, { cells });
+					await PureTable.updateOne({}, { cells });
 				}
 			});
 
@@ -399,10 +407,10 @@ const command = new Command('anarquia', flags)
 
 		const emoteId = decompressId(compressedEmoteId);
 
-		const react = (/**@type {string}*/ reaction) => interaction.message.react(reaction);
+		const react = (/**@type {string}*/ reaction: string) => interaction.message.react(reaction);
 	
 		const skillKey = /**@type {keyof skills}*/(interaction.values[0]);
-		const auser = await AUser.findOne({ userId });
+		const auser = await AnarchyUser.findOne({ userId });
 		if(!auser?.skills[skillKey]) {
 			react('❌');
 			return interaction.reply({ content: translator.getText('anarquiaSkillIssue'), ephemeral: true });
@@ -418,7 +426,7 @@ const command = new Command('anarquia', flags)
 				await interaction.deferUpdate();
 				cells = await fetchPureTableCells();
 				useSkill(cells, +x, +y, emoteId, skill.shape);
-				await Puretable.updateOne({}, { cells });
+				await PureTable.updateOne({}, { cells });
 			}
 		});
 		
@@ -467,18 +475,14 @@ const command = new Command('anarquia', flags)
 		});
 	}, { userFilterIndex: 0 });
 
-module.exports = command;
+export default command;
 
 async function fetchPureTableCells() {
-	return /**@type {Array<Array<string>>}*/((await Puretable.findOne({})).cells)
+	return (await PureTable.findOne({})).cells;
 }
 
-/**
- * @param {import('../Commons/typings').ComplexCommandRequest | import('discord.js').StringSelectMenuInteraction} request 
- * @param {string} emoteId 
- * @returns {Promise<boolean>} Whether the emote could be loaded (`true`) or not (`false`)
- */
-async function loadEmoteIfNotLoaded(request, emoteId) {
+/**@returns Whether the emote could be loaded (`true`) or not (`false`)*/
+async function loadEmoteIfNotLoaded(request: ComplexCommandRequest | StringSelectMenuInteraction, emoteId: string): Promise<boolean> {
 	const loadEmotes = globalConfigs.loademotes;
 
 	if(!Object.prototype.hasOwnProperty.call(loadEmotes, emoteId)) {
@@ -494,14 +498,7 @@ async function loadEmoteIfNotLoaded(request, emoteId) {
 	return true;
 }
 
-/**
- * @param {import('../Commons/typings').ComplexCommandRequest} request
- * @param {Translator} translator
- * @param {import('../../models/puretable.js').AUserDocument} auser
- * @param {[ number, number ]} position
- * @param {string} emoteId
- */
-async function makeSkillSelectReply(request, translator, auser, position, emoteId) {
+async function makeSkillSelectReply(request: ComplexCommandRequest, translator: Translator, auser:  AUserDocument, position: [number, number], emoteId: string) {
 	const userId = request.user.id;
 	const authorId = compressId(userId);
 	const [ x, y ] = position;
@@ -515,7 +512,7 @@ async function makeSkillSelectReply(request, translator, auser, position, emoteI
 			.setThumbnail(request.client.emojis.cache.get(emoteId).imageURL({ extension: 'png', size: 512 }))
 		],
 		components: [
-			makeStringSelectMenuRowBuilder().addComponents(
+			new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 				new StringSelectMenuBuilder()
 					.setCustomId(`anarquia_selectSkill_${x}_${y}_${compressId(emoteId)}_${authorId}`)
 					.setPlaceholder('Escoge una habilidad...')
@@ -527,7 +524,7 @@ async function makeSkillSelectReply(request, translator, auser, position, emoteI
 						}))
 					)
 			),
-			makeButtonRowBuilder().addComponents(
+			new ActionRowBuilder<ButtonBuilder>().addComponents(
 				new ButtonBuilder()
 					.setCustomId(`anarquia_cancel_${authorId}`)
 					.setLabel(translator.getText('buttonCancel'))
@@ -538,8 +535,7 @@ async function makeSkillSelectReply(request, translator, auser, position, emoteI
 	});
 }
 
-/**@param {Array<Array<string>>} cells*/
-async function drawPureTable(cells) {
+async function drawPureTable(cells: string[][]) {
 	const { image: pureTableImage, defaultEmote } = pureTableAssets;
 	const loadedEmotes = globalConfigs.loademotes;
 	
@@ -555,8 +551,9 @@ async function drawPureTable(cells) {
 
 	//Dibujar emotes en imagen
 	const emoteSize = 48;
+	const offsetY = 77; //Compensación - va a variar según la implementación de canvas porque por supuesto que lo hace
 	const tableX = canvas.width / 2 - emoteSize * cells.length / 2;
-	const tableY = ctx.measureText('M').actualBoundingBoxDescent + 65;
+	const tableY = ctx.measureText('M').actualBoundingBoxDescent + offsetY;
 	cells.map((arr, y) => {
 		arr.map((cell, x) => {
 			if(!loadedEmotes[cell])
@@ -570,14 +567,14 @@ async function drawPureTable(cells) {
 }
 
 /**
+ * @description
  * Sube de nivel al jugador, da la posibilidad de que obtenga habilidades especiales, NO GUARDA el documento
- * @param {import('../../models/puretable.js').AUserDocument} auser
  */
-function levelUpAndGetSkills(auser) {
+function levelUpAndGetSkills(auser: AUserDocument) {
 	const userLevel = calcUserLevel(auser);
 	const dropRate = calcDropRate(userLevel);
 
-	let droppedSkill;
+	let droppedSkill: { key: string, skill: Skill };
 	if(Math.random() < dropRate) {
 		droppedSkill = makeWeightedDecision(skillOptions);
 		auser.skills[droppedSkill.key] ??= 0;
@@ -594,24 +591,22 @@ function levelUpAndGetSkills(auser) {
 	};
 }
 
-/**@param {import('../../models/puretable.js').AUserDocument} auser*/
-function calcUserLevel(auser) {
+function calcUserLevel(auser: AUserDocument) {
 	return Math.floor(auser.exp / maxExp) + 1;
 }
 
-/**@param {number} userLevel*/
-function calcDropRate(userLevel) {
+function calcDropRate(userLevel: number) {
 	return baseDropRate + (userLevelDropRateMaxIncrease * userLevel / (userLevelDropRateHalfIncreaseLength + userLevel));
 }
 
 /**
- * @param {Array<Array<string>>} cells La tabla de p!anarquía
- * @param {number} x La posición X central donde se utiliza la skill en el tablero
- * @param {number} y La posición Y central donde se utiliza la skill en el tablero
- * @param {string} id Una ID de emoji con la cual usar la skill
- * @param {Array<Array<number>>} mask Una matriz máscara centrada a la posición indicada para determinar dónde colocar emotes
+ * @param cells La tabla de p!anarquía
+ * @param x La posición X central donde se utiliza la skill en el tablero
+ * @param y La posición Y central donde se utiliza la skill en el tablero
+ * @param id Una ID de emoji con la cual usar la skill
+ * @param mask Una matriz máscara centrada a la posición indicada para determinar dónde colocar emotes
  */
-function useSkill(cells, x, y, id, mask) {
+function useSkill(cells: string[][], x: number, y: number, id: string, mask: number[][]) {
 	const ptH = cells.length;
 	const ptW = calcMatrixWidth(cells);
 	const maskH = mask.length;
@@ -636,7 +631,6 @@ function useSkill(cells, x, y, id, mask) {
 	}
 }
 
-/**@param {Array<Array<*>>} matrix*/
-function calcMatrixWidth(matrix) {
+function calcMatrixWidth(matrix: any[][]) {
 	return matrix.map(r => r.length).reduce((a, b) => a > b ? a : b, 0);
 }

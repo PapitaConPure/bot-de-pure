@@ -1099,8 +1099,8 @@ export function fetchFlag(args: Array<string>, flag: {
 }
 
 /**
- * @param {Array<string>} args An array of words, which may contain double-quote groups
- * @param {number} i Index from which to extract a sentence, be it a single word or a group
+ * @param args An array of words, which may contain double-quote groups
+ * @param i Index from which to extract a sentence, be it a single word or a group
  */
 export function fetchSentence(args: Array<string>, i: number) {
     if(i == undefined || i >= args.length || args[i] == undefined)
@@ -1122,16 +1122,12 @@ export function fetchSentence(args: Array<string>, i: number) {
 //#endregion
 
 //#region Utilidades
-/**@param {string} text*/
 export const success = (text: string) => `✅ ${text}`;
 
-/**@param {string} text*/
 export const warn = (text: string) => `⚠️ ${text}`;
 
-/**@param {string} text*/
 export const unable = (text: string) => `❌ ${text}`;
 
-/**@param {string} encodedstring*/
 export function decodeEntities(encodedstring: string) {
     //Fuente: https://stackoverflow.com/questions/44195322/a-plain-javascript-way-to-decode-html-entities-works-on-both-browsers-and-node
     return encodedstring.replace(HTTP_ENTITIES_REGEX, function(match, entity) {
@@ -1142,17 +1138,12 @@ export function decodeEntities(encodedstring: string) {
     });
 }
 
-/**
- * @template T
- * @param {Array<{ weight: number, value: T }>} options
- * @returns {T}
- */
-export function makeWeightedDecision<T>(options: Array<{ weight: number; value: T; }>): T {
+export function makeWeightedDecision<T>(options: ({ weight: number; value: T; })[]): T {
     if(!options.length) return null;
 
     const total = options.map(option => option.weight).reduce((a, b) => a + b);
     const count = options.length;
-    
+
     let r = Math.random() * total;
     for(let i = 0; i < count; i++) {
         if(r < options[i].weight)
@@ -1173,23 +1164,14 @@ export const unicodeEmojiRegex = /\p{Emoji_Presentation}|\p{Extended_Pictographi
  */
 export const emojiRegex = /<a?:\w+:([0-9]+)>/gi;
 
-/**
- * Devuelve el primer emoji global encontrado en el string
- * @param {string} emoji 
- * @returns {string?}
- */
+/**Devuelve el primer emoji global encontrado en el string*/
 export function defaultEmoji(emoji: string): string | null {
     if(typeof emoji !== 'string') return null;
     return emoji.match(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu)?.[0]; //Expresión RegExp cursed
 }
 
-/**
- * Devuelve el primer emoji de servidor encontrado con el string
- * @param {string} emoji 
- * @param {import('discord.js').Guild} guild 
- * @returns {Discord.Emoji?}
- */
-export function guildEmoji(emoji: string, guild: import('discord.js').Guild): Discord.Emoji | null {
+/**Devuelve el primer emoji de servidor encontrado con el string*/
+export function guildEmoji(emoji: string, guild: Discord.Guild): Discord.Emoji | null {
     if(typeof emoji !== 'string') return null;
     if(!guild.emojis) throw TypeError('Debes ingresar una Guild');
     const parsedEmoji = emoji.match(/^<a*:\w+:[0-9]+>\B/gu)?.[0];
@@ -1198,9 +1180,7 @@ export function guildEmoji(emoji: string, guild: import('discord.js').Guild): Di
     return guild.emojis.resolve(parsedEmoji);
 }
 
-/**
- * Devuelve el primer emoji global o de servidor encontrado en el string
- */
+/**Devuelve el primer emoji global o de servidor encontrado en el string*/
 export const emoji = (emoji: string, guild: import('discord.js').Guild): Discord.Emoji | string | null => defaultEmoji(emoji) ?? guildEmoji(emoji, guild);
 
 export function isNSFWChannel(channel: import('discord.js').GuildBasedChannel) {
@@ -1213,12 +1193,7 @@ export function isNSFWChannel(channel: import('discord.js').GuildBasedChannel) {
     return false;
 }
 
-/**
- * Devuelve un valor acomodado al rango facilitado
- * @param {number} value El valor a acomodar
- * @param {number} min El mínimo del rango
- * @param {number} max El máximo del rango
- */
+/**Devuelve un valor acomodado al rango facilitado*/
 export function clamp(value: number, min: number, max: number) {
     if(min > max) {
         const temp = min;
@@ -1229,10 +1204,7 @@ export function clamp(value: number, min: number, max: number) {
     return Math.max(min, Math.min(value, max));
 }
 
-/**
- * Devuelve el valor mediano del conjunto especificado
- * @param {...number} values Los valores del conjunto
- */
+/**Devuelve la mediana del conjunto especificado*/
 export function median(...values: number[]) {
     if(!values.length) throw RangeError('Se esperaba al menos 1 número');
     values = values.sort((a, b) => a - b);
@@ -1244,9 +1216,8 @@ export function median(...values: number[]) {
 
 /**
  * Devuelve un valor aleatorio entre 0 y otro valor
- * @param {number} maxExclusive Máximo valor; excluído del resultado. 1 por defecto
- * @param {Boolean} [round=false] Si el número debería ser redondeado hacia abajo. `true` por defecto
- * @returns 
+ * @param maxExclusive Máximo valor; excluído del resultado. 1 por defecto
+ * @param [round=false] Si el número debería ser redondeado hacia abajo. `true` por defecto
  */
 export function rand(maxExclusive: number, round: boolean = true) {
     maxExclusive = +maxExclusive;
@@ -1258,10 +1229,9 @@ export function rand(maxExclusive: number, round: boolean = true) {
 
 /**
  * Devuelve un valor aleatorio dentro de un rango entre 2 valores
- * @param {number} minInclusive Mínimo valor; puede ser incluído en el resultado
- * @param {number} maxExclusive Máximo valor; excluído del resultado
- * @param {Boolean} [round=false] Si el número debería ser redondeado hacia abajo. `false` por defecto
- * @returns 
+ * @param minInclusive Mínimo valor; puede ser incluído en el resultado
+ * @param maxExclusive Máximo valor; excluído del resultado
+ * @param round Si el número debería ser redondeado hacia abajo. `false` por defecto
  */
 export function randRange(minInclusive: number, maxExclusive: number, round: boolean = true) {
     minInclusive = 1 * minInclusive;
@@ -1271,23 +1241,15 @@ export function randRange(minInclusive: number, maxExclusive: number, round: boo
     return round ? Math.floor(value) : value;
 }
 
-/**
- * Devuelve un elemento aleatorio dentro de la Array especificada
- * @template T
- * @param {Array<T>} array 
- * @returns {T} elemento
- */
-export function randInArray<T>(array: Array<T>): T {
+/**Devuelve un elemento aleatorio dentro de la Array especificada*/
+export function randInArray<T>(array: T[]): T {
     if(!array.length) return undefined;
     const randomIndex = rand(array.length);
     return array[randomIndex];
 }
 
-/**
- * @param {Array<*>} array
- * @see {@link https://stackoverflow.com/a/2450976}
- */
-export function shuffleArray(array: Array<any>) {
+/**@see {@link https://stackoverflow.com/a/2450976}*/
+export function shuffleArray(array: any[]) {
     let currentIndex = array.length;
     
     while(currentIndex !== 0) {
@@ -1330,9 +1292,9 @@ export function subdivideArray<T>(array: T[], divisionSize: number): T[][] {
  * 
  * SelectMenuInteraction `loadPageExact`
  * * `.values[0]`: página seleccionada
- * @param {string} commandFilename Nombre del archivo de comando
- * @param {number} page Número de página actual
- * @param {number} lastPage Número de última página
+ * @param commandFilename Nombre del archivo de comando
+ * @param page Número de página actual
+ * @param lastPage Número de última página
  */
 export function navigationRows(commandFilename: string, page: number, lastPage: number) {
     const backward = (page > 0) ? (page - 1) : lastPage;
@@ -1405,10 +1367,9 @@ interface ImproveNumberOptions {
     minDigits?: number;
 }
 /**
- * @function
- * @param {number | string} num El número a mejorarle la visibilidad
- * @param {ImproveNumberOptions} [options] Opciones para mejorar el número
- * @returns {string}
+ * @pure
+ * @param num El número a mejorarle la visibilidad
+ * @param options Opciones para mejorar el número
  */
 export function improveNumber(num: number | string, options: ImproveNumberOptions = {}): string {
     const {
@@ -1452,6 +1413,7 @@ export function improveNumber(num: number | string, options: ImproveNumberOption
     return `${ofPrefix}${obtainShortenednumber()}${ofSuffix}`;
 }
 
+/**@pure */
 export function quantityDisplay(num: number, translator: Translator) {
     return improveNumber(num, {
         appendOf: true,
@@ -1460,6 +1422,7 @@ export function quantityDisplay(num: number, translator: Translator) {
     });
 }
 
+/**@pure */
 export function regroupText(arr: string[], sep = ',') {
     const sepRegex = new RegExp(`([\\n ]*${sep}[\\n ]*)+`, 'g');
     return arr.join(' ').replace(sepRegex, sep).split(sep).filter(a => a.length);
@@ -1511,12 +1474,14 @@ interface SmartShortenStructDefinition {
     end: string;
     dynamic: Boolean;
 }
+
 interface SmartShortenOptions {
     max: number;
     hardMax: number;
     suspensor: string;
-    structs: Array<SmartShortenStructDefinition>;
+    structs: SmartShortenStructDefinition[];
 }
+
 /**
  * @description
  * Limita un string a una cantidad definida de caracteres de forma inteligente (no recorta palabras ni estructuras).
@@ -1545,13 +1510,9 @@ export function shortenTextSmart(text: string, options: Partial<SmartShortenOpti
 export const toCapitalized = (text) => `${text.slice(0, 1).toUpperCase()}${text.slice(1)}`;
 
 interface LowerCaseNormalizationOptions {
-    removeCarriageReturns?: Boolean;
+    removeCarriageReturns?: boolean;
 }
-/**
- * @param {string} text
- * @param {LowerCaseNormalizationOptions} options
- * @returns {string}
- */
+
 export function toLowerCaseNormalized(/** @type {string}*/ text: string, options: LowerCaseNormalizationOptions = null): string {
     options ??= {};
     options.removeCarriageReturns ??= false;
@@ -1587,7 +1548,7 @@ export function levenshteinDistance(a: string, b: string): number {
     for(let j = 1; j < n; j++)
         distance[0][j] = j;
 
-    let cost;
+    let cost: number;
     for(let i = 1; i < m; i++)
         for(let j = 1; j < n; j++) {
             cost = a.at(i - 1) === b.at(j - 1) ? 0 : 1;
@@ -1603,10 +1564,8 @@ export function levenshteinDistance(a: string, b: string): number {
 }
 
 /**
+ * @description
  * Calcula la distancia entre dos strings con el algoritmo de distancia Damerau-Levenshtein + peso Euclideano según distancia entre teclas del teclado
- * @param {string} a 
- * @param {string} b 
- * @returns {number}
  */
 export function edlDistance(a: string, b: string): number {
     const keyboardKeys = [
@@ -1629,7 +1588,7 @@ export function edlDistance(a: string, b: string): number {
     ];
 
     const keyboardCartesians = {};
-    function assignToPlane(x, y, c) {
+    function assignToPlane(x: number, y: number, c: string) {
         if(c == undefined) return;
         keyboardCartesians[c] = { x, y };
     }
@@ -1657,7 +1616,7 @@ export function edlDistance(a: string, b: string): number {
     let distance = (new Array(m)).fill(null).map((element, i) => {
         element = (new Array(n)).fill(0);
         element[0] = i;
-        return element;
+        return element as number[];
     });
     for(let j = 1; j < n; j++)
         distance[0][j] = j;
@@ -1688,11 +1647,6 @@ export function edlDistance(a: string, b: string): number {
 
 const digitsOf64 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/';
 
-/**
- * @param {number} n 
- * @param {string} s 
- * @returns {string}
- */
 export function radix10to64(n: number, s: string = ''): string {
     const newKey = n % 64;
     const remainder = Math.floor(n / 64);
@@ -1700,10 +1654,6 @@ export function radix10to64(n: number, s: string = ''): string {
     return remainder <= 0 ? stack : radix10to64(remainder, stack);
 }
 
-/**
- * @param {string} s 
- * @returns {number}
- */
 export function radix64to10(s: string): number {
     const digits = s.split('');
     let result = 0;
