@@ -10,7 +10,7 @@ import { Command } from '../commands/Commons/cmdBuilder';
 import { CommandFlagExpressive, CommandOptionSolver, CommandParam } from '../commands/Commons/cmdOpts';
 import { noDataBase } from '../data/globalProps';
 
-export async function onInteraction(interaction: Interaction, client: Client) {
+export async function onInteraction(interaction: Interaction) {
     if(!interaction.inCachedGuild())
         return handleBlockedInteraction(interaction).catch(console.error);
 
@@ -27,10 +27,10 @@ export async function onInteraction(interaction: Interaction, client: Client) {
     auditRequest(interaction);
 
     if(interaction.isChatInputCommand())
-        return handleCommand(interaction, client, stats);
+        return handleCommand(interaction, stats);
 
     if(interaction.isContextMenuCommand())
-        return handleAction(interaction, client, stats);
+        return handleAction(interaction, stats);
 
     if(interaction.isButton() || interaction.isStringSelectMenu() || interaction.isModalSubmit())
         return handleComponent(interaction);
@@ -38,7 +38,7 @@ export async function onInteraction(interaction: Interaction, client: Client) {
     return handleUnknownInteraction(interaction);
 }
 
-async function handleCommand(interaction: ChatInputCommandInteraction<'cached'>, client: Client, stats: import('../models/stats.js').StatsDocument) {
+async function handleCommand(interaction: ChatInputCommandInteraction<'cached'>, stats: import('../models/stats.js').StatsDocument) {
     const { commandName } = interaction;
     const slash = puré.slash.get(commandName) ?? puré.slashSaki.get(commandName);
     if(!slash) return;
@@ -105,7 +105,7 @@ async function handleCommand(interaction: ChatInputCommandInteraction<'cached'>,
     return stats.save();
 }
 
-async function handleAction(interaction: ContextMenuCommandInteraction<'cached'>, client: Client, stats: import('../models/stats.js').StatsDocument) {
+async function handleAction(interaction: ContextMenuCommandInteraction<'cached'>, stats: import('../models/stats.js').StatsDocument) {
     const { commandName } = interaction;
 
     const contextMenu = puré.contextMenu.get(commandName);

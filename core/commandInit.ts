@@ -4,7 +4,6 @@ import { readdirSync } from 'fs';
 import { Command } from '../commands/Commons/cmdBuilder';
 import { ContextMenuAction } from '../actions/Commons/actionBuilder';
 import { BaseParamType, CommandOptions } from '../commands/Commons/cmdOpts';
-import { commandFilenames } from '../commands/Commons';
 
 export type AnySlashCommandOption = import('discord.js').SlashCommandBooleanOption |
     import('discord.js').SlashCommandChannelOption |
@@ -122,13 +121,11 @@ export const puré = {
     contextMenu: new Collection<string, RESTPostAPIContextMenuApplicationCommandsJSONBody>(),
 };
 
-export function registerCommandFiles(log: boolean = false) {
+export function registerCommands(commands: Command[], log: boolean = false) {
     /**@type {{ name: string, flags: string, tieneEmote: string, tieneMod: string }[]}*/
     const commandTableStack: { name: string; flags: string; tieneEmote: string; tieneMod: string; }[] = [];
     
-    for(const file of commandFilenames) {
-        const commandModule = require(`../commands/Instances/${file}`);
-        const command: Command = commandModule instanceof Command ? commandModule : commandModule.default;
+    for(const command of commands) {
         puré.commands.set(command.name, command);
 
         log && commandTableStack.push({

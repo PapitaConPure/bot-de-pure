@@ -1,7 +1,8 @@
 import { Collection, GuildTextBasedChannel, REST, RESTPostAPIApplicationCommandsJSONBody, RESTPostAPIChatInputApplicationCommandsJSONBody } from 'discord.js';
 import { Routes } from 'discord-api-types/v9';
 
-import { puré } from '../core/commandInit';
+import { puré, registerCommands } from '../core/commandInit';
+import { fetchCommandsFromFiles } from '../commands/Commons';
 
 import { set, connect } from 'mongoose';
 import PrefixPairs from '../models/prefixpair';
@@ -39,6 +40,11 @@ const logOptions = {
 export async function onStartup(client: import('discord.js').Client) {
 	const confirm = () => console.log(chalk.green('Hecho.'));
 	globalConfigs.maintenance = '1';
+
+	console.log(chalk.bold.magentaBright('Procesando archivos de comando...'));
+	const commands = await fetchCommandsFromFiles();
+	registerCommands(commands, false);
+	confirm();
 
 	if(remoteStartup)
 		console.log(chalk.redBright.bold('Se inicializará para un entorno de producción'));
