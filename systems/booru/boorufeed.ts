@@ -410,7 +410,3 @@ export class BooruFeed {
         return this.channel.nsfw;
     }
 }
-
-module.exports = {
-    feedTagSuscriptionsCache,
-};

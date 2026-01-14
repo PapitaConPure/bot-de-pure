@@ -131,7 +131,7 @@ const command = new Command('tarjeta', tags)
 			.map(ch => args.flagIf(ch, ch))
 			.filter(ch => ch);
 
-		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda ${module.exports.name}\` para más información`;
+		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda ${command.name}\` para más información`;
 		if(request.isMessage && args.count < 3) return request.reply(`⚠️ Debes ingresar al menos el juego completado, la dificultad y la calidad de supervivencia.\n${helpstr}`);
 
 		const bg = backgrounds.find(b => b.aliases.includes(args.getString('juego')?.toLowerCase()));
