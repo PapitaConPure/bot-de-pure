@@ -25,7 +25,7 @@ const AnarchyUserSkillSubschema = new Schema({
     exclamation: { type: Number },
     a: { type: Number },
     ultimate: { type: Number },
-});
+}, { _id: false });
 
 const AnarchyUserSchema = new Schema({
     userId: { type: String },
