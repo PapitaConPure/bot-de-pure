@@ -1,41 +1,44 @@
-const { tenshiColor } = require('../../data/globalProps');
-const { saki } = require('../../data/sakiProps');
-const userIds = require('../../data/userIds.json');
-const Saki = require('../../models/saki.js').default;
-const { default: axios } = require('axios');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors } = require('discord.js');
-const { p_pure } = require('../../utils/prefixes.js');
-const { CommandTags, Command, CommandOptions, CommandParam } = require('../Commons/');
-const { auditError } = require('../../systems/others/auditor.js');
-const { colorsRow } = require('../../data/sakiProps.js');
-const { subdivideArray, isBoosting, stringHexToNumber } = require('../../func.js');
-const { makeStringSelectMenuRowBuilder, makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts.js');
+import { CommandTags, Command, CommandOptions, CommandParam } from '../Commons/';
+import { tenshiColor } from '../../data/globalProps';
+import { saki } from '../../data/sakiProps';
+import userIds from '../../data/userIds.json';
+import Saki from '../../models/saki.js';
+import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors } from 'discord.js';
+import { p_pure } from '../../utils/prefixes.js';
+import { auditError } from '../../systems/others/auditor.js';
+import { colorsRow } from '../../data/sakiProps.js';
+import { subdivideArray, isBoosting, stringHexToNumber } from '../../func.js';
+import { makeStringSelectMenuRowBuilder, makeButtonRowBuilder, makeTextInputRowBuilder } from '../../utils/tsCasts.js';
+import { SakiDocument } from '../../models/saki';
+import axios from 'axios';
 
-/**
- * @typedef {{ id: string; label: string; emote: string; }} RoleData
- * @typedef {RoleData[] | RoleData[][]} RoleDataPool
- * @typedef {'GAMES' | 'DRINKS' | 'FAITH'} CategoryIndex
- * @typedef {{ functionName: string; rolePool: RoleData[]; exclusive: boolean; }} CategoryContent
- * @typedef {Record<CategoryIndex, CategoryContent>} CategoryMap
- */
+type RoleData = {
+	id: string;
+	label: string;
+	emote: string;
+};
 
-/**
- * 
- * @param {import('discord.js').GuildMember} member 
- * @param {CategoryMap} categories 
- * @param {CategoryIndex} category 
- * @param {number | null} [section] 
- * @param {boolean} [exclusive] 
- * @param {string} [removeAllLabel] 
- * @returns 
- */
-function getAutoRoleRows(member, categories, category, section = null, exclusive = false, removeAllLabel = 'Quitarse todos de página') {
+type CategoryIndex = 
+	| 'GAMES'
+	| 'DRINKS'
+	| 'FAITH';
+
+type CategoryContent = {
+	functionName: string;
+	rolePool: RoleData[];
+	exclusive: boolean;
+};
+
+type CategoryMap = Record<CategoryIndex, CategoryContent>;
+
+function getAutoRoleRows(member: import('discord.js').GuildMember, categories: CategoryMap, category: CategoryIndex, section: number | null = null, exclusive: boolean = false, removeAllLabel: string = 'Quitarse todos de página') {
 	if(!section || isNaN(section))
 		section = 0;
 
 	const rolePool = subdivideArray(categories[category].rolePool, 5);
 	const pageRoles = rolePool[section];
 	const rows = [];
+
 	if(pageRoles.length)
 		rows.push(
 			makeButtonRowBuilder().addComponents(pageRoles.map(role => {
@@ -54,6 +57,7 @@ function getAutoRoleRows(member, categories, category, section = null, exclusive
 					.setStyle(ButtonStyle.Secondary);
 			})),
 		);
+
 	rows.push(
 		makeButtonRowBuilder().addComponents([
 			new ButtonBuilder()
@@ -67,12 +71,7 @@ function getAutoRoleRows(member, categories, category, section = null, exclusive
 	return rows;
 };
 
-/**
- * @param {CategoryMap} categories
- * @param {CategoryIndex} categoryName
- * @param {number} [section] 
- */
-const getPaginationControls = (categories, categoryName, section = 0) => {
+const getPaginationControls = (categories: CategoryMap, categoryName: CategoryIndex, section: number = 0) => {
 	const category = categories[categoryName];
 	const rolePool = subdivideArray(category.rolePool, 5);
 	if(rolePool.length < 2) return [];
@@ -81,7 +80,7 @@ const getPaginationControls = (categories, categoryName, section = 0) => {
 	const nextPage = section > 0 ? (section - 1) : (rolePool.length - 1)
 	const prevPage = section < (rolePool.length - 1) ? (section + 1) : 0;
 	return [
-		makeButtonRowBuilder().addComponents([
+		new ActionRowBuilder<ButtonBuilder>().addComponents([
 			new ButtonBuilder()
 				.setCustomId(`roles_${functionName}_${nextPage}_1`)
 				.setEmoji('934430008343158844')
@@ -98,7 +97,7 @@ const getPaginationControls = (categories, categoryName, section = 0) => {
  * @param {import('discord.js').GuildMember} member 
  * @param {CategoryIndex} category 
  */
-const getEditButtonRow = (member, category) => {
+const getEditButtonRow = (member: import('discord.js').GuildMember, category: CategoryIndex) => {
 	if(!member.permissions.has('ManageRoles'))
 		return [];
 
@@ -131,8 +130,8 @@ const command = new Command('roles', flags)
 		const role = args.getRole('búsqueda', true);
 
 		if(role) {
-			const houraiDB = /**@type {import('../../models/saki.js').SakiDocument}*/((await Saki.findOne({})) || new Saki({}));
-			const mentionRoles = /**@type {CategoryMap}*/(houraiDB.mentionRoles);
+			const sakiDB: SakiDocument = ((await Saki.findOne({})) || new Saki({}));
+			const mentionRoles = sakiDB.mentionRoles as CategoryMap;
 
 			const roleFound = Object.values(mentionRoles).some(category => category.rolePool.some(roleItem => {
 				if(Array.isArray(roleItem))
@@ -348,7 +347,7 @@ const command = new Command('roles', flags)
 		
 		const section = parseInt(sectionNumber);
 		const houraiDB = (await Saki.findOne({})) || new Saki({});
-		const mentionRoles = /**@type {CategoryMap}*/(houraiDB.mentionRoles);
+		const mentionRoles = houraiDB.mentionRoles as CategoryMap;
 		const messageActions = {
 			embeds: [
 				new EmbedBuilder()
@@ -375,7 +374,7 @@ const command = new Command('roles', flags)
 		
 		const section = parseInt(sectionNumber);
 		const houraiDB = (await Saki.findOne({})) || new Saki({});
-		const mentionRoles = /**@type {CategoryMap}*/(houraiDB.mentionRoles);
+		const mentionRoles = houraiDB.mentionRoles as CategoryMap;
 		const messageActions = {
 			embeds: [
 				new EmbedBuilder()
@@ -396,7 +395,7 @@ const command = new Command('roles', flags)
 	.setSelectMenuResponse(async function selectReligion(interaction, sectionNumber) {
 		const section = parseInt(sectionNumber);
 		const houraiDB = (await Saki.findOne({})) || new Saki({});
-		const mentionRoles = /**@type {CategoryMap}*/(houraiDB.mentionRoles);
+		const mentionRoles = houraiDB.mentionRoles as CategoryMap;
 
 		return interaction.reply({
 			embeds: [
@@ -625,7 +624,7 @@ const command = new Command('roles', flags)
 	})
 	.setButtonResponse(async function customRoleWizard(interaction, roleId) {
 		/**@type {import('discord.js').Role}*/
-		const customRole = interaction.member.roles.cache.get(roleId);
+		const customRole: import('discord.js').Role = interaction.member.roles.cache.get(roleId);
 		if(!customRole)
 			return interaction.update({
 				content: `⚠️ No se encontró tu Rol Personalizado. Prueba usando \`${p_pure(interaction.guildId).raw}roles\` una vez más para crear uno nuevo`,
@@ -671,7 +670,7 @@ const command = new Command('roles', flags)
 	})
 	.setModalResponse(async function applyCustomRoleChanges(interaction, roleId) {
 		/**@type {import('discord.js').Role}*/
-		const customRole = interaction.member.roles.cache.get(roleId);
+		const customRole: import('discord.js').Role = interaction.member.roles.cache.get(roleId);
 		if(!customRole) return interaction.reply({ content: '⚠️ No se encontró el rol personalizado. Intenta crearlo otra vez', ephemeral: true });
 		const roleName = interaction.fields.getTextInputValue('nameInput');
 		let roleColor = interaction.fields.getTextInputValue('colorInput');
@@ -716,7 +715,7 @@ const command = new Command('roles', flags)
 			}
 		}
 
-		replyStack.push('✅ Edición de Rol Personalizado finalizada')
+		replyStack.push('✅ Edición de Rol Personalizado finalizada');
 
 		await Promise.all([
 			interaction.deferReply({ ephemeral: true }),
@@ -725,4 +724,4 @@ const command = new Command('roles', flags)
 		interaction.editReply({ content: replyStack.join('\n') });
 	});
 
-module.exports = command;
+export default command;
