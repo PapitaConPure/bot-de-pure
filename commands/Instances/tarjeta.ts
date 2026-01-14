@@ -1,14 +1,10 @@
-const Canvas = require('@napi-rs/canvas');
-const { CommandOptions, CommandTags, Command } = require('../Commons/');
-const { p_pure } = require('../../utils/prefixes');
-const { AttachmentBuilder } = require('discord.js');
-const { improveNumber } = require('../../func');
+import Canvas from '@napi-rs/canvas';
+import { CommandOptions, CommandTags, Command, CommandParam, CommandFlag } from '../Commons';
+import { p_pure } from '../../utils/prefixes';
+import { AttachmentBuilder } from 'discord.js';
+import { improveNumber } from '../../func';
 
-/**
- * @param {String} url 
- * @param {Array<String>} aliases 
- */
-const asset = (url, aliases) => ({ url, aliases });
+const asset = (url: string, aliases: string[]) => ({ url, aliases });
 
 const backgrounds = [						  //Nº		Título		Subtítulo
 	asset('https://i.imgur.com/oH8TyAc.png', [ '01', 	'hrtp',		'reiiden',		]),
@@ -53,17 +49,71 @@ const highlights = {
 	],
 };
 
-const flags = new CommandTags().add('COMMON');
 const options = new CommandOptions()
-	.addParam('juego', 		['TEXT','NUMBER'], 												'para elegir el juego')
-	.addParam('dificultad', 'TEXT', 														'para establecer la dificultad jugada')
-	.addParam('survival', 	{ name: 'calidad', expression: '"clear", "1cc" o "nomiss"' }, 	'para establecer la calidad de supervivencia')
-	.addParam('puntaje',	'NUMBER', 														'para establecer el puntaje')
-	.addParam('fecha', 		{ name: 'fecha', expression: 'DD/MM/AAAA' }, 					'para establecer la fecha')
-	.addFlag('b', 			['nobomb','nb'], 												'para especificar que se logró sin usar bombas')
-	.addFlag(['s','c'], 	['nospecial','ns','noc'], 										'para especificar que se logró sin usar la tecla C')
-	.addFlag('p', 			['pacifista', 'pacifist'],										'para especificar que se logró sin realizar daño');
-const command = new Command('tarjeta', flags)
+	.addOptions(
+		new CommandParam('juego', [ 'TEXT', 'NUMBER' ])
+			.setDesc('para elegir el juego')
+			.setAutocomplete((interaction) => {
+				return interaction.respond(
+					backgrounds
+						.flatMap(background =>
+							background.aliases.map(alias => ({
+								name: alias,
+								value: alias,
+							}))
+						)
+						.slice(0, 10)
+				);
+			}),
+		new CommandParam('dificultad', 'TEXT')
+			.setDesc('para establecer la dificultad jugada')
+			.setAutocomplete((interaction) => {
+				return interaction.respond(
+					highlights.difficulty
+						.flatMap(difficulty =>
+							difficulty.aliases.map(alias => ({
+								name: alias,
+								value: alias,
+							}))
+						)
+						.slice(0, 10)
+				);
+			}),
+		new CommandParam('survival', { name: 'calidad', expression: '"clear", "1cc" o "nomiss"' })
+			.setDesc('para indicar logros de de supervivencia')
+			.setAutocomplete((interaction) => {
+				return interaction.respond(
+					highlights.difficulty
+						.flatMap(difficulty =>
+							difficulty.aliases.map(alias => ({
+								name: alias,
+								value: alias,
+							}))
+						)
+						.slice(0, 10)
+				);
+			}),
+		new CommandParam('puntaje', 'NUMBER')
+			.setDesc('para establecer el puntaje'),
+		new CommandParam('fecha', 'DATE')
+			.setDesc('para establecer la fecha'),
+		new CommandFlag()
+			.setShort('b')
+			.setLong(['nobomb', 'nb'])
+			.setDesc('para especificar que se logró sin usar bombas'),
+		new CommandFlag()
+			.setShort('sc')
+			.setLong(['nospecial','ns','noc'])
+			.setDesc('para especificar que se logró sin usar las teclas C o D'),
+		new CommandFlag()
+			.setShort('p')
+			.setLong(['pacifista', 'pacifist'])
+			.setDesc('para especificar que se logró sin realizar daño'),
+	);
+
+const tags = new CommandTags().add('COMMON');
+
+const command = new Command('tarjeta', tags)
 	.setAliases('logro', 'achievement')
 	.setBriefDescription('Para crear una tarjeta de logro personal. Imágenes por WMX#7937')
 	.setLongDescription(
@@ -96,8 +146,7 @@ const command = new Command('tarjeta', flags)
 		const score = improveNumber(args.getNumber('puntaje'), { minDigits: 10 });
 		if(!score || +score >= Math.pow(10, 12)) return request.reply(`⚠️ Debes ingresar un puntaje final válido.\n${helpstr}`);
 
-		/**@type {String}*/
-		let dateStr = request.isInteraction ? args.getString('fecha') : /**@type {Array<string>}*/(args.args).slice(4).join('');
+		let dateStr: string = request.isInteraction ? args.getString('fecha') : (args.args as string[]).slice(4).join('');
 		if(request.isMessage && !dateStr.length)
 			return request.reply(`⚠️ Se esperaba una fecha luego del puntaje.\n${helpstr}`);
 
@@ -166,4 +215,4 @@ const command = new Command('tarjeta', flags)
 		}
 	});
 
-module.exports = command;
+export default command;

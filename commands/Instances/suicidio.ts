@@ -1,5 +1,5 @@
-const { CommandTags, Command } = require('../Commons/');
-const { saki } = require('../../data/sakiProps');
+import { CommandTags, Command } from '../Commons';
+import { saki } from '../../data/sakiProps';
 
 const hd = saki.hangedRoleId; //Hanged Doll
 
@@ -23,4 +23,4 @@ const command = new Command('suicidio', flags)
 		return request.reply({ content: 'Shanghai Shanghai Shanghai Shanghai\nHourai Hourai Hourai Hourai' });
 	});
 
-module.exports = command;
+export default command;

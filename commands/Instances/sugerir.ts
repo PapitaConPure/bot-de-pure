@@ -1,5 +1,5 @@
 import Discord from 'discord.js';
-import { CommandTags, Command } from '../Commons/';
+import { CommandTags, Command } from '../Commons';
 import { tenshiColor, reportFormUrl } from '../../data/globalProps';
 
 const tags = new CommandTags().add('COMMON');
