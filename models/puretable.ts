@@ -12,7 +12,7 @@ const PuretableSchema = new Schema({
     },
 });
 
-const AUserSkillSubschema = new Schema({
+const AnarchyUserSkillSubschema = new Schema({
     hline: { type: Number, default: 1 },
     vline: { type: Number, default: 1 },
     x: { type: Number, default: 1 },
@@ -27,18 +27,18 @@ const AUserSkillSubschema = new Schema({
     ultimate: { type: Number },
 });
 
-const AUserSchema = new Schema({
+const AnarchyUserSchema = new Schema({
     userId: { type: String },
     last: { type: Number, default: 0 },
     exp: { type: Number, default: 0 },
-    skills: AUserSkillSubschema,
+    skills: AnarchyUserSkillSubschema,
 });
 
 export const PureTable = model('PureTable', PuretableSchema);
-export const AnarchyUser = model('AUser', AUserSchema);
+export const AnarchyUser = model('AnarchyUser', AnarchyUserSchema);
 
 function ptm() { return new PureTable({}); }
 export type PureTableDocument = ReturnType<(typeof ptm)>;
 
 function aum() { return new AnarchyUser({}); }
-export type AUserDocument = ReturnType<(typeof aum)>;
+export type AnarchyUserDocument = ReturnType<(typeof aum)>;

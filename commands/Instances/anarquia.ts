@@ -1,7 +1,7 @@
 import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons/';
 import { makeWeightedDecision, compressId, decompressId, improveNumber, emojiRegex } from '../../func';
 import { EmbedBuilder, AttachmentBuilder, StringSelectMenuBuilder, Colors, ButtonBuilder, ButtonStyle, ActionRowBuilder, StringSelectMenuInteraction, MessageFlags } from 'discord.js';
-import { PureTable, AnarchyUser, pureTableAssets, AUserDocument } from '../../models/puretable';
+import { PureTable, AnarchyUser, pureTableAssets, AnarchyUserDocument } from '../../models/puretable';
 import { createTaskScheduler } from '../../utils/concurrency';
 import { ComplexCommandRequest } from '../Commons/typings';
 import { createCanvas, loadImage } from '@napi-rs/canvas';
@@ -498,7 +498,7 @@ async function loadEmoteIfNotLoaded(request: ComplexCommandRequest | StringSelec
 	return true;
 }
 
-async function makeSkillSelectReply(request: ComplexCommandRequest, translator: Translator, auser:  AUserDocument, position: [number, number], emoteId: string) {
+async function makeSkillSelectReply(request: ComplexCommandRequest, translator: Translator, auser:  AnarchyUserDocument, position: [number, number], emoteId: string) {
 	const userId = request.user.id;
 	const authorId = compressId(userId);
 	const [ x, y ] = position;
@@ -570,7 +570,7 @@ async function drawPureTable(cells: string[][]) {
  * @description
  * Sube de nivel al jugador, da la posibilidad de que obtenga habilidades especiales, NO GUARDA el documento
  */
-function levelUpAndGetSkills(auser: AUserDocument) {
+function levelUpAndGetSkills(auser: AnarchyUserDocument) {
 	const userLevel = calcUserLevel(auser);
 	const dropRate = calcDropRate(userLevel);
 
@@ -591,7 +591,7 @@ function levelUpAndGetSkills(auser: AUserDocument) {
 	};
 }
 
-function calcUserLevel(auser: AUserDocument) {
+function calcUserLevel(auser: AnarchyUserDocument) {
 	return Math.floor(auser.exp / maxExp) + 1;
 }
 
