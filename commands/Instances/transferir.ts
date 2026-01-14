@@ -7,7 +7,7 @@ import UserConfigs from '../../models/userconfigs';
 import { EmbedBuilder } from 'discord.js';
 import { Translator } from '../../i18n';
 
-const transferLocks = new Set();
+const transferLocks = new Set<string>();
 
 const options = new CommandOptions()
     .addParam('monto', 'NUMBER', 'para especificar el monto a pagar en PRC')
