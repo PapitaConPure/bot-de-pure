@@ -1,44 +1,30 @@
 const Logger = require('../utils/logs').default;
 const { debug, info, error } = Logger('WARN', 'GRK');
 
-/**
- * @type {{
- *      members: Map<string, Date>,
- * }}
- */
-const fetchRegistry = {
+const fetchRegistry: {
+    members: Map<string, Date>;
+} = {
     members: new Map()
 };
 
-/**
- * @type {{
- *      client?: import('discord.js').Client,
- * }}
- */
-const GuildRateKeeper = {
+const GuildRateKeeper: {
+    client?: import('discord.js').Client;
+} = {
     client: null,
 };
 
-/**
- * @typedef {Object} GuildRateKeeperSetupOptions
- * @property {import('discord.js').Client} client 
- * 
- * @param {GuildRateKeeperSetupOptions} setupOptions
- */
-function setupGuildRateKeeper({ client }) {
+interface GuildRateKeeperSetupOptions {
+    client: import('discord.js').Client;
+}
+
+export function setupGuildRateKeeper({ client }: GuildRateKeeperSetupOptions) {
     GuildRateKeeper.client = client;
 }
 
-/**
- * @typedef {import('discord.js').Guild | string} GuildResolvable
- */
+type GuildResolvable = import('discord.js').Guild | string;
 
-/**
- * Refresca la caché de miembros del servidor indicado, si es que no ha sido refrescada en un tiempo
- * @param {GuildResolvable} target 
- * @param {{ withPresences?: boolean }} [fetchOptions]
- */
-async function fetchGuildMembers(target, fetchOptions = {}) {
+/**@description Refresca la caché de miembros del servidor indicado, si es que no ha sido refrescada en un tiempo.*/
+export async function fetchGuildMembers(target: GuildResolvable, fetchOptions: { withPresences?: boolean; } = {}) {
     const { withPresences = false } = fetchOptions;
     const guild = await resolveGuild(target);
     const guildId = guild.id;
@@ -62,7 +48,7 @@ async function fetchGuildMembers(target, fetchOptions = {}) {
     }
 }
 
-async function fetchAllGuildMembers() {
+export async function fetchAllGuildMembers(): Promise<void[]> {
     info('Attempting to fetch all guild members on all guilds...');
 
     try {
@@ -73,19 +59,10 @@ async function fetchAllGuildMembers() {
     }
 }
 
-/**
- * Resuelve un {@link GuildResolvable}
- * @param {GuildResolvable} data 
- */
-async function resolveGuild(data) {
+/**@description Resuelve un {@link GuildResolvable}.*/
+async function resolveGuild(data: GuildResolvable) {
     if(typeof data === 'string')
         return GuildRateKeeper.client.guilds.fetch(data);
 
     return data;
 }
-
-module.exports = {
-    setupGuildRateKeeper,
-    fetchGuildMembers,
-    fetchAllGuildMembers,
-};
