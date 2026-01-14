@@ -1,9 +1,9 @@
-const { ButtonBuilder, ButtonStyle } = require('discord.js'); //Integrar discord.js
-const { CommandTags, Command } = require('../Commons/');
-const { Translator } = require('../../i18n');
-const { useMainPlayer } = require('discord-player');
-const { tryRecoverSavedTracksQueue } = require('../../models/playerQueue.js');
-const { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/others/musicPlayer.js');
+import { ButtonBuilder, ButtonStyle } from 'discord.js';
+import { CommandTags, Command } from '../Commons/';
+import { Translator } from '../../i18n';
+import { useMainPlayer } from 'discord-player';
+import { tryRecoverSavedTracksQueue } from '../../models/playerQueue';
+import { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } from '../../systems/others/musicPlayer';
 
 const tags = new CommandTags().add(
 	'COMMON',
@@ -57,7 +57,7 @@ const command = new Command('resumir', tags)
 					.setTitle(translator.getText('resumirTitleNoTrack'));
 				return request.editReply({ embeds: [ embed ], ephemeral: true });
 			}
-			
+
 			const service = SERVICES[trackToPlay.source];
 			const embed = makePuréMusicEmbed(request, service.color, service.iconUrl, [ queueInfo ])
 				.setTitle(translator.getText('resumirTitleResumed'))
@@ -71,7 +71,7 @@ const command = new Command('resumir', tags)
 		const embed = makePuréMusicEmbed(request, service.color, service.iconUrl, [ queueInfo ])
 			.setDescription(`[${currentTrack.title}](${currentTrack.url})`)
 			.setThumbnail(currentTrack.thumbnail);
-		
+
 		if(!queue.node.isPaused() && queue.node.isPlaying()) {
 			embed.setTitle(translator.getText('resumirTitleTrackAlreadyResumed'));
 			return request.editReply({ embeds: [ embed ], ephemeral: true });
@@ -85,4 +85,4 @@ const command = new Command('resumir', tags)
 		return request.editReply({ embeds: [ embed ] });
 	});
 
-module.exports = command;
+export default command;
