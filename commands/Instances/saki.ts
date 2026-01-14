@@ -1,7 +1,7 @@
-const { CommandTags, Command, CommandOptions } = require('../Commons/');
-const { saki } = require('../../data/sakiProps');
-const Saki = require('../../models/saki.js').default;
-const { CommandPermissions } = require('../Commons/cmdPerms.js');
+import { CommandTags, Command, CommandOptions } from '../Commons/';
+import { CommandPermissions } from '../Commons/cmdPerms.js';
+import { saki } from '../../data/sakiProps';
+import Saki from '../../models/saki.js';
 
 let crazyBackupId = saki.crazyBackupChannelId;
 
@@ -43,15 +43,7 @@ function recibirEstado(texto) {
     return 0;
 }
 
-/**
- * 
- * @param {import("../../models/saki.js").SakiDocument} dbDoc 
- * @param {string[]} appliedList 
- * @param {string} prompt 
- * @param {string} configId 
- * @param {string} displayText 
- */
-function procesarConfig(dbDoc, appliedList, prompt, configId, displayText) {
+function procesarConfig(dbDoc: import("../../models/saki.js").SakiDocument, appliedList: string[], prompt: string, configId: string, displayText: string) {
     if(!prompt)
         return true;
     
@@ -71,12 +63,15 @@ function procesarConfig(dbDoc, appliedList, prompt, configId, displayText) {
 const tip = '⚠️ Estado inválido. Ingresa "Activado", "Desactivado" o similares para cambiar una configuración';
 
 const perms = CommandPermissions.adminOnly();
+
 const options = new CommandOptions()
     .addFlag([], 'bienvenida', 'Para habilitar o deshabilitar la bienvenida por completo', { name: 'estado', type: 'TEXT' })
     .addFlag([], 'despedida', 'Para habilitar o deshabilitar la bienvenida por completo', { name: 'estado', type: 'TEXT' })
     .addFlag([], 'ping', 'Para habilitar o deshabilitar el ping de bienvenida', { name: 'estado', type: 'TEXT' });
-const flags = new CommandTags().add('MOD', 'SAKI');
-const command = new Command('saki', flags)
+
+const tags = new CommandTags().add('MOD', 'SAKI');
+
+const command = new Command('saki', tags)
 	.setAliases(
 		'sakiscans',
 		'configsaki', 'sakiconfig'
@@ -119,4 +114,4 @@ const command = new Command('saki', flags)
         });
 	});
 
-module.exports = command;
+export default command;

@@ -1,9 +1,9 @@
-const { Colors } = require('discord.js'); //Integrar discord.js
-const { CommandTags, Command } = require('../Commons/');
-const { useMainPlayer } = require('discord-player');
-const { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/others/musicPlayer.js');
-const { Translator } = require('../../i18n');
-const { tryRecoverSavedTracksQueue } = require('../../models/playerQueue.js');
+import { CommandTags, Command } from '../Commons/';
+import { Colors, MessageFlags } from 'discord.js';
+import { useMainPlayer } from 'discord-player';
+import { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } from '../../systems/others/musicPlayer.js';
+import { tryRecoverSavedTracksQueue } from '../../models/playerQueue.js';
+import { Translator } from '../../i18n';
 
 const tags = new CommandTags().add(
 	'COMMON',
@@ -26,17 +26,26 @@ const command = new Command('saltar', tags)
 		try {
 			const channel = request.member.voice?.channel;
 			if(!channel)
-				return request.reply({ content: translator.getText('voiceExpected'), ephemeral: true });
+				return request.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('voiceExpected'),
+				});
 	
 			if(isPlayerUnavailable(channel))
-				return request.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
+				return request.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('voiceSameChannelExpected'),
+				});
 	
 			const player = useMainPlayer();
 			const queue = player.queues.get(request.guildId) ?? (await tryRecoverSavedTracksQueue(request));
 			if(!queue?.currentTrack) {
 				const embed = makePuréMusicEmbed(request)
 					.setTitle(translator.getText('queueSkipTitleNoTrack'));
-				return request.reply({ embeds: [ embed ], ephemeral: true });
+				return request.reply({
+					flags: MessageFlags.Ephemeral,
+					embeds: [ embed ],
+				});
 			}
 	
 			const {
@@ -68,4 +77,4 @@ const command = new Command('saltar', tags)
 		}
 	});
 
-module.exports = command;
+export default command;
