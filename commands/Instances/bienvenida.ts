@@ -1,5 +1,5 @@
-const { CommandPermissions } = require('../Commons/cmdPerms');
-const { CommandTags, Command, CommandOptions } = require('../Commons/');
+import { CommandPermissions } from '../Commons/cmdPerms';
+import { CommandTags, Command, CommandOptions } from '../Commons/';
 
 const perms = new CommandPermissions('ManageGuild');
 
@@ -23,4 +23,4 @@ const command = new Command('bienvenida', flags)
 		request.reply('a');
 	});
 
-module.exports = command;
+export default command;

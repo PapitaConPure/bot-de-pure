@@ -1,10 +1,10 @@
-const { EmbedBuilder, Colors } = require('discord.js'); //Integrar discord.js
-const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/');
-const { Translator } = require('../../i18n');
-const { default: axios } = require('axios');
-const { Catbox } = require('node-catbox');
-const { pipeline } = require('stream/promises');
-const fs = require('fs')
+import { EmbedBuilder, Colors } from 'discord.js';
+import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons/';
+import { Translator } from '../../i18n';
+import { Catbox } from 'node-catbox';
+import { pipeline } from 'stream/promises';
+import axios from 'axios';
+import fs from 'fs';
 
 const client = new Catbox();
 
@@ -41,12 +41,11 @@ const command = new Command('catbox', tags)
 
 		let count = 1;
 
-		/**@type {Array<Promise<string?>>}*/
-		const filePaths = [];
+		const filePaths: (Promise<string | null>)[] = [];
 		for(const upload of streamUploads) {
 			const filePath = `./temp_${request.id}_${count++}.png`;
-			
-			const filePathResult = /**@type {Promise<string?>}*/(pipeline(upload.data, fs.createWriteStream(filePath))
+
+			const filePathResult: Promise<string | null> = (pipeline(upload.data, fs.createWriteStream(filePath))
 			.then(() => filePath)
 			.catch(() => null));
 
@@ -58,7 +57,7 @@ const command = new Command('catbox', tags)
 
 		const successes = [];
 		const failures = [];
-		let imageUrl;
+		let imageUrl: string;
 		count = 1;
 		for(const upload of uploads) {
 			try {
@@ -96,12 +95,11 @@ const command = new Command('catbox', tags)
 		return request.editReply({ embeds: [ ...successes, ...failures ] });
 	});
 
+export default command;
+
 class FileStreamError extends Error {
-	/**@param {string} message*/
-	constructor(message) {
+	constructor(message: string) {
 		super(message);
 		this.name = 'FileStreamError';
 	}
 }
-
-module.exports = command;

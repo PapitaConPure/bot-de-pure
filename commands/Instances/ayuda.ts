@@ -1,16 +1,16 @@
-const { EmbedBuilder, MessageFlags } = require('discord.js');
-const serverIds = require('../../data/serverIds.json');
-const userIds = require('../../data/userIds.json');
-const { tenshiColor } = require('../../data/globalProps');
-const { isNotModerator, shortenText } = require('../../func');
-const { p_pure } = require('../../utils/prefixes');
-const { commandFilenames, CommandOptions, CommandTags, Command, CommandParam } = require('../Commons/');
-const { searchCommand, searchCommands, getWikiPageComponentsV2, makeCategoriesRow, makeGuideRow } = require('../../systems/others/wiki');
+import { EmbedBuilder, MessageFlags, StringSelectMenuInteraction } from 'discord.js';
+import serverIds from '../../data/serverIds.json';
+import userIds from '../../data/userIds.json';
+import { tenshiColor } from '../../data/globalProps';
+import { isNotModerator, shortenText } from '../../func';
+import { p_pure } from '../../utils/prefixes';
+import { commandFilenames, CommandOptions, CommandTags, Command, CommandParam, CommandTagResolvable } from '../Commons';
+import { searchCommand, searchCommands, getWikiPageComponentsV2, makeCategoriesRow, makeGuideRow } from '../../systems/others/wiki';
+import { ComplexCommandRequest } from '../Commons/typings';
 
-/**@param {import('../Commons/typings').ComplexCommandRequest | import('discord.js').StringSelectMenuInteraction<'cached'>} request*/
-const makeExcludedTags = (request) => {
+const makeExcludedTags = (request: ComplexCommandRequest | StringSelectMenuInteraction<'cached'>) => {
 	/**@type {Array<import('../Commons/cmdTags').CommandTagResolvable>}*/
-	const excludedTags = [ 'GUIDE' ];
+	const excludedTags: Array<import('../Commons/cmdTags').CommandTagResolvable> = [ 'GUIDE' ];
 
 	isNotModerator(request.member) && excludedTags.push('MOD');
 	request.guildId !== serverIds.saki && excludedTags.push('SAKI');
@@ -19,7 +19,7 @@ const makeExcludedTags = (request) => {
 	return excludedTags;
 };
 
-const flags = new CommandTags().add('COMMON');
+const tags = new CommandTags().add('COMMON');
 
 const options = new CommandOptions()
 	.addOptions(
@@ -39,7 +39,7 @@ const options = new CommandOptions()
 			}),
 	);
 
-const command = new Command('ayuda', flags)
+const command = new Command('ayuda', tags)
 	.setAliases('comandos', 'acciones', 'help', 'commands', 'h')
 	.setBriefDescription('Muestra una lista de comandos o un comando en detalle')
 	.setLongDescription(
@@ -49,9 +49,10 @@ const command = new Command('ayuda', flags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const search = args.getString('comando');
 		const guildPrefix = p_pure(request.guildId).raw;
 		const helpCommand = `${guildPrefix}${command.name}`;
+		
+		const search = args.getString('comando');
 		
 		//Análisis de comandos
 		if(!search) {
@@ -113,7 +114,7 @@ const command = new Command('ayuda', flags)
 		const helpCommand = `${guildPrefix}${command.name}`;
 
 		const commands = lookupCommands({
-			tags: /**@type {Array<import('../Commons/cmdTags').CommandTagResolvable>}*/(interaction.values),
+			tags: interaction.values as CommandTagResolvable[],
 			excludedTags: makeExcludedTags(interaction),
 			context: interaction,
 		});
@@ -211,29 +212,29 @@ const command = new Command('ayuda', flags)
 		return interaction.reply({ flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2, components: components });
 	}, { userFilterIndex: 0 });
 
-/**
- * Recupera un arreglo de {@linkcode Command} según la `query` proporcionada.
- * @typedef {Object} CommandsLookupQuery
- * @property {Array<import('../Commons/cmdTags').CommandTagResolvable>} [tags]
- * @property {Array<import('../Commons/cmdTags').CommandTagResolvable>} [excludedTags]
- * @property {{ member: import('discord.js').GuildMember, channel: import('discord.js').GuildChannelResolvable }} [context]
- * 
- * @param {CommandsLookupQuery} [query]
- */
-function lookupCommands(query = {}) {
+export default command;
+
+export interface CommandsLookupQuery {
+	tags?: Array<import('../Commons/cmdTags').CommandTagResolvable>;
+	excludedTags?: Array<import('../Commons/cmdTags').CommandTagResolvable>;
+	context?: { member: import('discord.js').GuildMember; channel: import('discord.js').GuildChannelResolvable; };
+}
+	
+/**@description Recupera un arreglo de {@linkcode Command} según la `query` proporcionada.*/
+export function lookupCommands(query: CommandsLookupQuery = {}) {
 	query.tags ??= [];
 	query.excludedTags ??= [];
 	const { tags, excludedTags, context } = query;
 
 	/**@type {(command: Command) => boolean} */
-	let commandIsAllowed;
+	let commandIsAllowed: (command: Command) => boolean;
 	if(context)
 		commandIsAllowed = (command) => command.permissions?.isAllowedIn(context.member, context.channel) ?? true;
 	else
 		commandIsAllowed = () => true;
 
 	/**@type {(command: Command) => boolean} */
-	let commandMeetsCriteria;
+	let commandMeetsCriteria: (command: Command) => boolean;
 	if(tags.length && excludedTags.length)
 		commandMeetsCriteria = (command) => !excludedTags.some(tag => command.tags.has(tag)) && tags.every(tag => command.tags.has(tag));
 	else if(tags.length)
@@ -244,7 +245,7 @@ function lookupCommands(query = {}) {
 		commandMeetsCriteria = () => true;
 
 	/**@type {Array<Command>}*/
-	const commands = [];
+	const commands: Array<Command> = [];
 
 	for(const file of commandFilenames) {
 		const commandFile = require(`./${file}`);
@@ -256,5 +257,3 @@ function lookupCommands(query = {}) {
 
 	return commands;
 }
-
-module.exports = command;

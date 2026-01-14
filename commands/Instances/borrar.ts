@@ -1,20 +1,20 @@
-const { sleep, fetchUser } = require('../../func');
-const { p_pure } = require('../../utils/prefixes');
-const { CommandPermissions } = require('../Commons/cmdPerms.js');
-const { CommandOptions, CommandTags, Command } = require('../Commons/');
+import { sleep, fetchUser } from '../../func';
+import { p_pure } from '../../utils/prefixes';
+import { CommandPermissions } from '../Commons/cmdPerms.js';
+import { CommandOptions, CommandTags, Command } from '../Commons/';
+import { ComplexCommandRequest } from '../Commons/typings.js';
+import { GuildTextBasedChannel, Message, User } from 'discord.js';
 
-/**@param {import('../Commons/typings.js').ComplexCommandRequest} message*/
-function safeDelete(message) {
+async function safeDelete(message: ComplexCommandRequest) {
 	if(!message?.delete) return;
-	return message.delete().catch(() => undefined);
+	try {
+		return await message.delete();
+	} catch {
+		return undefined;
+	}
 }
 
-/**
- * @param {import('discord.js').GuildTextBasedChannel} channel
- * @param {Number} amount
- * @param {import('discord.js').User} user
- */
-async function bulkDeleteMessages(channel, amount, user) {
+async function bulkDeleteMessages(channel: GuildTextBasedChannel, amount: number, user: User) {
 	if(user == undefined)
 		return channel.bulkDelete(amount);
 	
@@ -23,11 +23,7 @@ async function bulkDeleteMessages(channel, amount, user) {
 	return channel.bulkDelete(messages.filter(msg => msg.author.id === user.id && i++ < amount));
 }
 
-/**
- * @param {import('../Commons/typings.js').ComplexCommandRequest} request 
- * @param {import('discord.js').Message} reply 
- */
-function deleteOriginalAndReply(request, reply) {
+function deleteOriginalAndReply(request: ComplexCommandRequest, reply: Message) {
 	return Promise.all([
 		safeDelete(request),
 		request.isMessage && sleep(1000 * 5).then(() => reply.delete().catch(() => undefined)),
@@ -35,10 +31,13 @@ function deleteOriginalAndReply(request, reply) {
 }
 
 const perms = new CommandPermissions('ManageMessages');
+
 const options = new CommandOptions()
 	.addParam('cantidad', 'NUMBER', 'para especificar la cantidad de mensajes a borrar (sin contar el mensaje del comando)', { optional: true })
 	.addFlag('um', ['usuario', 'miembro'], 			'para especificar de qué usuario borrar mensajes', { name: 'user', type: 'USER' });
+
 const tags = new CommandTags().add('MOD');
+
 const command = new Command('borrar', tags)
 	.setAliases(
 		'borrarmsg',
@@ -82,4 +81,4 @@ const command = new Command('borrar', tags)
 			return request.editReply({ content: '✅ Mensajes eliminados' });
 	});
 
-module.exports = command;
+export default command;
