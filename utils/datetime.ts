@@ -137,10 +137,11 @@ export function makeDateFromComponents(a: number, b: number, c: number, locale: 
  * una fecha inválida si el string estaba malformado,
  * o `undefined` si el string estaba vacío
  */
-export function parseDateFromNaturalLanguage(str: string, locale: import('../i18n').LocaleKey, sanitizedTzCode: string = 'Etc/UTC'): UTCDate {
+export function parseDateFromNaturalLanguage(str: string, locale: import('../i18n').LocaleKey, sanitizedTzCode?: string): UTCDate {
 	if(!str)
 		return;
 
+	sanitizedTzCode ??= 'Etc/UTC';
 	str = str.toLowerCase();
 
 	for(const relativeDate of Object.values(relativeDates))
