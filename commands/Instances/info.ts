@@ -1,12 +1,12 @@
-const { ChannelType, ButtonBuilder, ButtonStyle, MessageFlags, ContainerBuilder, SectionBuilder } = require('discord.js'); //Integrar discord.js
-const { fetchMember, compressId, shortenText, quantityDisplay } = require('../../func');
-const { ChannelStats, Stats } = require('../../models/stats');
-const { CommandOptions, CommandTags, Command } = require('../Commons/');
-const { makeButtonRowBuilder } = require('../../utils/tsCasts');
-const { Translator } = require('../../i18n');
-const { fetchGuildMembers } = require('../../utils/guildratekeeper');
-const { getUnixTime } = require('date-fns');
-const { globalConfigs, noDataBase } = require('../../data/globalProps');
+import { ChannelType, ButtonBuilder, ButtonStyle, MessageFlags, ContainerBuilder, SectionBuilder } from 'discord.js';
+import { fetchMember, compressId, shortenText, quantityDisplay } from '../../func';
+import { ChannelStats, Stats } from '../../models/stats';
+import { CommandOptions, CommandTags, Command } from '../Commons/';
+import { makeButtonRowBuilder } from '../../utils/tsCasts';
+import { Translator } from '../../i18n';
+import { fetchGuildMembers } from '../../utils/guildratekeeper';
+import { getUnixTime } from 'date-fns';
+import { globalConfigs, noDataBase } from '../../data/globalProps';
 
 /**
  * @param {String} requestId
@@ -178,13 +178,13 @@ const command = new Command('info', tags)
 		
 		const membersRanking = targetChannelHasMessages
 			? Object.entries(targetChannelStats.sub)
-				.sort((a, b) => b[1] - a[1])
+				.sort((a: [string, number], b: [string, number]) => b[1] - a[1])
 				.slice(0, 5)
 			: undefined;
 		
 		const formattedMembersRanking = membersRanking
 			? membersRanking
-				.map(([id, count]) => `${translator.getText('infoStatsMemberMessageCountItem', id, quantityDisplay(count, translator))}`)
+				.map(([id, count]: [string, number]) => `${translator.getText('infoStatsMemberMessageCountItem', id, quantityDisplay(count, translator))}`)
 				.join('\n')
 			: translator.getText('infoStatsChannelEmptyNotice');
 		
@@ -194,7 +194,7 @@ const command = new Command('info', tags)
 			.map(channelStats => /**@type {[String, Number]}*/([channelStats.channelId, channelStats.cnt]));
 		const formattedChannelsRanking =
 			channelsRanking
-				.map(([id, count]) => `${translator.getText('infoStatsChannelMessageCountItem', id, quantityDisplay(count, translator))}`)
+				.map(([id, count]: [string, number]) => `${translator.getText('infoStatsChannelMessageCountItem', id, quantityDisplay(count, translator))}`)
 				.join('\n');
 
 		const statsSinceUnix = getUnixTime(new Date(stats.since));
@@ -309,4 +309,4 @@ const command = new Command('info', tags)
 		});
 	});
 
-module.exports = command;
+export default command;
