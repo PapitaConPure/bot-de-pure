@@ -38,11 +38,6 @@ export async function onInteraction(interaction: Interaction, client: Client) {
     return handleUnknownInteraction(interaction);
 }
 
-/**
- {ChatInputCommandInteraction<'cached'>} interaction 
- {Client} client 
- {import('../models/stats.js').StatsDocument} stats 
- */
 async function handleCommand(interaction: ChatInputCommandInteraction<'cached'>, client: Client, stats: import('../models/stats.js').StatsDocument) {
     const { commandName } = interaction;
     const slash = puré.slash.get(commandName) ?? puré.slashSaki.get(commandName);
