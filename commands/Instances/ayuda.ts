@@ -51,16 +51,16 @@ const command = new Command('ayuda', tags)
 	.setExecution(async (request, args) => {
 		const guildPrefix = p_pure(request.guildId).raw;
 		const helpCommand = `${guildPrefix}${command.name}`;
-		
+
 		const search = args.getString('comando');
-		
+
 		//Análisis de comandos
 		if(!search) {
 			const commands = lookupCommands({
-				excludedTags: makeExcludedTags(request), 
+				excludedTags: makeExcludedTags(request),
 				context: request,
 			});
-			
+
 			//Embed de metadatos
 			const embed = new EmbedBuilder()
 				.setColor(tenshiColor)
@@ -93,7 +93,7 @@ const command = new Command('ayuda', tags)
 		}
 
 		const foundCommand = searchCommand(request, search);
-		
+
 		if(!foundCommand) {
 			const embed = new EmbedBuilder()
 				.setColor(0xe44545)
@@ -158,7 +158,7 @@ const command = new Command('ayuda', tags)
 		const helpCommand = `${guildPrefix}${command.name}`;
 
 		const foundCommand = searchCommand(interaction, search);
-		
+
 		if(!foundCommand) {
 			const embed = new EmbedBuilder()
 				.setColor(0xe44545)
@@ -195,7 +195,7 @@ const command = new Command('ayuda', tags)
 		}
 
 		const foundCommand = searchCommand(interaction, search);
-		
+
 		if(!foundCommand) {
 			const embed = new EmbedBuilder()
 				.setColor(0xe44545)
@@ -207,19 +207,18 @@ const command = new Command('ayuda', tags)
 			const components = [makeGuideRow(interaction)];
 			return interaction.update({ embeds: [embed], components });
 		}
-		
+
 		const components = getWikiPageComponentsV2(foundCommand, Command.requestize(interaction));
 		return interaction.reply({ flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2, components: components });
 	}, { userFilterIndex: 0 });
 
 export default command;
-
 export interface CommandsLookupQuery {
 	tags?: Array<import('../Commons/cmdTags').CommandTagResolvable>;
 	excludedTags?: Array<import('../Commons/cmdTags').CommandTagResolvable>;
 	context?: { member: import('discord.js').GuildMember; channel: import('discord.js').GuildChannelResolvable; };
 }
-	
+
 /**@description Recupera un arreglo de {@linkcode Command} según la `query` proporcionada.*/
 export function lookupCommands(query: CommandsLookupQuery = {}) {
 	query.tags ??= [];
@@ -233,7 +232,6 @@ export function lookupCommands(query: CommandsLookupQuery = {}) {
 	else
 		commandIsAllowed = () => true;
 
-	/**@type {(command: Command) => boolean} */
 	let commandMeetsCriteria: (command: Command) => boolean;
 	if(tags.length && excludedTags.length)
 		commandMeetsCriteria = (command) => !excludedTags.some(tag => command.tags.has(tag)) && tags.every(tag => command.tags.has(tag));
@@ -244,12 +242,11 @@ export function lookupCommands(query: CommandsLookupQuery = {}) {
 	else
 		commandMeetsCriteria = () => true;
 
-	/**@type {Array<Command>}*/
-	const commands: Array<Command> = [];
+	const commands: Command[] = [];
 
 	for(const file of commandFilenames) {
-		const commandFile = require(`./${file}`);
-		const command = /**@type {Command}*/(commandFile.command ?? commandFile);
+        const commandModule = require(`./${file}`);
+        const command: Command = commandModule instanceof Command ? commandModule : commandModule.default;
 
 		if(commandIsAllowed(command) && commandMeetsCriteria(command))
 			commands.push(command);

@@ -2,7 +2,7 @@ const { ButtonBuilder, ButtonStyle, ContainerBuilder, TextDisplayBuilder, Sectio
 const { tenshiColor } = require('../../data/globalProps');
 const serverIds = require('../../data/serverIds.json');
 const userIds = require('../../data/userIds.json');
-const { commandFilenames } = require('../../commands/Commons/');
+const { commandFilenames, Command } = require('../../commands/Commons/');
 const { p_pure } = require('../../utils/prefixes');
 const { isNotModerator, edlDistance, toCapitalized, compressId } = require('../../func');
 const { client } = require('../../core/client');
@@ -137,8 +137,8 @@ const makeGuideRow = (request) => makeStringSelectMenuRowBuilder().addComponents
  */
 function searchCommand(request, nameOrAlias) {
 	for(const filename of commandFilenames) {
-		const commandFile = require(`../../commands/Instances/${filename}`);
-		const command = /**@type {import('../../commands/Commons/').Command}*/(commandFile.command ?? commandFile);
+		const commandModule = require(`../../commands/Instances/${filename}`);
+		const command = /**@type {Command}*/(commandModule instanceof Command ? commandModule : commandModule.default);
 
 		if(command.name !== nameOrAlias
 		&& !command.aliases.some(alias => alias === nameOrAlias))
