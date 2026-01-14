@@ -1,7 +1,7 @@
 import { CommandTags, Command, CommandOptions } from '../Commons/';
 import { CommandPermissions } from '../Commons/cmdPerms.js';
 import { saki } from '../../data/sakiProps';
-import Saki from '../../models/saki.js';
+import Saki, { SakiDocument } from '../../models/saki.js';
 
 let crazyBackupId = saki.crazyBackupChannelId;
 
@@ -43,7 +43,7 @@ function recibirEstado(texto) {
     return 0;
 }
 
-function procesarConfig(dbDoc: import("../../models/saki.js").SakiDocument, appliedList: string[], prompt: string, configId: string, displayText: string) {
+function procesarConfig(dbDoc: SakiDocument, appliedList: string[], prompt: string, configId: string, displayText: string) {
     if(!prompt)
         return true;
     

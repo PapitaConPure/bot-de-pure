@@ -1,10 +1,10 @@
-const { EmbedBuilder, Colors, ButtonBuilder, ButtonStyle, TextInputBuilder, TextInputStyle, ModalBuilder } = require('discord.js'); //Integrar discord.js
-const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/');
-const { pourSauce, testSauceNAOToken } = require('../../systems/others/saucenao');
-const { Translator } = require('../../i18n');
-const { encryptString } = require('../../utils/security');
-const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts');
-const SauceNAOUser = require('../../models/saucenaoUsers').default;
+import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons/';
+import { EmbedBuilder, Colors, ButtonBuilder, ButtonStyle, TextInputBuilder, TextInputStyle, ModalBuilder } from 'discord.js';
+import { pourSauce, testSauceNAOToken } from '../../systems/others/saucenao';
+import { encryptString } from '../../utils/security';
+import { makeButtonRowBuilder, makeTextInputRowBuilder } from '../../utils/tsCasts';
+import SauceNAOUser from '../../models/saucenaoUsers';
+import { Translator } from '../../i18n';
 
 const Logger = require('../../utils/logs').default;
 const { debug } = Logger('ERROR', 'p!saucenao');
@@ -129,11 +129,7 @@ const command = new Command('saucenao', flags)
 		});
 	});
 
-/**
- * @param {import('../Commons/typings').ComplexCommandRequest} request
- * @param {Translator} translator
- */
-function makeRegisterRequestResponse(request, translator) {
+function makeRegisterRequestResponse(request: import('../Commons/typings').ComplexCommandRequest, translator: Translator) {
 	debug('Se enviará el mensaje de registro');
 	const embeds = [new EmbedBuilder()
 		.setColor(0x151515)
@@ -168,8 +164,7 @@ function makeRegisterRequestResponse(request, translator) {
 	});
 }
 
-/**@param {Translator} translator*/
-function makeRegisterModal(translator) {
+function makeRegisterModal(translator: Translator) {
 	const clientIdRow = makeTextInputRowBuilder().addComponents(
 		new TextInputBuilder()
 			.setCustomId('clientId')
@@ -189,4 +184,4 @@ function makeRegisterModal(translator) {
 	return modal;
 }
 
-module.exports = command;
+export default command;
