@@ -13,6 +13,7 @@ import Hourai from './models/saki';
 import { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } from './utils/tsCasts';
 import { fetchGuildMembers } from './utils/guildratekeeper';
 import { Translator } from './i18n';
+import { client } from './core/client';
 const concol = {
     orange: chalk.rgb(255, 140, 70),
     purple: chalk.rgb(158, 114,214),
@@ -924,8 +925,6 @@ export async function fetchUserID(query: string, context: FetchUserContext): Pro
  */
 export async function fetchGuild(query: string): Promise<Discord.Guild> {
     if(typeof query !== 'string' || !query.length) return;
-
-    const client = require('./core/client').client;
 
     if(!isNaN(+query))
         return client.guilds.cache.get(query)
