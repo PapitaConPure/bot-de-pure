@@ -1,12 +1,11 @@
-const { ModalBuilder, TextInputBuilder, TextInputStyle, Colors, ButtonBuilder, ButtonStyle } = require('discord.js'); //Integrar discord.js
-const { decompressId, sleep } = require('../../func'); //Funciones globales
-const { CommandTags, Command } = require('../Commons/');
-const { useMainPlayer, QueueRepeatMode } = require('discord-player');
-const { showQueuePage, getPageAndNumberTrackIndex, isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/others/musicPlayer');
-const { Translator } = require('../../i18n');
-const { tryRecoverSavedTracksQueue, saveTracksQueue } = require('../../models/playerQueue.js');
-const { makeTextInputRowBuilder } = require('../../utils/tsCasts.js');
-const { p_pure } = require('../../utils/prefixes');
+import { ModalBuilder, TextInputStyle, Colors, ButtonBuilder, ButtonStyle, LabelBuilder } from 'discord.js';
+import { decompressId, sleep } from '../../func';
+import { CommandTags, Command } from '../Commons/';
+import { useMainPlayer, QueueRepeatMode } from 'discord-player';
+import { showQueuePage, getPageAndNumberTrackIndex, isPlayerUnavailable, SERVICES, makePuréMusicEmbed } from '../../systems/others/musicPlayer';
+import { tryRecoverSavedTracksQueue, saveTracksQueue } from '../../models/playerQueue.js';
+import { p_pure } from '../../utils/prefixes';
+import { Translator } from '../../i18n';
 
 const tags = new CommandTags().add(
 	'COMMON',
@@ -50,21 +49,22 @@ const command = new Command('cola', tags)
 		if(isPlayerUnavailable(channel))
 			return interaction.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
 
-		const queryRow = makeTextInputRowBuilder().addComponents(
-			new TextInputBuilder()
-				.setCustomId('query')
-				.setLabel(translator.getText('queueModalAddQueryLabel'))
-				.setLabel(translator.getText('queueModalAddQueryPlaceholder'))
-				.setRequired(true)
-				.setMinLength(2)
-				.setMaxLength(256)
-				.setStyle(TextInputStyle.Short),
-		);
-
 		const modal = new ModalBuilder()
 			.setCustomId(`cola_addQuery_${authorId}_${page}`)
 			.setTitle('Añadir Pista')
-			.addComponents(queryRow);
+			.addLabelComponents(label =>
+				label
+					.setLabel(translator.getText('queueModalAddQueryLabel'))
+					.setTextInputComponent(textInput =>
+						textInput
+							.setCustomId('query')
+							.setPlaceholder(translator.getText('queueModalAddQueryPlaceholder'))
+							.setRequired(true)
+							.setMinLength(2)
+							.setMaxLength(256)
+							.setStyle(TextInputStyle.Short),
+					)
+			);
 
 		return interaction.showModal(modal);
 	})
@@ -326,8 +326,7 @@ const command = new Command('cola', tags)
 			return interaction.reply({ embeds: [embed], ephemeral: true, });
 		}
 
-		/**@type {Map<QueueRepeatMode, QueueRepeatMode>}*/
-		const repeatModeWheel = new Map();
+		const repeatModeWheel: Map<QueueRepeatMode, QueueRepeatMode> = new Map();
 		repeatModeWheel
 			.set(QueueRepeatMode.OFF, QueueRepeatMode.QUEUE)
 			.set(QueueRepeatMode.QUEUE, QueueRepeatMode.TRACK)
@@ -448,4 +447,4 @@ const command = new Command('cola', tags)
 		return showQueuePage(interaction, 'DE', authorId, +page);
 	});
 
-module.exports = command;
+export default command;
