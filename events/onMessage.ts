@@ -15,7 +15,7 @@ import { sendConvertedPixivPosts } from '../systems/agents/purepix';
 import { sendConvertedTwitterPosts } from '../systems/agents/pureet';
 import { Translator } from '../i18n/index';
 import { fetchUserCache } from '../utils/usercache';
-import { addMessageCascade } from './onMessageDelete';
+import { addMessageCascade } from '../systems/others/messageCascades';
 import { noDataBase, PrefixPair, tenshiColor } from '../data/globalProps';
 import Logger from '../utils/logs';
 import { ValuesOf } from 'types';

@@ -1,30 +1,29 @@
 import { Collection, GuildTextBasedChannel, REST, RESTPostAPIApplicationCommandsJSONBody, RESTPostAPIChatInputApplicationCommandsJSONBody } from 'discord.js';
 import { Routes } from 'discord-api-types/v9';
 
+import { puré } from '../core/commandInit';
+
 import { set, connect } from 'mongoose';
 import PrefixPairs from '../models/prefixpair';
 import UserConfigs from '../models/userconfigs';
 import BooruTags from '../models/boorutags';
-import MessageCascades from '../models/messageCascades';
 import { PureTable, pureTableAssets } from '../models/puretable';
-import { deleteExpiredMessageCascades, cacheMessageCascade } from './onMessageDelete';
 
-import { puré } from '../core/commandInit';
-
-import { setupGuildFeedUpdateStack, feedTagSuscriptionsCache } from '../systems/booru/boorufeed';
 import { Booru, Tag } from '../systems/booru/boorufetch';
 import { modifyPresence } from '../systems/presence/presence';
 import { auditSystem } from '../systems/others/auditor';
+import { prepareTracksPlayer } from '../systems/others/musicPlayer';
+import { initializeMessageCascades } from '../systems/others/messageCascades';
+import { setupGuildFeedUpdateStack, feedTagSuscriptionsCache } from '../systems/booru/boorufeed';
+import { initRemindersScheduler, processReminders } from '../systems/others/remindersScheduler';
+import { initializeWebhookMessageOwners } from '../systems/agents/discordagent';
 
 import { GlobalFonts, loadImage } from '@napi-rs/canvas';
 import { getUnixTime } from 'date-fns';
 import { join } from 'path';
 import chalk from 'chalk';
 
-import { prepareTracksPlayer } from '../systems/others/musicPlayer';
-import { initializeWebhookMessageOwners } from '../systems/agents/discordagent';
 import { setupGuildRateKeeper, fetchAllGuildMembers } from '../utils/guildratekeeper';
-import { initRemindersScheduler, processReminders } from '../systems/others/remindersScheduler';
 import { discordToken, envPath, globalConfigs, noDataBase, prefixes, remoteStartup } from '../data/globalProps';
 
 import botStatus from '../data/botStatus.json';
@@ -117,11 +116,10 @@ export async function onStartup(client: import('discord.js').Client) {
 		});
 
 		console.log(chalk.gray('Obteniendo documentos...'));
-		const [ prefixPairs, userConfigs, booruTags, messageCascades ] = await Promise.all([
+		const [ prefixPairs, userConfigs, booruTags ] = await Promise.all([
 			PrefixPairs.find({}),
 			UserConfigs.find({}),
 			BooruTags.find({}),
-			MessageCascades.find({}),
 		]);
 
 		console.log(chalk.gray('Facilitando prefijos'));
@@ -141,11 +139,7 @@ export async function onStartup(client: import('discord.js').Client) {
 		logOptions.booruTags && console.table([...Booru.tagsCache.values()].sort((a, b) => a.id - b.id));
 		
 		console.log(chalk.gray('Preparando Cascadas de Mensajes...'));
-		deleteExpiredMessageCascades();
-		setInterval(deleteExpiredMessageCascades, 60 * 60e3);
-		await MessageCascades.syncIndexes();
-		await MessageCascades.createIndexes();
-		messageCascades.forEach(({ messageId, otherMessageId }) => cacheMessageCascade(messageId, otherMessageId));
+		await initializeMessageCascades();
 
 		console.log(chalk.gray('Preparando Suscripciones de Feeds...'));
 		userConfigs.forEach(config => {
