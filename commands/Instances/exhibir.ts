@@ -1,10 +1,10 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
-const { CommandTags, Command } = require('../Commons/');
-const { DiscordAgent } = require('../../systems/agents/discordagent');
-const { saki } = require('../../data/sakiProps');
-const serverIds = require('../../data/serverIds.json');
-const { CommandPermissions } = require('../Commons/cmdPerms.js');
-const { getUnixTime } = require('date-fns');
+import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, GuildTextBasedChannel } from 'discord.js';
+import { CommandTags, Command } from '../Commons/';
+import { DiscordAgent } from '../../systems/agents/discordagent';
+import { saki } from '../../data/sakiProps';
+import serverIds from '../../data/serverIds.json';
+import { CommandPermissions } from '../Commons/cmdPerms.js';
+import { getUnixTime } from 'date-fns';
 
 let crazyBackupId = saki.crazyBackupChannelId;
 
@@ -61,8 +61,8 @@ const command = new Command('exhibir', flags)
 		const [ pinnedMessages, backupChannel ] = await Promise.all([
 			(await channel.messages.fetchPinned()).reverse(),
 			(interaction.guild.id === serverIds.saki
-				? /**@type {Promise<import('discord.js').GuildTextBasedChannel>}*/(interaction.guild.channels.fetch(crazyBackupId)) //crazy-backup
-				: /**@type {Promise<import('discord.js').GuildTextBasedChannel>}*/(interaction.guild.channels.fetch('1232090120581156905')) //Puré I (tests)
+				? interaction.guild.channels.fetch(crazyBackupId) as Promise<GuildTextBasedChannel> //crazy-backup
+				: interaction.guild.channels.fetch('1232090120581156905') as Promise<GuildTextBasedChannel> //Puré I (tests)
 			),
 		]);
 
@@ -106,7 +106,7 @@ const command = new Command('exhibir', flags)
 
 				text += `[#${channel.name}](<${message.url}>) • <t:${getUnixTime(message.createdAt)}:F>`;
 				
-				/**@type {Array<EmbedBuilder>}*/(/**@type {Array<unknown>}*/(formattedMessage.embeds)).push(
+				(formattedMessage.embeds as unknown as EmbedBuilder[]).push(
 					new EmbedBuilder()
 						.setColor(Colors.Gold)
 						.setDescription(text),
@@ -114,7 +114,7 @@ const command = new Command('exhibir', flags)
 			}
 
 			message.member ? agent.setMember(message.member) : agent.setUser(message.author);
-			const sent = await agent.sendAsUser(/**@type {import('discord.js').WebhookMessageCreateOptions}*/(/**@type {unknown}*/(formattedMessage)));
+			const sent = await agent.sendAsUser(formattedMessage as unknown as import('discord.js').WebhookMessageCreateOptions);
 			if(!sent)
 				interaction.channel.send({ content: '⚠️ Se omitió un pin debido a un error al trasladarlo' });
 			else
@@ -123,6 +123,7 @@ const command = new Command('exhibir', flags)
 					.catch(() => interaction.channel.send({ content: `⚠️ No se pudo despinnear un mensaje\n${message.url}` }))
 				);
 		}
+
 		const flushed = (await Promise.all(flushing)).length;
 
 		const embed = new EmbedBuilder()
@@ -145,4 +146,4 @@ const command = new Command('exhibir', flags)
 		return interaction.update({ embeds: [embed], components: [] });
 	});
 
-module.exports = command;
+export default command;
