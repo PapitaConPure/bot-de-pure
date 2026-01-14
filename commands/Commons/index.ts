@@ -1,4 +1,5 @@
 export * from './cmdBuilder';
-export * from './cmdTags';
+export * from './cmdFiles';
 export * from './cmdOpts';
-export * from './cmdIndex';
+export * from './cmdPerms';
+export * from './cmdTags';
