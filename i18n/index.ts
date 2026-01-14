@@ -2828,13 +2828,13 @@ export class Translator {
 
 	/**
 	 * @description Mapea los componentes ingresados a día, mes y año teniendo en cuenta el orden en el que se especifican en la traducción indicada
-	 * @param id id de traducción
+	 * @param locale id de idioma de origen de la fecha
 	 * @param component1 primer componente de fecha, en orden traducido
 	 * @param component2 segundo componente de fecha, en orden traducido
 	 * @param component3 tercer componente de fecha, en orden traducido
 	 */
-	static mapReverseDateUTCComponents(id: LocaleKey, component1: number | undefined = null, component2: number | undefined = null, component3: number | undefined = null) {
-		const { day, month, year } = reverseDateMappers[id](component1, component2, component3);
+	static mapReverseDateUTCComponents(locale: LocaleKey, component1: number | undefined = null, component2: number | undefined = null, component3: number | undefined = null) {
+		const { day, month, year } = reverseDateMappers[locale](component1, component2, component3);
 		const tzNow = new Date(Date.now());
 		const utcNow = new Date(
 			Date.UTC(
