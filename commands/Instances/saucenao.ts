@@ -6,7 +6,7 @@ import { makeButtonRowBuilder, makeTextInputRowBuilder } from '../../utils/tsCas
 import SauceNAOUser from '../../models/saucenaoUsers';
 import { Translator } from '../../i18n';
 
-const Logger = require('../../utils/logs').default;
+import Logger from '../../utils/logs';
 const { debug } = Logger('ERROR', 'p!saucenao');
 
 const options = new CommandOptions()
