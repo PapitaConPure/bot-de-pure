@@ -1,4 +1,4 @@
-import { Message, CommandInteraction, Collection, ChatInputCommandInteraction, Snowflake, Attachment, PermissionsBitField, MessagePayload, MessageEditOptions, InteractionReplyOptions, InteractionDeferReplyOptions, InteractionEditReplyOptions, User, MessageComponentInteraction, MessageActionRowComponentBuilder, Interaction, ModalMessageModalSubmitInteraction, ButtonInteraction, SelectMenuInteraction, MessageReplyOptions, MessageFlags, InteractionCallbackResponse, BooleanCache, InteractionResponse, Client, InteractionCallback, InteractionCallbackResource, BaseInteraction } from 'discord.js';
+import { Message, CommandInteraction, Collection, ChatInputCommandInteraction, Snowflake, Attachment, PermissionsBitField, MessagePayload, MessageEditOptions, InteractionReplyOptions, InteractionDeferReplyOptions, InteractionEditReplyOptions, User, MessageComponentInteraction, MessageActionRowComponentBuilder, Interaction, ModalMessageModalSubmitInteraction, ButtonInteraction, SelectMenuInteraction, MessageReplyOptions, MessageFlags, InteractionCallbackResponse, BooleanCache, InteractionResponse, Client, InteractionCallback, InteractionCallbackResource, BaseInteraction, ContextMenuCommandInteraction, InteractionType } from 'discord.js';
 import { CommandTags } from './cmdTags';
 import { CommandArguments, CommandRequest, ComplexCommandRequest, ComponentInteraction, ExtendedCommandRequest } from './typings';
 import { CommandOptions, CommandOptionSolver } from './cmdOpts';
@@ -291,7 +291,18 @@ export class Command {
 	}
 
 	static requestIsInteraction(request: CommandRequest | Interaction): request is Interaction {
-		return request instanceof BaseInteraction;
+		if(this.requestIsMessage(request))
+			return false;
+
+		const interactionTypes = [
+			InteractionType.ApplicationCommand,
+			InteractionType.ApplicationCommandAutocomplete,
+			InteractionType.MessageComponent,
+			InteractionType.ModalSubmit,
+			InteractionType.Ping,
+		];
+
+		return interactionTypes.some(interactionType => request.type === interactionType);
 	}
 
 	static requestize(request: CommandRequest | ComponentInteraction) {
