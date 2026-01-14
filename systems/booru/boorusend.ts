@@ -662,7 +662,3 @@ export function getPostUrlFromContainer(container: ContainerComponent) {
 	const containerButtonRow = container.components[containerSize - 1] as ActionRow<ButtonComponent>;
 	return containerButtonRow.components[0].url;
 }
-
-module.exports = {
-	SOURCE_STYLES,
-};
