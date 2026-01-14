@@ -1,42 +1,64 @@
-const { default: axios } = require('axios');
-const { shuffleArray, decodeEntities } = require('../../func');
-const BooruTags = require('../../models/boorutags').default;
-const { noDataBase } = require('../../data/globalProps');
+import BooruTags from '../../models/boorutags';
+import { shuffleArray, decodeEntities } from '../../func';
+import { noDataBase } from '../../data/globalProps';
+import { ValuesOf } from 'types';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
-/**
- * @typedef {Object} APIPostData
- * @property {Number} id
- * @property {String} title
- * @property {Array<String> | String} tags
- * @property {String} source
- * @property {Number} score
- * @property {Rating} rating
- * @property {Date | String | Number} created_at
- * @property {Number} creator_id
- * @property {String} file_url
- * @property {Number} width
- * @property {Number} height
- * @property {String} [preview_url]
- * @property {Number} [preview_width]
- * @property {Number} [preview_height]
- * @property {String} [sample_url]
- * @property {Number} [sample_width]
- * @property {Number} [sample_height]
- * @typedef {Post | APIPostData} PostResolvable
- * @typedef {'general'|'sensitive'|'questionable'|'explicit'} Rating
- */
+export const PostRating = ({
+	General: 'general',
+	Sensitive: 'sensitive',
+	Questionable: 'questionable',
+	Explicit: 'explicit',
+}) as const;
+type Rating = ValuesOf<typeof PostRating>;
 
-/**
- * @class
- * Representa una conexión a un sitio Booru
- */
-class Booru {
-	/**@readonly @type {String}*/ static API_URI = 'https://gelbooru.com/index.php';
-	/**@readonly @type {String}*/ static API_POSTS_URL = 'https://gelbooru.com/index.php';
-	/**@readonly @type {String}*/ static API_TAGS_URL  = 'https://gelbooru.com/index.php?page=dapi&s=tag&q=index';
+export interface APIPostData {
+	id: number;
+	title: string;
+	tags: string[] | string;
+	source: string | string[];
+	score: number;
+	rating: Rating;
+	created_at: Date | string | number;
+	creator_id: number;
+	file_url: string;
+	width: number;
+	height: number;
+	preview_url?: string;
+	preview_width?: number;
+	preview_height?: number;
+	sample_url?: string;
+	sample_width?: number;
+	sample_height?: number;
+}
+
+export type PostResolvable = Post | APIPostData;
+
+export interface Credentials {
+	apiKey: string;
+	userId: string;
+};
+
+interface ExpectAPIFetchOptions {
+	dontThrowOnEmptyFetch?: boolean;
+}
+
+interface ExpectAPITagFetchOptions {
+	tags?: string;
+}
+
+interface BooruSearchOptions {
+	limit?: number;
+	random?: boolean;
+}
+
+/**@class Representa una conexión a un sitio Booru.*/
+export class Booru {
+	static readonly API_URI:       string = 'https://gelbooru.com/index.php';
+	static readonly API_POSTS_URL: string = 'https://gelbooru.com/index.php';
+	static readonly API_TAGS_URL:  string = 'https://gelbooru.com/index.php?page=dapi&s=tag&q=index';
 	
-	/**@readonly @type {import('axios').AxiosInstance}*/
-	static POSTS_API = axios.create({
+	static readonly POSTS_API: AxiosInstance = axios.create({
 		baseURL: Booru.API_URI,
 		timeout: 10000,
 		params: {
@@ -47,8 +69,7 @@ class Booru {
 		},
 	});
 	
-	/**@readonly @type {import('axios').AxiosInstance}*/
-	static TAGS_API = axios.create({
+	static readonly TAGS_API: AxiosInstance = axios.create({
 		baseURL: Booru.API_URI,
 		timeout: 10000,
 		params: {
@@ -59,28 +80,26 @@ class Booru {
 		},
 	});
 
-	/**@readonly @type {Number}*/ static TAGS_SEMAPHORE_MAX  = 100_000_000;
-	/**@readonly @type {Number}*/ static TAGS_CACHE_LIFETIME = 4 * 60 * 60e3;
-	/**@readonly @type {Number}*/ static TAGS_DB_LIFETIME    = 4 * 60 * 60e3; //De momento, exactamente igual que la vida en caché
+	static readonly TAGS_SEMAPHORE_MAX: number  = 100_000_000;
+	static readonly TAGS_CACHE_LIFETIME: number = 4 * 60 * 60e3;
+	static readonly TAGS_DB_LIFETIME: number    = 4 * 60 * 60e3; //De momento, exactamente igual que la vida en caché
 
-	/**@type {Map<String, Tag>}*/ static tagsCache = new Map();
-	/**@type {Number}*/ static tagsSemaphoreCount = 0;
-	/**@type {Number}*/ static tagsSemaphoreDone = 0;
+	static tagsCache: Map<string, Tag> = new Map();
+	static tagsSemaphoreCount: number = 0;
+	static tagsSemaphoreDone: number = 0;
 	
-	/**@typedef {{ apiKey: String, userId: String }} Credentials*/
-	/**@type {Credentials}*/ credentials;
+	credentials: Credentials;
 
-	/**
-	 * @constructor
-	 * @param {Credentials?} credentials Credenciales para autorizarse en la API
-	 */
-	constructor(credentials) {
+	/**@param credentials Credenciales para autorizarse en la API*/
+	constructor(credentials: Credentials | null) {
 		this.setCredentials(credentials);
 	}
 
 	/**
-	 * Libera memoria de Tags guardadas en caché que no se han refrescado en mucho tiempo
-	 * Se recomienda usar esto luego de llamar cualquier función que recupere Tags de un Post
+	 * @description
+	 * Libera memoria de Tags guardadas en caché que no se han refrescado en mucho tiempo.
+	 * 
+	 * Se recomienda usar esto luego de llamar cualquier función que recupere Tags de un Post.
 	 */
 	static cleanupTagsCache() {
 		const now = Date.now();
@@ -90,18 +109,11 @@ class Booru {
 	}
 
 	/**
-	 * @typedef {Object} ExpectAPIFetchOptions
-	 * @property {Boolean} [dontThrowOnEmptyFetch=false]
-	 */
-	/**
-	 * Verifica que el código de estado de una respuesta sea 200 y que los datos de Post sean válidos
-	 * @param {import('axios').AxiosResponse} response 
-	 * @param {ExpectAPIFetchOptions} options
-	 * @returns {Array<PostResolvable>}
+	 * @description Verifica que el código de estado de una respuesta sea 200 y que los datos de Post sean válidos.
 	 * @throws {BooruFetchError}
 	 * @throws {BooruUnknownPostError}
 	 */
-	static #expectPosts(response, options = {}) {
+	static #expectPosts(response: AxiosResponse, options: ExpectAPIFetchOptions = {}): PostResolvable[] {
 		const { dontThrowOnEmptyFetch = false } = options;
 
 		if(response.status !== 200)
@@ -118,18 +130,11 @@ class Booru {
 	}
 
 	/**
-	 * @typedef {Object} ExpectAPITagFetchOptions
-	 * @property {String?} [tags=null]
-	 */
-	/**
-	 * Verifica que el código de estado de una respuesta sea 200 y que los datos de Post sean válidos
-	 * @param {import('axios').AxiosResponse} response 
-	 * @param {ExpectAPIFetchOptions & ExpectAPITagFetchOptions} options
-	 * @returns {Array<TagResolvable>}
+	 * @description Verifica que el código de estado de una respuesta sea 200 y que los datos de Post sean válidos.
 	 * @throws {BooruFetchError}
 	 * @throws {BooruUnknownTagError}
 	 */
-	static #expectTags(response, options = {}) {
+	static #expectTags(response: AxiosResponse, options: ExpectAPIFetchOptions & ExpectAPITagFetchOptions = {}): TagResolvable[] {
 		const {
 			dontThrowOnEmptyFetch = false,
 			tags = null,
@@ -149,20 +154,14 @@ class Booru {
 	}
 
 	/**
-	 * @typedef {Object} BooruSearchOptions
-	 * @property {Number} [limit=1] Límite de resultados de la búsqueda
-	 * @property {Boolean} [random] Si los resultados se ordenan de forma aleatoria (true) o no (false)
-	 */
-	/**
-	 * Devuelve resultados de búsqueda en forma de {@linkcode Post}s
-	 * @param {String | Array<String>} tags Tags a buscar
-	 * @param {BooruSearchOptions} searchOptions Opciones de búsqueda
-	 * @returns {Promise<Array<Post>>}
+	 * @description Devuelve resultados de búsqueda en forma de {@linkcode Post}s.
+	 * @param tags Tags a buscar
+	 * @param searchOptions Opciones de búsqueda
 	 * @throws {ReferenceError}
 	 * @throws {TypeError}
 	 * @throws {BooruFetchError}
 	 */
-	async search(tags, searchOptions = {}) {
+	async search(tags: string | string[], searchOptions: BooruSearchOptions = {}): Promise<Post[]> {
 		const { limit = 1, random = false } = searchOptions;
 		
 		const { apiKey, userId } = this.#getCredentials();
@@ -183,15 +182,13 @@ class Booru {
 	}
 
 	/**
-	 * Obtiene y devuelve un {@linkcode Post} por ID
-	 * @param {String | Number} postId 
-	 * @returns {Promise<Post | undefined>}
+	 * @description Obtiene y devuelve un {@linkcode Post} por ID.
 	 * @throws {ReferenceError}
 	 * @throws {TypeError}
 	 * @throws {BooruFetchError}
 	 * @throws {BooruUnknownPostError}
 	 */
-	async fetchPostById(postId) {
+	async fetchPostById(postId: string | number): Promise<Post | undefined> {
 		const { apiKey, userId } = this.#getCredentials();
 		if(![ 'string', 'number' ].includes(typeof postId))
 			throw TypeError('Invalid Post ID');
@@ -208,14 +205,12 @@ class Booru {
 	}
 
 	/**
-	 * Obtiene y devuelve un {@linkcode Post} por enlace
-	 * @param {String} postUrl
-	 * @returns {Promise<Post | undefined>}
+	 * @description Obtiene y devuelve un {@linkcode Post} por enlace.
 	 * @throws {ReferenceError}
 	 * @throws {TypeError}
 	 * @throws {BooruFetchError}
 	 */
-	async fetchPostByUrl(postUrl) {
+	async fetchPostByUrl(postUrl: string): Promise<Post | undefined> {
 		const { apiKey, userId } = this.#getCredentials();
 
 		if(typeof postUrl !== 'string')
@@ -236,13 +231,12 @@ class Booru {
 	}
 
 	/**
-	 * Obtiene y devuelve las {@linkcode Tag}s del {@linkcode Post} indicado
-	 * @param {Post} post
+	 * @description Obtiene y devuelve las {@linkcode Tag}s del {@linkcode Post} indicado.
 	 * @throws {ReferenceError}
 	 * @throws {TypeError}
 	 * @throws {BooruFetchError}
 	 */
-	async fetchPostTags(post) {
+	async fetchPostTags(post: Post) {
 		if(!Array.isArray(post?.tags))
 			throw ReferenceError('Invalid Post');
 
@@ -250,13 +244,12 @@ class Booru {
 	}
 
 	/**
-	 * Obtiene un {@linkcode Post} desde el enlace indicado y devuelve sus {@linkcode Tag}s
-	 * @param {String} postUrl 
+	 * @description Obtiene un {@linkcode Post} desde el enlace indicado y devuelve sus {@linkcode Tag}s.
 	 * @throws {ReferenceError}
 	 * @throws {TypeError}
 	 * @throws {BooruFetchError}
 	 */
-	async fetchPostTagsByUrl(postUrl) {
+	async fetchPostTagsByUrl(postUrl: string) {
 		const post = await this.fetchPostByUrl(postUrl);
 		return post
 			? this.fetchTagsByNames(...post.tags)
@@ -264,13 +257,12 @@ class Booru {
 	}
 
 	/**
-	 * Obtiene el {@linkcode Post} con la ID indicada y devuelve sus {@linkcode Tag}s
-	 * @param {String | Number} postId 
+	 * @description Obtiene el {@linkcode Post} con la ID indicada y devuelve sus {@linkcode Tag}s.
 	 * @throws {ReferenceError}
 	 * @throws {TypeError}
 	 * @throws {BooruFetchError}
 	 */
-	async fetchPostTagsById(postId) {
+	async fetchPostTagsById(postId: string | number) {
 		const post = await this.fetchPostById(postId);
 		return post
 			? this.fetchTagsByNames(...post.tags)
@@ -278,13 +270,11 @@ class Booru {
 	}
 
 	/**
-	 * 
-	 * @param {Array<String>} tagNames 
 	 * @throws {ReferenceError}
 	 * @throws {TypeError}
 	 * @throws {BooruFetchError}
 	 */
-	async fetchTagsByNames(...tagNames) {
+	async fetchTagsByNames(...tagNames: string[]) {
 		const semaphoreId = Booru.tagsSemaphoreCount++ % Booru.TAGS_SEMAPHORE_MAX;
 
 		const { apiKey, userId } = this.#getCredentials();
@@ -295,20 +285,20 @@ class Booru {
 		while(semaphoreId !== Booru.tagsSemaphoreDone)
 			await new Promise(resolve => setTimeout(resolve, 50));
 
-		/**@type {Array<Tag>}*/
-		const cachedTags = [];
-		/**@type {Array<String>}*/
-		const uncachedTagNames = [];
+		/**@type {Tag[]}*/
+		const cachedTags: Tag[] = [];
+		/**@type {string[]}*/
+		const uncachedTagNames: string[] = [];
 		
 		tagNames
-		.map(decodeEntities)
-		.forEach(tn => {
-			const cachedTag = Booru.tagsCache.get(tn);
-			if(cachedTag && (Date.now() - Booru.TAGS_CACHE_LIFETIME) < (+cachedTag.fetchTimestamp))
-				cachedTags.push(cachedTag);
-			else
-				uncachedTagNames.push(tn);
-		});
+			.map(decodeEntities)
+			.forEach(tn => {
+				const cachedTag = Booru.tagsCache.get(tn);
+				if(cachedTag && (Date.now() - Booru.TAGS_CACHE_LIFETIME) < (+cachedTag.fetchTimestamp))
+					cachedTags.push(cachedTag);
+				else
+					uncachedTagNames.push(tn);
+			});
 
 		if(!uncachedTagNames.length) {
 			Booru.tagsSemaphoreDone = (Booru.tagsSemaphoreDone + 1) % Booru.TAGS_SEMAPHORE_MAX;
@@ -364,19 +354,19 @@ class Booru {
 	}
 
 	/**
-	 * Establece las credenciales a usar para cada búsqueda
-	 * @param {Credentials} credentials Credenciales para autorizarse en la API
+	 * @description Establece las credenciales a usar para cada búsqueda.
+	 * @param credentials Credenciales para autorizarse en la API
 	 * @throws {ReferenceError}
 	 * @throws {TypeError}
 	 */
-	setCredentials(credentials) {
+	setCredentials(credentials: Credentials) {
 		this.#expectCredentials(credentials);
 		this.credentials = credentials;
 		return this;
 	}
 
 	/**
-	 * Recupera las credenciales de búsqueda establecidas
+	 * @description Recupera las credenciales de búsqueda establecidas.
 	 * @throws {ReferenceError}
 	 * @throws {TypeError}
 	 */
@@ -386,50 +376,43 @@ class Booru {
 	}
 
 	/**
-	 * Establece las credenciales a usar para cada búsqueda
-	 * @param {Credentials} credentials Credenciales para autorizarse en la API
+	 * @description Establece las credenciales a usar para cada búsqueda.
+	 * @param credentials Credenciales para autorizarse en la API
 	 * @throws {ReferenceError}
 	 * @throws {TypeError}
 	 */
-	#expectCredentials(credentials) {
+	#expectCredentials(credentials: Credentials) {
 		if(!credentials) throw ReferenceError('No credentials were defined');
 		if(!credentials.apiKey || typeof credentials.apiKey !== 'string') throw TypeError('API Key is invalid');
 		if(!credentials.userId || ![ 'string', 'number' ].includes(typeof credentials.userId)) throw TypeError('User ID is invalid');
 	}
 }
 
-/**
- * @class
- * Representa una imagen publicada en un {@linkcode Booru}
- */
-class Post {
-	/**@type {Number}*/ id;
-	/**@type {String}*/ title;
-	/**@type {Array<String>}*/ tags;
-	/**@type {Array<String>}*/ sources;
-	/**@type {String}*/ source;
-	/**@type {Number}*/ score;
-	/**@type {Rating}*/ rating;
-	/**@type {Date}*/ createdAt;
-	/**@type {Number}*/ creatorId;
-	/**@type {String}*/ fileUrl;
-	/**@type {Array<Number>}*/ size;
-	/**@type {String?}*/ previewUrl;
-	/**@type {Array<Number>?}*/ previewSize;
-	/**@type {String?}*/ sampleUrl;
-	/**@type {Array<Number>?}*/ sampleSize;
+/**@class Representa una imagen publicada en un {@linkcode Booru}*/
+export class Post {
+	id: number;
+	title: string;
+	tags: string[];
+	sources: string[];
+	source: string;
+	score: number;
+	rating: Rating;
+	createdAt: Date;
+	creatorId: number;
+	fileUrl: string;
+	size: number[];
+	previewUrl: string | null;
+	previewSize: number[] | null;
+	sampleUrl: string | null;
+	sampleSize: number[] | null;
 
-	/**
-	 * @constructor
-	 * @param {PostResolvable} data
-	 */
-	constructor(data) {
+	constructor(data: PostResolvable) {
 		this.id = data.id;
 		this.title = data.title;
 		this.tags = Array.isArray(data.tags) ? data.tags.map(decodeEntities) : decodeEntities(data.tags ?? '').split(' ');
 		if(data.source) {
 			const sources = (typeof data.source === 'object')
-				? (Array.isArray(data.source) ? data.source : Object.values(data.source))
+				? (Array.isArray(data.source) ? data.source : Object.values(data.source as Record<string, string>))
 				: (data.source.split(/[ \n]+/));
 			this.sources = sources;
 			this.source = sources.join(' ');
@@ -462,9 +445,7 @@ class Post {
 		}
 	}
 
-	/**
-	 * Tries to find sources that match an URL pattern, and returns all matches (if any)
-	 */
+	/**@description Tries to find sources that match an URL pattern, and returns all matches (if any)*/
 	findUrlSources() {
 		return this.sources
 			.map(getSourceUrl)
@@ -472,6 +453,7 @@ class Post {
 	}
 
 	/**
+	 * @description
 	 * Finds and returns the first source that matches an URL pattern.
 	 * 
 	 * If no URL source is found, `undefined` is returned
@@ -483,6 +465,7 @@ class Post {
 	}
 
 	/**
+	 * @description
 	 * Finds and returns the last source that matches an URL pattern.
 	 * 
 	 * If no URL source is found, `undefined` is returned.
@@ -494,7 +477,8 @@ class Post {
 	}
 }
 
-const TagTypes = /**@type {const}*/({
+/**@satisfies {Record<string, number>}*/
+export const TagTypes = ({
 	GENERAL:    0,
 	ARTIST:     1,
 	UNKNOWN:    2,
@@ -502,38 +486,38 @@ const TagTypes = /**@type {const}*/({
 	CHARACTER:  4,
 	METADATA:   5,
 	DEPRECATED: 6,
-});
-/**@typedef {import('types').ValuesOf<TagTypes>} TagType*/
+}) as const;
 
-/**
- * @typedef {{ id: Number, name: String, count: Number, type: TagType | Number, ambiguous?: Boolean, fetchTimestamp: Date }} TagData
- * @typedef {Tag | TagData} TagResolvable
- */
+export type TagType = import('types').ValuesOf<typeof TagTypes>;
 
-/**
- * @class
- * Representa una tag de {@linkcode Post} de un {@linkcode Booru}
- */
-class Tag {
-	/**@type {Number}*/ id;
-	/**@type {String}*/ name;
-	/**@type {Number}*/ count;
-	/**@type {TagType}*/ type;
-	/**@type {Boolean?}*/ ambiguous;
-	/**@type {Date}*/ fetchTimestamp;
+interface TagData {
+	id: number;
+	name: string;
+	count: number;
+	type: TagType | number;
+	ambiguous?: boolean;
+	fetchTimestamp: Date;
+};
 
-	/**
-	 * @constructor
-	 * @param {TagResolvable} data
-	 */
-	constructor(data) {
+type TagResolvable = Tag | TagData;
+
+/**@class Representa una tag de {@linkcode Post} de un {@linkcode Booru}.*/
+export class Tag {
+	id: number;
+	name: string;
+	count: number;
+	type: TagType;
+	ambiguous: boolean | null;
+	fetchTimestamp: Date;
+
+	constructor(data: TagResolvable) {
 		if(!Object.values(TagTypes).some(t => t === data.type))
 			throw RangeError('Tipo de tag inválido. Solo se aceptan números: 0, 1, 2, 3, 4, 5, 6');
 
 		this.id = data.id;
 		this.name = decodeEntities(data.name);
 		this.count = data.count;
-		this.type = /**@type {TagType}*/(data.type);
+		this.type = data.type as TagType;
 		this.ambiguous = !!data.ambiguous;
 		this.fetchTimestamp = data.fetchTimestamp || new Date(Date.now());
 	}
@@ -555,53 +539,37 @@ class Tag {
 	}
 }
 
-/**@param {string} source*/
-function getSourceUrl(source) {
+function getSourceUrl(source: string) {
 	if(!source) return null;
 	const smatch = source.match(/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-])+\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_/.0-9#:?=&;,]*)?)?/);
 	if(!smatch) return null;
 	return source.slice(smatch.index, smatch.index + smatch[0].length);
 }
 
-class BooruError extends Error {
-    /**@param {String} message Error message*/
-    constructor(message) {
+export class BooruError extends Error {
+    constructor(message: string) {
         super(message);
         this.name = 'BooruError';
     }
 }
 
-class BooruFetchError extends BooruError {
-    /**@param {String} message Error message*/
-    constructor(message) {
+export class BooruFetchError extends BooruError {
+    constructor(message: string) {
         super(message);
         this.name = 'BooruFetchError';
     }
 }
 
-class BooruUnknownPostError extends BooruError {
-    /**@param {String} message Error message*/
-    constructor(message) {
+export class BooruUnknownPostError extends BooruError {
+    constructor(message: string) {
         super(message);
         this.name = 'BooruUnknownPostError';
     }
 }
 
-class BooruUnknownTagError extends BooruError {
-    /**@param {String} message Error message*/
-    constructor(message) {
+export class BooruUnknownTagError extends BooruError {
+    constructor(message: string) {
         super(message);
         this.name = 'BooruUnknownTagError';
     }
 }
-
-module.exports = {
-	Booru,
-	Post,
-	Tag,
-	BooruError,
-	BooruFetchError,
-	BooruUnknownPostError,
-	BooruUnknownTagError,
-	TagTypes,
-};

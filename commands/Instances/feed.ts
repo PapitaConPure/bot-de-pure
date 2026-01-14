@@ -4,7 +4,7 @@ import { isNotModerator, shortenText, guildEmoji, compressId, isNSFWChannel, ran
 import GuildConfig from '../../models/guildconfigs.js';
 import { auditError, auditAction } from '../../systems/others/auditor';
 import { globalConfigs, booruApiKey, booruUserId, tenshiAltColor } from '../../data/globalProps';
-import { Booru, TagTypes, BooruUnknownPostError } from '../../systems/booru/boorufetch';
+import { Booru, TagTypes, BooruUnknownPostError, TagType } from '../../systems/booru/boorufetch';
 import { addGuildToFeedUpdateStack } from '../../systems/booru/boorufeed';
 import { formatBooruPostMessage, formatTagNameListNew, getPostUrlFromContainer } from '../../systems/booru/boorusend.js';
 import { Translator } from '../../i18n';
@@ -1012,7 +1012,7 @@ const command = new Command('feed', tags)
 				.filter(t => t.type === TagTypes.COPYRIGHT)
 				.map(t => t.name);
 
-			const otherTagTypes: Array<import('../../systems/booru/boorufetch').TagType> = ([
+			const otherTagTypes: TagType[] = ([
 				TagTypes.ARTIST,
 				TagTypes.CHARACTER,
 				TagTypes.COPYRIGHT,

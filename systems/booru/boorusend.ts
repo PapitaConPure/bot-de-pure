@@ -1,40 +1,39 @@
-const { makeButtonRowBuilder } = require('../../utils/tsCasts');
-const { EmbedBuilder, ButtonBuilder, ButtonStyle, Colors, ContainerBuilder, MessageFlags, SeparatorSpacingSize } = require('discord.js');
-const { guildEmoji: gEmo, shortenText, isThread } = require('../../func');
-const { Booru, TagTypes } = require('./boorufetch');
-const { getBaseTags, getSearchTags } = require('./booruprops');
-const { globalConfigs, booruApiKey, booruUserId } = require('../../data/globalProps');
-const userIds = require('../../data/userIds.json');
-const rakki = require('../../commands/Instances/rakkidei').default;
-const { Translator } = require('../../i18n');
+import { makeButtonRowBuilder } from '../../utils/tsCasts';
+import { EmbedBuilder, ButtonBuilder, ButtonStyle, Colors, ContainerBuilder, MessageFlags, SeparatorSpacingSize, Snowflake, Message, Collection, GuildMember, ContainerComponent, ActionRow, ButtonComponent, User } from 'discord.js';
+import { guildEmoji as gEmo, shortenText, isThread } from '../../func';
+import { Booru, Post, TagTypes } from './boorufetch';
+import { getBaseTags, getSearchTags, tagMaps } from './booruprops';
+import { globalConfigs, booruApiKey, booruUserId } from '../../data/globalProps';
+import { CommandOptionSolver } from '../../commands/Commons/cmdOpts';
+import userIds from '../../data/userIds.json';
+import rakki from '../../commands/Instances/rakkidei';
+import { Translator } from '../../i18n';
 
-const Logger = require('../../utils/logs').default;
-const { CommandOptionSolver } = require('../../commands/Commons/cmdOpts');
+import Logger from '../../utils/logs';
+import { ComplexCommandRequest } from '../../commands/Commons/typings';
 const { debug, info, warn, error } = Logger('WARN', 'BooruSend');
 
-/**
- * @typedef {Object} PostFormatData
- * @property {number} [maxTags]
- * @property {string} [title]
- * @property {string} [subtitle]
- * @property {string} [footer]
- * @property {string} [cornerIcon]
- * @property {string} [manageableBy]
- * @property {boolean} [allowNSFW]
- * @property {boolean} [isNotFeed]
- * @property {boolean} [disableLinks]
- * @property {boolean} [disableActions]
- * 
- * @typedef {{ emoji: string, color: number }} SourceStyle
- */
+export interface PostFormatData {
+	maxTags?: number;
+	title?: string;
+	subtitle?: string;
+	footer?: string;
+	cornerIcon?: string;
+	manageableBy?: string;
+	allowNSFW?: boolean;
+	isNotFeed?: boolean;
+	disableLinks?: boolean;
+	disableActions?: boolean;
+}
+
+export type SourceStyle = { emoji: string; color: number; };
 
 /**
  * Algunos enlaces pueden pertenecer a dominios asociados de un sitio para alojar recursos. Cosas como enlaces de CDNs.
  * Estos enlaces generalmente expiran y no tienen un patrón reconocible para darles estilo, por lo que deben ser convertidos a enlaces de las publicaciones que contienen el recurso.
  * Aquellos con conversiones conocidas aparecen en este mapeado para recuperar el enlace de publicación al que están asociados
- * @type {ReadonlyArray<{ pattern: RegExp, replacement: string }>}
  */
-const sourceMappings = [
+const sourceMappings: ReadonlyArray<{ pattern: RegExp; replacement: string; }> = [
 	{
 		pattern: /https:\/\/i.pximg.net\/img-original\/img\/[0-9/]{19}\/([0-9]+)_p[0-9]+\.[A-Za-z]{2,4}/,
 		replacement: 'https://www.pixiv.net/artworks/$1',
@@ -45,8 +44,7 @@ const sourceMappings = [
 	},
 ];
 
-/**@type {ReadonlyArray<SourceStyle & { pattern: RegExp }>}*/
-const SOURCE_STYLES = [
+export const SOURCE_STYLES: ReadonlyArray<SourceStyle & { pattern: RegExp; }> = [
 	{ color: 0x0096fa, emoji: '1334816111270563880', pattern: /pixiv\.net(?!\/fanbox)/ },
 	{ color: 0x040404, emoji: '1232243415165440040', pattern: /(twitter|twimg|x)\.com/ },
 	{ color: 0xfaf18a, emoji: '999783444655648869' , pattern: /pixiv\.net\/fanbox|fanbox\.cc/ },
@@ -71,28 +69,25 @@ const SOURCE_STYLES = [
 	{ color: 0x252525, emoji: '1334123400024817724', pattern: /www\.nicovideo\.jp/ },
 ];
 
-/**@type {SourceStyle}*/
-const noSource = { color: Colors.Aqua, emoji: undefined };
+const noSource: SourceStyle = { color: Colors.Aqua, emoji: undefined };
+const unknownSource: SourceStyle = { color: 0x1bb76e, emoji: '969664712604262400' };
 
-/**@type {SourceStyle}*/
-const unknownSource = { color: 0x1bb76e, emoji: '969664712604262400' };
-
-/**@type {{ [K: string]: { order: number, emote: string } }}*/
-const resMappings = /**@type {const}*/({
+/**@satisfies {Record<string, { order: number; emote: string; }>}*/
+const resMappings = ({
 	'lowres'               : { order: 0, emote: '<:lowRes:1355765055945310238>' },
 	'highres'              : { order: 1, emote: '<:highRes:1355765065772699719>' },
 	'absurdres'            : { order: 2, emote: '<:absurdRes:1355765080800890891>' },
 	'incredibly_absurdres' : { order: 3, emote: '<:incrediblyAbsurdRes:1355765110387507374>' },
-});
+}) as const;
 
-/**@type {{ [K: string]: string }}*/
-const sexEmotes = /**@type {const}*/({
+/**@satisfies {Record<string, string>}*/
+const sexEmotes = ({
 	girl : '<:girl:1355803255481045053>',
 	boy  : '<:boy:1355803803248623646>',
 	futa : '<:futa:1355803817089831055>',
-});
+}) as const;
 
-const ignoredTagsIfSexCount = new Set([
+const ignoredTagsIfSexCount = new Set<string>([
 	'multiple_girls',
 	'multiple_boys',
 	'multiple_futa',
@@ -100,12 +95,11 @@ const ignoredTagsIfSexCount = new Set([
 
 /**
  * Genera un {@linkcode EmbedBuilder} a base de un {@linkcode Post} de {@linkcode Booru}
- * @param {Booru} booru Instancia de Booru
- * @param {import('./boorufetch').Post} post Post de Booru
- * @param {PostFormatData} data Información adicional a mostrar en el Embed. Se puede pasar un Feed directamente
- * @returns {Promise<import('discord.js').ContainerBuilder>}
+ * @param booru Instancia de Booru
+ * @param post Post de Booru
+ * @param data Información adicional a mostrar en el Embed. Se puede pasar un Feed directamente
  */
-async function formatBooruPostMessage(booru, post, data = {}) {
+export async function formatBooruPostMessage(booru: Booru, post: Post, data: PostFormatData = {}): Promise<ContainerBuilder> {
 	info('Se recibió una solicitud de formato de mensaje con Post de Booru');
 
 	const {
@@ -125,7 +119,7 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 	
 	//Botón de Fuente (si está disponible)
 	let containerColor = null;
-	const addSourceButtonAndApplyStyle = (/**@type {String}*/ source) => {
+	const addSourceButtonAndApplyStyle = (source: string) => {
 		sourceMappings.forEach(mapping => {
 			source = source.replace(mapping.pattern, mapping.replacement);
 		});
@@ -182,7 +176,7 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 	const originalPostTags = [ ...post.tags ];
 	let maxResOrder = -1;
 	let resTag = '';
-	const sexTags = /**@type {Array<String>}*/([]);
+	const sexTags: string[] = [];
 	let hasTagMe = false;
 	let hasRequestTags = false;
 	post.tags = post.tags.filter(t => {
@@ -314,10 +308,10 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		}
 
 		debug('A punto de distribuir las etiquetas en categorías');
-		const postArtistTags    = /**@type {Array<String>}*/([]);
-		const postCharacterTags = /**@type {Array<String>}*/([]);
-		const postCopyrightTags = /**@type {Array<String>}*/([]);
-		const postOtherTags     = /**@type {Array<String>}*/([]);
+		const postArtistTags:    string[] = [];
+		const postCharacterTags: string[] = [];
+		const postCopyrightTags: string[] = [];
+		const postOtherTags:     string[] = [];
 
 		postTags.forEach(tag => {
 			const { name } = tag;
@@ -346,7 +340,7 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 		const generalTagsContent = `${specialTags.join(' ')} ${formatTagNameListNew(otherTags, ' ')}`.trim();
 		const postGeneralTags = shortenText(`-# ${generalTagsTitle} ${generalTagsContent}`, 1020);
 
-		const getCategoryFieldString = (/**@type {String}*/ fieldName, /**@type {Array<String>}*/arr) => {
+		const getCategoryFieldString = (fieldName: string, arr: string[]) => {
 			if(!arr.length) return;
 
 			const totalCount = arr.length;
@@ -435,15 +429,13 @@ async function formatBooruPostMessage(booru, post, data = {}) {
 	return container;
 };
 
-/**
- * Envía una notificación de {@linkcode Post} de {@linkcode Booru} a todos los {@linkcode User} suscriptos a las tags del mismo
- * @typedef {{ userId: import('discord.js').Snowflake, followedTags: Array<String> }} Suscription
- * @param {import('./boorufetch').Post} post
- * @param {import('discord.js').Message<true>} sent
- * @param {import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').GuildMember>} members
- * @param {Array<Suscription>} feedSuscriptions 
- */
-async function notifyUsers(post, sent, members, feedSuscriptions) {
+export interface Suscription {
+	userId: Snowflake;
+	followedTags: string[];
+};
+
+/**@description Envía una notificación de {@linkcode Post} de {@linkcode Booru} a todos los {@linkcode User} suscriptos a las tags del mismo.*/
+export async function notifyUsers(post: Post, sent: Message<true>, members: Collection<Snowflake, GuildMember>, feedSuscriptions: Array<Suscription>) {
 	info('Se recibió una orden para notificar sobre un nuevo Post a usuarios suscriptos aplicables');
 
 	//No sé qué habré estado pensando cuando escribí esto, pero no pienso volver a tocarlo
@@ -451,7 +443,7 @@ async function notifyUsers(post, sent, members, feedSuscriptions) {
 	if(!sent)
 		throw 'Se esperaba un mensaje para el cuál notificar';
 
-	const container = /**@type {import('discord.js').ContainerComponent}*/(sent.components?.[0]);
+	const container = sent.components?.[0] as ContainerComponent;
 	if(!container)
 		throw 'Se esperaba un mensaje de Feed válido';
 
@@ -467,7 +459,7 @@ async function notifyUsers(post, sent, members, feedSuscriptions) {
 
 	info('Se encontraron suscripciones aplicables, intentando enviar notificaciones...');
 	const containerSize = container.components.length;
-	const containerButtonRow = /**@type {import('discord.js').ActionRow<import('discord.js').ButtonComponent>}*/(container.components[containerSize - 1]);
+	const containerButtonRow = container.components[containerSize - 1] as ActionRow<ButtonComponent>;
 
 	debug('Intentando enviar notificaciones...');
 	return Promise.all(matchingSuscriptions.map(async ({ userId, followedTags }) => {
@@ -515,32 +507,24 @@ async function notifyUsers(post, sent, members, feedSuscriptions) {
 }
 
 /**
+ * @description
  * De naturaleza memética.
- * Comprueba si la búsqueda de tags de {@linkcode Booru} no es aprobada por Dios
- * @param {Boolean} isNsfw 
- * @param {import('../../commands/Commons/typings').ComplexCommandRequest} request 
- * @param {Array<String>} terms 
- * @returns {Boolean}
+ * Comprueba si la búsqueda de tags de {@linkcode Booru} no es aprobada por Dios.
  */
-function isUnholy(isNsfw, request, terms) {
+function isUnholy(isNsfw: boolean, request: ComplexCommandRequest, terms: string[]): boolean {
 	return isNsfw
 		&& (request.userId !== userIds.papita)
 		&& (terms.includes('holo') || terms.includes('megumin'));
 }
 
-/**
- * @typedef {Object} CommandSearchOptions
- * @property {keyof import('./booruprops')['tagMaps']} [cmdtag] 
- * @property {string} [nsfwtitle] 
- * @property {string} [sfwtitle] 
- */
-/**
- * Busca las tags de {@linkcode Booru} deseadas y envía {@linkcode Message}s acorde a la petición
- * @param {import('../../commands/Commons/typings').ComplexCommandRequest} request
- * @param {import('../../commands/Commons/cmdOpts').CommandOptionSolver} args
- * @param {CommandSearchOptions} [options]
- */
-async function searchAndReplyWithPost(request, args, options = {}) {
+export interface CommandSearchOptions {
+	cmdtag?: keyof typeof tagMaps;
+	nsfwtitle?: string;
+	sfwtitle?: string;
+}
+
+/**@description Busca las tags de {@linkcode Booru} deseadas y envía {@linkcode Message}s acorde a la petición.*/
+export async function searchAndReplyWithPost(request: ComplexCommandRequest, args: import('../../commands/Commons/cmdOpts').CommandOptionSolver, options: CommandSearchOptions = {}) {
 	info('Se recibió una solicitud de respuesta con Posts resultados de búsqueda de Booru');
 
 	const {
@@ -553,7 +537,7 @@ async function searchAndReplyWithPost(request, args, options = {}) {
 		? request.channel.parent.nsfw
 		: request.channel.nsfw;
 
-	const clampPoolSize = (/**@type {number}*/x) => Math.max(2, Math.min(x, 10));
+	const clampPoolSize = (x: number) => Math.max(2, Math.min(x, 10));
 	const poolSize = args.flagExprIf('bomba', x => clampPoolSize(CommandOptionSolver.asNumber(x)), 1);
 	const words = (args.getString('etiquetas', true) ?? '').split(/\s+/);
 	debug('poolSize =', poolSize);
@@ -574,8 +558,7 @@ async function searchAndReplyWithPost(request, args, options = {}) {
 	debug('searchTags =', searchTags);
 	debug('userTags =', userTags);
 	debug('finalTags =', finalTags);
-	
-	/**@type {import('discord.js').User} */
+
 	const author = request.user;
 	
 	//Petición
@@ -588,7 +571,7 @@ async function searchAndReplyWithPost(request, args, options = {}) {
 		if(!response.length) {
 			warn('La respuesta de búsqueda no tiene resultados');
 			const replyOptions = { content: `⚠️ No hay resultados en **Gelbooru** para las tags **"${userTags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**` };
-			return /**@type {Promise<import('discord.js').Message<true>>}*/(request.editReply(replyOptions));
+			return request.editReply(replyOptions) as Promise<Message<true>>;
 		}
 
 		debug('Se obtuvieron resultados de búsqueda válidos');
@@ -626,7 +609,7 @@ async function searchAndReplyWithPost(request, args, options = {}) {
 			)
 		).catch(err => {
 			error(err, 'Ocurrió un problema al intentar enviar los resultados de búsqueda de Booru');
-			return /**@type {Array<import('discord.js').Message<true>>}*/([]);
+			return [] as Message<true>[];
 		});
 	} catch(err) {
 		error(err, 'Ocurrió un problema al procesar una petición de búsqueda de Booru');
@@ -642,12 +625,11 @@ async function searchAndReplyWithPost(request, args, options = {}) {
 				].join('\n'),
 			});
 			
-		return /**@type {Promise<import('discord.js').Message<true>>}*/(request.editReply({ embeds: [errorEmbed] }));
+		return request.editReply({ embeds: [errorEmbed] }) as Promise<Message<true>>;
 	}
 };
 
-/**@param {String} tag*/
-function formatTagName(tag) {
+export function formatTagName(tag: string) {
 	return tag
 		.replace(/\\/g, '\\\\')
 		.replace(/\*/g, '\\*')
@@ -655,51 +637,32 @@ function formatTagName(tag) {
 		.replace(/\|/g, '\\|');
 }
 
-/**@param {String} tag*/
-function formatTagNameNew(tag) {
+export function formatTagNameNew(tag: string) {
 	if(!tag.includes('`'))
 		return `\`${tag}\``;
 
 	return `\`\`${tag.replace(/`$/g, '` ')}\`\``;
 }
 
-/**
- * @param {Array<String>} tagNames
- * @param {String} sep
- * @param {{ leftStr?: String, rightStr?: String }} options
- */
-function formatTagNameList(tagNames, sep, options = {}) {
+export function formatTagNameList(tagNames: Array<string>, sep: string, options: { leftStr?: string; rightStr?: string; } = {}) {
 	const { leftStr = '', rightStr = '' } = options;
 	return tagNames
 		.map(tagName => `${leftStr}${formatTagName(tagName)}${rightStr}`)
 		.join(sep);
 }
 
-/**
- * @param {Array<String>} tagNames
- * @param {String} sep
- */
-function formatTagNameListNew(tagNames, sep) {
+export function formatTagNameListNew(tagNames: Array<string>, sep: string) {
 	return tagNames
 		.map(tagName => tagName === '(...)' ? '…' : formatTagNameNew(tagName))
 		.join(sep);
 }
 
-/**@param {import('discord.js').ContainerComponent} container*/
-function getPostUrlFromContainer(container) {
+export function getPostUrlFromContainer(container: ContainerComponent) {
 	const containerSize = container.components.length;
-	const containerButtonRow = /**@type {import('discord.js').ActionRow<import('discord.js').ButtonComponent>}*/(container.components[containerSize - 1]);
+	const containerButtonRow = container.components[containerSize - 1] as ActionRow<ButtonComponent>;
 	return containerButtonRow.components[0].url;
 }
 
 module.exports = {
 	SOURCE_STYLES,
-	formatBooruPostMessage,
-	notifyUsers,
-	searchAndReplyWithPost,
-	formatTagName,
-	formatTagNameList,
-	formatTagNameNew,
-	formatTagNameListNew,
-	getPostUrlFromContainer,
 };

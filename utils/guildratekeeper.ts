@@ -1,4 +1,4 @@
-const Logger = require('../utils/logs').default;
+import Logger from '../utils/logs';
 const { debug, info, error } = Logger('WARN', 'GRK');
 
 const fetchRegistry: {

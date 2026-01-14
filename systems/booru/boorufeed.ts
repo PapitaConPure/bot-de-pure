@@ -1,34 +1,31 @@
-const GuildConfigs = require('../../models/guildconfigs').default;
-const Discord = require('discord.js');
-const { formatBooruPostMessage, notifyUsers } = require('./boorusend');
-const { auditError, auditAction } = require('../others/auditor');
-const chalk = require('chalk');
-const { Booru } = require('./boorufetch');
-const { paginateRaw } = require('../../func');
-const { fetchGuildMembers } = require('../../utils/guildratekeeper');
-const { globalConfigs, booruApiKey, booruUserId, noDataBase } = require('../../data/globalProps');
+import { Booru } from './boorufetch';
+import GuildConfigs from '../../models/guildconfigs';
+import { formatBooruPostMessage, notifyUsers, PostFormatData, Suscription } from './boorusend';
+import { Client, Collection, Guild, GuildBasedChannel, GuildTextBasedChannel, MessageFlags, Snowflake } from 'discord.js';
+import { globalConfigs, booruApiKey, booruUserId, noDataBase } from '../../data/globalProps';
+import { fetchGuildMembers } from '../../utils/guildratekeeper';
+import { auditError, auditAction } from '../others/auditor';
+import { paginateRaw } from '../../func';
+import chalk from 'chalk';
 
 //const Logger = require('../../logs').default;
 //const { debug } = Logger('WARN', 'BooruSend');
 
-/**
- * @typedef {import('./boorusend').PostFormatData & { tags: String, lastFetchedAt?: Date, faults?: Number }} FeedData
- */
+export interface FeedData extends PostFormatData {
+    tags: string;
+    lastFetchedAt?: Date;
+    faults?: number;
+};
 
 //Configuraciones globales de actualización de Feeds
-/**@type {Map<Discord.Snowflake, Map<Discord.Snowflake, Array<String>>>}*/
-const feedTagSuscriptionsCache = new Map();
+export const feedTagSuscriptionsCache: Map<Snowflake, Map<Snowflake, Array<string>>> = new Map();
 
-/**@readonly*/const FEED_UPDATE_INTERVAL = 60e3 * 30;
-/**@readonly*/const FEED_UPDATE_MAX_POST_COUNT = 32;
-/**@readonly*/const FEED_BATCH_MAX_COUNT = 5;
-/**@readonly*/const LOG_MORE = false;
+const FEED_UPDATE_INTERVAL = 60e3 * 30;
+const FEED_UPDATE_MAX_POST_COUNT = 32;
+const FEED_BATCH_MAX_COUNT = 5;
+const LOG_MORE = false;
 
-/**
- * @param {Discord.Collection<Discord.Snowflake, Discord.Guild>} guilds
- * @returns {Promise<void>}
- */
-async function updateBooruFeeds(guilds) {
+async function updateBooruFeeds(guilds: Collection<Snowflake, Guild>): Promise<void> {
     const booru = new Booru({ apiKey: booruApiKey, userId: booruUserId });
     const startMs = Date.now();
 
@@ -43,17 +40,17 @@ async function updateBooruFeeds(guilds) {
 };
 
 /**
- * @param {Booru} booru El Booru a comprobar
- * @param {Discord.Collection<Discord.Snowflake, Discord.Guild>} guilds Colección de Guilds a procesar
+ * @param booru El Booru a comprobar
+ * @param guilds Colección de Guilds a procesar
  */
-async function processFeeds(booru, guilds) {
+async function processFeeds(booru: Booru, guilds: Collection<Snowflake, Guild>) {
     if(noDataBase) return;
 
     const guildIds = guilds.map(g => g.id);
-    const guildConfigs = /**@type {Array<import('../../models/guildconfigs').GuildConfigDocument>}*/(await GuildConfigs.find({
+    const guildConfigs = await GuildConfigs.find({
         guildId: { $in: guildIds },
         feeds: { $exists: true, $ne: {} },
-    }));
+    });
 
     const bulkOps = [];
     await Promise.all(guildConfigs.map(async gcfg => {
@@ -78,14 +75,13 @@ async function processFeeds(booru, guilds) {
                 return bulkOps.push(feed.reduceFaults());
 
             /**@type {Partial<FeedData>}*/
-            const toSave = {};
+            const toSave: Partial<FeedData> = {};
 
             if(feed.faults > 0)
                 toSave.faults = Math.max(0, feed.faults - 2);
 
             //Preparar suscripciones a Feeds
-            /**@type {Array<import('./boorusend').Suscription>}*/
-            const feedSuscriptions = [];
+            const feedSuscriptions: Suscription[] = [];
             for(const [ userId, feedSuscription ] of feedTagSuscriptionsCache) {
                 if(!feedSuscription.has(channelId)) continue;
 
@@ -95,11 +91,11 @@ async function processFeeds(booru, guilds) {
             
             //Comprobar recolectado en busca de imágenes nuevas
             const channel = feed.channel;
-            const messagesToSend = /**@type {Array<Discord.Message<true>>}*/([]);
+            const messagesToSend = /**@type {Array<Message<true>>}*/([]);
             await Promise.all(newPosts.map(async post => {
                 try {
                     const formattedContainer = await formatBooruPostMessage(booru, post, feed);
-                    const sent = await feed.channel.send({ flags: Discord.MessageFlags.IsComponentsV2, components: [formattedContainer] });
+                    const sent = await feed.channel.send({ flags: MessageFlags.IsComponentsV2, components: [formattedContainer] });
                     await notifyUsers(post, sent, members, feedSuscriptions);
                     messagesToSend.push(sent);
                 } catch(error) {
@@ -130,8 +126,7 @@ async function processFeeds(booru, guilds) {
         await GuildConfigs.bulkWrite(bulkOps);
 }
 
-/**@returns {Number}*/
-function getNextBaseUpdateStart() {
+function getNextBaseUpdateStart(): number {
     //Encontrar próximo inicio de fracción de hora para actualizar Feeds
     const now = new Date();
     let feedUpdateStart = FEED_UPDATE_INTERVAL - (
@@ -144,28 +139,25 @@ function getNextBaseUpdateStart() {
     return feedUpdateStart;
 };
 
-/**
- * @typedef {Object} GuildFeedChunk
- * @property {Date} timestamp
- * @property {NodeJS.Timeout} tid
- * @property {Array<[ Discord.Snowflake, Discord.Guild ]>} guilds
- */
-/**
- * Inicializa una cadena de actualización de Feeds en todas las Guilds que cuentan con uno
- * @param {Discord.Client} client 
- */
-async function setupGuildFeedUpdateStack(client) {
+interface GuildFeedChunk {
+    timestamp: Date;
+    tid: NodeJS.Timeout;
+    guilds: Array<[Snowflake, Guild]>;
+}
+
+/**@description Inicializa una cadena de actualización de Feeds en todas las Guilds que cuentan con uno.*/
+export async function setupGuildFeedUpdateStack(client: Client) {
     if(noDataBase) return;
 
     const feedUpdateStart = getNextBaseUpdateStart();
     const guildConfigs = await GuildConfigs.find({ feeds: { $exists: true } });
     /**@type {Array<GuildFeedChunk>}*/
-    const guildChunks = paginateRaw(client.guilds.cache.filter(guild => guildConfigs.some(gcfg => gcfg.guildId === guild.id)), FEED_BATCH_MAX_COUNT)
+    const guildChunks: Array<GuildFeedChunk> = paginateRaw(client.guilds.cache.filter(guild => guildConfigs.some(gcfg => gcfg.guildId === guild.id)), FEED_BATCH_MAX_COUNT)
         .map((g) => ({ tid: null, guilds: g, timestamp: null }));
     const chunkAmount = guildChunks.length;
     let shortestTime = 0;
     guildChunks.forEach((chunk, i) => {
-        const guilds = new Discord.Collection(chunk.guilds);
+        const guilds = new Collection(chunk.guilds);
         let chunkUpdateStart = feedUpdateStart + FEED_UPDATE_INTERVAL * (i / chunkAmount);
         if((chunkUpdateStart - FEED_UPDATE_INTERVAL) > 0)
             chunkUpdateStart -= FEED_UPDATE_INTERVAL;
@@ -187,11 +179,10 @@ async function setupGuildFeedUpdateStack(client) {
 };
 
 /**
- * Añade la Guild actual a la cadena de actualización de Feeds si aún no está en ella
- * @param {Discord.Guild} guild 
- * @returns {Number} La cantidad de milisegundos que faltan para actualizar el Feed añadido por primera vez, ó -1 si no se pudo agregar
+ * @description Añade la Guild actual a la cadena de actualización de Feeds si aún no está en ella
+ * @returns La cantidad de milisegundos que faltan para actualizar el Feed añadido por primera vez, ó -1 si no se pudo agregar
  */
-function addGuildToFeedUpdateStack(guild) {
+export function addGuildToFeedUpdateStack(guild: Guild): number {
     if(!('feedGuildChunks' in globalConfigs))
         return -1;
 
@@ -199,7 +190,7 @@ function addGuildToFeedUpdateStack(guild) {
         return -1;
 
     /**@type {Array<GuildFeedChunk>}*/
-    const guildChunks = globalConfigs.feedGuildChunks;
+    const guildChunks: Array<GuildFeedChunk> = globalConfigs.feedGuildChunks;
     const chunkAmount = guildChunks.length;
 
     //Retornar temprano si la guild ya está integrada al stack
@@ -223,7 +214,7 @@ function addGuildToFeedUpdateStack(guild) {
                 shortestTime = chunkUpdateStart;
 
             clearTimeout(chunk.tid);
-            guildChunks[i].tid = setTimeout(updateBooruFeeds, chunkUpdateStart, new Discord.Collection(chunk.guilds));
+            guildChunks[i].tid = setTimeout(updateBooruFeeds, chunkUpdateStart, new Collection(chunk.guilds));
             guildChunks[i].timestamp = new Date(Date.now() + chunkUpdateStart);
         });
 
@@ -240,7 +231,7 @@ function addGuildToFeedUpdateStack(guild) {
         const chunkAmount = guildChunks.length;
         newGuildChunkUpdateDelay = feedUpdateStart + FEED_UPDATE_INTERVAL * (chunkAmount - 1) / chunkAmount;
         clearTimeout(chunk.tid);
-        guildChunks[guildChunks.length - 1].tid = setTimeout(updateBooruFeeds, newGuildChunkUpdateDelay, new Discord.Collection(chunk.guilds));
+        guildChunks[guildChunks.length - 1].tid = setTimeout(updateBooruFeeds, newGuildChunkUpdateDelay, new Collection(chunk.guilds));
         guildChunks[guildChunks.length - 1].timestamp = new Date(Date.now() + newGuildChunkUpdateDelay);
     }
 
@@ -250,13 +241,12 @@ function addGuildToFeedUpdateStack(guild) {
 };
 
 /**
- * Actualiza el caché de una suscripción de Feed de un usuario con las tags suministradas
- * @param {Discord.Snowflake} userId La ID del usuario suspcrito
- * @param {Discord.Snowflake} channelId La ID del canal del Feed al cuál está suscripto el usuario
- * @param {Array<String>} newTags Las tags con las cuáles reemplazar las actuales en caché
- * @returns {void}
+ * @description Actualiza el caché de una suscripción de Feed de un usuario con las tags suministradas
+ * @param userId La ID del usuario suspcrito
+ * @param channelId La ID del canal del Feed al cuál está suscripto el usuario
+ * @param newTags Las tags con las cuáles reemplazar las actuales en caché
  */
-function updateFollowedFeedTagsCache(userId, channelId, newTags) {
+export function updateFollowedFeedTagsCache(userId: Snowflake, channelId: Snowflake, newTags: Array<string>): void {
     if(typeof userId !== 'string') throw ReferenceError('Se requiere una ID de usuario de tipo string');
     if(typeof channelId !== 'string') throw ReferenceError('Se requiere una ID de canal de tipo string');
     if(!Array.isArray(newTags)) throw TypeError('Las tags a incorporar deben ser un array');
@@ -279,43 +269,35 @@ function updateFollowedFeedTagsCache(userId, channelId, newTags) {
     return;
 }
 
-/**
- * @class
- * Representa un Feed programado de imágenes de {@linkcode Booru}
- */
-class BooruFeed {
-    /**@type {Booru}*/ booru;
-    /**@type {Discord.GuildTextBasedChannel}*/ channel;
-    /**@type {String}*/ tags;
+interface FeedOptions {
+    lastFetchedAt?: Date;
+    faults?: Number;
+    maxTags?: Number;
+    cornerIcon?: String;
+    title?: String;
+    subtitle?: String;
+    footer?: String;
+}
 
-    /**@type {Date}*/ lastFetchedAt;
-    /**@type {Number}*/ faults;
-    /**@type {Number}*/ maxTags;
-    /**@type {String}*/ cornerIcon;
-    /**@type {String}*/ title;
-    /**@type {String}*/ subtitle;
-    /**@type {String}*/ footer;
+/**@class Representa un Feed programado de imágenes de {@linkcode Booru}.*/
+export class BooruFeed {
+    booru: Booru;
+    channel: GuildTextBasedChannel;
+    tags: string;
 
-    /**
-     * @typedef {Object} FeedOptions
-     * @property {Date} [lastFetchedAt]
-     * @property {Number} [faults]
-     * @property {Number} [maxTags]
-     * @property {String} [cornerIcon]
-     * @property {String} [title]
-     * @property {String} [subtitle]
-     * @property {String} [footer]
-     */
+    lastFetchedAt: Date;
+    faults: number;
+    maxTags: number;
+    cornerIcon: string;
+    title: string;
+    subtitle: string;
+    footer: string;
 
     /**
-     * Crea una representación de un Feed programado de imágenes de {@linkcode Booru}
-     * @param {Booru} booru
-     * @param {Discord.GuildBasedChannel} channel
-     * @param {String} tags
-     * @param {FeedOptions} options 
+     * @description Crea una representación de un Feed programado de imágenes de {@linkcode Booru}.
      * @throws {TypeError}
      */
-    constructor(booru, channel, tags, options = undefined) {
+    constructor(booru: Booru, channel: GuildBasedChannel, tags: string, options = undefined) {
         this.booru = booru;
         this.channel = channel?.isTextBased() ? channel : null;
         this.tags = tags;
@@ -343,11 +325,8 @@ class BooruFeed {
         return !this.faults || this.faults < 10;
     }
 
-    /**
-     * Obtiene {@linkcode Post}s que no han sido publicados
-     * @returns {Promise<{ success: true, posts: Array<import('./boorufetch').Post>, newPosts: Array<import('./boorufetch').Post> } | { success: false, posts: [], newPosts: [] }>}
-     */
-    async fetchPosts() {
+    /**@description Obtiene {@linkcode Post}s que no han sido publicados.*/
+    async fetchPosts(): Promise<{ success: true; posts: Array<import('./boorufetch').Post>; newPosts: Array<import('./boorufetch').Post>; } | { success: false; posts: []; newPosts: []; }> {
         try {
             const fetched = await this.booru.search(this.tags, { limit: FEED_UPDATE_MAX_POST_COUNT });
             if(!fetched.length)
@@ -377,8 +356,8 @@ class BooruFeed {
     }
 
     /**
-     * Aumenta el número de fallas del Feed en pasos de 1
-     * @returns Una bulkOp de `updateOne` para un modelo {@linkcode GuildConfigs}, o `undefined` si ya se registraron 10 fallas
+     * @description Aumenta el número de fallas del Feed en pasos de 1.
+     * @returns Una bulkOp de `updateOne` para un modelo {@linkcode GuildConfigs}, o `undefined` si ya se registraron 10 fallas.
      */
     addFault() {
         const channel = this.channel;
@@ -403,8 +382,8 @@ class BooruFeed {
     }
 
     /**
-     * Reduce progresivamente las fallas detectadas del Feed en pasos de 2
-     * @returns Una bulkOp de `updateOne` para un modelo {@linkcode GuildConfigs}
+     * @description Reduce progresivamente las fallas detectadas del Feed en pasos de 2.
+     * @returns Una bulkOp de `updateOne` para un modelo {@linkcode GuildConfigs}.
      */
     reduceFaults() {
         const channel = this.channel;
@@ -433,9 +412,5 @@ class BooruFeed {
 }
 
 module.exports = {
-    setupGuildFeedUpdateStack,
-    addGuildToFeedUpdateStack,
     feedTagSuscriptionsCache,
-    updateFollowedFeedTagsCache,
-    BooruFeed,
 };
