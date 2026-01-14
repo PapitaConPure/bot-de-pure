@@ -1,4 +1,4 @@
-const WebhookOwner = require('../../models/webhookOwners.js');
+const WebhookOwner = require('../../models/webhookOwners.js').default;
 const { isThread } = require('../../func');
 
 /**

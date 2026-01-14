@@ -5,7 +5,7 @@ const { parseDateFromNaturalLanguage, parseTimeFromNaturalLanguage, addTime, utc
 const { MessageFlags, ContainerBuilder, ButtonBuilder, ButtonStyle, SeparatorSpacingSize, TextDisplayBuilder, ModalBuilder, TextInputStyle, ChannelType, TextInputBuilder } = require('discord.js');
 const { shortenText, compressId, decompressId } = require('../../func');
 const UserConfigs = require('../../models/userconfigs').default;
-const Reminder = require('../../models/reminders');
+const Reminder = require('../../models/reminders').default;
 const { isValid, addDays, isBefore, addMinutes, getUnixTime } = require('date-fns');
 const { scheduleReminder } = require('../../systems/others/remindersScheduler');
 const { UTCDate } = require('@date-fns/utc');

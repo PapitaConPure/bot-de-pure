@@ -1,5 +1,5 @@
-const Mongoose = require('mongoose');
-const { makeStringIdValidator } = require('./modelUtils');
+import Mongoose from 'mongoose';
+import { makeStringIdValidator } from './modelUtils';
 
 const reminderSchema = new Mongoose.Schema({
     _id: String,
@@ -24,10 +24,9 @@ const reminderSchema = new Mongoose.Schema({
     },
 });
 
-const model = Mongoose.model('reminder', reminderSchema);
+const Reminder = Mongoose.model('reminder', reminderSchema);
 
-// eslint-disable-next-line no-unused-vars
-function m() { return new model({}); }
-/**@typedef {ReturnType<(typeof m)>} ReminderDocument*/
+function m() { return new Reminder({}); }
+export type ReminderDocument = ReturnType<(typeof m)>;
 
-module.exports = model;
+export default Reminder;

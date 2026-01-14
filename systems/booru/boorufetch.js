@@ -1,6 +1,6 @@
 const { default: axios } = require('axios');
 const { shuffleArray, decodeEntities } = require('../../func');
-const BooruTags = require('../../models/boorutags');
+const BooruTags = require('../../models/boorutags').default;
 const { noDataBase } = require('../../data/globalProps');
 
 /**

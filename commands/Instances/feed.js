@@ -1,6 +1,6 @@
 const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType, MessageFlags, ContainerBuilder } = require('discord.js');
 const { isNotModerator, shortenText, guildEmoji, compressId, isNSFWChannel, randInArray, shortenTextLoose } = require('../../func');
-const GuildConfig = require('../../models/guildconfigs.js');
+const GuildConfig = require('../../models/guildconfigs.js').default;
 const { auditError, auditAction } = require('../../systems/others/auditor');
 const { CommandTags } = require('../Commons/cmdTags.js');
 const { globalConfigs, booruApiKey, booruUserId, tenshiAltColor } = require('../../data/globalProps');

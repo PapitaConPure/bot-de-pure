@@ -1,5 +1,7 @@
-const Mongoose = require('mongoose');
-const { serialize, deserialize, encode, decode, useMainPlayer } = require('discord-player');
+import Mongoose from 'mongoose';
+import { serialize, deserialize, encode, decode, useMainPlayer, GuildQueue, Track, Player } from 'discord-player';
+import { ComplexCommandRequest } from '../commands/Commons/typings';
+import { GuildMember, Interaction } from 'discord.js';
 
 const PlayerQueueSchema = new Mongoose.Schema({
 	guildId: {
@@ -13,23 +15,16 @@ const PlayerQueueSchema = new Mongoose.Schema({
 	},
 });
 
-const model = Mongoose.model('PlayerQueue', PlayerQueueSchema);
+const PlayerQueue = Mongoose.model('PlayerQueue', PlayerQueueSchema);
 
-// eslint-disable-next-line no-unused-vars
-function m() { return new model({}); }
-/**@typedef {ReturnType<(typeof m)>} PlayerTrackDocument*/
+function m() { return new PlayerQueue({}); }
+export type PlayerTrackDocument = ReturnType<(typeof m)>;
 
-/**
- * 
- * @param {import('../commands/Commons/typings').ComplexCommandRequest | import('discord.js').Interaction} request 
- * @param {import('discord-player').GuildQueue} queue 
- * @returns 
- */
-async function saveTracksQueue(request, queue) {
+export async function saveTracksQueue(request: ComplexCommandRequest | Interaction, queue: GuildQueue) {
 	if(!queue) return;
 
 	const pqQuery = { guildId: request.guild.id };
-	const playerQueue = (await model.findOne(pqQuery)) || new model(pqQuery);
+	const playerQueue = (await PlayerQueue.findOne(pqQuery)) || new PlayerQueue(pqQuery);
 	const serializedTracks = queue.tracks.map(serializeTrack);
 	if(queue.currentTrack)
 		serializedTracks.unshift(serializeTrack(queue.currentTrack));
@@ -39,11 +34,10 @@ async function saveTracksQueue(request, queue) {
 }
 
 /**
- * 
- * @param {import('../commands/Commons/typings').ComplexCommandRequest | import('discord.js').Interaction} request
- * @param {Boolean} [pauseOnInit=true] Si pausar la "pista actual" al reactivar la reproducción de una queue recuperada. `true` por defecto
+ * @param request La petición que requiere las pistas guardadas
+ * @param pauseOnInit Si pausar la "pista actual" al reactivar la reproducción de una queue recuperada. `true` por defecto
  */
-async function tryRecoverSavedTracksQueue(request, pauseOnInit = true) {
+export async function tryRecoverSavedTracksQueue(request: ComplexCommandRequest | Interaction, pauseOnInit: boolean = true) {
 	console.log('Attempting recovery of possible saved queue');
 	const { guild } = request;
 	const guildId = guild.id;
@@ -56,7 +50,7 @@ async function tryRecoverSavedTracksQueue(request, pauseOnInit = true) {
 	console.log('Queue wasn\'t cached. Searching in DB...');
 	const pqQuery = { guildId };
 	console.log(pqQuery);
-	const savedQueue = await model.findOne(pqQuery);
+	const savedQueue = await PlayerQueue.findOne(pqQuery);
 	
 	if(!savedQueue || !savedQueue.serializedTracks.length) return null;
 	
@@ -74,18 +68,14 @@ async function tryRecoverSavedTracksQueue(request, pauseOnInit = true) {
 	});
 }
 
-/**
- * @typedef {Object} __attempDatabaseQueueRecoveryData
- * @property {import('../commands/Commons/typings').ComplexCommandRequest | import('discord.js').Interaction} request
- * @property {Boolean} pauseOnInit
- * @property {import('discord-player').Track<unknown>} currentTrack
- * @property {Array<import('discord-player').Track<unknown>>} restOfTracks
- * 
- * @param {__attempDatabaseQueueRecoveryData} data 
- * @param {Number} retries 
- * @returns 
- */
-async function attemptDatabaseQueueRecovery(data, retries = 3) {
+interface __attempDatabaseQueueRecoveryData {
+	request: ComplexCommandRequest | Interaction;
+	pauseOnInit: Boolean;
+	currentTrack: Track<unknown>;
+	restOfTracks: Track<unknown>[];
+}
+
+async function attemptDatabaseQueueRecovery(data: __attempDatabaseQueueRecoveryData, retries: number = 3) {
 	const {
 		request,
 		pauseOnInit,
@@ -93,7 +83,7 @@ async function attemptDatabaseQueueRecovery(data, retries = 3) {
 		restOfTracks,
 	} = data;
 	
-	const channel = /**@type {import('discord.js').GuildMember}*/(request.member).voice?.channel;
+	const channel = (request.member as GuildMember).voice?.channel;
 	if(!channel)
 		return null;
 
@@ -136,26 +126,12 @@ async function attemptDatabaseQueueRecovery(data, retries = 3) {
 	}
 }
 
-/**
- * Serializa y codifica un Track a un string Base-64
- * @param {import('discord-player').Track<unknown>} t 
- * @returns {String}
- */
-function serializeTrack(t) {
+/**@description Serializa y codifica un Track a un string Base-64*/
+function serializeTrack(t: Track<unknown>): string {
 	return encode(serialize(t));
 }
 
-/**
- * Decodifica y deserializa un string Base-64 a un Track
- * @param {import('discord-player').Player} player 
- * @param {String} t 
- * @returns {import('discord-player').Track<unknown>}
- */
-function deserializeTrack(player, t) {
-	return /**@type {import('discord-player').Track<unknown>}*/(deserialize(player, decode(t)));
+/**@description Decodifica y deserializa un string Base-64 a un Track*/
+function deserializeTrack(player: Player, t: string): Track<unknown> {
+	return deserialize(player, decode(t)) as Track<unknown>;
 }
-
-module.exports = {
-	saveTracksQueue,
-	tryRecoverSavedTracksQueue,
-};

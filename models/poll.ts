@@ -1,4 +1,4 @@
-const Mongoose = require('mongoose');
+import Mongoose from 'mongoose';
 
 /**Describe una encuesta en progreso*/
 const PollSchema = new Mongoose.Schema({
@@ -17,4 +17,6 @@ const PollSchema = new Mongoose.Schema({
     votes: { type: Map, default: () => new Map() },
 });
 
-module.exports = Mongoose.model('Poll', PollSchema);
+const Poll = Mongoose.model('Poll', PollSchema);
+
+export default Poll;

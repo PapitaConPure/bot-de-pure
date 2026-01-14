@@ -1,5 +1,5 @@
 const { readdir } = require('fs/promises'); //Integrar operaciones sistema de archivos de consola
-const GuildConfig = require('../../models/guildconfigs.js');
+const GuildConfig = require('../../models/guildconfigs.js').default;
 const { p_pure } = require('../../utils/prefixes.js');
 const { CommandOptions, CommandTags, Command } = require('../Commons/');
 const { EmbedBuilder } = require('discord.js');

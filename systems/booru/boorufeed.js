@@ -1,4 +1,4 @@
-const GuildConfigs = require('../../models/guildconfigs');
+const GuildConfigs = require('../../models/guildconfigs').default;
 const Discord = require('discord.js');
 const { formatBooruPostMessage, notifyUsers } = require('./boorusend');
 const { auditError, auditAction } = require('../others/auditor');

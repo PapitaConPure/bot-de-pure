@@ -1,7 +1,7 @@
 const { tenshiColor } = require('../../data/globalProps');
 const { saki } = require('../../data/sakiProps');
 const userIds = require('../../data/userIds.json');
-const Hourai = require('../../models/saki.js');
+const Saki = require('../../models/saki.js').default;
 const { default: axios } = require('axios');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors } = require('discord.js');
 const { p_pure } = require('../../utils/prefixes.js');
@@ -131,7 +131,7 @@ const command = new Command('roles', flags)
 		const role = args.getRole('búsqueda', true);
 
 		if(role) {
-			const houraiDB = /**@type {import('../../models/saki.js').SakiDocument}*/((await Hourai.findOne({})) || new Hourai({}));
+			const houraiDB = /**@type {import('../../models/saki.js').SakiDocument}*/((await Saki.findOne({})) || new Saki({}));
 			const mentionRoles = /**@type {CategoryMap}*/(houraiDB.mentionRoles);
 
 			const roleFound = Object.values(mentionRoles).some(category => category.rolePool.some(roleItem => {
@@ -251,7 +251,7 @@ const command = new Command('roles', flags)
 		if(!interaction.inCachedGuild())
 			return interaction.reply({ content: '❌' });
 
-		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
+		const houraiDB = (await Saki.findOne({})) || new Saki({});
 		const boostedRecently = isBoosting(interaction.member) || interaction.user.id === userIds.papita;
 		const customRoleId = houraiDB.customRoles?.[interaction.user.id];
 
@@ -347,7 +347,7 @@ const command = new Command('roles', flags)
 			return interaction.isRepliable() && interaction.reply({ content: '❌' });
 		
 		const section = parseInt(sectionNumber);
-		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
+		const houraiDB = (await Saki.findOne({})) || new Saki({});
 		const mentionRoles = /**@type {CategoryMap}*/(houraiDB.mentionRoles);
 		const messageActions = {
 			embeds: [
@@ -374,7 +374,7 @@ const command = new Command('roles', flags)
 			return interaction.reply({ content: '❌' });
 		
 		const section = parseInt(sectionNumber);
-		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
+		const houraiDB = (await Saki.findOne({})) || new Saki({});
 		const mentionRoles = /**@type {CategoryMap}*/(houraiDB.mentionRoles);
 		const messageActions = {
 			embeds: [
@@ -395,7 +395,7 @@ const command = new Command('roles', flags)
 	})
 	.setSelectMenuResponse(async function selectReligion(interaction, sectionNumber) {
 		const section = parseInt(sectionNumber);
-		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
+		const houraiDB = (await Saki.findOne({})) || new Saki({});
 		const mentionRoles = /**@type {CategoryMap}*/(houraiDB.mentionRoles);
 
 		return interaction.reply({
@@ -494,7 +494,7 @@ const command = new Command('roles', flags)
 			return newComponent;
 		});
 
-		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
+		const houraiDB = (await Saki.findOne({})) || new Saki({});
 		let rolesToRemove = [];
 		if(category)
 			rolesToRemove = houraiDB.mentionRoles[category].rolePool
@@ -552,7 +552,7 @@ const command = new Command('roles', flags)
 	})
 	.setButtonResponse(async function removeAll(interaction, category) {
 		const { member } = interaction;
-		const houraiDB = (await Hourai.findOne({})) || new Hourai({});
+		const houraiDB = (await Saki.findOne({})) || new Saki({});
 		const rolePool = houraiDB.mentionRoles[category].rolePool
 			.filter(roleData => member.roles.cache.has(roleData.id));
 
@@ -577,7 +577,7 @@ const command = new Command('roles', flags)
 		interaction.editReply({ components: newComponents });
 	})
 	.setButtonResponse(async function customRole(interaction, operation) {
-		const houraiDB = (await Hourai.findOne({})) || new Hourai({ customRoles: {} });
+		const houraiDB = (await Saki.findOne({})) || new Saki({ customRoles: {} });
 		const userId = interaction.user.id;
 
 		switch(operation) {

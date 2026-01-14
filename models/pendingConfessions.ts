@@ -1,4 +1,4 @@
-const Mongoose = require('mongoose');
+import Mongoose from 'mongoose';
 
 const PendingConfessionSchema = new Mongoose.Schema({
     id: {
@@ -19,10 +19,9 @@ const PendingConfessionSchema = new Mongoose.Schema({
     },
 });
 
-const model = Mongoose.model('PendingConfession', PendingConfessionSchema);
+const PendingConfession = Mongoose.model('PendingConfession', PendingConfessionSchema);
 
-// eslint-disable-next-line no-unused-vars
-function m() { return new model({}); }
-/**@typedef {ReturnType<(typeof m)>} PendingConfessionDocument*/
+function m() { return new PendingConfession({}); }
+export type PendingConfessionDocument = ReturnType<(typeof m)>;
 
-module.exports = model;
+export default PendingConfession;

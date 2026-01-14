@@ -1,4 +1,4 @@
-const Mongoose = require('mongoose');
+import Mongoose from 'mongoose';
 
 const StatsSchema = new Mongoose.Schema({
     since: {
@@ -20,6 +20,11 @@ const StatsSchema = new Mongoose.Schema({
     }
 });
 
+export const Stats = Mongoose.model('Stats', StatsSchema);
+
+function m() { return new Stats({}); }
+export type StatsDocument = ReturnType<(typeof m)>;
+
 const ChannelStatsSchema = new Mongoose.Schema({
     guildId: {
         type: String,
@@ -39,18 +44,7 @@ const ChannelStatsSchema = new Mongoose.Schema({
     },
 });
 
-const model = Mongoose.model('Stats', StatsSchema);
-const channelModel = Mongoose.model('ChannelStats', ChannelStatsSchema);
+export const ChannelStats = Mongoose.model('ChannelStats', ChannelStatsSchema);
 
-// eslint-disable-next-line no-unused-vars
-function m() { return new model({}); }
-/**@typedef {ReturnType<(typeof m)>} StatsDocument*/
-
-// eslint-disable-next-line no-unused-vars
-function cm() { return new channelModel({}); }
-/**@typedef {ReturnType<(typeof cm)>} ChannelStatsDocument*/
-
-module.exports = {
-    Stats: model,
-    ChannelStats: channelModel
-};
+function cm() { return new ChannelStats({}); }
+export type ChannelStatsDocument = ReturnType<(typeof cm)>;

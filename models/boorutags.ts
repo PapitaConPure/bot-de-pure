@@ -1,6 +1,7 @@
-const Mongoose = require('mongoose');
-const Int32 = require('mongoose-int32').loadType(Mongoose);
-const TypeSafeInt32 = /**@type {typeof Number}*/(/**@type {unknown}*/(Int32));
+import Mongoose from 'mongoose';
+import _Int32 from 'mongoose-int32';
+const Int32 = _Int32.loadType(Mongoose);
+const TypeSafeInt32 = (Int32 as unknown) as typeof Number;
 
 const tagSchema = new Mongoose.Schema({
     _id: TypeSafeInt32,
@@ -37,8 +38,7 @@ const tagSchema = new Mongoose.Schema({
 
 const model = Mongoose.model('boorutags', tagSchema);
 
-// eslint-disable-next-line no-unused-vars
 function m() { return new model({}); }
-/**@typedef {ReturnType<(typeof m)>} TagDocument*/
+export type TagDocument = ReturnType<(typeof m)>;
 
-module.exports = model;
+export default model;

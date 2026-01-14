@@ -1,27 +1,32 @@
-const Mongoose = require('mongoose');
+import Mongoose from 'mongoose';
 
 /** Describe la configuración de un servidor. */
 const QueueSchema = new Mongoose.Schema({
     queueId: { type: String },
     content: { type: Array, default: [] },
 });
-const QueueModel = Mongoose.model('Queue', QueueSchema);
 
-/**
- * @typedef {{ queueId: String }} QueueQuery
- * @typedef {{ length: Number, mapFn?: (v, k) => *, sort: Sort }} QueueGenerationOptions
- * @typedef {*} QueueItem
- */
+export const QueueModel = Mongoose.model('Queue', QueueSchema);
+
+type QueueQuery = { queueId: String; };
+
+type QueueGenerationOptions = {
+    length: number;
+    mapFn?: (v: any, k: any) => any;
+    sort: Sort;
+};
+
+type QueueItem = any;
 
 /**
  * Genera una nueva Queue sin guardarla en la base de datos.
  * Es probable que prefieras usar getQueueItem antes que solamente esta función
- * @typedef {(a: *, b: *) => *} SortFn
- * @typedef {'NONE'|'REVERSE'|'ABC'|'ABC_R'|'VALUE'|'VALUE_R'|'RANDOM'|SortFn} Sort
- * @param {QueueGenerationOptions} options Largo, mapeado y ordenamiento de la Queue
- * @returns {Array<QueueItem>} Queue generada
  */
-const generateQueue = ({ length = 0, mapFn = (v, k) => k, sort = 'NONE' }) => {
+type SortFn = (a: any, b: any) => any;
+
+type Sort = 'NONE' | 'REVERSE' | 'ABC' | 'ABC_R' | 'VALUE' | 'VALUE_R' | 'RANDOM' | SortFn;
+
+export const generateQueue = ({ length = 0, mapFn = (v, k) => k, sort = 'NONE' }: QueueGenerationOptions): QueueItem[] => {
     if(length <= 0) return [];
     if(typeof mapFn !== 'function') return Array(length).fill(null);
 
@@ -39,23 +44,18 @@ const generateQueue = ({ length = 0, mapFn = (v, k) => k, sort = 'NONE' }) => {
     }
 };
 
-/**
- * Guarda una Queue con el Query especificado
- * @param {QueueQuery} queueQuery 
- * @returns
- */
-const saveQueue = async (queueQuery) => {
+/**@description Guarda una Queue con el Query especificado*/
+export const saveQueue = async (queueQuery) => {
     const queue = (await QueueModel.findOne(queueQuery)) || new QueueModel(queueQuery);
     return queue.save();
 };
 
 /**
+ * @description
  * Sustrae el primer elemento de la Queue especificada, lo devuelve y guarda los cambios en la base de datos.
  * Si la Queue no existe o está vacía, se genera una nueva basada en las opciones proporcionadas o valores de generación por defecto
- * @param {QueueQuery & QueueGenerationOptions} subtractOptions
- * @returns {Promise<QueueItem>}
  */
-const getQueueItem = async (subtractOptions) => {
+export const getQueueItem = async (subtractOptions: QueueQuery & QueueGenerationOptions): Promise<QueueItem> => {
     const { queueId, ...queueGenOptions } = subtractOptions;
     const queueQuery = { queueId };
     const queue = (await QueueModel.findOne(queueQuery)) || new QueueModel(queueQuery);
@@ -69,11 +69,4 @@ const getQueueItem = async (subtractOptions) => {
     await queue.save();
 
     return item;
-};
-
-module.exports = {
-    QueueModel,
-    generateQueue,
-    saveQueue,
-    getQueueItem,
 };

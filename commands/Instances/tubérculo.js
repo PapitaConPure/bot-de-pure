@@ -1,6 +1,6 @@
 const { default: axios } = require('axios');
 const { psDocsButton, psEditorButton } = require('./purescript.js');
-const GuildConfig = require('../../models/guildconfigs.js');
+const GuildConfig = require('../../models/guildconfigs.js').default;
 const { CommandOptions, CommandTags, Command, CommandOptionSolver, CommandParam } = require('../Commons/');
 const { p_pure } = require('../../utils/prefixes.js');
 const { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId, warn } = require('../../func.js');

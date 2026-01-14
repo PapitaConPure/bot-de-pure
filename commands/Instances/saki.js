@@ -1,6 +1,6 @@
 const { CommandTags, Command, CommandOptions } = require('../Commons/');
 const { saki } = require('../../data/sakiProps');
-const HouraiCfg = require('../../models/saki.js');
+const Saki = require('../../models/saki.js').default;
 const { CommandPermissions } = require('../Commons/cmdPerms.js');
 
 let crazyBackupId = saki.crazyBackupChannelId;
@@ -93,7 +93,7 @@ const command = new Command('saki', flags)
 		const despedida = args.parseFlagExpr('despedida');
 		const pingBienvenida = args.parseFlagExpr('ping');
         
-        const sakiCfg = (await HouraiCfg.findOne({})) || new HouraiCfg();
+        const sakiCfg = (await Saki.findOne({})) || new Saki();
         const applied = /**@type {string[]}*/([]);
 
         if(!procesarConfig(sakiCfg, applied, bienvenida, 'bienvenida', 'Bienvenida'))

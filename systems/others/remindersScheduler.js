@@ -1,5 +1,5 @@
 const { MessageFlags, ContainerBuilder } = require('discord.js');
-const Reminder = require('../../models/reminders');
+const Reminder = require('../../models/reminders').default;
 const Logger = require('../../utils/logs').default;
 const { Translator } = require('../../i18n');
 const { decompressId } = require('../../func');

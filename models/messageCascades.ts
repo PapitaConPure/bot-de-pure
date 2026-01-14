@@ -1,4 +1,4 @@
-const Mongoose = require('mongoose');
+import Mongoose from 'mongoose';
 
 const MessageCascadeSchema = new Mongoose.Schema({
     messageId: {
@@ -16,10 +16,9 @@ const MessageCascadeSchema = new Mongoose.Schema({
     },
 });
 
-const model = Mongoose.model('MessageCascade', MessageCascadeSchema);
+const MessageCascade = Mongoose.model('MessageCascade', MessageCascadeSchema);
 
-// eslint-disable-next-line no-unused-vars
-function m() { return new model({}); }
-/**@typedef {ReturnType<(typeof m)>} MessageCascadeDocument*/
+function m() { return new MessageCascade({}); }
+export type MessageCascadeDocument = ReturnType<(typeof m)>;
 
-module.exports = model;
+export default MessageCascade;

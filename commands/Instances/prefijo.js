@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require('discord.js');
 const { shortenText } = require('../../func');
-const PrefixPair = require('../../models/prefixpair.js');
+const PrefixPair = require('../../models/prefixpair.js').default;
 const { prefixes, tenshiColor } = require('../../data/globalProps');
 const { p_pure } = require('../../utils/prefixes');
 const { CommandOptions, CommandTags, Command } = require('../Commons/');

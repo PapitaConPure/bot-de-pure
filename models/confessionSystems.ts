@@ -1,5 +1,5 @@
-const Mongoose = require('mongoose');
-const { makeStringIdValidator } = require('./modelUtils');
+import Mongoose from 'mongoose';
+import { makeStringIdValidator } from './modelUtils';
 
 const ConfessionSystemSchema = new Mongoose.Schema({
     guildId: {
@@ -20,13 +20,12 @@ const ConfessionSystemSchema = new Mongoose.Schema({
     pending: {
         type: Array,
         default: [],
-    }
+    },
 });
 
-const model = Mongoose.model('ConfessionSystem', ConfessionSystemSchema);
+const ConfessionSystem = Mongoose.model('ConfessionSystem', ConfessionSystemSchema);
 
-// eslint-disable-next-line no-unused-vars
-function m() { return new model({}); }
-/**@typedef {ReturnType<(typeof m)>} ConfessionSystemDocument*/
+function m() { return new ConfessionSystem({}); }
+export type ConfessionSystemDocument = ReturnType<(typeof m)>;
 
-module.exports = model;
+export default ConfessionSystem;

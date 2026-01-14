@@ -1,7 +1,7 @@
 const userIds = require('../data/userIds.json');
 const serverIds = require('../data/serverIds.json');
 const { EmbedBuilder } = require('discord.js');
-const GuildConfig = require('../models/guildconfigs.js');
+const GuildConfig = require('../models/guildconfigs.js').default;
 const { isNotModerator } = require('../func');
 const chalk = require('chalk');
 const { auditError } = require('../systems/others/auditor');

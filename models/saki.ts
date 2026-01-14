@@ -1,12 +1,12 @@
-const Mongoose = require('mongoose');
+import Mongoose from 'mongoose';
 
 /** Describe la configuración de Saki Scans (Hourai Doll) */
 const SakiSchema = new Mongoose.Schema({
     configs: {
         type: Object,
-        bienvenida: /**@type {boolean}*/(/**@type {unknown}*/({ type: Boolean, default: true })),
-        despedida: /**@type {boolean}*/(/**@type {unknown}*/({ type: Boolean, default: true })),
-        pingBienvenida: /**@type {boolean}*/(/**@type {unknown}*/({ type: Boolean, default: true })),
+        bienvenida: { type: Boolean, default: true } as unknown as boolean,
+        despedida: { type: Boolean, default: true } as unknown as boolean,
+        pingBienvenida: { type: Boolean, default: true } as unknown as boolean,
         default: {},
     },
     customRoles: { type: Object, default: {} },
@@ -51,10 +51,9 @@ const SakiSchema = new Mongoose.Schema({
     },
 });
 
-const model = Mongoose.model('Hourai', SakiSchema);
+const Saki = Mongoose.model('Hourai', SakiSchema);
 
-// eslint-disable-next-line no-unused-vars
-function m() { return new model({}); }
-/**@typedef {ReturnType<(typeof m)>} SakiDocument*/
+function m() { return new Saki({}); }
+export type SakiDocument = ReturnType<(typeof m)>;
 
-module.exports = model;
+export default Saki;

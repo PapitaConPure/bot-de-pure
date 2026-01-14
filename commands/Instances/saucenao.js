@@ -4,7 +4,7 @@ const { pourSauce, testSauceNAOToken } = require('../../systems/others/saucenao'
 const { Translator } = require('../../i18n');
 const { encryptString } = require('../../utils/security');
 const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts');
-const SauceNAOUser = require('../../models/saucenaoUsers');
+const SauceNAOUser = require('../../models/saucenaoUsers').default;
 
 const Logger = require('../../utils/logs').default;
 const { debug } = Logger('ERROR', 'p!saucenao');

@@ -1,4 +1,4 @@
-const Mongoose = require('mongoose');
+import Mongoose from 'mongoose';
 
 /**Describe la configuración de un sistema PureVoice de servidor.*/
 const PureVoiceSchema = new Mongoose.Schema({
@@ -28,11 +28,10 @@ const PureVoiceSchema = new Mongoose.Schema({
 	},
 });
 
-const PureVoiceModel = Mongoose.model('PureVoice', PureVoiceSchema);
+export const PureVoiceModel = Mongoose.model('PureVoice', PureVoiceSchema);
 
-// eslint-disable-next-line no-unused-vars
 function m() { return new PureVoiceModel({}); }
-/**@typedef {ReturnType<(typeof m)>} PureVoiceDocument*/
+export type PureVoiceDocument = ReturnType<(typeof m)>;
 
 /** */
 const PureVoiceSessionSchema = new Mongoose.Schema({
@@ -75,13 +74,7 @@ const PureVoiceSessionSchema = new Mongoose.Schema({
 	},
 });
 
-const PureVoiceSessionModel = Mongoose.model('PureVoiceSession', PureVoiceSessionSchema);
+export const PureVoiceSessionModel = Mongoose.model('PureVoiceSession', PureVoiceSessionSchema);
 
-// eslint-disable-next-line no-unused-vars
 function n() { return new PureVoiceSessionModel({}); }
-/**@typedef {ReturnType<(typeof n)>} PureVoiceSessionDocument*/
-
-module.exports = {
-	PureVoiceModel,
-	PureVoiceSessionModel,
-};
+export type PureVoiceSessionDocument = ReturnType<(typeof n)>;
