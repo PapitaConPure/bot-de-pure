@@ -7,7 +7,8 @@ const tags = new CommandTags().add('COMMON');
 const command = new Command('gatos', tags)
 	.setAliases(
         'gato', 'felino', 'gatito', 'gatitos', 'miau', 'michi', 'michis',
-        'cats', 'cat', 'meow', 'nya', 'kitty', 'kitties'
+        'cats', 'cat', 'meow', 'kitty', 'kitties',
+		'neko', 'nya',
     )
 	.setLongDescription('Muestra imágenes de gatitos')
 	.setLongDescription(
@@ -42,7 +43,7 @@ const command = new Command('gatos', tags)
 		} catch(err) {
 			if(!(err instanceof AxiosError))
 				throw err;
-		
+
 			const container = new ContainerBuilder()
 				.setAccentColor(Colors.Red)
 				.addTextDisplayComponents(
