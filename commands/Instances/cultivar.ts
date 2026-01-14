@@ -1,13 +1,14 @@
-const { randRange, improveNumber } = require("../../func");
-const { CommandTags, Command } = require('../Commons/');
-const UserConfigs = require('../../models/userconfigs').default;
-const { tenshiColor } = require('../../data/globalProps');
-const { EmbedBuilder } = require("discord.js");
-const { Translator } = require("../../i18n");
-const { addDays, getUnixTime, isBefore } = require("date-fns");
+import { CommandTags, Command } from '../Commons/';
+import { EmbedBuilder } from 'discord.js';
+import { randRange, improveNumber } from '../../func';
+import UserConfigs from '../../models/userconfigs';
+import { tenshiColor } from '../../data/globalProps';
+import { addDays, getUnixTime, isBefore } from 'date-fns';
+import { Translator } from '../../i18n';
 
-const flags = new CommandTags().add('COMMON');
-const command = new Command('cultivar', flags)
+const tags = new CommandTags().add('COMMON');
+
+const command = new Command('cultivar', tags)
     .setAliases(
         'cosechar', 'cosecha', 'recolectar',
         'cultivate', 'farm',
@@ -15,8 +16,8 @@ const command = new Command('cultivar', flags)
     )
     .setBriefDescription('Permite cultivar entre 54 y 66 PRC diario')
     .setDescription(
-        'Permite cultivar <:prc:1097208828946301123> 54~66',
-        'Solo se puede hacer una vez por día',
+        'Permite cultivar <:prc:1097208828946301123> 54~66.',
+        'Solo se puede hacer una vez por día.',
     )
     .setExecution(async request => {
         const userQuery = { userId: request.userId };
@@ -46,4 +47,4 @@ const command = new Command('cultivar', flags)
         return request.reply({ embeds: [embed] });
     });
 
-module.exports = command;
+export default command;

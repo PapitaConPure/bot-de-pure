@@ -1,10 +1,11 @@
-const { improveNumber, compressId, sleep } = require('../../func');
-const { CommandTags, Command, CommandOptions } = require('../Commons/');
-const UserConfigs = require('../../models/userconfigs').default;
-const { EmbedBuilder } = require("discord.js");
-const { Translator } = require("../../i18n");
-const { globalConfigs, tenshiColor } = require('../../data/globalProps');
-const { auditError } = require('../../systems/others/auditor');
+import { CommandTags, Command, CommandOptions } from '../Commons/';
+import { improveNumber, compressId, sleep } from '../../func';
+import { ComplexCommandRequest } from '../Commons/typings';
+import { globalConfigs, tenshiColor } from '../../data/globalProps';
+import { auditError } from '../../systems/others/auditor';
+import UserConfigs from '../../models/userconfigs';
+import { EmbedBuilder } from 'discord.js';
+import { Translator } from '../../i18n';
 
 const transferLocks = new Set();
 
@@ -27,7 +28,7 @@ const command = new Command('transferir', flags)
             swapIfNeeded(args.args);
 
         const amount = args.getNumber('monto');
-        const target = await args.getUser('usuario');
+        const target = args.getUser('usuario');
 
         if(!amount || isNaN(amount))
             return request.editReply({ content: translator.getText('transferAmountExpected') });
@@ -43,7 +44,7 @@ const command = new Command('transferir', flags)
 
         if(amount < 1)
             return request.editReply({ content: translator.getText('transferAmountTooLow') });
-        
+
         const { userId } = request;
         const { id: targetId } = target;
 
@@ -53,7 +54,7 @@ const command = new Command('transferir', flags)
         try {
             transferLocks.add(userId);
             transferLocks.add(targetId);
-    
+
             const userQuery   = { userId: userId };
             const targetQuery = { userId: targetId };
             const [ userConfigs, targetConfigs ] = await Promise.all([
@@ -121,21 +122,21 @@ const command = new Command('transferir', flags)
         }
     });
 
-/**@param {Array<string>} args*/
-function swapIfNeeded(args) {
-    if(!Array.isArray(args)) return;
+function swapIfNeeded(args: string[]) {
+    if(!Array.isArray(args))
+        return;
 
     const amount = +args[0];
 
-    if(!isNaN(amount)) return;
+    if(!isNaN(amount))
+        return;
     
     const t = args[0];
     args[0] = args[1];
     args[1] = t;
 }
 
-/**@param {import('../Commons/typings').ComplexCommandRequest} request*/
-function makeTransactionCode(request) {
+export function makeTransactionCode(request: ComplexCommandRequest) {
     const requestId = request.id;
     const channelId = request.channel.id;
 
@@ -153,4 +154,4 @@ function makeTransactionCode(request) {
     return `[${compRequestId}]${compChannelId}{${compMergedIds}}`;
 }
 
-module.exports = command;
+export default command;
