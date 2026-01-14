@@ -1,11 +1,12 @@
-const { ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonStyle, EmbedBuilder, Colors } = require('discord.js'); //Integrar discord.js
-const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/');
-const { makeTextInputRowBuilder, makeButtonRowBuilder } = require('../../utils/tsCasts.js');
-const { Translator } = require('../../i18n');
-const { ImgurClient } = require('imgur');
-const { default: axios } = require('axios');
-const ImgurUser = require('../../models/imgurUsers.js');
-const { envPath } = require('../../data/globalProps');
+import { ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonStyle, EmbedBuilder, Colors } from 'discord.js';
+import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons/';
+import { makeTextInputRowBuilder, makeButtonRowBuilder } from '../../utils/tsCasts.js';
+import ImgurUser from '../../models/imgurUsers.js';
+import { envPath } from '../../data/globalProps';
+import { Translator } from '../../i18n';
+import { ImgurClient } from 'imgur';
+import { Payload } from 'imgur/dist/common/types';
+import axios from 'axios';
 
 const options = new CommandOptions()
 	.addParam('enlaces', 'TEXT', 'para indicar enlaces de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
@@ -84,9 +85,9 @@ const command = new Command('imgur', tags)
 			.map(async attachment => /**@type {ReadableStream}*/((await axios.get(attachment.url, { responseType: 'stream' })).data))
 			.slice(0, 5));
 
-		const uploads = [
-			...imageUrls.map(url => ({ image: url, type: /**@type {const}*/('url') })),
-			...imageStreams.map(stream => ({ image: stream, type: /**@type {const}*/('stream') })),
+		const uploads: Payload[] = [
+			...imageUrls.map(url => ({ image: url, type: 'url' as const })),
+			...imageStreams.map(stream => ({ image: stream, type: 'stream' as const })),
 		];
 
 		if(!uploads.length)
@@ -141,8 +142,7 @@ const command = new Command('imgur', tags)
 		});
 	});
 
-/**@param {Translator} translator*/
-function makeRegisterModal(translator) {
+function makeRegisterModal(translator: Translator) {
 	const clientIdRow = makeTextInputRowBuilder().addComponents(
 		new TextInputBuilder()
 			.setCustomId('clientId')
@@ -162,4 +162,4 @@ function makeRegisterModal(translator) {
 	return modal;
 }
 
-module.exports = command;
+export default command;
