@@ -1,44 +1,33 @@
-const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType, MessageFlags, ContainerBuilder } = require('discord.js');
-const { isNotModerator, shortenText, guildEmoji, compressId, isNSFWChannel, randInArray, shortenTextLoose } = require('../../func');
-const GuildConfig = require('../../models/guildconfigs.js').default;
-const { auditError, auditAction } = require('../../systems/others/auditor');
-const { CommandTags } = require('../Commons/cmdTags.js');
-const { globalConfigs, booruApiKey, booruUserId, tenshiAltColor } = require('../../data/globalProps');
-const { Booru, TagTypes, BooruUnknownPostError } = require('../../systems/booru/boorufetch');
-const { Command } = require('../Commons/cmdBuilder.js');
-const { addGuildToFeedUpdateStack } = require('../../systems/booru/boorufeed');
-const { formatBooruPostMessage, formatTagNameListNew, getPostUrlFromContainer } = require('../../systems/booru/boorusend.js');
-const { Translator } = require('../../i18n');
-const { CommandPermissions } = require('../Commons/cmdPerms.js');
-const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts.js');
-const { getUnixTime } = require('date-fns');
 
-/**@param {Translator} translator*/
-const wizTitle = (translator) => translator.getText('feedAuthor');
+import { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType, MessageFlags, ContainerBuilder, ContainerComponent, ButtonInteraction, SelectMenuComponentOptionData, Message, StringSelectMenuInteraction, ModalSubmitInteraction } from 'discord.js';
+import { isNotModerator, shortenText, guildEmoji, compressId, isNSFWChannel, randInArray, shortenTextLoose } from '../../func';
+import GuildConfig from '../../models/guildconfigs.js';
+import { auditError, auditAction } from '../../systems/others/auditor';
+import { globalConfigs, booruApiKey, booruUserId, tenshiAltColor } from '../../data/globalProps';
+import { Booru, TagTypes, BooruUnknownPostError } from '../../systems/booru/boorufetch';
+import { addGuildToFeedUpdateStack } from '../../systems/booru/boorufeed';
+import { formatBooruPostMessage, formatTagNameListNew, getPostUrlFromContainer } from '../../systems/booru/boorusend.js';
+import { Translator } from '../../i18n';
+import { makeButtonRowBuilder, makeStringSelectMenuRowBuilder, makeTextInputRowBuilder } from '../../utils/tsCasts.js';
+import { getUnixTime } from 'date-fns';
+import { Command, CommandTags, CommandPermissions } from '../Commons';
 
-/**@param {String} compressedAuthorId*/
-const cancelbutton = (compressedAuthorId) => new ButtonBuilder()
+const wizTitle = (translator: Translator) => translator.getText('feedAuthor');
+
+const cancelbutton = (compressedAuthorId: string) => new ButtonBuilder()
 	.setCustomId(`feed_cancelWizard_${compressedAuthorId}`)
 	.setEmoji('1355143793577426962')
 	.setStyle(ButtonStyle.Secondary);
 
-/**
- * @param {Translator} translator
- * @param {String} compressedAuthorId
- */
-const finishButton = (translator, compressedAuthorId) => new ButtonBuilder()
+const finishButton = (translator: Translator, compressedAuthorId: string) => new ButtonBuilder()
 	.setCustomId(`feed_finishWizard_${compressedAuthorId}`)
 	.setLabel(translator.getText('buttonFinish'))
 	.setStyle(ButtonStyle.Secondary);
 
 const safeTags = (_tags = '') => _tags.replace(/\\*\*/g,'\\*').replace(/\\*_/g,'\\_');
 
-/**
- * @param {import('discord.js').ButtonInteraction} interaction 
- * @returns {Promise<Array<import('discord.js').SelectMenuComponentOptionData>>}
- */
-const generateFeedOptions = async (interaction) => {
-	const gcfg = /**@type {import('../../models/guildconfigs.js').GuildConfigDocument}*/(await GuildConfig.findOne({ guildId: interaction.guild.id }));
+const generateFeedOptions = async (interaction: ButtonInteraction): Promise<SelectMenuComponentOptionData[]> => {
+	const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 	const feedOptions = Object.entries(gcfg.feeds).map(([chid, feed]) => {
 		const channel = interaction.guild.channels.cache.get(chid);
 		if(!channel) {
@@ -56,20 +45,15 @@ const generateFeedOptions = async (interaction) => {
 	return feedOptions;
 }
 
-/**
- * @param {import('discord.js').Message | import('discord.js').ButtonInteraction | import('discord.js').StringSelectMenuInteraction | import('discord.js').ModalSubmitInteraction} interaction
- * @param {String} channelId
- * @param {Translator} translator
- */
-function tagsSetupPrompt(interaction, channelId, translator) {
-	const fetchedChannel = /**@type {import('discord.js').BaseGuildTextChannel}*/(interaction.guild.channels.cache.get(channelId));
+function tagsSetupPrompt(interaction: Message | ButtonInteraction | StringSelectMenuInteraction | ModalSubmitInteraction, channelId: string, translator: Translator) {
+	const fetchedChannel = interaction.guild.channels.cache.get(channelId);
 	const gelEmoji = guildEmoji('gelbooru', globalConfigs.slots.slot3);
 	const embed = new EmbedBuilder()
 		.setColor(Colors.Blurple)
 		.setAuthor({ name: wizTitle(translator), iconURL: interaction.client.user.avatarURL() })
 		.setFooter({ text: 'Asignar tags' })
 		.addFields(
-			{ name: 'Destino', value: `**${fetchedChannel.name}** (canal ${fetchedChannel.nsfw ? 'NSFW' : 'SFW'})` },
+			{ name: 'Destino', value: `**${fetchedChannel.name}** (canal ${isNSFWChannel(fetchedChannel) ? 'NSFW' : 'SFW'})` },
 			{
 				name: 'Describe las tags del Feed',
 				value: [
@@ -424,16 +408,20 @@ const command = new Command('feed', tags)
 	}, { userFilterIndex: 0 })
 	.setSelectMenuResponse(async function selectedCustomize(interaction, authorId) {
 		const translator = await Translator.from(interaction.user.id);
-		const fetchedChannel = /**@type {import('discord.js').BaseGuildTextChannel}*/(interaction.guild.channels.cache.get(interaction.values[0] || interaction.channel.id));
+		const fetchedChannel = interaction.guild.channels.cache.get(interaction.values[0] || interaction.channel.id);
+
+		if(!fetchedChannel.isSendable())
+			return;
+
 		const wizard = new EmbedBuilder()
 			.setColor(Colors.Blurple)
 			.setAuthor({ name: wizTitle(translator), iconURL: interaction.client.user.avatarURL() })
 			.setFooter({ text: 'Seleccionar elemento a personalizar' })
 			.addFields(
-				{ name: 'Destino', value: `**${fetchedChannel.name}** (canal ${fetchedChannel.nsfw ? 'NSFW' : 'SFW'})` },
+				{ name: 'Destino', value: `**${fetchedChannel.name}** (canal ${isNSFWChannel(fetchedChannel) ? 'NSFW' : 'SFW'})` },
 				{ name: 'Selecciona un elemento a personalizar', value: 'Usa el menú desplegable para decidir qué personalizar' },
 			);
-		
+
 		return interaction.update({
 			embeds: [wizard],
 			components: [
@@ -587,14 +575,13 @@ const command = new Command('feed', tags)
 	.setSelectMenuResponse(async function selectItemCustomize(interaction, channelId, authorId) {
 		const translator = await Translator.from(interaction.user.id);
 		const customizeTarget = interaction.values[0];
-		const fetchedChannel = /**@type {import('discord.js').BaseGuildTextChannel}*/(interaction.guild.channels.cache.get(channelId));
-		console.log(channelId, fetchedChannel);
-		
+		const fetchedChannel = /**@type {BaseGuildTextChannel}*/(interaction.guild.channels.cache.get(channelId));
+
 		const wizard = new EmbedBuilder()
 			.setColor(Colors.Green)
 			.setAuthor({ name: wizTitle(translator), iconURL: interaction.client.user.avatarURL() })
 			.setFooter({ text: 'Personalizar elemento' })
-			.addFields({ name: 'Destino', value: `**${fetchedChannel.name}** (canal ${fetchedChannel.nsfw ? 'NSFW' : 'SFW'})` });
+			.addFields({ name: 'Destino', value: `**${fetchedChannel.name}** (canal ${isNSFWChannel(fetchedChannel) ? 'NSFW' : 'SFW'})` });
 		
 		const row = makeButtonRowBuilder();
 		switch(customizeTarget) {
@@ -1008,7 +995,7 @@ const command = new Command('feed', tags)
 	.setButtonResponse(async function showFeedImageTags(interaction, isNotFeed) {
         const translator = await Translator.from(interaction.user.id);
 		
-		const container = /**@type {import('discord.js').ContainerComponent}*/(interaction.message.components[0]);
+		const container = interaction.message.components[0] as ContainerComponent;
 		const url = getPostUrlFromContainer(container);
 		const booru = new Booru({ userId: booruUserId, apiKey: booruApiKey });
 		try {
@@ -1024,8 +1011,8 @@ const command = new Command('feed', tags)
 			const postCopyrightTags = postTags
 				.filter(t => t.type === TagTypes.COPYRIGHT)
 				.map(t => t.name);
-		
-			const otherTagTypes = /**@type {Array<import('../../systems/booru/boorufetch').TagType>}*/([
+
+			const otherTagTypes: Array<import('../../systems/booru/boorufetch').TagType> = ([
 				TagTypes.ARTIST,
 				TagTypes.CHARACTER,
 				TagTypes.COPYRIGHT,
@@ -1144,8 +1131,8 @@ const command = new Command('feed', tags)
 			.setMaxLength(160)
 			.setPlaceholder('touhou animated 1girl')
 			.setStyle(TextInputStyle.Paragraph);
-		let title;
 
+		let title: string;
 		if(operation === 'ADD') {
 			tagsInput.setLabel(translator.getText('feedEditTagsInputAdd'));
 			title = translator.getText('feedEditTagsTitleAdd');
@@ -1173,7 +1160,7 @@ const command = new Command('feed', tags)
 			});
 		
 		const { message } = interaction;
-		const container = /**@type {import('discord.js').ContainerComponent}*/(message.components[0]);
+		const container = message.components[0] as ContainerComponent;
 		const url = getPostUrlFromContainer(container);
 		if(isNotFeed || !url)
 			return Promise.all([
@@ -1249,7 +1236,7 @@ const command = new Command('feed', tags)
 	.setButtonResponse(async function contribute(interaction) {
         const translator = await Translator.from(interaction.user.id);
 
-		const container = /**@type {import('discord.js').ContainerComponent}*/(interaction.message.components[0]);
+		const container = interaction.message.components[0] as ContainerComponent;
 		const url = getPostUrlFromContainer(container);
 		const booru = new Booru({ userId: booruUserId, apiKey: booruApiKey });
 		try {
@@ -1347,4 +1334,4 @@ const command = new Command('feed', tags)
 		return interaction.reply({ content: translator.getText('feedFeedbackThanks'), ephemeral: true });
 	});
 
-module.exports = command;
+export default command;
