@@ -10,8 +10,7 @@ import { isNSFWChannel } from '../../func';
 const MATCH_COUNT_MAX = 3;
 const MATCH_THRESHOLD_PERCENT = 60;
 
-/**@param {string} token*/
-export function testSauceNAOToken(token) {
+export function testSauceNAOToken(token: string) {
 	try {
 		sagiri(token);
 		return true;
@@ -20,14 +19,8 @@ export function testSauceNAOToken(token) {
 	}
 }
 
-/**
- * Based on the supplied queries, injects corresponding SauceNAO result embeds into the specified payload
- * @param {string} clientId
- * @param {Array<string>} queries
- * @param {import('../../commands/Commons/typings').AnyRequest} request
- * @param {{ successes: Array<EmbedBuilder>, failures: Array<EmbedBuilder> }} payload
- */
-export async function pourSauce(clientId, queries, request, payload) {
+/**@description Based on the supplied queries, injects corresponding SauceNAO result embeds into the specified payload*/
+export async function pourSauce(clientId: string, queries: Array<string>, request: import('../../commands/Commons/typings').AnyRequest, payload: { successes: Array<EmbedBuilder>; failures: Array<EmbedBuilder>; }) {
 	const translator = await Translator.from(request.user.id);
 	const allowNSFW = isNSFWChannel(request.channel);
 	const { successes, failures } = payload;
