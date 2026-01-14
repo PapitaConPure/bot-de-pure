@@ -8,7 +8,7 @@ import { auditError, auditAction } from '../others/auditor';
 import { paginateRaw } from '../../func';
 import chalk from 'chalk';
 
-//const Logger = require('../../logs').default;
+//import Logger from '../../logs';
 //const { debug } = Logger('WARN', 'BooruSend');
 
 export interface FeedData extends PostFormatData {

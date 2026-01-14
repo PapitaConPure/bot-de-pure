@@ -1,5 +1,12 @@
 import { p_pure } from '../../utils/prefixes';
 import { CommandOptions, CommandTags, Command } from '../Commons/';
+// eslint-disable-next-line no-unused-vars
+import * as GlobalProps from '../../data/globalProps';
+// eslint-disable-next-line no-unused-vars
+import * as func from '../../func';
+import Discord from 'discord.js';
+// eslint-disable-next-line no-unused-vars
+import Canvas from '@napi-rs/canvas';
 
 const options = new CommandOptions()
 	.addFlag('d', ['del', 'delete'], 'para eliminar el mensaje original');
@@ -10,7 +17,7 @@ const command = new Command('papa-eval', tags)
 	.setDescription(
 		'Evalúa una función de JavaScript en el contexto de la función `execute` de un módulo de comando.',
 		'```ts',
-		'globalConfigs //Propiedades comunes en caché',
+		'GlobalProps //Propiedades comunes en caché',
 		'func //Funciones comunes en caché',
 		'Discord //Librería discord.js',
 		'Canvas //Librería Node Canvas',
@@ -31,14 +38,6 @@ const command = new Command('papa-eval', tags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		// eslint-disable-next-line no-unused-vars
-		const globalProps = require('../../data/globalProps');
-		// eslint-disable-next-line no-unused-vars
-		const func = require('../../func');
-		const Discord = require('discord.js');
-		// eslint-disable-next-line no-unused-vars
-		const Canvas = require('@napi-rs/canvas');
-
 		if(request.isInteraction)
 			return request.reply({ content: '❌ No permitido con comandos Slash.' });
 

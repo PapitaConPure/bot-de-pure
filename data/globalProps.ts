@@ -5,7 +5,8 @@ import chalk from 'chalk';
 import path from 'path';
 import { color } from 'bun';
 
-const argv = require('minimist')(process.argv.slice(2));
+import minimist from 'minimist';
+const argv = minimist(process.argv.slice(2));
 
 
 //Entorno

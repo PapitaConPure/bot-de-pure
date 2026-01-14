@@ -1,14 +1,14 @@
 [
     {
-        "text": "Disculpa, soy estúpida. Tal vez escribiste mal el comando y no te entiendo",
+        "text": "Disculpa, soy estúpida. Tal vez escribiste mal el comando y no te entiendo. Era **\"%COMMAND\"**, ¿no?",
         "imageUrl": "https://i.imgur.com/e4uM3z6.jpg"
     },
     {
-        "text": "No entiendo, ¿quieres usar un comando? Quieres usar uno, ¿verdad?, ¿prueba revisar cómo lo escribes?'",
+        "text": "No entiendo, ¿quieres usar un comando? Quieres usar uno, ¿verdad? ¿Prueba revisar cómo lo escribes?",
         "imageUrl": "https://i.imgur.com/uuLuxtj.jpg"
     },
     {
-        "text": "La verdad, no tengo ni idea de qué pueda ser **\"{commandName}\"**, ¿seguro que lo escribiste bien? Recuerda que soy un bot, eh",
+        "text": "La verdad, no tengo ni idea de qué pueda ser **\"%COMMAND\"**, ¿seguro que lo escribiste bien? Recuerda que soy un bot, eh",
         "imageUrl": "https://i.imgur.com/AHdc7E2.jpg"
     },
     {

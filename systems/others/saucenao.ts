@@ -20,7 +20,7 @@ export function testSauceNAOToken(token: string) {
 }
 
 /**@description Based on the supplied queries, injects corresponding SauceNAO result embeds into the specified payload*/
-export async function pourSauce(clientId: string, queries: Array<string>, request: import('../../commands/Commons/typings').AnyRequest, payload: { successes: Array<EmbedBuilder>; failures: Array<EmbedBuilder>; }) {
+export async function pourSauce(clientId: string, queries: string[], request: import('../../commands/Commons/typings').AnyRequest, payload: { successes: EmbedBuilder[]; failures: EmbedBuilder[]; }) {
 	const translator = await Translator.from(request.user.id);
 	const allowNSFW = isNSFWChannel(request.channel);
 	const { successes, failures } = payload;

@@ -1,5 +1,5 @@
 import { puré } from '../core/commandInit';
-import { EmbedBuilder, Guild, Message } from 'discord.js';
+import { ContainerBuilder, EmbedBuilder, Guild, Message, MessageFlags } from 'discord.js';
 import { Command, CommandOptionSolver } from '../commands/Commons/index';
 
 import { Stats, ChannelStats } from '../models/stats';
@@ -16,9 +16,11 @@ import { sendConvertedTwitterPosts } from '../systems/agents/pureet';
 import { Translator } from '../i18n/index';
 import { fetchUserCache } from '../utils/usercache';
 import { addMessageCascade } from '../systems/others/messageCascades';
-import { noDataBase, PrefixPair, tenshiColor } from '../data/globalProps';
+import { noDataBase, PrefixPair, tenshiAltColor, tenshiColor } from '../data/globalProps';
 import Logger from '../utils/logs';
 import { ValuesOf } from 'types';
+
+import unknownCommandReplies from '../data/unknownCommandReplies.json';
 
 const { error } = Logger('WARN', 'Message');
 
@@ -61,14 +63,18 @@ async function updateChannelMessageCounter(guildId: string, channelId: string, u
 };
 
 async function handleInvalidCommand(message: Message<true>, commandName: string, prefixPair: PrefixPair): Promise<CommandResult> {
-	const replies = require('../data/unknownCommandReplies.json');
-	
-	const selectedReply = replies[rand(replies.length)];
+	const { text, imageUrl } = unknownCommandReplies[rand(unknownCommandReplies.length)];
+	const processedText = text.replaceAll('%COMMAND', commandName);
+
 	async function replyAndDelete() {
-		const content = selectedReply.text.replace('{commandName}', commandName);
-		const notice = await message.reply({ content }).catch(() => undefined);
-		setTimeout(() => notice?.delete().catch(() => undefined), 6000);
-		return CommandResults.VOID;
+		try {
+			const notice = await message.reply({
+				content: processedText,
+			});
+			setTimeout(() => notice?.delete().catch(() => undefined), 6000);
+		} finally {
+			return CommandResults.VOID;
+		}
 	}
 
 	if(commandName.length < 2)
@@ -77,28 +83,43 @@ async function handleInvalidCommand(message: Message<true>, commandName: string,
 	const allowedGuesses = puré.commands.filter(cmd => !cmd.flags.any('OUTDATED', 'MAINTENANCE'));
 	const foundList = [];
 	for(const [ cmn, cmd ] of allowedGuesses) {
-		const lDistances = [ cmn, ...(cmd.aliases?.filter(a => a.length > 1) ?? []) ].map(c => ({ n: c, d: edlDistance(commandName, c) }));
-		const minorDistance = Math.min(...(lDistances.map(d => d.d)));
-		if(minorDistance < 3)
-			foundList.push({ command: cmd, distance: minorDistance });
+		const distances = [ cmn, ...(cmd.aliases?.filter(a => a.length > 1) ?? []) ].map(c => ({ n: c, d: edlDistance(commandName, c) }));
+		const lowestDistance = Math.min(...(distances.map(d => d.d)));
+		if(lowestDistance < 3)
+			foundList.push({ command: cmd, distance: lowestDistance });
 	}
 	const suggestions = foundList.sort((a, b) => a.distance - b.distance).slice(0, 5);
 	
 	if(!suggestions.length)
 		return replyAndDelete();
 	
-	const mockEmbed = new EmbedBuilder()
-		.setColor(tenshiColor)
-		.setDescription(selectedReply.text)
-		.setImage(selectedReply.imageUrl);
-	const suggestionEmbed = new EmbedBuilder()
-		.setColor(0x5070bb)
-		.setFooter({ text: 'Basado en nombres y alias de comando' })
-		.addFields({
-			name: `Comandos similares a "${commandName}"`,
-			value: suggestions.map(found => `• ${prefixPair.raw}${found.command.name}`).join('\n'),
-		});
-	message.reply({ embeds: [ mockEmbed, suggestionEmbed ] });
+	const mockEmbed = new ContainerBuilder()
+		.setAccentColor(tenshiColor)
+		.addSectionComponents(section => 
+			section
+				.addTextDisplayComponents(textDisplay =>
+					textDisplay.setContent(processedText)
+				)
+				.setThumbnailAccessory(thumbnail => 
+					thumbnail.setURL(imageUrl)
+				)
+		);
+
+	const suggestionEmbed = new ContainerBuilder()
+		.setAccentColor(tenshiAltColor)
+		.addTextDisplayComponents(
+			textDisplay => textDisplay.setContent(`### -# Comandos similares a "${commandName}"`),
+			textDisplay => textDisplay.setContent(
+				suggestions.map(found => `* ${prefixPair.raw}${found.command.name}`).join('\n')
+			),
+			textDisplay => textDisplay.setContent('-# Basado en nombres y alias de comando'),
+		);
+
+	message.reply({
+		flags: MessageFlags.IsComponentsV2,
+		components: [ mockEmbed, suggestionEmbed ],
+	});
+
 	return CommandResults.VOID;
 }
 
