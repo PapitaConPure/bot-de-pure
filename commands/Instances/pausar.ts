@@ -1,8 +1,8 @@
-const { ButtonBuilder, ButtonStyle } = require('discord.js'); //Integrar discord.js
-const { CommandTags, Command } = require('../Commons/');
-const { Translator } = require('../../i18n');
-const { useMainPlayer } = require('discord-player');
-const { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } = require('../../systems/others/musicPlayer.js');
+import { ButtonBuilder, ButtonStyle } from 'discord.js';
+import { CommandTags, Command } from '../Commons/';
+import { Translator } from '../../i18n';
+import { useMainPlayer } from 'discord-player';
+import { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } from '../../systems/others/musicPlayer';
 
 const tags = new CommandTags().add(
 	'COMMON',
@@ -64,4 +64,4 @@ const command = new Command('pausar', tags)
 		return request.reply({ embeds: [ embed ] });
 	});
 
-module.exports = command;
+export default command;

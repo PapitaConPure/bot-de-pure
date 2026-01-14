@@ -5,7 +5,7 @@ const { Booru, TagTypes } = require('./boorufetch');
 const { getBaseTags, getSearchTags } = require('./booruprops');
 const { globalConfigs, booruApiKey, booruUserId } = require('../../data/globalProps');
 const userIds = require('../../data/userIds.json');
-const rakki = require('../../commands/Instances/rakkidei');
+const rakki = require('../../commands/Instances/rakkidei').default;
 const { Translator } = require('../../i18n');
 
 const Logger = require('../../utils/logs').default;

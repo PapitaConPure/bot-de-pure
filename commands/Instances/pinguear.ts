@@ -1,6 +1,6 @@
-const { randRange } = require('../../func');
-const { p_pure } = require('../../utils/prefixes');
-const { CommandOptions, CommandTags, Command } = require('../Commons/');
+import { randRange } from '../../func';
+import { p_pure } from '../../utils/prefixes';
+import { CommandOptions, CommandTags, Command } from '../Commons/';
 
 const frase = [
 	'Oe po [m] <:junkNo:1107847991580164106>',
@@ -102,4 +102,4 @@ const command = new Command('pinguear', flags)
 		return pinguear(request, user, repeats, true);
 	});
 
-module.exports = command;
+export default command;

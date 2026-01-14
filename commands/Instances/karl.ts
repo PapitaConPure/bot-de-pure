@@ -1,8 +1,6 @@
-const { CommandTags, Command } = require('../Commons/');
-const { randRange } = require("../../func");
-const { EmbedBuilder } = require('discord.js');
-
-const star = '⭐';
+import { CommandTags, Command } from '../Commons/';
+import { randRange } from '../../func';
+import { EmbedBuilder } from 'discord.js';
 
 const instruments = [
 	//Ordenados de común a raro
@@ -38,16 +36,17 @@ const countRawMax = 2;         //Máximo base de cantidad de instrumentos
 const countMinOffsetFac = 0.5; //Factor de desplazamiento del mínimo de cantidad de instrumentos según la rareza
 const countMaxOffsetFac = 1.5; //Factor de desplazamiento del máximo de cantidad de instrumentos según la rareza
 
-const flags = new CommandTags().add(
+const tags = new CommandTags().add(
 	'MEME',
 	'GAME',
 );
-const command = new Command('karl', flags)
+
+const command = new Command('karl', tags)
 	.setAliases('karlos', 'zupija')
 	.setDescription('Comando de gacha musical de Karl Zuñiga')
 	.setExecution(async request => {
 		const tier = getKarlTier();
-		const stars = Array(tier.n).fill(star).join('');
+		const stars = Array(tier.n).fill('⭐').join('');
 		const pulled = pullInstruments(tier.n);
 
 		const embed = new EmbedBuilder()
@@ -64,7 +63,7 @@ const command = new Command('karl', flags)
 		return request.reply({ embeds: [embed] });
 	});
 
-module.exports = command;
+export default command;
 
 function getKarlTier() {
 	const weights = tiers.map(t => t.weight);
@@ -81,8 +80,7 @@ function getKarlTier() {
 	return tiers[tiers.length - 1];
 };
 
-/**@param {Number} tier*/
-function pullInstruments(tier) {
+function pullInstruments(tier: number) {
 	const poolSize = instruments.length; //Cantidad de instrumentos en pileta
 
 	//Cantidad total de instrumentos (sin contar drums)
@@ -92,7 +90,7 @@ function pullInstruments(tier) {
 		true);
 
 	//Curva de probabilidad de instrumentos
-	const curve = (/**@type {Number}*/x) => Math.pow(x, Math.pow(2, (qualityCurveMidpoint - tier) * qualityCurveInfluence));
+	const curve = (/**@type {Number}*/x: number) => Math.pow(x, Math.pow(2, (qualityCurveMidpoint - tier) * qualityCurveInfluence));
 	const pickInstrument = () => instruments[Math.trunc(poolSize * curve(Math.random()))];
 	const instr = Array(count).fill``.map(pickInstrument);
 

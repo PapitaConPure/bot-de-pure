@@ -1,10 +1,10 @@
-const { EmbedBuilder } = require('discord.js');
-const { shortenText } = require('../../func');
-const PrefixPair = require('../../models/prefixpair.js').default;
-const { prefixes, tenshiColor } = require('../../data/globalProps');
-const { p_pure } = require('../../utils/prefixes');
-const { CommandOptions, CommandTags, Command } = require('../Commons/');
-const { CommandPermissions } = require('../Commons/cmdPerms.js');
+import { EmbedBuilder } from 'discord.js';
+import { shortenText } from '../../func';
+import PrefixPair from '../../models/prefixpair';
+import { prefixes, tenshiColor } from '../../data/globalProps';
+import { p_pure } from '../../utils/prefixes';
+import { CommandOptions, CommandTags, Command } from '../Commons/';
+import { CommandPermissions } from '../Commons/cmdPerms';
 
 const perms = new CommandPermissions('ManageGuild');
 const flags = new CommandTags().add(
@@ -73,4 +73,4 @@ const command = new Command('prefijo', flags)
 		});
 	});
 
-module.exports = command;
+export default command;

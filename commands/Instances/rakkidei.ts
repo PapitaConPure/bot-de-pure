@@ -1,6 +1,6 @@
-const { ButtonBuilder, ButtonStyle } = require('discord.js');
-const { randRange } = require('../../func');
-const { CommandTags, Command } = require('../Commons/');
+import { ButtonBuilder, ButtonStyle } from 'discord.js';
+import { CommandTags, Command } from '../Commons/';
+import { randRange } from '../../func';
 
 const phrases = [
 	'Ahora sí vení que te saco la cresta',
@@ -37,4 +37,4 @@ const command = new Command('rakkidei', flags)
 		});
 	});
 
-module.exports = command;
+export default command;

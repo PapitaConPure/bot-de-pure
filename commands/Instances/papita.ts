@@ -1,5 +1,5 @@
-const { randRange, isThread } = require('../../func');
-const { CommandOptions, CommandTags, Command } = require('../Commons/');
+import { randRange, isThread } from '../../func';
+import { CommandOptions, CommandTags, Command } from '../Commons/';
 
 const paputa = [
 	'Romper al bot <:sagumeBlush:1108315844045455410>',
@@ -44,4 +44,4 @@ const command = new Command('papita', flags)
 			return request.reply({ content: `**${paputa[randRange(0, paputa.length)]}**` });
 	});
 
-module.exports = command;
+export default command;

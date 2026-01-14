@@ -1,10 +1,11 @@
-const Discord = require('discord.js'); //Integrar discord.js
-const { compressId } = require('../../func');
-const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/');
-const { CommandPermissions } = require('../Commons/cmdPerms.js');
-const { Translator } = require('../../i18n');
-const { makeButtonRowBuilder } = require('../../utils/tsCasts');
-const { fetchGuildMembers } = require('../../utils/guildratekeeper');
+import Discord, { EmbedBuilder } from 'discord.js';
+import { compressId } from '../../func';
+import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons/';
+import { CommandPermissions } from '../Commons/cmdPerms';
+import { Translator } from '../../i18n';
+import { makeButtonRowBuilder } from '../../utils/tsCasts';
+import { fetchGuildMembers } from '../../utils/guildratekeeper';
+import { ComplexCommandRequest } from '../Commons/typings';
 
 const MEMBERS_PER_PAGE = 10;
 
@@ -65,21 +66,16 @@ const command = new Command('inforol', flags)
 		return showInforolPage(interaction, +page, requestId, translator, query);
 	}, { userFilterIndex: 2 });
 
-/**
- * @param {import('../Commons/typings').ComplexCommandRequest | Discord.ButtonInteraction<'cached'>} request
- * @param {Number} page
- * @param {String} requestId
- * @param {Translator} translator
- * @param {{ strict: Boolean, roles: Array<Discord.Role>, members: Discord.Collection<String, Discord.GuildMember> }} query
- */
-function showInforolPage(request, page, requestId, translator, query) {
+function showInforolPage(request: ComplexCommandRequest | Discord.ButtonInteraction<'cached'>, page: number, requestId: string, translator: Translator, query: { strict: boolean; roles: Array<Discord.Role>; members: Discord.Collection<String, Discord.GuildMember>; }) {
 	const { strict, roles, members } = query;
 	const { guild, user } = request;
 
 	const isCommand = compressId(request.id) === requestId;
 
-	/**@param {Discord.MessagePayload | (Discord.InteractionReplyOptions & Discord.InteractionUpdateOptions)} replyBody*/
-	const replyOrUpdate = (replyBody) => isCommand ? (request.reply(replyBody)) : (/**@type {Discord.ButtonInteraction}*/(request).update(replyBody));
+	const replyOrUpdate = (replyBody: Discord.MessagePayload | (Discord.InteractionReplyOptions & Discord.InteractionUpdateOptions)) =>
+		isCommand
+			? (request.reply(replyBody))
+			: ((request as Discord.ButtonInteraction).update(replyBody));
 	
 	const membersCount = members.size;
 	if(!membersCount)
@@ -105,7 +101,7 @@ function showInforolPage(request, page, requestId, translator, query) {
 				.setStyle(Discord.ButtonStyle.Secondary),
 		)];
 	
-	let embed;
+	let embed: EmbedBuilder;
 	if(page === 0) {
 		const botsCount = members.filter(member => member.user.bot).size;
 		const humansCount = membersCount - botsCount;
@@ -151,4 +147,4 @@ function showInforolPage(request, page, requestId, translator, query) {
 	});
 }
 
-module.exports = command;
+export default command;

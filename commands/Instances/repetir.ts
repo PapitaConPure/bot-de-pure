@@ -1,10 +1,10 @@
-const { Colors, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonBuilder, ButtonStyle } = require('discord.js'); //Integrar discord.js
-const { CommandTags, Command } = require('../Commons/');
-const { useMainPlayer, QueueRepeatMode } = require('discord-player');
-const { isPlayerUnavailable, makePuréMusicEmbed, SERVICES } = require('../../systems/others/musicPlayer.js');
-const { Translator } = require('../../i18n');
-const { tryRecoverSavedTracksQueue } = require('../../models/playerQueue.js');
-const { makeStringSelectMenuRowBuilder } = require('../../utils/tsCasts.js');
+import { Colors, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { CommandTags, Command } from '../Commons/';
+import { useMainPlayer, QueueRepeatMode } from 'discord-player';
+import { isPlayerUnavailable, makePuréMusicEmbed, SERVICES } from '../../systems/others/musicPlayer.js';
+import { Translator } from '../../i18n';
+import { tryRecoverSavedTracksQueue } from '../../models/playerQueue.js';
+import { makeStringSelectMenuRowBuilder } from '../../utils/tsCasts.js';
 
 const tags = new CommandTags().add(
 	'COMMON',
@@ -158,4 +158,4 @@ const command = new Command('repetir', tags)
 		}
 	});
 
-module.exports = command;
+export default command;
