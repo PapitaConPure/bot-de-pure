@@ -4,7 +4,7 @@ import { readdirSync } from 'fs';
 import { Command } from '../commands/Commons/cmdBuilder';
 import { ContextMenuAction } from '../actions/Commons/actionBuilder';
 import { BaseParamType, CommandOptions } from '../commands/Commons/cmdOpts';
-import { commandFilenames } from '../commands/Commons/cmdIndex';
+import { commandFilenames } from '../commands/Commons';
 
 export type AnySlashCommandOption = import('discord.js').SlashCommandBooleanOption |
     import('discord.js').SlashCommandChannelOption |
