@@ -33,25 +33,25 @@
     "@distube/ytdl-core": "^4.16.12",
     "@napi-rs/canvas": "^0.1.88",
     "axios": "^1.13.2",
-    "chalk": "^4.1.1",
+    "chalk": "^4.1.2",
     "date-fns": "^4.1.0",
     "discord-player": "^7.1.0",
-    "discord-player-googlevideo": "^0.2.0",
+    "discord-player-googlevideo": "^0.2.1",
     "discord-player-soundcloud": "^1.0.7",
-    "discord.js": "^14.7.1",
-    "express": "^4.17.3",
+    "discord.js": "^14.25.1",
+    "express": "^4.22.1",
     "groq-sdk": "^0.29.0",
-    "imgur": "^2.4.2",
+    "imgur": "^2.5.0",
     "minimist": "^1.2.8",
-    "mongoose": "^6.2.7",
+    "mongoose": "^6.13.8",
     "mongoose-int32": "^0.6.0",
-    "node-catbox": "^3.3.0",
+    "node-catbox": "^3.4.0",
     "object-sizeof": "^2.6.5",
     "sagiri": "^4.3.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.23.0",
-    "eslint": "^9.23.0",
-    "globals": "^16.0.0"
+    "@eslint/js": "^9.39.2",
+    "eslint": "^9.39.2",
+    "globals": "^16.5.0"
   }
 }
