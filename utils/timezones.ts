@@ -55,15 +55,15 @@ const isoToIANA = ({
 }) as const;
 
 const spacesRegex = /\s+/g;
-const gmtUtcStartRegex = /^gmt|utc_?/;
+const gmtUtcStartRegex = /^(?:gmt|utc)_?/;
 const standardTimeEndRegex = /(?:_standard)?_time$/;
 const utcOffsetClockRegex = /([+-])?_?([0-9]{1,2})_?:?_?([0-9]{2})?/;
 
-export function sanitizeTzCode(tzCode: string | number) {
+export function sanitizeTzCode(tzCode: string | number): string {
 	tzCode = `${tzCode}`.toLowerCase();
 
 	const isoExtractedIANA = isoToIANA[tzCode];
-	if(isoExtractedIANA)
+	if(typeof isoExtractedIANA === 'string')
 		return isoExtractedIANA;
 
 	return tzCode
@@ -82,7 +82,7 @@ export function sanitizeTzCode(tzCode: string | number) {
 }
 
 /**@description Obtiene el huso horario especificado en minutos*/
-export function toUtcOffset(sanitizedTzCode: string) {
+export function toUtcOffset(sanitizedTzCode: string): number | null {
 	if(typeof sanitizedTzCode !== 'string')
 		return null;
 
@@ -96,7 +96,7 @@ export function toUtcOffset(sanitizedTzCode: string) {
 }
 
 /**@example "UTC+XX:XX", "UTC-XX:XX", ""*/
-export function utcOffsetDisplay(sanitizedTzCode: string) {
+export function utcOffsetDisplay(sanitizedTzCode: string): string {
 	if(!sanitizedTzCode?.length)
 		return '';
 
@@ -109,7 +109,7 @@ export function utcOffsetDisplay(sanitizedTzCode: string) {
 }
 
 /**@example " (UTC+XX:XX)", " (UTC-XX:XX)", ""*/
-export function utcOffsetDisplayFull(sanitizedTzCode: string) {
+export function utcOffsetDisplayFull(sanitizedTzCode: string): string {
 	if(!sanitizedTzCode?.length || /^utc|gmt/i.test(sanitizedTzCode))
 		return sanitizedTzCode.toUpperCase();
 
