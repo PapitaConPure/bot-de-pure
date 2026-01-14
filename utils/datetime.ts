@@ -1,30 +1,28 @@
-const { addDays, addHours, addMinutes, addSeconds, addMilliseconds, startOfDay } = require('date-fns');
-const { Translator } = require('../i18n');
-const { tz, TZDate } = require('@date-fns/tz');
-const { UTCDate } = require('@date-fns/utc');
+import { addDays, addHours, addMinutes, addSeconds, addMilliseconds, startOfDay, DateArg, StartOfDayOptions } from 'date-fns';
+import { Translator } from '../i18n';
+import { tz, TZDate } from '@date-fns/tz';
+import { UTCDate } from '@date-fns/utc';
 
 //RECORDATORIO DIARIO DE QUE SATANÁS INVENTÓ LAS ZONAS HORARIAS
 /**
- * @template {Date} DateType
- * @template {Date} [ResultDate=DateType]
- * @param {import('date-fns').DateArg<DateType>} date La fecha TZ de la cual obtener el día en TZ y el inicio horario en UTC
- * @param {import('date-fns').StartOfDayOptions<ResultDate>} [options] Código de zona horaria sanitizado (UTC por defecto)
+ * @param date La fecha TZ de la cual obtener el día en TZ y el inicio horario en UTC
+ * @param options Código de zona horaria sanitizado (UTC por defecto)
  */
-function utcStartOfTzDay(date, options) {
+function utcStartOfTzDay<DateType extends Date, ResultDate extends Date = DateType>(date: DateArg<DateType>, options: StartOfDayOptions<ResultDate>) {
 	const startOfTodayTZ = startOfDay(date, { in: options?.in });
 	const startOfTodayTZnoUTCHours = new UTCDate(startOfTodayTZ.setUTCHours(0, 0, 0, 0));
 	console.log({ startOfTodayTZ, startOfTodayTZnoUTCHours });
 	return startOfTodayTZnoUTCHours;
 };
 
-/**@param {string} [sanitizedTzCode] Código de zona horaria sanitizado (UTC por defecto)*/
-const utcStartOfTzToday     = (sanitizedTzCode = 'Etc/UTC') => utcStartOfTzDay(Date.now(), { in: tz(sanitizedTzCode) });
-/**@param {string} [sanitizedTzCode] Código de zona horaria sanitizado (UTC por defecto)*/
-const utcStartOfTzYesterday = (sanitizedTzCode = 'Etc/UTC') => utcStartOfTzDay(addDays(Date.now(), -1), { in: tz(sanitizedTzCode) });
-/**@param {string} [sanitizedTzCode] Código de zona horaria sanitizado (UTC por defecto)*/
-const utcStartOfTzTomorrow  = (sanitizedTzCode = 'Etc/UTC') => utcStartOfTzDay(addDays(Date.now(), +1), { in: tz(sanitizedTzCode) });
+/**@param sanitizedTzCode Código de zona horaria sanitizado (UTC por defecto)*/
+export const utcStartOfTzToday     = (sanitizedTzCode: string = 'Etc/UTC') => utcStartOfTzDay(Date.now(), { in: tz(sanitizedTzCode) });
+/**@param sanitizedTzCode Código de zona horaria sanitizado (UTC por defecto)*/
+export const utcStartOfTzYesterday = (sanitizedTzCode: string = 'Etc/UTC') => utcStartOfTzDay(addDays(Date.now(), -1), { in: tz(sanitizedTzCode) });
+/**@param sanitizedTzCode Código de zona horaria sanitizado (UTC por defecto)*/
+export const utcStartOfTzTomorrow  = (sanitizedTzCode: string = 'Etc/UTC') => utcStartOfTzDay(addDays(Date.now(), +1), { in: tz(sanitizedTzCode) });
 
-const relativeDates = /**@type {const}*/({
+export const relativeDates = ({
 	beforeYesterday: {
 		match: new Set([
 			'anteayer',
@@ -65,9 +63,9 @@ const relativeDates = /**@type {const}*/({
 		]),
 		getValue: (sanitizedTzCode = 'Etc/UTC') => addDays(utcStartOfTzToday(sanitizedTzCode), +2),
 	},
-});
+}) as const;
 
-const relativeTimes = /**@type {const}*/({
+export const relativeTimes = ({
 	today: {
 		match: new Set([
 			'ahora',
@@ -84,13 +82,13 @@ const relativeTimes = /**@type {const}*/({
 			return time;
 		},
 	},
-});
+}) as const;
 
 /**
- * Obtiene componentes de fecha del string localizado indicado
- * @param {string} str El string localizado del cual obtener los componentes de fecha
+ * @description Obtiene componentes de fecha del string localizado indicado
+ * @param str El string localizado del cual obtener los componentes de fecha
  */
-function getDateComponentsFromString(str) {
+export function getDateComponentsFromString(str: string) {
 	if(!str)
 		return;
 
@@ -107,13 +105,13 @@ function getDateComponentsFromString(str) {
 
 /**
  * Crea un objeto {@link Date} a partir de los componentes de fecha indicados, según el idioma.
- * @param {number} a El primer componente de fecha
- * @param {number} b El primer componente de fecha
- * @param {number} c El primer componente de fecha
- * @param {import('../i18n').LocaleKey} locale La clave del idioma en el cual interpretar la fecha
- * @param {string} sanitizedTzCode El código IANA de la zona horaria en la que se expresa la fecha, sanitizado
+ * @param a El primer componente de fecha
+ * @param b El primer componente de fecha
+ * @param c El primer componente de fecha
+ * @param locale La clave del idioma en el cual interpretar la fecha
+ * @param sanitizedTzCode El código IANA de la zona horaria en la que se expresa la fecha, sanitizado
  */
-function makeDateFromComponents(a, b, c, locale, sanitizedTzCode) {
+export function makeDateFromComponents(a: number, b: number, c: number, locale: import('../i18n').LocaleKey, sanitizedTzCode: string) {
 	let { day, month, year } = Translator.mapReverseDateUTCComponents(locale, a, b, c);
 
 	if(month > 12 || year > 9999) return;
@@ -129,16 +127,17 @@ function makeDateFromComponents(a, b, c, locale, sanitizedTzCode) {
 }
 
 /**
+ * @description
  * Interpreta el string de fecha localizado indicado y obtiene un objeto {@link Date},
  * compensado con la diferencia del huso horario de origen (`z`) indicado
- * @param {string} str El string localizado del cual obtener la fecha
- * @param {import('../i18n').LocaleKey} locale La clave del idioma en el cual interpretar la fecha
- * @param {string} sanitizedTzCode El código IANA de la zona horaria en la que se expresa la fecha, sanitizado (UTC por defecto)
- * @returns {UTCDate} La fecha correspondiente si el string pudo interpretarse,
+ * @param str El string localizado del cual obtener la fecha
+ * @param locale La clave del idioma en el cual interpretar la fecha
+ * @param sanitizedTzCode El código IANA de la zona horaria en la que se expresa la fecha, sanitizado (UTC por defecto)
+ * @returns La fecha correspondiente si el string pudo interpretarse,
  * una fecha inválida si el string estaba malformado,
  * o `undefined` si el string estaba vacío
  */
-function parseDateFromNaturalLanguage(str, locale, sanitizedTzCode = 'Etc/UTC') {
+export function parseDateFromNaturalLanguage(str: string, locale: import('../i18n').LocaleKey, sanitizedTzCode: string = 'Etc/UTC'): UTCDate {
 	if(!str)
 		return;
 
@@ -161,13 +160,13 @@ function parseDateFromNaturalLanguage(str, locale, sanitizedTzCode = 'Etc/UTC') 
 /**
  * Interpreta el string de tiempo indicado y obtiene un objeto {@link Date} cuyos ticks equivalen a la hora ingresada,
  * usando UTC y compensado con la diferencia del huso horario de origen (`z`) indicado
- * @param {string} str El string del cual obtener la hora
- * @param {number} utcOffset El huso horario con el cual corregir la fecha UTC obtenida, en minutos
- * @returns {Date} El tiempo correspondiente si el string pudo interpretarse,
+ * @param str El string del cual obtener la hora
+ * @param utcOffset El huso horario con el cual corregir la fecha UTC obtenida, en minutos
+ * @returns El tiempo correspondiente si el string pudo interpretarse,
  * una fecha inválida si el string estaba malformado,
  * o `undefined` si el string estaba vacío
  */
-function parseTimeFromNaturalLanguage(str, utcOffset = 0) {
+export function parseTimeFromNaturalLanguage(str: string, utcOffset: number = 0): Date {
 	if(!str)
 		return;
 
@@ -306,32 +305,13 @@ function parseTimeFromNaturalLanguage(str, utcOffset = 0) {
 	return addMinutes(time, -utcOffset);
 }
 
-function invalidDate() {
+export function invalidDate() {
 	return new UTCDate(NaN);
 }
 
-/**
- * @param {Date} date 
- * @param {Date} time 
- * @returns {UTCDate}
- */
-function addTime(date, time) {
+export function addTime(date: Date, time: Date): UTCDate {
 	const datetime = new UTCDate(+date + +time);
 	console.log({ date, time, datetime });
 
 	return datetime;
 }
-
-module.exports = {
-	relativeDates,
-	relativeTimes,
-	getDateComponentsFromString,
-	makeDateFromComponents,
-	parseDateFromNaturalLanguage,
-	parseTimeFromNaturalLanguage,
-	utcStartOfTzYesterday,
-	utcStartOfTzToday,
-	utcStartOfTzTomorrow,
-	invalidDate,
-	addTime,
-};
