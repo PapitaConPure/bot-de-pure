@@ -1,10 +1,10 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js'); //Integrar discord.js
-const { shortenText, compressId } = require('../../func'); //Funciones globales
-const { CommandTags, Command } = require('../Commons/');
-const { showQueuePage, makePuréMusicEmbed, SERVICES } = require('../../systems/others/musicPlayer');
-const { Translator } = require('../../i18n');
-const { tryRecoverSavedTracksQueue } = require('../../models/playerQueue.js');
-const { useMainPlayer } = require('discord-player');
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ColorResolvable, EmbedBuilder } from 'discord.js';
+import { shortenText, compressId } from '../../func';
+import { CommandTags, Command } from '../Commons/';
+import { showQueuePage, makePuréMusicEmbed, SERVICES } from '../../systems/others/musicPlayer';
+import { Translator } from '../../i18n';
+import { tryRecoverSavedTracksQueue } from '../../models/playerQueue.js';
+import { useMainPlayer } from 'discord-player';
 
 const flags = new CommandTags().add(
 	'COMMON',
@@ -29,8 +29,7 @@ const command = new Command('sonando', flags)
 			request.deferReply(),
 		]);
 
-		/**@param {import('discord.js').ColorResolvable} color*/
-		const makeReplyEmbed = (color) => new EmbedBuilder()
+		const makeReplyEmbed = (color: ColorResolvable) => new EmbedBuilder()
 			.setColor(color)
 			.setTitle(translator.getText('sonandoTitle'))
 			.setAuthor({
@@ -99,4 +98,4 @@ const command = new Command('sonando', flags)
 		return showQueuePage(interaction, 'CU', authorId, 0);
 	}, { userFilterIndex: 0 });
 
-module.exports = command;
+export default command;
