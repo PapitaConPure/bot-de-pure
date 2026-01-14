@@ -1,8 +1,8 @@
 /**
- * @typedef {{ type: String, value: String | Number | undefined, operator: String | undefined, leftOperand: MathToken | undefined, rightOperand: MathToken | undefined, argument: Number | undefined }} MathToken
+ * @typedef {{ type: string, value: string | Number | undefined, operator?: string | undefined, leftOperand?: MathToken | undefined, rightOperand?: MathToken | undefined, argument?: number | undefined }} MathToken
  * @typedef {MathToken} MathTree
  */
-const TokenTypes = {
+const TokenTypes = /**@type {const}*/({
     COMBINATION: 'COMBINATION',
     FACTOR: 'FACTOR',
     FUNCTION: 'FUNCTION',
@@ -13,7 +13,7 @@ const TokenTypes = {
     GROUP_OPEN: 'GROUP_OPEN',
     GROUP_CLOSE: 'GROUP_CLOSE',
     EOF: 'EOF',
-};
+});
 
 /**
  * @function
@@ -52,15 +52,6 @@ class MathLexer {
     get #current() {
         return this.#stream.charAt(this.#cursor);
     }
-
-    #createToken(type, value) {
-        this.#lastToken = {
-            type: type,
-            value: value,
-        };
-
-        return this.#lastToken;
-    };
     
     /**@returns {Array<MathToken>}*/
     tokenize(str) {
@@ -93,7 +84,7 @@ class MathLexer {
             if(/\d/.test(this.#current)) {
                 let numberString = '';
 
-                while(/[\d\.]/.test(this.#current) && this.#cursor < this.#stream.length) {
+                while(/[\d.]/.test(this.#current) && this.#cursor < this.#stream.length) {
                     numberString += this.#current;
                     this.#cursor++;
                 }
@@ -101,7 +92,7 @@ class MathLexer {
                 const finalNumber = parseFloat(numberString);
 
                 if(isNaN(finalNumber))
-                    throw new Error('Número inválido en posición', this.#cursor);
+                    throw new Error(`Número inválido en posición ${this.#cursor}`);
 
                 tokens.push(createToken(TokenTypes.NUMBER, finalNumber));
                 continue;
@@ -127,7 +118,7 @@ class MathLexer {
                         continue;
 
                     case 'inf':
-                        tokens.push(createToken(TokenTypes.NUMBER, Math.POSITIVE_INFINITY));
+                        tokens.push(createToken(TokenTypes.NUMBER, Number.POSITIVE_INFINITY));
                         continue;
                         
                     case 'sqrt':
@@ -165,7 +156,7 @@ class MathLexer {
 
             if('⁰¹²³⁴⁵⁶⁷⁸⁹'.includes(this.#current)) {
                 if(this.#lastToken && this.#lastToken.type === TokenTypes.FUNCTION && this.#lastToken.value === '^')
-                    throw Error(`Potencia inválida en posición ${this.#cursor}: ${text}\nUsa "^X" o un símbolo exponente, pero no ambos juntos`);
+                    throw Error(`Potencia inválida en posición ${this.#cursor}: ${this.#current}\nUsa "^X" o un símbolo exponente, pero no ambos juntos`);
 
                 tokens.push(createToken(TokenTypes.FUNCTION, '^'));
 
@@ -236,10 +227,6 @@ class MathParser {
 
     get #current() {
         return this.#tokens[this.#cursor];
-    }
-
-    #next(i = 1) {
-        return this.#tokens[this.#cursor + i];
     }
 
     #createUnaryToken(operator, argument) {
@@ -365,30 +352,35 @@ class MathCalculator {
 
     /**
      * Realiza una operación unaria
-     * @param {String} operator 
-     * @param {Number} argument 
-     * @returns {Number} El resultado de la operación
+     * @param {string} operator 
+     * @param {number | MathToken} argument 
+     * @returns {number} El resultado de la operación
      */
     #operateUnary(operator, argument) {
-        if(argument.type === TokenTypes.LITERAL)
-            argument = argument.value;
-        if(argument.type === TokenTypes.UNARY)
-            argument = this.#operateUnary(argument.operator, argument.argument);
-        if(argument.type === TokenTypes.BINARY)
-            argument = this.#calculateToken(argument);
+        let numArgument = +argument;
 
+        if(typeof argument !== 'number')  {
+            if(argument.type === TokenTypes.LITERAL)
+                numArgument = +argument.value;
+            if(argument.type === TokenTypes.UNARY)
+                numArgument = this.#operateUnary(argument.operator, argument.argument);
+            if(argument.type === TokenTypes.BINARY)
+                numArgument = this.#calculateToken(argument);
+        }
+
+        /**@satisfies {Record<string, (x: number) => number>}*/
         const operations = {
-            '+': (argument) => argument,
-            '-': (argument) => (-argument),
-            'sqrt': (argument) => Math.sqrt(argument),
-            'sin': (argument) => Math.sin(argument),
-            'cos': (argument) => Math.cos(argument),
-            'tan': (argument) => Math.tan(argument),
-            'rad': (argument) => argument * (Math.PI / 180),
-            'deg': (argument) => argument * (180 / Math.PI),
+            '+': x => x,
+            '-': x => (-x),
+            'sqrt': x => Math.sqrt(x),
+            'sin': x => Math.sin(x),
+            'cos': x => Math.cos(x),
+            'tan': x => Math.tan(x),
+            'rad': x => x * (Math.PI / 180),
+            'deg': x => x * (180 / Math.PI),
         };
 
-        return operations[operator](argument);
+        return operations[operator](numArgument);
     }
 
     /**
@@ -422,11 +414,11 @@ class MathCalculator {
     /**
      * @function
      * @param {MathToken} token
-     * @returns {Number} El resultado de la operación del Token
+     * @returns {number} El resultado de la operación del Token
      */
     #calculateToken(token) {
         if(token.type === TokenTypes.LITERAL)
-            return token.value;
+            return +token.value;
 
         if(token.type === TokenTypes.UNARY)
             return this.#operateUnary(token.operator, token.argument);
