@@ -1,7 +1,6 @@
-import { EmbedBuilder, Colors } from 'discord.js';
-import { auditError } from '../../systems/others/auditor';
+import { Colors, ContainerBuilder, MessageFlags } from 'discord.js';
 import { CommandTags, Command } from '../Commons/';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 const tags = new CommandTags().add('COMMON');
 
@@ -16,23 +15,48 @@ const command = new Command('gatos', tags)
 		'Fuente: https://cataas.com'
 	)
 	.setExecution(async request => {
-		const kittenData = (await axios.get('https://cataas.com/cat?json=true').catch(auditError));
+		try {
+			const kittenData = await axios.get('https://cataas.com/cat?json=true', {
+				validateStatus: (status) => status === 200,
+			});
 
-		const embed = new EmbedBuilder();
+			const { url: catUrl } = kittenData.data;
 
-		if(kittenData?.status !== 200) {
-			embed.addFields({ name: 'Error', value: 'El mundo de los gatitos no contactó con nosotros esta vez...' })
-				.setColor(Colors.Red);
-			return request.reply({ embeds: [embed] });
+			const container = new ContainerBuilder()
+				.setAccentColor(0xffc0cb)
+				.addMediaGalleryComponents(mediaGallery =>
+					mediaGallery.addItems(mediaGalleryItem =>
+						mediaGalleryItem
+							.setDescription('🐈')
+							.setURL(catUrl)
+					)
+				)
+				.addTextDisplayComponents(
+					textDisplay => textDisplay.setContent('## 🥺 Gatitos'),
+				);
+
+			return request.reply({
+				flags: MessageFlags.IsComponentsV2,
+				components: [container],
+			});
+		} catch(err) {
+			if(!(err instanceof AxiosError))
+				throw err;
+		
+			const container = new ContainerBuilder()
+				.setAccentColor(Colors.Red)
+				.addTextDisplayComponents(
+					textDisplay => textDisplay.setContent([
+						'## Error',
+						'El mundo de los gatitos no contactó con nosotros esta vez...',
+					].join('\n')),
+				);
+
+			return request.reply({
+				flags: MessageFlags.IsComponentsV2,
+				components: [container],
+			});
 		}
-		
-		const { url: catUrl } = kittenData.data;
-		
-		embed.setTitle('Gatitos 🥺')
-			.setImage(catUrl)
-			.setColor(0xffc0cb);
-			
-		return request.reply({ embeds: [embed] });
 	});
 
 export default command;
