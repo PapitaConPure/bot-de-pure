@@ -39,7 +39,6 @@
     "discord-player-googlevideo": "^0.2.1",
     "discord-player-soundcloud": "^1.0.7",
     "discord.js": "^14.25.1",
-    "express": "^4.22.1",
     "groq-sdk": "^0.29.0",
     "imgur": "^2.5.0",
     "minimist": "^1.2.8",
