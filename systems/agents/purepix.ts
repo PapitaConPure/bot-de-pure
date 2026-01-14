@@ -1,28 +1,25 @@
-const { ChannelType } = require('discord.js');
-const { ConverterEmptyPayload } = require('./converters');
-const Logger = require('../../utils/logs').default;
+import { ChannelType, Message } from 'discord.js';
+import { ConverterEmptyPayload, ConverterPayload } from './converters';
 
+import Logger from '../../utils/logs';
 const { error } = Logger('WARN', 'PuréPix');
 
-const acceptedPixivConvertersWithoutNone = /**@type {const}*/([ 'phixiv' ]);
-const acceptedPixivConverters = /**@type {const}*/([ '', ...acceptedPixivConvertersWithoutNone ]);
-const pixivRegex = /(?<st>(?:<|\|\|){0,2}) ?(?:(?:http:\/\/|https:\/\/)(?:www\.))?(?:pixiv.net(?<lang>\/en)?)\/artworks\/(?<id>[0-9]{6,9})(?:\/(?<page>[0-9]{1,4}))? ?(?<ed>(?:>|\|\|){0,2})/g;
+export const acceptedPixivConvertersWithoutNone = [ 'phixiv' ] as const;
+export const acceptedPixivConverters = [ '', ...acceptedPixivConvertersWithoutNone ] as const;
+export const pixivRegex = /(?<st>(?:<|\|\|){0,2}) ?(?:(?:http:\/\/|https:\/\/)(?:www\.))?(?:pixiv.net(?<lang>\/en)?)\/artworks\/(?<id>[0-9]{6,9})(?:\/(?<page>[0-9]{1,4}))? ?(?<ed>(?:>|\|\|){0,2})/g;
 
-/**
- * @typedef {typeof acceptedPixivConvertersWithoutNone[number]} AcceptedPixivConverterKey
- * @satisfies {Record<AcceptedPixivConverterKey, { name: string, service: string }>}
- */
-const pixivConversionServices = {
+export type AcceptedPixivConverterKey = (typeof acceptedPixivConvertersWithoutNone)[number];
+/**@satisfies {Record<AcceptedPixivConverterKey, { name: string, service: string }>}*/
+const pixivConversionServices = ({
 	phixiv: { name: 'phixiv', service: 'https://www.phixiv.net' },
-};
+}) as const;
 
 /**
- * Detecta enlaces de pixiv en un mensaje y los reenvía con un Embed corregido, a través de una respuesta.
- * @param {import('discord.js').Message<true>} message El mensaje a analizar
- * @param {AcceptedPixivConverterKey | ''} converterKey El identificador de servicio de conversión a utilizar
- * @returns {Promise<import('./converters').ConverterPayload>}
+ * @description Detecta enlaces de pixiv en un mensaje y los reenvía con un Embed corregido, a través de una respuesta.
+ * @param message El mensaje a analizar
+ * @param converterKey El identificador de servicio de conversión a utilizar
  */
-async function sendConvertedPixivPosts(message, converterKey) {
+export async function sendConvertedPixivPosts(message: Message<true>, converterKey: AcceptedPixivConverterKey | ''): Promise<ConverterPayload> {
 	if(converterKey === '')
 		return ConverterEmptyPayload;
 
@@ -68,9 +65,3 @@ async function sendConvertedPixivPosts(message, converterKey) {
 	
 	return { contentful: true, content };
 }
-
-module.exports = {
-	pixivRegex,
-	sendConvertedPixivPosts,
-	acceptedPixivConverters
-};

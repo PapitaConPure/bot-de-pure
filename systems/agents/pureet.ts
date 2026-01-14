@@ -1,31 +1,28 @@
-const { ChannelType } = require('discord.js');
-const { ConverterEmptyPayload } = require('./converters');
-const Logger = require('../../utils/logs').default;
+import { ChannelType, Message } from 'discord.js';
+import { ConverterEmptyPayload, ConverterPayload } from './converters';
 
+import Logger from '../../utils/logs';
 const { error } = Logger('WARN', 'Puréet');
 
-const acceptedTwitterConvertersWithoutNone = /**@type {const}*/([ 'vx', 'fx', 'girlcockx', 'cunnyx' ]);
-const acceptedTwitterConverters = /**@type {const}*/([ '', ...acceptedTwitterConvertersWithoutNone ]);
-const tweetRegex = /(?:<|\|{2})? ?((?:https?:\/\/)(?:www.)?(?:twitter|x).com\/(\w+)\/status\/(\d+)(?:\/([A-Za-z]+))?) ?(?:>|\|{2})?/g;
+export const acceptedTwitterConvertersWithoutNone = [ 'vx', 'fx', 'girlcockx', 'cunnyx' ] as const;
+export const acceptedTwitterConverters = [ '', ...acceptedTwitterConvertersWithoutNone ] as const;
+export const tweetRegex = /(?:<|\|{2})? ?((?:https?:\/\/)(?:www.)?(?:twitter|x).com\/(\w+)\/status\/(\d+)(?:\/([A-Za-z]+))?) ?(?:>|\|{2})?/g;
 
-/**
- * @typedef {typeof acceptedTwitterConvertersWithoutNone[number]} AcceptedTwitterConverterKey
- * @satisfies {Record<AcceptedTwitterConverterKey, { name: string, service: string }>}
- */
-const twitterConversionServices = {
+export type AcceptedTwitterConverterKey = (typeof acceptedTwitterConvertersWithoutNone)[number];
+/**@satisfies {Record<AcceptedTwitterConverterKey, { name: string, service: string }>}*/
+const twitterConversionServices = ({
 	vx: { name: 'vxTwitter', service: 'https://fixvx.com' },
 	fx: { name: 'fixTwitter', service: 'https://fxtwitter.com' },
 	girlcockx: { name: 'girlcockx', service: 'https://girlcockx.com' },
 	cunnyx: { name: 'cunnyx', service: 'https://cunnyx.com' },
-};
+}) as const;
 
 /**
- * Detecta enlaces de Twitter en un mensaje y los reenvía con un Embed corregido, a través de una respuesta.
- * @param {import('discord.js').Message<true>} message El mensaje a analizar
- * @param {AcceptedTwitterConverterKey | ''} converterKey El identificador de servicio de conversión a utilizar
- * @returns {Promise<import('./converters').ConverterPayload>}
+ * @description Detecta enlaces de Twitter en un mensaje y los reenvía con un Embed corregido, a través de una respuesta.
+ * @param message El mensaje a analizar
+ * @param converterKey El identificador de servicio de conversión a utilizar
  */
-async function sendConvertedTwitterPosts(message, converterKey) {
+export async function sendConvertedTwitterPosts(message: Message<true>, converterKey: AcceptedTwitterConverterKey | ''): Promise<ConverterPayload> {
 	if(converterKey === '')
 		return ConverterEmptyPayload;
 
@@ -80,10 +77,4 @@ async function sendConvertedTwitterPosts(message, converterKey) {
 		contentful: true,
 		content,
 	};
-};
-
-module.exports = {
-	tweetRegex,
-	sendConvertedTwitterPosts,
-	acceptedTwitterConverters,
 };

@@ -1,23 +1,19 @@
-const WebhookOwner = require('../../models/webhookOwners.js').default;
-const { isThread } = require('../../func');
+import WebhookOwner from '../../models/webhookOwners.js';
+import { AnyThreadChannel, GuildBasedChannel, GuildMember, GuildTextBasedChannel, Message, User, Webhook, WebhookMessageCreateOptions } from 'discord.js';
+import { isThread } from '../../func';
 
-/**
- * @typedef {{ userId: String, expirationDate: Number }} OwnerData
- * @type {Map<String, OwnerData>}
- */
-const owners = new Map();
+interface OwnerData {
+	userId: string;
+	expirationDate: number;
+};
+const owners: Map<string, OwnerData> = new Map();
 
-/**Clase para interactuar con Webhooks de Discord de forma más sencilla*/
-class DiscordAgent {
-	/**@type {import('discord.js').Webhook}*/
-	webhook;
-	/**@type {String}*/
-	threadId;
-	/**@type {import('discord.js').GuildMember | import('discord.js').User}*/
-	user;
-	/**@type {Promise<Boolean>}*/
-	userLock;
-
+/**@class Clase para interactuar con Webhooks de Discord de forma más sencilla.*/
+export class DiscordAgent {
+	webhook: Webhook;
+	threadId: string;
+	user: GuildMember | User;
+	userLock: Promise<boolean>;
 
 	constructor() {
 		this.webhook = null;
@@ -27,12 +23,12 @@ class DiscordAgent {
 	};
 
 	/**
-	 * Conecta al Agente a un canal por medio de un Webhook. Si el canal no tiene un Webhook disponible, crea uno nuevo.
-	 * @param {import('discord.js').GuildTextBasedChannel | import('discord.js').AnyThreadChannel} channel Objeto de canal o thread al cual enviar un mensaje como Agente
-	 * @param {String} name Nombre de muestra de Agente
+	 * @description Conecta al Agente a un canal por medio de un Webhook. Si el canal no tiene un Webhook disponible, crea uno nuevo.
+	 * @param channel Objeto de canal o thread al cual enviar un mensaje como Agente
+	 * @param name Nombre de muestra de Agente
 	 */
-	async setup(channel, name = 'Agente Puré') {
-		let hookable;
+	async setup(channel: GuildTextBasedChannel | AnyThreadChannel, name: string = 'Agente Puré') {
+		let hookable: GuildBasedChannel;
 		
 		if(isThread(channel)) {
 			this.threadId = channel.id;
@@ -49,11 +45,8 @@ class DiscordAgent {
 		return this;
 	};
 
-	/**
-	 * Establece el usuario a replicar por el Agente al enviar mensajes
-	 * @param {import('discord.js').User} user
-	 */
-	setUser(user) {
+	/**@description Establece el usuario a replicar por el Agente al enviar mensajes.*/
+	setUser(user: User) {
 		this.userLock = user.fetch()
 			.then(() => {
 				this.user = user;
@@ -64,21 +57,18 @@ class DiscordAgent {
 		return this;
 	};
 
-	/**
-	 * Establece el miembro a replicar por el Agente al enviar mensajes
-	 * @param {import('discord.js').GuildMember} member
-	 */
-	setMember(member) {
+	/**@description Establece el miembro a replicar por el Agente al enviar mensajes.*/
+	setMember(member: GuildMember) {
 		this.user = member;
 		return this;
 	};
 
 	/**
-	 * Envía un mensaje como el usuario especificado. Recuerda usar `setUser` o `setMember` antes.
-	 * @param {import('discord.js').WebhookMessageCreateOptions} messageOptions Opciones de envío. No se puede modificar el canal
-	 * @param {Boolean} [inheritAttachments] Si heredar los antiguos attachments del mensaje (true) o no (false)
+	 * @description Envía un mensaje como el usuario especificado. Recuerda usar `setUser` o `setMember` antes.
+	 * @param messageOptions Opciones de envío. No se puede modificar el canal
+	 * @param inheritAttachments Si heredar los antiguos attachments del mensaje (true) o no (false)
 	 */
-	async sendAsUser(messageOptions, inheritAttachments = true) {
+	async sendAsUser(messageOptions: WebhookMessageCreateOptions, inheritAttachments: boolean = true) {
 		await this.userLock;
 
 		if(!this.user)
@@ -117,22 +107,18 @@ class DiscordAgent {
 		return sent;
 	}
 
-	/**
-	 * 
-	 * @param {import('discord.js').User | import('discord.js').GuildMember} user 
-	 */
-	#getUserName(user) {
+	#getUserName(user: User | GuildMember) {
 		if('nickname' in user && user.nickname != null)
 			return user.nickname;
 
 		if(user.displayName)
 			return user.displayName;
 
-		return (/**@type {import('discord.js').User}*/ (user)).username;
+		return (user as User).username;
 	}
 }
 
-async function initializeWebhookMessageOwners() {
+export async function initializeWebhookMessageOwners() {
 	const webhookOwners = await WebhookOwner.find({});
 	const now = Date.now();
 	for(const owner of webhookOwners) {
@@ -143,22 +129,13 @@ async function initializeWebhookMessageOwners() {
 	}
 }
 
-/**
- * @param {String} messageId 
- * @returns {String?}
- */
-function getAgentMessageOwnerId(messageId) {
+export function getAgentMessageOwnerId(messageId: string): string | null {
 	const owner = owners.get(messageId);
 	if(!owner) return null;
 	return owner.userId;
 }
 
-/**
- * 
- * @param {import('discord.js').Message<Boolean>} sent 
- * @param {String} [ownerId] 
- */
-async function addAgentMessageOwner(sent, ownerId = undefined) {
+export async function addAgentMessageOwner(sent: Message, ownerId: string = undefined) {
 	//Crear nuevo
 	const messageId = sent.id;
 	const userId = ownerId ?? sent.mentions?.repliedUser?.id ?? sent.author.id;
@@ -168,7 +145,7 @@ async function addAgentMessageOwner(sent, ownerId = undefined) {
 	webhookOwner.save();
 }
 
-async function updateAgentMessageOwners() {
+export async function updateAgentMessageOwners() {
 	//Expirar viejos
 	const toDelete = [];
 	for(const [ messageId, owner ] of owners.entries()) {
@@ -182,10 +159,7 @@ async function updateAgentMessageOwners() {
 	toDelete.forEach(dkey => owners.delete(dkey));
 }
 
-/**
- * @param {import('discord.js').Message} message 
- */
-async function deleteAgentMessage(message) {
+export async function deleteAgentMessage(message: Message) {
 	const webhookOwner = await WebhookOwner.findOne({ messageId: message.id });
 
 	owners.delete(message.id);
@@ -195,12 +169,3 @@ async function deleteAgentMessage(message) {
 		webhookOwner && webhookOwner.delete(),
 	]);
 }
-
-module.exports = {
-	initializeWebhookMessageOwners,
-	addAgentMessageOwner,
-	getAgentMessageOwnerId,
-	updateAgentMessageOwners,
-	deleteAgentMessage,
-	DiscordAgent,
-};
