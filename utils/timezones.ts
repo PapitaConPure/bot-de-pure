@@ -1,6 +1,6 @@
-const { TZDate } = require("@date-fns/tz");
+import { TZDate } from '@date-fns/tz';
 
-const isoToIANA = /**@type {const}*/({
+const isoToIANA = ({
 	acst: 'Australia/South',
 	acdt: 'Australia/South',
 	adt: 'Canada/Atlantic',
@@ -52,15 +52,14 @@ const isoToIANA = /**@type {const}*/({
 	wib: 'Asia/Jakarta',
 	wit: 'Asia/Jayapura',
 	wita: 'Asia/Makassar',
-});
+}) as const;
 
 const spacesRegex = /\s+/g;
 const gmtUtcStartRegex = /^gmt|utc_?/;
 const standardTimeEndRegex = /(?:_standard)?_time$/;
 const utcOffsetClockRegex = /([+-])?_?([0-9]{1,2})_?:?_?([0-9]{2})?/;
 
-/**@param {string | number} tzCode*/
-function sanitizeTzCode(tzCode) {
+export function sanitizeTzCode(tzCode: string | number) {
 	tzCode = `${tzCode}`.toLowerCase();
 
 	const isoExtractedIANA = isoToIANA[tzCode];
@@ -72,7 +71,7 @@ function sanitizeTzCode(tzCode) {
 		.replace(spacesRegex, '_') //IANA no acepta espacios
 		.replace(gmtUtcStartRegex, '') //No complicarlo de más
 		.replace(standardTimeEndRegex, '') //IANA no usa Standard Time de ISO
-		.replace(utcOffsetClockRegex, (_, sign, hour, minute) => {
+		.replace(utcOffsetClockRegex, (_, sign?: string, hour?: string, minute?: string) => {
 			//Número a formato válido de offset para IAMA (+XX:XX/-XX:XX)
 			if(!minute)
 				return `${sign || '+'}${hour.padStart(2, '0')}:00`;
@@ -82,11 +81,8 @@ function sanitizeTzCode(tzCode) {
 		.trim();
 }
 
-/**
- * Obtiene el huso horario especificado en minutos
- * @param {string} sanitizedTzCode
- */
-function toUtcOffset(sanitizedTzCode) {
+/**@description Obtiene el huso horario especificado en minutos*/
+export function toUtcOffset(sanitizedTzCode: string) {
 	if(typeof sanitizedTzCode !== 'string')
 		return null;
 
@@ -99,11 +95,8 @@ function toUtcOffset(sanitizedTzCode) {
 	return utcOffset;
 }
 
-/**
- * "UTC+XX:XX", "UTC-XX:XX", ""
- * @param {string} sanitizedTzCode 
- */
-function utcOffsetDisplay(sanitizedTzCode) {
+/**@example "UTC+XX:XX", "UTC-XX:XX", ""*/
+export function utcOffsetDisplay(sanitizedTzCode: string) {
 	if(!sanitizedTzCode?.length)
 		return '';
 
@@ -115,11 +108,8 @@ function utcOffsetDisplay(sanitizedTzCode) {
 	return str;
 }
 
-/**
- * " (UTC+XX:XX)", "(UTC-XX:XX)", ""
- * @param {string} sanitizedTzCode 
- */
-function utcOffsetDisplayFull(sanitizedTzCode) {
+/**@example " (UTC+XX:XX)", " (UTC-XX:XX)", ""*/
+export function utcOffsetDisplayFull(sanitizedTzCode: string) {
 	if(!sanitizedTzCode?.length || /^utc|gmt/i.test(sanitizedTzCode))
 		return sanitizedTzCode.toUpperCase();
 
@@ -129,10 +119,3 @@ function utcOffsetDisplayFull(sanitizedTzCode) {
 
 	return `\`${formattedCode}\` (${utcOffsetDisplay(sanitizedTzCode)})`;
 }
-
-module.exports = {
-	toUtcOffset,
-	utcOffsetDisplay,
-	utcOffsetDisplayFull,
-	sanitizeTzCode,
-};
