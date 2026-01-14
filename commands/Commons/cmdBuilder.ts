@@ -1,7 +1,8 @@
-import { Message, CommandInteraction, Collection, ChatInputCommandInteraction, Snowflake, Attachment, PermissionsBitField, MessagePayload, MessageEditOptions, InteractionReplyOptions, InteractionDeferReplyOptions, InteractionEditReplyOptions, User, MessageComponentInteraction, MessageActionRowComponentBuilder, Interaction, ModalMessageModalSubmitInteraction, ButtonInteraction, SelectMenuInteraction, MessageReplyOptions } from 'discord.js';
+import { Message, CommandInteraction, Collection, ChatInputCommandInteraction, Snowflake, Attachment, PermissionsBitField, MessagePayload, MessageEditOptions, InteractionReplyOptions, InteractionDeferReplyOptions, InteractionEditReplyOptions, User, MessageComponentInteraction, MessageActionRowComponentBuilder, Interaction, ModalMessageModalSubmitInteraction, ButtonInteraction, SelectMenuInteraction, MessageReplyOptions, MessageFlags, InteractionCallbackResponse, BooleanCache, InteractionResponse, Client, InteractionCallback, InteractionCallbackResource } from 'discord.js';
 import { CommandTags } from './cmdTags';
 import { CommandArguments, CommandRequest, ComplexCommandRequest, ComponentInteraction } from './typings';
-import { CommandOptionSolver } from './cmdOpts';
+import { CommandOptions, CommandOptionSolver } from './cmdOpts';
+import { CommandPermissions } from './cmdPerms';
 
 export interface ExtendedCommandRequestPrototype {
 	/**The command's initial reply.*/
@@ -33,7 +34,7 @@ export interface ExtendedCommandRequestPrototype {
 	/**If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply*/
 	replyFirst: (options?: (string|MessagePayload)&(MessageEditOptions|InteractionReplyOptions)|{}|undefined) => Promise<Message<boolean>>;
 	/**If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply.*/
-	deferReply: (options?: InteractionDeferReplyOptions & { withResponse?: boolean }) => Promise<Message<boolean>>;
+	deferReply(options?: InteractionDeferReplyOptions & { fetchReply: true }): Promise<Message<boolean>>;
 	/**Deletes the original message if the command is a message command.*/
 	delete: () => Promise<Message<boolean>>;
 	/**Deletes the initial reply.*/
@@ -172,8 +173,8 @@ export class Command {
 	desc: string;
 	brief: string | null;
 	flags: CommandTags;
-	permissions: import('./cmdPerms').CommandPermissions;
-	options: import('./cmdOpts').CommandOptions | null;
+	permissions: CommandPermissions;
+	options: CommandOptions | null;
 	callx: string | null;
 	/**Define si usar una unión `string[] | CommandInteractionOptionResolver` por compatibilidad en lugar de un {@link CommandOptionSolver} para los `args`.*/
 	#legacy: boolean;
