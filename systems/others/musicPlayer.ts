@@ -1,23 +1,23 @@
-const { Player, useMainPlayer, QueueRepeatMode } = require('discord-player');
-const { DefaultExtractors } = require('@discord-player/extractor');
-const { SoundcloudExtractor } = require('discord-player-soundcloud');
-const { YoutubeSabrExtractor } = require('discord-player-googlevideo');
-const { EmbedBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, Colors } = require('discord.js'); //Integrar discord.js
-const { compressId, decompressId, shortenText } = require('../../func'); //Funciones globales
-const { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } = require('../../utils/tsCasts');
-const { Translator } = require('../../i18n');
-const { tryRecoverSavedTracksQueue, saveTracksQueue } = require('../../models/playerQueue');
-const Logger = require('../../utils/logs').default;
+import { Player, useMainPlayer, QueueRepeatMode, Track, GuildQueue } from 'discord-player';
+import { DefaultExtractors } from '@discord-player/extractor';
+import { SoundcloudExtractor } from 'discord-player-soundcloud';
+import { YoutubeSabrExtractor } from 'discord-player-googlevideo';
+import { EmbedBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, Colors, Client, ButtonInteraction, StringSelectMenuInteraction, ModalSubmitInteraction, ColorResolvable, BaseGuildVoiceChannel } from 'discord.js';
+import { ComplexCommandRequest, ComponentInteraction } from '../../commands/Commons/typings';
+import { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } from '../../utils/tsCasts';
+import { tryRecoverSavedTracksQueue, saveTracksQueue } from '../../models/playerQueue';
+import { compressId, decompressId, shortenText } from '../../func';
+import { Translator } from '../../i18n';
 
+import Logger from '../../utils/logs';
 const { debug, info, warn, error } = Logger('DEBUG', 'PuréMusic');
 
-/**
- * @param {import('../../commands/Commons/typings').ComplexCommandRequest | import('discord.js').ButtonInteraction<'cached'> | import('discord.js').StringSelectMenuInteraction<'cached'> | import('discord.js').ModalSubmitInteraction<'cached'>} request
- * @param {import('discord.js').ColorResolvable} [color]
- * @param {String} [iconUrl]
- * @param {Array<String>} [additionalFooterData]
- */
-function makePuréMusicEmbed(request, color = Colors.Blurple, iconUrl = 'https://cdn.discordapp.com/emojis/1354500099799257319.webp?size=32&quality=lossless', additionalFooterData = []) {
+export function makePuréMusicEmbed(
+	request: ComplexCommandRequest | ComponentInteraction | ModalSubmitInteraction<'cached'>,
+	color: ColorResolvable = Colors.Blurple,
+	iconUrl: string = 'https://cdn.discordapp.com/emojis/1354500099799257319.webp?size=32&quality=lossless',
+	additionalFooterData: string[] = [],
+) {
 	const { channel } = request.member.voice;
 
 	const footerExtraContent = additionalFooterData.length ? ` • ${additionalFooterData.join(' • ')}` : '';
@@ -38,26 +38,25 @@ function makePuréMusicEmbed(request, color = Colors.Blurple, iconUrl = 'https:/
 	return embed;
 }
 
-/**
- * @typedef {import('discord-player').Track['source']} ServiceKey
- * 
- * @typedef {Object}  BaseServiceInfo
- * @property {Number} color
- * @property {String} iconUrl
- * 
- * @typedef {Object} KnownServiceInfo
- * @property {String} name
- * @property {false} isArbitrary
- * 
- * @typedef {Object} ArbitraryServiceInfo
- * @property {null} name
- * @property {true} isArbitrary
- * 
- * @typedef {BaseServiceInfo & (KnownServiceInfo | ArbitraryServiceInfo)} ServiceInfo
- */
+export interface BaseServiceInfo {
+	color: number;
+	iconUrl: string;
+}
 
-/**@type {{ [K in ServiceKey]: ServiceInfo }}*/
-const SERVICES = {
+export interface KnownServiceInfo extends BaseServiceInfo {
+	name: string;
+	isArbitrary: false;
+}
+
+export interface ArbitraryServiceInfo extends BaseServiceInfo {
+	name: null;
+	isArbitrary: true;
+}
+
+export type ServiceInfo = KnownServiceInfo | ArbitraryServiceInfo;
+
+/**@satisfies {Record<string, ServiceInfo>}*/
+export const SERVICES = ({
 	youtube:      { name: 'YouTube',      color: 0xff0000, iconUrl: 'https://i.imgur.com/0k9tFqd.png', isArbitrary: false },
 	spotify:      { name: 'Spotify',      color: 0x1db954, iconUrl: 'https://i.imgur.com/qpCz3Ug.png', isArbitrary: false },
 	soundcloud:   { name: 'SoundCloud',   color: 0xff7e19, iconUrl: 'https://i.imgur.com/UVx6eva.png', isArbitrary: false },
@@ -65,16 +64,13 @@ const SERVICES = {
 	vimeo:        { name: 'Vimeo',        color: 0x9e3845, iconUrl: 'https://i.imgur.com/LC5Ic3R.png', isArbitrary: false },
 	reverbnation: { name: 'Reverbnation', color: 0x9e3845, iconUrl: 'https://i.imgur.com/LC5Ic3R.png', isArbitrary: false },
 	arbitrary:    { name: null,           color: 0x9e3845, iconUrl: 'https://i.imgur.com/LC5Ic3R.png', isArbitrary: true  },
-};
+}) as const;
+export type ServiceKey = (typeof Track.prototype.source) & string;
 
 /**Cantidad máxima de pistas por página al mostrar la cola de reproducción*/
 const QUEUE_PAGE_TRACKS_MAX = 5;
 
-/**
- * Registra un reproductor y extractor de YouTube
- * @param {import('discord.js').Client} client
- */
-async function prepareTracksPlayer(client) {
+export async function prepareTracksPlayer(client: Client) {
 	const player = new Player(client, {
 		lagMonitor: -1,
 	});
@@ -115,12 +111,12 @@ async function prepareTracksPlayer(client) {
 
 /**
  * Muestra una página de la queue de la Guild actual
- * @param {import('../../commands/Commons/typings').ComplexCommandRequest | import('discord.js').ButtonInteraction<'cached'> | import('discord.js').StringSelectMenuInteraction<'cached'> | import('discord.js').ModalSubmitInteraction<'cached'>} request El request que desencadenó esta petición
- * @param {String} [op] La operación particular que desencadena esta función
- * @param {String} [authorId] ID del autor para verificar permisos de botón
- * @param {Number} [page=0] Número de página, enumerado desde 0 y por defecto 0
+ * @param request El request que desencadenó esta petición
+ * @param op La operación particular que desencadena esta función
+ * @param authorId ID del autor para verificar permisos de botón
+ * @param page Número de página, enumerado desde 0 y por defecto 0
  */
-async function showQueuePage(request, op = undefined, authorId = undefined, page = 0) {
+export async function showQueuePage(request: ComplexCommandRequest | ButtonInteraction<'cached'> | StringSelectMenuInteraction<'cached'> | ModalSubmitInteraction<'cached'>, op: string = undefined, authorId: string = undefined, page: number = 0) {
 	const translator = await Translator.from(request.user.id);
 
 	if(authorId && request.user.id !== decompressId(authorId))
@@ -135,8 +131,8 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 	
 	const shortChannelName = shortenText(channel.name, 20);
 
-	/**@param {import('discord.js').ColorResolvable} color*/
-	const makeReplyEmbed = (color) => new EmbedBuilder()
+	/**@param {ColorResolvable} color*/
+	const makeReplyEmbed = (color: ColorResolvable) => new EmbedBuilder()
 		.setColor(color)
 		.setTitle(translator.getText('queueTitle'))
 		.setAuthor({
@@ -145,9 +141,11 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 		});
 	
 	if(op !== 'PL') {
-		await ((!op || op === 'CM')
-			? request.deferReply()
-			: /**@type {import('discord.js').ButtonInteraction<'cached'>}*/(request).deferUpdate());
+		await (
+			(!op || op === 'CM')
+				? request.deferReply()
+				: (request as ButtonInteraction<'cached'>).deferUpdate()
+		);
 	}
 
 	const player = useMainPlayer();
@@ -304,13 +302,7 @@ async function showQueuePage(request, op = undefined, authorId = undefined, page
 	return request.editReply(replyObj);
 }
 
-/**
- * @param {import('discord-player').GuildQueue} queue 
- * @param {Number} page
- * @param {String} userId 
- * @param {boolean} fullRows
- */
-function getTrackActionRow(queue, page, userId, fullRows) {
+function getTrackActionRow(queue: import('discord-player').GuildQueue, page: number, userId: string, fullRows: boolean) {
 	const compressedUserId = compressId(userId);
 
 	const actionRow = makeButtonRowBuilder().addComponents(
@@ -362,13 +354,7 @@ function getTrackActionRow(queue, page, userId, fullRows) {
 	return actionRow;
 }
 
-/**
- * @param {import('discord-player').GuildQueue} queue 
- * @param {Number} page
- * @param {String} userId 
- * @param {Translator} translator 
- */
-function getQueueActionRow(queue, page, userId, translator) {
+function getQueueActionRow(queue: GuildQueue, page: number, userId: string, translator: Translator) {
 	const compressedUserId = compressId(userId);
 
 	const actionRow = makeButtonRowBuilder().addComponents(
@@ -398,31 +384,13 @@ function getQueueActionRow(queue, page, userId, translator) {
 	return actionRow;
 }
 
-/**
- * 
- * @param {Number} page 
- * @param {Number} num 
- */
-function getPageAndNumberTrackIndex(page, num) {
+export function getPageAndNumberTrackIndex(page: number, num: number) {
 	const pageOffset = page * QUEUE_PAGE_TRACKS_MAX;
 	return pageOffset + num;
 }
 
-/**
- * 
- * @param {import('discord.js').BaseGuildVoiceChannel} targetChannel 
- */
-function isPlayerUnavailable(targetChannel) {
+export function isPlayerUnavailable(targetChannel: BaseGuildVoiceChannel) {
 	const playerChannel = targetChannel.guild?.members?.me?.voice?.channel;
 	if(!playerChannel) return false;
 	return playerChannel.id !== targetChannel.id;
 }
-
-module.exports = {
-	SERVICES,
-	prepareTracksPlayer,
-	showQueuePage,
-	getPageAndNumberTrackIndex,
-	isPlayerUnavailable,
-	makePuréMusicEmbed,
-};

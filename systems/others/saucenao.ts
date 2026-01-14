@@ -26,7 +26,7 @@ export async function pourSauce(clientId: string, queries: Array<string>, reques
 	const { successes, failures } = payload;
 
 	const token = decryptString(clientId);
-	let findSauce;
+	let findSauce: ReturnType<typeof sagiri>;
 	try {
 		findSauce = sagiri(token, {
 			results: MATCH_COUNT_MAX,
@@ -46,7 +46,7 @@ export async function pourSauce(clientId: string, queries: Array<string>, reques
 	for(let q = 0; q < queries.length; q++) {
 		const query = queries[q];
 		const count = q + 1;
-		
+
 		try {
 			const results = (await findSauce(query))
 				.filter(result => result.similarity > MATCH_THRESHOLD_PERCENT)
@@ -68,7 +68,7 @@ export async function pourSauce(clientId: string, queries: Array<string>, reques
 
 					const embed = new EmbedBuilder()
 						.setFooter({ text: `${result.similarity}%` });
-					
+
 					if(isNSFW && !allowNSFW) {
 						embed
 							.setColor(Colors.LuminousVividPink)
@@ -78,7 +78,7 @@ export async function pourSauce(clientId: string, queries: Array<string>, reques
 					} else {
 						const sources = post.findUrlSources();
 						const sourcesText = `${result.url}\n${sources.join('\n')}`;
-						
+
 						embed
 							.setColor(Colors.Green)
 							.setAuthor({
