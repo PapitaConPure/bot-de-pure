@@ -22,17 +22,17 @@ const command = new Command('uwus', flags)
         
         let uwuUsers = {};
         let lastUwu;
-        const filter = m => (m.content.toLowerCase().indexOf('uwu') !== -1 && !m.author.bot) || (m.content.toLowerCase() === 'antiuwu' && m.author.id === request.author.id);
+        const filter = m => (m.content.toLowerCase().indexOf('uwu') !== -1 && !m.author.bot) || (m.content.toLowerCase() === 'antiuwu' && m.author.id === request.user.id);
         const coll = request.channel.createMessageCollector({ filter: filter, time: (secs * 1000) });
 
         coll.on('collect', m => {
-            const userId = (m.author ?? m.user).id;
+            const userId = m.author.id;
             if(m.content === 'antiuwu') 
                 return coll.stop();
             
             uwuUsers[userId] ??= 0;
             uwuUsers[userId] += 1;
-            lastUwu = m.author ?? m.user;
+            lastUwu = m.author;
         });
 
         coll.on('end', collected => {
@@ -45,7 +45,7 @@ const command = new Command('uwus', flags)
                 }
             }
 
-            const collectedSlices = paginateRaw(collected, 100);
+            const collectedSlices = paginateRaw(/**@type {Collection<string, import('discord.js').Message<boolean>>}*/(collected), 100);
             // console.log(collectedSlices);
             
             const embed = new EmbedBuilder()
@@ -74,7 +74,7 @@ const command = new Command('uwus', flags)
             ]).catch(console.error);
         });
 
-        const user = request.author ?? request.user;
+        const user = request.user;
 
         const embed = new EmbedBuilder()
             .setColor(0xffbbbb)
