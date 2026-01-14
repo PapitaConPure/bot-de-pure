@@ -86,7 +86,7 @@ const command = new Command('estado', flags)
 		const guildPrefix = p_pure(interaction.guildId).raw;
 		const helpCommand = `${guildPrefix}${command.name}`;
         const query = interaction.values[0];
-        const foundCommand = searchCommand(interaction, query);
+        const foundCommand = await searchCommand(interaction, query);
 
 		if(!foundCommand) {
 			const embed = new EmbedBuilder()

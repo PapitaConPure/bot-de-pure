@@ -1,6 +1,6 @@
 import GuildConfig from '../../models/guildconfigs.js';
 import { p_pure } from '../../utils/prefixes.js';
-import { CommandOptions, CommandTags, Command, commandFilenames } from '../Commons/';
+import { CommandOptions, CommandTags, Command, fetchCommandsFromFiles } from '../Commons/';
 import { EmbedBuilder } from 'discord.js';
 import { CommandPermissions } from '../Commons/cmdPerms.js';
 
@@ -34,12 +34,8 @@ const command = new Command('caos', tags)
 			return request.reply({ content: '😴 Se desactivaron los comandos caóticos' });
 		}
 
-		const chaosnames = [];
-		for(const file of commandFilenames) {
-			const command = require(`./${file}`);
-			if(command.flags.has('CHAOS'))
-				chaosnames.push(command.name);
-		}
+		const chaosCommands = await fetchCommandsFromFiles({ includeTags: 'CHAOS' });
+		const chaosnames = chaosCommands.map(c => c.name);
 
 		const embed = new EmbedBuilder()
 			.setColor(0xb8322c)

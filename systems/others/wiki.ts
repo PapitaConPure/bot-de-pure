@@ -2,7 +2,7 @@ import { ButtonBuilder, ButtonStyle, ContainerBuilder, TextDisplayBuilder, Secti
 import { tenshiColor } from '../../data/globalProps';
 import serverIds from '../../data/serverIds.json';
 import userIds from '../../data/userIds.json';
-import { commandFilenames, Command } from '../../commands/Commons/';
+import { fetchCommandsFromFiles, Command, CommandTag } from '../../commands/Commons/';
 import { p_pure } from '../../utils/prefixes';
 import { isNotModerator, edlDistance, toCapitalized, compressId } from '../../func';
 import { client } from '../../core/client';
@@ -130,20 +130,17 @@ export const makeGuideRow = (request: ComplexCommandRequest | MessageComponentIn
  * 
  * Si no se encuentran resultados, se devuelve `null`
  */
-export function searchCommand(request: AnyRequest, nameOrAlias: string) {
-	for(const filename of commandFilenames) {
-		const commandModule = require(`../../commands/Instances/${filename}`);
-		const command: Command = commandModule instanceof Command ? commandModule : commandModule.default;
+export async function searchCommand(request: AnyRequest, nameOrAlias: string) {
+	const commands = await fetchCommandsFromFiles({
+		filter: command => command.name === nameOrAlias || command.aliases.some(alias => alias === nameOrAlias),
+	});
 
-		if(command.name !== nameOrAlias
-		&& !command.aliases.some(alias => alias === nameOrAlias))
-			continue;
-		
+	for(const command of commands) {
 		if((command.tags.has('PAPA') && request.user.id !== userIds.papita)
 		|| (command.tags.has('MOD') && isNotModerator(request.member))
 		|| (command.tags.has('SAKI') && request.guild.id !== serverIds.saki))
 			continue;
-		
+
 		return command;
 	}
 
@@ -158,17 +155,15 @@ export function searchCommand(request: AnyRequest, nameOrAlias: string) {
  * 
  * Si no se encuentran resultados, se devuelve `null`.
  */
-export function searchCommands(request: AnyRequest, query: string) {
-	const commands = [];
+export async function searchCommands(request: AnyRequest, query: string) {
+	const commandsWithDistance = [];
+
+	const commands = await fetchCommandsFromFiles({
+		excludeTags: CommandTag.GUIDE | CommandTag.MAINTENANCE | CommandTag.OUTDATED,
+	});
 	const nameBias = 0.334;
 
-	for(const filename of commandFilenames) {
-		const commandFile = require(`../../commands/Instances/${filename}`);
-		const command = commandFile.command ?? commandFile as Command;
-
-		if(command.tags.any('GUIDE', 'MAINTENANCE', 'OUTDATED'))
-			continue;
-
+	for(const command of commands) {
 		let distance = edlDistance(command.name, query);
 		if(distance > 3) {
 			distance = command.aliases
@@ -184,13 +179,13 @@ export function searchCommands(request: AnyRequest, query: string) {
 		|| (command.tags.has('SAKI') && request.guild.id !== serverIds.saki))
 			continue;
 		
-		commands.push({
+		commandsWithDistance.push({
 			command,
 			distance,
 		});
 	}
 
-	return commands;
+	return commandsWithDistance;
 }
 
 /**@description Representa un objeto de carga útil para inyectar en una página de wiki de comando.*/

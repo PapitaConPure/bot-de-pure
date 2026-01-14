@@ -9,6 +9,7 @@ export const commandFilenames = readdirSync('./commands/Instances')
 interface FetchCommandOptions {
 	includeTags?: CommandTagResolvable | CommandTagResolvable[],
 	excludeTags?: CommandTagResolvable | CommandTagResolvable[],
+	filter?: (command: Command) => boolean,
 }
 
 /**@throws {FetchCommandError}*/
@@ -19,15 +20,18 @@ export async function fetchCommandsFromFiles(options: FetchCommandOptions = {}):
 	const {
 		includeTags = null,
 		excludeTags = null,
+		filter = null,
 	} = options;
 
 	const matches: Command[] = [];
 
 	const pushOrDiscard = (command: Command) => {
-		const isIncluded = includeTags == null || command.tags.has(includeTags);
-		const isExcluded = excludeTags != null && command.tags.has(excludeTags);
+		let isValid: boolean = true;
+		isValid &&= includeTags == null || command.tags.has(includeTags);
+		isValid &&= excludeTags == null || !command.tags.has(excludeTags);
+		isValid &&= filter == null || filter(command);
 
-		if(isIncluded && !isExcluded)
+		if(isValid)
 			matches.push(command);
 	};
 

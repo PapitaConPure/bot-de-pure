@@ -4,7 +4,7 @@ import userIds from '../../data/userIds.json';
 import { tenshiColor } from '../../data/globalProps';
 import { isNotModerator, shortenText } from '../../func';
 import { p_pure } from '../../utils/prefixes';
-import { commandFilenames, CommandOptions, CommandTags, Command, CommandParam, CommandTagResolvable } from '../Commons';
+import { CommandOptions, CommandTags, Command, CommandParam, CommandTagResolvable, fetchCommandsFromFiles } from '../Commons';
 import { searchCommand, searchCommands, getWikiPageComponentsV2, makeCategoriesRow, makeGuideRow } from '../../systems/others/wiki';
 import { ComplexCommandRequest } from '../Commons/typings';
 
@@ -26,9 +26,11 @@ const options = new CommandOptions()
 		new CommandParam('comando', 'TEXT')
 			.setDesc('para ver ayuda en un comando en específico')
 			.setOptional(true)
-			.setAutocomplete((interaction, query) => {
+			.setAutocomplete(async(interaction, query) => {
+				const commands = await searchCommands(interaction, query);
+
 				return interaction.respond(
-					searchCommands(interaction, query)
+					commands
 						.sort(({ distance: a }, { distance: b }) => a - b)
 						.slice(0, 10)
 						.map(({ command }) => ({
@@ -56,7 +58,7 @@ const command = new Command('ayuda', tags)
 
 		//Análisis de comandos
 		if(!search) {
-			const commands = lookupCommands({
+			const commands = await lookupCommands({
 				excludedTags: makeExcludedTags(request),
 				context: request,
 			});
@@ -92,7 +94,7 @@ const command = new Command('ayuda', tags)
 			});
 		}
 
-		const foundCommand = searchCommand(request, search);
+		const foundCommand = await searchCommand(request, search);
 
 		if(!foundCommand) {
 			const embed = new EmbedBuilder()
@@ -113,7 +115,7 @@ const command = new Command('ayuda', tags)
 		const guildPrefix = p_pure(interaction.guildId).raw;
 		const helpCommand = `${guildPrefix}${command.name}`;
 
-		const commands = lookupCommands({
+		const commands = await lookupCommands({
 			tags: interaction.values as CommandTagResolvable[],
 			excludedTags: makeExcludedTags(interaction),
 			context: interaction,
@@ -157,7 +159,7 @@ const command = new Command('ayuda', tags)
 		const guildPrefix = p_pure(request).raw;
 		const helpCommand = `${guildPrefix}${command.name}`;
 
-		const foundCommand = searchCommand(interaction, search);
+		const foundCommand = await searchCommand(interaction, search);
 
 		if(!foundCommand) {
 			const embed = new EmbedBuilder()
@@ -185,7 +187,7 @@ const command = new Command('ayuda', tags)
 		const guildPrefix = p_pure(interaction.guildId).raw;
 		const helpCommand = `${guildPrefix}${command.name}`;
 
-		let search;
+		let search: string;
 		switch(interaction.values[0]) {
 		case 'index': search = 'g-indice'; break;
 		case 'options': search = 'g-opciones'; break;
@@ -194,7 +196,7 @@ const command = new Command('ayuda', tags)
 		default: search = ''; break;
 		}
 
-		const foundCommand = searchCommand(interaction, search);
+		const foundCommand = await searchCommand(interaction, search);
 
 		if(!foundCommand) {
 			const embed = new EmbedBuilder()
@@ -213,6 +215,7 @@ const command = new Command('ayuda', tags)
 	}, { userFilterIndex: 0 });
 
 export default command;
+
 export interface CommandsLookupQuery {
 	tags?: Array<import('../Commons/cmdTags').CommandTagResolvable>;
 	excludedTags?: Array<import('../Commons/cmdTags').CommandTagResolvable>;
@@ -220,37 +223,28 @@ export interface CommandsLookupQuery {
 }
 
 /**@description Recupera un arreglo de {@linkcode Command} según la `query` proporcionada.*/
-export function lookupCommands(query: CommandsLookupQuery = {}) {
+export async function lookupCommands(query: CommandsLookupQuery = {}): Promise<Command[]> {
 	query.tags ??= [];
 	query.excludedTags ??= [];
 	const { tags, excludedTags, context } = query;
 
-	/**@type {(command: Command) => boolean} */
 	let commandIsAllowed: (command: Command) => boolean;
 	if(context)
-		commandIsAllowed = (command) => command.permissions?.isAllowedIn(context.member, context.channel) ?? true;
+		commandIsAllowed = command => command.permissions?.isAllowedIn(context.member, context.channel) ?? true;
 	else
 		commandIsAllowed = () => true;
 
 	let commandMeetsCriteria: (command: Command) => boolean;
 	if(tags.length && excludedTags.length)
-		commandMeetsCriteria = (command) => !excludedTags.some(tag => command.tags.has(tag)) && tags.every(tag => command.tags.has(tag));
+		commandMeetsCriteria = command => !excludedTags.some(tag => command.tags.has(tag)) && tags.every(tag => command.tags.has(tag));
 	else if(tags.length)
-		commandMeetsCriteria = (command) => tags.every(tag => command.tags.has(tag));
+		commandMeetsCriteria = command => tags.every(tag => command.tags.has(tag));
 	else if(excludedTags.length)
-		commandMeetsCriteria = (command) => !excludedTags.some(tag => command.tags.has(tag));
+		commandMeetsCriteria = command => !excludedTags.some(tag => command.tags.has(tag));
 	else
 		commandMeetsCriteria = () => true;
 
-	const commands: Command[] = [];
-
-	for(const file of commandFilenames) {
-        const commandModule = require(`./${file}`);
-        const command: Command = commandModule instanceof Command ? commandModule : commandModule.default;
-
-		if(commandIsAllowed(command) && commandMeetsCriteria(command))
-			commands.push(command);
-	}
-
-	return commands;
+	return fetchCommandsFromFiles({
+		filter: command => commandIsAllowed(command) && commandMeetsCriteria(command),
+	});
 }

@@ -25,7 +25,7 @@ const command = new Command('papa-test', tags)
         if(!search)
             return request.reply({ content: 'wah' });
 
-		const foundCommand = searchCommand(request, search);
+		const foundCommand = await searchCommand(request, search);
 
 		if(!foundCommand) {
             const embed = new EmbedBuilder()

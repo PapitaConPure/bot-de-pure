@@ -1,4 +1,4 @@
-import { Message, CommandInteraction, Collection, ChatInputCommandInteraction, Snowflake, Attachment, PermissionsBitField, MessagePayload, MessageEditOptions, InteractionReplyOptions, InteractionDeferReplyOptions, InteractionEditReplyOptions, User, MessageComponentInteraction, MessageActionRowComponentBuilder, Interaction, ModalMessageModalSubmitInteraction, ButtonInteraction, SelectMenuInteraction, MessageReplyOptions, MessageFlags, InteractionCallbackResponse, BooleanCache, InteractionResponse, Client, InteractionCallback, InteractionCallbackResource } from 'discord.js';
+import { Message, CommandInteraction, Collection, ChatInputCommandInteraction, Snowflake, Attachment, PermissionsBitField, MessagePayload, MessageEditOptions, InteractionReplyOptions, InteractionDeferReplyOptions, InteractionEditReplyOptions, User, MessageComponentInteraction, MessageActionRowComponentBuilder, Interaction, ModalMessageModalSubmitInteraction, ButtonInteraction, SelectMenuInteraction, MessageReplyOptions, MessageFlags, InteractionCallbackResponse, BooleanCache, InteractionResponse, Client, InteractionCallback, InteractionCallbackResource, BaseInteraction } from 'discord.js';
 import { CommandTags } from './cmdTags';
 import { CommandArguments, CommandRequest, ComplexCommandRequest, ComponentInteraction, ExtendedCommandRequest } from './typings';
 import { CommandOptions, CommandOptionSolver } from './cmdOpts';
@@ -290,8 +290,8 @@ export class Command {
 		return request instanceof Message;
 	}
 
-	static requestIsInteraction(request: CommandRequest | Interaction): request is Interaction<'cached'> {
-		return request instanceof CommandInteraction;
+	static requestIsInteraction(request: CommandRequest | Interaction): request is Interaction {
+		return request instanceof BaseInteraction;
 	}
 
 	static requestize(request: CommandRequest | ComponentInteraction) {
