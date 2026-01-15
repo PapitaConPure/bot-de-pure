@@ -1,9 +1,9 @@
 {
     "compilerOptions": {
-        "target": "ES2023",
+        "target": "es2024",
         "checkJs": true,
-        "module": "CommonJS",
-        "moduleResolution": "node",
+        "module": "es2022",
+        "moduleResolution": "node16",
         "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
@@ -13,7 +13,6 @@
     },
     "exclude": [
         "node_modules",
-        "CommandBuilder",
         "PS Docs"
     ],
 }
