@@ -17,6 +17,7 @@ export default defineConfig([
       'no-unused-expressions': 'off',
       '@typescript-eslint/no-unused-expressions': 'off',
       '@typescript-eslint/no-require-imports': 'off',
+      'no-sparse-arrays': 'off',
     },
   },
 ]);
