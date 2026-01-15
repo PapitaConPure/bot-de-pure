@@ -1,15 +1,15 @@
-const { PureVoiceModel: PureVoice, PureVoiceSessionModel } = require('../../models/purevoice.js');
-const { PureVoiceSessionMember, getFrozenSessionAllowedMembers, makePVSessionName } = require('../../systems/others/purevoice.js');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder, MessageFlags } = require('discord.js');
-const { p_pure } = require('../../utils/prefixes.js');
-const { isNotModerator, defaultEmoji, compressId } = require('../../func.js');
-const { CommandOptions, CommandTags, Command } = require('../Commons/');
-const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts.js');
-const { Translator } = require('../../i18n');
-const { addMinutes, getUnixTime, isBefore } = require('date-fns');
+import { CommandOptions, CommandTags, Command } from '../Commons/';
+import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder, MessageFlags, ColorResolvable, CategoryChannel, GuildChannel } from 'discord.js';
+import { PureVoiceSessionMember, getFrozenSessionAllowedMembers, makePVSessionName } from '../../systems/others/purevoice.js';
+import { PureVoiceModel as PureVoice, PureVoiceSessionModel } from '../../models/purevoice.js';
+import { makeButtonRowBuilder, makeTextInputRowBuilder } from '../../utils/tsCasts.js';
+import { isNotModerator, defaultEmoji, compressId } from '../../func.js';
+import { addMinutes, getUnixTime, isBefore } from 'date-fns';
+import { p_pure } from '../../utils/prefixes.js';
+import { Translator } from '../../i18n';
+import { ComplexCommandRequest } from '../Commons/typings';
 
-/**@param {string} compressedUserId*/
-const cancelbutton = (compressedUserId) => new ButtonBuilder()
+const cancelbutton = (compressedUserId: string) => new ButtonBuilder()
 	.setCustomId(`voz_cancelWizard_${compressedUserId}`)
 	.setEmoji('1355143793577426962')
 	.setStyle(ButtonStyle.Secondary);
@@ -55,7 +55,7 @@ const command = new Command('voz', tags)
 
 		if(!voiceState?.channelId)
 			return warnNotInSession();
-		
+
 		if(sessionName.length > 24)
 			return request.reply({
 				content: translator.getText('voiceSessionNameTooLong'),
@@ -102,7 +102,7 @@ const command = new Command('voz', tags)
 				guildChannels.get(voiceId)?.setName(`${sessionEmote}【${sessionName}】`, translator.getText('voiceSessionReasonRename')),
 				guildRoles.get(roleId)?.setName(`${sessionEmote} ${sessionName}`, translator.getText('voiceSessionReasonRename')),
 			]);
-			
+
 			return request.reply({ content: translator.getText('voiceSessionRenameSuccess'), ephemeral: true });
 		} catch {
 			return request.reply({ content: translator.getText('voiceSessionRenameError'), ephemeral: true });
@@ -111,13 +111,13 @@ const command = new Command('voz', tags)
 	.setButtonResponse(async function startWizard(interaction, authorId) {
 		const translator = await Translator.from(interaction);
 		const { guild } = interaction;
-		
+
 		const wizard = wizEmbed(translator, interaction.client.user.avatarURL(), Colors.Navy)
 			.addFields({
 				name: translator.getText('voiceInstallationStartFieldName'),
 				value: translator.getText('voiceInstallationStartFieldValue'),
 			});
-			
+
 		const pv = await PureVoice.findOne({ guildId: guild.id });
 		const row = makeButtonRowBuilder();
 		const isInstalled = pv && guild.channels.cache.get(pv.categoryId) && guild.channels.cache.get(pv.voiceMakerId);
@@ -128,7 +128,7 @@ const command = new Command('voz', tags)
 					.setLabel(translator.getText('voiceButtonInstall'))
 					.setStyle(ButtonStyle.Primary),
 			);
-		else 
+		else
 			row.addComponents(
 				new ButtonBuilder()
 					.setCustomId(`voz_promptRelocateSystem_${authorId}`)
@@ -152,7 +152,7 @@ const command = new Command('voz', tags)
 	}, { userFilterIndex: 0 })
 	.setButtonResponse(async function selectInstallation(interaction, authorId) {
 		const translator = await Translator.from(interaction);
-		
+
 		const wizard = wizEmbed(translator, interaction.client.user.avatarURL(), Colors.Gold)
 			.addFields({
 				name: translator.getText('voiceInstallationSelectFieldName'),
@@ -217,8 +217,7 @@ const command = new Command('voz', tags)
 			interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 		]);
 
-		/**@type {import('discord.js').CategoryChannel}*/
-		let category;
+		let category: CategoryChannel;
 		if(createNew) {
 			const categoryName = interaction.fields.getTextInputValue('categoryName');
 			category = await interaction.guild.channels.create({
@@ -227,7 +226,7 @@ const command = new Command('voz', tags)
 				reason: translator.getText('voiceReasonCategoryCreate'),
 			});
 		} else {
-			category = /**@type {import('discord.js').CategoryChannel}*/(interaction.fields.getSelectedChannels('category')?.first());
+			category = interaction.fields.getSelectedChannels('category')?.first() as CategoryChannel;
 		}
 
 		try {
@@ -260,7 +259,7 @@ const command = new Command('voz', tags)
 				});
 
 			await pv.save();
-			
+
 			return Promise.all([
 				interaction.message.edit({
 					embeds: [wizard],
@@ -310,9 +309,9 @@ const command = new Command('voz', tags)
 			return interaction.deleteReply();
 
 		const channelsCache = interaction.guild.channels.cache;
-		const category = /**@type {import('discord.js').CategoryChannel}*/(interaction.fields.getSelectedChannels('category')?.first());
-		const voiceMaker = /**@type {import('discord.js').GuildChannel}*/(channelsCache.get(pv.voiceMakerId));
-		const controlPanel = /**@type {import('discord.js').GuildChannel}*/(channelsCache.get(pv.controlPanelId));
+		const category = interaction.fields.getSelectedChannels('category')?.first() as CategoryChannel;
+		const voiceMaker = channelsCache.get(pv.voiceMakerId) as GuildChannel;
+		const controlPanel = channelsCache.get(pv.controlPanelId) as GuildChannel;
 		const relocateReason = translator.getText('voiceReasonSystemRelocate', interaction.user.username);
 
 		await Promise.all([
@@ -324,10 +323,10 @@ const command = new Command('voz', tags)
 
 		await voiceMaker.permissionOverwrites.edit(interaction.guild.roles.everyone, { SendMessages: false }, { reason: relocateReason }).catch(console.error);
 		await Promise.all([
-			voiceMaker.permissionOverwrites.edit(interaction.guild.members.me,     { SendMessages: true  }, { reason: relocateReason }).catch(console.error),
+			voiceMaker.permissionOverwrites.edit(interaction.guild.members.me, { SendMessages: true  }, { reason: relocateReason }).catch(console.error),
 			pv.save(),
 		]);
-		
+
 		const wizard = wizEmbed(translator, interaction.client.user.avatarURL(), Colors.Yellow)
 			.addFields({
 				name: translator.getText('voiceRelocatedFieldName'),
@@ -341,7 +340,7 @@ const command = new Command('voz', tags)
 	}, { userFilterIndex: 0 })
 	.setButtonResponse(async function deleteSystem(interaction, authorId) {
 		const translator = await Translator.from(interaction);
-		
+
 		const wizard = wizEmbed(translator, interaction.client.user.avatarURL(), Colors.Yellow)
 			.addFields({
 				name: translator.getText('voiceUninstallFieldName'),
@@ -383,12 +382,12 @@ const command = new Command('voz', tags)
 				guildChannels.get(pv.voiceMakerId)?.delete(translator.getText('voiceReasonSystemRemove', interaction.user.username)).catch(console.error),
 				guildChannels.get(pv.controlPanelId)?.delete(translator.getText('voiceReasonSystemRemove', interaction.user.username)).catch(console.error),
 			]);
-	
+
 			await Promise.all([
 				PureVoiceSessionModel.deleteMany({ channelId: { $in: pv.sessions } }),
 				PureVoice.deleteOne(guildQuery),
 			]);
-	
+
 			const deleteEmbed = wizEmbed(translator, interaction.client.user.avatarURL(), Colors.Red)
 				.addFields({
 					name: translator.getText('voiceUninstalledFieldName'),
@@ -434,7 +433,7 @@ const command = new Command('voz', tags)
 
 		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
 		if(!session) return warnNotInSession();
-		
+
         const modal = new ModalBuilder()
             .setCustomId(`voz_applySessionName`)
             .setTitle(translator.getText('yoVoiceAutonameModalTitle'))
@@ -487,7 +486,7 @@ const command = new Command('voz', tags)
 		const defEmoji = defaultEmoji(emoji);
 		if(!defEmoji)
 			return interaction.editReply({ content: translator.getText('voiceSessionRenameInvalidEmoji') });
-		
+
 		voiceChannel.setName(makePVSessionName(name, defEmoji)).catch(console.error);
 		return interaction.editReply({ content: translator.getText('voiceSessionRenameSuccess') });
 	})
@@ -527,7 +526,7 @@ const command = new Command('voz', tags)
 				session.members.set(memberId, member.setWhitelisted(true).toJSON());
 				await voiceChannel.permissionOverwrites.edit(memberId, { Connect: true }, { reason: translator.getText('voiceSessionReasonFreeze', interaction.user.username) }).catch(console.error);
 			}
-			
+
 			session.markModified('members');
 
 			await Promise.all([
@@ -549,7 +548,7 @@ const command = new Command('voz', tags)
 			session.markModified('members');
 			await session.save();
 		}
-		
+
 		return interaction.editReply({
 			content: translator.getText('voiceSessionFreezeSuccess', `${voiceChannel}`, session.frozen),
 		});
@@ -573,12 +572,7 @@ const command = new Command('voz', tags)
 		});
 	});
 
-/**
- * @param {Translator} translator
- * @param {String} iconUrl
- * @param {import('discord.js').ColorResolvable} stepColor
- */
-function wizEmbed(translator, iconUrl, stepColor) {
+function wizEmbed(translator: Translator, iconUrl: string, stepColor: ColorResolvable) {
 	return new EmbedBuilder()
 		.setColor(stepColor)
 		.setAuthor({
@@ -587,11 +581,7 @@ function wizEmbed(translator, iconUrl, stepColor) {
 		});
 }
 
-/**
- * @param {import('../Commons/typings.js').ComplexCommandRequest} request
- * @param {Translator} translator
- */
-function generateFirstWizard(request, translator) {
+function generateFirstWizard(request: ComplexCommandRequest, translator: Translator) {
 	if(isNotModerator(request.member))
 		return request.reply({
 			flags: MessageFlags.Ephemeral,
@@ -617,4 +607,4 @@ function generateFirstWizard(request, translator) {
 	});
 }
 
-module.exports = command;
+export default command;
