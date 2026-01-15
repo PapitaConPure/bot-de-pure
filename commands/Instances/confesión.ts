@@ -1,20 +1,21 @@
-const { compressId, fetchChannel, decompressId } = require('../../func');
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder, Colors, DiscordAPIError, ContainerBuilder, SectionBuilder, MessageFlags } = require('discord.js');
-const ConfessionSystems = require('../../models/confessionSystems.js').default;
-const PendingConfessions = require('../../models/pendingConfessions.js').default;
-const { Command, CommandTags } = require('../Commons/');
-const { auditError } = require('../../systems/others/auditor');
-const { CommandPermissions } = require('../Commons/cmdPerms.js');
-const { makeTextInputRowBuilder, makeButtonRowBuilder } = require('../../utils/tsCasts.js');
-const { fetchGuildMembers } = require('../../utils/guildratekeeper');
-const { DiscordAgent } = require('../../systems/agents/discordagent');
+import { Command, CommandTags, CommandPermissions } from '../Commons/';
+import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder, Colors, DiscordAPIError, ContainerBuilder, SectionBuilder, MessageFlags, Interaction, TextChannel } from 'discord.js';
+import { makeTextInputRowBuilder, makeButtonRowBuilder } from '../../utils/tsCasts.js';
+import { compressId, fetchChannel, decompressId } from '../../func';
+import PendingConfessions from '../../models/pendingConfessions.js';
+import ConfessionSystems from '../../models/confessionSystems.js';
+import { DiscordAgent } from '../../systems/agents/discordagent';
+import { fetchGuildMembers } from '../../utils/guildratekeeper';
+import { auditError } from '../../systems/others/auditor';
 
 const confessionTasks = [];
 
 const perms = new CommandPermissions()
 	.requireAnyOf('ManageMessages')
 	.requireAnyOf([ 'ManageChannels', 'ManageGuild' ]);
+
 const tags = new CommandTags().add('MOD');
+
 const command = new Command('confesión', tags)
 	.setAliases(
 		'confesion',
@@ -291,10 +292,10 @@ const command = new Command('confesión', tags)
 					name: 'Respuestas',
 					reason: 'Aprobación de respuesta anónima a confesión',
 				});
-	
+
 			const agent = await (new DiscordAgent().setup(thread));
 			agent.setUser(interaction.client.user);
-	
+
 			await agent.sendAsUser({
 				username: 'Respuesta anónima',
 				content: `${confession.content}`,
@@ -309,7 +310,7 @@ const command = new Command('confesión', tags)
 				.setCustomId(`confesión_promptReplyAnon`)
 				.setEmoji('1456639740974600263')
 				.setStyle(ButtonStyle.Secondary);
-			
+
 			if(confession.anonymous) {
 				confessionContent += '<:person:1355128242993893539> Confesión anónima';
 				confessionSection
@@ -345,7 +346,7 @@ const command = new Command('confesión', tags)
 				.addTextDisplayComponents(textDisplay =>
 					textDisplay.setContent(confessionContent)
 				);
-		
+
 			await confChannel.send({
 				flags: MessageFlags.IsComponentsV2,
 				components: [confessionContainer],
@@ -375,7 +376,7 @@ const command = new Command('confesión', tags)
 		const index = confSystem.pending.indexOf(confId);
 		if(index < 0)
 			return interaction.update({ content: '⚠️ Esta confesión ya no está pendiente', components: [] });
-		
+
 		await Promise.allSettled(confessionTasks);
 		confSystem.pending.splice(index, 1);
 		confSystem.markModified('pending');
@@ -399,7 +400,7 @@ const command = new Command('confesión', tags)
 		const index = confSystem.pending.indexOf(confId);
 		if(index < 0)
 			return interaction.update({ content: '⚠️ La confesión ya se atendió, pero no se registró aquí por un error externo', components: [] });
-		
+
 		confSystem.pending.splice(index, 1);
 		confSystem.markModified('pending');
 		await delegateConfessionSystemTasks(
@@ -409,7 +410,7 @@ const command = new Command('confesión', tags)
 
 		const gmid = decompressId(userId);
 		const miembro = interaction.guild.members.cache.get(gmid);
-		let confirmationEmbed;
+		let confirmationEmbed: EmbedBuilder;
 		try {
 			if(miembro)
 				await miembro.timeout(120_000, `Aislado por ${interaction.user.username} por confesión malintencionada`);
@@ -444,7 +445,7 @@ const command = new Command('confesión', tags)
 		const index = confSystem.pending.indexOf(confId);
 		if(index < 0)
 			return interaction.update({ content: '⚠️ La confesión ya se atendió, pero no se registró aquí por un error externo', components: [] });
-		
+
 		confSystem.pending.splice(index, 1);
 		confSystem.markModified('pending');
 		await delegateConfessionSystemTasks(
@@ -454,7 +455,7 @@ const command = new Command('confesión', tags)
 
 		const gmid = decompressId(userId);
 		const miembro = interaction.guild.members.cache.get(gmid);
-		let confirmationEmbed;
+		let confirmationEmbed: EmbedBuilder;
 		try {
 			if(miembro)
 				await miembro.ban({ reason: `Banneado por ${interaction.user.username} por confesión malintencionada` });
@@ -502,10 +503,10 @@ const command = new Command('confesión', tags)
 		const data = await getConfessionSystemAndChannels(interaction);
 		if(data.success === false)
 			return interaction.reply({ content: data.message, ephemeral: true });
-		
+
 		const { confSystem, logChannel } = data;
 		const { message } = interaction;
-		
+
 		const userId = compressId(interaction.user.id);
 		const responseId = compressId(interaction.id);
 		const messageId = compressId(message.id);
@@ -560,26 +561,26 @@ const command = new Command('confesión', tags)
 	});
 
 /**
+ * @description
  * Intenta resolver un sistema de confesiones de la BDD y sus canales relacionados.
- * 
+ *
  * Verifica que todos los componentes necesarios para sustentar un sistema de confesiones sean válidos.
- * Si no lo son, falla y devuelve un objeto con `success = false` y un `message` de diagnóstico de error
- * @param {import('discord.js').Interaction} interaction 
- * @returns un objeto con los datos obtenidos
+ * Si no lo son, falla y devuelve un objeto con `success = false` y un `message` de diagnóstico de error.
+ * @returns Un objeto con los datos obtenidos.
  */
-async function getConfessionSystemAndChannels(interaction) {
+async function getConfessionSystemAndChannels(interaction: Interaction) {
 	await Promise.allSettled(confessionTasks);
 
 	/**
-	 * @param {string} message 
+	 * @param {string} message
 	 * @returns {{ success: false, message: string }}
 	 */
-	const makeErr = message => ({ success: false, message });
+	const makeErr = (message: string): { success: false; message: string; } => ({ success: false, message });
 
 	const confSystem = await ConfessionSystems.findOne({ guildId: interaction.guildId });
 	if(!confSystem)
 		return makeErr('⚠️ No se ha configurado un sistema de confesiones en este server');
-	
+
 	const logChannel = interaction.guild.channels.cache.get(confSystem.logChannelId);
 	if(!logChannel || logChannel.type !== ChannelType.GuildText)
 		return makeErr('⚠️ No se encontró un canal de auditoría de confesiones válido');
@@ -588,8 +589,7 @@ async function getConfessionSystemAndChannels(interaction) {
 	if(!confChannel || confChannel.type !== ChannelType.GuildText)
 		return makeErr('⚠️ No se encontró un canal de confesiones válido');
 
-	/**@type {{ success: true, confSystem: typeof confSystem, logChannel: import('discord.js').TextChannel, confChannel: import('discord.js').TextChannel }}*/
-	const ret = {
+	const ret: { success: true; confSystem: typeof confSystem; logChannel: TextChannel; confChannel: TextChannel; } = {
 		success: true,
 		confSystem,
 		logChannel,
@@ -600,13 +600,12 @@ async function getConfessionSystemAndChannels(interaction) {
 }
 
 /**
- * Delega tareas pendientes al sistema de confesiones
- * @param  {...any} tasks Nuevas promesas a delegar al sistema de confesiones
- * @returns 
+ * @description Delega tareas pendientes al sistema de confesiones.
+ * @param tasks Nuevas promesas a delegar al sistema de confesiones.
  */
-async function delegateConfessionSystemTasks(...tasks) {
+async function delegateConfessionSystemTasks(...tasks: any[]) {
 	confessionTasks.push(...tasks);
 	return Promise.allSettled(tasks);
 }
 
-module.exports = command;
+export default command;
