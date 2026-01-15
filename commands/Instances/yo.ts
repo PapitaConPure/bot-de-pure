@@ -1,16 +1,17 @@
-import UserConfigs, { UserConfigDocument } from '../../models/userconfigs';
-import { ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder, ContainerBuilder, MessageFlags, StringSelectMenuOptionBuilder, SeparatorSpacingSize, LabelBuilder, MessageComponentInteraction } from 'discord.js';
 import { CommandTags, Command, CommandOptions, CommandFlag } from '../Commons/';
-import { tenshiColor, tenshiAltColor } from '../../data/globalProps';
+import { ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder, ContainerBuilder, MessageFlags, StringSelectMenuOptionBuilder, SeparatorSpacingSize, LabelBuilder, MessageComponentInteraction, Interaction } from 'discord.js';
 import { Translator, Locales, isValidLocaleKey, LocaleIds, LocaleKey } from '../../i18n';
-import { recacheUser } from '../../utils/usercache';
 import { compressId, decompressId, improveNumber, warn, shortenText } from '../../func';
-import { makeTextInputRowBuilder } from '../../utils/tsCasts';
-import { auditError } from '../../systems/others/auditor';
+import { AcceptedTwitterConverterKey, acceptedTwitterConverters } from '../../systems/agents/pureet';
 import { updateFollowedFeedTagsCache } from '../../systems/booru/boorufeed';
+import UserConfigs, { UserConfigDocument } from '../../models/userconfigs';
 import { makeSessionAutoname } from '../../systems/others/purevoice';
+import { tenshiColor, tenshiAltColor } from '../../data/globalProps';
+import { makeTextInputRowBuilder } from '../../utils/tsCasts';
 import { toUtcOffset, sanitizeTzCode, utcOffsetDisplayFull } from '../../utils/timezones';
-import { acceptedTwitterConverters } from '../../systems/agents/pureet';
+import { ComplexCommandRequest } from '../Commons/typings';
+import { auditError } from '../../systems/others/auditor';
+import { recacheUser } from '../../utils/usercache';
 
 const userNotAvailableText = warn('Usuario no disponible / User unavailable / ユーザーは利用できません');
 
@@ -24,7 +25,7 @@ const cancelButton = (compressedAuthorId: string) => new ButtonBuilder()
 	.setEmoji('1355143793577426962')
 	.setStyle(ButtonStyle.Secondary);
 
-function makeDashboardContainer(request: import('discord.js').Interaction | import('../Commons/typings').ComplexCommandRequest, userConfigs: UserConfigDocument, translator: Translator) {
+function makeDashboardContainer(request: Interaction | ComplexCommandRequest, userConfigs: UserConfigDocument, translator: Translator) {
 	//const suscriptions = [...userConfigs.feedTagSuscriptions.values()];
 	//const suscriptionsFeedCount = suscriptions.length ? suscriptions.map(a => a.length ?? 0).reduce((a, b) => a + b) : 0;
 	//const suscriptionsServerCount = userConfigs.feedTagSuscriptions.size;
@@ -779,7 +780,7 @@ const command = new Command('yo', tags)
 		if(user.id !== decompressId(compressedAuthorId))
 			return interaction.editReply({ content: translator.getText('unauthorizedInteraction') });
 
-		let service = interaction.values[0] as import('../../systems/agents/pureet').AcceptedTwitterConverterKey | 'none' | '';
+		let service = interaction.values[0] as AcceptedTwitterConverterKey | 'none' | '';
 		if(service === 'none') service = '';
 
 		if(!acceptedTwitterConverters.includes(service))
