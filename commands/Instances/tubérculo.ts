@@ -1,19 +1,20 @@
-const { default: axios } = require('axios');
-const { psDocsButton, psEditorButton } = require('./purescript.js');
-const GuildConfig = require('../../models/guildconfigs.js').default;
-const { CommandOptions, CommandTags, Command, CommandOptionSolver, CommandParam } = require('../Commons/');
-const { p_pure } = require('../../utils/prefixes.js');
-const { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId, warn } = require('../../func.js');
-const { EmbedBuilder, ButtonBuilder, TextInputBuilder, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder, MessageFlags } = require('discord.js');
-const { RuntimeToLanguageType } = require('../../systems/ps/v1.0/commons.js');
-const { executeTuber: executeTuberPS1 } = require('../../systems/ps/v1.0/purescript.js');
-const { executeTuber: executeTuberPS2, CURRENT_PS_VERSION } = require('../../systems/ps/common/executeTuber.js');
-const { makeButtonRowBuilder, makeTextInputRowBuilder } = require('../../utils/tsCasts.js');
-const { ValueKindTranslationLookups } = require('../../systems/ps/v1.1/interpreter/values.js');
-const { Input } = require('../../systems/ps/v1.1/interpreter/inputReader.js');
-const { getWikiPageComponentsV2 } = require('../../systems/others/wiki.js');
-const { Translator } = require('../../i18n');
-const { fetchGuildMembers } = require('../../utils/guildratekeeper.js');
+import { CommandOptions, CommandTags, Command, CommandOptionSolver, CommandParam } from '../Commons/';
+import { EmbedBuilder, ButtonBuilder, TextInputBuilder, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder, MessageFlags } from 'discord.js';
+import { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId, warn } from '../../func.js';
+import GuildConfig, { GuildConfigDocument } from '../../models/guildconfigs.js';
+import { psDocsButton, psEditorButton } from './purescript.js';
+import { p_pure } from '../../utils/prefixes.js';
+import { RuntimeToLanguageType } from '../../systems/ps/v1.0/commons.js';
+import { executeTuber as executeTuberPS1 } from '../../systems/ps/v1.0/purescript.js';
+import { executeTuber as executeTuberPS2, CURRENT_PS_VERSION, Tubercle } from '../../systems/ps/common/executeTuber.js';
+import { makeButtonRowBuilder, makeTextInputRowBuilder } from '../../utils/tsCasts.js';
+import { ValueKindTranslationLookups } from '../../systems/ps/v1.1/interpreter/values.js';
+import { Input } from '../../systems/ps/v1.1/interpreter/inputReader.js';
+import { getWikiPageComponentsV2 } from '../../systems/others/wiki.js';
+import { fetchGuildMembers } from '../../utils/guildratekeeper.js';
+import { Translator } from '../../i18n';
+import axios from 'axios';
+import { ComplexCommandRequest } from '../Commons/typings.js';
 
 const pageMax = 10;
 const filters = {
@@ -27,15 +28,10 @@ const filters = {
 	},
 };
 
-/**
- * Retorna un arreglo de ActionRowBuilders en respecto a la página actual y si la navegación por página está permitida
- * @param {Number} page 
- * @param {Number} lastPage 
- * @param {Boolean} [navigationEnabled=true] 
- */
-function paginationRows(page, lastPage, navigationEnabled = true) {
+/**@description Retorna un arreglo de ActionRowBuilders en respecto a la página actual y si la navegación por página está permitida.*/
+function paginationRows(page: number, lastPage: number, navigationEnabled: boolean = true) {
 	/**@type {Array<import('discord.js').ActionRowBuilder<ButtonBuilder> | import('discord.js').ActionRowBuilder<import('discord.js').StringSelectMenuBuilder>>}*/
-	const rows = [];
+	const rows: Array<import('discord.js').ActionRowBuilder<ButtonBuilder> | import('discord.js').ActionRowBuilder<import('discord.js').StringSelectMenuBuilder>> = [];
 
 	if(navigationEnabled)
 		rows.push(...navigationRows('tubérculo', page, lastPage));
@@ -65,11 +61,7 @@ const helpRows = () => [
 	makeButtonRowBuilder().addComponents(psEditorButton, psDocsButton)
 ];
 
-/**
- * @param {import('discord.js').Guild} guild 
- * @param {String} [content] 
- */
-async function getItemsList(guild, content = undefined) {
+async function getItemsList(guild: import('discord.js').Guild, content: string = undefined) {
 	const gcfg = await GuildConfig.findOne({ guildId: guild.id }) || new GuildConfig({ guildId: guild.id });
 	let items = Object.entries(gcfg.tubers).reverse();
 	if(content) {
@@ -86,12 +78,7 @@ async function getItemsList(guild, content = undefined) {
 	return { items, lastPage };
 }
 
-/**
- * @param {import('discord.js').ButtonInteraction | import('discord.js').SelectMenuInteraction | import('discord.js').ModalSubmitInteraction} interaction 
- * @param {Number} page 
- * @param {String} [setFilter]
- */
-async function loadPageNumber(interaction, page, setFilter = undefined) {
+async function loadPageNumber(interaction: import('discord.js').ButtonInteraction | import('discord.js').SelectMenuInteraction | import('discord.js').ModalSubmitInteraction, page: number, setFilter: string = undefined) {
 	const { guild, message } = interaction;
 	const { items, lastPage } = await getItemsList(guild, setFilter ?? message.content);
 	const members = guild.members.cache;
@@ -99,7 +86,7 @@ async function loadPageNumber(interaction, page, setFilter = undefined) {
 	const paginationEnabled = items.length >= pageMax
 
 	/**@type {import('discord.js').MessageEditOptions}*/
-	const listUpdate = {
+	const listUpdate: import('discord.js').MessageEditOptions = {
 		embeds: [
 			new EmbedBuilder()
 				.setColor(oembed.color)
@@ -136,7 +123,7 @@ async function loadPageNumber(interaction, page, setFilter = undefined) {
 		return interaction.update(listUpdate);
 };
 
-const helpString = (/**@type {import('../Commons/typings.js').ComplexCommandRequest}*/ request) => [
+const helpString = (request: ComplexCommandRequest) => [
 	'## Ejemplos de Uso',
 	'Supongamos que queremos crear, ver o editar un Tubérculo llamado **"saludo"**:',
 	'* 🔍 **Ver Tubérculo** — `p!t --ver saludo` o `p!t -v saludo`',
@@ -166,7 +153,7 @@ const options = new CommandOptions()
 				const clientDisplayName = interaction.guild.members.me.displayName;
 
 				/**@type {Array<import('discord.js').ApplicationCommandOptionChoiceData>}*/
-				const options = tubersArr
+				const options: Array<import('discord.js').ApplicationCommandOptionChoiceData> = tubersArr
 					.sort(([ ,, aDistance ], [ ,, bDistance ]) => aDistance - bDistance)
 					.slice(0, +!!existingTuber + 24)
 					.map(([ name, tuber ]) => {
@@ -495,30 +482,22 @@ const command = new Command('tubérculo', flags)
 		return interaction.editReply({ content: `✅ Descripción de Entrada \`${shortenText(name, 256)}\` actualizada` });
 	});
 
-/**
- * 
- * @param {String} tuberId 
- * @param {import('../../models/guildconfigs.js').GuildConfigDocument} gcfg 
- * @param {Boolean} isPureScript 
- * @param {import('../Commons/typings.js').ComplexCommandRequest} request 
- * @param {CommandOptionSolver} args 
- */	
-async function createTuber(tuberId, gcfg, isPureScript, request, args) {
+async function createTuber(tuberId: string, gcfg: GuildConfigDocument, isPureScript: boolean, request: ComplexCommandRequest, args: CommandOptionSolver) {
 	if(tuberId.length > 24)
 		return request.reply({ content: '⚠️️ Las TuberID solo pueden medir hasta 24 caracteres' });
 	if(gcfg.tubers[tuberId] && isNotModerator(request.member) && gcfg.tubers[tuberId].author !== request.user.id)
 		return request.reply({ content: `⛔ Acción denegada. Esta TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.members.me).user.username}*` });
 	
-	const tuberContent = {
+	const tuberContent: Partial<Tubercle> = {
 		author: request.userId,
 		advanced: isPureScript,
 	};
 	const codeTag = args.isInteractionSolver() ? 0 : args.rawArgs.match(/```[A-Za-z0-9]*/)?.[0];
-	const mfiles = CommandOptionSolver.asAttachments(args.parsePolyParamSync('archivos')).filter(att => att);
+	const messageFiles = CommandOptionSolver.asAttachments(args.parsePolyParamSync('archivos')).filter(att => att);
 	const contentResult = await (async () => {
-		const hasCodeImport = mfiles[0]?.name.toLowerCase().endsWith('.tuber');
+		const hasCodeImport = messageFiles[0]?.name.toLowerCase().endsWith('.tuber');
 		const importCode = async () => {
-			const response = await axios.get(mfiles[0].url);
+			const response = await axios.get(messageFiles[0].url);
 
 			if(response.status !== 200)
 				return {
@@ -575,16 +554,16 @@ async function createTuber(tuberId, gcfg, isPureScript, request, args) {
 	const mcontent = contentResult.result;
 
 	//Incluir Tubérculo; crear colección de Tubérculos si es necesario
-	if(isPureScript) {
+	if(tuberContent.advanced) {
 		if(!mcontent)
 			return request.reply({ content: `⚠️️ Este Tubérculo requiere ingresar PuréScript\n${helpString(request)}` });
 		tuberContent.script = mcontent.replace(/```[A-Za-z0-9]*/, '');
 		console.log({ script: tuberContent.script });
 	} else {
-		if(!mcontent && !mfiles.length)
+		if(!mcontent && !messageFiles.length)
 			return request.reply({ content: `⚠️️ Debes ingresar un mensaje o archivo para registrar un Tubérculo\n${helpString(request)}` });
 		if(mcontent) tuberContent.content = mcontent;
-		if(mfiles.length) tuberContent.files = mfiles;
+		if(messageFiles.length) tuberContent.files = messageFiles.map(messageFile => messageFile.url);
 	}
 
 	gcfg.tubers[tuberId] = tuberContent;
@@ -620,15 +599,7 @@ async function createTuber(tuberId, gcfg, isPureScript, request, args) {
 	}
 }
 
-/**
- * 
- * @param {import('../Commons/typings.js').ComplexCommandRequest | import('discord.js').ButtonInteraction<'cached'>} interaction 
- * @param {*} item 
- * @param {String} tuberId 
- * @param {Number} inputVariant 
- * @param {*} updateMessage 
- */
-function viewTuber(interaction, item, tuberId, inputVariant, updateMessage) {
+function viewTuber(interaction: ComplexCommandRequest | import('discord.js').ButtonInteraction<'cached'>, item: any, tuberId: string, inputVariant: number, updateMessage?: string) {
 	if(!item)
 		return interaction.reply({ content: `⚠️️ El Tubérculo **${tuberId}** no existe` });
 
@@ -643,7 +614,7 @@ function viewTuber(interaction, item, tuberId, inputVariant, updateMessage) {
 	];
 	const variantButtons = [];
 	/**@type {Array<AttachmentBuilder>}*/
-	let files = [];
+	let files: Array<AttachmentBuilder> = [];
 	const embed = new EmbedBuilder()
 		.setColor(Colors.DarkVividPink)
 		.setAuthor({ name: interaction.guild.name, iconURL: interaction.guild.iconURL({ size: 256 }) })
@@ -760,17 +731,17 @@ function viewTuber(interaction, item, tuberId, inputVariant, updateMessage) {
 		components.push(makeButtonRowBuilder().addComponents(...variantButtons));
 
 	return updateMessage
-		? /**@type {import('discord.js').ButtonInteraction<'cached'>}*/(interaction).update({ embeds, files, components })
+		? (interaction as import('discord.js').ButtonInteraction).update({ embeds, files, components })
 		: interaction.reply({ embeds, files, components });
 }
 
 /**
  * 
  * @param {String} tuberId
- * @param {import('../../models/guildconfigs.js').GuildConfigDocument} gcfg 
- * @param {import('../Commons/typings.js').ComplexCommandRequest} request 
+ * @param {GuildConfigDocument} gcfg 
+ * @param {ComplexCommandRequest} request 
  */
-function deleteTuber(tuberId, gcfg, request) {
+function deleteTuber(tuberId: string, gcfg: GuildConfigDocument, request: ComplexCommandRequest) {
 	if(!gcfg.tubers[tuberId])
 		return request.reply({ content: `⚠️️ El Tubérculo **${tuberId}** no existe` });
 
@@ -786,12 +757,12 @@ function deleteTuber(tuberId, gcfg, request) {
 /**
  * 
  * @param {String} tuberId
- * @param {import('../../models/guildconfigs.js').GuildConfigDocument} gcfg 
+ * @param {GuildConfigDocument} gcfg 
  * @param {Boolean} isPureScript 
- * @param {import('../Commons/typings.js').ComplexCommandRequest} request 
+ * @param {ComplexCommandRequest} request 
  * @param {CommandOptionSolver} args 
  */
-async function opExecuteTuber(tuberId, gcfg, isPureScript, request, args) {
+async function opExecuteTuber(tuberId: string, gcfg: GuildConfigDocument, isPureScript: boolean, request: ComplexCommandRequest, args: CommandOptionSolver) {
 	let tid = tuberId;
 	if(!gcfg.tubers[tuberId]) {
 		const notFoundEmbed = new EmbedBuilder()
@@ -808,7 +779,7 @@ async function opExecuteTuber(tuberId, gcfg, isPureScript, request, args) {
 		);
 
 		/**@type {Array<{ name: String, distance: Number }>}*/
-		let similar = [];
+		let similar: Array<{ name: string; distance: number; }> = [];
 		let superSimilar;
 		if(tuberId.length > 1)
 			similar = Object.keys(gcfg.tubers)
@@ -879,4 +850,4 @@ async function opExecuteTuber(tuberId, gcfg, isPureScript, request, args) {
 	});
 }
 
-module.exports = command;
+export default command;
