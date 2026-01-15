@@ -1,53 +1,38 @@
-const { PureVoiceModel, PureVoiceSessionModel } = require('../../models/purevoice.js');
-const UserConfigs = require('../../models/userconfigs').default;
-const Discord = require('discord.js');
-const { p_pure } = require('../../utils/prefixes');
-const { Translator } = require('../../i18n');
-const chalk = require('chalk');
-const { ButtonStyle, ChannelType } = require('discord.js');
-const { makeButtonRowBuilder } = require('../../utils/tsCasts.js');
-const { tenshiColor } = require('../../data/globalProps.js');
-const Logger = require('../../utils/logs.js').default;
+import { PureVoiceDocument, PureVoiceModel, PureVoiceSessionModel } from '../../models/purevoice.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, EmbedBuilder, Guild, GuildMember, MessageCreateOptions, MessagePayload, TextChannel, VoiceBasedChannel, VoiceState } from 'discord.js';
+import UserConfigs, { UserConfigDocument } from '../../models/userconfigs';
+import { tenshiColor } from '../../data/globalProps.js';
+import { p_pure } from '../../utils/prefixes';
+import { Translator } from '../../i18n';
+import { ValuesOf } from 'types';
+import chalk from 'chalk';
 
+import Logger from '../../utils/logs.js';
 const { debug, info, warn, error } = Logger('WARN', 'PV');
 
-/**
- * 
- * @param {String} name 
- * @param {String} [emoji]
- */
-function makePVSessionName(name, emoji = null) {
+export function makePVSessionName(name: string, emoji: string = null) {
 	return `${emoji || '💠'}【${name}】`;
 }
 
-/**
- * 
- * @param {import('../../models/userconfigs').UserConfigDocument} userConfig 
- */
-function makeSessionAutoname(userConfig) {
+export function makeSessionAutoname(userConfig: UserConfigDocument) {
 	if(!userConfig?.voice?.autoname) return null;
 	return makePVSessionName(userConfig.voice.autoname, userConfig.voice.autoemoji);
 }
 
-/**
- * 
- * @param {import('../../models/userconfigs').UserConfigDocument} userConfig 
- */
-function makeSessionRoleAutoname(userConfig) {
+export function makeSessionRoleAutoname(userConfig: UserConfigDocument) {
 	if(!userConfig?.voice?.autoname) return null;
 	return `${userConfig.voice.autoemoji || '💠'} ${userConfig.voice.autoname}`;
 }
 
 class PureVoiceDocumentHandler {
-	/**@type {import('../../models/purevoice.js').PureVoiceDocument}*/
-	document;
+	document: PureVoiceDocument;
 
 	/**
 	 * Intenta conseguir un documento de sistema PuréVoice del servidor relacionado al cambio detectado, en la base de datos
-	 * @param {Object} documentQuery 
-	 * @returns {Promise<import('../../models/purevoice.js').PureVoiceDocument>}
+	 * @param {Object} documentQuery
+	 * @returns {Promise<PureVoiceDocument>}
 	 */
-	async fetchSystemDocument(documentQuery) {
+	async fetchSystemDocument(documentQuery: object): Promise<PureVoiceDocument> {
 		this.document = await PureVoiceModel.findOne(documentQuery).catch(err => { error(err); return undefined; });
 		return this.document;
 	};
@@ -63,39 +48,33 @@ class PureVoiceDocumentHandler {
 	}
 }
 
-class PureVoiceUpdateHandler {
-	/**@type {PureVoiceDocumentHandler}*/
-	#documentHandler;
-	/**@type {Discord.VoiceState}*/
-	#oldState;
-	/**@type {Discord.VoiceState}*/
-	#state;
+export class PureVoiceUpdateHandler {
+	#documentHandler: PureVoiceDocumentHandler;
+	#oldState: VoiceState;
+	#state: VoiceState;
 
-	/**
-	 * Crea un nuevo Handler para una actualización de estado de un canal de voz con Sistema PuréVoice
-	 * @param {Discord.VoiceState} oldState 
-	 * @param {Discord.VoiceState} state 
-	 */
-	constructor(oldState, state) {
+	/**@description Crea un nuevo Handler para una actualización de estado de un canal de voz con Sistema PuréVoice.*/
+	constructor(oldState: VoiceState, state: VoiceState) {
 		this.#documentHandler = new PureVoiceDocumentHandler();
 		this.#oldState = oldState;
 		this.#state = state;
 	};
 
-	/** Comprueba si hay un sistema PuréVoice instalado en el servidor actual o no */
+	/**@description Comprueba si hay un sistema PuréVoice instalado en el servidor actual o no.*/
 	systemIsInstalled() {
 		return !!(this.#documentHandler.document && this.#state.guild.channels.cache.get(this.#documentHandler.document.categoryId));
 	};
-	
-	/** Para controlar errores ocasionados por una eliminación prematura de uno de los canales asociados a una sesión */
+
+	/**@description Para controlar errores ocasionados por una eliminación prematura de uno de los canales asociados a una sesión.*/
 	prematureError = () => warn(chalk.gray('Canal probablemente eliminado prematuramente'));
-	
-	/** Comprueba si el cambio de estado no es un movimiento entre canales de voz */
+
+	/**@description Comprueba si el cambio de estado no es un movimiento entre canales de voz.*/
 	isNotConnectionUpdate = () => (this.#oldState.channelId === this.#state.channelId);
 
 	/**
+	 * @description
 	 * Comprueba si el cambio es una desconexión y verifica si el canal quedó vacío para poder eliminar la sesión.
-	 * Si la sesión no se elimina, en cambio se le revoca el rol de sesión al miembro que se desconectó
+	 * Si la sesión no se elimina, en cambio se le revoca el rol de sesión al miembro que se desconectó.
 	 */
 	async handleDisconnection() {
 		if(this.isNotConnectionUpdate()) return;
@@ -143,8 +122,8 @@ class PureVoiceUpdateHandler {
 				return;
 			}
 
-			const controlPannel = /**@type {Discord.TextChannel}*/(guild.channels.cache.get(pvDocument.controlPanelId));
-			
+			const controlPanel = guild.channels.cache.get(pvDocument.controlPanelId) as TextChannel;
+
 			const pvChannelToRemove = guild.channels.cache.get(session.channelId);
 			const pvSessionName = pvChannelToRemove?.name ? `#${pvChannelToRemove.name} (${session.channelId})` : session.channelId;
 			const deletionMessage = 'Eliminar componentes de sesión PuréVoice';
@@ -157,7 +136,7 @@ class PureVoiceUpdateHandler {
 					error(err);
 					success = false;
 				}),
-				controlPannel?.permissionOverwrites?.delete(member, deletionMessage)?.catch(err => {
+				controlPanel?.permissionOverwrites?.delete(member, deletionMessage)?.catch(err => {
 					error(new Error(`La eliminación de permisos en el Panel de Control PuréVoice falló para la sesión: ${pvSessionName}`));
 					error(err);
 					success = false;
@@ -183,13 +162,13 @@ class PureVoiceUpdateHandler {
 				pvDocument.markModified('sessions');
 			}
 
-			let removed;
+			let removed: boolean;
 			let reattempts = 3;
 			do {
 				removed = true;
 				await session.remove().catch(err => {
 					removed = false;
-					
+
 					error(new Error(`La eliminación del registro de Sesión PuréVoice falló para la sesión: #${pvSessionName}`));
 					error(err);
 
@@ -197,7 +176,7 @@ class PureVoiceUpdateHandler {
 						info(`Reintentando eliminación (${reattempts} intentos restantes)...`)
 				});
 			} while(!removed && reattempts-- > 0);
-			
+
 			if(removed)
 				info(`Se eliminaron los registros restantes de la sesión PuréVoice: #${pvSessionName}`);
 			else
@@ -212,7 +191,7 @@ class PureVoiceUpdateHandler {
 					'Esto puede deberse a una conexión en una sesión PuréVoice que estaba siendo eliminada.',
 					'Si el par de canales relacionales de la sesión fueron eliminados, puedes ignorar este mensaje.',
 				].join('\n') }).catch(error));
-			
+
 			return guild.systemChannel.send({ content: [
 				'⚠️ Ocurrió un problema en un intento de remover una sesión del Sistema PuréVoice del servidor.',
 				'Esto puede deberse a una conexión en una sesión PuréVoice que estaba siendo eliminada.',
@@ -228,16 +207,16 @@ class PureVoiceUpdateHandler {
 	 */
 	async handleConnection() {
 		if(this.isNotConnectionUpdate()) return;
-		
+
 		const { prematureError } = this;
 		const { guild, channel, member } = this.#state;
 		const pvDocument = this.#documentHandler.document;
 		if(!channel || channel?.parentId !== pvDocument.categoryId) return;
 
 		info(`Conexión a canal de voz detectada para #${channel.name} (${channel.id})`);
-		
+
 		//Embed de notificación
-		const embed = new Discord.EmbedBuilder()
+		const embed = new EmbedBuilder()
 			.setAuthor({ name: 'PuréVoice', iconURL: this.#state.client.user.avatarURL({ size: 128 }) });
 
 		if(channel.id !== pvDocument.voiceMakerId) {
@@ -252,7 +231,7 @@ class PureVoiceUpdateHandler {
 				warn(`Se encontró la ID de sesión "${currentSessionId}" en el servidor, pero no se encontró un documento PureVoiceSessionModel acorde a la misma`);
 				return;
 			}
-			
+
 			const sessionRole = guild.roles.cache.get(currentSession.roleId);
 			if(!sessionRole) {
 				warn(`Se encontró la ID de sesión "${currentSessionId}" en el servidor, y el documento PureVoiceSessionModel acorde a la misma.`
@@ -280,7 +259,7 @@ class PureVoiceUpdateHandler {
 				return member.voice.disconnect('Desconexión forzada de usuario no permitido en una sesión PuréVoice').catch(prematureError);
 			}
 
-			const controlPanel = /**@type {Discord.TextChannel}*/(guild.channels.cache.get(pvDocument.controlPanelId));
+			const controlPanel = guild.channels.cache.get(pvDocument.controlPanelId) as TextChannel;
 
 			await Promise.all([
 				member.roles.add(sessionRole, translator.getText('voiceSessionReasonMemberAdd')).catch(prematureError),
@@ -290,7 +269,7 @@ class PureVoiceUpdateHandler {
 			if(dbMember) return;
 
 			info(`Dará lugar el registro de un nuevo miembro de sesión: "${member.user.username}" (${member.id}), para la sesión del canal: #${channel.name} (${channel.id})`);
-			
+
 			const userConfigs = await UserConfigs.findOne({ userId: member.id }) || new UserConfigs({ userId: member.id });
 
 			embed
@@ -353,7 +332,7 @@ class PureVoiceUpdateHandler {
 			};
 
 			const prepareControlPanel = async () => {
-				let controlPanel = /**@type {Discord.TextChannel}*/(guild.channels.cache.get(pvDocument.controlPanelId));
+				let controlPanel = guild.channels.cache.get(pvDocument.controlPanelId) as TextChannel;
 
 				if(controlPanel) {
 					await controlPanel.permissionOverwrites.edit(member, { ViewChannel: true }).catch(prematureError);
@@ -391,7 +370,7 @@ class PureVoiceUpdateHandler {
 			pvDocument.voiceMakerId = newSession.id;
 			pvDocument.sessions.push(channel.id);
 			pvDocument.markModified('sessions');
-			
+
 			await PureVoiceSessionModel.create({
 				channelId: channel.id,
 				roleId: sessionRole.id,
@@ -414,7 +393,7 @@ class PureVoiceUpdateHandler {
 						name: translator.getText('voiceSessionNewSessionCustomizeName'),
 						value: translator.getText('voiceSessionNewSessionCustomizeValue', p_pure(guild.id).raw)
 					},
-					
+
 					{
 						name: translator.getText('voiceSessionNewSessionNamingName'),
 						value: translator.getText('voiceSessionNewSessionNamingValue', p_pure(guild.id).raw),
@@ -443,13 +422,12 @@ class PureVoiceUpdateHandler {
 				value: translator.getText('voiceSessionNewSessionAutonameValue'),
 				inline: true,
 			});
-			
-			/**@type {String | Discord.MessagePayload | Discord.MessageCreateOptions}*/
-			const startMessage = {
+
+			const startMessage: string | MessagePayload | MessageCreateOptions = {
 				embeds: [embed],
 				components: [
-					makeButtonRowBuilder().addComponents(
-						new Discord.ButtonBuilder({
+					new ActionRowBuilder<ButtonBuilder>().addComponents(
+						new ButtonBuilder({
 							customId: 'voz_showMeHow',
 							label: translator.getText('buttonShowMeHow'),
 							style: ButtonStyle.Primary,
@@ -462,7 +440,7 @@ class PureVoiceUpdateHandler {
 				startMessage.content = translator.getText('voiceSessionNewMemberContentHint', member);
 
 			await channel.send(startMessage).catch(prematureError);
-			
+
 			userConfigs.voice.autoname || setTimeout(async () => {
 				const pvDocument = await this.#documentHandler.relinkDocument();
 				if(!pvDocument) return;
@@ -472,9 +450,9 @@ class PureVoiceUpdateHandler {
 
 				const session = await PureVoiceSessionModel.findOne({ channelId: sessionId });
 				if(!session || session.nameChanged) return;
-				
+
 				session.nameChanged = new Date(Date.now());
-				
+
 				const name = member.user.username.slice(0, 24);
 				const namingReason = translator.getText('voiceSessionReasonChannelForceName');
 				return Promise.all([
@@ -503,11 +481,11 @@ class PureVoiceUpdateHandler {
 	 * Comprobar si hay sesiones en la base de datos que no corresponden a ningún canal existente, y eliminarlas
 	 * @returns {Promise<Number>} la cantidad de sesiones defectuosas eliminadas
 	 */
-	async checkFaultySessions() {
+	async checkFaultySessions(): Promise<number> {
 		const pvDocument = this.#documentHandler.document;
 		const guildChannels = this.#state.guild.channels.cache;
+		const members = new Map<string, GuildMember>();
 		const invalidSessionIds = [];
-		const members = /**@type {Map<String, Discord.GuildMember>}*/(new Map());
 
 		pvDocument.sessions = pvDocument.sessions.filter(sid => {
 			const channelExists = guildChannels.has(sid);
@@ -520,7 +498,7 @@ class PureVoiceUpdateHandler {
 			return channelExists;
 		});
 
-		const controlPanel = /**@type {Discord.TextChannel}*/(guildChannels.get(pvDocument.controlPanelId));
+		const controlPanel = guildChannels.get(pvDocument.controlPanelId) as TextChannel;
 
 		for(const [ , member ] of members)
 			await controlPanel.permissionOverwrites.delete(member, 'PLACEHOLDER_REASON_PV_CLEANUP_VIEWCHANNEL_DISABLE');
@@ -534,7 +512,7 @@ class PureVoiceUpdateHandler {
 	}
 
 	/**@param {string} guildId*/
-	async fetchGuildDocument(guildId) {
+	async fetchGuildDocument(guildId: string) {
 		await this.#documentHandler.fetchSystemDocument({ guildId });
 	}
 
@@ -543,21 +521,19 @@ class PureVoiceUpdateHandler {
 	}
 }
 
-/**@typedef {(documentHandler: PureVoiceDocumentHandler) => Promise<unknown>} ActionFn*/
-class PureVoiceActionHandler {
-	/**@type {PureVoiceDocumentHandler}*/
-	#documentHandler;
-	/**@type {ActionFn}*/
-	#actionFn;
-	/**@type {Discord.Guild}*/
-	#guild;
+type ActionFn = (documentHandler: PureVoiceDocumentHandler) => Promise<unknown>;
+
+export class PureVoiceActionHandler {
+	#documentHandler: PureVoiceDocumentHandler;
+	#actionFn: ActionFn;
+	#guild: Guild;
 
 	/**
-	 * 
-	 * @param {Discord.Guild} guild 
-	 * @param {ActionFn} actionHandler 
+	 *
+	 * @param {Guild} guild
+	 * @param {ActionFn} actionHandler
 	 */
-	constructor(guild, actionHandler) {
+	constructor(guild: Guild, actionHandler: ActionFn) {
 		this.#documentHandler = new PureVoiceDocumentHandler();
 		this.#actionFn = actionHandler;
 		this.#guild = guild;
@@ -582,21 +558,21 @@ class PureVoiceActionHandler {
 }
 
 /**@class Representa un orquestador de sistema PuréVoice*/
-class PureVoiceOrchestrator {
+export class PureVoiceOrchestrator {
 	/**@type {string}*/
-	#guildId;
+	#guildId: string;
 	/**@type {Array<PureVoiceUpdateHandler>}*/
-	#updates;
+	#updates: Array<PureVoiceUpdateHandler>;
 	/**@type {Array<PureVoiceActionHandler>}*/
-	#actions;
+	#actions: Array<PureVoiceActionHandler>;
 	/**@type {boolean}*/
-	#busy;
+	#busy: boolean;
 
 	/**
 	 * Instancia un orquestador de sistema PuréVoice para el servidor especificado
-	 * @param {string} guildId 
+	 * @param {string} guildId
 	 */
-	constructor(guildId) {
+	constructor(guildId: string) {
 		this.#guildId = guildId;
 		this.#updates = [];
 		this.#actions = [];
@@ -607,7 +583,7 @@ class PureVoiceOrchestrator {
 	 * Pone en cola un análisis de cambio de estado de una sesión de voz
 	 * @param {PureVoiceUpdateHandler} handler
 	 */
-	async orchestrateUpdate(handler) {
+	async orchestrateUpdate(handler: PureVoiceUpdateHandler) {
 		this.#updates.push(handler);
 
 		if(this.#busy) return true;
@@ -622,7 +598,7 @@ class PureVoiceOrchestrator {
 	 * Pone en cola prioritaria una ejecución de acción en una sesión de voz
 	 * @param {PureVoiceActionHandler} handler
 	 */
-	async orchestrateAction(handler) {
+	async orchestrateAction(handler: PureVoiceActionHandler) {
 		this.#actions.push(handler);
 
 		if(this.#busy) return true;
@@ -638,7 +614,7 @@ class PureVoiceOrchestrator {
 		const handler = this.#updates.shift();
 		await handler.fetchGuildDocument(this.#guildId).catch(error);
 		if(!handler.systemIsInstalled()) return;
-		
+
 		try {
 			await Promise.all([
 				handler.checkFaultySessions(),
@@ -649,12 +625,12 @@ class PureVoiceOrchestrator {
 		} catch(err) {
 			error(err, 'Ocurrió un error mientras se analizaba un cambio de estado en una sesión Purévoice');
 		}
-		
+
 		if(this.#actions.length) {
 			await this.consumeAction();
 			return;
 		}
-		
+
 		if(this.#updates.length) {
 			await this.consumeUpdate();
 			return;
@@ -676,7 +652,7 @@ class PureVoiceOrchestrator {
 		} catch(err) {
 			error(err, 'Ocurrió un error mientras se procesaba una acción en una sesión Purévoice');
 		}
-		
+
 		if(this.#actions.length) {
 			await this.consumeAction();
 			return;
@@ -692,29 +668,29 @@ class PureVoiceOrchestrator {
 	}
 }
 
-const PureVoiceSessionMemberRoles = /**@type {const}*/({
+export const PureVoiceSessionMemberRoles = ({
 	GUEST: 0,
 	MOD: 1,
 	ADMIN: 2,
-});
-/**@typedef {import('types').ValuesOf<typeof PureVoiceSessionMemberRoles>} PureVoiceSessionMemberRole*/
+}) as const;
 
-/**
- * @typedef {Object} PureVoiceSessionMemberJSONBody
- * @property {String} id
- * @property {Boolean} whitelisted
- * @property {Boolean} banned
- * @property {PureVoiceSessionMemberRole} role
- */
+export type PureVoiceSessionMemberRole = ValuesOf<typeof PureVoiceSessionMemberRoles>;
 
-class PureVoiceSessionMember {
-	id;
-	role;
-	#whitelisted;
-	#banned;
+export interface PureVoiceSessionMemberJSONBody {
+	id: string;
+	role: PureVoiceSessionMemberRole;
+	whitelisted: boolean;
+	banned: boolean;
+}
+
+export class PureVoiceSessionMember {
+	id: string;
+	role: PureVoiceSessionMemberRole;
+	#whitelisted: boolean;
+	#banned: boolean;
 
 	/**@param {Partial<PureVoiceSessionMemberJSONBody>} data*/
-	constructor(data) {
+	constructor(data: Partial<PureVoiceSessionMemberJSONBody>) {
 		this.id = data?.id ?? null;
 		this.role = data?.role ?? PureVoiceSessionMemberRoles.GUEST;
 		this.#whitelisted = !!(data?.whitelisted ?? false);
@@ -722,7 +698,7 @@ class PureVoiceSessionMember {
 	}
 
 	/**@param {PureVoiceSessionMember} other*/
-	exchangeAdmin(other) {
+	exchangeAdmin(other: PureVoiceSessionMember) {
 		if(this.role === other.role || !this.isAdmin())
 			return false;
 
@@ -734,7 +710,7 @@ class PureVoiceSessionMember {
 	}
 
 	/**@param {PureVoiceSessionMember} other*/
-	giveMod(other) {
+	giveMod(other: PureVoiceSessionMember) {
 		if(!this.isAdmin() || !other.isGuest())
 			return false;
 
@@ -743,7 +719,7 @@ class PureVoiceSessionMember {
 	}
 
 	/**@param {PureVoiceSessionMember} other*/
-	revokeMod(other) {
+	revokeMod(other: PureVoiceSessionMember) {
 		if(!this.isAdmin() || !other.isMod())
 			return false;
 
@@ -752,13 +728,13 @@ class PureVoiceSessionMember {
 	}
 
 	/**@param {Boolean} whitelist*/
-	setWhitelisted(whitelist) {
+	setWhitelisted(whitelist: boolean) {
 		this.#whitelisted = !!whitelist;
 		return this;
 	}
-	
+
 	/**@param {Boolean} ban*/
-	setBanned(ban) {
+	setBanned(ban: boolean) {
 		this.#banned = !!ban;
 		return this;
 	}
@@ -793,7 +769,7 @@ class PureVoiceSessionMember {
 	}
 
 	/**@returns {PureVoiceSessionMemberJSONBody} */
-	toJSON() {
+	toJSON(): PureVoiceSessionMemberJSONBody {
 		return {
 			id: this.id,
 			role: this.role,
@@ -803,49 +779,40 @@ class PureVoiceSessionMember {
 	}
 }
 
-/**@enum {string}*/
-const PVCPFailure = /**@type {const}*/({
+export const PVCPFailure = ({
 	InvalidParams: 'InvalidParams',
 	NoChannel: 'NoChannel',
 	NoCategory: 'NoCategory',
 	NoPermissions: 'NoPermissions',
 	Unknown: 'Unknown',
-});
-/**@enum {string}*/
-const PVCPSuccess = /**@type {const}*/({
+}) as const;
+export const PVCPSuccess = ({
 	Created: 'Created',
 	Fetched: 'Fetched',
-});
-/**@typedef {import('types').ValuesOf<PVCPFailure>} PVCPFailureState*/
-/**@typedef {import('types').ValuesOf<PVCPSuccess>} PVCPSuccessState*/
+}) as const;
+type PVCPFailureState = ValuesOf<typeof PVCPFailure>;
+type PVCPSuccessState = ValuesOf<typeof PVCPSuccess>;
 
-/**
- * @template {boolean} TSuccess
- * @typedef {Object} BasePVControlPanelResult
- * @property {TSuccess} success
- */
-/**
- * @typedef {Object} PVCPFailureResultData
- * @property {PVCPFailureState} status
- * @typedef {BasePVControlPanelResult<false> & PVCPFailureResultData} PVControlPanelFailResult
- */
-/**
- * @typedef {Object} PVCPSuccessResultData
- * @property {PVCPSuccessState} status
- * @property {Discord.TextChannel} controlPanel
- * @typedef {BasePVControlPanelResult<true> & PVCPSuccessResultData} PVControlPanelSuccessResult
- */
-/**@typedef {PVControlPanelFailResult | PVControlPanelSuccessResult} PVControlPanelResult*/
+interface BasePVControlPanelResult<TSuccess extends boolean> {
+	success: TSuccess;
+}
+interface PVCPFailureResultData {
+	status: PVCPFailureState;
+}
 
-/**
- * @param {Discord.Guild} guild
- * @param {String} categoryId 
- * @returns {Promise<PVControlPanelResult>}
- */
-async function createPVControlPanelChannel(guild, categoryId) {
+type PVControlPanelFailResult = BasePVControlPanelResult<false> & PVCPFailureResultData;
+interface PVCPSuccessResultData {
+	status: PVCPSuccessState;
+	controlPanel: TextChannel;
+}
+
+type PVControlPanelSuccessResult = BasePVControlPanelResult<true> & PVCPSuccessResultData;
+type PVControlPanelResult = PVControlPanelFailResult | PVControlPanelSuccessResult;
+
+export async function createPVControlPanelChannel(guild: Guild, categoryId: string): Promise<PVControlPanelResult> {
 	debug('A control panel creation request for category', categoryId, 'has begun. Checking basic requirements to create...');
 
-	if(!(guild instanceof Discord.Guild) || typeof categoryId !== 'string') {
+	if(!(guild instanceof Guild) || typeof categoryId !== 'string') {
 		warn('Malformed parameters in createPVControlPanelChannel:', { guild, categoryId });
 		return { success: false, status: PVCPFailure.InvalidParams };
 	}
@@ -856,12 +823,12 @@ async function createPVControlPanelChannel(guild, categoryId) {
 		warn('Couldn\'t resolve category channel from id:', categoryId);
 		return { success: false, status: PVCPFailure.NoChannel };
 	}
-	
+
 	if(categoryChannel.type !== ChannelType.GuildCategory) {
 		warn('Supplied channel ID does not correspond to a category channel:', categoryId);
 		return { success: false, status: PVCPFailure.NoCategory };
 	}
-	
+
 	if(!guild.members.me.permissions.has('ManageChannels', true)) {
 		info('Unable to create channel because of missing permissions in guild:', guild.name);
 		return { success: false, status: PVCPFailure.NoPermissions };
@@ -873,8 +840,8 @@ async function createPVControlPanelChannel(guild, categoryId) {
 	categoryChannel = await categoryChannel.fetch(true);
 
 	debug('Attempting to create new control panel channel...');
-	/**@type {Discord.TextChannel}*/
-	let controlPanelChannel;
+	/**@type {TextChannel}*/
+	let controlPanelChannel: TextChannel;
 	try {
 		controlPanelChannel = await guild.channels.create({
 			type: ChannelType.GuildText,
@@ -895,7 +862,7 @@ async function createPVControlPanelChannel(guild, categoryId) {
 		};
 	}
 
-	const controlPanelEmbed = new Discord.EmbedBuilder()
+	const controlPanelEmbed = new EmbedBuilder()
 		.setColor(tenshiColor)
 		.setAuthor({ name: 'Bot de Puré • PuréVoice', url: 'https://i.imgur.com/P9eeVWC.png' })
 		.addFields(
@@ -916,20 +883,20 @@ async function createPVControlPanelChannel(guild, categoryId) {
 			},
 		);
 
-	const controlPanelButtons = makeButtonRowBuilder().addComponents(
-		new Discord.ButtonBuilder()
+	const controlPanelButtons = new ActionRowBuilder<ButtonBuilder>().addComponents(
+		new ButtonBuilder()
 			.setCustomId('voz_setSessionName')
 			.setEmoji('1288444896331698241')
 			.setStyle(ButtonStyle.Primary),
-		new Discord.ButtonBuilder()
+		new ButtonBuilder()
 			.setCustomId('voz_editSessionMembers')
 			.setEmoji('1288445753425002527')
 			.setStyle(ButtonStyle.Primary),
-		new Discord.ButtonBuilder()
+		new ButtonBuilder()
 			.setCustomId('voz_editSessionKillDelay')
 			.setEmoji('1296729492550582363')
 			.setStyle(ButtonStyle.Primary),
-		new Discord.ButtonBuilder()
+		new ButtonBuilder()
 			.setCustomId('voz_freezeSession')
 			.setEmoji('1296661603814473758')
 			.setStyle(ButtonStyle.Danger),
@@ -958,17 +925,10 @@ async function createPVControlPanelChannel(guild, categoryId) {
 	};
 }
 
-/**
- * 
- * @param {Discord.Guild} guild 
- * @param {string} categoryId 
- * @param {string} controlPanelId 
- * @returns {Promise<PVControlPanelResult>}
- */
-async function requestPVControlPanel(guild, categoryId, controlPanelId) {
+export async function requestPVControlPanel(guild: Guild, categoryId: string, controlPanelId: string): Promise<PVControlPanelResult> {
 	debug('Processing request for control panel:', controlPanelId, 'in category:', categoryId);
 
-	const existingControlPanel = /**@type {Discord.TextChannel}*/(
+	const existingControlPanel = /**@type {TextChannel}*/(
 		guild.channels.cache.get(controlPanelId)
 		?? await guild.channels.fetch(controlPanelId).catch(() => undefined)
 	);
@@ -985,11 +945,7 @@ async function requestPVControlPanel(guild, categoryId, controlPanelId) {
 	return createPVControlPanelChannel(guild, categoryId);
 }
 
-/**
- * @param {Discord.VoiceBasedChannel} voiceChannel
- * @param {Map<String, Partial<PureVoiceSessionMemberJSONBody>>} dbMembers
- */
-function getFrozenSessionAllowedMembers(voiceChannel, dbMembers) {
+export function getFrozenSessionAllowedMembers(voiceChannel: VoiceBasedChannel, dbMembers: Map<string, Partial<PureVoiceSessionMemberJSONBody>>) {
 	const voiceMembers = voiceChannel.members;
 
 	const allowedSessionMembers = /**@type {Map<String, PureVoiceSessionMember>}*/(new Map());
@@ -1003,15 +959,14 @@ function getFrozenSessionAllowedMembers(voiceChannel, dbMembers) {
 	return allowedSessionMembers;
 }
 
-/**@type {Map<string, PureVoiceOrchestrator>}*/
-const orchestrators = new Map();
+const orchestrators: Map<string, PureVoiceOrchestrator> = new Map();
 
 /**
+ * @description
  * Obtiene el orquestador de el servidor indicado.
- * Si el servidor aun no tiene un orquestador instanciado, se lo instancia automáticamente
- * @param {string} guildId 
+ * Si el servidor aun no tiene un orquestador instanciado, se lo instancia automáticamente.
  */
-function getOrchestrator(guildId) {
+export function getOrchestrator(guildId: string) {
 	const orchestrator = orchestrators.get(guildId) || new PureVoiceOrchestrator(guildId);
 
 	if(!orchestrators.has(guildId))
@@ -1019,20 +974,3 @@ function getOrchestrator(guildId) {
 
 	return orchestrator;
 }
-
-module.exports = {
-	PureVoiceUpdateHandler,
-	PureVoiceActionHandler,
-	PureVoiceOrchestrator,
-	PureVoiceSessionMember,
-	makePVSessionName,
-	makeSessionAutoname,
-	makeSessionRoleAutoname,
-	createPVControlPanelChannel,
-	requestPVControlPanel,
-	getFrozenSessionAllowedMembers,
-	getOrchestrator,
-	PureVoiceSessionMemberRoles,
-	PVCPSuccess,
-	PVCPFailure,
-};
