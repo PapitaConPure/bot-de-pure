@@ -1,26 +1,22 @@
-const { Command, CommandTags, CommandOptions, CommandParam, CommandFlagExpressive } = require('../Commons/');
-const { p_pure } = require('../../utils/prefixes');
-const { Translator } = require('../../i18n');
-const { parseDateFromNaturalLanguage, parseTimeFromNaturalLanguage, addTime, utcStartOfTzToday } = require('../../utils/datetime');
-const { MessageFlags, ContainerBuilder, ButtonBuilder, ButtonStyle, SeparatorSpacingSize, TextDisplayBuilder, ModalBuilder, TextInputStyle, ChannelType, TextInputBuilder } = require('discord.js');
-const { shortenText, compressId, decompressId } = require('../../func');
-const UserConfigs = require('../../models/userconfigs').default;
-const Reminder = require('../../models/reminders').default;
-const { isValid, addDays, isBefore, addMinutes, getUnixTime } = require('date-fns');
-const { scheduleReminder } = require('../../systems/others/remindersScheduler');
-const { UTCDate } = require('@date-fns/utc');
-const { toUtcOffset, sanitizeTzCode } = require('../../utils/timezones');
-const { tenshiColor } = require('../../data/globalProps');
+import { Command, CommandTags, CommandOptions, CommandParam, CommandFlagExpressive } from '../Commons/';
+import { parseDateFromNaturalLanguage, parseTimeFromNaturalLanguage, addTime, utcStartOfTzToday } from '../../utils/datetime';
+import { MessageFlags, ContainerBuilder, ButtonBuilder, ButtonStyle, SeparatorSpacingSize, TextDisplayBuilder, ModalBuilder, TextInputStyle, ChannelType, TextInputBuilder } from 'discord.js';
+import { scheduleReminder } from '../../systems/others/remindersScheduler';
+import { toUtcOffset, sanitizeTzCode } from '../../utils/timezones';
+import UserConfigs from '../../models/userconfigs';
+import Reminder from '../../models/reminders';
+import { isValid, addDays, isBefore, addMinutes, getUnixTime } from 'date-fns';
+import { shortenText, compressId, decompressId } from '../../func';
+import { tenshiColor } from '../../data/globalProps';
+import { p_pure } from '../../utils/prefixes';
+import { Translator } from '../../i18n';
+import { UTCDate } from '@date-fns/utc';
 
 const maxReminderCountPerUser = 5;
 const maxReminderContentLength = 960;
 
-/**
- * Crea un contenedor con un listado CRUD de recordatorios
- * @param {string} compressedUserId 
- * @param {Translator} translator 
- */
-async function makeRemindersListContainer(compressedUserId, translator) {
+/**@description Crea un contenedor con un listado CRUD de recordatorios.*/
+async function makeRemindersListContainer(compressedUserId: string, translator: Translator) {
 	const reminders = await Reminder.find({ userId: compressedUserId });
 
 	const container = new ContainerBuilder()
@@ -91,12 +87,11 @@ async function makeRemindersListContainer(compressedUserId, translator) {
 }
 
 /**
- * Crea un contenedor en base al recordatorio indicado, con opciones para editar y eliminar
- * @param {import('../../models/reminders').ReminderDocument} reminder Recordatorio a mostrar
- * @param {Translator} translator 
- * @param {string} [title] Título alternativo
+ * @description Crea un contenedor en base al recordatorio indicado, con opciones para editar y eliminar.
+ * @param reminder Recordatorio a mostrar.
+ * @param title Título alternativo.
  */
-function makeReminderContainer(reminder, translator, title = undefined) {
+function makeReminderContainer(reminder: import('../../models/reminders').ReminderDocument, translator: Translator, title: string = undefined) {
 	const container = new ContainerBuilder()
 		.setAccentColor(tenshiColor)
 		.addTextDisplayComponents(
@@ -130,14 +125,8 @@ function makeReminderContainer(reminder, translator, title = undefined) {
 	return container;
 }
 
-/**
- * Crea un formulario modal para crear o editar un recordatorio
- * @param {import('../Commons/typings').AnyRequest} request 
- * @param {Translator} translator 
- * @param {number} utcOffset 
- * @param {import('../../models/reminders').ReminderDocument} reminder 
- */
-function makeReminderModal(request, translator, utcOffset, reminder = undefined) {
+/**@description Crea un formulario modal para crear o editar un recordatorio.*/
+function makeReminderModal(request: import('../Commons/typings').AnyRequest, translator: Translator, utcOffset: number, reminder: import('../../models/reminders').ReminderDocument = undefined) {
 	const reminderId = reminder?._id;
 	const reminderLocalizedDate = new UTCDate(addMinutes(reminder?.date ?? new Date(Date.now()), utcOffset));
 
@@ -214,22 +203,14 @@ function makeReminderModal(request, translator, utcOffset, reminder = undefined)
 	return modal;
 }
 
-/**
- * @param {Date} date
- * @param {string} sanitizedTzCode
- */
-const validateDate = (date, sanitizedTzCode) => isValid(date) && !isBefore(date, utcStartOfTzToday(sanitizedTzCode));
+const validateDate = (date: Date, sanitizedTzCode: string) => isValid(date) && !isBefore(date, utcStartOfTzToday(sanitizedTzCode));
 
-/**@param {Date} time*/
-const validateTime = (time) => isValid(time) && Math.abs(+time) < (+addDays(new Date(0), 2));
+const validateTime = (time: Date) => isValid(time) && Math.abs(+time) < (+addDays(new Date(0), 2));
 
-/**@param {Date} datetime*/
-const isReminderLateEnough = (datetime) => {
+const isReminderLateEnough = (datetime: Date) => {
 	const inAMinute = addMinutes(new Date(Date.now()), 1);
 	return datetime >= inAMinute;
 };
-
-const tags = new CommandTags().add('COMMON');
 
 const options = new CommandOptions()
 	.addOptions(
@@ -249,6 +230,8 @@ const options = new CommandOptions()
 			.setLong(['huso', 'franja', 'zona', 'zone', 'timezone', 'offset'])
 			.setDesc('para especificar un huso horario de referencia'),
 	);
+
+const tags = new CommandTags().add('COMMON');
 
 const command = new Command('recordatorio', tags)
 	.setAliases(
@@ -454,7 +437,7 @@ const command = new Command('recordatorio', tags)
 		const channel = interaction.fields.getSelectedChannels('channel')?.first();
 		const reminderContent = interaction.fields.getTextInputValue('content');
 
-		const informIssue = async (/**@type {string}*/content) => {
+		const informIssue = async (/**@type {string}*/content: string) => {
 			await interaction.editReply({
 				components: [await makeRemindersListContainer(compressedUserId, translator)],
 			});
@@ -617,4 +600,4 @@ const command = new Command('recordatorio', tags)
 		});
 	}, { userFilterIndex: 0 });
 
-module.exports = command;
+export default command;

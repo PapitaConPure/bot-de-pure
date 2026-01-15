@@ -1,11 +1,11 @@
-const { CommandOptions, CommandTags, Command } = require('../Commons/');
-const UserConfigs = require('../../models/userconfigs').default;
-const { toUtcOffset, utcOffsetDisplay, sanitizeTzCode } = require('../../utils/timezones');
-const { dateToUTCFormat } = require('../../func');
-const { Translator } = require('../../i18n');
-const { parseDateFromNaturalLanguage, addTime, utcStartOfTzToday } = require('../../utils/datetime');
-const { isValid, getUnixTime, addMinutes } = require('date-fns');
-const { ButtonBuilder, ButtonStyle } = require('discord.js');
+import { CommandOptions, CommandTags, Command } from '../Commons/';
+import UserConfigs from '../../models/userconfigs';
+import { toUtcOffset, utcOffsetDisplay, sanitizeTzCode } from '../../utils/timezones';
+import { dateToUTCFormat } from '../../func';
+import { Translator } from '../../i18n';
+import { parseDateFromNaturalLanguage, addTime, utcStartOfTzToday } from '../../utils/datetime';
+import { isValid, getUnixTime, addMinutes } from 'date-fns';
+import { ButtonBuilder, ButtonStyle } from 'discord.js';
 
 const options = new CommandOptions()
 	.addParam('hora', 'TIME', 'para establecer la hora a convertir', { optional: true })
@@ -74,8 +74,8 @@ const command = new Command('hora', tags)
 
 		const issueDate = addTime(date, time);
 		const unixDate = getUnixTime(issueDate);
-		
+
 		return request.reply(`<t:${unixDate}:T> <t:${unixDate}:D> — :index_pointing_at_the_viewer: ${translator.getText('horaAdaptedToYourTimezone')}`);
 	});
 
-module.exports = command;
+export default command;
