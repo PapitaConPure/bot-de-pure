@@ -69,12 +69,12 @@ function stringifySimplePSAST(obj) {
 
 	if(!isArray) {
 		if(Object.prototype.hasOwnProperty.call(obj, 'equals')) {
-			// eslint-disable-next-line no-unused-vars
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { equals, ...rest } = obj;
 			obj = rest;
 		}
 		if(Object.prototype.hasOwnProperty.call(obj, 'compareTo')) {
-			// eslint-disable-next-line no-unused-vars
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { compareTo, ...rest } = obj;
 			obj = rest;
 		}
@@ -175,12 +175,12 @@ function stringifyPSAST(obj, indentSize = 2, indent = indentSize) {
 	if(!isArray) {
 		hasKind = Object.prototype.hasOwnProperty.call(obj, 'kind');
 		if(Object.prototype.hasOwnProperty.call(obj, 'equals')) {
-			// eslint-disable-next-line no-unused-vars
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { equals, ...rest } = obj;
 			obj = rest;
 		}
 		if(Object.prototype.hasOwnProperty.call(obj, 'compareTo')) {
-			// eslint-disable-next-line no-unused-vars
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { compareTo, ...rest } = obj;
 			obj = rest;
 		}

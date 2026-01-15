@@ -254,7 +254,7 @@ export function updateFollowedFeedTagsCache(userId: Snowflake, channelId: Snowfl
 	if(!feedTagSuscriptionsCache.has(userId))
         feedTagSuscriptionsCache.set(userId, new Map());
 
-    let userMap = feedTagSuscriptionsCache.get(userId);
+    const userMap = feedTagSuscriptionsCache.get(userId);
     
     if(newTags.length) {
         userMap.set(channelId, newTags);
@@ -271,12 +271,12 @@ export function updateFollowedFeedTagsCache(userId: Snowflake, channelId: Snowfl
 
 interface FeedOptions {
     lastFetchedAt?: Date;
-    faults?: Number;
-    maxTags?: Number;
-    cornerIcon?: String;
-    title?: String;
-    subtitle?: String;
-    footer?: String;
+    faults?: number;
+    maxTags?: number;
+    cornerIcon?: string;
+    title?: string;
+    subtitle?: string;
+    footer?: string;
 }
 
 /**@class Representa un Feed programado de imágenes de {@linkcode Booru}.*/

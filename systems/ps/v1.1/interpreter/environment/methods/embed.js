@@ -1,4 +1,4 @@
-/* eslint-disable no-empty-pattern */
+ 
 
 const { ValueKinds } = require('../../values');
 const { fileRegex, expectParam, getParamOrNada, getParamOrDefault, linkRegex } = require('../nativeUtils');

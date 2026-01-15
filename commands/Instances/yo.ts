@@ -611,7 +611,7 @@ const command = new Command('yo', tags)
 
 		const translator = new Translator(userConfigs.language as LocaleKey);
 
-		let pingMode = interaction.values[0] as 'always' | 'onCreate' | 'never';
+		const pingMode = interaction.values[0] as 'always' | 'onCreate' | 'never';
 		userConfigs.voice.ping = pingMode;
 		userConfigs.markModified('voice');
 
@@ -874,7 +874,7 @@ const command = new Command('yo', tags)
 		const translator = new Translator(userConfigs.language);
 		let newTags = userConfigs.feedTagSuscriptions.get(channelId)?.slice(0) ?? [];
 		let setTagsResponse: LocaleIds;
-		let previousLength = newTags.length;
+		const previousLength = newTags.length;
 
 		if(operation === 'ADD') {
 			newTags.push(...editedTags.filter(t => !newTags.includes(t)));

@@ -1,5 +1,3 @@
-/* eslint-disable no-empty-pattern */
-
 const { ValueKinds, makeNumber, makeText, makeBoolean, makeList, makeNada, isInternalOperable } = require('../../values');
 const { calculatePositionOffset, expectParam, getParamOrDefault } = require('../nativeUtils');
 

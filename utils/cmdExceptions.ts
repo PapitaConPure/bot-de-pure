@@ -10,12 +10,12 @@ import { reportFormUrl } from '../data/globalProps';
 import { CommandTagResolvable } from '../commands/Commons';
 import { CommandRequest } from '../commands/Commons/typings';
 
-type ExceptionTestFn = (request: CommandRequest) => Promise<Boolean>;
+type ExceptionTestFn = (request: CommandRequest) => Promise<boolean>;
 
 export interface ExceptionSummary {
     tag: CommandTagResolvable;
-    title: String;
-    desc: String;
+    title: string;
+    desc: string;
     isException: ExceptionTestFn;
 }
 
@@ -132,7 +132,8 @@ export async function handleAndAuditError(error: Error, request: CommandRequest 
         return true;
     }
     
-    let { brief, details } = logOptions;
+    const { details } = logOptions;
+    let { brief } = logOptions;
     if(!brief) {
         if(Command.requestIsMessage(request)) brief = 'Ha ocurrido un error al ejecutar un comando';
         else if(request.isCommand())                 brief = 'Ha ocurrido un error al procesar un comando Slash';

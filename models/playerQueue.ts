@@ -43,7 +43,7 @@ export async function tryRecoverSavedTracksQueue(request: ComplexCommandRequest 
 	const guildId = guild.id;
 
 	const player = useMainPlayer();
-	let queue = player.queues.get(guildId);
+	const queue = player.queues.get(guildId);
 	console.log({ cachedQueue: queue });
 	if(queue) return queue;
 
@@ -70,7 +70,7 @@ export async function tryRecoverSavedTracksQueue(request: ComplexCommandRequest 
 
 interface __attempDatabaseQueueRecoveryData {
 	request: ComplexCommandRequest | Interaction;
-	pauseOnInit: Boolean;
+	pauseOnInit: boolean;
 	currentTrack: Track<unknown>;
 	restOfTracks: Track<unknown>[];
 }

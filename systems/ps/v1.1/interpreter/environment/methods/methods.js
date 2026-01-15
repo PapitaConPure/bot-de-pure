@@ -1,5 +1,3 @@
-/* eslint-disable no-empty-pattern */
-
 const { ValueKinds } = require('../../values');
 const { numberMethods } = require('./number');
 const { textMethods } = require('./text');

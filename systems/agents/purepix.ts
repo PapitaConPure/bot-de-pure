@@ -61,7 +61,7 @@ export async function sendConvertedPixivPosts(message: Message<true>, converterK
 			return `${spoiler}<:pixiv2:1334816111270563880>[\`${idAndPage}\`](${service}${lang}/artworks/${idAndPage})${spoiler}`;
 		});
 
-	let content = formattedPixivUrls.join(' ');
+	const content = formattedPixivUrls.join(' ');
 	
 	return { contentful: true, content };
 }

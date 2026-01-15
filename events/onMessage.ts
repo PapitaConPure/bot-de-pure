@@ -205,8 +205,8 @@ async function processCommand(message: Message<true>): Promise<CommandResult> {
 	auditRequest(message);
 
 	const args = content.replace(ppure.regex, '').split(/[\n ]+/); //Argumentos ingresados
-	let commandName = args.shift().toLowerCase(); //Comando ingresado
-	let command = puré.commands.get(commandName) || puré.commands.find(cmd => cmd.aliases?.includes(commandName));
+	const commandName = args.shift().toLowerCase(); //Comando ingresado
+	const command = puré.commands.get(commandName) || puré.commands.find(cmd => cmd.aliases?.includes(commandName));
 	
 	if(!command)
 		return handleInvalidCommand(message, commandName, ppure);

@@ -1,8 +1,8 @@
 export type Engine = 'gelbooru' | 'danbooru' | 'derpibooru' | 'yandere' | 'kcom' | 'knet';
 
-export type RestrictionsMap = Map<Boolean, String>;
+export type RestrictionsMap = Map<boolean, string>;
 
-export type TagMap = Map<String, String>;
+export type TagMap = Map<string, string>;
 
 const basetags = '-guro -furry -vore -comic -4koma';
 

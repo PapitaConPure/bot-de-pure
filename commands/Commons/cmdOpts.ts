@@ -62,10 +62,9 @@ const fetchMessageFlagText = (args: string[], i): string => {
 		return args.splice(i, 1)[0];
 
 	let lastIndex = i;
-	let text;
 	while(lastIndex < args.length && !args[lastIndex].endsWith('"'))
 		lastIndex++;
-	text = args.splice(i, lastIndex - i + 1).join(' ').slice(1);
+	const text = args.splice(i, lastIndex - i + 1).join(' ').slice(1);
 	
 	if(text.length === 0 || text === '"')
 		return undefined;
@@ -83,11 +82,11 @@ interface FeedbackOptions<TCallback extends ParamResult = ParamResult, TFallback
 }
 
 interface FetchMessageFlagOptions {
-	property: Boolean;
+	property: boolean;
 	short: string[];
 	long: string[];
 	callback: FlagCallback;
-	fallback: any;
+	fallback: unknown;
 }
 
 /**
@@ -114,14 +113,14 @@ const fetchMessageFlag = (args: string[], flag: FetchMessageFlagOptions = { prop
 
 		if(flag.short?.length && arg.startsWith('-') && arg !== '-') {
 			const flagChars = [...arg].slice(1).filter(c => flag.short.includes(c));
-			for(let c of flagChars) {
+			for(const c of flagChars) {
 				flagValue = flag.property ? fetchMessageFlagText(args, i + 1) : c;
 
 				if(arg.length <= 2)
 					return args.splice(i, 1);
 
 				const flagToRemove = new RegExp(c, 'g')
-				let temp = args.splice(i, 1); //Remover temporalmente el stack completo de flags cortas
+				const temp = args.splice(i, 1); //Remover temporalmente el stack completo de flags cortas
 				args.push(temp[0].replace(flagToRemove, '')); //Reincorporar lo eliminado, descartando las flags ya procesadas
 			}
 			if(args[i] === '-')
@@ -160,7 +159,7 @@ const isBaseParamType = (pt: ParamType): pt is BaseParamType => typeof pt === 's
  */
 const isParamTypeStrict = (pt: ParamType): pt is ParamTypeStrict => (typeof pt === 'object') && pt?.name != undefined && pt?.expression != undefined;
 
-type AutocompleteFunction = (interaction: AutocompleteInteraction<'cached'>, query: string) => Promise<any>;
+type AutocompleteFunction = (interaction: AutocompleteInteraction<'cached'>, query: string) => Promise<unknown>;
 
 /**
  * 
@@ -191,7 +190,7 @@ function groupQuoted(args: string[]): string[] {
 	let isInsideQuotes = false;
 	let groupedTemp = [];
 
-	for(let arg of args) {
+	for(const arg of args) {
 		if(arg.startsWith('"') && !isInsideQuotes) {
 			isInsideQuotes = true;
 			groupedTemp.push(arg.slice(1));
@@ -873,7 +872,7 @@ export class CommandOptions {
 			/**@type {ParamResult}*/
 			let result: ParamResult;
 
-			for(let pt of param.type) {
+			for(const pt of param.type) {
 				if(!isParamTypeStrict(pt))
 					getMethodName = paramTypes[pt].getMethod;
 
@@ -897,21 +896,21 @@ export class CommandOptions {
 
 	/**
 	 * Devuelve un arreglo de todas las entradas recibidas.
-	 * Si no se recibe ninguna entrada, se devuelve fallback
-	 * @param input El resolvedor de opciones de interacción
-	 * @param identifier El identificador del parámetro
-	 * @param callbackFn Una función de SlashCommandBuilder para leer un valor
-	 * @param fallback Un valor por defecto si no se recibe ninguna entrada
-	 * @returns Un arreglo con las entradas procesadas por callbackFn, o alternativamente, un valor devuelto por fallback
+	 * Si no se recibe ninguna entrada, se devuelve fallback.
+	 * @param input El resolvedor de opciones de interacción.
+	 * @param identifier El identificador del parámetro.
+	 * @param callbackFn Una función de SlashCommandBuilder para leer un valor.
+	 * @param fallback Un valor por defecto si no se recibe ninguna entrada.
+	 * @returns Un arreglo con las entradas procesadas por callbackFn, o alternativamente, un valor devuelto por fallback.
 	 */
-	fetchParamPoly(input: CommandInteractionOptionResolver | Omit<CommandInteractionOptionResolver<'cached'>, 'getMessage' | 'getFocused'>, identifier: string, callbackFn: Function, fallback: (Function | any) | null = undefined): any[] {
+	fetchParamPoly(input: CommandInteractionOptionResolver | Omit<CommandInteractionOptionResolver<'cached'>, 'getMessage' | 'getFocused'>, identifier: string, callbackFn: Function, fallback: (Function | unknown) | null = undefined): any[] {
 		/**@type {CommandParam}*/
 		const option: CommandParam = this.params.get(identifier);
 		if(!option)
 			throw new ReferenceError(`No se pudo encontrar un Poly-parámetro con el identificador: ${identifier}`);
 
 		const singlename = identifier.replace(/[Ss]$/, '');
-		let params;
+		let params: unknown[];
 		if(option && option.poly)
 			switch(option.poly) {
 			case 'MULTIPLE':
@@ -953,7 +952,7 @@ export class CommandOptions {
 			throw new ReferenceError(`No se pudo encontrar una Flag con el identificador: ${identifier}`);
 
 		if(Array.isArray(input))
-			// @ts-expect-error
+			// @ts-expect-error Te juro que se puede, solo no me acuerdo por qué
 			return fetchMessageFlag(input, {
 				property: flag.isExpressive(),
 				...this.flags.get(identifier).structure,
@@ -962,7 +961,6 @@ export class CommandOptions {
 
 		/**@type {GetMethodName}*/
 		let getMethod: GetMethodName = 'getBoolean';
-		let flagValue;
 
 		if(flag.isExpressive()) {
 			if(isParamTypeStrict(flag._type))
@@ -971,7 +969,7 @@ export class CommandOptions {
 				getMethod = paramTypes[flag._type]?.getMethod ?? 'getString';
 		}
 		
-		flagValue = (/**@type {(name: String) => T}*/(input[getMethod]))(identifier);
+		const flagValue = (input[getMethod] as ((name: string) => T))(identifier);
 		
 		if(flagValue == undefined)
 			return output.fallback;
@@ -1296,7 +1294,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 			if(seps.some(s => rawDateStr.endsWith(s)) && dateComponents.length >= 3)
 				return;
 
-			let done = false;
+			const done = false;
 			while(!done && this.#args.length && dateComponents.length < 3) {
 				const arg = this.#args[0];
 
@@ -1478,14 +1476,13 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	}
 
 	/**
-	 * Obtiene de forma asíncrona valores de usuario a partir del poli-parámetro bajo el `identifier` indicado y devuelve un array de resultado
-	 * * Si se obtienen valores de usuario para el poli-parámetro, se devuelve un array cuyos valores son de tipo {@linkcode ParamResult}, correspondientes a los valores de usuario
-	 * * Si no se obtiene ningún valor para el poli-parámetro y {@linkcode TFallback} no es `null` ni `undefined`, se devuelve un array cuyo único valor es `fallback`
-	 * * Si no se obtiene ningún valor para el poli-parámetro y {@linkcode TFallback} es `null` o `undefined`, se devuelve un array vacía
-	 * @param identifier El identificador del poli-parámetro que representa a cada {@linkcode CommandParam} asociado
-	 * @param parseOptions
+	 * Obtiene de forma asíncrona valores de usuario a partir del poli-parámetro bajo el `identifier` indicado y devuelve un array de resultado.
+	 * * Si se obtienen valores de usuario para el poli-parámetro, se devuelve un array cuyos valores son de tipo {@linkcode ParamResult}, correspondientes a los valores de usuario.
+	 * * Si no se obtiene ningún valor para el poli-parámetro y {@linkcode TFallback} no es `null` ni `undefined`, se devuelve un array cuyo único valor es `fallback`.
+	 * * Si no se obtiene ningún valor para el poli-parámetro y {@linkcode TFallback} es `null` o `undefined`, se devuelve un array vacía.
+	 * @param identifier El identificador del poli-parámetro que representa a cada {@linkcode CommandParam} asociado.
 	 */
-	async parsePolyParam<TFallback = undefined>(identifier: string, parseOptions: PolyParamParsingOptions<TFallback> = {}): Promise<Array<ParamResult | TFallback>> {
+	async parsePolyParam<TFallback = undefined>(identifier: string, parseOptions: PolyParamParsingOptions<TFallback> = {}): Promise<(ParamResult | TFallback)[]> {
 		const { regroupMethod = 'SEPARATOR', messageSep = ',', fallback = undefined, failedPayload = undefined } = parseOptions;
 		const option = this.#expectParam(identifier);
 

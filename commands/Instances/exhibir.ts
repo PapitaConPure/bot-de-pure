@@ -6,7 +6,7 @@ import serverIds from '../../data/serverIds.json';
 import { CommandPermissions } from '../Commons/cmdPerms.js';
 import { getUnixTime } from 'date-fns';
 
-let crazyBackupId = saki.crazyBackupChannelId;
+const crazyBackupId = saki.crazyBackupChannelId;
 
 const perms = new CommandPermissions([ 'ManageGuild', 'ManageChannels', 'ManageMessages' ]);
 
@@ -73,24 +73,24 @@ const command = new Command('exhibir', flags)
 			return interaction.editReply({ content: '⚠️ Canal receptor no encontrado' });
 		
 		const agent = await (new DiscordAgent().setup(backupChannel));
-		let flushing = [];
+		const flushing = [];
 
 		for(const message of pinnedMessages.values()) {
 			const formattedMessage = message;
 			message.embeds ??= [];
-			//@ts-expect-error
+			//@ts-expect-error Simplemente se extiende el tipo
 			message.files ??= [];
 
 			formattedMessage.embeds = message.embeds.map(embed => {
-				//@ts-expect-error
+				//@ts-expect-error Te juro que "type" sí existe y hace daño
 				if(embed.type === 'video')
 					return null;
 				
-				//@ts-expect-error
+				//@ts-expect-error Te juro que "type" sí existe y hace daño
 				if(embed.type === 'image' && embed.thumbnail && !embed.image) {
-					//@ts-expect-error
+					//@ts-expect-error Simplemente se extiende el tipo
 					embed.image = embed.thumbnail;
-					//@ts-expect-error
+					//@ts-expect-error Simplemente se extiende el tipo
 					embed.thumbnail = null;
 				}
 				

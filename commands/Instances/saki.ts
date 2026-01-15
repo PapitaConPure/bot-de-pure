@@ -3,7 +3,7 @@ import { CommandPermissions } from '../Commons/cmdPerms.js';
 import { saki } from '../../data/sakiProps';
 import Saki, { SakiDocument } from '../../models/saki.js';
 
-let crazyBackupId = saki.crazyBackupChannelId;
+const crazyBackupId = saki.crazyBackupChannelId;
 
 const positivos = new Set([
     'habilitado',

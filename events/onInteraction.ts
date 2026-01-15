@@ -131,7 +131,7 @@ async function handleComponent(interaction: ButtonInteraction | StringSelectMenu
 
     try {
         const funcStream: string[] = interaction.customId.split('_');
-        let commandName = funcStream.shift();
+        const commandName = funcStream.shift();
         const commandFnName = funcStream.shift();
 
         console.log(commandName, commandFnName, funcStream);

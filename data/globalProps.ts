@@ -71,7 +71,7 @@ export const reportFormUrl = 'https://forms.gle/tHFXxbsTmuJTQm1z7';
  * Propiedades globales configurables (no necesariamente persistentes / relacionadas a la BDD).
  * Modificar propiedades de `globalConfigs` reflejará los cambios en todos los archivos.
  */
-export let globalConfigs = {
+export const globalConfigs = {
 	maintenance: '',
 	seed: 0,
 	startupTime: 0,

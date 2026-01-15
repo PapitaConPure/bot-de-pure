@@ -1,4 +1,5 @@
 import { makeButtonRowBuilder } from '../../utils/tsCasts';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, Colors, ContainerBuilder, MessageFlags, SeparatorSpacingSize, Snowflake, Message, Collection, GuildMember, ContainerComponent, ActionRow, ButtonComponent, User } from 'discord.js';
 import { guildEmoji as gEmo, shortenText, isThread } from '../../func';
 import { Booru, Post, TagTypes } from './boorufetch';
@@ -352,7 +353,7 @@ export async function formatBooruPostMessage(booru: Booru, post: Post, data: Pos
 				partialCount = 3;
 			}
 
-			let content = formatTagNameListNew(arr, ' ');
+			const content = formatTagNameListNew(arr, ' ');
 			if(!content.length) return;
 			
 			const infoSuffix = partialCount < totalCount ? ` (${partialCount}/${totalCount})` : '';

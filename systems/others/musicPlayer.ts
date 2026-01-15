@@ -150,7 +150,7 @@ export async function showQueuePage(request: ComplexCommandRequest | ButtonInter
 
 	const player = useMainPlayer();
 	const queue = player.queues.get(request.guildId) ?? (await tryRecoverSavedTracksQueue(request));
-	let fullRows = [ 'EX', 'SF', 'AP', 'RP', 'LP' ].includes(op);
+	const fullRows = [ 'EX', 'SF', 'AP', 'RP', 'LP' ].includes(op);
 
 	if(!queue?.currentTrack && !queue?.size) {
 		const embed = makeReplyEmbed(Colors.Blurple)

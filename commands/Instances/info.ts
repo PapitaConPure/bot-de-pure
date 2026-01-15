@@ -68,7 +68,7 @@ const command = new Command('info', tags)
 		const humanCount = guild.members.cache.filter(member => !member.user.bot).size;
 		const botCount = guild.memberCount - humanCount;
 
-		let channelCounts = {
+		const channelCounts = {
 			text: 0,
 			voice: 0,
 			category: 0,

@@ -61,7 +61,7 @@ function subif(i: number, condition: ConditionString, rightOperand: any, whenTru
 }
 
 /**@satisfies {Record<string, Translation>}*/
-let localesObject = ({
+const localesObject = ({
 	currentLanguage: {
 		es: 'Español',
 		en: 'English',

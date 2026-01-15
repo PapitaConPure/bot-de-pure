@@ -6,7 +6,7 @@ export type UserCache = {
 	language: LocaleKey;
 	pixivConverter: 'phixiv' | '';
 	twitterPrefix: import('../systems/agents/pureet').AcceptedTwitterConverterKey | '';
-	banned: Boolean;
+	banned: boolean;
 };
 
 export type UserCacheResolvable = import('../commands/Commons/typings.js').AnyRequest |

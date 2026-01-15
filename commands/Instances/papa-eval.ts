@@ -1,11 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { p_pure } from '../../utils/prefixes';
 import { CommandOptions, CommandTags, Command } from '../Commons/';
-// eslint-disable-next-line no-unused-vars
-import * as GlobalProps from '../../data/globalProps';
-// eslint-disable-next-line no-unused-vars
-import * as func from '../../func';
 import Discord from 'discord.js';
-// eslint-disable-next-line no-unused-vars
+
+import * as GlobalProps from '../../data/globalProps';
+import * as func from '../../func';
 import Canvas from '@napi-rs/canvas';
 
 const options = new CommandOptions()

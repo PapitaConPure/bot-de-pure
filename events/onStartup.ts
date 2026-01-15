@@ -87,7 +87,7 @@ export async function onStartup(client: import('discord.js').Client) {
 	}
 
 	console.log(chalk.cyan('Semilla y horario calculados'));
-	let currentTime = Date.now();
+	const currentTime = Date.now();
 	globalConfigs.startupTime = currentTime;
 	globalConfigs.lechitauses = currentTime;
 	globalConfigs.seed = currentTime / 60000;

@@ -443,7 +443,7 @@ EnvironmentProvider.prototype.getMember = function() {
  * @param {string} query 
  * @returns {PSChannel?}
  */
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 EnvironmentProvider.prototype.fetchChannel = function(query) {
 	throw 'No implementado';
 }
@@ -453,7 +453,7 @@ EnvironmentProvider.prototype.fetchChannel = function(query) {
  * @param {string} query 
  * @returns {PSRole?}
  */
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 EnvironmentProvider.prototype.fetchRole = function(query) {
 	throw 'No implementado';
 }
@@ -463,7 +463,7 @@ EnvironmentProvider.prototype.fetchRole = function(query) {
  * @param {string} query 
  * @returns {PSMember?}
  */
-// eslint-disable-next-line no-unused-vars
+ 
 EnvironmentProvider.prototype.fetchMember = function(query) {
 	throw 'No implementado';
 }

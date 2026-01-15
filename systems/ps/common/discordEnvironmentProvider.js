@@ -1,5 +1,5 @@
 const { fetchChannel, fetchRole, fetchMember } = require('../../../func');
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { EnvironmentProvider, PSGuild, PSChannel, PSRole, PSUser, PSMember } = require('../v1.1/interpreter/environment/environmentProvider');
 
 /**@implements {EnvironmentProvider}*/

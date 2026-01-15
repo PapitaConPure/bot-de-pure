@@ -777,7 +777,7 @@ class Interpreter {
 	 * @param {import('../ast/statements').DeleteStatement} node 
 	 * @param {Scope} scope 
 	 */
-	// eslint-disable-next-line no-unused-vars
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	#evaluateDeleteStatement(node, scope) {
 		const { identifier } = node;
 		this.#saveTable.set(identifier, makeNada());

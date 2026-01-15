@@ -1,5 +1,3 @@
-/* eslint-disable no-empty-pattern */
-
 const { ValueKinds, makeText, makeBoolean, makeList, makeRegistry, coerceValue, makeNada } = require('../../values');
 const { expectParam, makePredicateFn } = require('../nativeUtils');
 

@@ -66,7 +66,7 @@ const command = new Command('inforol', flags)
 		return showInforolPage(interaction, +page, requestId, translator, query);
 	}, { userFilterIndex: 2 });
 
-function showInforolPage(request: ComplexCommandRequest | Discord.ButtonInteraction<'cached'>, page: number, requestId: string, translator: Translator, query: { strict: boolean; roles: Array<Discord.Role>; members: Discord.Collection<String, Discord.GuildMember>; }) {
+function showInforolPage(request: ComplexCommandRequest | Discord.ButtonInteraction<'cached'>, page: number, requestId: string, translator: Translator, query: { strict: boolean; roles: Array<Discord.Role>; members: Discord.Collection<string, Discord.GuildMember>; }) {
 	const { strict, roles, members } = query;
 	const { guild, user } = request;
 

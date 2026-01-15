@@ -58,7 +58,7 @@ const command = new Command('dados', flags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args, rawArgs) => {
-		let diceInputs = (
+		const diceInputs = (
 			args.isInteractionSolver()
 				? CommandOptionSolver.asStrings(args.parsePolyParamSync('dados', { messageSep: ' ' })).map(v => v.match(diceRegex))
 				: [ ...rawArgs.matchAll(new RegExp(diceRegex, 'g')) ]
@@ -72,7 +72,7 @@ const command = new Command('dados', flags)
 				].join('\n')
 			});
 
-		let dices = diceInputs
+		const dices = diceInputs
 			.slice(0, 16)
 			.map(parseDice);
 

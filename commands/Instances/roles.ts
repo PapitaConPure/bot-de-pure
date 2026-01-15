@@ -3,7 +3,7 @@ import { tenshiColor } from '../../data/globalProps';
 import { saki } from '../../data/sakiProps';
 import userIds from '../../data/userIds.json';
 import Saki from '../../models/saki.js';
-import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors } from 'discord.js';
+import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, TextInputBuilder, ModalBuilder, ButtonStyle, TextInputStyle, Colors, ButtonComponent } from 'discord.js';
 import { p_pure } from '../../utils/prefixes.js';
 import { auditError } from '../../systems/others/auditor.js';
 import { colorsRow } from '../../data/sakiProps.js';
@@ -46,7 +46,7 @@ function getAutoRoleRows(member: import('discord.js').GuildMember, categories: C
 					.setEmoji(role.emote)
 					.setLabel(role.label);
 
-				let sectionArg = exclusive ? `_${section}` : '';
+				const sectionArg = exclusive ? `_${section}` : '';
 
 				if(member.roles.cache.has(role.id))
 					return button
@@ -477,9 +477,9 @@ const command = new Command('roles', flags)
 		}
 
 		const newComponents = interaction.message.components;
-		//@ts-expect-error
-		newComponents[0].components = newComponents[0].components.map(component => {
-			const newComponent = ButtonBuilder.from(/**@type {import('discord.js').JSONEncodable<import('discord.js').APIButtonComponent>}*/(component));
+		//@ts-expect-error Estamos seguros de que hay un componente en el mensaje y es del tipo que queremos
+		newComponents[0].components = newComponents[0].components.map((component: ButtonComponent) => {
+			const newComponent = ButtonBuilder.from(component);
 			const componentRid = component.customId.split('_')[2];
 			
 			if(roleId === componentRid) {
@@ -529,13 +529,13 @@ const command = new Command('roles', flags)
 		}
 
 		const newComponents = interaction.message.components;
-		//@ts-expect-error
-		newComponents[0].components = newComponents[0].components.map(component => {
-			const newComponent = ButtonBuilder.from(/**@type {import('discord.js').JSONEncodable<import('discord.js').APIButtonComponent>}*/(component));
+		//@ts-expect-error Estamos seguros de que hay un componente en el mensaje y es del tipo que queremos
+		newComponents[0].components = newComponents[0].components.map((component: ButtonComponent) => {
+			const newComponent = ButtonBuilder.from(component);
 			const componentRid = component.customId.split('_')[2];
 			if(roleId !== componentRid) return newComponent;
 			
-			if(/**@type {import('discord.js').ButtonComponent}*/(component).style === ButtonStyle.Primary)
+			if(component.style === ButtonStyle.Primary)
 				return newComponent
 					.setCustomId(`roles_addRole_${componentRid}`)
 					.setStyle(ButtonStyle.Secondary);
@@ -559,11 +559,11 @@ const command = new Command('roles', flags)
 			return interaction.reply({ content: '❌ No tienes ningún rol de esta categoría', ephemeral: true });
 
 		const newComponents = interaction.message.components;
-		//@ts-expect-error
-		newComponents[0].components = newComponents[0].components.map(component => {
-			const newComponent = ButtonBuilder.from(/**@type {import('discord.js').JSONEncodable<import('discord.js').APIButtonComponent>}*/(component));
+		//@ts-expect-error Estamos seguros de que hay un componente en el mensaje y es del tipo que queremos
+		newComponents[0].components = newComponents[0].components.map((component: ButtonComponent) => {
+			const newComponent = ButtonBuilder.from(component);
 			const [ , functionName, componentRid ] = component.customId.split('_');
-			if(/**@type {import('discord.js').ButtonComponent}*/(component).style === ButtonStyle.Secondary) return newComponent;
+			if(component.style === ButtonStyle.Secondary) return newComponent;
 			if(functionName === 'removeRole')
 				newComponent.setCustomId(`roles_addRole_${componentRid}`)
 			return newComponent.setStyle(ButtonStyle.Secondary);
@@ -673,7 +673,7 @@ const command = new Command('roles', flags)
 		const customRole: import('discord.js').Role = interaction.member.roles.cache.get(roleId);
 		if(!customRole) return interaction.reply({ content: '⚠️ No se encontró el rol personalizado. Intenta crearlo otra vez', ephemeral: true });
 		const roleName = interaction.fields.getTextInputValue('nameInput');
-		let roleColor = interaction.fields.getTextInputValue('colorInput');
+		const roleColor = interaction.fields.getTextInputValue('colorInput');
 		let roleEmoteUrl = interaction.fields.getTextInputValue('emoteUrlInput');
 		const editStack = [];
 		const replyStack = [];

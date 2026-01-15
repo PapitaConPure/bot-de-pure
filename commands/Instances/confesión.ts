@@ -31,7 +31,7 @@ const command = new Command('confesión', tags)
 	)
 	.setPermissions(perms)
 	.setExecution(async request => {
-		let query = { guildId: request.guildId };
+		const query = { guildId: request.guildId };
 		const confSystem = await ConfessionSystems.findOne(query);
 		const logChannel = fetchChannel(confSystem?.logChannelId, request.guild);
 		const confChannel = fetchChannel(confSystem?.confessionsChannelId, request.guild);
@@ -603,7 +603,7 @@ async function getConfessionSystemAndChannels(interaction: Interaction) {
  * @description Delega tareas pendientes al sistema de confesiones.
  * @param tasks Nuevas promesas a delegar al sistema de confesiones.
  */
-async function delegateConfessionSystemTasks(...tasks: any[]) {
+async function delegateConfessionSystemTasks(...tasks: unknown[]) {
 	confessionTasks.push(...tasks);
 	return Promise.allSettled(tasks);
 }

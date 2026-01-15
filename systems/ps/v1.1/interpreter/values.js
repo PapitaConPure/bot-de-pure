@@ -243,7 +243,7 @@ function basicCompareTo(other) {
 }
 
 /**@param {NumberValue|TextValue|BooleanValue} other*/
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function invalidCompareTo(other) {
 	return makeNumber(-1);
 }

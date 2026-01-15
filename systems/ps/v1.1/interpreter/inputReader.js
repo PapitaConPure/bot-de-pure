@@ -190,7 +190,7 @@ class InputReader {
 	}
 
 	/**@type {(node: import('../ast/statements').ReadStatement, scope: import('./scope').Scope) => import('./values').RuntimeValue}}*/
-	// eslint-disable-next-line no-unused-vars
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	readInput(node, scope) {
 		return makeNada();
 	}

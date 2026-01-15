@@ -8,7 +8,7 @@ const QueueSchema = new Mongoose.Schema({
 
 export const QueueModel = Mongoose.model('Queue', QueueSchema);
 
-type QueueQuery = { queueId: String; };
+type QueueQuery = { queueId: string; };
 
 type QueueGenerationOptions = {
     length: number;

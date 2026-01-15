@@ -1,5 +1,3 @@
-/* eslint-disable no-empty-pattern */
-
 const { makeNumber, makeText, ValueKinds } = require('../../values');
 const { expectParam, getParamOrDefault } = require('../nativeUtils');
 const { improveNumber, clamp } = require('../../../utils/utils');

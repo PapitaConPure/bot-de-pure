@@ -277,12 +277,12 @@ interface CanvasTextDrawAreaOptions {
     maxSize?: number;
 }
 interface CanvasTextDrawFillOptions {
-    enabled?: Boolean;
-    onTop?: Boolean;
+    enabled?: boolean;
+    onTop?: boolean;
     color?: string;
 }
 interface CanvasTextDrawStrokeOptions {
-    widthAsFactor?: Boolean;
+    widthAsFactor?: boolean;
     width?: number;
     color?: string;
 }
@@ -509,7 +509,7 @@ export async function drawWelcomeStandard(member: Discord.GuildMember) {
 }
 
 interface SakiWelcomeDrawOptions {
-    force?: Boolean;
+    force?: boolean;
 }
 /**
  * 
@@ -666,8 +666,8 @@ export async function dibujarDespedida(miembro: Discord.GuildMember) {
         ctx.textBaseline = 'bottom';
         ctx.textAlign = 'center';
         const xcenter = canvas.width / 2;
-        let Texto = `Adiós, ${miembro.displayName}`;
-        let fontSize = 90;
+        const Texto = `Adiós, ${miembro.displayName}`;
+        const fontSize = 90;
         ctx.font = `bold ${fontSize}px "headline"`;
         ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
         ctx.strokeText(Texto, xcenter, canvas.height - 40);
@@ -997,7 +997,7 @@ export async function fetchMessage(data: string, context: FetchMessageContext = 
     const messages = context.channel?.messages;
     const matchedUrl = data.match(/https:\/\/discord.com\/channels\/\d+\/\d+\/(\d+)/);
     const messageId = matchedUrl ? matchedUrl[1] : data;
-    let message = messages.cache.get(messageId) || await messages.fetch(messageId).catch(_ => _);
+    const message = messages.cache.get(messageId) || await messages.fetch(messageId).catch(_ => _);
 
     if(!message?.channel) return;
     if(!acceptedChannelTypes.includes(message.channel.type)) return;
@@ -1091,7 +1091,7 @@ export function fetchFlag(args: Array<string>, flag: {
             }
 
             const charactersToRemove = new RegExp(c, 'g')
-            let temp = args.splice(i, flag.property ? 2 : 1);
+            const temp = args.splice(i, flag.property ? 2 : 1);
             args.push(temp[0].replace(charactersToRemove, ''));
             if(flag.property) args.push(temp[1]);
         }
@@ -1255,7 +1255,7 @@ export function shuffleArray(array: any[]) {
     let currentIndex = array.length;
     
     while(currentIndex !== 0) {
-        let randomIndex = Math.floor(Math.random() * currentIndex);
+        const randomIndex = Math.floor(Math.random() * currentIndex);
         currentIndex--;
     
         [ array[currentIndex], array[randomIndex] ] = [ array[randomIndex], array[currentIndex] ];
@@ -1474,7 +1474,7 @@ export function shortenTextLoose(text: string, max: number | null = 200, hardMax
 interface SmartShortenStructDefinition {
     start: string;
     end: string;
-    dynamic: Boolean;
+    dynamic: boolean;
 }
 
 interface SmartShortenOptions {
@@ -1539,7 +1539,7 @@ export function toLowerCaseNormalized(/** @type {string}*/ text: string, options
 export function levenshteinDistance(a: string, b: string): number {
     const m = a.length + 1;
     const n = b.length + 1;
-    let distance = new Array(m);
+    const distance = new Array(m);
     for(let i = 0; i < m; ++i) {
         distance[i] = new Array(n);
         for(let j = 0; j < n; ++j)
@@ -1615,7 +1615,7 @@ export function edlDistance(a: string, b: string): number {
 
     const m = a.length + 1;
     const n = b.length + 1;
-    let distance = (new Array(m)).fill(null).map((element, i) => {
+    const distance = (new Array(m)).fill(null).map((element, i) => {
         element = (new Array(n)).fill(0);
         element[0] = i;
         return element as number[];
@@ -1782,8 +1782,8 @@ export function compressId(id: string) {
     while(id[mid] === '0' && mid < id.length - 1)
         mid++;
 
-    let left = id.slice(0, mid);
-    let right = id.slice(mid);
+    const left = id.slice(0, mid);
+    const right = id.slice(mid);
     const compr = [ left, right ].map(str => {
         const int = parseInt(str);
         if(isNaN(int)) throw TypeError(`No se pudo convertir ${str} a un entero al intentar comprimir la id: ${id}`);
@@ -1799,8 +1799,8 @@ export function decompressId(id: string) {
 
     const mid = id[0];
     id = id.slice(1);
-    let left = id.slice(0, +mid);
-    let right = id.slice(+mid);
+    const left = id.slice(0, +mid);
+    const right = id.slice(+mid);
     const decomp = [ left, right ].map(str => radix128to10(str).toString());
     
     return decomp.join('');

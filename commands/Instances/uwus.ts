@@ -22,7 +22,7 @@ const command = new Command('uwus', tags)
 	.setExecution(async (request, args) => {
 		const secs = args.getNumber('tiempo', 30);
 
-		let uwuUsers = new Map<Snowflake, number>();
+		const uwuUsers = new Map<Snowflake, number>();
 		let lastUwu: User;
 		const filter = (m: Message) => !m.author.bot && m.content.toLowerCase().includes('uwu');
 		const coll = request.channel.createMessageCollector({ filter: filter, time: (secs * 1000) });
