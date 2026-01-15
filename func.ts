@@ -55,16 +55,19 @@ const HTTP_ENTITIES_REGEX = (() => {
 })();
 
 //#region Lista
-export function paginateRaw<T>(array: T[] | Discord.Collection<string, T>, pagemax: number | null = 10): T[][] | ([string, T])[][] {
-    if(!Array.isArray(array)) {
-        const intermediate = [...array.entries()];
+export function paginateRaw<T>(array: Discord.Collection<string, T>, pagemax?: number): [string, T][][];
+export function paginateRaw<T>(array: T[], pagemax?: number): T[][];
+export function paginateRaw<T>(values: T[] | Discord.Collection<string, T>, pagemax: number): T[][] | ([string, T])[][];
+export function paginateRaw<T>(values: T[] | Discord.Collection<string, T>, pagemax: number = 10): T[][] | ([string, T])[][] {
+    if(!Array.isArray(values)) {
+        const intermediate = [...values.entries()];
         return intermediate
             .map((_, i) => (i % pagemax === 0) ? intermediate.slice(i, i + pagemax) : null)
             .filter(item => item);
     }
 
-    return array
-        .map((_, i) => (i % pagemax === 0) ? array.slice(i, i + pagemax) : null)
+    return values
+        .map((_, i) => (i % pagemax === 0) ? values.slice(i, i + pagemax) : null)
         .filter(item => item);
 }
 //#endregion
@@ -74,9 +77,9 @@ interface PaginateOptions {
     format?: Function;
 }
 
-export function paginate<T>(array: Array<T> | Discord.Collection<string, T>, itemsOptions: PaginateOptions = { pagemax: 10, format: item => `\`${item.name.padEnd(24)}\`${item}` }): Array<Array<T>> {
+export function paginate<T>(values: T[] | Discord.Collection<string, T>, itemsOptions: PaginateOptions = { pagemax: 10, format: item => `\`${item.name.padEnd(24)}\`${item}` }): T[][] {
     const { pagemax, format } = itemsOptions;
-    const paginated = paginateRaw(array, pagemax);
+    const paginated = paginateRaw(values, pagemax);
     return paginated.map(page => page.map(format).join('\n'));
 }
 
