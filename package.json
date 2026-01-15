@@ -12,7 +12,15 @@
     "prod": "bun . -p",
     "start": "pm2-runtime start ecosystem.config.js --env production",
     "cmdbuild": ".\\CommandBuilder\\CommandBuilder\\bin\\Release\\CommandBuilder.exe",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "lint:fix": "eslint . — fix && prettier — write .",
+    "prepare": "lint-staged",
+    "lint-staged": {
+      ".{ts,js}": "eslint — cache — fix",
+      ".{ts,js,css,md}": "prettier — write",
+      ".js": "eslint — cache — fix",
+      ".{js,css,md}": "prettier — write"
+    }
   },
   "repository": {
     "type": "git",
