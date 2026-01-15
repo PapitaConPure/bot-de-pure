@@ -76,7 +76,7 @@ function makeDashboardContainer(request: Interaction | ComplexCommandRequest, us
 			actionRow => actionRow.addComponents(
 				new StringSelectMenuBuilder()
 					.setCustomId(`yo_selectLanguage_${compressedUserId}`)
-					.setPlaceholder(translator.getText('yoDashboardMenuConfig'))
+					.setPlaceholder(translator.getText('languageMenuPlaceholder'))
 					.setOptions(Object.values(Locales).map(locale => {
 						const subTranslator = new Translator(locale);
 						return new StringSelectMenuOptionBuilder()

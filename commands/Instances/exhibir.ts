@@ -39,7 +39,7 @@ const command = new Command('exhibir', flags)
 			});
 		return request.reply({
 			embeds: [embed],
-			components: [new ActionRowBuilder().addComponents(
+			components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
 				new ButtonBuilder()
 					.setCustomId(`exhibir_flushPins_${user.id}`)
 					.setLabel('Exhibir')

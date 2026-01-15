@@ -177,7 +177,7 @@ const command = new Command('roles', flags)
 					.setTitle('Selector de Roles')
 					.setDescription('Cualquiera puede usar el menú debajo para elegir roles.'),
 			],
-			components: [new ActionRowBuilder().addComponents(
+			components: [new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 				new StringSelectMenuBuilder()
 					.setCustomId('roles_onSelect')
 					.setPlaceholder('Elige una categoría')

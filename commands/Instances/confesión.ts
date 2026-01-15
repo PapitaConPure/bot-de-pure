@@ -58,14 +58,14 @@ const command = new Command('confesión', tags)
 
 		const rows = [
 			confSystem
-				? new ActionRowBuilder().addComponents([
+				? new ActionRowBuilder<ButtonBuilder>().addComponents([
 					new ButtonBuilder()
 						.setCustomId(`confesión_deleteSystem`)
 						.setLabel('Desmontar Sistema')
 						.setEmoji('1458130451834081513')
 						.setStyle(ButtonStyle.Danger),
 				])
-				: new ActionRowBuilder().addComponents([
+				: new ActionRowBuilder<ButtonBuilder>().addComponents([
 					new ButtonBuilder()
 						.setCustomId(`confesión_installSystem`)
 						.setLabel('Configurar Nuevo Sistema')

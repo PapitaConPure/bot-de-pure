@@ -1,3 +1,4 @@
+import { User } from 'discord.js';
 import { randRange } from '../../func';
 import { p_pure } from '../../utils/prefixes';
 import { CommandOptions, CommandTags, Command } from '../Commons/';
@@ -55,7 +56,7 @@ const command = new Command('pinguear', flags)
 	.setExecution(async (request, args) => {
 		const now = Date.now() * 1;
 		const uid = request.userId;
-		const lastUse = /**@type {number}*/(command.memory.get(uid)) ?? 0;
+		const lastUse = (command.memory.get(uid) as number) ?? 0;
 
 		if(now - lastUse < 1000 * 60)
 			return request.isInteraction
@@ -66,7 +67,7 @@ const command = new Command('pinguear', flags)
 			return request.reply({ content: `⚠️ Debes ingresar 2 parámetros (\`${p_pure(request.guild.id).raw}pinguear <cantidad> <usuario>\`)`, ephemeral: true });
 		
 		let repeats = -1;
-		let user;
+		let user: User;
 
 		if(request.isInteraction) {
 			repeats = Math.floor(args.getNumber('cantidad', 3));

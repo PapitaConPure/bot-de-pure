@@ -1,7 +1,7 @@
 import { CommandTags, CommandOptions, Command, CommandOptionSolver } from '../Commons/';
 import { CommandPermissions } from '../Commons/cmdPerms';
 import { Translator } from '../../i18n';
-import { GuildMember } from 'discord.js';
+import { GuildMember, MessageFlags } from 'discord.js';
 
 const perms = new CommandPermissions('ModerateMembers');
 
@@ -24,7 +24,10 @@ const command = new Command('aislar', tags)
 		const translator = await Translator.from(request.member);
 
 		if(args.empty)
-			return request.reply({ content: translator.getText('aislarNoTimeProvided'), ephemeral: true });
+			return request.reply({
+				flags: MessageFlags.Ephemeral ,
+				content: translator.getText('aislarNoTimeProvided'),
+			});
 
 		let duration = args.getNumber('duración');
 		if(isNaN(duration) || duration < 0)

@@ -37,7 +37,9 @@ const command = new Command('catbox', tags)
 		];
 
 		if(!uploads.length)
-			return request.editReply({ content: translator.getText('catboxInvalidImage'), ephemeral: true });
+			return request.editReply({
+				content: translator.getText('catboxInvalidImage'),
+			});
 
 		let count = 1;
 

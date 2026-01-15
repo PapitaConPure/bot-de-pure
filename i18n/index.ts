@@ -50,14 +50,15 @@ export const ConditionFields = ({
  * @param whenTrue Valor de reemplazo en caso de verdadero
  * @param whenFalse Valor de reemplazo en caso de falso
  */
-function subif(i: number, condition: ConditionString, rightOperand: any, whenTrue: string, whenFalse: string | null = '') {
+function subif<TReplacement>(i: number, condition: ConditionString, rightOperand: TReplacement, whenTrue: string, whenFalse: string | null = '') {
 	if(i == undefined) throw ReferenceError('Se esperaba un índice de componente de traducción');
 	if(!whenTrue) throw ReferenceError('Se esperaba un valor para verdadero en componente de traducción');
 
-	if(typeof rightOperand === 'boolean')
-		rightOperand = `__${rightOperand}__`;
+	const r = (typeof rightOperand === 'boolean')
+		? `__${rightOperand}__`
+		: rightOperand;
 
-	return `${i}{...}<!{${condition}:${rightOperand}|'${whenTrue}'}<?{'${whenFalse}'}`;
+	return `${i}{...}<!{${condition}:${r}|'${whenTrue}'}<?{'${whenFalse}'}`;
 }
 
 /**@satisfies {Record<string, Translation>}*/
@@ -76,6 +77,11 @@ const localesObject = ({
 		en: '<:en:1084646415319453756>',
 		es: '<:es:1084646419853488209>',
 		ja: '🇯🇵',
+	},
+	languageMenuPlaceholder: {
+		es: 'Seleccionar idioma',
+		en: 'Select Language',
+		ja: '言語を選択',
 	},
 	
 	dmDisclaimer: {
@@ -504,7 +510,7 @@ const localesObject = ({
 		ja: '無効',
 	},
 	goToUserPreferences: {
-		es: 'Preferencias de Usuario',
+		es: 'Preferencias de usuario',
 		en: 'User Preferences',
 		ja: 'ユーザー設定',
 	},
@@ -1934,6 +1940,27 @@ const localesObject = ({
 		ja: `-# ${subl(0)}さんへのリマインダー`,
 	},
 
+	serverDashboardServerEpigraph: {
+		es: '-# Preferencias de servidor',
+		en: '-# Server Preferences',
+		ja: '-# サーバー設定',
+	},
+	serverDashboardLanguageName: {
+		es: '### -# Idioma',
+		en: '### -# Language',
+		ja: '### -# 言語',
+	},
+	serverDashboardMenuConfig: {
+		es: 'Sistemas de servidor',
+		en: 'Server Systems',
+		ja: 'サーバーシステム',
+	},
+	serverDashboardMenuConfigConfessionsLabel: {
+		es: 'Confesiones',
+		en: 'Confessions',
+		ja: '告白',
+	},
+
 	voiceExpected: {
 		es: '❌ Debes conectarte a un canal de voz primero',
 		en: '❌ You need to connect to a voice channel first',
@@ -2359,17 +2386,17 @@ const localesObject = ({
 	},
 
 	yoCancelledStep: {
-		es: 'Se canceló la configuración de Preferencias de Usuario',
+		es: 'Se canceló la configuración de Preferencias de usuario',
 		en: 'The User Preferences configuration was cancelled',
 		ja: 'ユーザー設定の構成がキャンセルされました',
 	},
 	yoFinishedStep: {
-		es: 'Se cerró el Asistente de Preferencias de Usuario.',
+		es: 'Se cerró el Asistente de preferencias de usuario.',
 		en: 'The User Preferences Wizard has been closed.',
 		ja: 'ユーザー設定ウィザードが閉じました。',
 	},
 	yoDashboardEpigraph: {
-		es: '-# Preferencias de Usuario',
+		es: '-# Preferencias de usuario',
 		en: '-# User Preferences',
 		ja: '-# ユーザー設定',
 	},
@@ -2754,7 +2781,7 @@ export class Translator {
 	 * @param id id de texto a mostrar en forma localizada
 	 * @param values variables a insertar en el texto seleccionado como reemplazos de campos designados
 	 */
-	getText(id: LocaleIds, ...values: any[]) {
+	getText(id: LocaleIds, ...values: unknown[]) {
 		return Translator.getText(id, this.#locale, ...values);
 	}
 
@@ -2792,7 +2819,7 @@ export class Translator {
 	 * @param locale lenguaje al cual localizar el texto
 	 * @param values variables a insertar en el texto seleccionado como reemplazos de campos designados
 	 */
-	static getText(id: LocaleIds, locale: LocaleKey, ...values: any[]) {
+	static getText(id: LocaleIds, locale: LocaleKey, ...values: unknown[]) {
 		const localeSet = localesObject[id];
 		if(!localeSet) throw ReferenceError(`Se esperaba una id de texto localizado válido. Se recibió: ${id}`);
 		const translationTemplate = localeSet[locale];

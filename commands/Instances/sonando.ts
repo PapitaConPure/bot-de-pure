@@ -42,7 +42,7 @@ const command = new Command('sonando', flags)
 			const queue = player.queues.get(request.guildId) ?? (await tryRecoverSavedTracksQueue(request));
 
 			if(!queue?.currentTrack && !queue?.size)
-				return request.editReply(translator.getText('queueDescriptionEmptyQueue'));
+				return request.editReply({ content: translator.getText('queueDescriptionEmptyQueue') });
 
 			const shortChannelName = shortenText(request.member.voice.channel.name, 20);
 			const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted) : translator.getText('playFooterTextQueueEmpty');
@@ -75,11 +75,11 @@ const command = new Command('sonando', flags)
 						.setTimestamp(Date.now()),
 				],
 				components: [
-					new ActionRowBuilder().addComponents(
-							new ButtonBuilder()
-								.setCustomId(`sonando_expand_${compressId(request.userId)}`)
-								.setStyle(ButtonStyle.Secondary)
-								.setEmoji('1356977730754842684'),
+					new ActionRowBuilder<ButtonBuilder>().addComponents(
+						new ButtonBuilder()
+							.setCustomId(`sonando_expand_${compressId(request.userId)}`)
+							.setStyle(ButtonStyle.Secondary)
+							.setEmoji('1356977730754842684'),
 					),
 				]
 			});

@@ -102,7 +102,7 @@ const command = new Command('feed', tags)
 		const authorId = compressId(request.userId);
 		return request.reply({
 			embeds: [wizard],
-			components: [new ActionRowBuilder().addComponents(
+			components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
 				new ButtonBuilder()
 					.setCustomId('feed_startWizard')
 					.setLabel('Comenzar')

@@ -1,7 +1,7 @@
 import { CommandTags, Command } from '../Commons';
 import { improveNumber, sleep } from '../../func';
-import { InteractionEditReplyOptions, InteractionResponse, Message, MessageEditOptions, MessagePayload } from 'discord.js';
-import { ComplexCommandRequest } from '../Commons/typings';
+import { InteractionResponse, Message } from 'discord.js';
+import { CommandEditReplyOptions, ComplexCommandRequest } from '../Commons/typings';
 
 const tags = new CommandTags().add('COMMON');
 
@@ -56,14 +56,13 @@ const command = new Command('ping', tags)
 function editSent(
 	sent: Message<true> | InteractionResponse<false>,
 	request: ComplexCommandRequest,
-	editOptions: string | MessagePayload | MessageEditOptions | InteractionEditReplyOptions
+	editOptions: CommandEditReplyOptions
 ) {
 	if(request.isInteraction) {
-		const interaction = /**@type {CommandInteraction<'cached'>}*/(request);
-		return interaction.editReply(editOptions);
+		return request.editReply(editOptions);
 	} else {
-		const message = /**@type {Message<true>}*/(sent);
-		return message.edit(/**@type {MessageEditOptions}*/(editOptions));
+		const message = sent;
+		return message.edit(editOptions);
 	}
 }
 

@@ -25,11 +25,11 @@ const command = new Command('mimar', tags)
 	.setExecution(async (request, args) => {
 		const user2 = args.getUser('persona', true);
 		if(!user2)
-			return request.reply('⚠️️ Debes especificar una persona a mimar');
+			return request.reply({ content: '⚠️️ Debes especificar una persona a mimar' });
 
 		const user1 = request.user;
 		if(user1.id === user2.id)
-			return request.reply('⚠️️ El único mimo que puedes darte a ti mismo es el de vivir una vida de la que no te arrepentirás');
+			return request.reply({ content: '⚠️️ El único mimo que puedes darte a ti mismo es el de vivir una vida de la que no te arrepentirás' });
 
 		const embed = new EmbedBuilder()
 			.setColor(0xfa7b62)

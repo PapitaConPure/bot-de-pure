@@ -132,31 +132,48 @@ const command = new Command('tarjeta', tags)
 			.filter(ch => ch);
 
 		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda ${command.name}\` para más información`;
-		if(request.isMessage && args.count < 3) return request.reply(`⚠️ Debes ingresar al menos el juego completado, la dificultad y la calidad de supervivencia.\n${helpstr}`);
+		if(request.isMessage && args.count < 3)
+			return request.reply({
+				content: `⚠️ Debes ingresar al menos el juego completado, la dificultad y la calidad de supervivencia.\n${helpstr}`,
+			});
 
 		const bg = backgrounds.find(b => b.aliases.includes(args.getString('juego')?.toLowerCase()));
-		if(!bg) return request.reply('⚠️ Debes ingresar un nombre o número de juego válido. Solo se permiten juegos oficiales de danmaku tradicional');
+		if(!bg)
+			return request.reply({
+				content: '⚠️ Debes ingresar un nombre o número de juego válido. Solo se permiten juegos oficiales de danmaku tradicional'
+			});
 
 		const diff = highlights.difficulty.find(d => d.aliases.includes(args.getString('dificultad')?.toLowerCase()));
-		if(!diff) return request.reply(`⚠️ Debes ingresar una calidad de survival válida.\n${helpstr}`);
+		if(!diff)
+			return request.reply({
+				content: `⚠️ Debes ingresar una calidad de survival válida.\n${helpstr}`
+			});
 
 		const survivalname = args.getString('survival')?.toLowerCase();
-		if(!highlights.survival[survivalname]) return request.reply(`⚠️ Debes ingresar una calidad de survival válida.\n${helpstr}`);
+		if(!highlights.survival[survivalname])
+			return request.reply({
+				content: `⚠️ Debes ingresar una calidad de survival válida.\n${helpstr}`
+			});
 		
 		const score = improveNumber(args.getNumber('puntaje'), { minDigits: 10 });
-		if(!score || +score >= Math.pow(10, 12)) return request.reply(`⚠️ Debes ingresar un puntaje final válido.\n${helpstr}`);
+		if(!score || +score >= Math.pow(10, 12))
+			return request.reply({
+				content: `⚠️ Debes ingresar un puntaje final válido.\n${helpstr}`
+			});
 
 		let dateStr: string = request.isInteraction ? args.getString('fecha') : (args.args as string[]).slice(4).join('');
 		if(request.isMessage && !dateStr.length)
-			return request.reply(`⚠️ Se esperaba una fecha luego del puntaje.\n${helpstr}`);
+			return request.reply({
+				content: `⚠️ Se esperaba una fecha luego del puntaje.\n${helpstr}`
+			});
 
 		const dateNumbers = dateStr.split(/[/ ]+/);
 		if(dateNumbers.some(n => isNaN(+n)))
-			return request.reply('⚠️ Fecha inválida. Asegúrate de seguir el formato DD/MM/AAAA');
+			return request.reply({ content: '⚠️ Fecha inválida. Asegúrate de seguir el formato DD/MM/AAAA' });
 
 		dateStr = dateNumbers.map(d => d.padStart(2, '0')).join('/');
 		if(dateStr.length !== 'DD/MM/YYYY'.length)
-			return request.reply('⚠️ Fecha inválida. Asegúrate de seguir el formato DD/MM/AAAA');
+			return request.reply({ content: '⚠️ Fecha inválida. Asegúrate de seguir el formato DD/MM/AAAA' });
 
 		const issueDate = dateStr
 			? dateStr
@@ -211,7 +228,7 @@ const command = new Command('tarjeta', tags)
 			};
 			return request.editReply(replyContent);
 		} catch {
-			return request.editReply('Algo salió mal...');
+			return request.editReply({ content: 'Algo salió mal...' });
 		}
 	});
 

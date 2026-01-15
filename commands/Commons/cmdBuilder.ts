@@ -1,6 +1,6 @@
-import { Message, CommandInteraction, Collection, ChatInputCommandInteraction, Snowflake, Attachment, PermissionsBitField, MessagePayload, MessageEditOptions, InteractionReplyOptions, InteractionDeferReplyOptions, InteractionEditReplyOptions, User, MessageComponentInteraction, MessageActionRowComponentBuilder, Interaction, ModalMessageModalSubmitInteraction, ButtonInteraction, SelectMenuInteraction, MessageReplyOptions, MessageFlags, InteractionCallbackResponse, BooleanCache, InteractionResponse, Client, InteractionCallback, InteractionCallbackResource, BaseInteraction, ContextMenuCommandInteraction, InteractionType } from 'discord.js';
+import { Message, Collection, MessageComponentInteraction, MessageActionRowComponentBuilder, Interaction, ModalMessageModalSubmitInteraction, ButtonInteraction, SelectMenuInteraction, InteractionType, MessageReplyOptions } from 'discord.js';
 import { CommandTags } from './cmdTags';
-import { CommandArguments, CommandRequest, ComplexCommandRequest, ComponentInteraction, ExtendedCommandRequest } from './typings';
+import { CommandEditReplyOptions, CommandReplyOptions, CommandRequest, ComplexCommandRequest, ComponentInteraction, ExtendedCommandRequest } from './typings';
 import { CommandOptions, CommandOptionSolver } from './cmdOpts';
 import { CommandPermissions } from './cmdPerms';
 
@@ -58,10 +58,10 @@ function extendRequest(request: CommandRequest | ComponentInteraction): ComplexC
 
 			extension.replied = true;
 
-			return extension.initialReply.edit(typeof options === 'string' ? options : { content: '', ...options });
+			return extension.initialReply.edit({ content: '', ...options } as CommandEditReplyOptions);
 		};
 		extension.replyFirst = async(options) => {
-			const replied = request.reply(options);
+			const replied = (request as Message).reply(options as MessageReplyOptions);
 			extension.replied = true;
 			return replied;
 		}
@@ -94,21 +94,19 @@ function extendRequest(request: CommandRequest | ComponentInteraction): ComplexC
 	return request as ComplexCommandRequest;
 }
 
-type ExecutionFunction = (request: ComplexCommandRequest, args: CommandOptionSolver, rawArgs?: string) => Promise<any>;
+type ExecutionFunction = (request: ComplexCommandRequest, args: CommandOptionSolver, rawArgs?: string) => Promise<unknown>;
 
-type InteractionResponseFunction = (interaction: Interaction, ...args: string[]) => Promise<any>;
+type InteractionResponseFunction = (interaction: Interaction, ...args: string[]) => Promise<unknown>;
 
 interface InteractionResponseOptions {
 	userFilterIndex?: number;
 }
 
-type ButtonResponseFunction = (interaction: ButtonInteraction<'cached'>, ...args: string[]) => Promise<any>;
+type ButtonResponseFunction = (interaction: ButtonInteraction<'cached'>, ...args: string[]) => Promise<unknown>;
 
-type SelectMenuResponseFunction = (interaction: SelectMenuInteraction<'cached'>, ...args: string[]) => Promise<any>;
+type SelectMenuResponseFunction = (interaction: SelectMenuInteraction<'cached'>, ...args: string[]) => Promise<unknown>;
 
-type ModalResponseFunction = (interaction: ModalMessageModalSubmitInteraction<'cached'>, ...args: string[]) => Promise<any>;
-
-export type CommandReplyOptions = (string | MessagePayload | MessageReplyOptions) & InteractionReplyOptions & { fetchReply: boolean; };
+type ModalResponseFunction = (interaction: ModalMessageModalSubmitInteraction<'cached'>, ...args: string[]) => Promise<unknown>;
 
 export type WikiComponentEvaluator = (request: ComplexCommandRequest | MessageComponentInteraction<'cached'>) => MessageActionRowComponentBuilder;
 
@@ -130,11 +128,8 @@ export class Command {
 	permissions: CommandPermissions;
 	options: CommandOptions | null;
 	callx: string | null;
-	/**@type {Map<string, any>}*/
-	memory: Map<string, any>;
-	/**@type {CommandWikiData}*/
+	memory: Map<string, unknown>;
 	wiki: CommandWikiData;
-	/**@type {CommandReplyOptions}*/
 	reply: CommandReplyOptions;
 	execute: ExecutionFunction;
 
@@ -147,7 +142,8 @@ export class Command {
 		if(typeof name !== 'string') throw new TypeError('El nombre debe ser un string');
 		if(!name.length)             throw new Error('El nombre del comando no puede estar vacío');
 		if(!tags)                    throw new TypeError('Debes suministrar CommandTags para el comando');
-		if(!tags.bitfield)           throw new TypeError('Las flags deben ser un CommandTags');
+		if(tags.bitfield == null)    throw new TypeError('Las tags deben ser un CommandTags');
+		if(!tags.bitfield)           throw new Error('Las tags no pueden estar vacías');
 		this.name = name;
 		this.aliases = [];
 		this.flags = tags;
@@ -226,7 +222,7 @@ export class Command {
 	 * @param fn Una función NO anónima
 	 * @param options Opciones de respuesta de interacción
 	 */
-	setFunction(fn: Function, options: InteractionResponseOptions = {}) {
+	setFunction<TFunction extends (a?: unknown) => Promise<unknown>>(fn: TFunction, options: InteractionResponseOptions = {}) {
 		const functionName = fn.name;
 		this[functionName] = fn;
 		fn['userFilterIndex'] = options.userFilterIndex;

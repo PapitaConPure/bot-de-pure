@@ -1,6 +1,4 @@
-const GuildConfig = require('../../../models/guildconfigs.js');
-const { p_pure } = require('../../../utils/prefixes');
-const { randRange, fetchUserID, shortenText } = require('../../../func');
+const { shortenText } = require('../../../func');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
 const { TuberLexer } = require('./pslexer.js');
 const { TuberParser } = require('./psparser.js');
@@ -182,16 +180,16 @@ async function executeTuber(request, tuber, inputOptions) {
     }
 
     if(replyObject.content.length)
-        //@ts-expect-error
+        //@ts-expect-error Transformar a string
         replyObject.content = replyObject.content.join('\n');
     else
         delete replyObject.content;
     
     if(overwrite)
-        //@ts-expect-error
+        //@ts-expect-error Si bien el tipo no está bien notado, esto es correcto
         tuber.inputs = inputStack;
 
-    return request.editReply(replyObject).catch(async () => {
+    return request.editReply(/**@type {import('../../../commands/Commons/typings.js').CommandEditReplyOptions}*/(/**@type {unknown}*/(replyObject))).catch(async () => {
         await request.editReply({ content: `⚠️ No se puede enviar el mensaje. Revisa el largo y la validez de los datos` });
         throw Error('Envío inválido');
     });

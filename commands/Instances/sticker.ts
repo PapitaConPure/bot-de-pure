@@ -29,7 +29,7 @@ const command = new Command('sticker', tags)
             .setTimestamp(sticker.createdTimestamp)
             .setImage(sticker.url);
         
-        const row = new ActionRowBuilder().addComponents(
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
                 .setURL(sticker.url)
                 .setEmoji('922669195521568818')

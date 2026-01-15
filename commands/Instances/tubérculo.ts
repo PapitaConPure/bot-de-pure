@@ -1,5 +1,5 @@
 import { CommandOptions, CommandTags, Command, CommandOptionSolver, CommandParam } from '../Commons/';
-import { EmbedBuilder, ButtonBuilder, TextInputBuilder, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder, MessageFlags } from 'discord.js';
+import { EmbedBuilder, ButtonBuilder, TextInputBuilder, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder, MessageFlags, ButtonInteraction } from 'discord.js';
 import { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId, warn } from '../../func.js';
 import GuildConfig, { GuildConfigDocument } from '../../models/guildconfigs.js';
 import { psDocsButton, psEditorButton } from './purescript.js';
@@ -599,9 +599,10 @@ async function createTuber(tuberId: string, gcfg: GuildConfigDocument, isPureScr
 	}
 }
 
-function viewTuber(interaction: ComplexCommandRequest | import('discord.js').ButtonInteraction<'cached'>, item: any, tuberId: string, inputVariant: number, updateMessage?: string) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function viewTuber(interaction: ComplexCommandRequest | ButtonInteraction<'cached'>, item: any, tuberId: string, inputVariant: number, updateMessage?: string) {
 	if(!item)
-		return interaction.reply({ content: `⚠️️ El Tubérculo **${tuberId}** no existe` });
+		return (interaction as ButtonInteraction).reply({ content: `⚠️️ El Tubérculo **${tuberId}** no existe` });
 
 	const author = interaction.guild.members.cache.get(item.author) ?? interaction.guild.members.me;
 
@@ -732,7 +733,7 @@ function viewTuber(interaction: ComplexCommandRequest | import('discord.js').But
 
 	return updateMessage
 		? (interaction as import('discord.js').ButtonInteraction).update({ embeds, files, components })
-		: interaction.reply({ embeds, files, components });
+		: (interaction as ButtonInteraction).reply({ embeds, files, components });
 }
 
 /**

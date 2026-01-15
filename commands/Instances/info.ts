@@ -46,7 +46,7 @@ const command = new Command('info', tags)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		if(!request.guild.available)
-			return request.reply('⁉️');
+			return request.reply({ content: '⁉️' });
 
 		const guild = request.guild;
 		const [stats, translator] = await Promise.all([

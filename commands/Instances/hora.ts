@@ -5,7 +5,7 @@ import { dateToUTCFormat } from '../../func';
 import { Translator } from '../../i18n';
 import { parseDateFromNaturalLanguage, addTime, utcStartOfTzToday } from '../../utils/datetime';
 import { isValid, getUnixTime, addMinutes } from 'date-fns';
-import { ButtonBuilder, ButtonStyle } from 'discord.js';
+import { ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
 
 const options = new CommandOptions()
 	.addParam('hora', 'TIME', 'para establecer la hora a convertir', { optional: true })
@@ -60,22 +60,32 @@ const command = new Command('hora', tags)
 		}
 
 		if(!isValid(time))
-			return request.reply(translator.getText('invalidTime'));
+			return request.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('invalidTime'),
+			});
 
 		if(!date) {
 			const issueDate = addTime(utcStartOfTzToday(sanitizedTzCode), time);
 			const unixDate = getUnixTime(issueDate);
 
-			return request.reply(`<t:${unixDate}:T> — :index_pointing_at_the_viewer: ${translator.getText('horaAdaptedToYourTimezone')}`);
+			return request.reply({
+				content: `<t:${unixDate}:T> — :index_pointing_at_the_viewer: ${translator.getText('horaAdaptedToYourTimezone')}`,
+			});
 		}
 
 		if(!isValid(date))
-			return request.reply(translator.getText('invalidDate'));
+			return request.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('invalidDate'),
+			});
 
 		const issueDate = addTime(date, time);
 		const unixDate = getUnixTime(issueDate);
 
-		return request.reply(`<t:${unixDate}:T> <t:${unixDate}:D> — :index_pointing_at_the_viewer: ${translator.getText('horaAdaptedToYourTimezone')}`);
+		return request.reply({
+			content: `<t:${unixDate}:T> <t:${unixDate}:D> — :index_pointing_at_the_viewer: ${translator.getText('horaAdaptedToYourTimezone')}`,
+		});
 	});
 
 export default command;

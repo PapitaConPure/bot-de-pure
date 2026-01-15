@@ -91,7 +91,9 @@ const command = new Command('imgur', tags)
 		];
 
 		if(!uploads.length)
-			return request.editReply({ content: translator.getText('imgurInvalidImage'), ephemeral: true });
+			return request.editReply({
+				content: translator.getText('imgurInvalidImage'),
+			});
 
 		let count = 1;
 		const successes = [];

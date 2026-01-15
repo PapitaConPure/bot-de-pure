@@ -283,9 +283,9 @@ const command = new Command('anarquia', tags)
 		
 		const skill = args.hasFlag('skill');
 		const inverted = args.isMessageSolver(args.args) && isNaN(+args.args[0]);
-		let pos: number[], emote: string;
+		let emote: string;
 		if(inverted) emote = args.getString('emote');
-		pos = CommandOptionSolver.asNumbers(args.parsePolyParamSync('posición', { regroupMethod: 'NONE' })).filter(x => !isNaN(x));
+		const pos = CommandOptionSolver.asNumbers(args.parsePolyParamSync('posición', { regroupMethod: 'NONE' })).filter(x => !isNaN(x));
 		if(!inverted) emote = args.getString('emote');
 
 		if((pos.length === 2 && !emote)
@@ -631,6 +631,6 @@ function useSkill(cells: string[][], x: number, y: number, id: string, mask: num
 	}
 }
 
-function calcMatrixWidth(matrix: any[][]) {
+function calcMatrixWidth(matrix: unknown[][]) {
 	return matrix.map(r => r.length).reduce((a, b) => a > b ? a : b, 0);
 }

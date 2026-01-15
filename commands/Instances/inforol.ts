@@ -5,9 +5,15 @@ import { CommandPermissions } from '../Commons/cmdPerms';
 import { Translator } from '../../i18n';
 import { makeButtonRowBuilder } from '../../utils/tsCasts';
 import { fetchGuildMembers } from '../../utils/guildratekeeper';
-import { ComplexCommandRequest } from '../Commons/typings';
+import { CommandReplyOptions, ComplexCommandRequest } from '../Commons/typings';
 
 const MEMBERS_PER_PAGE = 10;
+
+type InforolQuery = {
+	strict: boolean;
+	roles: Discord.Role[];
+	members: Discord.Collection<string, Discord.GuildMember>;
+};
 
 const perms = new CommandPermissions('ManageRoles');
 const options = new CommandOptions()
@@ -59,14 +65,14 @@ const command = new Command('inforol', flags)
 	}).setButtonResponse(async function showPage(interaction, page, requestId) {
 		const translator = await Translator.from(interaction.user);
 
-		const query = command.memory.get(requestId);
+		const query = command.memory.get(requestId) as InforolQuery;
 		if(!query)
 			return interaction.reply({ content: translator.getText('expiredWizardData') });
 
 		return showInforolPage(interaction, +page, requestId, translator, query);
 	}, { userFilterIndex: 2 });
 
-function showInforolPage(request: ComplexCommandRequest | Discord.ButtonInteraction<'cached'>, page: number, requestId: string, translator: Translator, query: { strict: boolean; roles: Array<Discord.Role>; members: Discord.Collection<string, Discord.GuildMember>; }) {
+function showInforolPage(request: ComplexCommandRequest | Discord.ButtonInteraction<'cached'>, page: number, requestId: string, translator: Translator, query: InforolQuery) {
 	const { strict, roles, members } = query;
 	const { guild, user } = request;
 
@@ -74,7 +80,7 @@ function showInforolPage(request: ComplexCommandRequest | Discord.ButtonInteract
 
 	const replyOrUpdate = (replyBody: Discord.MessagePayload | (Discord.InteractionReplyOptions & Discord.InteractionUpdateOptions)) =>
 		isCommand
-			? (request.reply(replyBody))
+			? ((request as ComplexCommandRequest).reply(replyBody as CommandReplyOptions))
 			: ((request as Discord.ButtonInteraction).update(replyBody));
 	
 	const membersCount = members.size;

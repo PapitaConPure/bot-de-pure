@@ -1,8 +1,9 @@
-import Discord from 'discord.js';
+import Discord, { Message, MessageFlags } from 'discord.js';
 import serverIds from '../../data/serverIds.json';
 import { paginate, navigationRows, rand } from '../../func';
 import { CommandOptions, CommandTags, Command } from '../Commons/';
 import { InteractionType } from 'discord.js';
+import { ComplexCommandRequest } from '../Commons/typings';
 
 function getEmotesList(interaction: import('../Commons/typings').AnyRequest) {
 	const perritoNames = [
@@ -25,7 +26,10 @@ async function loadPageNumber(request: Exclude<import('../Commons/typings').AnyR
 	const emotePages = paginate(emotes);
 	const lastPage = emotePages.length - 1;
 	if(page > lastPage)
-		return request.reply({ content: '⚠️ Esta página no existe', ephemeral: true });
+		return (request as ComplexCommandRequest).reply({
+			flags: MessageFlags.Ephemeral,
+			content: '⚠️ Esta página no existe',
+		});
 
 	const perritoComun = emotes.find(perrito => perrito.name === 'perrito');
 
@@ -36,13 +40,13 @@ async function loadPageNumber(request: Exclude<import('../Commons/typings').AnyR
 		.setFooter({ text: `${page + 1} / ${lastPage + 1}` })
 		.addFields({ name: `${'Nombre`'.padEnd(24)}\`Emote`, value: `${emotePages[page]}` });
 
-	const content = /**@type {import('discord.js').InteractionReplyOptions & import('discord.js').InteractionUpdateOptions}*/({
+	const content = ({
 		embeds: [embed],
 		components: navigationRows('perrito', page, lastPage),
 	});
 
 	if(Object.hasOwn.call(request, 'author') || request.type === InteractionType.ApplicationCommand)
-		return request.reply(content);
+		return (request as Message).reply(content);
 
 	return 'update' in request
 		? request.update(content)

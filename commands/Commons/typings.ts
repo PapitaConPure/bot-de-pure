@@ -1,4 +1,4 @@
-import { Attachment, AutocompleteInteraction, ButtonInteraction, ChatInputCommandInteraction, Collection, CommandInteractionOptionResolver, InteractionDeferReplyOptions, InteractionEditReplyOptions, InteractionReplyOptions, Message, MessageContextMenuCommandInteraction, MessageEditOptions, MessagePayload, PermissionsBitField, Snowflake, StringSelectMenuInteraction, User } from 'discord.js';
+import { Attachment, AutocompleteInteraction, ButtonInteraction, ChatInputCommandInteraction, Collection, CommandInteractionOptionResolver, InteractionDeferReplyOptions, InteractionEditReplyOptions, InteractionReplyOptions, Message, MessageContextMenuCommandInteraction, MessagePayload, MessageReplyOptions, PermissionsBitField, Snowflake, StringSelectMenuInteraction, User } from 'discord.js';
 
 /**@description Representa los tipos de petición de comando.*/
 export type CommandRequest =
@@ -6,6 +6,12 @@ export type CommandRequest =
 	| Omit<ChatInputCommandInteraction<'cached'>, 'reply' | 'deferReply'>;
 
 /**@description Extensiones para {@link CommandRequest}.*/
+
+export type CommandReplyOptions =
+	Omit<MessagePayload | MessageReplyOptions, 'flags'> & InteractionReplyOptions;
+
+export type CommandEditReplyOptions =
+	(Omit<MessagePayload | MessageReplyOptions, 'flags'> & InteractionEditReplyOptions);
 
 export interface ExtendedCommandRequest {
 	/**The command's initial reply.*/
@@ -33,9 +39,9 @@ export interface ExtendedCommandRequest {
 	/**The id of the user who started the command.*/
 	userId: string;
 	/**If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply.*/
-	reply: (options?: (string|MessagePayload)&(MessageEditOptions|InteractionReplyOptions)|{}|undefined) => Promise<Message<boolean>>;
-	/**If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply*/
-	replyFirst: (options?: (string|MessagePayload)&(MessageEditOptions|InteractionReplyOptions)|{}|undefined) => Promise<Message<boolean>>;
+	reply: (options?: CommandReplyOptions) => Promise<Message<boolean>>;
+	/**If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply.*/
+	replyFirst: (options?: CommandReplyOptions) => Promise<Message<boolean>>;
 	/**If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply.*/
 	deferReply(options?: InteractionDeferReplyOptions & { fetchReply?: true }): Promise<Message<boolean>>;
 	/**Deletes the original message if the command is a message command.*/
@@ -43,7 +49,7 @@ export interface ExtendedCommandRequest {
 	/**Deletes the initial reply.*/
 	deleteReply: () => Promise<Message<boolean>>;
 	/**Edits the initial reply.*/
-	editReply: (options: (string|MessagePayload)&(MessageEditOptions|InteractionEditReplyOptions)|{}|undefined) => Promise<Message<boolean>>;
+	editReply: (options: CommandEditReplyOptions) => Promise<Message<boolean>>;
 	/**Determines whether the initial reply was deferred (true) or not (false).*/
 	wasDeferred: () => boolean;
 	/**Determines whether the initial reply was sent (true) or not (false).*/

@@ -20,7 +20,7 @@ const command = new Command('bienvenida', flags)
 	.setPermissions(perms)
 	.setOptions(options)
 	.setExecution(async (request) => {
-		request.reply('a');
+		request.reply({ content: 'a' });
 	});
 
 export default command;

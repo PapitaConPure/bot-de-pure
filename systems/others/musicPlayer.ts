@@ -2,7 +2,7 @@ import { Player, useMainPlayer, QueueRepeatMode, Track, GuildQueue } from 'disco
 import { DefaultExtractors } from '@discord-player/extractor';
 import { SoundcloudExtractor } from 'discord-player-soundcloud';
 import { YoutubeSabrExtractor } from 'discord-player-googlevideo';
-import { EmbedBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, Colors, Client, ButtonInteraction, StringSelectMenuInteraction, ModalSubmitInteraction, ColorResolvable, BaseGuildVoiceChannel } from 'discord.js';
+import { EmbedBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, Colors, Client, ButtonInteraction, StringSelectMenuInteraction, ModalSubmitInteraction, ColorResolvable, BaseGuildVoiceChannel, MessageFlags } from 'discord.js';
 import { ComplexCommandRequest, ComponentInteraction } from '../../commands/Commons/typings';
 import { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } from '../../utils/tsCasts';
 import { tryRecoverSavedTracksQueue, saveTracksQueue } from '../../models/playerQueue';
@@ -120,14 +120,23 @@ export async function showQueuePage(request: ComplexCommandRequest | ButtonInter
 	const translator = await Translator.from(request.user.id);
 
 	if(authorId && request.user.id !== decompressId(authorId))
-		return request.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
+		return (request as ComplexCommandRequest).reply({
+			flags: MessageFlags.Ephemeral,
+			content: translator.getText('unauthorizedInteraction'),
+		});
 	
 	const channel = request.member.voice?.channel;
 	if(!channel)
-		return (request.reply)({ content: translator.getText('voiceExpected'), ephemeral: true });
+		return (request as ComplexCommandRequest).reply({
+			flags: MessageFlags.Ephemeral,
+			content: translator.getText('voiceExpected'),
+		});
 
 	if(isPlayerUnavailable(channel))
-		return request.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
+		return (request as ComplexCommandRequest).reply({
+			flags: MessageFlags.Ephemeral,
+			content: translator.getText('voiceSameChannelExpected'),
+		});
 	
 	const shortChannelName = shortenText(channel.name, 20);
 

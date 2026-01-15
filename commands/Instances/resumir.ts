@@ -1,4 +1,4 @@
-import { ButtonBuilder, ButtonStyle } from 'discord.js';
+import { ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
 import { CommandTags, Command } from '../Commons/';
 import { Translator } from '../../i18n';
 import { useMainPlayer } from 'discord-player';
@@ -32,10 +32,16 @@ const command = new Command('resumir', tags)
 
 		const channel = request.member.voice?.channel;
 		if(!channel)
-			return request.reply({ content: translator.getText('voiceExpected'), ephemeral: true });
+			return request.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('voiceExpected'),
+			});
 
 		if(isPlayerUnavailable(channel))
-			return request.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
+			return request.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('voiceSameChannelExpected'),
+			});
 
 		await request.deferReply();
 
@@ -45,7 +51,9 @@ const command = new Command('resumir', tags)
 		if(!queue?.currentTrack && !queue?.size) {
 			const embed = makePuréMusicEmbed(request)
 				.setTitle(translator.getText('resumirTitleNoTrack'));
-			return request.editReply({ embeds: [ embed ], ephemeral: true });
+			return request.editReply({
+				embeds: [ embed ],
+			});
 		}
 
 		const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted) : translator.getText('playFooterTextQueueEmpty');
@@ -55,7 +63,7 @@ const command = new Command('resumir', tags)
 			if(!trackToPlay) {
 				const embed = makePuréMusicEmbed(request)
 					.setTitle(translator.getText('resumirTitleNoTrack'));
-				return request.editReply({ embeds: [ embed ], ephemeral: true });
+				return request.editReply({ embeds: [ embed ] });
 			}
 
 			const service = SERVICES[trackToPlay.source];
@@ -74,7 +82,7 @@ const command = new Command('resumir', tags)
 
 		if(!queue.node.isPaused() && queue.node.isPlaying()) {
 			embed.setTitle(translator.getText('resumirTitleTrackAlreadyResumed'));
-			return request.editReply({ embeds: [ embed ], ephemeral: true });
+			return request.editReply({ embeds: [ embed ] });
 		}
 
 		queue.node.resume();

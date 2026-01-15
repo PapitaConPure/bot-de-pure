@@ -597,7 +597,7 @@ function generateFirstWizard(request: ComplexCommandRequest, translator: Transla
 	const uid = compressId(request.userId);
 	return request.reply({
 		embeds: [wizard],
-		components: [new ActionRowBuilder().addComponents(
+		components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
 			new ButtonBuilder()
 				.setCustomId(`voz_startWizard_${uid}`)
 				.setLabel(translator.getText('buttonStart'))
