@@ -86,12 +86,8 @@ async function handleCommand(interaction: ChatInputCommandInteraction<'cached'>,
             return interaction.reply({ embeds: [ generateExceptionEmbed(exception, { cmdString: `/${commandName}` }) ], ephemeral: true });
 
         const complex = Command.requestize(interaction);
-        if(command.isLegacy()) {
-            await command.execute(complex, interaction.options, true, null);
-        } else if(command.isNotLegacy()) {
-            const solver = new CommandOptionSolver(complex, interaction.options, command.options);
-            await command.execute(complex, solver);
-        }
+        const solver = new CommandOptionSolver(complex, interaction.options, command.options);
+        await command.execute(complex, solver);
         stats.commands.succeeded++;
     } catch(error) {
         const isPermissionsError = handleAndAuditError(error, interaction, { details: `/${commandName}` });

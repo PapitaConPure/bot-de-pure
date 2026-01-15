@@ -163,12 +163,8 @@ async function handleMessageCommand(message: Message<true>, command: Command, ar
 		return exceptionString && message.channel.send({ embeds: [ generateExceptionEmbed(exception, { cmdString: exceptionString }) ]});
 
 	const completeExtendedRequest = Command.requestize(message);
-	if(command.isLegacy()) {
-		await command.execute(completeExtendedRequest, args, false, rawArgs);
-	} else if(command.isNotLegacy()) {
-		const optionSolver = new CommandOptionSolver(completeExtendedRequest, args, command.options, rawArgs);
-		await command.execute(completeExtendedRequest, optionSolver, rawArgs);
-	}
+	const optionSolver = new CommandOptionSolver(completeExtendedRequest, args, command.options, rawArgs);
+	await command.execute(completeExtendedRequest, optionSolver, rawArgs);
 }
 
 function handleMessageCommandError(error: Error, message: Message<true>, commandName: string, args: string[]): CommandResult {
@@ -283,7 +279,7 @@ async function processBeginnerHelp(message: Message<true>) {
 	const prefixCommand = prefixModule instanceof Command ? prefixModule : prefixModule.default;
 	const request = Command.requestize(message);
 	const solver = new CommandOptionSolver(request, [], prefixCommand.options);
-	return prefixCommand.isNotLegacy() && prefixCommand.execute(request, solver).catch(error);
+	return prefixCommand.execute(request, solver).catch(error);
 }
 
 export async function onMessage(message: Message) {

@@ -544,7 +544,7 @@ export async function searchAndReplyWithPost(request: ComplexCommandRequest, arg
 
 	debug('Verificando que la solicitud haya sido aprobada por el Vaticano');
 	if(isUnholy(isnsfw, request, [ commandTag, ...words ]))
-		return rakki.isNotLegacy() && rakki.execute(request, args);
+		return rakki.execute(request, args);
 
 	debug('Comunicando retraso de respuesta a interacción...');
 	await request.deferReply();

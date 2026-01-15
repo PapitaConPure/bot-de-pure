@@ -94,8 +94,6 @@ function extendRequest(request: CommandRequest | ComponentInteraction): ComplexC
 	return request as ComplexCommandRequest;
 }
 
-type CompatibilityExecutionFunction = (request: ComplexCommandRequest, args: CommandArguments, isSlash?: boolean, rawArgs?: string) => Promise<any>;
-
 type ExecutionFunction = (request: ComplexCommandRequest, args: CommandOptionSolver, rawArgs?: string) => Promise<any>;
 
 type InteractionResponseFunction = (interaction: Interaction, ...args: string[]) => Promise<any>;
@@ -132,15 +130,13 @@ export class Command {
 	permissions: CommandPermissions;
 	options: CommandOptions | null;
 	callx: string | null;
-	/**Define si usar una unión `string[] | CommandInteractionOptionResolver` por compatibilidad en lugar de un {@link CommandOptionSolver} para los `args`.*/
-	#legacy: boolean;
 	/**@type {Map<string, any>}*/
 	memory: Map<string, any>;
 	/**@type {CommandWikiData}*/
 	wiki: CommandWikiData;
 	/**@type {CommandReplyOptions}*/
 	reply: CommandReplyOptions;
-	execute: ExecutionFunction | CompatibilityExecutionFunction;
+	execute: ExecutionFunction;
 
 	/**
 	 * @description Crea un comando.
@@ -155,13 +151,11 @@ export class Command {
 		this.name = name;
 		this.aliases = [];
 		this.flags = tags;
-		this.#legacy = false;
 		this.memory = new Map();
 		this.wiki = {
 			rows: [],
 		};
-		if(this.isNotLegacy())
-			this.execute = (request => request.reply(this.reply)) as ExecutionFunction;
+		this.execute = request => request.reply(this.reply);
 	};
 
 	/**Alias de `<Command>.flags`.*/
@@ -222,13 +216,6 @@ export class Command {
 		return this;
 	}
 
-	/**@description Habilita {@linkcode Command.#legacy} y establece la función de ejecución de este comando.*/
-	setLegacyExecution(exeFn: CompatibilityExecutionFunction) {
-		this.#legacy = true;
-		this.execute = exeFn;
-		return this;
-	}
-
 	/**@description Establece la función de ejecución de este comando.*/
 	setExecution(exeFn: ExecutionFunction) {
 		this.execute = exeFn;
@@ -277,14 +264,6 @@ export class Command {
 	setModalResponse(responseFn: ModalResponseFunction, options: InteractionResponseOptions = {}) {
 		return this.setFunction(responseFn, options);
 	};
-
-	isLegacy(): this is { execute: CompatibilityExecutionFunction } {
-		return this.#legacy;
-	}
-
-	isNotLegacy(): this is { execute: ExecutionFunction } {
-		return !this.#legacy;
-	}
 
 	static requestIsMessage(request: CommandRequest | Interaction): request is Message<true> {
 		return request instanceof Message;
