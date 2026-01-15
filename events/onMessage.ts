@@ -279,7 +279,8 @@ async function processBeginnerHelp(message: Message<true>) {
 	if(!content.includes(`${client.user}`))
 		return;
 
-	const prefixCommand = (await import('../commands/Instances/prefijo')).default;
+	const prefixModule = (await import('../commands/Instances/prefijo'));
+	const prefixCommand = prefixModule instanceof Command ? prefixModule : prefixModule.default;
 	const request = Command.requestize(message);
 	const solver = new CommandOptionSolver(request, [], prefixCommand.options);
 	return prefixCommand.isNotLegacy() && prefixCommand.execute(request, solver).catch(error);
