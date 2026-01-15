@@ -839,14 +839,14 @@ export class CommandOptions {
 	}
 
 	/**
-	 * Si es un comando Slash, devuelve el valor del parámetro ingresado
-	 * Si es un comando de mensaje, remueve y devuelve la siguente entrada o devuelve todas las entradas en caso de que {@linkcode whole} sea verdadero
-	 * Si no se recibe ningún parámetro, se devuelve undefined
-	 * @param input El conjunto de entradas
-	 * @param slashIdentifier El identificador del parámetro para comandos Slash
-	 * @param whole Indica si devolver todas las entradas en caso de un comando de mensaje. Por defecto: false
-	 * @returns El valor del parámetro
-	 * @deprecated
+	 * Si es un comando Slash, devuelve el valor del parámetro ingresado.
+	 * Si es un comando de mensaje, remueve y devuelve la siguente entrada o devuelve todas las entradas en caso de que {@linkcode whole} sea verdadero.
+	 * Si no se recibe ningún parámetro, se devuelve undefined.
+	 * @param input El conjunto de entradas.
+	 * @param slashIdentifier El identificador del parámetro para comandos Slash.
+	 * @param whole Indica si devolver todas las entradas en caso de un comando de mensaje. Por defecto: false.
+	 * @returns El valor del parámetro.
+	 * @deprecated Esta función está deprecada. Usa {@linkcode CommandOptionSolver.getString}, {@linkcode CommandOptionSolver.getNumber}, etc. en su lugar.
 	 */
 	async fetchParam(input: CommandInteractionOptionResolver | Omit<CommandInteractionOptionResolver<'cached'>, 'getMessage' | 'getFocused'> | string[], slashIdentifier: string, whole: boolean = false): Promise<ParamResult> {
 		/**@type {CommandParam}*/
