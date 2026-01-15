@@ -1,8 +1,9 @@
-const { CommandTags, Command, CommandOptions } = require('../Commons/');
-const { Groq } = require('groq-sdk');
-const { Translator } = require('../../i18n');
-const { fetchChannel, fetchRole, compressId, fetchMember } = require('../../func');
-const { envPath } = require('../../data/globalProps');
+import { CommandTags, Command, CommandOptions } from '../Commons/';
+import { fetchChannel, fetchRole, compressId, fetchMember } from '../../func';
+import { ComplexCommandRequest } from '../Commons/typings';
+import { envPath } from '../../data/globalProps';
+import { Translator } from '../../i18n';
+import { Groq } from 'groq-sdk';
 
 const groq = new Groq({
 	apiKey: process.env?.GORK_IS_THIS_TRUE ?? require(envPath)?.aikey,
@@ -11,8 +12,9 @@ const groq = new Groq({
 const options = new CommandOptions()
     .addParam('mensaje', 'TEXT', 'para hacer una consulta a Bot de Puré');
 
-const flags = new CommandTags().add('COMMON');
-const command = new Command('preguntar', flags)
+const tags = new CommandTags().add('COMMON');
+
+const command = new Command('preguntar', tags)
 	.setAliases(
 		'pregunta',
 		'question',
@@ -34,7 +36,7 @@ const command = new Command('preguntar', flags)
 		const mentionRegex = /<(?:@|@&|#)([0-9]{16,24})>/g;
 		const namesMap = new Map();
 		const ids = Array.from(new Set([...rawUserPrompt.matchAll(mentionRegex)].map(m => m[1])));
-		
+
 		for(const id of ids) {
 			const name = fetchChannel(id, request.guild)?.name
 				|| fetchRole(id, request.guild)?.name
@@ -103,14 +105,13 @@ The User's Discord name is: "${request.member.displayName || request.user.userna
 			stop: null,
 		});
 
-		/**@type {string[]}*/
-		const responseChunks = new Array(1_000_000);
+		const responseChunks: string[] = new Array(1_000_000);
 		for await (const chunk of chatCompletion)
 			responseChunks.push(chunk.choices[0]?.delta?.content || '');
 
 		const chunkSize = 1990;
 		const response = responseChunks.join('');
-		
+
 		if(response.length <= chunkSize)
 			return request.editReply({ content: response });
 
@@ -124,13 +125,9 @@ The User's Discord name is: "${request.member.displayName || request.user.userna
 			await request.channel.send({ content: '...' + responsePart });
 	});
 
-/**
- * @param {string} id 
- * @param {import('../Commons/typings').ComplexCommandRequest} request 
- */
-function fetchMemberName(id, request) {
+function fetchMemberName(id: string, request: ComplexCommandRequest) {
 	const member = fetchMember(id, request);
 	return member?.displayName || member?.user?.username;
 }
 
-module.exports = command;
+export default command;
