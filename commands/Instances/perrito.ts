@@ -1,11 +1,10 @@
-const Discord = require('discord.js'); //Integrar discord.js
-const serverIds = require('../../data/serverIds.json');
-const { paginate, navigationRows, rand } = require('../../func');
-const { CommandOptions, CommandTags, Command, CommandOptionSolver } = require('../Commons/');
-const { InteractionType } = require('discord.js');
+import Discord from 'discord.js';
+import serverIds from '../../data/serverIds.json';
+import { paginate, navigationRows, rand } from '../../func';
+import { CommandOptions, CommandTags, Command } from '../Commons/';
+import { InteractionType } from 'discord.js';
 
-/**@param {import('../Commons/typings').AnyRequest} interaction*/
-function getEmotesList(interaction) {
+function getEmotesList(interaction: import('../Commons/typings').AnyRequest) {
 	const perritoNames = [
 		'perrito', 'otirrep', 'od', 'do', 'cerca', 'muycerca', 'lejos', 'muylejos', 'invertido', 'dormido', 'pistola', 'sad', 'gorrito', 'gorra', 'almirante', 'detective',
 		'ban', 'helado', 'corona', 'Bern', 'enojado', 'policia', 'ladron', 'importado', 'peleador', 'doge', 'cheems', 'jugo', 'Papita', 'mano', 'Mima', 'chad', 'Marisa',
@@ -21,11 +20,7 @@ function getEmotesList(interaction) {
 	return emotes;
 }
 
-/**
- * @param {Exclude<import('../Commons/typings').AnyRequest, Discord.AutocompleteInteraction>} request
- * @param {number} page
- */
-async function loadPageNumber(request, page) {
+async function loadPageNumber(request: Exclude<import('../Commons/typings').AnyRequest, Discord.AutocompleteInteraction>, page: number) {
 	const emotes = getEmotesList(request);
 	const emotePages = paginate(emotes);
 	const lastPage = emotePages.length - 1;
@@ -58,27 +53,26 @@ const options = new CommandOptions()
 	.addParam('perrito', 'TEXT', 'para especificar un perrito a enviar (por nombres identificadores)', { optional: true })
 	.addFlag('ltaeh', [ 'lista', 'todo', 'todos', 'ayuda', 'everything', 'all', 'help' ], 'para mostrar una lista de todos los perritos')
 	.addFlag('bd', ['borrar', 'delete'], 'para borrar el mensaje original');
-const flags = new CommandTags().add(
+
+const tags = new CommandTags().add(
 	'MEME',
 	'EMOTE',
 );
-const command = new Command('perrito', flags)
+
+const command = new Command('perrito', tags)
 	.setAliases('taton', 'dog', 'pe')
 	.setBriefDescription('Envía un emote de perrito o lista todos los disponibles')
 	.setLongDescription('Comando cachorro de Taton. Puedes ingresar una palabra identificadora para enviar un perrito en específico o ver una lista de perritos. Si no ingresas nada, se enviará un perrito aleatorio')
 	.setOptions(options)
-	.setLegacyExecution(async (request, args, isSlash) => {
-		const deleteMessage = isSlash ? false : options.fetchFlag(args, 'borrar');
-
-		if(deleteMessage && request.isMessage && request.inferAsMessage().deletable)
+	.setExecution(async (request, args) => {
+		if(args.hasFlag('borrar') && request.isMessage && request.inferAsMessage().deletable)
 			request.delete().catch(() => undefined);
 
-		const mostrarLista = options.fetchFlag(args, 'lista');
-		if(mostrarLista)
+		if(args.hasFlag('lista'))
 			return loadPageNumber(request, 0);
-		
+
 		const emotes = getEmotesList(request);
-		let perrito = CommandOptionSolver.asString(await options.fetchParam(args, 'perrito'));
+		let perrito = args.getString('perrito');
 
 		if(!perrito)
 			return request.reply({ content: `${emotes[rand(emotes.length)]}` });
@@ -101,4 +95,4 @@ const command = new Command('perrito', flags)
 		return loadPageNumber(interaction, parseInt(page));
 	});
 
-module.exports = command;
+export default command;
