@@ -1,23 +1,21 @@
-const { MessageFlags, ContainerBuilder } = require('discord.js');
-const Reminder = require('../../models/reminders').default;
-const Logger = require('../../utils/logs').default;
-const { Translator } = require('../../i18n');
-const { decompressId } = require('../../func');
-const Int32 = require('mongoose-int32');
-const { tenshiColor } = require('../../data/globalProps');
+import { MessageFlags, ContainerBuilder, Client, GuildTextBasedChannel, User } from 'discord.js';
+import Reminder, { ReminderDocument } from '../../models/reminders';
+import Logger from '../../utils/logs';
+import { decompressId } from '../../func';
+import { tenshiColor } from '../../data/globalProps';
+import { Translator } from '../../i18n';
+import Int32 from 'mongoose-int32';
 
 const { debug, info, error } = Logger('WARN', 'Reminders');
 
-/**@type {import('discord.js').Client}*/
-let schedulerClient = null;
-/**@type {Map<string, NodeJS.Timeout>}*/
-const scheduledIds = new Map();
+let schedulerClient: Client = null;
+const scheduledIds = new Map<string, NodeJS.Timeout>();
 
 /**
- * Programa el recordatorio indicado a ejecutarse en el tiempo que trae especificado
- * @param {import('../../models/reminders').ReminderDocument} reminder El recordatorio a programar
+ * @description Programa el recordatorio indicado a ejecutarse en el tiempo que trae especificado.
+ * @param reminder El recordatorio a programar.
  */
-async function scheduleReminder(reminder) {
+export async function scheduleReminder(reminder: ReminderDocument) {
 	if(!reminder)
 		throw new TypeError(`Expected a ReminderDocument. Got: ${reminder == null ? reminder : typeof reminder}`);
 
@@ -25,7 +23,7 @@ async function scheduleReminder(reminder) {
 
 	debug(`Cleaning up duplicate reminders of #${debugId}`);
 	clearScheduledReminder(reminder._id);
-	
+
 	debug(`Attempting to schedule reminder #${debugId}`);
 
 	const ms = timeUntil(reminder.date);
@@ -51,10 +49,10 @@ async function scheduleReminder(reminder) {
 }
 
 /**
- * Dispara todos los recordatorios pendientes que ya estén expirados y programa aquellos que no lo estén
+ * @description Dispara todos los recordatorios pendientes que ya estén expirados y programa aquellos que no lo estén.
  * @throws {RemindersSchedulerError}
  */
-async function processReminders() {
+export async function processReminders() {
 	try {
 		debug('Attempting to process all registered reminders');
 		const dueReminders = await Reminder.find();
@@ -70,22 +68,22 @@ async function processReminders() {
 }
 
 /**
- * Dispara el recordatorio indicado inmediatamente
- * @param {import('../../models/reminders').ReminderDocument} reminder El recordatorio a disparar
+ * @description Dispara el recordatorio indicado inmediatamente.
+ * @param reminder El recordatorio a disparar.
  */
-async function triggerReminder(reminder) {
+async function triggerReminder(reminder: ReminderDocument) {
 	if(!reminder)
 		throw new TypeError(`Expected a ReminderDocument. Got: ${reminder == null ? reminder : typeof reminder}`);
 
 	debug(`Attempting to trigger reminder #${reminder._id}.`);
-	
+
 	const channelId = decompressId(reminder.channelId);
 	const userId = decompressId(reminder.userId);
-	
+
 	debug(`Fetching the specified channel for reminder #${reminder._id}.`);
 	const channel = schedulerClient.channels.cache.get(channelId)
 	?? await schedulerClient.channels.fetch(channelId);
-	
+
 	debug(`Fetching the specified user for reminder #${reminder._id}.`);
 	const user = schedulerClient.users.cache.get(userId)
 		?? await schedulerClient.users.fetch(userId);
@@ -106,12 +104,12 @@ async function triggerReminder(reminder) {
 }
 
 /**
- * Envía el contenido de recordatorio indicado en el canal de Discord especificado, mencionando al miembro suministrado
- * @param {import('discord.js').GuildTextBasedChannel} channel El canal destino del envío
- * @param {import('discord.js').User} user El usuario a mencionar con el recordatorio
- * @param {string} reminderContent El contenido del recordatorio
+ * Envía el contenido de recordatorio indicado en el canal de Discord especificado, mencionando al miembro suministrado.
+ * @param channel El canal destino del envío.
+ * @param user El usuario a mencionar con el recordatorio.
+ * @param reminderContent El contenido del recordatorio.
  */
-async function sendReminder(channel, user, reminderContent) {
+async function sendReminder(channel: GuildTextBasedChannel, user: User, reminderContent: string) {
 	debug('Attempting to send a reminder message.');
 
 	const translator = await Translator.from(user.id);
@@ -129,57 +127,47 @@ async function sendReminder(channel, user, reminderContent) {
 	});
 }
 
-/**
- * Limpia cualquier posible timeout previamente asociado a la ID de recordatorio especificada
- * @param {string} reminderId
- */
-function clearScheduledReminder(reminderId) {
-	const samePreviousReminder = scheduledIds.get(reminderId);
+/**@description Limpia cualquier posible timeout previamente asociado a la ID del recordatorio especificado.*/
+export function clearScheduledReminder(reminder: ReminderDocument): NodeJS.Timeout;
+/**@description Limpia cualquier posible timeout previamente asociado a la ID de recordatorio especificada.*/
+export function clearScheduledReminder(reminderId: string): NodeJS.Timeout;
+export function clearScheduledReminder(reminder: ReminderDocument | string): NodeJS.Timeout {
+	const id: string = typeof reminder === 'string' ? reminder : reminder.id;
 
-	if(samePreviousReminder) {
-		debug(`Scheduled reminder #${reminderId} has been cleared.`);
-		clearTimeout(samePreviousReminder);
+	const samePreviousReminderTimeout = scheduledIds.get(id);
+	if(samePreviousReminderTimeout) {
+		debug(`Scheduled reminder #${id} has been cleared.`);
+		clearTimeout(samePreviousReminderTimeout);
 	}
 
-	return samePreviousReminder;
+	return samePreviousReminderTimeout;
 }
 
 /**
- * * Si el resultado es positivo, devuelve cuántos milisegundos faltan para alcanzar la fecha indicada
- * * Si el resultado es negativo, devuelve hace cuántos milisegundos ocurrió la fecha indicada
- * * Si el resultado es 0, la fecha indicada es ahora mismo
- * @param {Date} date
+ * @description
+ * * Si el resultado es positivo, devuelve cuántos milisegundos faltan para alcanzar la fecha indicada.
+ * * Si el resultado es negativo, devuelve hace cuántos milisegundos ocurrió la fecha indicada.
+ * * Si el resultado es `0`, la fecha indicada es ahora mismo.
  */
-function timeUntil(date) {
+function timeUntil(date: Date) {
 	const now = Date.now();
 	const then = +date;
 	return then - now;
 }
 
-/**
- * Inicializa el programador de recordatorios con el cliente indicado
- * @param {import('discord.js').Client} client 
- */
-function initRemindersScheduler(client) {
+/**@description Inicializa el programador de recordatorios con el cliente indicado.*/
+export function initRemindersScheduler(client: Client) {
 	if(!client)
 		throw new TypeError(`Expected a Discord client. Got: ${client == null ? client : typeof client}`);
-	
+
 	debug('Initializing the scheduler.');
 	schedulerClient = client;
 }
 
-/**@class Representa un error en relación al programador de recordatorios*/
-class RemindersSchedulerError extends Error {
-	/**@param {string} [message]*/
-	constructor(message = undefined) {
+/**@class Representa un error en relación al programador de recordatorios.*/
+export class RemindersSchedulerError extends Error {
+	constructor(message: string = undefined) {
 		super(message);
 		this.name = 'RemindersSchedulerError';
 	}
 }
-
-module.exports = {
-	initRemindersScheduler,
-	scheduleReminder,
-	triggerReminder,
-	processReminders,
-};

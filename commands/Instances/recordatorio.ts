@@ -1,7 +1,7 @@
 import { Command, CommandTags, CommandOptions, CommandParam, CommandFlagExpressive } from '../Commons/';
 import { parseDateFromNaturalLanguage, parseTimeFromNaturalLanguage, addTime, utcStartOfTzToday } from '../../utils/datetime';
 import { MessageFlags, ContainerBuilder, ButtonBuilder, ButtonStyle, SeparatorSpacingSize, TextDisplayBuilder, ModalBuilder, TextInputStyle, ChannelType, TextInputBuilder } from 'discord.js';
-import { scheduleReminder } from '../../systems/others/remindersScheduler';
+import { clearScheduledReminder, scheduleReminder } from '../../systems/others/remindersScheduler';
 import { toUtcOffset, sanitizeTzCode } from '../../utils/timezones';
 import UserConfigs from '../../models/userconfigs';
 import Reminder from '../../models/reminders';
@@ -580,6 +580,7 @@ const command = new Command('recordatorio', tags)
 
 		await interaction.deferUpdate(),
 
+		clearScheduledReminder(reminder);
 		await reminder.deleteOne();
 
 		const textDisplay = new TextDisplayBuilder()
