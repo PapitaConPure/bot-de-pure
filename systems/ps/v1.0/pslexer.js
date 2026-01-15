@@ -66,8 +66,8 @@ class TuberLexer {
     
     /**
      * Devuelve el caracter en las siguientes X posiciones del cursor
-     * @param {Number} steps
-     * @returns {String}
+     * @param {number} steps
+     * @returns {string}
      */
     #offset(steps) {
         return this.#stream.charAt(this.#cursor + steps);
@@ -244,8 +244,8 @@ class TuberLexer {
             return this.createToken(tokenType, this.#current);
         }
 
-        if(/[\d\.]/.test(this.#current)) {
-            const numberString = this.#processSimilar(/[\d\.]/);
+        if(/[\d.]/.test(this.#current)) {
+            const numberString = this.#processSimilar(/[\d.]/);
             const numberValue = +numberString;
 
             if(isNaN(numberValue))
