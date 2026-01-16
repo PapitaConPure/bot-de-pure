@@ -56,62 +56,68 @@ export default function Logger(logLevel: LogLevelKey, prefix: string = '') {
     prefix = chalk.cyanBright(prefix);
 
     /**
+     * @description
      * Realiza auditoría de depuración.
      * Requiere un nivel de advertencias de "DEBUG".
-     * @param {Array<*>} data Los datos de interés del evento.
+     * @param data Los datos de interés del evento.
      */
-    function debug(...data: Array<any>) {
+    function debug(...data: unknown[]) {
         LOG_LEVEL <= LogLevels.DEBUG && console.log(logLevelPrefix('DEBUG'), prefix, logLevelOutput('DEBUG', ...data));
     }
 
     /**
+     * @description
      * Realiza auditoría de información.
      * Requiere un nivel de advertencias hasta "INFO".
-     * @param {Array<*>} data Los datos de interés del evento.
+     * @param data Los datos de interés del evento.
      */
-    function info(...data: Array<any>) {
+    function info(...data: unknown[]) {
         LOG_LEVEL <= LogLevels.INFO && console.info(logLevelPrefix('INFO'), prefix, logLevelOutput('INFO', ...data));
     }
 
     /**
+     * @description
      * Realiza la auditoría de una advertencia.
      * Requiere un nivel de advertencias hasta "WARN".
-     * @param {Array<*>} data Los datos de interés del evento.
+     * @param data Los datos de interés del evento.
      */
-    function warn(...data: Array<any>) {
+    function warn(...data: unknown[]) {
         LOG_LEVEL <= LogLevels.WARN && console.warn(logLevelPrefix('WARN'), prefix, logLevelOutput('WARN', ...data));
     }
 
     /**
+     * @description
      * Realiza la auditoría de un error junto a la pila de ejecución, sin arrojar el error.
      * La auditoría primaria requiere un nivel de advertencias hasta "ERROR".
-     * @param {Error} err El error que ocasionó este evento.
-     * @param {Array<*>} data Los datos de interés del evento.
+     * @param err El error que ocasionó este evento.
+     * @param data Los datos de interés del evento.
      */
-    function error(err: Error, ...data: Array<any>) {
+    function error(err: Error, ...data: unknown[]) {
         LOG_LEVEL <= LogLevels.ERROR && console.error(logLevelPrefix('ERROR'), prefix, logLevelOutput('ERROR', err, ...data));
         console.error(err);
     }
 
     /**
-     * Realiza la auditoría de un error fatal junto a la pila de ejecución y arroja el error
+     * @description
+     * Realiza la auditoría de un error fatal junto a la pila de ejecución y arroja el error.
      * La auditoría primaria requiere un nivel de advertencias hasta "FATAL".
      * El error se arrojará sin importar el nivel de auditoría.
-     * @param {Error} err El error que ocasionó este evento.
-     * @param {Array<*>} data Los datos de interés del evento.
+     * @param err El error que ocasionó este evento.
+     * @param data Los datos de interés del evento.
      */
-    function fatal(err: Error, ...data: Array<any>) {
+    function fatal(err: Error, ...data: unknown[]) {
         LOG_LEVEL <= LogLevels.FATAL && console.error(logLevelPrefix('FATAL'), prefix, logLevelOutput('FATAL', err, ...data));
         throw err;
     }
 
     /**
-     * Realiza la auditoría de un error fatal junto a la pila de ejecución y arroja el error
+     * @description
+     * Realiza la auditoría de un error fatal junto a la pila de ejecución y arroja el error.
      * Resultará en una auditoría y la interrupción del proceso sin importar el nivel de auditoría.
-     * @param {Error} err El error que ocasionó este evento.
-     * @param {Array<*>} data Los datos de interés del evento.
+     * @param err El error que ocasionó este evento.
+     * @param data Los datos de interés del evento.
      */
-    function catastrophic(err: Error, ...data: Array<any>) {
+    function catastrophic(err: Error, ...data: unknown[]) {
         console.error(logLevelPrefix('CATAS'), prefix, logLevelOutput('CATAS', err, ...data));
         process.exit(1);
     }
