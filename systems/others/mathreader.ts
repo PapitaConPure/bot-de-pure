@@ -1,13 +1,19 @@
-import { ValuesOf } from "types";
+import { ValuesOf } from 'types';
 
-export const TokenTypes = ({
+import Logger from '../../utils/logs';
+import { shortenText, toLowerCaseNormalized } from '../../func';
+
+const { debug, fatal } = Logger('DEBUG', 'MathReader');
+
+export const MathTokenTypes = ({
 	NUMBER: 'Number',
 	OPERATOR: 'Operator',
 	IDENTIFIER: 'Identifier',
 	GROUP_OPEN: 'GroupOpen',
 	GROUP_CLOSE: 'GroupClose',
+	EOF: 'EndOfFile',
 }) as const;
-type TokenType = ValuesOf<typeof TokenTypes>;
+type MathTokenType = ValuesOf<typeof MathTokenTypes>;
 
 export const MathOperators = [
 	'+',
@@ -19,7 +25,7 @@ export const MathOperators = [
 ] as const;
 type OperatorType = typeof MathOperators[number];
 
-interface BaseMathToken<TToken extends TokenType> {
+interface BaseMathToken<TToken extends MathTokenType> {
 	type: TToken;
 	value: number | string | undefined;
 }
@@ -44,14 +50,19 @@ interface MathGroupCloseToken extends BaseMathToken<'GroupClose'> {
 	value: ')';
 }
 
+interface MathEndOfFileToken extends BaseMathToken<'EndOfFile'> {
+	value: undefined;
+}
+
 type MathToken =
 	| MathNumberToken
 	| MathOperatorToken
 	| MathIdentifierToken
 	| MathGroupOpenToken
-	| MathGroupCloseToken;
+	| MathGroupCloseToken
+	| MathEndOfFileToken;
 
-function createToken<TToken extends TokenType>(type: TToken, value: (MathToken & { type: TToken })['value']): MathToken {
+function createToken<TToken extends MathTokenType>(type: TToken, value: (MathToken & { type: TToken })['value']): MathToken {
 	return {
 		type: type,
 		value: value,
@@ -62,176 +73,252 @@ const operatorAliases = new Map<string, OperatorType>();
 operatorAliases.set('x', '*');
 operatorAliases.set(':', '/');
 
+type MathLexerPatternHandler = (match: string, rawMatch: string) => void;
+interface MathLexerPattern {
+	match: string | string[] | RegExp;
+	handler: MathLexerPatternHandler;
+}
+
 export class MathLexer {
 	#stream = '';
 	#cursor = 0;
-	#lastToken: MathToken;
+	#tokens: MathToken[];
 
-	get #current() {
-		return this.#stream.charAt(this.#cursor);
+	readonly #patterns: MathLexerPattern[] = [
+		{ match: /^\s+/, handler: this.#makeSkipHandler() },
+		{ match: [ ...MathOperators, ...operatorAliases.keys() ], handler: this.#makeOperatorHandler() },
+		{ match: '(', handler: this.#makeDefaultHandler(MathTokenTypes.GROUP_OPEN) },
+		{ match: ')', handler: this.#makeDefaultHandler(MathTokenTypes.GROUP_CLOSE) },
+		{ match: /^[A-Za-z_][A-Za-z0-9_]{0,20}/, handler: this.#makeSymbolHandler() },
+		{ match: /^[\d.]+/, handler: this.#makeNumberHandler() },
+		{ match: '⁰¹²³⁴⁵⁶⁷⁸⁹'.split(''), handler: this.#makeUnicodePowerHandler() },
+		{ match: 'π', handler: this.#makeInterpretationHandler(MathTokenTypes.NUMBER, Math.PI) },
+		{ match: '∞', handler: this.#makeInterpretationHandler(MathTokenTypes.NUMBER, Number.POSITIVE_INFINITY) },
+		{ match: '√', handler: this.#makeInterpretationHandler(MathTokenTypes.IDENTIFIER, 'sqrt') },
+	];
+
+	/**@description Devuelve el resto del source desde la posición actual.*/
+	get remainder() {
+		return this.#stream.slice(this.#cursor);
 	}
 
 	tokenize(str: string): MathToken[] {
+		debug('A punto de tokenizar stream:', str);
+		
 		this.#stream = str;
 		this.#cursor = 0;
-
-		const tokens: MathToken[] = [];
+		this.#tokens = [];
+		
+		let match: string;
+		let normalizedRemainder: string;
 
 		while(this.#cursor < this.#stream.length) {
-			if(/\s/.test(this.#current)) {
-				this.#cursor++;
-				continue;
-			}
+			match = null;
+			normalizedRemainder = toLowerCaseNormalized(this.remainder);
 
-			if(MathOperators.includes(this.#current as OperatorType) || operatorAliases.has(this.#current)) {
-				const actualOperator = operatorAliases.get(this.#current) || this.#current as OperatorType;
-				tokens.push(createToken(TokenTypes.OPERATOR, actualOperator));
-				this.#cursor++;
-				continue;
-			}
+			for(const pattern of this.#patterns) {
+				match = this.#matchPattern(pattern, normalizedRemainder);
 
-			if(this.#current === '(') {
-				tokens.push(createToken(TokenTypes.GROUP_OPEN, '('));
-				this.#cursor++;
-				continue;
-			}
-
-			if(this.#current === ')') {
-				tokens.push(createToken(TokenTypes.GROUP_CLOSE, ')'));
-				this.#cursor++;
-				continue;
-			}
-
-			if(/[\d.]/.test(this.#current)) {
-				let numberString = '';
-
-				while(/[\d.]/.test(this.#current) && this.#cursor < this.#stream.length) {
-					numberString += this.#current;
-					this.#cursor++;
-				}
-
-				const finalNumber = parseFloat(numberString);
-
-				if(isNaN(finalNumber))
-					throw new MathLexerError(`Número inválido en posición ${this.#cursor}`);
-
-				tokens.push(createToken(TokenTypes.NUMBER, finalNumber));
-				continue;
-			}
-
-			if(/\w/.test(this.#current)) {
-				let text = '';
-
-				while(/\w/.test(this.#current) && this.#cursor < this.#stream.length) {
-					text += this.#current;
-					this.#cursor++;
-				}
-
-				text = text.toLowerCase();
-
-				switch(text) {
-					case 'pi':
-						tokens.push(createToken(TokenTypes.NUMBER, Math.PI));
-						continue;
-
-					case 'e':
-						tokens.push(createToken(TokenTypes.NUMBER, Math.E));
-						continue;
-
-					case 'inf':
-						tokens.push(createToken(TokenTypes.NUMBER, Number.POSITIVE_INFINITY));
-						continue;
-
-					case 'sqrt':
-					case 'sin':
-					case 'cos':
-					case 'tan':
-					case 'rad':
-					case 'deg':
-						tokens.push(createToken(TokenTypes.IDENTIFIER, text));
-						continue;
-
-					default: {
-						throw new MathLexerError(`Texto inválido en posición ${this.#cursor}: ${text}`);
-					}
+				if(match != null) {
+					const rawMatch = this.remainder.slice(0, match.length);
+					pattern.handler(match, rawMatch);
+					break;
 				}
 			}
 
-			if('⁰¹²³⁴⁵⁶⁷⁸⁹'.includes(this.#current)) {
-				if(this.#lastToken && this.#lastToken.type === TokenTypes.IDENTIFIER && this.#lastToken.value === '^')
-					throw new MathLexerError(`Potencia inválida en posición ${this.#cursor}: ${this.#current}\nUsa "^X" o un símbolo exponente, pero no ambos juntos`);
-
-				tokens.push(createToken(TokenTypes.OPERATOR, '^'));
-
-				switch((this.#cursor++, this.#current)) {
-				case '⁰':
-					tokens.push(createToken(TokenTypes.NUMBER, 0));
-					continue;
-
-				case '¹':
-					tokens.push(createToken(TokenTypes.NUMBER, 1));
-					continue;
-
-				case '²':
-					tokens.push(createToken(TokenTypes.NUMBER, 2));
-					continue;
-
-				case '³':
-					tokens.push(createToken(TokenTypes.NUMBER, 3));
-					continue;
-
-				case '⁴':
-					tokens.push(createToken(TokenTypes.NUMBER, 4));
-					continue;
-
-				case '⁵':
-					tokens.push(createToken(TokenTypes.NUMBER, 5));
-					continue;
-
-				case '⁶':
-					tokens.push(createToken(TokenTypes.NUMBER, 6));
-					continue;
-
-				case '⁷':
-					tokens.push(createToken(TokenTypes.NUMBER, 7));
-					continue;
-
-				case '⁸':
-					tokens.push(createToken(TokenTypes.NUMBER, 8));
-					continue;
-
-				case '⁹':
-					tokens.push(createToken(TokenTypes.NUMBER, 9));
-					continue;
-				}
+			if(match == null) {
+				const wsIndex = this.remainder.match(/[\r\s\b]/)?.index ?? this.remainder.length;
+				throw new MathLexerError(`Símbolo no reconocido: \`${shortenText(this.remainder.slice(0, wsIndex), 12, ' (…)')}\``);
 			}
-
-			if(this.#current === 'π') {
-				tokens.push(createToken(TokenTypes.NUMBER, Math.PI));
-				this.#cursor++;
-				continue;
-			}
-
-			if(this.#current === '∞') {
-				tokens.push(createToken(TokenTypes.NUMBER, Number.POSITIVE_INFINITY));
-				this.#cursor++;
-				continue;
-			}
-
-			if(this.#current === '√') {
-				tokens.push(createToken(TokenTypes.IDENTIFIER, 'sqrt'));
-				this.#cursor++;
-				continue;
-			}
-
-			throw new MathLexerError(`Caracter inválido en posición ${this.#cursor}: ${this.#current}`);
 		}
 
-		return tokens;
+		this.#tokens.push(createToken(MathTokenTypes.EOF, undefined));
+
+		return [ ...this.#tokens ];
+	}
+
+	#matchPattern(pattern: MathLexerPattern, source: string) {
+		if(typeof pattern.match === 'string')
+			return this.#stringPatternMatch(pattern.match, source);
+
+		if(Array.isArray(pattern.match))
+			return this.#stringArrayPatternMatch(pattern.match, source);
+
+		return this.#regexPatternMatch(pattern.match, source);
+	}
+
+	#stringPatternMatch(matcher: string, source: string): string | null {
+		const slicedSource = source.slice(0, matcher.length);
+
+		return (slicedSource === matcher) ? slicedSource : null;
+	}
+
+	#stringArrayPatternMatch(matchers: string[] | ReadonlyArray<string>, source: string): string | null {
+		let matched: string | null = null;
+
+		for(const matcher of matchers) {
+			const slicedSource = source.slice(0, matcher.length);
+	
+			if(slicedSource === matcher)
+				matched = slicedSource;
+		}
+
+		return matched;
+	}
+
+	#regexPatternMatch(matcher: RegExp, source: string): string | null {
+		const match = matcher.exec(source);
+
+		if(match == null)
+			return null;
+
+		if(match.index !== 0)
+			return null;
+
+		return match[0];
+	}
+
+	#makeSkipHandler(): MathLexerPatternHandler {
+		return (matched) => {
+			this.#cursor += matched.length;
+		};
+	}
+
+	#makeDefaultHandler(tokenType: MathTokenType): MathLexerPatternHandler {
+		return (_, rawMatch) => {
+			this.#tokens.push(createToken(tokenType, rawMatch));
+			this.#cursor += `${rawMatch}`.length;
+		};
+	}
+
+	#makeOperatorHandler(): MathLexerPatternHandler {
+		return (match) => {
+			const operator: OperatorType = operatorAliases.get(match) || match as OperatorType;
+			this.#tokens.push(createToken(MathTokenTypes.OPERATOR, operator))
+			this.#cursor += match.length;
+		}
+	}
+
+	#makeSymbolHandler(): MathLexerPatternHandler {
+		return (match) => {
+			match = match.toLowerCase();
+			switch(match) {
+				case 'pi':
+					this.#tokens.push(createToken(MathTokenTypes.NUMBER, Math.PI));
+					this.#cursor += match.length;
+					return;
+
+				case 'e':
+					this.#tokens.push(createToken(MathTokenTypes.NUMBER, Math.E));
+					this.#cursor += match.length;
+					return;
+
+				case 'inf':
+					this.#tokens.push(createToken(MathTokenTypes.NUMBER, Number.POSITIVE_INFINITY));
+					this.#cursor += match.length;
+					return;
+
+				case 'sqrt':
+				case 'sin':
+				case 'cos':
+				case 'tan':
+				case 'rad':
+				case 'deg':
+					this.#tokens.push(createToken(MathTokenTypes.IDENTIFIER, match));
+					this.#cursor += match.length;
+					return;
+
+				default:
+					fatal(new MathLexerError(`Texto inválido en posición ${this.#cursor}: ${match}`));
+			}
+		};
+	}
+
+	#makeNumberHandler(): MathLexerPatternHandler {
+		return (matched) => {
+			const num = +matched.replace(/_/g, '');
+
+			if(isNaN(num))
+				fatal(new MathLexerError(`Número inválido en posición ${this.#cursor}`));
+
+			this.#tokens.push(createToken(MathTokenTypes.NUMBER, num));
+			this.#cursor += matched.length;
+		}
+	}
+
+	#makeUnicodePowerHandler(): MathLexerPatternHandler {
+		return (matched) => {
+			this.#tokens.push(createToken(MathTokenTypes.OPERATOR, '^'));
+
+			switch(matched) {
+			case '⁰':
+				this.#tokens.push(createToken(MathTokenTypes.NUMBER, 0));
+				return;
+
+			case '¹':
+				this.#tokens.push(createToken(MathTokenTypes.NUMBER, 1));
+				return;
+
+			case '²':
+				this.#tokens.push(createToken(MathTokenTypes.NUMBER, 2));
+				return;
+
+			case '³':
+				this.#tokens.push(createToken(MathTokenTypes.NUMBER, 3));
+				return;
+
+			case '⁴':
+				this.#tokens.push(createToken(MathTokenTypes.NUMBER, 4));
+				return;
+
+			case '⁵':
+				this.#tokens.push(createToken(MathTokenTypes.NUMBER, 5));
+				return;
+
+			case '⁶':
+				this.#tokens.push(createToken(MathTokenTypes.NUMBER, 6));
+				return;
+
+			case '⁷':
+				this.#tokens.push(createToken(MathTokenTypes.NUMBER, 7));
+				return;
+
+			case '⁸':
+				this.#tokens.push(createToken(MathTokenTypes.NUMBER, 8));
+				return;
+
+			case '⁹':
+				this.#tokens.push(createToken(MathTokenTypes.NUMBER, 9));
+				return;
+			}
+		}
+	}
+
+	#makeInterpretationHandler<TToken extends MathTokenType>(type: TToken, value: (MathToken & { type: TToken } & {})['value']): MathLexerPatternHandler {
+		return (matched) => {
+			if(type === 'Number')
+				this.#tokens.push({
+					type,
+					value: value as number,
+				});
+			else if(type === 'Operator')
+				this.#tokens.push({
+					type,
+					value: value as OperatorType,
+				});
+			else if(type === 'Identifier')
+				this.#tokens.push({
+					type,
+					value: value as string,
+				});
+			else throw new MathLexerError('Tipo inesperado en manejador de interpretación');
+
+			this.#cursor += matched.length;
+		}
 	}
 }
 
-class MathLexerError extends Error {
+export class MathLexerError extends Error {
 	constructor(message: string) {
 		super(message);
 		this.name = 'MathLexerError';
@@ -320,11 +407,11 @@ export class MathParser {
         };
     }
 
-	#expect<TToken extends TokenType>(tokenType: TToken): MathToken & { type: TToken } {
+	#expect<TToken extends MathTokenType>(tokenType: TToken): MathToken & { type: TToken } {
 		const token = this.#current;
 
 		if(token.type !== tokenType)
-			throw new MathParserError(`Se esperaba un token de tipo: ${tokenType}; se encontró: ${this.#current.type}; con valor: ${this.#current.value}`);
+			fatal(new MathParserError(`Se esperaba un token de tipo: ${tokenType}; se encontró: ${this.#current.type}; con valor: ${this.#current.value}`));
 
 		this.#cursor++;
 
@@ -339,8 +426,8 @@ export class MathParser {
 	#parseCombination(): MathNode {
 		let leftOperand = this.#parseFactor();
 
-		while(this.#current.type === TokenTypes.OPERATOR && '+-'.includes(this.#current.value)) {
-			const operator = this.#expect(TokenTypes.OPERATOR);
+		while(this.#current.type === MathTokenTypes.OPERATOR && '+-'.includes(this.#current.value)) {
+			const operator = this.#expect(MathTokenTypes.OPERATOR);
 			const rightOperand = this.#parseFactor();
 			leftOperand = this.#makeBinaryExpressionNode(operator.value, leftOperand, rightOperand);
 		}
@@ -352,8 +439,8 @@ export class MathParser {
 	#parseFactor(): MathNode {
 		let leftOperand = this.#parsePower();
 
-		while(this.#current.type === TokenTypes.OPERATOR && '*/%'.includes(this.#current.value)) {
-			const operator = this.#expect(TokenTypes.OPERATOR);
+		while(this.#current.type === MathTokenTypes.OPERATOR && '*/%'.includes(this.#current.value)) {
+			const operator = this.#expect(MathTokenTypes.OPERATOR);
 			const rightOperand = this.#parsePower();
 			leftOperand = this.#makeBinaryExpressionNode(operator.value, leftOperand, rightOperand);
 		}
@@ -365,8 +452,8 @@ export class MathParser {
 	#parsePower(): MathNode {
 		let leftOperand = this.#parseHighest();
 
-		while(this.#current.type === TokenTypes.OPERATOR && this.#current.value === '^') {
-			const identifier = this.#expect(TokenTypes.OPERATOR);
+		while(this.#current.type === MathTokenTypes.OPERATOR && this.#current.value === '^') {
+			const identifier = this.#expect(MathTokenTypes.OPERATOR);
 			const rightOperand = this.#parsePower();
 			leftOperand = this.#makeBinaryExpressionNode(identifier.value, leftOperand, rightOperand);
 		}
@@ -376,35 +463,35 @@ export class MathParser {
 
 	//Expresiones de mayor precedencia
 	#parseHighest(): MathNode {
-		if(this.#current.type === TokenTypes.NUMBER) {
-			const number = this.#expect(TokenTypes.NUMBER);
+		if(this.#current.type === MathTokenTypes.NUMBER) {
+			const number = this.#expect(MathTokenTypes.NUMBER);
 			return this.#makeLiteralExpressionNode(number.value);
 		}
 
-		if(this.#current.type === TokenTypes.OPERATOR) {
-			const operator = this.#expect(TokenTypes.OPERATOR);
-			const argument = this.#parseCombination();
+		if(this.#current.type === MathTokenTypes.OPERATOR) {
+			const operator = this.#expect(MathTokenTypes.OPERATOR);
+			const argument = this.#parseHighest();
 			return this.#makeUnaryExpressionNode(operator.value, argument);
 		}
 
-		if(this.#current.type === TokenTypes.IDENTIFIER) {
-			const identifier = this.#expect(TokenTypes.IDENTIFIER);
-			const argument = this.#parseCombination();
+		if(this.#current.type === MathTokenTypes.IDENTIFIER) {
+			const identifier = this.#expect(MathTokenTypes.IDENTIFIER);
+			const argument = this.#parseHighest();
 			return this.#makeFunctionCallNode(identifier.value, argument);
 		}
 
-		if(this.#current.type === TokenTypes.GROUP_OPEN) {
-			this.#expect(TokenTypes.GROUP_OPEN);
+		if(this.#current.type === MathTokenTypes.GROUP_OPEN) {
+			this.#expect(MathTokenTypes.GROUP_OPEN);
 			const expression = this.#parseCombination();
-			this.#expect(TokenTypes.GROUP_CLOSE);
+			this.#expect(MathTokenTypes.GROUP_CLOSE);
 			return expression;
 		}
 
-		throw new MathParserError(`Token inesperado en posición ${this.#cursor}: ${this.#current.type} (${this.#current.value})`);
+		fatal(new MathParserError(`Token inesperado en posición ${this.#cursor}: ${this.#current.type} (${this.#current.value})`));
 	}
 }
 
-class MathParserError extends Error {
+export class MathParserError extends Error {
 	constructor(message: string) {
 		super(message);
 		this.name = 'MathParserError';
@@ -415,12 +502,6 @@ type UnaryOperation = (argument: number) => number;
 const unaryOperations: Record<string, UnaryOperation> = {
 	'+':    argument => argument,
 	'-':    argument => (-argument),
-	'sqrt': argument => Math.sqrt(argument),
-	'sin':  argument => Math.sin(argument),
-	'cos':  argument => Math.cos(argument),
-	'tan':  argument => Math.tan(argument),
-	'rad':  argument => argument * (Math.PI / 180),
-	'deg':  argument => argument * (180 / Math.PI),
 };
 
 type BinaryOperation = (leftOperand: number, rightOperand: number) => number;
@@ -434,59 +515,85 @@ const binaryOperations: Record<OperatorType, BinaryOperation> = {
 };
 
 /**@class*/
-export class MathCalculator {
+export class MathEvaluator {
 	#tree: MathNode;
+	#functions: Record<string, ((x: number) => number)> = {
+		sqrt: argument => Math.sqrt(argument),
+		sin:  argument => Math.sin(argument),
+		cos:  argument => Math.cos(argument),
+		tan:  argument => Math.tan(argument),
+		rad:  argument => argument * (Math.PI / 180),
+		deg:  argument => argument * (180 / Math.PI),
+	}
 
 	constructor(tree: MathNode) {
 		this.#tree = tree;
 	}
 
 	/**@returns {Number} El resultado de la operación del árbol.*/
-	calculate(): number {
-		return this.#calculateNode(this.#tree);
+	evaluate(): number {
+		return this.#evaluateNode(this.#tree);
 	}
 
 	/**@returns El resultado de la operación del Token.*/
-	#calculateNode(token: MathNode): number {
-		switch(token.type) {
+	#evaluateNode(node: MathNode): number {
+		switch(node.type) {
 		case NodeTypes.LITERAL:
-			return token.value;
+			return node.value;
 
 		case NodeTypes.UNARY:
-			return this.#operateUnary(token.operator, token.argument);
+			return this.#evaluateUnaryExpression(node.operator, node.argument);
 
 		case NodeTypes.BINARY:
-			return this.#operateBinary(token.operator, token.leftOperand, token.rightOperand);
+			return this.#evaluateBinaryExpression(node.operator, node.leftOperand, node.rightOperand);
+
+		case NodeTypes.FUNCTION_CALL:
+			return this.#evaluateFunctionCall(node.identifier, node.argument);
 
 		default:
-			throw new MathCalculatorError(`Nodo inesperado: ${token.type}`);
+			fatal(new MathEvaluatorError(`Nodo inesperado: ${(node as MathNode)?.type}`));
 		}
 	}
 
 	/**
-	 * @description Realiza una operación unaria
+	 * @description Evalúa una operación unaria
 	 * @returns El resultado de la operación
 	 */
-	#operateUnary(operator: OperatorType, argument: MathNode): number {
-		const numericArgument = this.#calculateNode(argument);
-		return unaryOperations[operator](numericArgument);
+	#evaluateUnaryExpression(operator: OperatorType, argument: MathNode): number {
+		const evaluatedArgument = this.#evaluateNode(argument);
+		return unaryOperations[operator](evaluatedArgument);
 	}
 
 	/**
-	 * @description Realiza una operación binaria.
+	 * @description Evalúa una operación binaria.
 	 * @returns El resultado de la operación.
 	 */
-	#operateBinary(operator: OperatorType, leftOperand: MathNode, rightOperand: MathNode): number {
-		const numericLeftOperand = this.#calculateNode(leftOperand);
-		const numericRightOperand = this.#calculateNode(rightOperand);
-		return binaryOperations[operator](numericLeftOperand, numericRightOperand);
+	#evaluateBinaryExpression(operator: OperatorType, leftOperand: MathNode, rightOperand: MathNode): number {
+		const evaluatedLeftOperand = this.#evaluateNode(leftOperand);
+		const evaluatedRightOperand = this.#evaluateNode(rightOperand);
+		return binaryOperations[operator](evaluatedLeftOperand, evaluatedRightOperand);
+	}
+
+	/**
+	 * @description Evalúa una llamada de función.
+	 * @returns El resultado de la operación.
+	 */
+	#evaluateFunctionCall(identifier: string, argument: MathNode): number {
+		const evaluationFunction = this.#functions[identifier];
+
+		if(!evaluationFunction)
+			throw new MathEvaluatorError('Nigger hijo de puta');
+
+		const evaluatedArgument = this.#evaluateNode(argument);
+
+		return evaluationFunction(evaluatedArgument);
 	}
 }
 
-class MathCalculatorError extends Error {
+export class MathEvaluatorError extends Error {
 	constructor(message: string) {
 		super(message);
-		this.name = 'MathCalculatorError';
+		this.name = 'MathEvaluatorError';
 	}
 }
 
@@ -502,8 +609,8 @@ export function calc(operation: string): number {
 	const parser = new MathParser(tokens);
 	const tree = parser.parse();
 
-	const calculator = new MathCalculator(tree);
-	const result = calculator.calculate();
+	const calculator = new MathEvaluator(tree);
+	const result = calculator.evaluate();
 
 	return result;
 }
