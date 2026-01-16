@@ -19,7 +19,7 @@ const concol = {
     purple: chalk.rgb(158, 114,214),
 };
 
-const HTTP_ENTITIES = /**@type {const}*/({
+const HTTP_ENTITIES = ({
     nbsp:   ' ',
     amp:    '&',
     quot:   '"',
@@ -47,7 +47,7 @@ const HTTP_ENTITIES = /**@type {const}*/({
     laquo:  '«',
     raquo:  '»',
     circ:   '^',
-});
+}) as const;
 
 const HTTP_ENTITIES_REGEX = (() => {
     const keys = Object.keys(HTTP_ENTITIES).join('|');
@@ -71,17 +71,6 @@ export function paginateRaw<T>(values: T[] | Discord.Collection<string, T>, page
         .filter(item => item);
 }
 //#endregion
-
-interface PaginateOptions {
-    pagemax?: number;
-    format?: Function;
-}
-
-export function paginate<T>(values: T[] | Discord.Collection<string, T>, itemsOptions: PaginateOptions = { pagemax: 10, format: item => `\`${item.name.padEnd(24)}\`${item}` }): T[][] {
-    const { pagemax, format } = itemsOptions;
-    const paginated = paginateRaw(values, pagemax);
-    return paginated.map(page => page.map(format).join('\n'));
-}
 
 //#region Temporizadores
 /**
@@ -453,14 +442,12 @@ export async function drawWelcomeStandard(member: Discord.GuildMember) {
         const maxSize = canvas.width * 0.9;
         const vmargin = 15;
 
-        /**@type {CanvasTextDrawStrokeOptions}*/
         const defaultStroke: CanvasTextDrawStrokeOptions = {
             widthAsFactor: true,
             width: strokeFactor,
             color: '#000000',
         };
 
-        /**@type {CanvasTextDrawFontOptions}*/
         const defaultFont: CanvasTextDrawFontOptions = {
             family: 'headline',
             size: 100,
@@ -544,14 +531,12 @@ export async function drawWelcomeSaki(member: Discord.GuildMember, options: Saki
         const maxSize = canvas.width * 0.6;
         const vmargin = 15;
 
-        /**@type {CanvasTextDrawStrokeOptions}*/
         const defaultStroke: CanvasTextDrawStrokeOptions = {
             widthAsFactor: true,
             width: strokeFactor,
             color: '#000000',
         };
 
-        /**@type {CanvasTextDrawFontOptions}*/
         const defaultFont: CanvasTextDrawFontOptions = {
             family: 'headline',
             size: 100,
@@ -1028,93 +1013,21 @@ export function fetchRole(data: string, guild: Discord.Guild): Discord.Role {
 export const fetchArrows = (emojiscache: Discord.Collection<Discord.Snowflake, Discord.Emoji>): [Discord.Emoji, Discord.Emoji] => [emojiscache.get('681963688361590897'), emojiscache.get('681963688411922460')];
 
 /**
- * @deprecated
- * @param {Array<string>} args
- * @param {{
- *  property: Boolean
- *  short: Array<string>
- *  long: Array<string>
- *  callback: *
- *  fallback: *
- * }} flag
- */
-export function fetchFlag(args: Array<string>, flag: {
-    property: boolean;
-    short: Array<string>;
-    long: Array<string>;
-    callback: any;
-    fallback: any;
-} = { property: undefined, short: [], long: [], callback: undefined, fallback: undefined }) {
-    //Ahorrarse procesamiento en vano si no se ingresa nada
-    if(!args.length) return typeof flag.fallback === 'function' ? flag.fallback() : flag.fallback;
-
-    let target; //Retorno. Devuelve callback si se ingresa la flag buscada de forma válida, o fallback si no
-    const isFunc = (typeof flag.callback === 'function');
-
-    if(!isFunc) {
-        if(flag.property)
-            throw TypeError('Las flags de propiedad deben llamar una función.');
-        const temp = flag.callback;
-        flag.callback = () => { return temp; }
-    }
-
-    //Recorrer parámetros e intentar procesar flags
-    args.forEach((arg, i) => {
-        if(flag.property && i === (args.length - 1))
-            return;
-
-        arg = arg.toLowerCase();
-        if(flag.long?.length && arg.startsWith('--')) {
-            if(flag.long.includes(arg.slice(2))) {
-                target = flag.property
-                    ? flag.callback(args, i + 1)
-                    : flag.callback();
-                args.splice(i, flag.property?2:1);
-            }
-            return;
-        }
-
-        if(!flag.short?.length || !arg.startsWith('-'))
-            return;
-        
-        for(const c of arg.slice(1)) {
-            if(!flag.short.includes(c))
-                continue;
-
-            target = flag.property
-                ? flag.callback(args, i + 1)
-                : flag.callback();
-
-            if(arg.length <= 2) {
-                args.splice(i, flag.property ? 2 : 1);
-                continue;
-            }
-
-            const charactersToRemove = new RegExp(c, 'g')
-            const temp = args.splice(i, flag.property ? 2 : 1);
-            args.push(temp[0].replace(charactersToRemove, ''));
-            if(flag.property) args.push(temp[1]);
-        }
-    });
-
-    return target ? target : (typeof flag.fallback === 'function' ? flag.fallback() : flag.fallback);
-}
-
-/**
  * @param args An array of words, which may contain double-quote groups
  * @param i Index from which to extract a sentence, be it a single word or a group
  */
-export function fetchSentence(args: Array<string>, i: number) {
+export function fetchSentence(args: string[], i: number) {
     if(i == undefined || i >= args.length || args[i] == undefined)
         return undefined;
+
     if(!args[i].startsWith('"'))
         return args.splice(i, 1)[0];
 
     let last = i;
-    let text;
     while(last < args.length && !args[last].endsWith('"'))
         last++;
-    text = args.splice(i, last - i + 1).join(' ').slice(1);
+
+    const text = args.splice(i, last - i + 1).join(' ').slice(1);
 
     if(text.length === 0 || text === '"')
         return undefined;
@@ -1251,13 +1164,13 @@ export function randInArray<T>(array: T[]): T {
 }
 
 /**@see {@link https://stackoverflow.com/a/2450976}*/
-export function shuffleArray(array: any[]) {
+export function shuffleArray<T>(array: T[]): void {
     let currentIndex = array.length;
-    
+
     while(currentIndex !== 0) {
         const randomIndex = Math.floor(Math.random() * currentIndex);
         currentIndex--;
-    
+
         [ array[currentIndex], array[randomIndex] ] = [ array[randomIndex], array[currentIndex] ];
     }
 }
@@ -1515,7 +1428,7 @@ interface LowerCaseNormalizationOptions {
     removeCarriageReturns?: boolean;
 }
 
-export function toLowerCaseNormalized(/** @type {string}*/ text: string, options: LowerCaseNormalizationOptions = null): string {
+export function toLowerCaseNormalized(text: string, options: LowerCaseNormalizationOptions = null): string {
     options ??= {};
     options.removeCarriageReturns ??= false;
 
@@ -1683,11 +1596,12 @@ export function radix128to10(s: string): number {
 
 export function fullToShortHour(hour: number) {
     if(hour < 1)
-        return { value: 12, meridian: /**@type {const}*/('AM') };
+        return { value: 12, meridian: 'AM' as const };
+
     if(hour < 12)
-        return { value: hour, meridian: /**@type {const}*/('AM') };
-    
-    return { value: hour - 12, meridian: /**@type {const}*/('PM') };
+        return { value: hour, meridian: 'AM' as const };
+
+    return { value: hour - 12, meridian: 'PM' as const };
 }
 
 /**
@@ -1721,10 +1635,10 @@ export function fullToShortHour(hour: number) {
  * @param locale Por ejemplo, "en-US" o "es-ES".
  */
 export function dateToUTCFormat(date: Date, template: string, locale: string = 'en-US'): string {
-    if (!(date instanceof Date))
+    if(!(date instanceof Date))
         throw new TypeError("Se esperaba un objeto Date");
 
-    if (typeof template !== "string" || !template.length)
+    if(typeof template !== "string" || !template.length)
         throw new TypeError("Se esperaba un string válido como plantilla de formato");
 
     const year = date.getUTCFullYear().toString();
@@ -1777,8 +1691,10 @@ export function compressId(id: string) {
         throw Error('La id debe ser un string');
 
     let mid = Math.floor(id.length * 0.5);
+
     if(id[mid] === '0')
         mid = Math.floor(mid * 0.5) || 1;
+
     while(id[mid] === '0' && mid < id.length - 1)
         mid++;
 

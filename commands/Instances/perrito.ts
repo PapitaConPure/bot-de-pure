@@ -1,6 +1,6 @@
 import Discord, { Message, MessageFlags } from 'discord.js';
 import serverIds from '../../data/serverIds.json';
-import { paginate, navigationRows, rand } from '../../func';
+import { navigationRows, rand, paginateRaw } from '../../func';
 import { CommandOptions, CommandTags, Command } from '../Commons/';
 import { InteractionType } from 'discord.js';
 import { ComplexCommandRequest } from '../Commons/typings';
@@ -23,7 +23,12 @@ function getEmotesList(interaction: import('../Commons/typings').AnyRequest) {
 
 async function loadPageNumber(request: Exclude<import('../Commons/typings').AnyRequest, Discord.AutocompleteInteraction>, page: number) {
 	const emotes = getEmotesList(request);
-	const emotePages = paginate(emotes);
+	const emotePages = paginateRaw(emotes, 10)
+		.map(page => page
+			.map(item => `\`${item.name.padEnd(24)}\`${item}`)
+			.join('\n')
+		);
+
 	const lastPage = emotePages.length - 1;
 	if(page > lastPage)
 		return (request as ComplexCommandRequest).reply({

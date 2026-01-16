@@ -84,7 +84,7 @@ const getAvatarContainer = (member: GuildMember, translator: Translator) => {
 };
 
 function getMembers(request: ComplexCommandRequest, args: CommandOptionSolver) {
-    const notFound = /**@type {Array<string>}*/([]);
+    const notFound: string[] = [];
     const members = CommandOptionSolver.asMembers(args.parsePolyParamSync('miembros', {
         fallback: request.member,
         regroupMethod: 'MENTIONABLES-WITH-SEP',

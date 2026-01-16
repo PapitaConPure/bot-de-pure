@@ -3,7 +3,7 @@ import { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSen
 
 import Logger from '../../utils/logs';
 import { getDateComponentsFromString, makeDateFromComponents, parseTimeFromNaturalLanguage, relativeDates } from '../../utils/datetime';
-import { CommandArguments } from './typings';
+import { CommandArguments, CommandRequest, ComplexCommandRequest } from './typings';
 const { warn } = Logger('WARN', 'CmdOpts');
 
 export type ParamTypeStrict = { name: string; expression: string | number; };
@@ -55,7 +55,7 @@ const paramTypes = ({
 	TIME:    { getMethod: 'getString',     help: 'hora' },
 }) as const;
 
-const fetchMessageFlagText = (args: string[], i): string => {
+function fetchMessageFlagText(args: string[], i): string {
 	if(i >= args.length)
 		return undefined;
 	if(!args[i].startsWith('"'))
@@ -65,16 +65,31 @@ const fetchMessageFlagText = (args: string[], i): string => {
 	while(lastIndex < args.length && !args[lastIndex].endsWith('"'))
 		lastIndex++;
 	const text = args.splice(i, lastIndex - i + 1).join(' ').slice(1);
-	
+
 	if(text.length === 0 || text === '"')
 		return undefined;
 
 	return text.endsWith('"') ? text.slice(0, -1) : text;
 }
 
-export type ParamResult = number | string | boolean | User | GuildMember | Guild | GuildBasedChannel | Message<boolean> | Role | Attachment | Date | undefined;
+export type ParamResult =
+	| number
+	| string
+	| boolean
+	| User
+	| GuildMember
+	| Guild
+	| GuildBasedChannel
+	| Message<boolean>
+	| Role
+	| Attachment
+	| Date
+	| undefined;
 
-export type FlagCallback<T extends ParamResult = ParamResult> = (value: ParamResult, isSlash: boolean) => T;
+export type FlagCallback<TResult extends ParamResult = ParamResult> = (value: ParamResult, isSlash: boolean) => TResult;
+
+export type CommandArgumentGetFunction<TResult extends ParamResult = ParamResult>
+	= (identifier: string, required?: boolean) => TResult;
 
 interface FeedbackOptions<TCallback extends ParamResult = ParamResult, TFallback extends ParamResult = ParamResult> {
 	callback?: FlagCallback<TCallback> | TCallback;
@@ -89,17 +104,11 @@ interface FetchMessageFlagOptions {
 	fallback: unknown;
 }
 
-/**
- * @function
- * @param {string[]} args
- * @param {FetchMessageFlagOptions} flag
- */
-const fetchMessageFlag = (args: string[], flag: FetchMessageFlagOptions = { property: undefined, short: [], long: [], callback: undefined, fallback: undefined }) => {
-	//Ahorrarse procesamiento en vano si no se ingresa nada
-	if(!args.length) return flag.fallback;
+function fetchMessageFlag(args: string[], flag: FetchMessageFlagOptions = { property: undefined, short: [], long: [], callback: undefined, fallback: undefined }) {
+	if(!args.length)
+		return flag.fallback;
 
-	//Recorrer parámetros y procesar flags
-	let flagValue;
+	let flagValue: ParamResult;
 	args.forEach((arg, i) => {
 		if(flag.property && i === (args.length - 1)) return;
 		arg = arg.toLowerCase();
@@ -127,7 +136,7 @@ const fetchMessageFlag = (args: string[], flag: FetchMessageFlagOptions = { prop
 				args.splice(i, 1);
 		}
 	});
-	
+
 	if(flagValue == undefined)
 		return flag.fallback;
 
@@ -137,53 +146,32 @@ const fetchMessageFlag = (args: string[], flag: FetchMessageFlagOptions = { prop
 	return typeof flag.callback === 'function' ? flag.callback(flagValue, false) : flag.callback;
 }
 
-/**
- * Devuelve el tipo ingresado como texto de página de ayuda
- * @param {ParamType} type El tipo a convertir
- */
+/**@description Devuelve el texto de página de ayuda del tipo ingresado.*/
 export const typeHelp = (type: ParamType) => isParamTypeStrict(type)
 	? `${type.name}: ${type.expression}`
 	: paramTypes[type].help;
 
-/**
- * Devuelve si el parámetro es no-estricto
- * @param {ParamType} pt - una instancia ParamType
- * @returns {pt is BaseParamType}
- */
+/**@description Devuelve si el parámetro es "de formato no-estricto".*/
 const isBaseParamType = (pt: ParamType): pt is BaseParamType => typeof pt === 'string' && paramTypes[pt] != undefined;
 
-/**
- * Devuelve si el parámetro es estricto
- * @param {ParamType} pt - una instancia ParamType
- * @returns {pt is ParamTypeStrict}
- */
+/**@description Devuelve si el parámetro es "de formato estricto".*/
 const isParamTypeStrict = (pt: ParamType): pt is ParamTypeStrict => (typeof pt === 'object') && pt?.name != undefined && pt?.expression != undefined;
 
 type AutocompleteFunction = (interaction: AutocompleteInteraction<'cached'>, query: string) => Promise<unknown>;
 
-/**
- * 
- * @param {AutocompleteFunction} fn 
- * @param {AutocompleteInteraction<'cached'>} interaction 
- * @param {string} query 
- */
 async function handleAutocomplete(fn: AutocompleteFunction, interaction: AutocompleteInteraction<'cached'>, query: string) {
 	const result = await fn(interaction, query);
 
 	if(!interaction.responded) {
 		if(Array.isArray(result) && result.every(r => r.name && r.value))
 			return interaction.respond(result.slice(0, 10));
-		
+
 		return interaction.respond([]);
 	}
 
 	return result;
 }
 
-/**
- * @param {string[]} args 
- * @returns {string[]}
- */
 function groupQuoted(args: string[]): string[] {
 	const result = [];
 
@@ -211,39 +199,30 @@ function groupQuoted(args: string[]): string[] {
 	return result;
 }
 
-/**Representa una opción de comando*/
+/**@description Representa una opción de comando.*/
 class CommandOption {
-	/**@protected @type {string}*/
-	_desc: string;
+	protected _desc: string;
 
-	/**
-	 * La descripción de la opción
-	 */
+	/**@description La descripción de la opción.*/
 	get desc() {
 		return this._desc;
 	}
 
-	/**
-	 * Define la descripción de la opción
-	 * @param {string} d La descripción de la opción
-	 * @returns
-	 */
-	setDesc(d: string) {
-		if(!d)
+	/**@description Define la descripción de la opción.*/
+	setDesc(description: string) {
+		if(!description)
 			throw new InvalidCommandOptionAttributeError('La descripción de la opción no puede ser null ni estar vacío');
 
-		this._desc = d;
+		this._desc = description;
 		return this;
-	};
+	}
 
-	/**@returns {this is CommandParam}*/
 	isCommandParam(): this is CommandParam { return false; }
 
-	/**@returns {this is CommandFlag}*/
 	isCommandFlag(): this is CommandFlag { return false; }
-};
+}
 
-/**Representa un parámetro de comando*/
+/**@description Representa un parámetro de comando.*/
 export class CommandParam extends CommandOption {
 	#name: string;
 	#type: ParamType | ParamType[];
@@ -253,9 +232,8 @@ export class CommandParam extends CommandOption {
 	#autocompleteInner: AutocompleteFunction;
 
 	/**
-	 * @constructor
-	 * @param name El nombre del parámetro
-	 * @param {Exclude<ParamType | ParamType[], undefined | null>} type El tipo del parámetro
+	 * @param name El nombre del parámetro.
+	 * @param {Exclude<ParamType | ParamType[], undefined | null>} type El tipo del parámetro.
 	 */
 	constructor(name: string, type: Exclude<ParamType | ParamType[], undefined | null>) {
 		super();
@@ -273,21 +251,16 @@ export class CommandParam extends CommandOption {
 		this.#polymax = 8;
 	};
 
-	/**
-	 * Define si el parámetro es opcional
-	 * @param {Boolean} o La optabilidad del parámetro
-	 * @returns
-	 */
-	setOptional(o: boolean) {
-		this.#optional = o;
+	/**@description Define si el parámetro es opcional.*/
+	setOptional(optional: boolean) {
+		this.#optional = optional;
 		return this;
-	};
+	}
 
 	/**
-	 * Define la capacidad de entradas del parámetro
-	 * @param {ParamPoly} level La capacidad del parámetro
-	 * @param {Number?} max El máximo de entradas admitidas (para parámetros de tipo múltiple)
-	 * @returns
+	 * @description Define la capacidad de entradas del parámetro.
+	 * @param level La capacidad del parámetro.
+	 * @param max El máximo de entradas admitidas (para parámetros de tipo múltiple).
 	 */
 	setPoly(level: ParamPoly, max: number | null) {
 		this.#poly = level;
@@ -295,66 +268,46 @@ export class CommandParam extends CommandOption {
 		return this;
 	}
 
-	/**
-	 * Establece una función de autocompletado para este parámetro
-	 * @param {AutocompleteFunction} autocompleteFn
-	 */
+	/**@description Establece una función de autocompletado para este parámetro.*/
 	setAutocomplete(autocompleteFn: AutocompleteFunction) {
 		this.#autocompleteInner = autocompleteFn;
 		return this;
 	}
 
-	/**@returns {this is CommandParam}*/
 	isCommandParam(): this is CommandParam {
 		return true;
 	}
 
-	/**@type {AutocompleteFunction}*/
-	autocomplete(interaction, query) {
+	autocomplete: AutocompleteFunction = (interaction, query) => {
 		return handleAutocomplete(this.#autocompleteInner, interaction, query);
 	}
 
-	/**
-	 * Nombre del parámetro
-	 * @type {string}
-	 */
+	/**@description Nombre del parámetro.*/
 	get name() {
 		return this.#name;
 	}
 
-	/**
-	 * Tipo aceptado del parámetro
-	 * @type {ParamType | ParamType[]}
-	 */
+	/**@description Tipo aceptado del parámetro.*/
 	get type() {
 		return this.#type;
 	}
 
-	/**
-	 * Indica si el parámetro es opcional
-	 */
+	/**@description Indica si el parámetro es opcional.*/
 	get optional() {
 		return this.#optional;
 	}
 
-	/**
-	 * El tipo de poliparametrización del parámetro
-	 */
+	/**@description El tipo de poliparametrización del parámetro.*/
 	get poly() {
 		return this.#poly;
 	}
 
-	/**
-	 * La cantidad de parámetros máxima del parámetro poliparametrizado
-	 */
+	/**@description La cantidad de parámetros máxima del parámetro poliparametrizado.*/
 	get polymax() {
 		return this.#polymax;
 	}
 
-	/**
-	 * Texto del tipo aceptado del parámetro
-	 * @type {string}
-	 */
+	/**@description Texto del tipo aceptado del parámetro.*/
 	get typeDisplay() {
 		const typeString = [
 			Array.isArray(this.#type)
@@ -366,14 +319,11 @@ export class CommandParam extends CommandOption {
 			typeString.push(`[múltiple/${this.#polymax}]`);
 		else if(Array.isArray(this.#poly))
 			typeString.push(`[${this.#poly.length}]`);
-		
+
 		return typeString.join(' ');
-	};
-	
-	/**
-	 * Texto de ayuda del parámetro
-	 * @returns {string}
-	 */
+	}
+
+	/**@description Texto de ayuda del parámetro.*/
 	get display(): string {
 		const identifier = [this.#name];
 
@@ -382,87 +332,68 @@ export class CommandParam extends CommandOption {
 		else if(Array.isArray(this.#poly)) identifier.push(`(${this.#poly.join(',')})`);
 
 		return `\`<${identifier.join('')}>\` _(${this.typeDisplay})_ ${this.desc}`;
-	};
+	}
 
 	get hasAutocomplete() {
 		return this.#autocompleteInner != null;
 	}
-};
+}
 
-/**Representa una bandera de comando*/
+/**@class Representa una bandera de comando.*/
 export class CommandFlag extends CommandOption {
-	/**@protected @type {string[]}*/
-	_short: string[];
-	/**@protected @type {string[]}*/
-	_long: string[];
-	/**@protected @type {boolean}*/
-	_expressive: boolean;
-	/**@protected @type {ParamType|undefined}*/
-	_type: ParamType | undefined;
+	protected _short: string[];
+	protected _long: string[];
+	protected _expressive: boolean;
+	protected _type: ParamType | undefined;
 
-	/**@constructor*/
 	constructor() {
 		super();
 		this._expressive = false;
 		this._type = undefined;
 	}
-	/**
-	 * Define los identificadores cortos de la bandera
-	 * @param {string | string[]} identifiers El/los identificadores
-	 * @returns
-	 */
+
+	/**@description Define los identificadores cortos de la bandera.*/
 	setShort(identifiers: string | string[]) {
 		this._short = [...identifiers];
 		return this;
 	};
-	/**
-	 * Define los identificadores largos de la bandera
-	 * @param {string | string[]} identifiers El/los identificadores
-	 * @returns
-	 */
+
+	/**@description Define los identificadores largos de la bandera*/
 	setLong(identifiers: string | string[]) {
 		this._long = Array.isArray(identifiers) ? identifiers : [identifiers];
 		return this;
 	};
-	
-	/**@returns {this is CommandFlagExpressive}*/
+
 	isExpressive(): this is CommandFlagExpressive {
 		return this._expressive;
 	}
 
-	/**@returns {this is CommandFlag}*/
 	isCommandFlag(): this is CommandFlag {
 		return true;
 	}
 
-	/**
-	 * Los identificadores cortos de la bandera
-	 */
+	/**@description Los identificadores cortos de la bandera.*/
 	get short() {
 		return this._short;
 	}
 
-	/**
-	 * Los identificadores largos de la bandera
-	 */
+	/**@description Los identificadores largos de la bandera.*/
 	get long() {
 		return this._long;
 	}
 
-	/**
-	 * Tipo de bandera como un string
-	 * @returns {string|undefined}
-	 */
+	get actualType() {
+		return this._type;
+	}
+
+	/**@description Tipo de bandera como un string.*/
 	get type(): string | undefined {
 		if(this._type == undefined) return '';
 		if(isParamTypeStrict(this._type)) return 'ParamTypeStrict';
 		return this._type;
 	}
-	
-	/**
-	 * String de ayuda de la bandera
-	 * @returns {string}
-	 */
+
+	/**@description String de ayuda de la bandera.*/
 	get display(): string {
 		const { _short: short, _long: long, desc } = this;
 		const flagString = [];
@@ -471,29 +402,22 @@ export class CommandFlag extends CommandOption {
 		return `${flagString.join(' o ')} ${desc}`;
 	};
 
-	/**
-	 * Estructura de objeto de los identificadores de la bandera
-	 * @returns {{ property: Boolean, short: string[], long: string[] }}
-	 */
+	/**@description Estructura de objeto de los identificadores de la bandera.*/
 	get structure(): { property: boolean; short: string[]; long: string[]; } {
 		return { property: this.isExpressive(), short: this._short, long: this._long };
 	}
 
-	/**
-	 * Identificador de la bandera
-	 */
+	/**@description Identificador de la bandera.*/
 	get identifier() {
 		return this._long.length
 			? (Array.isArray(this._long) ? this._long[0] : this._long)
 			: this._short[0];
 	}
-};
+}
 
-/**Representa una bandera expresiva de comando*/
+/**@class Representa una bandera expresiva de comando.*/
 export class CommandFlagExpressive extends CommandFlag {
-	/**@type {string}*/
 	#name: string;
-	/**@type {AutocompleteFunction}*/
 	#autocompleteInner: AutocompleteFunction;
 
 	/**
@@ -509,55 +433,42 @@ export class CommandFlagExpressive extends CommandFlag {
 
 		if(!type)
 			throw new InvalidCommandOptionAttributeError('El tipo del parámetro no puede ser null ni estar vacío');
-		
+
 		this.#name = name;
 		this._type = type;
 		this._expressive = true;
 	};
 
 	/**
-	 * Define el nombre de entrada de la bandera
-	 * @param {string} n El tipo de la bandera
-	 * @returns
+	 * @description Define el nombre de entrada de la bandera.
+	 * @param n El tipo de la bandera.
 	 */
 	setName(n: string) {
 		this.#name = n;
 		return this;
 	};
 
-	/**
-	 * Establece una función de autocompletado para este parámetro
-	 * @param {AutocompleteFunction} autocompleteFn
-	 */
+	/**@description Establece una función de autocompletado para este parámetro.*/
 	setAutocomplete(autocompleteFn: AutocompleteFunction) {
 		this.#autocompleteInner = autocompleteFn;
 		return this;
 	}
 
-	/**@type {AutocompleteFunction}*/
-	autocomplete(interaction, query) {
+	autocomplete: AutocompleteFunction = (interaction, query) => {
 		return handleAutocomplete(this.#autocompleteInner, interaction, query);
 	}
 
-	/**
-	 * El nombre del parámetro de la bandera
-	 */
+	/**@description El nombre del parámetro de la bandera.*/
 	get name() {
 		return this.#name;
 	}
 
-	/**
-	 * El tipo del parámetro de la bandera
-	 * @returns {string}
-	 */
+	/**@description El tipo del parámetro de la bandera.*/
 	get typeDisplay(): string {
 		return typeHelp(this._type);
 	};
 
-	/**
-	 * Texto de ayuda de la bandera
-	 * @returns {string}
-	 */
+	/**@description Texto de ayuda de la bandera.*/
 	get display(): string {
 		const { short, long, name, typeDisplay, desc } = this;
 		const flagString = [];
@@ -573,43 +484,28 @@ export class CommandFlagExpressive extends CommandFlag {
 
 export type RegroupMethod = 'NONE' | 'SEPARATOR' | 'MENTIONABLES-WITH-SEP' | 'DOUBLE-QUOTES';
 
-export interface PolyParamParsingOptions<TFallback = undefined> {
+export interface PolyParamParsingOptions<TFallback extends ParamResult | null = undefined> {
 	regroupMethod?: RegroupMethod;
 	messageSep?: string;
 	fallback?: TFallback;
-	failedPayload?: Array<string>;
+	failedPayload?: string[];
 }
 
-/**Representa un administrador de opciones de comando*/
+/**@class Representa un administrador de opciones de comando.*/
 export class CommandOptions {
-	/**
-	 * Opciones del administrador
-	 * @type {Map<String, CommandOption>}
-	 */
+	/**@description Opciones del administrador.*/
 	options: Map<string, CommandOption>;
-	/**
-	 * Parámetros del administrador
-	 * @type {Map<String, CommandParam>}
-	 */
+	/**@description Parámetros del administrador.*/
 	params: Map<string, CommandParam>;
-	/**
-	 * Banderas del administrador
-	 * @type {Map<String, CommandFlag | CommandFlagExpressive>}
-	 */
+	/**@description Banderas del administrador.*/
 	flags: Map<string, CommandFlag | CommandFlagExpressive>;
-	/**Propiedades por defecto*/
-	#defaults;
-	/**
-	 * Contexto de Request
-	 * @type {import('./typings').CommandRequest?}
-	 */
-	#request: import('./typings').CommandRequest | null;
+	/**@description Propiedades por defecto*/
+	#defaults: { polymax: number };
+	/**@description Contexto de Request.*/
+	#request: CommandRequest | null;
 
-	/**
-	 * @constructor
-	 * @param {import('./typings').CommandRequest?} request El contexto de Request actual. Esto solo se ingresa dentro de una ejecución
-	 */
-	constructor(request: import('./typings').CommandRequest | null = null) {
+	/**@param {CommandRequest?} request El contexto de Request actual. Esto solo se ingresa dentro de una ejecución.*/
+	constructor(request: CommandRequest | null = null) {
 		this.options = new Map();
 		this.params = new Map();
 		this.flags = new Map();
@@ -618,18 +514,18 @@ export class CommandOptions {
 		};
 		this.#request = request;
 	};
-	
+
 	/**
-	 * Añade un parámetro al administrador
-	 * @param {string} name El nombre del parámetro
-	 * @param {Exclude<ParamType | ParamType[], undefined | null>} type El tipo de parámetro
-	 * @param {string} desc La descripción del parámetro
-	 * @param {{ poly?: ParamPoly, polymax?: Number, optional?: Boolean }} optionModifiers Los modificadores del parámetro
+	 * @description Añade un parámetro al administrador.
+	 * @param {string} name El nombre del parámetro.
+	 * @param {Exclude<ParamType | ParamType[], undefined | null>} type El tipo de parámetro.
+	 * @param {string} desc La descripción del parámetro.
+	 * @param {{ poly?: ParamPoly, polymax?: Number, optional?: Boolean }} optionModifiers Los modificadores del parámetro.
 	 */
 	addParam(name: string, type: Exclude<ParamType | ParamType[], undefined | null>, desc: string, optionModifiers: { poly?: ParamPoly; polymax?: number; optional?: boolean; } = { poly: undefined, polymax: undefined, optional: undefined } ) {
 		if(optionModifiers && typeof optionModifiers !== 'object')
 			throw new TypeError('Modificadores de parámetro inválidos');
-			
+
 		const { poly, polymax, optional } = optionModifiers ?? {};
 		if(poly && !Array.isArray(poly) && !['SINGLE', 'MULTIPLE',].includes(poly))
 			throw new TypeError('Multiplicidad de parámetro inválida');
@@ -644,11 +540,11 @@ export class CommandOptions {
 	};
 
 	/**
-	 * @description Añade una bandera al administrador
-	 * @param short El/los identificadores cortos
-	 * @param long El/los identificadores largos
-	 * @param desc La descripción de la bandera
-	 * @param expression La propiedad que modifica la bandera, si es expresiva
+	 * @description Añade una bandera al administrador.
+	 * @param short El/los identificadores cortos.
+	 * @param long El/los identificadores largos.
+	 * @param desc La descripción de la bandera.
+	 * @param expression La propiedad que modifica la bandera, si es expresiva.
 	 */
 	addFlag(short: string | string[], long: string | string[], desc: string, expression?: { name?: string; type?: Exclude<ParamType, undefined | null>; }) {
 		const commandFlag = (expression)
@@ -664,10 +560,7 @@ export class CommandOptions {
 		return this;
 	};
 
-	/**
-	 * Añade opciones al administrador
-	 * @param {...CommandOption} options
-	 */
+	/**@description Añade opciones al administrador.*/
 	addOptions(...options: CommandOption[]) {
 		for(const option of options) {
 			let identifier;
@@ -687,12 +580,11 @@ export class CommandOptions {
 	}
 
 	/**
-	 * Crea una copia del administrador de opciones bajo el contexto de ejecución actual
-	 * Es una tarea cara que se usa al querer fetchear un miembro, usuario u otro tipo de dato que requiera el contexto de ejecución. De lo contrario, no debería usarse
-	 * @param {import('./typings').CommandRequest} request
-	 * @returns {CommandOptions} La copia del administrador de opciones
+	 * @description
+	 * Crea una copia del administrador de opciones bajo el contexto de ejecución actual.
+	 * Se usa al querer fetchear un miembro, usuario u otro tipo de dato que requiera el contexto de ejecución. De lo contrario, no debería usarse.
 	 */
-	in(request: import('./typings').CommandRequest): CommandOptions {
+	in(request: CommandRequest): CommandOptions {
 		const newCOM = new CommandOptions(request);
 
 		newCOM.options = this.options;
@@ -702,10 +594,7 @@ export class CommandOptions {
 		return newCOM;
 	};
 
-	/**
-	 * String de ayuda de las opciones de comando del administrador
-	 * @returns {string}
-	 */
+	/**@description String de ayuda de las opciones de comando del administrador.*/
 	get display(): string {
 		return [
 			...[...this.params.values()].map(p => `* ${p.display}`),
@@ -713,13 +602,9 @@ export class CommandOptions {
 		].join('\n');
 	};
 
-	/**
-	 * String de ayuda de las opciones de comando del administrador
-	 * @returns {string}
-	 */
+	/**@description String de ayuda de las opciones de comando del administrador.*/
 	get callSyntax(): string {
-		/**@type {Array<CommandParam>}*/
-		const params: Array<CommandParam> = [...this.params.values()];
+		const params: CommandParam[] = [...this.params.values()];
 		return params.map(p => {
 			const paramExpressions = [ p.name ];
 			if(Array.isArray(p.poly)) paramExpressions.push(` (${p.poly.join(',')})`);
@@ -729,18 +614,18 @@ export class CommandOptions {
 		}).join(' ');
 	};
 
-	static #fetchDependantTypes = new Set(/**@type {ReadonlyArray<BaseParamType>}*/([
+	static readonly #fetchDependantTypes = new Set([
 		'MESSAGE',
 		'GUILD',
-	]));
+	] as ReadonlyArray<BaseParamType>);
 
-	static #requestDependantTypes = new Set(/**@type {ReadonlyArray<BaseParamType>}*/([
+	static readonly #requestDependantTypes = new Set([
 		'USER',
 		'MEMBER',
 		'MESSAGE',
 		'CHANNEL',
 		'ROLE',
-	]));
+	] as ReadonlyArray<BaseParamType>);
 
 	static get fetchDependantTypes() {
 		return this.#fetchDependantTypes;
@@ -751,11 +636,10 @@ export class CommandOptions {
 	}
 
 	/**
-	 * Remueve y devuelve la siguiente entrada o devuelve todas las entradas en caso de que {@linkcode whole} sea verdadero
-	 * @param {string[]} args El conjunto de entradas
-	 * @param {ParamType} type El tipo de entrada buscado
-	 * @param {Boolean} whole Indica si devolver todas las entradas o no
-	 * @returns {Promise<ParamResult>}
+	 * @description Remueve y devuelve la siguiente entrada o devuelve todas las entradas en caso de que {@linkcode whole} sea verdadero.
+	 * @param args El conjunto de entradas.
+	 * @param type El tipo de entrada buscado.
+	 * @param whole Indica si devolver todas las entradas o no.
 	 */
 	async fetchMessageParam(args: string[], type: ParamType, whole: boolean = false): Promise<ParamResult> {
 		if(isBaseParamType(type) && !CommandOptions.fetchDependantTypes.has(type))
@@ -766,7 +650,7 @@ export class CommandOptions {
 
 		const argsPrototype = this.getArgsPrototype(args, whole);
 		if(!argsPrototype) return;
-		
+
 		switch(type) {
 		case 'USER':
 			warn('USER ya no es un parámetro asíncrono. Se recomienda usar fetchMessageParamSync para este tipo de comandos');
@@ -782,11 +666,10 @@ export class CommandOptions {
 	}
 
 	/**
-	 * Remueve y devuelve la siguiente entrada o devuelve todas las entradas en caso de que {@linkcode whole} sea verdadero
-	 * @param {string[]} args El conjunto de entradas
-	 * @param {ParamType} type El tipo de entrada buscado
-	 * @param {Boolean} whole Indica si devolver todas las entradas o no
-	 * @returns {ParamResult}
+	 * @description Remueve y devuelve la siguiente entrada o devuelve todas las entradas en caso de que {@linkcode whole} sea verdadero.
+	 * @param args El conjunto de entradas.
+	 * @param type El tipo de entrada buscado.
+	 * @param whole Indica si devolver todas las entradas o no.
 	 */
 	fetchMessageParamSync(args: string[], type: ParamType, whole: boolean = false): ParamResult {
 		if(isBaseParamType(type) && CommandOptions.requestDependantTypes.has(type) && !this.#request)
@@ -794,7 +677,7 @@ export class CommandOptions {
 
 		const argsPrototype = this.getArgsPrototype(args, whole);
 		if(!argsPrototype) return;
-		
+
 		if(isParamTypeStrict(type))
 			return argsPrototype;
 
@@ -829,26 +712,21 @@ export class CommandOptions {
 		}
 	}
 
-	/**
-	 * @param {string[]} args
-	 * @param {Boolean} whole
-	 */
 	getArgsPrototype(args: string[], whole: boolean) {
 		return (whole ? args.join(' ') : fetchSentence(args, 0)) || undefined;
 	}
 
 	/**
+	 * @description
 	 * Si es un comando Slash, devuelve el valor del parámetro ingresado.
 	 * Si es un comando de mensaje, remueve y devuelve la siguente entrada o devuelve todas las entradas en caso de que {@linkcode whole} sea verdadero.
 	 * Si no se recibe ningún parámetro, se devuelve undefined.
 	 * @param input El conjunto de entradas.
 	 * @param slashIdentifier El identificador del parámetro para comandos Slash.
 	 * @param whole Indica si devolver todas las entradas en caso de un comando de mensaje. Por defecto: false.
-	 * @returns El valor del parámetro.
 	 * @deprecated Esta función está deprecada. Usa {@linkcode CommandOptionSolver.getString}, {@linkcode CommandOptionSolver.getNumber}, etc. en su lugar.
 	 */
 	async fetchParam(input: CommandInteractionOptionResolver | Omit<CommandInteractionOptionResolver<'cached'>, 'getMessage' | 'getFocused'> | string[], slashIdentifier: string, whole: boolean = false): Promise<ParamResult> {
-		/**@type {CommandParam}*/
 		const param: CommandParam = this.params.get(slashIdentifier);
 
 		if(!param)
@@ -865,11 +743,9 @@ export class CommandOptions {
 				return this.fetchMessageParam(input, param.type, whole);
 		}
 
-		/**@type {GetMethodName}*/
 		let getMethodName: GetMethodName = 'getString';
 
 		if(Array.isArray(param.type)) {
-			/**@type {ParamResult}*/
 			let result: ParamResult;
 
 			for(const pt of param.type) {
@@ -889,12 +765,13 @@ export class CommandOptions {
 		} else {
 			if(!isParamTypeStrict(param.type))
 				getMethodName = paramTypes[param.type].getMethod;
-			
+
 			return input[getMethodName](slashIdentifier, !param.optional);
 		}
 	};
 
 	/**
+	 * @description
 	 * Devuelve un arreglo de todas las entradas recibidas.
 	 * Si no se recibe ninguna entrada, se devuelve fallback.
 	 * @param input El resolvedor de opciones de interacción.
@@ -903,14 +780,17 @@ export class CommandOptions {
 	 * @param fallback Un valor por defecto si no se recibe ninguna entrada.
 	 * @returns Un arreglo con las entradas procesadas por callbackFn, o alternativamente, un valor devuelto por fallback.
 	 */
-	fetchParamPoly(input: CommandInteractionOptionResolver | Omit<CommandInteractionOptionResolver<'cached'>, 'getMessage' | 'getFocused'>, identifier: string, callbackFn: Function, fallback: (Function | unknown) | null = undefined): any[] {
-		/**@type {CommandParam}*/
+	fetchParamPoly<TResult extends ParamResult, TFallback extends ParamResult | null | undefined>(
+		input: CommandInteractionOptionResolver | Omit<CommandInteractionOptionResolver<'cached'>, 'getMessage' | 'getFocused'>,
+		identifier: string, callbackFn: CommandArgumentGetFunction<TResult>,
+		fallback: (() => TFallback) | TFallback | null | undefined = undefined
+	): (TResult | TFallback)[] {
 		const option: CommandParam = this.params.get(identifier);
 		if(!option)
 			throw new ReferenceError(`No se pudo encontrar un Poly-parámetro con el identificador: ${identifier}`);
 
 		const singlename = identifier.replace(/[Ss]$/, '');
-		let params: unknown[];
+		let params: string[];
 		if(option && option.poly)
 			switch(option.poly) {
 			case 'MULTIPLE':
@@ -929,21 +809,25 @@ export class CommandOptions {
 				break;
 			}
 
-		params = params
+		const results = params
 			.map((opt, i) => callbackFn.call(input, opt, !i && !option.optional))
 			.filter(param => param);
-			
-		return params.length ? params : [ (typeof fallback === 'function') ? fallback() : fallback ];
+
+		if(!params.length)
+			return [ typeof fallback === 'function' ? fallback() : fallback ];
+
+		return results;
 	};
 
 	/**
+	 * @description
 	 * Devuelve un valor o función basado en si se ingresó la flag buscada o no.
 	 * Si no se recibe ninguna entrada, se devuelve fallback.
-	 * Si callback no está definido, se devuelve el valor encontrado
-	 * @param input Los datos de entrada
-	 * @param identifier El identificador de la flag
-	 * @param output Define la respuestas en cada caso
-	 * @returns El valor de retorno de callback si la flag fue respondida, o en cambio, el de fallback
+	 * Si callback no está definido, se devuelve el valor encontrado.
+	 * @param input Los datos de entrada.
+	 * @param identifier El identificador de la flag.
+	 * @param output Define la respuestas en cada caso.
+	 * @returns El valor de retorno de callback si la flag fue respondida, o en cambio, el de fallback.
 	 */
 	fetchFlag<T extends ParamResult = ParamResult, 	N extends ParamResult = ParamResult>(input: CommandInteractionOptionResolver | Omit<CommandInteractionOptionResolver<'cached'>, 'getMessage' | 'getFocused'> | string[], identifier: string, output: FeedbackOptions<T, N> = { callback: undefined, fallback: undefined }): T | N {
 		const flag = this.flags.get(identifier);
@@ -959,18 +843,17 @@ export class CommandOptions {
 				...output
 			});
 
-		/**@type {GetMethodName}*/
 		let getMethod: GetMethodName = 'getBoolean';
 
 		if(flag.isExpressive()) {
-			if(isParamTypeStrict(flag._type))
+			if(isParamTypeStrict(flag.actualType))
 				getMethod = 'getString';
 			else
-				getMethod = paramTypes[flag._type]?.getMethod ?? 'getString';
+				getMethod = paramTypes[flag.actualType]?.getMethod ?? 'getString';
 		}
-		
+
 		const flagValue = (input[getMethod] as ((name: string) => T))(identifier);
-		
+
 		if(flagValue == undefined)
 			return output.fallback;
 
@@ -990,9 +873,9 @@ export class CommandOptions {
 	}
 };
 
-/**@class Representa un resolvedor de opciones de comando, sea este un comando de mensaje o un comandoSlash*/
+/**@class Representa un resolvedor de opciones de comando, sea este un comando de mensaje o un comandoSlash.*/
 export class CommandOptionSolver<TArgs extends CommandArguments = CommandArguments> {
-	#request: import('./typings').ComplexCommandRequest;
+	#request: ComplexCommandRequest;
 	#requestified: boolean;
 	#args: TArgs;
 	#rawArgs: string | null;
@@ -1003,9 +886,9 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	/**
 	 * @description
 	 * Crea un nuevo {@linkcode CommandOptionSolver} basado en el `request` indicado.
-	 * El tipo de argumentos es lo que ultimadamente decide el comportamiento particular de esta instancia
+	 * El tipo de argumentos es lo que ultimadamente decide el comportamiento particular de esta instancia.
 	 */
-	constructor(request: import('./typings').ComplexCommandRequest, args: TArgs, options: CommandOptions, rawArgs: string = null) {
+	constructor(request: ComplexCommandRequest, args: TArgs, options: CommandOptions, rawArgs: string = null) {
 		this.#request = request;
 		this.#requestified = false;
 		this.#args = args;
@@ -1014,7 +897,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		this.#isSlash = args instanceof CommandInteractionOptionResolver;
 	}
 
-	/**Devuelve los argumentos sin utilizar de este {@linkcode CommandOptionSolver} en texto*/
+	/**Devuelve los argumentos sin utilizar de este {@linkcode CommandOptionSolver} en texto.*/
 	get remainder() {
 		if(this.isMessageSolver(this.#args))
 			return this.#args.join(' ');
@@ -1022,14 +905,14 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		return `${this.#args}`;
 	}
 
-	/**Devuelve los argumentos de este {@linkcode CommandOptionSolver}, ya sean un array de strings o un {@linkcode CommandInteractionOptionResolver}*/
+	/**Devuelve los argumentos de este {@linkcode CommandOptionSolver}, ya sean un array de strings o un {@linkcode CommandInteractionOptionResolver}.*/
 	get args() {
 		return this.#args;
 	}
 
 	/**
 	 * Devuelve los argumentos de este {@linkcode CommandOptionSolver} como texto plano sin modificar del mensaje original.
-	 * 
+	 *
 	 * Si el comando es Slash, devuelve `null`.
 	 */
 	get rawArgs() {
@@ -1038,21 +921,21 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 
 	/**
 	 * Devuelve la cantidad de entradas de este {@linkcode CommandOptionSolver} si el mismo opera sobre un comando de mensaje.
-	 * 
+	 *
 	 * Si el comando es Slash, devuelve `-1`.
 	 */
 	get count() {
 		return this.isMessageSolver(this.#args) ? this.#args.length : -1;
 	}
 
-	/**Verifica si este {@linkcode CommandOptionSolver} opera sobre un comando de mensaje y el mismo no tiene entradas*/
+	/**Verifica si este {@linkcode CommandOptionSolver} opera sobre un comando de mensaje y el mismo no tiene entradas.*/
 	get empty() {
 		return this.isMessageSolver(this.#args) && this.#args.length === 0;
 	}
 
 	/**
 	 * @description Crea un iterador no destructivo de los argumentos de este {@linkcode CommandOptionSolver<String[]>}.
-	 * @throws {Error} Al usarse con un {@linkcode CommandOptionSolver<CommandInteractionOptionResolver>}
+	 * @throws {Error} Al usarse con un {@linkcode CommandOptionSolver<CommandInteractionOptionResolver>}.
 	 */
 	get iterator(): IterableIterator<string> {
 		if(!this.isMessageSolver(this.#args))
@@ -1073,7 +956,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 
 	/**
 	 * @description Arranca y devuelve la siguiente entrada de este {@linkcode CommandOptionSolver<String[]>}.
-	 * @throws {Error} Al usarse con un {@linkcode CommandOptionSolver<CommandInteractionOptionResolver>}
+	 * @throws {Error} Al usarse con un {@linkcode CommandOptionSolver<CommandInteractionOptionResolver>}.
 	 */
 	next(): string {
 		if(!this.isMessageSolver(this.#args))
@@ -1083,8 +966,8 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	}
 
 	/**
-	 * @description Verifica si existe una siguiente entrada en este {@linkcode CommandOptionSolver<String[]>}
-	 * @throws {Error} Al usarse con un {@linkcode CommandOptionSolver<CommandInteractionOptionResolver>}
+	 * @description Verifica si existe una siguiente entrada en este {@linkcode CommandOptionSolver<String[]>}.
+	 * @throws {Error} Al usarse con un {@linkcode CommandOptionSolver<CommandInteractionOptionResolver>}.
 	 */
 	hasNext(): boolean {
 		if(!this.isMessageSolver(this.#args))
@@ -1094,12 +977,12 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	}
 
 	//#region What is "this"
-	/**@description Indica si esto es un {@linkcode CommandOptionSolver<string[]>}*/
+	/**@description Indica si esto es un {@linkcode CommandOptionSolver<string[]>}.*/
 	isMessageSolver(args?: CommandArguments): args is string[] {
 		return !this.#isSlash;
 	}
 
-	/**@description Indica si esto es un {@linkcode CommandOptionSolver<CommandInteractionOptionResolver>}*/
+	/**@description Indica si esto es un {@linkcode CommandOptionSolver<CommandInteractionOptionResolver>}.*/
 	isInteractionSolver(args?: CommandArguments): args is CommandInteractionOptionResolver {
 		return this.#isSlash;
 	}
@@ -1107,9 +990,9 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 
 	//#region Getters
 	/**
-	 * @description Devuelve un String sin comprobar su tipo. Esto solo debe hacerse con comandos de mensaje
-	 * @param identifier El identificador del {@linkcode CommandParam}
-	 * @param getRestOfMessageWord Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
+	 * @description Devuelve un String sin comprobar su tipo. Esto solo debe hacerse con comandos de mensaje.
+	 * @param identifier El identificador del {@linkcode CommandParam}.
+	 * @param getRestOfMessageWord Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`.
 	 */
 	getStringUnchecked(identifier: string, getRestOfMessageWords: boolean = false): string | undefined {
 		if(this.isInteractionSolver(this.#args))
@@ -1120,8 +1003,8 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	}
 
 	/**
-	 * @param identifier El identificador del {@linkcode CommandParam}
-	 * @param getRestOfMessageWords Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
+	 * @param identifier El identificador del {@linkcode CommandParam}.
+	 * @param getRestOfMessageWords Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`.
 	 */
 	getString(identifier: string, getRestOfMessageWords: boolean = false): string | undefined {
 		if(this.isInteractionSolver(this.#args))
@@ -1131,10 +1014,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		return CommandOptionSolver.asString(result);
 	}
 
-	/**
-	 * @param identifier El identificador del {@linkcode CommandParam}
-	 * @param defaultValue
-	 */
+	/**@param identifier El identificador del {@linkcode CommandParam}.*/
 	getNumber(identifier: string, defaultValue: number | null = null): number | undefined {
 		if(this.isInteractionSolver(this.#args))
 			return this.#args.getNumber(identifier) ?? defaultValue;
@@ -1144,8 +1024,8 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	}
 
 	/**
-	 * @param identifier El identificador del {@linkcode CommandParam}
-	 * @param getRestOfMessageWords Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
+	 * @param identifier El identificador del {@linkcode CommandParam}.
+	 * @param getRestOfMessageWords Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`.
 	 */
 	getUser(identifier: string, getRestOfMessageWords: boolean = false): User | undefined {
 		if(this.isInteractionSolver(this.#args))
@@ -1158,8 +1038,8 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	}
 
 	/**
-	 * @param identifier El identificador del {@linkcode CommandParam}
-	 * @param getRestOfMessageWords Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
+	 * @param identifier El identificador del {@linkcode CommandParam}.
+	 * @param getRestOfMessageWords Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`.
 	 */
 	getMember(identifier: string, getRestOfMessageWords: boolean = false): GuildMember | undefined {
 		if(this.isInteractionSolver(this.#args)) {
@@ -1178,8 +1058,8 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	}
 
 	/**
-	 * @param identifier El identificador del {@linkcode CommandParam}
-	 * @param getRestOfMessageWords Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
+	 * @param identifier El identificador del {@linkcode CommandParam}.
+	 * @param getRestOfMessageWords Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`.
 	 */
 	async getGuild(identifier: string, getRestOfMessageWords: boolean = false): Promise<Guild | undefined> {
 		if(this.isInteractionSolver(this.#args))
@@ -1190,8 +1070,8 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	}
 
 	/**
-	 * @param identifier El identificador del {@linkcode CommandParam}
-	 * @param getRestOfMessageWords Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
+	 * @param identifier El identificador del {@linkcode CommandParam}.
+	 * @param getRestOfMessageWords Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`.
 	 */
 	getChannel(identifier: string, getRestOfMessageWords: boolean = false): GuildBasedChannel | undefined {
 		if(this.isInteractionSolver(this.#args)) {
@@ -1199,7 +1079,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 			const valid = channel instanceof GuildChannel;
 
 			if(!valid) return;
-			
+
 			return channel;
 		}
 
@@ -1209,9 +1089,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		return CommandOptionSolver.asChannel(result);
 	}
 
-	/**
-	 * @param identifier El identificador del {@linkcode CommandParam}
-	 */
+	/**@param identifier El identificador del {@linkcode CommandParam}.*/
 	getAttachment(identifier: string): Attachment | undefined {
 		if(this.isInteractionSolver(this.#args)) {
 			const attachment = this.#args.getAttachment(identifier);
@@ -1230,15 +1108,15 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	}
 
 	/**
-	 * @param identifier El identificador del {@linkcode CommandParam}
-	 * @param getRestOfMessageWords Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
+	 * @param identifier El identificador del {@linkcode CommandParam}.
+	 * @param getRestOfMessageWords Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`.
 	 */
 	async getMessage(identifier: string, getRestOfMessageWords: boolean = false): Promise<Message<true> | undefined> {
 		this.ensureRequistified();
 
 		if(this.isInteractionSolver(this.#args)) {
 			const message = await fetchMessage(this.#args.getString(identifier), this.#request);
-			
+
 			if(!message?.inGuild())
 				return undefined;
 
@@ -1250,8 +1128,8 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	}
 
 	/**
-	 * @param identifier El identificador del {@linkcode CommandParam}
-	 * @param getRestOfMessageWords Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`
+	 * @param identifier El identificador del {@linkcode CommandParam}.
+	 * @param getRestOfMessageWords Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`.
 	 */
 	getRole(identifier: string, getRestOfMessageWords: boolean = false): Role | undefined {
 		if(this.isInteractionSolver(this.#args)) {
@@ -1269,11 +1147,11 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		return CommandOptionSolver.asRole(result);
 	}
 
-	/**Obtiene componentes de fecha de los argumentos de mensaje.*/
+	/**@description Obtiene componentes de fecha de los argumentos de mensaje.*/
 	#getDateComponentsFromMessage() {
 		if(this.isMessageSolver(this.#args) === false)
 			throw 'Se esperaban argumentos de comando de mensaje';
-		
+
 		if(!this.#args.length)
 			return;
 
@@ -1281,7 +1159,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		const rawDateStr = fetchSentence(this.#args, 0);
 		const seps = [ '/', '.', '-' ];
 		const dateComponents = rawDateStr.split(/[/.-]/).map(d => +(d.trim()));
-		
+
 		if(dateComponents.some(d => isNaN(d))) return;
 
 		if(seps.some(s => rawDateStr.startsWith(s)))
@@ -1318,24 +1196,24 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 				}
 			}
 		}
-		
+
 		if(dateComponents.some(d => d < 1)) return;
 
 		return dateComponents;
 	}
 
 	/**
-	 * Obtiene componentes de fecha de una opción de comando Slash
-	 * @param {string} identifier El identificador del {@linkcode CommandParam}
+	 * @description Obtiene componentes de fecha de una opción de comando Slash.
+	 * @param {string} identifier El identificador del {@linkcode CommandParam}.
 	 */
 	#getDateComponentsFromInteraction(identifier: string) {
 		if(this.isInteractionSolver(this.#args) === false)
 			throw 'Se esperaban argumentos de comando Slash';
-		
+
 		const dateStr = this.#args.getString(identifier);
 		return getDateComponentsFromString(dateStr);
 	}
-	
+
 	#getRelativeDateCompatibleMessageArgs() {
 		if(this.isMessageSolver(this.#args) === false)
 			throw 'Se esperaban argumentos de comando de mensaje';
@@ -1345,10 +1223,10 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	}
 
 	/**
-	 * Obtiene un objeto {@link Date} cuyo valor equivale la fecha localizada especificada, sin componentes horarios en UTC
-	 * @param {string} identifier El identificador del {@linkcode CommandParam}
-	 * @param {import('../../i18n').LocaleKey} locale La clave del idioma en el cual interpretar la fecha
-	 * @param {string} tzCode El código de zona horaria en el que se espera la fecha a interpretar
+	 * Obtiene un objeto {@link Date} cuyo valor equivale la fecha localizada especificada, sin componentes horarios en UTC.
+	 * @param {string} identifier El identificador del {@linkcode CommandParam}.
+	 * @param {import('../../i18n').LocaleKey} locale La clave del idioma en el cual interpretar la fecha.
+	 * @param {string} tzCode El código de zona horaria en el que se espera la fecha a interpretar.
 	 */
 	getDate(identifier: string, locale: import('../../i18n').LocaleKey, tzCode: string = 'Etc/UTC') {
 		const str = this.isInteractionSolver(this.#args)
@@ -1358,24 +1236,22 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		for(const relativeDate of Object.values(relativeDates))
 			if(relativeDate.match.has(str))
 				return relativeDate.getValue(tzCode);
-		
+
 		const dateComponents = this.isInteractionSolver(this.#args)
 			? this.#getDateComponentsFromInteraction(identifier)
 			: this.#getDateComponentsFromMessage();
 
 		if(dateComponents == undefined) return;
-		
+
 		const [ a, b, c ] = dateComponents;
 		return makeDateFromComponents(a, b, c, locale, tzCode);
 	}
 
-	/**
-	 * Obtiene un texto de hora en lenguaje natural a partir de los argumentos de mensaje
-	 */
+	/**@description Obtiene un texto de hora en lenguaje natural a partir de los argumentos de mensaje.*/
 	#getTimeStringFromMessage() {
 		if(this.isMessageSolver(this.#args) === false)
 			throw 'Se esperaban argumentos de comando de mensaje';
-		
+
 		if(!this.#args.length)
 			return;
 
@@ -1388,10 +1264,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		let timeStr = rawTimeStr;
 
 		type __TimeStrMatchHandler = (x: string) => void;
-
-		/**@type {__TimeStrMatchHandler}*/
 		const emptyHandler: __TimeStrMatchHandler = () => undefined;
-		/**@type {__TimeStrMatchHandler}*/
 		const directAppendHandler: __TimeStrMatchHandler = (x) => { timeStr += x; };
 
 		const availableMatches: { [K: string]: ({ pattern: RegExp; limit: number; handler: __TimeStrMatchHandler; add?: typeof K[]; subtr?: typeof K[]; }); } = {
@@ -1431,7 +1304,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 					if(m.limit <= 0)
 						delete availableMatches[id];
 				});
-				
+
 				availableMatch.limit--;
 				if(availableMatch.limit <= 0)
 					delete availableMatches[id];
@@ -1482,7 +1355,10 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	 * * Si no se obtiene ningún valor para el poli-parámetro y {@linkcode TFallback} es `null` o `undefined`, se devuelve un array vacía.
 	 * @param identifier El identificador del poli-parámetro que representa a cada {@linkcode CommandParam} asociado.
 	 */
-	async parsePolyParam<TFallback = undefined>(identifier: string, parseOptions: PolyParamParsingOptions<TFallback> = {}): Promise<(ParamResult | TFallback)[]> {
+	async parsePolyParam<TFallback extends ParamResult | null>(
+		identifier: string,
+		parseOptions: PolyParamParsingOptions<TFallback> = {}
+	): Promise<(ParamResult | TFallback)[]> {
 		const { regroupMethod = 'SEPARATOR', messageSep = ',', fallback = undefined, failedPayload = undefined } = parseOptions;
 		const option = this.#expectParam(identifier);
 
@@ -1496,7 +1372,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 			const arrArgs = this.#regroupMessageArgs(this.#args, regroupMethod, { mentionableType, messageSep });
 			if(!arrArgs.length)
 				return this.#makePolyParamFallbackResult(fallback);
-				
+
 			const polymax = Array.isArray(option.poly) ? option.poly.length : option.polymax;
 			const results = [];
 			let i = 0;
@@ -1515,7 +1391,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 				else
 					failedPayload?.push(arrArg);
 			}
-			
+
 			return results;
 		}
 
@@ -1533,12 +1409,9 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	 * * Si se obtienen valores de usuario para el poli-parámetro, se devuelve un array cuyos valores son de tipo {@linkcode ParamResult}, correspondientes a los valores de usuario
 	 * * Si no se obtiene ningún valor para el poli-parámetro y {@linkcode TFallback} no es `null` ni `undefined`, se devuelve un array cuyo único valor es `fallback`
 	 * * Si no se obtiene ningún valor para el poli-parámetro y {@linkcode TFallback} es `null` o `undefined`, se devuelve un array vacía
-	 * @template {*} [TFallback=undefined]
-	 * @param {string} identifier El identificador del poli-parámetro que representa a cada {@linkcode CommandParam} asociado
-	 * @param {PolyParamParsingOptions<TFallback>} [parseOptions]
-	 * @returns {Array<ParamResult | TFallback>}
+	 * @param identifier El identificador del poli-parámetro que representa a cada {@linkcode CommandParam} asociado
 	 */
-	parsePolyParamSync<TFallback = undefined>(identifier: string, parseOptions: PolyParamParsingOptions<TFallback> = {}): Array<ParamResult | TFallback> {
+	parsePolyParamSync<TFallback extends ParamResult | null = undefined>(identifier: string, parseOptions: PolyParamParsingOptions<TFallback> = {}): Array<ParamResult | TFallback> {
 		const { regroupMethod = 'SEPARATOR', messageSep = ',', fallback = undefined, failedPayload = undefined } = parseOptions;
 		const option = this.#expectParam(identifier);
 
@@ -1552,11 +1425,11 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 			const arrArgs = this.#regroupMessageArgs(this.#args, regroupMethod, { mentionableType, messageSep });
 			if(!arrArgs.length)
 				return this.#makePolyParamFallbackResult(fallback);
-				
+
 			const polymax = Array.isArray(option.poly) ? option.poly.length : option.polymax;
 			const results = [];
 			let i = 0;
-			let arrArg;
+			let arrArg: string;
 			while(arrArgs.length && (arrArg = arrArgs[i], i++) < polymax) {
 				let result;
 
@@ -1571,36 +1444,25 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 				else
 					failedPayload?.push(arrArg);
 			}
-			
+
 			return results;
 		}
 
 		const method = (Array.isArray(option.type) || isParamTypeStrict(option.type))
-			? this.#args.getString
-			: (this.#args[paramTypes[option.type].getMethod]);
+			? this.#args.getString as CommandArgumentGetFunction<string>
+			: (this.#args[paramTypes[option.type].getMethod as GetMethodName] as CommandArgumentGetFunction);
 
 		return this.#options
 			.fetchParamPoly(this.#args, identifier, method, fallback)
 			.filter(input => input != null);
 	}
 
-	/**
-	 * @template {*} [TFallback=undefined]
-	 * @param {TFallback} fallback 
-	 * @returns {Array<TFallback>}
-	 */
 	#makePolyParamFallbackResult<TFallback = undefined>(fallback: TFallback): Array<TFallback> {
 		return fallback != undefined
 			? [ (typeof fallback === 'function') ? fallback() : fallback ]
 			: [];
 	}
 
-	/**
-	 * 
-	 * @param {string[]} args 
-	 * @param {RegroupMethod} regroupMethod 
-	 * @param {{ mentionableType?: ParamType | Array<ParamType>, messageSep?: String }} [options] 
-	 */
 	#regroupMessageArgs(args: string[], regroupMethod: RegroupMethod, options: { mentionableType?: ParamType | Array<ParamType>; messageSep?: string; } = {}) {
 		const { mentionableType: type = 'USER', messageSep: sep = ',' } = options;
 
@@ -1632,10 +1494,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		}
 	}
 
-	/**
-	 * Devuelve `true` si se ingresó la bandera especificada, o `false` de lo contrario
-	 * @param {string} identifier
-	 */
+	/**@description Devuelve `true` si se ingresó la bandera especificada, o `false` de lo contrario.*/
 	hasFlag(identifier: string) {
 		if(this.isInteractionSolver(this.#args))
 			return this.#args.getBoolean(identifier) ?? false;
@@ -1652,7 +1511,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		);
 	}
 
-	/**Devuelve el valor ingresado como un string si se ingresó la bandera especificada. De lo contrario, se devuelve `fallback` o `undefined`*/
+	/**Devuelve el valor ingresado como un string si se ingresó la bandera especificada. De lo contrario, se devuelve `fallback` o `undefined`.*/
 	parseFlagExpr(identifier: string, fallback: string = undefined) {
 		return CommandOptionSolver.asString(this.#options.fetchFlag(
 			this.#args,
@@ -1666,7 +1525,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 
 	/**
 	 * @description
-	 * Devuelve {@linkcode TResult} si se ingresó la bandera especificada, o {@linkcode TFallback} de lo contrario
+	 * Devuelve {@linkcode TResult} si se ingresó la bandera especificada, o {@linkcode TFallback} de lo contrario.
 	 */
 	flagIf<TResult extends ParamResult, TFallback extends ParamResult = undefined>(identifier: string, positiveResult: TResult, negativeResult: TFallback = undefined): TResult | TFallback {
 		return this.#options.fetchFlag(
@@ -1679,10 +1538,10 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		);
 	}
 
-	/**@description Devuelve el valor ingresado como un string si se ingresó la bandera especificada, o `undefined` de lo contrario*/
+	/**@description Devuelve el valor ingresado como un string si se ingresó la bandera especificada, o `undefined` de lo contrario.*/
 	flagExprIf(identifier: string): ReturnType<FlagCallback<string>> | undefined;
 
-	/**@description Devuelve un valor de tipo {@linkcode TResult} si se ingresó la bandera especificada, o {@linkcode TFallback} de lo contrario*/
+	/**@description Devuelve un valor de tipo {@linkcode TResult} si se ingresó la bandera especificada, o {@linkcode TFallback} de lo contrario.*/
 	flagExprIf<TResult extends ParamResult, TFallback extends ParamResult = undefined>(identifier: string, callback: FlagCallback<TResult>, fallback?: TFallback): ReturnType<FlagCallback<TResult>> | TFallback;
 
 	flagExprIf<TResult extends ParamResult, TFallback extends ParamResult = undefined>(
@@ -1710,7 +1569,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 			throw `Se esperaba el tipo de parámetro: Boolean, pero se recibió: ${typeof paramResult}`;
 		return paramResult;
 	}
-	
+
 	static asBooleans(paramResults: ParamResult[]) {
 		return paramResults.map(r => CommandOptionSolver.asBoolean(r));
 	}
@@ -1721,7 +1580,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 			throw `Se esperaba el tipo de parámetro: String, pero se recibió: ${typeof paramResult}`;
 		return paramResult;
 	}
-	
+
 	static asStrings(paramResults: ParamResult[]) {
 		return paramResults.map(r => CommandOptionSolver.asString(r));
 	}
@@ -1732,7 +1591,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 			throw `Se esperaba el tipo de parámetro: Number, pero se recibió: ${typeof paramResult}`;
 		return paramResult;
 	}
-	
+
 	static asNumbers(paramResults: ParamResult[]) {
 		return paramResults.map(r => CommandOptionSolver.asNumber(r));
 	}
@@ -1743,7 +1602,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 			throw `Se esperaba el tipo de parámetro: User, pero se recibió: ${typeof paramResult}`;
 		return paramResult;
 	}
-	
+
 	static asUsers(paramResults: ParamResult[]) {
 		return paramResults.map(r => CommandOptionSolver.asUser(r));
 	}
@@ -1754,7 +1613,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 			throw `Se esperaba el tipo de parámetro: GuildMember, pero se recibió: ${typeof paramResult}`;
 		return paramResult;
 	}
-	
+
 	static asMembers(paramResults: ParamResult[]) {
 		return paramResults.map(r => CommandOptionSolver.asMember(r));
 	}
@@ -1776,7 +1635,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 			throw `Se esperaba el tipo de parámetro: Guild, pero se recibió: ${typeof paramResult}`;
 		return paramResult;
 	}
-	
+
 	static asGuilds(paramResults: ParamResult[]) {
 		return paramResults.map(r => CommandOptionSolver.asGuild(r));
 	}

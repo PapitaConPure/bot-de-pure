@@ -2,6 +2,7 @@ import { ContextMenuAction } from '../Commons/actionBuilder';
 import { pourSauce } from '../../systems/others/saucenao';
 import SauceNAOUser from '../../models/saucenaoUsers';
 import { Translator } from '../../i18n';
+import { Attachment } from 'discord.js';
 
 const action = new ContextMenuAction('actionFindSource', 'Message')
     .setMessageResponse(async interaction => {
@@ -18,7 +19,7 @@ const action = new ContextMenuAction('actionFindSource', 'Message')
 
         const messageAttachments = message.attachments
             ? [ ...message.attachments.values() ]
-            : /**@type {Array<import('discord.js').Attachment>}*/([]);
+            : [] as Attachment[];
 		
 		const attachmentUrls = messageAttachments.map(att => att.url);
 		const otherMessageUrls = message.embeds
