@@ -5,6 +5,7 @@ import { Client, Collection, Guild, GuildBasedChannel, GuildTextBasedChannel, Me
 import { globalConfigs, booruApiKey, booruUserId, noDataBase } from '../../data/globalProps';
 import { fetchGuildMembers } from '../../utils/guildratekeeper';
 import { auditError, auditAction } from '../others/auditor';
+import { minutesToMilliseconds } from 'date-fns';
 import { paginateRaw } from '../../func';
 import chalk from 'chalk';
 
@@ -20,9 +21,13 @@ export interface FeedData extends PostFormatData {
 //Configuraciones globales de actualización de Feeds
 export const feedTagSuscriptionsCache: Map<Snowflake, Map<Snowflake, Array<string>>> = new Map();
 
-const FEED_UPDATE_INTERVAL = 60e3 * 30;
-const FEED_UPDATE_MAX_POST_COUNT = 32;
-const FEED_BATCH_MAX_COUNT = 5;
+/**@description Intervalo base de actualización de feeds.*/
+export const FEED_UPDATE_INTERVAL = minutesToMilliseconds(30);
+/**@description Máxima cantidad de posts por actualización de cada feed individual.*/
+export const FEED_UPDATE_MAX_POST_COUNT = 32;
+/**@description Máxima cantidad de feeds por bache de actualización.*/
+export const FEED_BATCH_MAX_COUNT = 5;
+/**@description Si mostrar más mensajes de log que los esenciales.*/
 const LOG_MORE = false;
 
 async function updateBooruFeeds(guilds: Collection<Snowflake, Guild>): Promise<void> {
@@ -33,7 +38,7 @@ async function updateBooruFeeds(guilds: Collection<Snowflake, Guild>): Promise<v
     Booru.cleanupTagsCache();
 
     const delayMs = Date.now() - startMs;
-    setTimeout(updateBooruFeeds, 60e3 * 30 - delayMs, guilds);
+    setTimeout(updateBooruFeeds, FEED_UPDATE_INTERVAL - delayMs, guilds);
     auditAction('Se procesaron Feeds',
         { name: 'Servers', value: `${guilds.size}`, inline: true },
     );
@@ -151,28 +156,38 @@ export async function setupGuildFeedUpdateStack(client: Client) {
 
     const feedUpdateStart = getNextBaseUpdateStart();
     const guildConfigs = await GuildConfigs.find({ feeds: { $exists: true } });
-    /**@type {Array<GuildFeedChunk>}*/
-    const guildChunks: Array<GuildFeedChunk> = paginateRaw(client.guilds.cache.filter(guild => guildConfigs.some(gcfg => gcfg.guildId === guild.id)), FEED_BATCH_MAX_COUNT)
-        .map((g) => ({ tid: null, guilds: g, timestamp: null }));
-    const chunkAmount = guildChunks.length;
+
+    const feedChunks = paginateRaw(
+        client.guilds.cache
+            .filter(guild => guildConfigs.some(gcfg => gcfg.guildId === guild.id)), FEED_BATCH_MAX_COUNT)
+            .map((g) => ({ tid: null, guilds: g, timestamp: null } as GuildFeedChunk)
+    );
+
+    const feedCount = guildConfigs
+        .filter(gcfg => gcfg.feeds?.size)
+        .map(gcfg => Object.keys(gcfg.feeds).length)
+        .reduce((previous, current) => previous + current, 0);
+    const chunkCount = feedChunks.length;
+
     let shortestTime = 0;
-    guildChunks.forEach((chunk, i) => {
+    feedChunks.forEach((chunk, i) => {
         const guilds = new Collection(chunk.guilds);
-        let chunkUpdateStart = feedUpdateStart + FEED_UPDATE_INTERVAL * (i / chunkAmount);
+        let chunkUpdateStart = feedUpdateStart + FEED_UPDATE_INTERVAL * (i / chunkCount);
         if((chunkUpdateStart - FEED_UPDATE_INTERVAL) > 0)
             chunkUpdateStart -= FEED_UPDATE_INTERVAL;
         if(!shortestTime || chunkUpdateStart < shortestTime)
             shortestTime = chunkUpdateStart;
 
-        guildChunks[i].tid = setTimeout(updateBooruFeeds, chunkUpdateStart, guilds);
-        guildChunks[i].timestamp = new Date(Date.now() + chunkUpdateStart);
+        feedChunks[i].tid = setTimeout(updateBooruFeeds, chunkUpdateStart, guilds);
+        feedChunks[i].timestamp = new Date(Date.now() + chunkUpdateStart);
     });
-    globalConfigs['feedGuildChunks'] = guildChunks;
+    globalConfigs['feedGuildChunks'] = feedChunks;
+    LOG_MORE && console.log({ feedChunks, feedCount, chunkCount, shortestTime });
 
     auditAction('Se prepararon Feeds',
         { name: 'Primer Envío',   value: `<t:${Math.floor((Date.now() + shortestTime) * 0.001)}:R>`, inline: true },
         { name: 'Intervalo Base', value: `${FEED_UPDATE_INTERVAL / 60e3} minutos`,                   inline: true },
-        { name: 'Subdivisiones',  value: `${chunkAmount}`,                                           inline: true },
+        { name: 'Subdivisiones',  value: `${chunkCount}`,                                           inline: true },
     );
 
     return;
@@ -269,7 +284,7 @@ export function updateFollowedFeedTagsCache(userId: Snowflake, channelId: Snowfl
     return;
 }
 
-interface FeedOptions {
+export interface FeedOptions {
     lastFetchedAt?: Date;
     faults?: number;
     maxTags?: number;
@@ -297,7 +312,7 @@ export class BooruFeed {
      * @description Crea una representación de un Feed programado de imágenes de {@linkcode Booru}.
      * @throws {TypeError}
      */
-    constructor(booru: Booru, channel: GuildBasedChannel, tags: string, options = undefined) {
+    constructor(booru: Booru, channel: GuildBasedChannel, tags: string, options: FeedOptions = undefined) {
         this.booru = booru;
         this.channel = channel?.isTextBased() ? channel : null;
         this.tags = tags;
