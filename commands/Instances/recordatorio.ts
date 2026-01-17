@@ -289,7 +289,7 @@ const command = new Command('recordatorio', tags)
 			});
 		}
 
-		if(reminderContent.length > 960)
+		if(reminderContent?.length > 960)
 			return request.reply({
 				flags: MessageFlags.Ephemeral,
 				content: translator.getText('recordarReminderContentTooLong'),
