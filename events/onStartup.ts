@@ -116,7 +116,7 @@ export async function onStartup(client: import('discord.js').Client) {
 		const mongoUri: string = process.env.MONGODB_URI ?? (require(envPath)?.dburi);
 		set("strictQuery", false);
 		connect(mongoUri, {
-			//@ts-expect-error
+			//@ts-expect-error Quizá sí existen estas 2
 			useUnifiedTopology: true,
 			useNewUrlParser: true,
 		});
