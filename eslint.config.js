@@ -18,6 +18,10 @@ export default defineConfig([
       '@typescript-eslint/no-unused-expressions': 'off',
       '@typescript-eslint/no-require-imports': 'off',
       'no-sparse-arrays': 'off',
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+      ]
     },
   },
 ]);
