@@ -1,19 +1,19 @@
 {
     "compilerOptions": {
         "target": "ES2023",
-        "checkJs": true,
         "module": "CommonJS",
         "moduleResolution": "node",
-        "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
+        "checkJs": true,
+		"removeComments": false,
+        "resolveJsonModule": true,
         "paths": {
             "types": ["./types.ts"]
         }
     },
     "exclude": [
         "node_modules",
-        "CommandBuilder",
         "PS Docs"
     ],
 }
