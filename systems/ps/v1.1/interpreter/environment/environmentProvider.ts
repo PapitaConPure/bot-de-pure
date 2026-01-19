@@ -325,13 +325,13 @@ export class PSMember {
 }
 
 /**@description Un adaptador de plataforma específica de funcionalidades de PuréScript.*/
-export interface EnvironmentProvider {
-	getGuild(): PSGuild;
-	getChannel(): PSChannel;
-	getUser(): PSUser;
-	getMember(): PSMember;
-	fetchChannel(query: string): PSChannel | null;
-	fetchRole(query: string): PSRole | null;
-	fetchMember(query: string): PSMember | null;
+export abstract class EnvironmentProvider {
+	abstract getGuild(): PSGuild;
+	abstract getChannel(): PSChannel;
+	abstract getUser(): PSUser;
+	abstract getMember(): PSMember;
+	abstract fetchChannel(query: string): PSChannel | null;
+	abstract fetchRole(query: string): PSRole | null;
+	abstract fetchMember(query: string): PSMember | null;
 	// makeEmbedBuilder(embedData: EmbedData);
 }
