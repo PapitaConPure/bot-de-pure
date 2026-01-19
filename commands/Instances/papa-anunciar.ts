@@ -30,7 +30,7 @@ const command = new Command('papa-anunciar', tags)
 					value: announcement,
 				});
 
-			guild.systemChannel?.send({ embeds: [embed] }).catch(console.error);
+			guild.systemChannel?.send({ embeds: [ embed ] }).catch(console.error);
 		});
 	});
 

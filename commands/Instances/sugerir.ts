@@ -30,7 +30,7 @@ const command = new Command('sugerir', tags)
 				},
 			);
 
-		return request.reply({ embeds: [embed] });
+		return request.reply({ embeds: [ embed ] });
 	});
 
 export default command;

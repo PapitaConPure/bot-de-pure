@@ -15,32 +15,32 @@ const options = new CommandOptions()
 
 				if(queryMatch) {
 					const [ , dices, faces ] = queryMatch;
-					return interaction.respond([{
+					return interaction.respond([ {
 						name: `${dices}d${faces}`,
 						value: `${dices}d${faces}`,
-					}]);
+					} ]);
 				}
 
 				queryMatch = query.match(/(.*)[Dd](.*)/);
-				if(!queryMatch) return interaction.respond([{
+				if(!queryMatch) return interaction.respond([ {
 					name: '1d6',
 					value: '1d6',
-				}]);
+				} ]);
 
 				const [ , dices, faces ] = queryMatch;
 
 				const dd = (isNaN(+dices) || !+dices)
 					? ({ name: '❌', value: 1 })
 					: ({ name: dices.trim(), value: +dices });
-					
+
 				const ff = (isNaN(+faces) || !+faces)
 					? ({ name: '❌', value: 6 })
 					: ({ name: faces.trim(), value: +faces });
 
-				return interaction.respond([{
+				return interaction.respond([ {
 					name:  `${dd.name}d${ff.name}`,
 					value: `${dd.value}d${ff.value}`,
-				}]);
+				} ]);
 			}),
 	);
 
@@ -77,7 +77,7 @@ const command = new Command('dados', flags)
 			.map(parseDice);
 
 		if(dices.some(dice => dice == null))
-			return request.reply({ content: '⚠️ Entrada inválida' })
+			return request.reply({ content: '⚠️ Entrada inválida' });
 
 		const embed = new EmbedBuilder()
 			.setColor(0x3f4581)
@@ -91,14 +91,14 @@ const command = new Command('dados', flags)
 				name: 'Total',
 				value: `${dices.map(dice => dice.t).reduce((a,b) => a + b)}`,
 			});
-		
-		return request.reply({ embeds: [embed] })
-		.catch(() => { request.reply({ content: '⚠️ Entrada inválida' }); });
+
+		return request.reply({ embeds: [ embed ] })
+			.catch(() => { request.reply({ content: '⚠️ Entrada inválida' }); });
 	});
 
 function parseDice(diceInput: RegExpMatchArray): { d: number; f: number; r: Array<number>; t: number; } {
 	if(!diceInput) return;
-	
+
 	const [ , dices, faces ] = diceInput;
 	const diceNumber = +dices;
 	const faceNumber = +faces;
@@ -108,7 +108,7 @@ function parseDice(diceInput: RegExpMatchArray): { d: number; f: number; r: Arra
 
 	const r = Array(+dices).fill(null).map(() => randRange(1, +faces + 1));
 	const t = r.reduce((a, b) => a + b);
-	
+
 	return ({
 		d: diceNumber,
 		f: faceNumber,

@@ -13,7 +13,7 @@ function utcStartOfTzDay<DateType extends Date, ResultDate extends Date = DateTy
 	const startOfTodayTZnoUTCHours = new UTCDate(startOfTodayTZ.setUTCHours(0, 0, 0, 0));
 	console.log({ startOfTodayTZ, startOfTodayTZnoUTCHours });
 	return startOfTodayTZnoUTCHours;
-};
+}
 
 /**@param sanitizedTzCode Código de zona horaria sanitizado (UTC por defecto)*/
 export const utcStartOfTzToday     = (sanitizedTzCode: string = 'Etc/UTC') => utcStartOfTzDay(Date.now(), { in: tz(sanitizedTzCode) });
@@ -94,12 +94,12 @@ export function getDateComponentsFromString(str: string) {
 
 	const seps = [ '/', '.', '-' ];
 	const dateComponents = str.split(/[/.-]/).map(d => +(d.trim()));
-	
+
 	if(dateComponents.some(d => isNaN(d))) return;
 
 	if(seps.some(s => str.startsWith(s)) || seps.some(s => str.endsWith(s)))
 		return;
-	
+
 	return dateComponents;
 }
 
@@ -146,14 +146,14 @@ export function parseDateFromNaturalLanguage(str: string, locale: import('../i18
 
 	for(const relativeDate of Object.values(relativeDates))
 		if(relativeDate.match.has(str)) {
-			console.log({z: sanitizedTzCode})
+			console.log({z: sanitizedTzCode});
 			return relativeDate.getValue(sanitizedTzCode);
 		}
 
 	const dateComponents = getDateComponentsFromString(str);
 
 	if(dateComponents == undefined) return invalidDate();
-	
+
 	const [ a, b, c ] = dateComponents;
 	return makeDateFromComponents(a, b, c, locale, sanitizedTzCode);
 }
@@ -178,7 +178,7 @@ export function parseTimeFromNaturalLanguage(str: string, utcOffset: number = 0)
 			return addMinutes(relativeTime.getValue(), -utcOffset);
 
 	str = str.replace(/\s+/g, '');
-		
+
 	const timeComponents = { h: 0, m: 0, s: 0, ms: 0 };
 	const rangesInclusive = {
 		h: [ 0, 24 ],
@@ -186,7 +186,7 @@ export function parseTimeFromNaturalLanguage(str: string, utcOffset: number = 0)
 		s: [ 0, 59 ],
 		ms: [ 0, 999 ],
 	};
-	
+
 	let hoursPeriodOffset = 0;
 
 	if(!isNaN(+str)) { //Hora militar sencilla: HHmmss
@@ -218,7 +218,7 @@ export function parseTimeFromNaturalLanguage(str: string, utcOffset: number = 0)
 
 		if(usesGozen && !(str.startsWith(gozen) || str.endsWith(gozen)))
 			return invalidDate();
-		
+
 		if(usesGogo && !(str.startsWith(gogo) || str.endsWith(gogo)))
 			return invalidDate();
 
@@ -226,10 +226,10 @@ export function parseTimeFromNaturalLanguage(str: string, utcOffset: number = 0)
 		const hMatch = str.match(/([0-9]{1,2})時/);
 		const mMatch = str.match(/([0-9]{1,2})分/);
 		const sMatch = str.match(/([0-9]{1,2})(?:\.([0-9]{1,3}))?秒/);
-		
+
 		if(usesHan && (mMatch || sMatch || !str.endsWith(han)))
 			return invalidDate();
-		
+
 		if(!hMatch)
 			return invalidDate();
 
@@ -276,7 +276,7 @@ export function parseTimeFromNaturalLanguage(str: string, utcOffset: number = 0)
 
 		if(meridiem1 && meridiem2)
 			return invalidDate();
-			
+
 		timeComponents.h = +h;
 		timeComponents.m = +(m || 0);
 		timeComponents.s = +(s || 0);
@@ -286,7 +286,7 @@ export function parseTimeFromNaturalLanguage(str: string, utcOffset: number = 0)
 		const isPostMeridiem = (meridiem1 === 'pm' || meridiem2 === 'pm');
 
 		if(isShortFormat) {
-			rangesInclusive.h = [1, 12];
+			rangesInclusive.h = [ 1, 12 ];
 			if(timeComponents.h === 12) hoursPeriodOffset -= 12;
 			if(isPostMeridiem) hoursPeriodOffset += 12;
 		} else

@@ -7,15 +7,15 @@
 const bigIntField = (n: number | bigint) => 2n ** BigInt(n);
 
 export const CommandTag = ({
-	COMMON      : bigIntField( 1),
-	MOD         : bigIntField( 2),
-	EMOTE       : bigIntField( 3),
-	MEME        : bigIntField( 4),
-	CHAOS       : bigIntField( 5),
-	GAME        : bigIntField( 6),
-	MAINTENANCE : bigIntField( 7),
-	OUTDATED    : bigIntField( 8),
-	GUIDE       : bigIntField( 9),
+	COMMON      : bigIntField(1),
+	MOD         : bigIntField(2),
+	EMOTE       : bigIntField(3),
+	MEME        : bigIntField(4),
+	CHAOS       : bigIntField(5),
+	GAME        : bigIntField(6),
+	MAINTENANCE : bigIntField(7),
+	OUTDATED    : bigIntField(8),
+	GUIDE       : bigIntField(9),
 	PAPA        : bigIntField(10),
 	SAKI        : bigIntField(11),
 	MUSIC       : bigIntField(12),
@@ -44,7 +44,7 @@ function resolveTagNumber(tag: CommandTagResolvable | CommandTagResolvable[]): b
 
 	if(Array.isArray(tag))
 		return resolveTagNumber(tag.reduce((a, b) => resolveTagNumber(a) | resolveTagNumber(b), 0n));
-		
+
 	throw new TypeError(`Se recibió una etiqueta de comando cuyo tipo es inválido: ${tag} (${typeof tag})`);
 }
 
@@ -59,7 +59,7 @@ export class CommandTags {
 	 */
 	constructor(bitfield: CommandTagResolvable = 0n) {
 		this.#bitfield = resolveTagNumber(bitfield);
-	};
+	}
 
 	/**
 	 * @description
@@ -69,7 +69,7 @@ export class CommandTags {
 	add(...flags: CommandTagResolvable[]) {
 		this.#bitfield |= resolveTagNumber(flags);
 		return this;
-	};
+	}
 
 	/**
 	 * @description
@@ -78,7 +78,7 @@ export class CommandTags {
 	 */
 	has(flag: CommandTagResolvable | CommandTagResolvable[]) {
 		return !!(this.#bitfield & resolveTagNumber(flag));
-	};
+	}
 
 	/**
 	 * @description
@@ -87,7 +87,7 @@ export class CommandTags {
 	 */
 	any(...flags: (CommandTagResolvable | CommandTagResolvable[])[]) {
 		return flags.some(flag => this.has(flag));
-	};
+	}
 
 	/**
 	 * @description
@@ -96,11 +96,11 @@ export class CommandTags {
 	 */
 	all(...flags: (CommandTagResolvable | CommandTagResolvable[])[]) {
 		return flags.every(flag => this.has(flag));
-	};
+	}
 
 	get bitfield() {
 		return this.#bitfield;
-	};
+	}
 
 	/**@description Valores decimales individuales de las Meta Flags existentes en el conjunto, ordenadas de mayor a menor*/
 	get rawValues() {
@@ -112,15 +112,15 @@ export class CommandTags {
 			if(value) values.push(value);
 			i = i >> 1n;
 		}
-		
+
 		return values;
-	};
+	}
 
 	get keys(): CommandTagStringField[] {
 		return metaFlagValues.filter(key => this.has(key));
-	};
+	}
 
 	toString() {
 		return `CommandTags{${this.#bitfield}}`;
 	}
-};
+}

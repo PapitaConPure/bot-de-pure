@@ -6,10 +6,10 @@ const tags = new CommandTags().add('COMMON');
 
 const command = new Command('gatos', tags)
 	.setAliases(
-        'gato', 'felino', 'gatito', 'gatitos', 'miau', 'michi', 'michis',
-        'cats', 'cat', 'meow', 'kitty', 'kitties',
+		'gato', 'felino', 'gatito', 'gatitos', 'miau', 'michi', 'michis',
+		'cats', 'cat', 'meow', 'kitty', 'kitties',
 		'neko', 'nya',
-    )
+	)
 	.setLongDescription('Muestra imágenes de gatitos')
 	.setLongDescription(
 		'Muestra imágenes de gatitos.',
@@ -38,7 +38,7 @@ const command = new Command('gatos', tags)
 
 			return request.reply({
 				flags: MessageFlags.IsComponentsV2,
-				components: [container],
+				components: [ container ],
 			});
 		} catch(err) {
 			if(!(err instanceof AxiosError))
@@ -55,7 +55,7 @@ const command = new Command('gatos', tags)
 
 			return request.reply({
 				flags: MessageFlags.IsComponentsV2,
-				components: [container],
+				components: [ container ],
 			});
 		}
 	});

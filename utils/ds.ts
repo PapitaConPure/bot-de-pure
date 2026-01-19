@@ -25,7 +25,7 @@ export class Stack<T> {
 		if(this.#head == null) {
 			this.#head = node;
 		} else {
-			const temp = this.#head
+			const temp = this.#head;
 			this.#head = node;
 			this.#head.next = temp;
 		}

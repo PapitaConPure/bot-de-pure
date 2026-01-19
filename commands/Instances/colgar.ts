@@ -32,8 +32,8 @@ const command = new Command('colgar', tags)
 				.setTitle('Colgar a todos')
 				.addFields({ name: 'Confirmar operación', value: '¿Quieres colgar o descolgar a todos?' });
 			return request.reply({
-				embeds: [embed],
-				components: [makeButtonRowBuilder().addComponents(
+				embeds: [ embed ],
+				components: [ makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId(`colgar_addHanged_${user.id}`)
 						.setLabel('Colgar')
@@ -46,7 +46,7 @@ const command = new Command('colgar', tags)
 						.setCustomId(`colgar_cancelHanged_${user.id}`)
 						.setEmoji('1355143793577426962')
 						.setStyle(ButtonStyle.Secondary),
-				)],
+				) ],
 			});
 		}
 
@@ -57,9 +57,9 @@ const command = new Command('colgar', tags)
 		const wasHanged = !member.roles.cache.has(hangedDollId);
 		let err: string;
 		if(wasHanged)
-			await member.roles.add(hangedDollId, `Colgado por ${user.tag}`).catch(() => { err = 'Oe oe espérate conchetumare eri muy poderoso wtf' });
-		else 
-			await member.roles.remove(member.roles.cache.find(r => r.id === hangedDollId)).catch(() => { err = 'wtf dios mío qué está pasando' });
+			await member.roles.add(hangedDollId, `Colgado por ${user.tag}`).catch(() => { err = 'Oe oe espérate conchetumare eri muy poderoso wtf'; });
+		else
+			await member.roles.remove(member.roles.cache.find(r => r.id === hangedDollId)).catch(() => { err = 'wtf dios mío qué está pasando'; });
 
 		if(err) return request.reply({ content: err });
 
@@ -77,7 +77,7 @@ const command = new Command('colgar', tags)
 			.setImage('https://i.imgur.com/RVsStid.png')
 			.addFields({ name: 'Se colgó a todos los miembros', value: 'Felicidades, Alice' });
 		await interaction.update({
-			embeds: [embed],
+			embeds: [ embed ],
 			components: [],
 		});
 		return Promise.all(interaction.guild.members.cache.filter(member => !member.user.bot).map(member => member.roles.add(hangedDollId, `Colgado por ${interaction.user.tag}`)));
@@ -89,7 +89,7 @@ const command = new Command('colgar', tags)
 			.setTitle('Colgada en Masa deshecha')
 			.addFields({ name: 'Se descolgó a todos los miembros', value: 'Si siguen vivos, bien por ellos~' });
 		await interaction.update({
-			embeds: [embed],
+			embeds: [ embed ],
 			components: [],
 		});
 		return Promise.all(interaction.guild.members.cache.filter(member => !member.user.bot).map(member =>
@@ -105,7 +105,7 @@ const command = new Command('colgar', tags)
 			.setTitle('Colgada en Masa cancelada')
 			.addFields({ name: 'Se canceló la operación', value: 'Supongo que van a vivir (o no) un día más' });
 		return interaction.update({
-			embeds: [embed],
+			embeds: [ embed ],
 			components: [],
 		});
 	});

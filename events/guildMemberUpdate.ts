@@ -24,7 +24,7 @@ function handleError(error: Error, guild: Discord.Guild, user: Discord.User, err
 		.addFields({ name: errorMessage || 'Error', value: `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\`` });
 	globalConfigs.logch.send({
 		content: `<@${userIds.papita}>`,
-		embeds: [errorEmbed],
+		embeds: [ errorEmbed ],
 	});
 }
 

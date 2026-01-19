@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder } = require('discord.js');
 
 const fileRegex = /(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_/.0-9#:?=&;,]*\.(txt|png|jpg|jpeg|webp|gif|webm|mp4|mp3|wav|flac|ogg)[a-zA-Z-_.0-9#:?=&;,]*/;
 const imageRegex = /(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_/.0-9#:?=&;,]*\.(png|jpg|jpeg|webp)[a-zA-Z-_.0-9#:?=&;,]*/;
@@ -29,48 +29,48 @@ const LanguageDataTypes = /**@type {const}*/({
 
 //#region Lexer
 const LexerTokenTypes = /**@type {const}*/({
-    Statement: 'STATEMENT',
+	Statement: 'STATEMENT',
 
-    BlockOpen:       'BLOCK_OPEN',
-    BlockClose:      'BLOCK_CLOSE',
-    ConditionOpen:   'CONDITION_OPEN',
-    ConditionChange: 'CONDITION_CHANGE',
-    While:           'WHILE',
-    DoOpen:          'DO_OPEN',
-    DoClose:         'DO_CLOSE',
-    Repeat:          'REPEAT',
-    RepeatOpen:      'REPEAT_OPEN',
-    For:             'FOR',
-    In:              'IN',
-    
-    Comma:       'COMMA',
-    GroupOpen:  'GROUP_OPEN',
-    GroupClose: 'GROUP_CLOSE',
+	BlockOpen:       'BLOCK_OPEN',
+	BlockClose:      'BLOCK_CLOSE',
+	ConditionOpen:   'CONDITION_OPEN',
+	ConditionChange: 'CONDITION_CHANGE',
+	While:           'WHILE',
+	DoOpen:          'DO_OPEN',
+	DoClose:         'DO_CLOSE',
+	Repeat:          'REPEAT',
+	RepeatOpen:      'REPEAT_OPEN',
+	For:             'FOR',
+	In:              'IN',
 
-    Assign:      'ASSIGN',
-    Equals:      'EQUALS',
-    Compare:     'COMPARE',
-    Not:         'NOT',
-    And:         'AND',
-    Or:          'OR',
-    Combination: 'COMBINATION',
-    Factor:      'FACTOR',
-    Power:       'POWER',
-    Arrow:       'ARROW',
-    Colon:       'COLON',
+	Comma:       'COMMA',
+	GroupOpen:  'GROUP_OPEN',
+	GroupClose: 'GROUP_CLOSE',
 
-    Identifier: 'IDENTIFIER',
-    Number:     'NUMBER',
-    Text:       'TEXT',
-    Boolean:    'BOOLEAN',
-    List:       'LIST',
-    Input:      'INPUT',
-    Glossary:   'GLOSSARY',
-    Embed:      'EMBED',
-    Nada:       'NADA',
-    DataType:   'DATA_TYPE',
+	Assign:      'ASSIGN',
+	Equals:      'EQUALS',
+	Compare:     'COMPARE',
+	Not:         'NOT',
+	And:         'AND',
+	Or:          'OR',
+	Combination: 'COMBINATION',
+	Factor:      'FACTOR',
+	Power:       'POWER',
+	Arrow:       'ARROW',
+	Colon:       'COLON',
 
-    EoF: 'EOF',
+	Identifier: 'IDENTIFIER',
+	Number:     'NUMBER',
+	Text:       'TEXT',
+	Boolean:    'BOOLEAN',
+	List:       'LIST',
+	Input:      'INPUT',
+	Glossary:   'GLOSSARY',
+	Embed:      'EMBED',
+	Nada:       'NADA',
+	DataType:   'DATA_TYPE',
+
+	EoF: 'EOF',
 });
 /**@typedef {import("types").ValuesOf<LexerTokenTypes>} LexerTokenType*/
 
@@ -153,12 +153,12 @@ const ParserNodeTypes = /**@type {const}*/({
 /**@typedef {import("types").ValuesOf<typeof ParserNodeTypes>} ParserNodeType*/
 
 /**
- * 
- * @param {Partial<typeof ParserNodeTypes>} parserNodeCategory 
- * @param {ParserNodeType} parserNodeType 
+ *
+ * @param {Partial<typeof ParserNodeTypes>} parserNodeCategory
+ * @param {ParserNodeType} parserNodeType
  */
 function parserNodeWithin(parserNodeCategory, parserNodeType) {
-	return Object.values(parserNodeCategory).includes(parserNodeType)
+	return Object.values(parserNodeCategory).includes(parserNodeType);
 }
 
 /**
@@ -190,7 +190,7 @@ function parserNodeWithin(parserNodeCategory, parserNodeType) {
  * @typedef {BaseParserLiteralNode<'TextLiteral'> & ParserLiteralData<string>} ParserTextLiteralNode
  * @typedef {BaseParserLiteralNode<'BooleanLiteral'> & ParserLiteralData<boolean>} ParserBooleanLiteralNode
  * @typedef {BaseParserLiteralNode<'NadaLiteral'> & ParserLiteralData<null>} ParserNadaLiteralNode
- * 
+ *
  * @typedef {ParserNumericLiteralNode
  *          |ParserTextLiteralNode
  *          |ParserBooleanLiteralNode
@@ -208,16 +208,16 @@ function parserNodeWithin(parserNodeCategory, parserNodeType) {
  * @typedef {Object} ParserListExpressionData
  * @property {Readonly<Array<ParserEvaluableExpressionNode>>} elements
  * @typedef {BaseParserLiteralNode<'ListExpression'> & ParserListExpressionData} ParserListExpressionNode
- * 
+ *
  * @typedef {Object} ParserPropertyExpressionData
  * @property {ParserIdentifierNode|ParserNumericLiteralNode} key
  * @property {ParserExpressionNode} value
  * @typedef {BaseParserNode<'PropertyExpression'> & ParserPropertyExpressionData} ParserPropertyExpressionNode
- * 
+ *
  * @typedef {Object} ParserGlossaryExpressionData
  * @property {Readonly<Array<ParserPropertyExpressionNode>>} properties
  * @typedef {BaseParserLiteralNode<'GlossaryExpression'> & ParserGlossaryExpressionData} ParserGlossaryExpressionNode
- * 
+ *
  * @typedef {Object} ParserCallExpressionData
  * @property {ParserEvaluableExpressionNode} emitter
  * @property {Readonly<Array<ParserArgumentNode>>} arguments
@@ -234,7 +234,7 @@ function parserNodeWithin(parserNodeCategory, parserNodeType) {
 /**
  * @typedef {Object} ParserIdentifierData
  * @property {Readonly<String>} name
- * 
+ *
  * @typedef {BaseParserNode<'IdentifierExpression'> & ParserCoercibleNode & ParserIdentifierData} ParserIdentifierNode
 **/
 
@@ -250,10 +250,10 @@ function parserNodeWithin(parserNodeCategory, parserNodeType) {
  * @typedef {Object} ParserUnaryExpressionData
  * @property {Readonly<String>} operator
  * @property {Readonly<ParserNode>} argument
- * 
+ *
  * @typedef {BaseParserNode<'UnaryExpression'> & ParserCoercibleNode & ParserUnaryExpressionData} ParserGeneralUnaryExpressionNode
  * @typedef {BaseParserNode<'UpdateExpression'> & ParserCoercibleNode & ParserUnaryExpressionData} ParserUpdateExpressionNode
- * 
+ *
  * @typedef {ParserGeneralUnaryExpressionNode | ParserUpdateExpressionNode} ParserUnaryExpressionNode
  */
 
@@ -265,11 +265,11 @@ function parserNodeWithin(parserNodeCategory, parserNodeType) {
  * @property {Readonly<ParserNode>} rightOperand
  */
 
-/** 
+/**
  * @typedef {BaseParserNode<'BinaryExpression'> & ParserCoercibleNode & ParserBinaryExpressionData} ParserGeneralBinaryExpressionNode
- * 
+ *
  * @typedef {BaseParserNode<'LogicalExpression'> & ParserCoercibleNode & ParserBinaryExpressionData<LogicalOperator>} ParserLogicalExpressionNode
- * 
+ *
  * @typedef {ParserGeneralBinaryExpressionNode | ParserLogicalExpressionNode} ParserBinaryExpressionNode
  */
 
@@ -277,7 +277,7 @@ function parserNodeWithin(parserNodeCategory, parserNodeType) {
  * @typedef {Object} ParserAssignmentExpressionData
  * @property {Readonly<ParserIdentifierNode|ParserArrowExpressionNode>} receptor
  * @property {Readonly<ParserExpressionNode>} reception
- * 
+ *
  * @typedef {BaseParserNode<'AssignExpression'> & ParserAssignmentExpressionData} ParserAssignmentExpressionNode
  */
 
@@ -286,11 +286,11 @@ function parserNodeWithin(parserNodeCategory, parserNodeType) {
  * @property {Readonly<ParserBlockBody>} body
  * @property {Readonly<ParserIdentifierNode>} [identifier]
  * @typedef {BaseParserStatementNode<'BlockStatement'> & ParserNamedBlockData} ParserNamedBlockNode
- * 
+ *
  * @typedef {Object} ParserFunctionAssignmentExpressionData
  * @property {Readonly<ParserCallExpressionNode>} receptor
  * @property {Readonly<ParserNamedBlockNode>} reception
- * 
+ *
  * @typedef {BaseParserNode<'AssignExpression'> & ParserFunctionAssignmentExpressionData} ParserFunctionAssignmentExpressionNode
  */
 
@@ -302,14 +302,14 @@ function parserNodeWithin(parserNodeCategory, parserNodeType) {
  * @typedef {Object} ParserArrowExpressionData
  * @property {Readonly<ParserExpressionNode>} container
  * @property {Readonly<ParserExpressionNode>} property
- * 
+ *
  * @typedef {BaseParserNode<'ArrowExpression'> & ParserArrowExpressionData & ParserCoercibleNode} ParserArrowExpressionNode
  */
 
 /**
  * @typedef {Object} ParserGeneralExpressionData
  * @property {ParserNode} expression
- * 
+ *
  * @typedef {BaseParserNode<'ExpressionStatement'> & ParserCoercibleNode & ParserGeneralExpressionData} ParserGeneralExpressionNode
  */
 
@@ -346,55 +346,55 @@ function parserNodeWithin(parserNodeCategory, parserNodeType) {
 
 /**
  * @typedef {BaseParserStatementNode<'ExpressionStatement'> & ParserExpressionNode} ParserExpressionStatementNode
- * 
+ *
  * @typedef {Object} ParserRegistryStatementData
  * @property {ParserAssignmentExpressionNode|ParserFunctionAssignmentExpressionNode} initialize
  * @typedef {BaseParserStatementNode<'RegistryStatement'> & ParserCoercibleNode<'CallExpression'|'InputExpression'|'ListExpression'> & ParserRegistryStatementData} ParserRegistryStatementNode
- * 
+ *
  * @typedef {Object} ParserDeclarationStatementData
  * @property {ParserIdentifierNode} identifier
  * @typedef {BaseParserStatementNode<'DeclareStatement'> & ParserCoercibleNode<ParserDataNodeType> & ParserDeclarationStatementData} ParserDeclarationStatementNode
- * 
+ *
  * @typedef {Object} ParserRelationalStatementData
  * @property {String} operator
  * @property {ParserAssignmentExpressionNode|ParserFunctionAssignmentExpressionNode} expression
  * @typedef {BaseParserStatementNode<'RelationalStatement'> & ParserRelationalStatementData} ParserRelationalStatementNode
- * 
+ *
  * @typedef {BaseParserStatementNode<'BreakStatement'>} ParserBreakStatementNode
- * 
+ *
  * @typedef {Object} ParserValueStatementData
  * @property {ParserExpressionNode} value
  * @typedef {BaseParserStatementNode<'SendStatement'|'ReturnStatement'> & ParserValueStatementData} ParserValueStatementNode
- * 
+ *
  * @typedef {BaseParserStatementNode<'CommentStatement'>} ParserCommentStatementNode
- * 
+ *
  * @typedef {ParserStatementNode & ParserStatementMetadata} ParserBlockItem
  * @typedef {Array<ParserBlockItem>} ParserBlockBody
  * @typedef {Object} ParserBlockStatementData
  * @property {Readonly<ParserBlockBody>} body
  * @typedef {BaseParserStatementNode<'BlockStatement'> & ParserBlockStatementData} ParserBlockNode
- * 
+ *
  * @typedef {Object} ParserControlStatementData
  * @property {ParserExpressionNode} test
- * 
+ *
  * @typedef {Object} ParserStopStatementData
  * @property {ParserNode} stopMessage
  * @typedef {BaseParserStatementNode<'StopStatement'> & ParserControlStatementData & ParserStopStatementData} ParserStopStatementNode
- * 
+ *
  * @typedef {Object} ParserConditionalStatementData
  * @property {ParserBlockNode} consequent
  * @property {(ParserBlockNode|ParserConditionalStatementNode) & ParserStatementMetadata} alternate
  * @typedef {BaseParserStatementNode<'ConditionalStatement'> & ParserControlStatementData & ParserConditionalStatementData} ParserConditionalStatementNode
- * 
+ *
  * @typedef {ParserBlockStatementData & ParserControlStatementData} ParserControlBlockStatementData
- * 
+ *
  * @typedef {BaseParserStatementNode<'WhileLoopStatement'|'DoWhileLoopStatement'> & ParserControlBlockStatementData} ParserWhileStatementNode
- * 
+ *
  * @typedef {Object} ParserForStatementData
  * @property {ParserAssignmentExpressionNode} assignment
  * @property {ParserExpressionNode} step
  * @typedef {BaseParserStatementNode<'ForLoopStatement'> & ParserControlBlockStatementData & ParserForStatementData} ParserForStatementNode
- * 
+ *
  * @typedef {Object} ParserForInStatementData
  * @property {ParserIdentifierNode} element
  * @property {ParserExpressionNode} list
@@ -410,25 +410,25 @@ function parserNodeWithin(parserNodeCategory, parserNodeType) {
  *          |ParserValueStatementNode
  *          |ParserCommentStatementNode
  * } ParserSimpleStatementNode
- * 
+ *
  * @typedef {ParserBlockNode
  *          |ParserWhileStatementNode
  *          |ParserForStatementNode
  *          |ParserForInStatementNode
  * } ParserBasicScopeNode
- * 
+ *
  * @typedef {ParserBasicScopeNode
  *          |ParserConditionalStatementNode
  *          |ParserStopStatementNode
  * } ParserControlStatementNode
- * 
+ *
  * @typedef {ParserSimpleStatementNode | ParserControlStatementNode} ParserStatementNode
  */
 
 /**
  * @typedef {Object} ParserProgramData
  * @property {Readonly<Array<ParserStatementNode & ParserStatementMetadata>>} body
- * 
+ *
  * @typedef {BaseParserNode<'Program'> & ParserProgramData} ParserProgramNode
  */
 
@@ -470,7 +470,7 @@ const RuntimeNodeTypes = /**@type {const}*/({
  * @property {Readonly<NonNullable<T>>} type
  */
 
-/** 
+/**
  * @template {RuntimeType} [T=RuntimeType]
  * @typedef {AtomicRuntimeValue<T> & BaseRuntimeValueData} BaseRuntimeValue
  */
@@ -492,41 +492,41 @@ const RuntimeNodeTypes = /**@type {const}*/({
  * @typedef {BaseRuntimeValue<'Boolean'> & RuntimePrimitiveValueData<boolean>} BooleanValue
  * @typedef {BaseRuntimeValue<'Embed'> & RuntimePrimitiveValueData<EmbedBuilder>} EmbedValue
  * @typedef {BaseRuntimeValue<'Nada'> & RuntimePrimitiveNadaData} NadaValue
- * 
+ *
  * @typedef {Object} RuntimeListData
  * @property {Array<RuntimeData>} elements
  * @typedef {BaseRuntimeValue<'List'> & RuntimeListData} ListValue
- * 
+ *
  * @typedef {Object} RuntimeGlossaryData
  * @property {Map<string, RuntimeValue>} properties
  * @typedef {BaseRuntimeValue<'Glossary'> & RuntimeGlossaryData} GlossaryValue
- * 
+ *
  * @typedef {Object} TuberIdentifierData
  * @property {Readonly<String>} name
  * @typedef {AtomicRuntimeValue<'Identifier'> & TuberIdentifierData} IdentifierValue
- * 
+ *
  * @typedef {Object} RuntimeArgumentData
  * @property {ParserEvaluableExpressionNode} [default]
  * @typedef {IdentifierValue & RuntimeArgumentData} ArgumentValue
- * 
+ *
  * @typedef {Object} RuntimeFunctionValueData
  * @property {Readonly<Array<ParserStatementNode & ParserStatementMetadata>>} body
  * @property {Readonly<NonNullable<IdentifierValue>>} identifier
  * @property {Readonly<NonNullable<Array<ParserArgumentNode>>>} arguments
  * @typedef {BaseRuntimeValue<'Function'> & RuntimeFunctionValueData} FunctionValue
- * 
+ *
  * @typedef {Object} TuberNativeFunctionValueData
  * @property {Readonly<Function>} call
  * @typedef {BaseRuntimeValue<'NativeFunction'> & TuberNativeFunctionValueData} NativeFunctionValue
- * 
+ *
  * @typedef {NumericValue | TextValue | BooleanValue} RuntimePrimitive
  * @typedef {ListValue | GlossaryValue | EmbedValue} RuntimeStructure
- * 
+ *
  * @typedef {RuntimePrimitive | RuntimeStructure} RuntimeData
- * 
+ *
  * @typedef {RuntimeData | NadaValue} RuntimeNadable
  * @typedef {RuntimeData | FunctionValue | NativeFunctionValue | NadaValue} RuntimeItem
- * 
+ *
  * @typedef {RuntimeItem | IdentifierValue} RuntimeValue
  */
 
@@ -535,8 +535,8 @@ const RuntimeNodeTypes = /**@type {const}*/({
  */
 
 /**
- * 
- * @param {ParserNode|RuntimeValue} node 
+ *
+ * @param {ParserNode|RuntimeValue} node
  * @returns {node is ParserNode}
  */
 function isParserNode(node) {
@@ -545,8 +545,8 @@ function isParserNode(node) {
 }
 
 /**
- * 
- * @param {ParserNode|RuntimeValue} node 
+ *
+ * @param {ParserNode|RuntimeValue} node
  * @returns {node is RuntimeValue}
  */
 function isRuntimeValue(node) {
@@ -555,8 +555,8 @@ function isRuntimeValue(node) {
 }
 
 /**
- * 
- * @param {RuntimeValue} runtime 
+ *
+ * @param {RuntimeValue} runtime
  * @returns {runtime is IdentifierValue}
  */
 function isIdentifier(runtime) {
@@ -568,8 +568,8 @@ function isIdentifier(runtime) {
 //#region Manejo de Errores
 /**
  * Alza un error e indica la posición del error
- * @param {String} message 
- * @param {{ number: Number, name: String }} statement 
+ * @param {String} message
+ * @param {{ number: Number, name: String }} statement
  * @returns {Error}
  */
 function TuberInterpreterError(message = 'Se encontró un Token inesperado', statement = { number: -1, name: 'desconocida' }) {
@@ -584,7 +584,7 @@ function TuberInterpreterError(message = 'Se encontró un Token inesperado', sta
 function basicCompareTo(other) {
 	if(this.type !== other.type)
 		return makeNumber(-1);
-	
+
 	if(this.value === other.value)
 		return makeNumber(0);
 
@@ -721,7 +721,7 @@ function makeNada() {
 //#region Comprobaciones de tipo de Runtime Value
 /**
  * Comprueba si un valor es un NumericValue
- * @param {RuntimeValue} runtime 
+ * @param {RuntimeValue} runtime
  * @returns {runtime is NumericValue}
  */
 function isNumeric(runtime) {
@@ -730,7 +730,7 @@ function isNumeric(runtime) {
 
 /**
  * Comprueba si un valor es un TextValue
- * @param {RuntimeValue} runtime 
+ * @param {RuntimeValue} runtime
  * @returns {runtime is TextValue}
  */
 function isText(runtime) {
@@ -739,7 +739,7 @@ function isText(runtime) {
 
 /**
  * Comprueba si un valor es un BooleanValue
- * @param {RuntimeValue} runtime 
+ * @param {RuntimeValue} runtime
  * @returns {runtime is BooleanValue}
  */
 function isBoolean(runtime) {
@@ -748,57 +748,57 @@ function isBoolean(runtime) {
 
 /**
  * Comprueba si un valor es un ListValue
- * @param {RuntimeValue} runtime 
+ * @param {RuntimeValue} runtime
  * @returns {runtime is ListValue}
  */
 function isList(runtime) {
-    const known = /**@type {ListValue}*/(/**@type {unknown}*/(runtime));
+	const known = /**@type {ListValue}*/(/**@type {unknown}*/(runtime));
 	return runtime.type === 'List' && Array.isArray(known.elements);
 }
 
 /**
  * Comprueba si un valor es un GlossaryValue
- * @param {RuntimeValue} runtime 
+ * @param {RuntimeValue} runtime
  * @returns {runtime is GlossaryValue}
  */
 function isGlossary(runtime) {
-    const known = /**@type {GlossaryValue}*/(/**@type {unknown}*/(runtime));
+	const known = /**@type {GlossaryValue}*/(/**@type {unknown}*/(runtime));
 	return runtime.type === 'Glossary' && known.properties !== undefined;
 }
 
 /**
  * Comprueba si un valor es un EmbedValue
- * @param {RuntimeValue} runtime 
+ * @param {RuntimeValue} runtime
  * @returns {runtime is EmbedValue}
  */
 function isEmbed(runtime) {
-    const known = /**@type {EmbedValue}*/(/**@type {unknown}*/(runtime));
+	const known = /**@type {EmbedValue}*/(/**@type {unknown}*/(runtime));
 	return runtime.type === 'Embed' && known.value instanceof EmbedBuilder;
 }
 
 /**
  * Comprueba si un valor es un FunctionValue
- * @param {RuntimeValue} runtime 
+ * @param {RuntimeValue} runtime
  * @returns {runtime is FunctionValue}
  */
 function isFunction(runtime) {
-    const known = /**@type {FunctionValue}*/(/**@type {unknown}*/(runtime));
+	const known = /**@type {FunctionValue}*/(/**@type {unknown}*/(runtime));
 	return runtime.type === 'Function' && Array.isArray(known.body);
 }
 
 /**
  * Comprueba si un valor es un NativeFunctionValue
- * @param {RuntimeValue} runtime 
+ * @param {RuntimeValue} runtime
  * @returns {runtime is NativeFunctionValue}
  */
 function isNativeFunction(runtime) {
-    const known = /**@type {NativeFunctionValue}*/(/**@type {unknown}*/(runtime));
+	const known = /**@type {NativeFunctionValue}*/(/**@type {unknown}*/(runtime));
 	return runtime.type === 'NativeFunction' && typeof known.call === 'function';
 }
 
 /**
  * Comprueba si un valor es Nada o inoperable
- * @param {RuntimeValue} node 
+ * @param {RuntimeValue} node
  * @returns {Boolean}
  */
 function isNada(node) {
@@ -824,7 +824,7 @@ function isNada(node) {
 //#region Utilidades de Runtime Value
 /**
  * Comprueba si un valor no existe o es numéricamente inoperable
- * @param {*} value 
+ * @param {*} value
  * @returns {Boolean}
  */
 function isNotOperable(value) {
@@ -833,7 +833,7 @@ function isNotOperable(value) {
 
 /**
  * Comprueba si un valor es Nada o inoperable
- * @param {RuntimeValue} node 
+ * @param {RuntimeValue} node
  */
 function isNotValidText(node) {
 	return node?.type !== 'Text';
@@ -940,7 +940,7 @@ RuntimeToParserType
 	.set(RuntimeNodeTypes.Glossary,   ParserNodeTypes.Glossary)
 	.set(RuntimeNodeTypes.Embed,      ParserNodeTypes.Embed)
 	.set(RuntimeNodeTypes.Nada,       ParserNodeTypes.Nada);
-	
+
 /**@type {Map<import('./commons.js').ParserNodeType, String>}*/
 const ParserToLanguageType = new Map();
 ParserToLanguageType
@@ -1074,7 +1074,7 @@ coercions.get('Boolean')
 coercions.get('List')
 	.set('Number',   (_) => makeNada())
 	.set('Text',     (x) => {
-		return makeText(`(${x?.map(y => makeValue(y, 'Text').value).join('')})`)
+		return makeText(`(${x?.map(y => makeValue(y, 'Text').value).join('')})`);
 	})
 	.set('Boolean',  (x) => makeBoolean(x?.length ? true : false))
 	.set('List',     (x) => makeList(x))
@@ -1089,7 +1089,7 @@ coercions.get('Glossary')
 	.set('Number',   (_) => makeNada())
 	.set('Text',     (/**@type Map<string, RuntimeValue>*/ x) => {
 		let glossaryStrings = [];
-		for(const [key, value] of x) {
+		for(const [ key, value ] of x) {
 			const coercedValue = makeValue(value, 'Text').value;
 			glossaryStrings.push(`${key}: ${coercedValue}`);
 		}
@@ -1116,34 +1116,34 @@ coercions.get('Embed')
 
 		if(x.data.description)
 			properties.set('descripción', makeText(x.data.description));
-		
+
 		if(x.data.author)
 			properties.set('autor', makeGlossary(new Map()
 				.set('nombre', x.data.author.name ? makeText(x.data.author.name) : makeNada())
 				.set('ícono', x.data.author.name ? makeText(x.data.author.icon_url) : makeNada())
 			));
-			
+
 		if(x.data.footer)
 			properties.set('pie', makeGlossary(new Map()
 				.set('texto', x.data.author.name ? makeText(x.data.footer.text) : makeNada())
 				.set('ícono', x.data.author.name ? makeText(x.data.footer.icon_url) : makeNada())
 			));
-		
+
 		if(x.data.timestamp)
 			properties.set('tiempo', makeText(x.data.timestamp));
 
 		if(x.data.image?.url)
 			properties.set('imagen', makeText(x.data.image.url));
-		
+
 		if(x.data.video?.url)
 			properties.set('video', makeText(x.data.video.url));
-		
+
 		if(x.data.thumbnail?.url)
 			properties.set('miniatura', makeText(x.data.thumbnail.url));
-		
+
 		if(x.data.url)
 			properties.set('enlace', makeText(x.data.url));
-		
+
 		return makeGlossary(properties);
 	});
 
@@ -1152,7 +1152,7 @@ coercions.get('Nada')
 	.set('Text',     (_) => makeText('Nada'))
 	.set('Boolean',  (_) => makeBoolean(false))
 	.set('List',     (_) => makeNada())
-	.set('Glossary', (_) => makeNada())
+	.set('Glossary', (_) => makeNada());
 //#endregion
 
 //#region Creación de Valor Arbitrario
@@ -1222,7 +1222,7 @@ coercions.get('Nada')
  * Si el valor y el tipo no coinciden, se intentará convertir el valor al tipo indicado.
  * Si la conversión no es posible, se alzará un error
  * @param {MakeableTypes} node
- * @param {RuntimeValue['type']} type 
+ * @param {RuntimeValue['type']} type
  */
 function makeValue(node, type) {
 	if(node == null || node.type == null)
@@ -1239,7 +1239,7 @@ function makeValue(node, type) {
 
 	if(isParserNode(node))
 		return makeRuntimeValueFromParserNode(node, type);
-	
+
 	if(node.type === 'Identifier' || node.type === 'Function' || node.type === 'NativeFunction') {
 		//@ts-expect-error
 		if(node.type === type)
@@ -1268,7 +1268,7 @@ function makeValue(node, type) {
  * Si el valor y el tipo no coinciden, se intentará convertir el valor al tipo indicado.
  * Si la conversión no es posible, se alzará un error
  * @param {ParserLiteralExpressionNode|ParserListExpressionNode|ParserGlossaryExpressionNode} node
- * @param {RuntimeData['type']} type 
+ * @param {RuntimeData['type']} type
  * @returns {RuntimeValue}
  */
 function makeRuntimeValueFromParserNode(node, type) {
@@ -1282,7 +1282,7 @@ function makeRuntimeValueFromParserNode(node, type) {
 
 	if(!sourceCoercion)
 		throw TuberInterpreterError('Tipo origen inesperado en creación de valor');
-	
+
 	const coercion = sourceCoercion.get(type);
 	if(!coercion)
 		throw TuberInterpreterError('Tipo destino inesperado en creación de valor');
@@ -1296,10 +1296,10 @@ function makeRuntimeValueFromParserNode(node, type) {
 function extractFromRuntimeValue(runtime) {
 	if(runtime == undefined)
 		return undefined;
-	
+
 	if(runtime.type === 'List')
 		return runtime.elements;
-	
+
 	if(runtime.type === 'Glossary')
 		return runtime.properties;
 

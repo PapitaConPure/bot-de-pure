@@ -56,7 +56,7 @@ export const tenshiColor = 0x608cf3;
 /**
  * @description Color alternativo de Tenshi — Lavanda.
  * @returns #bf94e4
- */	
+ */
 export const tenshiAltColor = color('#bf94e4', 'number');
 
 /**@description Color de resalte de Tenshi — Durazno.*/
@@ -84,4 +84,4 @@ export const globalConfigs = {
 	logch: null as GuildTextBasedChannel,
 	pureTableImage: null,
 	loademotes: {},
-}
+};

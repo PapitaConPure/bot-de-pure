@@ -55,7 +55,7 @@ const command = new Command('emote', flags)
 				.setTimestamp(emoji.createdTimestamp);
 
 			embeds.push(embed);
-						
+
 			const button = new ButtonBuilder()
 				.setURL(emoji.url)
 				.setEmoji('922669195521568818')
@@ -72,7 +72,7 @@ const command = new Command('emote', flags)
 
 		if(!embeds.length)
 			return request.reply({ content: '⚠️️ Los emotes mencionados son inválidos o inaccesibles. Verifica que yo esté en el servidor con el emote' });
-		
+
 		return request.reply({ embeds, components });
 	});
 

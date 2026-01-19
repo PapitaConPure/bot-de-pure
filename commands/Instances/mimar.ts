@@ -39,8 +39,8 @@ const command = new Command('mimar', tags)
 				{ name: user2.username, value: loveStats(), inline: true },
 			)
 			.setImage('https://i.imgur.com/HwqSNyy.jpg');
-		
-		return request.reply({ embeds: [embed] });
+
+		return request.reply({ embeds: [ embed ] });
 	});
 
 export default command;

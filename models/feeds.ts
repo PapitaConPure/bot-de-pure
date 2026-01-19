@@ -2,38 +2,38 @@ import Mongoose from 'mongoose';
 
 const FeedSchema = new Mongoose.Schema({
 	ids: {
-		type: [String],
+		type: [ String ],
 		default: [],
 	},
 	tags: {
 		type: String,
 		required: true,
 	},
-    faults: {
+	faults: {
 		type: Number,
 		default: 0,
 	},
-    lastFetchedAt: {
+	lastFetchedAt: {
 		type: Date,
 		default: Date.UTC(1970, 0, 1, 0, 0, 0, 0),
 	},
-    title: {
+	title: {
 		type: String,
 		required: false,
 	},
-    subtitle: {
+	subtitle: {
 		type: String,
 		required: false,
 	},
-    maxTags: {
+	maxTags: {
 		type: Number,
 		required: false,
 	},
-    cornerIcon: {
+	cornerIcon: {
 		type: String,
 		required: false,
 	},
-    footer: {
+	footer: {
 		type: String,
 		required: false,
 	},

@@ -5,7 +5,7 @@ const tags = new CommandTags().add('GUIDE');
 
 const command = new Command('g-índice', tags)
 	.setAliases(
-		'g-indice', 
+		'g-indice',
 		'g-index',
 		'g-ind', 'g-i',
 	)

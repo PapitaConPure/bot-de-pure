@@ -15,7 +15,7 @@ const command = new Command('papa-próximo', tags)
 		return Promise.all([
 			modifyPresence(message.client),
 			message.react('✅'),
-		])
+		]);
 	});
 
 export default command;

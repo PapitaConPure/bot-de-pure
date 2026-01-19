@@ -16,8 +16,8 @@ const cancelbutton = (compressedUserId: string) => new ButtonBuilder()
 
 const options = new CommandOptions()
 	.addParam('nombre', 'TEXT', 'para decidir el nombre de la sesión actual', { optional: true })
-	.addFlag('e', ['emote', 'emoji'], 'para determinar el emote de la sesión actual', { name: 'emt', type: 'EMOTE' })
-	.addFlag('aw', ['asistente','instalador','wizard'], 'para inicializar el Asistente de Configuración');
+	.addFlag('e', [ 'emote', 'emoji' ], 'para determinar el emote de la sesión actual', { name: 'emt', type: 'EMOTE' })
+	.addFlag('aw', [ 'asistente','instalador','wizard' ], 'para inicializar el Asistente de Configuración');
 
 const tags = new CommandTags().add('COMMON');
 
@@ -146,8 +146,8 @@ const command = new Command('voz', tags)
 		);
 
 		return interaction.update({
-			embeds: [wizard],
-			components: [row],
+			embeds: [ wizard ],
+			components: [ row ],
 		});
 	}, { userFilterIndex: 0 })
 	.setButtonResponse(async function selectInstallation(interaction, authorId) {
@@ -172,8 +172,8 @@ const command = new Command('voz', tags)
 		);
 
 		return interaction.update({
-			embeds: [wizard],
-			components: [row],
+			embeds: [ wizard ],
+			components: [ row ],
 		});
 	}, { userFilterIndex: 0 })
 	.setButtonResponse(async function promptInstallSystem(interaction, authorId, createNew) {
@@ -212,7 +212,7 @@ const command = new Command('voz', tags)
 		return interaction.showModal(modal);
 	}, { userFilterIndex: 0 })
 	.setModalResponse(async function installSystem(interaction, _, createNew) {
-		const [translator] = await Promise.all([
+		const [ translator ] = await Promise.all([
 			Translator.from(interaction),
 			interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 		]);
@@ -262,7 +262,7 @@ const command = new Command('voz', tags)
 
 			return Promise.all([
 				interaction.message.edit({
-					embeds: [wizard],
+					embeds: [ wizard ],
 					components: [],
 				}),
 				interaction.editReply({
@@ -334,7 +334,7 @@ const command = new Command('voz', tags)
 			});
 
 		return interaction.update({
-			embeds: [wizard],
+			embeds: [ wizard ],
 			components: [],
 		});
 	}, { userFilterIndex: 0 })
@@ -360,8 +360,8 @@ const command = new Command('voz', tags)
 		);
 
 		return interaction.update({
-			embeds: [wizard],
-			components: [row],
+			embeds: [ wizard ],
+			components: [ row ],
 		});
 	}, { userFilterIndex: 0 })
 	.setButtonResponse(async function deleteSystemConfirmed(interaction) {
@@ -395,7 +395,7 @@ const command = new Command('voz', tags)
 				});
 
 			return interaction.editReply({
-				embeds: [deleteEmbed],
+				embeds: [ deleteEmbed ],
 				components: [],
 			});
 		} catch {
@@ -415,13 +415,13 @@ const command = new Command('voz', tags)
 			});
 
 		return interaction.update({
-			embeds: [cancelEmbed],
+			embeds: [ cancelEmbed ],
 			components: [],
 		});
 	}, { userFilterIndex: 0 })
 	.setButtonResponse(async function setSessionName(interaction) {
 		const { member } = interaction;
-        const translator = await Translator.from(member);
+		const translator = await Translator.from(member);
 
 		const warnNotInSession = () => interaction.reply({
 			content: translator.getText('voiceSessionJoinExpected'),
@@ -434,37 +434,37 @@ const command = new Command('voz', tags)
 		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
 		if(!session) return warnNotInSession();
 
-        const modal = new ModalBuilder()
-            .setCustomId(`voz_applySessionName`)
-            .setTitle(translator.getText('yoVoiceAutonameModalTitle'))
-            .addComponents(
-                makeTextInputRowBuilder().addComponents(new TextInputBuilder()
-                    .setCustomId('inputName')
-                    .setLabel(translator.getText('name'))
-                    .setPlaceholder(translator.getText('yoVoiceAutonameModalNamingPlaceholder'))
-                    .setMinLength(1)
-                    .setMaxLength(24)
-                    .setRequired(true)
+		const modal = new ModalBuilder()
+			.setCustomId(`voz_applySessionName`)
+			.setTitle(translator.getText('yoVoiceAutonameModalTitle'))
+			.addComponents(
+				makeTextInputRowBuilder().addComponents(new TextInputBuilder()
+					.setCustomId('inputName')
+					.setLabel(translator.getText('name'))
+					.setPlaceholder(translator.getText('yoVoiceAutonameModalNamingPlaceholder'))
+					.setMinLength(1)
+					.setMaxLength(24)
+					.setRequired(true)
 					//.setValue(session.name ?? '')
-                    .setStyle(TextInputStyle.Short)),
-                makeTextInputRowBuilder().addComponents(new TextInputBuilder()
-                    .setCustomId('inputEmoji')
-                    .setLabel(translator.getText('emoji'))
-                    .setPlaceholder(translator.getText('yoVoiceAutonameModalEmojiPlaceholder'))
-                    .setMinLength(0)
-                    .setMaxLength(2)
-                    .setRequired(false)
+					.setStyle(TextInputStyle.Short)),
+				makeTextInputRowBuilder().addComponents(new TextInputBuilder()
+					.setCustomId('inputEmoji')
+					.setLabel(translator.getText('emoji'))
+					.setPlaceholder(translator.getText('yoVoiceAutonameModalEmojiPlaceholder'))
+					.setMinLength(0)
+					.setMaxLength(2)
+					.setRequired(false)
 					//.setValue(session.emoji ?? '')
-                    .setStyle(TextInputStyle.Short)),
-            );
+					.setStyle(TextInputStyle.Short)),
+			);
 
-        return interaction.showModal(modal);
+		return interaction.showModal(modal);
 	})
 	.setModalResponse(async function applySessionName(interaction) {
 		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
 		const { member } = interaction;
-        const translator = await Translator.from(member);
+		const translator = await Translator.from(member);
 
 		const warnNotInSession = () => interaction.editReply({
 			content: translator.getText('voiceSessionJoinExpected'),
@@ -494,7 +494,7 @@ const command = new Command('voz', tags)
 		await interaction.deferReply({ ephemeral: true });
 
 		const { member } = interaction;
-        const translator = await Translator.from(member);
+		const translator = await Translator.from(member);
 
 		const warnNotInSession = () => interaction.editReply({
 			content: translator.getText('voiceSessionJoinExpected'),
@@ -596,14 +596,14 @@ function generateFirstWizard(request: ComplexCommandRequest, translator: Transla
 
 	const uid = compressId(request.userId);
 	return request.reply({
-		embeds: [wizard],
-		components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
+		embeds: [ wizard ],
+		components: [ new ActionRowBuilder<ButtonBuilder>().addComponents(
 			new ButtonBuilder()
 				.setCustomId(`voz_startWizard_${uid}`)
 				.setLabel(translator.getText('buttonStart'))
 				.setStyle(ButtonStyle.Primary),
 			cancelbutton(uid),
-		)],
+		) ],
 	});
 }
 

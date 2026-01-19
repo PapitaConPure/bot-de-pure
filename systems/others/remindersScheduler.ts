@@ -123,7 +123,7 @@ async function sendReminder(channel: GuildTextBasedChannel, user: User, reminder
 
 	return channel.send({
 		flags: MessageFlags.IsComponentsV2,
-		components: [container],
+		components: [ container ],
 	});
 }
 

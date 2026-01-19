@@ -37,7 +37,7 @@ export type PostResolvable = Post | APIPostData;
 export interface Credentials {
 	apiKey: string;
 	userId: string;
-};
+}
 
 interface ExpectAPIFetchOptions {
 	dontThrowOnEmptyFetch?: boolean;
@@ -57,7 +57,7 @@ export class Booru {
 	static readonly API_URI:       string = 'https://gelbooru.com/index.php';
 	static readonly API_POSTS_URL: string = 'https://gelbooru.com/index.php';
 	static readonly API_TAGS_URL:  string = 'https://gelbooru.com/index.php?page=dapi&s=tag&q=index';
-	
+
 	static readonly POSTS_API: AxiosInstance = axios.create({
 		baseURL: Booru.API_URI,
 		timeout: 10000,
@@ -68,7 +68,7 @@ export class Booru {
 			'json': '1',
 		},
 	});
-	
+
 	static readonly TAGS_API: AxiosInstance = axios.create({
 		baseURL: Booru.API_URI,
 		timeout: 10000,
@@ -87,7 +87,7 @@ export class Booru {
 	static tagsCache: Map<string, Tag> = new Map();
 	static tagsSemaphoreCount: number = 0;
 	static tagsSemaphoreDone: number = 0;
-	
+
 	credentials: Credentials;
 
 	/**@param credentials Credenciales para autorizarse en la API*/
@@ -98,12 +98,12 @@ export class Booru {
 	/**
 	 * @description
 	 * Libera memoria de Tags guardadas en caché que no se han refrescado en mucho tiempo.
-	 * 
+	 *
 	 * Se recomienda usar esto luego de llamar cualquier función que recupere Tags de un Post.
 	 */
 	static cleanupTagsCache() {
 		const now = Date.now();
-		for(const [key, tag] of Booru.tagsCache.entries())
+		for(const [ key, tag ] of Booru.tagsCache.entries())
 			if((now - (+tag.fetchTimestamp)) > Booru.TAGS_CACHE_LIFETIME)
 				Booru.tagsCache.delete(key);
 	}
@@ -113,7 +113,7 @@ export class Booru {
 	 * @throws {BooruFetchError}
 	 * @throws {BooruUnknownPostError}
 	 */
-	static #expectPosts(response: AxiosResponse, options: ExpectAPIFetchOptions = {}): PostResolvable[] {
+	static#expectPosts(response: AxiosResponse, options: ExpectAPIFetchOptions = {}): PostResolvable[] {
 		const { dontThrowOnEmptyFetch = false } = options;
 
 		if(response.status !== 200)
@@ -134,7 +134,7 @@ export class Booru {
 	 * @throws {BooruFetchError}
 	 * @throws {BooruUnknownTagError}
 	 */
-	static #expectTags(response: AxiosResponse, options: ExpectAPIFetchOptions & ExpectAPITagFetchOptions = {}): TagResolvable[] {
+	static#expectTags(response: AxiosResponse, options: ExpectAPIFetchOptions & ExpectAPITagFetchOptions = {}): TagResolvable[] {
 		const {
 			dontThrowOnEmptyFetch = false,
 			tags = null,
@@ -163,11 +163,11 @@ export class Booru {
 	 */
 	async search(tags: string | string[], searchOptions: BooruSearchOptions = {}): Promise<Post[]> {
 		const { limit = 1, random = false } = searchOptions;
-		
+
 		const { apiKey, userId } = this.#getCredentials();
 		if(Array.isArray(tags))
 			tags = tags.join(' ');
-		
+
 		const response = await Booru.POSTS_API.get('', {
 			params: {
 				'api_key': apiKey,
@@ -224,7 +224,7 @@ export class Booru {
 				/&tags=[^&]+/,
 				'');
 		postUrl = `${postUrl}&api_key=${apiKey}&user_id=${userId}`;
-		
+
 		const response = await axios.get(postUrl);
 		const [ post ] = Booru.#expectPosts(response);
 		return new Post(post);
@@ -289,7 +289,7 @@ export class Booru {
 		const cachedTags: Tag[] = [];
 		/**@type {string[]}*/
 		const uncachedTagNames: string[] = [];
-		
+
 		tagNames
 			.map(decodeEntities)
 			.forEach(tn => {
@@ -304,14 +304,14 @@ export class Booru {
 			Booru.tagsSemaphoreDone = (Booru.tagsSemaphoreDone + 1) % Booru.TAGS_SEMAPHORE_MAX;
 			return cachedTags;
 		}
-		
+
 		try {
 			const query = { name: { $in: uncachedTagNames } };
 			const savedTags = (noDataBase ? [] : await BooruTags.find(query)).map(t => new Tag(t));
 
 			const savedTagNames = savedTags.map(t => t.name);
 			const missingTagNames = uncachedTagNames.filter(tn => !savedTagNames.includes(tn));
-			
+
 			if(missingTagNames.length) {
 				const fetchedTags = [];
 
@@ -325,13 +325,13 @@ export class Booru {
 						},
 					});
 					const tags = Booru.#expectTags(response, { tags: namesBatch });
-					
+
 					if(tags.length) {
 						const newTags = tags.map(t => new Tag(t));
 						fetchedTags.push(...newTags);
 					}
 				}
-	
+
 				if(fetchedTags.length) {
 					savedTags.push(...fetchedTags);
 					const bulkOps = fetchedTags.map(t => ({
@@ -341,10 +341,10 @@ export class Booru {
 							upsert: true,
 						},
 					}));
-		
+
 					!noDataBase && await BooruTags.bulkWrite(bulkOps);
 				}
-			};
+			}
 
 			savedTags.forEach(t => Booru.tagsCache.set(t.name, t));
 			return [ ...cachedTags, ...savedTags ];
@@ -424,7 +424,7 @@ export class Post {
 		const createdAt = ('createdAt' in data) ? data.createdAt : data.created_at;
 		this.createdAt = (typeof createdAt === 'string' || typeof createdAt === 'number') ? new Date(createdAt) : createdAt;
 
-		
+
 		this.fileUrl = ('fileUrl' in data) ? data.fileUrl : data.file_url;
 		this.size = ('size' in data) ? data.size : [ data.width, data.height ];
 
@@ -455,7 +455,7 @@ export class Post {
 	/**
 	 * @description
 	 * Finds and returns the first source that matches an URL pattern.
-	 * 
+	 *
 	 * If no URL source is found, `undefined` is returned
 	 */
 	findFirstUrlSource() {
@@ -467,7 +467,7 @@ export class Post {
 	/**
 	 * @description
 	 * Finds and returns the last source that matches an URL pattern.
-	 * 
+	 *
 	 * If no URL source is found, `undefined` is returned.
 	 */
 	findLastUrlSource() {
@@ -497,7 +497,7 @@ interface TagData {
 	type: TagType | number;
 	ambiguous?: boolean;
 	fetchTimestamp: Date;
-};
+}
 
 type TagResolvable = Tag | TagData;
 
@@ -533,7 +533,7 @@ export class Tag {
 		default: return 'Unknown';
 		}
 	}
-	
+
 	toString() {
 		return `{${this.id} / ${this.typeName}} ${this.count} ${this.name}`;
 	}
@@ -547,29 +547,29 @@ function getSourceUrl(source: string) {
 }
 
 export class BooruError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = 'BooruError';
-    }
+	constructor(message: string) {
+		super(message);
+		this.name = 'BooruError';
+	}
 }
 
 export class BooruFetchError extends BooruError {
-    constructor(message: string) {
-        super(message);
-        this.name = 'BooruFetchError';
-    }
+	constructor(message: string) {
+		super(message);
+		this.name = 'BooruFetchError';
+	}
 }
 
 export class BooruUnknownPostError extends BooruError {
-    constructor(message: string) {
-        super(message);
-        this.name = 'BooruUnknownPostError';
-    }
+	constructor(message: string) {
+		super(message);
+		this.name = 'BooruUnknownPostError';
+	}
 }
 
 export class BooruUnknownTagError extends BooruError {
-    constructor(message: string) {
-        super(message);
-        this.name = 'BooruUnknownTagError';
-    }
+	constructor(message: string) {
+		super(message);
+		this.name = 'BooruUnknownTagError';
+	}
 }

@@ -39,7 +39,7 @@ const TuberSchema = new Mongoose.Schema({
 		default: null,
 	},
 	inputs: {
-		type: [[TuberInputSchema]],
+		type: [ [ TuberInputSchema ] ],
 		default: [],
 	},
 	advanced: {
@@ -51,7 +51,7 @@ const TuberSchema = new Mongoose.Schema({
 		required: false,
 	},
 	files: {
-		type: [String],
+		type: [ String ],
 	},
 	script: {
 		type: String,

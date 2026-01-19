@@ -13,7 +13,7 @@ const flags = new CommandTags().add(
 );
 const options = new CommandOptions()
 	.addParam('prefijo', 'TEXT', 'para cambiar el prefijo del servidor', { optional: true })
-	.addFlag('r', ['reestablecer', 'reiniciar', 'reset'], 'para volver al prefijo por defecto');
+	.addFlag('r', [ 'reestablecer', 'reiniciar', 'reset' ], 'para volver al prefijo por defecto');
 
 const command = new Command('prefijo', flags)
 	.setAliases('prefix', 'pf')
@@ -52,10 +52,10 @@ const command = new Command('prefijo', flags)
 						inline: true,
 					},
 				);
-			
-			return request.reply({ embeds: [embed] });
+
+			return request.reply({ embeds: [ embed ] });
 		}
-		
+
 		await PrefixPair.findOneAndRemove(guildsearch);
 		const pfpair = (await PrefixPair.findOne(guildsearch)) || new PrefixPair(guildsearch);
 		const regex = new RegExp(`^${prefix.replace(/[a-z]/g, l => `[${l.toUpperCase()}${l}]`).replace('\\', '\\\\')}[\n ]*`);

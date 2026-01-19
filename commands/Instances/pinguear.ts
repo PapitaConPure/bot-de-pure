@@ -23,11 +23,11 @@ const frase = [
 ];
 
 /**
- * 
- * @param {import('../Commons/typings').ComplexCommandRequest} request 
- * @param {import('discord.js').User} user 
- * @param {number} cnt 
- * @param {boolean} isFirst 
+ *
+ * @param {import('../Commons/typings').ComplexCommandRequest} request
+ * @param {import('discord.js').User} user
+ * @param {number} cnt
+ * @param {boolean} isFirst
  */
 async function pinguear(request, user, cnt, isFirst) {
 	const replyContent = { content: frase[randRange(0, frase.length)].replace('[m]', `${user}`) };
@@ -62,10 +62,10 @@ const command = new Command('pinguear', flags)
 			return request.isInteraction
 				? request.reply({ content: '⏳ Pero no seas tan degenerado, aflójale un poco', ephemeral: true })
 				: request.inferAsMessage().react('⏳');
-		
+
 		if(request.isMessage && args.count < 2)
 			return request.reply({ content: `⚠️ Debes ingresar 2 parámetros (\`${p_pure(request.guild.id).raw}pinguear <cantidad> <usuario>\`)`, ephemeral: true });
-		
+
 		let repeats = -1;
 		let user: User;
 

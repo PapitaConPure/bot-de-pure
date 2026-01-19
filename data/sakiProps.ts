@@ -95,7 +95,7 @@ export const saki = {
 
 const roleList = (() => {
 	const menuOptions: SelectMenuComponentOptionData[] = [];
-	
+
 	saki.colorsList.forEach(color => menuOptions.push({
 		value: color.roleId,
 		label: color.roleName,
@@ -104,7 +104,7 @@ const roleList = (() => {
 			id: color.emoteId,
 		},
 	}));
-	
+
 	return new StringSelectMenuBuilder()
 		.setCustomId('colores_addColor')
 		.setPlaceholder('Escoge un color...')

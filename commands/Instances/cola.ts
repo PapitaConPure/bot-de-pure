@@ -77,10 +77,10 @@ const command = new Command('cola', tags)
 
 		if(isPlayerUnavailable(channel))
 			return interaction.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
-		
+
 		const query = interaction.fields.getTextInputValue('query');
 		await interaction.deferUpdate();
-		
+
 		try {
 			await tryRecoverSavedTracksQueue(interaction, false);
 
@@ -140,7 +140,7 @@ const command = new Command('cola', tags)
 
 		if(isPlayerUnavailable(channel))
 			return interaction.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
-		
+
 		const player = useMainPlayer();
 		const queue = player.queues.get(interaction.guildId);
 
@@ -153,7 +153,7 @@ const command = new Command('cola', tags)
 		const currentTrack = queue.currentTrack;
 		const service = SERVICES[currentTrack.source];
 		const currentTrackHyperlink = `[${currentTrack.title}](${currentTrack.url})`;
-		
+
 		if(queue.node.isPaused()) {
 			await showQueuePage(interaction, 'PA', authorId, +page);
 
@@ -201,10 +201,10 @@ const command = new Command('cola', tags)
 		const currentTrack = queue.currentTrack;
 		const service = SERVICES[currentTrack.source];
 		const currentTrackHyperlink = `[${currentTrack.title}](${currentTrack.url})`;
-		
+
 		if(!queue.node.isPaused() && queue.node.isPlaying()) {
 			await showQueuePage(interaction, 'PA', authorId, +page);
-			
+
 			const embed = makePuréMusicEmbed(interaction, service.color, service.iconUrl)
 				.setTitle(translator.getText('resumirTitleTrackAlreadyResumed'))
 				.setDescription(currentTrackHyperlink)
@@ -316,14 +316,14 @@ const command = new Command('cola', tags)
 		if(!queue?.currentTrack) {
 			const embed = makePuréMusicEmbed(interaction)
 				.setTitle(translator.getText('queueSkipTitleNoTrack'));
-			return interaction.reply({ embeds: [embed], ephemeral: true });
+			return interaction.reply({ embeds: [ embed ], ephemeral: true });
 		}
 
 		if(queue.repeatMode === QueueRepeatMode.AUTOPLAY) {
 			const embed = makePuréMusicEmbed(interaction)
 				.setTitle(translator.getText('queueLoopTitleAutoplayEnabled'))
 				.setDescription(translator.getText('queueLoopDescAutoplayEnabled', p_pure(interaction.guildId)));
-			return interaction.reply({ embeds: [embed], ephemeral: true, });
+			return interaction.reply({ embeds: [ embed ], ephemeral: true, });
 		}
 
 		const repeatModeWheel: Map<QueueRepeatMode, QueueRepeatMode> = new Map();
@@ -351,14 +351,14 @@ const command = new Command('cola', tags)
 
 		const player = useMainPlayer();
 		const queue = player.queues.get(interaction.guildId);
-		
+
 		queue.toggleShuffle();
 
 		const embed = makePuréMusicEmbed(interaction)
 			.setTitle(translator.getText('queueShuffleTitle', queue.isShuffling))
 			.setTimestamp(Date.now());
 		interaction.message.reply({ embeds: [ embed ] }).catch(console.error);
-		
+
 		await sleep(1250);
 		return showQueuePage(interaction, 'SF', authorId, +page);
 	})
@@ -434,7 +434,7 @@ const command = new Command('cola', tags)
 			thumbnail: removedThumbnail,
 		} = track;
 		const service = SERVICES[track.source];
-		
+
 		queue.removeTrack(track);
 
 		const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted) : translator.getText('playFooterTextQueueEmpty');

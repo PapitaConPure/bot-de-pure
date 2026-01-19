@@ -272,7 +272,7 @@ const makeTwitterServicePickerContainer = (compressedAuthorId: string, service: 
 		);
 
 	return container;
-}
+};
 
 const makePixivServicePickerContainer = (compressedAuthorId: string, service: string, translator: Translator) => {
 	const container = new ContainerBuilder()
@@ -317,7 +317,7 @@ const makePixivServicePickerContainer = (compressedAuthorId: string, service: st
 		);
 
 	return container;
-}
+};
 
 function makeSelectTagsChannelContainer(compressedAuthorId: string, request: MessageComponentInteraction, userConfigs: UserConfigDocument, translator: Translator) {
 	const container = new ContainerBuilder()
@@ -329,7 +329,7 @@ function makeSelectTagsChannelContainer(compressedAuthorId: string, request: Mes
 			actionRow => actionRow.addComponents(
 				new StringSelectMenuBuilder()
 					.setCustomId(`yo_modifyFollowedTags_${compressedAuthorId}`)
-					.setOptions([...userConfigs.feedTagSuscriptions.entries()].map(([channelId, tags]) => {
+					.setOptions([ ...userConfigs.feedTagSuscriptions.entries() ].map(([ channelId, tags ]) => {
 						const channel = request.client?.channels.cache.get(channelId);
 						if(!channel || channel.isDMBased() || !channel.isSendable())
 							return {
@@ -393,7 +393,7 @@ function makeFollowedTagsContainer(compressedAuthorId: string, channelId: string
 async function makeSelectFeedTCResponse(interaction: MessageComponentInteraction, compressedAuthorId: string) {
 	const { user } = interaction;
 
-	const [userConfigs] = await Promise.all([
+	const [ userConfigs ] = await Promise.all([
 		UserConfigs.findOne({ userId: user.id }),
 		interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 	]);
@@ -412,7 +412,7 @@ async function makeSelectFeedTCResponse(interaction: MessageComponentInteraction
 	return Promise.all([
 		userConfigs.save(),
 		interaction.message.edit({
-			components: [makeSelectTagsChannelContainer(compressedAuthorId, interaction, userConfigs, translator)],
+			components: [ makeSelectTagsChannelContainer(compressedAuthorId, interaction, userConfigs, translator) ],
 		}),
 		interaction.deleteReply(),
 	]);
@@ -442,7 +442,7 @@ const command = new Command('yo', tags)
 	.setExecution(async (request, args) => {
 		const userQuery = { userId: request.userId };
 
-		let [userConfigs] = await Promise.all([
+		let [ userConfigs ] = await Promise.all([
 			UserConfigs.findOne(userQuery),
 			request.deferReply(
 				args.hasFlag('efímero') ? { flags: MessageFlags.Ephemeral } : {}
@@ -457,7 +457,7 @@ const command = new Command('yo', tags)
 		const translator = new Translator(userConfigs.language);
 		return request.editReply({
 			flags: MessageFlags.IsComponentsV2,
-			components: [makeDashboardContainer(request, userConfigs, translator)],
+			components: [ makeDashboardContainer(request, userConfigs, translator) ],
 		});
 	})
 	.setButtonResponse(async function goToDashboard(interaction, authorId) {
@@ -473,7 +473,7 @@ const command = new Command('yo', tags)
 			return interaction.reply({ content: translator.getText('unauthorizedInteraction'), ephemeral: true });
 
 		return interaction.update({
-			components: [makeDashboardContainer(interaction, userConfigs, translator)],
+			components: [ makeDashboardContainer(interaction, userConfigs, translator) ],
 		});
 	})
 	.setSelectMenuResponse(async function selectLanguage(interaction) {
@@ -495,7 +495,7 @@ const command = new Command('yo', tags)
 		await userConfigs.save().then(() => recacheUser(user.id));
 
 		return interaction.update({
-			components: [makeDashboardContainer(interaction, userConfigs, translator)],
+			components: [ makeDashboardContainer(interaction, userConfigs, translator) ],
 		});
 	}, { userFilterIndex: 0 })
 	.setButtonResponse(async function promptSetTimezone(interaction) {
@@ -517,14 +517,14 @@ const command = new Command('yo', tags)
 				label
 					.setLabel(translator.getText('yoTimezoneModalTimezoneLabel'))
 					.setTextInputComponent(
-					new TextInputBuilder()
-						.setCustomId('inputTimezone')
-						.setPlaceholder(translator.getText('yoTimezoneModalTimezonePlaceholder'))
-						.setMinLength(0)
-						.setMaxLength(32)
-						.setRequired(false)
-						.setValue(`${userConfigs.tzCode || 'UTC'}`)
-						.setStyle(TextInputStyle.Short)
+						new TextInputBuilder()
+							.setCustomId('inputTimezone')
+							.setPlaceholder(translator.getText('yoTimezoneModalTimezonePlaceholder'))
+							.setMinLength(0)
+							.setMaxLength(32)
+							.setRequired(false)
+							.setValue(`${userConfigs.tzCode || 'UTC'}`)
+							.setStyle(TextInputStyle.Short)
 					),
 			);
 
@@ -561,7 +561,7 @@ const command = new Command('yo', tags)
 		return Promise.all([
 			userConfigs.save().then(() => recacheUser(user.id)),
 			interaction.update({
-				components: [makeDashboardContainer(interaction, userConfigs, translator)],
+				components: [ makeDashboardContainer(interaction, userConfigs, translator) ],
 			}),
 		]);
 	})
@@ -587,18 +587,18 @@ const command = new Command('yo', tags)
 		switch(selected) {
 		case 'voice':
 			return interaction.update({
-				components: [makeVoiceContainer(compressedAuthorId, userConfigs, translator)],
+				components: [ makeVoiceContainer(compressedAuthorId, userConfigs, translator) ],
 			});
 
 		case 'pixiv':
 			return interaction.update({
-				components: [makePixivServicePickerContainer(compressedAuthorId, userConfigs.pixivConverter, translator)],
+				components: [ makePixivServicePickerContainer(compressedAuthorId, userConfigs.pixivConverter, translator) ],
 
 			});
 
 		default:
 			return interaction.update({
-				components: [makeTwitterServicePickerContainer(compressedAuthorId, userConfigs.twitterPrefix, translator)],
+				components: [ makeTwitterServicePickerContainer(compressedAuthorId, userConfigs.twitterPrefix, translator) ],
 			});
 		}
 	})
@@ -618,7 +618,7 @@ const command = new Command('yo', tags)
 		return Promise.all([
 			userConfigs.save(),
 			interaction.update({
-				components: [makeVoiceContainer(compressedAuthorId, userConfigs, translator)],
+				components: [ makeVoiceContainer(compressedAuthorId, userConfigs, translator) ],
 			}),
 		]);
 	}, { userFilterIndex: 0 })
@@ -680,7 +680,7 @@ const command = new Command('yo', tags)
 		const translator = new Translator(userConfigs.language as LocaleKey);
 
 		await interaction.message.edit({
-			components: [makeVoiceContainer(compressId(interaction.user.id), userConfigs, translator)]
+			components: [ makeVoiceContainer(compressId(interaction.user.id), userConfigs, translator) ]
 		}).catch(console.error);
 
 		return interaction.editReply({ content: translator.getText('yoVoiceAutonameSuccess') });
@@ -729,7 +729,7 @@ const command = new Command('yo', tags)
 		const translator = new Translator(userConfigs.language as LocaleKey);
 
 		await interaction.message.edit({
-			components: [makeVoiceContainer(compressId(interaction.user.id), userConfigs, translator)],
+			components: [ makeVoiceContainer(compressId(interaction.user.id), userConfigs, translator) ],
 		}).catch(console.error);
 
 		return interaction.editReply({ content: translator.getText('yoVoiceKillDelaySuccess') });
@@ -737,7 +737,7 @@ const command = new Command('yo', tags)
 	.setSelectMenuResponse(async function setPixivConvert(interaction, compressedAuthorId) {
 		const { user } = interaction;
 
-		const [userConfigs] = await Promise.all([
+		const [ userConfigs ] = await Promise.all([
 			UserConfigs.findOne({ userId: user.id }),
 			interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 		]);
@@ -760,7 +760,7 @@ const command = new Command('yo', tags)
 		return Promise.all([
 			userConfigs.save().then(() => recacheUser(user.id)),
 			interaction.message.edit({
-				components: [makePixivServicePickerContainer(compressedAuthorId, userConfigs.pixivConverter, translator)],
+				components: [ makePixivServicePickerContainer(compressedAuthorId, userConfigs.pixivConverter, translator) ],
 			}),
 			interaction.editReply({ content: translator.getText('yoConversionServiceSuccess') }),
 		]);
@@ -768,7 +768,7 @@ const command = new Command('yo', tags)
 	.setSelectMenuResponse(async function setTwitterConvert(interaction, compressedAuthorId) {
 		const { user } = interaction;
 
-		const [userConfigs] = await Promise.all([
+		const [ userConfigs ] = await Promise.all([
 			UserConfigs.findOne({ userId: user.id }),
 			interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 		]);
@@ -791,7 +791,7 @@ const command = new Command('yo', tags)
 		return Promise.all([
 			userConfigs.save().then(() => recacheUser(user.id)),
 			interaction.message.edit({
-				components: [makeTwitterServicePickerContainer(compressedAuthorId, userConfigs.twitterPrefix, translator)],
+				components: [ makeTwitterServicePickerContainer(compressedAuthorId, userConfigs.twitterPrefix, translator) ],
 			}),
 			interaction.editReply({ content: translator.getText('yoConversionServiceSuccess') }),
 		]);
@@ -824,7 +824,7 @@ const command = new Command('yo', tags)
 		return Promise.all([
 			userConfigs.save(),
 			interaction.update({
-				components: [makeFollowedTagsContainer(compressedAuthorId, channelId, userConfigs, translator, !!isAlt)],
+				components: [ makeFollowedTagsContainer(compressedAuthorId, channelId, userConfigs, translator, !!isAlt) ],
 			}),
 		]);
 	})
@@ -904,7 +904,7 @@ const command = new Command('yo', tags)
 		return Promise.all([
 			interaction.message.edit({
 				content: translator.getText(setTagsResponse, editedTags.join(' ')),
-				components: [makeFollowedTagsContainer(compressId(userId), channelId, userConfigs, translator, !!isAlt)],
+				components: [ makeFollowedTagsContainer(compressId(userId), channelId, userConfigs, translator, !!isAlt) ],
 			}),
 			interaction.deleteReply(),
 		]);
@@ -918,7 +918,7 @@ const command = new Command('yo', tags)
 			);
 
 		return interaction.update({
-			components: [container],
+			components: [ container ],
 		});
 	}, { userFilterIndex: 0 })
 	.setButtonResponse(async function exitWizard(interaction) {
@@ -930,7 +930,7 @@ const command = new Command('yo', tags)
 			);
 
 		return interaction.update({
-			components: [finishContainer],
+			components: [ finishContainer ],
 		});
 	}, { userFilterIndex: 0 });
 

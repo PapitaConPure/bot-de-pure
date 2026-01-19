@@ -50,7 +50,7 @@ export async function onStartup(client: import('discord.js').Client) {
 		console.log(chalk.redBright.bold('Se inicializará para un entorno de producción'));
 	else
 		console.log(chalk.cyanBright.bold('Se inicializará para un entorno de desarrollo'));
-	
+
 	console.log(chalk.magenta('Obteniendo miembros de servidores de Discord...'));
 	setupGuildRateKeeper({ client });
 	await fetchAllGuildMembers();
@@ -71,7 +71,7 @@ export async function onStartup(client: import('discord.js').Client) {
 			Routes.applicationCommands(client.application.id),
 			{ body: commandData.global },
 		);
-		
+
 		const dedicatedServerId = serverIds.saki;
 		if(client.guilds.cache.get(dedicatedServerId))
 			await restGlobal.put(
@@ -102,11 +102,11 @@ export async function onStartup(client: import('discord.js').Client) {
 	])).forEach((guild, i) => { globalConfigs.slots[`slot${i + 1}`] = guild; });
 	globalConfigs.logch = globalConfigs.slots.slot1.channels.resolve('870347940181471242') as GuildTextBasedChannel;
 	confirm();
-	
+
 	console.log((chalk.rgb(255, 0, 0))('Preparando Reproductor de YouTube...'));
 	await prepareTracksPlayer(client);
 	confirm();
-	
+
 	//Cargado de datos de base de datos
 	if(noDataBase) {
 		console.log(chalk.yellow.italic('Se saltará la inicialización de base de datos a petición del usuario'));
@@ -114,7 +114,7 @@ export async function onStartup(client: import('discord.js').Client) {
 		console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
 		console.log(chalk.gray('Conectando a Cluster en la nube...'));
 		const mongoUri: string = process.env.MONGODB_URI ?? (require(envPath)?.dburi);
-		set("strictQuery", false);
+		set('strictQuery', false);
 		connect(mongoUri, {
 			//@ts-expect-error Quizá sí existen estas 2
 			useUnifiedTopology: true,
@@ -142,8 +142,8 @@ export async function onStartup(client: import('discord.js').Client) {
 		await BooruTags.syncIndexes();
 		await BooruTags.createIndexes();
 		booruTags.forEach(tag => Booru.tagsCache.set(tag.name, new Tag(tag)));
-		logOptions.booruTags && console.table([...Booru.tagsCache.values()].sort((a, b) => a.id - b.id));
-		
+		logOptions.booruTags && console.table([ ...Booru.tagsCache.values() ].sort((a, b) => a.id - b.id));
+
 		console.log(chalk.gray('Preparando Cascadas de Mensajes...'));
 		await initializeMessageCascades();
 
@@ -159,7 +159,7 @@ export async function onStartup(client: import('discord.js').Client) {
 		console.log(chalk.gray('Preparando recordatorios...'));
 		initRemindersScheduler(client);
 		await processReminders();
-		
+
 		console.log(chalk.gray('Preparando Dueños de Mensajes de Agentes Puré...'));
 		await initializeWebhookMessageOwners();
 
@@ -169,12 +169,12 @@ export async function onStartup(client: import('discord.js').Client) {
 		if(!puretable) puretable = new PureTable();
 		else //Limpiar emotes eliminados / no accesibles
 			puretable.cells = puretable.cells.map(arr =>
-				arr.map(cell => client.emojis.cache.get(cell) ? cell : pureTableAssets.defaultEmote )
+				arr.map(cell => client.emojis.cache.get(cell) ? cell : pureTableAssets.defaultEmote)
 			);
 		const uniqueEmoteIds = new Set<string>();
 		const pendingEmoteCells = [];
 		puretable.cells.flat().forEach(cell => uniqueEmoteIds.add(cell));
-		
+
 		/**@param {string} id*/
 		async function getEmoteCell(id: string) {
 			const image = await loadImage(client.emojis.cache.get(id).imageURL({ extension: 'png', size: 64 }));
@@ -192,7 +192,7 @@ export async function onStartup(client: import('discord.js').Client) {
 		globalConfigs.loademotes = {};
 		for(const cell of emoteCells)
 			globalConfigs.loademotes[cell.id] = cell.image;
-		
+
 		console.log(chalk.gray('Preparando imágenes extra...'));
 		const slot3Emojis = (/**@type {import('discord.js').Guild}*/(globalConfigs.slots.slot3)).emojis.cache;
 		const [ WHITE, BLACK, pawn ] = await Promise.all([
@@ -201,7 +201,7 @@ export async function onStartup(client: import('discord.js').Client) {
 			loadImage(slot3Emojis.find(e => e.name === 'pawn').imageURL({ extension: 'png', size: 256 })),
 		]);
 		globalConfigs.loademotes['chess'] = { WHITE, BLACK, pawn };
-		
+
 		console.log(chalk.gray('Iniciando cambios de presencia periódicos'));
 		modifyPresence(client);
 		confirm();
@@ -218,7 +218,7 @@ export async function onStartup(client: import('discord.js').Client) {
 
 	globalConfigs.maintenance = '';
 	console.log(chalk.greenBright.bold('Bot conectado y funcionando'));
-	auditSystem('Bot conectado y funcionando', 
+	auditSystem('Bot conectado y funcionando',
 		{ name: 'Host',             value: botStatus.host,                             inline: true },
 		{ name: 'N. de versión',    value: botStatus.version.number,                   inline: true },
 		{ name: 'Fecha',            value: `<t:${getUnixTime(new Date(Date.now()))}:f>`,    inline: true },

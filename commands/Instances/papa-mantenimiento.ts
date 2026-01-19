@@ -13,9 +13,9 @@ const command = new Command('papa-mantenimiento', tags)
 	)
 	.setExecution(async message => {
 		const { channel, user } = message;
-		const sent = await channel.send({ content: `**Host** \`${host}\`\n**ID de InstProc** \`${globalConfigs.startupTime}\`\n**Estado** \`[${globalConfigs.maintenance.length?'PAUSADO':'OPERANDO'}]\``})
+		const sent = await channel.send({ content: `**Host** \`${host}\`\n**ID de InstProc** \`${globalConfigs.startupTime}\`\n**Estado** \`[${globalConfigs.maintenance.length?'PAUSADO':'OPERANDO'}]\``});
 
-		const reactions = (globalConfigs.maintenance.length)?['🌀']:['💤','👁️'];
+		const reactions = (globalConfigs.maintenance.length)?[ '🌀' ]:[ '💤','👁️' ];
 		Promise.all(reactions.map(reaction => sent.react(reaction)));
 		const filter = (rc, u) => reactions.includes(rc.emoji.name) && user.id === u.id;
 		const collector = sent.createReactionCollector({ filter: filter, max: 1, time: 1000 * 30 });

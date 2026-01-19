@@ -30,7 +30,7 @@ const command = new Command('imgur', tags)
 		const translator = await Translator.from(request.userId);
 
 		if(args.hasFlag('registrar')) {
-			const embeds = [new EmbedBuilder()
+			const embeds = [ new EmbedBuilder()
 				.setColor('#1bb76e')
 				.setTitle(translator.getText('imgurRegisterTitle'))
 				.setURL('https://api.imgur.com/oauth2/addclient')
@@ -58,13 +58,13 @@ const command = new Command('imgur', tags)
 				),
 			];
 
-			const components = [makeButtonRowBuilder().addComponents(
+			const components = [ makeButtonRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId(`imgur_onButtonRegisterRequest`)
 					.setLabel(translator.getText('buttonRegister'))
 					.setEmoji('1355488586883137697')
 					.setStyle(ButtonStyle.Primary),
-			)];
+			) ];
 
 			return request.reply({
 				embeds,
@@ -78,7 +78,7 @@ const command = new Command('imgur', tags)
 		const imgurUser = (await ImgurUser.findOne({ userId: request.userId })) || new ImgurUser({ userId: request.userId });
 		const clientId = imgurUser.clientId ?? require(envPath).imgurclientid;
 		const client = new ImgurClient({ clientId });
-		
+
 		const imageUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(u => u);
 		const attachments = CommandOptionSolver.asAttachments(args.parsePolyParamSync('imagens')).filter(a => a);
 		const imageStreams = await Promise.all(attachments
@@ -100,7 +100,7 @@ const command = new Command('imgur', tags)
 		const failures = [];
 		for(const upload of uploads) {
 			const image = await client.upload(upload);
-		
+
 			if(image?.success)
 				successes.push(new EmbedBuilder()
 					.setTitle(translator.getText('imgurUploadSuccessTitle'))
@@ -117,7 +117,7 @@ const command = new Command('imgur', tags)
 						name: `Error ${image.status}`,
 						value: `\`\`\`\n${image.data}\n\`\`\``,
 					}));
-			
+
 			count++;
 		}
 

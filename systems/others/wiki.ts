@@ -24,14 +24,14 @@ export const makeCategoriesRow = (request: ComplexCommandRequest | ComponentInte
 			.setLabel('General')
 			.setDescription('Comandos comunes, de propósito general.')
 			.setDefault(getDefault('COMMON')));
-	
+
 	!isNotModerator(request.member) && categoriesMenu.addOptions(new StringSelectMenuOptionBuilder()
 		.setValue('MOD')
 		.setEmoji('704612794921779290')
 		.setLabel('Moderación')
 		.setDescription('Comandos limitados a moderadores.')
 		.setDefault(getDefault('MOD')));
-	
+
 	request.user.id === userIds.papita && categoriesMenu.addOptions(
 		new StringSelectMenuOptionBuilder()
 			.setValue('PAPA')
@@ -59,7 +59,7 @@ export const makeCategoriesRow = (request: ComplexCommandRequest | ComponentInte
 		.setLabel('Saki Scans')
 		.setDescription('Comandos exclusivos para Saki Scans.')
 		.setDefault(getDefault('SAKI')));
-	
+
 	categoriesMenu.addOptions(
 		new StringSelectMenuOptionBuilder()
 			.setValue('MUSIC')
@@ -94,7 +94,7 @@ export const makeCategoriesRow = (request: ComplexCommandRequest | ComponentInte
 	);
 
 	return makeStringSelectMenuRowBuilder().addComponents(categoriesMenu);
-}
+};
 
 export const makeGuideMenu = (request: ComplexCommandRequest | MessageComponentInteraction<'cached'>) => new StringSelectMenuBuilder()
 	.setCustomId(`ayuda_viewGuideWiki_${compressId(request.user.id)}`)
@@ -127,7 +127,7 @@ export const makeGuideRow = (request: ComplexCommandRequest | MessageComponentIn
 /**
  * @description
  * Devuelve un {@linkcode Command} según el `nameOrAlias` indicado.
- * 
+ *
  * Si no se encuentran resultados, se devuelve `null`
  */
 export async function searchCommand(request: AnyRequest, nameOrAlias: string) {
@@ -150,9 +150,9 @@ export async function searchCommand(request: AnyRequest, nameOrAlias: string) {
 /**
  * @description
  * Devuelve un arreglo de objetos según la `query` proporcionada.
- * 
+ *
  * Los objetos devueltos contienen un {@linkcode Command} y la distancia Damerau-Levenshtein con peso euclideano respecto a la `query`.
- * 
+ *
  * Si no se encuentran resultados, se devuelve `null`.
  */
 export async function searchCommands(request: AnyRequest, query: string) {
@@ -169,16 +169,16 @@ export async function searchCommands(request: AnyRequest, query: string) {
 			distance = command.aliases
 				.map(alias => edlDistance(alias, query))
 				.reduce((a, b) => a < b ? a : b, 999) + nameBias;
-			
+
 			if(distance > 3)
 				continue;
 		}
-		
+
 		if((command.tags.has('PAPA') && request.user.id !== userIds.papita)
 		|| (command.tags.has('MOD') && isNotModerator(request.member))
 		|| (command.tags.has('SAKI') && request.guild.id !== serverIds.saki))
 			continue;
-		
+
 		commandsWithDistance.push({
 			command,
 			distance,
@@ -243,7 +243,7 @@ export function injectWikiPage(command: Command, guildId: string, payload: WikiP
 			},
 			{ name: 'Etiquetas', value: flags.keys.map(f => `\`${f}\``).join(', '), inline: true },
 		));
-	
+
 	//Embed de información
 	const infoEmbed = new EmbedBuilder()
 		.setColor(0xbf94e4)
@@ -281,7 +281,7 @@ export function getWikiPageComponentsV2(command: Command, request: ComplexComman
 	const getDisplayFlags = () =>  `${commandTags.keys.map(t => displayTagMappings[t]).join(', ')}`;
 	const isNotGuidePage = !(commandTags.has('GUIDE'));
 	const listExists = (l: string[]) => l?.[0]?.length;
-	
+
 	//Contenedor de metadatos
 	const titleTextBuilder = new TextDisplayBuilder().setContent(
 		isNotGuidePage
@@ -309,7 +309,7 @@ export function getWikiPageComponentsV2(command: Command, request: ComplexComman
 	//Contenedor de información
 	const descriptionHeaderTextBuilder = new TextDisplayBuilder().setContent(isNotGuidePage ? '### Descripción' : '### Explicación');
 	const descriptionTextBuilder = new TextDisplayBuilder().setContent(command.desc || '⚠️ Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde');
-	
+
 	const wikiRows = command.wiki.rows.map(row => makeMessageActionRowBuilder()
 		.addComponents(row.map(componentEvaluator => componentEvaluator(request)))
 	);
@@ -344,13 +344,13 @@ export function getWikiPageComponentsV2(command: Command, request: ComplexComman
 				.setLabel('Componer...')
 				.setStyle(ButtonStyle.Secondary)
 				.setDisabled(true);
-	
+
 			 const optionsHeaderTextBuilder = new TextDisplayBuilder().setContent('### Opciones');
 			 const optionsTextBuilder = new TextDisplayBuilder().setContent(command.options?.display);
 			 const optionsSectionBuilder = new SectionBuilder()
 				.addTextDisplayComponents(optionsHeaderTextBuilder, optionsTextBuilder)
 				.setButtonAccessory(composeButton);
-				
+
 			infoContainerBuilder
 				.addSectionComponents(optionsSectionBuilder);
 		} else {

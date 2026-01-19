@@ -21,10 +21,10 @@ function getAnnoyedByHourai(message: Message) {
 			channel.isSendable() && channel.send({ content: fuckustr[Math.floor(Math.random() * fuckustr.length)] });
 		}, 800);
 	}
-};
+}
 
 //Funciones de Respuesta Rápida personalizadas por servidor
-export default {
+export default{
 	[serverIds.saki]: {
 		getAnnoyedByHourai,
 	},
@@ -36,4 +36,4 @@ export default {
 	[serverIds.slot1]: {
 		getAnnoyedByHourai,
 	},
-}
+};

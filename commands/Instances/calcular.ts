@@ -8,8 +8,8 @@ const tags = new CommandTags().add('COMMON');
 
 const options = new CommandOptions()
 	.addParam('operación', 'TEXT', ' para expresar la operación matemátca')
-	.addFlag(['a','s'], 'acortar', 'para acortar el resultado')
-	.addFlag(['m','d'], ['mínimo','minimo','digitos'], 'para designar el mínimo de dígitos', { name: 'minimo', type: 'NUMBER' });
+	.addFlag([ 'a','s' ], 'acortar', 'para acortar el resultado')
+	.addFlag([ 'm','d' ], [ 'mínimo','minimo','digitos' ], 'para designar el mínimo de dígitos', { name: 'minimo', type: 'NUMBER' });
 
 const command = new Command('calcular', tags)
 	.setAliases('calc', 'clc', 'cx')

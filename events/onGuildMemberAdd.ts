@@ -2,7 +2,7 @@ import { GuildMember } from 'discord.js';
 import { dibujarBienvenida } from '../func';
 import { guildIsAvailable, announceMemberUpdate } from './guildMemberUpdate';
 
-import Logger from'../utils/logs.js';
+import Logger from '../utils/logs.js';
 const { debug } = Logger('DEBUG', 'GMemberAdd');
 
 export async function onGuildMemberAdd(member: GuildMember) {
@@ -18,8 +18,8 @@ export async function onGuildMemberAdd(member: GuildMember) {
 
 async function equisde(member: GuildMember) {
 	return member.roles.remove('1107831054791876691')
-	.catch(error => {
-		console.error(error);
-		setTimeout(equisde, 1000 * 2, member);
-	});
+		.catch(error => {
+			console.error(error);
+			setTimeout(equisde, 1000 * 2, member);
+		});
 }

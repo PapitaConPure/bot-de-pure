@@ -20,7 +20,7 @@ export async function onReactionRemove(reaction: MessageReaction | PartialMessag
 
 	const { guild } = message;
 	const userId = message.author.id;
-	
+
 	if(guild.memberCount < 100) return;
 	if(user.id === userId) return;
 
@@ -41,8 +41,8 @@ export async function onReactionRemove(reaction: MessageReaction | PartialMessag
 	if(userConfigs.reactionsReceivedToday <= 10) {
 		userConfigs.prc -= 10 - ((userConfigs.reactionsReceivedToday - 1) / 3) ** 2;
 	}
-	
+
 	userConfigs.reactionsReceivedToday--;
-	
+
 	return userConfigs.save();
 }

@@ -34,31 +34,31 @@ const command = new Command('saucenao', flags)
 
 		const sauceNAOUser = (await SauceNAOUser.findOne({ userId: request.userId }));
 		if(!sauceNAOUser) {
-			debug('Usuario no tiene una cuenta de sauceNAO válida. Abortando...')
+			debug('Usuario no tiene una cuenta de sauceNAO válida. Abortando...');
 			const embed = new EmbedBuilder()
 				.setColor(0x151515)
 				.setDescription(translator.getText('saucenaoUnregisteredNotice'));
 
 			return request.reply({
-				embeds: [embed],
+				embeds: [ embed ],
 				ephemeral: true,
 			});
 		}
-		
+
 		const message = (request.isInteraction && await args.getMessage('mensaje'))
 			|| (request.isMessage && request.channel.messages.cache.get(request.inferAsMessage().reference?.messageId));
 		const messageAttachments = message?.attachments
 			? message.attachments.values()
 			: /**@type {Array<import('discord.js').Attachment>}*/([]);
-		
+
 		const imageUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(u => u);
 		const commandAttachments = CommandOptionSolver.asAttachments(args.parsePolyParamSync('imagens')).filter(a => a);
-		
+
 		const attachments = [
 			...messageAttachments,
 			...commandAttachments,
 		];
-		
+
 		const attachmentUrls = attachments.map(att => att.url);
 		const otherMessageUrls = message?.embeds
 			? (message.embeds
@@ -89,7 +89,7 @@ const command = new Command('saucenao', flags)
 
 		const successes = [];
 		const failures = [];
-		
+
 		await pourSauce(sauceNAOUser.clientId, queries, request, { successes, failures });
 
 		if(!successes.length && !failures.length)
@@ -103,7 +103,7 @@ const command = new Command('saucenao', flags)
 		return interaction.showModal(modal);
 	}).setModalResponse(async function onRegisterRequest(interaction) {
 		const translator = await Translator.from(interaction.user.id);
-		
+
 		const clientId = interaction.fields.getTextInputValue('clientId').trim();
 
 		if(!testSauceNAOToken(clientId)) {
@@ -131,7 +131,7 @@ const command = new Command('saucenao', flags)
 
 function makeRegisterRequestResponse(request: import('../Commons/typings').ComplexCommandRequest, translator: Translator) {
 	debug('Se enviará el mensaje de registro');
-	const embeds = [new EmbedBuilder()
+	const embeds = [ new EmbedBuilder()
 		.setColor(0x151515)
 		.setTitle(translator.getText('saucenaoRegisterTitle'))
 		.setFooter({
@@ -149,13 +149,13 @@ function makeRegisterRequestResponse(request: import('../Commons/typings').Compl
 		),
 	];
 
-	const components = [makeButtonRowBuilder().addComponents(
+	const components = [ makeButtonRowBuilder().addComponents(
 		new ButtonBuilder()
 			.setCustomId(`saucenao_onButtonRegisterRequest`)
 			.setLabel(translator.getText('buttonRegister'))
 			.setEmoji('1355488586883137697')
 			.setStyle(ButtonStyle.Primary),
-	)];
+	) ];
 
 	return request.reply({
 		embeds,

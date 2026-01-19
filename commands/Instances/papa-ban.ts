@@ -21,7 +21,7 @@ const command = new Command('papa-ban', tags)
 		const userConfig = (await UserConfig.findOne({ userId: user.id })) || new UserConfig({ userId: user.id });
 		userConfig.banned = !userConfig.banned;
 		await userConfig.save().then(() => recacheUser(user.id));
-		
+
 		return request.reply({ content: userConfig.banned ? '✅ Usuario banneado' : '✅ Usuario desbanneado' });
 	});
 

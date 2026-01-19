@@ -9,8 +9,8 @@ import { ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
 
 const options = new CommandOptions()
 	.addParam('hora', 'TIME', 'para establecer la hora a convertir', { optional: true })
-	.addFlag('lzt', ['huso', 'franja', 'zona', 'zone', 'timezone', 'offset'], 'para especificar un huso horario de referencia', { name: 'tz', type: 'TEXT' })
-	.addFlag(['f','d'], ['fecha', 'día', 'dia', 'date'], 'para ingresar un día', { name: 'dma', type: 'DATE' });
+	.addFlag('lzt', [ 'huso', 'franja', 'zona', 'zone', 'timezone', 'offset' ], 'para especificar un huso horario de referencia', { name: 'tz', type: 'TEXT' })
+	.addFlag([ 'f','d' ], [ 'fecha', 'día', 'dia', 'date' ], 'para ingresar un día', { name: 'dma', type: 'DATE' });
 
 const tags = new CommandTags().add('COMMON');
 

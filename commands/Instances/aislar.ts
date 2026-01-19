@@ -35,7 +35,7 @@ const command = new Command('aislar', tags)
 
 		if(duration === 0)
 			duration = null;
-		else 
+		else
 			duration = duration * 60e3;
 
 		const members = CommandOptionSolver.asMembers(args.parsePolyParamSync('miembros', { regroupMethod: 'MENTIONABLES-WITH-SEP' }));
@@ -54,7 +54,7 @@ const command = new Command('aislar', tags)
 				.timeout(duration, `Aislado por ${request.member.user.tag}`)
 				.then(() => succeeded.push(member))
 				.catch(() => failed.push(member))
-		));
+			));
 
 		if(!succeeded.length)
 			return request.reply({ content: translator.getText('aislarNoUpdatedMembers') });

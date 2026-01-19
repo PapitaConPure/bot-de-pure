@@ -99,15 +99,15 @@ const options = new CommandOptions()
 			.setDesc('para establecer la fecha'),
 		new CommandFlag()
 			.setShort('b')
-			.setLong(['nobomb', 'nb'])
+			.setLong([ 'nobomb', 'nb' ])
 			.setDesc('para especificar que se logró sin usar bombas'),
 		new CommandFlag()
 			.setShort('sc')
-			.setLong(['nospecial','ns','noc'])
+			.setLong([ 'nospecial','ns','noc' ])
 			.setDesc('para especificar que se logró sin usar las teclas C o D'),
 		new CommandFlag()
 			.setShort('p')
-			.setLong(['pacifista', 'pacifist'])
+			.setLong([ 'pacifista', 'pacifist' ])
 			.setDesc('para especificar que se logró sin realizar daño'),
 	);
 
@@ -127,7 +127,7 @@ const command = new Command('tarjeta', tags)
 		//Cargar imágenes derivadas de flags
 		const canvas = Canvas.createCanvas(640, 1120);
 		const ctx = canvas.getContext('2d');
-		const challenges = ['nobomb', 'nospecial', 'pacifista']
+		const challenges = [ 'nobomb', 'nospecial', 'pacifista' ]
 			.map(ch => args.flagIf(ch, ch))
 			.filter(ch => ch);
 
@@ -154,7 +154,7 @@ const command = new Command('tarjeta', tags)
 			return request.reply({
 				content: `⚠️ Debes ingresar una calidad de survival válida.\n${helpstr}`
 			});
-		
+
 		const score = improveNumber(args.getNumber('puntaje'), { minDigits: 10 });
 		if(!score || +score >= Math.pow(10, 12))
 			return request.reply({
@@ -178,7 +178,7 @@ const command = new Command('tarjeta', tags)
 		const issueDate = dateStr
 			? dateStr
 			: new Date(Date.now()).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' });
-		
+
 		//Carga de imágenes
 		await request.deferReply();
 
@@ -191,7 +191,7 @@ const command = new Command('tarjeta', tags)
 				Canvas.loadImage(member.displayAvatarURL({ size: 512, extension: 'png' })),
 				...challenges.map(ch => Canvas.loadImage(highlights.challenge[ch])),
 			]);
-	
+
 			//Dibujar imágenes
 			ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
 			ctx.drawImage(diffImage, 0, 0, canvas.width, canvas.height);

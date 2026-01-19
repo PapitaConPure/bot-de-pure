@@ -139,7 +139,7 @@ function makeReminderModal(request: import('../Commons/typings').AnyRequest, tra
 			textDisplay.setContent(`-# ${reminderId ? `#${decompressId(reminderId)}` : 'NUEVO RECORDATORIO'}`)
 		);
 
-	modal 
+	modal
 		.addLabelComponents(
 			label => label
 				.setLabel(translator.getText('reminderEditReminderModalDateLabel'))
@@ -179,11 +179,11 @@ function makeReminderModal(request: import('../Commons/typings').AnyRequest, tra
 							ChannelType.PublicThread,
 							ChannelType.PrivateThread,
 						)
-						.setDefaultChannels([reminder?.channelId ? decompressId(reminder.channelId) : request.channelId])
+						.setDefaultChannels([ reminder?.channelId ? decompressId(reminder.channelId) : request.channelId ])
 						.setRequired(true)
 				),
 		);
-	
+
 	const contentTextInput = new TextInputBuilder()
 		.setCustomId('content')
 		.setMinLength(1)
@@ -199,7 +199,7 @@ function makeReminderModal(request: import('../Commons/typings').AnyRequest, tra
 			.setLabel(translator.getText('reminderEditReminderModalContentLabel'))
 			.setTextInputComponent(contentTextInput),
 	);
-	
+
 	return modal;
 }
 
@@ -227,7 +227,7 @@ const options = new CommandOptions()
 			.setDesc('para indicar la fecha en la cual emitir el recordatorio'),
 		new CommandFlagExpressive('tz', 'TEXT')
 			.setShort('lzt')
-			.setLong(['huso', 'franja', 'zona', 'zone', 'timezone', 'offset'])
+			.setLong([ 'huso', 'franja', 'zona', 'zone', 'timezone', 'offset' ])
 			.setDesc('para especificar un huso horario de referencia'),
 	);
 
@@ -255,7 +255,7 @@ const command = new Command('recordatorio', tags)
 	.setExecution(async (request, args) => {
 		const userId = request.userId;
 		const compressedUserId = compressId(userId);
-		const [ translator, userConfigs] = await Promise.all([
+		const [ translator, userConfigs ] = await Promise.all([
 			Translator.from(request),
 			UserConfigs.findOne({ userId }),
 		]);
@@ -285,7 +285,7 @@ const command = new Command('recordatorio', tags)
 
 			return request.reply({
 				flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
-				components: [await makeRemindersListContainer(compressedUserId, translator)],
+				components: [ await makeRemindersListContainer(compressedUserId, translator) ],
 			});
 		}
 
@@ -310,10 +310,10 @@ const command = new Command('recordatorio', tags)
 			});
 
 		let datetime = addTime(date, time);
-		
+
 		if(!dateStr && !isReminderLateEnough(datetime))
 			datetime = addDays(datetime, 1);
-		
+
 		if(!isReminderLateEnough(datetime))
 			return request.reply({
 				flags: MessageFlags.Ephemeral,
@@ -340,10 +340,10 @@ const command = new Command('recordatorio', tags)
 
 		await reminder.save();
 		scheduleReminder(reminder);
-		
+
 		return request.editReply({
 			flags: MessageFlags.IsComponentsV2,
-			components: [makeReminderContainer(reminder, translator)],
+			components: [ makeReminderContainer(reminder, translator) ],
 		});
 	})
 	.setButtonResponse(async function viewReminder(interaction, reminderId) {
@@ -359,10 +359,10 @@ const command = new Command('recordatorio', tags)
 			return interaction.editReply({
 				content: translator.getText('recordarReminderNotFound'),
 			});
-		
+
 		return interaction.editReply({
 			flags: MessageFlags.IsComponentsV2,
-			components: [makeReminderContainer(reminder, translator)],
+			components: [ makeReminderContainer(reminder, translator) ],
 		});
 	}, { userFilterIndex: 1 })
 	.setButtonResponse(async function promptAddReminder(interaction) {
@@ -439,13 +439,13 @@ const command = new Command('recordatorio', tags)
 
 		const informIssue = async (/**@type {string}*/content: string) => {
 			await interaction.editReply({
-				components: [await makeRemindersListContainer(compressedUserId, translator)],
+				components: [ await makeRemindersListContainer(compressedUserId, translator) ],
 			});
 			await interaction.followUp({
 				flags: MessageFlags.Ephemeral,
 				content,
 			});
-		}
+		};
 
 		if(reminderContent.length > 960)
 			return informIssue(translator.getText('recordarReminderContentTooLong'));
@@ -480,14 +480,14 @@ const command = new Command('recordatorio', tags)
 
 		await reminder.save();
 		scheduleReminder(reminder);
-		
+
 		await interaction.editReply({
-			components: [await makeRemindersListContainer(compressedUserId, translator)],
+			components: [ await makeRemindersListContainer(compressedUserId, translator) ],
 		});
 
 		return interaction.followUp({
 			flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
-			components: [makeReminderContainer(reminder, translator)],
+			components: [ makeReminderContainer(reminder, translator) ],
 		});
 	})
 	.setModalResponse(async function editReminder(interaction, reminderId) {
@@ -517,13 +517,13 @@ const command = new Command('recordatorio', tags)
 		const timeStr = interaction.fields.getTextInputValue('time');
 		const channel = interaction.fields.getSelectedChannels('channel')?.first();
 		const reminderContent = interaction.fields.getTextInputValue('content');
-		
+
 		if(reminderContent.length > 960)
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
 				content: translator.getText('recordarReminderContentTooLong'),
 			});
-			
+
 		if(!channel?.isSendable() || !channel.isTextBased() || channel.isDMBased())
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
@@ -563,7 +563,7 @@ const command = new Command('recordatorio', tags)
 		scheduleReminder(reminder);
 
 		return interaction.editReply({
-			components: [makeReminderContainer(reminder, translator, translator.getText('recordarReminderEditSuccessTitle'))],
+			components: [ makeReminderContainer(reminder, translator, translator.getText('recordarReminderEditSuccessTitle')) ],
 		});
 	})
 	.setButtonResponse(async function deleteReminder(interaction, reminderId) {
@@ -587,7 +587,7 @@ const command = new Command('recordatorio', tags)
 			.setContent(translator.getText('recordarReminderDeleteSuccess'));
 
 		return interaction.editReply({
-			components: [textDisplay],
+			components: [ textDisplay ],
 		});
 	}, { userFilterIndex: 1 })
 	.setButtonResponse(async function refreshRemindersList(interaction, compressedUserId) {
@@ -597,7 +597,7 @@ const command = new Command('recordatorio', tags)
 		]);
 
 		return interaction.editReply({
-			components: [await makeRemindersListContainer(compressedUserId, translator)],
+			components: [ await makeRemindersListContainer(compressedUserId, translator) ],
 		});
 	}, { userFilterIndex: 0 });
 

@@ -2,12 +2,12 @@ import chalk from 'chalk';
 import { ValuesOf } from 'types';
 
 const LogLevels = ({
-    DEBUG: 0,
-    INFO: 1,
-    WARN: 2,
-    ERROR: 3,
-    FATAL: 4,
-    CATAS: 5,
+	DEBUG: 0,
+	INFO: 1,
+	WARN: 2,
+	ERROR: 3,
+	FATAL: 4,
+	CATAS: 5,
 }) as const;
 
 export type LogLevelKey = keyof typeof LogLevels;
@@ -15,45 +15,45 @@ export type LogLevel = ValuesOf<typeof LogLevels>;
 
 /**@satisfies {Record<LogLevelKey, `{${LogLevelKey}}`>}*/
 const LogLevelNames = ({
-    DEBUG: '{DEBUG}',
-    INFO: '{INFO}',
-    WARN: '{WARN}',
-    ERROR: '{ERROR}',
-    FATAL: '{FATAL}',
-    CATAS: '{CATAS}',
+	DEBUG: '{DEBUG}',
+	INFO: '{INFO}',
+	WARN: '{WARN}',
+	ERROR: '{ERROR}',
+	FATAL: '{FATAL}',
+	CATAS: '{CATAS}',
 }) as const;
 
 /**@satisfies {Record<LogLevelKey, chalk.Chalk>}*/
 const LogLevelColors = ({
-    DEBUG: chalk.white,
-    INFO: chalk.blueBright,
-    WARN: chalk.rgb(255, 140, 70),
-    ERROR: chalk.redBright,
-    FATAL: chalk.whiteBright.bgRgb(0, 0, 255),
-    CATAS: chalk.whiteBright.bgRgb(0, 0, 255),
+	DEBUG: chalk.white,
+	INFO: chalk.blueBright,
+	WARN: chalk.rgb(255, 140, 70),
+	ERROR: chalk.redBright,
+	FATAL: chalk.whiteBright.bgRgb(0, 0, 255),
+	CATAS: chalk.whiteBright.bgRgb(0, 0, 255),
 }) as const;
 
 const longestLogLevelName = Object.values(LogLevelNames)
-    .map(name => name.length)
-    .reduce((a, b) => a > b ? a : b, 0);
+	.map(name => name.length)
+	.reduce((a, b) => a > b ? a : b, 0);
 
 const logLevelPrefix = (logLevel: LogLevelKey) => LogLevelColors[logLevel](LogLevelNames[logLevel].padEnd(longestLogLevelName));
 
 const logLevelOutput = (logLevel: LogLevelKey, ...data) => LogLevelColors[logLevel](...data);
 
 /**
- * @param {LogLevelKey} logLevel 
- * @param {string} prefix 
+ * @param {LogLevelKey} logLevel
+ * @param {string} prefix
  */
 export default function Logger(logLevel: LogLevelKey, prefix: string = '') {
-    const LOG_LEVEL = LogLevels[logLevel];
+	const LOG_LEVEL = LogLevels[logLevel];
 
-    prefix = prefix.trim();
-    if(!prefix.startsWith('['))
-        prefix = '[' + prefix;
-    if(!prefix.endsWith(']'))
-        prefix = prefix + ']';
-    prefix = chalk.cyanBright(prefix);
+	prefix = prefix.trim();
+	if(!prefix.startsWith('['))
+		prefix = '[' + prefix;
+	if(!prefix.endsWith(']'))
+		prefix = prefix + ']';
+	prefix = chalk.cyanBright(prefix);
 
     /**
      * @description
@@ -61,9 +61,9 @@ export default function Logger(logLevel: LogLevelKey, prefix: string = '') {
      * Requiere un nivel de advertencias de "DEBUG".
      * @param data Los datos de interés del evento.
      */
-    function debug(...data: unknown[]) {
-        LOG_LEVEL <= LogLevels.DEBUG && console.log(logLevelPrefix('DEBUG'), prefix, logLevelOutput('DEBUG', ...data));
-    }
+	function debug(...data: unknown[]) {
+		LOG_LEVEL <= LogLevels.DEBUG && console.log(logLevelPrefix('DEBUG'), prefix, logLevelOutput('DEBUG', ...data));
+	}
 
     /**
      * @description
@@ -71,9 +71,9 @@ export default function Logger(logLevel: LogLevelKey, prefix: string = '') {
      * Requiere un nivel de advertencias hasta "INFO".
      * @param data Los datos de interés del evento.
      */
-    function info(...data: unknown[]) {
-        LOG_LEVEL <= LogLevels.INFO && console.info(logLevelPrefix('INFO'), prefix, logLevelOutput('INFO', ...data));
-    }
+	function info(...data: unknown[]) {
+		LOG_LEVEL <= LogLevels.INFO && console.info(logLevelPrefix('INFO'), prefix, logLevelOutput('INFO', ...data));
+	}
 
     /**
      * @description
@@ -81,9 +81,9 @@ export default function Logger(logLevel: LogLevelKey, prefix: string = '') {
      * Requiere un nivel de advertencias hasta "WARN".
      * @param data Los datos de interés del evento.
      */
-    function warn(...data: unknown[]) {
-        LOG_LEVEL <= LogLevels.WARN && console.warn(logLevelPrefix('WARN'), prefix, logLevelOutput('WARN', ...data));
-    }
+	function warn(...data: unknown[]) {
+		LOG_LEVEL <= LogLevels.WARN && console.warn(logLevelPrefix('WARN'), prefix, logLevelOutput('WARN', ...data));
+	}
 
     /**
      * @description
@@ -92,10 +92,10 @@ export default function Logger(logLevel: LogLevelKey, prefix: string = '') {
      * @param err El error que ocasionó este evento.
      * @param data Los datos de interés del evento.
      */
-    function error(err: Error, ...data: unknown[]) {
-        LOG_LEVEL <= LogLevels.ERROR && console.error(logLevelPrefix('ERROR'), prefix, logLevelOutput('ERROR', err, ...data));
-        console.error(err);
-    }
+	function error(err: Error, ...data: unknown[]) {
+		LOG_LEVEL <= LogLevels.ERROR && console.error(logLevelPrefix('ERROR'), prefix, logLevelOutput('ERROR', err, ...data));
+		console.error(err);
+	}
 
     /**
      * @description
@@ -105,10 +105,10 @@ export default function Logger(logLevel: LogLevelKey, prefix: string = '') {
      * @param err El error que ocasionó este evento.
      * @param data Los datos de interés del evento.
      */
-    function fatal(err: Error, ...data: unknown[]) {
-        LOG_LEVEL <= LogLevels.FATAL && console.error(logLevelPrefix('FATAL'), prefix, logLevelOutput('FATAL', err, ...data));
-        throw err;
-    }
+	function fatal(err: Error, ...data: unknown[]) {
+		LOG_LEVEL <= LogLevels.FATAL && console.error(logLevelPrefix('FATAL'), prefix, logLevelOutput('FATAL', err, ...data));
+		throw err;
+	}
 
     /**
      * @description
@@ -117,10 +117,10 @@ export default function Logger(logLevel: LogLevelKey, prefix: string = '') {
      * @param err El error que ocasionó este evento.
      * @param data Los datos de interés del evento.
      */
-    function catastrophic(err: Error, ...data: unknown[]) {
-        console.error(logLevelPrefix('CATAS'), prefix, logLevelOutput('CATAS', err, ...data));
-        process.exit(1);
-    }
+	function catastrophic(err: Error, ...data: unknown[]) {
+		console.error(logLevelPrefix('CATAS'), prefix, logLevelOutput('CATAS', err, ...data));
+		process.exit(1);
+	}
 
-    return { debug, info, warn, error, fatal, catastrophic };
+	return { debug, info, warn, error, fatal, catastrophic };
 }

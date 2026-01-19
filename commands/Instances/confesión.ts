@@ -75,7 +75,7 @@ const command = new Command('confesión', tags)
 		];
 
 		return request.reply({
-			embeds: [embed],
+			embeds: [ embed ],
 			components: rows,
 			ephemeral: true,
 		});
@@ -175,7 +175,7 @@ const command = new Command('confesión', tags)
 		];
 
 		await Promise.all([
-			confessionalChannel.send({ embeds: [embed], components: rows }),
+			confessionalChannel.send({ embeds: [ embed ], components: rows }),
 			confSystem.save(),
 		]);
 
@@ -193,7 +193,7 @@ const command = new Command('confesión', tags)
 		const modal = new ModalBuilder()
 			.setCustomId(`confesión_confessionFilled_${anonymous ?? ''}`)
 			.setTitle('Petición de Confesión')
-			.addComponents([row]);
+			.addComponents([ row ]);
 
 		return interaction.showModal(modal);
 	}).setModalResponse(async function confessionFilled(interaction, anonymous) {
@@ -246,7 +246,7 @@ const command = new Command('confesión', tags)
 		]);
 
 		await delegateConfessionSystemTasks(
-			logChannel.send({ embeds: [embed], components: [row] }),
+			logChannel.send({ embeds: [ embed ], components: [ row ] }),
 			confSystem.save().then(() => pendingConf.save()),
 		);
 
@@ -270,7 +270,7 @@ const command = new Command('confesión', tags)
 
 		return interaction.reply({
 			flags: MessageFlags.Ephemeral,
-			embeds: [confirmationEmbed],
+			embeds: [ confirmationEmbed ],
 		});
 	}).setButtonResponse(async function acceptConfession(interaction, confId, userId, messageId) {
 		const data = await getConfessionSystemAndChannels(interaction);
@@ -314,7 +314,7 @@ const command = new Command('confesión', tags)
 			if(confession.anonymous) {
 				confessionContent += '<:person:1355128242993893539> Confesión anónima';
 				confessionSection
-					.setButtonAccessory(replyButton)
+					.setButtonAccessory(replyButton);
 			} else {
 				await fetchGuildMembers(interaction.guild);
 				const gmid = decompressId(userId);
@@ -337,8 +337,8 @@ const command = new Command('confesión', tags)
 				} else {
 					confessionContent += `⚠️ Confesión no-anónima, pero no se pudo recuperar el autor`;
 					confessionSection
-						.setButtonAccessory(replyButton)
-					}
+						.setButtonAccessory(replyButton);
+				}
 			}
 			confessionContent += `\n${confession.content}`;
 
@@ -349,7 +349,7 @@ const command = new Command('confesión', tags)
 
 			await confChannel.send({
 				flags: MessageFlags.IsComponentsV2,
-				components: [confessionContainer],
+				components: [ confessionContainer ],
 			});
 		}
 
@@ -365,7 +365,7 @@ const command = new Command('confesión', tags)
 			.setColor(0x32e698)
 			.setDescription(`${messageId ? 'Respuesta anónima' : 'Confesión'} aceptada por ${interaction.user}. Aparecerá en ${confChannel}`);
 
-		return interaction.update({ embeds: [confirmationEmbed], components: [] });
+		return interaction.update({ embeds: [ confirmationEmbed ], components: [] });
 	}).setButtonResponse(async function rejectConfession(interaction, confId) {
 		const data = await getConfessionSystemAndChannels(interaction);
 		if(data.success === false)
@@ -389,7 +389,7 @@ const command = new Command('confesión', tags)
 			.setColor(0xeb345c)
 			.setDescription(`Confesión rechazada por ${interaction.user}. No se le notificará al autor`);
 
-		return interaction.update({ embeds: [confirmationEmbed], components: [] });
+		return interaction.update({ embeds: [ confirmationEmbed ], components: [] });
 	}).setButtonResponse(async function timeoutConfessant(interaction, confId, userId) {
 		const data = await getConfessionSystemAndChannels(interaction);
 		if(data.success === false)
@@ -434,7 +434,7 @@ const command = new Command('confesión', tags)
 				auditError(err, { request: interaction, brief: 'Ha ocurrido un error al aislar un confesante', ping: false });
 		}
 
-		return interaction.update({ embeds: [confirmationEmbed], components: [] });
+		return interaction.update({ embeds: [ confirmationEmbed ], components: [] });
 	}).setButtonResponse(async function banConfessant(interaction, confId, userId) {
 		const data = await getConfessionSystemAndChannels(interaction);
 		if(data.success === false)
@@ -479,7 +479,7 @@ const command = new Command('confesión', tags)
 				auditError(err, { request: interaction, brief: 'Ha ocurrido un error al bannear un confesante', ping: false });
 		}
 
-		return interaction.update({ embeds: [confirmationEmbed], components: [] });
+		return interaction.update({ embeds: [ confirmationEmbed ], components: [] });
 	}).setButtonResponse(async function promptReplyAnon(interaction) {
 		const modal = new ModalBuilder()
 			.setCustomId('confesión_replyAnon')
@@ -550,7 +550,7 @@ const command = new Command('confesión', tags)
 		]);
 
 		await delegateConfessionSystemTasks(
-			logChannel.send({ embeds: [embed], components: [row] }),
+			logChannel.send({ embeds: [ embed ], components: [ row ] }),
 			confSystem.save().then(() => pendingConf.save()),
 		);
 

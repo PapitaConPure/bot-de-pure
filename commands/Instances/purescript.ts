@@ -20,7 +20,7 @@ export const psDocsButton = new ButtonBuilder()
 	.setEmoji('📖')
 	.setStyle(ButtonStyle.Link);
 
-async function getScriptString(args: import("../Commons/cmdOpts").CommandOptionSolver, rawArgs?: string) {
+async function getScriptString(args: import('../Commons/cmdOpts').CommandOptionSolver, rawArgs?: string) {
 	const file = args.getAttachment('archivo');
 
 	if(file && file.name.toLowerCase().endsWith('.tuber')) {
@@ -33,13 +33,13 @@ async function getScriptString(args: import("../Commons/cmdOpts").CommandOptionS
 					statusText: response.statusText,
 					result: /**@type {null}*/(null),
 				};
-			
+
 			return {
 				status: 200,
 				statusText: 'OK',
 				result: /**@type {string}*/(response.data),
 			};
-		}
+		};
 
 		return importCode();
 	}
@@ -53,14 +53,14 @@ async function getScriptString(args: import("../Commons/cmdOpts").CommandOptionS
 			.replace(/```$/, '')
 			.trim();
 	}
-	
+
 	if(!script.length)
 		return {
 			status: 400,
 			statusText: 'Se requiere que ingreses código PuréScript válido. Nótese que solo los Tubérculos pueden usar las características de registro y lectura Entradas de Usuario',
 			result: /**@type {null}*/(null),
 		};
-	
+
 	return {
 		status: 200,
 		statusText: 'OK',
@@ -105,7 +105,7 @@ const command = new Command('purescript', flags)
 						.setTitle('¿Nunca programaste en PuréScript?')
 						.setDescription('¡Revisa la documentación oficial!'),
 				],
-				components: [makeButtonRowBuilder().addComponents(psEditorButton, psDocsButton)],
+				components: [ makeButtonRowBuilder().addComponents(psEditorButton, psDocsButton) ],
 			});
 
 		const script = scriptResult.result;
@@ -118,7 +118,7 @@ const command = new Command('purescript', flags)
 			psVersion: CURRENT_PS_VERSION,
 			saved: new Map(),
 		};
-		
+
 		try {
 			console.log(`Ejecutando PuréScript: ${tuber}`);
 			await request.deferReply();

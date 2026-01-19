@@ -236,7 +236,7 @@ const command = new Command('anarquia', tags)
 					})
 					.filter(s => s)
 					.join('\n');
-				
+
 				const exp = auser.exp % maxExp;
 				const userLevel = calcUserLevel(auser);
 				const dropRate = calcDropRate(userLevel);
@@ -276,11 +276,11 @@ const command = new Command('anarquia', tags)
 							`Usa \`${p_pure(request.guildId).raw}anarquia <posición(x,y)> <emote>\` para colocar un emote en la tabla de puré y crearte un perfil anárquico automáticamente\n` +
 							`Si tienes más dudas, usa \`${p_pure(request.guildId).raw}ayuda anarquia\``
 					});
-			return request.reply({ embeds: [embed] });
+			return request.reply({ embeds: [ embed ] });
 		}
-		
+
 		const reactIfMessage = async (/**@type {String}*/ reaction: string) => request.isMessage && request.inferAsMessage().react(reaction).catch(_ => _);
-		
+
 		const skill = args.hasFlag('skill');
 		const inverted = args.isMessageSolver(args.args) && isNaN(+args.args[0]);
 		let emote: string;
@@ -305,21 +305,21 @@ const command = new Command('anarquia', tags)
 		if(pos.length) {
 			const { userId } = request;
 			const auser = (await AnarchyUser.findOne({ userId })) || new AnarchyUser({ userId });
-			
+
 			//Tiempo de enfriamiento por usuario
 			if((Date.now() - auser.last) < 5000) {
 				reactIfMessage('⌛');
 				return request.reply({ content: '⌛ ¡No tan rápido!', ephemeral: true });
 			} else
 				auser.last = Date.now();
-			
+
 			const emoteMatch = emote.match(emojiRegex);
 			if(!emoteMatch) {
 				reactIfMessage('⚠️');
 				return request.reply({ content: translator.getText('invalidEmoji'), ephemeral: true });
 			}
 			const emoteId = emoteMatch[1];
-	
+
 			if(!request.client.emojis.cache.has(emoteId)) {
 				reactIfMessage('⚠️');
 				return request.reply({ content: '⚠️️ No reconozco ese emoji. Solo puedo usar emojis de servidores en los que esté', ephemeral: true });
@@ -345,7 +345,7 @@ const command = new Command('anarquia', tags)
 				const correctedX = Ut.clamp(originalX, 0, cells[0].length - 1);
 				const correctedY = Ut.clamp(originalY, 0, cells.length - 1);
 				wasCorrected = originalX !== correctedX || originalY !== correctedY;
-				
+
 				//Insertar emote en posición
 				couldLoadEmote = await loadEmoteIfNotLoaded(request, emoteId);
 				if(couldLoadEmote) {
@@ -354,26 +354,26 @@ const command = new Command('anarquia', tags)
 				}
 			});
 
-			if(!couldLoadEmote){
+			if(!couldLoadEmote) {
 				reactIfMessage('⚠️');
 				return request.reply({ content: translator.getText('anarquiaCouldNotLoadEmoji'), ephemeral: true });
 			}
-	
+
 			reactIfMessage(wasCorrected ? '☑️' : '✅');
 			embeds.push(new EmbedBuilder()
-			.setColor(Colors.DarkVividPink)
-			.setTitle('¡Hecho!')
-			.setDescription(
-				(wasCorrected
-					? '☑️ Emote colocado con *posición corregida*'
-					: '✅ Emote colocado'
-				)));
-			
+				.setColor(Colors.DarkVividPink)
+				.setTitle('¡Hecho!')
+				.setDescription(
+					(wasCorrected
+						? '☑️ Emote colocado con *posición corregida*'
+						: '✅ Emote colocado'
+					)));
+
 			//Sistema de nivel de jugador y adquisición de habilidades
 			const { userLevel, leveledUp, droppedSkill } = levelUpAndGetSkills(auser);
 			auser.markModified('skills');
 			auser.save();
-	
+
 			if(leveledUp) {
 				reactIfMessage('✨');
 				embeds.push(new EmbedBuilder()
@@ -398,7 +398,7 @@ const command = new Command('anarquia', tags)
 
 		//Ver tabla
 		const imagen = await drawPureTable(cells);
-		return request.editReply({ embeds, files: [imagen] });
+		return request.editReply({ embeds, files: [ imagen ] });
 	})
 	.setSelectMenuResponse(async function selectSkill(interaction, x, y, compressedEmoteId) {
 		const translator = await Translator.from(interaction.user);
@@ -408,7 +408,7 @@ const command = new Command('anarquia', tags)
 		const emoteId = decompressId(compressedEmoteId);
 
 		const react = (/**@type {string}*/ reaction: string) => interaction.message.react(reaction);
-	
+
 		const skillKey = /**@type {keyof skills}*/(interaction.values[0]);
 		const auser = await AnarchyUser.findOne({ userId });
 		if(!auser?.skills[skillKey]) {
@@ -429,7 +429,7 @@ const command = new Command('anarquia', tags)
 				await PureTable.updateOne({}, { cells });
 			}
 		});
-		
+
 		if(!couldLoadEmote) {
 			react('⚠️');
 			return interaction.reply({ content: translator.getText('anarquiaCouldNotLoadEmoji'), ephemeral: true });
@@ -463,9 +463,9 @@ const command = new Command('anarquia', tags)
 				.setTitle('¡Habilidad especial obtenida!')
 				.setDescription(`${user} obtuvo **1** x ${droppedSkill.emoji} *${droppedSkill.name}*`));
 		}
-		
+
 		const imagen = await drawPureTable(cells);
-		return interaction.editReply({ embeds, files: [imagen], components: [] });
+		return interaction.editReply({ embeds, files: [ imagen ], components: [] });
 	}, { userFilterIndex: 3 })
 	.setButtonResponse(async function cancel(interaction) {
 		const translator = await Translator.from(interaction.user);
@@ -491,7 +491,7 @@ async function loadEmoteIfNotLoaded(request: ComplexCommandRequest | StringSelec
 
 		const image = await loadImage(imageUrl);
 		if(!image) return false;
-		
+
 		loadEmotes[emoteId] = image;
 	}
 
@@ -504,7 +504,7 @@ async function makeSkillSelectReply(request: ComplexCommandRequest, translator: 
 	const [ x, y ] = position;
 
 	return request.editReply({
-		embeds: [new EmbedBuilder()
+		embeds: [ new EmbedBuilder()
 			.setColor(Colors.Fuchsia)
 			.setAuthor({ name: request.user.username, iconURL: request.member.displayAvatarURL({ size: 256 })})
 			.setTitle('¡A punto de usar una habilidad!')
@@ -538,7 +538,7 @@ async function makeSkillSelectReply(request: ComplexCommandRequest, translator: 
 async function drawPureTable(cells: string[][]) {
 	const { image: pureTableImage, defaultEmote } = pureTableAssets;
 	const loadedEmotes = globalConfigs.loademotes;
-	
+
 	const canvas = createCanvas(864, 996);
 	const ctx = canvas.getContext('2d');
 
@@ -562,7 +562,7 @@ async function drawPureTable(cells: string[][]) {
 			ctx.drawImage(loadedEmotes[cell], tableX + x * emoteSize, tableY + y * emoteSize, emoteSize, emoteSize);
 		});
 	});
-	
+
 	return new AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'anarquia.webp' });
 }
 

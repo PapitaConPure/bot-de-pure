@@ -6,7 +6,7 @@ const { warn, error, fatal, catastrophic } = Logger('WARN', 'PROCESO');
 
 export async function onUncaughtException(err: Error, origin: NodeJS.UncaughtExceptionOrigin) {
 	err = new UnhandledRejectionError(err, `${err}`);
-	
+
 	const lookups = [
 		err.message,
 		err.cause == null ? null : `${err.cause}`,

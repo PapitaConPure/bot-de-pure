@@ -1,18 +1,18 @@
 import Mongoose from 'mongoose';
 
 const WebhookOwnerSchema = new Mongoose.Schema({
-    messageId: {
-        type: String,
-        required: true,
-    },
-    userId: {
-        type: String,
-        required: true,
-    },
-    expirationDate: {
-        type: Number,
-        required: true,
-    },
+	messageId: {
+		type: String,
+		required: true,
+	},
+	userId: {
+		type: String,
+		required: true,
+	},
+	expirationDate: {
+		type: Number,
+		required: true,
+	},
 });
 
 const WebhookOwner = Mongoose.model('WebhookOwner', WebhookOwnerSchema);

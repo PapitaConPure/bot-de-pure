@@ -33,9 +33,9 @@ const CommandResults = ({
 export type CommandResult = ValuesOf<typeof CommandResults>;
 
 /**
- * 
- * @param {Message<true>} message 
- * @returns 
+ *
+ * @param {Message<true>} message
+ * @returns
  */
 async function processGuildPlugins(message: Message<true>) {
 	const guildFunctions = globalGuildFunctions[message.guild.id];
@@ -44,10 +44,10 @@ async function processGuildPlugins(message: Message<true>) {
 		return;
 
 	return Promise.all(Object.values(guildFunctions).map(fgf => fgf(message)))
-	.catch(error => handleAndAuditError(error, message, {
-		brief: 'Ocurrió un problema al ejecutar una respuesta rápida',
-		details: message.content ? `"${message.content}"` : 'Mensaje sin contenido'
-	}));
+		.catch(error => handleAndAuditError(error, message, {
+			brief: 'Ocurrió un problema al ejecutar una respuesta rápida',
+			details: message.content ? `"${message.content}"` : 'Mensaje sin contenido'
+		}));
 }
 
 async function updateChannelMessageCounter(guildId: string, channelId: string, userId: string) {
@@ -60,7 +60,7 @@ async function updateChannelMessageCounter(guildId: string, channelId: string, u
 	channelStats.sub[userId] += 1;
 	channelStats.markModified('sub');
 	channelStats.save();
-};
+}
 
 async function handleInvalidCommand(message: Message<true>, commandName: string, prefixPair: PrefixPair): Promise<CommandResult> {
 	const { text, imageUrl } = unknownCommandReplies[rand(unknownCommandReplies.length)];
@@ -89,18 +89,18 @@ async function handleInvalidCommand(message: Message<true>, commandName: string,
 			foundList.push({ command: cmd, distance: lowestDistance });
 	}
 	const suggestions = foundList.sort((a, b) => a.distance - b.distance).slice(0, 5);
-	
+
 	if(!suggestions.length)
 		return replyAndDelete();
-	
+
 	const mockEmbed = new ContainerBuilder()
 		.setAccentColor(tenshiColor)
-		.addSectionComponents(section => 
+		.addSectionComponents(section =>
 			section
 				.addTextDisplayComponents(textDisplay =>
 					textDisplay.setContent(processedText)
 				)
-				.setThumbnailAccessory(thumbnail => 
+				.setThumbnailAccessory(thumbnail =>
 					thumbnail.setURL(imageUrl)
 				)
 		);
@@ -132,15 +132,15 @@ async function handleMessageCommand(message: Message<true>, command: Command, ar
 					title: translator.getText('missingMemberChannelPermissionsTitle'),
 					desc: translator.getText('missingMemberChannelPermissionsDescription'),
 				}, { cmdString: exceptionString })
-				.addFields({
-					name: translator.getText('missingMemberChannelPermissionsFullRequisitesName'),
-					value: command.permissions.matrix
-						.map((requisite, n) => `${n + 1}. ${requisite.map(p => `\`${p}\``).join(' **o** ')}`)
-						.join('\n'),
-				}),
+					.addFields({
+						name: translator.getText('missingMemberChannelPermissionsFullRequisitesName'),
+						value: command.permissions.matrix
+							.map((requisite, n) => `${n + 1}. ${requisite.map(p => `\`${p}\``).join(' **o** ')}`)
+							.join('\n'),
+					}),
 			]});
 		}
-		
+
 		if(!command.permissions.amAllowedIn(message.channel)) {
 			const translator = await Translator.from(message.member);
 			return exceptionString && message.channel.send({ embeds: [
@@ -148,12 +148,12 @@ async function handleMessageCommand(message: Message<true>, command: Command, ar
 					title: translator.getText('missingMemberChannelPermissionsTitle'),
 					desc: translator.getText('missingClientChannelPermissionsDescription'),
 				}, { cmdString: exceptionString })
-				.addFields({
-					name: translator.getText('missingMemberChannelPermissionsFullRequisitesName'),
-					value: command.permissions.matrix
-						.map((requisite, n) => `${n + 1}. ${requisite.map(p => `\`${p}\``).join(' **o** ')}`)
-						.join('\n'),
-				}),
+					.addFields({
+						name: translator.getText('missingMemberChannelPermissionsFullRequisitesName'),
+						value: command.permissions.matrix
+							.map((requisite, n) => `${n + 1}. ${requisite.map(p => `\`${p}\``).join(' **o** ')}`)
+							.join('\n'),
+					}),
 			]});
 		}
 	}
@@ -181,7 +181,7 @@ async function checkEmoteCommand(message: Message<true>): Promise<CommandResult>
 		return CommandResults.VOID;
 
 	auditRequest(message);
-	
+
 	const args = words.slice(emoteCommandIndex + 1);
 	const commandName = words[emoteCommandIndex].toLowerCase().slice(1);
 	const command = puré.emotes.get(commandName) || puré.emotes.find(cmd => cmd.aliases?.includes(commandName));
@@ -207,7 +207,7 @@ async function processCommand(message: Message<true>): Promise<CommandResult> {
 	const args = content.replace(ppure.regex, '').split(/[\n ]+/); //Argumentos ingresados
 	const commandName = args.shift().toLowerCase(); //Comando ingresado
 	const command = puré.commands.get(commandName) || puré.commands.find(cmd => cmd.aliases?.includes(commandName));
-	
+
 	if(!command)
 		return handleInvalidCommand(message, commandName, ppure);
 	//#endregion
@@ -236,10 +236,10 @@ async function gainPRC(guild: Guild, userId: string) {
 		userConfigs.messagesToday = 0;
 		userConfigs.lastDateReceived = today;
 	}
-	
+
 	userConfigs.messagesToday++;
 	userConfigs.prc += 1 / ((userConfigs.messagesToday + 260) / 300);
-	
+
 	return userConfigs.save();
 }
 
@@ -256,12 +256,12 @@ async function processLinkConverters(message: Message<true>, userCache: import('
 			message.reply(messageResult),
 			message.suppressEmbeds(true),
 		]);
-		
+
 		setTimeout(() => {
 			if(!message?.embeds) return;
 			message.suppressEmbeds(true).catch(() => undefined);
 		}, 3000);
-	
+
 		await Promise.all([
 			addAgentMessageOwner(sent, message.author.id),
 			addMessageCascade(message.id, sent.id, new Date(+message.createdAt + 4 * 60 * 60e3)),
@@ -288,7 +288,7 @@ export async function onMessage(message: Message) {
 	const { author, channel, guild } = message;
 
 	if(channelIsBlocked(channel)) return;
-	
+
 	const userCache = await fetchUserCache(author);
 
 	if(userCache.banned) return;
@@ -296,7 +296,7 @@ export async function onMessage(message: Message) {
 	await processGuildPlugins(message);
 
 	if(author.bot) return;
-	
+
 	const stats = (!noDataBase && await Stats.findOne({})) || new Stats({ since: Date.now() });
 	stats.read++;
 	updateChannelMessageCounter(guild.id, channel.id, author.id);

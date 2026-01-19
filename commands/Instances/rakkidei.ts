@@ -33,7 +33,7 @@ const command = new Command('rakkidei', flags)
 	.setExecution(async function (request) {
 		return request.reply({
 			content: phrases[randRange(0, phrases.length)],
-			files: [tenshiurl],
+			files: [ tenshiurl ],
 		});
 	});
 

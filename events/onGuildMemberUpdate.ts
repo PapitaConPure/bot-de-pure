@@ -6,11 +6,11 @@ export async function onGuildMemberUpdate(oldMember: GuildMember | PartialGuildM
 	const { guild } = oldMember;
 	if(!guild.available) return;
 
-	if( guild.id !== serverIds.saki
+	if(guild.id !== serverIds.saki
 	 || newMember.premiumSinceTimestamp === oldMember.premiumSinceTimestamp
 	 || newMember.roles.cache.has(saki.titaniaRoleId)
 	  ) return;
 
 	return newMember.roles.add(saki.titaniaRoleId)
-	.catch(console.error);
+		.catch(console.error);
 }

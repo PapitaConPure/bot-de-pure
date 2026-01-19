@@ -112,12 +112,12 @@ export async function formatBooruPostMessage(booru: Booru, post: Post, data: Pos
 	//Botón de Post de Gelbooru
 	const buttonRow = makeButtonRowBuilder().addComponents(
 		new ButtonBuilder()
-		.setEmoji('919398540172750878')
-		.setStyle(ButtonStyle.Link)
-		.setURL(`https://gelbooru.com/index.php?page=post&s=view&id=${post.id}`)
-		.setDisabled(disableLinks),
+			.setEmoji('919398540172750878')
+			.setStyle(ButtonStyle.Link)
+			.setURL(`https://gelbooru.com/index.php?page=post&s=view&id=${post.id}`)
+			.setDisabled(disableLinks),
 	);
-	
+
 	//Botón de Fuente (si está disponible)
 	let containerColor = null;
 	const addSourceButtonAndApplyStyle = (source: string) => {
@@ -171,7 +171,7 @@ export async function formatBooruPostMessage(booru: Booru, post: Post, data: Pos
 		}
 	}
 	containerColor ??= noSource.color;
-	
+
 	//Filtrar tags con estilos especiales
 	debug('A punto de procesar tags especiales');
 	const originalPostTags = [ ...post.tags ];
@@ -219,14 +219,14 @@ export async function formatBooruPostMessage(booru: Booru, post: Post, data: Pos
 
 	const specialTags = [
 		...sexTags,
-		...(resTag ? [resTag] : []),
+		...(resTag ? [ resTag ] : []),
 	];
 
 	debug('specialTags =', specialTags);
 	debug('postTags =', post.tags);
 
 	debug('Aplicando botones adicionales...');
-	
+
 	//Botón de tags
 	buttonRow.addComponents(
 		new ButtonBuilder()
@@ -245,7 +245,7 @@ export async function formatBooruPostMessage(booru: Booru, post: Post, data: Pos
 				.setCustomId(`feed_contribute`)
 				.setDisabled(disableActions),
 		);
-	
+
 	//Botón de eliminación
 	buttonRow.addComponents(
 		new ButtonBuilder()
@@ -259,7 +259,7 @@ export async function formatBooruPostMessage(booru: Booru, post: Post, data: Pos
 	info('Se comenzará a preparar el contenedor final del Post');
 	const container = new ContainerBuilder()
 		.setAccentColor(containerColor);
-	
+
 	//Título
 	if(data.title)
 		container.addTextDisplayComponents(textDisplay =>
@@ -269,7 +269,7 @@ export async function formatBooruPostMessage(booru: Booru, post: Post, data: Pos
 	//Previsualización
 	debug('Comprobando bloqueo de contenido explícito de Post según el canal del mensaje');
 	const shouldBlock = (post.rating === 'explicit' || post.rating === 'questionable') && !allowNSFW;
-	
+
 	if(!shouldBlock) {
 		let previewUrl;
 		debug('El contenido no fue bloqueado. Se agregará al mensaje a continuación');
@@ -284,12 +284,12 @@ export async function formatBooruPostMessage(booru: Booru, post: Post, data: Pos
 			previewUrl = post.sampleUrl || post.fileUrl || post.previewUrl;
 		}
 		container.addMediaGalleryComponents(mediaGallery =>
-			mediaGallery.addItems(mediaGalleryItem => 
+			mediaGallery.addItems(mediaGalleryItem =>
 				mediaGalleryItem.setURL(previewUrl)
 			)
 		);
 	}
-		
+
 	//Tags
 	debug('A punto de intentar procesar las tags del Post');
 	const maxTags = data.maxTags ?? 20;
@@ -355,22 +355,22 @@ export async function formatBooruPostMessage(booru: Booru, post: Post, data: Pos
 
 			const content = formatTagNameListNew(arr, ' ');
 			if(!content.length) return;
-			
+
 			const infoSuffix = partialCount < totalCount ? ` (${partialCount}/${totalCount})` : '';
-			
+
 			return `${fieldName.trim()}${infoSuffix} ${shortenText(content.trim(), 320)}`;
-		}
-		
+		};
+
 		debug('A punto de formular etiquetas en el Embed del mensaje');
 		if(postArtistTags.length + postCharacterTags.length + postCopyrightTags.length > 0)
-		container.addTextDisplayComponents(textDisplay =>
-			textDisplay.setContent([
-				maxTags > 0 ? '###' : '',
-				getCategoryFieldString('<:palette:1355128249658638488>', postArtistTags),
-				getCategoryFieldString('<:person:1355128242993893539>', postCharacterTags),
-				getCategoryFieldString('<:landmark:1355128256432443584>', postCopyrightTags),
-			].join(' ').trim())
-		);
+			container.addTextDisplayComponents(textDisplay =>
+				textDisplay.setContent([
+					maxTags > 0 ? '###' : '',
+					getCategoryFieldString('<:palette:1355128249658638488>', postArtistTags),
+					getCategoryFieldString('<:person:1355128242993893539>', postCharacterTags),
+					getCategoryFieldString('<:landmark:1355128256432443584>', postCopyrightTags),
+				].join(' ').trim())
+			);
 
 		debug('Comprobando si se debe insertar un campo de tags sin categoría');
 		debug('displayedTagsCount =', displayedTagsCount);
@@ -386,11 +386,11 @@ export async function formatBooruPostMessage(booru: Booru, post: Post, data: Pos
 						.setThumbnailAccessory(accessory =>
 							accessory.setURL(thumbnailUrl)
 						)
-				)
+				);
 			} else {
 				container.addTextDisplayComponents(textDisplay =>
 					textDisplay.setContent(postGeneralTags)
-				)
+				);
 			}
 		}
 	} catch(err) {
@@ -415,7 +415,7 @@ export async function formatBooruPostMessage(booru: Booru, post: Post, data: Pos
 	}
 
 	post.tags = originalPostTags;
-	
+
 	info('Agregando botones');
 	container
 		.addSeparatorComponents(separator =>
@@ -426,21 +426,21 @@ export async function formatBooruPostMessage(booru: Booru, post: Post, data: Pos
 		.addActionRowComponents(buttonRow);
 
 	info('Se terminó de formatear un contenedor a de acuerdo a un Post de Booru');
-	
+
 	return container;
-};
+}
 
 export interface Suscription {
 	userId: Snowflake;
 	followedTags: string[];
-};
+}
 
 /**@description Envía una notificación de {@linkcode Post} de {@linkcode Booru} a todos los {@linkcode User} suscriptos a las tags del mismo.*/
 export async function notifyUsers(post: Post, sent: Message<true>, members: Collection<Snowflake, GuildMember>, feedSuscriptions: Array<Suscription>) {
 	info('Se recibió una orden para notificar sobre un nuevo Post a usuarios suscriptos aplicables');
 
 	//No sé qué habré estado pensando cuando escribí esto, pero no pienso volver a tocarlo
-	
+
 	if(!sent)
 		throw 'Se esperaba un mensaje para el cuál notificar';
 
@@ -489,7 +489,7 @@ export async function notifyUsers(post: Post, sent: Message<true>, members: Coll
 					inline: true,
 				},
 			);
-		
+
 		const postRow = makeButtonRowBuilder(containerButtonRow);
 		const spliceIndex = postRow.components.findLastIndex(component => component.data.style === ButtonStyle.Link);
 		postRow.components.splice(spliceIndex + 1);
@@ -501,8 +501,8 @@ export async function notifyUsers(post: Post, sent: Message<true>, members: Coll
 		);
 
 		return member.send({
-			embeds: [userEmbed],
-			components: [postRow],
+			embeds: [ userEmbed ],
+			components: [ postRow ],
 		}).catch(error);
 	}));
 }
@@ -561,7 +561,7 @@ export async function searchAndReplyWithPost(request: ComplexCommandRequest, arg
 	debug('finalTags =', finalTags);
 
 	const author = request.user;
-	
+
 	//Petición
 	try {
 		info('Buscando Posts...');
@@ -599,13 +599,13 @@ export async function searchAndReplyWithPost(request: ComplexCommandRequest, arg
 		const firstContainer = containers.shift();
 		await request.editReply({
 			flags: MessageFlags.IsComponentsV2,
-			components: [firstContainer],
+			components: [ firstContainer ],
 		});
 		return Promise.all(
 			containers.map(container =>
 				request.channel.send({
 					flags: MessageFlags.IsComponentsV2,
-					components: [container],
+					components: [ container ],
 				})
 			)
 		).catch(err => {
@@ -621,14 +621,14 @@ export async function searchAndReplyWithPost(request: ComplexCommandRequest, arg
 				value: [
 					'Es probable que le hayan pegado un tiro al que me suministra las imágenes, así que prueba buscar más tarde, a ver si revive 👉👈',
 					'```js',
-					`${[err.name, err.message].join(': ')}\n`,
+					`${[ err.name, err.message ].join(': ')}\n`,
 					'```',
 				].join('\n'),
 			});
-			
-		return request.editReply({ embeds: [errorEmbed] }) as Promise<Message<true>>;
+
+		return request.editReply({ embeds: [ errorEmbed ] }) as Promise<Message<true>>;
 	}
-};
+}
 
 export function formatTagName(tag: string) {
 	return tag

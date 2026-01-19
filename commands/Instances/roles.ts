@@ -18,7 +18,7 @@ type RoleData = {
 	emote: string;
 };
 
-type CategoryIndex = 
+type CategoryIndex =
 	| 'GAMES'
 	| 'DRINKS'
 	| 'FAITH';
@@ -67,9 +67,9 @@ function getAutoRoleRows(member: import('discord.js').GuildMember, categories: C
 				.setStyle(ButtonStyle.Danger),
 		])
 	);
-	
+
 	return rows;
-};
+}
 
 const getPaginationControls = (categories: CategoryMap, categoryName: CategoryIndex, section: number = 0) => {
 	const category = categories[categoryName];
@@ -77,7 +77,7 @@ const getPaginationControls = (categories: CategoryMap, categoryName: CategoryIn
 	if(rolePool.length < 2) return [];
 
 	const functionName = category.functionName;
-	const nextPage = section > 0 ? (section - 1) : (rolePool.length - 1)
+	const nextPage = section > 0 ? (section - 1) : (rolePool.length - 1);
 	const prevPage = section < (rolePool.length - 1) ? (section + 1) : 0;
 	return [
 		new ActionRowBuilder<ButtonBuilder>().addComponents([
@@ -94,8 +94,8 @@ const getPaginationControls = (categories: CategoryMap, categoryName: CategoryIn
 };
 
 /**
- * @param {import('discord.js').GuildMember} member 
- * @param {CategoryIndex} category 
+ * @param {import('discord.js').GuildMember} member
+ * @param {CategoryIndex} category
  */
 const getEditButtonRow = (member: import('discord.js').GuildMember, category: CategoryIndex) => {
 	if(!member.permissions.has('ManageRoles'))
@@ -110,7 +110,7 @@ const getEditButtonRow = (member: import('discord.js').GuildMember, category: Ca
 				.setStyle(ButtonStyle.Primary),
 		]),
 	];
-}
+};
 
 const options = new CommandOptions()
 	.addOptions(
@@ -137,7 +137,7 @@ const command = new Command('roles', flags)
 				if(Array.isArray(roleItem))
 					return roleItem.some(r => r.id === role.id);
 
-				return (roleItem.id === role.id)
+				return (roleItem.id === role.id);
 			}));
 
 			if(!roleFound)
@@ -157,7 +157,7 @@ const command = new Command('roles', flags)
 						.setTitle('Ponte o quítate el rol')
 						.setDescription(`${role}`),
 				],
-				components: [makeButtonRowBuilder().addComponents(
+				components: [ makeButtonRowBuilder().addComponents(
 					new ButtonBuilder()
 						.setCustomId(`roles_addRole_${role.id}__q`)
 						.setEmoji('1291900911643263008')
@@ -166,7 +166,7 @@ const command = new Command('roles', flags)
 						.setCustomId(`roles_removeRole_${role.id}_q`)
 						.setEmoji('1051265954312617994')
 						.setStyle(ButtonStyle.Danger),
-				)]
+				) ]
 			});
 		}
 
@@ -177,7 +177,7 @@ const command = new Command('roles', flags)
 					.setTitle('Selector de Roles')
 					.setDescription('Cualquiera puede usar el menú debajo para elegir roles.'),
 			],
-			components: [new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+			components: [ new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 				new StringSelectMenuBuilder()
 					.setCustomId('roles_onSelect')
 					.setPlaceholder('Elige una categoría')
@@ -231,9 +231,9 @@ const command = new Command('roles', flags)
 							value: 'selectCandy',
 						},
 					]),
-			)],
+			) ],
 		});
-    })
+	})
 	.setSelectMenuResponse(async function onSelect(interaction) {
 		const received = interaction.values[0].split('_');
 		const operation = received.shift();
@@ -275,7 +275,7 @@ const command = new Command('roles', flags)
 						},
 					),
 			],
-			components: [makeButtonRowBuilder().addComponents(
+			components: [ makeButtonRowBuilder().addComponents(
 				(!interaction.member.roles.cache.get(customRoleId)) ? [
 					new ButtonBuilder()
 						.setCustomId('roles_customRole_CREATE')
@@ -296,7 +296,7 @@ const command = new Command('roles', flags)
 						.setLabel('Eliminar rol')
 						.setStyle(ButtonStyle.Danger),
 				]
-			)],
+			) ],
 			ephemeral: true,
 		});
 	})
@@ -309,7 +309,7 @@ const command = new Command('roles', flags)
 
 		return interaction.reply({
 			content: saki.images.colors,
-			components: [colorsRow],
+			components: [ colorsRow ],
 			ephemeral: true,
 		});
 	})
@@ -319,7 +319,7 @@ const command = new Command('roles', flags)
 
 		if(!interaction.inCachedGuild())
 			return interaction.reply({ content: '❌' });
-		
+
 		const newsRole = '1107852759442665592';
 		const hasNews = interaction.member.roles.cache.has(newsRole);
 		return interaction.reply({
@@ -331,20 +331,20 @@ const command = new Command('roles', flags)
 						value: `Serás notificado en <#${saki.announcementChannelId}> por noticias importantes, eventos y ocasionalmente festividades.\nEste rol te será útil si te interesa alguna o todas esas cosas. No mencionamos muy seguido, tranquilo`,
 					})
 			],
-			components: [makeButtonRowBuilder().addComponents([
+			components: [ makeButtonRowBuilder().addComponents([
 				new ButtonBuilder()
 					.setEmoji('1107843515385389128')
 					.setLabel('Anuncios')
 					.setCustomId(`roles_${hasNews ? 'removeRole' : 'addRole'}_${newsRole}`)
 					.setStyle(hasNews ? ButtonStyle.Primary : ButtonStyle.Secondary),
-			])],
+			]) ],
 			ephemeral: true,
 		});
 	})
 	.setInteractionResponse(async function selectGame(interaction, sectionNumber, edit) {
 		if(!interaction.inCachedGuild())
 			return interaction.isRepliable() && interaction.reply({ content: '❌' });
-		
+
 		const section = parseInt(sectionNumber);
 		const houraiDB = (await Saki.findOne({})) || new Saki({});
 		const mentionRoles = houraiDB.mentionRoles as CategoryMap;
@@ -371,7 +371,7 @@ const command = new Command('roles', flags)
 
 		if(!interaction.inCachedGuild())
 			return interaction.reply({ content: '❌' });
-		
+
 		const section = parseInt(sectionNumber);
 		const houraiDB = (await Saki.findOne({})) || new Saki({});
 		const mentionRoles = houraiDB.mentionRoles as CategoryMap;
@@ -426,10 +426,10 @@ const command = new Command('roles', flags)
 
 		if(!interaction.inCachedGuild())
 			return interaction.reply({ content: '❌' });
-		
+
 		if(!interaction.member.roles.cache.has('1107831054791876691'))
 			return interaction.reply({ content: '🚫 No tienes permiso para hacer eso', ephemeral: true });
-		
+
 		const candyRole = saki.candyRoleId;
 		const hasCandy = interaction.member.roles.cache.has(candyRole);
 		return interaction.reply({
@@ -445,13 +445,13 @@ const command = new Command('roles', flags)
 						].join('\n'),
 					})
 			],
-			components: [makeButtonRowBuilder().addComponents([
+			components: [ makeButtonRowBuilder().addComponents([
 				new ButtonBuilder()
 					.setEmoji('778180421304188939')
 					.setLabel('Caramelos (+18)')
 					.setCustomId(`roles_${hasCandy ? 'removeRole' : 'addRole'}_${candyRole}`)
 					.setStyle(hasCandy ? ButtonStyle.Primary : ButtonStyle.Secondary),
-			])],
+			]) ],
 			ephemeral: true,
 		});
 	})
@@ -481,15 +481,15 @@ const command = new Command('roles', flags)
 		newComponents[0].components = newComponents[0].components.map((component: ButtonComponent) => {
 			const newComponent = ButtonBuilder.from(component);
 			const componentRid = component.customId.split('_')[2];
-			
+
 			if(roleId === componentRid) {
 				if(!category)
-					newComponent.setCustomId(`roles_removeRole_${componentRid}`)
+					newComponent.setCustomId(`roles_removeRole_${componentRid}`);
 				return newComponent.setStyle(ButtonStyle.Primary);
 			}
 			if(category)
 				return newComponent.setStyle(ButtonStyle.Secondary);
-			
+
 			return newComponent;
 		});
 
@@ -499,7 +499,7 @@ const command = new Command('roles', flags)
 			rolesToRemove = houraiDB.mentionRoles[category].rolePool
 				.filter(role => role.id !== roleId && member.roles.cache.has(role.id))
 				.map(role => member.roles.remove(role.id));
-		
+
 		await Promise.all([
 			interaction.deferUpdate(),
 			...rolesToRemove,
@@ -534,7 +534,7 @@ const command = new Command('roles', flags)
 			const newComponent = ButtonBuilder.from(component);
 			const componentRid = component.customId.split('_')[2];
 			if(roleId !== componentRid) return newComponent;
-			
+
 			if(component.style === ButtonStyle.Primary)
 				return newComponent
 					.setCustomId(`roles_addRole_${componentRid}`)
@@ -565,7 +565,7 @@ const command = new Command('roles', flags)
 			const [ , functionName, componentRid ] = component.customId.split('_');
 			if(component.style === ButtonStyle.Secondary) return newComponent;
 			if(functionName === 'removeRole')
-				newComponent.setCustomId(`roles_addRole_${componentRid}`)
+				newComponent.setCustomId(`roles_addRole_${componentRid}`);
 			return newComponent.setStyle(ButtonStyle.Secondary);
 		});
 
@@ -580,46 +580,46 @@ const command = new Command('roles', flags)
 		const userId = interaction.user.id;
 
 		switch(operation) {
-			case 'CREATE': {
-				if(interaction.member.roles.cache.get(houraiDB.customRoles[userId]))
-					return interaction.reply({ content: '⚠️ ¡Tu rol ya fue creado! Si cancelaste la configuración o la interacción falló, selecciona la categoría nuevamente para editarlo', ephemeral: true });
-					
-				const customRole = await interaction.guild.roles.create({
-					name: interaction.member.nickname ?? interaction.user.username,
-					position: (await interaction.guild.roles.fetch('1108486398719295612'))?.rawPosition,
-					reason: 'Creación de Rol Personalizado de miembro',
-				});
-				houraiDB.customRoles[userId] = customRole.id;
-				houraiDB.markModified('customRoles');
-				await Promise.all([
-					houraiDB.save(),
-					interaction.member.roles.add(customRole),
-				]);
+		case 'CREATE': {
+			if(interaction.member.roles.cache.get(houraiDB.customRoles[userId]))
+				return interaction.reply({ content: '⚠️ ¡Tu rol ya fue creado! Si cancelaste la configuración o la interacción falló, selecciona la categoría nuevamente para editarlo', ephemeral: true });
 
-				return command.customRoleWizard(interaction, customRole.id);
-			}
-			
-			case 'EDIT': {
-				const roleId = houraiDB.customRoles[userId];
-				return command.customRoleWizard(interaction, roleId);
-			}
+			const customRole = await interaction.guild.roles.create({
+				name: interaction.member.nickname ?? interaction.user.username,
+				position: (await interaction.guild.roles.fetch('1108486398719295612'))?.rawPosition,
+				reason: 'Creación de Rol Personalizado de miembro',
+			});
+			houraiDB.customRoles[userId] = customRole.id;
+			houraiDB.markModified('customRoles');
+			await Promise.all([
+				houraiDB.save(),
+				interaction.member.roles.add(customRole),
+			]);
 
-			case 'DELETE': {
-				const roleId = houraiDB.customRoles[userId];
-				houraiDB.customRoles[userId] = null;
-				delete houraiDB.customRoles[userId];
-				houraiDB.markModified('customRoles');
+			return command.customRoleWizard(interaction, customRole.id);
+		}
 
-				return Promise.all([
-					interaction.guild.roles.delete(roleId, 'Eliminación de Rol Personalizado de miembro'),
-					houraiDB.save(),
-					interaction.update({
-						content: '🗑 Rol personalizado eliminado',
-						embeds: [],
-						components: [],
-					}),
-				]);
-			}
+		case 'EDIT': {
+			const roleId = houraiDB.customRoles[userId];
+			return command.customRoleWizard(interaction, roleId);
+		}
+
+		case 'DELETE': {
+			const roleId = houraiDB.customRoles[userId];
+			houraiDB.customRoles[userId] = null;
+			delete houraiDB.customRoles[userId];
+			houraiDB.markModified('customRoles');
+
+			return Promise.all([
+				interaction.guild.roles.delete(roleId, 'Eliminación de Rol Personalizado de miembro'),
+				houraiDB.save(),
+				interaction.update({
+					content: '🗑 Rol personalizado eliminado',
+					embeds: [],
+					components: [],
+				}),
+			]);
+		}
 		}
 	})
 	.setButtonResponse(async function customRoleWizard(interaction, roleId) {
@@ -631,7 +631,7 @@ const command = new Command('roles', flags)
 				embeds: [],
 				components: [],
 			});
-		
+
 		const nameInput = new TextInputBuilder()
 			.setCustomId('nameInput')
 			.setLabel('Nombre')
@@ -639,7 +639,7 @@ const command = new Command('roles', flags)
 			.setRequired(false)
 			.setMaxLength(158)
 			.setPlaceholder(`Ej: Bhavaagra Princess`);
-		
+
 		const colorInput = new TextInputBuilder()
 			.setCustomId('colorInput')
 			.setLabel('Color (hexadecimal)')
@@ -665,7 +665,7 @@ const command = new Command('roles', flags)
 			.setCustomId(`roles_applyCustomRoleChanges_${customRole.id}`)
 			.setTitle('Edita tu Rol Personalizado')
 			.addComponents(rows);
-		
+
 		return interaction.showModal(modal).catch(() => {});
 	})
 	.setModalResponse(async function applyCustomRoleChanges(interaction, roleId) {
@@ -681,14 +681,14 @@ const command = new Command('roles', flags)
 		if(roleName.length)
 			editStack.push(
 				customRole.edit({ name: `✨ ${roleName}` })
-				.catch(() => replyStack.push('⚠️ No se pudo actualizar el nombre del rol'))
+					.catch(() => replyStack.push('⚠️ No se pudo actualizar el nombre del rol'))
 			);
 
 		if(roleColor.length) {
 			const roleColorNumber = stringHexToNumber(roleColor);
 			editStack.push(
 				customRole.edit({ color: roleColorNumber })
-				.catch(() => replyStack.push('⚠️ No se pudo actualizar el color del rol'))
+					.catch(() => replyStack.push('⚠️ No se pudo actualizar el color del rol'))
 			);
 		}
 
@@ -699,16 +699,16 @@ const command = new Command('roles', flags)
 			if(roleEmoteUrl.startsWith(imgurUrl)) {
 				roleEmoteUrl = roleEmoteUrl.slice(imgurUrl.length);
 				if(roleEmoteUrl.startsWith('a/'))
-				roleEmoteUrl = roleEmoteUrl.slice(2);
+					roleEmoteUrl = roleEmoteUrl.slice(2);
 				roleEmoteUrl = `https://i.imgur.com/${roleEmoteUrl}.png`;
 			}
 
 			try {
 				const response = await axios.get(roleEmoteUrl,  { responseType: 'arraybuffer' });
-				const roleEmoteBuffer = Buffer.from(response?.data, "utf-8")
+				const roleEmoteBuffer = Buffer.from(response?.data, 'utf-8');
 				editStack.push(
 					customRole.edit({ icon: roleEmoteBuffer })
-					.catch(() => replyStack.push('⚠️ No se pudo actualizar el ícono del rol. Puede que el servidor sea de nivel muy bajo o no hayas proporcionado un enlace directo a la imagen'))
+						.catch(() => replyStack.push('⚠️ No se pudo actualizar el ícono del rol. Puede que el servidor sea de nivel muy bajo o no hayas proporcionado un enlace directo a la imagen'))
 				);
 			} catch {
 				replyStack.push('⚠️ No se pudo actualizar el ícono del rol. Puede que no hayas proporcionado un enlace directo a la imagen o el enlace sea inválido');

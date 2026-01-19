@@ -60,7 +60,7 @@ const command = new Command('reproducir', tags)
 
 		if(isPlayerUnavailable(channel))
 			return request.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
-		
+
 		const query = args.getString('búsqueda', true);
 		if(!query)
 			return request.reply({ content: translator.getText('playSearchExpected'), ephemeral: true });

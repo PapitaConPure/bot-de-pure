@@ -92,7 +92,7 @@ export async function prepareTracksPlayer(client: Client) {
 	player.on('error', (err) => {
 		error(err, `Error emitted from the player: ${err.message}`);
 	});
-	
+
 	player.events.on('playerFinish', (queue) => {
 		saveTracksQueue(queue.metadata, queue);
 	});
@@ -124,7 +124,7 @@ export async function showQueuePage(request: ComplexCommandRequest | ButtonInter
 			flags: MessageFlags.Ephemeral,
 			content: translator.getText('unauthorizedInteraction'),
 		});
-	
+
 	const channel = request.member.voice?.channel;
 	if(!channel)
 		return (request as ComplexCommandRequest).reply({
@@ -137,7 +137,7 @@ export async function showQueuePage(request: ComplexCommandRequest | ButtonInter
 			flags: MessageFlags.Ephemeral,
 			content: translator.getText('voiceSameChannelExpected'),
 		});
-	
+
 	const shortChannelName = shortenText(channel.name, 20);
 
 	/**@param {ColorResolvable} color*/
@@ -148,7 +148,7 @@ export async function showQueuePage(request: ComplexCommandRequest | ButtonInter
 			name: request.member.displayName,
 			iconURL: request.member.displayAvatarURL({ size: 128 }),
 		});
-	
+
 	if(op !== 'PL') {
 		await (
 			(!op || op === 'CM')
@@ -181,10 +181,10 @@ export async function showQueuePage(request: ComplexCommandRequest | ButtonInter
 	let offset = page * QUEUE_PAGE_TRACKS_MAX;
 	while(queue.size && offset >= queue.size)
 		offset = (op === 'DE') ? Math.max(0, offset - QUEUE_PAGE_TRACKS_MAX) : 0;
-	
+
 	const tracks = queue.tracks.toArray().slice(offset, offset + QUEUE_PAGE_TRACKS_MAX);
 	const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted) : translator.getText('playFooterTextQueueEmpty');
-	
+
 	const lastPage = queue.size ? (Math.ceil(queue.size / QUEUE_PAGE_TRACKS_MAX) - 1) : 0;
 	const previousPage = page === 0 ? lastPage : page - 1;
 	const nextPage = page === lastPage ? 0 : page + 1;
@@ -192,7 +192,7 @@ export async function showQueuePage(request: ComplexCommandRequest | ButtonInter
 	const labels = [];
 
 	let queueEmbed;
-	
+
 	if(queue.currentTrack) {
 		const currentTrack = queue.currentTrack;
 		const isPaused = queue.node.isPaused();
@@ -204,7 +204,7 @@ export async function showQueuePage(request: ComplexCommandRequest | ButtonInter
 			indicator: '',
 			rightChar: '▱',
 		})}`;
-		
+
 		const service = SERVICES[currentTrack.source];
 		queueEmbed = makeReplyEmbed(service.color)
 			.setThumbnail(currentTrack.thumbnail ?? request.client.user.displayAvatarURL())
@@ -241,14 +241,14 @@ export async function showQueuePage(request: ComplexCommandRequest | ButtonInter
 
 	if(labels.length)
 		queueEmbed.setDescription(labels.join('\n'));
-	
+
 	queueEmbed
 		.addFields(...tracks.map((t, i) => ({
 			name: `${i + offset + 1}.  ⏱️ ${t.duration}${ t.requestedBy ? `  👤 ${t.requestedBy.username}` : '' }`,
 			value: `[${t.title || '<<???>>'}](${t.url})`,
 		})))
 		.setTimestamp(Date.now());
-	
+
 	const compressedUserId = compressId(request.user.id);
 
 	const components = [];
@@ -298,7 +298,7 @@ export async function showQueuePage(request: ComplexCommandRequest | ButtonInter
 
 	const trackRow = getTrackActionRow(queue, page, request.user.id, fullRows);
 	components.push(trackRow);
-	
+
 	if(fullRows) {
 		const queueRow = getQueueActionRow(queue, page, request.user.id, translator);
 		components.push(queueRow);
@@ -339,7 +339,7 @@ function getTrackActionRow(queue: import('discord-player').GuildQueue, page: num
 				.setCustomId(`cola_pause_${compressedUserId}_${page}`)
 				.setEmoji('1356977691122995371')
 				.setStyle(ButtonStyle.Primary);
-		
+
 		actionRow.addComponents(
 			pauseOrResumeButton,
 			new ButtonBuilder()

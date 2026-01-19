@@ -133,7 +133,7 @@ const command = new Command('presentar', tags)
 					].join('\n'))
 				),
 		];
-		
+
 		return request.reply({
 			flags: MessageFlags.IsComponentsV2,
 			components,

@@ -36,7 +36,7 @@ function extendRequest(request: CommandRequest | ComponentInteraction): ComplexC
 	if(Command.requestIsMessage(request)) {
 		extension.isMessage = true;
 		extension.inferAsMessage = () => request;
-		extension.inferAsSlash = () => { throw 'Invalid inference of a Message Command into a Slash Command' };
+		extension.inferAsSlash = () => { throw 'Invalid inference of a Message Command into a Slash Command'; };
 
 		extension.appPermisions = request.guild.members.me.permissionsIn(request.channel);
 		extension.deferred = false;
@@ -54,7 +54,7 @@ function extendRequest(request: CommandRequest | ComponentInteraction): ComplexC
 		extension.deleteReply = async() => extension.initialReply?.delete();
 		extension.editReply = async(options) => {
 			if(extension.initialReply == undefined)
-				throw "No se encontró una respuesta inicial de comando a editar";
+				throw 'No se encontró una respuesta inicial de comando a editar';
 
 			extension.replied = true;
 
@@ -64,18 +64,18 @@ function extendRequest(request: CommandRequest | ComponentInteraction): ComplexC
 			const replied = (request as Message).reply(options as MessageReplyOptions);
 			extension.replied = true;
 			return replied;
-		}
+		};
 		extension.wasDeferred = () => extension.deferred;
 		extension.wasReplied = () => extension.replied;
 	} else {
 		extension.isInteraction = true;
-		extension.inferAsMessage = () => { throw 'Invalid inference of a Slash Command into a Message Command' };
+		extension.inferAsMessage = () => { throw 'Invalid inference of a Slash Command into a Message Command'; };
 		extension.inferAsSlash = () => {
 			if(request.isChatInputCommand())
 				return request;
 			else
 				throw 'Invalid inference of a non-Slash Command Interaction into a Slash Command';
-			};
+		};
 
 		extension.activity = null;
 		extension.attachments = new Collection();
@@ -86,7 +86,7 @@ function extendRequest(request: CommandRequest | ComponentInteraction): ComplexC
 		extension.wasReplied = () => request.isCommand() && request.replied;
 	}
 
-	for(const [k, v] of Object.entries(extension)) {
+	for(const [ k, v ] of Object.entries(extension)) {
 		if(v !== undefined)
 			request[k] = v;
 	}
@@ -152,7 +152,7 @@ export class Command {
 			rows: [],
 		};
 		this.execute = request => request.reply(this.reply);
-	};
+	}
 
 	/**Alias de `<Command>.flags`.*/
 	get tags() {
@@ -163,24 +163,24 @@ export class Command {
 		if(!aliases.length) throw new Error('Debes pasar al menos un alias');
 		this.aliases = aliases;
 		return this;
-	};
+	}
 
 	setBriefDescription(desc: string) {
 		if(typeof desc !== 'string') throw new TypeError('La descripción debe ser un string');
 		if(!desc.length)             throw new Error('Debes escribir una descripción válida');
 		this.brief = desc;
 		return this;
-	};
+	}
 
 	setLongDescription(...desc: string[]) {
 		if(!desc.length) throw new Error('Debes especificar una descripción');
 		this.desc = desc.join('\n');
 		return this;
-	};
+	}
 
 	setDescription(...desc: string[]) {
 		return this.setLongDescription(...desc);
-	};
+	}
 
 	addWikiRow(...components: WikiComponentResolvable[]) {
 		if(!components.length) throw new Error('Debes pasar al menos un botón');
@@ -198,14 +198,14 @@ export class Command {
 
 		this.permissions = permissions;
 		return this;
-	};
+	}
 
 	setOptions(options: import('./cmdOpts').CommandOptions) {
 		if(!options.options) throw new Error('Las opciones deben ser un CommandOptions');
 		this.options = options;
 		this.callx = options.callSyntax;
 		return this;
-	};
+	}
 
 	setReply(replyOptions: CommandReplyOptions) {
 		this.reply = replyOptions;
@@ -235,7 +235,7 @@ export class Command {
 	 */
 	setInteractionResponse(responseFn: InteractionResponseFunction, options: InteractionResponseOptions = {}) {
 		return this.setFunction(responseFn, options);
-	};
+	}
 
 	/**
 	 * @param responseFn Una función NO anónima a ejecutar al recibir una interacción
@@ -243,7 +243,7 @@ export class Command {
 	 */
 	setButtonResponse(responseFn: ButtonResponseFunction, options: InteractionResponseOptions = {}) {
 		return this.setFunction(responseFn, options);
-	};
+	}
 
 	/**
 	 * @param responseFn Una función NO anónima a ejecutar al recibir una interacción
@@ -251,7 +251,7 @@ export class Command {
 	 */
 	setSelectMenuResponse(responseFn: SelectMenuResponseFunction, options: InteractionResponseOptions = {}) {
 		return this.setFunction(responseFn, options);
-	};
+	}
 
 	/**
 	 * @param responseFn Una función NO anónima a ejecutar al recibir una interacción
@@ -259,7 +259,7 @@ export class Command {
 	 */
 	setModalResponse(responseFn: ModalResponseFunction, options: InteractionResponseOptions = {}) {
 		return this.setFunction(responseFn, options);
-	};
+	}
 
 	static requestIsMessage(request: CommandRequest | Interaction): request is Message<true> {
 		return request instanceof Message;
@@ -283,4 +283,4 @@ export class Command {
 	static requestize(request: CommandRequest | ComponentInteraction) {
 		return extendRequest(request);
 	}
-};
+}

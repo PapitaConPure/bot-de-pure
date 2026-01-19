@@ -52,6 +52,6 @@ export function hsv2hex(hue: number, sat: number, lit: number): HexColorCode {
  * @param blue  Blue channel intensity (0~255)
  */
 export function rgb2hex(red: number, green: number, blue: number): HexColorCode {
-    const channelHex = (/**@type {Number}*/component: number) => Math.round(component).toString(16).padStart(2, '0');
-    return `#${channelHex(red)}${channelHex(green)}${channelHex(blue)}`;
+	const channelHex = (/**@type {Number}*/component: number) => Math.round(component).toString(16).padStart(2, '0');
+	return `#${channelHex(red)}${channelHex(green)}${channelHex(blue)}`;
 }

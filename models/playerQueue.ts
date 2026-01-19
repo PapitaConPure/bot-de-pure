@@ -51,15 +51,15 @@ export async function tryRecoverSavedTracksQueue(request: ComplexCommandRequest 
 	const pqQuery = { guildId };
 	console.log(pqQuery);
 	const savedQueue = await PlayerQueue.findOne(pqQuery);
-	
+
 	if(!savedQueue || !savedQueue.serializedTracks.length) return null;
-	
+
 	console.log('Non-empty saved queue found!');
 	const [ currentTrack, ...restOfTracks ] = savedQueue.serializedTracks.map(st => deserializeTrack(player, st));
 
 	console.log('Saved queue data retrieved!');
 	console.log({ currentTrack, restOfTracks });
-	
+
 	return attemptDatabaseQueueRecovery({
 		request,
 		pauseOnInit,
@@ -82,7 +82,7 @@ async function attemptDatabaseQueueRecovery(data: __attempDatabaseQueueRecoveryD
 		currentTrack,
 		restOfTracks,
 	} = data;
-	
+
 	const channel = (request.member as GuildMember).voice?.channel;
 	if(!channel)
 		return null;
@@ -95,7 +95,7 @@ async function attemptDatabaseQueueRecovery(data: __attempDatabaseQueueRecoveryD
 		});
 
 		console.log('"Current track" was set.');
-		
+
 		if(pauseOnInit) {
 			console.log('Caller requested to keep recovered "current track" paused.');
 			queue.node.pause();

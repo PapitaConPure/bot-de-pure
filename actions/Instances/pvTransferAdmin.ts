@@ -25,7 +25,7 @@ const action = new ContextMenuAction('actionPVTransferAdmin', 'User')
 
 		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
 		if(!session) return interaction.editReply({ content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción' });
-		
+
 		const dbOther = (other.voice?.channelId === voiceChannel.id) && session.members.get(other.id);
 		if(!dbOther)
 			return interaction.editReply({ content: '❌ El miembro al que le transfieras el cargo de administrador debe estar en la misma sesión que tú' });
@@ -41,7 +41,7 @@ const action = new ContextMenuAction('actionPVTransferAdmin', 'User')
 
 		const tweakControlPanelPerms = async () => {
 			const result = await requestPVControlPanel(guild, pv.categoryId, pv.controlPanelId);
-			
+
 			if(!result.success)
 				return;
 
@@ -57,7 +57,7 @@ const action = new ContextMenuAction('actionPVTransferAdmin', 'User')
 
 			if(sessionSelf.isGuest())
 				await controlPanel.permissionOverwrites.delete(member, 'PLACEHOLDER_PV_REASON_MEMBERSCHANGED_VIEWCHANNEL_DISABLE').catch(console.error);
-			
+
 			await Promise.all([
 				controlPanel.permissionOverwrites.edit(other, { ViewChannel: true }, { reason: 'PLACEHOLDER_PV_REASON_MEMBERSCHANGED_VIEWCHANNEL_ENABLE' }).catch(console.error),
 				voiceChannel.permissionOverwrites.delete(other, 'PLACEHOLDER_PV_REASON_MEMBERSCHANGED_CONNECT_ENABLE').catch(console.error),

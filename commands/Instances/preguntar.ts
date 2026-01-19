@@ -10,7 +10,7 @@ const groq = new Groq({
 });
 
 const options = new CommandOptions()
-    .addParam('mensaje', 'TEXT', 'para hacer una consulta a Bot de Puré');
+	.addParam('mensaje', 'TEXT', 'para hacer una consulta a Bot de Puré');
 
 const tags = new CommandTags().add('COMMON');
 
@@ -35,7 +35,7 @@ const command = new Command('preguntar', tags)
 		const rawUserPrompt = args.rawArgs ?? args.getString('mensaje');
 		const mentionRegex = /<(?:@|@&|#)([0-9]{16,24})>/g;
 		const namesMap = new Map();
-		const ids = Array.from(new Set([...rawUserPrompt.matchAll(mentionRegex)].map(m => m[1])));
+		const ids = Array.from(new Set([ ...rawUserPrompt.matchAll(mentionRegex) ].map(m => m[1])));
 
 		for(const id of ids) {
 			const name = fetchChannel(id, request.guild)?.name
@@ -106,7 +106,7 @@ The User's Discord name is: "${request.member.displayName || request.user.userna
 		});
 
 		const responseChunks: string[] = new Array(1_000_000);
-		for await (const chunk of chatCompletion)
+		for await(const chunk of chatCompletion)
 			responseChunks.push(chunk.choices[0]?.delta?.content || '');
 
 		const chunkSize = 1990;

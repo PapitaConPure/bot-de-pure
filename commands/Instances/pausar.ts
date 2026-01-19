@@ -50,7 +50,7 @@ const command = new Command('pausar', tags)
 		const embed = makePuréMusicEmbed(request, service.color, service.iconUrl, [ queueInfo ])
 			.setDescription(`[${currentTrack.title}](${currentTrack.url})`)
 			.setThumbnail(currentTrack.thumbnail);
-		
+
 		if(queue.node.isPaused()) {
 			embed.setTitle(translator.getText('pauseTitleTrackAlreadyPaused'));
 			return request.reply({ embeds: [ embed ], ephemeral: true });

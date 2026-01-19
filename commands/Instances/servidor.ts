@@ -20,10 +20,10 @@ const command = new Command('servidor', tags)
 	.setExecution(async (request) => {
 		const translator = await Translator.from(request);
 		const compressedUserId = compressId(request.userId);
-		console.log('wa')
+		console.log('wa');
 		return request.reply({
 			flags: MessageFlags.IsComponentsV2,
-			components: [makeDashboardContainer(compressedUserId, request.guild, translator)],
+			components: [ makeDashboardContainer(compressedUserId, request.guild, translator) ],
 		});
 	});
 

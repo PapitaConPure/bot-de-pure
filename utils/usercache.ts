@@ -24,7 +24,7 @@ const userCache = new Map<string, UserCache>();
 export async function cacheUser(user: UserCacheResolvable) {
 	const userId = resolveUserCacheId(user);
 	if(!userId) throw ReferenceError('Se esperaba una ID de usuario');
-	
+
 	const userQuery = { userId };
 	let userConfigs: UserConfigDocument;
 	if(noDataBase) {
@@ -64,7 +64,7 @@ export async function fetchUserCache(user: UserCacheResolvable): Promise<UserCac
 
 	if(!userCache.has(userId))
 		await cacheUser(userId);
-	
+
 	return userCache.get(userId);
 }
 

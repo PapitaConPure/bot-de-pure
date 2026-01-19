@@ -21,7 +21,7 @@ export async function onReactionAdd(reaction: MessageReaction | PartialMessageRe
 
 	const { guild } = message;
 	const userId = message.author.id;
-	
+
 	if(guild.memberCount < 100) return;
 	if(user.id === userId) return;
 
@@ -43,11 +43,11 @@ export async function onReactionAdd(reaction: MessageReaction | PartialMessageRe
 	if(userConfigs.reactionsReceivedToday <= 10) {
 		userConfigs.prc += 10 - ((userConfigs.reactionsReceivedToday - 1) / 3) ** 2;
 	}
-	
+
 	if(!userConfigs.highlightedToday && reaction.count >= 5) {
 		userConfigs.highlightedToday = true;
 		userConfigs.prc += 40;
 	}
-	
+
 	return userConfigs.save();
 }

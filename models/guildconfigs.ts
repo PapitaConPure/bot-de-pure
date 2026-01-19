@@ -12,12 +12,12 @@ const GuildConfigSchema: Mongoose.Schema<any, Mongoose.Model<any, any, any, any,
 	guildId: {
 		type: String,
 		required: true,
-        validator: makeStringIdValidator('Se esperaba una ID de servidor que no estuviera vacía'),
+		validator: makeStringIdValidator('Se esperaba una ID de servidor que no estuviera vacía'),
 	},
 
 	/** Habilitar modo caótico del servidor. */
 	chaos: { type: Boolean, default: false },
-	
+
 	/** Tubérculos del servidor. */
 	tubers: {
 		type: {},

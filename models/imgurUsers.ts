@@ -2,9 +2,9 @@ import Mongoose from 'mongoose';
 
 /**Describe la configuración de un sistema PureVoice de servidor.*/
 const ImgurUserSchema = new Mongoose.Schema({
-    userId: { type: String },
+	userId: { type: String },
     /**ID de cliente de Imgur*/
-    clientId: { type: String, required: true },
+	clientId: { type: String, required: true },
 });
 
 const ImgurUser = Mongoose.model('ImgurUser', ImgurUserSchema);

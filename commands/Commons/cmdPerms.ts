@@ -12,7 +12,7 @@ export class CommandPermissions {
 	constructor(permissions: PermissionResolvable = 0n) {
 		this.#requisites = [];
 		this.#add(permissions);
-	};
+	}
 
 	/**
 	 * @description
@@ -30,7 +30,7 @@ export class CommandPermissions {
 	 */
 	isAllowed(member: GuildMember) {
 		if(member?.permissions?.bitfield == undefined)
-			throw new TypeError("Se esperaba un miembro de un servidor de Discord");
+			throw new TypeError('Se esperaba un miembro de un servidor de Discord');
 
 		const mbf = member.permissions.bitfield;
 
@@ -43,7 +43,7 @@ export class CommandPermissions {
 		}
 
 		return true;
-	};
+	}
 
 	/**
 	 * @description
@@ -53,9 +53,9 @@ export class CommandPermissions {
 	 */
 	isAllowedIn(member: GuildMember, channel: GuildChannelResolvable) {
 		const memberChannelPermissions = member?.permissionsIn?.(channel);
-		
+
 		if(memberChannelPermissions?.bitfield == undefined)
-			throw new TypeError("Se esperaba un miembro de un servidor de Discord");
+			throw new TypeError('Se esperaba un miembro de un servidor de Discord');
 
 		const mbf = memberChannelPermissions.bitfield;
 
@@ -68,7 +68,7 @@ export class CommandPermissions {
 		}
 
 		return true;
-	};
+	}
 
 	amAllowedIn(channel: GuildBasedChannel) {
 		const { guild } = channel;
@@ -105,7 +105,7 @@ export class CommandPermissions {
 		if(permissions instanceof BitField)
 			return BigInt(permissions.bitfield);
 
-		throw new TypeError("Se esperaba un valor resolvible a uno o más permisos de Discord");
+		throw new TypeError('Se esperaba un valor resolvible a uno o más permisos de Discord');
 	}
 
 	/**
@@ -118,7 +118,7 @@ export class CommandPermissions {
 		for(const perm of permissions)
 			perms |= this.#resolveToBitfield(perm);
 		return perms;
-	};
+	}
 
 	get matrix() {
 		return this.requisites.map(requisite => {

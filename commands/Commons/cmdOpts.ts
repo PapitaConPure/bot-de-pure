@@ -121,14 +121,14 @@ function fetchMessageFlag(args: string[], flag: FetchMessageFlagOptions = { prop
 		}
 
 		if(flag.short?.length && arg.startsWith('-') && arg !== '-') {
-			const flagChars = [...arg].slice(1).filter(c => flag.short.includes(c));
+			const flagChars = [ ...arg ].slice(1).filter(c => flag.short.includes(c));
 			for(const c of flagChars) {
 				flagValue = flag.property ? fetchMessageFlagText(args, i + 1) : c;
 
 				if(arg.length <= 2)
 					return args.splice(i, 1);
 
-				const flagToRemove = new RegExp(c, 'g')
+				const flagToRemove = new RegExp(c, 'g');
 				const temp = args.splice(i, 1); //Remover temporalmente el stack completo de flags cortas
 				args.push(temp[0].replace(flagToRemove, '')); //Reincorporar lo eliminado, descartando las flags ya procesadas
 			}
@@ -249,7 +249,7 @@ export class CommandParam extends CommandOption {
 		this.#optional = false;
 		this.#poly = 'SINGLE';
 		this.#polymax = 8;
-	};
+	}
 
 	/**@description Define si el parámetro es opcional.*/
 	setOptional(optional: boolean) {
@@ -280,7 +280,7 @@ export class CommandParam extends CommandOption {
 
 	autocomplete: AutocompleteFunction = (interaction, query) => {
 		return handleAutocomplete(this.#autocompleteInner, interaction, query);
-	}
+	};
 
 	/**@description Nombre del parámetro.*/
 	get name() {
@@ -325,7 +325,7 @@ export class CommandParam extends CommandOption {
 
 	/**@description Texto de ayuda del parámetro.*/
 	get display(): string {
-		const identifier = [this.#name];
+		const identifier = [ this.#name ];
 
 		if(this.#optional) identifier.push('?');
 		if(this.#poly === 'MULTIPLE') identifier.push('(...)');
@@ -354,15 +354,15 @@ export class CommandFlag extends CommandOption {
 
 	/**@description Define los identificadores cortos de la bandera.*/
 	setShort(identifiers: string | string[]) {
-		this._short = [...identifiers];
+		this._short = [ ...identifiers ];
 		return this;
-	};
+	}
 
 	/**@description Define los identificadores largos de la bandera*/
 	setLong(identifiers: string | string[]) {
-		this._long = Array.isArray(identifiers) ? identifiers : [identifiers];
+		this._long = Array.isArray(identifiers) ? identifiers : [ identifiers ];
 		return this;
-	};
+	}
 
 	isExpressive(): this is CommandFlagExpressive {
 		return this._expressive;
@@ -400,7 +400,7 @@ export class CommandFlag extends CommandOption {
 		if(Array.isArray(short) && short.length) flagString.push(`\`-${short[0]}\``);
 		if(Array.isArray(long) && long.length)   flagString.push(`\`--${long[0]}\``);
 		return `${flagString.join(' o ')} ${desc}`;
-	};
+	}
 
 	/**@description Estructura de objeto de los identificadores de la bandera.*/
 	get structure(): { property: boolean; short: string[]; long: string[]; } {
@@ -437,7 +437,7 @@ export class CommandFlagExpressive extends CommandFlag {
 		this.#name = name;
 		this._type = type;
 		this._expressive = true;
-	};
+	}
 
 	/**
 	 * @description Define el nombre de entrada de la bandera.
@@ -446,7 +446,7 @@ export class CommandFlagExpressive extends CommandFlag {
 	setName(n: string) {
 		this.#name = n;
 		return this;
-	};
+	}
 
 	/**@description Establece una función de autocompletado para este parámetro.*/
 	setAutocomplete(autocompleteFn: AutocompleteFunction) {
@@ -456,7 +456,7 @@ export class CommandFlagExpressive extends CommandFlag {
 
 	autocomplete: AutocompleteFunction = (interaction, query) => {
 		return handleAutocomplete(this.#autocompleteInner, interaction, query);
-	}
+	};
 
 	/**@description El nombre del parámetro de la bandera.*/
 	get name() {
@@ -466,7 +466,7 @@ export class CommandFlagExpressive extends CommandFlag {
 	/**@description El tipo del parámetro de la bandera.*/
 	get typeDisplay(): string {
 		return typeHelp(this._type);
-	};
+	}
 
 	/**@description Texto de ayuda de la bandera.*/
 	get display(): string {
@@ -480,7 +480,7 @@ export class CommandFlagExpressive extends CommandFlag {
 	get hasAutocomplete() {
 		return this.#autocompleteInner != null;
 	}
-};
+}
 
 export type RegroupMethod = 'NONE' | 'SEPARATOR' | 'MENTIONABLES-WITH-SEP' | 'DOUBLE-QUOTES';
 
@@ -513,7 +513,7 @@ export class CommandOptions {
 			polymax: 5
 		};
 		this.#request = request;
-	};
+	}
 
 	/**
 	 * @description Añade un parámetro al administrador.
@@ -522,12 +522,12 @@ export class CommandOptions {
 	 * @param {string} desc La descripción del parámetro.
 	 * @param {{ poly?: ParamPoly, polymax?: Number, optional?: Boolean }} optionModifiers Los modificadores del parámetro.
 	 */
-	addParam(name: string, type: Exclude<ParamType | ParamType[], undefined | null>, desc: string, optionModifiers: { poly?: ParamPoly; polymax?: number; optional?: boolean; } = { poly: undefined, polymax: undefined, optional: undefined } ) {
+	addParam(name: string, type: Exclude<ParamType | ParamType[], undefined | null>, desc: string, optionModifiers: { poly?: ParamPoly; polymax?: number; optional?: boolean; } = { poly: undefined, polymax: undefined, optional: undefined }) {
 		if(optionModifiers && typeof optionModifiers !== 'object')
 			throw new TypeError('Modificadores de parámetro inválidos');
 
 		const { poly, polymax, optional } = optionModifiers ?? {};
-		if(poly && !Array.isArray(poly) && !['SINGLE', 'MULTIPLE',].includes(poly))
+		if(poly && !Array.isArray(poly) && ![ 'SINGLE', 'MULTIPLE', ].includes(poly))
 			throw new TypeError('Multiplicidad de parámetro inválida');
 
 		const commandParam = new CommandParam(name, type)
@@ -537,7 +537,7 @@ export class CommandOptions {
 		this.options.set(commandParam.name, commandParam);
 		this.params.set(commandParam.name, commandParam);
 		return this;
-	};
+	}
 
 	/**
 	 * @description Añade una bandera al administrador.
@@ -558,7 +558,7 @@ export class CommandOptions {
 		this.options.set(flagIdentifier, commandFlag);
 		this.flags.set(flagIdentifier, commandFlag);
 		return this;
-	};
+	}
 
 	/**@description Añade opciones al administrador.*/
 	addOptions(...options: CommandOption[]) {
@@ -574,7 +574,7 @@ export class CommandOptions {
 			}
 
 			this.options.set(identifier, option);
-		};
+		}
 
 		return this;
 	}
@@ -592,19 +592,19 @@ export class CommandOptions {
 		newCOM.flags = this.flags;
 
 		return newCOM;
-	};
+	}
 
 	/**@description String de ayuda de las opciones de comando del administrador.*/
 	get display(): string {
 		return [
-			...[...this.params.values()].map(p => `* ${p.display}`),
-			...[...this.flags.values()].map(f => `* ${f.display}`)
+			...[ ...this.params.values() ].map(p => `* ${p.display}`),
+			...[ ...this.flags.values() ].map(f => `* ${f.display}`)
 		].join('\n');
-	};
+	}
 
 	/**@description String de ayuda de las opciones de comando del administrador.*/
 	get callSyntax(): string {
-		const params: CommandParam[] = [...this.params.values()];
+		const params: CommandParam[] = [ ...this.params.values() ];
 		return params.map(p => {
 			const paramExpressions = [ p.name ];
 			if(Array.isArray(p.poly)) paramExpressions.push(` (${p.poly.join(',')})`);
@@ -612,7 +612,7 @@ export class CommandOptions {
 			if(p.optional) paramExpressions.push('?');
 			return `<${paramExpressions.join('')}>`;
 		}).join(' ');
-	};
+	}
 
 	static readonly #fetchDependantTypes = new Set([
 		'MESSAGE',
@@ -759,7 +759,7 @@ export class CommandOptions {
 				}
 
 				if(result !== undefined) break;
-			};
+			}
 
 			return result;
 		} else {
@@ -768,7 +768,7 @@ export class CommandOptions {
 
 			return input[getMethodName](slashIdentifier, !param.optional);
 		}
-	};
+	}
 
 	/**
 	 * @description
@@ -817,7 +817,7 @@ export class CommandOptions {
 			return [ typeof fallback === 'function' ? fallback() : fallback ];
 
 		return results;
-	};
+	}
 
 	/**
 	 * @description
@@ -861,7 +861,7 @@ export class CommandOptions {
 			return flagValue;
 
 		return typeof output.callback === 'function' ? output.callback(flagValue, true) : output.callback;
-	};
+	}
 
 	toJSON() {
 		return JSON.parse(JSON.stringify({
@@ -871,7 +871,7 @@ export class CommandOptions {
 			defaults: this.#defaults,
 		}));
 	}
-};
+}
 
 /**@class Representa un resolvedor de opciones de comando, sea este un comando de mensaje o un comandoSlash.*/
 export class CommandOptionSolver<TArgs extends CommandArguments = CommandArguments> {
@@ -1769,7 +1769,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		return finalResult;
 	}
 
-	async #getResultFromParam(identifier: string, getRestOfMessageWords: boolean = false): Promise<ParamResult> {
+	async#getResultFromParam(identifier: string, getRestOfMessageWords: boolean = false): Promise<ParamResult> {
 		if(!this.isMessageSolver(this.#args))
 			throw 'Se esperaban argumentos de comando de mensaje';
 

@@ -9,7 +9,7 @@ import * as func from '../../func';
 import Canvas from '@napi-rs/canvas';
 
 const options = new CommandOptions()
-	.addFlag('d', ['del', 'delete'], 'para eliminar el mensaje original');
+	.addFlag('d', [ 'del', 'delete' ], 'para eliminar el mensaje original');
 
 const tags = new CommandTags().add('PAPA');
 
@@ -57,7 +57,7 @@ const command = new Command('papa-eval', tags)
 					name: 'Ha ocurrido un error al ingresar un comando',
 					value: `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``,
 				});
-			await message.reply({ embeds: [embed] });
+			await message.reply({ embeds: [ embed ] });
 		}
 		if(deleteAfter)
 			message.delete();

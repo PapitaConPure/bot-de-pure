@@ -25,7 +25,7 @@ const action = new ContextMenuAction('actionPVRemoveMod', 'User')
 
 		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
 		if(!session) return interaction.editReply({ content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción' });
-		
+
 		const dbOther = session.members.get(other.id);
 		if(!dbOther)
 			return interaction.editReply({ content: '❌ El miembro que degrades de moderador debe haber estado en la misma sesión que tú' });
@@ -37,9 +37,9 @@ const action = new ContextMenuAction('actionPVRemoveMod', 'User')
 
 		session.members.set(other.id, sessionOther.toJSON());
 		session.markModified('members');
-		
+
 		const result = await requestPVControlPanel(guild, pv.categoryId, pv.controlPanelId);
-		
+
 		if(!result.success)
 			return interaction.editReply({ content: 'PLACEHOLDER_PV_CONTROL_PANEL_REQUEST_FAIL' });
 

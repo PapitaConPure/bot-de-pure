@@ -47,7 +47,7 @@ class TuberParser {
 	#assert(token) {
 		if(token === this.#current)
 			return this.#current;
-		
+
 		if(token === this.#next)
 			return this.#next;
 
@@ -102,7 +102,7 @@ class TuberParser {
 
 	/**
 	 * @template {import('./commons.js').LexerTokenType} T
-	 * @param {Array<T>} tokenTypes 
+	 * @param {Array<T>} tokenTypes
 	 * @param {String} [errorMessage]
 	 * @returns {import('./commons.js').LexerToken<T>}
 	 */
@@ -150,15 +150,15 @@ class TuberParser {
 		do {
 			if(this.#verify(...openStatements) && this.#current.value !== 'cada')
 				blockLevels++;
-				
+
 			if(blockLevels === 0 || this.#verify(LexerTokenTypes.BlockClose, LexerTokenTypes.ConditionChange))
 				blockLevels--;
-			
+
 			if(this.#verify(LexerTokenTypes.DoOpen, LexerTokenTypes.DoClose)) {
 				this.#cursor = originalCursor;
 				break;
 			}
-			
+
 			if(this.#verify(LexerTokenTypes.EoF)) {
 				if(hasToReturn)
 					throw this.TuberParserError('DEVOLVER no puede ser usado en el bloque Programa');
@@ -174,7 +174,7 @@ class TuberParser {
 	 * @returns {import('./commons.js').ParserProgramNode} El programa devuelto
 	 */
 	parse() {
-		return this.#parseProgram()
+		return this.#parseProgram();
 	}
 
 	/**
@@ -242,7 +242,7 @@ class TuberParser {
 		switch(statement.value) {
 		case 'crear':
 			return this.#parseDeclare();
-		
+
 		case 'registrar': {
 			const registryTypeNode = this.#expect(LexerTokenTypes.DataType);
 			const registryValue = LanguageDataToParserType.get(registryTypeNode.value);
@@ -288,7 +288,7 @@ class TuberParser {
 				expression: assignment,
 			};
 		}
-		
+
 		case 'usar':
 		case 'ejecutar': {
 			let expression = this.#parseMemberCall();
@@ -378,7 +378,7 @@ class TuberParser {
 	}
 
 	/**
-	 * 
+	 *
 	 * @returns {import('./commons.js').ParserWhileStatementNode}
 	 */
 	#parseWhile() {
@@ -397,7 +397,7 @@ class TuberParser {
 
 		while(this.#current.type !== LexerTokenTypes.BlockClose)
 			body.push({ ...this.#parseStatement(), number: this.#statementNumber++ });
-		
+
 		return {
 			...statement,
 			type: ParserNodeTypes.WhileLoop,
@@ -407,7 +407,7 @@ class TuberParser {
 	}
 
 	/**
-	 * 
+	 *
 	 * @returns {import('./commons.js').ParserWhileStatementNode}
 	 */
 	#parseDoWhile() {
@@ -422,14 +422,14 @@ class TuberParser {
 
 		while(this.#current.type !== LexerTokenTypes.DoClose)
 			body.push({ ...this.#parseStatement(), number: this.#statementNumber++ });
-		
+
 		this.#digest();
 		this.#expect(LexerTokenTypes.While);
 
 		const test = /**@type {import('./commons.js').ParserExpressionNode}*/(this.#parseOr());
 		if(!parserNodeWithin(ParserExpressionNodeTypes, test.type))
 			throw this.TuberParserError(`Se esperaba una expresión lógica o verificable en condición de repetición`);
-		
+
 		return {
 			...statement,
 			type: ParserNodeTypes.DoWhileLoop,
@@ -439,13 +439,13 @@ class TuberParser {
 	}
 
 	/**
-	 * 
+	 *
 	 * @returns {import('./commons.js').ParserForStatementNode|import('./commons.js').ParserForInStatementNode}
 	 */
 	#parseFor() {
 		let statement = /**@type {import('./commons.js').ParserForStatementNode|import('./commons.js').ParserForInStatementNode}*/
 			(this.#parseSimpleFor());
-			
+
 		const body = /**@type {import('./commons.js').ParserBlockBody}*/(statement.body);
 
 		if(this.#verify(LexerTokenTypes.For) && this.#current.value === 'cada' && this.#digest()) {
@@ -470,7 +470,7 @@ class TuberParser {
 
 		while(this.#current.type !== LexerTokenTypes.BlockClose)
 			body.push({ ...this.#parseStatement(), number: this.#statementNumber++ });
-		
+
 		return statement;
 	}
 
@@ -491,11 +491,11 @@ class TuberParser {
 			const test = /**@type {import('./commons.js').ParserExpressionNode}*/(this.#parseOr());
 			if(!parserNodeWithin(ParserExpressionNodeTypes, test.type))
 				throw this.TuberParserError(`Se esperaba una expresión condicional, lógica o verificable como segunda expresión de sentencia PARA`);
-			
+
 			const step = this.#parseStatement();
 			if(step.type !== ParserNodeTypes.Expression)
 				throw this.TuberParserError(`Se esperaba una sentencia de expresión como tercer componente de estructura PARA, pero se recibió: ${ParserToLanguageType.get(step.type) ?? 'Nada'}`);
-			
+
 			if(/**@type {import('./commons.js').ParserExpressionStatementNode}*/(step).expression.type !== ParserNodeTypes.UpdateExpression)
 				throw this.TuberParserError('Se esperaba una sentencia de expresión de actualización como tercer componente de estructura PARA');
 
@@ -539,7 +539,7 @@ class TuberParser {
 
 			this.#statementNumber++;
 		}
-		
+
 		let block = {
 			type: ParserNodeTypes.Block,
 			body,
@@ -608,7 +608,7 @@ class TuberParser {
 	 */
 	#parseStop() {
 		this.#expect(LexerTokenTypes.Assign);
-		
+
 		const stopMessage = this.#parseText();
 		this.#expect(LexerTokenTypes.ConditionOpen);
 		const test = /**@type {import('./commons.js').ParserExpressionNode}*/(this.#parseOr());
@@ -636,7 +636,7 @@ class TuberParser {
 			if(registryType && registryType.value === 'funcion') {
 				if(receptor.type !== 'CallExpression')
 					throw this.TuberParserError('El receptor de la asignación debe ser una maqueta de Función');
-				
+
 				return this.#parseRegistryAssignment(receptor);
 			}
 
@@ -681,7 +681,7 @@ class TuberParser {
 			emitter: receptor,
 			arguments: args,
 		};
-		
+
 		const { type, ...restOfBlock } = this.#parseBlock();
 		const reception = /**@type {import('./commons.js').ParserNamedBlockNode}*/({ type, identifier, ...restOfBlock });
 		this.#expect(LexerTokenTypes.BlockClose, 'Se esperaba un cierre de Función');
@@ -773,7 +773,7 @@ class TuberParser {
 				key,
 				value,
 			});
-			
+
 			if(!this.#verify(LexerTokenTypes.Comma))
 				break;
 			this.#digest();
@@ -788,7 +788,7 @@ class TuberParser {
 		return {
 			type: ParserNodeTypes.Glossary,
 			properties,
-		}
+		};
 	}
 
 	/**
@@ -798,7 +798,7 @@ class TuberParser {
 	#parseList() {
 		if(this.#current.type !== LexerTokenTypes.DataType)
 			return this.#parseMember();
-		
+
 		const tokenType = LanguageToLexerType.get(this.#current.value);
 		if(tokenType !== LexerTokenTypes.List)
 			return this.#parseLiteral();
@@ -828,14 +828,14 @@ class TuberParser {
 				elements.push(null);
 		}
 		this.#insideListing = false;
-		
+
 		if(expectGroupClose)
 			this.#expect(LexerTokenTypes.GroupClose);
 
 		return {
 			type: ParserNodeTypes.List,
 			elements,
-		}
+		};
 	}
 
 	/**
@@ -845,7 +845,7 @@ class TuberParser {
 	#parseLiteral() {
 		if(this.#current.type !== LexerTokenTypes.DataType)
 			return this.#parseOr();
-		
+
 		const dataTypeValue = this.#digest().value;
 		const targetType = LanguageDataToParserType.get(dataTypeValue);
 		if(targetType == undefined)
@@ -855,7 +855,7 @@ class TuberParser {
 
 		if(!parserNodeWithin(ParserExpressionNodeTypes, reception.type))
 			throw this.TuberParserError(`Se esperaba una expresión literal, pero se recibió: ${ParserToLanguageType.get(reception.type) ?? 'Nada'}`);
-		
+
 		return /**@type {import('./commons.js').ParserEvaluableExpressionNode}*/({
 			...reception,
 			as: targetType,
@@ -879,10 +879,10 @@ class TuberParser {
 				rightOperand,
 			};
 		}
-		
+
 		return leftOperand;
 	}
-	
+
 	/**
 	 * Parsea un "Y" lógico
 	 * @returns {import('./commons.js').ParserExpressionNode}
@@ -960,7 +960,7 @@ class TuberParser {
 	 */
 	#parseCombination() {
 		let leftOperand = this.#parseFactor();
-		
+
 		while(this.#current.type === LexerTokenTypes.Combination) {
 			const operator = this.#current.value;
 			this.#digest();
@@ -982,7 +982,7 @@ class TuberParser {
 	 */
 	#parseFactor() {
 		let leftOperand = this.#parsePowers();
-		
+
 		while(this.#current.type === LexerTokenTypes.Factor) {
 			const operator = this.#current.value;
 			this.#digest();
@@ -994,7 +994,7 @@ class TuberParser {
 				rightOperand
 			};
 		}
-		
+
 		return leftOperand;
 	}
 
@@ -1004,12 +1004,12 @@ class TuberParser {
 	 */
 	#parsePowers() {
 		let leftOperand = this.#parseUnary();
-		
+
 		while(this.#current.type === LexerTokenTypes.Power) {
 			const operator = this.#current.value;
 			this.#digest();
 			let rightOperand = this.#parsePowers();
-			
+
 			leftOperand = {
 				type: ParserNodeTypes.BinaryExpression,
 				operator,
@@ -1050,7 +1050,7 @@ class TuberParser {
 				throw this.TuberParserError(`Se esperaba una expresión que pueda contener una función, pero se recibió: ${member.type}`);
 
 			member = this.#parseFunctionCall(member);
-				
+
 			if(this.#verify(LexerTokenTypes.Arrow))
 				throw this.TuberParserError('No se permiten expresiones de miembro luego de una función');
 		}
@@ -1091,7 +1091,7 @@ class TuberParser {
 		const args = this.#verify(LexerTokenTypes.GroupClose, LexerTokenTypes.Statement, LexerTokenTypes.EoF)
 			? []
 			: this.#parseArgumentsList();
-		
+
 		this.#insideListing = wasInsideListing;
 
 		this.#expect(LexerTokenTypes.GroupClose, 'Se esperaba un cierre de función');
@@ -1111,7 +1111,7 @@ class TuberParser {
 			const arg = this.#parseArgument();
 			if(foundOptional && arg.default == undefined)
 				throw this.TuberParserError(`Los parámetros obligatorios deben escribirse antes que los parámetros opcionales en las declaraciones de función`);
-			
+
 			args.push(arg);
 			foundOptional ||= arg.default != undefined;
 		}
@@ -1120,7 +1120,7 @@ class TuberParser {
 	}
 
 	/**
-	 * 
+	 *
 	 * @returns {import('./commons.js').ParserArgumentNode}
 	 */
 	#parseArgument() {
@@ -1131,7 +1131,7 @@ class TuberParser {
 		let defExpr;
 		if(this.#verify(LexerTokenTypes.Colon) && this.#digest()) {
 			defExpr = this.#parseExpression();
-			
+
 			if(defExpr.type === ParserNodeTypes.AssignExpression)
 				throw this.TuberParserError('No se permite tratar una expresión de asignación como argumento de función');
 		}
@@ -1164,7 +1164,7 @@ class TuberParser {
 
 		return memberExpr;
 	}
-	
+
 	/**
 	 * Parsea una expresión primaria
 	 * @returns {import('./commons.js').ParserExpressionNode} La expresión evaluada
@@ -1185,7 +1185,7 @@ class TuberParser {
 			this.#expect(LexerTokenTypes.GroupClose);
 			return expr;
 		}
-		
+
 		case LexerTokenTypes.Identifier:
 			return {
 				type: ParserNodeTypes.Identifier,
@@ -1206,7 +1206,7 @@ class TuberParser {
 				type: ParserNodeTypes.Boolean,
 				value: this.#digest().value,
 			};
-		
+
 		case LexerTokenTypes.Nada:
 			this.#digest();
 			return {
@@ -1234,18 +1234,18 @@ class TuberParser {
 
 		if(!this.#insideTemplate && !this.#insideListing && this.#current.type === LexerTokenTypes.Comma) {
 			const expressions = [ text ];
-			
+
 			this.#insideTemplate = true;
 			while(this.#current.type === LexerTokenTypes.Comma) {
 				this.#digest();
 				expressions.push(this.#parseExpression());
 			}
 			this.#insideTemplate = false;
-			
+
 			return {
 				type: ParserNodeTypes.TextTemplate,
 				expressions,
-			}
+			};
 		}
 
 		if(text.type === ParserNodeTypes.AssignExpression)
@@ -1261,9 +1261,9 @@ class TuberParser {
 		return {
 			type: ParserNodeTypes.Text,
 			value: text.value,
-		}
+		};
 	}
-};
+}
 
 module.exports = {
 	ParserNodeTypes,

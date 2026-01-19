@@ -27,7 +27,7 @@ export async function sendConvertedTwitterPosts(message: Message<true>, converte
 		return ConverterEmptyPayload;
 
 	const { content: messageContent, channel } = message;
-	
+
 	if(!message.guild.members.me.permissionsIn(channel).has([ 'SendMessages', 'ManageMessages', 'AttachFiles' ]))
 		return ConverterEmptyPayload;
 
@@ -52,7 +52,7 @@ export async function sendConvertedTwitterPosts(message: Message<true>, converte
 	const configProp = twitterConversionServices[converterKey];
 	if(configProp == undefined)
 		return ConverterEmptyPayload;
-	
+
 	let warnAboutUnsupportedTranslationUrls = false;
 	const service = configProp.service;
 	const formattedTweetUrls = tweetUrls
@@ -68,7 +68,7 @@ export async function sendConvertedTwitterPosts(message: Message<true>, converte
 			}
 			return `${spoiler}<:twitter2:1232243415165440040>[\`${artist}/${id}\`](${service}/${artist}/status/${id}${langSuffix})${spoiler}`;
 		});
-	
+
 	let content = formattedTweetUrls.join(' ');
 	if(warnAboutUnsupportedTranslationUrls)
 		content += '\n-# ⚠️️ El conversor de vxTwitter todavía no tiene una característica de traducción';
@@ -77,4 +77,4 @@ export async function sendConvertedTwitterPosts(message: Message<true>, converte
 		contentful: true,
 		content,
 	};
-};
+}

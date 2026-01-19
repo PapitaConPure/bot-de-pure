@@ -7,7 +7,7 @@ const tags = new CommandTags().add('COMMON');
 const command = new Command('touhou', tags)
 	.setAliases(
 		'imagentouhou', 'imgtouhou', 'tohas', 'touhas', 'tojas', 'tohitas', 'touhitas', 'tojitas',
-        'touhoupic', '2hupic',
+		'touhoupic', '2hupic',
 		'2hu', '2ho',
 	)
 	.setBriefDescription('Muestra imágenes de Touhou')

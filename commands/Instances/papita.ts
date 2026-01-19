@@ -31,7 +31,7 @@ const command = new Command('papita', flags)
 		const isnsfw = isThread(request.channel)
 			? request.channel.parent.nsfw
 			: request.channel.nsfw;
-		
+
 		const words = args.getString('frase')?.split(/[ \n]+/);
 		if(words?.length) {
 			const newmsg = `***:copyright: ${words.shift()}:registered: ${words.join(' ').replace(/[a-zA-Z0-9áéíóúÁÉÍÓÚüÑñ;:]+/g, '$&:tm:')}***`;
@@ -40,7 +40,7 @@ const command = new Command('papita', flags)
 
 		if(isnsfw)
 			return request.reply({ content: 'https://www.youtube.com/watch?v=pwEvEY-7p9o' });
-		else 
+		else
 			return request.reply({ content: `**${paputa[randRange(0, paputa.length)]}**` });
 	});
 

@@ -14,7 +14,7 @@ const command = new Command('café', tags)
 			embeds: [ new EmbedBuilder() ],
 			files: null,
 		};
-		
+
 		if(fetched.status === 200) {
 			const image = fetched.data;
 			replyBody.embeds[0]

@@ -38,8 +38,8 @@ const command = new Command('exhibir', flags)
 				value: `¿Quieres postear todos los mensajes pinneados del canal actual en <#${crazyBackupId}> y despinnearlos?\nEsto liberará **${pinnedMessages.size}** espacios para pin`,
 			});
 		return request.reply({
-			embeds: [embed],
-			components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
+			embeds: [ embed ],
+			components: [ new ActionRowBuilder<ButtonBuilder>().addComponents(
 				new ButtonBuilder()
 					.setCustomId(`exhibir_flushPins_${user.id}`)
 					.setLabel('Exhibir')
@@ -48,14 +48,14 @@ const command = new Command('exhibir', flags)
 					.setCustomId(`exhibir_cancelFlush_${user.id}`)
 					.setEmoji('1355143793577426962')
 					.setStyle(ButtonStyle.Secondary),
-			)],
+			) ],
 			ephemeral: true,
 		});
 	})
 	.setButtonResponse(async function flushPins(interaction, userId) {
 		if(interaction.user.id !== userId)
 			return interaction.reply({ content: '❌ No permitido', ephemeral: true });
-		
+
 		interaction.deferUpdate();
 		const { channel } = interaction;
 		const [ pinnedMessages, backupChannel ] = await Promise.all([
@@ -71,7 +71,7 @@ const command = new Command('exhibir', flags)
 
 		if(!backupChannel)
 			return interaction.editReply({ content: '⚠️ Canal receptor no encontrado' });
-		
+
 		const agent = await (new DiscordAgent().setup(backupChannel));
 		const flushing = [];
 
@@ -85,7 +85,7 @@ const command = new Command('exhibir', flags)
 				//@ts-expect-error Te juro que "type" sí existe y hace daño
 				if(embed.type === 'video')
 					return null;
-				
+
 				//@ts-expect-error Te juro que "type" sí existe y hace daño
 				if(embed.type === 'image' && embed.thumbnail && !embed.image) {
 					//@ts-expect-error Simplemente se extiende el tipo
@@ -93,10 +93,10 @@ const command = new Command('exhibir', flags)
 					//@ts-expect-error Simplemente se extiende el tipo
 					embed.thumbnail = null;
 				}
-				
+
 				return embed;
 			}).filter(embed => embed);
-			
+
 			if(message.embeds.length < 10) {
 				let text = '\n-# ';
 
@@ -105,7 +105,7 @@ const command = new Command('exhibir', flags)
 					text += `${fetchedMessage.reactions.cache.first(3).map(reaction => `${reaction.emoji} ${reaction.count}`).join(' ')} • `;
 
 				text += `[#${channel.name}](<${message.url}>) • <t:${getUnixTime(message.createdAt)}:F>`;
-				
+
 				(formattedMessage.embeds as unknown as EmbedBuilder[]).push(
 					new EmbedBuilder()
 						.setColor(Colors.Gold)
@@ -120,7 +120,7 @@ const command = new Command('exhibir', flags)
 			else
 				flushing.push(
 					message.unpin()
-					.catch(() => interaction.channel.send({ content: `⚠️ No se pudo despinnear un mensaje\n${message.url}` }))
+						.catch(() => interaction.channel.send({ content: `⚠️ No se pudo despinnear un mensaje\n${message.url}` }))
 				);
 		}
 
@@ -131,19 +131,19 @@ const command = new Command('exhibir', flags)
 			.addFields({ name: 'Se completó la operación', value: `Se liberaron **${flushed}** espacios para pin` });
 
 		return interaction.editReply({
-			embeds: [embed],
+			embeds: [ embed ],
 			components: [],
 		});
 	})
 	.setButtonResponse(async function cancelFlush(interaction, userId) {
 		if(interaction.user.id !== userId)
 			return interaction.reply({ content: '❌ No permitido', ephemeral: true });
-		
+
 		const embed = new EmbedBuilder()
 			.setTitle('Traslado cancelado')
 			.addFields({ name: 'Se canceló la operación', value: 'Todos los mensajes pinneados siguen ahí' });
-		
-		return interaction.update({ embeds: [embed], components: [] });
+
+		return interaction.update({ embeds: [ embed ], components: [] });
 	});
 
 export default command;

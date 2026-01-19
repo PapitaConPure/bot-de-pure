@@ -11,12 +11,12 @@ import { globalConfigs, noDataBase } from '../../data/globalProps';
 /**
  * @param {String} requestId
  * @param {Number} pageCount
- * @param {Number?} page 
+ * @param {Number?} page
  */
 const getPaginationControls = (page, pageCount, requestId) => {
 	const firstPage = 0;
 	const lastPage = pageCount - 1;
-	const prevPage = page > firstPage ? (page - 1) : lastPage
+	const prevPage = page > firstPage ? (page - 1) : lastPage;
 	const nextPage = page < lastPage ? (page + 1) : firstPage;
 	return makeButtonRowBuilder().addComponents([
 		new ButtonBuilder()
@@ -39,7 +39,7 @@ const tags = new CommandTags().add('COMMON');
 const command = new Command('info', tags)
 	.setAliases(
 		'informacion', 'información', 'inf',
-        'serverinfo', 'svinfo', 'svinf',
+		'serverinfo', 'svinfo', 'svinf',
 		'i',
 	)
 	.setLongDescription('Muestra información estadística paginada del servidor')
@@ -49,7 +49,7 @@ const command = new Command('info', tags)
 			return request.reply({ content: '⁉️' });
 
 		const guild = request.guild;
-		const [stats, translator] = await Promise.all([
+		const [ stats, translator ] = await Promise.all([
 			noDataBase ? new Stats({ since: Date.now() }) : Stats.findOne({}),
 			Translator.from(request),
 			request.deferReply(),
@@ -75,21 +75,21 @@ const command = new Command('info', tags)
 			thread: 0,
 			news: 0,
 		};
-		
+
 		guild.channels.cache.forEach(channel => {
 			switch(channel.type) {
-				case ChannelType.GuildAnnouncement:  channelCounts.news++;     break;
-				case ChannelType.GuildForum:         channelCounts.text++;     break;
-				case ChannelType.GuildText:          channelCounts.text++;     break;
-				case ChannelType.GuildVoice:         channelCounts.voice++;    break;
-				case ChannelType.GuildStageVoice:    channelCounts.voice++;    break;
-				case ChannelType.GuildCategory:      channelCounts.category++; break;
-				case ChannelType.AnnouncementThread: channelCounts.thread++;   break;
-				case ChannelType.PublicThread:       channelCounts.thread++;   break;
-				case ChannelType.PrivateThread:      channelCounts.thread++;   break;
+			case ChannelType.GuildAnnouncement:  channelCounts.news++;     break;
+			case ChannelType.GuildForum:         channelCounts.text++;     break;
+			case ChannelType.GuildText:          channelCounts.text++;     break;
+			case ChannelType.GuildVoice:         channelCounts.voice++;    break;
+			case ChannelType.GuildStageVoice:    channelCounts.voice++;    break;
+			case ChannelType.GuildCategory:      channelCounts.category++; break;
+			case ChannelType.AnnouncementThread: channelCounts.thread++;   break;
+			case ChannelType.PublicThread:       channelCounts.thread++;   break;
+			case ChannelType.PrivateThread:      channelCounts.thread++;   break;
 			}
 		});
-		
+
 		const bannerURL = guild.bannerURL({ size: 4096 });
 		if(bannerURL)
 			mainCointainer.addMediaGalleryComponents(mediaGallery =>
@@ -102,7 +102,7 @@ const command = new Command('info', tags)
 
 		const owner = await guild.fetchOwner();
 		const guildIsDiscoverable = guild.features.includes('DISCOVERABLE');
-		const guildCreatedAtUnix = Math.floor(getUnixTime(guild.createdAt))
+		const guildCreatedAtUnix = Math.floor(getUnixTime(guild.createdAt));
 
 		mainCointainer
 			.addSectionComponents(section =>
@@ -152,7 +152,7 @@ const command = new Command('info', tags)
 					translator.getText('infoGuildChannelCount',
 						channelCounts.text, channelCounts.voice, channelCounts.news,
 						channelCounts.category, channelCounts.thread,
-					) 
+					)
 				)
 			)
 			.addTextDisplayComponents(textDisplay =>
@@ -162,8 +162,8 @@ const command = new Command('info', tags)
 			);
 
 		pages.push(mainCointainer);
-		
-		
+
+
 		//Página de estadísticas de actividad
 		const activityStatsContainer = new ContainerBuilder()
 			.setAccentColor(0xeebb00);
@@ -173,28 +173,28 @@ const command = new Command('info', tags)
 			channelId: targetChannel.id,
 		};
 		const targetChannelStats = /**@type {import('../../models/stats.js').ChannelStatsDocument}*/((!noDataBase && await ChannelStats.findOne(channelQuery)) || new ChannelStats(channelQuery));
-		const guildChannelStats = /**@type {import('../../models/stats.js').ChannelStatsDocument[]}*/(!noDataBase ? await ChannelStats.find({ guildId: guild.id }) : [new ChannelStats(channelQuery)]);
+		const guildChannelStats = /**@type {import('../../models/stats.js').ChannelStatsDocument[]}*/(!noDataBase ? await ChannelStats.find({ guildId: guild.id }) : [ new ChannelStats(channelQuery) ]);
 		const targetChannelHasMessages = Object.keys(targetChannelStats.sub).length;
-		
+
 		const membersRanking = targetChannelHasMessages
 			? Object.entries(targetChannelStats.sub)
 				.sort((a: [string, number], b: [string, number]) => b[1] - a[1])
 				.slice(0, 5)
 			: undefined;
-		
+
 		const formattedMembersRanking = membersRanking
 			? membersRanking
-				.map(([id, count]: [string, number]) => `${translator.getText('infoStatsMemberMessageCountItem', id, quantityDisplay(count, translator))}`)
+				.map(([ id, count ]: [string, number]) => `${translator.getText('infoStatsMemberMessageCountItem', id, quantityDisplay(count, translator))}`)
 				.join('\n')
 			: translator.getText('infoStatsChannelEmptyNotice');
-		
+
 		const channelsRanking = Object.values(guildChannelStats)
 			.sort((a, b) => b.cnt - a.cnt)
 			.slice(0, 5)
-			.map(channelStats => /**@type {[String, Number]}*/([channelStats.channelId, channelStats.cnt]));
+			.map(channelStats => /**@type {[String, Number]}*/([ channelStats.channelId, channelStats.cnt ]));
 		const formattedChannelsRanking =
 			channelsRanking
-				.map(([id, count]: [string, number]) => `${translator.getText('infoStatsChannelMessageCountItem', id, quantityDisplay(count, translator))}`)
+				.map(([ id, count ]: [string, number]) => `${translator.getText('infoStatsChannelMessageCountItem', id, quantityDisplay(count, translator))}`)
 				.join('\n');
 
 		const statsSinceUnix = getUnixTime(new Date(stats.since));
@@ -233,9 +233,9 @@ const command = new Command('info', tags)
 					.slice(0, 5);
 				const formattedMemberChannelsRanking =
 					memberChannelsRanking
-						.map(([id, count]) => translator.getText('infoStatsChannelMessageCountItem', id, quantityDisplay(count, translator)))
+						.map(([ id, count ]) => translator.getText('infoStatsChannelMessageCountItem', id, quantityDisplay(count, translator)))
 						.join('\n');
-	
+
 				memberSectionBuilder.addTextDisplayComponents(
 					textDisplay => textDisplay.setContent(
 						`${translator.getText('infoStatsTargetMemberTitle', targetMember.displayName)}\n${formattedMemberActivitySum}\n­ ­`
@@ -287,10 +287,10 @@ const command = new Command('info', tags)
 				.addActionRowComponents(getPaginationControls(pageNumber, pages.length, requestId))
 		);
 		command.memory.set(requestId, pages);
-		
+
 		return request.editReply({
 			flags: MessageFlags.IsComponentsV2,
-			components: [mainCointainer],
+			components: [ mainCointainer ],
 			allowedMentions: {},
 		});
 	})
@@ -302,10 +302,10 @@ const command = new Command('info', tags)
 
 		if(!pages)
 			return interaction.reply({ content: translator.getText('expiredWizardData'), flags: MessageFlags.Ephemeral });
-		
+
 		return interaction.update({
 			flags: MessageFlags.IsComponentsV2,
-			components: [pages[pageNumber]],
+			components: [ pages[pageNumber] ],
 		});
 	});
 

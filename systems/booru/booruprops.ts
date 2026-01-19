@@ -337,14 +337,14 @@ function normalizeTag(tag: string, tagMap: TagMap) {
 
 /**
  * Devuelve tags base para un determinado canal y motor
- * @param engine 
- * @param nsfw 
+ * @param engine
+ * @param nsfw
  * @returns Tags base junto a tags específicas al canal y motor, separadas por espacios
  */
 export function getBaseTags(engine: Engine, nsfw: boolean) {
-	if(['danbooru', 'derpibooru', 'yandere', 'kcom', 'knet'].includes(engine))
+	if([ 'danbooru', 'derpibooru', 'yandere', 'kcom', 'knet' ].includes(engine))
 		return `rating:${nsfwRating.get(nsfw)}`;
-	return [basetags, nsfwRating.get(nsfw), nsfwTags.get(nsfw)].join(' ');
+	return [ basetags, nsfwRating.get(nsfw), nsfwTags.get(nsfw) ].join(' ');
 }
 
 /**
@@ -357,5 +357,5 @@ export function getBaseTags(engine: Engine, nsfw: boolean) {
 export function getSearchTags(words: Array<string>, engine: 'gelbooru' | 'danbooru', tagMapId: TagMapKey) {
 	if(engine === 'danbooru') return '';
 	const tagMap = tagMaps[tagMapId];
-	return words.map(word => normalizeTag(word, tagMap)).join(' ')
+	return words.map(word => normalizeTag(word, tagMap)).join(' ');
 }

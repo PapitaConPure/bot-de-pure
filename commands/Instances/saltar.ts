@@ -22,7 +22,7 @@ const command = new Command('saltar', tags)
 	.setExecution(async request => {
 		const userId = request.userId;
 		const translator = await Translator.from(userId);
-		
+
 		try {
 			const channel = request.member.voice?.channel;
 			if(!channel)
@@ -30,13 +30,13 @@ const command = new Command('saltar', tags)
 					flags: MessageFlags.Ephemeral,
 					content: translator.getText('voiceExpected'),
 				});
-	
+
 			if(isPlayerUnavailable(channel))
 				return request.reply({
 					flags: MessageFlags.Ephemeral,
 					content: translator.getText('voiceSameChannelExpected'),
 				});
-	
+
 			const player = useMainPlayer();
 			const queue = player.queues.get(request.guildId) ?? (await tryRecoverSavedTracksQueue(request));
 			if(!queue?.currentTrack) {
@@ -47,13 +47,13 @@ const command = new Command('saltar', tags)
 					embeds: [ embed ],
 				});
 			}
-	
+
 			const {
 				title: skippedTitle,
 				url: skippedUrl,
 				thumbnail: skippedThumbnail
 			} = queue.currentTrack;
-	
+
 			if(!queue.size)
 				queue.node.stop();
 			else
@@ -73,7 +73,7 @@ const command = new Command('saltar', tags)
 			const embed = makePuréMusicEmbed(request, Colors.Red)
 				.setTitle(translator.getText('somethingWentWrong'));
 
-			return request.reply({ embeds: [embed] });
+			return request.reply({ embeds: [ embed ] });
 		}
 	});
 

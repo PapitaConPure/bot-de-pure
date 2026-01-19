@@ -34,9 +34,9 @@ const action = new ContextMenuAction('actionPVGiveMod', 'User')
 		sessionOther.setBanned(false);
 		session.members.set(other.id, sessionOther.toJSON());
 		session.markModified('members');
-		
+
 		const result = await requestPVControlPanel(guild, pv.categoryId, pv.controlPanelId);
-		
+
 		if(!result.success)
 			return interaction.editReply({ content: 'PLACEHOLDER_PV_CONTROL_PANEL_REQUEST_FAIL' });
 

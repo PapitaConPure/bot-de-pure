@@ -1,6 +1,6 @@
 import sagiri from 'sagiri';
 import { booruApiKey, booruUserId } from '../../data/globalProps';
-import { EmbedBuilder, Colors } from "discord.js";
+import { EmbedBuilder, Colors } from 'discord.js';
 import { decryptString } from '../../utils/security';
 import { Booru } from '../booru/boorufetch';
 import { auditError } from './auditor';
@@ -31,7 +31,7 @@ export async function pourSauce(clientId: string, queries: string[], request: im
 		findSauce = sagiri(token, {
 			results: MATCH_COUNT_MAX,
 			getRatings: true,
-			mask: [25], //Gelbooru
+			mask: [ 25 ], //Gelbooru
 		});
 	} catch {
 		const embed = new EmbedBuilder()

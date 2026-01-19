@@ -24,7 +24,7 @@ export async function sendConvertedPixivPosts(message: Message<true>, converterK
 		return ConverterEmptyPayload;
 
 	const { content: messageContent, channel } = message;
-	
+
 	if(!message.guild.members.me.permissionsIn(channel).has([ 'SendMessages', 'ManageMessages', 'AttachFiles' ]))
 		return ConverterEmptyPayload;
 
@@ -49,7 +49,7 @@ export async function sendConvertedPixivPosts(message: Message<true>, converterK
 	const configProp = pixivConversionServices[converterKey];
 	if(configProp == undefined)
 		return ConverterEmptyPayload;
-	
+
 	const service = configProp.service;
 	const formattedPixivUrls = pixivUrls
 		.map(u => {
@@ -62,6 +62,6 @@ export async function sendConvertedPixivPosts(message: Message<true>, converterK
 		});
 
 	const content = formattedPixivUrls.join(' ');
-	
+
 	return { contentful: true, content };
 }

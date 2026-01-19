@@ -21,9 +21,9 @@ client.on('messageReactionRemove', (reaction, user) => events.onReactionRemove(r
 client.on('messageDelete', message => events.onMessageDelete(message).catch(events.onCriticalError));
 client.on('interactionCreate', interaction => events.onInteraction(interaction).catch(events.onCriticalError));
 client.on('voiceStateUpdate', (oldState, newState) => events.onVoiceUpdate(oldState, newState).catch(events.onCriticalError));
-client.on('guildMemberAdd', member => { events.onGuildMemberAdd(member).catch(events.onCriticalError) });
-client.on('guildMemberRemove', member => { events.onGuildMemberRemove(member).catch(events.onCriticalError) });
-client.on('guildMemberUpdate', (oldMember, newMember) => { events.onGuildMemberUpdate(oldMember, newMember).catch(events.onCriticalError) });
+client.on('guildMemberAdd', member => { events.onGuildMemberAdd(member).catch(events.onCriticalError); });
+client.on('guildMemberRemove', member => { events.onGuildMemberRemove(member).catch(events.onCriticalError); });
+client.on('guildMemberUpdate', (oldMember, newMember) => { events.onGuildMemberUpdate(oldMember, newMember).catch(events.onCriticalError); });
 client.rest.on('rateLimited', events.onRateLimit);
 
 client.login(discordToken);

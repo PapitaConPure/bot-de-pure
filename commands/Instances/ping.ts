@@ -9,7 +9,7 @@ const command = new Command('ping', tags)
 	.setLongDescription('Muestra el tiempo de respuesta del Bot y la API')
 	.setExecution(async request => {
 		const sent = (await request.reply({
-			content: 
+			content:
 				'Pong~♪\n' +
 				`**Latencia de la API** ${request.client.ws.ping}ms\n` +
 				`**Tiempo de respuesta** _comprobando..._`,
@@ -20,7 +20,7 @@ const command = new Command('ping', tags)
 		let start: number, end: number;
 		start = Date.now();
 		await editSent(sent, request, {
-			content: 
+			content:
 				'Pong~♪\n' +
 				`**Latencia de la API** ${wsPing}ms\n` +
 				`**Tiempo de respuesta** _enviando..._`,

@@ -6,8 +6,8 @@ import { CommandPermissions } from '../Commons/cmdPerms.js';
 
 const perms = CommandPermissions.adminOnly();
 const options = new CommandOptions()
-	.addFlag([], ['activar', 'activate', 'on'],    'para activar los comandos caóticos del servidor')
-	.addFlag([], ['desactivar', 'deactivate', 'off'], 'para desactivar los comandos caóticos del servidor');
+	.addFlag([], [ 'activar', 'activate', 'on' ],    'para activar los comandos caóticos del servidor')
+	.addFlag([], [ 'desactivar', 'deactivate', 'off' ], 'para desactivar los comandos caóticos del servidor');
 
 const tags = new CommandTags().add('MOD');
 
@@ -59,7 +59,7 @@ const command = new Command('caos', tags)
 			);
 
 		return request.reply({
-			embeds: [embed],
+			embeds: [ embed ],
 			ephemeral: true,
 		});
 	});

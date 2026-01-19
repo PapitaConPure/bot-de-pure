@@ -46,7 +46,7 @@ async function loadPageNumber(request: Exclude<import('../Commons/typings').AnyR
 		.addFields({ name: `${'Nombre`'.padEnd(24)}\`Emote`, value: `${emotePages[page]}` });
 
 	const content = ({
-		embeds: [embed],
+		embeds: [ embed ],
 		components: navigationRows('perrito', page, lastPage),
 	});
 
@@ -61,7 +61,7 @@ async function loadPageNumber(request: Exclude<import('../Commons/typings').AnyR
 const options = new CommandOptions()
 	.addParam('perrito', 'TEXT', 'para especificar un perrito a enviar (por nombres identificadores)', { optional: true })
 	.addFlag('ltaeh', [ 'lista', 'todo', 'todos', 'ayuda', 'everything', 'all', 'help' ], 'para mostrar una lista de todos los perritos')
-	.addFlag('bd', ['borrar', 'delete'], 'para borrar el mensaje original');
+	.addFlag('bd', [ 'borrar', 'delete' ], 'para borrar el mensaje original');
 
 const tags = new CommandTags().add(
 	'MEME',

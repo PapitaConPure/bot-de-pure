@@ -17,7 +17,7 @@ async function safeDelete(message: ComplexCommandRequest) {
 async function bulkDeleteMessages(channel: GuildTextBasedChannel, amount: number, user: User) {
 	if(user == undefined)
 		return channel.bulkDelete(amount);
-	
+
 	const messages = await channel.messages.fetch({ limit: 100 });
 	let i = 0;
 	return channel.bulkDelete(messages.filter(msg => msg.author.id === user.id && i++ < amount));
@@ -34,15 +34,15 @@ const perms = new CommandPermissions('ManageMessages');
 
 const options = new CommandOptions()
 	.addParam('cantidad', 'NUMBER', 'para especificar la cantidad de mensajes a borrar (sin contar el mensaje del comando)', { optional: true })
-	.addFlag('um', ['usuario', 'miembro'], 			'para especificar de qué usuario borrar mensajes', { name: 'user', type: 'USER' });
+	.addFlag('um', [ 'usuario', 'miembro' ], 			'para especificar de qué usuario borrar mensajes', { name: 'user', type: 'USER' });
 
 const tags = new CommandTags().add('MOD');
 
 const command = new Command('borrar', tags)
 	.setAliases(
 		'borrarmsg',
-        'deletemsg', 'delete',
-        'del', 'd',
+		'deletemsg', 'delete',
+		'del', 'd',
 	)
 	.setLongDescription('Elimina una cierta cantidad de mensajes entre 2 y 100')
 	.setPermissions(perms)
@@ -74,7 +74,7 @@ const command = new Command('borrar', tags)
 			await safeDelete(request);
 
 		const cappedAmount = Math.max(2, Math.min(amount, 100));
-		
+
 		await bulkDeleteMessages(request.channel, cappedAmount, user);
 
 		if(request.isInteraction)

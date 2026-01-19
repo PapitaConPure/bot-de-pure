@@ -12,7 +12,7 @@ const uwusopt = [
 const options = new CommandOptions()
 	.addParam('uwu', { name: 'uwu', expression: 'uwu' }, 'uwu', { optional: true })
 	.addFlag('u', 'uwuwu', 'uwu')
-	.addFlag('bd', ['borrar', 'delete'], 'para borrar el mensaje original');
+	.addFlag('bd', [ 'borrar', 'delete' ], 'para borrar el mensaje original');
 
 const tags = new CommandTags().add(
 	'MEME',
@@ -26,7 +26,7 @@ const command = new Command('uwu', tags)
 	.setExecution(async (request, args) => {
 		const deleteOriginal = args.hasFlag('borrar');
 		const randomUwu = randInArray(uwusopt);
-		
+
 		if(deleteOriginal && request.isMessage) {
 			return Promise.all([
 				request.channel.send({ content: randomUwu }).catch(console.error),

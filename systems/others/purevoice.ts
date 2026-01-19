@@ -35,13 +35,13 @@ class PureVoiceDocumentHandler {
 	async fetchSystemDocument(documentQuery: object): Promise<PureVoiceDocument> {
 		this.document = await PureVoiceModel.findOne(documentQuery).catch(err => { error(err); return undefined; });
 		return this.document;
-	};
+	}
 
 	async relinkDocument() {
 		const documentId = this.document._id;
 		this.document = await PureVoiceModel.findById(documentId).catch(err => { error(err); return undefined; });
 		return this.document;
-	};
+	}
 
 	async saveChanges() {
 		return this.document.save();
@@ -58,12 +58,12 @@ export class PureVoiceUpdateHandler {
 		this.#documentHandler = new PureVoiceDocumentHandler();
 		this.#oldState = oldState;
 		this.#state = state;
-	};
+	}
 
 	/**@description Comprueba si hay un sistema PuréVoice instalado en el servidor actual o no.*/
 	systemIsInstalled() {
 		return !!(this.#documentHandler.document && this.#state.guild.channels.cache.get(this.#documentHandler.document.categoryId));
-	};
+	}
 
 	/**@description Para controlar errores ocasionados por una eliminación prematura de uno de los canales asociados a una sesión.*/
 	prematureError = () => warn(chalk.gray('Canal probablemente eliminado prematuramente'));
@@ -94,7 +94,7 @@ export class PureVoiceUpdateHandler {
 			if(!sessionId) {
 				debug('El canal no forma parte del sistema PuréVoice del servidor. Ignorando');
 				return;
-			};
+			}
 
 			const session = await PureVoiceSessionModel.findOne({ channelId: sessionId });
 			if(!session) {
@@ -173,7 +173,7 @@ export class PureVoiceUpdateHandler {
 					error(err);
 
 					if(reattempts > 0)
-						info(`Reintentando eliminación (${reattempts} intentos restantes)...`)
+						info(`Reintentando eliminación (${reattempts} intentos restantes)...`);
 				});
 			} while(!removed && reattempts-- > 0);
 
@@ -198,7 +198,7 @@ export class PureVoiceUpdateHandler {
 				'Si el par de canales relacionales de la sesión fueron eliminados, puedes ignorar este mensaje',
 			].join('\n') }).catch(error);
 		}
-	};
+	}
 
 	/**
 	 * Comprueba si el cambio es una conexión y verifica si el canal al que se conectó es un Canal Automutable PuréVoice o una sesión en curso.
@@ -282,7 +282,7 @@ export class PureVoiceUpdateHandler {
 
 			await channel?.send({
 				content: (userConfigs.voice.ping !== 'always' || member.user.bot) ? null : translator.getText('voiceSessionNewMemberContentHint', `${member}`),
-				embeds: [embed],
+				embeds: [ embed ],
 			}).catch(prematureError);
 			currentSession.members.set(
 				member.id,
@@ -424,7 +424,7 @@ export class PureVoiceUpdateHandler {
 			});
 
 			const startMessage: string | MessagePayload | MessageCreateOptions = {
-				embeds: [embed],
+				embeds: [ embed ],
 				components: [
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder({
@@ -433,7 +433,7 @@ export class PureVoiceUpdateHandler {
 							style: ButtonStyle.Primary,
 							emoji: '📖',
 						}),
-				)],
+					) ],
 			};
 
 			if(userConfigs.voice.ping !== 'never')
@@ -475,7 +475,7 @@ export class PureVoiceUpdateHandler {
 				'Si lo ven necesario, ¡menciónenle el asunto a un moderador!',
 			].join('\n') });
 		}
-	};
+	}
 
 	/**
 	 * Comprobar si hay sesiones en la base de datos que no corresponden a ningún canal existente, y eliminarlas
@@ -542,7 +542,7 @@ export class PureVoiceActionHandler {
 	/** Comprueba si hay un sistema PuréVoice instalado en el servidor actual o no */
 	systemIsInstalled() {
 		return !!(this.#documentHandler.document && this.#guild.channels.cache.get(this.#documentHandler.document.categoryId));
-	};
+	}
 
 	async performAction() {
 		await this.#actionFn(this.#documentHandler);
@@ -905,15 +905,15 @@ export async function createPVControlPanelChannel(guild: Guild, categoryId: stri
 	debug('Sending menu to control panel.');
 	try {
 		await controlPanelChannel.send({
-			embeds: [controlPanelEmbed],
-			components: [controlPanelButtons],
+			embeds: [ controlPanelEmbed ],
+			components: [ controlPanelButtons ],
 		});
 	} catch(err) {
 		error(err);
 		return {
 			success: false,
 			status: PVCPFailure.Unknown,
-		}
+		};
 	}
 
 	info('Created a new control panel for category:', categoryId);

@@ -104,8 +104,8 @@ const command = new Command('ayuda', tags)
 					name: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
 					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}ayuda <comando>\` para ver un comando en específico`,
 				});
-			const components = [makeGuideRow(request)];
-			return request.reply({ embeds: [embed], components });
+			const components = [ makeGuideRow(request) ];
+			return request.reply({ embeds: [ embed ], components });
 		}
 
 		const components = getWikiPageComponentsV2(foundCommand, request);
@@ -169,10 +169,10 @@ const command = new Command('ayuda', tags)
 					name: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
 					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}ayuda <comando>\` para ver un comando en específico`,
 				});
-			const components = [makeGuideRow(request)];
+			const components = [ makeGuideRow(request) ];
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
-				embeds: [embed],
+				embeds: [ embed ],
 				components
 			});
 		}
@@ -206,8 +206,8 @@ const command = new Command('ayuda', tags)
 					name: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
 					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}ayuda <comando>\` para ver un comando en específico`,
 				});
-			const components = [makeGuideRow(interaction)];
-			return interaction.update({ embeds: [embed], components });
+			const components = [ makeGuideRow(interaction) ];
+			return interaction.update({ embeds: [ embed ], components });
 		}
 
 		const components = getWikiPageComponentsV2(foundCommand, Command.requestize(interaction));

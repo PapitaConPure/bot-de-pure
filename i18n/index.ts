@@ -26,11 +26,11 @@ function paragraph(...lines: string[]) {
 function subl(i: number, defaultValue?: string) {
 	if(i == undefined) throw ReferenceError('Se esperaba un índice de componente de traducción');
 
-	const baseSub = `${i}{...}`
+	const baseSub = `${i}{...}`;
 
 	if(!defaultValue)
 		return baseSub;
-	
+
 	return `${baseSub}<?{'${defaultValue}'}`;
 }
 
@@ -83,7 +83,7 @@ const localesObject = ({
 		en: 'Select Language',
 		ja: '言語を選択',
 	},
-	
+
 	dmDisclaimer: {
 		es: 'Nota: Bot de Puré no opera con mensajes privados',
 		en: 'Note: Bot de Puré does not reply to DMs',
@@ -134,7 +134,7 @@ const localesObject = ({
 		en: '❌ You can\'t do that. If you tried to interact with a command message, try calling the command yourself',
 		ja: '❌ それはできません。コマンドメッセージとやり取りしようとした場合は、自分でコマンドを呼び出してみてください',
 	},
-	
+
 	expiredWizardData: {
 		es: '❌ Este asistente hace uso de memoria de sesión, pero no se encontró ninguna sesión. Vuelve a usar el comando para crear una nueva sesión de este asistente',
 		en: '❌ This Wizard uses session memory, but no session was found. Use the command again to start a new session of this Wizard',
@@ -724,7 +724,7 @@ const localesObject = ({
 		en: 'Arbitrary source',
 		ja: '任意のソース',
 	},
-	
+
 	pauseTitleNoTrack: {
 		es: 'No hay ninguna pista a pausar actualmente',
 		en: 'No track currently playing to pause',
@@ -740,7 +740,7 @@ const localesObject = ({
 		en: 'Track paused',
 		ja: 'トラック一時停止ました',
 	},
-	
+
 	resumirTitleNoTrack: {
 		es: 'No hay ninguna pista a resumir actualmente',
 		en: 'No track currently playing to resume',
@@ -1341,7 +1341,7 @@ const localesObject = ({
 		en: 'Tags of Interest',
 		ja: 'Tags of Interest',
 	},
-	
+
 	feedAuthor: {
 		es: 'Asistente de configuración de Feed de imágenes',
 		en: 'Imageboard Feed Configuration Wizard',
@@ -2824,32 +2824,32 @@ export class Translator {
 		if(!localeSet) throw ReferenceError(`Se esperaba una id de texto localizado válido. Se recibió: ${id}`);
 		const translationTemplate = localeSet[locale];
 		if(translationTemplate == null) throw RangeError(`Se esperaba una clave de localización válida. Se recibió: ${id} :: ${locale}`);
-	
+
 		//Ejemplo: 1{...}<?{'por defecto'}
 		const subLocaleRegex = /(\d+){\.\.\.}(?:<!{((?:[!=<>]{1,2}):[^|]+)\|'((?:(?!'}).)*)'})?(?:<\?{'((?:(?!'}).)*)'})?/g;
 		const translation = translationTemplate.replace(subLocaleRegex, (_match, /**@type {String}*/i: string, /**@type {String}*/condition: string, /**@type {String}*/whenTrue: string, /**@type {String}*/defaultValue: string) => {
 			const value = values[i];
-	
+
 			if(condition != undefined) {
 				const leftValue = (typeof value === 'boolean') ? `__${value}__` : `${value}`;
 				const [ operator, rightValue ] = condition.split(':') as [ ConditionString, string];
-				
+
 				if(!conditionFns.has(operator))
 					throw 'Operador inválido';
 
 				const conditionFn = conditionFns.get(operator);
 				return conditionFn(leftValue, rightValue) ? whenTrue : (defaultValue ?? '');
 			}
-			
+
 			if(value != undefined)
 				return value;
-			
+
 			if(defaultValue != undefined)
 				return defaultValue;
-	
+
 			throw ReferenceError(`Se esperaba un valor de reemplazo en índice [${i}] para texto localizado ${id} :: ${locale}`);
 		});
-	
+
 		return translation;
 	}
 

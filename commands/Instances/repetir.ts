@@ -61,11 +61,11 @@ const command = new Command('repetir', tags)
 						.setLabel(translator.getText('queueLoopMenuAutoplayLabel'))
 						.setDescription(translator.getText('queueLoopMenuAutoplayDesc')),
 				),
-			);
+		);
 
 		return request.reply({
-			embeds: [embed],
-			components: [row],
+			embeds: [ embed ],
+			components: [ row ],
 		}).catch(console.error);
 	}).setSelectMenuResponse(async function setLoopMode(interaction) {
 		const userId = interaction.user.id;
@@ -85,11 +85,11 @@ const command = new Command('repetir', tags)
 				const embed = makePuréMusicEmbed(interaction)
 					.setTitle(translator.getText('queueLoopTitleNoTrack'));
 				return interaction.reply({
-					embeds: [embed],
+					embeds: [ embed ],
 					ephemeral: true,
 				});
 			}
-			
+
 			const [ loopMode ] = interaction.values;
 
 			let embed;
@@ -146,7 +146,7 @@ const command = new Command('repetir', tags)
 			}
 
 			return interaction.update({
-				embeds: [embed],
+				embeds: [ embed ],
 				components: [],
 			});
 		} catch(err) {
@@ -154,7 +154,7 @@ const command = new Command('repetir', tags)
 			const embed = makePuréMusicEmbed(interaction, Colors.Red)
 				.setTitle(translator.getText('somethingWentWrong'));
 
-			return interaction.reply({ embeds: [embed] });
+			return interaction.reply({ embeds: [ embed ] });
 		}
 	});
 

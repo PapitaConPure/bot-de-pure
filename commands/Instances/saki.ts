@@ -6,58 +6,58 @@ import Saki, { SakiDocument } from '../../models/saki.js';
 const crazyBackupId = saki.crazyBackupChannelId;
 
 const positivos = new Set([
-    'habilitado',
-    'habilitar',
-    'encendido',
-    'encendida',
-    'encender',
-    'activado',
-    'activada',
-    'activar',
-    'true',
-    'on',
-    '1',
+	'habilitado',
+	'habilitar',
+	'encendido',
+	'encendida',
+	'encender',
+	'activado',
+	'activada',
+	'activar',
+	'true',
+	'on',
+	'1',
 ]);
 
 const negativos = new Set([
-    'deshabilitado',
-    'deshabilitar',
-    'desactivado',
-    'desactivada',
-    'desactivar',
-    'apagado',
-    'apagada',
-    'apagar',
-    'false',
-    'off',
-    '0',
+	'deshabilitado',
+	'deshabilitar',
+	'desactivado',
+	'desactivada',
+	'desactivar',
+	'apagado',
+	'apagada',
+	'apagar',
+	'false',
+	'off',
+	'0',
 ]);
 
 function recibirEstado(texto) {
-    if(positivos.has(texto))
-        return 1;
-    
-    if(negativos.has(texto))
-        return -1;
+	if(positivos.has(texto))
+		return 1;
 
-    return 0;
+	if(negativos.has(texto))
+		return -1;
+
+	return 0;
 }
 
 function procesarConfig(dbDoc: SakiDocument, appliedList: string[], prompt: string, configId: string, displayText: string) {
-    if(!prompt)
-        return true;
-    
-    const state = recibirEstado(prompt);
+	if(!prompt)
+		return true;
 
-    if(state === 0)
-        return false;
+	const state = recibirEstado(prompt);
 
-    dbDoc.configs[configId] = (state === 1);
-    dbDoc.markModified('configs');
+	if(state === 0)
+		return false;
 
-    appliedList.push(`${displayText}: ${state === 1 ? '✅' : '❌'}`);
+	dbDoc.configs[configId] = (state === 1);
+	dbDoc.markModified('configs');
 
-    return true;
+	appliedList.push(`${displayText}: ${state === 1 ? '✅' : '❌'}`);
+
+	return true;
 }
 
 const tip = '⚠️ Estado inválido. Ingresa "Activado", "Desactivado" o similares para cambiar una configuración';
@@ -65,9 +65,9 @@ const tip = '⚠️ Estado inválido. Ingresa "Activado", "Desactivado" o simila
 const perms = CommandPermissions.adminOnly();
 
 const options = new CommandOptions()
-    .addFlag([], 'bienvenida', 'Para habilitar o deshabilitar la bienvenida por completo', { name: 'estado', type: 'TEXT' })
-    .addFlag([], 'despedida', 'Para habilitar o deshabilitar la bienvenida por completo', { name: 'estado', type: 'TEXT' })
-    .addFlag([], 'ping', 'Para habilitar o deshabilitar el ping de bienvenida', { name: 'estado', type: 'TEXT' });
+	.addFlag([], 'bienvenida', 'Para habilitar o deshabilitar la bienvenida por completo', { name: 'estado', type: 'TEXT' })
+	.addFlag([], 'despedida', 'Para habilitar o deshabilitar la bienvenida por completo', { name: 'estado', type: 'TEXT' })
+	.addFlag([], 'ping', 'Para habilitar o deshabilitar el ping de bienvenida', { name: 'estado', type: 'TEXT' });
 
 const tags = new CommandTags().add('MOD', 'SAKI');
 
@@ -81,37 +81,37 @@ const command = new Command('saki', tags)
 		`Envía mensajes pinneados en el canal actual a <#${crazyBackupId}>`,
 		'Esto eliminará todos los pins en el canal luego de reenviarlos',
 	)
-    .setPermissions(perms)
-    .setOptions(options)
+	.setPermissions(perms)
+	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const bienvenida = args.parseFlagExpr('bienvenida');
 		const despedida = args.parseFlagExpr('despedida');
 		const pingBienvenida = args.parseFlagExpr('ping');
-        
-        const sakiCfg = (await Saki.findOne({})) || new Saki();
-        const applied = /**@type {string[]}*/([]);
 
-        if(!procesarConfig(sakiCfg, applied, bienvenida, 'bienvenida', 'Bienvenida'))
-            return request.reply({ content: tip });
+		const sakiCfg = (await Saki.findOne({})) || new Saki();
+		const applied = /**@type {string[]}*/([]);
 
-        if(!procesarConfig(sakiCfg, applied, despedida, 'despedida', 'Despedida'))
-            return request.reply({ content: tip });
+		if(!procesarConfig(sakiCfg, applied, bienvenida, 'bienvenida', 'Bienvenida'))
+			return request.reply({ content: tip });
 
-        if(!procesarConfig(sakiCfg, applied, pingBienvenida, 'pingBienvenida', 'Ping de Bienvenida'))
-            return request.reply({ content: tip });
+		if(!procesarConfig(sakiCfg, applied, despedida, 'despedida', 'Despedida'))
+			return request.reply({ content: tip });
 
-        if(!applied.length)
-            return request.reply({ content: '⚠️ No se aplicaron configuraciones.\nRevisa la página de ayuda del comando con `p!ayuda saki`' });
+		if(!procesarConfig(sakiCfg, applied, pingBienvenida, 'pingBienvenida', 'Ping de Bienvenida'))
+			return request.reply({ content: tip });
 
-        await sakiCfg.save();
+		if(!applied.length)
+			return request.reply({ content: '⚠️ No se aplicaron configuraciones.\nRevisa la página de ayuda del comando con `p!ayuda saki`' });
 
-        return request.reply({
-            content: [
-                '## Se aplicaron configuraciones',
-                '',
-                ...applied.map(a => `* ${a}`),
-            ].join('\n'),
-        });
+		await sakiCfg.save();
+
+		return request.reply({
+			content: [
+				'## Se aplicaron configuraciones',
+				'',
+				...applied.map(a => `* ${a}`),
+			].join('\n'),
+		});
 	});
 
 export default command;

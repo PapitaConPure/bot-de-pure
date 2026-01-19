@@ -25,7 +25,7 @@ const action = new ContextMenuAction('actionPVUnbanMember', 'User')
 
 		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
 		if(!session) return interaction.editReply({ content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción' });
-		
+
 		const dbOther = session.members.get(other.id);
 		if(!dbOther)
 			return interaction.editReply({ content: '❌ El miembro que expulses debe haber estado en la misma sesión que tú' });
@@ -33,7 +33,7 @@ const action = new ContextMenuAction('actionPVUnbanMember', 'User')
 		const sessionSelf = new PureVoiceSessionMember(session.members.get(member.id));
 		if(sessionSelf.isGuest())
 			return interaction.editReply({ content: '❌ Debes ser administrador o moderador de la sesión para quitarle la expulsión a un miembro' });
-		
+
 		const sessionOther = new PureVoiceSessionMember(dbOther);
 		if(sessionOther.isAdmin())
 			return interaction.editReply({ content: '❌ No se puede expulsar al administrador de la sesión' });
@@ -44,9 +44,9 @@ const action = new ContextMenuAction('actionPVUnbanMember', 'User')
 		sessionOther.setBanned(false);
 		session.members.set(other.id, sessionOther.toJSON());
 		session.markModified('members');
-		
+
 		const result = await requestPVControlPanel(guild, pv.categoryId, pv.controlPanelId);
-		
+
 		if(!result.success)
 			return interaction.editReply({ content: 'PLACEHOLDER_PV_CONTROL_PANEL_REQUEST_FAIL' });
 

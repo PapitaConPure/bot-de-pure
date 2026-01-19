@@ -60,7 +60,7 @@ const command = new Command('karl', tags)
 				value: pulled.join(' '),
 			});
 
-		return request.reply({ embeds: [embed] });
+		return request.reply({ embeds: [ embed ] });
 	});
 
 export default command;
@@ -68,7 +68,7 @@ export default command;
 function getKarlTier() {
 	const weights = tiers.map(t => t.weight);
 	const total = weights.reduce((a, b) => a + b);
-	
+
 	let r = Math.random() * total;
 	for(let i = 0; i < tiers.length; i++) {
 		if(r < weights[i])
@@ -78,7 +78,7 @@ function getKarlTier() {
 	}
 
 	return tiers[tiers.length - 1];
-};
+}
 
 function pullInstruments(tier: number) {
 	const poolSize = instruments.length; //Cantidad de instrumentos en pileta

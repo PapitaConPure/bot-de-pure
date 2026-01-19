@@ -16,17 +16,17 @@ const command = new Command('colores', tags)
 	.setExecution(async request => {
 		return request.reply({
 			content: `Aquí teni los colore po **${request.user.username}** <:reibu:1107876018171162705>`,
-			files: [saki.images.colors],
-			components: [colorsRow],
+			files: [ saki.images.colors ],
+			components: [ colorsRow ],
 			ephemeral: true,
 		});
 	})
 	.setSelectMenuResponse(async function addColor(interaction) {
 		const { guild, member } = interaction;
-        const role = guild.roles.cache.get(interaction.values[0]);
-        if(!role)
+		const role = guild.roles.cache.get(interaction.values[0]);
+		if(!role)
 			return interaction.reply({ content: '❌ No se encontró el rol. Si lo intentas más tarde, puede que el problema se haya solucionado', ephemeral: true });
-		
+
 		const hadroles = member.roles.cache.find(mr => colorsList.some(color => color.roleId === mr.id));
 		if(hadroles == undefined) {
 			await member.roles.add(role);

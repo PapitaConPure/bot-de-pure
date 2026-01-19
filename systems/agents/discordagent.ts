@@ -5,7 +5,7 @@ import { isThread } from '../../func';
 interface OwnerData {
 	userId: string;
 	expirationDate: number;
-};
+}
 const owners: Map<string, OwnerData> = new Map();
 
 /**@class Clase para interactuar con Webhooks de Discord de forma más sencilla.*/
@@ -20,7 +20,7 @@ export class DiscordAgent {
 		this.threadId = null;
 		this.user = null;
 		this.userLock = Promise.resolve(false);
-	};
+	}
 
 	/**
 	 * @description Conecta al Agente a un canal por medio de un Webhook. Si el canal no tiene un Webhook disponible, crea uno nuevo.
@@ -29,21 +29,21 @@ export class DiscordAgent {
 	 */
 	async setup(channel: GuildTextBasedChannel | AnyThreadChannel, name: string = 'Agente Puré') {
 		let hookable: GuildBasedChannel;
-		
+
 		if(isThread(channel)) {
 			this.threadId = channel.id;
 			hookable = channel.parent;
 		} else
 			hookable = channel;
-		
+
 		const webhooks = await hookable.fetchWebhooks();
 		this.webhook = webhooks.find(wh => wh.token && wh.channelId === hookable.id);
-		
+
 		if(!this.webhook)
 			this.webhook = await hookable.createWebhook({ name, reason: 'Desplegar Agente de Puré' });
 
 		return this;
-	};
+	}
 
 	/**@description Establece el usuario a replicar por el Agente al enviar mensajes.*/
 	setUser(user: User) {
@@ -53,15 +53,15 @@ export class DiscordAgent {
 				return true;
 			})
 			.catch(() => false);
-		
+
 		return this;
-	};
+	}
 
 	/**@description Establece el miembro a replicar por el Agente al enviar mensajes.*/
 	setMember(member: GuildMember) {
 		this.user = member;
 		return this;
-	};
+	}
 
 	/**
 	 * @description Envía un mensaje como el usuario especificado. Recuerda usar `setUser` o `setMember` antes.
@@ -76,7 +76,7 @@ export class DiscordAgent {
 
 		if(!messageOptions.content)
 			messageOptions.content = undefined;
-		
+
 		//@ts-expect-error
 		const { attachments, username } = messageOptions;
 		if(inheritAttachments && attachments && !Array.isArray(attachments)) {
@@ -86,9 +86,9 @@ export class DiscordAgent {
 			//@ts-expect-error
 			messageOptions.attachments = [];
 		}
-		
+
 		let sent = null;
-		
+
 		try {
 			sent = await this.webhook.send({
 				threadId: this.threadId,

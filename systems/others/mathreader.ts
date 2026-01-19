@@ -144,7 +144,7 @@ export class MathLexer {
 		this.#tokens.push(token);
 
 		return token;
-	};
+	}
 
 	#matchPattern(pattern: MathLexerPattern, source: string) {
 		if(typeof pattern.match === 'string')
@@ -207,7 +207,7 @@ export class MathLexer {
 			const operator: OperatorType = operatorAliases.get(matched) || matched as OperatorType;
 			this.#addToken(MathTokenTypes.OPERATOR, operator, tokenLength);
 			this.#cursor += tokenLength;
-		}
+		};
 	}
 
 	#makeSymbolHandler(): MathLexerPatternHandler {
@@ -215,33 +215,33 @@ export class MathLexer {
 			const tokenLength = matched.length;
 			matched = matched.toLowerCase();
 			switch(matched) {
-				case 'pi':
-					this.#addToken(MathTokenTypes.NUMBER, Math.PI, tokenLength);
-					this.#cursor += matched.length;
-					return;
+			case 'pi':
+				this.#addToken(MathTokenTypes.NUMBER, Math.PI, tokenLength);
+				this.#cursor += matched.length;
+				return;
 
-				case 'e':
-					this.#addToken(MathTokenTypes.NUMBER, Math.E, tokenLength);
-					this.#cursor += matched.length;
-					return;
+			case 'e':
+				this.#addToken(MathTokenTypes.NUMBER, Math.E, tokenLength);
+				this.#cursor += matched.length;
+				return;
 
-				case 'inf':
-					this.#addToken(MathTokenTypes.NUMBER, Number.POSITIVE_INFINITY, tokenLength);
-					this.#cursor += matched.length;
-					return;
+			case 'inf':
+				this.#addToken(MathTokenTypes.NUMBER, Number.POSITIVE_INFINITY, tokenLength);
+				this.#cursor += matched.length;
+				return;
 
-				case 'sqrt':
-				case 'sin':
-				case 'cos':
-				case 'tan':
-				case 'rad':
-				case 'deg':
-					this.#addToken(MathTokenTypes.IDENTIFIER, matched, tokenLength);
-					this.#cursor += matched.length;
-					return;
+			case 'sqrt':
+			case 'sin':
+			case 'cos':
+			case 'tan':
+			case 'rad':
+			case 'deg':
+				this.#addToken(MathTokenTypes.IDENTIFIER, matched, tokenLength);
+				this.#cursor += matched.length;
+				return;
 
-				default:
-					fatal(new MathLexerError(`Texto inválido en posición ${this.#cursor}: ${matched}`));
+			default:
+				fatal(new MathLexerError(`Texto inválido en posición ${this.#cursor}: ${matched}`));
 			}
 		};
 	}
@@ -256,7 +256,7 @@ export class MathLexer {
 
 			this.#addToken(MathTokenTypes.NUMBER, num, tokenLength);
 			this.#cursor += matched.length;
-		}
+		};
 	}
 
 	#makeUnicodePowerHandler(): MathLexerPatternHandler {
@@ -306,7 +306,7 @@ export class MathLexer {
 				this.#addToken(MathTokenTypes.NUMBER, 9, tokenLength);
 				return;
 			}
-		}
+		};
 	}
 
 	#makeInterpretationHandler<TToken extends MathTokenType>(type: TToken, value: MathToken<TToken>['value']): MathLexerPatternHandler {
@@ -314,7 +314,7 @@ export class MathLexer {
 			const tokenLength = matched.length;
 			this.#addToken<TToken>(type, value, tokenLength);
 			this.#cursor += tokenLength;
-		}
+		};
 	}
 }
 
@@ -375,37 +375,37 @@ export class MathParser {
 		return this.#tokens[this.#cursor];
 	}
 
-    #makeLiteralExpressionNode(value: number): MathLiteralExpressionNode {
-        return {
-            type: NodeTypes.LITERAL,
-            value,
-        };
-    }
+	#makeLiteralExpressionNode(value: number): MathLiteralExpressionNode {
+		return {
+			type: NodeTypes.LITERAL,
+			value,
+		};
+	}
 
-    #makeUnaryExpressionNode(operator: OperatorType, argument: MathNode): MathUnaryExpressionNode {
-        return {
-            type: NodeTypes.UNARY,
-            operator,
-            argument,
-        };
-    }
+	#makeUnaryExpressionNode(operator: OperatorType, argument: MathNode): MathUnaryExpressionNode {
+		return {
+			type: NodeTypes.UNARY,
+			operator,
+			argument,
+		};
+	}
 
-    #makeBinaryExpressionNode(operator: OperatorType, leftOperand: MathNode, rightOperand: MathNode): MathBinaryExpressionNode {
-        return {
-            type: NodeTypes.BINARY,
-            operator,
-            leftOperand,
-            rightOperand,
-        };
-    }
+	#makeBinaryExpressionNode(operator: OperatorType, leftOperand: MathNode, rightOperand: MathNode): MathBinaryExpressionNode {
+		return {
+			type: NodeTypes.BINARY,
+			operator,
+			leftOperand,
+			rightOperand,
+		};
+	}
 
-    #makeFunctionCallNode(identifier: string, argument: MathNode): MathFunctionCallNode {
-        return {
-            type: NodeTypes.FUNCTION_CALL,
-            identifier,
-            argument,
-        };
-    }
+	#makeFunctionCallNode(identifier: string, argument: MathNode): MathFunctionCallNode {
+		return {
+			type: NodeTypes.FUNCTION_CALL,
+			identifier,
+			argument,
+		};
+	}
 
 	#expect<TToken extends MathTokenType>(tokenType: TToken): MathToken & { type: TToken } {
 		const token = this.#current;
@@ -537,7 +537,7 @@ export class MathEvaluator {
 		tan:  argument => Math.tan(argument),
 		rad:  argument => argument * (Math.PI / 180),
 		deg:  argument => argument * (180 / Math.PI),
-	}
+	};
 
 	constructor(tree: MathNode) {
 		this.#tree = tree;

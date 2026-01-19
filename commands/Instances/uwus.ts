@@ -72,7 +72,7 @@ const command = new Command('uwus', tags)
 						const sliceCollection = new Collection<Snowflake, Message>(slice);
 						return request.channel.bulkDelete(sliceCollection);
 					}),
-					request.channel.send({ embeds: [embed] }),
+					request.channel.send({ embeds: [ embed ] }),
 				]);
 			} catch (message) {
 				return console.error(message);
@@ -96,7 +96,7 @@ const command = new Command('uwus', tags)
 			)
 			.setAuthor({ name: `Evento iniciado por ${user.username}`, iconURL: user.avatarURL({ size: 256 }) });
 
-		return request.reply({ embeds: [embed] });
+		return request.reply({ embeds: [ embed ] });
 	});
 
 export default command;

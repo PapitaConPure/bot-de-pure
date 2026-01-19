@@ -22,7 +22,7 @@ const command = new Command('catbox', tags)
 		const translator = await Translator.from(request.userId);
 
 		await request.deferReply();
-		
+
 		const imageUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(u => u);
 		const attachments = CommandOptionSolver.asAttachments(args.parsePolyParamSync('imagens')).filter(a => a);
 		const imageStreams = await Promise.all(attachments
@@ -48,8 +48,8 @@ const command = new Command('catbox', tags)
 			const filePath = `./temp_${request.id}_${count++}.png`;
 
 			const filePathResult: Promise<string | null> = (pipeline(upload.data, fs.createWriteStream(filePath))
-			.then(() => filePath)
-			.catch(() => null));
+				.then(() => filePath)
+				.catch(() => null));
 
 			filePaths.push(filePathResult);
 		}
@@ -88,7 +88,7 @@ const command = new Command('catbox', tags)
 						value: `\`\`\`\n${err.message || err}\n\`\`\``,
 					}));
 			}
-			
+
 			count++;
 		}
 

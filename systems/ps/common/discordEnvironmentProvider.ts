@@ -5,8 +5,8 @@ import { fetchChannel, fetchRole, fetchMember } from '../../../func';
 export default class DiscordEnvironmentProvider implements EnvironmentProvider {
 	static CACHE_LIFETIME: number = 5e3;
 
-	static #GUILDS: Map<string, { validUntil: number; guild: PSGuild; }> = new Map();
-	static #OWNERS: Map<string, { validUntil: number; owner: import('discord.js').GuildMember | null; }> = new Map();
+	static#GUILDS: Map<string, { validUntil: number; guild: PSGuild; }> = new Map();
+	static#OWNERS: Map<string, { validUntil: number; owner: import('discord.js').GuildMember | null; }> = new Map();
 
 	#request: ComplexCommandRequest;
 
@@ -63,7 +63,7 @@ export default class DiscordEnvironmentProvider implements EnvironmentProvider {
 		});
 	}
 
-	static #getOrMakePSGuild(guild: import('discord.js').Guild) {
+	static#getOrMakePSGuild(guild: import('discord.js').Guild) {
 		const existingPsGuild = DiscordEnvironmentProvider.#GUILDS.get(guild.id);
 
 		if(existingPsGuild && Date.now() < existingPsGuild.validUntil)
