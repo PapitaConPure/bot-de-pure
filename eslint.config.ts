@@ -9,9 +9,11 @@ export default defineConfig([
 		files: [ '**/*.{js,mjs,cjs,ts,mts,cts}' ],
 		plugins: {
 			js,
-			'@stylistic': stylistic,
 		},
-		extends: [ 'js/recommended' ],
+		extends: [
+			'js/recommended',
+			tseslint.configs.recommended,
+		],
 		languageOptions: {
 			globals: globals.node
 		},
@@ -21,6 +23,8 @@ export default defineConfig([
 			'@typescript-eslint/no-require-imports': 'off',
 			'no-sparse-arrays': 'off',
 			'no-unused-vars': 'off',
+			'quotes': 'off',
+
 			'@typescript-eslint/no-unused-vars': [
 				'warn',
 				{
@@ -50,7 +54,17 @@ export default defineConfig([
 			} ],
 			'array-bracket-spacing': [ 'error', 'always' ],
 			'space-in-parens': 'error',
-			'quotes': 'off',
+		},
+	},
+	{
+		files: [ '**/*.{js,mjs,cjs,ts,mts,cts}' ],
+		plugins: {
+			'@stylistic': stylistic,
+		},
+		languageOptions: {
+			globals: globals.node
+		},
+		rules: {
 			'@stylistic/quotes': [ 'error', 'single', {
 				'avoidEscape': true,
 				'allowTemplateLiterals': 'always',
@@ -111,6 +125,5 @@ export default defineConfig([
 			} ],
 			'@stylistic/eol-last': 'error',
 		},
-	},
-	tseslint.configs.recommended,
+	}
 ]);
