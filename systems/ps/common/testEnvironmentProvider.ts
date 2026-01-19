@@ -1,85 +1,167 @@
-import { EnvironmentProvider, PSGuild, PSChannel, PSRole, PSUser, PSMember } from '../v1.1';
+import { EnvironmentProvider, PSChannel, PSGuild, PSMember, PSRole, PSUser } from '../v1.1/interpreter/environment/environmentProvider';
 
 export default class TestEnvironmentProvider implements EnvironmentProvider {
-	fetchChannel(): PSChannel | null {
-		return TestEnvironmentProvider.#makePSChannel();
-	}
-	
-	fetchRole(): PSRole | null {
-		return TestEnvironmentProvider.#makePSRole();
-	}
-	
-	fetchMember(): PSMember | null {
-		return TestEnvironmentProvider.#makePSMember();
-	}
-	
-	getGuild(): PSGuild {
-		return TestEnvironmentProvider.#makePSGuild();
-	}
+	guild: PSGuild;
+	channel: PSChannel;
+	role: PSRole;
+	user: PSUser;
+	member: PSMember;
 
-	getChannel(): PSChannel {
-		return TestEnvironmentProvider.#makePSChannel();
-	}
-
-	getMember(): PSMember {
-		return TestEnvironmentProvider.#makePSMember();
-	}
-
-	getUser(): PSUser {
-		return TestEnvironmentProvider.#makePSUser();
-	}
-
-	static #makePSChannel(deep: boolean = true) {
-		return new PSChannel({
-			id: 'channelId',
-			name: 'Canal',
-			nsfw: false,
-			guild: deep ? this.#makePSGuild(false) : undefined,
-		});
-	}
-
-	static #makePSRole(deep: boolean = true) {
-		return new PSRole({
-			id: 'roleId',
-			name: 'Rol',
-			color: 0x123456,
-			guild: deep ? this.#makePSGuild() : undefined,
-			iconUrlHandler: () => 'https://random-images-website-thats-absolutely-not-real.xyz/roleIconUrl',
-		});
-	}
-
-	static #makePSMember(deep: boolean = true) {
-		return new PSMember({
-			user: this.#makePSUser(),
-			nickname: 'Member Nickname',
-			roleIds: [ 'memberRoleId' ],
-			guild: deep ? this.#makePSGuild() : undefined,
-			displayAvatarUrlHandler: () => 'https://random-images-website-thats-absolutely-not-real.xyz/memberAvatarUrl',
-		});
-	}
-
-	static #makePSUser() {
-		return new PSUser({
-			id: 'userId',
-			username: 'user.name',
-			displayName: 'User Display Name',
-		});
-	}
-
-	static #makePSGuild(deep: boolean = true) {
-		return new PSGuild({
-			id: 'guildId',
-			name: 'Servidor',
-			description: 'Descripción del servidor.',
-			ownerId: 'ownerId',
-			systemChannelId: 'systemChannelId',
+	constructor() {
+		this.guild = new PSGuild({
+			id: '123456789012345678',
+			name: 'Servidor de Prueba',
+			ownerId: '123456789012345684',
+			description: 'Este ser un servidor que realmente no existe',
+			systemChannelId: '123456789012345680',
+			iconUrlHandler: this.testUrlHandler,
+			bannerUrlHandler: this.testUrlHandler,
+			splashUrlHandler: this.testUrlHandler,
 			premiumTier: 0,
-			roles: [ deep ? this.#makePSRole(false) : undefined ],
-			members: [ deep ? this.#makePSMember(false) : undefined ],
-			channels: [ deep ? this.#makePSChannel(false) : undefined ],
-			iconUrlHandler: () => 'https://random-images-website-thats-absolutely-not-real.xyz/guildIconUrl',
-			splashUrlHandler: () => 'https://random-images-website-thats-absolutely-not-real.xyz/guildSplashUrl',
-			bannerUrlHandler: () => 'https://random-images-website-thats-absolutely-not-real.xyz/guildBannerUrl',
+			channels:  [
+				{
+					id: '123456789012345680',
+					name: 'canal-de-prueba-2',
+					nsfw: false,
+				},
+			],
+			roles: [
+				{
+					id: '123456789012345681',
+					name: 'Rol de Prueba 1',
+					iconUrlHandler: () => 'https://i.imgur.com/ALNMRS6.png',
+					color: 0x608cf3,
+				},
+				{
+					id: '123456789012345682',
+					name: 'Rol de Prueba 2',
+					iconUrlHandler: () => null,
+				},
+			],
+			members: [
+				{
+					user: new PSUser({
+						id: '123456789012345683',
+						username: 'usuario.de.prueba',
+						displayName: 'Usuario de Prueba',
+					}),
+					displayAvatarUrlHandler: () => 'https://i.imgur.com/P9eeVWC.png',
+					roleIds: [ '123456789012345682' ],
+				},
+				{
+					user: new PSUser({
+						id: '123456789012345684',
+						username: 'otro.usuario',
+						displayName: 'Otro Usuario',
+					}),
+					nickname: 'Otro Usuario',
+					displayAvatarUrlHandler: () => 'https://i.imgur.com/P9eeVWC.png',
+					roleIds: [],
+				},
+			]
 		});
+
+		this.channel = this.guild.registerChannel({
+			id: '123456789012345679',
+			name: 'canal-de-prueba-1',
+			nsfw: false,
+		});
+
+		this.user = new PSUser({
+			id: '651250669390528561',
+			username: 'botdepure',
+		});
+
+		this.member = this.guild.registerMember({
+			user: this.user,
+			nickname: 'Bot de Puré',
+			displayAvatarUrlHandler: () => 'https://i.imgur.com/P9eeVWC.png',
+			roleIds: [ '123456789012345681', '123456789012345682' ],
+		});
+	}
+
+	getGuild() {
+		return this.guild;
+	}
+
+	getChannel() {
+		return this.channel;
+	}
+
+	getUser() {
+		return this.user;
+	}
+
+	getMember() {
+		return this.member;
+	}
+
+	fetchChannel(query: string) {
+		if(!isNaN(+query)) {
+			const channel = this.guild.channels.get(query);
+			if(channel) return channel;
+		}
+
+		let bestScore = 0;
+		let bestMatch = null;
+
+		for(const channel of this.guild.channels.values()) {
+			if(channel.name.includes(query) && channel.name.length > bestScore) {
+				bestScore = channel.name.length;
+				bestMatch = channel;
+			}
+		}
+
+		return bestMatch;
+	}
+
+	fetchRole(query: string) {
+		if(!isNaN(+query)) {
+			const role = this.guild.roles.get(query);
+			if(role) return role;
+		}
+
+		let bestScore = 0;
+		let bestMatch = null;
+
+		for(const roles of this.guild.roles.values()) {
+			if(roles.name.includes(query) && roles.name.length > bestScore) {
+				bestScore = roles.name.length;
+				bestMatch = roles;
+			}
+		}
+
+		return bestMatch;
+	}
+
+	fetchMember(query: string) {
+		if(!isNaN(+query)) {
+			const member = this.guild.members.get(query);
+			if(member) return member;
+		}
+
+		let bestScore = 0;
+		let bestMatch = null;
+
+		for(const member of this.guild.members.values()) {
+			const tryName = (/**@type {string?}*/ name: string | null) => {
+				if(name && name.includes(query) && name.length > bestScore) {
+					bestScore = name.length;
+					bestMatch = member;
+					return true;
+				}
+				return false;
+			};
+
+			if(tryName(member.nickname)) continue;
+			if(tryName(member.user.displayName)) continue;
+			if(tryName(member.user.username)) continue;
+		}
+
+		return bestMatch;
+	}
+
+	private testUrlHandler() {
+		return '';
 	}
 }

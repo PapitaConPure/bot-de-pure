@@ -1,12 +1,11 @@
 import { CommandTags } from '../Commons/cmdTags';
 import { Command } from '../Commons/cmdBuilder';
-import { executeTuber, CURRENT_PS_VERSION } from '../../systems/ps/common/executeTuber';
+import { executeTuber, CURRENT_PS_VERSION, Tubercle } from '../../systems/ps/common/executeTuber';
 import { CommandOptions } from '../Commons/cmdOpts';
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { p_pure } from '../../utils/prefixes';
 import { tenshiColor } from '../../data/globalProps';
 import { makeButtonRowBuilder } from '../../utils/tsCasts';
-import { Tubercle } from '../../systems/ps/v1.1';
 import axios from 'axios';
 
 export const psEditorButton = new ButtonBuilder()
