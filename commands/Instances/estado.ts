@@ -1,4 +1,4 @@
-import { EmbedBuilder, StringSelectMenuBuilder, MessageFlags, ContainerBuilder, ButtonStyle, ButtonBuilder, SeparatorSpacingSize } from 'discord.js';
+import { EmbedBuilder, StringSelectMenuBuilder, MessageFlags, ContainerBuilder, ButtonStyle, ButtonBuilder } from 'discord.js';
 import { version, note, changelog, todo as toDo } from '../../data/botStatus.json';
 import { noDataBase, remoteStartup, tenshiColor } from '../../data/globalProps';
 import { p_pure } from '../../utils/prefixes';
@@ -17,7 +17,7 @@ function listFormat(str: string, request: import('../Commons/typings').AnyReques
 const flags = new CommandTags().add('COMMON');
 const command = new Command('estado', flags)
 	.setAliases('status', 'botstatus')
-	.setLongDescription('Muestra mi estado actual. Eso incluye versión, host, registro de cambios, cosas por hacer, etc')
+	.setLongDescription('Muestra mi estado actual. Eso incluye versión, registro de cambios, cosas por hacer, etc')
 	.setExecution(async request => {
 		const translator = await Translator.from(request.member);
 		const stats = (!noDataBase && await Stats.findOne({})) || new Stats({ since: Date.now()});

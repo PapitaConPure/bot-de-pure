@@ -1,5 +1,4 @@
-import { host } from '../../data/botStatus.json';
-import { globalConfigs } from '../../data/globalProps';
+import { getHostName, globalConfigs, remoteStartup } from '../../data/globalProps';
 import { CommandTags, Command } from '../Commons';
 
 const tags = new CommandTags().add('PAPA');
@@ -13,9 +12,16 @@ const command = new Command('papa-mantenimiento', tags)
 	)
 	.setExecution(async message => {
 		const { channel, user } = message;
-		const sent = await channel.send({ content: `**Host** \`${host}\`\n**ID de InstProc** \`${globalConfigs.startupTime}\`\n**Estado** \`[${globalConfigs.maintenance.length?'PAUSADO':'OPERANDO'}]\``});
+		const sent = await channel.send({
+			content: [
+				`**Host** \`${getHostName()}\``,
+				`**Entorno** \`${remoteStartup ? 'PRODUCCIÓN' : 'DESARROLLO'}\``,
+				`**ID de InstProc** \`${globalConfigs.startupTime}\``,
+				`**Estado** \`[${globalConfigs.maintenance.length?'PAUSADO':'OPERANDO'}]\``,
+			].join('\n'),
+		});
 
-		const reactions = (globalConfigs.maintenance.length)?[ '🌀' ]:[ '💤','👁️' ];
+		const reactions = (globalConfigs.maintenance.length)?[ '🌀' ]:[ '💤', '👁️' ];
 		Promise.all(reactions.map(reaction => sent.react(reaction)));
 		const filter = (rc, u) => reactions.includes(rc.emoji.name) && user.id === u.id;
 		const collector = sent.createReactionCollector({ filter: filter, max: 1, time: 1000 * 30 });

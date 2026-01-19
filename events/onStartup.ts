@@ -1,4 +1,4 @@
-import { Collection, GuildTextBasedChannel, REST, RESTPostAPIApplicationCommandsJSONBody, RESTPostAPIChatInputApplicationCommandsJSONBody } from 'discord.js';
+import { Client, Collection, GuildTextBasedChannel, REST, RESTPostAPIApplicationCommandsJSONBody, RESTPostAPIChatInputApplicationCommandsJSONBody } from 'discord.js';
 import { Routes } from 'discord-api-types/v9';
 
 import { puré, registerCommands } from '../core/commandInit';
@@ -25,7 +25,7 @@ import { join } from 'path';
 import chalk from 'chalk';
 
 import { setupGuildRateKeeper, fetchAllGuildMembers } from '../utils/guildratekeeper';
-import { discordToken, envPath, globalConfigs, noDataBase, prefixes, remoteStartup } from '../data/globalProps';
+import { discordToken, envPath, getHostName, globalConfigs, noDataBase, prefixes, remoteStartup, resolveHost } from '../data/globalProps';
 
 import botStatus from '../data/botStatus.json';
 import serverIds from '../data/serverIds.json';
@@ -37,9 +37,18 @@ const logOptions = {
 	feedSuscriptions: false,
 };
 
-export async function onStartup(client: import('discord.js').Client) {
-	const confirm = () => console.log(chalk.green('Hecho.'));
+const confirm = () => console.log(chalk.green('Hecho.'));
+
+export async function onStartup(client: Client) {
 	globalConfigs.maintenance = '1';
+
+	console.log(chalk.cyan('Obteniendo nombre de host...'));
+	await resolveHost({
+		fallback: 'Desconocido',
+		onSuccess: confirm,
+		onFailure: () => console.log(chalk.yellowBright('No se pudo obtener el nombre de host. Se estableció un nombre por defecto')),
+	});
+	console.log(chalk.gray(`Hostname: ${getHostName()}`));
 
 	console.log(chalk.bold.magentaBright('Procesando archivos de comando...'));
 	const commands = await fetchCommandsFromFiles();
@@ -47,9 +56,9 @@ export async function onStartup(client: import('discord.js').Client) {
 	confirm();
 
 	if(remoteStartup)
-		console.log(chalk.redBright.bold('Se inicializará para un entorno de producción'));
+		console.log(chalk.redBright.bold('Se inicializará para un entorno de producción.'));
 	else
-		console.log(chalk.cyanBright.bold('Se inicializará para un entorno de desarrollo'));
+		console.log(chalk.cyanBright.bold('Se inicializará para un entorno de desarrollo.'));
 
 	console.log(chalk.magenta('Obteniendo miembros de servidores de Discord...'));
 	setupGuildRateKeeper({ client });
@@ -82,11 +91,11 @@ export async function onStartup(client: import('discord.js').Client) {
 		logOptions.slash && console.log(`Comandos registrados + hourai (${dedicatedServerId} :: ${client.guilds.cache.get(dedicatedServerId)?.name}):`, restGlobal);
 		confirm();
 	} catch(error) {
-		console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos Slash y/o Contextuales'));
+		console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos Slash y/o Contextuales.'));
 		console.error(error);
 	}
 
-	console.log(chalk.cyan('Semilla y horario calculados'));
+	console.log(chalk.cyan('Calculando semilla y horario (compatibilidad)...'));
 	const currentTime = Date.now();
 	globalConfigs.startupTime = currentTime;
 	globalConfigs.lechitauses = currentTime;
@@ -128,7 +137,7 @@ export async function onStartup(client: import('discord.js').Client) {
 			BooruTags.find({}),
 		]);
 
-		console.log(chalk.gray('Facilitando prefijos'));
+		console.log(chalk.gray('Facilitando prefijos...'));
 		prefixPairs.forEach(pp => {
 			prefixes[pp.guildId] = {
 				raw: pp.pure.raw,
@@ -208,20 +217,20 @@ export async function onStartup(client: import('discord.js').Client) {
 	}
 
 	console.log(chalk.rgb(158,114,214)('Registrando fuentes'));
-	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'Alice-Regular.ttf'),             'headline');
-	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'cuyabra.otf'),                   'cuyabra');
-	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'teen bd.ttf'),                   'cardname');
-	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'kirsty rg.otf'),                 'cardclass');
-	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'asap-condensed.semichalk.bold.ttf'),   'cardbody');
-	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'BebasNeue_1.otf'),               'bebas');
-	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'DINPro-Cond.otf'),               'dinpro');
+	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'Alice-Regular.ttf'),                 'headline');
+	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'cuyabra.otf'),                       'cuyabra');
+	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'teen bd.ttf'),                       'cardname');
+	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'kirsty rg.otf'),                     'cardclass');
+	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'asap-condensed.semichalk.bold.ttf'), 'cardbody');
+	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'BebasNeue_1.otf'),                   'bebas');
+	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'DINPro-Cond.otf'),                   'dinpro');
 
 	globalConfigs.maintenance = '';
 	console.log(chalk.greenBright.bold('Bot conectado y funcionando'));
 	auditSystem('Bot conectado y funcionando',
-		{ name: 'Host',             value: botStatus.host,                             inline: true },
-		{ name: 'N. de versión',    value: botStatus.version.number,                   inline: true },
-		{ name: 'Fecha',            value: `<t:${getUnixTime(new Date(Date.now()))}:f>`,    inline: true },
+		{ name: 'Host',             value: getHostName(),                               inline: true },
+		{ name: 'N. de versión',    value: botStatus.version.number,                     inline: true },
+		{ name: 'Fecha',            value: `<t:${getUnixTime(new Date(Date.now()))}:f>`, inline: true },
 	);
 
 	await setupGuildFeedUpdateStack(client);
