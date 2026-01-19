@@ -4,7 +4,7 @@ import { tenshiColor } from '../../data/globalProps';
 import { Locales, Translator } from '../../i18n';
 import { compressId } from '../../func';
 
-const tags = new CommandTags().add('MOD');
+const tags = new CommandTags().add('MOD', 'MAINTENANCE');
 
 const permissions = new CommandPermissions()
 	.requireAnyOf([ 'ManageGuild' ]);
