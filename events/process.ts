@@ -47,6 +47,15 @@ export async function onUncaughtException(err: Error, origin: NodeJS.UncaughtExc
 }
 
 export async function onUnhandledRejection(reason: unknown, promise: Promise<unknown>) {
+	if(reason instanceof mongoose.mongo.MongoNetworkError) {
+		//No morirse por una simple desconexión
+
+		warn('Hubo un problema de conexión al contactar el servidor de MongoDB', reason);
+		warn('Anatomía del error:', { ...reason });
+
+		return;
+	}
+
 	const err = new UnhandledRejectionError(new Error(`${reason}`), `${reason}`);
 
 	if(err.message.includes('ECONNRESET') || err.message.includes('terminated')) {
