@@ -67,6 +67,10 @@ export class Booru {
 			'q': 'index',
 			'json': '1',
 		},
+		headers: {
+			'Referer': 'https://papitaconpure.github.io',
+			'Accept': 'application/json',
+		},
 	});
 
 	static readonly TAGS_API: AxiosInstance = axios.create({
@@ -77,6 +81,10 @@ export class Booru {
 			's': 'tag',
 			'q': 'index',
 			'json': '1',
+		},
+		headers: {
+			'Referer': 'https://papitaconpure.github.io',
+			'Accept': 'application/json',
 		},
 	});
 
