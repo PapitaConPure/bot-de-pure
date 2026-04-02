@@ -204,8 +204,7 @@ export function addGuildToFeedUpdateStack(guild: Guild): number {
 	if(!Array.isArray(globalConfigs.feedGuildChunks))
 		return -1;
 
-    /**@type {Array<GuildFeedChunk>}*/
-	const guildChunks: Array<GuildFeedChunk> = globalConfigs.feedGuildChunks;
+	const guildChunks: GuildFeedChunk[] = globalConfigs.feedGuildChunks;
 	const chunkAmount = guildChunks.length;
 
     //Retornar temprano si la guild ya está integrada al stack
