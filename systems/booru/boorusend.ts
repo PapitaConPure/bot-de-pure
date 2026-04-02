@@ -273,15 +273,12 @@ export async function formatBooruPostMessage(booru: Booru, post: Post, data: Pos
 	if(!shouldBlock) {
 		let previewUrl;
 		debug('El contenido no fue bloqueado. Se agregará al mensaje a continuación');
-		if(/\.(mp4|webm|webp)/.test(post.fileUrl)) {
-			debug('El contenido es un video');
-			previewUrl = post.fileUrl || post.previewUrl || post.sampleUrl;
-		} else if(/\.gif/.test(post.fileUrl)) {
-			debug('El contenido es un GIF');
-			previewUrl = post.fileUrl || post.previewUrl || post.sampleUrl;
+		if(/\.(mp4|webm|webp|gif)/.test(post.fileUrl)) {
+			debug('El contenido es un video o GIF');
+			previewUrl = post.previewUrl || post.fileUrl || post.sampleUrl; //Revertir a `post.fileUrl || post.previewUrl || post.sampleUrl` cuando se solucione el problema
 		} else {
 			debug('El contenido es probablemente una imagen estática');
-			previewUrl = post.sampleUrl || post.fileUrl || post.previewUrl;
+			previewUrl = post.previewUrl || post.sampleUrl || post.fileUrl; //Revertir a `post.sampleUrl || post.fileUrl || post.previewUrl` cuando se solucione el problema
 		}
 		container.addMediaGalleryComponents(mediaGallery =>
 			mediaGallery.addItems(mediaGalleryItem =>
