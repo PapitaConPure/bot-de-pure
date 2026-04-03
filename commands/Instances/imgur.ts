@@ -1,15 +1,19 @@
-import { ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonStyle, EmbedBuilder, LabelBuilder, ActionRowBuilder } from 'discord.js';
+import { ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonStyle, EmbedBuilder, LabelBuilder, ActionRowBuilder, Colors } from 'discord.js';
 import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons/';
-import ImgurUser from '../../models/imgurUsers.js';
+import { ImgurClient, ImgurImagePayload } from '../../utils/imgur';
+import ImgurUser from '../../models/imgurUsers';
 import { envPath } from '../../data/globalProps';
 import { Translator } from '../../i18n';
+
+import Logger from '../../utils/logs';
+const { error } = Logger('WARN', '/imgur');
 
 const options = new CommandOptions()
 	.addParam('enlaces', 'TEXT', 'para indicar enlaces de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
 	.addParam('imagens', 'IMAGE', 'para indicar archivos de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
 	.addFlag('r', [ 'registrar', 'register' ], 'para registrar una ID de cliente y evitar el límite global');
 
-const tags = new CommandTags().add('COMMON', 'MAINTENANCE');
+const tags = new CommandTags().add('COMMON');
 
 const command = new Command('imgur', tags)
 	.setAliases(
@@ -75,13 +79,13 @@ const command = new Command('imgur', tags)
 
 		const imgurUser = (await ImgurUser.findOne({ userId: request.userId })) || new ImgurUser({ userId: request.userId });
 		const clientId = imgurUser.clientId ?? require(envPath).imgurclientid;
-		//FIXME: const client = new ImgurClient({ clientId });
+		const client = new ImgurClient(clientId);
 
 		const directUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(u => u);
 		const attachments = CommandOptionSolver.asAttachments(args.parsePolyParamSync('imagens')).filter(a => a);
 		const attachmentUrls = attachments.map(attachment => attachment.url);
 
-		const uploads: unknown[] = [
+		const uploads: ImgurImagePayload[] = [
 			...directUrls.map(url => ({ type: 'url' as const, image: url })),
 			...attachmentUrls.map(url => ({ type: 'url' as const, image: url })),
 		];
@@ -95,24 +99,26 @@ const command = new Command('imgur', tags)
 		const successes = [];
 		const failures = [];
 		for(const upload of uploads) {
-			//FIXME: const image = await client.upload(upload);
+			const result = await client.upload(upload);
 
-			/*if(image?.success)
+			if(result.success === true) {
 				successes.push(new EmbedBuilder()
 					.setTitle(translator.getText('imgurUploadSuccessTitle'))
 					.setColor(Colors.Green)
-					.setURL(image.data.link)
-					.setDescription(image.data.link)
-					.setImage(image.data.link));
-			else
+					.setURL(result.data.link)
+					.setDescription(result.data.link)
+					.setImage(result.data.link));
+			} else {
+				error(result.error);
 				failures.push(new EmbedBuilder()
 					.setTitle(translator.getText('imgurUploadErrorTitle', count))
 					.setDescription(translator.getText('imgurUploadErrorDesc'))
 					.setColor(Colors.Red)
 					.addFields({
-						name: `Error ${image.status}`,
-						value: `\`\`\`\n${image.data}\n\`\`\``,
-					}));*/
+						name: `Error ${result.status}`,
+						value: `\`\`\`\n${result.statusText}\n\`\`\``,
+					}));
+			}
 
 			count++;
 		}
