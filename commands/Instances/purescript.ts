@@ -6,7 +6,7 @@ import { ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { p_pure } from '../../utils/prefixes';
 import { tenshiColor } from '../../data/globalProps';
 import { makeButtonRowBuilder } from '../../utils/tsCasts';
-import axios from 'axios';
+import { fetchExt } from '../../utils/fetchext';
 
 export const psEditorButton = new ButtonBuilder()
 	.setURL('https://papitaconpure.github.io/ps/')
@@ -25,19 +25,12 @@ async function getScriptString(args: import('../Commons/cmdOpts').CommandOptionS
 
 	if(file && file.name.toLowerCase().endsWith('.tuber')) {
 		const importCode = async () => {
-			const response = await axios.get(file.url);
-
-			if(response.status !== 200)
-				return {
-					status: response.status,
-					statusText: response.statusText,
-					result: /**@type {null}*/(null),
-				};
+			const fetchResult = await fetchExt(file.url, { type: 'text' });
 
 			return {
-				status: 200,
-				statusText: 'OK',
-				result: /**@type {string}*/(response.data),
+				status: fetchResult.response.status,
+				statusText: fetchResult.response.statusText,
+				result: fetchResult.success ? fetchResult.data : null,
 			};
 		};
 

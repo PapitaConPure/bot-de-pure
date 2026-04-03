@@ -1,6 +1,6 @@
 import { EmbedBuilder, Colors, AttachmentBuilder } from 'discord.js';
 import { CommandTags, Command } from '../Commons/';
-import axios from 'axios';
+import { fetchExt } from '../../utils/fetchext';
 
 const tags = new CommandTags().add('COMMON');
 
@@ -8,25 +8,41 @@ const command = new Command('café', tags)
 	.setAliases('cafe', 'cafecito', 'coffee', 'cawfee')
 	.setLongDescription('Muestra imágenes de café. API: https://coffee.alexflipnote.dev')
 	.setExecution(async request => {
-		const fetched = await axios.get('https://coffee.alexflipnote.dev/random', { responseType: 'arraybuffer' });
+		const fetchResult = await fetchExt('https://coffee.alexflipnote.dev/random', { type: 'buffer' });
+
+		if(!fetchResult.success) {
+			return request.reply({
+				embeds: [
+					new EmbedBuilder()
+						.setColor(Colors.Orange)
+						.setDescription('Problema de conexión a tercero'),
+				],
+			});
+		}
+
+		if(!fetchResult.response.ok) {
+			return request.reply({
+				embeds: [
+					new EmbedBuilder()
+						.setColor(Colors.Red)
+						.setDescription('Error de solicitud a tercero'),
+				],
+			});
+		}
+
+		const image = fetchResult.data;
 
 		const replyBody = {
-			embeds: [ new EmbedBuilder() ],
-			files: null,
+			embeds: [
+				new EmbedBuilder()
+					.setColor(0x6a4928)
+					.setTitle('Café ☕')
+					.setImage('attachment://cawfee.png'),
+			],
+			files: [
+				new AttachmentBuilder(image, { name: 'cawfee.png' })
+			],
 		};
-
-		if(fetched.status === 200) {
-			const image = fetched.data;
-			replyBody.embeds[0]
-				.setColor(0x6a4928)
-				.setTitle('Café ☕')
-				.setImage('attachment://cawfee.png');
-			replyBody.files = [ new AttachmentBuilder(image, { name: 'cawfee.png' }) ];
-		} else {
-			replyBody.embeds[0]
-				.setColor(Colors.Red)
-				.setDescription('Error de solicitud a tercero');
-		}
 
 		return request.reply(replyBody);
 	});

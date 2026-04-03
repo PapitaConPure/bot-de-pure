@@ -13,8 +13,8 @@ import { Input } from '../../systems/ps/v1.1/interpreter/inputReader.js';
 import { getWikiPageComponentsV2 } from '../../systems/others/wiki.js';
 import { fetchGuildMembers } from '../../utils/guildratekeeper.js';
 import { Translator } from '../../i18n';
-import axios from 'axios';
 import { ComplexCommandRequest } from '../Commons/typings.js';
+import { fetchExt } from '../../utils/fetchext';
 
 const pageMax = 10;
 const filters = {
@@ -497,17 +497,17 @@ async function createTuber(tuberId: string, gcfg: GuildConfigDocument, isPureScr
 	const contentResult = await (async () => {
 		const hasCodeImport = messageFiles[0]?.name.toLowerCase().endsWith('.tuber');
 		const importCode = async () => {
-			const response = await axios.get(messageFiles[0].url);
+			const fetchResult = await fetchExt(messageFiles[0].url, { type: 'text' });
 
-			if(response.status !== 200)
+			if(fetchResult.success === false)
 				return {
-					error: response.statusText,
-					result: /**@type {null}*/(null),
+					error: `${fetchResult.error}`,
+					result: null as null,
 				};
 
 			return {
-				error: /**@type {null}*/(null),
-				result: /**@type {string}*/(response.data),
+				error: null as null,
+				result: fetchResult.data,
 			};
 		};
 

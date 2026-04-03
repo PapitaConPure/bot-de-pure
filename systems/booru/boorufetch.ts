@@ -2,7 +2,7 @@ import BooruTags from '../../models/boorutags';
 import { shuffleArray, decodeEntities } from '../../func';
 import { noDataBase } from '../../data/globalProps';
 import { ValuesOf } from 'types';
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import { fetchExt, FetchResult } from '../../utils/fetchext';
 
 export const PostRating = ({
 	General: 'general',
@@ -34,6 +34,37 @@ export interface APIPostData {
 
 export type PostResolvable = Post | APIPostData;
 
+/**@satisfies {Record<string, number>}*/
+export const TagTypes = ({
+	GENERAL:    0,
+	ARTIST:     1,
+	UNKNOWN:    2,
+	COPYRIGHT:  3,
+	CHARACTER:  4,
+	METADATA:   5,
+	DEPRECATED: 6,
+}) as const;
+export type TagType = ValuesOf<typeof TagTypes>;
+
+interface APITagData {
+	id: number;
+	name: string;
+	count: number;
+	type: TagType | number;
+	ambiguous?: boolean;
+}
+
+interface TagData {
+	id: number;
+	name: string;
+	count: number;
+	type: TagType | number;
+	ambiguous?: boolean;
+	fetchTimestamp: Date;
+}
+
+export type TagResolvable = Tag | TagData | APITagData;
+
 export interface Credentials {
 	apiKey: string;
 	userId: string;
@@ -54,38 +85,24 @@ interface BooruSearchOptions {
 
 /**@class Representa una conexión a un sitio Booru.*/
 export class Booru {
-	static readonly API_URI:       string = 'https://gelbooru.com/index.php';
-	static readonly API_POSTS_URL: string = 'https://gelbooru.com/index.php';
-	static readonly API_TAGS_URL:  string = 'https://gelbooru.com/index.php?page=dapi&s=tag&q=index';
+	static readonly API_URI       = 'https://gelbooru.com/index.php';
+	static readonly API_POSTS_URL = 'https://gelbooru.com/index.php';
+	static readonly API_TAGS_URL  = 'https://gelbooru.com/index.php?page=dapi&s=tag&q=index';
 
-	static readonly POSTS_API: AxiosInstance = axios.create({
-		baseURL: Booru.API_URI,
-		timeout: 10000,
-		params: {
-			'page': 'dapi',
-			's': 'post',
-			'q': 'index',
-			'json': '1',
-		},
-		headers: {
-			'Referer': 'https://papitaconpure.github.io',
-			'Accept': 'application/json',
-		},
+	static readonly POSTS_API = Booru.#createBooruEndpoint({
+		//timeout: 10000,
+		page: 'dapi',
+		s: 'post',
+		q: 'index',
+		json: '1',
 	});
 
-	static readonly TAGS_API: AxiosInstance = axios.create({
-		baseURL: Booru.API_URI,
-		timeout: 10000,
-		params: {
-			'page': 'dapi',
-			's': 'tag',
-			'q': 'index',
-			'json': '1',
-		},
-		headers: {
-			'Referer': 'https://papitaconpure.github.io',
-			'Accept': 'application/json',
-		},
+	static readonly TAGS_API = Booru.#createBooruEndpoint({
+		//timeout: 10000,
+		page: 'dapi',
+		s: 'tag',
+		q: 'index',
+		json: '1',
 	});
 
 	static readonly TAGS_SEMAPHORE_MAX: number  = 100_000_000;
@@ -101,6 +118,30 @@ export class Booru {
 	/**@param credentials Credenciales para autorizarse en la API*/
 	constructor(credentials: Credentials | null) {
 		this.setCredentials(credentials);
+	}
+
+	static #createBooruEndpoint(defaultParams: Record<string, string>) {
+		const endpointURL = new URL(Booru.API_URI);
+
+		for(const [ name, value ] of Object.entries(defaultParams))
+			endpointURL.searchParams.set(name, value);
+
+		return {
+			async request<TSchema>(params: Record<string, unknown>) {
+				const searchURL = new URL(endpointURL);
+
+				for(const [ name, value ] of Object.entries(params))
+					searchURL.searchParams.set(name, `${value}`);
+
+				return fetchExt<TSchema>(searchURL, {
+					type: 'json',
+					init: {
+						referrer: 'https://papitaconpure.github.io',
+						signal: AbortSignal.timeout(10_000),
+					},
+				});
+			},
+		};
 	}
 
 	/**
@@ -121,20 +162,20 @@ export class Booru {
 	 * @throws {BooruFetchError}
 	 * @throws {BooruUnknownPostError}
 	 */
-	static#expectPosts(response: AxiosResponse, options: ExpectAPIFetchOptions = {}): PostResolvable[] {
+	static #expectPosts(fetchResult: FetchResult<{ post: APIPostData[] }>, options: ExpectAPIFetchOptions = {}): PostResolvable[] {
 		const { dontThrowOnEmptyFetch = false } = options;
 
-		if(response.status !== 200)
-			throw new BooruFetchError(`Booru API Posts fetch failed: ${response.status} ${response.statusText ?? 'Unknown Error'}`);
+		if(fetchResult.success === false)
+			throw new BooruFetchError(`Booru API Posts fetch failed: ${fetchResult.response.status} ${fetchResult.response.statusText ?? 'Unknown Error'}`);
 
-		if(!Array.isArray(response.data?.post)) {
+		if(!Array.isArray(fetchResult.data?.post)) {
 			if(dontThrowOnEmptyFetch)
 				return [];
 			else
 				throw new BooruUnknownPostError(`Couldn't fetch any Posts from the Booru API`);
 		}
 
-		return response.data.post;
+		return fetchResult.data.post;
 	}
 
 	/**
@@ -142,23 +183,23 @@ export class Booru {
 	 * @throws {BooruFetchError}
 	 * @throws {BooruUnknownTagError}
 	 */
-	static#expectTags(response: AxiosResponse, options: ExpectAPIFetchOptions & ExpectAPITagFetchOptions = {}): TagResolvable[] {
+	static #expectTags(fetchResult: FetchResult<{ tag: APITagData[] }>, options: ExpectAPIFetchOptions & ExpectAPITagFetchOptions = {}): TagResolvable[] {
 		const {
 			dontThrowOnEmptyFetch = false,
 			tags = null,
 		} = options;
 
-		if(response.status !== 200)
-			throw new BooruFetchError(`Booru API Tags fetch failed: ${response.statusText ?? 'Unknown Error'}`);
+		if(fetchResult.success === false)
+			throw new BooruFetchError(`Booru API Tags fetch failed: ${fetchResult.response.status} ${fetchResult.response.statusText ?? 'Unknown Error'}`);
 
-		if(!Array.isArray(response.data?.tag)) {
+		if(!Array.isArray(fetchResult.data?.tag)) {
 			if(dontThrowOnEmptyFetch)
 				return [];
 			else
 				throw new BooruUnknownTagError(`Couldn't fetch any Tags from the Booru API${tags ? `. Tried to fetch: ${tags}` : ''}`);
 		}
 
-		return response.data.tag;
+		return fetchResult.data.tag;
 	}
 
 	/**
@@ -176,13 +217,11 @@ export class Booru {
 		if(Array.isArray(tags))
 			tags = tags.join(' ');
 
-		const response = await Booru.POSTS_API.get('', {
-			params: {
-				'api_key': apiKey,
-				'user_id': userId,
-				'limit': limit,
-				'tags': tags,
-			},
+		const response = await Booru.POSTS_API.request<{ post: APIPostData[] }>({
+			'api_key': apiKey,
+			'user_id': userId,
+			'limit': limit,
+			'tags': tags,
 		});
 		const posts = Booru.#expectPosts(response, { dontThrowOnEmptyFetch: true });
 		if(random) shuffleArray(posts);
@@ -201,12 +240,10 @@ export class Booru {
 		if(![ 'string', 'number' ].includes(typeof postId))
 			throw TypeError('Invalid Post ID');
 
-		const response = await Booru.POSTS_API.get('', {
-			params: {
-				'api_key': apiKey,
-				'user_id': userId,
-				'id': postId,
-			},
+		const response = await Booru.POSTS_API.request<{ post: APIPostData[] }>({
+			'api_key': apiKey,
+			'user_id': userId,
+			'id': postId,
 		});
 		const [ post ] = Booru.#expectPosts(response);
 		return new Post(post);
@@ -224,16 +261,16 @@ export class Booru {
 		if(typeof postUrl !== 'string')
 			throw TypeError('Invalid Post URL');
 
-		postUrl = postUrl
-			.replace(
-				'page=post&s=view',
-				'page=dapi&s=post&q=index&json=1')
-			.replace(
-				/&tags=[^&]+/,
-				'');
-		postUrl = `${postUrl}&api_key=${apiKey}&user_id=${userId}`;
+		const url = new URL(postUrl);
+		url.searchParams.set('page', 'dapi');
+		url.searchParams.set('s', 'post');
+		url.searchParams.set('q', 'index');
+		url.searchParams.set('json', '1');
+		url.searchParams.delete('tags');
+		url.searchParams.set('api_key', apiKey);
+		url.searchParams.set('user_id', userId);
 
-		const response = await axios.get(postUrl);
+		const response = await fetchExt<{ post: APIPostData[] }>(url.toString());
 		const [ post ] = Booru.#expectPosts(response);
 		return new Post(post);
 	}
@@ -302,7 +339,7 @@ export class Booru {
 			.map(decodeEntities)
 			.forEach(tn => {
 				const cachedTag = Booru.tagsCache.get(tn);
-				if(cachedTag && (Date.now() - Booru.TAGS_CACHE_LIFETIME) < (+cachedTag.fetchTimestamp))
+				if(cachedTag && (Date.now() - (+cachedTag.fetchTimestamp)) < Booru.TAGS_CACHE_LIFETIME)
 					cachedTags.push(cachedTag);
 				else
 					uncachedTagNames.push(tn);
@@ -325,12 +362,10 @@ export class Booru {
 
 				for(let i = 0; i < missingTagNames.length; i += 100) {
 					const namesBatch = missingTagNames.slice(i, i + 100).join(' ');
-					const response = await Booru.TAGS_API.get('', {
-						params: {
-							'api_key': apiKey,
-							'user_id': userId,
-							'names': namesBatch,
-						},
+					const response = await Booru.TAGS_API.request<{ tag: APITagData[] }>({
+						'api_key': apiKey,
+						'user_id': userId,
+						'names': namesBatch,
 					});
 					const tags = Booru.#expectTags(response, { tags: namesBatch });
 
@@ -485,30 +520,6 @@ export class Post {
 	}
 }
 
-/**@satisfies {Record<string, number>}*/
-export const TagTypes = ({
-	GENERAL:    0,
-	ARTIST:     1,
-	UNKNOWN:    2,
-	COPYRIGHT:  3,
-	CHARACTER:  4,
-	METADATA:   5,
-	DEPRECATED: 6,
-}) as const;
-
-export type TagType = import('types').ValuesOf<typeof TagTypes>;
-
-interface TagData {
-	id: number;
-	name: string;
-	count: number;
-	type: TagType | number;
-	ambiguous?: boolean;
-	fetchTimestamp: Date;
-}
-
-type TagResolvable = Tag | TagData;
-
 /**@class Representa una tag de {@linkcode Post} de un {@linkcode Booru}.*/
 export class Tag {
 	id: number;
@@ -527,7 +538,7 @@ export class Tag {
 		this.count = data.count;
 		this.type = data.type as TagType;
 		this.ambiguous = !!data.ambiguous;
-		this.fetchTimestamp = data.fetchTimestamp || new Date(Date.now());
+		this.fetchTimestamp = ('fetchTimestamp' in data) ? data.fetchTimestamp : new Date(Date.now());
 	}
 
 	get typeName() {

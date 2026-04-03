@@ -3,8 +3,8 @@ import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Co
 import { Translator } from '../../i18n';
 import { Catbox } from 'node-catbox';
 import { pipeline } from 'stream/promises';
-import axios from 'axios';
 import fs from 'fs';
+import { fetchExt } from '../../utils/fetchext';
 
 const client = new Catbox();
 
@@ -25,13 +25,16 @@ const command = new Command('catbox', tags)
 
 		const imageUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(u => u);
 		const attachments = CommandOptionSolver.asAttachments(args.parsePolyParamSync('imagens')).filter(a => a);
-		const imageStreams = await Promise.all(attachments
-			.map(async attachment => /**@type {ReadableStream}*/((await axios.get(attachment.url, { responseType: 'stream' })).data))
-			.slice(0, 5));
+		const imageStreams: NodeJS.ReadableStream[] = await Promise.all(attachments
+			.slice(0, 5)
+			.map(async attachment => {
+				const fetchResult = await fetchExt(attachment.url, { type: 'nodeStream' });
+				return fetchResult.success ? fetchResult.data : undefined;
+			}));
 
-		const urlUploads = imageUrls.map(url => ({ data: url, type: /**@type {const}*/('url') }));
-		const streamUploads = imageStreams.map(stream => ({ data: stream, type: /**@type {const}*/('stream') }));
-		const uploads = [
+		const urlUploads: UrlPayload[] = imageUrls.map(url => ({ type: 'url', image: url }));
+		const streamUploads: StreamPayload[] = imageStreams.map(stream => ({ type: 'stream', image: stream }));
+		const uploads: Payload[] = [
 			...urlUploads,
 			...streamUploads,
 		];
@@ -47,24 +50,24 @@ const command = new Command('catbox', tags)
 		for(const upload of streamUploads) {
 			const filePath = `./temp_${request.id}_${count++}.png`;
 
-			const filePathResult: Promise<string | null> = (pipeline(upload.data, fs.createWriteStream(filePath))
+			const filePathResult: Promise<string | null> = pipeline(upload.image, fs.createWriteStream(filePath))
 				.then(() => filePath)
-				.catch(() => null));
+				.catch(() => null);
 
 			filePaths.push(filePathResult);
 		}
 
-		const readyFilePaths = await Promise.all(filePaths);
-		const filePathsPendingForDeletion = readyFilePaths.filter(p => p);
+		const readyFilePaths: string[] = await Promise.all(filePaths);
+		const filePathsPendingForDeletion: string[] = readyFilePaths.filter(p => p);
 
-		const successes = [];
-		const failures = [];
+		const successes: EmbedBuilder[] = [];
+		const failures: EmbedBuilder[] = [];
 		let imageUrl: string;
 		count = 1;
 		for(const upload of uploads) {
 			try {
 				if(upload.type === 'url') {
-					const url = upload.data;
+					const url = upload.image;
 					imageUrl = await client.uploadURL({ url });
 				} else {
 					const path = readyFilePaths.shift();
@@ -98,6 +101,15 @@ const command = new Command('catbox', tags)
 	});
 
 export default command;
+
+interface BasePayload<TType extends 'url' | 'stream', TImage> {
+	type: TType;
+	image: TImage;
+}
+
+type UrlPayload = BasePayload<'url', string>;
+type StreamPayload = BasePayload<'stream', NodeJS.ReadableStream>;
+type Payload = UrlPayload | StreamPayload;
 
 class FileStreamError extends Error {
 	constructor(message: string) {

@@ -10,7 +10,7 @@ import { colorsRow } from '../../data/sakiProps.js';
 import { subdivideArray, isBoosting, stringHexToNumber } from '../../func.js';
 import { makeStringSelectMenuRowBuilder, makeButtonRowBuilder, makeTextInputRowBuilder } from '../../utils/tsCasts.js';
 import { SakiDocument } from '../../models/saki';
-import axios from 'axios';
+import { fetchExt } from '../../utils/fetchext';
 
 type RoleData = {
 	id: string;
@@ -703,14 +703,13 @@ const command = new Command('roles', flags)
 				roleEmoteUrl = `https://i.imgur.com/${roleEmoteUrl}.png`;
 			}
 
-			try {
-				const response = await axios.get(roleEmoteUrl,  { responseType: 'arraybuffer' });
-				const roleEmoteBuffer = Buffer.from(response?.data, 'utf-8');
+			const fetchResult = await fetchExt(roleEmoteUrl, { type: 'buffer' });
+			if(fetchResult.success) {
 				editStack.push(
-					customRole.edit({ icon: roleEmoteBuffer })
+					customRole.edit({ icon: fetchResult.data })
 						.catch(() => replyStack.push('⚠️ No se pudo actualizar el ícono del rol. Puede que el servidor sea de nivel muy bajo o no hayas proporcionado un enlace directo a la imagen'))
 				);
-			} catch {
+			} else {
 				replyStack.push('⚠️ No se pudo actualizar el ícono del rol. Puede que no hayas proporcionado un enlace directo a la imagen o el enlace sea inválido');
 			}
 		}

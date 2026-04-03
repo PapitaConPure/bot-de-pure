@@ -1,12 +1,10 @@
-import { ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonStyle, EmbedBuilder, Colors } from 'discord.js';
+import { ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonStyle, EmbedBuilder, Colors, LabelBuilder, ActionRowBuilder } from 'discord.js';
 import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons/';
-import { makeTextInputRowBuilder, makeButtonRowBuilder } from '../../utils/tsCasts.js';
 import ImgurUser from '../../models/imgurUsers.js';
 import { envPath } from '../../data/globalProps';
 import { Translator } from '../../i18n';
 import { ImgurClient } from 'imgur';
 import { Payload } from 'imgur/dist/common/types';
-import axios from 'axios';
 
 const options = new CommandOptions()
 	.addParam('enlaces', 'TEXT', 'para indicar enlaces de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
@@ -58,13 +56,15 @@ const command = new Command('imgur', tags)
 				),
 			];
 
-			const components = [ makeButtonRowBuilder().addComponents(
-				new ButtonBuilder()
-					.setCustomId(`imgur_onButtonRegisterRequest`)
-					.setLabel(translator.getText('buttonRegister'))
-					.setEmoji('1355488586883137697')
-					.setStyle(ButtonStyle.Primary),
-			) ];
+			const components = [
+				new ActionRowBuilder<ButtonBuilder>().addComponents(
+					new ButtonBuilder()
+						.setCustomId(`imgur_onButtonRegisterRequest`)
+						.setLabel(translator.getText('buttonRegister'))
+						.setEmoji('1355488586883137697')
+						.setStyle(ButtonStyle.Primary),
+				),
+			];
 
 			return request.reply({
 				embeds,
@@ -79,15 +79,13 @@ const command = new Command('imgur', tags)
 		const clientId = imgurUser.clientId ?? require(envPath).imgurclientid;
 		const client = new ImgurClient({ clientId });
 
-		const imageUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(u => u);
+		const directUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(u => u);
 		const attachments = CommandOptionSolver.asAttachments(args.parsePolyParamSync('imagens')).filter(a => a);
-		const imageStreams = await Promise.all(attachments
-			.map(async attachment => /**@type {ReadableStream}*/((await axios.get(attachment.url, { responseType: 'stream' })).data))
-			.slice(0, 5));
+		const attachmentUrls = attachments.map(attachment => attachment.url);
 
 		const uploads: Payload[] = [
-			...imageUrls.map(url => ({ image: url, type: 'url' as const })),
-			...imageStreams.map(stream => ({ image: stream, type: 'stream' as const })),
+			...directUrls.map(url => ({ type: 'url' as const, image: url })),
+			...attachmentUrls.map(url => ({ type: 'url' as const, image: url })),
 		];
 
 		if(!uploads.length)
@@ -145,21 +143,22 @@ const command = new Command('imgur', tags)
 	});
 
 function makeRegisterModal(translator: Translator) {
-	const clientIdRow = makeTextInputRowBuilder().addComponents(
-		new TextInputBuilder()
-			.setCustomId('clientId')
-			.setLabel(translator.getText('imgurRegisterModalClientIdLabel'))
-			.setRequired(true)
-			.setMinLength(8)
-			.setMaxLength(32)
-			.setStyle(TextInputStyle.Short)
-			.setPlaceholder('XXXXXXXXXXXXXXX'),
-	);
+	const clientIdLabel = new LabelBuilder()
+		.setLabel(translator.getText('imgurRegisterModalClientIdLabel'))
+		.setTextInputComponent(
+			new TextInputBuilder()
+				.setCustomId('clientId')
+				.setRequired(true)
+				.setMinLength(8)
+				.setMaxLength(32)
+				.setStyle(TextInputStyle.Short)
+				.setPlaceholder('XXXXXXXXXXXXXXX')
+		);
 
 	const modal = new ModalBuilder()
 		.setCustomId('imgur_onRegisterRequest')
 		.setTitle(translator.getText('imgurRegisterModalTitle'))
-		.addComponents(clientIdRow);
+		.addLabelComponents(clientIdLabel);
 
 	return modal;
 }
