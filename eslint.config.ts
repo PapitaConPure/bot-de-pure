@@ -127,6 +127,9 @@ export default defineConfig([
 					'interface': {
 						'after': true,
 					},
+					'static': {
+						'after': true,
+					},
 				},
 			} ],
 			'@stylistic/eol-last': 'error',
