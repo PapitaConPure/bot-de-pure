@@ -3,7 +3,6 @@ import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Co
 import ImgurUser from '../../models/imgurUsers.js';
 import { envPath } from '../../data/globalProps';
 import { Translator } from '../../i18n';
-import { ImgurClient } from 'imgur';
 import { Payload } from 'imgur/dist/common/types';
 
 const options = new CommandOptions()
@@ -11,7 +10,7 @@ const options = new CommandOptions()
 	.addParam('imagens', 'IMAGE', 'para indicar archivos de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
 	.addFlag('r', [ 'registrar', 'register' ], 'para registrar una ID de cliente y evitar el límite global');
 
-const tags = new CommandTags().add('COMMON');
+const tags = new CommandTags().add('COMMON', 'MAINTENANCE');
 
 const command = new Command('imgur', tags)
 	.setAliases(
@@ -77,7 +76,7 @@ const command = new Command('imgur', tags)
 
 		const imgurUser = (await ImgurUser.findOne({ userId: request.userId })) || new ImgurUser({ userId: request.userId });
 		const clientId = imgurUser.clientId ?? require(envPath).imgurclientid;
-		const client = new ImgurClient({ clientId });
+		//FIXME: const client = new ImgurClient({ clientId });
 
 		const directUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(u => u);
 		const attachments = CommandOptionSolver.asAttachments(args.parsePolyParamSync('imagens')).filter(a => a);
@@ -97,9 +96,9 @@ const command = new Command('imgur', tags)
 		const successes = [];
 		const failures = [];
 		for(const upload of uploads) {
-			const image = await client.upload(upload);
+			//FIXME: const image = await client.upload(upload);
 
-			if(image?.success)
+			/*if(image?.success)
 				successes.push(new EmbedBuilder()
 					.setTitle(translator.getText('imgurUploadSuccessTitle'))
 					.setColor(Colors.Green)
@@ -114,7 +113,7 @@ const command = new Command('imgur', tags)
 					.addFields({
 						name: `Error ${image.status}`,
 						value: `\`\`\`\n${image.data}\n\`\`\``,
-					}));
+					}));*/
 
 			count++;
 		}

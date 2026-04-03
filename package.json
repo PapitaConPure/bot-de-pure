@@ -39,7 +39,6 @@
     "discord-player-soundcloud": "^1.0.7",
     "discord.js": "^14.25.1",
     "groq-sdk": "^0.29.0",
-    "imgur": "^2.5.0",
     "minimist": "^1.2.8",
     "mongoose": "^6.13.8",
     "mongoose-int32": "^0.6.0",
