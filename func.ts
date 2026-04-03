@@ -91,12 +91,12 @@ export async function askForRole(miembro: Discord.GuildMember, canal: Discord.Te
 	console.log(concol.orange('El miembro sigue en el servidor'));
 	const hasColor = hasColorRole(miembro);
 
-    //Comprobación constante para ver si el miembro ya tiene roles de colores
+	//Comprobación constante para ver si el miembro ya tiene roles de colores
 	if(hasColor) {
 		console.log(chalk.green(`El miembro ha recibido sus roles básicos.`));
 		canal.send({ content: `Weno **${miembro.user.username}**, ya teni tu rol, q esti bien po <:junky:1107847993484386304>` });
 
-        //Finalizar
+		//Finalizar
 		return setTimeout(finalizarHourai, 1000, miembro, canal);
 	}
 
@@ -145,7 +145,7 @@ export function forceRole(miembro: Discord.GuildMember, canal: Discord.TextChann
 		console.log(chalk.green('El miembro ya tiene los roles básicos.'));
 		canal.send({ content: `Al fin qliao ya teni tu rol. Q esti bien **${miembro.user.username}**, po <:uwu:681935702308552730>` }).catch(() => {});
 
-        //Finalizar
+		//Finalizar
 		return setTimeout(finalizarHourai, 1000, miembro, canal);
 	}
 
@@ -159,14 +159,14 @@ export function forceRole(miembro: Discord.GuildMember, canal: Discord.TextChann
 		const colores = saki.colorsList.map(c => c.roleId);
 		canal.send({
 			content:
-                `**${miembro.user.username}**, cagaste altiro watón fome <:tenshiSmug:1108791369897607219>\n` +
-                `Toma un rol random po <:mayuwu:1107843515385389128> <:hr:797294230463840267>`,
+				`**${miembro.user.username}**, cagaste altiro watón fome <:tenshiSmug:1108791369897607219>\n` +
+				`Toma un rol random po <:mayuwu:1107843515385389128> <:hr:797294230463840267>`,
 			files: [ saki.images.forcecolors ]
 		});
 		miembro.roles.add(colores[Math.floor(Math.random() * 7)]);
 		console.log(chalk.greenBright('Roles forzados.'));
 
-        //Finalizar
+		//Finalizar
 		setTimeout(finalizarHourai, 1000, miembro, canal);
 	} catch(e) {
 		console.log(chalk.red('El miembro ya no tiene ningún rol básico.'));
@@ -222,7 +222,7 @@ export function channelIsBlocked(channel: import('discord.js').GuildTextBasedCha
  * @param {Discord.TextChannel} canal
  */
 export function finalizarHourai(miembro: Discord.GuildMember, canal: Discord.TextChannel) {
-    //Mensaje de fin de bienvenida
+	//Mensaje de fin de bienvenida
 	try {
 		canal.send({
 			content: [
@@ -233,7 +233,7 @@ export function finalizarHourai(miembro: Discord.GuildMember, canal: Discord.Tex
 			].join('\n')
 		});
 
-        //Sugerir p!suicidio con 30% de probabilidad
+		//Sugerir p!suicidio con 30% de probabilidad
 		if(Math.random() < 0.3)
 			setTimeout(() => {
 				canal.send({
@@ -241,7 +241,7 @@ export function finalizarHourai(miembro: Discord.GuildMember, canal: Discord.Tex
 				});
 			}, 1000 * 5);
 
-        //Otorgar rol con 50% de probabilidad
+		//Otorgar rol con 50% de probabilidad
 		const gr = canal.guild.roles.cache;
 		const role50 = gr.find(r => r.name.includes('Rol con 50% de probabilidades de tenerlo'));
 		if(role50 && Math.random() < 0.5)
@@ -261,30 +261,30 @@ export function calculateRealMemberCount(guild: Discord.Guild) {
 }
 
 interface CanvasTextDrawAreaOptions {
-    halign?: Canvas.CanvasTextAlign;
-    valign?: Canvas.CanvasTextBaseline;
-    maxSize?: number;
+	halign?: Canvas.CanvasTextAlign;
+	valign?: Canvas.CanvasTextBaseline;
+	maxSize?: number;
 }
 interface CanvasTextDrawFillOptions {
-    enabled?: boolean;
-    onTop?: boolean;
-    color?: string;
+	enabled?: boolean;
+	onTop?: boolean;
+	color?: string;
 }
 interface CanvasTextDrawStrokeOptions {
-    widthAsFactor?: boolean;
-    width?: number;
-    color?: string;
+	widthAsFactor?: boolean;
+	width?: number;
+	color?: string;
 }
 interface CanvasTextDrawFontOptions {
-    family?: 'headline';
-    size?: number;
-    styles?: Array<'regular' | 'bold' | 'italic' | 'underline'>;
+	family?: 'headline';
+	size?: number;
+	styles?: Array<'regular' | 'bold' | 'italic' | 'underline'>;
 }
 interface CanvasTextDrawOptions {
-    area?: CanvasTextDrawAreaOptions;
-    fill?: CanvasTextDrawFillOptions;
-    stroke?: CanvasTextDrawStrokeOptions;
-    font?: CanvasTextDrawFontOptions;
+	area?: CanvasTextDrawAreaOptions;
+	fill?: CanvasTextDrawFillOptions;
+	stroke?: CanvasTextDrawStrokeOptions;
+	font?: CanvasTextDrawFontOptions;
 }
 /**
  * Dibuja un avatar circular con Node Canvas
@@ -296,7 +296,7 @@ interface CanvasTextDrawOptions {
  * @returns {void}
  */
 export function drawText(ctx: import('@napi-rs/canvas').SKRSContext2D, x: number, y: number, text: string, options: CanvasTextDrawOptions = {}): void {
-    //Parámetros opcionales
+	//Parámetros opcionales
 	options.area ??= {};
 	options.area.halign ??= 'left';
 	options.area.valign ??= 'top';
@@ -352,19 +352,19 @@ export function drawText(ctx: import('@napi-rs/canvas').SKRSContext2D, x: number
 }
 
 interface CanvasAvatarDrawOptions {
-    circleStrokeColor?: string;
-    circleStrokeFactor?: number;
+	circleStrokeColor?: string;
+	circleStrokeFactor?: number;
 }
 export async function drawCircularImage(ctx: import('@napi-rs/canvas').SKRSContext2D, user: Discord.User, xcenter: number, ycenter: number, radius: number, options: CanvasAvatarDrawOptions = {}): Promise<void> {
 	options.circleStrokeColor ??= '#000000';
 	options.circleStrokeFactor ??= 0.02;
 
-    //Fondo
+	//Fondo
 	ctx.fillStyle = '#36393f';
 	ctx.arc(xcenter, ycenter, radius, 0, Math.PI * 2, true);
 	ctx.fill();
 
-    //Foto de perfil
+	//Foto de perfil
 	ctx.strokeStyle = options.circleStrokeColor;
 	ctx.lineWidth = radius * 0.33 * options.circleStrokeFactor;
 	ctx.arc(xcenter, ycenter, radius + ctx.lineWidth, 0, Math.PI * 2, true);
@@ -385,20 +385,20 @@ export async function drawCircularImage(ctx: import('@napi-rs/canvas').SKRSConte
  * @param {Boolean} forceSaki
  */
 export async function dibujarBienvenida(member: Discord.GuildMember, forceSaki: boolean = false) {
-    //Dar bienvenida a un miembro nuevo de un servidor
+	//Dar bienvenida a un miembro nuevo de un servidor
 	const guild = member.guild; //Servidor
 
 	const channel = guild.systemChannel; //Canal de mensajes de sistema
 
-    //#region Comprobación de miembro y servidor
+	//#region Comprobación de miembro y servidor
 	if(guild.systemChannel == null) {
 		console.log(chalk.blue('El servidor no tiene canal de mensajes de sistema.'));
 		guild.fetchOwner().then(ow => ow.user.send({
 			content:
-                '¡Hola, soy Bot de Puré!\n' +
-                `¡Un nuevo miembro, **${member} (${member.user.username} / ${member.id})**, ha entrado a tu servidor **${guild.name}**!\n\n` +
-                '*Si deseas que envíe una bienvenida a los miembros nuevos en lugar de enviarte un mensaje privado, selecciona un canal de mensajes de sistema en tu servidor.*\n' +
-                '-# Nota: Bot de Puré no opera con mensajes privados.'
+				'¡Hola, soy Bot de Puré!\n' +
+				`¡Un nuevo miembro, **${member} (${member.user.username} / ${member.id})**, ha entrado a tu servidor **${guild.name}**!\n\n` +
+				'*Si deseas que envíe una bienvenida a los miembros nuevos en lugar de enviarte un mensaje privado, selecciona un canal de mensajes de sistema en tu servidor.*\n' +
+				'-# Nota: Bot de Puré no opera con mensajes privados.'
 		}));
 		return;
 	}
@@ -407,7 +407,7 @@ export async function dibujarBienvenida(member: Discord.GuildMember, forceSaki: 
 		return;
 
 	console.log(concol.purple`Un usuario ha entrado a ${guild.name}...`);
-    //#endregion
+	//#endregion
 
 	await channel.sendTyping();
 
@@ -426,7 +426,7 @@ export async function drawWelcomeStandard(member: Discord.GuildMember) {
 	const channel = guild.systemChannel;
 
 	try {
-        //Creación de imagen
+		//Creación de imagen
 		const canvas = Canvas.createCanvas(1275, 825);
 		const ctx = canvas.getContext('2d');
 
@@ -436,8 +436,8 @@ export async function drawWelcomeStandard(member: Discord.GuildMember) {
 		]);
 		ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 
-        //#region Texto
-        //#region Propiedades Básicas de texto
+		//#region Texto
+		//#region Propiedades Básicas de texto
 		const strokeFactor = 0.09;
 		const maxSize = canvas.width * 0.9;
 		const vmargin = 15;
@@ -453,31 +453,31 @@ export async function drawWelcomeStandard(member: Discord.GuildMember) {
 			size: 100,
 			styles: [ 'bold' ],
 		};
-        //#endregion
+		//#endregion
 
-        //Nombre del miembro
+		//Nombre del miembro
 		drawText(ctx, canvas.width / 2, vmargin, `${displayName}`, {
 			area: { halign: 'center', valign: 'top', maxSize },
 			stroke: defaultStroke,
 			font: defaultFont,
 		});
 
-        //Complemento encima del Nombre de Servidor
+		//Complemento encima del Nombre de Servidor
 		drawText(ctx, canvas.width / 2, canvas.height - 105 - vmargin, '¡Bienvenid@ a', {
 			area: { halign: 'center', valign: 'bottom', maxSize },
 			stroke: { ...defaultStroke, width: 56 * strokeFactor },
 			font: { ...defaultFont, size: 56 },
 		});
 
-        //Nombre de Servidor
+		//Nombre de Servidor
 		drawText(ctx, canvas.width / 2, canvas.height - vmargin, `${guild.name}!`, {
 			area: { halign: 'center', valign: 'bottom', maxSize },
 			stroke: defaultStroke,
 			font: defaultFont,
 		});
-        //#endregion
+		//#endregion
 
-        //Foto de perfil
+		//Foto de perfil
 		await drawCircularImage(ctx, user, canvas.width / 2, (canvas.height - 56) / 2, 200, { circleStrokeFactor: strokeFactor });
 
 		const imagen = new Discord.AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'bienvenida.webp' });
@@ -486,8 +486,8 @@ export async function drawWelcomeStandard(member: Discord.GuildMember) {
 
 		return channel.send({
 			content:
-                `¡Bienvenido al servidor **${displayName}**!\n` +
-                `-# Ahora hay **${peoplecnt}** usuarios en el server.`
+				`¡Bienvenido al servidor **${displayName}**!\n` +
+				`-# Ahora hay **${peoplecnt}** usuarios en el server.`
 		});
 	} catch(err) {
 		console.log(chalk.redBright.bold('Error de bienvenida genérica'));
@@ -496,7 +496,7 @@ export async function drawWelcomeStandard(member: Discord.GuildMember) {
 }
 
 interface SakiWelcomeDrawOptions {
-    force?: boolean;
+	force?: boolean;
 }
 /**
  *
@@ -515,7 +515,7 @@ export async function drawWelcomeSaki(member: Discord.GuildMember, options: Saki
 	const channel = guild.systemChannel;
 
 	try {
-        //Creación de imagen
+		//Creación de imagen
 		const canvas = Canvas.createCanvas(1366, 768);
 		const ctx = canvas.getContext('2d');
 
@@ -525,8 +525,8 @@ export async function drawWelcomeSaki(member: Discord.GuildMember, options: Saki
 		]);
 		ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 
-        //#region Texto
-        //#region Propiedades Básicas de texto
+		//#region Texto
+		//#region Propiedades Básicas de texto
 		const strokeFactor = 0.09;
 		const maxSize = canvas.width * 0.6;
 		const vmargin = 15;
@@ -542,9 +542,9 @@ export async function drawWelcomeSaki(member: Discord.GuildMember, options: Saki
 			size: 100,
 			styles: [ 'bold' ],
 		};
-        //#endregion
+		//#endregion
 
-        //Nombre del miembro
+		//Nombre del miembro
 		drawText(ctx, canvas.width * 0.5, vmargin, `${displayName}`, {
 			area: { halign: 'center', valign: 'top', maxSize },
 			stroke: defaultStroke,
@@ -553,22 +553,22 @@ export async function drawWelcomeSaki(member: Discord.GuildMember, options: Saki
 
 		const xcenterGuild = canvas.width * 0.5;
 
-        //Complemento encima del Nombre de Servidor
+		//Complemento encima del Nombre de Servidor
 		drawText(ctx, xcenterGuild, canvas.height - 105 - vmargin, '¡Bienvenid@ a', {
 			area: { halign: 'center', valign: 'bottom', maxSize },
 			stroke: defaultStroke,
 			font: { ...defaultFont, size: 56 },
 		});
 
-        //Nombre de Servidor
+		//Nombre de Servidor
 		drawText(ctx, xcenterGuild, canvas.height - vmargin, `${guild.name}!`, {
 			area: { halign: 'center', valign: 'bottom', maxSize },
 			stroke: defaultStroke,
 			font: defaultFont,
 		});
-        //#endregion
+		//#endregion
 
-        //Foto de perfil
+		//Foto de perfil
 		await drawCircularImage(ctx, user, canvas.width * 0.5, (canvas.height - 56) * 0.5, 200, { circleStrokeFactor: strokeFactor * 0.75 });
 
 		const imagen = new Discord.AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'bienvenida.webp' });
@@ -610,11 +610,11 @@ export async function drawWelcomeSaki(member: Discord.GuildMember, options: Saki
  * @returns
  */
 export async function dibujarDespedida(miembro: Discord.GuildMember) {
-    //Dar despedida a ex-miembros de un servidor
+	//Dar despedida a ex-miembros de un servidor
 	const servidor = miembro.guild;
 	const canal = servidor.systemChannel;
 
-    //#region Comprobación de miembro y servidor
+	//#region Comprobación de miembro y servidor
 	if(!canal) {
 		console.log('El servidor no tiene canal de mensajes de sistema.');
 		return;
@@ -626,10 +626,10 @@ export async function dibujarDespedida(miembro: Discord.GuildMember) {
 		return;
 	}
 	canal.sendTyping();
-    //#endregion
+	//#endregion
 
 	try {
-        //#region Creación de imagen
+		//#region Creación de imagen
 		const canvas = Canvas.createCanvas(1500, 900);
 		const ctx = canvas.getContext('2d');
 
@@ -638,16 +638,16 @@ export async function dibujarDespedida(miembro: Discord.GuildMember) {
 			fetchGuildMembers(servidor),
 		]);
 		ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
-        //#endregion
+		//#endregion
 
-        //#region Texto
-        //#region Propiedades de Texto
+		//#region Texto
+		//#region Propiedades de Texto
 		const strokeFactor = 0.09;
 		ctx.fillStyle = '#ffffff';
 		ctx.strokeStyle = '#000000';
-        //#endregion
+		//#endregion
 
-        //#region Nombre del usuario
+		//#region Nombre del usuario
 		ctx.textBaseline = 'bottom';
 		ctx.textAlign = 'center';
 		const xcenter = canvas.width / 2;
@@ -657,12 +657,12 @@ export async function dibujarDespedida(miembro: Discord.GuildMember) {
 		ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
 		ctx.strokeText(Texto, xcenter, canvas.height - 40);
 		ctx.fillText(Texto, xcenter, canvas.height - 40);
-        //#endregion
-        //#endregion
+		//#endregion
+		//#endregion
 
 		await drawCircularImage(ctx, miembro.user, canvas.width / 2, 80 + 200, 200, { circleStrokeFactor: strokeFactor });
 
-        //#region Imagen y Mensaje extra
+		//#region Imagen y Mensaje extra
 		const imagen = new Discord.AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'despedida.webp' });
 		const members = servidor.members.cache;
 		const peoplecnt = members.filter(member => !member.user.bot).size;
@@ -674,8 +674,8 @@ export async function dibujarDespedida(miembro: Discord.GuildMember) {
 			await canal.send({ files: [ imagen ] });
 			await canal.send({
 				content:
-                    'Nooooo po csm, perdimo otro weón <:meguDerp:1107848004775465032>\n' +
-                    `*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
+					'Nooooo po csm, perdimo otro weón <:meguDerp:1107848004775465032>\n' +
+					`*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
 			});
 
 			hourai.save().catch(() => undefined);
@@ -684,7 +684,7 @@ export async function dibujarDespedida(miembro: Discord.GuildMember) {
 			await canal.send({ content: `*Ahora hay **${peoplecnt}** usuarios en el server.*`});
 		}
 
-        //#endregion
+		//#endregion
 		console.log('Despedida finalizada.');
 	} catch(err) {
 		console.log(chalk.redBright.bold('Error de despedida'));
@@ -703,25 +703,25 @@ export function extractUserID(data: string): string {
 }
 
 interface MemberMatch {
-    member: Discord.GuildMember;
-    rawTarget: string;
-    length: number;
-    matchIndex: number;
+	member: Discord.GuildMember;
+	rawTarget: string;
+	length: number;
+	matchIndex: number;
 }
 function memberMatchComparer(a: MemberMatch, b: MemberMatch): number {
-    //Favorecer coincidencia temprana
+	//Favorecer coincidencia temprana
 	if(a.matchIndex < b.matchIndex)
 		return -1;
 	if(a.matchIndex > b.matchIndex)
 		return 1;
 
-    //Favorecer nombre corto
+	//Favorecer nombre corto
 	if(a.length < b.length)
 		return -1;
 	if(a.length > b.length)
 		return 1;
 
-    //Favorecer orden lexicográfico
+	//Favorecer orden lexicográfico
 	if(a.rawTarget < b.rawTarget)
 		return -1;
 	if(a.rawTarget > b.rawTarget)
@@ -806,34 +806,34 @@ export function fetchMember(query: Discord.GuildMember | string, context: FetchU
 		throw new Error('Se requieren la guild actual y el cliente en búsqueda de miembro');
 
 
-    //Prioridad 1: Intentar encontrar por ID
+	//Prioridad 1: Intentar encontrar por ID
 	const allGuilds = client.guilds.cache;
 	const otherGuilds = allGuilds.filter(g => g.id !== thisGuild.id);
 	query = extractUserID(query);
 
 	if(!isNaN(+query)) {
 		return thisGuild.members.cache.find(m => m.id === query)
-            ?? otherGuilds
-            	.map(guild => guild.members.cache.find(m => m.id === query))
-            	.find(m => m)
-            ?? undefined;
+			?? otherGuilds
+				.map(guild => guild.members.cache.find(m => m.id === query))
+				.find(m => m)
+		?? undefined;
 	}
 
-    //Prioridad 2: Intentar encontrar por nombres (este server)
+	//Prioridad 2: Intentar encontrar por nombres (este server)
 	const lowerQuery = (query as string).toLowerCase();
 	const thisGuildMembers = thisGuild.members.cache;
 	const memberInThisGuild = findMemberByGlobalName(thisGuildMembers, lowerQuery)
-        ?? findMemberByUsername(thisGuildMembers, lowerQuery)
-        ?? findMemberByNickname(thisGuildMembers, lowerQuery);
+		?? findMemberByUsername(thisGuildMembers, lowerQuery)
+		?? findMemberByNickname(thisGuildMembers, lowerQuery);
 
 	if(memberInThisGuild)
 		return memberInThisGuild;
 
-    //Prioridad 3: Intentar encontrar por nombres (otros servers)
+	//Prioridad 3: Intentar encontrar por nombres (otros servers)
 	const otherGuildsMembers = otherGuilds.flatMap(g => g.members.cache);
 	const memberInOtherGuilds = findMemberByGlobalName(otherGuildsMembers, lowerQuery)
-        ?? findMemberByUsername(otherGuildsMembers, lowerQuery)
-        ?? findMemberByNickname(otherGuildsMembers, lowerQuery);
+		?? findMemberByUsername(otherGuildsMembers, lowerQuery)
+		?? findMemberByNickname(otherGuildsMembers, lowerQuery);
 
 	if(memberInOtherGuilds)
 		return memberInOtherGuilds;
@@ -842,8 +842,8 @@ export function fetchMember(query: Discord.GuildMember | string, context: FetchU
 }
 
 interface FetchUserContext {
-    guild?: Discord.Guild;
-    client?: Discord.Client;
+	guild?: Discord.Guild;
+	client?: Discord.Client;
 }
 /**
  * Busca usuarios de Discord según la consulta y el contexto proporcionados.
@@ -862,30 +862,30 @@ export function fetchUser(query: Discord.User | string, context: FetchUserContex
 	if(!query || !thisGuild || !client)
 		throw new Error('Se requieren la guild actual y el cliente en búsqueda de usuario');
 
-    //Prioridad 1: Intentar encontrar por ID
+	//Prioridad 1: Intentar encontrar por ID
 	const usersCache = client.users.cache;
 	query = extractUserID(query);
 
 	if(!isNaN(+query))
 		return usersCache.find(u => u.id === query);
 
-    //Prioridad 2: Intentar encontrar por nombres (este server)
+	//Prioridad 2: Intentar encontrar por nombres (este server)
 	const lowerQuery = (query as string).toLowerCase();
 	const thisGuildMembers = thisGuild.members.cache;
 	const memberInThisGuild = findMemberByGlobalName(thisGuildMembers, lowerQuery)
-        ?? findMemberByUsername(thisGuildMembers, lowerQuery)
-        ?? findMemberByNickname(thisGuildMembers, lowerQuery);
+		?? findMemberByUsername(thisGuildMembers, lowerQuery)
+		?? findMemberByNickname(thisGuildMembers, lowerQuery);
 
 	if(memberInThisGuild)
 		return memberInThisGuild.user;
 
-    //Prioridad 3: Intentar encontrar por nombres (otros servers)
+	//Prioridad 3: Intentar encontrar por nombres (otros servers)
 	const allGuilds = client.guilds.cache;
 	const otherGuilds = allGuilds.filter(g => g.id !== thisGuild.id);
 	const otherGuildsMembers = otherGuilds.flatMap(g => g.members.cache);
 	const memberInOtherGuilds = findMemberByGlobalName(otherGuildsMembers, lowerQuery)
-        ?? findMemberByUsername(otherGuildsMembers, lowerQuery)
-        ?? findMemberByNickname(otherGuildsMembers, lowerQuery);
+		?? findMemberByUsername(otherGuildsMembers, lowerQuery)
+		?? findMemberByNickname(otherGuildsMembers, lowerQuery);
 
 	if(memberInOtherGuilds)
 		return memberInOtherGuilds.user;
@@ -916,7 +916,7 @@ export async function fetchGuild(query: string): Promise<Discord.Guild> {
 
 	if(!isNaN(+query))
 		return client.guilds.cache.get(query)
-            ?? client.guilds.fetch(query);
+			?? client.guilds.fetch(query);
 
 	let bestDistance = -1;
 	return client.guilds.cache
@@ -958,8 +958,8 @@ export function fetchChannel(query: string, guild: Discord.Guild): Discord.Guild
 }
 
 interface FetchMessageContext {
-    guild?: Discord.Guild;
-    channel?: Discord.GuildTextBasedChannel;
+	guild?: Discord.Guild;
+	channel?: Discord.GuildTextBasedChannel;
 }
 /**
  * Busca un mensaje basado en la data ingresada.
@@ -1044,7 +1044,7 @@ export const warn = (text: string) => `⚠️ ${text}`;
 export const unable = (text: string) => `❌ ${text}`;
 
 export function decodeEntities(encodedstring: string) {
-    //Fuente: https://stackoverflow.com/questions/44195322/a-plain-javascript-way-to-decode-html-entities-works-on-both-browsers-and-node
+	//Fuente: https://stackoverflow.com/questions/44195322/a-plain-javascript-way-to-decode-html-entities-works-on-both-browsers-and-node
 	return encodedstring.replace(HTTP_ENTITIES_REGEX, function(match, entity) {
 		return HTTP_ENTITIES[entity] ?? match;
 	}).replace(/&#(\d+);/gi, function(_, numStr) {
@@ -1276,10 +1276,10 @@ export const shortnumberNames = {
 };
 
 interface ImproveNumberOptions {
-    appendOf?: boolean;
-    shorten?: boolean;
-    translator?: Translator;
-    minDigits?: number;
+	appendOf?: boolean;
+	shorten?: boolean;
+	translator?: Translator;
+	minDigits?: number;
 }
 /**
  * @pure
@@ -1300,10 +1300,10 @@ export function improveNumber(num: number | string, options: ImproveNumberOption
 	if(isNaN(num))
 		return '0';
 
-    /**
-     * @param {number} n
-     * @param {Intl.numberFormatOptions} nopt
-     */
+	/**
+	 * @param {number} n
+	 * @param {Intl.numberFormatOptions} nopt
+	 */
 	const formatnumber = (n: number, nopt: Intl.NumberFormatOptions = {}) => n.toLocaleString(translator.locale, { maximumFractionDigits: 2, minimumIntegerDigits: minDigits, ...nopt });
 	if((num < 1000000) || !shorten)
 		return formatnumber(num);
@@ -1385,16 +1385,16 @@ export function shortenTextLoose(text: string, max: number | null = 200, hardMax
 }
 
 interface SmartShortenStructDefinition {
-    start: string;
-    end: string;
-    dynamic: boolean;
+	start: string;
+	end: string;
+	dynamic: boolean;
 }
 
 interface SmartShortenOptions {
-    max: number;
-    hardMax: number;
-    suspensor: string;
-    structs: SmartShortenStructDefinition[];
+	max: number;
+	hardMax: number;
+	suspensor: string;
+	structs: SmartShortenStructDefinition[];
 }
 
 /**
@@ -1417,7 +1417,7 @@ export function shortenTextSmart(text: string, options: Partial<SmartShortenOpti
 	const whitespaceOffset = /\s/.exec(text.slice(max, trueHardMax - suspensor.length)).index;
 	const trueMax = max + (whitespaceOffset > 0 ? whitespaceOffset : 0);
 
-    //PENDIENTE
+	//PENDIENTE
 
 	return `${text.slice(0, trueMax)}${suspensor}`;
 }
@@ -1425,7 +1425,7 @@ export function shortenTextSmart(text: string, options: Partial<SmartShortenOpti
 export const toCapitalized = (text) => `${text.slice(0, 1).toUpperCase()}${text.slice(1)}`;
 
 interface LowerCaseNormalizationOptions {
-    removeCarriageReturns?: boolean;
+	removeCarriageReturns?: boolean;
 }
 
 export function toLowerCaseNormalized(text: string, options: LowerCaseNormalizationOptions = null): string {
@@ -1499,7 +1499,7 @@ export function edlDistance(a: string, b: string): number {
 		[ ...'\\|@#~€¬      ' ],
 		[ ... '           []' ],
 		[ ... '           {}' ],
-		[ ... '             ' ],
+		[ ... '			 ' ],
 	];
 
 	const keyboardCartesians = {};

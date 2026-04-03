@@ -13,9 +13,9 @@ import chalk from 'chalk';
 //const { debug } = Logger('WARN', 'BooruSend');
 
 export interface FeedData extends PostFormatData {
-    tags: string;
-    lastFetchedAt?: Date;
-    faults?: number;
+	tags: string;
+	lastFetchedAt?: Date;
+	faults?: number;
 }
 
 //Configuraciones globales de actualización de Feeds
@@ -71,7 +71,7 @@ async function processFeeds(booru: Booru, guilds: Collection<Snowflake, Guild>) 
 			if(!feed.isProcessable)
 				return feed.faults < 10 && bulkOps.push(feed.addFault());
 
-            //Recolectar últimas imágenes para el Feed
+	        //Recolectar últimas imágenes para el Feed
 			const { success, posts, newPosts } = await feed.fetchPosts();
 			if(!success) return;
 			if(!posts.length)
@@ -79,13 +79,13 @@ async function processFeeds(booru: Booru, guilds: Collection<Snowflake, Guild>) 
 			if(!newPosts.length)
 				return bulkOps.push(feed.reduceFaults());
 
-            /**@type {Partial<FeedData>}*/
+	        /**@type {Partial<FeedData>}*/
 			const toSave: Partial<FeedData> = {};
 
 			if(feed.faults > 0)
 				toSave.faults = Math.max(0, feed.faults - 2);
 
-            //Preparar suscripciones a Feeds
+	        //Preparar suscripciones a Feeds
 			const feedSuscriptions: Suscription[] = [];
 			for(const [ userId, feedSuscription ] of feedTagSuscriptionsCache) {
 				if(!feedSuscription.has(channelId)) continue;
@@ -94,7 +94,7 @@ async function processFeeds(booru: Booru, guilds: Collection<Snowflake, Guild>) 
 				feedSuscriptions.push({ userId, followedTags });
 			}
 
-            //Comprobar recolectado en busca de imágenes nuevas
+	        //Comprobar recolectado en busca de imágenes nuevas
 			const channel = feed.channel;
 			const messagesToSend = /**@type {Array<Message<true>>}*/([]);
 			await Promise.all(newPosts.map(async post => {
@@ -110,7 +110,7 @@ async function processFeeds(booru: Booru, guilds: Collection<Snowflake, Guild>) 
 				}
 			}));
 
-            //Eliminar aquellos Posts no coincidentes con lo encontrado y guardar
+	        //Eliminar aquellos Posts no coincidentes con lo encontrado y guardar
 			toSave.lastFetchedAt = feed.lastFetchedAt;
 
 			const $set = {};
@@ -132,12 +132,12 @@ async function processFeeds(booru: Booru, guilds: Collection<Snowflake, Guild>) 
 }
 
 function getNextBaseUpdateStart(): number {
-    //Encontrar próximo inicio de fracción de hora para actualizar Feeds
+	//Encontrar próximo inicio de fracción de hora para actualizar Feeds
 	const now = new Date();
 	let feedUpdateStart = FEED_UPDATE_INTERVAL - (
 		now.getMinutes() * 60e3 +
-        now.getSeconds() * 1e3 +
-        now.getMilliseconds());
+	    now.getSeconds() * 1e3 +
+	    now.getMilliseconds());
 	while(feedUpdateStart <= 0)
 		feedUpdateStart += FEED_UPDATE_INTERVAL;
 	feedUpdateStart += 30e3; //Añadir 30 segundos para dar ventana de tiempo razonable al update de Gelbooru
@@ -145,9 +145,9 @@ function getNextBaseUpdateStart(): number {
 }
 
 interface GuildFeedChunk {
-    timestamp: Date;
-    tid: NodeJS.Timeout;
-    guilds: Array<[Snowflake, Guild]>;
+	timestamp: Date;
+	tid: NodeJS.Timeout;
+	guilds: Array<[Snowflake, Guild]>;
 }
 
 /**@description Inicializa una cadena de actualización de Feeds en todas las Guilds que cuentan con uno.*/
@@ -207,16 +207,16 @@ export function addGuildToFeedUpdateStack(guild: Guild): number {
 	const guildChunks: GuildFeedChunk[] = globalConfigs.feedGuildChunks;
 	const chunkAmount = guildChunks.length;
 
-    //Retornar temprano si la guild ya está integrada al stack
+	//Retornar temprano si la guild ya está integrada al stack
 	const chunkIndexWithThisGuild = guildChunks.findIndex(chunk => chunk.guilds.some(g => guild.id === g[0]));
 	if(chunkIndexWithThisGuild)
 		return getNextBaseUpdateStart() + FEED_UPDATE_INTERVAL * (chunkIndexWithThisGuild / chunkAmount);
 
-    //Añadir guild a stack en un chunk nuevo o uno ya definido
+	//Añadir guild a stack en un chunk nuevo o uno ya definido
 	const feedUpdateStart = getNextBaseUpdateStart();
 	let newGuildChunkUpdateDelay = 0;
 	if(guildChunks[guildChunks.length - 1].guilds.length >= FEED_BATCH_MAX_COUNT) {
-        //Subdividir 1 nivel más
+	    //Subdividir 1 nivel más
 		guildChunks.push({ tid: null, guilds: [ [ guild.id, guild ] ], timestamp: null });
 		const chunkAmount = guildChunks.length;
 		let shortestTime = 0;
@@ -239,7 +239,7 @@ export function addGuildToFeedUpdateStack(guild: Guild): number {
 			{ name: 'Subdivisiones',  value: `${chunkAmount}`, inline: true },
 		);
 	} else {
-        //Añadir a última subdivisión
+	    //Añadir a última subdivisión
 		guildChunks[guildChunks.length - 1].guilds.push([ guild.id, guild ]);
 		const chunk = guildChunks[guildChunks.length - 1];
 		const chunkAmount = guildChunks.length;
@@ -284,13 +284,13 @@ export function updateFollowedFeedTagsCache(userId: Snowflake, channelId: Snowfl
 }
 
 export interface FeedOptions {
-    lastFetchedAt?: Date;
-    faults?: number;
-    maxTags?: number;
-    cornerIcon?: string;
-    title?: string;
-    subtitle?: string;
-    footer?: string;
+	lastFetchedAt?: Date;
+	faults?: number;
+	maxTags?: number;
+	cornerIcon?: string;
+	title?: string;
+	subtitle?: string;
+	footer?: string;
 }
 
 /**@class Representa un Feed programado de imágenes de {@linkcode Booru}.*/
@@ -307,10 +307,10 @@ export class BooruFeed {
 	subtitle: string;
 	footer: string;
 
-    /**
-     * @description Crea una representación de un Feed programado de imágenes de {@linkcode Booru}.
-     * @throws {TypeError}
-     */
+	/**
+	 * @description Crea una representación de un Feed programado de imágenes de {@linkcode Booru}.
+	 * @throws {TypeError}
+	 */
 	constructor(booru: Booru, channel: GuildBasedChannel, tags: string, options: FeedOptions = undefined) {
 		this.booru = booru;
 		this.channel = channel?.isTextBased() ? channel : null;
@@ -331,15 +331,15 @@ export class BooruFeed {
 			return false;
 
 		return this.channel.id
-            && this.channel.guild
-            && this.channel.guild.channels.cache.has(this.channel.id);
+	        && this.channel.guild
+	        && this.channel.guild.channels.cache.has(this.channel.id);
 	}
 
 	get isRunning() {
 		return !this.faults || this.faults < 10;
 	}
 
-    /**@description Obtiene {@linkcode Post}s que no han sido publicados.*/
+	/**@description Obtiene {@linkcode Post}s que no han sido publicados.*/
 	async fetchPosts(): Promise<{ success: true; posts: Array<import('./boorufetch').Post>; newPosts: Array<import('./boorufetch').Post>; } | { success: false; posts: []; newPosts: []; }> {
 		try {
 			const fetched = await this.booru.search(this.tags, { limit: FEED_UPDATE_MAX_POST_COUNT });
@@ -369,10 +369,10 @@ export class BooruFeed {
 		}
 	}
 
-    /**
-     * @description Aumenta el número de fallas del Feed en pasos de 1.
-     * @returns Una bulkOp de `updateOne` para un modelo {@linkcode GuildConfigs}, o `undefined` si ya se registraron 10 fallas.
-     */
+	/**
+	 * @description Aumenta el número de fallas del Feed en pasos de 1.
+	 * @returns Una bulkOp de `updateOne` para un modelo {@linkcode GuildConfigs}, o `undefined` si ya se registraron 10 fallas.
+	 */
 	addFault() {
 		const channel = this.channel;
 		const guild = channel.guild;
@@ -395,10 +395,10 @@ export class BooruFeed {
 		};
 	}
 
-    /**
-     * @description Reduce progresivamente las fallas detectadas del Feed en pasos de 2.
-     * @returns Una bulkOp de `updateOne` para un modelo {@linkcode GuildConfigs}.
-     */
+	/**
+	 * @description Reduce progresivamente las fallas detectadas del Feed en pasos de 2.
+	 * @returns Una bulkOp de `updateOne` para un modelo {@linkcode GuildConfigs}.
+	 */
 	reduceFaults() {
 		const channel = this.channel;
 
