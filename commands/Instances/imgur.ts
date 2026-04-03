@@ -1,9 +1,8 @@
-import { ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonStyle, EmbedBuilder, Colors, LabelBuilder, ActionRowBuilder } from 'discord.js';
+import { ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonStyle, EmbedBuilder, LabelBuilder, ActionRowBuilder } from 'discord.js';
 import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons/';
 import ImgurUser from '../../models/imgurUsers.js';
 import { envPath } from '../../data/globalProps';
 import { Translator } from '../../i18n';
-import { Payload } from 'imgur/dist/common/types';
 
 const options = new CommandOptions()
 	.addParam('enlaces', 'TEXT', 'para indicar enlaces de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
@@ -82,7 +81,7 @@ const command = new Command('imgur', tags)
 		const attachments = CommandOptionSolver.asAttachments(args.parsePolyParamSync('imagens')).filter(a => a);
 		const attachmentUrls = attachments.map(attachment => attachment.url);
 
-		const uploads: Payload[] = [
+		const uploads: unknown[] = [
 			...directUrls.map(url => ({ type: 'url' as const, image: url })),
 			...attachmentUrls.map(url => ({ type: 'url' as const, image: url })),
 		];

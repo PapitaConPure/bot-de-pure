@@ -11,7 +11,7 @@ export type ContextMenuInteraction =
     | MessageContextMenuCommandInteraction<'cached'>
     | UserContextMenuCommandInteraction<'cached'>;
 
-export type ContextMenuActionHandler<T extends ContextMenuInteraction = ContextMenuInteraction> = (request: T) => Promise<any>;
+export type ContextMenuActionHandler<T extends ContextMenuInteraction = ContextMenuInteraction> = (request: T) => Promise<unknown>;
 
 /**Representa una acción de menú contextual*/
 export class ContextMenuAction {
