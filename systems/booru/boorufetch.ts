@@ -166,7 +166,7 @@ export class Booru {
 		const { dontThrowOnEmptyFetch = false } = options;
 
 		if(fetchResult.success === false)
-			throw new BooruFetchError(`Booru API Posts fetch failed: ${fetchResult.response.status} ${fetchResult.response.statusText ?? 'Unknown Error'}`);
+			throw new BooruFetchError(`Booru API Posts fetch failed: ${fetchResult.error.name} ${fetchResult.error.message || ''}`, { cause: fetchResult.error });
 
 		if(!Array.isArray(fetchResult.data?.post)) {
 			if(dontThrowOnEmptyFetch)
@@ -217,14 +217,18 @@ export class Booru {
 		if(Array.isArray(tags))
 			tags = tags.join(' ');
 
-		const response = await Booru.POSTS_API.request<{ post: APIPostData[] }>({
+		const fetchResult = await Booru.POSTS_API.request<{ post: APIPostData[] }>({
 			'api_key': apiKey,
 			'user_id': userId,
 			'limit': limit,
 			'tags': tags,
 		});
-		const posts = Booru.#expectPosts(response, { dontThrowOnEmptyFetch: true });
-		if(random) shuffleArray(posts);
+
+		const posts = Booru.#expectPosts(fetchResult, { dontThrowOnEmptyFetch: true });
+
+		if(random)
+			shuffleArray(posts);
+
 		return posts.map(p => new Post(p));
 	}
 
@@ -566,29 +570,29 @@ function getSourceUrl(source: string) {
 }
 
 export class BooruError extends Error {
-	constructor(message: string) {
-		super(message);
+	constructor(message: string, options?: ErrorOptions) {
+		super(message, options);
 		this.name = 'BooruError';
 	}
 }
 
 export class BooruFetchError extends BooruError {
-	constructor(message: string) {
-		super(message);
+	constructor(message: string, options?: ErrorOptions) {
+		super(message, options);
 		this.name = 'BooruFetchError';
 	}
 }
 
 export class BooruUnknownPostError extends BooruError {
-	constructor(message: string) {
-		super(message);
+	constructor(message: string, options?: ErrorOptions) {
+		super(message, options);
 		this.name = 'BooruUnknownPostError';
 	}
 }
 
 export class BooruUnknownTagError extends BooruError {
-	constructor(message: string) {
-		super(message);
+	constructor(message: string, options?: ErrorOptions) {
+		super(message, options);
 		this.name = 'BooruUnknownTagError';
 	}
 }
