@@ -65,6 +65,19 @@ export default function Logger(logLevel: LogLevelKey, prefix: string = '') {
 		LOG_LEVEL <= LogLevels.DEBUG && console.log(logLevelPrefix('DEBUG'), prefix, logLevelOutput('DEBUG', ...data));
 	}
 
+	/**
+	 * La firma es idéntica a {@link console.dir}. Produce una auditoría de depuración utilizando el mismo.
+	 * Requiere un nivel de advertencias de "DEBUG"
+	 * @see https://developer.mozilla.org/en-US/docs/Web/API/console/dir_static
+	 */
+	debug.dir = function(data: unknown, options?: Record<string, unknown>) {
+		if(LOG_LEVEL > LogLevels.DEBUG) return;
+		console.log(logLevelPrefix('DEBUG'), prefix);
+		console.log(logLevelOutput('INFO', '- '.repeat(5)));
+		console.dir(data, options);
+		console.log(logLevelOutput('INFO', '- '.repeat(5)));
+	};
+
     /**
      * @description
      * Realiza auditoría de información.
@@ -74,6 +87,19 @@ export default function Logger(logLevel: LogLevelKey, prefix: string = '') {
 	function info(...data: unknown[]) {
 		LOG_LEVEL <= LogLevels.INFO && console.info(logLevelPrefix('INFO'), prefix, logLevelOutput('INFO', ...data));
 	}
+
+	/**
+	 * La firma es idéntica a {@link console.dir}. Produce una auditoría de información utilizando el mismo.
+	 * Requiere un nivel de advertencias de "INFO"
+	 * @see https://developer.mozilla.org/en-US/docs/Web/API/console/dir_static
+	 */
+	info.dir = function(data: unknown, options?: Record<string, unknown>) {
+		if(LOG_LEVEL > LogLevels.INFO) return;
+		console.log(logLevelPrefix('INFO'), prefix);
+		console.log(logLevelOutput('INFO', '- '.repeat(5)));
+		console.dir(data, options);
+		console.log(logLevelOutput('INFO', '- '.repeat(5)));
+	};
 
     /**
      * @description
