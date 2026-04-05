@@ -5,12 +5,12 @@ import { Client, Collection, Guild, GuildBasedChannel, GuildTextBasedChannel, Me
 import { globalConfigs, booruApiKey, booruUserId, noDataBase } from '../../data/globalProps';
 import { fetchGuildMembers } from '../../utils/guildratekeeper';
 import { auditError, auditAction } from '../others/auditor';
-import { minutesToMilliseconds } from 'date-fns';
+import { getUnixTime, minutesToMilliseconds } from 'date-fns';
 import { paginateRaw } from '../../func';
 import chalk from 'chalk';
 
-//import Logger from '../../logs';
-//const { debug } = Logger('WARN', 'BooruSend');
+import Logger from '../../utils/logs';
+const { debug, warn, error } = Logger('WARN', 'BooruSend');
 
 export interface FeedData extends PostFormatData {
 	tags: string;
@@ -27,15 +27,21 @@ export const FEED_UPDATE_INTERVAL = minutesToMilliseconds(30);
 export const FEED_UPDATE_MAX_POST_COUNT = 32;
 /**@description Máxima cantidad de feeds por bache de actualización.*/
 export const FEED_BATCH_MAX_COUNT = 5;
-/**@description Si mostrar más mensajes de log que los esenciales.*/
-const LOG_MORE = false;
 
 async function updateBooruFeeds(guilds: Collection<Snowflake, Guild>): Promise<void> {
 	const booru = new Booru({ apiKey: booruApiKey, userId: booruUserId });
 	const startMs = Date.now();
 
-	await processFeeds(booru, guilds).catch(console.error);
-	Booru.cleanupTagsCache();
+	try {
+		await processFeeds(booru, guilds).catch(console.error);
+		Booru.cleanupTagsCache();
+	} catch(err) {
+		//Solución temporal para atrapar el bug malvado de una vez
+		const now = new Date(Date.now());
+		const unixNow = getUnixTime(now);
+		auditError(err, { brief: 'Ocurrió un error crítico y verdaderamente inesperado al procesar Feeds', details: `<t:${unixNow}:F> <t:${unixNow}:R>`, ping: true });
+		error(err, 'Fecha del error:', now);
+	}
 
 	const delayMs = Date.now() - startMs;
 	setTimeout(updateBooruFeeds, FEED_UPDATE_INTERVAL - delayMs, guilds);
@@ -79,7 +85,6 @@ async function processFeeds(booru: Booru, guilds: Collection<Snowflake, Guild>) 
 			if(!newPosts.length)
 				return bulkOps.push(feed.reduceFaults());
 
-	        /**@type {Partial<FeedData>}*/
 			const toSave: Partial<FeedData> = {};
 
 			if(feed.faults > 0)
@@ -103,10 +108,10 @@ async function processFeeds(booru: Booru, guilds: Collection<Snowflake, Guild>) 
 					const sent = await feed.channel.send({ flags: MessageFlags.IsComponentsV2, components: [ formattedContainer ] });
 					await notifyUsers(post, sent, members, feedSuscriptions);
 					messagesToSend.push(sent);
-				} catch(error) {
-					console.log(`Ocurrió un error al enviar la imagen de Feed: ${post.source ?? post.id} para ${channel.name}`);
-					console.error(error);
-					auditError(error, { brief: 'Ocurrió un error al enviar una imagen de Feed', details: `\`Post<"${post.source ?? post.id}">\`\n${channel}` });
+				} catch(err) {
+					warn(`Ocurrió un error al enviar la imagen de Feed: ${post.source ?? post.id} para ${channel.name}`);
+					error(err);
+					auditError(err, { brief: 'Ocurrió un error al enviar una imagen de Feed', details: `\`Post<"${post.source ?? post.id}">\`\n${channel}` });
 				}
 			}));
 
@@ -126,7 +131,8 @@ async function processFeeds(booru: Booru, guilds: Collection<Snowflake, Guild>) 
 		}));
 	}));
 
-	LOG_MORE && console.dir(bulkOps, { depth: null });
+	debug.dir(bulkOps, { depth: null });
+
 	if(bulkOps.length)
 		await GuildConfigs.bulkWrite(bulkOps);
 }
@@ -182,7 +188,7 @@ export async function setupGuildFeedUpdateStack(client: Client) {
 		feedChunks[i].timestamp = new Date(Date.now() + chunkUpdateStart);
 	});
 	globalConfigs['feedGuildChunks'] = feedChunks;
-	LOG_MORE && console.log({ feedChunks, feedCount, chunkCount, shortestTime });
+	debug({ feedChunks, feedCount, chunkCount, shortestTime });
 
 	auditAction('Se prepararon Feeds',
 		{ name: 'Primer Envío',   value: `<t:${Math.floor((Date.now() + shortestTime) * 0.001)}:R>`, inline: true },
