@@ -133,6 +133,9 @@ export default defineConfig([
 					'async': {
 						'after': true,
 					},
+					'default': {
+						'after': true,
+					},
 				},
 			} ],
 			'@stylistic/eol-last': 'error',
