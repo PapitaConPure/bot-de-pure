@@ -190,7 +190,7 @@ export class Booru {
 		} = options;
 
 		if(fetchResult.success === false)
-			throw new BooruFetchError(`Booru API Tags fetch failed: ${fetchResult.response.status} ${fetchResult.response.statusText ?? 'Unknown Error'}`);
+			throw new BooruFetchError(`Booru API Tags fetch failed: ${fetchResult.error.name} ${fetchResult.error.message || ''}`, { cause: fetchResult.error });
 
 		if(!Array.isArray(fetchResult.data?.tag)) {
 			if(dontThrowOnEmptyFetch)
@@ -334,9 +334,7 @@ export class Booru {
 		while(semaphoreId !== Booru.tagsSemaphoreDone)
 			await new Promise(resolve => setTimeout(resolve, 50));
 
-		/**@type {Tag[]}*/
 		const cachedTags: Tag[] = [];
-		/**@type {string[]}*/
 		const uncachedTagNames: string[] = [];
 
 		tagNames
@@ -362,7 +360,7 @@ export class Booru {
 			const missingTagNames = uncachedTagNames.filter(tn => !savedTagNames.includes(tn));
 
 			if(missingTagNames.length) {
-				const fetchedTags = [];
+				const fetchedTags: Tag[] = [];
 
 				for(let i = 0; i < missingTagNames.length; i += 100) {
 					const namesBatch = missingTagNames.slice(i, i + 100).join(' ');
