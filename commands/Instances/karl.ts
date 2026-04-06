@@ -1,32 +1,40 @@
 import { CommandTags, Command } from '../Commons/';
-import { randRange } from '../../func';
-import { EmbedBuilder } from 'discord.js';
+import { makeWeightedDecision, randRange, WeightedDecision } from '../../func';
+import { ContainerBuilder, MessageFlags } from 'discord.js';
 
-const instruments = [
-	//Ordenados de común a raro
-	':banjo:',
+//Ordenados de común a raro
+const instruments = ([
+	'🪕',
 	':accordion:',
-	':aquarius:',
+	'♒',
 	':flute:',
-	':saxophone:',
-	':musical_keyboard:',
-	':guitar:',
-	':violin:',
-	':trumpet:',
-];
-const drums = {
-	common: ':drum:',
+	'🎷',
+	'🎹',
+	'🎸',
+	'🎻',
+	'🎺'
+]) as const;
+const drums = ({
+	common: '🥁',
 	rare: ':long_drum:',
-};
+}) as const;
 
-const tiers = [
-	{ n: 1, weight: 1.000, hex: 0xA0A0A0, label: 'Común',        img: '', karl: 'Hola, soy Karl. No me hago responsable por esta mamadera <:reibu:1107876018171162705>' },
-	{ n: 2, weight: 0.700, hex: 0x4CAF50, label: 'Raro',         img: '', karl: 'Buenas, soy Karl. Combina estas weás, créeme soy licenciado <:reibu:1107876018171162705> :thumbsup:' },
-	{ n: 3, weight: 0.300, hex: 0x2196F3, label: 'Épico',        img: '', karl: 'Aló, soy Karl. ¿Y esa mamasita? Te traes unos MIDIS muy buenos eh <:reibu:1107876018171162705> :thumbsup:' },
-	{ n: 4, weight: 0.150, hex: 0x9C27B0, label: 'Pachamama',    img: '', karl: 'Mucho gusto, soy Karl. Te traes unas trompetas muy chad la verdad :muscle: <:reibu:1107876018171162705>' },
-	{ n: 5, weight: 0.020, hex: 0xFF9800, label: 'Machu Picchu', img: '', karl: 'Muy buenas tardes, soy Karl y... QUÉ ES ESO LOCO, TREMENDO MIDI <:reibu:1107876018171162705> :ok_hand:' },
-	{ n: 6, weight: 0.001, hex: 0xE53935, label: 'Perútensoku',  img: '', karl: 'TAMARE OE, QUE SOY KARL CAUSA. AHORA SÍ ME LAS VAS A PAGAR ZUN :muscle: <:reibu:1107876018171162705> :trumpet:' },
-];
+interface Tier {
+	n: number;
+	hex: number;
+	label: string;
+	image?: string;
+	karl: string;
+}
+
+const tiers: WeightedDecision<Tier>[] = ([
+	{ weight: 1.000, value: { n: 1, hex: 0xA0A0A0, label: 'Común',        image: 'https://i.imgur.com/ShmLYeU.png', karl: 'Hola, soy Karl. No me hago responsable por esta mamadera <:reibu:1107876018171162705>' } },
+	{ weight: 0.700, value: { n: 2, hex: 0x4CAF50, label: 'Raro',         image: 'https://i.imgur.com/5xi2Ub3.png', karl: 'Buenas, soy Karl. Combina estas weás, créeme soy licenciado <:reibu:1107876018171162705> :thumbsup:' } },
+	{ weight: 0.300, value: { n: 3, hex: 0x2196F3, label: 'Épico',        image: 'https://i.imgur.com/uMcSxEf.png', karl: 'Aló, soy Karl. ¿Y esa mamasita? Te traes unos MIDIS muy buenos eh <:reibu:1107876018171162705> :thumbsup:' } },
+	{ weight: 0.150, value: { n: 4, hex: 0x9C27B0, label: 'Pachamama',    image: 'https://i.imgur.com/uMcSxEf.png', karl: 'Mucho gusto, soy Karl. Te traes unas trompetas muy chad la verdad :muscle: <:reibu:1107876018171162705>' } },
+	{ weight: 0.020, value: { n: 5, hex: 0xFF9800, label: 'Machu Picchu', image: 'https://i.imgur.com/7h840q1.png', karl: 'Muy buenas tardes, soy Karl y... QUÉ ES ESO LOCO, TREMENDO MIDI <:reibu:1107876018171162705> :ok_hand:' } },
+	{ weight: 0.001, value: { n: 6, hex: 0xE53935, label: 'Perútensoku',  image: 'https://i.imgur.com/qbPwCy9.png', karl: 'TAMARE OE, QUE SOY KARL CAUSA. AHORA SÍ ME LAS VAS A PAGAR ZUN :muscle: <:reibu:1107876018171162705> :trumpet:' } },
+]);
 
 const qualityCurveInfluence = 0.75; //Influencia de la curva de calidad de instrumento
 const qualityCurveMidpoint = 3;     //Punto de rareza en el que la curva de calidad de instrumento forma una línea recta
@@ -42,43 +50,38 @@ const tags = new CommandTags().add(
 );
 
 const command = new Command('karl', tags)
-	.setAliases('karlos', 'zupija')
+	.setAliases('karlos', 'zupija', 'karsuniga', 'zuñiga')
 	.setDescription('Comando de gacha musical de Karl Zuñiga')
 	.setExecution(async request => {
-		const tier = getKarlTier();
-		const stars = Array(tier.n).fill('⭐').join('');
-		const pulled = pullInstruments(tier.n);
+		const tier = makeWeightedDecision(tiers);
+		const starsText = Array(tier.n).fill('⭐').join('');
+		const pulledInstruments = pullInstruments(tier.n);
 
-		const embed = new EmbedBuilder()
-			.setColor(tier.hex)
-			.setFooter({
-				text: `Karl ${tier.label} • ${stars}`,
-				iconURL: 'https://i.imgur.com/tV5LHKz.png'
-			})
-			.addFields({
-				name: tier.karl,
-				value: pulled.join(' '),
-			});
+		const container = new ContainerBuilder()
+			.setAccentColor(tier.hex)
+			.addSectionComponents(section =>
+				section
+					.addTextDisplayComponents(
+						textDisplay => textDisplay.setContent([
+							`${tier.karl}`,
+							`# ${pulledInstruments.join(' ')}`,
+							`### -# Karl ${tier.label} — ${starsText}`,
+						].join('\n')),
+					)
+					.setThumbnailAccessory(thumbnail =>
+						thumbnail
+							.setURL(tier.image || 'https://i.imgur.com/tV5LHKz.png')
+							.setDescription('El misericordioso Karl Zuñiga'),
+					),
+			);
 
-		return request.reply({ embeds: [ embed ] });
+		return request.reply({
+			flags: MessageFlags.IsComponentsV2,
+			components: [ container ],
+		});
 	});
 
 export default command;
-
-function getKarlTier() {
-	const weights = tiers.map(t => t.weight);
-	const total = weights.reduce((a, b) => a + b);
-
-	let r = Math.random() * total;
-	for(let i = 0; i < tiers.length; i++) {
-		if(r < weights[i])
-			return tiers[i];
-		else
-			r -= weights[i];
-	}
-
-	return tiers[tiers.length - 1];
-}
 
 function pullInstruments(tier: number) {
 	const poolSize = instruments.length; //Cantidad de instrumentos en pileta
@@ -90,9 +93,9 @@ function pullInstruments(tier: number) {
 		true);
 
 	//Curva de probabilidad de instrumentos
-	const curve = (/**@type {Number}*/x: number) => Math.pow(x, Math.pow(2, (qualityCurveMidpoint - tier) * qualityCurveInfluence));
-	const pickInstrument = () => instruments[Math.trunc(poolSize * curve(Math.random()))];
-	const instr = Array(count).fill``.map(pickInstrument);
+	const curveFn = (x: number) => Math.pow(x, Math.pow(2, (qualityCurveMidpoint - tier) * qualityCurveInfluence));
+	const pickInstrument = () => instruments[Math.trunc(poolSize * curveFn(Math.random()))];
+	const instr: string[] = Array(count).fill``.map(pickInstrument);
 
 	//Probabilidad de drums
 	const r = Math.random();
