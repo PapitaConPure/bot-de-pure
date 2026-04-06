@@ -15,30 +15,12 @@ Como personaje, es una robot torpe y agresiva en algunos casos, pero parece mete
 > [!IMPORTANT]
 > Ejecutar una copia local te dará una experiencia más responsiva con Bot de Puré y te permitirá modificar su comportamiento a gusto.
 > 
-> Para aquellos que quieran ejecutar una copia local:
-> * Introduce los archivos `./localenv.json` y `./remoteenv.json`, ambos con el siguiente formato (no compartas los datos con nadie):
->   ```js
->   {
->     "token": "<<El Token de la aplicación de Discord sobre la cual operarás el bot>>",
->     "dburi": "<<La URI de la Base de Datos de MongoDB que usarás>>",
->     "booruapikey": "<<La clave de API de una cuenta de Gelbooru>>",
->     "booruuserid": "<<La ID de usuario de la misma cuenta de Gelbooru>>",
->     "imgurclientid": "<<La ID de cliente de una cuenta de Imgur>>",
->     "aikey": "<<Una clave de API de Groq.com para comandos de IA>>"
->   }
->   ```
-> * `localenv.json` se usa para un entorno de **desarrollo**, mientras que `remoteenv.json` se usa para un entorno de **producción**. Esta solución no es para nada elegante pero me ha estado funcionando bien de momento
-> * Al ejecutar con Node, usas la bandera `-d` para usar el entorno de **desarrollo** y `-p` para el entorno de **producción**
->   ```cmd
->   node . -d
->   ```
->   ```cmd
->   bun . -p
->   ```
-> * Sube emojis personalizados en [la pestaña de Emojis de tu bot](https://discord.com/developers/applications). Luego, reemplaza los markdowns y las IDs de emojis personalizados en el código.
+> Revisa la sección de [Preparación](#preparación) y luego la de [Instalación y Configuración](#instalación-y-configuración) para más información.
 
 ## Índice
 * [Tecnologías Principales](#tecnologías-principales)
+* [Preparación](#preparación)
+* [Instalación y Configuración](#instalación-y-configuración)
 * [Características](#características)
 * [Convenciones de Desarrollo](#convenciones-de-desarrollo)
 * [Integrantes](#integrantes)
@@ -48,6 +30,150 @@ Como personaje, es una robot torpe y agresiva en algunos casos, pero parece mete
 ## Tecnologías Principales
 * [discord.js](https://discord.js.org)
 * [MongoDB](https://www.mongodb.com) / [Mongoose](https://github.com/Automattic/mongoose)
+
+## Preparación
+#### Requerido
+* Un runtime de JavaScript: **Bun 1.3.5+ (recomendado)** / NodeJS v20+ / Deno
+* Un token de Discord. Obtenlo en el [portal de desarrolladores de Discord](https://discord.com/developers/applications)
+* Una URI de base de datos de MongoDB. Obtenla en [su sitio](https://cloud.mongodb.com/v2/635277bf9f5c7b5620db28a4#clusters)
+
+#### Optativo (para características adicionales)
+* WIP
+
+## Instalación y Configuración
+### Descargar proyecto
+Ejecuta esto en una terminal para clonar el repositorio:
+```bash
+git clone https://github.com/PapitaConPure/bot-de-pure.git
+cd bot-de-pure
+```
+
+Alternativamente, si no te importa recibir actualizaciones, puedes descargar el último ZIP:
+<p>
+  <a href="https://github.com/PapitaConPure/bot-de-pure/archive/refs/heads/master.zip">
+    <img src="https://img.shields.io/badge/Descargar-ZIP-blue?style=for-the-badge" alt="Descargar ZIP">
+  </p>
+</a>
+
+### Instalar dependencias
+<details open>
+<summary>Bun</summary>
+
+```bash
+bun install
+```
+</details>
+<details>
+<summary>Node</summary>
+
+```bash
+npm install
+```
+
+</details>
+
+<br>
+
+### Configurar variables de entorno
+Crea un archivo `.env` en la raíz del proyecto y ábrelo para editarlo. Completa los valores necesarios en base a esta referencia:
+
+```env
+DISCORD_TOKEN=
+MONGODB_URI=
+ENCRYPTION_KEY=
+IV=
+```
+
+<details>
+<summary>Ejemplo</summary>
+
+```env
+DISCORD_TOKEN=abcdefgh12345678ABCDEFGH.ABCDEF.abcdefghijklmn0123456789ABCDEFGHIJKLMN
+MONGODB_URI=mongodb+srv://nombreusuario:contraseña@cluster.abc01.mongodb.net/botdepure?retryWrites=true&w=majority
+ENCRYPTION_KEY=abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789
+IV=abcdef0123456789abcdef0123456789
+```
+</details>
+<br>
+
+Para funciones adicionales, puedes completar estos valores respectivos:
+```env
+GELBOORU_APIKEY=
+GELBOORU_USERID=
+IMGUR_CLIENT_ID=
+GROQ_KEY=
+```
+
+<details>
+<summary>Ejemplo</summary>
+
+```env
+GELBOORU_APIKEY=abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz01
+GELBOORU_USERID=123456
+IMGUR_CLIENT_ID=abcdefg12345678
+GROQ_KEY=abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRST
+```
+</details>
+<br>
+
+Alternativamente, si no te queda claro, puedes revisar el archivo `.env.example` a modo de referencia.
+
+> [!WARNING]
+> Los archivos `.env` son de naturaleza sensible, **nunca** los subas a Internet.
+> 
+> **NUNCA** completes el archivo `.env.example` con datos reales. Crea un nuevo archivo llamado `.env` en su lugar.
+
+### Comprobar scripts y dependencias
+**Puedes saltarte este paso si estás usando Bun.**
+
+Si estás usando Node, abre el archivo `package.json` y edita las partes indicadas:
+```jsonc
+{
+  // (...)
+  "engines": {
+    "node": "^20.x"
+  },
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --env-file=.env .",
+    "prod": "node --env-file=.env.production .",
+    // (...)
+  },
+  // (...)
+}
+
+Adicionalmente, desinstala `@types/bun`:
+```bash
+npm uninstall @types/bun
+```
+
+### Mensajes de estado
+Crea un archivo `status.txt` en `systems/presence/` y ábrelo para editarlo.
+
+Cada línea en este archivo es un texto que aparecerá periódicamente como el estado de tu bot.
+Aprovéchalo para colocar información útil, frases de personaje o chistes.
+
+Solo asegúrate de que las líneas no sean muy largas, pues hay un límite de caracteres.
+
+### Prefijo
+Los prefijos de Bot de Puré se almacenan como expresiones regulares. Por ende, para cambiar el prefijo por defecto de tu bot ("p!"), debes [escribir una expresión regular](https://regexr.com).
+
+La definición de prefijos se encuentra en `data/globalProps.ts`, desde la fila ~`59` hasta la ~`67`. Para modificar el prefijo por defecto, edita las propiedades dentro de las llaves de `'0'`:
+* `raw`: Cómo se muestra tu prefijo a otros usuarios en comandos de ayuda.
+* `regex`: La expresión regular con la que el bot detecta tu prefijo.
+
+```ts
+export const prefixes: Record<string, PrefixPair> = {
+	'0': {
+		raw: 'p!',
+		regex: /^p *!\s*/i,
+	}
+};
+```
+
+### Usar emojis personalizados
+Sube los emojis personalizados que quieras usar en [la pestaña de Emojis de tu bot](https://discord.com/developers/applications).
+Luego, reemplaza los markdowns y las IDs de emojis personalizados en el código.
 
 ## Características
 * Personalización a nivel de servidor y usuario
