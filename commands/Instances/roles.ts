@@ -250,9 +250,9 @@ const command = new Command('roles', flags)
 		if(!interaction.inCachedGuild())
 			return interaction.reply({ content: '❌' });
 
-		const houraiDB = (await Saki.findOne({})) || new Saki({});
+		const sakiDB = (await Saki.findOne({})) || new Saki({});
 		const boostedRecently = isBoosting(interaction.member) || interaction.user.id === userIds.papita;
-		const customRoleId = houraiDB.customRoles?.[interaction.user.id];
+		const customRoleId = sakiDB.customRoles?.[interaction.user.id];
 
 		return interaction.reply({
 			embeds: [
@@ -346,8 +346,8 @@ const command = new Command('roles', flags)
 			return interaction.isRepliable() && interaction.reply({ content: '❌' });
 
 		const section = parseInt(sectionNumber);
-		const houraiDB = (await Saki.findOne({})) || new Saki({});
-		const mentionRoles = houraiDB.mentionRoles as CategoryMap;
+		const sakiDB = (await Saki.findOne({})) || new Saki({});
+		const mentionRoles = sakiDB.mentionRoles as CategoryMap;
 		const messageActions = {
 			embeds: [
 				new EmbedBuilder()
@@ -373,8 +373,8 @@ const command = new Command('roles', flags)
 			return interaction.reply({ content: '❌' });
 
 		const section = parseInt(sectionNumber);
-		const houraiDB = (await Saki.findOne({})) || new Saki({});
-		const mentionRoles = houraiDB.mentionRoles as CategoryMap;
+		const sakiDB = (await Saki.findOne({})) || new Saki({});
+		const mentionRoles = sakiDB.mentionRoles as CategoryMap;
 		const messageActions = {
 			embeds: [
 				new EmbedBuilder()
@@ -394,8 +394,8 @@ const command = new Command('roles', flags)
 	})
 	.setSelectMenuResponse(async function selectReligion(interaction, sectionNumber) {
 		const section = parseInt(sectionNumber);
-		const houraiDB = (await Saki.findOne({})) || new Saki({});
-		const mentionRoles = houraiDB.mentionRoles as CategoryMap;
+		const sakiDB = (await Saki.findOne({})) || new Saki({});
+		const mentionRoles = sakiDB.mentionRoles as CategoryMap;
 
 		return interaction.reply({
 			embeds: [
@@ -493,10 +493,10 @@ const command = new Command('roles', flags)
 			return newComponent;
 		});
 
-		const houraiDB = (await Saki.findOne({})) || new Saki({});
+		const sakiDB = (await Saki.findOne({})) || new Saki({});
 		let rolesToRemove = [];
 		if(category)
-			rolesToRemove = houraiDB.mentionRoles[category].rolePool
+			rolesToRemove = sakiDB.mentionRoles[category].rolePool
 				.filter(role => role.id !== roleId && member.roles.cache.has(role.id))
 				.map(role => member.roles.remove(role.id));
 
@@ -551,8 +551,8 @@ const command = new Command('roles', flags)
 	})
 	.setButtonResponse(async function removeAll(interaction, category) {
 		const { member } = interaction;
-		const houraiDB = (await Saki.findOne({})) || new Saki({});
-		const rolePool = houraiDB.mentionRoles[category].rolePool
+		const sakiDB = (await Saki.findOne({})) || new Saki({});
+		const rolePool = sakiDB.mentionRoles[category].rolePool
 			.filter(roleData => member.roles.cache.has(roleData.id));
 
 		if(!rolePool.length)
@@ -576,12 +576,12 @@ const command = new Command('roles', flags)
 		interaction.editReply({ components: newComponents });
 	})
 	.setButtonResponse(async function customRole(interaction, operation) {
-		const houraiDB = (await Saki.findOne({})) || new Saki({ customRoles: {} });
+		const sakiDB = (await Saki.findOne({})) || new Saki({ customRoles: {} });
 		const userId = interaction.user.id;
 
 		switch(operation) {
 		case 'CREATE': {
-			if(interaction.member.roles.cache.get(houraiDB.customRoles[userId]))
+			if(interaction.member.roles.cache.get(sakiDB.customRoles[userId]))
 				return interaction.reply({ content: '⚠️ ¡Tu rol ya fue creado! Si cancelaste la configuración o la interacción falló, selecciona la categoría nuevamente para editarlo', ephemeral: true });
 
 			const customRole = await interaction.guild.roles.create({
@@ -589,10 +589,10 @@ const command = new Command('roles', flags)
 				position: (await interaction.guild.roles.fetch('1108486398719295612'))?.rawPosition,
 				reason: 'Creación de Rol Personalizado de miembro',
 			});
-			houraiDB.customRoles[userId] = customRole.id;
-			houraiDB.markModified('customRoles');
+			sakiDB.customRoles[userId] = customRole.id;
+			sakiDB.markModified('customRoles');
 			await Promise.all([
-				houraiDB.save(),
+				sakiDB.save(),
 				interaction.member.roles.add(customRole),
 			]);
 
@@ -600,19 +600,19 @@ const command = new Command('roles', flags)
 		}
 
 		case 'EDIT': {
-			const roleId = houraiDB.customRoles[userId];
+			const roleId = sakiDB.customRoles[userId];
 			return command.customRoleWizard(interaction, roleId);
 		}
 
 		case 'DELETE': {
-			const roleId = houraiDB.customRoles[userId];
-			houraiDB.customRoles[userId] = null;
-			delete houraiDB.customRoles[userId];
-			houraiDB.markModified('customRoles');
+			const roleId = sakiDB.customRoles[userId];
+			sakiDB.customRoles[userId] = null;
+			delete sakiDB.customRoles[userId];
+			sakiDB.markModified('customRoles');
 
 			return Promise.all([
 				interaction.guild.roles.delete(roleId, 'Eliminación de Rol Personalizado de miembro'),
-				houraiDB.save(),
+				sakiDB.save(),
 				interaction.update({
 					content: '🗑 Rol personalizado eliminado',
 					embeds: [],

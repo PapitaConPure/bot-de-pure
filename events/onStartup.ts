@@ -88,7 +88,7 @@ export async function onStartup(client: Client) {
 				{ body: commandData.saki },
 			);
 
-		logOptions.slash && console.log(`Comandos registrados + hourai (${dedicatedServerId} :: ${client.guilds.cache.get(dedicatedServerId)?.name}):`, restGlobal);
+		logOptions.slash && console.log(`Comandos registrados :: ${client.guilds.cache.get(dedicatedServerId)?.name}):`, restGlobal);
 		confirm();
 	} catch(error) {
 		console.log(chalk.bold.redBright('Ocurrió un error al intentar cargar los comandos Slash y/o Contextuales.'));

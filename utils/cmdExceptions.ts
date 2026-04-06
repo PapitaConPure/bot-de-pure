@@ -65,7 +65,7 @@ export const exceptions: ExceptionSummary[] = [
 		tag: 'SAKI',
 		title: 'Comando exclusivo de Saki Scans',
 		desc: [
-			'El comando es de uso restringido para el servidor __Saki Scans (anteriormente Hourai Doll)__.',
+			'El comando es de uso restringido para el servidor __Saki Scans__.',
 			'Esto generalmente se debe a que cumple funciones que solo funcionan allí o que solo tiene sentido que se mantengan en dicho lugar',
 			'Si te interesa, puedes [unirte al servidor](https://discord.gg/pPwP2UNvAC)',
 		].join('\n'),
