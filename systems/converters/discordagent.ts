@@ -77,13 +77,13 @@ export class DiscordAgent {
 		if(!messageOptions.content)
 			messageOptions.content = undefined;
 
-		//@ts-expect-error
+		//@ts-expect-error Esto es un truco. Cambiar con cuidado.
 		const { attachments, username } = messageOptions;
 		if(inheritAttachments && attachments && !Array.isArray(attachments)) {
 			messageOptions.files ??= [];
-			//@ts-expect-error
+			//@ts-expect-error Esto es un truco. Cambiar con cuidado.
 			messageOptions.files.push(...[ ...attachments.values() ]);
-			//@ts-expect-error
+			//@ts-expect-error Esto es un truco. Cambiar con cuidado.
 			messageOptions.attachments = [];
 		}
 
