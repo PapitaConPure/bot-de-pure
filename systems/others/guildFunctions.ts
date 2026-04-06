@@ -6,7 +6,7 @@ type GuildMessagePlugin = (message: Message) => void;
 //Permite agregar plugins que se ejecutan en cada procesado de mensaje en servidores particulares.
 //Para agregar un servidor, introduce su ID como clave y un objeto como valor.
 //Cada campo del objeto debe ser una función, y representa un plugin para ese servidor.
-export default {
+const globalFunctions: Record<string, GuildMessagePlugin> = {
 	// '1234567890': {
 	//   function doSomethingVerySilly() {
 	//     ...
@@ -20,4 +20,6 @@ export default {
 	//     ...
 	//   },
 	// },
-} satisfies Record<string, GuildMessagePlugin>;
+};
+
+export default globalFunctions;
