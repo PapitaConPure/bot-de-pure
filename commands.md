@@ -12,7 +12,7 @@ La columna "Meta" indica los modificadores de interés de un comando:
 * 🥔 = Comando de Dueño
 * 🛡️ = Comando de Moderación
 * 📖 = Guia
-* 🎎 = Comando de Hourai Doll (eliminación pendiente)
+* 🎎 = Comando de Saki Scans (eliminación pendiente)
 * 🚧 = Comando en Mantenimiento
 * 💔 = Comando Desactualizado
 
