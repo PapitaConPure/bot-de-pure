@@ -3,6 +3,8 @@ node_modules
 
 #DOTENV
 .env
+.env.dev
+.env.production
 
 #ENVs artificiales
 localenv.json
