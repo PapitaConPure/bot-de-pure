@@ -1,5 +1,5 @@
 import { puré } from '../core/commandInit';
-import { AutocompleteInteraction, ButtonInteraction, ChatInputCommandInteraction, Client, ContextMenuCommandInteraction, Interaction, ModalSubmitInteraction, StringSelectMenuInteraction } from 'discord.js';
+import { AutocompleteInteraction, ButtonInteraction, ChatInputCommandInteraction, ContextMenuCommandInteraction, Interaction, ModalSubmitInteraction, StringSelectMenuInteraction } from 'discord.js';
 import { Stats } from '../models/stats';
 import userIds from '../data/userIds.json';
 import { channelIsBlocked, isUsageBanned, decompressId } from '../func';
@@ -113,7 +113,7 @@ async function handleAction(interaction: ContextMenuCommandInteraction<'cached'>
 		await action.execute(interaction);
 		stats.commands.succeeded++;
 	} catch(error) {
-        //@ts-expect-error
+        //@ts-expect-error Da un poco igual las propiedades por las que se queja TypeScript
 		const isPermissionsError = handleAndAuditError(error, interaction, { details: `/${commandName}` });
 		if(!isPermissionsError)
 			stats.commands.failed++;

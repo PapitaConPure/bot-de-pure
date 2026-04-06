@@ -1,6 +1,6 @@
 import Mongoose from 'mongoose';
 
-/** Describe la configuración de Saki Scans (Hourai Doll) */
+/**@description Describe la configuración de Saki Scans*/
 const SakiSchema = new Mongoose.Schema({
 	configs: {
 		type: Object,

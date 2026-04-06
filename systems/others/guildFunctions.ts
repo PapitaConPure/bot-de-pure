@@ -23,7 +23,10 @@ function getAnnoyedByHourai(message: Message) {
 	}
 }
 
-//Funciones de Respuesta Rápida personalizadas por servidor
+//Funciones de Respuesta Rápida personalizadas por servidor.
+//Permite agregar plugins que se ejecutan en cada procesado de mensaje en servidores particulares.
+//Para agregar un servidor, introduce su ID como clave y un objeto como valor.
+//Cada campo del objeto debe ser una función, y representa un plugin para ese servidor.
 export default{
 	[serverIds.saki]: {
 		getAnnoyedByHourai,
