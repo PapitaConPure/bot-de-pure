@@ -1,5 +1,5 @@
 import { puré } from '../core/commandInit';
-import { ContainerBuilder, EmbedBuilder, Guild, Message, MessageFlags } from 'discord.js';
+import { ContainerBuilder, Guild, Message, MessageFlags } from 'discord.js';
 import { Command, CommandOptionSolver } from '../commands/Commons/index';
 
 import { Stats, ChannelStats } from '../models/stats';
@@ -72,9 +72,11 @@ async function handleInvalidCommand(message: Message<true>, commandName: string,
 				content: processedText,
 			});
 			setTimeout(() => notice?.delete().catch(() => undefined), 6000);
-		} finally {
-			return CommandResults.VOID;
+		} catch(err) {
+			error(err);
 		}
+
+		return CommandResults.VOID;
 	}
 
 	if(commandName.length < 2)
@@ -123,7 +125,7 @@ async function handleInvalidCommand(message: Message<true>, commandName: string,
 	return CommandResults.VOID;
 }
 
-async function handleMessageCommand(message: Message<true>, command: Command, args: string[], rawArgs?: string, exceptionString?: string): Promise<any> {
+async function handleMessageCommand(message: Message<true>, command: Command, args: string[], rawArgs?: string, exceptionString?: string): Promise<unknown> {
 	if(command.permissions) {
 		if(!command.permissions.isAllowedIn(message.member, message.channel)) {
 			const translator = await Translator.from(message.member);
@@ -189,7 +191,8 @@ async function checkEmoteCommand(message: Message<true>): Promise<CommandResult>
 		return CommandResults.VOID;
 
 	try {
-		return handleMessageCommand(message, command, args);
+		await handleMessageCommand(message, command, args);
+		return CommandResults.SUCCEEDED;
 	} catch(error) {
 		return handleMessageCommandError(error, message, commandName, args);
 	}
