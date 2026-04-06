@@ -1,6 +1,6 @@
 import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, GuildTextBasedChannel } from 'discord.js';
 import { CommandTags, Command } from '../Commons/';
-import { DiscordAgent } from '../../systems/agents/discordagent';
+import { DiscordAgent } from '../../systems/converters/discordagent';
 import { saki } from '../../data/sakiProps';
 import serverIds from '../../data/serverIds.json';
 import { CommandPermissions } from '../Commons/cmdPerms.js';

@@ -5,14 +5,14 @@ import { Command, CommandOptionSolver } from '../commands/Commons/index';
 import { Stats, ChannelStats } from '../models/stats';
 import { p_pure } from '../utils/prefixes';
 
-import { updateAgentMessageOwners, addAgentMessageOwner } from '../systems/agents/discordagent';
+import { updateAgentMessageOwners, addAgentMessageOwner } from '../systems/converters/discordagent';
 import { channelIsBlocked, rand, edlDistance } from '../func';
 import globalGuildFunctions from '../systems/others/guildFunctions';
 import { auditRequest } from '../systems/others/auditor';
 import { findFirstException, handleAndAuditError, generateExceptionEmbed } from '../utils/cmdExceptions';
 import UserConfigs from '../models/userconfigs';
-import { sendConvertedPixivPosts } from '../systems/agents/purepix';
-import { sendConvertedTwitterPosts } from '../systems/agents/pureet';
+import { sendConvertedPixivPosts } from '../systems/converters/purepix';
+import { sendConvertedTwitterPosts } from '../systems/converters/pureet';
 import { Translator } from '../i18n/index';
 import { fetchUserCache } from '../utils/usercache';
 import { addMessageCascade } from '../systems/others/messageCascades';

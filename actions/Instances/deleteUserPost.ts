@@ -1,5 +1,5 @@
 import { ContextMenuAction } from '../Commons/actionBuilder';
-import { getAgentMessageOwnerId, deleteAgentMessage } from '../../systems/agents/discordagent';
+import { getAgentMessageOwnerId, deleteAgentMessage } from '../../systems/converters/discordagent';
 import { Translator } from '../../i18n';
 
 const action = new ContextMenuAction('actionDeleteUserPost', 'Message')

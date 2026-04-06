@@ -1,6 +1,6 @@
 import WebhookOwner from '../../models/webhookOwners.js';
 import { AnyThreadChannel, GuildBasedChannel, GuildMember, GuildTextBasedChannel, Message, User, Webhook, WebhookMessageCreateOptions } from 'discord.js';
-import { isThread } from '../../func';
+import { isThread } from '../../func.js';
 
 interface OwnerData {
 	userId: string;

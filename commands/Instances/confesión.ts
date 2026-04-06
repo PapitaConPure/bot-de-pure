@@ -4,7 +4,7 @@ import { makeTextInputRowBuilder, makeButtonRowBuilder } from '../../utils/tsCas
 import { compressId, fetchChannel, decompressId } from '../../func';
 import PendingConfessions from '../../models/pendingConfessions.js';
 import ConfessionSystems from '../../models/confessionSystems.js';
-import { DiscordAgent } from '../../systems/agents/discordagent';
+import { DiscordAgent } from '../../systems/converters/discordagent';
 import { fetchGuildMembers } from '../../utils/guildratekeeper';
 import { auditError } from '../../systems/others/auditor';
 

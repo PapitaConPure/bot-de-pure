@@ -5,7 +5,7 @@ import { noDataBase } from '../data/globalProps';
 export type UserCache = {
 	language: LocaleKey;
 	pixivConverter: 'phixiv' | '';
-	twitterPrefix: import('../systems/agents/pureet').AcceptedTwitterConverterKey | '';
+	twitterPrefix: import('../systems/converters/pureet').AcceptedTwitterConverterKey | '';
 	banned: boolean;
 };
 

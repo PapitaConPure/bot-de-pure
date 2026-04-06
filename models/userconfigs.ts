@@ -1,6 +1,6 @@
 import Mongoose from 'mongoose';
 import Locales from '../i18n/locales';
-import { acceptedTwitterConverters } from '../systems/agents/pureet';
+import { acceptedTwitterConverters } from '../systems/converters/pureet';
 
 const UserConfigSchema = new Mongoose.Schema({
 	userId: {

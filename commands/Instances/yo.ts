@@ -2,7 +2,7 @@ import { CommandTags, Command, CommandOptions, CommandFlag } from '../Commons/';
 import { ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder, ContainerBuilder, MessageFlags, StringSelectMenuOptionBuilder, SeparatorSpacingSize, LabelBuilder, MessageComponentInteraction, Interaction } from 'discord.js';
 import { Translator, Locales, isValidLocaleKey, LocaleIds, LocaleKey } from '../../i18n';
 import { compressId, decompressId, improveNumber, warn, shortenText } from '../../func';
-import { AcceptedTwitterConverterKey, acceptedTwitterConverters } from '../../systems/agents/pureet';
+import { AcceptedTwitterConverterKey, acceptedTwitterConverters } from '../../systems/converters/pureet';
 import { updateFollowedFeedTagsCache } from '../../systems/booru/boorufeed';
 import UserConfigs, { UserConfigDocument } from '../../models/userconfigs';
 import { makeSessionAutoname } from '../../systems/others/purevoice';

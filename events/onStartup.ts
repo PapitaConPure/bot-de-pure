@@ -17,7 +17,7 @@ import { prepareTracksPlayer } from '../systems/others/musicPlayer';
 import { initializeMessageCascades } from '../systems/others/messageCascades';
 import { setupGuildFeedUpdateStack, feedTagSuscriptionsCache } from '../systems/booru/boorufeed';
 import { initRemindersScheduler, processReminders } from '../systems/others/remindersScheduler';
-import { initializeWebhookMessageOwners } from '../systems/agents/discordagent';
+import { initializeWebhookMessageOwners } from '../systems/converters/discordagent';
 
 import { GlobalFonts, loadImage } from '@napi-rs/canvas';
 import { getUnixTime } from 'date-fns';
