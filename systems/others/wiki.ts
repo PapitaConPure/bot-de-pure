@@ -327,13 +327,13 @@ export function getWikiPageComponentsV2(command: Command, request: ComplexComman
 			.setStyle(ButtonStyle.Primary)
 			.setDisabled(true);
 
-	 	const usageHeaderTextBuilder = new TextDisplayBuilder().setContent('### Uso (plantilla)');
-	 	const usageTextBuilder = new TextDisplayBuilder().setContent(`\`\`\`bnf\n${p_pure(request).raw}${commandName}${command.callx ? ` ${command.callx}` : ''}\n\`\`\``);
-	 	const usageSectionBuilder = new SectionBuilder()
-	 		.addTextDisplayComponents(usageHeaderTextBuilder, usageTextBuilder)
-	 		.setButtonAccessory(showMeHowButton);
+		const usageHeaderTextBuilder = new TextDisplayBuilder().setContent('### Uso (plantilla)');
+		const usageTextBuilder = new TextDisplayBuilder().setContent(`\`\`\`bnf\n${p_pure(request).raw}${commandName}${command.callx ? ` ${command.callx}` : ''}\n\`\`\``);
+		const usageSectionBuilder = new SectionBuilder()
+			.addTextDisplayComponents(usageHeaderTextBuilder, usageTextBuilder)
+			.setButtonAccessory(showMeHowButton);
 
-	 	infoContainerBuilder
+		infoContainerBuilder
 			.addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large))
 			.addSectionComponents(usageSectionBuilder)
 			.addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large));
