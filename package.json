@@ -9,8 +9,8 @@
   "packageManager": "bun@1.3.5",
   "main": "index.js",
   "scripts": {
-    "dev": "bun . -d",
-    "prod": "bun . -p",
+    "dev": "bun --env-file=.env .",
+    "prod": "bun --env-file=.env.production .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix && prettier --write .",
     "prepare": "lint-staged"
