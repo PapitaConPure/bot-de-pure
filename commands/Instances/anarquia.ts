@@ -1,5 +1,5 @@
 import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons/';
-import { makeWeightedDecision, compressId, decompressId, improveNumber, emojiRegex } from '../../func';
+import { makeWeightedDecision, compressId, decompressId, improveNumber, emojiRegex, WeightedDecision } from '../../func';
 import { EmbedBuilder, AttachmentBuilder, StringSelectMenuBuilder, Colors, ButtonBuilder, ButtonStyle, ActionRowBuilder, StringSelectMenuInteraction, MessageFlags } from 'discord.js';
 import { PureTable, AnarchyUser, pureTableAssets, AnarchyUserDocument } from '../../models/puretable';
 import { createTaskScheduler } from '../../utils/concurrency';
@@ -10,17 +10,16 @@ import { p_pure } from '../../utils/prefixes';
 import { Translator } from '../../i18n';
 import Ut from '../../utils/general';
 
-type Skill = {
+const ptTaskScheduler = createTaskScheduler();
+
+interface Skill {
 	readonly name: string;
 	readonly emoji: string;
 	readonly weight: number;
 	readonly shape: number[][];
-};
+}
 
-const ptTaskScheduler = createTaskScheduler();
-
-/**@satisfies {Record<string, Skill>} */
-const skills = ({
+const skills: Record<string, Skill> = ({
 	hline: {
 		name: 'Habilidad Horizontal',
 		emoji: '↔️',
@@ -178,7 +177,12 @@ const skills = ({
 		],
 	} as Skill,
 }) as const;
-type WeightedSkillOption = { weight: number, value: { key: string, skill: Skill }};
+
+interface SkillOption {
+	key: string,
+	skill: Skill,
+}
+type WeightedSkillOption = WeightedDecision<SkillOption>;
 const skillOptions: WeightedSkillOption[] = Object.entries(skills).map(([ key, skill ]) => ({ weight: skill.weight, value: { key, skill } }));
 
 const baseDropRate = 0.02; //La chance de drop base, incrementada con las propiedades de abajo según el nivel de usuario
