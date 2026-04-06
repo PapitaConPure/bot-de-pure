@@ -1,6 +1,6 @@
 import { CommandOptions, CommandTags, Command, CommandOptionSolver, CommandParam } from '../Commons/';
 import { EmbedBuilder, ButtonBuilder, TextInputBuilder, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder, MessageFlags, ButtonInteraction } from 'discord.js';
-import { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId, warn } from '../../func.js';
+import { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId } from '../../func.js';
 import GuildConfig, { GuildConfigDocument } from '../../models/guildconfigs.js';
 import { psDocsButton, psEditorButton } from './purescript.js';
 import { p_pure } from '../../utils/prefixes.js';
@@ -251,7 +251,7 @@ const command = new Command('tubérculo', flags)
 
 		if(tuberId == null) {
 			return request.reply({
-				content: warn(`Debes indicar una TuberID válida para realizar una acción\n${helpString(request)}`)
+				content: `⚠️ Debes indicar una TuberID válida para realizar una acción\n${helpString(request)}`
 			});
 		}
 

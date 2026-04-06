@@ -1,7 +1,7 @@
 import { CommandTags, Command, CommandOptions, CommandFlag } from '../Commons/';
 import { ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder, ContainerBuilder, MessageFlags, StringSelectMenuOptionBuilder, SeparatorSpacingSize, LabelBuilder, MessageComponentInteraction, Interaction } from 'discord.js';
 import { Translator, Locales, isValidLocaleKey, LocaleIds, LocaleKey } from '../../i18n';
-import { compressId, decompressId, improveNumber, warn, shortenText } from '../../func';
+import { compressId, decompressId, improveNumber, shortenText } from '../../func';
 import { AcceptedTwitterConverterKey, acceptedTwitterConverters } from '../../systems/converters/pureet';
 import { updateFollowedFeedTagsCache } from '../../systems/booru/boorufeed';
 import UserConfigs, { UserConfigDocument } from '../../models/userconfigs';
@@ -13,7 +13,7 @@ import { ComplexCommandRequest } from '../Commons/typings';
 import { auditError } from '../../systems/others/auditor';
 import { recacheUser } from '../../utils/usercache';
 
-const userNotAvailableText = warn('Usuario no disponible / User unavailable / ユーザーは利用できません');
+const userNotAvailableText = '⚠️ Usuario no disponible / User unavailable / ユーザーは利用できません';
 
 const backToDashboardButton = (compressedAuthorId: string) => new ButtonBuilder()
 	.setCustomId(`yo_goToDashboard_${compressedAuthorId}`)

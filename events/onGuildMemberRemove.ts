@@ -1,5 +1,5 @@
 import { GuildMember, PartialGuildMember } from 'discord.js';
-import { dibujarDespedida } from '../func';
+import { sendFarewellMessage } from '../func';
 import { guildIsAvailable, announceMemberUpdate } from './guildMemberUpdate';
 
 export async function onGuildMemberRemove(member: GuildMember | PartialGuildMember) {
@@ -7,5 +7,5 @@ export async function onGuildMemberRemove(member: GuildMember | PartialGuildMemb
 	if(!guildIsAvailable(member.guild)) return;
 	if(member.user.id === '239550977638793217')
 		return member.guild.systemChannel.send('Se fue el bigote');
-	announceMemberUpdate(member, dibujarDespedida);
+	announceMemberUpdate(member, sendFarewellMessage);
 }

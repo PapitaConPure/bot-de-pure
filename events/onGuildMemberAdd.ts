@@ -1,5 +1,5 @@
 import { GuildMember } from 'discord.js';
-import { dibujarBienvenida } from '../func';
+import { sendWelcomeMessage } from '../func';
 import { guildIsAvailable, announceMemberUpdate } from './guildMemberUpdate';
 
 import Logger from '../utils/logs.js';
@@ -13,7 +13,7 @@ export async function onGuildMemberAdd(member: GuildMember) {
 		member.roles.add('1139992433501942001').catch(console.error);
 		return member.guild.systemChannel.send('<:kokocrong:1107848001541644389>').catch(console.error);
 	}
-	announceMemberUpdate(member, dibujarBienvenida);
+	announceMemberUpdate(member, sendWelcomeMessage);
 }
 
 async function equisde(member: GuildMember) {

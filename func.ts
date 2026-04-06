@@ -1,15 +1,10 @@
 import Discord from 'discord.js'; //Discord.js
-import serverIds from './data/serverIds.json';
-import { globalConfigs } from './data/globalProps';
-import { saki } from './data/sakiProps';
-import images from './data/images.json'; //Imágenes globales
-import { p_pure } from './utils/prefixes';
+import { globalConfigs, tenshiColor } from './data/globalProps';
+import images from './data/images.json';
 import Canvas from '@napi-rs/canvas'; //Node Canvas
-import chalk from 'chalk'; //Consola con formato bonito
-import { colorsRow } from './data/sakiProps';
+import chalk from 'chalk';
 import { ButtonStyle, ChannelType } from 'discord.js';
 import { fetchUserCache } from './utils/usercache';
-import Hourai from './models/saki';
 import { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } from './utils/tsCasts';
 import { fetchGuildMembers } from './utils/guildratekeeper';
 import { Translator } from './i18n';
@@ -19,42 +14,7 @@ const concol = {
 	purple: chalk.rgb(158, 114,214),
 };
 
-const HTTP_ENTITIES = ({
-	nbsp:   ' ',
-	amp:    '&',
-	quot:   '"',
-	lt:     '<',
-	gt:     '>',
-	tilde:  '~',
-	apos:   '\'',
-	'#039': '\'',
-	cent:   '¢',
-	pound:  '£',
-	euro:   '€',
-	yen:    '¥',
-	copy:   '©',
-	reg:    '®',
-	iexcl:  '¡',
-	brvbar: '¦',
-	sect:   '§',
-	uml:    '¨',
-	not:    '¬',
-	deg:    'º',
-	acute:  '`',
-	micro:  'µ',
-	para:   '¶',
-	ordm:   'º',
-	laquo:  '«',
-	raquo:  '»',
-	circ:   '^',
-}) as const;
-
-const HTTP_ENTITIES_REGEX = (() => {
-	const keys = Object.keys(HTTP_ENTITIES).join('|');
-	return new RegExp(`&(${keys});`, 'g');
-})();
-
-//#region Lista
+//WARNING: Esta función permanece por compatibilidad. NO TOCAR
 export function paginateRaw<T>(array: Discord.Collection<string, T>, pagemax?: number): [string, T][][];
 export function paginateRaw<T>(array: T[], pagemax?: number): T[][];
 export function paginateRaw<T>(values: T[] | Discord.Collection<string, T>, pagemax: number): T[][] | ([string, T])[][];
@@ -70,111 +30,12 @@ export function paginateRaw<T>(values: T[] | Discord.Collection<string, T>, page
 		.map((_, i) => (i % pagemax === 0) ? values.slice(i, i + pagemax) : null)
 		.filter(item => item);
 }
-//#endregion
 
-//#region Temporizadores
-/**
- * Crea una promesa que dura la cantidad de milisegundos ingresados
- */
+/**@description Crea una promesa que dura la cantidad de milisegundos indicados.*/
 export function sleep(ms: number): Promise<void> {
 	if(typeof ms !== 'number') throw 'Se esperaba un número de milisegundos durante el cuál esperar';
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-export async function askForRole(miembro: Discord.GuildMember, canal: Discord.TextChannel, rep: number) {
-	const reps = 4;
-	console.log(chalk.cyan('Comprobando miembro nuevo en Saki Scans para petición de rol de color...'));
-	if(!canal.guild.members.cache.has(miembro.id)) {
-		console.log(chalk.red(`El miembro se fue del servidor. Abortando.`));
-		return canal.send({ content: `Se murió el wn de <@${miembro.user.id}> po <:mayuwu:1107843515385389128>` });
-	}
-	console.log(concol.orange('El miembro sigue en el servidor'));
-	const hasColor = hasColorRole(miembro);
-
-	//Comprobación constante para ver si el miembro ya tiene roles de colores
-	if(hasColor) {
-		console.log(chalk.green(`El miembro ha recibido sus roles básicos.`));
-		canal.send({ content: `Weno **${miembro.user.username}**, ya teni tu rol, q esti bien po <:junky:1107847993484386304>` });
-
-		//Finalizar
-		return setTimeout(finalizarHourai, 1000, miembro, canal);
-	}
-
-	if(rep > 0)
-		return setTimeout(askForRole, 1000 * 60 / reps, miembro, canal, rep - 1);
-
-	if(!miembro.roles.cache.has('1107831054791876691')) {
-		console.log(chalk.magenta('El miembro está retenido.'));
-		saki.warn++;
-		if(saki.warn <= 6) {
-			if(saki.warn <= 3)
-				canal.send({ content: `Oigan cabros, creo que a este qliao (<@${miembro.user.id}>) lo mató Hourai <:mayuwu:1107843515385389128> (${saki.warn}/3 llamados)` });
-			setTimeout(askForRole, 1000, miembro , canal, reps);
-			console.log(chalk.cyan(`Volviendo a esperar confirmación de miembro (${saki.warn}/6)...`));
-		}
-		return;
-	}
-
-	console.log(chalk.yellow('El miembro no ha recibido roles básicos.'));
-	await canal.send({
-		content: `Oe <@${miembro.user.id}> conchetumare vai a elegir un rol o te empalo altoke? <:mayuwu:1107843515385389128>`,
-		files: [ saki.images.colors ],
-		components: [ colorsRow ],
-	});
-	setTimeout(forceRole, 1000, miembro, canal, 2 * reps);
-	console.log(chalk.magentaBright(`Esperando comprobación final de miembro en unos minutos...`));
-}
-
-/**
- *
- * @param {Discord.GuildMember} miembro
- * @param {Discord.TextChannel} canal
- * @param {number} rep
- * @returns
- */
-export function forceRole(miembro: Discord.GuildMember, canal: Discord.TextChannel, rep: number) {
-	const reps = 4;
-	console.log(chalk.cyan('Comprobando miembro nuevo en Saki Scans para forzado de rol de color'));
-	if(!canal.guild.members.cache.get(miembro.id))
-		return canal.send({ content: `Se fue cagando el <@${miembro?.user.id ?? 'nose'}> csm <:mayuwu:1107843515385389128>` }).catch(() => {});
-
-	console.log(concol.orange('El miembro sigue en el servidor'));
-	const hasColor = hasColorRole(miembro);
-
-	if(hasColor) {
-		console.log(chalk.green('El miembro ya tiene los roles básicos.'));
-		canal.send({ content: `Al fin qliao ya teni tu rol. Q esti bien **${miembro.user.username}**, po <:uwu:681935702308552730>` }).catch(() => {});
-
-		//Finalizar
-		return setTimeout(finalizarHourai, 1000, miembro, canal);
-	}
-
-	if(rep > 0) {
-		setTimeout(forceRole, 1000 * 60 / reps, miembro, canal, rep - 1);
-		return;
-	}
-
-	try {
-		console.log(chalk.magentaBright('El miembro requiere roles básicos. Forzando roles...'));
-		const colores = saki.colorsList.map(c => c.roleId);
-		canal.send({
-			content:
-				`**${miembro.user.username}**, cagaste altiro watón fome <:tenshiSmug:1108791369897607219>\n` +
-				`Toma un rol random po <:mayuwu:1107843515385389128> <:hr:797294230463840267>`,
-			files: [ saki.images.forcecolors ]
-		});
-		miembro.roles.add(colores[Math.floor(Math.random() * 7)]);
-		console.log(chalk.greenBright('Roles forzados.'));
-
-		//Finalizar
-		setTimeout(finalizarHourai, 1000, miembro, canal);
-	} catch(e) {
-		console.log(chalk.red('El miembro ya no tiene ningún rol básico.'));
-		console.error(e);
-		canal.send({ content: `Espérate qué weá pasó con **${miembro.user.username}** <:reibu:1107876018171162705>\nOh bueno, ya me aburrí... chao.` }).catch(() => {});
-	}
-}
-//#endregion
 
 //#region Comprobadores
 export const isNotModerator = (member: Discord.GuildMember) => !(member.permissions.has('ManageRoles') || member.permissions.has('ManageMessages'));
@@ -182,11 +43,6 @@ export const isNotModerator = (member: Discord.GuildMember) => !(member.permissi
 export async function isUsageBanned(user: Discord.User | Discord.GuildMember) {
 	const userCache = await fetchUserCache(user);
 	return userCache.banned;
-}
-
-/**@param {Discord.GuildMember} member*/
-export function hasColorRole(member: Discord.GuildMember) {
-	return member?.roles?.cache?.hasAny(...saki.colorsList.map(c => c.roleId));
 }
 
 /**@param {Discord.GuildMember} member*/
@@ -217,43 +73,7 @@ export function channelIsBlocked(channel: import('discord.js').GuildTextBasedCha
 
 //#region Anuncios
 /**
- *
- * @param {Discord.GuildMember} miembro
- * @param {Discord.TextChannel} canal
- */
-export function finalizarHourai(miembro: Discord.GuildMember, canal: Discord.TextChannel) {
-	//Mensaje de fin de bienvenida
-	try {
-		canal.send({
-			content: [
-				`Okay, ya 'tamos ${miembro}, recuerda convivir adecuadamente con el resto <:comodowo:1107847983065747476>`,
-				'Si te interesa, puedes revisar los mensajes pinneados de este canal <:tenshiJuguito:1107843487891734588>',
-				'Y estate tranqui, que ya no vas a recibir tantos pings <:dormidowo:1108318689624866846>',
-				`Dicho esto, ¡disfruta el server po'! Si quieres más roles, puedes usar \`${p_pure(serverIds.saki).raw}roles\``,
-			].join('\n')
-		});
-
-		//Sugerir p!suicidio con 30% de probabilidad
-		if(Math.random() < 0.3)
-			setTimeout(() => {
-				canal.send({
-					content: `Por cierto, tenemos una tradición un poco más oscura. ¿Te atrevei a usar \`${p_pure(serverIds.saki).raw}suicidio\`?`
-				});
-			}, 1000 * 5);
-
-		//Otorgar rol con 50% de probabilidad
-		const gr = canal.guild.roles.cache;
-		const role50 = gr.find(r => r.name.includes('Rol con 50% de probabilidades de tenerlo'));
-		if(role50 && Math.random() < 0.5)
-			miembro.roles.add(role50);
-	} catch(e) {
-		console.error(e);
-	}
-}
-
-/**
- * Se debe llamar {@link fetchGuildMembers} antes para obtener buenos resultados
- * @param {Discord.Guild} guild
+ * Se debe llamar {@link fetchGuildMembers} antes para obtener buenos resultados.
  */
 export function calculateRealMemberCount(guild: Discord.Guild) {
 	const members = guild.members.cache;
@@ -286,14 +106,14 @@ interface CanvasTextDrawOptions {
 	stroke?: CanvasTextDrawStrokeOptions;
 	font?: CanvasTextDrawFontOptions;
 }
+
 /**
- * Dibuja un avatar circular con Node Canvas
- * @param {import('@napi-rs/canvas').SKRSContext2D} ctx El Canvas context2D utilizado
- * @param {number} x La posición X del origen del texto
- * @param {number} y La posición Y del origen del texto
- * @param {string} text El usuario del cual dibujar la foto de perfil
- * @param {CanvasTextDrawOptions} options Opciones de renderizado de texto
- * @returns {void}
+ * @description Dibuja un avatar circular con Node Canvas.
+ * @param ctx El Canvas context2D utilizado
+ * @param x La posición X del origen del texto
+ * @param y La posición Y del origen del texto
+ * @param text El usuario del cual dibujar la foto de perfil
+ * @param options Opciones de renderizado de texto
  */
 export function drawText(ctx: import('@napi-rs/canvas').SKRSContext2D, x: number, y: number, text: string, options: CanvasTextDrawOptions = {}): void {
 	//Parámetros opcionales
@@ -355,6 +175,7 @@ interface CanvasAvatarDrawOptions {
 	circleStrokeColor?: string;
 	circleStrokeFactor?: number;
 }
+
 export async function drawCircularImage(ctx: import('@napi-rs/canvas').SKRSContext2D, user: Discord.User, xcenter: number, ycenter: number, radius: number, options: CanvasAvatarDrawOptions = {}): Promise<void> {
 	options.circleStrokeColor ??= '#000000';
 	options.circleStrokeFactor ??= 0.02;
@@ -379,20 +200,15 @@ export async function drawCircularImage(ctx: import('@napi-rs/canvas').SKRSConte
 	ctx.restore();
 }
 
-/**
- *
- * @param {Discord.GuildMember} member
- * @param {Boolean} forceSaki
- */
-export async function dibujarBienvenida(member: Discord.GuildMember, forceSaki: boolean = false) {
-	//Dar bienvenida a un miembro nuevo de un servidor
-	const guild = member.guild; //Servidor
+export async function sendWelcomeMessage(member: Discord.GuildMember) {
+	if(member == null || typeof member !== 'object')
+		throw ReferenceError('Se esperaba un miembro a cual dar la bienvenida.');
 
-	const channel = guild.systemChannel; //Canal de mensajes de sistema
+	const { guild, user, displayName } = member;
 
-	//#region Comprobación de miembro y servidor
+	const channel = guild.systemChannel;
+
 	if(guild.systemChannel == null) {
-		console.log(chalk.blue('El servidor no tiene canal de mensajes de sistema.'));
 		guild.fetchOwner().then(ow => ow.user.send({
 			content:
 				'¡Hola, soy Bot de Puré!\n' +
@@ -407,26 +223,11 @@ export async function dibujarBienvenida(member: Discord.GuildMember, forceSaki: 
 		return;
 
 	console.log(concol.purple`Un usuario ha entrado a ${guild.name}...`);
-	//#endregion
 
 	await channel.sendTyping();
 
-	if(forceSaki || guild.id === serverIds.saki)
-		drawWelcomeSaki(member, { force: forceSaki });
-	else
-		drawWelcomeStandard(member);
-}
-
-/**
- *
- * @param {Discord.GuildMember} member
- */
-export async function drawWelcomeStandard(member: Discord.GuildMember) {
-	const { guild, user, displayName } = member;
-	const channel = guild.systemChannel;
-
 	try {
-		//Creación de imagen
+		//Crear la imagen de bienvenida
 		const canvas = Canvas.createCanvas(1275, 825);
 		const ctx = canvas.getContext('2d');
 
@@ -436,8 +237,6 @@ export async function drawWelcomeStandard(member: Discord.GuildMember) {
 		]);
 		ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 
-		//#region Texto
-		//#region Propiedades Básicas de texto
 		const strokeFactor = 0.09;
 		const maxSize = canvas.width * 0.9;
 		const vmargin = 15;
@@ -453,7 +252,6 @@ export async function drawWelcomeStandard(member: Discord.GuildMember) {
 			size: 100,
 			styles: [ 'bold' ],
 		};
-		//#endregion
 
 		//Nombre del miembro
 		drawText(ctx, canvas.width / 2, vmargin, `${displayName}`, {
@@ -475,216 +273,110 @@ export async function drawWelcomeStandard(member: Discord.GuildMember) {
 			stroke: defaultStroke,
 			font: defaultFont,
 		});
-		//#endregion
 
 		//Foto de perfil
 		await drawCircularImage(ctx, user, canvas.width / 2, (canvas.height - 56) / 2, 200, { circleStrokeFactor: strokeFactor });
 
-		const imagen = new Discord.AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'bienvenida.webp' });
-		const peoplecnt = calculateRealMemberCount(guild);
-		await channel.send({ files: [ imagen ] });
+		const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'bienvenida.webp' });
+		const memberCount = calculateRealMemberCount(guild);
+
+		const container = new Discord.ContainerBuilder()
+			.setAccentColor(tenshiColor)
+			.addMediaGalleryComponents(mediaGallery =>
+				mediaGallery.addItems(item =>
+					item
+						.setURL('attachment://bienvenida.webp')
+						.setDescription('Imagen de bienvenida.'),
+				),
+			)
+			.addTextDisplayComponents(textDisplay =>
+				textDisplay.setContent([
+					`¡Bienvenido al servidor **${displayName}**!`,
+					`-# Ahora hay **${memberCount}** usuarios en el server.`,
+				].join('\n'))
+			);
 
 		return channel.send({
-			content:
-				`¡Bienvenido al servidor **${displayName}**!\n` +
-				`-# Ahora hay **${peoplecnt}** usuarios en el server.`
+			flags: Discord.MessageFlags.IsComponentsV2,
+			components: [ container ],
+			files: [ attachment ],
 		});
 	} catch(err) {
-		console.log(chalk.redBright.bold('Error de bienvenida genérica'));
+		console.log(chalk.redBright.bold('Ocurrió un problema al intentar enviar un mensaje de bienvenida:'));
 		console.error(err);
 	}
 }
 
-interface SakiWelcomeDrawOptions {
-	force?: boolean;
-}
-/**
- *
- * @param {Discord.GuildMember} member
- * @param {SakiWelcomeDrawOptions} [options]
- */
-export async function drawWelcomeSaki(member: Discord.GuildMember, options: SakiWelcomeDrawOptions = {}) {
-	options.force ??= false;
-
-	const sakiCfg = (await Hourai.findOne()) || new Hourai();
-
-	if(!options.force && sakiCfg.configs?.bienvenida == false)
-		return;
-
-	const { guild, user, displayName } = member;
+export async function sendFarewellMessage(member: Discord.GuildMember) {
+	const { guild } = member;
 	const channel = guild.systemChannel;
 
-	try {
-		//Creación de imagen
-		const canvas = Canvas.createCanvas(1366, 768);
-		const ctx = canvas.getContext('2d');
-
-		const [ fondo ] = await Promise.all([
-			Canvas.loadImage(saki.images.welcome),
-			fetchGuildMembers(guild),
-		]);
-		ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
-
-		//#region Texto
-		//#region Propiedades Básicas de texto
-		const strokeFactor = 0.09;
-		const maxSize = canvas.width * 0.6;
-		const vmargin = 15;
-
-		const defaultStroke: CanvasTextDrawStrokeOptions = {
-			widthAsFactor: true,
-			width: strokeFactor,
-			color: '#000000',
-		};
-
-		const defaultFont: CanvasTextDrawFontOptions = {
-			family: 'headline',
-			size: 100,
-			styles: [ 'bold' ],
-		};
-		//#endregion
-
-		//Nombre del miembro
-		drawText(ctx, canvas.width * 0.5, vmargin, `${displayName}`, {
-			area: { halign: 'center', valign: 'top', maxSize },
-			stroke: defaultStroke,
-			font: defaultFont,
-		});
-
-		const xcenterGuild = canvas.width * 0.5;
-
-		//Complemento encima del Nombre de Servidor
-		drawText(ctx, xcenterGuild, canvas.height - 105 - vmargin, '¡Bienvenid@ a', {
-			area: { halign: 'center', valign: 'bottom', maxSize },
-			stroke: defaultStroke,
-			font: { ...defaultFont, size: 56 },
-		});
-
-		//Nombre de Servidor
-		drawText(ctx, xcenterGuild, canvas.height - vmargin, `${guild.name}!`, {
-			area: { halign: 'center', valign: 'bottom', maxSize },
-			stroke: defaultStroke,
-			font: defaultFont,
-		});
-		//#endregion
-
-		//Foto de perfil
-		await drawCircularImage(ctx, user, canvas.width * 0.5, (canvas.height - 56) * 0.5, 200, { circleStrokeFactor: strokeFactor * 0.75 });
-
-		const imagen = new Discord.AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'bienvenida.webp' });
-		const peoplecnt = calculateRealMemberCount(guild);
-
-		await channel.send({ files: [ imagen ] });
-
-		const toSend = [
-			`Wena po <@${user.id}> conchetumare, como estai.`,
-			'Como tradición, elige un color con el menú de abajo <:mayuwu:1107843515385389128>',
-			'-# Nota: si no lo haces, lo haré por ti, por aweonao <:junkNo:1107847991580164106>',
-		];
-
-		if(sakiCfg.configs?.pingBienvenida)
-			toSend.push('<@&1107831054791876694>, vengan a saludar po maricones <:hl:797294230359375912><:miyoi:1107848008005062727><:hr:797294230463840267>');
-
-		toSend.push(`*Por cierto, ahora hay **${peoplecnt}** wnes en el server* <:meguSmile:1107880958981587004>`);
-		toSend.push(saki.images.colors);
-
-		sakiCfg.save().catch(() => undefined);
-
-		return channel.send({
-			content: toSend.join('\n'),
-			components: [ colorsRow ],
-		}).then(sent => {
-			setTimeout(askForRole, 1000, member, channel, 3 * 4);
-			console.log('Esperando evento personalizado de Saki Scans en unos minutos...');
-			return sent;
-		});
-	} catch(err) {
-		console.log(chalk.redBright.bold('Error de bienvenida de Saki Scans'));
-		console.error(err);
-	}
-}
-
-/**
- *
- * @param {Discord.GuildMember} miembro
- * @returns
- */
-export async function dibujarDespedida(miembro: Discord.GuildMember) {
-	//Dar despedida a ex-miembros de un servidor
-	const servidor = miembro.guild;
-	const canal = servidor.systemChannel;
-
-	//#region Comprobación de miembro y servidor
-	if(!canal) {
+	if(!channel) {
 		console.log('El servidor no tiene canal de mensajes de sistema.');
 		return;
 	}
 
-	console.log(`Un usuario ha salido de ${servidor.name}...`);
-	if(!servidor.members.me.permissionsIn(canal).has([ 'SendMessages', 'ViewChannel' ])) {
+	console.log(`Un usuario ha salido de ${guild.name}...`);
+	if(!guild.members.me.permissionsIn(channel).has([ 'SendMessages', 'ViewChannel' ])) {
 		console.log('No se puede enviar un mensaje de despedida en este canal.');
 		return;
 	}
-	canal.sendTyping();
-	//#endregion
+
+	await channel.sendTyping();
 
 	try {
-		//#region Creación de imagen
+		//Crear imagen de despedida
 		const canvas = Canvas.createCanvas(1500, 900);
 		const ctx = canvas.getContext('2d');
 
 		const [ fondo ] = await Promise.all([
 			Canvas.loadImage(images.announcements.farewell),
-			fetchGuildMembers(servidor),
+			fetchGuildMembers(guild),
 		]);
 		ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
-		//#endregion
 
-		//#region Texto
-		//#region Propiedades de Texto
 		const strokeFactor = 0.09;
 		ctx.fillStyle = '#ffffff';
 		ctx.strokeStyle = '#000000';
-		//#endregion
 
-		//#region Nombre del usuario
+		//Nombre del usuario + despedida
 		ctx.textBaseline = 'bottom';
 		ctx.textAlign = 'center';
-		const xcenter = canvas.width / 2;
-		const Texto = `Adiós, ${miembro.displayName}`;
+		const halfWidth = canvas.width / 2;
+		const farewellText = `Adiós, ${member.displayName}`;
 		const fontSize = 90;
 		ctx.font = `bold ${fontSize}px "headline"`;
 		ctx.lineWidth = Math.ceil(fontSize * strokeFactor);
-		ctx.strokeText(Texto, xcenter, canvas.height - 40);
-		ctx.fillText(Texto, xcenter, canvas.height - 40);
-		//#endregion
-		//#endregion
+		ctx.strokeText(farewellText, halfWidth, canvas.height - 40);
+		ctx.fillText(farewellText, halfWidth, canvas.height - 40);
 
-		await drawCircularImage(ctx, miembro.user, canvas.width / 2, 80 + 200, 200, { circleStrokeFactor: strokeFactor });
+		//Foto de perfil
+		await drawCircularImage(ctx, member.user, canvas.width / 2, 80 + 200, 200, { circleStrokeFactor: strokeFactor });
 
-		//#region Imagen y Mensaje extra
-		const imagen = new Discord.AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'despedida.webp' });
-		const members = servidor.members.cache;
-		const peoplecnt = members.filter(member => !member.user.bot).size;
-		if(servidor.id === serverIds.saki) {
-			const hourai = await Hourai.findOne() || new Hourai();
-			if(hourai.configs?.despedida == false)
-				return;
+		//Enviar imagen y mensaje extra
+		const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'despedida.webp' });
+		const members = guild.members.cache;
+		const memberCount = members.filter(member => !member.user.bot).size;
 
-			await canal.send({ files: [ imagen ] });
-			await canal.send({
-				content:
-					'Nooooo po csm, perdimo otro weón <:meguDerp:1107848004775465032>\n' +
-					`*Ahora quedan **${peoplecnt}** aweonaos en el server.*`
-			});
+		const container = new Discord.ContainerBuilder()
+			.setAccentColor(tenshiColor)
+			.addMediaGalleryComponents(mediaGallery =>
+				mediaGallery.addItems(item =>
+					item
+						.setURL('attachment://despedida.webp')
+						.setDescription('Imagen de despedida.'),
+				),
+			)
+			.addTextDisplayComponents(textDisplay =>
+				textDisplay.setContent(`*Ahora hay **${memberCount}** usuarios en el server.*`),
+			);
 
-			hourai.save().catch(() => undefined);
-		} else { //Otros servidores
-			await canal.send({ files: [ imagen ] });
-			await canal.send({ content: `*Ahora hay **${peoplecnt}** usuarios en el server.*`});
-		}
+		await channel.send({
+			flags: Discord.MessageFlags.IsComponentsV2,
+			components: [ container ],
+			files: [ attachment ],
+		});
 
-		//#endregion
 		console.log('Despedida finalizada.');
 	} catch(err) {
 		console.log(chalk.redBright.bold('Error de despedida'));
@@ -708,6 +400,7 @@ interface MemberMatch {
 	length: number;
 	matchIndex: number;
 }
+
 function memberMatchComparer(a: MemberMatch, b: MemberMatch): number {
 	//Favorecer coincidencia temprana
 	if(a.matchIndex < b.matchIndex)
@@ -786,13 +479,14 @@ export function findMemberByGlobalName(members: Discord.Collection<string, Disco
 }
 
 /**
+ * @description
  * Busca miembros de Discord según la consulta y el contexto proporcionados.
  *
  * Devuelve el {@link Discord.GuildMember miembro} de mayor coincidencia.
  * Si no se encuentra ningún miembro, se devuelve `undefined`.
- * @param {Discord.GuildMember | string} query
- * @param {FetchUserContext} context
- * @returns {Discord.GuildMember}
+ * @param query La consulta a realizar para obtener un miembro.
+ * @param context El contexto del cuál obtener un miembro con la consulta.
+ * @returns El miembro encontrado.
  */
 export function fetchMember(query: Discord.GuildMember | string, context: FetchUserContext): Discord.GuildMember {
 	if(!query)
@@ -845,11 +539,16 @@ interface FetchUserContext {
 	guild?: Discord.Guild;
 	client?: Discord.Client;
 }
+
 /**
+ * @description
  * Busca usuarios de Discord según la consulta y el contexto proporcionados.
  *
  * Devuelve el {@link Discord.User usuario} de mayor coincidencia.
  * Si no se encuentra ningún usuario, se devuelve `undefined`.
+ * @param query La consulta a realizar para obtener un usuario.
+ * @param context El contexto del cuál obtener un usuario con la consulta.
+ * @returns El usuario encontrado.
  */
 export function fetchUser(query: Discord.User | string, context: FetchUserContext): Discord.User {
 	if(!query)
@@ -894,22 +593,28 @@ export function fetchUser(query: Discord.User | string, context: FetchUserContex
 }
 
 /**
+ * @description
  * Busca un usuario basado en la data ingresada.
- * Devuelve la ID del usuario que más coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún usuario, se devuelve undefined.
- * @param {string} query
- * @param {FetchUserContext} context
- * @returns {Promise<string>}
+ *
+ * Devuelve la ID del usuario que más coincide con el término de búsqueda y contexto actual (si se encuentra alguno).
+ * Si no se encuentra ningún usuario, se devuelve `undefined`.
+ * @param query La consulta a realizar para encontrar un usuario.
+ * @param context El contexto del cuál obtener un usuario con la consulta.
+ * @returns La ID del usuario encontrado.
  */
-export async function fetchUserID(query: string, context: FetchUserContext): Promise<string> {
+export async function fetchUserID(query: Discord.User | string, context: FetchUserContext): Promise<string> {
 	const user = fetchUser(query, context);
-	return (user === undefined) ? undefined : user.id;
+	return (user != null) ? user.id : undefined;
 }
 
 /**
+ * @description
  * Busca un servidor basado en la data ingresada.
- * Devuelve el servidor que coincide con el término de búsqueda (si se encuentra alguno). Si no se encuentra ningún servidor, se devuelve `undefined`.
- * @param {string} query
- * @returns {Promise<Discord.Guild>}
+ *
+ * Devuelve el servidor que coincide con el término de búsqueda (si se encuentra alguno).
+ * Si no se encuentra ningún servidor, se devuelve `undefined`.
+ * @param query La consulta a realizar para obtener un servidor.
+ * @returns El servidor encontrado.
  */
 export async function fetchGuild(query: string): Promise<Discord.Guild> {
 	if(typeof query !== 'string' || !query.length) return;
@@ -934,11 +639,14 @@ export async function fetchGuild(query: string): Promise<Discord.Guild> {
 }
 
 /**
+ * @description
  * Busca un canal basado en la data ingresada.
- * Devuelve el canal que coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún canal, se devuelve `undefined`.
- * @param {string} query
- * @param {Discord.Guild} guild
- * @returns {Discord.GuildBasedChannel}
+ *
+ * Devuelve el canal que coincide con el término de búsqueda y contexto actual (si se encuentra alguno).
+ * Si no se encuentra ningún canal, se devuelve `undefined`.
+ * @param query La consulta a realizar para obtener un canal.
+ * @param guild El servidor en el cual buscar el canal.
+ * @returns El canal encontrado.
  */
 export function fetchChannel(query: string, guild: Discord.Guild): Discord.GuildBasedChannel {
 	if(typeof query !== 'string' || !query.length) return;
@@ -951,6 +659,7 @@ export function fetchChannel(query: string, guild: Discord.Guild): Discord.Guild
 
 	if(!channel)
 		return;
+
 	if(![ ChannelType.GuildText, ChannelType.GuildVoice ].includes(channel.type))
 		return;
 
@@ -961,9 +670,16 @@ interface FetchMessageContext {
 	guild?: Discord.Guild;
 	channel?: Discord.GuildTextBasedChannel;
 }
+
 /**
+ * @description
  * Busca un mensaje basado en la data ingresada.
- * Devuelve el mensaje que coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún canal, se devuelve undefined.
+ *
+ * Devuelve el mensaje que coincide con el término de búsqueda y contexto actual (si se encuentra alguno).
+ * Si no se encuentra ningún mensaje, se devuelve `undefined`.
+ * @param data Los datos a utilizar para encontrar un mensaje.
+ * @param context El contexto del cuál obtener un mensaje con la consulta.
+ * @returns El mensaje encontrado.
  */
 export async function fetchMessage(data: string, context: FetchMessageContext = {}): Promise<Discord.Message> {
 	if(typeof data !== 'string' || !data.length) return;
@@ -990,11 +706,14 @@ export async function fetchMessage(data: string, context: FetchMessageContext = 
 }
 
 /**
- * Busca un canal basado en la data ingresada.
- * Devuelve el canal que coincide con el término de búsqueda y contexto actual (si se encuentra alguno). Si no se encuentra ningún canal, se devuelve undefined.
- * @param {string} data
- * @param {Discord.Guild} guild
- * @returns {Discord.Role}
+ * @description
+ * Busca un rol basado en la data ingresada.
+ *
+ * Devuelve el rol que coincide con el término de búsqueda y contexto actual (si se encuentra alguno).
+ * Si no se encuentra ningún rol, se devuelve `undefined`.
+ * @param data Los datos a utilizar para encontrar un rol.
+ * @param guild El servidor en el cual buscar el rol.
+ * @returns El rol encontrado.
  */
 export function fetchRole(data: string, guild: Discord.Guild): Discord.Role {
 	if(typeof data !== 'string' || !data.length) return;
@@ -1007,14 +726,13 @@ export function fetchRole(data: string, guild: Discord.Guild): Discord.Role {
 	return role;
 }
 
-/**
- * @deprecated
- */
+/**@deprecated Mantenido por compatibilidad. No debe reusarse nunca hoy en día, y en su lugar: deben usarse componentes de entrada de usuario de Discord.*/
 export const fetchArrows = (emojiscache: Discord.Collection<Discord.Snowflake, Discord.Emoji>): [Discord.Emoji, Discord.Emoji] => [ emojiscache.get('681963688361590897'), emojiscache.get('681963688411922460') ];
 
 /**
  * @param args An array of words, which may contain double-quote groups
  * @param i Index from which to extract a sentence, be it a single word or a group
+ * @ignore This should never be used directly, because the class for addressing options already handles the intended use case of this function in a less confusing manner.
  */
 export function fetchSentence(args: string[], i: number) {
 	if(i == undefined || i >= args.length || args[i] == undefined)
@@ -1037,11 +755,40 @@ export function fetchSentence(args: string[], i: number) {
 //#endregion
 
 //#region Utilidades
-export const success = (text: string) => `✅ ${text}`;
+const HTTP_ENTITIES = ({
+	nbsp:   ' ',
+	amp:    '&',
+	quot:   '"',
+	lt:     '<',
+	gt:     '>',
+	tilde:  '~',
+	apos:   '\'',
+	'#039': '\'',
+	cent:   '¢',
+	pound:  '£',
+	euro:   '€',
+	yen:    '¥',
+	copy:   '©',
+	reg:    '®',
+	iexcl:  '¡',
+	brvbar: '¦',
+	sect:   '§',
+	uml:    '¨',
+	not:    '¬',
+	deg:    'º',
+	acute:  '`',
+	micro:  'µ',
+	para:   '¶',
+	ordm:   'º',
+	laquo:  '«',
+	raquo:  '»',
+	circ:   '^',
+}) as const;
 
-export const warn = (text: string) => `⚠️ ${text}`;
-
-export const unable = (text: string) => `❌ ${text}`;
+const HTTP_ENTITIES_REGEX = (() => {
+	const keys = Object.keys(HTTP_ENTITIES).join('|');
+	return new RegExp(`&(${keys});`, 'g');
+})();
 
 export function decodeEntities(encodedstring: string) {
 	//Fuente: https://stackoverflow.com/questions/44195322/a-plain-javascript-way-to-decode-html-entities-works-on-both-browsers-and-node
@@ -1053,21 +800,53 @@ export function decodeEntities(encodedstring: string) {
 	});
 }
 
-export function makeWeightedDecision<T>(options: ({ weight: number; value: T; })[]): T {
-	if(!options.length) return null;
+export interface WeightedDecision<TValue> {
+	value: TValue;
+	weight: number;
+}
 
-	const total = options.map(option => option.weight).reduce((a, b) => a + b);
-	const count = options.length;
+/**
+ * @description
+ * Selects a value from a list of weighted options using a random distribution.
+ *
+ * Each option's probability is proportional to its `weight` relative to the total weight.
+ * For example, an option with weight `2` is twice as likely to be selected as an option with weight `1`.
+ * @param options An array of weighted options to choose from.
+ * @returns The randomly selected value based on weight, or `undefined` if no options are provided.
+ *
+ * @example
+ * const result = makeWeightedDecision([
+ *   { value: 'common', weight: 80 },
+ *   { value: 'rare', weight: 15 },
+ *   { value: 'legendary', weight: 5 }
+ * ]);
+ *
+ * // 'common' is most likely, 'legendary' is least likely
+ * console.log(result);
+ */
+export function makeWeightedDecision<TValue = unknown>(options: WeightedDecision<TValue>[]): TValue {
+	if(!options.length) return;
 
-	let r = Math.random() * total;
-	for(let i = 0; i < count; i++) {
+	const optionCount = options.length;
+
+	let totalWeight = 0;
+	for(const option of options)
+		totalWeight += option.weight;
+
+	if(totalWeight === 0) {
+		const r = Math.floor(Math.random() * optionCount);
+		return options[r].value;
+	}
+
+	let r = Math.random() * totalWeight;
+	for(let i = 0; i < optionCount; i++) {
 		if(r < options[i].weight)
 			return options[i].value;
 		else
 			r -= options[i].weight;
 	}
 
-	return options[count - 1].value;
+	return options[optionCount - 1].value;
 }
 //#endregion
 
@@ -1079,13 +858,13 @@ export const unicodeEmojiRegex = /\p{Emoji_Presentation}|\p{Extended_Pictographi
  */
 export const emojiRegex = /<a?:\w+:([0-9]+)>/gi;
 
-/**Devuelve el primer emoji global encontrado en el string*/
+/**@description Devuelve el primer emoji global encontrado en el string.*/
 export function defaultEmoji(emoji: string): string | null {
 	if(typeof emoji !== 'string') return null;
 	return emoji.match(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu)?.[0]; //Expresión RegExp cursed
 }
 
-/**Devuelve el primer emoji de servidor encontrado con el string*/
+/**@description Devuelve el primer emoji de servidor encontrado con el string.*/
 export function guildEmoji(emoji: string, guild: Discord.Guild): Discord.Emoji | null {
 	if(typeof emoji !== 'string') return null;
 	if(!guild.emojis) throw TypeError('Debes ingresar una Guild');
@@ -1095,7 +874,7 @@ export function guildEmoji(emoji: string, guild: Discord.Guild): Discord.Emoji |
 	return guild.emojis.resolve(parsedEmoji);
 }
 
-/**Devuelve el primer emoji global o de servidor encontrado en el string*/
+/**@description Devuelve el primer emoji global o de servidor encontrado en el string.*/
 export const emoji = (emoji: string, guild: import('discord.js').Guild): Discord.Emoji | string | null => defaultEmoji(emoji) ?? guildEmoji(emoji, guild);
 
 export function isNSFWChannel(channel: import('discord.js').GuildBasedChannel) {
@@ -1108,7 +887,10 @@ export function isNSFWChannel(channel: import('discord.js').GuildBasedChannel) {
 	return false;
 }
 
-/**Devuelve un valor acomodado al rango facilitado*/
+/**
+ * @pure
+ * @description Devuelve el valor ingresado, restringido al rango facilitado.
+ */
 export function clamp(value: number, min: number, max: number) {
 	if(min > max) {
 		const temp = min;
@@ -1119,7 +901,10 @@ export function clamp(value: number, min: number, max: number) {
 	return Math.max(min, Math.min(value, max));
 }
 
-/**Devuelve la mediana del conjunto especificado*/
+/**
+ * @pure
+ * @description Devuelve la mediana del conjunto especificado.
+ */
 export function median(...values: number[]) {
 	if(!values.length) throw RangeError('Se esperaba al menos 1 número');
 	values = values.sort((a, b) => a - b);
@@ -1130,9 +915,9 @@ export function median(...values: number[]) {
 }
 
 /**
- * Devuelve un valor aleatorio entre 0 y otro valor
- * @param maxExclusive Máximo valor; excluído del resultado. 1 por defecto
- * @param [round=false] Si el número debería ser redondeado hacia abajo. `true` por defecto
+ * @description Devuelve un valor aleatorio entre 0 y otro valor.
+ * @param maxExclusive Máximo valor; excluído del resultado. 1 por defecto.
+ * @param [round=false] Si el número debería ser redondeado hacia abajo. `true` por defecto.
  */
 export function rand(maxExclusive: number, round: boolean = true) {
 	maxExclusive = +maxExclusive;
@@ -1143,10 +928,10 @@ export function rand(maxExclusive: number, round: boolean = true) {
 }
 
 /**
- * Devuelve un valor aleatorio dentro de un rango entre 2 valores
- * @param minInclusive Mínimo valor; puede ser incluído en el resultado
- * @param maxExclusive Máximo valor; excluído del resultado
- * @param round Si el número debería ser redondeado hacia abajo. `false` por defecto
+ * @description Devuelve un valor aleatorio dentro de un rango entre 2 valores.
+ * @param minInclusive Mínimo valor; puede ser incluído en el resultado.
+ * @param maxExclusive Máximo valor; excluído del resultado.
+ * @param round Si el número debería ser redondeado hacia abajo. `false` por defecto.
  */
 export function randRange(minInclusive: number, maxExclusive: number, round: boolean = true) {
 	minInclusive = 1 * minInclusive;
@@ -1156,7 +941,7 @@ export function randRange(minInclusive: number, maxExclusive: number, round: boo
 	return round ? Math.floor(value) : value;
 }
 
-/**Devuelve un elemento aleatorio dentro de la Array especificada*/
+/**@description Devuelve un elemento aleatorio dentro de la Array especificada.*/
 export function randInArray<T>(array: T[]): T {
 	if(!array.length) return undefined;
 	const randomIndex = rand(array.length);
@@ -1187,6 +972,7 @@ export function subdivideArray<T>(array: T[], divisionSize: number): T[][] {
 }
 
 /**
+ * @description
  * Agrega filas de control de navegación de páginas.
  *
  * Tanto `loadPage` como `loadPageExact` cumplen la función de ir a un número de página resaltado.
@@ -1254,7 +1040,7 @@ export function navigationRows(commandFilename: string, page: number, lastPage: 
 	];
 }
 
-export const shortnumberNames = {
+export const shortnumberNames = ({
 	es: [
 		'millones', 'miles de millones', 'billones', 'miles de billones', 'trillones', 'miles de trillones', 'cuatrillones', 'miles de cuatrillones',
 		'quintillones', 'miles de quintillones', 'sextillones', 'miles de sextillones', 'septillones', 'miles de septillones', 'octillones', 'miles de octillones', 'nonillones', 'miles de nonillones',
@@ -1273,7 +1059,7 @@ export const shortnumberNames = {
 		'vigintillions', 'unvigintillions', 'duovigintillions', 'trevigintillions', 'quattuorvigintillions', 'quinvigintillions', 'sexvigintillions', 'septenvigintillions', 'octovigintillions', 'novemvigintillions',
 		'trigintillions', 'untrigintillions', 'duotrigintillions',
 	],
-};
+}) as const;
 
 interface ImproveNumberOptions {
 	appendOf?: boolean;
@@ -1346,7 +1132,7 @@ export function regroupText(arr: string[], sep = ',') {
 /**
  * @description
  * Limita un string a una cantidad definida de caracteres.
- * Si el string sobrepasa el máximo establecido, se reemplaza el final por un string suspensor para indicar el recorte
+ * Si el string sobrepasa el máximo establecido, se reemplaza el final por un string suspensor para indicar el recorte.
  */
 export function shortenText(text: string, max: number | null = 200, suspensor: string | null = '...'): string {
 	if(typeof text !== 'string') throw TypeError('El texto debe ser un string');
@@ -1359,7 +1145,7 @@ export function shortenText(text: string, max: number | null = 200, suspensor: s
 /**
  * @description
  * Limita un string a una cantidad definida de caracteres de forma floja (no recorta palabras).
- * Si el string sobrepasa el máximo establecido, se reemplaza el final por un string suspensor para indicar el recorte
+ * Si el string sobrepasa el máximo establecido, se reemplaza el final por un string suspensor para indicar el recorte.
  */
 export function shortenTextLoose(text: string, max: number | null = 200, hardMax: number | null = 256, suspensor: string | null = '...'): string {
 	if(typeof text !== 'string') throw TypeError('El texto debe ser un string');
@@ -1422,12 +1208,14 @@ export function shortenTextSmart(text: string, options: Partial<SmartShortenOpti
 	return `${text.slice(0, trueMax)}${suspensor}`;
 }
 
-export const toCapitalized = (text) => `${text.slice(0, 1).toUpperCase()}${text.slice(1)}`;
+/**@description Devuelve una representación del string ingresado con su primer caracter en mayúscula.*/
+export const toCapitalized = (text: string) => `${text.slice(0, 1).toUpperCase()}${text.slice(1)}`;
 
 interface LowerCaseNormalizationOptions {
 	removeCarriageReturns?: boolean;
 }
 
+/**@description Obtiene una representación en minúsculas, normalizada y sin diacríticos del string ingresado.*/
 export function toLowerCaseNormalized(text: string, options: LowerCaseNormalizationOptions = null): string {
 	options ??= {};
 	options.removeCarriageReturns ??= false;
@@ -1444,7 +1232,7 @@ export function toLowerCaseNormalized(text: string, options: LowerCaseNormalizat
 }
 
 /**
- * Calcula la distancia entre dos strings con el algoritmo de distancia Levenshtein
+ * Calcula la distancia entre dos strings con el algoritmo de distancia Levenshtein.
  * @param {string} a
  * @param {string} b
  * @returns {number}
@@ -1480,7 +1268,9 @@ export function levenshteinDistance(a: string, b: string): number {
 
 /**
  * @description
- * Calcula la distancia entre dos strings con el algoritmo de distancia Damerau-Levenshtein + peso Euclideano según distancia entre teclas del teclado
+ * Calcula la distancia entre dos strings con el algoritmo de distancia Damerau-Levenshtein + peso Euclideano según distancia entre teclas del teclado.
+ *
+ * Asume una distribución de teclado de tipo QWERTY en Español (España).
  */
 export function edlDistance(a: string, b: string): number {
 	const keyboardKeys = [
@@ -1686,7 +1476,13 @@ export function dateToUTCFormat(date: Date, template: string, locale: string = '
 	return formatted;
 }
 
-export function compressId(id: string) {
+/**
+ * @description
+ * Comprime un snowflake de Discord dividiéndolo en dos partes, convirtiéndolas a un sistema arbitrario de base 128 y concatenando el resultado.
+ *
+ * La longitud del segmento izquierdo comprimido se antepone al resultado para permitir su decodificación.
+ */
+export function compressId(id: string): string {
 	if(typeof id !== 'string')
 		throw Error('La id debe ser un string');
 
@@ -1709,7 +1505,8 @@ export function compressId(id: string) {
 	return compr[0].length + compr.join('');
 }
 
-export function decompressId(id: string) {
+/**@description Realiza el proceso inverso de la función de compresión: {@linkcode compressId}.*/
+export function decompressId(id: string): string {
 	if(typeof id !== 'string')
 		throw Error('La id debe ser un string');
 
@@ -1738,9 +1535,8 @@ export function stringHexToNumber(str: string): number {
 /**
  * @description
  * Reduce la presición de un número a solo los dígitos especificados.
- * Si la parte decimal tiene menos dígitos que lo especificado, se deja como está
- * @param num El número
- * @param precision La precisión
+ *
+ * Si la parte decimal tiene menos dígitos que lo especificado, se deja como está.
  */
 export function toPrecision(num: number, precision: number) {
 	if(typeof num !== 'number') throw TypeError('Se esperaba un número válido');
