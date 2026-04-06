@@ -4,6 +4,9 @@ node_modules
 #DOTENV
 .env
 .env.dev
+.env.prod
+.env.develop
+.env.development
 .env.production
 
 #ENVs artificiales
