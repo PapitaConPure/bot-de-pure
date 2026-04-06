@@ -2,7 +2,6 @@ import { ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonSt
 import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons/';
 import { ImgurClient, ImgurImagePayload } from '../../utils/imgur';
 import ImgurUser from '../../models/imgurUsers';
-import { envPath } from '../../data/globalProps';
 import { Translator } from '../../i18n';
 
 import Logger from '../../utils/logs';
@@ -78,7 +77,7 @@ const command = new Command('imgur', tags)
 		await request.deferReply();
 
 		const imgurUser = (await ImgurUser.findOne({ userId: request.userId })) || new ImgurUser({ userId: request.userId });
-		const clientId = imgurUser.clientId ?? require(envPath).imgurclientid;
+		const clientId = imgurUser.clientId ?? process.env.IMGUR_CLIENT_ID;
 		const client = new ImgurClient(clientId);
 
 		const directUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(u => u);

@@ -1,12 +1,11 @@
 import { CommandTags, Command, CommandOptions } from '../Commons/';
 import { fetchChannel, fetchRole, compressId, fetchMember } from '../../func';
 import { ComplexCommandRequest } from '../Commons/typings';
-import { envPath } from '../../data/globalProps';
 import { Translator } from '../../i18n';
 import { Groq } from 'groq-sdk';
 
 const groq = new Groq({
-	apiKey: process.env?.GORK_IS_THIS_TRUE ?? require(envPath)?.aikey,
+	apiKey: process.env.GROQ_KEY,
 });
 
 const options = new CommandOptions()

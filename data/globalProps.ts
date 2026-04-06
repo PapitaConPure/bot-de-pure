@@ -1,7 +1,6 @@
 import { Guild, GuildTextBasedChannel } from 'discord.js';
 import { lookupService } from 'dns';
 import { promisify } from 'util';
-import path from 'path';
 import { color } from 'bun';
 
 import minimist from 'minimist';
@@ -10,20 +9,10 @@ const argv = minimist(process.argv.slice(2));
 
 //Entorno
 /**@description Si se está en un entorno de producción (`true`) o de desarrollo (`false`, por defecto).*/
-export const remoteStartup: boolean = ((+!!argv.p) - (+!!argv.d)) > 0;
+export const remoteStartup: boolean = process.env.NODE_ENV === 'production';
 
 /**@description Si está prohibido el uso de base de datos (`true`) o permitido (`false`, por defecto).*/
 export const noDataBase: boolean = !!argv.nodb;
-
-/**
- * @description
- * La ruta hacia el .env casero cagada que hice para entornos locales (varía según {@linkcode remoteStartup}).
- *
- * Mamá: "tenemos .env en casa"
- *
- * El .env:
- */
-export const envPath: string = path.join(__dirname, remoteStartup ? '../remoteenv.json' : '../localenv.json');
 
 
 //Claves
@@ -38,7 +27,7 @@ export const envPath: string = path.join(__dirname, remoteStartup ? '../remoteen
  *
  * @see https://github.com/PapitaConPure/bot-de-pure
  */
-export const discordToken: string = process.env.I_LOVE_MEGUMIN ?? (require(envPath)?.token);
+export const discordToken: string = process.env.DISCORD_TOKEN;
 
 /**
  * @description
@@ -51,7 +40,7 @@ export const discordToken: string = process.env.I_LOVE_MEGUMIN ?? (require(envPa
  * @see https://github.com/PapitaConPure/bot-de-pure
  * @see https://gelbooru.com/index.php?page=wiki&s=view&id=18780
  */
-export const booruApiKey: string = process.env.BOORU_APIKEY ?? (require(envPath)?.booruapikey);
+export const booruApiKey: string = process.env.GELBOORU_APIKEY;
 
 /**
  * @description
@@ -64,7 +53,7 @@ export const booruApiKey: string = process.env.BOORU_APIKEY ?? (require(envPath)
  * @see https://github.com/PapitaConPure/bot-de-pure
  * @see https://gelbooru.com/index.php?page=wiki&s=view&id=18780
  */
-export const booruUserId: string = process.env.BOORU_USERID ?? (require(envPath)?.booruuserid);
+export const booruUserId: string = process.env.GELBOORU_USERID;
 
 
 //Prefijos

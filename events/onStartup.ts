@@ -25,7 +25,7 @@ import { join } from 'path';
 import chalk from 'chalk';
 
 import { setupGuildRateKeeper, fetchAllGuildMembers } from '../utils/guildratekeeper';
-import { discordToken, envPath, getHostName, globalConfigs, noDataBase, prefixes, remoteStartup, resolveHost } from '../data/globalProps';
+import { discordToken, getHostName, globalConfigs, noDataBase, prefixes, remoteStartup, resolveHost } from '../data/globalProps';
 
 import botStatus from '../data/botStatus.json';
 import serverIds from '../data/serverIds.json';
@@ -122,7 +122,7 @@ export async function onStartup(client: Client) {
 	} else {
 		console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
 		console.log(chalk.gray('Conectando a Cluster en la nube...'));
-		const mongoUri: string = process.env.MONGODB_URI ?? (require(envPath)?.dburi);
+		const mongoUri: string = process.env.MONGODB_URI;
 		set('strictQuery', false);
 		connect(mongoUri, {
 			//@ts-expect-error Quizá sí existen estas 2

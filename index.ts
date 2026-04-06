@@ -1,4 +1,11 @@
 console.time('Carga de inicio');
+import { getRuntimeEnvHint } from './utils/runtime';
+
+if(!process.env?.MONGODB_URI) {
+	const hint = getRuntimeEnvHint();
+	throw new Error(`Missing MongoDB database environment variable.\n\n${hint}`);
+}
+
 import { initializeClient } from './core/client';
 import * as events from './events';
 import { discordToken } from './data/globalProps';

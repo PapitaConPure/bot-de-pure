@@ -1,8 +1,7 @@
 import { createCipheriv, createDecipheriv } from 'crypto';
-import { envPath } from '../data/globalProps';
 
-const key = process.env.ENCRYPTION_KEY ?? (require(envPath)?.encryptionKey);
-const iv = process.env.IV ?? (require(envPath)?.iv);
+const key = process.env.ENCRYPTION_KEY;
+const iv = process.env.IV;
 
 const keyBuffer = Buffer.from(key, 'hex');
 const ivBuffer = Buffer.from(iv, 'hex');
