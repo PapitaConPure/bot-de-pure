@@ -1,4 +1,5 @@
-import { ActionRowBuilder, SelectMenuComponentOptionData, StringSelectMenuBuilder } from 'discord.js';
+import type { SelectMenuComponentOptionData} from 'discord.js';
+import { ActionRowBuilder, StringSelectMenuBuilder } from 'discord.js';
 
 export const saki = {
 	config: {

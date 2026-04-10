@@ -1,7 +1,7 @@
-import { Token } from '../lexer/tokens';
-import { ValuesOf } from '../util/types';
-import { NodeMetadata } from '.';
-import { BlockStatement } from './statements';
+import type { Token } from '../lexer/tokens';
+import type { ValuesOf } from '../util/types';
+import type { NodeMetadata } from '.';
+import type { BlockStatement } from './statements';
 
 export const ExpressionKinds = ({
 	NUMBER_LITERAL: 'NumberLiteralExpression',

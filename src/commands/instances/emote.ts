@@ -1,4 +1,5 @@
-import { EmbedBuilder, ButtonBuilder, ButtonStyle, Message } from 'discord.js';
+import type { Message } from 'discord.js';
+import { EmbedBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { CommandTags, Command, CommandOptions } from '../commons';
 import { emojiRegex } from '@/func';
 import { makeButtonRowBuilder } from '@/utils/tsCasts';

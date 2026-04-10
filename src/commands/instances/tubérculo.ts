@@ -2,12 +2,14 @@ import { CommandOptions, CommandTags, Command, CommandOptionSolver, CommandParam
 import { EmbedBuilder, ButtonBuilder, TextInputBuilder, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder, MessageFlags } from 'discord.js';
 import type { ActionRowBuilder, ApplicationCommandOptionChoiceData, ButtonInteraction, Guild, MessageEditOptions, StringSelectMenuBuilder } from 'discord.js';
 import { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId } from '@/func';
-import GuildConfig, { GuildConfigDocument } from '@/models/guildconfigs';
+import type { GuildConfigDocument } from '@/models/guildconfigs';
+import GuildConfig from '@/models/guildconfigs';
 import { psDocsButton, psEditorButton } from './purescript';
 import { p_pure } from '@/utils/prefixes';
 import { RuntimeToLanguageType } from '@/systems/ps/v1.0/commons';
 import { executeTuber as executeTuberPS1 } from '@/systems/ps/v1.0/purescript';
-import { executeTuber as executeTuberPS2, CURRENT_PS_VERSION, Tubercle } from '@/systems/ps/common/executeTuber';
+import type { Tubercle } from '@/systems/ps/common/executeTuber';
+import { executeTuber as executeTuberPS2, CURRENT_PS_VERSION } from '@/systems/ps/common/executeTuber';
 import { makeButtonRowBuilder, makeTextInputRowBuilder } from '@/utils/tsCasts';
 import { ValueKindTranslationLookups } from '@/systems/ps/v1.1/interpreter/values';
 import { Input } from '@/systems/ps/v1.1/interpreter/inputReader';

@@ -1,4 +1,4 @@
-import { Message, MessageReaction, PartialMessageReaction, PartialUser, User } from 'discord.js';
+import type { Message, MessageReaction, PartialMessageReaction, PartialUser, User } from 'discord.js';
 import UserConfigs from '../models/userconfigs';
 
 import Logger from '@/utils/logs.js';

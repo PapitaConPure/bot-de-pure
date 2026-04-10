@@ -1,6 +1,6 @@
 import { ContextMenuCommandBuilder, InteractionContextType } from 'discord.js';
 import type { ContextMenuCommandType } from 'discord.js';
-import { ContextMenuAction as Action } from './actionBuilder';
+import type { ContextMenuAction as Action } from './actionBuilder';
 import puré from '@/core/puréRegistry';
 
 interface ActionRegistryLogTableRow {

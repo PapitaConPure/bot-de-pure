@@ -1,7 +1,8 @@
-import { AnyThreadChannel, AttachmentBuilder, Client as DiscordClient, Collection, ContainerBuilder, Guild, GuildBasedChannel, GuildMember, GuildTextBasedChannel, MessageFlags, User, Message, Role, Snowflake, Emoji, ButtonBuilder, StringSelectMenuBuilder } from 'discord.js'; //js
+import type { AnyThreadChannel, Client as DiscordClient, Collection, Guild, GuildBasedChannel, GuildMember, GuildTextBasedChannel, User, Message, Role, Snowflake, Emoji} from 'discord.js';
+import { AttachmentBuilder, ContainerBuilder, MessageFlags, ButtonBuilder, StringSelectMenuBuilder } from 'discord.js'; //js
 import { globalConfigs, tenshiColor } from './data/globalProps';
 import images from './data/images.json';
-import Canvas from '@napi-rs/canvas'; //Node Canvas
+import Canvas, { type SKRSContext2D } from '@napi-rs/canvas'; //Node Canvas
 import chalk from 'chalk';
 import { ButtonStyle, ChannelType } from 'discord.js';
 import { fetchUserCache } from './utils/usercache';
@@ -109,7 +110,7 @@ interface CanvasTextDrawOptions {
  * @param text El usuario del cual dibujar la foto de perfil
  * @param options Opciones de renderizado de texto
  */
-export function drawText(ctx: import('@napi-rs/canvas').SKRSContext2D, x: number, y: number, text: string, options: CanvasTextDrawOptions = {}): void {
+export function drawText(ctx: SKRSContext2D, x: number, y: number, text: string, options: CanvasTextDrawOptions = {}): void {
 	//Parámetros opcionales
 	options.area ??= {};
 	options.area.halign ??= 'left';
@@ -170,7 +171,7 @@ interface CanvasAvatarDrawOptions {
 	circleStrokeFactor?: number;
 }
 
-export async function drawCircularImage(ctx: import('@napi-rs/canvas').SKRSContext2D, user: User, xcenter: number, ycenter: number, radius: number, options: CanvasAvatarDrawOptions = {}): Promise<void> {
+export async function drawCircularImage(ctx: SKRSContext2D, user: User, xcenter: number, ycenter: number, radius: number, options: CanvasAvatarDrawOptions = {}): Promise<void> {
 	options.circleStrokeColor ??= '#000000';
 	options.circleStrokeFactor ??= 0.02;
 
@@ -869,9 +870,9 @@ export function guildEmoji(emoji: string, guild: Guild): Emoji | null {
 }
 
 /**@description Devuelve el primer emoji global o de servidor encontrado en el string.*/
-export const emoji = (emoji: string, guild: import('discord.js').Guild): Emoji | string | null => defaultEmoji(emoji) ?? guildEmoji(emoji, guild);
+export const emoji = (emoji: string, guild: Guild): Emoji | string | null => defaultEmoji(emoji) ?? guildEmoji(emoji, guild);
 
-export function isNSFWChannel(channel: import('discord.js').GuildBasedChannel) {
+export function isNSFWChannel(channel: GuildBasedChannel) {
 	if(channel.isThread())
 		return channel.parent.nsfw;
 

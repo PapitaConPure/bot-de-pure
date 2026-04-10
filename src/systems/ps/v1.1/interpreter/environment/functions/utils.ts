@@ -1,14 +1,15 @@
 /* eslint-disable no-empty-pattern */
 
-import {
+import type {
 	RuntimeValue,
 	NativeFunction,
-	ValueKinds,
 	ValueKind,
 	NumberValue,
 	TextValue,
 	BooleanValue,
-	NadaValue,
+	NadaValue} from '../../values';
+import {
+	ValueKinds,
 	makeNumber,
 	makeText,
 	makeBoolean,
@@ -17,7 +18,7 @@ import {
 import { getParamOrNada, expectParam } from '../nativeUtils';
 import { rand, randRange } from '../../../util/utils';
 import { rgb2hex, hsl2hex, hsv2hex } from '../../../util/colorUtils';
-import { NativeFunctionEntry } from '.';
+import type { NativeFunctionEntry } from '.';
 
 const aleatorio: NativeFunction<null, [NumberValue, NumberValue], NumberValue> = (
 	_self,

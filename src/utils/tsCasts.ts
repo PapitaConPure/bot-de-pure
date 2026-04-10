@@ -1,4 +1,5 @@
-import { ActionRowBuilder, APIActionRowComponent, ButtonBuilder, ChannelSelectMenuBuilder, JSONEncodable, MentionableSelectMenuBuilder, MessageActionRowComponentBuilder, RoleSelectMenuBuilder, StringSelectMenuBuilder, TextInputBuilder, UserSelectMenuBuilder } from 'discord.js';
+import type { APIActionRowComponent, ButtonBuilder, ChannelSelectMenuBuilder, JSONEncodable, MentionableSelectMenuBuilder, MessageActionRowComponentBuilder, RoleSelectMenuBuilder, StringSelectMenuBuilder, TextInputBuilder, UserSelectMenuBuilder } from 'discord.js';
+import { ActionRowBuilder } from 'discord.js';
 
 export function makeButtonRowBuilder(component?: JSONEncodable<APIActionRowComponent<ReturnType<any>>> | APIActionRowComponent<ReturnType<any>>) {
 	if(component)

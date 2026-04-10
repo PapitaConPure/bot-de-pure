@@ -1,17 +1,19 @@
-import { Expression } from '../ast/expressions';
-import { TokenKind, TokenKinds } from '../lexer/tokens';
-import { Interpreter } from '.';
+import type { Expression } from '../ast/expressions';
+import type { TokenKind} from '../lexer/tokens';
+import { TokenKinds } from '../lexer/tokens';
+import type { Interpreter } from '.';
+import type {
+	RuntimeValue,
+	NumberValue,
+	TextValue,
+	ValueKind} from './values';
 import {
 	ValueKinds,
 	coerceValue,
 	makeNumber,
 	makeText,
 	makeBoolean,
-	toggleBoolean,
-	RuntimeValue,
-	NumberValue,
-	TextValue,
-	ValueKind,
+	toggleBoolean
 } from './values';
 
 export type UnaryExpressionFunction = (

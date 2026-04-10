@@ -1,4 +1,5 @@
-import { AutocompleteInteraction, EmbedBuilder, Message, MessageFlags } from 'discord.js';
+import type { AutocompleteInteraction, Message} from 'discord.js';
+import { EmbedBuilder, MessageFlags } from 'discord.js';
 import serverIds from '@/data/serverIds.json';
 import { navigationRows, rand, paginateRaw } from '@/func';
 import { CommandOptions, CommandTags, Command } from '../commons';

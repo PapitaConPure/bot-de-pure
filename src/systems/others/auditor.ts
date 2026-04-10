@@ -1,5 +1,5 @@
 import { Command } from '@/commands/commons/commandBuilder';
-import { CommandRequest } from 'types/commands';
+import type { CommandRequest } from 'types/commands';
 import { globalConfigs } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
 import { EmbedBuilder, Colors, type Interaction, type User, type APIEmbedField } from 'discord.js';

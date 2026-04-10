@@ -1,5 +1,5 @@
-import { ValuesOf } from '../util/types';
-import { Lexer } from '.';
+import type { ValuesOf } from '../util/types';
+import type { Lexer } from '.';
 
 /**Contiene tipos de token de lexer*/
 export const TokenKinds = ({

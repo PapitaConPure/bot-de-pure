@@ -1,6 +1,7 @@
 import { ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonStyle, EmbedBuilder, LabelBuilder, ActionRowBuilder, Colors } from 'discord.js';
 import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../commons';
-import { ImgurClient, ImgurImagePayload } from '@/utils/imgur';
+import type { ImgurImagePayload } from '@/utils/imgur';
+import { ImgurClient } from '@/utils/imgur';
 import ImgurUser from '@/models/imgurUsers';
 import { Translator } from '@/i18n';
 

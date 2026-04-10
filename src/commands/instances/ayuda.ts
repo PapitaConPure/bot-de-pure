@@ -1,10 +1,12 @@
-import { AnySelectMenuInteraction, EmbedBuilder, MessageFlags } from 'discord.js';
+import type { AnySelectMenuInteraction} from 'discord.js';
+import { EmbedBuilder, MessageFlags } from 'discord.js';
 import serverIds from '@/data/serverIds.json';
 import userIds from '@/data/userIds.json';
 import { tenshiColor } from '@/data/globalProps';
 import { isNotModerator, shortenText } from '@/func';
 import { p_pure } from '@/utils/prefixes';
-import { CommandOptions, CommandTags, Command, CommandParam, CommandTagResolvable, fetchCommandsFromFiles } from '../commons';
+import type { CommandTagResolvable} from '../commons';
+import { CommandOptions, CommandTags, Command, CommandParam, fetchCommandsFromFiles } from '../commons';
 import { searchCommand, searchCommands, getWikiPageComponentsV2, makeCategoriesRow, makeGuideRow } from '@/systems/others/wiki';
 import type { ComplexCommandRequest } from 'types/commands';
 

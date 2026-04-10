@@ -1,10 +1,10 @@
-import { Token } from '../lexer/tokens';
-import { ValuesOf } from '../util/types';
-import { NodeMetadata } from '.';
-import { Expression } from './expressions';
-import { Interpreter } from '../interpreter';
-import { RuntimeValue } from '../interpreter/values';
-import { Scope } from '../interpreter/scope';
+import type { Token } from '../lexer/tokens';
+import type { ValuesOf } from '../util/types';
+import type { NodeMetadata } from '.';
+import type { Expression } from './expressions';
+import type { Interpreter } from '../interpreter';
+import type { RuntimeValue } from '../interpreter/values';
+import type { Scope } from '../interpreter/scope';
 
 /**@description Contiene tipos de sentencia.*/
 export const StatementKinds = ({

@@ -1,9 +1,12 @@
-import { Token, TokenKind, TokenKinds, translateTokenKind, translateTokenKinds } from '../lexer/tokens';
+import type { Token, TokenKind} from '../lexer/tokens';
+import { TokenKinds, translateTokenKind, translateTokenKinds } from '../lexer/tokens';
 import { stmtLookup, nudLookup, ledLookup, bpLookup, createLookups, assLookup } from './lookups';
-import { ProgramStatement, Statement, StatementKinds } from '../ast/statements';
-import { Associativities, Associativity, BindingPower } from '../ast';
+import type { ProgramStatement, Statement} from '../ast/statements';
+import { StatementKinds } from '../ast/statements';
+import type { Associativity, BindingPower } from '../ast';
+import { Associativities } from '../ast';
 import { parseBlockBody } from './syntax/statementParsing';
-import { Expression } from '../ast/expressions';
+import type { Expression } from '../ast/expressions';
 
 /**@description Representa un Analizador Sintáctico de PuréScript.*/
 export class Parser {

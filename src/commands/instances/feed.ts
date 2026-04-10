@@ -1,10 +1,12 @@
 
-import { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType, MessageFlags, ContainerBuilder, ContainerComponent, ButtonInteraction, SelectMenuComponentOptionData, Message } from 'discord.js';
+import type { ContainerComponent, ButtonInteraction, SelectMenuComponentOptionData, Message } from 'discord.js';
+import { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, ButtonBuilder, ButtonStyle, TextInputStyle, Colors, ChannelType, MessageFlags, ContainerBuilder } from 'discord.js';
 import { isNotModerator, shortenText, guildEmoji, compressId, isNSFWChannel, randInArray, shortenTextLoose } from '@/func';
 import GuildConfig from '@/models/guildconfigs.js';
 import { auditError, auditAction } from '@/systems/others/auditor';
 import { globalConfigs, booruApiKey, booruUserId, tenshiAltColor } from '@/data/globalProps';
-import { Booru, TagTypes, BooruUnknownPostError, TagType } from '@/systems/booru/boorufetch';
+import type { TagType } from '@/systems/booru/boorufetch';
+import { Booru, TagTypes, BooruUnknownPostError } from '@/systems/booru/boorufetch';
 import { addGuildToFeedUpdateStack } from '@/systems/booru/boorufeed';
 import { formatBooruPostMessage, formatTagNameListNew, getPostUrlFromContainer } from '@/systems/booru/boorusend.js';
 import { Translator } from '@/i18n';

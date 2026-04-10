@@ -1,5 +1,5 @@
 import puré from '../core/puréRegistry';
-import { AutocompleteInteraction, ButtonInteraction, ChatInputCommandInteraction, ContextMenuCommandInteraction, Interaction, ModalSubmitInteraction, StringSelectMenuInteraction } from 'discord.js';
+import type { AutocompleteInteraction, ButtonInteraction, ChatInputCommandInteraction, ContextMenuCommandInteraction, Interaction, ModalSubmitInteraction, StringSelectMenuInteraction } from 'discord.js';
 import { Stats, type StatsDocument } from '../models/stats';
 import userIds from '../data/userIds.json';
 import { channelIsBlocked, isUsageBanned, decompressId } from '@/func';
@@ -7,7 +7,8 @@ import { auditRequest } from '../systems/others/auditor';
 import { findFirstException, handleAndAuditError, generateExceptionEmbed } from '@/utils/cmdExceptions';
 import { Translator } from '../i18n';
 import { Command } from '../commands/commons/commandBuilder';
-import { CommandFlagExpressive, CommandOptionSolver, CommandParam } from '../commands/commons/cmdOpts';
+import type { CommandFlagExpressive, CommandParam } from '../commands/commons/cmdOpts';
+import { CommandOptionSolver } from '../commands/commons/cmdOpts';
 import { noDataBase } from '../data/globalProps';
 
 export async function onInteraction(interaction: Interaction) {

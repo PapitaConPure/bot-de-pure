@@ -1,10 +1,10 @@
-import { ArgumentExpression, Expression } from '../ast/expressions';
-import { BlockStatement } from '../ast/statements';
+import type { ArgumentExpression, Expression } from '../ast/expressions';
+import type { BlockStatement } from '../ast/statements';
 import { EmbedData } from '../embedData';
-import { ValuesOf } from '../util/types';
+import type { ValuesOf } from '../util/types';
 import { makeEmbedRegistry } from './environment/registryPrefabs';
-import { Interpreter } from '.';
-import { Scope } from './scope';
+import type { Interpreter } from '.';
+import type { Scope } from './scope';
 
 /**@description Contiene los tipos de valores de PuréScript.*/
 export const ValueKinds = ({

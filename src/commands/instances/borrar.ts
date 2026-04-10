@@ -3,7 +3,8 @@ import { p_pure } from '@/utils/prefixes';
 import { CommandPermissions } from '../commons/cmdPerms.js';
 import { CommandOptions, CommandTags, Command } from '../commons';
 import type { ComplexCommandRequest } from 'types/commands';
-import { GuildTextBasedChannel, Message, MessageFlags, User } from 'discord.js';
+import type { GuildTextBasedChannel, Message, User } from 'discord.js';
+import { MessageFlags } from 'discord.js';
 
 async function safeDelete(message: ComplexCommandRequest) {
 	if(!message?.delete) return;

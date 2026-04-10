@@ -1,6 +1,7 @@
 /* eslint-disable no-empty-pattern */
 
-import { RuntimeValue, NativeFunction, ValueKinds, NumberValue, TextValue, BooleanValue, ListValue, NadaValue, makeNumber, makeText, makeBoolean, makeList, makeNada, isInternalOperable } from '../../values';
+import type { RuntimeValue, NativeFunction, NumberValue, TextValue, BooleanValue, ListValue, NadaValue} from '../../values';
+import { ValueKinds, makeNumber, makeText, makeBoolean, makeList, makeNada, isInternalOperable } from '../../values';
 import { calculatePositionOffset, expectParam, getParamOrDefault } from '../nativeUtils';
 import { toLowerCaseNormalized } from '../../../util/utils';
 

@@ -1,7 +1,8 @@
 import { CommandTags, CommandOptions, Command, CommandOptionSolver } from '../commons';
 import { CommandPermissions } from '../commons/cmdPerms';
 import { Translator } from '@/i18n';
-import { GuildMember, MessageFlags } from 'discord.js';
+import type { GuildMember} from 'discord.js';
+import { MessageFlags } from 'discord.js';
 
 const perms = new CommandPermissions('ModerateMembers');
 

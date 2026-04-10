@@ -1,5 +1,6 @@
-import { ValuesOf } from '../types/util';
-import { fetchUserCache, UserCacheResolvable } from '@/utils/usercache';
+import type { ValuesOf } from '../types/util';
+import type { UserCacheResolvable } from '@/utils/usercache';
+import { fetchUserCache } from '@/utils/usercache';
 import Locales from './locales';
 
 export { Locales };

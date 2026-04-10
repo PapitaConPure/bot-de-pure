@@ -1,8 +1,10 @@
-import { Player, useMainPlayer, QueueRepeatMode, Track, GuildQueue } from 'discord-player';
+import type { Track, GuildQueue } from 'discord-player';
+import { Player, useMainPlayer, QueueRepeatMode } from 'discord-player';
 import { DefaultExtractors } from '@discord-player/extractor';
 import { SoundcloudExtractor } from 'discord-player-soundcloud';
 import { YoutubeSabrExtractor } from 'discord-player-googlevideo';
-import { EmbedBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, Colors, Client, ButtonInteraction, ModalSubmitInteraction, ColorResolvable, BaseGuildVoiceChannel, MessageFlags, AnySelectMenuInteraction } from 'discord.js';
+import type { Client, ButtonInteraction, ModalSubmitInteraction, ColorResolvable, BaseGuildVoiceChannel, AnySelectMenuInteraction } from 'discord.js';
+import { EmbedBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, Colors, MessageFlags } from 'discord.js';
 import type { ComplexCommandRequest, ComponentInteraction } from 'types/commands';
 import { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } from '@/utils/tsCasts';
 import { tryRecoverSavedTracksQueue, saveTracksQueue } from '@/models/playerQueue';

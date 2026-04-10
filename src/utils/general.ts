@@ -4,7 +4,7 @@ function* iotaGenerator(first: number) {
 }
 
 class Ut {
-	static#iota: Generator<number, void, unknown>;
+	static #iota: Generator<number, void, unknown>;
 
 	/**
 	 * @description Crea un nuevo generador Iota con el valor inicial especificado, avanza el generador y devuelve ese valor

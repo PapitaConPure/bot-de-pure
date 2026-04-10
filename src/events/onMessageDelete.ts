@@ -1,6 +1,6 @@
 import { deleteMessageCascade, getMessageCascade } from '../systems/others/messageCascades';
 import { channelIsBlocked, isUsageBanned, fetchMessage } from '@/func';
-import { Message, PartialMessage } from 'discord.js';
+import type { Message, PartialMessage } from 'discord.js';
 
 export async function onMessageDelete(message: Message | PartialMessage) {
 	const { author } = message;

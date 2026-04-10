@@ -1,5 +1,7 @@
-import { ApplicationCommandType, ContextMenuCommandInteraction, Locale as DiscordLocale, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction } from 'discord.js';
-import { LocaleIds, Translator } from '@/i18n';
+import type { ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction } from 'discord.js';
+import { ApplicationCommandType, Locale as DiscordLocale } from 'discord.js';
+import type { LocaleIds} from '@/i18n';
+import { Translator } from '@/i18n';
 
 export type ActionCommandType =
     | 'ChatInput'

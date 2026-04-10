@@ -1,6 +1,7 @@
 /* eslint-disable no-empty-pattern */
 
-import { RuntimeValue, NativeFunction, ValueKinds, TextValue, BooleanValue, RegistryValue, EmbedValue } from '../../values';
+import type { RuntimeValue, NativeFunction, TextValue, BooleanValue, RegistryValue, EmbedValue } from '../../values';
+import { ValueKinds } from '../../values';
 import { psFileRegex, expectParam, getParamOrNada, getParamOrDefault, psLinkRegex } from '../nativeUtils';
 import { stringHexToNumber } from '../../../util/utils';
 

@@ -1,7 +1,10 @@
 import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../commons';
-import { makeWeightedDecision, compressId, decompressId, improveNumber, emojiRegex, WeightedDecision } from '@/func';
-import { EmbedBuilder, AttachmentBuilder, StringSelectMenuBuilder, Colors, ButtonBuilder, ButtonStyle, ActionRowBuilder, MessageFlags, AnySelectMenuInteraction } from 'discord.js';
-import { PureTable, AnarchyUser, pureTableAssets, AnarchyUserDocument } from '@/models/puretable';
+import type { WeightedDecision } from '@/func';
+import { makeWeightedDecision, compressId, decompressId, improveNumber, emojiRegex } from '@/func';
+import type { AnySelectMenuInteraction } from 'discord.js';
+import { EmbedBuilder, AttachmentBuilder, StringSelectMenuBuilder, Colors, ButtonBuilder, ButtonStyle, ActionRowBuilder, MessageFlags } from 'discord.js';
+import type { AnarchyUserDocument } from '@/models/puretable';
+import { PureTable, AnarchyUser, pureTableAssets } from '@/models/puretable';
 import { createTaskScheduler } from '@/utils/concurrency';
 import type { ComplexCommandRequest } from 'types/commands';
 import { createCanvas, loadImage } from '@napi-rs/canvas';

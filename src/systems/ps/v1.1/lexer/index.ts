@@ -1,4 +1,5 @@
-import { TokenKinds, TokenKind, Token } from './tokens';
+import type { TokenKind} from './tokens';
+import { TokenKinds, Token } from './tokens';
 import { shortenText, toLowerCaseNormalized } from '../util/utils';
 
 interface Keyword {

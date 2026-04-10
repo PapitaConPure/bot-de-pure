@@ -1,5 +1,7 @@
-import { ChannelType, Message } from 'discord.js';
-import { ConverterEmptyPayload, ConverterPayload } from './converters';
+import type { Message } from 'discord.js';
+import { ChannelType } from 'discord.js';
+import type { ConverterPayload } from './converters';
+import { ConverterEmptyPayload } from './converters';
 
 import Logger from '@/utils/logs';
 const { error } = Logger('WARN', 'Puréet');

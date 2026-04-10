@@ -1,8 +1,11 @@
 import { makeButtonRowBuilder } from '@/utils/tsCasts';
-import { EmbedBuilder, ButtonBuilder, ButtonStyle, Colors, ContainerBuilder, MessageFlags, SeparatorSpacingSize, Snowflake, Message, Collection, GuildMember, ContainerComponent, ActionRow, ButtonComponent } from 'discord.js';
+import type { Snowflake, Message, Collection, GuildMember, ContainerComponent, ActionRow, ButtonComponent } from 'discord.js';
+import { EmbedBuilder, ButtonBuilder, ButtonStyle, Colors, ContainerBuilder, MessageFlags, SeparatorSpacingSize } from 'discord.js';
 import { guildEmoji as gEmo, shortenText } from '@/func';
-import { Booru, Post, TagTypes } from './boorufetch';
-import { getBaseTags, getSearchTags, tagMaps } from './booruprops';
+import type { Post} from './boorufetch';
+import { Booru, TagTypes } from './boorufetch';
+import type { tagMaps } from './booruprops';
+import { getBaseTags, getSearchTags } from './booruprops';
 import { globalConfigs, booruApiKey, booruUserId } from '@/data/globalProps';
 import { CommandOptionSolver } from '@/commands/commons/cmdOpts';
 import userIds from '@/data/userIds.json';

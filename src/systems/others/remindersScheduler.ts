@@ -1,5 +1,7 @@
-import { MessageFlags, ContainerBuilder, Client, GuildTextBasedChannel, User } from 'discord.js';
-import Reminder, { ReminderDocument } from '@/models/reminders';
+import type { Client, GuildTextBasedChannel, User } from 'discord.js';
+import { MessageFlags, ContainerBuilder } from 'discord.js';
+import type { ReminderDocument } from '@/models/reminders';
+import Reminder from '@/models/reminders';
 import Logger from '@/utils/logs';
 import { decompressId } from '@/func';
 import { tenshiColor } from '@/data/globalProps';

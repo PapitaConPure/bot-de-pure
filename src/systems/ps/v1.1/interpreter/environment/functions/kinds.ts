@@ -1,9 +1,10 @@
-import {
+import type {
 	RuntimeValue,
 	NativeFunction,
-	ValueKinds,
 	TextValue,
-	BooleanValue,
+	BooleanValue} from '../../values';
+import {
+	ValueKinds,
 	makeBoolean,
 	isOperable,
 	isValidText,
@@ -14,7 +15,7 @@ import {
 	isNada,
 } from '../../values';
 import { expectParam, psFileRegex, psLinkRegex, psImageRegex } from '../nativeUtils';
-import { NativeFunctionEntry } from '.';
+import type { NativeFunctionEntry } from '.';
 
 const esNúmero: NativeFunction<null, [RuntimeValue], BooleanValue> = (_self, [ x ]) => {
 	const test = isOperable(x);

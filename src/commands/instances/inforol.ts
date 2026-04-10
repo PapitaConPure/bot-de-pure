@@ -1,4 +1,5 @@
-import { ButtonBuilder, ButtonInteraction, ButtonStyle, Collection, EmbedBuilder, GuildMember, InteractionReplyOptions, InteractionUpdateOptions, MessagePayload, Role } from 'discord.js';
+import type { ButtonInteraction, Collection, GuildMember, InteractionReplyOptions, InteractionUpdateOptions, MessagePayload, Role } from 'discord.js';
+import { ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { compressId } from '@/func';
 import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../commons';
 import { CommandPermissions } from '../commons/cmdPerms';

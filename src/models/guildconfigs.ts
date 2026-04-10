@@ -1,7 +1,7 @@
 import Mongoose from 'mongoose';
 import { makeStringIdValidator } from './modelUtils';
-import { Tubercle } from '../systems/ps/common/executeTuber';
-import { FeedData } from '../systems/booru/boorufeed';
+import type { Tubercle } from '../systems/ps/common/executeTuber';
+import type { FeedData } from '../systems/booru/boorufeed';
 
 //Perdoname por todos mis pecados
 export type TubersDict = Record<string, Tubercle>;

@@ -1,14 +1,19 @@
-import { Input, InputReader, ProductionInputReader, TestDriveInputReader } from './inputReader';
-import { RuntimeValue, AssertedRuntimeValue, ValueKinds, ValueKindTranslationLookups, makeNumber, makeText, makeBoolean, makeList, makeRegistry, makeEmbed, makeFunction, makeLambda, makeNativeFunction, makeNada, coerceValue, isInternalOperable, ValueKind, AnyFunctionValue } from './values';
+import type { Input, InputReader} from './inputReader';
+import { ProductionInputReader, TestDriveInputReader } from './inputReader';
+import type { RuntimeValue, AssertedRuntimeValue, ValueKind, AnyFunctionValue } from './values';
+import { ValueKinds, ValueKindTranslationLookups, makeNumber, makeText, makeBoolean, makeList, makeRegistry, makeEmbed, makeFunction, makeLambda, makeNativeFunction, makeNada, coerceValue, isInternalOperable } from './values';
 import { UnaryOperationLookups, BinaryOperationLookups, ValueKindLookups } from './lookups';
-import { EnvironmentProvider } from './environment/environmentProvider';
+import type { EnvironmentProvider } from './environment/environmentProvider';
 import { NativeMethodsLookup } from './environment';
 import { Scope } from './scope';
-import { Token, TokenKinds } from '../lexer/tokens';
-import { AssignmentStatement, BlockStatement, ConditionalStatement, DeclarationStatement, DeleteStatement, DoUntilStatement, ExpressionStatement, ForEachStatement, ForStatement, FullForStatement, InsertionStatement, LoadStatement, ProgramStatement, ReadStatement, RepeatStatement, ReturnStatement, SaveStatement, SendStatement, ShortForStatement, Statement, StatementKinds, StopStatement, WhileStatement } from '../ast/statements';
-import { ArrowExpression, BinaryExpression, CallExpression, CastExpression, ConditionalExpression, Expression, ExpressionKinds, FunctionExpression, ListLiteralExpression, RegistryLiteralExpression, SequenceExpression, UnaryExpression } from '../ast/expressions';
+import type { Token} from '../lexer/tokens';
+import { TokenKinds } from '../lexer/tokens';
+import type { AssignmentStatement, BlockStatement, ConditionalStatement, DeclarationStatement, DeleteStatement, DoUntilStatement, ExpressionStatement, ForEachStatement, ForStatement, FullForStatement, InsertionStatement, LoadStatement, ProgramStatement, ReadStatement, RepeatStatement, ReturnStatement, SaveStatement, SendStatement, ShortForStatement, Statement, StopStatement, WhileStatement } from '../ast/statements';
+import { StatementKinds } from '../ast/statements';
+import type { ArrowExpression, BinaryExpression, CallExpression, CastExpression, ConditionalExpression, Expression, FunctionExpression, ListLiteralExpression, RegistryLiteralExpression, SequenceExpression, UnaryExpression } from '../ast/expressions';
+import { ExpressionKinds } from '../ast/expressions';
 import { iota, shortenText } from '../util/utils';
-import { ValuesOf } from '../util/types';
+import type { ValuesOf } from '../util/types';
 
 export const Stops = ({
 	NONE: iota(0),

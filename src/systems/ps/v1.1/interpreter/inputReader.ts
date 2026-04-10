@@ -1,5 +1,9 @@
-import { Token, TokenKinds } from '../lexer/tokens';
-import { Scope } from './scope';
+import type { Token} from '../lexer/tokens';
+import { TokenKinds } from '../lexer/tokens';
+import type { Scope } from './scope';
+import type {
+	ValueKind,
+	RuntimeValue} from './values';
 import {
 	makeText,
 	coerceValue,
@@ -7,13 +11,11 @@ import {
 	ValueKinds,
 	ValueKindTranslationLookups,
 	makeNumber,
-	makeBoolean,
-	ValueKind,
-	RuntimeValue,
+	makeBoolean
 } from './values';
 import { ValueKindLookups } from './lookups';
-import { Interpreter } from '.';
-import { ReadStatement, ReadStatementPreModifier } from '../ast/statements';
+import type { Interpreter } from '.';
+import type { ReadStatement, ReadStatementPreModifier } from '../ast/statements';
 
 const boolWords = {
 	TRUE: [

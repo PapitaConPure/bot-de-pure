@@ -1,6 +1,7 @@
 /* eslint-disable no-empty-pattern */
 
-import { RuntimeValue, NativeFunction, ValueKinds, TextValue, BooleanValue, ListValue, RegistryValue, FunctionValue, NadaValue, makeText, makeBoolean, makeList, makeRegistry, makeNada, coerceValue } from '../../values';
+import type { RuntimeValue, NativeFunction, TextValue, BooleanValue, ListValue, RegistryValue, FunctionValue, NadaValue} from '../../values';
+import { ValueKinds, makeText, makeBoolean, makeList, makeRegistry, makeNada, coerceValue } from '../../values';
 import { makePredicateFn, expectParam } from '../nativeUtils';
 
 export type RegistryMethod<TArg extends RuntimeValue[] = RuntimeValue[], TResult extends RuntimeValue = RuntimeValue>

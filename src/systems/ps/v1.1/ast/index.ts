@@ -1,4 +1,4 @@
-import { ValuesOf } from '../util/types';
+import type { ValuesOf } from '../util/types';
 import { iota } from '../util/utils';
 
 /**@description Contiene niveles de vínculo de operadores.*/

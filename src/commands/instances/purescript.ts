@@ -1,6 +1,7 @@
 import { CommandTags } from '../commons/cmdTags';
 import { Command } from '../commons/commandBuilder';
-import { executeTuber, CURRENT_PS_VERSION, Tubercle } from '@/systems/ps/common/executeTuber';
+import type { Tubercle } from '@/systems/ps/common/executeTuber';
+import { executeTuber, CURRENT_PS_VERSION } from '@/systems/ps/common/executeTuber';
 import { CommandOptions } from '../commons/cmdOpts';
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { p_pure } from '@/utils/prefixes';

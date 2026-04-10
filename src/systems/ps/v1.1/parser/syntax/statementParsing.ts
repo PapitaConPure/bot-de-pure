@@ -1,12 +1,16 @@
-import { TokenKinds, translateTokenKind, Token, TokenKind } from '../../lexer/tokens';
+import type { Token, TokenKind } from '../../lexer/tokens';
+import { TokenKinds, translateTokenKind } from '../../lexer/tokens';
 import { BindingPowers, Associativities } from '../../ast';
-import { StatementKinds, ScopeAbortKinds, BlockBody, BlockStatement, ConditionalStatement, WhileStatement, DoUntilStatement, RepeatStatement, ForEachStatement, ForStatement, ExpressionStatement, ReadStatement, ReadStatementPreModifier, ReadStatementModifier, DeclarationStatement, SaveStatement, AssignmentStatement, LoadStatement, InsertionStatement, DeleteStatement, ReturnStatement, EndStatement, StopStatement, SendStatement } from '../../ast/statements';
-import { Expression, ExpressionKinds } from '../../ast/expressions';
+import type { BlockBody, BlockStatement, ConditionalStatement, WhileStatement, DoUntilStatement, RepeatStatement, ForEachStatement, ForStatement, ExpressionStatement, ReadStatement, ReadStatementPreModifier, ReadStatementModifier, DeclarationStatement, SaveStatement, AssignmentStatement, LoadStatement, InsertionStatement, DeleteStatement, ReturnStatement, EndStatement, StopStatement, SendStatement } from '../../ast/statements';
+import { StatementKinds, ScopeAbortKinds } from '../../ast/statements';
+import type { Expression} from '../../ast/expressions';
+import { ExpressionKinds } from '../../ast/expressions';
 import { makeMetadata } from '../../ast/metadata';
-import { ValueKinds, NumberValue, TextValue, BooleanValue, makeNumber, makeText, coerceValue } from '../../interpreter/values';
+import type { NumberValue, TextValue, BooleanValue} from '../../interpreter/values';
+import { ValueKinds, makeNumber, makeText, coerceValue } from '../../interpreter/values';
 import { TuberInputError } from '../../interpreter/inputReader';
 import { toLowerCaseNormalized } from '../../util/utils';
-import { Parser } from '..';
+import type { Parser } from '..';
 
 /**
  * @description

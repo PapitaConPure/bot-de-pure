@@ -1,5 +1,6 @@
-import { LocaleKey } from '../i18n';
-import UserConfigs, { UserConfigDocument } from '../models/userconfigs';
+import type { LocaleKey } from '../i18n';
+import type { UserConfigDocument } from '../models/userconfigs';
+import UserConfigs from '../models/userconfigs';
 import { noDataBase } from '../data/globalProps';
 import type { AnyRequest } from '../types/commands';
 import type { AcceptedTwitterConverterKey } from '../systems/converters/pureet';

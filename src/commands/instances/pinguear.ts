@@ -1,4 +1,4 @@
-import { User } from 'discord.js';
+import type { User } from 'discord.js';
 import { randRange } from '@/func';
 import { p_pure } from '@/utils/prefixes';
 import { CommandOptions, CommandTags, Command } from '../commons';

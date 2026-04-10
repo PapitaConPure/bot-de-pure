@@ -1,7 +1,9 @@
 import { Booru, type Post } from '@/systems/booru/boorufetch';
 import GuildConfigs from '@/models/guildconfigs';
-import { formatBooruPostMessage, notifyUsers, PostFormatData, Suscription } from '@/systems/booru/boorusend';
-import { Client, Collection, Guild, GuildBasedChannel, GuildTextBasedChannel, MessageFlags, Snowflake } from 'discord.js';
+import type { PostFormatData, Suscription } from '@/systems/booru/boorusend';
+import { formatBooruPostMessage, notifyUsers } from '@/systems/booru/boorusend';
+import type { Client, Guild, GuildBasedChannel, GuildTextBasedChannel, Snowflake } from 'discord.js';
+import { Collection, MessageFlags } from 'discord.js';
 import { globalConfigs, booruApiKey, booruUserId, noDataBase } from '@/data/globalProps';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
 import { auditError, auditAction } from '@/systems/others/auditor';

@@ -1,9 +1,9 @@
 import { Message, Collection, InteractionType } from 'discord.js';
 import type { MessageComponentInteraction, MessageActionRowComponentBuilder, Interaction, ModalMessageModalSubmitInteraction, ButtonInteraction, MessageReplyOptions, AnySelectMenuInteraction } from 'discord.js';
-import { CommandTags } from './cmdTags';
+import type { CommandTags } from './cmdTags';
 import type { CommandEditReplyOptions, CommandReplyOptions, CommandRequest, ComplexCommandRequest, ComponentInteraction, ExtendedCommandRequest } from 'types/commands';
-import { CommandOptions, CommandOptionSolver } from './cmdOpts';
-import { CommandPermissions } from './cmdPerms';
+import type { CommandOptions, CommandOptionSolver } from './cmdOpts';
+import type { CommandPermissions } from './cmdPerms';
 
 const extendedCommandRequestBlank: ExtendedCommandRequest = {
 	initialReply: undefined,

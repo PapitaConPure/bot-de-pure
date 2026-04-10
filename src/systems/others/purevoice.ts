@@ -1,10 +1,13 @@
-import { PureVoiceDocument, PureVoiceModel, PureVoiceSessionModel } from '@/models/purevoice.js';
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, EmbedBuilder, Guild, GuildMember, MessageCreateOptions, MessagePayload, TextChannel, VoiceBasedChannel, VoiceState } from 'discord.js';
-import UserConfigs, { UserConfigDocument } from '@/models/userconfigs.js';
+import type { PureVoiceDocument} from '@/models/purevoice.js';
+import { PureVoiceModel, PureVoiceSessionModel } from '@/models/purevoice.js';
+import type { GuildMember, MessageCreateOptions, MessagePayload, TextChannel, VoiceBasedChannel, VoiceState } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, EmbedBuilder, Guild } from 'discord.js';
+import type { UserConfigDocument } from '@/models/userconfigs.js';
+import UserConfigs from '@/models/userconfigs.js';
 import { tenshiColor } from '@/data/globalProps.js';
 import { p_pure } from '@/utils/prefixes';
 import { Translator } from '@/i18n/index.js';
-import { ValuesOf } from 'types';
+import type { ValuesOf } from 'types';
 import chalk from 'chalk';
 
 import Logger from '@/utils/logs.js';

@@ -1,7 +1,8 @@
 import puré from '@/core/puréRegistry';
-import { PermissionFlagsBits, SlashCommandBuilder, SlashCommandStringOption, InteractionContextType } from 'discord.js';
+import type { SlashCommandStringOption} from 'discord.js';
+import { PermissionFlagsBits, SlashCommandBuilder, InteractionContextType } from 'discord.js';
 import { shortenText } from '@/func';
-import { Command, CommandOptions } from '@/commands/commons';
+import type { Command, CommandOptions } from '@/commands/commons';
 import type { BaseParamType } from 'types/commands';
 import type { AnySlashCommandOption, SlashCommandBuilderAddFunctionName } from '@/types/discord';
 

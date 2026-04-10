@@ -1,4 +1,4 @@
-import { Guild, GuildTextBasedChannel } from 'discord.js';
+import type { Guild, GuildTextBasedChannel } from 'discord.js';
 import { lookupService } from 'dns';
 import { promisify } from 'util';
 import { color } from 'bun';

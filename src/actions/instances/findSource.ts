@@ -2,7 +2,7 @@ import { ContextMenuAction } from '../commons/actionBuilder';
 import { pourSauce } from '@/systems/others/saucenao';
 import SauceNAOUser from '@/models/saucenaoUsers';
 import { Translator } from '@/i18n';
-import { Attachment } from 'discord.js';
+import type { Attachment } from 'discord.js';
 
 const action = new ContextMenuAction('actionFindSource', 'Message')
 	.setMessageResponse(async interaction => {

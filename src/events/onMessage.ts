@@ -1,5 +1,6 @@
 import puré from '../core/puréRegistry';
-import { ContainerBuilder, Guild, Message, MessageFlags } from 'discord.js';
+import type { Guild, Message} from 'discord.js';
+import { ContainerBuilder, MessageFlags } from 'discord.js';
 import { Command, CommandOptionSolver } from '../commands/commons/index';
 
 import { Stats, ChannelStats } from '../models/stats';
@@ -16,9 +17,10 @@ import { sendConvertedTwitterPosts } from '../systems/converters/pureet';
 import { Translator } from '../i18n/index';
 import { fetchUserCache, type UserCache } from '@/utils/usercache';
 import { addMessageCascade } from '../systems/others/messageCascades';
-import { noDataBase, PrefixPair, tenshiAltColor, tenshiColor } from '../data/globalProps';
+import type { PrefixPair} from '../data/globalProps';
+import { noDataBase, tenshiAltColor, tenshiColor } from '../data/globalProps';
 import Logger from '@/utils/logs';
-import { ValuesOf } from '../types/util';
+import type { ValuesOf } from '../types/util';
 
 import unknownCommandReplies from '../data/unknownCommandReplies.json';
 

@@ -1,4 +1,5 @@
-import { EnvironmentProvider, PSGuild, PSChannel, PSRole, PSUser, PSMember, PSMemberCreationData } from '../v1.1/interpreter/environment/environmentProvider';
+import type { EnvironmentProvider, PSChannel, PSRole, PSMember, PSMemberCreationData } from '../v1.1/interpreter/environment/environmentProvider';
+import { PSGuild, PSUser } from '../v1.1/interpreter/environment/environmentProvider';
 import type { ComplexCommandRequest } from 'types/commands';
 import { fetchChannel, fetchRole, fetchMember } from '@/func';
 

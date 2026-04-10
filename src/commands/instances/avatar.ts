@@ -1,4 +1,5 @@
-import { MessageFlags, TextDisplayBuilder, ContainerBuilder, GuildMember, ImageURLOptions } from 'discord.js';
+import type { GuildMember, ImageURLOptions } from 'discord.js';
+import { MessageFlags, TextDisplayBuilder, ContainerBuilder } from 'discord.js';
 import { p_pure } from '@/utils/prefixes';
 import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../commons';
 import { Translator } from '@/i18n';

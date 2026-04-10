@@ -1,15 +1,16 @@
-import {
+import type {
 	RuntimeValue,
 	NativeFunction,
-	ValueKinds,
-	makeNada,
 	TextValue,
 	RegistryValue,
-	NadaValue,
+	NadaValue} from '../../values';
+import {
+	ValueKinds,
+	makeNada
 } from '../../values';
 import { expectParam } from '../nativeUtils';
 import { makeDiscordChannel, makeDiscordMember, makeDiscordRole } from '../registryPrefabs';
-import { NativeFunctionEntry } from '.';
+import type { NativeFunctionEntry } from '.';
 
 const buscarCanal: NativeFunction<RuntimeValue, [TextValue], RegistryValue | NadaValue> = (
 	_self,

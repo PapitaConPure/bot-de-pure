@@ -1,8 +1,9 @@
-import { User, GuildMember, Message, GuildChannel, CommandInteractionOptionResolver, Role, Attachment, Guild, GuildBasedChannel, AutocompleteInteraction } from 'discord.js';
+import type { GuildBasedChannel, AutocompleteInteraction } from 'discord.js';
+import { User, GuildMember, Message, GuildChannel, CommandInteractionOptionResolver, Role, Attachment, Guild } from 'discord.js';
 import { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSentence, regroupText, fetchGuild } from '@/func';
 import { getDateComponentsFromString, makeDateFromComponents, parseTimeFromNaturalLanguage, relativeDates } from '@/utils/datetime';
 import type { BaseParamType, CommandArgumentGetFunction, CommandArguments, CommandRequest, ComplexCommandRequest, FeedbackOptions, FetchMessageFlagOptions, FlagCallback, GetMethodName, ParamPoly, ParamResult, ParamType, ParamTypeStrict } from '@/types/commands';
-import { LocaleKey } from '@/i18n';
+import type { LocaleKey } from '@/i18n';
 
 import Logger from '@/utils/logs';
 const { warn } = Logger('WARN', 'CmdOpts');

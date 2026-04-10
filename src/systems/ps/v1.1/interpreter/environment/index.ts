@@ -1,6 +1,7 @@
-import { Scope } from '../scope';
+import type { Scope } from '../scope';
+import type {
+	RuntimeValue} from '../values';
 import {
-	RuntimeValue,
 	ValueKinds,
 	makeNumber,
 	makeText,
@@ -13,7 +14,7 @@ import { NativeColorsLookup } from './variables/colors';
 import { NativeFunctions } from './functions';
 import { makeDiscordMember, makeDiscordChannel, makeDiscordGuild } from './registryPrefabs';
 import { makeKindFromValue } from './nativeUtils';
-import { EnvironmentProvider } from './environmentProvider';
+import type { EnvironmentProvider } from './environmentProvider';
 
 export { NativeMethodsLookup } from './methods';
 

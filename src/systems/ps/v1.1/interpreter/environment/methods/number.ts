@@ -1,6 +1,7 @@
 /* eslint-disable no-empty-pattern */
 
-import { RuntimeValue, NativeFunction, ValueKinds, NumberValue, TextValue, BooleanValue, makeNumber, makeText } from '../../values';
+import type { RuntimeValue, NativeFunction, NumberValue, TextValue, BooleanValue} from '../../values';
+import { ValueKinds, makeNumber, makeText } from '../../values';
 import { expectParam, getParamOrDefault } from '../nativeUtils';
 import { improveNumber, clamp } from '../../../util/utils';
 

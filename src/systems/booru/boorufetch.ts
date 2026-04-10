@@ -1,8 +1,9 @@
 import BooruTags from '@/models/boorutags';
 import { shuffleArray, decodeEntities } from '@/func';
 import { noDataBase } from '@/data/globalProps';
-import { ValuesOf } from 'types';
-import { fetchExt, FetchResult } from '@/utils/fetchext';
+import type { ValuesOf } from 'types';
+import type { FetchResult } from '@/utils/fetchext';
+import { fetchExt } from '@/utils/fetchext';
 
 export const PostRating = ({
 	General: 'general',

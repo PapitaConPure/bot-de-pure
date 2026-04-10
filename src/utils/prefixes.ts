@@ -1,4 +1,5 @@
-import { prefixes, PrefixPair } from '../data/globalProps';
+import type { PrefixPair } from '../data/globalProps';
+import { prefixes } from '../data/globalProps';
 import type { ComplexCommandRequest } from '../types/commands';
 
 export const slashPrefixPair = { raw: '/', regex: /\//i } as const;

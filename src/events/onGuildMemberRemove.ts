@@ -1,4 +1,4 @@
-import { GuildMember, PartialGuildMember } from 'discord.js';
+import type { GuildMember, PartialGuildMember } from 'discord.js';
 import { sendFarewellMessage } from '@/func';
 import { guildIsAvailable, announceMemberUpdate } from './guildMemberUpdate';
 

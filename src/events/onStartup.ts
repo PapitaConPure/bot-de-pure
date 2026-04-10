@@ -1,4 +1,5 @@
-import { Client, Collection, GuildTextBasedChannel, REST, RESTPostAPIApplicationCommandsJSONBody, RESTPostAPIChatInputApplicationCommandsJSONBody } from 'discord.js';
+import type { Client, Collection, GuildTextBasedChannel, RESTPostAPIApplicationCommandsJSONBody, RESTPostAPIChatInputApplicationCommandsJSONBody } from 'discord.js';
+import { REST } from 'discord.js';
 import { Routes } from 'discord-api-types/v9';
 
 import puré from '../core/puréRegistry';

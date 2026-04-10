@@ -1,5 +1,6 @@
 import { Command, CommandPermissions, CommandTags } from '../commons';
-import { ContainerBuilder, Guild, MessageFlags, SeparatorSpacingSize, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from 'discord.js';
+import type { Guild} from 'discord.js';
+import { ContainerBuilder, MessageFlags, SeparatorSpacingSize, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from 'discord.js';
 import { tenshiColor } from '@/data/globalProps';
 import { Locales, Translator } from '@/i18n';
 import { compressId } from '@/func';

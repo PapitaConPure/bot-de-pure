@@ -1,4 +1,5 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ColorResolvable, EmbedBuilder } from 'discord.js';
+import type { ColorResolvable} from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { shortenText, compressId } from '@/func';
 import { CommandTags, Command } from '../commons';
 import { showQueuePage, makePuréMusicEmbed, SERVICES } from '@/systems/others/musicPlayer';

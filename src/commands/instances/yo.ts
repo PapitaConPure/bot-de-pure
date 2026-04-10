@@ -1,10 +1,14 @@
 import { CommandTags, Command, CommandOptions, CommandFlag } from '../commons';
-import { ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder, ContainerBuilder, MessageFlags, StringSelectMenuOptionBuilder, SeparatorSpacingSize, LabelBuilder, MessageComponentInteraction, Interaction } from 'discord.js';
-import { Translator, Locales, isValidLocaleKey, LocaleIds, LocaleKey } from '@/i18n';
+import type { MessageComponentInteraction, Interaction } from 'discord.js';
+import { ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder, ContainerBuilder, MessageFlags, StringSelectMenuOptionBuilder, SeparatorSpacingSize, LabelBuilder } from 'discord.js';
+import type { LocaleIds, LocaleKey } from '@/i18n';
+import { Translator, Locales, isValidLocaleKey } from '@/i18n';
 import { compressId, decompressId, improveNumber, shortenText } from '@/func';
-import { AcceptedTwitterConverterKey, acceptedTwitterConverters } from '@/systems/converters/pureet';
+import type { AcceptedTwitterConverterKey} from '@/systems/converters/pureet';
+import { acceptedTwitterConverters } from '@/systems/converters/pureet';
 import { updateFollowedFeedTagsCache } from '@/systems/booru/boorufeed';
-import UserConfigs, { UserConfigDocument } from '@/models/userconfigs';
+import type { UserConfigDocument } from '@/models/userconfigs';
+import UserConfigs from '@/models/userconfigs';
 import { makeSessionAutoname } from '@/systems/others/purevoice';
 import { tenshiColor, tenshiAltColor } from '@/data/globalProps';
 import { makeTextInputRowBuilder } from '@/utils/tsCasts';

@@ -1,6 +1,6 @@
 import { CommandTags, Command } from '../commons';
 import { improveNumber, sleep } from '@/func';
-import { InteractionResponse, Message } from 'discord.js';
+import type { InteractionResponse, Message } from 'discord.js';
 import type { CommandEditReplyOptions, ComplexCommandRequest } from 'types/commands';
 
 const tags = new CommandTags().add('COMMON');

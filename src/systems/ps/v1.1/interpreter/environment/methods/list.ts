@@ -1,6 +1,7 @@
 /* eslint-disable no-empty-pattern */
 
-import { RuntimeValue, NativeFunction, ValueKinds, NumberValue, TextValue, BooleanValue, ListValue, RegistryValue, FunctionValue, NadaValue, makeNumber, makeText, makeBoolean, makeList, makeRegistry, makeNada, coerceValue } from '../../values';
+import type { RuntimeValue, NativeFunction, NumberValue, TextValue, BooleanValue, ListValue, RegistryValue, FunctionValue, NadaValue} from '../../values';
+import { ValueKinds, makeNumber, makeText, makeBoolean, makeList, makeRegistry, makeNada, coerceValue } from '../../values';
 import { expectParam, getParamOrNada, makePredicateFn, getParamOrDefault } from '../nativeUtils';
 import { randRange } from '../../../util/utils';
 

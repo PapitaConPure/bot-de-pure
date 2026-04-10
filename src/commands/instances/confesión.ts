@@ -1,5 +1,6 @@
 import { Command, CommandTags, CommandPermissions } from '../commons';
-import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder, Colors, DiscordAPIError, ContainerBuilder, SectionBuilder, MessageFlags, Interaction, TextChannel } from 'discord.js';
+import type { Interaction, TextChannel } from 'discord.js';
+import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder, Colors, DiscordAPIError, ContainerBuilder, SectionBuilder, MessageFlags } from 'discord.js';
 import { makeTextInputRowBuilder, makeButtonRowBuilder } from '@/utils/tsCasts.js';
 import { compressId, fetchChannel, decompressId } from '@/func';
 import PendingConfessions from '@/models/pendingConfessions.js';

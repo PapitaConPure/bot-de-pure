@@ -1,6 +1,7 @@
 /* eslint-disable no-empty-pattern */
 
-import { NativeFunction, RuntimeValue, ValueKind, ValueKinds, NativeFunctionValue, FunctionValue } from '../../values';
+import type { NativeFunction, RuntimeValue, ValueKind, NativeFunctionValue, FunctionValue } from '../../values';
+import { ValueKinds } from '../../values';
 import { numberMethods } from './number';
 import { textMethods } from './text';
 import { listMethods } from './list';

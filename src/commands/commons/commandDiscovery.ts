@@ -1,5 +1,5 @@
 import { Command } from './commandBuilder';
-import { CommandTagResolvable } from './cmdTags';
+import type { CommandTagResolvable } from './cmdTags';
 import { getModuleNames, readdirFromSync } from '@/utils/runtimeFs';
 
 export const commandFilenames = getModuleNames(readdirFromSync(import.meta.url, '../instances'));

@@ -1,7 +1,8 @@
 import Mongoose from 'mongoose';
-import { serialize, deserialize, encode, decode, useMainPlayer, GuildQueue, Track, Player } from 'discord-player';
+import type { GuildQueue, Track, Player } from 'discord-player';
+import { serialize, deserialize, encode, decode, useMainPlayer } from 'discord-player';
 import type { ComplexCommandRequest } from '../types/commands';
-import { GuildMember, Interaction } from 'discord.js';
+import type { GuildMember, Interaction } from 'discord.js';
 
 const PlayerQueueSchema = new Mongoose.Schema({
 	guildId: {

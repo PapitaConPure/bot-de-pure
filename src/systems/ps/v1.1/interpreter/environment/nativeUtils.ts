@@ -1,8 +1,9 @@
-import { RuntimeValue, AssertedRuntimeValue, RuntimeInternalValue, ValueKinds, ValueKind, ValueKindTranslationLookups, FunctionValue, NativeFunction, NadaValue, makeList, makeRegistry, makeEmbed, makeFunction, makeNativeFunction, makeNada, valueMakers, coerceValue, isOperable, isValidText } from '../values';
-import { ArgumentExpression } from '../../ast/expressions';
-import { BlockStatement } from '../../ast/statements';
-import { EmbedData } from '../../embedData';
-import { Scope } from '../scope';
+import type { RuntimeValue, AssertedRuntimeValue, RuntimeInternalValue, ValueKind, FunctionValue, NativeFunction, NadaValue} from '../values';
+import { ValueKinds, ValueKindTranslationLookups, makeList, makeRegistry, makeEmbed, makeFunction, makeNativeFunction, makeNada, valueMakers, coerceValue, isOperable, isValidText } from '../values';
+import type { ArgumentExpression } from '../../ast/expressions';
+import type { BlockStatement } from '../../ast/statements';
+import type { EmbedData } from '../../embedData';
+import type { Scope } from '../scope';
 
 export const psFileRegex = /(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_/.0-9#:?=&;,]*\.(txt|png|jpg|jpeg|webp|gif|webm|mp4|mp3|wav|flac|ogg)[a-zA-Z-_.0-9#:?=&;,]*/i;
 export const psImageRegex = /(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_/.0-9#:?=&;,]*\.(png|jpg|jpeg|webp)[a-zA-Z-_.0-9#:?=&;,]*/i;

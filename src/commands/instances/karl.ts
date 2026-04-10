@@ -1,5 +1,6 @@
 import { CommandTags, Command } from '../commons';
-import { makeWeightedDecision, randRange, WeightedDecision } from '@/func';
+import type { WeightedDecision } from '@/func';
+import { makeWeightedDecision, randRange } from '@/func';
 import { ContainerBuilder, MessageFlags } from 'discord.js';
 
 //Ordenados de común a raro

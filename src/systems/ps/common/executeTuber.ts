@@ -2,13 +2,13 @@ import { EmbedBuilder, Colors, ButtonBuilder, ActionRowBuilder, ButtonStyle } fr
 import { shortenText } from '@/func';
 import DiscordEnvironmentProvider from './discordEnvironmentProvider';
 import sizeof from 'object-sizeof';
-import { Input } from '../v1.1';
-import { InputJSONData } from '../v1.1/interpreter/inputReader';
-import { RequireAtLeastOne } from 'types';
-import { RuntimeValue } from '../v1.1/interpreter/values';
-import { ComplexCommandRequest } from 'types/commands';
-import { EvaluationResult } from '../v1.1/interpreter';
-import { EmbedData } from '../v1.1/embedData';
+import type { Input } from '../v1.1';
+import type { InputJSONData } from '../v1.1/interpreter/inputReader';
+import type { RequireAtLeastOne } from 'types';
+import type { RuntimeValue } from '../v1.1/interpreter/values';
+import type { ComplexCommandRequest } from 'types/commands';
+import type { EvaluationResult } from '../v1.1/interpreter';
+import type { EmbedData } from '../v1.1/embedData';
 
 export const CURRENT_PS_VERSION = 1.11;
 

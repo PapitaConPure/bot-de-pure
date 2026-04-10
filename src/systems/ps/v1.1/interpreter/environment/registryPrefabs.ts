@@ -1,6 +1,7 @@
-import { PSMember, PSChannel, PSGuild, PSRole } from './environmentProvider';
-import { makeNumber, makeText, makeBoolean, makeList, makeRegistry, makeNada, RuntimeValue, RegistryValue } from '../values';
-import { EmbedData } from '../../embedData';
+import type { PSMember, PSChannel, PSGuild, PSRole } from './environmentProvider';
+import type { RuntimeValue, RegistryValue } from '../values';
+import { makeNumber, makeText, makeBoolean, makeList, makeRegistry, makeNada } from '../values';
+import type { EmbedData } from '../../embedData';
 
 export function makeDate(date: Date): RegistryValue {
 	//PENDIENTE: Implementar una forma de lidiar con husos horarios

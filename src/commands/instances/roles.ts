@@ -10,7 +10,7 @@ import { auditError } from '@/systems/others/auditor.js';
 import { colorsRow } from '@/data/sakiProps.js';
 import { subdivideArray, isBoosting, stringHexToNumber } from '@/func';
 import { makeStringSelectMenuRowBuilder, makeButtonRowBuilder, makeTextInputRowBuilder } from '@/utils/tsCasts.js';
-import { SakiDocument } from '@/models/saki';
+import type { SakiDocument } from '@/models/saki';
 import { fetchExt } from '@/utils/fetchext';
 
 type RoleData = {

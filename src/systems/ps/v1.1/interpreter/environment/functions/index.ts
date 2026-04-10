@@ -1,4 +1,4 @@
-import { NativeFunction } from '../../values';
+import type { NativeFunction } from '../../values';
 import { utilFunctions } from './utils';
 import { kindFunctions } from './kinds';
 import { discordFunctions } from './discord';
