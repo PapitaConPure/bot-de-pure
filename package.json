@@ -60,9 +60,9 @@
     "typescript": "^5.9.3"
   },
   "lint-staged": {
-    "./src/**/*.{ts,js}": "eslint --cache --fix",
-    "./src/**/*.{ts,js,css,md}": "prettier --write",
-    "./src/**/*.js": "eslint --cache --fix",
-    "./src/**/*.{js,css,md}": "prettier --write"
+    "./src/**/*.{ts,js}": "bunx biome lint --write",
+    "./src/**/*.{ts,js,css,md}": "bunx biome format --write",
+    "./src/**/*.js": "bunx biome lint --write",
+    "./src/**/*.{js,css,md}": "bunx biome format --write"
   }
 }
