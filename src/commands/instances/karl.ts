@@ -11,7 +11,7 @@ const drums = {
 } as const;
 
 interface Tier {
-	n: number;
+	stars: number;
 	hex: number;
 	label: string;
 	image?: string;
@@ -22,7 +22,7 @@ const tiers: WeightedDecision<Tier>[] = [
 	{
 		weight: 1.0,
 		value: {
-			n: 1,
+			stars: 1,
 			hex: 0xa0a0a0,
 			label: 'Común',
 			image: 'https://i.imgur.com/ShmLYeU.png',
@@ -30,9 +30,9 @@ const tiers: WeightedDecision<Tier>[] = [
 		},
 	},
 	{
-		weight: 0.7,
+		weight: 0.83,
 		value: {
-			n: 2,
+			stars: 2,
 			hex: 0x4caf50,
 			label: 'Raro',
 			image: 'https://i.imgur.com/5xi2Ub3.png',
@@ -40,9 +40,9 @@ const tiers: WeightedDecision<Tier>[] = [
 		},
 	},
 	{
-		weight: 0.3,
+		weight: 0.581,
 		value: {
-			n: 3,
+			stars: 3,
 			hex: 0x2196f3,
 			label: 'Épico',
 			image: 'https://i.imgur.com/uMcSxEf.png',
@@ -50,9 +50,9 @@ const tiers: WeightedDecision<Tier>[] = [
 		},
 	},
 	{
-		weight: 0.15,
+		weight: 0.371,
 		value: {
-			n: 4,
+			stars: 4,
 			hex: 0x9c27b0,
 			label: 'Pachamama',
 			image: 'https://i.imgur.com/uMcSxEf.png',
@@ -60,9 +60,9 @@ const tiers: WeightedDecision<Tier>[] = [
 		},
 	},
 	{
-		weight: 0.02,
+		weight: 0.0798,
 		value: {
-			n: 5,
+			stars: 5,
 			hex: 0xff9800,
 			label: 'Machu Picchu',
 			image: 'https://i.imgur.com/7h840q1.png',
@@ -70,9 +70,9 @@ const tiers: WeightedDecision<Tier>[] = [
 		},
 	},
 	{
-		weight: 0.001,
+		weight: 0.021,
 		value: {
-			n: 6,
+			stars: 6,
 			hex: 0xe53935,
 			label: 'Perútensoku',
 			image: 'https://i.imgur.com/qbPwCy9.png',
@@ -96,8 +96,8 @@ const command = new Command('karl', tags)
 	.setDescription('Comando de gacha musical de Karl Zuñiga')
 	.setExecution(async (request) => {
 		const tier = makeWeightedDecision(tiers);
-		const starsText = Array(tier.n).fill('⭐').join('');
-		const pulledInstruments = pullInstruments(tier.n);
+		const starsText = Array(tier.stars).fill('⭐').join('');
+		const pulledInstruments = pullInstruments(tier.stars);
 
 		const container = new ContainerBuilder()
 			.setAccentColor(tier.hex)
