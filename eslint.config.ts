@@ -1,8 +1,6 @@
 import js from '@eslint/js';
-import globals from 'globals';
-import tseslint from 'typescript-eslint';
 import { defineConfig } from 'eslint/config';
-import stylistic from '@stylistic/eslint-plugin';
+import globals from 'globals';
 
 export default defineConfig([
 	{
@@ -12,7 +10,6 @@ export default defineConfig([
 		},
 		extends: [
 			'js/recommended',
-			tseslint.configs.recommended,
 		],
 		languageOptions: {
 			globals: globals.node
@@ -60,7 +57,6 @@ export default defineConfig([
 	{
 		files: [ '**/*.{js,mjs,cjs,ts,mts,cts}' ],
 		plugins: {
-			'@stylistic': stylistic,
 		},
 		languageOptions: {
 			globals: globals.node

@@ -47,16 +47,13 @@
     "sagiri": "^4.3.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
-    "@stylistic/eslint-plugin": "^5.7.0",
+    "@biomejs/biome": "2.4.11",
     "@types/bun": "latest",
     "@types/minimist": "^1.2.5",
-    "eslint": "^9.39.2",
     "globals": "^17.0.0",
     "husky": "^9.1.7",
     "jiti": "^2.6.1",
-    "lint-staged": "^16.2.7",
-    "typescript-eslint": "^8.53.0"
+    "lint-staged": "^16.2.7"
   },
   "private": true,
   "peerDependencies": {
