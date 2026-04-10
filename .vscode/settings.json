@@ -1,3 +1,7 @@
 {
+	"editor.codeActionsOnSave": {
+		"source.organizeImports.biome": "explicit",
+    	"source.fixAll.biome": "explicit"
+	},
 	"js/ts.preferences.preferTypeOnlyAutoImports": true
 }
