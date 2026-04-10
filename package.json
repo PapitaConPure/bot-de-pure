@@ -11,8 +11,8 @@
   "scripts": {
     "dev": "bun --env-file=.env ./src/main.ts",
     "prod": "bun --env-file=.env.production ./src/main.ts",
-    "lint": "eslint .",
-    "lint:fix": "eslint ./src --fix && prettier --write ./src",
+    "lint": "bunx biome lint",
+    "lint:fix": "bunx biome lint --write && bunx biome format --write",
     "prepare": "lint-staged"
   },
   "repository": {
