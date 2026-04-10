@@ -12,8 +12,7 @@
     "dev": "bun --env-file=.env ./src/main.ts",
     "prod": "bun --env-file=.env.production ./src/main.ts",
     "lint": "bunx biome lint",
-    "lint:fix": "bunx biome lint --write && bunx biome format --write",
-    "prepare": "lint-staged"
+    "lint:fix": "bunx biome lint --write && bunx biome format --write"
   },
   "repository": {
     "type": "git",
@@ -52,17 +51,10 @@
     "@types/minimist": "^1.2.5",
     "globals": "^17.4.0",
     "husky": "^9.1.7",
-    "jiti": "^2.6.1",
-    "lint-staged": "^16.4.0"
+    "jiti": "^2.6.1"
   },
   "private": true,
   "peerDependencies": {
     "typescript": "^5.9.3"
-  },
-  "lint-staged": {
-    "./src/**/*.{ts,js}": "bunx biome lint --write",
-    "./src/**/*.{ts,js,css,md}": "bunx biome format --write",
-    "./src/**/*.js": "bunx biome lint --write",
-    "./src/**/*.{js,css,md}": "bunx biome format --write"
   }
 }
