@@ -1,43 +1,13 @@
 import { User, GuildMember, Message, GuildChannel, CommandInteractionOptionResolver, Role, Attachment, Guild, GuildBasedChannel, AutocompleteInteraction } from 'discord.js';
 import { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSentence, regroupText, fetchGuild } from '../../func';
 import { getDateComponentsFromString, makeDateFromComponents, parseTimeFromNaturalLanguage, relativeDates } from '../../utils/datetime';
-import { CommandArguments, CommandRequest, ComplexCommandRequest } from './typings';
+import type { CommandArguments, CommandRequest, ComplexCommandRequest } from '../../types/commands';
 import { LocaleKey } from '../../i18n';
 
 import Logger from '../../utils/logs';
+import { BaseParamType, CommandArgumentGetFunction, FeedbackOptions, FetchMessageFlagOptions, FlagCallback, GetMethodName, ParamPoly, ParamResult, ParamType, ParamTypeStrict } from '../../types/commands';
 const { warn } = Logger('WARN', 'CmdOpts');
 
-export type ParamTypeStrict = { name: string; expression: string | number; };
-
-export type BaseParamType =
-	| 'NUMBER'
-	| 'TEXT'
-	| 'USER'
-	| 'MEMBER'
-	| 'ROLE'
-	| 'GUILD'
-	| 'CHANNEL'
-	| 'MESSAGE'
-	| 'EMOTE'
-	| 'IMAGE'
-	| 'FILE'
-	| 'URL'
-	| 'ID'
-	| 'DATE'
-	| 'TIME';
-
-export type ParamType = BaseParamType | ParamTypeStrict;
-
-export type ParamPoly = 'SINGLE' | 'MULTIPLE' | string[];
-
-export type GetMethodName = keyof CommandInteractionOptionResolver & `get${string}`;
-
-export interface ParamTypeSpecification {
-	getMethod: string;
-	help: string;
-}
-
-/**@satisfies {Record<BaseParamType, { getMethod: GetMethodName, help: string }>}*/
 const paramTypes = ({
 	NUMBER:  { getMethod: 'getNumber',     help: 'número' },
 	TEXT:    { getMethod: 'getString',     help: 'texto' },
@@ -54,7 +24,7 @@ const paramTypes = ({
 	ID:      { getMethod: 'getInteger',    help: 'id' },
 	DATE:    { getMethod: 'getString',     help: 'fecha' },
 	TIME:    { getMethod: 'getString',     help: 'hora' },
-}) as const;
+}) as const satisfies Record<BaseParamType, { getMethod: GetMethodName, help: string }>;
 
 function fetchMessageFlagText(args: string[], i): string {
 	if(i >= args.length)
@@ -71,38 +41,6 @@ function fetchMessageFlagText(args: string[], i): string {
 		return undefined;
 
 	return text.endsWith('"') ? text.slice(0, -1) : text;
-}
-
-export type ParamResult =
-	| number
-	| string
-	| boolean
-	| User
-	| GuildMember
-	| Guild
-	| GuildBasedChannel
-	| Message<boolean>
-	| Role
-	| Attachment
-	| Date
-	| undefined;
-
-export type FlagCallback<TResult extends ParamResult = ParamResult> = (value: ParamResult, isSlash: boolean) => TResult;
-
-export type CommandArgumentGetFunction<TResult extends ParamResult = ParamResult>
-	= (identifier: string, required?: boolean) => TResult;
-
-interface FeedbackOptions<TCallback extends ParamResult = ParamResult, TFallback extends ParamResult = ParamResult> {
-	callback?: FlagCallback<TCallback> | TCallback;
-	fallback?: TFallback;
-}
-
-interface FetchMessageFlagOptions {
-	property: boolean;
-	short: string[];
-	long: string[];
-	callback: FlagCallback;
-	fallback: unknown;
 }
 
 function fetchMessageFlag(args: string[], flag: FetchMessageFlagOptions = { property: undefined, short: [], long: [], callback: undefined, fallback: undefined }) {

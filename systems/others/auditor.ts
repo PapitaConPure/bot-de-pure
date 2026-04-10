@@ -1,14 +1,14 @@
 import { Command } from '../../commands/Commons/cmdBuilder';
-import { CommandRequest } from '../../commands/Commons/typings';
+import { CommandRequest } from '../../types/commands';
 import { globalConfigs } from '../../data/globalProps';
 import userIds from '../../data/userIds.json';
-import { EmbedBuilder, Colors, Interaction, User, APIEmbedField, CommandInteraction } from 'discord.js';
+import { EmbedBuilder, Colors, type Interaction, type User, type APIEmbedField } from 'discord.js';
 
 function generateRequestRecord(request: CommandRequest | Interaction) {
-    // @ts-expect-error
+    // @ts-expect-error Alguno de los dos va a existir
 	const user: User = request.user ?? request.author;
 	const embed = new EmbedBuilder()
-        // @ts-expect-error
+        // @ts-expect-error request.url puede existir
 		.setAuthor({ name: `${request.guild.name} • ${request.channel.name}`, iconURL: user.avatarURL({ size: 128 }), url: request.url || request.channel?.url || 'https://discordapp.com' });
 	return embed;
 }

@@ -8,7 +8,7 @@ import { auditError } from '../systems/others/auditor';
 import { Command } from '../commands/Commons/cmdBuilder.js';
 import { reportFormUrl } from '../data/globalProps';
 import { CommandTagResolvable } from '../commands/Commons';
-import { CommandRequest } from '../commands/Commons/typings';
+import { CommandRequest } from '../types/commands';
 
 type ExceptionTestFn = (request: CommandRequest) => Promise<boolean>;
 

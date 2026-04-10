@@ -7,7 +7,7 @@ import { isNotModerator, defaultEmoji, compressId } from '../../func.js';
 import { addMinutes, getUnixTime, isBefore } from 'date-fns';
 import { p_pure } from '../../utils/prefixes.js';
 import { Translator } from '../../i18n';
-import { ComplexCommandRequest } from '../Commons/typings';
+import type { ComplexCommandRequest } from '../../types/commands';
 
 const cancelbutton = (compressedUserId: string) => new ButtonBuilder()
 	.setCustomId(`voz_cancelWizard_${compressedUserId}`)

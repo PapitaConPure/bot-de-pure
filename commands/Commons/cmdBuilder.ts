@@ -1,6 +1,6 @@
 import { Message, Collection, MessageComponentInteraction, MessageActionRowComponentBuilder, Interaction, ModalMessageModalSubmitInteraction, ButtonInteraction, SelectMenuInteraction, InteractionType, MessageReplyOptions } from 'discord.js';
 import { CommandTags } from './cmdTags';
-import { CommandEditReplyOptions, CommandReplyOptions, CommandRequest, ComplexCommandRequest, ComponentInteraction, ExtendedCommandRequest } from './typings';
+import type { CommandEditReplyOptions, CommandReplyOptions, CommandRequest, ComplexCommandRequest, ComponentInteraction, ExtendedCommandRequest } from '../../types/commands';
 import { CommandOptions, CommandOptionSolver } from './cmdOpts';
 import { CommandPermissions } from './cmdPerms';
 

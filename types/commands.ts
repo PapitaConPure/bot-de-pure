@@ -1,4 +1,4 @@
-import { Attachment, AutocompleteInteraction, ButtonInteraction, ChatInputCommandInteraction, Collection, CommandInteractionOptionResolver, InteractionDeferReplyOptions, InteractionEditReplyOptions, InteractionReplyOptions, Message, MessageContextMenuCommandInteraction, MessagePayload, MessageReplyOptions, PermissionsBitField, Snowflake, StringSelectMenuInteraction, User } from 'discord.js';
+import type { Attachment, AutocompleteInteraction, ButtonInteraction, ChatInputCommandInteraction, Collection, CommandInteractionOptionResolver, Guild, GuildBasedChannel, GuildMember, InteractionDeferReplyOptions, InteractionEditReplyOptions, InteractionReplyOptions, Message, MessageContextMenuCommandInteraction, MessagePayload, MessageReplyOptions, PermissionsBitField, Role, Snowflake, StringSelectMenuInteraction, User } from 'discord.js';
 
 /**@description Representa los tipos de petición de comando.*/
 export type CommandRequest =
@@ -72,7 +72,7 @@ export type CommandArguments =
 	| MessageArguments
 	| SlashArguments;
 
-/**@description .*/
+/**@description Representa los tipos de interacciones sobre mensajes.*/
 export type ComponentInteraction =
 	| ButtonInteraction<'cached'>
 	| StringSelectMenuInteraction<'cached'>
@@ -83,3 +83,62 @@ export type ComponentInteraction =
 export type AnyRequest =
 	| ComplexCommandRequest
 	| ComponentInteraction;
+
+export type ParamTypeStrict = { name: string; expression: string | number; };
+
+export type BaseParamType = 'NUMBER' |
+	'TEXT' |
+	'USER' |
+	'MEMBER' |
+	'ROLE' |
+	'GUILD' |
+	'CHANNEL' |
+	'MESSAGE' |
+	'EMOTE' |
+	'IMAGE' |
+	'FILE' |
+	'URL' |
+	'ID' |
+	'DATE' |
+	'TIME';
+
+export type ParamType = BaseParamType | ParamTypeStrict;
+
+export type ParamPoly = 'SINGLE' | 'MULTIPLE' | string[];
+
+export type GetMethodName = keyof CommandInteractionOptionResolver & `get${string}`;
+
+export interface ParamTypeSpecification {
+	getMethod: string;
+	help: string;
+}
+
+export type ParamResult = number |
+	string |
+	boolean |
+	User |
+	GuildMember |
+	Guild |
+	GuildBasedChannel |
+	Message<boolean> |
+	Role |
+	Attachment |
+	Date |
+	undefined;
+
+export type FlagCallback<TResult extends ParamResult = ParamResult> = (value: ParamResult, isSlash: boolean) => TResult;
+
+export type CommandArgumentGetFunction<TResult extends ParamResult = ParamResult> = (identifier: string, required?: boolean) => TResult;
+
+export interface FeedbackOptions<TCallback extends ParamResult = ParamResult, TFallback extends ParamResult = ParamResult> {
+	callback?: FlagCallback<TCallback> | TCallback;
+	fallback?: TFallback;
+}
+
+export interface FetchMessageFlagOptions {
+	property: boolean;
+	short: string[];
+	long: string[];
+	callback: FlagCallback;
+	fallback: unknown;
+}

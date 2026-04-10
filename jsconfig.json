@@ -8,7 +8,7 @@
 		"removeComments": false,
         "resolveJsonModule": true,
         "paths": {
-            "types": ["./types.ts"]
+            "types": ["./types/util.ts"]
         }
     },
     "exclude": [

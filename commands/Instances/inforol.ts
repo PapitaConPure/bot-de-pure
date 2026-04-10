@@ -5,7 +5,7 @@ import { CommandPermissions } from '../Commons/cmdPerms';
 import { Translator } from '../../i18n';
 import { makeButtonRowBuilder } from '../../utils/tsCasts';
 import { fetchGuildMembers } from '../../utils/guildratekeeper';
-import { CommandReplyOptions, ComplexCommandRequest } from '../Commons/typings';
+import type { CommandReplyOptions, ComplexCommandRequest } from '../../types/commands';
 
 const MEMBERS_PER_PAGE = 10;
 

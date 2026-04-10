@@ -1,6 +1,5 @@
 import { makeButtonRowBuilder } from '../../utils/tsCasts';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { EmbedBuilder, ButtonBuilder, ButtonStyle, Colors, ContainerBuilder, MessageFlags, SeparatorSpacingSize, Snowflake, Message, Collection, GuildMember, ContainerComponent, ActionRow, ButtonComponent, User } from 'discord.js';
+import { EmbedBuilder, ButtonBuilder, ButtonStyle, Colors, ContainerBuilder, MessageFlags, SeparatorSpacingSize, Snowflake, Message, Collection, GuildMember, ContainerComponent, ActionRow, ButtonComponent } from 'discord.js';
 import { guildEmoji as gEmo, shortenText, isThread } from '../../func';
 import { Booru, Post, TagTypes } from './boorufetch';
 import { getBaseTags, getSearchTags, tagMaps } from './booruprops';
@@ -9,9 +8,9 @@ import { CommandOptionSolver } from '../../commands/Commons/cmdOpts';
 import userIds from '../../data/userIds.json';
 import rakki from '../../commands/Instances/rakkidei';
 import { Translator } from '../../i18n';
+import type { ComplexCommandRequest } from '../../types/commands';
 
 import Logger from '../../utils/logs';
-import { ComplexCommandRequest } from '../../commands/Commons/typings';
 const { debug, info, warn, error } = Logger('WARN', 'BooruSend');
 
 export interface PostFormatData {

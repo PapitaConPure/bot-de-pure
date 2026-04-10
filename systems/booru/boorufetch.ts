@@ -1,7 +1,7 @@
 import BooruTags from '../../models/boorutags';
 import { shuffleArray, decodeEntities } from '../../func';
 import { noDataBase } from '../../data/globalProps';
-import { ValuesOf } from 'types';
+import { ValuesOf } from '../../types/util';
 import { fetchExt, FetchResult } from '../../utils/fetchext';
 
 export const PostRating = ({

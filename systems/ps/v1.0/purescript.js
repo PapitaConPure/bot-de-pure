@@ -31,7 +31,7 @@ const logOptions = {
  * @typedef {Object} PartialBasicTubercleData
  * @property {String?} [content]
  * @property {Array<String>} [files]
- * @typedef {import('types').RequireAtLeastOne<PartialBasicTubercleData>} BasicTubercleData
+ * @typedef {import('../../../types/util').RequireAtLeastOne<PartialBasicTubercleData>} BasicTubercleData
  */
 /**
  * @typedef {Object} AdvancedTubercleData
@@ -66,7 +66,7 @@ function isAdvanced(tuber) {
 /**
  * Evalua el tipo de Tubérculo (básico o avanzado) y lo ejecuta. Si es avanzado, se ejecutará con PuréScript
  * @function
- * @param {import("../../../commands/Commons/typings.js").ComplexCommandRequest} request
+ * @param {import("../../../types/commands").ComplexCommandRequest} request
  * @param {Tubercle} tuber
  * @param {TuberExecutionOptions} [inputOptions]
  */
@@ -189,7 +189,7 @@ async function executeTuber(request, tuber, inputOptions) {
         //@ts-expect-error Si bien el tipo no está bien notado, esto es correcto
 		tuber.inputs = inputStack;
 
-	return request.editReply(/**@type {import('../../../commands/Commons/typings.js').CommandEditReplyOptions}*/(/**@type {unknown}*/(replyObject))).catch(async () => {
+	return request.editReply(/**@type {import('../../../types/commands').CommandEditReplyOptions}*/(/**@type {unknown}*/(replyObject))).catch(async () => {
 		await request.editReply({ content: `⚠️ No se puede enviar el mensaje. Revisa el largo y la validez de los datos` });
 		throw Error('Envío inválido');
 	});

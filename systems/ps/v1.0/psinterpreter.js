@@ -218,7 +218,7 @@ class TuberInterpreter {
 		}
 
 		case ParserNodeTypes.Conditional: {
-			const assertedNode = /**@type {import('types').Flatten<import('./commons.js').ParserConditionalStatementNode>}*/(node);
+			const assertedNode = /**@type {import('../../../types/util.js').Flatten<import('./commons.js').ParserConditionalStatementNode>}*/(node);
 			const test = makeValue(this.#evaluate(assertedNode.test, scope), 'Boolean');
 			const blockScope = new TuberScope(scope);
 			if(test.value)

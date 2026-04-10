@@ -1,4 +1,4 @@
-import { ValuesOf } from 'types';
+import { ValuesOf } from '../types/util';
 import { fetchUserCache, UserCacheResolvable } from '../utils/usercache';
 import Locales from './locales';
 

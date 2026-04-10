@@ -3,7 +3,8 @@ import { shortenText } from '../func';
 import { readdirSync } from 'fs';
 import { Command } from '../commands/Commons/cmdBuilder';
 import { ContextMenuAction } from '../actions/Commons/actionBuilder';
-import { BaseParamType, CommandOptions } from '../commands/Commons/cmdOpts';
+import { CommandOptions } from '../commands/Commons/cmdOpts';
+import type { BaseParamType } from '../types/commands';
 
 export type AnySlashCommandOption =
 	| SlashCommandBooleanOption
@@ -122,9 +123,15 @@ export const puré = {
 	contextMenu: new Collection<string, RESTPostAPIContextMenuApplicationCommandsJSONBody>(),
 };
 
+interface CommandRegistryLogTableRow {
+	name: string;
+	flags: string;
+	tieneEmote: string;
+	tieneMod: string;
+}
+
 export function registerCommands(commands: Command[], log: boolean = false) {
-    /**@type {{ name: string, flags: string, tieneEmote: string, tieneMod: string }[]}*/
-	const commandTableStack: { name: string; flags: string; tieneEmote: string; tieneMod: string; }[] = [];
+	const commandTableStack: CommandRegistryLogTableRow[] = [];
 
 	for(const command of commands) {
 		puré.commands.set(command.name, command);

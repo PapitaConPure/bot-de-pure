@@ -1,4 +1,4 @@
-import { puré } from '../core/commandInit';
+import { puré } from '../commands/Commons/commandRegistry';
 import { AutocompleteInteraction, ButtonInteraction, ChatInputCommandInteraction, ContextMenuCommandInteraction, Interaction, ModalSubmitInteraction, StringSelectMenuInteraction } from 'discord.js';
 import { Stats } from '../models/stats';
 import userIds from '../data/userIds.json';

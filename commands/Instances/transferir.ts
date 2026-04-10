@@ -1,6 +1,6 @@
 import { CommandTags, Command, CommandOptions } from '../Commons/';
 import { improveNumber, compressId, sleep } from '../../func';
-import { ComplexCommandRequest } from '../Commons/typings';
+import type { ComplexCommandRequest } from '../../types/commands';
 import { globalConfigs, tenshiColor } from '../../data/globalProps';
 import { auditError } from '../../systems/others/auditor';
 import UserConfigs from '../../models/userconfigs';

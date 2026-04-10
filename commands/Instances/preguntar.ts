@@ -1,6 +1,6 @@
 import { CommandTags, Command, CommandOptions } from '../Commons/';
 import { fetchChannel, fetchRole, compressId, fetchMember } from '../../func';
-import { ComplexCommandRequest } from '../Commons/typings';
+import type { ComplexCommandRequest } from '../../types/commands';
 import { Translator } from '../../i18n';
 import { Groq } from 'groq-sdk';
 

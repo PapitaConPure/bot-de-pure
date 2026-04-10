@@ -6,7 +6,7 @@ import { isNotModerator, shortenText } from '../../func';
 import { p_pure } from '../../utils/prefixes';
 import { CommandOptions, CommandTags, Command, CommandParam, CommandTagResolvable, fetchCommandsFromFiles } from '../Commons';
 import { searchCommand, searchCommands, getWikiPageComponentsV2, makeCategoriesRow, makeGuideRow } from '../../systems/others/wiki';
-import { ComplexCommandRequest } from '../Commons/typings';
+import type { ComplexCommandRequest } from '../../types/commands';
 
 const makeExcludedTags = (request: ComplexCommandRequest | StringSelectMenuInteraction<'cached'>) => {
 	const excludedTags: Array<import('../Commons/cmdTags').CommandTagResolvable> = [ 'GUIDE' ];

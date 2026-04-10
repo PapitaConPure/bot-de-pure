@@ -1,9 +1,9 @@
 import { MessageFlags, TextDisplayBuilder, ContainerBuilder, GuildMember, ImageURLOptions } from 'discord.js';
 import { p_pure } from '../../utils/prefixes';
-import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons/';
+import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons';
 import { Translator } from '../../i18n';
 import { fetchGuildMembers } from '../../utils/guildratekeeper';
-import { ComplexCommandRequest } from '../Commons/typings.js';
+import type { ComplexCommandRequest } from '../../types/commands';
 
 const getAvatarContainer = (member: GuildMember, translator: Translator) => {
 	const avatarURLDisplayOptions: ImageURLOptions = { size: 4096 };

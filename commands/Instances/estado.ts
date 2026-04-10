@@ -6,11 +6,12 @@ import { Stats } from '../../models/stats';
 import { quantityDisplay } from '../../func';
 import { CommandTags, Command, commandFilenames } from '../Commons';
 import { searchCommand, makeGuideRow, getWikiPageComponentsV2 } from '../../systems/others/wiki';
+import type { AnyRequest } from '../../types/commands';
 import { Translator } from '../../i18n';
 
 const COMMAND_REGEX = new RegExp(`(${p_pure().raw})([a-záéíóúñ0-9_.-]+)`, 'gi');
 
-function listFormat(str: string, request: import('../Commons/typings').AnyRequest) {
+function listFormat(str: string, request: AnyRequest) {
 	return str.replace(COMMAND_REGEX, `\`${p_pure(request.guildId).raw}$2\``);
 }
 

@@ -11,6 +11,7 @@ import { tenshiColor } from '../../data/globalProps';
 import { p_pure } from '../../utils/prefixes';
 import { Translator } from '../../i18n';
 import { UTCDate } from '@date-fns/utc';
+import type { AnyRequest } from '../../types/commands';
 
 const maxReminderCountPerUser = 5;
 const maxReminderContentLength = 960;
@@ -126,7 +127,7 @@ function makeReminderContainer(reminder: import('../../models/reminders').Remind
 }
 
 /**@description Crea un formulario modal para crear o editar un recordatorio.*/
-function makeReminderModal(request: import('../Commons/typings').AnyRequest, translator: Translator, utcOffset: number, reminder: import('../../models/reminders').ReminderDocument = undefined) {
+function makeReminderModal(request: AnyRequest, translator: Translator, utcOffset: number, reminder: import('../../models/reminders').ReminderDocument = undefined) {
 	const reminderId = reminder?._id;
 	const reminderLocalizedDate = new UTCDate(addMinutes(reminder?.date ?? new Date(Date.now()), utcOffset));
 

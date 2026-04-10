@@ -1,4 +1,4 @@
-import { ModalBuilder, TextInputStyle, Colors, ButtonBuilder, ButtonStyle, LabelBuilder } from 'discord.js';
+import { ModalBuilder, TextInputStyle, Colors, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { decompressId, sleep } from '../../func';
 import { CommandTags, Command } from '../Commons/';
 import { useMainPlayer, QueueRepeatMode } from 'discord-player';

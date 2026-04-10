@@ -1,4 +1,4 @@
-import { puré } from '../core/commandInit';
+import { puré } from '../commands/Commons/commandRegistry';
 import { ContainerBuilder, Guild, Message, MessageFlags } from 'discord.js';
 import { Command, CommandOptionSolver } from '../commands/Commons/index';
 
@@ -18,7 +18,7 @@ import { fetchUserCache } from '../utils/usercache';
 import { addMessageCascade } from '../systems/others/messageCascades';
 import { noDataBase, PrefixPair, tenshiAltColor, tenshiColor } from '../data/globalProps';
 import Logger from '../utils/logs';
-import { ValuesOf } from 'types';
+import { ValuesOf } from '../types/util';
 
 import unknownCommandReplies from '../data/unknownCommandReplies.json';
 

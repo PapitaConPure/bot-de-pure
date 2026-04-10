@@ -5,6 +5,7 @@ import { encryptString } from '../../utils/security';
 import { makeButtonRowBuilder, makeTextInputRowBuilder } from '../../utils/tsCasts';
 import SauceNAOUser from '../../models/saucenaoUsers';
 import { Translator } from '../../i18n';
+import type { ComplexCommandRequest } from '../../types/commands';
 
 import Logger from '../../utils/logs';
 const { debug } = Logger('ERROR', 'p!saucenao');
@@ -129,7 +130,7 @@ const command = new Command('saucenao', flags)
 		});
 	});
 
-function makeRegisterRequestResponse(request: import('../Commons/typings').ComplexCommandRequest, translator: Translator) {
+function makeRegisterRequestResponse(request: ComplexCommandRequest, translator: Translator) {
 	debug('Se enviará el mensaje de registro');
 	const embeds = [ new EmbedBuilder()
 		.setColor(0x151515)

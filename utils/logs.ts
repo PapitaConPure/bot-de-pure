@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { ValuesOf } from 'types';
+import { ValuesOf } from '../types/util';
 
 const LogLevels = ({
 	DEBUG: 0,

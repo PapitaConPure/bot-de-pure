@@ -1,4 +1,4 @@
-import { ValuesOf } from 'types';
+import { ValuesOf } from '../../types/util';
 
 import Logger from '../../utils/logs';
 import { shortenText, toLowerCaseNormalized } from '../../func';

@@ -3,7 +3,7 @@ import { DefaultExtractors } from '@discord-player/extractor';
 import { SoundcloudExtractor } from 'discord-player-soundcloud';
 import { YoutubeSabrExtractor } from 'discord-player-googlevideo';
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, Colors, Client, ButtonInteraction, StringSelectMenuInteraction, ModalSubmitInteraction, ColorResolvable, BaseGuildVoiceChannel, MessageFlags } from 'discord.js';
-import { ComplexCommandRequest, ComponentInteraction } from '../../commands/Commons/typings';
+import type { ComplexCommandRequest, ComponentInteraction } from '../../types/commands';
 import { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } from '../../utils/tsCasts';
 import { tryRecoverSavedTracksQueue, saveTracksQueue } from '../../models/playerQueue';
 import { compressId, decompressId, shortenText } from '../../func';

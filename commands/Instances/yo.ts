@@ -9,7 +9,7 @@ import { makeSessionAutoname } from '../../systems/others/purevoice';
 import { tenshiColor, tenshiAltColor } from '../../data/globalProps';
 import { makeTextInputRowBuilder } from '../../utils/tsCasts';
 import { toUtcOffset, sanitizeTzCode, utcOffsetDisplayFull } from '../../utils/timezones';
-import { ComplexCommandRequest } from '../Commons/typings';
+import type { ComplexCommandRequest } from '../../types/commands';
 import { auditError } from '../../systems/others/auditor';
 import { recacheUser } from '../../utils/usercache';
 

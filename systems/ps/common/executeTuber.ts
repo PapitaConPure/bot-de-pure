@@ -4,9 +4,9 @@ import DiscordEnvironmentProvider from './discordEnvironmentProvider';
 import sizeof from 'object-sizeof';
 import { Input } from '../v1.1';
 import { InputJSONData } from '../v1.1/interpreter/inputReader';
-import { RequireAtLeastOne } from 'types';
+import { RequireAtLeastOne } from '../../../types/util';
 import { RuntimeValue } from '../v1.1/interpreter/values';
-import { ComplexCommandRequest } from '../../../commands/Commons/typings.js';
+import { ComplexCommandRequest } from '../../../types/commands';
 import { EvaluationResult } from '../v1.1/interpreter';
 import { EmbedData } from '../v1.1/embedData';
 

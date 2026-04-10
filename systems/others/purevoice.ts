@@ -4,7 +4,7 @@ import UserConfigs, { UserConfigDocument } from '../../models/userconfigs';
 import { tenshiColor } from '../../data/globalProps.js';
 import { p_pure } from '../../utils/prefixes';
 import { Translator } from '../../i18n';
-import { ValuesOf } from 'types';
+import { ValuesOf } from '../../types/util.js';
 import chalk from 'chalk';
 
 import Logger from '../../utils/logs.js';

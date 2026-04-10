@@ -13,7 +13,7 @@ import { Input } from '../../systems/ps/v1.1/interpreter/inputReader.js';
 import { getWikiPageComponentsV2 } from '../../systems/others/wiki.js';
 import { fetchGuildMembers } from '../../utils/guildratekeeper.js';
 import { Translator } from '../../i18n';
-import { ComplexCommandRequest } from '../Commons/typings.js';
+import type { ComplexCommandRequest } from '../../types/commands';
 import { fetchExt } from '../../utils/fetchext';
 
 const pageMax = 10;

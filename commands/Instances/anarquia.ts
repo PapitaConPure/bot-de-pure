@@ -3,7 +3,7 @@ import { makeWeightedDecision, compressId, decompressId, improveNumber, emojiReg
 import { EmbedBuilder, AttachmentBuilder, StringSelectMenuBuilder, Colors, ButtonBuilder, ButtonStyle, ActionRowBuilder, StringSelectMenuInteraction, MessageFlags } from 'discord.js';
 import { PureTable, AnarchyUser, pureTableAssets, AnarchyUserDocument } from '../../models/puretable';
 import { createTaskScheduler } from '../../utils/concurrency';
-import { ComplexCommandRequest } from '../Commons/typings';
+import type { ComplexCommandRequest } from '../../types/commands';
 import { createCanvas, loadImage } from '@napi-rs/canvas';
 import { globalConfigs } from '../../data/globalProps';
 import { p_pure } from '../../utils/prefixes';

@@ -3,7 +3,7 @@ import serverIds from '../../data/serverIds.json';
 import { navigationRows, rand, paginateRaw } from '../../func';
 import { CommandOptions, CommandTags, Command } from '../Commons/';
 import { InteractionType } from 'discord.js';
-import { AnyRequest, ComplexCommandRequest } from '../Commons/typings';
+import type { AnyRequest, ComplexCommandRequest } from '../../types/commands';
 
 function getEmotesList(interaction: AnyRequest) {
 	const perritoNames = [

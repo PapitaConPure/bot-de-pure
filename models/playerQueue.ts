@@ -1,6 +1,6 @@
 import Mongoose from 'mongoose';
 import { serialize, deserialize, encode, decode, useMainPlayer, GuildQueue, Track, Player } from 'discord-player';
-import { ComplexCommandRequest } from '../commands/Commons/typings';
+import type { ComplexCommandRequest } from '../types/commands';
 import { GuildMember, Interaction } from 'discord.js';
 
 const PlayerQueueSchema = new Mongoose.Schema({
@@ -17,6 +17,7 @@ const PlayerQueueSchema = new Mongoose.Schema({
 
 const PlayerQueue = Mongoose.model('PlayerQueue', PlayerQueueSchema);
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function m() { return new PlayerQueue({}); }
 export type PlayerTrackDocument = ReturnType<(typeof m)>;
 

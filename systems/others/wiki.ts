@@ -1,4 +1,5 @@
-import { ButtonBuilder, ButtonStyle, ContainerBuilder, TextDisplayBuilder, SectionBuilder, SeparatorBuilder, EmbedBuilder, ActionRowBuilder, SeparatorSpacingSize, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, AnyComponentBuilder, MessageComponentInteraction } from 'discord.js';
+import { ButtonBuilder, ButtonStyle, ContainerBuilder, TextDisplayBuilder, SectionBuilder, SeparatorBuilder, EmbedBuilder, ActionRowBuilder, SeparatorSpacingSize, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from 'discord.js';
+import type { AnyComponentBuilder, MessageComponentInteraction, MessageActionRowComponentBuilder } from 'discord.js';
 import { tenshiColor } from '../../data/globalProps';
 import serverIds from '../../data/serverIds.json';
 import userIds from '../../data/userIds.json';
@@ -6,9 +7,8 @@ import { fetchCommandsFromFiles, Command, CommandTag } from '../../commands/Comm
 import { p_pure } from '../../utils/prefixes';
 import { isNotModerator, edlDistance, toCapitalized, compressId } from '../../func';
 import { client } from '../../core/client';
-import { makeStringSelectMenuRowBuilder, makeMessageActionRowBuilder } from '../../utils/tsCasts';
-import { AnyRequest, ComplexCommandRequest, ComponentInteraction } from '../../commands/Commons/typings';
-import { MessageComponentDataResolvable } from 'types';
+import type { AnyRequest, ComplexCommandRequest, ComponentInteraction } from '../../types/commands';
+import type { MessageComponentDataResolvable } from '../../types/util';
 
 export const makeCategoriesRow = (request: ComplexCommandRequest | ComponentInteraction, selections: string[]) => {
 	const getDefault = (d: string) => !!selections.includes(d);
@@ -93,7 +93,7 @@ export const makeCategoriesRow = (request: ComplexCommandRequest | ComponentInte
 			.setDefault(getDefault('CHAOS')),
 	);
 
-	return makeStringSelectMenuRowBuilder().addComponents(categoriesMenu);
+	return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(categoriesMenu);
 };
 
 export const makeGuideMenu = (request: ComplexCommandRequest | MessageComponentInteraction<'cached'>) => new StringSelectMenuBuilder()
@@ -122,7 +122,7 @@ export const makeGuideMenu = (request: ComplexCommandRequest | MessageComponentI
 			.setDescription('Detalles sobre los Tipos de Parámetro u Expresiones de Bandera.'),
 	);
 
-export const makeGuideRow = (request: ComplexCommandRequest | MessageComponentInteraction<'cached'>) => makeStringSelectMenuRowBuilder().addComponents(makeGuideMenu(request));
+export const makeGuideRow = (request: ComplexCommandRequest | MessageComponentInteraction<'cached'>) => new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(makeGuideMenu(request));
 
 /**
  * @description
@@ -310,7 +310,7 @@ export function getWikiPageComponentsV2(command: Command, request: ComplexComman
 	const descriptionHeaderTextBuilder = new TextDisplayBuilder().setContent(isNotGuidePage ? '### Descripción' : '### Explicación');
 	const descriptionTextBuilder = new TextDisplayBuilder().setContent(command.desc || '⚠️ Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde');
 
-	const wikiRows = command.wiki.rows.map(row => makeMessageActionRowBuilder()
+	const wikiRows = command.wiki.rows.map(row => new ActionRowBuilder<MessageActionRowComponentBuilder>()
 		.addComponents(row.map(componentEvaluator => componentEvaluator(request)))
 	);
 	const infoContainerBuilder = new ContainerBuilder()

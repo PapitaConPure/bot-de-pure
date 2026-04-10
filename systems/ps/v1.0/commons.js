@@ -24,7 +24,7 @@ const LanguageDataTypes = /**@type {const}*/({
 	Input: 'entrada',
 	Function: 'funcion',
 });
-/**@typedef {import("types").ValuesOf<LanguageDataTypes>} LanguageDataType*/
+/**@typedef {import("../../../types/util.js").ValuesOf<LanguageDataTypes>} LanguageDataType*/
 //#endregion
 
 //#region Lexer
@@ -72,7 +72,7 @@ const LexerTokenTypes = /**@type {const}*/({
 
 	EoF: 'EOF',
 });
-/**@typedef {import("types").ValuesOf<LexerTokenTypes>} LexerTokenType*/
+/**@typedef {import("../../../types/util.js").ValuesOf<LexerTokenTypes>} LexerTokenType*/
 
 /**
  * @template {LexerTokenType} [T=LexerTokenType]
@@ -104,7 +104,7 @@ const ParserStatementNodeTypes = /**@type {const}*/({
 	Stop: 'StopStatement',
 	Comment: 'CommentStatement',
 });
-/**@typedef {import("types").ValuesOf<typeof ParserStatementNodeTypes>} ParserStatementNodeType*/
+/**@typedef {import("../../../types/util.js").ValuesOf<typeof ParserStatementNodeTypes>} ParserStatementNodeType*/
 
 const ParserDataNodeTypes = /**@type {const}*/({
 	Numeric: 'NumericLiteral',
@@ -114,7 +114,7 @@ const ParserDataNodeTypes = /**@type {const}*/({
 	Glossary: 'GlossaryExpression',
 	Nada: 'NadaLiteral',
 });
-/**@typedef {import("types").ValuesOf<typeof ParserDataNodeTypes>} ParserDataNodeType*/
+/**@typedef {import("../../../types/util.js").ValuesOf<typeof ParserDataNodeTypes>} ParserDataNodeType*/
 
 const ParserLiteralNodeTypes = /**@type {const}*/({
 	...ParserDataNodeTypes,
@@ -122,7 +122,7 @@ const ParserLiteralNodeTypes = /**@type {const}*/({
 	Input: 'InputExpression',
 	Embed: 'EmbedExpression',
 });
-/**@typedef {import("types").ValuesOf<typeof ParserLiteralNodeTypes>} ParserLiteralNodeType*/
+/**@typedef {import("../../../types/util.js").ValuesOf<typeof ParserLiteralNodeTypes>} ParserLiteralNodeType*/
 
 const ParserExpressionNodeTypes = /**@type {const}*/({
 	Identifier:          'IdentifierExpression',
@@ -137,12 +137,12 @@ const ParserExpressionNodeTypes = /**@type {const}*/({
 	BinaryExpression:    'BinaryExpression',
 	Property:            'PropertyExpression',
 });
-/**@typedef {import("types").ValuesOf<typeof ParserExpressionNodeTypes>} ParserExpressionNodeType*/
+/**@typedef {import("../../../types/util.js").ValuesOf<typeof ParserExpressionNodeTypes>} ParserExpressionNodeType*/
 
 const ParserSpecialNodeTypes = /**@type {const}*/({
 	Program:             'Program',
 });
-/**@typedef {import("types").ValuesOf<typeof ParserSpecialNodeTypes>} ParserSpecialNodeType*/
+/**@typedef {import("../../../types/util.js").ValuesOf<typeof ParserSpecialNodeTypes>} ParserSpecialNodeType*/
 
 const ParserNodeTypes = /**@type {const}*/({
 	...ParserStatementNodeTypes,
@@ -150,7 +150,7 @@ const ParserNodeTypes = /**@type {const}*/({
 	...ParserExpressionNodeTypes,
 	...ParserSpecialNodeTypes,
 });
-/**@typedef {import("types").ValuesOf<typeof ParserNodeTypes>} ParserNodeType*/
+/**@typedef {import("../../../types/util.js").ValuesOf<typeof ParserNodeTypes>} ParserNodeType*/
 
 /**
  *

@@ -1,6 +1,7 @@
 import { LocaleKey } from '../i18n';
 import UserConfigs, { UserConfigDocument } from '../models/userconfigs';
 import { noDataBase } from '../data/globalProps';
+import type { AnyRequest } from '../types/commands';
 
 export type UserCache = {
 	language: LocaleKey;
@@ -9,7 +10,7 @@ export type UserCache = {
 	banned: boolean;
 };
 
-export type UserCacheResolvable = import('../commands/Commons/typings.js').AnyRequest |
+export type UserCacheResolvable = AnyRequest |
 	import('discord.js').Interaction |
 	import('discord.js').User |
 	import('discord.js').GuildMember |

@@ -6,6 +6,7 @@ import { Booru } from '../booru/boorufetch';
 import { auditError } from './auditor';
 import { Translator } from '../../i18n';
 import { isNSFWChannel } from '../../func';
+import type { AnyRequest } from '../../types/commands';
 
 const MATCH_COUNT_MAX = 3;
 const MATCH_THRESHOLD_PERCENT = 60;
@@ -20,7 +21,7 @@ export function testSauceNAOToken(token: string) {
 }
 
 /**@description Based on the supplied queries, injects corresponding SauceNAO result embeds into the specified payload*/
-export async function pourSauce(clientId: string, queries: string[], request: import('../../commands/Commons/typings').AnyRequest, payload: { successes: EmbedBuilder[]; failures: EmbedBuilder[]; }) {
+export async function pourSauce(clientId: string, queries: string[], request: AnyRequest, payload: { successes: EmbedBuilder[]; failures: EmbedBuilder[]; }) {
 	const translator = await Translator.from(request.user.id);
 	const allowNSFW = isNSFWChannel(request.channel);
 	const { successes, failures } = payload;
