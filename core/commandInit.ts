@@ -1,20 +1,21 @@
-import { Collection, PermissionFlagsBits, SlashCommandBuilder, ContextMenuCommandBuilder, RESTPostAPIChatInputApplicationCommandsJSONBody, RESTPostAPIContextMenuApplicationCommandsJSONBody, SlashCommandStringOption, ContextMenuCommandType, InteractionContextType } from 'discord.js';
+import { Collection, PermissionFlagsBits, SlashCommandBuilder, ContextMenuCommandBuilder, RESTPostAPIChatInputApplicationCommandsJSONBody, RESTPostAPIContextMenuApplicationCommandsJSONBody, SlashCommandStringOption, ContextMenuCommandType, InteractionContextType, SlashCommandChannelOption, SlashCommandIntegerOption, SlashCommandMentionableOption, SlashCommandNumberOption, SlashCommandRoleOption, SlashCommandAttachmentOption, SlashCommandUserOption, SlashCommandBooleanOption } from 'discord.js';
 import { shortenText } from '../func';
 import { readdirSync } from 'fs';
 import { Command } from '../commands/Commons/cmdBuilder';
 import { ContextMenuAction } from '../actions/Commons/actionBuilder';
 import { BaseParamType, CommandOptions } from '../commands/Commons/cmdOpts';
 
-export type AnySlashCommandOption = import('discord.js').SlashCommandBooleanOption |
-    import('discord.js').SlashCommandChannelOption |
-    import('discord.js').SlashCommandIntegerOption |
-    import('discord.js').SlashCommandMentionableOption |
-    import('discord.js').SlashCommandNumberOption |
-    import('discord.js').SlashCommandRoleOption |
-    import('discord.js').SlashCommandStringOption |
-    import('discord.js').SlashCommandAttachmentOption |
-    import('discord.js').SlashCommandMentionableOption |
-    import('discord.js').SlashCommandUserOption;
+export type AnySlashCommandOption =
+	| SlashCommandBooleanOption
+	| SlashCommandChannelOption
+    | SlashCommandIntegerOption
+    | SlashCommandMentionableOption
+    | SlashCommandNumberOption
+    | SlashCommandRoleOption
+    | SlashCommandStringOption
+    | SlashCommandAttachmentOption
+    | SlashCommandMentionableOption
+    | SlashCommandUserOption;
 
 export type SlashCommandBuilderAddFunctionName = keyof SlashCommandBuilder & `add${string}`;
 
@@ -38,7 +39,7 @@ const addFunctionNames: Record<BaseParamType, SlashCommandBuilderAddFunctionName
 
 const defaultAddFunctionName: SlashCommandBuilderAddFunctionName =  'addStringOption';
 
-function setupOptionBuilders(slash: SlashCommandBuilder, options: import('../commands/Commons/cmdOpts').CommandOptions, log = false) {
+function setupOptionBuilders(slash: SlashCommandBuilder, options: CommandOptions, log = false) {
 	options.params.forEach(p => {
 		const optionBuilder = <T extends AnySlashCommandOption>(option: T, name: string, fullyOptional: boolean = false): T => {
 			option
