@@ -1,5 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
-import { CommandOptions, CommandTags, Command, CommandParam } from '../Commons/';
+import { CommandOptions, CommandTags, Command, CommandParam } from '../commons';
 import { useMainPlayer } from 'discord-player';
 import { Translator } from '../../i18n';
 import { saveTracksQueue, tryRecoverSavedTracksQueue } from '../../models/playerQueue.js';

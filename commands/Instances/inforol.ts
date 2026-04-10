@@ -1,7 +1,7 @@
 import { ButtonBuilder, ButtonInteraction, ButtonStyle, Collection, EmbedBuilder, GuildMember, InteractionReplyOptions, InteractionUpdateOptions, MessagePayload, Role } from 'discord.js';
 import { compressId } from '../../func';
-import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons/';
-import { CommandPermissions } from '../Commons/cmdPerms';
+import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../commons';
+import { CommandPermissions } from '../commons/cmdPerms';
 import { Translator } from '../../i18n';
 import { makeButtonRowBuilder } from '../../utils/tsCasts';
 import { fetchGuildMembers } from '../../utils/guildratekeeper';

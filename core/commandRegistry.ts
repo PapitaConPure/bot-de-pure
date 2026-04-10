@@ -1,9 +1,9 @@
 import { Collection, PermissionFlagsBits, SlashCommandBuilder, ContextMenuCommandBuilder, RESTPostAPIChatInputApplicationCommandsJSONBody, RESTPostAPIContextMenuApplicationCommandsJSONBody, SlashCommandStringOption, ContextMenuCommandType, InteractionContextType, SlashCommandChannelOption, SlashCommandIntegerOption, SlashCommandMentionableOption, SlashCommandNumberOption, SlashCommandRoleOption, SlashCommandAttachmentOption, SlashCommandUserOption, SlashCommandBooleanOption } from 'discord.js';
 import { shortenText } from '../func';
 import { readdirSync } from 'fs';
-import { Command } from '../commands/Commons/cmdBuilder';
+import { Command } from '../commands/commons/cmdBuilder';
 import { ContextMenuAction } from '../actions/Commons/actionBuilder';
-import { CommandOptions } from '../commands/Commons/cmdOpts';
+import { CommandOptions } from '../commands/commons/cmdOpts';
 import type { BaseParamType } from '../types/commands';
 
 export type AnySlashCommandOption =

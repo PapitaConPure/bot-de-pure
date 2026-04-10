@@ -1,6 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
 import { tenshiColor } from '../../data/globalProps';
-import { CommandTags, Command, CommandOptions } from '../Commons/';
+import { CommandTags, Command, CommandOptions } from '../commons';
 
 const tags = new CommandTags().add('PAPA');
 

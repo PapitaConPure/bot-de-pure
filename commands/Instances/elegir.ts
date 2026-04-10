@@ -1,4 +1,4 @@
-import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons/';
+import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../commons';
 import { EmbedBuilder, Colors } from 'discord.js';
 import { randRange } from '../../func';
 

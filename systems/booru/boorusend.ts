@@ -4,7 +4,7 @@ import { guildEmoji as gEmo, shortenText, isThread } from '../../func';
 import { Booru, Post, TagTypes } from './boorufetch';
 import { getBaseTags, getSearchTags, tagMaps } from './booruprops';
 import { globalConfigs, booruApiKey, booruUserId } from '../../data/globalProps';
-import { CommandOptionSolver } from '../../commands/Commons/cmdOpts';
+import { CommandOptionSolver } from '../../commands/commons/cmdOpts';
 import userIds from '../../data/userIds.json';
 import rakki from '../../commands/Instances/rakkidei';
 import { Translator } from '../../i18n';
@@ -521,7 +521,7 @@ export interface CommandSearchOptions {
 }
 
 /**@description Busca las tags de {@linkcode Booru} deseadas y envía {@linkcode Message}s acorde a la petición.*/
-export async function searchAndReplyWithPost(request: ComplexCommandRequest, args: import('../../commands/Commons/cmdOpts').CommandOptionSolver, options: CommandSearchOptions = {}) {
+export async function searchAndReplyWithPost(request: ComplexCommandRequest, args: import('../../commands/commons/cmdOpts').CommandOptionSolver, options: CommandSearchOptions = {}) {
 	info('Se recibió una solicitud de respuesta con Posts resultados de búsqueda de Booru');
 
 	const {

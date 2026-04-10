@@ -1,5 +1,5 @@
 import { EmbedBuilder, MessageFlags } from 'discord.js';
-import { CommandTags, Command, CommandOptions } from '../Commons';
+import { CommandTags, Command, CommandOptions } from '../commons';
 import { searchCommand, getWikiPageComponentsV2 } from '../../systems/others/wiki.js';
 import { p_pure } from '../../utils/prefixes';
 

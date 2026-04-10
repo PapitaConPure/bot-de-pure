@@ -1,4 +1,4 @@
-import { CommandTags, Command, CommandOptions } from '../Commons/';
+import { CommandTags, Command, CommandOptions } from '../commons';
 
 const options = new CommandOptions()
 	.addParam('servidor', 'GUILD', 'para indicar un servidor');

@@ -74,7 +74,7 @@ class TuberInterpreter {
 	#listStack = [];
 	/**@type {Array<RuntimeValue>}*/
 	#sendStack = [];
-	/**@type {import('../../../commands/Commons/typings.js').CommandRequest}*/
+	/**@type {import('../../../commands/commons/typings.js').CommandRequest}*/
 	#request;
 	/**@type {Boolean}*/
 	#testDrive;

@@ -1,5 +1,5 @@
 import { randRange, isNSFWChannel } from '../../func';
-import { CommandOptions, CommandTags, Command } from '../Commons/';
+import { CommandOptions, CommandTags, Command } from '../commons';
 
 const paputa = [
 	'Romper al bot <:sagumeBlush:1108315844045455410>',

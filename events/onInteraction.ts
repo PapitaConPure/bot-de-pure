@@ -1,4 +1,4 @@
-import { puré } from '../commands/Commons/commandRegistry';
+import { puré } from '../core/commandRegistry';
 import { AutocompleteInteraction, ButtonInteraction, ChatInputCommandInteraction, ContextMenuCommandInteraction, Interaction, ModalSubmitInteraction, StringSelectMenuInteraction } from 'discord.js';
 import { Stats } from '../models/stats';
 import userIds from '../data/userIds.json';
@@ -6,8 +6,8 @@ import { channelIsBlocked, isUsageBanned, decompressId } from '../func';
 import { auditRequest } from '../systems/others/auditor';
 import { findFirstException, handleAndAuditError, generateExceptionEmbed } from '../utils/cmdExceptions';
 import { Translator } from '../i18n';
-import { Command } from '../commands/Commons/cmdBuilder';
-import { CommandFlagExpressive, CommandOptionSolver, CommandParam } from '../commands/Commons/cmdOpts';
+import { Command } from '../commands/commons/cmdBuilder';
+import { CommandFlagExpressive, CommandOptionSolver, CommandParam } from '../commands/commons/cmdOpts';
 import { noDataBase } from '../data/globalProps';
 
 export async function onInteraction(interaction: Interaction) {

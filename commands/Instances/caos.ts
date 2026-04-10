@@ -1,8 +1,8 @@
 import GuildConfig from '../../models/guildconfigs.js';
 import { p_pure } from '../../utils/prefixes.js';
-import { CommandOptions, CommandTags, Command, fetchCommandsFromFiles } from '../Commons/';
+import { CommandOptions, CommandTags, Command, fetchCommandsFromFiles } from '../commons/index.js';
 import { EmbedBuilder } from 'discord.js';
-import { CommandPermissions } from '../Commons/cmdPerms.js';
+import { CommandPermissions } from '../commons/cmdPerms.js';
 
 const perms = CommandPermissions.adminOnly();
 const options = new CommandOptions()

@@ -1,5 +1,5 @@
 import { ButtonBuilder, ButtonStyle, ContainerBuilder, MessageFlags } from 'discord.js';
-import { CommandTags, Command, commandFilenames } from '../Commons/';
+import { CommandTags, Command, commandFilenames } from '../commons';
 import { tenshiAltColor, tenshiColor } from '../../data/globalProps';
 import { Translator } from '../../i18n';
 import userIds from '../../data/userIds.json';

@@ -5,9 +5,9 @@ import GuildConfig from '../models/guildconfigs.js';
 import { isNotModerator } from '../func';
 import chalk from 'chalk';
 import { auditError } from '../systems/others/auditor';
-import { Command } from '../commands/Commons/cmdBuilder.js';
+import { Command } from '../commands/commons/cmdBuilder.js';
 import { reportFormUrl } from '../data/globalProps';
-import { CommandTagResolvable } from '../commands/Commons';
+import { CommandTagResolvable } from '../commands/commons';
 import { CommandRequest } from '../types/commands';
 
 type ExceptionTestFn = (request: CommandRequest) => Promise<boolean>;

@@ -1,4 +1,4 @@
-import { CommandTags, Command } from '../Commons/';
+import { CommandTags, Command } from '../commons';
 import { EmbedBuilder } from 'discord.js';
 import { randRange, improveNumber } from '../../func';
 import UserConfigs from '../../models/userconfigs';

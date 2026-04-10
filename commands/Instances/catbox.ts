@@ -1,5 +1,5 @@
 import { EmbedBuilder, Colors } from 'discord.js';
-import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons/';
+import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../commons';
 import { Translator } from '../../i18n';
 import { Catbox } from 'node-catbox';
 import { pipeline } from 'stream/promises';

@@ -3,7 +3,7 @@ import type { AnyComponentBuilder, MessageComponentInteraction, MessageActionRow
 import { tenshiColor } from '../../data/globalProps';
 import serverIds from '../../data/serverIds.json';
 import userIds from '../../data/userIds.json';
-import { fetchCommandsFromFiles, Command, CommandTag } from '../../commands/Commons/';
+import { fetchCommandsFromFiles, Command, CommandTag } from '../../commands/commons';
 import { p_pure } from '../../utils/prefixes';
 import { isNotModerator, edlDistance, toCapitalized, compressId } from '../../func';
 import { client } from '../../core/client';

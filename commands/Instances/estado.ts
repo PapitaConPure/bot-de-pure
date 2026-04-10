@@ -4,7 +4,7 @@ import { noDataBase, remoteStartup, tenshiColor } from '../../data/globalProps';
 import { p_pure } from '../../utils/prefixes';
 import { Stats } from '../../models/stats';
 import { quantityDisplay } from '../../func';
-import { CommandTags, Command, commandFilenames } from '../Commons';
+import { CommandTags, Command, commandFilenames } from '../commons';
 import { searchCommand, makeGuideRow, getWikiPageComponentsV2 } from '../../systems/others/wiki';
 import type { AnyRequest } from '../../types/commands';
 import { Translator } from '../../i18n';

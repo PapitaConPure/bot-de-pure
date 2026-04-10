@@ -1,5 +1,5 @@
 import UserConfig from '../../models/userconfigs';
-import { Command, CommandTags, CommandOptions } from '../Commons';
+import { Command, CommandTags, CommandOptions } from '../commons';
 import { recacheUser } from '../../utils/usercache';
 import { papita } from '../../data/userIds.json';
 

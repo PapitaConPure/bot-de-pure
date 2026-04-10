@@ -1,6 +1,6 @@
 import { ModalBuilder, TextInputStyle, Colors, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { decompressId, sleep } from '../../func';
-import { CommandTags, Command } from '../Commons/';
+import { CommandTags, Command } from '../commons';
 import { useMainPlayer, QueueRepeatMode } from 'discord-player';
 import { showQueuePage, getPageAndNumberTrackIndex, isPlayerUnavailable, SERVICES, makePuréMusicEmbed } from '../../systems/others/musicPlayer';
 import { tryRecoverSavedTracksQueue, saveTracksQueue } from '../../models/playerQueue.js';

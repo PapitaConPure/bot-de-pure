@@ -1,4 +1,4 @@
-import { CommandOptions, CommandTags, Command } from '../Commons/';
+import { CommandOptions, CommandTags, Command } from '../commons';
 import UserConfigs from '../../models/userconfigs';
 import { toUtcOffset, utcOffsetDisplay, sanitizeTzCode } from '../../utils/timezones';
 import { dateToUTCFormat } from '../../func';

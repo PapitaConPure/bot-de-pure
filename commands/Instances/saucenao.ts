@@ -1,4 +1,4 @@
-import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons/';
+import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../commons';
 import { EmbedBuilder, Colors, ButtonBuilder, ButtonStyle, TextInputBuilder, TextInputStyle, ModalBuilder } from 'discord.js';
 import { pourSauce, testSauceNAOToken } from '../../systems/others/saucenao';
 import { encryptString } from '../../utils/security';

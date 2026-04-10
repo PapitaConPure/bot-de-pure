@@ -1,6 +1,6 @@
 import { MessageFlags, TextDisplayBuilder, ContainerBuilder, GuildMember, ImageURLOptions } from 'discord.js';
 import { p_pure } from '../../utils/prefixes';
-import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons';
+import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../commons';
 import { Translator } from '../../i18n';
 import { fetchGuildMembers } from '../../utils/guildratekeeper';
 import type { ComplexCommandRequest } from '../../types/commands';

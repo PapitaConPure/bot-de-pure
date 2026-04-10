@@ -1,4 +1,4 @@
-import { CommandTags, Command } from '../Commons/';
+import { CommandTags, Command } from '../commons';
 import { searchAndReplyWithPost } from '../../systems/booru/boorusend.js';
 import { searchCommandOptions } from './buscar';
 

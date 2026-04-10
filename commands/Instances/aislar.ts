@@ -1,5 +1,5 @@
-import { CommandTags, CommandOptions, Command, CommandOptionSolver } from '../Commons/';
-import { CommandPermissions } from '../Commons/cmdPerms';
+import { CommandTags, CommandOptions, Command, CommandOptionSolver } from '../commons';
+import { CommandPermissions } from '../commons/cmdPerms';
 import { Translator } from '../../i18n';
 import { GuildMember, MessageFlags } from 'discord.js';
 

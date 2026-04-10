@@ -1,5 +1,5 @@
 import { improveNumber } from '../../func';
-import { CommandTags, Command, CommandOptions, CommandOptionSolver } from '../Commons/';
+import { CommandTags, Command, CommandOptions, CommandOptionSolver } from '../commons';
 import { calc, MathEvaluatorError, MathLexerError, MathParserError } from '../../systems/others/mathreader';
 import { Colors, ContainerBuilder, MessageFlags } from 'discord.js';
 import { Translator } from '../../i18n';

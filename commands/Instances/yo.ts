@@ -1,4 +1,4 @@
-import { CommandTags, Command, CommandOptions, CommandFlag } from '../Commons/';
+import { CommandTags, Command, CommandOptions, CommandFlag } from '../commons';
 import { ButtonBuilder, ButtonStyle, Colors, TextInputBuilder, TextInputStyle, ModalBuilder, StringSelectMenuBuilder, ContainerBuilder, MessageFlags, StringSelectMenuOptionBuilder, SeparatorSpacingSize, LabelBuilder, MessageComponentInteraction, Interaction } from 'discord.js';
 import { Translator, Locales, isValidLocaleKey, LocaleIds, LocaleKey } from '../../i18n';
 import { compressId, decompressId, improveNumber, shortenText } from '../../func';

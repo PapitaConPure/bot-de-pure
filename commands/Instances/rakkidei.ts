@@ -1,5 +1,5 @@
 import { ButtonBuilder, ButtonStyle } from 'discord.js';
-import { CommandTags, Command } from '../Commons/';
+import { CommandTags, Command } from '../commons';
 import { randRange } from '../../func';
 
 const phrases = [

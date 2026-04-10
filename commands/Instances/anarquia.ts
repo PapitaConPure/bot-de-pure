@@ -1,4 +1,4 @@
-import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons/';
+import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../commons';
 import { makeWeightedDecision, compressId, decompressId, improveNumber, emojiRegex, WeightedDecision } from '../../func';
 import { EmbedBuilder, AttachmentBuilder, StringSelectMenuBuilder, Colors, ButtonBuilder, ButtonStyle, ActionRowBuilder, StringSelectMenuInteraction, MessageFlags } from 'discord.js';
 import { PureTable, AnarchyUser, pureTableAssets, AnarchyUserDocument } from '../../models/puretable';

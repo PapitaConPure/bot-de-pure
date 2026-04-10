@@ -10,7 +10,7 @@ import { formatBooruPostMessage, formatTagNameListNew, getPostUrlFromContainer }
 import { Translator } from '../../i18n';
 import { makeButtonRowBuilder, makeStringSelectMenuRowBuilder, makeTextInputRowBuilder } from '../../utils/tsCasts.js';
 import { getUnixTime } from 'date-fns';
-import { Command, CommandTags, CommandPermissions } from '../Commons';
+import { Command, CommandTags, CommandPermissions } from '../commons';
 
 const wizTitle = (translator: Translator) => translator.getText('feedAuthor');
 

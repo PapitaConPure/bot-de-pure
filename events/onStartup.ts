@@ -1,8 +1,8 @@
 import { Client, Collection, GuildTextBasedChannel, REST, RESTPostAPIApplicationCommandsJSONBody, RESTPostAPIChatInputApplicationCommandsJSONBody } from 'discord.js';
 import { Routes } from 'discord-api-types/v9';
 
-import { puré, registerCommands } from '../commands/Commons/commandRegistry';
-import { fetchCommandsFromFiles } from '../commands/Commons';
+import { puré, registerCommands } from '../core/commandRegistry';
+import { fetchCommandsFromFiles } from '../commands/commons';
 
 import { set, connect } from 'mongoose';
 import PrefixPairs from '../models/prefixpair';

@@ -1,4 +1,4 @@
-import { CommandTags, Command } from '../Commons/';
+import { CommandTags, Command } from '../commons';
 import { makeWeightedDecision, randRange, WeightedDecision } from '../../func';
 import { ContainerBuilder, MessageFlags } from 'discord.js';
 

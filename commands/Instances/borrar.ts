@@ -1,7 +1,7 @@
 import { sleep, fetchUser } from '../../func';
 import { p_pure } from '../../utils/prefixes';
-import { CommandPermissions } from '../Commons/cmdPerms.js';
-import { CommandOptions, CommandTags, Command } from '../Commons/';
+import { CommandPermissions } from '../commons/cmdPerms.js';
+import { CommandOptions, CommandTags, Command } from '../commons';
 import type { ComplexCommandRequest } from '../../types/commands';
 import { GuildTextBasedChannel, Message, MessageFlags, User } from 'discord.js';
 

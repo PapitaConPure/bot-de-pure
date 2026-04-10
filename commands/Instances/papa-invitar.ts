@@ -1,5 +1,5 @@
 import { EmbedBuilder, Colors } from 'discord.js';
-import { CommandTags, Command } from '../Commons/';
+import { CommandTags, Command } from '../commons';
 
 const tenshi = { '👉👈': 'https://i.imgur.com/yeYyEvp.jpg' };
 

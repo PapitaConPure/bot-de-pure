@@ -1,5 +1,5 @@
 import { randInArray } from '../../func';
-import { CommandOptions, CommandTags, Command } from '../Commons/';
+import { CommandOptions, CommandTags, Command } from '../commons';
 
 const uwusopt = [
 	'<:uwu:681935702308552730>',

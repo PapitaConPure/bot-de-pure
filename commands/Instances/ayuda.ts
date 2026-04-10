@@ -4,12 +4,12 @@ import userIds from '../../data/userIds.json';
 import { tenshiColor } from '../../data/globalProps';
 import { isNotModerator, shortenText } from '../../func';
 import { p_pure } from '../../utils/prefixes';
-import { CommandOptions, CommandTags, Command, CommandParam, CommandTagResolvable, fetchCommandsFromFiles } from '../Commons';
+import { CommandOptions, CommandTags, Command, CommandParam, CommandTagResolvable, fetchCommandsFromFiles } from '../commons';
 import { searchCommand, searchCommands, getWikiPageComponentsV2, makeCategoriesRow, makeGuideRow } from '../../systems/others/wiki';
 import type { ComplexCommandRequest } from '../../types/commands';
 
 const makeExcludedTags = (request: ComplexCommandRequest | StringSelectMenuInteraction<'cached'>) => {
-	const excludedTags: Array<import('../Commons/cmdTags').CommandTagResolvable> = [ 'GUIDE' ];
+	const excludedTags: Array<import('../commons/cmdTags').CommandTagResolvable> = [ 'GUIDE' ];
 
 	isNotModerator(request.member) && excludedTags.push('MOD');
 	request.guildId !== serverIds.saki && excludedTags.push('SAKI');
@@ -216,8 +216,8 @@ const command = new Command('ayuda', tags)
 export default command;
 
 export interface CommandsLookupQuery {
-	tags?: Array<import('../Commons/cmdTags').CommandTagResolvable>;
-	excludedTags?: Array<import('../Commons/cmdTags').CommandTagResolvable>;
+	tags?: Array<import('../commons/cmdTags').CommandTagResolvable>;
+	excludedTags?: Array<import('../commons/cmdTags').CommandTagResolvable>;
 	context?: { member: import('discord.js').GuildMember; channel: import('discord.js').GuildChannelResolvable; };
 }
 

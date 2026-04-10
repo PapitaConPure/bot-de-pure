@@ -1,7 +1,7 @@
-import { CommandTags } from '../Commons/cmdTags';
-import { Command } from '../Commons/cmdBuilder';
+import { CommandTags } from '../commons/cmdTags';
+import { Command } from '../commons/cmdBuilder';
 import { executeTuber, CURRENT_PS_VERSION, Tubercle } from '../../systems/ps/common/executeTuber';
-import { CommandOptions } from '../Commons/cmdOpts';
+import { CommandOptions } from '../commons/cmdOpts';
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { p_pure } from '../../utils/prefixes';
 import { tenshiColor } from '../../data/globalProps';
@@ -20,7 +20,7 @@ export const psDocsButton = new ButtonBuilder()
 	.setEmoji('📖')
 	.setStyle(ButtonStyle.Link);
 
-async function getScriptString(args: import('../Commons/cmdOpts').CommandOptionSolver, rawArgs?: string) {
+async function getScriptString(args: import('../commons/cmdOpts').CommandOptionSolver, rawArgs?: string) {
 	const file = args.getAttachment('archivo');
 
 	if(file && file.name.toLowerCase().endsWith('.tuber')) {

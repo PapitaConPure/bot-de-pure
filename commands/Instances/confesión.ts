@@ -1,4 +1,4 @@
-import { Command, CommandTags, CommandPermissions } from '../Commons/';
+import { Command, CommandTags, CommandPermissions } from '../commons';
 import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder, Colors, DiscordAPIError, ContainerBuilder, SectionBuilder, MessageFlags, Interaction, TextChannel } from 'discord.js';
 import { makeTextInputRowBuilder, makeButtonRowBuilder } from '../../utils/tsCasts.js';
 import { compressId, fetchChannel, decompressId } from '../../func';

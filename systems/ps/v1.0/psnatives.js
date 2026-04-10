@@ -304,7 +304,7 @@ async function createDiscordGuild(guild) {
 /**
  * @param {Array<RuntimeValue>} param0
  * @param {CurrentStatement} currentStatement
- * @param {import('../../../commands/Commons/typings.js').CommandRequest} request
+ * @param {import('../../../commands/commons/typings.js').CommandRequest} request
  */
 function buscarMiembro([búsqueda], currentStatement, _, request) {
     if(búsqueda?.type !== 'Text')
@@ -320,7 +320,7 @@ function buscarMiembro([búsqueda], currentStatement, _, request) {
 /**
  * @param {Array<RuntimeValue>} param0
  * @param {CurrentStatement} currentStatement
- * @param {import('../../../commands/Commons/typings.js').CommandRequest} request
+ * @param {import('../../../commands/commons/typings.js').CommandRequest} request
  */
 function buscarCanal([búsqueda], currentStatement, _, request) {
     if(búsqueda?.type !== 'Text')
@@ -336,7 +336,7 @@ function buscarCanal([búsqueda], currentStatement, _, request) {
 /**
  * @param {Array<RuntimeValue>} param0
  * @param {CurrentStatement} currentStatement
- * @param {import('../../../commands/Commons/typings.js').CommandRequest} request
+ * @param {import('../../../commands/commons/typings.js').CommandRequest} request
  */
 function buscarRol([búsqueda], currentStatement, _, request) {
     if(búsqueda?.type !== 'Text')
@@ -1027,7 +1027,7 @@ function TuberInitializerError(message) {
 /**
  * 
  * @param {TuberScope} scope 
- * @param {import('../../../commands/Commons/typings.js').ComplexCommandRequest} request 
+ * @param {import('../../../commands/commons/typings.js').ComplexCommandRequest} request 
  * @param {import('./purescript.js').Tubercle} tuber
  * @param {Array<String>} args 
  */

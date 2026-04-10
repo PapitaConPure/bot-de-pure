@@ -1,5 +1,5 @@
 import { EmbedBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { CommandTags, Command } from '../Commons/';
+import { CommandTags, Command } from '../commons';
 import GuildConfig from '../../models/guildconfigs.js';
 import { tenshiColor } from '../../data/globalProps';
 import { makeButtonRowBuilder } from '../../utils/tsCasts.js';

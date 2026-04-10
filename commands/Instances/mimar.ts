@@ -1,6 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
 import { randRange } from '../../func';
-import { CommandOptions, CommandTags, Command } from '../Commons/';
+import { CommandOptions, CommandTags, Command } from '../commons';
 
 const loveStats = () => [
 	{ text: '🤝 [n]% amistad',    number: randRange(0, 100, false) },

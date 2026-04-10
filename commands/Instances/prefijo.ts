@@ -3,8 +3,8 @@ import { shortenText } from '../../func';
 import PrefixPair from '../../models/prefixpair';
 import { prefixes, tenshiColor } from '../../data/globalProps';
 import { p_pure } from '../../utils/prefixes';
-import { CommandOptions, CommandTags, Command } from '../Commons/';
-import { CommandPermissions } from '../Commons/cmdPerms';
+import { CommandOptions, CommandTags, Command } from '../commons';
+import { CommandPermissions } from '../commons/cmdPerms';
 
 const perms = new CommandPermissions('ManageGuild');
 const flags = new CommandTags().add(

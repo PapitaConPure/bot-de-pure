@@ -1,4 +1,4 @@
-import { CommandOptions, CommandTags, Command } from '../Commons/';
+import { CommandOptions, CommandTags, Command } from '../commons';
 import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, ChannelType, ModalBuilder, TextInputStyle, TextInputBuilder, MessageFlags, ColorResolvable, CategoryChannel, GuildChannel } from 'discord.js';
 import { PureVoiceSessionMember, getFrozenSessionAllowedMembers, makePVSessionName } from '../../systems/others/purevoice.js';
 import { PureVoiceModel as PureVoice, PureVoiceSessionModel } from '../../models/purevoice.js';

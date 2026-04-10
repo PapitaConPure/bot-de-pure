@@ -1,4 +1,4 @@
-import { CommandTags, Command } from '../Commons/';
+import { CommandTags, Command } from '../commons';
 import { Colors, MessageFlags } from 'discord.js';
 import { useMainPlayer } from 'discord-player';
 import { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } from '../../systems/others/musicPlayer.js';

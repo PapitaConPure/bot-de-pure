@@ -1,4 +1,4 @@
-import { CommandTags, Command, CommandOptions } from '../Commons/';
+import { CommandTags, Command, CommandOptions } from '../commons';
 import { improveNumber, compressId, sleep } from '../../func';
 import type { ComplexCommandRequest } from '../../types/commands';
 import { globalConfigs, tenshiColor } from '../../data/globalProps';

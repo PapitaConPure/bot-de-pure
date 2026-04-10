@@ -1,7 +1,7 @@
 import { User } from 'discord.js';
 import { randRange } from '../../func';
 import { p_pure } from '../../utils/prefixes';
-import { CommandOptions, CommandTags, Command } from '../Commons/';
+import { CommandOptions, CommandTags, Command } from '../commons';
 
 const frase = [
 	'Oe po [m] <:junkNo:1107847991580164106>',

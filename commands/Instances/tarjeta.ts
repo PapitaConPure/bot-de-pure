@@ -1,5 +1,5 @@
 import Canvas from '@napi-rs/canvas';
-import { CommandOptions, CommandTags, Command, CommandParam, CommandFlag } from '../Commons';
+import { CommandOptions, CommandTags, Command, CommandParam, CommandFlag } from '../commons';
 import { p_pure } from '../../utils/prefixes';
 import { AttachmentBuilder } from 'discord.js';
 import { improveNumber } from '../../func';

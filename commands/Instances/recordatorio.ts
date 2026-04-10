@@ -1,4 +1,4 @@
-import { Command, CommandTags, CommandOptions, CommandParam, CommandFlagExpressive } from '../Commons/';
+import { Command, CommandTags, CommandOptions, CommandParam, CommandFlagExpressive } from '../commons';
 import { parseDateFromNaturalLanguage, parseTimeFromNaturalLanguage, addTime, utcStartOfTzToday } from '../../utils/datetime';
 import { MessageFlags, ContainerBuilder, ButtonBuilder, ButtonStyle, SeparatorSpacingSize, TextDisplayBuilder, ModalBuilder, TextInputStyle, ChannelType, TextInputBuilder } from 'discord.js';
 import { clearScheduledReminder, scheduleReminder } from '../../systems/others/remindersScheduler';

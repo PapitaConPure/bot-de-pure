@@ -1,5 +1,5 @@
 import { modifyPresence } from '../../systems/presence/presence';
-import { CommandTags, Command } from '../Commons';
+import { CommandTags, Command } from '../commons';
 
 const tags = new CommandTags().add('PAPA');
 

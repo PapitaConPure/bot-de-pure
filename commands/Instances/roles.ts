@@ -1,4 +1,4 @@
-import { CommandTags, Command, CommandOptions, CommandParam } from '../Commons/';
+import { CommandTags, Command, CommandOptions, CommandParam } from '../commons';
 import { tenshiColor } from '../../data/globalProps';
 import { saki } from '../../data/sakiProps';
 import userIds from '../../data/userIds.json';

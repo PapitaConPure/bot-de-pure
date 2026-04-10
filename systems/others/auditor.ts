@@ -1,4 +1,4 @@
-import { Command } from '../../commands/Commons/cmdBuilder';
+import { Command } from '../../commands/commons/cmdBuilder';
 import { CommandRequest } from '../../types/commands';
 import { globalConfigs } from '../../data/globalProps';
 import userIds from '../../data/userIds.json';

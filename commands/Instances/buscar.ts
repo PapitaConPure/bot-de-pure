@@ -1,4 +1,4 @@
-import { CommandOptions, CommandTags, Command } from '../Commons';
+import { CommandOptions, CommandTags, Command } from '../commons';
 import { searchAndReplyWithPost } from '../../systems/booru/boorusend';
 
 export const searchCommandOptions = new CommandOptions()

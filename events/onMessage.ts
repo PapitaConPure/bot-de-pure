@@ -1,6 +1,6 @@
-import { puré } from '../commands/Commons/commandRegistry';
+import { puré } from '../core/commandRegistry';
 import { ContainerBuilder, Guild, Message, MessageFlags } from 'discord.js';
-import { Command, CommandOptionSolver } from '../commands/Commons/index';
+import { Command, CommandOptionSolver } from '../commands/commons/index';
 
 import { Stats, ChannelStats } from '../models/stats';
 import { p_pure } from '../utils/prefixes';

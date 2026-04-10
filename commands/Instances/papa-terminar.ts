@@ -1,4 +1,4 @@
-import { CommandTags, Command } from '../Commons';
+import { CommandTags, Command } from '../commons';
 
 const flags = new CommandTags().add('PAPA');
 

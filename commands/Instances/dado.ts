@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import { randRange } from '../../func';
 import { p_pure } from '../../utils/prefixes';
-import { CommandOptions, CommandTags, Command, CommandOptionSolver, CommandParam } from '../Commons/';
+import { CommandOptions, CommandTags, Command, CommandOptionSolver, CommandParam } from '../commons';
 
 const diceRegex = /([0-9]+)\s*[Dd]\s*([0-9]+)/;
 

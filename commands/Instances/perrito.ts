@@ -1,7 +1,7 @@
 import { AutocompleteInteraction, EmbedBuilder, Message, MessageFlags } from 'discord.js';
 import serverIds from '../../data/serverIds.json';
 import { navigationRows, rand, paginateRaw } from '../../func';
-import { CommandOptions, CommandTags, Command } from '../Commons/';
+import { CommandOptions, CommandTags, Command } from '../commons';
 import { InteractionType } from 'discord.js';
 import type { AnyRequest, ComplexCommandRequest } from '../../types/commands';
 

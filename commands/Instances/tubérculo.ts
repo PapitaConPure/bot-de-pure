@@ -1,4 +1,4 @@
-import { CommandOptions, CommandTags, Command, CommandOptionSolver, CommandParam } from '../Commons/';
+import { CommandOptions, CommandTags, Command, CommandOptionSolver, CommandParam } from '../commons';
 import { EmbedBuilder, ButtonBuilder, TextInputBuilder, ButtonStyle, TextInputStyle, Colors, ModalBuilder, AttachmentBuilder, MessageFlags, ButtonInteraction } from 'discord.js';
 import { isNotModerator, fetchUserID, navigationRows, edlDistance, shortenText, compressId, decompressId } from '../../func.js';
 import GuildConfig, { GuildConfigDocument } from '../../models/guildconfigs.js';

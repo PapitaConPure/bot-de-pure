@@ -1,6 +1,6 @@
 import { EmbedBuilder, Collection, Message, User, Snowflake } from 'discord.js';
 import { paginateRaw } from '../../func';
-import { CommandOptions, CommandTags, Command } from '../Commons/';
+import { CommandOptions, CommandTags, Command } from '../commons';
 
 const options = new CommandOptions()
 	.addParam('tiempo', 'NUMBER', 'para establecer la duración del evento, en segundos', { optional: true });

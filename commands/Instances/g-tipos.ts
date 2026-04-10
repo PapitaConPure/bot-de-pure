@@ -1,5 +1,5 @@
 import { makeGuideMenu } from '../../systems/others/wiki.js';
-import { CommandTags, Command } from '../Commons/';
+import { CommandTags, Command } from '../commons/index.js';
 
 const tags = new CommandTags().add('GUIDE');
 

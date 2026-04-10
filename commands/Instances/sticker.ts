@@ -1,4 +1,4 @@
-import { CommandTags, Command, CommandOptions } from '../Commons/';
+import { CommandTags, Command, CommandOptions } from '../commons';
 import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 
 const options = new CommandOptions()

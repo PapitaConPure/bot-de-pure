@@ -1,6 +1,6 @@
 import { EmbedBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { CommandOptions, CommandTags, Command } from '../Commons/';
-import { CommandPermissions } from '../Commons/cmdPerms';
+import { CommandOptions, CommandTags, Command } from '../commons';
+import { CommandPermissions } from '../commons/cmdPerms';
 import { makeButtonRowBuilder } from '../../utils/tsCasts';
 import { saki } from '../../data/sakiProps';
 

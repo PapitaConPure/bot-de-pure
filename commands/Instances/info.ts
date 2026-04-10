@@ -1,7 +1,7 @@
 import { ChannelType, ButtonBuilder, ButtonStyle, MessageFlags, ContainerBuilder, SectionBuilder } from 'discord.js';
 import { fetchMember, compressId, shortenText, quantityDisplay } from '../../func';
 import { ChannelStats, Stats } from '../../models/stats';
-import { CommandOptions, CommandTags, Command } from '../Commons/';
+import { CommandOptions, CommandTags, Command } from '../commons';
 import { makeButtonRowBuilder } from '../../utils/tsCasts';
 import { Translator } from '../../i18n';
 import { fetchGuildMembers } from '../../utils/guildratekeeper';

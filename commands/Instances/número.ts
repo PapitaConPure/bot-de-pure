@@ -1,6 +1,6 @@
 import { improveNumber } from '../../func';
 import { Translator } from '../../i18n';
-import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons';
+import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../commons';
 
 const tags = new CommandTags().add('COMMON');
 

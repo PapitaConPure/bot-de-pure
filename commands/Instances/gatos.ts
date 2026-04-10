@@ -1,5 +1,5 @@
 import { Colors, ContainerBuilder, MessageFlags } from 'discord.js';
-import { CommandTags, Command } from '../Commons/';
+import { CommandTags, Command } from '../commons';
 import { fetchExt } from '../../utils/fetchext';
 
 const tags = new CommandTags().add('COMMON');

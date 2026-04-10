@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { p_pure } from '../../utils/prefixes';
-import { CommandOptions, CommandTags, Command } from '../Commons/';
+import { CommandOptions, CommandTags, Command } from '../commons';
 import { EmbedBuilder } from 'discord.js';
 
 import * as GlobalProps from '../../data/globalProps';

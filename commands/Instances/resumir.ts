@@ -1,5 +1,5 @@
 import { ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
-import { CommandTags, Command } from '../Commons/';
+import { CommandTags, Command } from '../commons';
 import { Translator } from '../../i18n';
 import { useMainPlayer } from 'discord-player';
 import { tryRecoverSavedTracksQueue } from '../../models/playerQueue';

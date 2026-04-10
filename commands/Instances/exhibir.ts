@@ -1,9 +1,9 @@
 import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, GuildTextBasedChannel } from 'discord.js';
-import { CommandTags, Command } from '../Commons/';
+import { CommandTags, Command } from '../commons';
 import { DiscordAgent } from '../../systems/converters/discordagent';
 import { saki } from '../../data/sakiProps';
 import serverIds from '../../data/serverIds.json';
-import { CommandPermissions } from '../Commons/cmdPerms.js';
+import { CommandPermissions } from '../commons/cmdPerms.js';
 import { getUnixTime } from 'date-fns';
 
 const crazyBackupId = saki.crazyBackupChannelId;

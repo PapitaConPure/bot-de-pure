@@ -1,5 +1,5 @@
 import { Colors, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { CommandTags, Command } from '../Commons/';
+import { CommandTags, Command } from '../commons';
 import { useMainPlayer, QueueRepeatMode } from 'discord-player';
 import { isPlayerUnavailable, makePuréMusicEmbed, SERVICES } from '../../systems/others/musicPlayer.js';
 import { Translator } from '../../i18n';

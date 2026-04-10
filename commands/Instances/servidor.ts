@@ -1,4 +1,4 @@
-import { Command, CommandPermissions, CommandTags } from '../Commons/';
+import { Command, CommandPermissions, CommandTags } from '../commons';
 import { ContainerBuilder, Guild, MessageFlags, SeparatorSpacingSize, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from 'discord.js';
 import { tenshiColor } from '../../data/globalProps';
 import { Locales, Translator } from '../../i18n';

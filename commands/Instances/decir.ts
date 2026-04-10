@@ -1,4 +1,4 @@
-import { CommandOptions, CommandTags, Command } from '../Commons';
+import { CommandOptions, CommandTags, Command } from '../commons';
 
 const options = new CommandOptions()
 	.addParam('mensaje', 'TEXT', 'para especificar qué decir')

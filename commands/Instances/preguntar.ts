@@ -1,4 +1,4 @@
-import { CommandTags, Command, CommandOptions } from '../Commons/';
+import { CommandTags, Command, CommandOptions } from '../commons';
 import { fetchChannel, fetchRole, compressId, fetchMember } from '../../func';
 import type { ComplexCommandRequest } from '../../types/commands';
 import { Translator } from '../../i18n';

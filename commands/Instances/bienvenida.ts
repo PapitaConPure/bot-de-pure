@@ -1,5 +1,5 @@
-import { CommandPermissions } from '../Commons/cmdPerms';
-import { CommandTags, Command, CommandOptions } from '../Commons/';
+import { CommandPermissions } from '../commons/cmdPerms';
+import { CommandTags, Command, CommandOptions } from '../commons';
 
 const perms = new CommandPermissions('ManageGuild');
 

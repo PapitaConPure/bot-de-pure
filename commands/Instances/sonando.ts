@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ColorResolvable, EmbedBuilder } from 'discord.js';
 import { shortenText, compressId } from '../../func';
-import { CommandTags, Command } from '../Commons/';
+import { CommandTags, Command } from '../commons';
 import { showQueuePage, makePuréMusicEmbed, SERVICES } from '../../systems/others/musicPlayer';
 import { Translator } from '../../i18n';
 import { tryRecoverSavedTracksQueue } from '../../models/playerQueue.js';
