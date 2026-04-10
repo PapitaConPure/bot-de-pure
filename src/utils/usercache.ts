@@ -4,6 +4,7 @@ import UserConfigs from '../models/userconfigs';
 import { noDataBase } from '../data/globalProps';
 import type { AnyRequest } from '../types/commands';
 import type { AcceptedTwitterConverterKey } from '../systems/converters/pureet';
+import type { GuildMember, Interaction, User } from 'discord.js';
 
 export type UserCache = {
 	language: LocaleKey;
@@ -12,11 +13,12 @@ export type UserCache = {
 	banned: boolean;
 };
 
-export type UserCacheResolvable = AnyRequest |
-	import('discord.js').Interaction |
-	import('discord.js').User |
-	import('discord.js').GuildMember |
-	string;
+export type UserCacheResolvable =
+	| AnyRequest
+	| Interaction
+	| User
+	| GuildMember
+	| string;
 
 const userCache = new Map<string, UserCache>();
 
