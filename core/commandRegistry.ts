@@ -2,7 +2,7 @@ import { Collection, PermissionFlagsBits, SlashCommandBuilder, ContextMenuComman
 import { shortenText } from '../func';
 import { readdirSync } from 'fs';
 import { Command } from '../commands/commons/cmdBuilder';
-import { ContextMenuAction } from '../actions/Commons/actionBuilder';
+import { ContextMenuAction } from '../actions/commons/actionBuilder';
 import { CommandOptions } from '../commands/commons/cmdOpts';
 import type { BaseParamType } from '../types/commands';
 

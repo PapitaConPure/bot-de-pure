@@ -1,4 +1,4 @@
-import { ContextMenuAction } from '../Commons/actionBuilder';
+import { ContextMenuAction } from '../commons/actionBuilder';
 import { PureVoiceSessionMember, requestPVControlPanel, PVCPSuccess, PureVoiceActionHandler, getOrchestrator } from '../../systems/others/purevoice';
 import { PureVoiceModel, PureVoiceSessionModel } from '../../models/purevoice';
 import { MessageFlags } from 'discord.js';

@@ -1,4 +1,4 @@
-import { ContextMenuAction } from '../Commons/actionBuilder';
+import { ContextMenuAction } from '../commons/actionBuilder';
 import { MessageFlags, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
 import { emojiRegex } from '../../func';
 import { Translator } from '../../i18n';

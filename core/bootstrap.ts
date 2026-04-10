@@ -4,14 +4,12 @@ import * as events from '../events';
 import { discordToken } from '../data/globalProps';
 
 export async function bootstrap() {
-	console.time('Carga de inicio');
+	console.log('Inicializando bot...');
 
 	if(!process.env?.MONGODB_URI) {
 		const hint = getRuntimeEnvHint();
 		throw new Error(`Missing MongoDB database environment variable.\n\n${hint}`);
 	}
-
-	console.timeEnd('Carga de inicio');
 
 	console.time('Creación de cliente de Discord');
 	const client = initializeClient();

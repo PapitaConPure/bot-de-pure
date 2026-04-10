@@ -1,4 +1,4 @@
-import { ContextMenuAction } from '../Commons/actionBuilder';
+import { ContextMenuAction } from '../commons/actionBuilder';
 import { getAgentMessageOwnerId, deleteAgentMessage } from '../../systems/converters/discordagent';
 import { Translator } from '../../i18n';
 

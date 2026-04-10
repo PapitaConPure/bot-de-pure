@@ -1,4 +1,4 @@
-import { ContextMenuAction } from '../Commons/actionBuilder';
+import { ContextMenuAction } from '../commons/actionBuilder';
 import { pourSauce } from '../../systems/others/saucenao';
 import SauceNAOUser from '../../models/saucenaoUsers';
 import { Translator } from '../../i18n';
