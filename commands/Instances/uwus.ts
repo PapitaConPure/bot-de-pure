@@ -1,4 +1,4 @@
-import { EmbedBuilder, Collection, Message, User, ReadonlyCollection, Snowflake } from 'discord.js';
+import { EmbedBuilder, Collection, Message, User, Snowflake } from 'discord.js';
 import { paginateRaw } from '../../func';
 import { CommandOptions, CommandTags, Command } from '../Commons/';
 
