@@ -9,6 +9,7 @@
         "resolveJsonModule": true,
         "paths": {
             "types": ["./src/types/util.ts"],
+            "types/*": ["./src/types/*"],
             "@/*": [
                 "./src/*"
             ]
