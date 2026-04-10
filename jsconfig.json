@@ -8,7 +8,10 @@
 		"removeComments": false,
         "resolveJsonModule": true,
         "paths": {
-            "types": ["./types/util.ts"]
+            "types": ["./src/types/util.ts"],
+            "@/*": [
+                "./src/*"
+            ]
         }
     },
     "exclude": [
