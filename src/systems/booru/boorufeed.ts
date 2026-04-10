@@ -178,7 +178,7 @@ function getNextBaseUpdateStart(): number {
 	return feedUpdateStart;
 }
 
-interface GuildFeedChunk {
+export interface GuildFeedChunk {
 	timestamp: Date;
 	tid: NodeJS.Timeout;
 	guilds: Array<[Snowflake, Guild]>;
@@ -214,9 +214,6 @@ export async function setupGuildFeedUpdateStack(client: Client) {
 		feedChunks[i].tid = setTimeout(updateBooruFeeds, chunkUpdateStart, guilds);
 		feedChunks[i].timestamp = new Date(Date.now() + chunkUpdateStart);
 	});
-
-	if (!('feedGuildChunks' in globalConfigs))
-		throw new Error('"feedGuildChunks" debería existir en globalConfigs');
 
 	globalConfigs.feedGuildChunks = feedChunks;
 

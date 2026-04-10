@@ -3,6 +3,7 @@ import { promisify } from 'node:util';
 import { color } from 'bun';
 import type { Guild, GuildTextBasedChannel } from 'discord.js';
 import minimist from 'minimist';
+import type { GuildFeedChunk } from '@/systems/booru/boorufeed';
 
 const argv = minimist(process.argv.slice(2));
 
@@ -165,4 +166,5 @@ export const globalConfigs = {
 	pureTableImage: null,
 	/**@description Emojis cargados en memoria.*/
 	loademotes: {},
+	feedGuildChunks: [] as GuildFeedChunk[],
 };
