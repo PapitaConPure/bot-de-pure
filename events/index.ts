@@ -1,4 +1,4 @@
-export { onUncaughtException, onUnhandledRejection } from './process';
+export { onUncaughtException, onUnhandledRejection, onShutdown } from './process';
 export { onStartup } from './onStartup';
 export { onMessage } from './onMessage';
 export { onReactionAdd } from './onReactionAdd';

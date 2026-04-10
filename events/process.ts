@@ -1,3 +1,4 @@
+import { client } from '../core/client';
 import { auditError } from '../systems/others/auditor';
 import { shortenText } from '../func';
 import mongoose from 'mongoose';
@@ -76,6 +77,13 @@ export async function onUnhandledRejection(reason: unknown, promise: Promise<unk
 	} catch {
 		catastrophic(err, reason, promise);
 	}
+}
+
+export async function onShutdown() {
+	process.on('SIGTERM', async () => {
+		await client.destroy();
+		process.exit(0);
+	});
 }
 
 class UnhandledRejectionError extends Error {

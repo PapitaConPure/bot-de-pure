@@ -20,6 +20,7 @@ export async function bootstrap() {
 	console.time('Registro de eventos de proceso');
 	process.on('uncaughtException', events.onUncaughtException);
 	process.on('unhandledRejection', events.onUnhandledRejection);
+	process.on('SIGTERM', events.onShutdown);
 	console.timeEnd('Registro de eventos de proceso');
 
 	console.time('Registro de eventos del cliente');
