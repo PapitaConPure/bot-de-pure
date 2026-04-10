@@ -67,6 +67,23 @@ export async function onStartup(client: Client) {
 	});
 	console.log(chalk.gray(`Hostname: ${getHostName()}`));
 
+	console.log(chalk.cyan('Estableciendo actividad de "cargando"...'));
+	try {
+		client.user.setActivity({
+			type: 4,
+			name: 'loading',
+			state: `⏳ Despertando...`
+		});
+		confirm();
+	} catch(error) {
+		console.log(
+			chalk.bold.redBright(
+				'Ocurrió un error al intentar mostrar la actividad para "cargando" durante la inicialización del bot.',
+			),
+		);
+		console.error(error);
+	}
+
 	console.log(chalk.bold.magentaBright('Compilando comandos...'));
 	const commands = await fetchCommandsFromFiles();
 	registerCommands(commands, false);
