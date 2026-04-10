@@ -2,17 +2,11 @@ import { lookupService } from 'node:dns';
 import { promisify } from 'node:util';
 import { color } from 'bun';
 import type { Guild, GuildTextBasedChannel } from 'discord.js';
-import minimist from 'minimist';
 import type { GuildFeedChunk } from '@/systems/booru/boorufeed';
-
-const argv = minimist(process.argv.slice(2));
 
 //Entorno
 /**@description Si se está en un entorno de producción (`true`) o de desarrollo (`false`, por defecto).*/
 export const remoteStartup: boolean = process.env.NODE_ENV === 'production';
-
-/**@description Si está prohibido el uso de base de datos (`true`) o permitido (`false`, por defecto).*/
-export const noDataBase: boolean = !!argv.nodb;
 
 //Claves
 /**

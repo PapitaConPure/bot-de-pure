@@ -8,7 +8,7 @@ import {
 } from 'discord.js';
 import type { AnyRequest } from 'types/commands';
 import { changelog, note, todo as toDo, version } from '@/data/botStatus.json';
-import { noDataBase, remoteStartup, tenshiColor } from '@/data/globalProps';
+import { remoteStartup, tenshiColor } from '@/data/globalProps';
 import { quantityDisplay } from '@/func';
 import { Translator } from '@/i18n';
 import { Stats } from '@/models/stats';
@@ -31,7 +31,7 @@ const command = new Command('estado', flags)
 	.setExecution(async (request) => {
 		const translator = await Translator.from(request.member);
 		const stats =
-			(!noDataBase && (await Stats.findOne({}))) || new Stats({ since: Date.now() });
+			(await Stats.findOne({})) || new Stats({ since: Date.now() });
 		const counts = {
 			commands: commandFilenames.length,
 			guilds: request.client.guilds.cache.size,

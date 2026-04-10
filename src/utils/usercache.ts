@@ -1,7 +1,5 @@
 import type { GuildMember, Interaction, User } from 'discord.js';
-import { noDataBase } from '../data/globalProps';
 import type { LocaleKey } from '../i18n';
-import type { UserConfigDocument } from '../models/userconfigs';
 import UserConfigs from '../models/userconfigs';
 import type { AcceptedTwitterConverterKey } from '../systems/converters/pureet';
 import type { AnyRequest } from '../types/commands';
@@ -26,15 +24,11 @@ export async function cacheUser(user: UserCacheResolvable) {
 	if (!userId) throw ReferenceError('Se esperaba una ID de usuario');
 
 	const userQuery = { userId };
-	let userConfigs: UserConfigDocument;
-	if (noDataBase) {
+	let userConfigs = await UserConfigs.findOne(userQuery);
+
+	if (!userConfigs) {
 		userConfigs = new UserConfigs(userQuery);
-	} else {
-		userConfigs = await UserConfigs.findOne(userQuery);
-		if (!userConfigs) {
-			userConfigs = new UserConfigs(userQuery);
-			await userConfigs.save();
-		}
+		await userConfigs.save();
 	}
 
 	return userCache.set(userId, {

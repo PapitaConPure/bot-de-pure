@@ -1,5 +1,4 @@
 import type { ValuesOf } from 'types';
-import { noDataBase } from '@/data/globalProps';
 import { decodeEntities, shuffleArray } from '@/func';
 import BooruTags from '@/models/boorutags';
 import type { FetchResult } from '@/utils/fetchext';
@@ -349,9 +348,7 @@ export class Booru {
 
 		try {
 			const query = { name: { $in: uncachedTagNames } };
-			const savedTags = (noDataBase ? [] : await BooruTags.find(query)).map(
-				(t) => new Tag(t),
-			);
+			const savedTags = (await BooruTags.find(query)).map((t) => new Tag(t));
 
 			const savedTagNames = savedTags.map((t) => t.name);
 			const missingTagNames = uncachedTagNames.filter((tn) => !savedTagNames.includes(tn));
@@ -384,7 +381,7 @@ export class Booru {
 						},
 					}));
 
-					!noDataBase && (await BooruTags.bulkWrite(bulkOps));
+					await BooruTags.bulkWrite(bulkOps);
 				}
 			}
 

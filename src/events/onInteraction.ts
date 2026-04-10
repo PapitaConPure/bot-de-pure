@@ -18,7 +18,6 @@ import {
 	Command,
 } from '../commands/commons/commandBuilder';
 import puré from '../core/puréRegistry';
-import { noDataBase } from '../data/globalProps';
 import userIds from '../data/userIds.json';
 import { Translator } from '../i18n';
 import { Stats, type StatsDocument } from '../models/stats';
@@ -33,7 +32,7 @@ export async function onInteraction(interaction: Interaction) {
 	if (channelIsBlocked(channel) || (await isUsageBanned(user)))
 		return handleBlockedInteraction(interaction).catch(console.error);
 
-	const stats = (!noDataBase && (await Stats.findOne({}))) || new Stats({ since: Date.now() });
+	const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
 
 	if (interaction.isAutocomplete()) return handleAutocompleteInteraction(interaction);
 
@@ -135,8 +134,6 @@ async function handleCommand(
 		if (!isPermissionsError) stats.commands.failed++;
 	}
 
-	if (noDataBase) return;
-
 	stats.markModified('commands');
 	return stats.save();
 }
@@ -162,8 +159,6 @@ async function handleAction(
 		});
 		if (!isPermissionsError) stats.commands.failed++;
 	}
-
-	if (noDataBase) return;
 
 	stats.markModified('commands');
 	return stats.save();

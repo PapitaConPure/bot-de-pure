@@ -8,7 +8,7 @@ import {
 	MessageFlags,
 	SectionBuilder,
 } from 'discord.js';
-import { globalConfigs, noDataBase } from '@/data/globalProps';
+import { globalConfigs } from '@/data/globalProps';
 import { compressId, fetchMember, quantityDisplay, shortenText } from '@/func';
 import { Translator } from '@/i18n';
 import { ChannelStats, Stats } from '@/models/stats';
@@ -55,7 +55,7 @@ const command = new Command('info', tags)
 
 		const guild = request.guild;
 		const [stats, translator] = await Promise.all([
-			noDataBase ? new Stats({ since: Date.now() }) : Stats.findOne({}),
+			Stats.findOne({}),
 			Translator.from(request),
 			request.deferReply(),
 			fetchGuildMembers(guild),
@@ -214,13 +214,10 @@ const command = new Command('info', tags)
 			channelId: targetChannel.id,
 		};
 		const targetChannelStats = /**@type {import('@/models/stats.js').ChannelStatsDocument}*/ (
-			(!noDataBase && (await ChannelStats.findOne(channelQuery)))
-				|| new ChannelStats(channelQuery)
+			(await ChannelStats.findOne(channelQuery)) || new ChannelStats(channelQuery)
 		);
 		const guildChannelStats = /**@type {import('@/models/stats.js').ChannelStatsDocument[]}*/ (
-			!noDataBase
-				? await ChannelStats.find({ guildId: guild.id })
-				: [new ChannelStats(channelQuery)]
+			await ChannelStats.find({ guildId: guild.id })
 		);
 		const targetChannelHasMessages = Object.keys(targetChannelStats.sub).length;
 

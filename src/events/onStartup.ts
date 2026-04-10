@@ -24,7 +24,6 @@ import {
 	discordToken,
 	getHostName,
 	globalConfigs,
-	noDataBase,
 	prefixes,
 	remoteStartup,
 	resolveHost,
@@ -170,127 +169,119 @@ export async function onStartup(client: Client) {
 	confirm();
 
 	//Cargado de datos de base de datos
-	if (noDataBase) {
-		console.log(
-			chalk.yellow.italic(
-				'Se saltará la inicialización de base de datos a petición del usuario',
+	console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
+	console.log(chalk.gray('Conectando a Cluster en la nube...'));
+	const mongoUri: string = process.env.MONGODB_URI;
+	set('strictQuery', false);
+	connect(mongoUri, {
+		//@ts-expect-error Quizá sí existen estas 2
+		useUnifiedTopology: true,
+		useNewUrlParser: true,
+	});
+
+	console.log(chalk.gray('Obteniendo documentos...'));
+	const [prefixPairs, userConfigs, booruTags] = await Promise.all([
+		PrefixPairs.find({}),
+		UserConfigs.find({}),
+		BooruTags.find({}),
+	]);
+
+	console.log(chalk.gray('Facilitando prefijos...'));
+	prefixPairs.forEach((pp) => {
+		prefixes[pp.guildId] = {
+			raw: pp.pure.raw,
+			regex: pp.pure.regex,
+		};
+	});
+	logOptions.prefixes && console.table(prefixes);
+
+	console.log(chalk.gray('Preparando Tags de Booru...'));
+	await BooruTags.deleteMany({
+		fetchTimestamp: { $lt: new Date(Date.now() - Booru.TAGS_DB_LIFETIME) },
+	}).catch(console.error);
+	await BooruTags.syncIndexes();
+	await BooruTags.createIndexes();
+	booruTags.forEach((tag) => Booru.tagsCache.set(tag.name, new Tag(tag)));
+	logOptions.booruTags
+		&& console.table([...Booru.tagsCache.values()].sort((a, b) => a.id - b.id));
+
+	console.log(chalk.gray('Preparando Cascadas de Mensajes...'));
+	await initializeMessageCascades();
+
+	console.log(chalk.gray('Preparando Suscripciones de Feeds...'));
+	userConfigs.forEach((config) => {
+		const suscriptions = new Map<string, string[]>();
+		for (const [chId, tags] of config.feedTagSuscriptions) suscriptions.set(chId, tags);
+		feedTagSuscriptionsCache.set(config.userId, suscriptions);
+	});
+	logOptions.feedSuscriptions && console.log({ feedTagSuscriptionsCache });
+
+	console.log(chalk.gray('Preparando recordatorios...'));
+	initRemindersScheduler(client);
+	await processReminders();
+
+	console.log(chalk.gray('Preparando Dueños de Mensajes de Agentes Puré...'));
+	await initializeWebhookMessageOwners();
+
+	console.log(chalk.gray('Preparando Tabla de Puré...'));
+	const pureTableDocument = await PureTable.findOne({});
+	let puretable = pureTableDocument;
+	if (!puretable) puretable = new PureTable();
+	//Limpiar emotes eliminados / no accesibles
+	else
+		puretable.cells = puretable.cells.map((arr) =>
+			arr.map((cell) =>
+				client.emojis.cache.get(cell) ? cell : pureTableAssets.defaultEmote,
 			),
 		);
-	} else {
-		console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
-		console.log(chalk.gray('Conectando a Cluster en la nube...'));
-		const mongoUri: string = process.env.MONGODB_URI;
-		set('strictQuery', false);
-		connect(mongoUri, {
-			//@ts-expect-error Quizá sí existen estas 2
-			useUnifiedTopology: true,
-			useNewUrlParser: true,
-		});
+	const uniqueEmoteIds = new Set<string>();
+	const pendingEmoteCells = [];
+	puretable.cells.flat().forEach((cell) => uniqueEmoteIds.add(cell));
 
-		console.log(chalk.gray('Obteniendo documentos...'));
-		const [prefixPairs, userConfigs, booruTags] = await Promise.all([
-			PrefixPairs.find({}),
-			UserConfigs.find({}),
-			BooruTags.find({}),
-		]);
-
-		console.log(chalk.gray('Facilitando prefijos...'));
-		prefixPairs.forEach((pp) => {
-			prefixes[pp.guildId] = {
-				raw: pp.pure.raw,
-				regex: pp.pure.regex,
-			};
-		});
-		logOptions.prefixes && console.table(prefixes);
-
-		console.log(chalk.gray('Preparando Tags de Booru...'));
-		await BooruTags.deleteMany({
-			fetchTimestamp: { $lt: new Date(Date.now() - Booru.TAGS_DB_LIFETIME) },
-		}).catch(console.error);
-		await BooruTags.syncIndexes();
-		await BooruTags.createIndexes();
-		booruTags.forEach((tag) => Booru.tagsCache.set(tag.name, new Tag(tag)));
-		logOptions.booruTags
-			&& console.table([...Booru.tagsCache.values()].sort((a, b) => a.id - b.id));
-
-		console.log(chalk.gray('Preparando Cascadas de Mensajes...'));
-		await initializeMessageCascades();
-
-		console.log(chalk.gray('Preparando Suscripciones de Feeds...'));
-		userConfigs.forEach((config) => {
-			const suscriptions = new Map<string, string[]>();
-			for (const [chId, tags] of config.feedTagSuscriptions) suscriptions.set(chId, tags);
-			feedTagSuscriptionsCache.set(config.userId, suscriptions);
-		});
-		logOptions.feedSuscriptions && console.log({ feedTagSuscriptionsCache });
-
-		console.log(chalk.gray('Preparando recordatorios...'));
-		initRemindersScheduler(client);
-		await processReminders();
-
-		console.log(chalk.gray('Preparando Dueños de Mensajes de Agentes Puré...'));
-		await initializeWebhookMessageOwners();
-
-		console.log(chalk.gray('Preparando Tabla de Puré...'));
-		const pureTableDocument = await PureTable.findOne({});
-		let puretable = pureTableDocument;
-		if (!puretable) puretable = new PureTable();
-		//Limpiar emotes eliminados / no accesibles
-		else
-			puretable.cells = puretable.cells.map((arr) =>
-				arr.map((cell) =>
-					client.emojis.cache.get(cell) ? cell : pureTableAssets.defaultEmote,
-				),
-			);
-		const uniqueEmoteIds = new Set<string>();
-		const pendingEmoteCells = [];
-		puretable.cells.flat().forEach((cell) => uniqueEmoteIds.add(cell));
-
-		/**@param {string} id*/
-		async function getEmoteCell(id: string) {
-			const image = await loadImage(
-				client.emojis.cache.get(id).imageURL({ extension: 'png', size: 64 }),
-			);
-			return { id, image };
-		}
-
-		for (const id of uniqueEmoteIds) pendingEmoteCells.push(getEmoteCell(id));
-		const [, pureTableImage, emoteCells] = await Promise.all([
-			puretable.save(),
-			loadImage('https://i.imgur.com/TIL0jPV.png'),
-			Promise.all(pendingEmoteCells),
-		]);
-		pureTableAssets.image = pureTableImage;
-		globalConfigs.loademotes = {};
-		for (const cell of emoteCells) globalConfigs.loademotes[cell.id] = cell.image;
-
-		console.log(chalk.gray('Preparando imágenes extra...'));
-		const slot3Emojis = /**@type {import('discord.js').Guild}*/ (globalConfigs.slots.slot3)
-			.emojis.cache;
-		const [WHITE, BLACK, pawn] = await Promise.all([
-			loadImage(
-				slot3Emojis
-					.find((e) => e.name === 'wCell')
-					.imageURL({ extension: 'png', size: 256 }),
-			),
-			loadImage(
-				slot3Emojis
-					.find((e) => e.name === 'bCell')
-					.imageURL({ extension: 'png', size: 256 }),
-			),
-			loadImage(
-				slot3Emojis
-					.find((e) => e.name === 'pawn')
-					.imageURL({ extension: 'png', size: 256 }),
-			),
-		]);
-		// biome-ignore lint/complexity/useLiteralKeys: 'chess' no está garantizado en loademotes
-		globalConfigs.loademotes['chess'] = { WHITE, BLACK, pawn };
-
-		console.log(chalk.gray('Iniciando cambios de presencia periódicos'));
-		modifyPresence(client);
-		confirm();
+	/**@param {string} id*/
+	async function getEmoteCell(id: string) {
+		const image = await loadImage(
+			client.emojis.cache.get(id).imageURL({ extension: 'png', size: 64 }),
+		);
+		return { id, image };
 	}
+
+	for (const id of uniqueEmoteIds) pendingEmoteCells.push(getEmoteCell(id));
+	const [, pureTableImage, emoteCells] = await Promise.all([
+		puretable.save(),
+		loadImage('https://i.imgur.com/TIL0jPV.png'),
+		Promise.all(pendingEmoteCells),
+	]);
+	pureTableAssets.image = pureTableImage;
+	globalConfigs.loademotes = {};
+	for (const cell of emoteCells) globalConfigs.loademotes[cell.id] = cell.image;
+
+	console.log(chalk.gray('Preparando imágenes extra...'));
+	const slot3Emojis = /**@type {import('discord.js').Guild}*/ (globalConfigs.slots.slot3)
+		.emojis.cache;
+	const [WHITE, BLACK, pawn] = await Promise.all([
+		loadImage(
+			slot3Emojis
+				.find((e) => e.name === 'wCell')
+				.imageURL({ extension: 'png', size: 256 }),
+		),
+		loadImage(
+			slot3Emojis
+				.find((e) => e.name === 'bCell')
+				.imageURL({ extension: 'png', size: 256 }),
+		),
+		loadImage(
+			slot3Emojis
+				.find((e) => e.name === 'pawn')
+				.imageURL({ extension: 'png', size: 256 }),
+		),
+	]);
+	// biome-ignore lint/complexity/useLiteralKeys: 'chess' no está garantizado en loademotes
+	globalConfigs.loademotes['chess'] = { WHITE, BLACK, pawn };
+
+	console.log(chalk.gray('Iniciando cambios de presencia periódicos'));
+	modifyPresence(client);
+	confirm();
 
 	console.log(chalk.rgb(158, 114, 214)('Registrando fuentes'));
 	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'Alice-Regular.ttf'), 'headline');

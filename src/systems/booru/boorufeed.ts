@@ -8,7 +8,7 @@ import type {
 	Snowflake,
 } from 'discord.js';
 import { Collection, MessageFlags } from 'discord.js';
-import { booruApiKey, booruUserId, globalConfigs, noDataBase } from '@/data/globalProps';
+import { booruApiKey, booruUserId, globalConfigs } from '@/data/globalProps';
 import { paginateRaw } from '@/func';
 import GuildConfigs from '@/models/guildconfigs';
 import { Booru, type Post } from '@/systems/booru/boorufetch';
@@ -66,8 +66,6 @@ async function updateBooruFeeds(guilds: Collection<Snowflake, Guild>): Promise<v
  * @param guilds Colección de Guilds a procesar
  */
 async function processFeeds(booru: Booru, guilds: Collection<Snowflake, Guild>) {
-	if (noDataBase) return;
-
 	const guildIds = guilds.map((g) => g.id);
 	const guildConfigs = await GuildConfigs.find({
 		guildId: { $in: guildIds },
@@ -186,8 +184,6 @@ export interface GuildFeedChunk {
 
 /**@description Inicializa una cadena de actualización de Feeds en todas las Guilds que cuentan con uno.*/
 export async function setupGuildFeedUpdateStack(client: Client) {
-	if (noDataBase) return;
-
 	const feedUpdateStart = getNextBaseUpdateStart();
 	const guildConfigs = await GuildConfigs.find({ feeds: { $exists: true } });
 
