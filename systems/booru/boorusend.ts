@@ -6,7 +6,7 @@ import { getBaseTags, getSearchTags, tagMaps } from './booruprops';
 import { globalConfigs, booruApiKey, booruUserId } from '../../data/globalProps';
 import { CommandOptionSolver } from '../../commands/commons/cmdOpts';
 import userIds from '../../data/userIds.json';
-import rakki from '../../commands/Instances/rakkidei';
+import rakki from '../../commands/instances/rakkidei';
 import { Translator } from '../../i18n';
 import type { ComplexCommandRequest } from '../../types/commands';
 
